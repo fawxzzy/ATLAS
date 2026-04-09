@@ -1,0 +1,163 @@
+﻿{
+    "$schema":  "https://json-schema.org/draft/2020-12/schema",
+    "$id":  "atlas://events/pre_command.schema.json",
+    "title":  "ATLAS pre_command event",
+    "type":  "object",
+    "additionalProperties":  false,
+    "required":  [
+                     "contract_version",
+                     "event_type",
+                     "event_id",
+                     "occurred_at",
+                     "producer",
+                     "session",
+                     "payload",
+                     "task"
+                 ],
+    "properties":  {
+                       "contract_version":  {
+                                                "type":  "string",
+                                                "const":  "atlas.event.v1"
+                                            },
+                       "event_type":  {
+                                          "type":  "string",
+                                          "const":  "pre_command"
+                                      },
+                       "event_id":  {
+                                        "type":  "string",
+                                        "pattern":  "^[A-Za-z0-9._:-]+$",
+                                        "minLength":  3
+                                    },
+                       "occurred_at":  {
+                                           "type":  "string",
+                                           "format":  "date-time"
+                                       },
+                       "producer":  {
+                                        "type":  "object",
+                                        "additionalProperties":  false,
+                                        "required":  [
+                                                         "kind",
+                                                         "name"
+                                                     ],
+                                        "properties":  {
+                                                           "kind":  {
+                                                                        "type":  "string",
+                                                                        "enum":  [
+                                                                                     "wrapper",
+                                                                                     "native_hook",
+                                                                                     "git_hook",
+                                                                                     "ci",
+                                                                                     "service",
+                                                                                     "manual",
+                                                                                     "test"
+                                                                                 ]
+                                                                    },
+                                                           "name":  {
+                                                                        "type":  "string",
+                                                                        "minLength":  1
+                                                                    },
+                                                           "version":  {
+                                                                           "type":  "string"
+                                                                       },
+                                                           "host":  {
+                                                                        "type":  "string"
+                                                                    }
+                                                       }
+                                    },
+                       "session":  {
+                                       "type":  "object",
+                                       "additionalProperties":  false,
+                                       "required":  [
+                                                        "session_id",
+                                                        "workspace_root"
+                                                    ],
+                                       "properties":  {
+                                                          "session_id":  {
+                                                                             "type":  "string",
+                                                                             "pattern":  "^[A-Za-z0-9._:-]+$",
+                                                                             "minLength":  3
+                                                                         },
+                                                          "workspace_root":  {
+                                                                                 "type":  "string",
+                                                                                 "minLength":  1
+                                                                             },
+                                                          "operator":  {
+                                                                           "type":  "string"
+                                                                       },
+                                                          "run_label":  {
+                                                                            "type":  "string"
+                                                                        }
+                                                      }
+                                   },
+                       "task":  {
+                                    "type":  "object",
+                                    "additionalProperties":  false,
+                                    "required":  [
+                                                     "task_id",
+                                                     "task_name"
+                                                 ],
+                                    "properties":  {
+                                                       "task_id":  {
+                                                                       "type":  "string",
+                                                                       "pattern":  "^[A-Za-z0-9._:-]+$",
+                                                                       "minLength":  3
+                                                                   },
+                                                       "task_name":  {
+                                                                         "type":  "string",
+                                                                         "minLength":  1
+                                                                     },
+                                                       "scope_paths":  {
+                                                                           "type":  "array",
+                                                                           "items":  {
+                                                                                         "type":  "string",
+                                                                                         "minLength":  1
+                                                                                     }
+                                                                       },
+                                                       "repo_ids":  {
+                                                                        "type":  "array",
+                                                                        "items":  {
+                                                                                      "type":  "string",
+                                                                                      "minLength":  1
+                                                                                  }
+                                                                    },
+                                                       "mutation_mode":  {
+                                                                             "type":  "string",
+                                                                             "enum":  [
+                                                                                          "read_only",
+                                                                                          "scoped_write",
+                                                                                          "stack_only"
+                                                                                      ]
+                                                                         }
+                                                   }
+                                },
+                       "payload":  {
+                                       "properties":  {
+                                                          "command":  {
+                                                                          "type":  "array",
+                                                                          "minItems":  1,
+                                                                          "items":  {
+                                                                                        "type":  "string",
+                                                                                        "minLength":  1
+                                                                                    }
+                                                                      },
+                                                          "cwd":  {
+                                                                      "type":  "string",
+                                                                      "minLength":  1
+                                                                  },
+                                                          "timeout_seconds":  {
+                                                                                  "type":  "integer",
+                                                                                  "minimum":  0
+                                                                              },
+                                                          "intent":  {
+                                                                         "type":  "string"
+                                                                     }
+                                                      },
+                                       "type":  "object",
+                                       "required":  [
+                                                        "command",
+                                                        "cwd"
+                                                    ],
+                                       "additionalProperties":  false
+                                   }
+                   }
+}

@@ -1,0 +1,41 @@
+# Repo-local Codex config template for ATLAS-managed repos.
+# Copy to <repo>/.codex/config.toml and then adjust only the repo-specific values.
+
+model = "gpt-5.4"
+model_reasoning_effort = "high"
+personality = "pragmatic"
+
+[windows]
+codex_command = "%USERPROFILE%/.codex/.sandbox-bin/codex.exe"
+sandbox = "workspace-write"
+approval_policy = "never"
+
+[runner]
+base_ref = "origin/main"
+branch_prefix = "codex/"
+inbox_dir = "../../runtime/codex/inbox/<repo-id>"
+archive_dir = "../../runtime/codex/archive/<repo-id>"
+logs_dir = "../../runtime/codex/logs/<repo-id>"
+worktree_root = "../../runtime/codex/worktrees/<repo-id>"
+exports_dir = "../../packages/snapshots/<repo-id>"
+adapter_contract = ".codex/repo-adapter.json"
+poll_interval_seconds = 5
+settle_seconds = 2
+auto_commit = true
+skip_push = true
+cleanup_worktree_on_success = false
+fetch_origin = false
+
+[exports]
+patch = true
+bundle = false
+
+[git]
+author_name = "Codex Inbox Runner"
+author_email = "codex-inbox@local"
+
+# Replace <repo-id> with the canonical stack repo id such as:
+# atlas, playbook, lifeline, fitness, mazer, stack
+#
+# If the relative "../../" prefix does not match a repo's depth,
+# adjust it to keep runtime and package outputs outside the repo root.

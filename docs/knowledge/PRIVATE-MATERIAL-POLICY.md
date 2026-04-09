@@ -1,0 +1,58 @@
+# Private Material Policy
+
+This policy governs stack-owned handling for personal learning materials imported into `data/imports/knowledge/`.
+
+## Defaults
+
+- treat personal notes, school materials, and purchased course packs as non-public by default
+- prefer `privacy_flag = private` unless there is a clear reason to use `mixed` or `shareable`
+- keep imported content ATLAS-local and outside `repos/`
+- do not assume that possession implies redistribution rights
+
+## Privacy Classes
+
+### `private`
+
+Use when the archive may contain personal notes, grades, contact details, transcripts, exports, or anything intended only for the owner.
+
+Handling:
+
+- do not enable downstream indexing of full content
+- normalize metadata only
+- keep catalog notes high-level and non-sensitive
+
+### `mixed`
+
+Use when the archive mixes private notes with less sensitive public or shared reference material.
+
+Handling:
+
+- restrict indexing until manual review is complete
+- avoid copying quoted content into docs or runtime metadata
+- treat the archive as partially sensitive
+
+### `shareable`
+
+Use only when the material is confirmed safe to catalog and index at content level.
+
+Handling:
+
+- still run evaluation for secrets, copyright, and executable content
+- keep normalized metadata concise and provenance-aware
+
+## Disallowed Actions
+
+- unpacking imported archives into `repos/`
+- executing scripts, notebooks, binaries, installers, or macros from imported content
+- copying secret-bearing content into docs, runtime metadata, or repo files
+- treating copyrighted courseware as if it were stack-owned source material
+
+## Indexing Rule
+
+`safe_for_indexing` is advisory for downstream tools:
+
+- `no`: do not index content
+- `restricted`: index metadata only unless a human review says otherwise
+- `yes`: content indexing is acceptable based on the current scan and privacy flag
+
+Metadata normalization can still be allowed when full-content indexing is not.

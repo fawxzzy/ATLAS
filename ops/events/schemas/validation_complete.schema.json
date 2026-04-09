@@ -1,0 +1,197 @@
+﻿{
+    "$schema":  "https://json-schema.org/draft/2020-12/schema",
+    "$id":  "atlas://events/validation_complete.schema.json",
+    "title":  "ATLAS validation_complete event",
+    "type":  "object",
+    "additionalProperties":  false,
+    "required":  [
+                     "contract_version",
+                     "event_type",
+                     "event_id",
+                     "occurred_at",
+                     "producer",
+                     "session",
+                     "payload",
+                     "task"
+                 ],
+    "properties":  {
+                       "contract_version":  {
+                                                "type":  "string",
+                                                "const":  "atlas.event.v1"
+                                            },
+                       "event_type":  {
+                                          "type":  "string",
+                                          "const":  "validation_complete"
+                                      },
+                       "event_id":  {
+                                        "type":  "string",
+                                        "pattern":  "^[A-Za-z0-9._:-]+$",
+                                        "minLength":  3
+                                    },
+                       "occurred_at":  {
+                                           "type":  "string",
+                                           "format":  "date-time"
+                                       },
+                       "producer":  {
+                                        "type":  "object",
+                                        "additionalProperties":  false,
+                                        "required":  [
+                                                         "kind",
+                                                         "name"
+                                                     ],
+                                        "properties":  {
+                                                           "kind":  {
+                                                                        "type":  "string",
+                                                                        "enum":  [
+                                                                                     "wrapper",
+                                                                                     "native_hook",
+                                                                                     "git_hook",
+                                                                                     "ci",
+                                                                                     "service",
+                                                                                     "manual",
+                                                                                     "test"
+                                                                                 ]
+                                                                    },
+                                                           "name":  {
+                                                                        "type":  "string",
+                                                                        "minLength":  1
+                                                                    },
+                                                           "version":  {
+                                                                           "type":  "string"
+                                                                       },
+                                                           "host":  {
+                                                                        "type":  "string"
+                                                                    }
+                                                       }
+                                    },
+                       "session":  {
+                                       "type":  "object",
+                                       "additionalProperties":  false,
+                                       "required":  [
+                                                        "session_id",
+                                                        "workspace_root"
+                                                    ],
+                                       "properties":  {
+                                                          "session_id":  {
+                                                                             "type":  "string",
+                                                                             "pattern":  "^[A-Za-z0-9._:-]+$",
+                                                                             "minLength":  3
+                                                                         },
+                                                          "workspace_root":  {
+                                                                                 "type":  "string",
+                                                                                 "minLength":  1
+                                                                             },
+                                                          "operator":  {
+                                                                           "type":  "string"
+                                                                       },
+                                                          "run_label":  {
+                                                                            "type":  "string"
+                                                                        }
+                                                      }
+                                   },
+                       "task":  {
+                                    "type":  "object",
+                                    "additionalProperties":  false,
+                                    "required":  [
+                                                     "task_id",
+                                                     "task_name"
+                                                 ],
+                                    "properties":  {
+                                                       "task_id":  {
+                                                                       "type":  "string",
+                                                                       "pattern":  "^[A-Za-z0-9._:-]+$",
+                                                                       "minLength":  3
+                                                                   },
+                                                       "task_name":  {
+                                                                         "type":  "string",
+                                                                         "minLength":  1
+                                                                     },
+                                                       "scope_paths":  {
+                                                                           "type":  "array",
+                                                                           "items":  {
+                                                                                         "type":  "string",
+                                                                                         "minLength":  1
+                                                                                     }
+                                                                       },
+                                                       "repo_ids":  {
+                                                                        "type":  "array",
+                                                                        "items":  {
+                                                                                      "type":  "string",
+                                                                                      "minLength":  1
+                                                                                  }
+                                                                    },
+                                                       "mutation_mode":  {
+                                                                             "type":  "string",
+                                                                             "enum":  [
+                                                                                          "read_only",
+                                                                                          "scoped_write",
+                                                                                          "stack_only"
+                                                                                      ]
+                                                                         }
+                                                   }
+                                },
+                       "payload":  {
+                                       "properties":  {
+                                                          "validator":  {
+                                                                            "type":  "string",
+                                                                            "minLength":  1
+                                                                        },
+                                                          "status":  {
+                                                                         "type":  "string",
+                                                                         "enum":  [
+                                                                                      "passed",
+                                                                                      "failed",
+                                                                                      "warn"
+                                                                                  ]
+                                                                     },
+                                                          "summary":  {
+                                                                          "type":  "string",
+                                                                          "minLength":  1
+                                                                      },
+                                                          "artifacts":  {
+                                                                            "type":  "array",
+                                                                            "items":  {
+                                                                                          "type":  "string",
+                                                                                          "minLength":  1
+                                                                                      }
+                                                                        },
+                                                          "finding_counts":  {
+                                                                                 "type":  "object",
+                                                                                 "additionalProperties":  false,
+                                                                                 "required":  [
+                                                                                                  "critical",
+                                                                                                  "error",
+                                                                                                  "warning",
+                                                                                                  "info"
+                                                                                              ],
+                                                                                 "properties":  {
+                                                                                                    "critical":  {
+                                                                                                                     "type":  "integer",
+                                                                                                                     "minimum":  0
+                                                                                                                 },
+                                                                                                    "error":  {
+                                                                                                                  "type":  "integer",
+                                                                                                                  "minimum":  0
+                                                                                                              },
+                                                                                                    "warning":  {
+                                                                                                                    "type":  "integer",
+                                                                                                                    "minimum":  0
+                                                                                                                },
+                                                                                                    "info":  {
+                                                                                                                 "type":  "integer",
+                                                                                                                 "minimum":  0
+                                                                                                             }
+                                                                                                }
+                                                                             }
+                                                      },
+                                       "type":  "object",
+                                       "required":  [
+                                                        "validator",
+                                                        "status",
+                                                        "summary",
+                                                        "finding_counts"
+                                                    ],
+                                       "additionalProperties":  false
+                                   }
+                   }
+}

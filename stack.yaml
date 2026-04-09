@@ -1,0 +1,173 @@
+name: ATLAS
+version: 2
+path_mode: relative
+zip_safe: true
+
+policies:
+  portable_paths_only: true
+  runtime_state_outside_repos: true
+  secrets_in_exports_by_default: false
+  repo_roots_are_source_only: true
+
+paths:
+  root: .
+  repos: repos
+  runtime: runtime
+  data: data
+  packages: packages
+  docs: docs
+  ops: ops
+  tmp: tmp
+  secrets: secrets
+
+path_contract:
+  repos: source repositories and repo-owned source files only
+  runtime: non-secret runtime state that must survive a session
+  data: retained imports, fixtures, and durable non-secret data assets
+  packages: explicit bundles, releases, patches, and prebuilt exports
+  docs: stack-level architecture, standards, audits, and runbooks
+  ops: shared bootstrap, validation, and operator scripts
+  tmp: disposable logs, captures, previews, and scratch outputs
+  secrets: machine-local secrets and secret templates only
+
+subpaths:
+  runtime:
+    codex: runtime/codex
+    cortex: runtime/cortex
+    cortex_catalog: runtime/cortex/catalog
+    cortex_knowledge: runtime/cortex/catalog/knowledge
+    cortex_memory: runtime/cortex/catalog/memory
+    cortex_playbooks: runtime/cortex/catalog/playbooks
+    devservers: runtime/devservers
+    events: runtime/receipts/events
+    lifeline: runtime/lifeline
+    playbook: runtime/playbook
+    receipts: runtime/receipts
+    state: runtime/state
+  data:
+    fixtures: data/fixtures
+    knowledge: data/imports/knowledge
+    playbooks: data/imports/playbooks
+    imports: data/imports
+    exports: data/exports
+  packages:
+    bundles: packages/bundles
+    patches: packages/patches
+    prebuilt: packages/prebuilt
+    releases: packages/releases
+    snapshots: packages/snapshots
+  docs:
+    architecture: docs/architecture
+    audits: docs/audits
+    codex: docs/codex
+    knowledge: docs/knowledge
+    ops: docs/ops
+    playbooks: docs/playbooks
+    runbooks: docs/runbooks
+    standards: docs/standards
+  ops:
+    backup: ops/backup
+    bootstrap: ops/bootstrap
+    codex: ops/codex
+    doctor: ops/doctor
+    events: ops/events
+    knowledge: ops/knowledge
+    scripts: ops/scripts
+    validation: ops/validation
+  tmp:
+    captures: tmp/captures
+    logs: tmp/logs
+    previews: tmp/previews
+    scratch: tmp/scratch
+  secrets:
+    local: secrets/local
+    templates: secrets/templates
+
+repo_registry:
+  stack:
+    path: .
+    role: operator-layer
+    status: active
+  atlas:
+    path: repos/fawxzzy-atlas
+    role: architecture-truth
+    status: active
+  playbook:
+    path: repos/fawxzzy-playbook
+    role: governance-runtime
+    status: active
+  lifeline:
+    path: repos/fawxzzy-lifeline
+    role: local-operator
+    status: active
+  fitness:
+    path: repos/fawxzzy-fitness
+    role: application
+    status: active
+  mazer:
+    path: repos/fawxzzy-mazer
+    role: application
+    status: active
+  cortex:
+    path: repos/cortex
+    role: framework
+    status: unmanaged
+  nat1-games:
+    path: repos/Nat1-Games/nat1-games
+    role: application
+    status: incubating
+  playbook-demo:
+    path: repos/playbook-demo/playbook-demo
+    role: demo
+    status: demo
+  playbook-v1:
+    path: repos/playbook-old/playbookv1
+    role: legacy-governance
+    status: legacy
+  mazer-unreal:
+    path: repos/mazer-legacy-unreal/Mazer
+    role: legacy-application
+    status: legacy
+
+archives:
+  backups: repos/repo-backups
+  media:
+    - repos/Realm Blade
+    - repos/Hard Pill To Swallow
+  zip_snapshots:
+    - repos/CORTEX-AND-PLAYBOOK-20260408.zip
+    - repos/dev.zip
+    - repos/mazer-legacy-unreal.zip
+
+export_defaults:
+  source_snapshot_root: packages/snapshots
+  patch_root: packages/patches
+  bundle_root: packages/bundles
+  release_root: packages/releases
+  prebuilt_root: packages/prebuilt
+  include:
+    - repos/**
+    - docs/**
+    - ops/**
+    - stack.yaml
+    - README-STACK.md
+    - AGENTS.md
+  exclude:
+    - secrets/**
+    - runtime/**
+    - tmp/**
+    - repos/.vercel/**
+    - repos/**/.env
+    - repos/**/.env.*
+    - repos/**/.next/**
+    - repos/**/node_modules/**
+    - repos/**/dist/**
+    - repos/**/coverage/**
+    - repos/**/playwright-report/**
+    - repos/**/test-results/**
+
+session_defaults:
+  root_agents: AGENTS.md
+  repo_agents_name: AGENTS.md
+  repo_config_template: docs/codex/CONFIG-TEMPLATE.toml
+  global_agents_proposal: docs/codex/GLOBAL-AGENTS.proposed.md

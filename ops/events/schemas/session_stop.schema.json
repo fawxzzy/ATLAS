@@ -1,0 +1,125 @@
+﻿{
+    "$schema":  "https://json-schema.org/draft/2020-12/schema",
+    "$id":  "atlas://events/session_stop.schema.json",
+    "title":  "ATLAS session_stop event",
+    "type":  "object",
+    "additionalProperties":  false,
+    "required":  [
+                     "contract_version",
+                     "event_type",
+                     "event_id",
+                     "occurred_at",
+                     "producer",
+                     "session",
+                     "payload"
+                 ],
+    "properties":  {
+                       "contract_version":  {
+                                                "type":  "string",
+                                                "const":  "atlas.event.v1"
+                                            },
+                       "event_type":  {
+                                          "type":  "string",
+                                          "const":  "session_stop"
+                                      },
+                       "event_id":  {
+                                        "type":  "string",
+                                        "pattern":  "^[A-Za-z0-9._:-]+$",
+                                        "minLength":  3
+                                    },
+                       "occurred_at":  {
+                                           "type":  "string",
+                                           "format":  "date-time"
+                                       },
+                       "producer":  {
+                                        "type":  "object",
+                                        "additionalProperties":  false,
+                                        "required":  [
+                                                         "kind",
+                                                         "name"
+                                                     ],
+                                        "properties":  {
+                                                           "kind":  {
+                                                                        "type":  "string",
+                                                                        "enum":  [
+                                                                                     "wrapper",
+                                                                                     "native_hook",
+                                                                                     "git_hook",
+                                                                                     "ci",
+                                                                                     "service",
+                                                                                     "manual",
+                                                                                     "test"
+                                                                                 ]
+                                                                    },
+                                                           "name":  {
+                                                                        "type":  "string",
+                                                                        "minLength":  1
+                                                                    },
+                                                           "version":  {
+                                                                           "type":  "string"
+                                                                       },
+                                                           "host":  {
+                                                                        "type":  "string"
+                                                                    }
+                                                       }
+                                    },
+                       "session":  {
+                                       "type":  "object",
+                                       "additionalProperties":  false,
+                                       "required":  [
+                                                        "session_id",
+                                                        "workspace_root"
+                                                    ],
+                                       "properties":  {
+                                                          "session_id":  {
+                                                                             "type":  "string",
+                                                                             "pattern":  "^[A-Za-z0-9._:-]+$",
+                                                                             "minLength":  3
+                                                                         },
+                                                          "workspace_root":  {
+                                                                                 "type":  "string",
+                                                                                 "minLength":  1
+                                                                             },
+                                                          "operator":  {
+                                                                           "type":  "string"
+                                                                       },
+                                                          "run_label":  {
+                                                                            "type":  "string"
+                                                                        }
+                                                      }
+                                   },
+                       "payload":  {
+                                       "properties":  {
+                                                          "status":  {
+                                                                         "type":  "string",
+                                                                         "enum":  [
+                                                                                      "completed",
+                                                                                      "failed",
+                                                                                      "cancelled"
+                                                                                  ]
+                                                                     },
+                                                          "summary":  {
+                                                                          "type":  "string",
+                                                                          "minLength":  1
+                                                                      },
+                                                          "task_ids":  {
+                                                                           "type":  "array",
+                                                                           "items":  {
+                                                                                         "type":  "string",
+                                                                                         "minLength":  1
+                                                                                     }
+                                                                       },
+                                                          "receipt_count":  {
+                                                                                "type":  "integer",
+                                                                                "minimum":  0
+                                                                            }
+                                                      },
+                                       "type":  "object",
+                                       "required":  [
+                                                        "status",
+                                                        "summary"
+                                                    ],
+                                       "additionalProperties":  false
+                                   }
+                   }
+}
