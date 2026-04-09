@@ -43,6 +43,16 @@ function Get-AtlasRelativePath {
   return $absolute -replace "\\", "/"
 }
 
+function Write-Utf8File {
+  param(
+    [string]$Path,
+    [string]$Content
+  )
+
+  $encoding = New-Object System.Text.UTF8Encoding($false)
+  [System.IO.File]::WriteAllText($Path, $Content, $encoding)
+}
+
 function New-PreviewStem {
   param(
     [string]$HandoffAbsolute,
@@ -112,7 +122,7 @@ $messageDirectory = Split-Path -Parent $messagePath
 if ($messageDirectory) {
   New-Item -ItemType Directory -Force -Path $messageDirectory | Out-Null
 }
-$commitMessage | Set-Content -Encoding UTF8 -LiteralPath $messagePath
+Write-Utf8File -Path $messagePath -Content $commitMessage
 
 $preview = [ordered]@{
   generated_at = (Get-Date).ToUniversalTime().ToString("o")
@@ -141,7 +151,7 @@ if ($target.status -eq "resolved") {
   $preview.git_status = $statusCapture.output
 }
 
-$preview | ConvertTo-Json -Depth 8 | Set-Content -Encoding UTF8 -LiteralPath $previewJsonPath
+Write-Utf8File -Path $previewJsonPath -Content ($preview | ConvertTo-Json -Depth 8)
 
 Write-Host ("Handoff       : {0}" -f (Get-AtlasRelativePath -Candidate $handoffAbsolute))
 Write-Host ("Repo status   : {0}" -f $target.status)
@@ -177,7 +187,7 @@ if ($StageAll) {
   $preview.stage_command = @("git", "-C", $target.repo_root, "add", "-A")
   $preview.stage_output = $stageCapture.output
   $preview.stage_exit_code = $stageCapture.exit_code
-  $preview | ConvertTo-Json -Depth 8 | Set-Content -Encoding UTF8 -LiteralPath $previewJsonPath
+  Write-Utf8File -Path $previewJsonPath -Content ($preview | ConvertTo-Json -Depth 8)
   if ($stageCapture.exit_code -ne 0) {
     throw "git add failed. See the preview JSON for the captured error output."
   }
@@ -186,7 +196,7 @@ if ($StageAll) {
 $commitCapture = Invoke-CapturedCommand -Arguments @("git", "-C", $target.repo_root, "commit", "-F", $messagePath)
 $preview.commit_output = $commitCapture.output
 $preview.commit_exit_code = $commitCapture.exit_code
-$preview | ConvertTo-Json -Depth 8 | Set-Content -Encoding UTF8 -LiteralPath $previewJsonPath
+Write-Utf8File -Path $previewJsonPath -Content ($preview | ConvertTo-Json -Depth 8)
 
 if ($commitCapture.exit_code -ne 0) {
   $joined = ($commitCapture.output -join "`n")

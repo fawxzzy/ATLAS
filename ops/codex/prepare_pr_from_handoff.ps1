@@ -45,6 +45,16 @@ function Get-AtlasRelativePath {
   return $absolute -replace "\\", "/"
 }
 
+function Write-Utf8File {
+  param(
+    [string]$Path,
+    [string]$Content
+  )
+
+  $encoding = New-Object System.Text.UTF8Encoding($false)
+  [System.IO.File]::WriteAllText($Path, $Content, $encoding)
+}
+
 function New-PreviewStem {
   param(
     [string]$HandoffAbsolute,
@@ -128,7 +138,7 @@ $lines = @(
   (Get-AtlasRelativePath -Candidate $handoffAbsolute)
 )
 
-$lines -join "`r`n" | Set-Content -Encoding UTF8 -LiteralPath $renderPath
+Write-Utf8File -Path $renderPath -Content ($lines -join "`r`n")
 
 $ghCommand = @("gh", "pr", "create", "--title", $handoff.pr_title, "--body-file", $renderPath)
 if ($BaseBranch) {
@@ -156,7 +166,7 @@ $preview = [ordered]@{
   pr_body = $handoff.pr_body.Trim()
   gh_command = if ($target.repo_root) { $ghCommand } else { @() }
 }
-$preview | ConvertTo-Json -Depth 8 | Set-Content -Encoding UTF8 -LiteralPath $previewJsonPath
+Write-Utf8File -Path $previewJsonPath -Content ($preview | ConvertTo-Json -Depth 8)
 
 Write-Host ("Handoff    : {0}" -f (Get-AtlasRelativePath -Candidate $handoffAbsolute))
 Write-Host ("Repo status: {0}" -f $target.status)
@@ -185,7 +195,7 @@ if ($target.status -ne "resolved") {
 $authCapture = Invoke-CapturedCommand -Arguments @("gh", "auth", "status")
 $preview.auth_output = $authCapture.output
 $preview.auth_exit_code = $authCapture.exit_code
-$preview | ConvertTo-Json -Depth 8 | Set-Content -Encoding UTF8 -LiteralPath $previewJsonPath
+Write-Utf8File -Path $previewJsonPath -Content ($preview | ConvertTo-Json -Depth 8)
 if ($authCapture.exit_code -ne 0) {
   throw "gh auth status failed. PR execution is blocked until GitHub CLI authentication is available."
 }
@@ -200,7 +210,7 @@ finally {
 
 $preview.open_output = $openCapture.output
 $preview.open_exit_code = $openCapture.exit_code
-$preview | ConvertTo-Json -Depth 8 | Set-Content -Encoding UTF8 -LiteralPath $previewJsonPath
+Write-Utf8File -Path $previewJsonPath -Content ($preview | ConvertTo-Json -Depth 8)
 
 if ($openCapture.exit_code -ne 0) {
   $joined = ($openCapture.output -join "`n")
