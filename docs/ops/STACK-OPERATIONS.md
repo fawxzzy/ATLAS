@@ -52,10 +52,35 @@ python .\ops\validation\validate_stack.py
 powershell -NoProfile -ExecutionPolicy Bypass -File .\ops\validation\validate_stack.ps1
 ```
 
+## Commit
+
+Script:
+
+- `ops/codex/commit_stack_repos.ps1`
+
+Purpose:
+
+- detect dirty registered repos from `stack.yaml`
+- commit each selected dirty repo independently
+- keep the root `stack` repo separate from child repo histories
+- support `-DryRun`, `-IncludeRoot`, `-RepoIds`, `-CommitMessagePrefix`, and `-CommitMessageSuffix`
+
+Command:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\ops\codex\commit_stack_repos.ps1 -DryRun
+```
+
+Use `-RepoIds mazer` to target only specific child repos. Add `-IncludeRoot` or target `stack` explicitly when the root control repo should be committed too.
+
 Exit behavior:
 
 - returns `2` when critical failures exist
 - returns `0` when only errors or warnings exist
+
+## Multi-Repo Commit
+
+See the `Commit` section above for the current stack-aware helper and examples.
 
 ## Export
 
@@ -157,7 +182,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\ops\backup\restore_stack.p
 ```
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\ops\backup\restore_stack.ps1 -SourcePath .\packages\snapshots\atlas-snapshot -DestinationRoot C:\ATLAS-Restore
+powershell -NoProfile -ExecutionPolicy Bypass -File .\ops\backup\restore_stack.ps1 -SourcePath .\packages\snapshots\atlas-snapshot -DestinationRoot .\tmp\scratch\atlas-restore
 ```
 
 ```powershell

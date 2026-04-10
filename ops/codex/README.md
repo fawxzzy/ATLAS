@@ -5,6 +5,8 @@ This directory provides the explicit wrapper strategy for running Codex from ATL
 ## Current Tool
 
 - `run_scoped_task.ps1`
+- `commit_stack_repos.ps1`
+- `commit_dirty_repos.ps1` (legacy alias)
 
 The wrapper is intentionally simple:
 
@@ -69,3 +71,28 @@ python ops/events/invoke_event.py --payload-file tmp/scratch/example-event.json 
 3. run validators explicitly
 4. inspect receipts after each run
 5. add future adapters by mapping them into the same event contract
+
+## Multi-Repo Commit Helper
+
+Use `commit_stack_repos.ps1` from the ATLAS root when you need to commit dirty registered repos without opening each repo separately.
+
+It reads `stack.yaml`, checks each eligible repo independently, and commits each dirty child repo with its own git history. The ATLAS root control repo is separate and stays opt-in unless you pass `-IncludeRoot` or target `stack`.
+
+Dry-run example:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\ops\codex\commit_stack_repos.ps1 -DryRun
+```
+
+Target only named repos and include the root control repo:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\ops\codex\commit_stack_repos.ps1 `
+  -IncludeRoot `
+  -RepoIds mazer,fitness `
+  -CommitMessage "chore: sync local updates" `
+  -CommitMessagePrefix "[atlas] " `
+  -CommitMessageSuffix " root-orchestrated"
+```
+
+The older `commit_dirty_repos.ps1` surface remains available for compatibility, but the stack-aware helper is the preferred command.
