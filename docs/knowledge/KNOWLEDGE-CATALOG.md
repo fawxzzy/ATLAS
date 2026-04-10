@@ -28,7 +28,9 @@ The intended raw import lane is:
 ## Catalog Records
 
 <!-- KNOWLEDGE-CATALOG:BEGIN -->
-No knowledge archives are cataloged yet in this pass.
+| archive_id | source | privacy_flag | status | safe_for_indexing | normalization_allowed | risk_summary | notes |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `personal--college-fullstack-ai-archive` | `personal` | `private` | `normalized` | `restricted` | `yes` | `personal_private_material, copyrighted_courseware_risk, executable_content` | `Treat the archive as private or partially private. No active credentials were found after human review, but keyword-only secret hits remain documented. Courseware copyright signals were detected; retain metadata only. Executable or script content exists and must remain non-executed.` |
 <!-- KNOWLEDGE-CATALOG:END -->
 
 ## Review Discipline
