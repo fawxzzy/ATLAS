@@ -115,13 +115,8 @@ Current tests:
 
 - `src/lib/dev/mobile-regression-fixtures.test.ts` validates scenario IDs, family mapping, contract checks, and stable screen/fixture lookup pairs.
 - `tests/mobile-fixtures/mobile-regression-inventory.test.ts` validates route coverage, floating-header usage, and retained hardening fixtures.
+- `tests/mobile-fixtures/build-mobile-regression-boards.test.ts` directly exercises `scripts/build-mobile-regression-boards.py` through the CLI boundary, verifies the named board set, locks deterministic PNG hashes for canonical output, and covers malformed-manifest, unknown-family, missing-screenshot, and missing-manifest failures.
 - `tests/visual-regression/mobile-regression-contracts.test.ts` validates that known geometry and state regressions trip the contract helpers.
-
-Missing tests:
-
-- No direct test currently exercises `build-mobile-regression-boards.py`.
-- No malformed-manifest contract test exists for the Python surface.
-- No golden-image assertion exists for board layout output.
 
 ## Dependencies
 
@@ -148,7 +143,7 @@ External assets:
 
 - The surviving script is a validated successor, not an exact filename recovery of `build_mobile_regression_board.py`.
 - The surviving Markdown doc is a partial equivalent, not a recovered text README.
-- The Python board builder still lacks direct contract coverage, malformed-manifest tests, and golden-image layout assertions.
+- The current proof surface validates the board-builder CLI boundary with synthetic fixtures and locked output hashes rather than the checked-in sample manifest artifact.
 
 ## Promotion Target
 
@@ -159,9 +154,6 @@ External assets:
 Minimal refactor needed before promotion:
 
 - Extract the board-builder and fixture-contract helpers as an explicitly owned boundary inside `fawxzzy-fitness`.
-- Add direct contract coverage for the Python board-builder surface.
-- Add malformed-manifest tests for the Python surface.
-- Add a golden-image assertion for board layout output.
 - Keep manifest parsing, review-family ordering, artifact names, fixture inventory, and contract validation helpers stable during extraction.
 
 ## Operational Caveat
