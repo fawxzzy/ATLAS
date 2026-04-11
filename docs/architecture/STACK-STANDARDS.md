@@ -163,3 +163,11 @@ When structural cleanup is needed, use this order:
 4. move artifacts and residue out of repo roots
 5. validate repo and stack flows
 6. only then consider renames or repo moves
+
+## 11. Ingest And Cleanup Guardrails
+
+- Move useful knowledge into ATLAS deliberately, not through blind copy-then-delete sweeps.
+- Keep live implementation truth in the owning repo and keep ATLAS references short and pointer-oriented.
+- For recovered machine material, prefer manifest-first or selective ingest until the content is classified.
+- Delete originals only when they are verified generated trash, dead shims, or safely superseded material.
+- See `docs/architecture/ATLAS-INGEST-AND-CLEANUP-GUARDRAILS.md` for the current operating detail.
