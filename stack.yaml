@@ -63,6 +63,7 @@ subpaths:
     knowledge: docs/knowledge
     ops: docs/ops
     playbooks: docs/playbooks
+    research: docs/research
     runbooks: docs/runbooks
     standards: docs/standards
   ops:
