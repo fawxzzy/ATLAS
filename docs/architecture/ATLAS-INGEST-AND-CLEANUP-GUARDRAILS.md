@@ -17,7 +17,18 @@ Delete or replace an original only after one of these is true:
 - the path is a dead shim or compatibility wrapper with a documented successor
 - the retained ATLAS or repo-local record makes the original safely superseded
 
-## Live Repo Boundaries
+## Two Canonical Lanes
+
+ATLAS now operates with two explicit lanes:
+
+- Live code and active docs move toward canonical ownership in the repo that owns the work.
+- Recovered machine material stays catalog-first in ATLAS until it is classified and a selective ingest decision is justified.
+
+The lanes share one cleanup rule:
+
+- delete only after the retained repo-local or ATLAS record makes the original provably safe to remove
+
+## Lane 1: Live Repo Boundaries
 
 For active work, the source of truth should move toward the owning repo and away from duplicated stack docs.
 
@@ -32,7 +43,7 @@ That slice establishes the current pattern:
 - ATLAS keeps a short lineage and pointer record
 - ATLAS should not carry duplicate file inventories once the repo-local contract exists
 
-## Archive And Recovery Ingest
+## Lane 2: Archive And Recovery Ingest
 
 Machine cleanup and archive recovery should classify material before adoption.
 
@@ -66,6 +77,16 @@ This is the approved cleanup posture:
 - ingest or pointerize valuable material first
 - keep mixed or unresolved material cataloged until understood
 - delete only verified generated trash, dead shims, or safely superseded originals
+
+## Tracked Evidence Caveat
+
+The copied ingest exports under `data/exports/atlas-ingest/` are useful review evidence, but they are not durable in git by default.
+
+- the root `.gitignore` ignores `data/**` by default
+- copied CSV exports in `data/exports/atlas-ingest/` remain local-only unless a workflow intentionally unignores or relocates them
+- the tracked source of truth for current ingest posture is therefore the stack docs, with the local CSV copies serving as review evidence
+
+Use the local exports to support cataloging and provenance review, but update the tracked story in ATLAS docs unless the export itself is intentionally promoted into a tracked lane.
 
 ## Source Snapshot
 

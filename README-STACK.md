@@ -42,6 +42,8 @@ The ids are canonical even where disk names have not been normalized yet.
 3. Do not commit machine-specific absolute paths in stack docs or config.
 4. Do not store logs, screenshots, or runtime state in repo roots when a stack bucket exists.
 5. Do not let default exports include `secrets/`, `.env*`, `runtime/`, or `tmp/`.
+6. Keep live implementation truth in the owning repo; ATLAS docs should stay lineage- and boundary-oriented.
+7. For recovered machine material, catalog first and delete originals only after verified-safe classification.
 
 ## Packaging and Exports
 
