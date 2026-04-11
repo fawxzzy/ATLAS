@@ -20,6 +20,7 @@ Supporting boundary files:
 - `repos/fawxzzy-fitness/src/lib/dev/mobileRegressionFixtures.ts`
 - `repos/fawxzzy-fitness/src/lib/dev/mobileRegressionContracts.ts`
 - `repos/fawxzzy-fitness/src/lib/dev/mobile-regression-fixtures.test.ts`
+- `repos/fawxzzy-fitness/tests/mobile-fixtures/build-mobile-regression-boards.test.ts`
 - `repos/fawxzzy-fitness/tests/mobile-fixtures/mobile-regression-inventory.test.ts`
 - `repos/fawxzzy-fitness/tests/visual-regression/mobile-regression-contracts.test.ts`
 
@@ -82,7 +83,7 @@ CLI entrypoints:
 
 - `npm run qa:matrix`
 - `npm run qa:boards`
-- `npm run test:mobile-regression-fixtures`
+- `npm run test:mobile-regression-fixtures` (includes the CLI-boundary board-builder harness in `tests/mobile-fixtures/build-mobile-regression-boards.test.ts`)
 
 Direct callable surfaces:
 
@@ -143,7 +144,8 @@ External assets:
 
 - The surviving script is a validated successor, not an exact filename recovery of `build_mobile_regression_board.py`.
 - The surviving Markdown doc is a partial equivalent, not a recovered text README.
-- The current proof surface validates the board-builder CLI boundary with synthetic fixtures and locked output hashes rather than the checked-in sample manifest artifact.
+- The Python board builder now has dedicated contract coverage through the CLI boundary with deterministic PNG-hash assertions and explicit malformed-manifest, unknown-family, missing-screenshot, and missing-manifest failure coverage.
+- Remaining gaps are no longer basic Python-surface coverage; they are the historical filename/doc provenance gap above plus any future work around checked-in sample-manifest provenance, extraction packaging, or environment-hardening.
 
 ## Promotion Target
 
