@@ -15,11 +15,15 @@ Primary implementation sources:
 - `repos/fawxzzy-fitness/src/features/mobile-regression/contracts.ts`
 - `repos/fawxzzy-fitness/scripts/mobile_regression/board_builder.py`
 - `repos/fawxzzy-fitness/src/app/dev/mobile-regression/page.tsx`
+- `repos/fawxzzy-fitness/scripts/qa-matrix.mjs`
 - `repos/fawxzzy-fitness/docs/mobile-regression-fixtures.md`
 
-Supporting boundary files:
+Public CLI shim:
 
-- `repos/fawxzzy-fitness/scripts/qa-matrix.mjs`
+- `repos/fawxzzy-fitness/scripts/build-mobile-regression-boards.py`
+
+Supporting tests:
+
 - `repos/fawxzzy-fitness/tests/mobile-regression/fixtures.test.ts`
 - `repos/fawxzzy-fitness/tests/mobile-regression/inventory.test.ts`
 - `repos/fawxzzy-fitness/tests/mobile-regression/build-mobile-regression-boards.test.ts`
@@ -28,7 +32,6 @@ Supporting boundary files:
 
 Temporary compatibility shims:
 
-- `repos/fawxzzy-fitness/scripts/build-mobile-regression-boards.py`
 - `repos/fawxzzy-fitness/src/lib/dev/mobileRegressionFixtures.ts`
 - `repos/fawxzzy-fitness/src/lib/dev/mobileRegressionContracts.ts`
 
@@ -119,7 +122,7 @@ Stable expectations:
 
 - Current review-family board names stay as listed above.
 - Current family ordering comes from the live script and companion doc.
-- Fixture inventory and manifest compatibility stay aligned with the live Fitness contract surface during extraction.
+- Fixture inventory and manifest compatibility stay aligned with the extracted Fitness contract surface during downstream consolidation.
 
 Current tests:
 
@@ -154,10 +157,10 @@ External assets:
 
 ## Gaps
 
-- The surviving script is a validated successor, not an exact filename recovery of `build_mobile_regression_board.py`.
-- The surviving Markdown doc is a partial equivalent, not a recovered text README.
-- The Python board builder now has dedicated contract coverage through the CLI boundary with deterministic PNG-hash assertions and explicit malformed-manifest, unknown-family, missing-screenshot, and missing-manifest failure coverage.
-- Remaining gaps are no longer basic Python-surface coverage; they are the historical filename/doc provenance gap above, any downstream callers still pinned to the temporary shim paths, and future work around checked-in sample-manifest provenance, extraction packaging, or environment-hardening.
+- The extraction already landed: the feature boundary lives under `src/features/mobile-regression`, and board construction lives in `scripts/mobile_regression/board_builder.py`.
+- Remaining work is downstream import and call-site consolidation onto `src/features/mobile-regression/*` and `scripts/mobile_regression/board_builder.py` while compatibility shims remain in place.
+- Deliberate shim removal is still pending for `src/lib/dev/mobileRegressionFixtures.ts` and `src/lib/dev/mobileRegressionContracts.ts` after downstream callers are clean.
+- Historical filename/doc provenance and future work around checked-in sample-manifest provenance, extraction packaging, or environment-hardening remain follow-on concerns, not blockers for treating the boundary as already extracted.
 
 ## Promotion Target
 
@@ -165,11 +168,12 @@ External assets:
 - ATLAS contract record: `docs/architecture/MOBILE-REGRESSION-EXTRACTION-CONTRACT.md`
 - Shared sample payloads should later normalize under `data/fixtures/mobile-regression/`
 
-Minimal refactor needed before promotion:
+Promotion posture:
 
-- The board-builder and fixture-contract helpers are now extracted as an explicitly owned boundary inside `fawxzzy-fitness`.
-- Finish import and call-site consolidation onto `src/features/mobile-regression/*` and `scripts/mobile_regression/board_builder.py` while keeping the current shims in place for downstream compatibility.
-- Keep manifest parsing, review-family ordering, artifact names, fixture inventory, and contract validation helpers stable until shim removal is deliberately scheduled.
+- The board-builder and fixture-contract helpers are already extracted as an explicitly owned boundary inside `fawxzzy-fitness`.
+- Treat `src/features/mobile-regression/*` and `scripts/mobile_regression/board_builder.py` as the canonical promotion shape.
+- Finish downstream import and call-site consolidation while keeping the public CLI shim and temporary compatibility shims stable for callers that still depend on them.
+- Remove the temporary shims only after caller cleanup is complete, while keeping manifest parsing, review-family ordering, artifact names, fixture inventory, and contract validation helpers stable through that transition.
 
 ## Operational Caveat
 
