@@ -3,7 +3,7 @@
 ## Status
 
 - Reviewed: `2026-04-11`
-- Posture: `repo-local contract established`
+- Posture: `repo-local contract established; downstream consolidation remains repo-owned`
 - ATLAS role: lineage, boundary summary, and phase tracking only
 
 ## Source of truth
@@ -24,3 +24,5 @@
 - Keep ATLAS references short and pointer-oriented to avoid contract drift.
 - Do not mix unrelated repo work into mobile-regression consolidation.
 - Keep stack-level tracking focused on lineage and phase status, not duplicate repo inventories.
+- Treat downstream cleanup and any future wrapper retirement as repo-owned follow-on decisions, not ATLAS implementation work.
+- Until an explicit CLI cutover is approved in the repo-local contract, keep `repos/fawxzzy-fitness/scripts/build-mobile-regression-boards.py` as the stable public wrapper.

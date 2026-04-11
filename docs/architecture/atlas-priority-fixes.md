@@ -1,33 +1,32 @@
 # ATLAS Priority Fixes
 
-Audit date: 2026-04-08
+Audit date: 2026-04-11
 
-## Top 10 fixes in execution order
+## Freeze Point
 
-1. Rewrite `C:\ATLAS\stack.yaml` as the canonical stack registry using root-relative paths and the actual repo set.
-2. Freeze a canonical list of active repo roots versus wrappers, demos, legacy repos, and binary drops.
-3. Remove old `C:\Users\zjhre\dev\...` workspace assumptions from `repos\_stack\README.md` and `repos\_stack\AGENTS.md`.
-4. Reconcile Atlas architecture docs with the actual root layout by removing or clearly redefining the nonexistent `dev/` dispatcher layer.
-5. Publish a minimum repo contract for active repos: `README.md`, `AGENTS.md`, `.codex\config.toml`, validation command, and runtime-state policy.
-6. Add missing repo contracts where absent or inconsistent: `fawxzzy-atlas`, `fawxzzy-fitness`, `fawxzzy-lifeline`, `fawxzzy-mazer`, and nested app roots such as `Nat1-Games\nat1-games`.
-7. Define where generated state belongs and stop mixing screenshots, logs, Playbook indexes, receipts, and temporary files into active repo roots without a rule.
-8. Clean the `repos\` namespace by classifying wrappers and nested roots (`Nat1-Games`, `playbook-demo`, `playbook-old`, `mazer-legacy-unreal`) before any moves.
-9. Quarantine non-source artifacts from `repos\`: zip files, bundles, installers, videos, and legacy build outputs should move to `packages\`, `data\`, or `repos\legacy\` only after validation.
-10. Repair secondary hygiene drift in active repos, including the merge conflict markers in `repos\fawxzzy-playbook\README.md`, after the stack-level contracts are stabilized.
+The stack policy is frozen at this boundary:
 
-## Risky moves that should wait
+- live implementation truth stays in the owning repo
+- ATLAS stays lineage- and boundary-oriented
+- `data/exports/atlas-ingest/` stays local review evidence unless a specific export is deliberately promoted after it clears the stability and portability gate
 
-- Renaming `fawxzzy-*` directories to shorter names before every manifest, script, and deploy path is converted to relative lookup.
-- Moving `_stack` out of its current repo path before its PowerShell runner contracts and package scripts are rewritten and proven.
-- Collapsing nested repos (`Nat1-Games\nat1-games`, `playbook-demo\playbook-demo`, `playbook-old\playbookv1`, `mazer-legacy-unreal\Mazer`) before each canonical root is confirmed.
-- Deleting or relocating legacy Unreal generated directories (`Binaries`, `DerivedDataCache`, `Intermediate`, `Saved`) before preserving a recovery path and owner intent.
-- Purging `.playbook`, `.lifeline`, `.codex`, `.vercel`, screenshots, or preview logs without first deciding which are runtime state, which are fixtures, and which are accidental commits.
-- Moving installers, videos, and bundle backups without recording where they will live and whether checksums or provenance matter.
-- Touching `secrets\` layout beyond documenting the contract.
+The current ingest registry already matches that posture:
 
-## Success criteria for the next structural pass
+- `desktop` remains a mixed archive that must be split before any ingest decision
+- `temp` remains manifest-only provenance
+- `solar-flare` remains unresolved
 
-- One manifest defines the real stack.
-- One naming scheme distinguishes active, demo, legacy, and binary-only entries.
-- One repo contract exists for every active repo.
-- One policy defines where runtime state, generated artifacts, and archives belong.
+## Next Queue
+
+1. Finish mobile-regression consolidation inside `repos/fawxzzy-fitness`.
+   The extracted boundary is already real. The remaining decisions are downstream cleanup and whether `scripts/build-mobile-regression-boards.py` stays the long-term public wrapper or yields later to an explicit CLI cutover.
+2. Split the `desktop` ingest bundle into smaller subproject catalogs instead of promoting it wholesale.
+   The minimum lanes already evidenced are `Robocode`, `LRPython / linear regression`, and general `Python/course material`.
+3. Make the ingest-or-reference decision separately for each resulting desktop subproject catalog.
+4. Leave the export lane unchanged until one exact CSV or JSON file earns promotion under the current policy.
+
+## Deferred On Purpose
+
+- Do not broaden ATLAS stack work back into repo-local implementation cleanup outside the named mobile-regression slice.
+- Do not promote the whole `desktop` bundle as one recovered project.
+- Do not blanket-unignore `data/**` just to track review exports.

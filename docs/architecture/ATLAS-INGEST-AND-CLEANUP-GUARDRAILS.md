@@ -4,6 +4,14 @@ This document defines how ATLAS absorbs useful material while reducing machine c
 
 The operating rule is not "copy once, then delete." The operating rule is "migrate useful knowledge into the right canonical lane, keep lineage visible, and delete originals only when removal is verified safe."
 
+## Freeze Point
+
+The current freeze point is:
+
+- live implementation truth stays in the repo that owns the active code or docs
+- ATLAS stays lineage- and boundary-oriented instead of becoming a duplicate implementation repo
+- `data/exports/atlas-ingest/` stays local review evidence unless one exact CSV or JSON export later clears the promotion gate
+
 ## Core Rule
 
 - Live implementation truth belongs in the repo that owns the code or active docs.
@@ -62,6 +70,13 @@ Operational rules:
 - Manifest-only items may support provenance or fixture review without becoming source repos.
 - ATLAS docs should avoid machine-specific absolute paths even when raw manifests capture local-only provenance.
 
+Desktop split rule:
+
+- Do not promote the `desktop` bundle wholesale.
+- Split it into smaller subproject catalogs first.
+- The currently confirmed lanes are `Robocode`, `LRPython / linear regression`, and general `Python/course material`.
+- Each lane must receive its own ingest-or-reference decision after the smaller catalog exists.
+
 ## Verified Cleanup Only
 
 Cleanup passes may remove only explicit junk or generated residue that has already been classified as safe to regenerate.
@@ -100,6 +115,14 @@ Promotion should stay narrow and explicit:
 - do not blanket-unignore `data/**`
 - promote exact files one by one only after they cross the gate above
 - if the durable truth already lives in a repo-local contract or stack doc, keep the export local-only
+
+## Next Queue
+
+Keep the queue narrow:
+
+1. Finish mobile-regression consolidation inside `repos/fawxzzy-fitness`, where the extracted boundary is already established and the remaining decisions are downstream cleanup plus any later explicit CLI cutover.
+2. Split the `desktop` ingest bundle into small subproject catalogs before making any promotion or repo-ingest call.
+3. Leave the export lane alone until one exact CSV or JSON file actually earns promotion under the gate above.
 
 ## Source Snapshot
 
