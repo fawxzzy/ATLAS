@@ -9,20 +9,28 @@
 
 ## Canonical Sources
 
-Primary sources:
+Primary implementation sources:
 
-- `repos/fawxzzy-fitness/scripts/build-mobile-regression-boards.py`
+- `repos/fawxzzy-fitness/src/features/mobile-regression/fixtures.ts`
+- `repos/fawxzzy-fitness/src/features/mobile-regression/contracts.ts`
+- `repos/fawxzzy-fitness/scripts/mobile_regression/board_builder.py`
+- `repos/fawxzzy-fitness/src/app/dev/mobile-regression/page.tsx`
 - `repos/fawxzzy-fitness/docs/mobile-regression-fixtures.md`
 
 Supporting boundary files:
 
 - `repos/fawxzzy-fitness/scripts/qa-matrix.mjs`
+- `repos/fawxzzy-fitness/tests/mobile-regression/fixtures.test.ts`
+- `repos/fawxzzy-fitness/tests/mobile-regression/inventory.test.ts`
+- `repos/fawxzzy-fitness/tests/mobile-regression/build-mobile-regression-boards.test.ts`
+- `repos/fawxzzy-fitness/tests/mobile-regression/contracts.test.ts`
+- `repos/fawxzzy-fitness/tests/mobile-regression/README.md`
+
+Temporary compatibility shims:
+
+- `repos/fawxzzy-fitness/scripts/build-mobile-regression-boards.py`
 - `repos/fawxzzy-fitness/src/lib/dev/mobileRegressionFixtures.ts`
 - `repos/fawxzzy-fitness/src/lib/dev/mobileRegressionContracts.ts`
-- `repos/fawxzzy-fitness/src/lib/dev/mobile-regression-fixtures.test.ts`
-- `repos/fawxzzy-fitness/tests/mobile-fixtures/build-mobile-regression-boards.test.ts`
-- `repos/fawxzzy-fitness/tests/mobile-fixtures/mobile-regression-inventory.test.ts`
-- `repos/fawxzzy-fitness/tests/visual-regression/mobile-regression-contracts.test.ts`
 
 ## Purpose
 
@@ -37,9 +45,10 @@ Supporting boundary files:
 - Manifest shape includes `generatedAt`, `baseUrl`, `viewportHeight`, `widths[]`, and `scenarios[]`.
 - Each scenario currently carries `id`, `name`, `family`, `route`, `screen`, `fixture`, and `captures[]`.
 - Screenshot payloads must exist beside the manifest and currently follow `{scenario-id}-{width}.png`.
-- Fixture inventory comes from `mobileRegressionScenarios` in `src/lib/dev/mobileRegressionFixtures.ts`.
+- Fixture inventory comes from `mobileRegressionScenarios` in `src/features/mobile-regression/fixtures.ts`.
 - The board builder accepts an optional manifest path override.
 - The capture lane accepts optional scenario selectors as `scenario.id` or `screen:fixture`.
+- The public CLI entrypoint still runs through `scripts/build-mobile-regression-boards.py`, which is now a thin shim over `scripts/mobile_regression/board_builder.py`.
 
 Environment assumptions:
 
@@ -83,7 +92,7 @@ CLI entrypoints:
 
 - `npm run qa:matrix`
 - `npm run qa:boards`
-- `npm run test:mobile-regression-fixtures` (includes the CLI-boundary board-builder harness in `tests/mobile-fixtures/build-mobile-regression-boards.test.ts`)
+- `npm run test:mobile-regression-fixtures` (includes the CLI-boundary board-builder harness in `tests/mobile-regression/build-mobile-regression-boards.test.ts`)
 
 Direct callable surfaces:
 
@@ -114,10 +123,10 @@ Stable expectations:
 
 Current tests:
 
-- `src/lib/dev/mobile-regression-fixtures.test.ts` validates scenario IDs, family mapping, contract checks, and stable screen/fixture lookup pairs.
-- `tests/mobile-fixtures/mobile-regression-inventory.test.ts` validates route coverage, floating-header usage, and retained hardening fixtures.
-- `tests/mobile-fixtures/build-mobile-regression-boards.test.ts` directly exercises `scripts/build-mobile-regression-boards.py` through the CLI boundary, verifies the named board set, locks deterministic PNG hashes for canonical output, and covers malformed-manifest, unknown-family, missing-screenshot, and missing-manifest failures.
-- `tests/visual-regression/mobile-regression-contracts.test.ts` validates that known geometry and state regressions trip the contract helpers.
+- `tests/mobile-regression/fixtures.test.ts` validates scenario IDs, family mapping, contract checks, and stable screen/fixture lookup pairs.
+- `tests/mobile-regression/inventory.test.ts` validates route coverage, floating-header usage, and retained hardening fixtures.
+- `tests/mobile-regression/build-mobile-regression-boards.test.ts` directly exercises `scripts/build-mobile-regression-boards.py` through the CLI boundary, verifies the named board set, locks deterministic PNG hashes for canonical output, and covers malformed-manifest, unknown-family, missing-screenshot, and missing-manifest failures while the shim delegates into `scripts/mobile_regression/board_builder.py`.
+- `tests/mobile-regression/contracts.test.ts` validates that known geometry and state regressions trip the contract helpers.
 
 ## Dependencies
 
@@ -130,8 +139,11 @@ Runtime dependencies:
 
 File dependencies:
 
-- `src/lib/dev/mobileRegressionFixtures.ts`
-- `src/lib/dev/mobileRegressionContracts.ts`
+- `src/features/mobile-regression/fixtures.ts`
+- `src/features/mobile-regression/contracts.ts`
+- `src/app/dev/mobile-regression/page.tsx`
+- `scripts/mobile_regression/board_builder.py`
+- `scripts/qa-matrix.mjs`
 - `.codex/qa/mobile-regression/manifest.json`
 - `.codex/qa/mobile-regression/*.png`
 
@@ -145,7 +157,7 @@ External assets:
 - The surviving script is a validated successor, not an exact filename recovery of `build_mobile_regression_board.py`.
 - The surviving Markdown doc is a partial equivalent, not a recovered text README.
 - The Python board builder now has dedicated contract coverage through the CLI boundary with deterministic PNG-hash assertions and explicit malformed-manifest, unknown-family, missing-screenshot, and missing-manifest failure coverage.
-- Remaining gaps are no longer basic Python-surface coverage; they are the historical filename/doc provenance gap above plus any future work around checked-in sample-manifest provenance, extraction packaging, or environment-hardening.
+- Remaining gaps are no longer basic Python-surface coverage; they are the historical filename/doc provenance gap above, any downstream callers still pinned to the temporary shim paths, and future work around checked-in sample-manifest provenance, extraction packaging, or environment-hardening.
 
 ## Promotion Target
 
@@ -155,8 +167,9 @@ External assets:
 
 Minimal refactor needed before promotion:
 
-- Extract the board-builder and fixture-contract helpers as an explicitly owned boundary inside `fawxzzy-fitness`.
-- Keep manifest parsing, review-family ordering, artifact names, fixture inventory, and contract validation helpers stable during extraction.
+- The board-builder and fixture-contract helpers are now extracted as an explicitly owned boundary inside `fawxzzy-fitness`.
+- Finish import and call-site consolidation onto `src/features/mobile-regression/*` and `scripts/mobile_regression/board_builder.py` while keeping the current shims in place for downstream compatibility.
+- Keep manifest parsing, review-family ordering, artifact names, fixture inventory, and contract validation helpers stable until shim removal is deliberately scheduled.
 
 ## Operational Caveat
 
