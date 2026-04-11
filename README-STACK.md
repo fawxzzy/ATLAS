@@ -24,7 +24,7 @@ Read these files first:
 
 Use these ids in stack docs, tickets, and automation:
 
-- `stack` -> `repos/_stack`
+- `stack` -> `.`
 - `atlas` -> `repos/fawxzzy-atlas`
 - `playbook` -> `repos/fawxzzy-playbook`
 - `lifeline` -> `repos/fawxzzy-lifeline`
