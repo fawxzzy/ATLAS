@@ -162,6 +162,27 @@ External assets:
 - Deliberate shim removal is still pending for `src/lib/dev/mobileRegressionFixtures.ts` and `src/lib/dev/mobileRegressionContracts.ts` after downstream callers are clean.
 - Historical filename/doc provenance and future work around checked-in sample-manifest provenance, extraction packaging, or environment-hardening remain follow-on concerns, not blockers for treating the boundary as already extracted.
 
+## Shim Removal Checklist
+
+Remaining shim targets as of `2026-04-11`:
+
+- `src/lib/dev/mobileRegressionFixtures.ts` and `src/lib/dev/mobileRegressionContracts.ts` currently have no in-repo importers; they exist only as compatibility re-export surfaces.
+- `scripts/build-mobile-regression-boards.py` is still the repo-owned shim path behind `package.json` `qa:boards` and `tests/mobile-regression/build-mobile-regression-boards.test.ts`.
+- Historical docs may still mention the old CLI path, but the repo's normal usage docs already flow through `npm run qa:boards` rather than the filename directly.
+
+Caller migration order:
+
+1. Keep all new repo code on `src/features/mobile-regression/*`; do not add fresh imports to `src/lib/dev/*`.
+2. Repoint `package.json` `qa:boards` from `python scripts/build-mobile-regression-boards.py` to `python scripts/mobile_regression/board_builder.py` while preserving the `npm run qa:boards` command surface.
+3. Move `tests/mobile-regression/build-mobile-regression-boards.test.ts` onto the canonical builder path. If one interim compatibility check is still desired, reduce it to a thin delegation smoke test instead of keeping the shim as the primary exercised surface.
+4. After the repo-owned callers are migrated, update any remaining stack or repo docs that still present the shim path as current.
+
+Exact delete point:
+
+- Delete `src/lib/dev/mobileRegressionFixtures.ts` and `src/lib/dev/mobileRegressionContracts.ts` once a repo and ATLAS-wide reference search shows no live imports outside compatibility notes and the renamed `tests/mobile-regression/*` suite plus `npm run verify` still pass without them.
+- Delete `scripts/build-mobile-regression-boards.py` once `qa:boards`, the board-builder test, and any operator or CI callers have been repointed to `scripts/mobile_regression/board_builder.py`, then rerun `npm run test:mobile-regression-fixtures` and `npm run verify`.
+- Treat shim deletion as a caller-cleanup cut, not as part of further extraction work; the extraction boundary is already established.
+
 ## Promotion Target
 
 - Proposed ATLAS module name: `mobile-regression`
