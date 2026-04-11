@@ -9,6 +9,7 @@ These copied exports are not durable in git by default because the root `.gitign
 
 Current rule:
 
-- treat the CSV copies here as local review evidence
+- treat CSV and JSON exports here as local review evidence by default
 - keep the tracked ingest posture in stack docs such as `docs/architecture/ATLAS-INGEST-AND-CLEANUP-GUARDRAILS.md`
-- only unignore or relocate an export when a workflow intentionally needs that export itself to become tracked
+- promote only exact files, one by one, after they meet the export tracking gate in that guardrails doc
+- do not blanket-unignore `data/**` just to track review artifacts early

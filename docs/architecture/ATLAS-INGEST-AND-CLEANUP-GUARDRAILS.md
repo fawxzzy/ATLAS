@@ -78,15 +78,28 @@ This is the approved cleanup posture:
 - keep mixed or unresolved material cataloged until understood
 - delete only verified generated trash, dead shims, or safely superseded originals
 
-## Tracked Evidence Caveat
+## Export Tracking Policy
 
-The copied ingest exports under `data/exports/atlas-ingest/` are useful review evidence, but they are not durable in git by default.
+Files under `data/exports/atlas-ingest/` are local review evidence by default and remain untracked unless explicitly promoted.
+
+Current durability boundary:
 
 - the root `.gitignore` ignores `data/**` by default
-- copied CSV exports in `data/exports/atlas-ingest/` remain local-only unless a workflow intentionally unignores or relocates them
-- the tracked source of truth for current ingest posture is therefore the stack docs, with the local CSV copies serving as review evidence
+- copied CSV exports in `data/exports/atlas-ingest/` therefore stay local-only unless a workflow intentionally promotes a specific file
+- the durable tracked truth for ingest posture remains the stack docs, while local exports support review, cataloging, and provenance checks
 
-Use the local exports to support cataloging and provenance review, but update the tracked story in ATLAS docs unless the export itself is intentionally promoted into a tracked lane.
+Promotion gate:
+
+1. its schema is stable enough to survive review churn
+2. its contents are normalized and not dependent on local absolute paths
+3. it represents durable cross-session truth rather than a one-pass audit artifact
+4. it does not duplicate a repo-local contract or stack doc that already owns the truth
+
+Promotion should stay narrow and explicit:
+
+- do not blanket-unignore `data/**`
+- promote exact files one by one only after they cross the gate above
+- if the durable truth already lives in a repo-local contract or stack doc, keep the export local-only
 
 ## Source Snapshot
 
