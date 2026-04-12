@@ -59,7 +59,7 @@ Current ingest posture:
 
 | Item | Current posture | Guardrail |
 | --- | --- | --- |
-| `desktop` | mixed archive | keep as a collection-level manifest and split into subproject catalogs before any repo-ingest decision |
+| `desktop` | mixed archive with tracked child catalogs | keep the parent as a collection-level manifest and make any later ingest-or-reference call per child catalog |
 | `temp` | manifest-only provenance sample | retain manifest-only unless a specific fixture import is needed |
 | `solar-flare` | unresolved placeholder | keep unresolved and continue searching approved roots; do not treat the placeholder folder as recovered project content |
 
@@ -73,9 +73,9 @@ Operational rules:
 Desktop split rule:
 
 - Do not promote the `desktop` bundle wholesale.
-- Split it into smaller subproject catalogs first.
-- The currently confirmed lanes are `Robocode`, `LRPython / linear regression`, and general `Python/course material`.
-- Each lane must receive its own ingest-or-reference decision after the smaller catalog exists.
+- Keep the tracked child catalog under `docs/knowledge/catalogs/desktop/`.
+- The current child lanes are `Robocode`, `LRPython / linear regression`, and general `Python/course material`.
+- Keep the parent bundle manifest-only until each child lane receives its own ingest-or-reference decision.
 
 ## Verified Cleanup Only
 
@@ -121,7 +121,7 @@ Promotion should stay narrow and explicit:
 Keep the queue narrow:
 
 1. Finish mobile-regression consolidation inside `repos/fawxzzy-fitness`, where the extracted boundary is already established and the remaining decisions are downstream cleanup plus any later explicit CLI cutover.
-2. Split the `desktop` ingest bundle into small subproject catalogs before making any promotion or repo-ingest call.
+2. Make the ingest-or-reference decision separately for the `desktop` child catalogs instead of promoting the parent bundle as one recovered project.
 3. Leave the export lane alone until one exact CSV or JSON file actually earns promotion under the gate above.
 
 ## Source Snapshot
@@ -129,6 +129,8 @@ Keep the queue narrow:
 This guardrail summary reflects the stack state reviewed on `2026-04-11` from:
 
 - `docs/architecture/MOBILE-REGRESSION-EXTRACTION-CONTRACT.md`
+- `docs/knowledge/catalogs/desktop/README.md`
 - `data/exports/atlas-ingest/atlas-ingest-registry.csv`
 - `data/exports/atlas-ingest/descendant-registry.csv`
+- `tmp/cleanup-manifests/desktop-split/desktop-subprojects.md`
 - `tmp/cleanup-manifests/20260410-195055/reclaimed-space-summary.md`

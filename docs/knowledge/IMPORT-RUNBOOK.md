@@ -95,6 +95,10 @@ Human catalog:
 
 - `docs/knowledge/KNOWLEDGE-CATALOG.md`
 
+Mixed collection catalogs:
+
+- `docs/knowledge/catalogs/<collection>/`
+
 ## Review Flow
 
 1. import the archive into the stack-owned lane
@@ -103,6 +107,17 @@ Human catalog:
 4. normalize only if metadata retention is acceptable for the archive
 5. refresh and validate the catalog
 6. keep any downstream indexing decision aligned with `safe_for_indexing`
+
+For mixed recovery bundles that are too broad to classify as one archive or repo:
+
+1. keep the parent item at collection level
+2. write tracked child catalogs under `docs/knowledge/catalogs/<collection>/`
+3. keep paths collection-relative instead of copying machine-local absolute paths into durable docs
+4. make ingest-or-reference decisions per child catalog instead of promoting the whole parent bundle
+
+Current example:
+
+- `docs/knowledge/catalogs/desktop/README.md`
 
 ## Validation
 
