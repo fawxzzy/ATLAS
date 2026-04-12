@@ -5,7 +5,7 @@
 - catalog id: `desktop/lrpython-linear-regression`
 - parent item: `desktop`
 - collection-relative path: `career/notes/ai/aimaterial/lab projects/linearregression - base/LRPython`
-- current posture: archive/reference with selective extraction potential
+- current posture: copy-first selective ingest executed; originals retained
 - confidence: `0.94`
 
 ## Evidence
@@ -19,13 +19,15 @@
 
 ## Decision
 
-- keep this lane separate from the other desktop material when future ingest decisions are made
-- allow only a later narrow decision about metadata, datasets, or source extraction
-- do not treat the current archive slice as an application repo just because it has project files
+- executed copy-first selective ingest into `data/imports/knowledge/personal/desktop-lrpython-linear-regression`
+- the imported child archive contains only the approved source, test, CSV dataset, and project-file keeper scope
+- archive id: `personal--desktop-lrpython-linear-regression`
+- do not promote this child lane as a repo and do not treat the current archive slice as an application repo
+- keep the original archive slice in place until a later explicit reclaim step is approved
 
 ## Keeper Boundary
 
-Strong keeper candidates if this child lane later earns selective ingest:
+Approved keeper scope copied into the child archive:
 
 - `LinearRegression.py`
 - `LinearRegressionBasic.py`
@@ -58,6 +60,6 @@ Non-keeper generated artifacts:
 
 Current handling rule:
 
-- keep the original archive slice in place until a child-level ingest decision is made
-- bias any future extraction toward source, tests, datasets, and the project file
+- use the imported child archive as the working lane for any future LRPython review or reuse
+- keep batch launchers optional and provenance-only unless a concrete tooling reason appears
 - leave compiled outputs behind unless a provenance-only note later requires them

@@ -75,7 +75,10 @@ Desktop split rule:
 - Do not promote the `desktop` bundle wholesale.
 - Keep the tracked child catalog under `docs/knowledge/catalogs/desktop/`.
 - The current child lanes are `Robocode`, `LRPython / linear regression`, and general `Python/course material`.
-- Keep the parent bundle manifest-only until each child lane receives its own ingest-or-reference decision.
+- A copy-first selective ingest for `LRPython / linear regression` now exists at `data/imports/knowledge/personal/desktop-lrpython-linear-regression`.
+- That imported child archive is limited to source, tests, CSV datasets, and `LRPython.pyproj`.
+- `Robocode` and `Python/course material` remain reference-first until a narrower extraction need is justified.
+- Keep originals in place until any child-level extraction or reclaim step is explicitly executed.
 
 ## Verified Cleanup Only
 
@@ -121,7 +124,7 @@ Promotion should stay narrow and explicit:
 Keep the queue narrow:
 
 1. Finish mobile-regression consolidation inside `repos/fawxzzy-fitness`, where the extracted boundary is already established and the remaining decisions are downstream cleanup plus any later explicit CLI cutover.
-2. Make the ingest-or-reference decision separately for the `desktop` child catalogs instead of promoting the parent bundle as one recovered project.
+2. If desktop work continues, keep LRPython follow-up scoped to the imported child archive and keep the other child lanes reference-first.
 3. Leave the export lane alone until one exact CSV or JSON file actually earns promotion under the gate above.
 
 ## Source Snapshot
@@ -130,6 +133,7 @@ This guardrail summary reflects the stack state reviewed on `2026-04-11` from:
 
 - `docs/architecture/MOBILE-REGRESSION-EXTRACTION-CONTRACT.md`
 - `docs/knowledge/catalogs/desktop/README.md`
+- `docs/knowledge/reviews/desktop-lrpython-linear-regression.md`
 - `data/exports/atlas-ingest/atlas-ingest-registry.csv`
 - `data/exports/atlas-ingest/descendant-registry.csv`
 - `tmp/cleanup-manifests/desktop-split/desktop-subprojects.md`
