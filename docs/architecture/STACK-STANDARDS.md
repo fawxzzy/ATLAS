@@ -140,6 +140,12 @@ Recommended validation names:
 
 If a repo cannot adopt that naming, document the exception in its README and AGENTS file.
 
+For stack-wide validation, prefer ratcheting over one-shot cleanup gates:
+
+- keep a committed baseline artifact for existing stack findings
+- fail only on new or expanded `critical` and `error` findings
+- keep warnings visible but non-blocking
+
 ## 9. Root Session Rule
 
 A session launched from `C:\ATLAS` should default to stack work:

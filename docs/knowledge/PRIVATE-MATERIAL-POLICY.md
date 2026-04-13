@@ -18,6 +18,7 @@ Use when the archive may contain personal notes, grades, contact details, transc
 Handling:
 
 - do not enable downstream indexing of full content
+- default promotion posture is `derived_only` if a human elects to promote safe derived knowledge
 - normalize metadata only
 - keep catalog notes high-level and non-sensitive
 
@@ -28,6 +29,7 @@ Use when the archive mixes private notes with less sensitive public or shared re
 Handling:
 
 - restrict indexing until manual review is complete
+- default promotion posture is `derived_only`
 - avoid copying quoted content into docs or runtime metadata
 - treat the archive as partially sensitive
 
@@ -56,6 +58,12 @@ Handling:
 - `metadata_only`: retain manifests, evaluation, catalog metadata, and receipts only
 - `derived_only`: allow promoted summaries and topic maps, but not raw imported content
 - `full_text`: allow content-level indexing for confirmed shareable material
+
+Promotion-specific rule:
+
+- promotion must stop until any credential-like material is rotated and scrubbed
+- `derived_only` is the default promotion profile for `private` and `mixed` archives
+- `full_text` promotion is allowed only when evaluation returned `safe_for_indexing = yes` and the archive is `shareable`
 
 Compatibility mapping still applies:
 

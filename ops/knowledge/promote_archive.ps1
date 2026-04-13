@@ -9,6 +9,7 @@ param(
   [string]$PromotionStatus = "draft",
   [ValidateSet("ephemeral", "operational", "governed-audit", "regulated")]
   [string]$RetentionClass,
+  [switch]$RefreshDerived,
   [switch]$DryRun
 )
 
@@ -36,6 +37,9 @@ if ($PromotionStatus) {
 }
 if ($RetentionClass) {
   $pythonArgs += @("--retention-class", $RetentionClass)
+}
+if ($RefreshDerived) {
+  $pythonArgs += "--refresh-derived"
 }
 if ($DryRun) {
   $pythonArgs += "--dry-run"

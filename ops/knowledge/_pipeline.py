@@ -5,6 +5,7 @@ import hashlib
 import json
 import re
 import shutil
+import sys
 import zipfile
 from collections import Counter
 from datetime import datetime, timezone
@@ -95,6 +96,41 @@ COPYRIGHT_PATTERNS = [
 ]
 CATALOG_BEGIN = "<!-- KNOWLEDGE-CATALOG:BEGIN -->"
 CATALOG_END = "<!-- KNOWLEDGE-CATALOG:END -->"
+PROMOTION_DRAFT_PREFIX_OLD = "Draft promotion created from evaluation metadata for"
+PROMOTION_DRAFT_PREFIX_V21 = "Draft promotion created from structural metadata for"
+PROMOTION_SCAFFOLD_SECTION_PREFIXES = {
+    "Topic Map": (
+        "- source:",
+        "- privacy flag:",
+        "- safe_for_indexing:",
+        "- file count:",
+        "- text file count:",
+        "- dominant extensions:",
+        "- top-level directories:",
+        "- representative paths:",
+    ),
+    "Evidence References": (
+        "- manifest:",
+        "- evaluation:",
+        "- import lane:",
+        "- raw archive:",
+        "- raw tree:",
+        "- extracted tree:",
+        "- extracted snapshot digest:",
+    ),
+    "Exclusions And Redactions": (
+        "- `",
+        "- No additional redactions are recorded in this draft.",
+        "- Promotion scaffolds omit raw body text, code blocks, and long excerpts by default.",
+    ),
+}
+RECEIPT_ENTRYPOINTS = {
+    "import": "ops/knowledge/import_archive.py",
+    "evaluate": "ops/knowledge/evaluate_archive.py",
+    "promote": "ops/knowledge/promote_archive.py",
+    "normalize": "ops/knowledge/normalize_archive.py",
+    "backfill-v2": "ops/knowledge/backfill_v2.py",
+}
 
 
 def atlas_root() -> Path:
@@ -235,6 +271,15 @@ def file_checksum(path: Path) -> str:
     return f"sha256:{digest.hexdigest()}"
 
 
+def stable_json_digest(value: Any) -> str:
+    encoded = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode("utf-8")
+    return f"sha256:{hashlib.sha256(encoded).hexdigest()}"
+
+
+def file_checksum_if_exists(path: Path) -> str | None:
+    return file_checksum(path) if path.exists() and path.is_file() else None
+
+
 def list_files(root: Path) -> list[Path]:
     if not root.exists():
         return []
@@ -300,6 +345,17 @@ def iter_text_files(paths: list[Path]) -> list[Path]:
     return [path for path in paths if path.suffix.lower() in TEXT_EXTENSIONS]
 
 
+def top_level_directories(root: Path) -> list[str]:
+    if not root.exists():
+        return []
+    entries = [path.name for path in root.iterdir() if path.is_dir()]
+    return sorted(entries)[:8]
+
+
+def representative_relative_paths(root: Path, paths: list[Path], limit: int = 6) -> list[str]:
+    return [path.relative_to(root).as_posix() for path in paths[:limit]]
+
+
 def read_text_limited(path: Path, max_chars: int = 4000) -> str:
     return path.read_text(encoding="utf-8", errors="ignore")[:max_chars]
 
@@ -335,6 +391,31 @@ def match_patterns(paths: list[Path], patterns: list[re.Pattern[str]]) -> list[d
             else:
                 continue
             break
+    return hits[:20]
+
+
+def match_inline_text(label: str, text: str, patterns: list[re.Pattern[str]]) -> list[dict[str, Any]]:
+    hits: list[dict[str, Any]] = []
+    for index, line in enumerate(text.splitlines(), start=1):
+        for pattern in patterns:
+            matched = pattern.search(line)
+            if matched:
+                hits.append({"path": label, "line_number": index, "match": matched.group(0)})
+                break
+    return hits[:20]
+
+
+def scan_secret_risk(
+    *,
+    paths: list[Path] | None = None,
+    inline_documents: list[tuple[str, str]] | None = None,
+) -> list[dict[str, Any]]:
+    hits: list[dict[str, Any]] = []
+    if paths:
+        hits.extend(match_patterns(paths, SECRET_PATTERNS))
+    if inline_documents:
+        for label, text in inline_documents:
+            hits.extend(match_inline_text(label, text, SECRET_PATTERNS))
     return hits[:20]
 
 
@@ -519,6 +600,96 @@ def clean_markdown_text(value: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
 
 
+def promotion_draft_summary(archive_id: str) -> str:
+    return (
+        f"Draft promotion created from structural metadata for `{archive_id}`. "
+        "Replace this section with a human-authored derived summary before marking the promotion as promoted."
+    )
+
+
+def build_promotion_scaffold_sections(
+    *,
+    archive_path: Path,
+    manifest: dict[str, Any],
+    evaluation: dict[str, Any],
+    archive_id: str,
+) -> dict[str, str]:
+    extracted_root = extracted_dir(archive_path)
+    extracted_files = list_files(extracted_root)
+    dominant_extensions = list(evaluation.get("summary", {}).get("extension_counts", {}).items())[:5]
+    rendered_extensions = (
+        ", ".join(f"{ext}={count}" for ext, count in dominant_extensions) if dominant_extensions else "none"
+    )
+    top_dirs = top_level_directories(extracted_root)
+    representative_paths = representative_relative_paths(extracted_root, extracted_files)
+    topic_lines = [
+        f"- source: `{manifest['source_name']}`",
+        f"- privacy flag: `{manifest['privacy_flag']}`",
+        f"- safe_for_indexing: `{evaluation.get('safe_for_indexing', 'pending_review')}`",
+        f"- file count: `{evaluation.get('summary', {}).get('file_count', 'unknown')}`",
+        f"- text file count: `{evaluation.get('summary', {}).get('text_file_count', 'unknown')}`",
+        f"- dominant extensions: `{rendered_extensions}`",
+        f"- top-level directories: `{', '.join(top_dirs) if top_dirs else 'none'}`",
+        f"- representative paths: `{', '.join(representative_paths) if representative_paths else 'none'}`",
+    ]
+    evidence_lines = [
+        f"- manifest: `{relative_to_atlas(manifest_path(archive_path))}`",
+        f"- evaluation: `{relative_to_atlas(evaluation_path(archive_path))}`",
+        f"- import lane: `{relative_to_atlas(archive_path)}`",
+        f"- extracted tree: `{relative_to_atlas(extracted_root)}`",
+        f"- extracted snapshot digest: `{manifest.get('extracted_snapshot_digest', 'sha256:pending')}`",
+    ]
+    if manifest.get("raw_archive_path"):
+        evidence_lines.append(f"- raw archive: `{manifest['raw_archive_path']}`")
+    if manifest.get("raw_reference_dir"):
+        evidence_lines.append(f"- raw tree: `{manifest['raw_reference_dir']}`")
+
+    exclusion_lines = [
+        "- Promotion scaffolds omit raw body text, code blocks, and long excerpts by default.",
+    ]
+    for name, enabled in evaluation.get("risk_flags", {}).items():
+        if enabled:
+            exclusion_lines.append(f"- `{name}` remains excluded from promotion-safe derived output.")
+    if len(exclusion_lines) == 1:
+        exclusion_lines.append("- No additional redactions are recorded in this draft.")
+
+    return {
+        "Derived Summary": promotion_draft_summary(archive_id),
+        "Topic Map": "\n".join(topic_lines),
+        "Evidence References": "\n".join(evidence_lines),
+        "Exclusions And Redactions": "\n".join(exclusion_lines),
+    }
+
+
+def is_promotion_summary_scaffold(archive_id: str, summary: str) -> bool:
+    cleaned = clean_markdown_text(summary)
+    expected_prefixes = [
+        clean_markdown_text(promotion_draft_summary(archive_id)),
+        clean_markdown_text(
+            f"Draft promotion created from evaluation metadata for `{archive_id}`. "
+            "Replace this section with a human-authored derived summary before downstream derived indexing."
+        ),
+        clean_markdown_text(PROMOTION_DRAFT_PREFIX_OLD + f" `{archive_id}`."),
+        clean_markdown_text(PROMOTION_DRAFT_PREFIX_V21 + f" `{archive_id}`."),
+    ]
+    return any(cleaned.startswith(prefix) for prefix in expected_prefixes)
+
+
+def section_looks_scaffold(section_name: str, value: str, archive_id: str) -> bool:
+    stripped = value.strip()
+    if not stripped:
+        return True
+    if section_name == "Derived Summary":
+        return is_promotion_summary_scaffold(archive_id, stripped)
+    prefixes = PROMOTION_SCAFFOLD_SECTION_PREFIXES.get(section_name, ())
+    if not prefixes:
+        return False
+    lines = [line.strip() for line in stripped.splitlines() if line.strip()]
+    if not lines:
+        return True
+    return all(any(line.startswith(prefix) for prefix in prefixes) for line in lines)
+
+
 def build_promotion_document(
     *,
     archive_path: Path,
@@ -529,6 +700,7 @@ def build_promotion_document(
     promotion_status: str,
     retention_class: str,
     existing_text: str | None,
+    refresh_derived: bool,
 ) -> str:
     existing_metadata: dict[str, Any] = {}
     existing_sections: dict[str, str] = {}
@@ -536,43 +708,45 @@ def build_promotion_document(
         existing_metadata, existing_body = frontmatter_block(existing_text)
         existing_sections = extract_section_map(existing_body)
 
-    created_at = str(existing_metadata.get("created_at", utc_now()))
-    updated_at = utc_now()
+    timestamp_now = utc_now()
+    created_at = str(existing_metadata.get("created_at", timestamp_now))
     title = f"# Promotion: {archive_id}"
-    summary_default = (
-        f"Draft promotion created from evaluation metadata for `{archive_id}`. "
-        "Replace this section with a human-authored derived summary before downstream derived indexing."
+    scaffold_sections = build_promotion_scaffold_sections(
+        archive_path=archive_path,
+        manifest=manifest,
+        evaluation=evaluation,
+        archive_id=archive_id,
     )
-    dominant_extensions = list(evaluation.get("summary", {}).get("extension_counts", {}).items())[:5]
-    topic_lines = [
-        f"- source: `{manifest['source_name']}`",
-        f"- privacy flag: `{manifest['privacy_flag']}`",
-        f"- file count: `{evaluation.get('summary', {}).get('file_count', 'unknown')}`",
-        f"- safe_for_indexing: `{evaluation.get('safe_for_indexing', 'pending_review')}`",
-    ]
-    if dominant_extensions:
-        rendered = ", ".join(f"{ext}={count}" for ext, count in dominant_extensions)
-        topic_lines.append(f"- top extensions: `{rendered}`")
-    evidence_lines = [
-        f"- manifest: `{relative_to_atlas(manifest_path(archive_path))}`",
-        f"- evaluation: `{relative_to_atlas(evaluation_path(archive_path))}`",
-        f"- import lane: `{relative_to_atlas(archive_path)}`",
-    ]
-    if manifest.get("raw_archive_path"):
-        evidence_lines.append(f"- raw archive: `{manifest['raw_archive_path']}`")
-    exclusion_lines = []
-    for name, enabled in evaluation.get("risk_flags", {}).items():
-        if enabled:
-            exclusion_lines.append(f"- `{name}` remains excluded from promotion-safe derived output.")
-    if not exclusion_lines:
-        exclusion_lines.append("- No additional redactions are recorded in this draft.")
-
-    sections = {
-        "Derived Summary": existing_sections.get("Derived Summary") or summary_default,
-        "Topic Map": existing_sections.get("Topic Map") or "\n".join(topic_lines),
-        "Evidence References": existing_sections.get("Evidence References") or "\n".join(evidence_lines),
-        "Exclusions And Redactions": existing_sections.get("Exclusions And Redactions") or "\n".join(exclusion_lines),
-    }
+    sections: dict[str, str] = {}
+    for section_name in PROMOTION_REQUIRED_SECTIONS:
+        existing_value = existing_sections.get(section_name)
+        if not existing_value:
+            sections[section_name] = scaffold_sections[section_name]
+            continue
+        if refresh_derived and section_looks_scaffold(section_name, existing_value, archive_id):
+            sections[section_name] = scaffold_sections[section_name]
+            continue
+        sections[section_name] = existing_value
+    metadata_changed = any(
+        str(existing_metadata.get(key)) != str(value)
+        for key, value in {
+            "schema_version": PROMOTION_SCHEMA_VERSION,
+            "archive_id": archive_id,
+            "promotion_status": promotion_status,
+            "indexing_profile": indexing_profile,
+            "retention_class": retention_class,
+            "created_at": created_at,
+        }.items()
+    )
+    sections_changed = any(
+        (existing_sections.get(section_name, "").strip() != sections[section_name].strip())
+        for section_name in PROMOTION_REQUIRED_SECTIONS
+    )
+    updated_at = (
+        timestamp_now
+        if metadata_changed or sections_changed or not existing_text
+        else str(existing_metadata.get("updated_at", created_at))
+    )
     metadata = {
         "schema_version": PROMOTION_SCHEMA_VERSION,
         "archive_id": archive_id,
@@ -660,11 +834,30 @@ def current_validation_placeholder() -> dict[str, Any]:
     return {"status": "not_run", "findings": []}
 
 
+def receipt_entrypoint_path(action: str) -> Path | None:
+    relative = RECEIPT_ENTRYPOINTS.get(action)
+    return atlas_root() / relative if relative else None
+
+
+def receipt_tooling(action: str) -> dict[str, Any]:
+    entrypoint = receipt_entrypoint_path(action)
+    pipeline_path = Path(__file__).resolve()
+    return {
+        "entrypoint_path": relative_to_atlas(entrypoint) if entrypoint and entrypoint.exists() else None,
+        "entrypoint_digest": file_checksum_if_exists(entrypoint) if entrypoint is not None else None,
+        "pipeline_path": relative_to_atlas(pipeline_path),
+        "pipeline_digest": file_checksum(pipeline_path),
+        "python_version": sys.version.split()[0],
+    }
+
+
 def write_knowledge_receipt(
     *,
     archive_path: Path,
     action: str,
     validation_results: dict[str, Any] | None,
+    promotion_blocked: bool = False,
+    promotion_block_reason: str | None = None,
     dry_run: bool,
 ) -> dict[str, Any]:
     manifest = read_json(manifest_path(archive_path))
@@ -673,7 +866,12 @@ def write_knowledge_receipt(
     normalized_file = normalized_path(manifest["source_name"], manifest["slug"])
     normalized = read_json(normalized_file) if normalized_file.exists() else None
     promotion_file = promotion_doc_path(archive_id)
-    promotion = read_promotion_doc(promotion_file) if promotion_file.exists() else None
+    promotion = None
+    if promotion_file.exists():
+        try:
+            promotion = read_promotion_doc(promotion_file)
+        except ValueError:
+            promotion = None
     recorded_at = utc_now()
     timestamp = recorded_at.replace("-", "").replace(":", "").replace(".", "")
     receipt_folder = receipt_dir(archive_id)
@@ -683,6 +881,7 @@ def write_knowledge_receipt(
     if normalized is not None:
         runtime_outputs.append(relative_to_atlas(normalized_file))
     runtime_outputs.append(relative_to_atlas(catalog_doc_path()))
+    validation_payload = validation_results or current_validation_placeholder()
     receipt = {
         "receipt_version": RECEIPT_VERSION,
         "receipt_id": f"{archive_id}-{action}-{timestamp}",
@@ -691,6 +890,8 @@ def write_knowledge_receipt(
         "archive_id": archive_id,
         "action": action,
         "atlas_root": ".",
+        "promotion_blocked": promotion_blocked,
+        "promotion_block_reason": promotion_block_reason,
         "paths": {
             "manifest_path": relative_to_atlas(manifest_path(archive_path)),
             "evaluation_path": relative_to_atlas(evaluation_path(archive_path))
@@ -704,6 +905,15 @@ def write_knowledge_receipt(
         "inputs": {
             "artifact_digests": manifest.get("artifact_digests", {}),
             "extracted_snapshot_digest": manifest.get("extracted_snapshot_digest"),
+        },
+        "digests": {
+            "manifest": file_checksum(manifest_path(archive_path)),
+            "evaluation": file_checksum_if_exists(evaluation_path(archive_path)),
+            "promotion_doc": promotion["digest"] if promotion is not None else file_checksum_if_exists(promotion_file),
+            "runtime_catalog": file_checksum_if_exists(normalized_file),
+            "validation_results": None
+            if validation_payload == current_validation_placeholder()
+            else stable_json_digest(validation_payload),
         },
         "no_execute_guarantee": bool(manifest.get("no_execute_guarantee", True)),
         "evaluation": {
@@ -724,7 +934,8 @@ def write_knowledge_receipt(
         if promotion is not None
         else None,
         "runtime_outputs": runtime_outputs,
-        "validation_results": validation_results or current_validation_placeholder(),
+        "validation_results": validation_payload,
+        "tooling": receipt_tooling(action),
     }
     if not dry_run:
         receipt_folder.mkdir(parents=True, exist_ok=True)
@@ -849,7 +1060,7 @@ def evaluate_archive(*, archive_path: Path, dry_run: bool) -> dict[str, Any]:
     paths = list_files(review_dir)
     text_paths = iter_text_files(paths)
     private_hits = match_patterns(paths, PRIVATE_PATTERNS)
-    secrets_hits = match_patterns(paths, SECRET_PATTERNS)
+    secrets_hits = scan_secret_risk(paths=paths)
     copyright_hits = match_patterns(paths, COPYRIGHT_PATTERNS)
     executable_flag, executable_hits = detect_executable_content(paths)
     flags = {
@@ -939,16 +1150,36 @@ def promote_archive(
     indexing_profile: str | None,
     promotion_status: str,
     retention_class: str | None,
+    refresh_derived: bool,
     dry_run: bool,
 ) -> dict[str, Any]:
     archive_path = archive_path.resolve()
     manifest = read_json(manifest_path(archive_path))
     report = read_json(evaluation_path(archive_path))
     if not report.get("promotion_allowed", False):
+        if not dry_run:
+            write_knowledge_receipt(
+                archive_path=archive_path,
+                action="promote",
+                validation_results=None,
+                promotion_blocked=True,
+                promotion_block_reason="Evaluation kept the archive quarantined from promotion.",
+                dry_run=False,
+            )
         raise ValueError("This archive cannot be promoted because evaluation kept it quarantined.")
-    chosen_profile = indexing_profile or str(report.get("indexing_profile", "metadata_only"))
+    chosen_profile = indexing_profile or "derived_only"
     if chosen_profile not in INDEXING_PROFILES:
         raise ValueError(f"Unsupported indexing profile: {chosen_profile}")
+    if (
+        chosen_profile == "full_text"
+        and (
+            report.get("safe_for_indexing") != "yes"
+            or manifest.get("privacy_flag") != "shareable"
+        )
+    ):
+        raise ValueError(
+            "full_text promotion is allowed only for shareable archives whose evaluation returned safe_for_indexing = yes."
+        )
     if promotion_status not in PROMOTION_STATUSES or promotion_status == "not_promoted":
         raise ValueError("Promotion status must be one of: draft, promoted.")
     chosen_retention = retention_class or str(
@@ -968,19 +1199,54 @@ def promote_archive(
         promotion_status=promotion_status,
         retention_class=chosen_retention,
         existing_text=existing_text,
+        refresh_derived=refresh_derived,
     )
+    evidence_secret_hits = scan_secret_risk(paths=list_files(extracted_dir(archive_path)))
+    candidate_secret_hits = scan_secret_risk(
+        inline_documents=[(relative_to_atlas(promotion_file), rendered)]
+    )
+    if evidence_secret_hits or candidate_secret_hits:
+        block_reason = "Promotion blocked because the imported evidence or candidate promotion markdown failed secret scanning."
+        if not dry_run:
+            write_knowledge_receipt(
+                archive_path=archive_path,
+                action="promote",
+                validation_results={
+                    "status": "blocked",
+                    "findings": {
+                        "imported_evidence_secret_hits": evidence_secret_hits,
+                        "candidate_promotion_secret_hits": candidate_secret_hits,
+                    },
+                },
+                promotion_blocked=True,
+                promotion_block_reason=block_reason,
+                dry_run=False,
+            )
+        raise ValueError(block_reason)
     if not dry_run:
         promotions_dir().mkdir(parents=True, exist_ok=True)
-        promotion_file.write_text(rendered, encoding="utf-8")
+        if existing_text != rendered:
+            promotion_file.write_text(rendered, encoding="utf-8")
 
     promotion = read_promotion_doc(promotion_file) if not dry_run else None
+    manifest_last_reviewed_at = (
+        utc_now()
+        if (
+            manifest.get("indexing_profile") != chosen_profile
+            or manifest.get("promotion_status") != promotion_status
+            or manifest.get("retention_class") != chosen_retention
+            or existing_text != rendered
+        )
+        else str(manifest.get("last_reviewed_at", utc_now()))
+    )
     manifest = update_manifest(
         archive_path,
         {
+            "indexing_profile": chosen_profile,
             "promotion_status": promotion_status,
             "retention_class": chosen_retention,
             "pipeline_version": PIPELINE_VERSION,
-            "last_reviewed_at": utc_now(),
+            "last_reviewed_at": manifest_last_reviewed_at,
         },
         dry_run,
     )
@@ -998,6 +1264,7 @@ def promote_archive(
         "promotion_status": promotion_status,
         "indexing_profile": chosen_profile,
         "retention_class": chosen_retention,
+        "refresh_derived": refresh_derived,
         "promotion": build_promotion_summary(promotion) if promotion is not None else None,
     }
 
@@ -1460,6 +1727,51 @@ def validate_catalog() -> dict[str, Any]:
                             "message": "Promotion doc exists even though evaluation disallowed promotion.",
                         }
                     )
+                if manifest.get("promotion_status") != promotion["metadata"]["promotion_status"]:
+                    findings.append(
+                        {
+                            "severity": "error",
+                            "path": relative_to_atlas(manifest_file),
+                            "message": "Manifest promotion_status must match the promotion doc.",
+                        }
+                    )
+                if manifest.get("indexing_profile") != promotion["metadata"]["indexing_profile"]:
+                    findings.append(
+                        {
+                            "severity": "error",
+                            "path": relative_to_atlas(manifest_file),
+                            "message": "Manifest indexing_profile must match the promotion doc.",
+                        }
+                    )
+                if (
+                    promotion["metadata"]["promotion_status"] == "promoted"
+                    and is_promotion_summary_scaffold(
+                        archive_id,
+                        promotion["sections"]["Derived Summary"],
+                    )
+                ):
+                    findings.append(
+                        {
+                            "severity": "error",
+                            "path": relative_to_atlas(promotion_file),
+                            "message": "Promotion docs marked promoted must replace the scaffold-derived summary with human-authored content.",
+                        }
+                    )
+                if (
+                    promotion["metadata"]["indexing_profile"] == "full_text"
+                    and (
+                        manifest.get("privacy_flag") != "shareable"
+                        or evaluation is None
+                        or evaluation.get("safe_for_indexing") != "yes"
+                    )
+                ):
+                    findings.append(
+                        {
+                            "severity": "error",
+                            "path": relative_to_atlas(promotion_file),
+                            "message": "full_text promotion is only valid for shareable archives whose evaluation returned safe_for_indexing = yes.",
+                        }
+                    )
         elif manifest.get("promotion_status") != "not_promoted":
             findings.append(
                 {
@@ -1549,6 +1861,14 @@ def validate_catalog() -> dict[str, Any]:
                             "severity": "error",
                             "path": relative_to_atlas(normalized_file),
                             "message": "Runtime catalog indexing_profile must match the promotion doc when a promotion doc exists.",
+                        }
+                    )
+                if normalized.get("promotion_status") != promotion["metadata"]["promotion_status"]:
+                    findings.append(
+                        {
+                            "severity": "error",
+                            "path": relative_to_atlas(normalized_file),
+                            "message": "Runtime catalog promotion_status must match the promotion doc when a promotion doc exists.",
                         }
                     )
 

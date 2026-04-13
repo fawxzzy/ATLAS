@@ -12,12 +12,14 @@ updated_at: 2026-04-13T00:00:00Z
 
 ## Derived Summary
 
-Replace this text with a concise promoted summary that is safe to retain and index.
+Replace this text with a concise promoted summary that is safe to retain and index. Do not paste raw excerpts, code blocks, or long copyrighted passages.
 
 ## Topic Map
 
-- Topic or theme
-- Topic or theme
+- source / privacy posture
+- dominant extensions or content classes
+- top-level directories
+- representative relative paths
 
 ## Evidence References
 
@@ -28,3 +30,4 @@ Replace this text with a concise promoted summary that is safe to retain and ind
 ## Exclusions And Redactions
 
 - Note any content classes that must stay out of promoted knowledge.
+- Confirm secrets were rotated and scrubbed before promotion when applicable.

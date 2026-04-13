@@ -21,6 +21,7 @@ def main() -> int:
     parser.add_argument("--indexing-profile", choices=sorted(INDEXING_PROFILES))
     parser.add_argument("--promotion-status", choices=sorted(PROMOTION_STATUSES - {'not_promoted'}), default="draft")
     parser.add_argument("--retention-class", choices=sorted(RETENTION_CLASSES))
+    parser.add_argument("--refresh-derived", action="store_true")
     args = parser.parse_args()
 
     archive_path = resolve_archive_dir(args.source_name, args.slug, args.archive_dir)
@@ -29,6 +30,7 @@ def main() -> int:
         indexing_profile=args.indexing_profile,
         promotion_status=args.promotion_status,
         retention_class=args.retention_class,
+        refresh_derived=args.refresh_derived,
         dry_run=args.dry_run,
     )
     print(json.dumps(result, indent=2))

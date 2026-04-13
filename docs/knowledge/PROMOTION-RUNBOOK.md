@@ -10,6 +10,7 @@ This runbook defines the explicit promotion step for ATLAS knowledge archives af
 - record pipeline receipts in `runtime/receipts/knowledge/`
 
 Promotion is optional. Do not create a promotion doc unless a human intends to retain derived knowledge beyond metadata-only handling.
+Promotion scaffolds default to `derived_only`; `full_text` must be an explicit choice and is only valid for `shareable` archives whose evaluation returned `safe_for_indexing = yes`.
 
 ## Promotion Preconditions
 
@@ -19,6 +20,7 @@ Promotion is optional. Do not create a promotion doc unless a human intends to r
 - no-execute posture remains in force
 
 Archives with `credentials_secrets_risk = true` must remain quarantined and cannot be promoted.
+If any candidate promotion draft contains credential-like material, rotate and scrub the source material before retrying promotion.
 
 ## Commands
 
@@ -38,8 +40,16 @@ Or call Python directly:
 python ops/knowledge/promote_archive.py `
   --source-name personal `
   --slug example-archive `
-  --promotion-status draft `
-  --indexing-profile derived_only
+  --promotion-status draft
+```
+
+Refresh scaffolded derived sections from current archive metadata without overwriting human-authored text:
+
+```powershell
+python ops/knowledge/promote_archive.py `
+  --source-name personal `
+  --slug example-archive `
+  --refresh-derived
 ```
 
 Normalize after promotion:
@@ -96,6 +106,6 @@ Runtime catalog entries continue to live at:
 
 1. Keep the promoted summary high-level and provenance-aware.
 2. Do not copy raw private notes, courseware, or secrets into the promotion doc.
-3. Use `derived_only` when only the promoted summary and topic map should be indexable.
-4. Use `full_text` only for confirmed shareable content.
+3. Treat `derived_only` as the default for private or mixed archives.
+4. Use `full_text` only for confirmed shareable content that evaluated to `safe_for_indexing = yes`.
 5. If a promotion doc is removed, rerun normalization and catalog refresh so the runtime lane falls back to `not_promoted`.

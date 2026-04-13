@@ -36,6 +36,7 @@ MUTABLE_DIR_CANDIDATES = [
 ]
 ROOT_LOG_PATTERNS = ["*.log", "*.err.log", "*.out.log", "*.tmp", "*.db", "*.sqlite", "*.sqlite3"]
 ROOT_CAPTURE_PATTERNS = ["*screenshot*.png", "artifacts*.png", "*check*.png", "*review*.png"]
+BASELINE_VERSION = "atlas.stack.validation.baseline.v1"
 
 
 @dataclass
@@ -295,6 +296,7 @@ def summarize_findings(findings: list[Finding]) -> dict[str, int]:
 def write_markdown_report(report: dict[str, Any], output_path: Path) -> None:
     summary = report["summary"]
     findings = report["findings"]
+    ratchet = report.get("ratchet")
     lines = [
         "# ATLAS Stack Validation Report",
         "",
@@ -311,6 +313,25 @@ def write_markdown_report(report: dict[str, Any], output_path: Path) -> None:
         f"- Total: {summary['total']}",
         "",
     ]
+    if isinstance(ratchet, dict):
+        lines += [
+            "## Ratchet",
+            "",
+            f"- Enabled: `{ratchet.get('enabled', False)}`",
+            f"- Baseline: `{ratchet.get('baseline_path', 'none')}`",
+            f"- Baseline findings: {ratchet.get('baseline_finding_count', 0)}",
+            f"- Current blocking findings: {ratchet.get('current_blocking_count', 0)}",
+            f"- New blocking findings: {ratchet.get('new_blocking_count', 0)}",
+            "",
+        ]
+        new_blocking = ratchet.get("new_blocking_findings") or []
+        if new_blocking:
+            lines += ["### New Blocking Findings", ""]
+            for finding in new_blocking:
+                detail = finding.get("details") or {}
+                suffix = f" (line {detail['line_number']})" if detail.get("line_number") else ""
+                lines.append(f"- `{finding['path']}`: {finding['message']}{suffix}")
+            lines.append("")
     for severity in ["critical", "error", "warning", "info"]:
         scoped = [finding for finding in findings if finding["severity"] == severity]
         if not scoped:
@@ -328,16 +349,113 @@ def default_output_dir(stack_file: Path) -> Path:
     return stack_file.parent.resolve() / "runtime" / "receipts" / "validation"
 
 
+def default_baseline_path(stack_file: Path) -> Path:
+    return stack_file.parent.resolve() / "ops" / "validation" / "stack-validation.baseline.json"
+
+
+def baseline_relpath(stack_file: Path, path: Path) -> str:
+    root = stack_file.parent.resolve()
+    resolved = path.resolve()
+    if resolved.is_relative_to(root):
+        return normalize_slashes(str(resolved.relative_to(root)))
+    return normalize_slashes(str(resolved))
+
+
+def normalized_baseline_details(details: dict[str, Any] | None) -> dict[str, Any] | None:
+    if not isinstance(details, dict):
+        return None
+    normalized: dict[str, Any] = {}
+    if isinstance(details.get("line_number"), int):
+        normalized["line_number"] = details["line_number"]
+    return normalized or None
+
+
+def normalize_finding_for_baseline(finding: Finding | dict[str, Any]) -> dict[str, Any]:
+    if isinstance(finding, Finding):
+        entry = {
+            "severity": finding.severity,
+            "category": finding.category,
+            "path": finding.path,
+            "message": finding.message,
+        }
+        details = normalized_baseline_details(finding.details)
+    else:
+        entry = {
+            "severity": str(finding["severity"]),
+            "category": str(finding["category"]),
+            "path": str(finding["path"]),
+            "message": str(finding["message"]),
+        }
+        details = normalized_baseline_details(finding.get("details"))
+    if details is not None:
+        entry["details"] = details
+    return entry
+
+
+def finding_baseline_key(finding: dict[str, Any]) -> str:
+    return json.dumps(normalize_finding_for_baseline(finding), sort_keys=True, separators=(",", ":"))
+
+
+def build_baseline(report: dict[str, Any], *, stack_file: Path) -> dict[str, Any]:
+    findings = [normalize_finding_for_baseline(item) for item in report["findings"]]
+    findings.sort(key=lambda item: json.dumps(item, sort_keys=True, separators=(",", ":")))
+    return {
+        "baseline_version": BASELINE_VERSION,
+        "generated_at": report["generated_at"],
+        "stack_file": baseline_relpath(stack_file, stack_file),
+        "findings": findings,
+    }
+
+
+def load_baseline(path: Path) -> dict[str, Any]:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError("Baseline file must contain a JSON object.")
+    if payload.get("baseline_version") != BASELINE_VERSION:
+        raise ValueError(f"Baseline version must be '{BASELINE_VERSION}'.")
+    findings = payload.get("findings")
+    if not isinstance(findings, list):
+        raise ValueError("Baseline file must contain a findings array.")
+    return payload
+
+
+def ratchet_report(current_findings: list[dict[str, Any]], baseline: dict[str, Any], *, baseline_path: Path, stack_file: Path) -> dict[str, Any]:
+    baseline_entries = [item for item in baseline.get("findings", []) if isinstance(item, dict)]
+    baseline_keys = {finding_baseline_key(item) for item in baseline_entries}
+    blocking = [
+        item for item in current_findings
+        if item["severity"] in {"critical", "error"}
+    ]
+    new_blocking = [
+        item for item in blocking
+        if finding_baseline_key(item) not in baseline_keys
+    ]
+    return {
+        "enabled": True,
+        "baseline_path": baseline_relpath(stack_file, baseline_path),
+        "baseline_version": baseline.get("baseline_version"),
+        "baseline_finding_count": len(baseline_entries),
+        "current_blocking_count": len(blocking),
+        "new_blocking_count": len(new_blocking),
+        "new_blocking_findings": [normalize_finding_for_baseline(item) for item in new_blocking],
+    }
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Validate the ATLAS stack against stack.yaml.")
     parser.add_argument("--stack-file", default=str(repo_root() / "stack.yaml"))
     parser.add_argument("--output-dir")
     parser.add_argument("--json-name", default="stack-validation.latest.json")
     parser.add_argument("--markdown-name", default="stack-validation.latest.md")
+    parser.add_argument("--baseline-path")
+    parser.add_argument("--write-baseline", action="store_true")
+    parser.add_argument("--ratchet", action="store_true")
     args = parser.parse_args(argv)
 
     stack_file = Path(args.stack_file).resolve()
     output_dir = Path(args.output_dir).resolve() if args.output_dir else default_output_dir(stack_file)
+    baseline_path = Path(args.baseline_path).resolve() if args.baseline_path else default_baseline_path(stack_file)
+    should_exit_success = False
     try:
         config = load_stack_config(stack_file)
         report = {
@@ -358,6 +476,54 @@ def main(argv: list[str] | None = None) -> int:
             "repo_ids": [],
             "findings": [asdict(Finding("critical", "validator-crash", normalize_slashes(str(stack_file)), f"Validator failed before completion: {exc}"))],
         }
+    if args.write_baseline:
+        baseline_path.parent.mkdir(parents=True, exist_ok=True)
+        baseline = build_baseline(report, stack_file=stack_file)
+        baseline_path.write_text(json.dumps(baseline, indent=2) + "\n", encoding="utf-8")
+        report["baseline"] = {
+            "path": baseline_relpath(stack_file, baseline_path),
+            "baseline_version": BASELINE_VERSION,
+            "finding_count": len(baseline["findings"]),
+        }
+        should_exit_success = True
+    if args.ratchet:
+        baseline_error: str | None = None
+        baseline: dict[str, Any] | None = None
+        if baseline_path.exists():
+            try:
+                baseline = load_baseline(baseline_path)
+            except Exception as exc:
+                baseline_error = str(exc)
+        else:
+            baseline_error = "Ratchet mode requires a committed baseline file."
+        if baseline is not None:
+            report["ratchet"] = ratchet_report(
+                report["findings"],
+                baseline,
+                baseline_path=baseline_path,
+                stack_file=stack_file,
+            )
+            should_exit_success = report["ratchet"]["new_blocking_count"] == 0
+        else:
+            report["ratchet"] = {
+                "enabled": True,
+                "baseline_path": baseline_relpath(stack_file, baseline_path),
+                "baseline_version": None,
+                "baseline_finding_count": 0,
+                "current_blocking_count": sum(
+                    1 for item in report["findings"] if item["severity"] in {"critical", "error"}
+                ),
+                "new_blocking_count": 1,
+                "new_blocking_findings": [
+                    {
+                        "severity": "critical",
+                        "category": "baseline-missing",
+                        "path": baseline_relpath(stack_file, baseline_path),
+                        "message": baseline_error or "Ratchet mode requires a committed baseline file.",
+                    }
+                ],
+            }
+            should_exit_success = False
     output_dir.mkdir(parents=True, exist_ok=True)
     json_path = output_dir / args.json_name
     markdown_path = output_dir / args.markdown_name
@@ -367,6 +533,8 @@ def main(argv: list[str] | None = None) -> int:
     print(f"Stack validation complete: critical={summary['critical']} error={summary['error']} warning={summary['warning']} info={summary['info']}")
     print(f"Markdown report: {normalize_slashes(str(markdown_path))}")
     print(f"JSON report: {normalize_slashes(str(json_path))}")
+    if args.ratchet or args.write_baseline:
+        return 0 if should_exit_success else 2
     return 2 if summary["critical"] > 0 else 0
 
 

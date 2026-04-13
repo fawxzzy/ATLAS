@@ -1,7 +1,10 @@
 [CmdletBinding()]
 param(
   [string]$StackFile,
-  [string]$OutputDir
+  [string]$OutputDir,
+  [string]$BaselinePath,
+  [switch]$WriteBaseline,
+  [switch]$Ratchet
 )
 
 $ErrorActionPreference = "Stop"
@@ -19,6 +22,15 @@ $pythonArgs = @(
 
 if ($OutputDir) {
   $pythonArgs += @("--output-dir", $OutputDir)
+}
+if ($BaselinePath) {
+  $pythonArgs += @("--baseline-path", $BaselinePath)
+}
+if ($WriteBaseline) {
+  $pythonArgs += "--write-baseline"
+}
+if ($Ratchet) {
+  $pythonArgs += "--ratchet"
 }
 
 & python @pythonArgs

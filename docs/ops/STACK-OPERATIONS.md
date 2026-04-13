@@ -35,6 +35,7 @@ Purpose:
 - check `AGENTS.md` and `.codex/config.toml` where expected
 - detect common absolute-path leaks
 - detect obvious mutable state left inside repos
+- support a committed validation baseline for ratcheting
 - write markdown and json reports
 
 Default report location:
@@ -51,6 +52,22 @@ python .\ops\validation\validate_stack.py
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\ops\validation\validate_stack.ps1
 ```
+
+Write or refresh the committed baseline:
+
+```powershell
+python .\ops\validation\validate_stack.py --write-baseline
+```
+
+Run in ratchet mode so only new critical or error findings fail the command:
+
+```powershell
+python .\ops\validation\validate_stack.py --ratchet
+```
+
+Default baseline path:
+
+- `ops/validation/stack-validation.baseline.json`
 
 ## Commit
 

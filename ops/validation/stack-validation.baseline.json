@@ -1,0 +1,5560 @@
+{
+  "baseline_version": "atlas.stack.validation.baseline.v1",
+  "generated_at": "2026-04-13T19:57:59.116221+00:00",
+  "stack_file": "stack.yaml",
+  "findings": [
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/audits/atlas-structure-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 104
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/audits/atlas-structure-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 104
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/audits/atlas-structure-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 105
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/audits/atlas-structure-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 105
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/audits/atlas-structure-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 106
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/audits/atlas-structure-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 106
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/audits/atlas-structure-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 107
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/audits/atlas-structure-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 107
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/architecture/ATLAS-RETENTION-AND-MEMORY-POLICY.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 123
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/architecture/ATLAS-RETENTION-AND-MEMORY-POLICY.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 123
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/architecture/ATLAS-CORTEX-PLAYBOOK-CODEX.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 137
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/architecture/ATLAS-CORTEX-PLAYBOOK-CODEX.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 137
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/architecture/STACK-STANDARDS.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 151
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/architecture/STACK-STANDARDS.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 151
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/audits/atlas-structure-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 154
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/audits/atlas-structure-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 154
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/audits/atlas-structure-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 156
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/audits/atlas-structure-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 156
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/audits/atlas-structure-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 157
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/audits/atlas-structure-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 157
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "AGENTS.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 15
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "AGENTS.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 15
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/audits/atlas-structure-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 15
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/audits/atlas-structure-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 15
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/audits/atlas-structure-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 168
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/audits/atlas-structure-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 168
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "ops/codex/commit_from_handoff.ps1",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 176
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "ops/codex/commit_from_handoff.ps1",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 176
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "ops/codex/prepare_pr_from_handoff.ps1",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 186
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "ops/codex/prepare_pr_from_handoff.ps1",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 186
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "repos/cortex/AGENTS.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 22
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "repos/cortex/AGENTS.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 22
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/audits/atlas-structure-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 23
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/audits/atlas-structure-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 23
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/audits/atlas-structure-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 24
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/audits/atlas-structure-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 24
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_SURFACES.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 24
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_SURFACES.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 24
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "repos/fawxzzy-mazer/docs/research/MAZER_VARIETY_DIAGNOSIS.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 24
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "repos/fawxzzy-mazer/docs/research/MAZER_VARIETY_DIAGNOSIS.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 24
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/audits/atlas-structure-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 25
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/audits/atlas-structure-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 25
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "AGENTS.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 29
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "AGENTS.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 29
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/architecture/ATLAS-CORTEX-PLAYBOOK-CODEX.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 31
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/architecture/ATLAS-CORTEX-PLAYBOOK-CODEX.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 31
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/audits/atlas-structure-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 36
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/audits/atlas-structure-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 36
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/audits/atlas-structure-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 37
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/audits/atlas-structure-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 37
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/architecture/ATLAS-RETENTION-AND-MEMORY-POLICY.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 3
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/architecture/ATLAS-RETENTION-AND-MEMORY-POLICY.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 3
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/architecture/PATH-POLICY.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 3
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/architecture/PATH-POLICY.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 3
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "README-STACK.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 42
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "README-STACK.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 42
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "AGENTS.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 4
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "AGENTS.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 4
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "repos/cortex/AGENTS.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 4
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "repos/cortex/AGENTS.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 4
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "repos/cortex/docs/repo-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 4
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "repos/cortex/docs/repo-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 4
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/ops/AUTOMATION-LEVELS.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 51
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/ops/AUTOMATION-LEVELS.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 51
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/audits/atlas-structure-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 54
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/audits/atlas-structure-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 54
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/audits/atlas-structure-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 55
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/audits/atlas-structure-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 55
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/audits/atlas-structure-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 56
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/audits/atlas-structure-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 56
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/audits/atlas-structure-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 57
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/audits/atlas-structure-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 57
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "repos/cortex/MANIFEST.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 5
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "repos/cortex/MANIFEST.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 5
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/audits/atlas-structure-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 62
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/audits/atlas-structure-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 62
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/architecture/atlas-target-tree.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 67
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/architecture/atlas-target-tree.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 67
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/audits/atlas-structure-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 72
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/audits/atlas-structure-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 72
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/audits/atlas-structure-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 7
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/audits/atlas-structure-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 7
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "repos/fawxzzy-playbook/docs/repo-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 7
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "repos/fawxzzy-playbook/docs/repo-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 7
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/architecture/atlas-current-tree.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 8
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/architecture/atlas-current-tree.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 8
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/architecture/atlas-target-tree.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 8
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "docs/architecture/atlas-target-tree.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 8
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "repos/cortex/AGENTS.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 8
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "repos/cortex/AGENTS.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 8
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "repos/cortex/docs/repo-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 8
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "repos/cortex/docs/repo-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 8
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "repos/cortex/AGENTS.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 9
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path",
+      "path": "repos/cortex/AGENTS.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 9
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path-alt",
+      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_DECISION_MATRIX.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 100
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path-alt",
+      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_DECISION_MATRIX.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 100
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path-alt",
+      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_DECISION_MATRIX.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 101
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path-alt",
+      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_DECISION_MATRIX.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 101
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path-alt",
+      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_DECISION_MATRIX.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 102
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path-alt",
+      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_DECISION_MATRIX.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 102
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path-alt",
+      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_DECISION_MATRIX.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 103
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path-alt",
+      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_DECISION_MATRIX.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 103
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path-alt",
+      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_DECISION_MATRIX.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 104
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path-alt",
+      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_DECISION_MATRIX.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 104
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path-alt",
+      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_DECISION_MATRIX.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 105
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path-alt",
+      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_DECISION_MATRIX.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 105
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path-alt",
+      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_SURFACES.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 12
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path-alt",
+      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_SURFACES.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 12
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path-alt",
+      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_SURFACES.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 224
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path-alt",
+      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_SURFACES.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 224
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path-alt",
+      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_SURFACES.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 28
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path-alt",
+      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_SURFACES.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 28
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path-alt",
+      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_SURFACES.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 29
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path-alt",
+      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_SURFACES.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 29
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path-alt",
+      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_SURFACES.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 30
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path-alt",
+      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_SURFACES.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 30
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path-alt",
+      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_SURFACES.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 34
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path-alt",
+      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_SURFACES.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 34
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path-alt",
+      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_SURFACES.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 35
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path-alt",
+      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_SURFACES.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 35
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path-alt",
+      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_SURFACES.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 36
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path-alt",
+      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_SURFACES.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 36
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path-alt",
+      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_SURFACES.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 37
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path-alt",
+      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_SURFACES.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 37
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path-alt",
+      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_SURFACES.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 41
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path-alt",
+      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_SURFACES.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 41
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path-alt",
+      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_SURFACES.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 42
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path-alt",
+      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_SURFACES.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 42
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path-alt",
+      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_SURFACES.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 43
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path-alt",
+      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_SURFACES.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 43
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path-alt",
+      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_DECISION_MATRIX.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 98
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path-alt",
+      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_DECISION_MATRIX.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 98
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path-alt",
+      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_DECISION_MATRIX.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 99
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "atlas-root-path-alt",
+      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_DECISION_MATRIX.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 99
+      }
+    },
+    {
+      "severity": "warning",
+      "category": "missing-agents",
+      "path": "repos/Nat1-Games/nat1-games",
+      "message": "Expected AGENTS.md is missing."
+    },
+    {
+      "severity": "error",
+      "category": "missing-agents",
+      "path": "repos/fawxzzy-atlas",
+      "message": "Expected AGENTS.md is missing."
+    },
+    {
+      "severity": "error",
+      "category": "missing-agents",
+      "path": "repos/fawxzzy-lifeline",
+      "message": "Expected AGENTS.md is missing."
+    },
+    {
+      "severity": "error",
+      "category": "missing-agents",
+      "path": "repos/fawxzzy-fitness",
+      "message": "Expected AGENTS.md is missing; singular AGENT.md exists."
+    },
+    {
+      "severity": "error",
+      "category": "missing-codex-config",
+      "path": "repos/fawxzzy-atlas",
+      "message": "Expected .codex/config.toml is missing for an active repo."
+    },
+    {
+      "severity": "error",
+      "category": "missing-codex-config",
+      "path": "repos/fawxzzy-fitness",
+      "message": "Expected .codex/config.toml is missing for an active repo."
+    },
+    {
+      "severity": "error",
+      "category": "missing-codex-config",
+      "path": "repos/fawxzzy-lifeline",
+      "message": "Expected .codex/config.toml is missing for an active repo."
+    },
+    {
+      "severity": "error",
+      "category": "missing-codex-config",
+      "path": "repos/fawxzzy-mazer",
+      "message": "Expected .codex/config.toml is missing for an active repo."
+    },
+    {
+      "severity": "critical",
+      "category": "missing-repo-path",
+      "path": "repos/mazer-legacy-unreal/Mazer",
+      "message": "Repo path for 'mazer-unreal' does not exist."
+    },
+    {
+      "severity": "critical",
+      "category": "missing-repo-path",
+      "path": "repos/playbook-old/playbookv1",
+      "message": "Repo path for 'playbook-v1' does not exist."
+    },
+    {
+      "severity": "warning",
+      "category": "mutable-artifact-in-repo-root",
+      "path": "repos/fawxzzy-mazer/.codex-preview.err.log",
+      "message": "Mutable log, temp, or database artifact detected in repo root."
+    },
+    {
+      "severity": "warning",
+      "category": "mutable-artifact-in-repo-root",
+      "path": "repos/fawxzzy-mazer/.codex-preview.err.log",
+      "message": "Mutable log, temp, or database artifact detected in repo root."
+    },
+    {
+      "severity": "warning",
+      "category": "mutable-artifact-in-repo-root",
+      "path": "repos/fawxzzy-mazer/.codex-preview.log",
+      "message": "Mutable log, temp, or database artifact detected in repo root."
+    },
+    {
+      "severity": "warning",
+      "category": "mutable-artifact-in-repo-root",
+      "path": "repos/fawxzzy-mazer/.codex-vite-lane1.err.log",
+      "message": "Mutable log, temp, or database artifact detected in repo root."
+    },
+    {
+      "severity": "warning",
+      "category": "mutable-artifact-in-repo-root",
+      "path": "repos/fawxzzy-mazer/.codex-vite-lane1.err.log",
+      "message": "Mutable log, temp, or database artifact detected in repo root."
+    },
+    {
+      "severity": "warning",
+      "category": "mutable-artifact-in-repo-root",
+      "path": "repos/fawxzzy-mazer/.codex-vite-lane1.log",
+      "message": "Mutable log, temp, or database artifact detected in repo root."
+    },
+    {
+      "severity": "warning",
+      "category": "mutable-artifact-in-repo-root",
+      "path": "repos/fawxzzy-mazer/.codex-vite.err.log",
+      "message": "Mutable log, temp, or database artifact detected in repo root."
+    },
+    {
+      "severity": "warning",
+      "category": "mutable-artifact-in-repo-root",
+      "path": "repos/fawxzzy-mazer/.codex-vite.err.log",
+      "message": "Mutable log, temp, or database artifact detected in repo root."
+    },
+    {
+      "severity": "warning",
+      "category": "mutable-artifact-in-repo-root",
+      "path": "repos/fawxzzy-mazer/.codex-vite.log",
+      "message": "Mutable log, temp, or database artifact detected in repo root."
+    },
+    {
+      "severity": "warning",
+      "category": "mutable-state-in-repo",
+      "path": "repos/Nat1-Games/nat1-games/playwright-report",
+      "message": "Mutable or generated state is present inside a repo path."
+    },
+    {
+      "severity": "warning",
+      "category": "mutable-state-in-repo",
+      "path": "repos/Nat1-Games/nat1-games/test-results",
+      "message": "Mutable or generated state is present inside a repo path."
+    },
+    {
+      "severity": "warning",
+      "category": "mutable-state-in-repo",
+      "path": "repos/fawxzzy-fitness/.lifeline",
+      "message": "Mutable or generated state is present inside a repo path."
+    },
+    {
+      "severity": "warning",
+      "category": "mutable-state-in-repo",
+      "path": "repos/fawxzzy-fitness/.next",
+      "message": "Mutable or generated state is present inside a repo path."
+    },
+    {
+      "severity": "warning",
+      "category": "mutable-state-in-repo",
+      "path": "repos/fawxzzy-fitness/.playbook",
+      "message": "Mutable or generated state is present inside a repo path."
+    },
+    {
+      "severity": "warning",
+      "category": "mutable-state-in-repo",
+      "path": "repos/fawxzzy-fitness/.vercel",
+      "message": "Mutable or generated state is present inside a repo path."
+    },
+    {
+      "severity": "warning",
+      "category": "mutable-state-in-repo",
+      "path": "repos/fawxzzy-fitness/node_modules",
+      "message": "Mutable or generated state is present inside a repo path."
+    },
+    {
+      "severity": "warning",
+      "category": "mutable-state-in-repo",
+      "path": "repos/fawxzzy-lifeline/.lifeline",
+      "message": "Mutable or generated state is present inside a repo path."
+    },
+    {
+      "severity": "warning",
+      "category": "mutable-state-in-repo",
+      "path": "repos/fawxzzy-lifeline/.playbook",
+      "message": "Mutable or generated state is present inside a repo path."
+    },
+    {
+      "severity": "warning",
+      "category": "mutable-state-in-repo",
+      "path": "repos/fawxzzy-lifeline/dist",
+      "message": "Mutable or generated state is present inside a repo path."
+    },
+    {
+      "severity": "warning",
+      "category": "mutable-state-in-repo",
+      "path": "repos/fawxzzy-lifeline/node_modules",
+      "message": "Mutable or generated state is present inside a repo path."
+    },
+    {
+      "severity": "warning",
+      "category": "mutable-state-in-repo",
+      "path": "repos/fawxzzy-mazer/.vercel",
+      "message": "Mutable or generated state is present inside a repo path."
+    },
+    {
+      "severity": "warning",
+      "category": "mutable-state-in-repo",
+      "path": "repos/fawxzzy-mazer/dist",
+      "message": "Mutable or generated state is present inside a repo path."
+    },
+    {
+      "severity": "warning",
+      "category": "mutable-state-in-repo",
+      "path": "repos/fawxzzy-mazer/node_modules",
+      "message": "Mutable or generated state is present inside a repo path."
+    },
+    {
+      "severity": "warning",
+      "category": "mutable-state-in-repo",
+      "path": "repos/fawxzzy-playbook/.lifeline",
+      "message": "Mutable or generated state is present inside a repo path."
+    },
+    {
+      "severity": "warning",
+      "category": "mutable-state-in-repo",
+      "path": "repos/fawxzzy-playbook/.playbook",
+      "message": "Mutable or generated state is present inside a repo path."
+    },
+    {
+      "severity": "warning",
+      "category": "mutable-state-in-repo",
+      "path": "repos/fawxzzy-playbook/node_modules",
+      "message": "Mutable or generated state is present inside a repo path."
+    },
+    {
+      "severity": "warning",
+      "category": "mutable-state-in-repo",
+      "path": "repos/playbook-demo/playbook-demo/.playbook",
+      "message": "Mutable or generated state is present inside a repo path."
+    },
+    {
+      "severity": "warning",
+      "category": "mutable-state-in-repo",
+      "path": "repos/playbook-demo/playbook-demo/dist",
+      "message": "Mutable or generated state is present inside a repo path."
+    },
+    {
+      "severity": "warning",
+      "category": "repo-local-secret-material",
+      "path": "repos/Nat1-Games/nat1-games/.env",
+      "message": "Repo-local environment file detected; secrets should not be part of default exports."
+    },
+    {
+      "severity": "warning",
+      "category": "repo-local-secret-material",
+      "path": "repos/fawxzzy-fitness/.env.local",
+      "message": "Repo-local environment file detected; secrets should not be part of default exports."
+    },
+    {
+      "severity": "warning",
+      "category": "repo-local-secret-material",
+      "path": "repos/fawxzzy-fitness/.env.playbook-fallback-proof",
+      "message": "Repo-local environment file detected; secrets should not be part of default exports."
+    },
+    {
+      "severity": "warning",
+      "category": "repo-local-secret-material",
+      "path": "repos/fawxzzy-mazer/.env.local",
+      "message": "Repo-local environment file detected; secrets should not be part of default exports."
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/CUTOVER_GATE_STATUS.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 100
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/CUTOVER_GATE_STATUS.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 101
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/cortex/APP-INSTALLATION-GUIDE.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 105
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/cortex/APP-INSTALLATION-GUIDE.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 105
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/historical_snapshots/20260410_033321/memory_consolidated/cross_team_raw.json",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 10609
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/data/memory/cross_team_raw.json",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 10609
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/.claude/settings.local.json",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 10
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/Context_Switching_Quick_Start.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 116
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/.claude/settings.local.json",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 11
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/scripts/intelligence/CODE_REVIEW_README.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 123
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/LAUNCHER_SETUP_COMPLETE.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 125
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/scripts/intelligence/README_TECH_DEBT.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 128
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/.claude/settings.local.json",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 13
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/SHORTCUT-SETUP-COMPLETE.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 146
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/SHORTCUT-SETUP-COMPLETE.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 151
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/Archive/consolidation_20260410/CONSOLIDATION_QUICK_START.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 155
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/Context_Switching_Intelligence_Implementation.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 18
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/historical_snapshots/20260410_033321/memory_consolidated/git_historical_patterns.json",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 2408
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/data/memory/git_historical_patterns.json",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 2408
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/historical_snapshots/20260410_033321/memory_consolidated/git_historical_patterns.json",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 2643
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/data/memory/git_historical_patterns.json",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 2643
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/historical_snapshots/20260410_033321/memory_consolidated/git_historical_patterns.json",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 2644
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/data/memory/git_historical_patterns.json",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 2644
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/historical_snapshots/20260410_033321/memory_consolidated/git_historical_patterns.json",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 2645
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/data/memory/git_historical_patterns.json",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 2645
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/.claude/plugins/marketplaces/claude-plugins-official/plugins/plugin-dev/skills/plugin-structure/SKILL.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 280
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "ops/validation/validate_stack.py",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 29
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "ops/validation/validate_stack.py",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 29
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "ops/validation/validate_stack.py",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 30
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "ops/validation/validate_stack.py",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 30
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/.claude/plugins/marketplaces/claude-plugins-official/plugins/plugin-dev/skills/plugin-settings/references/real-world-examples.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 336
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/.claude/plugins/marketplaces/claude-plugins-official/plugins/plugin-dev/skills/hook-development/references/patterns.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 338
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/.claude/plugins/marketplaces/claude-plugins-official/plugins/plugin-dev/skills/plugin-structure/references/manifest-reference.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 347
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/historical_snapshots/20260410_033321/memory_consolidated/git_historical_patterns.json",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 3578
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/data/memory/git_historical_patterns.json",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 3578
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/historical_snapshots/20260410_033321/memory_consolidated/git_historical_patterns.json",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 3579
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/data/memory/git_historical_patterns.json",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 3579
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/CUTOVER_GATE_STATUS.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 39
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/HOMEOSTASIS_AUDIT.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 39
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/.claude/plugins/marketplaces/claude-plugins-official/plugins/plugin-dev/skills/plugin-structure/references/manifest-reference.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 413
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/historical_snapshots/20260410_033321/memory_consolidated/cross_team_raw.json",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 4376
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/data/memory/cross_team_raw.json",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 4376
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/.claude/settings.local.json",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 44
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/.claude/settings.local.json",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 45
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/historical_snapshots/20260410_033321/memory_consolidated/git_historical_patterns.json",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 4730
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/data/memory/git_historical_patterns.json",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 4730
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/historical_snapshots/20260410_033321/memory_consolidated/git_historical_patterns.json",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 4953
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/data/memory/git_historical_patterns.json",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 4953
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/historical_snapshots/20260410_033321/memory_consolidated/git_historical_patterns.json",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 4954
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/data/memory/git_historical_patterns.json",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 4954
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/historical_snapshots/20260410_033321/memory_consolidated/git_historical_patterns.json",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 4955
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/data/memory/git_historical_patterns.json",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 4955
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/.claude/settings.local.json",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 4
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/scripts/intelligence/QUICKSTART_LOG_ANALYSIS.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 51
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/DATA-HARVEST-OPERATION-COMPLETE.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 520
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/CUTOVER_VERIFICATION.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 53
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/fawxzzy-playbook/packages/cli/src/lib/repoRoot.test.ts",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 53
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/fawxzzy-playbook/packages/cli/src/lib/repoRoot.test.ts",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 53
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/.claude/plugins/marketplaces/claude-plugins-official/plugins/plugin-dev/skills/command-development/examples/plugin-commands.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 548
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/CUTOVER_VERIFICATION.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 54
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/historical_snapshots/20260410_033321/memory_consolidated/git_historical_patterns.json",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 5811
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/data/memory/git_historical_patterns.json",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 5811
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/historical_snapshots/20260410_033321/memory_consolidated/git_historical_patterns.json",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 5812
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/data/memory/git_historical_patterns.json",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 5812
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/.claude/plugins/marketplaces/claude-plugins-official/plugins/mcp-server-dev/skills/build-mcp-server/references/server-capabilities.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 58
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/historical_snapshots/20260410_033321/memory_consolidated/cross_team_raw.json",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 5903
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/data/memory/cross_team_raw.json",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 5903
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/scripts/intelligence/USAGE_EXAMPLES.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 59
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/CLAUDE_RUNS_FROM_HERE.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 61
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/CUTOVER_VERIFICATION.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 66
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/CUTOVER_VERIFICATION.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 67
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/HOMEOSTASIS_ACHIEVED.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 74
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "unix-home-path",
+      "path": "repos/Verta-Core/Verta-Core/.claude/plugins/marketplaces/claude-plugins-official/plugins/plugin-dev/skills/hook-development/scripts/hook-linter.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 75
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 101
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/README.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 101
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 102
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/README.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 102
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 103
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/README.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 103
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 106
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/COMPLETE-SYSTEM-ORGANIZATION.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 106
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/CUTOVER_GATE_STATUS.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 106
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 107
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/CUTOVER_VERIFICATION.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 107
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 108
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/claude_docs/Claude-Launcher-Setup.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 109
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/docs/dispatcher-protocol.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 109
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 111
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 112
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/claude_docs/verta-optimization-implementation-guide.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 112
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 113
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 116
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 117
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 118
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/CHECKPOINT_PRE_ATLAS_AUDIT.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 119
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/AGENTS.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 11
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 11
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/README.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 11
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 121
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 122
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 123
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/README.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 124
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 126
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 127
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 128
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/HOMEOSTASIS_AUDIT.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 129
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 12
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/HOMEOSTASIS_AUDIT.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 12
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/claude_docs/Claude-Launcher-Setup.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 12
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/README.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 12
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/TRUTH_MATRIX.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 1319
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 131
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 132
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 133
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/ATLAS_ABSORPTION_GATE.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 137
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/Archive/cleanup_reports_20260410/Claude-Directory-Analysis.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 138
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/PRE_CORE_HARDENING_CHECKPOINT.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 139
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/FINAL_CLEANUP.bat",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 13
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 13
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/NAMING_DECISION.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 13
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/README.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 13
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/MUTATION_BOUNDARIES.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 140
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/PRE_CORE_HARDENING_CHECKPOINT.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 140
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/FILE-ORGANIZATION-COMPLETE.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 149
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/FINAL_CLEANUP.bat",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 14
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/claude_docs/VERTA-QUICK-START.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 14
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/README.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 14
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/INTERNAL_NORMALIZATION_PLAN.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 153
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/MUTATION_BOUNDARIES.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 154
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/CLAUDE_OPERATING_SYSTEM.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 155
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/LAUNCHER_FIX_REQUIRED.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 15
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/README.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 15
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/ARCHITECTURE_SUMMARY.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 167
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 16
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/docs/dispatcher-protocol.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 16
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/docs/fitness-local-verify.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 16
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/claude_docs/VERTA-QUICK-START.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 171
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/ATLAS_ABSORPTION_GATE.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 173
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/HOMEOSTASIS_AUDIT.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 175
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/PHYSICAL_SPLIT_PLAN.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 178
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 17
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/Archive/consolidation_20260410/CONSOLIDATION_FINAL.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 17
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/SHORTCUT-SETUP-COMPLETE.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 17
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/docs/dispatcher-protocol.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 17
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/NAMING_DECISION.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 180
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 18
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/Archive/consolidation_20260410/CONSOLIDATION_FINAL.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 18
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/Archive/cleanup_reports_20260410/Final-Cleanup-Report.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 190
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/fawxzzy-fitness/docs/CHANGELOG.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 1959
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/fawxzzy-fitness/docs/CHANGELOG.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 1959
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/cortex/APP-INSTALLATION-GUIDE.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 198
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/cortex/APP-INSTALLATION-GUIDE.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 198
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/cortex/APP-INSTALLATION-GUIDE.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 199
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/cortex/APP-INSTALLATION-GUIDE.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 199
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/Archive/consolidation_20260410/CONSOLIDATION_FINAL.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 19
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/IMPLEMENTATION-SUMMARY.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 19
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/scripts/intelligence/BUG_INTELLIGENCE_SUMMARY.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 200
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "docs/audits/atlas-structure-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 203
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "docs/audits/atlas-structure-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 203
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/claude_docs/verta-optimization-implementation-guide.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 208
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/SHORTCUT-SETUP-COMPLETE.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 211
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/SHORTCUT-SETUP-COMPLETE.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 212
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/SHORTCUT-SETUP-COMPLETE.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 213
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 21
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/CUTOVER_GATE_STATUS.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 21
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/PRE_CORE_HARDENING_CHECKPOINT.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 21
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/HOMEOSTASIS_AUDIT.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 220
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/claude_docs/VERTA-QUICK-START.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 226
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/PRE_CORE_HARDENING_CHECKPOINT.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 228
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/claude_docs/VERTA-QUICK-START.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 229
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 22
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/claude_docs/verta-optimization-implementation-guide.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 22
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/claude_docs/VERTA-QUICK-START.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 235
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/scripts/intelligence/README_COLLABORATION.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 237
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 23
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/ARCHITECTURE_DECISION.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 23
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/Archive/consolidation_20260410/CONSOLIDATION_FINAL.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 23
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/claude_docs/Claude-Launcher-Setup.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 23
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/AGENTS.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 23
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/COMPLETE-SYSTEM-ORGANIZATION.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 243
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/COMPLETE-SYSTEM-ORGANIZATION.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 244
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/COMPLETE-SYSTEM-ORGANIZATION.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 249
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/ATLAS_ABSORPTION_GATE.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 24
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/CONVERGENCE_PLAN.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 24
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/queue/README.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 25
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/CHECKPOINT_PRE_ATLAS_AUDIT.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 266
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/CHECKPOINT_PRE_ATLAS_AUDIT.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 269
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 26
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/Archive/cleanup_reports_20260410/Quick-Start.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 26
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/COMPLETE-SYSTEM-ORGANIZATION.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 26
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/CLAUDE_OPERATING_SYSTEM.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 279
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/FINAL_CLEANUP.bat",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 27
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 27
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/HOMEOSTASIS_AUDIT.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 27
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/OPTIMIZATIONS_APPLIED.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 27
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/docs/fitness-local-verify.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 27
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/queue/README.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 27
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/FINAL_CLEANUP.bat",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 28
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 28
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/OPTIMIZATIONS_APPLIED.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 28
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/HOMEOSTASIS_AUDIT.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 292
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/HOMEOSTASIS_AUDIT.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 294
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/ATLAS_ABSORPTION_GATE.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 297
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/Archive/consolidation_20260410/DESKTOP-CLEANED.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 29
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/Archive/consolidation_20260410/SHORTCUT-UPDATED.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 29
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/Archive/consolidation_20260410/SHORTCUT-UPDATED.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 30
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/README.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 30
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/docs/dispatcher-protocol.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 30
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/INTERNAL_NORMALIZATION_PLAN.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 311
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/scripts/COMPLETION_CHECKLIST.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 313
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/TEAM-SHARING-GUIDE.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 314
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/claude_docs/verta-optimization-implementation-guide.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 316
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 31
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/Archive/consolidation_20260410/MIGRATION_2026-04-10.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 31
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/README.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 31
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/VERTA-2.0-DEPLOYMENT.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 323
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 32
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/Archive/consolidation_20260410/MIGRATION_2026-04-10.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 32
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/Archive/consolidation_20260410/SYSTEM_CONSOLIDATION_ANALYSIS.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 32
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/CLEANUP_DECISION.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 32
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/README.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 32
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/RUNTIME_SURFACE_MAP.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 330
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/CLEANUP_DECISION.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 334
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/scripts/COMPLETION_CHECKLIST.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 334
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 33
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/README.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 33
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/CLEANUP_EXECUTION.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 34
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/README.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 34
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/docs/fitness-local-verify.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 34
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/HOMEOSTASIS_ACHIEVED.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 35
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/Archive/consolidation_20260410/SYSTEM_CONSOLIDATION_ANALYSIS.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 360
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/Archive/consolidation_20260410/SYSTEM_CONSOLIDATION_ANALYSIS.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 361
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/Analysis/onboarding-intelligence-implementation-summary.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 362
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/Analysis/onboarding-intelligence-implementation-summary.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 363
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/Analysis/onboarding-intelligence-implementation-summary.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 364
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/Analysis/onboarding-intelligence-implementation-summary.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 367
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/Analysis/onboarding-intelligence-implementation-summary.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 368
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 36
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/FINAL_CLEANUP.bat",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 37
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 37
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/Archive/cleanup_reports_20260410/Quick-Start.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 37
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/Analysis/onboarding-intelligence-implementation-summary.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 385
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/FINAL_CLEANUP.bat",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 38
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 38
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/SHORTCUT-SETUP-COMPLETE.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 38
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/INTELLIGENCE_REFRESH_PASS4.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 397
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/MUTATION_BOUNDARIES.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 39
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/queue/README.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 3
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/CLEANUP_DECISION.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 402
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/ATLAS_ABSORPTION_GATE.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 409
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/claude_docs/Claude-Launcher-Setup.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 40
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/ATLAS_ABSORPTION_GATE.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 410
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/claude_docs/VERTA_BOOTSTRAP_GUIDE.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 410
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/ATLAS_ABSORPTION_GATE.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 413
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "docs/audits/atlas-structure-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 41
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "docs/audits/atlas-structure-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 41
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 41
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "docs/audits/atlas-structure-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 42
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "docs/audits/atlas-structure-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 42
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 42
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/docs/fitness-local-verify.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 42
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "docs/audits/atlas-structure-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 43
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "docs/audits/atlas-structure-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 43
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 43
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/Archive/consolidation_20260410/MIGRATION_2026-04-10.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 43
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "docs/audits/atlas-structure-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 44
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "docs/audits/atlas-structure-audit.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 44
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/SECURITY_NOTE_MCP_CREDENTIALS.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 44
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/templates/child-task-handoff.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 44
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/cortex/TRANSFER-GUIDE.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 44
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/cortex/TRANSFER-GUIDE.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 44
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/CUTOVER_GATE_STATUS.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 45
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 46
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/templates/child-task-handoff.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 46
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/FINAL_CLEANUP.bat",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 47
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 47
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 48
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/.claude/launcher/Launch Claude.bat",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 4
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/Archive/consolidation_20260410/MIGRATION_2026-04-10.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 4
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/Archive/consolidation_20260410/SHORTCUT-UPDATED.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 4
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/COMPLETE-SYSTEM-ORGANIZATION.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 4
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/AGENTS.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 4
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/.verta/metadata/documentation/Plans/ATLAS-PR1-VERTA-CORE-TRUTH-CUTOVER.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 504
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/Archive/atlas-plans/ATLAS-PR1-VERTA-CORE-TRUTH-CUTOVER.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 504
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/.verta/metadata/documentation/Plans/ATLAS-PR1-VERTA-CORE-TRUTH-CUTOVER.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 505
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/Archive/atlas-plans/ATLAS-PR1-VERTA-CORE-TRUTH-CUTOVER.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 505
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/CONSOLIDATION_VISUAL.txt",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 50
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/claude_docs/Claude-Launcher-Setup.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 50
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/docs/dispatcher-protocol.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 50
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/docs/fitness-local-verify.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 50
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/.verta/metadata/documentation/Plans/ATLAS-PR1-VERTA-CORE-TRUTH-CUTOVER.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 512
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/Archive/atlas-plans/ATLAS-PR1-VERTA-CORE-TRUTH-CUTOVER.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 512
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/.verta/metadata/documentation/Plans/ATLAS-PR1-VERTA-CORE-TRUTH-CUTOVER.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 513
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/Archive/atlas-plans/ATLAS-PR1-VERTA-CORE-TRUTH-CUTOVER.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 513
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 51
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/CUTOVER_GATE_STATUS.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 51
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/docs/dispatcher-protocol.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 51
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/SNAPSHOT_PRE_FORK.txt",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 52
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 52
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/FILE-ORGANIZATION-COMPLETE.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 52
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/docs/dispatcher-protocol.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 52
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/SYSTEMS_AUDIT.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 537
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 53
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/TEAM-SHARING-GUIDE.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 53
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/docs/dispatcher-protocol.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 53
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/claude_docs/verta-optimization-implementation-guide.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 541
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/FINAL_CLEANUP.bat",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 54
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "docs/architecture/STACK-STANDARDS.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 55
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "docs/architecture/STACK-STANDARDS.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 55
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 56
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/PRE_CORE_HARDENING_CHECKPOINT.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 56
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 57
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/CUTOVER_GATE_STATUS.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 57
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/templates/child-task-handoff.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 57
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 58
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/HOMEOSTASIS_AUDIT.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 592
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/HOMEOSTASIS_AUDIT.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 593
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/CLEANUP_DECISION.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 599
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/HOMEOSTASIS_AUDIT.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 599
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/CONSOLIDATED_INDEX.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 59
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/MUTATION_BOUNDARIES.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 59
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/templates/child-task-handoff.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 59
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/Analysis/onboarding-intelligence-implementation-summary.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 5
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/Archive/consolidation_20260410/DESKTOP-CLEANED.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 5
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/AGENTS.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 5
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/docs/dispatcher-protocol.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 5
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/CLEANUP_DECISION.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 602
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/CONSOLIDATED_INDEX.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 60
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/HOMEOSTASIS_AUDIT.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 617
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/FINAL_CLEANUP.bat",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 61
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 61
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/PROGRESS.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 61
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 62
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/.claude/launcher/README.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 63
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 63
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/Wiki-Dashboard-Instructions.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 63
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/Archive/cleanup_reports_20260410/CLEANUP-COMPLETE.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 64
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 66
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/CUTOVER_GATE_STATUS.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 66
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 67
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/docs/fitness-local-verify.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 67
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 68
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/Archive/consolidation_20260410/DESKTOP-CLEANED.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 68
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/Archive/cleanup_reports_20260410/CLEANUP-COMPLETE.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 69
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/claude_docs/Claude-Launcher-Setup.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 69
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/docs/dispatcher-protocol.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 69
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/.claude/launcher/claude-with-auth.bat",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 6
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/claude_docs/Claude-Launcher-Setup.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 6
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/README.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 6
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/Archive/cleanup_reports_20260410/Shortcut-Fixed.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 70
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/COMPLETE-SYSTEM-ORGANIZATION.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 70
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/MUTATION_BOUNDARIES.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 70
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 71
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/docs/dispatcher-protocol.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 71
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/templates/child-task-handoff.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 71
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 72
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/claude_docs/verta-development-status.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 72
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/docs/dispatcher-protocol.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 72
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 73
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/templates/child-task-handoff.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 73
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/ATLAS_ABSORPTION_GATE.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 74
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/claude_docs/verta-development-status.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 75
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 76
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/claude_docs/VERTA_BUILD_ROADMAP.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 76
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 77
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/claude_docs/VERTA_BUILD_ROADMAP.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 77
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/README.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 77
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 78
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/claude_docs/verta-development-status.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 78
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/Archive/cleanup_reports_20260410/Shortcut-Fixed.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 79
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/claude_docs/VERTA_BOOTSTRAP_GUIDE.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 7
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/README.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 7
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/docs/dispatcher-protocol.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 7
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/Archive/consolidation_20260410/MIGRATION_2026-04-10.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 80
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 81
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/Archive/cleanup_reports_20260410/Cleanup-Done.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 81
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/MUTATION_BOUNDARIES.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 81
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/README.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 81
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 82
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/scripts/intelligence/ONBOARDING_INSTALL.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 82
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/README.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 82
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/Archive/consolidation_20260410/SYSTEM_CONSOLIDATION_ANALYSIS.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 834
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/Archive/consolidation_20260410/SYSTEM_CONSOLIDATION_ANALYSIS.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 835
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 83
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/scripts/intelligence/ONBOARDING_INSTALL.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 83
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/README.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 83
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/scripts/intelligence/ONBOARDING_INSTALL.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 84
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/templates/child-task-handoff.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 84
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/scripts/intelligence/ONBOARDING_INSTALL.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 85
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 86
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/COMPLETE-SYSTEM-ORGANIZATION.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 86
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/scripts/intelligence/ONBOARDING_INSTALL.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 86
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/README.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 86
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/templates/child-task-handoff.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 86
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 87
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/scripts/intelligence/ONBOARDING_INSTALL.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 87
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/README.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 87
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 88
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/scripts/intelligence/ONBOARDING_INSTALL.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 88
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/README.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 88
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/README.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 89
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/CONSOLIDATION_VISUAL.txt",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 8
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/docs/fitness-local-verify.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 8
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/fawxzzy-playbook/docs/CHANGELOG.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 913
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/fawxzzy-playbook/docs/CHANGELOG.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 913
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 91
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/MUTATION_BOUNDARIES.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 91
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 92
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/TEAM-SHARING-GUIDE.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 92
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 93
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/docs/dispatcher-protocol.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 94
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/Dashboard-Responsive-Optimization.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 95
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/docs/claude_docs/Claude-Launcher-Setup.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 95
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 96
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 97
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/templates/child-task-handoff.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 97
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/Verta-Core/Verta-Core/data/archive/rollback/rollback_20260410_145225.sh",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 98
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path",
+      "path": "repos/_stack/templates/child-task-handoff.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 99
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path-alt",
+      "path": "repos/Verta-Core/Verta-Core/docs/PRE_CORE_HARDENING_CHECKPOINT.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 100
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path-alt",
+      "path": "repos/Verta-Core/Verta-Core/docs/PRE_CORE_HARDENING_CHECKPOINT.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 103
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path-alt",
+      "path": "repos/Verta-Core/Verta-Core/docs/PRE_CORE_HARDENING_CHECKPOINT.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 108
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path-alt",
+      "path": "repos/Verta-Core/Verta-Core/docs/PRE_CORE_HARDENING_CHECKPOINT.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 109
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path-alt",
+      "path": "repos/Verta-Core/Verta-Core/LAUNCHER_SETUP_COMPLETE.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 112
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path-alt",
+      "path": "repos/Verta-Core/Verta-Core/docs/PRE_CORE_HARDENING_CHECKPOINT.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 126
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path-alt",
+      "path": "repos/Verta-Core/Verta-Core/docs/PRE_CORE_HARDENING_CHECKPOINT.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 127
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path-alt",
+      "path": "repos/Verta-Core/Verta-Core/docs/Archive/cleanup_reports_20260410/Claude-Directory-Analysis.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 12
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path-alt",
+      "path": "repos/Verta-Core/Verta-Core/docs/PRE_CORE_HARDENING_CHECKPOINT.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 130
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path-alt",
+      "path": "repos/Verta-Core/Verta-Core/docs/PRE_CORE_HARDENING_CHECKPOINT.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 131
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path-alt",
+      "path": "repos/Verta-Core/Verta-Core/docs/Archive/cleanup_reports_20260410/Claude-Directory-Analysis.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 13
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path-alt",
+      "path": "repos/Verta-Core/Verta-Core/docs/WAVE2A_PLAN.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 157
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path-alt",
+      "path": "repos/Verta-Core/Verta-Core/docs/claude_docs/verta-optimization-implementation-guide.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 194
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path-alt",
+      "path": "repos/Verta-Core/Verta-Core/docs/Archive/cleanup_reports_20260410/Claude-Directory-Analysis.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 208
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path-alt",
+      "path": "repos/Verta-Core/Verta-Core/docs/CUTOVER_VERIFICATION.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 25
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path-alt",
+      "path": "repos/Verta-Core/Verta-Core/docs/claude_docs/verta-optimization-implementation-guide.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 283
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path-alt",
+      "path": "repos/Verta-Core/Verta-Core/docs/PRE_CORE_HARDENING_CHECKPOINT.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 315
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path-alt",
+      "path": "repos/Verta-Core/Verta-Core/.claude/settings.local.json",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 31
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path-alt",
+      "path": "repos/Verta-Core/Verta-Core/docs/CUTOVER_VERIFICATION.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 31
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path-alt",
+      "path": "repos/Verta-Core/Verta-Core/.claude/settings.local.json",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 32
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path-alt",
+      "path": "repos/Verta-Core/Verta-Core/.claude/settings.local.json",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 33
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path-alt",
+      "path": "repos/Verta-Core/Verta-Core/docs/HOMEOSTASIS_AUDIT.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 468
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path-alt",
+      "path": "repos/Verta-Core/Verta-Core/docs/HOMEOSTASIS_AUDIT.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 501
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path-alt",
+      "path": "repos/Verta-Core/Verta-Core/docs/HOMEOSTASIS_AUDIT.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 506
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path-alt",
+      "path": "repos/Verta-Core/Verta-Core/docs/claude_docs/verta-optimization-implementation-guide.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 510
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path-alt",
+      "path": "repos/Verta-Core/Verta-Core/docs/HOMEOSTASIS_AUDIT.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 563
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path-alt",
+      "path": "repos/Verta-Core/Verta-Core/docs/HOMEOSTASIS_AUDIT.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 573
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path-alt",
+      "path": "repos/Verta-Core/Verta-Core/docs/claude_docs/verta-optimization-implementation-guide.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 588
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path-alt",
+      "path": "repos/Verta-Core/Verta-Core/docs/PRE_CORE_HARDENING_CHECKPOINT.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 59
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path-alt",
+      "path": "repos/Verta-Core/Verta-Core/docs/HOMEOSTASIS_AUDIT.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 611
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path-alt",
+      "path": "repos/Verta-Core/Verta-Core/docs/PRE_CORE_HARDENING_CHECKPOINT.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 62
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path-alt",
+      "path": "repos/Verta-Core/Verta-Core/docs/HOMEOSTASIS_AUDIT.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 64
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path-alt",
+      "path": "repos/Verta-Core/Verta-Core/docs/HOMEOSTASIS_AUDIT.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 66
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path-alt",
+      "path": "repos/Verta-Core/Verta-Core/.claude/scheduled_tasks.json",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 6
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path-alt",
+      "path": "repos/Verta-Core/Verta-Core/docs/PRE_CORE_HARDENING_CHECKPOINT.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 71
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path-alt",
+      "path": "repos/Verta-Core/Verta-Core/docs/CUTOVER_GATE_STATUS.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 78
+      }
+    },
+    {
+      "severity": "critical",
+      "category": "windows-user-path-alt",
+      "path": "repos/Verta-Core/Verta-Core/docs/Archive/cleanup_reports_20260410/Final-Cleanup-Report.md",
+      "message": "Absolute path leak detected in committed text.",
+      "details": {
+        "line_number": 85
+      }
+    }
+  ]
+}
