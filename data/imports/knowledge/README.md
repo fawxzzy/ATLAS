@@ -28,5 +28,7 @@ Recommended contents:
 ## Relationship To Other Lanes
 
 - raw and extracted knowledge materials stay here
+- promotion-safe derived knowledge lives in `docs/knowledge/promotions/`
 - human review and policy live in `docs/knowledge/`
 - normalized machine-readable metadata belongs in `runtime/cortex/catalog/knowledge/`
+- pipeline receipts belong in `runtime/receipts/knowledge/`

@@ -155,6 +155,19 @@ def should_scan_file(path: Path) -> bool:
     return not (lowered_parts & {part.lower() for part in SCAN_SKIP_DIRS})
 
 
+def is_import_evidence_file(root: Path, path: Path) -> bool:
+    try:
+        relative = path.resolve().relative_to(root.resolve())
+    except ValueError:
+        return False
+    parts = [part.lower() for part in relative.parts]
+    if len(parts) < 4:
+        return False
+    if parts[0] != "data" or parts[1] != "imports":
+        return False
+    return "raw" in parts[2:] or "extracted" in parts[2:]
+
+
 def collect_text_scan_roots(root: Path, config: dict[str, Any], stack_file: Path) -> list[Path]:
     roots: list[Path] = []
     for candidate in ["README-STACK.md", "AGENTS.md", "stack.yaml", "docs", "ops"]:
@@ -259,6 +272,8 @@ def build_findings(stack_file: Path, config: dict[str, Any]) -> list[Finding]:
         ("warning", "atlas-root-path-alt", re.compile(re.escape(normalize_slashes(str(root))))),
     ]
     for file_path in iter_scan_files(collect_text_scan_roots(root, config, stack_file)):
+        if is_import_evidence_file(root, file_path):
+            continue
         try:
             text = file_path.read_text(encoding="utf-8", errors="ignore")
         except OSError:

@@ -49,10 +49,18 @@ Handling:
 
 ## Indexing Rule
 
-`safe_for_indexing` is advisory for downstream tools:
+`safe_for_indexing` remains the compatibility signal for coarse allow or restrict decisions.
 
-- `no`: do not index content
-- `restricted`: index metadata only unless a human review says otherwise
-- `yes`: content indexing is acceptable based on the current scan and privacy flag
+`indexing_profile` is the v2 downstream execution policy:
+
+- `metadata_only`: retain manifests, evaluation, catalog metadata, and receipts only
+- `derived_only`: allow promoted summaries and topic maps, but not raw imported content
+- `full_text`: allow content-level indexing for confirmed shareable material
+
+Compatibility mapping still applies:
+
+- `no`: do not promote or index beyond metadata handling
+- `restricted`: use `metadata_only` unless a human explicitly creates a safe promotion doc
+- `yes`: content indexing may be acceptable based on the current scan and privacy flag
 
 Metadata normalization can still be allowed when full-content indexing is not.

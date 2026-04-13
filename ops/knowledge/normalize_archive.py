@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 
-from import_archive import add_common_archive_args, normalize_archive, resolve_archive_dir
+from _pipeline import add_common_archive_args, normalize_archive, resolve_archive_dir
 
 
 def main() -> int:

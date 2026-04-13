@@ -731,3 +731,940 @@ def write_knowledge_receipt(
         receipt_path_value.write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
         latest_path.write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
     return receipt
+
+
+def import_archive(
+    *,
+    input_path: Path,
+    source_name: str,
+    slug: str | None,
+    privacy_flag: str,
+    provenance_note: str | None,
+    dry_run: bool,
+    force: bool,
+) -> dict[str, Any]:
+    if privacy_flag not in PRIVACY_FLAGS:
+        raise ValueError(f"Unsupported privacy flag: {privacy_flag}")
+    input_path = resolve_atlas_path(input_path)
+    if not input_path.exists():
+        raise FileNotFoundError(f"Input path does not exist: {relative_to_atlas(input_path)}")
+    input_path_rel = relative_to_atlas(input_path)
+    archive_slug = slugify(slug or input_path.stem or input_path.name)
+    knowledge_dir = archive_dir(source_name, archive_slug)
+    detected_type = "zip" if input_path.is_file() and input_path.suffix.lower() == ".zip" else "folder"
+    if detected_type not in {"zip", "folder"}:
+        raise ValueError("Input must be a directory or a .zip file.")
+    if knowledge_dir.exists() and not force:
+        raise FileExistsError(
+            f"Import destination already exists: {relative_to_atlas(knowledge_dir)}"
+        )
+
+    manifest: dict[str, Any] = {
+        "archive_id": f"{slugify(source_name)}--{archive_slug}",
+        "source_name": source_name,
+        "slug": archive_slug,
+        "source_type": detected_type,
+        "imported_at": utc_now(),
+        "input_path": input_path_rel,
+        "original_filename": input_path.name,
+        "privacy_flag": privacy_flag,
+        "review_status": "imported",
+        "safe_for_indexing": "pending_review",
+        "indexing_profile": "metadata_only",
+        "promotion_status": "not_promoted",
+        "retention_class": default_retention_class(),
+        "pipeline_version": PIPELINE_VERSION,
+        "no_execute_guarantee": True,
+        "paths": {
+            "import_dir": relative_to_atlas(knowledge_dir),
+            "raw_dir": relative_to_atlas(raw_dir(knowledge_dir)),
+            "extracted_dir": relative_to_atlas(extracted_dir(knowledge_dir)),
+        },
+        "provenance": {
+            "staged_under_atlas": True,
+            "source_label": source_name,
+            "original_filename": input_path.name,
+        },
+    }
+    if provenance_note:
+        manifest["provenance"]["note"] = provenance_note
+    if detected_type == "zip":
+        manifest["checksum"] = file_checksum(input_path)
+        manifest["raw_archive_path"] = f"{relative_to_atlas(raw_dir(knowledge_dir))}/{input_path.name}"
+    else:
+        manifest["raw_reference_dir"] = relative_to_atlas(raw_dir(knowledge_dir))
+        manifest["raw_entries"] = build_raw_entries(input_path)
+
+    operations: list[str] = [f"prepare:{relative_to_atlas(knowledge_dir)}"]
+    if detected_type == "zip":
+        operations.append(f"copy:{relative_to_atlas(raw_dir(knowledge_dir) / input_path.name)}")
+        operations.append(f"extract:{relative_to_atlas(extracted_dir(knowledge_dir))}")
+    else:
+        operations.append(f"copytree:{relative_to_atlas(raw_dir(knowledge_dir))}")
+        operations.append(f"copytree:{relative_to_atlas(extracted_dir(knowledge_dir))}")
+    operations.append(f"write:{relative_to_atlas(manifest_path(knowledge_dir))}")
+
+    if not dry_run:
+        if knowledge_dir.exists() and force:
+            shutil.rmtree(knowledge_dir)
+        knowledge_dir.mkdir(parents=True, exist_ok=True)
+        if detected_type == "zip":
+            raw_dir(knowledge_dir).mkdir(parents=True, exist_ok=True)
+            shutil.copy2(input_path, raw_dir(knowledge_dir) / input_path.name)
+            extract_zip_safely(input_path, extracted_dir(knowledge_dir))
+        else:
+            copy_folder(input_path, raw_dir(knowledge_dir))
+            copy_folder(input_path, extracted_dir(knowledge_dir))
+        manifest["artifact_digests"] = build_manifest_artifact_digests(manifest, knowledge_dir)
+        manifest["extracted_snapshot_digest"] = extracted_snapshot_digest(knowledge_dir)
+        write_json(manifest_path(knowledge_dir), manifest, dry_run=False)
+        write_knowledge_receipt(
+            archive_path=knowledge_dir,
+            action="import",
+            validation_results=None,
+            dry_run=False,
+        )
+    else:
+        manifest["artifact_digests"] = {}
+        manifest["extracted_snapshot_digest"] = "sha256:dry-run"
+
+    return {
+        "ok": True,
+        "dry_run": dry_run,
+        "archive_id": manifest["archive_id"],
+        "pipeline_version": PIPELINE_VERSION,
+        "no_execute_guarantee": True,
+        "import_dir": relative_to_atlas(knowledge_dir),
+        "manifest": manifest,
+        "planned_operations": operations,
+    }
+
+
+def evaluate_archive(*, archive_path: Path, dry_run: bool) -> dict[str, Any]:
+    archive_path = archive_path.resolve()
+    review_dir = extracted_dir(archive_path)
+    if not review_dir.exists():
+        raise FileNotFoundError(f"Missing extracted directory: {relative_to_atlas(review_dir)}")
+    manifest = read_json(manifest_path(archive_path))
+    paths = list_files(review_dir)
+    text_paths = iter_text_files(paths)
+    private_hits = match_patterns(paths, PRIVATE_PATTERNS)
+    secrets_hits = match_patterns(paths, SECRET_PATTERNS)
+    copyright_hits = match_patterns(paths, COPYRIGHT_PATTERNS)
+    executable_flag, executable_hits = detect_executable_content(paths)
+    flags = {
+        "personal_private_material": manifest["privacy_flag"] != "shareable" or bool(private_hits),
+        "credentials_secrets_risk": bool(secrets_hits),
+        "copyrighted_courseware_risk": bool(copyright_hits),
+        "executable_content": executable_flag,
+    }
+    safe_for_indexing_status = classify_safe_for_indexing(manifest["privacy_flag"], flags)
+    indexing_profile = recommend_indexing_profile(
+        privacy_flag=manifest["privacy_flag"],
+        safe_for_indexing_status=safe_for_indexing_status,
+        flags=flags,
+    )
+    quarantine = quarantine_flags(flags)
+    notes: list[str] = []
+    if flags["personal_private_material"]:
+        notes.append("Treat the archive as private or partially private.")
+    if flags["credentials_secrets_risk"]:
+        notes.append("Potential credentials or secret-bearing material were detected.")
+    if flags["copyrighted_courseware_risk"]:
+        notes.append("Courseware copyright signals were detected; retain metadata only.")
+    if flags["executable_content"]:
+        notes.append("Executable or script content exists and must remain non-executed.")
+    if not notes:
+        notes.append("Archive metadata is low-risk for cataloging based on the current scan.")
+
+    generated = {
+        "archive_id": manifest["archive_id"],
+        "source_name": manifest["source_name"],
+        "slug": manifest["slug"],
+        "evaluated_at": utc_now(),
+        "import_dir": relative_to_atlas(archive_path),
+        "extracted_dir": relative_to_atlas(review_dir),
+        "manifest_path": relative_to_atlas(manifest_path(archive_path)),
+        "review_status": "evaluated",
+        "privacy_flag": manifest["privacy_flag"],
+        "safe_for_indexing": safe_for_indexing_status,
+        "indexing_profile": indexing_profile,
+        "promotion_allowed": promotion_allowed(flags),
+        "quarantine_flags": quarantine,
+        "quarantine_reason": quarantine_reason(quarantine),
+        "normalization_allowed": normalization_allowed(flags),
+        "retention_class": manifest.get("retention_class", default_retention_class()),
+        "pipeline_version": PIPELINE_VERSION,
+        "no_execute_guarantee": True,
+        "summary": {
+            "file_count": len(paths),
+            "text_file_count": len(text_paths),
+            "extension_counts": summarize_extension_counts(paths),
+        },
+        "risk_flags": flags,
+        "risk_indicators": {
+            "personal_private_material": private_hits,
+            "credentials_secrets_risk": secrets_hits,
+            "copyrighted_courseware_risk": copyright_hits,
+            "executable_content": executable_hits,
+        },
+        "notes": " ".join(notes),
+    }
+    report = update_evaluation(archive_path, generated, dry_run)
+    manifest_updates = {
+        "review_status": "evaluated",
+        "safe_for_indexing": safe_for_indexing_status,
+        "indexing_profile": report["indexing_profile"],
+        "promotion_status": infer_promotion_status(manifest["archive_id"], existing_manifest=manifest),
+        "retention_class": manifest.get("retention_class", default_retention_class()),
+        "pipeline_version": PIPELINE_VERSION,
+        "artifact_digests": build_manifest_artifact_digests(manifest, archive_path),
+        "extracted_snapshot_digest": extracted_snapshot_digest(archive_path),
+        "last_reviewed_at": report["evaluated_at"],
+    }
+    manifest = update_manifest(archive_path, manifest_updates, dry_run)
+    if not dry_run:
+        write_knowledge_receipt(
+            archive_path=archive_path,
+            action="evaluate",
+            validation_results=None,
+            dry_run=False,
+        )
+    return report | {"dry_run": dry_run, "manifest": manifest}
+
+
+def promote_archive(
+    *,
+    archive_path: Path,
+    indexing_profile: str | None,
+    promotion_status: str,
+    retention_class: str | None,
+    dry_run: bool,
+) -> dict[str, Any]:
+    archive_path = archive_path.resolve()
+    manifest = read_json(manifest_path(archive_path))
+    report = read_json(evaluation_path(archive_path))
+    if not report.get("promotion_allowed", False):
+        raise ValueError("This archive cannot be promoted because evaluation kept it quarantined.")
+    chosen_profile = indexing_profile or str(report.get("indexing_profile", "metadata_only"))
+    if chosen_profile not in INDEXING_PROFILES:
+        raise ValueError(f"Unsupported indexing profile: {chosen_profile}")
+    if promotion_status not in PROMOTION_STATUSES or promotion_status == "not_promoted":
+        raise ValueError("Promotion status must be one of: draft, promoted.")
+    chosen_retention = retention_class or str(
+        manifest.get("retention_class", report.get("retention_class", default_retention_class()))
+    )
+    if chosen_retention not in RETENTION_CLASSES:
+        raise ValueError(f"Unsupported retention class: {chosen_retention}")
+
+    promotion_file = promotion_doc_path(manifest["archive_id"])
+    existing_text = promotion_file.read_text(encoding="utf-8") if promotion_file.exists() else None
+    rendered = build_promotion_document(
+        archive_path=archive_path,
+        archive_id=manifest["archive_id"],
+        manifest=manifest,
+        evaluation=report,
+        indexing_profile=chosen_profile,
+        promotion_status=promotion_status,
+        retention_class=chosen_retention,
+        existing_text=existing_text,
+    )
+    if not dry_run:
+        promotions_dir().mkdir(parents=True, exist_ok=True)
+        promotion_file.write_text(rendered, encoding="utf-8")
+
+    promotion = read_promotion_doc(promotion_file) if not dry_run else None
+    manifest = update_manifest(
+        archive_path,
+        {
+            "promotion_status": promotion_status,
+            "retention_class": chosen_retention,
+            "pipeline_version": PIPELINE_VERSION,
+            "last_reviewed_at": utc_now(),
+        },
+        dry_run,
+    )
+    if not dry_run:
+        write_knowledge_receipt(
+            archive_path=archive_path,
+            action="promote",
+            validation_results=None,
+            dry_run=False,
+        )
+    return {
+        "archive_id": manifest["archive_id"],
+        "dry_run": dry_run,
+        "promotion_doc_path": relative_to_atlas(promotion_file),
+        "promotion_status": promotion_status,
+        "indexing_profile": chosen_profile,
+        "retention_class": chosen_retention,
+        "promotion": build_promotion_summary(promotion) if promotion is not None else None,
+    }
+
+
+def normalize_archive(*, archive_path: Path, dry_run: bool, force: bool) -> dict[str, Any]:
+    archive_path = archive_path.resolve()
+    manifest = read_json(manifest_path(archive_path))
+    report = read_json(evaluation_path(archive_path))
+    if not report.get("normalization_allowed") and not force:
+        raise ValueError("Evaluation rejected normalization for this archive. Use --force to override.")
+
+    promotion_file = promotion_doc_path(manifest["archive_id"])
+    promotion = read_promotion_doc(promotion_file) if promotion_file.exists() else None
+    final_indexing_profile = (
+        str(promotion["metadata"]["indexing_profile"])
+        if promotion is not None
+        else str(report.get("indexing_profile", manifest.get("indexing_profile", "metadata_only")))
+    )
+    final_promotion_status = (
+        str(promotion["metadata"]["promotion_status"])
+        if promotion is not None
+        else str(manifest.get("promotion_status", "not_promoted"))
+    )
+    output_path = normalized_path(manifest["source_name"], manifest["slug"])
+    generated = {
+        "archive_id": manifest["archive_id"],
+        "source_name": manifest["source_name"],
+        "slug": manifest["slug"],
+        "source_type": manifest["source_type"],
+        "status": "normalized",
+        "privacy_flag": manifest["privacy_flag"],
+        "imported_at": manifest["imported_at"],
+        "evaluated_at": report["evaluated_at"],
+        "normalized_at": utc_now(),
+        "safe_for_indexing": report["safe_for_indexing"],
+        "indexing_profile": final_indexing_profile,
+        "promotion_status": final_promotion_status,
+        "promotion_doc_path": relative_to_atlas(promotion_file) if promotion is not None else None,
+        "promotion": build_promotion_summary(promotion) if promotion is not None else None,
+        "normalization_allowed": report["normalization_allowed"],
+        "retention_class": manifest.get("retention_class", report.get("retention_class", default_retention_class())),
+        "pipeline_version": PIPELINE_VERSION,
+        "import_dir": relative_to_atlas(archive_path),
+        "manifest_path": relative_to_atlas(manifest_path(archive_path)),
+        "evaluation_path": relative_to_atlas(evaluation_path(archive_path)),
+        "catalog_doc_path": relative_to_atlas(catalog_doc_path()),
+        "risk_flags": report["risk_flags"],
+        "summary": report["summary"],
+        "notes": report["notes"],
+        "no_execute_guarantee": True,
+        "provenance": deep_merge(
+            manifest.get("provenance", {}),
+            {
+                "manifest_path": relative_to_atlas(manifest_path(archive_path)),
+                "evaluation_path": relative_to_atlas(evaluation_path(archive_path)),
+            },
+        ),
+    }
+    if "raw_archive_path" in manifest:
+        generated["provenance"]["raw_archive_path"] = manifest["raw_archive_path"]
+    if "raw_reference_dir" in manifest:
+        generated["provenance"]["raw_reference_dir"] = manifest["raw_reference_dir"]
+    if "raw_entries" in manifest:
+        generated["raw_entries"] = manifest["raw_entries"]
+
+    entry = update_runtime_catalog(
+        archive_path,
+        source_name=manifest["source_name"],
+        slug=manifest["slug"],
+        updates=generated,
+        dry_run=dry_run,
+    )
+    manifest = update_manifest(
+        archive_path,
+        {
+            "review_status": "normalized",
+            "safe_for_indexing": report["safe_for_indexing"],
+            "indexing_profile": final_indexing_profile,
+            "promotion_status": final_promotion_status,
+            "retention_class": generated["retention_class"],
+            "pipeline_version": PIPELINE_VERSION,
+            "artifact_digests": build_manifest_artifact_digests(manifest, archive_path),
+            "extracted_snapshot_digest": extracted_snapshot_digest(archive_path),
+            "last_reviewed_at": entry["normalized_at"],
+        },
+        dry_run,
+    )
+    if not dry_run:
+        write_knowledge_receipt(
+            archive_path=archive_path,
+            action="normalize",
+            validation_results=None,
+            dry_run=False,
+        )
+    return entry | {"dry_run": dry_run, "output_path": relative_to_atlas(output_path), "manifest": manifest}
+
+
+def discover_import_manifests() -> list[Path]:
+    root = atlas_root() / "data" / "imports" / "knowledge"
+    return sorted(root.glob("*/*/IMPORT-MANIFEST.json"))
+
+
+def build_catalog_record(manifest_file: Path) -> dict[str, Any]:
+    archive_path = manifest_file.parent
+    manifest = read_json(manifest_file)
+    evaluation_file = evaluation_path(archive_path)
+    normalized_file = normalized_path(manifest["source_name"], manifest["slug"])
+    evaluation = read_json(evaluation_file) if evaluation_file.exists() else None
+    normalized = read_json(normalized_file) if normalized_file.exists() else None
+    promotion_file = promotion_doc_path(manifest["archive_id"])
+    promotion = None
+    promotion_error = None
+    if promotion_file.exists():
+        try:
+            promotion = read_promotion_doc(promotion_file)
+        except ValueError as exc:
+            promotion_error = str(exc)
+
+    status = str(manifest.get("review_status", "imported"))
+    safe_status = str(manifest.get("safe_for_indexing", "pending_review"))
+    indexing_profile = str(manifest.get("indexing_profile", "metadata_only"))
+    promotion_status = str(manifest.get("promotion_status", "not_promoted"))
+    allowed = False
+    notes = "Imported and awaiting evaluation."
+    flags: dict[str, bool] = {
+        "personal_private_material": False,
+        "credentials_secrets_risk": False,
+        "copyrighted_courseware_risk": False,
+        "executable_content": False,
+    }
+    if evaluation is not None:
+        status = str(evaluation.get("review_status", status))
+        safe_status = str(evaluation.get("safe_for_indexing", safe_status))
+        indexing_profile = str(evaluation.get("indexing_profile", indexing_profile))
+        allowed = bool(evaluation.get("normalization_allowed", False))
+        notes = str(evaluation.get("notes", notes))
+        flags = evaluation.get("risk_flags", flags)
+    if normalized is not None:
+        status = str(normalized.get("status", "normalized"))
+        safe_status = str(normalized.get("safe_for_indexing", safe_status))
+        indexing_profile = str(normalized.get("indexing_profile", indexing_profile))
+        promotion_status = str(normalized.get("promotion_status", promotion_status))
+        allowed = bool(normalized.get("normalization_allowed", allowed))
+        notes = str(normalized.get("notes", notes))
+        flags = normalized.get("risk_flags", flags)
+    if promotion is not None:
+        promotion_status = str(promotion["metadata"]["promotion_status"])
+        indexing_profile = str(promotion["metadata"]["indexing_profile"])
+    return {
+        "archive_id": manifest["archive_id"],
+        "source": manifest["source_name"],
+        "privacy_flag": manifest["privacy_flag"],
+        "status": status,
+        "safe_for_indexing": safe_status,
+        "indexing_profile": indexing_profile,
+        "promotion_status": promotion_status,
+        "normalization_allowed": "yes" if allowed else "no",
+        "risk_summary": risk_summary(flags),
+        "notes": notes,
+        "manifest_path": relative_to_atlas(manifest_file),
+        "evaluation_path": relative_to_atlas(evaluation_file) if evaluation_file.exists() else "",
+        "normalized_path": relative_to_atlas(normalized_file) if normalized_file.exists() else "",
+        "promotion_doc_path": relative_to_atlas(promotion_file) if promotion_file.exists() else "",
+        "promotion_error": promotion_error,
+    }
+
+
+def render_catalog(records: list[dict[str, Any]]) -> str:
+    lines = [
+        "# Knowledge Catalog",
+        "",
+        "This document is the human-readable index for imported knowledge archives reviewed by ATLAS.",
+        "",
+        "## Catalog Fields",
+        "",
+        "| Field | Meaning |",
+        "| --- | --- |",
+        "| `archive_id` | Stable local identifier |",
+        "| `source` | Where the archive came from |",
+        "| `privacy_flag` | `private`, `mixed`, or `shareable` |",
+        "| `status` | `imported`, `evaluated`, `normalized`, `indexed_metadata_only`, or `rejected` |",
+        "| `safe_for_indexing` | `pending_review`, `no`, `restricted`, or `yes` |",
+        "| `indexing_profile` | Downstream execution policy: `metadata_only`, `derived_only`, or `full_text` |",
+        "| `promotion_status` | `not_promoted`, `draft`, or `promoted` |",
+        "| `normalization_allowed` | Whether metadata may be retained in the runtime catalog |",
+        "| `risk_summary` | Short list of active risk flags |",
+        "| `notes` | Short explanation of the decision |",
+        "",
+        "## Current State",
+        "",
+        "The machine-readable companion lane is:",
+        "",
+        "- `runtime/cortex/catalog/knowledge/`",
+        "",
+        "The raw import lane is:",
+        "",
+        "- `data/imports/knowledge/`",
+        "",
+        "The promotion lane is:",
+        "",
+        "- `docs/knowledge/promotions/`",
+        "",
+        "The receipt lane is:",
+        "",
+        "- `runtime/receipts/knowledge/`",
+        "",
+        "## Catalog Records",
+        "",
+        CATALOG_BEGIN,
+    ]
+    if records:
+        lines.extend(
+            [
+                "| archive_id | source | privacy_flag | status | safe_for_indexing | indexing_profile | promotion_status | normalization_allowed | risk_summary | notes |",
+                "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+            ]
+        )
+        for record in records:
+            notes = record["notes"].replace("|", "/").replace("\n", " ").strip()
+            summary = record["risk_summary"].replace("|", "/").replace("\n", " ").strip()
+            lines.append(
+                f"| `{record['archive_id']}` | `{record['source']}` | `{record['privacy_flag']}` | `{record['status']}` | `{record['safe_for_indexing']}` | `{record['indexing_profile']}` | `{record['promotion_status']}` | `{record['normalization_allowed']}` | `{summary}` | `{notes}` |"
+            )
+    else:
+        lines.append("No knowledge archives are cataloged yet in this pass.")
+    lines.extend(
+        [
+            CATALOG_END,
+            "",
+            "## Review Discipline",
+            "",
+            "When a new archive is reviewed:",
+            "",
+            "1. preserve the raw import in `data/imports/knowledge/`",
+            "2. record the evaluation decision and indexing profile",
+            "3. create a promotion doc only when derived or promoted knowledge is intentional",
+            "4. write normalized runtime catalog entries from manifest, evaluation, and optional promotion docs",
+            "5. keep copied notes high-level and non-sensitive",
+            "6. do not treat imported courseware as stack-owned source",
+        ]
+    )
+    return "\n".join(lines)
+
+
+def update_catalog_doc(*, dry_run: bool) -> dict[str, Any]:
+    records = [build_catalog_record(path) for path in discover_import_manifests()]
+    rendered = render_catalog(records)
+    path = catalog_doc_path()
+    if not dry_run:
+        path.write_text(rendered, encoding="utf-8")
+    return {
+        "dry_run": dry_run,
+        "catalog_path": relative_to_atlas(path),
+        "record_count": len(records),
+        "records": records,
+        "rendered_markdown": rendered,
+    }
+
+
+def parse_catalog_table(text: str) -> list[dict[str, str]]:
+    if CATALOG_BEGIN not in text or CATALOG_END not in text:
+        raise ValueError("Catalog markers are missing from KNOWLEDGE-CATALOG.md")
+    block = text.split(CATALOG_BEGIN, 1)[1].split(CATALOG_END, 1)[0]
+    rows = []
+    for line in block.splitlines():
+        stripped = line.strip()
+        if not stripped.startswith("|"):
+            continue
+        if stripped.startswith("| archive_id ") or stripped.startswith("| --- "):
+            continue
+        parts = [part.strip() for part in stripped.strip("|").split("|")]
+        if len(parts) != 10:
+            continue
+        rows.append(
+            {
+                "archive_id": parts[0].strip("`"),
+                "source": parts[1].strip("`"),
+                "privacy_flag": parts[2].strip("`"),
+                "status": parts[3].strip("`"),
+                "safe_for_indexing": parts[4].strip("`"),
+                "indexing_profile": parts[5].strip("`"),
+                "promotion_status": parts[6].strip("`"),
+                "normalization_allowed": parts[7].strip("`"),
+                "risk_summary": parts[8].strip("`"),
+                "notes": parts[9].strip("`"),
+            }
+        )
+    return rows
+
+
+def validate_catalog() -> dict[str, Any]:
+    findings: list[dict[str, str]] = []
+    records = [build_catalog_record(path) for path in discover_import_manifests()]
+    for manifest_file in discover_import_manifests():
+        archive_path = manifest_file.parent
+        manifest = read_json(manifest_file)
+        archive_id = manifest["archive_id"]
+        required_manifest = [
+            "archive_id",
+            "source_name",
+            "slug",
+            "source_type",
+            "imported_at",
+            "input_path",
+            "original_filename",
+            "privacy_flag",
+            "review_status",
+            "safe_for_indexing",
+            "indexing_profile",
+            "promotion_status",
+            "retention_class",
+            "pipeline_version",
+            "artifact_digests",
+            "extracted_snapshot_digest",
+            "no_execute_guarantee",
+            "paths",
+            "provenance",
+        ]
+        missing = [field for field in required_manifest if field not in manifest]
+        if manifest.get("source_type") == "zip" and "checksum" not in manifest:
+            missing.append("checksum")
+        if missing:
+            findings.append(
+                {
+                    "severity": "error",
+                    "path": relative_to_atlas(manifest_file),
+                    "message": f"Manifest missing required fields: {', '.join(missing)}",
+                }
+            )
+        if manifest.get("pipeline_version") != PIPELINE_VERSION:
+            findings.append(
+                {
+                    "severity": "error",
+                    "path": relative_to_atlas(manifest_file),
+                    "message": f"Manifest pipeline_version must be '{PIPELINE_VERSION}'.",
+                }
+            )
+        if manifest.get("privacy_flag") not in PRIVACY_FLAGS:
+            findings.append(
+                {
+                    "severity": "error",
+                    "path": relative_to_atlas(manifest_file),
+                    "message": f"Unsupported privacy flag '{manifest.get('privacy_flag')}'.",
+                }
+            )
+        if manifest.get("safe_for_indexing") not in SAFE_FOR_INDEXING:
+            findings.append(
+                {
+                    "severity": "error",
+                    "path": relative_to_atlas(manifest_file),
+                    "message": f"Unsupported safe_for_indexing '{manifest.get('safe_for_indexing')}'.",
+                }
+            )
+        if manifest.get("indexing_profile") not in INDEXING_PROFILES:
+            findings.append(
+                {
+                    "severity": "error",
+                    "path": relative_to_atlas(manifest_file),
+                    "message": f"Unsupported indexing_profile '{manifest.get('indexing_profile')}'.",
+                }
+            )
+        if manifest.get("promotion_status") not in PROMOTION_STATUSES:
+            findings.append(
+                {
+                    "severity": "error",
+                    "path": relative_to_atlas(manifest_file),
+                    "message": f"Unsupported promotion_status '{manifest.get('promotion_status')}'.",
+                }
+            )
+        if manifest.get("retention_class") not in RETENTION_CLASSES:
+            findings.append(
+                {
+                    "severity": "error",
+                    "path": relative_to_atlas(manifest_file),
+                    "message": f"Unsupported retention_class '{manifest.get('retention_class')}'.",
+                }
+            )
+
+        evaluation_file = evaluation_path(archive_path)
+        evaluation = read_json(evaluation_file) if evaluation_file.exists() else None
+        if evaluation is not None:
+            required_evaluation = [
+                "archive_id",
+                "source_name",
+                "slug",
+                "evaluated_at",
+                "review_status",
+                "safe_for_indexing",
+                "indexing_profile",
+                "promotion_allowed",
+                "quarantine_flags",
+                "normalization_allowed",
+                "retention_class",
+                "pipeline_version",
+                "summary",
+                "risk_flags",
+                "notes",
+            ]
+            missing_eval = [field for field in required_evaluation if field not in evaluation]
+            if missing_eval:
+                findings.append(
+                    {
+                        "severity": "error",
+                        "path": relative_to_atlas(evaluation_file),
+                        "message": f"Evaluation missing required fields: {', '.join(missing_eval)}",
+                    }
+                )
+            if evaluation.get("pipeline_version") != PIPELINE_VERSION:
+                findings.append(
+                    {
+                        "severity": "error",
+                        "path": relative_to_atlas(evaluation_file),
+                        "message": f"Evaluation pipeline_version must be '{PIPELINE_VERSION}'.",
+                    }
+                )
+            if evaluation.get("indexing_profile") not in INDEXING_PROFILES:
+                findings.append(
+                    {
+                        "severity": "error",
+                        "path": relative_to_atlas(evaluation_file),
+                        "message": f"Unsupported indexing_profile '{evaluation.get('indexing_profile')}'.",
+                    }
+                )
+            if evaluation.get("retention_class") not in RETENTION_CLASSES:
+                findings.append(
+                    {
+                        "severity": "error",
+                        "path": relative_to_atlas(evaluation_file),
+                        "message": f"Unsupported retention_class '{evaluation.get('retention_class')}'.",
+                    }
+                )
+
+        promotion_file = promotion_doc_path(archive_id)
+        promotion = None
+        if promotion_file.exists():
+            try:
+                promotion = read_promotion_doc(promotion_file)
+            except ValueError as exc:
+                findings.append(
+                    {
+                        "severity": "error",
+                        "path": relative_to_atlas(promotion_file),
+                        "message": str(exc),
+                    }
+                )
+            else:
+                if promotion["metadata"]["archive_id"] != archive_id:
+                    findings.append(
+                        {
+                            "severity": "error",
+                            "path": relative_to_atlas(promotion_file),
+                            "message": "Promotion archive_id does not match the manifest archive_id.",
+                        }
+                    )
+                if evaluation is not None and not evaluation.get("promotion_allowed", False):
+                    findings.append(
+                        {
+                            "severity": "error",
+                            "path": relative_to_atlas(promotion_file),
+                            "message": "Promotion doc exists even though evaluation disallowed promotion.",
+                        }
+                    )
+        elif manifest.get("promotion_status") != "not_promoted":
+            findings.append(
+                {
+                    "severity": "error",
+                    "path": relative_to_atlas(manifest_file),
+                    "message": "Manifest promotion_status requires a promotion doc, but none exists.",
+                }
+            )
+
+        normalized_file = normalized_path(manifest["source_name"], manifest["slug"])
+        normalized = read_json(normalized_file) if normalized_file.exists() else None
+        if manifest.get("review_status") == "normalized" and normalized is None:
+            findings.append(
+                {
+                    "severity": "error",
+                    "path": relative_to_atlas(manifest_file),
+                    "message": "Normalized review_status requires a runtime catalog entry.",
+                }
+            )
+        if normalized is not None:
+            required_normalized = [
+                "archive_id",
+                "source_name",
+                "slug",
+                "status",
+                "safe_for_indexing",
+                "indexing_profile",
+                "promotion_status",
+                "retention_class",
+                "pipeline_version",
+                "manifest_path",
+                "evaluation_path",
+            ]
+            missing_normalized = [field for field in required_normalized if field not in normalized]
+            if missing_normalized:
+                findings.append(
+                    {
+                        "severity": "error",
+                        "path": relative_to_atlas(normalized_file),
+                        "message": f"Runtime catalog missing required fields: {', '.join(missing_normalized)}",
+                    }
+                )
+            if normalized.get("pipeline_version") != PIPELINE_VERSION:
+                findings.append(
+                    {
+                        "severity": "error",
+                        "path": relative_to_atlas(normalized_file),
+                        "message": f"Runtime catalog pipeline_version must be '{PIPELINE_VERSION}'.",
+                    }
+                )
+            if normalized.get("promotion_status") not in PROMOTION_STATUSES:
+                findings.append(
+                    {
+                        "severity": "error",
+                        "path": relative_to_atlas(normalized_file),
+                        "message": f"Unsupported promotion_status '{normalized.get('promotion_status')}'.",
+                    }
+                )
+            if normalized.get("promotion_doc_path") and promotion is None:
+                findings.append(
+                    {
+                        "severity": "error",
+                        "path": relative_to_atlas(normalized_file),
+                        "message": "Runtime catalog references a promotion doc that does not validate.",
+                    }
+                )
+            if promotion is None and normalized.get("promotion_status") != "not_promoted":
+                findings.append(
+                    {
+                        "severity": "error",
+                        "path": relative_to_atlas(normalized_file),
+                        "message": "Runtime catalog promotion_status requires a valid promotion doc.",
+                    }
+                )
+            if promotion is not None:
+                if normalized.get("promotion_doc_path") != promotion["path"]:
+                    findings.append(
+                        {
+                            "severity": "error",
+                            "path": relative_to_atlas(normalized_file),
+                            "message": "Runtime catalog promotion_doc_path does not match the promotion doc location.",
+                        }
+                    )
+                if normalized.get("indexing_profile") != promotion["metadata"]["indexing_profile"]:
+                    findings.append(
+                        {
+                            "severity": "error",
+                            "path": relative_to_atlas(normalized_file),
+                            "message": "Runtime catalog indexing_profile must match the promotion doc when a promotion doc exists.",
+                        }
+                    )
+
+    catalog_path_value = catalog_doc_path()
+    doc_rows = parse_catalog_table(catalog_path_value.read_text(encoding="utf-8"))
+    expected = {
+        (
+            record["archive_id"],
+            record["privacy_flag"],
+            record["status"],
+            record["safe_for_indexing"],
+            record["indexing_profile"],
+            record["promotion_status"],
+        )
+        for record in records
+    }
+    actual = {
+        (
+            row["archive_id"],
+            row["privacy_flag"],
+            row["status"],
+            row["safe_for_indexing"],
+            row["indexing_profile"],
+            row["promotion_status"],
+        )
+        for row in doc_rows
+    }
+    if expected != actual:
+        findings.append(
+            {
+                "severity": "error",
+                "path": relative_to_atlas(catalog_path_value),
+                "message": "Catalog document rows do not match discovered knowledge records.",
+            }
+        )
+
+    return {
+        "generated_at": utc_now(),
+        "catalog_path": relative_to_atlas(catalog_path_value),
+        "record_count": len(records),
+        "summary": {
+            "errors": sum(1 for finding in findings if finding["severity"] == "error"),
+            "warnings": sum(1 for finding in findings if finding["severity"] == "warning"),
+            "total": len(findings),
+        },
+        "findings": findings,
+    }
+
+
+def backfill_archive(archive_path: Path, *, dry_run: bool) -> dict[str, Any]:
+    archive_path = archive_path.resolve()
+    manifest = read_json(manifest_path(archive_path))
+    evaluation = read_json(evaluation_path(archive_path)) if evaluation_path(archive_path).exists() else None
+    promotion_file = promotion_doc_path(manifest["archive_id"])
+    promotion = read_promotion_doc(promotion_file) if promotion_file.exists() else None
+    default_profile = "metadata_only"
+    retention_class = str(manifest.get("retention_class", default_retention_class()))
+    manifest = update_manifest(
+        archive_path,
+        {
+            "indexing_profile": str(manifest.get("indexing_profile", default_profile)),
+            "promotion_status": promotion["metadata"]["promotion_status"] if promotion is not None else "not_promoted",
+            "retention_class": retention_class,
+            "pipeline_version": PIPELINE_VERSION,
+            "artifact_digests": build_manifest_artifact_digests(manifest, archive_path),
+            "extracted_snapshot_digest": extracted_snapshot_digest(archive_path),
+            "last_reviewed_at": utc_now(),
+        },
+        dry_run,
+    )
+    if evaluation is not None:
+        flags = evaluation.get("risk_flags", {})
+        quarantine = quarantine_flags(flags)
+        update_evaluation(
+            archive_path,
+            {
+                "indexing_profile": str(evaluation.get("indexing_profile", default_profile)),
+                "promotion_allowed": bool(
+                    evaluation.get("promotion_allowed", not flags.get("credentials_secrets_risk", False))
+                ),
+                "quarantine_flags": evaluation.get("quarantine_flags", quarantine),
+                "quarantine_reason": evaluation.get("quarantine_reason", quarantine_reason(quarantine)),
+                "retention_class": str(evaluation.get("retention_class", retention_class)),
+                "pipeline_version": PIPELINE_VERSION,
+            },
+            dry_run,
+        )
+        normalize_archive(archive_path=archive_path, dry_run=dry_run, force=True)
+    if not dry_run:
+        write_knowledge_receipt(
+            archive_path=archive_path,
+            action="backfill-v2",
+            validation_results=None,
+            dry_run=False,
+        )
+    return {
+        "archive_id": manifest["archive_id"],
+        "dry_run": dry_run,
+        "archive_dir": relative_to_atlas(archive_path),
+    }
+
+
+def resolve_archive_dir(
+    source_name: str | None,
+    slug: str | None,
+    archive_path: Path | None,
+) -> Path:
+    if archive_path is not None:
+        return resolve_atlas_path(archive_path)
+    if not source_name or not slug:
+        raise ValueError("Provide either --archive-dir or both --source-name and --slug.")
+    return archive_dir(source_name, slug).resolve()
+
+
+def add_common_archive_args(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("--archive-dir", type=Path)
+    parser.add_argument("--source-name")
+    parser.add_argument("--slug")
+    parser.add_argument("--dry-run", action="store_true")

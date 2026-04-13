@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 
-from import_archive import validate_catalog
+from _pipeline import validate_catalog
 
 
 def main() -> int:

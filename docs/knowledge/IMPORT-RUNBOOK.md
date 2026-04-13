@@ -8,10 +8,21 @@ This runbook defines the ATLAS-owned intake lane for personal learning materials
 - preserve original source artifacts in `raw/`
 - extract into `extracted/` for inspection without execution
 - evaluate privacy, secrets, copyright, and executable-content risk
+- optionally promote derived knowledge into `docs/knowledge/promotions/`
 - normalize accepted metadata into `runtime/cortex/catalog/knowledge/`
 - refresh `docs/knowledge/KNOWLEDGE-CATALOG.md`
+- write receipts to `runtime/receipts/knowledge/`
 
 The pipeline is stack-owned and does not mutate `repos/`.
+
+The v2 pipeline is:
+
+1. import
+2. evaluate
+3. optionally promote
+4. normalize
+5. catalog
+6. validate
 
 ## No-Execute Guarantee
 
@@ -69,6 +80,16 @@ python ops/knowledge/normalize_archive.py `
   --slug college-fullstack-ai-archive
 ```
 
+Create or update a promotion doc when explicit derived knowledge should be retained:
+
+```powershell
+python ops/knowledge/promote_archive.py `
+  --source-name personal `
+  --slug college-fullstack-ai-archive `
+  --promotion-status draft `
+  --indexing-profile derived_only
+```
+
 Refresh the human-readable catalog:
 
 ```powershell
@@ -98,6 +119,14 @@ Human catalog:
 
 - `docs/knowledge/KNOWLEDGE-CATALOG.md`
 
+Promotion docs:
+
+- `docs/knowledge/promotions/<archive_id>.md`
+
+Knowledge receipts:
+
+- `runtime/receipts/knowledge/<archive_id>/`
+
 Mixed collection catalogs:
 
 - `docs/knowledge/catalogs/<collection>/`
@@ -107,9 +136,10 @@ Mixed collection catalogs:
 1. import the archive into the stack-owned lane
 2. evaluate `EVALUATION.json` without opening executables
 3. complete `docs/knowledge/REVIEW-TEMPLATE.md`
-4. normalize only if metadata retention is acceptable for the archive
-5. refresh and validate the catalog
-6. keep any downstream indexing decision aligned with `safe_for_indexing`
+4. create a promotion doc only when derived or promoted knowledge is intentional
+5. normalize only if metadata retention is acceptable for the archive
+6. refresh and validate the catalog
+7. keep any downstream indexing decision aligned with `indexing_profile`
 
 For mixed recovery bundles that are too broad to classify as one archive or repo:
 

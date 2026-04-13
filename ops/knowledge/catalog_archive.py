@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 
-from import_archive import update_catalog_doc
+from _pipeline import update_catalog_doc
 
 
 def main() -> int:

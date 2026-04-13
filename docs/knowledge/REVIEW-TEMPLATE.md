@@ -26,10 +26,14 @@ Use this template for each knowledge archive after `EVALUATION.json` is generate
 - `copyrighted_courseware_risk`:
 - `executable_content`:
 - `safe_for_indexing`:
+- `indexing_profile`:
+- `promotion_allowed`:
+- `retention_class`:
 
 ## Decision
 
 - review status:
+- promotion status:
 - normalization allowed:
 - metadata retention allowed:
 - content indexing allowed:
