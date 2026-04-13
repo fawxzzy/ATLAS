@@ -5,7 +5,7 @@ This runbook defines the ATLAS-owned intake lane for personal learning materials
 ## Scope
 
 - import a zip or folder into `data/imports/knowledge/<source>/<slug>/`
-- preserve the original zip in `raw/` when present
+- preserve original source artifacts in `raw/`
 - extract into `extracted/` for inspection without execution
 - evaluate privacy, secrets, copyright, and executable-content risk
 - normalize accepted metadata into `runtime/cortex/catalog/knowledge/`
@@ -84,8 +84,11 @@ Imported archive:
 
 - `data/imports/knowledge/<source>/<slug>/IMPORT-MANIFEST.json`
 - `data/imports/knowledge/<source>/<slug>/raw/<archive>.zip` for zip inputs
+- `data/imports/knowledge/<source>/<slug>/raw/**` for folder inputs and loose-document bundles
 - `data/imports/knowledge/<source>/<slug>/extracted/**`
 - `data/imports/knowledge/<source>/<slug>/EVALUATION.json` after evaluation
+
+For folder inputs, `raw/` is the preserved source copy and `extracted/` is the no-execute inspection mirror. Do not treat `extracted/` as the canonical preserved source artifact.
 
 Normalized metadata:
 

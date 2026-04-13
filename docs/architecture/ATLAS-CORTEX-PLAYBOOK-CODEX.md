@@ -38,6 +38,8 @@ Use this file to answer four questions:
 
 ATLAS is the stack truth. If a stack-level doc conflicts with a repo convenience script, ATLAS wins.
 
+The Atlas platform-layer doctrine itself is canonical in `repos/fawxzzy-atlas/README.md` and `repos/fawxzzy-atlas/docs/**`. This stack-root document is only the integration and boundary view; it must not become a second source of platform architecture truth.
+
 ### CORTEX should eventually own
 
 - portable event and observation schemas
@@ -140,6 +142,7 @@ Examples:
 - stack path policy -> `docs/architecture/PATH-POLICY.md`
 - stack operations -> `docs/ops/STACK-OPERATIONS.md`
 - Playbook repo command truth -> `repos/fawxzzy-playbook/docs/**`
+- Atlas platform architecture and contract doctrine -> `repos/fawxzzy-atlas/docs/**`
 
 ## Maturity Rule For CORTEX
 

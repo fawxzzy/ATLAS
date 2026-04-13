@@ -127,7 +127,7 @@ def catalog_doc_path() -> Path:
 
 
 def read_json(path: Path) -> dict[str, Any]:
-    return json.loads(path.read_text(encoding="utf-8"))
+    return json.loads(path.read_text(encoding="utf-8-sig"))
 
 
 def write_json(path: Path, data: dict[str, Any], dry_run: bool) -> None:
@@ -171,6 +171,19 @@ def copy_folder(source: Path, destination: Path) -> None:
 
 def list_files(root: Path) -> list[Path]:
     return sorted(path for path in root.rglob("*") if path.is_file())
+
+
+def build_raw_entries(root: Path) -> list[dict[str, Any]]:
+    entries: list[dict[str, Any]] = []
+    for path in list_files(root):
+        entries.append(
+            {
+                "path": path.relative_to(root).as_posix(),
+                "size_bytes": path.stat().st_size,
+                "checksum": file_checksum(path),
+            }
+        )
+    return entries
 
 
 def summarize_extension_counts(paths: list[Path]) -> dict[str, int]:
@@ -312,12 +325,16 @@ def import_archive(
     if detected_type == "zip":
         manifest["checksum"] = file_checksum(input_path)
         manifest["raw_archive_path"] = f"{relative_to_atlas(raw_dir(knowledge_dir))}/{input_path.name}"
+    else:
+        manifest["raw_reference_dir"] = relative_to_atlas(raw_dir(knowledge_dir))
+        manifest["raw_entries"] = build_raw_entries(input_path)
 
     operations: list[str] = [f"prepare:{relative_to_atlas(knowledge_dir)}"]
     if detected_type == "zip":
         operations.append(f"copy:{relative_to_atlas(raw_dir(knowledge_dir) / input_path.name)}")
         operations.append(f"extract:{relative_to_atlas(extracted_dir(knowledge_dir))}")
     else:
+        operations.append(f"copytree:{relative_to_atlas(raw_dir(knowledge_dir))}")
         operations.append(f"copytree:{relative_to_atlas(extracted_dir(knowledge_dir))}")
     operations.append(f"write:{relative_to_atlas(manifest_path(knowledge_dir))}")
 
@@ -330,6 +347,7 @@ def import_archive(
             shutil.copy2(input_path, raw_dir(knowledge_dir) / input_path.name)
             extract_zip_safely(input_path, extracted_dir(knowledge_dir))
         else:
+            copy_folder(input_path, raw_dir(knowledge_dir))
             copy_folder(input_path, extracted_dir(knowledge_dir))
         write_json(manifest_path(knowledge_dir), manifest, dry_run=False)
 
@@ -439,7 +457,18 @@ def normalize_archive(*, archive_path: Path, dry_run: bool, force: bool) -> dict
         "summary": report["summary"],
         "notes": report["notes"],
         "no_execute_guarantee": True,
+        "provenance": manifest.get("provenance", {})
+        | {
+            "manifest_path": relative_to_atlas(manifest_path(archive_path)),
+            "evaluation_path": relative_to_atlas(evaluation_path(archive_path)),
+        },
     }
+    if "raw_archive_path" in manifest:
+        entry["provenance"]["raw_archive_path"] = manifest["raw_archive_path"]
+    if "raw_reference_dir" in manifest:
+        entry["provenance"]["raw_reference_dir"] = manifest["raw_reference_dir"]
+    if "raw_entries" in manifest:
+        entry["raw_entries"] = manifest["raw_entries"]
     write_json(output_path, entry, dry_run)
     update_manifest(
         archive_path,
