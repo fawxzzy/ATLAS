@@ -15,6 +15,9 @@ from typing import Any
 PIPELINE_VERSION = "atlas.knowledge.pipeline.v2"
 RECEIPT_VERSION = "atlas.knowledge.receipt.v1"
 PROMOTION_SCHEMA_VERSION = "atlas.knowledge.promotion.v1"
+QUERY_BUNDLE_VERSION = "atlas.knowledge.query-bundle.v1"
+QUERY_RESULT_VERSION = "atlas.knowledge.query-results.v1"
+QUERY_FULL_TEXT_STATUS = "reserved"
 
 IMPORT_STATUSES = {
     "imported",
@@ -250,6 +253,31 @@ def knowledge_receipts_root() -> Path:
 
 def receipt_dir(archive_id: str) -> Path:
     return knowledge_receipts_root() / archive_id
+
+
+def knowledge_query_root() -> Path:
+    return atlas_root() / "runtime" / "cortex" / "query" / "knowledge"
+
+
+def knowledge_query_bundle_path() -> Path:
+    return knowledge_query_root() / "bundle.json"
+
+
+def latest_receipt_path(archive_id: str) -> Path:
+    return receipt_dir(archive_id) / "latest.json"
+
+
+def discover_runtime_catalogs() -> list[Path]:
+    root = atlas_root() / "runtime" / "cortex" / "catalog" / "knowledge"
+    return sorted(path for path in root.glob("*.json") if path.is_file())
+
+
+def discover_promotion_docs() -> list[Path]:
+    return sorted(path for path in promotions_dir().glob("*.md") if path.is_file())
+
+
+def discover_latest_receipts() -> list[Path]:
+    return sorted(path for path in knowledge_receipts_root().glob("*/latest.json") if path.is_file())
 
 
 def read_json(path: Path) -> dict[str, Any]:
@@ -600,6 +628,40 @@ def clean_markdown_text(value: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
 
 
+def stable_unique_strings(values: list[str]) -> list[str]:
+    result: list[str] = []
+    seen: set[str] = set()
+    for value in values:
+        cleaned = value.strip()
+        if not cleaned or cleaned in seen:
+            continue
+        result.append(cleaned)
+        seen.add(cleaned)
+    return result
+
+
+def tokenize_lexical_terms(*values: str) -> list[str]:
+    tokens: set[str] = set()
+    for value in values:
+        for match in re.findall(r"[a-z0-9]+(?:-[a-z0-9]+)*", value.lower()):
+            tokens.add(match)
+            tokens.update(part for part in match.split("-") if part)
+    return sorted(tokens)
+
+
+def evidence_reference_ids(lines: list[str]) -> list[str]:
+    identifiers: list[str] = []
+    for line in lines:
+        matches = re.findall(r"`([^`]+)`", line)
+        if matches:
+            identifiers.extend(matches)
+            continue
+        cleaned = clean_markdown_text(line)
+        if cleaned:
+            identifiers.append(cleaned)
+    return stable_unique_strings(identifiers)
+
+
 def promotion_draft_summary(archive_id: str) -> str:
     return (
         f"Draft promotion created from structural metadata for `{archive_id}`. "
@@ -828,6 +890,302 @@ def build_promotion_summary(doc: dict[str, Any]) -> dict[str, Any]:
         "evidence_references": evidence_refs[:8],
         "exclusions": clean_markdown_text(sections["Exclusions And Redactions"]),
     }
+
+
+def query_search_policy(
+    *,
+    indexing_profile: str,
+    promotion_exists: bool,
+    promotion_allowed: bool,
+) -> dict[str, Any]:
+    derived_searchable = (
+        promotion_exists
+        and promotion_allowed
+        and indexing_profile in {"derived_only", "full_text"}
+    )
+    return {
+        "metadata_searchable": True,
+        "derived_searchable": derived_searchable,
+        "full_text_searchable": False,
+        "full_text_status": QUERY_FULL_TEXT_STATUS,
+    }
+
+
+def build_query_bundle_payload() -> dict[str, Any]:
+    promotion_docs = {
+        doc["metadata"]["archive_id"]: doc
+        for doc in (read_promotion_doc(path) for path in discover_promotion_docs())
+    }
+    receipt_docs = {
+        receipt["archive_id"]: {"path": path, "payload": receipt}
+        for path in discover_latest_receipts()
+        for receipt in [read_json(path)]
+    }
+    runtime_sources: list[dict[str, str]] = []
+    promotion_sources: list[dict[str, str]] = []
+    receipt_sources: list[dict[str, str]] = []
+    records: list[dict[str, Any]] = []
+
+    for path in discover_runtime_catalogs():
+        catalog = read_json(path)
+        archive_id = str(catalog["archive_id"])
+        receipt_entry = receipt_docs.get(archive_id)
+        if receipt_entry is None:
+            raise FileNotFoundError(f"Missing latest receipt for archive_id '{archive_id}'.")
+        receipt = receipt_entry["payload"]
+        digests = receipt.get("digests")
+        tooling = receipt.get("tooling")
+        if not isinstance(digests, dict):
+            raise ValueError(f"Latest receipt for '{archive_id}' is missing receipt digests.")
+        if not isinstance(tooling, dict):
+            raise ValueError(f"Latest receipt for '{archive_id}' is missing tooling metadata.")
+        if not digests.get("manifest") or not digests.get("evaluation"):
+            raise ValueError(f"Latest receipt for '{archive_id}' is missing manifest or evaluation digests.")
+        if not tooling.get("pipeline_digest"):
+            raise ValueError(f"Latest receipt for '{archive_id}' is missing the pipeline digest.")
+        if receipt_entrypoint_path(str(receipt.get("action"))) is not None and not tooling.get("entrypoint_digest"):
+            raise ValueError(f"Latest receipt for '{archive_id}' is missing the entrypoint digest.")
+
+        promotion = promotion_docs.get(archive_id)
+        promotion_summary = build_promotion_summary(promotion) if promotion is not None else None
+        promotion_allowed = bool((receipt.get("evaluation") or {}).get("promotion_allowed", False))
+        query_policy = query_search_policy(
+            indexing_profile=str(catalog.get("indexing_profile", "metadata_only")),
+            promotion_exists=promotion is not None,
+            promotion_allowed=promotion_allowed,
+        )
+        derived_summary_text = (
+            str(promotion_summary["derived_summary"])
+            if promotion_summary is not None and query_policy["derived_searchable"]
+            else None
+        )
+        topic_map_terms = (
+            stable_unique_strings(
+                [clean_markdown_text(term) for term in promotion_summary["topic_map"]]
+            )
+            if promotion_summary is not None and query_policy["derived_searchable"]
+            else []
+        )
+        evidence_ids = (
+            evidence_reference_ids(promotion_summary["evidence_references"])
+            if promotion_summary is not None and query_policy["derived_searchable"]
+            else []
+        )
+
+        metadata_terms = tokenize_lexical_terms(
+            str(catalog.get("archive_id", "")),
+            str(catalog.get("source_name", "")),
+            str(catalog.get("status", "")),
+            str(catalog.get("privacy_flag", "")),
+            str(catalog.get("promotion_status", "")),
+            str(catalog.get("indexing_profile", "")),
+            str(catalog.get("retention_class", "")),
+        )
+        derived_terms = tokenize_lexical_terms(derived_summary_text or "", *topic_map_terms)
+        evidence_terms = tokenize_lexical_terms(*evidence_ids)
+
+        records.append(
+            {
+                "archive_id": archive_id,
+                "source_name": str(catalog.get("source_name", "")),
+                "status": str(catalog.get("status", "")),
+                "privacy_flag": str(catalog.get("privacy_flag", "")),
+                "promotion_status": str(catalog.get("promotion_status", "not_promoted")),
+                "indexing_profile": str(catalog.get("indexing_profile", "metadata_only")),
+                "retention_class": str(catalog.get("retention_class", default_retention_class())),
+                "promotion_allowed": promotion_allowed,
+                "paths": {
+                    "runtime_catalog_path": relative_to_atlas(path),
+                    "promotion_doc_path": promotion["path"] if promotion is not None else None,
+                    "latest_receipt_path": relative_to_atlas(Path(receipt_entry["path"])),
+                },
+                "source_digests": {
+                    "runtime_catalog": file_checksum(path),
+                    "promotion_doc": promotion["digest"] if promotion is not None else None,
+                    "latest_receipt": file_checksum(Path(receipt_entry["path"])),
+                },
+                "query_policy": query_policy,
+                "derived_summary_text": derived_summary_text,
+                "topic_map_terms": topic_map_terms,
+                "evidence_reference_ids": evidence_ids,
+                "receipt": {
+                    "receipt_id": receipt.get("receipt_id"),
+                    "action": receipt.get("action"),
+                    "recorded_at": receipt.get("recorded_at"),
+                    "digests": digests,
+                    "tooling_digests": {
+                        "entrypoint_digest": tooling.get("entrypoint_digest"),
+                        "pipeline_digest": tooling.get("pipeline_digest"),
+                    },
+                },
+                "search_terms": {
+                    "metadata": metadata_terms,
+                    "derived": derived_terms,
+                    "evidence": evidence_terms,
+                },
+            }
+        )
+
+        runtime_sources.append(
+            {
+                "archive_id": archive_id,
+                "path": relative_to_atlas(path),
+                "digest": file_checksum(path),
+            }
+        )
+
+    for archive_id, doc in sorted(promotion_docs.items()):
+        promotion_sources.append(
+            {
+                "archive_id": archive_id,
+                "path": doc["path"],
+                "digest": doc["digest"],
+            }
+        )
+    for receipt_path_value in discover_latest_receipts():
+        receipt = read_json(receipt_path_value)
+        receipt_sources.append(
+            {
+                "archive_id": str(receipt["archive_id"]),
+                "path": relative_to_atlas(receipt_path_value),
+                "digest": file_checksum(receipt_path_value),
+            }
+        )
+
+    return {
+        "schema_version": QUERY_BUNDLE_VERSION,
+        "pipeline_version": PIPELINE_VERSION,
+        "full_text_status": QUERY_FULL_TEXT_STATUS,
+        "record_count": len(records),
+        "bundle_inputs": {
+            "runtime_catalogs": sorted(runtime_sources, key=lambda item: item["archive_id"]),
+            "promotion_docs": sorted(promotion_sources, key=lambda item: item["archive_id"]),
+            "latest_receipts": sorted(receipt_sources, key=lambda item: item["archive_id"]),
+        },
+        "records": records,
+    }
+
+
+def build_query_bundle(*, dry_run: bool) -> dict[str, Any]:
+    payload = build_query_bundle_payload()
+    content_digest = stable_json_digest(payload)
+    bundle = payload | {"content_digest": content_digest}
+    bundle_path_value = knowledge_query_bundle_path()
+    if not dry_run:
+        write_json(bundle_path_value, bundle, dry_run=False)
+    return {
+        "dry_run": dry_run,
+        "bundle_path": relative_to_atlas(bundle_path_value),
+        "record_count": bundle["record_count"],
+        "content_digest": content_digest,
+        "input_counts": {
+            "runtime_catalogs": len(payload["bundle_inputs"]["runtime_catalogs"]),
+            "promotion_docs": len(payload["bundle_inputs"]["promotion_docs"]),
+            "latest_receipts": len(payload["bundle_inputs"]["latest_receipts"]),
+        },
+    }
+
+
+def validate_query_bundle() -> list[dict[str, str]]:
+    findings: list[dict[str, str]] = []
+    bundle_path_value = knowledge_query_bundle_path()
+    runtime_catalogs = discover_runtime_catalogs()
+    if runtime_catalogs and not bundle_path_value.exists():
+        findings.append(
+            {
+                "severity": "error",
+                "path": relative_to_atlas(bundle_path_value),
+                "message": "Knowledge query bundle is missing for the current runtime knowledge catalog.",
+            }
+        )
+        return findings
+    if not bundle_path_value.exists():
+        return findings
+
+    bundle = read_json(bundle_path_value)
+    required_fields = [
+        "schema_version",
+        "pipeline_version",
+        "full_text_status",
+        "record_count",
+        "bundle_inputs",
+        "records",
+        "content_digest",
+    ]
+    missing = [field for field in required_fields if field not in bundle]
+    if missing:
+        findings.append(
+            {
+                "severity": "error",
+                "path": relative_to_atlas(bundle_path_value),
+                "message": f"Query bundle is missing required fields: {', '.join(missing)}",
+            }
+        )
+        return findings
+    if bundle.get("schema_version") != QUERY_BUNDLE_VERSION:
+        findings.append(
+            {
+                "severity": "error",
+                "path": relative_to_atlas(bundle_path_value),
+                "message": f"Query bundle schema_version must be '{QUERY_BUNDLE_VERSION}'.",
+            }
+        )
+    if bundle.get("pipeline_version") != PIPELINE_VERSION:
+        findings.append(
+            {
+                "severity": "error",
+                "path": relative_to_atlas(bundle_path_value),
+                "message": f"Query bundle pipeline_version must be '{PIPELINE_VERSION}'.",
+            }
+        )
+    if bundle.get("full_text_status") != QUERY_FULL_TEXT_STATUS:
+        findings.append(
+            {
+                "severity": "error",
+                "path": relative_to_atlas(bundle_path_value),
+                "message": f"Query bundle full_text_status must remain '{QUERY_FULL_TEXT_STATUS}' in this pass.",
+            }
+        )
+    try:
+        expected_payload = build_query_bundle_payload()
+    except Exception as exc:
+        findings.append(
+            {
+                "severity": "error",
+                "path": relative_to_atlas(bundle_path_value),
+                "message": f"Query bundle could not be rebuilt from source lanes: {exc}",
+            }
+        )
+        return findings
+
+    actual_payload = dict(bundle)
+    actual_digest = str(actual_payload.pop("content_digest"))
+    expected_digest = stable_json_digest(expected_payload)
+    if actual_digest != expected_digest:
+        findings.append(
+            {
+                "severity": "error",
+                "path": relative_to_atlas(bundle_path_value),
+                "message": "Query bundle content_digest does not match the rebuilt deterministic payload.",
+            }
+        )
+    if actual_payload != expected_payload:
+        findings.append(
+            {
+                "severity": "error",
+                "path": relative_to_atlas(bundle_path_value),
+                "message": "Query bundle contents do not match the rebuilt deterministic payload.",
+            }
+        )
+    if bundle.get("record_count") != len(expected_payload["records"]):
+        findings.append(
+            {
+                "severity": "error",
+                "path": relative_to_atlas(bundle_path_value),
+                "message": "Query bundle record_count does not match the rebuilt record set.",
+            }
+        )
+    return findings
 
 
 def current_validation_placeholder() -> dict[str, Any]:
@@ -1555,7 +1913,7 @@ def parse_catalog_table(text: str) -> list[dict[str, str]]:
     return rows
 
 
-def validate_catalog() -> dict[str, Any]:
+def validate_catalog(*, include_query_bundle: bool = True) -> dict[str, Any]:
     findings: list[dict[str, str]] = []
     records = [build_catalog_record(path) for path in discover_import_manifests()]
     for manifest_file in discover_import_manifests():
@@ -1872,6 +2230,143 @@ def validate_catalog() -> dict[str, Any]:
                         }
                     )
 
+        latest_receipt = latest_receipt_path(archive_id)
+        if not latest_receipt.exists():
+            findings.append(
+                {
+                    "severity": "error",
+                    "path": relative_to_atlas(receipt_dir(archive_id)),
+                    "message": "Latest knowledge receipt is missing for this archive.",
+                }
+            )
+        else:
+            receipt = read_json(latest_receipt)
+            required_receipt = [
+                "receipt_version",
+                "receipt_id",
+                "recorded_at",
+                "pipeline_version",
+                "archive_id",
+                "action",
+                "paths",
+                "inputs",
+                "digests",
+                "no_execute_guarantee",
+                "evaluation",
+                "promotion",
+                "runtime_outputs",
+                "validation_results",
+                "tooling",
+            ]
+            missing_receipt = [field for field in required_receipt if field not in receipt]
+            if missing_receipt:
+                findings.append(
+                    {
+                        "severity": "error",
+                        "path": relative_to_atlas(latest_receipt),
+                        "message": f"Latest receipt is missing required fields: {', '.join(missing_receipt)}",
+                    }
+                )
+            if receipt.get("receipt_version") != RECEIPT_VERSION:
+                findings.append(
+                    {
+                        "severity": "error",
+                        "path": relative_to_atlas(latest_receipt),
+                        "message": f"Receipt receipt_version must be '{RECEIPT_VERSION}'.",
+                    }
+                )
+            if receipt.get("pipeline_version") != PIPELINE_VERSION:
+                findings.append(
+                    {
+                        "severity": "error",
+                        "path": relative_to_atlas(latest_receipt),
+                        "message": f"Receipt pipeline_version must be '{PIPELINE_VERSION}'.",
+                    }
+                )
+            if receipt.get("archive_id") != archive_id:
+                findings.append(
+                    {
+                        "severity": "error",
+                        "path": relative_to_atlas(latest_receipt),
+                        "message": "Latest receipt archive_id does not match the manifest archive_id.",
+                    }
+                )
+
+            receipt_paths = receipt.get("paths") if isinstance(receipt.get("paths"), dict) else {}
+            if receipt_paths.get("latest_path") != relative_to_atlas(latest_receipt):
+                findings.append(
+                    {
+                        "severity": "error",
+                        "path": relative_to_atlas(latest_receipt),
+                        "message": "Latest receipt paths.latest_path does not match the stored latest.json location.",
+                    }
+                )
+            if receipt_paths.get("manifest_path") != relative_to_atlas(manifest_file):
+                findings.append(
+                    {
+                        "severity": "error",
+                        "path": relative_to_atlas(latest_receipt),
+                        "message": "Latest receipt paths.manifest_path does not match the manifest location.",
+                    }
+                )
+
+            receipt_digests = receipt.get("digests") if isinstance(receipt.get("digests"), dict) else {}
+            expected_manifest_digest = file_checksum(manifest_file)
+            if receipt_digests.get("manifest") != expected_manifest_digest:
+                findings.append(
+                    {
+                        "severity": "error",
+                        "path": relative_to_atlas(latest_receipt),
+                        "message": "Latest receipt manifest digest is stale or missing.",
+                    }
+                )
+            expected_evaluation_digest = file_checksum_if_exists(evaluation_file)
+            if receipt_digests.get("evaluation") != expected_evaluation_digest:
+                findings.append(
+                    {
+                        "severity": "error",
+                        "path": relative_to_atlas(latest_receipt),
+                        "message": "Latest receipt evaluation digest is stale or missing.",
+                    }
+                )
+            expected_runtime_digest = file_checksum_if_exists(normalized_file)
+            if receipt_digests.get("runtime_catalog") != expected_runtime_digest:
+                findings.append(
+                    {
+                        "severity": "error",
+                        "path": relative_to_atlas(latest_receipt),
+                        "message": "Latest receipt runtime catalog digest is stale or missing.",
+                    }
+                )
+            expected_promotion_digest = promotion["digest"] if promotion is not None else file_checksum_if_exists(promotion_file)
+            if receipt_digests.get("promotion_doc") != expected_promotion_digest:
+                findings.append(
+                    {
+                        "severity": "error",
+                        "path": relative_to_atlas(latest_receipt),
+                        "message": "Latest receipt promotion doc digest is stale or missing.",
+                    }
+                )
+
+            tooling = receipt.get("tooling") if isinstance(receipt.get("tooling"), dict) else {}
+            if tooling.get("pipeline_digest") != file_checksum(Path(__file__).resolve()):
+                findings.append(
+                    {
+                        "severity": "error",
+                        "path": relative_to_atlas(latest_receipt),
+                        "message": "Latest receipt tooling.pipeline_digest is stale or missing.",
+                    }
+                )
+            entrypoint = receipt_entrypoint_path(str(receipt.get("action")))
+            if entrypoint is not None and tooling.get("entrypoint_digest") != file_checksum_if_exists(entrypoint):
+                findings.append(
+                    {
+                        "severity": "error",
+                        "path": relative_to_atlas(latest_receipt),
+                        "message": "Latest receipt tooling.entrypoint_digest is stale or missing.",
+                    }
+                )
+
     catalog_path_value = catalog_doc_path()
     doc_rows = parse_catalog_table(catalog_path_value.read_text(encoding="utf-8"))
     expected = {
@@ -1905,9 +2400,13 @@ def validate_catalog() -> dict[str, Any]:
             }
         )
 
+    if include_query_bundle:
+        findings.extend(validate_query_bundle())
+
     return {
         "generated_at": utc_now(),
         "catalog_path": relative_to_atlas(catalog_path_value),
+        "query_bundle_path": relative_to_atlas(knowledge_query_bundle_path()),
         "record_count": len(records),
         "summary": {
             "errors": sum(1 for finding in findings if finding["severity"] == "error"),

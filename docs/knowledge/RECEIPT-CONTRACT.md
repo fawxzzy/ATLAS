@@ -10,6 +10,8 @@ Receipts are written under:
 
 Each lane stores timestamped receipts plus `latest.json`.
 
+`latest.json` is the compatibility target for downstream automation such as the knowledge query bundle.
+
 ## Contract
 
 - `receipt_version`: `atlas.knowledge.receipt.v1`
@@ -39,6 +41,8 @@ Each receipt records digests for the current pipeline state when present:
 - promotion doc markdown
 - validation result payload when validation data was attached
 
+The latest receipt must stay current with the manifest, evaluation, promotion doc, and runtime catalog files it references. Stale digests are a contract violation.
+
 `inputs.artifact_digests` continues to carry the raw archive or raw tree digests, and `inputs.extracted_snapshot_digest` carries the extracted snapshot digest.
 
 ## Tooling Metadata
@@ -50,6 +54,8 @@ Each receipt records the current operator entrypoint and shared pipeline metadat
 - `_pipeline.py` path
 - `_pipeline.py` digest
 - Python version
+
+These tooling digests are consumed by the deterministic query bundle so worker-facing query results can carry provenance without hydrating raw evidence.
 
 ## Purpose
 

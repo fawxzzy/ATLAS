@@ -38,6 +38,8 @@ subpaths:
     cortex_knowledge: runtime/cortex/catalog/knowledge
     cortex_memory: runtime/cortex/catalog/memory
     cortex_playbooks: runtime/cortex/catalog/playbooks
+    cortex_query: runtime/cortex/query
+    cortex_query_knowledge: runtime/cortex/query/knowledge
     devservers: runtime/devservers
     events: runtime/receipts/events
     knowledge_receipts: runtime/receipts/knowledge

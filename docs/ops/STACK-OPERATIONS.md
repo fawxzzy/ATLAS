@@ -69,6 +69,12 @@ Default baseline path:
 
 - `ops/validation/stack-validation.baseline.json`
 
+Knowledge-lane validation:
+
+```powershell
+python .\ops\knowledge\validate_knowledge_catalog.py
+```
+
 ## Commit
 
 Script:
@@ -205,6 +211,33 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\ops\backup\restore_stack.p
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\ops\backup\restore_stack.ps1 -SourcePath .\packages\snapshots\atlas-selected.zip -Overwrite
 ```
+
+## Knowledge Query
+
+Scripts:
+
+- `ops/knowledge/build_query_bundle.py`
+- `ops/knowledge/query_knowledge.py`
+
+Purpose:
+
+- build a deterministic query surface over promoted knowledge, runtime catalogs, and latest receipts
+- keep query artifacts rebuildable under `runtime/cortex/query/knowledge/`
+- let workers query promoted or metadata-safe knowledge without hydrating raw imports
+
+Commands:
+
+```powershell
+python .\ops\knowledge\build_query_bundle.py
+```
+
+```powershell
+python .\ops\knowledge\query_knowledge.py "verta core"
+```
+
+Operational rule:
+
+- query artifacts are derived runtime state, not durable source truth
 
 ## Operational Notes
 
