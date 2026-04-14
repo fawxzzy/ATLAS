@@ -86,6 +86,13 @@
         "minLength": 1
       }
     },
+    "source_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
     "target_resources": {
       "type": "array",
       "items": {
@@ -107,10 +114,17 @@
         "allowed_data_classes"
       ],
       "properties": {
+        "contract_version": {
+          "type": "string",
+          "const": "atlas.capability.profile.v1"
+        },
         "capability_profile_id": {
           "type": "string",
           "minLength": 3,
           "pattern": "^[A-Za-z0-9._:-]+$"
+        },
+        "description": {
+          "type": "string"
         },
         "filesystem_scopes": {
           "type": "object"
@@ -140,6 +154,14 @@
           "items": {
             "type": "string"
           }
+        },
+        "audit_class": {
+          "type": "string",
+          "enum": [
+            "standard",
+            "sensitive",
+            "restricted"
+          ]
         }
       }
     },

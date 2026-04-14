@@ -22,6 +22,8 @@ Inputs:
 Outputs:
 
 - `atlas.worker.merge-request.v1`
+- reserved merge-worker handoff refs under `runtime/cortex/supervisor/`
+- descriptor-backed merge completion status through `atlas.stack.supervisor-consumer.v1`
 
 ## Non-Goals
 
@@ -72,3 +74,7 @@ python ops/cortex/supervise_workers.py --artifact-path tmp/scratch/cortex-superv
 5. emit deterministic `atlas.worker.merge-request.v1` artifacts for overlap or drift conflicts
 
 Forbidden-scope violations are reported in the supervisor summary output even when they do not produce a pairwise merge request.
+
+The merge request reserves `merge_worker_handoff.handoff_ref` for the future merged handoff artifact. `_stack` consumes that ref to create the merger assignment and resume-context artifacts without scraping transcript history.
+
+After `_stack` consumes the merge request, register both the merge request and the supervisor completion artifact so the root status read model can determine which merge requests are still open without inspecting transcripts or logs.

@@ -79,3 +79,14 @@ Determinism rules:
 - source of truth remains the import manifest, evaluation, promotion doc, runtime catalog, and latest receipt lanes
 - the query bundle is disposable and may be rebuilt at any time
 - deleting `runtime/cortex/query/knowledge/bundle.json` must not lose knowledge truth
+
+## Worker Context Consumers
+
+The worker context lane under `runtime/cortex/context/` is a query-plane consumer.
+
+Rules:
+
+- worker context packs must select through the query bundle first
+- worker context packs may hydrate only policy-allowed fields from promotion docs, runtime catalogs, and latest receipts
+- `metadata_only` archives must remain metadata-only inside worker context artifacts
+- descriptor registration and status rendering must consume the worker context artifact, not re-run query selection from logs

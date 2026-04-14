@@ -119,6 +119,8 @@ The validator reports drift when:
 
 The lockfile pins the current root working set across the stack control repo and the explicitly included child repos.
 
+The pinned set now includes the `_stack` workflow operator repo so root sessions do not treat `_stack` as an ambient unchecked dependency.
+
 It does not:
 
 - convert child repos to submodules

@@ -48,6 +48,7 @@
 - do not execute any archived scripts, launchers, or eval tooling
 - do not treat `repos/Verta-Core/` as trusted or active repo truth until secret scrub and any required rotation are complete
 - use the sanitized candidate only as a rebuildable metadata-only evidence path until policy allows promotion
+- enforce the standing root trust gate in `docs/ops/VERTA-TRUST-GATE.md`
 
 ## Required Follow-Up
 

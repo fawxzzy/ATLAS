@@ -2,6 +2,13 @@
 
 This document covers bootstrap, validation, export, and restore for the ATLAS root.
 
+See also:
+
+- `docs/ops/ATLAS-SESSION-RUNBOOK.md`
+- `docs/ops/ATLAS-ARTIFACT-DESCRIPTOR-RUNBOOK.md`
+- `docs/ops/ATLAS-STATUS-RUNBOOK.md`
+- `docs/ops/VERTA-TRUST-GATE.md`
+
 ## Bootstrap
 
 Script:
@@ -238,6 +245,49 @@ python .\ops\knowledge\query_knowledge.py "verta core"
 Operational rule:
 
 - query artifacts are derived runtime state, not durable source truth
+
+## Session Runner
+
+Script:
+
+- `ops/atlas/run_session.py`
+
+Purpose:
+
+- create one `atlas.session.v1` manifest
+- build worker context
+- emit worker assignment
+- invoke `_stack` and record Lifeline receipt refs
+- record supervisor pause/merge/resume refs when conflicts occur
+- close the session with an explicit final status
+
+Command:
+
+```powershell
+python .\ops\atlas\run_session.py --task-id atlas-session-readonly
+```
+
+## Descriptor Registry
+
+Scripts:
+
+- `ops/cortex/register_artifacts.py`
+- `ops/cortex/render_status.py`
+
+Purpose:
+
+- register `atlas.artifact.descriptor.v1` files for governed runtime artifacts
+- render a stable status view from descriptor metadata only
+
+Commands:
+
+```powershell
+python .\ops\cortex\register_artifacts.py
+```
+
+```powershell
+python .\ops\cortex\render_status.py
+```
 
 ## Operational Notes
 

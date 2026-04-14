@@ -37,6 +37,10 @@ MUTABLE_DIR_CANDIDATES = [
 ROOT_LOG_PATTERNS = ["*.log", "*.err.log", "*.out.log", "*.tmp", "*.db", "*.sqlite", "*.sqlite3"]
 ROOT_CAPTURE_PATTERNS = ["*screenshot*.png", "artifacts*.png", "*check*.png", "*review*.png"]
 BASELINE_VERSION = "atlas.stack.validation.baseline.v1"
+VERTA_SECRET_PATTERNS = [
+    ("verta-live-secret", re.compile(r"gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|AKIA[0-9A-Z]{16}|sk-[A-Za-z0-9]{20,}|xox[baprs]-[A-Za-z0-9-]{10,}|-----BEGIN [A-Z ]*PRIVATE KEY-----|Bearer\s+[A-Za-z0-9._-]{16,}")),
+]
+VERTA_SURFACE_TEXT_EXTENSIONS = {".bat", ".cmd", ".conf", ".cfg", ".ini", ".json", ".md", ".ps1", ".py", ".sh", ".txt", ".yaml", ".yml"}
 
 ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
@@ -399,6 +403,164 @@ def validate_gitdir_hygiene(root: Path) -> list[Finding]:
     return findings
 
 
+def load_json_object(path: Path) -> dict[str, Any]:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError(f"Expected JSON object at {normalize_slashes(str(path))}.")
+    return payload
+
+
+def validate_verta_trust_gate(stack_file: Path, config: dict[str, Any]) -> list[Finding]:
+    root = stack_file.parent.resolve()
+    findings: list[Finding] = []
+    lock_config = config.get("stack_lock", {})
+    excluded_surfaces = lock_config.get("excluded_surfaces", {}) if isinstance(lock_config, dict) else {}
+    required_surfaces = {
+        "verta_core_checkout": "repos/Verta-Core",
+        "verta_core_archive": "repos/Verta-Core.zip",
+    }
+    for surface_id, expected_path in required_surfaces.items():
+        surface = excluded_surfaces.get(surface_id)
+        if not isinstance(surface, dict):
+            findings.append(
+                Finding(
+                    "error",
+                    "verta-trust-surface-missing",
+                    "stack.yaml",
+                    f"stack_lock.excluded_surfaces.{surface_id} must remain declared for the standing Verta trust gate.",
+                )
+            )
+            continue
+        if str(surface.get("path", "")) != expected_path:
+            findings.append(
+                Finding(
+                    "error",
+                    "verta-trust-surface-path",
+                    "stack.yaml",
+                    f"stack_lock.excluded_surfaces.{surface_id}.path must remain '{expected_path}'.",
+                )
+            )
+        if str(surface.get("trust_class", "")) != "untrusted":
+            findings.append(
+                Finding(
+                    "error",
+                    "verta-trust-class",
+                    "stack.yaml",
+                    f"stack_lock.excluded_surfaces.{surface_id}.trust_class must remain 'untrusted'.",
+                )
+            )
+        if bool(surface.get("release_eligible")):
+            findings.append(
+                Finding(
+                    "error",
+                    "verta-release-eligibility",
+                    "stack.yaml",
+                    f"stack_lock.excluded_surfaces.{surface_id}.release_eligible must remain false.",
+                )
+            )
+
+    catalog_expectations = {
+        "runtime/cortex/catalog/knowledge/personal--verta-core.json": {
+            "safe_for_indexing": "no",
+            "indexing_profile": "metadata_only",
+            "promotion_status": "not_promoted",
+            "promotion_doc_path": None,
+        },
+        "runtime/cortex/catalog/knowledge/personal--verta-core-sanitized.json": {
+            "safe_for_indexing": "restricted",
+            "indexing_profile": "metadata_only",
+            "promotion_status": "not_promoted",
+            "promotion_doc_path": None,
+        },
+    }
+    for relative_path, expected in catalog_expectations.items():
+        catalog_path = root / relative_path
+        if not catalog_path.exists():
+            findings.append(
+                Finding(
+                    "error",
+                    "verta-catalog-missing",
+                    relative_path,
+                    "Expected Verta trust-gate catalog artifact is missing.",
+                )
+            )
+            continue
+        try:
+            payload = load_json_object(catalog_path)
+        except Exception as exc:
+            findings.append(
+                Finding(
+                    "error",
+                    "verta-catalog-invalid",
+                    relative_path,
+                    f"Unable to read the Verta trust-gate catalog artifact: {exc}",
+                )
+            )
+            continue
+        for field, expected_value in expected.items():
+            if payload.get(field) != expected_value:
+                findings.append(
+                    Finding(
+                        "error",
+                        "verta-catalog-policy",
+                        relative_path,
+                        f"Field '{field}' must remain {expected_value!r} for the standing Verta trust gate.",
+                    )
+                )
+        if not bool(payload.get("no_execute_guarantee")):
+            findings.append(
+                Finding(
+                    "error",
+                    "verta-no-execute-guarantee",
+                    relative_path,
+                    "Verta trust-gate catalogs must retain no_execute_guarantee = true.",
+                )
+            )
+
+    for promotion_doc in [
+        root / "docs" / "knowledge" / "promotions" / "personal--verta-core.md",
+        root / "docs" / "knowledge" / "promotions" / "personal--verta-core-sanitized.md",
+    ]:
+        if promotion_doc.exists():
+            findings.append(
+                Finding(
+                    "error",
+                    "verta-promotion-doc-present",
+                    relative_to_root(root, promotion_doc),
+                    "Verta trust-gate surfaces must not grow a promotion doc before an explicit trust change.",
+                )
+            )
+
+    scan_roots = [
+        root / "data" / "imports" / "knowledge" / "personal" / "verta-core-sanitized" / "raw",
+        root / "data" / "imports" / "knowledge" / "personal" / "verta-core-sanitized" / "extracted",
+    ]
+    for scan_root in scan_roots:
+        if not scan_root.exists():
+            continue
+        for candidate in scan_root.rglob("*"):
+            if not candidate.is_file() or candidate.suffix.lower() not in VERTA_SURFACE_TEXT_EXTENSIONS:
+                continue
+            try:
+                text = candidate.read_text(encoding="utf-8", errors="ignore")
+            except OSError:
+                continue
+            for line_number, line in enumerate(text.splitlines(), start=1):
+                for category, pattern in VERTA_SECRET_PATTERNS:
+                    if pattern.search(line):
+                        findings.append(
+                            Finding(
+                                "error",
+                                category,
+                                relative_to_root(root, candidate),
+                                "Potential live secret material was detected in a Verta trust-gated surface.",
+                                {"line_number": line_number, "line_preview": line.strip()[:220]},
+                            )
+                        )
+                        break
+    return findings
+
+
 def iter_relative_directory_targets(config: dict[str, Any]) -> list[tuple[str, str]]:
     targets: list[tuple[str, str]] = []
     for key, value in config.get("paths", {}).items():
@@ -474,6 +636,7 @@ def build_findings(stack_file: Path, config: dict[str, Any], *, lock_file_overri
     root = stack_file.parent.resolve()
     findings: list[Finding] = []
     findings.extend(validate_subsystem_registry(stack_file, config))
+    findings.extend(validate_verta_trust_gate(stack_file, config))
 
     for label, raw_path in iter_relative_directory_targets(config):
         resolved = resolve_path(stack_file, raw_path)

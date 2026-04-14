@@ -27,6 +27,7 @@ Use logical ids in stack docs and automation. Current canonical ids:
 | Repo id | Current path | Status |
 | --- | --- | --- |
 | `stack` | `.` | active |
+| `_stack` | `repos/_stack` | active |
 | `atlas` | `repos/fawxzzy-atlas` | active |
 | `playbook` | `repos/fawxzzy-playbook` | active |
 | `lifeline` | `repos/fawxzzy-lifeline` | active |
@@ -52,8 +53,8 @@ Good:
 
 Bad:
 
-- `C:\Users\name\dev\fawxzzy-playbook`
-- `%HOMEPATH%\Desktop\ATLAS`
+- `<machine-local-absolute-path>/fawxzzy-playbook`
+- `<home>/Desktop/ATLAS`
 
 ## 4. Source vs State
 
@@ -100,8 +101,10 @@ Default exports must exclude:
 Retained runtime state belongs under clearly named roots:
 
 - `runtime/codex`
+- `runtime/atlas`
 - `runtime/devservers`
 - `runtime/lifeline`
+- `runtime/cortex/artifacts`
 - `runtime/playbook`
 - `runtime/receipts`
 - `runtime/state`

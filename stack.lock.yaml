@@ -1,8 +1,19 @@
 schema_version: "atlas.stack.lock.v1"
 stack_manifest_path: "stack.yaml"
-stack_manifest_digest: "sha256:87f73d017fbabcb0be75a0992a903adde748141db14911abe6d1220b81dff4d9"
-component_count: 8
+stack_manifest_digest: "sha256:9adbdfc4d95712b75a1d1f4c1a39b9c4fb3fb0153c9315e7d6940838acb05ac5"
+component_count: 9
 components:
+  _stack:
+    path: "repos/_stack"
+    role: "workflow-operator"
+    status: "active"
+    remote: null
+    ref_type: "branch"
+    ref: "main"
+    commit: "851fc997581a035dd5d0a04c0bd8c608aede6b0f"
+    dirty: true
+    trust_class: "trusted"
+    release_eligible: false
   atlas:
     path: "repos/fawxzzy-atlas"
     role: "architecture-truth"
@@ -21,7 +32,7 @@ components:
     remote: "https://github.com/ZachariahRedfield/FawxzzyFitness.git"
     ref_type: "branch"
     ref: "main"
-    commit: "742471dd78a2a58279df3ef12217635c1f07d1e4"
+    commit: "86d241b5abe96a5e8990911680b615bf2c6a002d"
     dirty: true
     trust_class: "trusted"
     release_eligible: true
@@ -42,7 +53,7 @@ components:
     status: "active"
     remote: "https://github.com/ZachariahRedfield/fawxzzy-mazer.git"
     ref_type: "branch"
-    ref: "codex/mazer-playbook-scope"
+    ref: "codex/mazer-d2-learning-scorer"
     commit: "cb996f08360433569af6dce7654d0e17c128ed93"
     dirty: true
     trust_class: "trusted"
@@ -87,7 +98,7 @@ components:
     remote: null
     ref_type: "branch"
     ref: "master"
-    commit: "76c17c9baaa7c31848e85ad7d8e2ce716d985245"
+    commit: "d58b0326560d956b8856efd118d7ae6849b10fb9"
     dirty: true
     trust_class: "trusted"
     release_eligible: false
@@ -104,4 +115,4 @@ excluded_surfaces:
     trust_class: "untrusted"
     release_eligible: false
     reason: "Token-bearing Verta checkout remains quarantined and untrusted until scrub and rotation are complete."
-lock_digest: "sha256:79c44c70c94bef3239d75e7206f1b57817af6b8462eb756b465adfcb13869b99"
+lock_digest: "sha256:65138c38362ed90d5336885be81df33b864119cefaa445dcbe53ce04c22e5458"

@@ -19,6 +19,8 @@ Read these files first:
 - `AGENTS.md`
 - `docs/architecture/STACK-STANDARDS.md`
 - `docs/architecture/PATH-POLICY.md`
+- `docs/ops/ATLAS-SESSION-RUNBOOK.md`
+- `docs/ops/ATLAS-STATUS-RUNBOOK.md`
 
 For ATLAS platform architecture doctrine, use `repos/fawxzzy-atlas/README.md` and the docs under `repos/fawxzzy-atlas/docs/` as the canonical source. Stack-root docs should stay stack- and boundary-oriented and should link back to Atlas instead of duplicating platform specs.
 
@@ -27,6 +29,7 @@ For ATLAS platform architecture doctrine, use `repos/fawxzzy-atlas/README.md` an
 Use these ids in stack docs, tickets, and automation:
 
 - `stack` -> `.`
+- `_stack` -> `repos/_stack`
 - `atlas` -> `repos/fawxzzy-atlas`
 - `playbook` -> `repos/fawxzzy-playbook`
 - `lifeline` -> `repos/fawxzzy-lifeline`
@@ -41,6 +44,12 @@ The ids are canonical even where disk names have not been normalized yet.
 - `cortex` -> `runtime/cortex`
 
 `repos/cortex` is adjacent historical context only. The active Cortex runtime surface is root-owned under `runtime/cortex/**`.
+
+## Root Artifact Lanes
+
+- sessions -> `runtime/atlas/sessions`
+- descriptor registry -> `runtime/cortex/artifacts`
+- worker execution receipts -> `runtime/lifeline/worker-execution`
 
 ## Working Rules
 

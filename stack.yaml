@@ -32,19 +32,24 @@ path_contract:
 
 subpaths:
   runtime:
+    atlas: runtime/atlas
+    atlas_sessions: runtime/atlas/sessions
     codex: runtime/codex
     cortex: runtime/cortex
+    cortex_artifacts: runtime/cortex/artifacts
     cortex_catalog: runtime/cortex/catalog
     cortex_knowledge: runtime/cortex/catalog/knowledge
     cortex_memory: runtime/cortex/catalog/memory
     cortex_playbooks: runtime/cortex/catalog/playbooks
     cortex_query: runtime/cortex/query
     cortex_query_knowledge: runtime/cortex/query/knowledge
+    cortex_context: runtime/cortex/context
     cortex_supervisor: runtime/cortex/supervisor
     devservers: runtime/devservers
     events: runtime/receipts/events
     knowledge_receipts: runtime/receipts/knowledge
     lifeline: runtime/lifeline
+    lifeline_worker_execution: runtime/lifeline/worker-execution
     playbook: runtime/playbook
     receipts: runtime/receipts
     state: runtime/state
@@ -95,6 +100,10 @@ repo_registry:
   stack:
     path: .
     role: operator-layer
+    status: active
+  _stack:
+    path: repos/_stack
+    role: workflow-operator
     status: active
   atlas:
     path: repos/fawxzzy-atlas
@@ -184,6 +193,7 @@ stack_lock:
   path: stack.lock.yaml
   include_repo_ids:
     - stack
+    - _stack
     - atlas
     - playbook
     - lifeline
@@ -193,6 +203,9 @@ stack_lock:
     - playbook-demo
   repo_overrides:
     stack:
+      trust_class: trusted
+      release_eligible: false
+    _stack:
       trust_class: trusted
       release_eligible: false
     atlas:

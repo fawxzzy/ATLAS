@@ -1,0 +1,287 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://schemas/atlas.session.v1.json",
+  "title": "ATLAS session manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "session_id",
+    "title",
+    "task_id",
+    "scenario",
+    "session_state",
+    "stack_lock_digest",
+    "stack_manifest_ref",
+    "created_at",
+    "updated_at",
+    "closed_at",
+    "orchestrator",
+    "worker",
+    "refs",
+    "completion"
+  ],
+  "properties": {
+    "contract_version": {
+      "type": "string",
+      "const": "atlas.session.v1"
+    },
+    "session_id": {
+      "type": "string",
+      "minLength": 3,
+      "pattern": "^[A-Za-z0-9._:-]+$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "task_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scenario": {
+      "type": "string",
+      "enum": [
+        "read_only",
+        "conflict_fixture"
+      ]
+    },
+    "session_state": {
+      "type": "string",
+      "enum": [
+        "created",
+        "context_built",
+        "assignment_emitted",
+        "executing",
+        "execution_recorded",
+        "merge_requested",
+        "resume_ready",
+        "completed",
+        "failed"
+      ]
+    },
+    "stack_lock_digest": {
+      "type": "string",
+      "minLength": 1
+    },
+    "stack_manifest_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "closed_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "orchestrator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "owner",
+        "stack_component",
+        "orchestrator_component",
+        "supervisor_component",
+        "executor_component"
+      ],
+      "properties": {
+        "owner": {
+          "type": "string",
+          "minLength": 1
+        },
+        "stack_component": {
+          "type": "object"
+        },
+        "orchestrator_component": {
+          "type": "object"
+        },
+        "supervisor_component": {
+          "type": "object"
+        },
+        "executor_component": {
+          "type": "object"
+        }
+      }
+    },
+    "worker": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "worker_id",
+        "assignment_id",
+        "context_ref",
+        "assignment_ref"
+      ],
+      "properties": {
+        "worker_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "assignment_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "context_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "assignment_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "refs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status_refs",
+        "capability_profile_ref",
+        "request_ref",
+        "approval_receipt_ref",
+        "execution_receipt_ref",
+        "bridge_record_ref",
+        "merge_request_refs",
+        "pause_status_refs",
+        "resume_context_refs",
+        "merge_assignment_ref",
+        "merge_prompt_ref",
+        "merge_context_ref",
+        "merge_completion_ref"
+      ],
+      "properties": {
+        "status_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "capability_profile_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "request_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "approval_receipt_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "execution_receipt_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "bridge_record_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "merge_request_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "pause_status_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "resume_context_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "merge_assignment_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "merge_prompt_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "merge_context_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "merge_completion_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "completion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "final_status",
+        "final_status_ref",
+        "close_receipt_refs"
+      ],
+      "properties": {
+        "final_status": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "resume_ready",
+            "completed",
+            "failed",
+            null
+          ]
+        },
+        "final_status_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "close_receipt_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  }
+}

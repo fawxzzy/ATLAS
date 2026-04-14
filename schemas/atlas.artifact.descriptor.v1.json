@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://schemas/atlas.artifact.descriptor.v1.json",
+  "title": "ATLAS artifact descriptor",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "artifact_class",
+    "artifact_type",
+    "schema_ref",
+    "digest",
+    "media_type",
+    "size_bytes",
+    "source_ref",
+    "trust_class",
+    "release_eligible",
+    "retention_class",
+    "regulated_artifact_class",
+    "identity",
+    "state",
+    "links"
+  ],
+  "properties": {
+    "contract_version": {
+      "type": "string",
+      "const": "atlas.artifact.descriptor.v1"
+    },
+    "artifact_class": {
+      "type": "string",
+      "enum": [
+        "coordination",
+        "execution",
+        "governance",
+        "knowledge",
+        "session",
+        "workflow"
+      ]
+    },
+    "artifact_type": {
+      "type": "string",
+      "minLength": 1
+    },
+    "schema_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "media_type": {
+      "type": "string",
+      "const": "application/json"
+    },
+    "size_bytes": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "source_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "trust_class": {
+      "type": "string",
+      "enum": [
+        "trusted",
+        "adjacent",
+        "untrusted"
+      ]
+    },
+    "release_eligible": {
+      "type": "boolean"
+    },
+    "retention_class": {
+      "type": "string",
+      "minLength": 1
+    },
+    "regulated_artifact_class": {
+      "type": "string",
+      "minLength": 1
+    },
+    "identity": {
+      "type": "object"
+    },
+    "state": {
+      "type": "object"
+    },
+    "links": {
+      "type": "object"
+    }
+  }
+}

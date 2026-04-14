@@ -44,3 +44,4 @@ This report covers the scrubbed Verta launcher/config/docs surfaces used to prod
 
 - The original `personal--verta-core` archive remains quarantined and not promoted.
 - The exploratory whole-repo candidate `personal--verta-core-clean` still carries broader private/courseware/executable signals and stays quarantined.
+- The sanitized candidate remains metadata-only and untrusted for release/governed-flow purposes until an explicit trust change is reviewed.

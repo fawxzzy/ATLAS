@@ -18,7 +18,7 @@ from ops._atlas import atlas_root, normalize_slashes, resolve_atlas_path
 WORKER_ASSIGNMENT_VERSION = "atlas.worker.assignment.v1"
 WORKER_STATUS_VERSION = "atlas.worker.status.v1"
 WORKER_MERGE_REQUEST_VERSION = "atlas.worker.merge-request.v1"
-ACTIVE_STATES = {"assigned", "running", "paused", "blocked", "merge_wait", "completed"}
+ACTIVE_STATES = {"assigned", "running", "paused", "blocked", "merge_wait", "completed", "failed"}
 
 
 @dataclass
@@ -142,7 +142,7 @@ def merge_request_for_conflict(
             "worker_id": "pending-merge-worker",
             "assignment_id": f"assignment-{merge_request_id}",
             "task_id": f"merge-{merge_request_id}",
-            "handoff_ref": f"runtime/cortex/supervisor/{merge_request_id}.json",
+            "handoff_ref": f"runtime/cortex/supervisor/{merge_request_id}.merge-handoff.json",
         },
         "notes": "Read-only Cortex supervisor emitted this merge request from worker status and assignment artifacts only.",
     }

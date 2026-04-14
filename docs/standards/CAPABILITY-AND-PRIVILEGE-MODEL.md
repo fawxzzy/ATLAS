@@ -16,6 +16,8 @@ ATLAS workers do not hold ambient admin rights. Privilege is requested per actio
 3. the host executes only within the approved scope
 4. execution emits a receipt that names the request, approval, worker, assignment, and stack lock digest
 
+Worker-originated requests may also carry `source_refs` so the privileged path stays anchored to governed assignment, context, merge, or session artifacts instead of hidden transcript history.
+
 ## Capability Profile
 
 A capability profile must declare:
