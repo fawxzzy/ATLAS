@@ -7,6 +7,7 @@ from typing import Any
 from ops._atlas import atlas_relative, atlas_root, resolve_atlas_path
 from ops.atlas.load_tool_registry import load_tool_registry_bundle
 from ops.cortex._artifacts import load_descriptors, read_json, register_artifact_descriptors, write_json
+from ops.cortex.index_working_memory import load_working_memory_catalog
 from ops.cortex.render_status import render_status_payload
 from ops.cortex.world_model import (
     attention_output_path,
@@ -382,6 +383,40 @@ def fetch_session(
     }
 
 
+def fetch_memory(
+    memory_id: str,
+    *,
+    root: Path | None = None,
+) -> dict[str, Any]:
+    base_root = (root or atlas_root()).resolve()
+    catalog = load_working_memory_catalog(base_root)
+    item = next(
+        (
+            candidate
+            for candidate in catalog.get("items", [])
+            if isinstance(candidate, dict) and str(candidate.get("id")) == memory_id
+        ),
+        None,
+    )
+    if item is None:
+        raise FileNotFoundError(f"Unknown working-memory id: {memory_id}")
+    artifact = fetch_artifact(str(item.get("path")), root=base_root)
+    return {
+        "schema_version": FETCH_CONTRACT_VERSION,
+        "id": f"memory:{memory_id}",
+        "title": str(item.get("title") or memory_id),
+        "url": _artifact_url("memory", memory_id),
+        "text": artifact["text"],
+        "metadata": {
+            "source_kind": "memory",
+            "memory_kind": item.get("memory_kind"),
+            "status": item.get("status"),
+            "owner": item.get("owner"),
+            "path": item.get("path"),
+        },
+    }
+
+
 def _knowledge_record(archive_id: str, *, root: Path, refresh: bool) -> dict[str, Any]:
     bundle = _load_query_bundle(root=root, refresh=refresh)
     for record in bundle.get("records", []):
@@ -437,6 +472,9 @@ def search(
         if entry_type == "session":
             result_id = f"session:{entry.get('key')}"
             url = _artifact_url("session", str(entry.get("key")))
+        elif entry_type == "memory":
+            result_id = f"memory:{entry.get('key')}"
+            url = _artifact_url("memory", str(entry.get("key")))
         else:
             result_id = f"artifact:{entry.get('source_ref')}"
             url = _artifact_url("artifact", str(entry.get("source_ref")))
@@ -583,6 +621,10 @@ def fetch(
                 "manifest_ref": session.get("manifest_ref"),
             },
         }
+
+    if identifier.startswith("memory:"):
+        memory_id = identifier.split(":", 1)[1]
+        return fetch_memory(memory_id, root=base_root)
 
     if identifier.startswith("artifact:"):
         ref = identifier.split(":", 1)[1]

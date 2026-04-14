@@ -71,6 +71,7 @@ Use:
 - `docs/architecture/**`
 - `docs/standards/**`
 - `docs/ops/**`
+- `docs/memory/**`
 - `docs/knowledge/promotions/**`
 - repo-owned doctrine inside the repo that owns it
 
@@ -79,6 +80,7 @@ Rules:
 - documents are editable and reviewable
 - documents must cite their explicit source files or receipt lanes when they summarize runtime truth
 - document updates must not pretend to be raw event history
+- structured working memory must use typed contracts for plans, decisions, initiatives, and hypotheses
 
 ## Compaction Rule
 
@@ -125,6 +127,10 @@ Current machine-readable contracts:
 - `schemas/atlas.inventory.entry.v1.json`
 - `schemas/atlas.attention.item.v1.json`
 - `schemas/atlas.state.snapshot.v1.json`
+- `schemas/atlas.plan.v1.json`
+- `schemas/atlas.decision.v1.json`
+- `schemas/atlas.initiative.v1.json`
+- `schemas/atlas.hypothesis.v1.json`
 
 ## Enforceable Rule
 
@@ -136,8 +142,71 @@ At the stack root it means:
 - governed execution receipts must produce matching observations
 - attention is derived from explicit observations and descriptors, not operator memory
 - world-model snapshots must be rebuildable and content-digest stable from the same inputs
+- durable plans and decisions must live in structured working-memory artifacts rather than transcript-only summaries
 
 If those artifacts are missing, the stack is out of contract.
+
+## Completed Governed Flow Contract
+
+A governed flow is complete only when the required artifacts, receipts, and observations all exist and agree.
+
+Required artifact set for a completed governed flow:
+
+- `runtime/atlas/sessions/<session_id>/session.manifest.json`
+- `worker.assignment.json`
+- `worker.status.running.json`
+- `privileged-action.request.json`
+- `approval.receipt.json`
+- `runtime/lifeline/worker-execution/<assignment_id>/receipt.json`
+- `worker.status.completed.json`
+- closure evidence in `completion.close_receipt_refs`
+
+Required observation matrix:
+
+| Owner | Observation | Required when |
+| --- | --- | --- |
+| `_stack` | `assignment_created` | governed assignment exists |
+| `_stack` | `heartbeat` | governed worker enters running state |
+| Lifeline | `execution_requested` | governed execution request exists |
+| Lifeline | `execution_approved` / `execution_rejected` / `execution_expired` | approval receipt exists |
+| Lifeline | `execution_completed` | execution receipt exists |
+| `_stack` | `completed` | final worker state is `completed` or `failed` |
+| `_stack` | `merge_requested` | supervisor emitted merge request |
+| `_stack` | `paused` | worker paused for merge |
+| `_stack` | `merger_assigned` | merger worker assignment exists |
+| `_stack` | `resume_ready` | resume context or merge completion exists |
+
+Every governed observation must carry:
+
+- `session_id`
+- `worker_id` when applicable
+- `assignment_id` when applicable
+- `stack_lock_digest`
+- `tool_id`
+- `extension_id` when applicable
+- `registry_digest`
+- `source_artifact_refs`
+
+Root is the publication destination and state builder. `_stack` and Lifeline emit facts; they do not become alternate session stores.
+
+## Working-Memory Guardrails
+
+Working memory is structured memory, not transcript dumping.
+
+Required behavior:
+
+- plans, decisions, initiatives, and hypotheses stay in typed artifacts under `docs/memory/**`
+- each item stays small, linked, and superseding rather than acting as a second knowledge junk drawer
+- runtime catalog output at `runtime/cortex/catalog/memory/working-memory.latest.json` must be rebuildable from those source documents
+- working-memory artifacts must carry stable digests and provenance fields so world-model snapshots can cite them directly
+
+Boundary rule:
+
+- knowledge docs are durable promoted truth
+- working memory is active reasoning scaffold and decision record
+- observations and receipts are hot operational truth
+
+When those lanes blur, awareness quality degrades even if all of the files still exist.
 
 ## Connector Boundary
 

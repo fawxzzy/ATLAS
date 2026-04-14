@@ -47,18 +47,31 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from ops.stack.generate_lockfile import (
+    LOCK_COMPONENT_FIELDS,
+    LOCK_EXCLUDED_SURFACE_FIELDS,
     STACK_LOCK_SCHEMA_VERSION,
     TRUST_CLASSES,
     build_lock_payload,
     default_lockfile_path,
     git_output,
     load_lockfile,
+    normalize_lock_payload,
     repo_is_git_root,
 )
 from ops.stack.audit_gitdir_hygiene import build_report as build_gitdir_hygiene_report, default_target_paths as default_gitdir_hygiene_targets
-from ops.atlas.observations import build_observation, emit_observation, load_observations
+from ops.atlas.observations import (
+    build_observation,
+    canonical_observation_type,
+    emit_observation,
+    load_observations,
+)
 from ops.atlas.load_tool_registry import load_tool_registry_bundle
 from ops.cortex._artifacts import load_descriptors, register_artifact_descriptors, stable_json_digest
+from ops.cortex.index_working_memory import (
+    build_working_memory_catalog,
+    load_working_memory_catalog,
+    validate_working_memory_documents,
+)
 from ops.cortex.world_model import world_model_state_root, write_world_model_state
 
 
@@ -195,6 +208,107 @@ def verify_locked_ref(repo_path: Path, component: dict[str, Any]) -> str | None:
     if commit and head_commit != commit:
         return f"Pinned commit '{commit}' does not match current HEAD '{head_commit}'."
     return None
+
+
+def lock_component_field_drift(
+    locked: dict[str, Any],
+    generated: dict[str, Any],
+) -> list[str]:
+    return [field for field in LOCK_COMPONENT_FIELDS if locked.get(field) != generated.get(field)]
+
+
+def lock_surface_field_drift(
+    locked: dict[str, Any],
+    generated: dict[str, Any],
+) -> list[str]:
+    return [field for field in LOCK_EXCLUDED_SURFACE_FIELDS if locked.get(field) != generated.get(field)]
+
+
+def describe_stack_lock_drift(
+    *,
+    lockfile_rel: str,
+    locked: dict[str, Any],
+    generated: dict[str, Any],
+) -> list[Finding]:
+    findings: list[Finding] = []
+    locked_components = locked.get("components") if isinstance(locked.get("components"), dict) else {}
+    generated_components = generated.get("components") if isinstance(generated.get("components"), dict) else {}
+    component_ids = sorted(set(locked_components) | set(generated_components))
+    for component_id in component_ids:
+        component_path = f"{lockfile_rel}#{component_id}"
+        locked_component = locked_components.get(component_id)
+        generated_component = generated_components.get(component_id)
+        if not isinstance(locked_component, dict) or not isinstance(generated_component, dict):
+            findings.append(
+                Finding(
+                    "error",
+                    "stack-lock-component-membership-drift",
+                    component_path,
+                    "Pinned component membership differs from the current generated working set.",
+                )
+            )
+            continue
+        drift_fields = lock_component_field_drift(locked_component, generated_component)
+        if not drift_fields:
+            continue
+        if drift_fields == ["dirty"]:
+            findings.append(
+                Finding(
+                    "error",
+                    "stack-lock-worktree-drift",
+                    component_path,
+                    f"Pinned dirty state is {locked_component.get('dirty')!r} but the current worktree state is {generated_component.get('dirty')!r}.",
+                )
+            )
+            continue
+        findings.append(
+            Finding(
+                "error",
+                "stack-lock-pin-drift",
+                component_path,
+                f"Pinned component fields differ from the current generated working set: {', '.join(drift_fields)}.",
+            )
+        )
+
+    locked_surfaces = locked.get("excluded_surfaces") if isinstance(locked.get("excluded_surfaces"), dict) else {}
+    generated_surfaces = generated.get("excluded_surfaces") if isinstance(generated.get("excluded_surfaces"), dict) else {}
+    surface_ids = sorted(set(locked_surfaces) | set(generated_surfaces))
+    for surface_id in surface_ids:
+        surface_path = f"{lockfile_rel}#{surface_id}"
+        locked_surface = locked_surfaces.get(surface_id)
+        generated_surface = generated_surfaces.get(surface_id)
+        if not isinstance(locked_surface, dict) or not isinstance(generated_surface, dict):
+            findings.append(
+                Finding(
+                    "error",
+                    "stack-lock-excluded-surface-membership-drift",
+                    surface_path,
+                    "Excluded surface membership differs from the current generated working set.",
+                )
+            )
+            continue
+        drift_fields = lock_surface_field_drift(locked_surface, generated_surface)
+        if drift_fields:
+            findings.append(
+                Finding(
+                    "error",
+                    "stack-lock-excluded-surface-drift",
+                    surface_path,
+                    f"Excluded surface fields differ from the current generated working set: {', '.join(drift_fields)}.",
+                )
+            )
+
+    for field in ("schema_version", "stack_manifest_path", "stack_manifest_digest", "component_count"):
+        if locked.get(field) != generated.get(field):
+            findings.append(
+                Finding(
+                    "error",
+                    "stack-lock-metadata-drift",
+                    lockfile_rel,
+                    f"Stack lockfile field '{field}' differs from the current generated working set.",
+                )
+            )
+    return findings
 
 
 def discover_unregistered_git_roots(root: Path, config: dict[str, Any], stack_file: Path) -> list[Path]:
@@ -404,6 +518,46 @@ def validate_gitdir_hygiene(root: Path) -> list[Finding]:
                     message,
                 )
             )
+    return findings
+
+
+def validate_working_memory(stack_file: Path) -> list[Finding]:
+    root = stack_file.parent.resolve()
+    findings: list[Finding] = []
+    for error in validate_working_memory_documents(root):
+        findings.append(
+            Finding(
+                "error",
+                "working-memory-invalid",
+                str(error["path"]),
+                str(error["message"]),
+            )
+        )
+    if findings:
+        return findings
+
+    try:
+        generated = build_working_memory_catalog(root)
+        stored = load_working_memory_catalog(root)
+    except Exception as exc:
+        return [
+            Finding(
+                "error",
+                "working-memory-index-failed",
+                "runtime/cortex/catalog/memory/working-memory.latest.json",
+                f"Working-memory catalog could not be built: {exc}",
+            )
+        ]
+
+    if stored != generated:
+        findings.append(
+            Finding(
+                "error",
+                "working-memory-catalog-drift",
+                "runtime/cortex/catalog/memory/working-memory.latest.json",
+                "Working-memory catalog does not match the current structured memory documents.",
+            )
+        )
     return findings
 
 
@@ -685,34 +839,96 @@ def validate_world_model_state(stack_file: Path) -> list[Finding]:
         for item in stored_observations
         if isinstance(item, dict) and isinstance(item.get("source_ref"), str)
     }
+    snapshot_observation_keys = {
+        (
+            canonical_observation_type(
+                str(item.get("observation_type", "")),
+                status=str(item.get("status", "")),
+            ),
+            str(item.get("source_ref")),
+        )
+        for item in observations
+        if isinstance(item, dict) and isinstance(item.get("source_ref"), str)
+    }
+    stored_observation_keys = {
+        (
+            canonical_observation_type(
+                str(item.get("observation_type", "")),
+                status=str(item.get("status", "")),
+            ),
+            str(item.get("source_ref")),
+        )
+        for item in stored_observations
+        if isinstance(item, dict) and isinstance(item.get("source_ref"), str)
+    }
     inventory_source_refs = {
         str(item.get("source_ref"))
         for item in inventory_entries
         if isinstance(item, dict) and isinstance(item.get("source_ref"), str)
     }
 
+    def optional_string(value: Any) -> str | None:
+        if isinstance(value, str) and value.strip():
+            return value.strip()
+        return None
+
+    def source_payload(source_ref: str | None) -> dict[str, Any] | None:
+        if not isinstance(source_ref, str) or not source_ref.strip():
+            return None
+        candidate = root / Path(source_ref)
+        if not candidate.exists():
+            return None
+        try:
+            return load_json_object(candidate)
+        except Exception:
+            return None
+
+    def approval_observation_type(payload: dict[str, Any]) -> tuple[str, str]:
+        approval_status = optional_string(payload.get("approval_status")) or "unknown"
+        expiry_at = optional_string(payload.get("expiry_at"))
+        if expiry_at:
+            try:
+                expiry = datetime.fromisoformat(expiry_at.replace("Z", "+00:00"))
+                if expiry <= datetime.now(timezone.utc):
+                    return "execution_expired", "expired"
+            except ValueError:
+                pass
+        if approval_status == "rejected":
+            return "execution_rejected", approval_status
+        return "execution_approved", approval_status
+
+    def require_observation(
+        observation_type: str,
+        source_ref: str | None,
+        *,
+        owner_ref: str,
+    ) -> None:
+        normalized_source_ref = optional_string(source_ref)
+        if not normalized_source_ref:
+            return
+        if (observation_type, normalized_source_ref) not in snapshot_observation_keys:
+            findings.append(
+                Finding(
+                    "error",
+                    "missing-required-observation",
+                    relative_to_root(root, snapshot_path),
+                    f"Governed flow '{owner_ref}' is missing observation '{observation_type}' for '{normalized_source_ref}' in the state snapshot.",
+                )
+            )
+        if (observation_type, normalized_source_ref) not in stored_observation_keys:
+            findings.append(
+                Finding(
+                    "error",
+                    "missing-required-observation-store",
+                    relative_to_root(root, snapshot_path),
+                    f"Governed flow '{owner_ref}' is missing observation '{observation_type}' for '{normalized_source_ref}' in the observation store.",
+                )
+            )
+
     for descriptor in descriptors:
         artifact_type = str(descriptor.get("artifact_type", ""))
         source_ref = str(descriptor.get("source_ref", ""))
         state = descriptor.get("state", {})
-        if artifact_type == "execution_receipt" and source_ref not in observation_source_refs:
-            findings.append(
-                Finding(
-                    "error",
-                    "missing-governed-observation",
-                    relative_to_root(root, snapshot_path),
-                    f"Execution receipt '{source_ref}' is missing from the state snapshot observations.",
-                )
-            )
-        if artifact_type == "execution_receipt" and source_ref not in stored_observation_source_refs:
-            findings.append(
-                Finding(
-                    "error",
-                    "missing-governed-observation-store",
-                    relative_to_root(root, snapshot_path),
-                    f"Execution receipt '{source_ref}' is missing from the emitted observation store.",
-                )
-            )
         if artifact_type == "session_manifest" and str(state.get("final_status", "")) in {"completed", "resume_ready", "failed"}:
             if source_ref not in observation_source_refs:
                 findings.append(
@@ -753,6 +969,83 @@ def validate_world_model_state(stack_file: Path) -> list[Finding]:
                         f"Completed session '{source_ref}' is missing closure receipt refs.",
                     )
                 )
+
+            session_payload = source_payload(source_ref)
+            if not isinstance(session_payload, dict):
+                findings.append(
+                    Finding(
+                        "error",
+                        "invalid-governed-session-artifact",
+                        relative_to_root(root, snapshot_path),
+                        f"Completed governed session '{source_ref}' could not be loaded for observation validation.",
+                    )
+                )
+                continue
+
+            governed_surfaces = session_payload.get("governed_surfaces")
+            if not isinstance(governed_surfaces, dict):
+                continue
+            execution_surface = governed_surfaces.get("execution")
+            if not isinstance(execution_surface, dict) or not optional_string(execution_surface.get("tool_id")):
+                continue
+
+            refs = session_payload.get("refs") if isinstance(session_payload.get("refs"), dict) else {}
+            completion = session_payload.get("completion") if isinstance(session_payload.get("completion"), dict) else {}
+
+            assignment_ref = optional_string(session_payload.get("worker", {}).get("assignment_ref")) or optional_string(refs.get("assignment_ref")) or optional_string(descriptor.get("links", {}).get("assignment_ref"))
+            request_ref = optional_string(refs.get("request_ref")) or optional_string(descriptor.get("links", {}).get("request_ref"))
+            approval_ref = optional_string(refs.get("approval_receipt_ref")) or optional_string(descriptor.get("links", {}).get("approval_receipt_ref"))
+            execution_receipt_ref = optional_string(refs.get("execution_receipt_ref")) or optional_string(descriptor.get("links", {}).get("execution_receipt_ref"))
+            final_status = optional_string(completion.get("final_status")) or optional_string(state.get("final_status"))
+            final_status_ref = optional_string(completion.get("final_status_ref")) or optional_string(descriptor.get("links", {}).get("final_status_ref"))
+            merge_request_refs = [
+                item for item in (refs.get("merge_request_refs") or descriptor.get("links", {}).get("merge_request_refs") or [])
+                if isinstance(item, str) and item.strip()
+            ]
+            pause_status_refs = [
+                item for item in (refs.get("pause_status_refs") or descriptor.get("links", {}).get("pause_status_refs") or [])
+                if isinstance(item, str) and item.strip()
+            ]
+            resume_context_refs = [
+                item for item in (refs.get("resume_context_refs") or descriptor.get("links", {}).get("resume_context_refs") or [])
+                if isinstance(item, str) and item.strip()
+            ]
+            merge_assignment_ref = optional_string(refs.get("merge_assignment_ref")) or optional_string(descriptor.get("links", {}).get("merge_assignment_ref"))
+            merge_completion_ref = optional_string(refs.get("merge_completion_ref")) or optional_string(descriptor.get("links", {}).get("merge_completion_ref"))
+
+            running_status_ref = None
+            status_refs = [
+                item for item in (refs.get("status_refs") or descriptor.get("links", {}).get("status_refs") or [])
+                if isinstance(item, str) and item.strip()
+            ]
+            for status_ref in status_refs:
+                status_payload = source_payload(status_ref)
+                if isinstance(status_payload, dict) and optional_string(status_payload.get("state")) == "running":
+                    running_status_ref = status_ref
+                    break
+
+            require_observation("assignment_created", assignment_ref, owner_ref=source_ref)
+            require_observation("heartbeat", running_status_ref, owner_ref=source_ref)
+            require_observation("execution_requested", request_ref, owner_ref=source_ref)
+
+            approval_payload = source_payload(approval_ref)
+            if isinstance(approval_payload, dict):
+                approval_type, _ = approval_observation_type(approval_payload)
+                require_observation(approval_type, approval_ref, owner_ref=source_ref)
+
+            require_observation("execution_completed", execution_receipt_ref, owner_ref=source_ref)
+            if final_status in {"completed", "failed"}:
+                require_observation("completed", final_status_ref, owner_ref=source_ref)
+            for merge_request_ref in merge_request_refs:
+                require_observation("merge_requested", merge_request_ref, owner_ref=source_ref)
+            for pause_status_ref in pause_status_refs:
+                require_observation("paused", pause_status_ref, owner_ref=source_ref)
+            require_observation("merger_assigned", merge_assignment_ref, owner_ref=source_ref)
+            if resume_context_refs:
+                for resume_context_ref in resume_context_refs:
+                    require_observation("resume_ready", resume_context_ref, owner_ref=source_ref)
+            else:
+                require_observation("resume_ready", merge_completion_ref, owner_ref=source_ref)
 
     if isinstance(attention, dict):
         snapshot_attention_ids = sorted(
@@ -882,6 +1175,7 @@ def build_findings(stack_file: Path, config: dict[str, Any], *, lock_file_overri
     findings.extend(validate_tool_registry(root))
     findings.extend(validate_subsystem_registry(stack_file, config))
     findings.extend(validate_verta_trust_gate(stack_file, config))
+    findings.extend(validate_working_memory(stack_file))
     findings.extend(validate_world_model_state(stack_file))
 
     for label, raw_path in iter_relative_directory_targets(config):
@@ -998,13 +1292,21 @@ def build_findings(stack_file: Path, config: dict[str, Any], *, lock_file_overri
                     )
                 )
                 generated_lock = None
-            if isinstance(generated_lock, dict) and lockfile != generated_lock:
+            normalized_lockfile = normalize_lock_payload(lockfile)
+            if isinstance(generated_lock, dict) and normalized_lockfile != generated_lock:
                 findings.append(
                     Finding(
                         "error",
                         "stack-lock-drift",
                         lockfile_rel,
                         "Stack lockfile does not match the current pinned working set.",
+                    )
+                )
+                findings.extend(
+                    describe_stack_lock_drift(
+                        lockfile_rel=lockfile_rel,
+                        locked=normalized_lockfile,
+                        generated=generated_lock,
                     )
                 )
 
@@ -1019,16 +1321,7 @@ def build_findings(stack_file: Path, config: dict[str, Any], *, lock_file_overri
                     )
                 )
             else:
-                required_component_fields = {
-                    "path",
-                    "remote",
-                    "ref_type",
-                    "ref",
-                    "commit",
-                    "dirty",
-                    "trust_class",
-                    "release_eligible",
-                }
+                required_component_fields = set(LOCK_COMPONENT_FIELDS)
                 for component_id, component in components.items():
                     component_path = f"{lockfile_rel}#{component_id}"
                     if not isinstance(component, dict):
@@ -1086,6 +1379,16 @@ def build_findings(stack_file: Path, config: dict[str, Any], *, lock_file_overri
                     if not isinstance(surface, dict):
                         findings.append(Finding("error", "stack-lock-excluded-surface-shape", surface_path, "Excluded surface entry must be a mapping."))
                         continue
+                    missing_fields = sorted(field for field in LOCK_EXCLUDED_SURFACE_FIELDS if field not in surface)
+                    if missing_fields:
+                        findings.append(
+                            Finding(
+                                "error",
+                                "stack-lock-excluded-surface-fields",
+                                surface_path,
+                                f"Excluded surface entry is missing required fields: {', '.join(missing_fields)}",
+                            )
+                        )
                     trust_class = str(surface.get("trust_class", ""))
                     if trust_class not in TRUST_CLASSES:
                         findings.append(Finding("error", "stack-lock-excluded-surface-trust", surface_path, f"Unsupported trust_class '{trust_class}' in excluded surface entry."))

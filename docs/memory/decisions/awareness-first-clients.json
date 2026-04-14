@@ -1,0 +1,32 @@
+{
+  "contract_version": "atlas.decision.v1",
+  "id": "awareness-first-clients",
+  "title": "ATLAS Remains The Source Of Truth",
+  "summary": "Chat, voice, CLI, and UI must stay read-first clients of ATLAS awareness and governed execution surfaces rather than becoming parallel memory authorities.",
+  "status": "accepted",
+  "owner": "stack-root",
+  "created_at": "2026-04-14T12:20:00Z",
+  "updated_at": "2026-04-14T12:20:00Z",
+  "related_session_refs": [
+    "runtime/atlas/sessions/session-atlas-session-readonly-20260414T080843Z/session.manifest.json"
+  ],
+  "related_artifact_refs": [
+    "runtime/atlas/sessions/session-atlas-session-readonly-20260414T080843Z/artifacts/privileged-action.request.json",
+    "runtime/lifeline/worker-execution/session-atlas-session-readonly-20260414T080843Z-assignment/receipt-session-atlas-session-readonly-20260414T080843Z-request-1776154124391.json"
+  ],
+  "evidence_refs": [
+    "docs/architecture/AWARENESS-FIRST-WORLD-MODEL.md",
+    "docs/memory/plans/wave-8b-awareness-closure.json"
+  ],
+  "supersedes": [],
+  "superseded_by": [],
+  "metadata": {
+    "decision_type": "architecture-boundary",
+    "applies_to": [
+      "connector",
+      "voice",
+      "cli",
+      "ui"
+    ]
+  }
+}

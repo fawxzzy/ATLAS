@@ -98,7 +98,7 @@ components:
     remote: null
     ref_type: "branch"
     ref: "master"
-    commit: "fc3eb26ae5a4f85c27362bcdd5787ddf849675f1"
+    commit: "983ae190db936a7e1e25bf9b6f52b2cce3c6ac74"
     dirty: true
     trust_class: "trusted"
     release_eligible: false
@@ -108,8 +108,8 @@ components:
     status: "incubating"
     remote: null
     ref_type: "branch"
-    ref: "main"
-    commit: "1dd3298c556b4d0839e6bb43b3dde7c3527022f7"
+    ref: "codex/fstrm-wave2-contract-freeze"
+    commit: "aed4e6c732b32695557c544c18eccde30b1a8184"
     dirty: true
     trust_class: "trusted"
     release_eligible: false
@@ -126,4 +126,4 @@ excluded_surfaces:
     trust_class: "untrusted"
     release_eligible: false
     reason: "Token-bearing Verta checkout remains quarantined and untrusted until scrub and rotation are complete."
-lock_digest: "sha256:c695f887024fc992b5d421e4d96c0414d583aa277258bbcb4cc98752735ec4bd"
+lock_digest: "sha256:bcfb099c46c79b83344a461d81df61171e1bede1b19dc68c8673bb5f6d1de3c2"

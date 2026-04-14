@@ -17,6 +17,25 @@ from ops._atlas import atlas_relative, atlas_root, load_stack_config, normalize_
 STACK_LOCK_SCHEMA_VERSION = "atlas.stack.lock.v1"
 TRUST_CLASSES = {"trusted", "adjacent", "untrusted"}
 DEFAULT_INCLUDED_STATUSES = {"active", "incubating", "demo", "unmanaged"}
+LOCK_COMPONENT_FIELDS = (
+    "path",
+    "role",
+    "status",
+    "remote",
+    "ref_type",
+    "ref",
+    "commit",
+    "dirty",
+    "trust_class",
+    "release_eligible",
+)
+LOCK_EXCLUDED_SURFACE_FIELDS = (
+    "path",
+    "present",
+    "trust_class",
+    "release_eligible",
+    "reason",
+)
 
 
 def stable_json_digest(value: Any) -> str:
@@ -145,6 +164,64 @@ def excluded_surfaces(config: dict[str, Any], root: Path) -> dict[str, dict[str,
     return surfaces
 
 
+def normalize_lock_component(component: dict[str, Any]) -> dict[str, Any]:
+    remote = component.get("remote")
+    return {
+        "path": normalize_slashes(str(component.get("path", ""))),
+        "role": str(component.get("role", "")),
+        "status": str(component.get("status", "unknown")),
+        "remote": normalize_slashes(str(remote)) if isinstance(remote, str) and remote else None,
+        "ref_type": str(component.get("ref_type", "")),
+        "ref": str(component.get("ref", "")),
+        "commit": str(component.get("commit", "")),
+        "dirty": bool(component.get("dirty", False)),
+        "trust_class": str(component.get("trust_class", "")),
+        "release_eligible": bool(component.get("release_eligible", False)),
+    }
+
+
+def normalize_excluded_surface(surface: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "path": normalize_slashes(str(surface.get("path", ""))),
+        "present": bool(surface.get("present", False)),
+        "trust_class": str(surface.get("trust_class", "")),
+        "release_eligible": bool(surface.get("release_eligible", False)),
+        "reason": str(surface.get("reason", "")),
+    }
+
+
+def normalize_lock_payload(payload: dict[str, Any]) -> dict[str, Any]:
+    raw_components = payload.get("components", {})
+    components: dict[str, dict[str, Any]] = {}
+    if isinstance(raw_components, dict):
+        for component_id, component in sorted(
+            ((str(raw_key), raw_value) for raw_key, raw_value in raw_components.items()),
+            key=lambda item: item[0],
+        ):
+            if isinstance(component, dict):
+                components[component_id] = normalize_lock_component(component)
+
+    raw_excluded_surfaces = payload.get("excluded_surfaces", {})
+    excluded: dict[str, dict[str, Any]] = {}
+    if isinstance(raw_excluded_surfaces, dict):
+        for surface_id, surface in sorted(
+            ((str(raw_key), raw_value) for raw_key, raw_value in raw_excluded_surfaces.items()),
+            key=lambda item: item[0],
+        ):
+            if isinstance(surface, dict):
+                excluded[surface_id] = normalize_excluded_surface(surface)
+
+    body = {
+        "schema_version": str(payload.get("schema_version", STACK_LOCK_SCHEMA_VERSION)),
+        "stack_manifest_path": normalize_slashes(str(payload.get("stack_manifest_path", "stack.yaml"))),
+        "stack_manifest_digest": str(payload.get("stack_manifest_digest", "")),
+        "component_count": len(components),
+        "components": components,
+        "excluded_surfaces": excluded,
+    }
+    return body | {"lock_digest": stable_json_digest(body)}
+
+
 def build_lock_payload(config: dict[str, Any] | None = None, root: Path | None = None) -> dict[str, Any]:
     base = (root or atlas_root()).resolve()
     stack_config = config or load_stack_config(base / "stack.yaml")
@@ -187,10 +264,10 @@ def build_lock_payload(config: dict[str, Any] | None = None, root: Path | None =
         "stack_manifest_path": atlas_relative(base / "stack.yaml", root=base),
         "stack_manifest_digest": stable_json_digest(stack_config),
         "component_count": len(components),
-        "components": dict(sorted(components.items())),
+        "components": components,
         "excluded_surfaces": excluded_surfaces(stack_config, base),
     }
-    return payload | {"lock_digest": stable_json_digest(payload)}
+    return normalize_lock_payload(payload)
 
 
 def load_lockfile(path: Path) -> dict[str, Any]:

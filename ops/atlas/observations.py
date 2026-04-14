@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import argparse
 import json
 import re
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -10,6 +12,15 @@ from ops._atlas import atlas_relative, atlas_root
 from ops.cortex._artifacts import stable_json_digest, write_json
 
 OBSERVATION_CONTRACT_VERSION = "atlas.observation.v1"
+LEGACY_OBSERVATION_TYPE_ALIASES = {
+    "assignment.created": "assignment_created",
+    "execution.requested": "execution_requested",
+    "execution.completed": "execution_completed",
+    "execution.result": "execution_completed",
+    "session.merge_requested": "merge_requested",
+    "worker.paused": "paused",
+    "session.resume_ready": "resume_ready",
+}
 
 
 def utc_now() -> str:
@@ -22,6 +33,32 @@ def stamp_now() -> str:
 
 def stable_item_id(payload: dict[str, Any]) -> str:
     return stable_json_digest(payload)
+
+
+def canonical_observation_type(
+    observation_type: str,
+    *,
+    status: str | None = None,
+) -> str:
+    raw_type = str(observation_type or "").strip()
+    raw_status = str(status or "").strip().lower()
+    if raw_type == "execution.approval":
+        if raw_status == "expired":
+            return "execution_expired"
+        if raw_status == "rejected":
+            return "execution_rejected"
+        return "execution_approved"
+    return LEGACY_OBSERVATION_TYPE_ALIASES.get(raw_type, raw_type)
+
+
+def observation_matches_type(
+    observation: dict[str, Any],
+    expected_type: str,
+) -> bool:
+    return canonical_observation_type(
+        str(observation.get("observation_type", "")),
+        status=str(observation.get("status", "")),
+    ) == expected_type
 
 
 def _slugify(value: str) -> str:
@@ -80,11 +117,13 @@ def observation_directory(
         if isinstance(observation.get("scope_ref"), str) and str(observation.get("scope_ref")).strip()
         else str(observation.get("source_ref") or observation.get("observation_id") or "scope")
     )
+    source_value = str(observation.get("source_ref") or observation.get("observation_id") or "source")
     return (
         base
         / _stable_segment(owner)
         / _stable_segment(str(observation.get("observation_type", "observation")))
         / _stable_segment(scope_value)
+        / _stable_segment(source_value)
     )
 
 
@@ -155,3 +194,57 @@ def emitted_observation_ids(root: Path | None = None) -> set[str]:
         for item in load_observations(root)
         if isinstance(item.get("observation_id"), str)
     }
+
+
+def _parse_details_json(value: str) -> dict[str, Any]:
+    if not value.strip():
+        return {}
+    parsed = json.loads(value)
+    if not isinstance(parsed, dict):
+        raise ValueError("Observation details must decode to a JSON object.")
+    return parsed
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description="ATLAS observation helpers.")
+    subparsers = parser.add_subparsers(dest="command")
+
+    emit_parser = subparsers.add_parser("emit", help="Emit one atlas.observation.v1 record.")
+    emit_parser.add_argument("--owner", required=True)
+    emit_parser.add_argument("--root", type=Path, default=atlas_root())
+    emit_parser.add_argument("--observation-type", required=True)
+    emit_parser.add_argument("--source-kind", required=True)
+    emit_parser.add_argument("--status", required=True)
+    emit_parser.add_argument("--source-ref", required=True)
+    emit_parser.add_argument("--observed-at")
+    emit_parser.add_argument("--scope-ref")
+    emit_parser.add_argument("--details-json", default="{}")
+    emit_parser.add_argument("--dry-run", action="store_true")
+
+    args = parser.parse_args(argv)
+    if args.command != "emit":
+        parser.print_help(sys.stderr)
+        return 1
+
+    details = _parse_details_json(args.details_json)
+    observation = build_observation(
+        observation_type=args.observation_type,
+        source_kind=args.source_kind,
+        status=args.status,
+        source_ref=args.source_ref,
+        observed_at=args.observed_at,
+        scope_ref=args.scope_ref,
+        details=details,
+    )
+    result = emit_observation(
+        observation,
+        owner=args.owner,
+        root=args.root.resolve(),
+        dry_run=args.dry_run,
+    )
+    print(json.dumps(result, indent=2))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

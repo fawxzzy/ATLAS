@@ -14,6 +14,7 @@ if str(ROOT) not in sys.path:
 from ops._atlas import atlas_relative, atlas_root, resolve_atlas_path
 from ops.atlas.load_tool_registry import load_tool_registry_bundle
 from ops.cortex._artifacts import load_descriptors
+from ops.cortex.index_working_memory import load_working_memory_catalog
 
 STATUS_VERSION = "atlas.cortex.status.v2"
 ACTIVE_SESSION_STATES = {
@@ -540,6 +541,17 @@ def world_model_state() -> dict[str, Any]:
     return result
 
 
+def working_memory_summary() -> dict[str, Any]:
+    catalog = load_working_memory_catalog(atlas_root())
+    return {
+        "catalog_ref": catalog.get("output_path"),
+        "content_digest": catalog.get("content_digest"),
+        "item_count": catalog.get("item_count", 0),
+        "kind_counts": catalog.get("kind_counts", {}),
+        "status_counts": catalog.get("status_counts", {}),
+    }
+
+
 def session_overview(session_descriptor: dict[str, Any] | None) -> dict[str, Any] | None:
     if session_descriptor is None:
         return None
@@ -597,6 +609,7 @@ def render_status_payload(
         "open_merge_requests": open_merge_requests_payload,
         "closure_receipts": closure_receipts_payload,
         "trust_surfaces": trust_surfaces_payload,
+        "working_memory": working_memory_summary(),
         "attention_queue": attention_queue(
             active_session=active_session,
             blocked_workers_payload=blocked_workers_payload,
