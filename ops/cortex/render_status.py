@@ -12,6 +12,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from ops._atlas import atlas_relative, atlas_root, resolve_atlas_path
+from ops.atlas.load_tool_registry import load_tool_registry_bundle
 from ops.cortex._artifacts import load_descriptors
 
 STATUS_VERSION = "atlas.cortex.status.v1"
@@ -88,6 +89,21 @@ def artifact_inventory(descriptors: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+def registry_summary() -> dict[str, Any]:
+    try:
+        bundle = load_tool_registry_bundle(root=atlas_root())
+    except Exception as exc:
+        return {"ok": False, "error": str(exc)}
+    return {
+        "ok": True,
+        "registry_digest": bundle.get("registry_digest"),
+        "tool_registry_digest": bundle.get("tool_registry_digest"),
+        "extension_registry_digest": bundle.get("extension_registry_digest"),
+        "tool_count": bundle.get("tool_count"),
+        "extension_count": bundle.get("extension_count"),
+    }
+
+
 def blocked_workers(descriptors: list[dict[str, Any]]) -> list[dict[str, Any]]:
     results: list[dict[str, Any]] = []
     for descriptor in latest_worker_states(descriptors):
@@ -98,8 +114,11 @@ def blocked_workers(descriptors: list[dict[str, Any]]) -> list[dict[str, Any]]:
             {
                 "worker_id": descriptor.get("identity", {}).get("worker_id"),
                 "assignment_id": descriptor.get("identity", {}).get("assignment_id"),
+                "tool_id": descriptor.get("identity", {}).get("tool_id"),
+                "extension_id": descriptor.get("identity", {}).get("extension_id"),
                 "state": state,
                 "blocked_reason": descriptor.get("state", {}).get("blocked_reason"),
+                "registry_digest": descriptor.get("state", {}).get("registry_digest"),
                 "source_ref": descriptor.get("source_ref"),
             }
         )
@@ -122,6 +141,9 @@ def open_merge_requests(descriptors: list[dict[str, Any]]) -> list[dict[str, Any
         results.append(
             {
                 "merge_request_id": merge_request_id,
+                "tool_id": descriptor.get("identity", {}).get("tool_id"),
+                "extension_id": descriptor.get("identity", {}).get("extension_id"),
+                "registry_digest": descriptor.get("state", {}).get("registry_digest"),
                 "conflicting_workers": descriptor.get("links", {}).get("conflicting_workers", []),
                 "source_ref": descriptor.get("source_ref"),
             }
@@ -176,7 +198,10 @@ def closure_receipts(
                 "source_ref": ref,
                 "artifact_type": descriptor.get("artifact_type"),
                 "receipt_id": descriptor.get("identity", {}).get("receipt_id"),
+                "tool_id": descriptor.get("identity", {}).get("tool_id"),
+                "extension_id": descriptor.get("identity", {}).get("extension_id"),
                 "result": descriptor.get("state", {}).get("result"),
+                "registry_digest": descriptor.get("state", {}).get("registry_digest"),
             }
         )
     return results
@@ -188,6 +213,7 @@ def session_overview(session_descriptor: dict[str, Any] | None) -> dict[str, Any
     identity = session_descriptor.get("identity", {})
     state = session_descriptor.get("state", {})
     links = session_descriptor.get("links", {})
+    governed_surfaces = links.get("governed_surfaces", {})
     return {
         "session_id": identity.get("session_id"),
         "task_id": identity.get("task_id"),
@@ -197,6 +223,8 @@ def session_overview(session_descriptor: dict[str, Any] | None) -> dict[str, Any
         "scenario": state.get("scenario"),
         "final_status": state.get("final_status"),
         "updated_at": state.get("updated_at"),
+        "registry_digest": state.get("registry_digest"),
+        "governed_surfaces": governed_surfaces if isinstance(governed_surfaces, dict) else {},
         "execution_receipt_ref": links.get("execution_receipt_ref"),
         "merge_request_refs": links.get("merge_request_refs", []),
         "source_ref": session_descriptor.get("source_ref"),
@@ -223,6 +251,7 @@ def render_status_payload(
     return {
         "schema_version": STATUS_VERSION,
         "descriptor_root": atlas_relative(descriptor_root, root=atlas_root()),
+        "registry": registry_summary(),
         "active_session": session_overview(target_session),
         "artifact_inventory": artifact_inventory(descriptors),
         "blocked_workers": blocked_workers(descriptors),

@@ -114,6 +114,25 @@ def action_summary(value: dict[str, Any] | None) -> dict[str, Any]:
     return result
 
 
+def governed_surface_ref(value: Any) -> dict[str, Any]:
+    if not isinstance(value, dict):
+        return {
+            "tool_id": None,
+            "extension_id": None,
+        }
+    return {
+        "tool_id": value.get("tool_id"),
+        "extension_id": value.get("extension_id"),
+    }
+
+
+def governed_surface_identity(payload: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "tool_id": payload.get("tool_id"),
+        "extension_id": payload.get("extension_id"),
+    }
+
+
 def descriptor_base(
     *,
     artifact_class: str,
@@ -153,6 +172,10 @@ def build_session_descriptor(payload: dict[str, Any], *, digest: str, size_bytes
     worker = payload.get("worker", {})
     refs = payload.get("refs", {})
     completion = payload.get("completion", {})
+    governed_surfaces = payload.get("governed_surfaces", {})
+    context_surface = governed_surface_ref(governed_surfaces.get("context"))
+    supervision_surface = governed_surface_ref(governed_surfaces.get("supervision"))
+    execution_surface = governed_surface_ref(governed_surfaces.get("execution"))
     return descriptor_base(
         artifact_class="session",
         artifact_type="session_manifest",
@@ -169,6 +192,10 @@ def build_session_descriptor(payload: dict[str, Any], *, digest: str, size_bytes
             "task_id": payload.get("task_id"),
             "worker_id": worker.get("worker_id"),
             "assignment_id": worker.get("assignment_id"),
+            "context_tool_id": context_surface["tool_id"],
+            "supervision_tool_id": supervision_surface["tool_id"],
+            "execution_tool_id": execution_surface["tool_id"],
+            "execution_extension_id": execution_surface["extension_id"],
         },
         state={
             "session_state": payload.get("session_state"),
@@ -176,10 +203,18 @@ def build_session_descriptor(payload: dict[str, Any], *, digest: str, size_bytes
             "final_status": completion.get("final_status"),
             "updated_at": payload.get("updated_at"),
             "closed_at": payload.get("closed_at"),
+            "registry_digest": governed_surfaces.get("registry_digest")
+            if isinstance(governed_surfaces, dict)
+            else None,
         },
         links={
             "context_ref": worker.get("context_ref"),
             "assignment_ref": worker.get("assignment_ref"),
+            "governed_surfaces": {
+                "context": context_surface,
+                "supervision": supervision_surface,
+                "execution": execution_surface,
+            },
             "status_refs": clean_refs(refs.get("status_refs", [])),
             "capability_profile_ref": refs.get("capability_profile_ref"),
             "request_ref": refs.get("request_ref"),
@@ -252,9 +287,12 @@ def build_worker_assignment_descriptor(payload: dict[str, Any], *, digest: str, 
             "assignment_id": payload.get("assignment_id"),
             "worker_id": payload.get("worker_id"),
             "task_id": payload.get("task_id"),
+            "tool_id": payload.get("tool_id"),
+            "extension_id": payload.get("extension_id"),
         },
         state={
             "stack_lock_digest": payload.get("stack_lock_digest"),
+            "registry_digest": payload.get("registry_digest"),
         },
         links={
             "allowed_globs": clean_refs(payload.get("allowed_globs", [])),
@@ -280,12 +318,15 @@ def build_worker_status_descriptor(payload: dict[str, Any], *, digest: str, size
         identity={
             "assignment_id": payload.get("assignment_id"),
             "worker_id": payload.get("worker_id"),
+            "tool_id": payload.get("tool_id"),
+            "extension_id": payload.get("extension_id"),
         },
         state={
             "worker_state": payload.get("state"),
             "heartbeat_at": payload.get("heartbeat_at"),
             "blocked_reason": payload.get("blocked_reason"),
             "touched_range_count": len(payload.get("touched_ranges", [])) if isinstance(payload.get("touched_ranges"), list) else 0,
+            "registry_digest": payload.get("registry_digest"),
         },
         links={
             "output_refs": clean_refs(payload.get("output_refs", [])),
@@ -308,10 +349,13 @@ def build_merge_request_descriptor(payload: dict[str, Any], *, digest: str, size
         regulated_artifact_class="merge_request",
         identity={
             "merge_request_id": payload.get("merge_request_id"),
+            "tool_id": payload.get("tool_id"),
+            "extension_id": payload.get("extension_id"),
         },
         state={
             "stack_lock_digest": payload.get("stack_lock_digest"),
             "overlap_count": len(payload.get("overlaps", [])) if isinstance(payload.get("overlaps"), list) else 0,
+            "registry_digest": payload.get("registry_digest"),
         },
         links={
             "conflicting_workers": clean_refs(payload.get("conflicting_workers", [])),
@@ -320,6 +364,12 @@ def build_merge_request_descriptor(payload: dict[str, Any], *, digest: str, size
             if isinstance(payload.get("merge_worker_handoff"), dict)
             else None,
             "merge_worker_handoff_ref": payload.get("merge_worker_handoff", {}).get("handoff_ref")
+            if isinstance(payload.get("merge_worker_handoff"), dict)
+            else None,
+            "merge_worker_tool_id": payload.get("merge_worker_handoff", {}).get("tool_id")
+            if isinstance(payload.get("merge_worker_handoff"), dict)
+            else None,
+            "merge_worker_extension_id": payload.get("merge_worker_handoff", {}).get("extension_id")
             if isinstance(payload.get("merge_worker_handoff"), dict)
             else None,
             "overlap_paths": clean_refs(
@@ -379,6 +429,8 @@ def build_privileged_request_descriptor(payload: dict[str, Any], *, digest: str,
             "request_id": payload.get("request_id"),
             "worker_id": payload.get("worker_id"),
             "assignment_id": payload.get("assignment_id"),
+            "tool_id": payload.get("tool_id"),
+            "extension_id": payload.get("extension_id"),
         },
         state={
             "requested_at": payload.get("requested_at"),
@@ -386,6 +438,7 @@ def build_privileged_request_descriptor(payload: dict[str, Any], *, digest: str,
             "capability_profile_id": requested_capability.get("capability_profile_id")
             if isinstance(requested_capability, dict)
             else None,
+            "registry_digest": payload.get("registry_digest"),
         },
         links={
             "source_refs": clean_refs(payload.get("source_refs", [])),
@@ -413,11 +466,14 @@ def build_approval_receipt_descriptor(payload: dict[str, Any], *, digest: str, s
             "request_id": payload.get("request_id"),
             "worker_id": payload.get("worker_id"),
             "assignment_id": payload.get("assignment_id"),
+            "tool_id": payload.get("tool_id"),
+            "extension_id": payload.get("extension_id"),
         },
         state={
             "approval_status": payload.get("approval_status"),
             "issued_at": payload.get("issued_at"),
             "expiry_at": payload.get("expiry_at"),
+            "registry_digest": payload.get("registry_digest"),
         },
         links={
             "request_digest": payload.get("request_digest"),
@@ -447,12 +503,15 @@ def build_execution_receipt_descriptor(payload: dict[str, Any], *, digest: str, 
             "approval_receipt_id": payload.get("approval_receipt_id"),
             "worker_id": payload.get("worker_id"),
             "assignment_id": payload.get("assignment_id"),
+            "tool_id": payload.get("tool_id"),
+            "extension_id": payload.get("extension_id"),
         },
         state={
             "result": payload.get("result"),
             "approval_status": payload.get("approval_status"),
             "execution_mode": payload.get("execution_mode"),
             "executed_at": payload.get("executed_at"),
+            "registry_digest": payload.get("registry_digest"),
         },
         links={
             "source_refs": clean_refs(payload.get("source_refs", [])),
@@ -479,10 +538,13 @@ def build_supervisor_consumer_descriptor(payload: dict[str, Any], *, digest: str
         regulated_artifact_class="merge_completion",
         identity={
             "merge_request_id": payload.get("merge_request_id"),
+            "tool_id": payload.get("tool_id"),
+            "extension_id": payload.get("extension_id"),
         },
         state={
             "stack_lock_digest": payload.get("stack_lock_digest"),
             "transcript_dependency": payload.get("transcript_dependency"),
+            "registry_digest": payload.get("registry_digest"),
         },
         links={
             "merge_request_ref": payload.get("merge_request_ref"),

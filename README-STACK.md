@@ -20,6 +20,7 @@ Read these files first:
 - `docs/architecture/STACK-STANDARDS.md`
 - `docs/architecture/PATH-POLICY.md`
 - `docs/ops/ATLAS-SESSION-RUNBOOK.md`
+- `docs/ops/ATLAS-TOOL-REGISTRY-RUNBOOK.md`
 - `docs/ops/ATLAS-STATUS-RUNBOOK.md`
 
 For ATLAS platform architecture doctrine, use `repos/fawxzzy-atlas/README.md` and the docs under `repos/fawxzzy-atlas/docs/` as the canonical source. Stack-root docs should stay stack- and boundary-oriented and should link back to Atlas instead of duplicating platform specs.
@@ -35,6 +36,7 @@ Use these ids in stack docs, tickets, and automation:
 - `lifeline` -> `repos/fawxzzy-lifeline`
 - `fitness` -> `repos/fawxzzy-fitness`
 - `mazer` -> `repos/fawxzzy-mazer`
+- `stream` -> `repos/fawxzzy-stream`
 - `nat1-games` -> `repos/Nat1-Games/nat1-games`
 
 The ids are canonical even where disk names have not been normalized yet.
@@ -50,6 +52,7 @@ The ids are canonical even where disk names have not been normalized yet.
 - sessions -> `runtime/atlas/sessions`
 - descriptor registry -> `runtime/cortex/artifacts`
 - worker execution receipts -> `runtime/lifeline/worker-execution`
+- governed tool and extension registries -> `docs/registry`
 
 ## Working Rules
 

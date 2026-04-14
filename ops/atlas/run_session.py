@@ -13,12 +13,16 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from ops._atlas import atlas_relative, atlas_root, load_stack_config, normalize_slashes
+from ops.atlas.load_tool_registry import load_tool_registry_bundle, select_tool_entry
 from ops.cortex._artifacts import register_artifact_descriptors, sha256_bytes, write_json
 from ops.cortex.build_worker_context import build_worker_context_payload, normalize_query_terms
 from ops.cortex.render_status import render_status_payload
 
 DEFAULT_CONTEXT_LIMIT = 5
 SESSION_CONTRACT_VERSION = "atlas.session.v1"
+CONTEXT_TOOL_ID = "cortex.build_worker_context"
+SUPERVISION_TOOL_ID = "cortex.supervise_workers"
+READ_ONLY_EXECUTION_TOOL_ID = "read_only_scan"
 
 
 def utc_now() -> datetime:
@@ -125,6 +129,10 @@ def session_manifest_template(
     lock_payload: dict[str, Any],
     worker_id: str,
     assignment_id: str,
+    registry_digest: str,
+    context_tool: dict[str, Any],
+    supervision_tool: dict[str, Any],
+    execution_tool: dict[str, Any],
 ) -> dict[str, Any]:
     return {
         "contract_version": SESSION_CONTRACT_VERSION,
@@ -147,6 +155,21 @@ def session_manifest_template(
                 "model": "root-owned-subsystem",
             },
             "executor_component": component_snapshot(lock_payload, "lifeline", fallback_path="repos/fawxzzy-lifeline"),
+        },
+        "governed_surfaces": {
+            "registry_digest": registry_digest,
+            "context": {
+                "tool_id": context_tool["tool_id"],
+                "extension_id": context_tool["extension_id"],
+            },
+            "supervision": {
+                "tool_id": supervision_tool["tool_id"],
+                "extension_id": supervision_tool["extension_id"],
+            },
+            "execution": {
+                "tool_id": execution_tool["tool_id"],
+                "extension_id": execution_tool["extension_id"],
+            },
         },
         "worker": {
             "worker_id": worker_id,
@@ -184,6 +207,9 @@ def build_worker_assignment(
     task_id: str,
     stack_lock_digest: str,
     context_ref: str,
+    tool_id: str,
+    extension_id: str | None,
+    registry_digest: str,
 ) -> dict[str, Any]:
     return {
         "contract_version": "atlas.worker.assignment.v1",
@@ -191,6 +217,9 @@ def build_worker_assignment(
         "worker_id": worker_id,
         "task_id": task_id,
         "stack_lock_digest": stack_lock_digest,
+        "tool_id": tool_id,
+        "extension_id": extension_id,
+        "registry_digest": registry_digest,
         "allowed_globs": [
             "docs/**",
             "ops/**",
@@ -215,6 +244,9 @@ def build_worker_status(
     worker_id: str,
     assignment_id: str,
     state: str,
+    tool_id: str,
+    extension_id: str | None,
+    registry_digest: str,
     output_refs: list[str] | None = None,
     touched_ranges: list[dict[str, Any]] | None = None,
     blocked_reason: str | None = None,
@@ -225,6 +257,9 @@ def build_worker_status(
         "contract_version": "atlas.worker.status.v1",
         "worker_id": worker_id,
         "assignment_id": assignment_id,
+        "tool_id": tool_id,
+        "extension_id": extension_id,
+        "registry_digest": registry_digest,
         "state": state,
         "heartbeat_at": isoformat(heartbeat_at),
         "touched_ranges": touched_ranges or [],
@@ -234,45 +269,11 @@ def build_worker_status(
     }
 
 
-def build_capability_profile() -> dict[str, Any]:
-    return {
-        "contract_version": "atlas.capability.profile.v1",
-        "capability_profile_id": "cap-atlas-session-readonly-v1",
-        "description": "Root ATLAS read-only session capability profile.",
-        "filesystem_scopes": {
-            "read": ["."],
-            "write": [],
-            "create": [],
-            "deny": ["secrets/**"],
-        },
-        "network_scopes": {
-            "mode": "none",
-            "allowed_domains": [],
-            "blocked_domains": [],
-        },
-        "process_execution_permissions": {
-            "allow_spawn": True,
-            "allow_shell": False,
-            "allow_python": False,
-            "allowed_commands": ["node"],
-            "denied_commands": ["powershell", "cmd", "git"],
-        },
-        "package_manager_permissions": {
-            "allow_install": False,
-            "allow_update": False,
-            "allowed_managers": [],
-            "blocked_managers": ["npm", "pnpm", "yarn"],
-        },
-        "elevation_requirement": "per_action_approval",
-        "resource_budgets": {
-            "wall_clock_seconds": 120,
-            "cpu_seconds": 30,
-            "memory_mb": 256,
-            "disk_mb": 50,
-        },
-        "allowed_data_classes": ["public", "internal", "machine_state"],
-        "audit_class": "standard",
-    }
+def build_capability_profile(tool_entry: dict[str, Any]) -> dict[str, Any]:
+    capability_profile = tool_entry.get("capability_profile")
+    if not isinstance(capability_profile, dict):
+        raise ValueError(f"Tool entry '{tool_entry.get('tool_id')}' is missing capability_profile.")
+    return json.loads(json.dumps(capability_profile))
 
 
 def build_privileged_action_request(
@@ -286,6 +287,9 @@ def build_privileged_action_request(
     status_ref: str,
     context_ref: str,
     capability_profile: dict[str, Any],
+    tool_id: str,
+    extension_id: str | None,
+    registry_digest: str,
 ) -> dict[str, Any]:
     return {
         "contract_version": "atlas.privileged-action.request.v1",
@@ -294,6 +298,9 @@ def build_privileged_action_request(
         "worker_id": worker_id,
         "assignment_id": assignment_id,
         "stack_lock_digest": stack_lock_digest,
+        "tool_id": tool_id,
+        "extension_id": extension_id,
+        "registry_digest": registry_digest,
         "source_refs": [
             session_manifest_ref,
             assignment_ref,
@@ -329,6 +336,9 @@ def build_approval_receipt(
         "worker_id": request["worker_id"],
         "assignment_id": request["assignment_id"],
         "stack_lock_digest": request["stack_lock_digest"],
+        "tool_id": request["tool_id"],
+        "extension_id": request["extension_id"],
+        "registry_digest": request["registry_digest"],
         "approver": {
             "kind": "system",
             "name": "atlas-session-policy-gate",
@@ -481,6 +491,11 @@ def main(argv: list[str] | None = None) -> int:
     supervisor_root = ROOT / "runtime" / "cortex" / "supervisor" / session_id
 
     lock_payload = load_stack_lock_payload()
+    registry_bundle = load_tool_registry_bundle(root=ROOT)
+    context_tool = select_tool_entry(registry_bundle, CONTEXT_TOOL_ID)
+    supervision_tool = select_tool_entry(registry_bundle, SUPERVISION_TOOL_ID)
+    execution_tool = select_tool_entry(registry_bundle, READ_ONLY_EXECUTION_TOOL_ID)
+    registry_digest = str(registry_bundle["registry_digest"])
     stack_lock_digest = str(lock_payload.get("lock_digest", "")).strip()
     if not stack_lock_digest:
         raise ValueError("stack.lock.yaml does not declare lock_digest.")
@@ -494,6 +509,10 @@ def main(argv: list[str] | None = None) -> int:
         lock_payload=lock_payload,
         worker_id=worker_id,
         assignment_id=assignment_id,
+        registry_digest=registry_digest,
+        context_tool=context_tool,
+        supervision_tool=supervision_tool,
+        execution_tool=execution_tool,
     )
 
     def persist_manifest() -> None:
@@ -526,6 +545,9 @@ def main(argv: list[str] | None = None) -> int:
             task_id=task_id,
             stack_lock_digest=stack_lock_digest,
             context_ref=manifest["worker"]["context_ref"],
+            tool_id=execution_tool["tool_id"],
+            extension_id=execution_tool["extension_id"],
+            registry_digest=registry_digest,
         )
         write_json(assignment_path, assignment)
         manifest["session_state"] = "assignment_emitted"
@@ -536,6 +558,9 @@ def main(argv: list[str] | None = None) -> int:
             worker_id=worker_id,
             assignment_id=assignment_id,
             state="running",
+            tool_id=execution_tool["tool_id"],
+            extension_id=execution_tool["extension_id"],
+            registry_digest=registry_digest,
         )
         write_json(running_status_path, running_status)
         manifest["refs"]["status_refs"] = unique_refs(
@@ -544,7 +569,7 @@ def main(argv: list[str] | None = None) -> int:
         manifest["session_state"] = "executing"
         persist_manifest()
 
-        capability_profile = build_capability_profile()
+        capability_profile = build_capability_profile(execution_tool)
         write_json(capability_path, capability_profile)
         manifest["refs"]["capability_profile_ref"] = atlas_relative(capability_path, root=ROOT)
 
@@ -558,6 +583,9 @@ def main(argv: list[str] | None = None) -> int:
             status_ref=atlas_relative(running_status_path, root=ROOT),
             context_ref=manifest["worker"]["context_ref"],
             capability_profile=capability_profile,
+            tool_id=execution_tool["tool_id"],
+            extension_id=execution_tool["extension_id"],
+            registry_digest=registry_digest,
         )
         approval = build_approval_receipt(
             approval_receipt_id=approval_receipt_id,
@@ -605,6 +633,9 @@ def main(argv: list[str] | None = None) -> int:
                 worker_id=worker_id,
                 assignment_id=assignment_id,
                 state="completed",
+                tool_id=execution_tool["tool_id"],
+                extension_id=execution_tool["extension_id"],
+                registry_digest=registry_digest,
                 output_refs=unique_refs(
                     [
                         manifest["refs"]["request_ref"],
@@ -632,6 +663,9 @@ def main(argv: list[str] | None = None) -> int:
                     task_id=f"{task_id}-fixture",
                     stack_lock_digest=stack_lock_digest,
                     context_ref=manifest["worker"]["context_ref"],
+                    tool_id=execution_tool["tool_id"],
+                    extension_id=execution_tool["extension_id"],
+                    registry_digest=registry_digest,
                 ),
             )
             write_json(
@@ -640,6 +674,9 @@ def main(argv: list[str] | None = None) -> int:
                     worker_id=fixture_worker_id,
                     assignment_id=fixture_assignment_id,
                     state="completed",
+                    tool_id=execution_tool["tool_id"],
+                    extension_id=execution_tool["extension_id"],
+                    registry_digest=registry_digest,
                     output_refs=["fixture://conflict"],
                     touched_ranges=[conflict_range],
                     heartbeat_at=utc_now() + timedelta(seconds=3),

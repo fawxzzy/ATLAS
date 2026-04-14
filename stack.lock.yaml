@@ -1,7 +1,7 @@
 schema_version: "atlas.stack.lock.v1"
 stack_manifest_path: "stack.yaml"
-stack_manifest_digest: "sha256:9adbdfc4d95712b75a1d1f4c1a39b9c4fb3fb0153c9315e7d6940838acb05ac5"
-component_count: 9
+stack_manifest_digest: "sha256:5c2a3c186d9132125db4d21036fdf9f950d6c7123c366218a5069f32a86cc203"
+component_count: 10
 components:
   _stack:
     path: "repos/_stack"
@@ -98,8 +98,19 @@ components:
     remote: null
     ref_type: "branch"
     ref: "master"
-    commit: "d58b0326560d956b8856efd118d7ae6849b10fb9"
+    commit: "1f022fcf99e442bc30430fc3bd5bcd3d0c18bfe1"
     dirty: true
+    trust_class: "trusted"
+    release_eligible: false
+  stream:
+    path: "repos/fawxzzy-stream"
+    role: "application"
+    status: "incubating"
+    remote: null
+    ref_type: "branch"
+    ref: "main"
+    commit: "1dd3298c556b4d0839e6bb43b3dde7c3527022f7"
+    dirty: false
     trust_class: "trusted"
     release_eligible: false
 excluded_surfaces:
@@ -115,4 +126,4 @@ excluded_surfaces:
     trust_class: "untrusted"
     release_eligible: false
     reason: "Token-bearing Verta checkout remains quarantined and untrusted until scrub and rotation are complete."
-lock_digest: "sha256:65138c38362ed90d5336885be81df33b864119cefaa445dcbe53ce04c22e5458"
+lock_digest: "sha256:2c1ac5e9b5f2baa54423f078580a5d3fd21949fe90396776ff6126e2b731cc52"

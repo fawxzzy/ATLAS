@@ -14,6 +14,7 @@
 - session manifests live under `runtime/atlas/sessions/<session_id>/`
 - the canonical manifest path is `runtime/atlas/sessions/<session_id>/session.manifest.json`
 - session-local worker artifacts live under `runtime/atlas/sessions/<session_id>/artifacts/`
+- governed tool and extension registry truth lives under `docs/registry/`
 
 ## Required Linkage
 
@@ -27,6 +28,12 @@ Every completed session must carry refs for:
 - approval receipt
 - execution receipt
 
+Every governed execution step must also carry:
+
+- `tool_id`
+- `extension_id` when the surface is extension-backed
+- `registry_digest`
+
 Conflict sessions may also carry refs for:
 
 - merge request artifacts
@@ -38,14 +45,22 @@ Conflict sessions may also carry refs for:
 ## Lifecycle
 
 1. load `stack.lock.yaml`
-2. create `atlas.session.v1`
-3. build the Cortex worker context artifact
-4. emit the worker assignment artifact
-5. emit request and approval artifacts
-6. invoke `_stack` to bridge into Lifeline
-7. record the execution receipt and status update refs
-8. if needed, run Cortex supervision and let `_stack` consume merge requests
-9. close the session with an explicit final status
+2. load the governed tool and extension registries from `docs/registry/`
+3. create `atlas.session.v1`
+4. build the Cortex worker context artifact
+5. emit the worker assignment artifact
+6. emit request and approval artifacts
+7. invoke `_stack` to bridge into Lifeline
+8. record the execution receipt and status update refs
+9. if needed, run Cortex supervision and let `_stack` consume merge requests
+10. close the session with an explicit final status
+
+## Governed Surface Rule
+
+- `atlas.session.v1` declares the governed tool surfaces used by the session
+- worker assignment, worker status, privileged-action request, approval receipt, and execution receipt artifacts must agree on `tool_id`, optional `extension_id`, and `registry_digest`
+- merge-request, pause, merge, and resume artifacts must preserve the same governed surface identity instead of inventing local task names
+- session state is derived from linked artifacts and receipts only
 
 ## Commands
 

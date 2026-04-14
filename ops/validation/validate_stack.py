@@ -56,6 +56,7 @@ from ops.stack.generate_lockfile import (
     repo_is_git_root,
 )
 from ops.stack.audit_gitdir_hygiene import build_report as build_gitdir_hygiene_report, default_target_paths as default_gitdir_hygiene_targets
+from ops.atlas.load_tool_registry import load_tool_registry_bundle
 
 
 @dataclass
@@ -561,6 +562,33 @@ def validate_verta_trust_gate(stack_file: Path, config: dict[str, Any]) -> list[
     return findings
 
 
+def validate_tool_registry(root: Path) -> list[Finding]:
+    try:
+        bundle = load_tool_registry_bundle(root=root)
+    except Exception as exc:
+        return [
+            Finding(
+                "error",
+                "invalid-tool-registry",
+                "docs/registry",
+                f"ATLAS tool or extension registry could not be loaded: {exc}",
+            )
+        ]
+
+    findings: list[Finding] = []
+    registry_digest = str(bundle.get("registry_digest", "")).strip()
+    if not registry_digest:
+        findings.append(
+            Finding(
+                "error",
+                "missing-tool-registry-digest",
+                "docs/registry",
+                "ATLAS tool or extension registry did not resolve to a stable digest.",
+            )
+        )
+    return findings
+
+
 def iter_relative_directory_targets(config: dict[str, Any]) -> list[tuple[str, str]]:
     targets: list[tuple[str, str]] = []
     for key, value in config.get("paths", {}).items():
@@ -635,6 +663,7 @@ def iter_scan_files(roots: list[Path]) -> list[Path]:
 def build_findings(stack_file: Path, config: dict[str, Any], *, lock_file_override: Path | None = None) -> list[Finding]:
     root = stack_file.parent.resolve()
     findings: list[Finding] = []
+    findings.extend(validate_tool_registry(root))
     findings.extend(validate_subsystem_registry(stack_file, config))
     findings.extend(validate_verta_trust_gate(stack_file, config))
 

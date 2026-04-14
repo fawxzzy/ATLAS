@@ -11,6 +11,9 @@
     "worker_id",
     "assignment_id",
     "stack_lock_digest",
+    "tool_id",
+    "extension_id",
+    "registry_digest",
     "request_id",
     "approval_receipt_id",
     "host",
@@ -51,6 +54,20 @@
       "minLength": 1
     },
     "stack_lock_digest": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tool_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "extension_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "registry_digest": {
       "type": "string",
       "minLength": 1
     },

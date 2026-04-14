@@ -1,0 +1,378 @@
+{
+  "schema_version": "atlas.tool.registry.v1",
+  "kind": "atlas-tool-registry",
+  "entries": [
+    {
+      "contract_version": "atlas.tool.catalog.entry.v1",
+      "tool_id": "cortex.build_worker_context",
+      "display_name": "Cortex Build Worker Context",
+      "description": "Root-owned Cortex worker-context build surface for governed ATLAS sessions.",
+      "surface_kind": "builtin",
+      "status": "active",
+      "owner": "stack-root",
+      "extension_id": null,
+      "trust_class": "trusted",
+      "release_eligible": true,
+      "executor": {
+        "component_id": "cortex",
+        "entrypoint": "ops/cortex/build_worker_context.py",
+        "mode": "subprocess"
+      },
+      "contracts": {
+        "request": null,
+        "receipt": null
+      },
+      "invocation": {
+        "kind": "coordination",
+        "action_operation": null,
+        "execution_mode": null
+      },
+      "capability_profile": {
+        "contract_version": "atlas.capability.profile.v1",
+        "capability_profile_id": "cap-cortex-build-worker-context-v1",
+        "description": "Cortex worker-context build surface.",
+        "filesystem_scopes": {
+          "read": [
+            "docs/**",
+            "data/**",
+            "runtime/cortex/query/**",
+            "runtime/cortex/catalog/**",
+            "stack.yaml",
+            "stack.lock.yaml"
+          ],
+          "write": [
+            "runtime/**"
+          ],
+          "create": [
+            "runtime/**"
+          ],
+          "deny": [
+            "secrets/**",
+            "repos/Verta-Core/**"
+          ]
+        },
+        "network_scopes": {
+          "mode": "none",
+          "allowed_domains": [],
+          "blocked_domains": []
+        },
+        "process_execution_permissions": {
+          "allow_spawn": false,
+          "allow_shell": false,
+          "allow_python": false,
+          "allowed_commands": [],
+          "denied_commands": [
+            "powershell",
+            "cmd",
+            "git",
+            "python",
+            "node"
+          ]
+        },
+        "package_manager_permissions": {
+          "allow_install": false,
+          "allow_update": false,
+          "allowed_managers": [],
+          "blocked_managers": [
+            "npm",
+            "pnpm",
+            "yarn"
+          ]
+        },
+        "elevation_requirement": "none",
+        "resource_budgets": {
+          "wall_clock_seconds": 120,
+          "cpu_seconds": 60,
+          "memory_mb": 512,
+          "disk_mb": 256
+        },
+        "allowed_data_classes": [
+          "public",
+          "internal",
+          "machine_state"
+        ],
+        "audit_class": "standard"
+      },
+      "approval": {
+        "required": false,
+        "approver_kind": null,
+        "required_status": null,
+        "granted_scope_required": false
+      }
+    },
+    {
+      "contract_version": "atlas.tool.catalog.entry.v1",
+      "tool_id": "cortex.supervise_workers",
+      "display_name": "Cortex Supervise Workers",
+      "description": "Root-owned Cortex supervision and merge-request surface for governed ATLAS sessions.",
+      "surface_kind": "builtin",
+      "status": "active",
+      "owner": "stack-root",
+      "extension_id": null,
+      "trust_class": "trusted",
+      "release_eligible": true,
+      "executor": {
+        "component_id": "cortex",
+        "entrypoint": "ops/cortex/supervise_workers.py",
+        "mode": "subprocess"
+      },
+      "contracts": {
+        "request": null,
+        "receipt": null
+      },
+      "invocation": {
+        "kind": "coordination",
+        "action_operation": null,
+        "execution_mode": null
+      },
+      "capability_profile": {
+        "contract_version": "atlas.capability.profile.v1",
+        "capability_profile_id": "cap-cortex-supervise-workers-v1",
+        "description": "Cortex worker supervision surface.",
+        "filesystem_scopes": {
+          "read": [
+            "runtime/**",
+            "docs/**",
+            "stack.yaml",
+            "stack.lock.yaml"
+          ],
+          "write": [
+            "runtime/**"
+          ],
+          "create": [
+            "runtime/**"
+          ],
+          "deny": [
+            "secrets/**",
+            "repos/Verta-Core/**"
+          ]
+        },
+        "network_scopes": {
+          "mode": "none",
+          "allowed_domains": [],
+          "blocked_domains": []
+        },
+        "process_execution_permissions": {
+          "allow_spawn": false,
+          "allow_shell": false,
+          "allow_python": false,
+          "allowed_commands": [],
+          "denied_commands": [
+            "powershell",
+            "cmd",
+            "git",
+            "python",
+            "node"
+          ]
+        },
+        "package_manager_permissions": {
+          "allow_install": false,
+          "allow_update": false,
+          "allowed_managers": [],
+          "blocked_managers": [
+            "npm",
+            "pnpm",
+            "yarn"
+          ]
+        },
+        "elevation_requirement": "none",
+        "resource_budgets": {
+          "wall_clock_seconds": 120,
+          "cpu_seconds": 60,
+          "memory_mb": 512,
+          "disk_mb": 256
+        },
+        "allowed_data_classes": [
+          "public",
+          "internal",
+          "machine_state"
+        ],
+        "audit_class": "standard"
+      },
+      "approval": {
+        "required": false,
+        "approver_kind": null,
+        "required_status": null,
+        "granted_scope_required": false
+      }
+    },
+    {
+      "contract_version": "atlas.tool.catalog.entry.v1",
+      "tool_id": "read_only_scan",
+      "display_name": "Read-only Scan",
+      "description": "Governed read-only filesystem inspection through Lifeline.",
+      "surface_kind": "builtin",
+      "status": "active",
+      "owner": "stack-root",
+      "extension_id": null,
+      "trust_class": "trusted",
+      "release_eligible": true,
+      "executor": {
+        "component_id": "lifeline",
+        "entrypoint": "lifeline execute",
+        "mode": "runtime"
+      },
+      "contracts": {
+        "request": "atlas.privileged-action.request.v1",
+        "receipt": "atlas.privileged-action.receipt.v1"
+      },
+      "invocation": {
+        "kind": "execution",
+        "action_operation": "read_only_scan",
+        "execution_mode": "read_only_scan"
+      },
+      "capability_profile": {
+        "contract_version": "atlas.capability.profile.v1",
+        "capability_profile_id": "cap-atlas-session-readonly-v1",
+        "description": "Root ATLAS read-only session capability profile.",
+        "filesystem_scopes": {
+          "read": [
+            "."
+          ],
+          "write": [],
+          "create": [],
+          "deny": [
+            "secrets/**",
+            "repos/Verta-Core/**"
+          ]
+        },
+        "network_scopes": {
+          "mode": "none",
+          "allowed_domains": [],
+          "blocked_domains": []
+        },
+        "process_execution_permissions": {
+          "allow_spawn": true,
+          "allow_shell": false,
+          "allow_python": false,
+          "allowed_commands": [
+            "node"
+          ],
+          "denied_commands": [
+            "powershell",
+            "cmd",
+            "git"
+          ]
+        },
+        "package_manager_permissions": {
+          "allow_install": false,
+          "allow_update": false,
+          "allowed_managers": [],
+          "blocked_managers": [
+            "npm",
+            "pnpm",
+            "yarn"
+          ]
+        },
+        "elevation_requirement": "per_action_approval",
+        "resource_budgets": {
+          "wall_clock_seconds": 120,
+          "cpu_seconds": 30,
+          "memory_mb": 256,
+          "disk_mb": 50
+        },
+        "allowed_data_classes": [
+          "public",
+          "internal",
+          "machine_state"
+        ],
+        "audit_class": "standard"
+      },
+      "approval": {
+        "required": true,
+        "approver_kind": "system",
+        "required_status": "approved",
+        "granted_scope_required": true
+      }
+    },
+    {
+      "contract_version": "atlas.tool.catalog.entry.v1",
+      "tool_id": "scoped_write.dry_run",
+      "display_name": "Scoped Write Dry Run",
+      "description": "Governed scoped-write dry-run command surface through Lifeline.",
+      "surface_kind": "builtin",
+      "status": "active",
+      "owner": "stack-root",
+      "extension_id": null,
+      "trust_class": "trusted",
+      "release_eligible": true,
+      "executor": {
+        "component_id": "lifeline",
+        "entrypoint": "lifeline execute",
+        "mode": "runtime"
+      },
+      "contracts": {
+        "request": "atlas.privileged-action.request.v1",
+        "receipt": "atlas.privileged-action.receipt.v1"
+      },
+      "invocation": {
+        "kind": "execution",
+        "action_operation": "scoped_write",
+        "execution_mode": "dry_run_command"
+      },
+      "capability_profile": {
+        "contract_version": "atlas.capability.profile.v1",
+        "capability_profile_id": "cap-atlas-scoped-write-dry-run-v1",
+        "description": "ATLAS scoped-write dry-run capability profile.",
+        "filesystem_scopes": {
+          "read": [
+            "."
+          ],
+          "write": [],
+          "create": [],
+          "deny": [
+            "secrets/**",
+            "repos/Verta-Core/**"
+          ]
+        },
+        "network_scopes": {
+          "mode": "none",
+          "allowed_domains": [],
+          "blocked_domains": []
+        },
+        "process_execution_permissions": {
+          "allow_spawn": true,
+          "allow_shell": false,
+          "allow_python": false,
+          "allowed_commands": [
+            "node"
+          ],
+          "denied_commands": [
+            "powershell",
+            "cmd",
+            "git"
+          ]
+        },
+        "package_manager_permissions": {
+          "allow_install": false,
+          "allow_update": false,
+          "allowed_managers": [],
+          "blocked_managers": [
+            "npm",
+            "pnpm",
+            "yarn"
+          ]
+        },
+        "elevation_requirement": "per_action_approval",
+        "resource_budgets": {
+          "wall_clock_seconds": 120,
+          "cpu_seconds": 30,
+          "memory_mb": 256,
+          "disk_mb": 50
+        },
+        "allowed_data_classes": [
+          "public",
+          "internal",
+          "machine_state"
+        ],
+        "audit_class": "standard"
+      },
+      "approval": {
+        "required": true,
+        "approver_kind": "system",
+        "required_status": "approved",
+        "granted_scope_required": true
+      }
+    }
+  ]
+}

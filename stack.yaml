@@ -73,10 +73,12 @@ subpaths:
     knowledge_promotions: docs/knowledge/promotions
     ops: docs/ops
     playbooks: docs/playbooks
+    registry: docs/registry
     research: docs/research
     runbooks: docs/runbooks
     standards: docs/standards
   ops:
+    atlas: ops/atlas
     backup: ops/backup
     bootstrap: ops/bootstrap
     codex: ops/codex
@@ -125,6 +127,10 @@ repo_registry:
     path: repos/fawxzzy-mazer
     role: application
     status: active
+  stream:
+    path: repos/fawxzzy-stream
+    role: application
+    status: incubating
   nat1-games:
     path: repos/Nat1-Games/nat1-games
     role: application
@@ -199,6 +205,7 @@ stack_lock:
     - lifeline
     - fitness
     - mazer
+    - stream
     - nat1-games
     - playbook-demo
   repo_overrides:
@@ -223,6 +230,9 @@ stack_lock:
     mazer:
       trust_class: trusted
       release_eligible: true
+    stream:
+      trust_class: trusted
+      release_eligible: false
     nat1-games:
       trust_class: trusted
       release_eligible: false

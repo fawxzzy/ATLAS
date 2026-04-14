@@ -131,10 +131,34 @@ def merge_request_for_conflict(
         *derive_paused_handoff_refs(left_status, left_assignment),
         *derive_paused_handoff_refs(right_status, right_assignment),
     })
+    tool_id = str(
+        left_status.get("tool_id")
+        or left_assignment.get("tool_id")
+        or right_status.get("tool_id")
+        or right_assignment.get("tool_id")
+        or ""
+    ).strip()
+    extension_id = left_status.get("extension_id")
+    if extension_id is None:
+        extension_id = left_assignment.get("extension_id")
+    if extension_id is None:
+        extension_id = right_status.get("extension_id")
+    if extension_id is None:
+        extension_id = right_assignment.get("extension_id")
+    registry_digest = str(
+        left_status.get("registry_digest")
+        or left_assignment.get("registry_digest")
+        or right_status.get("registry_digest")
+        or right_assignment.get("registry_digest")
+        or ""
+    ).strip()
     return {
         "contract_version": WORKER_MERGE_REQUEST_VERSION,
         "merge_request_id": merge_request_id,
         "stack_lock_digest": lock_digest,
+        "tool_id": tool_id,
+        "extension_id": extension_id,
+        "registry_digest": registry_digest,
         "conflicting_workers": worker_ids,
         "overlaps": overlaps,
         "paused_handoff_refs": paused_handoffs,
@@ -143,6 +167,9 @@ def merge_request_for_conflict(
             "assignment_id": f"assignment-{merge_request_id}",
             "task_id": f"merge-{merge_request_id}",
             "handoff_ref": f"runtime/cortex/supervisor/{merge_request_id}.merge-handoff.json",
+            "tool_id": tool_id,
+            "extension_id": extension_id,
+            "registry_digest": registry_digest,
         },
         "notes": "Read-only Cortex supervisor emitted this merge request from worker status and assignment artifacts only.",
     }

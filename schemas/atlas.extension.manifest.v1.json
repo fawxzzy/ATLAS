@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://schemas/atlas.extension.manifest.v1.json",
+  "title": "ATLAS extension manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "extension_id",
+    "display_name",
+    "description",
+    "owner",
+    "status",
+    "trust_class",
+    "release_eligible",
+    "tool_ids"
+  ],
+  "properties": {
+    "contract_version": {
+      "type": "string",
+      "const": "atlas.extension.manifest.v1"
+    },
+    "extension_id": {
+      "type": "string",
+      "minLength": 3,
+      "pattern": "^[A-Za-z0-9._:-]+$"
+    },
+    "display_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1
+    },
+    "owner": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "disabled",
+        "experimental"
+      ]
+    },
+    "trust_class": {
+      "type": "string",
+      "enum": [
+        "trusted",
+        "adjacent",
+        "untrusted"
+      ]
+    },
+    "release_eligible": {
+      "type": "boolean"
+    },
+    "tool_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "pattern": "^[A-Za-z0-9._:-]+$"
+      }
+    }
+  }
+}

@@ -17,6 +17,7 @@
     "updated_at",
     "closed_at",
     "orchestrator",
+    "governed_surfaces",
     "worker",
     "refs",
     "completion"
@@ -109,6 +110,31 @@
         },
         "executor_component": {
           "type": "object"
+        }
+      }
+    },
+    "governed_surfaces": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "registry_digest",
+        "context",
+        "supervision",
+        "execution"
+      ],
+      "properties": {
+        "registry_digest": {
+          "type": "string",
+          "minLength": 1
+        },
+        "context": {
+          "$ref": "#/$defs/governedSurfaceRef"
+        },
+        "supervision": {
+          "$ref": "#/$defs/governedSurfaceRef"
+        },
+        "execution": {
+          "$ref": "#/$defs/governedSurfaceRef"
         }
       }
     },
@@ -280,6 +306,28 @@
             "type": "string",
             "minLength": 1
           }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "governedSurfaceRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tool_id",
+        "extension_id"
+      ],
+      "properties": {
+        "tool_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "extension_id": {
+          "type": [
+            "string",
+            "null"
+          ]
         }
       }
     }
