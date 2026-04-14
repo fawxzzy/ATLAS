@@ -113,6 +113,24 @@ ATLAS should also emit an explicit attention view for operator-relevant anomalie
 
 Attention is a read model. It does not grant execution authority.
 
+## Governed Artifact Epochs
+
+ATLAS uses an explicit governed-artifact epoch boundary for historical runtime truth.
+
+Registry-backed governed artifacts cut over on **2026-04-14T08:06:53Z**.
+
+Epoch classes:
+
+- `legacy_pre_registry`: artifacts that predate the cutover and cannot truthfully satisfy the governed_v1 identity or closure contract
+- `governed_v1`: artifacts created at or after the cutover, or older artifacts that already carry the governed identity and closure contract
+
+Epoch behavior:
+
+- `governed_v1` stays fail-closed for governed identity, required observations, and closure evidence
+- `legacy_pre_registry` stays visible in the world model, awareness, and status surfaces
+- `legacy_pre_registry` is non-blocking for impossible modern fields, but it must emit an explicit compatibility signal until it is backfilled or archived
+- original historical artifacts are not rewritten in place just to fake governed identity
+
 ## World-Model Artifact Paths
 
 Current root-owned outputs:
@@ -188,6 +206,12 @@ Every governed observation must carry:
 - `source_artifact_refs`
 
 Root is the publication destination and state builder. `_stack` and Lifeline emit facts; they do not become alternate session stores.
+
+Historical exception rule:
+
+- a `legacy_pre_registry` session may be incomplete
+- a `legacy_pre_registry` session may not be invisible
+- compatibility status for legacy history must be explicit in the attention layer
 
 ## Working-Memory Guardrails
 

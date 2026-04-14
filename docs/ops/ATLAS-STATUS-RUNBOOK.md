@@ -61,6 +61,7 @@ Current attention items may include:
 
 - registry load failure
 - registry drift between the active session and the current registry bundle
+- historical sessions in `legacy_pre_registry` compatibility mode
 - unknown governed tool or extension ids referenced by active artifacts
 - blocked or paused workers
 - open merge requests
@@ -69,6 +70,24 @@ Current attention items may include:
 - untrusted knowledge surfaces that remain quarantined
 
 The queue must stay descriptor-backed and deterministic. It must not inspect transcripts, terminal output, or raw imported evidence.
+
+## Epoch Compatibility
+
+Governed runtime history is epoch-aware.
+
+The registry-backed governed epoch starts at **2026-04-14T08:06:53Z**.
+
+Status behavior by epoch:
+
+- `governed_v1` surfaces missing `tool_id`, `registry_digest`, observation-chain, or closure evidence as blocking governance defects
+- `legacy_pre_registry` surfaces those same gaps as compatibility attention instead of pretending the old artifact was minted under the new contract
+
+Current status output exposes legacy compatibility through:
+
+- `legacy_compatibility`
+- `attention_queue.items[*].kind = legacy_governed_compatibility`
+
+That keeps historical sessions queryable without lying about their epoch.
 
 ## World-Model Refs
 

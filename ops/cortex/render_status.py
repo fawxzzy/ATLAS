@@ -13,6 +13,10 @@ if str(ROOT) not in sys.path:
 
 from ops._atlas import atlas_relative, atlas_root, resolve_atlas_path
 from ops.atlas.load_tool_registry import load_tool_registry_bundle
+from ops.atlas.observations import (
+    GOVERNED_ARTIFACT_EPOCH_LEGACY_PRE_REGISTRY,
+    governed_artifact_epoch_details,
+)
 from ops.cortex._artifacts import load_descriptors
 from ops.cortex.index_working_memory import load_working_memory_catalog
 
@@ -245,6 +249,46 @@ def closure_receipts(
     return results
 
 
+def load_source_payload(source_ref: Any) -> dict[str, Any] | None:
+    if not isinstance(source_ref, str) or not source_ref.strip():
+        return None
+    candidate = resolve_atlas_path(source_ref, root=atlas_root())
+    if not candidate.exists():
+        return None
+    try:
+        payload = json.loads(candidate.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    return payload if isinstance(payload, dict) else None
+
+
+def legacy_compatibility_surfaces(descriptors: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    items: list[dict[str, Any]] = []
+    sessions_root = atlas_root() / "runtime" / "atlas" / "sessions"
+    if not sessions_root.exists():
+        return items
+    for path in sorted(sessions_root.rglob("session.manifest.json")):
+        source_ref = atlas_relative(path, root=atlas_root())
+        payload = load_source_payload(source_ref)
+        if not isinstance(payload, dict):
+            continue
+        epoch = governed_artifact_epoch_details(payload, source_ref=str(source_ref))
+        if not isinstance(epoch, dict) or epoch.get("epoch") != GOVERNED_ARTIFACT_EPOCH_LEGACY_PRE_REGISTRY:
+            continue
+        items.append(
+            {
+                "session_id": payload.get("session_id"),
+                "source_ref": source_ref,
+                "epoch": epoch.get("epoch"),
+                "cutover_at": epoch.get("cutover_at"),
+                "observed_at": epoch.get("observed_at"),
+                "missing_governed_requirements": epoch.get("missing_requirements", []),
+            }
+        )
+    items.sort(key=lambda item: (str(item.get("observed_at") or ""), str(item.get("session_id") or ""), str(item.get("source_ref") or "")))
+    return items
+
+
 def attention_item(
     *,
     kind: str,
@@ -315,6 +359,7 @@ def attention_queue(
     blocked_workers_payload: list[dict[str, Any]],
     open_merge_requests_payload: list[dict[str, Any]],
     closure_receipts_payload: list[dict[str, Any]],
+    legacy_compatibility_payload: list[dict[str, Any]],
     trust_surfaces_payload: list[dict[str, Any]],
     registry_state: dict[str, Any],
 ) -> dict[str, Any]:
@@ -477,6 +522,22 @@ def attention_queue(
             )
         )
 
+    for legacy_surface in legacy_compatibility_payload:
+        items.append(
+            attention_item(
+                kind="legacy_governed_compatibility",
+                severity="medium",
+                summary=f"Historical session '{legacy_surface.get('session_id')}' predates the governed registry epoch and remains in compatibility mode.",
+                source_ref=legacy_surface.get("source_ref"),
+                details={
+                    "epoch": legacy_surface.get("epoch"),
+                    "cutover_at": legacy_surface.get("cutover_at"),
+                    "observed_at": legacy_surface.get("observed_at"),
+                    "missing_governed_requirements": legacy_surface.get("missing_governed_requirements", []),
+                },
+            )
+        )
+
     for trust_surface in trust_surfaces_payload:
         if trust_surface.get("trust_class") != "untrusted":
             continue
@@ -597,6 +658,7 @@ def render_status_payload(
     blocked_workers_payload = blocked_workers(descriptors)
     open_merge_requests_payload = open_merge_requests(descriptors)
     closure_receipts_payload = closure_receipts(descriptors, session_descriptor=target_session)
+    legacy_compatibility_payload = legacy_compatibility_surfaces(descriptors)
     trust_surfaces_payload = trust_surfaces(descriptors)
 
     return {
@@ -608,6 +670,7 @@ def render_status_payload(
         "blocked_workers": blocked_workers_payload,
         "open_merge_requests": open_merge_requests_payload,
         "closure_receipts": closure_receipts_payload,
+        "legacy_compatibility": legacy_compatibility_payload,
         "trust_surfaces": trust_surfaces_payload,
         "working_memory": working_memory_summary(),
         "attention_queue": attention_queue(
@@ -615,6 +678,7 @@ def render_status_payload(
             blocked_workers_payload=blocked_workers_payload,
             open_merge_requests_payload=open_merge_requests_payload,
             closure_receipts_payload=closure_receipts_payload,
+            legacy_compatibility_payload=legacy_compatibility_payload,
             trust_surfaces_payload=trust_surfaces_payload,
             registry_state=registry_state,
         ),

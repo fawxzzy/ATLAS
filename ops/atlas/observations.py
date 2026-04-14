@@ -12,6 +12,28 @@ from ops._atlas import atlas_relative, atlas_root
 from ops.cortex._artifacts import stable_json_digest, write_json
 
 OBSERVATION_CONTRACT_VERSION = "atlas.observation.v1"
+GOVERNED_ARTIFACT_EPOCH_LEGACY_PRE_REGISTRY = "legacy_pre_registry"
+GOVERNED_ARTIFACT_EPOCH_GOVERNED_V1 = "governed_v1"
+GOVERNED_ARTIFACT_REGISTRY_CUTOVER = "2026-04-14T08:06:53Z"
+GOVERNED_ARTIFACT_TIMESTAMP_PATTERN = re.compile(r"(20\d{6}T\d{6}Z)", re.IGNORECASE)
+GOVERNED_ARTIFACT_TIME_FIELDS = (
+    "created_at",
+    "updated_at",
+    "closed_at",
+    "requested_at",
+    "issued_at",
+    "executed_at",
+    "heartbeat_at",
+    "recorded_at",
+)
+GOVERNED_SURFACE_CONTRACT_VERSIONS = {
+    "atlas.worker.assignment.v1",
+    "atlas.worker.status.v1",
+    "atlas.worker.merge-request.v1",
+    "atlas.privileged-action.request.v1",
+    "atlas.approval.receipt.v1",
+    "atlas.privileged-action.receipt.v1",
+}
 LEGACY_OBSERVATION_TYPE_ALIASES = {
     "assignment.created": "assignment_created",
     "execution.requested": "execution_requested",
@@ -33,6 +55,152 @@ def stamp_now() -> str:
 
 def stable_item_id(payload: dict[str, Any]) -> str:
     return stable_json_digest(payload)
+
+
+def _optional_string(value: Any) -> str | None:
+    if isinstance(value, str) and value.strip():
+        return value.strip()
+    return None
+
+
+def _parse_iso_timestamp(value: str | None) -> datetime | None:
+    text = _optional_string(value)
+    if not text:
+        return None
+    try:
+        return datetime.fromisoformat(text.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+
+
+def _parse_embedded_timestamp(value: str | None) -> datetime | None:
+    text = _optional_string(value)
+    if not text:
+        return None
+    match = GOVERNED_ARTIFACT_TIMESTAMP_PATTERN.search(text)
+    if not match:
+        return None
+    try:
+        return datetime.strptime(match.group(1).upper(), "%Y%m%dT%H%M%SZ").replace(tzinfo=timezone.utc)
+    except ValueError:
+        return None
+
+
+def governed_artifact_cutover_datetime() -> datetime:
+    parsed = _parse_iso_timestamp(GOVERNED_ARTIFACT_REGISTRY_CUTOVER)
+    if parsed is None:
+        raise ValueError("GOVERNED_ARTIFACT_REGISTRY_CUTOVER must be a valid ISO timestamp.")
+    return parsed
+
+
+def _non_empty_string_list(value: Any) -> list[str]:
+    if not isinstance(value, list):
+        return []
+    return [item.strip() for item in value if isinstance(item, str) and item.strip()]
+
+
+def _session_missing_governed_requirements(payload: dict[str, Any]) -> list[str]:
+    missing: list[str] = []
+    governed_surfaces = payload.get("governed_surfaces")
+    if not isinstance(governed_surfaces, dict):
+        return [
+            "governed_surfaces.registry_digest",
+            "governed_surfaces.context.tool_id",
+            "governed_surfaces.supervision.tool_id",
+            "governed_surfaces.execution.tool_id",
+            "worker.assignment_ref",
+            "refs.status_refs",
+            "refs.request_ref",
+            "refs.approval_receipt_ref",
+            "refs.execution_receipt_ref",
+            "completion.final_status",
+            "completion.final_status_ref",
+            "completion.close_receipt_refs",
+        ]
+
+    if not _optional_string(governed_surfaces.get("registry_digest")):
+        missing.append("governed_surfaces.registry_digest")
+    for scope_name in ("context", "supervision", "execution"):
+        scope = governed_surfaces.get(scope_name)
+        if not isinstance(scope, dict) or not _optional_string(scope.get("tool_id")):
+            missing.append(f"governed_surfaces.{scope_name}.tool_id")
+
+    worker = payload.get("worker") if isinstance(payload.get("worker"), dict) else {}
+    refs = payload.get("refs") if isinstance(payload.get("refs"), dict) else {}
+    completion = payload.get("completion") if isinstance(payload.get("completion"), dict) else {}
+
+    if not (_optional_string(worker.get("assignment_ref")) or _optional_string(refs.get("assignment_ref"))):
+        missing.append("worker.assignment_ref")
+    if not _non_empty_string_list(refs.get("status_refs")):
+        missing.append("refs.status_refs")
+    if not _optional_string(refs.get("request_ref")):
+        missing.append("refs.request_ref")
+    if not _optional_string(refs.get("approval_receipt_ref")):
+        missing.append("refs.approval_receipt_ref")
+    if not _optional_string(refs.get("execution_receipt_ref")):
+        missing.append("refs.execution_receipt_ref")
+
+    final_status = _optional_string(completion.get("final_status"))
+    if not final_status:
+        missing.append("completion.final_status")
+    if not _optional_string(completion.get("final_status_ref")):
+        missing.append("completion.final_status_ref")
+    if final_status in {None, "completed", "failed", "resume_ready"} and not _non_empty_string_list(
+        completion.get("close_receipt_refs")
+    ):
+        missing.append("completion.close_receipt_refs")
+    return missing
+
+
+def _surface_missing_governed_requirements(payload: dict[str, Any]) -> list[str]:
+    missing: list[str] = []
+    if not _optional_string(payload.get("tool_id")):
+        missing.append("tool_id")
+    if not _optional_string(payload.get("registry_digest")):
+        missing.append("registry_digest")
+    return missing
+
+
+def governed_artifact_epoch_details(
+    payload: dict[str, Any],
+    *,
+    source_ref: str | None = None,
+) -> dict[str, Any] | None:
+    contract_version = _optional_string(payload.get("contract_version"))
+    if contract_version == "atlas.session.v1":
+        missing_requirements = _session_missing_governed_requirements(payload)
+    elif contract_version in GOVERNED_SURFACE_CONTRACT_VERSIONS:
+        missing_requirements = _surface_missing_governed_requirements(payload)
+    else:
+        return None
+
+    observed_at = None
+    for field in GOVERNED_ARTIFACT_TIME_FIELDS:
+        observed_at = _parse_iso_timestamp(_optional_string(payload.get(field)))
+        if observed_at is not None:
+            break
+    if observed_at is None:
+        observed_at = _parse_embedded_timestamp(source_ref)
+    if observed_at is None:
+        observed_at = _parse_embedded_timestamp(_optional_string(payload.get("session_id")))
+    if observed_at is None:
+        observed_at = _parse_embedded_timestamp(_optional_string(payload.get("assignment_id")))
+
+    cutover_at = governed_artifact_cutover_datetime()
+    predates_cutover = observed_at is not None and observed_at < cutover_at
+    epoch = (
+        GOVERNED_ARTIFACT_EPOCH_LEGACY_PRE_REGISTRY
+        if predates_cutover and bool(missing_requirements)
+        else GOVERNED_ARTIFACT_EPOCH_GOVERNED_V1
+    )
+    return {
+        "epoch": epoch,
+        "contract_version": contract_version,
+        "cutover_at": GOVERNED_ARTIFACT_REGISTRY_CUTOVER,
+        "observed_at": observed_at.isoformat().replace("+00:00", "Z") if observed_at else None,
+        "predates_cutover": predates_cutover,
+        "missing_requirements": missing_requirements,
+    }
 
 
 def canonical_observation_type(

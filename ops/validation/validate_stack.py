@@ -60,9 +60,11 @@ from ops.stack.generate_lockfile import (
 )
 from ops.stack.audit_gitdir_hygiene import build_report as build_gitdir_hygiene_report, default_target_paths as default_gitdir_hygiene_targets
 from ops.atlas.observations import (
+    GOVERNED_ARTIFACT_EPOCH_LEGACY_PRE_REGISTRY,
     build_observation,
     canonical_observation_type,
     emit_observation,
+    governed_artifact_epoch_details,
     load_observations,
 )
 from ops.atlas.load_tool_registry import load_tool_registry_bundle
@@ -866,6 +868,11 @@ def validate_world_model_state(stack_file: Path) -> list[Finding]:
         for item in inventory_entries
         if isinstance(item, dict) and isinstance(item.get("source_ref"), str)
     }
+    attention_item_keys = {
+        (str(item.get("kind", "")), str(item.get("source_ref")))
+        for item in attention_items
+        if isinstance(item, dict) and isinstance(item.get("source_ref"), str)
+    }
 
     def optional_string(value: Any) -> str | None:
         if isinstance(value, str) and value.strip():
@@ -983,6 +990,20 @@ def validate_world_model_state(stack_file: Path) -> list[Finding]:
                 continue
 
             governed_surfaces = session_payload.get("governed_surfaces")
+            epoch_details = governed_artifact_epoch_details(session_payload, source_ref=source_ref)
+            if isinstance(epoch_details, dict) and epoch_details.get("epoch") == GOVERNED_ARTIFACT_EPOCH_LEGACY_PRE_REGISTRY:
+                require_observation("governed_compatibility", source_ref, owner_ref=source_ref)
+                if ("legacy_governed_compatibility", source_ref) not in attention_item_keys:
+                    findings.append(
+                        Finding(
+                            "error",
+                            "missing-legacy-compatibility-attention",
+                            relative_to_root(root, attention_path),
+                            f"Historical session '{source_ref}' is missing the required legacy compatibility attention item.",
+                        )
+                    )
+                continue
+
             if not isinstance(governed_surfaces, dict):
                 continue
             execution_surface = governed_surfaces.get("execution")
