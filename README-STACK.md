@@ -17,6 +17,7 @@ Read these files first:
 
 - `stack.yaml`
 - `AGENTS.md`
+- `docs/architecture/AWARENESS-FIRST-WORLD-MODEL.md`
 - `docs/architecture/STACK-STANDARDS.md`
 - `docs/architecture/PATH-POLICY.md`
 - `docs/ops/ATLAS-SESSION-RUNBOOK.md`

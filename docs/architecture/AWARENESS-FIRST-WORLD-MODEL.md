@@ -1,0 +1,140 @@
+# Awareness-First World Model
+
+This document turns the awareness-first requirement into stack-owned contracts for ATLAS.
+
+It is a stack boundary document, not a replacement for platform doctrine in `repos/fawxzzy-atlas/docs/**`.
+
+## Purpose
+
+ATLAS should not aim for "every component knows everything."
+
+ATLAS should aim for this stricter invariant:
+
+**No dark state:** any state that can change behavior must be represented as at least one of:
+
+- a registered surface
+- a typed artifact
+- an append-only observation or receipt
+- a deterministic snapshot or attention view derived from the above
+
+If behavior depends on state that exists only in one process memory, one terminal scrollback, or one person's recollection, the system is not awareness-first yet.
+
+## World-Model Layers
+
+| Layer | Question answered | Current ATLAS surface | Required rule |
+| --- | --- | --- | --- |
+| registry | what may exist or be invoked | `docs/registry/**`, `schemas/atlas.tool.catalog.entry.v1.json`, `schemas/atlas.extension.manifest.v1.json` | unknown surfaces fail closed |
+| artifact | what durable object exists | `schemas/atlas.artifact.descriptor.v1.json`, `runtime/cortex/artifacts/**` | important objects have typed identity and digest |
+| observation | what happened | `runtime/receipts/**`, `runtime/lifeline/worker-execution/**`, `runtime/receipts/events/**`, knowledge receipts | actions and decisions are receipt-backed, not transcript-backed |
+| snapshot | what is true now | `ops/cortex/render_status.py`, `runtime/atlas/sessions/*/status.snapshot.json`, `runtime/cortex/query/knowledge/bundle.json` | current truth is derived from explicit artifacts only |
+| attention | what requires a choice | status `attention_queue`, future queue-like read models under `runtime/state/**` when needed | anomalies are first-class outputs, not hidden interpretation |
+
+## Current Mapping
+
+ATLAS already has most of the substrate required for awareness-first behavior:
+
+- registry-backed governed tool surfaces
+- content-addressed artifact descriptors
+- typed session manifests, worker assignments, worker status artifacts, and execution receipts
+- a read-only Cortex query plane and status read model
+- explicit privilege requests, approvals, and execution receipts
+
+That means the main gap is not raw capability. The gap is turning these surfaces into one coherent world model that makes uncertainty, drift, and blocked work visible before action is taken.
+
+## Memory Contract
+
+ATLAS should treat memory as two different classes with different rules.
+
+### Event Memory
+
+Event memory answers "what happened."
+
+Use:
+
+- `runtime/receipts/events/**`
+- `runtime/receipts/knowledge/**`
+- `runtime/lifeline/worker-execution/**`
+- other append-only receipt lanes
+
+Rules:
+
+- raw receipts are immutable once written
+- corrective understanding is added through new receipts or derived artifacts, not by silently rewriting history
+- retention may archive timestamped duplicates only when a stable `latest.json` or equivalent compatibility target exists
+
+### Document Memory
+
+Document memory answers "what is known, planned, decided, or standardized."
+
+Use:
+
+- `docs/architecture/**`
+- `docs/standards/**`
+- `docs/ops/**`
+- `docs/knowledge/promotions/**`
+- repo-owned doctrine inside the repo that owns it
+
+Rules:
+
+- documents are editable and reviewable
+- documents must cite their explicit source files or receipt lanes when they summarize runtime truth
+- document updates must not pretend to be raw event history
+
+## Compaction Rule
+
+Compaction is allowed only when provenance remains inspectable.
+
+Safe compaction means:
+
+- keep raw event or receipt lanes as the auditable source
+- create summary, catalog, or query artifacts that link back to source refs and digests
+- make compaction itself observable through receipts or reports
+
+Unsafe compaction means:
+
+- replacing the only copy of history with a summary
+- rewriting state without a source ref
+- carrying critical memory only in a model context window
+
+## Attention Rule
+
+A snapshot is not sufficient if it only lists inventory.
+
+ATLAS should also emit an explicit attention view for operator-relevant anomalies, such as:
+
+- blocked or paused workers
+- sessions waiting for resume or merge handling
+- registry load failure or registry drift
+- governed surfaces that are unknown to the current registry
+- failed or missing closure receipts
+- quarantined trust surfaces that still require review or containment
+
+Attention is a read model. It does not grant execution authority.
+
+## Connector Boundary
+
+Any external chat, voice, or app connector must bind to the same governed model:
+
+- discoverable surfaces come from the registry, not ad hoc prompts
+- reads consume snapshots, catalogs, and descriptors where possible
+- writes or execution requests flow through Lifeline or another approved executor
+- privileged actions still require approval and receipts
+
+An external client may be a better interface, but it must not become a second execution or memory authority.
+
+## Before Wave 7
+
+Before expanding orchestration, ATLAS should keep these invariants hard:
+
+1. no decision-relevant state lives only in transcripts, logs, or RAM
+2. all governed surfaces are registry-backed and fail closed when unknown
+3. status remains descriptor-driven rather than terminal-driven
+4. attention items are derived explicitly from typed artifacts
+5. memory refinement preserves source refs and digests
+
+## Non-Goals
+
+- no background daemon that mutates repos without scoped artifacts
+- no hidden cross-repo queue runner
+- no "smart memory" that silently edits doctrine or repo code
+- no promotion of Cortex from advisory to executor without a separate contract
