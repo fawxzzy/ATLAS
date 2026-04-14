@@ -56,8 +56,10 @@ from ops.stack.generate_lockfile import (
     repo_is_git_root,
 )
 from ops.stack.audit_gitdir_hygiene import build_report as build_gitdir_hygiene_report, default_target_paths as default_gitdir_hygiene_targets
+from ops.atlas.observations import build_observation, emit_observation, load_observations
 from ops.atlas.load_tool_registry import load_tool_registry_bundle
-from ops.cortex._artifacts import load_descriptors, stable_json_digest
+from ops.cortex._artifacts import load_descriptors, register_artifact_descriptors, stable_json_digest
+from ops.cortex.world_model import world_model_state_root, write_world_model_state
 
 
 @dataclass
@@ -672,9 +674,15 @@ def validate_world_model_state(stack_file: Path) -> list[Finding]:
     observations = snapshot.get("observations", [])
     inventory_entries = snapshot.get("inventory_entries", [])
     attention_items = snapshot.get("attention_items", [])
+    stored_observations = load_observations(root)
     observation_source_refs = {
         str(item.get("source_ref"))
         for item in observations
+        if isinstance(item, dict) and isinstance(item.get("source_ref"), str)
+    }
+    stored_observation_source_refs = {
+        str(item.get("source_ref"))
+        for item in stored_observations
         if isinstance(item, dict) and isinstance(item.get("source_ref"), str)
     }
     inventory_source_refs = {
@@ -696,6 +704,15 @@ def validate_world_model_state(stack_file: Path) -> list[Finding]:
                     f"Execution receipt '{source_ref}' is missing from the state snapshot observations.",
                 )
             )
+        if artifact_type == "execution_receipt" and source_ref not in stored_observation_source_refs:
+            findings.append(
+                Finding(
+                    "error",
+                    "missing-governed-observation-store",
+                    relative_to_root(root, snapshot_path),
+                    f"Execution receipt '{source_ref}' is missing from the emitted observation store.",
+                )
+            )
         if artifact_type == "session_manifest" and str(state.get("final_status", "")) in {"completed", "resume_ready", "failed"}:
             if source_ref not in observation_source_refs:
                 findings.append(
@@ -713,6 +730,27 @@ def validate_world_model_state(stack_file: Path) -> list[Finding]:
                         "missing-session-inventory-entry",
                         relative_to_root(root, snapshot_path),
                         f"Completed session '{source_ref}' is missing from the state snapshot inventory.",
+                    )
+                )
+            if source_ref not in stored_observation_source_refs:
+                findings.append(
+                    Finding(
+                        "error",
+                        "missing-session-observation-store",
+                        relative_to_root(root, snapshot_path),
+                        f"Completed session '{source_ref}' is missing from the emitted observation store.",
+                    )
+                )
+            close_receipt_refs = descriptor.get("links", {}).get("close_receipt_refs", [])
+            if not isinstance(close_receipt_refs, list) or not any(
+                isinstance(item, str) and item.strip() for item in close_receipt_refs
+            ):
+                findings.append(
+                    Finding(
+                        "error",
+                        "missing-session-closure-evidence",
+                        relative_to_root(root, snapshot_path),
+                        f"Completed session '{source_ref}' is missing closure receipt refs.",
                     )
                 )
 
@@ -1247,6 +1285,63 @@ def ratchet_report(current_findings: list[dict[str, Any]], baseline: dict[str, A
     }
 
 
+def emit_validation_observations(report: dict[str, Any], *, json_path: Path, root: Path) -> None:
+    summary = report.get("summary", {}) if isinstance(report.get("summary"), dict) else {}
+    findings = report.get("findings", []) if isinstance(report.get("findings"), list) else []
+    source_ref = relative_to_root(root, json_path)
+    generated_at = str(report.get("generated_at")) if report.get("generated_at") is not None else None
+    emit_observation(
+        build_observation(
+            observation_type="validation.stack",
+            source_kind="validation_receipt",
+            status="blocking" if (summary.get("critical", 0) or summary.get("error", 0)) else "clean",
+            observed_at=generated_at,
+            source_ref=source_ref,
+            scope_ref="stack",
+            details={
+                "critical": summary.get("critical"),
+                "error": summary.get("error"),
+                "warning": summary.get("warning"),
+                "total": summary.get("total"),
+            },
+        ),
+        owner="stack-validation",
+        root=root,
+    )
+    if any(isinstance(item, dict) and item.get("category") == "stack-lock-drift" for item in findings):
+        emit_observation(
+            build_observation(
+                observation_type="lockfile.drift",
+                source_kind="validation_receipt",
+                status="detected",
+                observed_at=generated_at,
+                source_ref=source_ref,
+                scope_ref="stack",
+                details={"category": "stack-lock-drift"},
+            ),
+            owner="stack-validation",
+            root=root,
+        )
+    ratchet = report.get("ratchet") if isinstance(report.get("ratchet"), dict) else {}
+    if int(ratchet.get("new_blocking_count", 0) or 0) > 0:
+        emit_observation(
+            build_observation(
+                observation_type="validation.ratchet",
+                source_kind="validation_receipt",
+                status="regression",
+                observed_at=generated_at,
+                source_ref=source_ref,
+                scope_ref="stack",
+                details={
+                    "new_blocking_count": ratchet.get("new_blocking_count"),
+                    "baseline_path": ratchet.get("baseline_path"),
+                },
+            ),
+            owner="stack-validation",
+            root=root,
+        )
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Validate the ATLAS stack against stack.yaml.")
     parser.add_argument("--stack-file", default=str(repo_root() / "stack.yaml"))
@@ -1267,6 +1362,15 @@ def main(argv: list[str] | None = None) -> int:
     should_exit_success = False
     try:
         config = load_stack_config(stack_file)
+        write_world_model_state(
+            descriptor_root=stack_file.parent.resolve() / "runtime" / "cortex" / "artifacts",
+            root=stack_file.parent.resolve(),
+        )
+        register_artifact_descriptors(
+            [world_model_state_root(stack_file.parent.resolve())],
+            output_dir=stack_file.parent.resolve() / "runtime" / "cortex" / "artifacts",
+            root=stack_file.parent.resolve(),
+        )
         resolved_lock_file = lock_file or lockfile_output_path(stack_file, config)
         report = {
             "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -1341,6 +1445,7 @@ def main(argv: list[str] | None = None) -> int:
     markdown_path = output_dir / args.markdown_name
     json_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
     write_markdown_report(report, markdown_path)
+    emit_validation_observations(report, json_path=json_path, root=stack_file.parent.resolve())
     summary = report["summary"]
     print(f"Stack validation complete: critical={summary['critical']} error={summary['error']} warning={summary['warning']} info={summary['info']}")
     print(f"Markdown report: {normalize_slashes(str(markdown_path))}")

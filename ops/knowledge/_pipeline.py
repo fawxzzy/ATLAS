@@ -12,6 +12,12 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from ops.atlas.observations import build_observation, emit_observation
+
 PIPELINE_VERSION = "atlas.knowledge.pipeline.v2"
 RECEIPT_VERSION = "atlas.knowledge.receipt.v1"
 PROMOTION_SCHEMA_VERSION = "atlas.knowledge.promotion.v1"
@@ -265,6 +271,102 @@ def knowledge_query_bundle_path() -> Path:
 
 def latest_receipt_path(archive_id: str) -> Path:
     return receipt_dir(archive_id) / "latest.json"
+
+
+def emit_knowledge_observations(receipt: dict[str, Any], *, dry_run: bool) -> None:
+    if dry_run:
+        return
+    source_ref = str(receipt.get("paths", {}).get("latest_path", "")).strip()
+    if not source_ref:
+        return
+    archive_id = str(receipt.get("archive_id", "")).strip() or None
+    recorded_at = str(receipt.get("recorded_at")) if receipt.get("recorded_at") is not None else None
+    emit_observation(
+        build_observation(
+            observation_type=f"knowledge_receipt.{receipt.get('action', 'unknown')}",
+            source_kind="knowledge_receipt",
+            status="blocked" if receipt.get("promotion_blocked") else "recorded",
+            observed_at=recorded_at,
+            source_ref=source_ref,
+            scope_ref=archive_id,
+            details={
+                "archive_id": archive_id,
+                "promotion_status": receipt.get("promotion", {}).get("promotion_status")
+                if isinstance(receipt.get("promotion"), dict)
+                else None,
+                "indexing_profile": receipt.get("promotion", {}).get("indexing_profile")
+                if isinstance(receipt.get("promotion"), dict)
+                else receipt.get("evaluation", {}).get("indexing_profile")
+                if isinstance(receipt.get("evaluation"), dict)
+                else None,
+            },
+        ),
+        owner="knowledge-pipeline",
+        root=atlas_root(),
+    )
+
+    if receipt.get("action") == "import":
+        emit_observation(
+            build_observation(
+                observation_type="knowledge.archive",
+                source_kind="knowledge_receipt",
+                status="imported",
+                observed_at=recorded_at,
+                source_ref=source_ref,
+                scope_ref=archive_id,
+                details={
+                    "archive_id": archive_id,
+                    "manifest_path": receipt.get("paths", {}).get("manifest_path")
+                    if isinstance(receipt.get("paths"), dict)
+                    else None,
+                },
+            ),
+            owner="knowledge-pipeline",
+            root=atlas_root(),
+        )
+
+    promotion = receipt.get("promotion") if isinstance(receipt.get("promotion"), dict) else {}
+    if receipt.get("action") == "promote" or promotion.get("promotion_status") not in {None, "not_promoted"}:
+        emit_observation(
+            build_observation(
+                observation_type="knowledge.promotion",
+                source_kind="knowledge_receipt",
+                status=str(promotion.get("promotion_status") or "not_promoted"),
+                observed_at=recorded_at,
+                source_ref=source_ref,
+                scope_ref=archive_id,
+                details={
+                    "archive_id": archive_id,
+                    "indexing_profile": promotion.get("indexing_profile"),
+                    "promotion_doc_path": receipt.get("paths", {}).get("promotion_doc_path")
+                    if isinstance(receipt.get("paths"), dict)
+                    else None,
+                },
+            ),
+            owner="knowledge-pipeline",
+            root=atlas_root(),
+        )
+
+    evaluation = receipt.get("evaluation") if isinstance(receipt.get("evaluation"), dict) else {}
+    if receipt.get("promotion_blocked") or evaluation.get("quarantine_flags"):
+        emit_observation(
+            build_observation(
+                observation_type="knowledge.trust_gate",
+                source_kind="knowledge_receipt",
+                status="blocked",
+                observed_at=recorded_at,
+                source_ref=source_ref,
+                scope_ref=archive_id,
+                details={
+                    "archive_id": archive_id,
+                    "promotion_block_reason": receipt.get("promotion_block_reason"),
+                    "quarantine_flags": evaluation.get("quarantine_flags"),
+                    "quarantine_reason": evaluation.get("quarantine_reason"),
+                },
+            ),
+            owner="knowledge-pipeline",
+            root=atlas_root(),
+        )
 
 
 def discover_runtime_catalogs() -> list[Path]:
@@ -1299,6 +1401,7 @@ def write_knowledge_receipt(
         receipt_folder.mkdir(parents=True, exist_ok=True)
         receipt_path_value.write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
         latest_path.write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
+        emit_knowledge_observations(receipt, dry_run=False)
     return receipt
 
 

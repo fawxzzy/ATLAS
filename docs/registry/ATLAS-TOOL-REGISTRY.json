@@ -4,6 +4,504 @@
   "entries": [
     {
       "contract_version": "atlas.tool.catalog.entry.v1",
+      "tool_id": "atlas_query_knowledge",
+      "display_name": "ATLAS Query Knowledge",
+      "description": "Read-only governed knowledge query surface exposed through the Awareness API.",
+      "surface_kind": "builtin",
+      "status": "active",
+      "owner": "stack-root",
+      "extension_id": null,
+      "trust_class": "trusted",
+      "release_eligible": true,
+      "executor": {
+        "component_id": "atlas-awareness",
+        "entrypoint": "ops/atlas/serve_awareness.py",
+        "mode": "http"
+      },
+      "contracts": {
+        "request": null,
+        "receipt": null
+      },
+      "invocation": {
+        "kind": "query",
+        "action_operation": null,
+        "execution_mode": null
+      },
+      "capability_profile": {
+        "contract_version": "atlas.capability.profile.v1",
+        "capability_profile_id": "cap-atlas-query-knowledge-v1",
+        "description": "Governed knowledge query over metadata and promotion-safe derived content only.",
+        "filesystem_scopes": {
+          "read": [
+            "runtime/cortex/query/knowledge/**",
+            "runtime/cortex/catalog/knowledge/**",
+            "runtime/state/atlas/**",
+            "docs/**",
+            "ops/**",
+            "stack.yaml",
+            "stack.lock.yaml",
+            "README-STACK.md"
+          ],
+          "write": [],
+          "create": [],
+          "deny": [
+            "secrets/**",
+            "tmp/**",
+            "data/imports/**",
+            "repos/Verta-Core/**"
+          ]
+        },
+        "network_scopes": {
+          "mode": "none",
+          "allowed_domains": [],
+          "blocked_domains": []
+        },
+        "process_execution_permissions": {
+          "allow_spawn": false,
+          "allow_shell": false,
+          "allow_python": false,
+          "allowed_commands": [],
+          "denied_commands": [
+            "powershell",
+            "cmd",
+            "git",
+            "python",
+            "node"
+          ]
+        },
+        "package_manager_permissions": {
+          "allow_install": false,
+          "allow_update": false,
+          "allowed_managers": [],
+          "blocked_managers": [
+            "npm",
+            "pnpm",
+            "yarn"
+          ]
+        },
+        "elevation_requirement": "none",
+        "resource_budgets": {
+          "wall_clock_seconds": 30,
+          "cpu_seconds": 10,
+          "memory_mb": 256,
+          "disk_mb": 25
+        },
+        "allowed_data_classes": [
+          "public",
+          "internal",
+          "machine_state"
+        ],
+        "audit_class": "standard"
+      },
+      "approval": {
+        "required": false,
+        "approver_kind": null,
+        "required_status": null,
+        "granted_scope_required": false
+      }
+    },
+    {
+      "contract_version": "atlas.tool.catalog.entry.v1",
+      "tool_id": "atlas_session_fetch",
+      "display_name": "ATLAS Session Fetch",
+      "description": "Read-only governed session fetch surface exposed through the Awareness API.",
+      "surface_kind": "builtin",
+      "status": "active",
+      "owner": "stack-root",
+      "extension_id": null,
+      "trust_class": "trusted",
+      "release_eligible": true,
+      "executor": {
+        "component_id": "atlas-awareness",
+        "entrypoint": "ops/atlas/serve_awareness.py",
+        "mode": "http"
+      },
+      "contracts": {
+        "request": null,
+        "receipt": null
+      },
+      "invocation": {
+        "kind": "query",
+        "action_operation": null,
+        "execution_mode": null
+      },
+      "capability_profile": {
+        "contract_version": "atlas.capability.profile.v1",
+        "capability_profile_id": "cap-atlas-session-fetch-v1",
+        "description": "Read-only governed session inspection surface.",
+        "filesystem_scopes": {
+          "read": [
+            "runtime/atlas/sessions/**",
+            "runtime/cortex/artifacts/**",
+            "runtime/cortex/supervisor/**",
+            "runtime/receipts/**",
+            "runtime/state/atlas/**",
+            "docs/**",
+            "ops/**",
+            "stack.yaml",
+            "stack.lock.yaml",
+            "README-STACK.md"
+          ],
+          "write": [],
+          "create": [],
+          "deny": [
+            "secrets/**",
+            "tmp/**",
+            "data/imports/**",
+            "repos/Verta-Core/**"
+          ]
+        },
+        "network_scopes": {
+          "mode": "none",
+          "allowed_domains": [],
+          "blocked_domains": []
+        },
+        "process_execution_permissions": {
+          "allow_spawn": false,
+          "allow_shell": false,
+          "allow_python": false,
+          "allowed_commands": [],
+          "denied_commands": [
+            "powershell",
+            "cmd",
+            "git",
+            "python",
+            "node"
+          ]
+        },
+        "package_manager_permissions": {
+          "allow_install": false,
+          "allow_update": false,
+          "allowed_managers": [],
+          "blocked_managers": [
+            "npm",
+            "pnpm",
+            "yarn"
+          ]
+        },
+        "elevation_requirement": "none",
+        "resource_budgets": {
+          "wall_clock_seconds": 30,
+          "cpu_seconds": 10,
+          "memory_mb": 256,
+          "disk_mb": 25
+        },
+        "allowed_data_classes": [
+          "public",
+          "internal",
+          "machine_state"
+        ],
+        "audit_class": "standard"
+      },
+      "approval": {
+        "required": false,
+        "approver_kind": null,
+        "required_status": null,
+        "granted_scope_required": false
+      }
+    },
+    {
+      "contract_version": "atlas.tool.catalog.entry.v1",
+      "tool_id": "atlas_status",
+      "display_name": "ATLAS Status",
+      "description": "Read-only awareness status surface exposing digested current-state summaries.",
+      "surface_kind": "builtin",
+      "status": "active",
+      "owner": "stack-root",
+      "extension_id": null,
+      "trust_class": "trusted",
+      "release_eligible": true,
+      "executor": {
+        "component_id": "atlas-awareness",
+        "entrypoint": "ops/atlas/serve_awareness.py",
+        "mode": "http"
+      },
+      "contracts": {
+        "request": null,
+        "receipt": null
+      },
+      "invocation": {
+        "kind": "query",
+        "action_operation": null,
+        "execution_mode": null
+      },
+      "capability_profile": {
+        "contract_version": "atlas.capability.profile.v1",
+        "capability_profile_id": "cap-atlas-status-v1",
+        "description": "Read-only current-state snapshot and attention summary surface.",
+        "filesystem_scopes": {
+          "read": [
+            "runtime/state/atlas/**",
+            "runtime/cortex/artifacts/**",
+            "runtime/cortex/query/knowledge/**",
+            "docs/**",
+            "ops/**",
+            "stack.yaml",
+            "stack.lock.yaml",
+            "README-STACK.md"
+          ],
+          "write": [],
+          "create": [],
+          "deny": [
+            "secrets/**",
+            "tmp/**",
+            "data/imports/**",
+            "repos/Verta-Core/**"
+          ]
+        },
+        "network_scopes": {
+          "mode": "none",
+          "allowed_domains": [],
+          "blocked_domains": []
+        },
+        "process_execution_permissions": {
+          "allow_spawn": false,
+          "allow_shell": false,
+          "allow_python": false,
+          "allowed_commands": [],
+          "denied_commands": [
+            "powershell",
+            "cmd",
+            "git",
+            "python",
+            "node"
+          ]
+        },
+        "package_manager_permissions": {
+          "allow_install": false,
+          "allow_update": false,
+          "allowed_managers": [],
+          "blocked_managers": [
+            "npm",
+            "pnpm",
+            "yarn"
+          ]
+        },
+        "elevation_requirement": "none",
+        "resource_budgets": {
+          "wall_clock_seconds": 30,
+          "cpu_seconds": 10,
+          "memory_mb": 256,
+          "disk_mb": 25
+        },
+        "allowed_data_classes": [
+          "public",
+          "internal",
+          "machine_state"
+        ],
+        "audit_class": "standard"
+      },
+      "approval": {
+        "required": false,
+        "approver_kind": null,
+        "required_status": null,
+        "granted_scope_required": false
+      }
+    },
+    {
+      "contract_version": "atlas.tool.catalog.entry.v1",
+      "tool_id": "fetch",
+      "display_name": "ATLAS Fetch",
+      "description": "Read-only artifact and document fetch surface exposed through the Awareness API.",
+      "surface_kind": "builtin",
+      "status": "active",
+      "owner": "stack-root",
+      "extension_id": null,
+      "trust_class": "trusted",
+      "release_eligible": true,
+      "executor": {
+        "component_id": "atlas-awareness",
+        "entrypoint": "ops/atlas/serve_awareness.py",
+        "mode": "http"
+      },
+      "contracts": {
+        "request": null,
+        "receipt": null
+      },
+      "invocation": {
+        "kind": "query",
+        "action_operation": null,
+        "execution_mode": null
+      },
+      "capability_profile": {
+        "contract_version": "atlas.capability.profile.v1",
+        "capability_profile_id": "cap-atlas-fetch-v1",
+        "description": "Read-only fetch surface constrained by the Awareness API allowlist and query policy.",
+        "filesystem_scopes": {
+          "read": [
+            "docs/**",
+            "ops/**",
+            "runtime/atlas/sessions/**",
+            "runtime/cortex/catalog/knowledge/**",
+            "runtime/cortex/context/**",
+            "runtime/cortex/query/knowledge/**",
+            "runtime/cortex/supervisor/**",
+            "runtime/lifeline/worker-execution/**",
+            "runtime/receipts/**",
+            "runtime/state/atlas/**",
+            "stack.yaml",
+            "stack.lock.yaml",
+            "README-STACK.md"
+          ],
+          "write": [],
+          "create": [],
+          "deny": [
+            "secrets/**",
+            "tmp/**",
+            "data/imports/**",
+            "repos/Verta-Core/**"
+          ]
+        },
+        "network_scopes": {
+          "mode": "none",
+          "allowed_domains": [],
+          "blocked_domains": []
+        },
+        "process_execution_permissions": {
+          "allow_spawn": false,
+          "allow_shell": false,
+          "allow_python": false,
+          "allowed_commands": [],
+          "denied_commands": [
+            "powershell",
+            "cmd",
+            "git",
+            "python",
+            "node"
+          ]
+        },
+        "package_manager_permissions": {
+          "allow_install": false,
+          "allow_update": false,
+          "allowed_managers": [],
+          "blocked_managers": [
+            "npm",
+            "pnpm",
+            "yarn"
+          ]
+        },
+        "elevation_requirement": "none",
+        "resource_budgets": {
+          "wall_clock_seconds": 30,
+          "cpu_seconds": 10,
+          "memory_mb": 256,
+          "disk_mb": 25
+        },
+        "allowed_data_classes": [
+          "public",
+          "internal",
+          "machine_state"
+        ],
+        "audit_class": "standard"
+      },
+      "approval": {
+        "required": false,
+        "approver_kind": null,
+        "required_status": null,
+        "granted_scope_required": false
+      }
+    },
+    {
+      "contract_version": "atlas.tool.catalog.entry.v1",
+      "tool_id": "search",
+      "display_name": "ATLAS Search",
+      "description": "Read-only ATLAS search surface over inventory, attention, sessions, and governed knowledge.",
+      "surface_kind": "builtin",
+      "status": "active",
+      "owner": "stack-root",
+      "extension_id": null,
+      "trust_class": "trusted",
+      "release_eligible": true,
+      "executor": {
+        "component_id": "atlas-awareness",
+        "entrypoint": "ops/atlas/serve_awareness.py",
+        "mode": "http"
+      },
+      "contracts": {
+        "request": null,
+        "receipt": null
+      },
+      "invocation": {
+        "kind": "query",
+        "action_operation": null,
+        "execution_mode": null
+      },
+      "capability_profile": {
+        "contract_version": "atlas.capability.profile.v1",
+        "capability_profile_id": "cap-atlas-search-v1",
+        "description": "Read-only ATLAS search surface that respects knowledge indexing policy.",
+        "filesystem_scopes": {
+          "read": [
+            "runtime/state/atlas/**",
+            "runtime/cortex/artifacts/**",
+            "runtime/cortex/query/knowledge/**",
+            "runtime/cortex/catalog/knowledge/**",
+            "docs/**",
+            "ops/**",
+            "stack.yaml",
+            "stack.lock.yaml",
+            "README-STACK.md"
+          ],
+          "write": [],
+          "create": [],
+          "deny": [
+            "secrets/**",
+            "tmp/**",
+            "data/imports/**",
+            "repos/Verta-Core/**"
+          ]
+        },
+        "network_scopes": {
+          "mode": "none",
+          "allowed_domains": [],
+          "blocked_domains": []
+        },
+        "process_execution_permissions": {
+          "allow_spawn": false,
+          "allow_shell": false,
+          "allow_python": false,
+          "allowed_commands": [],
+          "denied_commands": [
+            "powershell",
+            "cmd",
+            "git",
+            "python",
+            "node"
+          ]
+        },
+        "package_manager_permissions": {
+          "allow_install": false,
+          "allow_update": false,
+          "allowed_managers": [],
+          "blocked_managers": [
+            "npm",
+            "pnpm",
+            "yarn"
+          ]
+        },
+        "elevation_requirement": "none",
+        "resource_budgets": {
+          "wall_clock_seconds": 30,
+          "cpu_seconds": 10,
+          "memory_mb": 256,
+          "disk_mb": 25
+        },
+        "allowed_data_classes": [
+          "public",
+          "internal",
+          "machine_state"
+        ],
+        "audit_class": "standard"
+      },
+      "approval": {
+        "required": false,
+        "approver_kind": null,
+        "required_status": null,
+        "granted_scope_required": false
+      }
+    },
+    {
+      "contract_version": "atlas.tool.catalog.entry.v1",
       "tool_id": "cortex.build_worker_context",
       "display_name": "Cortex Build Worker Context",
       "description": "Root-owned Cortex worker-context build surface for governed ATLAS sessions.",

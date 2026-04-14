@@ -18,6 +18,70 @@ EXTENSION_REGISTRY_VERSION = "atlas.extension.registry.v1"
 TOOL_ENTRY_VERSION = "atlas.tool.catalog.entry.v1"
 EXTENSION_ENTRY_VERSION = "atlas.extension.manifest.v1"
 CAPABILITY_PROFILE_VERSION = "atlas.capability.profile.v1"
+AWARENESS_CONNECTOR_SCHEMA_VERSION = "atlas.awareness.connector.toolset.v1"
+CONNECTOR_TOOL_IDS = [
+    "search",
+    "fetch",
+    "atlas_status",
+    "atlas_session_fetch",
+    "atlas_query_knowledge",
+]
+CONNECTOR_TOOL_SPECS: dict[str, dict[str, Any]] = {
+    "search": {
+        "description": "Search ATLAS inventory, sessions, attention items, and governed knowledge surfaces.",
+        "inputSchema": {
+            "type": "object",
+            "additionalProperties": False,
+            "required": ["query"],
+            "properties": {
+                "query": {"type": "string", "minLength": 1},
+                "limit": {"type": "integer", "minimum": 1},
+            },
+        },
+    },
+    "fetch": {
+        "description": "Fetch a full ATLAS search result document by id.",
+        "inputSchema": {
+            "type": "object",
+            "additionalProperties": False,
+            "required": ["id"],
+            "properties": {
+                "id": {"type": "string", "minLength": 1},
+            },
+        },
+    },
+    "atlas_status": {
+        "description": "Return the current ATLAS awareness status with snapshot and attention digests.",
+        "inputSchema": {
+            "type": "object",
+            "additionalProperties": False,
+            "properties": {},
+        },
+    },
+    "atlas_session_fetch": {
+        "description": "Fetch a governed ATLAS session by session_id.",
+        "inputSchema": {
+            "type": "object",
+            "additionalProperties": False,
+            "required": ["session_id"],
+            "properties": {
+                "session_id": {"type": "string", "minLength": 1},
+            },
+        },
+    },
+    "atlas_query_knowledge": {
+        "description": "Query the ATLAS knowledge bundle under indexing policy constraints.",
+        "inputSchema": {
+            "type": "object",
+            "additionalProperties": False,
+            "required": ["query"],
+            "properties": {
+                "query": {"type": "string", "minLength": 1},
+                "limit": {"type": "integer", "minimum": 1},
+            },
+        },
+    },
+}
 
 
 def read_json_object(path: Path) -> dict[str, Any]:
@@ -339,6 +403,38 @@ def select_extension_entry(bundle: dict[str, Any], extension_id: str) -> dict[st
         if isinstance(entry, dict) and entry.get("extension_id") == extension_id:
             return entry
     raise KeyError(f"Unknown extension_id '{extension_id}'.")
+
+
+def load_awareness_connector_toolset(*, root: Path | None = None) -> dict[str, Any]:
+    bundle = load_tool_registry_bundle(root=root)
+    tools: list[dict[str, Any]] = []
+    for tool_id in CONNECTOR_TOOL_IDS:
+        entry = select_tool_entry(bundle, tool_id)
+        spec = CONNECTOR_TOOL_SPECS.get(tool_id)
+        if spec is None:
+            raise KeyError(f"Missing awareness connector tool spec for '{tool_id}'.")
+        tools.append(
+            {
+                "name": tool_id,
+                "description": spec["description"],
+                "inputSchema": spec["inputSchema"],
+                "tool_id": entry["tool_id"],
+                "display_name": entry["display_name"],
+                "owner": entry["owner"],
+                "status": entry["status"],
+                "surface_kind": entry["surface_kind"],
+                "trust_class": entry["trust_class"],
+                "release_eligible": entry["release_eligible"],
+                "registry_digest": bundle["registry_digest"],
+                "executor": entry["executor"],
+                "capability_profile": entry["capability_profile"],
+            }
+        )
+    return {
+        "schema_version": AWARENESS_CONNECTOR_SCHEMA_VERSION,
+        "registry_digest": bundle["registry_digest"],
+        "tools": tools,
+    }
 
 
 def main(argv: list[str] | None = None) -> int:

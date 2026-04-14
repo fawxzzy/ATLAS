@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any
 
 from ops._atlas import atlas_relative, atlas_root, load_repo_registry
+from ops.atlas.observations import emit_observation, load_observations
 from ops.atlas.load_tool_registry import load_tool_registry_bundle
 from ops.cortex._artifacts import load_descriptors, read_json, stable_json_digest, write_json
 from ops.cortex.render_status import latest_worker_states, render_status_payload
@@ -436,6 +437,30 @@ def build_observations(
     return observations
 
 
+def sync_world_model_observations(
+    *,
+    root: Path,
+    observations: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    emitted = load_observations(root)
+    emitted_ids = {
+        str(item.get("observation_id"))
+        for item in emitted
+        if isinstance(item.get("observation_id"), str)
+    }
+    for observation in observations:
+        observation_id = str(observation.get("observation_id", "")).strip()
+        if not observation_id or observation_id in emitted_ids:
+            continue
+        emit_observation(
+            observation,
+            owner="cortex-world-model-sync",
+            root=root,
+        )
+        emitted_ids.add(observation_id)
+    return load_observations(root)
+
+
 def build_attention_items(
     *,
     status_payload: dict[str, Any],
@@ -578,6 +603,10 @@ def build_world_model_payloads(
         event_latest=event_latest,
         knowledge_latest=knowledge_latest,
         validation_latest=validation_latest,
+    )
+    observations = sync_world_model_observations(
+        root=base_root,
+        observations=observations,
     )
     attention_items = build_attention_items(
         status_payload=status_payload,

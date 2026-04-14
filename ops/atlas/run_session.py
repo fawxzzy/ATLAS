@@ -13,8 +13,9 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from ops._atlas import atlas_relative, atlas_root, load_stack_config, normalize_slashes
+from ops.atlas.observations import build_observation, emit_observation
 from ops.atlas.load_tool_registry import load_tool_registry_bundle, select_tool_entry
-from ops.cortex._artifacts import register_artifact_descriptors, sha256_bytes, write_json
+from ops.cortex._artifacts import read_json, register_artifact_descriptors, sha256_bytes, write_json
 from ops.cortex.build_worker_context import build_worker_context_payload, normalize_query_terms
 from ops.cortex.render_status import render_status_payload
 from ops.cortex.world_model import world_model_state_root, write_world_model_state
@@ -520,7 +521,52 @@ def main(argv: list[str] | None = None) -> int:
         manifest["updated_at"] = isoformat()
         write_json(session_manifest_path, manifest)
 
+    def emit_session_state_observation() -> None:
+        emit_observation(
+            build_observation(
+                observation_type="session.state",
+                source_kind="descriptor",
+                status=str(manifest.get("session_state", "unknown")),
+                observed_at=str(manifest.get("updated_at")) if manifest.get("updated_at") is not None else None,
+                source_ref=atlas_relative(session_manifest_path, root=ROOT),
+                scope_ref=str(manifest.get("session_id")) if manifest.get("session_id") is not None else None,
+                details={
+                    "task_id": manifest.get("task_id"),
+                    "final_status": manifest.get("completion", {}).get("final_status")
+                    if isinstance(manifest.get("completion"), dict)
+                    else None,
+                },
+            ),
+            owner="atlas-session-runner",
+            root=ROOT,
+        )
+
+    def emit_observation_for_ref(
+        *,
+        observation_type: str,
+        status: str,
+        source_ref: str,
+        observed_at: str | None = None,
+        details: dict[str, Any] | None = None,
+    ) -> None:
+        if not isinstance(source_ref, str) or not source_ref.strip():
+            return
+        emit_observation(
+            build_observation(
+                observation_type=observation_type,
+                source_kind="descriptor",
+                status=status,
+                observed_at=observed_at,
+                source_ref=source_ref,
+                scope_ref=session_id,
+                details=details,
+            ),
+            owner="atlas-session-runner",
+            root=ROOT,
+        )
+
     persist_manifest()
+    emit_session_state_observation()
     receipt_root: Path | None = None
 
     try:
@@ -554,6 +600,18 @@ def main(argv: list[str] | None = None) -> int:
         manifest["session_state"] = "assignment_emitted"
         manifest["worker"]["assignment_ref"] = atlas_relative(assignment_path, root=ROOT)
         persist_manifest()
+        emit_session_state_observation()
+        emit_observation_for_ref(
+            observation_type="assignment.created",
+            status="emitted",
+            source_ref=manifest["worker"]["assignment_ref"],
+            observed_at=manifest["updated_at"],
+            details={
+                "worker_id": worker_id,
+                "assignment_id": assignment_id,
+                "tool_id": execution_tool["tool_id"],
+            },
+        )
 
         running_status = build_worker_status(
             worker_id=worker_id,
@@ -569,6 +627,7 @@ def main(argv: list[str] | None = None) -> int:
         )
         manifest["session_state"] = "executing"
         persist_manifest()
+        emit_session_state_observation()
 
         capability_profile = build_capability_profile(execution_tool)
         write_json(capability_path, capability_profile)
@@ -597,6 +656,29 @@ def main(argv: list[str] | None = None) -> int:
         manifest["refs"]["request_ref"] = atlas_relative(request_path, root=ROOT)
         manifest["refs"]["approval_receipt_ref"] = atlas_relative(approval_path, root=ROOT)
         persist_manifest()
+        emit_observation_for_ref(
+            observation_type="execution.requested",
+            status="requested",
+            source_ref=manifest["refs"]["request_ref"],
+            observed_at=request["requested_at"],
+            details={
+                "request_id": request_id,
+                "worker_id": worker_id,
+                "assignment_id": assignment_id,
+                "tool_id": execution_tool["tool_id"],
+            },
+        )
+        emit_observation_for_ref(
+            observation_type="execution.approval",
+            status=str(approval.get("approval_status", "unknown")),
+            source_ref=manifest["refs"]["approval_receipt_ref"],
+            observed_at=str(approval.get("issued_at")) if approval.get("issued_at") is not None else None,
+            details={
+                "request_id": request_id,
+                "approval_receipt_id": approval_receipt_id,
+                "worker_id": worker_id,
+            },
+        )
 
         execution = run_stack_function(
             "Invoke-StackLifelineExecution",
@@ -619,6 +701,31 @@ def main(argv: list[str] | None = None) -> int:
         receipt_ref = str(execution.get("receipt_ref", "")).strip()
         receipt_root = (ROOT / receipt_ref).resolve().parent if receipt_ref else None
         persist_manifest()
+        if receipt_ref:
+            receipt_payload = read_json((ROOT / receipt_ref).resolve())
+            emit_observation_for_ref(
+                observation_type="execution.completed",
+                status=str(receipt_payload.get("result", "unknown")),
+                source_ref=receipt_ref,
+                observed_at=str(receipt_payload.get("executed_at")) if receipt_payload.get("executed_at") is not None else None,
+                details={
+                    "approval_status": receipt_payload.get("approval_status"),
+                    "execution_mode": receipt_payload.get("execution_mode"),
+                    "worker_id": worker_id,
+                    "assignment_id": assignment_id,
+                },
+            )
+            emit_observation_for_ref(
+                observation_type="execution.result",
+                status=str(receipt_payload.get("result", "unknown")),
+                source_ref=receipt_ref,
+                observed_at=str(receipt_payload.get("executed_at")) if receipt_payload.get("executed_at") is not None else None,
+                details={
+                    "worker_id": worker_id,
+                    "assignment_id": assignment_id,
+                    "tool_id": execution_tool["tool_id"],
+                },
+            )
 
         if scenario == "conflict":
             repo_commit = git_output(ROOT, "rev-parse", "HEAD") or "unknown"
@@ -698,6 +805,18 @@ def main(argv: list[str] | None = None) -> int:
             manifest["session_state"] = "merge_requested"
             manifest["refs"]["merge_request_refs"] = unique_refs(merge_request_paths)
             persist_manifest()
+            emit_session_state_observation()
+            for merge_request_ref in merge_request_paths:
+                emit_observation_for_ref(
+                    observation_type="session.merge_requested",
+                    status="open",
+                    source_ref=merge_request_ref,
+                    observed_at=manifest["updated_at"],
+                    details={
+                        "session_id": session_id,
+                        "worker_id": worker_id,
+                    },
+                )
 
             consumer = run_stack_function(
                 "Invoke-StackSupervisorConsumer",
@@ -728,6 +847,29 @@ def main(argv: list[str] | None = None) -> int:
             manifest["session_state"] = "resume_ready"
             manifest["completion"]["final_status"] = "resume_ready"
             manifest["completion"]["final_status_ref"] = first_processed.get("completion_path")
+            persist_manifest()
+            emit_session_state_observation()
+            for pause_ref in manifest["refs"]["pause_status_refs"]:
+                emit_observation_for_ref(
+                    observation_type="worker.paused",
+                    status="paused",
+                    source_ref=pause_ref,
+                    observed_at=manifest["updated_at"],
+                    details={
+                        "session_id": session_id,
+                        "worker_id": worker_id,
+                    },
+                )
+            emit_observation_for_ref(
+                observation_type="session.resume_ready",
+                status="ready",
+                source_ref=str(first_processed.get("completion_path")),
+                observed_at=manifest["updated_at"],
+                details={
+                    "session_id": session_id,
+                    "worker_id": worker_id,
+                },
+            )
         else:
             manifest["session_state"] = "completed"
             manifest["completion"]["final_status"] = "completed"
@@ -738,6 +880,7 @@ def main(argv: list[str] | None = None) -> int:
         )
         manifest["closed_at"] = isoformat()
         persist_manifest()
+        emit_session_state_observation()
 
         written_descriptors = register_session_descriptors(
             session_root=session_root,
