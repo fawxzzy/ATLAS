@@ -24,6 +24,43 @@ It repairs only artifacts that can be regenerated truthfully from root-owned can
 - Immutable evidence that cannot be rebuilt truthfully must remain visible and failing until replay replaces it.
 - Do not hand-patch JSON when a canonical builder already exists.
 
+## Repair Vs Replay
+
+- Repair is allowed only when the original execution outcome can be proven from existing governed evidence.
+- Replay is required when the current stack can no longer prove what actually executed.
+- Repair emits a new artifact and preserves the original evidence.
+- Replay does not mutate the old receipt. It creates a new governed execution event later.
+
+## Execution Receipt Supersession
+
+Post-cutover Lifeline execution receipts are immutable evidence. When a receipt carries stale governed identity but the execution outcome can still be proven, Lifeline emits a new superseding receipt instead of rewriting the old file.
+
+The superseding receipt must carry:
+
+- `supersedes_receipt_ref`
+- `repair_basis_refs`
+- `reconciled_at`
+- `reconciled_by_tool_version`
+- the current truthful `registry_digest`
+
+The original receipt remains visible for audit and history. Status, world-model generation, and Playbook verify should prefer the superseding receipt when present.
+
+## Truthful Reconstruction Boundary
+
+Execution receipts may be repaired only when ATLAS can prove the result from explicit artifacts such as:
+
+- the original receipt
+- the original privileged-action request
+- the approval receipt
+- the session manifest
+- worker assignment, worker context, and worker status artifacts
+
+ATLAS may reconstruct governed identity from the canonical request and approval artifacts. ATLAS may not invent:
+
+- a result that was never evidenced
+- a command result or inspection payload that is not supported by existing artifacts
+- governed identity for an execution with missing or contradictory source evidence
+
 ## Canonical Repair Coverage
 
 The root reconcile utility currently rebuilds:
@@ -36,7 +73,9 @@ The root reconcile utility currently rebuilds:
 - approval receipts
 - supervisor merge-request artifacts
 
-The root lane does not currently rebuild Lifeline execution receipts. Those remain `replay_required`.
+The root lane does not currently rebuild Lifeline execution receipts in place.
+
+Those receipts are handled by the Lifeline repair utility, which emits superseding receipts when truthful repair is possible and emits `replay_required` attention when it is not.
 
 ## Command
 
@@ -52,6 +91,12 @@ Apply rebuildable repairs:
 python .\ops\atlas\reconcile_governed_runtime_artifacts.py --apply
 ```
 
+Repair privileged-action receipts truthfully:
+
+```powershell
+pnpm -C .\repos\fawxzzy-lifeline repair:privileged-receipts -- --atlas-root C:\ATLAS
+```
+
 The utility writes its latest report to:
 
 - `runtime/state/atlas/governed-runtime-repair/latest.json`
@@ -60,6 +105,7 @@ The utility writes its latest report to:
 
 - Rebuildable post-cutover artifacts are restamped against the current registry digest and canonical tool surface.
 - The world model and status snapshot are refreshed after apply.
+- Repairable Lifeline execution receipts gain superseding receipts without mutating the originals.
 - Remaining red should represent replay-required receipts or unrelated historical repo debt, not stale governed runtime derivatives.
 
 ## Non-Goals

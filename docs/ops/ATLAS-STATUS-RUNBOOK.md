@@ -18,6 +18,7 @@ The current status read model answers:
 - which governed tool and extension surfaces are registered
 - which workers are blocked or paused
 - which merge requests are still open
+- which merge-request artifacts are retained residue rather than current live truth
 - which receipts closed the selected session
 - which quarantined trust surfaces remain metadata-only or untrusted
 - which current anomalies require operator review before more work is launched
@@ -49,7 +50,23 @@ The status renderer exposes governed surface identity from descriptors only:
 - session manifests declare the session's governed surfaces
 - worker descriptors expose `tool_id`, optional `extension_id`, and `registry_digest`
 - receipt descriptors expose the same governed identity for the closing execution step
+- receipt supersession is resolved from descriptors, so the preferred closing receipt may differ from the original historical receipt ref
 - the top-level registry section reports the current registry digest and entry counts
+
+## Receipt Supersession Rule
+
+When a truthful repaired execution receipt exists, status prefers the superseding receipt for current-state reads while keeping the original receipt visible.
+
+Current status output exposes this through:
+
+- `active_session.execution_receipt_ref`
+- `active_session.original_execution_receipt_ref`
+- `closure_receipts[*].source_ref`
+- `closure_receipts[*].original_source_ref`
+- `closure_receipts[*].supersedes_receipt_ref`
+- `closure_receipts[*].reconciled_at`
+- `closure_receipts[*].reconciled_by_tool_version`
+- `closure_receipts[*].repair_basis_refs`
 
 ## Attention Queue
 
@@ -102,6 +119,19 @@ Those artifacts are the global snapshot layer above descriptors and receipts. St
 ## Open Merge Rule
 
 A merge request remains open until a registered `atlas.stack.supervisor-consumer.v1` descriptor closes the same `merge_request_id`.
+
+## Residue Classification Rule
+
+Status exposes one canonical active merge-request artifact per conflict key or session scope.
+
+Extra merge-request artifacts with the same live conflict surface remain visible as residue instead of competing as equal current truth.
+
+Current status output exposes this through:
+
+- `open_merge_requests`
+- `merge_request_residue`
+
+Residue is retention-friendly. It is not deleted automatically, but it is not allowed to confuse current-state reads.
 
 ## Trust Surface Rule
 

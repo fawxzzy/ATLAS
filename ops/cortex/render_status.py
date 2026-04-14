@@ -165,26 +165,157 @@ def blocked_workers(descriptors: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
 
 def open_merge_requests(descriptors: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    active, _ = classify_merge_requests(descriptors)
+    return active
+
+
+def classify_merge_requests(
+    descriptors: list[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     completed_ids = {
         str(item.get("identity", {}).get("merge_request_id"))
         for item in descriptors
         if item.get("artifact_type") == "supervisor_merge_completion"
     }
-    results: list[dict[str, Any]] = []
+    session_linked_ids = {
+        str(merge_request_ref).rsplit("/", 1)[-1].replace(".json", "")
+        for item in descriptors
+        if item.get("artifact_type") == "session_manifest"
+        for merge_request_ref in (item.get("links", {}).get("merge_request_refs", []) if isinstance(item.get("links", {}).get("merge_request_refs"), list) else [])
+        if isinstance(merge_request_ref, str)
+    }
+    grouped: dict[str, list[dict[str, Any]]] = {}
     for descriptor in descriptors:
         if descriptor.get("artifact_type") != "merge_request":
             continue
-        merge_request_id = str(descriptor.get("identity", {}).get("merge_request_id", ""))
-        if merge_request_id in completed_ids:
+        conflict_key = str(descriptor.get("identity", {}).get("conflict_key") or descriptor.get("source_ref") or "")
+        grouped.setdefault(conflict_key, []).append(descriptor)
+
+    active: list[dict[str, Any]] = []
+    residue: list[dict[str, Any]] = []
+    for group in grouped.values():
+        ordered = sorted(
+            group,
+            key=lambda descriptor: (
+                str(descriptor.get("identity", {}).get("merge_request_id", "")) not in completed_ids,
+                str(descriptor.get("identity", {}).get("merge_request_id", "")) not in session_linked_ids,
+                -len(descriptor.get("links", {}).get("conflicting_workers", [])) if isinstance(descriptor.get("links", {}).get("conflicting_workers"), list) else 0,
+                str(descriptor.get("source_ref", "")),
+            ),
+        )
+        canonical = ordered[0]
+        canonical_id = str(canonical.get("identity", {}).get("merge_request_id", ""))
+        group_completed = canonical_id in completed_ids or any(
+            str(item.get("identity", {}).get("merge_request_id", "")) in completed_ids
+            for item in ordered
+        )
+        if not group_completed:
+            active.append(
+                {
+                    "merge_request_id": canonical_id,
+                    "tool_id": canonical.get("identity", {}).get("tool_id"),
+                    "extension_id": canonical.get("identity", {}).get("extension_id"),
+                    "registry_digest": canonical.get("state", {}).get("registry_digest"),
+                    "conflicting_workers": canonical.get("links", {}).get("conflicting_workers", []),
+                    "source_ref": canonical.get("source_ref"),
+                    "conflict_key": canonical.get("identity", {}).get("conflict_key"),
+                }
+            )
+        for descriptor in ordered:
+            if descriptor is canonical:
+                continue
+            residue.append(
+                {
+                    "merge_request_id": descriptor.get("identity", {}).get("merge_request_id"),
+                    "source_ref": descriptor.get("source_ref"),
+                    "conflict_key": descriptor.get("identity", {}).get("conflict_key"),
+                    "status": "superseded_residue" if group_completed else "retained_residue",
+                    "canonical_merge_request_id": canonical_id,
+                    "canonical_source_ref": canonical.get("source_ref"),
+                }
+            )
+    return active, residue
+
+
+def execution_receipt_supersession_index(
+    descriptors: list[dict[str, Any]],
+) -> dict[str, dict[str, Any]]:
+    grouped: dict[str, list[dict[str, Any]]] = {}
+    for descriptor in descriptors:
+        if descriptor.get("artifact_type") != "execution_receipt":
             continue
+        supersedes = descriptor.get("links", {}).get("supersedes_receipt_ref")
+        if not isinstance(supersedes, str) or not supersedes.strip():
+            continue
+        grouped.setdefault(supersedes, []).append(descriptor)
+    selected: dict[str, dict[str, Any]] = {}
+    for source_ref, candidates in grouped.items():
+        ordered = sorted(
+            candidates,
+            key=lambda descriptor: (
+                parse_timestamp(descriptor.get("state", {}).get("reconciled_at")),
+                parse_timestamp(descriptor.get("state", {}).get("executed_at")),
+                str(descriptor.get("source_ref", "")),
+            ),
+        )
+        selected[source_ref] = ordered[-1]
+    return selected
+
+
+def resolve_execution_receipt_descriptor(
+    source_ref: str,
+    descriptors: list[dict[str, Any]],
+) -> dict[str, Any] | None:
+    by_source_ref = {
+        str(descriptor.get("source_ref", "")): descriptor
+        for descriptor in descriptors
+        if descriptor.get("artifact_type") == "execution_receipt"
+    }
+    superseders = execution_receipt_supersession_index(descriptors)
+    current = source_ref
+    seen: set[str] = set()
+    while current not in seen:
+        seen.add(current)
+        candidate = superseders.get(current)
+        if candidate is None:
+            return by_source_ref.get(current)
+        current = str(candidate.get("source_ref", ""))
+    return by_source_ref.get(source_ref)
+
+
+def closure_receipts(
+    descriptors: list[dict[str, Any]],
+    *,
+    session_descriptor: dict[str, Any] | None,
+) -> list[dict[str, Any]]:
+    if session_descriptor is None:
+        return []
+    refs = session_descriptor.get("links", {}).get("close_receipt_refs", [])
+    if not isinstance(refs, list):
+        return []
+    results: list[dict[str, Any]] = []
+    for ref in refs:
+        if not isinstance(ref, str):
+            continue
+        descriptor = resolve_execution_receipt_descriptor(ref, descriptors)
+        if descriptor is None:
+            results.append({"source_ref": ref, "missing": True})
+            continue
+        resolved_ref = str(descriptor.get("source_ref", ""))
         results.append(
             {
-                "merge_request_id": merge_request_id,
+                "source_ref": resolved_ref,
+                "original_source_ref": ref,
+                "artifact_type": descriptor.get("artifact_type"),
+                "receipt_id": descriptor.get("identity", {}).get("receipt_id"),
                 "tool_id": descriptor.get("identity", {}).get("tool_id"),
                 "extension_id": descriptor.get("identity", {}).get("extension_id"),
+                "result": descriptor.get("state", {}).get("result"),
                 "registry_digest": descriptor.get("state", {}).get("registry_digest"),
-                "conflicting_workers": descriptor.get("links", {}).get("conflicting_workers", []),
-                "source_ref": descriptor.get("source_ref"),
+                "supersedes_receipt_ref": descriptor.get("links", {}).get("supersedes_receipt_ref"),
+                "reconciled_at": descriptor.get("state", {}).get("reconciled_at"),
+                "reconciled_by_tool_version": descriptor.get("state", {}).get("reconciled_by_tool_version"),
+                "repair_basis_refs": descriptor.get("links", {}).get("repair_basis_refs", []),
             }
         )
     return results
@@ -207,42 +338,6 @@ def trust_surfaces(descriptors: list[dict[str, Any]]) -> list[dict[str, Any]]:
             }
         )
     results.sort(key=lambda item: (str(item["trust_class"]), str(item["archive_id"])))
-    return results
-
-
-def closure_receipts(
-    descriptors: list[dict[str, Any]],
-    *,
-    session_descriptor: dict[str, Any] | None,
-) -> list[dict[str, Any]]:
-    if session_descriptor is None:
-        return []
-    refs = session_descriptor.get("links", {}).get("close_receipt_refs", [])
-    if not isinstance(refs, list):
-        return []
-    by_source_ref = {
-        str(descriptor.get("source_ref", "")): descriptor
-        for descriptor in descriptors
-    }
-    results: list[dict[str, Any]] = []
-    for ref in refs:
-        if not isinstance(ref, str):
-            continue
-        descriptor = by_source_ref.get(ref)
-        if descriptor is None:
-            results.append({"source_ref": ref, "missing": True})
-            continue
-        results.append(
-            {
-                "source_ref": ref,
-                "artifact_type": descriptor.get("artifact_type"),
-                "receipt_id": descriptor.get("identity", {}).get("receipt_id"),
-                "tool_id": descriptor.get("identity", {}).get("tool_id"),
-                "extension_id": descriptor.get("identity", {}).get("extension_id"),
-                "result": descriptor.get("state", {}).get("result"),
-                "registry_digest": descriptor.get("state", {}).get("registry_digest"),
-            }
-        )
     return results
 
 
@@ -602,13 +697,21 @@ def working_memory_summary() -> dict[str, Any]:
     }
 
 
-def session_overview(session_descriptor: dict[str, Any] | None) -> dict[str, Any] | None:
+def session_overview(
+    session_descriptor: dict[str, Any] | None,
+    descriptors: list[dict[str, Any]],
+) -> dict[str, Any] | None:
     if session_descriptor is None:
         return None
     identity = session_descriptor.get("identity", {})
     state = session_descriptor.get("state", {})
     links = session_descriptor.get("links", {})
     governed_surfaces = links.get("governed_surfaces", {})
+    execution_receipt_ref = links.get("execution_receipt_ref")
+    preferred_execution_receipt_ref = None
+    if isinstance(execution_receipt_ref, str):
+        descriptor = resolve_execution_receipt_descriptor(execution_receipt_ref, descriptors)
+        preferred_execution_receipt_ref = descriptor.get("source_ref") if isinstance(descriptor, dict) else execution_receipt_ref
     return {
         "session_id": identity.get("session_id"),
         "task_id": identity.get("task_id"),
@@ -620,7 +723,8 @@ def session_overview(session_descriptor: dict[str, Any] | None) -> dict[str, Any
         "updated_at": state.get("updated_at"),
         "registry_digest": state.get("registry_digest"),
         "governed_surfaces": governed_surfaces if isinstance(governed_surfaces, dict) else {},
-        "execution_receipt_ref": links.get("execution_receipt_ref"),
+        "execution_receipt_ref": preferred_execution_receipt_ref or execution_receipt_ref,
+        "original_execution_receipt_ref": execution_receipt_ref if preferred_execution_receipt_ref and preferred_execution_receipt_ref != execution_receipt_ref else None,
         "merge_request_refs": links.get("merge_request_refs", []),
         "source_ref": session_descriptor.get("source_ref"),
     }
@@ -644,9 +748,9 @@ def render_status_payload(
                 break
     else:
         target_session = choose_latest_session(descriptors)
-    active_session = session_overview(target_session)
+    active_session = session_overview(target_session, descriptors)
     blocked_workers_payload = blocked_workers(descriptors)
-    open_merge_requests_payload = open_merge_requests(descriptors)
+    open_merge_requests_payload, merge_request_residue_payload = classify_merge_requests(descriptors)
     closure_receipts_payload = closure_receipts(descriptors, session_descriptor=target_session)
     legacy_compatibility_payload = legacy_compatibility_surfaces(descriptors)
     trust_surfaces_payload = trust_surfaces(descriptors)
@@ -659,6 +763,7 @@ def render_status_payload(
         "artifact_inventory": artifact_inventory(descriptors),
         "blocked_workers": blocked_workers_payload,
         "open_merge_requests": open_merge_requests_payload,
+        "merge_request_residue": merge_request_residue_payload,
         "closure_receipts": closure_receipts_payload,
         "legacy_compatibility": legacy_compatibility_payload,
         "trust_surfaces": trust_surfaces_payload,

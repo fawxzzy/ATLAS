@@ -24,6 +24,7 @@ Outputs:
 - `atlas.worker.merge-request.v1`
 - reserved merge-worker handoff refs under `runtime/cortex/supervisor/`
 - descriptor-backed merge completion status through `atlas.stack.supervisor-consumer.v1`
+- residue-aware current-state selection through status and world-model consumers
 
 ## Non-Goals
 
@@ -78,3 +79,27 @@ Forbidden-scope violations are reported in the supervisor summary output even wh
 The merge request reserves `merge_worker_handoff.handoff_ref` for the future merged handoff artifact. `_stack` consumes that ref to create the merger assignment and resume-context artifacts without scraping transcript history.
 
 After `_stack` consumes the merge request, register both the merge request and the supervisor completion artifact so the root status read model can determine which merge requests are still open without inspecting transcripts or logs.
+
+## Canonical Active Merge Rule
+
+Supervisor history may retain multiple merge-request artifacts for the same conflict surface.
+
+Current-state consumers must select one canonical active merge request per conflict key or session scope.
+
+The canonical active artifact is chosen by preferring:
+
+1. merge requests not already closed by a supervisor-consumer completion artifact
+2. merge requests linked by the active session
+3. the most inclusive conflicting-worker set
+4. deterministic source-ref ordering as the final tie-breaker
+
+## Residue Retention Rule
+
+Non-canonical merge-request artifacts are not deleted automatically.
+
+Instead they are surfaced as:
+
+- `retained_residue` when the artifact is still historically relevant but not the canonical current artifact
+- `superseded_residue` when a later canonical artifact clearly replaces it for the same live conflict key
+
+That preserves auditability without letting multiple artifacts compete as equal live truth.

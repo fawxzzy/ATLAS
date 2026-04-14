@@ -393,6 +393,84 @@ def _parse_details_json(value: str) -> dict[str, Any]:
     return parsed
 
 
+def _iter_json_paths(root: Path) -> list[Path]:
+    if not root.exists():
+        return []
+    return sorted(path.resolve() for path in root.rglob("*.json") if path.is_file())
+
+
+def _execution_receipt_root(root: Path | None = None) -> Path:
+    base = (root or atlas_root()).resolve()
+    return base / "runtime" / "lifeline" / "worker-execution"
+
+
+def load_execution_receipt_payloads(root: Path | None = None) -> dict[str, dict[str, Any]]:
+    base_root = (root or atlas_root()).resolve()
+    results: dict[str, dict[str, Any]] = {}
+    for path in _iter_json_paths(_execution_receipt_root(base_root)):
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        if not isinstance(payload, dict):
+            continue
+        if payload.get("contract_version") != "atlas.privileged-action.receipt.v1":
+            continue
+        results[atlas_relative(path, root=base_root)] = payload
+    return results
+
+
+def execution_receipt_supersession_index(root: Path | None = None) -> dict[str, dict[str, Any]]:
+    receipts = load_execution_receipt_payloads(root)
+    superseders: dict[str, list[dict[str, Any]]] = {}
+    for source_ref, payload in receipts.items():
+        supersedes_ref = _optional_string(payload.get("supersedes_receipt_ref"))
+        if not supersedes_ref:
+            continue
+        superseders.setdefault(supersedes_ref, []).append(
+            {
+                "source_ref": source_ref,
+                "payload": payload,
+                "reconciled_at": _optional_string(payload.get("reconciled_at")),
+                "executed_at": _optional_string(payload.get("executed_at")),
+            }
+        )
+
+    selected: dict[str, dict[str, Any]] = {}
+    for source_ref, candidates in superseders.items():
+        candidates.sort(
+            key=lambda item: (
+                item.get("reconciled_at") or "",
+                item.get("executed_at") or "",
+                item.get("source_ref") or "",
+            )
+        )
+        selected[source_ref] = candidates[-1]
+    return selected
+
+
+def resolve_preferred_execution_receipt_ref(
+    source_ref: str | None,
+    *,
+    root: Path | None = None,
+) -> str | None:
+    current = _optional_string(source_ref)
+    if not current:
+        return None
+    supersession_index = execution_receipt_supersession_index(root)
+    seen: set[str] = set()
+    while current not in seen:
+        seen.add(current)
+        candidate = supersession_index.get(current)
+        if not isinstance(candidate, dict):
+            return current
+        next_ref = _optional_string(candidate.get("source_ref"))
+        if not next_ref:
+            return current
+        current = next_ref
+    return current
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="ATLAS observation helpers.")
     subparsers = parser.add_subparsers(dest="command")

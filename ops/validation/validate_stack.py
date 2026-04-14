@@ -37,6 +37,10 @@ MUTABLE_DIR_CANDIDATES = [
 ROOT_LOG_PATTERNS = ["*.log", "*.err.log", "*.out.log", "*.tmp", "*.db", "*.sqlite", "*.sqlite3"]
 ROOT_CAPTURE_PATTERNS = ["*screenshot*.png", "artifacts*.png", "*check*.png", "*review*.png"]
 BASELINE_VERSION = "atlas.stack.validation.baseline.v1"
+PLAYBOOK_ENFORCEMENT_TRACKED_PATHS = [
+    "packages/engine/src/verify/rules/atlasRootPolicyChecks.ts",
+    "packages/engine/src/verify/rules/atlasRootPolicyChecks.test.ts",
+]
 VERTA_SECRET_PATTERNS = [
     ("verta-live-secret", re.compile(r"gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|AKIA[0-9A-Z]{16}|sk-[A-Za-z0-9]{20,}|xox[baprs]-[A-Za-z0-9-]{10,}|-----BEGIN [A-Z ]*PRIVATE KEY-----|Bearer\s+[A-Za-z0-9._-]{16,}")),
 ]
@@ -64,9 +68,11 @@ from ops.atlas.observations import (
     GOVERNED_ARTIFACT_EPOCH_LEGACY_PRE_REGISTRY,
     build_observation,
     canonical_observation_type,
+    load_execution_receipt_payloads,
     emit_observation,
     governed_artifact_epoch_details,
     load_observations,
+    resolve_preferred_execution_receipt_ref,
 )
 from ops.atlas.load_tool_registry import load_tool_registry_bundle
 from ops.cortex._artifacts import load_descriptors, register_artifact_descriptors, stable_json_digest
@@ -562,6 +568,130 @@ def validate_working_memory(stack_file: Path) -> list[Finding]:
             )
         )
     return findings
+
+
+def validate_execution_receipt_repairs(stack_file: Path) -> list[Finding]:
+    root = stack_file.parent.resolve()
+    findings: list[Finding] = []
+    try:
+        registry_bundle = load_tool_registry_bundle(root=root)
+    except Exception as exc:
+        return [
+            Finding(
+                "warning",
+                "execution-receipt-repair-registry-unavailable",
+                "docs/registry",
+                f"Could not validate execution receipt repairs because the registry bundle failed to load: {exc}",
+            )
+        ]
+
+    receipt_payloads = load_execution_receipt_payloads(root)
+    current_digest = str(registry_bundle.get("registry_digest", ""))
+    sessions_root = root / "runtime" / "atlas" / "sessions"
+    if not sessions_root.exists():
+        return findings
+
+    for session_path in sorted(sessions_root.rglob("session.manifest.json")):
+        session_payload = load_json_object(session_path)
+        if not isinstance(session_payload, dict):
+            continue
+        epoch = governed_artifact_epoch_details(session_payload, source_ref=relative_to_root(root, session_path))
+        if not isinstance(epoch, dict) or epoch.get("epoch") == GOVERNED_ARTIFACT_EPOCH_LEGACY_PRE_REGISTRY:
+            continue
+        refs = session_payload.get("refs") if isinstance(session_payload.get("refs"), dict) else {}
+        original_ref = str(refs.get("execution_receipt_ref") or "").strip()
+        if not original_ref:
+            continue
+        original_payload = receipt_payloads.get(original_ref)
+        if not isinstance(original_payload, dict):
+            continue
+        if str(original_payload.get("registry_digest") or "") == current_digest:
+            continue
+
+        preferred_ref = resolve_preferred_execution_receipt_ref(original_ref, root=root)
+        preferred_payload = receipt_payloads.get(preferred_ref or "")
+        if not isinstance(preferred_payload, dict):
+            findings.append(
+                Finding(
+                    "error",
+                    "execution-receipt-repair-required",
+                    original_ref,
+                    "Post-cutover execution receipt does not match the current registry digest and has no truthful superseding receipt.",
+                    {"session_ref": relative_to_root(root, session_path)},
+                )
+            )
+            continue
+
+        repair_basis_refs = preferred_payload.get("repair_basis_refs")
+        if (
+            preferred_ref == original_ref
+            or str(preferred_payload.get("registry_digest") or "") != current_digest
+            or str(preferred_payload.get("supersedes_receipt_ref") or "") != original_ref
+            or not isinstance(repair_basis_refs, list)
+            or len([item for item in repair_basis_refs if isinstance(item, str) and item.strip()]) == 0
+            or not str(preferred_payload.get("reconciled_at") or "").strip()
+            or not str(preferred_payload.get("reconciled_by_tool_version") or "").strip()
+        ):
+            findings.append(
+                Finding(
+                    "error",
+                    "execution-receipt-repair-invalid",
+                    preferred_ref or original_ref,
+                    "Superseding execution receipt exists but does not satisfy the truthful repair contract.",
+                    {"original_receipt_ref": original_ref, "session_ref": relative_to_root(root, session_path)},
+                )
+            )
+    return findings
+
+
+def validate_playbook_enforcement_tracking(stack_file: Path, config: dict[str, Any]) -> list[Finding]:
+    root = stack_file.parent.resolve()
+    repo_registry = config.get("repo_registry", {})
+    playbook = repo_registry.get("playbook") if isinstance(repo_registry, dict) else None
+    if not isinstance(playbook, dict) or not isinstance(playbook.get("path"), str):
+        return []
+
+    playbook_root = resolve_path(stack_file, playbook["path"])
+    if not playbook_root.exists() or not playbook_root.is_dir() or not repo_is_git_root(playbook_root):
+        return []
+
+    repo_rel = relative_to_root(root, playbook_root)
+    code, output = git_output(
+        playbook_root,
+        "status",
+        "--short",
+        "--untracked-files=all",
+        "--",
+        *PLAYBOOK_ENFORCEMENT_TRACKED_PATHS,
+    )
+    if code != 0:
+        return [
+            Finding(
+                "warning",
+                "playbook-enforcement-tracking-check-failed",
+                repo_rel,
+                "Unable to verify whether Playbook ATLAS enforcement files are tracked repo truth.",
+            )
+        ]
+
+    untracked = []
+    for line in output.splitlines():
+        if line.startswith("?? "):
+            candidate = line[3:].strip().replace("\\", "/")
+            if candidate:
+                untracked.append(candidate)
+    if not untracked:
+        return []
+
+    return [
+        Finding(
+            "error",
+            "playbook-enforcement-untracked",
+            repo_rel,
+            "ATLAS root validation cannot depend on untracked Playbook enforcement files.",
+            {"paths": untracked},
+        )
+    ]
 
 
 def load_json_object(path: Path) -> dict[str, Any]:
@@ -1210,6 +1340,8 @@ def build_findings(stack_file: Path, config: dict[str, Any], *, lock_file_overri
     findings: list[Finding] = []
     findings.extend(validate_tool_registry(root))
     findings.extend(validate_subsystem_registry(stack_file, config))
+    findings.extend(validate_execution_receipt_repairs(stack_file))
+    findings.extend(validate_playbook_enforcement_tracking(stack_file, config))
     findings.extend(validate_verta_trust_gate(stack_file, config))
     findings.extend(validate_working_memory(stack_file))
     findings.extend(validate_world_model_state(stack_file))

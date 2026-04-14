@@ -12,6 +12,7 @@ from ops.atlas.observations import (
     emit_observation,
     governed_artifact_epoch_details,
     load_observations,
+    resolve_preferred_execution_receipt_ref,
 )
 from ops.atlas.load_tool_registry import load_tool_registry_bundle
 from ops.cortex._artifacts import load_descriptors, read_json, stable_json_digest, write_json
@@ -830,7 +831,10 @@ def build_governed_session_observations(
                 extras={"approval_receipt_id": approval_payload.get("approval_receipt_id")},
             )
 
-        receipt_ref = execution_receipt_ref or (close_receipt_refs[0] if close_receipt_refs else None)
+        receipt_ref = resolve_preferred_execution_receipt_ref(
+            execution_receipt_ref or (close_receipt_refs[0] if close_receipt_refs else None),
+            root=root,
+        )
         receipt_payload = load_source_payload(root, receipt_ref)
         if receipt_ref and receipt_payload:
             maybe_add_observation(

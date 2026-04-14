@@ -128,6 +128,47 @@ def action_summary(value: dict[str, Any] | None) -> dict[str, Any]:
     return result
 
 
+def source_session_scope(source_ref: str) -> str | None:
+    parts = normalize_slashes(source_ref).split("/")
+    try:
+        index = parts.index("supervisor")
+    except ValueError:
+        return None
+    next_index = index + 1
+    if next_index >= len(parts):
+        return None
+    return parts[next_index] or None
+
+
+def merge_request_conflict_key(payload: dict[str, Any], *, source_ref: str) -> str:
+    overlaps = payload.get("overlaps") if isinstance(payload.get("overlaps"), list) else []
+    overlap_surfaces = []
+    for item in overlaps:
+        if not isinstance(item, dict):
+            continue
+        overlap_surfaces.append(
+            {
+                "repo_path": item.get("repo_path"),
+                "path": item.get("path"),
+                "file_digest_before": item.get("file_digest_before"),
+            }
+        )
+    overlap_surfaces.sort(
+        key=lambda item: (
+            str(item.get("repo_path", "")),
+            str(item.get("path", "")),
+            str(item.get("file_digest_before", "")),
+        )
+    )
+    return stable_json_digest(
+        {
+            "session_scope": source_session_scope(source_ref),
+            "stack_lock_digest": payload.get("stack_lock_digest"),
+            "overlap_surfaces": overlap_surfaces,
+        }
+    )
+
+
 def governed_surface_ref(value: Any) -> dict[str, Any]:
     if not isinstance(value, dict):
         return {
@@ -363,6 +404,8 @@ def build_merge_request_descriptor(payload: dict[str, Any], *, digest: str, size
         regulated_artifact_class="merge_request",
         identity={
             "merge_request_id": payload.get("merge_request_id"),
+            "session_scope": source_session_scope(source_ref),
+            "conflict_key": merge_request_conflict_key(payload, source_ref=source_ref),
             "tool_id": payload.get("tool_id"),
             "extension_id": payload.get("extension_id"),
         },
@@ -526,6 +569,8 @@ def build_execution_receipt_descriptor(payload: dict[str, Any], *, digest: str, 
             "execution_mode": payload.get("execution_mode"),
             "executed_at": payload.get("executed_at"),
             "registry_digest": payload.get("registry_digest"),
+            "reconciled_at": payload.get("reconciled_at"),
+            "reconciled_by_tool_version": payload.get("reconciled_by_tool_version"),
         },
         links={
             "source_refs": clean_refs(payload.get("source_refs", [])),
@@ -533,6 +578,8 @@ def build_execution_receipt_descriptor(payload: dict[str, Any], *, digest: str, 
             "target_resources": clean_refs(payload.get("target_resources", [])),
             "request_digest": payload.get("request_digest"),
             "capability_profile_digest": payload.get("capability_profile_digest"),
+            "supersedes_receipt_ref": payload.get("supersedes_receipt_ref"),
+            "repair_basis_refs": clean_refs(payload.get("repair_basis_refs", [])),
             "action": action_summary(requested_action or executed_action),
         },
     )

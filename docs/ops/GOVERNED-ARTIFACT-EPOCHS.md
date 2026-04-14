@@ -35,6 +35,8 @@ Use this class for:
 
 Governed_v1 artifacts fail closed when required governed fields are missing or inconsistent.
 
+Post-cutover execution-receipt repair also stays inside `governed_v1`. Truthful repair emits a new superseding receipt; it does not downgrade the failure into `legacy_pre_registry`.
+
 ## Required Governed_v1 Identity
 
 Governed_v1 runtime artifacts must carry:
@@ -53,6 +55,7 @@ Governed_v1 session manifests must also carry the observation-chain refs and clo
 - missing required observation-chain evidence on governed_v1 is blocking
 - missing closure evidence on governed_v1 is blocking
 - missing descriptor-backed legacy backfill visibility for `legacy_pre_registry` history is blocking
+- missing truthful repair metadata on a superseding governed_v1 execution receipt is blocking
 
 ## Non-Blocking Rules
 
@@ -60,6 +63,32 @@ Governed_v1 session manifests must also carry the observation-chain refs and clo
 - a `legacy_pre_registry` artifact may not be invisible
 - legacy compatibility classification does not rewrite the original source artifact
 - legacy backfill may record `unknown_legacy` or `conflict_legacy` when governed identity cannot be proven
+- original governed_v1 receipts may remain visible after supersession, but they are no longer the preferred current-state artifact
+
+## Supersession Rule
+
+Receipt supersession is allowed only for post-cutover governed execution receipts and only when truthful reconstruction is possible.
+
+The superseding receipt becomes the preferred current-state artifact when it includes:
+
+- `supersedes_receipt_ref`
+- `repair_basis_refs`
+- `reconciled_at`
+- `reconciled_by_tool_version`
+- a valid current `registry_digest`
+
+The original receipt remains immutable evidence.
+
+## Residue Rule
+
+Historical artifact retention is broader than epoch compatibility.
+
+An artifact may be:
+
+- `legacy_pre_registry` because it predates the governed cutover
+- retained residue because it is still visible history but not canonical current state
+
+Retention never permits silent invisibility, silent mutation, or multiple competing current artifacts.
 
 ## Backfill Rule
 
