@@ -24,7 +24,7 @@ Legacy artifacts remain:
 - queryable in awareness and status
 - non-blocking for fields that did not exist yet
 
-Legacy artifacts must still be surfaced as compatibility attention until they are backfilled or archived.
+Legacy visibility is carried by descriptor-backed backfill records, not by mutating the original artifacts.
 
 ### `governed_v1`
 
@@ -52,13 +52,25 @@ Governed_v1 session manifests must also carry the observation-chain refs and clo
 - mismatched `registry_digest` on governed_v1 is blocking
 - missing required observation-chain evidence on governed_v1 is blocking
 - missing closure evidence on governed_v1 is blocking
-- missing legacy compatibility visibility is blocking
+- missing descriptor-backed legacy backfill visibility for `legacy_pre_registry` history is blocking
 
 ## Non-Blocking Rules
 
 - a `legacy_pre_registry` artifact may be incomplete
 - a `legacy_pre_registry` artifact may not be invisible
 - legacy compatibility classification does not rewrite the original source artifact
+- legacy backfill may record `unknown_legacy` or `conflict_legacy` when governed identity cannot be proven
+
+## Backfill Rule
+
+Historical compatibility is published through dedicated backfill records under `runtime/state/atlas/legacy-backfill/`.
+
+Those records:
+
+- keep source evidence immutable
+- record provenance and inference basis
+- register descriptor surfaces into the root world model
+- allow awareness and status to query historical sessions without pretending they were minted as `governed_v1`
 
 ## Provenance Rule
 

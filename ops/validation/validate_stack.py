@@ -59,6 +59,7 @@ from ops.stack.generate_lockfile import (
     repo_is_git_root,
 )
 from ops.stack.audit_gitdir_hygiene import build_report as build_gitdir_hygiene_report, default_target_paths as default_gitdir_hygiene_targets
+from ops.atlas.backfill_legacy_runtime_artifacts import backfill_legacy_runtime_artifacts
 from ops.atlas.observations import (
     GOVERNED_ARTIFACT_EPOCH_LEGACY_PRE_REGISTRY,
     build_observation,
@@ -879,6 +880,14 @@ def validate_world_model_state(stack_file: Path) -> list[Finding]:
             return value.strip()
         return None
 
+    legacy_backfill_by_session_ref = {
+        optional_string(descriptor.get("links", {}).get("original_session_ref")): descriptor
+        for descriptor in descriptors
+        if str(descriptor.get("artifact_type", "")) == "legacy_runtime_backfill"
+        and isinstance(descriptor.get("links"), dict)
+        and optional_string(descriptor.get("links", {}).get("original_session_ref"))
+    }
+
     def source_payload(source_ref: str | None) -> dict[str, Any] | None:
         if not isinstance(source_ref, str) or not source_ref.strip():
             return None
@@ -964,19 +973,6 @@ def validate_world_model_state(stack_file: Path) -> list[Finding]:
                         f"Completed session '{source_ref}' is missing from the emitted observation store.",
                     )
                 )
-            close_receipt_refs = descriptor.get("links", {}).get("close_receipt_refs", [])
-            if not isinstance(close_receipt_refs, list) or not any(
-                isinstance(item, str) and item.strip() for item in close_receipt_refs
-            ):
-                findings.append(
-                    Finding(
-                        "error",
-                        "missing-session-closure-evidence",
-                        relative_to_root(root, snapshot_path),
-                        f"Completed session '{source_ref}' is missing closure receipt refs.",
-                    )
-                )
-
             session_payload = source_payload(source_ref)
             if not isinstance(session_payload, dict):
                 findings.append(
@@ -992,17 +988,36 @@ def validate_world_model_state(stack_file: Path) -> list[Finding]:
             governed_surfaces = session_payload.get("governed_surfaces")
             epoch_details = governed_artifact_epoch_details(session_payload, source_ref=source_ref)
             if isinstance(epoch_details, dict) and epoch_details.get("epoch") == GOVERNED_ARTIFACT_EPOCH_LEGACY_PRE_REGISTRY:
-                require_observation("governed_compatibility", source_ref, owner_ref=source_ref)
-                if ("legacy_governed_compatibility", source_ref) not in attention_item_keys:
+                backfill_descriptor = legacy_backfill_by_session_ref.get(source_ref)
+                if backfill_descriptor is None:
                     findings.append(
                         Finding(
                             "error",
-                            "missing-legacy-compatibility-attention",
-                            relative_to_root(root, attention_path),
-                            f"Historical session '{source_ref}' is missing the required legacy compatibility attention item.",
+                            "missing-legacy-backfill-record",
+                            relative_to_root(root, snapshot_path),
+                            f"Historical session '{source_ref}' is missing a descriptor-backed legacy backfill record.",
                         )
                     )
+                    continue
+                require_observation(
+                    "governed_compatibility",
+                    optional_string(backfill_descriptor.get("source_ref")),
+                    owner_ref=source_ref,
+                )
                 continue
+
+            close_receipt_refs = descriptor.get("links", {}).get("close_receipt_refs", [])
+            if not isinstance(close_receipt_refs, list) or not any(
+                isinstance(item, str) and item.strip() for item in close_receipt_refs
+            ):
+                findings.append(
+                    Finding(
+                        "error",
+                        "missing-session-closure-evidence",
+                        relative_to_root(root, snapshot_path),
+                        f"Completed session '{source_ref}' is missing closure receipt refs.",
+                    )
+                )
 
             if not isinstance(governed_surfaces, dict):
                 continue
@@ -1686,6 +1701,7 @@ def main(argv: list[str] | None = None) -> int:
     should_exit_success = False
     try:
         config = load_stack_config(stack_file)
+        backfill_legacy_runtime_artifacts(root=stack_file.parent.resolve())
         write_world_model_state(
             descriptor_root=stack_file.parent.resolve() / "runtime" / "cortex" / "artifacts",
             root=stack_file.parent.resolve(),

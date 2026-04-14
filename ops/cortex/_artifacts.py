@@ -10,6 +10,7 @@ from ops._atlas import atlas_relative, atlas_root, normalize_slashes
 DESCRIPTOR_CONTRACT_VERSION = "atlas.artifact.descriptor.v1"
 WORKER_CONTEXT_VERSION = "atlas.cortex.worker-context.v1"
 SUPERVISOR_CONSUMER_VERSION = "atlas.stack.supervisor-consumer.v1"
+LEGACY_RUNTIME_BACKFILL_VERSION = "atlas.legacy-runtime.backfill.v1"
 
 
 def sha256_bytes(value: bytes) -> str:
@@ -31,6 +32,18 @@ def read_json(path: Path) -> dict[str, Any]:
 def write_json(path: Path, payload: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+
+
+def write_json_if_changed(path: Path, payload: dict[str, Any]) -> bool:
+    rendered = json.dumps(payload, indent=2) + "\n"
+    try:
+        if path.exists() and path.read_text(encoding="utf-8") == rendered:
+            return False
+    except OSError:
+        pass
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(rendered, encoding="utf-8")
+    return True
 
 
 def iter_candidate_json_paths(paths: Iterable[Path]) -> list[Path]:
@@ -648,6 +661,63 @@ def build_state_snapshot_descriptor(payload: dict[str, Any], *, digest: str, siz
     )
 
 
+def build_legacy_runtime_backfill_descriptor(
+    payload: dict[str, Any],
+    *,
+    digest: str,
+    size_bytes: int,
+    source_ref: str,
+) -> dict[str, Any]:
+    identity_resolution = payload.get("governed_identity") if isinstance(payload.get("governed_identity"), dict) else {}
+    context_identity = identity_resolution.get("context") if isinstance(identity_resolution.get("context"), dict) else {}
+    supervision_identity = (
+        identity_resolution.get("supervision") if isinstance(identity_resolution.get("supervision"), dict) else {}
+    )
+    execution_identity = identity_resolution.get("execution") if isinstance(identity_resolution.get("execution"), dict) else {}
+    registry_identity = identity_resolution.get("registry_digest") if isinstance(identity_resolution.get("registry_digest"), dict) else {}
+    worker = payload.get("worker") if isinstance(payload.get("worker"), dict) else {}
+    return descriptor_base(
+        artifact_class="compatibility",
+        artifact_type="legacy_runtime_backfill",
+        schema_ref=LEGACY_RUNTIME_BACKFILL_VERSION,
+        digest=digest,
+        size_bytes=size_bytes,
+        source_ref=source_ref,
+        trust_class="trusted",
+        release_eligible=False,
+        retention_class="runtime",
+        regulated_artifact_class="legacy_compatibility",
+        identity={
+            "session_id": payload.get("session_id"),
+            "task_id": payload.get("task_id"),
+            "worker_id": worker.get("worker_id"),
+            "assignment_id": worker.get("assignment_id"),
+            "context_tool_id": context_identity.get("tool_id"),
+            "supervision_tool_id": supervision_identity.get("tool_id"),
+            "execution_tool_id": execution_identity.get("tool_id"),
+            "execution_extension_id": execution_identity.get("extension_id"),
+        },
+        state={
+            "session_state": payload.get("session_state"),
+            "final_status": payload.get("final_status"),
+            "compatibility_class": payload.get("compatibility_class"),
+            "cutover_at": payload.get("cutover_at"),
+            "observed_at": payload.get("observed_at"),
+            "recorded_at": payload.get("recorded_at"),
+            "backfill_status": payload.get("backfill_status"),
+            "registry_digest": registry_identity.get("value"),
+        },
+        links={
+            "original_session_ref": payload.get("original_session_ref"),
+            "source_refs": clean_refs(payload.get("source_refs", [])),
+            "missing_governed_requirements": clean_refs(payload.get("missing_governed_requirements", [])),
+            "inference_basis": payload.get("inference_basis", []),
+            "governed_identity": identity_resolution,
+            "source_ref_digests": payload.get("source_ref_digests", []),
+        },
+    )
+
+
 def build_descriptor_for_payload(path: Path, payload: dict[str, Any], *, root: Path | None = None) -> dict[str, Any] | None:
     data = path.read_bytes()
     digest = sha256_bytes(data)
@@ -678,6 +748,8 @@ def build_descriptor_for_payload(path: Path, payload: dict[str, Any], *, root: P
         return build_supervisor_consumer_descriptor(payload, digest=digest, size_bytes=size_bytes, source_ref=source_ref)
     if contract_version == "atlas.state.snapshot.v1":
         return build_state_snapshot_descriptor(payload, digest=digest, size_bytes=size_bytes, source_ref=source_ref)
+    if contract_version == LEGACY_RUNTIME_BACKFILL_VERSION:
+        return build_legacy_runtime_backfill_descriptor(payload, digest=digest, size_bytes=size_bytes, source_ref=source_ref)
     if "archive_id" in payload and "indexing_profile" in payload and "promotion_status" in payload:
         return build_knowledge_catalog_descriptor(payload, digest=digest, size_bytes=size_bytes, source_ref=source_ref)
     return None

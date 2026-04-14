@@ -2,9 +2,15 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import sys
 from typing import Any
 
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 from ops._atlas import atlas_relative, atlas_root, resolve_atlas_path
+from ops.atlas.backfill_legacy_runtime_artifacts import backfill_legacy_runtime_artifacts
 from ops.atlas.load_tool_registry import load_tool_registry_bundle
 from ops.cortex._artifacts import load_descriptors, read_json, register_artifact_descriptors, write_json
 from ops.cortex.index_working_memory import load_working_memory_catalog
@@ -48,6 +54,7 @@ def ensure_world_model(*, root: Path | None = None, refresh: bool = False) -> di
     base_root = (root or atlas_root()).resolve()
     snapshot_path = snapshot_output_path(base_root)
     attention_path = attention_output_path(base_root)
+    backfill_legacy_runtime_artifacts(root=base_root)
     summary = write_world_model_state(
         descriptor_root=base_root / "runtime" / "cortex" / "artifacts",
         root=base_root,

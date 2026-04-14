@@ -251,7 +251,7 @@ def build_inventory_entries(
             continue
         if artifact_type == "session_manifest":
             session_id = str(identity.get("session_id", "")).strip()
-            if session_id:
+            if session_id and epoch_details.get("compatibility_class") != GOVERNED_ARTIFACT_EPOCH_LEGACY_PRE_REGISTRY:
                 entries.append(
                     build_inventory_entry(
                         entry_type="session",
@@ -266,6 +266,35 @@ def build_inventory_entries(
                             "assignment_id": identity.get("assignment_id"),
                             "final_status": state.get("final_status"),
                             **epoch_details,
+                        },
+                    )
+                )
+        elif artifact_type == "legacy_runtime_backfill":
+            session_id = str(identity.get("session_id", "")).strip()
+            links = descriptor.get("links", {}) if isinstance(descriptor.get("links"), dict) else {}
+            governed_identity = links.get("governed_identity") if isinstance(links.get("governed_identity"), dict) else {}
+            if session_id:
+                entries.append(
+                    build_inventory_entry(
+                        entry_type="session",
+                        key=session_id,
+                        label=session_id,
+                        status=str(state.get("session_state", "unknown")),
+                        source_ref=source_ref,
+                        trust_class=str(trust_class) if trust_class is not None else None,
+                        details={
+                            "task_id": identity.get("task_id"),
+                            "worker_id": identity.get("worker_id"),
+                            "assignment_id": identity.get("assignment_id"),
+                            "final_status": state.get("final_status"),
+                            "compatibility_class": state.get("compatibility_class"),
+                            "backfill_status": state.get("backfill_status"),
+                            "cutover_at": state.get("cutover_at"),
+                            "observed_at": state.get("observed_at"),
+                            "recorded_at": state.get("recorded_at"),
+                            "original_session_ref": links.get("original_session_ref"),
+                            "missing_governed_requirements": links.get("missing_governed_requirements", []),
+                            "governed_identity": governed_identity,
                         },
                     )
                 )
@@ -322,64 +351,6 @@ def build_inventory_entries(
                     "digest": descriptor.get("digest"),
                     "schema_ref": descriptor.get("schema_ref"),
                     **epoch_details,
-                },
-            )
-        )
-
-    descriptor_source_refs = {
-        str(descriptor.get("source_ref", "")).strip()
-        for descriptor in descriptors
-        if isinstance(descriptor, dict)
-    }
-    for path in raw_session_manifest_paths(root):
-        source_ref = atlas_relative(path, root=root)
-        if source_ref in descriptor_source_refs:
-            continue
-        payload = load_source_payload(root, source_ref)
-        if not isinstance(payload, dict):
-            continue
-        governance_epoch = governed_artifact_epoch_details(payload, source_ref=source_ref)
-        if not isinstance(governance_epoch, dict):
-            continue
-        if governance_epoch.get("epoch") != GOVERNED_ARTIFACT_EPOCH_LEGACY_PRE_REGISTRY:
-            continue
-        session_id = str(payload.get("session_id", "")).strip() or source_ref
-        entries.append(
-            build_inventory_entry(
-                entry_type="session",
-                key=session_id,
-                label=session_id,
-                status=str(payload.get("session_state", "unknown")),
-                source_ref=source_ref,
-                trust_class="trusted",
-                details={
-                    "task_id": payload.get("task_id"),
-                    "worker_id": payload.get("worker", {}).get("worker_id") if isinstance(payload.get("worker"), dict) else None,
-                    "assignment_id": payload.get("worker", {}).get("assignment_id") if isinstance(payload.get("worker"), dict) else None,
-                    "final_status": payload.get("completion", {}).get("final_status") if isinstance(payload.get("completion"), dict) else None,
-                    "governed_epoch": governance_epoch.get("epoch"),
-                    "governed_epoch_cutover_at": governance_epoch.get("cutover_at"),
-                    "governed_epoch_observed_at": governance_epoch.get("observed_at"),
-                    "compatibility_class": GOVERNED_ARTIFACT_EPOCH_LEGACY_PRE_REGISTRY,
-                    "missing_governed_requirements": governance_epoch.get("missing_requirements", []),
-                },
-            )
-        )
-        entries.append(
-            build_inventory_entry(
-                entry_type="artifact",
-                key=f"session_manifest:{source_ref}",
-                label="session_manifest",
-                status=str(payload.get("session_state", "unknown")),
-                source_ref=source_ref,
-                trust_class="trusted",
-                details={
-                    "artifact_type": "session_manifest",
-                    "governed_epoch": governance_epoch.get("epoch"),
-                    "governed_epoch_cutover_at": governance_epoch.get("cutover_at"),
-                    "governed_epoch_observed_at": governance_epoch.get("observed_at"),
-                    "compatibility_class": GOVERNED_ARTIFACT_EPOCH_LEGACY_PRE_REGISTRY,
-                    "missing_governed_requirements": governance_epoch.get("missing_requirements", []),
                 },
             )
         )
@@ -559,12 +530,7 @@ def build_observations(
             )
         )
 
-    observations.extend(
-        build_governed_epoch_observations(
-            root=root,
-            descriptors=descriptors,
-        )
-    )
+    observations.extend(build_legacy_backfill_observations(descriptors=descriptors))
     observations.extend(
         build_governed_session_observations(
             root=root,
@@ -693,60 +659,36 @@ def maybe_add_observation(
     )
 
 
-def build_governed_epoch_observations(
+def build_legacy_backfill_observations(
     *,
-    root: Path,
     descriptors: list[dict[str, Any]],
 ) -> list[dict[str, Any]]:
     observations: list[dict[str, Any]] = []
-    descriptor_index = {
-        optional_string(descriptor.get("source_ref")): descriptor
-        for descriptor in descriptors
-        if str(descriptor.get("artifact_type", "")) == "session_manifest"
-    }
-    for path in raw_session_manifest_paths(root):
-        source_ref = atlas_relative(path, root=root)
-        descriptor = descriptor_index.get(source_ref, {})
-        session_payload = load_source_payload(root, source_ref)
-        if not isinstance(session_payload, dict):
+    for descriptor in descriptors:
+        if str(descriptor.get("artifact_type", "")) != "legacy_runtime_backfill":
             continue
-        epoch_details = governed_artifact_epoch_details(session_payload, source_ref=source_ref)
-        if not isinstance(epoch_details, dict):
+        source_ref = optional_string(descriptor.get("source_ref"))
+        if not source_ref:
             continue
-        if epoch_details.get("epoch") != GOVERNED_ARTIFACT_EPOCH_LEGACY_PRE_REGISTRY:
-            continue
-
-        session_id = optional_string(session_payload.get("session_id")) or optional_string(descriptor.get("identity", {}).get("session_id"))
-        refs = session_payload.get("refs") if isinstance(session_payload.get("refs"), dict) else {}
-        completion = session_payload.get("completion") if isinstance(session_payload.get("completion"), dict) else {}
-        source_artifact_refs = unique_source_refs(
-            source_ref,
-            session_payload.get("worker", {}).get("assignment_ref") if isinstance(session_payload.get("worker"), dict) else None,
-            refs.get("status_refs"),
-            refs.get("request_ref"),
-            refs.get("approval_receipt_ref"),
-            refs.get("execution_receipt_ref"),
-            refs.get("merge_request_refs"),
-            refs.get("pause_status_refs"),
-            refs.get("resume_context_refs"),
-            refs.get("merge_assignment_ref"),
-            refs.get("merge_completion_ref"),
-            completion.get("final_status_ref"),
-            completion.get("close_receipt_refs"),
-        )
+        identity = descriptor.get("identity", {}) if isinstance(descriptor.get("identity"), dict) else {}
+        state = descriptor.get("state", {}) if isinstance(descriptor.get("state"), dict) else {}
+        links = descriptor.get("links", {}) if isinstance(descriptor.get("links"), dict) else {}
+        session_id = optional_string(identity.get("session_id"))
         observations.append(
             build_observation(
                 observation_type="governed_compatibility",
-                source_kind="compatibility_policy",
-                status=GOVERNED_ARTIFACT_EPOCH_LEGACY_PRE_REGISTRY,
-                observed_at=epoch_details.get("observed_at"),
+                source_kind="legacy_backfill",
+                status=str(state.get("backfill_status") or "backfilled"),
+                observed_at=optional_string(state.get("recorded_at")) or optional_string(state.get("observed_at")),
                 source_ref=source_ref,
                 scope_ref=session_id,
                 details={
-                    "epoch": epoch_details.get("epoch"),
-                    "cutover_at": epoch_details.get("cutover_at"),
-                    "missing_governed_requirements": epoch_details.get("missing_requirements", []),
-                    "source_artifact_refs": source_artifact_refs,
+                    "compatibility_class": state.get("compatibility_class"),
+                    "cutover_at": state.get("cutover_at"),
+                    "original_session_ref": links.get("original_session_ref"),
+                    "missing_governed_requirements": links.get("missing_governed_requirements", []),
+                    "source_artifact_refs": links.get("source_refs", []),
+                    "governed_identity": links.get("governed_identity"),
                 },
             )
         )

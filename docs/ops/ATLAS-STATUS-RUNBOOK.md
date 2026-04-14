@@ -80,14 +80,15 @@ The registry-backed governed epoch starts at **2026-04-14T08:06:53Z**.
 Status behavior by epoch:
 
 - `governed_v1` surfaces missing `tool_id`, `registry_digest`, observation-chain, or closure evidence as blocking governance defects
-- `legacy_pre_registry` surfaces those same gaps as compatibility attention instead of pretending the old artifact was minted under the new contract
+- `legacy_pre_registry` surfaces those same gaps through descriptor-backed compatibility records instead of pretending the old artifact was minted under the new contract
 
 Current status output exposes legacy compatibility through:
 
 - `legacy_compatibility`
-- `attention_queue.items[*].kind = legacy_governed_compatibility`
+- `runtime/state/atlas/legacy-backfill/*.json`
+- `runtime/cortex/artifacts/runtime/state/atlas/legacy-backfill/*.descriptor.json`
 
-That keeps historical sessions queryable without lying about their epoch.
+That keeps historical sessions queryable without lying about their epoch or mutating the originals.
 
 ## World-Model Refs
 

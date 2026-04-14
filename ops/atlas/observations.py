@@ -321,6 +321,26 @@ def emit_observation(
     }
 
 
+def emit_observation_if_missing(
+    observation: dict[str, Any],
+    *,
+    owner: str,
+    root: Path | None = None,
+    dry_run: bool = False,
+) -> dict[str, Any] | None:
+    observation_id = str(observation.get("observation_id", "")).strip()
+    if not observation_id:
+        return None
+    if observation_id in emitted_observation_ids(root):
+        return None
+    return emit_observation(
+        observation,
+        owner=owner,
+        root=root,
+        dry_run=dry_run,
+    )
+
+
 def iter_observation_paths(root: Path | None = None) -> list[Path]:
     base = observation_state_root(root)
     if not base.exists():

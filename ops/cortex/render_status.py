@@ -12,11 +12,8 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from ops._atlas import atlas_relative, atlas_root, resolve_atlas_path
+from ops.atlas.backfill_legacy_runtime_artifacts import backfill_legacy_runtime_artifacts
 from ops.atlas.load_tool_registry import load_tool_registry_bundle
-from ops.atlas.observations import (
-    GOVERNED_ARTIFACT_EPOCH_LEGACY_PRE_REGISTRY,
-    governed_artifact_epoch_details,
-)
 from ops.cortex._artifacts import load_descriptors
 from ops.cortex.index_working_memory import load_working_memory_catalog
 
@@ -264,28 +261,36 @@ def load_source_payload(source_ref: Any) -> dict[str, Any] | None:
 
 def legacy_compatibility_surfaces(descriptors: list[dict[str, Any]]) -> list[dict[str, Any]]:
     items: list[dict[str, Any]] = []
-    sessions_root = atlas_root() / "runtime" / "atlas" / "sessions"
-    if not sessions_root.exists():
-        return items
-    for path in sorted(sessions_root.rglob("session.manifest.json")):
-        source_ref = atlas_relative(path, root=atlas_root())
-        payload = load_source_payload(source_ref)
-        if not isinstance(payload, dict):
+    for descriptor in descriptors:
+        if str(descriptor.get("artifact_type", "")) != "legacy_runtime_backfill":
             continue
-        epoch = governed_artifact_epoch_details(payload, source_ref=str(source_ref))
-        if not isinstance(epoch, dict) or epoch.get("epoch") != GOVERNED_ARTIFACT_EPOCH_LEGACY_PRE_REGISTRY:
+        source_ref = str(descriptor.get("source_ref", "")).strip()
+        identity = descriptor.get("identity", {}) if isinstance(descriptor.get("identity"), dict) else {}
+        state = descriptor.get("state", {}) if isinstance(descriptor.get("state"), dict) else {}
+        links = descriptor.get("links", {}) if isinstance(descriptor.get("links"), dict) else {}
+        governed_identity = links.get("governed_identity") if isinstance(links.get("governed_identity"), dict) else {}
+        if not source_ref:
             continue
         items.append(
             {
-                "session_id": payload.get("session_id"),
+                "session_id": identity.get("session_id"),
                 "source_ref": source_ref,
-                "epoch": epoch.get("epoch"),
-                "cutover_at": epoch.get("cutover_at"),
-                "observed_at": epoch.get("observed_at"),
-                "missing_governed_requirements": epoch.get("missing_requirements", []),
+                "original_session_ref": links.get("original_session_ref"),
+                "epoch": state.get("compatibility_class"),
+                "cutover_at": state.get("cutover_at"),
+                "observed_at": state.get("observed_at"),
+                "recorded_at": state.get("recorded_at"),
+                "missing_governed_requirements": links.get("missing_governed_requirements", []),
+                "governed_identity": governed_identity,
             }
         )
-    items.sort(key=lambda item: (str(item.get("observed_at") or ""), str(item.get("session_id") or ""), str(item.get("source_ref") or "")))
+    items.sort(
+        key=lambda item: (
+            str(item.get("observed_at") or ""),
+            str(item.get("session_id") or ""),
+            str(item.get("source_ref") or ""),
+        )
+    )
     return items
 
 
@@ -522,22 +527,6 @@ def attention_queue(
             )
         )
 
-    for legacy_surface in legacy_compatibility_payload:
-        items.append(
-            attention_item(
-                kind="legacy_governed_compatibility",
-                severity="medium",
-                summary=f"Historical session '{legacy_surface.get('session_id')}' predates the governed registry epoch and remains in compatibility mode.",
-                source_ref=legacy_surface.get("source_ref"),
-                details={
-                    "epoch": legacy_surface.get("epoch"),
-                    "cutover_at": legacy_surface.get("cutover_at"),
-                    "observed_at": legacy_surface.get("observed_at"),
-                    "missing_governed_requirements": legacy_surface.get("missing_governed_requirements", []),
-                },
-            )
-        )
-
     for trust_surface in trust_surfaces_payload:
         if trust_surface.get("trust_class") != "untrusted":
             continue
@@ -642,6 +631,7 @@ def render_status_payload(
     *,
     session_id: str | None = None,
 ) -> dict[str, Any]:
+    backfill_legacy_runtime_artifacts(root=atlas_root(), descriptor_root=descriptor_root)
     descriptors = load_descriptors(descriptor_root)
     registry_state = load_registry_state()
     target_session = None
