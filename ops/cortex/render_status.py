@@ -510,6 +510,36 @@ def attention_queue(
     }
 
 
+def world_model_state() -> dict[str, Any]:
+    snapshot_path = atlas_root() / "runtime" / "state" / "atlas" / "world-model.snapshot.latest.json"
+    attention_path = atlas_root() / "runtime" / "state" / "atlas" / "world-model.attention.latest.json"
+    result: dict[str, Any] = {
+        "snapshot_ref": atlas_relative(snapshot_path, root=atlas_root()),
+        "attention_ref": atlas_relative(attention_path, root=atlas_root()),
+        "snapshot_present": snapshot_path.exists(),
+        "attention_present": attention_path.exists(),
+    }
+    for prefix, path in (("snapshot", snapshot_path), ("attention", attention_path)):
+        if not path.exists():
+            continue
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        if not isinstance(payload, dict):
+            continue
+        result[f"{prefix}_content_digest"] = payload.get("content_digest")
+        if prefix == "snapshot":
+            inventory_entries = payload.get("inventory_entries", [])
+            observations = payload.get("observations", [])
+            result["inventory_entry_count"] = len(inventory_entries) if isinstance(inventory_entries, list) else 0
+            result["observation_count"] = len(observations) if isinstance(observations, list) else 0
+        if prefix == "attention":
+            attention_items = payload.get("attention_items", [])
+            result["attention_item_count"] = len(attention_items) if isinstance(attention_items, list) else 0
+    return result
+
+
 def session_overview(session_descriptor: dict[str, Any] | None) -> dict[str, Any] | None:
     if session_descriptor is None:
         return None
@@ -575,6 +605,7 @@ def render_status_payload(
             trust_surfaces_payload=trust_surfaces_payload,
             registry_state=registry_state,
         ),
+        "world_model": world_model_state(),
     }
 
 

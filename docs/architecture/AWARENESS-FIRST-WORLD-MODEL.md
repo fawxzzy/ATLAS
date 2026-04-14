@@ -111,6 +111,34 @@ ATLAS should also emit an explicit attention view for operator-relevant anomalie
 
 Attention is a read model. It does not grant execution authority.
 
+## World-Model Artifact Paths
+
+Current root-owned outputs:
+
+- global state snapshot: `runtime/state/atlas/world-model.snapshot.latest.json`
+- global attention snapshot: `runtime/state/atlas/world-model.attention.latest.json`
+- session-local status snapshot: `runtime/atlas/sessions/<session_id>/status.snapshot.json`
+
+Current machine-readable contracts:
+
+- `schemas/atlas.observation.v1.json`
+- `schemas/atlas.inventory.entry.v1.json`
+- `schemas/atlas.attention.item.v1.json`
+- `schemas/atlas.state.snapshot.v1.json`
+
+## Enforceable Rule
+
+`No dark state` is not doctrine only.
+
+At the stack root it means:
+
+- completed governed sessions must appear in the world-model inventory and observation surfaces
+- governed execution receipts must produce matching observations
+- attention is derived from explicit observations and descriptors, not operator memory
+- world-model snapshots must be rebuildable and content-digest stable from the same inputs
+
+If those artifacts are missing, the stack is out of contract.
+
 ## Connector Boundary
 
 Any external chat, voice, or app connector must bind to the same governed model:

@@ -17,6 +17,7 @@ from ops.atlas.load_tool_registry import load_tool_registry_bundle, select_tool_
 from ops.cortex._artifacts import register_artifact_descriptors, sha256_bytes, write_json
 from ops.cortex.build_worker_context import build_worker_context_payload, normalize_query_terms
 from ops.cortex.render_status import render_status_payload
+from ops.cortex.world_model import world_model_state_root, write_world_model_state
 
 DEFAULT_CONTEXT_LIMIT = 5
 SESSION_CONTRACT_VERSION = "atlas.session.v1"
@@ -743,6 +744,15 @@ def main(argv: list[str] | None = None) -> int:
             receipt_root=receipt_root,
             supervisor_root=supervisor_root if supervisor_root.exists() else None,
         )
+        world_model_summary = write_world_model_state(
+            descriptor_root=ROOT / "runtime" / "cortex" / "artifacts",
+            root=ROOT,
+        )
+        register_artifact_descriptors(
+            [world_model_state_root(ROOT)],
+            output_dir=ROOT / "runtime" / "cortex" / "artifacts",
+            root=ROOT,
+        )
         status_snapshot = render_status_payload(
             ROOT / "runtime" / "cortex" / "artifacts",
             session_id=session_id,
@@ -760,6 +770,8 @@ def main(argv: list[str] | None = None) -> int:
                     "merge_request_refs": manifest["refs"]["merge_request_refs"],
                     "descriptor_count": len(written_descriptors),
                     "status_snapshot_ref": atlas_relative(session_root / "status.snapshot.json", root=ROOT),
+                    "world_model_snapshot_ref": world_model_summary["snapshot_ref"],
+                    "world_model_attention_ref": world_model_summary["attention_ref"],
                 },
                 indent=2,
             )

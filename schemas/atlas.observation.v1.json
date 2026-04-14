@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://schemas/atlas.observation.v1.json",
+  "title": "ATLAS observation v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "observation_id",
+    "observation_type",
+    "source_kind",
+    "status",
+    "observed_at",
+    "source_ref",
+    "details"
+  ],
+  "properties": {
+    "contract_version": {
+      "type": "string",
+      "const": "atlas.observation.v1"
+    },
+    "observation_id": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "observation_type": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_kind": {
+      "type": "string",
+      "enum": [
+        "registry",
+        "descriptor",
+        "event_receipt",
+        "knowledge_receipt",
+        "validation_receipt"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "minLength": 1
+    },
+    "observed_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "source_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scope_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "details": {
+      "type": "object"
+    }
+  }
+}

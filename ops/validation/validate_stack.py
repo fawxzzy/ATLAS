@@ -57,6 +57,7 @@ from ops.stack.generate_lockfile import (
 )
 from ops.stack.audit_gitdir_hygiene import build_report as build_gitdir_hygiene_report, default_target_paths as default_gitdir_hygiene_targets
 from ops.atlas.load_tool_registry import load_tool_registry_bundle
+from ops.cortex._artifacts import load_descriptors, stable_json_digest
 
 
 @dataclass
@@ -562,6 +563,183 @@ def validate_verta_trust_gate(stack_file: Path, config: dict[str, Any]) -> list[
     return findings
 
 
+def validate_world_model_state(stack_file: Path) -> list[Finding]:
+    root = stack_file.parent.resolve()
+    findings: list[Finding] = []
+    snapshot_path = root / "runtime" / "state" / "atlas" / "world-model.snapshot.latest.json"
+    attention_path = root / "runtime" / "state" / "atlas" / "world-model.attention.latest.json"
+    descriptor_root = root / "runtime" / "cortex" / "artifacts"
+    descriptors = load_descriptors(descriptor_root) if descriptor_root.exists() else []
+
+    required_files = [
+        (snapshot_path, "state"),
+        (attention_path, "attention"),
+    ]
+    payloads: dict[str, dict[str, Any]] = {}
+    for path, snapshot_kind in required_files:
+        relative_path = relative_to_root(root, path)
+        if not path.exists():
+            findings.append(
+                Finding(
+                    "error",
+                    "missing-world-model-artifact",
+                    relative_path,
+                    f"Required world-model {snapshot_kind} artifact is missing.",
+                )
+            )
+            continue
+        try:
+            payload = load_json_object(path)
+        except Exception as exc:
+            findings.append(
+                Finding(
+                    "error",
+                    "invalid-world-model-artifact",
+                    relative_path,
+                    f"Unable to read the world-model {snapshot_kind} artifact: {exc}",
+                )
+            )
+            continue
+        payloads[snapshot_kind] = payload
+        if payload.get("contract_version") != "atlas.state.snapshot.v1":
+            findings.append(
+                Finding(
+                    "error",
+                    "world-model-contract-version",
+                    relative_path,
+                    "World-model artifacts must use contract_version 'atlas.state.snapshot.v1'.",
+                )
+            )
+        if payload.get("snapshot_kind") != snapshot_kind:
+            findings.append(
+                Finding(
+                    "error",
+                    "world-model-snapshot-kind",
+                    relative_path,
+                    f"World-model artifact must declare snapshot_kind '{snapshot_kind}'.",
+                )
+            )
+        expected_digest = stable_json_digest(
+            {
+                key: value
+                for key, value in payload.items()
+                if key != "content_digest"
+            }
+        )
+        if payload.get("content_digest") != expected_digest:
+            findings.append(
+                Finding(
+                    "error",
+                    "world-model-content-digest",
+                    relative_path,
+                    "World-model artifact content_digest does not match the stable payload.",
+                )
+            )
+
+    snapshot = payloads.get("state")
+    attention = payloads.get("attention")
+    if not isinstance(snapshot, dict):
+        return findings
+
+    source_refs = snapshot.get("source_refs")
+    if not isinstance(source_refs, dict):
+        findings.append(
+            Finding(
+                "error",
+                "world-model-source-refs",
+                relative_to_root(root, snapshot_path),
+                "State snapshot must declare source_refs.",
+            )
+        )
+    else:
+        for required_key in [
+            "descriptor_root",
+            "registry_refs",
+            "event_latest_refs",
+            "knowledge_latest_refs",
+            "validation_refs",
+        ]:
+            if required_key not in source_refs:
+                findings.append(
+                    Finding(
+                        "error",
+                        "world-model-source-ref-key",
+                        relative_to_root(root, snapshot_path),
+                        f"State snapshot source_refs must include '{required_key}'.",
+                    )
+                )
+
+    observations = snapshot.get("observations", [])
+    inventory_entries = snapshot.get("inventory_entries", [])
+    attention_items = snapshot.get("attention_items", [])
+    observation_source_refs = {
+        str(item.get("source_ref"))
+        for item in observations
+        if isinstance(item, dict) and isinstance(item.get("source_ref"), str)
+    }
+    inventory_source_refs = {
+        str(item.get("source_ref"))
+        for item in inventory_entries
+        if isinstance(item, dict) and isinstance(item.get("source_ref"), str)
+    }
+
+    for descriptor in descriptors:
+        artifact_type = str(descriptor.get("artifact_type", ""))
+        source_ref = str(descriptor.get("source_ref", ""))
+        state = descriptor.get("state", {})
+        if artifact_type == "execution_receipt" and source_ref not in observation_source_refs:
+            findings.append(
+                Finding(
+                    "error",
+                    "missing-governed-observation",
+                    relative_to_root(root, snapshot_path),
+                    f"Execution receipt '{source_ref}' is missing from the state snapshot observations.",
+                )
+            )
+        if artifact_type == "session_manifest" and str(state.get("final_status", "")) in {"completed", "resume_ready", "failed"}:
+            if source_ref not in observation_source_refs:
+                findings.append(
+                    Finding(
+                        "error",
+                        "missing-session-observation",
+                        relative_to_root(root, snapshot_path),
+                        f"Completed session '{source_ref}' is missing from the state snapshot observations.",
+                    )
+                )
+            if source_ref not in inventory_source_refs:
+                findings.append(
+                    Finding(
+                        "error",
+                        "missing-session-inventory-entry",
+                        relative_to_root(root, snapshot_path),
+                        f"Completed session '{source_ref}' is missing from the state snapshot inventory.",
+                    )
+                )
+
+    if isinstance(attention, dict):
+        snapshot_attention_ids = sorted(
+            str(item.get("attention_id"))
+            for item in attention_items
+            if isinstance(item, dict) and isinstance(item.get("attention_id"), str)
+        )
+        attention_attention_ids = sorted(
+            str(item.get("attention_id"))
+            for item in attention.get("attention_items", [])
+            if isinstance(item, dict) and isinstance(item.get("attention_id"), str)
+        )
+        if snapshot_attention_ids != attention_attention_ids:
+            findings.append(
+                Finding(
+                    "error",
+                    "attention-artifact-drift",
+                    relative_to_root(root, attention_path),
+                    "Attention artifact does not match the state snapshot attention items.",
+                )
+            )
+
+    return findings
+
+
 def validate_tool_registry(root: Path) -> list[Finding]:
     try:
         bundle = load_tool_registry_bundle(root=root)
@@ -666,6 +844,7 @@ def build_findings(stack_file: Path, config: dict[str, Any], *, lock_file_overri
     findings.extend(validate_tool_registry(root))
     findings.extend(validate_subsystem_registry(stack_file, config))
     findings.extend(validate_verta_trust_gate(stack_file, config))
+    findings.extend(validate_world_model_state(stack_file))
 
     for label, raw_path in iter_relative_directory_targets(config):
         resolved = resolve_path(stack_file, raw_path)

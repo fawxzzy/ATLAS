@@ -36,6 +36,12 @@ Render one session:
 python .\ops\cortex\render_status.py --session-id <session_id>
 ```
 
+Build the world-model artifacts first:
+
+```powershell
+python .\ops\cortex\build_world_model.py
+```
+
 ## Governed Surface View
 
 The status renderer exposes governed surface identity from descriptors only:
@@ -63,6 +69,15 @@ Current attention items may include:
 - untrusted knowledge surfaces that remain quarantined
 
 The queue must stay descriptor-backed and deterministic. It must not inspect transcripts, terminal output, or raw imported evidence.
+
+## World-Model Refs
+
+The status payload also reports root-owned world-model artifact refs when present:
+
+- `runtime/state/atlas/world-model.snapshot.latest.json`
+- `runtime/state/atlas/world-model.attention.latest.json`
+
+Those artifacts are the global snapshot layer above descriptors and receipts. Status remains descriptor-backed, but it may report the current snapshot and attention digests for clients that need one stable read surface.
 
 ## Open Merge Rule
 

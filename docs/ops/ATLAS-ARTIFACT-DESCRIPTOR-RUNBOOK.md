@@ -29,6 +29,7 @@ Current registry coverage includes:
 - approval receipt
 - execution receipt
 - knowledge runtime catalogs needed for trust/status views
+- world-model state and attention snapshots under `runtime/state/atlas/`
 
 ## Determinism
 

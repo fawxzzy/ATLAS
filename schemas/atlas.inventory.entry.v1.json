@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://schemas/atlas.inventory.entry.v1.json",
+  "title": "ATLAS inventory entry v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "entry_id",
+    "entry_type",
+    "key",
+    "label",
+    "status",
+    "source_ref",
+    "details"
+  ],
+  "properties": {
+    "contract_version": {
+      "type": "string",
+      "const": "atlas.inventory.entry.v1"
+    },
+    "entry_id": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "entry_type": {
+      "type": "string",
+      "enum": [
+        "repo",
+        "tool",
+        "extension",
+        "session",
+        "worker",
+        "artifact",
+        "knowledge"
+      ]
+    },
+    "key": {
+      "type": "string",
+      "minLength": 1
+    },
+    "label": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "type": "string",
+      "minLength": 1
+    },
+    "trust_class": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "source_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "details": {
+      "type": "object"
+    }
+  }
+}

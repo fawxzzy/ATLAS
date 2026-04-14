@@ -62,6 +62,7 @@ def default_artifact_source_paths(root: Path | None = None) -> list[Path]:
         base / "runtime" / "cortex" / "supervisor",
         base / "runtime" / "lifeline" / "worker-execution",
         base / "runtime" / "cortex" / "catalog" / "knowledge",
+        base / "runtime" / "state" / "atlas",
     ]
 
 
@@ -602,6 +603,51 @@ def build_knowledge_catalog_descriptor(payload: dict[str, Any], *, digest: str, 
     )
 
 
+def build_state_snapshot_descriptor(payload: dict[str, Any], *, digest: str, size_bytes: int, source_ref: str) -> dict[str, Any]:
+    snapshot_kind = str(payload.get("snapshot_kind", "state"))
+    artifact_type = "attention_snapshot" if snapshot_kind == "attention" else "state_snapshot"
+    summary = payload.get("summary", {})
+    active_session = payload.get("active_session", {})
+    return descriptor_base(
+        artifact_class="coordination",
+        artifact_type=artifact_type,
+        schema_ref="atlas.state.snapshot.v1",
+        digest=digest,
+        size_bytes=size_bytes,
+        source_ref=source_ref,
+        trust_class="trusted",
+        release_eligible=False,
+        retention_class="runtime",
+        regulated_artifact_class="world_model",
+        identity={
+            "snapshot_kind": snapshot_kind,
+            "active_session_id": active_session.get("session_id") if isinstance(active_session, dict) else None,
+        },
+        state={
+            "content_digest": payload.get("content_digest"),
+            "inventory_entry_count": summary.get("inventory_entry_count"),
+            "observation_count": summary.get("observation_count"),
+            "attention_item_count": summary.get("attention_item_count"),
+            "highest_severity": summary.get("highest_severity") or summary.get("attention_highest_severity"),
+            "registry_digest": summary.get("registry_digest"),
+        },
+        links={
+            "descriptor_root": payload.get("source_refs", {}).get("descriptor_root")
+            if isinstance(payload.get("source_refs"), dict)
+            else None,
+            "event_latest_refs": clean_refs(payload.get("source_refs", {}).get("event_latest_refs", []))
+            if isinstance(payload.get("source_refs"), dict)
+            else [],
+            "knowledge_latest_refs": clean_refs(payload.get("source_refs", {}).get("knowledge_latest_refs", []))
+            if isinstance(payload.get("source_refs"), dict)
+            else [],
+            "validation_refs": clean_refs(payload.get("source_refs", {}).get("validation_refs", []))
+            if isinstance(payload.get("source_refs"), dict)
+            else [],
+        },
+    )
+
+
 def build_descriptor_for_payload(path: Path, payload: dict[str, Any], *, root: Path | None = None) -> dict[str, Any] | None:
     data = path.read_bytes()
     digest = sha256_bytes(data)
@@ -630,6 +676,8 @@ def build_descriptor_for_payload(path: Path, payload: dict[str, Any], *, root: P
         return build_execution_receipt_descriptor(payload, digest=digest, size_bytes=size_bytes, source_ref=source_ref)
     if schema_version == SUPERVISOR_CONSUMER_VERSION:
         return build_supervisor_consumer_descriptor(payload, digest=digest, size_bytes=size_bytes, source_ref=source_ref)
+    if contract_version == "atlas.state.snapshot.v1":
+        return build_state_snapshot_descriptor(payload, digest=digest, size_bytes=size_bytes, source_ref=source_ref)
     if "archive_id" in payload and "indexing_profile" in payload and "promotion_status" in payload:
         return build_knowledge_catalog_descriptor(payload, digest=digest, size_bytes=size_bytes, source_ref=source_ref)
     return None

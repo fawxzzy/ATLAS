@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://schemas/atlas.state.snapshot.v1.json",
+  "title": "ATLAS state snapshot v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "snapshot_kind",
+    "source_refs",
+    "registry",
+    "active_session",
+    "summary",
+    "inventory_entries",
+    "observations",
+    "attention_items",
+    "content_digest"
+  ],
+  "properties": {
+    "contract_version": {
+      "type": "string",
+      "const": "atlas.state.snapshot.v1"
+    },
+    "snapshot_kind": {
+      "type": "string",
+      "enum": [
+        "state",
+        "attention"
+      ]
+    },
+    "source_refs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "descriptor_root",
+        "registry_refs",
+        "event_latest_refs",
+        "knowledge_latest_refs",
+        "validation_refs"
+      ],
+      "properties": {
+        "descriptor_root": {
+          "type": "string",
+          "minLength": 1
+        },
+        "registry_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "event_latest_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "knowledge_latest_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "validation_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "registry": {
+      "type": "object"
+    },
+    "active_session": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "summary": {
+      "type": "object"
+    },
+    "inventory_entries": {
+      "type": "array",
+      "items": {
+        "$ref": "atlas://schemas/atlas.inventory.entry.v1.json"
+      }
+    },
+    "observations": {
+      "type": "array",
+      "items": {
+        "$ref": "atlas://schemas/atlas.observation.v1.json"
+      }
+    },
+    "attention_items": {
+      "type": "array",
+      "items": {
+        "$ref": "atlas://schemas/atlas.attention.item.v1.json"
+      }
+    },
+    "content_digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  }
+}

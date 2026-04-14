@@ -54,8 +54,8 @@ components:
     remote: "https://github.com/ZachariahRedfield/fawxzzy-mazer.git"
     ref_type: "branch"
     ref: "codex/mazer-d2-learning-scorer"
-    commit: "cb996f08360433569af6dce7654d0e17c128ed93"
-    dirty: true
+    commit: "22f60e830c76991de925dd9814ca8e108156026f"
+    dirty: false
     trust_class: "trusted"
     release_eligible: true
   nat1-games:
@@ -98,7 +98,7 @@ components:
     remote: null
     ref_type: "branch"
     ref: "master"
-    commit: "1f022fcf99e442bc30430fc3bd5bcd3d0c18bfe1"
+    commit: "c8495198166f6654de5ddd936bd2cfcf18e9f5a7"
     dirty: true
     trust_class: "trusted"
     release_eligible: false
@@ -110,7 +110,7 @@ components:
     ref_type: "branch"
     ref: "main"
     commit: "1dd3298c556b4d0839e6bb43b3dde7c3527022f7"
-    dirty: false
+    dirty: true
     trust_class: "trusted"
     release_eligible: false
 excluded_surfaces:
@@ -126,4 +126,4 @@ excluded_surfaces:
     trust_class: "untrusted"
     release_eligible: false
     reason: "Token-bearing Verta checkout remains quarantined and untrusted until scrub and rotation are complete."
-lock_digest: "sha256:2c1ac5e9b5f2baa54423f078580a5d3fd21949fe90396776ff6126e2b731cc52"
+lock_digest: "sha256:cd11ce81e5f415f15fbf306c5a465a950fefa30c0254e4124ad1c4dfbb916d66"
