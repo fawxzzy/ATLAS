@@ -32,10 +32,15 @@ Use these ids in stack docs, tickets, and automation:
 - `lifeline` -> `repos/fawxzzy-lifeline`
 - `fitness` -> `repos/fawxzzy-fitness`
 - `mazer` -> `repos/fawxzzy-mazer`
-- `cortex` -> `repos/cortex`
 - `nat1-games` -> `repos/Nat1-Games/nat1-games`
 
 The ids are canonical even where disk names have not been normalized yet.
+
+## Root-Owned Subsystems
+
+- `cortex` -> `runtime/cortex`
+
+`repos/cortex` is adjacent historical context only. The active Cortex runtime surface is root-owned under `runtime/cortex/**`.
 
 ## Working Rules
 

@@ -18,7 +18,7 @@ Use this file to answer four questions:
 | Component | Current role | Owns | Must not own |
 | --- | --- | --- | --- |
 | `ATLAS` | stack root and stack contract | stack map, path policy, stack docs, stack validators, export and bootstrap tooling | repo business logic, background orchestration, hidden memory |
-| `CORTEX` | future orchestration substrate, currently an unmanaged framework snapshot | event schemas, pattern extraction, future coordination logic once proven | stack truth, repo policy truth, direct authority to rewrite repos by default |
+| `CORTEX` | root-owned read-only coordination subsystem under `runtime/cortex/**` | event schemas, query/runtime catalogs, read-only supervisor logic, future coordination logic once proven | stack truth, repo policy truth, direct authority to rewrite repos by default |
 | `Playbook` | deterministic repo runtime and governance layer | repo-local context, repo validation, repo doctrine, repo-facing automation contracts | stack-wide filesystem truth, global orchestration state |
 | `Codex` | session executor | setup, migration, validation, refactors, docs, targeted edits, receipts produced during a session | hidden daemon behavior, durable system memory without an explicit file contract |
 
@@ -40,13 +40,22 @@ ATLAS is the stack truth. If a stack-level doc conflicts with a repo convenience
 
 The Atlas platform-layer doctrine itself is canonical in `repos/fawxzzy-atlas/README.md` and `repos/fawxzzy-atlas/docs/**`. This stack-root document is only the integration and boundary view; it must not become a second source of platform architecture truth.
 
-### CORTEX should eventually own
+### CORTEX owns now
+
+- read-only runtime/query/catalog state under `runtime/cortex/**`
+- portable event and observation schemas
+- a read-only worker supervisor that consumes explicit worker artifacts
+- future coordination logic only when it remains file-contract based
+
+### CORTEX may eventually own
 
 - portable event and observation schemas
 - pattern extraction across validated stack receipts
 - orchestration recommendations derived from real artifacts
 - future queueing and coordination logic that works from explicit manifests
 - optional memory and query surfaces that read retained state from `runtime/`
+
+CORTEX is a root-owned subsystem, not an active managed child repo. `repos/cortex` may exist as adjacent historical context, but the active owner surface is `runtime/cortex/**`.
 
 CORTEX should not become the place where stack truth is only implicit in code. Its inputs and outputs must stay file-contract based.
 
@@ -94,6 +103,8 @@ ATLAS may expose:
 - repo registry and maturity status
 
 CORTEX may read those files and make recommendations. It should not silently become a second source of truth for stack boundaries.
+
+The active Cortex surface lives under `runtime/cortex/**`. It is not a repo-local execution surface and it must remain read-only unless a future contract explicitly expands it.
 
 ### Playbook -> Codex
 
@@ -146,7 +157,7 @@ Examples:
 
 ## Maturity Rule For CORTEX
 
-CORTEX is not yet the active orchestration authority in ATLAS.
+CORTEX is not the active orchestration authority in ATLAS. It is currently a root-owned read-only subsystem.
 
 It can become one only after all of the following are true:
 
@@ -155,7 +166,7 @@ It can become one only after all of the following are true:
 3. its recommendations can be validated against stack receipts
 4. it does not require hidden local state to reproduce decisions
 
-Until then, CORTEX is a future integration target, not the current controller.
+Until then, CORTEX stays a read-only supervisor and query/runtime surface, not the current controller.
 
 ## Safe Integration Pattern
 
@@ -165,7 +176,7 @@ Use this order:
 2. Playbook validates repo-local behavior
 3. Codex executes scoped changes against the contract
 4. receipts are written to `runtime/receipts/**`
-5. future CORTEX reads receipts and recommends the next step
+5. CORTEX reads receipts and worker artifacts, then recommends the next step or emits a merge request
 
 That preserves human review and keeps orchestration explainable.
 

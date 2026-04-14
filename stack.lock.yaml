@@ -1,6 +1,6 @@
 schema_version: "atlas.stack.lock.v1"
 stack_manifest_path: "stack.yaml"
-stack_manifest_digest: "sha256:adb66ccd52128a38bd3395822cbe0b2551fe11a7ed3a865c15349d729de0ea21"
+stack_manifest_digest: "sha256:87f73d017fbabcb0be75a0992a903adde748141db14911abe6d1220b81dff4d9"
 component_count: 8
 components:
   atlas:
@@ -22,7 +22,7 @@ components:
     ref_type: "branch"
     ref: "main"
     commit: "742471dd78a2a58279df3ef12217635c1f07d1e4"
-    dirty: false
+    dirty: true
     trust_class: "trusted"
     release_eligible: true
   lifeline:
@@ -33,7 +33,7 @@ components:
     ref_type: "branch"
     ref: "codex/startup-public-truth-reconcile"
     commit: "76cea9821374543875052119640de538640c780f"
-    dirty: false
+    dirty: true
     trust_class: "trusted"
     release_eligible: true
   mazer:
@@ -44,7 +44,7 @@ components:
     ref_type: "branch"
     ref: "codex/mazer-playbook-scope"
     commit: "cb996f08360433569af6dce7654d0e17c128ed93"
-    dirty: false
+    dirty: true
     trust_class: "trusted"
     release_eligible: true
   nat1-games:
@@ -66,7 +66,7 @@ components:
     ref_type: "branch"
     ref: "codex/assistant-reliability-safety-playbook-clean"
     commit: "021cb65b262fee0a59c464af367739629c99d574"
-    dirty: false
+    dirty: true
     trust_class: "trusted"
     release_eligible: true
   playbook-demo:
@@ -87,7 +87,7 @@ components:
     remote: null
     ref_type: "branch"
     ref: "master"
-    commit: "cf2c8b144f23a5a24cae539f3a3ea13e30ccd943"
+    commit: "76c17c9baaa7c31848e85ad7d8e2ce716d985245"
     dirty: true
     trust_class: "trusted"
     release_eligible: false
@@ -104,4 +104,4 @@ excluded_surfaces:
     trust_class: "untrusted"
     release_eligible: false
     reason: "Token-bearing Verta checkout remains quarantined and untrusted until scrub and rotation are complete."
-lock_digest: "sha256:b578a219aea96c20c17c59186c0984c6b7029a0eca94b05ec30a79b5a3535964"
+lock_digest: "sha256:79c44c70c94bef3239d75e7206f1b57817af6b8462eb756b465adfcb13869b99"

@@ -40,6 +40,7 @@ subpaths:
     cortex_playbooks: runtime/cortex/catalog/playbooks
     cortex_query: runtime/cortex/query
     cortex_query_knowledge: runtime/cortex/query/knowledge
+    cortex_supervisor: runtime/cortex/supervisor
     devservers: runtime/devservers
     events: runtime/receipts/events
     knowledge_receipts: runtime/receipts/knowledge
@@ -74,6 +75,7 @@ subpaths:
     backup: ops/backup
     bootstrap: ops/bootstrap
     codex: ops/codex
+    cortex: ops/cortex
     doctor: ops/doctor
     events: ops/events
     knowledge: ops/knowledge
@@ -114,10 +116,6 @@ repo_registry:
     path: repos/fawxzzy-mazer
     role: application
     status: active
-  cortex:
-    path: repos/cortex
-    role: framework
-    status: unmanaged
   nat1-games:
     path: repos/Nat1-Games/nat1-games
     role: application
@@ -134,6 +132,15 @@ repo_registry:
     path: repos/mazer-legacy-unreal/Mazer
     role: legacy-application
     status: legacy
+
+subsystem_registry:
+  cortex:
+    path: runtime/cortex
+    owner: stack
+    role: read-only coordination runtime
+    status: active
+    model: root-owned-subsystem
+    adjacent_snapshot: repos/cortex
 
 archives:
   backups: repos/repo-backups

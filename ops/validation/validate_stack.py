@@ -51,6 +51,7 @@ from ops.stack.generate_lockfile import (
     load_lockfile,
     repo_is_git_root,
 )
+from ops.stack.audit_gitdir_hygiene import build_report as build_gitdir_hygiene_report, default_target_paths as default_gitdir_hygiene_targets
 
 
 @dataclass
@@ -228,6 +229,176 @@ def discover_unregistered_git_roots(root: Path, config: dict[str, Any], stack_fi
     return discovered
 
 
+def validate_subsystem_registry(stack_file: Path, config: dict[str, Any]) -> list[Finding]:
+    root = stack_file.parent.resolve()
+    findings: list[Finding] = []
+    repo_registry = config.get("repo_registry", {})
+    subsystem_registry = config.get("subsystem_registry", {})
+
+    if "cortex" in repo_registry:
+        findings.append(
+            Finding(
+                "error",
+                "cortex-repo-registry-entry",
+                "stack.yaml",
+                "Cortex must not be modeled as a repo_registry entry; use subsystem_registry for the root-owned runtime surface.",
+            )
+        )
+
+    if not isinstance(subsystem_registry, dict):
+        findings.append(
+            Finding(
+                "error",
+                "missing-subsystem-registry",
+                "stack.yaml",
+                "subsystem_registry must declare root-owned runtime subsystems.",
+            )
+        )
+        return findings
+
+    cortex = subsystem_registry.get("cortex")
+    if not isinstance(cortex, dict):
+        findings.append(
+            Finding(
+                "error",
+                "missing-cortex-subsystem",
+                "stack.yaml",
+                "subsystem_registry.cortex must declare the active root-owned Cortex surface.",
+            )
+        )
+        return findings
+
+    raw_path = cortex.get("path")
+    if not isinstance(raw_path, str):
+        findings.append(
+            Finding(
+                "error",
+                "invalid-cortex-subsystem-path",
+                "stack.yaml",
+                "subsystem_registry.cortex.path must be a relative path string.",
+            )
+        )
+        return findings
+
+    cortex_path = resolve_path(stack_file, raw_path)
+    cortex_rel = relative_to_root(root, cortex_path)
+    if not cortex_path.exists():
+        findings.append(
+            Finding(
+                "error",
+                "missing-cortex-subsystem-path",
+                cortex_rel,
+                "Configured Cortex subsystem path does not exist.",
+            )
+        )
+    elif not cortex_path.is_dir():
+        findings.append(
+            Finding(
+                "error",
+                "cortex-subsystem-path-not-directory",
+                cortex_rel,
+                "Configured Cortex subsystem path must be a directory.",
+            )
+        )
+
+    if str(cortex.get("owner", "")) != "stack":
+        findings.append(
+            Finding(
+                "error",
+                "invalid-cortex-subsystem-owner",
+                "stack.yaml",
+                "subsystem_registry.cortex.owner must be 'stack'.",
+            )
+        )
+    if str(cortex.get("model", "")) != "root-owned-subsystem":
+        findings.append(
+            Finding(
+                "error",
+                "invalid-cortex-subsystem-model",
+                "stack.yaml",
+                "subsystem_registry.cortex.model must be 'root-owned-subsystem'.",
+            )
+        )
+    if str(cortex.get("status", "")) != "active":
+        findings.append(
+            Finding(
+                "warning",
+                "inactive-cortex-subsystem",
+                "stack.yaml",
+                "subsystem_registry.cortex.status should remain 'active' while Cortex is the live root-owned runtime surface.",
+            )
+        )
+
+    adjacent_snapshot = cortex.get("adjacent_snapshot")
+    if isinstance(adjacent_snapshot, str):
+        adjacent_path = resolve_path(stack_file, adjacent_snapshot)
+        if not adjacent_path.exists():
+            findings.append(
+                Finding(
+                    "warning",
+                    "missing-cortex-adjacent-snapshot",
+                    relative_to_root(root, adjacent_path),
+                    "Configured Cortex adjacent snapshot path does not exist.",
+                )
+            )
+    return findings
+
+
+def validate_gitdir_hygiene(root: Path) -> list[Finding]:
+    findings: list[Finding] = []
+    try:
+        report = build_gitdir_hygiene_report(default_gitdir_hygiene_targets(root), apply_repairs=False)
+    except Exception as exc:
+        return [
+            Finding(
+                "warning",
+                "gitdir-hygiene-audit-failed",
+                "ops/stack/audit_gitdir_hygiene.py",
+                f"Gitdir hygiene audit could not complete: {exc}",
+            )
+        ]
+
+    for repo in report.get("repos", []):
+        if not isinstance(repo, dict):
+            continue
+        repo_path = str(repo.get("repo_path", ""))
+        for item in repo.get("findings", []):
+            if not isinstance(item, dict):
+                continue
+            path = str(item.get("metadata_path") or item.get("target_path") or repo_path or "repos")
+            findings.append(
+                Finding(
+                    "warning",
+                    f"gitdir-hygiene-{item.get('category', 'finding')}",
+                    path,
+                    str(item.get("message", "Gitdir hygiene finding detected.")),
+                    {"repo_path": repo_path},
+                )
+            )
+        commands = repo.get("commands", {})
+        if not isinstance(commands, dict):
+            continue
+        for command_name, command_result in commands.items():
+            if not isinstance(command_result, dict):
+                continue
+            exit_code = command_result.get("exit_code")
+            if exit_code == 0:
+                continue
+            stderr = str(command_result.get("stderr") or command_result.get("stdout") or "").strip()
+            message = f"Git hygiene command '{command_name}' failed during audit."
+            if stderr:
+                message = f"{message} {stderr}"
+            findings.append(
+                Finding(
+                    "warning",
+                    f"gitdir-hygiene-command-{command_name}",
+                    repo_path or "repos",
+                    message,
+                )
+            )
+    return findings
+
+
 def iter_relative_directory_targets(config: dict[str, Any]) -> list[tuple[str, str]]:
     targets: list[tuple[str, str]] = []
     for key, value in config.get("paths", {}).items():
@@ -302,6 +473,7 @@ def iter_scan_files(roots: list[Path]) -> list[Path]:
 def build_findings(stack_file: Path, config: dict[str, Any], *, lock_file_override: Path | None = None) -> list[Finding]:
     root = stack_file.parent.resolve()
     findings: list[Finding] = []
+    findings.extend(validate_subsystem_registry(stack_file, config))
 
     for label, raw_path in iter_relative_directory_targets(config):
         resolved = resolve_path(stack_file, raw_path)
@@ -527,6 +699,8 @@ def build_findings(stack_file: Path, config: dict[str, Any], *, lock_file_overri
                 "Git repo root is present under repos/ but not tracked by repo_registry or excluded_surfaces.",
             )
         )
+
+    findings.extend(validate_gitdir_hygiene(root))
 
     root_abs_patterns = [
         ("warning", "atlas-root-path", re.compile(re.escape(str(root)))),
