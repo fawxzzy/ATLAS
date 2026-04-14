@@ -1,0 +1,313 @@
+{
+  "cases": [
+    {
+      "case": "read-only-scan",
+      "request": {
+        "contract_version": "atlas.privileged-action.request.v1",
+        "request_id": "request-read-scan-001",
+        "requested_at": "2026-04-13T20:40:00Z",
+        "worker_id": "worker-meseeks-01",
+        "assignment_id": "assignment-lockfile-a",
+        "stack_lock_digest": "sha256:stack-lock-abc123",
+        "action": {
+          "summary": "Run a read-only scan over the lockfile and worker contracts.",
+          "operation": "read_only_scan",
+          "command": [
+            "python",
+            "ops/validation/validate_stack.py",
+            "--ratchet"
+          ],
+          "cwd": "."
+        },
+        "target_paths": [
+          "stack.yaml",
+          "ops/validation/validate_stack.py"
+        ],
+        "requested_capability": {
+          "capability_profile_id": "cap-read-only",
+          "filesystem_scopes": {
+            "read": [
+              "."
+            ],
+            "write": [],
+            "create": [],
+            "deny": [
+              "secrets/**"
+            ]
+          },
+          "network_scopes": {
+            "mode": "none",
+            "allowed_domains": [],
+            "blocked_domains": []
+          },
+          "process_execution_permissions": {
+            "allow_spawn": true,
+            "allow_shell": false,
+            "allow_python": true,
+            "allowed_commands": [
+              "python"
+            ],
+            "denied_commands": []
+          },
+          "package_manager_permissions": {
+            "allow_install": false,
+            "allow_update": false,
+            "allowed_managers": [],
+            "blocked_managers": [
+              "npm",
+              "pip"
+            ]
+          },
+          "elevation_requirement": "none",
+          "resource_budgets": {
+            "wall_clock_seconds": 120,
+            "cpu_seconds": 120,
+            "memory_mb": 512,
+            "disk_mb": 50
+          },
+          "allowed_data_classes": [
+            "machine_state"
+          ]
+        },
+        "dry_run_output": "Stack validation is read-only in this pass."
+      }
+    },
+    {
+      "case": "approved-admin-action",
+      "request": {
+        "contract_version": "atlas.privileged-action.request.v1",
+        "request_id": "request-admin-002",
+        "requested_at": "2026-04-13T20:41:00Z",
+        "worker_id": "worker-meseeks-01",
+        "assignment_id": "assignment-lockfile-a",
+        "stack_lock_digest": "sha256:stack-lock-abc123",
+        "action": {
+          "summary": "Install a host-level package with approval.",
+          "operation": "package_install",
+          "command": [
+            "winget",
+            "install",
+            "--id",
+            "Git.Git"
+          ],
+          "cwd": "."
+        },
+        "target_paths": [
+          "C:/Program Files/Git"
+        ],
+        "target_resources": [
+          "winget"
+        ],
+        "requested_capability": {
+          "capability_profile_id": "cap-admin-install",
+          "filesystem_scopes": {
+            "read": [
+              "."
+            ],
+            "write": [
+              "C:/Program Files/Git"
+            ],
+            "create": [],
+            "deny": [
+              "secrets/**"
+            ]
+          },
+          "network_scopes": {
+            "mode": "allowlist",
+            "allowed_domains": [
+              "github.com"
+            ],
+            "blocked_domains": []
+          },
+          "process_execution_permissions": {
+            "allow_spawn": true,
+            "allow_shell": true,
+            "allow_python": false,
+            "allowed_commands": [
+              "winget"
+            ],
+            "denied_commands": [
+              "powershell -NoProfile -Command Start-Process -Verb RunAs"
+            ]
+          },
+          "package_manager_permissions": {
+            "allow_install": true,
+            "allow_update": false,
+            "allowed_managers": [
+              "winget"
+            ],
+            "blocked_managers": [
+              "npm",
+              "pip"
+            ]
+          },
+          "elevation_requirement": "per_action_approval",
+          "resource_budgets": {
+            "wall_clock_seconds": 600,
+            "cpu_seconds": 300,
+            "memory_mb": 1024,
+            "disk_mb": 200
+          },
+          "allowed_data_classes": [
+            "machine_state"
+          ]
+        },
+        "dry_run_output": "Would install Git.Git through winget."
+      }
+    },
+    {
+      "case": "rejected-request",
+      "request": {
+        "contract_version": "atlas.privileged-action.request.v1",
+        "request_id": "request-admin-003",
+        "requested_at": "2026-04-13T20:42:00Z",
+        "worker_id": "worker-meseeks-02",
+        "assignment_id": "assignment-secret-scan",
+        "stack_lock_digest": "sha256:stack-lock-abc123",
+        "action": {
+          "summary": "Request unrestricted admin access.",
+          "operation": "admin_action",
+          "command": [
+            "powershell",
+            "-NoProfile",
+            "-Command",
+            "Start-Process PowerShell -Verb RunAs"
+          ],
+          "cwd": "."
+        },
+        "target_paths": [
+          "C:/"
+        ],
+        "requested_capability": {
+          "capability_profile_id": "cap-admin-unscoped",
+          "filesystem_scopes": {
+            "read": [
+              "."
+            ],
+            "write": [
+              "C:/"
+            ],
+            "create": [
+              "C:/"
+            ],
+            "deny": []
+          },
+          "network_scopes": {
+            "mode": "restricted",
+            "allowed_domains": [],
+            "blocked_domains": [
+              "*"
+            ]
+          },
+          "process_execution_permissions": {
+            "allow_spawn": true,
+            "allow_shell": true,
+            "allow_python": true,
+            "allowed_commands": [
+              "powershell"
+            ],
+            "denied_commands": []
+          },
+          "package_manager_permissions": {
+            "allow_install": true,
+            "allow_update": true,
+            "allowed_managers": [
+              "winget",
+              "choco"
+            ],
+            "blocked_managers": []
+          },
+          "elevation_requirement": "host_gated",
+          "resource_budgets": {
+            "wall_clock_seconds": 1200,
+            "cpu_seconds": 600,
+            "memory_mb": 4096,
+            "disk_mb": 1000
+          },
+          "allowed_data_classes": [
+            "machine_state",
+            "private_evidence"
+          ]
+        },
+        "dry_run_output": "Request would be rejected because the scope is unbounded."
+      }
+    },
+    {
+      "case": "expired-approval",
+      "request": {
+        "contract_version": "atlas.privileged-action.request.v1",
+        "request_id": "request-expired-004",
+        "requested_at": "2026-04-13T20:43:00Z",
+        "worker_id": "worker-meseeks-03",
+        "assignment_id": "assignment-retry",
+        "stack_lock_digest": "sha256:stack-lock-abc123",
+        "action": {
+          "summary": "Retry a scoped write after approval expiry.",
+          "operation": "scoped_write",
+          "command": [
+            "python",
+            "ops/knowledge/build_query_bundle.py"
+          ],
+          "cwd": "."
+        },
+        "target_paths": [
+          "runtime/cortex/query/knowledge/bundle.json"
+        ],
+        "requested_capability": {
+          "capability_profile_id": "cap-query-write",
+          "filesystem_scopes": {
+            "read": [
+              "docs/knowledge/promotions",
+              "runtime/cortex/catalog/knowledge",
+              "runtime/receipts/knowledge"
+            ],
+            "write": [
+              "runtime/cortex/query/knowledge"
+            ],
+            "create": [
+              "runtime/cortex/query/knowledge"
+            ],
+            "deny": [
+              "secrets/**"
+            ]
+          },
+          "network_scopes": {
+            "mode": "none",
+            "allowed_domains": [],
+            "blocked_domains": []
+          },
+          "process_execution_permissions": {
+            "allow_spawn": true,
+            "allow_shell": false,
+            "allow_python": true,
+            "allowed_commands": [
+              "python"
+            ],
+            "denied_commands": []
+          },
+          "package_manager_permissions": {
+            "allow_install": false,
+            "allow_update": false,
+            "allowed_managers": [],
+            "blocked_managers": [
+              "npm",
+              "pip"
+            ]
+          },
+          "elevation_requirement": "per_action_approval",
+          "resource_budgets": {
+            "wall_clock_seconds": 180,
+            "cpu_seconds": 120,
+            "memory_mb": 512,
+            "disk_mb": 100
+          },
+          "allowed_data_classes": [
+            "internal",
+            "machine_state"
+          ]
+        },
+        "dry_run_output": "Approval expired before execution could begin."
+      }
+    }
+  ]
+}

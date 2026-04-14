@@ -1,0 +1,107 @@
+schema_version: "atlas.stack.lock.v1"
+stack_manifest_path: "stack.yaml"
+stack_manifest_digest: "sha256:adb66ccd52128a38bd3395822cbe0b2551fe11a7ed3a865c15349d729de0ea21"
+component_count: 8
+components:
+  atlas:
+    path: "repos/fawxzzy-atlas"
+    role: "architecture-truth"
+    status: "active"
+    remote: null
+    ref_type: "branch"
+    ref: "main"
+    commit: "14fb5ccd8d7285f9d84d7cb3e82165b997f84686"
+    dirty: true
+    trust_class: "trusted"
+    release_eligible: true
+  fitness:
+    path: "repos/fawxzzy-fitness"
+    role: "application"
+    status: "active"
+    remote: "https://github.com/ZachariahRedfield/FawxzzyFitness.git"
+    ref_type: "branch"
+    ref: "main"
+    commit: "742471dd78a2a58279df3ef12217635c1f07d1e4"
+    dirty: false
+    trust_class: "trusted"
+    release_eligible: true
+  lifeline:
+    path: "repos/fawxzzy-lifeline"
+    role: "local-operator"
+    status: "active"
+    remote: "https://github.com/ZachariahRedfield/fawxzzy-lifeline.git"
+    ref_type: "branch"
+    ref: "codex/startup-public-truth-reconcile"
+    commit: "76cea9821374543875052119640de538640c780f"
+    dirty: false
+    trust_class: "trusted"
+    release_eligible: true
+  mazer:
+    path: "repos/fawxzzy-mazer"
+    role: "application"
+    status: "active"
+    remote: "https://github.com/ZachariahRedfield/fawxzzy-mazer.git"
+    ref_type: "branch"
+    ref: "codex/mazer-playbook-scope"
+    commit: "cb996f08360433569af6dce7654d0e17c128ed93"
+    dirty: false
+    trust_class: "trusted"
+    release_eligible: true
+  nat1-games:
+    path: "repos/Nat1-Games/nat1-games"
+    role: "application"
+    status: "incubating"
+    remote: "https://github.com/ZachariahRedfield/nat1-games.git"
+    ref_type: "branch"
+    ref: "main"
+    commit: "ce9643465d69f76a46d92d0db6ed855d117e1bbd"
+    dirty: false
+    trust_class: "trusted"
+    release_eligible: false
+  playbook:
+    path: "repos/fawxzzy-playbook"
+    role: "governance-runtime"
+    status: "active"
+    remote: "https://github.com/ZachariahRedfield/fawxzzy-playbook.git"
+    ref_type: "branch"
+    ref: "codex/assistant-reliability-safety-playbook-clean"
+    commit: "021cb65b262fee0a59c464af367739629c99d574"
+    dirty: false
+    trust_class: "trusted"
+    release_eligible: true
+  playbook-demo:
+    path: "repos/playbook-demo/playbook-demo"
+    role: "demo"
+    status: "demo"
+    remote: "https://github.com/ZachariahRedfield/playbook-demo.git"
+    ref_type: "branch"
+    ref: "main"
+    commit: "4d0444bcb14c3470fe0913a21c8739f0791a1827"
+    dirty: false
+    trust_class: "trusted"
+    release_eligible: false
+  stack:
+    path: "."
+    role: "operator-layer"
+    status: "active"
+    remote: null
+    ref_type: "branch"
+    ref: "master"
+    commit: "cf2c8b144f23a5a24cae539f3a3ea13e30ccd943"
+    dirty: true
+    trust_class: "trusted"
+    release_eligible: false
+excluded_surfaces:
+  verta_core_archive:
+    path: "repos/Verta-Core.zip"
+    present: true
+    trust_class: "untrusted"
+    release_eligible: false
+    reason: "Token-bearing Verta archive remains quarantined private evidence and must stay out of release sets."
+  verta_core_checkout:
+    path: "repos/Verta-Core"
+    present: true
+    trust_class: "untrusted"
+    release_eligible: false
+    reason: "Token-bearing Verta checkout remains quarantined and untrusted until scrub and rotation are complete."
+lock_digest: "sha256:b578a219aea96c20c17c59186c0984c6b7029a0eca94b05ec30a79b5a3535964"

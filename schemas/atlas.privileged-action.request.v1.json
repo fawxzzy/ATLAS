@@ -1,0 +1,157 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://schemas/atlas.privileged-action.request.v1.json",
+  "title": "ATLAS privileged action request v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "request_id",
+    "requested_at",
+    "worker_id",
+    "assignment_id",
+    "stack_lock_digest",
+    "action",
+    "target_paths",
+    "requested_capability",
+    "dry_run_output"
+  ],
+  "properties": {
+    "contract_version": {
+      "type": "string",
+      "const": "atlas.privileged-action.request.v1"
+    },
+    "request_id": {
+      "type": "string",
+      "minLength": 3,
+      "pattern": "^[A-Za-z0-9._:-]+$"
+    },
+    "requested_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "worker_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "assignment_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "stack_lock_digest": {
+      "type": "string",
+      "minLength": 1
+    },
+    "action": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "summary",
+        "operation",
+        "command",
+        "cwd"
+      ],
+      "properties": {
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "operation": {
+          "type": "string",
+          "enum": [
+            "read_only_scan",
+            "scoped_write",
+            "package_install",
+            "admin_action"
+          ]
+        },
+        "command": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "cwd": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "target_paths": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "target_resources": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "requested_capability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "capability_profile_id",
+        "filesystem_scopes",
+        "network_scopes",
+        "process_execution_permissions",
+        "package_manager_permissions",
+        "elevation_requirement",
+        "resource_budgets",
+        "allowed_data_classes"
+      ],
+      "properties": {
+        "capability_profile_id": {
+          "type": "string",
+          "minLength": 3,
+          "pattern": "^[A-Za-z0-9._:-]+$"
+        },
+        "filesystem_scopes": {
+          "type": "object"
+        },
+        "network_scopes": {
+          "type": "object"
+        },
+        "process_execution_permissions": {
+          "type": "object"
+        },
+        "package_manager_permissions": {
+          "type": "object"
+        },
+        "elevation_requirement": {
+          "type": "string",
+          "enum": [
+            "none",
+            "per_action_approval",
+            "host_gated"
+          ]
+        },
+        "resource_budgets": {
+          "type": "object"
+        },
+        "allowed_data_classes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "dry_run_output": {
+      "type": "string"
+    },
+    "justification": {
+      "type": "string"
+    },
+    "requested_expiry_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

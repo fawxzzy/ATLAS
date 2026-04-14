@@ -1,0 +1,267 @@
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import subprocess
+import sys
+from pathlib import Path
+from typing import Any
+
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from ops._atlas import atlas_relative, atlas_root, load_stack_config, normalize_slashes, resolve_atlas_path
+
+STACK_LOCK_SCHEMA_VERSION = "atlas.stack.lock.v1"
+TRUST_CLASSES = {"trusted", "adjacent", "untrusted"}
+DEFAULT_INCLUDED_STATUSES = {"active", "incubating", "demo", "unmanaged"}
+
+
+def stable_json_digest(value: Any) -> str:
+    encoded = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode("utf-8")
+    return f"sha256:{hashlib.sha256(encoded).hexdigest()}"
+
+
+def git_output(repo_path: Path, *args: str) -> tuple[int, str]:
+    completed = subprocess.run(
+        ["git", "-C", str(repo_path), *args],
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+    return completed.returncode, completed.stdout.strip()
+
+
+def git_lines(repo_path: Path, *args: str) -> list[str]:
+    code, stdout = git_output(repo_path, *args)
+    if code != 0:
+        return []
+    return [line.strip() for line in stdout.splitlines() if line.strip()]
+
+
+def repo_is_git_root(repo_path: Path) -> bool:
+    code, stdout = git_output(repo_path, "rev-parse", "--show-toplevel")
+    return code == 0 and Path(stdout).resolve() == repo_path.resolve()
+
+
+def current_ref(repo_path: Path, commit: str) -> tuple[str, str]:
+    code, branch = git_output(repo_path, "symbolic-ref", "--quiet", "--short", "HEAD")
+    if code == 0 and branch:
+        return "branch", branch
+    code, tag = git_output(repo_path, "describe", "--tags", "--exact-match")
+    if code == 0 and tag:
+        return "tag", tag
+    return "commit", commit
+
+
+def current_remote(repo_path: Path) -> str | None:
+    code, remote = git_output(repo_path, "remote", "get-url", "origin")
+    if code == 0 and remote:
+        return normalize_slashes(remote)
+    remotes = git_lines(repo_path, "remote")
+    for name in remotes:
+        code, value = git_output(repo_path, "remote", "get-url", name)
+        if code == 0 and value:
+            return normalize_slashes(value)
+    return None
+
+
+def repo_trust_class(repo_id: str, repo_info: dict[str, Any], lock_config: dict[str, Any]) -> str:
+    overrides = lock_config.get("repo_overrides", {})
+    if isinstance(overrides, dict):
+        repo_override = overrides.get(repo_id, {})
+        if isinstance(repo_override, dict) and isinstance(repo_override.get("trust_class"), str):
+            trust_class = str(repo_override["trust_class"])
+            if trust_class not in TRUST_CLASSES:
+                raise ValueError(f"Unsupported trust_class '{trust_class}' for repo '{repo_id}'.")
+            return trust_class
+    status = str(repo_info.get("status", "unknown"))
+    if status == "unmanaged":
+        return "adjacent"
+    return "trusted"
+
+
+def repo_release_eligible(repo_id: str, repo_info: dict[str, Any], lock_config: dict[str, Any]) -> bool:
+    overrides = lock_config.get("repo_overrides", {})
+    if isinstance(overrides, dict):
+        repo_override = overrides.get(repo_id, {})
+        if isinstance(repo_override, dict) and "release_eligible" in repo_override:
+            return bool(repo_override["release_eligible"])
+    return str(repo_info.get("status", "unknown")) == "active" and repo_id != "stack"
+
+
+def included_repo_ids(config: dict[str, Any]) -> list[str]:
+    lock_config = config.get("stack_lock", {})
+    if isinstance(lock_config, dict):
+        explicit = lock_config.get("include_repo_ids")
+        if isinstance(explicit, list) and explicit:
+            return [str(item) for item in explicit]
+    repo_registry = config.get("repo_registry", {})
+    result: list[str] = []
+    for repo_id, repo_info in repo_registry.items():
+        if not isinstance(repo_info, dict):
+            continue
+        if str(repo_info.get("status", "unknown")) in DEFAULT_INCLUDED_STATUSES:
+            result.append(str(repo_id))
+    return sorted(result)
+
+
+def default_lockfile_path(config: dict[str, Any] | None = None, root: Path | None = None) -> Path:
+    base = (root or atlas_root()).resolve()
+    stack_config = config or load_stack_config(base / "stack.yaml")
+    lock_config = stack_config.get("stack_lock", {})
+    if isinstance(lock_config, dict) and isinstance(lock_config.get("path"), str):
+        return resolve_atlas_path(lock_config["path"], root=base)
+    return base / "stack.lock.yaml"
+
+
+def excluded_surfaces(config: dict[str, Any], root: Path) -> dict[str, dict[str, Any]]:
+    lock_config = config.get("stack_lock", {})
+    surfaces: dict[str, dict[str, Any]] = {}
+    if not isinstance(lock_config, dict):
+        return surfaces
+    raw_surfaces = lock_config.get("excluded_surfaces", {})
+    if not isinstance(raw_surfaces, dict):
+        return surfaces
+    for surface_id in sorted(raw_surfaces):
+        value = raw_surfaces[surface_id]
+        if not isinstance(value, dict) or not isinstance(value.get("path"), str):
+            raise ValueError(f"Excluded surface '{surface_id}' must declare a path.")
+        trust_class = str(value.get("trust_class", "untrusted"))
+        if trust_class not in TRUST_CLASSES:
+            raise ValueError(f"Unsupported trust_class '{trust_class}' for excluded surface '{surface_id}'.")
+        surface_path = resolve_atlas_path(value["path"], root=root)
+        surfaces[str(surface_id)] = {
+            "path": atlas_relative(surface_path, root=root),
+            "present": surface_path.exists(),
+            "trust_class": trust_class,
+            "release_eligible": bool(value.get("release_eligible", False)),
+            "reason": str(value.get("reason", "")),
+        }
+    return surfaces
+
+
+def build_lock_payload(config: dict[str, Any] | None = None, root: Path | None = None) -> dict[str, Any]:
+    base = (root or atlas_root()).resolve()
+    stack_config = config or load_stack_config(base / "stack.yaml")
+    registry = stack_config.get("repo_registry", {})
+    lock_config = stack_config.get("stack_lock", {}) if isinstance(stack_config.get("stack_lock"), dict) else {}
+    components: dict[str, dict[str, Any]] = {}
+
+    for repo_id in included_repo_ids(stack_config):
+        repo_info = registry.get(repo_id)
+        if not isinstance(repo_info, dict) or not isinstance(repo_info.get("path"), str):
+            raise ValueError(f"Included repo '{repo_id}' is missing a valid repo_registry entry.")
+        repo_path = resolve_atlas_path(repo_info["path"], root=base)
+        if not repo_path.exists():
+            raise FileNotFoundError(f"Included repo path does not exist: {atlas_relative(repo_path, root=base)}")
+        if not repo_path.is_dir():
+            raise ValueError(f"Included repo path is not a directory: {atlas_relative(repo_path, root=base)}")
+        if not repo_is_git_root(repo_path):
+            raise ValueError(f"Included repo is not a git root: {atlas_relative(repo_path, root=base)}")
+
+        code, commit = git_output(repo_path, "rev-parse", "HEAD")
+        if code != 0 or not commit:
+            raise ValueError(f"Unable to resolve HEAD for repo '{repo_id}'.")
+        ref_type, ref = current_ref(repo_path, commit)
+        status_lines = git_lines(repo_path, "status", "--porcelain=v1")
+        components[repo_id] = {
+            "path": atlas_relative(repo_path, root=base),
+            "role": str(repo_info.get("role", "")),
+            "status": str(repo_info.get("status", "unknown")),
+            "remote": current_remote(repo_path),
+            "ref_type": ref_type,
+            "ref": ref,
+            "commit": commit,
+            "dirty": bool(status_lines),
+            "trust_class": repo_trust_class(repo_id, repo_info, lock_config),
+            "release_eligible": repo_release_eligible(repo_id, repo_info, lock_config),
+        }
+
+    payload = {
+        "schema_version": STACK_LOCK_SCHEMA_VERSION,
+        "stack_manifest_path": atlas_relative(base / "stack.yaml", root=base),
+        "stack_manifest_digest": stable_json_digest(stack_config),
+        "component_count": len(components),
+        "components": dict(sorted(components.items())),
+        "excluded_surfaces": excluded_surfaces(stack_config, base),
+    }
+    return payload | {"lock_digest": stable_json_digest(payload)}
+
+
+def load_lockfile(path: Path) -> dict[str, Any]:
+    payload = load_stack_config(path)
+    if not isinstance(payload, dict):
+        raise ValueError("Lockfile must deserialize to a mapping.")
+    return payload
+
+
+def yaml_scalar(value: Any) -> str:
+    if value is None:
+        return "null"
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if isinstance(value, (int, float)):
+        return str(value)
+    return json.dumps(str(value), ensure_ascii=False)
+
+
+def render_yaml(value: Any, indent: int = 0) -> list[str]:
+    prefix = " " * indent
+    if isinstance(value, dict):
+        lines: list[str] = []
+        for key, item in value.items():
+            if isinstance(item, dict):
+                lines.append(f"{prefix}{key}:")
+                lines.extend(render_yaml(item, indent + 2))
+            else:
+                lines.append(f"{prefix}{key}: {yaml_scalar(item)}")
+        return lines
+    raise TypeError(f"Unsupported YAML value: {type(value)!r}")
+
+
+def write_lockfile(path: Path, payload: dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    rendered = "\n".join(render_yaml(payload)) + "\n"
+    path.write_text(rendered, encoding="utf-8")
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        description="Generate the deterministic ATLAS stack lockfile from the current managed git working set."
+    )
+    parser.add_argument("--stack-file", type=Path, default=atlas_root() / "stack.yaml")
+    parser.add_argument("--output-path", type=Path)
+    parser.add_argument("--dry-run", action="store_true")
+    args = parser.parse_args()
+
+    stack_file = resolve_atlas_path(args.stack_file)
+    root = stack_file.parent.resolve()
+    config = load_stack_config(stack_file)
+    payload = build_lock_payload(config=config, root=root)
+    output_path = resolve_atlas_path(args.output_path, root=root) if args.output_path else default_lockfile_path(config, root)
+    if not args.dry_run:
+        write_lockfile(output_path, payload)
+
+    print(
+        json.dumps(
+            {
+                "dry_run": args.dry_run,
+                "stack_file": atlas_relative(stack_file, root=root),
+                "output_path": atlas_relative(output_path, root=root),
+                "component_count": payload["component_count"],
+                "excluded_surface_count": len(payload["excluded_surfaces"]),
+                "lock_digest": payload["lock_digest"],
+            },
+            indent=2,
+        )
+    )
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

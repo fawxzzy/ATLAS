@@ -1,0 +1,227 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://schemas/atlas.capability.profile.v1.json",
+  "title": "ATLAS capability profile v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "capability_profile_id",
+    "filesystem_scopes",
+    "network_scopes",
+    "process_execution_permissions",
+    "package_manager_permissions",
+    "elevation_requirement",
+    "resource_budgets",
+    "allowed_data_classes"
+  ],
+  "properties": {
+    "contract_version": {
+      "type": "string",
+      "const": "atlas.capability.profile.v1"
+    },
+    "capability_profile_id": {
+      "type": "string",
+      "minLength": 3,
+      "pattern": "^[A-Za-z0-9._:-]+$"
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1
+    },
+    "filesystem_scopes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "read",
+        "write",
+        "create"
+      ],
+      "properties": {
+        "read": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "write": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "create": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "deny": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "network_scopes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode",
+        "allowed_domains"
+      ],
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "none",
+            "allowlist",
+            "restricted"
+          ]
+        },
+        "allowed_domains": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "blocked_domains": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "process_execution_permissions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "allow_spawn",
+        "allow_shell",
+        "allow_python"
+      ],
+      "properties": {
+        "allow_spawn": {
+          "type": "boolean"
+        },
+        "allow_shell": {
+          "type": "boolean"
+        },
+        "allow_python": {
+          "type": "boolean"
+        },
+        "allowed_commands": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "denied_commands": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "package_manager_permissions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "allow_install",
+        "allow_update",
+        "allowed_managers"
+      ],
+      "properties": {
+        "allow_install": {
+          "type": "boolean"
+        },
+        "allow_update": {
+          "type": "boolean"
+        },
+        "allowed_managers": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "blocked_managers": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "elevation_requirement": {
+      "type": "string",
+      "enum": [
+        "none",
+        "per_action_approval",
+        "host_gated"
+      ]
+    },
+    "resource_budgets": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "wall_clock_seconds",
+        "cpu_seconds",
+        "memory_mb",
+        "disk_mb"
+      ],
+      "properties": {
+        "wall_clock_seconds": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "cpu_seconds": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "memory_mb": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "disk_mb": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "allowed_data_classes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "public",
+          "internal",
+          "private_evidence",
+          "secret_redacted",
+          "machine_state"
+        ]
+      }
+    },
+    "audit_class": {
+      "type": "string",
+      "enum": [
+        "standard",
+        "sensitive",
+        "restricted"
+      ]
+    }
+  }
+}

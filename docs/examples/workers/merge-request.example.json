@@ -1,0 +1,45 @@
+{
+  "merge_handoff": {
+    "contract_version": "atlas.worker.merge-request.v1",
+    "merge_request_id": "merge-request://mr-001",
+    "stack_lock_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+    "conflicting_workers": [
+      "worker-a",
+      "worker-b"
+    ],
+    "overlaps": [
+      {
+        "repo_path": ".",
+        "path": "docs/standards/WORKER-ORCHESTRATION.md",
+        "overlap_type": "line_overlap",
+        "file_digest_before": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "conflicting_ranges": [
+          {
+            "worker_id": "worker-a",
+            "start_line": 1,
+            "end_line": 120,
+            "op": "modify"
+          },
+          {
+            "worker_id": "worker-b",
+            "start_line": 90,
+            "end_line": 160,
+            "op": "modify"
+          }
+        ],
+        "reason": "Same file, overlapping ranges, same file digest before edit."
+      }
+    ],
+    "paused_handoff_refs": [
+      "handoff://paused/worker-a",
+      "handoff://paused/worker-b"
+    ],
+    "merge_worker_handoff": {
+      "worker_id": "merge-worker-1",
+      "assignment_id": "assign-merge-001",
+      "task_id": "merge-docs-orchestration",
+      "handoff_ref": "handoff://merge/worker-a-worker-b"
+    },
+    "notes": "Merger consumes paused handoff artifacts only."
+  }
+}

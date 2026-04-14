@@ -1,0 +1,25 @@
+{
+  "normal_progress": {
+    "contract_version": "atlas.worker.assignment.v1",
+    "assignment_id": "assign-root-docs-001",
+    "worker_id": "worker-a",
+    "task_id": "task-docs-standards",
+    "stack_lock_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+    "allowed_globs": [
+      "docs/standards/**",
+      "docs/examples/workers/**"
+    ],
+    "forbidden_globs": [
+      "secrets/**",
+      "repos/Verta-Core/**"
+    ],
+    "input_handoff_refs": [
+      "handoff://root/docs-plan"
+    ],
+    "expected_outputs": [
+      "docs/standards/WORKER-ORCHESTRATION.md",
+      "docs/standards/WORKER-COLLISION-POLICY.md"
+    ],
+    "notes": "Root-scoped docs lane with no repo writes."
+  }
+}

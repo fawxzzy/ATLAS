@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://schemas/atlas.worker.assignment.v1.json",
+  "title": "ATLAS worker assignment",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "assignment_id",
+    "worker_id",
+    "task_id",
+    "stack_lock_digest",
+    "allowed_globs",
+    "forbidden_globs",
+    "input_handoff_refs",
+    "expected_outputs"
+  ],
+  "properties": {
+    "contract_version": {
+      "type": "string",
+      "const": "atlas.worker.assignment.v1"
+    },
+    "assignment_id": {
+      "type": "string",
+      "minLength": 3,
+      "pattern": "^[A-Za-z0-9._:-]+$"
+    },
+    "worker_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "task_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "stack_lock_digest": {
+      "type": "string",
+      "minLength": 1
+    },
+    "allowed_globs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "forbidden_globs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "input_handoff_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "expected_outputs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "notes": {
+      "type": "string"
+    }
+  }
+}

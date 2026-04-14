@@ -1,0 +1,88 @@
+{
+  "normal_progress": {
+    "contract_version": "atlas.worker.status.v1",
+    "worker_id": "worker-a",
+    "assignment_id": "assign-root-docs-001",
+    "state": "running",
+    "heartbeat_at": "2026-04-13T20:45:00Z",
+    "touched_ranges": [
+      {
+        "repo_path": ".",
+        "repo_commit": "stack@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "file_digest_before": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "path": "docs/standards/WORKER-ORCHESTRATION.md",
+        "start_line": 1,
+        "end_line": 120,
+        "op": "modify"
+      }
+    ],
+    "output_refs": [
+      "docs/standards/WORKER-ORCHESTRATION.md"
+    ],
+    "blocked_reason": null,
+    "merge_request_ref": null
+  },
+  "overlap_conflict": {
+    "contract_version": "atlas.worker.status.v1",
+    "worker_id": "worker-b",
+    "assignment_id": "assign-root-docs-002",
+    "state": "paused",
+    "heartbeat_at": "2026-04-13T20:45:05Z",
+    "touched_ranges": [
+      {
+        "repo_path": ".",
+        "repo_commit": "stack@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "file_digest_before": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "path": "docs/standards/WORKER-ORCHESTRATION.md",
+        "start_line": 90,
+        "end_line": 160,
+        "op": "modify"
+      }
+    ],
+    "output_refs": [],
+    "blocked_reason": "Overlap conflict with worker-a on docs/standards/WORKER-ORCHESTRATION.md.",
+    "merge_request_ref": "merge-request://mr-001"
+  },
+  "drift_conflict": {
+    "contract_version": "atlas.worker.status.v1",
+    "worker_id": "worker-c",
+    "assignment_id": "assign-root-docs-003",
+    "state": "paused",
+    "heartbeat_at": "2026-04-13T20:45:10Z",
+    "touched_ranges": [
+      {
+        "repo_path": ".",
+        "repo_commit": "stack@sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "file_digest_before": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "path": "docs/standards/WORKER-COLLISION-POLICY.md",
+        "start_line": 1,
+        "end_line": 80,
+        "op": "modify"
+      }
+    ],
+    "output_refs": [],
+    "blocked_reason": "Drift conflict: file digest changed relative to overlapping worker-b edits.",
+    "merge_request_ref": "merge-request://mr-002"
+  },
+  "forbidden_scope_violation": {
+    "contract_version": "atlas.worker.status.v1",
+    "worker_id": "worker-d",
+    "assignment_id": "assign-root-docs-004",
+    "state": "failed",
+    "heartbeat_at": "2026-04-13T20:45:15Z",
+    "touched_ranges": [
+      {
+        "repo_path": ".",
+        "repo_commit": "stack@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "file_digest_before": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "path": "repos/Verta-Core/README.md",
+        "start_line": 1,
+        "end_line": 12,
+        "op": "modify"
+      }
+    ],
+    "output_refs": [],
+    "blocked_reason": "Forbidden scope touch in repos/Verta-Core/**.",
+    "merge_request_ref": null
+  }
+}

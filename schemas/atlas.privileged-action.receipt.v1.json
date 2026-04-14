@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://schemas/atlas.privileged-action.receipt.v1.json",
+  "title": "ATLAS privileged action receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "receipt_id",
+    "executed_at",
+    "worker_id",
+    "assignment_id",
+    "stack_lock_digest",
+    "request_id",
+    "approval_receipt_id",
+    "host",
+    "executed_action",
+    "result"
+  ],
+  "properties": {
+    "contract_version": {
+      "type": "string",
+      "const": "atlas.privileged-action.receipt.v1"
+    },
+    "receipt_id": {
+      "type": "string",
+      "minLength": 3,
+      "pattern": "^[A-Za-z0-9._:-]+$"
+    },
+    "executed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "worker_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "assignment_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "stack_lock_digest": {
+      "type": "string",
+      "minLength": 1
+    },
+    "request_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "approval_receipt_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "host": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "platform"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "platform": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "executed_action": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "summary",
+        "operation",
+        "command",
+        "cwd"
+      ],
+      "properties": {
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "operation": {
+          "type": "string",
+          "enum": [
+            "read_only_scan",
+            "scoped_write",
+            "package_install",
+            "admin_action"
+          ]
+        },
+        "command": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "cwd": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "result": {
+      "type": "string",
+      "enum": [
+        "succeeded",
+        "failed",
+        "blocked"
+      ]
+    },
+    "changed_paths": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "changed_resources": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "rollback_notes": {
+      "type": "string"
+    },
+    "execution_notes": {
+      "type": "string"
+    }
+  }
+}

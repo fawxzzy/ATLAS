@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://schemas/atlas.worker.status.v1.json",
+  "title": "ATLAS worker status",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "worker_id",
+    "assignment_id",
+    "state",
+    "heartbeat_at",
+    "touched_ranges",
+    "output_refs",
+    "blocked_reason"
+  ],
+  "properties": {
+    "contract_version": {
+      "type": "string",
+      "const": "atlas.worker.status.v1"
+    },
+    "worker_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "assignment_id": {
+      "type": "string",
+      "minLength": 3,
+      "pattern": "^[A-Za-z0-9._:-]+$"
+    },
+    "state": {
+      "type": "string",
+      "enum": [
+        "assigned",
+        "running",
+        "paused",
+        "blocked",
+        "merge_wait",
+        "completed",
+        "failed"
+      ]
+    },
+    "heartbeat_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "touched_ranges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "repo_path",
+          "repo_commit",
+          "file_digest_before",
+          "path",
+          "start_line",
+          "end_line",
+          "op"
+        ],
+        "properties": {
+          "repo_path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "repo_commit": {
+            "type": "string",
+            "minLength": 1
+          },
+          "file_digest_before": {
+            "type": "string",
+            "minLength": 1
+          },
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "start_line": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "end_line": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "op": {
+            "type": "string",
+            "enum": [
+              "add",
+              "modify",
+              "delete",
+              "rename",
+              "scan",
+              "review"
+            ]
+          }
+        }
+      }
+    },
+    "output_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "blocked_reason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "merge_request_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

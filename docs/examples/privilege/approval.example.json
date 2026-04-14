@@ -1,0 +1,207 @@
+{
+  "cases": [
+    {
+      "case": "read-only-scan",
+      "approval_receipt": {
+        "contract_version": "atlas.approval.receipt.v1",
+        "approval_receipt_id": "approval-read-scan-001",
+        "request_id": "request-read-scan-001",
+        "worker_id": "worker-meseeks-01",
+        "assignment_id": "assignment-lockfile-a",
+        "stack_lock_digest": "sha256:stack-lock-abc123",
+        "approver": {
+          "kind": "system",
+          "name": "stack-policy-gate"
+        },
+        "approval_status": "approved",
+        "granted_scope": {
+          "filesystem_scopes": {
+            "read": [
+              "."
+            ],
+            "write": [],
+            "create": [],
+            "deny": [
+              "secrets/**"
+            ]
+          },
+          "network_scopes": {
+            "mode": "none",
+            "allowed_domains": [],
+            "blocked_domains": []
+          },
+          "process_execution_permissions": {
+            "allow_spawn": true,
+            "allow_shell": false,
+            "allow_python": true
+          },
+          "package_manager_permissions": {
+            "allow_install": false,
+            "allow_update": false,
+            "allowed_managers": []
+          },
+          "elevation_requirement": "none",
+          "resource_budgets": {
+            "wall_clock_seconds": 120,
+            "cpu_seconds": 120,
+            "memory_mb": 512,
+            "disk_mb": 50
+          },
+          "allowed_data_classes": [
+            "machine_state"
+          ]
+        },
+        "expiry_at": "2026-04-13T20:45:00Z",
+        "request_digest": "sha256:request-read-scan-digest",
+        "issued_at": "2026-04-13T20:40:10Z"
+      }
+    },
+    {
+      "case": "approved-admin-action",
+      "approval_receipt": {
+        "contract_version": "atlas.approval.receipt.v1",
+        "approval_receipt_id": "approval-admin-002",
+        "request_id": "request-admin-002",
+        "worker_id": "worker-meseeks-01",
+        "assignment_id": "assignment-lockfile-a",
+        "stack_lock_digest": "sha256:stack-lock-abc123",
+        "approver": {
+          "kind": "human",
+          "name": "operator-review"
+        },
+        "approval_status": "approved",
+        "granted_scope": {
+          "filesystem_scopes": {
+            "read": [
+              "."
+            ],
+            "write": [
+              "C:/Program Files/Git"
+            ],
+            "create": [],
+            "deny": [
+              "secrets/**"
+            ]
+          },
+          "network_scopes": {
+            "mode": "allowlist",
+            "allowed_domains": [
+              "github.com"
+            ],
+            "blocked_domains": []
+          },
+          "process_execution_permissions": {
+            "allow_spawn": true,
+            "allow_shell": true,
+            "allow_python": false
+          },
+          "package_manager_permissions": {
+            "allow_install": true,
+            "allow_update": false,
+            "allowed_managers": [
+              "winget"
+            ]
+          },
+          "elevation_requirement": "per_action_approval",
+          "resource_budgets": {
+            "wall_clock_seconds": 600,
+            "cpu_seconds": 300,
+            "memory_mb": 1024,
+            "disk_mb": 200
+          },
+          "allowed_data_classes": [
+            "machine_state"
+          ]
+        },
+        "expiry_at": "2026-04-13T20:51:00Z",
+        "request_digest": "sha256:request-admin-002-digest",
+        "issued_at": "2026-04-13T20:41:10Z"
+      }
+    },
+    {
+      "case": "rejected-request",
+      "approval_receipt": {
+        "contract_version": "atlas.approval.receipt.v1",
+        "approval_receipt_id": "approval-admin-003",
+        "request_id": "request-admin-003",
+        "worker_id": "worker-meseeks-02",
+        "assignment_id": "assignment-secret-scan",
+        "stack_lock_digest": "sha256:stack-lock-abc123",
+        "approver": {
+          "kind": "human",
+          "name": "operator-review"
+        },
+        "approval_status": "rejected",
+        "granted_scope": null,
+        "expiry_at": null,
+        "request_digest": "sha256:request-admin-003-digest",
+        "issued_at": "2026-04-13T20:42:10Z",
+        "reason": "Requested scope was unbounded and exceeded release policy."
+      }
+    },
+    {
+      "case": "expired-approval",
+      "approval_receipt": {
+        "contract_version": "atlas.approval.receipt.v1",
+        "approval_receipt_id": "approval-expired-004",
+        "request_id": "request-expired-004",
+        "worker_id": "worker-meseeks-03",
+        "assignment_id": "assignment-retry",
+        "stack_lock_digest": "sha256:stack-lock-abc123",
+        "approver": {
+          "kind": "system",
+          "name": "stack-policy-gate"
+        },
+        "approval_status": "expired",
+        "granted_scope": {
+          "filesystem_scopes": {
+            "read": [
+              "docs/knowledge/promotions",
+              "runtime/cortex/catalog/knowledge",
+              "runtime/receipts/knowledge"
+            ],
+            "write": [
+              "runtime/cortex/query/knowledge"
+            ],
+            "create": [
+              "runtime/cortex/query/knowledge"
+            ],
+            "deny": [
+              "secrets/**"
+            ]
+          },
+          "network_scopes": {
+            "mode": "none",
+            "allowed_domains": [],
+            "blocked_domains": []
+          },
+          "process_execution_permissions": {
+            "allow_spawn": true,
+            "allow_shell": false,
+            "allow_python": true
+          },
+          "package_manager_permissions": {
+            "allow_install": false,
+            "allow_update": false,
+            "allowed_managers": []
+          },
+          "elevation_requirement": "per_action_approval",
+          "resource_budgets": {
+            "wall_clock_seconds": 180,
+            "cpu_seconds": 120,
+            "memory_mb": 512,
+            "disk_mb": 100
+          },
+          "allowed_data_classes": [
+            "internal",
+            "machine_state"
+          ]
+        },
+        "expiry_at": "2026-04-13T20:44:00Z",
+        "request_digest": "sha256:request-expired-004-digest",
+        "issued_at": "2026-04-13T20:43:10Z",
+        "reason": "Approval window elapsed before execution began."
+      }
+    }
+  ]
+}

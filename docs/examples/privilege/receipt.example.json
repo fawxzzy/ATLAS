@@ -1,0 +1,102 @@
+{
+  "cases": [
+    {
+      "case": "read-only-scan",
+      "privileged_action_receipt": {
+        "contract_version": "atlas.privileged-action.receipt.v1",
+        "receipt_id": "receipt-read-scan-001",
+        "executed_at": "2026-04-13T20:40:20Z",
+        "worker_id": "worker-meseeks-01",
+        "assignment_id": "assignment-lockfile-a",
+        "stack_lock_digest": "sha256:stack-lock-abc123",
+        "request_id": "request-read-scan-001",
+        "approval_receipt_id": "approval-read-scan-001",
+        "host": {
+          "name": "atlas-root-host",
+          "platform": "windows"
+        },
+        "executed_action": {
+          "summary": "Run a read-only scan over the lockfile and worker contracts.",
+          "operation": "read_only_scan",
+          "command": [
+            "python",
+            "ops/validation/validate_stack.py",
+            "--ratchet"
+          ],
+          "cwd": "."
+        },
+        "result": "succeeded",
+        "changed_paths": [],
+        "changed_resources": [],
+        "execution_notes": "No files changed."
+      }
+    },
+    {
+      "case": "approved-admin-action",
+      "privileged_action_receipt": {
+        "contract_version": "atlas.privileged-action.receipt.v1",
+        "receipt_id": "receipt-admin-002",
+        "executed_at": "2026-04-13T20:41:30Z",
+        "worker_id": "worker-meseeks-01",
+        "assignment_id": "assignment-lockfile-a",
+        "stack_lock_digest": "sha256:stack-lock-abc123",
+        "request_id": "request-admin-002",
+        "approval_receipt_id": "approval-admin-002",
+        "host": {
+          "name": "atlas-root-host",
+          "platform": "windows"
+        },
+        "executed_action": {
+          "summary": "Install a host-level package with approval.",
+          "operation": "package_install",
+          "command": [
+            "winget",
+            "install",
+            "--id",
+            "Git.Git"
+          ],
+          "cwd": "."
+        },
+        "result": "succeeded",
+        "changed_paths": [
+          "C:/Program Files/Git"
+        ],
+        "changed_resources": [
+          "winget"
+        ],
+        "execution_notes": "Installation completed under time-bounded approval.",
+        "rollback_notes": "Uninstall would be required if rollback were requested."
+      }
+    },
+    {
+      "case": "blocked-expired-approval",
+      "privileged_action_receipt": {
+        "contract_version": "atlas.privileged-action.receipt.v1",
+        "receipt_id": "receipt-expired-004",
+        "executed_at": "2026-04-13T20:44:10Z",
+        "worker_id": "worker-meseeks-03",
+        "assignment_id": "assignment-retry",
+        "stack_lock_digest": "sha256:stack-lock-abc123",
+        "request_id": "request-expired-004",
+        "approval_receipt_id": "approval-expired-004",
+        "host": {
+          "name": "atlas-root-host",
+          "platform": "windows"
+        },
+        "executed_action": {
+          "summary": "Retry a scoped write after approval expiry.",
+          "operation": "scoped_write",
+          "command": [
+            "python",
+            "ops/knowledge/build_query_bundle.py"
+          ],
+          "cwd": "."
+        },
+        "result": "blocked",
+        "changed_paths": [],
+        "changed_resources": [],
+        "execution_notes": "Execution did not start because approval expired before host handoff."
+      }
+    }
+  ]
+}

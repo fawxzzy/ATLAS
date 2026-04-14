@@ -77,6 +77,7 @@ subpaths:
     doctor: ops/doctor
     events: ops/events
     knowledge: ops/knowledge
+    stack: ops/stack
     scripts: ops/scripts
     validation: ops/validation
   tmp:
@@ -155,6 +156,7 @@ export_defaults:
     - docs/**
     - ops/**
     - stack.yaml
+    - stack.lock.yaml
     - README-STACK.md
     - AGENTS.md
   exclude:
@@ -170,6 +172,54 @@ export_defaults:
     - repos/**/coverage/**
     - repos/**/playwright-report/**
     - repos/**/test-results/**
+
+stack_lock:
+  path: stack.lock.yaml
+  include_repo_ids:
+    - stack
+    - atlas
+    - playbook
+    - lifeline
+    - fitness
+    - mazer
+    - nat1-games
+    - playbook-demo
+  repo_overrides:
+    stack:
+      trust_class: trusted
+      release_eligible: false
+    atlas:
+      trust_class: trusted
+      release_eligible: true
+    playbook:
+      trust_class: trusted
+      release_eligible: true
+    lifeline:
+      trust_class: trusted
+      release_eligible: true
+    fitness:
+      trust_class: trusted
+      release_eligible: true
+    mazer:
+      trust_class: trusted
+      release_eligible: true
+    nat1-games:
+      trust_class: trusted
+      release_eligible: false
+    playbook-demo:
+      trust_class: trusted
+      release_eligible: false
+  excluded_surfaces:
+    verta_core_checkout:
+      path: repos/Verta-Core
+      trust_class: untrusted
+      release_eligible: false
+      reason: Token-bearing Verta checkout remains quarantined and untrusted until scrub and rotation are complete.
+    verta_core_archive:
+      path: repos/Verta-Core.zip
+      trust_class: untrusted
+      release_eligible: false
+      reason: Token-bearing Verta archive remains quarantined private evidence and must stay out of release sets.
 
 session_defaults:
   root_agents: AGENTS.md

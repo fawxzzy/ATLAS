@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://schemas/atlas.approval.receipt.v1.json",
+  "title": "ATLAS approval receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "approval_receipt_id",
+    "request_id",
+    "worker_id",
+    "assignment_id",
+    "stack_lock_digest",
+    "approver",
+    "approval_status",
+    "request_digest",
+    "issued_at"
+  ],
+  "properties": {
+    "contract_version": {
+      "type": "string",
+      "const": "atlas.approval.receipt.v1"
+    },
+    "approval_receipt_id": {
+      "type": "string",
+      "minLength": 3,
+      "pattern": "^[A-Za-z0-9._:-]+$"
+    },
+    "request_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "worker_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "assignment_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "stack_lock_digest": {
+      "type": "string",
+      "minLength": 1
+    },
+    "approver": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "name"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "system",
+            "human"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "approval_status": {
+      "type": "string",
+      "enum": [
+        "approved",
+        "rejected",
+        "expired"
+      ]
+    },
+    "granted_scope": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "expiry_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "request_digest": {
+      "type": "string",
+      "minLength": 1
+    },
+    "issued_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "reason": {
+      "type": "string"
+    }
+  }
+}

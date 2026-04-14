@@ -38,6 +38,20 @@ ROOT_LOG_PATTERNS = ["*.log", "*.err.log", "*.out.log", "*.tmp", "*.db", "*.sqli
 ROOT_CAPTURE_PATTERNS = ["*screenshot*.png", "artifacts*.png", "*check*.png", "*review*.png"]
 BASELINE_VERSION = "atlas.stack.validation.baseline.v1"
 
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from ops.stack.generate_lockfile import (
+    STACK_LOCK_SCHEMA_VERSION,
+    TRUST_CLASSES,
+    build_lock_payload,
+    default_lockfile_path,
+    git_output,
+    load_lockfile,
+    repo_is_git_root,
+)
+
 
 @dataclass
 class Finding:
@@ -123,7 +137,7 @@ def load_stack_config(path: Path) -> dict[str, Any]:
 
 
 def repo_root() -> Path:
-    return Path(__file__).resolve().parents[2]
+    return ROOT
 
 
 def resolve_path(stack_file: Path, raw_path: str) -> Path:
@@ -133,6 +147,85 @@ def resolve_path(stack_file: Path, raw_path: str) -> Path:
 
 def normalize_slashes(path: str) -> str:
     return path.replace("\\", "/")
+
+
+def relative_to_root(root: Path, path: Path) -> str:
+    resolved = path.resolve()
+    if resolved.is_relative_to(root.resolve()):
+        relative = resolved.relative_to(root.resolve())
+        return "." if not relative.parts else normalize_slashes(str(relative))
+    return normalize_slashes(str(resolved))
+
+
+def lockfile_output_path(stack_file: Path, config: dict[str, Any]) -> Path:
+    return default_lockfile_path(config=config, root=stack_file.parent.resolve())
+
+
+def verify_locked_ref(repo_path: Path, component: dict[str, Any]) -> str | None:
+    ref_type = str(component.get("ref_type", ""))
+    ref = str(component.get("ref", ""))
+    commit = str(component.get("commit", ""))
+    if ref_type == "branch":
+        code, _ = git_output(repo_path, "show-ref", "--verify", "--quiet", f"refs/heads/{ref}")
+        if code != 0:
+            return f"Pinned branch ref '{ref}' is missing."
+    elif ref_type == "tag":
+        code, _ = git_output(repo_path, "show-ref", "--verify", "--quiet", f"refs/tags/{ref}")
+        if code != 0:
+            return f"Pinned tag ref '{ref}' is missing."
+    elif ref_type == "commit":
+        code, output = git_output(repo_path, "rev-parse", "--verify", f"{ref}^{{commit}}")
+        if code != 0 or not output:
+            return f"Pinned commit ref '{ref}' is missing."
+    else:
+        return f"Unsupported ref_type '{ref_type}'."
+
+    code, head_commit = git_output(repo_path, "rev-parse", "HEAD")
+    if code != 0 or not head_commit:
+        return "Unable to resolve current HEAD for pinned component."
+    if commit and head_commit != commit:
+        return f"Pinned commit '{commit}' does not match current HEAD '{head_commit}'."
+    return None
+
+
+def discover_unregistered_git_roots(root: Path, config: dict[str, Any], stack_file: Path) -> list[Path]:
+    repos_root = root / "repos"
+    if not repos_root.exists():
+        return []
+    registry_paths = {
+        resolve_path(stack_file, repo_info["path"]).resolve()
+        for repo_info in config.get("repo_registry", {}).values()
+        if isinstance(repo_info, dict) and isinstance(repo_info.get("path"), str)
+    }
+    lock_config = config.get("stack_lock", {})
+    excluded_roots = {
+        resolve_path(stack_file, value["path"]).resolve()
+        for value in lock_config.get("excluded_surfaces", {}).values()
+        if isinstance(lock_config, dict)
+        and isinstance(value, dict)
+        and isinstance(value.get("path"), str)
+    } if isinstance(lock_config, dict) else set()
+
+    candidates: set[Path] = set()
+    for top_level in repos_root.iterdir():
+        if not top_level.is_dir():
+            continue
+        candidates.add(top_level)
+        for child in top_level.iterdir():
+            if child.is_dir():
+                candidates.add(child)
+
+    discovered: list[Path] = []
+    for candidate in sorted(candidates):
+        if not repo_is_git_root(candidate):
+            continue
+        resolved = candidate.resolve()
+        if resolved in registry_paths:
+            continue
+        if any(resolved == excluded or resolved.is_relative_to(excluded) for excluded in excluded_roots):
+            continue
+        discovered.append(resolved)
+    return discovered
 
 
 def iter_relative_directory_targets(config: dict[str, Any]) -> list[tuple[str, str]]:
@@ -206,7 +299,7 @@ def iter_scan_files(roots: list[Path]) -> list[Path]:
     return files
 
 
-def build_findings(stack_file: Path, config: dict[str, Any]) -> list[Finding]:
+def build_findings(stack_file: Path, config: dict[str, Any], *, lock_file_override: Path | None = None) -> list[Finding]:
     root = stack_file.parent.resolve()
     findings: list[Finding] = []
 
@@ -234,6 +327,16 @@ def build_findings(stack_file: Path, config: dict[str, Any]) -> list[Finding]:
         if not repo_path.is_dir():
             findings.append(Finding("critical", "repo-path-not-directory", repo_rel, f"Repo path for '{repo_id}' is not a directory.", {"status": status}))
             continue
+        if not is_stack_control_repo and not repo_is_git_root(repo_path):
+            findings.append(
+                Finding(
+                    "warning",
+                    "repo-path-not-git-root",
+                    repo_rel,
+                    "Repo registry path resolves inside another git worktree and cannot be pinned as an independent child repo.",
+                    {"repo_id": repo_id, "status": status},
+                )
+            )
 
         agents_path = repo_path / "AGENTS.md"
         singular_agent_path = repo_path / "AGENT.md"
@@ -267,6 +370,163 @@ def build_findings(stack_file: Path, config: dict[str, Any]) -> list[Finding]:
             for file_path in repo_path.glob(pattern):
                 if file_path.is_file():
                     findings.append(Finding("warning", "capture-artifact-in-repo-root", normalize_slashes(str(file_path.relative_to(root))), "Likely review or capture artifact detected in repo root.", {"repo_id": repo_id, "pattern": pattern}))
+
+    lockfile_path = lock_file_override.resolve() if lock_file_override is not None else lockfile_output_path(stack_file, config)
+    lockfile_rel = relative_to_root(root, lockfile_path)
+    if not lockfile_path.exists():
+        findings.append(
+            Finding(
+                "error",
+                "missing-stack-lockfile",
+                lockfile_rel,
+                "Stack lockfile is missing. Generate it before relying on root-driven orchestration.",
+            )
+        )
+    else:
+        try:
+            lockfile = load_lockfile(lockfile_path)
+        except Exception as exc:
+            findings.append(
+                Finding(
+                    "error",
+                    "invalid-stack-lockfile",
+                    lockfile_rel,
+                    f"Stack lockfile could not be loaded: {exc}",
+                )
+            )
+            lockfile = None
+        if isinstance(lockfile, dict):
+            if lockfile.get("schema_version") != STACK_LOCK_SCHEMA_VERSION:
+                findings.append(
+                    Finding(
+                        "error",
+                        "stack-lock-schema-version",
+                        lockfile_rel,
+                        f"Stack lockfile schema_version must be '{STACK_LOCK_SCHEMA_VERSION}'.",
+                    )
+                )
+            try:
+                generated_lock = build_lock_payload(config=config, root=root)
+            except Exception as exc:
+                findings.append(
+                    Finding(
+                        "error",
+                        "stack-lock-build-failed",
+                        lockfile_rel,
+                        f"Current stack lock payload could not be rebuilt: {exc}",
+                    )
+                )
+                generated_lock = None
+            if isinstance(generated_lock, dict) and lockfile != generated_lock:
+                findings.append(
+                    Finding(
+                        "error",
+                        "stack-lock-drift",
+                        lockfile_rel,
+                        "Stack lockfile does not match the current pinned working set.",
+                    )
+                )
+
+            components = lockfile.get("components")
+            if not isinstance(components, dict):
+                findings.append(
+                    Finding(
+                        "error",
+                        "stack-lock-components-shape",
+                        lockfile_rel,
+                        "Stack lockfile components must be a mapping keyed by repo id.",
+                    )
+                )
+            else:
+                required_component_fields = {
+                    "path",
+                    "remote",
+                    "ref_type",
+                    "ref",
+                    "commit",
+                    "dirty",
+                    "trust_class",
+                    "release_eligible",
+                }
+                for component_id, component in components.items():
+                    component_path = f"{lockfile_rel}#{component_id}"
+                    if not isinstance(component, dict):
+                        findings.append(Finding("error", "stack-lock-component-shape", component_path, "Stack lockfile component entry must be a mapping."))
+                        continue
+                    missing_fields = sorted(field for field in required_component_fields if field not in component)
+                    if missing_fields:
+                        findings.append(
+                            Finding(
+                                "error",
+                                "stack-lock-component-fields",
+                                component_path,
+                                f"Stack lockfile component is missing required fields: {', '.join(missing_fields)}",
+                            )
+                        )
+                    repo_path = resolve_path(stack_file, str(component.get("path", "")))
+                    if not repo_path.exists():
+                        findings.append(Finding("error", "stack-lock-missing-path", component_path, "Pinned component path does not exist on disk."))
+                        continue
+                    if not repo_path.is_dir():
+                        findings.append(Finding("error", "stack-lock-path-not-directory", component_path, "Pinned component path is not a directory."))
+                        continue
+                    if not repo_is_git_root(repo_path):
+                        findings.append(Finding("error", "stack-lock-not-git-root", component_path, "Pinned component path is not a git root."))
+                        continue
+                    trust_class = str(component.get("trust_class", ""))
+                    if trust_class not in TRUST_CLASSES:
+                        findings.append(Finding("error", "stack-lock-trust-class", component_path, f"Unsupported trust_class '{trust_class}' in stack lockfile."))
+                    ref_problem = verify_locked_ref(repo_path, component)
+                    if ref_problem:
+                        findings.append(Finding("error", "stack-lock-missing-ref", component_path, ref_problem))
+                    if bool(component.get("release_eligible")) and trust_class != "trusted":
+                        findings.append(
+                            Finding(
+                                "error",
+                                "stack-lock-release-trust",
+                                component_path,
+                                "Only trusted components may be marked release_eligible.",
+                            )
+                        )
+
+            excluded_surfaces = lockfile.get("excluded_surfaces")
+            if not isinstance(excluded_surfaces, dict):
+                findings.append(
+                    Finding(
+                        "error",
+                        "stack-lock-excluded-surfaces-shape",
+                        lockfile_rel,
+                        "Stack lockfile excluded_surfaces must be a mapping keyed by surface id.",
+                    )
+                )
+            else:
+                for surface_id, surface in excluded_surfaces.items():
+                    surface_path = f"{lockfile_rel}#{surface_id}"
+                    if not isinstance(surface, dict):
+                        findings.append(Finding("error", "stack-lock-excluded-surface-shape", surface_path, "Excluded surface entry must be a mapping."))
+                        continue
+                    trust_class = str(surface.get("trust_class", ""))
+                    if trust_class not in TRUST_CLASSES:
+                        findings.append(Finding("error", "stack-lock-excluded-surface-trust", surface_path, f"Unsupported trust_class '{trust_class}' in excluded surface entry."))
+                    if bool(surface.get("release_eligible")) and trust_class != "trusted":
+                        findings.append(
+                            Finding(
+                                "error",
+                                "stack-lock-excluded-surface-release",
+                                surface_path,
+                                "Only trusted surfaces may be marked release_eligible.",
+                            )
+                        )
+
+    for repo_path in discover_unregistered_git_roots(root, config, stack_file):
+        findings.append(
+            Finding(
+                "warning",
+                "unregistered-git-root",
+                relative_to_root(root, repo_path),
+                "Git repo root is present under repos/ but not tracked by repo_registry or excluded_surfaces.",
+            )
+        )
 
     root_abs_patterns = [
         ("warning", "atlas-root-path", re.compile(re.escape(str(root)))),
@@ -302,6 +562,7 @@ def write_markdown_report(report: dict[str, Any], output_path: Path) -> None:
         "",
         f"- Generated: `{report['generated_at']}`",
         f"- Stack file: `{report['stack_file']}`",
+        f"- Stack lock file: `{report.get('stack_lock_file', 'stack.lock.yaml')}`",
         f"- Stack root: `{report['stack_root']}`",
         "",
         "## Summary",
@@ -444,6 +705,7 @@ def ratchet_report(current_findings: list[dict[str, Any]], baseline: dict[str, A
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Validate the ATLAS stack against stack.yaml.")
     parser.add_argument("--stack-file", default=str(repo_root() / "stack.yaml"))
+    parser.add_argument("--lock-file")
     parser.add_argument("--output-dir")
     parser.add_argument("--json-name", default="stack-validation.latest.json")
     parser.add_argument("--markdown-name", default="stack-validation.latest.md")
@@ -453,16 +715,20 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     stack_file = Path(args.stack_file).resolve()
+    lock_file = Path(args.lock_file).resolve() if args.lock_file else None
+    default_lock_file = lock_file or (stack_file.parent.resolve() / "stack.lock.yaml")
     output_dir = Path(args.output_dir).resolve() if args.output_dir else default_output_dir(stack_file)
     baseline_path = Path(args.baseline_path).resolve() if args.baseline_path else default_baseline_path(stack_file)
     should_exit_success = False
     try:
         config = load_stack_config(stack_file)
+        resolved_lock_file = lock_file or lockfile_output_path(stack_file, config)
         report = {
             "generated_at": datetime.now(timezone.utc).isoformat(),
             "stack_file": normalize_slashes(str(stack_file)),
             "stack_root": normalize_slashes(str(stack_file.parent.resolve())),
-            "summary": summarize_findings(findings := build_findings(stack_file, config)),
+            "stack_lock_file": relative_to_root(stack_file.parent.resolve(), resolved_lock_file),
+            "summary": summarize_findings(findings := build_findings(stack_file, config, lock_file_override=lock_file)),
             "repo_ids": sorted(config.get("repo_registry", {}).keys()),
             "findings": [asdict(item) for item in findings],
         }
@@ -472,6 +738,7 @@ def main(argv: list[str] | None = None) -> int:
             "generated_at": datetime.now(timezone.utc).isoformat(),
             "stack_file": normalize_slashes(str(stack_file)),
             "stack_root": normalize_slashes(str(stack_file.parent.resolve())),
+            "stack_lock_file": relative_to_root(stack_file.parent.resolve(), default_lock_file),
             "summary": {"critical": 1, "error": 0, "warning": 0, "info": 0, "total": 1},
             "repo_ids": [],
             "findings": [asdict(Finding("critical", "validator-crash", normalize_slashes(str(stack_file)), f"Validator failed before completion: {exc}"))],
