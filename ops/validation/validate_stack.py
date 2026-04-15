@@ -53,13 +53,14 @@ if str(ROOT) not in sys.path:
 from ops.stack.generate_lockfile import (
     LOCK_COMPONENT_FIELDS,
     LOCK_EXCLUDED_SURFACE_FIELDS,
+    LOCK_METADATA_FIELDS,
     STACK_LOCK_SCHEMA_VERSION,
     TRUST_CLASSES,
     build_lock_payload,
     default_lockfile_path,
+    describe_lock_payload_drift,
     git_output,
     load_lockfile,
-    normalize_lock_payload,
     repo_is_git_root,
 )
 from ops.stack.audit_gitdir_hygiene import build_report as build_gitdir_hygiene_report, default_target_paths as default_gitdir_hygiene_targets
@@ -452,35 +453,24 @@ def verify_locked_ref(repo_path: Path, component: dict[str, Any]) -> str | None:
     return None
 
 
-def lock_component_field_drift(
-    locked: dict[str, Any],
-    generated: dict[str, Any],
-) -> list[str]:
-    return [field for field in LOCK_COMPONENT_FIELDS if locked.get(field) != generated.get(field)]
-
-
-def lock_surface_field_drift(
-    locked: dict[str, Any],
-    generated: dict[str, Any],
-) -> list[str]:
-    return [field for field in LOCK_EXCLUDED_SURFACE_FIELDS if locked.get(field) != generated.get(field)]
-
-
 def describe_stack_lock_drift(
     *,
     lockfile_rel: str,
-    locked: dict[str, Any],
-    generated: dict[str, Any],
+    drift_report: dict[str, Any],
 ) -> list[Finding]:
     findings: list[Finding] = []
-    locked_components = locked.get("components") if isinstance(locked.get("components"), dict) else {}
-    generated_components = generated.get("components") if isinstance(generated.get("components"), dict) else {}
-    component_ids = sorted(set(locked_components) | set(generated_components))
-    for component_id in component_ids:
+    locked = drift_report.get("locked") if isinstance(drift_report.get("locked"), dict) else {}
+    generated = drift_report.get("generated") if isinstance(drift_report.get("generated"), dict) else {}
+
+    component_drift = drift_report.get("components") if isinstance(drift_report.get("components"), dict) else {}
+    for component_id in sorted(component_drift):
         component_path = f"{lockfile_rel}#{component_id}"
-        locked_component = locked_components.get(component_id)
-        generated_component = generated_components.get(component_id)
-        if not isinstance(locked_component, dict) or not isinstance(generated_component, dict):
+        details = component_drift.get(component_id)
+        if not isinstance(details, dict):
+            continue
+        drift_kind = str(details.get("kind", ""))
+        drift_fields = [str(field) for field in details.get("fields", []) if isinstance(field, str)]
+        if drift_kind == "membership":
             findings.append(
                 Finding(
                     "error",
@@ -490,10 +480,11 @@ def describe_stack_lock_drift(
                 )
             )
             continue
-        drift_fields = lock_component_field_drift(locked_component, generated_component)
-        if not drift_fields:
-            continue
-        if drift_fields == ["dirty"]:
+        if drift_kind == "worktree":
+            locked_components = locked.get("components") if isinstance(locked.get("components"), dict) else {}
+            generated_components = generated.get("components") if isinstance(generated.get("components"), dict) else {}
+            locked_component = locked_components.get(component_id) if isinstance(locked_components.get(component_id), dict) else {}
+            generated_component = generated_components.get(component_id) if isinstance(generated_components.get(component_id), dict) else {}
             findings.append(
                 Finding(
                     "error",
@@ -502,6 +493,8 @@ def describe_stack_lock_drift(
                     f"Pinned dirty state is {locked_component.get('dirty')!r} but the current worktree state is {generated_component.get('dirty')!r}.",
                 )
             )
+            continue
+        if not drift_fields:
             continue
         findings.append(
             Finding(
@@ -512,14 +505,15 @@ def describe_stack_lock_drift(
             )
         )
 
-    locked_surfaces = locked.get("excluded_surfaces") if isinstance(locked.get("excluded_surfaces"), dict) else {}
-    generated_surfaces = generated.get("excluded_surfaces") if isinstance(generated.get("excluded_surfaces"), dict) else {}
-    surface_ids = sorted(set(locked_surfaces) | set(generated_surfaces))
-    for surface_id in surface_ids:
+    surface_drift = drift_report.get("excluded_surfaces") if isinstance(drift_report.get("excluded_surfaces"), dict) else {}
+    for surface_id in sorted(surface_drift):
         surface_path = f"{lockfile_rel}#{surface_id}"
-        locked_surface = locked_surfaces.get(surface_id)
-        generated_surface = generated_surfaces.get(surface_id)
-        if not isinstance(locked_surface, dict) or not isinstance(generated_surface, dict):
+        details = surface_drift.get(surface_id)
+        if not isinstance(details, dict):
+            continue
+        drift_kind = str(details.get("kind", ""))
+        drift_fields = [str(field) for field in details.get("fields", []) if isinstance(field, str)]
+        if drift_kind == "membership":
             findings.append(
                 Finding(
                     "error",
@@ -529,7 +523,6 @@ def describe_stack_lock_drift(
                 )
             )
             continue
-        drift_fields = lock_surface_field_drift(locked_surface, generated_surface)
         if drift_fields:
             findings.append(
                 Finding(
@@ -540,16 +533,19 @@ def describe_stack_lock_drift(
                 )
             )
 
-    for field in ("schema_version", "stack_manifest_path", "stack_manifest_digest", "component_count"):
-        if locked.get(field) != generated.get(field):
-            findings.append(
-                Finding(
-                    "error",
-                    "stack-lock-metadata-drift",
-                    lockfile_rel,
-                    f"Stack lockfile field '{field}' differs from the current generated working set.",
-                )
+    for field in [
+        str(field)
+        for field in drift_report.get("metadata_fields", [])
+        if isinstance(field, str) and field in LOCK_METADATA_FIELDS
+    ]:
+        findings.append(
+            Finding(
+                "error",
+                "stack-lock-metadata-drift",
+                lockfile_rel,
+                f"Stack lockfile field '{field}' differs from the current generated working set.",
             )
+        )
     return findings
 
 
@@ -1711,8 +1707,8 @@ def build_findings(stack_file: Path, config: dict[str, Any], *, lock_file_overri
                     )
                 )
                 generated_lock = None
-            normalized_lockfile = normalize_lock_payload(lockfile)
-            if isinstance(generated_lock, dict) and normalized_lockfile != generated_lock:
+            drift_report = describe_lock_payload_drift(lockfile, generated_lock) if isinstance(generated_lock, dict) else None
+            if isinstance(drift_report, dict) and drift_report.get("has_drift"):
                 findings.append(
                     Finding(
                         "error",
@@ -1724,8 +1720,7 @@ def build_findings(stack_file: Path, config: dict[str, Any], *, lock_file_overri
                 findings.extend(
                     describe_stack_lock_drift(
                         lockfile_rel=lockfile_rel,
-                        locked=normalized_lockfile,
-                        generated=generated_lock,
+                        drift_report=drift_report,
                     )
                 )
 

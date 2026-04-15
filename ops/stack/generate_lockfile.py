@@ -29,6 +29,12 @@ LOCK_COMPONENT_FIELDS = (
     "trust_class",
     "release_eligible",
 )
+LOCK_METADATA_FIELDS = (
+    "schema_version",
+    "stack_manifest_path",
+    "stack_manifest_digest",
+    "component_count",
+)
 LOCK_EXCLUDED_SURFACE_FIELDS = (
     "path",
     "present",
@@ -220,6 +226,71 @@ def normalize_lock_payload(payload: dict[str, Any]) -> dict[str, Any]:
         "excluded_surfaces": excluded,
     }
     return body | {"lock_digest": stable_json_digest(body)}
+
+
+def lock_component_field_drift(
+    locked: dict[str, Any],
+    generated: dict[str, Any],
+) -> list[str]:
+    return [field for field in LOCK_COMPONENT_FIELDS if locked.get(field) != generated.get(field)]
+
+
+def lock_surface_field_drift(
+    locked: dict[str, Any],
+    generated: dict[str, Any],
+) -> list[str]:
+    return [field for field in LOCK_EXCLUDED_SURFACE_FIELDS if locked.get(field) != generated.get(field)]
+
+
+def classify_component_drift_fields(drift_fields: list[str]) -> str:
+    return "worktree" if drift_fields == ["dirty"] else "pin"
+
+
+def describe_lock_payload_drift(
+    locked_payload: dict[str, Any],
+    generated_payload: dict[str, Any],
+) -> dict[str, Any]:
+    locked = normalize_lock_payload(locked_payload)
+    generated = normalize_lock_payload(generated_payload)
+
+    component_drift: dict[str, dict[str, Any]] = {}
+    locked_components = locked.get("components") if isinstance(locked.get("components"), dict) else {}
+    generated_components = generated.get("components") if isinstance(generated.get("components"), dict) else {}
+    for component_id in sorted(set(locked_components) | set(generated_components)):
+        locked_component = locked_components.get(component_id)
+        generated_component = generated_components.get(component_id)
+        if not isinstance(locked_component, dict) or not isinstance(generated_component, dict):
+            component_drift[component_id] = {"kind": "membership", "fields": []}
+            continue
+        drift_fields = lock_component_field_drift(locked_component, generated_component)
+        if drift_fields:
+            component_drift[component_id] = {
+                "kind": classify_component_drift_fields(drift_fields),
+                "fields": drift_fields,
+            }
+
+    excluded_surface_drift: dict[str, dict[str, Any]] = {}
+    locked_surfaces = locked.get("excluded_surfaces") if isinstance(locked.get("excluded_surfaces"), dict) else {}
+    generated_surfaces = generated.get("excluded_surfaces") if isinstance(generated.get("excluded_surfaces"), dict) else {}
+    for surface_id in sorted(set(locked_surfaces) | set(generated_surfaces)):
+        locked_surface = locked_surfaces.get(surface_id)
+        generated_surface = generated_surfaces.get(surface_id)
+        if not isinstance(locked_surface, dict) or not isinstance(generated_surface, dict):
+            excluded_surface_drift[surface_id] = {"kind": "membership", "fields": []}
+            continue
+        drift_fields = lock_surface_field_drift(locked_surface, generated_surface)
+        if drift_fields:
+            excluded_surface_drift[surface_id] = {"kind": "fields", "fields": drift_fields}
+
+    metadata_fields = [field for field in LOCK_METADATA_FIELDS if locked.get(field) != generated.get(field)]
+    return {
+        "locked": locked,
+        "generated": generated,
+        "components": component_drift,
+        "excluded_surfaces": excluded_surface_drift,
+        "metadata_fields": metadata_fields,
+        "has_drift": bool(component_drift or excluded_surface_drift or metadata_fields),
+    }
 
 
 def build_lock_payload(config: dict[str, Any] | None = None, root: Path | None = None) -> dict[str, Any]:

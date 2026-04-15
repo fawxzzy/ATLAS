@@ -27,6 +27,11 @@ Validation:
 - `ops/validation/validate_stack.py`
 - debt reporting: `runtime/receipts/validation/stack-validation.latest.json`
 
+Shared comparison contract:
+
+- generator normalization and validator drift comparison both flow through the same canonical payload diff helpers in `ops/stack/generate_lockfile.py`
+- lock refresh bugs are treated as normalization bugs first, not as operator excuses to repin blindly
+
 ## Schema
 
 - `schema_version`: `atlas.stack.lock.v1`
@@ -84,6 +89,8 @@ Regenerate the committed lockfile only after an intentional pinned-working-set c
 - a component dirty/clean state changed and that new state should become the pinned truth
 - stack registry or trust-policy inputs changed in `stack.yaml`
 
+Do not regenerate just because validation is red. Refresh is allowed only when the current live state is the intended pinned truth.
+
 Regenerate in place:
 
 ```powershell
@@ -134,11 +141,23 @@ Policy:
 - unintentional drift or unknown repo movement: fail validation and reconcile the repo state first
 - identical repo state with differing lock output: treat that as a generator/validator bug and fix normalization before refreshing the file
 
+Debt classification:
+
+- `stack-lock-pin-drift`: ref, commit, membership, or other pinned metadata differs from current intended truth
+- `stack-lock-worktree-drift`: the only mismatch is `dirty`; this is a worktree-state drift, not a repin of execution truth
+- inherited baseline debt: unrelated ratchet blockers remain ledgered by class and must not be hidden by lock refresh
+
 Ratchet rule:
 
 - lock refresh is allowed for intentional working-set changes
 - lock refresh must not be used to hide unrelated inherited debt
 - inherited debt is tracked through the debt ledger and ratchet classes, not by changing the lock alone
+
+Operational rule:
+
+- regenerate when the intended pinned state changed
+- fail closed when the live state is unexpected
+- fix the diff contract when generation and validation disagree on unchanged state
 
 ## Dirty State Policy
 
