@@ -19,6 +19,14 @@ The core platform boundary is now stable enough that debt work should proceed as
 4. Move or clean repo-root mutable residue where the owning repo agrees.
 5. Keep all new repos compliant on `AGENTS.md`, `.codex/config.toml`, and relative-path discipline.
 
+## Bucket Order
+
+1. Repair current governed runtime buckets with canonical builders or truthful receipt supersession.
+2. Classify retained runtime residue so current-state reads stop treating old artifacts as live truth.
+3. Keep mutable-state warnings visible as historical debt until relocation is worth the churn.
+4. Burn down repo-local config gaps only through intentional repo mapping changes.
+5. Burn down path-discipline leaks repo by repo without weakening the validator.
+
 ## Owner Map
 
 | Area | Primary owner | Notes |

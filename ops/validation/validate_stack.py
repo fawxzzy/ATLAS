@@ -68,6 +68,7 @@ from ops.atlas.observations import (
     GOVERNED_ARTIFACT_EPOCH_LEGACY_PRE_REGISTRY,
     build_observation,
     canonical_observation_type,
+    execution_receipt_residue_records,
     load_execution_receipt_payloads,
     emit_observation,
     governed_artifact_epoch_details,
@@ -158,6 +159,57 @@ DEBT_CLASS_CONFIG = [
     },
 ]
 ENV_EXAMPLE_MARKERS = (".example", ".sample", ".template", ".dist")
+REMEDIATION_BUCKET_CONFIG = [
+    {
+        "bucket_id": "execution-receipt-repair-invalid",
+        "title": "Execution Receipt Repair",
+        "treatment": "repair through canonical builders",
+        "categories": {
+            "execution-receipt-repair-required",
+            "execution-receipt-repair-invalid",
+        },
+    },
+    {
+        "bucket_id": "mutable-state-warnings",
+        "title": "Mutable-State Warnings",
+        "treatment": "classify as retained residue / historical debt",
+        "categories": {
+            "mutable-state-in-repo",
+            "mutable-artifact-in-repo-root",
+            "capture-artifact-in-repo-root",
+        },
+    },
+    {
+        "bucket_id": "repo-local-config-gaps",
+        "title": "Repo-Local Config Gaps",
+        "treatment": "move into the debt ledger as inherited debt",
+        "categories": {
+            "missing-repo-path",
+            "repo-path-not-directory",
+            "repo-path-not-git-root",
+            "missing-readme",
+        },
+    },
+    {
+        "bucket_id": "path-discipline-leaks",
+        "title": "Path-Discipline Leaks",
+        "treatment": "move into the debt ledger as inherited debt",
+        "categories": {
+            "windows-user-path",
+            "windows-user-path-alt",
+            "unix-home-path",
+            "atlas-root-path",
+            "atlas-root-path-alt",
+        },
+    },
+    {
+        "bucket_id": "retained-runtime-residue",
+        "title": "Retained Runtime Residue",
+        "treatment": "classify as retained residue / historical debt",
+        "categories": set(),
+        "include_execution_receipt_residue": True,
+    },
+]
 
 
 def classify_debt_class(category: str) -> str:
@@ -220,6 +272,58 @@ def debt_class_counts(findings: list[dict[str, Any]]) -> dict[str, int]:
     for finding in findings:
         counts[classify_debt_class(str(finding.get("category", "")))] += 1
     return dict(sorted(counts.items()))
+
+
+def summarize_remediation_buckets(
+    findings: list[dict[str, Any]],
+    *,
+    root: Path,
+) -> list[dict[str, Any]]:
+    summarized: list[dict[str, Any]] = []
+    execution_receipt_residue = execution_receipt_residue_records(root)
+    for config in REMEDIATION_BUCKET_CONFIG:
+        bucket_findings = [
+            finding
+            for finding in findings
+            if str(finding.get("category", "")) in config.get("categories", set())
+        ]
+        residue_records = execution_receipt_residue if config.get("include_execution_receipt_residue") else []
+        if not bucket_findings and not residue_records:
+            continue
+        category_counts = Counter(str(finding.get("category", "")) for finding in bucket_findings)
+        severity_counts = Counter(str(finding.get("severity", "unknown")) for finding in bucket_findings)
+        residue_status_counts = Counter(str(item.get("status", "unknown")) for item in residue_records)
+        examples: list[str] = []
+        for finding in bucket_findings:
+            candidate = str(finding.get("path", "")).strip()
+            if candidate and candidate not in examples:
+                examples.append(candidate)
+            if len(examples) >= 5:
+                break
+        if len(examples) < 5:
+            for residue in residue_records:
+                candidate = str(residue.get("source_ref", "")).strip()
+                if candidate and candidate not in examples:
+                    examples.append(candidate)
+                if len(examples) >= 5:
+                    break
+        summarized.append(
+            {
+                "bucket_id": str(config["bucket_id"]),
+                "title": str(config["title"]),
+                "treatment": str(config["treatment"]),
+                "finding_count": len(bucket_findings),
+                "blocking_count": sum(
+                    1 for finding in bucket_findings if finding.get("severity") in {"critical", "error"}
+                ),
+                "residue_count": len(residue_records),
+                "severity_counts": dict(sorted(severity_counts.items())),
+                "category_counts": dict(sorted(category_counts.items())),
+                "residue_status_counts": dict(sorted(residue_status_counts.items())),
+                "examples": examples,
+            }
+        )
+    return summarized
 
 
 def parse_scalar(value: str) -> Any:
@@ -738,6 +842,17 @@ def validate_execution_receipt_repairs(stack_file: Path) -> list[Finding]:
             continue
 
         preferred_ref = resolve_preferred_execution_receipt_ref(original_ref, root=root)
+        if preferred_ref == original_ref:
+            findings.append(
+                Finding(
+                    "error",
+                    "execution-receipt-repair-required",
+                    original_ref,
+                    "Post-cutover execution receipt does not match the current registry digest and has no truthful superseding receipt.",
+                    {"session_ref": relative_to_root(root, session_path)},
+                )
+            )
+            continue
         preferred_payload = receipt_payloads.get(preferred_ref or "")
         if not isinstance(preferred_payload, dict):
             findings.append(
@@ -753,8 +868,7 @@ def validate_execution_receipt_repairs(stack_file: Path) -> list[Finding]:
 
         repair_basis_refs = preferred_payload.get("repair_basis_refs")
         if (
-            preferred_ref == original_ref
-            or str(preferred_payload.get("registry_digest") or "") != current_digest
+            str(preferred_payload.get("registry_digest") or "") != current_digest
             or str(preferred_payload.get("supersedes_receipt_ref") or "") != original_ref
             or not isinstance(repair_basis_refs, list)
             or len([item for item in repair_basis_refs if isinstance(item, str) and item.strip()]) == 0
@@ -1328,7 +1442,13 @@ def validate_world_model_state(stack_file: Path) -> list[Finding]:
                 approval_type, _ = approval_observation_type(approval_payload)
                 require_observation(approval_type, approval_ref, owner_ref=source_ref)
 
-            require_observation("execution_completed", execution_receipt_ref, owner_ref=source_ref)
+            expected_execution_observation = "execution_completed"
+            execution_receipt_payload = source_payload(execution_receipt_ref)
+            if isinstance(execution_receipt_payload, dict):
+                execution_result = optional_string(execution_receipt_payload.get("result")) or ""
+                if execution_result in {"blocked", "failed"}:
+                    expected_execution_observation = "execution_failed"
+            require_observation(expected_execution_observation, execution_receipt_ref, owner_ref=source_ref)
             if final_status in {"completed", "failed"}:
                 require_observation("completed", final_status_ref, owner_ref=source_ref)
             for merge_request_ref in merge_request_refs:
@@ -1743,6 +1863,11 @@ def write_markdown_report(report: dict[str, Any], output_path: Path) -> None:
     findings = report["findings"]
     ratchet = report.get("ratchet")
     debt_classes = report.get("debt_classes") if isinstance(report.get("debt_classes"), list) else []
+    remediation_buckets = (
+        report.get("remediation_buckets")
+        if isinstance(report.get("remediation_buckets"), list)
+        else []
+    )
     lines = [
         "# ATLAS Stack Validation Report",
         "",
@@ -1771,6 +1896,21 @@ def write_markdown_report(report: dict[str, Any], output_path: Path) -> None:
             lines.append(
                 f"- `{item.get('class_id')}`: total={item.get('total', 0)}, blocking={item.get('blocking_total', 0)}, categories={len(item.get('category_counts') or {})}"
             )
+        lines.append("")
+    if remediation_buckets:
+        lines += [
+            "## Remediation Buckets",
+            "",
+        ]
+        for item in remediation_buckets:
+            if not isinstance(item, dict):
+                continue
+            lines.append(
+                f"- `{item.get('bucket_id')}`: treatment={item.get('treatment')}, findings={item.get('finding_count', 0)}, residue={item.get('residue_count', 0)}, blocking={item.get('blocking_count', 0)}"
+            )
+            examples = item.get("examples") if isinstance(item.get("examples"), list) else []
+            for example in examples[:3]:
+                lines.append(f"  - `{example}`")
         lines.append("")
     if isinstance(ratchet, dict):
         lines += [
@@ -2007,6 +2147,10 @@ def main(argv: list[str] | None = None) -> int:
             "findings": [asdict(item) for item in findings],
         }
         report["debt_classes"] = summarize_debt_classes(report["findings"])
+        report["remediation_buckets"] = summarize_remediation_buckets(
+            report["findings"],
+            root=stack_file.parent.resolve(),
+        )
     except Exception as exc:
         output_dir.mkdir(parents=True, exist_ok=True)
         report = {
@@ -2019,6 +2163,10 @@ def main(argv: list[str] | None = None) -> int:
             "findings": [asdict(Finding("critical", "validator-crash", normalize_slashes(str(stack_file)), f"Validator failed before completion: {exc}"))],
         }
         report["debt_classes"] = summarize_debt_classes(report["findings"])
+        report["remediation_buckets"] = summarize_remediation_buckets(
+            report["findings"],
+            root=stack_file.parent.resolve(),
+        )
     if args.write_baseline:
         baseline_path.parent.mkdir(parents=True, exist_ok=True)
         baseline = build_baseline(report, stack_file=stack_file)

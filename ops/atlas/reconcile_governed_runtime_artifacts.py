@@ -174,6 +174,7 @@ def _rebuild_status(
 def _rebuild_request(
     *,
     existing: dict[str, Any],
+    session_payload: dict[str, Any],
     session_manifest_ref: str,
     assignment_ref: str,
     running_status_ref: str,
@@ -185,6 +186,9 @@ def _rebuild_request(
 ) -> dict[str, Any]:
     payload = build_privileged_action_request(
         request_id=str(existing.get("request_id")),
+        session_id=str(session_payload.get("session_id")),
+        task_id=str(session_payload.get("task_id")),
+        scenario=str(session_payload.get("scenario") or "read_only"),
         worker_id=str(existing.get("worker_id")),
         assignment_id=str(existing.get("assignment_id")),
         stack_lock_digest=stack_lock_digest,
@@ -334,6 +338,7 @@ def _repair_session(
         if existing_request:
             request_payload = _rebuild_request(
                 existing=existing_request,
+                session_payload=session_payload,
                 session_manifest_ref=session_ref,
                 assignment_ref=assignment_ref,
                 running_status_ref=running_status_ref,

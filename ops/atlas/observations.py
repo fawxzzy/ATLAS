@@ -217,6 +217,10 @@ def canonical_observation_type(
         if raw_status == "rejected":
             return "execution_rejected"
         return "execution_approved"
+    if raw_type in {"execution.completed", "execution.result", "execution_completed"}:
+        if raw_status in {"blocked", "failed"}:
+            return "execution_failed"
+        return "execution_completed"
     return LEGACY_OBSERVATION_TYPE_ALIASES.get(raw_type, raw_type)
 
 

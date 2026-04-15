@@ -95,6 +95,17 @@ Current final statuses:
 
 `resume_failed` means the root-owned resume executor dispatched or validated the resume path and failed closed.
 
+## First Bounded Write
+
+The first non-dry-run governed machine action is `workspace_file_apply`.
+
+Session rule:
+
+- the request must declare the execution `tool_id`, `registry_digest`, `stack_lock_digest`, and assignment linkage
+- the write target must stay inside the declared `runtime/atlas/session-workspaces/<session_id>/` workspace root
+- approval and receipt artifacts remain `approved_action`
+- rollback metadata should capture the prior file hash or a backup ref when available
+
 ## Resume Lifecycle
 
 Resume is a first-class governed session transition.

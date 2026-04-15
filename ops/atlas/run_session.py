@@ -25,6 +25,7 @@ SESSION_CONTRACT_VERSION = "atlas.session.v1"
 CONTEXT_TOOL_ID = "cortex.build_worker_context"
 SUPERVISION_TOOL_ID = "cortex.supervise_workers"
 READ_ONLY_EXECUTION_TOOL_ID = "read_only_scan"
+WORKSPACE_FILE_APPLY_TOOL_ID = "workspace_file_apply"
 OBSERVE_AUTOMATION_LEVEL = "observe"
 CONTEXT_AUTOMATION_LEVEL = "context"
 REQUEST_ACTION_AUTOMATION_LEVEL = "request_action"
@@ -305,6 +306,9 @@ def build_capability_profile(tool_entry: dict[str, Any]) -> dict[str, Any]:
 def build_privileged_action_request(
     *,
     request_id: str,
+    session_id: str,
+    task_id: str,
+    scenario: str,
     worker_id: str,
     assignment_id: str,
     stack_lock_digest: str,
@@ -317,6 +321,54 @@ def build_privileged_action_request(
     extension_id: str | None,
     registry_digest: str,
 ) -> dict[str, Any]:
+    if tool_id == WORKSPACE_FILE_APPLY_TOOL_ID or scenario == "workspace-write":
+        workspace_root = normalize_slashes(
+            str(Path("runtime") / "atlas" / "session-workspaces" / session_id)
+        )
+        write_target = "governed-write.txt"
+        target_path = f"{workspace_root}/{write_target}"
+        return {
+            "contract_version": "atlas.privileged-action.request.v1",
+            "automation_level": REQUEST_ACTION_AUTOMATION_LEVEL,
+            "request_id": request_id,
+            "requested_at": isoformat(),
+            "worker_id": worker_id,
+            "assignment_id": assignment_id,
+            "stack_lock_digest": stack_lock_digest,
+            "tool_id": tool_id,
+            "extension_id": extension_id,
+            "registry_digest": registry_digest,
+            "source_refs": [
+                session_manifest_ref,
+                assignment_ref,
+                status_ref,
+                context_ref,
+            ],
+            "action": {
+                "summary": "Apply one bounded file write inside the declared session-owned workspace.",
+                "operation": "scoped_write",
+                "command": [],
+                "cwd": ".",
+                "workspace_root": workspace_root,
+                "write_target": write_target,
+                "write_content": "\n".join(
+                    [
+                        f"session_id={session_id}",
+                        f"task_id={task_id}",
+                        "write_class=workspace_file_apply",
+                        f"requested_at={isoformat()}",
+                    ]
+                )
+                + "\n",
+            },
+            "target_paths": [
+                workspace_root,
+                target_path,
+            ],
+            "target_resources": ["filesystem"],
+            "requested_capability": capability_profile,
+            "justification": "Exercise the first governed bounded write class inside a session-owned workspace only.",
+        }
     return {
         "contract_version": "atlas.privileged-action.request.v1",
         "automation_level": REQUEST_ACTION_AUTOMATION_LEVEL,
@@ -526,7 +578,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--task-id", required=True)
     parser.add_argument("--title")
     parser.add_argument("--session-id")
-    parser.add_argument("--scenario", choices=["read-only", "conflict"], default="read-only")
+    parser.add_argument("--scenario", choices=["read-only", "conflict", "workspace-write"], default="read-only")
     parser.add_argument("--query-term", action="append", dest="query_terms")
     parser.add_argument("--task-tag", action="append", dest="task_tags")
     args = parser.parse_args(argv)
@@ -552,12 +604,16 @@ def main(argv: list[str] | None = None) -> int:
     approval_path = artifact_root / "approval.receipt.json"
     session_manifest_path = session_root / "session.manifest.json"
     supervisor_root = ROOT / "runtime" / "cortex" / "supervisor" / session_id
+    session_workspace_root = ROOT / "runtime" / "atlas" / "session-workspaces" / session_id
 
     lock_payload = load_stack_lock_payload()
     registry_bundle = load_tool_registry_bundle(root=ROOT)
     context_tool = select_tool_entry(registry_bundle, CONTEXT_TOOL_ID)
     supervision_tool = select_tool_entry(registry_bundle, SUPERVISION_TOOL_ID)
-    execution_tool = select_tool_entry(registry_bundle, READ_ONLY_EXECUTION_TOOL_ID)
+    execution_tool = select_tool_entry(
+        registry_bundle,
+        WORKSPACE_FILE_APPLY_TOOL_ID if scenario == "workspace-write" else READ_ONLY_EXECUTION_TOOL_ID,
+    )
     registry_digest = str(registry_bundle["registry_digest"])
     stack_lock_digest = str(lock_payload.get("lock_digest", "")).strip()
     if not stack_lock_digest:
@@ -567,7 +623,11 @@ def main(argv: list[str] | None = None) -> int:
         session_id=session_id,
         title=title,
         task_id=task_id,
-        scenario="conflict_fixture" if scenario == "conflict" else "read_only",
+        scenario=(
+            "conflict_fixture"
+            if scenario == "conflict"
+            else "workspace_write" if scenario == "workspace-write" else "read_only"
+        ),
         stack_lock_digest=stack_lock_digest,
         lock_payload=lock_payload,
         worker_id=worker_id,
@@ -693,12 +753,18 @@ def main(argv: list[str] | None = None) -> int:
         persist_manifest()
         emit_session_state_observation()
 
+        if scenario == "workspace-write":
+            session_workspace_root.mkdir(parents=True, exist_ok=True)
+
         capability_profile = build_capability_profile(execution_tool)
         write_json(capability_path, capability_profile)
         manifest["refs"]["capability_profile_ref"] = atlas_relative(capability_path, root=ROOT)
 
         request = build_privileged_action_request(
             request_id=request_id,
+            session_id=session_id,
+            task_id=task_id,
+            scenario=scenario,
             worker_id=worker_id,
             assignment_id=assignment_id,
             stack_lock_digest=stack_lock_digest,

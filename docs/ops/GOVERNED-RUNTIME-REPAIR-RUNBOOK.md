@@ -24,6 +24,23 @@ It repairs only artifacts that can be regenerated truthfully from root-owned can
 - Immutable evidence that cannot be rebuilt truthfully must remain visible and failing until replay replaces it.
 - Do not hand-patch JSON when a canonical builder already exists.
 
+## Remediation Matrix
+
+| Validator bucket | Treatment | Rule |
+| --- | --- | --- |
+| `execution-receipt-repair-invalid` | repair through canonical builders | use canonical rebuilders or truthful Lifeline receipt supersession; do not hand-edit historical receipts |
+| `mutable-state-warnings` | classify as retained residue / historical debt | keep residue visible and separate from current governed truth |
+| `repo-local-config-gaps` | move into the debt ledger as inherited debt | keep explicit until the repo path or contract is intentionally closed |
+| `path-discipline-leaks` | move into the debt ledger as inherited debt | burn down by repo slice without reopening healthy governed surfaces |
+| `retained-runtime-residue` | classify as retained residue / historical debt | preserve history, prefer the canonical current artifact, and never silently rewrite old evidence |
+
+## Repair, Supersede, Or Classify
+
+- Repair when the artifact is derived runtime state and the current governed stack can rebuild it truthfully from canonical inputs.
+- Supersede when the original receipt is immutable evidence but the current stack can prove the same outcome under the current registry digest.
+- Classify as retained residue when the old artifact is historical, audit-relevant, or no longer the canonical current artifact.
+- Move to the debt ledger when the finding is inherited stack debt rather than a live governed-path defect.
+
 ## Repair Vs Replay
 
 - Repair is allowed only when the original execution outcome can be proven from existing governed evidence.

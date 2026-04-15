@@ -10,7 +10,7 @@ components:
     remote: null
     ref_type: "branch"
     ref: "main"
-    commit: "851fc997581a035dd5d0a04c0bd8c608aede6b0f"
+    commit: "aca112a95acea7107ccd3352a54157db50604d4d"
     dirty: true
     trust_class: "trusted"
     release_eligible: false
@@ -32,8 +32,8 @@ components:
     remote: "https://github.com/ZachariahRedfield/FawxzzyFitness.git"
     ref_type: "branch"
     ref: "main"
-    commit: "86d241b5abe96a5e8990911680b615bf2c6a002d"
-    dirty: true
+    commit: "66820abb0a2f1ce54283dda477d6b2d1298a4a39"
+    dirty: false
     trust_class: "trusted"
     release_eligible: true
   lifeline:
@@ -54,7 +54,7 @@ components:
     remote: "https://github.com/ZachariahRedfield/fawxzzy-mazer.git"
     ref_type: "branch"
     ref: "codex/mazer-d2-learning-scorer"
-    commit: "14030d60edeb95de308e61b3c68050c1c2f342f3"
+    commit: "d312e5c86869fb99b3d352b92690de39f0894f96"
     dirty: true
     trust_class: "trusted"
     release_eligible: true
@@ -98,7 +98,7 @@ components:
     remote: null
     ref_type: "branch"
     ref: "master"
-    commit: "2b5057eef043342eac031e5226e23da60b8f9b8a"
+    commit: "c2e138b014b0df24dc38afc8969d890d00a3e658"
     dirty: true
     trust_class: "trusted"
     release_eligible: false
@@ -109,8 +109,8 @@ components:
     remote: null
     ref_type: "branch"
     ref: "codex/fstrm-wave2-contract-freeze"
-    commit: "e5e3a89e436b24fe12fb4b6927b70d8915a8fcbe"
-    dirty: true
+    commit: "3def5649d92d73ac8d35c788d3b95dde0d49a22d"
+    dirty: false
     trust_class: "trusted"
     release_eligible: false
 excluded_surfaces:
@@ -126,4 +126,4 @@ excluded_surfaces:
     trust_class: "untrusted"
     release_eligible: false
     reason: "Token-bearing Verta checkout remains quarantined and untrusted until scrub and rotation are complete."
-lock_digest: "sha256:e6c4b73d11b2bb2e08c162c24d69170625a98a5c1abcc34b2204abb6476bb59e"
+lock_digest: "sha256:eefc08e120eda675cf80270dc58380ac230a552f6c0cc4b5014f40c4b1d84217"

@@ -155,6 +155,17 @@ Current status output exposes this through:
 
 Residue is retention-friendly. It is not deleted automatically, but it is not allowed to confuse current-state reads.
 
+## Governed Write View
+
+Status now exposes the first bounded truthful write class separately from generic execution receipts.
+
+Current output includes:
+
+- `governed_writes`
+- `execution_receipt_residue`
+
+`governed_writes` shows only canonical current `workspace_file_apply` receipts. Retained residue stays visible, but it does not compete as current truth.
+
 ## Trust Surface Rule
 
 Knowledge status output is metadata-only for quarantined surfaces. The status view must never hydrate raw Verta evidence or derived promotion text for those surfaces.

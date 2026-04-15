@@ -321,6 +321,41 @@ def normalize_tool_entry(value: Any, *, extension_ids: set[str], index: int) -> 
             raise ValueError(f"tool_entry[{index}] execution tools must declare request and receipt contracts.")
         if normalized["invocation"]["action_operation"] is None or normalized["invocation"]["execution_mode"] is None:
             raise ValueError(f"tool_entry[{index}] execution tools must declare action_operation and execution_mode.")
+    if normalized["invocation"]["execution_mode"] == "workspace_file_apply":
+        filesystem_scopes = normalized["capability_profile"]["filesystem_scopes"]
+        process_permissions = normalized["capability_profile"]["process_execution_permissions"]
+        package_permissions = normalized["capability_profile"]["package_manager_permissions"]
+        if normalized["invocation"]["action_operation"] != "scoped_write":
+            raise ValueError(
+                f"tool_entry[{index}] workspace_file_apply tools must use invocation.action_operation 'scoped_write'."
+            )
+        if normalized["max_automation_level"] != "approved_action":
+            raise ValueError(
+                f"tool_entry[{index}] workspace_file_apply tools must cap at max_automation_level 'approved_action'."
+            )
+        if not normalized["approval"]["required"] or not normalized["approval"]["granted_scope_required"]:
+            raise ValueError(
+                f"tool_entry[{index}] workspace_file_apply tools must require approval and granted_scope."
+            )
+        required_scope_prefix = "runtime/atlas/session-workspaces/**"
+        for scope_name in ["write", "create"]:
+            scopes = filesystem_scopes.get(scope_name, [])
+            if required_scope_prefix not in scopes:
+                raise ValueError(
+                    f"tool_entry[{index}] workspace_file_apply tools must include '{required_scope_prefix}' in filesystem_scopes.{scope_name}."
+                )
+        if process_permissions.get("allow_spawn") or process_permissions.get("allow_shell") or process_permissions.get("allow_python"):
+            raise ValueError(
+                f"tool_entry[{index}] workspace_file_apply tools may not allow process execution."
+            )
+        if process_permissions.get("allowed_commands"):
+            raise ValueError(
+                f"tool_entry[{index}] workspace_file_apply tools may not declare allowed process commands."
+            )
+        if package_permissions.get("allow_install") or package_permissions.get("allow_update"):
+            raise ValueError(
+                f"tool_entry[{index}] workspace_file_apply tools may not allow package manager mutation."
+            )
     return normalized
 
 

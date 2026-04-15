@@ -81,12 +81,20 @@ Debt tracking docs:
 
 - `docs/audits/STACK-DEBT-LEDGER.md`
 - `docs/backlog/STACK-DEBT-BURNDOWN.md`
+- `runtime/receipts/validation/stack-validation.latest.json#remediation_buckets`
 
 Ratchet rule:
 
 - inherited blocking findings stay visible by debt class
 - only new blocking findings fail a healthy ratchet run
 - governed-surface regressions are not debt and should not be normalized away
+
+Remediation rule:
+
+- repair current governed runtime defects through canonical builders
+- supersede immutable execution receipts instead of rewriting them
+- classify retained residue explicitly
+- move inherited repo debt into the debt ledger instead of broadening validator suppressions
 
 Knowledge-lane validation:
 

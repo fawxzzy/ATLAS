@@ -125,6 +125,10 @@ def action_summary(value: dict[str, Any] | None) -> dict[str, Any]:
     command = ordered_strings(value.get("command", [])) if isinstance(value.get("command"), list) else []
     if command:
         result["command"] = command
+    if "target_path" not in result:
+        write_target = value.get("write_target")
+        if isinstance(write_target, str) and write_target.strip():
+            result["target_path"] = write_target.strip()
     return result
 
 

@@ -793,6 +793,100 @@
     },
     {
       "contract_version": "atlas.tool.catalog.entry.v1",
+      "tool_id": "workspace_file_apply",
+      "display_name": "Workspace File Apply",
+      "description": "Governed bounded file write inside a declared ATLAS session workspace through Lifeline.",
+      "surface_kind": "builtin",
+      "status": "active",
+      "owner": "stack-root",
+      "extension_id": null,
+      "trust_class": "trusted",
+      "release_eligible": true,
+      "max_automation_level": "approved_action",
+      "executor": {
+        "component_id": "lifeline",
+        "entrypoint": "lifeline execute",
+        "mode": "runtime"
+      },
+      "contracts": {
+        "request": "atlas.privileged-action.request.v1",
+        "receipt": "atlas.privileged-action.receipt.v1"
+      },
+      "invocation": {
+        "kind": "execution",
+        "action_operation": "scoped_write",
+        "execution_mode": "workspace_file_apply"
+      },
+      "capability_profile": {
+        "contract_version": "atlas.capability.profile.v1",
+        "capability_profile_id": "cap-atlas-workspace-file-apply-v1",
+        "description": "ATLAS bounded workspace file apply capability profile.",
+        "filesystem_scopes": {
+          "read": [
+            "runtime/atlas/session-workspaces/**"
+          ],
+          "write": [
+            "runtime/atlas/session-workspaces/**"
+          ],
+          "create": [
+            "runtime/atlas/session-workspaces/**"
+          ],
+          "deny": [
+            "secrets/**",
+            "repos/Verta-Core/**"
+          ]
+        },
+        "network_scopes": {
+          "mode": "none",
+          "allowed_domains": [],
+          "blocked_domains": []
+        },
+        "process_execution_permissions": {
+          "allow_spawn": false,
+          "allow_shell": false,
+          "allow_python": false,
+          "allowed_commands": [],
+          "denied_commands": [
+            "powershell",
+            "cmd",
+            "git",
+            "node",
+            "python"
+          ]
+        },
+        "package_manager_permissions": {
+          "allow_install": false,
+          "allow_update": false,
+          "allowed_managers": [],
+          "blocked_managers": [
+            "npm",
+            "pnpm",
+            "yarn"
+          ]
+        },
+        "elevation_requirement": "per_action_approval",
+        "resource_budgets": {
+          "wall_clock_seconds": 120,
+          "cpu_seconds": 30,
+          "memory_mb": 256,
+          "disk_mb": 50
+        },
+        "allowed_data_classes": [
+          "public",
+          "internal",
+          "machine_state"
+        ],
+        "audit_class": "standard"
+      },
+      "approval": {
+        "required": true,
+        "approver_kind": "system",
+        "required_status": "approved",
+        "granted_scope_required": true
+      }
+    },
+    {
+      "contract_version": "atlas.tool.catalog.entry.v1",
       "tool_id": "scoped_write.dry_run",
       "display_name": "Scoped Write Dry Run",
       "description": "Governed scoped-write dry-run command surface through Lifeline.",

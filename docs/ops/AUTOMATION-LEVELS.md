@@ -47,6 +47,7 @@ Allowed examples:
 - approval receipts
 - Lifeline execution receipts
 - bounded write classes that explicitly require approval
+- `workspace_file_apply` inside a declared session-owned workspace root
 
 ## Enforcement
 
@@ -114,3 +115,20 @@ Governed observations and receipts should also carry automation level so later a
 - asked
 - approved
 - executed
+
+## First Write Class
+
+The first truthful machine write class is deliberately narrow:
+
+- one bounded file write/apply
+- inside `runtime/atlas/session-workspaces/<session_id>/`
+- approval-gated at `approved_action`
+- rollback-aware through prior hash or backup ref when available
+
+Still out of scope:
+
+- package installs
+- service installs
+- OS-wide mutation
+- arbitrary shell writes
+- admin-wide mutation

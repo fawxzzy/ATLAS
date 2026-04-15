@@ -22,6 +22,7 @@ Current lane posture:
 - spoken notifications only
 - no ambient hotword
 - no bypass around governed request or approval artifacts
+- no broader machine mutation than the bounded workspace write class
 
 ## Supported Intents
 
@@ -43,6 +44,17 @@ These query the Awareness API read model and speak back concise summaries.
 ### Read-only scan
 
 This creates a governed root session via `ops/atlas/run_session.py` and returns the session id.
+
+### Bounded workspace write
+
+When voice eventually requests the first truthful write class, it must still route through the same governed session and approval chain.
+
+The write remains limited to:
+
+- one bounded file apply
+- inside the declared session workspace root
+- receipt-backed with rollback metadata where available
+- visible through root status and awareness
 
 ### Resume paused session
 

@@ -31,6 +31,16 @@ Current ratchet state from the latest root run:
 | `missing-agents-codex-defaults` | 0 | 0 | stack root + repo owner | should stay zero | keep repo-local `AGENTS.md` and `.codex/config.toml` present where policy expects them |
 | `governed-surface-contracts` | 0 | 0 | stack root, `_stack`, Lifeline, Cortex | must stay zero | never trade core governed correctness for debt cleanup progress |
 
+## Remediation Matrix
+
+| Bucket | Treatment | Current intent |
+| --- | --- | --- |
+| `execution-receipt-repair-invalid` | repair through canonical builders | fix with root reconcile or Lifeline truthful supersession and keep current governed failures red until repaired |
+| `mutable-state-warnings` | classify as retained residue / historical debt | keep visible, move only when it improves operations, and never present residue as fresh truth |
+| `repo-local-config-gaps` | move into the debt ledger as inherited debt | explicit legacy debt until repo mapping is repaired, archived, or removed |
+| `path-discipline-leaks` | move into the debt ledger as inherited debt | close by repo slice without turning validation into blanket suppression |
+| `retained-runtime-residue` | classify as retained residue / historical debt | keep residue queryable while status and world model prefer canonical current artifacts only |
+
 ## Named Findings
 
 ### Repo-local config gaps
@@ -80,6 +90,13 @@ Closure options:
 2. add it to an explicit exclusion list if it stays adjacent
 3. remove the checkout if it is not part of the stack
 
+## Current Runtime Rule
+
+- ATLAS current-state reads ignore retained runtime residue unless that artifact is the canonical current artifact.
+- History may be incomplete, but it may not be invisible.
+- New governed artifacts fail closed.
+- Old artifacts get classified, superseded, or ledgered. They do not get silently “fixed.”
+
 ## Completed Low-Risk Closures In This Baseline
 
 - added missing repo-local `AGENTS.md` where policy expected it
@@ -103,4 +120,3 @@ Operator rule:
 - if a finding is old and unavoidable today, classify it
 - if a finding is new, remove it or intentionally baseline it with review
 - never hide inherited debt by broad report suppression
-
