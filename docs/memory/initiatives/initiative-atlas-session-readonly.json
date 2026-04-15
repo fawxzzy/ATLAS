@@ -6,7 +6,15 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-04-14T05:11:24.816774Z",
-  "updated_at": "2026-04-14T08:08:44.601892Z",
+  "updated_at": "2026-04-15T04:20:00Z",
+  "related_plan_refs": [
+    "docs/memory/plans/wave-8b-awareness-closure.json",
+    "docs/memory/plans/wave-9-operator-productization-and-debt-burndown.json"
+  ],
+  "related_decision_refs": [
+    "docs/memory/decisions/awareness-first-clients.json"
+  ],
+  "related_hypothesis_refs": [],
   "related_session_refs": [
     "runtime/atlas/sessions/session-atlas-session-readonly-20260414T051124Z/session.manifest.json",
     "runtime/atlas/sessions/session-atlas-session-readonly-20260414T051300Z/session.manifest.json",
@@ -14,21 +22,21 @@
     "runtime/atlas/sessions/session-atlas-session-readonly-20260414T051626Z/session.manifest.json",
     "runtime/atlas/sessions/session-atlas-session-readonly-20260414T080843Z/session.manifest.json"
   ],
-  "related_artifact_refs": [
-    "runtime/lifeline/worker-execution/session-atlas-session-readonly-20260414T051531Z-assignment/receipt-session-atlas-session-readonly-20260414T051531Z-request-1776143733325.json",
-    "runtime/lifeline/worker-execution/session-atlas-session-readonly-20260414T051626Z-assignment/receipt-session-atlas-session-readonly-20260414T051626Z-request-1776143787672.json",
-    "runtime/lifeline/worker-execution/session-atlas-session-readonly-20260414T080843Z-assignment/receipt-session-atlas-session-readonly-20260414T080843Z-request-1776154124391.json"
-  ],
+  "related_attention_refs": [],
   "evidence_refs": [
+    "docs/memory/decisions/awareness-first-clients.json",
+    "docs/memory/plans/wave-8b-awareness-closure.json",
+    "docs/memory/plans/wave-9-operator-productization-and-debt-burndown.json",
     "runtime/atlas/sessions/session-atlas-session-readonly-20260414T080843Z/session.manifest.json",
     "runtime/lifeline/worker-execution/session-atlas-session-readonly-20260414T051531Z-assignment/receipt-session-atlas-session-readonly-20260414T051531Z-request-1776143733325.json",
     "runtime/lifeline/worker-execution/session-atlas-session-readonly-20260414T051626Z-assignment/receipt-session-atlas-session-readonly-20260414T051626Z-request-1776143787672.json",
     "runtime/lifeline/worker-execution/session-atlas-session-readonly-20260414T080843Z-assignment/receipt-session-atlas-session-readonly-20260414T080843Z-request-1776154124391.json"
   ],
+  "proposed_next_session_refs": [],
   "supersedes": [],
   "superseded_by": [],
   "metadata": {
-    "authoring_source": "session-cluster",
+    "authoring_source": "initiative-contract-upgrade",
     "task_id": "atlas-session-readonly",
     "session_count": 5,
     "status_counts": {

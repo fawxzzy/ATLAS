@@ -12,6 +12,10 @@ ATLAS should aim for this stricter invariant:
 
 **Not everything knows everything. Nothing meaningful stays dark.**
 
+The next extension of that invariant is:
+
+**Nothing meaningful stays unowned.**
+
 **No dark state:** any state that can change behavior must be represented as at least one of:
 
 - a registered surface
@@ -53,7 +57,7 @@ ATLAS already has most of the substrate required for awareness-first behavior:
 
 The global index layer is therefore partially implemented already as registry + descriptors + observations + snapshot + attention + working memory + Awareness API.
 
-That means the main missing layer is no longer basic awareness. The next gap is initiative management, durable extension lifecycle, and governed action progression on top of the current awareness substrate.
+That means the main missing layer is no longer basic awareness. The next gap is initiative management above sessions, durable proposal and portfolio handling, durable extension lifecycle, and governed action progression on top of the current awareness substrate.
 
 ## Operating Loop
 
@@ -86,6 +90,8 @@ Initiatives therefore belong above sessions, not beside them:
 - proposed sessions are advisory `request_action` outputs, not autonomous execution
 - execution still flows through the governed session path
 - memory refinement updates working memory and read models from explicit evidence
+
+If attention persists over time, it should become an initiative or be explicitly dismissed.
 
 ## Memory Contract
 

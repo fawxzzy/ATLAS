@@ -13,7 +13,7 @@ from ops._atlas import atlas_relative, atlas_root, resolve_atlas_path
 from ops.atlas.backfill_legacy_runtime_artifacts import backfill_legacy_runtime_artifacts
 from ops.atlas.load_tool_registry import load_tool_registry_bundle
 from ops.cortex._artifacts import load_descriptors, read_json, register_artifact_descriptors, write_json
-from ops.cortex.index_working_memory import load_working_memory_catalog
+from ops.cortex.index_working_memory import WORKING_MEMORY_OUTPUT, load_working_memory_catalog
 from ops.cortex.render_status import render_status_payload
 from ops.cortex.world_model import (
     attention_output_path,
@@ -218,6 +218,94 @@ def _knowledge_search(query: str, *, limit: int, root: Path, refresh: bool) -> l
     return results[:limit]
 
 
+def _load_working_memory(*, root: Path, refresh: bool) -> dict[str, Any]:
+    catalog_path = (root / WORKING_MEMORY_OUTPUT).resolve()
+    if refresh or not catalog_path.exists():
+        ensure_world_model(root=root, refresh=refresh)
+    return load_working_memory_catalog(root)
+
+
+def _memory_source_kind(item: dict[str, Any]) -> str:
+    memory_kind = str(item.get("memory_kind", "")).strip()
+    return memory_kind if memory_kind == "initiative" else "memory"
+
+
+def _memory_identifier(item: dict[str, Any]) -> str:
+    memory_id = str(item.get("id", "")).strip()
+    source_kind = _memory_source_kind(item)
+    return f"{source_kind}:{memory_id}"
+
+
+def _memory_metadata(item: dict[str, Any]) -> dict[str, Any]:
+    metadata = {
+        "source_kind": _memory_source_kind(item),
+        "memory_kind": item.get("memory_kind"),
+        "status": item.get("status"),
+        "owner": item.get("owner"),
+        "path": item.get("path"),
+    }
+    for field in (
+        "related_plan_refs",
+        "related_decision_refs",
+        "related_hypothesis_refs",
+        "related_session_refs",
+        "related_attention_refs",
+        "related_artifact_refs",
+        "evidence_refs",
+        "proposed_next_session_refs",
+        "supersedes",
+        "superseded_by",
+    ):
+        if field in item:
+            metadata[field] = item.get(field, [])
+    return metadata
+
+
+def _working_memory_search_haystacks(item: dict[str, Any]) -> list[str]:
+    haystacks = [
+        str(item.get("id", "")),
+        str(item.get("title", "")),
+        str(item.get("summary", "")),
+        str(item.get("status", "")),
+        str(item.get("owner", "")),
+        str(item.get("memory_kind", "")),
+        str(item.get("path", "")),
+        _json_text(item.get("metadata", {})),
+    ]
+    for key, value in item.items():
+        if not isinstance(key, str) or not key.endswith("_refs"):
+            continue
+        if isinstance(value, list):
+            haystacks.append(" ".join(str(entry) for entry in value))
+    return haystacks
+
+
+def _working_memory_search(query: str, *, limit: int, root: Path, refresh: bool) -> list[dict[str, Any]]:
+    catalog = _load_working_memory(root=root, refresh=refresh)
+    results: list[dict[str, Any]] = []
+    for item in catalog.get("items", []):
+        if not isinstance(item, dict):
+            continue
+        score = _score_text(query, *_working_memory_search_haystacks(item))
+        if score <= 0:
+            continue
+        memory_id = str(item.get("id", "")).strip()
+        if not memory_id:
+            continue
+        results.append(
+            {
+                "id": _memory_identifier(item),
+                "title": str(item.get("title") or memory_id),
+                "url": _artifact_url(_memory_source_kind(item), memory_id),
+                "text": _trimmed_text(str(item.get("summary") or item.get("title") or memory_id)),
+                "metadata": _memory_metadata(item),
+                "_score": score,
+            }
+        )
+    results.sort(key=lambda item: (-int(item["_score"]), str(item["title"]), str(item["id"])))
+    return results[:limit]
+
+
 def atlas_status(*, root: Path | None = None, refresh: bool = False) -> dict[str, Any]:
     base_root = (root or atlas_root()).resolve()
     snapshot = _load_snapshot(root=base_root, refresh=refresh)
@@ -239,6 +327,7 @@ def atlas_status(*, root: Path | None = None, refresh: bool = False) -> dict[str
             "summary": attention.get("summary"),
         },
         "working_memory": status.get("working_memory"),
+        "initiatives": status.get("initiatives"),
         "governed_writes": status.get("governed_writes"),
         "digests": {
             "registry_digest": status.get("registry", {}).get("registry_digest")
@@ -418,9 +507,10 @@ def fetch_memory(
     memory_id: str,
     *,
     root: Path | None = None,
+    refresh: bool = False,
 ) -> dict[str, Any]:
     base_root = (root or atlas_root()).resolve()
-    catalog = load_working_memory_catalog(base_root)
+    catalog = _load_working_memory(root=base_root, refresh=refresh)
     item = next(
         (
             candidate
@@ -432,19 +522,14 @@ def fetch_memory(
     if item is None:
         raise FileNotFoundError(f"Unknown working-memory id: {memory_id}")
     artifact = fetch_artifact(str(item.get("path")), root=base_root)
+    source_kind = _memory_source_kind(item)
     return {
         "schema_version": FETCH_CONTRACT_VERSION,
-        "id": f"memory:{memory_id}",
+        "id": f"{source_kind}:{memory_id}",
         "title": str(item.get("title") or memory_id),
-        "url": _artifact_url("memory", memory_id),
+        "url": _artifact_url(source_kind, memory_id),
         "text": artifact["text"],
-        "metadata": {
-            "source_kind": "memory",
-            "memory_kind": item.get("memory_kind"),
-            "status": item.get("status"),
-            "owner": item.get("owner"),
-            "path": item.get("path"),
-        },
+        "metadata": _memory_metadata(item),
     }
 
 
@@ -500,15 +585,21 @@ def search(
         if score <= 0:
             continue
         entry_type = str(entry.get("entry_type", "artifact"))
+        details = entry.get("details", {}) if isinstance(entry.get("details"), dict) else {}
         if entry_type == "session":
             result_id = f"session:{entry.get('key')}"
             url = _artifact_url("session", str(entry.get("key")))
         elif entry_type == "memory":
-            result_id = f"memory:{entry.get('key')}"
-            url = _artifact_url("memory", str(entry.get("key")))
+            if str(details.get("memory_kind", "")) == "initiative":
+                result_id = f"initiative:{entry.get('key')}"
+                url = _artifact_url("initiative", str(entry.get("key")))
+            else:
+                result_id = f"memory:{entry.get('key')}"
+                url = _artifact_url("memory", str(entry.get("key")))
         else:
             result_id = f"artifact:{entry.get('source_ref')}"
             url = _artifact_url("artifact", str(entry.get("source_ref")))
+        source_kind = "initiative" if entry_type == "memory" and str(details.get("memory_kind", "")) == "initiative" else entry_type
         results.append(
             {
                 "id": result_id,
@@ -518,12 +609,13 @@ def search(
                     f"{entry_type} {entry.get('status')} {entry.get('source_ref')} {_json_text(entry.get('details', {}))}"
                 ),
                 "metadata": {
-                    "source_kind": entry_type,
+                    "source_kind": source_kind,
                     "key": entry.get("key"),
                     "trust_class": entry.get("trust_class"),
                     "status": entry.get("status"),
-                    "automation_level": entry.get("details", {}).get("automation_level") if isinstance(entry.get("details"), dict) else None,
-                    "max_automation_level": entry.get("details", {}).get("max_automation_level") if isinstance(entry.get("details"), dict) else None,
+                    "memory_kind": details.get("memory_kind"),
+                    "automation_level": details.get("automation_level"),
+                    "max_automation_level": details.get("max_automation_level"),
                 },
                 "_score": score,
             }
@@ -550,6 +642,7 @@ def search(
             }
         )
 
+    results.extend(_working_memory_search(query, limit=max(limit, 1), root=base_root, refresh=refresh))
     results.extend(_knowledge_search(query, limit=max(limit, 1), root=base_root, refresh=refresh))
     deduped: dict[str, dict[str, Any]] = {}
     for item in results:
@@ -657,7 +750,11 @@ def fetch(
 
     if identifier.startswith("memory:"):
         memory_id = identifier.split(":", 1)[1]
-        return fetch_memory(memory_id, root=base_root)
+        return fetch_memory(memory_id, root=base_root, refresh=refresh)
+
+    if identifier.startswith("initiative:"):
+        initiative_id = identifier.split(":", 1)[1]
+        return fetch_memory(initiative_id, root=base_root, refresh=refresh)
 
     if identifier.startswith("artifact:"):
         ref = identifier.split(":", 1)[1]

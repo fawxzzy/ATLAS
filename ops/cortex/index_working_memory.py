@@ -17,29 +17,59 @@ from ops.cortex._artifacts import stable_json_digest, write_json
 
 WORKING_MEMORY_CATALOG_VERSION = "atlas.working-memory.catalog.v1"
 WORKING_MEMORY_OUTPUT = Path("runtime/cortex/catalog/memory/working-memory.latest.json")
-MEMORY_ARRAY_FIELDS = (
-    "related_session_refs",
-    "related_artifact_refs",
+BASE_REQUIRED_TEXT_FIELDS = (
+    "id",
+    "title",
+    "status",
+    "owner",
+    "created_at",
+    "updated_at",
+)
+COMMON_ARRAY_FIELDS = (
     "evidence_refs",
     "supersedes",
     "superseded_by",
+)
+STANDARD_RELATION_ARRAY_FIELDS = (
+    "related_session_refs",
+    "related_artifact_refs",
+)
+INITIATIVE_RELATION_ARRAY_FIELDS = (
+    "related_plan_refs",
+    "related_decision_refs",
+    "related_hypothesis_refs",
+    "related_session_refs",
+    "related_attention_refs",
+    "proposed_next_session_refs",
 )
 MEMORY_KIND_CONFIG = {
     "plan": {
         "contract_version": "atlas.plan.v1",
         "directory": Path("docs/memory/plans"),
+        "required_text_fields": (*BASE_REQUIRED_TEXT_FIELDS, "summary"),
+        "optional_text_fields": (),
+        "array_fields": (*STANDARD_RELATION_ARRAY_FIELDS, *COMMON_ARRAY_FIELDS),
     },
     "decision": {
         "contract_version": "atlas.decision.v1",
         "directory": Path("docs/memory/decisions"),
+        "required_text_fields": (*BASE_REQUIRED_TEXT_FIELDS, "summary"),
+        "optional_text_fields": (),
+        "array_fields": (*STANDARD_RELATION_ARRAY_FIELDS, *COMMON_ARRAY_FIELDS),
     },
     "initiative": {
         "contract_version": "atlas.initiative.v1",
         "directory": Path("docs/memory/initiatives"),
+        "required_text_fields": BASE_REQUIRED_TEXT_FIELDS,
+        "optional_text_fields": ("summary",),
+        "array_fields": (*INITIATIVE_RELATION_ARRAY_FIELDS, *COMMON_ARRAY_FIELDS),
     },
     "hypothesis": {
         "contract_version": "atlas.hypothesis.v1",
         "directory": Path("docs/memory/hypotheses"),
+        "required_text_fields": (*BASE_REQUIRED_TEXT_FIELDS, "summary"),
+        "optional_text_fields": (),
+        "array_fields": (*STANDARD_RELATION_ARRAY_FIELDS, *COMMON_ARRAY_FIELDS),
     },
 }
 
@@ -59,8 +89,18 @@ def as_string(value: Any, *, field: str, relative_path: str) -> str:
     return value.strip()
 
 
-def as_string_list(value: Any, *, field: str, relative_path: str) -> list[str]:
+def as_optional_string(value: Any, *, field: str, relative_path: str) -> str | None:
     if value is None:
+        return None
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"{relative_path}: field '{field}' must be a non-empty string when provided.")
+    return value.strip()
+
+
+def as_string_list(value: Any, *, field: str, relative_path: str, required: bool = False) -> list[str]:
+    if value is None:
+        if required:
+            raise ValueError(f"{relative_path}: field '{field}' is required.")
         return []
     if not isinstance(value, list) or any(not isinstance(item, str) or not item.strip() for item in value):
         raise ValueError(f"{relative_path}: field '{field}' must be an array of non-empty strings.")
@@ -131,13 +171,25 @@ def normalize_working_memory_document(
         raise ValueError(
             f"{relative_path}: contract_version must be '{contract_version}'."
         )
+    config = MEMORY_KIND_CONFIG[memory_kind]
+    allowed_fields = {
+        "contract_version",
+        *config["required_text_fields"],
+        *config["optional_text_fields"],
+        *config["array_fields"],
+        "metadata",
+    }
+    unexpected_fields = sorted(set(payload) - allowed_fields)
+    if unexpected_fields:
+        raise ValueError(
+            f"{relative_path}: unsupported fields for {memory_kind} artifact: {', '.join(unexpected_fields)}."
+        )
 
     normalized = {
         "contract_version": contract_version,
         "memory_kind": memory_kind,
         "id": as_string(payload.get("id"), field="id", relative_path=relative_path),
         "title": as_string(payload.get("title"), field="title", relative_path=relative_path),
-        "summary": as_string(payload.get("summary"), field="summary", relative_path=relative_path),
         "status": as_string(payload.get("status"), field="status", relative_path=relative_path),
         "owner": as_string(payload.get("owner"), field="owner", relative_path=relative_path),
         "created_at": parse_iso_timestamp(
@@ -152,32 +204,29 @@ def normalize_working_memory_document(
         ),
         "path": relative_path,
     }
-    for field in MEMORY_ARRAY_FIELDS:
-        normalized[field] = as_string_list(payload.get(field), field=field, relative_path=relative_path)
+    if "summary" in config["required_text_fields"]:
+        normalized["summary"] = as_string(payload.get("summary"), field="summary", relative_path=relative_path)
+    else:
+        summary = as_optional_string(payload.get("summary"), field="summary", relative_path=relative_path)
+        normalized["summary"] = summary or ""
+    for field in config["array_fields"]:
+        normalized[field] = as_string_list(
+            payload.get(field),
+            field=field,
+            relative_path=relative_path,
+            required=True,
+        )
 
     metadata = payload.get("metadata", {})
     if metadata is not None and not isinstance(metadata, dict):
         raise ValueError(f"{relative_path}: field 'metadata' must be an object when provided.")
     normalized["metadata"] = metadata or {}
-    normalized["content_digest"] = stable_json_digest(
-        {
-            "contract_version": normalized["contract_version"],
-            "memory_kind": normalized["memory_kind"],
-            "id": normalized["id"],
-            "title": normalized["title"],
-            "summary": normalized["summary"],
-            "status": normalized["status"],
-            "owner": normalized["owner"],
-            "created_at": normalized["created_at"],
-            "updated_at": normalized["updated_at"],
-            "related_session_refs": normalized["related_session_refs"],
-            "related_artifact_refs": normalized["related_artifact_refs"],
-            "evidence_refs": normalized["evidence_refs"],
-            "supersedes": normalized["supersedes"],
-            "superseded_by": normalized["superseded_by"],
-            "metadata": normalized["metadata"],
-        }
-    )
+    digest_body = {
+        key: value
+        for key, value in normalized.items()
+        if key not in {"path", "content_digest"}
+    }
+    normalized["content_digest"] = stable_json_digest(digest_body)
     return normalized
 
 

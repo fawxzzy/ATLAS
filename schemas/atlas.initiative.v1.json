@@ -8,14 +8,17 @@
     "contract_version",
     "id",
     "title",
-    "summary",
     "status",
     "owner",
     "created_at",
     "updated_at",
+    "related_plan_refs",
+    "related_decision_refs",
+    "related_hypothesis_refs",
     "related_session_refs",
-    "related_artifact_refs",
+    "related_attention_refs",
     "evidence_refs",
+    "proposed_next_session_refs",
     "supersedes",
     "superseded_by"
   ],
@@ -52,15 +55,31 @@
       "type": "string",
       "format": "date-time"
     },
+    "related_plan_refs": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "related_decision_refs": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "related_hypothesis_refs": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
     "related_session_refs": {
       "type": "array",
       "items": { "type": "string", "minLength": 1 }
     },
-    "related_artifact_refs": {
+    "related_attention_refs": {
       "type": "array",
       "items": { "type": "string", "minLength": 1 }
     },
     "evidence_refs": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "proposed_next_session_refs": {
       "type": "array",
       "items": { "type": "string", "minLength": 1 }
     },

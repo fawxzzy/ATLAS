@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+from collections import Counter
 import json
 import sys
 from datetime import datetime
@@ -744,9 +745,47 @@ def world_model_state() -> dict[str, Any]:
     return result
 
 
+def initiative_summary(items: list[dict[str, Any]]) -> dict[str, Any]:
+    initiatives = [
+        item
+        for item in items
+        if isinstance(item, dict) and str(item.get("memory_kind", "")) == "initiative"
+    ]
+    status_counts = Counter(str(item.get("status", "unknown")) for item in initiatives)
+    active_items = sorted(
+        [
+            item
+            for item in initiatives
+            if str(item.get("status", "")).strip() == "active"
+        ],
+        key=lambda item: (
+            parse_timestamp(item.get("updated_at"))[0],
+            str(item.get("id", "")),
+        ),
+        reverse=True,
+    )
+    return {
+        "item_count": len(initiatives),
+        "status_counts": dict(sorted(status_counts.items())),
+        "active_items": [
+            {
+                "id": item.get("id"),
+                "title": item.get("title"),
+                "status": item.get("status"),
+                "updated_at": item.get("updated_at"),
+                "related_session_refs": item.get("related_session_refs", []),
+                "related_attention_refs": item.get("related_attention_refs", []),
+                "proposed_next_session_refs": item.get("proposed_next_session_refs", []),
+            }
+            for item in active_items[:5]
+        ],
+    }
+
+
 def working_memory_summary() -> dict[str, Any]:
     catalog = load_working_memory_catalog(atlas_root())
     items = catalog.get("items", []) if isinstance(catalog.get("items"), list) else []
+    initiatives = initiative_summary(items)
     recent_items = sorted(
         [
             item
@@ -765,6 +804,7 @@ def working_memory_summary() -> dict[str, Any]:
         "item_count": catalog.get("item_count", 0),
         "kind_counts": catalog.get("kind_counts", {}),
         "status_counts": catalog.get("status_counts", {}),
+        "initiatives": initiatives,
         "recent_items": [
             {
                 "id": item.get("id"),
@@ -857,6 +897,7 @@ def render_status_payload(
     governed_writes_payload = governed_writes(descriptors)
     legacy_compatibility_payload = legacy_compatibility_surfaces(descriptors)
     trust_surfaces_payload = trust_surfaces(descriptors)
+    working_memory = working_memory_summary()
 
     return {
         "schema_version": STATUS_VERSION,
@@ -872,7 +913,8 @@ def render_status_payload(
         "closure_receipts": closure_receipts_payload,
         "legacy_compatibility": legacy_compatibility_payload,
         "trust_surfaces": trust_surfaces_payload,
-        "working_memory": working_memory_summary(),
+        "working_memory": working_memory,
+        "initiatives": working_memory.get("initiatives"),
         "attention_queue": attention_queue(
             active_session=active_session,
             blocked_workers_payload=blocked_workers_payload,

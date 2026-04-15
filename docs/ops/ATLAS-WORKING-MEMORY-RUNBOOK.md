@@ -26,28 +26,41 @@ Each artifact is a JSON document validated against its matching schema in `schem
 
 ## Required Fields
 
-Every working-memory artifact must include:
+All working-memory artifacts must include:
 
 - `contract_version`
 - `id`
 - `title`
-- `summary`
 - `status`
 - `owner`
 - `created_at`
 - `updated_at`
-- `related_session_refs`
-- `related_artifact_refs`
 - `evidence_refs`
 - `supersedes`
 - `superseded_by`
 
+Plans, decisions, and hypotheses also require:
+
+- `summary`
+- `related_session_refs`
+- `related_artifact_refs`
+
+Initiatives require the initiative-layer relation fields instead:
+
+- `related_plan_refs`
+- `related_decision_refs`
+- `related_hypothesis_refs`
+- `related_session_refs`
+- `related_attention_refs`
+- `proposed_next_session_refs`
+
+`summary` is optional for initiatives and recommended when the title alone is too terse.
+
 ## Provenance Rules
 
-- `related_session_refs` links the memory item to governed sessions when relevant
-- `related_artifact_refs` points at durable artifacts that the memory item depends on
 - `evidence_refs` records the supporting docs, receipts, or manifests
 - `supersedes` and `superseded_by` make revision lineage explicit instead of silently overwriting prior intent
+- initiative relations should point to durable plans, decisions, hypotheses, sessions, and attention refs instead of flattening everything into one artifact bucket
 
 Do not dump raw transcript text into working memory.
 
@@ -83,6 +96,13 @@ Do not:
 - create a new initiative for every session touching the same objective
 - treat transcript summaries as initiative artifacts
 - skip provenance fields when refining an existing initiative
+
+Transcript-exclusion rule:
+
+- chat logs are not working memory
+- terminal scrollback is not working memory
+- private model summaries are not working memory
+- if it matters later, cite the explicit artifact or do not claim it as durable memory
 
 The intended lifecycle is:
 
@@ -122,6 +142,7 @@ Validation checks:
 - schema and required fields
 - ISO timestamps
 - string-array provenance fields
+- initiative-specific relation fields
 - duplicate ids
 - catalog drift against the source documents
 
@@ -130,3 +151,5 @@ Validation checks:
 Working memory is queryable truth, not hidden context.
 
 If a plan or decision should influence later behavior, put it in this lane or ATLAS will treat it as non-durable.
+
+If attention persists across sessions, it should either become an initiative or be explicitly dismissed.
