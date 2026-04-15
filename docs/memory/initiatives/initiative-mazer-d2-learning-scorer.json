@@ -1,0 +1,54 @@
+{
+  "contract_version": "atlas.initiative.v1",
+  "id": "initiative-mazer-d2-learning-scorer",
+  "title": "Mazer D2 Learning Scorer",
+  "summary": "Track the codex/mazer-d2-learning-scorer branch now that AC landed so the next governed follow-up stays attached to the live Mazer scorer work: fixed-blessed-id soak smoke first, then manual blessing review.",
+  "status": "active",
+  "owner": "stack-root",
+  "created_at": "2026-04-15T13:15:00Z",
+  "updated_at": "2026-04-15T15:50:48.935546Z",
+  "related_plan_refs": [],
+  "related_decision_refs": [],
+  "related_hypothesis_refs": [],
+  "related_session_refs": [],
+  "related_attention_refs": [
+    "attention:sha256:6a9aeb06d039913aeed84e9f24a209e53bdbcdb2285a1cf409a51c7c69a2f880"
+  ],
+  "evidence_refs": [
+    "stack.yaml",
+    "repos/fawxzzy-mazer/artifacts/training/governed-candidate-experiment-pack.json",
+    "repos/fawxzzy-mazer/artifacts/training/manual-blessing-review-pack.json",
+    "repos/fawxzzy-mazer/artifacts/training/playbook-weight-registry.json",
+    "repos/fawxzzy-mazer/docs/INTEGRATION_SCOPE.md",
+    "repos/fawxzzy-mazer/scripts/lifeline/burn-in.ts",
+    "repos/fawxzzy-mazer/scripts/training/promote-weights.mjs",
+    "repos/fawxzzy-mazer/src/mazer-core/eval/RuntimeEval.ts",
+    "repos/fawxzzy-mazer/tests/core/training/promote-weights.test.ts"
+  ],
+  "proposed_next_session_refs": [
+    "runtime/atlas/proposed-sessions/session-proposed-mazer-d2-fixed-blessed-id-soak/session.manifest.json"
+  ],
+  "supersedes": [],
+  "superseded_by": [],
+  "metadata": {
+    "authoring_source": "operator-seeded-initiative",
+    "repo_id": "mazer",
+    "repo_refs": [
+      "repos/fawxzzy-mazer"
+    ],
+    "branch_ref": "codex/mazer-d2-learning-scorer",
+    "branch_summary": "AC landed. No blessing has occurred yet.",
+    "next_step": "fixed-blessed-id soak smoke",
+    "follow_up": "manual blessing review",
+    "waiting_on": [
+      "fixed-blessed-id soak smoke",
+      "manual blessing review"
+    ],
+    "blessing_state": "pending_manual_review",
+    "attention_summary": "Mazer D2 learning scorer is waiting on the fixed-blessed-id soak smoke and the manual blessing review before any blessing decision.",
+    "attention_severity": "medium",
+    "execution_mode": "non_executing",
+    "proposal_session_id": "session-proposed-mazer-d2-fixed-blessed-id-soak",
+    "proposal_ref": "runtime/atlas/proposed-sessions/session-proposed-mazer-d2-fixed-blessed-id-soak/session.manifest.json"
+  }
+}

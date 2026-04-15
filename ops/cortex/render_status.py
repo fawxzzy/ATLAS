@@ -40,6 +40,20 @@ SEVERITY_ORDER = {
 }
 
 
+def unique_strings(values: list[Any]) -> list[str]:
+    ordered: list[str] = []
+    seen: set[str] = set()
+    for value in values:
+        if not isinstance(value, str):
+            continue
+        stripped = value.strip()
+        if not stripped or stripped in seen:
+            continue
+        seen.add(stripped)
+        ordered.append(stripped)
+    return ordered
+
+
 def parse_timestamp(value: Any) -> tuple[int, str]:
     if not isinstance(value, str) or not value.strip():
         return (0, "")
@@ -513,6 +527,7 @@ def attention_queue(
     closure_receipts_payload: list[dict[str, Any]],
     legacy_compatibility_payload: list[dict[str, Any]],
     trust_surfaces_payload: list[dict[str, Any]],
+    working_memory_items: list[dict[str, Any]],
     registry_state: dict[str, Any],
 ) -> dict[str, Any]:
     items: list[dict[str, Any]] = []
@@ -705,6 +720,8 @@ def attention_queue(
             )
         )
 
+    items.extend(initiative_attention_items(working_memory_items))
+
     for descriptor in descriptors:
         if str(descriptor.get("artifact_type", "")) != "conversation_turn":
             continue
@@ -772,6 +789,111 @@ def world_model_state() -> dict[str, Any]:
     return result
 
 
+def _collect_strings(value: Any) -> list[str]:
+    strings: list[str] = []
+    if isinstance(value, str):
+        strings.append(value)
+    elif isinstance(value, dict):
+        for nested in value.values():
+            strings.extend(_collect_strings(nested))
+    elif isinstance(value, list):
+        for nested in value:
+            strings.extend(_collect_strings(nested))
+    return strings
+
+
+def _repo_root_ref(ref: str) -> str | None:
+    normalized = ref.strip().replace("\\", "/")
+    if not normalized.startswith("repos/"):
+        return None
+    parts = [part for part in normalized.split("/") if part]
+    if len(parts) < 2:
+        return None
+    return "/".join(parts[:2])
+
+
+def initiative_repo_refs(item: dict[str, Any]) -> list[str]:
+    refs: list[str] = []
+    for key, value in item.items():
+        if key == "path" or key.endswith("_refs") or key == "metadata":
+            refs.extend(_collect_strings(value))
+    return sorted(
+        {
+            repo_ref
+            for repo_ref in (_repo_root_ref(candidate) for candidate in refs)
+            if repo_ref
+        }
+    )
+
+
+def _initiative_metadata(item: dict[str, Any]) -> dict[str, Any]:
+    return item.get("metadata", {}) if isinstance(item.get("metadata"), dict) else {}
+
+
+def initiative_attention_summary(item: dict[str, Any]) -> str | None:
+    metadata = _initiative_metadata(item)
+    summary = str(metadata.get("attention_summary") or "").strip()
+    if summary:
+        return summary
+    waiting_on = [
+        str(entry).strip()
+        for entry in metadata.get("waiting_on", [])
+        if isinstance(entry, str) and entry.strip()
+    ]
+    title = str(item.get("title") or item.get("id") or "initiative").strip()
+    if waiting_on:
+        return f"{title} is waiting on {', '.join(waiting_on[:2])}."
+    if item.get("proposed_next_session_refs"):
+        return f"{title} has proposed next work waiting for operator review."
+    if item.get("related_attention_refs"):
+        return f"{title} still has linked attention open."
+    return None
+
+
+def initiative_attention_details(item: dict[str, Any]) -> dict[str, Any]:
+    metadata = _initiative_metadata(item)
+    details: dict[str, Any] = {
+        "initiative_id": item.get("id"),
+        "title": item.get("title"),
+        "repo_refs": initiative_repo_refs(item),
+        "proposed_next_session_refs": item.get("proposed_next_session_refs", []),
+    }
+    for field in ("branch_ref", "next_step", "follow_up", "blessing_state"):
+        value = metadata.get(field)
+        if isinstance(value, str) and value.strip():
+            details[field] = value.strip()
+    waiting_on = [
+        str(entry).strip()
+        for entry in metadata.get("waiting_on", [])
+        if isinstance(entry, str) and entry.strip()
+    ]
+    if waiting_on:
+        details["waiting_on"] = waiting_on
+    return details
+
+
+def initiative_attention_items(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    results: list[dict[str, Any]] = []
+    for item in items:
+        if not isinstance(item, dict) or str(item.get("status", "")).strip() != "active":
+            continue
+        summary = initiative_attention_summary(item)
+        if not summary:
+            continue
+        metadata = _initiative_metadata(item)
+        severity = str(metadata.get("attention_severity") or "medium").strip() or "medium"
+        results.append(
+            attention_item(
+                kind="initiative_open_attention",
+                severity=severity,
+                summary=summary,
+                source_ref=str(item.get("path") or item.get("id") or "").strip() or None,
+                details=initiative_attention_details(item),
+            )
+        )
+    return results
+
+
 def initiative_summary(items: list[dict[str, Any]]) -> dict[str, Any]:
     initiatives = [
         item
@@ -791,8 +913,49 @@ def initiative_summary(items: list[dict[str, Any]]) -> dict[str, Any]:
         ),
         reverse=True,
     )
+    open_attention_items = [
+        {
+            "id": item.get("id"),
+            "title": item.get("title"),
+            "status": item.get("status"),
+            "updated_at": item.get("updated_at"),
+            "attention_summary": initiative_attention_summary(item),
+            "related_attention_refs": item.get("related_attention_refs", []),
+            "proposed_next_session_refs": item.get("proposed_next_session_refs", []),
+            "repo_refs": initiative_repo_refs(item),
+        }
+        for item in active_items
+        if initiative_attention_summary(item)
+    ]
+    proposed_session_items = [
+        {
+            "id": item.get("id"),
+            "title": item.get("title"),
+            "status": item.get("status"),
+            "updated_at": item.get("updated_at"),
+            "proposed_next_session_refs": item.get("proposed_next_session_refs", []),
+            "repo_refs": initiative_repo_refs(item),
+            "attention_summary": initiative_attention_summary(item),
+        }
+        for item in active_items
+        if isinstance(item.get("proposed_next_session_refs"), list) and item.get("proposed_next_session_refs")
+    ]
+    repo_linked_items = [
+        {
+            "id": item.get("id"),
+            "title": item.get("title"),
+            "status": item.get("status"),
+            "updated_at": item.get("updated_at"),
+            "repo_refs": initiative_repo_refs(item),
+            "proposed_next_session_refs": item.get("proposed_next_session_refs", []),
+            "attention_summary": initiative_attention_summary(item),
+        }
+        for item in active_items
+        if initiative_repo_refs(item)
+    ]
     return {
         "item_count": len(initiatives),
+        "active_item_count": len(active_items),
         "status_counts": dict(sorted(status_counts.items())),
         "active_items": [
             {
@@ -803,9 +966,14 @@ def initiative_summary(items: list[dict[str, Any]]) -> dict[str, Any]:
                 "related_session_refs": item.get("related_session_refs", []),
                 "related_attention_refs": item.get("related_attention_refs", []),
                 "proposed_next_session_refs": item.get("proposed_next_session_refs", []),
+                "repo_refs": initiative_repo_refs(item),
+                "attention_summary": initiative_attention_summary(item),
             }
             for item in active_items[:5]
         ],
+        "open_attention_items": open_attention_items[:5],
+        "proposed_session_items": proposed_session_items[:5],
+        "repo_linked_items": repo_linked_items[:5],
     }
 
 
@@ -863,6 +1031,7 @@ def working_memory_summary() -> dict[str, Any]:
         "kind_counts": catalog.get("kind_counts", {}),
         "status_counts": catalog.get("status_counts", {}),
         "initiatives": initiatives,
+        "_items": items,
         "recent_items": [
             {
                 "id": item.get("id"),
@@ -964,6 +1133,7 @@ def render_status_payload(
     legacy_compatibility_payload = legacy_compatibility_surfaces(descriptors)
     trust_surfaces_payload = trust_surfaces(descriptors)
     working_memory = working_memory_summary()
+    working_memory_items = working_memory.pop("_items", [])
     conversations = conversation_summary(descriptors)
 
     return {
@@ -991,6 +1161,7 @@ def render_status_payload(
             closure_receipts_payload=closure_receipts_payload,
             legacy_compatibility_payload=legacy_compatibility_payload,
             trust_surfaces_payload=trust_surfaces_payload,
+            working_memory_items=working_memory_items,
             registry_state=registry_state,
         ),
         "world_model": world_model_state(),

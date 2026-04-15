@@ -246,6 +246,13 @@ def ensure_proposed_session(
     initiative_ref: str,
     attention_ref: str,
 ) -> str:
+    initiative_payload = load_json_if_present(resolve_atlas_path(initiative_ref, root=root))
+    if isinstance(initiative_payload, dict):
+        for existing_ref in initiative_payload.get("proposed_next_session_refs", []):
+            if not isinstance(existing_ref, str) or not existing_ref.strip():
+                continue
+            if resolve_atlas_path(existing_ref, root=root).exists():
+                return existing_ref
     ref_set = turn_context.get("retrieved_ref_set", {}) if isinstance(turn_context.get("retrieved_ref_set"), dict) else {}
     durable_refs = durable_turn_source_refs(root, turn_context)
     initiative_id = resolve_atlas_path(initiative_ref, root=root).stem

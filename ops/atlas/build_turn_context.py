@@ -43,6 +43,16 @@ def _unique(values: list[str]) -> list[str]:
     return ordered
 
 
+def _parse_json_text(value: Any) -> dict[str, Any] | None:
+    if not isinstance(value, str) or not value.strip():
+        return None
+    try:
+        payload = json.loads(value)
+    except json.JSONDecodeError:
+        return None
+    return payload if isinstance(payload, dict) else None
+
+
 def _classify_intent(user_input: str) -> dict[str, Any]:
     normalized = _normalize(user_input)
     if normalized in {"attention", "what needs attention"} or "needs attention" in normalized:
@@ -51,6 +61,8 @@ def _classify_intent(user_input: str) -> dict[str, Any]:
         return {"intent": "changes_today", "target": None, "action_mode": "informational"}
     if "what initiatives are active" in normalized or normalized == "active initiatives":
         return {"intent": "active_initiatives", "target": None, "action_mode": "informational"}
+    if "repo work" in normalized and ("blessing" in normalized or "review" in normalized):
+        return {"intent": "repo_waiting_on_review", "target": None, "action_mode": "informational"}
     if normalized.startswith("summarize initiative "):
         return {
             "intent": "initiative_summary",
@@ -183,6 +195,40 @@ def build_turn_context(
         facts["initiatives"] = initiatives
         query_trace.append(_trace("status", "active initiatives", refs))
 
+    elif intent == "repo_waiting_on_review":
+        status = atlas_status(root=base_root, refresh=refresh)
+        repo_linked = (
+            status.get("initiatives", {}).get("repo_linked_items", [])
+            if isinstance(status.get("initiatives"), dict)
+            else []
+        )
+        filtered = [
+            item
+            for item in repo_linked
+            if isinstance(item, dict)
+            and any(
+                token in " ".join(
+                    [
+                        str(item.get("attention_summary") or ""),
+                        str(item.get("title") or ""),
+                    ]
+                ).lower()
+                for token in ("blessing", "review")
+            )
+        ]
+        refs = []
+        for item in filtered:
+            identifier = str(item.get("id") or "").strip()
+            if not identifier:
+                continue
+            ref = f"initiative:{identifier}"
+            refs.append(ref)
+            _register_ref(retrieved_ref_set, "initiative_refs", ref)
+            for proposal_ref in item.get("proposed_next_session_refs", []):
+                _register_ref(retrieved_ref_set, "artifact_refs", str(proposal_ref))
+        facts["repo_waiting"] = filtered
+        query_trace.append(_trace("status", "repo work waiting on blessing or review", refs))
+
     elif intent in {"initiative_summary", "initiative_next_work"}:
         query = str(target or "").strip()
         results = search(query, root=base_root, refresh=refresh, limit=8)
@@ -198,9 +244,11 @@ def build_turn_context(
             _register_ref(retrieved_ref_set, "initiative_refs", f"initiative:{initiative_id}")
             _register_ref(retrieved_ref_set, "memory_refs", str(initiative_payload.get("metadata", {}).get("path")))
             facts["initiative"] = initiative_payload
+            facts["initiative_document"] = _parse_json_text(initiative_payload.get("text"))
             query_trace.append(_trace("search", query, [str(item.get("id")) for item in candidates]))
         else:
             facts["initiative"] = None
+            facts["initiative_document"] = None
             query_trace.append(_trace("search", query, []))
 
     elif intent == "session_blocked_reason":

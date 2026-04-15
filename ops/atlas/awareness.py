@@ -256,6 +256,7 @@ def _memory_metadata(item: dict[str, Any]) -> dict[str, Any]:
         "status": item.get("status"),
         "owner": item.get("owner"),
         "path": item.get("path"),
+        "document_metadata": item.get("metadata", {}),
     }
     for field in (
         "related_plan_refs",

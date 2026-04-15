@@ -31,6 +31,10 @@ Current lane posture:
 
 - `what needs attention`
 - `what changed today`
+- `what initiatives are active`
+- `summarize initiative mazer d2 learning scorer`
+- `propose next work for initiative mazer d2 learning scorer`
+- `what repo work is waiting on blessing review`
 - `show blocked sessions`
 - `resume paused session`
 - `run read-only scan on <target>`
@@ -85,6 +89,7 @@ Watch mode polls the Awareness API and speaks when:
 - a session needs resume follow-up
 - a governed resume fails
 - a conversation turn leaves proposal-only follow-up in attention
+- an initiative advertises open attention such as the Mazer soak-and-review follow-up
 
 ## Commands
 
@@ -120,8 +125,10 @@ Minimum checks:
 
 ```powershell
 python .\ops\atlas\talk.py --base-url http://127.0.0.1:8765 --auth-token local-test --command "what needs attention" --mute
-python .\ops\atlas\talk.py --base-url http://127.0.0.1:8765 --auth-token local-test --command "show blocked sessions" --mute
-python .\ops\atlas\talk.py --base-url http://127.0.0.1:8765 --auth-token local-test --command "run read-only scan on stack status" --mute
+python .\ops\atlas\talk.py --base-url http://127.0.0.1:8765 --auth-token local-test --command "what initiatives are active" --mute
+python .\ops\atlas\talk.py --base-url http://127.0.0.1:8765 --auth-token local-test --command "summarize initiative mazer d2 learning scorer" --mute
+python .\ops\atlas\talk.py --base-url http://127.0.0.1:8765 --auth-token local-test --command "propose next work for initiative mazer d2 learning scorer" --mute
+python .\ops\atlas\talk.py --base-url http://127.0.0.1:8765 --auth-token local-test --command "what repo work is waiting on blessing review" --mute
 ```
 
 Expected properties:

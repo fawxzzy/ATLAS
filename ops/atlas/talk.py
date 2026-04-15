@@ -174,7 +174,7 @@ def watch(base_url: str, token: str | None, *, poll_seconds: int, speak_enabled:
             for item in attention.get("items", [])
             if isinstance(item, dict)
             and (str(item.get("kind") or ""), str(item.get("source_ref") or "")) not in last_attention_keys
-            and str(item.get("kind") or "") in {"session_needs_resume", "blocked_worker", "open_merge_request", "execution_approval_pending", "resume_failed"}
+            and str(item.get("kind") or "") in {"session_needs_resume", "blocked_worker", "open_merge_request", "execution_approval_pending", "resume_failed", "initiative_open_attention"}
         ]
         for item in new_attention:
             summary = str(item.get("summary") or item.get("kind") or "attention")

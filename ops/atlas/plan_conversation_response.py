@@ -70,20 +70,48 @@ def compose_response(
     elif intent == "active_initiatives":
         items = facts.get("initiatives", []) if isinstance(facts.get("initiatives"), list) else []
         if items:
-            titles = ", ".join(
-                str(item.get("title") or item.get("id"))
-                for item in items[:3]
-                if isinstance(item, dict)
-            )
-            text = f"Active initiatives: {titles}. [refs: {_render_refs(refs.get('initiative_refs', []))}]"
+            summaries = []
+            for item in items[:3]:
+                if not isinstance(item, dict):
+                    continue
+                title = str(item.get("title") or item.get("id") or "initiative")
+                next_refs = item.get("proposed_next_session_refs", [])
+                if isinstance(next_refs, list) and next_refs:
+                    summaries.append(f"{title} (proposal ready)")
+                else:
+                    summaries.append(title)
+            text = f"Active initiatives: {', '.join(summaries)}. [refs: {_render_refs(refs.get('initiative_refs', []))}]"
         else:
             text = "No active initiatives are currently surfaced."
 
+    elif intent == "repo_waiting_on_review":
+        items = facts.get("repo_waiting", []) if isinstance(facts.get("repo_waiting"), list) else []
+        if items:
+            first = items[0] if isinstance(items[0], dict) else {}
+            repo_refs = first.get("repo_refs", []) if isinstance(first.get("repo_refs"), list) else []
+            text = (
+                f"Repo-linked work waiting on blessing or review: {first.get('title') or first.get('id')}. "
+                f"{first.get('attention_summary') or 'Operator review is still pending.'} "
+                f"[refs: {_render_refs(refs.get('initiative_refs', []) + refs.get('artifact_refs', []) + repo_refs)}]"
+            )
+        else:
+            text = "No repo-linked initiatives currently advertise blessing or review follow-up."
+
     elif intent == "initiative_summary":
         initiative = facts.get("initiative")
+        initiative_document = facts.get("initiative_document") if isinstance(facts.get("initiative_document"), dict) else {}
+        metadata = initiative_document.get("metadata", {}) if isinstance(initiative_document.get("metadata"), dict) else {}
         if isinstance(initiative, dict):
+            next_step = str(metadata.get("next_step") or "").strip()
+            follow_up = str(metadata.get("follow_up") or "").strip()
+            tail = []
+            if next_step:
+                tail.append(f"Next: {next_step}.")
+            if follow_up:
+                tail.append(f"After that: {follow_up}.")
             text = (
-                f"{initiative.get('title')}: {_trim(str(initiative.get('text') or initiative.get('title') or 'initiative'))} "
+                f"{initiative.get('title')}: {initiative_document.get('summary') or initiative.get('title') or 'initiative'} "
+                f"{' '.join(tail)} "
                 f"[refs: {_render_refs(refs.get('initiative_refs', [])) or _render_refs(refs.get('memory_refs', []))}]."
             )
         else:
@@ -109,9 +137,13 @@ def compose_response(
         )
 
     elif intent in {"initiative_next_work", "request_resume_session", "request_read_only_scan"}:
+        initiative_document = facts.get("initiative_document") if isinstance(facts.get("initiative_document"), dict) else {}
+        metadata = initiative_document.get("metadata", {}) if isinstance(initiative_document.get("metadata"), dict) else {}
         if proposed_refs:
+            next_step = str(metadata.get("next_step") or turn_context.get("target") or "").strip()
             text = (
                 "ATLAS authored a proposal-only next step instead of executing. "
+                f"{f'Next step: {next_step}. ' if next_step else ''}"
                 f"Proposed session refs: {_render_refs(proposed_refs)}."
             )
             if memory_refs:
