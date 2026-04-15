@@ -136,4 +136,5 @@ Expected properties:
 - voice queries return current awareness data
 - proposal-seeking turns author proposal artifacts instead of executing
 - the same conversation id can accumulate grounded turns over time
+- each grounded turn remains fetchable through Awareness as `conversation_turn:<turn_id>`
 - no voice path bypasses session or approval flow

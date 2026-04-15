@@ -66,6 +66,7 @@ Conversation now sits above that substrate as a governed client runtime:
 - conversation manifests under `runtime/atlas/conversations/**`
 - grounded turn artifacts with deterministic retrieved refs and provenance
 - proposal-only follow-up authored from explicit refs instead of hidden chat state
+- first-class Awareness ids for both `conversation:<id>` and `conversation_turn:<turn_id>`
 
 ## Operating Loop
 

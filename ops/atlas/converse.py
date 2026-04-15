@@ -420,7 +420,7 @@ def run_conversation_turn(
         refresh=refresh,
     )
     created_at = isoformat()
-    turn_id = f"turn-{utc_now().strftime('%Y%m%dT%H%M%S%fZ')}"
+    turn_id = f"turn-{slugify(conversation_id)}-{utc_now().strftime('%Y%m%dT%H%M%S%fZ')}"
     turn_path = turn_artifact_path(root, conversation_id, turn_id)
     turn_ref = atlas_relative(turn_path, root=root)
     turn_payload = build_turn_payload(

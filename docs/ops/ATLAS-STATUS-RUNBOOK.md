@@ -164,10 +164,18 @@ Current output includes:
 - `conversations.item_count`
 - `conversations.active_count`
 - `conversations.recent_items`
+- `conversations.recent_items[*].recent_turn_refs`
+- `conversations.recent_items[*].active_initiative_refs`
+- `conversations.recent_items[*].active_session_refs`
 
 Conversation attention is derived from conversation turn descriptors with `action_mode=proposal_required`.
 
 That keeps proposed follow-up visible in the same governed attention queue as other operator work.
+
+Conversation turns are also first-class Awareness entities by id:
+
+- `conversation:<conversation_id>`
+- `conversation_turn:<turn_id>`
 
 ## Open Merge Rule
 

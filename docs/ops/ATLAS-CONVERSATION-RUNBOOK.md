@@ -31,6 +31,7 @@ Turn artifact:
 
 - one grounded turn outcome
 - stores `input_summary`, `retrieved_ref_set`, `response_summary`, proposal refs, memory refs, query trace, and provenance
+- uses a conversation-scoped `turn_id` so Awareness can fetch a turn by id without hidden lookup state
 - stored at `runtime/atlas/conversations/<conversation_id>/turns/<turn_id>.json`
 
 Memory artifact:
@@ -100,12 +101,19 @@ Inspect a conversation through Awareness:
 python .\ops\atlas\awareness.py fetch conversation:atlas-main
 ```
 
+Inspect a grounded turn through Awareness:
+
+```powershell
+python .\ops\atlas\awareness.py fetch conversation_turn:<turn_id>
+```
+
 ## Verification
 
 Minimum checks:
 
 - same deterministic fixture yields the same manifest shape
 - `conversation:<id>` resolves through Awareness fetch
+- `conversation_turn:<turn_id>` resolves through Awareness fetch
 - search by initiative or proposal ref returns the related conversation artifacts
 - proposal turns emit `retrieved_ref_set` and full provenance
 - stack validation remains green apart from inherited unrelated debt

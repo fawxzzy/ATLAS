@@ -1001,6 +1001,9 @@ def conversation_summary(descriptors: list[dict[str, Any]]) -> dict[str, Any]:
                 "status": item.get("state", {}).get("status"),
                 "turn_count": item.get("state", {}).get("turn_count"),
                 "last_turn_at": item.get("state", {}).get("last_turn_at"),
+                "recent_turn_refs": item.get("links", {}).get("recent_turn_refs", []),
+                "active_initiative_refs": item.get("links", {}).get("active_initiative_refs", []),
+                "active_session_refs": item.get("links", {}).get("active_session_refs", []),
                 "source_ref": item.get("source_ref"),
             }
             for item in active[:5]

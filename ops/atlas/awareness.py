@@ -571,6 +571,76 @@ def fetch_conversation(
     }
 
 
+def fetch_conversation_turn(
+    turn_id: str,
+    *,
+    root: Path | None = None,
+    refresh: bool = False,
+) -> dict[str, Any]:
+    base_root = (root or atlas_root()).resolve()
+    snapshot = _load_snapshot(root=base_root, refresh=refresh)
+    descriptors = load_descriptors(base_root / "runtime" / "cortex" / "artifacts")
+    turn_descriptors = [
+        descriptor
+        for descriptor in descriptors
+        if descriptor.get("artifact_type") == "conversation_turn"
+        and descriptor.get("identity", {}).get("turn_id") == turn_id
+    ]
+    if not turn_descriptors:
+        raise FileNotFoundError(f"Unknown turn_id: {turn_id}")
+    if len(turn_descriptors) > 1:
+        refs = ", ".join(sorted(str(descriptor.get("source_ref", "")) for descriptor in turn_descriptors))
+        raise ValueError(f"Ambiguous turn_id '{turn_id}' matches multiple turn artifacts: {refs}")
+    turn_descriptor = turn_descriptors[0]
+    source_ref = str(turn_descriptor.get("source_ref", ""))
+    artifact = fetch_artifact(source_ref, root=base_root)
+    conversation_id = str(turn_descriptor.get("identity", {}).get("conversation_id") or "").strip()
+    conversation_ref = None
+    if conversation_id:
+        conversation_descriptor = next(
+            (
+                descriptor
+                for descriptor in descriptors
+                if descriptor.get("artifact_type") == "conversation_manifest"
+                and descriptor.get("identity", {}).get("conversation_id") == conversation_id
+            ),
+            None,
+        )
+        if conversation_descriptor is not None:
+            conversation_ref = conversation_descriptor.get("source_ref")
+    observations = [
+        item
+        for item in snapshot.get("observations", [])
+        if isinstance(item, dict)
+        and (
+            item.get("source_ref") == source_ref
+            or item.get("scope_ref") == conversation_id
+            or item.get("details", {}).get("turn_id") == turn_id
+        )
+    ]
+    related_inventory = [
+        item
+        for item in snapshot.get("inventory_entries", [])
+        if isinstance(item, dict)
+        and (
+            item.get("source_ref") == source_ref
+            or item.get("key") == turn_id
+            or item.get("details", {}).get("turn_id") == turn_id
+        )
+    ]
+    return {
+        "schema_version": "atlas.awareness.conversation-turn.v1",
+        "conversation_id": conversation_id or None,
+        "conversation_ref": conversation_ref,
+        "turn_id": turn_id,
+        "turn_ref": source_ref,
+        "turn": artifact.get("json"),
+        "descriptor": turn_descriptor,
+        "observations": observations,
+        "inventory_entries": related_inventory,
+    }
+
+
 def fetch_memory(
     memory_id: str,
     *,
@@ -657,6 +727,12 @@ def search(
         if entry_type == "session":
             result_id = f"session:{entry.get('key')}"
             url = _artifact_url("session", str(entry.get("key")))
+        elif entry_type == "conversation":
+            result_id = f"conversation:{entry.get('key')}"
+            url = _artifact_url("conversation", str(entry.get("key")))
+        elif entry_type == "conversation_turn":
+            result_id = f"conversation_turn:{entry.get('key')}"
+            url = _artifact_url("conversation_turn", str(entry.get("key")))
         elif entry_type == "memory":
             if str(details.get("memory_kind", "")) == "initiative":
                 result_id = f"initiative:{entry.get('key')}"
@@ -829,6 +905,24 @@ def fetch(
                 "source_kind": "conversation",
                 "conversation_id": conversation_id,
                 "manifest_ref": conversation.get("manifest_ref"),
+            },
+        }
+
+    if identifier.startswith("conversation_turn:") or identifier.startswith("turn:"):
+        turn_id = identifier.split(":", 1)[1]
+        turn = fetch_conversation_turn(turn_id, root=base_root, refresh=refresh)
+        return {
+            "schema_version": FETCH_CONTRACT_VERSION,
+            "id": identifier if identifier.startswith("conversation_turn:") else f"conversation_turn:{turn_id}",
+            "title": turn_id,
+            "url": _artifact_url("conversation_turn", turn_id),
+            "text": _json_text(turn),
+            "metadata": {
+                "source_kind": "conversation_turn",
+                "turn_id": turn_id,
+                "conversation_id": turn.get("conversation_id"),
+                "turn_ref": turn.get("turn_ref"),
+                "conversation_ref": turn.get("conversation_ref"),
             },
         }
 
