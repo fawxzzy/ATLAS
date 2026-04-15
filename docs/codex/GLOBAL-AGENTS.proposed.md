@@ -41,3 +41,13 @@ Exports
 - Keep this global file generic.
 - Put stack-specific rules in the stack root `AGENTS.md`.
 - Put repo-specific rules in repo-local `AGENTS.md`.
+
+## Prompt Framing Update
+
+If this proposal is reused as prompt scaffolding for an ATLAS-style stack, do not describe the global index or awareness layer as missing.
+
+Use this framing instead:
+
+- `Global Index Layer is partially implemented as registry + descriptors + observations + snapshot + attention + working memory + Awareness API. The missing layer is initiative management, durable extension lifecycle, and governed action progression.`
+- `Awareness -> attention -> initiative -> governed action -> memory refinement.`
+- `Not everything knows everything. Nothing meaningful stays dark.`

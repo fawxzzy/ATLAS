@@ -24,6 +24,15 @@ Read these files first:
 - `docs/ops/ATLAS-TOOL-REGISTRY-RUNBOOK.md`
 - `docs/ops/ATLAS-STATUS-RUNBOOK.md`
 
+## Current Posture
+
+ATLAS root and Cortex now form an awareness and coordination core built on explicit files and read models rather than repo folklore.
+
+- major awareness primitives are present
+- governed sessions and governed resume are real
+- the first bounded truthful write exists
+- the next compounding layer is initiative management above sessions, not basic awareness discovery
+
 For ATLAS platform architecture doctrine, use `repos/fawxzzy-atlas/README.md` and the docs under `repos/fawxzzy-atlas/docs/` as the canonical source. Stack-root docs should stay stack- and boundary-oriented and should link back to Atlas instead of duplicating platform specs.
 
 ## Canonical Repo Ids

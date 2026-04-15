@@ -14,6 +14,8 @@ Today, orchestration is mostly manual and session-driven:
 
 There is no approved always-on orchestrator yet.
 
+Awareness is no longer the primary missing layer. ATLAS already has registry-backed truth, typed runtime observations, working memory, and a query-first awareness surface. The missing layer is governed initiative management above sessions.
+
 ## Allowed Orchestration Layers
 
 ### Layer 1: Human-directed sessions
@@ -50,7 +52,8 @@ Examples:
 
 - CORTEX ranking next tasks
 - CORTEX reading receipts and suggesting migrations
-- CORTEX emitting proposed handoff manifests
+- a root initiative loop clustering attention, plans, decisions, hypotheses, and recent sessions into initiatives
+- CORTEX or root-owned tooling emitting proposed handoff manifests or proposed sessions
 
 These outputs must remain advisory until proven.
 
@@ -103,11 +106,21 @@ Each handoff should answer:
 
 Use the following loop:
 
-1. audit first
-2. propose the change
-3. create standards and validators
-4. normalize one repo at a time
-5. stop and summarize after each phase
+1. awareness
+2. attention
+3. initiative
+4. proposed session
+5. approval
+6. execution
+7. receipt
+8. memory refinement
+
+For the current stack posture, only the later stages are approved for execution:
+
+- initiative and proposed-session outputs remain advisory
+- execution still requires the governed session path
+- receipts and memory refinement must be file-contract based
+- nothing may bypass approval by pretending a proposal is execution authority
 
 This is the approved orchestration pattern for now.
 
@@ -135,4 +148,4 @@ These file names are illustrative only. They are not active interfaces yet.
 
 ## Tiny Useful Scaffold
 
-The only useful scaffold to create now is stable file-contract documentation. Do not create a fake queue runner, scheduler, daemon, or orchestration database yet.
+The only useful scaffold to create now is stable file-contract documentation and advisory initiative artifacts. Do not create a fake queue runner, scheduler, daemon, or orchestration database yet.

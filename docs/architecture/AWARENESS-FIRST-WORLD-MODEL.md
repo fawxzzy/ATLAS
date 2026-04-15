@@ -10,6 +10,8 @@ ATLAS should not aim for "every component knows everything."
 
 ATLAS should aim for this stricter invariant:
 
+**Not everything knows everything. Nothing meaningful stays dark.**
+
 **No dark state:** any state that can change behavior must be represented as at least one of:
 
 - a registered surface
@@ -39,13 +41,51 @@ Client rule:
 
 ATLAS already has most of the substrate required for awareness-first behavior:
 
+- pinned stack truth through `stack.lock.yaml`
 - registry-backed governed tool surfaces
 - content-addressed artifact descriptors
 - typed session manifests, worker assignments, worker status artifacts, and execution receipts
-- a read-only Cortex query plane and status read model
+- a query-first awareness layer through status, the Awareness API, voice, MCP, and read-model artifacts
+- a typed world model with explicit snapshot and attention outputs
+- structured working memory for plans, decisions, initiatives, and hypotheses
+- stable platform-boundary contracts instead of repo folklore
 - explicit privilege requests, approvals, and execution receipts
 
-That means the main gap is not raw capability. The gap is turning these surfaces into one coherent world model that makes uncertainty, drift, and blocked work visible before action is taken.
+The global index layer is therefore partially implemented already as registry + descriptors + observations + snapshot + attention + working memory + Awareness API.
+
+That means the main missing layer is no longer basic awareness. The next gap is initiative management, durable extension lifecycle, and governed action progression on top of the current awareness substrate.
+
+## Operating Loop
+
+The root operating loop is:
+
+1. awareness
+2. attention
+3. initiative
+4. proposed session
+5. approval
+6. execution
+7. receipt
+8. memory refinement
+
+Current ATLAS can already:
+
+- see itself through the world model, status, and awareness surfaces
+- remember in structured form through working memory and promoted knowledge
+- expose state to chat, voice, and MCP clients
+- run governed sessions
+- resume paused governed work
+- perform a first bounded truthful write
+
+What it does not yet do is manage a portfolio of work over time the way an operating environment should.
+
+Initiatives therefore belong above sessions, not beside them:
+
+- attention identifies what needs choice
+- initiatives cluster repeated related work into one durable identity
+- proposed sessions are advisory `request_action` outputs, not autonomous execution
+- execution still flows through the governed session path
+- memory refinement updates working memory and read models from explicit evidence
 
 ## Memory Contract
 

@@ -11,6 +11,8 @@ Working memory is structured document memory.
 
 This lane exists so future sessions build on durable artifacts instead of chat residue.
 
+In the operating loop, working memory is the bridge between attention and governed action. It is where plans, decisions, initiatives, and hypotheses remain queryable after a session ends.
+
 ## Storage
 
 Store working-memory artifacts under:
@@ -64,6 +66,31 @@ Do not use working memory for:
 - ephemeral scratch notes
 - unreviewed transcript summaries
 - mutable runtime state that belongs in `runtime/`
+
+## Initiative Policy
+
+Initiatives are the durable identity for repeated related work.
+
+Use initiatives to:
+
+- cluster multiple related sessions under one objective
+- record why follow-on work still exists
+- keep evidence, decisions, plans, and hypotheses attached to the same thread of work
+- propose future sessions without treating the proposal as execution authority
+
+Do not:
+
+- create a new initiative for every session touching the same objective
+- treat transcript summaries as initiative artifacts
+- skip provenance fields when refining an existing initiative
+
+The intended lifecycle is:
+
+1. attention surfaces a real issue or opportunity
+2. an initiative captures the durable objective and evidence
+3. proposed sessions attach to that initiative
+4. governed execution produces receipts
+5. working memory is refined from those receipts instead of forked into duplicate artifacts
 
 ## Indexing
 
