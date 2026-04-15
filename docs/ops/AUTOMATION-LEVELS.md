@@ -1,85 +1,116 @@
 # Automation Levels
 
-This document defines how aggressively ATLAS should reduce manual work while keeping repo ownership and retention explicit.
+ATLAS now uses one machine-readable automation policy across chat, voice, CLI, Awareness API, MCP, Cortex, and Lifeline.
 
-## Level 0: Observe
+The policy is carried on governed artifacts as `automation_level`, and governed tool registry entries declare `max_automation_level`.
 
-ATLAS reads doctrine, audits, and repo state, but it does not write previews, memory artifacts, commits, or PRs.
+## Levels
 
-Use when:
+### `observe`
 
-- the task is an audit only
-- repo ownership is unclear
-- the operator wants a manual-only pass
+Read-only status and inventory access.
 
-## Level 1: Structured Handoff
+Allowed examples:
 
-ATLAS captures task results as a validated handoff JSON and stops there.
+- render status
+- list attention
+- list inventory
+- health checks
 
-Required outputs:
+### `context`
 
-- handoff under `runtime/receipts/handoffs/`
-- schema validation result
+Read-only context gathering that may fetch richer session, artifact, or knowledge detail.
 
-## Level 2: Preview Automation
+Allowed examples:
 
-ATLAS consumes the handoff and prepares repo-targeted preview artifacts without mutating git.
+- session fetch
+- governed artifact fetch
+- knowledge query
+- search over promoted state
 
-Required outputs:
+### `request_action`
 
-- target repo detection result
-- commit preview JSON and commit message under `tmp/previews/`
-- PR preview JSON and rendered markdown under `tmp/previews/`
+A client is asking root-owned governed machinery to perform an action, but no execution approval has been consumed yet.
 
-This is the default operating level for cross-session handoff reduction.
+Allowed examples:
 
-## Level 3: Repo Mutation
+- privileged-action request artifacts
+- root-owned resume request and dispatch artifacts
+- local voice or CLI issuing a governed action request
 
-ATLAS is allowed to execute repo-local git actions when repo permissions and auth allow it.
+### `approved_action`
 
-Allowed actions:
+Execution may proceed because the governed approval boundary has been crossed.
 
-- `git add -A` when explicitly requested
-- `git commit -F <preview message file>`
-- `gh pr create` from the resolved repo root
+Allowed examples:
 
-Required rules:
+- approval receipts
+- Lifeline execution receipts
+- bounded write classes that explicitly require approval
 
-- detect the actual owning repo first
-- preview first
-- fail clearly when `.git` access or remote auth is blocked
-- never treat the ATLAS root path as the commit target unless the root `stack` repo was intentionally resolved
+## Enforcement
 
-## Level 4: Stack Memory And Retention
+Defaults:
 
-ATLAS continuously reduces manual rereading and runtime clutter at the stack layer.
+- every client defaults to `observe`
+- clients may only request a higher level when the target surface allows it
 
-Allowed actions:
+Registry rule:
 
-- extract normalized memory from approved docs into `runtime/cortex/catalog/memory/`
-- compact stale previews and expired temp files
-- archive redundant derived artifacts and superseded timestamped receipts
-- emit retention reports
+- every governed tool entry declares `max_automation_level`
+- artifacts for that tool must not exceed the registered maximum
 
-Required rules:
+Artifact rule:
 
-- do not invent facts during memory extraction
-- keep provenance back to the source doc
-- never auto-delete repo source, raw imports, or source-of-record docs
+- session manifests carry `automation_level` and `max_automation_level`
+- privileged-action requests must use `request_action`
+- approval receipts must use `approved_action`
+- privileged-action receipts must use `approved_action`
+- resume request and resume dispatch artifacts use `request_action`
 
-## Current Target State
+## Client Matrix
 
-ATLAS should operate at:
+| Surface | Max level | Notes |
+| --- | --- | --- |
+| Awareness API status, inventory, attention | `observe` | Read-only and fail closed on higher requested levels |
+| Awareness API search, fetch, knowledge, session fetch | `context` | Read-only and fail closed on action attempts |
+| MCP read bridge | per tool registry entry | Uses the same awareness policy and rejects action-level requests |
+| Voice | `request_action` | Must route through governed session/request artifacts |
+| CLI | `request_action` | Must route through governed session/request artifacts |
+| Cortex session orchestration | up to session `max_automation_level` | Root-owned coordinator, not an executor |
+| Lifeline | `approved_action` | Executes only with matching approval and governed identity |
 
-- Level 2 by default for Codex handoff flows
-- Level 3 when the operator explicitly chooses execution and the repo checkout allows it
-- Level 4 for stack-owned memory extraction and retention maintenance
+## Resume Lifecycle
 
-## Near-Zero-Manual Definition
+The root-owned resume path is now:
 
-Near-zero-manual in ATLAS does not mean hidden mutation. It means:
+1. `resume_ready`
+2. `resume_requested`
+3. `resume_dispatched`
+4. `completed` or `resume_failed`
 
-- repo-target detection is automatic and inspectable
-- commit and PR text are generated automatically from structured handoffs
-- execution paths fail fast with a concrete reason instead of silent drift
-- stack memory and retention reduce repeated operator cleanup work
+Required refs for resume:
+
+- session manifest
+- merge completion ref
+- resume-context ref
+- merge request ref
+- paused worker handoff refs
+- current `stack_lock_digest`
+- current `tool_id` and `registry_digest`
+
+Root resume fails closed when any of those are stale, missing, or inconsistent.
+
+## Audit Expectations
+
+Awareness API and MCP request logs must record:
+
+- requested automation level
+- max automation level
+- route or tool name
+
+Governed observations and receipts should also carry automation level so later analysis can distinguish:
+
+- asked
+- approved
+- executed

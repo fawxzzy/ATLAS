@@ -22,6 +22,7 @@ The current status read model answers:
 - which receipts closed the selected session
 - which quarantined trust surfaces remain metadata-only or untrusted
 - which current anomalies require operator review before more work is launched
+- which sessions are mid-resume or failed-resume
 
 ## Command
 
@@ -84,6 +85,7 @@ Current attention items may include:
 - open merge requests
 - failed or missing closure receipts
 - active sessions waiting in `resume_ready`
+- root-owned resume failures
 - untrusted knowledge surfaces that remain quarantined
 
 The queue must stay descriptor-backed and deterministic. It must not inspect transcripts, terminal output, or raw imported evidence.
@@ -106,6 +108,26 @@ Current status output exposes legacy compatibility through:
 - `runtime/cortex/artifacts/runtime/state/atlas/legacy-backfill/*.descriptor.json`
 
 That keeps historical sessions queryable without lying about their epoch or mutating the originals.
+
+## Resume Visibility
+
+Status now exposes governed resume transition data from descriptors only:
+
+- `resume_status`
+- `resume_request_ref`
+- `resume_dispatch_ref`
+- `resume_run_manifest_ref`
+- `resumed_assignment_ref`
+- `resumed_running_status_ref`
+- `resumed_completed_status_ref`
+- `resume_context_ref`
+- `resume_merge_completion_ref`
+- `resume_requested_at`
+- `resume_dispatched_at`
+- `resume_completed_at`
+- `resume_failure_reason`
+
+That makes the transition from `resume_ready` to `running` to `completed` or `resume_failed` visible without reading `_stack` logs directly.
 
 ## World-Model Refs
 

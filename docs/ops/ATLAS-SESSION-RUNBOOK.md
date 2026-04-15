@@ -39,6 +39,9 @@ Conflict sessions may also carry refs for:
 - merge request artifacts
 - paused worker statuses
 - resume-context artifacts
+- resume request artifact
+- resume dispatch artifact
+- resumed worker assignment and status refs
 - merger assignment and prompt artifacts
 - supervisor merge completion artifact
 
@@ -53,7 +56,8 @@ Conflict sessions may also carry refs for:
 7. invoke `_stack` to bridge into Lifeline
 8. record the execution receipt and status update refs
 9. if needed, run Cortex supervision and let `_stack` consume merge requests
-10. close the session with an explicit final status
+10. if the session becomes `resume_ready`, resume only through `ops/atlas/resume_session.py`
+11. close the session with an explicit final status
 
 ## Governed Surface Rule
 
@@ -84,9 +88,36 @@ Current final statuses:
 
 - `completed`
 - `resume_ready`
+- `resume_failed`
 - `failed`
 
 `resume_ready` means pause, merge-request, and resume-context artifacts were emitted and the session is waiting for resumed worker execution through the existing `_stack` flow.
+
+`resume_failed` means the root-owned resume executor dispatched or validated the resume path and failed closed.
+
+## Resume Lifecycle
+
+Resume is a first-class governed session transition.
+
+States:
+
+- `resume_ready`
+- `resume_requested`
+- `running`
+- `completed` or `resume_failed`
+
+Required refs before resume:
+
+- `refs.merge_completion_ref`
+- `resume.resume_context_ref`
+- resume-context `paused_handoff_refs`
+- stable `stack_lock_digest`
+- stable `tool_id`
+- stable `registry_digest`
+
+Resume must fail closed when merge completion is missing, the lock digest is stale, required handoff refs are missing, or governed surface identity does not match.
+
+Voice no longer needs a bypass path because the root session layer owns the governed resume executor directly.
 
 ## Non-Goals
 

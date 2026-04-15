@@ -253,6 +253,10 @@ def build_inventory_entries(
         if artifact_type == "session_manifest":
             session_id = str(identity.get("session_id", "")).strip()
             if session_id and epoch_details.get("compatibility_class") != GOVERNED_ARTIFACT_EPOCH_LEGACY_PRE_REGISTRY:
+                resume_state = state.get("resume_status")
+                automation_level = state.get("automation_level")
+                max_automation_level = state.get("max_automation_level")
+                descriptor_links = descriptor.get("links", {}) if isinstance(descriptor.get("links"), dict) else {}
                 entries.append(
                     build_inventory_entry(
                         entry_type="session",
@@ -266,6 +270,15 @@ def build_inventory_entries(
                             "worker_id": identity.get("worker_id"),
                             "assignment_id": identity.get("assignment_id"),
                             "final_status": state.get("final_status"),
+                            "automation_level": automation_level,
+                            "max_automation_level": max_automation_level,
+                            "resume_status": resume_state,
+                            "resume_request_ref": descriptor_links.get("resume_request_ref"),
+                            "resume_dispatch_ref": descriptor_links.get("resume_dispatch_ref"),
+                            "resume_run_manifest_ref": descriptor_links.get("resume_run_manifest_ref"),
+                            "resumed_assignment_ref": descriptor_links.get("resumed_assignment_ref"),
+                            "resumed_running_status_ref": descriptor_links.get("resumed_running_status_ref"),
+                            "resumed_completed_status_ref": descriptor_links.get("resumed_completed_status_ref"),
                             **epoch_details,
                         },
                     )
@@ -725,7 +738,10 @@ def build_governed_session_observations(
         tool_id = optional_string(execution_surface.get("tool_id")) or optional_string(descriptor.get("identity", {}).get("execution_tool_id"))
         extension_id = optional_string(execution_surface.get("extension_id")) or optional_string(descriptor.get("identity", {}).get("execution_extension_id"))
         registry_digest = optional_string(governed_surfaces.get("registry_digest")) or optional_string(descriptor.get("state", {}).get("registry_digest"))
+        session_automation_level = optional_string(session_payload.get("automation_level")) or optional_string(descriptor.get("state", {}).get("automation_level"))
+        session_max_automation_level = optional_string(session_payload.get("max_automation_level")) or optional_string(descriptor.get("state", {}).get("max_automation_level"))
         refs = session_payload.get("refs") if isinstance(session_payload.get("refs"), dict) else {}
+        resume = session_payload.get("resume") if isinstance(session_payload.get("resume"), dict) else {}
         completion = session_payload.get("completion") if isinstance(session_payload.get("completion"), dict) else {}
         if not session_id or not stack_lock_digest or not tool_id or not registry_digest:
             continue
@@ -741,12 +757,30 @@ def build_governed_session_observations(
         merge_context_ref = optional_string(refs.get("merge_context_ref")) or optional_string(descriptor.get("links", {}).get("merge_context_ref"))
         merge_prompt_ref = optional_string(refs.get("merge_prompt_ref")) or optional_string(descriptor.get("links", {}).get("merge_prompt_ref"))
         merge_completion_ref = optional_string(refs.get("merge_completion_ref")) or optional_string(descriptor.get("links", {}).get("merge_completion_ref"))
+        resume_request_ref = optional_string(refs.get("resume_request_ref")) or optional_string(descriptor.get("links", {}).get("resume_request_ref"))
+        resume_dispatch_ref = optional_string(refs.get("resume_dispatch_ref")) or optional_string(descriptor.get("links", {}).get("resume_dispatch_ref"))
+        resume_run_manifest_ref = optional_string(refs.get("resume_run_manifest_ref")) or optional_string(descriptor.get("links", {}).get("resume_run_manifest_ref"))
+        resumed_assignment_ref = optional_string(refs.get("resumed_assignment_ref")) or optional_string(descriptor.get("links", {}).get("resumed_assignment_ref"))
+        resumed_running_status_ref = optional_string(refs.get("resumed_running_status_ref")) or optional_string(descriptor.get("links", {}).get("resumed_running_status_ref"))
+        resumed_completed_status_ref = optional_string(refs.get("resumed_completed_status_ref")) or optional_string(descriptor.get("links", {}).get("resumed_completed_status_ref"))
         close_receipt_refs = unique_source_refs(completion.get("close_receipt_refs"), descriptor.get("links", {}).get("close_receipt_refs"))
         final_status = optional_string(completion.get("final_status")) or optional_string(descriptor.get("state", {}).get("final_status"))
         final_status_ref = optional_string(completion.get("final_status_ref")) or optional_string(descriptor.get("links", {}).get("final_status_ref"))
         session_updated_at = optional_string(session_payload.get("updated_at")) or optional_string(descriptor.get("state", {}).get("updated_at"))
         session_created_at = optional_string(session_payload.get("created_at"))
         session_closed_at = optional_string(session_payload.get("closed_at")) or optional_string(descriptor.get("state", {}).get("closed_at"))
+        resume_status = optional_string(resume.get("status")) or optional_string(descriptor.get("state", {}).get("resume_status"))
+        resume_context_ref = optional_string(resume.get("resume_context_ref")) or optional_string(descriptor.get("links", {}).get("resume_context_ref"))
+        resume_merge_completion_ref = optional_string(resume.get("merge_completion_ref")) or optional_string(descriptor.get("links", {}).get("resume_merge_completion_ref")) or merge_completion_ref
+        resume_requested_at = optional_string(resume.get("requested_at")) or optional_string(descriptor.get("links", {}).get("resume_requested_at"))
+        resume_dispatched_at = optional_string(resume.get("dispatched_at")) or optional_string(descriptor.get("links", {}).get("resume_dispatched_at"))
+        resume_completed_at = optional_string(resume.get("completed_at")) or optional_string(descriptor.get("links", {}).get("resume_completed_at"))
+        resume_failure_reason = optional_string(resume.get("failure_reason")) or optional_string(descriptor.get("links", {}).get("resume_failure_reason"))
+        resume_requested_worker_id = optional_string(resume.get("requested_worker_id")) or optional_string(descriptor.get("links", {}).get("resume_requested_worker_id"))
+        base_extras = {
+            "automation_level": session_automation_level,
+            "max_automation_level": session_max_automation_level,
+        }
 
         if assignment_ref:
             maybe_add_observation(
@@ -763,6 +797,7 @@ def build_governed_session_observations(
                 extension_id=extension_id,
                 registry_digest=registry_digest,
                 source_artifact_refs=unique_source_refs(source_ref, assignment_ref),
+                extras=base_extras,
             )
 
         running_status_ref: str | None = None
@@ -788,6 +823,10 @@ def build_governed_session_observations(
                 extension_id=optional_string(running_status_payload.get("extension_id")) or extension_id,
                 registry_digest=optional_string(running_status_payload.get("registry_digest")) or registry_digest,
                 source_artifact_refs=unique_source_refs(source_ref, assignment_ref, running_status_ref),
+                extras={
+                    **base_extras,
+                    "automation_level": optional_string(running_status_payload.get("automation_level")) or session_automation_level,
+                },
             )
 
         request_payload = load_source_payload(root, request_ref)
@@ -806,6 +845,10 @@ def build_governed_session_observations(
                 extension_id=optional_string(request_payload.get("extension_id")) or extension_id,
                 registry_digest=optional_string(request_payload.get("registry_digest")) or registry_digest,
                 source_artifact_refs=unique_source_refs(source_ref, request_ref, request_payload.get("source_refs")),
+                extras={
+                    **base_extras,
+                    "automation_level": optional_string(request_payload.get("automation_level")) or session_automation_level,
+                },
             )
 
         approval_payload = load_source_payload(root, approval_ref)
@@ -828,7 +871,11 @@ def build_governed_session_observations(
                 extension_id=optional_string(approval_payload.get("extension_id")) or extension_id,
                 registry_digest=optional_string(approval_payload.get("registry_digest")) or registry_digest,
                 source_artifact_refs=unique_source_refs(source_ref, request_ref, approval_ref),
-                extras={"approval_receipt_id": approval_payload.get("approval_receipt_id")},
+                extras={
+                    **base_extras,
+                    "approval_receipt_id": approval_payload.get("approval_receipt_id"),
+                    "automation_level": optional_string(approval_payload.get("automation_level")) or session_automation_level,
+                },
             )
 
         receipt_ref = resolve_preferred_execution_receipt_ref(
@@ -852,8 +899,10 @@ def build_governed_session_observations(
                 registry_digest=optional_string(receipt_payload.get("registry_digest")) or registry_digest,
                 source_artifact_refs=unique_source_refs(source_ref, request_ref, approval_ref, receipt_ref, receipt_payload.get("source_refs")),
                 extras={
+                    **base_extras,
                     "approval_status": receipt_payload.get("approval_status"),
                     "execution_mode": receipt_payload.get("execution_mode"),
+                    "automation_level": optional_string(receipt_payload.get("automation_level")) or session_automation_level,
                 },
             )
 
@@ -877,7 +926,10 @@ def build_governed_session_observations(
                 extension_id=extension_id,
                 registry_digest=registry_digest,
                 source_artifact_refs=unique_source_refs(source_ref, final_status_ref, close_receipt_refs),
-                extras={"final_status": final_status},
+                extras={
+                    **base_extras,
+                    "final_status": final_status,
+                },
             )
 
         for merge_request_ref in merge_request_refs:
@@ -895,6 +947,7 @@ def build_governed_session_observations(
                 extension_id=extension_id,
                 registry_digest=registry_digest,
                 source_artifact_refs=unique_source_refs(source_ref, merge_request_ref, pause_status_refs),
+                extras=base_extras,
             )
 
         for pause_status_ref in pause_status_refs:
@@ -913,6 +966,7 @@ def build_governed_session_observations(
                 extension_id=(optional_string(pause_payload.get("extension_id")) if pause_payload else None) or extension_id,
                 registry_digest=(optional_string(pause_payload.get("registry_digest")) if pause_payload else None) or registry_digest,
                 source_artifact_refs=unique_source_refs(source_ref, merge_request_refs, pause_status_ref),
+                extras=base_extras,
             )
 
         merge_assignment_payload = load_source_payload(root, merge_assignment_ref)
@@ -937,6 +991,7 @@ def build_governed_session_observations(
                     merge_context_ref,
                     merge_prompt_ref,
                 ),
+                extras=base_extras,
             )
 
         if resume_context_refs:
@@ -962,7 +1017,10 @@ def build_governed_session_observations(
                         merge_completion_ref,
                         resume_context_ref,
                     ),
-                    extras={"merge_completion_ref": merge_completion_ref},
+                    extras={
+                        **base_extras,
+                        "merge_completion_ref": merge_completion_ref,
+                    },
                 )
         elif merge_completion_ref:
             maybe_add_observation(
@@ -984,6 +1042,126 @@ def build_governed_session_observations(
                     merge_assignment_ref,
                     merge_completion_ref,
                 ),
+                extras=base_extras,
+            )
+
+        resume_request_payload = load_source_payload(root, resume_request_ref)
+        if resume_request_ref:
+            maybe_add_observation(
+                observations,
+                observation_type="resume_requested",
+                status="requested",
+                source_ref=resume_request_ref,
+                observed_at=(optional_string(resume_request_payload.get("requested_at")) if resume_request_payload else None) or resume_requested_at or session_updated_at,
+                session_id=session_id,
+                worker_id=(optional_string(resume_request_payload.get("worker_id")) if resume_request_payload else None) or resume_requested_worker_id or worker_id,
+                assignment_id=(optional_string(resume_request_payload.get("assignment_id")) if resume_request_payload else None) or assignment_id,
+                stack_lock_digest=stack_lock_digest,
+                tool_id=(optional_string(resume_request_payload.get("tool_id")) if resume_request_payload else None) or tool_id,
+                extension_id=(optional_string(resume_request_payload.get("extension_id")) if resume_request_payload else None) or extension_id,
+                registry_digest=(optional_string(resume_request_payload.get("registry_digest")) if resume_request_payload else None) or registry_digest,
+                source_artifact_refs=unique_source_refs(
+                    source_ref,
+                    resume_request_ref,
+                    resume_context_ref,
+                    resume_merge_completion_ref,
+                    merge_request_refs,
+                    pause_status_refs,
+                ),
+                extras={
+                    **base_extras,
+                    "automation_level": (optional_string(resume_request_payload.get("automation_level")) if resume_request_payload else None) or session_automation_level,
+                    "resume_context_ref": resume_context_ref,
+                    "merge_completion_ref": resume_merge_completion_ref,
+                },
+            )
+
+        resume_dispatch_payload = load_source_payload(root, resume_dispatch_ref)
+        if resume_dispatch_ref:
+            maybe_add_observation(
+                observations,
+                observation_type="resume_dispatched",
+                status="running",
+                source_ref=resume_dispatch_ref,
+                observed_at=(optional_string(resume_dispatch_payload.get("dispatched_at")) if resume_dispatch_payload else None) or resume_dispatched_at or session_updated_at,
+                session_id=session_id,
+                worker_id=resume_requested_worker_id or worker_id,
+                assignment_id=assignment_id,
+                stack_lock_digest=stack_lock_digest,
+                tool_id=(optional_string(resume_dispatch_payload.get("tool_id")) if resume_dispatch_payload else None) or tool_id,
+                extension_id=(optional_string(resume_dispatch_payload.get("extension_id")) if resume_dispatch_payload else None) or extension_id,
+                registry_digest=(optional_string(resume_dispatch_payload.get("registry_digest")) if resume_dispatch_payload else None) or registry_digest,
+                source_artifact_refs=unique_source_refs(
+                    source_ref,
+                    resume_request_ref,
+                    resume_dispatch_ref,
+                    resume_run_manifest_ref,
+                    resumed_assignment_ref,
+                    resumed_running_status_ref,
+                ),
+                extras={
+                    **base_extras,
+                    "automation_level": (optional_string(resume_dispatch_payload.get("automation_level")) if resume_dispatch_payload else None) or session_automation_level,
+                    "resume_run_manifest_ref": resume_run_manifest_ref,
+                    "resumed_assignment_ref": resumed_assignment_ref,
+                    "resumed_running_status_ref": resumed_running_status_ref,
+                },
+            )
+
+        if resume_status == "resume_failed":
+            maybe_add_observation(
+                observations,
+                observation_type="resume_failed",
+                status="failed",
+                source_ref=resume_run_manifest_ref or resumed_completed_status_ref or resume_dispatch_ref or source_ref,
+                observed_at=resume_completed_at or session_closed_at or session_updated_at,
+                session_id=session_id,
+                worker_id=resume_requested_worker_id or worker_id,
+                assignment_id=assignment_id,
+                stack_lock_digest=stack_lock_digest,
+                tool_id=tool_id,
+                extension_id=extension_id,
+                registry_digest=registry_digest,
+                source_artifact_refs=unique_source_refs(
+                    source_ref,
+                    resume_request_ref,
+                    resume_dispatch_ref,
+                    resume_run_manifest_ref,
+                    resumed_completed_status_ref,
+                ),
+                extras={
+                    **base_extras,
+                    "failure_reason": resume_failure_reason,
+                    "resume_run_manifest_ref": resume_run_manifest_ref,
+                    "resumed_completed_status_ref": resumed_completed_status_ref,
+                },
+            )
+        elif resume_status == "completed":
+            maybe_add_observation(
+                observations,
+                observation_type="resume_completed",
+                status="completed",
+                source_ref=resumed_completed_status_ref or resume_run_manifest_ref or resume_dispatch_ref,
+                observed_at=resume_completed_at or session_closed_at or session_updated_at,
+                session_id=session_id,
+                worker_id=resume_requested_worker_id or worker_id,
+                assignment_id=assignment_id,
+                stack_lock_digest=stack_lock_digest,
+                tool_id=tool_id,
+                extension_id=extension_id,
+                registry_digest=registry_digest,
+                source_artifact_refs=unique_source_refs(
+                    source_ref,
+                    resume_request_ref,
+                    resume_dispatch_ref,
+                    resume_run_manifest_ref,
+                    resumed_completed_status_ref,
+                ),
+                extras={
+                    **base_extras,
+                    "resume_run_manifest_ref": resume_run_manifest_ref,
+                    "resumed_completed_status_ref": resumed_completed_status_ref,
+                },
             )
 
     return observations

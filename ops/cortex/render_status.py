@@ -25,7 +25,9 @@ ACTIVE_SESSION_STATES = {
     "executing",
     "execution_recorded",
     "merge_requested",
+    "resume_requested",
     "resume_ready",
+    "running",
 }
 BLOCKED_WORKER_STATES = {"blocked", "paused", "merge_wait"}
 SEVERITY_ORDER = {
@@ -508,6 +510,20 @@ def attention_queue(
                     },
                 )
             )
+        if session_state == "resume_failed" or final_status == "resume_failed":
+            items.append(
+                attention_item(
+                    kind="resume_failed",
+                    severity="high",
+                    summary="The active session resume path failed and needs operator review.",
+                    source_ref=active_session.get("source_ref"),
+                    details={
+                        "session_id": active_session.get("session_id"),
+                        "task_id": active_session.get("task_id"),
+                        "resume_failure_reason": active_session.get("resume_failure_reason"),
+                    },
+                )
+            )
         if session_state == "failed" or final_status == "failed":
             items.append(
                 attention_item(
@@ -731,6 +747,8 @@ def session_overview(
     state = session_descriptor.get("state", {})
     links = session_descriptor.get("links", {})
     governed_surfaces = links.get("governed_surfaces", {})
+    source_payload = load_source_payload(session_descriptor.get("source_ref"))
+    resume_payload = source_payload.get("resume") if isinstance(source_payload, dict) and isinstance(source_payload.get("resume"), dict) else {}
     execution_receipt_ref = links.get("execution_receipt_ref")
     preferred_execution_receipt_ref = None
     if isinstance(execution_receipt_ref, str):
@@ -743,6 +761,9 @@ def session_overview(
         "assignment_id": identity.get("assignment_id"),
         "session_state": state.get("session_state"),
         "scenario": state.get("scenario"),
+        "automation_level": state.get("automation_level"),
+        "max_automation_level": state.get("max_automation_level"),
+        "resume_status": state.get("resume_status"),
         "final_status": state.get("final_status"),
         "updated_at": state.get("updated_at"),
         "registry_digest": state.get("registry_digest"),
@@ -750,6 +771,20 @@ def session_overview(
         "execution_receipt_ref": preferred_execution_receipt_ref or execution_receipt_ref,
         "original_execution_receipt_ref": execution_receipt_ref if preferred_execution_receipt_ref and preferred_execution_receipt_ref != execution_receipt_ref else None,
         "merge_request_refs": links.get("merge_request_refs", []),
+        "resume_request_ref": links.get("resume_request_ref"),
+        "resume_dispatch_ref": links.get("resume_dispatch_ref"),
+        "resume_run_manifest_ref": links.get("resume_run_manifest_ref"),
+        "resumed_assignment_ref": links.get("resumed_assignment_ref"),
+        "resumed_running_status_ref": links.get("resumed_running_status_ref"),
+        "resumed_completed_status_ref": links.get("resumed_completed_status_ref"),
+        "resume_context_ref": links.get("resume_context_ref"),
+        "resume_merge_completion_ref": links.get("resume_merge_completion_ref"),
+        "resume_requested_at": links.get("resume_requested_at"),
+        "resume_dispatched_at": links.get("resume_dispatched_at"),
+        "resume_completed_at": links.get("resume_completed_at"),
+        "resume_failure_reason": links.get("resume_failure_reason"),
+        "resume_requested_worker_id": links.get("resume_requested_worker_id"),
+        "resume": resume_payload if isinstance(resume_payload, dict) else {},
         "source_ref": session_descriptor.get("source_ref"),
     }
 

@@ -200,17 +200,21 @@ def handle_command(command: str, *, base_url: str, token: str | None, speak_enab
             speak(response, enabled=speak_enabled)
             return response
         session_id = str(selected.get("key"))
-        payload = request_json(base_url, f"/atlas/sessions/{urllib.parse.quote(session_id, safe='')}", token=token)
-        manifest = payload.get("manifest") if isinstance(payload.get("manifest"), dict) else {}
-        refs = manifest.get("refs") if isinstance(manifest.get("refs"), dict) else {}
+        payload = run_python(
+            [
+                "ops/atlas/resume_session.py",
+                "--session-id",
+                session_id,
+            ]
+        )
         lines = [
-            f"Resume context is ready for {session_id}.",
-            f"- final_status: {manifest.get('completion', {}).get('final_status') if isinstance(manifest.get('completion'), dict) else manifest.get('session_state')}",
-            f"- merge_completion_ref: {refs.get('merge_completion_ref')}",
-            "- action: root voice shell currently surfaces governed resume context only; it does not bypass into a direct resume executor.",
+            f"Dispatched governed resume for {session_id}.",
+            f"- session_state: {payload.get('session_state')}",
+            f"- final_status: {payload.get('final_status')}",
+            f"- resume_run_manifest_ref: {payload.get('resume_run_manifest_ref')}",
         ]
-        for ref in refs.get("resume_context_refs", [])[:4] if isinstance(refs.get("resume_context_refs"), list) else []:
-            lines.append(f"- resume_context_ref: {ref}")
+        if payload.get("failure_reason"):
+            lines.append(f"- failure_reason: {payload.get('failure_reason')}")
         response = render_lines(lines)
         speak(response, enabled=speak_enabled)
         return response
@@ -304,7 +308,7 @@ def watch(base_url: str, token: str | None, *, poll_seconds: int, speak_enabled:
             for item in attention.get("items", [])
             if isinstance(item, dict)
             and (str(item.get("kind") or ""), str(item.get("source_ref") or "")) not in last_attention_keys
-            and str(item.get("kind") or "") in {"session_needs_resume", "blocked_worker", "open_merge_request", "execution_approval_pending"}
+            and str(item.get("kind") or "") in {"session_needs_resume", "blocked_worker", "open_merge_request", "execution_approval_pending", "resume_failed"}
         ]
         for item in new_attention:
             summary = str(item.get("summary") or item.get("kind") or "attention")

@@ -30,6 +30,20 @@ from ops.atlas.awareness import (
     query_knowledge,
     search,
 )
+from ops.atlas.load_tool_registry import automation_level_allows, normalize_automation_level
+
+OBSERVE_AUTOMATION_LEVEL = "observe"
+CONTEXT_AUTOMATION_LEVEL = "context"
+ROUTE_MAX_AUTOMATION_LEVELS = {
+    "/health": OBSERVE_AUTOMATION_LEVEL,
+    "/atlas/status": OBSERVE_AUTOMATION_LEVEL,
+    "/atlas/inventory": OBSERVE_AUTOMATION_LEVEL,
+    "/atlas/snapshot": OBSERVE_AUTOMATION_LEVEL,
+    "/atlas/attention": OBSERVE_AUTOMATION_LEVEL,
+    "/atlas/search": CONTEXT_AUTOMATION_LEVEL,
+    "/atlas/knowledge/query": CONTEXT_AUTOMATION_LEVEL,
+    "/atlas/artifacts/fetch": CONTEXT_AUTOMATION_LEVEL,
+}
 
 
 def utc_now() -> str:
@@ -194,6 +208,17 @@ class AwarenessHandler(BaseHTTPRequestHandler):
             return False, "invalid", _token_fingerprint(presented)
         return True, "ok", _token_fingerprint(presented)
 
+    def _requested_automation_level(self, query: dict[str, list[str]]) -> str:
+        raw_value = _first(query, "automation_level") or self.headers.get("X-ATLAS-Automation-Level")
+        if raw_value is None:
+            return OBSERVE_AUTOMATION_LEVEL
+        return normalize_automation_level(raw_value, "automation_level")
+
+    def _max_route_automation_level(self, route: str) -> str:
+        if route.startswith("/atlas/sessions/"):
+            return CONTEXT_AUTOMATION_LEVEL
+        return ROUTE_MAX_AUTOMATION_LEVELS.get(route, OBSERVE_AUTOMATION_LEVEL)
+
     def _send_json(
         self,
         payload: dict[str, Any],
@@ -243,6 +268,8 @@ class AwarenessHandler(BaseHTTPRequestHandler):
         auth_principal: str | None,
         error: str | None,
         etag: str | None,
+        requested_automation_level: str,
+        max_automation_level: str,
     ) -> None:
         today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
         log_path = self._config().request_log_dir / f"{today}.jsonl"
@@ -263,6 +290,8 @@ class AwarenessHandler(BaseHTTPRequestHandler):
                 "auth_principal": auth_principal,
                 "deployment_profile": self._config().deployment_profile,
                 "etag": etag,
+                "requested_automation_level": requested_automation_level,
+                "max_automation_level": max_automation_level,
                 "error": error,
             },
         )
@@ -279,8 +308,34 @@ class AwarenessHandler(BaseHTTPRequestHandler):
         auth_principal: str | None = None
         error: str | None = None
         etag: str | None = None
+        requested_automation_level = OBSERVE_AUTOMATION_LEVEL
+        max_automation_level = OBSERVE_AUTOMATION_LEVEL
 
         try:
+            requested_automation_level = self._requested_automation_level(query)
+            max_automation_level = self._max_route_automation_level(route)
+            automation_headers = {
+                "X-ATLAS-Automation-Level": requested_automation_level,
+                "X-ATLAS-Max-Automation-Level": max_automation_level,
+            }
+            if not automation_level_allows(
+                max_level=max_automation_level,
+                requested_level=requested_automation_level,
+            ):
+                status = self._send_json(
+                    {
+                        "ok": False,
+                        "error": "automation_level_denied",
+                        "message": "Requested automation level exceeds the read-only policy for this Awareness API route.",
+                        "requested_automation_level": requested_automation_level,
+                        "max_automation_level": max_automation_level,
+                    },
+                    request_id=request_id,
+                    status=HTTPStatus.FORBIDDEN,
+                    extra_headers=automation_headers,
+                )
+                return
+
             remote_addr = self.client_address[0] if self.client_address else "unknown"
             retry_after = self._config().rate_limiter.check(remote_addr)
             if retry_after is not None:
@@ -294,7 +349,7 @@ class AwarenessHandler(BaseHTTPRequestHandler):
                     },
                     request_id=request_id,
                     status=HTTPStatus.TOO_MANY_REQUESTS,
-                    extra_headers={"Retry-After": str(retry_after)},
+                    extra_headers={**automation_headers, "Retry-After": str(retry_after)},
                 )
                 return
 
@@ -316,6 +371,9 @@ class AwarenessHandler(BaseHTTPRequestHandler):
                         "service": "atlas-awareness",
                         "auth_required": bool(self._config().auth_tokens),
                         "deployment_profile": self._config().deployment_profile,
+                        "read_only": True,
+                        "requested_automation_level": requested_automation_level,
+                        "max_automation_level": max_automation_level,
                         "request_log_retention_days": self._config().request_log_retention_days,
                         "rate_limit": {
                             "window_seconds": self._config().rate_limiter.window_seconds,
@@ -325,6 +383,7 @@ class AwarenessHandler(BaseHTTPRequestHandler):
                     },
                     request_id=request_id,
                     etag=etag,
+                    extra_headers=automation_headers,
                 )
                 return
 
@@ -340,14 +399,14 @@ class AwarenessHandler(BaseHTTPRequestHandler):
                     },
                     request_id=request_id,
                     status=HTTPStatus.UNAUTHORIZED,
-                    extra_headers={"WWW-Authenticate": 'Bearer realm="atlas-awareness"'},
+                    extra_headers={**automation_headers, "WWW-Authenticate": 'Bearer realm="atlas-awareness"'},
                 )
                 return
 
             if parsed.path == "/atlas/status":
                 payload = atlas_status(refresh=refresh)
                 etag = str(payload.get("snapshot", {}).get("content_digest") or "")
-                status = self._send_json(payload, request_id=request_id, etag=etag)
+                status = self._send_json(payload, request_id=request_id, etag=etag, extra_headers=automation_headers)
                 return
 
             if parsed.path in {"/atlas/inventory", "/atlas/snapshot"}:
@@ -360,7 +419,7 @@ class AwarenessHandler(BaseHTTPRequestHandler):
                     limit=_first_int(query, "limit", 0) or None,
                 )
                 etag = str(payload.get("snapshot_content_digest") or "")
-                status = self._send_json(payload, request_id=request_id, etag=etag)
+                status = self._send_json(payload, request_id=request_id, etag=etag, extra_headers=automation_headers)
                 return
 
             if parsed.path == "/atlas/attention":
@@ -371,7 +430,7 @@ class AwarenessHandler(BaseHTTPRequestHandler):
                     limit=_first_int(query, "limit", 0) or None,
                 )
                 etag = str(payload.get("attention_content_digest") or "")
-                status = self._send_json(payload, request_id=request_id, etag=etag)
+                status = self._send_json(payload, request_id=request_id, etag=etag, extra_headers=automation_headers)
                 return
 
             if parsed.path == "/atlas/search":
@@ -379,7 +438,7 @@ class AwarenessHandler(BaseHTTPRequestHandler):
                 if q is None:
                     raise ValueError("Missing required query parameter: q")
                 payload = search(q, refresh=refresh, limit=_first_int(query, "limit", 10))
-                status = self._send_json(payload, request_id=request_id)
+                status = self._send_json(payload, request_id=request_id, extra_headers=automation_headers)
                 return
 
             if parsed.path == "/atlas/knowledge/query":
@@ -387,7 +446,7 @@ class AwarenessHandler(BaseHTTPRequestHandler):
                 if q is None:
                     raise ValueError("Missing required query parameter: q")
                 payload = query_knowledge(q, refresh=refresh, limit=_first_int(query, "limit", 5))
-                status = self._send_json(payload, request_id=request_id)
+                status = self._send_json(payload, request_id=request_id, extra_headers=automation_headers)
                 return
 
             if parsed.path == "/atlas/artifacts/fetch":
@@ -399,7 +458,7 @@ class AwarenessHandler(BaseHTTPRequestHandler):
                     payload = fetch_artifact(ref)
                 else:
                     raise ValueError("Provide either id or ref for /atlas/artifacts/fetch")
-                status = self._send_json(payload, request_id=request_id)
+                status = self._send_json(payload, request_id=request_id, extra_headers=automation_headers)
                 return
 
             if parsed.path.startswith("/atlas/sessions/"):
@@ -407,7 +466,7 @@ class AwarenessHandler(BaseHTTPRequestHandler):
                 if not session_id:
                     raise ValueError("Session path must end with a session id.")
                 payload = fetch_session(session_id, refresh=refresh)
-                status = self._send_json(payload, request_id=request_id)
+                status = self._send_json(payload, request_id=request_id, extra_headers=automation_headers)
                 return
 
             status = self._send_json(
@@ -420,6 +479,7 @@ class AwarenessHandler(BaseHTTPRequestHandler):
                 },
                 request_id=request_id,
                 status=HTTPStatus.NOT_FOUND,
+                extra_headers=automation_headers,
             )
         except FileNotFoundError as exc:
             error = str(exc)
@@ -427,6 +487,10 @@ class AwarenessHandler(BaseHTTPRequestHandler):
                 {"ok": False, "error": "not_found", "message": error, "category": "lookup", "retryable": False},
                 request_id=request_id,
                 status=HTTPStatus.NOT_FOUND,
+                extra_headers={
+                    "X-ATLAS-Automation-Level": requested_automation_level,
+                    "X-ATLAS-Max-Automation-Level": max_automation_level,
+                },
             )
         except ValueError as exc:
             error = str(exc)
@@ -434,6 +498,10 @@ class AwarenessHandler(BaseHTTPRequestHandler):
                 {"ok": False, "error": "bad_request", "message": error, "category": "client-contract", "retryable": False},
                 request_id=request_id,
                 status=HTTPStatus.BAD_REQUEST,
+                extra_headers={
+                    "X-ATLAS-Automation-Level": requested_automation_level,
+                    "X-ATLAS-Max-Automation-Level": max_automation_level,
+                },
             )
         except Exception as exc:  # pragma: no cover - defensive server path
             error = str(exc)
@@ -441,6 +509,10 @@ class AwarenessHandler(BaseHTTPRequestHandler):
                 {"ok": False, "error": "internal_error", "message": error, "category": "server", "retryable": True},
                 request_id=request_id,
                 status=HTTPStatus.INTERNAL_SERVER_ERROR,
+                extra_headers={
+                    "X-ATLAS-Automation-Level": requested_automation_level,
+                    "X-ATLAS-Max-Automation-Level": max_automation_level,
+                },
             )
         finally:
             _prune_old_logs(
@@ -457,6 +529,8 @@ class AwarenessHandler(BaseHTTPRequestHandler):
                 auth_principal=auth_principal,
                 error=error,
                 etag=etag,
+                requested_automation_level=requested_automation_level,
+                max_automation_level=max_automation_level,
             )
 
     def do_GET(self) -> None:  # noqa: N802

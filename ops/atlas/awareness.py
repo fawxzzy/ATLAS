@@ -28,6 +28,8 @@ SEARCH_CONTRACT_VERSION = "atlas.awareness.search.v1"
 FETCH_CONTRACT_VERSION = "atlas.awareness.fetch.v1"
 SESSION_CONTRACT_VERSION = "atlas.awareness.session.v1"
 ARTIFACT_CONTRACT_VERSION = "atlas.awareness.artifact.v1"
+OBSERVE_AUTOMATION_LEVEL = "observe"
+CONTEXT_AUTOMATION_LEVEL = "context"
 
 ALLOWED_FETCH_PREFIXES = [
     "docs/",
@@ -246,6 +248,12 @@ def atlas_status(*, root: Path | None = None, refresh: bool = False) -> dict[str
             if isinstance(status.get("working_memory"), dict)
             else None,
         },
+        "automation_policy": {
+            "surface": "awareness_api",
+            "default_level": OBSERVE_AUTOMATION_LEVEL,
+            "max_level": CONTEXT_AUTOMATION_LEVEL,
+            "read_only": True,
+        },
         "world_model": status.get("world_model"),
     }
 
@@ -393,6 +401,8 @@ def fetch_session(
         "schema_version": SESSION_CONTRACT_VERSION,
         "session_id": session_id,
         "manifest_ref": source_ref,
+        "automation_level": manifest.get("json", {}).get("automation_level") if isinstance(manifest.get("json"), dict) else None,
+        "max_automation_level": manifest.get("json", {}).get("max_automation_level") if isinstance(manifest.get("json"), dict) else None,
         "manifest": manifest.get("json"),
         "descriptor": session_descriptor,
         "status_snapshot_ref": atlas_relative(status_snapshot_path, root=base_root) if status_snapshot_path.exists() else None,
@@ -510,6 +520,8 @@ def search(
                     "key": entry.get("key"),
                     "trust_class": entry.get("trust_class"),
                     "status": entry.get("status"),
+                    "automation_level": entry.get("details", {}).get("automation_level") if isinstance(entry.get("details"), dict) else None,
+                    "max_automation_level": entry.get("details", {}).get("max_automation_level") if isinstance(entry.get("details"), dict) else None,
                 },
                 "_score": score,
             }

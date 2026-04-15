@@ -21,7 +21,7 @@ Current lane posture:
 - read-only first
 - spoken notifications only
 - no ambient hotword
-- no write or apply path
+- no bypass around governed request or approval artifacts
 
 ## Supported Intents
 
@@ -46,15 +46,15 @@ This creates a governed root session via `ops/atlas/run_session.py` and returns 
 
 ### Resume paused session
 
-Current behavior is intentionally narrow:
+Current behavior is root-owned and governed:
 
 - locate a `resume_ready` session
-- fetch the governed session manifest
-- return the merge completion ref and resume-context refs
+- invoke `ops/atlas/resume_session.py`
+- validate merge completion, resume-context, paused handoff refs, `stack_lock_digest`, `tool_id`, and `registry_digest`
+- dispatch the resumed worker through the existing `_stack` path only
+- emit `resume_requested`, `resume_dispatched`, and `resume_completed` or `resume_failed`
 
-It does **not** invoke a direct resume executor because no root-owned resume executor is currently published.
-
-That keeps the voice surface truthful and avoids bypassing the governed loop.
+Voice issues a governed `request_action`. It does not invent a private resume path and it does not execute Lifeline directly.
 
 ### Plan and decision authoring
 
@@ -68,6 +68,7 @@ Watch mode polls the Awareness API and speaks when:
 - a blocked worker appears
 - a merge request remains open
 - a session needs resume follow-up
+- a governed resume fails
 
 ## Commands
 
@@ -110,5 +111,5 @@ Expected properties:
 
 - voice queries return current awareness data
 - read-only sessions still produce governed receipts and snapshots
+- resume uses the same governed root executor as local CLI
 - no voice path bypasses session or approval flow
-

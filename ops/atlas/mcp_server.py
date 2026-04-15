@@ -21,11 +21,16 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from ops.atlas.load_tool_registry import load_awareness_connector_toolset
+from ops.atlas.load_tool_registry import (
+    automation_level_allows,
+    load_awareness_connector_toolset,
+    normalize_automation_level,
+)
 
 SERVER_NAME = "atlas-awareness-mcp"
 SERVER_VERSION = "0.2.0"
 MCP_PROTOCOL_VERSION = "2025-11-05"
+OBSERVE_AUTOMATION_LEVEL = "observe"
 
 
 def utc_now() -> str:
@@ -129,6 +134,7 @@ class MCPServerConfig:
     request_log_dir: Path
     toolset_digest: str | None
     registry_digest: str | None
+    tool_levels: dict[str, str]
 
 
 class MCPHTTPServer(ThreadingHTTPServer):
@@ -153,13 +159,33 @@ def _tool_defs() -> list[dict[str, Any]]:
             "name": tool["name"],
             "description": tool["description"],
             "inputSchema": tool["inputSchema"],
+            "max_automation_level": tool.get("max_automation_level", OBSERVE_AUTOMATION_LEVEL),
         }
         for tool in toolset["tools"]
     ]
 
 
-def call_tool(name: str, arguments: dict[str, Any] | None, *, client: AwarenessApiClient) -> dict[str, Any]:
+def call_tool(
+    name: str,
+    arguments: dict[str, Any] | None,
+    *,
+    client: AwarenessApiClient,
+    tool_levels: dict[str, str],
+) -> dict[str, Any]:
     args = arguments or {}
+    requested_automation_level = normalize_automation_level(
+        args.get("automation_level", OBSERVE_AUTOMATION_LEVEL),
+        "automation_level",
+    )
+    max_automation_level = tool_levels.get(name, OBSERVE_AUTOMATION_LEVEL)
+    if not automation_level_allows(
+        max_level=max_automation_level,
+        requested_level=requested_automation_level,
+    ):
+        raise PermissionError(
+            f"Tool '{name}' rejects automation_level '{requested_automation_level}' above '{max_automation_level}'."
+        )
+
     if name == "search":
         return _content_text(
             client.request_json(
@@ -167,6 +193,7 @@ def call_tool(name: str, arguments: dict[str, Any] | None, *, client: AwarenessA
                 query={
                     "q": str(args.get("query", "")),
                     "limit": max(int(args.get("limit", 10)), 1),
+                    "automation_level": requested_automation_level,
                 },
             )
         )
@@ -174,14 +201,27 @@ def call_tool(name: str, arguments: dict[str, Any] | None, *, client: AwarenessA
         return _content_text(
             client.request_json(
                 "/atlas/artifacts/fetch",
-                query={"id": str(args.get("id", ""))},
+                query={
+                    "id": str(args.get("id", "")),
+                    "automation_level": requested_automation_level,
+                },
             )
         )
     if name == "atlas_status":
-        return _content_text(client.request_json("/atlas/status"))
+        return _content_text(
+            client.request_json(
+                "/atlas/status",
+                query={"automation_level": requested_automation_level},
+            )
+        )
     if name == "atlas_session_fetch":
         session_id = urllib.parse.quote(str(args.get("session_id", "")).strip(), safe="")
-        return _content_text(client.request_json(f"/atlas/sessions/{session_id}"))
+        return _content_text(
+            client.request_json(
+                f"/atlas/sessions/{session_id}",
+                query={"automation_level": requested_automation_level},
+            )
+        )
     if name == "atlas_query_knowledge":
         return _content_text(
             client.request_json(
@@ -189,6 +229,7 @@ def call_tool(name: str, arguments: dict[str, Any] | None, *, client: AwarenessA
                 query={
                     "q": str(args.get("query", "")),
                     "limit": max(int(args.get("limit", 5)), 1),
+                    "automation_level": requested_automation_level,
                 },
             )
         )
@@ -215,6 +256,7 @@ def _handle_message(
     *,
     client: AwarenessApiClient,
     tool_defs: list[dict[str, Any]],
+    tool_levels: dict[str, str],
 ) -> dict[str, Any] | None:
     message_id = payload.get("id")
     method = payload.get("method")
@@ -241,7 +283,7 @@ def _handle_message(
         name = str(params.get("name", "")).strip()
         arguments = params.get("arguments") if isinstance(params.get("arguments"), dict) else {}
         try:
-            return _response(message_id, call_tool(name, arguments, client=client))
+            return _response(message_id, call_tool(name, arguments, client=client, tool_levels=tool_levels))
         except AwarenessApiError as exc:
             if exc.status == HTTPStatus.NOT_FOUND:
                 return _error(message_id, -32001, str(exc))
@@ -249,7 +291,11 @@ def _handle_message(
                 return _error(message_id, -32002, str(exc))
             if exc.status == HTTPStatus.BAD_REQUEST:
                 return _error(message_id, -32602, str(exc))
+            if exc.status == HTTPStatus.FORBIDDEN:
+                return _error(message_id, -32003, str(exc))
             return _error(message_id, -32603, str(exc))
+        except PermissionError as exc:
+            return _error(message_id, -32003, str(exc))
         except ValueError as exc:
             return _error(message_id, -32602, str(exc))
         except Exception as exc:  # pragma: no cover - defensive protocol path
@@ -259,7 +305,12 @@ def _handle_message(
     return _error(message_id, -32601, f"Method not found: {method}")
 
 
-def run_stdio(*, client: AwarenessApiClient, tool_defs: list[dict[str, Any]]) -> int:
+def run_stdio(
+    *,
+    client: AwarenessApiClient,
+    tool_defs: list[dict[str, Any]],
+    tool_levels: dict[str, str],
+) -> int:
     for raw_line in sys.stdin:
         line = raw_line.strip()
         if not line:
@@ -272,7 +323,12 @@ def run_stdio(*, client: AwarenessApiClient, tool_defs: list[dict[str, Any]]) ->
             if not isinstance(payload, dict):
                 response = _error(None, -32600, "Invalid request object.")
             else:
-                response = _handle_message(payload, client=client, tool_defs=tool_defs)
+                response = _handle_message(
+                    payload,
+                    client=client,
+                    tool_defs=tool_defs,
+                    tool_levels=tool_levels,
+                )
         if response is not None:
             sys.stdout.write(json.dumps(response, ensure_ascii=True) + "\n")
             sys.stdout.flush()
@@ -346,6 +402,8 @@ class MCPHandler(BaseHTTPRequestHandler):
         auth_result: str,
         auth_principal: str | None,
         error: str | None,
+        requested_automation_level: str,
+        max_automation_level: str,
     ) -> None:
         today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
         log_path = self._config().request_log_dir / f"{today}.jsonl"
@@ -367,6 +425,8 @@ class MCPHandler(BaseHTTPRequestHandler):
                 "awareness_base_url": self._config().api_client.base_url,
                 "toolset_digest": self._config().toolset_digest,
                 "registry_digest": self._config().registry_digest,
+                "requested_automation_level": requested_automation_level,
+                "max_automation_level": max_automation_level,
                 "error": error,
             },
         )
@@ -376,6 +436,8 @@ class MCPHandler(BaseHTTPRequestHandler):
         started = time.perf_counter()
         status = HTTPStatus.OK
         error: str | None = None
+        requested_automation_level = OBSERVE_AUTOMATION_LEVEL
+        max_automation_level = OBSERVE_AUTOMATION_LEVEL
         try:
             if self.path == "/health":
                 status = self._send_json(
@@ -387,6 +449,7 @@ class MCPHandler(BaseHTTPRequestHandler):
                         "tool_names": [tool["name"] for tool in self._config().tool_defs],
                         "toolset_digest": self._config().toolset_digest,
                         "registry_digest": self._config().registry_digest,
+                        "tool_automation_levels": self._config().tool_levels,
                     },
                     request_id=request_id,
                 )
@@ -407,6 +470,8 @@ class MCPHandler(BaseHTTPRequestHandler):
                 auth_result="not_checked",
                 auth_principal=None,
                 error=error,
+                requested_automation_level=requested_automation_level,
+                max_automation_level=max_automation_level,
             )
 
     def do_POST(self) -> None:  # noqa: N802
@@ -419,6 +484,8 @@ class MCPHandler(BaseHTTPRequestHandler):
         auth_result = "not_checked"
         auth_principal: str | None = None
         error: str | None = None
+        requested_automation_level = OBSERVE_AUTOMATION_LEVEL
+        max_automation_level = OBSERVE_AUTOMATION_LEVEL
 
         try:
             if self.path != "/mcp":
@@ -452,11 +519,18 @@ class MCPHandler(BaseHTTPRequestHandler):
             rpc_method = str(payload.get("method")) if payload.get("method") is not None else None
             params = payload.get("params") if isinstance(payload.get("params"), dict) else {}
             tool_name = str(params.get("name")) if rpc_method == "tools/call" and params.get("name") is not None else None
+            if tool_name:
+                max_automation_level = self._config().tool_levels.get(tool_name, OBSERVE_AUTOMATION_LEVEL)
+                requested_automation_level = normalize_automation_level(
+                    arguments.get("automation_level", OBSERVE_AUTOMATION_LEVEL) if isinstance((arguments := params.get("arguments")), dict) else OBSERVE_AUTOMATION_LEVEL,
+                    "automation_level",
+                )
 
             response = _handle_message(
                 payload,
                 client=self._config().api_client,
                 tool_defs=self._config().tool_defs,
+                tool_levels=self._config().tool_levels,
             )
             if response is None:
                 status = self._send_empty(request_id=request_id)
@@ -494,6 +568,8 @@ class MCPHandler(BaseHTTPRequestHandler):
                 auth_result=auth_result,
                 auth_principal=auth_principal,
                 error=error,
+                requested_automation_level=requested_automation_level,
+                max_automation_level=max_automation_level,
             )
 
     def log_message(self, format: str, *args: object) -> None:  # noqa: A003
@@ -519,6 +595,7 @@ def serve_http(
         request_log_dir=request_log_dir,
         toolset_digest=toolset_digest,
         registry_digest=registry_digest,
+        tool_levels={tool["name"]: str(tool.get("max_automation_level", OBSERVE_AUTOMATION_LEVEL)) for tool in tool_defs},
     )
     print(
         json.dumps(
@@ -531,6 +608,7 @@ def serve_http(
                 "request_log_dir": str(request_log_dir),
                 "toolset_digest": toolset_digest,
                 "registry_digest": registry_digest,
+                "tool_automation_levels": {tool["name"]: str(tool.get("max_automation_level", OBSERVE_AUTOMATION_LEVEL)) for tool in tool_defs},
             },
             indent=2,
         )
@@ -579,13 +657,20 @@ def main(argv: list[str] | None = None) -> int:
             "name": tool["name"],
             "description": tool["description"],
             "inputSchema": tool["inputSchema"],
+            "max_automation_level": tool.get("max_automation_level", OBSERVE_AUTOMATION_LEVEL),
         }
         for tool in toolset["tools"]
     ]
+    tool_levels = {tool["name"]: str(tool.get("max_automation_level", OBSERVE_AUTOMATION_LEVEL)) for tool in tool_defs}
 
     if args.call_tool:
         payload = json.loads(args.args_json) if args.args_json else {}
-        result = call_tool(args.call_tool, payload if isinstance(payload, dict) else {}, client=client)
+        result = call_tool(
+            args.call_tool,
+            payload if isinstance(payload, dict) else {},
+            client=client,
+            tool_levels=tool_levels,
+        )
         print(json.dumps(result, indent=2))
         return 0
 
@@ -611,7 +696,7 @@ def main(argv: list[str] | None = None) -> int:
             registry_digest=toolset.get("registry_digest"),
         )
 
-    return run_stdio(client=client, tool_defs=tool_defs)
+    return run_stdio(client=client, tool_defs=tool_defs, tool_levels=tool_levels)
 
 
 if __name__ == "__main__":
