@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from ops._atlas import atlas_relative, atlas_root
+from ops.atlas.load_tool_registry import load_tool_registry_bundle
 from ops.cortex._artifacts import stable_json_digest, write_json
 
 OBSERVATION_CONTRACT_VERSION = "atlas.observation.v1"
@@ -420,8 +421,36 @@ def load_execution_receipt_payloads(root: Path | None = None) -> dict[str, dict[
     return results
 
 
+def _current_registry_digest(root: Path | None = None) -> str | None:
+    try:
+        bundle = load_tool_registry_bundle(root=(root or atlas_root()).resolve())
+    except Exception:
+        return None
+    digest = _optional_string(bundle.get("registry_digest"))
+    return digest
+
+
+def _is_truthful_superseding_receipt(
+    payload: dict[str, Any],
+    *,
+    source_ref: str,
+    current_registry_digest: str | None,
+) -> bool:
+    repair_basis_refs = payload.get("repair_basis_refs")
+    return (
+        current_registry_digest is not None
+        and _optional_string(payload.get("registry_digest")) == current_registry_digest
+        and _optional_string(payload.get("supersedes_receipt_ref")) == source_ref
+        and isinstance(repair_basis_refs, list)
+        and any(isinstance(item, str) and item.strip() for item in repair_basis_refs)
+        and _optional_string(payload.get("reconciled_at")) is not None
+        and _optional_string(payload.get("reconciled_by_tool_version")) is not None
+    )
+
+
 def execution_receipt_supersession_index(root: Path | None = None) -> dict[str, dict[str, Any]]:
     receipts = load_execution_receipt_payloads(root)
+    current_registry_digest = _current_registry_digest(root)
     superseders: dict[str, list[dict[str, Any]]] = {}
     for source_ref, payload in receipts.items():
         supersedes_ref = _optional_string(payload.get("supersedes_receipt_ref"))
@@ -438,6 +467,18 @@ def execution_receipt_supersession_index(root: Path | None = None) -> dict[str, 
 
     selected: dict[str, dict[str, Any]] = {}
     for source_ref, candidates in superseders.items():
+        truthful_candidates = [
+            item
+            for item in candidates
+            if _is_truthful_superseding_receipt(
+                item["payload"],
+                source_ref=source_ref,
+                current_registry_digest=current_registry_digest,
+            )
+        ]
+        if not truthful_candidates:
+            continue
+        candidates = truthful_candidates
         candidates.sort(
             key=lambda item: (
                 item.get("reconciled_at") or "",
@@ -469,6 +510,85 @@ def resolve_preferred_execution_receipt_ref(
             return current
         current = next_ref
     return current
+
+
+def execution_receipt_residue_records(root: Path | None = None) -> list[dict[str, Any]]:
+    receipts = load_execution_receipt_payloads(root)
+    current_registry_digest = _current_registry_digest(root)
+    grouped: dict[str, list[dict[str, Any]]] = {}
+    for source_ref, payload in receipts.items():
+        supersedes_ref = _optional_string(payload.get("supersedes_receipt_ref"))
+        if not supersedes_ref:
+            continue
+        grouped.setdefault(supersedes_ref, []).append(
+            {
+                "source_ref": source_ref,
+                "payload": payload,
+                "reconciled_at": _optional_string(payload.get("reconciled_at")),
+                "executed_at": _optional_string(payload.get("executed_at")),
+            }
+        )
+
+    residue: list[dict[str, Any]] = []
+    for original_ref, candidates in grouped.items():
+        ordered = sorted(
+            candidates,
+            key=lambda item: (
+                item.get("reconciled_at") or "",
+                item.get("executed_at") or "",
+                item.get("source_ref") or "",
+            ),
+        )
+        canonical: dict[str, Any] | None = None
+        truthful_candidates = [
+            item
+            for item in ordered
+            if _is_truthful_superseding_receipt(
+                item["payload"],
+                source_ref=original_ref,
+                current_registry_digest=current_registry_digest,
+            )
+        ]
+        if truthful_candidates:
+            canonical = truthful_candidates[-1]
+
+        canonical_source_ref = (
+            _optional_string(canonical.get("source_ref")) if isinstance(canonical, dict) else None
+        ) or original_ref
+        for candidate in ordered:
+            candidate_source_ref = _optional_string(candidate.get("source_ref"))
+            if not candidate_source_ref:
+                continue
+            if canonical is not None and candidate_source_ref == canonical_source_ref:
+                continue
+            status = (
+                "superseded_residue"
+                if _is_truthful_superseding_receipt(
+                    candidate["payload"],
+                    source_ref=original_ref,
+                    current_registry_digest=current_registry_digest,
+                )
+                else "retained_residue"
+            )
+            residue.append(
+                {
+                    "source_ref": candidate_source_ref,
+                    "supersedes_receipt_ref": original_ref,
+                    "canonical_source_ref": canonical_source_ref,
+                    "status": status,
+                    "registry_digest": candidate["payload"].get("registry_digest"),
+                    "reconciled_at": candidate["payload"].get("reconciled_at"),
+                    "reconciled_by_tool_version": candidate["payload"].get("reconciled_by_tool_version"),
+                }
+            )
+    residue.sort(
+        key=lambda item: (
+            str(item.get("supersedes_receipt_ref", "")),
+            str(item.get("status", "")),
+            str(item.get("source_ref", "")),
+        )
+    )
+    return residue
 
 
 def main(argv: list[str] | None = None) -> int:

@@ -16,6 +16,7 @@ from ops.atlas.backfill_legacy_runtime_artifacts import backfill_legacy_runtime_
 from ops.atlas.load_tool_registry import load_tool_registry_bundle
 from ops.cortex._artifacts import load_descriptors
 from ops.cortex.index_working_memory import load_working_memory_catalog
+from ops.atlas.observations import execution_receipt_residue_records
 
 STATUS_VERSION = "atlas.cortex.status.v2"
 ACTIVE_SESSION_STATES = {
@@ -321,6 +322,47 @@ def closure_receipts(
             }
         )
     return results
+
+
+def governed_writes(descriptors: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    writes: list[dict[str, Any]] = []
+    residue_refs = {
+        str(item.get("source_ref"))
+        for item in execution_receipt_residue_records(atlas_root())
+        if isinstance(item, dict) and isinstance(item.get("source_ref"), str)
+    }
+    for descriptor in descriptors:
+        if descriptor.get("artifact_type") != "execution_receipt":
+            continue
+        if str(descriptor.get("source_ref", "")) in residue_refs:
+            continue
+        links = descriptor.get("links", {}) if isinstance(descriptor.get("links"), dict) else {}
+        state = descriptor.get("state", {}) if isinstance(descriptor.get("state"), dict) else {}
+        action = links.get("action") if isinstance(links.get("action"), dict) else {}
+        if str(state.get("execution_mode", "")) != "workspace_file_apply":
+            continue
+        writes.append(
+            {
+                "receipt_id": descriptor.get("identity", {}).get("receipt_id"),
+                "source_ref": descriptor.get("source_ref"),
+                "result": state.get("result"),
+                "tool_id": descriptor.get("identity", {}).get("tool_id"),
+                "registry_digest": state.get("registry_digest"),
+                "workspace_root": action.get("workspace_root"),
+                "target_path": action.get("target_path"),
+                "rollback_ref": action.get("rollback_ref"),
+                "prior_sha256": action.get("prior_sha256"),
+                "applied_at": action.get("applied_at") or state.get("executed_at"),
+            }
+        )
+    writes.sort(
+        key=lambda item: (
+            str(item.get("applied_at", "")),
+            str(item.get("source_ref", "")),
+        ),
+        reverse=True,
+    )
+    return writes
 
 
 def trust_surfaces(descriptors: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -811,6 +853,8 @@ def render_status_payload(
     blocked_workers_payload = blocked_workers(descriptors)
     open_merge_requests_payload, merge_request_residue_payload = classify_merge_requests(descriptors)
     closure_receipts_payload = closure_receipts(descriptors, session_descriptor=target_session)
+    execution_receipt_residue_payload = execution_receipt_residue_records(atlas_root())
+    governed_writes_payload = governed_writes(descriptors)
     legacy_compatibility_payload = legacy_compatibility_surfaces(descriptors)
     trust_surfaces_payload = trust_surfaces(descriptors)
 
@@ -823,6 +867,8 @@ def render_status_payload(
         "blocked_workers": blocked_workers_payload,
         "open_merge_requests": open_merge_requests_payload,
         "merge_request_residue": merge_request_residue_payload,
+        "execution_receipt_residue": execution_receipt_residue_payload,
+        "governed_writes": governed_writes_payload,
         "closure_receipts": closure_receipts_payload,
         "legacy_compatibility": legacy_compatibility_payload,
         "trust_surfaces": trust_surfaces_payload,

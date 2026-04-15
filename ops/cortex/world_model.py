@@ -9,6 +9,7 @@ from ops._atlas import atlas_relative, atlas_root, load_repo_registry
 from ops.atlas.observations import (
     GOVERNED_ARTIFACT_EPOCH_LEGACY_PRE_REGISTRY,
     canonical_observation_type,
+    execution_receipt_residue_records,
     emit_observation,
     governed_artifact_epoch_details,
     load_observations,
@@ -173,6 +174,11 @@ def build_inventory_entries(
 ) -> list[dict[str, Any]]:
     entries: list[dict[str, Any]] = []
     repo_registry = load_repo_registry(root=root)
+    execution_receipt_residue = {
+        str(item.get("source_ref")): item
+        for item in execution_receipt_residue_records(root)
+        if isinstance(item, dict) and isinstance(item.get("source_ref"), str)
+    }
 
     for repo_id, repo in sorted(repo_registry.items()):
         entries.append(
@@ -350,6 +356,32 @@ def build_inventory_entries(
                         },
                     )
                 )
+        elif artifact_type == "execution_receipt":
+            links = descriptor.get("links", {}) if isinstance(descriptor.get("links"), dict) else {}
+            action = links.get("action") if isinstance(links.get("action"), dict) else {}
+            residue = execution_receipt_residue.get(source_ref)
+            if str(state.get("execution_mode", "")) == "workspace_file_apply":
+                receipt_id = str(identity.get("receipt_id", "")).strip()
+                if receipt_id:
+                    entries.append(
+                        build_inventory_entry(
+                            entry_type="governed_write",
+                            key=receipt_id,
+                            label=str(action.get("target_path") or receipt_id),
+                            status=str(state.get("result") or "recorded"),
+                            source_ref=source_ref,
+                            trust_class=str(trust_class) if trust_class is not None else None,
+                            details={
+                                "tool_id": identity.get("tool_id"),
+                                "workspace_root": action.get("workspace_root"),
+                                "target_path": action.get("target_path"),
+                                "rollback_ref": action.get("rollback_ref"),
+                                "prior_sha256": action.get("prior_sha256"),
+                                "current_state_role": residue.get("status") if isinstance(residue, dict) else "canonical_current",
+                                "canonical_source_ref": residue.get("canonical_source_ref") if isinstance(residue, dict) else source_ref,
+                            },
+                        )
+                    )
 
         artifact_key = f"{artifact_type}:{source_ref}"
         entries.append(
@@ -364,6 +396,20 @@ def build_inventory_entries(
                     "artifact_type": artifact_type,
                     "digest": descriptor.get("digest"),
                     "schema_ref": descriptor.get("schema_ref"),
+                    **(
+                        {
+                            "current_state_role": execution_receipt_residue[source_ref].get("status"),
+                            "canonical_source_ref": execution_receipt_residue[source_ref].get("canonical_source_ref"),
+                        }
+                        if artifact_type == "execution_receipt" and source_ref in execution_receipt_residue
+                        else (
+                            {
+                                "current_state_role": "canonical_current",
+                            }
+                            if artifact_type == "execution_receipt"
+                            else {}
+                        )
+                    ),
                     **epoch_details,
                 },
             )

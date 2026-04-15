@@ -118,13 +118,28 @@ def action_summary(value: dict[str, Any] | None) -> dict[str, Any]:
     if not isinstance(value, dict):
         return {}
     result: dict[str, Any] = {}
-    for field in ("summary", "operation", "cwd"):
+    for field in ("summary", "operation", "cwd", "workspace_root", "target_path"):
         candidate = value.get(field)
         if isinstance(candidate, str) and candidate.strip():
             result[field] = candidate.strip()
     command = ordered_strings(value.get("command", [])) if isinstance(value.get("command"), list) else []
     if command:
         result["command"] = command
+    return result
+
+
+def write_result_summary(value: Any) -> dict[str, Any]:
+    if not isinstance(value, list) or not value:
+        return {}
+    first = value[0] if isinstance(value[0], dict) else None
+    if not isinstance(first, dict):
+        return {}
+    result: dict[str, Any] = {}
+    for field in ("workspace_root", "target_path", "backup_ref", "prior_sha256", "applied_at"):
+        candidate = first.get(field)
+        if isinstance(candidate, str) and candidate.strip():
+            key = "rollback_ref" if field == "backup_ref" else field
+            result[key] = candidate.strip()
     return result
 
 
@@ -562,6 +577,7 @@ def build_approval_receipt_descriptor(payload: dict[str, Any], *, digest: str, s
 def build_execution_receipt_descriptor(payload: dict[str, Any], *, digest: str, size_bytes: int, source_ref: str) -> dict[str, Any]:
     requested_action = payload.get("requested_action") if isinstance(payload.get("requested_action"), dict) else None
     executed_action = payload.get("executed_action") if isinstance(payload.get("executed_action"), dict) else None
+    write_summary = write_result_summary(payload.get("write_results"))
     return descriptor_base(
         artifact_class="execution",
         artifact_type="execution_receipt",
@@ -600,7 +616,10 @@ def build_execution_receipt_descriptor(payload: dict[str, Any], *, digest: str, 
             "capability_profile_digest": payload.get("capability_profile_digest"),
             "supersedes_receipt_ref": payload.get("supersedes_receipt_ref"),
             "repair_basis_refs": clean_refs(payload.get("repair_basis_refs", [])),
-            "action": action_summary(requested_action or executed_action),
+            "action": {
+                **action_summary(requested_action or executed_action),
+                **write_summary,
+            },
         },
     )
 

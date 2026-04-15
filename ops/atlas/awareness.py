@@ -35,6 +35,7 @@ ALLOWED_FETCH_PREFIXES = [
     "docs/",
     "ops/",
     "runtime/atlas/sessions/",
+    "runtime/atlas/session-workspaces/",
     "runtime/cortex/catalog/knowledge/",
     "runtime/cortex/context/",
     "runtime/cortex/query/knowledge/",
@@ -238,6 +239,7 @@ def atlas_status(*, root: Path | None = None, refresh: bool = False) -> dict[str
             "summary": attention.get("summary"),
         },
         "working_memory": status.get("working_memory"),
+        "governed_writes": status.get("governed_writes"),
         "digests": {
             "registry_digest": status.get("registry", {}).get("registry_digest")
             if isinstance(status.get("registry"), dict)
