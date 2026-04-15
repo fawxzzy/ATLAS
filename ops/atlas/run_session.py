@@ -25,6 +25,10 @@ SESSION_CONTRACT_VERSION = "atlas.session.v1"
 CONTEXT_TOOL_ID = "cortex.build_worker_context"
 SUPERVISION_TOOL_ID = "cortex.supervise_workers"
 READ_ONLY_EXECUTION_TOOL_ID = "read_only_scan"
+OBSERVE_AUTOMATION_LEVEL = "observe"
+CONTEXT_AUTOMATION_LEVEL = "context"
+REQUEST_ACTION_AUTOMATION_LEVEL = "request_action"
+APPROVED_ACTION_AUTOMATION_LEVEL = "approved_action"
 
 
 def utc_now() -> datetime:
@@ -143,6 +147,10 @@ def session_manifest_template(
         "task_id": task_id,
         "scenario": scenario,
         "session_state": "created",
+        "automation_level": OBSERVE_AUTOMATION_LEVEL,
+        "max_automation_level": str(
+            execution_tool.get("max_automation_level") or APPROVED_ACTION_AUTOMATION_LEVEL
+        ),
         "stack_lock_digest": stack_lock_digest,
         "stack_manifest_ref": "stack.yaml",
         "created_at": isoformat(),
@@ -193,6 +201,22 @@ def session_manifest_template(
             "merge_prompt_ref": None,
             "merge_context_ref": None,
             "merge_completion_ref": None,
+            "resume_request_ref": None,
+            "resume_dispatch_ref": None,
+            "resume_run_manifest_ref": None,
+            "resumed_assignment_ref": None,
+            "resumed_running_status_ref": None,
+            "resumed_completed_status_ref": None,
+        },
+        "resume": {
+            "status": "not_requested",
+            "requested_at": None,
+            "requested_worker_id": None,
+            "resume_context_ref": None,
+            "merge_completion_ref": None,
+            "dispatched_at": None,
+            "completed_at": None,
+            "failure_reason": None,
         },
         "completion": {
             "final_status": None,
@@ -295,6 +319,7 @@ def build_privileged_action_request(
 ) -> dict[str, Any]:
     return {
         "contract_version": "atlas.privileged-action.request.v1",
+        "automation_level": REQUEST_ACTION_AUTOMATION_LEVEL,
         "request_id": request_id,
         "requested_at": isoformat(),
         "worker_id": worker_id,
@@ -333,6 +358,7 @@ def build_approval_receipt(
 ) -> dict[str, Any]:
     return {
         "contract_version": "atlas.approval.receipt.v1",
+        "automation_level": APPROVED_ACTION_AUTOMATION_LEVEL,
         "approval_receipt_id": approval_receipt_id,
         "request_id": request["request_id"],
         "worker_id": request["worker_id"],
@@ -456,6 +482,41 @@ def register_session_descriptors(
         output_dir=ROOT / "runtime" / "cortex" / "artifacts",
         root=ROOT,
     )
+
+
+def sync_session_outputs(
+    *,
+    session_root: Path,
+    session_id: str,
+    receipt_root: Path | None,
+    supervisor_root: Path | None,
+) -> dict[str, Any]:
+    written_descriptors = register_session_descriptors(
+        session_root=session_root,
+        receipt_root=receipt_root,
+        supervisor_root=supervisor_root if supervisor_root is not None and supervisor_root.exists() else None,
+    )
+    world_model_summary = write_world_model_state(
+        descriptor_root=ROOT / "runtime" / "cortex" / "artifacts",
+        root=ROOT,
+    )
+    register_artifact_descriptors(
+        [world_model_state_root(ROOT)],
+        output_dir=ROOT / "runtime" / "cortex" / "artifacts",
+        root=ROOT,
+    )
+    status_snapshot = render_status_payload(
+        ROOT / "runtime" / "cortex" / "artifacts",
+        session_id=session_id,
+    )
+    status_snapshot_path = session_root / "status.snapshot.json"
+    write_json(status_snapshot_path, status_snapshot)
+    return {
+        "descriptors": written_descriptors,
+        "world_model_summary": world_model_summary,
+        "status_snapshot": status_snapshot,
+        "status_snapshot_ref": atlas_relative(status_snapshot_path, root=ROOT),
+    }
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -583,6 +644,7 @@ def main(argv: list[str] | None = None) -> int:
             output_path=context_path,
         )
         manifest["session_state"] = "context_built"
+        manifest["automation_level"] = CONTEXT_AUTOMATION_LEVEL
         manifest["worker"]["context_ref"] = atlas_relative(context_path, root=ROOT)
         persist_manifest()
 
@@ -598,6 +660,7 @@ def main(argv: list[str] | None = None) -> int:
         )
         write_json(assignment_path, assignment)
         manifest["session_state"] = "assignment_emitted"
+        manifest["automation_level"] = CONTEXT_AUTOMATION_LEVEL
         manifest["worker"]["assignment_ref"] = atlas_relative(assignment_path, root=ROOT)
         persist_manifest()
         emit_session_state_observation()
@@ -626,6 +689,7 @@ def main(argv: list[str] | None = None) -> int:
             [*manifest["refs"]["status_refs"], atlas_relative(running_status_path, root=ROOT)]
         )
         manifest["session_state"] = "executing"
+        manifest["automation_level"] = CONTEXT_AUTOMATION_LEVEL
         persist_manifest()
         emit_session_state_observation()
 
@@ -647,14 +711,9 @@ def main(argv: list[str] | None = None) -> int:
             extension_id=execution_tool["extension_id"],
             registry_digest=registry_digest,
         )
-        approval = build_approval_receipt(
-            approval_receipt_id=approval_receipt_id,
-            request=request,
-        )
         write_json(request_path, request)
-        write_json(approval_path, approval)
         manifest["refs"]["request_ref"] = atlas_relative(request_path, root=ROOT)
-        manifest["refs"]["approval_receipt_ref"] = atlas_relative(approval_path, root=ROOT)
+        manifest["automation_level"] = REQUEST_ACTION_AUTOMATION_LEVEL
         persist_manifest()
         emit_observation_for_ref(
             observation_type="execution.requested",
@@ -666,8 +725,17 @@ def main(argv: list[str] | None = None) -> int:
                 "worker_id": worker_id,
                 "assignment_id": assignment_id,
                 "tool_id": execution_tool["tool_id"],
+                "automation_level": REQUEST_ACTION_AUTOMATION_LEVEL,
             },
         )
+        approval = build_approval_receipt(
+            approval_receipt_id=approval_receipt_id,
+            request=request,
+        )
+        write_json(approval_path, approval)
+        manifest["refs"]["approval_receipt_ref"] = atlas_relative(approval_path, root=ROOT)
+        manifest["automation_level"] = APPROVED_ACTION_AUTOMATION_LEVEL
+        persist_manifest()
         emit_observation_for_ref(
             observation_type="execution.approval",
             status=str(approval.get("approval_status", "unknown")),
@@ -677,6 +745,7 @@ def main(argv: list[str] | None = None) -> int:
                 "request_id": request_id,
                 "approval_receipt_id": approval_receipt_id,
                 "worker_id": worker_id,
+                "automation_level": APPROVED_ACTION_AUTOMATION_LEVEL,
             },
         )
 
@@ -713,6 +782,7 @@ def main(argv: list[str] | None = None) -> int:
                     "execution_mode": receipt_payload.get("execution_mode"),
                     "worker_id": worker_id,
                     "assignment_id": assignment_id,
+                    "automation_level": APPROVED_ACTION_AUTOMATION_LEVEL,
                 },
             )
             emit_observation_for_ref(
@@ -803,6 +873,7 @@ def main(argv: list[str] | None = None) -> int:
                 for path in supervisor_report.get("written_merge_request_paths", [])
             ]
             manifest["session_state"] = "merge_requested"
+            manifest["automation_level"] = CONTEXT_AUTOMATION_LEVEL
             manifest["refs"]["merge_request_refs"] = unique_refs(merge_request_paths)
             persist_manifest()
             emit_session_state_observation()
@@ -827,6 +898,12 @@ def main(argv: list[str] | None = None) -> int:
             )
             processed = consumer.get("merge_requests", [])
             first_processed = processed[0] if isinstance(processed, list) and processed else {}
+            first_resume_context_ref = None
+            if isinstance(first_processed.get("resume_contexts"), list):
+                for item in first_processed.get("resume_contexts", []):
+                    if isinstance(item, dict) and isinstance(item.get("path"), str) and item.get("path").strip():
+                        first_resume_context_ref = item.get("path")
+                        break
             manifest["refs"]["pause_status_refs"] = unique_refs(
                 item.get("path")
                 for item in first_processed.get("pause_statuses", [])
@@ -845,6 +922,12 @@ def main(argv: list[str] | None = None) -> int:
                 [*manifest["refs"]["status_refs"], *manifest["refs"]["pause_status_refs"]]
             )
             manifest["session_state"] = "resume_ready"
+            manifest["automation_level"] = CONTEXT_AUTOMATION_LEVEL
+            manifest["resume"]["status"] = "resume_ready"
+            manifest["resume"]["requested_worker_id"] = worker_id
+            manifest["resume"]["resume_context_ref"] = first_resume_context_ref
+            manifest["resume"]["merge_completion_ref"] = first_processed.get("completion_path")
+            manifest["resume"]["failure_reason"] = None
             manifest["completion"]["final_status"] = "resume_ready"
             manifest["completion"]["final_status_ref"] = first_processed.get("completion_path")
             persist_manifest()
@@ -872,6 +955,7 @@ def main(argv: list[str] | None = None) -> int:
             )
         else:
             manifest["session_state"] = "completed"
+            manifest["automation_level"] = APPROVED_ACTION_AUTOMATION_LEVEL
             manifest["completion"]["final_status"] = "completed"
             manifest["completion"]["final_status_ref"] = execution.get("worker_status_update_ref")
 
@@ -882,25 +966,12 @@ def main(argv: list[str] | None = None) -> int:
         persist_manifest()
         emit_session_state_observation()
 
-        written_descriptors = register_session_descriptors(
+        sync_summary = sync_session_outputs(
             session_root=session_root,
-            receipt_root=receipt_root,
-            supervisor_root=supervisor_root if supervisor_root.exists() else None,
-        )
-        world_model_summary = write_world_model_state(
-            descriptor_root=ROOT / "runtime" / "cortex" / "artifacts",
-            root=ROOT,
-        )
-        register_artifact_descriptors(
-            [world_model_state_root(ROOT)],
-            output_dir=ROOT / "runtime" / "cortex" / "artifacts",
-            root=ROOT,
-        )
-        status_snapshot = render_status_payload(
-            ROOT / "runtime" / "cortex" / "artifacts",
             session_id=session_id,
+            receipt_root=receipt_root,
+            supervisor_root=supervisor_root,
         )
-        write_json(session_root / "status.snapshot.json", status_snapshot)
 
         print(
             json.dumps(
@@ -911,10 +982,10 @@ def main(argv: list[str] | None = None) -> int:
                     "final_status": manifest["completion"]["final_status"],
                     "execution_receipt_ref": manifest["refs"]["execution_receipt_ref"],
                     "merge_request_refs": manifest["refs"]["merge_request_refs"],
-                    "descriptor_count": len(written_descriptors),
-                    "status_snapshot_ref": atlas_relative(session_root / "status.snapshot.json", root=ROOT),
-                    "world_model_snapshot_ref": world_model_summary["snapshot_ref"],
-                    "world_model_attention_ref": world_model_summary["attention_ref"],
+                    "descriptor_count": len(sync_summary["descriptors"]),
+                    "status_snapshot_ref": sync_summary["status_snapshot_ref"],
+                    "world_model_snapshot_ref": sync_summary["world_model_summary"]["snapshot_ref"],
+                    "world_model_attention_ref": sync_summary["world_model_summary"]["attention_ref"],
                 },
                 indent=2,
             )
@@ -922,6 +993,7 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     except Exception:
         manifest["session_state"] = "failed"
+        manifest["automation_level"] = CONTEXT_AUTOMATION_LEVEL
         manifest["completion"]["final_status"] = "failed"
         manifest["completion"]["final_status_ref"] = manifest["refs"].get("execution_receipt_ref")
         manifest["closed_at"] = isoformat()

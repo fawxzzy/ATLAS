@@ -19,6 +19,13 @@ TOOL_ENTRY_VERSION = "atlas.tool.catalog.entry.v1"
 EXTENSION_ENTRY_VERSION = "atlas.extension.manifest.v1"
 CAPABILITY_PROFILE_VERSION = "atlas.capability.profile.v1"
 AWARENESS_CONNECTOR_SCHEMA_VERSION = "atlas.awareness.connector.toolset.v1"
+AUTOMATION_LEVELS = (
+    "observe",
+    "context",
+    "request_action",
+    "approved_action",
+)
+AUTOMATION_LEVEL_ORDER = {level: index for index, level in enumerate(AUTOMATION_LEVELS)}
 CONNECTOR_TOOL_IDS = [
     "search",
     "fetch",
@@ -109,6 +116,19 @@ def expect_bool(value: Any, field: str) -> bool:
     if not isinstance(value, bool):
         raise ValueError(f"{field} must be a boolean.")
     return value
+
+
+def normalize_automation_level(value: Any, field: str) -> str:
+    level = expect_string(value, field)
+    if level not in AUTOMATION_LEVEL_ORDER:
+        raise ValueError(f"{field} must be one of: {', '.join(AUTOMATION_LEVELS)}.")
+    return level
+
+
+def automation_level_allows(*, max_level: str, requested_level: str) -> bool:
+    normalized_max = normalize_automation_level(max_level, "max_level")
+    normalized_requested = normalize_automation_level(requested_level, "requested_level")
+    return AUTOMATION_LEVEL_ORDER[normalized_requested] <= AUTOMATION_LEVEL_ORDER[normalized_max]
 
 
 def expect_string_list(value: Any, field: str) -> list[str]:
@@ -241,6 +261,10 @@ def normalize_tool_entry(value: Any, *, extension_ids: set[str], index: int) -> 
         "extension_id": extension_id,
         "trust_class": expect_string(entry.get("trust_class"), f"tool_entry[{index}].trust_class"),
         "release_eligible": expect_bool(entry.get("release_eligible"), f"tool_entry[{index}].release_eligible"),
+        "max_automation_level": normalize_automation_level(
+            entry.get("max_automation_level"),
+            f"tool_entry[{index}].max_automation_level",
+        ),
         "executor": {
             "component_id": expect_string(executor.get("component_id"), f"tool_entry[{index}].executor.component_id"),
             "entrypoint": expect_string(executor.get("entrypoint"), f"tool_entry[{index}].executor.entrypoint"),
@@ -425,6 +449,7 @@ def load_awareness_connector_toolset(*, root: Path | None = None) -> dict[str, A
                 "surface_kind": entry["surface_kind"],
                 "trust_class": entry["trust_class"],
                 "release_eligible": entry["release_eligible"],
+                "max_automation_level": entry["max_automation_level"],
                 "registry_digest": bundle["registry_digest"],
                 "executor": entry["executor"],
                 "capability_profile": entry["capability_profile"],

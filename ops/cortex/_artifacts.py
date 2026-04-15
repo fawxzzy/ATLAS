@@ -226,6 +226,7 @@ def descriptor_base(
 def build_session_descriptor(payload: dict[str, Any], *, digest: str, size_bytes: int, source_ref: str) -> dict[str, Any]:
     worker = payload.get("worker", {})
     refs = payload.get("refs", {})
+    resume = payload.get("resume", {}) if isinstance(payload.get("resume"), dict) else {}
     completion = payload.get("completion", {})
     governed_surfaces = payload.get("governed_surfaces", {})
     context_surface = governed_surface_ref(governed_surfaces.get("context"))
@@ -255,6 +256,9 @@ def build_session_descriptor(payload: dict[str, Any], *, digest: str, size_bytes
         state={
             "session_state": payload.get("session_state"),
             "scenario": payload.get("scenario"),
+            "automation_level": payload.get("automation_level"),
+            "max_automation_level": payload.get("max_automation_level"),
+            "resume_status": resume.get("status"),
             "final_status": completion.get("final_status"),
             "updated_at": payload.get("updated_at"),
             "closed_at": payload.get("closed_at"),
@@ -283,6 +287,19 @@ def build_session_descriptor(payload: dict[str, Any], *, digest: str, size_bytes
             "merge_prompt_ref": refs.get("merge_prompt_ref"),
             "merge_context_ref": refs.get("merge_context_ref"),
             "merge_completion_ref": refs.get("merge_completion_ref"),
+            "resume_request_ref": refs.get("resume_request_ref"),
+            "resume_dispatch_ref": refs.get("resume_dispatch_ref"),
+            "resume_run_manifest_ref": refs.get("resume_run_manifest_ref"),
+            "resumed_assignment_ref": refs.get("resumed_assignment_ref"),
+            "resumed_running_status_ref": refs.get("resumed_running_status_ref"),
+            "resumed_completed_status_ref": refs.get("resumed_completed_status_ref"),
+            "resume_context_ref": resume.get("resume_context_ref"),
+            "resume_merge_completion_ref": resume.get("merge_completion_ref"),
+            "resume_requested_at": resume.get("requested_at"),
+            "resume_requested_worker_id": resume.get("requested_worker_id"),
+            "resume_dispatched_at": resume.get("dispatched_at"),
+            "resume_completed_at": resume.get("completed_at"),
+            "resume_failure_reason": resume.get("failure_reason"),
             "close_receipt_refs": clean_refs(completion.get("close_receipt_refs", [])),
             "final_status_ref": completion.get("final_status_ref"),
         },
@@ -490,6 +507,7 @@ def build_privileged_request_descriptor(payload: dict[str, Any], *, digest: str,
             "extension_id": payload.get("extension_id"),
         },
         state={
+            "automation_level": payload.get("automation_level"),
             "requested_at": payload.get("requested_at"),
             "operation": payload.get("action", {}).get("operation") if isinstance(payload.get("action"), dict) else None,
             "capability_profile_id": requested_capability.get("capability_profile_id")
@@ -527,6 +545,7 @@ def build_approval_receipt_descriptor(payload: dict[str, Any], *, digest: str, s
             "extension_id": payload.get("extension_id"),
         },
         state={
+            "automation_level": payload.get("automation_level"),
             "approval_status": payload.get("approval_status"),
             "issued_at": payload.get("issued_at"),
             "expiry_at": payload.get("expiry_at"),
@@ -564,6 +583,7 @@ def build_execution_receipt_descriptor(payload: dict[str, Any], *, digest: str, 
             "extension_id": payload.get("extension_id"),
         },
         state={
+            "automation_level": payload.get("automation_level"),
             "result": payload.get("result"),
             "approval_status": payload.get("approval_status"),
             "execution_mode": payload.get("execution_mode"),
