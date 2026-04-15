@@ -688,12 +688,36 @@ def world_model_state() -> dict[str, Any]:
 
 def working_memory_summary() -> dict[str, Any]:
     catalog = load_working_memory_catalog(atlas_root())
+    items = catalog.get("items", []) if isinstance(catalog.get("items"), list) else []
+    recent_items = sorted(
+        [
+            item
+            for item in items
+            if isinstance(item, dict)
+        ],
+        key=lambda item: (
+            parse_timestamp(item.get("updated_at"))[0],
+            str(item.get("id", "")),
+        ),
+        reverse=True,
+    )[:5]
     return {
         "catalog_ref": catalog.get("output_path"),
         "content_digest": catalog.get("content_digest"),
         "item_count": catalog.get("item_count", 0),
         "kind_counts": catalog.get("kind_counts", {}),
         "status_counts": catalog.get("status_counts", {}),
+        "recent_items": [
+            {
+                "id": item.get("id"),
+                "title": item.get("title"),
+                "memory_kind": item.get("memory_kind"),
+                "status": item.get("status"),
+                "updated_at": item.get("updated_at"),
+                "related_session_refs": item.get("related_session_refs", []),
+            }
+            for item in recent_items
+        ],
     }
 
 

@@ -54,17 +54,18 @@ def ensure_world_model(*, root: Path | None = None, refresh: bool = False) -> di
     base_root = (root or atlas_root()).resolve()
     snapshot_path = snapshot_output_path(base_root)
     attention_path = attention_output_path(base_root)
-    backfill_legacy_runtime_artifacts(root=base_root)
-    summary = write_world_model_state(
-        descriptor_root=base_root / "runtime" / "cortex" / "artifacts",
-        root=base_root,
-    )
-    register_artifact_descriptors(
-        [world_model_state_root(base_root)],
-        output_dir=base_root / "runtime" / "cortex" / "artifacts",
-        root=base_root,
-    )
-    write_json(base_root / "runtime" / "state" / "atlas" / "world-model.last-build.json", summary)
+    if refresh or not snapshot_path.exists() or not attention_path.exists():
+        backfill_legacy_runtime_artifacts(root=base_root)
+        summary = write_world_model_state(
+            descriptor_root=base_root / "runtime" / "cortex" / "artifacts",
+            root=base_root,
+        )
+        register_artifact_descriptors(
+            [world_model_state_root(base_root)],
+            output_dir=base_root / "runtime" / "cortex" / "artifacts",
+            root=base_root,
+        )
+        write_json(base_root / "runtime" / "state" / "atlas" / "world-model.last-build.json", summary)
     return {
         "snapshot_path": snapshot_path,
         "attention_path": attention_path,
@@ -233,6 +234,17 @@ def atlas_status(*, root: Path | None = None, refresh: bool = False) -> dict[str
             "path": atlas_relative(attention_output_path(base_root), root=base_root),
             "content_digest": attention.get("content_digest"),
             "summary": attention.get("summary"),
+        },
+        "working_memory": status.get("working_memory"),
+        "digests": {
+            "registry_digest": status.get("registry", {}).get("registry_digest")
+            if isinstance(status.get("registry"), dict)
+            else None,
+            "world_model_digest": snapshot.get("content_digest"),
+            "attention_digest": attention.get("content_digest"),
+            "working_memory_digest": status.get("working_memory", {}).get("content_digest")
+            if isinstance(status.get("working_memory"), dict)
+            else None,
         },
         "world_model": status.get("world_model"),
     }

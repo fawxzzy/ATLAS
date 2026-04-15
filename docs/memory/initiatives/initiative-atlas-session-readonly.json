@@ -1,0 +1,39 @@
+{
+  "contract_version": "atlas.initiative.v1",
+  "id": "initiative-atlas-session-readonly",
+  "title": "Atlas Session Readonly Initiative",
+  "summary": "Cluster repeated governed sessions under the shared atlas-session-readonly objective so progress survives across session boundaries.",
+  "status": "active",
+  "owner": "stack-root",
+  "created_at": "2026-04-14T05:11:24.816774Z",
+  "updated_at": "2026-04-14T08:08:44.601892Z",
+  "related_session_refs": [
+    "runtime/atlas/sessions/session-atlas-session-readonly-20260414T051124Z/session.manifest.json",
+    "runtime/atlas/sessions/session-atlas-session-readonly-20260414T051300Z/session.manifest.json",
+    "runtime/atlas/sessions/session-atlas-session-readonly-20260414T051531Z/session.manifest.json",
+    "runtime/atlas/sessions/session-atlas-session-readonly-20260414T051626Z/session.manifest.json",
+    "runtime/atlas/sessions/session-atlas-session-readonly-20260414T080843Z/session.manifest.json"
+  ],
+  "related_artifact_refs": [
+    "runtime/lifeline/worker-execution/session-atlas-session-readonly-20260414T051531Z-assignment/receipt-session-atlas-session-readonly-20260414T051531Z-request-1776143733325.json",
+    "runtime/lifeline/worker-execution/session-atlas-session-readonly-20260414T051626Z-assignment/receipt-session-atlas-session-readonly-20260414T051626Z-request-1776143787672.json",
+    "runtime/lifeline/worker-execution/session-atlas-session-readonly-20260414T080843Z-assignment/receipt-session-atlas-session-readonly-20260414T080843Z-request-1776154124391.json"
+  ],
+  "evidence_refs": [
+    "runtime/atlas/sessions/session-atlas-session-readonly-20260414T080843Z/session.manifest.json",
+    "runtime/lifeline/worker-execution/session-atlas-session-readonly-20260414T051531Z-assignment/receipt-session-atlas-session-readonly-20260414T051531Z-request-1776143733325.json",
+    "runtime/lifeline/worker-execution/session-atlas-session-readonly-20260414T051626Z-assignment/receipt-session-atlas-session-readonly-20260414T051626Z-request-1776143787672.json",
+    "runtime/lifeline/worker-execution/session-atlas-session-readonly-20260414T080843Z-assignment/receipt-session-atlas-session-readonly-20260414T080843Z-request-1776154124391.json"
+  ],
+  "supersedes": [],
+  "superseded_by": [],
+  "metadata": {
+    "authoring_source": "session-cluster",
+    "task_id": "atlas-session-readonly",
+    "session_count": 5,
+    "status_counts": {
+      "completed": 3,
+      "failed": 2
+    }
+  }
+}

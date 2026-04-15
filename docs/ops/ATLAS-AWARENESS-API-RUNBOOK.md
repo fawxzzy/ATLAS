@@ -32,7 +32,7 @@ It is the single read model for ChatGPT, voice, CLI, UI, and the hosted MCP brid
 
 - transport: HTTP JSON over a read-only endpoint set
 - source of truth: root world model plus governed receipts and catalogs
-- rebuild rule: every read may refresh the world model and query bundle before serving
+- rebuild rule: reads use the latest emitted world-model artifacts by default and rebuild only when `refresh=true` is requested or the cached world-model files are missing
 - cache posture: digest-backed responses with `ETag`; repeated unchanged reads should stay stable
 - mutation rule: no execution, no write-through, no Lifeline shortcut
 
@@ -40,7 +40,7 @@ The Awareness API is the externalized cognition surface. Clients query it first,
 
 ## Read Model
 
-The API rebuilds the world model before serving requests so current reads stay digest-backed and observation closure is backfilled for historical governed artifacts.
+The API serves the current emitted world model and only rebuilds on demand. That keeps the boundary query-first and avoids turning every read into a full hydrate cycle.
 
 Observation closure currently comes from two lanes:
 
@@ -99,8 +99,12 @@ Supported inputs:
 
 - `--auth-token <token>`
 - `--auth-token-file <path>`
+- `--auth-token-previous <token>`
+- `--auth-token-previous-file <path>`
 - `ATLAS_AWARENESS_TOKEN`
 - `ATLAS_AWARENESS_TOKEN_FILE`
+- `ATLAS_AWARENESS_PREVIOUS_TOKEN`
+- `ATLAS_AWARENESS_PREVIOUS_TOKEN_FILE`
 
 Header:
 
@@ -111,6 +115,27 @@ Fail-closed behavior:
 - remote binds without a token are rejected unless `--allow-unauthenticated` is explicitly set
 - invalid or missing tokens return `401`
 - tokens are never written to disk; request logs store only a token fingerprint
+
+Rotation rule:
+
+- publish a new current token
+- keep the prior token in the previous-token slot during the migration window
+- remove the prior token once all clients have rotated
+
+## Abuse and Retention Controls
+
+Supported server knobs:
+
+- `--request-log-retention-days`
+- `--rate-limit-window-seconds`
+- `--rate-limit-max-requests`
+- `--deployment-profile local-only|hosted`
+
+Behavior:
+
+- request logs are pruned by age
+- rate limiting is enforced per client address
+- error payloads include a stable category and retryability signal
 
 ## Request Logging
 
@@ -126,7 +151,9 @@ Logged fields include:
 - status code
 - duration
 - auth result
+- deployment profile
 - response digest tag when available
+- never raw bearer tokens or sensitive request payload bodies
 
 ## Knowledge Boundary
 
@@ -149,7 +176,7 @@ python ops/atlas/serve_awareness.py --host 127.0.0.1 --port 8765
 Hosted or remote bind:
 
 ```powershell
-python ops/atlas/serve_awareness.py --host 0.0.0.0 --port 8765 --auth-token-file secrets/local/atlas-awareness.token
+python ops/atlas/serve_awareness.py --host 0.0.0.0 --port 8765 --deployment-profile hosted --auth-token-file secrets/local/atlas-awareness.token --auth-token-previous-file secrets/local/atlas-awareness.previous.token
 ```
 
 The server returns JSON only.
@@ -168,19 +195,32 @@ Recommended checks:
 
 ```powershell
 python ops/atlas/serve_awareness.py --host 127.0.0.1 --port 8765 --auth-token local-test
-python -c "import json, urllib.request; req=urllib.request.Request('http://127.0.0.1:8765/atlas/status', headers={'Authorization':'Bearer local-test'}); print(json.loads(urllib.request.urlopen(req).read().decode())['schema_version'])"
+python ops/atlas/check_awareness_health.py --base-url http://127.0.0.1:8765 --auth-token local-test
 python -c "import json, urllib.request; req=urllib.request.Request('http://127.0.0.1:8765/atlas/artifacts/fetch?id=knowledge:personal--verta-core', headers={'Authorization':'Bearer local-test'}); payload=json.loads(urllib.request.urlopen(req).read().decode()); print('metadata-only' if 'withheld' in payload['text'] else 'unexpected')"
 python ops/validation/validate_stack.py --ratchet
 ```
 
 Expected properties:
 
-- repeated status reads return digest-backed snapshot data
+- repeated authenticated status reads return digest-backed snapshot data
 - repeated identical status reads keep the same `ETag` until source state changes
 - knowledge fetch for Verta returns metadata-only content
 - observation store exists under `runtime/state/atlas/observations/**`
 - request logs appear under `runtime/atlas/awareness/requests/**`
 - ratchet stays green
+
+## Health Endpoint
+
+`GET /health` returns:
+
+- service name
+- deployment profile
+- auth-required flag
+- request-log retention days
+- rate-limit configuration
+- digests for registry, world model, attention, and working memory
+
+Remote clients should use these digests to reason about staleness instead of assuming every response is freshly recomputed.
 
 ## Non-Goals
 

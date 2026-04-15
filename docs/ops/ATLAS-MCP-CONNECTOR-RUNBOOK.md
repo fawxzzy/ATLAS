@@ -21,6 +21,12 @@ The bridge supports two transports:
 
 The bridge never reads ATLAS state directly when serving tools. It calls the Awareness API and inherits its query and fetch policy.
 
+Hosted health also exposes:
+
+- `tool_names`
+- `toolset_digest`
+- `registry_digest`
+
 ## Tools
 
 The bridge exposes these tools:
@@ -69,7 +75,7 @@ python ops/atlas/mcp_server.py --serve-http --host 0.0.0.0 --port 8766 --awarene
 Health check:
 
 ```powershell
-python -c "import json, urllib.request; req=urllib.request.Request('http://127.0.0.1:8766/health', headers={'Authorization':'Bearer local-test'}); print(json.loads(urllib.request.urlopen(req).read().decode())['service'])"
+python -c "import json, urllib.request; req=urllib.request.Request('http://127.0.0.1:8766/health', headers={'Authorization':'Bearer mcp-test'}); print(json.loads(urllib.request.urlopen(req).read().decode())['toolset_digest'])"
 ```
 
 ## Tool Intent
@@ -122,6 +128,8 @@ Logged fields include:
 - duration
 - auth result
 - awareness base URL
+- toolset digest
+- registry digest
 
 ## Trust Boundary
 
@@ -157,12 +165,14 @@ Minimum verification:
 python ops/atlas/mcp_server.py --awareness-url http://127.0.0.1:8765 --awareness-auth-token local-test --call-tool atlas_status
 python ops/atlas/mcp_server.py --awareness-url http://127.0.0.1:8765 --awareness-auth-token local-test --call-tool search --args-json "{\"query\":\"resume ready\",\"limit\":5}"
 python ops/atlas/mcp_server.py --awareness-url http://127.0.0.1:8765 --awareness-auth-token local-test --call-tool fetch --args-json "{\"id\":\"knowledge:personal--verta-core\"}"
+python -c "import json, urllib.request; req=urllib.request.Request('http://127.0.0.1:8766/health', headers={'Authorization':'Bearer mcp-test'}); payload=json.loads(urllib.request.urlopen(req).read().decode()); print(payload['registry_digest'])"
 python ops/validation/validate_stack.py --ratchet
 ```
 
 Expected behavior:
 
 - tool list is stable
+- hosted health reports the same registry-backed tool allowlist every time until the registry changes
 - search returns real ATLAS artifacts or attention items
 - fetch returns governed text, not raw quarantined content
 - hosted HTTP mode logs requests under `runtime/atlas/mcp/requests/**`

@@ -94,7 +94,7 @@ python .\ops\atlas\reconcile_governed_runtime_artifacts.py --apply
 Repair privileged-action receipts truthfully:
 
 ```powershell
-pnpm -C .\repos\fawxzzy-lifeline repair:privileged-receipts -- --atlas-root C:\ATLAS
+pnpm -C .\repos\fawxzzy-lifeline repair:privileged-receipts -- --atlas-root .
 ```
 
 The utility writes its latest report to:

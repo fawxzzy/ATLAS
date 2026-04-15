@@ -19,6 +19,12 @@ ATLAS should aim for this stricter invariant:
 
 If behavior depends on state that exists only in one process memory, one terminal scrollback, or one person's recollection, the system is not awareness-first yet.
 
+Client rule:
+
+- ATLAS is the source of truth
+- chat, voice, CLI, dashboards, and hosted connectors are clients
+- clients query awareness first and hydrate narrower artifacts second
+
 ## World-Model Layers
 
 | Layer | Question answered | Current ATLAS surface | Required rule |
@@ -81,6 +87,7 @@ Rules:
 - documents must cite their explicit source files or receipt lanes when they summarize runtime truth
 - document updates must not pretend to be raw event history
 - structured working memory must use typed contracts for plans, decisions, initiatives, and hypotheses
+- transcript residue is not memory
 
 ## Compaction Rule
 
@@ -223,6 +230,7 @@ Required behavior:
 - each item stays small, linked, and superseding rather than acting as a second knowledge junk drawer
 - runtime catalog output at `runtime/cortex/catalog/memory/working-memory.latest.json` must be rebuildable from those source documents
 - working-memory artifacts must carry stable digests and provenance fields so world-model snapshots can cite them directly
+- deterministic authoring tools may create or update working-memory items from governed session closure evidence, but they must stay transcript-free and idempotent
 
 Boundary rule:
 
@@ -238,6 +246,7 @@ Any external chat, voice, or app connector must bind to the same governed model:
 
 - discoverable surfaces come from the registry, not ad hoc prompts
 - reads consume snapshots, catalogs, and descriptors where possible
+- clients should query first, then hydrate narrower artifacts only when needed
 - writes or execution requests flow through Lifeline or another approved executor
 - privileged actions still require approval and receipts
 

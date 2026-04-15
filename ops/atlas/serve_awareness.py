@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import argparse
+from collections import defaultdict
 import hashlib
 import json
 import os
 import sys
 import time
 import uuid
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -57,19 +58,50 @@ def _token_fingerprint(token: str) -> str:
     return hashlib.sha256(token.encode("utf-8")).hexdigest()[:16]
 
 
-def _load_auth_token(args: argparse.Namespace) -> str | None:
-    if isinstance(args.auth_token, str) and args.auth_token.strip():
-        return args.auth_token.strip()
-    env_token = os.environ.get("ATLAS_AWARENESS_TOKEN", "").strip()
+def _load_optional_token(
+    *,
+    direct_value: str | None,
+    file_value: str | None,
+    env_key: str,
+    env_file_key: str,
+) -> str | None:
+    if isinstance(direct_value, str) and direct_value.strip():
+        return direct_value.strip()
+    env_token = os.environ.get(env_key, "").strip()
     if env_token:
         return env_token
-    token_file = args.auth_token_file or os.environ.get("ATLAS_AWARENESS_TOKEN_FILE")
+    token_file = file_value or os.environ.get(env_file_key)
     if token_file:
         token_path = Path(str(token_file)).expanduser().resolve()
         token = token_path.read_text(encoding="utf-8").strip()
         if token:
             return token
     return None
+
+
+def _load_auth_tokens(args: argparse.Namespace) -> list[str]:
+    values = [
+        _load_optional_token(
+            direct_value=args.auth_token,
+            file_value=args.auth_token_file,
+            env_key="ATLAS_AWARENESS_TOKEN",
+            env_file_key="ATLAS_AWARENESS_TOKEN_FILE",
+        ),
+        _load_optional_token(
+            direct_value=args.auth_token_previous,
+            file_value=args.auth_token_previous_file,
+            env_key="ATLAS_AWARENESS_PREVIOUS_TOKEN",
+            env_file_key="ATLAS_AWARENESS_PREVIOUS_TOKEN_FILE",
+        ),
+    ]
+    unique: list[str] = []
+    seen: set[str] = set()
+    for value in values:
+        if not isinstance(value, str) or not value.strip() or value in seen:
+            continue
+        seen.add(value)
+        unique.append(value)
+    return unique
 
 
 def _is_loopback_host(host: str) -> bool:
@@ -89,10 +121,46 @@ def _append_jsonl(path: Path, payload: dict[str, Any]) -> None:
         handle.write(json.dumps(payload, ensure_ascii=True) + "\n")
 
 
+def _prune_old_logs(path: Path, *, retention_days: int) -> None:
+    if retention_days <= 0 or not path.exists():
+        return
+    cutoff = time.time() - (retention_days * 86400)
+    for candidate in path.glob("*.jsonl"):
+        try:
+            if candidate.stat().st_mtime < cutoff:
+                candidate.unlink()
+        except OSError:
+            continue
+
+
+@dataclass(slots=True)
+class AwarenessRateLimiter:
+    window_seconds: int
+    max_requests: int
+    hits: dict[str, list[float]] = field(default_factory=lambda: defaultdict(list))
+
+    def check(self, key: str) -> int | None:
+        if self.max_requests <= 0 or self.window_seconds <= 0:
+            return None
+        now = time.time()
+        window_floor = now - self.window_seconds
+        bucket = [value for value in self.hits.get(key, []) if value >= window_floor]
+        self.hits[key] = bucket
+        if len(bucket) >= self.max_requests:
+            retry_after = max(1, int(self.window_seconds - (now - bucket[0])))
+            return retry_after
+        bucket.append(now)
+        self.hits[key] = bucket
+        return None
+
+
 @dataclass(slots=True)
 class AwarenessServerConfig:
-    auth_token: str | None
+    auth_tokens: list[str]
     request_log_dir: Path
+    deployment_profile: str
+    request_log_retention_days: int
+    rate_limiter: AwarenessRateLimiter
 
 
 class AwarenessHTTPServer(ThreadingHTTPServer):
@@ -116,13 +184,13 @@ class AwarenessHandler(BaseHTTPRequestHandler):
         return None
 
     def _authenticate(self) -> tuple[bool, str, str | None]:
-        auth_token = self._config().auth_token
-        if not auth_token:
+        auth_tokens = self._config().auth_tokens
+        if not auth_tokens:
             return True, "not_required", None
         presented = self._client_token()
         if not presented:
             return False, "missing", None
-        if presented != auth_token:
+        if presented not in auth_tokens:
             return False, "invalid", _token_fingerprint(presented)
         return True, "ok", _token_fingerprint(presented)
 
@@ -137,9 +205,10 @@ class AwarenessHandler(BaseHTTPRequestHandler):
     ) -> int:
         if etag and self.headers.get("If-None-Match") == etag:
             self.send_response(HTTPStatus.NOT_MODIFIED)
-            self.send_header("Cache-Control", "no-store")
+            self.send_header("Cache-Control", "private, no-store")
             self.send_header("ETag", etag)
             self.send_header("X-ATLAS-Request-Id", request_id)
+            self.send_header("X-ATLAS-Deployment-Profile", self._config().deployment_profile)
             if extra_headers:
                 for key, value in extra_headers.items():
                     self.send_header(key, value)
@@ -150,8 +219,9 @@ class AwarenessHandler(BaseHTTPRequestHandler):
         self.send_response(status)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(encoded)))
-        self.send_header("Cache-Control", "no-store")
+        self.send_header("Cache-Control", "private, no-store")
         self.send_header("X-ATLAS-Request-Id", request_id)
+        self.send_header("X-ATLAS-Deployment-Profile", self._config().deployment_profile)
         if etag:
             self.send_header("ETag", etag)
         if extra_headers:
@@ -188,9 +258,10 @@ class AwarenessHandler(BaseHTTPRequestHandler):
                 "query_shape": _query_shape(query),
                 "status": int(status),
                 "duration_ms": round(duration_ms, 3),
-                "auth_required": self._config().auth_token is not None,
+                "auth_required": bool(self._config().auth_tokens),
                 "auth_result": auth_result,
                 "auth_principal": auth_principal,
+                "deployment_profile": self._config().deployment_profile,
                 "etag": etag,
                 "error": error,
             },
@@ -210,14 +281,50 @@ class AwarenessHandler(BaseHTTPRequestHandler):
         etag: str | None = None
 
         try:
+            remote_addr = self.client_address[0] if self.client_address else "unknown"
+            retry_after = self._config().rate_limiter.check(remote_addr)
+            if retry_after is not None:
+                status = self._send_json(
+                    {
+                        "ok": False,
+                        "error": "rate_limited",
+                        "message": "The ATLAS Awareness API rate limit was exceeded for this client.",
+                        "category": "abuse-control",
+                        "retryable": True,
+                    },
+                    request_id=request_id,
+                    status=HTTPStatus.TOO_MANY_REQUESTS,
+                    extra_headers={"Retry-After": str(retry_after)},
+                )
+                return
+
             if parsed.path == "/health":
+                payload = atlas_status(refresh=False)
+                etag = "|".join(
+                    str(item)
+                    for item in [
+                        payload.get("digests", {}).get("registry_digest") if isinstance(payload.get("digests"), dict) else None,
+                        payload.get("digests", {}).get("world_model_digest") if isinstance(payload.get("digests"), dict) else None,
+                        payload.get("digests", {}).get("attention_digest") if isinstance(payload.get("digests"), dict) else None,
+                        payload.get("digests", {}).get("working_memory_digest") if isinstance(payload.get("digests"), dict) else None,
+                    ]
+                    if isinstance(item, str) and item
+                ) or None
                 status = self._send_json(
                     {
                         "ok": True,
                         "service": "atlas-awareness",
-                        "auth_required": self._config().auth_token is not None,
+                        "auth_required": bool(self._config().auth_tokens),
+                        "deployment_profile": self._config().deployment_profile,
+                        "request_log_retention_days": self._config().request_log_retention_days,
+                        "rate_limit": {
+                            "window_seconds": self._config().rate_limiter.window_seconds,
+                            "max_requests": self._config().rate_limiter.max_requests,
+                        },
+                        "digests": payload.get("digests"),
                     },
                     request_id=request_id,
+                    etag=etag,
                 )
                 return
 
@@ -228,6 +335,8 @@ class AwarenessHandler(BaseHTTPRequestHandler):
                         "ok": False,
                         "error": "unauthorized",
                         "message": "A valid bearer token is required for the ATLAS Awareness API.",
+                        "category": "auth",
+                        "retryable": False,
                     },
                     request_id=request_id,
                     status=HTTPStatus.UNAUTHORIZED,
@@ -306,6 +415,8 @@ class AwarenessHandler(BaseHTTPRequestHandler):
                     "ok": False,
                     "error": "not_found",
                     "path": parsed.path,
+                    "category": "routing",
+                    "retryable": False,
                 },
                 request_id=request_id,
                 status=HTTPStatus.NOT_FOUND,
@@ -313,25 +424,29 @@ class AwarenessHandler(BaseHTTPRequestHandler):
         except FileNotFoundError as exc:
             error = str(exc)
             status = self._send_json(
-                {"ok": False, "error": "not_found", "message": error},
+                {"ok": False, "error": "not_found", "message": error, "category": "lookup", "retryable": False},
                 request_id=request_id,
                 status=HTTPStatus.NOT_FOUND,
             )
         except ValueError as exc:
             error = str(exc)
             status = self._send_json(
-                {"ok": False, "error": "bad_request", "message": error},
+                {"ok": False, "error": "bad_request", "message": error, "category": "client-contract", "retryable": False},
                 request_id=request_id,
                 status=HTTPStatus.BAD_REQUEST,
             )
         except Exception as exc:  # pragma: no cover - defensive server path
             error = str(exc)
             status = self._send_json(
-                {"ok": False, "error": "internal_error", "message": error},
+                {"ok": False, "error": "internal_error", "message": error, "category": "server", "retryable": True},
                 request_id=request_id,
                 status=HTTPStatus.INTERNAL_SERVER_ERROR,
             )
         finally:
+            _prune_old_logs(
+                self._config().request_log_dir,
+                retention_days=self._config().request_log_retention_days,
+            )
             self._log_request(
                 request_id=request_id,
                 route=route,
@@ -357,23 +472,38 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--port", type=int, default=int(os.environ.get("ATLAS_AWARENESS_PORT", "8765")))
     parser.add_argument("--auth-token")
     parser.add_argument("--auth-token-file")
+    parser.add_argument("--auth-token-previous")
+    parser.add_argument("--auth-token-previous-file")
     parser.add_argument("--allow-unauthenticated", action="store_true")
+    parser.add_argument("--deployment-profile", choices=["local-only", "hosted"])
+    parser.add_argument("--request-log-retention-days", type=int, default=int(os.environ.get("ATLAS_AWARENESS_REQUEST_LOG_RETENTION_DAYS", "14")))
+    parser.add_argument("--rate-limit-window-seconds", type=int, default=int(os.environ.get("ATLAS_AWARENESS_RATE_LIMIT_WINDOW_SECONDS", "60")))
+    parser.add_argument("--rate-limit-max-requests", type=int, default=int(os.environ.get("ATLAS_AWARENESS_RATE_LIMIT_MAX_REQUESTS", "120")))
     parser.add_argument(
         "--request-log-dir",
         default=str(ROOT / "runtime" / "atlas" / "awareness" / "requests"),
     )
     args = parser.parse_args(argv)
 
-    auth_token = _load_auth_token(args)
-    if auth_token is None and not args.allow_unauthenticated and not _is_loopback_host(args.host):
+    auth_tokens = _load_auth_tokens(args)
+    deployment_profile = args.deployment_profile or ("local-only" if _is_loopback_host(args.host) else "hosted")
+    if not auth_tokens and not args.allow_unauthenticated and not _is_loopback_host(args.host):
         parser.error(
             "Remote ATLAS Awareness API binds require --auth-token or --auth-token-file unless --allow-unauthenticated is set."
         )
 
+    request_log_dir = Path(args.request_log_dir).resolve()
+    _prune_old_logs(request_log_dir, retention_days=args.request_log_retention_days)
     server = AwarenessHTTPServer((args.host, args.port), AwarenessHandler)
     server.atlas_config = AwarenessServerConfig(
-        auth_token=auth_token,
-        request_log_dir=Path(args.request_log_dir).resolve(),
+        auth_tokens=auth_tokens,
+        request_log_dir=request_log_dir,
+        deployment_profile=deployment_profile,
+        request_log_retention_days=args.request_log_retention_days,
+        rate_limiter=AwarenessRateLimiter(
+            window_seconds=args.rate_limit_window_seconds,
+            max_requests=args.rate_limit_max_requests,
+        ),
     )
     print(
         json.dumps(
@@ -381,8 +511,13 @@ def main(argv: list[str] | None = None) -> int:
                 "host": args.host,
                 "port": args.port,
                 "service": "atlas-awareness",
-                "auth_required": auth_token is not None,
+                "auth_required": bool(auth_tokens),
+                "deployment_profile": deployment_profile,
+                "token_rotation_enabled": len(auth_tokens) > 1,
                 "request_log_dir": str(server.atlas_config.request_log_dir),
+                "request_log_retention_days": args.request_log_retention_days,
+                "rate_limit_window_seconds": args.rate_limit_window_seconds,
+                "rate_limit_max_requests": args.rate_limit_max_requests,
             },
             indent=2,
         )

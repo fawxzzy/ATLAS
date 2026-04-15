@@ -93,6 +93,135 @@ class Finding:
     details: dict[str, Any] | None = None
 
 
+DEBT_CLASS_CONFIG = [
+    {
+        "id": "repo-local-config-gaps",
+        "categories": {
+            "missing-repo-path",
+            "repo-path-not-directory",
+            "repo-path-not-git-root",
+            "missing-readme",
+        },
+    },
+    {
+        "id": "path-discipline-leaks",
+        "categories": {
+            "windows-user-path",
+            "windows-user-path-alt",
+            "unix-home-path",
+            "atlas-root-path",
+            "atlas-root-path-alt",
+        },
+    },
+    {
+        "id": "lock-registry-hygiene",
+        "categories": {
+            "unregistered-git-root",
+            "missing-stack-lockfile",
+            "invalid-stack-lockfile",
+            "stack-lock-drift",
+            "stack-lock-missing-ref",
+            "stack-lock-pin-drift",
+            "stack-lock-worktree-drift",
+            "stack-lock-metadata-drift",
+            "stack-lock-component-membership-drift",
+            "stack-lock-component-trust",
+            "stack-lock-component-release",
+            "stack-lock-excluded-surface-membership-drift",
+            "stack-lock-excluded-surface-drift",
+            "stack-lock-excluded-surface-release",
+            "stack-lock-excluded-surface-trust",
+            "playbook-enforcement-untracked",
+            "playbook-enforcement-tracking-check-failed",
+        },
+        "prefixes": [
+            "stack-lock-",
+            "gitdir-hygiene-",
+            "execution-receipt-repair-",
+        ],
+    },
+    {
+        "id": "missing-agents-codex-defaults",
+        "categories": {
+            "missing-agents",
+            "missing-codex-config",
+        },
+    },
+    {
+        "id": "historical-stack-baseline-residue",
+        "categories": {
+            "mutable-state-in-repo",
+            "mutable-artifact-in-repo-root",
+            "capture-artifact-in-repo-root",
+            "repo-local-secret-material",
+        },
+    },
+]
+ENV_EXAMPLE_MARKERS = (".example", ".sample", ".template", ".dist")
+
+
+def classify_debt_class(category: str) -> str:
+    for config in DEBT_CLASS_CONFIG:
+        if category in config.get("categories", set()):
+            return str(config["id"])
+        for prefix in config.get("prefixes", []):
+            if category.startswith(str(prefix)):
+                return str(config["id"])
+    return "governed-surface-contracts"
+
+
+def is_repo_local_secret_candidate(path: Path) -> bool:
+    name = path.name.lower()
+    if name == ".env":
+        return True
+    if not name.startswith(".env."):
+        return False
+    suffix = name.removeprefix(".env.")
+    return not any(marker in suffix for marker in ENV_EXAMPLE_MARKERS)
+
+
+def summarize_debt_classes(findings: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    buckets: dict[str, dict[str, Any]] = {}
+    for finding in findings:
+        category = str(finding.get("category", ""))
+        debt_class = classify_debt_class(category)
+        bucket = buckets.setdefault(
+            debt_class,
+            {
+                "class_id": debt_class,
+                "total": 0,
+                "blocking_total": 0,
+                "severity_counts": Counter(),
+                "category_counts": Counter(),
+            },
+        )
+        bucket["total"] += 1
+        if finding.get("severity") in {"critical", "error"}:
+            bucket["blocking_total"] += 1
+        bucket["severity_counts"][str(finding.get("severity", "unknown"))] += 1
+        bucket["category_counts"][category] += 1
+    summarized: list[dict[str, Any]] = []
+    for debt_class in sorted(buckets):
+        bucket = buckets[debt_class]
+        summarized.append(
+            {
+                "class_id": debt_class,
+                "total": bucket["total"],
+                "blocking_total": bucket["blocking_total"],
+                "severity_counts": dict(sorted(bucket["severity_counts"].items())),
+                "category_counts": dict(sorted(bucket["category_counts"].items())),
+            }
+        )
+    return summarized
+
+
+def debt_class_counts(findings: list[dict[str, Any]]) -> dict[str, int]:
+    counts: Counter[str] = Counter()
+    for finding in findings:
+        counts[classify_debt_class(str(finding.get("category", "")))] += 1
+    return dict(sorted(counts.items()))
+
+
 def parse_scalar(value: str) -> Any:
     lowered = value.lower()
     if lowered == "true":
@@ -1404,6 +1533,8 @@ def build_findings(stack_file: Path, config: dict[str, Any], *, lock_file_overri
                 rel = normalize_slashes(str(candidate.relative_to(root)))
                 findings.append(Finding("warning", "mutable-state-in-repo", rel, "Mutable or generated state is present inside a repo path.", {"repo_id": repo_id, "state_path": relative_dir}))
         for env_candidate in list(repo_path.glob(".env")) + list(repo_path.glob(".env.*")):
+            if not is_repo_local_secret_candidate(env_candidate):
+                continue
             findings.append(Finding("warning", "repo-local-secret-material", normalize_slashes(str(env_candidate.relative_to(root))), "Repo-local environment file detected; secrets should not be part of default exports.", {"repo_id": repo_id}))
         for pattern in ROOT_LOG_PATTERNS:
             for file_path in repo_path.glob(pattern):
@@ -1611,6 +1742,7 @@ def write_markdown_report(report: dict[str, Any], output_path: Path) -> None:
     summary = report["summary"]
     findings = report["findings"]
     ratchet = report.get("ratchet")
+    debt_classes = report.get("debt_classes") if isinstance(report.get("debt_classes"), list) else []
     lines = [
         "# ATLAS Stack Validation Report",
         "",
@@ -1628,6 +1760,18 @@ def write_markdown_report(report: dict[str, Any], output_path: Path) -> None:
         f"- Total: {summary['total']}",
         "",
     ]
+    if debt_classes:
+        lines += [
+            "## Debt Classes",
+            "",
+        ]
+        for item in debt_classes:
+            if not isinstance(item, dict):
+                continue
+            lines.append(
+                f"- `{item.get('class_id')}`: total={item.get('total', 0)}, blocking={item.get('blocking_total', 0)}, categories={len(item.get('category_counts') or {})}"
+            )
+        lines.append("")
     if isinstance(ratchet, dict):
         lines += [
             "## Ratchet",
@@ -1637,6 +1781,8 @@ def write_markdown_report(report: dict[str, Any], output_path: Path) -> None:
             f"- Baseline findings: {ratchet.get('baseline_finding_count', 0)}",
             f"- Current blocking findings: {ratchet.get('current_blocking_count', 0)}",
             f"- New blocking findings: {ratchet.get('new_blocking_count', 0)}",
+            f"- Inherited blocking classes: `{json.dumps(ratchet.get('inherited_blocking_by_class', {}), sort_keys=True)}`",
+            f"- New blocking classes: `{json.dumps(ratchet.get('new_blocking_by_class', {}), sort_keys=True)}`",
             "",
         ]
         new_blocking = ratchet.get("new_blocking_findings") or []
@@ -1745,6 +1891,10 @@ def ratchet_report(current_findings: list[dict[str, Any]], baseline: dict[str, A
         item for item in blocking
         if finding_baseline_key(item) not in baseline_keys
     ]
+    inherited_blocking = [
+        item for item in blocking
+        if finding_baseline_key(item) in baseline_keys
+    ]
     return {
         "enabled": True,
         "baseline_path": baseline_relpath(stack_file, baseline_path),
@@ -1752,6 +1902,9 @@ def ratchet_report(current_findings: list[dict[str, Any]], baseline: dict[str, A
         "baseline_finding_count": len(baseline_entries),
         "current_blocking_count": len(blocking),
         "new_blocking_count": len(new_blocking),
+        "current_blocking_by_class": debt_class_counts(blocking),
+        "inherited_blocking_by_class": debt_class_counts(inherited_blocking),
+        "new_blocking_by_class": debt_class_counts(new_blocking),
         "new_blocking_findings": [normalize_finding_for_baseline(item) for item in new_blocking],
     }
 
@@ -1853,6 +2006,7 @@ def main(argv: list[str] | None = None) -> int:
             "repo_ids": sorted(config.get("repo_registry", {}).keys()),
             "findings": [asdict(item) for item in findings],
         }
+        report["debt_classes"] = summarize_debt_classes(report["findings"])
     except Exception as exc:
         output_dir.mkdir(parents=True, exist_ok=True)
         report = {
@@ -1864,6 +2018,7 @@ def main(argv: list[str] | None = None) -> int:
             "repo_ids": [],
             "findings": [asdict(Finding("critical", "validator-crash", normalize_slashes(str(stack_file)), f"Validator failed before completion: {exc}"))],
         }
+        report["debt_classes"] = summarize_debt_classes(report["findings"])
     if args.write_baseline:
         baseline_path.parent.mkdir(parents=True, exist_ok=True)
         baseline = build_baseline(report, stack_file=stack_file)

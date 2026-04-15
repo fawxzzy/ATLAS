@@ -127,6 +127,8 @@ class MCPServerConfig:
     api_client: AwarenessApiClient
     tool_defs: list[dict[str, Any]]
     request_log_dir: Path
+    toolset_digest: str | None
+    registry_digest: str | None
 
 
 class MCPHTTPServer(ThreadingHTTPServer):
@@ -363,6 +365,8 @@ class MCPHandler(BaseHTTPRequestHandler):
                 "auth_result": auth_result,
                 "auth_principal": auth_principal,
                 "awareness_base_url": self._config().api_client.base_url,
+                "toolset_digest": self._config().toolset_digest,
+                "registry_digest": self._config().registry_digest,
                 "error": error,
             },
         )
@@ -380,6 +384,9 @@ class MCPHandler(BaseHTTPRequestHandler):
                         "service": SERVER_NAME,
                         "auth_required": self._config().auth_token is not None,
                         "awareness_base_url": self._config().api_client.base_url,
+                        "tool_names": [tool["name"] for tool in self._config().tool_defs],
+                        "toolset_digest": self._config().toolset_digest,
+                        "registry_digest": self._config().registry_digest,
                     },
                     request_id=request_id,
                 )
@@ -501,6 +508,8 @@ def serve_http(
     request_log_dir: Path,
     client: AwarenessApiClient,
     tool_defs: list[dict[str, Any]],
+    toolset_digest: str | None,
+    registry_digest: str | None,
 ) -> int:
     server = MCPHTTPServer((host, port), MCPHandler)
     server.mcp_config = MCPServerConfig(
@@ -508,6 +517,8 @@ def serve_http(
         api_client=client,
         tool_defs=tool_defs,
         request_log_dir=request_log_dir,
+        toolset_digest=toolset_digest,
+        registry_digest=registry_digest,
     )
     print(
         json.dumps(
@@ -518,6 +529,8 @@ def serve_http(
                 "auth_required": server_auth_token is not None,
                 "awareness_base_url": client.base_url,
                 "request_log_dir": str(request_log_dir),
+                "toolset_digest": toolset_digest,
+                "registry_digest": registry_digest,
             },
             indent=2,
         )
@@ -560,7 +573,15 @@ def main(argv: list[str] | None = None) -> int:
         base_url=str(args.awareness_url).rstrip("/"),
         auth_token=awareness_auth_token,
     )
-    tool_defs = _tool_defs()
+    toolset = load_awareness_connector_toolset(root=ROOT)
+    tool_defs = [
+        {
+            "name": tool["name"],
+            "description": tool["description"],
+            "inputSchema": tool["inputSchema"],
+        }
+        for tool in toolset["tools"]
+    ]
 
     if args.call_tool:
         payload = json.loads(args.args_json) if args.args_json else {}
@@ -586,6 +607,8 @@ def main(argv: list[str] | None = None) -> int:
             request_log_dir=Path(args.request_log_dir).resolve(),
             client=client,
             tool_defs=tool_defs,
+            toolset_digest=toolset.get("toolset_digest"),
+            registry_digest=toolset.get("registry_digest"),
         )
 
     return run_stdio(client=client, tool_defs=tool_defs)

@@ -430,9 +430,21 @@ def load_awareness_connector_toolset(*, root: Path | None = None) -> dict[str, A
                 "capability_profile": entry["capability_profile"],
             }
         )
-    return {
+    toolset_body = {
         "schema_version": AWARENESS_CONNECTOR_SCHEMA_VERSION,
         "registry_digest": bundle["registry_digest"],
+        "tools": [
+            {
+                "name": tool["name"],
+                "description": tool["description"],
+                "inputSchema": tool["inputSchema"],
+            }
+            for tool in tools
+        ],
+    }
+    return {
+        **toolset_body,
+        "toolset_digest": stable_json_digest(toolset_body),
         "tools": tools,
     }
 

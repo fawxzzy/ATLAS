@@ -48,7 +48,7 @@ Required rules:
 - detect the actual owning repo first
 - preview first
 - fail clearly when `.git` access or remote auth is blocked
-- never treat `C:\ATLAS` as the commit target
+- never treat the ATLAS root path as the commit target unless the root `stack` repo was intentionally resolved
 
 ## Level 4: Stack Memory And Retention
 

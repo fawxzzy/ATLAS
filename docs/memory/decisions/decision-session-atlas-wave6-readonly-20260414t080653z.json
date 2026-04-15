@@ -1,0 +1,37 @@
+{
+  "contract_version": "atlas.decision.v1",
+  "id": "decision-session-atlas-wave6-readonly-20260414t080653z",
+  "title": "Atlas Wave6 Readonly Decision",
+  "summary": "Session session-atlas-wave6-readonly-20260414T080653Z established a governed closure record for atlas-wave6-readonly with final status 'completed'.",
+  "status": "accepted",
+  "owner": "stack-root",
+  "created_at": "2026-04-14T08:06:54.640757Z",
+  "updated_at": "2026-04-14T08:06:54.640757Z",
+  "related_session_refs": [
+    "runtime/atlas/sessions/session-atlas-wave6-readonly-20260414T080653Z/session.manifest.json"
+  ],
+  "related_artifact_refs": [
+    "runtime/atlas/sessions/session-atlas-wave6-readonly-20260414T080653Z/artifacts/privileged-action.request.json",
+    "runtime/atlas/sessions/session-atlas-wave6-readonly-20260414T080653Z/artifacts/approval.receipt.json",
+    "runtime/lifeline/worker-execution/session-atlas-wave6-readonly-20260414T080653Z-assignment/receipt-session-atlas-wave6-readonly-20260414T080653Z-request-1776154014415.json",
+    "runtime/atlas/sessions/session-atlas-wave6-readonly-20260414T080653Z/artifacts/worker.execution.receipt-session-atlas-wave6-readonly-20260414t080653z-request-1776154014415.json",
+    "runtime/atlas/sessions/session-atlas-wave6-readonly-20260414T080653Z/artifacts/worker.status.running.json",
+    "runtime/atlas/sessions/session-atlas-wave6-readonly-20260414T080653Z/artifacts/worker.status.execution.receipt-session-atlas-wave6-readonly-20260414t080653z-request-1776154014415.json"
+  ],
+  "evidence_refs": [
+    "runtime/atlas/sessions/session-atlas-wave6-readonly-20260414T080653Z/session.manifest.json",
+    "runtime/atlas/sessions/session-atlas-wave6-readonly-20260414T080653Z/status.snapshot.json",
+    "runtime/atlas/sessions/session-atlas-wave6-readonly-20260414T080653Z/artifacts/worker.status.execution.receipt-session-atlas-wave6-readonly-20260414t080653z-request-1776154014415.json",
+    "runtime/lifeline/worker-execution/session-atlas-wave6-readonly-20260414T080653Z-assignment/receipt-session-atlas-wave6-readonly-20260414T080653Z-request-1776154014415.json"
+  ],
+  "supersedes": [],
+  "superseded_by": [],
+  "metadata": {
+    "authoring_source": "session-closure",
+    "decision_type": "session-closure",
+    "task_id": "atlas-wave6-readonly",
+    "session_id": "session-atlas-wave6-readonly-20260414T080653Z",
+    "scenario": "read_only",
+    "final_status": "completed"
+  }
+}

@@ -54,7 +54,7 @@ components:
     remote: "https://github.com/ZachariahRedfield/fawxzzy-mazer.git"
     ref_type: "branch"
     ref: "codex/mazer-d2-learning-scorer"
-    commit: "22f60e830c76991de925dd9814ca8e108156026f"
+    commit: "14030d60edeb95de308e61b3c68050c1c2f342f3"
     dirty: true
     trust_class: "trusted"
     release_eligible: true
@@ -66,7 +66,7 @@ components:
     ref_type: "branch"
     ref: "main"
     commit: "ce9643465d69f76a46d92d0db6ed855d117e1bbd"
-    dirty: false
+    dirty: true
     trust_class: "trusted"
     release_eligible: false
   playbook:
@@ -98,7 +98,7 @@ components:
     remote: null
     ref_type: "branch"
     ref: "master"
-    commit: "983ae190db936a7e1e25bf9b6f52b2cce3c6ac74"
+    commit: "2b5057eef043342eac031e5226e23da60b8f9b8a"
     dirty: true
     trust_class: "trusted"
     release_eligible: false
@@ -109,7 +109,7 @@ components:
     remote: null
     ref_type: "branch"
     ref: "codex/fstrm-wave2-contract-freeze"
-    commit: "aed4e6c732b32695557c544c18eccde30b1a8184"
+    commit: "e5e3a89e436b24fe12fb4b6927b70d8915a8fcbe"
     dirty: true
     trust_class: "trusted"
     release_eligible: false
@@ -126,4 +126,4 @@ excluded_surfaces:
     trust_class: "untrusted"
     release_eligible: false
     reason: "Token-bearing Verta checkout remains quarantined and untrusted until scrub and rotation are complete."
-lock_digest: "sha256:bcfb099c46c79b83344a461d81df61171e1bede1b19dc68c8673bb5f6d1de3c2"
+lock_digest: "sha256:e6c4b73d11b2bb2e08c162c24d69170625a98a5c1abcc34b2204abb6476bb59e"

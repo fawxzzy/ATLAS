@@ -1,0 +1,48 @@
+{
+  "contract_version": "atlas.hypothesis.v1",
+  "id": "hypothesis-atlas-session-conflict",
+  "title": "Atlas Session Conflict Hypothesis",
+  "summary": "Session session-atlas-session-conflict-20260414T080843Z remains unresolved with final status 'resume_ready', so the next operator pass should test the recorded resume and closure evidence rather than recreating private state.",
+  "status": "active",
+  "owner": "stack-root",
+  "created_at": "2026-04-14T08:08:45.736556Z",
+  "updated_at": "2026-04-14T08:08:45.736556Z",
+  "related_session_refs": [
+    "runtime/atlas/sessions/session-atlas-session-conflict-20260414T080843Z/session.manifest.json"
+  ],
+  "related_artifact_refs": [
+    "runtime/atlas/sessions/session-atlas-session-conflict-20260414T080843Z/artifacts/privileged-action.request.json",
+    "runtime/atlas/sessions/session-atlas-session-conflict-20260414T080843Z/artifacts/approval.receipt.json",
+    "runtime/lifeline/worker-execution/session-atlas-session-conflict-20260414T080843Z-assignment/receipt-session-atlas-session-conflict-20260414T080843Z-request-1776154124391.json",
+    "runtime/atlas/sessions/session-atlas-session-conflict-20260414T080843Z/artifacts/worker.execution.receipt-session-atlas-session-conflict-20260414t080843z-request-1776154124391.json",
+    "runtime/atlas/sessions/session-atlas-session-conflict-20260414T080843Z/artifacts/merge/merge-request-6c16d4cdfc862069/worker.assignment.merge.json",
+    "runtime/atlas/sessions/session-atlas-session-conflict-20260414T080843Z/artifacts/merge/merge-request-6c16d4cdfc862069/merge.prompt.md",
+    "runtime/cortex/context/assignment-merge-request-6c16d4cdfc862069.json",
+    "runtime/atlas/sessions/session-atlas-session-conflict-20260414T080843Z/artifacts/merge/merge-request-6c16d4cdfc862069/completion.json",
+    "runtime/atlas/sessions/session-atlas-session-conflict-20260414T080843Z/artifacts/worker.status.running.json",
+    "runtime/atlas/sessions/session-atlas-session-conflict-20260414T080843Z/artifacts/worker.status.execution.receipt-session-atlas-session-conflict-20260414t080843z-request-1776154124391.json",
+    "runtime/atlas/sessions/session-atlas-session-conflict-20260414T080843Z/artifacts/worker.status.completed.json",
+    "runtime/atlas/sessions/session-atlas-session-conflict-20260414T080843Z/artifacts/worker.status.paused.merge-request-6c16d4cdfc862069.json",
+    "runtime/cortex/supervisor/session-atlas-session-conflict-20260414T080843Z/merge-request-6c16d4cdfc862069.json",
+    "runtime/atlas/sessions/session-atlas-session-conflict-20260414T080843Z/artifacts/merge/merge-request-6c16d4cdfc862069/resume-context.session-atlas-session-conflict-20260414T080843Z-worker.json",
+    "runtime/atlas/sessions/session-atlas-session-conflict-20260414T080843Z/artifacts/merge/merge-request-6c16d4cdfc862069/resume-context.session-atlas-session-conflict-20260414T080843Z-worker-fixture.json"
+  ],
+  "evidence_refs": [
+    "runtime/atlas/sessions/session-atlas-session-conflict-20260414T080843Z/session.manifest.json",
+    "runtime/atlas/sessions/session-atlas-session-conflict-20260414T080843Z/status.snapshot.json",
+    "runtime/atlas/sessions/session-atlas-session-conflict-20260414T080843Z/artifacts/merge/merge-request-6c16d4cdfc862069/completion.json",
+    "runtime/lifeline/worker-execution/session-atlas-session-conflict-20260414T080843Z-assignment/receipt-session-atlas-session-conflict-20260414T080843Z-request-1776154124391.json"
+  ],
+  "supersedes": [],
+  "superseded_by": [],
+  "metadata": {
+    "authoring_source": "session-unresolved",
+    "task_id": "atlas-session-conflict",
+    "session_id": "session-atlas-session-conflict-20260414T080843Z",
+    "final_status": "resume_ready",
+    "resume_context_refs": [
+      "runtime/atlas/sessions/session-atlas-session-conflict-20260414T080843Z/artifacts/merge/merge-request-6c16d4cdfc862069/resume-context.session-atlas-session-conflict-20260414T080843Z-worker.json",
+      "runtime/atlas/sessions/session-atlas-session-conflict-20260414T080843Z/artifacts/merge/merge-request-6c16d4cdfc862069/resume-context.session-atlas-session-conflict-20260414T080843Z-worker-fixture.json"
+    ]
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "contract_version": "atlas.plan.v1",
+  "id": "wave-9-operator-productization-and-debt-burndown",
+  "title": "Wave 9 Operator Productization And Debt Burn-Down",
+  "summary": "Shift ATLAS from core platform correction into operator productization, explicit inherited-debt separation, awareness-first client surfaces, and one later narrow write path only after the read and receipt loop is boringly trustworthy.",
+  "status": "active",
+  "owner": "stack-root",
+  "created_at": "2026-04-14T21:20:00Z",
+  "updated_at": "2026-04-14T21:20:00Z",
+  "related_session_refs": [],
+  "related_artifact_refs": [],
+  "evidence_refs": [
+    "docs/architecture/AWARENESS-FIRST-WORLD-MODEL.md",
+    "docs/memory/decisions/awareness-first-clients.json",
+    "docs/ops/STACK-LOCKFILE.md",
+    "docs/ops/ATLAS-WORKING-MEMORY-RUNBOOK.md"
+  ],
+  "supersedes": [],
+  "superseded_by": [],
+  "metadata": {
+    "milestone": "wave-9",
+    "phase": "operator-productization",
+    "lanes": [
+      "root-debt-burn-down",
+      "session-to-memory-authoring",
+      "voice-shell",
+      "hosted-awareness-hardening",
+      "scoped-write-progression"
+    ],
+    "frozen_rules": [
+      "atlas-is-source-of-truth",
+      "working-memory-is-structured",
+      "read-surfaces-scale-before-write-surfaces"
+    ]
+  }
+}

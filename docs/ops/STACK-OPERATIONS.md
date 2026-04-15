@@ -43,6 +43,7 @@ Purpose:
 - detect common absolute-path leaks
 - detect obvious mutable state left inside repos
 - support a committed validation baseline for ratcheting
+- classify inherited debt separately from new regressions
 - write markdown and json reports
 
 Default report location:
@@ -75,6 +76,17 @@ python .\ops\validation\validate_stack.py --ratchet
 Default baseline path:
 
 - `ops/validation/stack-validation.baseline.json`
+
+Debt tracking docs:
+
+- `docs/audits/STACK-DEBT-LEDGER.md`
+- `docs/backlog/STACK-DEBT-BURNDOWN.md`
+
+Ratchet rule:
+
+- inherited blocking findings stay visible by debt class
+- only new blocking findings fail a healthy ratchet run
+- governed-surface regressions are not debt and should not be normalized away
 
 Knowledge-lane validation:
 

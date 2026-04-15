@@ -25,6 +25,7 @@ Generator:
 Validation:
 
 - `ops/validation/validate_stack.py`
+- debt reporting: `runtime/receipts/validation/stack-validation.latest.json`
 
 ## Schema
 
@@ -132,6 +133,12 @@ Policy:
 - intentional stack-state change: regenerate `stack.lock.yaml`, then rerun validation
 - unintentional drift or unknown repo movement: fail validation and reconcile the repo state first
 - identical repo state with differing lock output: treat that as a generator/validator bug and fix normalization before refreshing the file
+
+Ratchet rule:
+
+- lock refresh is allowed for intentional working-set changes
+- lock refresh must not be used to hide unrelated inherited debt
+- inherited debt is tracked through the debt ledger and ratchet classes, not by changing the lock alone
 
 ## Dirty State Policy
 
