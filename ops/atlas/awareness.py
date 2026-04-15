@@ -34,6 +34,7 @@ SEARCH_CONTRACT_VERSION = "atlas.awareness.search.v1"
 FETCH_CONTRACT_VERSION = "atlas.awareness.fetch.v1"
 SESSION_CONTRACT_VERSION = "atlas.awareness.session.v1"
 ARTIFACT_CONTRACT_VERSION = "atlas.awareness.artifact.v1"
+VOICE_CONTRACT_VERSION = "atlas.awareness.voice.v1"
 OBSERVE_AUTOMATION_LEVEL = "observe"
 CONTEXT_AUTOMATION_LEVEL = "context"
 
@@ -44,6 +45,7 @@ ALLOWED_FETCH_PREFIXES = [
     "runtime/atlas/sessions/",
     "runtime/atlas/proposed-sessions/",
     "runtime/atlas/session-workspaces/",
+    "runtime/atlas/voice/",
     "runtime/cortex/catalog/knowledge/",
     "runtime/cortex/context/",
     "runtime/cortex/query/knowledge/",
@@ -638,6 +640,175 @@ def fetch_conversation_turn(
         "descriptor": turn_descriptor,
         "observations": observations,
         "inventory_entries": related_inventory,
+    }
+
+
+def _voice_notification(
+    *,
+    key: str,
+    category: str,
+    summary: str,
+    source_ref: str | None,
+    kind: str,
+) -> dict[str, Any]:
+    return {
+        "key": key,
+        "category": category,
+        "kind": kind,
+        "summary": summary,
+        "source_ref": source_ref,
+    }
+
+
+def _voice_session_notification(active_session: dict[str, Any] | None) -> dict[str, Any] | None:
+    if not isinstance(active_session, dict):
+        return None
+    session_id = str(active_session.get("session_id") or "").strip()
+    state = str(active_session.get("final_status") or active_session.get("session_state") or "").strip()
+    if not session_id or not state:
+        return None
+    lowered = state.lower()
+    if lowered in {"completed", "complete", "succeeded", "success", "merged", "closed"}:
+        return _voice_notification(
+            key=f"completion:{session_id}:{lowered}",
+            category="completion",
+            kind="session_completion",
+            summary=f"Session {session_id} completed with state {state}.",
+            source_ref=str(active_session.get("source_ref") or "") or None,
+        )
+    if lowered in {"blocked", "resume_failed", "failed"}:
+        return _voice_notification(
+            key=f"blocked:{session_id}:{lowered}",
+            category="blocked",
+            kind="session_blocked",
+            summary=f"Session {session_id} is blocked with state {state}.",
+            source_ref=str(active_session.get("source_ref") or "") or None,
+        )
+    if lowered in {"approval_pending", "awaiting_approval"}:
+        return _voice_notification(
+            key=f"approval:{session_id}:{lowered}",
+            category="approval_needed",
+            kind="session_approval_pending",
+            summary=f"Session {session_id} is waiting on approval.",
+            source_ref=str(active_session.get("source_ref") or "") or None,
+        )
+    return None
+
+
+def _voice_attention_category(kind: str) -> str | None:
+    if kind in {"conversation_action_request", "initiative_open_attention", "execution_approval_pending"}:
+        return "approval_needed"
+    if kind in {"blocked_worker", "resume_failed", "session_needs_resume", "open_merge_request"}:
+        return "blocked"
+    return None
+
+
+def _voice_attention_notifications(
+    attention_items: list[dict[str, Any]],
+    *,
+    conversation_id: str | None,
+) -> list[dict[str, Any]]:
+    notifications: list[dict[str, Any]] = []
+    conversation_token = f"/conversations/{conversation_id}/" if conversation_id else None
+    for item in attention_items:
+        if not isinstance(item, dict):
+            continue
+        kind = str(item.get("kind") or "").strip()
+        category = _voice_attention_category(kind)
+        if category is None:
+            continue
+        source_ref = str(item.get("source_ref") or "").strip() or None
+        if kind == "conversation_action_request" and conversation_token and source_ref:
+            normalized_ref = source_ref.replace("\\", "/")
+            if conversation_token not in normalized_ref:
+                continue
+        attention_id = str(item.get("attention_id") or "").strip()
+        summary = str(item.get("summary") or kind or "attention").strip()
+        notifications.append(
+            _voice_notification(
+                key=f"{category}:{attention_id or kind}:{source_ref or ''}",
+                category=category,
+                kind=kind,
+                summary=summary,
+                source_ref=source_ref,
+            )
+        )
+    return notifications
+
+
+def voice_runtime(
+    *,
+    root: Path | None = None,
+    refresh: bool = False,
+    conversation_id: str | None = None,
+) -> dict[str, Any]:
+    base_root = (root or atlas_root()).resolve()
+    status = atlas_status(root=base_root, refresh=refresh)
+    attention_payload = list_attention(root=base_root, refresh=refresh, limit=25)
+    active_session = status.get("active_session") if isinstance(status.get("active_session"), dict) else None
+    attention_items = attention_payload.get("items", []) if isinstance(attention_payload.get("items"), list) else []
+    notifications = _voice_attention_notifications(attention_items, conversation_id=conversation_id)
+    session_notification = _voice_session_notification(active_session)
+    if session_notification is not None:
+        notifications.insert(0, session_notification)
+
+    conversation_payload = None
+    if isinstance(conversation_id, str) and conversation_id.strip():
+        try:
+            conversation_payload = fetch_conversation(conversation_id.strip(), root=base_root, refresh=refresh)
+        except FileNotFoundError:
+            conversation_payload = None
+
+    conversation_view = None
+    if isinstance(conversation_payload, dict):
+        manifest = conversation_payload.get("manifest") if isinstance(conversation_payload.get("manifest"), dict) else {}
+        turns = conversation_payload.get("turns", []) if isinstance(conversation_payload.get("turns"), list) else []
+        conversation_view = {
+            "conversation_id": conversation_payload.get("conversation_id"),
+            "manifest_ref": conversation_payload.get("manifest_ref"),
+            "summary": manifest.get("summary"),
+            "recent_turns": [
+                {
+                    "turn_id": turn.get("turn_id"),
+                    "created_at": turn.get("created_at"),
+                    "input_summary": turn.get("input_summary"),
+                    "response_summary": turn.get("response_summary"),
+                    "action_mode": turn.get("provenance", {}).get("action_mode")
+                    if isinstance(turn.get("provenance"), dict)
+                    else None,
+                }
+                for turn in turns[-4:]
+                if isinstance(turn, dict)
+            ],
+        }
+
+    initiatives = status.get("initiatives") if isinstance(status.get("initiatives"), dict) else {}
+    conversations = status.get("conversations") if isinstance(status.get("conversations"), dict) else {}
+    return {
+        "schema_version": VOICE_CONTRACT_VERSION,
+        "conversation_id": conversation_id,
+        "digests": status.get("digests"),
+        "active_session": active_session,
+        "attention_summary": {
+            "item_count": attention_payload.get("item_count"),
+            "content_digest": attention_payload.get("attention_content_digest"),
+        },
+        "notifications": notifications,
+        "initiatives": {
+            "active_items": initiatives.get("active_items", [])[:5]
+            if isinstance(initiatives.get("active_items"), list)
+            else [],
+            "open_attention_items": initiatives.get("open_attention_items", [])[:5]
+            if isinstance(initiatives.get("open_attention_items"), list)
+            else [],
+        },
+        "conversations": {
+            "active_count": conversations.get("active_count"),
+            "recent_items": conversations.get("recent_items", [])[:5]
+            if isinstance(conversations.get("recent_items"), list)
+            else [],
+        },
+        "conversation": conversation_view,
     }
 
 

@@ -177,6 +177,24 @@ Conversation turns are also first-class Awareness entities by id:
 - `conversation:<conversation_id>`
 - `conversation_turn:<turn_id>`
 
+## Voice Read Model
+
+The Awareness API also exposes a thin voice-oriented read surface at `/atlas/voice`.
+
+It does not invent private state. It repackages existing status, attention, and conversation truth for local operator clients.
+
+Current output includes:
+
+- digests for registry / world model / attention / working memory
+- the current active session summary
+- filtered voice notification items in `completion`, `approval_needed`, and `blocked`
+- recent active initiatives and open-attention initiatives
+- the requested conversation's recent grounded turns when `conversation_id` is supplied
+
+That lets voice stay query-first instead of carrying a hidden prompt residue blob.
+
+Voice validation logs under `runtime/atlas/voice/runs/**` are operator audit artifacts, not canonical status truth.
+
 ## Open Merge Rule
 
 A merge request remains open until a registered `atlas.stack.supervisor-consumer.v1` descriptor closes the same `merge_request_id`.

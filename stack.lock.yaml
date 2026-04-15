@@ -10,8 +10,8 @@ components:
     remote: null
     ref_type: "branch"
     ref: "main"
-    commit: "aca112a95acea7107ccd3352a54157db50604d4d"
-    dirty: true
+    commit: "05b5ff9f195ad3e7f81676529b2d7892a1b095c6"
+    dirty: false
     trust_class: "trusted"
     release_eligible: false
   atlas:
@@ -21,7 +21,7 @@ components:
     remote: null
     ref_type: "branch"
     ref: "main"
-    commit: "14fb5ccd8d7285f9d84d7cb3e82165b997f84686"
+    commit: "d1ac68aa7ce1bb72d413f03f20561b1fe46edd95"
     dirty: true
     trust_class: "trusted"
     release_eligible: true
@@ -32,7 +32,7 @@ components:
     remote: "https://github.com/ZachariahRedfield/FawxzzyFitness.git"
     ref_type: "branch"
     ref: "main"
-    commit: "7103c418ac551bb7f8e882920b0e99c14619e59c"
+    commit: "724cafea9b58ecda583aedae5045954689e2c3ce"
     dirty: false
     trust_class: "trusted"
     release_eligible: true
@@ -43,8 +43,8 @@ components:
     remote: "https://github.com/ZachariahRedfield/fawxzzy-lifeline.git"
     ref_type: "branch"
     ref: "codex/startup-public-truth-reconcile"
-    commit: "76cea9821374543875052119640de538640c780f"
-    dirty: true
+    commit: "7a3ed573dd391eb9429f2f2d158046de4cfaa9a1"
+    dirty: false
     trust_class: "trusted"
     release_eligible: true
   mazer:
@@ -54,7 +54,7 @@ components:
     remote: "https://github.com/ZachariahRedfield/fawxzzy-mazer.git"
     ref_type: "branch"
     ref: "codex/mazer-d2-learning-scorer"
-    commit: "acdeed78c60a3681b64f56fe9721547ae7099a32"
+    commit: "a9c6019b9af7a01592d9149bc41b30a3b9fc4cd5"
     dirty: true
     trust_class: "trusted"
     release_eligible: true
@@ -76,7 +76,7 @@ components:
     remote: "https://github.com/ZachariahRedfield/fawxzzy-playbook.git"
     ref_type: "branch"
     ref: "codex/assistant-reliability-safety-playbook-clean"
-    commit: "021cb65b262fee0a59c464af367739629c99d574"
+    commit: "8820810af93069d98db8c4b03900a5fa2cb732e1"
     dirty: true
     trust_class: "trusted"
     release_eligible: true
@@ -98,7 +98,7 @@ components:
     remote: null
     ref_type: "branch"
     ref: "master"
-    commit: "817d3b39c5540d30d0d80e7c863de58188f09cd0"
+    commit: "202e2af189a1bb087b7f14d8cf6489f8a83e415a"
     dirty: true
     trust_class: "trusted"
     release_eligible: false
@@ -108,8 +108,8 @@ components:
     status: "incubating"
     remote: null
     ref_type: "branch"
-    ref: "codex/fstrm-wave2-contract-freeze"
-    commit: "3def5649d92d73ac8d35c788d3b95dde0d49a22d"
+    ref: "codex/fstrm-wave3-surface-base"
+    commit: "2152063d8d1ce7293e088f51c2053146cdf44033"
     dirty: false
     trust_class: "trusted"
     release_eligible: false
@@ -126,4 +126,4 @@ excluded_surfaces:
     trust_class: "untrusted"
     release_eligible: false
     reason: "Token-bearing Verta checkout remains quarantined and untrusted until scrub and rotation are complete."
-lock_digest: "sha256:095e1d1b3bb09aede86a0952041cecf70ae0c19b7c1a18396c41940bc4c00ca1"
+lock_digest: "sha256:05c333770847a7a81ab439d1e557365f865f97ec6e5e8d8d8409bdbe1b702e90"

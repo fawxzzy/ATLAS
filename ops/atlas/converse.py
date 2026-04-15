@@ -52,6 +52,33 @@ def trim_text(value: str, limit: int = 220) -> str:
     return compact if len(compact) <= limit else f"{compact[: limit - 3]}..."
 
 
+def split_response_segments(value: str, *, segment_limit: int = 220) -> list[str]:
+    text = " ".join(value.split()).strip()
+    if not text:
+        return []
+    sentences = re.split(r"(?<=[.!?])\s+", text)
+    segments: list[str] = []
+    for sentence in sentences:
+        cleaned = sentence.strip()
+        if not cleaned:
+            continue
+        if len(cleaned) <= segment_limit:
+            segments.append(cleaned)
+            continue
+        words = cleaned.split(" ")
+        chunk = ""
+        for word in words:
+            candidate = f"{chunk} {word}".strip()
+            if chunk and len(candidate) > segment_limit:
+                segments.append(chunk)
+                chunk = word
+            else:
+                chunk = candidate
+        if chunk:
+            segments.append(chunk)
+    return segments
+
+
 def unique_strings(values: list[Any]) -> list[str]:
     ordered: list[str] = []
     seen: set[str] = set()
@@ -430,11 +457,14 @@ def run_conversation_turn(
         turn_context=turn_context,
     )
     write_json(turn_path, turn_payload)
-    refresh_descriptors_and_world_model(root)
 
     authored_memory_refs: list[str] = []
     proposed_session_refs: list[str] = []
-    if str(turn_payload.get("provenance", {}).get("action_mode")) == "proposal_required":
+    action_mode = str(turn_payload.get("provenance", {}).get("action_mode"))
+    if action_mode == "proposal_required":
+        # Proposal-seeking turns need one early rebuild so the derived attention
+        # queue can see the newly written turn before proposal authoring begins.
+        refresh_descriptors_and_world_model(root)
         attention_ref = known_attention_ref_for_turn(root, turn_ref)
         if attention_ref:
             initiative_ref = ensure_conversation_initiative(
@@ -445,7 +475,6 @@ def run_conversation_turn(
             )
             authored_memory_refs.append(initiative_ref)
             write_working_memory_catalog(root)
-            refresh_descriptors_and_world_model(root)
             proposal_ref = ensure_proposed_session(
                 root=root,
                 turn_ref=turn_ref,
@@ -454,7 +483,6 @@ def run_conversation_turn(
                 attention_ref=attention_ref,
             )
             proposed_session_refs.append(proposal_ref)
-            refresh_descriptors_and_world_model(root)
 
     response = compose_response(
         turn_context,
@@ -484,9 +512,14 @@ def run_conversation_turn(
         "conversation_ref": atlas_relative(conversation_manifest_path(root, conversation_id), root=root),
         "turn_id": turn_id,
         "turn_ref": turn_ref,
+        "input_summary": turn_payload["input_summary"],
         "response": response["response_text"],
         "response_summary": response["response_summary"],
+        "response_segments": split_response_segments(response["response_text"]),
         "provider": response["provider"],
+        "intent": turn_payload["provenance"]["intent"],
+        "action_mode": turn_payload["provenance"]["action_mode"],
+        "created_at": created_at,
         "proposed_session_refs": proposed_session_refs,
         "authored_memory_refs": authored_memory_refs,
         "retrieved_ref_set": turn_payload["retrieved_ref_set"],

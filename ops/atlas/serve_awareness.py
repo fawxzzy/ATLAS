@@ -29,6 +29,7 @@ from ops.atlas.awareness import (
     list_inventory,
     query_knowledge,
     search,
+    voice_runtime,
 )
 from ops.atlas.load_tool_registry import automation_level_allows, normalize_automation_level
 
@@ -37,6 +38,7 @@ CONTEXT_AUTOMATION_LEVEL = "context"
 ROUTE_MAX_AUTOMATION_LEVELS = {
     "/health": OBSERVE_AUTOMATION_LEVEL,
     "/atlas/status": OBSERVE_AUTOMATION_LEVEL,
+    "/atlas/voice": OBSERVE_AUTOMATION_LEVEL,
     "/atlas/inventory": OBSERVE_AUTOMATION_LEVEL,
     "/atlas/snapshot": OBSERVE_AUTOMATION_LEVEL,
     "/atlas/attention": OBSERVE_AUTOMATION_LEVEL,
@@ -406,6 +408,26 @@ class AwarenessHandler(BaseHTTPRequestHandler):
             if parsed.path == "/atlas/status":
                 payload = atlas_status(refresh=refresh)
                 etag = str(payload.get("snapshot", {}).get("content_digest") or "")
+                status = self._send_json(payload, request_id=request_id, etag=etag, extra_headers=automation_headers)
+                return
+
+            if parsed.path == "/atlas/voice":
+                payload = voice_runtime(
+                    refresh=refresh,
+                    conversation_id=_first(query, "conversation_id"),
+                )
+                digests = payload.get("digests") if isinstance(payload.get("digests"), dict) else {}
+                conversation = payload.get("conversation") if isinstance(payload.get("conversation"), dict) else {}
+                conversation_summary = conversation.get("summary") if isinstance(conversation.get("summary"), dict) else {}
+                etag = "|".join(
+                    str(value or "")
+                    for value in [
+                        digests.get("world_model_digest"),
+                        digests.get("attention_digest"),
+                        digests.get("working_memory_digest"),
+                        conversation_summary.get("last_turn_at"),
+                    ]
+                )
                 status = self._send_json(payload, request_id=request_id, etag=etag, extra_headers=automation_headers)
                 return
 

@@ -19,6 +19,10 @@ The runtime must not:
 - treat raw transcripts as durable truth
 - execute Lifeline or `_stack` work directly
 
+Voice and text use the same runtime.
+
+The voice client may interrupt spoken delivery, but it still writes the same durable conversation and turn artifacts as text mode.
+
 ## Artifact Roles
 
 Conversation manifest:
@@ -31,6 +35,7 @@ Turn artifact:
 
 - one grounded turn outcome
 - stores `input_summary`, `retrieved_ref_set`, `response_summary`, proposal refs, memory refs, query trace, and provenance
+- CLI responses also expose `response_segments`, `intent`, and `action_mode` for local voice delivery
 - uses a conversation-scoped `turn_id` so Awareness can fetch a turn by id without hidden lookup state
 - stored at `runtime/atlas/conversations/<conversation_id>/turns/<turn_id>.json`
 
@@ -52,6 +57,8 @@ Durable conversation truth is:
 - authored memory refs
 - deterministic provenance
 
+Voice validation logs may retain grounded turn summaries under `runtime/atlas/voice/runs/**`, but they must not retain raw transcript or raw audio.
+
 ## Automation Ceiling
 
 Conversation clients are capped at `request_action`.
@@ -68,9 +75,19 @@ Rules:
 1. user turn enters `converse.py`
 2. `build_turn_context.py` classifies intent and queries the minimum relevant surfaces
 3. `plan_conversation_response.py` composes a grounded response with cited refs
-4. optional initiative refinement and proposal-only session authoring occurs
-5. turn artifact and conversation manifest are persisted
-6. status, descriptors, and the world model are refreshed
+4. proposal-seeking turns rebuild the world model early so attention can see the new request before proposal authoring
+5. optional initiative refinement and proposal-only session authoring occurs
+6. turn artifact and conversation manifest are persisted
+7. status, descriptors, and the world model are refreshed
+
+## Voice Delivery Model
+
+`ops/atlas/talk.py --stream` is only a client layer above this runtime:
+
+- continuous local STT finalizes one utterance at a time
+- each finalized utterance becomes one grounded turn on the shared `conversation_id`
+- response delivery may be interrupted locally by barge-in
+- interrupt stops TTS only; it does not alter the durable turn or manifest
 
 ## Query-First Rule
 
@@ -107,6 +124,12 @@ Inspect a grounded turn through Awareness:
 python .\ops\atlas\awareness.py fetch conversation_turn:<turn_id>
 ```
 
+Inspect the voice read model for one conversation:
+
+```powershell
+Invoke-WebRequest "http://127.0.0.1:8765/atlas/voice?conversation_id=atlas-main" -Headers @{ Authorization = "Bearer local-test" }
+```
+
 ## Verification
 
 Minimum checks:
@@ -114,6 +137,7 @@ Minimum checks:
 - same deterministic fixture yields the same manifest shape
 - `conversation:<id>` resolves through Awareness fetch
 - `conversation_turn:<turn_id>` resolves through Awareness fetch
+- `/atlas/voice` surfaces recent grounded turns and voice-relevant notifications without private state
 - search by initiative or proposal ref returns the related conversation artifacts
 - proposal turns emit `retrieved_ref_set` and full provenance
 - stack validation remains green apart from inherited unrelated debt
