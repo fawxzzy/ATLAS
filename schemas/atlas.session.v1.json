@@ -44,12 +44,21 @@
       "type": "string",
       "enum": [
         "read_only",
-        "conflict_fixture"
+        "conflict_fixture",
+        "proposed_session"
+      ]
+    },
+    "session_role": {
+      "type": "string",
+      "enum": [
+        "governed_session",
+        "proposed_session"
       ]
     },
     "session_state": {
       "type": "string",
       "enum": [
+        "proposed",
         "created",
         "context_built",
         "assignment_emitted",
@@ -270,6 +279,107 @@
             "string",
             "null"
           ]
+        },
+        "resume_request_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "resume_dispatch_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "resume_run_manifest_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "resumed_assignment_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "resumed_running_status_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "resumed_completed_status_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "resume": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "requested_at",
+        "requested_worker_id",
+        "resume_context_ref",
+        "merge_completion_ref",
+        "dispatched_at",
+        "completed_at",
+        "failure_reason"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1
+        },
+        "requested_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "requested_worker_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "resume_context_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "merge_completion_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "dispatched_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "completed_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "failure_reason": {
+          "type": [
+            "string",
+            "null"
+          ]
         }
       }
     },
@@ -308,6 +418,9 @@
           }
         }
       }
+    },
+    "proposal": {
+      "$ref": "#/$defs/proposalState"
     }
   },
   "$defs": {
@@ -328,6 +441,74 @@
             "string",
             "null"
           ]
+        }
+      }
+    },
+    "proposalState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "initiative_ref",
+        "triggering_attention_refs",
+        "supporting_evidence_refs",
+        "related_plan_refs",
+        "related_decision_refs",
+        "related_hypothesis_refs",
+        "related_prior_session_refs",
+        "generated_from_digest"
+      ],
+      "properties": {
+        "initiative_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "triggering_attention_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "supporting_evidence_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "related_plan_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "related_decision_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "related_hypothesis_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "related_prior_session_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "generated_from_digest": {
+          "type": "string",
+          "minLength": 1
         }
       }
     }

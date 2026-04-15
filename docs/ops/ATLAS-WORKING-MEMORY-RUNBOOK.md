@@ -112,6 +112,12 @@ The intended lifecycle is:
 4. governed execution produces receipts
 5. working memory is refined from those receipts instead of forked into duplicate artifacts
 
+Proposal evidence rule:
+
+- `proposed_next_session_refs` may only point at `runtime/atlas/proposed-sessions/**`
+- every proposed session must cite explicit triggering attention refs and supporting evidence refs
+- initiatives should not point at transcript residue or inferred private context
+
 ## Indexing
 
 Build or refresh the working-memory catalog with:

@@ -67,10 +67,16 @@ def validation_receipt_paths(root: Path) -> list[Path]:
 
 
 def raw_session_manifest_paths(root: Path) -> list[Path]:
-    base = root / "runtime" / "atlas" / "sessions"
-    if not base.exists():
-        return []
-    return sorted(path.resolve() for path in base.rglob("session.manifest.json") if path.is_file())
+    results: list[Path] = []
+    for relative_root in (
+        Path("runtime/atlas/sessions"),
+        Path("runtime/atlas/proposed-sessions"),
+    ):
+        base = root / relative_root
+        if not base.exists():
+            continue
+        results.extend(path.resolve() for path in base.rglob("session.manifest.json") if path.is_file())
+    return sorted(results)
 
 
 def working_memory_catalog_ref(root: Path) -> str:
@@ -272,6 +278,7 @@ def build_inventory_entries(
                         source_ref=source_ref,
                         trust_class=str(trust_class) if trust_class is not None else None,
                         details={
+                            "session_role": state.get("session_role"),
                             "task_id": identity.get("task_id"),
                             "worker_id": identity.get("worker_id"),
                             "assignment_id": identity.get("assignment_id"),
@@ -279,6 +286,13 @@ def build_inventory_entries(
                             "automation_level": automation_level,
                             "max_automation_level": max_automation_level,
                             "resume_status": resume_state,
+                            "initiative_ref": descriptor_links.get("initiative_ref"),
+                            "triggering_attention_refs": descriptor_links.get("triggering_attention_refs", []),
+                            "supporting_evidence_refs": descriptor_links.get("supporting_evidence_refs", []),
+                            "related_plan_refs": descriptor_links.get("related_plan_refs", []),
+                            "related_decision_refs": descriptor_links.get("related_decision_refs", []),
+                            "related_hypothesis_refs": descriptor_links.get("related_hypothesis_refs", []),
+                            "related_prior_session_refs": descriptor_links.get("related_prior_session_refs", []),
                             "resume_request_ref": descriptor_links.get("resume_request_ref"),
                             "resume_dispatch_ref": descriptor_links.get("resume_dispatch_ref"),
                             "resume_run_manifest_ref": descriptor_links.get("resume_run_manifest_ref"),
@@ -768,6 +782,11 @@ def build_governed_session_observations(
         source_ref = optional_string(descriptor.get("source_ref"))
         session_payload = load_source_payload(root, source_ref)
         if not session_payload:
+            continue
+        if (
+            optional_string(session_payload.get("session_role")) == "proposed_session"
+            or optional_string(session_payload.get("session_state")) == "proposed"
+        ):
             continue
 
         governed_surfaces = session_payload.get("governed_surfaces")

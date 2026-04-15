@@ -71,6 +71,7 @@ def default_artifact_source_paths(root: Path | None = None) -> list[Path]:
     base = (root or atlas_root()).resolve()
     return [
         base / "runtime" / "atlas" / "sessions",
+        base / "runtime" / "atlas" / "proposed-sessions",
         base / "runtime" / "cortex" / "context",
         base / "runtime" / "cortex" / "supervisor",
         base / "runtime" / "lifeline" / "worker-execution",
@@ -248,6 +249,7 @@ def build_session_descriptor(payload: dict[str, Any], *, digest: str, size_bytes
     resume = payload.get("resume", {}) if isinstance(payload.get("resume"), dict) else {}
     completion = payload.get("completion", {})
     governed_surfaces = payload.get("governed_surfaces", {})
+    proposal = payload.get("proposal", {}) if isinstance(payload.get("proposal"), dict) else {}
     context_surface = governed_surface_ref(governed_surfaces.get("context"))
     supervision_surface = governed_surface_ref(governed_surfaces.get("supervision"))
     execution_surface = governed_surface_ref(governed_surfaces.get("execution"))
@@ -271,9 +273,11 @@ def build_session_descriptor(payload: dict[str, Any], *, digest: str, size_bytes
             "supervision_tool_id": supervision_surface["tool_id"],
             "execution_tool_id": execution_surface["tool_id"],
             "execution_extension_id": execution_surface["extension_id"],
+            "session_role": payload.get("session_role"),
         },
         state={
             "session_state": payload.get("session_state"),
+            "session_role": payload.get("session_role"),
             "scenario": payload.get("scenario"),
             "automation_level": payload.get("automation_level"),
             "max_automation_level": payload.get("max_automation_level"),
@@ -321,6 +325,14 @@ def build_session_descriptor(payload: dict[str, Any], *, digest: str, size_bytes
             "resume_failure_reason": resume.get("failure_reason"),
             "close_receipt_refs": clean_refs(completion.get("close_receipt_refs", [])),
             "final_status_ref": completion.get("final_status_ref"),
+            "initiative_ref": proposal.get("initiative_ref"),
+            "triggering_attention_refs": clean_refs(proposal.get("triggering_attention_refs", [])),
+            "supporting_evidence_refs": clean_refs(proposal.get("supporting_evidence_refs", [])),
+            "related_plan_refs": clean_refs(proposal.get("related_plan_refs", [])),
+            "related_decision_refs": clean_refs(proposal.get("related_decision_refs", [])),
+            "related_hypothesis_refs": clean_refs(proposal.get("related_hypothesis_refs", [])),
+            "related_prior_session_refs": clean_refs(proposal.get("related_prior_session_refs", [])),
+            "generated_from_digest": proposal.get("generated_from_digest"),
         },
     )
 

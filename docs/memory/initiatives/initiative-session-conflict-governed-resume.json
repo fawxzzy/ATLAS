@@ -17,30 +17,60 @@
     "docs/memory/hypotheses/hypothesis-atlas-session-conflict.json"
   ],
   "related_session_refs": [
+    "runtime/atlas/sessions/session-atlas-session-conflict-20260414T051648Z/session.manifest.json",
+    "runtime/atlas/sessions/session-atlas-session-conflict-20260414T051754Z/session.manifest.json",
     "runtime/atlas/sessions/session-atlas-session-conflict-20260414T080843Z/session.manifest.json"
   ],
   "related_attention_refs": [
     "attention:sha256:206ce0f2669fc997010203b65d5eaaa0cc941e4c95aee5b28fa3953aac5deb5c",
+    "attention:sha256:dcfe6245b752460f0592d82377bb1837d873dde2a3fd628f8f2cc29a9281899c",
     "attention:sha256:dfb93b9a5b513383a5a1f460b9d3520a8df6637365cb70623d2e37731c053241",
-    "runtime/cortex/supervisor/session-atlas-session-conflict-20260414T080843Z/merge-request-c814978bffdac481.json",
-    "runtime/atlas/sessions/session-atlas-session-conflict-20260414T080843Z/session.manifest.json"
+    "runtime/atlas/sessions/session-atlas-session-conflict-20260414T080843Z/session.manifest.json",
+    "runtime/cortex/supervisor/session-atlas-session-conflict-20260414T080843Z/merge-request-c814978bffdac481.json"
   ],
   "evidence_refs": [
+    "docs/architecture/AWARENESS-FIRST-WORLD-MODEL.md",
+    "docs/memory/decisions/awareness-first-clients.json",
     "docs/memory/hypotheses/hypothesis-atlas-session-conflict.json",
+    "docs/memory/plans/wave-8b-awareness-closure.json",
+    "docs/ops/ATLAS-WORKING-MEMORY-RUNBOOK.md",
+    "docs/ops/STACK-LOCKFILE.md",
+    "runtime/atlas/sessions/session-atlas-session-conflict-20260414T051648Z/session.manifest.json",
+    "runtime/atlas/sessions/session-atlas-session-conflict-20260414T051754Z/session.manifest.json",
+    "runtime/atlas/sessions/session-atlas-session-conflict-20260414T080843Z/artifacts/approval.receipt.json",
+    "runtime/atlas/sessions/session-atlas-session-conflict-20260414T080843Z/artifacts/merge/merge-request-6c16d4cdfc862069/completion.json",
+    "runtime/atlas/sessions/session-atlas-session-conflict-20260414T080843Z/artifacts/merge/merge-request-6c16d4cdfc862069/merge.prompt.md",
+    "runtime/atlas/sessions/session-atlas-session-conflict-20260414T080843Z/artifacts/merge/merge-request-6c16d4cdfc862069/resume-context.session-atlas-session-conflict-20260414T080843Z-worker-fixture.json",
+    "runtime/atlas/sessions/session-atlas-session-conflict-20260414T080843Z/artifacts/merge/merge-request-6c16d4cdfc862069/resume-context.session-atlas-session-conflict-20260414T080843Z-worker.json",
+    "runtime/atlas/sessions/session-atlas-session-conflict-20260414T080843Z/artifacts/merge/merge-request-6c16d4cdfc862069/worker.assignment.merge.json",
+    "runtime/atlas/sessions/session-atlas-session-conflict-20260414T080843Z/artifacts/privileged-action.request.json",
+    "runtime/atlas/sessions/session-atlas-session-conflict-20260414T080843Z/artifacts/worker.execution.receipt-session-atlas-session-conflict-20260414t080843z-request-1776154124391.json",
+    "runtime/atlas/sessions/session-atlas-session-conflict-20260414T080843Z/artifacts/worker.status.completed.json",
+    "runtime/atlas/sessions/session-atlas-session-conflict-20260414T080843Z/artifacts/worker.status.execution.receipt-session-atlas-session-conflict-20260414t080843z-request-1776154124391.json",
+    "runtime/atlas/sessions/session-atlas-session-conflict-20260414T080843Z/artifacts/worker.status.paused.merge-request-6c16d4cdfc862069.json",
+    "runtime/atlas/sessions/session-atlas-session-conflict-20260414T080843Z/artifacts/worker.status.running.json",
     "runtime/atlas/sessions/session-atlas-session-conflict-20260414T080843Z/session.manifest.json",
     "runtime/atlas/sessions/session-atlas-session-conflict-20260414T080843Z/status.snapshot.json",
+    "runtime/cortex/context/assignment-merge-request-6c16d4cdfc862069.json",
+    "runtime/cortex/supervisor/session-atlas-session-conflict-20260414T051648Z/merge-request-d6194ad6166c0c83.json",
+    "runtime/cortex/supervisor/session-atlas-session-conflict-20260414T080843Z/merge-request-6c16d4cdfc862069.json",
     "runtime/cortex/supervisor/session-atlas-session-conflict-20260414T080843Z/merge-request-c814978bffdac481.json",
-    "runtime/lifeline/worker-execution/session-atlas-session-conflict-20260414T080843Z-assignment/receipt-session-atlas-session-conflict-20260414T080843Z-request-1776154124391--reconciled.json"
+    "runtime/lifeline/worker-execution/session-atlas-session-conflict-20260414T051754Z-assignment/receipt-session-atlas-session-conflict-20260414T051754Z-request-1776143875603.json",
+    "runtime/lifeline/worker-execution/session-atlas-session-conflict-20260414T080843Z-assignment/receipt-session-atlas-session-conflict-20260414T080843Z-request-1776154124391--reconciled.json",
+    "runtime/lifeline/worker-execution/session-atlas-session-conflict-20260414T080843Z-assignment/receipt-session-atlas-session-conflict-20260414T080843Z-request-1776154124391.json"
   ],
-  "proposed_next_session_refs": [],
+  "proposed_next_session_refs": [
+    "runtime/atlas/proposed-sessions/session-proposed-atlas-session-conflict/session.manifest.json"
+  ],
   "supersedes": [],
   "superseded_by": [],
   "metadata": {
-    "authoring_source": "initiative-contract-upgrade",
+    "authoring_source": "initiative-proposal-loop",
     "task_id": "atlas-session-conflict",
     "attention_kinds": [
       "open_merge_request",
       "session_needs_resume"
-    ]
+    ],
+    "session_count": 3
   }
 }

@@ -10,11 +10,7 @@ ATLAS should not aim for "every component knows everything."
 
 ATLAS should aim for this stricter invariant:
 
-**Not everything knows everything. Nothing meaningful stays dark.**
-
-The next extension of that invariant is:
-
-**Nothing meaningful stays unowned.**
+**Not everything knows everything. Nothing meaningful stays dark. Nothing meaningful stays unowned.**
 
 **No dark state:** any state that can change behavior must be represented as at least one of:
 
@@ -59,6 +55,12 @@ The global index layer is therefore partially implemented already as registry + 
 
 That means the main missing layer is no longer basic awareness. The next gap is initiative management above sessions, durable proposal and portfolio handling, durable extension lifecycle, and governed action progression on top of the current awareness substrate.
 
+That initiative layer is now represented explicitly by:
+
+- initiative artifacts under `docs/memory/initiatives/**`
+- non-executing proposed sessions under `runtime/atlas/proposed-sessions/**`
+- proposal provenance that binds attention, supporting evidence, and prior governed work together
+
 ## Operating Loop
 
 The root operating loop is:
@@ -88,6 +90,7 @@ Initiatives therefore belong above sessions, not beside them:
 - attention identifies what needs choice
 - initiatives cluster repeated related work into one durable identity
 - proposed sessions are advisory `request_action` outputs, not autonomous execution
+- proposed sessions are indexed and fetchable, but they remain non-executing until a governed session is created
 - execution still flows through the governed session path
 - memory refinement updates working memory and read models from explicit evidence
 

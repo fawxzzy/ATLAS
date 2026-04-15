@@ -24,9 +24,16 @@
   ],
   "related_attention_refs": [],
   "evidence_refs": [
+    "docs/architecture/AWARENESS-FIRST-WORLD-MODEL.md",
     "docs/memory/decisions/awareness-first-clients.json",
     "docs/memory/plans/wave-8b-awareness-closure.json",
     "docs/memory/plans/wave-9-operator-productization-and-debt-burndown.json",
+    "docs/ops/ATLAS-WORKING-MEMORY-RUNBOOK.md",
+    "docs/ops/STACK-LOCKFILE.md",
+    "runtime/atlas/sessions/session-atlas-session-readonly-20260414T051124Z/session.manifest.json",
+    "runtime/atlas/sessions/session-atlas-session-readonly-20260414T051300Z/session.manifest.json",
+    "runtime/atlas/sessions/session-atlas-session-readonly-20260414T051531Z/session.manifest.json",
+    "runtime/atlas/sessions/session-atlas-session-readonly-20260414T051626Z/session.manifest.json",
     "runtime/atlas/sessions/session-atlas-session-readonly-20260414T080843Z/session.manifest.json",
     "runtime/lifeline/worker-execution/session-atlas-session-readonly-20260414T051531Z-assignment/receipt-session-atlas-session-readonly-20260414T051531Z-request-1776143733325.json",
     "runtime/lifeline/worker-execution/session-atlas-session-readonly-20260414T051626Z-assignment/receipt-session-atlas-session-readonly-20260414T051626Z-request-1776143787672.json",
@@ -36,12 +43,13 @@
   "supersedes": [],
   "superseded_by": [],
   "metadata": {
-    "authoring_source": "initiative-contract-upgrade",
+    "authoring_source": "initiative-proposal-loop",
     "task_id": "atlas-session-readonly",
     "session_count": 5,
     "status_counts": {
       "completed": 3,
       "failed": 2
-    }
+    },
+    "attention_kinds": []
   }
 }

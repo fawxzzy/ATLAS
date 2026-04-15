@@ -52,7 +52,13 @@ def parse_timestamp(value: Any) -> tuple[int, str]:
 
 
 def choose_latest_session(descriptors: list[dict[str, Any]]) -> dict[str, Any] | None:
-    sessions = [item for item in descriptors if item.get("artifact_type") == "session_manifest"]
+    sessions = [
+        item
+        for item in descriptors
+        if item.get("artifact_type") == "session_manifest"
+        and str(item.get("state", {}).get("session_state", "")).strip() != "proposed"
+        and str(item.get("state", {}).get("session_role", "")).strip() != "proposed_session"
+    ]
     if not sessions:
         return None
     sessions.sort(
@@ -839,6 +845,7 @@ def session_overview(
     return {
         "session_id": identity.get("session_id"),
         "task_id": identity.get("task_id"),
+        "session_role": state.get("session_role"),
         "worker_id": identity.get("worker_id"),
         "assignment_id": identity.get("assignment_id"),
         "session_state": state.get("session_state"),
@@ -866,6 +873,13 @@ def session_overview(
         "resume_completed_at": links.get("resume_completed_at"),
         "resume_failure_reason": links.get("resume_failure_reason"),
         "resume_requested_worker_id": links.get("resume_requested_worker_id"),
+        "initiative_ref": links.get("initiative_ref"),
+        "triggering_attention_refs": links.get("triggering_attention_refs", []),
+        "supporting_evidence_refs": links.get("supporting_evidence_refs", []),
+        "related_plan_refs": links.get("related_plan_refs", []),
+        "related_decision_refs": links.get("related_decision_refs", []),
+        "related_hypothesis_refs": links.get("related_hypothesis_refs", []),
+        "related_prior_session_refs": links.get("related_prior_session_refs", []),
         "resume": resume_payload if isinstance(resume_payload, dict) else {},
         "source_ref": session_descriptor.get("source_ref"),
     }

@@ -1482,6 +1482,118 @@ def validate_world_model_state(stack_file: Path) -> list[Finding]:
     return findings
 
 
+def validate_proposed_sessions(stack_file: Path) -> list[Finding]:
+    root = stack_file.parent.resolve()
+    findings: list[Finding] = []
+    proposed_root = root / "runtime" / "atlas" / "proposed-sessions"
+    if not proposed_root.exists():
+        return findings
+
+    attention_ids: set[str] = set()
+    attention_path = root / "runtime" / "state" / "atlas" / "world-model.attention.latest.json"
+    if attention_path.exists():
+        try:
+            attention_payload = load_json_object(attention_path)
+            attention_ids = {
+                f"attention:{item.get('attention_id')}"
+                for item in attention_payload.get("attention_items", [])
+                if isinstance(item, dict) and isinstance(item.get("attention_id"), str)
+            }
+        except Exception:
+            attention_ids = set()
+
+    for path in sorted(proposed_root.rglob("session.manifest.json")):
+        relative_path = relative_to_root(root, path)
+        try:
+            payload = load_json_object(path)
+        except Exception as exc:
+            findings.append(
+                Finding(
+                    "error",
+                    "invalid-proposed-session",
+                    relative_path,
+                    f"Proposed session could not be parsed: {exc}",
+                )
+            )
+            continue
+
+        if payload.get("contract_version") != "atlas.session.v1":
+            findings.append(Finding("error", "invalid-proposed-session", relative_path, "Proposed session must use atlas.session.v1."))
+        if payload.get("scenario") != "proposed_session":
+            findings.append(Finding("error", "invalid-proposed-session", relative_path, "Proposed session must use scenario 'proposed_session'."))
+        if payload.get("session_state") != "proposed":
+            findings.append(Finding("error", "invalid-proposed-session", relative_path, "Proposed session must remain in session_state 'proposed'."))
+        if payload.get("session_role") != "proposed_session":
+            findings.append(Finding("error", "invalid-proposed-session", relative_path, "Proposed session must declare session_role 'proposed_session'."))
+
+        refs = payload.get("refs") if isinstance(payload.get("refs"), dict) else {}
+        if any(refs.get(field) for field in ("request_ref", "approval_receipt_ref", "execution_receipt_ref", "bridge_record_ref")):
+            findings.append(
+                Finding(
+                    "error",
+                    "proposal-triggers-execution",
+                    relative_path,
+                    "Proposed sessions may not include request, approval, execution, or bridge refs.",
+                )
+            )
+        if any(
+            isinstance(refs.get(field), list) and refs.get(field)
+            for field in ("status_refs", "merge_request_refs", "pause_status_refs", "resume_context_refs")
+        ):
+            findings.append(
+                Finding(
+                    "error",
+                    "proposal-triggers-execution",
+                    relative_path,
+                    "Proposed sessions may not include live status, merge, or resume refs.",
+                )
+            )
+
+        proposal = payload.get("proposal") if isinstance(payload.get("proposal"), dict) else None
+        if proposal is None:
+            findings.append(Finding("error", "missing-proposal-provenance", relative_path, "Proposed session is missing the proposal provenance block."))
+            continue
+
+        initiative_ref = proposal.get("initiative_ref")
+        if not isinstance(initiative_ref, str) or not initiative_ref.strip():
+            findings.append(Finding("error", "missing-proposal-provenance", relative_path, "proposal.initiative_ref is required."))
+        elif not (root / Path(initiative_ref)).resolve().exists():
+            findings.append(Finding("error", "missing-proposal-provenance", relative_path, f"proposal.initiative_ref does not resolve: {initiative_ref}"))
+
+        triggering_attention_refs = proposal.get("triggering_attention_refs")
+        if not isinstance(triggering_attention_refs, list) or not any(isinstance(ref, str) and ref.strip() for ref in triggering_attention_refs):
+            findings.append(Finding("error", "missing-proposal-provenance", relative_path, "proposal.triggering_attention_refs must be non-empty."))
+        else:
+            for ref in triggering_attention_refs:
+                if not isinstance(ref, str) or not ref.strip():
+                    findings.append(Finding("error", "missing-proposal-provenance", relative_path, "proposal.triggering_attention_refs must contain non-empty strings."))
+                elif ref not in attention_ids:
+                    findings.append(Finding("error", "missing-proposal-provenance", relative_path, f"proposal.triggering_attention_ref does not resolve: {ref}"))
+
+        for field in (
+            "supporting_evidence_refs",
+            "related_plan_refs",
+            "related_decision_refs",
+            "related_hypothesis_refs",
+            "related_prior_session_refs",
+        ):
+            refs_value = proposal.get(field, [])
+            if field == "supporting_evidence_refs" and (not isinstance(refs_value, list) or not refs_value):
+                findings.append(Finding("error", "missing-proposal-provenance", relative_path, "proposal.supporting_evidence_refs must be non-empty."))
+                continue
+            if not isinstance(refs_value, list):
+                findings.append(Finding("error", "missing-proposal-provenance", relative_path, f"proposal.{field} must be an array."))
+                continue
+            for ref in refs_value:
+                if not isinstance(ref, str) or not ref.strip():
+                    findings.append(Finding("error", "missing-proposal-provenance", relative_path, f"proposal.{field} must contain non-empty strings."))
+                    continue
+                if not (root / Path(ref)).resolve().exists():
+                    findings.append(Finding("error", "missing-proposal-provenance", relative_path, f"proposal.{field} does not resolve: {ref}"))
+
+    return findings
+
+
 def validate_tool_registry(root: Path) -> list[Finding]:
     try:
         bundle = load_tool_registry_bundle(root=root)
@@ -1590,6 +1702,7 @@ def build_findings(stack_file: Path, config: dict[str, Any], *, lock_file_overri
     findings.extend(validate_verta_trust_gate(stack_file, config))
     findings.extend(validate_working_memory(stack_file))
     findings.extend(validate_world_model_state(stack_file))
+    findings.extend(validate_proposed_sessions(stack_file))
 
     for label, raw_path in iter_relative_directory_targets(config):
         resolved = resolve_path(stack_file, raw_path)

@@ -13,8 +13,14 @@
 
 - session manifests live under `runtime/atlas/sessions/<session_id>/`
 - the canonical manifest path is `runtime/atlas/sessions/<session_id>/session.manifest.json`
+- proposed session manifests live under `runtime/atlas/proposed-sessions/<session_id>/`
 - session-local worker artifacts live under `runtime/atlas/sessions/<session_id>/artifacts/`
 - governed tool and extension registry truth lives under `docs/registry/`
+
+`atlas.session.v1` now has two roles:
+
+- `governed_session`: the normal approval and execution gateway
+- `proposed_session`: a non-executing next-work artifact emitted by the initiative loop
 
 ## Required Linkage
 
@@ -58,6 +64,13 @@ Conflict sessions may also carry refs for:
 9. if needed, run Cortex supervision and let `_stack` consume merge requests
 10. if the session becomes `resume_ready`, resume only through `ops/atlas/resume_session.py`
 11. close the session with an explicit final status
+
+Proposed-session lifecycle:
+
+1. initiative evidence and attention are clustered above sessions
+2. the initiative loop emits or refreshes a `proposed_session`
+3. the proposal stays queryable through awareness and status surfaces
+4. no approval or execution occurs until a real governed session is created separately
 
 ## Governed Surface Rule
 
@@ -135,3 +148,4 @@ Voice no longer needs a bypass path because the root session layer owns the gove
 - no direct executor logic at the root
 - no transcript scraping for lifecycle inference
 - no second orchestration model beside `_stack` worker artifacts and Lifeline receipts
+- no proposal artifact that silently becomes execution state

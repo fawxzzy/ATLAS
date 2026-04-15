@@ -53,14 +53,32 @@ def session_manifest_path(*, root: Path, session_id: str | None, session_ref: st
     raise FileNotFoundError(f"Unknown session manifest for session_id '{session_id}'.")
 
 
-def all_session_manifests(root: Path) -> list[tuple[Path, dict[str, Any]]]:
+def _collect_session_manifests(base: Path) -> list[tuple[Path, dict[str, Any]]]:
     manifests: list[tuple[Path, dict[str, Any]]] = []
-    for path in sorted((root / "runtime" / "atlas" / "sessions").rglob("session.manifest.json")):
+    if not base.exists():
+        return manifests
+    for path in sorted(base.rglob("session.manifest.json")):
         try:
             manifests.append((path, load_json(path)))
         except Exception:
             continue
     return manifests
+
+
+def all_session_manifests(
+    root: Path,
+    *,
+    include_proposed: bool = False,
+) -> list[tuple[Path, dict[str, Any]]]:
+    manifests: list[tuple[Path, dict[str, Any]]] = []
+    manifests.extend(_collect_session_manifests(root / "runtime" / "atlas" / "sessions"))
+    if include_proposed:
+        manifests.extend(_collect_session_manifests(root / "runtime" / "atlas" / "proposed-sessions"))
+    return manifests
+
+
+def all_proposed_session_manifests(root: Path) -> list[tuple[Path, dict[str, Any]]]:
+    return _collect_session_manifests(root / "runtime" / "atlas" / "proposed-sessions")
 
 
 def unique_strings(values: list[Any]) -> list[str]:

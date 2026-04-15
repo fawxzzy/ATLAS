@@ -12,7 +12,13 @@ if str(ROOT) not in sys.path:
 from ops._atlas import atlas_relative, atlas_root, resolve_atlas_path
 from ops.atlas.backfill_legacy_runtime_artifacts import backfill_legacy_runtime_artifacts
 from ops.atlas.load_tool_registry import load_tool_registry_bundle
-from ops.cortex._artifacts import load_descriptors, read_json, register_artifact_descriptors, write_json
+from ops.cortex._artifacts import (
+    default_artifact_source_paths,
+    load_descriptors,
+    read_json,
+    register_artifact_descriptors,
+    write_json,
+)
 from ops.cortex.index_working_memory import WORKING_MEMORY_OUTPUT, load_working_memory_catalog
 from ops.cortex.render_status import render_status_payload
 from ops.cortex.world_model import (
@@ -35,6 +41,7 @@ ALLOWED_FETCH_PREFIXES = [
     "docs/",
     "ops/",
     "runtime/atlas/sessions/",
+    "runtime/atlas/proposed-sessions/",
     "runtime/atlas/session-workspaces/",
     "runtime/cortex/catalog/knowledge/",
     "runtime/cortex/context/",
@@ -59,6 +66,11 @@ def ensure_world_model(*, root: Path | None = None, refresh: bool = False) -> di
     attention_path = attention_output_path(base_root)
     if refresh or not snapshot_path.exists() or not attention_path.exists():
         backfill_legacy_runtime_artifacts(root=base_root)
+        register_artifact_descriptors(
+            default_artifact_source_paths(base_root),
+            output_dir=base_root / "runtime" / "cortex" / "artifacts",
+            root=base_root,
+        )
         summary = write_world_model_state(
             descriptor_root=base_root / "runtime" / "cortex" / "artifacts",
             root=base_root,
@@ -485,7 +497,7 @@ def fetch_session(
             or item.get("key") == session_id
         )
     ]
-    session_root = base_root / "runtime" / "atlas" / "sessions" / session_id
+    session_root = resolve_atlas_path(source_ref, root=base_root).parent
     status_snapshot_path = session_root / "status.snapshot.json"
     status_snapshot = read_json(status_snapshot_path) if status_snapshot_path.exists() else None
     return {

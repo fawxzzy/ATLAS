@@ -102,13 +102,26 @@ def _non_empty_string_list(value: Any) -> list[str]:
 
 def _session_missing_governed_requirements(payload: dict[str, Any]) -> list[str]:
     missing: list[str] = []
+    session_role = _optional_string(payload.get("session_role"))
+    session_state = _optional_string(payload.get("session_state"))
+    proposal = payload.get("proposal") if isinstance(payload.get("proposal"), dict) else {}
     governed_surfaces = payload.get("governed_surfaces")
     if not isinstance(governed_surfaces, dict):
-        return [
+        base_missing = [
             "governed_surfaces.registry_digest",
             "governed_surfaces.context.tool_id",
             "governed_surfaces.supervision.tool_id",
             "governed_surfaces.execution.tool_id",
+        ]
+        if session_role == "proposed_session" or session_state == "proposed":
+            return [
+                *base_missing,
+                "proposal.initiative_ref",
+                "proposal.triggering_attention_refs",
+                "proposal.supporting_evidence_refs",
+            ]
+        return [
+            *base_missing,
             "worker.assignment_ref",
             "refs.status_refs",
             "refs.request_ref",
@@ -129,6 +142,15 @@ def _session_missing_governed_requirements(payload: dict[str, Any]) -> list[str]
     worker = payload.get("worker") if isinstance(payload.get("worker"), dict) else {}
     refs = payload.get("refs") if isinstance(payload.get("refs"), dict) else {}
     completion = payload.get("completion") if isinstance(payload.get("completion"), dict) else {}
+
+    if session_role == "proposed_session" or session_state == "proposed":
+        if not _optional_string(proposal.get("initiative_ref")):
+            missing.append("proposal.initiative_ref")
+        if not _non_empty_string_list(proposal.get("triggering_attention_refs")):
+            missing.append("proposal.triggering_attention_refs")
+        if not _non_empty_string_list(proposal.get("supporting_evidence_refs")):
+            missing.append("proposal.supporting_evidence_refs")
+        return missing
 
     if not (_optional_string(worker.get("assignment_ref")) or _optional_string(refs.get("assignment_ref"))):
         missing.append("worker.assignment_ref")
