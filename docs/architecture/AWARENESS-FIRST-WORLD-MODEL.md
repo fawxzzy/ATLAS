@@ -61,6 +61,12 @@ That initiative layer is now represented explicitly by:
 - non-executing proposed sessions under `runtime/atlas/proposed-sessions/**`
 - proposal provenance that binds attention, supporting evidence, and prior governed work together
 
+Conversation now sits above that substrate as a governed client runtime:
+
+- conversation manifests under `runtime/atlas/conversations/**`
+- grounded turn artifacts with deterministic retrieved refs and provenance
+- proposal-only follow-up authored from explicit refs instead of hidden chat state
+
 ## Operating Loop
 
 The root operating loop is:
@@ -84,6 +90,13 @@ Current ATLAS can already:
 - perform a first bounded truthful write
 
 What it does not yet do is manage a portfolio of work over time the way an operating environment should.
+
+Conversation now fits the operating loop like this:
+
+- clients do not carry durable state in prompt history
+- each turn queries awareness, memory, and related portfolio surfaces
+- durable truth is the structured turn artifact, not the raw transcript
+- action-seeking turns author proposal artifacts and memory refinements instead of executing
 
 Initiatives therefore belong above sessions, not beside them:
 
@@ -281,6 +294,11 @@ Required behavior:
 - working-memory artifacts must carry stable digests and provenance fields so world-model snapshots can cite them directly
 - deterministic authoring tools may create or update working-memory items from governed session closure evidence, but they must stay transcript-free and idempotent
 
+Conversation-specific rule:
+
+- raw chat transcript and raw audio are excluded from the durable memory lane
+- only turn summaries, refs, provenance, and separately authored memory updates count as durable truth
+
 Boundary rule:
 
 - knowledge docs are durable promoted truth
@@ -298,6 +316,12 @@ Any external chat, voice, or app connector must bind to the same governed model:
 - clients should query first, then hydrate narrower artifacts only when needed
 - writes or execution requests flow through Lifeline or another approved executor
 - privileged actions still require approval and receipts
+
+Conversation-client rule:
+
+- a conversation client may keep a local transcript for UX, but not as system truth
+- durable conversation state must stay reconstructable from the stored manifest and turn artifacts
+- the automation ceiling for conversation clients is proposal-only: `request_action`
 
 An external client may be a better interface, but it must not become a second execution or memory authority.
 

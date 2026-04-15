@@ -23,6 +23,7 @@ The current status read model answers:
 - which quarantined trust surfaces remain metadata-only or untrusted
 - which current anomalies require operator review before more work is launched
 - which sessions are mid-resume or failed-resume
+- which conversations are active and which recent conversation turns requested governed follow-up
 
 ## Command
 
@@ -87,6 +88,7 @@ Current attention items may include:
 - active sessions waiting in `resume_ready`
 - root-owned resume failures
 - untrusted knowledge surfaces that remain quarantined
+- conversation turns that requested governed follow-up
 
 The queue must stay descriptor-backed and deterministic. It must not inspect transcripts, terminal output, or raw imported evidence.
 
@@ -137,6 +139,20 @@ The status payload also reports root-owned world-model artifact refs when presen
 - `runtime/state/atlas/world-model.attention.latest.json`
 
 Those artifacts are the global snapshot layer above descriptors and receipts. Status remains descriptor-backed, but it may report the current snapshot and attention digests for clients that need one stable read surface.
+
+## Conversation Surface
+
+Status now exposes root conversation state from conversation descriptors only.
+
+Current output includes:
+
+- `conversations.item_count`
+- `conversations.active_count`
+- `conversations.recent_items`
+
+Conversation attention is derived from conversation turn descriptors with `action_mode=proposal_required`.
+
+That keeps proposed follow-up visible in the same governed attention queue as other operator work.
 
 ## Open Merge Rule
 

@@ -1,0 +1,170 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://schemas/atlas.conversation.turn.v1.json",
+  "title": "ATLAS conversation turn v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "conversation_id",
+    "turn_id",
+    "role",
+    "created_at",
+    "input_summary",
+    "retrieved_ref_set",
+    "response_summary",
+    "proposed_session_refs",
+    "authored_memory_refs",
+    "tool_trace_refs",
+    "query_trace"
+  ],
+  "properties": {
+    "contract_version": {
+      "type": "string",
+      "const": "atlas.conversation.turn.v1"
+    },
+    "conversation_id": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9._:-]+$"
+    },
+    "turn_id": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9._:-]+$"
+    },
+    "role": {
+      "type": "string",
+      "enum": [
+        "user",
+        "assistant",
+        "system"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "input_summary": {
+      "type": "string",
+      "minLength": 1
+    },
+    "retrieved_ref_set": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "inventory_refs",
+        "attention_refs",
+        "session_refs",
+        "initiative_refs",
+        "memory_refs",
+        "knowledge_refs",
+        "artifact_refs"
+      ],
+      "properties": {
+        "inventory_refs": {
+          "$ref": "#/$defs/refArray"
+        },
+        "attention_refs": {
+          "$ref": "#/$defs/refArray"
+        },
+        "session_refs": {
+          "$ref": "#/$defs/refArray"
+        },
+        "initiative_refs": {
+          "$ref": "#/$defs/refArray"
+        },
+        "memory_refs": {
+          "$ref": "#/$defs/refArray"
+        },
+        "knowledge_refs": {
+          "$ref": "#/$defs/refArray"
+        },
+        "artifact_refs": {
+          "$ref": "#/$defs/refArray"
+        }
+      }
+    },
+    "response_summary": {
+      "type": "string",
+      "minLength": 1
+    },
+    "proposed_session_refs": {
+      "$ref": "#/$defs/refArray"
+    },
+    "authored_memory_refs": {
+      "$ref": "#/$defs/refArray"
+    },
+    "tool_trace_refs": {
+      "$ref": "#/$defs/refArray"
+    },
+    "query_trace": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "surface",
+          "query"
+        ],
+        "properties": {
+          "surface": {
+            "type": "string",
+            "minLength": 1
+          },
+          "query": {
+            "type": "string",
+            "minLength": 1
+          },
+          "ref_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "sample_refs": {
+            "$ref": "#/$defs/refArray"
+          }
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "intent",
+        "provider",
+        "context_digest",
+        "action_mode"
+      ],
+      "properties": {
+        "intent": {
+          "type": "string",
+          "minLength": 1
+        },
+        "provider": {
+          "type": "string",
+          "minLength": 1
+        },
+        "context_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "action_mode": {
+          "type": "string",
+          "enum": [
+            "informational",
+            "proposal_required"
+          ]
+        }
+      }
+    }
+  },
+  "$defs": {
+    "refArray": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  }
+}

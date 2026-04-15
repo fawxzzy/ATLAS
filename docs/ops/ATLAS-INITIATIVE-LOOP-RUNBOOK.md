@@ -61,6 +61,12 @@ Every proposed session must carry:
 
 Malformed provenance is a blocking validation failure.
 
+Durability rule:
+
+- `proposal.triggering_attention_refs` may use stable attention ids
+- every other proposal provenance ref must resolve as a durable stack path
+- conversation-derived proposals must not store `knowledge:<id>` or `session:<id>` placeholders inside the proposal provenance block
+
 ## Dedupe And Idempotency
 
 The loop is deterministic and idempotent.

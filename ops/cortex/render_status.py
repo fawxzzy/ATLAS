@@ -506,6 +506,7 @@ def validate_surface_ref(
 
 def attention_queue(
     *,
+    descriptors: list[dict[str, Any]],
     active_session: dict[str, Any] | None,
     blocked_workers_payload: list[dict[str, Any]],
     open_merge_requests_payload: list[dict[str, Any]],
@@ -704,6 +705,26 @@ def attention_queue(
             )
         )
 
+    for descriptor in descriptors:
+        if str(descriptor.get("artifact_type", "")) != "conversation_turn":
+            continue
+        state = descriptor.get("state", {}) if isinstance(descriptor.get("state"), dict) else {}
+        if str(state.get("action_mode", "")) != "proposal_required":
+            continue
+        items.append(
+            attention_item(
+                kind="conversation_action_request",
+                severity="medium",
+                summary=f"Conversation turn '{descriptor.get('identity', {}).get('turn_id')}' requested a governed action proposal.",
+                source_ref=descriptor.get("source_ref"),
+                details={
+                    "conversation_id": descriptor.get("identity", {}).get("conversation_id"),
+                    "turn_id": descriptor.get("identity", {}).get("turn_id"),
+                    "intent": state.get("intent"),
+                },
+            )
+        )
+
     items.sort(
         key=lambda item: (
             SEVERITY_ORDER.get(str(item.get("severity")), 99),
@@ -784,6 +805,37 @@ def initiative_summary(items: list[dict[str, Any]]) -> dict[str, Any]:
                 "proposed_next_session_refs": item.get("proposed_next_session_refs", []),
             }
             for item in active_items[:5]
+        ],
+    }
+
+
+def conversation_summary(descriptors: list[dict[str, Any]]) -> dict[str, Any]:
+    conversations = [
+        descriptor
+        for descriptor in descriptors
+        if str(descriptor.get("artifact_type", "")) == "conversation_manifest"
+    ]
+    active = sorted(
+        conversations,
+        key=lambda item: (
+            parse_timestamp(item.get("state", {}).get("updated_at"))[0],
+            str(item.get("identity", {}).get("conversation_id", "")),
+        ),
+        reverse=True,
+    )
+    return {
+        "item_count": len(conversations),
+        "active_count": sum(1 for item in conversations if str(item.get("state", {}).get("status", "")) == "active"),
+        "recent_items": [
+            {
+                "conversation_id": item.get("identity", {}).get("conversation_id"),
+                "mode": item.get("identity", {}).get("mode"),
+                "status": item.get("state", {}).get("status"),
+                "turn_count": item.get("state", {}).get("turn_count"),
+                "last_turn_at": item.get("state", {}).get("last_turn_at"),
+                "source_ref": item.get("source_ref"),
+            }
+            for item in active[:5]
         ],
     }
 
@@ -912,6 +964,7 @@ def render_status_payload(
     legacy_compatibility_payload = legacy_compatibility_surfaces(descriptors)
     trust_surfaces_payload = trust_surfaces(descriptors)
     working_memory = working_memory_summary()
+    conversations = conversation_summary(descriptors)
 
     return {
         "schema_version": STATUS_VERSION,
@@ -929,7 +982,9 @@ def render_status_payload(
         "trust_surfaces": trust_surfaces_payload,
         "working_memory": working_memory,
         "initiatives": working_memory.get("initiatives"),
+        "conversations": conversations,
         "attention_queue": attention_queue(
+            descriptors=descriptors,
             active_session=active_session,
             blocked_workers_payload=blocked_workers_payload,
             open_merge_requests_payload=open_merge_requests_payload,

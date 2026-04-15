@@ -262,6 +262,55 @@ def build_inventory_entries(
             epoch_details["missing_governed_requirements"] = governance_epoch.get("missing_requirements", [])
         if artifact_type in {"state_snapshot", "attention_snapshot"}:
             continue
+        if artifact_type == "conversation_manifest":
+            conversation_id = str(identity.get("conversation_id", "")).strip()
+            if conversation_id:
+                entries.append(
+                    build_inventory_entry(
+                        entry_type="conversation",
+                        key=conversation_id,
+                        label=conversation_id,
+                        status=str(state.get("status", "unknown")),
+                        source_ref=source_ref,
+                        trust_class=str(trust_class) if trust_class is not None else None,
+                        details={
+                            "mode": identity.get("mode"),
+                            "automation_level_ceiling": state.get("automation_level_ceiling"),
+                            "turn_count": state.get("turn_count"),
+                            "last_turn_at": state.get("last_turn_at"),
+                            "last_intent": state.get("last_intent"),
+                            "active_initiative_refs": descriptor.get("links", {}).get("active_initiative_refs", []),
+                            "active_session_refs": descriptor.get("links", {}).get("active_session_refs", []),
+                            "recent_turn_refs": descriptor.get("links", {}).get("recent_turn_refs", []),
+                        },
+                    )
+                )
+        elif artifact_type == "conversation_turn":
+            turn_id = str(identity.get("turn_id", "")).strip()
+            if turn_id:
+                entries.append(
+                    build_inventory_entry(
+                        entry_type="conversation_turn",
+                        key=turn_id,
+                        label=turn_id,
+                        status=str(state.get("action_mode", "informational")),
+                        source_ref=source_ref,
+                        trust_class=str(trust_class) if trust_class is not None else None,
+                        details={
+                            "conversation_id": identity.get("conversation_id"),
+                            "role": identity.get("role"),
+                            "intent": state.get("intent"),
+                            "response_summary": state.get("response_summary"),
+                            "attention_refs": descriptor.get("links", {}).get("attention_refs", []),
+                            "session_refs": descriptor.get("links", {}).get("session_refs", []),
+                            "initiative_refs": descriptor.get("links", {}).get("initiative_refs", []),
+                            "memory_refs": descriptor.get("links", {}).get("memory_refs", []),
+                            "knowledge_refs": descriptor.get("links", {}).get("knowledge_refs", []),
+                            "proposed_session_refs": descriptor.get("links", {}).get("proposed_session_refs", []),
+                            "authored_memory_refs": descriptor.get("links", {}).get("authored_memory_refs", []),
+                        },
+                    )
+                )
         if artifact_type == "session_manifest":
             session_id = str(identity.get("session_id", "")).strip()
             if session_id and epoch_details.get("compatibility_class") != GOVERNED_ARTIFACT_EPOCH_LEGACY_PRE_REGISTRY:
@@ -565,6 +614,38 @@ def build_observations(
                     details={
                         "task_id": identity.get("task_id"),
                         "final_status": state.get("final_status"),
+                    },
+                )
+            )
+        elif artifact_type == "conversation_manifest":
+            observations.append(
+                build_observation(
+                    observation_type="conversation.state",
+                    source_kind="descriptor",
+                    status=str(state.get("status", "unknown")),
+                    observed_at=str(state.get("updated_at")) if state.get("updated_at") is not None else None,
+                    source_ref=source_ref,
+                    scope_ref=str(identity.get("conversation_id")) if identity.get("conversation_id") is not None else None,
+                    details={
+                        "mode": identity.get("mode"),
+                        "turn_count": state.get("turn_count"),
+                        "last_intent": state.get("last_intent"),
+                    },
+                )
+            )
+        elif artifact_type == "conversation_turn":
+            observations.append(
+                build_observation(
+                    observation_type="conversation.turn",
+                    source_kind="descriptor",
+                    status=str(state.get("action_mode", "informational")),
+                    observed_at=str(state.get("created_at")) if state.get("created_at") is not None else None,
+                    source_ref=source_ref,
+                    scope_ref=str(identity.get("conversation_id")) if identity.get("conversation_id") is not None else None,
+                    details={
+                        "turn_id": identity.get("turn_id"),
+                        "intent": state.get("intent"),
+                        "proposed_session_refs": descriptor.get("links", {}).get("proposed_session_refs", []),
                     },
                 )
             )

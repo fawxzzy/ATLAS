@@ -1,0 +1,158 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://schemas/atlas.conversation.v1.json",
+  "title": "ATLAS conversation manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "conversation_id",
+    "mode",
+    "status",
+    "created_at",
+    "updated_at",
+    "automation_level_ceiling",
+    "active_initiative_refs",
+    "active_session_refs",
+    "recent_turn_refs",
+    "related_memory_refs",
+    "related_attention_refs"
+  ],
+  "properties": {
+    "contract_version": {
+      "type": "string",
+      "const": "atlas.conversation.v1"
+    },
+    "conversation_id": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9._:-]+$"
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "text",
+        "voice"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "idle",
+        "closed"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "automation_level_ceiling": {
+      "type": "string",
+      "enum": [
+        "observe",
+        "context",
+        "request_action",
+        "approved_action"
+      ]
+    },
+    "active_initiative_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "active_session_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "recent_turn_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "related_memory_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "related_attention_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "turn_count",
+        "last_turn_at",
+        "last_input_summary",
+        "last_response_summary"
+      ],
+      "properties": {
+        "turn_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "last_turn_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "last_input_summary": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "last_response_summary": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "last_intent": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "provider": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "adapter",
+        "model"
+      ],
+      "properties": {
+        "adapter": {
+          "type": "string",
+          "minLength": 1
+        },
+        "model": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

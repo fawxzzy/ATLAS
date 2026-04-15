@@ -70,6 +70,7 @@ def iter_candidate_json_paths(paths: Iterable[Path]) -> list[Path]:
 def default_artifact_source_paths(root: Path | None = None) -> list[Path]:
     base = (root or atlas_root()).resolve()
     return [
+        base / "runtime" / "atlas" / "conversations",
         base / "runtime" / "atlas" / "sessions",
         base / "runtime" / "atlas" / "proposed-sessions",
         base / "runtime" / "cortex" / "context",
@@ -333,6 +334,81 @@ def build_session_descriptor(payload: dict[str, Any], *, digest: str, size_bytes
             "related_hypothesis_refs": clean_refs(proposal.get("related_hypothesis_refs", [])),
             "related_prior_session_refs": clean_refs(proposal.get("related_prior_session_refs", [])),
             "generated_from_digest": proposal.get("generated_from_digest"),
+        },
+    )
+
+
+def build_conversation_descriptor(payload: dict[str, Any], *, digest: str, size_bytes: int, source_ref: str) -> dict[str, Any]:
+    summary = payload.get("summary") if isinstance(payload.get("summary"), dict) else {}
+    return descriptor_base(
+        artifact_class="coordination",
+        artifact_type="conversation_manifest",
+        schema_ref="atlas.conversation.v1",
+        digest=digest,
+        size_bytes=size_bytes,
+        source_ref=source_ref,
+        trust_class="trusted",
+        release_eligible=False,
+        retention_class="runtime",
+        regulated_artifact_class="conversation_runtime",
+        identity={
+            "conversation_id": payload.get("conversation_id"),
+            "mode": payload.get("mode"),
+        },
+        state={
+            "status": payload.get("status"),
+            "automation_level_ceiling": payload.get("automation_level_ceiling"),
+            "updated_at": payload.get("updated_at"),
+            "turn_count": summary.get("turn_count"),
+            "last_turn_at": summary.get("last_turn_at"),
+            "last_intent": summary.get("last_intent"),
+        },
+        links={
+            "recent_turn_refs": clean_refs(payload.get("recent_turn_refs", [])),
+            "active_initiative_refs": clean_refs(payload.get("active_initiative_refs", [])),
+            "active_session_refs": clean_refs(payload.get("active_session_refs", [])),
+            "related_memory_refs": clean_refs(payload.get("related_memory_refs", [])),
+            "related_attention_refs": clean_refs(payload.get("related_attention_refs", [])),
+        },
+    )
+
+
+def build_conversation_turn_descriptor(payload: dict[str, Any], *, digest: str, size_bytes: int, source_ref: str) -> dict[str, Any]:
+    provenance = payload.get("provenance") if isinstance(payload.get("provenance"), dict) else {}
+    retrieved_ref_set = payload.get("retrieved_ref_set") if isinstance(payload.get("retrieved_ref_set"), dict) else {}
+    return descriptor_base(
+        artifact_class="coordination",
+        artifact_type="conversation_turn",
+        schema_ref="atlas.conversation.turn.v1",
+        digest=digest,
+        size_bytes=size_bytes,
+        source_ref=source_ref,
+        trust_class="trusted",
+        release_eligible=False,
+        retention_class="runtime",
+        regulated_artifact_class="conversation_runtime",
+        identity={
+            "conversation_id": payload.get("conversation_id"),
+            "turn_id": payload.get("turn_id"),
+            "role": payload.get("role"),
+        },
+        state={
+            "intent": provenance.get("intent"),
+            "action_mode": provenance.get("action_mode"),
+            "provider": provenance.get("provider"),
+            "created_at": payload.get("created_at"),
+            "response_summary": payload.get("response_summary"),
+        },
+        links={
+            "attention_refs": clean_refs(retrieved_ref_set.get("attention_refs", [])),
+            "session_refs": clean_refs(retrieved_ref_set.get("session_refs", [])),
+            "initiative_refs": clean_refs(retrieved_ref_set.get("initiative_refs", [])),
+            "memory_refs": clean_refs(retrieved_ref_set.get("memory_refs", [])),
+            "knowledge_refs": clean_refs(retrieved_ref_set.get("knowledge_refs", [])),
+            "artifact_refs": clean_refs(retrieved_ref_set.get("artifact_refs", [])),
+            "proposed_session_refs": clean_refs(payload.get("proposed_session_refs", [])),
+            "authored_memory_refs": clean_refs(payload.get("authored_memory_refs", [])),
+            "tool_trace_refs": clean_refs(payload.get("tool_trace_refs", [])),
         },
     )
 
@@ -828,6 +904,10 @@ def build_descriptor_for_payload(path: Path, payload: dict[str, Any], *, root: P
     contract_version = str(payload.get("contract_version", ""))
     schema_version = str(payload.get("schema_version", ""))
 
+    if contract_version == "atlas.conversation.v1":
+        return build_conversation_descriptor(payload, digest=digest, size_bytes=size_bytes, source_ref=source_ref)
+    if contract_version == "atlas.conversation.turn.v1":
+        return build_conversation_turn_descriptor(payload, digest=digest, size_bytes=size_bytes, source_ref=source_ref)
     if contract_version == "atlas.session.v1":
         return build_session_descriptor(payload, digest=digest, size_bytes=size_bytes, source_ref=source_ref)
     if schema_version == WORKER_CONTEXT_VERSION:

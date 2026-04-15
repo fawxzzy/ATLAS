@@ -4,7 +4,7 @@
 
 `ops/atlas/talk.py` is the local explicit-command voice shell for ATLAS.
 
-It is a client on top of the Awareness API and session runner. It is not a second orchestrator.
+It is a client on top of the Awareness API and the conversation runtime. It is not a second orchestrator.
 
 ## Boundary
 
@@ -13,14 +13,17 @@ Rules:
 - chat, voice, CLI, and dashboards are clients
 - ATLAS root remains the source of truth
 - voice reads through the Awareness API first
+- voice routes commands through `ops/atlas/converse.py`
 - any action still routes through governed session artifacts and receipts
 
 Current lane posture:
 
 - push-to-talk or explicit typed command only
-- read-only first
+- grounded conversation turns over a stable conversation id
+- read-only first with proposal-only action handling
 - spoken notifications only
 - no ambient hotword
+- no streaming STT/TTS or barge-in yet
 - no bypass around governed request or approval artifacts
 - no broader machine mutation than the bounded workspace write class
 
@@ -43,7 +46,9 @@ These query the Awareness API read model and speak back concise summaries.
 
 ### Read-only scan
 
-This creates a governed root session via `ops/atlas/run_session.py` and returns the session id.
+This now authors a proposal-only next step through the conversation runtime.
+
+The voice client does not start execution directly.
 
 ### Bounded workspace write
 
@@ -60,11 +65,9 @@ The write remains limited to:
 
 Current behavior is root-owned and governed:
 
-- locate a `resume_ready` session
-- invoke `ops/atlas/resume_session.py`
-- validate merge completion, resume-context, paused handoff refs, `stack_lock_digest`, `tool_id`, and `registry_digest`
-- dispatch the resumed worker through the existing `_stack` path only
-- emit `resume_requested`, `resume_dispatched`, and `resume_completed` or `resume_failed`
+- locate the relevant resume context through grounded conversation retrieval
+- author a proposal-only follow-up instead of resuming directly
+- keep approval and execution on the existing governed path
 
 Voice issues a governed `request_action`. It does not invent a private resume path and it does not execute Lifeline directly.
 
@@ -81,6 +84,7 @@ Watch mode polls the Awareness API and speaks when:
 - a merge request remains open
 - a session needs resume follow-up
 - a governed resume fails
+- a conversation turn leaves proposal-only follow-up in attention
 
 ## Commands
 
@@ -105,6 +109,7 @@ python .\ops\atlas\talk.py --base-url http://127.0.0.1:8765 --auth-token local-t
 ## Safety Boundary
 
 - voice never reaches around the Awareness API for private state
+- voice never bypasses `converse.py` for grounded command handling
 - voice never mutates Lifeline directly
 - voice never treats transcript residue as memory
 - voice notifications are advisory only
@@ -122,6 +127,6 @@ python .\ops\atlas\talk.py --base-url http://127.0.0.1:8765 --auth-token local-t
 Expected properties:
 
 - voice queries return current awareness data
-- read-only sessions still produce governed receipts and snapshots
-- resume uses the same governed root executor as local CLI
+- proposal-seeking turns author proposal artifacts instead of executing
+- the same conversation id can accumulate grounded turns over time
 - no voice path bypasses session or approval flow

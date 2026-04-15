@@ -40,6 +40,7 @@ CONTEXT_AUTOMATION_LEVEL = "context"
 ALLOWED_FETCH_PREFIXES = [
     "docs/",
     "ops/",
+    "runtime/atlas/conversations/",
     "runtime/atlas/sessions/",
     "runtime/atlas/proposed-sessions/",
     "runtime/atlas/session-workspaces/",
@@ -340,6 +341,7 @@ def atlas_status(*, root: Path | None = None, refresh: bool = False) -> dict[str
         },
         "working_memory": status.get("working_memory"),
         "initiatives": status.get("initiatives"),
+        "conversations": status.get("conversations"),
         "governed_writes": status.get("governed_writes"),
         "digests": {
             "registry_digest": status.get("registry", {}).get("registry_digest")
@@ -511,6 +513,59 @@ def fetch_session(
         "status_snapshot_ref": atlas_relative(status_snapshot_path, root=base_root) if status_snapshot_path.exists() else None,
         "status_snapshot": status_snapshot,
         "observations": observations,
+        "inventory_entries": related_inventory,
+    }
+
+
+def fetch_conversation(
+    conversation_id: str,
+    *,
+    root: Path | None = None,
+    refresh: bool = False,
+) -> dict[str, Any]:
+    base_root = (root or atlas_root()).resolve()
+    snapshot = _load_snapshot(root=base_root, refresh=refresh)
+    descriptors = load_descriptors(base_root / "runtime" / "cortex" / "artifacts")
+    conversation_descriptor = next(
+        (
+            descriptor
+            for descriptor in descriptors
+            if descriptor.get("artifact_type") == "conversation_manifest"
+            and descriptor.get("identity", {}).get("conversation_id") == conversation_id
+        ),
+        None,
+    )
+    if conversation_descriptor is None:
+        raise FileNotFoundError(f"Unknown conversation_id: {conversation_id}")
+    source_ref = str(conversation_descriptor.get("source_ref", ""))
+    manifest = fetch_artifact(source_ref, root=base_root)
+    related_inventory = [
+        item
+        for item in snapshot.get("inventory_entries", [])
+        if isinstance(item, dict)
+        and (
+            item.get("source_ref") == source_ref
+            or item.get("key") == conversation_id
+            or item.get("details", {}).get("conversation_id") == conversation_id
+        )
+    ]
+    turn_refs = (
+        conversation_descriptor.get("links", {}).get("recent_turn_refs", [])
+        if isinstance(conversation_descriptor.get("links"), dict)
+        else []
+    )
+    turns = [
+        fetch_artifact(str(ref), root=base_root).get("json")
+        for ref in turn_refs
+        if isinstance(ref, str) and ref.strip()
+    ]
+    return {
+        "schema_version": "atlas.awareness.conversation.v1",
+        "conversation_id": conversation_id,
+        "manifest_ref": source_ref,
+        "manifest": manifest.get("json"),
+        "descriptor": conversation_descriptor,
+        "turns": [turn for turn in turns if isinstance(turn, dict)],
         "inventory_entries": related_inventory,
     }
 
@@ -757,6 +812,22 @@ def fetch(
                 "source_kind": "session",
                 "session_id": session_id,
                 "manifest_ref": session.get("manifest_ref"),
+            },
+        }
+
+    if identifier.startswith("conversation:"):
+        conversation_id = identifier.split(":", 1)[1]
+        conversation = fetch_conversation(conversation_id, root=base_root, refresh=refresh)
+        return {
+            "schema_version": FETCH_CONTRACT_VERSION,
+            "id": identifier,
+            "title": conversation_id,
+            "url": _artifact_url("conversation", conversation_id),
+            "text": _json_text(conversation),
+            "metadata": {
+                "source_kind": "conversation",
+                "conversation_id": conversation_id,
+                "manifest_ref": conversation.get("manifest_ref"),
             },
         }
 

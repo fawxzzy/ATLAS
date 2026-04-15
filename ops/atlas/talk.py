@@ -131,154 +131,20 @@ def render_lines(lines: list[str]) -> str:
 
 
 def handle_command(command: str, *, base_url: str, token: str | None, speak_enabled: bool) -> str:
-    normalized = " ".join(command.lower().split())
-    snapshot = None
-
-    if "what needs attention" in normalized or normalized == "attention":
-        attention = fetch_attention(base_url, token)
-        items = attention.get("items", []) if isinstance(attention.get("items"), list) else []
-        lines = [f"Attention items: {len(items)}"]
-        for item in items[:5]:
-            if isinstance(item, dict):
-                lines.append(f"- [{item.get('severity', 'unknown')}] {item.get('summary', '')}")
-        response = render_lines(lines)
-        speak(response, enabled=speak_enabled)
-        return response
-
-    if "what changed today" in normalized or "changed today" in normalized:
-        snapshot = fetch_snapshot(base_url, token)
-        today = datetime.now(timezone.utc).date().isoformat()
-        changed: list[str] = []
-        for observation in snapshot.get("observations", []):
-            if not isinstance(observation, dict):
-                continue
-            observed_at = str(observation.get("observed_at") or "")
-            if observed_at.startswith(today):
-                changed.append(
-                    f"- {observation.get('observation_type', 'observation')} {observation.get('status', 'unknown')} from {observation.get('source_ref', '<unknown>')}"
-                )
-        response = render_lines([f"Observed changes on {today}: {len(changed)}", *changed[:8]])
-        speak(response, enabled=speak_enabled)
-        return response
-
-    if "blocked sessions" in normalized:
-        snapshot = snapshot or fetch_snapshot(base_url, token)
-        blocked = [
-            item
-            for item in snapshot.get("inventory_entries", [])
-            if isinstance(item, dict)
-            and str(item.get("entry_type")) == "session"
-            and str(item.get("status")) in {"resume_ready", "blocked", "paused", "merge_requested"}
+    del base_url
+    del token
+    payload = run_python(
+        [
+            "ops/atlas/converse.py",
+            "--conversation-id",
+            "voice-main",
+            "--mode",
+            "voice",
+            "--input",
+            command,
         ]
-        lines = [f"Blocked or resumable sessions: {len(blocked)}"]
-        for item in blocked[:5]:
-            lines.append(f"- {item.get('key')}: {item.get('status')}")
-        response = render_lines(lines)
-        speak(response, enabled=speak_enabled)
-        return response
-
-    if normalized.startswith("resume paused session") or normalized.startswith("resume session"):
-        snapshot = snapshot or fetch_snapshot(base_url, token)
-        requested_id = command.split()[-1] if command.strip().split() else ""
-        candidates = [
-            item
-            for item in snapshot.get("inventory_entries", [])
-            if isinstance(item, dict)
-            and str(item.get("entry_type")) == "session"
-            and str(item.get("status")) == "resume_ready"
-        ]
-        selected = None
-        if requested_id:
-            for item in candidates:
-                if str(item.get("key")) == requested_id:
-                    selected = item
-                    break
-        if selected is None and candidates:
-            selected = candidates[0]
-        if selected is None:
-            response = "No resume_ready session is currently available."
-            speak(response, enabled=speak_enabled)
-            return response
-        session_id = str(selected.get("key"))
-        payload = run_python(
-            [
-                "ops/atlas/resume_session.py",
-                "--session-id",
-                session_id,
-            ]
-        )
-        lines = [
-            f"Dispatched governed resume for {session_id}.",
-            f"- session_state: {payload.get('session_state')}",
-            f"- final_status: {payload.get('final_status')}",
-            f"- resume_run_manifest_ref: {payload.get('resume_run_manifest_ref')}",
-        ]
-        if payload.get("failure_reason"):
-            lines.append(f"- failure_reason: {payload.get('failure_reason')}")
-        response = render_lines(lines)
-        speak(response, enabled=speak_enabled)
-        return response
-
-    if normalized.startswith("run read-only scan on "):
-        target = command.split("run read-only scan on ", 1)[1].strip()
-        payload = run_python(
-            [
-                "ops/atlas/run_session.py",
-                "--task-id",
-                f"voice-readonly-{slugify(target)}",
-                "--title",
-                f"Voice read-only scan: {target}",
-                "--query-term",
-                target,
-            ]
-        )
-        session_id = payload.get("session_id") or payload.get("session", {}).get("session_id")
-        response = render_lines(
-            [
-                f"Started governed read-only scan for {target}.",
-                f"- session_id: {session_id}",
-            ]
-        )
-        speak(response, enabled=speak_enabled)
-        return response
-
-    if "verta posture" in normalized:
-        payload = request_json(base_url, "/atlas/artifacts/fetch", token=token, query={"id": "knowledge:personal--verta-core"})
-        response = render_lines(
-            [
-                "Current Verta posture:",
-                "- metadata-only trust gate remains in force",
-                f"- source: {payload.get('id')}",
-            ]
-        )
-        speak(response, enabled=speak_enabled)
-        return response
-
-    if "create a plan" in normalized or "create plan" in normalized or "create decision" in normalized:
-        status = request_json(base_url, "/atlas/status", token=token)
-        active = status.get("active_session") if isinstance(status.get("active_session"), dict) else {}
-        session_id = str(active.get("session_id") or "").strip()
-        if not session_id:
-            response = "No active governed session is available to author from."
-            speak(response, enabled=speak_enabled)
-            return response
-        args = ["ops/atlas/author_working_memory.py", "--session-id", session_id]
-        if "decision" in normalized:
-            args += ["--memory-kind", "decision"]
-        if "plan" in normalized:
-            args += ["--memory-kind", "plan"]
-        if "plan" not in normalized and "decision" not in normalized:
-            args += ["--memory-kind", "plan", "--memory-kind", "decision"]
-        payload = run_python(args)
-        lines = [f"Authored working memory from {session_id}."]
-        for item in payload.get("items", [])[:4]:
-            if isinstance(item, dict):
-                lines.append(f"- {item.get('memory_kind')}: {item.get('id')}")
-        response = render_lines(lines)
-        speak(response, enabled=speak_enabled)
-        return response
-
-    response = "Supported intents: what needs attention, what changed today, show blocked sessions, resume paused session, run read-only scan on X, summarize current Verta posture, create a plan, create a decision."
+    )
+    response = str(payload.get("response") or payload.get("response_summary") or "No response was produced.")
     speak(response, enabled=speak_enabled)
     return response
 
