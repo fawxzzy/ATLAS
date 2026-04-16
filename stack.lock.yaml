@@ -32,7 +32,7 @@ components:
     remote: "https://github.com/ZachariahRedfield/FawxzzyFitness.git"
     ref_type: "branch"
     ref: "main"
-    commit: "7e0b226dcf94c835cd286c449fcb91ec2c175149"
+    commit: "4ca5c6809de2988fc3588a5eb8152fca4c52e34c"
     dirty: false
     trust_class: "trusted"
     release_eligible: true
@@ -98,8 +98,8 @@ components:
     remote: null
     ref_type: "branch"
     ref: "master"
-    commit: "9fa1665ba1d199529724495314b5b7fb2444479c"
-    dirty: false
+    commit: "c9732d3dbcb73d948239c7d1560affe593bb5e48"
+    dirty: true
     trust_class: "trusted"
     release_eligible: false
   stream:
@@ -110,7 +110,7 @@ components:
     ref_type: "branch"
     ref: "codex/fstrm-wave3-surface-base"
     commit: "fadb44e26802ba4699e060f050e5d71906aaaa1e"
-    dirty: false
+    dirty: true
     trust_class: "trusted"
     release_eligible: false
 excluded_surfaces:
@@ -126,4 +126,4 @@ excluded_surfaces:
     trust_class: "untrusted"
     release_eligible: false
     reason: "Token-bearing Verta checkout remains quarantined and untrusted until scrub and rotation are complete."
-lock_digest: "sha256:12b3ce39a573640b18a89236a08bd3f4a60ea631c93430a5fd3d491f3b4fdc94"
+lock_digest: "sha256:8c8456730769e98f9b505a26dee573f7f351d85da8e6c2c99f3b543f764c336c"

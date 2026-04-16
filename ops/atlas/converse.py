@@ -32,6 +32,35 @@ CONVERSATION_AUTOMATION_LEVEL_CEILING = "request_action"
 CONVERSATION_CONTRACT_VERSION = "atlas.conversation.v1"
 TURN_CONTRACT_VERSION = "atlas.conversation.turn.v1"
 RECENT_TURN_LIMIT = 8
+VOICE_STATUS_ALLOWLIST = {
+    "status",
+    "show status",
+    "current status",
+    "what is active",
+    "what's active",
+    "what is going on",
+    "what's going on",
+    "active session",
+}
+VOICE_FILLER_TOKENS = {
+    "a",
+    "all",
+    "an",
+    "as",
+    "had",
+    "huh",
+    "is",
+    "it",
+    "okay",
+    "ok",
+    "so",
+    "the",
+    "uh",
+    "um",
+    "well",
+    "yeah",
+    "yep",
+}
 
 
 def utc_now() -> datetime:
@@ -91,6 +120,71 @@ def unique_strings(values: list[Any]) -> list[str]:
         seen.add(stripped)
         ordered.append(stripped)
     return ordered
+
+
+def normalize_voice_text(value: str) -> str:
+    return " ".join(value.lower().split())
+
+
+def voice_tokens(value: str) -> list[str]:
+    cleaned = re.sub(r"[^a-z0-9'\s-]+", " ", normalize_voice_text(value))
+    return [token.strip("'") for token in cleaned.split(" ") if token.strip("'")]
+
+
+def should_commit_voice_turn(*, user_input: str, mode: str, turn_context: dict[str, Any]) -> tuple[bool, str | None]:
+    if mode != "voice":
+        return True, None
+    intent = str(turn_context.get("intent") or "status_overview")
+    if intent != "status_overview":
+        return True, None
+    normalized = normalize_voice_text(user_input)
+    if normalized in VOICE_STATUS_ALLOWLIST:
+        return True, None
+    tokens = voice_tokens(user_input)
+    if not tokens:
+        return False, "empty_voice_input"
+    if len(tokens) <= 2:
+        return False, "weak_voice_intent"
+    if all(token in VOICE_FILLER_TOKENS for token in tokens):
+        return False, "weak_voice_intent"
+    return True, None
+
+
+def build_uncommitted_voice_result(
+    *,
+    root: Path,
+    conversation_id: str,
+    mode: str,
+    user_input: str,
+    turn_context: dict[str, Any],
+    rejection_reason: str,
+) -> dict[str, Any]:
+    response = "No committed turn was recorded because the utterance was too weak to ground safely. Repeat it or use push-to-talk."
+    manifest_path = conversation_manifest_path(root, conversation_id)
+    return {
+        "conversation_id": conversation_id,
+        "conversation_ref": atlas_relative(manifest_path, root=root) if manifest_path.exists() else None,
+        "turn_id": None,
+        "turn_ref": None,
+        "input_summary": trim_text(user_input),
+        "response": response,
+        "response_summary": trim_text(response),
+        "response_segments": split_response_segments(response),
+        "provider": {
+            "adapter": "deterministic-grounding-v1",
+            "model": "atlas-grounded-rules",
+        },
+        "intent": str(turn_context.get("intent") or "status_overview"),
+        "action_mode": str(turn_context.get("action_mode") or "informational"),
+        "created_at": isoformat(),
+        "proposed_session_refs": [],
+        "authored_memory_refs": [],
+        "retrieved_ref_set": turn_context.get("retrieved_ref_set", {}),
+        "context_digest": str(turn_context.get("context_digest") or stable_json_digest(turn_context)),
+        "committed": False,
+        "rejection_reason": rejection_reason,
+        "mode": mode,
+    }
 
 
 def conversation_root(root: Path, conversation_id: str) -> Path:
@@ -438,7 +532,6 @@ def run_conversation_turn(
     user_input: str,
     refresh: bool = False,
 ) -> dict[str, Any]:
-    manifest = ensure_conversation_manifest(root=root, conversation_id=conversation_id, mode=mode)
     turn_context = build_turn_context(
         user_input,
         root=root,
@@ -446,6 +539,17 @@ def run_conversation_turn(
         mode=mode,
         refresh=refresh,
     )
+    should_commit, rejection_reason = should_commit_voice_turn(user_input=user_input, mode=mode, turn_context=turn_context)
+    if not should_commit:
+        return build_uncommitted_voice_result(
+            root=root,
+            conversation_id=conversation_id,
+            mode=mode,
+            user_input=user_input,
+            turn_context=turn_context,
+            rejection_reason=str(rejection_reason or "weak_voice_intent"),
+        )
+    manifest = ensure_conversation_manifest(root=root, conversation_id=conversation_id, mode=mode)
     created_at = isoformat()
     turn_id = f"turn-{slugify(conversation_id)}-{utc_now().strftime('%Y%m%dT%H%M%S%fZ')}"
     turn_path = turn_artifact_path(root, conversation_id, turn_id)
@@ -524,6 +628,8 @@ def run_conversation_turn(
         "authored_memory_refs": authored_memory_refs,
         "retrieved_ref_set": turn_payload["retrieved_ref_set"],
         "context_digest": turn_payload["provenance"]["context_digest"],
+        "committed": True,
+        "rejection_reason": None,
     }
 
 

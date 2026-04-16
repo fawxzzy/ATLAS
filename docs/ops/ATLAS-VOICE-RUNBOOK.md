@@ -113,6 +113,9 @@ The first poll seeds the baseline and does not replay old notifications.
 
 - recognition stays local using Windows `System.Speech`
 - finalized utterances call the same grounded conversation runtime as text mode
+- stream mode defaults to a higher commit floor with `--min-confidence 0.55`
+- one-token finalized junk turns are dropped instead of being committed
+- weak voice fallback turns return "no committed turn" instead of writing a bogus generic status reply
 - response speech is emitted in short segments so it can be interrupted cleanly
 - any new partial utterance during speech counts as barge-in and cancels the remaining spoken response
 - interrupt affects speech delivery only; it does not rewind or delete the already-written conversation turn
@@ -123,6 +126,8 @@ Local control phrases:
 - `stop talking`
 - `cancel response`
 - `exit atlas`
+
+Those phrases stay on the control path. They do not become committed user turns.
 
 ## Operator Run Logs
 
@@ -139,6 +144,8 @@ They keep:
 - grounded turn ids, refs, intent, action mode, and summaries
 - voice notification summaries
 - interrupt events and diagnostics
+- low-confidence ignores with token counts and digests only
+- dropped-junk and no-commit voice events with digests only
 
 They do not keep:
 
@@ -177,6 +184,12 @@ Inspect the voice read model directly:
 Invoke-WebRequest "http://127.0.0.1:8765/atlas/voice?conversation_id=voice-mazer" -Headers @{ Authorization = "Bearer local-test" }
 ```
 
+Prepare a fresh daily cert conversation id and deterministic receipt:
+
+```powershell
+python .\ops\atlas\certify_voice_daily.py --base-url http://127.0.0.1:8765 --auth-token local-test
+```
+
 ## Safety Boundary
 
 - voice never reaches around the Awareness API for private state
@@ -190,11 +203,14 @@ Invoke-WebRequest "http://127.0.0.1:8765/atlas/voice?conversation_id=voice-mazer
 
 Use the Mazer initiative as the first real fixture on the target machine:
 
-1. start `--stream` on one stable `conversation_id`
-2. ask for the initiative summary
-3. ask what repo work is waiting on blessing review
-4. ask for the next work proposal
-5. interrupt one longer response mid-stream and confirm the conversation manifest and turn refs remain intact
+1. refresh and freeze `stack.lock.yaml`, then confirm `python .\ops\validation\validate_stack.py --ratchet` is green
+2. run `certify_voice_daily.py` once to mint a fresh `conversation_id`
+3. start `--stream` on that fresh `conversation_id`
+4. ask for the initiative summary
+5. ask what repo work is waiting on blessing review
+6. ask for the next work proposal
+7. interrupt one longer response mid-stream and confirm the conversation manifest and turn refs remain intact
+8. rerun `certify_voice_daily.py --conversation-id <same id>` to verify the live stream gate sees `interrupts >= 1`
 
 After the run, inspect:
 
@@ -208,6 +224,7 @@ After the run, inspect:
 - open-air speakers may self-trigger interrupts; headphones or separated audio paths are the expected operator setup
 - Windows `System.Speech` remains the current local STT/TTS dependency for this lane
 - this lane proves local operator audio only; it does not add hotword mode or remote execution
+- push-to-talk remains the default operator posture until the live mic cert pass is clean
 
 ## Verification
 
@@ -219,6 +236,7 @@ python .\ops\atlas\talk.py --base-url http://127.0.0.1:8765 --auth-token local-t
 python .\ops\atlas\talk.py --base-url http://127.0.0.1:8765 --auth-token local-test --command "summarize initiative mazer d2 learning scorer" --mute
 python .\ops\atlas\talk.py --base-url http://127.0.0.1:8765 --auth-token local-test --command "propose next work for initiative mazer d2 learning scorer" --mute
 python .\ops\atlas\talk.py --base-url http://127.0.0.1:8765 --auth-token local-test --command "what repo work is waiting on blessing review" --mute
+python .\ops\atlas\certify_voice_daily.py --base-url http://127.0.0.1:8765 --auth-token local-test
 python .\ops\atlas\talk.py --base-url http://127.0.0.1:8765 --auth-token local-test --conversation-id voice-mazer --stream --print-partials
 Invoke-WebRequest "http://127.0.0.1:8765/atlas/voice?conversation_id=voice-main" -Headers @{ Authorization = "Bearer local-test" }
 ```
@@ -230,6 +248,7 @@ Expected properties:
 - the same conversation id can accumulate grounded turns over time
 - `/atlas/voice` returns current digests, active session state, filtered notifications, and recent conversation turns
 - barge-in stops spoken delivery without corrupting the conversation manifest or turn refs
+- one-token junk turns and weak fallback turns do not become durable conversation artifacts
 - transcript-safe run logs land under `runtime/atlas/voice/runs/**`
 - each grounded turn remains fetchable through Awareness as `conversation_turn:<turn_id>`
 - no voice path bypasses session or approval flow

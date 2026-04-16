@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import argparse
 import base64
+import hashlib
 import json
 import os
 import queue
+import re
 import subprocess
 import sys
 import threading
@@ -20,6 +22,7 @@ DEFAULT_CONVERSATION_ID = "voice-main"
 VOICE_RUN_ROOT = ROOT / "runtime" / "atlas" / "voice" / "runs"
 EXIT_COMMANDS = {"exit", "quit", "exit atlas", "quit atlas", "stop listening"}
 INTERRUPT_COMMANDS = {"stop", "stop talking", "cancel response", "be quiet", "interrupt"}
+DEFAULT_STREAM_MIN_CONFIDENCE = 0.55
 
 
 def load_token(args: argparse.Namespace) -> str | None:
@@ -195,6 +198,7 @@ class VoiceRunLogger:
         speech_rate: int | None = None,
         min_confidence: float | None = None,
         print_partials: bool = False,
+        update_latest_summary: bool = True,
     ) -> None:
         self.conversation_id = conversation_id
         self.mode = mode
@@ -206,11 +210,14 @@ class VoiceRunLogger:
         self.events_path = self.run_dir / f"{self.run_id}.jsonl"
         self.summary_path = self.run_dir / f"{self.run_id}.summary.json"
         self.latest_summary_path = self.run_dir / "latest.summary.json"
+        self.update_latest_summary = update_latest_summary
         self.counts = {
             "turns": 0,
             "notifications": 0,
             "interrupts": 0,
             "low_confidence_ignored": 0,
+            "dropped_junk": 0,
+            "uncommitted_turns": 0,
             "diagnostics": 0,
         }
         self._closed = False
@@ -225,6 +232,7 @@ class VoiceRunLogger:
                 "speech_rate": speech_rate,
                 "min_confidence": min_confidence,
                 "print_partials": print_partials,
+                "update_latest_summary": update_latest_summary,
                 "stores_raw_transcript": False,
                 "stores_raw_audio": False,
             },
@@ -282,12 +290,39 @@ class VoiceRunLogger:
             },
         )
 
-    def record_low_confidence(self, confidence: float) -> None:
+    def record_low_confidence(self, confidence: float, *, text: str = "") -> None:
         self.counts["low_confidence_ignored"] += 1
         self._append(
             "low_confidence_ignored",
             {
                 "confidence": round(confidence, 3),
+                "token_count": len(spoken_tokens(text)),
+                "input_digest": spoken_input_digest(text),
+            },
+        )
+
+    def record_dropped_junk(self, *, text: str, confidence: float | None = None, reason: str) -> None:
+        self.counts["dropped_junk"] += 1
+        self._append(
+            "dropped_junk",
+            {
+                "reason": reason,
+                "confidence": round(confidence, 3) if isinstance(confidence, float) else None,
+                "token_count": len(spoken_tokens(text)),
+                "input_digest": spoken_input_digest(text),
+            },
+        )
+
+    def record_uncommitted_turn(self, *, reason: str, payload: dict[str, Any]) -> None:
+        self.counts["uncommitted_turns"] += 1
+        self._append(
+            "uncommitted_turn",
+            {
+                "reason": reason,
+                "response_summary": payload.get("response_summary"),
+                "intent": payload.get("intent"),
+                "action_mode": payload.get("action_mode"),
+                "input_digest": spoken_input_digest(str(payload.get("input_summary") or "")),
             },
         )
 
@@ -327,7 +362,8 @@ class VoiceRunLogger:
         }
         self._append("run_finished", {"finished_at": finished_at, "outcome": outcome, "error": error})
         write_json(self.summary_path, summary)
-        write_json(self.latest_summary_path, summary)
+        if self.update_latest_summary:
+            write_json(self.latest_summary_path, summary)
 
 
 def handle_command(
@@ -630,6 +666,23 @@ def normalize_control_text(text: str) -> str:
     return " ".join(text.lower().split())
 
 
+def spoken_tokens(text: str) -> list[str]:
+    lowered = normalize_control_text(text)
+    cleaned = re.sub(r"[^a-z0-9'\s-]+", " ", lowered)
+    return [token.strip("'") for token in cleaned.split(" ") if token.strip("'")]
+
+
+def spoken_input_digest(text: str) -> str:
+    normalized = normalize_control_text(text)
+    if not normalized:
+        return ""
+    return hashlib.sha256(normalized.encode("utf-8")).hexdigest()[:12]
+
+
+def is_stream_junk_turn(text: str) -> bool:
+    return len(spoken_tokens(text)) == 1
+
+
 def stream_voice(
     *,
     base_url: str,
@@ -718,7 +771,7 @@ def stream_voice(
             last_partial = ""
             if confidence < min_confidence:
                 print(f"heard> ignored low-confidence speech ({confidence:.2f})")
-                logger.record_low_confidence(confidence)
+                logger.record_low_confidence(confidence, text=text)
                 continue
 
             normalized = normalize_control_text(text)
@@ -730,9 +783,22 @@ def stream_voice(
                 print("atlas> interrupted")
                 logger.record_interrupt(reason="control_phrase", interrupted_source=interrupted_source)
                 continue
+            if is_stream_junk_turn(text):
+                print("heard> ignored one-token junk turn")
+                logger.record_dropped_junk(text=text, confidence=confidence, reason="one_token_stream_junk")
+                continue
 
             print(f"user> {text}")
             payload = run_turn(text, conversation_id=conversation_id)
+            if not bool(payload.get("committed", True)):
+                logger.record_uncommitted_turn(reason=str(payload.get("rejection_reason") or "uncommitted"), payload=payload)
+                response = str(payload.get("response") or payload.get("response_summary") or "No committed turn was recorded.")
+                print(f"atlas> {response}")
+                speaker.enqueue_segments(
+                    payload.get("response_segments", split_response_segments(response)),
+                    source="response",
+                )
+                continue
             response = str(payload.get("response") or payload.get("response_summary") or "No response was produced.")
             logger.record_turn(payload)
             print(f"atlas> {response}")
@@ -819,7 +885,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--stream", action="store_true")
     parser.add_argument("--watch", action="store_true")
     parser.add_argument("--poll-seconds", type=int, default=10)
-    parser.add_argument("--min-confidence", type=float, default=0.45)
+    parser.add_argument("--min-confidence", type=float, default=DEFAULT_STREAM_MIN_CONFIDENCE)
     parser.add_argument("--speech-rate", type=int, default=0)
     parser.add_argument("--print-partials", action="store_true")
     parser.add_argument("--mute", action="store_true")

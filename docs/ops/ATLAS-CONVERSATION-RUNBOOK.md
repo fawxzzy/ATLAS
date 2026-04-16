@@ -23,6 +23,12 @@ Voice and text use the same runtime.
 
 The voice client may interrupt spoken delivery, but it still writes the same durable conversation and turn artifacts as text mode.
 
+Weak voice fallback is now explicit:
+
+- if a voice utterance collapses into an ungrounded generic `status_overview` guess, the runtime prefers no committed turn
+- short filler turns such as one-word or weak two-word residue do not mutate the conversation manifest
+- explicit status requests still remain allowed voice turns
+
 ## Artifact Roles
 
 Conversation manifest:
@@ -86,6 +92,7 @@ Rules:
 
 - continuous local STT finalizes one utterance at a time
 - each finalized utterance becomes one grounded turn on the shared `conversation_id`
+- except for weak voice fallback turns, which now return a no-commit response instead of persisting bogus status residue
 - response delivery may be interrupted locally by barge-in
 - interrupt stops TTS only; it does not alter the durable turn or manifest
 
@@ -140,4 +147,5 @@ Minimum checks:
 - `/atlas/voice` surfaces recent grounded turns and voice-relevant notifications without private state
 - search by initiative or proposal ref returns the related conversation artifacts
 - proposal turns emit `retrieved_ref_set` and full provenance
+- weak voice fallback turns do not append `recent_turn_refs` or overwrite the last grounded thread summary
 - stack validation remains green apart from inherited unrelated debt

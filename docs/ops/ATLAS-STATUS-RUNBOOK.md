@@ -191,6 +191,11 @@ Current output includes:
 - recent active initiatives and open-attention initiatives
 - the requested conversation's recent grounded turns when `conversation_id` is supplied
 
+Weak voice residue is intentionally excluded from this surface:
+
+- low-confidence ignores, dropped junk turns, and no-commit fallback events stay in transcript-safe operator run logs only
+- `/atlas/voice` reports grounded conversation truth, not rejected speech residue
+
 That lets voice stay query-first instead of carrying a hidden prompt residue blob.
 
 Voice validation logs under `runtime/atlas/voice/runs/**` are operator audit artifacts, not canonical status truth.

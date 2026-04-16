@@ -7,6 +7,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+from uuid import uuid4
 
 ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
@@ -49,6 +50,42 @@ def conversation_manifest_path(conversation_id: str) -> Path:
 
 def voice_run_latest_summary_path(conversation_id: str) -> Path:
     return VOICE_RUN_ROOT / conversation_id / "latest.summary.json"
+
+
+def voice_run_root(conversation_id: str) -> Path:
+    return VOICE_RUN_ROOT / conversation_id
+
+
+def fresh_conversation_id() -> str:
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    return f"voice-daily-cert-{stamp}-{uuid4().hex[:6]}"
+
+
+def list_voice_run_summaries(conversation_id: str, *, mode: str | None = None) -> list[dict[str, Any]]:
+    run_dir = voice_run_root(conversation_id)
+    if not run_dir.exists():
+        return []
+    summaries: list[dict[str, Any]] = []
+    for path in sorted(run_dir.glob("*.summary.json")):
+        if path.name == "latest.summary.json":
+            continue
+        payload = read_json(path)
+        if mode is not None and str(payload.get("mode") or "").strip() != mode:
+            continue
+        summaries.append(
+            {
+                "path": normalize_slashes(str(path.relative_to(ROOT))),
+                "payload": payload,
+                "finished_at": str(payload.get("finished_at") or payload.get("started_at") or ""),
+            }
+        )
+    summaries.sort(key=lambda item: str(item.get("finished_at") or ""))
+    return summaries
+
+
+def latest_voice_run_summary(conversation_id: str, *, mode: str | None = None) -> dict[str, Any] | None:
+    summaries = list_voice_run_summaries(conversation_id, mode=mode)
+    return summaries[-1] if summaries else None
 
 
 def run_json_command(args: list[str]) -> tuple[int, dict[str, Any] | None, str]:
@@ -116,6 +153,7 @@ def run_scripted_turns(
         base_url=base_url,
         speak_enabled=False,
         speech_rate=0,
+        update_latest_summary=False,
     )
     turns: list[dict[str, Any]] = []
     outcome = "completed"
@@ -165,10 +203,11 @@ def compare_read_model(
     base_url: str,
     token: str | None,
     scripted_turns: list[dict[str, Any]],
+    scripted_summary_path: str,
 ) -> dict[str, Any]:
-    latest_summary_path = voice_run_latest_summary_path(conversation_id)
+    latest_stream_summary = latest_voice_run_summary(conversation_id, mode="stream")
     manifest_path = conversation_manifest_path(conversation_id)
-    latest_summary = read_json(latest_summary_path)
+    scripted_summary = read_json(ROOT / scripted_summary_path)
     manifest = read_json(manifest_path)
     voice_payload = request_json(
         base_url,
@@ -200,21 +239,22 @@ def compare_read_model(
 
     return {
         "ok": (
-            latest_summary.get("conversation_id") == conversation_id
-            and int(latest_summary.get("counts", {}).get("turns", 0) or 0) == len(scripted_turns)
+            scripted_summary.get("conversation_id") == conversation_id
+            and int(scripted_summary.get("counts", {}).get("turns", 0) or 0) == len(scripted_turns)
             and turn_refs_present
             and voice_turn_match
             and proposal_refs_present
         ),
-        "latest_summary_path": normalize_slashes(str(latest_summary_path.relative_to(ROOT))),
+        "scripted_summary_path": scripted_summary_path,
+        "latest_stream_summary_path": latest_stream_summary.get("path") if isinstance(latest_stream_summary, dict) else None,
         "manifest_path": normalize_slashes(str(manifest_path.relative_to(ROOT))),
         "voice_view_turn_match": voice_turn_match,
         "manifest_contains_turn_refs": turn_refs_present,
         "proposal_refs_present": proposal_refs_present,
-        "latest_summary": {
-            "run_id": latest_summary.get("run_id"),
-            "counts": latest_summary.get("counts"),
-            "outcome": latest_summary.get("outcome"),
+        "scripted_summary": {
+            "run_id": scripted_summary.get("run_id"),
+            "counts": scripted_summary.get("counts"),
+            "outcome": scripted_summary.get("outcome"),
         },
         "voice_view": {
             "conversation_id": voice_payload.get("conversation_id"),
@@ -227,6 +267,43 @@ def compare_read_model(
     }
 
 
+def live_stream_gate(*, conversation_id: str, base_url: str) -> dict[str, Any]:
+    latest_stream = latest_voice_run_summary(conversation_id, mode="stream")
+    if not isinstance(latest_stream, dict):
+        return {
+            "required": True,
+            "ok": False,
+            "status": "pending",
+            "reason": "missing_live_stream_run",
+            "remaining_proof": "run one live stream on this fresh conversation id and include a deliberate barge-in interrupt",
+            "stream_command": (
+                f"python .\\ops\\atlas\\talk.py --base-url {base_url} "
+                f"--auth-token <token> --conversation-id {conversation_id} --stream --print-partials"
+            ),
+        }
+    payload = latest_stream.get("payload", {}) if isinstance(latest_stream.get("payload"), dict) else {}
+    counts = payload.get("counts", {}) if isinstance(payload.get("counts"), dict) else {}
+    interrupts = int(counts.get("interrupts", 0) or 0)
+    turn_count = int(counts.get("turns", 0) or 0)
+    ok = str(payload.get("outcome") or "") == "completed" and turn_count >= 1 and interrupts >= 1
+    return {
+        "required": True,
+        "ok": ok,
+        "status": "passed" if ok else "pending",
+        "reason": None if ok else "live_stream_interrupt_proof_missing",
+        "stream_summary_path": latest_stream.get("path"),
+        "run_id": payload.get("run_id"),
+        "outcome": payload.get("outcome"),
+        "turn_count": turn_count,
+        "interrupts": interrupts,
+        "remaining_proof": None if ok else "latest live stream must show at least one interrupt on the same conversation id",
+        "stream_command": (
+            f"python .\\ops\\atlas\\talk.py --base-url {base_url} "
+            f"--auth-token <token> --conversation-id {conversation_id} --stream --print-partials"
+        ),
+    }
+
+
 def build_receipt(
     *,
     conversation_id: str,
@@ -236,6 +313,8 @@ def build_receipt(
     awareness_preflight: dict[str, Any],
     scripted_run: dict[str, Any] | None,
     read_model: dict[str, Any] | None,
+    live_gate: dict[str, Any],
+    fresh_requested: bool,
 ) -> dict[str, Any]:
     deterministic_ok = (
         bool(stack_preflight.get("ok"))
@@ -245,10 +324,20 @@ def build_receipt(
         and isinstance(read_model, dict)
         and bool(read_model.get("ok"))
     )
+    overall_status = "blocked"
+    if deterministic_ok and bool(live_gate.get("ok")):
+        overall_status = "passed"
+    elif deterministic_ok:
+        overall_status = "pending_live_barge_in"
     return {
         "contract_version": RECEIPT_CONTRACT_VERSION,
         "generated_at": utc_now(),
         "conversation_id": conversation_id,
+        "conversation": {
+            "fresh_requested": fresh_requested,
+            "fresh_conversation_required": True,
+            "live_stream_required": True,
+        },
         "prompts": prompts,
         "preflight": {
             "stack": stack_preflight,
@@ -256,18 +345,17 @@ def build_receipt(
         },
         "scripted_run": scripted_run,
         "read_model": read_model,
-        "manual_gate": {
-            "required": True,
-            "status": "pending",
-            "remaining_proof": "real human mic -> spoken response -> human barge-in interrupt -> clean continued state on the same conversation id",
-            "stream_command": (
-                f"python .\\ops\\atlas\\talk.py --base-url {base_url} "
-                f"--auth-token <token> --conversation-id {conversation_id} --stream --print-partials"
-            ),
-        },
+        "live_stream_gate": live_gate,
         "overall": {
             "deterministic_gate_ok": deterministic_ok,
-            "release_gate_status": "pending_live_barge_in" if deterministic_ok else "blocked",
+            "required_fields": {
+                "lock_preflight_ok": bool(stack_preflight.get("ok")),
+                "interrupts_gte_1": bool(live_gate.get("interrupts", 0) >= 1),
+                "read_model_ok": None if isinstance(read_model, dict) and read_model.get("skipped") else bool(isinstance(read_model, dict) and read_model.get("ok")),
+                "voice_view_turn_match": None if isinstance(read_model, dict) and read_model.get("skipped") else bool(isinstance(read_model, dict) and read_model.get("voice_view_turn_match")),
+                "proposal_refs_present": None if isinstance(read_model, dict) and read_model.get("skipped") else bool(isinstance(read_model, dict) and read_model.get("proposal_refs_present")),
+            },
+            "release_gate_status": overall_status,
         },
     }
 def receipt_paths(conversation_id: str) -> tuple[Path, Path]:
@@ -283,7 +371,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--base-url", default="http://127.0.0.1:8765")
     parser.add_argument("--auth-token")
     parser.add_argument("--auth-token-file")
-    parser.add_argument("--conversation-id", default="voice-daily-cert")
+    parser.add_argument("--conversation-id")
+    parser.add_argument("--fresh-conversation-id", action="store_true")
     parser.add_argument("--skip-preflight", action="store_true")
     parser.add_argument("--skip-scripted-run", action="store_true")
     parser.add_argument("--skip-read-model-check", action="store_true")
@@ -291,6 +380,8 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     token = load_token(args)
+    conversation_id = args.conversation_id.strip() if isinstance(args.conversation_id, str) and args.conversation_id.strip() else fresh_conversation_id()
+    fresh_requested = bool(args.fresh_conversation_id or not args.conversation_id)
     prompts = [prompt.strip() for prompt in (args.prompts or DEFAULT_PROMPTS) if isinstance(prompt, str) and prompt.strip()]
 
     stack_preflight = {"ok": True, "skipped": True}
@@ -299,15 +390,15 @@ def main(argv: list[str] | None = None) -> int:
         stack_preflight = run_stack_preflight()
         awareness_preflight = run_awareness_preflight(args.base_url, token)
 
-    scripted_run: dict[str, Any] | None = None
+    scripted_run: dict[str, Any] | None = {"ok": True, "skipped": True, "turns": []} if args.skip_scripted_run else None
     if not args.skip_scripted_run:
         scripted_run = run_scripted_turns(
             prompts=prompts,
-            conversation_id=args.conversation_id,
+            conversation_id=conversation_id,
             base_url=args.base_url,
         )
 
-    read_model: dict[str, Any] | None = None
+    read_model: dict[str, Any] | None = {"ok": True, "skipped": True} if args.skip_read_model_check else None
     if (
         not args.skip_read_model_check
         and isinstance(scripted_run, dict)
@@ -316,10 +407,11 @@ def main(argv: list[str] | None = None) -> int:
     ):
         try:
             read_model = compare_read_model(
-                conversation_id=args.conversation_id,
+                conversation_id=conversation_id,
                 base_url=args.base_url,
                 token=token,
                 scripted_turns=scripted_run.get("turns", []),
+                scripted_summary_path=str(scripted_run.get("summary_path")),
             )
         except Exception as exc:
             read_model = {
@@ -327,20 +419,23 @@ def main(argv: list[str] | None = None) -> int:
                 "error": str(exc),
             }
 
+    live_gate = live_stream_gate(conversation_id=conversation_id, base_url=args.base_url)
     receipt = build_receipt(
-        conversation_id=args.conversation_id,
+        conversation_id=conversation_id,
         base_url=args.base_url,
         prompts=prompts,
         stack_preflight=stack_preflight,
         awareness_preflight=awareness_preflight,
         scripted_run=scripted_run,
         read_model=read_model,
+        live_gate=live_gate,
+        fresh_requested=fresh_requested,
     )
-    latest_path, timestamped_path = receipt_paths(args.conversation_id)
+    latest_path, timestamped_path = receipt_paths(conversation_id)
     write_json(latest_path, receipt)
     write_json(timestamped_path, receipt)
     print(json.dumps(receipt, indent=2))
-    return 0 if receipt["overall"]["release_gate_status"] == "pending_live_barge_in" else 1
+    return 0 if receipt["overall"]["release_gate_status"] in {"pending_live_barge_in", "passed"} else 1
 
 
 if __name__ == "__main__":
