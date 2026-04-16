@@ -84,6 +84,7 @@ from ops.cortex.index_working_memory import (
     validate_working_memory_documents,
 )
 from ops.cortex.world_model import world_model_state_root, write_world_model_state
+from ops.validation.atlas_topology_contract import validate_contract_files as validate_atlas_topology_contract_files
 
 
 @dataclass
@@ -1697,6 +1698,19 @@ def iter_scan_files(roots: list[Path]) -> list[Path]:
 def build_findings(stack_file: Path, config: dict[str, Any], *, lock_file_override: Path | None = None) -> list[Finding]:
     root = stack_file.parent.resolve()
     findings: list[Finding] = []
+    try:
+        _, _, topology_issues = validate_atlas_topology_contract_files(stack_file=stack_file)
+    except Exception as exc:
+        findings.append(
+            Finding(
+                "error",
+                "atlas-topology-validator-crash",
+                "ops/validation/atlas_topology_contract.py",
+                f"Atlas topology validator failed before completion: {exc}",
+            )
+        )
+    else:
+        findings.extend(Finding(item.severity, item.category, item.path, item.message, item.details) for item in topology_issues)
     findings.extend(validate_tool_registry(root))
     findings.extend(validate_subsystem_registry(stack_file, config))
     findings.extend(validate_execution_receipt_repairs(stack_file))
