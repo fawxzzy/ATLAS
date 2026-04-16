@@ -150,10 +150,37 @@ Current output includes:
 
 - `initiatives.active_items`
 - `initiatives.open_attention_items`
+- `initiatives.waiting_on_review_items`
+- `initiatives.pending_proposal_items`
 - `initiatives.proposed_session_items`
 - `initiatives.repo_linked_items`
+- `trust_posture`
+- `slices.active_initiatives`
+- `slices.waiting_on_review`
+- `slices.pending_proposals`
+- `slices.repo_linked_initiatives`
+- `slices.trust_posture`
 
 The Mazer D2 learning scorer initiative is the first real repo-linked example: it should surface as active, open-attention, and repo-linked before any proposal executes.
+
+The same record should also surface as:
+
+- `waiting_on_review` because blessing is still pending
+- `pending_proposals` because the soak session is still proposal-only
+
+## Slice Rules
+
+Status and Awareness now expose first-class read slices so chat mostly selects instead of infers.
+
+Primary slices:
+
+- active initiatives
+- waiting on review
+- pending proposals
+- repo-linked initiatives
+- trust posture
+
+Session state remains visible, but it is lower priority for generic `what is active` style prompts unless the operator explicitly asks a session-centric question.
 
 ## Conversation Surface
 
@@ -231,3 +258,5 @@ Current output includes:
 ## Trust Surface Rule
 
 Knowledge status output is metadata-only for quarantined surfaces. The status view must never hydrate raw Verta evidence or derived promotion text for those surfaces.
+
+`trust_posture` is the read slice that makes that policy explicit for chat and Awareness fetch/search. Verta must remain surfaced as untrusted and metadata-only there.

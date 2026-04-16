@@ -12,6 +12,7 @@ The runtime must:
 - build a deterministic turn context from the minimum relevant refs
 - write durable conversation manifests and grounded turn artifacts
 - author proposal-only follow-up artifacts when a turn requests action
+- answer generic text turns from initiative / proposal / trust slices before falling back to stale `active_session`
 
 The runtime must not:
 
@@ -105,6 +106,35 @@ Grounding stays query-first / hydrate-later:
 - Verta remains visible but untrusted and metadata-only
 - conversation provenance must remain reconstructable from explicit refs
 
+## Initiative-First Ordering
+
+Generic text answers should prefer this order:
+
+- `waiting_on_review`
+- `pending_proposals`
+- `active_initiatives`
+- `trust_posture`
+- `active_session` only when the prompt is session-centric or the higher slices are empty
+
+That prevents stale session truth from outranking live initiative truth such as:
+
+- Mazer waiting on `fixed-blessed-id soak smoke`
+- then `manual blessing review`
+- with the proposal still non-executing
+
+## Explicit Text Paths
+
+The text planner now has direct grounded paths for:
+
+- `what is active`
+- `what needs attention`
+- `what repo work is waiting on blessing review`
+- `what proposal is pending`
+- `summarize initiative <name>`
+- `propose next work for initiative <name>`
+
+Proposal-seeking turns remain proposal-only. They may author or reuse a proposal artifact, but they do not execute governed work.
+
 ## Commands
 
 One grounded text turn:
@@ -142,10 +172,14 @@ Invoke-WebRequest "http://127.0.0.1:8765/atlas/voice?conversation_id=atlas-main"
 Minimum checks:
 
 - same deterministic fixture yields the same manifest shape
+- repeated identical text turns yield the same `retrieved_ref_set` when the underlying world model is unchanged
 - `conversation:<id>` resolves through Awareness fetch
 - `conversation_turn:<turn_id>` resolves through Awareness fetch
 - `/atlas/voice` surfaces recent grounded turns and voice-relevant notifications without private state
 - search by initiative or proposal ref returns the related conversation artifacts
+- `what repo work is waiting on blessing review` resolves to the Mazer initiative slice before any stale session headline
+- `what proposal is pending` resolves from the pending-proposal slice
+- `propose next work for initiative mazer d2 learning scorer` stays proposal-only
 - proposal turns emit `retrieved_ref_set` and full provenance
 - weak voice fallback turns do not append `recent_turn_refs` or overwrite the last grounded thread summary
 - stack validation remains green apart from inherited unrelated debt

@@ -20,7 +20,7 @@ from ops.cortex._artifacts import (
     write_json,
 )
 from ops.cortex.index_working_memory import WORKING_MEMORY_OUTPUT, load_working_memory_catalog
-from ops.cortex.render_status import render_status_payload
+from ops.cortex.render_status import initiative_view, render_status_payload
 from ops.cortex.world_model import (
     attention_output_path,
     snapshot_output_path,
@@ -342,8 +342,10 @@ def atlas_status(*, root: Path | None = None, refresh: bool = False) -> dict[str
             "content_digest": attention.get("content_digest"),
             "summary": attention.get("summary"),
         },
+        "trust_posture": status.get("trust_posture"),
         "working_memory": status.get("working_memory"),
         "initiatives": status.get("initiatives"),
+        "slices": status.get("slices"),
         "conversations": status.get("conversations"),
         "governed_writes": status.get("governed_writes"),
         "digests": {
@@ -363,6 +365,150 @@ def atlas_status(*, root: Path | None = None, refresh: bool = False) -> dict[str
             "read_only": True,
         },
         "world_model": status.get("world_model"),
+    }
+
+
+def _slice_titles() -> dict[str, str]:
+    return {
+        "active_initiatives": "Active Initiatives",
+        "waiting_on_review": "Waiting On Review",
+        "pending_proposals": "Pending Proposals",
+        "repo_linked_initiatives": "Repo-Linked Initiatives",
+        "trust_posture": "Trust Posture",
+    }
+
+
+def _status_slices(status: dict[str, Any]) -> dict[str, Any]:
+    return status.get("slices", {}) if isinstance(status.get("slices"), dict) else {}
+
+
+def _status_slice_payload(status: dict[str, Any], slice_name: str) -> dict[str, Any]:
+    slices = _status_slices(status)
+    titles = _slice_titles()
+    if slice_name == "trust_posture":
+        payload = slices.get(slice_name, status.get("trust_posture", {}))
+        if not isinstance(payload, dict):
+            payload = {}
+        return {
+            "slice_name": slice_name,
+            "title": titles.get(slice_name, slice_name),
+            "item_count": int(payload.get("item_count", 0) or 0),
+            "items": payload.get("items", []) if isinstance(payload.get("items"), list) else [],
+            "payload": payload,
+        }
+    items = slices.get(slice_name, [])
+    if not isinstance(items, list):
+        items = []
+    return {
+        "slice_name": slice_name,
+        "title": titles.get(slice_name, slice_name),
+        "item_count": len(items),
+        "items": items,
+        "payload": {
+            "slice_name": slice_name,
+            "item_count": len(items),
+            "items": items,
+        },
+    }
+
+
+def _initiative_catalog_item(initiative_id: str, *, root: Path, refresh: bool) -> dict[str, Any] | None:
+    catalog = _load_working_memory(root=root, refresh=refresh)
+    for item in catalog.get("items", []):
+        if not isinstance(item, dict):
+            continue
+        if str(item.get("memory_kind", "")).strip() != "initiative":
+            continue
+        if str(item.get("id", "")).strip() != initiative_id:
+            continue
+        return item
+    return None
+
+
+def _initiative_status_view(initiative_id: str, *, root: Path, refresh: bool) -> dict[str, Any] | None:
+    status = atlas_status(root=root, refresh=refresh)
+    initiatives = status.get("initiatives", {}) if isinstance(status.get("initiatives"), dict) else {}
+    for key in ("active_items", "pending_proposal_items", "waiting_on_review_items", "repo_linked_items"):
+        items = initiatives.get(key, [])
+        if not isinstance(items, list):
+            continue
+        for item in items:
+            if isinstance(item, dict) and str(item.get("id", "")).strip() == initiative_id:
+                return item
+    catalog_item = _initiative_catalog_item(initiative_id, root=root, refresh=refresh)
+    if catalog_item is None:
+        return None
+    return initiative_view(catalog_item)
+
+
+def _proposal_payload_for_initiative(
+    initiative_id: str,
+    *,
+    root: Path,
+    refresh: bool,
+) -> dict[str, Any]:
+    initiative_payload = fetch_memory(initiative_id, root=root, refresh=refresh)
+    initiative_metadata = initiative_payload.get("metadata", {}) if isinstance(initiative_payload.get("metadata"), dict) else {}
+    status_view = _initiative_status_view(initiative_id, root=root, refresh=refresh) or {}
+    proposal_ref = str(status_view.get("proposal_ref") or "").strip()
+    if not proposal_ref:
+        proposal_ref = str(initiative_metadata.get("document_metadata", {}).get("proposal_ref") or "").strip()
+    proposed_refs = status_view.get("proposed_next_session_refs", []) if isinstance(status_view.get("proposed_next_session_refs"), list) else []
+    if not proposal_ref and proposed_refs:
+        proposal_ref = str(proposed_refs[0] or "").strip()
+    if not proposal_ref:
+        proposed_from_metadata = initiative_metadata.get("proposed_next_session_refs", [])
+        if isinstance(proposed_from_metadata, list) and proposed_from_metadata:
+            proposal_ref = str(proposed_from_metadata[0] or "").strip()
+    if not proposal_ref:
+        raise FileNotFoundError(f"No proposal is linked to initiative: {initiative_id}")
+    proposal_artifact = fetch_artifact(proposal_ref, root=root)
+    proposal_json = proposal_artifact.get("json") if isinstance(proposal_artifact.get("json"), dict) else {}
+    return {
+        "schema_version": FETCH_CONTRACT_VERSION,
+        "id": f"proposal:{initiative_id}",
+        "title": str(proposal_json.get("title") or f"Pending proposal for {initiative_id}"),
+        "url": _artifact_url("proposal", initiative_id),
+        "text": _json_text(
+            {
+                "initiative_id": initiative_id,
+                "initiative_title": status_view.get("title") or initiative_payload.get("title"),
+                "proposal_ref": proposal_ref,
+                "proposal_session": proposal_json,
+            }
+        ),
+        "metadata": {
+            "source_kind": "proposal",
+            "initiative_id": initiative_id,
+            "proposal_ref": proposal_ref,
+            "session_id": proposal_json.get("session_id"),
+            "initiative_ref": initiative_metadata.get("path"),
+        },
+    }
+
+
+def fetch_status_slice(
+    slice_name: str,
+    *,
+    root: Path | None = None,
+    refresh: bool = False,
+) -> dict[str, Any]:
+    base_root = (root or atlas_root()).resolve()
+    if slice_name not in _slice_titles():
+        raise FileNotFoundError(f"Unknown awareness status slice: {slice_name}")
+    status = atlas_status(root=base_root, refresh=refresh)
+    payload = _status_slice_payload(status, slice_name)
+    return {
+        "schema_version": FETCH_CONTRACT_VERSION,
+        "id": f"slice:{slice_name}",
+        "title": payload["title"],
+        "url": _artifact_url("slice", slice_name),
+        "text": _json_text(payload["payload"]),
+        "metadata": {
+            "source_kind": "status_slice",
+            "slice_name": slice_name,
+            "item_count": payload["item_count"],
+        },
     }
 
 
@@ -885,6 +1031,7 @@ def search(
 ) -> dict[str, Any]:
     base_root = (root or atlas_root()).resolve()
     snapshot = _load_snapshot(root=base_root, refresh=refresh)
+    status = atlas_status(root=base_root, refresh=refresh)
     results: list[dict[str, Any]] = []
 
     for entry in snapshot.get("inventory_entries", []):
@@ -959,6 +1106,71 @@ def search(
 
     results.extend(_working_memory_search(query, limit=max(limit, 1), root=base_root, refresh=refresh))
     results.extend(_knowledge_search(query, limit=max(limit, 1), root=base_root, refresh=refresh))
+    initiatives = status.get("initiatives", {}) if isinstance(status.get("initiatives"), dict) else {}
+    pending_proposals = initiatives.get("pending_proposal_items", [])
+    if isinstance(pending_proposals, list):
+        for item in pending_proposals:
+            if not isinstance(item, dict):
+                continue
+            initiative_id = str(item.get("id", "")).strip()
+            if not initiative_id:
+                continue
+            score = _score_text(
+                query,
+                str(item.get("id", "")),
+                str(item.get("title", "")),
+                str(item.get("path", "")),
+                str(item.get("proposal_ref", "")),
+                str(item.get("next_step", "")),
+                str(item.get("follow_up", "")),
+                str(item.get("attention_summary", "")),
+                " ".join(str(value) for value in item.get("waiting_on", []) if isinstance(value, str)),
+                " ".join(str(value) for value in item.get("repo_refs", []) if isinstance(value, str)),
+            )
+            if score <= 0:
+                continue
+            results.append(
+                {
+                    "id": f"proposal:{initiative_id}",
+                    "title": str(item.get("title") or initiative_id),
+                    "url": _artifact_url("proposal", initiative_id),
+                    "text": _trimmed_text(
+                        f"proposal {item.get('proposal_ref')} next {item.get('next_step')} follow_up {item.get('follow_up')}"
+                    ),
+                    "metadata": {
+                        "source_kind": "proposal",
+                        "initiative_id": initiative_id,
+                        "proposal_ref": item.get("proposal_ref"),
+                        "initiative_ref": item.get("path"),
+                    },
+                    "_score": score,
+                }
+            )
+
+    for slice_name, title in _slice_titles().items():
+        payload = _status_slice_payload(status, slice_name)
+        score = _score_text(
+            query,
+            slice_name,
+            title,
+            _json_text(payload["payload"]),
+        )
+        if score <= 0:
+            continue
+        results.append(
+            {
+                "id": f"slice:{slice_name}",
+                "title": title,
+                "url": _artifact_url("slice", slice_name),
+                "text": _trimmed_text(_json_text(payload["payload"])),
+                "metadata": {
+                    "source_kind": "status_slice",
+                    "slice_name": slice_name,
+                    "item_count": payload["item_count"],
+                },
+                "_score": score,
+            }
+        )
     deduped: dict[str, dict[str, Any]] = {}
     for item in results:
         existing = deduped.get(str(item["id"]))
@@ -1104,6 +1316,14 @@ def fetch(
     if identifier.startswith("initiative:"):
         initiative_id = identifier.split(":", 1)[1]
         return fetch_memory(initiative_id, root=base_root, refresh=refresh)
+
+    if identifier.startswith("proposal:"):
+        initiative_id = identifier.split(":", 1)[1]
+        return _proposal_payload_for_initiative(initiative_id, root=base_root, refresh=refresh)
+
+    if identifier.startswith("slice:"):
+        slice_name = identifier.split(":", 1)[1]
+        return fetch_status_slice(slice_name, root=base_root, refresh=refresh)
 
     if identifier.startswith("artifact:"):
         ref = identifier.split(":", 1)[1]

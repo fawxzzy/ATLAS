@@ -55,12 +55,16 @@ def _parse_json_text(value: Any) -> dict[str, Any] | None:
 
 def _classify_intent(user_input: str) -> dict[str, Any]:
     normalized = _normalize(user_input)
+    if normalized in {"what is active", "what's active", "what is going on", "what's going on", "active"}:
+        return {"intent": "active_overview", "target": None, "action_mode": "informational"}
     if normalized in {"attention", "what needs attention"} or "needs attention" in normalized:
         return {"intent": "attention_overview", "target": None, "action_mode": "informational"}
     if "what changed today" in normalized or "changed today" in normalized:
         return {"intent": "changes_today", "target": None, "action_mode": "informational"}
     if "what initiatives are active" in normalized or normalized == "active initiatives":
         return {"intent": "active_initiatives", "target": None, "action_mode": "informational"}
+    if "proposal" in normalized and "pending" in normalized:
+        return {"intent": "pending_proposal", "target": None, "action_mode": "informational"}
     if "repo work" in normalized and ("blessing" in normalized or "review" in normalized):
         return {"intent": "repo_waiting_on_review", "target": None, "action_mode": "informational"}
     if normalized.startswith("summarize initiative "):
@@ -128,6 +132,33 @@ def _trace(surface: str, query: str, refs: list[str]) -> dict[str, Any]:
     }
 
 
+def _status_slices(status: dict[str, Any]) -> dict[str, Any]:
+    return status.get("slices", {}) if isinstance(status.get("slices"), dict) else {}
+
+
+def _register_initiative_item_refs(ref_set: dict[str, list[str]], item: dict[str, Any]) -> None:
+    initiative_id = str(item.get("id") or "").strip()
+    if initiative_id:
+        _register_ref(ref_set, "initiative_refs", f"initiative:{initiative_id}")
+    initiative_path = str(item.get("path") or "").strip()
+    if initiative_path:
+        _register_ref(ref_set, "memory_refs", initiative_path)
+    proposal_ref = str(item.get("proposal_ref") or "").strip()
+    if proposal_ref:
+        _register_ref(ref_set, "artifact_refs", proposal_ref)
+    for proposal_ref in item.get("proposed_next_session_refs", []):
+        _register_ref(ref_set, "artifact_refs", str(proposal_ref))
+
+
+def _register_trust_refs(ref_set: dict[str, list[str]], item: dict[str, Any]) -> None:
+    source_ref = str(item.get("source_ref") or "").strip()
+    if source_ref:
+        _register_ref(ref_set, "artifact_refs", source_ref)
+    knowledge_ref = str(item.get("knowledge_ref") or "").strip()
+    if knowledge_ref:
+        _register_ref(ref_set, "knowledge_refs", knowledge_ref)
+
+
 def build_turn_context(
     user_input: str,
     *,
@@ -177,55 +208,69 @@ def build_turn_context(
 
     elif intent == "active_initiatives":
         status = atlas_status(root=base_root, refresh=refresh)
-        initiatives = (
-            status.get("initiatives", {}).get("active_items", [])
-            if isinstance(status.get("initiatives"), dict)
-            else []
-        )
-        refs = []
-        for item in initiatives:
+        initiatives = _status_slices(status).get("active_initiatives", [])
+        refs: list[str] = []
+        for item in initiatives if isinstance(initiatives, list) else []:
             if not isinstance(item, dict):
                 continue
-            identifier = str(item.get("id") or "").strip()
-            if not identifier:
-                continue
-            ref = f"initiative:{identifier}"
-            refs.append(ref)
-            _register_ref(retrieved_ref_set, "initiative_refs", ref)
+            _register_initiative_item_refs(retrieved_ref_set, item)
+            if item.get("id"):
+                refs.append(f"initiative:{item.get('id')}")
         facts["initiatives"] = initiatives
         query_trace.append(_trace("status", "active initiatives", refs))
 
+    elif intent == "active_overview":
+        status = atlas_status(root=base_root, refresh=refresh)
+        slices = _status_slices(status)
+        active_items = slices.get("active_initiatives", []) if isinstance(slices.get("active_initiatives"), list) else []
+        waiting_items = slices.get("waiting_on_review", []) if isinstance(slices.get("waiting_on_review"), list) else []
+        pending_items = slices.get("pending_proposals", []) if isinstance(slices.get("pending_proposals"), list) else []
+        trust_posture = slices.get("trust_posture", {}) if isinstance(slices.get("trust_posture"), dict) else {}
+        refs: list[str] = []
+        for bucket in (active_items, waiting_items, pending_items):
+            for item in bucket:
+                if not isinstance(item, dict):
+                    continue
+                _register_initiative_item_refs(retrieved_ref_set, item)
+                if item.get("id"):
+                    refs.append(f"initiative:{item.get('id')}")
+        for item in trust_posture.get("items", []) if isinstance(trust_posture.get("items"), list) else []:
+            if not isinstance(item, dict):
+                continue
+            _register_trust_refs(retrieved_ref_set, item)
+            if item.get("knowledge_ref"):
+                refs.append(str(item.get("knowledge_ref")))
+        facts["status"] = status
+        facts["active_initiatives"] = active_items
+        facts["waiting_on_review"] = waiting_items
+        facts["pending_proposals"] = pending_items
+        facts["trust_posture"] = trust_posture
+        query_trace.append(_trace("status", "active overview", refs))
+
+    elif intent == "pending_proposal":
+        status = atlas_status(root=base_root, refresh=refresh)
+        pending_items = _status_slices(status).get("pending_proposals", [])
+        refs: list[str] = []
+        for item in pending_items if isinstance(pending_items, list) else []:
+            if not isinstance(item, dict):
+                continue
+            _register_initiative_item_refs(retrieved_ref_set, item)
+            if item.get("id"):
+                refs.append(f"initiative:{item.get('id')}")
+        facts["pending_proposals"] = pending_items
+        facts["status"] = status
+        query_trace.append(_trace("status", "pending proposals", refs))
+
     elif intent == "repo_waiting_on_review":
         status = atlas_status(root=base_root, refresh=refresh)
-        repo_linked = (
-            status.get("initiatives", {}).get("repo_linked_items", [])
-            if isinstance(status.get("initiatives"), dict)
-            else []
-        )
-        filtered = [
-            item
-            for item in repo_linked
-            if isinstance(item, dict)
-            and any(
-                token in " ".join(
-                    [
-                        str(item.get("attention_summary") or ""),
-                        str(item.get("title") or ""),
-                    ]
-                ).lower()
-                for token in ("blessing", "review")
-            )
-        ]
+        filtered = _status_slices(status).get("waiting_on_review", [])
         refs = []
-        for item in filtered:
+        for item in filtered if isinstance(filtered, list) else []:
             identifier = str(item.get("id") or "").strip()
             if not identifier:
                 continue
-            ref = f"initiative:{identifier}"
-            refs.append(ref)
-            _register_ref(retrieved_ref_set, "initiative_refs", ref)
-            for proposal_ref in item.get("proposed_next_session_refs", []):
-                _register_ref(retrieved_ref_set, "artifact_refs", str(proposal_ref))
+            refs.append(f"initiative:{identifier}")
+            _register_initiative_item_refs(retrieved_ref_set, item)
         facts["repo_waiting"] = filtered
         query_trace.append(_trace("status", "repo work waiting on blessing or review", refs))
 
@@ -245,10 +290,18 @@ def build_turn_context(
             _register_ref(retrieved_ref_set, "memory_refs", str(initiative_payload.get("metadata", {}).get("path")))
             facts["initiative"] = initiative_payload
             facts["initiative_document"] = _parse_json_text(initiative_payload.get("text"))
+            try:
+                proposal_payload = fetch(f"proposal:{initiative_id}", root=base_root, refresh=refresh)
+            except FileNotFoundError:
+                proposal_payload = None
+            if isinstance(proposal_payload, dict):
+                facts["proposal"] = proposal_payload
+                _register_ref(retrieved_ref_set, "artifact_refs", str(proposal_payload.get("metadata", {}).get("proposal_ref")))
             query_trace.append(_trace("search", query, [str(item.get("id")) for item in candidates]))
         else:
             facts["initiative"] = None
             facts["initiative_document"] = None
+            facts["proposal"] = None
             query_trace.append(_trace("search", query, []))
 
     elif intent == "session_blocked_reason":
@@ -261,15 +314,21 @@ def build_turn_context(
         query_trace.append(_trace("session", session_id, [f"session:{session_id}", str(manifest_ref or "")]))
 
     elif intent == "verta_trust_posture":
-        knowledge_id = "knowledge:personal--verta-core"
-        try:
-            payload = fetch(knowledge_id, root=base_root, refresh=refresh)
-        except FileNotFoundError:
-            knowledge_id = "knowledge:personal--verta-core-sanitized"
-            payload = fetch(knowledge_id, root=base_root, refresh=refresh)
-        _register_ref(retrieved_ref_set, "knowledge_refs", knowledge_id)
-        facts["knowledge"] = payload
-        query_trace.append(_trace("knowledge", knowledge_id, [knowledge_id]))
+        status = atlas_status(root=base_root, refresh=refresh)
+        trust_posture = _status_slices(status).get("trust_posture", {})
+        items = [
+            item
+            for item in trust_posture.get("items", [])
+            if isinstance(item, dict) and "verta" in str(item.get("archive_id") or "").lower()
+        ] if isinstance(trust_posture, dict) else []
+        refs: list[str] = []
+        for item in items:
+            _register_trust_refs(retrieved_ref_set, item)
+            if item.get("knowledge_ref"):
+                refs.append(str(item.get("knowledge_ref")))
+        facts["trust_posture"] = trust_posture
+        facts["trust_items"] = items
+        query_trace.append(_trace("status", "verta trust posture", refs))
 
     elif intent == "request_resume_session":
         snapshot = fetch("artifact:runtime/state/atlas/world-model.snapshot.latest.json", root=base_root, refresh=refresh)
@@ -320,21 +379,37 @@ def build_turn_context(
 
     else:
         status = atlas_status(root=base_root, refresh=refresh)
+        slices = _status_slices(status)
+        active_items = slices.get("active_initiatives", []) if isinstance(slices.get("active_initiatives"), list) else []
+        waiting_items = slices.get("waiting_on_review", []) if isinstance(slices.get("waiting_on_review"), list) else []
+        pending_items = slices.get("pending_proposals", []) if isinstance(slices.get("pending_proposals"), list) else []
+        trust_posture = slices.get("trust_posture", {}) if isinstance(slices.get("trust_posture"), dict) else {}
         active_session = status.get("active_session") if isinstance(status.get("active_session"), dict) else None
-        initiatives = status.get("initiatives") if isinstance(status.get("initiatives"), dict) else {}
-        if isinstance(active_session, dict) and active_session.get("session_id"):
+        for bucket in (waiting_items, pending_items, active_items):
+            for item in bucket:
+                if not isinstance(item, dict):
+                    continue
+                _register_initiative_item_refs(retrieved_ref_set, item)
+        for item in trust_posture.get("items", []) if isinstance(trust_posture.get("items"), list) else []:
+            if not isinstance(item, dict):
+                continue
+            _register_trust_refs(retrieved_ref_set, item)
+        if not any(retrieved_ref_set.values()) and isinstance(active_session, dict) and active_session.get("session_id"):
             _register_ref(retrieved_ref_set, "session_refs", f"session:{active_session.get('session_id')}")
-        for item in initiatives.get("active_items", []) if isinstance(initiatives.get("active_items"), list) else []:
-            if isinstance(item, dict) and item.get("id"):
-                _register_ref(retrieved_ref_set, "initiative_refs", f"initiative:{item.get('id')}")
         facts["status"] = status
+        facts["active_initiatives"] = active_items
+        facts["waiting_on_review"] = waiting_items
+        facts["pending_proposals"] = pending_items
+        facts["trust_posture"] = trust_posture
         query_trace.append(
             _trace(
                 "status",
                 "status overview",
                 [
-                    *retrieved_ref_set["session_refs"],
                     *retrieved_ref_set["initiative_refs"],
+                    *retrieved_ref_set["artifact_refs"],
+                    *retrieved_ref_set["knowledge_refs"],
+                    *retrieved_ref_set["session_refs"],
                 ],
             )
         )
