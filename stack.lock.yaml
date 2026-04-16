@@ -1,6 +1,6 @@
 schema_version: "atlas.stack.lock.v1"
 stack_manifest_path: "stack.yaml"
-stack_manifest_digest: "sha256:5c2a3c186d9132125db4d21036fdf9f950d6c7123c366218a5069f32a86cc203"
+stack_manifest_digest: "sha256:328c7dd209a4de092d66714161f3aef268d725d1f4ca004362c327803f06feef"
 component_count: 10
 components:
   _stack:
@@ -10,8 +10,8 @@ components:
     remote: null
     ref_type: "branch"
     ref: "main"
-    commit: "05b5ff9f195ad3e7f81676529b2d7892a1b095c6"
-    dirty: true
+    commit: "b2c747a115339447d697c54290ab7d98f3a650e6"
+    dirty: false
     trust_class: "trusted"
     release_eligible: false
   atlas:
@@ -98,7 +98,7 @@ components:
     remote: null
     ref_type: "branch"
     ref: "master"
-    commit: "e884c38867c9398023e1a1af1f21c0562006d30b"
+    commit: "99ef087d8de716333d85e2e57ed13550252d24f4"
     dirty: true
     trust_class: "trusted"
     release_eligible: false
@@ -126,4 +126,4 @@ excluded_surfaces:
     trust_class: "untrusted"
     release_eligible: false
     reason: "Token-bearing Verta checkout remains quarantined and untrusted until scrub and rotation are complete."
-lock_digest: "sha256:9cb771c152bcb595d2cb30db1c3961de0dae1850f8f0aa54a5fd7bf68a0e6f9a"
+lock_digest: "sha256:bb43b13deec8ed678a581f456d33373fa2079bf3c92fecf90a04f545db30c9d2"

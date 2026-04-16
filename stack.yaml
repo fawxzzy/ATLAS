@@ -139,14 +139,6 @@ repo_registry:
     path: repos/playbook-demo/playbook-demo
     role: demo
     status: demo
-  playbook-v1:
-    path: repos/playbook-old/playbookv1
-    role: legacy-governance
-    status: legacy
-  mazer-unreal:
-    path: repos/mazer-legacy-unreal/Mazer
-    role: legacy-application
-    status: legacy
 
 subsystem_registry:
   cortex:
