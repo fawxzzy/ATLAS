@@ -10,8 +10,8 @@ components:
     remote: null
     ref_type: "branch"
     ref: "main"
-    commit: "b2c747a115339447d697c54290ab7d98f3a650e6"
-    dirty: false
+    commit: "6125e1800401cdcec30f35de0e8d64ac602dadab"
+    dirty: true
     trust_class: "trusted"
     release_eligible: false
   atlas:
@@ -21,18 +21,18 @@ components:
     remote: null
     ref_type: "branch"
     ref: "main"
-    commit: "d1ac68aa7ce1bb72d413f03f20561b1fe46edd95"
-    dirty: true
+    commit: "d915c6d3d5cc86c3a9f5de8805c90ae4d0de73d8"
+    dirty: false
     trust_class: "trusted"
     release_eligible: true
   fitness:
     path: "repos/fawxzzy-fitness"
     role: "application"
     status: "active"
-    remote: "https://github.com/ZachariahRedfield/FawxzzyFitness.git"
+    remote: "https://github.com/fawxzzy/fawxzzy-fitness.git"
     ref_type: "branch"
     ref: "main"
-    commit: "d49e88d9f4c6a1de7cfce1233b2e79ce61035062"
+    commit: "9e9eaaef785f940f54c09731211878e6958353f2"
     dirty: true
     trust_class: "trusted"
     release_eligible: true
@@ -51,10 +51,10 @@ components:
     path: "repos/fawxzzy-mazer"
     role: "application"
     status: "active"
-    remote: "https://github.com/ZachariahRedfield/fawxzzy-mazer.git"
+    remote: "https://github.com/fawxzzy/fawxzzy-mazer.git"
     ref_type: "branch"
-    ref: "codex/mazer-d2-learning-scorer"
-    commit: "22a8ade03196e4359a62d3da0f50502406d869fe"
+    ref: "main"
+    commit: "f98cebb3e856a09d1a171221cdff1ed687bc5c28"
     dirty: true
     trust_class: "trusted"
     release_eligible: true
@@ -73,10 +73,10 @@ components:
     path: "repos/fawxzzy-playbook"
     role: "governance-runtime"
     status: "active"
-    remote: "https://github.com/ZachariahRedfield/fawxzzy-playbook.git"
+    remote: "https://github.com/fawxzzy/fawxzzy-playbook.git"
     ref_type: "branch"
-    ref: "codex/assistant-reliability-safety-playbook-clean"
-    commit: "8820810af93069d98db8c4b03900a5fa2cb732e1"
+    ref: "main"
+    commit: "4efc7b7a85c23ee41f5210051ff90664a1aee444"
     dirty: true
     trust_class: "trusted"
     release_eligible: true
@@ -95,11 +95,11 @@ components:
     path: "."
     role: "operator-layer"
     status: "active"
-    remote: null
+    remote: "https://github.com/fawxzzy/ATLAS.git"
     ref_type: "branch"
-    ref: "master"
-    commit: "b4ddc7f7d4c0adee4f58850a5735fc8da17140ad"
-    dirty: false
+    ref: "main"
+    commit: "4dd8d8888b95c0d6d6bbea45283283051c4499e8"
+    dirty: true
     trust_class: "trusted"
     release_eligible: false
   stream:
@@ -109,7 +109,7 @@ components:
     remote: null
     ref_type: "branch"
     ref: "codex/fstrm-wave3-surface-base"
-    commit: "fadb44e26802ba4699e060f050e5d71906aaaa1e"
+    commit: "e30944cd79bd2f2d18afc9bbd9bdfe6f7a04df0f"
     dirty: true
     trust_class: "trusted"
     release_eligible: false
@@ -126,4 +126,4 @@ excluded_surfaces:
     trust_class: "untrusted"
     release_eligible: false
     reason: "Token-bearing Verta checkout remains quarantined and untrusted until scrub and rotation are complete."
-lock_digest: "sha256:ad745cfc5d4db39789a81d28e71088c5c529303836934af5ac135081d0ce011f"
+lock_digest: "sha256:3edf3956b3b02511c1a7f92d33325c1d684f811a0eacb473671f4f178ddc600c"

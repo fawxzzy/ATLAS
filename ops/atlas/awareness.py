@@ -28,6 +28,11 @@ from ops.cortex.world_model import (
     write_world_model_state,
 )
 from ops.knowledge._pipeline import build_query_bundle, knowledge_query_bundle_path
+from ops.stack.export_repo_inventory import (
+    build_repo_inventory,
+    find_excluded_surface,
+    find_repo_inventory_entry,
+)
 
 STATUS_CONTRACT_VERSION = "atlas.awareness.status.v1"
 SEARCH_CONTRACT_VERSION = "atlas.awareness.search.v1"
@@ -240,6 +245,11 @@ def _load_working_memory(*, root: Path, refresh: bool) -> dict[str, Any]:
     return load_working_memory_catalog(root)
 
 
+def _load_repo_inventory(*, root: Path, refresh: bool) -> dict[str, Any]:
+    _ = refresh
+    return build_repo_inventory(root=root)
+
+
 def _memory_source_kind(item: dict[str, Any]) -> str:
     memory_kind = str(item.get("memory_kind", "")).strip()
     return memory_kind if memory_kind == "initiative" else "memory"
@@ -322,6 +332,84 @@ def _working_memory_search(query: str, *, limit: int, root: Path, refresh: bool)
     return results[:limit]
 
 
+def _repo_inventory_search(query: str, *, limit: int, root: Path, refresh: bool) -> list[dict[str, Any]]:
+    inventory = _load_repo_inventory(root=root, refresh=refresh)
+    results: list[dict[str, Any]] = []
+    for item in inventory.get("repos", []):
+        if not isinstance(item, dict):
+            continue
+        local_path = str(item.get("local_path") or "")
+        related_initiatives = item.get("related_initiatives", []) if isinstance(item.get("related_initiatives"), list) else []
+        score = _score_text(
+            query,
+            str(item.get("logical_id", "")),
+            local_path,
+            local_path.replace("/", "\\"),
+            str(item.get("role", "")),
+            str(item.get("status", "")),
+            str(item.get("branch", "")),
+            str(item.get("remote_url", "")),
+            _json_text(related_initiatives),
+        )
+        if score <= 0:
+            continue
+        results.append(
+            {
+                "id": f"repo:{item.get('logical_id')}",
+                "title": str(item.get("logical_id") or local_path or "repo"),
+                "url": _artifact_url("repo", str(item.get("logical_id") or local_path)),
+                "text": _trimmed_text(
+                    f"{local_path} branch={item.get('branch')} dirty={item.get('dirty')} trust={item.get('trust_class')}"
+                ),
+                "metadata": {
+                    "source_kind": "repo_inventory",
+                    "logical_id": item.get("logical_id"),
+                    "local_path": local_path,
+                    "branch": item.get("branch"),
+                    "dirty": item.get("dirty"),
+                    "trust_class": item.get("trust_class"),
+                    "release_eligible": item.get("release_eligible"),
+                    "related_initiative_refs": item.get("related_initiative_refs", []),
+                },
+                "_score": score,
+            }
+        )
+    for item in inventory.get("excluded_surfaces", []):
+        if not isinstance(item, dict):
+            continue
+        local_path = str(item.get("local_path") or "")
+        score = _score_text(
+            query,
+            str(item.get("surface_id", "")),
+            local_path,
+            local_path.replace("/", "\\"),
+            str(item.get("reason", "")),
+            str(item.get("trust_class", "")),
+        )
+        if score <= 0:
+            continue
+        results.append(
+            {
+                "id": f"excluded_surface:{item.get('surface_id')}",
+                "title": str(item.get("surface_id") or local_path or "excluded_surface"),
+                "url": _artifact_url("excluded_surface", str(item.get("surface_id") or local_path)),
+                "text": _trimmed_text(
+                    f"{local_path} trust={item.get('trust_class')} visibility={item.get('visibility_mode')}"
+                ),
+                "metadata": {
+                    "source_kind": "excluded_surface",
+                    "surface_id": item.get("surface_id"),
+                    "local_path": local_path,
+                    "trust_class": item.get("trust_class"),
+                    "visibility_mode": item.get("visibility_mode"),
+                },
+                "_score": score,
+            }
+        )
+    results.sort(key=lambda item: (-int(item["_score"]), str(item["title"]), str(item["id"])))
+    return results[:limit]
+
+
 def atlas_status(*, root: Path | None = None, refresh: bool = False) -> dict[str, Any]:
     base_root = (root or atlas_root()).resolve()
     snapshot = _load_snapshot(root=base_root, refresh=refresh)
@@ -343,6 +431,7 @@ def atlas_status(*, root: Path | None = None, refresh: bool = False) -> dict[str
             "summary": attention.get("summary"),
         },
         "trust_posture": status.get("trust_posture"),
+        "repo_inventory": status.get("repo_inventory"),
         "working_memory": status.get("working_memory"),
         "initiatives": status.get("initiatives"),
         "slices": status.get("slices"),
@@ -356,6 +445,9 @@ def atlas_status(*, root: Path | None = None, refresh: bool = False) -> dict[str
             "attention_digest": attention.get("content_digest"),
             "working_memory_digest": status.get("working_memory", {}).get("content_digest")
             if isinstance(status.get("working_memory"), dict)
+            else None,
+            "repo_inventory_digest": status.get("repo_inventory", {}).get("content_digest")
+            if isinstance(status.get("repo_inventory"), dict)
             else None,
         },
         "automation_policy": {
@@ -375,6 +467,7 @@ def _slice_titles() -> dict[str, str]:
         "pending_proposals": "Pending Proposals",
         "repo_linked_initiatives": "Repo-Linked Initiatives",
         "trust_posture": "Trust Posture",
+        "repo_inventory": "Repo Inventory",
     }
 
 
@@ -1105,6 +1198,7 @@ def search(
         )
 
     results.extend(_working_memory_search(query, limit=max(limit, 1), root=base_root, refresh=refresh))
+    results.extend(_repo_inventory_search(query, limit=max(limit, 1), root=base_root, refresh=refresh))
     results.extend(_knowledge_search(query, limit=max(limit, 1), root=base_root, refresh=refresh))
     initiatives = status.get("initiatives", {}) if isinstance(status.get("initiatives"), dict) else {}
     pending_proposals = initiatives.get("pending_proposal_items", [])
@@ -1197,6 +1291,7 @@ def fetch(
     refresh: bool = False,
 ) -> dict[str, Any]:
     base_root = (root or atlas_root()).resolve()
+    inventory = _load_repo_inventory(root=base_root, refresh=refresh)
     if identifier.startswith("knowledge:"):
         archive_id = identifier.split(":", 1)[1]
         record = _knowledge_record(archive_id, root=base_root, refresh=refresh)
@@ -1324,6 +1419,73 @@ def fetch(
     if identifier.startswith("slice:"):
         slice_name = identifier.split(":", 1)[1]
         return fetch_status_slice(slice_name, root=base_root, refresh=refresh)
+
+    if identifier.startswith("repo:"):
+        repo_id = identifier.split(":", 1)[1]
+        item = find_repo_inventory_entry(inventory, repo_id=repo_id)
+        if item is None:
+            raise FileNotFoundError(f"Unknown repo inventory id: {identifier}")
+        return {
+            "schema_version": FETCH_CONTRACT_VERSION,
+            "id": identifier,
+            "title": str(item.get("logical_id") or repo_id),
+            "url": _artifact_url("repo", str(item.get("logical_id") or repo_id)),
+            "text": _json_text(item),
+            "metadata": {
+                "source_kind": "repo_inventory",
+                "logical_id": item.get("logical_id"),
+                "local_path": item.get("local_path"),
+                "branch": item.get("branch"),
+                "dirty": item.get("dirty"),
+                "trust_class": item.get("trust_class"),
+                "release_eligible": item.get("release_eligible"),
+                "related_initiative_refs": item.get("related_initiative_refs", []),
+            },
+        }
+
+    if identifier.startswith("repo_path:"):
+        repo_path = identifier.split(":", 1)[1]
+        item = find_repo_inventory_entry(inventory, repo_path=repo_path)
+        if item is None:
+            raise FileNotFoundError(f"Unknown repo inventory path: {identifier}")
+        logical_id = str(item.get("logical_id") or repo_path)
+        return {
+            "schema_version": FETCH_CONTRACT_VERSION,
+            "id": f"repo:{logical_id}",
+            "title": logical_id,
+            "url": _artifact_url("repo", logical_id),
+            "text": _json_text(item),
+            "metadata": {
+                "source_kind": "repo_inventory",
+                "logical_id": item.get("logical_id"),
+                "local_path": item.get("local_path"),
+                "branch": item.get("branch"),
+                "dirty": item.get("dirty"),
+                "trust_class": item.get("trust_class"),
+                "release_eligible": item.get("release_eligible"),
+                "related_initiative_refs": item.get("related_initiative_refs", []),
+            },
+        }
+
+    if identifier.startswith("excluded_surface:"):
+        surface_id = identifier.split(":", 1)[1]
+        item = find_excluded_surface(inventory, surface_id)
+        if item is None:
+            raise FileNotFoundError(f"Unknown excluded surface: {identifier}")
+        return {
+            "schema_version": FETCH_CONTRACT_VERSION,
+            "id": identifier,
+            "title": str(item.get("surface_id") or surface_id),
+            "url": _artifact_url("excluded_surface", str(item.get("surface_id") or surface_id)),
+            "text": _json_text(item),
+            "metadata": {
+                "source_kind": "excluded_surface",
+                "surface_id": item.get("surface_id"),
+                "local_path": item.get("local_path"),
+                "trust_class": item.get("trust_class"),
+                "visibility_mode": item.get("visibility_mode"),
+            },
+        }
 
     if identifier.startswith("artifact:"):
         ref = identifier.split(":", 1)[1]

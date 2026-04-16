@@ -13,6 +13,20 @@ This root exists to make the stack rebuildable, zip-safe, and path-independent:
 - disposable artifacts live in `tmp/`
 - secrets live only in `secrets/`
 
+## Control Repo Boundary
+
+ATLAS root is the control repo and coordination layer. It is not a second umbrella source repo.
+
+- child repos under `repos/**` stay independent git roots
+- root-owned visibility for those repos is published through inventory and audits, not by vendoring repo content into root
+- repo-local commands should run against the child repo path directly, for example `pnpm -C repos/fawxzzy-playbook ...`
+- committed topology visibility lives in `docs/registry/STACK-REPO-INVENTORY.json` and `docs/audits/STACK-REPO-INVENTORY.md`
+
+Root rule:
+
+- federate repo truth
+- do not duplicate repo truth
+
 Read these files first:
 
 - `stack.yaml`
@@ -57,6 +71,8 @@ Use these ids in stack docs, tickets, and automation:
 - `nat1-games` -> `repos/Nat1-Games/nat1-games`
 
 The ids are canonical even where disk names have not been normalized yet.
+
+`repos/**` remains untracked by the root repo as a code surface. The stack root tracks inventory and policy about those repos, not mirrored copies of their source trees.
 
 ## Root-Owned Subsystems
 

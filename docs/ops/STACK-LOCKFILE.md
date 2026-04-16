@@ -12,6 +12,7 @@ Root rule:
 
 - the manifest declares
 - the lockfile pins
+- the repo inventory publishes visible topology
 - receipts and validation prove
 
 ## File
@@ -26,6 +27,10 @@ Validation:
 
 - `ops/validation/validate_stack.py`
 - debt reporting: `runtime/receipts/validation/stack-validation.latest.json`
+- visibility export: `ops/stack/export_repo_inventory.py`
+- published surfaces:
+  - `docs/registry/STACK-REPO-INVENTORY.json`
+  - `docs/audits/STACK-REPO-INVENTORY.md`
 
 Shared comparison contract:
 
@@ -185,5 +190,21 @@ The pinned set now includes the `_stack` workflow operator repo so root sessions
 It does not:
 
 - convert child repos to submodules
+- make the root repo a second source checkout for child repos
 - promote untrusted checkouts into managed release surfaces
 - replace the repo registry or topology audit
+
+## Inventory Relationship
+
+Use the lockfile and repo inventory together:
+
+- `stack.yaml` declares which repo ids and paths exist
+- `stack.lock.yaml` pins the intended managed working set
+- `STACK-REPO-INVENTORY` publishes the live, searchable visibility surface for root status, chat, and cockpit clients
+
+Policy:
+
+- the lockfile is a pinning contract
+- the inventory is a visibility contract
+- neither changes the independent topology of child repos
+- `repos/**` stays untracked by the root repo as source; only stack-owned docs and audits outside that tree are committed here

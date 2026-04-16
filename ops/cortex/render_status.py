@@ -18,6 +18,7 @@ from ops.atlas.load_tool_registry import load_tool_registry_bundle
 from ops.cortex._artifacts import load_descriptors
 from ops.cortex.index_working_memory import load_working_memory_catalog
 from ops.atlas.observations import execution_receipt_residue_records
+from ops.stack.export_repo_inventory import build_repo_inventory, summarize_repo_inventory
 
 STATUS_VERSION = "atlas.cortex.status.v2"
 ACTIVE_SESSION_STATES = {
@@ -1204,6 +1205,7 @@ def render_status_payload(
     working_memory = working_memory_summary()
     working_memory_items = working_memory.pop("_items", [])
     conversations = conversation_summary(descriptors)
+    repo_inventory = summarize_repo_inventory(build_repo_inventory(root=atlas_root()))
     initiative_slices = {
         "active_initiatives": working_memory.get("initiatives", {}).get("active_items", [])
         if isinstance(working_memory.get("initiatives"), dict)
@@ -1218,6 +1220,7 @@ def render_status_payload(
         if isinstance(working_memory.get("initiatives"), dict)
         else [],
         "trust_posture": trust_posture,
+        "repo_inventory": repo_inventory.get("items", []),
     }
 
     return {
@@ -1235,6 +1238,7 @@ def render_status_payload(
         "legacy_compatibility": legacy_compatibility_payload,
         "trust_surfaces": trust_surfaces_payload,
         "trust_posture": trust_posture,
+        "repo_inventory": repo_inventory,
         "working_memory": working_memory,
         "initiatives": working_memory.get("initiatives"),
         "slices": initiative_slices,
