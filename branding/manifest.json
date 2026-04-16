@@ -1,0 +1,146 @@
+{
+  "schemaVersion": 1,
+  "brand": {
+    "id": "atlas-sigil",
+    "label": "ATLAS Sigil",
+    "canonical": {
+      "svg": "branding/source/atlas-sigil-master.svg",
+      "png": "branding/source/atlas-sigil-master.png",
+      "ico": "branding/source/atlas-sigil-master.ico"
+    }
+  },
+  "outputs": [
+    {
+      "id": "atlas-sigil-png-1024",
+      "kind": "png",
+      "size": 1024,
+      "target": "branding/generated/png/atlas-sigil-1024.png"
+    },
+    {
+      "id": "atlas-sigil-png-512",
+      "kind": "png",
+      "size": 512,
+      "target": "branding/generated/png/atlas-sigil-512.png"
+    },
+    {
+      "id": "atlas-sigil-png-256",
+      "kind": "png",
+      "size": 256,
+      "target": "branding/generated/png/atlas-sigil-256.png"
+    },
+    {
+      "id": "atlas-sigil-app-192",
+      "kind": "png",
+      "size": 192,
+      "target": "branding/generated/app/icon-192.png"
+    },
+    {
+      "id": "atlas-sigil-app-512",
+      "kind": "png",
+      "size": 512,
+      "target": "branding/generated/app/icon-512.png"
+    },
+    {
+      "id": "atlas-sigil-apple-touch",
+      "kind": "png",
+      "size": 180,
+      "target": "branding/generated/favicon/apple-touch-icon.png"
+    },
+    {
+      "id": "atlas-sigil-favicon-32",
+      "kind": "png",
+      "size": 32,
+      "target": "branding/generated/favicon/favicon-32x32.png"
+    },
+    {
+      "id": "atlas-sigil-favicon-16",
+      "kind": "png",
+      "size": 16,
+      "target": "branding/generated/favicon/favicon-16x16.png"
+    },
+    {
+      "id": "atlas-sigil-launcher-ico",
+      "kind": "ico",
+      "sizes": [16, 20, 24, 32, 40, 48, 64, 128, 256],
+      "target": "branding/generated/ico/atlas-sigil-launcher.ico"
+    },
+    {
+      "id": "atlas-sigil-favicon-ico",
+      "kind": "ico",
+      "sizes": [16, 32, 48],
+      "target": "branding/generated/favicon/favicon.ico"
+    }
+  ],
+  "consumers": [
+    {
+      "id": "stack-launcher-icon",
+      "repoId": "_stack",
+      "description": "_stack Windows launcher icon",
+      "source": "branding/generated/ico/atlas-sigil-launcher.ico",
+      "target": "repos/_stack/ops/assets/release-launcher.ico"
+    },
+    {
+      "id": "fitness-brand-master",
+      "repoId": "fitness",
+      "description": "Fitness local master copy for repo-local icon generation",
+      "source": "branding/source/atlas-sigil-master.png",
+      "target": "repos/fawxzzy-fitness/public/brand/atlas-sigil-master.png"
+    },
+    {
+      "id": "fitness-app-icon-192",
+      "repoId": "fitness",
+      "description": "Fitness PWA app icon 192",
+      "source": "branding/generated/app/icon-192.png",
+      "target": "repos/fawxzzy-fitness/public/app/icon-192.png"
+    },
+    {
+      "id": "fitness-app-icon-512",
+      "repoId": "fitness",
+      "description": "Fitness PWA app icon 512",
+      "source": "branding/generated/app/icon-512.png",
+      "target": "repos/fawxzzy-fitness/public/app/icon-512.png"
+    },
+    {
+      "id": "fitness-public-icon-192",
+      "repoId": "fitness",
+      "description": "Fitness public icon 192",
+      "source": "branding/generated/app/icon-192.png",
+      "target": "repos/fawxzzy-fitness/public/icons/icon-192.png"
+    },
+    {
+      "id": "fitness-public-icon-512",
+      "repoId": "fitness",
+      "description": "Fitness public icon 512",
+      "source": "branding/generated/app/icon-512.png",
+      "target": "repos/fawxzzy-fitness/public/icons/icon-512.png"
+    },
+    {
+      "id": "fitness-apple-touch",
+      "repoId": "fitness",
+      "description": "Fitness apple-touch icon",
+      "source": "branding/generated/favicon/apple-touch-icon.png",
+      "target": "repos/fawxzzy-fitness/public/icons/apple-touch-icon.png"
+    },
+    {
+      "id": "fitness-favicon-32",
+      "repoId": "fitness",
+      "description": "Fitness favicon 32",
+      "source": "branding/generated/favicon/favicon-32x32.png",
+      "target": "repos/fawxzzy-fitness/public/favicon-32x32.png"
+    },
+    {
+      "id": "fitness-favicon-16",
+      "repoId": "fitness",
+      "description": "Fitness favicon 16",
+      "source": "branding/generated/favicon/favicon-16x16.png",
+      "target": "repos/fawxzzy-fitness/public/favicon-16x16.png"
+    },
+    {
+      "id": "fitness-favicon-ico",
+      "repoId": "fitness",
+      "description": "Fitness root favicon",
+      "source": "branding/generated/favicon/favicon.ico",
+      "target": "repos/fawxzzy-fitness/public/favicon.ico"
+    }
+  ]
+}

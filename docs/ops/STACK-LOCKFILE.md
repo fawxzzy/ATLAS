@@ -30,6 +30,7 @@ Validation:
 Shared comparison contract:
 
 - generator normalization and validator drift comparison both flow through the same canonical payload diff helpers in `ops/stack/generate_lockfile.py`
+- generator writes the canonical lockfile bytes from that shared path, and validation compares the on-disk file against those exact canonical bytes
 - lock refresh bugs are treated as normalization bugs first, not as operator excuses to repin blindly
 
 ## Schema
@@ -103,6 +104,12 @@ Validate the refreshed lock against the current working set:
 python .\ops\validation\validate_stack.py --ratchet
 ```
 
+Certification/preflight exception:
+
+- `stack.lock.yaml` may remain as the sole uncommitted root delta only when that file already equals the canonical generated lockfile for the current live working set
+- this exception applies only to stack-root preflight and certification gates
+- it does not excuse any second modified root file, any stale or non-canonical `stack.lock.yaml`, or any dirty child repo
+
 Validate a non-default or temporary lockfile:
 
 ```powershell
@@ -140,6 +147,7 @@ Policy:
 - intentional stack-state change: regenerate `stack.lock.yaml`, then rerun validation
 - unintentional drift or unknown repo movement: fail validation and reconcile the repo state first
 - identical repo state with differing lock output: treat that as a generator/validator bug and fix normalization before refreshing the file
+- byte-identical canonical output is part of the contract; a semantically similar but non-canonical render still fails validation
 
 Debt classification:
 
@@ -163,9 +171,10 @@ Operational rule:
 
 Dirty state is pinned as part of the working-set truth.
 
-- there are currently no dirty-state exceptions
 - a repo may be intentionally locked as `dirty: true`
 - if a repo flips between dirty and clean, validation should fail until the stack owner either restores the prior state or intentionally regenerates the lockfile
+- sole exception: for the stack control repo only, preflight/cert treats `stack.dirty_effective = false` when `stack.lock.yaml` is the only modified root file and its on-disk bytes exactly match the canonical generated lockfile for the current live working set
+- this is not a general dirty-worktree exemption; it does not apply to any other root file, any second root delta, any non-canonical lockfile bytes, or any child repo
 
 ## Scope
 

@@ -56,7 +56,7 @@ from ops.stack.generate_lockfile import (
     LOCK_METADATA_FIELDS,
     STACK_LOCK_SCHEMA_VERSION,
     TRUST_CLASSES,
-    build_lock_payload,
+    build_canonical_lockfile_artifacts,
     default_lockfile_path,
     describe_lock_payload_drift,
     git_output,
@@ -125,6 +125,7 @@ DEBT_CLASS_CONFIG = [
             "stack-lock-missing-ref",
             "stack-lock-pin-drift",
             "stack-lock-worktree-drift",
+            "stack-lock-render-drift",
             "stack-lock-metadata-drift",
             "stack-lock-component-membership-drift",
             "stack-lock-component-trust",
@@ -133,6 +134,7 @@ DEBT_CLASS_CONFIG = [
             "stack-lock-excluded-surface-drift",
             "stack-lock-excluded-surface-release",
             "stack-lock-excluded-surface-trust",
+            "root-lock-refresh-pending",
             "playbook-enforcement-untracked",
             "playbook-enforcement-tracking-check-failed",
         },
@@ -1809,7 +1811,7 @@ def build_findings(stack_file: Path, config: dict[str, Any], *, lock_file_overri
                     )
                 )
             try:
-                generated_lock = build_lock_payload(config=config, root=root)
+                canonical_lock = build_canonical_lockfile_artifacts(config=config, root=root)
             except Exception as exc:
                 findings.append(
                     Finding(
@@ -1819,9 +1821,23 @@ def build_findings(stack_file: Path, config: dict[str, Any], *, lock_file_overri
                         f"Current stack lock payload could not be rebuilt: {exc}",
                     )
                 )
-                generated_lock = None
+                canonical_lock = None
+            generated_lock = canonical_lock.get("payload") if isinstance(canonical_lock, dict) else None
             drift_report = describe_lock_payload_drift(lockfile, generated_lock) if isinstance(generated_lock, dict) else None
-            if isinstance(drift_report, dict) and drift_report.get("has_drift"):
+            canonical_bytes = canonical_lock.get("bytes") if isinstance(canonical_lock, dict) else None
+            lockfile_bytes = lockfile_path.read_bytes()
+            lockfile_bytes_match = isinstance(canonical_bytes, bytes) and lockfile_bytes == canonical_bytes
+            stack_root_state = canonical_lock.get("stack_root") if isinstance(canonical_lock, dict) else None
+            root_lock_refresh_pending = (
+                isinstance(canonical_lock, dict)
+                and lockfile_path.resolve() == canonical_lock.get("lockfile_path")
+                and isinstance(stack_root_state, dict)
+                and bool(stack_root_state.get("self_refresh_only"))
+                and lockfile_bytes_match
+            )
+            has_payload_drift = isinstance(drift_report, dict) and bool(drift_report.get("has_drift"))
+            has_render_drift = isinstance(canonical_bytes, bytes) and not lockfile_bytes_match
+            if has_payload_drift or has_render_drift:
                 findings.append(
                     Finding(
                         "error",
@@ -1830,10 +1846,35 @@ def build_findings(stack_file: Path, config: dict[str, Any], *, lock_file_overri
                         "Stack lockfile does not match the current pinned working set.",
                     )
                 )
-                findings.extend(
-                    describe_stack_lock_drift(
-                        lockfile_rel=lockfile_rel,
-                        drift_report=drift_report,
+                if has_render_drift:
+                    findings.append(
+                        Finding(
+                            "error",
+                            "stack-lock-render-drift",
+                            lockfile_rel,
+                            "Stack lockfile bytes do not match the canonical generated lockfile payload.",
+                        )
+                    )
+                if has_payload_drift and isinstance(drift_report, dict):
+                    findings.extend(
+                        describe_stack_lock_drift(
+                            lockfile_rel=lockfile_rel,
+                            drift_report=drift_report,
+                        )
+                    )
+            elif root_lock_refresh_pending:
+                findings.append(
+                    Finding(
+                        "info",
+                        "root-lock-refresh-pending",
+                        lockfile_rel,
+                        "Root preflight is green with a pending stack.lock.yaml self-refresh because it is the sole root delta and already matches the canonical live working set.",
+                        {
+                            "repo_id": stack_root_state.get("repo_id"),
+                            "dirty_actual": stack_root_state.get("dirty_actual"),
+                            "dirty_effective": stack_root_state.get("dirty_effective"),
+                            "modified_paths": stack_root_state.get("modified_paths"),
+                        },
                     )
                 )
 

@@ -58,7 +58,7 @@ def git_output(repo_path: Path, *args: str) -> tuple[int, str]:
         encoding="utf-8",
         errors="replace",
     )
-    return completed.returncode, completed.stdout.strip()
+    return completed.returncode, completed.stdout.rstrip("\n").rstrip("\r")
 
 
 def git_lines(repo_path: Path, *args: str) -> list[str]:
@@ -66,6 +66,32 @@ def git_lines(repo_path: Path, *args: str) -> list[str]:
     if code != 0:
         return []
     return [line.strip() for line in stdout.splitlines() if line.strip()]
+
+
+def git_status_lines(repo_path: Path) -> list[str]:
+    code, stdout = git_output(repo_path, "status", "--porcelain=v1", "--untracked-files=all")
+    if code != 0:
+        return []
+    return [line.rstrip("\r") for line in stdout.splitlines() if line]
+
+
+def parse_porcelain_path(line: str) -> str:
+    entry = line[3:] if len(line) > 3 else ""
+    if " -> " in entry:
+        entry = entry.split(" -> ", 1)[1]
+    entry = entry.strip()
+    if entry.startswith('"') and entry.endswith('"'):
+        try:
+            decoded = json.loads(entry)
+            if isinstance(decoded, str):
+                entry = decoded
+        except json.JSONDecodeError:
+            entry = entry[1:-1]
+    return normalize_slashes(entry)
+
+
+def status_paths(status_lines: list[str]) -> list[str]:
+    return [path for path in (parse_porcelain_path(line) for line in status_lines) if path]
 
 
 def repo_is_git_root(repo_path: Path) -> bool:
@@ -133,6 +159,17 @@ def included_repo_ids(config: dict[str, Any]) -> list[str]:
         if str(repo_info.get("status", "unknown")) in DEFAULT_INCLUDED_STATUSES:
             result.append(str(repo_id))
     return sorted(result)
+
+
+def stack_component_repo_id(config: dict[str, Any], root: Path) -> str | None:
+    registry = config.get("repo_registry", {})
+    for repo_id in included_repo_ids(config):
+        repo_info = registry.get(repo_id)
+        if not isinstance(repo_info, dict) or not isinstance(repo_info.get("path"), str):
+            continue
+        if resolve_atlas_path(repo_info["path"], root=root).resolve() == root.resolve():
+            return str(repo_id)
+    return None
 
 
 def default_lockfile_path(config: dict[str, Any] | None = None, root: Path | None = None) -> Path:
@@ -228,6 +265,36 @@ def normalize_lock_payload(payload: dict[str, Any]) -> dict[str, Any]:
     return body | {"lock_digest": stable_json_digest(body)}
 
 
+def stack_root_dirty_state(
+    config: dict[str, Any],
+    *,
+    root: Path,
+    lockfile_path: Path | None = None,
+) -> dict[str, Any]:
+    resolved_root = root.resolve()
+    resolved_lockfile = (
+        resolve_atlas_path(lockfile_path, root=resolved_root)
+        if lockfile_path is not None
+        else default_lockfile_path(config=config, root=resolved_root)
+    )
+    repo_id = stack_component_repo_id(config, resolved_root)
+    status_lines = git_status_lines(resolved_root)
+    modified_paths = sorted(status_paths(status_lines))
+    lockfile_rel = atlas_relative(resolved_lockfile, root=resolved_root)
+    self_refresh_only = bool(repo_id) and modified_paths == [lockfile_rel]
+    dirty_actual = bool(status_lines)
+    dirty_effective = dirty_actual and not self_refresh_only
+    return {
+        "repo_id": repo_id,
+        "lockfile_path": resolved_lockfile,
+        "lockfile_rel": lockfile_rel,
+        "modified_paths": modified_paths,
+        "dirty_actual": dirty_actual,
+        "dirty_effective": dirty_effective,
+        "self_refresh_only": self_refresh_only,
+    }
+
+
 def lock_component_field_drift(
     locked: dict[str, Any],
     generated: dict[str, Any],
@@ -293,7 +360,12 @@ def describe_lock_payload_drift(
     }
 
 
-def build_lock_payload(config: dict[str, Any] | None = None, root: Path | None = None) -> dict[str, Any]:
+def build_lock_payload(
+    config: dict[str, Any] | None = None,
+    root: Path | None = None,
+    *,
+    dirty_overrides: dict[str, bool] | None = None,
+) -> dict[str, Any]:
     base = (root or atlas_root()).resolve()
     stack_config = config or load_stack_config(base / "stack.yaml")
     registry = stack_config.get("repo_registry", {})
@@ -316,7 +388,10 @@ def build_lock_payload(config: dict[str, Any] | None = None, root: Path | None =
         if code != 0 or not commit:
             raise ValueError(f"Unable to resolve HEAD for repo '{repo_id}'.")
         ref_type, ref = current_ref(repo_path, commit)
-        status_lines = git_lines(repo_path, "status", "--porcelain=v1")
+        status_lines = git_status_lines(repo_path)
+        dirty = bool(status_lines)
+        if dirty_overrides and repo_id in dirty_overrides:
+            dirty = bool(dirty_overrides[repo_id])
         components[repo_id] = {
             "path": atlas_relative(repo_path, root=base),
             "role": str(repo_info.get("role", "")),
@@ -325,7 +400,7 @@ def build_lock_payload(config: dict[str, Any] | None = None, root: Path | None =
             "ref_type": ref_type,
             "ref": ref,
             "commit": commit,
-            "dirty": bool(status_lines),
+            "dirty": dirty,
             "trust_class": repo_trust_class(repo_id, repo_info, lock_config),
             "release_eligible": repo_release_eligible(repo_id, repo_info, lock_config),
         }
@@ -372,10 +447,39 @@ def render_yaml(value: Any, indent: int = 0) -> list[str]:
     raise TypeError(f"Unsupported YAML value: {type(value)!r}")
 
 
+def render_lockfile_text(payload: dict[str, Any]) -> str:
+    return "\n".join(render_yaml(payload)) + "\n"
+
+
+def render_lockfile_bytes(payload: dict[str, Any]) -> bytes:
+    return render_lockfile_text(payload).encode("utf-8")
+
+
+def build_canonical_lockfile_artifacts(
+    config: dict[str, Any] | None = None,
+    root: Path | None = None,
+) -> dict[str, Any]:
+    base = (root or atlas_root()).resolve()
+    stack_config = config or load_stack_config(base / "stack.yaml")
+    dirty_state = stack_root_dirty_state(stack_config, root=base)
+    dirty_overrides: dict[str, bool] | None = None
+    repo_id = dirty_state.get("repo_id")
+    if dirty_state.get("self_refresh_only") and isinstance(repo_id, str):
+        dirty_overrides = {repo_id: bool(dirty_state["dirty_effective"])}
+    payload = build_lock_payload(config=stack_config, root=base, dirty_overrides=dirty_overrides)
+    text = render_lockfile_text(payload)
+    return {
+        "payload": payload,
+        "text": text,
+        "bytes": text.encode("utf-8"),
+        "lockfile_path": dirty_state["lockfile_path"],
+        "stack_root": dirty_state,
+    }
+
+
 def write_lockfile(path: Path, payload: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    rendered = "\n".join(render_yaml(payload)) + "\n"
-    path.write_text(rendered, encoding="utf-8")
+    path.write_bytes(render_lockfile_bytes(payload))
 
 
 def main() -> int:
@@ -390,7 +494,8 @@ def main() -> int:
     stack_file = resolve_atlas_path(args.stack_file)
     root = stack_file.parent.resolve()
     config = load_stack_config(stack_file)
-    payload = build_lock_payload(config=config, root=root)
+    artifacts = build_canonical_lockfile_artifacts(config=config, root=root)
+    payload = artifacts["payload"]
     output_path = resolve_atlas_path(args.output_path, root=root) if args.output_path else default_lockfile_path(config, root)
     if not args.dry_run:
         write_lockfile(output_path, payload)

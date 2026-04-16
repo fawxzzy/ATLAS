@@ -64,6 +64,17 @@ The ids are canonical even where disk names have not been normalized yet.
 - worker execution receipts -> `runtime/lifeline/worker-execution`
 - governed tool and extension registries -> `docs/registry`
 
+## Branding
+
+ATLAS now owns the canonical sigil at the stack root.
+
+- source of truth -> `branding/source/`
+- generated derivatives -> `branding/generated/`
+- consumer mapping -> `branding/manifest.json`
+- workflow + policy -> `docs/standards/BRANDING-ASSET-PIPELINE.md`
+
+Consumer repos should receive generated or synced copies only. Do not hand-manage brand assets per repo.
+
 ## Working Rules
 
 1. Start at `C:\ATLAS` only for stack-wide work, audits, standards, packaging, or cross-repo routing.

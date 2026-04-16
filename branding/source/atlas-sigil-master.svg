@@ -1,0 +1,108 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
+  <title id="title">ATLAS Sigil master source</title>
+  <desc id="desc">Canonical green Fawxzzy and ATLAS sigil with halo rings, trident spine, crossed blades, and operator numerals.</desc>
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="48%" r="62%">
+      <stop offset="0%" stop-color="#7DFF8B" stop-opacity="0.42" />
+      <stop offset="52%" stop-color="#3FD85A" stop-opacity="0.18" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="metal" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#D6FFD7" />
+      <stop offset="18%" stop-color="#82F28C" />
+      <stop offset="52%" stop-color="#2EA93E" />
+      <stop offset="100%" stop-color="#0D4E17" />
+    </linearGradient>
+    <linearGradient id="rim" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#9BFF9F" />
+      <stop offset="55%" stop-color="#4ADE63" />
+      <stop offset="100%" stop-color="#93FFB8" />
+    </linearGradient>
+    <filter id="soft-glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+    <filter id="hard-glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="0" stdDeviation="10" flood-color="#45F06A" flood-opacity="0.42" />
+      <feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#C7FFD0" flood-opacity="0.4" />
+    </filter>
+    <style>
+      .halo {
+        fill: none;
+        stroke: url(#rim);
+        stroke-linecap: round;
+        filter: url(#soft-glow);
+      }
+      .mark {
+        fill: url(#metal);
+        stroke: #CCFFD3;
+        stroke-width: 7;
+        stroke-linejoin: round;
+        filter: url(#hard-glow);
+      }
+      .digits {
+        fill: #E5FFDF;
+        font-family: "Orbitron", "Eurostile", "Arial Black", sans-serif;
+        font-size: 42px;
+        font-weight: 800;
+        letter-spacing: 0.16em;
+        filter: url(#soft-glow);
+      }
+      .speck {
+        fill: #76FF7F;
+        opacity: 0.82;
+      }
+    </style>
+  </defs>
+
+  <rect width="1024" height="1024" fill="#000000" />
+  <circle cx="512" cy="512" r="352" fill="url(#glow)" />
+
+  <path class="halo" d="M148 630a372 372 0 0 1 5-286" stroke-width="8" stroke-dasharray="16 20 18 24" />
+  <path class="halo" d="M868 344a372 372 0 0 1 7 287" stroke-width="8" stroke-dasharray="16 20 18 24" />
+  <path class="halo" d="M178 662a410 410 0 0 1 1-300" stroke-width="10" stroke-dasharray="80 14 26 18" />
+  <path class="halo" d="M845 363a410 410 0 0 1 2 299" stroke-width="10" stroke-dasharray="80 14 26 18" />
+  <path class="halo" d="M120 615a446 446 0 0 1 16-312" stroke-width="8" stroke-dasharray="140 18 36 24" opacity="0.82" />
+  <path class="halo" d="M889 311a446 446 0 0 1 17 308" stroke-width="8" stroke-dasharray="140 18 36 24" opacity="0.82" />
+
+  <path class="mark" d="M486 154l26 44 26-44v625l-26 155-26-155z" />
+  <path class="mark" d="M448 214l20 18v244l-20-18z" />
+  <path class="mark" d="M576 214l-20 18v244l20-18z" />
+  <path class="mark" d="M495 164h34v214h-34z" />
+
+  <path class="mark" d="M304 370l204 156-39 41-186-116 74 162-28 17-123-260 180 118-82-118z" />
+  <path class="mark" d="M720 370L516 526l39 41 186-116-74 162 28 17 123-260-180 118 82-118z" />
+  <path class="mark" d="M364 622l124 81-18 27-126-48-52 21 64-81z" />
+  <path class="mark" d="M660 622l-124 81 18 27 126-48 52 21-64-81z" />
+  <path class="mark" d="M456 732l22 18v100l-22 20z" />
+  <path class="mark" d="M568 732l-22 18v100l22 20z" />
+
+  <rect x="498" y="184" width="7" height="210" rx="3.5" fill="#103815" />
+  <rect x="519" y="184" width="7" height="210" rx="3.5" fill="#103815" />
+
+  <path class="halo" d="M432 126h160" stroke-width="6" stroke-dasharray="14 18" />
+  <path class="halo" d="M454 108h116" stroke-width="6" stroke-dasharray="8 24" />
+  <circle class="speck" cx="362" cy="198" r="4" />
+  <circle class="speck" cx="308" cy="218" r="3" />
+  <circle class="speck" cx="277" cy="264" r="4" />
+  <circle class="speck" cx="730" cy="202" r="4" />
+  <circle class="speck" cx="761" cy="225" r="3" />
+  <circle class="speck" cx="814" cy="258" r="4" />
+  <circle class="speck" cx="238" cy="699" r="3" />
+  <circle class="speck" cx="190" cy="744" r="4" />
+  <circle class="speck" cx="170" cy="672" r="4" />
+  <circle class="speck" cx="831" cy="696" r="3" />
+  <circle class="speck" cx="873" cy="748" r="4" />
+  <circle class="speck" cx="847" cy="677" r="4" />
+  <circle class="speck" cx="137" cy="520" r="5" />
+  <circle class="speck" cx="162" cy="588" r="3" />
+  <circle class="speck" cx="881" cy="526" r="5" />
+  <circle class="speck" cx="855" cy="589" r="3" />
+
+  <text class="digits" x="148" y="734">444</text>
+  <text class="digits" x="800" y="734">777</text>
+  <circle cx="512" cy="512" r="364" fill="none" stroke="#4CFF73" stroke-opacity="0.14" stroke-width="2" />
+</svg>
