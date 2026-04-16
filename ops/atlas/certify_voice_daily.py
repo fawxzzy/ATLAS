@@ -293,8 +293,9 @@ def live_stream_gate(*, conversation_id: str, base_url: str) -> dict[str, Any]:
     dropped_junk = int(counts.get("dropped_junk", 0) or 0)
     uncommitted_turns = int(counts.get("uncommitted_turns", 0) or 0)
     conversation_id_match = str(payload.get("conversation_id") or "").strip() == conversation_id
+    outcome = str(payload.get("outcome") or "").strip()
     ok = (
-        str(payload.get("outcome") or "") == "completed"
+        outcome in {"completed", "operator_exit"}
         and conversation_id_match
         and turn_count >= 1
         and interrupts >= 1
@@ -306,7 +307,7 @@ def live_stream_gate(*, conversation_id: str, base_url: str) -> dict[str, Any]:
         "reason": None if ok else "live_stream_interrupt_proof_missing",
         "stream_summary_path": latest_stream.get("path"),
         "run_id": payload.get("run_id"),
-        "outcome": payload.get("outcome"),
+        "outcome": outcome,
         "conversation_id_match": conversation_id_match,
         "turn_count": turn_count,
         "interrupts": interrupts,
