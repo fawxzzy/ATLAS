@@ -55,6 +55,34 @@ function ensureSize(value, label) {
   return value;
 }
 
+function validateVariantMap(value) {
+  if (value === undefined) {
+    return new Map();
+  }
+  if (!Array.isArray(value)) {
+    throw new Error("brand.variants must be an array when provided.");
+  }
+
+  const variantMap = new Map();
+  for (let index = 0; index < value.length; index += 1) {
+    const variant = value[index];
+    const id = ensureString(variant?.id, `brand.variants[${index}].id`);
+    if (variantMap.has(id)) {
+      throw new Error(`Duplicate brand variant id: ${id}`);
+    }
+
+    variantMap.set(id, {
+      id,
+      label: typeof variant.label === "string" ? variant.label.trim() : "",
+      description: typeof variant.description === "string" ? variant.description.trim() : "",
+      png: resolveAtlasPath(ensureString(variant?.png, `brand.variants[${index}].png`)),
+      ico: resolveAtlasPath(ensureString(variant?.ico, `brand.variants[${index}].ico`))
+    });
+  }
+
+  return variantMap;
+}
+
 let sharpPromise;
 
 async function loadSharp() {
@@ -219,7 +247,15 @@ async function validateManifest(manifest) {
   const canonical = manifest?.brand?.canonical ?? {};
   const png = resolveAtlasPath(ensureString(canonical.png, "brand.canonical.png"));
   const ico = resolveAtlasPath(ensureString(canonical.ico, "brand.canonical.ico"));
+  const variants = validateVariantMap(manifest?.brand?.variants);
   await stat(png);
+  await stat(ico);
+  await Promise.all(
+    [...variants.values()].flatMap((variant) => [
+      stat(variant.png),
+      stat(variant.ico)
+    ])
+  );
 
   const outputs = Array.isArray(manifest.outputs) ? manifest.outputs : [];
   if (outputs.length === 0) {
@@ -232,11 +268,19 @@ async function validateManifest(manifest) {
     outputs: outputs.map((output, index) => {
       const kind = ensureString(output.kind, `outputs[${index}].kind`);
       const target = resolveAtlasPath(ensureString(output.target, `outputs[${index}].target`));
+      const variantId = typeof output.variant === "string" ? output.variant.trim() : "";
+      const variant = variantId ? variants.get(variantId) : null;
+      if (variantId && !variant) {
+        throw new Error(`outputs[${index}].variant references unknown brand variant ${variantId}.`);
+      }
+      const sourcePngPath = variant?.png ?? png;
       if (kind === "png") {
         return {
           id: ensureString(output.id, `outputs[${index}].id`),
           kind,
+          variantId,
           size: ensureSize(output.size, `outputs[${index}].size`),
+          sourcePngPath,
           target
         };
       }
@@ -248,6 +292,8 @@ async function validateManifest(manifest) {
         return {
           id: ensureString(output.id, `outputs[${index}].id`),
           kind,
+          variantId,
+          sourcePngPath,
           sizes,
           target
         };
@@ -269,15 +315,15 @@ async function main() {
     if (output.kind === "png") {
       if (output.size === 1024) {
         await mkdir(path.dirname(output.target), { recursive: true });
-        await copyFile(validated.canonicalPngPath, output.target);
+        await copyFile(output.sourcePngPath, output.target);
       } else {
-        await resizePng(validated.canonicalPngPath, output.target, output.size);
+        await resizePng(output.sourcePngPath, output.target, output.size);
       }
       console.log(`built ${path.relative(ATLAS_ROOT, output.target)}`);
       continue;
     }
 
-    await createIco(validated.canonicalPngPath, output.target, output.sizes);
+    await createIco(output.sourcePngPath, output.target, output.sizes);
     console.log(`built ${path.relative(ATLAS_ROOT, output.target)}`);
   }
 }

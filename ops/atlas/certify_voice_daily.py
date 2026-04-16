@@ -236,6 +236,8 @@ def compare_read_model(
     proposal_turns = [turn for turn in scripted_turns if str(turn.get("action_mode")) == "proposal_required"]
     proposal_refs_present = all(bool(turn.get("proposed_session_refs")) for turn in proposal_turns)
     turn_refs_present = all(str(turn.get("turn_ref") or "") in manifest_turn_refs for turn in scripted_turns)
+    manifest_request_action = str(manifest.get("automation_level_ceiling") or "").strip() == "request_action"
+    proposal_only_ok = proposal_refs_present and manifest_request_action
 
     return {
         "ok": (
@@ -243,7 +245,7 @@ def compare_read_model(
             and int(scripted_summary.get("counts", {}).get("turns", 0) or 0) == len(scripted_turns)
             and turn_refs_present
             and voice_turn_match
-            and proposal_refs_present
+            and proposal_only_ok
         ),
         "scripted_summary_path": scripted_summary_path,
         "latest_stream_summary_path": latest_stream_summary.get("path") if isinstance(latest_stream_summary, dict) else None,
@@ -251,6 +253,8 @@ def compare_read_model(
         "voice_view_turn_match": voice_turn_match,
         "manifest_contains_turn_refs": turn_refs_present,
         "proposal_refs_present": proposal_refs_present,
+        "manifest_request_action": manifest_request_action,
+        "proposal_only_ok": proposal_only_ok,
         "scripted_summary": {
             "run_id": scripted_summary.get("run_id"),
             "counts": scripted_summary.get("counts"),
@@ -285,7 +289,16 @@ def live_stream_gate(*, conversation_id: str, base_url: str) -> dict[str, Any]:
     counts = payload.get("counts", {}) if isinstance(payload.get("counts"), dict) else {}
     interrupts = int(counts.get("interrupts", 0) or 0)
     turn_count = int(counts.get("turns", 0) or 0)
-    ok = str(payload.get("outcome") or "") == "completed" and turn_count >= 1 and interrupts >= 1
+    low_confidence_ignored = int(counts.get("low_confidence_ignored", 0) or 0)
+    dropped_junk = int(counts.get("dropped_junk", 0) or 0)
+    uncommitted_turns = int(counts.get("uncommitted_turns", 0) or 0)
+    conversation_id_match = str(payload.get("conversation_id") or "").strip() == conversation_id
+    ok = (
+        str(payload.get("outcome") or "") == "completed"
+        and conversation_id_match
+        and turn_count >= 1
+        and interrupts >= 1
+    )
     return {
         "required": True,
         "ok": ok,
@@ -294,8 +307,12 @@ def live_stream_gate(*, conversation_id: str, base_url: str) -> dict[str, Any]:
         "stream_summary_path": latest_stream.get("path"),
         "run_id": payload.get("run_id"),
         "outcome": payload.get("outcome"),
+        "conversation_id_match": conversation_id_match,
         "turn_count": turn_count,
         "interrupts": interrupts,
+        "low_confidence_ignored": low_confidence_ignored,
+        "dropped_junk": dropped_junk,
+        "uncommitted_turns": uncommitted_turns,
         "remaining_proof": None if ok else "latest live stream must show at least one interrupt on the same conversation id",
         "stream_command": (
             f"python .\\ops\\atlas\\talk.py --base-url {base_url} "
@@ -353,11 +370,13 @@ def build_receipt(
                 "interrupts_gte_1": bool(live_gate.get("interrupts", 0) >= 1),
                 "read_model_ok": None if isinstance(read_model, dict) and read_model.get("skipped") else bool(isinstance(read_model, dict) and read_model.get("ok")),
                 "voice_view_turn_match": None if isinstance(read_model, dict) and read_model.get("skipped") else bool(isinstance(read_model, dict) and read_model.get("voice_view_turn_match")),
-                "proposal_refs_present": None if isinstance(read_model, dict) and read_model.get("skipped") else bool(isinstance(read_model, dict) and read_model.get("proposal_refs_present")),
+                "proposal_only_ok": None if isinstance(read_model, dict) and read_model.get("skipped") else bool(isinstance(read_model, dict) and read_model.get("proposal_only_ok")),
             },
             "release_gate_status": overall_status,
         },
     }
+
+
 def receipt_paths(conversation_id: str) -> tuple[Path, Path]:
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     output_dir = ROOT / "runtime" / "receipts" / "validation"
@@ -376,6 +395,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--skip-preflight", action="store_true")
     parser.add_argument("--skip-scripted-run", action="store_true")
     parser.add_argument("--skip-read-model-check", action="store_true")
+    parser.add_argument("--require-passed", action="store_true")
     parser.add_argument("--prompt", action="append", dest="prompts")
     args = parser.parse_args(argv)
 
@@ -435,7 +455,10 @@ def main(argv: list[str] | None = None) -> int:
     write_json(latest_path, receipt)
     write_json(timestamped_path, receipt)
     print(json.dumps(receipt, indent=2))
-    return 0 if receipt["overall"]["release_gate_status"] in {"pending_live_barge_in", "passed"} else 1
+    status = str(receipt["overall"]["release_gate_status"])
+    if args.require_passed:
+        return 0 if status == "passed" else 1
+    return 0 if status in {"pending_live_barge_in", "passed"} else 1
 
 
 if __name__ == "__main__":

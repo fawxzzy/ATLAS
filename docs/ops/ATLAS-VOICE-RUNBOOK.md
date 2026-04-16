@@ -28,6 +28,12 @@ Current lane posture:
 - no bypass around governed request or approval artifacts
 - no broader machine mutation than the bounded workspace write class
 
+Current certification label:
+
+- grounded text conversation is ready now
+- voice companion remains certification yellow until one clean live mic cert pass proves the interrupt path on a fresh cert conversation id
+- until that pass is clean, treat voice as a near-ready operator surface rather than the default write-capable lane
+
 ## Supported Intents
 
 - `what needs attention`
@@ -190,6 +196,12 @@ Prepare a fresh daily cert conversation id and deterministic receipt:
 python .\ops\atlas\certify_voice_daily.py --base-url http://127.0.0.1:8765 --auth-token local-test
 ```
 
+Require a full clean certification pass after the live run:
+
+```powershell
+python .\ops\atlas\certify_voice_daily.py --base-url http://127.0.0.1:8765 --auth-token local-test --conversation-id <same id> --require-passed
+```
+
 ## Safety Boundary
 
 - voice never reaches around the Awareness API for private state
@@ -209,8 +221,16 @@ Use the Mazer initiative as the first real fixture on the target machine:
 4. ask for the initiative summary
 5. ask what repo work is waiting on blessing review
 6. ask for the next work proposal
-7. interrupt one longer response mid-stream and confirm the conversation manifest and turn refs remain intact
-8. rerun `certify_voice_daily.py --conversation-id <same id>` to verify the live stream gate sees `interrupts >= 1`
+7. force one real human barge-in during a longer spoken response and confirm the conversation manifest and turn refs remain intact
+8. rerun `certify_voice_daily.py --conversation-id <same id> --require-passed`
+9. require this receipt state before calling voice beta-ready:
+   `preflight.stack.ok = true`
+   `overall.required_fields.lock_preflight_ok = true`
+   `overall.required_fields.interrupts_gte_1 = true`
+   `overall.required_fields.read_model_ok = true`
+   `overall.required_fields.voice_view_turn_match = true`
+   `overall.required_fields.proposal_only_ok = true`
+   `overall.release_gate_status = passed`
 
 After the run, inspect:
 
@@ -252,3 +272,4 @@ Expected properties:
 - transcript-safe run logs land under `runtime/atlas/voice/runs/**`
 - each grounded turn remains fetchable through Awareness as `conversation_turn:<turn_id>`
 - no voice path bypasses session or approval flow
+- a clean manual cert pass now means `--require-passed` succeeds on the same conversation id after the live barge-in run

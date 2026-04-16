@@ -74,10 +74,12 @@ async function validateConsumers(manifest) {
       const id = ensureString(consumer.id, `consumers[${index}].id`);
       const source = resolveAtlasPath(ensureString(consumer.source, `consumers[${index}].source`));
       const target = resolveAtlasPath(ensureString(consumer.target, `consumers[${index}].target`));
+      const variant = typeof consumer.variant === "string" ? ensureString(consumer.variant, `consumers[${index}].variant`) : "";
       await stat(source);
       return {
         id,
         description: typeof consumer.description === "string" ? consumer.description.trim() : "",
+        variant,
         source,
         target
       };
@@ -93,6 +95,7 @@ async function main() {
   const staleConsumers = [];
 
   for (const consumer of consumers) {
+    const variantSuffix = consumer.variant ? ` [${consumer.variant}]` : "";
     let status = "unchanged";
     let targetExists = true;
     try {
@@ -111,7 +114,7 @@ async function main() {
     }
 
     if (status === "unchanged") {
-      console.log(`ok    ${path.relative(ATLAS_ROOT, consumer.target)}`);
+      console.log(`ok    ${path.relative(ATLAS_ROOT, consumer.target)}${variantSuffix}`);
       continue;
     }
 
@@ -121,13 +124,13 @@ async function main() {
     });
 
     if (options.check || options.dryRun) {
-      console.log(`${status.padEnd(5)} ${path.relative(ATLAS_ROOT, consumer.target)}`);
+      console.log(`${status.padEnd(5)} ${path.relative(ATLAS_ROOT, consumer.target)}${variantSuffix}`);
       continue;
     }
 
     await mkdir(path.dirname(consumer.target), { recursive: true });
     await copyFile(consumer.source, consumer.target);
-    console.log(`sync  ${path.relative(ATLAS_ROOT, consumer.target)}`);
+    console.log(`sync  ${path.relative(ATLAS_ROOT, consumer.target)}${variantSuffix}`);
   }
 
   if (options.check && staleConsumers.length > 0) {

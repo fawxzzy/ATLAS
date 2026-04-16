@@ -7,7 +7,16 @@
       "svg": "branding/source/atlas-sigil-master.svg",
       "png": "branding/source/atlas-sigil-master.png",
       "ico": "branding/source/atlas-sigil-master.ico"
-    }
+    },
+    "variants": [
+      {
+        "id": "core",
+        "label": "Core",
+        "description": "Canonical sigil treatment for operator-facing surfaces that should match the master mark.",
+        "png": "branding/source/atlas-sigil-master.png",
+        "ico": "branding/source/atlas-sigil-master.ico"
+      }
+    ]
   },
   "outputs": [
     {
@@ -59,10 +68,11 @@
       "target": "branding/generated/favicon/favicon-16x16.png"
     },
     {
-      "id": "atlas-sigil-launcher-ico",
+      "id": "atlas-sigil-core-launcher-ico",
       "kind": "ico",
+      "variant": "core",
       "sizes": [16, 20, 24, 32, 40, 48, 64, 128, 256],
-      "target": "branding/generated/ico/atlas-sigil-launcher.ico"
+      "target": "branding/generated/ico/atlas-sigil-core-launcher.ico"
     },
     {
       "id": "atlas-sigil-favicon-ico",
@@ -75,8 +85,9 @@
     {
       "id": "stack-launcher-icon",
       "repoId": "_stack",
-      "description": "_stack Windows launcher icon",
-      "source": "branding/generated/ico/atlas-sigil-launcher.ico",
+      "variant": "core",
+      "description": "_stack Windows launcher icon using the canonical core sigil treatment",
+      "source": "branding/generated/ico/atlas-sigil-core-launcher.ico",
       "target": "repos/_stack/ops/assets/release-launcher.ico"
     },
     {

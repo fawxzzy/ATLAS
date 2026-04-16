@@ -33,6 +33,13 @@ ATLAS root and Cortex now form an awareness and coordination core built on expli
 - the first bounded truthful write exists
 - the next compounding layer is initiative management above sessions, not basic awareness discovery
 
+Current operating call:
+
+- grounded text conversation is ready for bounded daily operator use
+- voice companion is still a beta candidate pending one clean live certification pass
+- the blocking proof is operational trust, not missing backend architecture
+- the next build after that pass should be a thin cockpit over the Awareness API, not more backend plumbing
+
 For ATLAS platform architecture doctrine, use `repos/fawxzzy-atlas/README.md` and the docs under `repos/fawxzzy-atlas/docs/` as the canonical source. Stack-root docs should stay stack- and boundary-oriented and should link back to Atlas instead of duplicating platform specs.
 
 ## Canonical Repo Ids

@@ -32,8 +32,8 @@ components:
     remote: "https://github.com/ZachariahRedfield/FawxzzyFitness.git"
     ref_type: "branch"
     ref: "main"
-    commit: "4ca5c6809de2988fc3588a5eb8152fca4c52e34c"
-    dirty: true
+    commit: "d49e88d9f4c6a1de7cfce1233b2e79ce61035062"
+    dirty: false
     trust_class: "trusted"
     release_eligible: true
   lifeline:
@@ -54,7 +54,7 @@ components:
     remote: "https://github.com/ZachariahRedfield/fawxzzy-mazer.git"
     ref_type: "branch"
     ref: "codex/mazer-d2-learning-scorer"
-    commit: "a9c6019b9af7a01592d9149bc41b30a3b9fc4cd5"
+    commit: "22a8ade03196e4359a62d3da0f50502406d869fe"
     dirty: true
     trust_class: "trusted"
     release_eligible: true
@@ -98,7 +98,7 @@ components:
     remote: null
     ref_type: "branch"
     ref: "master"
-    commit: "82874806abecf00f5f278bc3f764818c5597ed88"
+    commit: "3837901a983015ac8abe7b639a6212d2eee9b579"
     dirty: false
     trust_class: "trusted"
     release_eligible: false
@@ -126,4 +126,4 @@ excluded_surfaces:
     trust_class: "untrusted"
     release_eligible: false
     reason: "Token-bearing Verta checkout remains quarantined and untrusted until scrub and rotation are complete."
-lock_digest: "sha256:3080d94a3087308f42267f465bac5453ac33c954bc7e7a23accaef030d15e968"
+lock_digest: "sha256:4017c3096ea0b3f0a4158967ddf60e897344fa4bc3c25ee82e751ec3c447e7c2"
