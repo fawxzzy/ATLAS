@@ -11,7 +11,7 @@ components:
     ref_type: "branch"
     ref: "main"
     commit: "05b5ff9f195ad3e7f81676529b2d7892a1b095c6"
-    dirty: false
+    dirty: true
     trust_class: "trusted"
     release_eligible: false
   atlas:
@@ -98,8 +98,8 @@ components:
     remote: null
     ref_type: "branch"
     ref: "master"
-    commit: "3175417604aa91eea56344e2006b6bef731538cf"
-    dirty: true
+    commit: "3207dcf3d7249670687421036693ccd33a9b40f4"
+    dirty: false
     trust_class: "trusted"
     release_eligible: false
   stream:
@@ -110,7 +110,7 @@ components:
     ref_type: "branch"
     ref: "codex/fstrm-wave3-surface-base"
     commit: "2152063d8d1ce7293e088f51c2053146cdf44033"
-    dirty: false
+    dirty: true
     trust_class: "trusted"
     release_eligible: false
 excluded_surfaces:
@@ -126,4 +126,4 @@ excluded_surfaces:
     trust_class: "untrusted"
     release_eligible: false
     reason: "Token-bearing Verta checkout remains quarantined and untrusted until scrub and rotation are complete."
-lock_digest: "sha256:c95a12f180482e6c1ad7cff8a6b3e9143b18d0c7d513b2547dc4c09f8de56781"
+lock_digest: "sha256:4ba885f8c6321d66ff1868db0bc0c84ba9b32a0271616bb5a593d659df99af2f"
