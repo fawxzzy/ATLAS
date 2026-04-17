@@ -1,6 +1,11 @@
 # Root control repo ignores child repos and mutable stack lanes by default.
 repos/**
 runtime/**
+!runtime/
+!runtime/atlas/
+runtime/atlas/**
+!runtime/atlas/context-packs/
+!runtime/atlas/context-packs/.gitkeep
 tmp/**
 secrets/**
 packages/**

@@ -30,11 +30,14 @@ Root rule:
 Read these files first:
 
 - `stack.yaml`
+- `stack.lock.yaml`
+- `docs/registry/STACK-REPO-INVENTORY.json`
 - `AGENTS.md`
 - `docs/architecture/AWARENESS-FIRST-WORLD-MODEL.md`
 - `docs/architecture/STACK-STANDARDS.md`
 - `docs/architecture/PATH-POLICY.md`
 - `docs/ops/ATLAS-SESSION-RUNBOOK.md`
+- `docs/ops/ATLAS-CODEX-CONTEXT-RUNBOOK.md`
 - `docs/ops/ATLAS-TOOL-REGISTRY-RUNBOOK.md`
 - `docs/ops/ATLAS-STATUS-RUNBOOK.md`
 
@@ -83,9 +86,37 @@ The ids are canonical even where disk names have not been normalized yet.
 ## Root Artifact Lanes
 
 - sessions -> `runtime/atlas/sessions`
+- context packs -> `runtime/atlas/context-packs`
 - descriptor registry -> `runtime/cortex/artifacts`
 - worker execution receipts -> `runtime/lifeline/worker-execution`
 - governed tool and extension registries -> `docs/registry`
+
+## Codex Context
+
+Root-launched Codex work should use intent-routed context packs instead of broad stack dumps.
+
+- builder -> `ops/atlas/build_codex_context.py`
+- prompt renderer -> `ops/atlas/prepare_codex_task.py`
+- output lane -> `runtime/atlas/context-packs/<task-id>/`
+
+Bootstrap order for root Codex work:
+
+1. `stack.yaml`
+2. `stack.lock.yaml`
+3. `docs/registry/STACK-REPO-INVENTORY.json`
+4. relevant awareness slices
+5. related initiative, proposal, and trust refs
+6. only then target repo docs or code
+
+Intent routing:
+
+- governance / policy / verification -> Playbook
+- execution / capability / approvals / tools -> Lifeline
+- orchestration / worker flow / resume / merge -> `_stack`
+- doctrine / UAPI / platform contracts -> Atlas repo
+- knowledge / evidence / promotion / query -> knowledge lane
+- topology / git / repo visibility -> repo inventory + lock + debt ledger
+- operator / chat / session / initiative -> awareness + status + working memory
 
 ## Branding
 

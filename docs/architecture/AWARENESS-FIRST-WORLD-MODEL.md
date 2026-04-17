@@ -67,6 +67,31 @@ Conversation now sits above that substrate as a governed client runtime:
 - grounded turn artifacts with deterministic retrieved refs and provenance
 - proposal-only follow-up authored from explicit refs instead of hidden chat state
 - first-class Awareness ids for both `conversation:<id>` and `conversation_turn:<turn_id>`
+- intent-routed Codex context packs under `runtime/atlas/context-packs/**`
+
+Pattern: Intent-Routed Context
+
+Root should select the minimum relevant ATLAS surfaces for a task and route the task to the correct owner lane rather than copying repo truth into the root.
+
+Intent routing rule:
+
+- governance / policy / verification -> Playbook
+- execution / capability / approvals / tools -> Lifeline
+- orchestration / worker flow / resume / merge -> `_stack`
+- doctrine / UAPI / platform contracts -> Atlas repo
+- knowledge / evidence / promotion / query -> knowledge lane
+- topology / git / repo visibility -> repo inventory + lock + debt ledger
+- operator / chat / session / initiative -> awareness + status + working memory
+
+Bootstrap rule for root-launched Codex work:
+
+1. read `stack.yaml` and `stack.lock.yaml`
+2. read `docs/registry/STACK-REPO-INVENTORY.json`
+3. read the relevant awareness slices
+4. read related initiative, proposal, and trust-posture refs
+5. only then open target repo docs or code
+
+The root-owned context-pack lane exists to make that bootstrap deterministic without turning ATLAS root into a second umbrella source repo.
 
 ## Operating Loop
 
@@ -208,6 +233,7 @@ Current root-owned outputs:
 - global state snapshot: `runtime/state/atlas/world-model.snapshot.latest.json`
 - global attention snapshot: `runtime/state/atlas/world-model.attention.latest.json`
 - session-local status snapshot: `runtime/atlas/sessions/<session_id>/status.snapshot.json`
+- Codex context pack: `runtime/atlas/context-packs/<task-id>/context.json`
 
 Current machine-readable contracts:
 

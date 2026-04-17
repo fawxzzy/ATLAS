@@ -10,8 +10,8 @@ components:
     remote: null
     ref_type: "branch"
     ref: "main"
-    commit: "6125e1800401cdcec30f35de0e8d64ac602dadab"
-    dirty: true
+    commit: "55690aae00ba67b113f127274be9c534f7159ed8"
+    dirty: false
     trust_class: "trusted"
     release_eligible: false
   atlas:
@@ -32,8 +32,8 @@ components:
     remote: "https://github.com/fawxzzy/fawxzzy-fitness.git"
     ref_type: "branch"
     ref: "main"
-    commit: "9e9eaaef785f940f54c09731211878e6958353f2"
-    dirty: true
+    commit: "23cb6677eb918922f2943d12632939a33e6f01f8"
+    dirty: false
     trust_class: "trusted"
     release_eligible: true
   lifeline:
@@ -54,7 +54,7 @@ components:
     remote: "https://github.com/fawxzzy/fawxzzy-mazer.git"
     ref_type: "branch"
     ref: "main"
-    commit: "f98cebb3e856a09d1a171221cdff1ed687bc5c28"
+    commit: "a0277e79dcbace70969dd718cf45e82e16c807d2"
     dirty: true
     trust_class: "trusted"
     release_eligible: true
@@ -76,8 +76,8 @@ components:
     remote: "https://github.com/fawxzzy/fawxzzy-playbook.git"
     ref_type: "branch"
     ref: "main"
-    commit: "4efc7b7a85c23ee41f5210051ff90664a1aee444"
-    dirty: true
+    commit: "efec70fcc19107c9192557790ac43c7214162fe8"
+    dirty: false
     trust_class: "trusted"
     release_eligible: true
   playbook-demo:
@@ -98,7 +98,7 @@ components:
     remote: "https://github.com/fawxzzy/ATLAS.git"
     ref_type: "branch"
     ref: "main"
-    commit: "4dd8d8888b95c0d6d6bbea45283283051c4499e8"
+    commit: "c079b7e3e9f15a5b23503886b2f56bdfe4af7ae1"
     dirty: true
     trust_class: "trusted"
     release_eligible: false
@@ -109,8 +109,8 @@ components:
     remote: null
     ref_type: "branch"
     ref: "codex/fstrm-wave3-surface-base"
-    commit: "e30944cd79bd2f2d18afc9bbd9bdfe6f7a04df0f"
-    dirty: true
+    commit: "e8da0053e7762886687a40ea154a665186f70f95"
+    dirty: false
     trust_class: "trusted"
     release_eligible: false
 excluded_surfaces:
@@ -126,4 +126,4 @@ excluded_surfaces:
     trust_class: "untrusted"
     release_eligible: false
     reason: "Token-bearing Verta checkout remains quarantined and untrusted until scrub and rotation are complete."
-lock_digest: "sha256:3edf3956b3b02511c1a7f92d33325c1d684f811a0eacb473671f4f178ddc600c"
+lock_digest: "sha256:4675db1687012886666fa46b823f4e00b9a8ec8e1192abb3301ca89351b2926b"

@@ -47,6 +47,7 @@ ALLOWED_FETCH_PREFIXES = [
     "docs/",
     "ops/",
     "runtime/atlas/conversations/",
+    "runtime/atlas/context-packs/",
     "runtime/atlas/sessions/",
     "runtime/atlas/proposed-sessions/",
     "runtime/atlas/session-workspaces/",
