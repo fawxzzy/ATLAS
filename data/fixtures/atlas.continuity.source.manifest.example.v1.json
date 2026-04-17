@@ -1,0 +1,82 @@
+{
+  "manifest_id": "atlas_continuity_sources_bootstrap",
+  "generated_at": "2026-04-17T16:35:00Z",
+  "sources": [
+    {
+      "source_id": "root_convergence_doc",
+      "source_path": "docs/ops/ATLAS-PLAYBOOK-CONVERGENCE.md",
+      "path_kind": "file",
+      "lane": "root_docs_ops",
+      "artifact_type": "markdown",
+      "content_class": "structured_artifact",
+      "repo_scope": "atlas_root",
+      "trust_posture": "trusted",
+      "status": "indexed",
+      "initiative_refs": [
+        "initiative-playbook-convergence-and-continuity"
+      ],
+      "plan_refs": [
+        "wave-9b-playbook-convergence-and-continuity"
+      ],
+      "promotion_candidate": false,
+      "promotion_targets": [],
+      "source_summary": "Root-owned roadmap for Playbook convergence and continuity.",
+      "notes": [
+        "Primary stack coordination artifact."
+      ]
+    },
+    {
+      "source_id": "imports_verta_core_glob",
+      "source_path": "data/imports/knowledge/personal/verta-core*/**",
+      "path_kind": "glob",
+      "lane": "imports",
+      "artifact_type": "glob_root",
+      "content_class": "raw_evidence",
+      "repo_scope": "atlas_root",
+      "trust_posture": "visible_untrusted",
+      "status": "pending_review",
+      "initiative_refs": [
+        "initiative-playbook-convergence-and-continuity"
+      ],
+      "plan_refs": [
+        "wave-9b-playbook-convergence-and-continuity"
+      ],
+      "promotion_candidate": true,
+      "promotion_targets": [
+        "initiative",
+        "plan",
+        "knowledge"
+      ],
+      "source_summary": "Imported historical planning lane for Verta-derived artifacts and retained PDFs.",
+      "notes": [
+        "Discovery root only. Do not infer content before review."
+      ]
+    },
+    {
+      "source_id": "downloads_continuity_packet",
+      "source_path": "Downloads/ATLAS-CONTINUITY-SEARCH-PROMOTION-PACKET.md",
+      "path_kind": "file",
+      "lane": "downloads",
+      "artifact_type": "markdown",
+      "content_class": "residue",
+      "repo_scope": "local_only",
+      "trust_posture": "trusted",
+      "status": "pending_review",
+      "initiative_refs": [
+        "initiative-playbook-convergence-and-continuity"
+      ],
+      "plan_refs": [
+        "wave-9b-playbook-convergence-and-continuity"
+      ],
+      "promotion_candidate": true,
+      "promotion_targets": [
+        "plan",
+        "knowledge"
+      ],
+      "source_summary": "Local packet residue for the continuity search and promotion tranche.",
+      "notes": [
+        "Local-only Downloads alias; not a canonical stack path."
+      ]
+    }
+  ]
+}

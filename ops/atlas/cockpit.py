@@ -145,6 +145,13 @@ def _render_html(payload: dict[str, Any], *, refresh_seconds: int) -> str:
     review = payload.get("review_queue", {}) if isinstance(payload.get("review_queue"), dict) else {}
     latest_proposal = payload.get("latest_governed_proposal", {}) if isinstance(payload.get("latest_governed_proposal"), dict) else {}
     proposal_only = payload.get("proposal_only_state", {}) if isinstance(payload.get("proposal_only_state"), dict) else {}
+    playbook = payload.get("playbook_convergence", {}) if isinstance(payload.get("playbook_convergence"), dict) else {}
+    playbook_contract = playbook.get("contract_source", {}) if isinstance(playbook.get("contract_source"), dict) else {}
+    playbook_summary = playbook.get("summary", {}) if isinstance(playbook.get("summary"), dict) else {}
+    continuity = payload.get("continuity", {}) if isinstance(payload.get("continuity"), dict) else {}
+    continuity_coverage = continuity.get("coverage", {}) if isinstance(continuity.get("coverage"), dict) else {}
+    continuity_promotion_queue = continuity.get("promotion_queue", {}) if isinstance(continuity.get("promotion_queue"), dict) else {}
+    continuity_source_groups = continuity.get("source_groups", {}) if isinstance(continuity.get("source_groups"), dict) else {}
     repo_inventory = payload.get("repo_inventory", {}) if isinstance(payload.get("repo_inventory"), dict) else {}
     lock_hygiene = payload.get("lock_worktree_hygiene", {}) if isinstance(payload.get("lock_worktree_hygiene"), dict) else {}
     trust = payload.get("trust_posture", {}) if isinstance(payload.get("trust_posture"), dict) else {}
@@ -178,6 +185,17 @@ def _render_html(payload: dict[str, Any], *, refresh_seconds: int) -> str:
                 "Dirty Repos",
                 overview.get("dirty_repo_count", "—"),
                 tone=_count_tone(overview.get("dirty_repo_count"), zero="ok", nonzero="danger"),
+            ),
+            _metric("Playbook Repos", overview.get("playbook_repo_count", "—")),
+            _metric(
+                "Playbook Drift",
+                overview.get("playbook_non_green_count", "—"),
+                tone=_count_tone(overview.get("playbook_non_green_count"), zero="ok", nonzero="warn"),
+            ),
+            _metric(
+                "Continuity Review",
+                overview.get("continuity_pending_review_count", "—"),
+                tone=_count_tone(overview.get("continuity_pending_review_count"), zero="ok", nonzero="warn"),
             ),
             _metric(
                 "Verta Visible",
@@ -396,6 +414,104 @@ def _render_html(payload: dict[str, Any], *, refresh_seconds: int) -> str:
         if isinstance(item, dict)
     ]
 
+    playbook_items = [
+        _item(
+            "Owner Contract Export",
+            eyebrow=playbook_contract.get("repo_id"),
+            badges=[
+                _badge("source", playbook_contract.get("source_status")),
+                _badge("validation", playbook_contract.get("validation_state")),
+                _badge("version", playbook_contract.get("contract_version")),
+            ],
+            body=_pairs(
+                [
+                    ("repo_path", playbook_contract.get("repo_path")),
+                    ("export", playbook_contract.get("export_relpath")),
+                    ("schema", playbook_contract.get("schema_relpath")),
+                    ("doc", playbook_contract.get("doc_relpath")),
+                    ("warnings", playbook_contract.get("warnings", [])),
+                ]
+            ),
+            featured=str(playbook_contract.get("source_status") or "") == "present",
+        )
+        if playbook_contract
+        else "<div class='empty'>Playbook contract status is unavailable.</div>"
+    ]
+    playbook_items.extend(
+        _item(
+            item.get("repo_id") or "repo",
+            badges=[
+                _badge("identity", item.get("repo_identity")),
+                _badge("adoption", item.get("adoption_status")),
+                _badge("verification", item.get("verification_state")),
+                _badge("continuity", item.get("continuity_status")),
+            ],
+            body=_pairs(
+                [
+                    ("drift", item.get("drift_status")),
+                    ("contract_version", item.get("contract_version_claimed")),
+                    ("initiative_refs", item.get("initiative_refs", [])),
+                    ("notes", item.get("notes", [])),
+                ]
+            ),
+        )
+        for item in (playbook.get("repos", []) if isinstance(playbook.get("repos"), list) else [])[:6]
+        if isinstance(item, dict)
+    )
+
+    continuity_items = [
+        _item(
+            "Continuity Coverage",
+            badges=[
+                _badge("status", continuity_coverage.get("status")),
+                _badge("sources", continuity_coverage.get("source_count")),
+                _badge("pending_review", continuity_coverage.get("pending_review_count")),
+            ],
+            body=_pairs(
+                [
+                    ("handoff_schema", continuity_coverage.get("handoff_schema_ref")),
+                    ("handoff_receipts", continuity_coverage.get("handoff_receipt_count")),
+                    ("lane_docs", continuity_coverage.get("lane_doc_refs", [])),
+                    ("transcript_role", continuity_coverage.get("transcript_role")),
+                ]
+            ),
+            featured=str(continuity_coverage.get("status") or "") == "structured",
+        )
+        if continuity_coverage
+        else "<div class='empty'>Continuity coverage is unavailable.</div>"
+    ]
+    continuity_items.extend(
+        _item(
+            item.get("source_id") or "promotion-candidate",
+            eyebrow=item.get("lane"),
+            badges=[
+                _badge("status", item.get("status")),
+                _badge("class", item.get("content_class")),
+            ],
+            body=_pairs(
+                [
+                    ("path", item.get("source_path")),
+                    ("promotion_targets", item.get("promotion_targets", [])),
+                    ("summary", item.get("source_summary")),
+                ]
+            ),
+        )
+        for item in (continuity_promotion_queue.get("items", []) if isinstance(continuity_promotion_queue.get("items"), list) else [])[:4]
+        if isinstance(item, dict)
+    )
+    continuity_group_items = [
+        _item(
+            item.get("lane") or "lane",
+            badges=[
+                _badge("sources", item.get("source_count")),
+                _badge("pending", item.get("pending_review_count")),
+                _badge("promotion", item.get("promotion_candidate_count")),
+            ],
+        )
+        for item in (continuity_source_groups.get("items", []) if isinstance(continuity_source_groups.get("items"), list) else [])[:5]
+        if isinstance(item, dict)
+    ]
+
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -428,6 +544,18 @@ def _render_html(payload: dict[str, Any], *, refresh_seconds: int) -> str:
     {_card("Blessing Review Queue", _stack(review_items, "No repo work is currently waiting on blessing review."), "span-4")}
     {_card("Governed Proposal And Proposal-Only State", proposal_body, "span-6")}
     {_card("Operator Paths", _stack(path_items, "No focused operator paths are pending."), "span-6")}
+    {_card("Playbook Convergence", "<div class='metrics'>" + "".join([
+      f"<div class='metric'><div class='label'>Repos</div><div class='value'>{escape(str(playbook_summary.get('repo_count', '—')))}</div></div>",
+      f"<div class='metric'><div class='label'>Partial</div><div class='value'>{escape(str(playbook_summary.get('partial_count', '—')))}</div></div>",
+      f"<div class='metric'><div class='label'>Adopted</div><div class='value'>{escape(str(playbook_summary.get('adopted_count', '—')))}</div></div>",
+      f"<div class='metric'><div class='label'>Local Only</div><div class='value {_count_tone(playbook_summary.get('local_only_count'), zero='ok', nonzero='warn')}'>{escape(str(playbook_summary.get('local_only_count', '—')))}</div></div>",
+    ]) + "</div>" + _stack(playbook_items, "No Playbook convergence state is published."), "span-6")}
+    {_card("Continuity Coverage", "<div class='metrics'>" + "".join([
+      f"<div class='metric'><div class='label'>Sources</div><div class='value'>{escape(str(continuity_coverage.get('source_count', '—')))}</div></div>",
+      f"<div class='metric'><div class='label'>Pending Review</div><div class='value {_count_tone(continuity_coverage.get('pending_review_count'), zero='ok', nonzero='warn')}'>{escape(str(continuity_coverage.get('pending_review_count', '—')))}</div></div>",
+      f"<div class='metric'><div class='label'>Indexed</div><div class='value'>{escape(str(continuity_coverage.get('indexed_count', '—')))}</div></div>",
+      f"<div class='metric'><div class='label'>Handoffs</div><div class='value'>{escape(str(continuity_coverage.get('handoff_receipt_count', '—')))}</div></div>",
+    ]) + "</div>" + _stack(continuity_items, "No continuity coverage is published.") + _stack(continuity_group_items, "No continuity lane groups are published."), "span-6")}
     {_card("Repo Inventory State", "<div class='metrics'>" + "".join([
       f"<div class='metric'><div class='label'>Repos</div><div class='value'>{escape(str(repo_inventory.get('item_count', '—')))}</div></div>",
       f"<div class='metric'><div class='label'>Dirty</div><div class='value {_count_tone(repo_inventory.get('dirty_item_count'), zero='ok', nonzero='danger')}'>{escape(str(repo_inventory.get('dirty_item_count', '—')))}</div></div>",

@@ -1,0 +1,80 @@
+{
+  "report_id": "playbook_adoption_report_root_projection",
+  "generated_at": "2026-04-17T16:30:00Z",
+  "contract_source": {
+    "repo_id": "playbook",
+    "repo_identity": "remote",
+    "repo_path": "repos/fawxzzy-playbook",
+    "export_relpath": "repos/fawxzzy-playbook/exports/playbook.contract.example.v1.json",
+    "schema_relpath": "repos/fawxzzy-playbook/exports/playbook.contract.schema.v1.json",
+    "doc_relpath": "repos/fawxzzy-playbook/docs/contracts/PLAYBOOK-CONTRACT.md",
+    "contract_id": "playbook_convergence_contract",
+    "contract_version": "1.0.0",
+    "contract_status": "candidate",
+    "source_status": "present",
+    "validation_state": "schema_valid",
+    "evidence_refs": [
+      "repos/fawxzzy-playbook/exports/playbook.contract.example.v1.json",
+      "repos/fawxzzy-playbook/exports/playbook.contract.schema.v1.json",
+      "repos/fawxzzy-playbook/packages/engine/test/playbookContractExport.test.ts"
+    ],
+    "warnings": []
+  },
+  "summary": {
+    "repo_count": 10,
+    "remote_count": 7,
+    "local_only_count": 3,
+    "unassessed_count": 3,
+    "planned_count": 2,
+    "partial_count": 4,
+    "adopted_count": 1,
+    "verified_count": 0,
+    "exception_count": 0
+  },
+  "repos": [
+    {
+      "repo_id": "playbook",
+      "role": "playbook",
+      "repo_identity": "remote",
+      "contract_version_claimed": "1.0.0",
+      "adoption_status": "adopted",
+      "verification_state": "targeted",
+      "continuity_status": "structured",
+      "drift_status": "none_detected",
+      "evidence_types": [
+        "contract_example",
+        "schema_validation",
+        "runbook_reference",
+        "unit_test"
+      ],
+      "evidence_refs": [
+        "repos/fawxzzy-playbook/exports/playbook.contract.example.v1.json"
+      ],
+      "initiative_refs": [],
+      "notes": [
+        "Owner-truth export remains canonical."
+      ]
+    },
+    {
+      "repo_id": "_stack",
+      "role": "stack_orchestrator",
+      "repo_identity": "local_only",
+      "contract_version_claimed": null,
+      "adoption_status": "partial",
+      "verification_state": "none",
+      "continuity_status": "partial",
+      "drift_status": "possible",
+      "evidence_types": [
+        "inventory_export",
+        "runbook_reference"
+      ],
+      "evidence_refs": [
+        "repos/_stack"
+      ],
+      "initiative_refs": [],
+      "notes": [
+        "Local-only identity does not imply verification."
+      ]
+    }
+  ]
+}

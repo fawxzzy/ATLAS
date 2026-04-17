@@ -21,6 +21,17 @@ Structured handoffs use:
 - schema: `schemas/atlas.continuity.handoff.v1.json`
 - storage path: `runtime/receipts/handoffs/**`
 
+Continuity source inventory uses:
+
+- schema: `schemas/atlas.continuity.source.manifest.v1.json`
+- loader: `ops/atlas/continuity.py`
+- read-only slices:
+  - `continuity_source_inventory`
+  - `continuity_promotion_queue`
+  - `continuity_source_groups`
+  - `continuity_search_status`
+  - `continuity_coverage`
+
 Related existing surfaces:
 
 - `docs/architecture/CODEX-HANDOFF-CONTRACT.md` for Codex task-output capture
@@ -80,6 +91,7 @@ Promotion rules:
 - promote only validated, durable outputs
 - prefer owner-repo promotion when the fact belongs to a child repo
 - keep source lineage explicit
+- do not auto-promote raw imports or transcript residue
 
 ## Authoring Flow
 

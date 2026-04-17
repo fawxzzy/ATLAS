@@ -13,6 +13,9 @@ data/**
 !data/**/
 !data/**/README.md
 !data/**/.gitkeep
+!data/fixtures/
+!data/fixtures/atlas.continuity.source.manifest.example.v1.json
+!data/fixtures/atlas.playbook.adoption.report.example.v1.json
 data/imports/**/raw/**
 data/imports/**/extracted/**
 

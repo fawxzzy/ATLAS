@@ -39,6 +39,8 @@ Build a manifest of saved planning artifacts grouped by type:
 Default output target:
 
 - `data/imports/knowledge/continuity/harvest-manifest.json`
+- first-class schema: `schemas/atlas.continuity.source.manifest.v1.json`
+- current root loader: `ops/atlas/continuity.py`
 
 Minimum metadata per source:
 
@@ -97,6 +99,13 @@ Each promoted item should link back to:
 4. Extract durable decisions and tasks from those ten artifacts.
 5. Promote validated outputs into initiative, plan, knowledge, and receipt lanes.
 6. Record unresolved questions in one tracked queue instead of leaving them in transcript residue.
+
+Current grounded lanes for the first manifest are:
+
+- root docs in `docs/ops/`
+- Playbook roadmap files under `repos/fawxzzy-playbook/`
+- imported planning roots under `data/imports/knowledge/personal/**`
+- local Downloads residue treated as local-only trace, not canonical stack truth
 
 ## Acceptance Criteria
 

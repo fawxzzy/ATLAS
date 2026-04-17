@@ -27,6 +27,36 @@ This program closes that gap through two tracks:
 - Track A: Playbook convergence across repos
 - Track B: durable context continuity across Codex and ChatGPT work
 
+## Current Root Consumption
+
+The current root tranche consumes the landed Playbook owner export read-only from:
+
+- `repos/fawxzzy-playbook/exports/playbook.contract.example.v1.json`
+- `repos/fawxzzy-playbook/exports/playbook.contract.schema.v1.json`
+- `repos/fawxzzy-playbook/docs/contracts/PLAYBOOK-CONTRACT.md`
+
+The root-side read models that project this owner truth are:
+
+- `ops/atlas/playbook_contract.py`
+- `ops/atlas/continuity.py`
+- awareness slices:
+  - `playbook_contract_status`
+  - `playbook_adoption_summary`
+  - `playbook_repo_adoption`
+  - `playbook_drift`
+  - `continuity_coverage`
+  - `continuity_source_inventory`
+  - `continuity_promotion_queue`
+  - `continuity_source_groups`
+  - `continuity_search_status`
+
+Supporting stack-owned schemas now live at:
+
+- `schemas/atlas.playbook.adoption.report.v1.json`
+- `schemas/atlas.continuity.source.manifest.v1.json`
+
+These surfaces are projections only. They do not create a second canonical store for Playbook doctrine.
+
 ## Non-Goals
 
 - do not merge child repos into the stack root
@@ -61,7 +91,7 @@ No new canonical path class is introduced by this roadmap.
 | `G1 contract-extraction` | Export the canonical Playbook principles, patterns, and verification expectations into explicit contracts. | Playbook publishes one human-readable spec and one machine-readable contract that root tooling can reference by version. | Playbook repo spec, Playbook contract artifact, root references to the contract |
 | `G2 continuity-lane` | Make preserved conversations and handoffs queryable without promoting transcript residue into doctrine. | Structured handoffs are required for serious sessions, prior archives have an import path, and promotion from handoff or archive into memory/knowledge is documented and testable. | `schemas/atlas.continuity.handoff.v1.json`, continuity runbook updates, continuity promotion flow, import/query references |
 | `G3 core-repo-rollout` | Align the stack control surfaces and the core operator repos to the Playbook contract. | `stack`, `atlas`, `playbook`, `lifeline`, and `_stack` each have an explicit adoption state, a repo-local slice, and a verification surface. | repo-local PRs, updated verify hooks or docs, adoption receipts |
-| `G4 application-rollout-and-reporting` | Extend adoption status into the application repos and publish drift as a stack-visible report. | Every in-scope application repo is marked `adopted`, `partial`, `missing`, or `n/a` with an evidence ref, and stack reporting exposes both convergence and continuity health. | application repo PRs, stack report surface, validation or cockpit summary |
+| `G4 application-rollout-and-reporting` | Extend adoption status into the application repos and publish drift as a stack-visible report. | Every in-scope application repo is marked `adopted`, `verified`, `partial`, `missing`, or `n/a` with an evidence ref, and stack reporting exposes both convergence and continuity health. | application repo PRs, stack report surface, validation or cockpit summary |
 
 ## Phase Plan
 
@@ -126,13 +156,16 @@ Primary slices:
 Acceptance criteria:
 
 - each in-scope application repo has an explicit adoption decision instead of silent drift
+- landed repo-local adoption work is projected honestly at root
+- `verified` remains blocked until the stack has an explicit, evidence-backed promotion gate
 - the stack can report both convergence status and conversation-continuity health from saved artifacts
 - repo-local rollout remains scoped to the owning repo
 
 Primary slices:
 
 - application repo PRs: add repo-local adoption or document `n/a` where justified
-- stack root PR: publish a report surface for adoption drift and continuity-lane health
+- stack root PR: project landed repo-local adoption evidence read-only into awareness and cockpit
+- stack root PR: add the explicit adopted-to-verified gate and root-visible verification report
 
 ## First Repo-Local PR Slices
 
@@ -142,8 +175,8 @@ Primary slices:
 | `lifeline` | Align approval, receipt, and execution surfaces to the shared contract. | Lifeline docs or verify output can show which Playbook contract version is implemented. |
 | `_stack` | Align worker merge, resume, and orchestration patterns to the shared contract. | Resume and merge flows cite the contract and verification is explicit. |
 | `atlas` | Pull contract refs and continuity refs by intent instead of broad context dumps. | Context or awareness surfaces can retrieve the right contract and continuity artifacts deterministically. |
-| `fitness` | Decide whether this repo adopts the shared Playbook contract now or later. | Matrix status is explicit and backed by a repo-local artifact. |
-| `mazer` | Do the same, with repo-local verification rather than root assumptions. | Matrix status is explicit and backed by a repo-local artifact. |
+| `fitness` | Repo-local adoption slice is landed. | Matrix status is explicit at root as `adopted`, and `verified` stays blocked until the root-visible gate evaluates broader proof or a bounded exception. |
+| `mazer` | Repo-local adoption slice is landed. | Matrix status is explicit at root as `adopted`, and `verified` stays blocked until the root-visible gate evaluates broader proof or a bounded exception. |
 | `stream` | Do the same once incubating scope is confirmed. | Matrix status is explicit and backed by a repo-local artifact or a documented defer decision. |
 | `nat1-games` | Do the same once incubating scope is confirmed. | Matrix status is explicit and backed by a repo-local artifact or a documented defer decision. |
 | `playbook-demo` | Decide whether it remains a demo-only mirror or a contract demonstration surface. | Matrix status is explicit and the demo role is documented. |

@@ -12,7 +12,9 @@ if str(ROOT) not in sys.path:
 
 from ops._atlas import atlas_relative, atlas_root, resolve_atlas_path
 from ops.atlas.backfill_legacy_runtime_artifacts import backfill_legacy_runtime_artifacts
+from ops.atlas.continuity import build_continuity_status_slices
 from ops.atlas.load_tool_registry import load_tool_registry_bundle
+from ops.atlas.playbook_contract import build_playbook_status_slices
 from ops.cortex._artifacts import (
     default_artifact_source_paths,
     load_descriptors,
@@ -422,6 +424,14 @@ def atlas_status(*, root: Path | None = None, refresh: bool = False) -> dict[str
     snapshot = _load_snapshot(root=base_root, refresh=refresh)
     attention = _load_attention(root=base_root, refresh=refresh)
     status = render_status_payload(base_root / "runtime" / "cortex" / "artifacts")
+    repo_inventory = _load_repo_inventory(root=base_root, refresh=refresh)
+    playbook_report, playbook_slices = build_playbook_status_slices(
+        root=base_root,
+        inventory_payload=repo_inventory,
+    )
+    continuity_manifest, continuity_slices = build_continuity_status_slices(root=base_root)
+    existing_slices = status.get("slices", {}) if isinstance(status.get("slices"), dict) else {}
+    status["slices"] = existing_slices | playbook_slices | continuity_slices
     return {
         "schema_version": STATUS_CONTRACT_VERSION,
         "registry": status.get("registry"),
@@ -442,6 +452,8 @@ def atlas_status(*, root: Path | None = None, refresh: bool = False) -> dict[str
         "working_memory": status.get("working_memory"),
         "initiatives": status.get("initiatives"),
         "slices": status.get("slices"),
+        "playbook_report": playbook_report,
+        "continuity_manifest": continuity_manifest,
         "conversations": status.get("conversations"),
         "attention_queue": status.get("attention_queue"),
         "proposal_only": status.get("proposal_only"),
@@ -625,6 +637,26 @@ def _initiative_operator_path(
 def cockpit_status(*, root: Path | None = None, refresh: bool = False) -> dict[str, Any]:
     base_root = (root or atlas_root()).resolve()
     status = atlas_status(root=base_root, refresh=refresh)
+    playbook_report = status.get("playbook_report", {}) if isinstance(status.get("playbook_report"), dict) else {}
+    playbook_summary = playbook_report.get("summary", {}) if isinstance(playbook_report.get("summary"), dict) else {}
+    continuity_coverage = (
+        status.get("slices", {}).get("continuity_coverage", {})
+        if isinstance(status.get("slices"), dict)
+        and isinstance(status.get("slices", {}).get("continuity_coverage"), dict)
+        else {}
+    )
+    continuity_promotion_queue = (
+        status.get("slices", {}).get("continuity_promotion_queue", {})
+        if isinstance(status.get("slices"), dict)
+        and isinstance(status.get("slices", {}).get("continuity_promotion_queue"), dict)
+        else {}
+    )
+    continuity_source_groups = (
+        status.get("slices", {}).get("continuity_source_groups", {})
+        if isinstance(status.get("slices"), dict)
+        and isinstance(status.get("slices", {}).get("continuity_source_groups"), dict)
+        else {}
+    )
     initiatives = status.get("initiatives", {}) if isinstance(status.get("initiatives"), dict) else {}
     active_items = initiatives.get("active_items", []) if isinstance(initiatives.get("active_items"), list) else []
     review_queue = (
@@ -698,6 +730,15 @@ def cockpit_status(*, root: Path | None = None, refresh: bool = False) -> dict[s
             "dirty_repo_count": lock_hygiene.get("dirty_repo_count"),
             "lock_frozen": lock_hygiene.get("lock_frozen"),
             "untrusted_visible_count": trust_posture.get("untrusted_item_count"),
+            "playbook_repo_count": playbook_summary.get("repo_count"),
+            "playbook_non_green_count": sum(
+                1
+                for item in playbook_report.get("repos", [])
+                if isinstance(item, dict) and str(item.get("drift_status") or "unknown") != "none_detected"
+            )
+            if isinstance(playbook_report.get("repos"), list)
+            else None,
+            "continuity_pending_review_count": continuity_coverage.get("pending_review_count"),
             "verta_visible_untrusted": any(
                 "verta" in str(item.get("archive_id", "")).lower()
                 and str(item.get("trust_class", "")).strip() == "untrusted"
@@ -724,6 +765,18 @@ def cockpit_status(*, root: Path | None = None, refresh: bool = False) -> dict[s
             "items": pending_proposals[:10],
         },
         "proposal_only_state": proposal_only,
+        "playbook_convergence": {
+            "contract_source": playbook_report.get("contract_source", {}),
+            "summary": playbook_summary,
+            "repos": playbook_report.get("repos", [])[:10]
+            if isinstance(playbook_report.get("repos"), list)
+            else [],
+        },
+        "continuity": {
+            "coverage": continuity_coverage,
+            "promotion_queue": continuity_promotion_queue,
+            "source_groups": continuity_source_groups,
+        },
         "repo_inventory": status.get("repo_inventory"),
         "lock_worktree_hygiene": lock_hygiene,
         "trust_posture": trust_posture,
@@ -741,6 +794,15 @@ def _slice_titles() -> dict[str, str]:
         "repo_linked_initiatives": "Repo-Linked Initiatives",
         "trust_posture": "Trust Posture",
         "repo_inventory": "Repo Inventory",
+        "playbook_contract_status": "Playbook Contract Status",
+        "playbook_adoption_summary": "Playbook Adoption Summary",
+        "playbook_repo_adoption": "Playbook Repo Adoption",
+        "playbook_drift": "Playbook Drift",
+        "continuity_source_inventory": "Continuity Source Inventory",
+        "continuity_promotion_queue": "Continuity Promotion Queue",
+        "continuity_source_groups": "Continuity Source Groups",
+        "continuity_search_status": "Continuity Search Status",
+        "continuity_coverage": "Continuity Coverage",
     }
 
 
@@ -752,19 +814,19 @@ def _status_slice_payload(status: dict[str, Any], slice_name: str) -> dict[str, 
     slices = _status_slices(status)
     titles = _slice_titles()
     if slice_name == "trust_posture":
-        payload = slices.get(slice_name, status.get("trust_posture", {}))
-        if not isinstance(payload, dict):
-            payload = {}
+        payload: Any = slices.get(slice_name, status.get("trust_posture", {}))
+    else:
+        payload = slices.get(slice_name, [])
+    if isinstance(payload, dict):
+        items = payload.get("items", []) if isinstance(payload.get("items"), list) else []
         return {
             "slice_name": slice_name,
             "title": titles.get(slice_name, slice_name),
-            "item_count": int(payload.get("item_count", 0) or 0),
-            "items": payload.get("items", []) if isinstance(payload.get("items"), list) else [],
+            "item_count": int(payload.get("item_count", len(items)) or 0),
+            "items": items,
             "payload": payload,
         }
-    items = slices.get(slice_name, [])
-    if not isinstance(items, list):
-        items = []
+    items = payload if isinstance(payload, list) else []
     return {
         "slice_name": slice_name,
         "title": titles.get(slice_name, slice_name),

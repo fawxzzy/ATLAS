@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://schemas/atlas.continuity.source.manifest.v1.json",
+  "title": "ATLAS Continuity Source Manifest v1",
+  "description": "Inventory of saved planning sources used by the ATLAS continuity lane.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "manifest_id",
+    "generated_at",
+    "sources"
+  ],
+  "properties": {
+    "manifest_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/source"
+      }
+    }
+  },
+  "$defs": {
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_id",
+        "source_path",
+        "path_kind",
+        "lane",
+        "artifact_type",
+        "content_class",
+        "repo_scope",
+        "trust_posture",
+        "status",
+        "initiative_refs",
+        "plan_refs",
+        "promotion_candidate",
+        "promotion_targets",
+        "source_summary"
+      ],
+      "properties": {
+        "source_id": {
+          "type": "string"
+        },
+        "source_path": {
+          "type": "string"
+        },
+        "path_kind": {
+          "enum": [
+            "file",
+            "dir",
+            "glob"
+          ]
+        },
+        "lane": {
+          "enum": [
+            "root_docs_ops",
+            "playbook_roadmap",
+            "imports",
+            "downloads",
+            "other"
+          ]
+        },
+        "artifact_type": {
+          "enum": [
+            "markdown",
+            "json",
+            "pdf",
+            "chat_export",
+            "runbook",
+            "plan",
+            "dir_root",
+            "glob_root",
+            "other"
+          ]
+        },
+        "content_class": {
+          "enum": [
+            "raw_evidence",
+            "structured_artifact",
+            "promoted_truth",
+            "residue",
+            "unknown"
+          ]
+        },
+        "repo_scope": {
+          "type": "string"
+        },
+        "trust_posture": {
+          "enum": [
+            "trusted",
+            "visible_untrusted",
+            "unknown"
+          ]
+        },
+        "status": {
+          "enum": [
+            "indexed",
+            "pending_review",
+            "promoted",
+            "superseded",
+            "unknown"
+          ]
+        },
+        "initiative_refs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "plan_refs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "promotion_candidate": {
+          "type": "boolean"
+        },
+        "promotion_targets": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "source_summary": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

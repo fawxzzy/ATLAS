@@ -1,0 +1,273 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://schemas/atlas.playbook.adoption.report.v1.json",
+  "title": "ATLAS Playbook Adoption Report v1",
+  "description": "Read-only projected convergence report built from the Playbook owner export, the live repo inventory, and stack-level evidence surfaces.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "report_id",
+    "generated_at",
+    "contract_source",
+    "summary",
+    "repos"
+  ],
+  "properties": {
+    "report_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "contract_source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repo_id",
+        "repo_identity",
+        "export_relpath",
+        "schema_relpath",
+        "contract_id",
+        "contract_version",
+        "contract_status",
+        "source_status",
+        "validation_state"
+      ],
+      "properties": {
+        "repo_id": {
+          "type": "string"
+        },
+        "repo_identity": {
+          "enum": [
+            "remote",
+            "local_only",
+            "unknown"
+          ]
+        },
+        "repo_path": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "export_relpath": {
+          "type": "string"
+        },
+        "schema_relpath": {
+          "type": "string"
+        },
+        "doc_relpath": {
+          "type": "string"
+        },
+        "contract_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "contract_version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "contract_status": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "source_status": {
+          "enum": [
+            "present",
+            "missing",
+            "malformed",
+            "unknown"
+          ]
+        },
+        "validation_state": {
+          "enum": [
+            "schema_valid",
+            "schema_invalid",
+            "owner_slice_verified",
+            "owner_slice_not_verified",
+            "unknown"
+          ]
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repo_count",
+        "remote_count",
+        "local_only_count",
+        "unassessed_count",
+        "planned_count",
+        "partial_count",
+        "adopted_count",
+        "verified_count",
+        "exception_count"
+      ],
+      "properties": {
+        "repo_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "remote_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "local_only_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unassessed_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "planned_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "partial_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "adopted_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "verified_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "exception_count": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "repos": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/repo_row"
+      }
+    }
+  },
+  "$defs": {
+    "repo_row": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repo_id",
+        "role",
+        "repo_identity",
+        "adoption_status",
+        "verification_state",
+        "continuity_status",
+        "drift_status",
+        "evidence_types",
+        "notes"
+      ],
+      "properties": {
+        "repo_id": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string"
+        },
+        "repo_identity": {
+          "enum": [
+            "remote",
+            "local_only",
+            "unknown"
+          ]
+        },
+        "contract_version_claimed": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "adoption_status": {
+          "enum": [
+            "unassessed",
+            "planned",
+            "partial",
+            "adopted",
+            "verified",
+            "exception"
+          ]
+        },
+        "verification_state": {
+          "enum": [
+            "none",
+            "targeted",
+            "full",
+            "exception_documented",
+            "unknown"
+          ]
+        },
+        "continuity_status": {
+          "enum": [
+            "missing",
+            "planned",
+            "partial",
+            "structured",
+            "verified",
+            "unknown"
+          ]
+        },
+        "drift_status": {
+          "enum": [
+            "unknown",
+            "none_detected",
+            "possible",
+            "detected",
+            "exception"
+          ]
+        },
+        "evidence_types": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "initiative_refs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

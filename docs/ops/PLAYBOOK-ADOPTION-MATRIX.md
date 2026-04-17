@@ -2,10 +2,12 @@
 
 This matrix is the root-owned visibility surface for cross-repo Playbook convergence.
 
-Current statuses are evidence-based working assessments from stack-root artifacts. They do not become repo-owned truth until the named verification artifact exists in the owning repo or stack surface.
+Current statuses are evidence-based working assessments from the stack-root read models, the live repo inventory at `docs/registry/STACK-REPO-INVENTORY.json`, and the Playbook owner export. They do not become repo-owned truth until the named verification artifact exists in the owning repo or stack surface.
 
 ## Status Legend
 
+- `adopted`: repo-local owner-truth adoption evidence exists and targeted proof is green, but `verified` is still deferred pending an explicit root-visible gate
+- `verified`: repo-local adoption evidence is reproducible, root-visible, and has cleared the explicit promotion gate
 - `partial`: current artifacts show meaningful alignment, but explicit contract adoption is not yet proven
 - `missing`: no explicit contract adoption artifact is visible from the stack root yet
 - `n/a`: the surface is intentionally out of the current adoption gate
@@ -15,13 +17,13 @@ Current statuses are evidence-based working assessments from stack-root artifact
 | Surface | Scope | Current Status | Evidence Now | Verification Needed | First Slice |
 | --- | --- | --- | --- | --- | --- |
 | `stack` | stack coordination root | `partial` | `README-STACK.md`, `docs/architecture/ATLAS-CORTEX-PLAYBOOK-CODEX.md`, `docs/ops/ATLAS-PLAYBOOK-CONVERGENCE.md` | root-visible adoption and continuity report | publish and maintain the stack-level report surface |
-| `playbook` | repo-local governance owner | `partial` | `README-STACK.md` routes governance, policy, and verification to Playbook | human-readable spec plus machine-readable contract export | export the canonical contract |
+| `playbook` | repo-local governance owner | `partial` | `repos/fawxzzy-playbook/exports/playbook.contract.example.v1.json`, `repos/fawxzzy-playbook/exports/playbook.contract.schema.v1.json`, `repos/fawxzzy-playbook/docs/contracts/PLAYBOOK-CONTRACT.md` | owner-repo verification beyond the export slice | keep the export canonical and versioned |
 | `atlas` | doctrine and context-routing owner | `partial` | awareness-first and conversation docs already enforce grounded, explicit files | context or verify output tied to the shared Playbook contract | route contract refs and continuity refs by intent |
 | `lifeline` | approvals and execution owner | `partial` | current stack doctrine already routes execution and approvals here | repo-local artifact that names the implemented contract version | align approvals, receipts, and execution surfaces |
 | `_stack` | orchestration and resume owner | `partial` | current stack doctrine already routes worker flow here | repo-local artifact that names the implemented contract version | align merge and resume patterns |
 | `knowledge lane` | stack-owned import, catalog, and promotion lane | `partial` | `docs/knowledge/IMPORT-RUNBOOK.md`, `docs/knowledge/QUERY-CONTRACT.md`, `docs/knowledge/PROMOTION-RUNBOOK.md` | explicit continuity promotion flow from handoff or archive into queryable outputs | wire conversation continuity into the import and promotion lane |
-| `fitness` | application repo | `missing` | visible in `stack.yaml` and inventory only | repo-local adoption note, verify output, or explicit defer decision | decide current scope and adoption target |
-| `mazer` | application repo | `missing` | visible in `stack.yaml`, inventory, and initiative refs only | repo-local adoption note, verify output, or explicit defer decision | decide current scope and adoption target |
+| `fitness` | application repo | `adopted` | `repos/fawxzzy-fitness/exports/fitness.playbook.adoption.evidence.v1.json`, `repos/fawxzzy-fitness/docs/ops/FITNESS-PLAYBOOK-ADOPTION.md`, `repos/fawxzzy-fitness/tests/playbook-adoption-evidence.test.mjs` | explicit adopted-to-verified gate or bounded broader verification exception | keep status at `adopted` until the root-visible verified gate lands |
+| `mazer` | application repo | `adopted` | `repos/fawxzzy-mazer/exports/mazer.playbook.adoption.evidence.v1.json`, `repos/fawxzzy-mazer/docs/ops/MAZER-PLAYBOOK-ADOPTION.md`, `repos/fawxzzy-mazer/tests/playbook-adoption-evidence.test.mjs` | explicit adopted-to-verified gate or bounded broader verification exception | keep status at `adopted` until the root-visible verified gate lands |
 | `stream` | incubating application repo | `missing` | visible in `stack.yaml` and inventory only | repo-local adoption note or explicit incubating defer decision | decide whether it joins the first rollout |
 | `nat1-games` | incubating application repo | `missing` | visible in `stack.yaml` and inventory only | repo-local adoption note or explicit incubating defer decision | decide whether it joins the first rollout |
 | `playbook-demo` | demo surface | `n/a` | demo repo exists in `stack.yaml` and inventory | explicit demo-role decision if reused for contract demos | keep out of the critical path unless intentionally used as a mirror |
@@ -36,3 +38,12 @@ A status should move only when the owning surface has a concrete artifact such a
 - a stack-visible report or receipt that proves the rollout
 
 Until then, the matrix is an honest working assessment, not proof.
+
+## Root Projection Note
+
+ATLAS now projects these statuses into the awareness and cockpit read models, but those projections stay negative-safe:
+
+- local-only repos remain visible without being marked verified
+- missing or malformed owner exports render non-green
+- continuity coverage is reported separately from adoption
+- `fitness` and `mazer` should project as `adopted` from their repo-local evidence while still staying non-green for `verified`
