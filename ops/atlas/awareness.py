@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime, timezone
 import json
 from pathlib import Path
 import sys
@@ -20,7 +21,7 @@ from ops.cortex._artifacts import (
     write_json,
 )
 from ops.cortex.index_working_memory import WORKING_MEMORY_OUTPUT, load_working_memory_catalog
-from ops.cortex.render_status import initiative_view, render_status_payload
+from ops.cortex.render_status import initiative_view, parse_timestamp, render_status_payload
 from ops.cortex.world_model import (
     attention_output_path,
     snapshot_output_path,
@@ -40,6 +41,7 @@ FETCH_CONTRACT_VERSION = "atlas.awareness.fetch.v1"
 SESSION_CONTRACT_VERSION = "atlas.awareness.session.v1"
 ARTIFACT_CONTRACT_VERSION = "atlas.awareness.artifact.v1"
 VOICE_CONTRACT_VERSION = "atlas.awareness.voice.v1"
+COCKPIT_CONTRACT_VERSION = "atlas.awareness.cockpit.v1"
 OBSERVE_AUTOMATION_LEVEL = "observe"
 CONTEXT_AUTOMATION_LEVEL = "context"
 
@@ -67,6 +69,10 @@ ALLOWED_FETCH_PREFIXES = [
 
 def _bundle_path(root: Path) -> Path:
     return (root / "runtime" / "cortex" / "query" / "knowledge" / "bundle.json").resolve()
+
+
+def _utc_now() -> str:
+    return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
 def ensure_world_model(*, root: Path | None = None, refresh: bool = False) -> dict[str, Any]:
@@ -437,7 +443,10 @@ def atlas_status(*, root: Path | None = None, refresh: bool = False) -> dict[str
         "initiatives": status.get("initiatives"),
         "slices": status.get("slices"),
         "conversations": status.get("conversations"),
+        "attention_queue": status.get("attention_queue"),
+        "proposal_only": status.get("proposal_only"),
         "governed_writes": status.get("governed_writes"),
+        "lock_worktree_hygiene": status.get("lock_worktree_hygiene"),
         "digests": {
             "registry_digest": status.get("registry", {}).get("registry_digest")
             if isinstance(status.get("registry"), dict)
@@ -450,6 +459,9 @@ def atlas_status(*, root: Path | None = None, refresh: bool = False) -> dict[str
             "repo_inventory_digest": status.get("repo_inventory", {}).get("content_digest")
             if isinstance(status.get("repo_inventory"), dict)
             else None,
+            "generated_lock_digest": status.get("lock_worktree_hygiene", {}).get("generated_lock_digest")
+            if isinstance(status.get("lock_worktree_hygiene"), dict)
+            else None,
         },
         "automation_policy": {
             "surface": "awareness_api",
@@ -457,6 +469,266 @@ def atlas_status(*, root: Path | None = None, refresh: bool = False) -> dict[str
             "max_level": CONTEXT_AUTOMATION_LEVEL,
             "read_only": True,
         },
+        "world_model": status.get("world_model"),
+    }
+
+
+def _attention_queue_items(status: dict[str, Any]) -> list[dict[str, Any]]:
+    payload = status.get("attention_queue", {}) if isinstance(status.get("attention_queue"), dict) else {}
+    items = payload.get("items", []) if isinstance(payload.get("items"), list) else []
+    return [item for item in items if isinstance(item, dict)]
+
+
+def _initiative_attention_item(
+    initiative_view_item: dict[str, Any],
+    *,
+    attention_items: list[dict[str, Any]],
+) -> dict[str, Any] | None:
+    initiative_id = str(initiative_view_item.get("id", "")).strip()
+    related_refs = {
+        str(value).strip()
+        for value in initiative_view_item.get("related_attention_refs", [])
+        if isinstance(value, str) and value.strip()
+    }
+    for item in attention_items:
+        details = item.get("details", {}) if isinstance(item.get("details"), dict) else {}
+        attention_id = str(item.get("attention_id", "")).strip()
+        if initiative_id and str(details.get("initiative_id", "")).strip() == initiative_id:
+            return item
+        if attention_id and f"attention:{attention_id}" in related_refs:
+            return item
+    return None
+
+
+def _proposal_session_view(
+    initiative_view_item: dict[str, Any],
+    *,
+    root: Path,
+    refresh: bool,
+) -> dict[str, Any] | None:
+    initiative_id = str(initiative_view_item.get("id", "")).strip()
+    if not initiative_id:
+        return None
+    proposal_ref = str(initiative_view_item.get("proposal_ref") or "").strip()
+    if not proposal_ref:
+        return None
+    proposal_artifact = fetch_artifact(proposal_ref, root=root)
+    proposal_json = proposal_artifact.get("json") if isinstance(proposal_artifact.get("json"), dict) else {}
+    proposal_section = proposal_json.get("proposal") if isinstance(proposal_json.get("proposal"), dict) else {}
+    return {
+        "initiative_id": initiative_id,
+        "initiative_title": initiative_view_item.get("title"),
+        "proposal_ref": proposal_ref,
+        "session_id": proposal_json.get("session_id"),
+        "title": proposal_json.get("title"),
+        "session_state": proposal_json.get("session_state"),
+        "scenario": proposal_json.get("scenario"),
+        "created_at": proposal_json.get("created_at"),
+        "updated_at": proposal_json.get("updated_at"),
+        "automation_level": proposal_json.get("automation_level"),
+        "max_automation_level": proposal_json.get("max_automation_level"),
+        "initiative_ref": proposal_section.get("initiative_ref"),
+        "triggering_attention_refs": proposal_section.get("triggering_attention_refs", [])
+        if isinstance(proposal_section.get("triggering_attention_refs"), list)
+        else [],
+    }
+
+
+def _pending_proposal_views(
+    pending_items: list[dict[str, Any]],
+    *,
+    root: Path,
+    refresh: bool,
+) -> list[dict[str, Any]]:
+    views: list[dict[str, Any]] = []
+    for item in pending_items:
+        if not isinstance(item, dict):
+            continue
+        proposal = _proposal_session_view(item, root=root, refresh=refresh)
+        if proposal is None:
+            continue
+        proposal["blessing_state"] = item.get("blessing_state")
+        proposal["next_step"] = item.get("next_step")
+        proposal["follow_up"] = item.get("follow_up")
+        proposal["repo_refs"] = item.get("repo_refs", []) if isinstance(item.get("repo_refs"), list) else []
+        views.append(proposal)
+    views.sort(
+        key=lambda item: (
+            parse_timestamp(item.get("updated_at"))[0],
+            parse_timestamp(item.get("created_at"))[0],
+            str(item.get("initiative_id", "")),
+        ),
+        reverse=True,
+    )
+    return views
+
+
+def _initiative_operator_path(
+    initiative_view_item: dict[str, Any],
+    *,
+    attention_items: list[dict[str, Any]],
+    root: Path,
+    refresh: bool,
+) -> dict[str, Any]:
+    attention_item = _initiative_attention_item(initiative_view_item, attention_items=attention_items)
+    proposal_session = _proposal_session_view(initiative_view_item, root=root, refresh=refresh)
+    return {
+        "initiative_id": initiative_view_item.get("id"),
+        "title": initiative_view_item.get("title"),
+        "summary": initiative_view_item.get("summary"),
+        "status": initiative_view_item.get("status"),
+        "updated_at": initiative_view_item.get("updated_at"),
+        "initiative_ref": initiative_view_item.get("path"),
+        "repo_refs": initiative_view_item.get("repo_refs", [])
+        if isinstance(initiative_view_item.get("repo_refs"), list)
+        else [],
+        "branch_ref": initiative_view_item.get("branch_ref"),
+        "next_step": initiative_view_item.get("next_step"),
+        "follow_up": initiative_view_item.get("follow_up"),
+        "waiting_on": initiative_view_item.get("waiting_on", [])
+        if isinstance(initiative_view_item.get("waiting_on"), list)
+        else [],
+        "blessing_state": initiative_view_item.get("blessing_state"),
+        "attention": (
+            {
+                "attention_id": attention_item.get("attention_id"),
+                "kind": attention_item.get("kind"),
+                "severity": attention_item.get("severity"),
+                "summary": attention_item.get("summary"),
+                "source_ref": attention_item.get("source_ref"),
+            }
+            if isinstance(attention_item, dict)
+            else None
+        ),
+        "proposal_session": proposal_session,
+        "state_chain": [
+            {
+                "label": "initiative",
+                "value": initiative_view_item.get("id"),
+            },
+            {
+                "label": "open_attention",
+                "value": attention_item.get("summary") if isinstance(attention_item, dict) else None,
+            },
+            {
+                "label": "proposed_session",
+                "value": proposal_session.get("session_id") if isinstance(proposal_session, dict) else None,
+            },
+            {
+                "label": "blessing_state",
+                "value": initiative_view_item.get("blessing_state"),
+            },
+        ],
+    }
+
+
+def cockpit_status(*, root: Path | None = None, refresh: bool = False) -> dict[str, Any]:
+    base_root = (root or atlas_root()).resolve()
+    status = atlas_status(root=base_root, refresh=refresh)
+    initiatives = status.get("initiatives", {}) if isinstance(status.get("initiatives"), dict) else {}
+    active_items = initiatives.get("active_items", []) if isinstance(initiatives.get("active_items"), list) else []
+    review_queue = (
+        initiatives.get("waiting_on_review_items", [])
+        if isinstance(initiatives.get("waiting_on_review_items"), list)
+        else []
+    )
+    pending_items = (
+        initiatives.get("pending_proposal_items", [])
+        if isinstance(initiatives.get("pending_proposal_items"), list)
+        else []
+    )
+    attention_items = _attention_queue_items(status)
+    pending_proposals = _pending_proposal_views(pending_items, root=base_root, refresh=refresh)
+    featured_paths: list[dict[str, Any]] = []
+    seen_initiatives: set[str] = set()
+    for item in review_queue + pending_items:
+        if not isinstance(item, dict):
+            continue
+        initiative_id = str(item.get("id", "")).strip()
+        if not initiative_id or initiative_id in seen_initiatives:
+            continue
+        seen_initiatives.add(initiative_id)
+        featured_paths.append(
+            _initiative_operator_path(item, attention_items=attention_items, root=base_root, refresh=refresh)
+        )
+    featured_paths.sort(
+        key=lambda item: (
+            parse_timestamp(item.get("updated_at"))[0],
+            str(item.get("initiative_id", "")),
+        ),
+        reverse=True,
+    )
+    trust_posture = status.get("trust_posture", {}) if isinstance(status.get("trust_posture"), dict) else {}
+    trust_items = trust_posture.get("items", []) if isinstance(trust_posture.get("items"), list) else []
+    lock_hygiene = (
+        status.get("lock_worktree_hygiene", {})
+        if isinstance(status.get("lock_worktree_hygiene"), dict)
+        else {}
+    )
+    proposal_only = status.get("proposal_only", {}) if isinstance(status.get("proposal_only"), dict) else {}
+    conversations = status.get("conversations", {}) if isinstance(status.get("conversations"), dict) else {}
+    mazer_path = next(
+        (
+            item
+            for item in featured_paths
+            if str(item.get("initiative_id", "")).strip() == "initiative-mazer-d2-learning-scorer"
+        ),
+        None,
+    )
+    return {
+        "schema_version": COCKPIT_CONTRACT_VERSION,
+        "generated_at": _utc_now(),
+        "read_only": True,
+        "source_of_truth": {
+            "mode": "awareness_api_or_root_read_model",
+            "client_not_store": True,
+            "status_surface": "/atlas/status",
+            "cockpit_surface": "/atlas/cockpit",
+        },
+        "digests": status.get("digests"),
+        "overview": {
+            "active_conversation_count": conversations.get("active_count"),
+            "active_initiative_count": len(active_items),
+            "attention_item_count": status.get("attention_queue", {}).get("item_count")
+            if isinstance(status.get("attention_queue"), dict)
+            else None,
+            "review_queue_count": len(review_queue),
+            "pending_proposal_count": len(pending_proposals),
+            "proposal_only_count": proposal_only.get("item_count"),
+            "dirty_repo_count": lock_hygiene.get("dirty_repo_count"),
+            "lock_frozen": lock_hygiene.get("lock_frozen"),
+            "untrusted_visible_count": trust_posture.get("untrusted_item_count"),
+            "verta_visible_untrusted": any(
+                "verta" in str(item.get("archive_id", "")).lower()
+                and str(item.get("trust_class", "")).strip() == "untrusted"
+                for item in trust_items
+                if isinstance(item, dict)
+            ),
+        },
+        "conversation_state": {
+            "active_session": status.get("active_session"),
+            "conversations": conversations,
+        },
+        "active_initiatives": {
+            "item_count": len(active_items),
+            "items": active_items[:10],
+        },
+        "attention_queue": status.get("attention_queue"),
+        "review_queue": {
+            "item_count": len(review_queue),
+            "items": review_queue[:10],
+        },
+        "latest_governed_proposal": pending_proposals[0] if pending_proposals else None,
+        "pending_proposals": {
+            "item_count": len(pending_proposals),
+            "items": pending_proposals[:10],
+        },
+        "proposal_only_state": proposal_only,
+        "repo_inventory": status.get("repo_inventory"),
+        "lock_worktree_hygiene": lock_hygiene,
+        "trust_posture": trust_posture,
+        "featured_paths": featured_paths[:10],
+        "mazer_path": mazer_path,
         "world_model": status.get("world_model"),
     }
 

@@ -22,6 +22,7 @@ if str(ROOT) not in sys.path:
 
 from ops.atlas.awareness import (
     atlas_status,
+    cockpit_status,
     fetch,
     fetch_artifact,
     fetch_session,
@@ -38,6 +39,7 @@ CONTEXT_AUTOMATION_LEVEL = "context"
 ROUTE_MAX_AUTOMATION_LEVELS = {
     "/health": OBSERVE_AUTOMATION_LEVEL,
     "/atlas/status": OBSERVE_AUTOMATION_LEVEL,
+    "/atlas/cockpit": OBSERVE_AUTOMATION_LEVEL,
     "/atlas/voice": OBSERVE_AUTOMATION_LEVEL,
     "/atlas/inventory": OBSERVE_AUTOMATION_LEVEL,
     "/atlas/snapshot": OBSERVE_AUTOMATION_LEVEL,
@@ -408,6 +410,27 @@ class AwarenessHandler(BaseHTTPRequestHandler):
             if parsed.path == "/atlas/status":
                 payload = atlas_status(refresh=refresh)
                 etag = str(payload.get("snapshot", {}).get("content_digest") or "")
+                status = self._send_json(payload, request_id=request_id, etag=etag, extra_headers=automation_headers)
+                return
+
+            if parsed.path == "/atlas/cockpit":
+                payload = cockpit_status(refresh=refresh)
+                digests = payload.get("digests") if isinstance(payload.get("digests"), dict) else {}
+                lock_hygiene = (
+                    payload.get("lock_worktree_hygiene", {})
+                    if isinstance(payload.get("lock_worktree_hygiene"), dict)
+                    else {}
+                )
+                etag = "|".join(
+                    str(value or "")
+                    for value in [
+                        digests.get("world_model_digest"),
+                        digests.get("attention_digest"),
+                        digests.get("working_memory_digest"),
+                        digests.get("repo_inventory_digest"),
+                        lock_hygiene.get("generated_lock_digest"),
+                    ]
+                )
                 status = self._send_json(payload, request_id=request_id, etag=etag, extra_headers=automation_headers)
                 return
 

@@ -33,7 +33,7 @@ components:
     ref_type: "branch"
     ref: "main"
     commit: "23cb6677eb918922f2943d12632939a33e6f01f8"
-    dirty: false
+    dirty: true
     trust_class: "trusted"
     release_eligible: true
   lifeline:
@@ -54,8 +54,8 @@ components:
     remote: "https://github.com/fawxzzy/fawxzzy-mazer.git"
     ref_type: "branch"
     ref: "main"
-    commit: "a0277e79dcbace70969dd718cf45e82e16c807d2"
-    dirty: true
+    commit: "e8fee1a0ff4819815ee9fe92b7791b5b63588371"
+    dirty: false
     trust_class: "trusted"
     release_eligible: true
   nat1-games:
@@ -98,7 +98,7 @@ components:
     remote: "https://github.com/fawxzzy/ATLAS.git"
     ref_type: "branch"
     ref: "main"
-    commit: "c079b7e3e9f15a5b23503886b2f56bdfe4af7ae1"
+    commit: "2c6487413ebfab5e5061ee15169546407c789218"
     dirty: true
     trust_class: "trusted"
     release_eligible: false
@@ -126,4 +126,4 @@ excluded_surfaces:
     trust_class: "untrusted"
     release_eligible: false
     reason: "Token-bearing Verta checkout remains quarantined and untrusted until scrub and rotation are complete."
-lock_digest: "sha256:4675db1687012886666fa46b823f4e00b9a8ec8e1192abb3301ca89351b2926b"
+lock_digest: "sha256:d8157fb9a9931aa5e716ca35a6a6f6190a4bd5aa43fcda4fa0d9f16b46c9305d"

@@ -40,6 +40,7 @@ Read these files first:
 - `docs/ops/ATLAS-CODEX-CONTEXT-RUNBOOK.md`
 - `docs/ops/ATLAS-TOOL-REGISTRY-RUNBOOK.md`
 - `docs/ops/ATLAS-STATUS-RUNBOOK.md`
+- `docs/ops/ATLAS-COCKPIT-RUNBOOK.md`
 
 ## Current Posture
 
@@ -55,7 +56,7 @@ Current operating call:
 - grounded text conversation is ready for bounded daily operator use
 - voice companion is still a beta candidate pending one clean live certification pass
 - the blocking proof is operational trust, not missing backend architecture
-- the next build after that pass should be a thin cockpit over the Awareness API, not more backend plumbing
+- the next build after that pass is a thin read-only cockpit over the Awareness API, not more backend plumbing
 
 For ATLAS platform architecture doctrine, use `repos/fawxzzy-atlas/README.md` and the docs under `repos/fawxzzy-atlas/docs/` as the canonical source. Stack-root docs should stay stack- and boundary-oriented and should link back to Atlas instead of duplicating platform specs.
 

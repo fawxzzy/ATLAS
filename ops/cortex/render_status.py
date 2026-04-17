@@ -15,12 +15,18 @@ if str(ROOT) not in sys.path:
 from ops._atlas import atlas_relative, atlas_root, resolve_atlas_path
 from ops.atlas.backfill_legacy_runtime_artifacts import backfill_legacy_runtime_artifacts
 from ops.atlas.load_tool_registry import load_tool_registry_bundle
-from ops.cortex._artifacts import load_descriptors
+from ops.cortex._artifacts import load_descriptors, stable_json_digest
 from ops.cortex.index_working_memory import load_working_memory_catalog
 from ops.atlas.observations import execution_receipt_residue_records
-from ops.stack.export_repo_inventory import build_repo_inventory, summarize_repo_inventory
+from ops.stack.generate_lockfile import (
+    build_canonical_lockfile_artifacts,
+    default_lockfile_path,
+    describe_lock_payload_drift,
+    load_lockfile,
+)
+from ops.stack.export_repo_inventory import DEFAULT_JSON_OUTPUT, DEFAULT_MARKDOWN_OUTPUT
 
-STATUS_VERSION = "atlas.cortex.status.v2"
+STATUS_VERSION = "atlas.cortex.status.v3"
 ACTIVE_SESSION_STATES = {
     "created",
     "context_built",
@@ -827,6 +833,151 @@ def world_model_state() -> dict[str, Any]:
     return result
 
 
+def lock_worktree_hygiene(*, canonical_artifacts: dict[str, Any] | None = None) -> dict[str, Any]:
+    root = atlas_root()
+    try:
+        lockfile_path = default_lockfile_path(root=root)
+        canonical = canonical_artifacts or build_canonical_lockfile_artifacts(root=root)
+        generated_payload = canonical.get("payload", {}) if isinstance(canonical, dict) else {}
+        stack_root = canonical.get("stack_root", {}) if isinstance(canonical, dict) else {}
+        stored_payload = load_lockfile(lockfile_path) if lockfile_path.exists() else None
+        drift = (
+            describe_lock_payload_drift(stored_payload, generated_payload)
+            if isinstance(stored_payload, dict)
+            else {"components": {}, "excluded_surfaces": {}, "metadata_fields": [], "has_drift": True}
+        )
+        generated_components = (
+            generated_payload.get("components", {})
+            if isinstance(generated_payload.get("components"), dict)
+            else {}
+        )
+        dirty_repos = [
+            {
+                "logical_id": repo_id,
+                "path": component.get("path"),
+                "ref": component.get("ref"),
+                "dirty": component.get("dirty"),
+            }
+            for repo_id, component in sorted(generated_components.items())
+            if isinstance(component, dict) and bool(component.get("dirty"))
+        ]
+        component_drift = drift.get("components", {}) if isinstance(drift.get("components"), dict) else {}
+        excluded_surface_drift = (
+            drift.get("excluded_surfaces", {})
+            if isinstance(drift.get("excluded_surfaces"), dict)
+            else {}
+        )
+        lock_present = lockfile_path.exists()
+        lock_frozen = bool(lock_present and not drift.get("has_drift"))
+        return {
+            "status": "frozen" if lock_frozen else ("missing" if not lock_present else "drifted"),
+            "lock_frozen": lock_frozen,
+            "stack_lock_ref": atlas_relative(lockfile_path, root=root),
+            "stack_lock_present": lock_present,
+            "stack_lock_digest": stored_payload.get("lock_digest") if isinstance(stored_payload, dict) else None,
+            "generated_lock_digest": generated_payload.get("lock_digest")
+            if isinstance(generated_payload, dict)
+            else None,
+            "has_drift": bool(drift.get("has_drift")),
+            "drifted_component_count": len(component_drift),
+            "drifted_component_ids": sorted(component_drift),
+            "drifted_excluded_surface_count": len(excluded_surface_drift),
+            "drifted_excluded_surface_ids": sorted(excluded_surface_drift),
+            "metadata_drift_fields": drift.get("metadata_fields", [])
+            if isinstance(drift.get("metadata_fields"), list)
+            else [],
+            "dirty_repo_count": len(dirty_repos),
+            "dirty_repos": dirty_repos,
+            "stack_root": {
+                "repo_id": stack_root.get("repo_id") if isinstance(stack_root, dict) else None,
+                "dirty_actual": stack_root.get("dirty_actual") if isinstance(stack_root, dict) else None,
+                "dirty_effective": stack_root.get("dirty_effective") if isinstance(stack_root, dict) else None,
+                "self_refresh_only": stack_root.get("self_refresh_only") if isinstance(stack_root, dict) else None,
+                "modified_paths": stack_root.get("modified_paths", [])[:10]
+                if isinstance(stack_root, dict) and isinstance(stack_root.get("modified_paths"), list)
+                else [],
+            },
+        }
+    except Exception as exc:  # pragma: no cover - defensive summary path
+        return {
+            "status": "error",
+            "lock_frozen": False,
+            "has_drift": True,
+            "error": str(exc),
+            "stack_lock_ref": atlas_relative(default_lockfile_path(root=root), root=root),
+            "stack_lock_present": False,
+            "drifted_component_count": 0,
+            "drifted_component_ids": [],
+            "drifted_excluded_surface_count": 0,
+            "drifted_excluded_surface_ids": [],
+            "metadata_drift_fields": [],
+            "dirty_repo_count": 0,
+            "dirty_repos": [],
+            "stack_root": {
+                "repo_id": None,
+                "dirty_actual": None,
+                "dirty_effective": None,
+                "self_refresh_only": None,
+                "modified_paths": [],
+            },
+        }
+
+
+def repo_inventory_summary_from_lock(
+    *,
+    canonical_artifacts: dict[str, Any],
+    working_memory_items: list[dict[str, Any]],
+) -> dict[str, Any]:
+    generated_payload = (
+        canonical_artifacts.get("payload", {})
+        if isinstance(canonical_artifacts.get("payload"), dict)
+        else {}
+    )
+    components = generated_payload.get("components", {}) if isinstance(generated_payload.get("components"), dict) else {}
+    initiative_index: dict[str, list[str]] = {}
+    for item in working_memory_items:
+        if not isinstance(item, dict) or str(item.get("memory_kind", "")).strip() != "initiative":
+            continue
+        initiative_ref = f"initiative:{item.get('id')}"
+        for repo_ref in initiative_repo_refs(item):
+            initiative_index.setdefault(repo_ref, []).append(initiative_ref)
+    items = []
+    for repo_id, component in sorted(components.items()):
+        if not isinstance(component, dict):
+            continue
+        local_path = str(component.get("path") or "")
+        related_refs = sorted(set(initiative_index.get(local_path, [])))
+        items.append(
+            {
+                "logical_id": repo_id,
+                "local_path": local_path,
+                "branch": component.get("ref") if str(component.get("ref_type", "")).strip() == "branch" else None,
+                "dirty": component.get("dirty"),
+                "trust_class": component.get("trust_class"),
+                "release_eligible": component.get("release_eligible"),
+                "related_initiative_refs": related_refs,
+            }
+        )
+    summary = {
+        "schema_version": "atlas.stack.repo-inventory.summary.v1",
+        "published_refs": {
+            "json": str(DEFAULT_JSON_OUTPUT).replace("\\", "/"),
+            "markdown": str(DEFAULT_MARKDOWN_OUTPUT).replace("\\", "/"),
+        },
+        "item_count": len(items),
+        "dirty_item_count": sum(1 for item in items if item.get("dirty") is True),
+        "release_eligible_count": sum(1 for item in items if bool(item.get("release_eligible"))),
+        "repo_ids": [item.get("logical_id") for item in items],
+        "excluded_surface_count": len(
+            generated_payload.get("excluded_surfaces", {})
+            if isinstance(generated_payload.get("excluded_surfaces"), dict)
+            else {}
+        ),
+        "items": items,
+    }
+    return summary | {"content_digest": stable_json_digest(summary)}
+
+
 def _collect_strings(value: Any) -> list[str]:
     strings: list[str] = []
     if isinstance(value, str):
@@ -947,6 +1098,34 @@ def initiative_view(item: dict[str, Any]) -> dict[str, Any]:
         "follow_up": str(metadata.get("follow_up") or "").strip() or None,
         "waiting_on": waiting_on,
         "blessing_state": str(metadata.get("blessing_state") or "").strip() or None,
+    }
+
+
+def proposal_only_state(attention_queue_payload: dict[str, Any]) -> dict[str, Any]:
+    queue_items = (
+        attention_queue_payload.get("items", [])
+        if isinstance(attention_queue_payload.get("items"), list)
+        else []
+    )
+    items = []
+    for item in queue_items:
+        if not isinstance(item, dict) or str(item.get("kind", "")).strip() != "conversation_action_request":
+            continue
+        details = item.get("details", {}) if isinstance(item.get("details"), dict) else {}
+        items.append(
+            {
+                "summary": item.get("summary"),
+                "severity": item.get("severity"),
+                "source_ref": item.get("source_ref"),
+                "conversation_id": details.get("conversation_id"),
+                "turn_id": details.get("turn_id"),
+                "intent": details.get("intent"),
+            }
+        )
+    return {
+        "status": "pending" if items else "clear",
+        "item_count": len(items),
+        "items": items[:5],
     }
 
 
@@ -1180,7 +1359,8 @@ def render_status_payload(
     *,
     session_id: str | None = None,
 ) -> dict[str, Any]:
-    backfill_legacy_runtime_artifacts(root=atlas_root(), descriptor_root=descriptor_root)
+    if not descriptor_root.exists() or not any(descriptor_root.iterdir()):
+        backfill_legacy_runtime_artifacts(root=atlas_root(), descriptor_root=descriptor_root)
     descriptors = load_descriptors(descriptor_root)
     registry_state = load_registry_state()
     target_session = None
@@ -1205,7 +1385,12 @@ def render_status_payload(
     working_memory = working_memory_summary()
     working_memory_items = working_memory.pop("_items", [])
     conversations = conversation_summary(descriptors)
-    repo_inventory = summarize_repo_inventory(build_repo_inventory(root=atlas_root()))
+    canonical_lock_artifacts = build_canonical_lockfile_artifacts(root=atlas_root())
+    repo_inventory = repo_inventory_summary_from_lock(
+        canonical_artifacts=canonical_lock_artifacts,
+        working_memory_items=working_memory_items,
+    )
+    lock_hygiene = lock_worktree_hygiene(canonical_artifacts=canonical_lock_artifacts)
     initiative_slices = {
         "active_initiatives": working_memory.get("initiatives", {}).get("active_items", [])
         if isinstance(working_memory.get("initiatives"), dict)
@@ -1222,6 +1407,18 @@ def render_status_payload(
         "trust_posture": trust_posture,
         "repo_inventory": repo_inventory.get("items", []),
     }
+    attention_queue_payload = attention_queue(
+        descriptors=descriptors,
+        active_session=active_session,
+        blocked_workers_payload=blocked_workers_payload,
+        open_merge_requests_payload=open_merge_requests_payload,
+        closure_receipts_payload=closure_receipts_payload,
+        legacy_compatibility_payload=legacy_compatibility_payload,
+        trust_surfaces_payload=trust_surfaces_payload,
+        working_memory_items=working_memory_items,
+        registry_state=registry_state,
+    )
+    proposal_only = proposal_only_state(attention_queue_payload)
 
     return {
         "schema_version": STATUS_VERSION,
@@ -1243,17 +1440,9 @@ def render_status_payload(
         "initiatives": working_memory.get("initiatives"),
         "slices": initiative_slices,
         "conversations": conversations,
-        "attention_queue": attention_queue(
-            descriptors=descriptors,
-            active_session=active_session,
-            blocked_workers_payload=blocked_workers_payload,
-            open_merge_requests_payload=open_merge_requests_payload,
-            closure_receipts_payload=closure_receipts_payload,
-            legacy_compatibility_payload=legacy_compatibility_payload,
-            trust_surfaces_payload=trust_surfaces_payload,
-            working_memory_items=working_memory_items,
-            registry_state=registry_state,
-        ),
+        "attention_queue": attention_queue_payload,
+        "proposal_only": proposal_only,
+        "lock_worktree_hygiene": lock_hygiene,
         "world_model": world_model_state(),
     }
 

@@ -1,0 +1,109 @@
+# ATLAS Cockpit Runbook
+
+## Purpose
+
+`ops/atlas/cockpit.py` serves a thin read-only operator cockpit for the ATLAS root.
+
+It exists to present the current awareness slice cleanly, not to add a new state system.
+
+Boundary:
+
+- the cockpit is a client
+- the Awareness API and root read model remain the source of truth
+- no write, execute, resume, proposal, or approval controls are exposed
+- no local cache or private state is persisted by the cockpit
+
+## Sources Of Truth
+
+The cockpit reads from the existing stack surfaces only:
+
+- `ops/atlas/awareness.py`
+- `ops/atlas/serve_awareness.py`
+- `ops/cortex/render_status.py`
+- `runtime/state/atlas/world-model.*.latest.json`
+- `runtime/cortex/artifacts/**`
+- `stack.lock.yaml`
+
+Operational rule:
+
+- root selects context
+- child repos own truth
+- the cockpit only renders the current read model
+
+## What It Shows
+
+- active conversation and active session state
+- active initiatives
+- attention queue
+- repo work waiting on blessing review
+- latest governed proposal and proposal-only conversation state
+- repo inventory state
+- lock and worktree hygiene state
+- trust posture, including Verta as visible, untrusted, and metadata-only
+- focused operator paths, including the Mazer review path when present
+
+## Running
+
+Directly from the root read model:
+
+```powershell
+python ops/atlas/cockpit.py
+```
+
+Through the Awareness API:
+
+```powershell
+python ops/atlas/serve_awareness.py
+python ops/atlas/cockpit.py --awareness-base-url http://127.0.0.1:8765
+```
+
+With bearer auth:
+
+```powershell
+python ops/atlas/cockpit.py --awareness-base-url http://127.0.0.1:8765 --auth-token-file secrets/local/atlas-awareness.token
+```
+
+JSON-only verification:
+
+```powershell
+python ops/atlas/cockpit.py --dump-json
+```
+
+## Read-Only Boundary
+
+The cockpit deliberately omits:
+
+- execute buttons
+- resume buttons
+- proposal buttons
+- approval controls
+- local mutation or cache files
+
+If a future lane adds controls, they must call existing governed entrypoints exactly. This cockpit lane does not do that.
+
+## Example Views
+
+Mazer path:
+
+- initiative: `initiative-mazer-d2-learning-scorer`
+- open attention: fixed-blessed-id soak smoke plus manual blessing review
+- proposed session: `session-proposed-mazer-d2-fixed-blessed-id-soak`
+- blessing state: `pending_manual_review`
+
+Verta trust posture:
+
+- visible in trust posture
+- `trust_class: untrusted`
+- `read_mode: metadata_only`
+- not promoted
+
+## Verification
+
+Confirm all of the following:
+
+1. The cockpit answers what is active, what needs attention, and what repo work is waiting on blessing review.
+2. The latest governed proposal is visible and proposal-only conversation state is visible separately.
+3. The Mazer path is visible end to end from initiative to open attention to proposed soak session to `pending_manual_review`.
+4. Lock and worktree hygiene answer whether the lock is frozen and which repos are dirty or drifted.
+5. Verta appears as visible, untrusted, and metadata-only.
+6. `python ops/validation/validate_stack.py --ratchet` stays green.
