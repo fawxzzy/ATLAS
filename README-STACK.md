@@ -41,6 +41,8 @@ Read these files first:
 - `docs/ops/ATLAS-TOOL-REGISTRY-RUNBOOK.md`
 - `docs/ops/ATLAS-STATUS-RUNBOOK.md`
 - `docs/ops/ATLAS-COCKPIT-RUNBOOK.md`
+- `docs/ops/ATLAS-PLAYBOOK-CONVERGENCE.md`
+- `docs/ops/PLAYBOOK-ADOPTION-MATRIX.md`
 
 ## Current Posture
 
@@ -57,6 +59,11 @@ Current operating call:
 - voice companion is still a beta candidate pending one clean live certification pass
 - the blocking proof is operational trust, not missing backend architecture
 - the next build after that pass is a thin read-only cockpit over the Awareness API, not more backend plumbing
+
+Roadmap addition:
+
+- cross-repo Playbook convergence and durable conversation continuity are now tracked as an explicit stack program in `docs/ops/ATLAS-PLAYBOOK-CONVERGENCE.md`
+- that program complements the operator cockpit slice; it does not convert the root into an umbrella monorepo or replace repo-owned doctrine
 
 For ATLAS platform architecture doctrine, use `repos/fawxzzy-atlas/README.md` and the docs under `repos/fawxzzy-atlas/docs/` as the canonical source. Stack-root docs should stay stack- and boundary-oriented and should link back to Atlas instead of duplicating platform specs.
 

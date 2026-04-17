@@ -1,0 +1,59 @@
+{
+  "contract_version": "atlas.plan.v1",
+  "id": "wave-9b-playbook-convergence-and-continuity",
+  "title": "Wave 9B Playbook Convergence And Continuity",
+  "summary": "Add an explicit cross-repo Playbook convergence program and a durable conversation-continuity lane without collapsing the stack root into a monorepo or promoting raw transcripts into canonical memory.",
+  "status": "active",
+  "owner": "stack-root",
+  "created_at": "2026-04-17T00:00:00Z",
+  "updated_at": "2026-04-17T00:00:00Z",
+  "related_session_refs": [],
+  "related_artifact_refs": [],
+  "evidence_refs": [
+    "README-STACK.md",
+    "docs/architecture/ATLAS-CORTEX-PLAYBOOK-CODEX.md",
+    "docs/architecture/CODEX-HANDOFF-CONTRACT.md",
+    "docs/architecture/ATLAS-RETENTION-AND-MEMORY-POLICY.md",
+    "docs/architecture/PLAYBOOK-INGEST-PIPELINE.md",
+    "docs/ops/ATLAS-CONVERSATION-RUNBOOK.md",
+    "docs/ops/ATLAS-PLAYBOOK-CONVERGENCE.md",
+    "docs/ops/PLAYBOOK-ADOPTION-MATRIX.md",
+    "docs/knowledge/IMPORT-RUNBOOK.md",
+    "docs/memory/plans/wave-9-operator-productization-and-debt-burndown.json"
+  ],
+  "supersedes": [],
+  "superseded_by": [],
+  "metadata": {
+    "milestone": "wave-9b",
+    "phase": "playbook-convergence-and-continuity",
+    "tracks": [
+      "playbook-convergence",
+      "durable-context-continuity"
+    ],
+    "gates": [
+      "posture-lock",
+      "contract-extraction",
+      "continuity-lane",
+      "core-repo-rollout",
+      "application-rollout-and-reporting"
+    ],
+    "in_scope_repo_ids": [
+      "stack",
+      "atlas",
+      "playbook",
+      "lifeline",
+      "_stack",
+      "fitness",
+      "mazer",
+      "stream",
+      "nat1-games",
+      "playbook-demo"
+    ],
+    "frozen_rules": [
+      "atlas-root-is-coordination-only",
+      "repo-truth-stays-with-owner-repo",
+      "raw-transcripts-are-not-canonical-memory",
+      "voice-remains-deprioritized"
+    ]
+  }
+}
