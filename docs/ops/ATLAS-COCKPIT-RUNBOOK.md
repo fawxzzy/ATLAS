@@ -57,10 +57,16 @@ python ops/atlas/serve_awareness.py
 python ops/atlas/cockpit.py --awareness-base-url http://127.0.0.1:8765
 ```
 
-With bearer auth:
+With bearer auth for the upstream Awareness API:
 
 ```powershell
 python ops/atlas/cockpit.py --awareness-base-url http://127.0.0.1:8765 --auth-token-file secrets/local/atlas-awareness.token
+```
+
+Remote bind with cockpit auth enforced:
+
+```powershell
+python ops/atlas/cockpit.py --host 0.0.0.0 --port 8786 --server-auth-token-file secrets/local/atlas-cockpit.token
 ```
 
 JSON-only verification:
@@ -80,6 +86,12 @@ The cockpit deliberately omits:
 - local mutation or cache files
 
 If a future lane adds controls, they must call existing governed entrypoints exactly. This cockpit lane does not do that.
+
+Remote-bind rule:
+
+- loopback binds may run without cockpit auth for local operator use
+- non-loopback binds fail closed unless `--server-auth-token` or `--server-auth-token-file` is configured
+- when cockpit auth is configured, both `/` and `/api/cockpit` require a bearer token
 
 ## Example Views
 

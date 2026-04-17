@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import argparse
 from collections import defaultdict
-import hashlib
 import json
 import os
 import sys
@@ -31,6 +30,12 @@ from ops.atlas.awareness import (
     query_knowledge,
     search,
     voice_runtime,
+)
+from ops.atlas.http_boundary import (
+    authenticate_bearer,
+    enforce_remote_bind_policy,
+    is_loopback_host,
+    load_auth_tokens,
 )
 from ops.atlas.load_tool_registry import automation_level_allows, normalize_automation_level
 
@@ -70,60 +75,6 @@ def _first_int(query: dict[str, list[str]], key: str, default: int) -> int:
         return int(raw)
     except ValueError:
         return default
-
-
-def _token_fingerprint(token: str) -> str:
-    return hashlib.sha256(token.encode("utf-8")).hexdigest()[:16]
-
-
-def _load_optional_token(
-    *,
-    direct_value: str | None,
-    file_value: str | None,
-    env_key: str,
-    env_file_key: str,
-) -> str | None:
-    if isinstance(direct_value, str) and direct_value.strip():
-        return direct_value.strip()
-    env_token = os.environ.get(env_key, "").strip()
-    if env_token:
-        return env_token
-    token_file = file_value or os.environ.get(env_file_key)
-    if token_file:
-        token_path = Path(str(token_file)).expanduser().resolve()
-        token = token_path.read_text(encoding="utf-8").strip()
-        if token:
-            return token
-    return None
-
-
-def _load_auth_tokens(args: argparse.Namespace) -> list[str]:
-    values = [
-        _load_optional_token(
-            direct_value=args.auth_token,
-            file_value=args.auth_token_file,
-            env_key="ATLAS_AWARENESS_TOKEN",
-            env_file_key="ATLAS_AWARENESS_TOKEN_FILE",
-        ),
-        _load_optional_token(
-            direct_value=args.auth_token_previous,
-            file_value=args.auth_token_previous_file,
-            env_key="ATLAS_AWARENESS_PREVIOUS_TOKEN",
-            env_file_key="ATLAS_AWARENESS_PREVIOUS_TOKEN_FILE",
-        ),
-    ]
-    unique: list[str] = []
-    seen: set[str] = set()
-    for value in values:
-        if not isinstance(value, str) or not value.strip() or value in seen:
-            continue
-        seen.add(value)
-        unique.append(value)
-    return unique
-
-
-def _is_loopback_host(host: str) -> bool:
-    return host in {"127.0.0.1", "localhost", "::1"}
 
 
 def _query_shape(query: dict[str, list[str]]) -> dict[str, list[int]]:
@@ -194,23 +145,8 @@ class AwarenessHandler(BaseHTTPRequestHandler):
     def _request_id(self) -> str:
         return uuid.uuid4().hex
 
-    def _client_token(self) -> str | None:
-        authorization = self.headers.get("Authorization", "").strip()
-        if authorization.startswith("Bearer "):
-            token = authorization.removeprefix("Bearer ").strip()
-            return token or None
-        return None
-
     def _authenticate(self) -> tuple[bool, str, str | None]:
-        auth_tokens = self._config().auth_tokens
-        if not auth_tokens:
-            return True, "not_required", None
-        presented = self._client_token()
-        if not presented:
-            return False, "missing", None
-        if presented not in auth_tokens:
-            return False, "invalid", _token_fingerprint(presented)
-        return True, "ok", _token_fingerprint(presented)
+        return authenticate_bearer(self.headers, self._config().auth_tokens)
 
     def _requested_automation_level(self, query: dict[str, list[str]]) -> str:
         raw_value = _first(query, "automation_level") or self.headers.get("X-ATLAS-Automation-Level")
@@ -604,12 +540,30 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
-    auth_tokens = _load_auth_tokens(args)
-    deployment_profile = args.deployment_profile or ("local-only" if _is_loopback_host(args.host) else "hosted")
-    if not auth_tokens and not args.allow_unauthenticated and not _is_loopback_host(args.host):
-        parser.error(
-            "Remote ATLAS Awareness API binds require --auth-token or --auth-token-file unless --allow-unauthenticated is set."
-        )
+    auth_tokens = load_auth_tokens(
+        specs=[
+            (
+                args.auth_token,
+                args.auth_token_file,
+                "ATLAS_AWARENESS_TOKEN",
+                "ATLAS_AWARENESS_TOKEN_FILE",
+            ),
+            (
+                args.auth_token_previous,
+                args.auth_token_previous_file,
+                "ATLAS_AWARENESS_PREVIOUS_TOKEN",
+                "ATLAS_AWARENESS_PREVIOUS_TOKEN_FILE",
+            ),
+        ]
+    )
+    deployment_profile = args.deployment_profile or ("local-only" if is_loopback_host(args.host) else "hosted")
+    enforce_remote_bind_policy(
+        parser=parser,
+        host=args.host,
+        auth_tokens=auth_tokens,
+        allow_unauthenticated=args.allow_unauthenticated,
+        error_message="Remote ATLAS Awareness API binds require --auth-token or --auth-token-file unless --allow-unauthenticated is set.",
+    )
 
     request_log_dir = Path(args.request_log_dir).resolve()
     _prune_old_logs(request_log_dir, retention_days=args.request_log_retention_days)

@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 from html import escape
 import json
+import os
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -17,16 +18,14 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from ops.atlas.awareness import cockpit_status
+from ops.atlas.http_boundary import (
+    authenticate_bearer,
+    enforce_remote_bind_policy,
+    load_auth_tokens,
+    load_optional_token,
+)
 
 DEFAULT_REFRESH_SECONDS = 60
-
-
-def _load_optional_token(*, direct_value: str | None, file_value: str | None) -> str | None:
-    if isinstance(direct_value, str) and direct_value.strip():
-        return direct_value.strip()
-    if isinstance(file_value, str) and file_value.strip():
-        return Path(file_value).expanduser().resolve().read_text(encoding="utf-8").strip() or None
-    return None
 
 
 def _normalize_awareness_endpoint(value: str) -> str:
@@ -52,21 +51,58 @@ def _fetch_remote_cockpit(endpoint: str, *, auth_token: str | None, refresh: boo
     return payload
 
 
-def _tone(value: Any) -> str:
-    text = str(value or "").lower()
-    if text in {"frozen", "clear", "active", "pending_manual_review", "restricted", "true"}:
+def _state_tone(value: Any) -> str:
+    if value is None or value == "" or value == []:
+        return "neutral"
+    text = str(value).strip().lower()
+    if text in {"frozen", "clear", "active", "pending_manual_review", "true"}:
         return "ok"
-    if text in {"pending", "medium", "adjacent", "drifted"}:
+    if text in {"pending", "medium", "adjacent", "drifted", "restricted", "metadata_only"}:
         return "warn"
     if text in {"error", "failed", "critical", "high", "untrusted", "missing", "false"}:
         return "danger"
     return "neutral"
 
 
-def _badge(label: str, value: Any) -> str:
+def _normalized_bool(value: Any) -> bool | None:
+    if isinstance(value, bool):
+        return value
+    text = str(value).strip().lower()
+    if text in {"true", "1", "yes"}:
+        return True
+    if text in {"false", "0", "no"}:
+        return False
+    return None
+
+
+def _bool_tone(value: Any, *, truthy: str, falsy: str, unknown: str = "neutral") -> str:
+    normalized = _normalized_bool(value)
+    if normalized is None:
+        return unknown
+    return truthy if normalized else falsy
+
+
+def _count_tone(value: Any, *, zero: str, nonzero: str, unknown: str = "neutral") -> str:
+    if value is None or value == "":
+        return unknown
+    try:
+        count = int(value)
+    except (TypeError, ValueError):
+        return _state_tone(value)
+    return zero if count == 0 else nonzero
+
+
+def _badge(label: str, value: Any, *, tone: str | None = None) -> str:
     if value is None or value == "" or value == []:
         return ""
-    return f'<span class="badge {_tone(value)}">{escape(label)}: {escape(str(value))}</span>'
+    return f'<span class="badge {tone or _state_tone(value)}">{escape(label)}: {escape(str(value))}</span>'
+
+
+def _metric(label: str, value: Any, *, tone: str | None = None) -> str:
+    return (
+        f"<div class='metric'><div class='label'>{escape(label)}</div>"
+        f"<div class='value {tone or _state_tone(value)}'>{escape(str(value))}</div></div>"
+    )
 
 
 def _pairs(rows: list[tuple[str, Any]]) -> str:
@@ -115,16 +151,39 @@ def _render_html(payload: dict[str, Any], *, refresh_seconds: int) -> str:
     featured_paths = payload.get("featured_paths", []) if isinstance(payload.get("featured_paths"), list) else []
 
     metrics = "".join(
-        f"<div class='metric'><div class='label'>{escape(label)}</div><div class='value {_tone(value)}'>{escape(str(value))}</div></div>"
-        for label, value in [
-            ("Conversations", overview.get("active_conversation_count", "—")),
-            ("Initiatives", overview.get("active_initiative_count", "—")),
-            ("Attention", overview.get("attention_item_count", "—")),
-            ("Review Queue", overview.get("review_queue_count", "—")),
-            ("Pending Proposals", overview.get("pending_proposal_count", "—")),
-            ("Lock Frozen", overview.get("lock_frozen", "—")),
-            ("Dirty Repos", overview.get("dirty_repo_count", "—")),
-            ("Verta Visible", overview.get("verta_visible_untrusted", "—")),
+        [
+            _metric("Conversations", overview.get("active_conversation_count", "—")),
+            _metric("Initiatives", overview.get("active_initiative_count", "—")),
+            _metric(
+                "Attention",
+                overview.get("attention_item_count", "—"),
+                tone=_count_tone(overview.get("attention_item_count"), zero="ok", nonzero="warn"),
+            ),
+            _metric(
+                "Review Queue",
+                overview.get("review_queue_count", "—"),
+                tone=_count_tone(overview.get("review_queue_count"), zero="ok", nonzero="warn"),
+            ),
+            _metric(
+                "Pending Proposals",
+                overview.get("pending_proposal_count", "—"),
+                tone=_count_tone(overview.get("pending_proposal_count"), zero="ok", nonzero="warn"),
+            ),
+            _metric(
+                "Lock Frozen",
+                overview.get("lock_frozen", "—"),
+                tone=_bool_tone(overview.get("lock_frozen"), truthy="ok", falsy="danger"),
+            ),
+            _metric(
+                "Dirty Repos",
+                overview.get("dirty_repo_count", "—"),
+                tone=_count_tone(overview.get("dirty_repo_count"), zero="ok", nonzero="danger"),
+            ),
+            _metric(
+                "Verta Visible",
+                overview.get("verta_visible_untrusted", "—"),
+                tone=_bool_tone(overview.get("verta_visible_untrusted"), truthy="warn", falsy="danger"),
+            ),
         ]
     )
 
@@ -155,7 +214,11 @@ def _render_html(payload: dict[str, Any], *, refresh_seconds: int) -> str:
             badges=[
                 _badge("status", item.get("status")),
                 _badge("mode", item.get("mode")),
-                _badge("turns", item.get("turn_count")),
+                _badge(
+                    "turns",
+                    item.get("turn_count"),
+                    tone=_count_tone(item.get("turn_count"), zero="warn", nonzero="ok"),
+                ),
             ],
             body=_pairs(
                 [
@@ -286,7 +349,11 @@ def _render_html(payload: dict[str, Any], *, refresh_seconds: int) -> str:
     repo_items = [
         _item(
             item.get("logical_id") or item.get("local_path") or "repo",
-            badges=[_badge("branch", item.get("branch")), _badge("dirty", item.get("dirty")), _badge("trust", item.get("trust_class"))],
+            badges=[
+                _badge("branch", item.get("branch")),
+                _badge("dirty", item.get("dirty"), tone=_bool_tone(item.get("dirty"), truthy="danger", falsy="ok")),
+                _badge("trust", item.get("trust_class")),
+            ],
             body=_pairs(
                 [
                     ("path", item.get("local_path")),
@@ -302,7 +369,10 @@ def _render_html(payload: dict[str, Any], *, refresh_seconds: int) -> str:
     dirty_repo_items = [
         _item(
             item.get("logical_id") or item.get("path") or "dirty-repo",
-            badges=[_badge("dirty", item.get("dirty")), _badge("ref", item.get("ref"))],
+            badges=[
+                _badge("dirty", item.get("dirty"), tone=_bool_tone(item.get("dirty"), truthy="danger", falsy="ok")),
+                _badge("ref", item.get("ref")),
+            ],
             body=_pairs([("path", item.get("path"))]),
         )
         for item in (lock_hygiene.get("dirty_repos", []) if isinstance(lock_hygiene.get("dirty_repos"), list) else [])
@@ -360,21 +430,21 @@ def _render_html(payload: dict[str, Any], *, refresh_seconds: int) -> str:
     {_card("Operator Paths", _stack(path_items, "No focused operator paths are pending."), "span-6")}
     {_card("Repo Inventory State", "<div class='metrics'>" + "".join([
       f"<div class='metric'><div class='label'>Repos</div><div class='value'>{escape(str(repo_inventory.get('item_count', '—')))}</div></div>",
-      f"<div class='metric'><div class='label'>Dirty</div><div class='value {_tone(repo_inventory.get('dirty_item_count'))}'>{escape(str(repo_inventory.get('dirty_item_count', '—')))}</div></div>",
+      f"<div class='metric'><div class='label'>Dirty</div><div class='value {_count_tone(repo_inventory.get('dirty_item_count'), zero='ok', nonzero='danger')}'>{escape(str(repo_inventory.get('dirty_item_count', '—')))}</div></div>",
       f"<div class='metric'><div class='label'>Release</div><div class='value'>{escape(str(repo_inventory.get('release_eligible_count', '—')))}</div></div>",
       f"<div class='metric'><div class='label'>Excluded</div><div class='value'>{escape(str(repo_inventory.get('excluded_surface_count', '—')))}</div></div>",
     ]) + "</div>" + _stack(repo_items, "Repo inventory is empty."), "span-6")}
     {_card("Lock And Worktree Hygiene", "<div class='metrics'>" + "".join([
-      f"<div class='metric'><div class='label'>Lock</div><div class='value {_tone(lock_hygiene.get('status'))}'>{escape(str(lock_hygiene.get('status', '—')))}</div></div>",
-      f"<div class='metric'><div class='label'>Dirty Repos</div><div class='value {_tone(lock_hygiene.get('dirty_repo_count'))}'>{escape(str(lock_hygiene.get('dirty_repo_count', '—')))}</div></div>",
-      f"<div class='metric'><div class='label'>Component Drift</div><div class='value {_tone(lock_hygiene.get('drifted_component_count'))}'>{escape(str(lock_hygiene.get('drifted_component_count', '—')))}</div></div>",
-      f"<div class='metric'><div class='label'>Surface Drift</div><div class='value {_tone(lock_hygiene.get('drifted_excluded_surface_count'))}'>{escape(str(lock_hygiene.get('drifted_excluded_surface_count', '—')))}</div></div>",
-    ]) + "</div>" + _item("Current lock posture", badges=[_badge("frozen", lock_hygiene.get("lock_frozen")), _badge("root_dirty", lock_hygiene.get("stack_root", {}).get("dirty_effective") if isinstance(lock_hygiene.get("stack_root"), dict) else None), _badge("self_refresh_only", lock_hygiene.get("stack_root", {}).get("self_refresh_only") if isinstance(lock_hygiene.get("stack_root"), dict) else None)], body=_pairs([("stack_lock_ref", lock_hygiene.get("stack_lock_ref")), ("stack_lock_digest", lock_hygiene.get("stack_lock_digest")), ("generated_lock_digest", lock_hygiene.get("generated_lock_digest")), ("drifted_components", lock_hygiene.get("drifted_component_ids", [])), ("drifted_surfaces", lock_hygiene.get("drifted_excluded_surface_ids", [])), ("metadata_drift", lock_hygiene.get("metadata_drift_fields", [])), ("modified_paths", lock_hygiene.get("stack_root", {}).get("modified_paths", []) if isinstance(lock_hygiene.get("stack_root"), dict) else [])])) + _stack(dirty_repo_items, "No dirty repos are currently pinned by the generated lock view."), "span-6")}
+      f"<div class='metric'><div class='label'>Lock</div><div class='value {_state_tone(lock_hygiene.get('status'))}'>{escape(str(lock_hygiene.get('status', '—')))}</div></div>",
+      f"<div class='metric'><div class='label'>Dirty Repos</div><div class='value {_count_tone(lock_hygiene.get('dirty_repo_count'), zero='ok', nonzero='danger')}'>{escape(str(lock_hygiene.get('dirty_repo_count', '—')))}</div></div>",
+      f"<div class='metric'><div class='label'>Component Drift</div><div class='value {_count_tone(lock_hygiene.get('drifted_component_count'), zero='ok', nonzero='warn')}'>{escape(str(lock_hygiene.get('drifted_component_count', '—')))}</div></div>",
+      f"<div class='metric'><div class='label'>Surface Drift</div><div class='value {_count_tone(lock_hygiene.get('drifted_excluded_surface_count'), zero='ok', nonzero='warn')}'>{escape(str(lock_hygiene.get('drifted_excluded_surface_count', '—')))}</div></div>",
+    ]) + "</div>" + _item("Current lock posture", badges=[_badge("frozen", lock_hygiene.get("lock_frozen"), tone=_bool_tone(lock_hygiene.get("lock_frozen"), truthy="ok", falsy="danger")), _badge("root_dirty", lock_hygiene.get("stack_root", {}).get("dirty_effective") if isinstance(lock_hygiene.get("stack_root"), dict) else None, tone=_bool_tone(lock_hygiene.get("stack_root", {}).get("dirty_effective") if isinstance(lock_hygiene.get("stack_root"), dict) else None, truthy="danger", falsy="ok")), _badge("self_refresh_only", lock_hygiene.get("stack_root", {}).get("self_refresh_only") if isinstance(lock_hygiene.get("stack_root"), dict) else None, tone=_bool_tone(lock_hygiene.get("stack_root", {}).get("self_refresh_only") if isinstance(lock_hygiene.get("stack_root"), dict) else None, truthy="warn", falsy="ok"))], body=_pairs([("stack_lock_ref", lock_hygiene.get("stack_lock_ref")), ("stack_lock_digest", lock_hygiene.get("stack_lock_digest")), ("generated_lock_digest", lock_hygiene.get("generated_lock_digest")), ("drifted_components", lock_hygiene.get("drifted_component_ids", [])), ("drifted_surfaces", lock_hygiene.get("drifted_excluded_surface_ids", [])), ("metadata_drift", lock_hygiene.get("metadata_drift_fields", [])), ("modified_paths", lock_hygiene.get("stack_root", {}).get("modified_paths", []) if isinstance(lock_hygiene.get("stack_root"), dict) else [])])) + _stack(dirty_repo_items, "No dirty repos are currently pinned by the generated lock view."), "span-6")}
     {_card("Trust Posture", "<div class='metrics'>" + "".join([
-      f"<div class='metric'><div class='label'>Status</div><div class='value {_tone(trust.get('status'))}'>{escape(str(trust.get('status', '—')))}</div></div>",
+      f"<div class='metric'><div class='label'>Status</div><div class='value {_state_tone(trust.get('status'))}'>{escape(str(trust.get('status', '—')))}</div></div>",
       f"<div class='metric'><div class='label'>Visible</div><div class='value'>{escape(str(trust.get('item_count', '—')))}</div></div>",
-      f"<div class='metric'><div class='label'>Untrusted</div><div class='value {_tone(trust.get('untrusted_item_count'))}'>{escape(str(trust.get('untrusted_item_count', '—')))}</div></div>",
-      f"<div class='metric'><div class='label'>Metadata Only</div><div class='value {_tone(trust.get('metadata_only_item_count'))}'>{escape(str(trust.get('metadata_only_item_count', '—')))}</div></div>",
+      f"<div class='metric'><div class='label'>Untrusted</div><div class='value {_count_tone(trust.get('untrusted_item_count'), zero='ok', nonzero='danger')}'>{escape(str(trust.get('untrusted_item_count', '—')))}</div></div>",
+      f"<div class='metric'><div class='label'>Metadata Only</div><div class='value {_count_tone(trust.get('metadata_only_item_count'), zero='ok', nonzero='warn')}'>{escape(str(trust.get('metadata_only_item_count', '—')))}</div></div>",
     ]) + "</div>" + _stack(trust_items, "No trust posture items are published."))}
   </main>
 </body>
@@ -385,6 +455,7 @@ class CockpitServer(ThreadingHTTPServer):
     awareness_endpoint: str | None
     auth_token: str | None
     refresh_seconds: int
+    server_auth_tokens: list[str]
 
 
 class CockpitHandler(BaseHTTPRequestHandler):
@@ -399,12 +470,24 @@ class CockpitHandler(BaseHTTPRequestHandler):
             return _fetch_remote_cockpit(config.awareness_endpoint, auth_token=config.auth_token, refresh=refresh)
         return cockpit_status(refresh=refresh)
 
-    def _send_json(self, payload: dict[str, Any], *, status: int = HTTPStatus.OK) -> None:
+    def _authenticate(self) -> tuple[bool, str, str | None]:
+        return authenticate_bearer(self.headers, self._config().server_auth_tokens)
+
+    def _send_json(
+        self,
+        payload: dict[str, Any],
+        *,
+        status: int = HTTPStatus.OK,
+        extra_headers: dict[str, str] | None = None,
+    ) -> None:
         encoded = json.dumps(payload, indent=2).encode("utf-8")
         self.send_response(status)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(encoded)))
         self.send_header("Cache-Control", "private, no-store")
+        if extra_headers:
+            for key, value in extra_headers.items():
+                self.send_header(key, value)
         self.end_headers()
         self.wfile.write(encoded)
 
@@ -421,6 +504,19 @@ class CockpitHandler(BaseHTTPRequestHandler):
         parsed = urlparse(self.path)
         refresh = parse_qs(parsed.query, keep_blank_values=False).get("refresh", ["false"])[0].strip().lower() == "true"
         try:
+            if parsed.path in {"/", "/api/cockpit"}:
+                authenticated, _, _ = self._authenticate()
+                if not authenticated:
+                    self._send_json(
+                        {
+                            "ok": False,
+                            "error": "unauthorized",
+                            "message": "A valid bearer token is required for the ATLAS cockpit.",
+                        },
+                        status=HTTPStatus.UNAUTHORIZED,
+                        extra_headers={"WWW-Authenticate": 'Bearer realm="atlas-cockpit"'},
+                    )
+                    return
             if parsed.path == "/":
                 self._send_html(_render_html(self._payload(refresh=refresh), refresh_seconds=self._config().refresh_seconds))
                 return
@@ -428,7 +524,14 @@ class CockpitHandler(BaseHTTPRequestHandler):
                 self._send_json(self._payload(refresh=refresh))
                 return
             if parsed.path == "/health":
-                self._send_json({"ok": True, "service": "atlas-cockpit", "read_only": True})
+                self._send_json(
+                    {
+                        "ok": True,
+                        "service": "atlas-cockpit",
+                        "read_only": True,
+                        "auth_required": bool(self._config().server_auth_tokens),
+                    }
+                )
                 return
             self._send_json({"ok": False, "error": "not_found", "path": parsed.path}, status=HTTPStatus.NOT_FOUND)
         except Exception as exc:  # pragma: no cover - defensive path
@@ -440,28 +543,63 @@ class CockpitHandler(BaseHTTPRequestHandler):
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Serve the ATLAS read-only operator cockpit.")
-    parser.add_argument("--host", default="127.0.0.1")
-    parser.add_argument("--port", type=int, default=8786)
+    parser.add_argument("--host", default=os.environ.get("ATLAS_COCKPIT_HOST", "127.0.0.1"))
+    parser.add_argument("--port", type=int, default=int(os.environ.get("ATLAS_COCKPIT_PORT", "8786")))
     parser.add_argument("--awareness-base-url")
-    parser.add_argument("--auth-token")
-    parser.add_argument("--auth-token-file")
+    parser.add_argument("--awareness-auth-token", "--auth-token", dest="awareness_auth_token")
+    parser.add_argument("--awareness-auth-token-file", "--auth-token-file", dest="awareness_auth_token_file")
+    parser.add_argument("--server-auth-token")
+    parser.add_argument("--server-auth-token-file")
+    parser.add_argument("--server-auth-token-previous")
+    parser.add_argument("--server-auth-token-previous-file")
+    parser.add_argument("--allow-unauthenticated", action="store_true")
     parser.add_argument("--refresh-seconds", type=int, default=DEFAULT_REFRESH_SECONDS)
     parser.add_argument("--dump-json", action="store_true")
     args = parser.parse_args(argv)
 
     awareness_endpoint = _normalize_awareness_endpoint(args.awareness_base_url) if args.awareness_base_url else None
-    auth_token = _load_optional_token(direct_value=args.auth_token, file_value=args.auth_token_file)
+    auth_token = load_optional_token(
+        direct_value=args.awareness_auth_token,
+        file_value=args.awareness_auth_token_file,
+        env_key="ATLAS_AWARENESS_TOKEN",
+        env_file_key="ATLAS_AWARENESS_TOKEN_FILE",
+    )
+    server_auth_tokens = load_auth_tokens(
+        specs=[
+            (
+                args.server_auth_token,
+                args.server_auth_token_file,
+                "ATLAS_COCKPIT_TOKEN",
+                "ATLAS_COCKPIT_TOKEN_FILE",
+            ),
+            (
+                args.server_auth_token_previous,
+                args.server_auth_token_previous_file,
+                "ATLAS_COCKPIT_PREVIOUS_TOKEN",
+                "ATLAS_COCKPIT_PREVIOUS_TOKEN_FILE",
+            ),
+        ]
+    )
 
     if args.dump_json:
         payload = _fetch_remote_cockpit(awareness_endpoint, auth_token=auth_token, refresh=False) if awareness_endpoint else cockpit_status(refresh=False)
         print(json.dumps(payload, indent=2))
         return 0
 
+    enforce_remote_bind_policy(
+        parser=parser,
+        host=args.host,
+        auth_tokens=server_auth_tokens,
+        allow_unauthenticated=args.allow_unauthenticated,
+        error_message="Remote ATLAS cockpit binds require --server-auth-token or --server-auth-token-file unless --allow-unauthenticated is set.",
+    )
+
     server = CockpitServer((args.host, args.port), CockpitHandler)
     server.awareness_endpoint = awareness_endpoint
     server.auth_token = auth_token
     server.refresh_seconds = max(args.refresh_seconds, 5)
-    print(json.dumps({"service": "atlas-cockpit", "host": args.host, "port": args.port, "read_only": True, "awareness_endpoint": awareness_endpoint, "refresh_seconds": server.refresh_seconds}, indent=2))
+    server.server_auth_tokens = server_auth_tokens
+    print(json.dumps({"service": "atlas-cockpit", "host": args.host, "port": args.port, "read_only": True, "auth_required": bool(server_auth_tokens), "awareness_endpoint": awareness_endpoint, "refresh_seconds": server.refresh_seconds}, indent=2))
     try:
         server.serve_forever()
     except KeyboardInterrupt:
