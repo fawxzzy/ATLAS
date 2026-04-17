@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-04-17T00:00:00Z",
-  "updated_at": "2026-04-17T00:00:00Z",
+  "updated_at": "2026-04-17T12:00:00Z",
   "related_plan_refs": [
     "docs/memory/plans/wave-9-operator-productization-and-debt-burndown.json",
     "docs/memory/plans/wave-9b-playbook-convergence-and-continuity.json"
@@ -24,6 +24,9 @@
     "docs/architecture/ATLAS-RETENTION-AND-MEMORY-POLICY.md",
     "docs/architecture/PLAYBOOK-INGEST-PIPELINE.md",
     "docs/ops/ATLAS-CONVERSATION-RUNBOOK.md",
+    "docs/ops/ATLAS-CONTINUITY-HARVEST-BACKLOG.md",
+    "docs/ops/ATLAS-CONTINUITY-LANE.md",
+    "docs/ops/ATLAS-NEXT-BUILD-QUEUE.md",
     "docs/ops/ATLAS-PLAYBOOK-CONVERGENCE.md",
     "docs/ops/PLAYBOOK-ADOPTION-MATRIX.md",
     "docs/knowledge/IMPORT-RUNBOOK.md",
@@ -41,7 +44,7 @@
       "playbook-convergence",
       "durable-context-continuity"
     ],
-    "current_gate": "posture-lock",
+    "current_gate": "contract-extraction",
     "priority_repos": [
       "playbook",
       "atlas",

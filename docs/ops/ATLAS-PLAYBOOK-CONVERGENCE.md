@@ -15,6 +15,8 @@ This roadmap is grounded in current stack doctrine and preserved artifacts:
 - `docs/ops/ATLAS-CONVERSATION-RUNBOOK.md` already preserves grounded turn artifacts without treating raw transcript as durable truth.
 - `docs/architecture/PLAYBOOK-INGEST-PIPELINE.md` and `docs/knowledge/IMPORT-RUNBOOK.md` already define import, evaluation, normalization, catalog, and promotion lanes.
 - `docs/memory/plans/wave-9-operator-productization-and-debt-burndown.json` captures the current operator-cockpit wave and remains active.
+- `docs/ops/ATLAS-CONTINUITY-LANE.md` defines the stack-owned continuity lane and promotion routing on top of the existing handoff and memory surfaces.
+- `docs/ops/ATLAS-NEXT-BUILD-QUEUE.md` grounds the next PR slices against the repos and git remotes actually visible in this workspace.
 
 ## Program Intent
 
@@ -57,7 +59,7 @@ No new canonical path class is introduced by this roadmap.
 | --- | --- | --- | --- |
 | `G0 posture-lock` | Turn the reconstructed strategy into explicit stack doctrine without breaking the root boundary. | Scope, non-goals, evidence refs, and an initial adoption matrix exist in root-owned docs. | `docs/ops/ATLAS-PLAYBOOK-CONVERGENCE.md`, `docs/ops/PLAYBOOK-ADOPTION-MATRIX.md`, related plan and initiative memory artifacts |
 | `G1 contract-extraction` | Export the canonical Playbook principles, patterns, and verification expectations into explicit contracts. | Playbook publishes one human-readable spec and one machine-readable contract that root tooling can reference by version. | Playbook repo spec, Playbook contract artifact, root references to the contract |
-| `G2 continuity-lane` | Make preserved conversations and handoffs queryable without promoting transcript residue into doctrine. | Structured handoffs are required for serious sessions, prior archives have an import path, and promotion from handoff or archive into memory/knowledge is documented and testable. | handoff schema and runbook updates, continuity promotion flow, import/query references |
+| `G2 continuity-lane` | Make preserved conversations and handoffs queryable without promoting transcript residue into doctrine. | Structured handoffs are required for serious sessions, prior archives have an import path, and promotion from handoff or archive into memory/knowledge is documented and testable. | `schemas/atlas.continuity.handoff.v1.json`, continuity runbook updates, continuity promotion flow, import/query references |
 | `G3 core-repo-rollout` | Align the stack control surfaces and the core operator repos to the Playbook contract. | `stack`, `atlas`, `playbook`, `lifeline`, and `_stack` each have an explicit adoption state, a repo-local slice, and a verification surface. | repo-local PRs, updated verify hooks or docs, adoption receipts |
 | `G4 application-rollout-and-reporting` | Extend adoption status into the application repos and publish drift as a stack-visible report. | Every in-scope application repo is marked `adopted`, `partial`, `missing`, or `n/a` with an evidence ref, and stack reporting exposes both convergence and continuity health. | application repo PRs, stack report surface, validation or cockpit summary |
 
@@ -100,6 +102,7 @@ Acceptance criteria:
 Primary slices:
 
 - stack root PR: standardize a structured conversation-handoff authoring flow on top of the existing handoff contract
+- stack root PR: validate serious handoffs against `schemas/atlas.continuity.handoff.v1.json`
 - stack root PR: document promotion from handoff or imported archive into memory and knowledge lanes
 - Atlas repo PR: update context-pack selection or query surfaces so handoff and contract refs are retrievable by intent
 
