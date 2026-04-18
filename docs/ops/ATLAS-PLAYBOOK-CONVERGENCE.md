@@ -49,11 +49,19 @@ The current landed state from this workspace is:
 - `fitness` is `verified` for a bounded `verification_scope=targeted`
 - `mazer` is `verified` for a bounded `verification_scope=targeted`
 
-The active next move is therefore not more root product plumbing. It is selective widening only where the next operator constraint actually depends on another repo-local adoption or verification slice.
+The active next move is therefore not more root product plumbing. It is stack-wide source-verified synergy discovery before any shared implementation lane, with Atlas/Fitness as tranche 1 rather than the whole frontier.
 
-## Deferred Cross-App Synergy Lane
+## Next Cross-App Synergy Discovery Lane
 
-Cross-app synergy between Atlas and Fitness now has an explicit deferred lane. It is informed by reviewed strategy material, but it does not change the live status board and it does not outrank the current Mazer verification frontier.
+Cross-app synergy is now the next active widening lane at the stack level, not just a two-repo program. The reviewed PDF stayed out of live posture while it lacked direct repo, Drive, chat, and Playbook access. That was the right trust posture then. Now that source access exists and the Mazer verification frontier is closed, the correct next move is source-verified discovery rather than more strategy prose.
+
+Owner-surface scope for the first wave is explicit:
+
+- `lifeline` owns approvals, receipts, and capability semantics and must be searched early for implicit stack-wide contracts that should become explicit owner truth
+- `playbook` owns governance, verification, and workflow-pack reuse surfaces
+- `_stack` owns orchestration, merge, resume, and worker contracts
+- `atlas` owns doctrine, UAPI, and platform contracts
+- Atlas/Fitness remains the first concrete telemetry-first pairing, not the whole frontier
 
 Operating rules carried forward:
 
@@ -61,17 +69,22 @@ Operating rules carried forward:
 - run risky integrations in shadow mode before cutover
 - keep unified auth behind telemetry hygiene, support tooling, and account-model stabilization
 
-Sequencing for the deferred lane:
+Sequencing for the next lane:
 
-1. build a synergy registry for surfaces that already behave like shared assets but still lack an explicit owner, contract, or package
-2. align shared event contracts and telemetry first
-3. extract reusable CI or CD and Playbook workflow rules in parallel
-4. defer unified auth until telemetry and the account model are stable
-5. defer shared UI until token ownership, package boundaries, and publishing are explicit
-6. defer cross-sell until identity and attribution exist
-7. defer shared data or ML until the earlier layers are real and verifiable
+1. build a source-verified synergy registry across `repos/**` for surfaces that already behave shared but still lack an explicit owner, contract, or package
+2. run a first-wave owner-surface discovery pass across Lifeline, Playbook, `_stack`, and Atlas owner lanes
+3. use Atlas/Fitness as the first concrete telemetry-first tranche for shared glossary and event-contract discovery
+4. freeze the canonical noun glossary and the top shared event contracts before sharing implementation
+5. instrument Atlas against those contracts
+6. instrument Fitness against those contracts
+7. rank second-wave repos by duplication, shared nouns, active initiative pressure, and contract absence
+8. extract reusable workflow or warehouse checks only after the contract lane is frozen
+9. defer unified auth until telemetry and the account model are stable
+10. defer shared UI until token ownership, package boundaries, and publishing are explicit
+11. defer cross-sell until identity and attribution exist
+12. defer shared data or ML until the earlier layers are real and verifiable
 
-This lane is roadmap truth only. Live posture remains grounded in owner-repo evidence and root read-only projections.
+This lane starts as discovery truth grounded in visible source material. Live posture still changes only when owner-repo evidence exists and the root can project it read-only without reinterpretation.
 
 ## Current Root Consumption
 
@@ -214,7 +227,7 @@ Primary slices:
 - application repo PRs: widen only where the next repo-local adoption or verification slice creates real operator leverage
 - stack root PR: keep projecting landed repo-local adoption and verification evidence read-only into awareness and cockpit
 - only then: widen into additional repo-local waves where the next operator constraint actually depends on them
-- only after that frontier is stable: begin the deferred cross-app synergy lane from the registry and telemetry end, not from auth or ML
+- only after that frontier is stable: continue widening the deferred cross-app synergy lane from the registry and telemetry end, not from auth or ML
 
 ## First Repo-Local PR Slices
 

@@ -46,11 +46,10 @@ Read these files first:
 
 ## Current Posture
 
-ATLAS is now an awareness-first operator platform built on explicit files and read models rather than repo folklore.
+ATLAS is now an awareness-first, federated operator platform built on explicit files and read models rather than repo folklore.
 
 - the cockpit is landed as a thin read-only operator surface
-- Playbook owner export and root read-only consumption are landed
-- continuity and historical query coverage are landed
+- Playbook convergence and continuity lanes are landed
 - reviewed Verta derivative notes are landed without changing Verta trust posture
 - root remains the selector and report surface, not a second truth store
 
@@ -59,8 +58,10 @@ Current operating call:
 - grounded text conversation is ready for bounded daily operator use
 - `fitness` is the first bounded `verified` repo at `verification_scope=targeted`
 - `mazer` is now the second bounded `verified` repo at `verification_scope=targeted`
-- the next highest-leverage slices should widen only where clear operator leverage exists, not by adding more root plumbing
-- additional repo waves should follow only where leverage is clear
+- the next frontier is stack-wide source-verified synergy discovery across `repos/**`: registry first, then owner-lane glossary and shared contract discovery, with Atlas/Fitness telemetry-first as tranche 1 rather than the whole frontier
+- first-wave owner-surface discovery should explicitly include Lifeline approvals, receipts, and capability semantics; Playbook governance and verification workflow-pack reuse; and `_stack` orchestration, merge, resume, and worker contracts
+- reusable workflow or warehouse checks should follow only after the contract lane is frozen
+- auth, shared UI, cross-sell, and ML stay explicitly later
 - voice remains intentionally below the line unless explicitly chosen
 
 Roadmap addition:

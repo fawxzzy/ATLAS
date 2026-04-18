@@ -40,7 +40,7 @@ Operational rule:
 - repo inventory state
 - lock and worktree hygiene state
 - trust posture, including Verta as visible, untrusted, and metadata-only
-- focused operator paths, including the Mazer review path when present
+- focused operator paths from active initiatives and proposal state when present
 
 ## Running
 
@@ -95,12 +95,11 @@ Remote-bind rule:
 
 ## Example Views
 
-Mazer path:
+Playbook convergence projection:
 
-- initiative: `initiative-mazer-d2-learning-scorer`
-- open attention: fixed-blessed-id soak smoke plus manual blessing review
-- proposed session: `session-proposed-mazer-d2-fixed-blessed-id-soak`
-- blessing state: `pending_manual_review`
+- root summary shows `verified_count=2`
+- `fitness` and `mazer` project as bounded `verified` at `verification_scope=targeted`
+- root consumes owner-repo verification artifacts read-only instead of restating repo truth as a second source
 
 Verta trust posture:
 
@@ -115,7 +114,7 @@ Confirm all of the following:
 
 1. The cockpit answers what is active, what needs attention, and what repo work is waiting on blessing review.
 2. The latest governed proposal is visible and proposal-only conversation state is visible separately.
-3. The Mazer path is visible end to end from initiative to open attention to proposed soak session to `pending_manual_review`.
+3. The Playbook convergence card shows `verified_count=2` and projects `fitness` and `mazer` as targeted `verified` without implying broader certification.
 4. Lock and worktree hygiene answer whether the lock is frozen and which repos are dirty or drifted.
 5. Verta appears as visible, untrusted, and metadata-only.
 6. `python ops/validation/validate_stack.py --ratchet` stays green.

@@ -21,7 +21,7 @@ updated_at: 2026-04-18T06:14:16Z
 
 ## Derived Summary
 
-This report is worth carrying forward as reviewed strategy, but not as live stack posture. Its own executive framing says it was written without direct access to the repos, Drive corpus, Atlas chat logs, or Playbook artifacts in that session. The durable value is therefore the sequencing logic and operating rules, not the report's point-in-time status assumptions. ATLAS should use this PDF as doctrine input, continuity-backed historical planning context, and a deferred roadmap lane. It should not use the PDF to override current owner-repo truth or root-visible live status.
+This report is worth carrying forward as reviewed strategy, but not as live stack posture. Its own executive framing says it was written without direct access to the repos, Drive corpus, Atlas chat logs, or Playbook artifacts in that session. The durable value is therefore the sequencing logic and operating rules, not the report's point-in-time status assumptions. ATLAS should use this PDF as doctrine input, continuity-backed historical planning context, and a deferred roadmap lane. It should not use the PDF to override current owner-repo truth or root-visible live status. It should also be read as the first concrete Atlas/Fitness tranche inside a broader stack-wide synergy-discovery parent lane, not as the entire frontier by itself.
 
 ## Key Claims
 
@@ -31,6 +31,7 @@ This report is worth carrying forward as reviewed strategy, but not as live stac
 | Risky cross-app integrations should run in shadow mode before cutover. | operating-rule | active | `docs/ops/ATLAS-PLAYBOOK-CONVERGENCE.md` |
 | Unified auth should wait until telemetry hygiene, support tooling, and the account model are stable. | sequencing-rule | active | `docs/ops/ATLAS-PLAYBOOK-CONVERGENCE.md` |
 | The right first synergy lane is a registry plus shared event and telemetry contracts, ahead of auth or ML. | sequencing-rule | active | `docs/ops/ATLAS-PLAYBOOK-CONVERGENCE.md` |
+| Atlas/Fitness should be treated as tranche 1 of a broader stack-wide source-verified synergy lane rather than the whole frontier. | sequencing-rule | active | `README-STACK.md`, `docs/ops/ATLAS-NEXT-BUILD-QUEUE.md`, `docs/ops/ATLAS-PLAYBOOK-CONVERGENCE.md` |
 | Historical live-status guidance such as older cockpit timing should be treated as current adopted posture. | historical-status | rejected | `README-STACK.md`, `docs/ops/ATLAS-NEXT-BUILD-QUEUE.md` |
 
 ## Accepted Operating Rules
@@ -41,7 +42,7 @@ This report is worth carrying forward as reviewed strategy, but not as live stac
 
 ## Deferred Sequence
 
-The report's recommended order is accepted as a deferred lane, not as the current active frontier:
+The report's recommended order is accepted as the first concrete tranche inside a broader stack-wide parent lane, not as the entire current active frontier:
 
 1. synergy registry
 2. shared event contracts and telemetry alignment
@@ -53,7 +54,11 @@ The report's recommended order is accepted as a deferred lane, not as the curren
 
 ## Source-Verified Discovery Still Required
 
-- inventory which Atlas and Fitness surfaces already behave like shared assets but still lack a clear owner, contract, or published package
+- inventory which stack-wide surfaces across owner and application repos already behave like shared assets but still lack a clear owner, contract, or published package
+- search Lifeline early for approvals, receipts, and capability semantics that may already imply reusable stack-wide contracts
+- search Playbook for governance, verification, and workflow-pack reuse surfaces
+- search `_stack` for orchestration, merge, resume, and worker contracts
+- treat Atlas/Fitness as the first telemetry-first pairing for glossary and event-contract discovery
 - verify actual event names, telemetry gaps, and attribution fields from owner-repo artifacts
 - verify which CI or CD and Playbook rules are already duplicated or drifted across repos
 - verify the current account model, support tooling, and identity boundaries before any auth work

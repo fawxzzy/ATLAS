@@ -2,11 +2,11 @@
   "contract_version": "atlas.initiative.v1",
   "id": "initiative-playbook-convergence-and-continuity",
   "title": "Playbook Convergence And Continuity",
-  "summary": "Turn preserved roadmap drafts, handoffs, imports, and memory scaffolding into one explicit cross-repo convergence program plus a durable continuity lane that promotes stable outputs instead of transcript residue.",
+  "summary": "Keep the cross-repo Playbook convergence program and durable continuity lane explicit while shifting the next widening lane into stack-wide source-verified synergy discovery, with Atlas/Fitness telemetry-first as tranche 1 instead of more root-side invention.",
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-04-17T00:00:00Z",
-  "updated_at": "2026-04-17T12:00:00Z",
+  "updated_at": "2026-04-18T15:00:00Z",
   "related_plan_refs": [
     "docs/memory/plans/wave-9-operator-productization-and-debt-burndown.json",
     "docs/memory/plans/wave-9b-playbook-convergence-and-continuity.json"
@@ -42,14 +42,31 @@
     "authoring_source": "manual-roadmap-reconstruction",
     "tracks": [
       "playbook-convergence",
-      "durable-context-continuity"
+      "durable-context-continuity",
+      "stack-wide-source-verified-synergy-discovery",
+      "atlas-fitness-telemetry-first-tranche"
     ],
-    "current_gate": "contract-extraction",
+    "current_gate": "application-rollout-and-reporting",
+    "next_frontier": "stack-wide source-verified synergy registry across repos/**, with Atlas/Fitness telemetry-first as tranche 1",
+    "active_queue": [
+      "synergy-registry",
+      "lifeline-approvals-receipts-capability-discovery",
+      "playbook-governance-and-verification-pack-discovery",
+      "_stack-orchestration-merge-resume-worker-discovery",
+      "atlas-fitness-telemetry-first-tranche",
+      "canonical-noun-glossary",
+      "shared-event-contracts",
+      "atlas-instrumentation",
+      "fitness-instrumentation",
+      "second-wave-repo-ranking",
+      "workflow-and-warehouse-checks-after-contract-freeze"
+    ],
     "priority_repos": [
-      "playbook",
-      "atlas",
       "lifeline",
-      "_stack"
+      "playbook",
+      "_stack",
+      "atlas",
+      "fitness"
     ]
   }
 }

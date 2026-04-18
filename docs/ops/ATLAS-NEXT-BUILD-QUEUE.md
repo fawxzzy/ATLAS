@@ -13,7 +13,7 @@ It replaces the older pre-adoption sequencing that assumed Playbook export, root
 - reviewed Verta derivative notes are landed without changing Verta's visible-untrusted metadata-only posture
 - `fitness` has repo-owned targeted verification truth and should project as the first bounded `verified` repo
 - `mazer` now has repo-owned targeted verification truth and should project as the second bounded `verified` repo
-- root-side reporting was lagging those repo-local adoption slices and must stay aligned with the owner evidence
+- root-side reporting now projects both bounded verified repos and must stay aligned with the owner evidence
 
 ## Repo And Git Visibility
 
@@ -72,36 +72,71 @@ The following items are concretely visible in this workspace now:
 
 ## Next Execution Order
 
-### 1. Additional repo-local waves only where leverage is clear
+### 1. Stack-wide source-verified synergy registry across repos/**
 
-Now that the root posture, cockpit, Playbook export, continuity lane, and first two bounded application verification slices are landed, widen only where there is clear leverage.
-
-Target outcomes:
-
-- prioritize `lifeline`, `_stack`, or `atlas` only when the next operator constraint actually depends on them
-- keep application rollout selective rather than mechanical
-- avoid widening ATLAS root into a second truth store
-
-### 2. Historical reviewed-note promotion only where coverage is partial or missing
-
-This is no longer the primary program gap. Keep doing it only where it buys real historical coverage.
+Mazer is no longer the blocking frontier. The next strong lane is stack-wide synergy discovery, but only as source-verified discovery with owner repos still holding truth.
 
 Target outcomes:
 
-- fill partial or missing historical answers with reviewed derivative notes
-- keep raw Verta sources visible-untrusted and metadata-only
-- avoid turning reviewed-note promotion into a general documentation binge
+- inventory cross-repo surfaces that already behave like shared assets but still lack a clear owner, contract, or package
+- keep root as the projection layer and treat owner repos as the source of truth
+- avoid reopening generic root or cockpit invention work
 
-### Deferred after the current frontier: cross-app synergy lane
+### 2. First-wave owner-surface discovery
 
-The Atlas and Fitness cross-app synergy report is now retained as a reviewed strategy note, not as a live posture update.
+Target outcomes:
 
-Target outcomes after the current frontier:
+- `lifeline`: approvals, receipts, capability nouns, and reusable contracts
+- `playbook`: governance, verification workflow-pack reuse, and explicit owner-truth checks
+- `_stack`: orchestration, merge, resume, and worker contracts
+- rank the first-wave outputs by duplication, active initiative pressure, and contract absence before widening further
 
-- start with a synergy registry for assets that already behave shared but have no clear owner, contract, or package
-- land shared event contracts and telemetry alignment before auth, shared UI, cross-sell, or data work
-- treat reusable CI or CD and Playbook workflow rules as the second implementation lane
-- keep unified auth, shared UI, cross-sell, and shared data or ML explicitly deferred behind the earlier contract and identity prerequisites
+### 3. Atlas/Fitness telemetry-first tranche
+
+Target outcomes:
+
+- build the first concrete shared glossary and shared event-contract inventory across Atlas and Fitness
+- treat Atlas/Fitness as tranche 1 of the stack-wide registry, not as the whole program
+- keep the emphasis on telemetry and event contracts before any shared implementation
+
+### 4. Canonical noun glossary and top shared event contracts
+
+Target outcomes:
+
+- freeze the canonical nouns that the shared registry depends on
+- publish the first shared event-contract and telemetry inventory before any implementation sharing
+- keep the gate explicit: share contracts before sharing implementations
+
+### 5. Atlas instrumentation against the frozen contracts
+
+Target outcomes:
+
+- instrument Atlas against the agreed event and telemetry contracts
+- keep risky integration work in shadow mode until the contract lane proves stable
+
+### 6. Fitness instrumentation against the frozen contracts
+
+Target outcomes:
+
+- instrument Fitness against the same contracts without inventing a second contract dialect
+- verify the shared inventory from owner-repo evidence rather than stack-root restatement
+
+### 7. Second-wave repo ranking and reusable checks after contract freeze
+
+Target outcomes:
+
+- rank second-wave repos by duplication, shared nouns, active initiative pressure, and contract absence
+- extract reusable workflow, CI or CD, and warehouse checks only after the registry and contract lane are real
+- keep this as a reuse lane, not a shortcut around contract ownership
+
+### 8. Only later: auth, shared UI, cross-sell, and ML
+
+Target outcomes:
+
+- keep unified auth behind telemetry hygiene, support tooling, and account-model stabilization
+- keep shared UI behind explicit token, package, and publishing ownership
+- keep cross-sell behind identity and attribution
+- keep shared data or ML last
 
 ## Not Yet Verified Here
 
@@ -115,4 +150,4 @@ Target outcomes after the current frontier:
 - do not widen root into a second truth store
 - do not treat imported planning material or transcripts as doctrine just because it is searchable
 - do not force `verified` when the evidence still says blocked or missing
-- do not use cross-app synergy research to outrank the next owner-repo leverage slice
+- do not jump to auth, shared UI, cross-sell, or ML before the stack-wide registry and contract lane are source-verified
