@@ -72,53 +72,53 @@ The following items are concretely visible in this workspace now:
 
 ## Next Execution Order
 
-### 1. Stack-wide source-verified synergy registry across repos/**
-
-Mazer is no longer the blocking frontier. The next strong lane is stack-wide synergy discovery, but only as source-verified discovery with owner repos still holding truth.
+Root-side discovery is good enough for tranche selection. The next frontier is owner-repo contract work, not more registry prose.
 
 Projection artifact:
 
 - `docs/registry/STACK-SYNERGY-REGISTRY.json`
 
-Target outcomes:
-
-- inventory cross-repo surfaces that already behave like shared assets but still lack a clear owner, contract, or package
-- keep root as the projection layer and treat owner repos as the source of truth
-- avoid reopening generic root or cockpit invention work
-
-### 2. First-wave owner-surface discovery
+### 1. Atlas + Fitness event-contract package
 
 Target outcomes:
 
-- `lifeline`: approvals, receipts, capability nouns, and reusable contracts
-- `playbook`: governance, verification workflow-pack reuse, and explicit owner-truth checks
-- `_stack`: orchestration, merge, resume, and worker contracts
-- rank the first-wave outputs by duplication, active initiative pressure, and contract absence before widening further
+- freeze `atlas-fitness-event-contract-package` as the first shared telemetry lane
+- keep the slice contract-only first: glossary, event catalog, schemas or types, migration map, and shadow-mode rollout plan
+- keep Atlas/Fitness as tranche 1 of the broader lane rather than the whole program
+- do not widen into shared implementation yet
 
-### 3. Atlas/Fitness telemetry-first tranche
-
-Target outcomes:
-
-- build the first concrete shared glossary and shared event-contract inventory across Atlas and Fitness
-- treat Atlas/Fitness as tranche 1 of the stack-wide registry, not as the whole program
-- keep the emphasis on telemetry and event contracts before any shared implementation
-
-### 4. Canonical noun glossary and top shared event contracts
+### 2. Atlas / Lifeline approval-request lineage
 
 Target outcomes:
 
-- freeze the canonical nouns that the shared registry depends on, starting from the candidate set published in `docs/registry/STACK-SYNERGY-REGISTRY.json`
-- publish the first shared event-contract and telemetry inventory before any implementation sharing
-- keep the gate explicit: share contracts before sharing implementations
+- resolve the lineage blocker where Atlas contract mapping still points at `docs/standards/CAPABILITY-AND-PRIVILEGE-MODEL.md` in stack root instead of an Atlas-owned canonical spec path
+- clean up the first-wave approval, request, receipt, and capability lineage for Lifeline and Atlas owner surfaces
+- keep the fix anchored in owner truth rather than restating doctrine from root
 
-### 5. Atlas instrumentation against the frozen contracts
+### 3. Playbook workflow-pack reuse decision
+
+Target outcomes:
+
+- decide whether `playbook-governance-workflow-pack` should become the first reusable workflow-pack bundle
+- start from the source-verified local verification, workflow promotion, and export surfaces already visible in Playbook
+- keep this as a reuse decision, not implementation sprawl
+
+### 4. Keep candidate rows candidate until promoted by evidence
+
+Target outcomes:
+
+- keep `status`, `merge_request`, `conversation`, `session`, `proposal`, `day_summary_taxonomy`, `heartbeat`, `execution_rejected`, and `execution_expired` as candidate rows until stronger repo or doc evidence exists
+- avoid promoting naming similarity into shared-contract truth
+- keep root honest about what is source-verified versus merely plausible
+
+### 5. Only after owner contract freeze: Atlas instrumentation
 
 Target outcomes:
 
 - instrument Atlas against the agreed event and telemetry contracts
 - keep risky integration work in shadow mode until the contract lane proves stable
 
-### 6. Fitness instrumentation against the frozen contracts
+### 6. Only after owner contract freeze: Fitness instrumentation
 
 Target outcomes:
 
@@ -155,3 +155,4 @@ Target outcomes:
 - do not treat imported planning material or transcripts as doctrine just because it is searchable
 - do not force `verified` when the evidence still says blocked or missing
 - do not jump to auth, shared UI, cross-sell, or ML before the stack-wide registry and contract lane are source-verified
+- do not blur the decision gate: root work changes projection truth; owner-repo work changes owner truth

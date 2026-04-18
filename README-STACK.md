@@ -59,12 +59,15 @@ Current operating call:
 - grounded text conversation is ready for bounded daily operator use
 - `fitness` is the first bounded `verified` repo at `verification_scope=targeted`
 - `mazer` is now the second bounded `verified` repo at `verification_scope=targeted`
-- the next frontier is stack-wide source-verified synergy discovery across `repos/**`: registry first, then owner-lane glossary and shared contract discovery, with Atlas/Fitness telemetry-first as tranche 1 rather than the whole frontier
-- the first projection artifact for that lane now lives at `docs/registry/STACK-SYNERGY-REGISTRY.json` and records first-wave owner lanes plus Atlas/Fitness telemetry-first candidates without changing owner-repo truth
-- first-wave owner-surface discovery should explicitly include Lifeline approvals, receipts, and capability semantics; Playbook governance and verification workflow-pack reuse; and `_stack` orchestration, merge, resume, and worker contracts
+- stack-wide source-verified synergy discovery is landed enough at root for tranche selection
+- the next frontier is first-wave owner-repo contract freezing: Atlas/Fitness telemetry and event contracts first, Atlas/Lifeline approval-request lineage cleanup next, and the Playbook workflow-pack reuse decision after that
+- the first projection artifact for that lane lives at `docs/registry/STACK-SYNERGY-REGISTRY.json` and records first-wave owner lanes plus Atlas/Fitness telemetry-first candidates without changing owner-repo truth
+- first-wave owner surfaces still include Lifeline approvals, receipts, and capability semantics; Playbook governance and verification workflow-pack reuse; and `_stack` orchestration, merge, resume, and worker contracts
+- keep `status`, `merge_request`, `conversation`, `session`, `proposal`, `day_summary_taxonomy`, `heartbeat`, `execution_rejected`, and `execution_expired` as candidate rows until repo evidence promotes them
 - reusable workflow or warehouse checks should follow only after the contract lane is frozen
 - auth, shared UI, cross-sell, and ML stay explicitly later
 - voice remains intentionally below the line unless explicitly chosen
+- the decision gate stays explicit: root sessions change projection truth; owner-repo sessions change owner truth
 
 Roadmap addition:
 

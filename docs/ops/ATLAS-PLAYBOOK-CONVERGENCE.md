@@ -49,11 +49,11 @@ The current landed state from this workspace is:
 - `fitness` is `verified` for a bounded `verification_scope=targeted`
 - `mazer` is `verified` for a bounded `verification_scope=targeted`
 
-The active next move is therefore not more root product plumbing. It is stack-wide source-verified synergy discovery before any shared implementation lane, with Atlas/Fitness as tranche 1 rather than the whole frontier.
+The active next move is therefore not more root product plumbing. Stack-wide source-verified synergy discovery is landed enough at root for tranche selection. The next move is first-wave owner-repo contract freezing before any shared implementation lane, with Atlas/Fitness telemetry first and Lifeline, Playbook, and `_stack` still inside wave 1.
 
-## Next Cross-App Synergy Discovery Lane
+## Next Cross-App Contract Freeze Lane
 
-Cross-app synergy is now the next active widening lane at the stack level, not just a two-repo program. The reviewed PDF stayed out of live posture while it lacked direct repo, Drive, chat, and Playbook access. That was the right trust posture then. Now that source access exists and the Mazer verification frontier is closed, the correct next move is source-verified discovery rather than more strategy prose.
+Cross-app synergy remains the active widening lane at the stack level, not just a two-repo program. The reviewed PDF stayed out of live posture while it lacked direct repo, Drive, chat, and Playbook access. That was the right trust posture then. Now that source access exists and the Mazer verification frontier is closed, the root discovery pass is good enough for tranche selection. The correct next move is owner-repo contract work, not more registry prose.
 
 Owner-surface scope for the first wave is explicit:
 
@@ -71,24 +71,31 @@ Operating rules carried forward:
 
 Sequencing for the next lane:
 
-1. build a source-verified synergy registry across `repos/**` for surfaces that already behave shared but still lack an explicit owner, contract, or package
-2. run a first-wave owner-surface discovery pass across Lifeline, Playbook, `_stack`, and Atlas owner lanes
-3. use Atlas/Fitness as the first concrete telemetry-first tranche for shared glossary and event-contract discovery
-4. freeze the canonical noun glossary and the top shared event contracts before sharing implementation
-5. instrument Atlas against those contracts
-6. instrument Fitness against those contracts
-7. rank second-wave repos by duplication, shared nouns, active initiative pressure, and contract absence
-8. extract reusable workflow or warehouse checks only after the contract lane is frozen
-9. defer unified auth until telemetry and the account model are stable
-10. defer shared UI until token ownership, package boundaries, and publishing are explicit
-11. defer cross-sell until identity and attribution exist
-12. defer shared data or ML until the earlier layers are real and verifiable
+1. treat the source-verified synergy registry across `repos/**` as landed enough for tranche selection
+2. freeze `atlas-fitness-event-contract-package` as a contract-only slice: glossary, event catalog, schemas or types, migration map, and a shadow-mode rollout plan
+3. resolve the Atlas/Lifeline approval-request lineage blocker so Atlas-owned contract maps point at an Atlas-owned canonical spec path instead of stack-root doctrine
+4. decide whether `playbook-governance-workflow-pack` should become the first reusable workflow-pack bundle, starting from local verification, workflow promotion, and export surfaces already proven in source
+5. keep `status`, `merge_request`, `conversation`, `session`, `proposal`, `day_summary_taxonomy`, `heartbeat`, `execution_rejected`, and `execution_expired` as candidate-only rows until additional repo evidence promotes them
+6. freeze the canonical noun glossary and the top shared event contracts before sharing implementation
+7. instrument Atlas against those contracts in shadow mode before any cutover
+8. instrument Fitness against the same contracts in shadow mode before any cutover
+9. rank second-wave repos by duplication, shared nouns, active initiative pressure, and contract absence
+10. extract reusable workflow or warehouse checks only after the contract lane is frozen
+11. defer unified auth until telemetry and the account model are stable
+12. defer shared UI until token ownership, package boundaries, and publishing are explicit
+13. defer cross-sell until identity and attribution exist
+14. defer shared data or ML until the earlier layers are real and verifiable
 
 Current projection artifact for this lane:
 
 - `docs/registry/STACK-SYNERGY-REGISTRY.json`
 
-This lane starts as discovery truth grounded in visible source material. Live posture still changes only when owner-repo evidence exists and the root can project it read-only without reinterpretation.
+This lane now starts from discovery truth already grounded in visible source material. Live posture still changes only when owner-repo evidence exists and the root can project it read-only without reinterpretation.
+
+Decision gate for every slice:
+
+- if the change is to root projection, it belongs in the stack root
+- if the change is to owner truth, it belongs in the owner repo
 
 ## Current Root Consumption
 

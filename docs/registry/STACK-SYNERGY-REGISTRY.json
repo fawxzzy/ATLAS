@@ -2,6 +2,7 @@
   "schema_version": "atlas.stack.synergy-registry.v1",
   "generated_on": "2026-04-18",
   "registry_status": "source_verified_discovery",
+  "registry_readiness": "tranche_selection_ready",
   "stack_manifest_ref": "stack.yaml",
   "stack_manifest_digest": "sha256:328c7dd209a4de092d66714161f3aef268d725d1f4ca004362c327803f06feef",
   "published_refs": {
@@ -9,7 +10,9 @@
     "roadmap": "docs/ops/ATLAS-PLAYBOOK-CONVERGENCE.md",
     "queue": "docs/ops/ATLAS-NEXT-BUILD-QUEUE.md"
   },
-  "current_frontier": "stack-wide source-verified synergy discovery across repos/**, with Atlas/Fitness as telemetry-first tranche 1",
+  "current_frontier": "first-wave owner-repo contract freezing, with Atlas/Fitness telemetry first and Lifeline, Playbook, and _stack still in wave 1",
+  "discovery_posture": "stack-wide source-verified synergy discovery at root is landed enough for tranche selection but does not replace owner-repo truth",
+  "decision_gate": "If the change is root projection, do it in ATLAS root. If the change is owner truth, do it in the owner repo.",
   "operating_rules": [
     "share contracts before sharing implementations",
     "keep owner repos as source of truth and root as read-only projection",
@@ -436,12 +439,19 @@
     {
       "rank": 1,
       "opportunity_id": "atlas-fitness-event-contract-package",
-      "status": "source_verified_shortlist",
+      "status": "next_contract_freeze",
       "owner_repo_ids": [
         "atlas",
         "fitness"
       ],
       "why_now": "This is the strongest share-contracts-before-implementation lane because Atlas already owns naming and Fitness already ships typed signals, snapshots, routing metadata, and emit points in source.",
+      "freeze_scope": [
+        "glossary",
+        "event catalog",
+        "schemas_or_types",
+        "migration_map",
+        "shadow_mode_rollout_plan"
+      ],
       "promoted_rows": [
         "telemetry_first_tranche.atlas-fitness-telemetry-first",
         "glossary_candidates.signal",
@@ -462,32 +472,23 @@
     },
     {
       "rank": 2,
-      "opportunity_id": "worker-execution-observation-chain",
-      "status": "source_verified_shortlist",
+      "opportunity_id": "atlas-lifeline-approval-request-lineage",
+      "status": "next_contract_cleanup",
       "owner_repo_ids": [
-        "_stack",
         "lifeline",
         "atlas"
       ],
-      "why_now": "The worker assignment, approval, execution, merge, and resume surfaces are already explicit and test-backed, which makes this the strongest shared contract lane after telemetry.",
+      "why_now": "The Atlas contract-map lineage for Lifeline approval and request surfaces still points at stack-root doctrine instead of an Atlas-owned canonical spec path, which makes this the highest-priority non-telemetry contract cleanup.",
       "promoted_rows": [
-        "first_wave_owner_lanes._stack",
         "first_wave_owner_lanes.lifeline",
-        "glossary_candidates.assignment",
         "glossary_candidates.approval",
         "glossary_candidates.receipt",
         "glossary_candidates.capability_profile",
-        "event_candidates.assignment_created",
         "event_candidates.execution_requested",
         "event_candidates.execution_approved",
-        "event_candidates.execution_completed",
-        "event_candidates.merge_requested",
-        "event_candidates.resume_ready"
+        "event_candidates.execution_completed"
       ],
       "evidence_refs": [
-        "repos/_stack/docs/runbooks/STACK-WORKER-FLOW.md",
-        "repos/_stack/ops/stack/StackWorkerArtifacts.ps1",
-        "repos/_stack/ops/stack/Test-StackWorkerArtifacts.ps1",
         "repos/fawxzzy-lifeline/docs/privileged-execution.md",
         "repos/fawxzzy-lifeline/src/core/privileged-execution.ts",
         "repos/fawxzzy-atlas/docs/CONTRACT_MAP.md"
@@ -496,7 +497,7 @@
     {
       "rank": 3,
       "opportunity_id": "playbook-governance-workflow-pack",
-      "status": "source_verified_shortlist",
+      "status": "next_reuse_decision",
       "owner_repo_ids": [
         "playbook"
       ],
@@ -537,8 +538,56 @@
       "Atlas contract-map lineage for Lifeline approval/request contracts still points at stack-root docs/standards/CAPABILITY-AND-PRIVILEGE-MODEL.md rather than an Atlas-owned spec path.",
       "Cross-repo consumer tests for Atlas/Fitness telemetry contracts are missing; current proof is Fitness source/tests plus contract docs, not Playbook/Lifeline ingestion tests.",
       "day_summary_taxonomy is source-backed in Fitness but not yet proven as a shared noun outside the Fitness repo."
+    ],
+    "candidate_hold_rows": [
+      "status",
+      "merge_request",
+      "conversation",
+      "session",
+      "proposal",
+      "day_summary_taxonomy",
+      "heartbeat",
+      "execution_rejected",
+      "execution_expired"
     ]
   },
+  "next_execution_slices": [
+    {
+      "rank": 1,
+      "slice_id": "atlas-fitness-event-contract-package",
+      "type": "contract_freeze",
+      "scope": "contract_only",
+      "target_outcomes": [
+        "glossary",
+        "event catalog",
+        "schemas_or_types",
+        "migration_map",
+        "shadow_mode_rollout_plan"
+      ]
+    },
+    {
+      "rank": 2,
+      "slice_id": "atlas-lifeline-approval-request-lineage",
+      "type": "contract_cleanup",
+      "scope": "owner_lineage",
+      "target_outcomes": [
+        "Atlas-owned canonical spec path",
+        "contract-map lineage cleanup",
+        "approval/request/receipt/capability boundary clarification"
+      ]
+    },
+    {
+      "rank": 3,
+      "slice_id": "playbook-governance-workflow-pack",
+      "type": "reuse_decision",
+      "scope": "workflow_pack_bundle_decision",
+      "target_outcomes": [
+        "local verification reuse decision",
+        "workflow promotion reuse decision",
+        "export bundle reuse decision"
+      ]
+    }
+  ],
   "freeze_targets": {
     "shared_noun_glossary": "candidate_set_published",
     "top_event_contracts": "candidate_set_published",
@@ -547,6 +596,7 @@
   "notes": [
     "This registry is a root projection surface. It does not replace owner-repo truth.",
     "Candidate status means the surface was verified from visible repo source files in this workspace, not that the stack has frozen or promoted a shared contract yet.",
-    "Later widening should rank second-wave repos by duplication, active initiative pressure, and contract absence."
+    "Later widening should rank second-wave repos by duplication, active initiative pressure, and contract absence.",
+    "Root-side discovery is landed enough for tranche selection; the next slices are owner-repo contract freezing and reuse decisions."
   ]
 }
