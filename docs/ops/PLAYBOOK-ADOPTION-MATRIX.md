@@ -39,6 +39,14 @@ A status should move only when the owning surface has a concrete artifact such a
 
 `verified` specifically requires a repo-owned verification artifact with declared scope in addition to the adoption evidence.
 
+`adopted` to `verified` requires all of the following:
+
+- the owner-repo verification run passes
+- the repo-owned verification artifact or report is published in the expected shape
+- root consumes that artifact without reinterpretation
+- the root projection updates cleanly
+- continuity captures the recovery narrative separately from live posture
+
 Until then, the matrix is an honest working assessment, not proof.
 
 ## Root Projection Note

@@ -51,6 +51,28 @@ The current landed state from this workspace is:
 
 The active next move is therefore not more root product plumbing. It is the Mazer verification slice, projected read-only into root with an honest blocked or missing outcome if the repo-owned verification path still fails.
 
+## Deferred Cross-App Synergy Lane
+
+Cross-app synergy between Atlas and Fitness now has an explicit deferred lane. It is informed by reviewed strategy material, but it does not change the live status board and it does not outrank the current Mazer verification frontier.
+
+Operating rules carried forward:
+
+- share contracts before sharing implementations
+- run risky integrations in shadow mode before cutover
+- keep unified auth behind telemetry hygiene, support tooling, and account-model stabilization
+
+Sequencing for the deferred lane:
+
+1. build a synergy registry for surfaces that already behave like shared assets but still lack an explicit owner, contract, or package
+2. align shared event contracts and telemetry first
+3. extract reusable CI or CD and Playbook workflow rules in parallel
+4. defer unified auth until telemetry and the account model are stable
+5. defer shared UI until token ownership, package boundaries, and publishing are explicit
+6. defer cross-sell until identity and attribution exist
+7. defer shared data or ML until the earlier layers are real and verifiable
+
+This lane is roadmap truth only. Live posture remains grounded in owner-repo evidence and root read-only projections.
+
 ## Current Root Consumption
 
 The current root tranche consumes the landed Playbook owner export read-only from:
@@ -192,6 +214,7 @@ Primary slices:
 - application repo PRs: complete the Mazer verification slice or publish an honest blocked or missing report if the current path still fails
 - stack root PR: keep projecting landed repo-local adoption and verification evidence read-only into awareness and cockpit
 - only then: widen into additional repo-local waves where the next operator constraint actually depends on them
+- only after that frontier is stable: begin the deferred cross-app synergy lane from the registry and telemetry end, not from auth or ML
 
 ## First Repo-Local PR Slices
 

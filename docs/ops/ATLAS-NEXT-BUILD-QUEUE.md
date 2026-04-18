@@ -100,6 +100,17 @@ Target outcomes:
 - keep raw Verta sources visible-untrusted and metadata-only
 - avoid turning reviewed-note promotion into a general documentation binge
 
+### Deferred after the current frontier: cross-app synergy lane
+
+The Atlas and Fitness cross-app synergy report is now retained as a reviewed strategy note, not as a live posture update.
+
+Target outcomes after the current frontier:
+
+- start with a synergy registry for assets that already behave shared but have no clear owner, contract, or package
+- land shared event contracts and telemetry alignment before auth, shared UI, cross-sell, or data work
+- treat reusable CI or CD and Playbook workflow rules as the second implementation lane
+- keep unified auth, shared UI, cross-sell, and shared data or ML explicitly deferred behind the earlier contract and identity prerequisites
+
 ## Not Yet Verified Here
 
 - a repo-owned verification report for `mazer` is not landed yet
@@ -113,3 +124,4 @@ Target outcomes:
 - do not widen root into a second truth store
 - do not treat imported planning material or transcripts as doctrine just because it is searchable
 - do not force `verified` when the evidence still says blocked or missing
+- do not use cross-app synergy research to skip the current Mazer verification and root-consumption frontier

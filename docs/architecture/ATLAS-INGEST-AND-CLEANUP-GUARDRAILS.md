@@ -19,6 +19,14 @@ The current freeze point is:
 - Archive or recovered machine material should enter ATLAS manifest-first or by selective ingest, not by blind repo import.
 - Original material is not a deletion candidate just because it was seen once.
 
+Research ingest rule:
+
+- changes repo truth -> owner repo
+- changes root visibility -> read-only projection from owner truth
+- historical or planning context -> continuity lane
+- broad standards or operating rules -> doctrine
+- raw pasted research -> never live truth until it is reviewed and re-expressed in one of the lanes above
+
 Delete or replace an original only after one of these is true:
 
 - the path is confirmed generated or vendor output that can be rebuilt
@@ -112,6 +120,11 @@ Promotion gate:
 2. its contents are normalized and not dependent on local absolute paths
 3. it represents durable cross-session truth rather than a one-pass audit artifact
 4. it does not duplicate a repo-local contract or stack doc that already owns the truth
+
+Research and strategy material has one extra gate:
+
+- strategy reports, packets, and PDFs may inform doctrine, continuity, and roadmap sequencing
+- they do not update live posture or repo verification state until owner-repo evidence exists in the expected shape
 
 Promotion should stay narrow and explicit:
 

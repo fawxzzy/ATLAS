@@ -61,6 +61,7 @@ Rules:
 - raw artifacts may be retained for provenance
 - raw artifacts are not canonical memory by themselves
 - raw artifacts must keep trust posture explicit
+- strategy reports and research PDFs do not change live posture directly; they enter continuity first as reviewed derivative notes or remain raw evidence
 
 ### 2. Structured handoff
 
@@ -97,6 +98,7 @@ Promotion rules:
 - do not auto-promote raw imports or transcript residue
 - historical-planning answers should resolve to grounded source hits or an explicit gap, never transcript memory alone
 - reviewed derivative notes may summarize selected Verta historical sources without changing Verta archive trust posture
+- reviewed derivative notes for research or strategy reports should capture provenance limits, accepted operating rules, deferred items, and the source-verified discovery still required before any live-status change
 
 ## Authoring Flow
 
@@ -116,6 +118,7 @@ Use this routing by default:
 | ordered execution work | `docs/memory/plans/*.json` |
 | accepted stack decision | `docs/memory/decisions/*.json` |
 | reusable cross-session knowledge | `docs/knowledge/**` |
+| reviewed strategy or historical planning note | `docs/knowledge/promotions/*.md` |
 | execution or review evidence | `runtime/receipts/**` or repo-local receipt lane |
 | repo-specific doctrine or contract | owning repo, not ATLAS root |
 

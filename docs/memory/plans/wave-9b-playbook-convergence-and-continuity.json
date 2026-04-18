@@ -6,12 +6,15 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-04-17T00:00:00Z",
-  "updated_at": "2026-04-17T12:00:00Z",
+  "updated_at": "2026-04-18T06:14:16Z",
   "related_session_refs": [],
-  "related_artifact_refs": [],
+  "related_artifact_refs": [
+    "docs/knowledge/promotions/atlas--cross-app-synergy-atlas-fitness-20260418.md"
+  ],
   "evidence_refs": [
     "README-STACK.md",
     "docs/architecture/ATLAS-CORTEX-PLAYBOOK-CODEX.md",
+    "docs/architecture/ATLAS-INGEST-AND-CLEANUP-GUARDRAILS.md",
     "docs/architecture/CODEX-HANDOFF-CONTRACT.md",
     "docs/architecture/ATLAS-RETENTION-AND-MEMORY-POLICY.md",
     "docs/architecture/PLAYBOOK-INGEST-PIPELINE.md",
@@ -22,6 +25,7 @@
     "docs/ops/ATLAS-PLAYBOOK-CONVERGENCE.md",
     "docs/ops/PLAYBOOK-ADOPTION-MATRIX.md",
     "docs/knowledge/IMPORT-RUNBOOK.md",
+    "docs/knowledge/promotions/atlas--cross-app-synergy-atlas-fitness-20260418.md",
     "docs/memory/plans/wave-9-operator-productization-and-debt-burndown.json"
   ],
   "supersedes": [],
@@ -31,7 +35,17 @@
     "phase": "playbook-convergence-and-continuity",
     "tracks": [
       "playbook-convergence",
-      "durable-context-continuity"
+      "durable-context-continuity",
+      "deferred-cross-app-synergy"
+    ],
+    "deferred_lanes": [
+      "synergy-registry",
+      "shared-event-contracts-and-telemetry",
+      "reusable-cicd-and-playbook-pack",
+      "unified-auth-after-account-model-stabilization",
+      "shared-ui-after-package-ownership-is-explicit",
+      "cross-sell-after-identity-and-attribution",
+      "shared-data-or-ml-last"
     ],
     "gates": [
       "posture-lock",
