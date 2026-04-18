@@ -25,11 +25,14 @@ Continuity source inventory uses:
 
 - schema: `schemas/atlas.continuity.source.manifest.v1.json`
 - loader: `ops/atlas/continuity.py`
+- source typing: imported docs/PDFs, promotion notes, handoffs, reviews, and residue stay distinguishable in manifest-backed query results
+- historical query preference: reviewed derivative notes first, then existing promotion notes, then grounded docs and handoffs, then import metadata
 - read-only slices:
   - `continuity_source_inventory`
   - `continuity_promotion_queue`
   - `continuity_source_groups`
   - `continuity_search_status`
+  - `continuity_historical_query_coverage`
   - `continuity_coverage`
 
 Related existing surfaces:
@@ -92,6 +95,8 @@ Promotion rules:
 - prefer owner-repo promotion when the fact belongs to a child repo
 - keep source lineage explicit
 - do not auto-promote raw imports or transcript residue
+- historical-planning answers should resolve to grounded source hits or an explicit gap, never transcript memory alone
+- reviewed derivative notes may summarize selected Verta historical sources without changing Verta archive trust posture
 
 ## Authoring Flow
 

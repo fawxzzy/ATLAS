@@ -62,6 +62,23 @@ Each record includes:
 - treat receipt digests and tooling digests as provenance metadata, not content
 - keep `metadata_only` archives from exposing derived summary or topic map fields in query results
 
+## Historical Continuity Preference
+
+Historical continuity and planning queries should prefer grounded derivative artifacts in this order:
+
+- `reviewed_promotion_note`
+- `promotion_note`
+- trusted root or owner-repo docs
+- `handoff`
+- `import_evaluation`
+- raw `imported_doc` and `imported_pdf`
+
+Rules:
+
+- download residue and transcript residue must not be elevated into truth
+- raw imported evidence may support a partial result, but should not outrank reviewed derivative notes
+- source trust posture must remain explicit when an answer depends on visible-untrusted evidence
+
 ## Determinism
 
 The query bundle must be stable when the source promotion docs, runtime catalogs, and latest receipts have not changed.

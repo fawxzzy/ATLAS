@@ -82,6 +82,21 @@
             "other"
           ]
         },
+        "source_type": {
+          "enum": [
+            "root_doc",
+            "owner_repo_doc",
+            "imported_doc",
+            "imported_pdf",
+            "reviewed_promotion_note",
+            "promotion_note",
+            "handoff",
+            "review_note",
+            "import_evaluation",
+            "downloads_residue",
+            "other"
+          ]
+        },
         "content_class": {
           "enum": [
             "raw_evidence",

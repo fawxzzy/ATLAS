@@ -18,6 +18,7 @@ The root validation pass guards:
 - original Verta catalog stays `indexing_profile = metadata_only`
 - sanitized candidate stays metadata-only and not promoted
 - neither surface may gain a promotion doc without an explicit trust decision
+- ATLAS-authored reviewed derivative notes may cite selected Verta historical sources only when they keep source provenance explicit, preserve `visible_untrusted` posture for the source evidence, and do not change archive promotion status
 
 ## Validation Rules
 
@@ -32,3 +33,5 @@ The root validation pass guards:
 ## Non-Goal
 
 The trust gate does not promote Verta automatically. It only blocks silent drift back into trusted or releasable surfaces.
+
+Reviewed derivative notes are a separate lane from archive promotion. They are allowed only as provenance-heavy ATLAS notes about what a Verta document claimed, influenced, or left unclear.

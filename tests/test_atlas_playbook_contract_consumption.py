@@ -37,10 +37,10 @@ class AtlasPlaybookContractConsumptionTests(unittest.TestCase):
         for repo_id in ("_stack", "atlas", "stream"):
             with self.subTest(repo_id=repo_id):
                 self.assertEqual(rows[repo_id]["repo_identity"], "local_only")
-                self.assertEqual(rows[repo_id]["verification_state"], "none")
+                self.assertEqual(rows[repo_id]["verification_status"], "missing")
                 self.assertNotEqual(rows[repo_id]["adoption_status"], "verified")
 
-    def test_repo_local_adoption_slices_project_as_adopted_without_verified_promotion(self) -> None:
+    def test_repo_local_adoption_slices_project_live_verified_and_missing_split(self) -> None:
         report = build_playbook_adoption_report(root=self.root)
         rows = {
             row["repo_id"]: row
@@ -48,18 +48,42 @@ class AtlasPlaybookContractConsumptionTests(unittest.TestCase):
             if isinstance(row, dict) and isinstance(row.get("repo_id"), str)
         }
 
-        for repo_id in ("fitness", "mazer"):
-            with self.subTest(repo_id=repo_id):
-                self.assertEqual(rows[repo_id]["adoption_status"], "adopted")
-                self.assertEqual(rows[repo_id]["verification_state"], "targeted")
-                self.assertEqual(rows[repo_id]["continuity_status"], "structured")
-                self.assertNotEqual(rows[repo_id]["adoption_status"], "verified")
-                self.assertTrue(
-                    any(
-                        ref.endswith(f"{repo_id}.playbook.adoption.evidence.v1.json")
-                        for ref in rows[repo_id]["evidence_refs"]
-                    )
-                )
+        fitness = rows["fitness"]
+        self.assertEqual(fitness["adoption_status"], "adopted")
+        self.assertEqual(fitness["verification_state"], "targeted")
+        self.assertEqual(fitness["verification_scope"], "targeted")
+        self.assertEqual(fitness["verification_status"], "verified")
+        self.assertEqual(fitness["continuity_status"], "structured")
+        self.assertEqual(fitness["blocking_gaps"], [])
+        self.assertTrue(
+            any(
+                ref.endswith("fitness.playbook.verification.report.v1.json")
+                for ref in fitness["evidence_refs"]
+            )
+        )
+
+        mazer = rows["mazer"]
+        self.assertEqual(mazer["adoption_status"], "adopted")
+        self.assertEqual(mazer["verification_state"], "targeted")
+        self.assertEqual(mazer["verification_scope"], "targeted")
+        self.assertEqual(mazer["verification_status"], "missing")
+        self.assertEqual(mazer["continuity_status"], "structured")
+        self.assertTrue(mazer["blocking_gaps"])
+        self.assertTrue(
+            any(
+                ref.endswith("mazer.playbook.adoption.evidence.v1.json")
+                for ref in mazer["evidence_refs"]
+            )
+        )
+
+    def test_summary_distinguishes_adopted_from_verified(self) -> None:
+        report = build_playbook_adoption_report(root=self.root)
+        summary = report["summary"]
+
+        self.assertIn("verification_missing_count", summary)
+        self.assertIn("verification_blocked_count", summary)
+        self.assertGreaterEqual(summary["verified_count"], 1)
+        self.assertGreaterEqual(summary["adopted_count"], 1)
 
     def test_missing_export_is_reported_non_green(self) -> None:
         with TemporaryDirectory() as tempdir:

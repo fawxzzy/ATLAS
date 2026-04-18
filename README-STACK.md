@@ -46,19 +46,22 @@ Read these files first:
 
 ## Current Posture
 
-ATLAS root and Cortex now form an awareness and coordination core built on explicit files and read models rather than repo folklore.
+ATLAS is now an awareness-first operator platform built on explicit files and read models rather than repo folklore.
 
-- major awareness primitives are present
-- governed sessions and governed resume are real
-- the first bounded truthful write exists
-- the next compounding layer is initiative management above sessions, not basic awareness discovery
+- the cockpit is landed as a thin read-only operator surface
+- Playbook owner export and root read-only consumption are landed
+- continuity and historical query coverage are landed
+- reviewed Verta derivative notes are landed without changing Verta trust posture
+- root remains the selector and report surface, not a second truth store
 
 Current operating call:
 
 - grounded text conversation is ready for bounded daily operator use
-- voice companion is still a beta candidate pending one clean live certification pass
-- the blocking proof is operational trust, not missing backend architecture
-- the next build after that pass is a thin read-only cockpit over the Awareness API, not more backend plumbing
+- `fitness` is the first bounded `verified` repo at `verification_scope=targeted`
+- `mazer` is `adopted`; its verification slice should report honest blocked or missing truth instead of forcing `verified`
+- the next highest-leverage slice is Mazer verification, not more root plumbing
+- additional repo waves should follow only where leverage is clear
+- voice remains intentionally below the line unless explicitly chosen
 
 Roadmap addition:
 

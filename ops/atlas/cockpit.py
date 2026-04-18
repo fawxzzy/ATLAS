@@ -443,13 +443,16 @@ def _render_html(payload: dict[str, Any], *, refresh_seconds: int) -> str:
             badges=[
                 _badge("identity", item.get("repo_identity")),
                 _badge("adoption", item.get("adoption_status")),
-                _badge("verification", item.get("verification_state")),
+                _badge("verify", item.get("verification_status")),
                 _badge("continuity", item.get("continuity_status")),
             ],
             body=_pairs(
                 [
                     ("drift", item.get("drift_status")),
                     ("contract_version", item.get("contract_version_claimed")),
+                    ("verification_scope", item.get("verification_scope") or item.get("verification_state")),
+                    ("last_verified_at", item.get("last_verified_at")),
+                    ("blocking_gaps", item.get("blocking_gaps", [])),
                     ("initiative_refs", item.get("initiative_refs", [])),
                     ("notes", item.get("notes", [])),
                 ]
@@ -546,9 +549,10 @@ def _render_html(payload: dict[str, Any], *, refresh_seconds: int) -> str:
     {_card("Operator Paths", _stack(path_items, "No focused operator paths are pending."), "span-6")}
     {_card("Playbook Convergence", "<div class='metrics'>" + "".join([
       f"<div class='metric'><div class='label'>Repos</div><div class='value'>{escape(str(playbook_summary.get('repo_count', '—')))}</div></div>",
-      f"<div class='metric'><div class='label'>Partial</div><div class='value'>{escape(str(playbook_summary.get('partial_count', '—')))}</div></div>",
+      f"<div class='metric'><div class='label'>Planned</div><div class='value'>{escape(str(playbook_summary.get('planned_count', '-')))}</div></div>",
       f"<div class='metric'><div class='label'>Adopted</div><div class='value'>{escape(str(playbook_summary.get('adopted_count', '—')))}</div></div>",
-      f"<div class='metric'><div class='label'>Local Only</div><div class='value {_count_tone(playbook_summary.get('local_only_count'), zero='ok', nonzero='warn')}'>{escape(str(playbook_summary.get('local_only_count', '—')))}</div></div>",
+      f"<div class='metric'><div class='label'>Verified</div><div class='value {_count_tone(playbook_summary.get('verified_count'), zero='warn', nonzero='ok')}'>{escape(str(playbook_summary.get('verified_count', '-')))}</div></div>",
+      f"<div class='metric'><div class='label'>Blocked</div><div class='value {_count_tone(playbook_summary.get('verification_blocked_count'), zero='ok', nonzero='danger')}'>{escape(str(playbook_summary.get('verification_blocked_count', '-')))}</div></div>",
     ]) + "</div>" + _stack(playbook_items, "No Playbook convergence state is published."), "span-6")}
     {_card("Continuity Coverage", "<div class='metrics'>" + "".join([
       f"<div class='metric'><div class='label'>Sources</div><div class='value'>{escape(str(continuity_coverage.get('source_count', '—')))}</div></div>",

@@ -17,6 +17,7 @@ Current policy:
 - `metadata_only` archives stay metadata-only
 - `derived_only` promotions must stay policy-safe and human-authored
 - Verta remains quarantined and unpromoted
+- reviewed derivative notes may summarize selected Verta historical sources without changing archive trust posture or archive promotion status
 
 ## Current Ranking
 
@@ -37,6 +38,7 @@ Current policy:
 - Held back: `personal--college-fullstack-ai-archive` because it is private courseware with executable content and a narrower metadata-only posture
 - Held back: `personal--desktop-lrpython-linear-regression` because it remains metadata-only and is not the next safe derived-only promotion
 - Held back: `personal--verta-core` because it has credential-like material, copyright signals, and executable content
+- Allowed separately: ATLAS-authored reviewed derivative notes for selected Verta historical docs where provenance, claim labeling, and trust boundaries stay explicit
 
 ## Promotion Notes
 
@@ -49,3 +51,4 @@ Current policy:
 - Do not promote archives with secrets risk.
 - Do not promote Verta until scrub and rotation complete.
 - Do not promote archives where copyrighted or executable material would widen policy exposure beyond metadata-only handling.
+- Reviewed derivative notes about Verta history must not flip `personal--verta-core*` from metadata-only or untrusted status.

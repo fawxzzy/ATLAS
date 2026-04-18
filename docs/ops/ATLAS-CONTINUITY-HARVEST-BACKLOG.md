@@ -18,6 +18,7 @@ For each saved planning artifact, ATLAS should be able to answer:
 
 - what it is
 - where it came from
+- what source type it belongs to
 - whether it is raw evidence or promoted truth
 - what durable decisions or tasks it contributed
 - what initiative, plan, knowledge, or receipt it maps to now
@@ -46,6 +47,7 @@ Minimum metadata per source:
 
 - source path
 - artifact type
+- source type
 - created or modified date when available
 - related repo, initiative, or topic
 - promotion status
@@ -111,13 +113,17 @@ Current grounded lanes for the first manifest are:
 
 - old planning work is reusable without transcript-diving
 - raw evidence remains distinguishable from promoted truth
+- imported docs/PDFs, promotion notes, and handoffs remain distinguishable in query results
+- reviewed derivative notes can outrank raw import metadata without turning the import itself into trusted truth
 - no duplicate owner-repo truth is created in root
 - original ideas remain attributable and linked to current initiatives
 - future sessions can bootstrap from structured artifacts instead of memory guesswork
+- canonical historical-planning questions resolve to grounded source hits or an explicit gap
 
 ## Good First Questions
 
 - Is this artifact evidence, doctrine, plan, or residue?
+- Does the answer come from an imported doc/PDF, a promoted note, or a structured handoff?
 - Does it belong in root memory, root knowledge, or an owner repo?
 - Is there already a newer promoted version?
 - Should this remain historical context only?

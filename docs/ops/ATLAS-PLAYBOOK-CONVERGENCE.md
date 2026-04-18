@@ -27,6 +27,30 @@ This program closes that gap through two tracks:
 - Track A: Playbook convergence across repos
 - Track B: durable context continuity across Codex and ChatGPT work
 
+## Current Live Posture
+
+Treat the long doctrine handoff as constitutional guidance, not as a literal implementation status board.
+
+The still-authoritative rules are unchanged:
+
+- root is the control plane and child repos stay independent
+- root federates owner truth instead of duplicating it
+- transcript residue is not canonical memory
+- Verta stays visible, untrusted, and metadata-only
+- voice remains intentionally deprioritized unless explicitly chosen
+
+The current landed state from this workspace is:
+
+- cockpit is landed as a thin read-only operator surface
+- Playbook owner export is landed
+- root read-only consumption is landed
+- continuity and historical query coverage are landed
+- reviewed Verta derivative notes are landed without changing trust posture
+- `fitness` is `verified` for a bounded `verification_scope=targeted`
+- `mazer` is `adopted`, not yet `verified`
+
+The active next move is therefore not more root product plumbing. It is the Mazer verification slice, projected read-only into root with an honest blocked or missing outcome if the repo-owned verification path still fails.
+
 ## Current Root Consumption
 
 The current root tranche consumes the landed Playbook owner export read-only from:
@@ -95,18 +119,20 @@ No new canonical path class is introduced by this roadmap.
 
 ## Phase Plan
 
+Phases 1 through 3 are materially landed in the current workspace. The active program edge is Phase 4 and Phase 5, with the next concrete slice centered on `mazer`.
+
 ### Phase 1: Posture Lock
 
 Acceptance criteria:
 
 - the root doctrine says this is a convergence program, not a root merge
 - the adoption matrix is evidence-based and explicitly provisional until repo-local verification lands
-- operator-cockpit work remains active rather than being silently replaced
+- cockpit remains a read-only client surface rather than a second truth store
 
 Primary slices:
 
-- stack root PR: publish this roadmap and the adoption matrix
-- stack root PR: add structured memory artifacts so the program is queryable by initiatives and plans
+- landed: stack root PR published this roadmap and the adoption matrix
+- landed: stack root artifacts made the program queryable by initiatives and plans
 
 ### Phase 2: Contract Extraction
 
@@ -118,8 +144,8 @@ Acceptance criteria:
 
 Primary slices:
 
-- Playbook repo PR: export the canonical principles, patterns, and checklist contract
-- stack root PR: point intent routing and roadmap docs at the new contract artifact
+- landed: Playbook repo exported the canonical principles, patterns, and checklist contract
+- landed: stack root routing and roadmap refs point at the exported contract artifact
 
 ### Phase 3: Continuity Lane
 
@@ -131,10 +157,10 @@ Acceptance criteria:
 
 Primary slices:
 
-- stack root PR: standardize a structured conversation-handoff authoring flow on top of the existing handoff contract
-- stack root PR: validate serious handoffs against `schemas/atlas.continuity.handoff.v1.json`
-- stack root PR: document promotion from handoff or imported archive into memory and knowledge lanes
-- Atlas repo PR: update context-pack selection or query surfaces so handoff and contract refs are retrievable by intent
+- landed: stack root standardized a structured conversation-handoff authoring flow on top of the existing handoff contract
+- landed: continuity manifests, promotion routing, and historical query coverage are visible from root
+- landed: reviewed derivative-note promotion now covers the partial historical questions already processed
+- next only where useful: continue reviewed-note promotion for partial or missing historical answers, not as a general documentation binge
 
 ### Phase 4: Core Repo Rollout
 
@@ -157,15 +183,15 @@ Acceptance criteria:
 
 - each in-scope application repo has an explicit adoption decision instead of silent drift
 - landed repo-local adoption work is projected honestly at root
-- `verified` remains blocked until the stack has an explicit, evidence-backed promotion gate
+- `verified` requires scoped repo-owned verification truth and an honest root projection; broader product certification remains out of scope
 - the stack can report both convergence status and conversation-continuity health from saved artifacts
 - repo-local rollout remains scoped to the owning repo
 
 Primary slices:
 
-- application repo PRs: add repo-local adoption or document `n/a` where justified
-- stack root PR: project landed repo-local adoption evidence read-only into awareness and cockpit
-- stack root PR: add the explicit adopted-to-verified gate and root-visible verification report
+- application repo PRs: complete the Mazer verification slice or publish an honest blocked or missing report if the current path still fails
+- stack root PR: keep projecting landed repo-local adoption and verification evidence read-only into awareness and cockpit
+- only then: widen into additional repo-local waves where the next operator constraint actually depends on them
 
 ## First Repo-Local PR Slices
 
@@ -175,8 +201,8 @@ Primary slices:
 | `lifeline` | Align approval, receipt, and execution surfaces to the shared contract. | Lifeline docs or verify output can show which Playbook contract version is implemented. |
 | `_stack` | Align worker merge, resume, and orchestration patterns to the shared contract. | Resume and merge flows cite the contract and verification is explicit. |
 | `atlas` | Pull contract refs and continuity refs by intent instead of broad context dumps. | Context or awareness surfaces can retrieve the right contract and continuity artifacts deterministically. |
-| `fitness` | Repo-local adoption slice is landed. | Matrix status is explicit at root as `adopted`, and `verified` stays blocked until the root-visible gate evaluates broader proof or a bounded exception. |
-| `mazer` | Repo-local adoption slice is landed. | Matrix status is explicit at root as `adopted`, and `verified` stays blocked until the root-visible gate evaluates broader proof or a bounded exception. |
+| `fitness` | Repo-local adoption and targeted verification slices are landed. | Matrix status is explicit at root as bounded `verified` with `verification_scope=targeted`, without implying broader product certification. |
+| `mazer` | Repo-local adoption slice is landed; verification is the next slice. | Matrix status remains `adopted` until repo-owned verification truth lands or an honest blocked or missing report is published. |
 | `stream` | Do the same once incubating scope is confirmed. | Matrix status is explicit and backed by a repo-local artifact or a documented defer decision. |
 | `nat1-games` | Do the same once incubating scope is confirmed. | Matrix status is explicit and backed by a repo-local artifact or a documented defer decision. |
 | `playbook-demo` | Decide whether it remains a demo-only mirror or a contract demonstration surface. | Matrix status is explicit and the demo role is documented. |

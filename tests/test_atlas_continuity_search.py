@@ -19,6 +19,7 @@ class AtlasContinuitySearchTests(unittest.TestCase):
             "continuity_promotion_queue",
             "continuity_source_groups",
             "continuity_search_status",
+            "continuity_historical_query_coverage",
             "continuity_coverage",
         ):
             with self.subTest(slice_name=slice_name):

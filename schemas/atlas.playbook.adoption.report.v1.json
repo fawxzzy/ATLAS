@@ -6,6 +6,7 @@
   "type": "object",
   "additionalProperties": false,
   "required": [
+    "schema_version",
     "report_id",
     "generated_at",
     "contract_source",
@@ -13,6 +14,10 @@
     "repos"
   ],
   "properties": {
+    "schema_version": {
+      "type": "string",
+      "minLength": 1
+    },
     "report_id": {
       "type": "string",
       "minLength": 1
@@ -122,7 +127,10 @@
         "partial_count",
         "adopted_count",
         "verified_count",
-        "exception_count"
+        "exception_count",
+        "verification_missing_count",
+        "verification_partial_count",
+        "verification_blocked_count"
       ],
       "properties": {
         "repo_count": {
@@ -160,6 +168,18 @@
         "exception_count": {
           "type": "integer",
           "minimum": 0
+        },
+        "verification_missing_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "verification_partial_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "verification_blocked_count": {
+          "type": "integer",
+          "minimum": 0
         }
       }
     },
@@ -180,9 +200,11 @@
         "repo_identity",
         "adoption_status",
         "verification_state",
+        "verification_status",
         "continuity_status",
         "drift_status",
         "evidence_types",
+        "blocking_gaps",
         "notes"
       ],
       "properties": {
@@ -224,6 +246,15 @@
             "unknown"
           ]
         },
+        "verification_status": {
+          "enum": [
+            "missing",
+            "partial",
+            "blocked",
+            "verified",
+            "unknown"
+          ]
+        },
         "continuity_status": {
           "enum": [
             "missing",
@@ -260,6 +291,18 @@
           "items": {
             "type": "string"
           }
+        },
+        "blocking_gaps": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "last_verified_at": {
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "notes": {
           "type": "array",

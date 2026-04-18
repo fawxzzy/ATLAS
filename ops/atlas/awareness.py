@@ -731,6 +731,8 @@ def cockpit_status(*, root: Path | None = None, refresh: bool = False) -> dict[s
             "lock_frozen": lock_hygiene.get("lock_frozen"),
             "untrusted_visible_count": trust_posture.get("untrusted_item_count"),
             "playbook_repo_count": playbook_summary.get("repo_count"),
+            "playbook_verified_count": playbook_summary.get("verified_count"),
+            "playbook_verification_blocked_count": playbook_summary.get("verification_blocked_count"),
             "playbook_non_green_count": sum(
                 1
                 for item in playbook_report.get("repos", [])
@@ -802,6 +804,7 @@ def _slice_titles() -> dict[str, str]:
         "continuity_promotion_queue": "Continuity Promotion Queue",
         "continuity_source_groups": "Continuity Source Groups",
         "continuity_search_status": "Continuity Search Status",
+        "continuity_historical_query_coverage": "Continuity Historical Query Coverage",
         "continuity_coverage": "Continuity Coverage",
     }
 

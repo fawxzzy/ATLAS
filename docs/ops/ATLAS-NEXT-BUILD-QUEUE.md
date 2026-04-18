@@ -9,8 +9,10 @@ It replaces the older pre-adoption sequencing that assumed Playbook export, root
 - the ATLAS root worktree currently has convergence and continuity changes in flight rather than a clean posture snapshot
 - the thin cockpit is already live as a root-only, read-only operator surface
 - Playbook owner-truth export is already landed and root-side consumption is already wired
-- the continuity lane is real: manifest, loader, handoff, and first historical harvest artifacts are visible from root
-- `fitness` and `mazer` both already have repo-local Playbook adoption exports, docs, and targeted adoption tests
+- the continuity lane is real: manifest, loader, handoff, and historical query coverage are visible from root
+- reviewed Verta derivative notes are landed without changing Verta's visible-untrusted metadata-only posture
+- `fitness` has repo-owned targeted verification truth and should project as the first bounded `verified` repo
+- `mazer` has repo-local adoption evidence and targeted proof, but remains `adopted` until the verification slice lands or reports an honest block
 - root-side reporting was lagging those repo-local adoption slices and must stay aligned with the owner evidence
 
 ## Repo And Git Visibility
@@ -28,7 +30,7 @@ It replaces the older pre-adoption sequencing that assumed Playbook export, root
 
 | Repo | Local visibility | Git remote visibility | Notes |
 | --- | --- | --- | --- |
-| `fitness` | present at `repos/fawxzzy-fitness` | `origin` visible | repo-local adoption is landed and targeted proof is green |
+| `fitness` | present at `repos/fawxzzy-fitness` | `origin` visible | repo-local adoption and targeted verification report are landed |
 | `mazer` | present at `repos/fawxzzy-mazer` | `origin` visible | repo-local adoption is landed and targeted proof is green; broader verify still needs explicit handling before `verified` |
 | `stream` | present at `repos/fawxzzy-stream` | no remote visible in this workspace | incubating and still outside the first adopted tranche |
 | `playbook-demo` | nested repo present at `repos/playbook-demo/playbook-demo` | `origin` visible | keep out of the critical path unless intentionally used as a contract demo surface |
@@ -51,60 +53,63 @@ The following items are concretely visible in this workspace now:
   - `data/imports/knowledge/continuity/harvest-manifest.json`
   - `docs/knowledge/promotions/atlas--historical-planning-harvest-20260417.md`
   - `runtime/receipts/handoffs/playbook-convergence-historical-planning-harvest-20260417t161500z.handoff.json`
+- reviewed Verta derivative lane:
+  - `docs/knowledge/promotions/atlas--historical-planning-harvest-20260417.md`
+  - `docs/ops/VERTA-TRUST-GATE.md`
 - repo-local adoption tranches:
   - `repos/fawxzzy-fitness/exports/fitness.playbook.adoption.evidence.v1.json`
+  - `repos/fawxzzy-fitness/exports/fitness.playbook.verification.report.v1.json`
   - `repos/fawxzzy-fitness/docs/ops/FITNESS-PLAYBOOK-ADOPTION.md`
+  - `repos/fawxzzy-fitness/docs/ops/FITNESS-PLAYBOOK-VERIFICATION.md`
   - `repos/fawxzzy-fitness/tests/playbook-adoption-evidence.test.mjs`
+  - `repos/fawxzzy-fitness/tests/playbook-verification-report.test.mjs`
   - `repos/fawxzzy-mazer/exports/mazer.playbook.adoption.evidence.v1.json`
   - `repos/fawxzzy-mazer/docs/ops/MAZER-PLAYBOOK-ADOPTION.md`
   - `repos/fawxzzy-mazer/tests/playbook-adoption-evidence.test.mjs`
 
 ## Next Execution Order
 
-### 1. Historical planning query coverage
+### 1. Mazer verification slice
 
-This is the highest-leverage next slice because the continuity lane already has enough structure that answer quality is now the main gap.
-
-Target outcomes:
-
-- source-family clustering for historical planning lanes
-- explicit coverage for the historical planning questions that matter to current work
-- structured handoffs and promotions grouped by planning family instead of tiny per-file fragments
-- tests that prove ATLAS can answer the historical continuity and prioritization questions from retained evidence
-
-### 2. Explicit adopted-to-verified gate
-
-After historical query coverage, add the root-visible gate that decides when a repo can move from `adopted` to `verified`.
+This is the highest-leverage next slice because the root posture, cockpit, Playbook export, and continuity lane are already landed.
 
 Target outcomes:
 
-- one explicit gate model for `G1` through `G5`
-- one root-visible verification report
-- honest current evaluation for `fitness` and `mazer`
-- bounded handling for unrelated broader verification debt
+- add repo-owned verification truth for `mazer`
+- project that verification read-only into root reporting
+- if the existing timeout or broader path still blocks verification, report that honestly as blocked or missing instead of forcing `verified`
+- keep the verification scope explicit so the status does not overclaim broader product certification
 
-### 3. Additional repo-local adoption waves
+### 2. Additional repo-local waves only where leverage is clear
 
-After the first two slices above:
+After the Mazer slice, only widen the rollout where there is clear leverage.
 
-1. `lifeline`
-2. `_stack`
-3. `atlas`
-4. `stream`
-5. `nat1-games`
+Target outcomes:
 
-Use repo-local adoption only where the repo actually needs it; do not widen the rollout mechanically.
+- prioritize `lifeline`, `_stack`, or `atlas` only when the next operator constraint actually depends on them
+- keep application rollout selective rather than mechanical
+- avoid widening ATLAS root into a second truth store
+
+### 3. Historical reviewed-note promotion only where coverage is partial or missing
+
+This is no longer the primary program gap. Keep doing it only where it buys real historical coverage.
+
+Target outcomes:
+
+- fill partial or missing historical answers with reviewed derivative notes
+- keep raw Verta sources visible-untrusted and metadata-only
+- avoid turning reviewed-note promotion into a general documentation binge
 
 ## Not Yet Verified Here
 
-- a root-visible adopted-to-verified report is not landed yet
-- historical planning query coverage tests are not landed yet
-- `fitness` and `mazer` targeted adoption tests are green, but broader `verified` promotion proof is still incomplete
+- a repo-owned verification report for `mazer` is not landed yet
 - `_stack`, `atlas`, and `stream` still present as local-only identities from the current workspace view
+- voice is still intentionally below the current priority line and not certified
 
 ## Do Not Do In This Wave
 
 - do not copy Playbook owner truth into ATLAS root
 - do not widen cockpit or awareness into execution controls
+- do not widen root into a second truth store
 - do not treat imported planning material or transcripts as doctrine just because it is searchable
-- do not auto-promote `verified` from targeted repo-local tests alone
+- do not force `verified` when the evidence still says blocked or missing
