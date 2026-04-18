@@ -84,6 +84,10 @@ Sequencing for the next lane:
 11. defer cross-sell until identity and attribution exist
 12. defer shared data or ML until the earlier layers are real and verifiable
 
+Current projection artifact for this lane:
+
+- `docs/registry/STACK-SYNERGY-REGISTRY.json`
+
 This lane starts as discovery truth grounded in visible source material. Live posture still changes only when owner-repo evidence exists and the root can project it read-only without reinterpretation.
 
 ## Current Root Consumption

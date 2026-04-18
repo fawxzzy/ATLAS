@@ -32,6 +32,7 @@ Read these files first:
 - `stack.yaml`
 - `stack.lock.yaml`
 - `docs/registry/STACK-REPO-INVENTORY.json`
+- `docs/registry/STACK-SYNERGY-REGISTRY.json`
 - `AGENTS.md`
 - `docs/architecture/AWARENESS-FIRST-WORLD-MODEL.md`
 - `docs/architecture/STACK-STANDARDS.md`
@@ -59,6 +60,7 @@ Current operating call:
 - `fitness` is the first bounded `verified` repo at `verification_scope=targeted`
 - `mazer` is now the second bounded `verified` repo at `verification_scope=targeted`
 - the next frontier is stack-wide source-verified synergy discovery across `repos/**`: registry first, then owner-lane glossary and shared contract discovery, with Atlas/Fitness telemetry-first as tranche 1 rather than the whole frontier
+- the first projection artifact for that lane now lives at `docs/registry/STACK-SYNERGY-REGISTRY.json` and records first-wave owner lanes plus Atlas/Fitness telemetry-first candidates without changing owner-repo truth
 - first-wave owner-surface discovery should explicitly include Lifeline approvals, receipts, and capability semantics; Playbook governance and verification workflow-pack reuse; and `_stack` orchestration, merge, resume, and worker contracts
 - reusable workflow or warehouse checks should follow only after the contract lane is frozen
 - auth, shared UI, cross-sell, and ML stay explicitly later

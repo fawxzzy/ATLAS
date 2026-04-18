@@ -76,6 +76,10 @@ The following items are concretely visible in this workspace now:
 
 Mazer is no longer the blocking frontier. The next strong lane is stack-wide synergy discovery, but only as source-verified discovery with owner repos still holding truth.
 
+Projection artifact:
+
+- `docs/registry/STACK-SYNERGY-REGISTRY.json`
+
 Target outcomes:
 
 - inventory cross-repo surfaces that already behave like shared assets but still lack a clear owner, contract, or package
@@ -103,7 +107,7 @@ Target outcomes:
 
 Target outcomes:
 
-- freeze the canonical nouns that the shared registry depends on
+- freeze the canonical nouns that the shared registry depends on, starting from the candidate set published in `docs/registry/STACK-SYNERGY-REGISTRY.json`
 - publish the first shared event-contract and telemetry inventory before any implementation sharing
 - keep the gate explicit: share contracts before sharing implementations
 

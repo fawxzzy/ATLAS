@@ -1,0 +1,552 @@
+{
+  "schema_version": "atlas.stack.synergy-registry.v1",
+  "generated_on": "2026-04-18",
+  "registry_status": "source_verified_discovery",
+  "stack_manifest_ref": "stack.yaml",
+  "stack_manifest_digest": "sha256:328c7dd209a4de092d66714161f3aef268d725d1f4ca004362c327803f06feef",
+  "published_refs": {
+    "json": "docs/registry/STACK-SYNERGY-REGISTRY.json",
+    "roadmap": "docs/ops/ATLAS-PLAYBOOK-CONVERGENCE.md",
+    "queue": "docs/ops/ATLAS-NEXT-BUILD-QUEUE.md"
+  },
+  "current_frontier": "stack-wide source-verified synergy discovery across repos/**, with Atlas/Fitness as telemetry-first tranche 1",
+  "operating_rules": [
+    "share contracts before sharing implementations",
+    "keep owner repos as source of truth and root as read-only projection",
+    "treat Atlas/Fitness as tranche 1, not the whole program",
+    "defer auth, shared UI, cross-sell, and ML until the contract lane is frozen"
+  ],
+  "first_wave_owner_lanes": [
+    {
+      "repo_id": "lifeline",
+      "owner_lane": "execution",
+      "status": "source_verified_candidate",
+      "summary": "Lifeline already publishes approval, capability-profile, request, and receipt semantics that appear reusable stack-wide.",
+      "evidence_refs": [
+        "repos/fawxzzy-lifeline/README.md",
+        "repos/fawxzzy-lifeline/docs/privileged-execution.md",
+        "repos/fawxzzy-lifeline/src/core/privileged-execution.ts",
+        "repos/fawxzzy-lifeline/examples/privileged-execution/capability-profile.json",
+        "repos/fawxzzy-lifeline/examples/privileged-execution/read-only-scan.approval.json"
+      ],
+      "candidate_contracts": [
+        "atlas.capability.profile.v1",
+        "atlas.approval.receipt.v1"
+      ],
+      "candidate_nouns": [
+        "capability_profile",
+        "approval_receipt",
+        "request",
+        "receipt",
+        "worker_id",
+        "assignment_id",
+        "stack_lock_digest",
+        "source_refs"
+      ],
+      "projection_rule": "Project reusable semantics at root without restating Lifeline owner doctrine."
+    },
+    {
+      "repo_id": "playbook",
+      "owner_lane": "governance_and_verification",
+      "status": "source_verified_candidate",
+      "summary": "Playbook already exposes the human and machine-readable governance contract, local verification receipt model, and workflow-pack style orchestration surfaces.",
+      "evidence_refs": [
+        "repos/fawxzzy-playbook/README.md",
+        "repos/fawxzzy-playbook/exports/README.md",
+        "repos/fawxzzy-playbook/exports/playbook.contract.schema.v1.json",
+        "repos/fawxzzy-playbook/docs/contracts/PLAYBOOK-CONTRACT.md",
+        "repos/fawxzzy-playbook/docs/contracts/LOCAL_VERIFICATION_RECEIPT_CONTRACT.md",
+        "repos/fawxzzy-playbook/docs/contracts/OUTCOME_TELEMETRY.md",
+        "repos/fawxzzy-playbook/packages/contracts/src/local-verification-receipt.schema.json",
+        "repos/fawxzzy-playbook/packages/contracts/src/workflow-promotion.schema.json"
+      ],
+      "candidate_contracts": [
+        "playbook contract export",
+        "local verification receipt",
+        "outcome telemetry",
+        "workflow promotion contract"
+      ],
+      "candidate_nouns": [
+        "verification",
+        "verification_receipt",
+        "contract_version",
+        "principle",
+        "pattern",
+        "adoption_check",
+        "workflow_pack"
+      ],
+      "projection_rule": "Consume Playbook exports and contract docs read-only rather than creating a second governance store."
+    },
+    {
+      "repo_id": "_stack",
+      "owner_lane": "orchestration",
+      "status": "source_verified_candidate",
+      "summary": "_stack already defines deterministic worker assignment, status, merge-request, pause, and resume artifact surfaces stamped with the root stack lock digest.",
+      "evidence_refs": [
+        "repos/_stack/README.md",
+        "repos/_stack/docs/codex-orchestration.md",
+        "repos/_stack/docs/runbooks/STACK-WORKER-FLOW.md",
+        "repos/_stack/docs/examples/stack-worker-artifacts/assignment.example.json",
+        "repos/_stack/ops/stack/StackWorkerArtifacts.ps1",
+        "repos/_stack/ops/stack/Test-StackWorkerArtifacts.ps1"
+      ],
+      "candidate_contracts": [
+        "atlas.worker.assignment.v1",
+        "atlas.worker.status.v1",
+        "atlas.worker.merge-request.v1"
+      ],
+      "candidate_nouns": [
+        "assignment",
+        "status",
+        "merge_request",
+        "resume_context",
+        "touched_ranges",
+        "stack_lock_digest"
+      ],
+      "projection_rule": "Treat `_stack` artifacts as the orchestration owner surface and keep root resume/reporting aligned to those artifacts."
+    },
+    {
+      "repo_id": "atlas",
+      "owner_lane": "doctrine_and_public_contracts",
+      "status": "source_verified_candidate",
+      "summary": "Atlas already owns the public contract vocabulary for UAPI resources, semantic intent, capability profiles, approvals, receipts, and platform boundary language.",
+      "evidence_refs": [
+        "repos/fawxzzy-atlas/README.md",
+        "repos/fawxzzy-atlas/docs/ATLAS_UAPI.md",
+        "repos/fawxzzy-atlas/docs/ATLAS_UAPI_AND_EXTENSION_MODEL.md",
+        "repos/fawxzzy-atlas/docs/BOTTOM_ACTION_INTENT_CONTRACT.md",
+        "repos/fawxzzy-atlas/docs/CONTRACT_MAP.md"
+      ],
+      "candidate_contracts": [
+        "ATLAS UAPI",
+        "bottom-action intent contract",
+        "public-vs-internal contract split"
+      ],
+      "candidate_nouns": [
+        "conversation",
+        "initiative",
+        "proposal",
+        "session",
+        "artifact",
+        "tool",
+        "capability_profile",
+        "approval",
+        "receipt",
+        "intent"
+      ],
+      "projection_rule": "Use Atlas as the doctrine and vocabulary owner for cross-repo contract naming."
+    }
+  ],
+  "telemetry_first_tranche": {
+    "tranche_id": "atlas-fitness-telemetry-first",
+    "status": "source_verified_candidate",
+    "summary": "Atlas supplies the shared contract vocabulary while Fitness already emits deterministic app signals and carries concrete glossary/contracts that can validate the first shared event lane.",
+    "evidence_refs": [
+      "repos/fawxzzy-atlas/docs/BOTTOM_ACTION_INTENT_CONTRACT.md",
+      "repos/fawxzzy-fitness/docs/day-summary-taxonomy-glossary.md",
+      "repos/fawxzzy-fitness/docs/architecture/fitness-integration.md",
+      "repos/fawxzzy-fitness/docs/MOBILE-REGRESSION-EXTRACTION-CONTRACT.md",
+      "repos/fawxzzy-fitness/src/lib/ecosystem/fitness-integration-contract.ts",
+      "repos/fawxzzy-fitness/src/lib/ecosystem/fitness-integration-client.ts",
+      "repos/fawxzzy-fitness/src/app/today/page.tsx",
+      "repos/fawxzzy-fitness/src/lib/session-follow-up-jobs.ts"
+    ],
+    "projection_rule": "Use Atlas/Fitness to prove glossary and telemetry contracts first, then widen to other repos only after the noun and event lane is frozen."
+  },
+  "glossary_candidates": [
+    {
+      "noun": "approval",
+      "owner_repo_id": "lifeline",
+      "status": "source_verified_candidate",
+      "evidence_refs": [
+        "repos/fawxzzy-lifeline/docs/privileged-execution.md",
+        "repos/fawxzzy-atlas/docs/ATLAS_UAPI.md"
+      ]
+    },
+    {
+      "noun": "receipt",
+      "owner_repo_id": "lifeline",
+      "status": "source_verified_candidate",
+      "evidence_refs": [
+        "repos/fawxzzy-lifeline/docs/privileged-execution.md",
+        "repos/fawxzzy-fitness/docs/architecture/fitness-integration.md"
+      ]
+    },
+    {
+      "noun": "capability_profile",
+      "owner_repo_id": "lifeline",
+      "status": "source_verified_candidate",
+      "evidence_refs": [
+        "repos/fawxzzy-lifeline/src/core/privileged-execution.ts",
+        "repos/fawxzzy-lifeline/examples/privileged-execution/capability-profile.json",
+        "repos/fawxzzy-atlas/docs/ATLAS_UAPI.md"
+      ]
+    },
+    {
+      "noun": "assignment",
+      "owner_repo_id": "_stack",
+      "status": "source_verified_candidate",
+      "evidence_refs": [
+        "repos/_stack/docs/runbooks/STACK-WORKER-FLOW.md",
+        "repos/_stack/docs/examples/stack-worker-artifacts/assignment.example.json",
+        "repos/_stack/ops/stack/StackWorkerArtifacts.ps1"
+      ]
+    },
+    {
+      "noun": "status",
+      "owner_repo_id": "_stack",
+      "status": "candidate",
+      "evidence_refs": [
+        "repos/_stack/docs/runbooks/STACK-WORKER-FLOW.md"
+      ]
+    },
+    {
+      "noun": "merge_request",
+      "owner_repo_id": "_stack",
+      "status": "candidate",
+      "evidence_refs": [
+        "repos/_stack/docs/runbooks/STACK-WORKER-FLOW.md"
+      ]
+    },
+    {
+      "noun": "conversation",
+      "owner_repo_id": "atlas",
+      "status": "candidate",
+      "evidence_refs": [
+        "repos/fawxzzy-atlas/docs/ATLAS_UAPI.md"
+      ]
+    },
+    {
+      "noun": "session",
+      "owner_repo_id": "atlas",
+      "status": "candidate",
+      "evidence_refs": [
+        "repos/fawxzzy-atlas/docs/ATLAS_UAPI.md"
+      ]
+    },
+    {
+      "noun": "proposal",
+      "owner_repo_id": "atlas",
+      "status": "candidate",
+      "evidence_refs": [
+        "repos/fawxzzy-atlas/docs/ATLAS_UAPI.md"
+      ]
+    },
+    {
+      "noun": "verification_receipt",
+      "owner_repo_id": "playbook",
+      "status": "source_verified_candidate",
+      "evidence_refs": [
+        "repos/fawxzzy-playbook/docs/contracts/LOCAL_VERIFICATION_RECEIPT_CONTRACT.md",
+        "repos/fawxzzy-playbook/packages/contracts/src/local-verification-receipt.schema.json"
+      ]
+    },
+    {
+      "noun": "day_summary_taxonomy",
+      "owner_repo_id": "fitness",
+      "status": "candidate",
+      "evidence_refs": [
+        "repos/fawxzzy-fitness/docs/day-summary-taxonomy-glossary.md"
+      ]
+    },
+    {
+      "noun": "signal",
+      "owner_repo_id": "fitness",
+      "status": "source_verified_candidate",
+      "evidence_refs": [
+        "repos/fawxzzy-fitness/docs/architecture/fitness-integration.md",
+        "repos/fawxzzy-fitness/src/lib/ecosystem/fitness-integration-contract.ts"
+      ]
+    }
+  ],
+  "event_candidates": [
+    {
+      "event_name": "assignment_created",
+      "owner_repo_id": "_stack",
+      "status": "source_verified_candidate",
+      "evidence_ref": "repos/_stack/ops/codex/Invoke-CodexRepoTask.ps1"
+    },
+    {
+      "event_name": "heartbeat",
+      "owner_repo_id": "_stack",
+      "status": "candidate",
+      "evidence_ref": "repos/_stack/docs/runbooks/STACK-WORKER-FLOW.md"
+    },
+    {
+      "event_name": "execution_requested",
+      "owner_repo_id": "lifeline",
+      "status": "source_verified_candidate",
+      "evidence_ref": "repos/_stack/docs/runbooks/STACK-WORKER-FLOW.md"
+    },
+    {
+      "event_name": "execution_approved",
+      "owner_repo_id": "lifeline",
+      "status": "source_verified_candidate",
+      "evidence_ref": "repos/_stack/docs/runbooks/STACK-WORKER-FLOW.md"
+    },
+    {
+      "event_name": "execution_rejected",
+      "owner_repo_id": "lifeline",
+      "status": "candidate",
+      "evidence_ref": "repos/_stack/docs/runbooks/STACK-WORKER-FLOW.md"
+    },
+    {
+      "event_name": "execution_expired",
+      "owner_repo_id": "lifeline",
+      "status": "candidate",
+      "evidence_ref": "repos/_stack/docs/runbooks/STACK-WORKER-FLOW.md"
+    },
+    {
+      "event_name": "execution_completed",
+      "owner_repo_id": "lifeline",
+      "status": "source_verified_candidate",
+      "evidence_ref": "repos/_stack/ops/stack/Test-StackWorkerArtifacts.ps1"
+    },
+    {
+      "event_name": "merge_requested",
+      "owner_repo_id": "_stack",
+      "status": "source_verified_candidate",
+      "evidence_ref": "repos/_stack/ops/stack/StackWorkerArtifacts.ps1"
+    },
+    {
+      "event_name": "resume_ready",
+      "owner_repo_id": "_stack",
+      "status": "source_verified_candidate",
+      "evidence_ref": "repos/_stack/ops/stack/StackWorkerArtifacts.ps1"
+    },
+    {
+      "event_name": "workout_completed",
+      "owner_repo_id": "fitness",
+      "status": "source_verified_candidate",
+      "evidence_ref": "repos/fawxzzy-fitness/src/lib/session-follow-up-jobs.ts"
+    },
+    {
+      "event_name": "workout_missed",
+      "owner_repo_id": "fitness",
+      "status": "source_verified_candidate",
+      "evidence_ref": "repos/fawxzzy-fitness/src/app/today/page.tsx"
+    },
+    {
+      "event_name": "weekly_goal_hit",
+      "owner_repo_id": "fitness",
+      "status": "source_verified_candidate",
+      "evidence_ref": "repos/fawxzzy-fitness/src/lib/ecosystem/fitness-integration-client.ts"
+    },
+    {
+      "event_name": "recovery_warning",
+      "owner_repo_id": "fitness",
+      "status": "source_verified_candidate",
+      "evidence_ref": "repos/fawxzzy-fitness/src/lib/ecosystem/fitness-integration-client.ts"
+    },
+    {
+      "event_name": "streak_broken",
+      "owner_repo_id": "fitness",
+      "status": "source_verified_candidate",
+      "evidence_ref": "repos/fawxzzy-fitness/src/lib/ecosystem/fitness-integration-client.ts"
+    }
+  ],
+  "verification_summary": {
+    "total_rows": 31,
+    "source_verified_candidate_rows": 22,
+    "candidate_only_rows": 9,
+    "first_wave_owner_lane_rows": 4,
+    "telemetry_first_tranche_rows": 1,
+    "glossary_rows": 12,
+    "event_rows": 14,
+    "backing_repo_ids": [
+      "atlas",
+      "fitness",
+      "lifeline",
+      "playbook",
+      "_stack"
+    ],
+    "validated_existing_evidence_refs": 21
+  },
+  "repo_backing_summary": [
+    {
+      "repo_id": "atlas",
+      "backed_rows": [
+        "first_wave_owner_lanes.atlas",
+        "telemetry_first_tranche.atlas-fitness-telemetry-first",
+        "glossary_candidates.conversation",
+        "glossary_candidates.session",
+        "glossary_candidates.proposal"
+      ]
+    },
+    {
+      "repo_id": "fitness",
+      "backed_rows": [
+        "telemetry_first_tranche.atlas-fitness-telemetry-first",
+        "glossary_candidates.day_summary_taxonomy",
+        "glossary_candidates.signal",
+        "event_candidates.workout_completed",
+        "event_candidates.workout_missed",
+        "event_candidates.weekly_goal_hit",
+        "event_candidates.recovery_warning",
+        "event_candidates.streak_broken"
+      ]
+    },
+    {
+      "repo_id": "lifeline",
+      "backed_rows": [
+        "first_wave_owner_lanes.lifeline",
+        "glossary_candidates.approval",
+        "glossary_candidates.receipt",
+        "glossary_candidates.capability_profile",
+        "event_candidates.execution_requested",
+        "event_candidates.execution_approved",
+        "event_candidates.execution_rejected",
+        "event_candidates.execution_expired",
+        "event_candidates.execution_completed"
+      ]
+    },
+    {
+      "repo_id": "playbook",
+      "backed_rows": [
+        "first_wave_owner_lanes.playbook",
+        "glossary_candidates.verification_receipt"
+      ]
+    },
+    {
+      "repo_id": "_stack",
+      "backed_rows": [
+        "first_wave_owner_lanes._stack",
+        "glossary_candidates.assignment",
+        "glossary_candidates.status",
+        "glossary_candidates.merge_request",
+        "event_candidates.assignment_created",
+        "event_candidates.heartbeat",
+        "event_candidates.merge_requested",
+        "event_candidates.resume_ready"
+      ]
+    }
+  ],
+  "candidate_only_rows": [
+    "glossary_candidates.status",
+    "glossary_candidates.merge_request",
+    "glossary_candidates.conversation",
+    "glossary_candidates.session",
+    "glossary_candidates.proposal",
+    "glossary_candidates.day_summary_taxonomy",
+    "event_candidates.heartbeat",
+    "event_candidates.execution_rejected",
+    "event_candidates.execution_expired"
+  ],
+  "top_source_verified_opportunities": [
+    {
+      "rank": 1,
+      "opportunity_id": "atlas-fitness-event-contract-package",
+      "status": "source_verified_shortlist",
+      "owner_repo_ids": [
+        "atlas",
+        "fitness"
+      ],
+      "why_now": "This is the strongest share-contracts-before-implementation lane because Atlas already owns naming and Fitness already ships typed signals, snapshots, routing metadata, and emit points in source.",
+      "promoted_rows": [
+        "telemetry_first_tranche.atlas-fitness-telemetry-first",
+        "glossary_candidates.signal",
+        "event_candidates.workout_completed",
+        "event_candidates.workout_missed",
+        "event_candidates.weekly_goal_hit",
+        "event_candidates.recovery_warning",
+        "event_candidates.streak_broken"
+      ],
+      "evidence_refs": [
+        "repos/fawxzzy-atlas/docs/BOTTOM_ACTION_INTENT_CONTRACT.md",
+        "repos/fawxzzy-fitness/docs/architecture/fitness-integration.md",
+        "repos/fawxzzy-fitness/src/lib/ecosystem/fitness-integration-contract.ts",
+        "repos/fawxzzy-fitness/src/lib/ecosystem/fitness-integration-client.ts",
+        "repos/fawxzzy-fitness/src/app/today/page.tsx",
+        "repos/fawxzzy-fitness/src/lib/session-follow-up-jobs.ts"
+      ]
+    },
+    {
+      "rank": 2,
+      "opportunity_id": "worker-execution-observation-chain",
+      "status": "source_verified_shortlist",
+      "owner_repo_ids": [
+        "_stack",
+        "lifeline",
+        "atlas"
+      ],
+      "why_now": "The worker assignment, approval, execution, merge, and resume surfaces are already explicit and test-backed, which makes this the strongest shared contract lane after telemetry.",
+      "promoted_rows": [
+        "first_wave_owner_lanes._stack",
+        "first_wave_owner_lanes.lifeline",
+        "glossary_candidates.assignment",
+        "glossary_candidates.approval",
+        "glossary_candidates.receipt",
+        "glossary_candidates.capability_profile",
+        "event_candidates.assignment_created",
+        "event_candidates.execution_requested",
+        "event_candidates.execution_approved",
+        "event_candidates.execution_completed",
+        "event_candidates.merge_requested",
+        "event_candidates.resume_ready"
+      ],
+      "evidence_refs": [
+        "repos/_stack/docs/runbooks/STACK-WORKER-FLOW.md",
+        "repos/_stack/ops/stack/StackWorkerArtifacts.ps1",
+        "repos/_stack/ops/stack/Test-StackWorkerArtifacts.ps1",
+        "repos/fawxzzy-lifeline/docs/privileged-execution.md",
+        "repos/fawxzzy-lifeline/src/core/privileged-execution.ts",
+        "repos/fawxzzy-atlas/docs/CONTRACT_MAP.md"
+      ]
+    },
+    {
+      "rank": 3,
+      "opportunity_id": "playbook-governance-workflow-pack",
+      "status": "source_verified_shortlist",
+      "owner_repo_ids": [
+        "playbook"
+      ],
+      "why_now": "Playbook already exports a versioned governance contract and ships reusable verification and workflow-promotion schemas, plus Lifeline-facing archetype exports that are read-only by design.",
+      "promoted_rows": [
+        "first_wave_owner_lanes.playbook",
+        "glossary_candidates.verification_receipt"
+      ],
+      "evidence_refs": [
+        "repos/fawxzzy-playbook/docs/contracts/PLAYBOOK-CONTRACT.md",
+        "repos/fawxzzy-playbook/exports/playbook.contract.schema.v1.json",
+        "repos/fawxzzy-playbook/packages/contracts/src/local-verification-receipt.schema.json",
+        "repos/fawxzzy-playbook/packages/contracts/src/workflow-promotion.schema.json",
+        "repos/fawxzzy-playbook/exports/lifeline/README.md"
+      ]
+    }
+  ],
+  "ranked_shortlists": {
+    "top_shared_noun_glossary_candidates": [
+      "capability_profile",
+      "approval",
+      "receipt",
+      "assignment",
+      "verification_receipt"
+    ],
+    "top_shared_contract_candidates": [
+      "atlas-fitness-event-contract-package",
+      "atlas.worker.assignment.v1 + atlas.worker.status.v1 + atlas.worker.merge-request.v1",
+      "playbook contract export + local verification receipt + workflow promotion contract"
+    ],
+    "top_workflow_pack_reuse_candidates": [
+      "repos/fawxzzy-playbook/exports/lifeline/**",
+      "repos/fawxzzy-playbook/packages/contracts/src/local-verification-receipt.schema.json",
+      "repos/_stack/ops/stack/StackWorkerArtifacts.ps1"
+    ],
+    "blockers_missing_owners_missing_tests": [
+      "No owner repo has frozen a shared stack-level event package id/version for the Atlas/Fitness telemetry lane yet.",
+      "Atlas contract-map lineage for Lifeline approval/request contracts still points at stack-root docs/standards/CAPABILITY-AND-PRIVILEGE-MODEL.md rather than an Atlas-owned spec path.",
+      "Cross-repo consumer tests for Atlas/Fitness telemetry contracts are missing; current proof is Fitness source/tests plus contract docs, not Playbook/Lifeline ingestion tests.",
+      "day_summary_taxonomy is source-backed in Fitness but not yet proven as a shared noun outside the Fitness repo."
+    ]
+  },
+  "freeze_targets": {
+    "shared_noun_glossary": "candidate_set_published",
+    "top_event_contracts": "candidate_set_published",
+    "implementation_sharing": "blocked_until_owner_contracts_are_frozen"
+  },
+  "notes": [
+    "This registry is a root projection surface. It does not replace owner-repo truth.",
+    "Candidate status means the surface was verified from visible repo source files in this workspace, not that the stack has frozen or promoted a shared contract yet.",
+    "Later widening should rank second-wave repos by duplication, active initiative pressure, and contract absence."
+  ]
+}
