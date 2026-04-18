@@ -47,9 +47,9 @@ The current landed state from this workspace is:
 - continuity and historical query coverage are landed
 - reviewed Verta derivative notes are landed without changing trust posture
 - `fitness` is `verified` for a bounded `verification_scope=targeted`
-- `mazer` is `adopted`, not yet `verified`
+- `mazer` is `verified` for a bounded `verification_scope=targeted`
 
-The active next move is therefore not more root product plumbing. It is the Mazer verification slice, projected read-only into root with an honest blocked or missing outcome if the repo-owned verification path still fails.
+The active next move is therefore not more root product plumbing. It is selective widening only where the next operator constraint actually depends on another repo-local adoption or verification slice.
 
 ## Deferred Cross-App Synergy Lane
 
@@ -141,7 +141,7 @@ No new canonical path class is introduced by this roadmap.
 
 ## Phase Plan
 
-Phases 1 through 3 are materially landed in the current workspace. The active program edge is Phase 4 and Phase 5, with the next concrete slice centered on `mazer`.
+Phases 1 through 3 are materially landed in the current workspace. The active program edge is Phase 4 and selective widening inside Phase 5, now that both current vertical application fixtures have bounded repo-owned verification truth.
 
 ### Phase 1: Posture Lock
 
@@ -211,7 +211,7 @@ Acceptance criteria:
 
 Primary slices:
 
-- application repo PRs: complete the Mazer verification slice or publish an honest blocked or missing report if the current path still fails
+- application repo PRs: widen only where the next repo-local adoption or verification slice creates real operator leverage
 - stack root PR: keep projecting landed repo-local adoption and verification evidence read-only into awareness and cockpit
 - only then: widen into additional repo-local waves where the next operator constraint actually depends on them
 - only after that frontier is stable: begin the deferred cross-app synergy lane from the registry and telemetry end, not from auth or ML
@@ -225,7 +225,7 @@ Primary slices:
 | `_stack` | Align worker merge, resume, and orchestration patterns to the shared contract. | Resume and merge flows cite the contract and verification is explicit. |
 | `atlas` | Pull contract refs and continuity refs by intent instead of broad context dumps. | Context or awareness surfaces can retrieve the right contract and continuity artifacts deterministically. |
 | `fitness` | Repo-local adoption and targeted verification slices are landed. | Matrix status is explicit at root as bounded `verified` with `verification_scope=targeted`, without implying broader product certification. |
-| `mazer` | Repo-local adoption slice is landed; verification is the next slice. | Matrix status remains `adopted` until repo-owned verification truth lands or an honest blocked or missing report is published. |
+| `mazer` | Repo-local adoption and targeted verification slices are landed. | Matrix status is explicit at root as bounded `verified` with `verification_scope=targeted`, without implying broader product certification. |
 | `stream` | Do the same once incubating scope is confirmed. | Matrix status is explicit and backed by a repo-local artifact or a documented defer decision. |
 | `nat1-games` | Do the same once incubating scope is confirmed. | Matrix status is explicit and backed by a repo-local artifact or a documented defer decision. |
 | `playbook-demo` | Decide whether it remains a demo-only mirror or a contract demonstration surface. | Matrix status is explicit and the demo role is documented. |

@@ -1,6 +1,6 @@
 # ATLAS Next Build Queue
 
-This queue is grounded against the live ATLAS workspace on `2026-04-17`.
+This queue is grounded against the live ATLAS workspace on `2026-04-18`.
 
 It replaces the older pre-adoption sequencing that assumed Playbook export, root consumption, and the first vertical repo slices were still pending.
 
@@ -12,7 +12,7 @@ It replaces the older pre-adoption sequencing that assumed Playbook export, root
 - the continuity lane is real: manifest, loader, handoff, and historical query coverage are visible from root
 - reviewed Verta derivative notes are landed without changing Verta's visible-untrusted metadata-only posture
 - `fitness` has repo-owned targeted verification truth and should project as the first bounded `verified` repo
-- `mazer` has repo-local adoption evidence and targeted proof, but remains `adopted` until the verification slice lands or reports an honest block
+- `mazer` now has repo-owned targeted verification truth and should project as the second bounded `verified` repo
 - root-side reporting was lagging those repo-local adoption slices and must stay aligned with the owner evidence
 
 ## Repo And Git Visibility
@@ -31,7 +31,7 @@ It replaces the older pre-adoption sequencing that assumed Playbook export, root
 | Repo | Local visibility | Git remote visibility | Notes |
 | --- | --- | --- | --- |
 | `fitness` | present at `repos/fawxzzy-fitness` | `origin` visible | repo-local adoption and targeted verification report are landed |
-| `mazer` | present at `repos/fawxzzy-mazer` | `origin` visible | repo-local adoption is landed and targeted proof is green; broader verify still needs explicit handling before `verified` |
+| `mazer` | present at `repos/fawxzzy-mazer` | `origin` visible | repo-local adoption and targeted verification report are landed |
 | `stream` | present at `repos/fawxzzy-stream` | no remote visible in this workspace | incubating and still outside the first adopted tranche |
 | `playbook-demo` | nested repo present at `repos/playbook-demo/playbook-demo` | `origin` visible | keep out of the critical path unless intentionally used as a contract demo surface |
 | `nat1-games` | nested repo present at `repos/Nat1-Games/nat1-games` | `origin` visible | still incubating from the convergence-program perspective |
@@ -64,25 +64,17 @@ The following items are concretely visible in this workspace now:
   - `repos/fawxzzy-fitness/tests/playbook-adoption-evidence.test.mjs`
   - `repos/fawxzzy-fitness/tests/playbook-verification-report.test.mjs`
   - `repos/fawxzzy-mazer/exports/mazer.playbook.adoption.evidence.v1.json`
+  - `repos/fawxzzy-mazer/exports/mazer.playbook.verification.report.v1.json`
   - `repos/fawxzzy-mazer/docs/ops/MAZER-PLAYBOOK-ADOPTION.md`
+  - `repos/fawxzzy-mazer/docs/ops/MAZER-PLAYBOOK-VERIFICATION.md`
   - `repos/fawxzzy-mazer/tests/playbook-adoption-evidence.test.mjs`
+  - `repos/fawxzzy-mazer/tests/playbook-verification-report.test.mjs`
 
 ## Next Execution Order
 
-### 1. Mazer verification slice
+### 1. Additional repo-local waves only where leverage is clear
 
-This is the highest-leverage next slice because the root posture, cockpit, Playbook export, and continuity lane are already landed.
-
-Target outcomes:
-
-- add repo-owned verification truth for `mazer`
-- project that verification read-only into root reporting
-- if the existing timeout or broader path still blocks verification, report that honestly as blocked or missing instead of forcing `verified`
-- keep the verification scope explicit so the status does not overclaim broader product certification
-
-### 2. Additional repo-local waves only where leverage is clear
-
-After the Mazer slice, only widen the rollout where there is clear leverage.
+Now that the root posture, cockpit, Playbook export, continuity lane, and first two bounded application verification slices are landed, widen only where there is clear leverage.
 
 Target outcomes:
 
@@ -90,7 +82,7 @@ Target outcomes:
 - keep application rollout selective rather than mechanical
 - avoid widening ATLAS root into a second truth store
 
-### 3. Historical reviewed-note promotion only where coverage is partial or missing
+### 2. Historical reviewed-note promotion only where coverage is partial or missing
 
 This is no longer the primary program gap. Keep doing it only where it buys real historical coverage.
 
@@ -113,7 +105,6 @@ Target outcomes after the current frontier:
 
 ## Not Yet Verified Here
 
-- a repo-owned verification report for `mazer` is not landed yet
 - `_stack`, `atlas`, and `stream` still present as local-only identities from the current workspace view
 - voice is still intentionally below the current priority line and not certified
 
@@ -124,4 +115,4 @@ Target outcomes after the current frontier:
 - do not widen root into a second truth store
 - do not treat imported planning material or transcripts as doctrine just because it is searchable
 - do not force `verified` when the evidence still says blocked or missing
-- do not use cross-app synergy research to skip the current Mazer verification and root-consumption frontier
+- do not use cross-app synergy research to outrank the next owner-repo leverage slice

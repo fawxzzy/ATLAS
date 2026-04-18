@@ -58,8 +58,8 @@ Current operating call:
 
 - grounded text conversation is ready for bounded daily operator use
 - `fitness` is the first bounded `verified` repo at `verification_scope=targeted`
-- `mazer` is `adopted`; its verification slice should report honest blocked or missing truth instead of forcing `verified`
-- the next highest-leverage slice is Mazer verification, not more root plumbing
+- `mazer` is now the second bounded `verified` repo at `verification_scope=targeted`
+- the next highest-leverage slices should widen only where clear operator leverage exists, not by adding more root plumbing
 - additional repo waves should follow only where leverage is clear
 - voice remains intentionally below the line unless explicitly chosen
 
