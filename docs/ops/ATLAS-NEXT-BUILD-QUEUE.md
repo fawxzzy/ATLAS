@@ -9,8 +9,10 @@ It replaces the older pre-adoption sequencing that assumed Playbook export, root
 - the ATLAS root worktree currently has convergence and continuity changes in flight rather than a clean posture snapshot
 - the thin cockpit is already live as a root-only, read-only operator surface
 - Playbook owner-truth export is already landed and root-side consumption is already wired
+- Playbook now owns the reusable event-contract workflow surface plus publish and rollback guidance for downstream callers
 - the continuity lane is real: manifest, loader, handoff, and historical query coverage are visible from root
 - reviewed Verta derivative notes are landed without changing Verta's visible-untrusted metadata-only posture
+- `atlas` and `fitness` now both carry owner-repo caller workflows pinned to an immutable Playbook workflow ref instead of tracking `@main`
 - `fitness` has repo-owned targeted verification truth and should project as the first bounded `verified` repo
 - `mazer` now has repo-owned targeted verification truth and should project as the second bounded `verified` repo
 - root-side reporting now projects both bounded verified repos and must stay aligned with the owner evidence
@@ -69,71 +71,48 @@ The following items are concretely visible in this workspace now:
   - `repos/fawxzzy-mazer/docs/ops/MAZER-PLAYBOOK-VERIFICATION.md`
   - `repos/fawxzzy-mazer/tests/playbook-adoption-evidence.test.mjs`
   - `repos/fawxzzy-mazer/tests/playbook-verification-report.test.mjs`
+- wave-1 event-contract enforcement lane:
+  - `repos/fawxzzy-playbook/.github/workflows/event-contract-pack.yml`
+  - `repos/fawxzzy-playbook/docs/contracts/EVENT_CONTRACT_WORKFLOW_CONSUMERS.md`
+  - `repos/fawxzzy-playbook/docs/RELEASING.md`
+  - `repos/fawxzzy-atlas/.github/workflows/event-contracts.yml`
+  - `repos/fawxzzy-fitness/.github/workflows/event-contracts.yml`
+  - `repos/fawxzzy-fitness/src/lib/ecosystem/fitness-shadow-warehouse.test.ts`
 
 ## Next Execution Order
 
-Root-side discovery is good enough for tranche selection. The next frontier is owner-repo contract work, not more registry prose.
+Wave 1 owner-repo implementation is landed enough to treat as release-stable now that the shared workflow consumers are pinned to an immutable Playbook ref. Root should record that landed state once from owner evidence and then move to the report's wave-two metrics lane, not reopen contract freezing.
 
 Projection artifact:
 
 - `docs/registry/STACK-SYNERGY-REGISTRY.json`
 
-### 1. Atlas + Fitness event-contract package
+### 1. Root sync once from owner evidence
 
 Target outcomes:
 
-- freeze `atlas-fitness-event-contract-package` as the first shared telemetry lane
-- keep the slice contract-only first: glossary, event catalog, schemas or types, migration map, and shadow-mode rollout plan
-- keep Atlas/Fitness as tranche 1 of the broader lane rather than the whole program
-- do not widen into shared implementation yet
+- update `docs/registry/STACK-SYNERGY-REGISTRY.json` and this queue from the landed Playbook, Atlas, and Fitness owner evidence
+- record that the reusable workflow consumers are pinned to immutable Playbook ref `9ce397e893e4007afbe93366770867ed64f66500`
+- keep the root as a pointer and projection surface rather than a second truth store
+- stop after the sync; do not restate owner truth at root
 
-### 2. Atlas / Lifeline approval-request lineage
-
-Target outcomes:
-
-- resolve the lineage blocker where Atlas contract mapping still points at `docs/standards/CAPABILITY-AND-PRIVILEGE-MODEL.md` in stack root instead of an Atlas-owned canonical spec path
-- clean up the first-wave approval, request, receipt, and capability lineage for Lifeline and Atlas owner surfaces
-- keep the fix anchored in owner truth rather than restating doctrine from root
-
-### 3. Playbook workflow-pack reuse decision
+### 2. Shared noun and KPI approval
 
 Target outcomes:
 
-- decide whether `playbook-governance-workflow-pack` should become the first reusable workflow-pack bundle
-- start from the source-verified local verification, workflow promotion, and export surfaces already visible in Playbook
-- keep this as a reuse decision, not implementation sprawl
+- approve the reusable noun set and KPI vocabulary from the now-frozen contract base
+- keep owner truth in Atlas, Fitness, Lifeline, Playbook, and `_stack` rather than copying new glossary prose into root
+- use root only to point at the approved owner evidence and tranche boundary
 
-### 4. Keep candidate rows candidate until promoted by evidence
-
-Target outcomes:
-
-- keep `status`, `merge_request`, `conversation`, `session`, `proposal`, `day_summary_taxonomy`, `heartbeat`, `execution_rejected`, and `execution_expired` as candidate rows until stronger repo or doc evidence exists
-- avoid promoting naming similarity into shared-contract truth
-- keep root honest about what is source-verified versus merely plausible
-
-### 5. Only after owner contract freeze: Atlas instrumentation
+### 3. Cross-app funnel and dashboard work
 
 Target outcomes:
 
-- instrument Atlas against the agreed event and telemetry contracts
-- keep risky integration work in shadow mode until the contract lane proves stable
+- build the first cross-app funnel, growth, or dashboard surfaces on top of the shadow-mode contract evidence
+- keep the work metrics-first and contract-backed rather than reopening workflow-pack churn
+- keep auth, shared UI, and ML out of the critical path while the metrics lane proves value
 
-### 6. Only after owner contract freeze: Fitness instrumentation
-
-Target outcomes:
-
-- instrument Fitness against the same contracts without inventing a second contract dialect
-- verify the shared inventory from owner-repo evidence rather than stack-root restatement
-
-### 7. Second-wave repo ranking and reusable checks after contract freeze
-
-Target outcomes:
-
-- rank second-wave repos by duplication, shared nouns, active initiative pressure, and contract absence
-- extract reusable workflow, CI or CD, and warehouse checks only after the registry and contract lane are real
-- keep this as a reuse lane, not a shortcut around contract ownership
-
-### 8. Only later: auth, shared UI, cross-sell, and ML
+### 4. Keep later work parked
 
 Target outcomes:
 
@@ -154,5 +133,7 @@ Target outcomes:
 - do not widen root into a second truth store
 - do not treat imported planning material or transcripts as doctrine just because it is searchable
 - do not force `verified` when the evidence still says blocked or missing
-- do not jump to auth, shared UI, cross-sell, or ML before the stack-wide registry and contract lane are source-verified
+- do not reopen event-contract freezing or workflow-pack proving work unless new owner evidence says the current owner lane regressed
+- do not treat floating workflow refs as a stable consumer contract
+- do not jump to auth, shared UI, cross-sell, or ML before the shared noun/KPI lane and cross-app metrics surfaces are real
 - do not blur the decision gate: root work changes projection truth; owner-repo work changes owner truth

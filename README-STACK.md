@@ -60,11 +60,13 @@ Current operating call:
 - `fitness` is the first bounded `verified` repo at `verification_scope=targeted`
 - `mazer` is now the second bounded `verified` repo at `verification_scope=targeted`
 - stack-wide source-verified synergy discovery is landed enough at root for tranche selection
-- the next frontier is first-wave owner-repo contract freezing: Atlas/Fitness telemetry and event contracts first, Atlas/Lifeline approval-request lineage cleanup next, and the Playbook workflow-pack reuse decision after that
-- the first projection artifact for that lane lives at `docs/registry/STACK-SYNERGY-REGISTRY.json` and records first-wave owner lanes plus Atlas/Fitness telemetry-first candidates without changing owner-repo truth
-- first-wave owner surfaces still include Lifeline approvals, receipts, and capability semantics; Playbook governance and verification workflow-pack reuse; and `_stack` orchestration, merge, resume, and worker contracts
+- Wave 1 contract freeze, adoption, instrumentation, reusable workflow lane, and warehouse smoke-check lane are landed in the scope actually frozen
+- Atlas and Fitness caller workflows are pinned to immutable Playbook ref `9ce397e893e4007afbe93366770867ed64f66500`
+- the first projection artifact for that lane lives at `docs/registry/STACK-SYNERGY-REGISTRY.json` and records landed owner lanes plus the Wave 2 metrics frontier without changing owner-repo truth
+- first-wave owner surfaces still include Lifeline approvals, receipts, and capability semantics; Playbook governance, verification, reusable workflow, and warehouse-pack reuse; and `_stack` orchestration, merge, resume, and worker contracts
 - keep `status`, `merge_request`, `conversation`, `session`, `proposal`, `day_summary_taxonomy`, `heartbeat`, `execution_rejected`, and `execution_expired` as candidate rows until repo evidence promotes them
-- reusable workflow or warehouse checks should follow only after the contract lane is frozen
+- the next frontier is Wave 2 metrics: shared noun and KPI approval first, then cross-app funnel and dashboard work from the now-stable contract base
+- only after those metrics surfaces are real should the stack decide whether to take a small growth or eligibility experiment forward
 - auth, shared UI, cross-sell, and ML stay explicitly later
 - voice remains intentionally below the line unless explicitly chosen
 - the decision gate stays explicit: root sessions change projection truth; owner-repo sessions change owner truth

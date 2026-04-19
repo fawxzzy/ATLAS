@@ -4,6 +4,7 @@ import argparse
 import json
 import subprocess
 import sys
+import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
@@ -14,6 +15,7 @@ if str(ROOT) not in sys.path:
 
 from ops._atlas import atlas_relative, atlas_root, load_stack_config, normalize_slashes
 from ops.atlas.observations import build_observation, emit_observation
+from ops.atlas.shadow_events import emit_shadow_event
 from ops.atlas.load_tool_registry import load_tool_registry_bundle, select_tool_entry
 from ops.cortex._artifacts import read_json, register_artifact_descriptors, sha256_bytes, write_json
 from ops.cortex.build_worker_context import build_worker_context_payload, normalize_query_terms
@@ -593,6 +595,7 @@ def main(argv: list[str] | None = None) -> int:
     assignment_id = f"{session_id}-assignment"
     request_id = f"{session_id}-request"
     approval_receipt_id = f"{session_id}-approval"
+    task_mutation_mode = "scoped_write" if scenario == "workspace-write" else "stack_only"
 
     session_root = ROOT / "runtime" / "atlas" / "sessions" / session_id
     artifact_root = session_root / "artifacts"
@@ -637,6 +640,16 @@ def main(argv: list[str] | None = None) -> int:
         supervision_tool=supervision_tool,
         execution_tool=execution_tool,
     )
+    task_scope_paths = [
+        "runtime/atlas/sessions",
+        "runtime/lifeline/worker-execution",
+        "runtime/cortex/supervisor",
+    ]
+    if scenario == "workspace-write":
+        task_scope_paths.append(atlas_relative(session_workspace_root, root=ROOT))
+
+    shadow_event_receipt_refs: list[str] = []
+    shadow_event_errors: list[str] = []
 
     def persist_manifest() -> None:
         manifest["updated_at"] = isoformat()
@@ -686,8 +699,69 @@ def main(argv: list[str] | None = None) -> int:
             root=ROOT,
         )
 
+    def emit_shadow(
+        *,
+        event_type: str,
+        payload: dict[str, Any],
+        event_token: str,
+        occurred_at: str | None = None,
+        include_task: bool = False,
+    ) -> None:
+        task_payload = None
+        if include_task:
+            task_payload = {
+                "task_id": task_id,
+                "task_name": title,
+                "scope_paths": task_scope_paths,
+                "repo_ids": ["stack", "_stack", "lifeline"],
+                "mutation_mode": task_mutation_mode,
+            }
+        try:
+            result = emit_shadow_event(
+                event_type=event_type,
+                session_id=session_id,
+                workspace_root=".",
+                payload=payload,
+                task=task_payload,
+                event_token=event_token,
+                occurred_at=occurred_at,
+                strict=True,
+            )
+        except Exception as exc:
+            shadow_event_errors.append(f"{event_type}: {exc}")
+            return
+        shadow_event_receipt_refs.append(str(result["paths"]["receipt_path"]))
+
     persist_manifest()
     emit_session_state_observation()
+    emit_shadow(
+        event_type="session_start",
+        payload={
+            "trigger": "wrapper",
+            "intent": title,
+            "workspace_scope": task_scope_paths,
+            "metadata": {
+                "task_id": task_id,
+                "scenario": scenario,
+            },
+        },
+        event_token="session-start",
+        occurred_at=str(manifest.get("created_at")),
+    )
+    emit_shadow(
+        event_type="task_start",
+        payload={
+            "task_summary": title,
+            "scoped_paths": task_scope_paths,
+            "mutation_mode": task_mutation_mode,
+            "validation_plan": [
+                "python ops/validation/validate_stack.py",
+            ],
+        },
+        event_token="task-start",
+        occurred_at=str(manifest.get("created_at")),
+        include_task=True,
+    )
     receipt_root: Path | None = None
 
     try:
@@ -815,14 +889,59 @@ def main(argv: list[str] | None = None) -> int:
             },
         )
 
-        execution = run_stack_function(
+        execution_command = [
+            "powershell",
             "Invoke-StackLifelineExecution",
-            RepoRoot=str(ROOT / "repos" / "_stack"),
-            WorkerAssignmentRef=manifest["worker"]["assignment_ref"],
-            WorkerStatusRef=atlas_relative(running_status_path, root=ROOT),
-            RequestRef=manifest["refs"]["request_ref"],
-            ApprovalReceiptRef=manifest["refs"]["approval_receipt_ref"],
-            CapabilityProfileRef=manifest["refs"]["capability_profile_ref"],
+        ]
+        emit_shadow(
+            event_type="pre_command",
+            payload={
+                "command": execution_command,
+                "cwd": "repos/_stack",
+                "timeout_seconds": 300,
+                "intent": "Bridge the root-owned session into Lifeline execution through _stack.",
+            },
+            event_token="lifeline-execution-pre",
+            include_task=True,
+        )
+        execution_started = time.monotonic()
+        try:
+            execution = run_stack_function(
+                "Invoke-StackLifelineExecution",
+                RepoRoot=str(ROOT / "repos" / "_stack"),
+                WorkerAssignmentRef=manifest["worker"]["assignment_ref"],
+                WorkerStatusRef=atlas_relative(running_status_path, root=ROOT),
+                RequestRef=manifest["refs"]["request_ref"],
+                ApprovalReceiptRef=manifest["refs"]["approval_receipt_ref"],
+                CapabilityProfileRef=manifest["refs"]["capability_profile_ref"],
+            )
+        except Exception as exc:
+            emit_shadow(
+                event_type="post_command",
+                payload={
+                    "command": execution_command,
+                    "cwd": "repos/_stack",
+                    "status": "failed",
+                    "exit_code": 1,
+                    "duration_ms": int((time.monotonic() - execution_started) * 1000),
+                    "stderr_summary": str(exc),
+                },
+                event_token="lifeline-execution-post-failed",
+                include_task=True,
+            )
+            raise
+        emit_shadow(
+            event_type="post_command",
+            payload={
+                "command": execution_command,
+                "cwd": "repos/_stack",
+                "status": "succeeded",
+                "exit_code": 0,
+                "duration_ms": int((time.monotonic() - execution_started) * 1000),
+                "stdout_summary": "Invoke-StackLifelineExecution completed and returned worker bridge refs.",
+            },
+            event_token="lifeline-execution-post-succeeded",
+            include_task=True,
         )
         manifest["session_state"] = "execution_recorded"
         manifest["refs"]["execution_receipt_ref"] = str(execution.get("receipt_ref"))
@@ -1038,6 +1157,20 @@ def main(argv: list[str] | None = None) -> int:
             receipt_root=receipt_root,
             supervisor_root=supervisor_root,
         )
+        emit_shadow(
+            event_type="session_stop",
+            payload={
+                "status": "completed",
+                "summary": (
+                    "ATLAS session completed shadow-mode telemetry dual-write "
+                    f"with final_status={manifest['completion']['final_status']}."
+                ),
+                "task_ids": [task_id],
+                "receipt_count": len(shadow_event_receipt_refs),
+            },
+            event_token="session-stop-completed",
+            occurred_at=str(manifest.get("closed_at")),
+        )
 
         print(
             json.dumps(
@@ -1052,12 +1185,28 @@ def main(argv: list[str] | None = None) -> int:
                     "status_snapshot_ref": sync_summary["status_snapshot_ref"],
                     "world_model_snapshot_ref": sync_summary["world_model_summary"]["snapshot_ref"],
                     "world_model_attention_ref": sync_summary["world_model_summary"]["attention_ref"],
+                    "shadow_event_receipt_refs": shadow_event_receipt_refs,
+                    "shadow_event_errors": shadow_event_errors,
                 },
                 indent=2,
             )
         )
         return 0
     except Exception:
+        emit_shadow(
+            event_type="session_stop",
+            payload={
+                "status": "failed",
+                "summary": (
+                    "ATLAS session failed during shadow-mode telemetry dual-write "
+                    f"with final_status={manifest['completion']['final_status']}."
+                ),
+                "task_ids": [task_id],
+                "receipt_count": len(shadow_event_receipt_refs),
+            },
+            event_token="session-stop-failed",
+            occurred_at=isoformat(),
+        )
         manifest["session_state"] = "failed"
         manifest["automation_level"] = CONTEXT_AUTOMATION_LEVEL
         manifest["completion"]["final_status"] = "failed"

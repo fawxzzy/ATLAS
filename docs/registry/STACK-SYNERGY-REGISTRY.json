@@ -1,8 +1,8 @@
 {
   "schema_version": "atlas.stack.synergy-registry.v1",
   "generated_on": "2026-04-18",
-  "registry_status": "source_verified_discovery",
-  "registry_readiness": "tranche_selection_ready",
+  "registry_status": "owner_evidence_projected",
+  "registry_readiness": "wave_2_metrics_lane_ready",
   "stack_manifest_ref": "stack.yaml",
   "stack_manifest_digest": "sha256:328c7dd209a4de092d66714161f3aef268d725d1f4ca004362c327803f06feef",
   "published_refs": {
@@ -10,7 +10,7 @@
     "roadmap": "docs/ops/ATLAS-PLAYBOOK-CONVERGENCE.md",
     "queue": "docs/ops/ATLAS-NEXT-BUILD-QUEUE.md"
   },
-  "current_frontier": "first-wave owner-repo contract freezing, with Atlas/Fitness telemetry first and Lifeline, Playbook, and _stack still in wave 1",
+  "current_frontier": "wave-1 owner implementation is landed and the Atlas/Fitness workflow consumers are pinned to immutable Playbook ref 9ce397e893e4007afbe93366770867ed64f66500; the next lane is shared noun and KPI approval followed by cross-app funnel/dashboard work",
   "discovery_posture": "stack-wide source-verified synergy discovery at root is landed enough for tranche selection but does not replace owner-repo truth",
   "decision_gate": "If the change is root projection, do it in ATLAS root. If the change is owner truth, do it in the owner repo.",
   "operating_rules": [
@@ -439,12 +439,12 @@
     {
       "rank": 1,
       "opportunity_id": "atlas-fitness-event-contract-package",
-      "status": "next_contract_freeze",
+      "status": "landed_release_stable",
       "owner_repo_ids": [
         "atlas",
         "fitness"
       ],
-      "why_now": "This is the strongest share-contracts-before-implementation lane because Atlas already owns naming and Fitness already ships typed signals, snapshots, routing metadata, and emit points in source.",
+      "why_now": "The contract package, Atlas/Fitness instrumentation, reusable workflow lane, warehouse smoke checks, and publish/rollback guidance are now landed from owner repos, and the shared workflow consumers are pinned to an immutable Playbook commit instead of @main.",
       "freeze_scope": [
         "glossary",
         "event catalog",
@@ -463,11 +463,17 @@
       ],
       "evidence_refs": [
         "repos/fawxzzy-atlas/docs/BOTTOM_ACTION_INTENT_CONTRACT.md",
+        "repos/fawxzzy-atlas/.github/workflows/event-contracts.yml",
         "repos/fawxzzy-fitness/docs/architecture/fitness-integration.md",
+        "repos/fawxzzy-fitness/.github/workflows/event-contracts.yml",
         "repos/fawxzzy-fitness/src/lib/ecosystem/fitness-integration-contract.ts",
         "repos/fawxzzy-fitness/src/lib/ecosystem/fitness-integration-client.ts",
+        "repos/fawxzzy-fitness/src/lib/ecosystem/fitness-shadow-warehouse.test.ts",
         "repos/fawxzzy-fitness/src/app/today/page.tsx",
-        "repos/fawxzzy-fitness/src/lib/session-follow-up-jobs.ts"
+        "repos/fawxzzy-fitness/src/lib/session-follow-up-jobs.ts",
+        "repos/fawxzzy-playbook/.github/workflows/event-contract-pack.yml",
+        "repos/fawxzzy-playbook/docs/contracts/EVENT_CONTRACT_WORKFLOW_CONSUMERS.md",
+        "repos/fawxzzy-playbook/docs/RELEASING.md"
       ]
     },
     {
@@ -534,9 +540,8 @@
       "repos/_stack/ops/stack/StackWorkerArtifacts.ps1"
     ],
     "blockers_missing_owners_missing_tests": [
-      "No owner repo has frozen a shared stack-level event package id/version for the Atlas/Fitness telemetry lane yet.",
-      "Atlas contract-map lineage for Lifeline approval/request contracts still points at stack-root docs/standards/CAPABILITY-AND-PRIVILEGE-MODEL.md rather than an Atlas-owned spec path.",
-      "Cross-repo consumer tests for Atlas/Fitness telemetry contracts are missing; current proof is Fitness source/tests plus contract docs, not Playbook/Lifeline ingestion tests.",
+      "Shared noun and KPI approval is not yet frozen across Atlas, Fitness, Lifeline, Playbook, and _stack from the now-landed contract base.",
+      "Cross-app funnel or dashboard surfaces have not yet been promoted from the shadow-mode telemetry lane into a durable owner-backed metrics surface.",
       "day_summary_taxonomy is source-backed in Fitness but not yet proven as a shared noun outside the Fitness repo."
     ],
     "candidate_hold_rows": [
@@ -554,49 +559,49 @@
   "next_execution_slices": [
     {
       "rank": 1,
-      "slice_id": "atlas-fitness-event-contract-package",
-      "type": "contract_freeze",
-      "scope": "contract_only",
+      "slice_id": "shared-noun-and-kpi-approval",
+      "type": "product_alignment_lane",
+      "scope": "contract_governed_metrics_vocabulary",
       "target_outcomes": [
-        "glossary",
-        "event catalog",
-        "schemas_or_types",
-        "migration_map",
-        "shadow_mode_rollout_plan"
+        "approved shared nouns",
+        "approved KPI vocabulary",
+        "owner-backed glossary decisions",
+        "root projection update only"
       ]
     },
     {
       "rank": 2,
-      "slice_id": "atlas-lifeline-approval-request-lineage",
-      "type": "contract_cleanup",
-      "scope": "owner_lineage",
+      "slice_id": "cross-app-funnel-and-dashboard-work",
+      "type": "product_metrics_lane",
+      "scope": "growth_and_dashboard_surfaces",
       "target_outcomes": [
-        "Atlas-owned canonical spec path",
-        "contract-map lineage cleanup",
-        "approval/request/receipt/capability boundary clarification"
+        "cross-app funnel views",
+        "dashboard surfaces",
+        "growth instrumentation",
+        "contract-backed metrics proof"
       ]
     },
     {
       "rank": 3,
-      "slice_id": "playbook-governance-workflow-pack",
-      "type": "reuse_decision",
-      "scope": "workflow_pack_bundle_decision",
+      "slice_id": "later-auth-ui-and-ml",
+      "type": "parked_later",
+      "scope": "deferred_after_telemetry_stability",
       "target_outcomes": [
-        "local verification reuse decision",
-        "workflow promotion reuse decision",
-        "export bundle reuse decision"
+        "auth after taxonomy and account-model stability",
+        "shared UI after package ownership clarity",
+        "cross-sell and ML after identity and attribution"
       ]
     }
   ],
   "freeze_targets": {
     "shared_noun_glossary": "candidate_set_published",
     "top_event_contracts": "candidate_set_published",
-    "implementation_sharing": "blocked_until_owner_contracts_are_frozen"
+    "implementation_sharing": "wave_1_release_stable"
   },
   "notes": [
     "This registry is a root projection surface. It does not replace owner-repo truth.",
     "Candidate status means the surface was verified from visible repo source files in this workspace, not that the stack has frozen or promoted a shared contract yet.",
     "Later widening should rank second-wave repos by duplication, active initiative pressure, and contract absence.",
-    "Root-side discovery is landed enough for tranche selection; the next slices are owner-repo contract freezing and reuse decisions."
+    "Root-side discovery and owner evidence are now landed enough to freeze Wave 1 posture at root; the next slices are shared noun/KPI approval and cross-app metrics work."
   ]
 }
