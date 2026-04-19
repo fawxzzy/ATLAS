@@ -1,8 +1,8 @@
 {
   "schema_version": "atlas.stack.synergy-registry.v1",
-  "generated_on": "2026-04-18",
+  "generated_on": "2026-04-19",
   "registry_status": "owner_evidence_projected",
-  "registry_readiness": "wave_2_metrics_lane_ready",
+  "registry_readiness": "fitness_shadow_growth_gate_frozen",
   "stack_manifest_ref": "stack.yaml",
   "stack_manifest_digest": "sha256:328c7dd209a4de092d66714161f3aef268d725d1f4ca004362c327803f06feef",
   "published_refs": {
@@ -10,7 +10,7 @@
     "roadmap": "docs/ops/ATLAS-PLAYBOOK-CONVERGENCE.md",
     "queue": "docs/ops/ATLAS-NEXT-BUILD-QUEUE.md"
   },
-  "current_frontier": "wave-1 owner implementation is landed and the Atlas/Fitness workflow consumers are pinned to immutable Playbook ref 9ce397e893e4007afbe93366770867ed64f66500; the next lane is shared noun and KPI approval followed by cross-app funnel/dashboard work",
+  "current_frontier": "Wave 1 owner implementation is landed and the Atlas/Fitness workflow consumers are pinned to immutable Playbook ref 9ce397e893e4007afbe93366770867ed64f66500; Fitness owner truth now includes the first growth pack, the pilot-readiness threshold pack, and measured proof for one shadow-only placement; the current owner gate result is stay_shadow, no pilot-live rollout is authorized yet, and the next owner work is evidence-surface completion in repos/fawxzzy-fitness.",
   "discovery_posture": "stack-wide source-verified synergy discovery at root is landed enough for tranche selection but does not replace owner-repo truth",
   "decision_gate": "If the change is root projection, do it in ATLAS root. If the change is owner truth, do it in the owner repo.",
   "operating_rules": [
@@ -444,7 +444,7 @@
         "atlas",
         "fitness"
       ],
-      "why_now": "The contract package, Atlas/Fitness instrumentation, reusable workflow lane, warehouse smoke checks, and publish/rollback guidance are now landed from owner repos, and the shared workflow consumers are pinned to an immutable Playbook commit instead of @main.",
+      "why_now": "The contract package, Atlas/Fitness instrumentation, reusable workflow lane, warehouse smoke checks, publish/rollback guidance, and the frozen pilot gate are now landed from owner repos, and the shared workflow consumers are pinned to an immutable Playbook commit instead of @main.",
       "freeze_scope": [
         "glossary",
         "event catalog",
@@ -540,8 +540,8 @@
       "repos/_stack/ops/stack/StackWorkerArtifacts.ps1"
     ],
     "blockers_missing_owners_missing_tests": [
-      "Shared noun and KPI approval is not yet frozen across Atlas, Fitness, Lifeline, Playbook, and _stack from the now-landed contract base.",
-      "Cross-app funnel or dashboard surfaces have not yet been promoted from the shadow-mode telemetry lane into a durable owner-backed metrics surface.",
+      "The pilot-readiness threshold pack is now frozen in Fitness owner truth, but the current gate result is stay_shadow until the missing evidence surface is present in repo-owned receipts.",
+      "The current growth rollout remains shadow-only; no owner evidence promotes the placement to pilot-live yet.",
       "day_summary_taxonomy is source-backed in Fitness but not yet proven as a shared noun outside the Fitness repo."
     ],
     "candidate_hold_rows": [
@@ -559,26 +559,24 @@
   "next_execution_slices": [
     {
       "rank": 1,
-      "slice_id": "shared-noun-and-kpi-approval",
-      "type": "product_alignment_lane",
-      "scope": "contract_governed_metrics_vocabulary",
+      "slice_id": "fitness-pilot-readiness-evidence-surface",
+      "type": "owner_repo_gate",
+      "scope": "fitness_wave_2_growth_gate",
       "target_outcomes": [
-        "approved shared nouns",
-        "approved KPI vocabulary",
-        "owner-backed glossary decisions",
-        "root projection update only"
+        "pilot-readiness threshold pack stays frozen in Fitness owner truth",
+        "repo-owned evidence surface is completed so the evaluator can measure the frozen thresholds",
+        "shadow-only rollout remains explicit until the threshold gate passes"
       ]
     },
     {
       "rank": 2,
-      "slice_id": "cross-app-funnel-and-dashboard-work",
-      "type": "product_metrics_lane",
-      "scope": "growth_and_dashboard_surfaces",
+      "slice_id": "pilot-live-decision-after-thresholds",
+      "type": "gated_follow_on",
+      "scope": "post-threshold-promotion_decision",
       "target_outcomes": [
-        "cross-app funnel views",
-        "dashboard surfaces",
-        "growth instrumentation",
-        "contract-backed metrics proof"
+        "no pilot-live projection before owner thresholds pass",
+        "promotion decision stays in Fitness owner truth",
+        "root updates only after owner evidence changes"
       ]
     },
     {
@@ -602,6 +600,7 @@
     "This registry is a root projection surface. It does not replace owner-repo truth.",
     "Candidate status means the surface was verified from visible repo source files in this workspace, not that the stack has frozen or promoted a shared contract yet.",
     "Later widening should rank second-wave repos by duplication, active initiative pressure, and contract absence.",
-    "Root-side discovery and owner evidence are now landed enough to freeze Wave 1 posture at root; the next slices are shared noun/KPI approval and cross-app metrics work."
+    "Root-side discovery and owner evidence are now landed enough to project the first Fitness growth pack, the frozen pilot-readiness gate, and one measured shadow-only placement without widening root into a second truth store.",
+    "The current owner gate result is stay_shadow; root should point at Fitness evidence-surface completion rather than restate or bypass the growth contract."
   ]
 }

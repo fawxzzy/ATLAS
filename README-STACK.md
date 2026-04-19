@@ -62,11 +62,12 @@ Current operating call:
 - stack-wide source-verified synergy discovery is landed enough at root for tranche selection
 - Wave 1 contract freeze, adoption, instrumentation, reusable workflow lane, and warehouse smoke-check lane are landed in the scope actually frozen
 - Atlas and Fitness caller workflows are pinned to immutable Playbook ref `9ce397e893e4007afbe93366770867ed64f66500`
-- the first projection artifact for that lane lives at `docs/registry/STACK-SYNERGY-REGISTRY.json` and records landed owner lanes plus the Wave 2 metrics frontier without changing owner-repo truth
+- the first projection artifact for that lane lives at `docs/registry/STACK-SYNERGY-REGISTRY.json` and records landed owner lanes plus the projected Fitness Wave 2 metrics, funnel, and growth posture without changing owner-repo truth
 - first-wave owner surfaces still include Lifeline approvals, receipts, and capability semantics; Playbook governance, verification, reusable workflow, and warehouse-pack reuse; and `_stack` orchestration, merge, resume, and worker contracts
 - keep `status`, `merge_request`, `conversation`, `session`, `proposal`, `day_summary_taxonomy`, `heartbeat`, `execution_rejected`, and `execution_expired` as candidate rows until repo evidence promotes them
-- the next frontier is Wave 2 metrics: shared noun and KPI approval first, then cross-app funnel and dashboard work from the now-stable contract base
-- only after those metrics surfaces are real should the stack decide whether to take a small growth or eligibility experiment forward
+- Fitness owner truth now includes the first growth pack, the pilot-readiness threshold pack, and measured proof for one shadow-only placement in the Wave 2 growth lane
+- the pilot-readiness gate currently evaluates to `stay_shadow` in Fitness owner truth, so no pilot-live rollout is authorized at root
+- the next owner-repo work is evidence-surface completion in `repos/fawxzzy-fitness` so the frozen pilot thresholds can be measured from repo-owned receipts
 - auth, shared UI, cross-sell, and ML stay explicitly later
 - voice remains intentionally below the line unless explicitly chosen
 - the decision gate stays explicit: root sessions change projection truth; owner-repo sessions change owner truth
