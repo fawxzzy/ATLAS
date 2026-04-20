@@ -1,0 +1,29 @@
+{
+  "contract_version": "atlas.ui.capture-inputs.v1",
+  "owner_repo_id": "fitness",
+  "owner_repo_path": "repos/fawxzzy-fitness",
+  "owner_contract_refs": {
+    "manifest_ref": "repos/fawxzzy-fitness/truth-pack/fitness/design-system/README.md",
+    "tokens_ref": "repos/fawxzzy-fitness/truth-pack/fitness/design-system/tokens.v1.json",
+    "primitives_ref": "repos/fawxzzy-fitness/truth-pack/fitness/design-system/primitives.v1.json"
+  },
+  "capture_map_ref": "ops/atlas/ui_observe/fitness_capture_map.v1.json",
+  "capture_set": [
+    {
+      "screen_key": "todayOverview",
+      "state_key": "default"
+    },
+    {
+      "screen_key": "routinesOverview",
+      "state_key": "default"
+    },
+    {
+      "screen_key": "exerciseLog",
+      "state_key": "active"
+    },
+    {
+      "screen_key": "editDay",
+      "state_key": "default"
+    }
+  ]
+}

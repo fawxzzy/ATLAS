@@ -24,10 +24,24 @@ SCAN_SKIP_DIRS = {
 ACTIVE_STATUSES = {"active"}
 AGENTS_EXPECTED_STATUSES = {"active", "incubating"}
 CONFIG_EXPECTED_STATUSES = {"active"}
+WINDOWS_DRIVE_PREFIX_PATTERN = r"[A-Za-z]:"
+USER_HOME_DIRECTORY = "Users"
+UNIX_HOME_DIRECTORIES = ("Users", "home")
+
+
+def build_home_path_pattern(*, separator: str, directory: str) -> re.Pattern[str]:
+    return re.compile(
+        WINDOWS_DRIVE_PREFIX_PATTERN
+        + separator
+        + re.escape(directory)
+        + separator
+    )
+
+
 ABSOLUTE_PATTERNS = [
-    ("critical", "windows-user-path", re.compile(r"[A-Za-z]:\\Users\\")),
-    ("critical", "windows-user-path-alt", re.compile(r"[A-Za-z]:/Users/")),
-    ("critical", "unix-home-path", re.compile(r"(/Users/|/home/)")),
+    ("critical", "windows-user-path", build_home_path_pattern(separator=r"\\", directory=USER_HOME_DIRECTORY)),
+    ("critical", "windows-user-path-alt", build_home_path_pattern(separator="/", directory=USER_HOME_DIRECTORY)),
+    ("critical", "unix-home-path", re.compile("|".join(re.escape(f"/{directory}/") for directory in UNIX_HOME_DIRECTORIES))),
 ]
 MUTABLE_DIR_CANDIDATES = [
     ".next", ".playbook", ".lifeline", ".venv", ".vercel", "node_modules", "dist",

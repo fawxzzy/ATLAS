@@ -1,0 +1,400 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://schemas/atlas.ui.observation.v1.json",
+  "title": "ATLAS UI observation v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "observation_id",
+    "comparison_key",
+    "comparison_digest",
+    "observer_version",
+    "source_kind",
+    "owner_repo_id",
+    "owner_repo_path",
+    "owner_contract_refs",
+    "capture",
+    "observed_at",
+    "snapshot",
+    "traits",
+    "provenance"
+  ],
+  "properties": {
+    "contract_version": {
+      "type": "string",
+      "const": "atlas.ui.observation.v1"
+    },
+    "observation_id": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "comparison_key": {
+      "type": "string",
+      "minLength": 1
+    },
+    "comparison_digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "observer_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_kind": {
+      "type": "string",
+      "enum": [
+        "owner_contracts"
+      ]
+    },
+    "owner_repo_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "owner_repo_path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "owner_contract_refs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tokens_ref",
+        "primitives_ref"
+      ],
+      "properties": {
+        "manifest_ref": {
+          "type": "string"
+        },
+        "tokens_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "primitives_ref": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "capture": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "capture_id",
+        "screen_key",
+        "screen_label",
+        "state_key",
+        "state_label",
+        "route_family",
+        "capture_map_ref",
+        "owner_surface_refs",
+        "primitive_variants"
+      ],
+      "properties": {
+        "capture_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "screen_key": {
+          "type": "string",
+          "minLength": 1
+        },
+        "screen_label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "state_key": {
+          "type": "string",
+          "minLength": 1
+        },
+        "state_label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "route_family": {
+          "type": "string",
+          "minLength": 1
+        },
+        "capture_map_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "owner_surface_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "primitive_variants": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/primitiveVariantRef"
+          }
+        }
+      }
+    },
+    "observed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "snapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "selected_primitives",
+        "token_refs_by_scale",
+        "token_contract_ref"
+      ],
+      "properties": {
+        "selected_primitives": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/selectedPrimitive"
+          }
+        },
+        "token_refs_by_scale": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "spacing",
+            "typography",
+            "colors",
+            "radii",
+            "shadows",
+            "borders"
+          ],
+          "properties": {
+            "spacing": {
+              "$ref": "#/$defs/tokenRefArray"
+            },
+            "typography": {
+              "$ref": "#/$defs/tokenRefArray"
+            },
+            "colors": {
+              "$ref": "#/$defs/tokenRefArray"
+            },
+            "radii": {
+              "$ref": "#/$defs/tokenRefArray"
+            },
+            "shadows": {
+              "$ref": "#/$defs/tokenRefArray"
+            },
+            "borders": {
+              "$ref": "#/$defs/tokenRefArray"
+            }
+          }
+        },
+        "token_contract_ref": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "traits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "spacing",
+        "typography",
+        "header_shape",
+        "card_shape",
+        "tag_usage",
+        "section_layout"
+      ],
+      "properties": {
+        "spacing": {
+          "$ref": "#/$defs/normalizedScaleTrait"
+        },
+        "typography": {
+          "$ref": "#/$defs/normalizedScaleTrait"
+        },
+        "header_shape": {
+          "$ref": "#/$defs/normalizedPrimitiveTrait"
+        },
+        "card_shape": {
+          "$ref": "#/$defs/normalizedPrimitiveTrait"
+        },
+        "tag_usage": {
+          "$ref": "#/$defs/normalizedPrimitiveTrait"
+        },
+        "section_layout": {
+          "$ref": "#/$defs/normalizedPrimitiveTrait"
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "inputs_digest",
+        "contracts_digest",
+        "capture_map_digest",
+        "observer_root"
+      ],
+      "properties": {
+        "inputs_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "contracts_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "capture_map_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "observer_root": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  },
+  "$defs": {
+    "tokenRefArray": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^(spacing|typography|colors|radii|shadows|borders)\\.[A-Za-z0-9._-]+$"
+      }
+    },
+    "primitiveVariantRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "primitive_id",
+        "variant_id",
+        "contract_ref"
+      ],
+      "properties": {
+        "primitive_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "variant_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "contract_ref": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "selectedPrimitive": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "slot",
+        "trait_name",
+        "primitive_id",
+        "variant_id",
+        "contract_ref",
+        "token_refs",
+        "trait_snapshot"
+      ],
+      "properties": {
+        "slot": {
+          "type": "string",
+          "minLength": 1
+        },
+        "trait_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "primitive_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "variant_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "contract_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "token_refs": {
+          "$ref": "#/$defs/tokenRefArray"
+        },
+        "trait_snapshot": {
+          "type": "object"
+        }
+      }
+    },
+    "normalizedScaleTrait": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "token_refs",
+        "source_primitives"
+      ],
+      "properties": {
+        "token_refs": {
+          "$ref": "#/$defs/tokenRefArray"
+        },
+        "source_primitives": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "primitive_id",
+              "variant_id",
+              "contract_ref"
+            ],
+            "properties": {
+              "primitive_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "variant_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "contract_ref": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    "normalizedPrimitiveTrait": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "primitive_id",
+        "variant_id",
+        "contract_ref",
+        "token_refs",
+        "trait_snapshot"
+      ],
+      "properties": {
+        "primitive_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "variant_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "contract_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "token_refs": {
+          "$ref": "#/$defs/tokenRefArray"
+        },
+        "trait_snapshot": {
+          "type": "object"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,135 @@
+{
+  "contract_version": "atlas.ui.capture-map.v1",
+  "owner_repo_id": "fitness",
+  "owner_repo_path": "repos/fawxzzy-fitness",
+  "captures": [
+    {
+      "capture_id": "today-overview-default",
+      "screen_key": "todayOverview",
+      "screen_label": "Today overview",
+      "state_key": "default",
+      "state_label": "Default",
+      "route_family": "overview",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/components/ui/app/AppHeader.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/AppPanel.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/AppBadge.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/SharedSectionShell.tsx"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "shared"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "panel"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "today"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "dense"
+        }
+      }
+    },
+    {
+      "capture_id": "routines-overview-default",
+      "screen_key": "routinesOverview",
+      "screen_label": "Routines overview",
+      "state_key": "default",
+      "state_label": "Default",
+      "route_family": "overview",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/components/ui/app/AppHeader.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/AppPanel.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/AppBadge.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/SharedSectionShell.tsx"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "shared"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "panel"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "default"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "spacious"
+        }
+      }
+    },
+    {
+      "capture_id": "exercise-log-active",
+      "screen_key": "exerciseLog",
+      "screen_label": "Exercise log",
+      "state_key": "active",
+      "state_label": "Active session",
+      "route_family": "session",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/components/ui/app/AppHeader.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/AppPanel.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/AppBadge.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/SharedSectionShell.tsx"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "standalone"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "panel"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "default"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "standard"
+        }
+      }
+    },
+    {
+      "capture_id": "edit-day-default",
+      "screen_key": "editDay",
+      "screen_label": "Edit day",
+      "state_key": "default",
+      "state_label": "Default",
+      "route_family": "editor",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/components/ui/app/AppHeader.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/AppPanel.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/AppBadge.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/SharedSectionShell.tsx"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "standalone"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "panel"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "default"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "standard"
+        }
+      }
+    }
+  ]
+}

@@ -11,7 +11,7 @@ components:
     ref_type: "branch"
     ref: "main"
     commit: "55690aae00ba67b113f127274be9c534f7159ed8"
-    dirty: false
+    dirty: true
     trust_class: "trusted"
     release_eligible: false
   atlas:
@@ -22,7 +22,7 @@ components:
     ref_type: "branch"
     ref: "main"
     commit: "d915c6d3d5cc86c3a9f5de8805c90ae4d0de73d8"
-    dirty: false
+    dirty: true
     trust_class: "trusted"
     release_eligible: true
   fitness:
@@ -32,7 +32,7 @@ components:
     remote: "https://github.com/fawxzzy/fawxzzy-fitness.git"
     ref_type: "branch"
     ref: "main"
-    commit: "23cb6677eb918922f2943d12632939a33e6f01f8"
+    commit: "8015991815c597bbdefae779f70acb92aacc7a30"
     dirty: true
     trust_class: "trusted"
     release_eligible: true
@@ -40,11 +40,11 @@ components:
     path: "repos/fawxzzy-lifeline"
     role: "local-operator"
     status: "active"
-    remote: "https://github.com/ZachariahRedfield/fawxzzy-lifeline.git"
+    remote: "https://github.com/fawxzzy/fawxzzy-lifeline.git"
     ref_type: "branch"
-    ref: "codex/startup-public-truth-reconcile"
+    ref: "main"
     commit: "7a3ed573dd391eb9429f2f2d158046de4cfaa9a1"
-    dirty: false
+    dirty: true
     trust_class: "trusted"
     release_eligible: true
   mazer:
@@ -54,8 +54,8 @@ components:
     remote: "https://github.com/fawxzzy/fawxzzy-mazer.git"
     ref_type: "branch"
     ref: "main"
-    commit: "e8fee1a0ff4819815ee9fe92b7791b5b63588371"
-    dirty: false
+    commit: "847b3c61a51dc9fada74731304483b0ffab3e62a"
+    dirty: true
     trust_class: "trusted"
     release_eligible: true
   nat1-games:
@@ -76,8 +76,8 @@ components:
     remote: "https://github.com/fawxzzy/fawxzzy-playbook.git"
     ref_type: "branch"
     ref: "main"
-    commit: "efec70fcc19107c9192557790ac43c7214162fe8"
-    dirty: false
+    commit: "9ce397e893e4007afbe93366770867ed64f66500"
+    dirty: true
     trust_class: "trusted"
     release_eligible: true
   playbook-demo:
@@ -98,7 +98,7 @@ components:
     remote: "https://github.com/fawxzzy/ATLAS.git"
     ref_type: "branch"
     ref: "main"
-    commit: "2c6487413ebfab5e5061ee15169546407c789218"
+    commit: "9fb75a20982bf5e7cc311fa2bc85746322d042eb"
     dirty: true
     trust_class: "trusted"
     release_eligible: false
@@ -110,7 +110,7 @@ components:
     ref_type: "branch"
     ref: "codex/fstrm-wave3-surface-base"
     commit: "e8da0053e7762886687a40ea154a665186f70f95"
-    dirty: false
+    dirty: true
     trust_class: "trusted"
     release_eligible: false
 excluded_surfaces:
@@ -126,4 +126,4 @@ excluded_surfaces:
     trust_class: "untrusted"
     release_eligible: false
     reason: "Token-bearing Verta checkout remains quarantined and untrusted until scrub and rotation are complete."
-lock_digest: "sha256:d8157fb9a9931aa5e716ca35a6a6f6190a4bd5aa43fcda4fa0d9f16b46c9305d"
+lock_digest: "sha256:f2429eb3c062dede4270b470155e85c7bb54a032c04864af5a90a82201e73d5c"

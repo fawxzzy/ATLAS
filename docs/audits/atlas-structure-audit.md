@@ -4,7 +4,7 @@ Audit date: 2026-04-08
 
 Scope:
 
-- Read-only audit of `C:\ATLAS`
+- Read-only audit of the ATLAS root
 - No application code changes
 - Secret contents not inspected
 - Focus on portability, rebuildability, path independence, and stack truth
@@ -12,7 +12,7 @@ Scope:
 
 ## Executive summary
 
-The ATLAS root has the right high-level shell, but the current structure truth is split across a stale root manifest, path-coupled `_stack` docs, and Atlas architecture docs that still describe a `dev/` dispatcher layer that does not exist under `C:\ATLAS`. At the same time, the root support directories meant to hold shared state are empty, while runtime and generated state still live inside active repos.
+The ATLAS root has the right high-level shell, but the current structure truth is split across a stale root manifest, path-coupled `_stack` docs, and Atlas architecture docs that still describe a `dev/` dispatcher layer that does not exist at the ATLAS root. At the same time, the root support directories meant to hold shared state are empty, while runtime and generated state still live inside active repos.
 
 The biggest structural problem is namespace mixing under `repos\`: active source repos, nested wrapper repos, legacy source repos, Unreal build caches, installers, videos, zip drops, and backup bundles all sit side by side. That makes the stack hard to reason about, hard to rebuild on another machine, and easy to break with path-sensitive changes.
 
@@ -20,9 +20,9 @@ The biggest structural problem is namespace mixing under `repos\`: active source
 
 ### 1. Root stack truth is stale and path-coupled
 
-- `C:\ATLAS\stack.yaml` hardcodes `C:\ATLAS\...` absolute paths.
-- `C:\ATLAS\stack.yaml` lists only two repos under `repos:`.
-- One listed repo path is broken: `playbook: C:\ATLAS\repos\playbook` does not exist.
+- `stack.yaml` hardcodes absolute paths instead of stack-relative references.
+- `stack.yaml` lists only two repos under `repos:`.
+- One listed repo path is broken: `playbook: repos/playbook` does not exist.
 - The manifest omits active repos such as `_stack`, `fawxzzy-atlas`, `fawxzzy-fitness`, `fawxzzy-lifeline`, `fawxzzy-mazer`, and `fawxzzy-playbook`.
 
 Impact:
@@ -33,15 +33,15 @@ Impact:
 
 Observed in:
 
-- `C:\ATLAS\repos\_stack\README.md`
-- `C:\ATLAS\repos\_stack\AGENTS.md`
+- `repos/_stack/README.md`
+- `repos/_stack/AGENTS.md`
 
 Examples:
 
-- `Start in C:\Users\zjhre\dev`
-- `C:\Users\zjhre\dev\_stack`
-- `C:\Users\zjhre\dev\fawxzzy-mazer`
-- `C:\Users\zjhre\dev\AGENTS.md`
+- `Start in the prior workspace root`
+- `prior-workspace-root/_stack`
+- `prior-workspace-root/fawxzzy-mazer`
+- `prior-workspace-root/AGENTS.md`
 
 Impact:
 
@@ -51,15 +51,15 @@ Impact:
 
 Observed in:
 
-- `C:\ATLAS\repos\fawxzzy-atlas\README.md`
-- `C:\ATLAS\repos\fawxzzy-atlas\docs\STACK_OVERVIEW.md`
-- `C:\ATLAS\repos\fawxzzy-atlas\docs\SYSTEM_REGISTRY.md`
-- `C:\ATLAS\repos\fawxzzy-atlas\docs\LOCAL_FIRST_WORKFLOW.md`
+- `repos/fawxzzy-atlas/README.md`
+- `repos/fawxzzy-atlas/docs/STACK_OVERVIEW.md`
+- `repos/fawxzzy-atlas/docs/SYSTEM_REGISTRY.md`
+- `repos/fawxzzy-atlas/docs/LOCAL_FIRST_WORKFLOW.md`
 
 Evidence:
 
 - The docs repeatedly describe `dev/` as the dispatcher layer.
-- No `C:\ATLAS\dev` directory exists.
+- No `dev/` directory exists at the ATLAS root.
 
 Impact:
 
@@ -69,7 +69,7 @@ Impact:
 
 Observed:
 
-- `C:\ATLAS\runtime`, `C:\ATLAS\data`, `C:\ATLAS\packages`, `C:\ATLAS\ops`, and `C:\ATLAS\tmp` are empty.
+- `runtime/`, `data/`, `packages/`, `ops/`, and `tmp/` are empty.
 - Shared/runtime/generated state is instead scattered under repos:
   - `_stack\queue`, `_stack\receipts`, `_stack\ops`
   - repo-local `.playbook\`
@@ -101,10 +101,10 @@ Impact:
 
 Observed actual roots:
 
-- `C:\ATLAS\repos\Nat1-Games\nat1-games`
-- `C:\ATLAS\repos\playbook-demo\playbook-demo`
-- `C:\ATLAS\repos\playbook-old\playbookv1`
-- `C:\ATLAS\repos\mazer-legacy-unreal\Mazer`
+- `repos/Nat1-Games/nat1-games`
+- `repos/playbook-demo/playbook-demo`
+- `repos/playbook-old/playbookv1`
+- `repos/mazer-legacy-unreal/Mazer`
 
 Impact:
 
@@ -151,10 +151,10 @@ Impact:
 
 Examples:
 
-- `C:\ATLAS\repos\fawxzzy-mazer\dist`
+- `repos/fawxzzy-mazer/dist`
 - numerous `artifacts-*.png`, `review-*.png`, and `.tmp-*.log` files in `fawxzzy-mazer`
-- `C:\ATLAS\repos\Nat1-Games\.playbook\...`
-- `C:\ATLAS\repos\mazer-legacy-unreal\Mazer\Binaries`, `DerivedDataCache`, `Intermediate`, `Saved`
+- `repos/Nat1-Games/.playbook/...`
+- `repos/mazer-legacy-unreal/Mazer/Binaries`, `DerivedDataCache`, `Intermediate`, `Saved`
 
 Impact:
 
@@ -165,7 +165,7 @@ Impact:
 
 Observed:
 
-- `C:\ATLAS\repos\fawxzzy-playbook\README.md` contains unresolved merge conflict markers.
+- `repos/fawxzzy-playbook/README.md` contains unresolved merge conflict markers.
 
 Impact:
 
@@ -200,7 +200,7 @@ Impact:
 ## Top 10 structural issues
 
 1. `stack.yaml` is stale, absolute-path-based, and incomplete.
-2. `_stack` docs and rules are still coupled to `C:\Users\zjhre\dev`.
+2. `_stack` docs and rules are still coupled to the prior workspace root.
 3. Atlas architecture docs still depend on a nonexistent `dev/` layer.
 4. Root support directories are empty while shared concerns remain embedded inside repos.
 5. `repos\` mixes active source, demos, legacy, binaries, and backups.
