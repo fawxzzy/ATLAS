@@ -1,0 +1,138 @@
+{
+  "version": 1,
+  "defaults": {
+    "profile": "normal",
+    "mode": "observe",
+    "thresholds": {
+      "workingSetMb": 512,
+      "cpuSeconds": 180,
+      "ageMinutes": 45,
+      "repeatedBreaches": 2
+    },
+    "scheduledTask": {
+      "name": "ATLAS System Guardian",
+      "intervalMinutes": 15
+    }
+  },
+  "protected": {
+    "processNames": [
+      "explorer",
+      "Code",
+      "devenv",
+      "Taskmgr",
+      "OpenConsole",
+      "conhost",
+      "obs64",
+      "SystemSettings"
+    ],
+    "commandLineContains": [
+      "ops\\scripts\\system-guardian\\",
+      "codex"
+    ],
+    "browserProcessNames": [
+      "chrome",
+      "msedge",
+      "firefox",
+      "brave"
+    ]
+  },
+  "profiles": {
+    "normal": {
+      "mode": "observe"
+    },
+    "focus": {
+      "mode": "notify",
+      "thresholds": {
+        "workingSetMb": 384,
+        "cpuSeconds": 120,
+        "ageMinutes": 25,
+        "repeatedBreaches": 2
+      }
+    },
+    "stream": {
+      "mode": "notify",
+      "thresholds": {
+        "workingSetMb": 700,
+        "cpuSeconds": 240,
+        "ageMinutes": 60,
+        "repeatedBreaches": 2
+      }
+    },
+    "build": {
+      "mode": "cleanup",
+      "thresholds": {
+        "workingSetMb": 256,
+        "cpuSeconds": 90,
+        "ageMinutes": 20,
+        "repeatedBreaches": 1
+      }
+    }
+  },
+  "candidates": [
+    {
+      "id": "browser-background-review",
+      "description": "High-footprint browser workers stay notify-only unless policy explicitly allows background cleanup.",
+      "processNames": [
+        "chrome",
+        "msedge",
+        "firefox",
+        "brave"
+      ],
+      "defaultAction": "notify",
+      "cleanupAllowed": false,
+      "browserCleanupAllowed": false,
+      "thresholds": {
+        "workingSetMb": 800,
+        "cpuSeconds": 240,
+        "ageMinutes": 45,
+        "repeatedBreaches": 2
+      }
+    },
+    {
+      "id": "communication-overhead",
+      "description": "Collaboration clients are review candidates by default so the operator can decide what stays open.",
+      "processNames": [
+        "Teams",
+        "Discord",
+        "Slack",
+        "Telegram",
+        "WhatsApp"
+      ],
+      "defaultAction": "notify",
+      "cleanupAllowed": false
+    },
+    {
+      "id": "launcher-background-cleanup",
+      "description": "Background launchers can be closed only in cleanup mode and only when they are headless.",
+      "processNames": [
+        "Steam",
+        "EpicGamesLauncher",
+        "Battle.net",
+        "OneDrive"
+      ],
+      "defaultAction": "cleanup",
+      "cleanupAllowed": true,
+      "requireNoMainWindow": true
+    },
+    {
+      "id": "atlas-safe-test-process",
+      "description": "Dedicated command-line marker for safe apply-mode verification.",
+      "processNames": [
+        "powershell",
+        "pwsh",
+        "python"
+      ],
+      "commandLineContains": [
+        "atlas-system-guardian-test"
+      ],
+      "defaultAction": "cleanup",
+      "cleanupAllowed": true,
+      "thresholds": {
+        "workingSetMb": 1,
+        "cpuSeconds": 0,
+        "ageMinutes": 0,
+        "repeatedBreaches": 1
+      }
+    }
+  ]
+}
