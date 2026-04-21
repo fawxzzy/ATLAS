@@ -213,6 +213,164 @@ class AtlasUiObservationTests(unittest.TestCase):
         self.assertEqual([], validate_capture_map(capture_map, root=ROOT))
         self.assertEqual([], validate_capture_map_contract_bindings(capture_map, primitives))
 
+    def test_default_capture_set_covers_today_d2_history_session_workout_card_settings_and_detail_support_families(self) -> None:
+        inputs = json.loads(default_capture_inputs_path(ROOT).read_text(encoding="utf-8"))
+        capture_map = json.loads(default_capture_map_path(ROOT).read_text(encoding="utf-8"))
+
+        selectors = {(item["screen_key"], item["state_key"]) for item in inputs["capture_set"]}
+        capture_ids_by_selector = {
+            (item["screen_key"], item["state_key"]): item["capture_id"]
+            for item in capture_map["captures"]
+        }
+
+        expected_selectors = {
+            ("todayOverview", "default"),
+            ("routinesOverview", "default"),
+            ("routinesOverview", "selectedRoutine"),
+            ("exerciseLog", "sessionHeaderCard"),
+            ("exerciseLog", "entrySection"),
+            ("exerciseLog", "formSectionCard"),
+            ("exerciseLog", "compactLogRow"),
+            ("exerciseLog", "stickyFooter"),
+            ("workoutCard", "exerciseCard"),
+            ("workoutCard", "disclosureExpanded"),
+            ("workoutCard", "chipRow"),
+            ("workoutCard", "exerciseDetails"),
+            ("workoutCard", "metricItem"),
+            ("workoutCard", "sessionSummaryCard"),
+            ("settings", "overview"),
+            ("settings", "accountForm"),
+            ("settings", "glassEffects"),
+            ("settings", "legacyMigrationRow"),
+            ("settings", "legacyMigrationPanel"),
+            ("detailSupport", "detailSurface"),
+            ("detailSupport", "dayStateCard"),
+            ("detailSupport", "exerciseInfoSheet"),
+            ("detailSupport", "mediaCard"),
+            ("detailSupport", "historyRow"),
+            ("editDay", "default"),
+            ("editRoutine", "daysSection"),
+            ("editDayAddExercise", "default"),
+            ("historyOverview", "default"),
+            ("historyExercises", "default"),
+            ("historySessions", "default"),
+            ("historyLog", "default"),
+        }
+
+        self.assertEqual(expected_selectors, selectors)
+        self.assertEqual(
+            "routines-overview-selected-routine",
+            capture_ids_by_selector[("routinesOverview", "selectedRoutine")],
+        )
+        self.assertEqual(
+            "edit-routine-days-section-default",
+            capture_ids_by_selector[("editRoutine", "daysSection")],
+        )
+        self.assertEqual(
+            "edit-day-add-exercise-default",
+            capture_ids_by_selector[("editDayAddExercise", "default")],
+        )
+        self.assertEqual(
+            "exercise-log-session-header-card",
+            capture_ids_by_selector[("exerciseLog", "sessionHeaderCard")],
+        )
+        self.assertEqual(
+            "exercise-log-entry-section",
+            capture_ids_by_selector[("exerciseLog", "entrySection")],
+        )
+        self.assertEqual(
+            "exercise-log-form-section-card",
+            capture_ids_by_selector[("exerciseLog", "formSectionCard")],
+        )
+        self.assertEqual(
+            "exercise-log-compact-row",
+            capture_ids_by_selector[("exerciseLog", "compactLogRow")],
+        )
+        self.assertEqual(
+            "exercise-log-sticky-footer",
+            capture_ids_by_selector[("exerciseLog", "stickyFooter")],
+        )
+        self.assertEqual(
+            "workout-card-exercise-card",
+            capture_ids_by_selector[("workoutCard", "exerciseCard")],
+        )
+        self.assertEqual(
+            "workout-card-disclosure-expanded",
+            capture_ids_by_selector[("workoutCard", "disclosureExpanded")],
+        )
+        self.assertEqual(
+            "workout-card-chip-row",
+            capture_ids_by_selector[("workoutCard", "chipRow")],
+        )
+        self.assertEqual(
+            "workout-card-exercise-details",
+            capture_ids_by_selector[("workoutCard", "exerciseDetails")],
+        )
+        self.assertEqual(
+            "workout-card-metric-item",
+            capture_ids_by_selector[("workoutCard", "metricItem")],
+        )
+        self.assertEqual(
+            "workout-card-session-summary-card",
+            capture_ids_by_selector[("workoutCard", "sessionSummaryCard")],
+        )
+        self.assertEqual(
+            "settings-overview-default",
+            capture_ids_by_selector[("settings", "overview")],
+        )
+        self.assertEqual(
+            "settings-account-form",
+            capture_ids_by_selector[("settings", "accountForm")],
+        )
+        self.assertEqual(
+            "settings-glass-effects",
+            capture_ids_by_selector[("settings", "glassEffects")],
+        )
+        self.assertEqual(
+            "settings-legacy-migration-row",
+            capture_ids_by_selector[("settings", "legacyMigrationRow")],
+        )
+        self.assertEqual(
+            "settings-legacy-migration-panel",
+            capture_ids_by_selector[("settings", "legacyMigrationPanel")],
+        )
+        self.assertEqual(
+            "detail-support-surface",
+            capture_ids_by_selector[("detailSupport", "detailSurface")],
+        )
+        self.assertEqual(
+            "detail-support-day-state-card",
+            capture_ids_by_selector[("detailSupport", "dayStateCard")],
+        )
+        self.assertEqual(
+            "detail-support-exercise-info-sheet",
+            capture_ids_by_selector[("detailSupport", "exerciseInfoSheet")],
+        )
+        self.assertEqual(
+            "detail-support-media-card",
+            capture_ids_by_selector[("detailSupport", "mediaCard")],
+        )
+        self.assertEqual(
+            "detail-support-history-row",
+            capture_ids_by_selector[("detailSupport", "historyRow")],
+        )
+        self.assertEqual(
+            "history-overview-default",
+            capture_ids_by_selector[("historyOverview", "default")],
+        )
+        self.assertEqual(
+            "history-exercises-default",
+            capture_ids_by_selector[("historyExercises", "default")],
+        )
+        self.assertEqual(
+            "history-sessions-list-default",
+            capture_ids_by_selector[("historySessions", "default")],
+        )
+        self.assertEqual(
+            "history-log-detail-default",
+            capture_ids_by_selector[("historyLog", "default")],
+        )
+
     def test_duplicate_mapping_and_missing_variant_are_rejected(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

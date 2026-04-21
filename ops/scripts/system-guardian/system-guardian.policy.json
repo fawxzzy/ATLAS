@@ -38,10 +38,12 @@
   },
   "profiles": {
     "normal": {
-      "mode": "observe"
+      "mode": "observe",
+      "summary": "Baseline observe-only profile for normal development. No cleanup is authorized."
     },
     "focus": {
       "mode": "notify",
+      "summary": "Review-heavy profile for concentrated work. Cleanup stays disabled while background offenders are surfaced early.",
       "thresholds": {
         "workingSetMb": 384,
         "cpuSeconds": 120,
@@ -51,6 +53,7 @@
     },
     "stream": {
       "mode": "notify",
+      "summary": "Looser review profile for streaming or demos. Higher thresholds reduce false positives on live surfaces.",
       "thresholds": {
         "workingSetMb": 700,
         "cpuSeconds": 240,
@@ -60,6 +63,7 @@
     },
     "build": {
       "mode": "cleanup",
+      "summary": "Operator-approved cleanup profile for build windows. Only cleanup-enabled, policy-matched headless candidates can be stopped.",
       "thresholds": {
         "workingSetMb": 256,
         "cpuSeconds": 90,
@@ -79,6 +83,11 @@
         "brave"
       ],
       "defaultAction": "notify",
+      "classification": {
+        "family": "browser",
+        "intent": "background-review"
+      },
+      "operatorHint": "Review pinned tabs, downloads, and background browser workers before raising cleanup authority.",
       "cleanupAllowed": false,
       "browserCleanupAllowed": false,
       "thresholds": {
@@ -99,6 +108,11 @@
         "WhatsApp"
       ],
       "defaultAction": "notify",
+      "classification": {
+        "family": "communication",
+        "intent": "background-review"
+      },
+      "operatorHint": "Treat collaboration clients as operator-reviewed background load, not automatic cleanup targets.",
       "cleanupAllowed": false
     },
     {
@@ -111,6 +125,11 @@
         "OneDrive"
       ],
       "defaultAction": "cleanup",
+      "classification": {
+        "family": "launcher",
+        "intent": "startup-review"
+      },
+      "operatorHint": "Cleanup is allowed only for headless launcher/background helpers after dry-run receipts look sane.",
       "cleanupAllowed": true,
       "requireNoMainWindow": true
     },
@@ -126,6 +145,11 @@
         "atlas-system-guardian-test"
       ],
       "defaultAction": "cleanup",
+      "classification": {
+        "family": "verification",
+        "intent": "safe-apply-test"
+      },
+      "operatorHint": "This marker exists only for safe policy verification and should not be used as a general cleanup rule.",
       "cleanupAllowed": true,
       "thresholds": {
         "workingSetMb": 1,

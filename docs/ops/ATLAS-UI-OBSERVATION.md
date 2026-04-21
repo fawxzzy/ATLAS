@@ -33,12 +33,39 @@ The input contract names the active capture-set. The capture-map contract owns t
 
 ## Deterministic capture model
 
-The first capture set is intentionally small and fixed:
+The active capture set stays narrow but expands immediately after each adoption tranche:
 
 - `today-overview-default`
 - `routines-overview-default`
-- `exercise-log-active`
+- `routines-overview-selected-routine`
+- `exercise-log-session-header-card`
+- `exercise-log-entry-section`
+- `exercise-log-form-section-card`
+- `exercise-log-compact-row`
+- `exercise-log-sticky-footer`
+- `workout-card-exercise-card`
+- `workout-card-disclosure-expanded`
+- `workout-card-chip-row`
+- `workout-card-exercise-details`
+- `workout-card-metric-item`
+- `workout-card-session-summary-card`
+- `settings-overview-default`
+- `settings-account-form`
+- `settings-glass-effects`
+- `settings-legacy-migration-row`
+- `settings-legacy-migration-panel`
+- `detail-support-surface`
+- `detail-support-day-state-card`
+- `detail-support-exercise-info-sheet`
+- `detail-support-media-card`
+- `detail-support-history-row`
 - `edit-day-default`
+- `edit-routine-days-section-default`
+- `edit-day-add-exercise-default`
+- `history-overview-default`
+- `history-exercises-default`
+- `history-sessions-list-default`
+- `history-log-detail-default`
 
 The mapping contract defines:
 
@@ -48,6 +75,9 @@ The mapping contract defines:
 - explicit primitive variants for each slot
 
 The input contract selects which screen/state pairs are active for a run. This keeps the observer deterministic by rule instead of by inline assumptions.
+
+- Pattern: expand capture coverage immediately after each adoption tranche so validation lands before the next wider rewrite.
+- Failure Mode: assuming clean drift on old captures proves validator coverage for newly adopted surfaces.
 
 The observer resolves primitive variants from owner contracts, groups referenced tokens by scale, and emits one normalized artifact per capture.
 
@@ -85,6 +115,12 @@ Rebuildable outputs belong under:
 
 Do not hand-edit emitted artifacts. If capture output changes, rerun the observer.
 
+Obsolete capture ids that remain valuable for retention or audit must not be hard-deleted by default. Classify them with:
+
+- `runtime/atlas/ui-observe/fitness/<capture-id>/residue.json`
+
+Current-state drift reads ignore capture directories marked as `retained_residue` or `superseded_residue`, but the historical observation payloads remain on disk.
+
 ## Operation
 
 Run the observer from the stack root:
@@ -100,3 +136,9 @@ python ops/atlas/ui_observe/fitness.py --capture-id today-overview-default
 ```
 
 Use `--dry-run` when validating contract wiring without writing runtime artifacts.
+
+## Residue Rule
+
+- Rule: retained UI observation residue stays visible, but it does not compete as active validator truth.
+- Pattern: when a capture id is replaced by narrower active captures, keep the old artifacts and add a `residue.json` sidecar that records the retention reason and any replacement capture ids.
+- Failure Mode: deleting old runtime evidence casually or letting stale capture ids keep polluting drift reports.

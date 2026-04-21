@@ -43,6 +43,10 @@
       "state_label": "Default",
       "route_family": "overview",
       "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/app/routines/page.tsx",
+        "repos/fawxzzy-fitness/src/app/routines/RoutinesPageClient.tsx",
+        "repos/fawxzzy-fitness/src/components/routines/RoutinesScreenFamily.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/SharedScreenHeader.tsx",
         "repos/fawxzzy-fitness/src/components/ui/app/AppHeader.tsx",
         "repos/fawxzzy-fitness/src/components/ui/app/AppPanel.tsx",
         "repos/fawxzzy-fitness/src/components/ui/app/AppBadge.tsx",
@@ -68,13 +72,714 @@
       }
     },
     {
-      "capture_id": "exercise-log-active",
+      "capture_id": "routines-overview-selected-routine",
+      "screen_key": "routinesOverview",
+      "screen_label": "Routines overview",
+      "state_key": "selectedRoutine",
+      "state_label": "Selected routine days",
+      "route_family": "overview",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/app/routines/page.tsx",
+        "repos/fawxzzy-fitness/src/app/routines/RoutinesPageClient.tsx",
+        "repos/fawxzzy-fitness/src/components/routines/RoutinesScreenFamily.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/SharedScreenHeader.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/AppHeader.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/AppPanel.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/AppBadge.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/SharedSectionShell.tsx"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "shared"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "panel"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "success"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "dense"
+        }
+      }
+    },
+    {
+      "capture_id": "exercise-log-session-header-card",
       "screen_key": "exerciseLog",
       "screen_label": "Exercise log",
-      "state_key": "active",
-      "state_label": "Active session",
+      "state_key": "sessionHeaderCard",
+      "state_label": "Session header card",
       "route_family": "session",
       "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/components/ui/workout-entry/SessionHeaderCard.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "standalone"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "panel"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "default"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "standard"
+        }
+      }
+    },
+    {
+      "capture_id": "exercise-log-entry-section",
+      "screen_key": "exerciseLog",
+      "screen_label": "Exercise log",
+      "state_key": "entrySection",
+      "state_label": "Entry section",
+      "route_family": "session",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/components/ui/workout-entry/EntrySection.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "shared"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "panel"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "default"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "dense"
+        }
+      }
+    },
+    {
+      "capture_id": "exercise-log-form-section-card",
+      "screen_key": "exerciseLog",
+      "screen_label": "Exercise log",
+      "state_key": "formSectionCard",
+      "state_label": "Form section card",
+      "route_family": "session",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/components/ui/workout-entry/FormSectionCard.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "shared"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "muted"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "default"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "dense"
+        }
+      }
+    },
+    {
+      "capture_id": "exercise-log-compact-row",
+      "screen_key": "exerciseLog",
+      "screen_label": "Exercise log",
+      "state_key": "compactLogRow",
+      "state_label": "Compact log row",
+      "route_family": "session",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/components/ui/workout-entry/CompactLogRow.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "shared"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "row"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "default"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "dense"
+        }
+      }
+    },
+    {
+      "capture_id": "exercise-log-sticky-footer",
+      "screen_key": "exerciseLog",
+      "screen_label": "Exercise log",
+      "state_key": "stickyFooter",
+      "state_label": "Sticky footer",
+      "route_family": "session",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/components/session/SessionStickyFooter.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "shared"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "sticky-bar"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "default"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "dense"
+        }
+      }
+    },
+    {
+      "capture_id": "workout-card-exercise-card",
+      "screen_key": "workoutCard",
+      "screen_label": "Workout card family",
+      "state_key": "exerciseCard",
+      "state_label": "Exercise card",
+      "route_family": "shared",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/components/ExerciseCard.tsx",
+        "repos/fawxzzy-fitness/src/components/StandardExerciseRow.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "shared"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "row"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "default"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "dense"
+        }
+      }
+    },
+    {
+      "capture_id": "workout-card-disclosure-expanded",
+      "screen_key": "workoutCard",
+      "screen_label": "Workout card family",
+      "state_key": "disclosureExpanded",
+      "state_label": "Disclosure card expanded",
+      "route_family": "shared",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/components/workout/ExerciseDisclosureCard.tsx",
+        "repos/fawxzzy-fitness/src/components/StandardExerciseRow.tsx",
+        "repos/fawxzzy-fitness/src/components/ExerciseCard.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "shared"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "row"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "default"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "standard"
+        }
+      }
+    },
+    {
+      "capture_id": "workout-card-chip-row",
+      "screen_key": "workoutCard",
+      "screen_label": "Workout card family",
+      "state_key": "chipRow",
+      "state_label": "Workout chip row",
+      "route_family": "shared",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/components/workout/WorkoutCardChipRow.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/AppBadge.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "shared"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "row"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "default"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "dense"
+        }
+      }
+    },
+    {
+      "capture_id": "workout-card-exercise-details",
+      "screen_key": "workoutCard",
+      "screen_label": "Workout card family",
+      "state_key": "exerciseDetails",
+      "state_label": "Workout exercise details",
+      "route_family": "shared",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/components/workout/WorkoutExerciseCardDetails.tsx",
+        "repos/fawxzzy-fitness/src/components/workout/WorkoutCardChipRow.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/MetricItem.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "shared"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "muted"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "default"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "dense"
+        }
+      }
+    },
+    {
+      "capture_id": "workout-card-metric-item",
+      "screen_key": "workoutCard",
+      "screen_label": "Workout card family",
+      "state_key": "metricItem",
+      "state_label": "Metric item",
+      "route_family": "shared",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/components/ui/MetricItem.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "shared"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "muted"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "default"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "dense"
+        }
+      }
+    },
+    {
+      "capture_id": "workout-card-session-summary-card",
+      "screen_key": "workoutCard",
+      "screen_label": "Workout card family",
+      "state_key": "sessionSummaryCard",
+      "state_label": "Session summary card",
+      "route_family": "shared",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/components/SessionSummaryCard.tsx",
+        "repos/fawxzzy-fitness/src/components/ExerciseCard.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "shared"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "row"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "default"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "standard"
+        }
+      }
+    },
+    {
+      "capture_id": "settings-overview-default",
+      "screen_key": "settings",
+      "screen_label": "Settings",
+      "state_key": "overview",
+      "state_label": "Overview",
+      "route_family": "settings",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/app/settings/page.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/AppHeader.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "shared"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "panel"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "success"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "standard"
+        }
+      }
+    },
+    {
+      "capture_id": "settings-account-form",
+      "screen_key": "settings",
+      "screen_label": "Settings",
+      "state_key": "accountForm",
+      "state_label": "Account settings form",
+      "route_family": "settings",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/app/settings/page.tsx",
+        "repos/fawxzzy-fitness/src/components/settings/AccountSettingsForm.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "shared"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "panel"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "default"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "standard"
+        }
+      }
+    },
+    {
+      "capture_id": "settings-glass-effects",
+      "screen_key": "settings",
+      "screen_label": "Settings",
+      "state_key": "glassEffects",
+      "state_label": "Glass effects settings",
+      "route_family": "settings",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/app/settings/page.tsx",
+        "repos/fawxzzy-fitness/src/components/settings/GlassEffectsSettings.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "shared"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "panel"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "today"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "standard"
+        }
+      }
+    },
+    {
+      "capture_id": "settings-legacy-migration-row",
+      "screen_key": "settings",
+      "screen_label": "Settings",
+      "state_key": "legacyMigrationRow",
+      "state_label": "Legacy migration row",
+      "route_family": "settings",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/components/settings/LegacyMigrationSettings.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/AppRow.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "shared"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "row"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "warning"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "dense"
+        }
+      }
+    },
+    {
+      "capture_id": "settings-legacy-migration-panel",
+      "screen_key": "settings",
+      "screen_label": "Settings",
+      "state_key": "legacyMigrationPanel",
+      "state_label": "Legacy migration expanded panel",
+      "route_family": "settings",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/components/settings/LegacyMigrationSettings.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "shared"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "muted"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "success"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "standard"
+        }
+      }
+    },
+    {
+      "capture_id": "detail-support-surface",
+      "screen_key": "detailSupport",
+      "screen_label": "Detail support family",
+      "state_key": "detailSurface",
+      "state_label": "Detail surface section",
+      "route_family": "detail",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/components/DetailSurface.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "shared"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "panel"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "default"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "standard"
+        }
+      }
+    },
+    {
+      "capture_id": "detail-support-day-state-card",
+      "screen_key": "detailSupport",
+      "screen_label": "Detail support family",
+      "state_key": "dayStateCard",
+      "state_label": "Day detail state card",
+      "route_family": "detail",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/components/routines/day-detail/DayDetailStateCard.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "shared"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "muted"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "warning"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "dense"
+        }
+      }
+    },
+    {
+      "capture_id": "detail-support-exercise-info-sheet",
+      "screen_key": "detailSupport",
+      "screen_label": "Detail support family",
+      "state_key": "exerciseInfoSheet",
+      "state_label": "Exercise info sheet",
+      "route_family": "detail",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/components/ExerciseInfoSheet.tsx",
+        "repos/fawxzzy-fitness/src/components/DetailSurface.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/MetricItem.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "standalone"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "panel"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "default"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "standard"
+        }
+      }
+    },
+    {
+      "capture_id": "detail-support-media-card",
+      "screen_key": "detailSupport",
+      "screen_label": "Detail support family",
+      "state_key": "mediaCard",
+      "state_label": "Exercise info media card",
+      "route_family": "detail",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/components/ExerciseInfoSheet.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "shared"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "muted"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "default"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "dense"
+        }
+      }
+    },
+    {
+      "capture_id": "detail-support-history-row",
+      "screen_key": "detailSupport",
+      "screen_label": "Detail support family",
+      "state_key": "historyRow",
+      "state_label": "Exercise info history row",
+      "route_family": "detail",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/components/ExerciseInfoSheet.tsx",
+        "repos/fawxzzy-fitness/src/components/DetailSurface.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "shared"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "row"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "default"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "dense"
+        }
+      }
+    },
+    {
+      "capture_id": "edit-day-default",
+      "screen_key": "editDay",
+      "screen_label": "Edit day",
+      "state_key": "default",
+      "state_label": "Default",
+      "route_family": "editor",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/app/routines/[id]/edit/day/[dayId]/page.tsx",
+        "repos/fawxzzy-fitness/src/app/routines/[id]/edit/day/[dayId]/EditDaySettingsAutosaveForm.tsx",
+        "repos/fawxzzy-fitness/src/app/routines/[id]/edit/day/[dayId]/EditableRoutineDayExerciseList.tsx",
+        "repos/fawxzzy-fitness/src/components/routines/day-detail/DetailScreenScaffold.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/SharedScreenHeader.tsx",
         "repos/fawxzzy-fitness/src/components/ui/app/AppHeader.tsx",
         "repos/fawxzzy-fitness/src/components/ui/app/AppPanel.tsx",
         "repos/fawxzzy-fitness/src/components/ui/app/AppBadge.tsx",
@@ -100,13 +805,204 @@
       }
     },
     {
-      "capture_id": "edit-day-default",
-      "screen_key": "editDay",
-      "screen_label": "Edit day",
+      "capture_id": "edit-routine-days-section-default",
+      "screen_key": "editRoutine",
+      "screen_label": "Edit routine",
+      "state_key": "daysSection",
+      "state_label": "Days section",
+      "route_family": "editor",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/app/routines/[id]/edit/page.tsx",
+        "repos/fawxzzy-fitness/src/app/routines/[id]/edit/EditRoutineAutosaveForm.tsx",
+        "repos/fawxzzy-fitness/src/app/routines/[id]/edit/EditRoutineDaysSection.tsx",
+        "repos/fawxzzy-fitness/src/components/routines/RoutineEditorShared.tsx",
+        "repos/fawxzzy-fitness/src/components/routines/RoutineDetailsExitGuard.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/SharedScreenHeader.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/AppHeader.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/AppPanel.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/AppBadge.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/SharedSectionShell.tsx"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "standalone"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "panel"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "default"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "standard"
+        }
+      }
+    },
+    {
+      "capture_id": "edit-day-add-exercise-default",
+      "screen_key": "editDayAddExercise",
+      "screen_label": "Edit day add exercise",
       "state_key": "default",
       "state_label": "Default",
       "route_family": "editor",
       "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/app/routines/[id]/edit/day/[dayId]/add-exercise/page.tsx",
+        "repos/fawxzzy-fitness/src/app/routines/[id]/edit/day/[dayId]/EditDayAddExerciseScreen.tsx",
+        "repos/fawxzzy-fitness/src/app/routines/[id]/edit/day/[dayId]/RoutineDayAddExerciseForm.tsx",
+        "repos/fawxzzy-fitness/src/components/routines/RoutineEditorShared.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/SharedScreenHeader.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/AppHeader.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/AppPanel.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/SharedSectionShell.tsx"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "standalone"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "panel"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "default"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "standard"
+        }
+      }
+    },
+    {
+      "capture_id": "history-overview-default",
+      "screen_key": "historyOverview",
+      "screen_label": "History overview",
+      "state_key": "default",
+      "state_label": "Default",
+      "route_family": "overview",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/app/history/page.tsx",
+        "repos/fawxzzy-fitness/src/app/history/HistorySessionsClient.tsx",
+        "repos/fawxzzy-fitness/src/components/history/HistoryShared.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/SharedScreenHeader.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/AppHeader.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/AppPanel.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/AppBadge.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/SharedSectionShell.tsx"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "standalone"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "panel"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "default"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "standard"
+        }
+      }
+    },
+    {
+      "capture_id": "history-exercises-default",
+      "screen_key": "historyExercises",
+      "screen_label": "History exercises",
+      "state_key": "default",
+      "state_label": "Default",
+      "route_family": "overview",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/app/history/exercises/page.tsx",
+        "repos/fawxzzy-fitness/src/app/history/exercises/ExerciseBrowserClient.tsx",
+        "repos/fawxzzy-fitness/src/components/history/HistoryExerciseCard.tsx",
+        "repos/fawxzzy-fitness/src/components/history/HistoryShared.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/SharedScreenHeader.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/AppHeader.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/AppPanel.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/AppBadge.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/SharedSectionShell.tsx"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "standalone"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "panel"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "default"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "standard"
+        }
+      }
+    },
+    {
+      "capture_id": "history-sessions-list-default",
+      "screen_key": "historySessions",
+      "screen_label": "History sessions list",
+      "state_key": "default",
+      "state_label": "Default",
+      "route_family": "overview",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/app/history/page.tsx",
+        "repos/fawxzzy-fitness/src/app/history/HistorySessionsClient.tsx",
+        "repos/fawxzzy-fitness/src/components/SessionSummaryCard.tsx",
+        "repos/fawxzzy-fitness/src/components/history/HistoryShared.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/SharedScreenHeader.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/AppHeader.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/AppPanel.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/AppBadge.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/SharedSectionShell.tsx"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "standalone"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "panel"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "default"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "standard"
+        }
+      }
+    },
+    {
+      "capture_id": "history-log-detail-default",
+      "screen_key": "historyLog",
+      "screen_label": "History log detail",
+      "state_key": "default",
+      "state_label": "Default",
+      "route_family": "detail",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/app/history/[sessionId]/page.tsx",
+        "repos/fawxzzy-fitness/src/app/history/[sessionId]/HistoryLogPageClient.tsx",
+        "repos/fawxzzy-fitness/src/app/history/[sessionId]/LogAuditClient.tsx",
+        "repos/fawxzzy-fitness/src/components/SessionSummaryCard.tsx",
+        "repos/fawxzzy-fitness/src/components/history/HistoryShared.tsx",
+        "repos/fawxzzy-fitness/src/components/routines/day-detail/DetailScreenScaffold.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/SharedScreenHeader.tsx",
         "repos/fawxzzy-fitness/src/components/ui/app/AppHeader.tsx",
         "repos/fawxzzy-fitness/src/components/ui/app/AppPanel.tsx",
         "repos/fawxzzy-fitness/src/components/ui/app/AppBadge.tsx",

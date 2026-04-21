@@ -155,7 +155,17 @@ def _render_html(payload: dict[str, Any], *, refresh_seconds: int) -> str:
     repo_inventory = payload.get("repo_inventory", {}) if isinstance(payload.get("repo_inventory"), dict) else {}
     lock_hygiene = payload.get("lock_worktree_hygiene", {}) if isinstance(payload.get("lock_worktree_hygiene"), dict) else {}
     trust = payload.get("trust_posture", {}) if isinstance(payload.get("trust_posture"), dict) else {}
+    guardian = payload.get("system_guardian", {}) if isinstance(payload.get("system_guardian"), dict) else {}
     featured_paths = payload.get("featured_paths", []) if isinstance(payload.get("featured_paths"), list) else []
+    guardian_policy = guardian.get("policy", {}) if isinstance(guardian.get("policy"), dict) else {}
+    guardian_profile = guardian.get("active_profile", {}) if isinstance(guardian.get("active_profile"), dict) else {}
+    guardian_task = guardian.get("scheduled_task", {}) if isinstance(guardian.get("scheduled_task"), dict) else {}
+    guardian_kill = guardian.get("kill_switch", {}) if isinstance(guardian.get("kill_switch"), dict) else {}
+    guardian_last_run = guardian.get("last_run", {}) if isinstance(guardian.get("last_run"), dict) else {}
+    guardian_receipt = guardian.get("last_receipt", {}) if isinstance(guardian.get("last_receipt"), dict) else {}
+    guardian_summary_lines = (
+        guardian_receipt.get("summary_lines", []) if isinstance(guardian_receipt.get("summary_lines"), list) else []
+    )
 
     metrics = "".join(
         [
@@ -414,6 +424,63 @@ def _render_html(payload: dict[str, Any], *, refresh_seconds: int) -> str:
         if isinstance(item, dict)
     ]
 
+    guardian_items = [
+        _item(
+            guardian_profile.get("name") or "System Guardian",
+            eyebrow=guardian_policy.get("ref") or guardian_receipt.get("ref"),
+            badges=[
+                _badge("profile", guardian_profile.get("name")),
+                _badge(
+                    "task",
+                    guardian_task.get("state"),
+                    tone=_bool_tone(guardian_task.get("installed"), truthy="ok", falsy="warn"),
+                ),
+                _badge(
+                    "kill",
+                    guardian_kill.get("state"),
+                    tone=_bool_tone(guardian_kill.get("enabled"), truthy="danger", falsy="ok"),
+                ),
+                _badge("mode", guardian_last_run.get("mode")),
+                _badge("result", guardian_last_run.get("result")),
+            ],
+            body=_pairs(
+                [
+                    ("profile_summary", guardian_profile.get("summary")),
+                    ("profile_mode", guardian_profile.get("mode")),
+                    ("task_name", guardian_task.get("task_name")),
+                    ("task_interval", guardian_task.get("interval_minutes")),
+                    ("task_last_run", guardian_task.get("last_run_time")),
+                    ("task_next_run", guardian_task.get("next_run_time")),
+                    ("policy_hash", (guardian_policy.get("hash") or "")[:12] if guardian_policy.get("hash") else None),
+                    ("policy_version", guardian_policy.get("version")),
+                    ("last_run_at", guardian_last_run.get("ran_at")),
+                    ("last_run_profile", guardian_last_run.get("profile")),
+                    ("last_run_apply", guardian_last_run.get("apply_changes")),
+                    ("last_run_skipped", guardian_last_run.get("skipped")),
+                    ("last_run_kill_switch", guardian_last_run.get("kill_switch_enabled")),
+                    ("receipt_ref", guardian_receipt.get("ref")),
+                ]
+            ),
+            featured=bool(guardian_last_run),
+        ),
+        _item(
+            "Latest Receipt Summary",
+            eyebrow="receipt",
+            badges=[
+                _badge(
+                    "present",
+                    guardian_receipt.get("present"),
+                    tone=_bool_tone(guardian_receipt.get("present"), truthy="ok", falsy="warn"),
+                )
+            ],
+            body=(
+                "".join(f"<p>{escape(str(line))}</p>" for line in guardian_summary_lines[:6])
+                if guardian_summary_lines
+                else "<div class='empty'>No latest guardian receipt is available.</div>"
+            ),
+        ),
+    ]
+
     playbook_items = [
         _item(
             "Owner Contract Export",
@@ -572,6 +639,7 @@ def _render_html(payload: dict[str, Any], *, refresh_seconds: int) -> str:
       f"<div class='metric'><div class='label'>Component Drift</div><div class='value {_count_tone(lock_hygiene.get('drifted_component_count'), zero='ok', nonzero='warn')}'>{escape(str(lock_hygiene.get('drifted_component_count', '—')))}</div></div>",
       f"<div class='metric'><div class='label'>Surface Drift</div><div class='value {_count_tone(lock_hygiene.get('drifted_excluded_surface_count'), zero='ok', nonzero='warn')}'>{escape(str(lock_hygiene.get('drifted_excluded_surface_count', '—')))}</div></div>",
     ]) + "</div>" + _item("Current lock posture", badges=[_badge("frozen", lock_hygiene.get("lock_frozen"), tone=_bool_tone(lock_hygiene.get("lock_frozen"), truthy="ok", falsy="danger")), _badge("root_dirty", lock_hygiene.get("stack_root", {}).get("dirty_effective") if isinstance(lock_hygiene.get("stack_root"), dict) else None, tone=_bool_tone(lock_hygiene.get("stack_root", {}).get("dirty_effective") if isinstance(lock_hygiene.get("stack_root"), dict) else None, truthy="danger", falsy="ok")), _badge("self_refresh_only", lock_hygiene.get("stack_root", {}).get("self_refresh_only") if isinstance(lock_hygiene.get("stack_root"), dict) else None, tone=_bool_tone(lock_hygiene.get("stack_root", {}).get("self_refresh_only") if isinstance(lock_hygiene.get("stack_root"), dict) else None, truthy="warn", falsy="ok"))], body=_pairs([("stack_lock_ref", lock_hygiene.get("stack_lock_ref")), ("stack_lock_digest", lock_hygiene.get("stack_lock_digest")), ("generated_lock_digest", lock_hygiene.get("generated_lock_digest")), ("drifted_components", lock_hygiene.get("drifted_component_ids", [])), ("drifted_surfaces", lock_hygiene.get("drifted_excluded_surface_ids", [])), ("metadata_drift", lock_hygiene.get("metadata_drift_fields", [])), ("modified_paths", lock_hygiene.get("stack_root", {}).get("modified_paths", []) if isinstance(lock_hygiene.get("stack_root"), dict) else [])])) + _stack(dirty_repo_items, "No dirty repos are currently pinned by the generated lock view."), "span-6")}
+    {_card("System Guardian Telemetry", _stack(guardian_items, "System Guardian telemetry is unavailable."), "span-6")}
     {_card("Trust Posture", "<div class='metrics'>" + "".join([
       f"<div class='metric'><div class='label'>Status</div><div class='value {_state_tone(trust.get('status'))}'>{escape(str(trust.get('status', '—')))}</div></div>",
       f"<div class='metric'><div class='label'>Visible</div><div class='value'>{escape(str(trust.get('item_count', '—')))}</div></div>",

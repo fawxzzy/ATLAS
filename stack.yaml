@@ -127,6 +127,10 @@ repo_registry:
     path: repos/fawxzzy-mazer
     role: application
     status: active
+  trove:
+    path: repos/fawxzzy-trove
+    role: application
+    status: active
   stream:
     path: repos/fawxzzy-stream
     role: application
@@ -197,6 +201,7 @@ stack_lock:
     - lifeline
     - fitness
     - mazer
+    - trove
     - stream
     - nat1-games
     - playbook-demo
@@ -220,6 +225,9 @@ stack_lock:
       trust_class: trusted
       release_eligible: true
     mazer:
+      trust_class: trusted
+      release_eligible: true
+    trove:
       trust_class: trusted
       release_eligible: true
     stream:

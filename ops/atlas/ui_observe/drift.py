@@ -24,6 +24,8 @@ from ops.cortex._artifacts import stable_json_digest, write_json
 
 UI_DRIFT_REPORT_CONTRACT_VERSION = "atlas.ui.drift.report.v1"
 UI_DRIFT_REPORT_SCHEMA_ID = "atlas://schemas/atlas.ui.drift.report.v1.json"
+UI_OBSERVATION_RESIDUE_CONTRACT_VERSION = "atlas.ui.observation.residue.v1"
+UI_OBSERVATION_RESIDUE_STATUSES = {"retained_residue", "superseded_residue"}
 
 
 def utc_now() -> str:
@@ -76,12 +78,64 @@ def validate_drift_report_payload(payload: dict[str, Any]) -> list[str]:
     return errors
 
 
+def validate_observation_residue_payload(payload: dict[str, Any], *, capture_id: str) -> list[str]:
+    errors: list[str] = []
+    if payload.get("contract_version") != UI_OBSERVATION_RESIDUE_CONTRACT_VERSION:
+        errors.append(f"contract_version must be '{UI_OBSERVATION_RESIDUE_CONTRACT_VERSION}'.")
+    marker_capture_id = payload.get("capture_id")
+    if not isinstance(marker_capture_id, str) or not marker_capture_id.strip():
+        errors.append("capture_id must be a non-empty string.")
+    elif marker_capture_id != capture_id:
+        errors.append(f"capture_id must match the runtime capture directory '{capture_id}'.")
+    status = payload.get("status")
+    if status not in UI_OBSERVATION_RESIDUE_STATUSES:
+        allowed = ", ".join(sorted(UI_OBSERVATION_RESIDUE_STATUSES))
+        errors.append(f"status must be one of: {allowed}.")
+    reason = payload.get("reason")
+    if not isinstance(reason, str) or not reason.strip():
+        errors.append("reason must be a non-empty string.")
+    recorded_at = payload.get("recorded_at")
+    if not isinstance(recorded_at, str) or not recorded_at.strip():
+        errors.append("recorded_at must be a non-empty string.")
+    superseded_by = payload.get("superseded_by")
+    if superseded_by is not None:
+        if not isinstance(superseded_by, list) or any(not isinstance(item, str) or not item.strip() for item in superseded_by):
+            errors.append("superseded_by must be an array of non-empty strings when present.")
+    return errors
+
+
 def load_latest_observations(output_root: Path) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     if not output_root.exists():
         return [], []
     observations: list[dict[str, Any]] = []
     invalid: list[dict[str, Any]] = []
     for path in sorted(output_root.rglob("latest.json")):
+        residue_path = path.parent / "residue.json"
+        if residue_path.exists():
+            try:
+                residue_payload = load_json_object(residue_path)
+            except Exception as exc:
+                invalid.append(
+                    {
+                        "path": atlas_relative(path),
+                        "errors": [f"Failed to read residue marker: {exc}"],
+                        "payload": {},
+                        "residue_ref": atlas_relative(residue_path),
+                    }
+                )
+            else:
+                residue_errors = validate_observation_residue_payload(residue_payload, capture_id=path.parent.name)
+                if residue_errors:
+                    invalid.append(
+                        {
+                            "path": atlas_relative(path),
+                            "errors": residue_errors,
+                            "payload": {},
+                            "residue_ref": atlas_relative(residue_path),
+                        }
+                    )
+                else:
+                    continue
         payload = load_json_object(path)
         if payload.get("contract_version") != UI_OBSERVATION_CONTRACT_VERSION:
             invalid.append(
@@ -265,6 +319,10 @@ def validate_fitness_ui_drift(
     for item in invalid_observed:
         payload = item.get("payload") if isinstance(item.get("payload"), dict) else {}
         capture = payload.get("capture") if isinstance(payload.get("capture"), dict) else {}
+        observed_refs = {"path": item["path"]}
+        residue_ref = item.get("residue_ref")
+        if isinstance(residue_ref, str) and residue_ref.strip():
+            observed_refs["residue_ref"] = residue_ref
         findings.append(
             _finding(
                 kind="invalid_observation",
@@ -272,7 +330,7 @@ def validate_fitness_ui_drift(
                 comparison_key=str(payload.get("comparison_key") or item["path"]),
                 capture_id=str(capture.get("capture_id") or Path(str(item["path"])).parent.name),
                 message="Runtime observation artifact is stale or malformed for the current contract.",
-                observed={"path": item["path"]},
+                observed=observed_refs,
                 delta={"errors": item["errors"]},
             )
         )

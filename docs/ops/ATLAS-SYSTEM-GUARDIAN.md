@@ -4,6 +4,10 @@ ATLAS System Guardian is a Windows-only, root-owned operator lane for safe backg
 
 It is policy-driven, dry-run-first, and biased toward visibility before action.
 
+- Rule: cleanup is policy-driven and auditable, never magic.
+- Pattern: observe -> classify -> dry-run -> apply -> receipt.
+- Failure Mode: over-aggressive cleanup that treats live development workflows as disposable background noise.
+
 ## Scope
 
 - root-owned surface under `ops/scripts/system-guardian/`
@@ -144,11 +148,15 @@ Current lifecycle:
 `system-guardian-status.ps1` reports:
 
 - active profile
+- active profile summary and thresholds
+- available profile summaries
 - kill-switch state
 - policy path
 - runtime root
 - scheduled-task state
 - latest run summary
+- latest receipt path
+- startup/background review helper output from the latest run when available
 
 ## Logs And Runtime State
 
@@ -163,6 +171,15 @@ Current state surfaces:
 - `runtime/atlas/system-guardian/state/disabled.flag`
 - `runtime/atlas/system-guardian/logs/run-*.json`
 - `runtime/atlas/system-guardian/reports/run-*.txt`
+- `runtime/atlas/system-guardian/receipts/run-*.md`
+- `runtime/atlas/system-guardian/receipts/latest.md`
+
+Readable receipts summarize:
+
+- the active profile and thresholds
+- finding classification and reasons
+- helper guidance for startup/background review
+- action outcomes suitable for operator audit
 
 ## Rollback And Emergency Disable
 
@@ -179,6 +196,20 @@ Rollback restores the most recent control-plane snapshot:
 - scheduled-task install state
 
 Rollback does not restart processes that were already terminated. Process cleanup is intentionally one-way.
+
+## Classification And Review Helpers
+
+Each candidate rule carries an operator-facing classification and hint.
+
+- background review families surface browser and communication load without granting cleanup authority
+- startup review families cover launcher/helper processes that may be cleanup-safe only when headless
+- safe apply verification stays isolated behind the explicit `atlas-system-guardian-test` marker
+
+Run summaries and receipts include:
+
+- classification labels such as `browser/background-review`
+- reason codes explaining why a finding stayed observe-only, notify-only, deferred, or cleanup-eligible
+- helper summaries that group background-review and startup-review findings for fast operator triage
 
 ## Manual Cleanup Checklist
 

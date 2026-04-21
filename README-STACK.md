@@ -90,6 +90,7 @@ Use these ids in stack docs, tickets, and automation:
 - `lifeline` -> `repos/fawxzzy-lifeline`
 - `fitness` -> `repos/fawxzzy-fitness`
 - `mazer` -> `repos/fawxzzy-mazer`
+- `trove` -> `repos/fawxzzy-trove`
 - `stream` -> `repos/fawxzzy-stream`
 - `nat1-games` -> `repos/Nat1-Games/nat1-games`
 

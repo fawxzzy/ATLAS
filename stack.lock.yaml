@@ -1,7 +1,7 @@
 schema_version: "atlas.stack.lock.v1"
 stack_manifest_path: "stack.yaml"
-stack_manifest_digest: "sha256:328c7dd209a4de092d66714161f3aef268d725d1f4ca004362c327803f06feef"
-component_count: 10
+stack_manifest_digest: "sha256:3cc6496c2a818ffb1628f367b0e835258a8ed46627783b07f480c215d73d5828"
+component_count: 11
 components:
   _stack:
     path: "repos/_stack"
@@ -32,7 +32,7 @@ components:
     remote: "https://github.com/fawxzzy/fawxzzy-fitness.git"
     ref_type: "branch"
     ref: "main"
-    commit: "8015991815c597bbdefae779f70acb92aacc7a30"
+    commit: "199163f43587e53c46cb092bdda685ad80d376c2"
     dirty: true
     trust_class: "trusted"
     release_eligible: true
@@ -98,7 +98,7 @@ components:
     remote: "https://github.com/fawxzzy/ATLAS.git"
     ref_type: "branch"
     ref: "main"
-    commit: "9fb75a20982bf5e7cc311fa2bc85746322d042eb"
+    commit: "3ad6c1dd5ae8e037c7113177851485a46de8e3d7"
     dirty: true
     trust_class: "trusted"
     release_eligible: false
@@ -113,6 +113,17 @@ components:
     dirty: true
     trust_class: "trusted"
     release_eligible: false
+  trove:
+    path: "repos/fawxzzy-trove"
+    role: "application"
+    status: "active"
+    remote: "https://github.com/fawxzzy/fawxzzy-trove.git"
+    ref_type: "branch"
+    ref: "main"
+    commit: "17329fe916cedcc011d7faaca949c53a93dc5e77"
+    dirty: true
+    trust_class: "trusted"
+    release_eligible: true
 excluded_surfaces:
   verta_core_archive:
     path: "repos/Verta-Core.zip"
@@ -126,4 +137,4 @@ excluded_surfaces:
     trust_class: "untrusted"
     release_eligible: false
     reason: "Token-bearing Verta checkout remains quarantined and untrusted until scrub and rotation are complete."
-lock_digest: "sha256:f2429eb3c062dede4270b470155e85c7bb54a032c04864af5a90a82201e73d5c"
+lock_digest: "sha256:85df1887048264c528bd8f7c798b1174a066e0cd4b88d118133634bebb815859"

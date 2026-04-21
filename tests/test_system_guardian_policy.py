@@ -30,16 +30,27 @@ class SystemGuardianPolicyTests(unittest.TestCase):
         self.assertTrue({"normal", "focus", "stream", "build"}.issubset(policy["profiles"]))
         self.assertEqual(policy["profiles"]["normal"]["mode"], "observe")
         self.assertEqual(policy["profiles"]["build"]["mode"], "cleanup")
+        for name, profile in policy["profiles"].items():
+            self.assertTrue(profile.get("summary"), f"profile {name} is missing a summary")
 
         candidate_ids = {item["id"] for item in policy["candidates"]}
+        self.assertEqual(len(candidate_ids), len(policy["candidates"]))
         self.assertIn("browser-background-review", candidate_ids)
         self.assertIn("atlas-safe-test-process", candidate_ids)
+        for candidate in policy["candidates"]:
+            self.assertIn(candidate["defaultAction"], {"observe", "notify", "cleanup"})
+            self.assertTrue(candidate.get("operatorHint"))
+            classification = candidate.get("classification", {})
+            self.assertTrue(classification.get("family"))
+            self.assertTrue(classification.get("intent"))
 
     def test_doc_uses_root_allowed_paths(self) -> None:
         doc = self.doc_path.read_text(encoding="utf-8")
         self.assertIn("ops/scripts/system-guardian/", doc)
         self.assertIn("runtime/atlas/system-guardian/", doc)
         self.assertNotIn("config/system-guardian.policy.json", doc)
+        self.assertIn("observe -> classify -> dry-run -> apply -> receipt", doc)
+        self.assertIn("runtime/atlas/system-guardian/receipts/", doc)
 
 
 if __name__ == "__main__":

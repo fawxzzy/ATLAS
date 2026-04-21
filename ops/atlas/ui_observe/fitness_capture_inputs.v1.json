@@ -18,11 +18,119 @@
       "state_key": "default"
     },
     {
+      "screen_key": "routinesOverview",
+      "state_key": "selectedRoutine"
+    },
+    {
       "screen_key": "exerciseLog",
-      "state_key": "active"
+      "state_key": "sessionHeaderCard"
+    },
+    {
+      "screen_key": "exerciseLog",
+      "state_key": "entrySection"
+    },
+    {
+      "screen_key": "exerciseLog",
+      "state_key": "formSectionCard"
+    },
+    {
+      "screen_key": "exerciseLog",
+      "state_key": "compactLogRow"
+    },
+    {
+      "screen_key": "exerciseLog",
+      "state_key": "stickyFooter"
+    },
+    {
+      "screen_key": "workoutCard",
+      "state_key": "exerciseCard"
+    },
+    {
+      "screen_key": "workoutCard",
+      "state_key": "disclosureExpanded"
+    },
+    {
+      "screen_key": "workoutCard",
+      "state_key": "chipRow"
+    },
+    {
+      "screen_key": "workoutCard",
+      "state_key": "exerciseDetails"
+    },
+    {
+      "screen_key": "workoutCard",
+      "state_key": "metricItem"
+    },
+    {
+      "screen_key": "workoutCard",
+      "state_key": "sessionSummaryCard"
+    },
+    {
+      "screen_key": "settings",
+      "state_key": "overview"
+    },
+    {
+      "screen_key": "settings",
+      "state_key": "accountForm"
+    },
+    {
+      "screen_key": "settings",
+      "state_key": "glassEffects"
+    },
+    {
+      "screen_key": "settings",
+      "state_key": "legacyMigrationRow"
+    },
+    {
+      "screen_key": "settings",
+      "state_key": "legacyMigrationPanel"
+    },
+    {
+      "screen_key": "detailSupport",
+      "state_key": "detailSurface"
+    },
+    {
+      "screen_key": "detailSupport",
+      "state_key": "dayStateCard"
+    },
+    {
+      "screen_key": "detailSupport",
+      "state_key": "exerciseInfoSheet"
+    },
+    {
+      "screen_key": "detailSupport",
+      "state_key": "mediaCard"
+    },
+    {
+      "screen_key": "detailSupport",
+      "state_key": "historyRow"
     },
     {
       "screen_key": "editDay",
+      "state_key": "default"
+    },
+    {
+      "screen_key": "editRoutine",
+      "state_key": "daysSection"
+    },
+    {
+      "screen_key": "editDayAddExercise",
+      "state_key": "default"
+    },
+    {
+      "screen_key": "historyOverview",
+      "state_key": "default"
+    },
+    {
+      "screen_key": "historyExercises",
+      "state_key": "default"
+    },
+    {
+      "screen_key": "historySessions",
+      "state_key": "default"
+    },
+    {
+      "screen_key": "historyLog",
       "state_key": "default"
     }
   ]

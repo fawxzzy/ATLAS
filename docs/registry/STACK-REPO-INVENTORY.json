@@ -1,17 +1,17 @@
 {
   "schema_version": "atlas.stack.repo-inventory.v1",
   "stack_manifest_ref": "stack.yaml",
-  "stack_manifest_digest": "sha256:328c7dd209a4de092d66714161f3aef268d725d1f4ca004362c327803f06feef",
+  "stack_manifest_digest": "sha256:3cc6496c2a818ffb1628f367b0e835258a8ed46627783b07f480c215d73d5828",
   "stack_lock_ref": "stack.lock.yaml",
-  "stack_lock_digest": "sha256:f2429eb3c062dede4270b470155e85c7bb54a032c04864af5a90a82201e73d5c",
+  "stack_lock_digest": "sha256:85df1887048264c528bd8f7c798b1174a066e0cd4b88d118133634bebb815859",
   "working_memory_digest": "sha256:3402601264084c023f12833514f81b4c8683b3cbc2700af3d4078a1926ab5305",
   "published_refs": {
     "json": "docs/registry/STACK-REPO-INVENTORY.json",
     "markdown": "docs/audits/STACK-REPO-INVENTORY.md"
   },
-  "repo_count": 10,
-  "dirty_repo_count": 9,
-  "release_eligible_count": 5,
+  "repo_count": 11,
+  "dirty_repo_count": 10,
+  "release_eligible_count": 6,
   "repos": [
     {
       "logical_id": "_stack",
@@ -61,8 +61,8 @@
       "role": "application",
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/fawxzzy-fitness.git",
-      "pinned_commit": "8015991815c597bbdefae779f70acb92aacc7a30",
-      "current_commit": "8015991815c597bbdefae779f70acb92aacc7a30",
+      "pinned_commit": "199163f43587e53c46cb092bdda685ad80d376c2",
+      "current_commit": "199163f43587e53c46cb092bdda685ad80d376c2",
       "pinned_ref_type": "branch",
       "pinned_ref": "main",
       "current_ref_type": "branch",
@@ -196,8 +196,8 @@
       "role": "operator-layer",
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
-      "pinned_commit": "9fb75a20982bf5e7cc311fa2bc85746322d042eb",
-      "current_commit": "9fb75a20982bf5e7cc311fa2bc85746322d042eb",
+      "pinned_commit": "3ad6c1dd5ae8e037c7113177851485a46de8e3d7",
+      "current_commit": "3ad6c1dd5ae8e037c7113177851485a46de8e3d7",
       "pinned_ref_type": "branch",
       "pinned_ref": "main",
       "current_ref_type": "branch",
@@ -231,6 +231,27 @@
       "is_git_root": true,
       "related_initiatives": [],
       "related_initiative_refs": []
+    },
+    {
+      "logical_id": "trove",
+      "local_path": "repos/fawxzzy-trove",
+      "role": "application",
+      "status": "active",
+      "remote_url": "https://github.com/fawxzzy/fawxzzy-trove.git",
+      "pinned_commit": "17329fe916cedcc011d7faaca949c53a93dc5e77",
+      "current_commit": "17329fe916cedcc011d7faaca949c53a93dc5e77",
+      "pinned_ref_type": "branch",
+      "pinned_ref": "main",
+      "current_ref_type": "branch",
+      "current_ref": "main",
+      "branch": "main",
+      "dirty": true,
+      "trust_class": "trusted",
+      "release_eligible": true,
+      "exists": true,
+      "is_git_root": true,
+      "related_initiatives": [],
+      "related_initiative_refs": []
     }
   ],
   "excluded_surface_count": 2,
@@ -254,5 +275,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:417b889930911b37a14eecd80a80d82ae4c6c0899b1abdfe7bb7c69082288931"
+  "content_digest": "sha256:c12849258d4b60abc3957bc7675bbca452b0fdbf87c608c70c4dd59eb8e9766a"
 }

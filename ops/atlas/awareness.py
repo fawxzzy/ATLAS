@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 from datetime import datetime, timezone
 import json
 from pathlib import Path
@@ -46,6 +47,8 @@ VOICE_CONTRACT_VERSION = "atlas.awareness.voice.v1"
 COCKPIT_CONTRACT_VERSION = "atlas.awareness.cockpit.v1"
 OBSERVE_AUTOMATION_LEVEL = "observe"
 CONTEXT_AUTOMATION_LEVEL = "context"
+SYSTEM_GUARDIAN_POLICY_REF = "ops/scripts/system-guardian/system-guardian.policy.json"
+SYSTEM_GUARDIAN_RUNTIME_ROOT = Path("runtime/atlas/system-guardian")
 
 ALLOWED_FETCH_PREFIXES = [
     "docs/",
@@ -75,6 +78,26 @@ def _bundle_path(root: Path) -> Path:
 
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+
+
+def _sha256_text(text: str) -> str:
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def _read_json_if_exists(path: Path) -> dict[str, Any]:
+    if not path.exists():
+        return {}
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8-sig"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    return payload if isinstance(payload, dict) else {}
+
+
+def _read_text_if_exists(path: Path) -> str | None:
+    if not path.exists():
+        return None
+    return path.read_text(encoding="utf-8")
 
 
 def ensure_world_model(*, root: Path | None = None, refresh: bool = False) -> dict[str, Any]:
@@ -259,6 +282,137 @@ def _load_repo_inventory(*, root: Path, refresh: bool) -> dict[str, Any]:
     return build_repo_inventory(root=root)
 
 
+def _derive_system_guardian_run_result(run: dict[str, Any]) -> str:
+    if not run:
+        return "unavailable"
+    if bool(run.get("skipped")):
+        return "skipped"
+    summary = run.get("summary", {}) if isinstance(run.get("summary"), dict) else {}
+    finding_count = int(summary.get("findingCount") or 0)
+    cleanup_count = int(summary.get("cleanupCount") or 0)
+    notify_count = int(summary.get("notifyCount") or 0)
+    observe_count = int(summary.get("observeCount") or 0)
+    if finding_count == 0:
+        return "clean"
+    if cleanup_count > 0:
+        return "cleanup_applied"
+    if notify_count > 0:
+        return "notify_only"
+    if observe_count > 0:
+        return "observe_only"
+    return "findings_present"
+
+
+def _system_guardian_receipt_summary(receipt_text: str | None, *, latest_run: dict[str, Any]) -> list[str]:
+    if receipt_text:
+        lines: list[str] = []
+        for raw_line in receipt_text.splitlines():
+            line = raw_line.strip()
+            if not line:
+                continue
+            if line.startswith("## "):
+                break
+            if line.startswith("# "):
+                lines.append(line[2:].strip())
+                continue
+            if line.startswith("- "):
+                lines.append(line[2:].strip())
+        if lines:
+            return lines[:8]
+
+    summary = latest_run.get("summary", {}) if isinstance(latest_run.get("summary"), dict) else {}
+    fallback: list[str] = []
+    if latest_run:
+        fallback.extend(
+            [
+                f"Ran At: {latest_run.get('ranAt')}",
+                f"Profile: {latest_run.get('profile')}",
+                f"Mode: {latest_run.get('mode')}",
+                f"Result: {_derive_system_guardian_run_result(latest_run)}",
+                f"Findings: {summary.get('findingCount')}",
+                f"Cleanup Count: {summary.get('cleanupCount')}",
+                f"Notify Count: {summary.get('notifyCount')}",
+                f"Observe Count: {summary.get('observeCount')}",
+            ]
+        )
+    return [line for line in fallback if line and not line.endswith(": None")]
+
+
+def _build_system_guardian_read_model(*, root: Path, refresh: bool) -> dict[str, Any]:
+    _ = refresh
+    policy_path = (root / SYSTEM_GUARDIAN_POLICY_REF).resolve()
+    policy = _read_json_if_exists(policy_path)
+    policy_defaults = policy.get("defaults", {}) if isinstance(policy.get("defaults"), dict) else {}
+    policy_profiles = policy.get("profiles", {}) if isinstance(policy.get("profiles"), dict) else {}
+    active_profile_path = (root / SYSTEM_GUARDIAN_RUNTIME_ROOT / "state" / "active-profile.json").resolve()
+    latest_run_path = (root / SYSTEM_GUARDIAN_RUNTIME_ROOT / "state" / "latest-run.json").resolve()
+    rollback_path = (root / SYSTEM_GUARDIAN_RUNTIME_ROOT / "state" / "rollback-latest.json").resolve()
+    disabled_flag_path = (root / SYSTEM_GUARDIAN_RUNTIME_ROOT / "state" / "disabled.flag").resolve()
+    latest_receipt_path = (root / SYSTEM_GUARDIAN_RUNTIME_ROOT / "receipts" / "latest.md").resolve()
+    rollback_exists = rollback_path.exists()
+
+    active_profile = _read_json_if_exists(active_profile_path)
+    latest_run = _read_json_if_exists(latest_run_path)
+    rollback_snapshot = _read_json_if_exists(rollback_path)
+    scheduled_task = (
+        rollback_snapshot.get("scheduledTask", {}) if isinstance(rollback_snapshot.get("scheduledTask"), dict) else {}
+    )
+    receipt_text = _read_text_if_exists(latest_receipt_path)
+
+    policy_ref = atlas_relative(policy_path, root=root)
+    policy_digest = _sha256_text(policy_path.read_text(encoding="utf-8")) if policy_path.exists() else None
+    active_profile_name = str(active_profile.get("profile") or latest_run.get("profile") or policy_defaults.get("profile") or "")
+    profile_summary = policy_profiles.get(active_profile_name, {}) if active_profile_name else {}
+    profile_mode = profile_summary.get("mode") if isinstance(profile_summary, dict) else None
+    summary = profile_summary.get("summary") if isinstance(profile_summary, dict) else None
+
+    read_model = {
+        "policy": {
+            "ref": policy_ref,
+            "hash": policy_digest,
+            "version": policy.get("version"),
+        },
+        "active_profile": {
+            "name": active_profile_name or None,
+            "updated_at": active_profile.get("updatedAt"),
+            "mode": profile_mode,
+            "summary": summary,
+        },
+        "scheduled_task": {
+            "state": "installed" if scheduled_task.get("installed") else "uninstalled" if rollback_exists else "unknown",
+            "installed": bool(scheduled_task.get("installed")) if scheduled_task else False,
+            "task_name": scheduled_task.get("taskName") if scheduled_task else None,
+            "interval_minutes": scheduled_task.get("intervalMinutes") if scheduled_task else None,
+            "run_with_apply": scheduled_task.get("runWithApply") if scheduled_task else None,
+            "last_run_time": scheduled_task.get("lastRunTime") if scheduled_task else None,
+            "next_run_time": scheduled_task.get("nextRunTime") if scheduled_task else None,
+            "snapshot_ref": atlas_relative(rollback_path, root=root) if rollback_exists else None,
+        },
+        "kill_switch": {
+            "enabled": disabled_flag_path.exists() or bool(latest_run.get("killSwitchEnabled")),
+            "state_ref": atlas_relative(disabled_flag_path, root=root),
+            "state": "enabled" if disabled_flag_path.exists() or bool(latest_run.get("killSwitchEnabled")) else "disabled",
+        },
+        "last_run": {
+            "ran_at": latest_run.get("ranAt"),
+            "profile": latest_run.get("profile"),
+            "mode": latest_run.get("mode"),
+            "result": _derive_system_guardian_run_result(latest_run),
+            "apply_changes": latest_run.get("applyChanges"),
+            "skipped": latest_run.get("skipped"),
+            "kill_switch_enabled": latest_run.get("killSwitchEnabled"),
+            "summary": latest_run.get("summary", {}) if isinstance(latest_run.get("summary"), dict) else {},
+            "review_helpers": latest_run.get("reviewHelpers", []) if isinstance(latest_run.get("reviewHelpers"), list) else [],
+        },
+        "last_receipt": {
+            "present": receipt_text is not None,
+            "ref": atlas_relative(latest_receipt_path, root=root),
+            "summary_lines": _system_guardian_receipt_summary(receipt_text, latest_run=latest_run),
+        },
+    }
+    return read_model
+
+
 def _memory_source_kind(item: dict[str, Any]) -> str:
     memory_kind = str(item.get("memory_kind", "")).strip()
     return memory_kind if memory_kind == "initiative" else "memory"
@@ -425,13 +579,15 @@ def atlas_status(*, root: Path | None = None, refresh: bool = False) -> dict[str
     attention = _load_attention(root=base_root, refresh=refresh)
     status = render_status_payload(base_root / "runtime" / "cortex" / "artifacts")
     repo_inventory = _load_repo_inventory(root=base_root, refresh=refresh)
+    system_guardian = _build_system_guardian_read_model(root=base_root, refresh=refresh)
     playbook_report, playbook_slices = build_playbook_status_slices(
         root=base_root,
         inventory_payload=repo_inventory,
     )
     continuity_manifest, continuity_slices = build_continuity_status_slices(root=base_root)
     existing_slices = status.get("slices", {}) if isinstance(status.get("slices"), dict) else {}
-    status["slices"] = existing_slices | playbook_slices | continuity_slices
+    status["slices"] = existing_slices | playbook_slices | continuity_slices | {"system_guardian": system_guardian}
+    status["system_guardian"] = system_guardian
     return {
         "schema_version": STATUS_CONTRACT_VERSION,
         "registry": status.get("registry"),
@@ -449,6 +605,7 @@ def atlas_status(*, root: Path | None = None, refresh: bool = False) -> dict[str
         },
         "trust_posture": status.get("trust_posture"),
         "repo_inventory": status.get("repo_inventory"),
+        "system_guardian": system_guardian,
         "working_memory": status.get("working_memory"),
         "initiatives": status.get("initiatives"),
         "slices": status.get("slices"),
@@ -639,6 +796,7 @@ def cockpit_status(*, root: Path | None = None, refresh: bool = False) -> dict[s
     status = atlas_status(root=base_root, refresh=refresh)
     playbook_report = status.get("playbook_report", {}) if isinstance(status.get("playbook_report"), dict) else {}
     playbook_summary = playbook_report.get("summary", {}) if isinstance(playbook_report.get("summary"), dict) else {}
+    system_guardian = status.get("system_guardian", {}) if isinstance(status.get("system_guardian"), dict) else {}
     continuity_coverage = (
         status.get("slices", {}).get("continuity_coverage", {})
         if isinstance(status.get("slices"), dict)
@@ -774,6 +932,7 @@ def cockpit_status(*, root: Path | None = None, refresh: bool = False) -> dict[s
             if isinstance(playbook_report.get("repos"), list)
             else [],
         },
+        "system_guardian": system_guardian,
         "continuity": {
             "coverage": continuity_coverage,
             "promotion_queue": continuity_promotion_queue,
@@ -800,6 +959,7 @@ def _slice_titles() -> dict[str, str]:
         "playbook_adoption_summary": "Playbook Adoption Summary",
         "playbook_repo_adoption": "Playbook Repo Adoption",
         "playbook_drift": "Playbook Drift",
+        "system_guardian": "System Guardian",
         "continuity_source_inventory": "Continuity Source Inventory",
         "continuity_promotion_queue": "Continuity Promotion Queue",
         "continuity_source_groups": "Continuity Source Groups",

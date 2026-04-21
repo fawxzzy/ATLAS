@@ -15,3 +15,5 @@ $task = Register-SystemGuardianTask -Policy $policy -Paths $paths -IntervalMinut
 $status = Get-SystemGuardianStatus -Policy $policy -Paths $paths
 
 Write-Output ("installed task={0} intervalMinutes={1} profile={2}" -f $task.taskName, $task.intervalMinutes, $status.profile)
+Write-Output ("profileSummary={0}" -f $status.profileSummary.summary)
+Write-Output ("thresholds={0}" -f $status.profileSummary.thresholdSummary)
