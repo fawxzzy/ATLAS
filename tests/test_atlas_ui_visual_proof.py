@@ -124,6 +124,39 @@ class AtlasUiVisualProofTests(unittest.TestCase):
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
         self.assertEqual([], validate_visual_proof_manifest(manifest, root=ROOT))
 
+    def test_repo_manifest_only_gates_current_deterministic_visual_lane(self) -> None:
+        manifest_path = ROOT / "ops" / "atlas" / "ui_visual_proof" / "fitness_visual_proof.v1.json"
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+
+        capture_ids = [item["capture_id"] for item in manifest["captures"]]
+
+        self.assertEqual(
+            [
+                "settings-overview-default",
+                "today-overview-default",
+                "history-sessions-list-default",
+                "history-exercises-default",
+                "workout-card-session-summary-card",
+                "detail-support-exercise-info-sheet",
+            ],
+            capture_ids,
+        )
+        self.assertFalse(any(capture_id.startswith("history-log-") for capture_id in capture_ids))
+
+    def test_repo_manifest_reuses_existing_exercise_family_capture_ids(self) -> None:
+        manifest_path = ROOT / "ops" / "atlas" / "ui_visual_proof" / "fitness_visual_proof.v1.json"
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        captures_by_id = {item["capture_id"]: item for item in manifest["captures"]}
+
+        self.assertIn("history-exercises-default", captures_by_id)
+        self.assertIn("detail-support-exercise-info-sheet", captures_by_id)
+        self.assertEqual({"kind": "unchanged"}, captures_by_id["history-exercises-default"]["assertion"])
+        self.assertEqual(
+            {"kind": "unchanged"},
+            captures_by_id["detail-support-exercise-info-sheet"]["assertion"],
+        )
+        self.assertFalse(any(capture_id.startswith("exercise-detail-") for capture_id in captures_by_id))
+
     def test_manifest_validation_accepts_declared_capture(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

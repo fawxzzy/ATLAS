@@ -84,6 +84,8 @@ The approved references are seeded from the repo's existing deterministic mobile
 - `history-exercises-default` maps to the `history-exercises-compact` mobile-regression scenario.
 - `workout-card-session-summary-card` maps to the `today-in-session-summary` mobile-regression scenario.
 - `detail-support-exercise-info-sheet` maps to the `exercise-detail-strength` mobile-regression scenario.
+- Pattern: when owner screenshots for the exercise discovery/detail family still land on those two deterministic scenarios, keep root proof attached to the existing capture ids instead of cloning a new exercise-detail lane.
+- Failure Mode: copying owner scenario names into new root capture ids makes the proof rail wider without increasing validator signal.
 
 Visual proof should only widen onto already adopted surfaces that have a deterministic screenshot route.
 
@@ -105,8 +107,10 @@ Entry handoff and install-gate surfaces are not opted into visual proof yet.
 History detail / log-audit remains semantic-only for this tranche.
 
 - The adopted family now expands into explicit semantic captures for the detail surface, edit-mode panel, field inputs, disclosure shell, and note or empty-state chrome.
-- The current repo-backed mobile-regression manifest does not emit a history-detail screenshot artifact into the root proof lane yet.
+- Fitness does define a deterministic owner scenario for this family as `history-detail-broken-images`, but the current repo-backed screenshot export does not materialize a root-proof artifact for the active split `history-log-*` capture ids yet.
 - Root proof should only widen when a deterministic history-detail artifact exists in both the runtime screenshot path and the approved reference lane.
+- Pattern: when semantic coverage replaces one broad legacy capture with several active captures, visual proof may only attach once one of those active capture ids has its own deterministic screenshot binding and matching observation digest.
+- Failure Mode: binding an active `history-log-*` capture to a stale or legacy screenshot path would make the proof rail look green while comparing the wrong surface.
 
 ## Artifact Paths
 

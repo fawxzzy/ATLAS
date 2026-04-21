@@ -108,6 +108,10 @@ The input contract selects which screen/state pairs are active for a run. This k
 - Failure Mode: assuming clean drift on old captures proves validator coverage for newly adopted surfaces.
 - Pattern: when a newly adopted family splits from one broad capture into several narrower states, replace the broad selector immediately instead of carrying both.
 - Failure Mode: leaving a newly adopted detail family collapsed under one legacy capture id hides which sub-surface actually drifted.
+- Pattern: the F13 history-log adoption tranche stays represented by the five split `history-log-*` captures, while the retained `history-log-detail-default` artifact remains residue only.
+- Failure Mode: treating the retained legacy history-detail artifact as active proof would let residue masquerade as current validator coverage.
+- Pattern: when a new owner tranche lands on already-covered exercise discovery/detail surfaces, reconcile against the active `history-exercises-default` and `detail-support-exercise-info-sheet` captures before adding selectors.
+- Failure Mode: inventing a second exercise-detail capture lane in root when the changed family is already represented creates validator sprawl instead of better coverage.
 
 The observer resolves primitive variants from owner contracts, groups referenced tokens by scale, and emits one normalized artifact per capture.
 

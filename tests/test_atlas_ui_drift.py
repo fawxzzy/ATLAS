@@ -40,6 +40,30 @@ class AtlasUiDriftTests(unittest.TestCase):
 
         self.assertEqual(59, report["summary"]["expected_capture_count"])
 
+    def test_dry_run_keeps_exercise_discovery_and_detail_on_existing_validator_lane(self) -> None:
+        report = validate_fitness_ui_drift(
+            root=ROOT,
+            schema_path=default_drift_schema_path(ROOT),
+            observation_schema_path=default_schema_path(ROOT),
+            capture_map_schema_path=default_capture_map_schema_path(ROOT),
+            dry_run=True,
+        )
+        expected = observe_fitness_ui(
+            root=ROOT,
+            schema_path=default_schema_path(ROOT),
+            capture_map_schema_path=default_capture_map_schema_path(ROOT),
+            dry_run=True,
+        )
+
+        comparison_keys = {item["comparison_key"] for item in expected["observations"]}
+
+        self.assertIn("fitness:history-exercises-default", comparison_keys)
+        self.assertIn("fitness:detail-support-exercise-info-sheet", comparison_keys)
+        self.assertFalse(any(key.startswith("fitness:exercise-detail-") for key in comparison_keys))
+        self.assertEqual(len(comparison_keys), report["summary"]["expected_capture_count"])
+        self.assertEqual("clean", report["summary"]["status"])
+        self.assertEqual(0, report["summary"]["finding_count"])
+
     def test_validator_is_clean_for_compliant_observations(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

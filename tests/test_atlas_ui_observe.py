@@ -511,6 +511,32 @@ class AtlasUiObservationTests(unittest.TestCase):
             capture_ids_by_selector[("historyLog", "noteEmptyStateChrome")],
         )
 
+    def test_exercise_discovery_and_detail_family_reuses_existing_capture_ids(self) -> None:
+        inputs = json.loads(default_capture_inputs_path(ROOT).read_text(encoding="utf-8"))
+        capture_map = json.loads(default_capture_map_path(ROOT).read_text(encoding="utf-8"))
+
+        selectors = {(item["screen_key"], item["state_key"]) for item in inputs["capture_set"]}
+        captures_by_id = {item["capture_id"]: item for item in capture_map["captures"]}
+        capture_ids = set(captures_by_id)
+
+        self.assertIn(("historyExercises", "default"), selectors)
+        self.assertIn(("detailSupport", "exerciseInfoSheet"), selectors)
+        self.assertEqual("history-exercises-default", captures_by_id["history-exercises-default"]["capture_id"])
+        self.assertEqual(
+            "detail-support-exercise-info-sheet",
+            captures_by_id["detail-support-exercise-info-sheet"]["capture_id"],
+        )
+        self.assertIn(
+            "repos/fawxzzy-fitness/src/app/history/exercises/ExerciseBrowserClient.tsx",
+            captures_by_id["history-exercises-default"]["owner_surface_refs"],
+        )
+        self.assertIn(
+            "repos/fawxzzy-fitness/src/components/ExerciseInfoSheet.tsx",
+            captures_by_id["detail-support-exercise-info-sheet"]["owner_surface_refs"],
+        )
+        self.assertFalse(any(capture_id.startswith("exercise-detail-") for capture_id in capture_ids))
+        self.assertFalse(any(item["screen_key"] == "exerciseDetail" for item in capture_map["captures"]))
+
     def test_duplicate_mapping_and_missing_variant_are_rejected(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
