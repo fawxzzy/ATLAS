@@ -19,14 +19,14 @@ Operational rule:
 - Excluded surface count: `2`
 - Stack manifest: `stack.yaml`
 - Stack lock: `stack.lock.yaml`
-- Inventory digest: `sha256:5518dc6ac78a093d7af7aa0e0d710441cdb3a6ec943cbd317c5c6239dfadac24`
+- Inventory digest: `sha256:b13fa8c9bd9503ba4d66fe5583f1102e171bf8ac21fba1b90a8c71cf97437849`
 
 ## Managed Repos
 
 | Repo id | Path | Branch | Pinned commit | Current commit | Dirty | Trust | Release | Related initiatives |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | _stack | repos/_stack | main | a91bfbddbb2a7e0f83983c52cac9f7027e18cc4c | 11d9ab7ab11329237bd6d832e4c7ecc9a881b196 | True | trusted | False | - |
-| fitness | repos/fawxzzy-fitness-local | - | - | - | - | adjacent | False | - |
+| fitness | repos/fawxzzy-fitness | - | - | - | - | adjacent | False | - |
 | lifeline | repos/fawxzzy-lifeline | codex/lifeline-hermetic-validation-wave1 | 632075b1bb65aed59839cb1f9e205b826e41995d | cd45f2ce8840160275a37fd5a690b0970c924468 | False | trusted | True | - |
 | mazer | repos/fawxzzy-mazer | main | 3f90b9d5b476642a565a91ea8619561356c52382 | 412d960497f596d91b4c474e93134f318cad2ec4 | False | trusted | True | initiative:initiative-mazer-d2-learning-scorer |
 | nat1-games | repos/Nat1-Games/nat1-games | main | ce9643465d69f76a46d92d0db6ed855d117e1bbd | ce9643465d69f76a46d92d0db6ed855d117e1bbd | True | trusted | False | - |

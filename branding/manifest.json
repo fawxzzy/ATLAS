@@ -95,63 +95,63 @@
       "repoId": "fitness",
       "description": "Fitness local master copy for repo-local icon generation",
       "source": "branding/source/atlas-sigil-master.png",
-      "target": "repos/fawxzzy-fitness-local/public/brand/atlas-sigil-master.png"
+      "target": "repos/fawxzzy-fitness/public/brand/atlas-sigil-master.png"
     },
     {
       "id": "fitness-app-icon-192",
       "repoId": "fitness",
       "description": "Fitness PWA app icon 192",
       "source": "branding/generated/app/icon-192.png",
-      "target": "repos/fawxzzy-fitness-local/public/app/icon-192.png"
+      "target": "repos/fawxzzy-fitness/public/app/icon-192.png"
     },
     {
       "id": "fitness-app-icon-512",
       "repoId": "fitness",
       "description": "Fitness PWA app icon 512",
       "source": "branding/generated/app/icon-512.png",
-      "target": "repos/fawxzzy-fitness-local/public/app/icon-512.png"
+      "target": "repos/fawxzzy-fitness/public/app/icon-512.png"
     },
     {
       "id": "fitness-public-icon-192",
       "repoId": "fitness",
       "description": "Fitness public icon 192",
       "source": "branding/generated/app/icon-192.png",
-      "target": "repos/fawxzzy-fitness-local/public/icons/icon-192.png"
+      "target": "repos/fawxzzy-fitness/public/icons/icon-192.png"
     },
     {
       "id": "fitness-public-icon-512",
       "repoId": "fitness",
       "description": "Fitness public icon 512",
       "source": "branding/generated/app/icon-512.png",
-      "target": "repos/fawxzzy-fitness-local/public/icons/icon-512.png"
+      "target": "repos/fawxzzy-fitness/public/icons/icon-512.png"
     },
     {
       "id": "fitness-apple-touch",
       "repoId": "fitness",
       "description": "Fitness apple-touch icon",
       "source": "branding/generated/favicon/apple-touch-icon.png",
-      "target": "repos/fawxzzy-fitness-local/public/icons/apple-touch-icon.png"
+      "target": "repos/fawxzzy-fitness/public/icons/apple-touch-icon.png"
     },
     {
       "id": "fitness-favicon-32",
       "repoId": "fitness",
       "description": "Fitness favicon 32",
       "source": "branding/generated/favicon/favicon-32x32.png",
-      "target": "repos/fawxzzy-fitness-local/public/favicon-32x32.png"
+      "target": "repos/fawxzzy-fitness/public/favicon-32x32.png"
     },
     {
       "id": "fitness-favicon-16",
       "repoId": "fitness",
       "description": "Fitness favicon 16",
       "source": "branding/generated/favicon/favicon-16x16.png",
-      "target": "repos/fawxzzy-fitness-local/public/favicon-16x16.png"
+      "target": "repos/fawxzzy-fitness/public/favicon-16x16.png"
     },
     {
       "id": "fitness-favicon-ico",
       "repoId": "fitness",
       "description": "Fitness root favicon",
       "source": "branding/generated/favicon/favicon.ico",
-      "target": "repos/fawxzzy-fitness-local/public/favicon.ico"
+      "target": "repos/fawxzzy-fitness/public/favicon.ico"
     },
     {
       "id": "trove-brand-master",

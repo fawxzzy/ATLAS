@@ -116,7 +116,7 @@ repo_registry:
     role: local-operator
     status: active
   fitness:
-    path: repos/fawxzzy-fitness-local
+    path: repos/fawxzzy-fitness
     role: application
     status: unmanaged
   mazer:

@@ -92,7 +92,7 @@ async function loadSharp() {
         const module = await import("sharp");
         return module.default;
       } catch {
-        const fallbackPath = path.resolve(ATLAS_ROOT, "repos", "fawxzzy-fitness-local", "node_modules", "sharp", "lib", "index.js");
+        const fallbackPath = path.resolve(ATLAS_ROOT, "repos", "fawxzzy-fitness", "node_modules", "sharp", "lib", "index.js");
         try {
           await stat(fallbackPath);
         } catch {

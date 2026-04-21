@@ -68,7 +68,7 @@ Current operating call:
 - keep `status`, `merge_request`, `conversation`, `session`, `proposal`, `day_summary_taxonomy`, `heartbeat`, `execution_rejected`, and `execution_expired` as candidate rows until repo evidence promotes them
 - Fitness owner truth now includes the first growth pack, the pilot-readiness threshold pack, and measured proof for one shadow-only placement in the Wave 2 growth lane
 - the pilot-readiness gate currently evaluates to `stay_shadow` in Fitness owner truth, so no pilot-live rollout is authorized at root
-- the next owner-repo work is evidence-surface completion in `repos/fawxzzy-fitness-local` so the frozen pilot thresholds can be measured from repo-owned receipts
+- the next owner-repo work is evidence-surface completion in `repos/fawxzzy-fitness` so the frozen pilot thresholds can be measured from repo-owned receipts
 - auth, shared UI, cross-sell, and ML stay explicitly later
 - voice remains intentionally below the line unless explicitly chosen
 - the decision gate stays explicit: root sessions change projection truth; owner-repo sessions change owner truth
@@ -90,13 +90,13 @@ Use these ids in stack docs, tickets, and automation:
 - `_stack` -> `repos/_stack`
 - `playbook` -> `repos/fawxzzy-playbook`
 - `lifeline` -> `repos/fawxzzy-lifeline`
-- `fitness` -> `repos/fawxzzy-fitness-local`
+- `fitness` -> `repos/fawxzzy-fitness`
 - `mazer` -> `repos/fawxzzy-mazer`
 - `trove` -> `repos/fawxzzy-trove`
 - `stream` -> `repos/fawxzzy-stream`
 - `nat1-games` -> `repos/Nat1-Games/nat1-games`
 
-The ids are canonical even where disk names have not been normalized yet.
+The ids are canonical. Fitness is normalized on disk at `repos/fawxzzy-fitness`; other repo disk names may still differ where explicitly noted.
 
 `repos/**` remains untracked by the root repo as a code surface. The stack root tracks inventory and policy about those repos, not mirrored copies of their source trees.
 

@@ -1,7 +1,7 @@
 {
   "schema_version": "atlas.stack.repo-inventory.v1",
   "stack_manifest_ref": "stack.yaml",
-  "stack_manifest_digest": "sha256:408b0b297ff18dd6bdb8b8670a882f1260c7088e0160960650c5688c914f4658",
+  "stack_manifest_digest": "sha256:349c1ee779a4042f167182f61c4a3a365f517679556c56585bbd0b1c5e191bee",
   "stack_lock_ref": "stack.lock.yaml",
   "stack_lock_digest": "sha256:ac5cc8099a5e570ddf33d1dd58ce44dcd75cb187ec77fa6d1b8edcabb1164f4a",
   "working_memory_digest": "sha256:3402601264084c023f12833514f81b4c8683b3cbc2700af3d4078a1926ab5305",
@@ -36,7 +36,7 @@
     },
     {
       "logical_id": "fitness",
-      "local_path": "repos/fawxzzy-fitness-local",
+      "local_path": "repos/fawxzzy-fitness",
       "role": "application",
       "status": "unmanaged",
       "remote_url": null,
