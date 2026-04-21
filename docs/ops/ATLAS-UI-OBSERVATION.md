@@ -112,8 +112,12 @@ The input contract selects which screen/state pairs are active for a run. This k
 - Failure Mode: treating the retained legacy history-detail artifact as active proof would let residue masquerade as current validator coverage.
 - Pattern: when a new owner tranche lands on already-covered exercise discovery/detail surfaces, reconcile against the active `history-exercises-default` and `detail-support-exercise-info-sheet` captures before adding selectors.
 - Failure Mode: inventing a second exercise-detail capture lane in root when the changed family is already represented creates validator sprawl instead of better coverage.
+- Pattern: when a new owner tranche lands on shared main-tab chrome already exercised by Today, Routines, History, and Settings captures, reconcile lineage on those existing captures first instead of minting nav-only ids.
+- Failure Mode: adding a second root capture lane for shared chrome widens validator surface without increasing proof clarity.
 
 The observer resolves primitive variants from owner contracts, groups referenced tokens by scale, and emits one normalized artifact per capture.
+
+For shared chrome reconciliations, the capture map may widen owner-surface lineage inside an existing capture, such as binding `AppNav` to the active Today, Routines, History, and Settings captures, while the normalized trait digest stays anchored to the frozen primitive slots.
 
 ## Mapping contract
 

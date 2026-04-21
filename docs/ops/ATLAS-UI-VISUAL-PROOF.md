@@ -62,15 +62,17 @@ The currently proof-gated captures are:
 
 - `settings-overview-default`
 - `today-overview-default`
+- `routines-overview-default`
 - `history-sessions-list-default`
 - `history-exercises-default`
 - `workout-card-session-summary-card`
 - `detail-support-exercise-info-sheet`
 
-All six are currently baselined as `unchanged`.
+All seven are currently baselined as `unchanged`.
 
 - `settings-overview-default` is the stable control surface.
 - `today-overview-default` is the first high-signal Today surface tied to the active adoption rail.
+- `routines-overview-default` extends the proof lane across the shared main-tab family so the Routines-active state is explicitly baselined instead of inferred from Today, History, and Settings alone.
 - `history-sessions-list-default` extends the proof lane into the history session-summary family.
 - `history-exercises-default` extends the proof lane into the history exercise-browser family.
 - `workout-card-session-summary-card` extends the proof lane into the workout-card/session-summary family.
@@ -80,17 +82,21 @@ The approved references are seeded from the repo's existing deterministic mobile
 
 - `settings-overview-default` maps to the `settings-default` mobile-regression scenario.
 - `today-overview-default` maps to the `today-default` mobile-regression scenario.
+- `routines-overview-default` maps to the `routines-current-view` mobile-regression scenario.
 - `history-sessions-list-default` maps to the `history-sessions-compact` mobile-regression scenario.
 - `history-exercises-default` maps to the `history-exercises-compact` mobile-regression scenario.
 - `workout-card-session-summary-card` maps to the `today-in-session-summary` mobile-regression scenario.
 - `detail-support-exercise-info-sheet` maps to the `exercise-detail-strength` mobile-regression scenario.
 - Pattern: when owner screenshots for the exercise discovery/detail family still land on those two deterministic scenarios, keep root proof attached to the existing capture ids instead of cloning a new exercise-detail lane.
 - Failure Mode: copying owner scenario names into new root capture ids makes the proof rail wider without increasing validator signal.
+- Pattern: when a shared main-tab tranche lands on already-covered screen captures, widen proof by adding the missing active-tab screen capture first instead of inventing a nav-only screenshot lane.
+- Failure Mode: creating a synthetic top-nav proof id for chrome that is already visible on deterministic owner screens adds proof surface without adding trust.
 
 Visual proof should only widen onto already adopted surfaces that have a deterministic screenshot route.
 
 - Pattern: expand visual proof only when the owner repo can emit the same stable scenario artifact into both the runtime screenshot path and the approved reference lane.
 - Failure Mode: opting auth-gated, install-stateful, or otherwise unstable surfaces into screenshot proof weakens the rail with flaky diffs.
+- Rule: the shared main-tab pending indicator stays out of root proof until the owner repo exposes a deterministic screenshot scenario that holds that transient state without timing flake.
 
 Curated onboarding is not opted into visual proof yet.
 

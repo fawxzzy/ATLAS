@@ -134,6 +134,7 @@ class AtlasUiVisualProofTests(unittest.TestCase):
             [
                 "settings-overview-default",
                 "today-overview-default",
+                "routines-overview-default",
                 "history-sessions-list-default",
                 "history-exercises-default",
                 "workout-card-session-summary-card",
@@ -156,6 +157,23 @@ class AtlasUiVisualProofTests(unittest.TestCase):
             captures_by_id["detail-support-exercise-info-sheet"]["assertion"],
         )
         self.assertFalse(any(capture_id.startswith("exercise-detail-") for capture_id in captures_by_id))
+
+    def test_repo_manifest_reuses_existing_main_tab_capture_ids_for_shared_nav(self) -> None:
+        manifest_path = ROOT / "ops" / "atlas" / "ui_visual_proof" / "fitness_visual_proof.v1.json"
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        captures_by_id = {item["capture_id"]: item for item in manifest["captures"]}
+
+        for capture_id in (
+            "today-overview-default",
+            "routines-overview-default",
+            "history-sessions-list-default",
+            "history-exercises-default",
+            "settings-overview-default",
+        ):
+            self.assertIn(capture_id, captures_by_id)
+            self.assertEqual({"kind": "unchanged"}, captures_by_id[capture_id]["assertion"])
+
+        self.assertFalse(any(capture_id.startswith("main-tab-") for capture_id in captures_by_id))
 
     def test_manifest_validation_accepts_declared_capture(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

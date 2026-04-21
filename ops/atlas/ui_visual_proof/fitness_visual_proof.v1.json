@@ -3,7 +3,7 @@
   "owner_repo_id": "fitness",
   "owner_repo_path": "repos/fawxzzy-fitness",
   "capture_map_ref": "ops/atlas/ui_observe/fitness_capture_map.v1.json",
-  "expected_capture_map_digest": "sha256:afde8ba1e85f284b173a3cde518d570bd421417b114f01344a096f3027725fda",
+  "expected_capture_map_digest": "sha256:601a2a7d21bee4a59b8c1c74bcbe09382389ac68e34581571e86a7ec43f0e426",
   "image_artifact_root": "runtime/atlas/ui-observe/fitness",
   "reference_root": "data/atlas/ui-visual-proof/fitness",
   "captures": [
@@ -17,6 +17,13 @@
     {
       "capture_id": "today-overview-default",
       "expected_observation_digest": "sha256:ab79e8ce7a19ad24bcf6ce7bc0e803379ad2b1b0ae2760da7313de0d4d2f64ea",
+      "assertion": {
+        "kind": "unchanged"
+      }
+    },
+    {
+      "capture_id": "routines-overview-default",
+      "expected_observation_digest": "sha256:dd227bff4047bc2ec208fa735942e1e0ac9c3be9e2f9bccc427986a50d87592d",
       "assertion": {
         "kind": "unchanged"
       }

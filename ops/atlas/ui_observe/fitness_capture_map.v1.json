@@ -11,6 +11,8 @@
       "state_label": "Default",
       "route_family": "overview",
       "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/app/today/page.tsx",
+        "repos/fawxzzy-fitness/src/components/AppNav.tsx",
         "repos/fawxzzy-fitness/src/components/ui/app/AppHeader.tsx",
         "repos/fawxzzy-fitness/src/components/ui/app/AppPanel.tsx",
         "repos/fawxzzy-fitness/src/components/ui/app/AppBadge.tsx",
@@ -44,6 +46,7 @@
       "route_family": "overview",
       "owner_surface_refs": [
         "repos/fawxzzy-fitness/src/app/routines/page.tsx",
+        "repos/fawxzzy-fitness/src/components/AppNav.tsx",
         "repos/fawxzzy-fitness/src/app/routines/RoutinesPageClient.tsx",
         "repos/fawxzzy-fitness/src/components/routines/RoutinesScreenFamily.tsx",
         "repos/fawxzzy-fitness/src/components/ui/app/SharedScreenHeader.tsx",
@@ -80,6 +83,7 @@
       "route_family": "overview",
       "owner_surface_refs": [
         "repos/fawxzzy-fitness/src/app/routines/page.tsx",
+        "repos/fawxzzy-fitness/src/components/AppNav.tsx",
         "repos/fawxzzy-fitness/src/app/routines/RoutinesPageClient.tsx",
         "repos/fawxzzy-fitness/src/components/routines/RoutinesScreenFamily.tsx",
         "repos/fawxzzy-fitness/src/components/ui/app/SharedScreenHeader.tsx",
@@ -459,6 +463,7 @@
       "route_family": "settings",
       "owner_surface_refs": [
         "repos/fawxzzy-fitness/src/app/settings/page.tsx",
+        "repos/fawxzzy-fitness/src/components/AppNav.tsx",
         "repos/fawxzzy-fitness/src/components/ui/app/AppHeader.tsx",
         "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
         "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
@@ -1668,6 +1673,7 @@
       "route_family": "overview",
       "owner_surface_refs": [
         "repos/fawxzzy-fitness/src/app/history/page.tsx",
+        "repos/fawxzzy-fitness/src/components/AppNav.tsx",
         "repos/fawxzzy-fitness/src/app/history/HistorySessionsClient.tsx",
         "repos/fawxzzy-fitness/src/components/history/HistoryShared.tsx",
         "repos/fawxzzy-fitness/src/components/ui/app/SharedScreenHeader.tsx",
@@ -1704,6 +1710,7 @@
       "route_family": "overview",
       "owner_surface_refs": [
         "repos/fawxzzy-fitness/src/app/history/exercises/page.tsx",
+        "repos/fawxzzy-fitness/src/components/AppNav.tsx",
         "repos/fawxzzy-fitness/src/app/history/exercises/ExerciseBrowserClient.tsx",
         "repos/fawxzzy-fitness/src/components/history/HistoryExerciseCard.tsx",
         "repos/fawxzzy-fitness/src/components/history/HistoryShared.tsx",
@@ -1741,6 +1748,7 @@
       "route_family": "overview",
       "owner_surface_refs": [
         "repos/fawxzzy-fitness/src/app/history/page.tsx",
+        "repos/fawxzzy-fitness/src/components/AppNav.tsx",
         "repos/fawxzzy-fitness/src/app/history/HistorySessionsClient.tsx",
         "repos/fawxzzy-fitness/src/components/SessionSummaryCard.tsx",
         "repos/fawxzzy-fitness/src/components/history/HistoryShared.tsx",
