@@ -1,0 +1,49 @@
+{
+  "contract_version": "atlas.initiative.v1",
+  "id": "initiative-lifeline-platform-cutover",
+  "title": "Lifeline Platform Cutover",
+  "summary": "Restart the platform-cutover lane from the recovered operating model by keeping Atlas as coordinator, Lifeline as execution owner, and Playbook as shadow codification, with Wave 1 focused on one meaningful pilot rather than stack-wide replacement.",
+  "status": "active",
+  "owner": "stack-root",
+  "created_at": "2026-04-21T00:00:00Z",
+  "updated_at": "2026-04-21T00:00:00Z",
+  "related_plan_refs": [
+    "docs/memory/plans/wave-1-lifeline-platform-cutover.json"
+  ],
+  "related_decision_refs": [],
+  "related_hypothesis_refs": [],
+  "related_session_refs": [],
+  "related_attention_refs": [],
+  "evidence_refs": [
+    "stack.yaml",
+    "README-STACK.md",
+    "AGENTS.md",
+    "docs/architecture/PATH-POLICY.md",
+    "docs/ops/ATLAS-LIFELINE-PLATFORM-RESTART.md"
+  ],
+  "proposed_next_session_refs": [],
+  "supersedes": [],
+  "superseded_by": [],
+  "metadata": {
+    "authoring_source": "project-memory-triage",
+    "tracks": [
+      "lifeline-platform-cutover",
+      "pilot-first-cutover",
+      "playbook-shadow-codification"
+    ],
+    "current_gate": "wave-1-pilot",
+    "next_frontier": "one meaningful pilot app or service operated through Lifeline with rollback, health visibility, and an explicit parity checklist",
+    "priority_repos": [
+      "lifeline",
+      "playbook",
+      "atlas"
+    ],
+    "active_queue": [
+      "runtime-foundation",
+      "deploy-contract",
+      "ops-baseline",
+      "pilot-app-selection-and-migration",
+      "playbook-shadow-codification"
+    ]
+  }
+}

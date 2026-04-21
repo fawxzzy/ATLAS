@@ -29,7 +29,7 @@ class AtlasUiDriftTests(unittest.TestCase):
         schema = json.loads(default_drift_schema_path(ROOT).read_text(encoding="utf-8"))
         self.assertEqual([], validate_drift_schema_definition(schema))
 
-    def test_default_expected_observation_set_covers_expanded_history_session_workout_card_settings_and_detail_support_routes(self) -> None:
+    def test_default_expected_observation_set_covers_expanded_history_session_workout_card_settings_detail_support_and_chooser_routes(self) -> None:
         report = validate_fitness_ui_drift(
             root=ROOT,
             schema_path=default_drift_schema_path(ROOT),
@@ -38,7 +38,7 @@ class AtlasUiDriftTests(unittest.TestCase):
             dry_run=True,
         )
 
-        self.assertEqual(31, report["summary"]["expected_capture_count"])
+        self.assertEqual(37, report["summary"]["expected_capture_count"])
 
     def test_validator_is_clean_for_compliant_observations(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

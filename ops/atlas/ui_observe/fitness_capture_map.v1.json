@@ -768,6 +768,198 @@
       }
     },
     {
+      "capture_id": "exercise-chooser-picker",
+      "screen_key": "exerciseChooser",
+      "screen_label": "Exercise chooser family",
+      "state_key": "picker",
+      "state_label": "Exercise picker",
+      "route_family": "chooser",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/components/ExercisePicker.tsx",
+        "repos/fawxzzy-fitness/src/components/SessionAddExerciseForm.tsx",
+        "repos/fawxzzy-fitness/src/app/routines/[id]/edit/day/[dayId]/RoutineDayAddExerciseForm.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "shared"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "row"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "default"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "dense"
+        }
+      }
+    },
+    {
+      "capture_id": "exercise-chooser-tag-filter-control",
+      "screen_key": "exerciseChooser",
+      "screen_label": "Exercise chooser family",
+      "state_key": "tagFilterControl",
+      "state_label": "Tag filter control",
+      "route_family": "chooser",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/components/ExerciseTagFilterControl.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "shared"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "muted"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "default"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "dense"
+        }
+      }
+    },
+    {
+      "capture_id": "exercise-chooser-search-filters",
+      "screen_key": "exerciseChooser",
+      "screen_label": "Exercise chooser family",
+      "state_key": "searchFilters",
+      "state_label": "Search filters",
+      "route_family": "chooser",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/components/exercises/ExerciseSearchFilters.tsx",
+        "repos/fawxzzy-fitness/src/components/ExerciseTagFilterControl.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "shared"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "muted"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "default"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "dense"
+        }
+      }
+    },
+    {
+      "capture_id": "exercise-chooser-picker-panel",
+      "screen_key": "exerciseChooser",
+      "screen_label": "Exercise chooser family",
+      "state_key": "pickerPanel",
+      "state_label": "Picker panel",
+      "route_family": "chooser",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/components/ExercisePicker.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/PickerListViewport.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "shared"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "panel"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "default"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "standard"
+        }
+      }
+    },
+    {
+      "capture_id": "exercise-chooser-filter-panel",
+      "screen_key": "exerciseChooser",
+      "screen_label": "Exercise chooser family",
+      "state_key": "filterPanel",
+      "state_label": "Filter panel",
+      "route_family": "chooser",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/components/ExerciseTagFilterControl.tsx",
+        "repos/fawxzzy-fitness/src/components/exercises/ExerciseSearchFilters.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "shared"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "muted"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "default"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "dense"
+        }
+      }
+    },
+    {
+      "capture_id": "exercise-chooser-goal-panel",
+      "screen_key": "exerciseChooser",
+      "screen_label": "Exercise chooser family",
+      "state_key": "goalPanel",
+      "state_label": "Goal panel",
+      "route_family": "chooser",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/components/ExercisePicker.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/measurements/SharedExerciseGoalForm.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "shared"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "muted"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "default"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "standard"
+        }
+      }
+    },
+    {
       "capture_id": "edit-day-default",
       "screen_key": "editDay",
       "screen_label": "Edit day",

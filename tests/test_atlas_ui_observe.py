@@ -213,7 +213,7 @@ class AtlasUiObservationTests(unittest.TestCase):
         self.assertEqual([], validate_capture_map(capture_map, root=ROOT))
         self.assertEqual([], validate_capture_map_contract_bindings(capture_map, primitives))
 
-    def test_default_capture_set_covers_today_d2_history_session_workout_card_settings_and_detail_support_families(self) -> None:
+    def test_default_capture_set_covers_today_d2_history_session_workout_card_settings_detail_support_and_chooser_families(self) -> None:
         inputs = json.loads(default_capture_inputs_path(ROOT).read_text(encoding="utf-8"))
         capture_map = json.loads(default_capture_map_path(ROOT).read_text(encoding="utf-8"))
 
@@ -248,6 +248,12 @@ class AtlasUiObservationTests(unittest.TestCase):
             ("detailSupport", "exerciseInfoSheet"),
             ("detailSupport", "mediaCard"),
             ("detailSupport", "historyRow"),
+            ("exerciseChooser", "picker"),
+            ("exerciseChooser", "tagFilterControl"),
+            ("exerciseChooser", "searchFilters"),
+            ("exerciseChooser", "pickerPanel"),
+            ("exerciseChooser", "filterPanel"),
+            ("exerciseChooser", "goalPanel"),
             ("editDay", "default"),
             ("editRoutine", "daysSection"),
             ("editDayAddExercise", "default"),
@@ -353,6 +359,30 @@ class AtlasUiObservationTests(unittest.TestCase):
         self.assertEqual(
             "detail-support-history-row",
             capture_ids_by_selector[("detailSupport", "historyRow")],
+        )
+        self.assertEqual(
+            "exercise-chooser-picker",
+            capture_ids_by_selector[("exerciseChooser", "picker")],
+        )
+        self.assertEqual(
+            "exercise-chooser-tag-filter-control",
+            capture_ids_by_selector[("exerciseChooser", "tagFilterControl")],
+        )
+        self.assertEqual(
+            "exercise-chooser-search-filters",
+            capture_ids_by_selector[("exerciseChooser", "searchFilters")],
+        )
+        self.assertEqual(
+            "exercise-chooser-picker-panel",
+            capture_ids_by_selector[("exerciseChooser", "pickerPanel")],
+        )
+        self.assertEqual(
+            "exercise-chooser-filter-panel",
+            capture_ids_by_selector[("exerciseChooser", "filterPanel")],
+        )
+        self.assertEqual(
+            "exercise-chooser-goal-panel",
+            capture_ids_by_selector[("exerciseChooser", "goalPanel")],
         )
         self.assertEqual(
             "history-overview-default",

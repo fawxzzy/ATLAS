@@ -59,6 +59,12 @@ The active capture set stays narrow but expands immediately after each adoption 
 - `detail-support-exercise-info-sheet`
 - `detail-support-media-card`
 - `detail-support-history-row`
+- `exercise-chooser-picker`
+- `exercise-chooser-tag-filter-control`
+- `exercise-chooser-search-filters`
+- `exercise-chooser-picker-panel`
+- `exercise-chooser-filter-panel`
+- `exercise-chooser-goal-panel`
 - `edit-day-default`
 - `edit-routine-days-section-default`
 - `edit-day-add-exercise-default`

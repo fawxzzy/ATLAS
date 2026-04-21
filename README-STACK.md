@@ -42,6 +42,7 @@ Read these files first:
 - `docs/ops/ATLAS-TOOL-REGISTRY-RUNBOOK.md`
 - `docs/ops/ATLAS-STATUS-RUNBOOK.md`
 - `docs/ops/ATLAS-COCKPIT-RUNBOOK.md`
+- `docs/ops/ATLAS-LIFELINE-PLATFORM-RESTART.md`
 - `docs/ops/ATLAS-PLAYBOOK-CONVERGENCE.md`
 - `docs/ops/PLAYBOOK-ADOPTION-MATRIX.md`
 
@@ -76,6 +77,8 @@ Roadmap addition:
 
 - cross-repo Playbook convergence and durable conversation continuity are now tracked as an explicit stack program in `docs/ops/ATLAS-PLAYBOOK-CONVERGENCE.md`
 - that program complements the operator cockpit slice; it does not convert the root into an umbrella monorepo or replace repo-owned doctrine
+- the platform-cutover restart posture is tracked in `docs/ops/ATLAS-LIFELINE-PLATFORM-RESTART.md`
+- that restart keeps `atlas` as coordinator, `lifeline` as execution owner, and `playbook` as codification owner; it does not move platform implementation truth into the stack root
 
 For ATLAS platform architecture doctrine, use `repos/fawxzzy-atlas/README.md` and the docs under `repos/fawxzzy-atlas/docs/` as the canonical source. Stack-root docs should stay stack- and boundary-oriented and should link back to Atlas instead of duplicating platform specs.
 

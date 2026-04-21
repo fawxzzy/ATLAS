@@ -106,6 +106,30 @@
       "state_key": "historyRow"
     },
     {
+      "screen_key": "exerciseChooser",
+      "state_key": "picker"
+    },
+    {
+      "screen_key": "exerciseChooser",
+      "state_key": "tagFilterControl"
+    },
+    {
+      "screen_key": "exerciseChooser",
+      "state_key": "searchFilters"
+    },
+    {
+      "screen_key": "exerciseChooser",
+      "state_key": "pickerPanel"
+    },
+    {
+      "screen_key": "exerciseChooser",
+      "state_key": "filterPanel"
+    },
+    {
+      "screen_key": "exerciseChooser",
+      "state_key": "goalPanel"
+    },
+    {
       "screen_key": "editDay",
       "state_key": "default"
     },
