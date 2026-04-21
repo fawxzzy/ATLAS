@@ -130,6 +130,78 @@
       "state_key": "goalPanel"
     },
     {
+      "screen_key": "authRecovery",
+      "state_key": "shell"
+    },
+    {
+      "screen_key": "authRecovery",
+      "state_key": "login"
+    },
+    {
+      "screen_key": "authRecovery",
+      "state_key": "signup"
+    },
+    {
+      "screen_key": "authRecovery",
+      "state_key": "forgotPassword"
+    },
+    {
+      "screen_key": "authRecovery",
+      "state_key": "resetPassword"
+    },
+    {
+      "screen_key": "authRecovery",
+      "state_key": "recoveryBridge"
+    },
+    {
+      "screen_key": "authRecovery",
+      "state_key": "messageChrome"
+    },
+    {
+      "screen_key": "authRecovery",
+      "state_key": "accountChrome"
+    },
+    {
+      "screen_key": "authRecovery",
+      "state_key": "actionChrome"
+    },
+    {
+      "screen_key": "entryHandoff",
+      "state_key": "card"
+    },
+    {
+      "screen_key": "entryHandoff",
+      "state_key": "statusPanel"
+    },
+    {
+      "screen_key": "entryHandoff",
+      "state_key": "stageList"
+    },
+    {
+      "screen_key": "entryHandoff",
+      "state_key": "installManualPanel"
+    },
+    {
+      "screen_key": "curatedOnboarding",
+      "state_key": "shell"
+    },
+    {
+      "screen_key": "curatedOnboarding",
+      "state_key": "progress"
+    },
+    {
+      "screen_key": "curatedOnboarding",
+      "state_key": "optionCard"
+    },
+    {
+      "screen_key": "curatedOnboarding",
+      "state_key": "review"
+    },
+    {
+      "screen_key": "curatedOnboarding",
+      "state_key": "handoff"
+    },
+    {
       "screen_key": "editDay",
       "state_key": "default"
     },

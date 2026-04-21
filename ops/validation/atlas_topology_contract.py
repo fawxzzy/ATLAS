@@ -73,16 +73,16 @@ class ContractIssue:
     details: dict[str, Any] | None = None
 
 
-def atlas_repo_root() -> Path:
-    return atlas_root() / "repos" / "fawxzzy-atlas"
+def atlas_contract_root() -> Path:
+    return atlas_root()
 
 
 def default_manifest_path() -> Path:
-    return atlas_repo_root() / "docs" / "LIFELINE_TOPOLOGY_MANIFEST.json"
+    return atlas_contract_root() / "docs" / "LIFELINE_TOPOLOGY_MANIFEST.json"
 
 
 def default_schema_path() -> Path:
-    return atlas_repo_root() / "docs" / "LIFELINE_TOPOLOGY_MANIFEST.schema.json"
+    return atlas_contract_root() / "docs" / "LIFELINE_TOPOLOGY_MANIFEST.schema.json"
 
 
 def atlas_rel(path: Path) -> str:
@@ -156,7 +156,7 @@ def validate_topology_manifest(
 ) -> list[ContractIssue]:
     issues: list[ContractIssue] = []
     manifest_ref = atlas_rel(manifest_path)
-    repo_root = atlas_repo_root()
+    repo_root = atlas_contract_root()
 
     if manifest.get("schema_version") != SCHEMA_VERSION:
         issues.append(

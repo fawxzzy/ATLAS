@@ -1,0 +1,214 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://schemas/atlas.ui.proof-summary.v1.json",
+  "title": "ATLAS UI proof summary v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "report_id",
+    "generated_at",
+    "runner_version",
+    "owner_repo_id",
+    "completion_ready",
+    "failed_capture_ids",
+    "blocking_reasons",
+    "summary",
+    "semantic_proof",
+    "visual_proof",
+    "operator_summary"
+  ],
+  "properties": {
+    "contract_version": {
+      "type": "string",
+      "const": "atlas.ui.proof-summary.v1"
+    },
+    "report_id": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "runner_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "owner_repo_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "completion_ready": {
+      "type": "boolean"
+    },
+    "failed_capture_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "blocking_reasons": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "semantic_status",
+        "visual_status",
+        "gated_capture_count",
+        "failed_capture_count"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "completion_ready",
+            "proof_blocked"
+          ]
+        },
+        "semantic_status": {
+          "type": "string",
+          "enum": [
+            "clean",
+            "drift_detected",
+            "missing_report",
+            "invalid_report"
+          ]
+        },
+        "visual_status": {
+          "type": "string",
+          "enum": [
+            "clean",
+            "proof_failed",
+            "missing_report",
+            "invalid_report"
+          ]
+        },
+        "gated_capture_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "failed_capture_count": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "semantic_proof": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "report_ref",
+        "finding_count",
+        "failed_capture_ids",
+        "errors"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "clean",
+            "drift_detected",
+            "missing_report",
+            "invalid_report"
+          ]
+        },
+        "report_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "report_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "finding_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "failed_capture_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "visual_proof": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "report_ref",
+        "gated_capture_count",
+        "failed_capture_ids",
+        "errors"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "clean",
+            "proof_failed",
+            "missing_report",
+            "invalid_report"
+          ]
+        },
+        "report_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "report_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "gated_capture_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "failed_capture_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "operator_summary": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

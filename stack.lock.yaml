@@ -10,8 +10,8 @@ components:
     remote: null
     ref_type: "branch"
     ref: "main"
-    commit: "55690aae00ba67b113f127274be9c534f7159ed8"
-    dirty: true
+    commit: "a91bfbddbb2a7e0f83983c52cac9f7027e18cc4c"
+    dirty: false
     trust_class: "trusted"
     release_eligible: false
   atlas:
@@ -21,8 +21,8 @@ components:
     remote: null
     ref_type: "branch"
     ref: "main"
-    commit: "d915c6d3d5cc86c3a9f5de8805c90ae4d0de73d8"
-    dirty: true
+    commit: "bd34580de7610d1ee00cdfc4593b69d05c84c0b0"
+    dirty: false
     trust_class: "trusted"
     release_eligible: true
   fitness:
@@ -32,7 +32,7 @@ components:
     remote: "https://github.com/fawxzzy/fawxzzy-fitness.git"
     ref_type: "branch"
     ref: "main"
-    commit: "199163f43587e53c46cb092bdda685ad80d376c2"
+    commit: "a963848c9d60acc38e262d31dfe4916057f61351"
     dirty: true
     trust_class: "trusted"
     release_eligible: true
@@ -43,8 +43,8 @@ components:
     remote: "https://github.com/fawxzzy/fawxzzy-lifeline.git"
     ref_type: "branch"
     ref: "main"
-    commit: "7a3ed573dd391eb9429f2f2d158046de4cfaa9a1"
-    dirty: true
+    commit: "327da3765b047698fbb7b551a6cb117412da83dc"
+    dirty: false
     trust_class: "trusted"
     release_eligible: true
   mazer:
@@ -76,8 +76,8 @@ components:
     remote: "https://github.com/fawxzzy/fawxzzy-playbook.git"
     ref_type: "branch"
     ref: "main"
-    commit: "9ce397e893e4007afbe93366770867ed64f66500"
-    dirty: true
+    commit: "96acb49a67fcf650f0cd331f0c98b0966bac237d"
+    dirty: false
     trust_class: "trusted"
     release_eligible: true
   playbook-demo:
@@ -98,7 +98,7 @@ components:
     remote: "https://github.com/fawxzzy/ATLAS.git"
     ref_type: "branch"
     ref: "main"
-    commit: "3ad6c1dd5ae8e037c7113177851485a46de8e3d7"
+    commit: "a963848c9d60acc38e262d31dfe4916057f61351"
     dirty: true
     trust_class: "trusted"
     release_eligible: false
@@ -109,8 +109,8 @@ components:
     remote: null
     ref_type: "branch"
     ref: "codex/fstrm-wave3-surface-base"
-    commit: "e8da0053e7762886687a40ea154a665186f70f95"
-    dirty: true
+    commit: "2a03ef229bcb599855dcec31498cf8acfb6ee824"
+    dirty: false
     trust_class: "trusted"
     release_eligible: false
   trove:
@@ -120,8 +120,8 @@ components:
     remote: "https://github.com/fawxzzy/fawxzzy-trove.git"
     ref_type: "branch"
     ref: "main"
-    commit: "17329fe916cedcc011d7faaca949c53a93dc5e77"
-    dirty: true
+    commit: "cec9c6ac2df8e23737a0c68a2d94c2090aa200e2"
+    dirty: false
     trust_class: "trusted"
     release_eligible: true
 excluded_surfaces:
@@ -137,4 +137,4 @@ excluded_surfaces:
     trust_class: "untrusted"
     release_eligible: false
     reason: "Token-bearing Verta checkout remains quarantined and untrusted until scrub and rotation are complete."
-lock_digest: "sha256:85df1887048264c528bd8f7c798b1174a066e0cd4b88d118133634bebb815859"
+lock_digest: "sha256:0f006ad7a60a032e337f869c69c79d15957e0ad5a6872899b80cb04524d6b6da"

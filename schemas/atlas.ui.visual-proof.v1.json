@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://schemas/atlas.ui.visual-proof.v1.json",
+  "title": "ATLAS UI visual proof v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "owner_repo_id",
+    "owner_repo_path",
+    "capture_map_ref",
+    "image_artifact_root",
+    "reference_root",
+    "captures"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "atlas.ui.visual-proof.v1"
+    },
+    "owner_repo_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "owner_repo_path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "capture_map_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "expected_capture_map_digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "image_artifact_root": {
+      "type": "string",
+      "minLength": 1
+    },
+    "reference_root": {
+      "type": "string",
+      "minLength": 1
+    },
+    "captures": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "capture_id",
+          "assertion"
+        ],
+        "properties": {
+          "capture_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "current_image_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "reference_image_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "mask_image_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "expected_observation_digest": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "assertion": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind"
+            ],
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "unchanged",
+                  "changed_expected",
+                  "changed_only_within_mask",
+                  "max_visual_delta",
+                  "min_visual_delta"
+                ]
+              },
+              "max_visual_delta": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "min_visual_delta": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

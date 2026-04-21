@@ -1,0 +1,216 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://architecture/lifeline-topology-manifest.schema.json",
+  "title": "ATLAS Lifeline topology manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "source_docs",
+    "identity",
+    "apps",
+    "zones",
+    "environments",
+    "hostname_rules",
+    "routing",
+    "placement"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "source_docs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "identity": {
+      "$ref": "#/$defs/identity"
+    },
+    "apps": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/app"
+      }
+    },
+    "zones": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/zone"
+      }
+    },
+    "environments": {
+      "$ref": "#/$defs/environments"
+    },
+    "hostname_rules": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/hostname_rule"
+      }
+    },
+    "routing": {
+      "$ref": "#/$defs/routing"
+    },
+    "placement": {
+      "$ref": "#/$defs/placement"
+    }
+  },
+  "$defs": {
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "service_key_template",
+        "stable_public_unit",
+        "machine_identity_visibility",
+        "routing_default"
+      ],
+      "properties": {
+        "service_key_template": { "type": "string" },
+        "stable_public_unit": { "type": "string" },
+        "machine_identity_visibility": { "type": "string" },
+        "routing_default": { "type": "string" }
+      }
+    },
+    "app": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "app_id",
+        "repo_id",
+        "surface",
+        "default_zone",
+        "prod_hostname_mode",
+        "preview_hostname_mode",
+        "pr_preview_hostname_mode"
+      ],
+      "properties": {
+        "app_id": { "type": "string" },
+        "repo_id": { "type": "string" },
+        "surface": { "type": "string" },
+        "default_zone": { "type": "string" },
+        "prod_hostname_mode": { "type": "string" },
+        "preview_hostname_mode": { "type": "string" },
+        "pr_preview_hostname_mode": { "type": "string" }
+      }
+    },
+    "zone": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["zone", "kind", "status"],
+      "properties": {
+        "zone": { "type": "string" },
+        "kind": { "type": "string" },
+        "status": { "type": "string" }
+      }
+    },
+    "environments": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["named", "ephemeral"],
+      "properties": {
+        "named": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "kind", "public_hostname_mode"],
+            "properties": {
+              "name": { "type": "string" },
+              "kind": { "type": "string" },
+              "public_hostname_mode": { "type": "string" }
+            }
+          }
+        },
+        "ephemeral": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["kind", "environment_template", "match", "public_hostname_mode"],
+            "properties": {
+              "kind": { "type": "string" },
+              "environment_template": { "type": "string" },
+              "match": { "type": "string" },
+              "public_hostname_mode": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "hostname_rule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rule_id",
+        "kind",
+        "hostname_template",
+        "service_key_template",
+        "default_hostname_mode"
+      ],
+      "properties": {
+        "rule_id": { "type": "string" },
+        "kind": { "type": "string" },
+        "environment": { "type": "string" },
+        "environment_template": { "type": "string" },
+        "app_id": { "type": "string" },
+        "hostname_template": { "type": "string" },
+        "service_key_template": { "type": "string" },
+        "default_hostname_mode": { "type": "string" }
+      }
+    },
+    "routing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "default_strategy",
+        "path_routing_default",
+        "path_routing_allowed_for",
+        "gateway_resolves_service_before_placement",
+        "tls_termination",
+        "cookie_boundary",
+        "public_hostname_must_hide"
+      ],
+      "properties": {
+        "default_strategy": { "type": "string" },
+        "path_routing_default": { "type": "string" },
+        "path_routing_allowed_for": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "gateway_resolves_service_before_placement": { "type": "boolean" },
+        "tls_termination": { "type": "string" },
+        "cookie_boundary": { "type": "string" },
+        "public_hostname_must_hide": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "placement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stable_contract_unit",
+        "public_hostname_changes_with_placement",
+        "default_topology",
+        "stage_progression",
+        "lifeline_v1_exclusions"
+      ],
+      "properties": {
+        "stable_contract_unit": { "type": "string" },
+        "public_hostname_changes_with_placement": { "type": "boolean" },
+        "default_topology": { "type": "string" },
+        "stage_progression": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "lifeline_v1_exclusions": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    }
+  }
+}

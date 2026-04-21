@@ -87,7 +87,7 @@ Do not frame success as replacing Vercel everywhere.
 
 Frame success as:
 
-`lifeline` can deploy and operate one meaningful app or service with rollback, health visibility, and an explicit parity checklist.
+Trove runs on Lifeline with explicit parity criteria, health visibility, and a rehearsed rollback, and Vercel is no longer required for Trove.
 
 That milestone is intentionally narrower because it produces evidence sooner and limits platform sprawl.
 
@@ -298,3 +298,7 @@ Current stack-owned decision:
 - use one real pilot as the proof milestone
 
 This document is the explicit restart anchor for that posture.
+
+Execution packet for the current wave:
+
+- `docs/ops/ATLAS-LIFELINE-WAVE-1-LAUNCH.md`

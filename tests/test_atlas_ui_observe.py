@@ -213,7 +213,7 @@ class AtlasUiObservationTests(unittest.TestCase):
         self.assertEqual([], validate_capture_map(capture_map, root=ROOT))
         self.assertEqual([], validate_capture_map_contract_bindings(capture_map, primitives))
 
-    def test_default_capture_set_covers_today_d2_history_session_workout_card_settings_detail_support_and_chooser_families(self) -> None:
+    def test_default_capture_set_covers_today_d2_history_session_workout_card_settings_detail_support_chooser_auth_entry_and_curated_families(self) -> None:
         inputs = json.loads(default_capture_inputs_path(ROOT).read_text(encoding="utf-8"))
         capture_map = json.loads(default_capture_map_path(ROOT).read_text(encoding="utf-8"))
 
@@ -254,6 +254,24 @@ class AtlasUiObservationTests(unittest.TestCase):
             ("exerciseChooser", "pickerPanel"),
             ("exerciseChooser", "filterPanel"),
             ("exerciseChooser", "goalPanel"),
+            ("authRecovery", "shell"),
+            ("authRecovery", "login"),
+            ("authRecovery", "signup"),
+            ("authRecovery", "forgotPassword"),
+            ("authRecovery", "resetPassword"),
+            ("authRecovery", "recoveryBridge"),
+            ("authRecovery", "messageChrome"),
+            ("authRecovery", "accountChrome"),
+            ("authRecovery", "actionChrome"),
+            ("entryHandoff", "card"),
+            ("entryHandoff", "statusPanel"),
+            ("entryHandoff", "stageList"),
+            ("entryHandoff", "installManualPanel"),
+            ("curatedOnboarding", "shell"),
+            ("curatedOnboarding", "progress"),
+            ("curatedOnboarding", "optionCard"),
+            ("curatedOnboarding", "review"),
+            ("curatedOnboarding", "handoff"),
             ("editDay", "default"),
             ("editRoutine", "daysSection"),
             ("editDayAddExercise", "default"),
@@ -383,6 +401,78 @@ class AtlasUiObservationTests(unittest.TestCase):
         self.assertEqual(
             "exercise-chooser-goal-panel",
             capture_ids_by_selector[("exerciseChooser", "goalPanel")],
+        )
+        self.assertEqual(
+            "auth-recovery-shell",
+            capture_ids_by_selector[("authRecovery", "shell")],
+        )
+        self.assertEqual(
+            "auth-recovery-login-screen",
+            capture_ids_by_selector[("authRecovery", "login")],
+        )
+        self.assertEqual(
+            "auth-recovery-signup-form",
+            capture_ids_by_selector[("authRecovery", "signup")],
+        )
+        self.assertEqual(
+            "auth-recovery-forgot-password-form",
+            capture_ids_by_selector[("authRecovery", "forgotPassword")],
+        )
+        self.assertEqual(
+            "auth-recovery-reset-password-form",
+            capture_ids_by_selector[("authRecovery", "resetPassword")],
+        )
+        self.assertEqual(
+            "auth-recovery-recovery-bridge",
+            capture_ids_by_selector[("authRecovery", "recoveryBridge")],
+        )
+        self.assertEqual(
+            "auth-recovery-message-chrome",
+            capture_ids_by_selector[("authRecovery", "messageChrome")],
+        )
+        self.assertEqual(
+            "auth-recovery-account-panel",
+            capture_ids_by_selector[("authRecovery", "accountChrome")],
+        )
+        self.assertEqual(
+            "auth-recovery-action-chrome",
+            capture_ids_by_selector[("authRecovery", "actionChrome")],
+        )
+        self.assertEqual(
+            "entry-handoff-card",
+            capture_ids_by_selector[("entryHandoff", "card")],
+        )
+        self.assertEqual(
+            "entry-handoff-status-panel",
+            capture_ids_by_selector[("entryHandoff", "statusPanel")],
+        )
+        self.assertEqual(
+            "entry-handoff-stage-list",
+            capture_ids_by_selector[("entryHandoff", "stageList")],
+        )
+        self.assertEqual(
+            "entry-handoff-install-manual-panel",
+            capture_ids_by_selector[("entryHandoff", "installManualPanel")],
+        )
+        self.assertEqual(
+            "curated-onboarding-shell",
+            capture_ids_by_selector[("curatedOnboarding", "shell")],
+        )
+        self.assertEqual(
+            "curated-onboarding-progress-panel",
+            capture_ids_by_selector[("curatedOnboarding", "progress")],
+        )
+        self.assertEqual(
+            "curated-onboarding-option-card",
+            capture_ids_by_selector[("curatedOnboarding", "optionCard")],
+        )
+        self.assertEqual(
+            "curated-onboarding-review-panel",
+            capture_ids_by_selector[("curatedOnboarding", "review")],
+        )
+        self.assertEqual(
+            "curated-onboarding-handoff-panel",
+            capture_ids_by_selector[("curatedOnboarding", "handoff")],
         )
         self.assertEqual(
             "history-overview-default",

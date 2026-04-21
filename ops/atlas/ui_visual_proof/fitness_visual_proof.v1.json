@@ -1,0 +1,39 @@
+{
+  "contract_version": "atlas.ui.visual-proof.v1",
+  "owner_repo_id": "fitness",
+  "owner_repo_path": "repos/fawxzzy-fitness",
+  "capture_map_ref": "ops/atlas/ui_observe/fitness_capture_map.v1.json",
+  "expected_capture_map_digest": "sha256:fbd4307ef3740e6f1fdb8fb50060cb54a9b5a126515aa34fbde7b4e8c3b3cefc",
+  "image_artifact_root": "runtime/atlas/ui-observe/fitness",
+  "reference_root": "data/atlas/ui-visual-proof/fitness",
+  "captures": [
+    {
+      "capture_id": "settings-overview-default",
+      "expected_observation_digest": "sha256:2a2e1c980c1786e8da2e4a51b757aca571554d856ce736c717d8c273d8a7d755",
+      "assertion": {
+        "kind": "unchanged"
+      }
+    },
+    {
+      "capture_id": "today-overview-default",
+      "expected_observation_digest": "sha256:ab79e8ce7a19ad24bcf6ce7bc0e803379ad2b1b0ae2760da7313de0d4d2f64ea",
+      "assertion": {
+        "kind": "unchanged"
+      }
+    },
+    {
+      "capture_id": "history-sessions-list-default",
+      "expected_observation_digest": "sha256:bf2caceb502c99e9fcedd570991e91e5e9046d5e3c84c337531258325b0a0ee4",
+      "assertion": {
+        "kind": "unchanged"
+      }
+    },
+    {
+      "capture_id": "workout-card-session-summary-card",
+      "expected_observation_digest": "sha256:8eaf7ad8783e67ad7d399e710595380f9871e91574bc5c2c47cb2f59012d79a8",
+      "assertion": {
+        "kind": "unchanged"
+      }
+    }
+  ]
+}

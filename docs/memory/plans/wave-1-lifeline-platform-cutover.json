@@ -2,7 +2,7 @@
   "contract_version": "atlas.plan.v1",
   "id": "wave-1-lifeline-platform-cutover",
   "title": "Wave 1 Lifeline Platform Cutover",
-  "summary": "Drive the platform-cutover path through Lifeline by proving one real pilot with runtime, deploy, ops, and rollback coverage while Playbook shadows the work and Atlas remains the coordinator.",
+  "summary": "Drive the platform-cutover path through Lifeline by proving Trove as the real pilot with runtime, deploy, ops, and rollback coverage while Playbook shadows the work and Atlas remains the coordinator.",
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-04-21T00:00:00Z",
@@ -34,7 +34,7 @@
       "lifeline-runtime-foundation",
       "lifeline-deploy-contract",
       "lifeline-ops-baseline",
-      "pilot-app-cutover",
+      "trove-pilot-cutover",
       "playbook-shadow-capture"
     ],
     "gates": [

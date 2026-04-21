@@ -960,6 +960,595 @@
       }
     },
     {
+      "capture_id": "auth-recovery-shell",
+      "screen_key": "authRecovery",
+      "screen_label": "Auth and recovery family",
+      "state_key": "shell",
+      "state_label": "Auth shell",
+      "route_family": "auth",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/components/auth/AuthShell.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "standalone"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "panel"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "default"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "standard"
+        }
+      }
+    },
+    {
+      "capture_id": "auth-recovery-login-screen",
+      "screen_key": "authRecovery",
+      "screen_label": "Auth and recovery family",
+      "state_key": "login",
+      "state_label": "Login screen",
+      "route_family": "auth",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/app/login/page.tsx",
+        "repos/fawxzzy-fitness/src/app/login/LoginScreen.tsx",
+        "repos/fawxzzy-fitness/src/components/auth/AuthShell.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "standalone"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "panel"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "default"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "standard"
+        }
+      }
+    },
+    {
+      "capture_id": "auth-recovery-signup-form",
+      "screen_key": "authRecovery",
+      "screen_label": "Auth and recovery family",
+      "state_key": "signup",
+      "state_label": "Signup form",
+      "route_family": "auth",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/app/signup/page.tsx",
+        "repos/fawxzzy-fitness/src/components/auth/SignupForm.tsx",
+        "repos/fawxzzy-fitness/src/components/auth/AuthShell.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "standalone"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "panel"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "default"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "standard"
+        }
+      }
+    },
+    {
+      "capture_id": "auth-recovery-forgot-password-form",
+      "screen_key": "authRecovery",
+      "screen_label": "Auth and recovery family",
+      "state_key": "forgotPassword",
+      "state_label": "Forgot-password form",
+      "route_family": "auth",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/app/forgot-password/page.tsx",
+        "repos/fawxzzy-fitness/src/app/forgot-password/ForgotPasswordFormClient.tsx",
+        "repos/fawxzzy-fitness/src/components/auth/AuthShell.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "standalone"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "panel"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "default"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "standard"
+        }
+      }
+    },
+    {
+      "capture_id": "auth-recovery-reset-password-form",
+      "screen_key": "authRecovery",
+      "screen_label": "Auth and recovery family",
+      "state_key": "resetPassword",
+      "state_label": "Reset-password form",
+      "route_family": "auth",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/app/reset-password/page.tsx",
+        "repos/fawxzzy-fitness/src/components/auth/AuthShell.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "standalone"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "panel"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "default"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "standard"
+        }
+      }
+    },
+    {
+      "capture_id": "auth-recovery-recovery-bridge",
+      "screen_key": "authRecovery",
+      "screen_label": "Auth and recovery family",
+      "state_key": "recoveryBridge",
+      "state_label": "Recovery bridge",
+      "route_family": "auth",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/app/reset-password/page.tsx",
+        "repos/fawxzzy-fitness/src/app/reset-password/RecoverySessionBridge.tsx",
+        "repos/fawxzzy-fitness/src/components/auth/AuthShell.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "standalone"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "panel"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "warning"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "standard"
+        }
+      }
+    },
+    {
+      "capture_id": "auth-recovery-message-chrome",
+      "screen_key": "authRecovery",
+      "screen_label": "Auth and recovery family",
+      "state_key": "messageChrome",
+      "state_label": "Shared auth message chrome",
+      "route_family": "auth",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/components/auth/AuthShell.tsx",
+        "repos/fawxzzy-fitness/src/app/login/LoginScreen.tsx",
+        "repos/fawxzzy-fitness/src/app/forgot-password/ForgotPasswordFormClient.tsx",
+        "repos/fawxzzy-fitness/src/app/reset-password/RecoverySessionBridge.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "shared"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "muted"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "default"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "dense"
+        }
+      }
+    },
+    {
+      "capture_id": "auth-recovery-account-panel",
+      "screen_key": "authRecovery",
+      "screen_label": "Auth and recovery family",
+      "state_key": "accountChrome",
+      "state_label": "Remembered account chrome",
+      "route_family": "auth",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/app/login/LoginScreen.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "shared"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "muted"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "default"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "dense"
+        }
+      }
+    },
+    {
+      "capture_id": "auth-recovery-action-chrome",
+      "screen_key": "authRecovery",
+      "screen_label": "Auth and recovery family",
+      "state_key": "actionChrome",
+      "state_label": "Shared auth action chrome",
+      "route_family": "auth",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/app/login/LoginScreen.tsx",
+        "repos/fawxzzy-fitness/src/components/auth/SignupForm.tsx",
+        "repos/fawxzzy-fitness/src/app/forgot-password/ForgotPasswordFormClient.tsx",
+        "repos/fawxzzy-fitness/src/app/reset-password/page.tsx",
+        "repos/fawxzzy-fitness/src/app/reset-password/RecoverySessionBridge.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/AppButton.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "shared"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "row"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "default"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "dense"
+        }
+      }
+    },
+    {
+      "capture_id": "entry-handoff-card",
+      "screen_key": "entryHandoff",
+      "screen_label": "Entry handoff family",
+      "state_key": "card",
+      "state_label": "Shell card",
+      "route_family": "entry",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/components/auth/InitialExperienceGate.tsx",
+        "repos/fawxzzy-fitness/src/components/install/InstallEntryGate.tsx",
+        "repos/fawxzzy-fitness/src/components/auth/AuthShell.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "standalone"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "panel"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "warning"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "standard"
+        }
+      }
+    },
+    {
+      "capture_id": "entry-handoff-status-panel",
+      "screen_key": "entryHandoff",
+      "screen_label": "Entry handoff family",
+      "state_key": "statusPanel",
+      "state_label": "Status panel",
+      "route_family": "entry",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/components/auth/InitialExperienceGate.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "shared"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "muted"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "warning"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "dense"
+        }
+      }
+    },
+    {
+      "capture_id": "entry-handoff-stage-list",
+      "screen_key": "entryHandoff",
+      "screen_label": "Entry handoff family",
+      "state_key": "stageList",
+      "state_label": "Stage list",
+      "route_family": "entry",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/components/auth/InitialExperienceGate.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "shared"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "muted"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "default"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "dense"
+        }
+      }
+    },
+    {
+      "capture_id": "entry-handoff-install-manual-panel",
+      "screen_key": "entryHandoff",
+      "screen_label": "Entry handoff family",
+      "state_key": "installManualPanel",
+      "state_label": "Install manual panel",
+      "route_family": "entry",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/components/install/InstallEntryGate.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "shared"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "muted"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "default"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "standard"
+        }
+      }
+    },
+    {
+      "capture_id": "curated-onboarding-shell",
+      "screen_key": "curatedOnboarding",
+      "screen_label": "Curated onboarding family",
+      "state_key": "shell",
+      "state_label": "Shell card",
+      "route_family": "onboarding",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/app/curated-onboarding/page.tsx",
+        "repos/fawxzzy-fitness/src/features/curated-onboarding/components/CuratedOnboardingShell.tsx",
+        "repos/fawxzzy-fitness/src/features/curated-onboarding/components/CuratedSurface.tsx",
+        "repos/fawxzzy-fitness/src/components/auth/AuthShell.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "standalone"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "panel"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "success"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "standard"
+        }
+      }
+    },
+    {
+      "capture_id": "curated-onboarding-progress-panel",
+      "screen_key": "curatedOnboarding",
+      "screen_label": "Curated onboarding family",
+      "state_key": "progress",
+      "state_label": "Progress panel",
+      "route_family": "onboarding",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/features/curated-onboarding/components/CuratedOnboardingProgress.tsx",
+        "repos/fawxzzy-fitness/src/features/curated-onboarding/components/CuratedSurface.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/AppBadge.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "shared"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "panel"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "success"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "dense"
+        }
+      }
+    },
+    {
+      "capture_id": "curated-onboarding-option-card",
+      "screen_key": "curatedOnboarding",
+      "screen_label": "Curated onboarding family",
+      "state_key": "optionCard",
+      "state_label": "Shared option card",
+      "route_family": "onboarding",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/features/curated-onboarding/components/GoalsStep.tsx",
+        "repos/fawxzzy-fitness/src/features/curated-onboarding/components/ExperienceStep.tsx",
+        "repos/fawxzzy-fitness/src/features/curated-onboarding/components/PreferencesStep.tsx",
+        "repos/fawxzzy-fitness/src/features/curated-onboarding/components/CuratedSurface.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/AppBadge.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "shared"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "row"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "default"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "dense"
+        }
+      }
+    },
+    {
+      "capture_id": "curated-onboarding-review-panel",
+      "screen_key": "curatedOnboarding",
+      "screen_label": "Curated onboarding family",
+      "state_key": "review",
+      "state_label": "Review panel",
+      "route_family": "onboarding",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/features/curated-onboarding/components/ReviewStep.tsx",
+        "repos/fawxzzy-fitness/src/features/curated-onboarding/components/CuratedSurface.tsx",
+        "repos/fawxzzy-fitness/src/features/curated-onboarding/components/CuratedOnboardingShell.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "shared"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "muted"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "default"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "dense"
+        }
+      }
+    },
+    {
+      "capture_id": "curated-onboarding-handoff-panel",
+      "screen_key": "curatedOnboarding",
+      "screen_label": "Curated onboarding family",
+      "state_key": "handoff",
+      "state_label": "Generation handoff panel",
+      "route_family": "onboarding",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/features/curated-onboarding/components/GenerationHandoffStep.tsx",
+        "repos/fawxzzy-fitness/src/features/curated-onboarding/components/CuratedSurface.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "shared"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "panel"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "success"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "standard"
+        }
+      }
+    },
+    {
       "capture_id": "edit-day-default",
       "screen_key": "editDay",
       "screen_label": "Edit day",
