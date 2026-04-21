@@ -227,7 +227,23 @@
     },
     {
       "screen_key": "historyLog",
-      "state_key": "default"
+      "state_key": "detailSurface"
+    },
+    {
+      "screen_key": "historyLog",
+      "state_key": "editModeHeaderPanel"
+    },
+    {
+      "screen_key": "historyLog",
+      "state_key": "fieldInputState"
+    },
+    {
+      "screen_key": "historyLog",
+      "state_key": "disclosureExpanded"
+    },
+    {
+      "screen_key": "historyLog",
+      "state_key": "noteEmptyStateChrome"
     }
   ]
 }

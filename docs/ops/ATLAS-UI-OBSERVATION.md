@@ -89,7 +89,11 @@ The active capture set stays narrow but expands immediately after each adoption 
 - `history-overview-default`
 - `history-exercises-default`
 - `history-sessions-list-default`
-- `history-log-detail-default`
+- `history-log-detail-surface`
+- `history-log-edit-mode-header-panel`
+- `history-log-field-input-state`
+- `history-log-disclosure-expanded`
+- `history-log-note-empty-state-chrome`
 
 The mapping contract defines:
 
@@ -102,6 +106,8 @@ The input contract selects which screen/state pairs are active for a run. This k
 
 - Pattern: expand capture coverage immediately after each adoption tranche so validation lands before the next wider rewrite.
 - Failure Mode: assuming clean drift on old captures proves validator coverage for newly adopted surfaces.
+- Pattern: when a newly adopted family splits from one broad capture into several narrower states, replace the broad selector immediately instead of carrying both.
+- Failure Mode: leaving a newly adopted detail family collapsed under one legacy capture id hides which sub-surface actually drifted.
 
 The observer resolves primitive variants from owner contracts, groups referenced tokens by scale, and emits one normalized artifact per capture.
 

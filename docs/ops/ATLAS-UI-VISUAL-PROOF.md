@@ -91,6 +91,12 @@ Entry handoff and install-gate surfaces are not opted into visual proof yet.
 - Root proof still only gates captures that already have deterministic screenshot artifacts across browser modes.
 - Keep the entry handoff family on the semantic observer/drift lane until a stable install-state screenshot harness exists.
 
+History detail / log-audit remains semantic-only for this tranche.
+
+- The adopted family now expands into explicit semantic captures for the detail surface, edit-mode panel, field inputs, disclosure shell, and note or empty-state chrome.
+- The current repo-backed mobile-regression manifest does not emit a history-detail screenshot artifact into the root proof lane yet.
+- Root proof should only widen when a deterministic history-detail artifact exists in both the runtime screenshot path and the approved reference lane.
+
 ## Artifact Paths
 
 By default, current screenshots are read from:

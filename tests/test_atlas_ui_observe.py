@@ -213,7 +213,7 @@ class AtlasUiObservationTests(unittest.TestCase):
         self.assertEqual([], validate_capture_map(capture_map, root=ROOT))
         self.assertEqual([], validate_capture_map_contract_bindings(capture_map, primitives))
 
-    def test_default_capture_set_covers_today_d2_history_session_workout_card_settings_detail_support_chooser_auth_entry_and_curated_families(self) -> None:
+    def test_default_capture_set_covers_today_history_detail_workout_card_settings_detail_support_chooser_auth_entry_and_curated_families(self) -> None:
         inputs = json.loads(default_capture_inputs_path(ROOT).read_text(encoding="utf-8"))
         capture_map = json.loads(default_capture_map_path(ROOT).read_text(encoding="utf-8"))
 
@@ -278,7 +278,11 @@ class AtlasUiObservationTests(unittest.TestCase):
             ("historyOverview", "default"),
             ("historyExercises", "default"),
             ("historySessions", "default"),
-            ("historyLog", "default"),
+            ("historyLog", "detailSurface"),
+            ("historyLog", "editModeHeaderPanel"),
+            ("historyLog", "fieldInputState"),
+            ("historyLog", "disclosureExpanded"),
+            ("historyLog", "noteEmptyStateChrome"),
         }
 
         self.assertEqual(expected_selectors, selectors)
@@ -487,8 +491,24 @@ class AtlasUiObservationTests(unittest.TestCase):
             capture_ids_by_selector[("historySessions", "default")],
         )
         self.assertEqual(
-            "history-log-detail-default",
-            capture_ids_by_selector[("historyLog", "default")],
+            "history-log-detail-surface",
+            capture_ids_by_selector[("historyLog", "detailSurface")],
+        )
+        self.assertEqual(
+            "history-log-edit-mode-header-panel",
+            capture_ids_by_selector[("historyLog", "editModeHeaderPanel")],
+        )
+        self.assertEqual(
+            "history-log-field-input-state",
+            capture_ids_by_selector[("historyLog", "fieldInputState")],
+        )
+        self.assertEqual(
+            "history-log-disclosure-expanded",
+            capture_ids_by_selector[("historyLog", "disclosureExpanded")],
+        )
+        self.assertEqual(
+            "history-log-note-empty-state-chrome",
+            capture_ids_by_selector[("historyLog", "noteEmptyStateChrome")],
         )
 
     def test_duplicate_mapping_and_missing_variant_are_rejected(self) -> None:

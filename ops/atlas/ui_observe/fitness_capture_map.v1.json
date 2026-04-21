@@ -1770,11 +1770,11 @@
       }
     },
     {
-      "capture_id": "history-log-detail-default",
+      "capture_id": "history-log-detail-surface",
       "screen_key": "historyLog",
       "screen_label": "History log detail",
-      "state_key": "default",
-      "state_label": "Default",
+      "state_key": "detailSurface",
+      "state_label": "Detail surface",
       "route_family": "detail",
       "owner_surface_refs": [
         "repos/fawxzzy-fitness/src/app/history/[sessionId]/page.tsx",
@@ -1805,6 +1805,137 @@
         "section_layout": {
           "primitive_id": "section-layout",
           "variant_id": "standard"
+        }
+      }
+    },
+    {
+      "capture_id": "history-log-edit-mode-header-panel",
+      "screen_key": "historyLog",
+      "screen_label": "History log detail",
+      "state_key": "editModeHeaderPanel",
+      "state_label": "Edit-mode header and panel",
+      "route_family": "detail",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/app/history/[sessionId]/LogAuditClient.tsx",
+        "repos/fawxzzy-fitness/src/components/history/HistoryShared.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/SharedScreenHeader.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/AppHeader.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "standalone"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "muted"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "default"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "standard"
+        }
+      }
+    },
+    {
+      "capture_id": "history-log-field-input-state",
+      "screen_key": "historyLog",
+      "screen_label": "History log detail",
+      "state_key": "fieldInputState",
+      "state_label": "Field input state",
+      "route_family": "detail",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/app/history/[sessionId]/LogAuditClient.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "standalone"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "muted"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "default"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "standard"
+        }
+      }
+    },
+    {
+      "capture_id": "history-log-disclosure-expanded",
+      "screen_key": "historyLog",
+      "screen_label": "History log detail",
+      "state_key": "disclosureExpanded",
+      "state_label": "Disclosure expanded shell",
+      "route_family": "detail",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/app/history/[sessionId]/LogAuditClient.tsx",
+        "repos/fawxzzy-fitness/src/components/StandardExerciseRow.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/workout-entry/CompactLogRow.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/measurements/ModifyMeasurements.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "shared"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "row"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "default"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "standard"
+        }
+      }
+    },
+    {
+      "capture_id": "history-log-note-empty-state-chrome",
+      "screen_key": "historyLog",
+      "screen_label": "History log detail",
+      "state_key": "noteEmptyStateChrome",
+      "state_label": "Note and empty-state chrome",
+      "route_family": "detail",
+      "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/app/history/[sessionId]/LogAuditClient.tsx",
+        "repos/fawxzzy-fitness/src/components/history/HistoryShared.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/SharedSectionShell.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+      ],
+      "primitive_variants": {
+        "header": {
+          "primitive_id": "header",
+          "variant_id": "shared"
+        },
+        "card": {
+          "primitive_id": "card",
+          "variant_id": "muted"
+        },
+        "tag": {
+          "primitive_id": "badge",
+          "variant_id": "default"
+        },
+        "section_layout": {
+          "primitive_id": "section-layout",
+          "variant_id": "dense"
         }
       }
     }
