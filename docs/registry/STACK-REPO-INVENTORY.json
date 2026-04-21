@@ -1,7 +1,7 @@
 {
   "schema_version": "atlas.stack.repo-inventory.v1",
   "stack_manifest_ref": "stack.yaml",
-  "stack_manifest_digest": "sha256:a62c23c208cb583d89ee5e02ed40bbdefc5032d6d8ca7adf7f6154dbf9174f69",
+  "stack_manifest_digest": "sha256:408b0b297ff18dd6bdb8b8670a882f1260c7088e0160960650c5688c914f4658",
   "stack_lock_ref": "stack.lock.yaml",
   "stack_lock_digest": "sha256:ac5cc8099a5e570ddf33d1dd58ce44dcd75cb187ec77fa6d1b8edcabb1164f4a",
   "working_memory_digest": "sha256:3402601264084c023f12833514f81b4c8683b3cbc2700af3d4078a1926ab5305",
@@ -10,7 +10,7 @@
     "markdown": "docs/audits/STACK-REPO-INVENTORY.md"
   },
   "repo_count": 10,
-  "dirty_repo_count": 4,
+  "dirty_repo_count": 3,
   "release_eligible_count": 4,
   "repos": [
     {
@@ -20,7 +20,7 @@
       "status": "active",
       "remote_url": null,
       "pinned_commit": "a91bfbddbb2a7e0f83983c52cac9f7027e18cc4c",
-      "current_commit": "a91bfbddbb2a7e0f83983c52cac9f7027e18cc4c",
+      "current_commit": "11d9ab7ab11329237bd6d832e4c7ecc9a881b196",
       "pinned_ref_type": "branch",
       "pinned_ref": "main",
       "current_ref_type": "branch",
@@ -36,7 +36,7 @@
     },
     {
       "logical_id": "fitness",
-      "local_path": "repos/fawxzzy-fitness",
+      "local_path": "repos/fawxzzy-fitness-local",
       "role": "application",
       "status": "unmanaged",
       "remote_url": null,
@@ -62,12 +62,12 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/fawxzzy-lifeline.git",
       "pinned_commit": "632075b1bb65aed59839cb1f9e205b826e41995d",
-      "current_commit": "632075b1bb65aed59839cb1f9e205b826e41995d",
+      "current_commit": "cd45f2ce8840160275a37fd5a690b0970c924468",
       "pinned_ref_type": "branch",
       "pinned_ref": "main",
       "current_ref_type": "branch",
-      "current_ref": "main",
-      "branch": "main",
+      "current_ref": "codex/lifeline-hermetic-validation-wave1",
+      "branch": "codex/lifeline-hermetic-validation-wave1",
       "dirty": false,
       "trust_class": "trusted",
       "release_eligible": true,
@@ -83,7 +83,7 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/fawxzzy-mazer.git",
       "pinned_commit": "3f90b9d5b476642a565a91ea8619561356c52382",
-      "current_commit": "3f90b9d5b476642a565a91ea8619561356c52382",
+      "current_commit": "412d960497f596d91b4c474e93134f318cad2ec4",
       "pinned_ref_type": "branch",
       "pinned_ref": "main",
       "current_ref_type": "branch",
@@ -134,13 +134,13 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/fawxzzy-playbook.git",
       "pinned_commit": "96acb49a67fcf650f0cd331f0c98b0966bac237d",
-      "current_commit": "96acb49a67fcf650f0cd331f0c98b0966bac237d",
+      "current_commit": "75bde32b772e9486814c0970e69f30fd6fdcfb56",
       "pinned_ref_type": "branch",
       "pinned_ref": "main",
       "current_ref_type": "branch",
       "current_ref": "main",
       "branch": "main",
-      "dirty": true,
+      "dirty": false,
       "trust_class": "trusted",
       "release_eligible": true,
       "exists": true,
@@ -176,7 +176,7 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": "cf2d9bf45ed7be820c85d45c124596e4479a8701",
-      "current_commit": "cf2d9bf45ed7be820c85d45c124596e4479a8701",
+      "current_commit": "248daa44552cb744b8eeed48c0ec4177d9070116",
       "pinned_ref_type": "branch",
       "pinned_ref": "main",
       "current_ref_type": "branch",
@@ -218,7 +218,7 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/fawxzzy-trove.git",
       "pinned_commit": "9387e0b44d12df89eba0a2f36187648ceb1aa829",
-      "current_commit": "9387e0b44d12df89eba0a2f36187648ceb1aa829",
+      "current_commit": "c56ad8db3ed1a4f1e95c463ab0737fe2bf4925c6",
       "pinned_ref_type": "branch",
       "pinned_ref": "codex/trove-one-page-cleanup",
       "current_ref_type": "branch",
@@ -254,5 +254,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:0743964c70146b238d2586cee5ba90530fd2721930d5dcbdc628e13c8924a6d0"
+  "content_digest": "sha256:5518dc6ac78a093d7af7aa0e0d710441cdb3a6ec943cbd317c5c6239dfadac24"
 }
