@@ -107,10 +107,6 @@ repo_registry:
     path: repos/_stack
     role: workflow-operator
     status: active
-  atlas:
-    path: repos/fawxzzy-atlas
-    role: architecture-truth
-    status: active
   playbook:
     path: repos/fawxzzy-playbook
     role: governance-runtime
@@ -122,7 +118,7 @@ repo_registry:
   fitness:
     path: repos/fawxzzy-fitness
     role: application
-    status: active
+    status: unmanaged
   mazer:
     path: repos/fawxzzy-mazer
     role: application
@@ -196,10 +192,8 @@ stack_lock:
   include_repo_ids:
     - stack
     - _stack
-    - atlas
     - playbook
     - lifeline
-    - fitness
     - mazer
     - trove
     - stream
@@ -212,16 +206,10 @@ stack_lock:
     _stack:
       trust_class: trusted
       release_eligible: false
-    atlas:
-      trust_class: trusted
-      release_eligible: true
     playbook:
       trust_class: trusted
       release_eligible: true
     lifeline:
-      trust_class: trusted
-      release_eligible: true
-    fitness:
       trust_class: trusted
       release_eligible: true
     mazer:

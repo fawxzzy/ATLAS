@@ -29,8 +29,22 @@
       }
     },
     {
+      "capture_id": "history-exercises-default",
+      "expected_observation_digest": "sha256:0a09b48b72f34997e1a367589186c4f85f9a27769be9177cbc6054e00bcf0c87",
+      "assertion": {
+        "kind": "unchanged"
+      }
+    },
+    {
       "capture_id": "workout-card-session-summary-card",
       "expected_observation_digest": "sha256:8eaf7ad8783e67ad7d399e710595380f9871e91574bc5c2c47cb2f59012d79a8",
+      "assertion": {
+        "kind": "unchanged"
+      }
+    },
+    {
+      "capture_id": "detail-support-exercise-info-sheet",
+      "expected_observation_digest": "sha256:ead925ecfe1b53f5acfccdce0f937f7c2e37b0916e76e8def3f8ab929784d69b",
       "assertion": {
         "kind": "unchanged"
       }

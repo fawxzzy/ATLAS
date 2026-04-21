@@ -1,7 +1,7 @@
 schema_version: "atlas.stack.lock.v1"
 stack_manifest_path: "stack.yaml"
-stack_manifest_digest: "sha256:3cc6496c2a818ffb1628f367b0e835258a8ed46627783b07f480c215d73d5828"
-component_count: 11
+stack_manifest_digest: "sha256:a62c23c208cb583d89ee5e02ed40bbdefc5032d6d8ca7adf7f6154dbf9174f69"
+component_count: 9
 components:
   _stack:
     path: "repos/_stack"
@@ -11,31 +11,9 @@ components:
     ref_type: "branch"
     ref: "main"
     commit: "a91bfbddbb2a7e0f83983c52cac9f7027e18cc4c"
-    dirty: false
-    trust_class: "trusted"
-    release_eligible: false
-  atlas:
-    path: "repos/fawxzzy-atlas"
-    role: "architecture-truth"
-    status: "active"
-    remote: null
-    ref_type: "branch"
-    ref: "main"
-    commit: "bd34580de7610d1ee00cdfc4593b69d05c84c0b0"
-    dirty: false
-    trust_class: "trusted"
-    release_eligible: true
-  fitness:
-    path: "repos/fawxzzy-fitness"
-    role: "application"
-    status: "active"
-    remote: "https://github.com/fawxzzy/fawxzzy-fitness.git"
-    ref_type: "branch"
-    ref: "main"
-    commit: "a963848c9d60acc38e262d31dfe4916057f61351"
     dirty: true
     trust_class: "trusted"
-    release_eligible: true
+    release_eligible: false
   lifeline:
     path: "repos/fawxzzy-lifeline"
     role: "local-operator"
@@ -43,7 +21,7 @@ components:
     remote: "https://github.com/fawxzzy/fawxzzy-lifeline.git"
     ref_type: "branch"
     ref: "main"
-    commit: "327da3765b047698fbb7b551a6cb117412da83dc"
+    commit: "632075b1bb65aed59839cb1f9e205b826e41995d"
     dirty: false
     trust_class: "trusted"
     release_eligible: true
@@ -54,8 +32,8 @@ components:
     remote: "https://github.com/fawxzzy/fawxzzy-mazer.git"
     ref_type: "branch"
     ref: "main"
-    commit: "847b3c61a51dc9fada74731304483b0ffab3e62a"
-    dirty: true
+    commit: "3f90b9d5b476642a565a91ea8619561356c52382"
+    dirty: false
     trust_class: "trusted"
     release_eligible: true
   nat1-games:
@@ -77,7 +55,7 @@ components:
     ref_type: "branch"
     ref: "main"
     commit: "96acb49a67fcf650f0cd331f0c98b0966bac237d"
-    dirty: false
+    dirty: true
     trust_class: "trusted"
     release_eligible: true
   playbook-demo:
@@ -98,7 +76,7 @@ components:
     remote: "https://github.com/fawxzzy/ATLAS.git"
     ref_type: "branch"
     ref: "main"
-    commit: "a963848c9d60acc38e262d31dfe4916057f61351"
+    commit: "cf2d9bf45ed7be820c85d45c124596e4479a8701"
     dirty: true
     trust_class: "trusted"
     release_eligible: false
@@ -119,8 +97,8 @@ components:
     status: "active"
     remote: "https://github.com/fawxzzy/fawxzzy-trove.git"
     ref_type: "branch"
-    ref: "main"
-    commit: "cec9c6ac2df8e23737a0c68a2d94c2090aa200e2"
+    ref: "codex/trove-one-page-cleanup"
+    commit: "9387e0b44d12df89eba0a2f36187648ceb1aa829"
     dirty: false
     trust_class: "trusted"
     release_eligible: true
@@ -137,4 +115,4 @@ excluded_surfaces:
     trust_class: "untrusted"
     release_eligible: false
     reason: "Token-bearing Verta checkout remains quarantined and untrusted until scrub and rotation are complete."
-lock_digest: "sha256:0f006ad7a60a032e337f869c69c79d15957e0ad5a6872899b80cb04524d6b6da"
+lock_digest: "sha256:ac5cc8099a5e570ddf33d1dd58ce44dcd75cb187ec77fa6d1b8edcabb1164f4a"

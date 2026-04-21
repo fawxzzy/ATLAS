@@ -13,29 +13,28 @@ Operational rule:
 
 ## Summary
 
-- Repo count: `11`
-- Dirty repo count: `3`
-- Release-eligible repo count: `6`
+- Repo count: `10`
+- Dirty repo count: `4`
+- Release-eligible repo count: `4`
 - Excluded surface count: `2`
 - Stack manifest: `stack.yaml`
 - Stack lock: `stack.lock.yaml`
-- Inventory digest: `sha256:3fd220026373b19afc9739a002ebe46dfff80f26ce569c7c3db0ecba96e07110`
+- Inventory digest: `sha256:0743964c70146b238d2586cee5ba90530fd2721930d5dcbdc628e13c8924a6d0`
 
 ## Managed Repos
 
 | Repo id | Path | Branch | Pinned commit | Current commit | Dirty | Trust | Release | Related initiatives |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| _stack | repos/_stack | main | a91bfbddbb2a7e0f83983c52cac9f7027e18cc4c | a91bfbddbb2a7e0f83983c52cac9f7027e18cc4c | False | trusted | False | - |
-| atlas | repos/fawxzzy-atlas | main | bd34580de7610d1ee00cdfc4593b69d05c84c0b0 | bd34580de7610d1ee00cdfc4593b69d05c84c0b0 | False | trusted | True | - |
-| fitness | repos/fawxzzy-fitness | main | 911c4a936a17560d6843c661474b86ac4abcf11a | 911c4a936a17560d6843c661474b86ac4abcf11a | False | trusted | True | - |
-| lifeline | repos/fawxzzy-lifeline | main | 327da3765b047698fbb7b551a6cb117412da83dc | 327da3765b047698fbb7b551a6cb117412da83dc | False | trusted | True | - |
-| mazer | repos/fawxzzy-mazer | main | 847b3c61a51dc9fada74731304483b0ffab3e62a | 847b3c61a51dc9fada74731304483b0ffab3e62a | True | trusted | True | initiative:initiative-mazer-d2-learning-scorer |
+| _stack | repos/_stack | main | a91bfbddbb2a7e0f83983c52cac9f7027e18cc4c | a91bfbddbb2a7e0f83983c52cac9f7027e18cc4c | True | trusted | False | - |
+| fitness | repos/fawxzzy-fitness | - | - | - | - | adjacent | False | - |
+| lifeline | repos/fawxzzy-lifeline | main | 632075b1bb65aed59839cb1f9e205b826e41995d | 632075b1bb65aed59839cb1f9e205b826e41995d | False | trusted | True | - |
+| mazer | repos/fawxzzy-mazer | main | 3f90b9d5b476642a565a91ea8619561356c52382 | 3f90b9d5b476642a565a91ea8619561356c52382 | False | trusted | True | initiative:initiative-mazer-d2-learning-scorer |
 | nat1-games | repos/Nat1-Games/nat1-games | main | ce9643465d69f76a46d92d0db6ed855d117e1bbd | ce9643465d69f76a46d92d0db6ed855d117e1bbd | True | trusted | False | - |
-| playbook | repos/fawxzzy-playbook | main | 96acb49a67fcf650f0cd331f0c98b0966bac237d | 96acb49a67fcf650f0cd331f0c98b0966bac237d | False | trusted | True | - |
+| playbook | repos/fawxzzy-playbook | main | 96acb49a67fcf650f0cd331f0c98b0966bac237d | 96acb49a67fcf650f0cd331f0c98b0966bac237d | True | trusted | True | - |
 | playbook-demo | repos/playbook-demo/playbook-demo | main | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | False | trusted | False | - |
-| stack | . | main | a963848c9d60acc38e262d31dfe4916057f61351 | a963848c9d60acc38e262d31dfe4916057f61351 | True | trusted | False | - |
+| stack | . | main | cf2d9bf45ed7be820c85d45c124596e4479a8701 | cf2d9bf45ed7be820c85d45c124596e4479a8701 | True | trusted | False | - |
 | stream | repos/fawxzzy-stream | codex/fstrm-wave3-surface-base | 2a03ef229bcb599855dcec31498cf8acfb6ee824 | 2a03ef229bcb599855dcec31498cf8acfb6ee824 | False | trusted | False | - |
-| trove | repos/fawxzzy-trove | main | cec9c6ac2df8e23737a0c68a2d94c2090aa200e2 | cec9c6ac2df8e23737a0c68a2d94c2090aa200e2 | False | trusted | True | - |
+| trove | repos/fawxzzy-trove | codex/trove-one-page-cleanup | 9387e0b44d12df89eba0a2f36187648ceb1aa829 | 9387e0b44d12df89eba0a2f36187648ceb1aa829 | False | trusted | True | - |
 
 ## Excluded Surfaces
 

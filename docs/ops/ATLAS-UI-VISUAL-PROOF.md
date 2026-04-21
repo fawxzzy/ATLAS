@@ -56,28 +56,39 @@ Supported assertion kinds:
 - `max_visual_delta`
 - `min_visual_delta`
 
-## First Opted Captures
+## Current Opted Captures
 
 The currently proof-gated captures are:
 
 - `settings-overview-default`
 - `today-overview-default`
 - `history-sessions-list-default`
+- `history-exercises-default`
 - `workout-card-session-summary-card`
+- `detail-support-exercise-info-sheet`
 
-All four are currently baselined as `unchanged`.
+All six are currently baselined as `unchanged`.
 
 - `settings-overview-default` is the stable control surface.
 - `today-overview-default` is the first high-signal Today surface tied to the active adoption rail.
 - `history-sessions-list-default` extends the proof lane into the history session-summary family.
+- `history-exercises-default` extends the proof lane into the history exercise-browser family.
 - `workout-card-session-summary-card` extends the proof lane into the workout-card/session-summary family.
+- `detail-support-exercise-info-sheet` extends the proof lane into the adopted exercise-detail support family.
 
 The approved references are seeded from the repo's existing deterministic mobile-regression flow at `393px`, then copied into the root-owned proof locations.
 
 - `settings-overview-default` maps to the `settings-default` mobile-regression scenario.
 - `today-overview-default` maps to the `today-default` mobile-regression scenario.
 - `history-sessions-list-default` maps to the `history-sessions-compact` mobile-regression scenario.
+- `history-exercises-default` maps to the `history-exercises-compact` mobile-regression scenario.
 - `workout-card-session-summary-card` maps to the `today-in-session-summary` mobile-regression scenario.
+- `detail-support-exercise-info-sheet` maps to the `exercise-detail-strength` mobile-regression scenario.
+
+Visual proof should only widen onto already adopted surfaces that have a deterministic screenshot route.
+
+- Pattern: expand visual proof only when the owner repo can emit the same stable scenario artifact into both the runtime screenshot path and the approved reference lane.
+- Failure Mode: opting auth-gated, install-stateful, or otherwise unstable surfaces into screenshot proof weakens the rail with flaky diffs.
 
 Curated onboarding is not opted into visual proof yet.
 

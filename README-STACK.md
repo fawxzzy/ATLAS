@@ -78,9 +78,9 @@ Roadmap addition:
 - cross-repo Playbook convergence and durable conversation continuity are now tracked as an explicit stack program in `docs/ops/ATLAS-PLAYBOOK-CONVERGENCE.md`
 - that program complements the operator cockpit slice; it does not convert the root into an umbrella monorepo or replace repo-owned doctrine
 - the platform-cutover restart posture is tracked in `docs/ops/ATLAS-LIFELINE-PLATFORM-RESTART.md`
-- that restart keeps `atlas` as coordinator, `lifeline` as execution owner, and `playbook` as codification owner; it does not move platform implementation truth into the stack root
+- that restart keeps ATLAS root as coordinator, `lifeline` as execution owner, and `playbook` as codification owner; it does not move platform implementation truth into a separate umbrella repo
 
-For ATLAS platform architecture doctrine, use `repos/fawxzzy-atlas/README.md` and the docs under `repos/fawxzzy-atlas/docs/` as the canonical source. Stack-root docs should stay stack- and boundary-oriented and should link back to Atlas instead of duplicating platform specs.
+For ATLAS platform architecture doctrine in this workspace, use the stack-root architecture docs under `docs/architecture/` as the canonical source. A dedicated `repos/fawxzzy-atlas` checkout is not present in this stack view.
 
 ## Canonical Repo Ids
 
@@ -88,7 +88,6 @@ Use these ids in stack docs, tickets, and automation:
 
 - `stack` -> `.`
 - `_stack` -> `repos/_stack`
-- `atlas` -> `repos/fawxzzy-atlas`
 - `playbook` -> `repos/fawxzzy-playbook`
 - `lifeline` -> `repos/fawxzzy-lifeline`
 - `fitness` -> `repos/fawxzzy-fitness`
