@@ -30,7 +30,7 @@ The checked-in master in this pass is a traced first-pass source based on the la
 
 ## Commands
 
-From `C:\ATLAS`:
+From the ATLAS root:
 
 ```powershell
 node .\branding\scripts\build-brand-assets.mjs
@@ -38,7 +38,7 @@ node .\branding\scripts\sync-brand-assets.mjs
 node .\branding\scripts\sync-brand-assets.mjs --check
 ```
 
-From `C:\ATLAS\repos\_stack`:
+From `repos/_stack`:
 
 ```powershell
 pnpm run atlas:brand:build

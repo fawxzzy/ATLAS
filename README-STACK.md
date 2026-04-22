@@ -67,7 +67,7 @@ Current operating call:
 - Wave 1 contract freeze, adoption, instrumentation, reusable workflow lane, and warehouse smoke-check lane are landed in the scope actually frozen
 - Atlas and Fitness caller workflows are pinned to immutable Playbook ref `9ce397e893e4007afbe93366770867ed64f66500`
 - the first projection artifact for that lane lives at `docs/registry/STACK-SYNERGY-REGISTRY.json` and records landed owner lanes plus the projected Fitness Wave 2 metrics, funnel, and growth posture without changing owner-repo truth
-- first-wave owner surfaces still include Lifeline approvals, receipts, and capability semantics; Playbook governance, verification, reusable workflow, and warehouse-pack reuse; and `_stack` orchestration, merge, resume, and worker contracts
+- first-wave owner surfaces still include Lifeline execution, capability, approval, proof-pass receipt, and worker-execution receipt semantics; Playbook governance, verify, reusable workflow, and warehouse-pack reuse; and `_stack` orchestration, merge, resume, and worker contracts
 - keep `status`, `merge_request`, `conversation`, `session`, `proposal`, `day_summary_taxonomy`, `heartbeat`, `execution_rejected`, and `execution_expired` as candidate rows until repo evidence promotes them
 - Fitness owner truth now includes the first growth pack, the pilot-readiness threshold pack, and measured proof for one shadow-only placement in the Wave 2 growth lane
 - the pilot-readiness gate currently evaluates to `stay_shadow` in Fitness owner truth, so no pilot-live rollout is authorized at root
@@ -82,6 +82,11 @@ Roadmap addition:
 - that program complements the operator cockpit slice; it does not convert the root into an umbrella monorepo or replace repo-owned doctrine
 - the platform-cutover restart posture is tracked in `docs/ops/ATLAS-LIFELINE-PLATFORM-RESTART.md`
 - that restart keeps ATLAS root as coordinator, `lifeline` as execution owner, and `playbook` as codification owner; it does not move platform implementation truth into a separate umbrella repo
+- root execution docs should link to Lifeline's canonical contract set instead of restating those semantics locally:
+  - `repos/fawxzzy-lifeline/docs/contracts/privileged-execution-contract.md`
+  - `repos/fawxzzy-lifeline/docs/contracts/ui-proof-passed-receipt-contract.md`
+  - `repos/fawxzzy-lifeline/docs/ops/lifeline-operator-surface.md`
+  - `repos/fawxzzy-lifeline/docs/runbooks/hermetic-validation-operator-flow.md`
 - the rapid localhost iteration workflow is now tracked in `docs/playbooks/RAPID-LOCALHOST-ITERATION-LOOP.md`
 - its default posture is two-speed validation: affected-screen checks every iteration, broader screenshot sweeps only at checkpoints
 - named session bootstraps are now tracked through `docs/registry/ATLAS-SESSION-MODE-REGISTRY.json`
@@ -121,6 +126,8 @@ The ids are canonical. Fitness is normalized on disk at `repos/fawxzzy-fitness`;
 - worker execution receipts -> `runtime/lifeline/worker-execution`
 - governed tool and extension registries -> `docs/registry`
 
+The worker-execution receipt lane is a root-visible runtime lane for Lifeline-owned receipts. The root may index and route those artifacts, but Lifeline remains the canonical owner of receipt semantics.
+
 ## Codex Context
 
 Root-launched Codex work should use intent-routed context packs instead of broad stack dumps.
@@ -141,12 +148,19 @@ Bootstrap order for root Codex work:
 Intent routing:
 
 - governance / policy / verification -> Playbook
-- execution / capability / approvals / tools -> Lifeline
+- execution / capability / approvals / proof-pass receipts / tools -> Lifeline
 - orchestration / worker flow / resume / merge -> `_stack`
 - doctrine / UAPI / platform contracts -> Atlas repo
 - knowledge / evidence / promotion / query -> knowledge lane
 - topology / git / repo visibility -> repo inventory + lock + debt ledger
 - operator / chat / session / initiative -> awareness + status + working memory
+
+Execution contract refs:
+
+- canonical execution lineage -> `repos/fawxzzy-lifeline/docs/contracts/privileged-execution-contract.md`
+- canonical proof-pass receipt semantics -> `repos/fawxzzy-lifeline/docs/contracts/ui-proof-passed-receipt-contract.md`
+- canonical operator flow -> `repos/fawxzzy-lifeline/docs/ops/lifeline-operator-surface.md`
+- canonical hermetic validation flow -> `repos/fawxzzy-lifeline/docs/runbooks/hermetic-validation-operator-flow.md`
 
 ## Branding
 

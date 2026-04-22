@@ -9,6 +9,12 @@
 - root sessions do not replace `_stack` worker contracts
 - session state comes from manifests and receipts, not terminal logs
 
+Ownership routing for the linked artifacts:
+
+- worker assignment, status, merge, pause, and resume artifacts -> `_stack`
+- execution, approval, capability-profile, and proof-pass receipt semantics -> Lifeline
+- verify and governance policy -> Playbook
+
 ## Session Artifact Lane
 
 - session manifests live under `runtime/atlas/sessions/<session_id>/`
@@ -33,6 +39,11 @@ Every completed session must carry refs for:
 - privileged-action request
 - approval receipt
 - execution receipt
+
+Those refs are required at root, but their canonical execution-side semantics live in Lifeline:
+
+- `repos/fawxzzy-lifeline/docs/contracts/privileged-execution-contract.md`
+- `repos/fawxzzy-lifeline/docs/contracts/ui-proof-passed-receipt-contract.md`
 
 Every governed execution step must also carry:
 
@@ -78,6 +89,8 @@ Proposed-session lifecycle:
 - worker assignment, worker status, privileged-action request, approval receipt, and execution receipt artifacts must agree on `tool_id`, optional `extension_id`, and `registry_digest`
 - merge-request, pause, merge, and resume artifacts must preserve the same governed surface identity instead of inventing local task names
 - session state is derived from linked artifacts and receipts only
+
+Root sessions may validate linkage and identity, but they must not redefine Lifeline receipt shape or approval-status doctrine in local session docs.
 
 ## Commands
 

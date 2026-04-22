@@ -12,9 +12,12 @@
       "route_family": "overview",
       "owner_surface_refs": [
         "repos/fawxzzy-fitness/src/app/today/page.tsx",
+        "repos/fawxzzy-fitness/src/app/today/TodayDayPicker.tsx",
+        "repos/fawxzzy-fitness/src/app/today/TodayExerciseRows.tsx",
         "repos/fawxzzy-fitness/src/app/today/loading.tsx",
         "repos/fawxzzy-fitness/src/components/RouteLoading.tsx",
         "repos/fawxzzy-fitness/src/components/AppNav.tsx",
+        "repos/fawxzzy-fitness/src/components/day-list/DayList.tsx",
         "repos/fawxzzy-fitness/src/components/ui/app/AppHeader.tsx",
         "repos/fawxzzy-fitness/src/components/ui/app/AppPanel.tsx",
         "repos/fawxzzy-fitness/src/components/ui/app/AppBadge.tsx",
@@ -1022,9 +1025,12 @@
       "owner_surface_refs": [
         "repos/fawxzzy-fitness/src/app/login/page.tsx",
         "repos/fawxzzy-fitness/src/app/login/LoginScreen.tsx",
+        "repos/fawxzzy-fitness/src/app/login/loginScreenState.ts",
         "repos/fawxzzy-fitness/src/components/auth/AuthShell.tsx",
+        "repos/fawxzzy-fitness/src/components/auth/authCopy.ts",
         "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
-        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts",
+        "repos/fawxzzy-fitness/src/lib/remembered-login.ts"
       ],
       "primitive_variants": {
         "header": {
@@ -1057,7 +1063,8 @@
         "repos/fawxzzy-fitness/src/components/auth/SignupForm.tsx",
         "repos/fawxzzy-fitness/src/components/auth/AuthShell.tsx",
         "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
-        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts",
+        "repos/fawxzzy-fitness/src/lib/remembered-login.ts"
       ],
       "primitive_variants": {
         "header": {
@@ -1186,12 +1193,15 @@
       "owner_surface_refs": [
         "repos/fawxzzy-fitness/src/components/auth/AuthShell.tsx",
         "repos/fawxzzy-fitness/src/app/login/LoginScreen.tsx",
+        "repos/fawxzzy-fitness/src/app/login/loginScreenState.ts",
         "repos/fawxzzy-fitness/src/components/auth/SignupForm.tsx",
+        "repos/fawxzzy-fitness/src/components/auth/authCopy.ts",
         "repos/fawxzzy-fitness/src/app/forgot-password/ForgotPasswordFormClient.tsx",
         "repos/fawxzzy-fitness/src/app/reset-password/page.tsx",
         "repos/fawxzzy-fitness/src/app/reset-password/RecoverySessionBridge.tsx",
         "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
-        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts",
+        "repos/fawxzzy-fitness/src/lib/remembered-login.ts"
       ],
       "primitive_variants": {
         "header": {
@@ -1221,8 +1231,11 @@
       "route_family": "auth",
       "owner_surface_refs": [
         "repos/fawxzzy-fitness/src/app/login/LoginScreen.tsx",
+        "repos/fawxzzy-fitness/src/app/login/loginScreenState.ts",
+        "repos/fawxzzy-fitness/src/components/auth/authCopy.ts",
         "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
-        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts",
+        "repos/fawxzzy-fitness/src/lib/remembered-login.ts"
       ],
       "primitive_variants": {
         "header": {
@@ -1252,14 +1265,17 @@
       "route_family": "auth",
       "owner_surface_refs": [
         "repos/fawxzzy-fitness/src/app/login/LoginScreen.tsx",
+        "repos/fawxzzy-fitness/src/app/login/loginScreenState.ts",
         "repos/fawxzzy-fitness/src/components/auth/SignupForm.tsx",
+        "repos/fawxzzy-fitness/src/components/auth/authCopy.ts",
         "repos/fawxzzy-fitness/src/app/forgot-password/ForgotPasswordFormClient.tsx",
         "repos/fawxzzy-fitness/src/app/reset-password/page.tsx",
         "repos/fawxzzy-fitness/src/app/reset-password/RecoverySessionBridge.tsx",
         "repos/fawxzzy-fitness/src/components/auth/AuthShell.tsx",
         "repos/fawxzzy-fitness/src/components/ui/AppButton.tsx",
         "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
-        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts",
+        "repos/fawxzzy-fitness/src/lib/remembered-login.ts"
       ],
       "primitive_variants": {
         "header": {

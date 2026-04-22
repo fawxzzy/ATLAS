@@ -136,12 +136,18 @@ Use these owner lanes:
 Current route surfaces:
 
 - governance: `repos/fawxzzy-playbook/docs/commands/verify.md`, `repos/fawxzzy-playbook/docs/rules/verify-rules.md`, `repos/fawxzzy-playbook/docs/contracts/verify-output.md`
-- execution: `docs/registry/ATLAS-TOOL-REGISTRY.json`, `repos/fawxzzy-lifeline/docs/privileged-execution.md`, `repos/fawxzzy-lifeline/examples/privileged-execution/*.json`
+- execution: `docs/registry/ATLAS-TOOL-REGISTRY.json`, `repos/fawxzzy-lifeline/docs/contracts/privileged-execution-contract.md`, `repos/fawxzzy-lifeline/docs/contracts/ui-proof-passed-receipt-contract.md`, `repos/fawxzzy-lifeline/docs/ops/lifeline-operator-surface.md`, `repos/fawxzzy-lifeline/docs/runbooks/hermetic-validation-operator-flow.md`
 - orchestration: `docs/ops/ATLAS-SESSION-RUNBOOK.md`, `repos/_stack/docs/runbooks/STACK-WORKER-FLOW.md`, `repos/_stack/docs/dispatcher-protocol.md`
 - doctrine/platform: `repos/fawxzzy-atlas/docs/ATLAS_PLATFORM_MODEL.md`, `repos/fawxzzy-atlas/docs/ATLAS_UAPI.md`, `repos/fawxzzy-atlas/docs/OWNERSHIP_BOUNDARIES.md`
 - knowledge: `docs/knowledge/QUERY-CONTRACT.md`, `runtime/cortex/query/knowledge/bundle.json`
 - topology/git: `docs/audits/STACK-REPO-INVENTORY.md`, `docs/audits/STACK-DEBT-LEDGER.md`, `runtime/receipts/validation/stack-validation.latest.json`
 - operator/conversation: `docs/architecture/AWARENESS-FIRST-WORLD-MODEL.md`, `docs/ops/ATLAS-STATUS-RUNBOOK.md`, `runtime/cortex/catalog/memory/working-memory.latest.json`
+
+Routing rule for execution context:
+
+- prefer Lifeline contract and operator docs over root summaries when the task concerns capability profiles, approvals, execution receipts, proof-pass receipts, or worker-execution receipt lanes
+- use Playbook verify docs for verification policy and verify output, not Lifeline execution docs
+- use root docs only for routing, linkage, and read-model expectations
 
 ## Context-Pack Outputs
 

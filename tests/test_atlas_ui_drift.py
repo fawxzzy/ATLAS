@@ -134,6 +134,32 @@ class AtlasUiDriftTests(unittest.TestCase):
         self.assertFalse(any(key.startswith("fitness:auth-message-") for key in comparison_keys))
         self.assertFalse(any(key.startswith("fitness:auth-account-") for key in comparison_keys))
         self.assertFalse(any(key.startswith("fitness:auth-action-") for key in comparison_keys))
+        self.assertFalse(any(key.startswith("fitness:remembered-login-") for key in comparison_keys))
+        self.assertFalse(any(key.startswith("fitness:login-state-") for key in comparison_keys))
+        self.assertEqual(len(comparison_keys), report["summary"]["expected_capture_count"])
+        self.assertEqual("clean", report["summary"]["status"])
+        self.assertEqual(0, report["summary"]["finding_count"])
+
+    def test_dry_run_keeps_today_overview_token_bridge_on_existing_validator_lane(self) -> None:
+        report = validate_fitness_ui_drift(
+            root=ROOT,
+            schema_path=default_drift_schema_path(ROOT),
+            observation_schema_path=default_schema_path(ROOT),
+            capture_map_schema_path=default_capture_map_schema_path(ROOT),
+            dry_run=True,
+        )
+        expected = observe_fitness_ui(
+            root=ROOT,
+            schema_path=default_schema_path(ROOT),
+            capture_map_schema_path=default_capture_map_schema_path(ROOT),
+            dry_run=True,
+        )
+
+        comparison_keys = {item["comparison_key"] for item in expected["observations"]}
+
+        self.assertIn("fitness:today-overview-default", comparison_keys)
+        self.assertFalse(any(key.startswith("fitness:today-list-") for key in comparison_keys))
+        self.assertFalse(any(key.startswith("fitness:today-feedback-") for key in comparison_keys))
         self.assertEqual(len(comparison_keys), report["summary"]["expected_capture_count"])
         self.assertEqual("clean", report["summary"]["status"])
         self.assertEqual(0, report["summary"]["finding_count"])

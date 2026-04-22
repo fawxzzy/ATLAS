@@ -4,6 +4,12 @@ This document captures the stack-owned restart posture for the Lifeline platform
 
 It is a coordination artifact for the stack root, not a replacement for repo-owned implementation doctrine inside `repos/fawxzzy-lifeline`, `repos/fawxzzy-playbook`, or `repos/fawxzzy-atlas`.
 
+Adoption note for the current root posture:
+
+- Rule: ATLAS should federate Lifeline truth, not duplicate Lifeline truth.
+- Pattern: Root docs should route operator intent to the owning repo.
+- Failure Mode: Stack docs become a second truth store when root restates child-repo contracts instead of linking to them.
+
 ## Grounding
 
 This restart is grounded in the current stack boundary rules and the recovered operating model:
@@ -60,6 +66,13 @@ Lifeline owns the platform-cutover critical path:
 - parity criteria for exiting the old platform path
 
 This is the owner lane for the milestone that matters: proving one meaningful app or service can run outside Vercel with explicit operational controls.
+
+For execution-governance surfaces at the stack root, route to these Lifeline docs instead of re-authoring the contract locally:
+
+- `repos/fawxzzy-lifeline/docs/contracts/privileged-execution-contract.md`
+- `repos/fawxzzy-lifeline/docs/contracts/ui-proof-passed-receipt-contract.md`
+- `repos/fawxzzy-lifeline/docs/ops/lifeline-operator-surface.md`
+- `repos/fawxzzy-lifeline/docs/runbooks/hermetic-validation-operator-flow.md`
 
 ### Playbook
 

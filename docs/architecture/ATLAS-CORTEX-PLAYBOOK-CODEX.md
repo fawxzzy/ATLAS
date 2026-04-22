@@ -28,7 +28,7 @@ Use this file to answer four questions:
 
 - `stack.yaml`
 - `README-STACK.md`
-- `AGENTS.md` at `C:\ATLAS`
+- `AGENTS.md` at the ATLAS root
 - `docs/architecture/**`
 - `docs/audits/**`
 - `docs/ops/**`
@@ -145,7 +145,7 @@ Codex should only consume those outputs when they are materialized in explicit f
 
 Use this rule:
 
-- stack doctrine lives in `C:\ATLAS\docs`
+- stack doctrine lives in `docs`
 - repo doctrine lives in the repo that it governs
 
 Examples:

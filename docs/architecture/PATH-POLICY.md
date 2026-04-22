@@ -1,6 +1,6 @@
 # ATLAS Path Policy
 
-This document defines what belongs in each top-level bucket at `C:\ATLAS`.
+This document defines what belongs in each top-level bucket at the ATLAS root.
 
 ## `repos/`
 

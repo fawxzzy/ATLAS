@@ -1,7 +1,7 @@
 # ATLAS Root Rules
 
 Scope
-- Applies to sessions launched from `C:\ATLAS`.
+- Applies to sessions launched from the ATLAS root.
 - This file governs stack-wide work at the ATLAS root.
 - Repo-local `AGENTS.md` files override this file inside their own repo roots.
 
@@ -12,7 +12,7 @@ Purpose
 
 Routing
 - Single-repo implementation work should be routed into the target repo root.
-- Cross-repo work may touch only the named repos plus stack-level files under `C:\ATLAS`.
+- Cross-repo work may touch only the named repos plus stack-level files under the ATLAS root.
 - Stack-level files are:
   - `stack.yaml`
   - `README-STACK.md`
@@ -26,7 +26,7 @@ Routing
 - Do not make opportunistic code edits across unrelated repos from the root session.
 
 Path Discipline
-- Keep committed paths relative to `C:\ATLAS` whenever possible.
+- Keep committed paths relative to the ATLAS root whenever possible.
 - Do not add machine-specific absolute paths to committed docs, config, scripts, or templates.
 - If an absolute path is unavoidable for a local-only example, label it clearly as local-only and do not make it the canonical contract.
 

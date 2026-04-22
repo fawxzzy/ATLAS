@@ -1,6 +1,6 @@
 # ATLAS Retention And Memory Policy
 
-This policy defines how ATLAS compacts stack context without treating chat state as durable truth and without treating `C:\ATLAS` as a git repo.
+This policy defines how ATLAS compacts stack context without treating chat state as durable truth and without treating the ATLAS root as a git repo.
 
 ## Goals
 
@@ -120,4 +120,4 @@ Every memory extraction run must emit stable JSON artifacts so a human can trace
 
 Memory and retention are stack-owned, but commit and PR actions are repo-owned.
 
-ATLAS may prepare commit and PR artifacts from a handoff, but the target repo must be the actual registered repo root that owns the changed files. ATLAS must never assume `C:\ATLAS` is the git target.
+ATLAS may prepare commit and PR artifacts from a handoff, but the target repo must be the actual registered repo root that owns the changed files. ATLAS must never assume the ATLAS root is the git target.

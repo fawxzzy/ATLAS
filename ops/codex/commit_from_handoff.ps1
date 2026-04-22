@@ -173,7 +173,7 @@ if ($Mode -eq "preview") {
 }
 
 if ($target.status -eq "no_repo_detected") {
-  throw "Commit execution is blocked because the handoff does not map to a registered repo. ATLAS will not assume C:\ATLAS is the git target."
+  throw "Commit execution is blocked because the handoff does not map to a registered repo. ATLAS will not assume the ATLAS root is the git target."
 }
 if ($target.status -eq "git_unavailable") {
   throw "Commit execution is blocked because the resolved repo path does not expose a usable .git checkout."

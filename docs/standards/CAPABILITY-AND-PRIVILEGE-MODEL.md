@@ -2,12 +2,24 @@
 
 ATLAS workers do not hold ambient admin rights. Privilege is requested per action, approved per action, executed by the host, and proven by a receipt.
 
+This document is a root boundary summary only. Lifeline owns the canonical execution lineage and receipt semantics:
+
+- `repos/fawxzzy-lifeline/docs/contracts/privileged-execution-contract.md`
+- `repos/fawxzzy-lifeline/docs/privileged-execution.md`
+
 ## Contract Roles
 
 - `atlas.capability.profile.v1` describes what a worker may request.
 - `atlas.privileged-action.request.v1` records the worker proposal.
 - `atlas.approval.receipt.v1` records the approval, rejection, or expiry state for that proposal.
 - `atlas.privileged-action.receipt.v1` records what actually ran under the approved scope.
+
+Ownership rule:
+
+- Lifeline owns the execution-side field contract and lineage for these artifacts.
+- ATLAS root uses the vocabulary to route work and interpret boundaries.
+- Playbook may govern approval policy, but it does not replace Lifeline receipt ownership.
+- `_stack` may provide worker context and `source_refs`, but it does not redefine Lifeline execution receipts.
 
 ## Proposal To Receipt Flow
 
@@ -17,6 +29,8 @@ ATLAS workers do not hold ambient admin rights. Privilege is requested per actio
 4. execution emits a receipt that names the request, approval, worker, assignment, and stack lock digest
 
 Worker-originated requests may also carry `source_refs` so the privileged path stays anchored to governed assignment, context, merge, or session artifacts instead of hidden transcript history.
+
+Use the Lifeline contract doc for exact lineage keys, status values, normalized path rules, and blocked/failure receipt requirements.
 
 ## Capability Profile
 

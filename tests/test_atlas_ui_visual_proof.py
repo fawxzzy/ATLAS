@@ -166,6 +166,23 @@ class AtlasUiVisualProofTests(unittest.TestCase):
         )
         self.assertFalse(any(capture_id.startswith("exercise-detail-") for capture_id in captures_by_id))
 
+    def test_repo_manifest_keeps_chooser_family_semantic_only_until_root_artifacts_exist(self) -> None:
+        manifest_path = ROOT / "ops" / "atlas" / "ui_visual_proof" / "fitness_visual_proof.v1.json"
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        captures_by_id = {item["capture_id"]: item for item in manifest["captures"]}
+
+        self.assertNotIn("exercise-chooser-picker", captures_by_id)
+        self.assertNotIn("exercise-chooser-tag-filter-control", captures_by_id)
+        self.assertNotIn("exercise-chooser-search-filters", captures_by_id)
+        self.assertNotIn("exercise-chooser-picker-panel", captures_by_id)
+        self.assertNotIn("exercise-chooser-filter-panel", captures_by_id)
+        self.assertNotIn("exercise-chooser-goal-panel", captures_by_id)
+        self.assertFalse(any(capture_id.startswith("exercise-picker-") for capture_id in captures_by_id))
+        self.assertFalse(any(capture_id.startswith("exercise-search-filters-") for capture_id in captures_by_id))
+        self.assertFalse(any(capture_id.startswith("picker-list-viewport-") for capture_id in captures_by_id))
+        self.assertFalse(any(capture_id.startswith("chooser-panel-") for capture_id in captures_by_id))
+        self.assertFalse(any(capture_id.startswith("filter-shell-") for capture_id in captures_by_id))
+
     def test_repo_manifest_reuses_existing_main_tab_capture_ids_for_shared_nav(self) -> None:
         manifest_path = ROOT / "ops" / "atlas" / "ui_visual_proof" / "fitness_visual_proof.v1.json"
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))

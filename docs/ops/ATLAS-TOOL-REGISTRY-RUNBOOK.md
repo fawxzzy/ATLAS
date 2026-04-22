@@ -9,15 +9,22 @@ The governed ATLAS runtime surface is rooted in machine-readable registry data, 
 - tool entry schema: `schemas/atlas.tool.catalog.entry.v1.json`
 - extension entry schema: `schemas/atlas.extension.manifest.v1.json`
 
-Atlas doctrine defines the stable public catalog and extension model. The root registry is the executable allowlist used by sessions, status, Lifeline, and Playbook.
+Atlas doctrine defines the stable public catalog and extension model. The root registry is the executable allowlist used by sessions, status, Lifeline, and Playbook. It is a root projection and routing surface, not the canonical source for Lifeline execution semantics.
 
 ## Ownership
 
 - Atlas owns public naming, stability, and catalog doctrine
 - the ATLAS root owns the machine-readable runtime registry snapshots
+- Lifeline owns the canonical execution, capability, approval, and receipt lineage for execution-backed tool entries
 - Playbook enforces fail-closed policy against the registry
 - Lifeline enforces the same registry at execution time
 - `_stack` and root sessions may request only registered surfaces
+
+Canonical Lifeline references for execution-backed entries:
+
+- `repos/fawxzzy-lifeline/docs/contracts/privileged-execution-contract.md`
+- `repos/fawxzzy-lifeline/docs/contracts/ui-proof-passed-receipt-contract.md`
+- `repos/fawxzzy-lifeline/docs/ops/lifeline-operator-surface.md`
 
 ## Current Registered Surfaces
 
@@ -70,6 +77,8 @@ These fields must refer to a registry entry that exists in the current root bund
 3. validate the registry bundle
 4. run Playbook and Lifeline verification for the new surface
 5. run root ratchet validation
+
+If the change affects execution lineage, approval semantics, proof-pass receipt semantics, or receipt failure behavior, update the Lifeline owner docs first and then point the root registry and runbooks at that owner truth.
 
 ## Non-Goals
 

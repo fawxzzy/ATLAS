@@ -5,7 +5,7 @@ Audit date: 2026-04-08
 This is a logical target tree for portability, rebuildability, and path independence. It is not an instruction to rename or move everything immediately.
 
 ```text
-C:\ATLAS
+ATLAS root
 +-- stack.yaml                              [relative-path manifest; single source of stack truth]
 +-- docs\
 |   +-- architecture\                       [stack maps, target tree, boundaries]
@@ -64,7 +64,7 @@ C:\ATLAS
 
 ## Target rules
 
-- Stack truth is rooted at `C:\ATLAS`, but machine-readable paths should be relative to the manifest root rather than hardcoded absolute paths.
+- Stack truth is rooted at the ATLAS root, but machine-readable paths should be relative to the manifest root rather than hardcoded absolute paths.
 - `repos\` should contain canonical source roots, not wrapper folders, installers, videos, zip files, or backup bundles.
 - Shared runtime state belongs under `runtime\` or repo-local ignored state, not mixed into source roots without a contract.
 - Shared operator assets belong under `ops\`, not split between root-empty `ops\` and active `_stack` source.

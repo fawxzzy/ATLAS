@@ -19,7 +19,7 @@ This keeps the lane aligned with `stack.yaml` and the ATLAS root path policy wit
 
 ## Entry Points
 
-Run from `C:\ATLAS`:
+Run from the ATLAS root:
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\ops\scripts\system-guardian\install-system-guardian.ps1

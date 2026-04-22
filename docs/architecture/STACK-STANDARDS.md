@@ -151,7 +151,7 @@ For stack-wide validation, prefer ratcheting over one-shot cleanup gates:
 
 ## 9. Root Session Rule
 
-A session launched from `C:\ATLAS` should default to stack work:
+A session launched from the ATLAS root should default to stack work:
 
 - standards
 - audits

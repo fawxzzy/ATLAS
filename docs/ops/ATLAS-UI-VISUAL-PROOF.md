@@ -71,7 +71,7 @@ The currently proof-gated captures are:
 All seven are currently baselined as `unchanged`.
 
 - `settings-overview-default` is the stable control surface.
-- `today-overview-default` is the first high-signal Today surface tied to the active adoption rail.
+- `today-overview-default` is the first high-signal Today surface tied to the active adoption rail, including the shared list rhythm and feedback chrome now published through the owner token bridge.
 - `routines-overview-default` extends the proof lane across the shared main-tab family so the Routines-active state is explicitly baselined instead of inferred from Today, History, and Settings alone.
 - `history-sessions-list-default` extends the proof lane into the history session-summary family.
 - `history-exercises-default` extends the proof lane into the history exercise-browser family.
@@ -91,6 +91,8 @@ The approved references are seeded from the repo's existing deterministic mobile
 - Failure Mode: copying owner scenario names into new root capture ids makes the proof rail wider without increasing validator signal.
 - Pattern: when a shared main-tab tranche lands on already-covered screen captures, widen proof by adding the missing active-tab screen capture first instead of inventing a nav-only screenshot lane.
 - Failure Mode: creating a synthetic top-nav proof id for chrome that is already visible on deterministic owner screens adds proof surface without adding trust.
+- Pattern: when Today overview polish lands inside the already gated `today-overview-default` route, keep proof attached to that existing capture instead of inventing `today-list-*` or `today-feedback-*` screenshot ids.
+- Failure Mode: splitting list rhythm or feedback-card proof away from the already deterministic Today overview screen widens the screenshot rail without increasing trust.
 - Pattern: when a shared history tranche lands on history overview, sessions, exercises, or detail chrome already represented by the existing history captures, keep proof attached to those captures and only widen if a deterministic uncovered history state actually exists.
 - Failure Mode: creating history-header or history-control proof ids for chrome that is already visible on deterministic history screens adds proof surface without increasing trust.
 - Pattern: when a tranche lands on shared route-loading chrome, keep proof on the existing steady-state route captures unless the owner repo exposes a deterministic loading screenshot lane with a stable observation digest.
@@ -117,9 +119,9 @@ Entry handoff and install-gate surfaces are not opted into visual proof yet.
 Auth / recovery remains semantic-only for this tranche.
 
 - The active semantic lane already covers `auth-recovery-shell`, `auth-recovery-login-screen`, `auth-recovery-signup-form`, `auth-recovery-forgot-password-form`, `auth-recovery-reset-password-form`, `auth-recovery-recovery-bridge`, `auth-recovery-message-chrome`, `auth-recovery-account-panel`, and `auth-recovery-action-chrome`.
-- The family still depends on remembered-account hydration, recovery-fragment handoff, and session establishment state that does not yet produce a stable root-side screenshot artifact and approved reference pair.
+- The family still depends on remembered-account hydration, remembered-login sync after authenticated surfaces, recovery-fragment handoff, and session establishment state that do not yet produce a stable root-side screenshot artifact and approved reference pair.
 - Keep auth/recovery on the semantic observer/drift lane until one of those active capture ids has a deterministic runtime screenshot path and matching reference image.
-- Pattern: if auth/recovery later becomes deterministic enough for proof, attach it to the existing active `auth-recovery-*` capture ids before inventing route-scenario or wrapper-only proof ids.
+- Pattern: if auth/recovery later becomes deterministic enough for proof, attach it to the existing active `auth-recovery-*` capture ids before inventing route-scenario, wrapper-only, `remembered-login-*`, or `login-state-*` proof ids.
 - Failure Mode: forcing screenshot gating onto remembered-account or recovery-session transitions makes the proof rail flaky while pretending the wrong state is stable.
 
 Routine editor/detail remains semantic-only for this tranche.
@@ -150,6 +152,14 @@ History detail / log-audit remains semantic-only for this tranche.
 - Failure Mode: binding an active `history-log-*` capture to a stale or legacy screenshot path would make the proof rail look green while comparing the wrong surface.
 - Pattern: when shared history header/control polish lands inside the already proofed session and exercise routes, keep proof on `history-sessions-list-default` and `history-exercises-default` until the owner repo exposes a deterministic history-detail proof binding for an active `history-log-*` capture.
 - Route loading remains visual-proof unchanged for this tranche because `RouteLoading.tsx` mounts after a route delay and uses animated glows and particles, so the steady-state Today, Routines, Settings, History sessions, and History exercises captures remain the only deterministic screenshot lane.
+
+Chooser remains semantic-only for this tranche.
+
+- The active semantic lane already covers `exercise-chooser-picker`, `exercise-chooser-tag-filter-control`, `exercise-chooser-search-filters`, `exercise-chooser-picker-panel`, `exercise-chooser-filter-panel`, and `exercise-chooser-goal-panel`.
+- Root proof does not yet have approved reference images or active runtime screenshot artifacts bound to those capture ids, and the current chooser/search/filter states still depend on query and filter combinations that are not frozen into a deterministic root screenshot lane.
+- Keep the chooser family on the semantic observer/drift lane until one of those active capture ids has a stable root-side screenshot artifact and matching reference image.
+- Pattern: when a chooser tranche lands on already-covered `ExercisePicker`, `ExerciseSearchFilters`, `PickerListViewport`, and shared chooser panel or filter shell states, reconcile proof against the active `exercise-chooser-*` capture ids before inventing component-specific or shell-only proof ids.
+- Failure Mode: creating `exercise-picker-*`, `exercise-search-filters-*`, `picker-list-viewport-*`, `chooser-panel-*`, or `filter-shell-*` proof ids widens the screenshot rail without increasing trust.
 
 ## Artifact Paths
 

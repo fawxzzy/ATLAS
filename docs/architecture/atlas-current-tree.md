@@ -5,7 +5,7 @@ Audit date: 2026-04-08
 Normalized current tree, excluding `node_modules`, build output, and secret contents.
 
 ```text
-C:\ATLAS
+ATLAS root
 +-- stack.yaml                              [root stack manifest; stale absolute paths]
 +-- data\                                   [empty]
 +-- docs\
