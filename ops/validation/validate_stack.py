@@ -447,26 +447,29 @@ def verify_locked_ref(repo_path: Path, component: dict[str, Any]) -> str | None:
     ref_type = str(component.get("ref_type", ""))
     ref = str(component.get("ref", ""))
     commit = str(component.get("commit", ""))
+    resolved_commit = ""
     if ref_type == "branch":
         code, _ = git_output(repo_path, "show-ref", "--verify", "--quiet", f"refs/heads/{ref}")
         if code != 0:
             return f"Pinned branch ref '{ref}' is missing."
+        code, resolved_commit = git_output(repo_path, "rev-parse", f"{ref}^{{commit}}")
+        if code != 0 or not resolved_commit:
+            return f"Pinned branch ref '{ref}' could not be resolved to a commit."
     elif ref_type == "tag":
         code, _ = git_output(repo_path, "show-ref", "--verify", "--quiet", f"refs/tags/{ref}")
         if code != 0:
             return f"Pinned tag ref '{ref}' is missing."
+        code, resolved_commit = git_output(repo_path, "rev-parse", f"{ref}^{{commit}}")
+        if code != 0 or not resolved_commit:
+            return f"Pinned tag ref '{ref}' could not be resolved to a commit."
     elif ref_type == "commit":
-        code, output = git_output(repo_path, "rev-parse", "--verify", f"{ref}^{{commit}}")
-        if code != 0 or not output:
+        code, resolved_commit = git_output(repo_path, "rev-parse", "--verify", f"{ref}^{{commit}}")
+        if code != 0 or not resolved_commit:
             return f"Pinned commit ref '{ref}' is missing."
     else:
         return f"Unsupported ref_type '{ref_type}'."
-
-    code, head_commit = git_output(repo_path, "rev-parse", "HEAD")
-    if code != 0 or not head_commit:
-        return "Unable to resolve current HEAD for pinned component."
-    if commit and head_commit != commit:
-        return f"Pinned commit '{commit}' does not match current HEAD '{head_commit}'."
+    if commit and resolved_commit != commit:
+        return f"Pinned commit '{commit}' does not match resolved {ref_type} '{ref}' commit '{resolved_commit}'."
     return None
 
 

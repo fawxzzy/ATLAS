@@ -109,6 +109,43 @@ def current_ref(repo_path: Path, commit: str) -> tuple[str, str]:
     return "commit", commit
 
 
+def branch_exists(repo_path: Path, branch: str) -> bool:
+    code, _ = git_output(repo_path, "show-ref", "--verify", "--quiet", f"refs/heads/{branch}")
+    return code == 0
+
+
+def durable_branch(repo_path: Path) -> str | None:
+    code, remote_head = git_output(repo_path, "symbolic-ref", "--quiet", "--short", "refs/remotes/origin/HEAD")
+    if code == 0 and remote_head:
+        _, _, branch = remote_head.partition("/")
+        if branch and branch_exists(repo_path, branch):
+            return branch
+
+    for candidate in ("main", "master"):
+        if branch_exists(repo_path, candidate):
+            return candidate
+    return None
+
+
+def canonical_ref(repo_path: Path) -> tuple[str, str, str]:
+    branch = durable_branch(repo_path)
+    if branch:
+        code, commit = git_output(repo_path, "rev-parse", branch)
+        if code == 0 and commit:
+            return "branch", branch, commit
+
+    code, head_commit = git_output(repo_path, "rev-parse", "HEAD")
+    if code != 0 or not head_commit:
+        raise ValueError(f"Unable to resolve HEAD for repo '{repo_path}'.")
+
+    ref_type, ref = current_ref(repo_path, head_commit)
+    if ref_type == "tag":
+        code, tag_commit = git_output(repo_path, "rev-parse", f"{ref}^{{commit}}")
+        if code == 0 and tag_commit:
+            return ref_type, ref, tag_commit
+    return ref_type, ref, head_commit
+
+
 def current_remote(repo_path: Path) -> str | None:
     code, remote = git_output(repo_path, "remote", "get-url", "origin")
     if code == 0 and remote:
@@ -384,10 +421,7 @@ def build_lock_payload(
         if not repo_is_git_root(repo_path):
             raise ValueError(f"Included repo is not a git root: {atlas_relative(repo_path, root=base)}")
 
-        code, commit = git_output(repo_path, "rev-parse", "HEAD")
-        if code != 0 or not commit:
-            raise ValueError(f"Unable to resolve HEAD for repo '{repo_id}'.")
-        ref_type, ref = current_ref(repo_path, commit)
+        ref_type, ref, commit = canonical_ref(repo_path)
         status_lines = git_status_lines(repo_path)
         dirty = bool(status_lines)
         if dirty_overrides and repo_id in dirty_overrides:
