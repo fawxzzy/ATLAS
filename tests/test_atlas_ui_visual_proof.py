@@ -119,6 +119,14 @@ class AtlasUiVisualProofTests(unittest.TestCase):
         schema = json.loads(default_schema_path(ROOT).read_text(encoding="utf-8"))
         self.assertEqual([], validate_schema_definition(schema))
 
+    def test_repo_manifest_tracks_active_capture_map_digest(self) -> None:
+        manifest_path = ROOT / "ops" / "atlas" / "ui_visual_proof" / "fitness_visual_proof.v1.json"
+        capture_map_path = ROOT / "ops" / "atlas" / "ui_observe" / "fitness_capture_map.v1.json"
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        capture_map = json.loads(capture_map_path.read_text(encoding="utf-8"))
+
+        self.assertEqual(_digest(capture_map), manifest["expected_capture_map_digest"])
+
     def test_repo_manifest_validates(self) -> None:
         manifest_path = ROOT / "ops" / "atlas" / "ui_visual_proof" / "fitness_visual_proof.v1.json"
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
@@ -210,6 +218,22 @@ class AtlasUiVisualProofTests(unittest.TestCase):
         self.assertNotIn("history-log-detail-surface", captures_by_id)
         self.assertFalse(any(capture_id.startswith("route-loading-") for capture_id in captures_by_id))
         self.assertFalse(any(capture_id.startswith("boot-loading-") for capture_id in captures_by_id))
+
+    def test_repo_manifest_keeps_auth_recovery_family_semantic_only_until_root_bindings_exist(self) -> None:
+        manifest_path = ROOT / "ops" / "atlas" / "ui_visual_proof" / "fitness_visual_proof.v1.json"
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        captures_by_id = {item["capture_id"]: item for item in manifest["captures"]}
+
+        self.assertNotIn("auth-recovery-shell", captures_by_id)
+        self.assertNotIn("auth-recovery-login-screen", captures_by_id)
+        self.assertNotIn("auth-recovery-signup-form", captures_by_id)
+        self.assertNotIn("auth-recovery-forgot-password-form", captures_by_id)
+        self.assertNotIn("auth-recovery-reset-password-form", captures_by_id)
+        self.assertNotIn("auth-recovery-recovery-bridge", captures_by_id)
+        self.assertNotIn("auth-recovery-message-chrome", captures_by_id)
+        self.assertNotIn("auth-recovery-account-panel", captures_by_id)
+        self.assertNotIn("auth-recovery-action-chrome", captures_by_id)
+        self.assertFalse(any(capture_id.startswith("auth-recovery-") for capture_id in captures_by_id))
 
     def test_repo_manifest_keeps_routine_editor_detail_family_semantic_only_until_root_artifacts_exist(self) -> None:
         manifest_path = ROOT / "ops" / "atlas" / "ui_visual_proof" / "fitness_visual_proof.v1.json"

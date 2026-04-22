@@ -102,6 +102,19 @@ The mapping contract defines:
 - owner surface refs used for lineage
 - explicit primitive variants for each slot
 
+The current routine editor/detail tranche stays on those three active editor captures.
+
+- `edit-day-default` carries the day-detail layout, shared panel chrome, day settings autosave form, and editable exercise-list flow.
+- `edit-routine-days-section-default` carries the routine edit shell, days-section chrome, shared editor helpers, and exit-guard/meta wrappers.
+- `edit-day-add-exercise-default` carries the add-exercise route chrome, shared editor shell reuse, and the day add-exercise form.
+
+The current auth/recovery tranche stays on those nine active auth captures.
+
+- `auth-recovery-shell`, `auth-recovery-login-screen`, `auth-recovery-signup-form`, `auth-recovery-forgot-password-form`, `auth-recovery-reset-password-form`, and `auth-recovery-recovery-bridge` carry the shared auth shell plus the route-owned page and form states.
+- `auth-recovery-message-chrome` carries the shared message wrappers across login, signup, forgot-password, reset-password, and recovery-bridge flows.
+- `auth-recovery-account-panel` keeps the remembered-account branch on the existing login capture lane instead of inventing a separate account-shell id.
+- `auth-recovery-action-chrome` carries the shared footer and action-row wrappers plus the route-level action surfaces without minting footer-only or button-only capture ids.
+
 The input contract selects which screen/state pairs are active for a run. This keeps the observer deterministic by rule instead of by inline assumptions.
 
 - Pattern: expand capture coverage immediately after each adoption tranche so validation lands before the next wider rewrite.
@@ -124,6 +137,8 @@ The input contract selects which screen/state pairs are active for a run. This k
 - Failure Mode: adding redundant capture ids for shared history header, control, or section chrome creates validator sprawl and weakens proof clarity.
 - Pattern: when a tranche lands on shared transient route-loading chrome, widen `RouteLoading.tsx` plus the owning `app/**/loading.tsx` entrypoints onto the existing Today, Routines, Settings, History, and adjacent entry-handoff captures before minting loading-specific ids.
 - Failure Mode: inventing a root `routeLoading` screen key, `route-loading-*` capture id, or root-side loading primitive slot before the owner truth pack freezes that family copies owner truth into root and makes the semantic rail dishonest.
+- Pattern: when a tranche lands on auth/recovery shell, message, account, or action wrappers already represented by the active `auth-recovery-*` captures, widen lineage on those existing ids before inventing auth-footer, auth-message, or auth-account selectors.
+- Failure Mode: splitting shared auth wrappers into extra root-only capture ids widens validator surface without improving drift signal.
 
 The observer resolves primitive variants from owner contracts, groups referenced tokens by scale, and emits one normalized artifact per capture.
 
@@ -133,6 +148,7 @@ The same rule applies to transient route loading: root may bind `RouteLoading.ts
 The same rule applies to the routine editor/detail family: root should keep the shared editor shell, section chrome, control/meta wrappers, and detail layout attached to the existing `edit-day-default`, `edit-routine-days-section-default`, and `edit-day-add-exercise-default` captures via owner-surface lineage instead of creating synthetic routine-editor or routine-detail selectors.
 The same rule applies to the chooser family: root should bind `ExercisePicker.tsx`, `ExerciseSearchFilters.tsx`, `PickerListViewport.tsx`, the shared filter control, and chooser panel or goal shell surfaces onto the existing `exercise-chooser-*` captures rather than creating synthetic component-level or shell-only selectors.
 The same rule applies to the active session/log-set family: root should bind `SessionPageClient.tsx`, `SessionHeaderControls.tsx`, `SessionExerciseFocus.tsx`, `SessionExerciseBlock.tsx`, `SessionTimers.tsx`, and the `app/session/[id]/page.tsx` entrypoint onto the existing `exercise-log-*` and shared `workout-card-disclosure-expanded` captures rather than creating synthetic active-session, log-set, or timer selectors.
+The same rule applies to auth/recovery: root should bind `AuthShell.tsx` plus the route-owned login, signup, forgot-password, reset-password, and recovery-bridge surfaces onto the existing `auth-recovery-*` captures rather than creating synthetic auth-footer, auth-message, remembered-account, or action-only selectors.
 
 ## Mapping contract
 

@@ -100,6 +100,44 @@ class AtlasUiDriftTests(unittest.TestCase):
         self.assertEqual("clean", report["summary"]["status"])
         self.assertEqual(0, report["summary"]["finding_count"])
 
+    def test_dry_run_keeps_auth_recovery_family_on_existing_validator_lane(self) -> None:
+        report = validate_fitness_ui_drift(
+            root=ROOT,
+            schema_path=default_drift_schema_path(ROOT),
+            observation_schema_path=default_schema_path(ROOT),
+            capture_map_schema_path=default_capture_map_schema_path(ROOT),
+            dry_run=True,
+        )
+        expected = observe_fitness_ui(
+            root=ROOT,
+            schema_path=default_schema_path(ROOT),
+            capture_map_schema_path=default_capture_map_schema_path(ROOT),
+            dry_run=True,
+        )
+
+        comparison_keys = {item["comparison_key"] for item in expected["observations"]}
+
+        for comparison_key in {
+            "fitness:auth-recovery-shell",
+            "fitness:auth-recovery-login-screen",
+            "fitness:auth-recovery-signup-form",
+            "fitness:auth-recovery-forgot-password-form",
+            "fitness:auth-recovery-reset-password-form",
+            "fitness:auth-recovery-recovery-bridge",
+            "fitness:auth-recovery-message-chrome",
+            "fitness:auth-recovery-account-panel",
+            "fitness:auth-recovery-action-chrome",
+        }:
+            self.assertIn(comparison_key, comparison_keys)
+
+        self.assertFalse(any(key.startswith("fitness:auth-footer-") for key in comparison_keys))
+        self.assertFalse(any(key.startswith("fitness:auth-message-") for key in comparison_keys))
+        self.assertFalse(any(key.startswith("fitness:auth-account-") for key in comparison_keys))
+        self.assertFalse(any(key.startswith("fitness:auth-action-") for key in comparison_keys))
+        self.assertEqual(len(comparison_keys), report["summary"]["expected_capture_count"])
+        self.assertEqual("clean", report["summary"]["status"])
+        self.assertEqual(0, report["summary"]["finding_count"])
+
     def test_dry_run_keeps_shared_history_family_on_existing_validator_lane(self) -> None:
         report = validate_fitness_ui_drift(
             root=ROOT,

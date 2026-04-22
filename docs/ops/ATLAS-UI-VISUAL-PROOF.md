@@ -114,12 +114,22 @@ Entry handoff and install-gate surfaces are not opted into visual proof yet.
 - Root proof still only gates captures that already have deterministic screenshot artifacts across browser modes.
 - Keep the entry handoff family on the semantic observer/drift lane until a stable install-state screenshot harness exists.
 
+Auth / recovery remains semantic-only for this tranche.
+
+- The active semantic lane already covers `auth-recovery-shell`, `auth-recovery-login-screen`, `auth-recovery-signup-form`, `auth-recovery-forgot-password-form`, `auth-recovery-reset-password-form`, `auth-recovery-recovery-bridge`, `auth-recovery-message-chrome`, `auth-recovery-account-panel`, and `auth-recovery-action-chrome`.
+- The family still depends on remembered-account hydration, recovery-fragment handoff, and session establishment state that does not yet produce a stable root-side screenshot artifact and approved reference pair.
+- Keep auth/recovery on the semantic observer/drift lane until one of those active capture ids has a deterministic runtime screenshot path and matching reference image.
+- Pattern: if auth/recovery later becomes deterministic enough for proof, attach it to the existing active `auth-recovery-*` capture ids before inventing route-scenario or wrapper-only proof ids.
+- Failure Mode: forcing screenshot gating onto remembered-account or recovery-session transitions makes the proof rail flaky while pretending the wrong state is stable.
+
 Routine editor/detail remains semantic-only for this tranche.
 
 - Fitness does expose deterministic owner-side mobile-regression scenarios for `edit-day-default`, `edit-day-add-exercise`, and `edit-routine`.
 - Root proof does not yet have approved reference images or active runtime screenshot artifacts bound to the active capture ids `edit-day-default`, `edit-routine-days-section-default`, and `edit-day-add-exercise-default`.
+- The family also spans autosave and route-specific editor states, so root should not force a screenshot gate until one of those active capture ids has a stable root-side artifact path and reference image.
 - Keep the routine editor/detail family on the semantic observer/drift lane until one of those active capture ids has a matching root-side screenshot binding and observation digest.
 - Pattern: when owner screenshots exist for routine editor/detail routes, attach proof to the existing active editor capture ids before inventing new proof ids.
+- Pattern: when the active capture map changes but the proof lane does not, refresh `expected_capture_map_digest` to the current map instead of widening the proof surface.
 - Failure Mode: binding root proof to owner scenario names or stale screenshot paths instead of the active editor capture ids makes the proof rail look green while comparing the wrong surface.
 
 Session / log-set remains semantic-only for this tranche.
@@ -175,7 +185,7 @@ python ops/atlas/ui_visual_proof/fitness.py
 Limit to one declared capture while iterating:
 
 ```powershell
-python ops/atlas/ui_visual_proof/fitness.py --capture-id auth-recovery-login-screen
+python ops/atlas/ui_visual_proof/fitness.py --capture-id today-overview-default
 ```
 
 Validate wiring without writing reports or diff images:

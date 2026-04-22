@@ -611,6 +611,85 @@ class AtlasUiObservationTests(unittest.TestCase):
         self.assertFalse(any(item["screen_key"] == "chooserPanel" for item in capture_map["captures"]))
         self.assertFalse(any(item["screen_key"] == "filterShell" for item in capture_map["captures"]))
 
+    def test_auth_recovery_family_reuses_existing_capture_ids_and_lineage(self) -> None:
+        inputs = json.loads(default_capture_inputs_path(ROOT).read_text(encoding="utf-8"))
+        capture_map = json.loads(default_capture_map_path(ROOT).read_text(encoding="utf-8"))
+
+        selectors = {(item["screen_key"], item["state_key"]) for item in inputs["capture_set"]}
+        captures_by_id = {item["capture_id"]: item for item in capture_map["captures"]}
+        auth_shell_ref = "repos/fawxzzy-fitness/src/components/auth/AuthShell.tsx"
+        login_page_ref = "repos/fawxzzy-fitness/src/app/login/page.tsx"
+        login_screen_ref = "repos/fawxzzy-fitness/src/app/login/LoginScreen.tsx"
+        signup_page_ref = "repos/fawxzzy-fitness/src/app/signup/page.tsx"
+        signup_form_ref = "repos/fawxzzy-fitness/src/components/auth/SignupForm.tsx"
+        forgot_password_page_ref = "repos/fawxzzy-fitness/src/app/forgot-password/page.tsx"
+        forgot_password_client_ref = "repos/fawxzzy-fitness/src/app/forgot-password/ForgotPasswordFormClient.tsx"
+        reset_password_page_ref = "repos/fawxzzy-fitness/src/app/reset-password/page.tsx"
+        recovery_bridge_ref = "repos/fawxzzy-fitness/src/app/reset-password/RecoverySessionBridge.tsx"
+        app_button_ref = "repos/fawxzzy-fitness/src/components/ui/AppButton.tsx"
+
+        for selector in {
+            ("authRecovery", "shell"),
+            ("authRecovery", "login"),
+            ("authRecovery", "signup"),
+            ("authRecovery", "forgotPassword"),
+            ("authRecovery", "resetPassword"),
+            ("authRecovery", "recoveryBridge"),
+            ("authRecovery", "messageChrome"),
+            ("authRecovery", "accountChrome"),
+            ("authRecovery", "actionChrome"),
+        }:
+            self.assertIn(selector, selectors)
+
+        for capture_id in {
+            "auth-recovery-shell",
+            "auth-recovery-login-screen",
+            "auth-recovery-signup-form",
+            "auth-recovery-forgot-password-form",
+            "auth-recovery-reset-password-form",
+            "auth-recovery-recovery-bridge",
+            "auth-recovery-message-chrome",
+            "auth-recovery-action-chrome",
+        }:
+            self.assertIn(auth_shell_ref, captures_by_id[capture_id]["owner_surface_refs"])
+
+        self.assertIn(login_page_ref, captures_by_id["auth-recovery-login-screen"]["owner_surface_refs"])
+        self.assertIn(login_screen_ref, captures_by_id["auth-recovery-login-screen"]["owner_surface_refs"])
+        self.assertIn(signup_page_ref, captures_by_id["auth-recovery-signup-form"]["owner_surface_refs"])
+        self.assertIn(signup_form_ref, captures_by_id["auth-recovery-signup-form"]["owner_surface_refs"])
+        self.assertIn(
+            forgot_password_page_ref,
+            captures_by_id["auth-recovery-forgot-password-form"]["owner_surface_refs"],
+        )
+        self.assertIn(
+            forgot_password_client_ref,
+            captures_by_id["auth-recovery-forgot-password-form"]["owner_surface_refs"],
+        )
+        self.assertIn(reset_password_page_ref, captures_by_id["auth-recovery-reset-password-form"]["owner_surface_refs"])
+        self.assertIn(reset_password_page_ref, captures_by_id["auth-recovery-recovery-bridge"]["owner_surface_refs"])
+        self.assertIn(recovery_bridge_ref, captures_by_id["auth-recovery-recovery-bridge"]["owner_surface_refs"])
+
+        for owner_surface_ref in {
+            login_screen_ref,
+            signup_form_ref,
+            forgot_password_client_ref,
+            reset_password_page_ref,
+            recovery_bridge_ref,
+        }:
+            self.assertIn(owner_surface_ref, captures_by_id["auth-recovery-message-chrome"]["owner_surface_refs"])
+            self.assertIn(owner_surface_ref, captures_by_id["auth-recovery-action-chrome"]["owner_surface_refs"])
+
+        self.assertIn(login_screen_ref, captures_by_id["auth-recovery-account-panel"]["owner_surface_refs"])
+        self.assertIn(app_button_ref, captures_by_id["auth-recovery-action-chrome"]["owner_surface_refs"])
+        self.assertFalse(any(capture_id.startswith("auth-footer-") for capture_id in captures_by_id))
+        self.assertFalse(any(capture_id.startswith("auth-message-") for capture_id in captures_by_id))
+        self.assertFalse(any(capture_id.startswith("auth-account-") for capture_id in captures_by_id))
+        self.assertFalse(any(capture_id.startswith("auth-action-") for capture_id in captures_by_id))
+        self.assertFalse(any(item["screen_key"] == "authFooter" for item in capture_map["captures"]))
+        self.assertFalse(any(item["screen_key"] == "authMessage" for item in capture_map["captures"]))
+        self.assertFalse(any(item["screen_key"] == "authAccount" for item in capture_map["captures"]))
+        self.assertFalse(any(item["screen_key"] == "authAction" for item in capture_map["captures"]))
+
     def test_main_tab_nav_family_reuses_existing_capture_ids_and_app_nav_lineage(self) -> None:
         inputs = json.loads(default_capture_inputs_path(ROOT).read_text(encoding="utf-8"))
         capture_map = json.loads(default_capture_map_path(ROOT).read_text(encoding="utf-8"))
@@ -687,11 +766,16 @@ class AtlasUiObservationTests(unittest.TestCase):
 
         selectors = {(item["screen_key"], item["state_key"]) for item in inputs["capture_set"]}
         captures_by_id = {item["capture_id"]: item for item in capture_map["captures"]}
+        edit_day_page_ref = "repos/fawxzzy-fitness/src/app/routines/[id]/edit/day/[dayId]/page.tsx"
+        edit_routine_page_ref = "repos/fawxzzy-fitness/src/app/routines/[id]/edit/page.tsx"
+        add_exercise_page_ref = "repos/fawxzzy-fitness/src/app/routines/[id]/edit/day/[dayId]/add-exercise/page.tsx"
         routine_editor_shared_ref = "repos/fawxzzy-fitness/src/components/routines/RoutineEditorShared.tsx"
+        routine_details_exit_guard_ref = "repos/fawxzzy-fitness/src/components/routines/RoutineDetailsExitGuard.tsx"
         detail_scaffold_ref = "repos/fawxzzy-fitness/src/components/routines/day-detail/DetailScreenScaffold.tsx"
         shared_section_shell_ref = "repos/fawxzzy-fitness/src/components/ui/app/SharedSectionShell.tsx"
         shared_screen_header_ref = "repos/fawxzzy-fitness/src/components/ui/app/SharedScreenHeader.tsx"
         app_panel_ref = "repos/fawxzzy-fitness/src/components/ui/app/AppPanel.tsx"
+        app_badge_ref = "repos/fawxzzy-fitness/src/components/ui/app/AppBadge.tsx"
 
         for selector in {
             ("editDay", "default"),
@@ -703,6 +787,13 @@ class AtlasUiObservationTests(unittest.TestCase):
         self.assertIn(routine_editor_shared_ref, captures_by_id["edit-routine-days-section-default"]["owner_surface_refs"])
         self.assertIn(routine_editor_shared_ref, captures_by_id["edit-day-add-exercise-default"]["owner_surface_refs"])
         self.assertIn(detail_scaffold_ref, captures_by_id["edit-day-default"]["owner_surface_refs"])
+        self.assertIn(
+            routine_details_exit_guard_ref,
+            captures_by_id["edit-routine-days-section-default"]["owner_surface_refs"],
+        )
+        self.assertIn(edit_day_page_ref, captures_by_id["edit-day-default"]["owner_surface_refs"])
+        self.assertIn(edit_routine_page_ref, captures_by_id["edit-routine-days-section-default"]["owner_surface_refs"])
+        self.assertIn(add_exercise_page_ref, captures_by_id["edit-day-add-exercise-default"]["owner_surface_refs"])
 
         for capture_id in {
             "edit-day-default",
@@ -712,6 +803,12 @@ class AtlasUiObservationTests(unittest.TestCase):
             self.assertIn(shared_screen_header_ref, captures_by_id[capture_id]["owner_surface_refs"])
             self.assertIn(app_panel_ref, captures_by_id[capture_id]["owner_surface_refs"])
             self.assertIn(shared_section_shell_ref, captures_by_id[capture_id]["owner_surface_refs"])
+
+        for capture_id in {
+            "edit-day-default",
+            "edit-routine-days-section-default",
+        }:
+            self.assertIn(app_badge_ref, captures_by_id[capture_id]["owner_surface_refs"])
 
         self.assertIn(
             "repos/fawxzzy-fitness/src/app/routines/[id]/edit/day/[dayId]/EditDaySettingsAutosaveForm.tsx",
