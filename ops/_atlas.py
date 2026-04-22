@@ -103,6 +103,29 @@ def atlas_relative(candidate: str | Path, root: Path | None = None) -> str:
     try:
         return normalize_slashes(str(resolved.relative_to(base)))
     except ValueError:
+        shared_root_anchor = base / "repos"
+        if shared_root_anchor.exists():
+            try:
+                shared_root = shared_root_anchor.resolve().parent
+                return normalize_slashes(str(resolved.relative_to(shared_root)))
+            except ValueError:
+                pass
+            except OSError:
+                pass
+        try:
+            for child in base.iterdir():
+                try:
+                    child_resolved = child.resolve()
+                except OSError:
+                    continue
+                try:
+                    relative = resolved.relative_to(child_resolved)
+                except ValueError:
+                    continue
+                logical = Path(child.name) / relative
+                return normalize_slashes(str(logical))
+        except OSError:
+            pass
         return normalize_slashes(str(resolved))
 
 

@@ -263,10 +263,12 @@ def _slugify(value: str) -> str:
 
 def _stable_segment(value: str) -> str:
     slug = _slugify(value)
-    if len(slug) <= 48:
+    max_segment_length = 24
+    if len(slug) <= max_segment_length:
         return slug
     digest = stable_json_digest({"value": value}).replace("sha256:", "")[:12]
-    return f"{slug[:35]}-{digest}"
+    prefix_length = max_segment_length - len(digest) - 1
+    return f"{slug[:prefix_length]}-{digest}"
 
 
 def observation_state_root(root: Path | None = None) -> Path:

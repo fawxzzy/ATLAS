@@ -235,7 +235,7 @@ def excluded_surfaces(config: dict[str, Any], root: Path) -> dict[str, dict[str,
             raise ValueError(f"Unsupported trust_class '{trust_class}' for excluded surface '{surface_id}'.")
         surface_path = resolve_atlas_path(value["path"], root=root)
         surfaces[str(surface_id)] = {
-            "path": atlas_relative(surface_path, root=root),
+            "path": normalize_slashes(value["path"]),
             "present": surface_path.exists(),
             "trust_class": trust_class,
             "release_eligible": bool(value.get("release_eligible", False)),
@@ -427,7 +427,7 @@ def build_lock_payload(
         if dirty_overrides and repo_id in dirty_overrides:
             dirty = bool(dirty_overrides[repo_id])
         components[repo_id] = {
-            "path": atlas_relative(repo_path, root=base),
+            "path": normalize_slashes(repo_info["path"]),
             "role": str(repo_info.get("role", "")),
             "status": str(repo_info.get("status", "unknown")),
             "remote": current_remote(repo_path),

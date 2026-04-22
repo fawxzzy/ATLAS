@@ -64,6 +64,7 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from ops._atlas import atlas_relative
 from ops.stack.generate_lockfile import (
     LOCK_COMPONENT_FIELDS,
     LOCK_EXCLUDED_SURFACE_FIELDS,
@@ -437,6 +438,24 @@ def relative_to_root(root: Path, path: Path) -> str:
         relative = resolved.relative_to(root.resolve())
         return "." if not relative.parts else normalize_slashes(str(relative))
     return normalize_slashes(str(resolved))
+
+
+def display_config_path(root: Path, raw_path: str) -> str:
+    configured = normalize_slashes(raw_path).strip()
+    if not configured:
+        return "."
+    if Path(raw_path).is_absolute():
+        return relative_to_root(root, Path(raw_path))
+    return configured
+
+
+def join_display_path(base: str, child: Path) -> str:
+    child_display = normalize_slashes(str(child))
+    if base in {"", "."}:
+        return child_display if child_display else "."
+    if not child_display:
+        return base
+    return f"{base}/{child_display}"
 
 
 def lockfile_output_path(stack_file: Path, config: dict[str, Any]) -> Path:
@@ -1269,12 +1288,19 @@ def validate_world_model_state(stack_file: Path) -> list[Finding]:
             return value.strip()
         return None
 
+    def normalized_source_ref(value: Any) -> str | None:
+        text = optional_string(value)
+        if text is None:
+            return None
+        candidate = Path(text)
+        return atlas_relative(candidate if candidate.is_absolute() else root / candidate, root=root)
+
     legacy_backfill_by_session_ref = {
-        optional_string(descriptor.get("links", {}).get("original_session_ref")): descriptor
+        normalized_source_ref(descriptor.get("links", {}).get("original_session_ref")): descriptor
         for descriptor in descriptors
         if str(descriptor.get("artifact_type", "")) == "legacy_runtime_backfill"
         and isinstance(descriptor.get("links"), dict)
-        and optional_string(descriptor.get("links", {}).get("original_session_ref"))
+        and normalized_source_ref(descriptor.get("links", {}).get("original_session_ref"))
     }
 
     def source_payload(source_ref: str | None) -> dict[str, Any] | None:
@@ -1308,31 +1334,31 @@ def validate_world_model_state(stack_file: Path) -> list[Finding]:
         *,
         owner_ref: str,
     ) -> None:
-        normalized_source_ref = optional_string(source_ref)
-        if not normalized_source_ref:
+        normalized_ref = normalized_source_ref(source_ref)
+        if not normalized_ref:
             return
-        if (observation_type, normalized_source_ref) not in snapshot_observation_keys:
+        if (observation_type, normalized_ref) not in snapshot_observation_keys:
             findings.append(
                 Finding(
                     "error",
                     "missing-required-observation",
                     relative_to_root(root, snapshot_path),
-                    f"Governed flow '{owner_ref}' is missing observation '{observation_type}' for '{normalized_source_ref}' in the state snapshot.",
+                    f"Governed flow '{owner_ref}' is missing observation '{observation_type}' for '{normalized_ref}' in the state snapshot.",
                 )
             )
-        if (observation_type, normalized_source_ref) not in stored_observation_keys:
+        if (observation_type, normalized_ref) not in stored_observation_keys:
             findings.append(
                 Finding(
                     "error",
                     "missing-required-observation-store",
                     relative_to_root(root, snapshot_path),
-                    f"Governed flow '{owner_ref}' is missing observation '{observation_type}' for '{normalized_source_ref}' in the observation store.",
+                    f"Governed flow '{owner_ref}' is missing observation '{observation_type}' for '{normalized_ref}' in the observation store.",
                 )
             )
 
     for descriptor in descriptors:
         artifact_type = str(descriptor.get("artifact_type", ""))
-        source_ref = str(descriptor.get("source_ref", ""))
+        source_ref = normalized_source_ref(descriptor.get("source_ref")) or str(descriptor.get("source_ref", ""))
         state = descriptor.get("state", {})
         if artifact_type == "session_manifest" and str(state.get("final_status", "")) in {"completed", "resume_ready", "failed"}:
             if source_ref not in observation_source_refs:
@@ -1390,7 +1416,7 @@ def validate_world_model_state(stack_file: Path) -> list[Finding]:
                     continue
                 require_observation(
                     "governed_compatibility",
-                    optional_string(backfill_descriptor.get("source_ref")),
+                    normalized_source_ref(backfill_descriptor.get("source_ref")),
                     owner_ref=source_ref,
                 )
                 continue
@@ -1739,7 +1765,7 @@ def build_findings(stack_file: Path, config: dict[str, Any], *, lock_file_overri
 
     for label, raw_path in iter_relative_directory_targets(config):
         resolved = resolve_path(stack_file, raw_path)
-        rel = normalize_slashes(str(resolved.relative_to(root))) if resolved.is_relative_to(root) else normalize_slashes(str(resolved))
+        rel = display_config_path(root, raw_path)
         if not resolved.exists():
             findings.append(Finding("critical", "missing-directory", rel, f"Required directory from {label} is missing.", {"config_value": raw_path}))
         elif not resolved.is_dir():
@@ -1751,7 +1777,7 @@ def build_findings(stack_file: Path, config: dict[str, Any], *, lock_file_overri
             continue
         repo_path = resolve_path(stack_file, repo_info["path"])
         status = str(repo_info.get("status", "unknown"))
-        repo_rel = normalize_slashes(str(repo_path.relative_to(root))) if repo_path.is_relative_to(root) else normalize_slashes(str(repo_path))
+        repo_rel = display_config_path(root, repo_info["path"])
         if not repo_rel:
             repo_rel = "."
         is_stack_control_repo = repo_path == root
@@ -1792,20 +1818,20 @@ def build_findings(stack_file: Path, config: dict[str, Any], *, lock_file_overri
         for relative_dir in MUTABLE_DIR_CANDIDATES:
             candidate = repo_path / relative_dir
             if candidate.exists():
-                rel = normalize_slashes(str(candidate.relative_to(root)))
+                rel = join_display_path(repo_rel, candidate.relative_to(repo_path))
                 findings.append(Finding("warning", "mutable-state-in-repo", rel, "Mutable or generated state is present inside a repo path.", {"repo_id": repo_id, "state_path": relative_dir}))
         for env_candidate in list(repo_path.glob(".env")) + list(repo_path.glob(".env.*")):
             if not is_repo_local_secret_candidate(env_candidate):
                 continue
-            findings.append(Finding("warning", "repo-local-secret-material", normalize_slashes(str(env_candidate.relative_to(root))), "Repo-local environment file detected; secrets should not be part of default exports.", {"repo_id": repo_id}))
+            findings.append(Finding("warning", "repo-local-secret-material", join_display_path(repo_rel, env_candidate.relative_to(repo_path)), "Repo-local environment file detected; secrets should not be part of default exports.", {"repo_id": repo_id}))
         for pattern in ROOT_LOG_PATTERNS:
             for file_path in repo_path.glob(pattern):
                 if file_path.is_file():
-                    findings.append(Finding("warning", "mutable-artifact-in-repo-root", normalize_slashes(str(file_path.relative_to(root))), "Mutable log, temp, or database artifact detected in repo root.", {"repo_id": repo_id, "pattern": pattern}))
+                    findings.append(Finding("warning", "mutable-artifact-in-repo-root", join_display_path(repo_rel, file_path.relative_to(repo_path)), "Mutable log, temp, or database artifact detected in repo root.", {"repo_id": repo_id, "pattern": pattern}))
         for pattern in ROOT_CAPTURE_PATTERNS:
             for file_path in repo_path.glob(pattern):
                 if file_path.is_file():
-                    findings.append(Finding("warning", "capture-artifact-in-repo-root", normalize_slashes(str(file_path.relative_to(root))), "Likely review or capture artifact detected in repo root.", {"repo_id": repo_id, "pattern": pattern}))
+                    findings.append(Finding("warning", "capture-artifact-in-repo-root", join_display_path(repo_rel, file_path.relative_to(repo_path)), "Likely review or capture artifact detected in repo root.", {"repo_id": repo_id, "pattern": pattern}))
 
     lockfile_path = lock_file_override.resolve() if lock_file_override is not None else lockfile_output_path(stack_file, config)
     lockfile_rel = relative_to_root(root, lockfile_path)
