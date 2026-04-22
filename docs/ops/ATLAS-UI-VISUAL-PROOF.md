@@ -91,6 +91,8 @@ The approved references are seeded from the repo's existing deterministic mobile
 - Failure Mode: copying owner scenario names into new root capture ids makes the proof rail wider without increasing validator signal.
 - Pattern: when a shared main-tab tranche lands on already-covered screen captures, widen proof by adding the missing active-tab screen capture first instead of inventing a nav-only screenshot lane.
 - Failure Mode: creating a synthetic top-nav proof id for chrome that is already visible on deterministic owner screens adds proof surface without adding trust.
+- Pattern: when a shared history tranche lands on history overview, sessions, exercises, or detail chrome already represented by the existing history captures, keep proof attached to those captures and only widen if a deterministic uncovered history state actually exists.
+- Failure Mode: creating history-header or history-control proof ids for chrome that is already visible on deterministic history screens adds proof surface without increasing trust.
 
 Visual proof should only widen onto already adopted surfaces that have a deterministic screenshot route.
 
@@ -117,6 +119,7 @@ History detail / log-audit remains semantic-only for this tranche.
 - Root proof should only widen when a deterministic history-detail artifact exists in both the runtime screenshot path and the approved reference lane.
 - Pattern: when semantic coverage replaces one broad legacy capture with several active captures, visual proof may only attach once one of those active capture ids has its own deterministic screenshot binding and matching observation digest.
 - Failure Mode: binding an active `history-log-*` capture to a stale or legacy screenshot path would make the proof rail look green while comparing the wrong surface.
+- Pattern: when shared history header/control polish lands inside the already proofed session and exercise routes, keep proof on `history-sessions-list-default` and `history-exercises-default` until the owner repo exposes a deterministic history-detail proof binding for an active `history-log-*` capture.
 
 ## Artifact Paths
 

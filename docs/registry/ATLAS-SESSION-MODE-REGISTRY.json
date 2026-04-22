@@ -1,0 +1,289 @@
+{
+  "schema_version": "atlas.session.mode.registry.v1",
+  "kind": "atlas-session-mode-registry",
+  "published_refs": {
+    "registry": "docs/registry/ATLAS-SESSION-MODE-REGISTRY.json",
+    "repo_inventory": "docs/registry/STACK-REPO-INVENTORY.json"
+  },
+  "modes": [
+    {
+      "mode_id": "fast-iteration-loop",
+      "display_name": "Fast Iteration Loop",
+      "status": "active",
+      "description": "Named bootstrap for rapid localhost or emulator UI iteration with minimal patches and affected-screen validation by default.",
+      "aliases": [
+        "open the fast iteration loop",
+        "start fast iteration loop",
+        "rapid ui loop",
+        "rapid localhost iteration"
+      ],
+      "inputs": [
+        {
+          "name": "repo",
+          "required": true,
+          "description": "Target repo id, repo path, or repo-path basename resolved against the stack repo inventory."
+        }
+      ],
+      "repo_resolution": {
+        "inventory_ref": "docs/registry/STACK-REPO-INVENTORY.json",
+        "match_order": [
+          "logical_id",
+          "local_path",
+          "local_path_basename",
+          "explicit_path"
+        ]
+      },
+      "resolves_to": {
+        "workflow_doc": "docs/playbooks/RAPID-LOCALHOST-ITERATION-LOOP.md",
+        "prompt_doc": "docs/codex/FAST-ITERATION-LOOP.md",
+        "startup_rules": [
+          "assume localhost or emulator is already running unless stated otherwise",
+          "accept one small scoped change at a time",
+          "make the minimal patch",
+          "prefer affected-screen validation by default",
+          "reserve broader screenshot sweeps for checkpoints",
+          "escalate when the request stops being rapid-loop sized"
+        ],
+        "default_validation_mode": "affected-screen",
+        "default_localhost_assumption": "running",
+        "default_patch_style": "minimal"
+      },
+      "expected_first_response": {
+        "fields": [
+          "repo recognized",
+          "mode recognized",
+          "localhost assumption",
+          "validation mode",
+          "patch style",
+          "request"
+        ],
+        "template": [
+          "repo recognized: <logical_id> -> <local_path>",
+          "mode recognized: fast-iteration-loop",
+          "localhost assumption: active",
+          "validation mode: affected-screen",
+          "patch style: minimal",
+          "request: send the first small change"
+        ]
+      },
+      "expected_patch_response": {
+        "fields": [
+          "files changed",
+          "screens affected",
+          "visual verify",
+          "checkpoint sweep"
+        ]
+      }
+    },
+    {
+      "mode_id": "checkpoint-sweep",
+      "display_name": "Checkpoint Sweep",
+      "status": "active",
+      "description": "Named bootstrap for broader checkpoint validation after one or more rapid-loop edits, starting with related-flow coverage and widening only when justified.",
+      "aliases": [
+        "open checkpoint sweep mode",
+        "start checkpoint sweep",
+        "checkpoint sweep",
+        "open checkpoint mode"
+      ],
+      "inputs": [
+        {
+          "name": "repo",
+          "required": true,
+          "description": "Target repo id, repo path, or repo-path basename resolved against the stack repo inventory."
+        }
+      ],
+      "repo_resolution": {
+        "inventory_ref": "docs/registry/STACK-REPO-INVENTORY.json",
+        "match_order": [
+          "logical_id",
+          "local_path",
+          "local_path_basename",
+          "explicit_path"
+        ]
+      },
+      "resolves_to": {
+        "workflow_doc": "docs/playbooks/RAPID-LOCALHOST-ITERATION-LOOP.md",
+        "prompt_doc": "docs/codex/CHECKPOINT-SWEEP.md",
+        "startup_rules": [
+          "assume localhost or emulator is still available unless stated otherwise",
+          "treat the task as a checkpoint validation pass rather than a micro-change loop",
+          "start from the smallest sweep that answers the checkpoint question",
+          "prefer Level 2 related-flow sweep first",
+          "use Level 3 full-app sweep only when the checkpoint or operator request warrants it",
+          "report what was checked, what still needs eyes, and whether the checkpoint is satisfied"
+        ],
+        "default_validation_mode": "related-flow",
+        "default_localhost_assumption": "running",
+        "default_patch_style": "none-by-default"
+      },
+      "expected_first_response": {
+        "fields": [
+          "repo recognized",
+          "mode recognized",
+          "localhost assumption",
+          "validation mode",
+          "sweep posture",
+          "request"
+        ],
+        "template": [
+          "repo recognized: <logical_id> -> <local_path>",
+          "mode recognized: checkpoint-sweep",
+          "localhost assumption: active",
+          "validation mode: related-flow",
+          "sweep posture: checkpoint",
+          "request: tell me the changed area or the checkpoint you want covered"
+        ]
+      },
+      "expected_patch_response": {
+        "fields": [
+          "screens checked",
+          "sweep level",
+          "visual verify",
+          "checkpoint status",
+          "wider sweep"
+        ]
+      }
+    },
+    {
+      "mode_id": "structural-change-mode",
+      "display_name": "Structural Change Mode",
+      "status": "active",
+      "description": "Named bootstrap for work that has grown beyond rapid-loop size and now needs explicit scope, shared-surface reasoning, and broader validation posture.",
+      "aliases": [
+        "open structural change mode",
+        "start structural change mode",
+        "structural change mode",
+        "open structural mode"
+      ],
+      "inputs": [
+        {
+          "name": "repo",
+          "required": true,
+          "description": "Target repo id, repo path, or repo-path basename resolved against the stack repo inventory."
+        }
+      ],
+      "repo_resolution": {
+        "inventory_ref": "docs/registry/STACK-REPO-INVENTORY.json",
+        "match_order": [
+          "logical_id",
+          "local_path",
+          "local_path_basename",
+          "explicit_path"
+        ]
+      },
+      "resolves_to": {
+        "workflow_doc": "docs/playbooks/RAPID-LOCALHOST-ITERATION-LOOP.md",
+        "prompt_doc": "docs/codex/STRUCTURAL-CHANGE-MODE.md",
+        "startup_rules": [
+          "stop treating the task as a rapid-loop change",
+          "identify the structural seam before editing",
+          "clarify the likely blast radius across routes, components, schemas, shared chrome, or data contracts",
+          "prefer a bounded implementation plan before patching",
+          "choose validation based on the breadth of the change rather than affected-screen defaults",
+          "call out when checkpoint or full-app sweeps are now justified"
+        ],
+        "default_validation_mode": "scope-based",
+        "default_localhost_assumption": "running-if-useful",
+        "default_patch_style": "planned-bounded"
+      },
+      "expected_first_response": {
+        "fields": [
+          "repo recognized",
+          "mode recognized",
+          "rapid-loop status",
+          "suspected scope",
+          "validation posture",
+          "request"
+        ],
+        "template": [
+          "repo recognized: <logical_id> -> <local_path>",
+          "mode recognized: structural-change-mode",
+          "rapid-loop status: exited",
+          "suspected scope: <shared surface or contract area>",
+          "validation posture: scope-based",
+          "request: tell me the structural target or the constraint to preserve"
+        ]
+      },
+      "expected_patch_response": {
+        "fields": [
+          "files changed",
+          "shared surfaces",
+          "verify",
+          "sweep posture",
+          "mode follow-up"
+        ]
+      }
+    },
+    {
+      "mode_id": "deep-review-mode",
+      "display_name": "Deep Review Mode",
+      "status": "active",
+      "description": "Named bootstrap for review-first work where findings, regression risk, and verification gaps should be reported before implementation.",
+      "aliases": [
+        "open deep review mode",
+        "start deep review mode",
+        "deep review mode",
+        "open review mode"
+      ],
+      "inputs": [
+        {
+          "name": "repo",
+          "required": true,
+          "description": "Target repo id, repo path, or repo-path basename resolved against the stack repo inventory."
+        }
+      ],
+      "repo_resolution": {
+        "inventory_ref": "docs/registry/STACK-REPO-INVENTORY.json",
+        "match_order": [
+          "logical_id",
+          "local_path",
+          "local_path_basename",
+          "explicit_path"
+        ]
+      },
+      "resolves_to": {
+        "workflow_doc": "docs/playbooks/RAPID-LOCALHOST-ITERATION-LOOP.md",
+        "prompt_doc": "docs/codex/DEEP-REVIEW-MODE.md",
+        "startup_rules": [
+          "treat the task as review-first rather than implementation-first",
+          "prioritize bugs, regressions, risky assumptions, and missing tests",
+          "report findings before summaries or change overviews",
+          "keep findings concrete and tied to files, screens, routes, or contracts when possible",
+          "call out residual risk even when no findings are found",
+          "propose follow-on validation only after the findings section is clear"
+        ],
+        "default_validation_mode": "risk-based",
+        "default_localhost_assumption": "optional",
+        "default_patch_style": "review-first"
+      },
+      "expected_first_response": {
+        "fields": [
+          "repo recognized",
+          "mode recognized",
+          "review posture",
+          "scope assumption",
+          "validation posture",
+          "request"
+        ],
+        "template": [
+          "repo recognized: <logical_id> -> <local_path>",
+          "mode recognized: deep-review-mode",
+          "review posture: findings-first",
+          "scope assumption: repo or diff review",
+          "validation posture: risk-based",
+          "request: tell me the review target, branch, or diff surface"
+        ]
+      },
+      "expected_patch_response": {
+        "fields": [
+          "findings",
+          "affected surfaces",
+          "open questions",
+          "residual risk",
+          "follow-up"
+        ]
+      }
+    }
+  ]
+}

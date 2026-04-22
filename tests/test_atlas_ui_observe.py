@@ -574,6 +574,39 @@ class AtlasUiObservationTests(unittest.TestCase):
         self.assertFalse(any(capture_id.startswith("main-tab-") for capture_id in captures_by_id))
         self.assertFalse(any(item["screen_key"] == "mainTabNav" for item in capture_map["captures"]))
 
+    def test_history_shared_family_reuses_existing_history_capture_ids_and_lineage(self) -> None:
+        inputs = json.loads(default_capture_inputs_path(ROOT).read_text(encoding="utf-8"))
+        capture_map = json.loads(default_capture_map_path(ROOT).read_text(encoding="utf-8"))
+
+        selectors = {(item["screen_key"], item["state_key"]) for item in inputs["capture_set"]}
+        captures_by_id = {item["capture_id"]: item for item in capture_map["captures"]}
+        history_shared_ref = "repos/fawxzzy-fitness/src/components/history/HistoryShared.tsx"
+
+        for selector in {
+            ("historyOverview", "default"),
+            ("historyExercises", "default"),
+            ("historySessions", "default"),
+            ("historyLog", "detailSurface"),
+            ("historyLog", "editModeHeaderPanel"),
+            ("historyLog", "noteEmptyStateChrome"),
+        }:
+            self.assertIn(selector, selectors)
+
+        for capture_id in {
+            "history-overview-default",
+            "history-exercises-default",
+            "history-sessions-list-default",
+            "history-log-detail-surface",
+            "history-log-edit-mode-header-panel",
+            "history-log-note-empty-state-chrome",
+        }:
+            self.assertIn(history_shared_ref, captures_by_id[capture_id]["owner_surface_refs"])
+
+        self.assertFalse(any(capture_id.startswith("history-shared-") for capture_id in captures_by_id))
+        self.assertFalse(any(capture_id.startswith("history-control-") for capture_id in captures_by_id))
+        self.assertFalse(any(item["screen_key"] == "historyShared" for item in capture_map["captures"]))
+        self.assertFalse(any(item["screen_key"] == "historyControl" for item in capture_map["captures"]))
+
     def test_duplicate_mapping_and_missing_variant_are_rejected(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

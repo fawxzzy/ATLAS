@@ -40,11 +40,14 @@ Read these files first:
 - `docs/ops/ATLAS-SESSION-RUNBOOK.md`
 - `docs/ops/ATLAS-CODEX-CONTEXT-RUNBOOK.md`
 - `docs/ops/ATLAS-TOOL-REGISTRY-RUNBOOK.md`
+- `docs/registry/ATLAS-SESSION-MODE-REGISTRY.json`
 - `docs/ops/ATLAS-STATUS-RUNBOOK.md`
 - `docs/ops/ATLAS-COCKPIT-RUNBOOK.md`
 - `docs/ops/ATLAS-LIFELINE-PLATFORM-RESTART.md`
 - `docs/ops/ATLAS-PLAYBOOK-CONVERGENCE.md`
 - `docs/ops/PLAYBOOK-ADOPTION-MATRIX.md`
+- `docs/playbooks/RAPID-LOCALHOST-ITERATION-LOOP.md`
+- `docs/codex/FAST-ITERATION-LOOP.md`
 
 ## Current Posture
 
@@ -79,6 +82,10 @@ Roadmap addition:
 - that program complements the operator cockpit slice; it does not convert the root into an umbrella monorepo or replace repo-owned doctrine
 - the platform-cutover restart posture is tracked in `docs/ops/ATLAS-LIFELINE-PLATFORM-RESTART.md`
 - that restart keeps ATLAS root as coordinator, `lifeline` as execution owner, and `playbook` as codification owner; it does not move platform implementation truth into a separate umbrella repo
+- the rapid localhost iteration workflow is now tracked in `docs/playbooks/RAPID-LOCALHOST-ITERATION-LOOP.md`
+- its default posture is two-speed validation: affected-screen checks every iteration, broader screenshot sweeps only at checkpoints
+- named session bootstraps are now tracked through `docs/registry/ATLAS-SESSION-MODE-REGISTRY.json`
+- the first named mode binds natural-language openers to canonical workflow and prompt docs so Codex can recognize `fast-iteration-loop` as an Atlas contract instead of free-form instruction
 
 For ATLAS platform architecture doctrine in this workspace, use the stack-root architecture docs under `docs/architecture/` as the canonical source. A dedicated `repos/fawxzzy-atlas` checkout is not present in this stack view.
 

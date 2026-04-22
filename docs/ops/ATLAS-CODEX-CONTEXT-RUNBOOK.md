@@ -33,6 +33,94 @@ Every root-launched Codex task should bootstrap in this order:
 
 The context-pack builder emits that order explicitly in `bootstrap_contract.ordered_reads`.
 
+## Named Session Bootstrap Contract
+
+Atlas may also expose named session modes for reusable Codex operating patterns.
+
+Current active registry:
+
+- `docs/registry/ATLAS-SESSION-MODE-REGISTRY.json`
+- schema: `schemas/atlas.session.mode.registry.v1.json`
+- helper: `ops/atlas/list_session_modes.py`
+
+Current active prompt doc:
+
+- `docs/codex/FAST-ITERATION-LOOP.md`
+- `docs/codex/CHECKPOINT-SWEEP.md`
+- `docs/codex/STRUCTURAL-CHANGE-MODE.md`
+- `docs/codex/DEEP-REVIEW-MODE.md`
+
+Current active workflow doc:
+
+- `docs/playbooks/RAPID-LOCALHOST-ITERATION-LOOP.md`
+
+Rule:
+
+- named session modes resolve through canonical docs and a registry-backed alias layer
+- repo input resolves through `docs/registry/STACK-REPO-INVENTORY.json`
+- the named mode sets default operating posture before repo-local code is opened
+
+Current opener example:
+
+- `Open the fast iteration loop for fawxzzy-fitness.`
+- `Open checkpoint sweep mode for fawxzzy-fitness.`
+- `Open structural change mode for fawxzzy-fitness.`
+- `Open deep review mode for fawxzzy-fitness.`
+
+That opener should resolve to:
+
+- mode `fast-iteration-loop`
+- repo `fitness` at `repos/fawxzzy-fitness`
+- localhost assumption `running`
+- validation mode `affected-screen`
+- patch style `minimal`
+
+Checkpoint opener should resolve to:
+
+- mode `checkpoint-sweep`
+- repo `fitness` at `repos/fawxzzy-fitness`
+- localhost assumption `running`
+- validation mode `related-flow`
+- patch style `none-by-default`
+
+Structural opener should resolve to:
+
+- mode `structural-change-mode`
+- repo `fitness` at `repos/fawxzzy-fitness`
+- localhost assumption `running-if-useful`
+- validation mode `scope-based`
+- patch style `planned-bounded`
+
+Review opener should resolve to:
+
+- mode `deep-review-mode`
+- repo `fitness` at `repos/fawxzzy-fitness`
+- localhost assumption `optional`
+- validation mode `risk-based`
+- patch style `review-first`
+
+Expected first response shape for this mode:
+
+- repo recognized
+- mode recognized
+- localhost assumption
+- validation mode
+- patch style
+- request for the first small change
+
+Validation commands:
+
+```powershell
+python ops/atlas/list_session_modes.py
+python ops/atlas/list_session_modes.py --mode-id fast-iteration-loop
+python ops/atlas/validate_session_mode_registry.py
+python ops/atlas/validate_session_mode_registry.py --mode-id fast-iteration-loop
+python ops/atlas/validate_session_mode_registry.py --invocation "Open the fast iteration loop for fawxzzy-fitness." --repo fawxzzy-fitness
+python ops/atlas/validate_session_mode_registry.py --mode-id checkpoint-sweep --invocation "Open checkpoint sweep mode for fawxzzy-fitness." --repo fawxzzy-fitness
+python ops/atlas/validate_session_mode_registry.py --mode-id structural-change-mode --invocation "Open structural change mode for fawxzzy-fitness." --repo fawxzzy-fitness
+python ops/atlas/validate_session_mode_registry.py --mode-id deep-review-mode --invocation "Open deep review mode for fawxzzy-fitness." --repo fawxzzy-fitness
+```
+
 ## Intent Routing
 
 Use these owner lanes:
@@ -71,6 +159,20 @@ Prompt renderer:
 - `python ops/atlas/prepare_codex_task.py --task-id <task-id>`
 
 The renderer prints a copy-paste-ready Codex prompt from the saved context pack.
+
+Named mode rendering:
+
+- `python ops/atlas/prepare_codex_task.py --mode-id fast-iteration-loop --repo fawxzzy-fitness`
+- `python ops/atlas/prepare_codex_task.py --mode-id checkpoint-sweep --repo fawxzzy-fitness`
+- `python ops/atlas/prepare_codex_task.py --mode-id structural-change-mode --repo fawxzzy-fitness`
+- `python ops/atlas/prepare_codex_task.py --mode-id deep-review-mode --repo fawxzzy-fitness`
+
+Optional context-pack write while rendering a named mode:
+
+- `python ops/atlas/prepare_codex_task.py --mode-id fast-iteration-loop --repo fawxzzy-fitness --write-context-pack`
+- `python ops/atlas/prepare_codex_task.py --mode-id checkpoint-sweep --repo fawxzzy-fitness --write-context-pack`
+- `python ops/atlas/prepare_codex_task.py --mode-id structural-change-mode --repo fawxzzy-fitness --write-context-pack`
+- `python ops/atlas/prepare_codex_task.py --mode-id deep-review-mode --repo fawxzzy-fitness --write-context-pack`
 
 ## Size Discipline
 

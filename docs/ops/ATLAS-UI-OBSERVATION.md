@@ -114,10 +114,13 @@ The input contract selects which screen/state pairs are active for a run. This k
 - Failure Mode: inventing a second exercise-detail capture lane in root when the changed family is already represented creates validator sprawl instead of better coverage.
 - Pattern: when a new owner tranche lands on shared main-tab chrome already exercised by Today, Routines, History, and Settings captures, reconcile lineage on those existing captures first instead of minting nav-only ids.
 - Failure Mode: adding a second root capture lane for shared chrome widens validator surface without increasing proof clarity.
+- Pattern: when a new owner tranche lands on the shared history summary/control family already exercised by `history-overview-default`, `history-exercises-default`, `history-sessions-list-default`, and the active `history-log-*` captures, reconcile those existing selectors and lineage before minting new ids.
+- Failure Mode: adding redundant capture ids for shared history header, control, or section chrome creates validator sprawl and weakens proof clarity.
 
 The observer resolves primitive variants from owner contracts, groups referenced tokens by scale, and emits one normalized artifact per capture.
 
 For shared chrome reconciliations, the capture map may widen owner-surface lineage inside an existing capture, such as binding `AppNav` to the active Today, Routines, History, and Settings captures, while the normalized trait digest stays anchored to the frozen primitive slots.
+The same rule applies to shared history chrome: root should bind `HistoryShared.tsx` to the existing history overview, sessions, exercises, and detail captures rather than creating synthetic history-header or history-control selectors.
 
 ## Mapping contract
 

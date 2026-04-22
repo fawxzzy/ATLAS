@@ -46,3 +46,11 @@ When a new pack is reviewed:
 | pack_id | source | status | vendor_specificity | safety | adoption_surface | notes |
 | --- | --- | --- | --- | --- | --- | --- |
 | `example-pack` | `manual import` | `evaluated` | `medium` | `allowed_for_review` | `review checklist only` | `Prompt templates were reusable; installer logic was rejected.` |
+
+## ATLAS-Owned Workflow Index
+
+This companion index keeps stack-owned workflow entries easy to find without changing the third-party catalog contract above.
+
+| workflow | path | keywords | notes |
+| --- | --- | --- | --- |
+| `Rapid Localhost Iteration Loop` | `docs/playbooks/RAPID-LOCALHOST-ITERATION-LOOP.md` | `localhost`, `live reload`, `HMR`, `fast refresh`, `rapid iteration`, `screenshot sweep`, `visual regression`, `Codex loop`, `fast-iteration-loop`, `checkpoint-sweep`, `checkpoint mode`, `related-flow sweep`, `full-app sweep`, `structural-change-mode`, `structural mode`, `cross-cutting change`, `routing-heavy`, `schema-related`, `deep-review-mode`, `review mode`, `findings-first review`, `regression risk`, `verification gap` | Reusable Atlas workflow for persistent local-runtime UI iteration with affected-screen validation by default and checkpoint-only broader sweeps. Named bootstraps: `fast-iteration-loop` in `docs/codex/FAST-ITERATION-LOOP.md`, `checkpoint-sweep` in `docs/codex/CHECKPOINT-SWEEP.md`, `structural-change-mode` in `docs/codex/STRUCTURAL-CHANGE-MODE.md`, and `deep-review-mode` in `docs/codex/DEEP-REVIEW-MODE.md`, all registered in `docs/registry/ATLAS-SESSION-MODE-REGISTRY.json`. |

@@ -175,6 +175,22 @@ class AtlasUiVisualProofTests(unittest.TestCase):
 
         self.assertFalse(any(capture_id.startswith("main-tab-") for capture_id in captures_by_id))
 
+    def test_repo_manifest_reuses_existing_history_capture_ids_for_shared_history_chrome(self) -> None:
+        manifest_path = ROOT / "ops" / "atlas" / "ui_visual_proof" / "fitness_visual_proof.v1.json"
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        captures_by_id = {item["capture_id"]: item for item in manifest["captures"]}
+
+        for capture_id in (
+            "history-sessions-list-default",
+            "history-exercises-default",
+        ):
+            self.assertIn(capture_id, captures_by_id)
+            self.assertEqual({"kind": "unchanged"}, captures_by_id[capture_id]["assertion"])
+
+        self.assertFalse(any(capture_id.startswith("history-shared-") for capture_id in captures_by_id))
+        self.assertFalse(any(capture_id.startswith("history-control-") for capture_id in captures_by_id))
+        self.assertFalse(any(capture_id.startswith("history-log-") for capture_id in captures_by_id))
+
     def test_manifest_validation_accepts_declared_capture(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

@@ -13,6 +13,7 @@ if str(ROOT) not in sys.path:
 
 from ops._atlas import atlas_relative, atlas_root, load_stack_config, resolve_atlas_path
 from ops.atlas.awareness import atlas_status, fetch, fetch_memory, fetch_status_slice, list_attention, query_knowledge
+from ops.atlas.load_session_mode_registry import load_session_mode_registry_bundle, resolve_repo_input, select_mode_entry
 from ops.cortex._artifacts import read_json, sha256_bytes, stable_json_digest, write_json
 from ops.cortex.index_working_memory import load_working_memory_catalog
 from ops.stack.export_repo_inventory import find_repo_inventory_entry
@@ -495,6 +496,30 @@ def _repo_inventory_record(entry: dict[str, Any], *, why: str) -> dict[str, Any]
     }
 
 
+def _session_mode_record(
+    ref: str,
+    *,
+    title: str,
+    summary: str,
+    why: str,
+    root: Path,
+) -> dict[str, Any]:
+    path = resolve_atlas_path(ref, root=root)
+    return {
+        "ref": atlas_relative(path, root=root),
+        "kind": "session_mode_surface",
+        "owner": "stack-root",
+        "why": why,
+        "title": title,
+        "summary": _normalize_text(summary)[:240],
+        "digest": _sha_for_path(path),
+        "hydration_mode": "full",
+        "details": {
+            "path": atlas_relative(path, root=root),
+        },
+    }
+
+
 def _memory_record(item: dict[str, Any], *, why: str) -> dict[str, Any]:
     memory_kind = str(item.get("memory_kind") or "memory")
     memory_id = str(item.get("id") or "")
@@ -802,6 +827,7 @@ def _bootstrap_records(
     initiative_records: list[dict[str, Any]],
     proposal_records: list[dict[str, Any]],
     trust_records: list[dict[str, Any]],
+    session_mode_records: list[dict[str, Any]] | None = None,
 ) -> list[dict[str, Any]]:
     records = [
         _file_record(
@@ -826,6 +852,7 @@ def _bootstrap_records(
             root=root,
         ),
     ]
+    records.extend(session_mode_records or [])
     records.extend(slice_records)
     records.extend(initiative_records)
     records.extend(proposal_records)
@@ -840,6 +867,8 @@ def build_codex_context(
     intent_class: str,
     target_repo_ids: list[str] | None = None,
     target_repo_paths: list[str] | None = None,
+    session_mode_id: str | None = None,
+    session_mode_repo_input: str | None = None,
     root: Path | None = None,
 ) -> dict[str, Any]:
     base_root = (root or atlas_root()).resolve()
@@ -853,6 +882,77 @@ def build_codex_context(
     inventory = read_json(base_root / "docs" / "registry" / "STACK-REPO-INVENTORY.json")
     status = atlas_status(root=base_root)
     working_memory_catalog = load_working_memory_catalog(base_root)
+    session_mode_payload: dict[str, Any] | None = None
+    session_mode_records: list[dict[str, Any]] = []
+    if session_mode_id:
+        session_mode_bundle = load_session_mode_registry_bundle(root=base_root)
+        session_mode_entry = select_mode_entry(session_mode_bundle, session_mode_id)
+        resolved_mode_repo: dict[str, Any] | None = None
+        if session_mode_repo_input:
+            resolved_mode_repo = resolve_repo_input(session_mode_repo_input, root=base_root)
+        elif len(target_repo_ids) == 1:
+            resolved_mode_repo = find_repo_inventory_entry(inventory, repo_id=target_repo_ids[0])
+        elif len(target_repo_paths) == 1:
+            resolved_mode_repo = find_repo_inventory_entry(inventory, repo_path=target_repo_paths[0])
+        else:
+            raise ValueError("Named session mode requires a repo input or exactly one target repo.")
+
+        if not isinstance(resolved_mode_repo, dict):
+            raise ValueError("Named session mode repo resolution did not produce a repo inventory entry.")
+
+        resolved_mode_repo_id = str(resolved_mode_repo.get("logical_id") or "").strip()
+        resolved_mode_repo_path = str(resolved_mode_repo.get("local_path") or "").strip()
+        if resolved_mode_repo_id and resolved_mode_repo_id not in target_repo_ids:
+            target_repo_ids.append(resolved_mode_repo_id)
+        if resolved_mode_repo_path and resolved_mode_repo_path not in target_repo_paths:
+            target_repo_paths.append(resolved_mode_repo_path)
+
+        workflow_doc = str(session_mode_entry["resolves_to"]["workflow_doc"])
+        prompt_doc = str(session_mode_entry["resolves_to"]["prompt_doc"])
+        session_mode_records = [
+            _session_mode_record(
+                "docs/registry/ATLAS-SESSION-MODE-REGISTRY.json",
+                title="Session Mode Registry",
+                summary="Registry-backed alias and mode contract for named Codex session bootstraps.",
+                why="Named session mode registry defines the canonical alias and repo-resolution contract.",
+                root=base_root,
+            ),
+            _session_mode_record(
+                workflow_doc,
+                title=session_mode_entry["display_name"],
+                summary="Canonical workflow doc bound to the named session mode.",
+                why="Named session mode workflow doc defines the reusable operating loop.",
+                root=base_root,
+            ),
+            _session_mode_record(
+                prompt_doc,
+                title=f"{session_mode_entry['display_name']} Prompt",
+                summary="Codex bootstrap prompt bound to the named session mode.",
+                why="Named session mode prompt doc defines the startup rules and response shape.",
+                root=base_root,
+            ),
+        ]
+        session_mode_payload = {
+            "mode_id": session_mode_entry["mode_id"],
+            "display_name": session_mode_entry["display_name"],
+            "status": session_mode_entry["status"],
+            "aliases": session_mode_entry["aliases"],
+            "repo_input": session_mode_repo_input or resolved_mode_repo_id or resolved_mode_repo_path,
+            "resolved_repo": {
+                "logical_id": resolved_mode_repo_id,
+                "local_path": resolved_mode_repo_path,
+            },
+            "workflow_doc": workflow_doc,
+            "prompt_doc": prompt_doc,
+            "defaults": {
+                "localhost_assumption": session_mode_entry["resolves_to"]["default_localhost_assumption"],
+                "validation_mode": session_mode_entry["resolves_to"]["default_validation_mode"],
+                "patch_style": session_mode_entry["resolves_to"]["default_patch_style"],
+                "startup_rules": session_mode_entry["resolves_to"]["startup_rules"],
+            },
+            "expected_first_response": session_mode_entry["expected_first_response"],
+            "expected_patch_response": session_mode_entry["expected_patch_response"],
+        }
 
     target_entries = _resolve_target_repo_entries(
         inventory,
@@ -976,10 +1076,12 @@ def build_codex_context(
         initiative_records=initiative_records,
         proposal_records=proposal_records,
         trust_records=trust_records,
+        session_mode_records=session_mode_records,
     )
 
     selected_refs = {
         "bootstrap": bootstrap_records,
+        "session_mode": _unique_records(session_mode_records),
         "route_surfaces": _unique_records(route_surface_records),
         "repo_inventory": _unique_records(repo_inventory_records),
         "attention": _unique_records(attention_records),
@@ -1052,6 +1154,8 @@ def build_codex_context(
             "excluded_surface_count": inventory.get("excluded_surface_count"),
         },
     }
+    if session_mode_payload is not None:
+        payload["session_mode"] = session_mode_payload
     payload["context_digest"] = stable_json_digest(payload)
     return payload
 
@@ -1067,6 +1171,22 @@ def render_codex_context_markdown(payload: dict[str, Any]) -> str:
         f"- Target repos: `{', '.join(payload['target_repo_ids']) or 'none'}`",
         f"- Context digest: `{payload['context_digest']}`",
         "",
+    ]
+    if isinstance(payload.get("session_mode"), dict):
+        session_mode = payload["session_mode"]
+        lines.extend(
+            [
+                "## Named Session Mode",
+                "",
+                f"- Mode: `{session_mode['mode_id']}`",
+                f"- Repo: `{session_mode['resolved_repo']['logical_id']}` -> `{session_mode['resolved_repo']['local_path']}`",
+                f"- Localhost assumption: `{session_mode['defaults']['localhost_assumption']}`",
+                f"- Validation mode: `{session_mode['defaults']['validation_mode']}`",
+                f"- Patch style: `{session_mode['defaults']['patch_style']}`",
+                "",
+            ]
+        )
+    lines += [
         "## Bootstrap Order",
         "",
     ]
@@ -1074,6 +1194,7 @@ def render_codex_context_markdown(payload: dict[str, Any]) -> str:
         lines.append(f"{index}. `{record['ref']}` - {record['why']}")
     lines += ["", "## Selected Surfaces", ""]
     for group_name in (
+        "session_mode",
         "route_surfaces",
         "repo_inventory",
         "attention",
@@ -1111,10 +1232,39 @@ def render_codex_prompt(payload: dict[str, Any]) -> str:
         f"Target repos: {', '.join(payload['target_repo_ids']) or 'none'}",
         f"Routing rule: {payload['routing']['rule']}",
         "",
+    ]
+    if isinstance(payload.get("session_mode"), dict):
+        session_mode = payload["session_mode"]
+        lines += [
+            f"Named session mode: {session_mode['mode_id']}",
+            f"Resolved repo: {session_mode['resolved_repo']['logical_id']} -> {session_mode['resolved_repo']['local_path']}",
+            f"Localhost assumption: {session_mode['defaults']['localhost_assumption']}",
+            f"Validation mode: {session_mode['defaults']['validation_mode']}",
+            f"Patch style: {session_mode['defaults']['patch_style']}",
+            "",
+            "Mode startup rules:",
+        ]
+        for rule in session_mode["defaults"]["startup_rules"]:
+            lines.append(f"- {rule}")
+        lines += [
+            "",
+            "Expected first response shape:",
+        ]
+        for field in session_mode["expected_first_response"]["template"]:
+            lines.append(f"- {field}")
+        lines += [
+            "",
+        ]
+    lines += [
         "Follow the root bootstrap contract in this order before opening target repo docs or code:",
     ]
     for index, record in enumerate(payload["bootstrap_contract"]["ordered_reads"], start=1):
         lines.append(f"{index}. Read `{record['ref']}`. Reason: {record['why']}")
+    session_mode_surfaces = payload["selected_refs"].get("session_mode", [])
+    if session_mode_surfaces:
+        lines += ["", "Named session mode surfaces:"]
+        for record in session_mode_surfaces:
+            lines.append(f"- `{record['ref']}`: {record['why']}")
     route_surfaces = payload["selected_refs"].get("route_surfaces", [])
     if route_surfaces:
         lines += ["", "After the bootstrap contract, use these owner-controlled surfaces:"]
@@ -1148,6 +1298,8 @@ def write_codex_context_pack(
     intent_class: str,
     target_repo_ids: list[str] | None = None,
     target_repo_paths: list[str] | None = None,
+    session_mode_id: str | None = None,
+    session_mode_repo_input: str | None = None,
     root: Path | None = None,
     output_root: Path | None = None,
     payload: dict[str, Any] | None = None,
@@ -1162,6 +1314,8 @@ def write_codex_context_pack(
         intent_class=intent_class,
         target_repo_ids=target_repo_ids,
         target_repo_paths=target_repo_paths,
+        session_mode_id=session_mode_id,
+        session_mode_repo_input=session_mode_repo_input,
         root=base_root,
     )
     write_json(task_dir / "context.json", context_payload)
@@ -1176,6 +1330,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--intent-class", required=True)
     parser.add_argument("--target-repo", action="append", default=[])
     parser.add_argument("--target-path", action="append", default=[])
+    parser.add_argument("--session-mode-id")
+    parser.add_argument("--session-mode-repo")
     parser.add_argument("--output-root")
     args = parser.parse_args(argv)
 
@@ -1185,6 +1341,8 @@ def main(argv: list[str] | None = None) -> int:
         intent_class=args.intent_class,
         target_repo_ids=args.target_repo,
         target_repo_paths=args.target_path,
+        session_mode_id=args.session_mode_id,
+        session_mode_repo_input=args.session_mode_repo,
         root=atlas_root(),
         output_root=Path(args.output_root).resolve() if args.output_root else None,
     )
