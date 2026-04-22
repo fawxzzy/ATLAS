@@ -97,6 +97,43 @@ class AtlasUiDriftTests(unittest.TestCase):
         self.assertEqual("clean", report["summary"]["status"])
         self.assertEqual(0, report["summary"]["finding_count"])
 
+    def test_dry_run_keeps_route_loading_family_on_existing_route_and_entry_lanes(self) -> None:
+        report = validate_fitness_ui_drift(
+            root=ROOT,
+            schema_path=default_drift_schema_path(ROOT),
+            observation_schema_path=default_schema_path(ROOT),
+            capture_map_schema_path=default_capture_map_schema_path(ROOT),
+            dry_run=True,
+        )
+        expected = observe_fitness_ui(
+            root=ROOT,
+            schema_path=default_schema_path(ROOT),
+            capture_map_schema_path=default_capture_map_schema_path(ROOT),
+            dry_run=True,
+        )
+
+        comparison_keys = {item["comparison_key"] for item in expected["observations"]}
+
+        for comparison_key in {
+            "fitness:today-overview-default",
+            "fitness:routines-overview-default",
+            "fitness:routines-overview-selected-routine",
+            "fitness:settings-overview-default",
+            "fitness:entry-handoff-card",
+            "fitness:entry-handoff-status-panel",
+            "fitness:history-overview-default",
+            "fitness:history-exercises-default",
+            "fitness:history-sessions-list-default",
+            "fitness:history-log-detail-surface",
+        }:
+            self.assertIn(comparison_key, comparison_keys)
+
+        self.assertFalse(any(key.startswith("fitness:route-loading-") for key in comparison_keys))
+        self.assertFalse(any(key.startswith("fitness:boot-loading-") for key in comparison_keys))
+        self.assertEqual(len(comparison_keys), report["summary"]["expected_capture_count"])
+        self.assertEqual("clean", report["summary"]["status"])
+        self.assertEqual(0, report["summary"]["finding_count"])
+
     def test_validator_is_clean_for_compliant_observations(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

@@ -116,11 +116,14 @@ The input contract selects which screen/state pairs are active for a run. This k
 - Failure Mode: adding a second root capture lane for shared chrome widens validator surface without increasing proof clarity.
 - Pattern: when a new owner tranche lands on the shared history summary/control family already exercised by `history-overview-default`, `history-exercises-default`, `history-sessions-list-default`, and the active `history-log-*` captures, reconcile those existing selectors and lineage before minting new ids.
 - Failure Mode: adding redundant capture ids for shared history header, control, or section chrome creates validator sprawl and weakens proof clarity.
+- Pattern: when a tranche lands on shared transient route-loading chrome, widen `RouteLoading.tsx` plus the owning `app/**/loading.tsx` entrypoints onto the existing Today, Routines, Settings, History, and adjacent entry-handoff captures before minting loading-specific ids.
+- Failure Mode: inventing a root `routeLoading` screen key, `route-loading-*` capture id, or root-side loading primitive slot before the owner truth pack freezes that family copies owner truth into root and makes the semantic rail dishonest.
 
 The observer resolves primitive variants from owner contracts, groups referenced tokens by scale, and emits one normalized artifact per capture.
 
 For shared chrome reconciliations, the capture map may widen owner-surface lineage inside an existing capture, such as binding `AppNav` to the active Today, Routines, History, and Settings captures, while the normalized trait digest stays anchored to the frozen primitive slots.
 The same rule applies to shared history chrome: root should bind `HistoryShared.tsx` to the existing history overview, sessions, exercises, and detail captures rather than creating synthetic history-header or history-control selectors.
+The same rule applies to transient route loading: root may bind `RouteLoading.tsx` and the route `loading.tsx` entrypoints to the active route and entry captures, but it must keep the normalized trait digest anchored to the frozen `header`, `card`, `tag`, and `section_layout` slots until Fitness exposes a dedicated loading primitive contract.
 
 ## Mapping contract
 

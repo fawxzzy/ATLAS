@@ -607,6 +607,71 @@ class AtlasUiObservationTests(unittest.TestCase):
         self.assertFalse(any(item["screen_key"] == "historyShared" for item in capture_map["captures"]))
         self.assertFalse(any(item["screen_key"] == "historyControl" for item in capture_map["captures"]))
 
+    def test_route_loading_family_reuses_existing_route_and_entry_capture_ids(self) -> None:
+        inputs = json.loads(default_capture_inputs_path(ROOT).read_text(encoding="utf-8"))
+        capture_map = json.loads(default_capture_map_path(ROOT).read_text(encoding="utf-8"))
+
+        selectors = {(item["screen_key"], item["state_key"]) for item in inputs["capture_set"]}
+        captures_by_id = {item["capture_id"]: item for item in capture_map["captures"]}
+        route_loading_ref = "repos/fawxzzy-fitness/src/components/RouteLoading.tsx"
+
+        for selector in {
+            ("todayOverview", "default"),
+            ("routinesOverview", "default"),
+            ("routinesOverview", "selectedRoutine"),
+            ("settings", "overview"),
+            ("entryHandoff", "card"),
+            ("entryHandoff", "statusPanel"),
+            ("historyOverview", "default"),
+            ("historyExercises", "default"),
+            ("historySessions", "default"),
+            ("historyLog", "detailSurface"),
+        }:
+            self.assertIn(selector, selectors)
+
+        for capture_id in {
+            "today-overview-default",
+            "routines-overview-default",
+            "routines-overview-selected-routine",
+            "settings-overview-default",
+            "entry-handoff-card",
+            "entry-handoff-status-panel",
+            "history-overview-default",
+            "history-exercises-default",
+            "history-sessions-list-default",
+            "history-log-detail-surface",
+        }:
+            self.assertIn(route_loading_ref, captures_by_id[capture_id]["owner_surface_refs"])
+
+        self.assertIn(
+            "repos/fawxzzy-fitness/src/app/loading.tsx",
+            captures_by_id["entry-handoff-card"]["owner_surface_refs"],
+        )
+        self.assertIn(
+            "repos/fawxzzy-fitness/src/app/loading.tsx",
+            captures_by_id["entry-handoff-status-panel"]["owner_surface_refs"],
+        )
+        self.assertIn(
+            "repos/fawxzzy-fitness/src/app/today/loading.tsx",
+            captures_by_id["today-overview-default"]["owner_surface_refs"],
+        )
+        self.assertIn(
+            "repos/fawxzzy-fitness/src/app/routines/loading.tsx",
+            captures_by_id["routines-overview-default"]["owner_surface_refs"],
+        )
+        self.assertIn(
+            "repos/fawxzzy-fitness/src/app/settings/loading.tsx",
+            captures_by_id["settings-overview-default"]["owner_surface_refs"],
+        )
+        self.assertIn(
+            "repos/fawxzzy-fitness/src/app/history/loading.tsx",
+            captures_by_id["history-log-detail-surface"]["owner_surface_refs"],
+        )
+        self.assertFalse(any(capture_id.startswith("route-loading-") for capture_id in captures_by_id))
+        self.assertFalse(any(capture_id.startswith("boot-loading-") for capture_id in captures_by_id))
+        self.assertFalse(any(item["screen_key"] == "routeLoading" for item in capture_map["captures"]))
+        self.assertFalse(any(item["screen_key"] == "bootLoading" for item in capture_map["captures"]))
+
     def test_duplicate_mapping_and_missing_variant_are_rejected(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

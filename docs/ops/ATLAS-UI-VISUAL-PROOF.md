@@ -93,6 +93,8 @@ The approved references are seeded from the repo's existing deterministic mobile
 - Failure Mode: creating a synthetic top-nav proof id for chrome that is already visible on deterministic owner screens adds proof surface without adding trust.
 - Pattern: when a shared history tranche lands on history overview, sessions, exercises, or detail chrome already represented by the existing history captures, keep proof attached to those captures and only widen if a deterministic uncovered history state actually exists.
 - Failure Mode: creating history-header or history-control proof ids for chrome that is already visible on deterministic history screens adds proof surface without increasing trust.
+- Pattern: when a tranche lands on shared route-loading chrome, keep proof on the existing steady-state route captures unless the owner repo exposes a deterministic loading screenshot lane with a stable observation digest.
+- Failure Mode: forcing screenshot gating onto delayed or animated loading overlays, particles, or boot cards weakens the proof rail by making a timing-sensitive state look deterministic.
 
 Visual proof should only widen onto already adopted surfaces that have a deterministic screenshot route.
 
@@ -120,6 +122,7 @@ History detail / log-audit remains semantic-only for this tranche.
 - Pattern: when semantic coverage replaces one broad legacy capture with several active captures, visual proof may only attach once one of those active capture ids has its own deterministic screenshot binding and matching observation digest.
 - Failure Mode: binding an active `history-log-*` capture to a stale or legacy screenshot path would make the proof rail look green while comparing the wrong surface.
 - Pattern: when shared history header/control polish lands inside the already proofed session and exercise routes, keep proof on `history-sessions-list-default` and `history-exercises-default` until the owner repo exposes a deterministic history-detail proof binding for an active `history-log-*` capture.
+- Route loading remains visual-proof unchanged for this tranche because `RouteLoading.tsx` mounts after a route delay and uses animated glows and particles, so the steady-state Today, Routines, Settings, History sessions, and History exercises captures remain the only deterministic screenshot lane.
 
 ## Artifact Paths
 

@@ -191,6 +191,26 @@ class AtlasUiVisualProofTests(unittest.TestCase):
         self.assertFalse(any(capture_id.startswith("history-control-") for capture_id in captures_by_id))
         self.assertFalse(any(capture_id.startswith("history-log-") for capture_id in captures_by_id))
 
+    def test_repo_manifest_keeps_route_loading_off_visual_gate(self) -> None:
+        manifest_path = ROOT / "ops" / "atlas" / "ui_visual_proof" / "fitness_visual_proof.v1.json"
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        captures_by_id = {item["capture_id"]: item for item in manifest["captures"]}
+
+        for capture_id in (
+            "today-overview-default",
+            "routines-overview-default",
+            "history-sessions-list-default",
+            "history-exercises-default",
+            "settings-overview-default",
+        ):
+            self.assertIn(capture_id, captures_by_id)
+
+        self.assertNotIn("entry-handoff-card", captures_by_id)
+        self.assertNotIn("entry-handoff-status-panel", captures_by_id)
+        self.assertNotIn("history-log-detail-surface", captures_by_id)
+        self.assertFalse(any(capture_id.startswith("route-loading-") for capture_id in captures_by_id))
+        self.assertFalse(any(capture_id.startswith("boot-loading-") for capture_id in captures_by_id))
+
     def test_manifest_validation_accepts_declared_capture(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
