@@ -114,6 +114,23 @@ Entry handoff and install-gate surfaces are not opted into visual proof yet.
 - Root proof still only gates captures that already have deterministic screenshot artifacts across browser modes.
 - Keep the entry handoff family on the semantic observer/drift lane until a stable install-state screenshot harness exists.
 
+Routine editor/detail remains semantic-only for this tranche.
+
+- Fitness does expose deterministic owner-side mobile-regression scenarios for `edit-day-default`, `edit-day-add-exercise`, and `edit-routine`.
+- Root proof does not yet have approved reference images or active runtime screenshot artifacts bound to the active capture ids `edit-day-default`, `edit-routine-days-section-default`, and `edit-day-add-exercise-default`.
+- Keep the routine editor/detail family on the semantic observer/drift lane until one of those active capture ids has a matching root-side screenshot binding and observation digest.
+- Pattern: when owner screenshots exist for routine editor/detail routes, attach proof to the existing active editor capture ids before inventing new proof ids.
+- Failure Mode: binding root proof to owner scenario names or stale screenshot paths instead of the active editor capture ids makes the proof rail look green while comparing the wrong surface.
+
+Session / log-set remains semantic-only for this tranche.
+
+- Fitness does expose deterministic owner-side mobile-regression scenarios for `active-workout-session` and `active-workout-session-expanded`.
+- Root proof does not yet have approved reference images or active runtime screenshot artifacts bound to the active capture ids `exercise-log-session-header-card`, `exercise-log-entry-section`, `exercise-log-compact-row`, `exercise-log-sticky-footer`, or the shared `workout-card-disclosure-expanded` capture.
+- The family also includes live timer chrome, so root should not force screenshot gating until one of those active capture ids has a frozen runtime artifact and matching reference image that stays stable across reruns.
+- Keep the current session/log-set family on the semantic observer/drift lane until one of those active capture ids has a matching root-side screenshot binding and observation digest.
+- Pattern: when a session/log-set tranche lands on already-covered active capture ids, reconcile proof against those capture ids first instead of inventing `active-session-*`, `session-log-*`, or owner-scenario proof ids.
+- Failure Mode: binding root proof directly to owner scenario names or timer-driven screenshots without active capture-id alignment makes the proof rail look green while comparing the wrong or unstable state.
+
 History detail / log-audit remains semantic-only for this tranche.
 
 - The adopted family now expands into explicit semantic captures for the detail surface, edit-mode panel, field inputs, disclosure shell, and note or empty-state chrome.

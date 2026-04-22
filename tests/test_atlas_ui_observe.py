@@ -537,6 +537,80 @@ class AtlasUiObservationTests(unittest.TestCase):
         self.assertFalse(any(capture_id.startswith("exercise-detail-") for capture_id in capture_ids))
         self.assertFalse(any(item["screen_key"] == "exerciseDetail" for item in capture_map["captures"]))
 
+    def test_chooser_family_reuses_existing_capture_ids_and_lineage(self) -> None:
+        inputs = json.loads(default_capture_inputs_path(ROOT).read_text(encoding="utf-8"))
+        capture_map = json.loads(default_capture_map_path(ROOT).read_text(encoding="utf-8"))
+
+        selectors = {(item["screen_key"], item["state_key"]) for item in inputs["capture_set"]}
+        captures_by_id = {item["capture_id"]: item for item in capture_map["captures"]}
+        exercise_picker_ref = "repos/fawxzzy-fitness/src/components/ExercisePicker.tsx"
+        session_add_exercise_form_ref = "repos/fawxzzy-fitness/src/components/SessionAddExerciseForm.tsx"
+        routine_day_add_exercise_form_ref = (
+            "repos/fawxzzy-fitness/src/app/routines/[id]/edit/day/[dayId]/RoutineDayAddExerciseForm.tsx"
+        )
+        exercise_search_filters_ref = "repos/fawxzzy-fitness/src/components/exercises/ExerciseSearchFilters.tsx"
+        picker_list_viewport_ref = "repos/fawxzzy-fitness/src/components/ui/PickerListViewport.tsx"
+        tag_filter_control_ref = "repos/fawxzzy-fitness/src/components/ExerciseTagFilterControl.tsx"
+        shared_goal_form_ref = "repos/fawxzzy-fitness/src/components/ui/measurements/SharedExerciseGoalForm.tsx"
+
+        for selector in {
+            ("exerciseChooser", "picker"),
+            ("exerciseChooser", "tagFilterControl"),
+            ("exerciseChooser", "searchFilters"),
+            ("exerciseChooser", "pickerPanel"),
+            ("exerciseChooser", "filterPanel"),
+            ("exerciseChooser", "goalPanel"),
+        }:
+            self.assertIn(selector, selectors)
+
+        self.assertIn(exercise_picker_ref, captures_by_id["exercise-chooser-picker"]["owner_surface_refs"])
+        self.assertIn(session_add_exercise_form_ref, captures_by_id["exercise-chooser-picker"]["owner_surface_refs"])
+        self.assertIn(
+            routine_day_add_exercise_form_ref,
+            captures_by_id["exercise-chooser-picker"]["owner_surface_refs"],
+        )
+        self.assertIn(
+            tag_filter_control_ref,
+            captures_by_id["exercise-chooser-tag-filter-control"]["owner_surface_refs"],
+        )
+        self.assertIn(
+            exercise_search_filters_ref,
+            captures_by_id["exercise-chooser-search-filters"]["owner_surface_refs"],
+        )
+        self.assertIn(
+            tag_filter_control_ref,
+            captures_by_id["exercise-chooser-search-filters"]["owner_surface_refs"],
+        )
+        self.assertIn(exercise_picker_ref, captures_by_id["exercise-chooser-picker-panel"]["owner_surface_refs"])
+        self.assertIn(
+            picker_list_viewport_ref,
+            captures_by_id["exercise-chooser-picker-panel"]["owner_surface_refs"],
+        )
+        self.assertIn(
+            exercise_search_filters_ref,
+            captures_by_id["exercise-chooser-filter-panel"]["owner_surface_refs"],
+        )
+        self.assertIn(
+            tag_filter_control_ref,
+            captures_by_id["exercise-chooser-filter-panel"]["owner_surface_refs"],
+        )
+        self.assertIn(exercise_picker_ref, captures_by_id["exercise-chooser-goal-panel"]["owner_surface_refs"])
+        self.assertIn(
+            shared_goal_form_ref,
+            captures_by_id["exercise-chooser-goal-panel"]["owner_surface_refs"],
+        )
+
+        self.assertFalse(any(capture_id.startswith("exercise-picker-") for capture_id in captures_by_id))
+        self.assertFalse(any(capture_id.startswith("exercise-search-filters-") for capture_id in captures_by_id))
+        self.assertFalse(any(capture_id.startswith("picker-list-viewport-") for capture_id in captures_by_id))
+        self.assertFalse(any(capture_id.startswith("chooser-panel-") for capture_id in captures_by_id))
+        self.assertFalse(any(capture_id.startswith("filter-shell-") for capture_id in captures_by_id))
+        self.assertFalse(any(item["screen_key"] == "exercisePicker" for item in capture_map["captures"]))
+        self.assertFalse(any(item["screen_key"] == "exerciseSearchFilters" for item in capture_map["captures"]))
+        self.assertFalse(any(item["screen_key"] == "pickerListViewport" for item in capture_map["captures"]))
+        self.assertFalse(any(item["screen_key"] == "chooserPanel" for item in capture_map["captures"]))
+        self.assertFalse(any(item["screen_key"] == "filterShell" for item in capture_map["captures"]))
+
     def test_main_tab_nav_family_reuses_existing_capture_ids_and_app_nav_lineage(self) -> None:
         inputs = json.loads(default_capture_inputs_path(ROOT).read_text(encoding="utf-8"))
         capture_map = json.loads(default_capture_map_path(ROOT).read_text(encoding="utf-8"))
@@ -606,6 +680,107 @@ class AtlasUiObservationTests(unittest.TestCase):
         self.assertFalse(any(capture_id.startswith("history-control-") for capture_id in captures_by_id))
         self.assertFalse(any(item["screen_key"] == "historyShared" for item in capture_map["captures"]))
         self.assertFalse(any(item["screen_key"] == "historyControl" for item in capture_map["captures"]))
+
+    def test_routine_editor_detail_family_reuses_existing_editor_capture_ids_and_lineage(self) -> None:
+        inputs = json.loads(default_capture_inputs_path(ROOT).read_text(encoding="utf-8"))
+        capture_map = json.loads(default_capture_map_path(ROOT).read_text(encoding="utf-8"))
+
+        selectors = {(item["screen_key"], item["state_key"]) for item in inputs["capture_set"]}
+        captures_by_id = {item["capture_id"]: item for item in capture_map["captures"]}
+        routine_editor_shared_ref = "repos/fawxzzy-fitness/src/components/routines/RoutineEditorShared.tsx"
+        detail_scaffold_ref = "repos/fawxzzy-fitness/src/components/routines/day-detail/DetailScreenScaffold.tsx"
+        shared_section_shell_ref = "repos/fawxzzy-fitness/src/components/ui/app/SharedSectionShell.tsx"
+        shared_screen_header_ref = "repos/fawxzzy-fitness/src/components/ui/app/SharedScreenHeader.tsx"
+        app_panel_ref = "repos/fawxzzy-fitness/src/components/ui/app/AppPanel.tsx"
+
+        for selector in {
+            ("editDay", "default"),
+            ("editRoutine", "daysSection"),
+            ("editDayAddExercise", "default"),
+        }:
+            self.assertIn(selector, selectors)
+
+        self.assertIn(routine_editor_shared_ref, captures_by_id["edit-routine-days-section-default"]["owner_surface_refs"])
+        self.assertIn(routine_editor_shared_ref, captures_by_id["edit-day-add-exercise-default"]["owner_surface_refs"])
+        self.assertIn(detail_scaffold_ref, captures_by_id["edit-day-default"]["owner_surface_refs"])
+
+        for capture_id in {
+            "edit-day-default",
+            "edit-routine-days-section-default",
+            "edit-day-add-exercise-default",
+        }:
+            self.assertIn(shared_screen_header_ref, captures_by_id[capture_id]["owner_surface_refs"])
+            self.assertIn(app_panel_ref, captures_by_id[capture_id]["owner_surface_refs"])
+            self.assertIn(shared_section_shell_ref, captures_by_id[capture_id]["owner_surface_refs"])
+
+        self.assertIn(
+            "repos/fawxzzy-fitness/src/app/routines/[id]/edit/day/[dayId]/EditDaySettingsAutosaveForm.tsx",
+            captures_by_id["edit-day-default"]["owner_surface_refs"],
+        )
+        self.assertIn(
+            "repos/fawxzzy-fitness/src/app/routines/[id]/edit/day/[dayId]/EditableRoutineDayExerciseList.tsx",
+            captures_by_id["edit-day-default"]["owner_surface_refs"],
+        )
+        self.assertIn(
+            "repos/fawxzzy-fitness/src/app/routines/[id]/edit/EditRoutineAutosaveForm.tsx",
+            captures_by_id["edit-routine-days-section-default"]["owner_surface_refs"],
+        )
+        self.assertIn(
+            "repos/fawxzzy-fitness/src/app/routines/[id]/edit/EditRoutineDaysSection.tsx",
+            captures_by_id["edit-routine-days-section-default"]["owner_surface_refs"],
+        )
+        self.assertIn(
+            "repos/fawxzzy-fitness/src/app/routines/[id]/edit/day/[dayId]/EditDayAddExerciseScreen.tsx",
+            captures_by_id["edit-day-add-exercise-default"]["owner_surface_refs"],
+        )
+        self.assertIn(
+            "repos/fawxzzy-fitness/src/app/routines/[id]/edit/day/[dayId]/RoutineDayAddExerciseForm.tsx",
+            captures_by_id["edit-day-add-exercise-default"]["owner_surface_refs"],
+        )
+        self.assertFalse(any(capture_id.startswith("routine-editor-") for capture_id in captures_by_id))
+        self.assertFalse(any(capture_id.startswith("routine-detail-") for capture_id in captures_by_id))
+        self.assertFalse(any(item["screen_key"] == "routineEditor" for item in capture_map["captures"]))
+        self.assertFalse(any(item["screen_key"] == "routineDetail" for item in capture_map["captures"]))
+
+    def test_session_log_set_family_reuses_existing_capture_ids_and_lineage(self) -> None:
+        inputs = json.loads(default_capture_inputs_path(ROOT).read_text(encoding="utf-8"))
+        capture_map = json.loads(default_capture_map_path(ROOT).read_text(encoding="utf-8"))
+
+        selectors = {(item["screen_key"], item["state_key"]) for item in inputs["capture_set"]}
+        captures_by_id = {item["capture_id"]: item for item in capture_map["captures"]}
+        session_page_client_ref = "repos/fawxzzy-fitness/src/components/SessionPageClient.tsx"
+        session_header_controls_ref = "repos/fawxzzy-fitness/src/components/SessionHeaderControls.tsx"
+        session_route_ref = "repos/fawxzzy-fitness/src/app/session/[id]/page.tsx"
+        session_focus_ref = "repos/fawxzzy-fitness/src/components/SessionExerciseFocus.tsx"
+        session_timers_ref = "repos/fawxzzy-fitness/src/components/SessionTimers.tsx"
+        session_block_ref = "repos/fawxzzy-fitness/src/components/session/SessionExerciseBlock.tsx"
+
+        for selector in {
+            ("exerciseLog", "sessionHeaderCard"),
+            ("exerciseLog", "entrySection"),
+            ("exerciseLog", "compactLogRow"),
+            ("exerciseLog", "stickyFooter"),
+            ("workoutCard", "disclosureExpanded"),
+        }:
+            self.assertIn(selector, selectors)
+
+        self.assertIn(session_route_ref, captures_by_id["exercise-log-session-header-card"]["owner_surface_refs"])
+        self.assertIn(session_page_client_ref, captures_by_id["exercise-log-session-header-card"]["owner_surface_refs"])
+        self.assertIn(session_header_controls_ref, captures_by_id["exercise-log-session-header-card"]["owner_surface_refs"])
+        self.assertIn(session_focus_ref, captures_by_id["exercise-log-entry-section"]["owner_surface_refs"])
+        self.assertIn(session_timers_ref, captures_by_id["exercise-log-entry-section"]["owner_surface_refs"])
+        self.assertIn(session_timers_ref, captures_by_id["exercise-log-compact-row"]["owner_surface_refs"])
+        self.assertIn(session_page_client_ref, captures_by_id["exercise-log-sticky-footer"]["owner_surface_refs"])
+        self.assertIn(session_focus_ref, captures_by_id["workout-card-disclosure-expanded"]["owner_surface_refs"])
+        self.assertIn(session_block_ref, captures_by_id["workout-card-disclosure-expanded"]["owner_surface_refs"])
+
+        self.assertFalse(any(capture_id.startswith("active-session-") for capture_id in captures_by_id))
+        self.assertFalse(any(capture_id.startswith("session-log-") for capture_id in captures_by_id))
+        self.assertFalse(any(capture_id.startswith("log-set-") for capture_id in captures_by_id))
+        self.assertFalse(any(capture_id.startswith("session-timer-") for capture_id in captures_by_id))
+        self.assertFalse(any(item["screen_key"] == "activeSession" for item in capture_map["captures"]))
+        self.assertFalse(any(item["screen_key"] == "logSet" for item in capture_map["captures"]))
+        self.assertFalse(any(item["screen_key"] == "sessionTimer" for item in capture_map["captures"]))
 
     def test_route_loading_family_reuses_existing_route_and_entry_capture_ids(self) -> None:
         inputs = json.loads(default_capture_inputs_path(ROOT).read_text(encoding="utf-8"))

@@ -125,6 +125,9 @@
       "state_label": "Session header card",
       "route_family": "session",
       "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/app/session/[id]/page.tsx",
+        "repos/fawxzzy-fitness/src/components/SessionPageClient.tsx",
+        "repos/fawxzzy-fitness/src/components/SessionHeaderControls.tsx",
         "repos/fawxzzy-fitness/src/components/ui/workout-entry/SessionHeaderCard.tsx",
         "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
         "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
@@ -156,6 +159,8 @@
       "state_label": "Entry section",
       "route_family": "session",
       "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/components/SessionExerciseFocus.tsx",
+        "repos/fawxzzy-fitness/src/components/SessionTimers.tsx",
         "repos/fawxzzy-fitness/src/components/ui/workout-entry/EntrySection.tsx",
         "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
         "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
@@ -218,6 +223,7 @@
       "state_label": "Compact log row",
       "route_family": "session",
       "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/components/SessionTimers.tsx",
         "repos/fawxzzy-fitness/src/components/ui/workout-entry/CompactLogRow.tsx",
         "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
         "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
@@ -249,6 +255,7 @@
       "state_label": "Sticky footer",
       "route_family": "session",
       "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/components/SessionPageClient.tsx",
         "repos/fawxzzy-fitness/src/components/session/SessionStickyFooter.tsx",
         "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
         "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
@@ -312,6 +319,8 @@
       "state_label": "Disclosure card expanded",
       "route_family": "shared",
       "owner_surface_refs": [
+        "repos/fawxzzy-fitness/src/components/SessionExerciseFocus.tsx",
+        "repos/fawxzzy-fitness/src/components/session/SessionExerciseBlock.tsx",
         "repos/fawxzzy-fitness/src/components/workout/ExerciseDisclosureCard.tsx",
         "repos/fawxzzy-fitness/src/components/StandardExerciseRow.tsx",
         "repos/fawxzzy-fitness/src/components/ExerciseCard.tsx",
@@ -1405,14 +1414,13 @@
       "state_key": "shell",
       "state_label": "Shell card",
       "route_family": "onboarding",
-      "owner_surface_refs": [
-        "repos/fawxzzy-fitness/src/app/curated-onboarding/page.tsx",
-        "repos/fawxzzy-fitness/src/features/curated-onboarding/components/CuratedOnboardingShell.tsx",
-        "repos/fawxzzy-fitness/src/features/curated-onboarding/components/CuratedSurface.tsx",
-        "repos/fawxzzy-fitness/src/components/auth/AuthShell.tsx",
-        "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
-        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
-      ],
+        "owner_surface_refs": [
+          "repos/fawxzzy-fitness/src/app/curated-onboarding/page.tsx",
+          "repos/fawxzzy-fitness/src/features/curated-onboarding/components/CuratedOnboardingShell.tsx",
+          "repos/fawxzzy-fitness/src/components/auth/AuthShell.tsx",
+          "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
+          "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+        ],
       "primitive_variants": {
         "header": {
           "primitive_id": "header",
@@ -1439,13 +1447,13 @@
       "state_key": "progress",
       "state_label": "Progress panel",
       "route_family": "onboarding",
-      "owner_surface_refs": [
-        "repos/fawxzzy-fitness/src/features/curated-onboarding/components/CuratedOnboardingProgress.tsx",
-        "repos/fawxzzy-fitness/src/features/curated-onboarding/components/CuratedSurface.tsx",
-        "repos/fawxzzy-fitness/src/components/ui/app/AppBadge.tsx",
-        "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
-        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
-      ],
+        "owner_surface_refs": [
+          "repos/fawxzzy-fitness/src/features/curated-onboarding/components/CuratedOnboardingProgress.tsx",
+          "repos/fawxzzy-fitness/src/features/curated-onboarding/components/CuratedOnboardingShell.tsx",
+          "repos/fawxzzy-fitness/src/components/ui/app/AppBadge.tsx",
+          "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
+          "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+        ],
       "primitive_variants": {
         "header": {
           "primitive_id": "header",
@@ -1472,15 +1480,15 @@
       "state_key": "optionCard",
       "state_label": "Shared option card",
       "route_family": "onboarding",
-      "owner_surface_refs": [
-        "repos/fawxzzy-fitness/src/features/curated-onboarding/components/GoalsStep.tsx",
-        "repos/fawxzzy-fitness/src/features/curated-onboarding/components/ExperienceStep.tsx",
-        "repos/fawxzzy-fitness/src/features/curated-onboarding/components/PreferencesStep.tsx",
-        "repos/fawxzzy-fitness/src/features/curated-onboarding/components/CuratedSurface.tsx",
-        "repos/fawxzzy-fitness/src/components/ui/app/AppBadge.tsx",
-        "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
-        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
-      ],
+        "owner_surface_refs": [
+          "repos/fawxzzy-fitness/src/features/curated-onboarding/components/GoalsStep.tsx",
+          "repos/fawxzzy-fitness/src/features/curated-onboarding/components/ExperienceStep.tsx",
+          "repos/fawxzzy-fitness/src/features/curated-onboarding/components/PreferencesStep.tsx",
+          "repos/fawxzzy-fitness/src/features/curated-onboarding/components/CuratedOnboardingShell.tsx",
+          "repos/fawxzzy-fitness/src/components/ui/app/AppBadge.tsx",
+          "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
+          "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+        ],
       "primitive_variants": {
         "header": {
           "primitive_id": "header",
@@ -1507,13 +1515,12 @@
       "state_key": "review",
       "state_label": "Review panel",
       "route_family": "onboarding",
-      "owner_surface_refs": [
-        "repos/fawxzzy-fitness/src/features/curated-onboarding/components/ReviewStep.tsx",
-        "repos/fawxzzy-fitness/src/features/curated-onboarding/components/CuratedSurface.tsx",
-        "repos/fawxzzy-fitness/src/features/curated-onboarding/components/CuratedOnboardingShell.tsx",
-        "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
-        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
-      ],
+        "owner_surface_refs": [
+          "repos/fawxzzy-fitness/src/features/curated-onboarding/components/ReviewStep.tsx",
+          "repos/fawxzzy-fitness/src/features/curated-onboarding/components/CuratedOnboardingShell.tsx",
+          "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
+          "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+        ],
       "primitive_variants": {
         "header": {
           "primitive_id": "header",
@@ -1540,12 +1547,12 @@
       "state_key": "handoff",
       "state_label": "Generation handoff panel",
       "route_family": "onboarding",
-      "owner_surface_refs": [
-        "repos/fawxzzy-fitness/src/features/curated-onboarding/components/GenerationHandoffStep.tsx",
-        "repos/fawxzzy-fitness/src/features/curated-onboarding/components/CuratedSurface.tsx",
-        "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
-        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
-      ],
+        "owner_surface_refs": [
+          "repos/fawxzzy-fitness/src/features/curated-onboarding/components/GenerationHandoffStep.tsx",
+          "repos/fawxzzy-fitness/src/features/curated-onboarding/components/CuratedOnboardingShell.tsx",
+          "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
+          "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+        ],
       "primitive_variants": {
         "header": {
           "primitive_id": "header",

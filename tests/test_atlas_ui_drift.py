@@ -64,6 +64,42 @@ class AtlasUiDriftTests(unittest.TestCase):
         self.assertEqual("clean", report["summary"]["status"])
         self.assertEqual(0, report["summary"]["finding_count"])
 
+    def test_dry_run_keeps_chooser_family_on_existing_validator_lane(self) -> None:
+        report = validate_fitness_ui_drift(
+            root=ROOT,
+            schema_path=default_drift_schema_path(ROOT),
+            observation_schema_path=default_schema_path(ROOT),
+            capture_map_schema_path=default_capture_map_schema_path(ROOT),
+            dry_run=True,
+        )
+        expected = observe_fitness_ui(
+            root=ROOT,
+            schema_path=default_schema_path(ROOT),
+            capture_map_schema_path=default_capture_map_schema_path(ROOT),
+            dry_run=True,
+        )
+
+        comparison_keys = {item["comparison_key"] for item in expected["observations"]}
+
+        for comparison_key in {
+            "fitness:exercise-chooser-picker",
+            "fitness:exercise-chooser-tag-filter-control",
+            "fitness:exercise-chooser-search-filters",
+            "fitness:exercise-chooser-picker-panel",
+            "fitness:exercise-chooser-filter-panel",
+            "fitness:exercise-chooser-goal-panel",
+        }:
+            self.assertIn(comparison_key, comparison_keys)
+
+        self.assertFalse(any(key.startswith("fitness:exercise-picker-") for key in comparison_keys))
+        self.assertFalse(any(key.startswith("fitness:exercise-search-filters-") for key in comparison_keys))
+        self.assertFalse(any(key.startswith("fitness:picker-list-viewport-") for key in comparison_keys))
+        self.assertFalse(any(key.startswith("fitness:chooser-panel-") for key in comparison_keys))
+        self.assertFalse(any(key.startswith("fitness:filter-shell-") for key in comparison_keys))
+        self.assertEqual(len(comparison_keys), report["summary"]["expected_capture_count"])
+        self.assertEqual("clean", report["summary"]["status"])
+        self.assertEqual(0, report["summary"]["finding_count"])
+
     def test_dry_run_keeps_shared_history_family_on_existing_validator_lane(self) -> None:
         report = validate_fitness_ui_drift(
             root=ROOT,
@@ -130,6 +166,71 @@ class AtlasUiDriftTests(unittest.TestCase):
 
         self.assertFalse(any(key.startswith("fitness:route-loading-") for key in comparison_keys))
         self.assertFalse(any(key.startswith("fitness:boot-loading-") for key in comparison_keys))
+        self.assertEqual(len(comparison_keys), report["summary"]["expected_capture_count"])
+        self.assertEqual("clean", report["summary"]["status"])
+        self.assertEqual(0, report["summary"]["finding_count"])
+
+    def test_dry_run_keeps_routine_editor_detail_family_on_existing_editor_lanes(self) -> None:
+        report = validate_fitness_ui_drift(
+            root=ROOT,
+            schema_path=default_drift_schema_path(ROOT),
+            observation_schema_path=default_schema_path(ROOT),
+            capture_map_schema_path=default_capture_map_schema_path(ROOT),
+            dry_run=True,
+        )
+        expected = observe_fitness_ui(
+            root=ROOT,
+            schema_path=default_schema_path(ROOT),
+            capture_map_schema_path=default_capture_map_schema_path(ROOT),
+            dry_run=True,
+        )
+
+        comparison_keys = {item["comparison_key"] for item in expected["observations"]}
+
+        for comparison_key in {
+            "fitness:edit-day-default",
+            "fitness:edit-routine-days-section-default",
+            "fitness:edit-day-add-exercise-default",
+        }:
+            self.assertIn(comparison_key, comparison_keys)
+
+        self.assertFalse(any(key.startswith("fitness:routine-editor-") for key in comparison_keys))
+        self.assertFalse(any(key.startswith("fitness:routine-detail-") for key in comparison_keys))
+        self.assertEqual(len(comparison_keys), report["summary"]["expected_capture_count"])
+        self.assertEqual("clean", report["summary"]["status"])
+        self.assertEqual(0, report["summary"]["finding_count"])
+
+    def test_dry_run_keeps_session_log_set_family_on_existing_session_and_workout_lanes(self) -> None:
+        report = validate_fitness_ui_drift(
+            root=ROOT,
+            schema_path=default_drift_schema_path(ROOT),
+            observation_schema_path=default_schema_path(ROOT),
+            capture_map_schema_path=default_capture_map_schema_path(ROOT),
+            dry_run=True,
+        )
+        expected = observe_fitness_ui(
+            root=ROOT,
+            schema_path=default_schema_path(ROOT),
+            capture_map_schema_path=default_capture_map_schema_path(ROOT),
+            dry_run=True,
+        )
+
+        comparison_keys = {item["comparison_key"] for item in expected["observations"]}
+
+        for comparison_key in {
+            "fitness:exercise-log-session-header-card",
+            "fitness:exercise-log-entry-section",
+            "fitness:exercise-log-compact-row",
+            "fitness:exercise-log-sticky-footer",
+            "fitness:workout-card-disclosure-expanded",
+        }:
+            self.assertIn(comparison_key, comparison_keys)
+
+        self.assertNotIn("fitness:exercise-log-active", comparison_keys)
+        self.assertFalse(any(key.startswith("fitness:active-session-") for key in comparison_keys))
+        self.assertFalse(any(key.startswith("fitness:session-log-") for key in comparison_keys))
+        self.assertFalse(any(key.startswith("fitness:log-set-") for key in comparison_keys))
+        self.assertFalse(any(key.startswith("fitness:session-timer-") for key in comparison_keys))
         self.assertEqual(len(comparison_keys), report["summary"]["expected_capture_count"])
         self.assertEqual("clean", report["summary"]["status"])
         self.assertEqual(0, report["summary"]["finding_count"])

@@ -211,6 +211,33 @@ class AtlasUiVisualProofTests(unittest.TestCase):
         self.assertFalse(any(capture_id.startswith("route-loading-") for capture_id in captures_by_id))
         self.assertFalse(any(capture_id.startswith("boot-loading-") for capture_id in captures_by_id))
 
+    def test_repo_manifest_keeps_routine_editor_detail_family_semantic_only_until_root_artifacts_exist(self) -> None:
+        manifest_path = ROOT / "ops" / "atlas" / "ui_visual_proof" / "fitness_visual_proof.v1.json"
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        captures_by_id = {item["capture_id"]: item for item in manifest["captures"]}
+
+        self.assertNotIn("edit-day-default", captures_by_id)
+        self.assertNotIn("edit-routine-days-section-default", captures_by_id)
+        self.assertNotIn("edit-day-add-exercise-default", captures_by_id)
+        self.assertFalse(any(capture_id.startswith("routine-editor-") for capture_id in captures_by_id))
+        self.assertFalse(any(capture_id.startswith("routine-detail-") for capture_id in captures_by_id))
+
+    def test_repo_manifest_keeps_session_log_set_family_semantic_only_until_root_bindings_exist(self) -> None:
+        manifest_path = ROOT / "ops" / "atlas" / "ui_visual_proof" / "fitness_visual_proof.v1.json"
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        captures_by_id = {item["capture_id"]: item for item in manifest["captures"]}
+
+        self.assertNotIn("exercise-log-session-header-card", captures_by_id)
+        self.assertNotIn("exercise-log-entry-section", captures_by_id)
+        self.assertNotIn("exercise-log-form-section-card", captures_by_id)
+        self.assertNotIn("exercise-log-compact-row", captures_by_id)
+        self.assertNotIn("exercise-log-sticky-footer", captures_by_id)
+        self.assertNotIn("workout-card-disclosure-expanded", captures_by_id)
+        self.assertFalse(any(capture_id.startswith("active-session-") for capture_id in captures_by_id))
+        self.assertFalse(any(capture_id.startswith("session-log-") for capture_id in captures_by_id))
+        self.assertFalse(any(capture_id.startswith("log-set-") for capture_id in captures_by_id))
+        self.assertFalse(any(capture_id.startswith("session-timer-") for capture_id in captures_by_id))
+
     def test_manifest_validation_accepts_declared_capture(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
