@@ -77,7 +77,7 @@ components:
     ref_type: "branch"
     ref: "main"
     commit: "719c45d813f1c32fe8c493a1a65fa39abd1d9d3d"
-    dirty: true
+    dirty: false
     trust_class: "trusted"
     release_eligible: false
   stream:
@@ -115,4 +115,4 @@ excluded_surfaces:
     trust_class: "untrusted"
     release_eligible: false
     reason: "Token-bearing Verta checkout remains quarantined and untrusted until scrub and rotation are complete."
-lock_digest: "sha256:4fd0a886f653494a5e3379ac18be9e0ee10c5ea6770707e17cb9d2056612e753"
+lock_digest: "sha256:f213efa973827b1a800a63f16a15ada65386c08d8394ca5166c3beda0a0f38c3"
