@@ -178,10 +178,6 @@
       "state_key": "stageList"
     },
     {
-      "screen_key": "entryHandoff",
-      "state_key": "installManualPanel"
-    },
-    {
       "screen_key": "curatedOnboarding",
       "state_key": "shell"
     },

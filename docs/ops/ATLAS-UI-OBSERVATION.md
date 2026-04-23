@@ -77,7 +77,6 @@ The active capture set stays narrow but expands immediately after each adoption 
 - `entry-handoff-card`
 - `entry-handoff-status-panel`
 - `entry-handoff-stage-list`
-- `entry-handoff-install-manual-panel`
 - `curated-onboarding-shell`
 - `curated-onboarding-progress-panel`
 - `curated-onboarding-option-card`

@@ -38,7 +38,7 @@ class AtlasUiDriftTests(unittest.TestCase):
             dry_run=True,
         )
 
-        self.assertEqual(59, report["summary"]["expected_capture_count"])
+        self.assertEqual(58, report["summary"]["expected_capture_count"])
 
     def test_dry_run_keeps_exercise_discovery_and_detail_on_existing_validator_lane(self) -> None:
         report = validate_fitness_ui_drift(

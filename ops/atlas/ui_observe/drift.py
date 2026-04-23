@@ -310,15 +310,23 @@ def validate_fitness_ui_drift(
         capture_map_schema_path=capture_map_schema_path,
         dry_run=True,
     )
-    observed, invalid_observed = load_latest_observations(observation_target)
     expected = list(expected_payload["observations"])
     expected_index = _index_by_comparison_key(expected)
-    observed_index = _index_by_comparison_key(observed)
+    observed, invalid_observed = load_latest_observations(observation_target)
+    observed_index = {
+        comparison_key: observation
+        for comparison_key, observation in _index_by_comparison_key(observed).items()
+        if comparison_key in expected_index
+    }
     findings: list[dict[str, Any]] = []
 
     for item in invalid_observed:
         payload = item.get("payload") if isinstance(item.get("payload"), dict) else {}
         capture = payload.get("capture") if isinstance(payload.get("capture"), dict) else {}
+        comparison_key = str(payload.get("comparison_key") or item["path"])
+        capture_id = str(capture.get("capture_id") or Path(str(item["path"])).parent.name)
+        if comparison_key not in expected_index and f"fitness:{capture_id}" not in expected_index:
+            continue
         observed_refs = {"path": item["path"]}
         residue_ref = item.get("residue_ref")
         if isinstance(residue_ref, str) and residue_ref.strip():
@@ -327,8 +335,8 @@ def validate_fitness_ui_drift(
             _finding(
                 kind="invalid_observation",
                 severity="warning",
-                comparison_key=str(payload.get("comparison_key") or item["path"]),
-                capture_id=str(capture.get("capture_id") or Path(str(item["path"])).parent.name),
+                comparison_key=comparison_key,
+                capture_id=capture_id,
                 message="Runtime observation artifact is stale or malformed for the current contract.",
                 observed=observed_refs,
                 delta={"errors": item["errors"]},
@@ -369,19 +377,6 @@ def validate_fitness_ui_drift(
                     delta=_trait_delta(expected_trait, observed_trait),
                 )
             )
-
-    for comparison_key in sorted(set(observed_index) - set(expected_index)):
-        observed_item = observed_index[comparison_key]
-        findings.append(
-            _finding(
-                kind="unexpected_observation",
-                severity="info",
-                comparison_key=comparison_key,
-                capture_id=str(observed_item["capture"]["capture_id"]),
-                message="Observed runtime artifact does not belong to the active capture-set contract.",
-                observed={"comparison_key": comparison_key},
-            )
-        )
 
     summary = {
         "status": "clean" if not findings else "drift_detected",

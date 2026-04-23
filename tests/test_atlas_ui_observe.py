@@ -266,7 +266,6 @@ class AtlasUiObservationTests(unittest.TestCase):
             ("entryHandoff", "card"),
             ("entryHandoff", "statusPanel"),
             ("entryHandoff", "stageList"),
-            ("entryHandoff", "installManualPanel"),
             ("curatedOnboarding", "shell"),
             ("curatedOnboarding", "progress"),
             ("curatedOnboarding", "optionCard"),
@@ -453,10 +452,6 @@ class AtlasUiObservationTests(unittest.TestCase):
         self.assertEqual(
             "entry-handoff-stage-list",
             capture_ids_by_selector[("entryHandoff", "stageList")],
-        )
-        self.assertEqual(
-            "entry-handoff-install-manual-panel",
-            capture_ids_by_selector[("entryHandoff", "installManualPanel")],
         )
         self.assertEqual(
             "curated-onboarding-shell",

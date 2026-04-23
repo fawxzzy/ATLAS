@@ -110,11 +110,11 @@ Curated onboarding is not opted into visual proof yet.
 - Root proof only gates captures that already have deterministic screenshot artifacts.
 - Keep curated onboarding on the semantic observer/drift lane until a stable screenshot harness exists for that family.
 
-Entry handoff and install-gate surfaces are not opted into visual proof yet.
+Entry handoff surfaces are not opted into visual proof yet.
 
-- The current family depends on authenticated entry resolution plus browser/PWA install capability state.
+- The current family depends on authenticated entry resolution and saved first-run state.
 - Root proof still only gates captures that already have deterministic screenshot artifacts across browser modes.
-- Keep the entry handoff family on the semantic observer/drift lane until a stable install-state screenshot harness exists.
+- Keep the entry handoff family on the semantic observer/drift lane until a stable entry-state screenshot harness exists.
 
 Auth / recovery remains semantic-only for this tranche.
 

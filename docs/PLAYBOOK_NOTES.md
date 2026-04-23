@@ -1,5 +1,11 @@
 # Playbook Notes
 
+## 2026-04-23 - Fitness auth must not own install acquisition
+
+- Rule: app auth flow must not own install acquisition UX when install is handled externally.
+- Pattern: auth/recovery routes should keep one shared shell with inline status and error messages instead of branching into screen-per-state variants.
+- Failure Mode: install-first route branching and standalone recovery error screens create extra state surfaces, stale capture-map truth, and mobile UI drift for flows that should stay message-level.
+
 ## 2026-04-23 - Fitness release lanes require manual _stack deploys and reusable QA auth
 
 - Type: Guardrail

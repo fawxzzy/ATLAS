@@ -1307,7 +1307,6 @@
         "repos/fawxzzy-fitness/src/app/loading.tsx",
         "repos/fawxzzy-fitness/src/components/RouteLoading.tsx",
         "repos/fawxzzy-fitness/src/components/auth/InitialExperienceGate.tsx",
-        "repos/fawxzzy-fitness/src/components/install/InstallEntryGate.tsx",
         "repos/fawxzzy-fitness/src/components/auth/AuthShell.tsx",
         "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
         "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
@@ -1392,37 +1391,6 @@
         "section_layout": {
           "primitive_id": "section-layout",
           "variant_id": "dense"
-        }
-      }
-    },
-    {
-      "capture_id": "entry-handoff-install-manual-panel",
-      "screen_key": "entryHandoff",
-      "screen_label": "Entry handoff family",
-      "state_key": "installManualPanel",
-      "state_label": "Install manual panel",
-      "route_family": "entry",
-      "owner_surface_refs": [
-        "repos/fawxzzy-fitness/src/components/install/InstallEntryGate.tsx",
-        "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
-        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
-      ],
-      "primitive_variants": {
-        "header": {
-          "primitive_id": "header",
-          "variant_id": "shared"
-        },
-        "card": {
-          "primitive_id": "card",
-          "variant_id": "muted"
-        },
-        "tag": {
-          "primitive_id": "badge",
-          "variant_id": "default"
-        },
-        "section_layout": {
-          "primitive_id": "section-layout",
-          "variant_id": "standard"
         }
       }
     },
