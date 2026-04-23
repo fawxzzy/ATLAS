@@ -193,6 +193,7 @@ class AtlasUiDriftTests(unittest.TestCase):
 
         self.assertFalse(any(key.startswith("fitness:history-shared-") for key in comparison_keys))
         self.assertFalse(any(key.startswith("fitness:history-control-") for key in comparison_keys))
+        self.assertFalse(any(key.startswith("fitness:history-route-") for key in comparison_keys))
         self.assertEqual(len(comparison_keys), report["summary"]["expected_capture_count"])
         self.assertEqual("clean", report["summary"]["status"])
         self.assertEqual(0, report["summary"]["finding_count"])

@@ -137,6 +137,8 @@ The input contract selects which screen/state pairs are active for a run. This k
 - Failure Mode: splitting Today list or feedback chrome into extra root-only capture ids creates validator sprawl even though the live owner route still lands inside the existing Today overview capture.
 - Pattern: when a new owner tranche lands on the shared history summary/control family already exercised by `history-overview-default`, `history-exercises-default`, `history-sessions-list-default`, and the active `history-log-*` captures, reconcile those existing selectors and lineage before minting new ids.
 - Failure Mode: adding redundant capture ids for shared history header, control, or section chrome creates validator sprawl and weakens proof clarity.
+- Pattern: when the live history detail route shell moves under `HistoryRouteScaffold.tsx`, bind that owner surface onto the active `history-log-detail-surface` capture instead of leaving stale `DetailScreenScaffold.tsx` lineage or minting `history-route-*` ids.
+- Failure Mode: keeping stale owner-surface refs after the route shell changes makes root validation look wired while it is actually tracing the wrong owner seam.
 - Pattern: when a tranche lands on shared transient route-loading chrome, widen `RouteLoading.tsx` plus the owning `app/**/loading.tsx` entrypoints onto the existing Today, Routines, Settings, History, and adjacent entry-handoff captures before minting loading-specific ids.
 - Failure Mode: inventing a root `routeLoading` screen key, `route-loading-*` capture id, or root-side loading primitive slot before the owner truth pack freezes that family copies owner truth into root and makes the semantic rail dishonest.
 - Pattern: when a tranche lands on auth/recovery shell, message, account, or action wrappers already represented by the active `auth-recovery-*` captures, widen lineage on those existing ids before inventing auth-footer, auth-message, or auth-account selectors.
@@ -155,6 +157,7 @@ The same rule applies to the active session/log-set family: root should bind `Se
 The same rule applies to auth/recovery: root should bind `AuthShell.tsx` plus the route-owned login, signup, forgot-password, reset-password, and recovery-bridge surfaces onto the existing `auth-recovery-*` captures rather than creating synthetic auth-footer, auth-message, remembered-account, or action-only selectors.
 The same rule applies to Today overview token-bridge work: root should bind `TodayDayPicker.tsx`, `TodayExerciseRows.tsx`, and `DayList.tsx` onto `today-overview-default` rather than creating separate Today list or feedback selectors for chrome that is already exercised on that active route capture.
 The same rule applies to remembered-login auth logic: root should widen the existing `auth-recovery-*` lineage to include `loginScreenState.ts`, `authCopy.ts`, and `remembered-login.ts` instead of creating a new validator family for login-memory behavior.
+The same rule applies to the history detail route shell: root should bind `HistoryRouteScaffold.tsx` onto `history-log-detail-surface` instead of leaving stale `DetailScreenScaffold.tsx` lineage or creating synthetic `history-route-*` selectors.
 
 ## Mapping contract
 

@@ -1836,7 +1836,7 @@
         "repos/fawxzzy-fitness/src/app/history/[sessionId]/LogAuditClient.tsx",
         "repos/fawxzzy-fitness/src/components/SessionSummaryCard.tsx",
         "repos/fawxzzy-fitness/src/components/history/HistoryShared.tsx",
-        "repos/fawxzzy-fitness/src/components/routines/day-detail/DetailScreenScaffold.tsx",
+        "repos/fawxzzy-fitness/src/components/history/HistoryRouteScaffold.tsx",
         "repos/fawxzzy-fitness/src/components/ui/app/SharedScreenHeader.tsx",
         "repos/fawxzzy-fitness/src/components/ui/app/AppHeader.tsx",
         "repos/fawxzzy-fitness/src/components/ui/app/AppPanel.tsx",

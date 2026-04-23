@@ -784,6 +784,8 @@ class AtlasUiObservationTests(unittest.TestCase):
         selectors = {(item["screen_key"], item["state_key"]) for item in inputs["capture_set"]}
         captures_by_id = {item["capture_id"]: item for item in capture_map["captures"]}
         history_shared_ref = "repos/fawxzzy-fitness/src/components/history/HistoryShared.tsx"
+        history_route_scaffold_ref = "repos/fawxzzy-fitness/src/components/history/HistoryRouteScaffold.tsx"
+        detail_scaffold_ref = "repos/fawxzzy-fitness/src/components/routines/day-detail/DetailScreenScaffold.tsx"
 
         for selector in {
             ("historyOverview", "default"),
@@ -805,10 +807,21 @@ class AtlasUiObservationTests(unittest.TestCase):
         }:
             self.assertIn(history_shared_ref, captures_by_id[capture_id]["owner_surface_refs"])
 
+        self.assertIn(
+            history_route_scaffold_ref,
+            captures_by_id["history-log-detail-surface"]["owner_surface_refs"],
+        )
+        self.assertNotIn(
+            detail_scaffold_ref,
+            captures_by_id["history-log-detail-surface"]["owner_surface_refs"],
+        )
+
         self.assertFalse(any(capture_id.startswith("history-shared-") for capture_id in captures_by_id))
         self.assertFalse(any(capture_id.startswith("history-control-") for capture_id in captures_by_id))
+        self.assertFalse(any(capture_id.startswith("history-route-") for capture_id in captures_by_id))
         self.assertFalse(any(item["screen_key"] == "historyShared" for item in capture_map["captures"]))
         self.assertFalse(any(item["screen_key"] == "historyControl" for item in capture_map["captures"]))
+        self.assertFalse(any(item["screen_key"] == "historyRoute" for item in capture_map["captures"]))
 
     def test_routine_editor_detail_family_reuses_existing_editor_capture_ids_and_lineage(self) -> None:
         inputs = json.loads(default_capture_inputs_path(ROOT).read_text(encoding="utf-8"))

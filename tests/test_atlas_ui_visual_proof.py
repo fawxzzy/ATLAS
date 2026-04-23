@@ -215,6 +215,7 @@ class AtlasUiVisualProofTests(unittest.TestCase):
         self.assertFalse(any(capture_id.startswith("history-shared-") for capture_id in captures_by_id))
         self.assertFalse(any(capture_id.startswith("history-control-") for capture_id in captures_by_id))
         self.assertFalse(any(capture_id.startswith("history-log-") for capture_id in captures_by_id))
+        self.assertFalse(any(capture_id.startswith("history-route-") for capture_id in captures_by_id))
 
     def test_repo_manifest_keeps_route_loading_off_visual_gate(self) -> None:
         manifest_path = ROOT / "ops" / "atlas" / "ui_visual_proof" / "fitness_visual_proof.v1.json"

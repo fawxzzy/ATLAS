@@ -151,6 +151,7 @@ History detail / log-audit remains semantic-only for this tranche.
 - Pattern: when semantic coverage replaces one broad legacy capture with several active captures, visual proof may only attach once one of those active capture ids has its own deterministic screenshot binding and matching observation digest.
 - Failure Mode: binding an active `history-log-*` capture to a stale or legacy screenshot path would make the proof rail look green while comparing the wrong surface.
 - Pattern: when shared history header/control polish lands inside the already proofed session and exercise routes, keep proof on `history-sessions-list-default` and `history-exercises-default` until the owner repo exposes a deterministic history-detail proof binding for an active `history-log-*` capture.
+- Pattern: when the owner route shell moves to `HistoryRouteScaffold.tsx`, keep that change on the existing semantic `history-log-*` lane and refresh the capture-map digest instead of inventing `history-route-*` proof ids before deterministic history-detail artifacts exist.
 - Route loading remains visual-proof unchanged for this tranche because `RouteLoading.tsx` mounts after a route delay and uses animated glows and particles, so the steady-state Today, Routines, Settings, History sessions, and History exercises captures remain the only deterministic screenshot lane.
 
 Chooser remains semantic-only for this tranche.
