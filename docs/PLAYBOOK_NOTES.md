@@ -1,5 +1,14 @@
 # Playbook Notes
 
+## 2026-04-23 - Fitness release lanes require manual _stack deploys and reusable QA auth
+
+- Type: Guardrail
+- Summary: Fitness deploy and QA work must use `_stack` deploy entrypoints, keep Vercel Git auto-deploy creation disabled, and verify auth-aware local flows with one permanent Supabase QA user instead of random signup users.
+- Suggested Playbook File: docs/GUARDRAILS/fitness-auth-deploy-qa-lane.md
+- Rationale: Prevents repeated auth/deploy chaos where throwaway users accumulate, local browser and server Supabase env drift apart, Git-triggered Vercel deploys silently reappear, or deploys run from the wrong repo boundary.
+- Evidence: repos/_stack/ops/Test-FitnessDeployLink.ps1, repos/_stack/ops/Test-FitnessDoctor.ps1, repos/fawxzzy-fitness/scripts/qa/fitness-qa-user.mjs, repos/fawxzzy-fitness/scripts/qa/fitness-local-feedback.mjs
+- Status: Proposed
+
 ## Deploy identity guards
 
 - Production deploy guards should validate the configured live hosting identity for the current lane, not a guessed future owner or namespace.
