@@ -24,7 +24,7 @@ function ConvertTo-PlainData {
     foreach ($item in $InputObject) {
       $items += @(ConvertTo-PlainData -InputObject $item)
     }
-    return $items
+    return ,$items
   }
 
   if ($InputObject -is [psobject]) {
@@ -1235,6 +1235,11 @@ function Get-SystemGuardianStatus {
 
   $taskSnapshot = Get-ScheduledTaskSnapshot -Policy $Policy
   $latestRun = Read-JsonFile -Path $Paths.latestRunPath -Default @{}
+  $reviewHelpers = @()
+  if ($latestRun -and (Test-MapHasKey -Map $latestRun -Key "reviewHelpers")) {
+    $reviewHelpers = @($latestRun.reviewHelpers)
+  }
+
   return @{
     profile = Get-ActiveProfileName -Policy $Policy -Paths $Paths
     profileSummary = Get-ProfileSummary -Policy $Policy -ProfileName (Get-ActiveProfileName -Policy $Policy -Paths $Paths)
@@ -1245,7 +1250,7 @@ function Get-SystemGuardianStatus {
     scheduledTask = $taskSnapshot
     latestRun = $latestRun
     latestReceiptPath = $Paths.latestReceiptPath
-    reviewHelpers = if ($latestRun -and (Test-MapHasKey -Map $latestRun -Key "reviewHelpers")) { @($latestRun.reviewHelpers) } else { @() }
+    reviewHelpers = $reviewHelpers
   }
 }
 

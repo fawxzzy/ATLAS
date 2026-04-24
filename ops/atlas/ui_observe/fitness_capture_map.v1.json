@@ -1570,12 +1570,15 @@
         "repos/fawxzzy-fitness/src/app/routines/[id]/edit/day/[dayId]/page.tsx",
         "repos/fawxzzy-fitness/src/app/routines/[id]/edit/day/[dayId]/EditDaySettingsAutosaveForm.tsx",
         "repos/fawxzzy-fitness/src/app/routines/[id]/edit/day/[dayId]/EditableRoutineDayExerciseList.tsx",
+        "repos/fawxzzy-fitness/src/app/routines/[id]/edit/day/[dayId]/ReorderExerciseRow.tsx",
         "repos/fawxzzy-fitness/src/components/routines/day-detail/DetailScreenScaffold.tsx",
         "repos/fawxzzy-fitness/src/components/ui/app/SharedScreenHeader.tsx",
         "repos/fawxzzy-fitness/src/components/ui/app/AppHeader.tsx",
         "repos/fawxzzy-fitness/src/components/ui/app/AppPanel.tsx",
         "repos/fawxzzy-fitness/src/components/ui/app/AppBadge.tsx",
-        "repos/fawxzzy-fitness/src/components/ui/app/SharedSectionShell.tsx"
+        "repos/fawxzzy-fitness/src/components/ui/app/SharedSectionShell.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
       ],
       "primitive_variants": {
         "header": {
@@ -1608,12 +1611,15 @@
         "repos/fawxzzy-fitness/src/app/routines/[id]/edit/EditRoutineAutosaveForm.tsx",
         "repos/fawxzzy-fitness/src/app/routines/[id]/edit/EditRoutineDaysSection.tsx",
         "repos/fawxzzy-fitness/src/components/routines/RoutineEditorShared.tsx",
+        "repos/fawxzzy-fitness/src/components/routines/RoutineEditorForm.tsx",
         "repos/fawxzzy-fitness/src/components/routines/RoutineDetailsExitGuard.tsx",
         "repos/fawxzzy-fitness/src/components/ui/app/SharedScreenHeader.tsx",
         "repos/fawxzzy-fitness/src/components/ui/app/AppHeader.tsx",
         "repos/fawxzzy-fitness/src/components/ui/app/AppPanel.tsx",
         "repos/fawxzzy-fitness/src/components/ui/app/AppBadge.tsx",
-        "repos/fawxzzy-fitness/src/components/ui/app/SharedSectionShell.tsx"
+        "repos/fawxzzy-fitness/src/components/ui/app/SharedSectionShell.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
       ],
       "primitive_variants": {
         "header": {
@@ -1649,7 +1655,9 @@
         "repos/fawxzzy-fitness/src/components/ui/app/SharedScreenHeader.tsx",
         "repos/fawxzzy-fitness/src/components/ui/app/AppHeader.tsx",
         "repos/fawxzzy-fitness/src/components/ui/app/AppPanel.tsx",
-        "repos/fawxzzy-fitness/src/components/ui/app/SharedSectionShell.tsx"
+        "repos/fawxzzy-fitness/src/components/ui/app/SharedSectionShell.tsx",
+        "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
+        "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
       ],
       "primitive_variants": {
         "header": {

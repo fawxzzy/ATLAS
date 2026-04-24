@@ -834,6 +834,10 @@ class AtlasUiObservationTests(unittest.TestCase):
         shared_screen_header_ref = "repos/fawxzzy-fitness/src/components/ui/app/SharedScreenHeader.tsx"
         app_panel_ref = "repos/fawxzzy-fitness/src/components/ui/app/AppPanel.tsx"
         app_badge_ref = "repos/fawxzzy-fitness/src/components/ui/app/AppBadge.tsx"
+        design_system_ref = "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts"
+        tokens_ref = "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+        routine_editor_form_ref = "repos/fawxzzy-fitness/src/components/routines/RoutineEditorForm.tsx"
+        reorder_exercise_row_ref = "repos/fawxzzy-fitness/src/app/routines/[id]/edit/day/[dayId]/ReorderExerciseRow.tsx"
 
         for selector in {
             ("editDay", "default"),
@@ -877,11 +881,19 @@ class AtlasUiObservationTests(unittest.TestCase):
             captures_by_id["edit-day-default"]["owner_surface_refs"],
         )
         self.assertIn(
+            reorder_exercise_row_ref,
+            captures_by_id["edit-day-default"]["owner_surface_refs"],
+        )
+        self.assertIn(
             "repos/fawxzzy-fitness/src/app/routines/[id]/edit/EditRoutineAutosaveForm.tsx",
             captures_by_id["edit-routine-days-section-default"]["owner_surface_refs"],
         )
         self.assertIn(
             "repos/fawxzzy-fitness/src/app/routines/[id]/edit/EditRoutineDaysSection.tsx",
+            captures_by_id["edit-routine-days-section-default"]["owner_surface_refs"],
+        )
+        self.assertIn(
+            routine_editor_form_ref,
             captures_by_id["edit-routine-days-section-default"]["owner_surface_refs"],
         )
         self.assertIn(
@@ -892,6 +904,13 @@ class AtlasUiObservationTests(unittest.TestCase):
             "repos/fawxzzy-fitness/src/app/routines/[id]/edit/day/[dayId]/RoutineDayAddExerciseForm.tsx",
             captures_by_id["edit-day-add-exercise-default"]["owner_surface_refs"],
         )
+        for capture_id in {
+            "edit-day-default",
+            "edit-routine-days-section-default",
+            "edit-day-add-exercise-default",
+        }:
+            self.assertIn(design_system_ref, captures_by_id[capture_id]["owner_surface_refs"])
+            self.assertIn(tokens_ref, captures_by_id[capture_id]["owner_surface_refs"])
         self.assertFalse(any(capture_id.startswith("routine-editor-") for capture_id in captures_by_id))
         self.assertFalse(any(capture_id.startswith("routine-detail-") for capture_id in captures_by_id))
         self.assertFalse(any(item["screen_key"] == "routineEditor" for item in capture_map["captures"]))

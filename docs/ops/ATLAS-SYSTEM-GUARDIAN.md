@@ -219,5 +219,21 @@ Use this before enabling cleanup on a new profile:
 2. Review `latest-run.json` and the matching text report.
 3. Confirm protected processes were skipped.
 4. Confirm browsers stayed notify-only unless policy explicitly allows headless cleanup.
-5. Verify the candidate rule list matches the machine’s real background profile.
+5. Verify the candidate rule list matches the machine's real background profile.
 6. Switch to a cleanup-capable profile only after the dry-run output looks sane.
+
+## Smoke Verification
+
+For a no-install check from the ATLAS root:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\ops\scripts\system-guardian\system-guardian-status.ps1
+```
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\ops\scripts\system-guardian\system-guardian-run.ps1 -DryRun
+```
+
+The status command may report the scheduled task as not installed. That is a valid state for manual-only operation.
+
+The dry-run command writes runtime receipts under `runtime/atlas/system-guardian/` and must not terminate processes.
