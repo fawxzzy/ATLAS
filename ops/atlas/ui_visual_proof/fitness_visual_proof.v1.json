@@ -3,7 +3,7 @@
   "owner_repo_id": "fitness",
   "owner_repo_path": "repos/fawxzzy-fitness",
   "capture_map_ref": "ops/atlas/ui_observe/fitness_capture_map.v1.json",
-  "expected_capture_map_digest": "sha256:ddee91ebaee60733c37422ce151abbd4ec6d86b02917cd6620f458d217ea153b",
+  "expected_capture_map_digest": "sha256:bdf777b93a1f72177b32955347061d8eeb86624375e7693f14e8dd2bc8ad0cf6",
   "image_artifact_root": "runtime/atlas/ui-observe/fitness",
   "reference_root": "data/atlas/ui-visual-proof/fitness",
   "captures": [

@@ -702,6 +702,37 @@ class AtlasUiObservationTests(unittest.TestCase):
         self.assertFalse(any(item["screen_key"] == "rememberedLogin" for item in capture_map["captures"]))
         self.assertFalse(any(item["screen_key"] == "loginState" for item in capture_map["captures"]))
 
+    def test_install_flow_removal_reuses_existing_entry_handoff_capture_ids_and_entry_resolution_lineage(self) -> None:
+        inputs = json.loads(default_capture_inputs_path(ROOT).read_text(encoding="utf-8"))
+        capture_map = json.loads(default_capture_map_path(ROOT).read_text(encoding="utf-8"))
+
+        selectors = {(item["screen_key"], item["state_key"]) for item in inputs["capture_set"]}
+        captures_by_id = {item["capture_id"]: item for item in capture_map["captures"]}
+        initial_experience_gate_ref = "repos/fawxzzy-fitness/src/components/auth/InitialExperienceGate.tsx"
+        entry_resolution_ref = "repos/fawxzzy-fitness/src/lib/resolvePostLoginDestination.ts"
+        install_entry_gate_ref = "repos/fawxzzy-fitness/src/components/install/InstallEntryGate.tsx"
+        root_page_ref = "repos/fawxzzy-fitness/src/app/page.tsx"
+
+        for selector in {
+            ("entryHandoff", "card"),
+            ("entryHandoff", "statusPanel"),
+            ("entryHandoff", "stageList"),
+        }:
+            self.assertIn(selector, selectors)
+
+        for capture_id in {
+            "entry-handoff-card",
+            "entry-handoff-status-panel",
+            "entry-handoff-stage-list",
+        }:
+            self.assertIn(initial_experience_gate_ref, captures_by_id[capture_id]["owner_surface_refs"])
+            self.assertIn(entry_resolution_ref, captures_by_id[capture_id]["owner_surface_refs"])
+            self.assertNotIn(install_entry_gate_ref, captures_by_id[capture_id]["owner_surface_refs"])
+            self.assertNotIn(root_page_ref, captures_by_id[capture_id]["owner_surface_refs"])
+
+        self.assertFalse(any(capture_id.startswith("install-entry-") for capture_id in captures_by_id))
+        self.assertFalse(any(item["screen_key"] == "installEntry" for item in capture_map["captures"]))
+
     def test_today_overview_token_bridge_family_reuses_existing_capture_id_and_lineage(self) -> None:
         inputs = json.loads(default_capture_inputs_path(ROOT).read_text(encoding="utf-8"))
         capture_map = json.loads(default_capture_map_path(ROOT).read_text(encoding="utf-8"))

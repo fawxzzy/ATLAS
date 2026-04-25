@@ -113,6 +113,7 @@ Curated onboarding is not opted into visual proof yet.
 Entry handoff surfaces are not opted into visual proof yet.
 
 - The current family depends on authenticated entry resolution and saved first-run state.
+- The install-acquisition removal on the owner side still resolves through the existing semantic `entry-handoff-*` captures, with routing and destination logic reuse made explicit in lineage instead of by adding a new screenshot lane.
 - Root proof still only gates captures that already have deterministic screenshot artifacts across browser modes.
 - Keep the entry handoff family on the semantic observer/drift lane until a stable entry-state screenshot harness exists.
 
@@ -120,6 +121,7 @@ Auth / recovery remains semantic-only for this tranche.
 
 - The active semantic lane already covers `auth-recovery-shell`, `auth-recovery-login-screen`, `auth-recovery-signup-form`, `auth-recovery-forgot-password-form`, `auth-recovery-reset-password-form`, `auth-recovery-recovery-bridge`, `auth-recovery-message-chrome`, `auth-recovery-account-panel`, and `auth-recovery-action-chrome`.
 - The family still depends on remembered-account hydration, remembered-login sync after authenticated surfaces, recovery-fragment handoff, and session establishment state that do not yet produce a stable root-side screenshot artifact and approved reference pair.
+- The install-flow removal that landed with the auth alignment tranche does not change that constraint; the route now reuses the semantic auth and entry-handoff lanes rather than creating a deterministic install/auth screenshot state.
 - Keep auth/recovery on the semantic observer/drift lane until one of those active capture ids has a deterministic runtime screenshot path and matching reference image.
 - Pattern: if auth/recovery later becomes deterministic enough for proof, attach it to the existing active `auth-recovery-*` capture ids before inventing route-scenario, wrapper-only, `remembered-login-*`, or `login-state-*` proof ids.
 - Failure Mode: forcing screenshot gating onto remembered-account or recovery-session transitions makes the proof rail flaky while pretending the wrong state is stable.

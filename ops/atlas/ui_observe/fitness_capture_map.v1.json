@@ -1308,6 +1308,7 @@
         "repos/fawxzzy-fitness/src/components/RouteLoading.tsx",
         "repos/fawxzzy-fitness/src/components/auth/InitialExperienceGate.tsx",
         "repos/fawxzzy-fitness/src/components/auth/AuthShell.tsx",
+        "repos/fawxzzy-fitness/src/lib/resolvePostLoginDestination.ts",
         "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
         "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
       ],
@@ -1341,6 +1342,7 @@
         "repos/fawxzzy-fitness/src/app/loading.tsx",
         "repos/fawxzzy-fitness/src/components/RouteLoading.tsx",
         "repos/fawxzzy-fitness/src/components/auth/InitialExperienceGate.tsx",
+        "repos/fawxzzy-fitness/src/lib/resolvePostLoginDestination.ts",
         "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
         "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
       ],
@@ -1372,6 +1374,7 @@
       "route_family": "entry",
       "owner_surface_refs": [
         "repos/fawxzzy-fitness/src/components/auth/InitialExperienceGate.tsx",
+        "repos/fawxzzy-fitness/src/lib/resolvePostLoginDestination.ts",
         "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts",
         "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
       ],
