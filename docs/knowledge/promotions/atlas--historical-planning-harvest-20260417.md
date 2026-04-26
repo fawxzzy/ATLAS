@@ -56,6 +56,15 @@ These sources remain indexed-only or pending review after this harvest:
 - `Downloads/ATLAS-HISTORICAL-PLANNING-HARVEST-PACKET.md`
 - `Downloads/CODEX-PROMPT-ATLAS-HISTORICAL-PLANNING-HARVEST.md`
 
+## Topic Map
+
+- continuity harvest
+- root doctrine versus owner truth
+- Playbook roadmap provenance
+- Verta trust posture
+- indexed-only residue handling
+- historical planning promotion
+
 ## Evidence References
 
 - continuity manifest: `data/imports/knowledge/continuity/harvest-manifest.json`
@@ -72,3 +81,9 @@ These sources remain indexed-only or pending review after this harvest:
   `docs/knowledge/reviews/verta-core-scrub-report.md`
   `data/imports/knowledge/personal/verta-core/EVALUATION.json`
   `data/imports/knowledge/personal/verta-core-sanitized/EVALUATION.json`
+
+## Exclusions And Redactions
+
+- This note does not promote raw Verta archive text into trusted doctrine.
+- Local Downloads packet paths remain local-only residue references, not canonical stack contracts.
+- Historical packet assumptions do not override live owner-repo truth.

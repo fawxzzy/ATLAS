@@ -19,6 +19,13 @@ The core platform boundary is now stable enough that debt work should proceed as
 4. Move or clean repo-root mutable residue where the owning repo agrees.
 5. Keep all new repos compliant on `AGENTS.md`, `.codex/config.toml`, and relative-path discipline.
 
+## Parked Architecture Cleanup
+
+Track the naming-lane follow-up in `docs/atlas/decisions/adr-canonical-ai-naming-and-cortex-boundary.md`.
+
+- Normalize stale stack docs that still treat `repos/cortex` or `repos/fawxzzy-atlas` as active AI/platform surfaces when the live Cortex surface is `runtime/cortex/**`.
+- Keep this parked behind the active rail. Fitness owner adoption remains the next execution move, not naming consolidation implementation.
+
 ## Bucket Order
 
 1. Repair current governed runtime buckets with canonical builders or truthful receipt supersession.

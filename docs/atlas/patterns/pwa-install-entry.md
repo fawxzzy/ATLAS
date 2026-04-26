@@ -50,10 +50,11 @@ Important distinctions:
 The progressive enhancement order is fixed:
 
 1. Build an installable PWA foundation.
-2. Wait for the browser to expose install-prompt capability.
-3. Render an in-app Install CTA only after capability is confirmed and the app is not already running in installed mode.
-4. On click, call the retained prompt once.
-5. Remove or replace the CTA after install, after dismissal, or when installed state is detected.
+2. Route launcher surfaces into the target app's canonical install or open route instead of pretending the launcher can install a different-origin app.
+3. Wait for the browser to expose install-prompt capability inside the current app.
+4. Render an in-app Install CTA only after capability is confirmed and the app is not already running in installed mode.
+5. On click, call the retained prompt once.
+6. Remove or replace the CTA after install, after dismissal, or when installed state is detected.
 
 Operational rules:
 
@@ -62,6 +63,35 @@ Operational rules:
 - Treat `prompt()` as one-shot for a given deferred event.
 - Hide or replace the CTA when `appinstalled` fires on supported Chromium browsers.
 - Also hide or replace the CTA when runtime detection shows the app is already running in installed display mode, such as `standalone`.
+- Do not label a cross-origin navigation button as `Install`. Use `Open`, `Open installer`, or equivalent truthful copy unless the current page can actually trigger the browser prompt for the current origin.
+
+## Launcher Handoff Rule
+
+Launcher apps and bio-link hubs must route users into the target app's own install surface.
+
+- A launcher may only trigger a native PWA install prompt for its own current origin after `beforeinstallprompt` has fired.
+- When the target app lives on another origin, the launcher must link to the target app's canonical install route, not to a fake install action.
+- If the launcher has platform-aware labels, keep them action-truthful. Example:
+  - iOS browser or in-app browser: `Open` -> target app install route
+  - iOS standalone: `Open` -> target app root
+  - Android, desktop, or other non-iOS browser: `Open installer` -> target app install route
+- The target app owns installability checks, iOS gating, and standalone access truth.
+
+## iOS Access-Gate Pattern
+
+When an app requires stronger iOS install guidance, use a split access pattern instead of a single generic install prompt:
+
+1. iOS in-app browser: hard gate with `Open in Safari` guidance and copyable canonical install URL.
+2. iOS Safari browser tab: hard gate with `Share, then Add to Home Screen` guidance.
+3. iOS standalone or Home Screen launch: allow normal app access.
+4. Android and other non-iOS platforms: allow browser access and progressively show a native install CTA only when the browser exposes prompt capability.
+
+Guardrails:
+
+- Do not attempt to force-open Safari.
+- Do not claim the app is installed based on query params or storage.
+- Use runtime standalone detection as the source of truth for installed iOS access.
+- Keep browser-auth entry points usable when product doctrine requires browser login or recovery to remain available.
 
 ## Fallback Strategy
 
@@ -104,6 +134,7 @@ Use a consistent event set across apps:
 - Put capability detection, installed-state detection, and telemetry vocabulary in a shared package when multiple apps need the same behavior.
 - Keep copy, engagement heuristics, manual instruction content, and design treatment app-local.
 - Treat browser support tables as living reference material and re-check MDN and web.dev before operationalizing the pattern in a production app.
+- Browser automation may validate app logic with mocked contexts, but real iOS Add to Home Screen and real Android native install confirmation still require manual device QA.
 
 ## Primary References
 

@@ -1,0 +1,103 @@
+# Fitness Exercise Catalog Ops
+
+## Purpose
+
+Reusable ATLAS-level workflow for evolving the `fawxzzy-fitness` exercise catalog without letting taxonomy, migrations, or runtime usage drift apart.
+
+## Source Of Truth
+
+- Repo: `repos/fawxzzy-fitness`
+- Canonical catalog: `repos/fawxzzy-fitness/supabase/data/global_exercises_canonical.json`
+- Catalog refresh generator: `repos/fawxzzy-fitness/scripts/refresh-exercise-catalog.mjs`
+- Catalog analysis generator: `repos/fawxzzy-fitness/scripts/analyze-exercise-catalog.mjs`
+
+## Required Outputs
+
+- DB migration derived from canonical catalog:
+  `repos/fawxzzy-fitness/supabase/migrations/040_exercise_curation_tags_and_howto_refresh.sql`
+- Analysis bundle:
+  `repos/fawxzzy-fitness/supabase/data/global_exercises_catalog_index.json`
+  `repos/fawxzzy-fitness/supabase/data/global_exercises_catalog_index.csv`
+  `repos/fawxzzy-fitness/supabase/data/global_exercises_review_queue.json`
+- Human-readable review docs:
+  `repos/fawxzzy-fitness/docs/exercise-catalog-analysis.md`
+  `repos/fawxzzy-fitness/docs/exercise-catalog-review-queue.md`
+
+## Workflow
+
+1. Edit or regenerate the canonical catalog, not UI fixtures or ad hoc DB rows.
+2. Run `node scripts/refresh-exercise-catalog.mjs` in `repos/fawxzzy-fitness`.
+3. Run `npm run analyze:exercise-catalog` in `repos/fawxzzy-fitness`.
+4. Review:
+   `docs/exercise-catalog-analysis.md`
+   `docs/exercise-catalog-review-queue.md`
+   `supabase/data/global_exercises_catalog_index.csv`
+5. If metadata contracts changed, inspect the generated migration before deploy.
+6. Run repo verification:
+   `npm run verify`
+   `npm run build`
+7. Record the pass in an ATLAS audit note under `docs/audits/`.
+
+## Operating Rules
+
+- Keep canonical equipment values normalized and finite.
+- Prefer deterministic generators over hand-editing 100+ rows.
+- Treat `measurement_type` and `default_unit` as explicit catalog contract fields, not runtime fallback assumptions.
+- Keep filter-only taxonomy separate from card-display taxonomy.
+- Expand the library by coverage, not by raw count alone. New exercises should fill meaningful gaps in:
+  `primary_muscle`
+  `movement_pattern` / `pattern_detail`
+  `equipment`
+  `training_goal`
+- Current filter/logic taxonomy includes:
+  `pattern_detail`, `plane_of_motion`, `exercise_utility`, `body_position`, `training_goal`, `difficulty`, `setup_cost`, `stability_requirement`, `unilateral_profile`, `loading_profile`, `joint_emphasis`, `spine_demand`, `grip_constraint`
+- Use ATLAS docs for reusable process notes; use repo docs for app-specific analysis artifacts.
+- When a concept belongs in browse/reference but not in normal performance logging, model it as a reference-only hub entity backed by its own dataset rather than forcing it into the main exercise logging contract.
+
+## Coverage Matrix
+
+- Before large catalog expansion, audit which high-value tag combinations already exist and which are thin or missing.
+- Distinguish between:
+  exercise coverage for the workout engine
+  stretch coverage for the mobility/reference codex
+- Similar-looking exercises are still acceptable when they create a reasoned programming difference such as:
+  equipment constraint
+  stability demand
+  unilateral vs bilateral loading
+  setup cost
+  spine demand
+  tension or joint emphasis differences
+- The goal is not "no overlap"; the goal is overlap with a defensible reason the engine can use.
+
+## Reference-Only Hubs
+
+- Current example: the single `Stretch` card in `fawxzzy-fitness`.
+- Keep the top-level catalog surface to one hub card when the sub-items would create noise in browse, history, or stats.
+- Store the hub's sub-items in a separate typed dataset so the library can expand without inflating the main exercise table.
+- Reuse one presentation component across:
+  `exercise info`
+  `current-session reference mode`
+- For visual QA, review the hub in the same system contexts the user actually touches:
+  `add-exercise picker row`
+  `history/browser compact + detailed cards`
+  `planned-day row treatment`
+  `today card`
+  `current-session/live-reference mode`
+  `full exercise info screen`
+- Prefer live authenticated localhost captures for these QA passes over custom demo routes when the goal is to validate real account data, logging state, and route wiring.
+- Style hub sub-item lists to inherit the app's existing chooser/list language whenever possible so the reference layer feels native instead of bolted on.
+- For the Stretch hub specifically:
+  keep card surfaces free of normal goal/description copy
+  use `Mobility`, `Recovery`, and an optional third identity chip (`Bodyweight` currently)
+  treat add-exercise configuration as `sets`-only unless the product later decides Stretch should become a true logged modality
+- When validating real UI changes for these hubs, prefer live localhost captures from a signed-in QA account over preview routes.
+  On `fawxzzy-fitness`, the current reliable path is a localhost-only `x-atlas-access-token` header fallback plus short-lived fresh dev servers per capture.
+- Do not show normal set logging, PRs, or history for reference-only hubs unless the product explicitly decides they should become first-class log entities later.
+- Apply the same coverage thinking here: the stretch library should cover the full body/physique map with targeted options, but it remains a separate codex from the logged exercise engine.
+
+## Visual Review Order
+
+1. Non-`reps` measurement rows.
+2. Rare equipment rows (`Plate`, `Sled`, `Smith Machine`, `Cardio Machine`).
+3. Any review-queue flags generated by `analyze-exercise-catalog`.
+4. New exercises before they are merged into the main canonical list.

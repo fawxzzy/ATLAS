@@ -177,11 +177,14 @@ class AtlasUiVisualProofTests(unittest.TestCase):
         self.assertNotIn("exercise-chooser-picker-panel", captures_by_id)
         self.assertNotIn("exercise-chooser-filter-panel", captures_by_id)
         self.assertNotIn("exercise-chooser-goal-panel", captures_by_id)
+        # Configure Goal depends on chooser state plus form input; root keeps it semantic-only.
         self.assertFalse(any(capture_id.startswith("exercise-picker-") for capture_id in captures_by_id))
         self.assertFalse(any(capture_id.startswith("exercise-search-filters-") for capture_id in captures_by_id))
         self.assertFalse(any(capture_id.startswith("picker-list-viewport-") for capture_id in captures_by_id))
         self.assertFalse(any(capture_id.startswith("chooser-panel-") for capture_id in captures_by_id))
         self.assertFalse(any(capture_id.startswith("filter-shell-") for capture_id in captures_by_id))
+        self.assertFalse(any(capture_id.startswith("configure-goal-") for capture_id in captures_by_id))
+        self.assertFalse(any(capture_id.startswith("goal-form-") for capture_id in captures_by_id))
 
     def test_repo_manifest_reuses_existing_main_tab_capture_ids_for_shared_nav(self) -> None:
         manifest_path = ROOT / "ops" / "atlas" / "ui_visual_proof" / "fitness_visual_proof.v1.json"
@@ -200,6 +203,18 @@ class AtlasUiVisualProofTests(unittest.TestCase):
 
         self.assertFalse(any(capture_id.startswith("main-tab-") for capture_id in captures_by_id))
 
+    def test_repo_manifest_keeps_settings_subpanels_semantic_only_until_deterministic_artifacts_exist(self) -> None:
+        manifest_path = ROOT / "ops" / "atlas" / "ui_visual_proof" / "fitness_visual_proof.v1.json"
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        captures_by_id = {item["capture_id"]: item for item in manifest["captures"]}
+
+        self.assertIn("settings-overview-default", captures_by_id)
+        self.assertEqual({"kind": "unchanged"}, captures_by_id["settings-overview-default"]["assertion"])
+        self.assertNotIn("settings-account-form", captures_by_id)
+        self.assertNotIn("settings-glass-effects", captures_by_id)
+        self.assertNotIn("settings-legacy-migration-row", captures_by_id)
+        self.assertNotIn("settings-legacy-migration-panel", captures_by_id)
+
     def test_repo_manifest_reuses_existing_history_capture_ids_for_shared_history_chrome(self) -> None:
         manifest_path = ROOT / "ops" / "atlas" / "ui_visual_proof" / "fitness_visual_proof.v1.json"
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
@@ -216,6 +231,33 @@ class AtlasUiVisualProofTests(unittest.TestCase):
         self.assertFalse(any(capture_id.startswith("history-control-") for capture_id in captures_by_id))
         self.assertFalse(any(capture_id.startswith("history-log-") for capture_id in captures_by_id))
         self.assertFalse(any(capture_id.startswith("history-route-") for capture_id in captures_by_id))
+
+    def test_repo_manifest_reuses_existing_deterministic_today_and_history_lanes_for_floating_header_rail(self) -> None:
+        manifest_path = ROOT / "ops" / "atlas" / "ui_visual_proof" / "fitness_visual_proof.v1.json"
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        captures_by_id = {item["capture_id"]: item for item in manifest["captures"]}
+
+        for capture_id in (
+            "today-overview-default",
+            "history-sessions-list-default",
+            "history-exercises-default",
+        ):
+            self.assertIn(capture_id, captures_by_id)
+            self.assertEqual({"kind": "unchanged"}, captures_by_id[capture_id]["assertion"])
+
+        # The shared Today/History rail now resolves through reused route lanes; root does not
+        # promote a separate overview-only or detail-header screenshot family without a stable fixture.
+        self.assertNotIn("history-overview-default", captures_by_id)
+        self.assertNotIn("history-log-detail-surface", captures_by_id)
+        self.assertNotIn("history-log-edit-mode-header-panel", captures_by_id)
+
+        for prefix in (
+            "floating-header-",
+            "header-rail-",
+            "today-header-shell-",
+            "history-header-shell-",
+        ):
+            self.assertFalse(any(capture_id.startswith(prefix) for capture_id in captures_by_id))
 
     def test_repo_manifest_keeps_route_loading_off_visual_gate(self) -> None:
         manifest_path = ROOT / "ops" / "atlas" / "ui_visual_proof" / "fitness_visual_proof.v1.json"
@@ -264,11 +306,28 @@ class AtlasUiVisualProofTests(unittest.TestCase):
         self.assertFalse(any(capture_id.startswith("routine-editor-") for capture_id in captures_by_id))
         self.assertFalse(any(capture_id.startswith("routine-detail-") for capture_id in captures_by_id))
 
+    def test_repo_manifest_keeps_view_day_family_semantic_only_without_deterministic_fixture(self) -> None:
+        manifest_path = ROOT / "ops" / "atlas" / "ui_visual_proof" / "fitness_visual_proof.v1.json"
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        captures_by_id = {item["capture_id"]: item for item in manifest["captures"]}
+
+        # View-day route states are auth and live-data driven, so root keeps both the
+        # shared planned-workout row shell and the day-state variants semantic-only.
+        self.assertNotIn("detail-support-surface", captures_by_id)
+        self.assertNotIn("detail-support-day-state-card", captures_by_id)
+        self.assertNotIn("edit-day-default", captures_by_id)
+        self.assertFalse(any(capture_id.startswith("day-detail-row-") for capture_id in captures_by_id))
+        self.assertFalse(any(capture_id.startswith("view-day-shell-") for capture_id in captures_by_id))
+        self.assertFalse(any(capture_id.startswith("shared-section-view-day-") for capture_id in captures_by_id))
+        self.assertFalse(any(capture_id.startswith("day-view-section-") for capture_id in captures_by_id))
+        self.assertFalse(any(capture_id.startswith("mobile-regression-") for capture_id in captures_by_id))
+
     def test_repo_manifest_keeps_session_log_set_family_semantic_only_until_root_bindings_exist(self) -> None:
         manifest_path = ROOT / "ops" / "atlas" / "ui_visual_proof" / "fitness_visual_proof.v1.json"
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
         captures_by_id = {item["capture_id"]: item for item in manifest["captures"]}
 
+        # Session timers are volatile, and root only promotes screenshot gates for deterministic fixtures.
         self.assertNotIn("exercise-log-session-header-card", captures_by_id)
         self.assertNotIn("exercise-log-entry-section", captures_by_id)
         self.assertNotIn("exercise-log-form-section-card", captures_by_id)
@@ -278,6 +337,7 @@ class AtlasUiVisualProofTests(unittest.TestCase):
         self.assertFalse(any(capture_id.startswith("active-session-") for capture_id in captures_by_id))
         self.assertFalse(any(capture_id.startswith("session-log-") for capture_id in captures_by_id))
         self.assertFalse(any(capture_id.startswith("log-set-") for capture_id in captures_by_id))
+        self.assertFalse(any(capture_id.startswith("measurement-panel-") for capture_id in captures_by_id))
         self.assertFalse(any(capture_id.startswith("session-timer-") for capture_id in captures_by_id))
 
     def test_manifest_validation_accepts_declared_capture(self) -> None:
