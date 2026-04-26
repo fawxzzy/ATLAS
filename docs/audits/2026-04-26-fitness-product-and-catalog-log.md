@@ -22,6 +22,7 @@ Cross-pass ATLAS note for the `repos/fawxzzy-fitness` and `repos/fawxzzy-trove` 
 - Tightened the Stretch sub-card presentation again by removing the left visual strip and using an inline green divider below the title/meta block before the descriptive copy.
 - Propagated that same detailed-card treatment into the history family by switching boxed top-right meta tags to plain green text and adding the same thin gradient divider between heading/meta content and lower detail blocks.
 - Added a stretch-specific search and horizontal area-filter rail directly inside the bounded Stretch library viewport so the hub keeps the same scroll-shell behavior as add-exercise while staying curated to mobility content.
+- Cleaned the Stretch library shell further by centering the library heading, adding an explicit drill count, simplifying the sticky refinement header, and exposing a clear action so the library reads as one polished module instead of stacked utility controls.
 
 ## Catalog Work Recorded
 
