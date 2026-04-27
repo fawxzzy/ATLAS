@@ -23,6 +23,7 @@ Cross-pass ATLAS note for the `repos/fawxzzy-fitness` and `repos/fawxzzy-trove` 
 - Propagated that same detailed-card treatment into the history family by switching boxed top-right meta tags to plain green text and adding the same thin gradient divider between heading/meta content and lower detail blocks.
 - Added a stretch-specific search and horizontal area-filter rail directly inside the bounded Stretch library viewport so the hub keeps the same scroll-shell behavior as add-exercise while staying curated to mobility content.
 - Cleaned the Stretch library shell further by centering the library heading, adding an explicit drill count, simplifying the sticky refinement header, and exposing a clear action so the library reads as one polished module instead of stacked utility controls.
+- Expanded the Stretch hub from a short starter list into a broader full-body basic/intermediate codex, widened the tray back toward the intended `~2.5 cards visible` behavior, removed the redundant `guided drills` subtitle, and kept the search/filter controls outside the scroll viewport so the tray remains card-first.
 
 ## Catalog Work Recorded
 
@@ -33,6 +34,17 @@ Cross-pass ATLAS note for the `repos/fawxzzy-fitness` and `repos/fawxzzy-trove` 
 - Added second-layer taxonomy for `plane_of_motion`, `exercise_utility`, and `body_position`.
 - Added analysis outputs, a review queue, and CSV/JSON index artifacts for future scale-up passes.
 - Captured the next blueprint direction: expand the main exercise library by meaningful taxonomy-coverage gaps and treat the stretch library as a parallel full-body codex with its own coverage requirements.
+- Grounded the stretch-codex expansion in public exercise-reference guidance from ACE, NASM, ExRx, and Harvard Health, then rewrote the in-app entries into the product's shorter professional cue style rather than copying source text directly.
+- Expanded the stretch codex further to `50` home/gym-friendly entries, adding broader chest, biceps, adductor, hamstring, front-body, foot, and dynamic mobility coverage while keeping the same lightweight in-app data shape.
+- Added a generic mobility/recovery fallback description in the exercise info layer so custom rows like `Mobility` no longer render blank explanation copy even when they are not part of the canonical catalog.
+- Expanded the stretch codex again to `62` home/gym-friendly entries, filling lateral-hip, QL/side-body, rhomboid, serratus, straddle, dynamic adductor, and additional low-back/hip reset gaps.
+- Tightened stretch-library scaling so the UI now filters against a precomputed summary index, resolves full drill detail by `id`, and progressively renders the bounded tray instead of dropping the entire codex into the DOM at once.
+- Expanded the stretch codex again to `76` entries, adding puppy pose, thread-the-needle, triceps-bench, shoulder external rotation, strap extension, straddle-side reach, hip internal rotation, 90/90 flow, shin/top-of-foot, toe extension, SCM, pronation, supination, and IT-band line coverage.
+- Split the Stretch hub runtime into summary and deferred-detail files, added a generator script (`npm run gen:stretch-library-split`), and switched the panel to load long-form stretch cues/how-to copy after the lightweight shell instead of on the first client path.
+- Expanded the stretch codex again to `88` entries, adding wall angel, windmill, deep squat pry, adductor glide, rear-delt doorway, reverse prayer, seated calf strap, ankle inversion/eversion, banana stretch, scorpion rotation, foam-roll chest opener, and groiner coverage.
+- Wired stretch split generation into `prebuild` so the lightweight summary path and deferred detail path regenerate automatically during normal build flow instead of relying on manual discipline.
+- Expanded the stretch codex to `100` entries, adding sleeper, heel-on-box hamstring, doorway lat hang, lizard lunge, pigeon, shin-box fold, cat-tail side bend, toe yoga, supported wall split calf, bench-supported pec/biceps opener, bench-supported calf/ankle rock, and another supine figure-four variant.
+- Tightened the stretch query path again by precomputing per-filter candidate buckets and using tokenized query matching so the UI can narrow into a smaller working set before scanning text.
 
 ## Process Notes
 
@@ -44,7 +56,7 @@ Cross-pass ATLAS note for the `repos/fawxzzy-fitness` and `repos/fawxzzy-trove` 
 ## Follow-Up Focus
 
 1. Visual-review the non-`reps` catalog rows and rare-equipment rows before adding new exercises.
-2. Decide whether runtime payloads should split lightweight browse metadata from long-form exercise detail payloads.
+2. Decide when the stretch codex should graduate from client-side summary/detail indexing to a true split payload boundary.
 3. Lock a long-term slug/id strategy before large catalog expansion.
 4. Reuse the Stretch hub pattern for other reference-only entities only when they do not belong in the normal log/history model.
 5. Expand future exercise additions by taxonomy-combination coverage, not just raw count, and keep stretch-library coverage tracked as its own full-body codex lane.

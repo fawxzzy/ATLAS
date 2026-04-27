@@ -532,6 +532,88 @@ class AtlasUiObservationTests(unittest.TestCase):
         self.assertFalse(any(capture_id.startswith("exercise-detail-") for capture_id in capture_ids))
         self.assertFalse(any(item["screen_key"] == "exerciseDetail" for item in capture_map["captures"]))
 
+    def test_overlay_dialog_chrome_owner_adoption_reuses_existing_sheet_and_destructive_lanes(self) -> None:
+        inputs = json.loads(default_capture_inputs_path(ROOT).read_text(encoding="utf-8"))
+        capture_map = json.loads(default_capture_map_path(ROOT).read_text(encoding="utf-8"))
+
+        selectors = {(item["screen_key"], item["state_key"]) for item in inputs["capture_set"]}
+        captures_by_id = {item["capture_id"]: item for item in capture_map["captures"]}
+        bottom_sheet_ref = "repos/fawxzzy-fitness/src/components/ui/BottomSheet.tsx"
+        confirmed_server_form_button_ref = "repos/fawxzzy-fitness/src/components/destructive/ConfirmedServerFormButton.tsx"
+        confirm_destructive_modal_ref = "repos/fawxzzy-fitness/src/components/ui/ConfirmDestructiveModal.tsx"
+        overlay_chrome_ref = "repos/fawxzzy-fitness/src/components/ui/OverlayChrome.tsx"
+        delete_routine_button_ref = "repos/fawxzzy-fitness/src/app/routines/[id]/edit/DeleteRoutineButton.tsx"
+        editable_routine_day_exercise_list_ref = (
+            "repos/fawxzzy-fitness/src/app/routines/[id]/edit/day/[dayId]/EditableRoutineDayExerciseList.tsx"
+        )
+        exercise_info_sheet_ref = "repos/fawxzzy-fitness/src/components/ExerciseInfoSheet.tsx"
+        history_log_client_ref = "repos/fawxzzy-fitness/src/app/history/[sessionId]/LogAuditClient.tsx"
+        routine_details_exit_guard_ref = "repos/fawxzzy-fitness/src/components/routines/RoutineDetailsExitGuard.tsx"
+        today_page_ref = "repos/fawxzzy-fitness/src/app/today/page.tsx"
+
+        for selector in {
+            ("todayOverview", "default"),
+            ("detailSupport", "exerciseInfoSheet"),
+            ("editDay", "default"),
+            ("editRoutine", "daysSection"),
+            ("historyLog", "detailSurface"),
+        }:
+            self.assertIn(selector, selectors)
+
+        # Root reuses the existing exercise-info sheet semantic lane for shared sheet chrome
+        # instead of minting a duplicate bottom-sheet capture family.
+        self.assertIn(exercise_info_sheet_ref, captures_by_id["detail-support-exercise-info-sheet"]["owner_surface_refs"])
+        self.assertIn(bottom_sheet_ref, captures_by_id["detail-support-exercise-info-sheet"]["owner_surface_refs"])
+        self.assertIn(overlay_chrome_ref, captures_by_id["detail-support-exercise-info-sheet"]["owner_surface_refs"])
+
+        # Destructive confirmations stay attached to their existing route families.
+        for capture_id in {
+            "today-overview-default",
+            "history-log-detail-surface",
+        }:
+            self.assertIn(confirmed_server_form_button_ref, captures_by_id[capture_id]["owner_surface_refs"])
+            self.assertIn(confirm_destructive_modal_ref, captures_by_id[capture_id]["owner_surface_refs"])
+            self.assertIn(overlay_chrome_ref, captures_by_id[capture_id]["owner_surface_refs"])
+
+        self.assertIn(today_page_ref, captures_by_id["today-overview-default"]["owner_surface_refs"])
+        self.assertIn(history_log_client_ref, captures_by_id["history-log-detail-surface"]["owner_surface_refs"])
+
+        self.assertIn(
+            editable_routine_day_exercise_list_ref,
+            captures_by_id["edit-day-default"]["owner_surface_refs"],
+        )
+        self.assertIn(confirm_destructive_modal_ref, captures_by_id["edit-day-default"]["owner_surface_refs"])
+        self.assertIn(overlay_chrome_ref, captures_by_id["edit-day-default"]["owner_surface_refs"])
+
+        self.assertIn(delete_routine_button_ref, captures_by_id["edit-routine-days-section-default"]["owner_surface_refs"])
+        self.assertIn(
+            routine_details_exit_guard_ref,
+            captures_by_id["edit-routine-days-section-default"]["owner_surface_refs"],
+        )
+        self.assertIn(
+            confirm_destructive_modal_ref,
+            captures_by_id["edit-routine-days-section-default"]["owner_surface_refs"],
+        )
+        self.assertIn(overlay_chrome_ref, captures_by_id["edit-routine-days-section-default"]["owner_surface_refs"])
+
+        for prefix in (
+            "overlay-chrome-",
+            "dialog-chrome-",
+            "bottom-sheet-chrome-",
+            "confirm-destructive-modal-",
+            "destructive-dialog-",
+        ):
+            self.assertFalse(any(capture_id.startswith(prefix) for capture_id in captures_by_id))
+
+        for screen_key in {
+            "overlayChrome",
+            "dialogChrome",
+            "bottomSheetChrome",
+            "confirmDestructiveModal",
+            "destructiveDialog",
+        }:
+            self.assertFalse(any(item["screen_key"] == screen_key for item in capture_map["captures"]))
+
     def test_chooser_family_reuses_existing_capture_ids_and_lineage(self) -> None:
         inputs = json.loads(default_capture_inputs_path(ROOT).read_text(encoding="utf-8"))
         capture_map = json.loads(default_capture_map_path(ROOT).read_text(encoding="utf-8"))
@@ -1085,6 +1167,48 @@ class AtlasUiObservationTests(unittest.TestCase):
         shared_section_shell_ref = "repos/fawxzzy-fitness/src/components/ui/app/SharedSectionShell.tsx"
         design_system_ref = "repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts"
         tokens_ref = "repos/fawxzzy-fitness/src/components/ui/app/tokens.ts"
+        route_source = (
+            ROOT
+            / "repos"
+            / "fawxzzy-fitness"
+            / "src"
+            / "app"
+            / "routines"
+            / "[id]"
+            / "days"
+            / "[dayId]"
+            / "page.tsx"
+        ).read_text(encoding="utf-8")
+        state_card_source = (
+            ROOT
+            / "repos"
+            / "fawxzzy-fitness"
+            / "src"
+            / "components"
+            / "routines"
+            / "day-detail"
+            / "DayDetailStateCard.tsx"
+        ).read_text(encoding="utf-8")
+        design_system_source = (
+            ROOT
+            / "repos"
+            / "fawxzzy-fitness"
+            / "src"
+            / "components"
+            / "ui"
+            / "app"
+            / "designSystem.ts"
+        ).read_text(encoding="utf-8")
+        tokens_source = (
+            ROOT
+            / "repos"
+            / "fawxzzy-fitness"
+            / "src"
+            / "components"
+            / "ui"
+            / "app"
+            / "tokens.ts"
+        ).read_text(encoding="utf-8")
 
         self.assertIn(("detailSupport", "dayStateCard"), selectors)
 
@@ -1100,10 +1224,39 @@ class AtlasUiObservationTests(unittest.TestCase):
 
         self.assertIn(design_system_ref, captures_by_id["detail-support-day-state-card"]["owner_surface_refs"])
         self.assertIn(tokens_ref, captures_by_id["detail-support-day-state-card"]["owner_surface_refs"])
-        self.assertFalse(any(capture_id.startswith("view-day-shell-") for capture_id in captures_by_id))
-        self.assertFalse(any(capture_id.startswith("shared-section-view-day-") for capture_id in captures_by_id))
-        self.assertFalse(any(capture_id.startswith("day-view-section-") for capture_id in captures_by_id))
-        self.assertFalse(any(item["screen_key"] == "viewDay" for item in capture_map["captures"]))
+
+        for tone in ("warning", "rest", "blocking", "neutral"):
+            self.assertIn(f'tone="{tone}"', route_source)
+        for token_name in (
+            "detailStateCard",
+            "detailStateRest",
+            "detailStateWarning",
+            "detailStateBlocking",
+            "detailStateNeutral",
+        ):
+            self.assertIn(token_name, state_card_source)
+            self.assertIn(f"{token_name}ClassName", design_system_source)
+            self.assertIn(token_name, tokens_source)
+
+        for prefix in {
+            "view-day-shell-",
+            "shared-section-view-day-",
+            "day-view-section-",
+            "day-detail-state-card-",
+            "rest-day-state-card-",
+            "detail-state-card-",
+            "detail-state-",
+        }:
+            self.assertFalse(any(capture_id.startswith(prefix) for capture_id in captures_by_id))
+
+        for screen_key in {
+            "viewDay",
+            "dayDetailStateCard",
+            "restDayStateCard",
+            "detailStateCard",
+            "detailState",
+        }:
+            self.assertFalse(any(item["screen_key"] == screen_key for item in capture_map["captures"]))
 
     def test_session_log_set_family_reuses_existing_capture_ids_and_lineage(self) -> None:
         inputs = json.loads(default_capture_inputs_path(ROOT).read_text(encoding="utf-8"))
@@ -1170,6 +1323,86 @@ class AtlasUiObservationTests(unittest.TestCase):
         self.assertFalse(any(item["screen_key"] == "measurementPanel" for item in capture_map["captures"]))
         self.assertFalse(any(item["screen_key"] == "logSet" for item in capture_map["captures"]))
         self.assertFalse(any(item["screen_key"] == "sessionTimer" for item in capture_map["captures"]))
+
+    def test_bottom_action_owner_adoption_reuses_existing_route_capture_ids_and_lineage(self) -> None:
+        inputs = json.loads(default_capture_inputs_path(ROOT).read_text(encoding="utf-8"))
+        capture_map = json.loads(default_capture_map_path(ROOT).read_text(encoding="utf-8"))
+
+        selectors = {(item["screen_key"], item["state_key"]) for item in inputs["capture_set"]}
+        captures_by_id = {item["capture_id"]: item for item in capture_map["captures"]}
+        canonical_bottom_actions_ref = "repos/fawxzzy-fitness/src/components/layout/CanonicalBottomActions.tsx"
+        bottom_actions_store_ref = "repos/fawxzzy-fitness/src/components/layout/bottom-actions.tsx"
+        publish_bottom_actions_ref = "repos/fawxzzy-fitness/src/components/layout/PublishBottomActions.tsx"
+        bottom_action_bar_ref = "repos/fawxzzy-fitness/src/components/ui/BottomActionBar.tsx"
+        settings_sign_out_ref = "repos/fawxzzy-fitness/src/components/settings/SettingsBottomSignOutAction.tsx"
+        session_sticky_footer_ref = "repos/fawxzzy-fitness/src/components/session/SessionStickyFooter.tsx"
+
+        for selector in {
+            ("todayOverview", "default"),
+            ("routinesOverview", "default"),
+            ("routinesOverview", "selectedRoutine"),
+            ("settings", "overview"),
+            ("historySessions", "default"),
+            ("historyExercises", "default"),
+            ("exerciseLog", "stickyFooter"),
+            ("editDay", "default"),
+            ("editRoutine", "daysSection"),
+            ("editDayAddExercise", "default"),
+            ("historyLog", "detailSurface"),
+        }:
+            self.assertIn(selector, selectors)
+
+        for capture_id in {
+            "today-overview-default",
+            "routines-overview-default",
+            "routines-overview-selected-routine",
+            "settings-overview-default",
+            "history-sessions-list-default",
+            "history-exercises-default",
+            "exercise-log-sticky-footer",
+            "edit-day-default",
+            "edit-routine-days-section-default",
+            "edit-day-add-exercise-default",
+            "history-log-detail-surface",
+        }:
+            self.assertIn(canonical_bottom_actions_ref, captures_by_id[capture_id]["owner_surface_refs"])
+            self.assertIn(bottom_actions_store_ref, captures_by_id[capture_id]["owner_surface_refs"])
+
+        for capture_id in {
+            "today-overview-default",
+            "settings-overview-default",
+            "history-sessions-list-default",
+            "history-exercises-default",
+            "exercise-log-sticky-footer",
+            "edit-day-default",
+            "edit-routine-days-section-default",
+            "edit-day-add-exercise-default",
+        }:
+            self.assertIn(publish_bottom_actions_ref, captures_by_id[capture_id]["owner_surface_refs"])
+
+        self.assertIn(settings_sign_out_ref, captures_by_id["settings-overview-default"]["owner_surface_refs"])
+        self.assertIn(session_sticky_footer_ref, captures_by_id["exercise-log-sticky-footer"]["owner_surface_refs"])
+        self.assertIn(bottom_action_bar_ref, captures_by_id["exercise-log-sticky-footer"]["owner_surface_refs"])
+
+        for prefix in {
+            "footer-dock-",
+            "footer-owner-",
+            "bottom-action-dock-",
+            "bottom-action-shell-",
+            "bottom-actions-shell-",
+            "bottom-dock-",
+        }:
+            self.assertFalse(any(capture_id.startswith(prefix) for capture_id in captures_by_id))
+
+        for screen_key in {
+            "footerDock",
+            "footerOwner",
+            "bottomActionDock",
+            "bottomActionShell",
+            "bottomActionsShell",
+            "bottomDock",
+        }:
+            self.assertFalse(any(item["screen_key"] == screen_key for item in capture_map["captures"]))
 
     def test_route_loading_family_reuses_existing_route_and_entry_capture_ids(self) -> None:
         inputs = json.loads(default_capture_inputs_path(ROOT).read_text(encoding="utf-8"))

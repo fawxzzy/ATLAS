@@ -1,0 +1,117 @@
+{
+  "contract_version": "atlas.cortex.rule-registry.v1",
+  "rules": [
+    {
+      "id": "fitness-owns-ui-truth",
+      "kind": "rule",
+      "statement": "Fitness owns product UI truth.",
+      "applies_to": [
+        "fitness",
+        "cortex",
+        "root planning"
+      ],
+      "evidence": [
+        "docs/atlas/notes/cortex-mvp-spec-2026-04-26.md"
+      ],
+      "next_action_hint": "Route UI implementation changes into Fitness and keep Cortex read-only over product surfaces."
+    },
+    {
+      "id": "root-validates-proves-projects",
+      "kind": "rule",
+      "statement": "The ATLAS root validates, proves, and projects stack state, but does not absorb repo-owned implementation truth.",
+      "applies_to": [
+        "atlas root",
+        "cortex"
+      ],
+      "evidence": [
+        "AGENTS.md",
+        "stack.yaml"
+      ],
+      "next_action_hint": "Prefer stack-level runtime, docs, and ops files when building Cortex intelligence primitives."
+    },
+    {
+      "id": "footer-catch-up-precedes-pivot",
+      "kind": "pattern",
+      "statement": "After Fitness adoption, the matching ATLAS/Cortex catch-up is the next rail step before a primary-lane pivot.",
+      "applies_to": [
+        "fitness rail",
+        "cortex proof rail"
+      ],
+      "evidence": [
+        "docs/atlas/notes/cortex-priority-pivot-2026-04-26.md"
+      ],
+      "next_action_hint": "Treat the footer catch-up as the latest clean step before building new Cortex capabilities."
+    },
+    {
+      "id": "fitness-owner-adoption-resumes-unless-pivot",
+      "kind": "pattern",
+      "statement": "After ATLAS/Cortex catch-up, Fitness owner adoption is next unless a documented priority pivot changes the rail.",
+      "applies_to": [
+        "fitness rail",
+        "cortex planning"
+      ],
+      "evidence": [
+        "docs/atlas/notes/cortex-priority-pivot-2026-04-26.md"
+      ],
+      "next_action_hint": "Require an explicit pivot note before skipping back to Fitness owner-adoption work."
+    },
+    {
+      "id": "existing-captures-first",
+      "kind": "rule",
+      "statement": "Use existing captures first.",
+      "applies_to": [
+        "ui proof",
+        "visual verification",
+        "cortex evidence selection"
+      ],
+      "evidence": [
+        "ops/atlas/ui_observe/fitness_capture_map.v1.json",
+        "ops/atlas/ui_visual_proof/fitness_visual_proof.v1.json"
+      ],
+      "next_action_hint": "Read existing capture maps and proof manifests before proposing new evidence work."
+    },
+    {
+      "id": "screenshot-proof-only-for-deterministic-states",
+      "kind": "rule",
+      "statement": "Screenshot proof is allowed only for deterministic states.",
+      "applies_to": [
+        "ui proof",
+        "cortex proof summaries"
+      ],
+      "evidence": [
+        "docs/atlas/notes/cortex-mvp-spec-2026-04-26.md"
+      ],
+      "next_action_hint": "Mark non-deterministic UI states as unsupported proof inputs rather than forcing screenshot evidence."
+    },
+    {
+      "id": "no-root-shadow-capture-families",
+      "kind": "failure_mode",
+      "statement": "Do not create root shadow capture families that duplicate repo-owned product evidence.",
+      "applies_to": [
+        "atlas root",
+        "cortex"
+      ],
+      "evidence": [
+        "AGENTS.md",
+        "stack.yaml"
+      ],
+      "next_action_hint": "Keep Cortex consuming existing repo proof surfaces instead of inventing parallel capture systems."
+    },
+    {
+      "id": "cortex-observes-interprets-proves-only",
+      "kind": "failure_mode",
+      "statement": "Cortex observes, interprets, and proves; it does not own product, governance, receipt, or enforcement truth.",
+      "applies_to": [
+        "cortex",
+        "playbook",
+        "lifeline",
+        "_stack",
+        "fitness"
+      ],
+      "evidence": [
+        "docs/atlas/notes/cortex-mvp-spec-2026-04-26.md"
+      ],
+      "next_action_hint": "Reduce scope whenever a Cortex change starts looking like product ownership, governance authoring, receipt authority, or enforcement."
+    }
+  ]
+}

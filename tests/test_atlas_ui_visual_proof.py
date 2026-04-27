@@ -166,6 +166,27 @@ class AtlasUiVisualProofTests(unittest.TestCase):
         )
         self.assertFalse(any(capture_id.startswith("exercise-detail-") for capture_id in captures_by_id))
 
+    def test_repo_manifest_keeps_overlay_dialog_chrome_semantic_only_without_stable_open_fixture(self) -> None:
+        manifest_path = ROOT / "ops" / "atlas" / "ui_visual_proof" / "fitness_visual_proof.v1.json"
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        captures_by_id = {item["capture_id"]: item for item in manifest["captures"]}
+
+        # The existing exercise-info sheet fixture remains the only deterministic overlay-adjacent
+        # proof lane; interaction-driven modal and sheet open states stay semantic-only.
+        self.assertIn("detail-support-exercise-info-sheet", captures_by_id)
+        self.assertNotIn("edit-day-default", captures_by_id)
+        self.assertNotIn("edit-routine-days-section-default", captures_by_id)
+        self.assertNotIn("history-log-detail-surface", captures_by_id)
+
+        for prefix in (
+            "overlay-chrome-",
+            "dialog-chrome-",
+            "bottom-sheet-chrome-",
+            "confirm-destructive-modal-",
+            "destructive-dialog-",
+        ):
+            self.assertFalse(any(capture_id.startswith(prefix) for capture_id in captures_by_id))
+
     def test_repo_manifest_keeps_chooser_family_semantic_only_until_root_artifacts_exist(self) -> None:
         manifest_path = ROOT / "ops" / "atlas" / "ui_visual_proof" / "fitness_visual_proof.v1.json"
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
@@ -312,15 +333,25 @@ class AtlasUiVisualProofTests(unittest.TestCase):
         captures_by_id = {item["capture_id"]: item for item in manifest["captures"]}
 
         # View-day route states are auth and live-data driven, so root keeps both the
-        # shared planned-workout row shell and the day-state variants semantic-only.
+        # shared planned-workout row shell and the rest/warning/blocking/neutral
+        # day-state variants semantic-only even after Fitness centralized detailState*
+        # owner bridge exports.
         self.assertNotIn("detail-support-surface", captures_by_id)
         self.assertNotIn("detail-support-day-state-card", captures_by_id)
         self.assertNotIn("edit-day-default", captures_by_id)
-        self.assertFalse(any(capture_id.startswith("day-detail-row-") for capture_id in captures_by_id))
-        self.assertFalse(any(capture_id.startswith("view-day-shell-") for capture_id in captures_by_id))
-        self.assertFalse(any(capture_id.startswith("shared-section-view-day-") for capture_id in captures_by_id))
-        self.assertFalse(any(capture_id.startswith("day-view-section-") for capture_id in captures_by_id))
-        self.assertFalse(any(capture_id.startswith("mobile-regression-") for capture_id in captures_by_id))
+
+        for prefix in (
+            "day-detail-row-",
+            "view-day-shell-",
+            "shared-section-view-day-",
+            "day-view-section-",
+            "day-detail-state-card-",
+            "rest-day-state-card-",
+            "detail-state-card-",
+            "detail-state-",
+            "mobile-regression-",
+        ):
+            self.assertFalse(any(capture_id.startswith(prefix) for capture_id in captures_by_id))
 
     def test_repo_manifest_keeps_session_log_set_family_semantic_only_until_root_bindings_exist(self) -> None:
         manifest_path = ROOT / "ops" / "atlas" / "ui_visual_proof" / "fitness_visual_proof.v1.json"

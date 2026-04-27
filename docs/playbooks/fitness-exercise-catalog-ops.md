@@ -94,6 +94,55 @@ Reusable ATLAS-level workflow for evolving the `fawxzzy-fitness` exercise catalo
   On `fawxzzy-fitness`, the current reliable path is a localhost-only `x-atlas-access-token` header fallback plus short-lived fresh dev servers per capture.
 - Do not show normal set logging, PRs, or history for reference-only hubs unless the product explicitly decides they should become first-class log entities later.
 - Apply the same coverage thinking here: the stretch library should cover the full body/physique map with targeted options, but it remains a separate codex from the logged exercise engine.
+- Keep stretch-library controls outside the bounded card tray when the goal is to preserve a clean `2-3 cards visible` viewport. Search and filter can sit above the tray, but the tray itself should stay focused on card scanning and vertical browsing.
+- As the stretch codex grows, keep the tray cheap by:
+  precomputing search/filter summaries once
+  resolving full detail payloads by `id`
+  progressively rendering only the visible card batch inside the bounded tray
+  using CSS containment/content-visibility on individual library cards when appropriate
+  precomputing filter buckets so narrow category rails query a smaller candidate pool instead of rescanning the full summary list
+- Keep a deterministic split-generation step for the Stretch hub so runtime files do not drift:
+  source authoring currently lives in `repos/fawxzzy-fitness/src/lib/stretch-library.ts`
+  generate browse summaries with `npm run gen:stretch-library-split`
+  consume `stretch-library-summaries.ts` on the initial client path
+  defer `stretch-library-details.ts` behind the library panel so long-form cues/how-to copy load after the shell
+  keep `npm run build` / `prebuild` responsible for regenerating the split so source edits cannot ship stale summary/detail artifacts
+- If the codex grows far beyond the current client-friendly range, split lightweight browse metadata from long-form drill detail payloads before inflating the main app bundle.
+- When expanding the Stretch hub, add coverage by body-region gaps first:
+  hips and hip flexors
+  glutes and hip rotation
+  hamstrings
+  adductors and groin
+  quads
+  calves and ankles
+  chest
+  shoulders and triceps
+  upper back and thoracic rotation
+  neck and forearms
+  lateral hip / TFL / glute med
+  side body / QL / ribcage reach
+  serratus / scapular reach
+  feet / arches / toes / peroneals
+- Prefer reputable movement-reference sources for stretch-codex additions, then rewrite the entry data into the app's shorter professional voice.
+  Current anchors used for the first codex pass:
+  [ACE exercise library](https://www.acefitness.org/resources/everyone/exercise-library/)
+  [NASM stretch and exercise library](https://www.nasm.org/resource-center/exercise-library/)
+  [ExRx stretch directory](https://exrx.net/Lists/Directory)
+  [Harvard Health stretching guidance](https://www.health.harvard.edu/exercise-and-fitness/take-time-to-stretch-FV8ERJTB)
+- Recent high-value gap fills added on top of the first codex wave:
+  lateral hip / TFL / IT-band line
+  rhomboid / serratus / scapular reach
+  deep hip rotation
+  straddle and side-body combinations
+  front-neck / SCM
+  pronation / supination forearm work
+  top-of-foot / shin / toe extension
+  deep squat and groiner prep
+  windmill / scorpion rotational flows
+  wall angel and foam-roll chest opening
+  sleeper / shoulder-rotation work
+  lizard / pigeon / shin-box hip-opening variants
+  heel-on-box and support-assisted hamstring/calf progressions
 
 ## Visual Review Order
 

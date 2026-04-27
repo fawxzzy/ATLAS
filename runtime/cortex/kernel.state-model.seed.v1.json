@@ -1,0 +1,101 @@
+{
+  "contract_version": "atlas.cortex.kernel-state.v1",
+  "posture": {
+    "posture_id": "cortex-mvp-wave1",
+    "classification": "pivoted",
+    "summary": "Cortex is the active product lane after the footer-owner catch-up, and known stack debt remains intentionally untouched.",
+    "handoff_summaries": [
+      "docs/atlas/notes/cortex-priority-pivot-2026-04-26.md",
+      "docs/atlas/notes/cortex-mvp-spec-2026-04-26.md"
+    ],
+    "git_status_summaries": [
+      "git status --short shows the three Cortex notes as new while unrelated Fitness-facing files remain dirty and out of scope."
+    ],
+    "verification_summaries": [
+      "Wave 1 should preserve the clean footer catch-up proof step and treat stack validation debt as existing debt unless the current tranche introduces a regression."
+    ],
+    "stack_validation_summaries": [
+      "runtime/receipts/validation/stack-validation.latest.json"
+    ],
+    "rail_state": {
+      "rail_id": "cortex-mvp",
+      "owner_layer": "cortex",
+      "latest_clean_step": {
+        "step_id": "footer-owner-atlas-cortex-catch-up",
+        "owner_layer": "atlas",
+        "summary": "Footer owner adoption and the matching ATLAS/Cortex catch-up are the latest clean proof step.",
+        "status": "clean",
+        "evidence": [
+          "docs/atlas/notes/cortex-priority-pivot-2026-04-26.md"
+        ],
+        "source_inputs": [
+          "handoff summary",
+          "proof rail status"
+        ],
+        "completed_at": "2026-04-26"
+      },
+      "dirty_lanes": [
+        {
+          "lane_id": "cortex-kernel-v0-1",
+          "owner_layer": "cortex",
+          "summary": "State, rule, and proof-summary primitives still need to be recorded as explicit Cortex runtime inputs.",
+          "status": "open",
+          "blocking_reason": "Cortex cannot yet classify project posture or emit structured proof memory without a dedicated kernel schema.",
+          "evidence": [
+            "docs/atlas/notes/cortex-mvp-inventory-2026-04-26.md",
+            "docs/atlas/notes/cortex-mvp-spec-2026-04-26.md"
+          ],
+          "source_inputs": [
+            "runtime/cortex/** inventory",
+            "Cortex MVP notes"
+          ]
+        }
+      ],
+      "verification": [
+        {
+          "status": "completed_with_known_debt",
+          "passed": [
+            "Footer catch-up is documented.",
+            "Cortex MVP notes exist under docs/atlas/notes."
+          ],
+          "failed": [],
+          "known_debt": [
+            "Existing stack validation debt remains outside the active Cortex tranche."
+          ],
+          "notes": [
+            "Do not classify unchanged stack debt as a new Cortex failure."
+          ]
+        }
+      ],
+      "next_action": {
+        "action_id": "build-cortex-kernel-wave1",
+        "owner_layer": "cortex",
+        "title": "Add the first descriptive Cortex kernel primitives.",
+        "rationale": "The Cortex MVP needs explicit state, rule, and proof-summary structures before planning or connector work can be trusted.",
+        "required_inputs": [
+          "handoff summaries",
+          "git status summaries",
+          "unittest and verify outputs",
+          "stack validation summaries"
+        ],
+        "verification_plan": [
+          "python -m unittest tests.test_cortex_kernel",
+          "python -m unittest tests.test_atlas_ui_observe",
+          "python -m unittest tests.test_atlas_ui_visual_proof",
+          "python -m unittest tests.test_atlas_ui_proof_summary",
+          "python .\\ops\\validation\\validate_stack.py"
+        ],
+        "receipt_scope": "Cortex should be able to draft proof summaries without claiming Lifeline receipt authority."
+      },
+      "boundary_reminders": [
+        "Fitness owns product UI truth.",
+        "_stack owns orchestration and enforcement truth.",
+        "Lifeline owns receipt and approval truth."
+      ]
+    },
+    "boundary_reminders": [
+      "Cortex observes, interprets, and proves.",
+      "Cortex does not become owner truth for product, governance, or receipts."
+    ]
+  }
+}

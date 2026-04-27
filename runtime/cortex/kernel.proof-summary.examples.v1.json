@@ -1,0 +1,82 @@
+{
+  "contract_version": "atlas.cortex.proof-summary.examples.v1",
+  "examples": [
+    {
+      "proof_id": "fitness-verify-clean",
+      "command": "python -m unittest tests.test_atlas_ui_proof_summary",
+      "status": "passed",
+      "passed": [
+        "Fitness proof summary classification stays completion-ready when semantic and visual proof are both clean."
+      ],
+      "failed": [],
+      "known_debt": [],
+      "notes": [
+        "This is a repo-owned verification signal that Cortex can consume without taking over UI truth."
+      ],
+      "touched_files": [
+        "tests/test_atlas_ui_proof_summary.py",
+        "ops/atlas/ui_proof/fitness.py"
+      ],
+      "owner_layer": "fitness",
+      "next_required_layer": "cortex",
+      "receipt_ready": true,
+      "evidence": [
+        "tests/test_atlas_ui_proof_summary.py"
+      ]
+    },
+    {
+      "proof_id": "cortex-kernel-schema-clean",
+      "command": "python -m unittest tests.test_cortex_kernel",
+      "status": "passed",
+      "passed": [
+        "Cortex kernel state, rule registry, and proof summary examples load from explicit runtime artifacts."
+      ],
+      "failed": [],
+      "known_debt": [],
+      "notes": [
+        "Wave 1 keeps the kernel descriptive and deterministic."
+      ],
+      "touched_files": [
+        "ops/cortex/kernel.py",
+        "runtime/cortex/kernel.state-model.seed.v1.json",
+        "runtime/cortex/kernel.rule-registry.seed.v1.json",
+        "runtime/cortex/kernel.proof-summary.examples.v1.json",
+        "tests/test_cortex_kernel.py"
+      ],
+      "owner_layer": "cortex",
+      "next_required_layer": "cortex",
+      "receipt_ready": true,
+      "evidence": [
+        "runtime/cortex/kernel.state-model.seed.v1.json",
+        "runtime/cortex/kernel.rule-registry.seed.v1.json",
+        "runtime/cortex/kernel.proof-summary.examples.v1.json"
+      ]
+    },
+    {
+      "proof_id": "stack-validation-known-debt",
+      "command": "python .\\ops\\validation\\validate_stack.py",
+      "status": "completed_with_known_debt",
+      "passed": [
+        "Stack validation completed and exercised the stack-level path policy."
+      ],
+      "failed": [],
+      "known_debt": [
+        "Existing stack debt remained present before and after the Cortex tranche."
+      ],
+      "notes": [
+        "Known existing debt blocks a clean receipt but is not a new Cortex regression unless the tranche introduced it."
+      ],
+      "touched_files": [
+        "stack.yaml",
+        "README-STACK.md",
+        "ops/validation/validate_stack.py"
+      ],
+      "owner_layer": "stack",
+      "next_required_layer": "cortex",
+      "receipt_ready": false,
+      "evidence": [
+        "stack.yaml"
+      ]
+    }
+  ]
+}
