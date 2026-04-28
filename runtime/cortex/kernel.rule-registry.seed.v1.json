@@ -30,6 +30,21 @@
       "next_action_hint": "Prefer stack-level runtime, docs, and ops files when building Cortex intelligence primitives."
     },
     {
+      "id": "known-validation-debt-stays-ambient-unless-regression",
+      "kind": "rule",
+      "statement": "Known validation debt stays ambient unless the active tranche introduces a regression.",
+      "applies_to": [
+        "cortex validation",
+        "stack validation",
+        "proof receipts"
+      ],
+      "evidence": [
+        "runtime/cortex/kernel.state-model.seed.v1.json",
+        "runtime/cortex/kernel.proof-summary.examples.v1.json"
+      ],
+      "next_action_hint": "Preserve inherited validation debt on the CortexRunResult ledger without treating it as a current-tranche blocker."
+    },
+    {
       "id": "footer-catch-up-precedes-pivot",
       "kind": "pattern",
       "statement": "After Fitness adoption, the matching ATLAS/Cortex catch-up is the next rail step before a primary-lane pivot.",

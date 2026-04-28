@@ -1,0 +1,194 @@
+from __future__ import annotations
+
+import unittest
+from dataclasses import replace
+
+from ops._atlas import atlas_root
+from ops.cortex.kernel import CortexPosture, NextAction, RailState, load_kernel_state_model, load_rule_registry
+from ops.cortex.worker_plan import build_worker_plan
+
+
+class CortexWorkerPlanTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.root = atlas_root()
+        cls.posture = load_kernel_state_model(root=cls.root)
+        cls.rules = load_rule_registry(root=cls.root)
+
+    def _with_state(
+        self,
+        *,
+        posture: CortexPosture | None = None,
+        rail_state: RailState | None = None,
+        next_action: NextAction | None = None,
+    ) -> tuple[CortexPosture, RailState, NextAction]:
+        base_posture = posture or self.posture
+        base_rail_state = rail_state or base_posture.rail_state
+        if base_posture.rail_state != base_rail_state:
+            base_posture = replace(base_posture, rail_state=base_rail_state)
+        base_next_action = next_action or base_rail_state.next_action
+        return base_posture, base_rail_state, base_next_action
+
+    def test_cortex_runtime_next_action_produces_cortex_runtime_prompt(self) -> None:
+        posture, rail_state, next_action = self._with_state(
+            posture=replace(self.posture, classification="steady"),
+            rail_state=replace(
+                self.posture.rail_state,
+                owner_layer="cortex",
+                latest_clean_step=replace(self.posture.rail_state.latest_clean_step, owner_layer="atlas"),
+                next_action=replace(
+                    self.posture.rail_state.next_action,
+                    action_id="cortex-runtime-work",
+                    owner_layer="cortex",
+                    title="Continue Cortex runtime work.",
+                    rationale="Cortex remains active and should stay on the runtime lane.",
+                    verification_plan=("python -m unittest tests.test_cortex_worker_plan",),
+                ),
+            ),
+        )
+
+        plan = build_worker_plan(posture, rail_state, next_action, self.rules)
+
+        self.assertEqual("cortex_runtime_work", plan.template_id)
+        self.assertEqual("cortex", plan.owner_layer)
+        self.assertIn("Objective", plan.prompt)
+        self.assertIn("Context", plan.prompt)
+        self.assertIn("Implementation plan", plan.prompt)
+        self.assertIn("Files to modify", plan.prompt)
+        self.assertIn("Files to avoid", plan.prompt)
+        self.assertIn("Verification steps", plan.prompt)
+        self.assertIn("Documentation summary", plan.prompt)
+        self.assertIn("Rule", plan.prompt)
+        self.assertIn("Pattern", plan.prompt)
+        self.assertIn("Failure Mode", plan.prompt)
+        self.assertIn("Cortex priority override active: yes", plan.prompt)
+        self.assertTrue(any(path.startswith("ops/cortex/") for path in plan.files_to_modify))
+
+    def test_fitness_owner_adoption_next_action_produces_fitness_scoped_prompt(self) -> None:
+        posture, rail_state, next_action = self._with_state(
+            posture=replace(self.posture, classification="steady"),
+            rail_state=replace(
+                self.posture.rail_state,
+                owner_layer="fitness",
+                latest_clean_step=replace(self.posture.rail_state.latest_clean_step, owner_layer="atlas"),
+                next_action=replace(
+                    self.posture.rail_state.next_action,
+                    action_id="fitness-owner-adoption",
+                    owner_layer="fitness",
+                    title="Resume Fitness owner adoption.",
+                    rationale="Fitness owns the lane and should continue adoption work.",
+                    verification_plan=("python -m unittest tests.test_atlas_playbook_contract_consumption",),
+                ),
+            ),
+        )
+
+        plan = build_worker_plan(posture, rail_state, next_action, self.rules)
+
+        self.assertEqual("fitness_owner_adoption", plan.template_id)
+        self.assertIn("Fitness", plan.prompt)
+        self.assertTrue(any(path.startswith("repos/fawxzzy-fitness") for path in plan.files_to_modify))
+        self.assertIn("ops/cortex/**", plan.prompt)
+
+    def test_atlas_cortex_catch_up_next_action_produces_root_only_proof_prompt(self) -> None:
+        posture, rail_state, next_action = self._with_state(
+            posture=replace(self.posture, classification="steady"),
+            rail_state=replace(
+                self.posture.rail_state,
+                owner_layer="atlas",
+                latest_clean_step=replace(self.posture.rail_state.latest_clean_step, owner_layer="fitness"),
+                next_action=replace(
+                    self.posture.rail_state.next_action,
+                    action_id="atlas-cortex-catch-up",
+                    owner_layer="atlas",
+                    title="Perform the matching ATLAS/Cortex catch-up.",
+                    rationale="The root proof lane should stay at the ATLAS boundary.",
+                    verification_plan=("python .\\ops\\validation\\validate_stack.py",),
+                ),
+            ),
+        )
+
+        plan = build_worker_plan(posture, rail_state, next_action, self.rules)
+
+        self.assertEqual("atlas_cortex_catch_up", plan.template_id)
+        self.assertTrue(all(not path.startswith("repos/") for path in plan.files_to_modify))
+        self.assertIn("AGENTS.md", plan.prompt)
+        self.assertIn("stack.yaml", plan.prompt)
+        self.assertIn("Root proof work should validate stack posture", plan.prompt)
+
+    def test_docs_adr_next_action_avoids_broad_stack_cleanup(self) -> None:
+        posture, rail_state, next_action = self._with_state(
+            posture=replace(self.posture, classification="steady"),
+            rail_state=replace(
+                self.posture.rail_state,
+                owner_layer="cortex",
+                next_action=replace(
+                    self.posture.rail_state.next_action,
+                    action_id="docs-adr-or-debt-slice",
+                    owner_layer="cortex",
+                    title="Draft the Cortex docs ADR slice.",
+                    rationale="Capture the narrow docs slice without broad stack cleanup.",
+                    verification_plan=("python -m unittest tests.test_cortex_worker_plan",),
+                ),
+            ),
+        )
+
+        plan = build_worker_plan(posture, rail_state, next_action, self.rules)
+
+        self.assertEqual("docs_adr_or_debt_slice", plan.template_id)
+        self.assertTrue(all(not path.startswith("repos/") for path in plan.files_to_modify))
+        self.assertIn("broad stack cleanup", plan.prompt.lower())
+
+    def test_generated_prompt_includes_files_to_avoid_when_provided(self) -> None:
+        posture, rail_state, next_action = self._with_state(
+            rail_state=replace(
+                self.posture.rail_state,
+                next_action=replace(
+                    self.posture.rail_state.next_action,
+                    action_id="cortex-runtime-work",
+                    owner_layer="cortex",
+                    title="Continue Cortex runtime work.",
+                    rationale="Keep the runtime lane active.",
+                ),
+            ),
+        )
+
+        plan = build_worker_plan(
+            posture,
+            rail_state,
+            next_action,
+            self.rules,
+            files_to_avoid=["tmp/**", "repos/**"],
+        )
+
+        self.assertIn("tmp/**", plan.prompt)
+        self.assertIn("repos/**", plan.prompt)
+        self.assertIn("tmp/**", plan.files_to_avoid)
+        self.assertIn("repos/**", plan.files_to_avoid)
+
+    def test_invalid_next_action_fails_clearly(self) -> None:
+        posture, rail_state, _ = self._with_state(
+            rail_state=replace(
+                self.posture.rail_state,
+                next_action=replace(
+                    self.posture.rail_state.next_action,
+                    action_id="open-connector-work",
+                    owner_layer="connector",
+                    title="Open connector work.",
+                    rationale="This lane is outside the supported Cortex prompt templates.",
+                ),
+            ),
+        )
+        unsupported_next_action = replace(
+            rail_state.next_action,
+            action_id="open-connector-work",
+            owner_layer="connector",
+            title="Open connector work.",
+            rationale="This lane is outside the supported Cortex prompt templates.",
+        )
+
+        with self.assertRaisesRegex(ValueError, "Unsupported Cortex NextAction"):
+            build_worker_plan(posture, rail_state, unsupported_next_action, self.rules)
+
+
+if __name__ == "__main__":
+    unittest.main()

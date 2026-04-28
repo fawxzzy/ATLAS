@@ -32,11 +32,11 @@ class CortexKernelTests(unittest.TestCase):
         self.assertEqual("pivoted", posture.classification)
         self.assertEqual("cortex-mvp", posture.rail_state.rail_id)
         self.assertEqual(
-            "footer-owner-atlas-cortex-catch-up",
+            "cortex-kernel-v0-1",
             posture.rail_state.latest_clean_step.step_id,
         )
         self.assertIn(
-            "handoff summaries",
+            "runtime/cortex/kernel.state-model.seed.v1.json",
             posture.rail_state.next_action.required_inputs,
         )
         self.assertEqual(posture, load_kernel_state_model(path=path))

@@ -45,6 +45,12 @@ Cross-pass ATLAS note for the `repos/fawxzzy-fitness` and `repos/fawxzzy-trove` 
 - Wired stretch split generation into `prebuild` so the lightweight summary path and deferred detail path regenerate automatically during normal build flow instead of relying on manual discipline.
 - Expanded the stretch codex to `100` entries, adding sleeper, heel-on-box hamstring, doorway lat hang, lizard lunge, pigeon, shin-box fold, cat-tail side bend, toe yoga, supported wall split calf, bench-supported pec/biceps opener, bench-supported calf/ankle rock, and another supine figure-four variant.
 - Tightened the stretch query path again by precomputing per-filter candidate buckets and using tokenized query matching so the UI can narrow into a smaller working set before scanning text.
+- Standardized the add-exercise goal measurement inputs onto a single inline-label contract: green meta text in the top-right of every field, with matching input padding so sets, reps, weight, time, distance, calories, and RPE no longer mix placeholder-only, centered-right, and bottom-right label treatments.
+- Standardized preview-time grammar across the workout-builder/session-target surfaces so any previewed duration metric now renders with an explicit `s` suffix (`3:00 s`) instead of relying on bare clock text.
+- Promoted the green top-right measurement-label treatment from add-exercise-only to the shared `MeasurementPanelV2` contract so live logging, edit-day measurement editing, and other real measurement-entry surfaces all use the same label placement and input padding rules.
+- Replaced raw text bullets in goal/metric preview surfaces with structured green-dot separators so add-exercise goal previews, inline goal summaries, and live session metric previews now share the same visual grammar instead of faking separators inside a single text string.
+- Tightened the mobile auth/input contract across the pre-login surfaces by reducing auth field height/padding on phone widths, trimming auth-form stack spacing, and moving signup/forgot/reset onto the same shared auth input class as login so those screens stop mixing oversized generic inputs with the login-specific chrome.
+- Hardened the exercise-filter taxonomy path by parsing stringified `curation_tags`, backfilling canonical curation tags from the repo catalog when DB rows omit them, and wiring the add-exercise picker onto the same expanded curation-group filter model as history so filter surfaces stop silently collapsing back to the legacy three-group view.
 
 ## Process Notes
 

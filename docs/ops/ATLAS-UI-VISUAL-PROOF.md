@@ -209,6 +209,22 @@ python ops/atlas/ui_visual_proof/fitness.py --dry-run
 
 The CLI exits non-zero when any declared proof capture fails.
 
+## Live Debug Capture Notes
+
+Deterministic proof and ad hoc live-user screenshots are related, but they are not the same lane.
+
+- Deterministic proof should keep using the declared manifest, stable capture ids, and approved references.
+- Live-user debugging may use preview routes and temporary capture specs when a user reports that the current signed-in UI does not match the expected render.
+- Live-user screenshots are debugging evidence, not proof-manifest replacements.
+
+Rules for ad hoc live screenshots:
+
+- prefer `tmp/captures/**` for generated capture specs and PNGs
+- verify the local runtime build first through the app's version endpoint before trusting a screenshot
+- when sharing a fresh screenshot in chat, write it to a new filename instead of overwriting the previous image path
+- when the bug depends on real truncation, real counts, or signed-in chrome, capture the live-data preview route rather than a fixture route
+- if the browser render appears older than the source and server build, suspect stale service-worker or cache state before treating the screenshot as current truth
+
 ## Notes
 
 - A clean semantic drift report is not enough to prove that a visual edit landed correctly.
