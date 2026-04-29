@@ -37,6 +37,7 @@ Read these files first:
 - `docs/architecture/AWARENESS-FIRST-WORLD-MODEL.md`
 - `docs/architecture/STACK-STANDARDS.md`
 - `docs/architecture/PATH-POLICY.md`
+- `docs/ops/ATLAS-MISSION-CONTEXT.md`
 - `docs/ops/ATLAS-SESSION-RUNBOOK.md`
 - `docs/ops/ATLAS-CODEX-CONTEXT-RUNBOOK.md`
 - `docs/ops/ATLAS-TOOL-REGISTRY-RUNBOOK.md`
