@@ -10,6 +10,9 @@ from ops._atlas import atlas_root, normalize_slashes
 from ops.atlas.ui_proof.fitness import default_schema_path, derive_ui_proof_summary
 from ops.cortex.feedback import CortexFeedbackInput, classify_feedback
 from ops.cortex.feedback_artifact import write_feedback_artifact
+from ops.cortex.connector_proof_reference_integration import (
+    default_integrated_proof_reference_pack_latest_json_path,
+)
 from ops.cortex.lifeline_receipt_payload import (
     build_lifeline_receipt_candidate,
     default_lifeline_receipt_candidate_latest_json_path,
@@ -153,6 +156,12 @@ class CortexLifelineReceiptPayloadTests(unittest.TestCase):
         write_receipt_handoff(root=root)
         artifact = write_proof_reference_pack(root=root)
         return artifact.latest_artifact_path
+
+    def _seed_integrated_pack(self, root: Path, pack_path: Path) -> Path:
+        payload = json.loads(pack_path.read_text(encoding="utf-8"))
+        integrated_path = default_integrated_proof_reference_pack_latest_json_path(root)
+        _write_json(integrated_path, payload)
+        return integrated_path
 
     def _seed_ui_proof_summary(self, root: Path) -> None:
         _write_json(
@@ -341,6 +350,33 @@ class CortexLifelineReceiptPayloadTests(unittest.TestCase):
 
         json.dumps(artifact.to_payload(), sort_keys=True)
         json.dumps(artifact.candidate_payload, sort_keys=True)
+
+    def test_payload_uses_integrated_pack_reference_when_present(self) -> None:
+        root = self._temp_root()
+        pack_path = self._seed_pack(root)
+        self._seed_integrated_pack(root, pack_path)
+        self._seed_ui_proof_summary(root)
+        write_lifeline_receipt_with_approval(
+            root=root,
+            approval={
+                "explicit_human_approval": True,
+                "approved_at": "2026-04-28T18:42:00.000Z",
+                "reviewer_label": "Lane S reviewer",
+                "approval_note": "Explicit human approval recorded after compatibility review.",
+            },
+            lifeline_receipt_input=LifelineReceiptInput(
+                source_repo_id="fitness",
+                tranche_id="F11",
+                proof_summary_ref="runtime/atlas/ui-proof/fitness/latest.json",
+            ),
+        )
+
+        artifact = build_lifeline_receipt_candidate(root=root)
+
+        self.assertEqual(
+            "runtime/cortex/proof-reference-packs/integrated/latest.json",
+            artifact.candidate_payload["source_artifacts"]["proof_reference_pack_ref"],
+        )
 
     def test_no_final_lifeline_receipt_is_written(self) -> None:
         root = self._temp_root()

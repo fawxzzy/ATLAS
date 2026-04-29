@@ -8,6 +8,9 @@ from pathlib import Path
 from ops._atlas import atlas_root
 from ops.cortex.feedback import CortexFeedbackInput, classify_feedback
 from ops.cortex.feedback_artifact import write_feedback_artifact
+from ops.cortex.connector_proof_reference_integration import (
+    default_integrated_proof_reference_pack_latest_json_path,
+)
 from ops.cortex.lifeline_receipt_candidate import (
     render_lifeline_candidate_summary,
     validate_lifeline_receipt_candidate,
@@ -104,6 +107,12 @@ class CortexLifelineReceiptCandidateTests(unittest.TestCase):
         write_receipt_handoff(root=root)
         artifact = write_proof_reference_pack(root=root)
         return artifact.latest_artifact_path
+
+    def _seed_integrated_pack(self, root: Path, pack_path: Path) -> Path:
+        payload = json.loads(pack_path.read_text(encoding="utf-8"))
+        integrated_path = default_integrated_proof_reference_pack_latest_json_path(root)
+        _write_json(integrated_path, payload)
+        return integrated_path
 
     def test_valid_receipt_ready_pack_is_human_review_ready(self) -> None:
         root = self._temp_root()
@@ -240,6 +249,16 @@ class CortexLifelineReceiptCandidateTests(unittest.TestCase):
         self.assertTrue(Path(validation.proof_reference_pack_path).exists())
         self.assertTrue(validation.candidate_valid)
         self.assertIn("proof-reference-packs", validation.proof_reference_pack_path)
+
+    def test_defaults_to_integrated_pack_when_present(self) -> None:
+        root = self._temp_root()
+        pack_path = self._seed_pack(root)
+        integrated_path = self._seed_integrated_pack(root, pack_path)
+
+        validation = validate_lifeline_receipt_candidate(root=root)
+
+        self.assertTrue(validation.candidate_valid)
+        self.assertEqual(str(integrated_path).replace("\\", "/"), validation.proof_reference_pack_path)
 
 
 if __name__ == "__main__":

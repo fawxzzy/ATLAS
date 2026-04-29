@@ -6,6 +6,9 @@ from typing import Any
 
 from ops._atlas import atlas_root, normalize_slashes
 from ops.cortex._artifacts import read_json
+from ops.cortex.connector_proof_reference_integration import (
+    default_integrated_proof_reference_pack_latest_json_path,
+)
 from ops.cortex.proof_reference_pack import CortexProofReferencePack, default_proof_reference_pack_latest_json_path
 
 
@@ -162,7 +165,7 @@ def _load_candidate_input(
     root: Path | None = None,
 ) -> _LifelineReceiptCandidateInput:
     base = (root or atlas_root()).resolve()
-    default_path = default_proof_reference_pack_latest_json_path(base).resolve()
+    default_path = default_lifeline_candidate_source_pack_path(base)
 
     if isinstance(proof_reference_pack, CortexProofReferencePack):
         payload = proof_reference_pack.to_payload(root=base)
@@ -185,6 +188,14 @@ def _load_candidate_input(
         raise ValueError(
             f"Malformed Cortex proof reference pack at {normalize_slashes(str(artifact_path))}: {exc}"
         ) from exc
+
+
+def default_lifeline_candidate_source_pack_path(root: Path | None = None) -> Path:
+    base = (root or atlas_root()).resolve()
+    integrated_path = default_integrated_proof_reference_pack_latest_json_path(base).resolve()
+    if integrated_path.exists():
+        return integrated_path
+    return default_proof_reference_pack_latest_json_path(base).resolve()
 
 
 def _find_reference(

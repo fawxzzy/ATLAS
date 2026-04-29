@@ -9,12 +9,10 @@ from ops._atlas import atlas_relative, atlas_root, normalize_slashes, resolve_at
 from ops.cortex._artifacts import read_json, stable_json_digest, write_json_if_changed
 from ops.cortex.lifeline_receipt_candidate import (
     LifelineReceiptCandidateValidation,
+    default_lifeline_candidate_source_pack_path,
     validate_lifeline_receipt_candidate,
 )
-from ops.cortex.proof_reference_pack import (
-    CortexProofReferencePack,
-    default_proof_reference_pack_latest_json_path,
-)
+from ops.cortex.proof_reference_pack import CortexProofReferencePack
 
 LIFELINE_WRITE_READY_CONTRACT_VERSION = "atlas.cortex.lifeline-write-ready.v1"
 
@@ -349,7 +347,7 @@ def _load_pack_payload(
     *,
     root: Path,
 ) -> tuple[dict[str, Any], Path]:
-    default_path = default_proof_reference_pack_latest_json_path(root).resolve()
+    default_path = default_lifeline_candidate_source_pack_path(root)
     if isinstance(proof_reference_pack, CortexProofReferencePack):
         return proof_reference_pack.to_payload(root=root), default_path
     if isinstance(proof_reference_pack, dict):

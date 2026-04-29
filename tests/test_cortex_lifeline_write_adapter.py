@@ -8,6 +8,9 @@ from pathlib import Path
 from ops._atlas import atlas_root
 from ops.cortex.feedback import CortexFeedbackInput, classify_feedback
 from ops.cortex.feedback_artifact import write_feedback_artifact
+from ops.cortex.connector_proof_reference_integration import (
+    default_integrated_proof_reference_pack_latest_json_path,
+)
 from ops.cortex.lifeline_write_adapter import (
     LifelineWriteAdapter,
     default_lifeline_write_ready_latest_json_path,
@@ -107,6 +110,12 @@ class CortexLifelineWriteAdapterTests(unittest.TestCase):
         write_receipt_handoff(root=root)
         artifact = write_proof_reference_pack(root=root)
         return artifact.latest_artifact_path
+
+    def _seed_integrated_pack(self, root: Path, pack_path: Path) -> Path:
+        payload = json.loads(pack_path.read_text(encoding="utf-8"))
+        integrated_path = default_integrated_proof_reference_pack_latest_json_path(root)
+        _write_json(integrated_path, payload)
+        return integrated_path
 
     def _approved_result(self, pack_path: Path, *, root: Path):
         return write_lifeline_receipt_with_approval(
@@ -316,6 +325,28 @@ class CortexLifelineWriteAdapterTests(unittest.TestCase):
         self.assertEqual("cortex_write_ready_artifact_only", written_payload["write_scope"])
         self.assertEqual(False, written_payload["final_receipt_ready"])
         self.assertTrue(any(item == "source_repo_id" for item in written_payload["required_lifeline_inputs_missing"]))
+
+    def test_defaults_to_integrated_pack_when_present(self) -> None:
+        root = self._temp_root()
+        pack_path = self._seed_pack(root)
+        integrated_path = self._seed_integrated_pack(root, pack_path)
+
+        result = write_lifeline_receipt_with_approval(
+            root=root,
+            approval={
+                "explicit_human_approval": True,
+                "reviewer_label": "Lane Q reviewer",
+                "approval_note": "Use the integrated proof-reference pack.",
+            },
+        )
+
+        self.assertTrue(result.write_ready_artifact_written)
+        self.assertEqual("runtime/cortex/proof-reference-packs/integrated/latest.json", result.proof_reference_pack_path)
+        self.assertEqual(
+            "runtime/cortex/proof-reference-packs/integrated/latest.json",
+            result.prepared_receipt_payload["proof_reference_pack_path"],
+        )
+        self.assertTrue(integrated_path.exists())
 
 
 if __name__ == "__main__":
