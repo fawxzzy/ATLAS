@@ -217,6 +217,7 @@ class CortexConnectorProofReferenceIntegrationTests(unittest.TestCase):
         self.assertEqual(1, len(connector_refs))
         self.assertEqual("https://github.com/example/atlas/pull/4", connector_refs[0].url)
         self.assertEqual("github-pr-4", connector_refs[0].source_candidate_id)
+        self.assertEqual("github-pr-4", connector_refs[0].source_reference_id)
 
     def test_integrates_eligible_vercel_candidate_into_a_proof_reference_pack(self) -> None:
         root = self._temp_root()
@@ -240,6 +241,7 @@ class CortexConnectorProofReferenceIntegrationTests(unittest.TestCase):
         connector_ref = next(reference for reference in result.references if reference.source == "connector_candidate")
         self.assertEqual(1, result.candidate_source_counts["vercel"])
         self.assertEqual("vercel-deployment-1", connector_ref.source_candidate_id)
+        self.assertEqual("vercel-deployment-1", connector_ref.source_reference_id)
         self.assertEqual("https://atlas-cortex-git-lane-ab.vercel.app", connector_ref.url)
 
     def test_preserves_existing_base_proof_references(self) -> None:
@@ -505,8 +507,13 @@ class CortexConnectorProofReferenceIntegrationTests(unittest.TestCase):
 
         result = integrate_connector_candidates(root=root)
         summary = render_integrated_pack_summary(result)
+        payload = result.to_payload(root=root)
 
-        json.dumps(result.to_payload(root=root), sort_keys=True)
+        json.dumps(payload, sort_keys=True)
+        connector_payload = next(
+            reference for reference in payload["references"] if reference["source"] == "connector_candidate"
+        )
+        self.assertEqual("vercel-deployment-1", connector_payload["source_reference_id"])
         self.assertIn("Cortex Integrated Proof Reference Pack", summary)
 
     def test_does_not_require_live_connectors(self) -> None:

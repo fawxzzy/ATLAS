@@ -171,6 +171,7 @@ class IntegratedProofReference:
     notes: tuple[str, ...]
     source: str
     source_candidate_id: str | None
+    source_reference_id: str | None
     source_inventory_path: str | None
 
     def __post_init__(self) -> None:
@@ -202,6 +203,7 @@ class IntegratedProofReference:
             "notes": list(self.notes),
             "source": self.source,
             "source_candidate_id": self.source_candidate_id,
+            "source_reference_id": self.source_reference_id,
             "source_inventory_path": self.source_inventory_path,
         }
 
@@ -699,6 +701,7 @@ def _base_reference_to_integrated(
         ),
         source="base_pack",
         source_candidate_id=None,
+        source_reference_id=None,
         source_inventory_path=None,
     )
 
@@ -747,6 +750,7 @@ def _candidate_to_integrated(
         notes=_candidate_reference_notes(candidate),
         source="connector_candidate",
         source_candidate_id=candidate.candidate_id,
+        source_reference_id=candidate.source_reference_id,
         source_inventory_path=candidate.source_inventory_path,
     )
 
@@ -783,6 +787,7 @@ def _reference_canonical_key(reference: IntegratedProofReference) -> tuple[str, 
         reference.command or "",
         reference.claim,
         reference.source_candidate_id or "",
+        reference.source_reference_id or "",
         reference.source_inventory_path or "",
     )
 
