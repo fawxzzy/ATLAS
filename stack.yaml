@@ -228,6 +228,16 @@ stack_lock:
       trust_class: trusted
       release_eligible: false
   excluded_surfaces:
+    lifeline_operator_evidence_worktree:
+      path: repos/fawxzzy-lifeline-operator-evidence
+      trust_class: trusted
+      release_eligible: false
+      reason: Lifeline operator evidence is a branch worktree of the registered lifeline repo and remains a temporary non-canonical evidence lane outside the governed repo surface.
+    trove_release_cutover_worktree:
+      path: repos/fawxzzy-trove-release-cutover
+      trust_class: trusted
+      release_eligible: false
+      reason: Trove release cutover is a branch worktree of the registered trove repo and remains a temporary non-canonical cutover lane outside the governed repo surface.
     verta_core_checkout:
       path: repos/Verta-Core
       trust_class: untrusted

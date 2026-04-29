@@ -22,6 +22,34 @@ Map Cortex draft fields to Lifeline receipt expectations before implementing wri
 
 Do not mutate Lifeline just because Cortex can now produce receipt-ready handoffs.
 
+## Lane S Update
+
+Lane S adds a Cortex-owned compatibility bridge that prepares a Lifeline-contract-compatible receipt candidate payload from a human-approved Cortex write-ready artifact.
+
+The bridge writes only Cortex-owned candidate artifacts under `runtime/cortex/lifeline-receipt-candidates/` and validates the nested receipt payload structurally against the Lifeline-owned proof-reference receipt schema.
+
+Rule: Cortex may build Lifeline-compatible receipt candidate payloads, but Lifeline remains the final receipt owner.
+
+Pattern: After Lifeline defines the contract, Cortex should validate compatibility before enabling any final write path.
+
+Failure Mode: Do not treat schema-compatible, write-ready, or human-approved candidate payloads as final Lifeline receipts.
+
+## Lane Z Update
+
+Lane Z adds Cortex-owned read-only ingestion for a Lifeline-owned proof-reference receipt audit index artifact.
+
+Cortex reads an explicit Lifeline audit index JSON path, or the conventional Lifeline audit artifact path when present, then validates the owner-produced summary shape without invoking the Lifeline indexer or mutating Lifeline receipts.
+
+The Lane Z summary remains read-only. It reports receipt counts, source repo and tranche grouping, proof-reference totals, invalid receipt entries, ambient debt inventory, current validation debt inventory, missing boundary statements, and `auto_approved` violations.
+
+Connector-backed publication must remain blocked when the Lifeline audit index reports invalid receipts, current validation debt in any final receipt, missing boundary statements, or `auto_approved` drift.
+
+Rule: Cortex may read Lifeline audit indexes, but Lifeline remains the final receipt owner.
+
+Pattern: After Lifeline receipt promotion and indexing are stable, Cortex can ingest audit summaries as read-only receipt truth.
+
+Failure Mode: Do not let Cortex audit-index ingestion become a receipt repair tool, promotion tool, connector publisher, or hidden Lifeline mutator.
+
 ## Read-Only Findings
 
 Lifeline's current receipt contract is `atlas.ui.proof-passed.receipt.v1`.
@@ -30,6 +58,12 @@ The canonical owner-repo contract and implementation are:
 
 - `repos/fawxzzy-lifeline/docs/contracts/ui-proof-passed-receipt-contract.md`
 - `repos/fawxzzy-lifeline/src/core/ui-proof-receipt.ts`
+
+As of 2026-04-28, the owner-side proof-reference receipt contract is also defined at:
+
+- `repos/fawxzzy-lifeline/docs/contracts/proof-reference-receipt-contract.md`
+- `repos/fawxzzy-lifeline/schemas/proof-reference-receipt.schema.json`
+- `repos/fawxzzy-lifeline/fixtures/contracts/proof-reference-receipt.example.json`
 
 Current Lifeline receipt emission requires:
 
@@ -86,6 +120,25 @@ Before Lane O, Cortex handoff drafts do not provide the full Lifeline receipt in
 - no explicit human approval artifact
 
 This is the main compatibility result: Cortex handoff drafts are not proof-passed receipts in waiting.
+
+Lane R narrows the ambiguity by making the Lifeline-owned proof-reference receipt shape explicit. The remaining gap is implementation compatibility, not owner-side schema ownership.
+
+The Lifeline-owned proof-reference contract requires these mapped inputs for a future final receipt:
+
+- `source_artifacts.proof_reference_pack_ref`
+- `source_artifacts.proof_reference_pack_digest`
+- `source_artifacts.write_ready_artifact_ref`
+- `source_repo_id`
+- `tranche_id`
+- `proof_summary.owner_repo_id`
+- `proof_summary.summary_ref`
+- `proof_summary.report_id`
+- `proof_refs.semantic_report_ref`
+- `proof_refs.visual_report_ref`
+- `source_refs`
+- `approval.explicit_human_approval=true`
+- `approval.auto_approved=false`
+- `validation_context.current_validation_debt=[]`
 
 ## What Must Remain Human-Reviewed
 

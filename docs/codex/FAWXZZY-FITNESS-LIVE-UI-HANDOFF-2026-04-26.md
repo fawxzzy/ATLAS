@@ -148,7 +148,7 @@ Best next step:
 - lint the main logged-session edit/detail files:
   - `node scripts/next-cli.mjs lint --file src/app/history/[sessionId]/LogAuditClient.tsx --file src/components/ui/workout-entry/LoggedSetSummaryRow.tsx --file src/components/session/SessionExerciseBlock.tsx`
 - standard runner capture:
-  - `node scripts/qa/cdp-edge.mjs C:\ATLAS\tmp\<capture-config>.json`
+  - `node scripts/qa/cdp-edge.mjs tmp/captures/<capture-config>.json`
 - direct signed-in Playwright fallback:
   - run an inline Node script from `repos/fawxzzy-fitness` that imports:
     - `./scripts/qa/fitness-auth-artifact.mjs`

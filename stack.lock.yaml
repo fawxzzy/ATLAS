@@ -1,6 +1,6 @@
 schema_version: "atlas.stack.lock.v1"
 stack_manifest_path: "stack.yaml"
-stack_manifest_digest: "sha256:a62c23c208cb583d89ee5e02ed40bbdefc5032d6d8ca7adf7f6154dbf9174f69"
+stack_manifest_digest: "sha256:01a22932e0b33605cb75693417d83076a4bf40c6283d8eecc7d8c949ff6e542b"
 component_count: 9
 components:
   _stack:
@@ -103,6 +103,18 @@ components:
     trust_class: "trusted"
     release_eligible: true
 excluded_surfaces:
+  lifeline_operator_evidence_worktree:
+    path: "repos/fawxzzy-lifeline-operator-evidence"
+    present: true
+    trust_class: "trusted"
+    release_eligible: false
+    reason: "Lifeline operator evidence is a branch worktree of the registered lifeline repo and remains a temporary non-canonical evidence lane outside the governed repo surface."
+  trove_release_cutover_worktree:
+    path: "repos/fawxzzy-trove-release-cutover"
+    present: true
+    trust_class: "trusted"
+    release_eligible: false
+    reason: "Trove release cutover is a branch worktree of the registered trove repo and remains a temporary non-canonical cutover lane outside the governed repo surface."
   verta_core_archive:
     path: "repos/Verta-Core.zip"
     present: true
