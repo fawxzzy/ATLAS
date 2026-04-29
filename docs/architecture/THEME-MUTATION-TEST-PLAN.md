@@ -39,6 +39,16 @@ Observed results
   - Passed visibly on public auth/install shells after exaggerating `Test Theme`
   - Still only partially bridged across the wider app because some compiled design-system classes retain fixed radius literals
 
+Current blockers
+- Local `npm run build` now passes in `repos/fawxzzy-fitness`, so the current production red state is not reproduced by the checked-out workspace itself.
+- The dedicated theme harness test must run through the repo alias loader.
+  - Direct `node --test src/lib/app-theme.test.ts` fails with `ERR_MODULE_NOT_FOUND` for `@/lib/app-theme`.
+  - The repeatable command is `npm run test:app-theme`.
+- Production deploy health can still fail independently of the local visual harness when deploy source and workspace source drift.
+  - Current failure mode: `src/components/ui/LabeledEditorField.tsx` exists locally but the failing production deploy did not resolve `@/components/ui/LabeledEditorField`.
+- Protected-route capture remains blocked in this workspace until a fresh QA session artifact can be minted from valid local QA credentials.
+  - `runtime/fitness/qa-session.json` exists, but the stored session is stale and `npm run qa:session` cannot refresh it here without `FITNESS_QA_EMAIL` / `FITNESS_QA_PASSWORD`.
+
 Blocked route set
 - The representative protected validation set remains blocked until capture auth is repaired:
   - `/settings`
@@ -53,3 +63,24 @@ Next patch list
 - Repair protected-route capture auth so the representative suite can be re-run.
 - Promote remaining fixed-radius primitives to semantic variables where they are supposed to follow the card lane.
 - Re-run before/after captures for the blocked protected routes with the existing `Test Theme`.
+- Keep production gated on:
+  - a passing local build
+  - a passing `npm run test:app-theme`
+  - a successful preview deployment sourced from the current workspace changes
+
+## 2026-04-29 Destructive-Lane Note
+
+Additional semantic lane proved during the current-session pass
+- Destructive controls are effectively their own shared visual lane and must be treated as a global family, not as isolated red local overrides.
+
+Confirmed shared destructive surfaces updated in the repo
+- `bottom-action` danger buttons already used the darker dark-surface plus red-text treatment.
+- `action-chrome` danger buttons were lighter and were realigned to the darker family.
+- destructive badge/pill primitives were also realigned so delete/discard chips stop diverging from button treatment.
+
+Current lesson
+- When the user asks for "make this delete/discard look like the other delete/discard buttons," inspect the shared primitive path first:
+  - `bottom-action` danger
+  - `action-chrome` danger
+  - destructive badge/pill tokens
+- If those lanes disagree, fix the shared token family before adding more per-screen overrides.

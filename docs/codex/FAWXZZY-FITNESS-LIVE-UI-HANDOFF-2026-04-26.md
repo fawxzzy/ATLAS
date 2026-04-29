@@ -460,3 +460,77 @@ Useful final screenshots:
   - stale chat image path reuse
   - stale `.next` runtime
   - the right component branch was not the one actually rendering the screen
+
+## 2026-04-29 current-session live logger additions
+
+### Scope added in the later thread
+
+- current-session live logged-set screen
+- current-set summary card and saved-set rows
+- `Warm-Up`, `View`, and `Delete` action parity
+- floating-border measurement fields
+- horizontal measurement scroll reuse
+- destructive palette normalization across the app
+
+### Current-session files that now carry the current truth
+
+- `repos/fawxzzy-fitness/src/components/SessionTimers.tsx`
+- `repos/fawxzzy-fitness/src/components/ui/measurements/MeasurementPanelV2.tsx`
+- `repos/fawxzzy-fitness/src/components/ui/MetricItem.tsx`
+- `repos/fawxzzy-fitness/src/lib/exercise-goal-format.ts`
+- `repos/fawxzzy-fitness/src/app/globals.css`
+- `repos/fawxzzy-fitness/src/components/ui/Pill.tsx`
+- `repos/fawxzzy-fitness/src/components/ui/app/designSystem.ts`
+
+### Intentional UI outcomes from this pass
+
+- current-set card no longer uses the old highlighted border treatment
+- current-set emphasis now comes from the shared green accent bar below the summary text
+- set summaries use the green pipe separator between `Set #` and the metric cluster
+- measurement fields on the logger use the same floating-border title treatment as edit-day measurement cards
+- the `Warm-Up` control now uses the same global yellow family as `View`
+- the delete button is a compact pill and now uses the darker shared destructive family instead of the lighter red-wash style
+- the darker destructive treatment was pushed into shared primitives so delete/discard UI stops drifting by surface
+
+### Screenshot and live-runtime failures that mattered
+
+- the mobile regression route could look broken for three different reasons that are easy to confuse:
+  - the wrong process owned `:3000`
+  - Next dev had stale `.next` output and returned `500`
+  - the screenshot script framed the wrong region and made a good UI look bad
+- one especially misleading failure was the first `Warm-Up` swap to `DockButton`:
+  - the screenshot looked corrupted
+  - that was not just a bad capture
+  - it exposed that the shared dock-button structure was too heavy for that embedded field slot
+- another recurring failure mode:
+  - the route returned `404` because some other process, not the intended fitness QA server, was the one listening on `127.0.0.1:3000`
+
+### Recovery path that proved reliable in this thread
+
+1. verify the exact target route directly:
+   - `/dev/mobile-regression?scenario=session-logger-strength-weight`
+2. if it is not `200`, assume the runtime is untrustworthy
+3. clear only the fitness build cache:
+   - `pnpm run clean:next`
+4. stop the current `:3000` listener
+5. launch one clean server only:
+   - `pnpm run qa:dev`
+6. poll until the route returns `200`
+7. capture with a fresh JSON spec and a fresh output filename
+8. inspect the generated PNG before showing it to the user
+
+### Most relevant current-session proof artifacts
+
+- stable latest current-session capture at thread close:
+  - `tmp/current-session-v19.png`
+- matching capture spec:
+  - `tmp/current-session-v19.capture.json`
+
+### Production-push rule from this pass
+
+- for this repo, "local verify passed" is necessary but not sufficient for high-confidence UI promotion
+- before the next production push after live UI edits:
+  - run `pnpm run verify`
+  - confirm the intended `qa:dev` route returns `200`
+  - capture at least one fresh current proof image from the target route
+  - then run the existing preview-deploy gate from the current workspace source
