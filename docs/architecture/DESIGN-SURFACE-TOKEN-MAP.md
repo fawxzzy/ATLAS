@@ -1,34 +1,88 @@
 # Pass 2.5 Surface Token Map
 
-Implemented semantic controls
-- Primary action color
-  - Expected family: primary buttons, positive dock actions, accent-led CTA surfaces
-- Destructive action color
-  - Expected family: delete, discard, destructive confirmation, destructive pills/badges
-- Surface/card color
-  - Expected family: auth cards, install cards, shared panels, glass-backed cards
-- Button radius
-  - Expected family: `AppButton`, action chrome, bottom dock buttons
-- Card radius
-  - Expected family: `AppPanel`, `SurfaceCard`, `ExerciseCard`, `Glass` card shells, labeled editor shells
+Current contract
+- App Theme is not a raw color picker.
+- App Theme is the runtime proof harness for the Fitness surface map.
+- Controls must mutate semantic UI families, not route-local one-off colors.
 
-Current bridge status
-- Strong color bridge:
-  - Most shared color tokens already resolve through CSS variables.
+Implemented semantic lanes
+- Primary action:
+  - primary CTA buttons
+  - positive dock actions
+  - primary action chrome
+- Secondary action:
+  - secondary dock buttons
+  - toggle-style action chrome
+  - yellow/default secondary button lane
+- Accent / Divider:
+  - signature pipes and dots
+  - thin separators
+  - history divider bars
+  - weekday accent text
+  - thin image/card separator lines
+  - decorative accent strips
+- Surface / Card:
+  - shared panels
+  - glass-backed cards
+  - card shells
+  - settings/install/auth surfaces
+- Success / Complete:
+  - completed exercise/session text
+  - completed shells and state strips
+  - success badges/messages
+- Selection / Active:
+  - selected exercise cards
+  - selected picker rails/pills
+  - active badges and selection highlights
+- Loader / Scan:
+  - route loading scan animation
+  - loading glow energy line
+- Warning:
+  - rest-day chips
+  - warning cards
+  - yellow attention states
+- Destructive:
+  - still treated as a shared global family, separate from the App Theme lanes above
+
+Mapped V1.1 families
+- `/today`
+  - weekday title accents
+  - rest-day header subtitle suppression
+  - today-state badges
+- `/session/[id]`
+  - completed row text/shells
+  - stats strips
+  - logger and disclosure success states
+- `/routines/[id]/edit/day/[dayId]`
+  - selected exercise rows
+  - add-exercise selection rail
+  - goal dock accent border
+- `/history` and `/history/exercises`
+  - compact card image separator lines
+  - detailed card strips
+  - PR labels
+  - metric divider bars
+
+Bridge status
+- Strong runtime bridge:
+  - color lanes above now resolve through CSS variables across shared components and design-system utility classes.
 - Partial radius bridge:
-  - Shared card/button shells now read from runtime variables in the minimal harness path.
-  - Some generated class names still embed fixed radius values from the frozen design-system pack.
+  - card/button shells read runtime variables in the main shared path.
+  - some generated design-system classes still hold fixed radius literals.
 
-Confirmed families
-- Public auth/install family mutates through shared semantic tokens.
-- Destructive family now has an explicit preferred contract:
-  - darker shared surface
-  - red border/text emphasis
-  - shared behavior across `bottom-action`, `action-chrome`, and destructive badge/pill primitives
+Intentional constraint
+- Do not add one giant raw "green" setting.
+- Green/yellow surfaces are split by meaning:
+  - accent/divider
+  - success/complete
+  - selection/active
+  - loader/scan
+  - warning
 
-Unconfirmed families
-- Settings, today, routines, edit-day, session, history, history-exercises remain unconfirmed visually because protected capture auth currently redirects to `/login`.
-
-Known gap
-- `fitnessDesignPrimitiveClassNames` still contains fixed radius literals for part of the compiled design-system surface map.
-- Protected-route capture remains more fragile than the token map itself; route proof can fail even when the semantic lane change is correct.
+Open proof gap
+- Protected-route capture still needs fresh evidence after the V1.1 lane expansion.
+- If a surface does not mutate in capture, classify it as one of:
+  - token gap
+  - intentional local exception
+  - unmapped surface
+  - component-specific styling debt

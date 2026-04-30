@@ -75,7 +75,9 @@ from ops.stack.generate_lockfile import (
     describe_lock_payload_drift,
     git_output,
     load_lockfile,
+    normalize_lock_payload,
     repo_is_git_root,
+    render_lockfile_bytes,
 )
 from ops.stack.audit_gitdir_hygiene import build_report as build_gitdir_hygiene_report, default_target_paths as default_gitdir_hygiene_targets
 from ops.atlas.backfill_legacy_runtime_artifacts import backfill_legacy_runtime_artifacts
@@ -149,6 +151,7 @@ DEBT_CLASS_CONFIG = [
             "stack-lock-excluded-surface-drift",
             "stack-lock-excluded-surface-release",
             "stack-lock-excluded-surface-trust",
+            "root-lock-refresh-accepted",
             "root-lock-refresh-pending",
             "playbook-enforcement-untracked",
             "playbook-enforcement-tracking-check-failed",
@@ -468,6 +471,113 @@ def verify_locked_ref(repo_path: Path, component: dict[str, Any]) -> str | None:
     if commit and head_commit != commit:
         return f"Pinned commit '{commit}' does not match current HEAD '{head_commit}'."
     return None
+
+
+def classify_root_lock_refresh_state(
+    *,
+    root: Path,
+    lockfile_path: Path,
+    lockfile: dict[str, Any],
+    lockfile_bytes: bytes,
+    canonical_lock: dict[str, Any] | None,
+    drift_report: dict[str, Any] | None,
+) -> dict[str, Any] | None:
+    if not isinstance(canonical_lock, dict):
+        return None
+
+    stack_root_state = canonical_lock.get("stack_root")
+    canonical_bytes = canonical_lock.get("bytes")
+    repo_id = stack_root_state.get("repo_id") if isinstance(stack_root_state, dict) else None
+    if not isinstance(stack_root_state, dict) or not isinstance(repo_id, str):
+        return None
+
+    if (
+        lockfile_path.resolve() == canonical_lock.get("lockfile_path")
+        and bool(stack_root_state.get("self_refresh_only"))
+        and isinstance(canonical_bytes, bytes)
+        and lockfile_bytes == canonical_bytes
+    ):
+        return {
+            "state": "pending",
+            "repo_id": repo_id,
+            "details": {
+                "repo_id": repo_id,
+                "dirty_actual": stack_root_state.get("dirty_actual"),
+                "dirty_effective": stack_root_state.get("dirty_effective"),
+                "modified_paths": stack_root_state.get("modified_paths"),
+            },
+        }
+
+    if not isinstance(drift_report, dict):
+        return None
+    if bool(stack_root_state.get("dirty_actual")) or bool(stack_root_state.get("dirty_effective")):
+        return None
+    modified_paths = stack_root_state.get("modified_paths")
+    if modified_paths not in ([], None):
+        return None
+    if drift_report.get("metadata_fields") or drift_report.get("excluded_surfaces"):
+        return None
+
+    component_drift = drift_report.get("components")
+    if not isinstance(component_drift, dict) or sorted(component_drift) != [repo_id]:
+        return None
+    repo_drift = component_drift.get(repo_id)
+    if not isinstance(repo_drift, dict):
+        return None
+    if str(repo_drift.get("kind", "")) != "pin":
+        return None
+    drift_fields = repo_drift.get("fields")
+    if drift_fields != ["commit"]:
+        return None
+
+    locked_payload = normalize_lock_payload(lockfile)
+    if lockfile.get("lock_digest") != locked_payload.get("lock_digest"):
+        return None
+    if lockfile_bytes != render_lockfile_bytes(locked_payload):
+        return None
+
+    locked_components = drift_report.get("locked", {}).get("components")
+    generated_components = drift_report.get("generated", {}).get("components")
+    if not isinstance(locked_components, dict) or not isinstance(generated_components, dict):
+        return None
+    locked_component = locked_components.get(repo_id)
+    generated_component = generated_components.get(repo_id)
+    if not isinstance(locked_component, dict) or not isinstance(generated_component, dict):
+        return None
+
+    pinned_commit = str(locked_component.get("commit", ""))
+    current_commit = str(generated_component.get("commit", ""))
+    if not pinned_commit or not current_commit:
+        return None
+
+    code, _ = git_output(root, "cat-file", "-e", f"{pinned_commit}^{{commit}}")
+    if code != 0:
+        return None
+    code, _ = git_output(root, "merge-base", "--is-ancestor", pinned_commit, current_commit)
+    if code != 0:
+        return None
+    code, diff_output = git_output(root, "diff", "--name-only", pinned_commit, current_commit)
+    if code != 0:
+        return None
+    changed_paths = sorted(
+        normalize_slashes(line.strip())
+        for line in diff_output.splitlines()
+        if line.strip()
+    )
+    lockfile_rel = relative_to_root(root, lockfile_path)
+    if changed_paths != [lockfile_rel]:
+        return None
+
+    return {
+        "state": "accepted",
+        "repo_id": repo_id,
+        "details": {
+            "repo_id": repo_id,
+            "pinned_commit": pinned_commit,
+            "current_commit": current_commit,
+            "changed_paths": changed_paths,
+        },
+    }
 
 
 def describe_stack_lock_drift(
@@ -1855,17 +1965,32 @@ def build_findings(stack_file: Path, config: dict[str, Any], *, lock_file_overri
             canonical_bytes = canonical_lock.get("bytes") if isinstance(canonical_lock, dict) else None
             lockfile_bytes = lockfile_path.read_bytes()
             lockfile_bytes_match = isinstance(canonical_bytes, bytes) and lockfile_bytes == canonical_bytes
-            stack_root_state = canonical_lock.get("stack_root") if isinstance(canonical_lock, dict) else None
-            root_lock_refresh_pending = (
-                isinstance(canonical_lock, dict)
-                and lockfile_path.resolve() == canonical_lock.get("lockfile_path")
-                and isinstance(stack_root_state, dict)
-                and bool(stack_root_state.get("self_refresh_only"))
-                and lockfile_bytes_match
+            root_lock_refresh_state = classify_root_lock_refresh_state(
+                root=root,
+                lockfile_path=lockfile_path,
+                lockfile=lockfile,
+                lockfile_bytes=lockfile_bytes,
+                canonical_lock=canonical_lock,
+                drift_report=drift_report,
+            )
+            accepted_root_refresh_repo_id = (
+                str(root_lock_refresh_state.get("repo_id"))
+                if isinstance(root_lock_refresh_state, dict) and root_lock_refresh_state.get("state") == "accepted"
+                else None
             )
             has_payload_drift = isinstance(drift_report, dict) and bool(drift_report.get("has_drift"))
             has_render_drift = isinstance(canonical_bytes, bytes) and not lockfile_bytes_match
-            if has_payload_drift or has_render_drift:
+            if isinstance(root_lock_refresh_state, dict) and root_lock_refresh_state.get("state") == "accepted":
+                findings.append(
+                    Finding(
+                        "info",
+                        "root-lock-refresh-accepted",
+                        lockfile_rel,
+                        "Committed stack.lock.yaml self-refresh is accepted because the pinned root commit is an ancestor and stack.lock.yaml is the only intervening root diff.",
+                        root_lock_refresh_state.get("details") if isinstance(root_lock_refresh_state.get("details"), dict) else None,
+                    )
+                )
+            elif has_payload_drift or has_render_drift:
                 findings.append(
                     Finding(
                         "error",
@@ -1890,21 +2015,18 @@ def build_findings(stack_file: Path, config: dict[str, Any], *, lock_file_overri
                             drift_report=drift_report,
                         )
                     )
-            elif root_lock_refresh_pending:
+            elif isinstance(root_lock_refresh_state, dict) and root_lock_refresh_state.get("state") == "pending":
                 findings.append(
                     Finding(
                         "info",
                         "root-lock-refresh-pending",
                         lockfile_rel,
                         "Root preflight is green with a pending stack.lock.yaml self-refresh because it is the sole root delta and already matches the canonical live working set.",
-                        {
-                            "repo_id": stack_root_state.get("repo_id"),
-                            "dirty_actual": stack_root_state.get("dirty_actual"),
-                            "dirty_effective": stack_root_state.get("dirty_effective"),
-                            "modified_paths": stack_root_state.get("modified_paths"),
-                        },
+                        root_lock_refresh_state.get("details") if isinstance(root_lock_refresh_state.get("details"), dict) else None,
                     )
                 )
+            else:
+                accepted_root_refresh_repo_id = None
 
             components = lockfile.get("components")
             if not isinstance(components, dict):
@@ -1946,7 +2068,7 @@ def build_findings(stack_file: Path, config: dict[str, Any], *, lock_file_overri
                     trust_class = str(component.get("trust_class", ""))
                     if trust_class not in TRUST_CLASSES:
                         findings.append(Finding("error", "stack-lock-trust-class", component_path, f"Unsupported trust_class '{trust_class}' in stack lockfile."))
-                    ref_problem = verify_locked_ref(repo_path, component)
+                    ref_problem = None if component_id == accepted_root_refresh_repo_id else verify_locked_ref(repo_path, component)
                     if ref_problem:
                         findings.append(Finding("error", "stack-lock-missing-ref", component_path, ref_problem))
                     if bool(component.get("release_eligible")) and trust_class != "trusted":
