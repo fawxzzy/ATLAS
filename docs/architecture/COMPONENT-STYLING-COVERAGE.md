@@ -21,11 +21,13 @@ V1.1 semantic-lane consumers now bridged
 - `repos/fawxzzy-fitness/src/app/today/TodayDayPicker.tsx`
 - `repos/fawxzzy-fitness/src/app/today/TodayExerciseRows.tsx`
 - `repos/fawxzzy-fitness/src/app/routines/RoutinesPageClient.tsx`
+- `repos/fawxzzy-fitness/src/components/RoutineSwitcherBar.tsx`
 - `repos/fawxzzy-fitness/src/components/history/HistorySessionCard.tsx`
 - `repos/fawxzzy-fitness/src/components/history/HistoryExerciseCard.tsx`
 - `repos/fawxzzy-fitness/src/components/history/HistoryDetailExerciseCard.tsx`
 - `repos/fawxzzy-fitness/src/components/RouteLoading.tsx`
 - `repos/fawxzzy-fitness/src/components/stretch/StretchLibraryPanel.tsx`
+- `repos/fawxzzy-fitness/src/components/ui/ToastMessageCard.tsx`
 
 Confirmed semantic mutation coverage
 - Primary action lane:
@@ -56,5 +58,15 @@ Remaining styling debt
 
 Coverage note
 - Public-route proof is sufficient to verify bootstrap and token application.
-- Protected-route proof is required to call the V1.1 surface family complete.
-- Session/edit-day/history screens should be treated as high-value validation surfaces for every follow-up App Theme patch.
+- Protected-route proof is now refreshed locally under:
+  - `tmp/captures/fitness/visual-operator/theme/2026-04-29`
+- Preview-grounded final proof evidence also exists under:
+  - `tmp/captures/fitness/app-theme-v1_1-final-proof/2026-04-29-preview`
+- Session/edit-day/history screens remain high-value validation surfaces for every follow-up App Theme patch.
+- The current minimal operator does not replace every ad hoc proof yet:
+  - settings-panel-open proof still comes from the closeout set
+  - loader/scan proof still comes from the closeout set
+  - `edit-day-expanded` still comes from the closeout set
+- The final proof follow-up did not close those gaps because:
+  - the available isolated preview auth redirected `/settings` to `/login`
+  - the local `127.0.0.1:3000` lane stalled on `/login` and `/settings`

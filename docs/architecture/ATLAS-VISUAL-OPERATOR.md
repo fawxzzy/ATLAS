@@ -37,6 +37,39 @@ Browser ownership model
 - one controlled viewport per capture target
 - one evidence path under `tmp/` for disposable artifacts
 
+Current Fitness implementation
+- Repo-local command exists now:
+  - `repos/fawxzzy-fitness/package.json` -> `npm run visual:fitness:theme`
+- Current script:
+  - `repos/fawxzzy-fitness/scripts/qa/visual-fitness-theme.mjs`
+- Verified command shape:
+  - `npm run visual:fitness:theme -- --profile-dir ../../runtime/fitness/<profile> --output-dir ../../tmp/captures/fitness/visual-operator/theme/<stamp> --edit-day-path <route> --edit-day-add-exercise-path <route>`
+- Supported flags:
+  - `--base-url`
+  - `--viewport`
+  - `--profile-dir`
+  - `--output-dir`
+  - `--theme-preset`
+  - `--session-id`
+  - `--edit-day-path`
+  - `--edit-day-add-exercise-path`
+- Default suite coverage:
+  - `/login`
+  - `/install`
+  - `/settings`
+  - `/today`
+  - `/routines`
+  - `/history`
+  - `/history?view=detailed`
+  - `/history/[sessionId]`
+  - `/history/exercises` compact
+  - `/history/exercises` detailed
+  - `/session/[id]`
+  - `/session/[id]/add-exercise`
+  - edit-day route seam
+  - edit-day add-exercise seam
+- Protected captures mark `blocked` when auth is invalid or a dynamic seam cannot be discovered.
+
 Fitness integration points
 - Current source-of-truth docs:
   - `docs/architecture/THEME-MUTATION-TEST-PLAN.md`
@@ -53,6 +86,10 @@ Minimal first command
   - `atlas visual capture --app fitness --suite theme`
 - Acceptable repo-local bootstrap while the Atlas wrapper is still documentation-only:
   - `npm run visual:fitness:theme`
+- Current verified evidence root:
+  - `tmp/captures/fitness/visual-operator/theme/2026-04-29`
+- Current closeout evidence root with settings-panel-open and loader captures:
+  - `tmp/captures/fitness/app-theme-v1_1-closeout/2026-04-29`
 
 Failure modes
 - user browser reuse creates privacy and session-risk
@@ -63,4 +100,8 @@ Failure modes
 Scope boundary
 - This document defines the operator contract and rules.
 - It does not require broad new automation in this pass.
-- Implement only the minimal first command once the contract is stable and the Fitness route/state suite is clean.
+- Fitness now has the minimal first command.
+- Keep the next slice small:
+  - strengthen loader-state capture
+  - add richer route setup only where screenshot evidence proves the need
+  - do not turn this into a generic visual diff platform yet

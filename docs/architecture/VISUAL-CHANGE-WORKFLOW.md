@@ -31,6 +31,37 @@ Capture contract
   - expected surface family
   - screenshot output path
 
+Current Fitness execution
+- Verified repo-local command:
+  - `npm run visual:fitness:theme`
+- Verified isolated profile run on April 29, 2026 wrote evidence to:
+  - `tmp/captures/fitness/visual-operator/theme/2026-04-29`
+- Final proof follow-up run on April 29, 2026 wrote evidence to:
+  - `tmp/captures/fitness/app-theme-v1_1-final-proof/2026-04-29-preview`
+- Screenshot-backed protected route proof now exists for:
+  - `/settings`
+  - `/today`
+  - `/routines`
+  - `/session/[id]`
+  - `/session/[id]/add-exercise`
+  - `/routines/[id]/edit/day/[dayId]`
+  - `/routines/[id]/edit/day/[dayId]/add-exercise`
+  - `/history`
+  - `/history?view=detailed`
+  - `/history/[sessionId]`
+  - `/history/exercises` compact
+  - `/history/exercises` detailed
+- Separate closeout evidence also exists under:
+  - `tmp/captures/fitness/app-theme-v1_1-closeout/2026-04-29`
+- Use the closeout set for:
+  - settings panel-open proof
+  - loader/scan proof
+  - the ad hoc `edit-day-expanded` delta image
+- Use the final-proof preview set for:
+  - canonical preview `/login` smoke
+  - canonical preview `/install` smoke
+  - documented proof that the available isolated auth artifact still redirects preview `/settings` to `/login`
+
 Classification rules for misses
 - token gap
 - intentional local exception
@@ -52,10 +83,14 @@ Failure modes
 - Using the user's browser creates privacy risk, session confusion, stale state, and unreliable screenshots.
 - Single screenshot edits without route/state expectation recreate the human-memory bottleneck.
 - A green screenshot on the wrong route or wrong server is invalid proof.
+- A preview build can be READY while isolated protected auth is still unavailable and the local `:3000` lane is too stalled to produce fresh trustworthy proof.
 
 Promotion posture
 - Preview deploy only while Pass 2.5 App Theme work is active.
 - Production remains gated until the representative protected route suite is visually proven in a Codex-owned browser.
+- Protected/history proof is no longer blocked in the verified local isolated profile.
+- Loader/scan and settings-panel-open still remain closeout-only proof in the final proof pass.
+- Production still remains gated in this thread because preview-green is not the same as promotion approval.
 
 Related docs
 - `docs/architecture/THEME-MUTATION-TEST-PLAN.md`

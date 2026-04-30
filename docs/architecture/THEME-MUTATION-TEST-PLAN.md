@@ -113,13 +113,38 @@ Operator rule
 - Do not use the user's personal browser, active logged-in browser, or random user-facing windows for capture or interaction.
 
 Evidence posture
-- Public-route screenshot proof exists under `tmp/`.
-- Protected-route proof must be refreshed after the semantic-lane expansion because `/session/[id]`, edit-day, today, and history surfaces changed materially.
+- Screenshot-backed proof now exists under:
+  - `tmp/captures/fitness/app-theme-v1_1-closeout/2026-04-29`
+  - `tmp/captures/fitness/visual-operator/theme/2026-04-29`
+- Final proof follow-up evidence now also exists under:
+  - `tmp/captures/fitness/app-theme-v1_1-final-proof/2026-04-29-preview`
+- Protected representative-route proof is refreshed for:
+  - `/settings`
+  - `/today`
+  - `/routines`
+  - `/session/[id]`
+  - `/session/[id]/add-exercise`
+  - `/routines/[id]/edit/day/[dayId]`
+  - `/routines/[id]/edit/day/[dayId]/add-exercise`
+  - `/history`
+  - `/history?view=detailed`
+- `/history/[sessionId]`
+- `/history/exercises`
+- `/history/exercises` detailed
+- Delta-remap evidence now exists for the changed high-value surfaces instead of relying on the older Pass 2 map alone.
+- Current preview-grounded follow-up evidence confirms:
+  - the canonical preview `/login` and `/install` routes respond cleanly
+  - the available isolated auth artifact redirects `/settings` back to `/login` on preview, so protected preview proof is not closed by the final proof pass
 - Do not mark the V1.1 lane complete from code inspection alone.
+- Remaining honest gaps:
+  - settings-panel-open proof still relies on the closeout capture set
+  - loader/scan proof is still coming from the closeout capture set, not the minimal operator suite
+  - rest-day header wording is source-verified through subtitle suppression, but not freshly screenshot-backed in the current authenticated state
 
 Known risks
 - Some generated design-system classes still embed fixed radii and remain partial radius debt.
-- Protected-route capture is still more fragile than the token layer itself because it depends on valid auth artifacts and the correct local server owning `127.0.0.1:3000`.
+- Protected-route capture is still more fragile than the token layer itself because it depends on valid auth state and the correct local server owning `127.0.0.1:3000`.
+- The April 29 final proof pass also showed that a local server can stall on `/login` and `/settings` long enough to invalidate fresh screenshot attempts even when build output is green.
 - Preview can be green while production remains intentionally gated.
 
 Promotion gate

@@ -49,19 +49,32 @@ Mapped V1.1 families
   - weekday title accents
   - rest-day header subtitle suppression
   - today-state badges
+  - resume dock secondary/primary split
 - `/session/[id]`
   - completed row text/shells
   - stats strips
   - logger and disclosure success states
+  - add-exercise quick-add selected state via the related session flow
 - `/routines/[id]/edit/day/[dayId]`
   - selected exercise rows
   - add-exercise selection rail
   - goal dock accent border
+  - measurement editor and expanded edit-day state
 - `/history` and `/history/exercises`
   - compact card image separator lines
   - detailed card strips
   - PR labels
   - metric divider bars
+- `/history/[sessionId]`
+  - focused detail metrics
+  - detailed divider bars
+  - compact-to-detailed parity through the same accent/divider lane
+
+Recently re-proven consumers
+- `ToastMessageCard`
+  - success and warning message strips now follow semantic lanes instead of fixed green/yellow styling
+- `RoutineSwitcherBar`
+  - active badge now follows the selection/active lane
 
 Bridge status
 - Strong runtime bridge:
@@ -80,9 +93,14 @@ Intentional constraint
   - warning
 
 Open proof gap
-- Protected-route capture still needs fresh evidence after the V1.1 lane expansion.
+- Fresh protected-route evidence now exists for the changed session, history, routines, and edit-day families.
+- The preview follow-up pass proved current public deployment health, but did not close protected preview proof because isolated `/settings` redirected back to `/login`.
 - If a surface does not mutate in capture, classify it as one of:
   - token gap
   - intentional local exception
   - unmapped surface
   - component-specific styling debt
+- Remaining exception status:
+  - settings-panel-open is still only backed by the closeout capture set
+  - loader/scan is still only backed by the closeout capture set
+  - rest-day header wording is source-verified but not freshly screenshot-backed from a live rest-day route state
