@@ -63,3 +63,55 @@ Operational lesson
   - confirm the `:3000` listener is the intended fitness server
   - verify `/dev/mobile-regression?scenario=session-logger-strength-weight` returns `200`
   - only then trust screenshots as proof for promotion decisions
+
+## 2026-04-30 Edit-Day / View-Day / Account Addendum
+
+What shipped locally
+- View-day header back navigation was restored.
+- Edit-day now keeps the list visible and opens an inline single-card dropdown instead of relying on the earlier full-screen feeling branch.
+- The expanded edit-day card now uses the attached under-card action strip pattern:
+  - left `View`
+  - right `Delete`
+- Edit-day measurement inputs sit directly under that strip in the shared horizontal measurement rail.
+- The old expanded `Order` input is gone.
+- Exercise-card goal summaries use the thinner green pipe treatment in both collapsed and expanded states.
+- Settings now initialize fully collapsed.
+- Legacy migration no longer shows the inline `Not migrated` label.
+- The Today header was patched to suppress the extra `Rest day` subtitle.
+
+Files carrying the current truth
+- `repos/fawxzzy-fitness/src/app/routines/[id]/days/[dayId]/page.tsx`
+- `repos/fawxzzy-fitness/src/app/routines/[id]/edit/day/[dayId]/EditableRoutineDayExerciseList.tsx`
+- `repos/fawxzzy-fitness/src/components/session/SessionExerciseBlock.tsx`
+- `repos/fawxzzy-fitness/src/components/ui/measurements/MeasurementPanelV2.tsx`
+- `repos/fawxzzy-fitness/src/components/ExerciseCard.tsx`
+- `repos/fawxzzy-fitness/src/components/ui/app/SignatureSeparator.tsx`
+- `repos/fawxzzy-fitness/src/components/workout/ExerciseDisclosureCard.tsx`
+- `repos/fawxzzy-fitness/src/app/today/page.tsx`
+- `repos/fawxzzy-fitness/src/components/settings/LegacyMigrationSettings.tsx`
+- `repos/fawxzzy-fitness/src/components/settings/SettingsAccordionClient.tsx`
+
+Live proof captured from the real signed-in local app
+- View day:
+  - `tmp/captures/fawxzzy-fitness/view-day-live-window-20260430-0127.png`
+- Edit day:
+  - `tmp/captures/fawxzzy-fitness/edit-day-live-window-20260430-0129.png`
+- Edit day expanded:
+  - `tmp/captures/fawxzzy-fitness/edit-day-expanded-live-window-20260430-0130.png`
+
+Capture workflow correction
+- Stop spawning many browser windows for one UI pass.
+- Preferred workflow is one dedicated Codex-owned signed-in Edge window on `127.0.0.1:3000`, reused across route captures.
+- If screenshots and UI disagree, confirm the live route id and the `:3000` owner before changing code.
+
+Next-prod-push posture
+- Local verification passed:
+  - `npm run test:app-theme`
+  - `npm run build`
+- Preview-only deploy had already succeeded earlier in this thread on the approved Vercel non-prod project.
+- Production still did not ship in this thread.
+- These UI changes are suitable to ride the next approved production deployment once the normal prod gate is explicitly reopened.
+
+Remaining caution
+- Fresh trustworthy screenshots for the final Today/settings micro-patches were blocked by a local live-route loading stall while compiling `/today`.
+- The code is green; the remaining gap is visual proof for those last two screens, not a known build failure.

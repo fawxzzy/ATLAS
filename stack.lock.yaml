@@ -10,7 +10,7 @@ components:
     remote: null
     ref_type: "branch"
     ref: "main"
-    commit: "11d9ab7ab11329237bd6d832e4c7ecc9a881b196"
+    commit: "b0a373f5cf3465e046d20377111155f101119e84"
     dirty: true
     trust_class: "trusted"
     release_eligible: false
@@ -20,9 +20,9 @@ components:
     status: "active"
     remote: "https://github.com/fawxzzy/fawxzzy-lifeline.git"
     ref_type: "branch"
-    ref: "codex/canary-verify-contract"
-    commit: "a81914d6a849e056ae4d7ea703a3a16be97a5e70"
-    dirty: false
+    ref: "codex/lifeline-release-mechanics"
+    commit: "15ea3c5223a9fbaf9d942f57c21ec43a2f28aa63"
+    dirty: true
     trust_class: "trusted"
     release_eligible: true
   mazer:
@@ -32,8 +32,8 @@ components:
     remote: "https://github.com/fawxzzy/fawxzzy-mazer.git"
     ref_type: "branch"
     ref: "main"
-    commit: "f42f472bb057b2e4d57d8ac5c06253e2c3ef5166"
-    dirty: false
+    commit: "d3ef851f822348250f152702889fac2c3683f519"
+    dirty: true
     trust_class: "trusted"
     release_eligible: true
   nat1-games:
@@ -43,7 +43,7 @@ components:
     remote: "https://github.com/ZachariahRedfield/nat1-games.git"
     ref_type: "branch"
     ref: "main"
-    commit: "ce9643465d69f76a46d92d0db6ed855d117e1bbd"
+    commit: "412846a1baac6c0ce782ab9ab94530ccf4e89ff5"
     dirty: true
     trust_class: "trusted"
     release_eligible: false
@@ -76,8 +76,8 @@ components:
     remote: "https://github.com/fawxzzy/ATLAS.git"
     ref_type: "branch"
     ref: "main"
-    commit: "49fc31298562c0ce240729fe4705768817ceee1f"
-    dirty: true
+    commit: "387203b387be50070bb73336706be4b9f012935e"
+    dirty: false
     trust_class: "trusted"
     release_eligible: false
   stream:
@@ -98,8 +98,8 @@ components:
     remote: "https://github.com/fawxzzy/fawxzzy-trove.git"
     ref_type: "branch"
     ref: "main"
-    commit: "6254a0615de5c2bcf415936f57a07a74f34cf512"
-    dirty: false
+    commit: "e0566a6b8d65d5892f0cc9defda36481eccbaa29"
+    dirty: true
     trust_class: "trusted"
     release_eligible: true
 excluded_surfaces:
@@ -127,4 +127,4 @@ excluded_surfaces:
     trust_class: "untrusted"
     release_eligible: false
     reason: "Token-bearing Verta checkout remains quarantined and untrusted until scrub and rotation are complete."
-lock_digest: "sha256:ca00ddb8b34b103abe101edda9f14682e92b3acece16352e7cb6a996ffb33394"
+lock_digest: "sha256:4c0bc8ed5412d70d7c2747d427a49df09344c85b9f974d405d0720e50abeb1f3"
