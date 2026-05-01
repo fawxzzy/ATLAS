@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-04-21T00:00:00Z",
-  "updated_at": "2026-04-21T00:00:00Z",
+  "updated_at": "2026-05-01T04:07:23Z",
   "related_session_refs": [],
   "related_artifact_refs": [
     "docs/ops/ATLAS-LIFELINE-PLATFORM-RESTART.md"
@@ -34,8 +34,12 @@
       "lifeline-runtime-foundation",
       "lifeline-deploy-contract",
       "lifeline-ops-baseline",
-      "trove-pilot-cutover",
       "playbook-shadow-capture"
+    ],
+    "resolution_note": [
+      "The Trove merge lane closed on 2026-05-01 after PR #3 merged to main at commit 0e9ae02c4c70e604b458e6d9d0489651827134a3.",
+      "PR #4 closed unmerged, and the self-hosted preview lane did not become the landed Wave 1 cutover path.",
+      "Do not treat W4 as an active pilot until a new bounded application lane is explicitly opened."
     ],
     "gates": [
       "ownership-lock",
@@ -46,9 +50,9 @@
     ],
     "in_scope_repo_ids": [
       "stack",
-      "atlas",
       "lifeline",
-      "playbook"
+      "playbook",
+      "trove"
     ],
     "frozen_rules": [
       "atlas-coordinates-only",

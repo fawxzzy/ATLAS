@@ -20,6 +20,16 @@ Selected pilot lane:
 
 Atlas remains coordination-only in this phase. Do not open an Atlas execution lane.
 
+## Current Resolution
+
+As of `2026-05-01`, the Trove merge lane is closed for this wave packet.
+
+- remote PR `#3` merged into `main` at `2026-05-01T04:07:23Z`
+- merge commit: `0e9ae02c4c70e604b458e6d9d0489651827134a3`
+- remote PR `#4` closed unmerged
+- local `repos/fawxzzy-trove` parity check confirmed `main` is clean and aligned to the same merge commit as `origin/main`
+- the self-hosted preview lane did not land, so this launch packet should not present an active Lifeline/Trove follow-up from that branch
+
 ## Launch Order
 
 1. freeze the restart posture slice unchanged
@@ -35,7 +45,7 @@ Atlas remains coordination-only in this phase. Do not open an Atlas execution la
 | `W1` | runtime foundation | `lifeline` | ready | none |
 | `W2` | deploy contract | `lifeline` | ready | none |
 | `W3` | ops baseline | `lifeline` | ready | none |
-| `W4` | pilot app migration | `trove` | queued | `W0`, `W1`, `W2` |
+| `W4` | pilot app migration | `trove` | closed | `W0`, `W1`, `W2` |
 | `W5` | Playbook shadow codification | `playbook` and optional stack links | ready | none |
 
 ## Packet Layout
@@ -79,6 +89,12 @@ Operational rules for this handoff:
 
 - `W0` must land before `W4` because both lanes would otherwise contend around `repos/fawxzzy-trove/.codex/config.toml`
 - `W4` stays inside `trove` only; if a paired Lifeline change becomes unavoidable, open a new non-overlapping follow-on slice instead of widening the pilot worker
+
+Closeout note for `W4`:
+
+- the merge branch is resolved at commit `0e9ae02c4c70e604b458e6d9d0489651827134a3`
+- the self-hosted preview branch did not land
+- no further Trove/Lifeline action remains active in this launch packet unless a new pilot or follow-on slice is explicitly opened
 
 ## References
 

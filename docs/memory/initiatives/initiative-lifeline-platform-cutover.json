@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-04-21T00:00:00Z",
-  "updated_at": "2026-04-21T00:00:00Z",
+  "updated_at": "2026-05-01T04:07:23Z",
   "related_plan_refs": [
     "docs/memory/plans/wave-1-lifeline-platform-cutover.json"
   ],
@@ -31,19 +31,24 @@
       "pilot-first-cutover",
       "playbook-shadow-codification"
     ],
-    "current_gate": "wave-1-pilot",
-    "next_frontier": "Wave 1 is complete when Trove runs on Lifeline with explicit parity criteria, health visibility, and a rehearsed rollback, and Vercel is no longer required for Trove.",
+    "current_gate": "post-trove-pilot-closeout",
+    "next_frontier": "The Trove pilot merge lane is closed at commit 0e9ae02c4c70e604b458e6d9d0489651827134a3 without a landed self-hosted preview cutover. Choose a new pilot or explicitly retire Wave 1 before reopening application-migration work.",
     "priority_repos": [
+      "stack",
       "lifeline",
       "playbook",
-      "atlas"
+      "trove"
     ],
     "active_queue": [
       "runtime-foundation",
       "deploy-contract",
       "ops-baseline",
-      "trove-pilot-migration",
       "playbook-shadow-codification"
+    ],
+    "resolution_note": [
+      "PR #3 merged into trove/main at 2026-05-01T04:07:23Z with merge commit 0e9ae02c4c70e604b458e6d9d0489651827134a3.",
+      "PR #4 closed unmerged.",
+      "The self-hosted preview lane did not land, so no further Lifeline/Trove follow-up remains active from that branch."
     ]
   }
 }
