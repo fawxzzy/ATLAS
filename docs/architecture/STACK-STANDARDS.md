@@ -33,7 +33,7 @@ Use logical ids in stack docs and automation. Current canonical ids:
 | `lifeline` | `repos/fawxzzy-lifeline` | active |
 | `fitness` | `repos/fawxzzy-fitness` | active |
 | `mazer` | `repos/fawxzzy-mazer` | active |
-| `cortex` | `repos/cortex` | unmanaged |
+| `cortex` | `runtime/cortex` | root-owned subsystem |
 | `nat1-games` | `repos/Nat1-Games/nat1-games` | incubating |
 
 Do not hardcode branded disk names into new stack contracts when a repo id is sufficient.
