@@ -1,6 +1,6 @@
 schema_version: "atlas.stack.lock.v1"
 stack_manifest_path: "stack.yaml"
-stack_manifest_digest: "sha256:01a22932e0b33605cb75693417d83076a4bf40c6283d8eecc7d8c949ff6e542b"
+stack_manifest_digest: "sha256:d50a1f74e584c9e55ab1127997781dd1e8086e6d5cdeed4b395373dfc6bacc43"
 component_count: 9
 components:
   _stack:
@@ -53,9 +53,9 @@ components:
     status: "active"
     remote: "https://github.com/fawxzzy/fawxzzy-playbook.git"
     ref_type: "branch"
-    ref: "main"
-    commit: "5abc4556031166feb2532c683d8dd7c8b6b09738"
-    dirty: false
+    ref: "codex/changelog-generator"
+    commit: "738c5bef8c920793ff0389d5e21ad3119cbc9501"
+    dirty: true
     trust_class: "trusted"
     release_eligible: true
   playbook-demo:
@@ -75,8 +75,8 @@ components:
     status: "active"
     remote: "https://github.com/fawxzzy/ATLAS.git"
     ref_type: "branch"
-    ref: "main"
-    commit: "96e98b8787051ff6328dc24530d789b023dcc992"
+    ref: "codex/remove-stale-cortex-contract-v2"
+    commit: "7e193b7cd34fc3363df97a61b4618e5bc62eb4df"
     dirty: false
     trust_class: "trusted"
     release_eligible: false
@@ -98,8 +98,8 @@ components:
     remote: "https://github.com/fawxzzy/fawxzzy-trove.git"
     ref_type: "branch"
     ref: "main"
-    commit: "e0566a6b8d65d5892f0cc9defda36481eccbaa29"
-    dirty: true
+    commit: "0e9ae02c4c70e604b458e6d9d0489651827134a3"
+    dirty: false
     trust_class: "trusted"
     release_eligible: true
 excluded_surfaces:
@@ -127,4 +127,4 @@ excluded_surfaces:
     trust_class: "untrusted"
     release_eligible: false
     reason: "Token-bearing Verta checkout remains quarantined and untrusted until scrub and rotation are complete."
-lock_digest: "sha256:4589325de64b5e12a687e3fb436c5846279c09648a25cfde2efd1cebf49acf4f"
+lock_digest: "sha256:8790e5a2dcbe5964d31b4cdbbf99abd2fe1ddb9f4159f035825ca418285aafee"
