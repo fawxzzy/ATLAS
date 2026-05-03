@@ -12,13 +12,20 @@ The reason is already encoded in stack truth:
 - the trust class is `untrusted`
 - the reason says the checkout remains quarantined until scrub and rotation are complete
 
-That means the current `345` critical findings are real, but they are not evidence that the main stack program should automatically pivot into broad Verta-Core cleanup.
+That means the current `345` validator findings are real, but they are not evidence that the main stack program should automatically pivot into broad Verta-Core cleanup.
+
+## Validation Policy
+
+Validation receipts must keep Verta-Core path-leak evidence visible without presenting that quarantine backlog as active stack-owned contract breakage.
+
+- quarantined excluded surfaces stay in the receipt
+- the receipt must preserve surface label, file path, category, and count data
+- quarantined excluded-surface path leaks are quarantine debt, not active critical ownership debt
 
 ## Live Backlog Shape
 
-- Live Verta-Core critical total: `345`
-- Current stack total: `345`
-- Share of remaining critical backlog: `100%`
+- Live Verta-Core validator finding total: `345`
+- These findings remain visible as quarantined excluded-surface debt instead of active stack-owned critical debt
 
 This is no longer mixed with core-owner debt. It is a single quarantined surface.
 
@@ -83,6 +90,5 @@ Recommendation: keep Verta-Core as a separate backlog for now.
 
 The clustered routing view still sums back to the live Verta-Core total:
 
-- Verta-Core critical total: `345`
-- Non-Verta critical total in the live receipt: `0`
-- Stack critical total: `345`
+- Verta-Core validator finding total: `345`
+- Receipt policy: keep the evidence visible, but classify it as quarantined excluded-surface debt
