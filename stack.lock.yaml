@@ -10,8 +10,8 @@ components:
     remote: null
     ref_type: "branch"
     ref: "main"
-    commit: "b0a373f5cf3465e046d20377111155f101119e84"
-    dirty: true
+    commit: "ef5cfc84e583c616a89ce13694541207518f1206"
+    dirty: false
     trust_class: "trusted"
     release_eligible: false
   lifeline:
@@ -20,9 +20,9 @@ components:
     status: "active"
     remote: "https://github.com/fawxzzy/fawxzzy-lifeline.git"
     ref_type: "branch"
-    ref: "codex/lifeline-release-mechanics"
-    commit: "15ea3c5223a9fbaf9d942f57c21ec43a2f28aa63"
-    dirty: true
+    ref: "codex/lifeline-release-cli-surface"
+    commit: "16b10ef43b2d073ccf4ef124ec3bf9c18a6950a4"
+    dirty: false
     trust_class: "trusted"
     release_eligible: true
   mazer:
@@ -31,9 +31,9 @@ components:
     status: "active"
     remote: "https://github.com/fawxzzy/fawxzzy-mazer.git"
     ref_type: "branch"
-    ref: "main"
-    commit: "d3ef851f822348250f152702889fac2c3683f519"
-    dirty: true
+    ref: "codex/mazer-remove-pwa-install-surface"
+    commit: "021291d2b4f75379ab7e4c7891e302b54d4845c6"
+    dirty: false
     trust_class: "trusted"
     release_eligible: true
   nat1-games:
@@ -54,7 +54,7 @@ components:
     remote: "https://github.com/fawxzzy/fawxzzy-playbook.git"
     ref_type: "branch"
     ref: "codex/changelog-generator"
-    commit: "738c5bef8c920793ff0389d5e21ad3119cbc9501"
+    commit: "4e4e65289479a350933bccf9f4f5d3bac3145288"
     dirty: true
     trust_class: "trusted"
     release_eligible: true
@@ -74,10 +74,10 @@ components:
     role: "operator-layer"
     status: "active"
     remote: "https://github.com/fawxzzy/ATLAS.git"
-    ref_type: "branch"
-    ref: "codex/remove-stale-cortex-contract-v2"
-    commit: "7e193b7cd34fc3363df97a61b4618e5bc62eb4df"
-    dirty: false
+    ref_type: "commit"
+    ref: "51c23193cca9a120cb804f87283c8909d7aade68"
+    commit: "51c23193cca9a120cb804f87283c8909d7aade68"
+    dirty: true
     trust_class: "trusted"
     release_eligible: false
   stream:
@@ -97,8 +97,8 @@ components:
     status: "active"
     remote: "https://github.com/fawxzzy/fawxzzy-trove.git"
     ref_type: "branch"
-    ref: "main"
-    commit: "0e9ae02c4c70e604b458e6d9d0489651827134a3"
+    ref: "codex/trove-brand-asset-sync"
+    commit: "9ab7ba4f3582897c4aaadd41d7dcb17c3679d15b"
     dirty: false
     trust_class: "trusted"
     release_eligible: true
@@ -127,4 +127,4 @@ excluded_surfaces:
     trust_class: "untrusted"
     release_eligible: false
     reason: "Token-bearing Verta checkout remains quarantined and untrusted until scrub and rotation are complete."
-lock_digest: "sha256:8790e5a2dcbe5964d31b4cdbbf99abd2fe1ddb9f4159f035825ca418285aafee"
+lock_digest: "sha256:8a33cb6ed171ad7192ee9a9f2dc0aee6e21e33c3fa4f9b416f2ea887f32eb122"
