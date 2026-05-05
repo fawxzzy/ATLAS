@@ -43,6 +43,8 @@ ABSOLUTE_PATTERNS = [
     ("critical", "windows-user-path-alt", build_home_path_pattern(separator="/", directory=USER_HOME_DIRECTORY)),
     ("critical", "unix-home-path", re.compile("|".join(re.escape(f"/{directory}/") for directory in UNIX_HOME_DIRECTORIES))),
 ]
+QUARANTINED_EXCLUDED_SURFACE_LABEL = "quarantined-excluded-surface"
+EXCLUDED_SURFACE_LABEL = "excluded-surface"
 MUTABLE_DIR_CANDIDATES = [
     ".next", ".playbook", ".lifeline", ".venv", ".vercel", "node_modules", "dist",
     "coverage", "playwright-report", "test-results", "DerivedDataCache",
@@ -440,6 +442,98 @@ def relative_to_root(root: Path, path: Path) -> str:
         relative = resolved.relative_to(root.resolve())
         return "." if not relative.parts else normalize_slashes(str(relative))
     return normalize_slashes(str(resolved))
+
+
+def collect_excluded_surface_roots(
+    stack_file: Path,
+    config: dict[str, Any],
+) -> list[tuple[Path, dict[str, Any]]]:
+    root = stack_file.parent.resolve()
+    lock_config = config.get("stack_lock", {})
+    excluded_surfaces = lock_config.get("excluded_surfaces", {}) if isinstance(lock_config, dict) else {}
+    if not isinstance(excluded_surfaces, dict):
+        return []
+
+    collected: list[tuple[Path, dict[str, Any]]] = []
+    for surface_id, surface in excluded_surfaces.items():
+        if not isinstance(surface, dict) or not isinstance(surface.get("path"), str):
+            continue
+        resolved_path = resolve_path(stack_file, str(surface["path"])).resolve()
+        trust_class = str(surface.get("trust_class", ""))
+        collected.append(
+            (
+                resolved_path,
+                {
+                    "surface_id": str(surface_id),
+                    "path": relative_to_root(root, resolved_path),
+                    "trust_class": trust_class,
+                    "release_eligible": bool(surface.get("release_eligible")),
+                    "reason": str(surface.get("reason", "")).strip() or None,
+                    "label": (
+                        QUARANTINED_EXCLUDED_SURFACE_LABEL
+                        if trust_class == "untrusted"
+                        else EXCLUDED_SURFACE_LABEL
+                    ),
+                },
+            )
+        )
+    collected.sort(key=lambda item: len(item[0].parts), reverse=True)
+    return collected
+
+
+def excluded_surface_details_for_path(
+    file_path: Path,
+    *,
+    excluded_surface_roots: list[tuple[Path, dict[str, Any]]],
+) -> dict[str, Any] | None:
+    resolved_file_path = file_path.resolve()
+    for surface_root, metadata in excluded_surface_roots:
+        if resolved_file_path == surface_root or resolved_file_path.is_relative_to(surface_root):
+            return {
+                "surface_id": str(metadata.get("surface_id", "")),
+                "path": str(metadata.get("path", "")),
+                "trust_class": str(metadata.get("trust_class", "")),
+                "release_eligible": bool(metadata.get("release_eligible")),
+                "reason": metadata.get("reason"),
+                "label": str(metadata.get("label", EXCLUDED_SURFACE_LABEL)),
+            }
+    return None
+
+
+def build_absolute_path_finding(
+    *,
+    root: Path,
+    file_path: Path,
+    severity: str,
+    category: str,
+    line_number: int,
+    line_preview: str,
+    excluded_surface_roots: list[tuple[Path, dict[str, Any]]],
+) -> Finding:
+    details: dict[str, Any] = {
+        "line_number": line_number,
+        "line_preview": line_preview[:220],
+    }
+    emitted_severity = severity
+    message = "Absolute path leak detected in committed text."
+    excluded_surface = excluded_surface_details_for_path(
+        file_path,
+        excluded_surface_roots=excluded_surface_roots,
+    )
+    if excluded_surface is not None:
+        details["excluded_surface"] = excluded_surface
+        if excluded_surface.get("label") == QUARANTINED_EXCLUDED_SURFACE_LABEL:
+            emitted_severity = "warning"
+            message = "Absolute path leak detected in quarantined excluded surface."
+        else:
+            message = "Absolute path leak detected in excluded surface."
+    return Finding(
+        emitted_severity,
+        category,
+        relative_to_root(root, file_path),
+        message,
+        details,
+    )
 
 
 def lockfile_output_path(stack_file: Path, config: dict[str, Any]) -> Path:
@@ -2132,6 +2226,7 @@ def build_findings(stack_file: Path, config: dict[str, Any], *, lock_file_overri
 
     findings.extend(validate_gitdir_hygiene(root))
 
+    excluded_surface_roots = collect_excluded_surface_roots(stack_file, config)
     root_abs_patterns = [
         ("warning", "atlas-root-path", re.compile(re.escape(str(root)))),
         ("warning", "atlas-root-path-alt", re.compile(re.escape(normalize_slashes(str(root))))),
@@ -2146,7 +2241,17 @@ def build_findings(stack_file: Path, config: dict[str, Any], *, lock_file_overri
         for line_number, line in enumerate(text.splitlines(), start=1):
             for severity, category, pattern in ABSOLUTE_PATTERNS + root_abs_patterns:
                 if pattern.search(line):
-                    findings.append(Finding(severity, category, normalize_slashes(str(file_path.relative_to(root))), "Absolute path leak detected in committed text.", {"line_number": line_number, "line_preview": line.strip()[:220]}))
+                    findings.append(
+                        build_absolute_path_finding(
+                            root=root,
+                            file_path=file_path,
+                            severity=severity,
+                            category=category,
+                            line_number=line_number,
+                            line_preview=line.strip(),
+                            excluded_surface_roots=excluded_surface_roots,
+                        )
+                    )
                     break
 
     return findings
@@ -2157,11 +2262,94 @@ def summarize_findings(findings: list[Finding]) -> dict[str, int]:
     return {key: counts.get(key, 0) for key in ["critical", "error", "warning", "info"]} | {"total": len(findings)}
 
 
+def summarize_excluded_surface_findings(findings: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    buckets: dict[str, dict[str, Any]] = {}
+    for finding in findings:
+        details = finding.get("details")
+        if not isinstance(details, dict):
+            continue
+        excluded_surface = details.get("excluded_surface")
+        if not isinstance(excluded_surface, dict):
+            continue
+
+        surface_id = str(excluded_surface.get("surface_id", "")).strip()
+        if not surface_id:
+            continue
+
+        bucket = buckets.setdefault(
+            surface_id,
+            {
+                "surface_id": surface_id,
+                "path": str(excluded_surface.get("path", "")),
+                "trust_class": str(excluded_surface.get("trust_class", "")),
+                "release_eligible": bool(excluded_surface.get("release_eligible")),
+                "reason": excluded_surface.get("reason"),
+                "label": str(excluded_surface.get("label", EXCLUDED_SURFACE_LABEL)),
+                "finding_count": 0,
+                "blocking_count": 0,
+                "severity_counts": Counter(),
+                "category_counts": Counter(),
+                "paths": {},
+            },
+        )
+        bucket["finding_count"] += 1
+        if finding.get("severity") in {"critical", "error"}:
+            bucket["blocking_count"] += 1
+        category = str(finding.get("category", ""))
+        path = str(finding.get("path", ""))
+        bucket["severity_counts"][str(finding.get("severity", "unknown"))] += 1
+        bucket["category_counts"][category] += 1
+        path_bucket = bucket["paths"].setdefault(
+            path,
+            {
+                "path": path,
+                "count": 0,
+                "category_counts": Counter(),
+            },
+        )
+        path_bucket["count"] += 1
+        path_bucket["category_counts"][category] += 1
+
+    summarized: list[dict[str, Any]] = []
+    for surface_id in sorted(buckets):
+        bucket = buckets[surface_id]
+        path_entries = list(bucket["paths"].values())
+        path_entries.sort(key=lambda item: (-int(item["count"]), str(item["path"])))
+        summarized.append(
+            {
+                "surface_id": bucket["surface_id"],
+                "path": bucket["path"],
+                "trust_class": bucket["trust_class"],
+                "release_eligible": bucket["release_eligible"],
+                "reason": bucket["reason"],
+                "label": bucket["label"],
+                "finding_count": bucket["finding_count"],
+                "blocking_count": bucket["blocking_count"],
+                "severity_counts": dict(sorted(bucket["severity_counts"].items())),
+                "category_counts": dict(sorted(bucket["category_counts"].items())),
+                "paths": [
+                    {
+                        "path": item["path"],
+                        "count": item["count"],
+                        "category_counts": dict(sorted(item["category_counts"].items())),
+                    }
+                    for item in path_entries
+                ],
+            }
+        )
+    return summarized
+
+
 def write_markdown_report(report: dict[str, Any], output_path: Path) -> None:
     summary = report["summary"]
     findings = report["findings"]
     ratchet = report.get("ratchet")
     debt_classes = report.get("debt_classes") if isinstance(report.get("debt_classes"), list) else []
+    excluded_surface_summary = (
+        report.get("excluded_surface_summary")
+        if isinstance(report.get("excluded_surface_summary"), list)
+        else []
+    )
     remediation_buckets = (
         report.get("remediation_buckets")
         if isinstance(report.get("remediation_buckets"), list)
@@ -2195,6 +2383,27 @@ def write_markdown_report(report: dict[str, Any], output_path: Path) -> None:
             lines.append(
                 f"- `{item.get('class_id')}`: total={item.get('total', 0)}, blocking={item.get('blocking_total', 0)}, categories={len(item.get('category_counts') or {})}"
             )
+        lines.append("")
+    if excluded_surface_summary:
+        lines += [
+            "## Excluded Surface Debt",
+            "",
+        ]
+        for item in excluded_surface_summary:
+            if not isinstance(item, dict):
+                continue
+            lines.append(
+                f"- `{item.get('surface_id')}` ({item.get('label')}): path={item.get('path')}, findings={item.get('finding_count', 0)}, blocking={item.get('blocking_count', 0)}, categories={json.dumps(item.get('category_counts', {}), sort_keys=True)}"
+            )
+            reason = item.get("reason")
+            if reason:
+                lines.append(f"  - reason: {reason}")
+            for path_item in (item.get("paths") or [])[:3]:
+                if not isinstance(path_item, dict):
+                    continue
+                lines.append(
+                    f"  - `{path_item.get('path')}`: count={path_item.get('count', 0)}, categories={json.dumps(path_item.get('category_counts', {}), sort_keys=True)}"
+                )
         lines.append("")
     if remediation_buckets:
         lines += [
@@ -2446,6 +2655,7 @@ def main(argv: list[str] | None = None) -> int:
             "findings": [asdict(item) for item in findings],
         }
         report["debt_classes"] = summarize_debt_classes(report["findings"])
+        report["excluded_surface_summary"] = summarize_excluded_surface_findings(report["findings"])
         report["remediation_buckets"] = summarize_remediation_buckets(
             report["findings"],
             root=stack_file.parent.resolve(),
@@ -2462,6 +2672,7 @@ def main(argv: list[str] | None = None) -> int:
             "findings": [asdict(Finding("critical", "validator-crash", normalize_slashes(str(stack_file)), f"Validator failed before completion: {exc}"))],
         }
         report["debt_classes"] = summarize_debt_classes(report["findings"])
+        report["excluded_surface_summary"] = summarize_excluded_surface_findings(report["findings"])
         report["remediation_buckets"] = summarize_remediation_buckets(
             report["findings"],
             root=stack_file.parent.resolve(),
