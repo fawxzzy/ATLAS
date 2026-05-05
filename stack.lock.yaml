@@ -20,8 +20,8 @@ components:
     status: "active"
     remote: "https://github.com/fawxzzy/fawxzzy-lifeline.git"
     ref_type: "branch"
-    ref: "codex/lifeline-release-cli-surface"
-    commit: "16b10ef43b2d073ccf4ef124ec3bf9c18a6950a4"
+    ref: "main"
+    commit: "39b15edbaec9597f60a586b5bbdb179afbc45582"
     dirty: false
     trust_class: "trusted"
     release_eligible: true
@@ -76,7 +76,7 @@ components:
     remote: "https://github.com/fawxzzy/ATLAS.git"
     ref_type: "branch"
     ref: "codex/cortex-rail-state-reader-wave2"
-    commit: "97dff5cd2c15e09368e8f5915785680b764da2ca"
+    commit: "73fd8f3404d29e257070377e867e0f53ba600ef4"
     dirty: false
     trust_class: "trusted"
     release_eligible: false
@@ -99,7 +99,7 @@ components:
     ref_type: "branch"
     ref: "codex/trove-brand-asset-sync"
     commit: "9ab7ba4f3582897c4aaadd41d7dcb17c3679d15b"
-    dirty: false
+    dirty: true
     trust_class: "trusted"
     release_eligible: true
 excluded_surfaces:
@@ -127,4 +127,4 @@ excluded_surfaces:
     trust_class: "untrusted"
     release_eligible: false
     reason: "Token-bearing Verta checkout remains quarantined and untrusted until scrub and rotation are complete."
-lock_digest: "sha256:1f04892812d2d5119d2a43e57fdcb9f567401595e016140d13997255f68fe707"
+lock_digest: "sha256:15e4e2867202bed703181ad0cfcd8e63697c8a40197f4a3c9b0cfb22fd8d3597"
