@@ -75,8 +75,8 @@ components:
     status: "active"
     remote: "https://github.com/fawxzzy/ATLAS.git"
     ref_type: "branch"
-    ref: "codex/cortex-rail-state-reader-wave2"
-    commit: "73fd8f3404d29e257070377e867e0f53ba600ef4"
+    ref: "codex/cortex-rail-seed-progression"
+    commit: "e18e0df4df13bda6df906d59192b2914d3d8ddc8"
     dirty: false
     trust_class: "trusted"
     release_eligible: false
@@ -127,4 +127,4 @@ excluded_surfaces:
     trust_class: "untrusted"
     release_eligible: false
     reason: "Token-bearing Verta checkout remains quarantined and untrusted until scrub and rotation are complete."
-lock_digest: "sha256:15e4e2867202bed703181ad0cfcd8e63697c8a40197f4a3c9b0cfb22fd8d3597"
+lock_digest: "sha256:abb08d5bebf51362e1f25d9a2efde8e9393a26c63fe0e09184bfed2b1d8af4eb"
