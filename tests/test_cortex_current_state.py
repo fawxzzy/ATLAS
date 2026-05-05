@@ -143,7 +143,7 @@ class CortexCurrentStateTests(unittest.TestCase):
         )
 
         self.assertEqual([], payload["active_blockers"])
-        self.assertEqual("build-cortex-rail-state-reader-wave2", payload["next_recommended_lane"]["lane_id"])
+        self.assertEqual("build-cortex-context-assembler-wave3", payload["next_recommended_lane"]["lane_id"])
         self.assertEqual("cortex", payload["next_recommended_lane"]["owner_layer"])
         self.assertEqual("cortex-kernel-v0-1", payload["latest_clean_step"]["step_id"])
         self.assertEqual("in_sync", payload["remote_publication_state"]["status"])
@@ -177,7 +177,7 @@ class CortexCurrentStateTests(unittest.TestCase):
         self.assertEqual(artifact.payload["head"], payload["head"])
         self.assertEqual("atlas.cortex.current-state.v1", payload["contract_version"])
         self.assertIn("# Cortex Current State", summary)
-        self.assertIn("build-cortex-rail-state-reader-wave2", summary)
+        self.assertIn("build-cortex-context-assembler-wave3", summary)
 
     def test_cli_fails_clearly_when_validation_receipt_is_missing(self) -> None:
         temp_dir = tempfile.TemporaryDirectory()

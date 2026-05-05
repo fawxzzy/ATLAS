@@ -39,18 +39,19 @@
       },
       "dirty_lanes": [
         {
-          "lane_id": "cortex-planner-loop-v0-1",
+          "lane_id": "cortex-context-assembler-v0-1",
           "owner_layer": "cortex",
-          "summary": "Cortex can now represent structured project state, but it cannot yet classify posture or choose the safest next action from that representation.",
+          "summary": "Cortex can now classify posture and route the next lane, but it cannot yet assemble compact, lane-scoped context packets for bounded worker execution.",
           "status": "open",
-          "blocking_reason": "Wave 2 still needs a deterministic rail-state reader before planner, receipt, or connector work can rely on Cortex posture classification.",
+          "blocking_reason": "Wave 3 still needs a deterministic context assembler before worker planning, proof interpretation, or receipt drafting can rely on compact artifact-backed context.",
           "evidence": [
             "docs/atlas/notes/cortex-mvp-spec-2026-04-26.md",
-            "docs/atlas/notes/cortex-priority-pivot-2026-04-26.md"
+            "runtime/cortex/current-state/latest.json",
+            "runtime/cortex/rail-state/latest.json"
           ],
           "source_inputs": [
-            "Wave 1 kernel artifacts",
-            "priority pivot note"
+            "Wave 2 current-state artifact",
+            "Wave 2 rail-state artifact"
           ]
         }
       ],
@@ -71,22 +72,23 @@
         }
       ],
       "next_action": {
-        "action_id": "build-cortex-rail-state-reader-wave2",
+        "action_id": "build-cortex-context-assembler-wave3",
         "owner_layer": "cortex",
-        "title": "Build the first deterministic Cortex rail-state reader.",
-        "rationale": "Wave 1 now represents posture, rules, and proof summaries, so the next Cortex jump is deterministic posture classification and safe next-action selection.",
+        "title": "Build the first deterministic Cortex context assembler.",
+        "rationale": "Wave 2 now provides artifact-backed current-state and rail-state outputs, so the next Cortex jump is compact context assembly for bounded worker execution.",
         "required_inputs": [
           "runtime/cortex/kernel.state-model.seed.v1.json",
           "runtime/cortex/kernel.rule-registry.seed.v1.json",
-          "docs/atlas/notes/cortex-priority-pivot-2026-04-26.md",
+          "runtime/cortex/current-state/latest.json",
+          "runtime/cortex/rail-state/latest.json",
           "docs/atlas/notes/cortex-mvp-spec-2026-04-26.md"
         ],
         "verification_plan": [
-          "python -m unittest tests.test_cortex_kernel",
-          "python -m unittest tests.test_cortex_rail_state",
+          "python -m unittest tests.test_cortex_current_state",
+          "python -m unittest tests.test_cortex_rail_state_reader",
           "python .\\ops\\validation\\validate_stack.py"
         ],
-        "receipt_scope": "Cortex should classify posture and known debt from explicit artifacts before planner or receipt layers claim more authority."
+        "receipt_scope": "Cortex should assemble compact, explicit context packets before worker planning or receipt layers claim more authority."
       },
       "boundary_reminders": [
         "Fitness owns product UI truth.",

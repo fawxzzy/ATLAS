@@ -81,9 +81,9 @@ class CortexRailStateReaderTests(unittest.TestCase):
         }
         payload["active_blockers"] = []
         payload["next_recommended_lane"] = {
-            "lane_id": "build-cortex-rail-state-reader-wave2",
+            "lane_id": "build-cortex-context-assembler-wave3",
             "owner_layer": "cortex",
-            "rationale": "Wave 1 now represents posture, rules, and proof summaries, so the next Cortex jump is deterministic posture classification and safe next-action selection.",
+            "rationale": "Wave 2 now provides artifact-backed current-state and rail-state outputs, so the next Cortex jump is compact context assembly for bounded worker execution.",
             "blocked_by": [],
             "source_refs": [
                 "runtime/cortex/kernel.state-model.seed.v1.json",
@@ -119,9 +119,9 @@ class CortexRailStateReaderTests(unittest.TestCase):
 
         self.assertEqual("cortex-mvp", payload["active_rail"])
         self.assertEqual("ready", payload["rail_status"])
-        self.assertEqual("build-cortex-rail-state-reader-wave2", payload["next_recommended_lane"]["lane_id"])
+        self.assertEqual("build-cortex-context-assembler-wave3", payload["next_recommended_lane"]["lane_id"])
         self.assertEqual([], payload["active_blockers"])
-        self.assertIn("cortex-planner-loop-v0-1", payload["dirty_lanes"])
+        self.assertIn("cortex-context-assembler-v0-1", payload["dirty_lanes"])
 
     def test_validation_blocker_forces_stabilize_stack_validation(self) -> None:
         current_state_payload = self._base_current_state_payload()
@@ -142,7 +142,7 @@ class CortexRailStateReaderTests(unittest.TestCase):
 
         self.assertEqual("blocked", payload["rail_status"])
         self.assertEqual("stabilize-stack-validation", payload["next_recommended_lane"]["lane_id"])
-        self.assertEqual(["stabilize-stack-validation", "cortex-planner-loop-v0-1"], payload["dirty_lanes"])
+        self.assertEqual(["stabilize-stack-validation", "cortex-context-assembler-v0-1"], payload["dirty_lanes"])
 
     def test_dirty_worktree_forces_stabilize_root_worktree(self) -> None:
         current_state_payload = self._base_current_state_payload()
@@ -177,7 +177,7 @@ class CortexRailStateReaderTests(unittest.TestCase):
 
         self.assertEqual("stabilize-first", payload["rail_status"])
         self.assertEqual("stabilize-root-worktree", payload["next_recommended_lane"]["lane_id"])
-        self.assertEqual(["stabilize-root-worktree", "cortex-planner-loop-v0-1"], payload["dirty_lanes"])
+        self.assertEqual(["stabilize-root-worktree", "cortex-context-assembler-v0-1"], payload["dirty_lanes"])
 
     def test_missing_current_state_artifact_fails_clearly(self) -> None:
         temp_dir = tempfile.TemporaryDirectory()
@@ -204,7 +204,7 @@ class CortexRailStateReaderTests(unittest.TestCase):
         payload = build_rail_state_payload(root=root)
 
         self.assertEqual("bounded-fallback", payload["rail_status"])
-        self.assertEqual("build-cortex-rail-state-reader-wave2", payload["next_recommended_lane"]["lane_id"])
+        self.assertEqual("build-cortex-context-assembler-wave3", payload["next_recommended_lane"]["lane_id"])
         self.assertEqual(
             [
                 "runtime/cortex/current-state/latest.json",
