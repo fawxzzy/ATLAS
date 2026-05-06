@@ -11,7 +11,7 @@ components:
     ref_type: "branch"
     ref: "main"
     commit: "ef5cfc84e583c616a89ce13694541207518f1206"
-    dirty: false
+    dirty: true
     trust_class: "trusted"
     release_eligible: false
   lifeline:
@@ -22,7 +22,7 @@ components:
     ref_type: "branch"
     ref: "main"
     commit: "39b15edbaec9597f60a586b5bbdb179afbc45582"
-    dirty: false
+    dirty: true
     trust_class: "trusted"
     release_eligible: true
   mazer:
@@ -33,7 +33,7 @@ components:
     ref_type: "branch"
     ref: "codex/mazer-remove-pwa-install-surface"
     commit: "021291d2b4f75379ab7e4c7891e302b54d4845c6"
-    dirty: false
+    dirty: true
     trust_class: "trusted"
     release_eligible: true
   nat1-games:
@@ -66,7 +66,7 @@ components:
     ref_type: "branch"
     ref: "main"
     commit: "4d0444bcb14c3470fe0913a21c8739f0791a1827"
-    dirty: false
+    dirty: true
     trust_class: "trusted"
     release_eligible: false
   stack:
@@ -75,8 +75,8 @@ components:
     status: "active"
     remote: "https://github.com/fawxzzy/ATLAS.git"
     ref_type: "branch"
-    ref: "codex/cortex-context-assembler-wave3"
-    commit: "1a66b20933804b31e0242f18fbe446675494e617"
+    ref: "codex/cortex-rail-seed-progression-r7"
+    commit: "48e291e2693ffe436c668fa6d174296d97ba7f8d"
     dirty: false
     trust_class: "trusted"
     release_eligible: false
@@ -127,4 +127,4 @@ excluded_surfaces:
     trust_class: "untrusted"
     release_eligible: false
     reason: "Token-bearing Verta checkout remains quarantined and untrusted until scrub and rotation are complete."
-lock_digest: "sha256:056699cf33e3b4e5c535a78b9581dfde72668849927a343d1401c139d86e0a20"
+lock_digest: "sha256:47febef1753079aeb9a0b312aa771650543300f47fd3833ce9e81c6ae6663e4d"
