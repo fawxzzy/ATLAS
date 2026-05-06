@@ -2,6 +2,11 @@
 
 Scoped inventory of the current stack-root Cortex surface as of 2026-04-26.
 
+Update 2026-05-06:
+This file remains the dated 2026-04-26 snapshot.
+The live reconciliation note for the current implementation surface is `docs/atlas/notes/cortex-surface-reconciliation-2026-05-06.md`.
+Several gaps listed below were later closed by landed `ops/cortex/**` modules and tests; use the reconciliation note for current status and next steps.
+
 ## Surface Map
 
 | Area | Current surface | Purpose |
@@ -69,7 +74,7 @@ Scoped inventory of the current stack-root Cortex surface as of 2026-04-26.
 - `docs/knowledge/QUERY-CONTRACT.md`, `docs/ops/ATLAS-CODEX-CONTEXT-RUNBOOK.md`, and several runtime context artifacts still reference `runtime/cortex/query/knowledge/bundle.json` directly, which is fine because that bundle is the current generated query plane.
 - Runtime memory and catalog data still includes `personal--verta-core` and `personal--verta-core-sanitized`; those are intentionally quarantined / metadata-only surfaces, not active Cortex implementation truth.
 
-## MVP Gap List
+## Initial MVP Gap List
 
 | Gap | Why it still matters |
 | --- | --- |
