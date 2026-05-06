@@ -45,13 +45,11 @@ The following April 26 gap statements are no longer accurate if read as current 
 
 The remaining problems are now about coherence and operating surface design, not raw feature existence:
 
-1. Seed and status drift remains real.
-   The active seed and dependent tests still route the next action through `build-cortex-context-assembler-wave3` even though the context-packet lane already exists.
-2. There is still no single operator entrypoint.
-   Current state, rail state, context packet, run result, and run ledger exist, but operators still consume multiple artifact families instead of one promoted default surface.
-3. Final Lifeline receipt emission remains gated.
+1. There is still no single operator entrypoint.
+   The seeded next action should now move to `promote-cortex-operator-surface-wave4`, because operators still consume multiple artifact families instead of one promoted default surface.
+2. Final Lifeline receipt emission remains gated.
    `ops/cortex/lifeline_write_adapter.py` intentionally stops at write-ready artifacts when mapped receipt inputs are incomplete or ambiguous.
-4. The `_stack` consumption loop is still under-promoted.
+3. The `_stack` consumption loop is still under-promoted.
    Cortex can emit context and planning artifacts, but the productized `_stack` consumer path is not yet the default operating lane.
 
 ## Recommended Order
