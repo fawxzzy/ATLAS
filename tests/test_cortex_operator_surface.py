@@ -97,7 +97,7 @@ class CortexOperatorSurfaceTests(unittest.TestCase):
         }
         payload["active_blockers"] = []
         payload["next_recommended_lane"] = {
-            "lane_id": "promote-cortex-operator-surface-wave4",
+            "lane_id": "build-cortex-ledger-wave5",
             "owner_layer": "cortex",
             "rationale": "Current-state, rail-state, context packets, run results, and run-ledger outputs exist, but operators still need one promoted surface that joins posture, blockers, selected lane, latest run summary, and receipt readiness.",
             "blocked_by": [],
@@ -113,7 +113,7 @@ class CortexOperatorSurfaceTests(unittest.TestCase):
         payload["generated_at"] = "2026-05-06T20:02:00+00:00"
         payload["rail_status"] = "ready"
         payload["active_blockers"] = []
-        payload["dirty_lanes"] = ["cortex-operator-surface-v0-1"]
+        payload["dirty_lanes"] = ["cortex-ledger-v0-1"]
         payload["validation_posture"] = {
             "status": "ambient-debt-only",
             "counts": {
@@ -127,7 +127,7 @@ class CortexOperatorSurfaceTests(unittest.TestCase):
             "receipt_path": "runtime/receipts/validation/stack-validation.latest.json",
         }
         payload["next_recommended_lane"] = {
-            "lane_id": "promote-cortex-operator-surface-wave4",
+            "lane_id": "build-cortex-ledger-wave5",
             "owner_layer": "cortex",
             "rationale": "Current-state, rail-state, context packets, run results, and run-ledger outputs exist, but operators still need one promoted surface that joins posture, blockers, selected lane, latest run summary, and receipt readiness.",
             "blocked_by": [],
@@ -142,16 +142,16 @@ class CortexOperatorSurfaceTests(unittest.TestCase):
     def _base_context_payload(self) -> dict:
         payload = json.loads(json.dumps(self.context_payload))
         payload["generated_at"] = "2026-05-06T20:03:00+00:00"
-        payload["packet_id"] = "context-promote-cortex-operator-surface-wave4"
+        payload["packet_id"] = "context-build-cortex-ledger-wave5"
         payload["context_summary"] = (
-            "Cortex context packet for promote-cortex-operator-surface-wave4 derived from explicit current-state, "
+            "Cortex context packet for build-cortex-ledger-wave5 derived from explicit current-state, "
             "rail-state, validation, and seed artifacts."
         )
         payload["posture_snapshot"]["branch"] = "codex/cortex-operator-surface-wave4"
         payload["posture_snapshot"]["head"] = "abc123def456"
         payload["posture_snapshot"]["worktree_status"] = "clean"
         payload["posture_snapshot"]["active_blocker_count"] = 0
-        payload["posture_snapshot"]["dirty_lanes"] = ["cortex-operator-surface-v0-1"]
+        payload["posture_snapshot"]["dirty_lanes"] = ["cortex-ledger-v0-1"]
         payload["posture_snapshot"]["validation_status"] = "ambient-debt-only"
         payload["posture_snapshot"]["validation_counts"] = {
             "critical": 0,
@@ -160,14 +160,14 @@ class CortexOperatorSurfaceTests(unittest.TestCase):
             "info": 1,
             "total": 5,
         }
-        payload["task_frame"]["lane_id"] = "promote-cortex-operator-surface-wave4"
+        payload["task_frame"]["lane_id"] = "build-cortex-ledger-wave5"
         payload["task_frame"]["owner_layer"] = "cortex"
-        payload["task_frame"]["title"] = "Promote a canonical Cortex operator surface."
+        payload["task_frame"]["title"] = "Build the canonical Cortex ledger."
         payload["task_frame"]["status"] = "ready"
         payload["task_frame"]["rationale"] = (
-            "Current-state, rail-state, context packets, run results, and run-ledger outputs exist, but operators "
-            "still need one promoted surface that joins posture, blockers, selected lane, latest run summary, and "
-            "receipt readiness."
+            "Current-state, rail-state, context packets, run results, run-ledger outputs, and the operator surface "
+            "now exist, but Cortex still needs one durable ledger that records posture, blockers, selected lane, "
+            "proof status, receipt readiness, and evidence refs together."
         )
         payload["task_frame"]["blocked_by"] = []
         payload["task_frame"]["ready_to_execute"] = True
@@ -212,8 +212,8 @@ class CortexOperatorSurfaceTests(unittest.TestCase):
         self.assertEqual("atlas.cortex.operator-surface.v1", payload["contract_version"])
         self.assertEqual("cortex-mvp", payload["active_rail"])
         self.assertEqual("ready", payload["rail_status"])
-        self.assertEqual("promote-cortex-operator-surface-wave4", payload["next_recommended_lane"]["lane_id"])
-        self.assertEqual("context-promote-cortex-operator-surface-wave4", payload["context_packet_id"])
+        self.assertEqual("build-cortex-ledger-wave5", payload["next_recommended_lane"]["lane_id"])
+        self.assertEqual("context-build-cortex-ledger-wave5", payload["context_packet_id"])
         self.assertEqual([], payload["active_blockers"])
         self.assertEqual("in_sync", payload["publication_posture"]["remote_status"])
         self.assertEqual(
@@ -251,7 +251,7 @@ class CortexOperatorSurfaceTests(unittest.TestCase):
         rail_state_payload["rail_status"] = "blocked"
         rail_state_payload["active_blockers"] = current_state_payload["active_blockers"]
         rail_state_payload["next_recommended_lane"] = current_state_payload["next_recommended_lane"]
-        rail_state_payload["dirty_lanes"] = ["stabilize-stack-validation", "cortex-operator-surface-v0-1"]
+        rail_state_payload["dirty_lanes"] = ["stabilize-stack-validation", "cortex-ledger-v0-1"]
         context_payload = self._base_context_payload()
         context_payload["task_frame"]["lane_id"] = "stabilize-stack-validation"
         context_payload["task_frame"]["owner_layer"] = "atlas"

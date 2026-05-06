@@ -3,7 +3,7 @@
   "posture": {
     "posture_id": "cortex-wave1-landed",
     "classification": "pivoted",
-    "summary": "Cortex current-state, rail-state, and context assembly are landed, the active product lane remains Cortex, and the next tranche is promoting a canonical operator surface while known stack validation debt stays ambient debt.",
+    "summary": "Cortex current-state, rail-state, context assembly, and operator surface are landed, the active product lane remains Cortex, and the next tranche is building a canonical Cortex ledger while known stack validation debt stays ambient debt.",
     "handoff_summaries": [
       "docs/atlas/notes/cortex-priority-pivot-2026-04-26.md",
       "docs/atlas/notes/cortex-mvp-spec-2026-04-26.md",
@@ -13,7 +13,7 @@
       "Current branch and worktree posture should be read from the explicit current-state artifact rather than inferred from seed-era git residue."
     ],
     "verification_summaries": [
-      "Wave 4 should preserve the clean kernel-to-context path and treat stack validation debt as existing debt unless the current tranche introduces a regression."
+      "Wave 5 should preserve the clean kernel-to-operator path and treat stack validation debt as existing debt unless the current tranche introduces a regression."
     ],
     "stack_validation_summaries": [
       "runtime/receipts/validation/stack-validation.latest.json"
@@ -40,19 +40,20 @@
       },
       "dirty_lanes": [
         {
-          "lane_id": "cortex-operator-surface-v0-1",
+          "lane_id": "cortex-ledger-v0-1",
           "owner_layer": "cortex",
-          "summary": "Cortex can now emit current-state, rail-state, context packets, run results, and run-ledger views, but operators still lack one promoted surface that joins posture, blockers, selected lane, latest run summary, and receipt readiness.",
+          "summary": "Cortex can now emit current-state, rail-state, context packets, run results, run-ledger views, and one operator surface, but it still lacks a canonical durable ledger that records posture, blockers, selected lane, proof status, receipt readiness, and evidence refs together.",
           "status": "open",
-          "blocking_reason": "Wave 4 still needs a canonical operator surface before Cortex can present one default read model for day-to-day stack operation.",
+          "blocking_reason": "Wave 5 still needs a canonical Cortex ledger before the operator-facing read model becomes the durable default operating surface.",
           "evidence": [
             "docs/atlas/notes/cortex-surface-reconciliation-2026-05-06.md",
             "runtime/cortex/current-state/latest.json",
             "runtime/cortex/rail-state/latest.json",
-            "runtime/cortex/context/latest.json"
+            "runtime/cortex/context/latest.json",
+            "runtime/cortex/operator-surface/latest.json"
           ],
           "source_inputs": [
-            "Wave 3 context packet artifact",
+            "Wave 4 operator surface artifact",
             "Cortex run-result and run-ledger lanes"
           ]
         }
@@ -74,23 +75,24 @@
         }
       ],
       "next_action": {
-        "action_id": "promote-cortex-operator-surface-wave4",
+        "action_id": "build-cortex-ledger-wave5",
         "owner_layer": "cortex",
-        "title": "Promote a canonical Cortex operator surface.",
-        "rationale": "Current-state, rail-state, context packets, run results, and run-ledger outputs exist, but operators still need one promoted surface that joins posture, blockers, selected lane, latest run summary, and receipt readiness.",
+        "title": "Build the canonical Cortex ledger.",
+        "rationale": "Current-state, rail-state, context packets, run results, run-ledger outputs, and the operator surface now exist, but Cortex still needs one durable ledger that records posture, blockers, selected lane, proof status, receipt readiness, and evidence refs together.",
         "required_inputs": [
           "runtime/cortex/current-state/latest.json",
           "runtime/cortex/rail-state/latest.json",
           "runtime/cortex/context/latest.json",
+          "runtime/cortex/operator-surface/latest.json",
           "runtime/cortex/kernel.state-model.seed.v1.json",
           "runtime/cortex/kernel.rule-registry.seed.v1.json",
           "docs/atlas/notes/cortex-surface-reconciliation-2026-05-06.md"
         ],
         "verification_plan": [
-          "python -m unittest tests.test_cortex_current_state tests.test_cortex_rail_state_reader tests.test_cortex_context_assembler tests.test_cortex_loop tests.test_cortex_run_artifact",
+          "python -m unittest tests.test_cortex_current_state tests.test_cortex_rail_state_reader tests.test_cortex_context_assembler tests.test_cortex_operator_surface tests.test_cortex_loop tests.test_cortex_run_artifact",
           "python .\\ops\\validation\\validate_stack.py"
         ],
-        "receipt_scope": "Cortex should promote one canonical operator-facing surface before expanding Lifeline-ready receipt mapping or _stack consumer defaults."
+        "receipt_scope": "Cortex should promote one canonical durable ledger before expanding Lifeline-ready receipt mapping or _stack consumer defaults."
       },
       "boundary_reminders": [
         "Fitness owns product UI truth.",

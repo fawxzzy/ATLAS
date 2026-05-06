@@ -76,7 +76,7 @@ class CortexLoopTests(unittest.TestCase):
         self.assertIn("Pattern", result.worker_plan.prompt)
         self.assertIn("Failure Mode", result.worker_plan.prompt)
         self.assertTrue(any(rule.kind == "failure_mode" for rule in result.rules_applied))
-        self.assertEqual("promote-cortex-operator-surface-wave4", trace["selected_next_action_id"])
+        self.assertEqual("build-cortex-ledger-wave5", trace["selected_next_action_id"])
         self.assertIn("fitness-owner-adoption-resumes-unless-pivot", trace["pattern_ids"])
         self.assertIn("known-validation-debt-stays-ambient-unless-regression", trace["rule_ids"])
         self.assertIn("cortex-observes-interprets-proves-only", trace["failure_mode_ids"])
