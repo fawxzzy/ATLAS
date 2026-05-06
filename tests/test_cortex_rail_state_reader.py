@@ -81,9 +81,9 @@ class CortexRailStateReaderTests(unittest.TestCase):
         }
         payload["active_blockers"] = []
         payload["next_recommended_lane"] = {
-            "lane_id": "build-cortex-ledger-wave5",
+            "lane_id": "promote-cortex-worker-prompt-contract-wave6",
             "owner_layer": "cortex",
-            "rationale": "Current-state, rail-state, context packets, run results, and run-ledger outputs exist, but operators still need one promoted surface that joins posture, blockers, selected lane, latest run summary, and receipt readiness.",
+            "rationale": "The canonical ledger is landed, but Cortex still needs one promoted worker-prompt artifact contract that _stack can consume while planner, context, proof, receipt-draft, and final receipt stay separate and linked by refs and digests.",
             "blocked_by": [],
             "source_refs": [
                 "runtime/cortex/kernel.state-model.seed.v1.json",
@@ -119,9 +119,9 @@ class CortexRailStateReaderTests(unittest.TestCase):
 
         self.assertEqual("cortex-mvp", payload["active_rail"])
         self.assertEqual("ready", payload["rail_status"])
-        self.assertEqual("build-cortex-ledger-wave5", payload["next_recommended_lane"]["lane_id"])
+        self.assertEqual("promote-cortex-worker-prompt-contract-wave6", payload["next_recommended_lane"]["lane_id"])
         self.assertEqual([], payload["active_blockers"])
-        self.assertIn("cortex-ledger-v0-1", payload["dirty_lanes"])
+        self.assertIn("cortex-worker-prompt-contract-v0-1", payload["dirty_lanes"])
 
     def test_validation_blocker_forces_stabilize_stack_validation(self) -> None:
         current_state_payload = self._base_current_state_payload()
@@ -142,7 +142,7 @@ class CortexRailStateReaderTests(unittest.TestCase):
 
         self.assertEqual("blocked", payload["rail_status"])
         self.assertEqual("stabilize-stack-validation", payload["next_recommended_lane"]["lane_id"])
-        self.assertEqual(["stabilize-stack-validation", "cortex-ledger-v0-1"], payload["dirty_lanes"])
+        self.assertEqual(["stabilize-stack-validation", "cortex-worker-prompt-contract-v0-1"], payload["dirty_lanes"])
 
     def test_dirty_worktree_forces_stabilize_root_worktree(self) -> None:
         current_state_payload = self._base_current_state_payload()
@@ -177,7 +177,7 @@ class CortexRailStateReaderTests(unittest.TestCase):
 
         self.assertEqual("stabilize-first", payload["rail_status"])
         self.assertEqual("stabilize-root-worktree", payload["next_recommended_lane"]["lane_id"])
-        self.assertEqual(["stabilize-root-worktree", "cortex-ledger-v0-1"], payload["dirty_lanes"])
+        self.assertEqual(["stabilize-root-worktree", "cortex-worker-prompt-contract-v0-1"], payload["dirty_lanes"])
 
     def test_missing_current_state_artifact_fails_clearly(self) -> None:
         temp_dir = tempfile.TemporaryDirectory()
@@ -204,7 +204,7 @@ class CortexRailStateReaderTests(unittest.TestCase):
         payload = build_rail_state_payload(root=root)
 
         self.assertEqual("bounded-fallback", payload["rail_status"])
-        self.assertEqual("build-cortex-ledger-wave5", payload["next_recommended_lane"]["lane_id"])
+        self.assertEqual("promote-cortex-worker-prompt-contract-wave6", payload["next_recommended_lane"]["lane_id"])
         self.assertEqual(
             [
                 "runtime/cortex/current-state/latest.json",
