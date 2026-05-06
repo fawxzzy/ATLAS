@@ -54,7 +54,7 @@ class CortexRunArtifactTests(unittest.TestCase):
             payload = json.loads(artifact.artifact_path.read_text(encoding="utf-8"))
             summary = artifact.summary_path.read_text(encoding="utf-8") if artifact.summary_path is not None else ""
 
-        self.assertEqual("promote-cortex-operator-surface-wave4", payload["selected_next_action"]["action_id"])
+        self.assertEqual("build-cortex-ledger-wave5", payload["selected_next_action"]["action_id"])
         self.assertEqual("cortex_runtime_work", payload["worker_plan"]["template_id"])
         self.assertTrue(payload["receipt_ready"])
         self.assertTrue(payload["known_ambient_debt"])
