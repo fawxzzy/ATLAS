@@ -3,16 +3,17 @@
   "posture": {
     "posture_id": "cortex-wave1-landed",
     "classification": "pivoted",
-    "summary": "Cortex Wave 1 kernel is landed, the active product lane remains Cortex, and known stack validation debt stays intentionally classified as ambient debt.",
+    "summary": "Cortex current-state, rail-state, and context assembly are landed, the active product lane remains Cortex, and the next tranche is promoting a canonical operator surface while known stack validation debt stays ambient debt.",
     "handoff_summaries": [
       "docs/atlas/notes/cortex-priority-pivot-2026-04-26.md",
-      "docs/atlas/notes/cortex-mvp-spec-2026-04-26.md"
+      "docs/atlas/notes/cortex-mvp-spec-2026-04-26.md",
+      "docs/atlas/notes/cortex-surface-reconciliation-2026-05-06.md"
     ],
     "git_status_summaries": [
-      "git status --short shows the three Cortex notes as new while unrelated Fitness-facing files remain dirty and out of scope."
+      "Current branch and worktree posture should be read from the explicit current-state artifact rather than inferred from seed-era git residue."
     ],
     "verification_summaries": [
-      "Wave 1 should preserve the clean footer catch-up proof step and treat stack validation debt as existing debt unless the current tranche introduces a regression."
+      "Wave 4 should preserve the clean kernel-to-context path and treat stack validation debt as existing debt unless the current tranche introduces a regression."
     ],
     "stack_validation_summaries": [
       "runtime/receipts/validation/stack-validation.latest.json"
@@ -39,19 +40,20 @@
       },
       "dirty_lanes": [
         {
-          "lane_id": "cortex-context-assembler-v0-1",
+          "lane_id": "cortex-operator-surface-v0-1",
           "owner_layer": "cortex",
-          "summary": "Cortex can now classify posture and route the next lane, but it cannot yet assemble compact, lane-scoped context packets for bounded worker execution.",
+          "summary": "Cortex can now emit current-state, rail-state, context packets, run results, and run-ledger views, but operators still lack one promoted surface that joins posture, blockers, selected lane, latest run summary, and receipt readiness.",
           "status": "open",
-          "blocking_reason": "Wave 3 still needs a deterministic context assembler before worker planning, proof interpretation, or receipt drafting can rely on compact artifact-backed context.",
+          "blocking_reason": "Wave 4 still needs a canonical operator surface before Cortex can present one default read model for day-to-day stack operation.",
           "evidence": [
-            "docs/atlas/notes/cortex-mvp-spec-2026-04-26.md",
+            "docs/atlas/notes/cortex-surface-reconciliation-2026-05-06.md",
             "runtime/cortex/current-state/latest.json",
-            "runtime/cortex/rail-state/latest.json"
+            "runtime/cortex/rail-state/latest.json",
+            "runtime/cortex/context/latest.json"
           ],
           "source_inputs": [
-            "Wave 2 current-state artifact",
-            "Wave 2 rail-state artifact"
+            "Wave 3 context packet artifact",
+            "Cortex run-result and run-ledger lanes"
           ]
         }
       ],
@@ -72,23 +74,23 @@
         }
       ],
       "next_action": {
-        "action_id": "build-cortex-context-assembler-wave3",
+        "action_id": "promote-cortex-operator-surface-wave4",
         "owner_layer": "cortex",
-        "title": "Build the first deterministic Cortex context assembler.",
-        "rationale": "Wave 2 now provides artifact-backed current-state and rail-state outputs, so the next Cortex jump is compact context assembly for bounded worker execution.",
+        "title": "Promote a canonical Cortex operator surface.",
+        "rationale": "Current-state, rail-state, context packets, run results, and run-ledger outputs exist, but operators still need one promoted surface that joins posture, blockers, selected lane, latest run summary, and receipt readiness.",
         "required_inputs": [
-          "runtime/cortex/kernel.state-model.seed.v1.json",
-          "runtime/cortex/kernel.rule-registry.seed.v1.json",
           "runtime/cortex/current-state/latest.json",
           "runtime/cortex/rail-state/latest.json",
-          "docs/atlas/notes/cortex-mvp-spec-2026-04-26.md"
+          "runtime/cortex/context/latest.json",
+          "runtime/cortex/kernel.state-model.seed.v1.json",
+          "runtime/cortex/kernel.rule-registry.seed.v1.json",
+          "docs/atlas/notes/cortex-surface-reconciliation-2026-05-06.md"
         ],
         "verification_plan": [
-          "python -m unittest tests.test_cortex_current_state",
-          "python -m unittest tests.test_cortex_rail_state_reader",
+          "python -m unittest tests.test_cortex_current_state tests.test_cortex_rail_state_reader tests.test_cortex_context_assembler tests.test_cortex_loop tests.test_cortex_run_artifact",
           "python .\\ops\\validation\\validate_stack.py"
         ],
-        "receipt_scope": "Cortex should assemble compact, explicit context packets before worker planning or receipt layers claim more authority."
+        "receipt_scope": "Cortex should promote one canonical operator-facing surface before expanding Lifeline-ready receipt mapping or _stack consumer defaults."
       },
       "boundary_reminders": [
         "Fitness owns product UI truth.",
