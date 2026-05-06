@@ -76,8 +76,8 @@ components:
     remote: "https://github.com/fawxzzy/ATLAS.git"
     ref_type: "branch"
     ref: "codex/cortex-context-assembler-wave3"
-    commit: "aec4c5559f7dd8262451c514d9e08adf6432dc51"
-    dirty: true
+    commit: "1a66b20933804b31e0242f18fbe446675494e617"
+    dirty: false
     trust_class: "trusted"
     release_eligible: false
   stream:
@@ -127,4 +127,4 @@ excluded_surfaces:
     trust_class: "untrusted"
     release_eligible: false
     reason: "Token-bearing Verta checkout remains quarantined and untrusted until scrub and rotation are complete."
-lock_digest: "sha256:28948c1679ce94fda12b82d834cf1bfe63e6958a8d9e5215856a7ff555e223f0"
+lock_digest: "sha256:056699cf33e3b4e5c535a78b9581dfde72668849927a343d1401c139d86e0a20"
