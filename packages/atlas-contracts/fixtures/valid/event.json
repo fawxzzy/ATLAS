@@ -1,0 +1,54 @@
+{
+  "contract_version": "atlas.event.v1",
+  "event_type": "catalog.refresh",
+  "event_id": "evt-20260507-001",
+  "occurred_at": "2026-05-07T12:30:00Z",
+  "repo_id": "trove",
+  "app_id": "fawxzzy-trove",
+  "environment": "preview",
+  "producer": {
+    "kind": "service",
+    "name": "trove-build",
+    "version": "1.0.0",
+    "host": "ci"
+  },
+  "session": {
+    "session_id": "sess-20260507-001",
+    "workspace_root": ".",
+    "operator": "codex",
+    "run_label": "atlas-platform-v1-contracts"
+  },
+  "task": {
+    "task_id": "task-20260507-001",
+    "task_name": "generate-catalog",
+    "scope_paths": [
+      "repos/fawxzzy-trove",
+      "docs/registry"
+    ],
+    "repo_ids": [
+      "trove",
+      "stack"
+    ],
+    "mutation_mode": "owner_repo"
+  },
+  "trace": {
+    "correlation_id": "corr-20260507-001",
+    "trace_id": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "span_id": "00f067aa0ba902b7"
+  },
+  "subject": {
+    "kind": "catalog",
+    "id": "public-apps",
+    "path": "docs/registry/STACK-REPO-INVENTORY.json"
+  },
+  "payload": {
+    "summary": "Refresh public catalog from Foundation and ATLAS registry truth.",
+    "records": 7
+  },
+  "links": [
+    {
+      "rel": "inventory",
+      "href": "docs/registry/STACK-REPO-INVENTORY.json"
+    }
+  ]
+}

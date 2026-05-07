@@ -1,0 +1,21 @@
+{
+  "contract_version": "atlas.app-registration.v1",
+  "repo_id": "cortex",
+  "app_id": "fawxzzy-cortex",
+  "repo_class": "active",
+  "status": "incubating",
+  "owner_repo": "stack",
+  "root_path": "runtime/cortex",
+  "validation_entrypoint": "pnpm verify",
+  "health_endpoint": null,
+  "event_sink": null,
+  "receipt_root": "runtime/receipts",
+  "admission": {
+    "owner": "stack",
+    "contract_status": "blocked",
+    "required_receipts": [
+      "promotion-gate"
+    ]
+  },
+  "dependencies": []
+}

@@ -1,0 +1,186 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://packages/contracts/atlas.app-registration.v1.schema.json",
+  "title": "ATLAS app registration contract v1",
+  "description": "Registration contract for a repo-owned app or platform surface admitted into ATLAS.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "repo_id",
+    "app_id",
+    "repo_class",
+    "status",
+    "owner_repo",
+    "root_path",
+    "validation_entrypoint",
+    "health_endpoint",
+    "event_sink",
+    "receipt_root",
+    "admission",
+    "dependencies"
+  ],
+  "properties": {
+    "contract_version": {
+      "type": "string",
+      "const": "atlas.app-registration.v1"
+    },
+    "repo_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*$"
+    },
+    "app_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*$"
+    },
+    "repo_class": {
+      "type": "string",
+      "enum": [
+        "stack",
+        "application",
+        "governance-runtime",
+        "local-operator",
+        "workflow-operator",
+        "demo",
+        "incubating",
+        "legacy",
+        "archive",
+        "quarantined"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "managed",
+        "unmanaged",
+        "verified",
+        "incubating",
+        "demo",
+        "legacy",
+        "archived",
+        "quarantined"
+      ]
+    },
+    "owner_repo": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*$"
+    },
+    "root_path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(\\.|[A-Za-z0-9_./-]+)$"
+    },
+    "validation_entrypoint": {
+      "type": "string",
+      "minLength": 1
+    },
+    "health_endpoint": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "event_sink": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "receipt_root": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "admission": {
+      "$ref": "#/$defs/admission"
+    },
+    "dependencies": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/dependency"
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "$defs": {
+    "admission": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "owner",
+        "contract_status",
+        "required_receipts"
+      ],
+      "properties": {
+        "owner": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]*$"
+        },
+        "contract_status": {
+          "type": "string",
+          "enum": [
+            "planned",
+            "adopted",
+            "verified",
+            "blocked"
+          ]
+        },
+        "required_receipts": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "promotion_blockers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "dependency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repo_id",
+        "kind"
+      ],
+      "properties": {
+        "repo_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]*$"
+        },
+        "app_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[a-z0-9][a-z0-9-]*$"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "runtime",
+            "workflow",
+            "catalog",
+            "data",
+            "deployment",
+            "observability"
+          ]
+        },
+        "required": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

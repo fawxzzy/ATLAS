@@ -1,0 +1,41 @@
+{
+  "contract_version": "atlas.app-registration.v1",
+  "repo_id": "fitness",
+  "app_id": "fawxzzy-fitness",
+  "repo_class": "application",
+  "status": "managed",
+  "owner_repo": "fitness",
+  "root_path": "repos/fawxzzy-fitness",
+  "validation_entrypoint": "pnpm verify",
+  "health_endpoint": "/api/health",
+  "event_sink": "runtime/receipts/events",
+  "receipt_root": "runtime/receipts",
+  "admission": {
+    "owner": "fitness",
+    "contract_status": "planned",
+    "required_receipts": [
+      "contract-check",
+      "verify"
+    ],
+    "promotion_blockers": [
+      "atlas-auth is not part of Wave 1."
+    ]
+  },
+  "dependencies": [
+    {
+      "repo_id": "playbook",
+      "app_id": null,
+      "kind": "workflow",
+      "required": true
+    },
+    {
+      "repo_id": "lifeline",
+      "app_id": null,
+      "kind": "runtime",
+      "required": false
+    }
+  ],
+  "notes": [
+    "Owner repos implement behavior after contracts merge."
+  ]
+}

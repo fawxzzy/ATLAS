@@ -143,6 +143,11 @@ Recommended validation names:
 
 If a repo cannot adopt that naming, document the exception in its README and AGENTS file.
 
+For the Wave 1 platform admission surface, use:
+
+- `docs/architecture/atlas-platform-v1.md`
+- `docs/architecture/repo-class-admission-rules.md`
+
 For stack-wide validation, prefer ratcheting over one-shot cleanup gates:
 
 - keep a committed baseline artifact for existing stack findings

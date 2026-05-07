@@ -26,6 +26,7 @@ Root rule:
 
 - federate repo truth
 - do not duplicate repo truth
+- freeze importable platform contracts at root before owner-repo auth or runtime package work
 
 Read these files first:
 
@@ -36,6 +37,8 @@ Read these files first:
 - `AGENTS.md`
 - `docs/architecture/AWARENESS-FIRST-WORLD-MODEL.md`
 - `docs/architecture/STACK-STANDARDS.md`
+- `docs/architecture/atlas-platform-v1.md`
+- `docs/architecture/repo-class-admission-rules.md`
 - `docs/architecture/PATH-POLICY.md`
 - `docs/ops/ATLAS-MISSION-CONTEXT.md`
 - `docs/ops/ATLAS-SESSION-RUNBOOK.md`
