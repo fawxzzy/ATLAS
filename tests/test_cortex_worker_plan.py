@@ -95,6 +95,38 @@ class CortexWorkerPlanTests(unittest.TestCase):
         self.assertIn("ops/cortex/worker_prompt.py", plan.files_to_modify)
         self.assertIn("stack.yaml", plan.files_to_avoid)
 
+    def test_stack_consumption_pilot_next_action_produces_bounded_pilot_template(self) -> None:
+        posture, rail_state, next_action = self._with_state(
+            posture=replace(self.posture, classification="pivoted"),
+            rail_state=replace(
+                self.posture.rail_state,
+                owner_layer="cortex",
+                next_action=replace(
+                    self.posture.rail_state.next_action,
+                    action_id="pilot-cortex-worker-prompt-stack-consumption-wave7",
+                    owner_layer="cortex",
+                    title="Pilot bounded _stack consumption of the Cortex worker-prompt contract.",
+                    rationale="Cortex needs one _stack pilot that consumes artifacts without transcript scraping.",
+                    receipt_scope="Keep receipt authority outside Cortex and do not enable default routing.",
+                    verification_plan=(
+                        "python -m unittest tests.test_cortex_stack_consumption_pilot tests.test_cortex_worker_prompt",
+                    ),
+                ),
+            ),
+        )
+
+        plan = build_worker_plan(posture, rail_state, next_action, self.rules)
+
+        self.assertEqual("cortex_stack_consumption_pilot", plan.template_id)
+        self.assertIn("without transcript scraping", plan.prompt.lower())
+        self.assertIn("ops/cortex/stack_consumption_pilot.py", plan.files_to_modify)
+        self.assertIn("runtime/atlas/conversations/**", plan.files_to_avoid)
+        self.assertIn("Do not scrape transcripts or conversations for pilot inputs.", plan.failure_modes_to_avoid)
+        self.assertIn(
+            "Respect receipt scope: Keep receipt authority outside Cortex and do not enable default routing.",
+            plan.implementation_plan,
+        )
+
     def test_fitness_owner_adoption_next_action_produces_fitness_scoped_prompt(self) -> None:
         posture, rail_state, next_action = self._with_state(
             posture=replace(self.posture, classification="steady"),
