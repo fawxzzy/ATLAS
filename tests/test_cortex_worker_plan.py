@@ -63,6 +63,37 @@ class CortexWorkerPlanTests(unittest.TestCase):
         self.assertIn("Failure Mode", plan.prompt)
         self.assertIn("Cortex priority override active: yes", plan.prompt)
         self.assertTrue(any(path.startswith("ops/cortex/") for path in plan.files_to_modify))
+        self.assertTrue(plan.implementation_plan)
+        self.assertTrue(plan.failure_modes_to_avoid)
+
+    def test_worker_prompt_contract_next_action_produces_dedicated_prompt_template(self) -> None:
+        posture, rail_state, next_action = self._with_state(
+            posture=replace(self.posture, classification="pivoted"),
+            rail_state=replace(
+                self.posture.rail_state,
+                owner_layer="cortex",
+                next_action=replace(
+                    self.posture.rail_state.next_action,
+                    action_id="promote-cortex-worker-prompt-contract-wave6",
+                    owner_layer="cortex",
+                    title="Promote the Cortex worker-prompt contract.",
+                    rationale="Cortex needs one _stack-consumable worker prompt while staying advisory.",
+                    receipt_scope="Keep receipt authority outside Cortex.",
+                    verification_plan=(
+                        "python -m unittest tests.test_cortex_worker_prompt tests.test_cortex_worker_plan",
+                    ),
+                ),
+            ),
+        )
+
+        plan = build_worker_plan(posture, rail_state, next_action, self.rules)
+
+        self.assertEqual("cortex_worker_prompt_contract", plan.template_id)
+        self.assertIn("worker-prompt contract", plan.prompt.lower())
+        self.assertIn("Respect receipt scope: Keep receipt authority outside Cortex.", plan.implementation_plan)
+        self.assertIn("Do not treat the worker prompt as execution authority.", plan.failure_modes_to_avoid)
+        self.assertIn("ops/cortex/worker_prompt.py", plan.files_to_modify)
+        self.assertIn("stack.yaml", plan.files_to_avoid)
 
     def test_fitness_owner_adoption_next_action_produces_fitness_scoped_prompt(self) -> None:
         posture, rail_state, next_action = self._with_state(
