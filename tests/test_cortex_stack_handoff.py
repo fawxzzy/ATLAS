@@ -9,14 +9,13 @@ from copy import deepcopy
 from pathlib import Path
 
 from ops._atlas import atlas_root
-from ops.cortex.stack_consumption_pilot import (
-    build_stack_consumption_pilot_payload,
-    default_stack_consumption_pilot_latest_json_path,
-    default_stack_consumption_pilot_latest_markdown_path,
+from ops.cortex.stack_handoff import (
+    build_stack_advisory_handoff_payload,
+    default_stack_advisory_handoff_latest_json_path,
+    default_stack_advisory_handoff_latest_markdown_path,
     main,
-    persist_stack_consumption_pilot_artifact,
+    persist_stack_advisory_handoff_artifact,
 )
-from ops.cortex.stack_handoff import persist_stack_advisory_handoff_artifact
 from ops.cortex.worker_prompt import persist_cortex_worker_prompt_artifact
 
 
@@ -25,7 +24,7 @@ def _write_json(path: Path, payload: dict) -> None:
     path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
 
 
-class CortexStackConsumptionPilotTests(unittest.TestCase):
+class CortexStackAdvisoryHandoffTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.root = atlas_root()
@@ -217,62 +216,52 @@ class CortexStackConsumptionPilotTests(unittest.TestCase):
         _write_json(root / "runtime" / "cortex" / "kernel.proof-summary.examples.v1.json", self.proof_payload)
         (root / "stack.lock.yaml").write_text(self.stack_lock_text, encoding="utf-8")
         persist_cortex_worker_prompt_artifact(root=root)
-        persist_stack_advisory_handoff_artifact(root=root)
         return root
 
-    def test_clean_ready_posture_emits_stack_consumption_pilot(self) -> None:
+    def test_clean_ready_posture_emits_canonical_handoff(self) -> None:
         root = self._temp_root()
 
-        payload = build_stack_consumption_pilot_payload(root=root)
+        payload = build_stack_advisory_handoff_payload(root=root)
 
-        self.assertEqual("atlas.cortex.stack-consumption-pilot.v1", payload["contract_version"])
+        self.assertEqual("atlas.cortex.stack-advisory-handoff.v2", payload["contract_version"])
         self.assertEqual("read_only_advisory", payload["authority_level"])
-        self.assertEqual("_stack", payload["consumer_id"])
-        self.assertEqual("artifact_refs_only", payload["stack_handoff"]["consumption_mode"])
-        self.assertEqual("ready", payload["pilot_result"]["status"])
-        self.assertTrue(payload["pilot_result"]["ready_for_stack_consumer"])
+        self.assertEqual("_stack", payload["consumer"]["consumer_id"])
+        self.assertEqual("artifact_refs_only", payload["consumer"]["consumption_mode"])
+        self.assertTrue(payload["routing_contract"]["routing_contract_promoted"])
+        self.assertEqual("explicit_artifact_ref_handoff", payload["routing_contract"]["routing_mode"])
+        self.assertFalse(payload["routing_contract"]["automatic_dispatch_enabled"])
+        self.assertFalse(payload["routing_contract"]["execution_authorized"])
+        self.assertFalse(payload["routing_contract"]["receipt_authorized"])
+        self.assertFalse(payload["routing_contract"]["owner_truth_mutation_authorized"])
+        self.assertFalse(payload["routing_contract"]["transcript_scraping_allowed"])
         self.assertEqual(
             "promote-cortex-stack-consumer-default-routing-wave8",
             payload["next_recommended_lane"]["lane_id"],
         )
+        self.assertEqual("ready", payload["handoff_result"]["status"])
+        self.assertTrue(payload["handoff_result"]["ready_for_stack_consumer"])
+        self.assertTrue(all(check["status"] == "passed" for check in payload["handoff_checks"]))
         self.assertEqual(
-            "runtime/cortex/stack-advisory-handoff/latest.json",
-            payload["canonical_handoff"]["ref"],
+            "runtime/cortex/stack-consumption-pilot/latest.json",
+            payload["canonical_refs"]["stack_consumption_pilot"],
         )
-        self.assertEqual("runtime/cortex/worker-prompts/latest.json", payload["stack_handoff"]["worker_prompt_ref"])
-        self.assertEqual("runtime/cortex/context/latest.json", payload["stack_handoff"]["context_ref"])
-        self.assertEqual(
-            "atlas.cortex.stack-advisory-handoff.v2",
-            payload["canonical_handoff"]["contract_version"],
-        )
-        self.assertFalse(payload["stack_handoff"]["execution_authorized"])
-        self.assertFalse(payload["stack_handoff"]["receipt_authorized"])
-        self.assertFalse(payload["stack_handoff"]["owner_truth_mutation_authorized"])
-        self.assertFalse(payload["stack_handoff"]["default_routing_enabled"])
-        self.assertFalse(payload["stack_handoff"]["transcript_scraping_allowed"])
-        self.assertFalse(payload["transcript_scraping"]["detected"])
-        self.assertEqual([], payload["transcript_scraping"]["detected_refs"])
-        self.assertIsNone(payload["stack_handoff"]["final_receipt_ref"])
-        self.assertIn("runtime/cortex/stack-advisory-handoff/latest.json", payload["source_refs"])
-        self.assertIn("runtime/cortex/worker-prompts/latest.json", payload["source_refs"])
-        self.assertIn("runtime/cortex/context/latest.json", payload["source_refs"])
-        self.assertTrue(all(check["status"] == "passed" for check in payload["pilot_checks"]))
         json.dumps(payload, sort_keys=True)
 
-    def test_markdown_summary_includes_pilot_checks_and_guards(self) -> None:
+    def test_markdown_summary_includes_boundary_language(self) -> None:
         root = self._temp_root()
 
-        artifact = persist_stack_consumption_pilot_artifact(root=root)
-        payload = json.loads(default_stack_consumption_pilot_latest_json_path(root).read_text(encoding="utf-8"))
-        summary = default_stack_consumption_pilot_latest_markdown_path(root).read_text(encoding="utf-8")
+        artifact = persist_stack_advisory_handoff_artifact(root=root)
+        payload = json.loads(default_stack_advisory_handoff_latest_json_path(root).read_text(encoding="utf-8"))
+        summary = default_stack_advisory_handoff_latest_markdown_path(root).read_text(encoding="utf-8")
 
         self.assertEqual(json.dumps(payload), json.dumps(artifact.payload))
-        self.assertIn("# Cortex Stack Consumption Pilot", summary)
+        self.assertIn("# Cortex Stack Advisory Handoff", summary)
         self.assertIn("promote-cortex-stack-consumer-default-routing-wave8", summary)
-        self.assertIn("Canonical handoff", summary)
-        self.assertIn("Pilot Checks", summary)
-        self.assertIn("Transcript scraping", summary)
-        self.assertIn("Execution authorized", summary)
+        self.assertIn("_stack", summary)
+        self.assertIn("artifact_refs_only", summary)
+        self.assertIn("automatic dispatch", summary.lower())
+        self.assertIn("execution authorized", summary.lower())
+        self.assertIn("receipt authorized", summary.lower())
         self.assertIn("Authority Guards", summary)
 
     def test_missing_worker_prompt_fails_clearly(self) -> None:
@@ -287,6 +276,22 @@ class CortexStackConsumptionPilotTests(unittest.TestCase):
         self.assertEqual(2, exit_code)
         self.assertEqual("", stdout.getvalue())
         self.assertIn("Cortex worker-prompt artifact not found", stderr.getvalue())
+
+    def test_transcript_refs_block_readiness(self) -> None:
+        root = self._temp_root()
+        worker_prompt_path = root / "runtime" / "cortex" / "worker-prompts" / "latest.json"
+        payload = json.loads(worker_prompt_path.read_text(encoding="utf-8"))
+        payload["source_refs"] = list(payload.get("source_refs", [])) + [
+            "runtime/atlas/conversations/example-transcript.json"
+        ]
+        worker_prompt_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+
+        handoff_payload = build_stack_advisory_handoff_payload(root=root)
+
+        self.assertEqual("blocked", handoff_payload["handoff_result"]["status"])
+        self.assertFalse(handoff_payload["handoff_result"]["ready_for_stack_consumer"])
+        self.assertTrue(handoff_payload["transcript_scraping"]["detected"])
+        self.assertIn("transcript-scraping-absent", handoff_payload["handoff_result"]["failed_checks"])
 
 
 if __name__ == "__main__":

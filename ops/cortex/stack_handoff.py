@@ -18,36 +18,34 @@ from ops.cortex.context_assembler import default_context_latest_json_path
 from ops.cortex.kernel import default_rule_registry_path, default_state_model_path
 from ops.cortex.ledger import default_ledger_latest_json_path
 from ops.cortex.operator_surface import default_operator_surface_latest_json_path
-from ops.cortex.stack_handoff import (
-    STACK_ADVISORY_HANDOFF_CONTRACT_VERSION,
-    STACK_CONSUMER_ID,
-    default_stack_advisory_handoff_latest_json_path,
-)
 from ops.cortex.worker_prompt import (
     WORKER_PROMPT_AUTHORITY_LEVEL,
     WORKER_PROMPT_CONTRACT_VERSION,
     default_worker_prompt_latest_json_path,
 )
 
-STACK_CONSUMPTION_PILOT_CONTRACT_VERSION = "atlas.cortex.stack-consumption-pilot.v1"
-STACK_CONSUMPTION_PILOT_AUTHORITY_LEVEL = "read_only_advisory"
+STACK_ADVISORY_HANDOFF_CONTRACT_VERSION = "atlas.cortex.stack-advisory-handoff.v2"
+STACK_ADVISORY_HANDOFF_AUTHORITY_LEVEL = "read_only_advisory"
+STACK_CONSUMER_ID = "_stack"
+STACK_CONSUMER_ROLE = "advisory_artifact_consumer"
+STACK_CONSUMPTION_MODE = "artifact_refs_only"
 
 
-def stack_consumption_pilot_root(root: Path | None = None) -> Path:
+def stack_advisory_handoff_root(root: Path | None = None) -> Path:
     base = (root or atlas_root()).resolve()
-    return base / "runtime" / "cortex" / "stack-consumption-pilot"
+    return base / "runtime" / "cortex" / "stack-advisory-handoff"
 
 
-def default_stack_consumption_pilot_latest_json_path(root: Path | None = None) -> Path:
-    return stack_consumption_pilot_root(root) / "latest.json"
+def default_stack_advisory_handoff_latest_json_path(root: Path | None = None) -> Path:
+    return stack_advisory_handoff_root(root) / "latest.json"
 
 
-def default_stack_consumption_pilot_latest_markdown_path(root: Path | None = None) -> Path:
-    return stack_consumption_pilot_root(root) / "latest.md"
+def default_stack_advisory_handoff_latest_markdown_path(root: Path | None = None) -> Path:
+    return stack_advisory_handoff_root(root) / "latest.md"
 
 
 @dataclass(frozen=True)
-class PersistedStackConsumptionPilotArtifact:
+class PersistedStackAdvisoryHandoffArtifact:
     artifact_path: Path
     summary_path: Path | None
     payload_digest: str
@@ -99,6 +97,15 @@ def _string(value: Any) -> str:
     return value.strip() if isinstance(value, str) else ""
 
 
+def _check(check_id: str, passed: bool, summary: str, *, source_ref: str | None = None) -> dict[str, Any]:
+    return {
+        "check_id": check_id,
+        "status": "passed" if passed else "failed",
+        "summary": summary,
+        "source_ref": source_ref,
+    }
+
+
 def _separation_ref(worker_prompt_payload: dict[str, Any], key: str) -> str | None:
     section = _dict(_dict(worker_prompt_payload.get("separation_refs")).get(key))
     ref = section.get("ref")
@@ -110,108 +117,8 @@ def _separation_status(worker_prompt_payload: dict[str, Any], key: str) -> str:
     return _string(section.get("status"))
 
 
-def _transcript_refs(values: list[str]) -> list[str]:
-    suspicious: list[str] = []
-    for value in values:
-        lowered = value.lower()
-        if "transcript" in lowered or "runtime/atlas/conversations" in lowered or "runtime/atlas/sessions" in lowered:
-            suspicious.append(value)
-    return _ordered_unique_strings(suspicious)
-
-
-def _check(check_id: str, passed: bool, summary: str, *, source_ref: str | None = None) -> dict[str, Any]:
-    return {
-        "check_id": check_id,
-        "status": "passed" if passed else "failed",
-        "summary": summary,
-        "source_ref": source_ref,
-    }
-
-
-def _authority_guards() -> list[str]:
-    return [
-        "Pilot is advisory only and does not dispatch _stack work.",
-        "Pilot consumes explicit Cortex artifacts only; transcript scraping is not allowed.",
-        "Pilot does not mutate owner repos, stack.yaml, Lifeline receipt authority, Playbook governance truth, or product truth.",
-        "Planner, context, proof, receipt-draft, and final receipt remain separately referenceable by refs and digests.",
-    ]
-
-
-def _source_refs(
-    *,
-    worker_prompt_payload: dict[str, Any],
-    worker_prompt_ref: str,
-    stack_handoff_ref: str,
-    context_ref: str,
-    operator_surface_ref: str,
-    ledger_ref: str,
-    state_model_ref: str,
-    rule_registry_ref: str,
-) -> list[str]:
-    values: list[Any] = [
-        worker_prompt_ref,
-        stack_handoff_ref,
-        context_ref,
-        operator_surface_ref,
-        ledger_ref,
-        state_model_ref,
-        rule_registry_ref,
-        *_list(worker_prompt_payload.get("source_refs")),
-        *_list(worker_prompt_payload.get("top_evidence_refs")),
-        _separation_ref(worker_prompt_payload, "planner"),
-        _separation_ref(worker_prompt_payload, "context"),
-        _separation_ref(worker_prompt_payload, "proof"),
-        _separation_ref(worker_prompt_payload, "receipt_draft"),
-        _separation_ref(worker_prompt_payload, "final_receipt"),
-    ]
-    return _ordered_unique_strings(values)
-
-
-def _stack_handoff(
-    worker_prompt_payload: dict[str, Any],
-    stack_handoff_payload: dict[str, Any],
-    *,
-    worker_prompt_ref: str,
-    stack_handoff_ref: str,
-    context_ref: str,
-) -> dict[str, Any]:
-    consumer = _dict(stack_handoff_payload.get("consumer"))
-    routing_contract = _dict(stack_handoff_payload.get("routing_contract"))
-    return {
-        "consumer_id": _string(consumer.get("consumer_id")) or STACK_CONSUMER_ID,
-        "consumption_mode": _string(consumer.get("consumption_mode")) or "artifact_refs_only",
-        "worker_prompt_ref": worker_prompt_ref,
-        "stack_advisory_handoff_ref": stack_handoff_ref,
-        "stack_advisory_handoff_contract_version": _string(stack_handoff_payload.get("contract_version")),
-        "worker_prompt_contract_version": _string(worker_prompt_payload.get("contract_version")),
-        "planner_ref": _separation_ref(worker_prompt_payload, "planner"),
-        "context_ref": context_ref,
-        "proof_ref": _separation_ref(worker_prompt_payload, "proof"),
-        "receipt_draft_ref": _separation_ref(worker_prompt_payload, "receipt_draft"),
-        "final_receipt_ref": _separation_ref(worker_prompt_payload, "final_receipt"),
-        "execution_authorized": bool(routing_contract.get("execution_authorized")),
-        "receipt_authorized": bool(routing_contract.get("receipt_authorized")),
-        "owner_truth_mutation_authorized": bool(routing_contract.get("owner_truth_mutation_authorized")),
-        "default_routing_enabled": bool(routing_contract.get("automatic_dispatch_enabled")),
-        "automatic_dispatch_enabled": bool(routing_contract.get("automatic_dispatch_enabled")),
-        "transcript_scraping_allowed": bool(routing_contract.get("transcript_scraping_allowed")),
-    }
-
-
-def _advisory_assignment(worker_prompt_payload: dict[str, Any]) -> dict[str, Any]:
-    return {
-        "run_id": _string(worker_prompt_payload.get("run_id")),
-        "assignment_id": _string(worker_prompt_payload.get("assignment_id")),
-        "stack_lock_digest": _string(worker_prompt_payload.get("stack_lock_digest")),
-        "owner_layer": _string(worker_prompt_payload.get("owner_layer")),
-        "objective": _string(worker_prompt_payload.get("objective")),
-        "implementation_plan": _ordered_unique_strings(_list(worker_prompt_payload.get("implementation_plan"))),
-        "files_to_modify": _ordered_unique_strings(_list(worker_prompt_payload.get("files_to_modify"))),
-        "files_to_avoid": _ordered_unique_strings(_list(worker_prompt_payload.get("files_to_avoid"))),
-        "verification_steps": _ordered_unique_strings(_list(worker_prompt_payload.get("verification_steps"))),
-        "matched_rule_ids": _ordered_unique_strings(_list(worker_prompt_payload.get("matched_rule_ids"))),
-        "failure_modes_to_avoid": _ordered_unique_strings(_list(worker_prompt_payload.get("failure_modes_to_avoid"))),
-    }
+def _stack_consumption_pilot_ref(root: Path) -> str:
+    return atlas_relative(root / "runtime" / "cortex" / "stack-consumption-pilot" / "latest.json", root=root)
 
 
 def _artifact_input(ref: str, role: str, payload: dict[str, Any]) -> dict[str, Any]:
@@ -223,11 +130,114 @@ def _artifact_input(ref: str, role: str, payload: dict[str, Any]) -> dict[str, A
     }
 
 
-def build_stack_consumption_pilot_payload(
+def _transcript_refs(values: list[str]) -> list[str]:
+    suspicious: list[str] = []
+    for value in values:
+        lowered = value.lower()
+        if "transcript" in lowered or "runtime/atlas/conversations" in lowered or "runtime/atlas/sessions" in lowered:
+            suspicious.append(value)
+    return _ordered_unique_strings(suspicious)
+
+
+def _canonical_refs(
+    *,
+    worker_prompt_ref: str,
+    context_ref: str,
+    operator_surface_ref: str,
+    ledger_ref: str,
+    state_model_ref: str,
+    rule_registry_ref: str,
+    stack_consumption_pilot_ref: str,
+) -> dict[str, str]:
+    return {
+        "worker_prompt": worker_prompt_ref,
+        "context": context_ref,
+        "operator_surface": operator_surface_ref,
+        "ledger": ledger_ref,
+        "stack_consumption_pilot": stack_consumption_pilot_ref,
+        "state_model_seed": state_model_ref,
+        "rule_registry_seed": rule_registry_ref,
+    }
+
+
+def _source_refs(
+    *,
+    worker_prompt_payload: dict[str, Any],
+    worker_prompt_ref: str,
+    context_ref: str,
+    operator_surface_ref: str,
+    ledger_ref: str,
+    state_model_ref: str,
+    rule_registry_ref: str,
+    stack_consumption_pilot_ref: str,
+) -> list[str]:
+    values: list[Any] = [
+        worker_prompt_ref,
+        context_ref,
+        operator_surface_ref,
+        ledger_ref,
+        state_model_ref,
+        rule_registry_ref,
+        stack_consumption_pilot_ref,
+        *_list(worker_prompt_payload.get("source_refs")),
+        *_list(worker_prompt_payload.get("top_evidence_refs")),
+        _separation_ref(worker_prompt_payload, "planner"),
+        _separation_ref(worker_prompt_payload, "context"),
+        _separation_ref(worker_prompt_payload, "proof"),
+        _separation_ref(worker_prompt_payload, "receipt_draft"),
+        _separation_ref(worker_prompt_payload, "final_receipt"),
+    ]
+    return _ordered_unique_strings(values)
+
+
+def _consumer_payload() -> dict[str, str]:
+    return {
+        "consumer_id": STACK_CONSUMER_ID,
+        "consumer_role": STACK_CONSUMER_ROLE,
+        "consumption_mode": STACK_CONSUMPTION_MODE,
+    }
+
+
+def _routing_contract() -> dict[str, Any]:
+    return {
+        "routing_contract_promoted": True,
+        "routing_mode": "explicit_artifact_ref_handoff",
+        "default_consumer_id": STACK_CONSUMER_ID,
+        "automatic_dispatch_enabled": False,
+        "execution_authorized": False,
+        "receipt_authorized": False,
+        "owner_truth_mutation_authorized": False,
+        "transcript_scraping_allowed": False,
+    }
+
+
+def _advisory_assignment(worker_prompt_payload: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "run_id": _string(worker_prompt_payload.get("run_id")),
+        "assignment_id": _string(worker_prompt_payload.get("assignment_id")),
+        "objective": _string(worker_prompt_payload.get("objective")),
+        "implementation_plan": _ordered_unique_strings(_list(worker_prompt_payload.get("implementation_plan"))),
+        "files_to_modify": _ordered_unique_strings(_list(worker_prompt_payload.get("files_to_modify"))),
+        "files_to_avoid": _ordered_unique_strings(_list(worker_prompt_payload.get("files_to_avoid"))),
+        "verification_steps": _ordered_unique_strings(_list(worker_prompt_payload.get("verification_steps"))),
+        "matched_rule_ids": _ordered_unique_strings(_list(worker_prompt_payload.get("matched_rule_ids"))),
+        "failure_modes_to_avoid": _ordered_unique_strings(_list(worker_prompt_payload.get("failure_modes_to_avoid"))),
+    }
+
+
+def _authority_guards() -> list[str]:
+    return [
+        "Canonical handoff is advisory only and does not dispatch _stack work.",
+        "Default routing promotion means explicit artifact-ref handoff shape only; automatic dispatch remains disabled.",
+        "Cortex does not grant execution, owner-truth mutation, or Lifeline final receipt authority through the handoff.",
+        "Transcript scraping remains disallowed; planner, context, proof, receipt-draft, and final receipt stay separately referenceable.",
+    ]
+
+
+def build_stack_advisory_handoff_payload(
     *,
     root: Path | None = None,
     worker_prompt_path: Path | None = None,
-    stack_handoff_path: Path | None = None,
     context_path: Path | None = None,
     operator_surface_path: Path | None = None,
     ledger_path: Path | None = None,
@@ -236,7 +246,6 @@ def build_stack_consumption_pilot_payload(
 ) -> dict[str, Any]:
     base = (root or atlas_root()).resolve()
     resolved_worker_prompt = (worker_prompt_path or default_worker_prompt_latest_json_path(base)).resolve()
-    resolved_stack_handoff = (stack_handoff_path or default_stack_advisory_handoff_latest_json_path(base)).resolve()
     resolved_context = (context_path or default_context_latest_json_path(base)).resolve()
     resolved_operator_surface = (operator_surface_path or default_operator_surface_latest_json_path(base)).resolve()
     resolved_ledger = (ledger_path or default_ledger_latest_json_path(base)).resolve()
@@ -244,7 +253,6 @@ def build_stack_consumption_pilot_payload(
     resolved_rule_registry = (rule_registry_path or default_rule_registry_path(base)).resolve()
 
     worker_prompt_payload = _require_json_object(resolved_worker_prompt, label="Cortex worker-prompt artifact")
-    stack_handoff_payload = _require_json_object(resolved_stack_handoff, label="Cortex stack-advisory-handoff artifact")
     context_payload = _require_json_object(resolved_context, label="Cortex context artifact")
     operator_payload = _require_json_object(resolved_operator_surface, label="Cortex operator-surface artifact")
     ledger_payload = _require_json_object(resolved_ledger, label="Cortex ledger artifact")
@@ -252,51 +260,39 @@ def build_stack_consumption_pilot_payload(
     rule_registry_payload = _require_json_object(resolved_rule_registry, label="Cortex rule registry seed")
 
     worker_prompt_ref = atlas_relative(resolved_worker_prompt, root=base)
-    stack_handoff_ref = atlas_relative(resolved_stack_handoff, root=base)
     context_ref = atlas_relative(resolved_context, root=base)
     operator_ref = atlas_relative(resolved_operator_surface, root=base)
     ledger_ref = atlas_relative(resolved_ledger, root=base)
     state_model_ref = atlas_relative(resolved_state_model, root=base)
     rule_registry_ref = atlas_relative(resolved_rule_registry, root=base)
+    stack_consumption_pilot_ref = _stack_consumption_pilot_ref(base)
 
-    next_lane = _dict(stack_handoff_payload.get("next_recommended_lane"))
-    lane_id = _string(next_lane.get("lane_id")) or _string(_dict(ledger_payload.get("next_recommended_lane")).get("lane_id"))
+    consumer = _consumer_payload()
+    routing_contract = _routing_contract()
+    next_lane = _dict(worker_prompt_payload.get("next_recommended_lane"))
+    if not next_lane:
+        next_lane = _dict(ledger_payload.get("next_recommended_lane"))
+    lane_id = _string(next_lane.get("lane_id"))
     context_packet_id = _string(context_payload.get("packet_id"))
+    operator_lane_id = _string(_dict(operator_payload.get("next_recommended_lane")).get("lane_id"))
     ledger_lane_id = _string(_dict(ledger_payload.get("next_recommended_lane")).get("lane_id"))
-    stack_handoff = _stack_handoff(
-        worker_prompt_payload,
-        stack_handoff_payload,
-        worker_prompt_ref=worker_prompt_ref,
-        stack_handoff_ref=stack_handoff_ref,
-        context_ref=context_ref,
-    )
     source_refs = _source_refs(
         worker_prompt_payload=worker_prompt_payload,
         worker_prompt_ref=worker_prompt_ref,
-        stack_handoff_ref=stack_handoff_ref,
         context_ref=context_ref,
         operator_surface_ref=operator_ref,
         ledger_ref=ledger_ref,
         state_model_ref=state_model_ref,
         rule_registry_ref=rule_registry_ref,
+        stack_consumption_pilot_ref=stack_consumption_pilot_ref,
     )
     transcript_refs = _transcript_refs(source_refs)
-    handoff_result = _dict(stack_handoff_payload.get("handoff_result"))
-    handoff_transcript = _dict(stack_handoff_payload.get("transcript_scraping"))
     separated_surfaces_present = all(
         _separation_status(worker_prompt_payload, key)
         for key in ("planner", "context", "proof", "receipt_draft", "final_receipt")
     ) and _separation_status(worker_prompt_payload, "final_receipt") == "not_emitted_by_cortex"
 
     checks = [
-        _check(
-            "stack-advisory-handoff-ready",
-            _string(stack_handoff_payload.get("contract_version")) == STACK_ADVISORY_HANDOFF_CONTRACT_VERSION
-            and _string(handoff_result.get("status")) == "ready"
-            and bool(handoff_result.get("ready_for_stack_consumer")),
-            "Canonical stack-advisory-handoff is present and ready for _stack consumption.",
-            source_ref=stack_handoff_ref,
-        ),
         _check(
             "worker-prompt-contract-version",
             _string(worker_prompt_payload.get("contract_version")) == WORKER_PROMPT_CONTRACT_VERSION,
@@ -310,9 +306,28 @@ def build_stack_consumption_pilot_payload(
             source_ref=worker_prompt_ref,
         ),
         _check(
-            "stack-lock-digest-present",
-            _string(worker_prompt_payload.get("stack_lock_digest")).startswith("sha256:"),
-            "Worker prompt carries a stack lock digest for _stack consumption.",
+            "consumer-is-stack-advisory",
+            consumer["consumer_id"] == STACK_CONSUMER_ID
+            and consumer["consumer_role"] == STACK_CONSUMER_ROLE
+            and consumer["consumption_mode"] == STACK_CONSUMPTION_MODE,
+            "Canonical handoff targets _stack as an advisory artifact consumer only.",
+            source_ref=worker_prompt_ref,
+        ),
+        _check(
+            "routing-contract-promoted",
+            routing_contract["routing_contract_promoted"]
+            and routing_contract["routing_mode"] == "explicit_artifact_ref_handoff",
+            "Canonical handoff promotes an explicit artifact-ref routing contract.",
+            source_ref=worker_prompt_ref,
+        ),
+        _check(
+            "no-automatic-dispatch-or-authority",
+            not routing_contract["automatic_dispatch_enabled"]
+            and not routing_contract["execution_authorized"]
+            and not routing_contract["receipt_authorized"]
+            and not routing_contract["owner_truth_mutation_authorized"]
+            and not routing_contract["transcript_scraping_allowed"],
+            "Canonical handoff does not enable automatic dispatch, execution, receipt authority, owner-truth mutation, or transcript scraping.",
             source_ref=worker_prompt_ref,
         ),
         _check(
@@ -322,6 +337,12 @@ def build_stack_consumption_pilot_payload(
             source_ref=context_ref,
         ),
         _check(
+            "operator-surface-lane-matches-worker-prompt",
+            bool(lane_id) and operator_lane_id == lane_id,
+            "Operator surface and worker prompt agree on the next lane.",
+            source_ref=operator_ref,
+        ),
+        _check(
             "ledger-lane-matches-worker-prompt",
             bool(lane_id) and ledger_lane_id == lane_id,
             "Ledger and worker prompt agree on the next lane.",
@@ -329,11 +350,9 @@ def build_stack_consumption_pilot_payload(
         ),
         _check(
             "transcript-scraping-absent",
-            not transcript_refs
-            and not bool(handoff_transcript.get("detected"))
-            and not stack_handoff["transcript_scraping_allowed"],
-            "Pilot consumes artifact refs only and does not scrape transcripts.",
-            source_ref=stack_handoff_ref,
+            not transcript_refs and not routing_contract["transcript_scraping_allowed"],
+            "Canonical handoff consumes explicit artifact refs only and does not scrape transcripts.",
+            source_ref=worker_prompt_ref,
         ),
         _check(
             "separated-surfaces-preserved",
@@ -341,63 +360,52 @@ def build_stack_consumption_pilot_payload(
             "Planner, context, proof, receipt-draft, and final receipt stay separately referenceable.",
             source_ref=worker_prompt_ref,
         ),
-        _check(
-            "no-execution-or-receipt-authority",
-            not stack_handoff["execution_authorized"]
-            and not stack_handoff["receipt_authorized"]
-            and not stack_handoff["owner_truth_mutation_authorized"]
-            and not stack_handoff["default_routing_enabled"],
-            "Pilot does not authorize execution, final receipts, owner-truth mutation, or default routing.",
-            source_ref=worker_prompt_ref,
-        ),
     ]
     ready = all(item["status"] == "passed" for item in checks)
     failed_checks = [item["check_id"] for item in checks if item["status"] != "passed"]
 
     return {
-        "contract_version": STACK_CONSUMPTION_PILOT_CONTRACT_VERSION,
+        "contract_version": STACK_ADVISORY_HANDOFF_CONTRACT_VERSION,
         "generated_at": _utc_now(),
-        "authority_level": STACK_CONSUMPTION_PILOT_AUTHORITY_LEVEL,
+        "authority_level": STACK_ADVISORY_HANDOFF_AUTHORITY_LEVEL,
         "stack_root": normalize_slashes(str(base)),
-        "pilot_id": f"stack-consumption-pilot-{lane_id or 'unknown'}",
-        "consumer_id": STACK_CONSUMER_ID,
+        "handoff_id": f"stack-advisory-handoff-{lane_id or 'unknown'}",
+        "consumer": consumer,
+        "routing_contract": routing_contract,
         "next_recommended_lane": {
             "lane_id": lane_id,
             "owner_layer": _string(next_lane.get("owner_layer")),
             "rationale": _string(next_lane.get("rationale")),
         },
-        "pilot_result": {
-            "status": "ready" if ready else "blocked",
-            "ready_for_stack_consumer": ready,
-            "blocked_reason": None if ready else f"Failed pilot checks: {', '.join(failed_checks)}",
-            "failed_checks": failed_checks,
-        },
-        "canonical_handoff": {
-            "ref": stack_handoff_ref,
-            "contract_version": _string(stack_handoff_payload.get("contract_version")),
-            "handoff_id": _string(stack_handoff_payload.get("handoff_id")),
-            "handoff_result": handoff_result,
-            "consumer": _dict(stack_handoff_payload.get("consumer")),
-            "routing_contract": _dict(stack_handoff_payload.get("routing_contract")),
-        },
-        "stack_handoff": stack_handoff,
-        "advisory_assignment": _advisory_assignment(worker_prompt_payload),
-        "artifact_consumption": [
+        "artifact_inputs": [
             _artifact_input(worker_prompt_ref, "worker_prompt", worker_prompt_payload),
-            _artifact_input(stack_handoff_ref, "stack_advisory_handoff", stack_handoff_payload),
             _artifact_input(context_ref, "context", context_payload),
             _artifact_input(operator_ref, "operator_surface", operator_payload),
             _artifact_input(ledger_ref, "ledger", ledger_payload),
             _artifact_input(state_model_ref, "state_model_seed", state_model_payload),
             _artifact_input(rule_registry_ref, "rule_registry_seed", rule_registry_payload),
         ],
-        "pilot_checks": checks,
+        "canonical_refs": _canonical_refs(
+            worker_prompt_ref=worker_prompt_ref,
+            context_ref=context_ref,
+            operator_surface_ref=operator_ref,
+            ledger_ref=ledger_ref,
+            state_model_ref=state_model_ref,
+            rule_registry_ref=rule_registry_ref,
+            stack_consumption_pilot_ref=stack_consumption_pilot_ref,
+        ),
+        "advisory_assignment": _advisory_assignment(worker_prompt_payload),
+        "handoff_checks": checks,
+        "handoff_result": {
+            "status": "ready" if ready else "blocked",
+            "ready_for_stack_consumer": ready,
+            "blocked_reason": None if ready else f"Failed handoff checks: {', '.join(failed_checks)}",
+            "failed_checks": failed_checks,
+        },
         "transcript_scraping": {
             "allowed": False,
-            "detected": bool(transcript_refs) or bool(handoff_transcript.get("detected")),
-            "detected_refs": _ordered_unique_strings(
-                [*transcript_refs, *_list(handoff_transcript.get("detected_refs"))]
-            ),
+            "detected": bool(transcript_refs),
+            "detected_refs": transcript_refs,
             "forbidden_source_patterns": [
                 "runtime/atlas/conversations/**",
                 "runtime/atlas/sessions/**",
@@ -414,51 +422,33 @@ def build_stack_consumption_pilot_payload(
             ]
         ),
         "source_refs": source_refs,
-        "source_artifact_refs": {
-            "worker_prompt": worker_prompt_ref,
-            "stack_handoff": stack_handoff_ref,
-            "context": context_ref,
-            "operator_surface": operator_ref,
-            "ledger": ledger_ref,
-            "seed": state_model_ref,
-            "rules": rule_registry_ref,
-        },
     }
 
 
-def render_stack_consumption_pilot_summary(payload: dict[str, Any]) -> str:
-    next_lane = payload["next_recommended_lane"]
-    result = payload["pilot_result"]
-    handoff = payload["stack_handoff"]
+def render_stack_advisory_handoff_summary(payload: dict[str, Any]) -> str:
+    lane = payload["next_recommended_lane"]
+    routing_contract = payload["routing_contract"]
+    result = payload["handoff_result"]
     lines = [
-        "# Cortex Stack Consumption Pilot",
+        "# Cortex Stack Advisory Handoff",
         "",
         f"- Generated: `{payload['generated_at']}`",
-        f"- Pilot id: `{payload['pilot_id']}`",
+        f"- Handoff id: `{payload['handoff_id']}`",
         f"- Authority level: `{payload['authority_level']}`",
-        f"- Consumer: `{payload['consumer_id']}`",
-        f"- Consumption mode: `{handoff['consumption_mode']}`",
-        f"- Next recommended lane: `{next_lane['lane_id']}` ({next_lane['owner_layer']})",
-        f"- Pilot status: `{result['status']}`",
+        f"- Consumer: `{payload['consumer']['consumer_id']}`",
+        f"- Consumption mode: `{payload['consumer']['consumption_mode']}`",
+        f"- Next recommended lane: `{lane['lane_id']}` ({lane['owner_layer']})",
+        f"- Handoff status: `{result['status']}`",
         f"- Ready for _stack consumer: `{'yes' if result['ready_for_stack_consumer'] else 'no'}`",
-        f"- Canonical handoff: `{payload['canonical_handoff']['ref']}`",
-        f"- Worker prompt: `{handoff['worker_prompt_ref']}`",
-        f"- Context: `{handoff['context_ref']}`",
-        f"- Transcript scraping: `{'yes' if payload['transcript_scraping']['detected'] else 'no'}`",
-        f"- Execution authorized: `{'yes' if handoff['execution_authorized'] else 'no'}`",
-        f"- Receipt authorized: `{'yes' if handoff['receipt_authorized'] else 'no'}`",
+        f"- Routing mode: `{routing_contract['routing_mode']}`",
+        f"- Automatic dispatch: `{'yes' if routing_contract['automatic_dispatch_enabled'] else 'no'}`",
+        f"- Execution authorized: `{'yes' if routing_contract['execution_authorized'] else 'no'}`",
+        f"- Receipt authorized: `{'yes' if routing_contract['receipt_authorized'] else 'no'}`",
         "",
-        "## Pilot Checks",
+        "## Handoff Checks",
     ]
-    for check in payload["pilot_checks"]:
-        lines.append(f"- `{check['check_id']}`: {check['status']} — {check['summary']}")
-
-    lines.extend(["", "## Advisory Assignment"])
-    assignment = payload["advisory_assignment"]
-    lines.append(f"- Run id: `{assignment['run_id']}`")
-    lines.append(f"- Assignment id: `{assignment['assignment_id']}`")
-    lines.append(f"- Stack lock digest: `{assignment['stack_lock_digest']}`")
-    lines.append(f"- Objective: {assignment['objective']}")
+    for check in payload["handoff_checks"]:
+        lines.append(f"- `{check['check_id']}`: {check['status']} - {check['summary']}")
 
     lines.extend(["", "## Authority Guards"])
     for guard in payload["authority_guards"]:
@@ -470,11 +460,10 @@ def render_stack_consumption_pilot_summary(payload: dict[str, Any]) -> str:
     return "\n".join(lines) + "\n"
 
 
-def persist_stack_consumption_pilot_artifact(
+def persist_stack_advisory_handoff_artifact(
     *,
     root: Path | None = None,
     worker_prompt_path: Path | None = None,
-    stack_handoff_path: Path | None = None,
     context_path: Path | None = None,
     operator_surface_path: Path | None = None,
     ledger_path: Path | None = None,
@@ -483,30 +472,29 @@ def persist_stack_consumption_pilot_artifact(
     output_json_path: Path | None = None,
     output_markdown_path: Path | None = None,
     write_markdown: bool = True,
-) -> PersistedStackConsumptionPilotArtifact:
+) -> PersistedStackAdvisoryHandoffArtifact:
     base = (root or atlas_root()).resolve()
-    artifact_path = (output_json_path or default_stack_consumption_pilot_latest_json_path(base)).resolve()
+    artifact_path = (output_json_path or default_stack_advisory_handoff_latest_json_path(base)).resolve()
     summary_path = (
-        (output_markdown_path or default_stack_consumption_pilot_latest_markdown_path(base)).resolve()
+        (output_markdown_path or default_stack_advisory_handoff_latest_markdown_path(base)).resolve()
         if write_markdown
         else None
     )
-    payload = build_stack_consumption_pilot_payload(
+    payload = build_stack_advisory_handoff_payload(
         root=base,
         worker_prompt_path=worker_prompt_path.resolve() if worker_prompt_path is not None else None,
-        stack_handoff_path=stack_handoff_path.resolve() if stack_handoff_path is not None else None,
         context_path=context_path.resolve() if context_path is not None else None,
         operator_surface_path=operator_surface_path.resolve() if operator_surface_path is not None else None,
         ledger_path=ledger_path.resolve() if ledger_path is not None else None,
         state_model_path=state_model_path.resolve() if state_model_path is not None else None,
         rule_registry_path=rule_registry_path.resolve() if rule_registry_path is not None else None,
     )
-    summary = render_stack_consumption_pilot_summary(payload)
+    summary = render_stack_advisory_handoff_summary(payload)
     write_json(artifact_path, payload)
     if summary_path is not None:
         summary_path.parent.mkdir(parents=True, exist_ok=True)
         summary_path.write_text(summary, encoding="utf-8")
-    return PersistedStackConsumptionPilotArtifact(
+    return PersistedStackAdvisoryHandoffArtifact(
         artifact_path=artifact_path,
         summary_path=summary_path,
         payload_digest=stable_json_digest(payload),
@@ -516,10 +504,9 @@ def persist_stack_consumption_pilot_artifact(
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Persist the bounded Cortex _stack worker-prompt consumption pilot.")
+    parser = argparse.ArgumentParser(description="Persist the canonical Cortex -> _stack advisory handoff artifact.")
     parser.add_argument("--root", type=Path, default=atlas_root())
     parser.add_argument("--worker-prompt-path", type=Path)
-    parser.add_argument("--stack-handoff-path", type=Path)
     parser.add_argument("--context-path", type=Path)
     parser.add_argument("--operator-surface-path", type=Path)
     parser.add_argument("--ledger-path", type=Path)
@@ -533,10 +520,9 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     try:
-        artifact = persist_stack_consumption_pilot_artifact(
+        artifact = persist_stack_advisory_handoff_artifact(
             root=args.root.resolve(),
             worker_prompt_path=args.worker_prompt_path.resolve() if args.worker_prompt_path else None,
-            stack_handoff_path=args.stack_handoff_path.resolve() if args.stack_handoff_path else None,
             context_path=args.context_path.resolve() if args.context_path else None,
             operator_surface_path=args.operator_surface_path.resolve() if args.operator_surface_path else None,
             ledger_path=args.ledger_path.resolve() if args.ledger_path else None,

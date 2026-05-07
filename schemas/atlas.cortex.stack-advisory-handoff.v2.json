@@ -1,0 +1,316 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://schemas/atlas.cortex.stack-advisory-handoff.v2.json",
+  "title": "ATLAS Cortex stack advisory handoff",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "generated_at",
+    "authority_level",
+    "stack_root",
+    "handoff_id",
+    "consumer",
+    "routing_contract",
+    "next_recommended_lane",
+    "artifact_inputs",
+    "canonical_refs",
+    "advisory_assignment",
+    "handoff_checks",
+    "handoff_result",
+    "authority_guards",
+    "boundary_reminders",
+    "source_refs"
+  ],
+  "properties": {
+    "contract_version": {
+      "type": "string",
+      "const": "atlas.cortex.stack-advisory-handoff.v2"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "authority_level": {
+      "type": "string",
+      "const": "read_only_advisory"
+    },
+    "stack_root": {
+      "type": "string",
+      "minLength": 1
+    },
+    "handoff_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "consumer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "consumer_id",
+        "consumer_role",
+        "consumption_mode"
+      ],
+      "properties": {
+        "consumer_id": {
+          "type": "string",
+          "const": "_stack"
+        },
+        "consumer_role": {
+          "type": "string",
+          "const": "advisory_artifact_consumer"
+        },
+        "consumption_mode": {
+          "type": "string",
+          "const": "artifact_refs_only"
+        }
+      }
+    },
+    "routing_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "routing_contract_promoted",
+        "routing_mode",
+        "default_consumer_id",
+        "automatic_dispatch_enabled",
+        "execution_authorized",
+        "receipt_authorized",
+        "owner_truth_mutation_authorized",
+        "transcript_scraping_allowed"
+      ],
+      "properties": {
+        "routing_contract_promoted": {
+          "type": "boolean",
+          "const": true
+        },
+        "routing_mode": {
+          "type": "string",
+          "const": "explicit_artifact_ref_handoff"
+        },
+        "default_consumer_id": {
+          "type": "string",
+          "const": "_stack"
+        },
+        "automatic_dispatch_enabled": {
+          "type": "boolean",
+          "const": false
+        },
+        "execution_authorized": {
+          "type": "boolean",
+          "const": false
+        },
+        "receipt_authorized": {
+          "type": "boolean",
+          "const": false
+        },
+        "owner_truth_mutation_authorized": {
+          "type": "boolean",
+          "const": false
+        },
+        "transcript_scraping_allowed": {
+          "type": "boolean",
+          "const": false
+        }
+      }
+    },
+    "next_recommended_lane": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "lane_id",
+        "owner_layer",
+        "rationale"
+      ],
+      "properties": {
+        "lane_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "owner_layer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rationale": {
+          "type": "string"
+        }
+      }
+    },
+    "artifact_inputs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "role",
+          "ref",
+          "contract_version",
+          "digest"
+        ],
+        "properties": {
+          "role": {
+            "type": "string",
+            "minLength": 1
+          },
+          "ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "contract_version": {
+            "type": "string",
+            "minLength": 1
+          },
+          "digest": {
+            "type": "string",
+            "pattern": "^sha256:"
+          }
+        }
+      }
+    },
+    "canonical_refs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "worker_prompt",
+        "context",
+        "operator_surface",
+        "ledger",
+        "stack_consumption_pilot",
+        "state_model_seed",
+        "rule_registry_seed"
+      ],
+      "properties": {
+        "worker_prompt": { "type": "string", "minLength": 1 },
+        "context": { "type": "string", "minLength": 1 },
+        "operator_surface": { "type": "string", "minLength": 1 },
+        "ledger": { "type": "string", "minLength": 1 },
+        "stack_consumption_pilot": { "type": "string", "minLength": 1 },
+        "state_model_seed": { "type": "string", "minLength": 1 },
+        "rule_registry_seed": { "type": "string", "minLength": 1 }
+      }
+    },
+    "advisory_assignment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "run_id",
+        "assignment_id",
+        "objective",
+        "implementation_plan",
+        "files_to_modify",
+        "files_to_avoid",
+        "verification_steps",
+        "matched_rule_ids",
+        "failure_modes_to_avoid"
+      ],
+      "properties": {
+        "run_id": { "type": "string" },
+        "assignment_id": { "type": "string" },
+        "objective": { "type": "string" },
+        "implementation_plan": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "files_to_modify": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "files_to_avoid": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "verification_steps": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "matched_rule_ids": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "failure_modes_to_avoid": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "handoff_checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "check_id",
+          "status",
+          "summary"
+        ],
+        "properties": {
+          "check_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "passed",
+              "failed"
+            ]
+          },
+          "summary": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source_ref": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "handoff_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "ready_for_stack_consumer",
+        "blocked_reason",
+        "failed_checks"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "ready",
+            "blocked"
+          ]
+        },
+        "ready_for_stack_consumer": {
+          "type": "boolean"
+        },
+        "blocked_reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "failed_checks": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "authority_guards": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "boundary_reminders": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "source_refs": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}
