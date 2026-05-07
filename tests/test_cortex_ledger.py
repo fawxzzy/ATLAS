@@ -97,9 +97,9 @@ class CortexLedgerTests(unittest.TestCase):
         }
         payload["active_blockers"] = []
         payload["next_recommended_lane"] = {
-            "lane_id": "promote-cortex-worker-prompt-contract-wave6",
+            "lane_id": "pilot-cortex-worker-prompt-stack-consumption-wave7",
             "owner_layer": "cortex",
-            "rationale": "The canonical ledger is landed, but Cortex still needs one promoted worker-prompt artifact contract that _stack can consume while planner, context, proof, receipt-draft, and final receipt stay separate and linked by refs and digests.",
+            "rationale": "The worker-prompt contract is landed, but Cortex still needs one bounded _stack pilot that consumes current context and planning artifacts without transcript scraping while planner, context, proof, receipt-draft, and final receipt stay separate and linked by refs and digests.",
             "blocked_by": [],
             "source_refs": [
                 "runtime/cortex/kernel.state-model.seed.v1.json",
@@ -113,7 +113,7 @@ class CortexLedgerTests(unittest.TestCase):
         payload["generated_at"] = "2026-05-06T21:02:00+00:00"
         payload["rail_status"] = "ready"
         payload["active_blockers"] = []
-        payload["dirty_lanes"] = ["cortex-worker-prompt-contract-v0-1"]
+        payload["dirty_lanes"] = ["cortex-worker-prompt-stack-consumption-pilot-v0-1"]
         payload["validation_posture"] = {
             "status": "ambient-debt-only",
             "counts": {
@@ -127,9 +127,9 @@ class CortexLedgerTests(unittest.TestCase):
             "receipt_path": "runtime/receipts/validation/stack-validation.latest.json",
         }
         payload["next_recommended_lane"] = {
-            "lane_id": "promote-cortex-worker-prompt-contract-wave6",
+            "lane_id": "pilot-cortex-worker-prompt-stack-consumption-wave7",
             "owner_layer": "cortex",
-            "rationale": "The canonical ledger is landed, but Cortex still needs one promoted worker-prompt artifact contract that _stack can consume while planner, context, proof, receipt-draft, and final receipt stay separate and linked by refs and digests.",
+            "rationale": "The worker-prompt contract is landed, but Cortex still needs one bounded _stack pilot that consumes current context and planning artifacts without transcript scraping while planner, context, proof, receipt-draft, and final receipt stay separate and linked by refs and digests.",
             "blocked_by": [],
             "source_refs": [
                 "runtime/cortex/current-state/latest.json",
@@ -142,33 +142,49 @@ class CortexLedgerTests(unittest.TestCase):
     def _base_context_payload(self) -> dict:
         payload = json.loads(json.dumps(self.context_payload))
         payload["generated_at"] = "2026-05-06T21:03:00+00:00"
-        payload["packet_id"] = "context-promote-cortex-worker-prompt-contract-wave6"
+        payload["packet_id"] = "context-pilot-cortex-worker-prompt-stack-consumption-wave7"
         payload["context_summary"] = (
-            "Cortex context packet for promote-cortex-worker-prompt-contract-wave6 derived from explicit current-state, "
+            "Cortex context packet for pilot-cortex-worker-prompt-stack-consumption-wave7 derived from explicit current-state, "
             "rail-state, validation, and seed artifacts."
         )
-        payload["task_frame"]["lane_id"] = "promote-cortex-worker-prompt-contract-wave6"
+        payload["task_frame"]["lane_id"] = "pilot-cortex-worker-prompt-stack-consumption-wave7"
         payload["task_frame"]["owner_layer"] = "cortex"
-        payload["task_frame"]["title"] = "Promote the Cortex worker-prompt contract."
+        payload["task_frame"]["title"] = "Pilot bounded _stack consumption of the Cortex worker-prompt contract."
         payload["task_frame"]["status"] = "ready"
         payload["task_frame"]["rationale"] = (
-            "The canonical ledger is landed, but Cortex still needs one promoted worker-prompt artifact contract that "
-            "_stack can consume while planner, context, proof, receipt-draft, and final receipt stay separate and "
+            "The worker-prompt contract is landed, but Cortex still needs one bounded _stack pilot that consumes current "
+            "context and planning artifacts without transcript scraping while planner, context, proof, receipt-draft, and final receipt stay separate and "
             "linked by refs and digests."
         )
         payload["task_frame"]["blocked_by"] = []
+        payload["task_frame"]["required_inputs"] = [
+            "runtime/cortex/current-state/latest.json",
+            "runtime/cortex/rail-state/latest.json",
+            "runtime/cortex/context/latest.json",
+            "runtime/cortex/operator-surface/latest.json",
+            "runtime/cortex/ledger/latest.json",
+            "runtime/cortex/worker-prompts/latest.json",
+            "runtime/cortex/kernel.state-model.seed.v1.json",
+            "runtime/cortex/kernel.rule-registry.seed.v1.json",
+            "docs/atlas/notes/cortex-surface-reconciliation-2026-05-06.md",
+        ]
         payload["task_frame"]["ready_to_execute"] = True
         return payload
 
     def _base_operator_surface_payload(self) -> dict:
         payload = json.loads(json.dumps(self.operator_surface_payload))
         payload["generated_at"] = "2026-05-06T21:04:00+00:00"
+        payload["operator_summary"] = (
+            "Cortex operator surface for pilot-cortex-worker-prompt-stack-consumption-wave7 derived from explicit current-state, "
+            "rail-state, context, validation, and seed artifacts."
+        )
+        payload["rail_status"] = "ready"
         payload["active_blockers"] = []
-        payload["dirty_lanes"] = ["cortex-worker-prompt-contract-v0-1"]
+        payload["dirty_lanes"] = ["cortex-worker-prompt-stack-consumption-pilot-v0-1"]
         payload["next_recommended_lane"] = {
-            "lane_id": "promote-cortex-worker-prompt-contract-wave6",
+            "lane_id": "pilot-cortex-worker-prompt-stack-consumption-wave7",
             "owner_layer": "cortex",
-            "rationale": "The canonical ledger is landed, but Cortex still needs one promoted worker-prompt artifact contract that _stack can consume while planner, context, proof, receipt-draft, and final receipt stay separate and linked by refs and digests.",
+            "rationale": "The worker-prompt contract is landed, but Cortex still needs one bounded _stack pilot that consumes current context and planning artifacts without transcript scraping while planner, context, proof, receipt-draft, and final receipt stay separate and linked by refs and digests.",
             "blocked_by": [],
             "source_refs": [
                 "runtime/cortex/current-state/latest.json",
@@ -193,17 +209,32 @@ class CortexLedgerTests(unittest.TestCase):
             "pr_state": "open",
             "pr_url": "https://example.invalid/pr/10",
         }
-        payload["context_packet_id"] = "context-promote-cortex-worker-prompt-contract-wave6"
-        payload["task_frame_summary"]["lane_id"] = "promote-cortex-worker-prompt-contract-wave6"
+        payload["context_packet_id"] = "context-pilot-cortex-worker-prompt-stack-consumption-wave7"
+        payload["context_summary"] = (
+            "Cortex context packet for pilot-cortex-worker-prompt-stack-consumption-wave7 derived from explicit current-state, "
+            "rail-state, validation, and seed artifacts."
+        )
+        payload["task_frame_summary"]["lane_id"] = "pilot-cortex-worker-prompt-stack-consumption-wave7"
         payload["task_frame_summary"]["owner_layer"] = "cortex"
-        payload["task_frame_summary"]["title"] = "Promote the Cortex worker-prompt contract."
+        payload["task_frame_summary"]["title"] = "Pilot bounded _stack consumption of the Cortex worker-prompt contract."
         payload["task_frame_summary"]["status"] = "ready"
         payload["task_frame_summary"]["rationale"] = (
-            "The canonical ledger is landed, but Cortex still needs one promoted worker-prompt artifact contract that "
-            "_stack can consume while planner, context, proof, receipt-draft, and final receipt stay separate and "
+            "The worker-prompt contract is landed, but Cortex still needs one bounded _stack pilot that consumes current "
+            "context and planning artifacts without transcript scraping while planner, context, proof, receipt-draft, and final receipt stay separate and "
             "linked by refs and digests."
         )
         payload["task_frame_summary"]["blocked_by"] = []
+        payload["task_frame_summary"]["required_inputs"] = [
+            "runtime/cortex/current-state/latest.json",
+            "runtime/cortex/rail-state/latest.json",
+            "runtime/cortex/context/latest.json",
+            "runtime/cortex/operator-surface/latest.json",
+            "runtime/cortex/ledger/latest.json",
+            "runtime/cortex/worker-prompts/latest.json",
+            "runtime/cortex/kernel.state-model.seed.v1.json",
+            "runtime/cortex/kernel.rule-registry.seed.v1.json",
+            "docs/atlas/notes/cortex-surface-reconciliation-2026-05-06.md",
+        ]
         payload["task_frame_summary"]["ready_to_execute"] = True
         payload["top_evidence_refs"] = [
             "runtime/cortex/current-state/latest.json",
@@ -262,8 +293,8 @@ class CortexLedgerTests(unittest.TestCase):
         self.assertEqual("read_only_advisory", payload["authority_level"])
         self.assertEqual("ready", payload["rail_status"])
         self.assertEqual([], payload["active_blockers"])
-        self.assertEqual("promote-cortex-worker-prompt-contract-wave6", payload["next_recommended_lane"]["lane_id"])
-        self.assertEqual("context-promote-cortex-worker-prompt-contract-wave6", payload["context_packet_id"])
+        self.assertEqual("pilot-cortex-worker-prompt-stack-consumption-wave7", payload["next_recommended_lane"]["lane_id"])
+        self.assertEqual("context-pilot-cortex-worker-prompt-stack-consumption-wave7", payload["context_packet_id"])
         self.assertEqual("clean", payload["worktree_status"])
         self.assertEqual("unavailable", payload["proof_or_receipt_readiness"]["status"])
         self.assertEqual(
@@ -288,7 +319,7 @@ class CortexLedgerTests(unittest.TestCase):
         proof = payload["proof_or_receipt_readiness"]
         self.assertEqual("passed", proof["status"])
         self.assertTrue(proof["receipt_ready"])
-        self.assertEqual("promote-cortex-worker-prompt-contract-wave6", proof["selected_next_action"])
+        self.assertEqual("pilot-cortex-worker-prompt-stack-consumption-wave7", proof["selected_next_action"])
         labels = [item["label"] for item in payload["evidence_refs"]]
         self.assertIn("run_ledger.latest_run", labels)
 
@@ -347,7 +378,7 @@ class CortexLedgerTests(unittest.TestCase):
 
         self.assertEqual(json.dumps(payload), json.dumps(artifact.payload))
         self.assertIn("# Cortex Ledger", summary)
-        self.assertIn("promote-cortex-worker-prompt-contract-wave6", summary)
+        self.assertIn("pilot-cortex-worker-prompt-stack-consumption-wave7", summary)
         self.assertIn("rail status", summary.lower())
         self.assertIn("validation", summary.lower())
         self.assertIn("Evidence Refs", summary)
