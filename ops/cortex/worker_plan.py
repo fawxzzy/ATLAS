@@ -135,6 +135,8 @@ def _select_template(posture: CortexPosture, next_action: NextAction) -> WorkerP
         return ATLAS_CORTEX_CATCH_UP_TEMPLATE
     if next_action.action_id == "promote-cortex-worker-prompt-contract-wave6":
         return CORTEX_WORKER_PROMPT_CONTRACT_TEMPLATE
+    if next_action.action_id == "pilot-cortex-worker-prompt-stack-consumption-wave7":
+        return CORTEX_STACK_CONSUMPTION_PILOT_TEMPLATE
     if next_action.owner_layer == "cortex" or "cortex runtime" in action_text or "runtime work" in action_text:
         return CORTEX_RUNTIME_WORK_TEMPLATE
 
@@ -319,6 +321,44 @@ CORTEX_WORKER_PROMPT_CONTRACT_TEMPLATE = WorkerPlanTemplate(
     default_failure_modes_to_avoid=(
         "Do not treat the worker prompt as execution authority.",
         "Do not collapse planner, context, proof, or receipt surfaces into one mutable truth store.",
+    ),
+)
+
+
+CORTEX_STACK_CONSUMPTION_PILOT_TEMPLATE = WorkerPlanTemplate(
+    template_id="cortex_stack_consumption_pilot",
+    objective="Pilot bounded _stack consumption of Cortex worker-prompt artifacts without widening authority.",
+    implementation_plan=(
+        "Consume only explicit runtime/cortex worker-prompt, context, operator-surface, and ledger artifacts.",
+        "Emit one read-only _stack pilot handoff artifact without dispatching execution or scraping transcripts.",
+        "Keep planner, context, proof, receipt-draft, and final receipt separated by refs and digests.",
+    ),
+    default_files_to_modify=(
+        "ops/cortex/stack_consumption_pilot.py",
+        "ops/cortex/worker_plan.py",
+        "tests/test_cortex_stack_consumption_pilot.py",
+        "tests/test_cortex_worker_plan.py",
+    ),
+    default_files_to_avoid=(
+        "stack.yaml",
+        "repos/**",
+        "apps/**",
+        "packages/**",
+        "runtime/lifeline/**",
+        "runtime/atlas/conversations/**",
+        "runtime/atlas/sessions/**",
+    ),
+    documentation_summary=(
+        "The Cortex _stack consumption pilot proves artifact-ref consumption only; it does not dispatch work, "
+        "scrape transcripts, change default routing, or grant final receipt authority."
+    ),
+    default_verification_steps=(
+        "python -m unittest tests.test_cortex_stack_consumption_pilot tests.test_cortex_worker_prompt tests.test_cortex_worker_plan",
+    ),
+    default_failure_modes_to_avoid=(
+        "Do not dispatch or execute _stack actions from the pilot.",
+        "Do not scrape transcripts or conversations for pilot inputs.",
+        "Do not treat the pilot as default consumer routing or receipt authority.",
     ),
 )
 
