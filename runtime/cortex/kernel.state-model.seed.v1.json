@@ -3,7 +3,7 @@
   "posture": {
     "posture_id": "cortex-wave1-landed",
     "classification": "pivoted",
-    "summary": "Cortex current-state, rail-state, context assembly, operator surface, and canonical ledger are landed, the active product lane remains Cortex, and the next tranche is promoting a worker-prompt contract while known stack validation debt stays ambient debt.",
+    "summary": "Cortex current-state, rail-state, context assembly, operator surface, canonical ledger, and worker-prompt contract are landed, the active product lane remains Cortex, and the next tranche is piloting bounded _stack consumption of Cortex worker prompts while known stack validation debt stays ambient debt.",
     "handoff_summaries": [
       "docs/atlas/notes/cortex-priority-pivot-2026-04-26.md",
       "docs/atlas/notes/cortex-mvp-spec-2026-04-26.md",
@@ -22,39 +22,41 @@
       "rail_id": "cortex-mvp",
       "owner_layer": "cortex",
       "latest_clean_step": {
-        "step_id": "cortex-kernel-v0-1",
+        "step_id": "cortex-worker-prompt-contract-v0-1",
         "owner_layer": "cortex",
-        "summary": "Wave 1 kernel landed with explicit posture, rail state, rules, proof summaries, and next-action primitives.",
+        "summary": "Wave 6 landed the advisory Cortex worker-prompt contract as a bounded _stack-consumable handoff surface without changing Cortex execution or receipt authority.",
         "status": "clean",
         "evidence": [
-          "runtime/cortex/kernel.state-model.seed.v1.json",
-          "runtime/cortex/kernel.rule-registry.seed.v1.json",
-          "runtime/cortex/kernel.proof-summary.examples.v1.json",
-          "tests/test_cortex_kernel.py"
+          "ops/cortex/worker_prompt.py",
+          "ops/cortex/worker_plan.py",
+          "runtime/cortex/worker-prompts/latest.json",
+          "tests/test_cortex_worker_prompt.py",
+          "tests/test_cortex_worker_plan.py"
         ],
         "source_inputs": [
-          "tracked runtime seed artifacts",
+          "Wave 6 worker-prompt artifact",
           "targeted unittest proof"
         ],
-        "completed_at": "2026-04-27"
+        "completed_at": "2026-05-06"
       },
       "dirty_lanes": [
         {
-          "lane_id": "cortex-worker-prompt-contract-v0-1",
+          "lane_id": "cortex-worker-prompt-stack-consumption-pilot-v0-1",
           "owner_layer": "cortex",
-          "summary": "Cortex can now emit current-state, rail-state, context packets, operator views, run-ledger summaries, and one canonical ledger, but it still lacks a promoted worker-prompt contract that _stack can consume as a stable handoff surface.",
+          "summary": "Cortex can now emit a canonical advisory worker-prompt contract, but it still needs one bounded _stack pilot that consumes that prompt without transcript scraping or authority bleed.",
           "status": "open",
-          "blocking_reason": "Wave 6 still needs a canonical worker-prompt contract before Cortex artifacts become a stable default handoff surface for _stack consumers.",
+          "blocking_reason": "Wave 7 still needs a bounded _stack pilot that proves Cortex worker-prompt consumption can stay explicit, read-only, and non-authoritative.",
           "evidence": [
             "docs/atlas/notes/cortex-surface-reconciliation-2026-05-06.md",
             "runtime/cortex/current-state/latest.json",
             "runtime/cortex/rail-state/latest.json",
             "runtime/cortex/context/latest.json",
             "runtime/cortex/operator-surface/latest.json",
-            "runtime/cortex/ledger/latest.json"
+            "runtime/cortex/ledger/latest.json",
+            "runtime/cortex/worker-prompts/latest.json"
           ],
           "source_inputs": [
-            "Wave 5 canonical ledger artifact",
+            "Wave 6 worker-prompt contract artifact",
             "Cortex run-result and run-ledger lanes"
           ]
         }
@@ -72,21 +74,22 @@
           ],
           "notes": [
             "Do not classify unchanged stack debt as a new Cortex regression.",
-            "Wave 6 should preserve the clean kernel-to-ledger path and keep worker-prompt promotion read-only until a later consumer lane."
+            "Wave 7 should preserve the clean kernel-to-worker-prompt path and keep _stack prompt consumption bounded and advisory."
           ]
         }
       ],
       "next_action": {
-        "action_id": "promote-cortex-worker-prompt-contract-wave6",
+        "action_id": "pilot-cortex-worker-prompt-stack-consumption-wave7",
         "owner_layer": "cortex",
-        "title": "Promote the Cortex worker-prompt contract.",
-        "rationale": "The canonical ledger is landed, but Cortex still needs one promoted worker-prompt artifact contract that _stack can consume while planner, context, proof, receipt-draft, and final receipt stay separate and linked by refs and digests.",
+        "title": "Pilot bounded _stack consumption of the Cortex worker-prompt contract.",
+        "rationale": "The worker-prompt contract is landed, but Cortex still needs one bounded _stack pilot that consumes current context and planning artifacts without transcript scraping while planner, context, proof, receipt-draft, and final receipt stay separate and linked by refs and digests.",
         "required_inputs": [
           "runtime/cortex/current-state/latest.json",
           "runtime/cortex/rail-state/latest.json",
           "runtime/cortex/context/latest.json",
           "runtime/cortex/operator-surface/latest.json",
           "runtime/cortex/ledger/latest.json",
+          "runtime/cortex/worker-prompts/latest.json",
           "runtime/cortex/kernel.state-model.seed.v1.json",
           "runtime/cortex/kernel.rule-registry.seed.v1.json",
           "docs/atlas/notes/cortex-surface-reconciliation-2026-05-06.md"
@@ -95,7 +98,7 @@
           "python -m unittest tests.test_cortex_current_state tests.test_cortex_rail_state_reader tests.test_cortex_context_assembler tests.test_cortex_operator_surface tests.test_cortex_ledger tests.test_cortex_loop tests.test_cortex_run_artifact tests.test_cortex_run_ledger",
           "python .\\ops\\validation\\validate_stack.py"
         ],
-        "receipt_scope": "Cortex should promote one _stack-consumable worker-prompt contract before widening default consumer routing or receipt authority."
+        "receipt_scope": "Cortex should prove one bounded _stack worker-prompt consumption pilot before widening default consumer routing or receipt authority."
       },
       "boundary_reminders": [
         "Fitness owns product UI truth.",
