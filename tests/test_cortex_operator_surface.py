@@ -97,7 +97,7 @@ class CortexOperatorSurfaceTests(unittest.TestCase):
         }
         payload["active_blockers"] = []
         payload["next_recommended_lane"] = {
-            "lane_id": "pilot-cortex-worker-prompt-stack-consumption-wave7",
+            "lane_id": "promote-cortex-stack-consumer-default-routing-wave8",
             "owner_layer": "cortex",
             "rationale": "The canonical ledger is landed, but Cortex still needs one promoted worker-prompt artifact contract that _stack can consume while planner, context, proof, receipt-draft, and final receipt stay separate and linked by refs and digests.",
             "blocked_by": [],
@@ -113,7 +113,7 @@ class CortexOperatorSurfaceTests(unittest.TestCase):
         payload["generated_at"] = "2026-05-06T20:02:00+00:00"
         payload["rail_status"] = "ready"
         payload["active_blockers"] = []
-        payload["dirty_lanes"] = ["cortex-worker-prompt-stack-consumption-pilot-v0-1"]
+        payload["dirty_lanes"] = ["cortex-stack-consumer-default-routing-v0-1"]
         payload["validation_posture"] = {
             "status": "ambient-debt-only",
             "counts": {
@@ -127,7 +127,7 @@ class CortexOperatorSurfaceTests(unittest.TestCase):
             "receipt_path": "runtime/receipts/validation/stack-validation.latest.json",
         }
         payload["next_recommended_lane"] = {
-            "lane_id": "pilot-cortex-worker-prompt-stack-consumption-wave7",
+            "lane_id": "promote-cortex-stack-consumer-default-routing-wave8",
             "owner_layer": "cortex",
             "rationale": "The canonical ledger is landed, but Cortex still needs one promoted worker-prompt artifact contract that _stack can consume while planner, context, proof, receipt-draft, and final receipt stay separate and linked by refs and digests.",
             "blocked_by": [],
@@ -142,16 +142,16 @@ class CortexOperatorSurfaceTests(unittest.TestCase):
     def _base_context_payload(self) -> dict:
         payload = json.loads(json.dumps(self.context_payload))
         payload["generated_at"] = "2026-05-06T20:03:00+00:00"
-        payload["packet_id"] = "context-pilot-cortex-worker-prompt-stack-consumption-wave7"
+        payload["packet_id"] = "context-promote-cortex-stack-consumer-default-routing-wave8"
         payload["context_summary"] = (
-            "Cortex context packet for pilot-cortex-worker-prompt-stack-consumption-wave7 derived from explicit current-state, "
+            "Cortex context packet for promote-cortex-stack-consumer-default-routing-wave8 derived from explicit current-state, "
             "rail-state, validation, and seed artifacts."
         )
         payload["posture_snapshot"]["branch"] = "codex/cortex-operator-surface-wave4"
         payload["posture_snapshot"]["head"] = "abc123def456"
         payload["posture_snapshot"]["worktree_status"] = "clean"
         payload["posture_snapshot"]["active_blocker_count"] = 0
-        payload["posture_snapshot"]["dirty_lanes"] = ["cortex-worker-prompt-stack-consumption-pilot-v0-1"]
+        payload["posture_snapshot"]["dirty_lanes"] = ["cortex-stack-consumer-default-routing-v0-1"]
         payload["posture_snapshot"]["validation_status"] = "ambient-debt-only"
         payload["posture_snapshot"]["validation_counts"] = {
             "critical": 0,
@@ -160,7 +160,7 @@ class CortexOperatorSurfaceTests(unittest.TestCase):
             "info": 1,
             "total": 5,
         }
-        payload["task_frame"]["lane_id"] = "pilot-cortex-worker-prompt-stack-consumption-wave7"
+        payload["task_frame"]["lane_id"] = "promote-cortex-stack-consumer-default-routing-wave8"
         payload["task_frame"]["owner_layer"] = "cortex"
         payload["task_frame"]["title"] = "Promote the Cortex worker-prompt contract."
         payload["task_frame"]["status"] = "ready"
@@ -212,8 +212,8 @@ class CortexOperatorSurfaceTests(unittest.TestCase):
         self.assertEqual("atlas.cortex.operator-surface.v1", payload["contract_version"])
         self.assertEqual("cortex-mvp", payload["active_rail"])
         self.assertEqual("ready", payload["rail_status"])
-        self.assertEqual("pilot-cortex-worker-prompt-stack-consumption-wave7", payload["next_recommended_lane"]["lane_id"])
-        self.assertEqual("context-pilot-cortex-worker-prompt-stack-consumption-wave7", payload["context_packet_id"])
+        self.assertEqual("promote-cortex-stack-consumer-default-routing-wave8", payload["next_recommended_lane"]["lane_id"])
+        self.assertEqual("context-promote-cortex-stack-consumer-default-routing-wave8", payload["context_packet_id"])
         self.assertEqual([], payload["active_blockers"])
         self.assertEqual("in_sync", payload["publication_posture"]["remote_status"])
         self.assertEqual(
@@ -251,7 +251,7 @@ class CortexOperatorSurfaceTests(unittest.TestCase):
         rail_state_payload["rail_status"] = "blocked"
         rail_state_payload["active_blockers"] = current_state_payload["active_blockers"]
         rail_state_payload["next_recommended_lane"] = current_state_payload["next_recommended_lane"]
-        rail_state_payload["dirty_lanes"] = ["stabilize-stack-validation", "cortex-worker-prompt-stack-consumption-pilot-v0-1"]
+        rail_state_payload["dirty_lanes"] = ["stabilize-stack-validation", "cortex-stack-consumer-default-routing-v0-1"]
         context_payload = self._base_context_payload()
         context_payload["task_frame"]["lane_id"] = "stabilize-stack-validation"
         context_payload["task_frame"]["owner_layer"] = "atlas"

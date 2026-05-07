@@ -84,7 +84,7 @@ class CortexContextAssemblerTests(unittest.TestCase):
         }
         payload["active_blockers"] = []
         payload["next_recommended_lane"] = {
-            "lane_id": "pilot-cortex-worker-prompt-stack-consumption-wave7",
+            "lane_id": "promote-cortex-stack-consumer-default-routing-wave8",
             "owner_layer": "cortex",
             "rationale": "The canonical ledger is landed, but Cortex still needs one promoted worker-prompt artifact contract that _stack can consume while planner, context, proof, receipt-draft, and final receipt stay separate and linked by refs and digests.",
             "blocked_by": [],
@@ -100,7 +100,7 @@ class CortexContextAssemblerTests(unittest.TestCase):
         payload["generated_at"] = "2026-05-05T23:52:00+00:00"
         payload["rail_status"] = "ready"
         payload["active_blockers"] = []
-        payload["dirty_lanes"] = ["cortex-worker-prompt-stack-consumption-pilot-v0-1"]
+        payload["dirty_lanes"] = ["cortex-stack-consumer-default-routing-v0-1"]
         payload["validation_posture"] = {
             "status": "ambient-debt-only",
             "counts": {
@@ -114,7 +114,7 @@ class CortexContextAssemblerTests(unittest.TestCase):
             "receipt_path": "runtime/receipts/validation/stack-validation.latest.json",
         }
         payload["next_recommended_lane"] = {
-            "lane_id": "pilot-cortex-worker-prompt-stack-consumption-wave7",
+            "lane_id": "promote-cortex-stack-consumer-default-routing-wave8",
             "owner_layer": "cortex",
             "rationale": "The canonical ledger is landed, but Cortex still needs one promoted worker-prompt artifact contract that _stack can consume while planner, context, proof, receipt-draft, and final receipt stay separate and linked by refs and digests.",
             "blocked_by": [],
@@ -124,7 +124,7 @@ class CortexContextAssemblerTests(unittest.TestCase):
                 "runtime/cortex/kernel.rule-registry.seed.v1.json",
             ],
         }
-        payload["seeded_rail_state"]["next_action"]["action_id"] = "pilot-cortex-worker-prompt-stack-consumption-wave7"
+        payload["seeded_rail_state"]["next_action"]["action_id"] = "promote-cortex-stack-consumer-default-routing-wave8"
         payload["seeded_rail_state"]["next_action"]["owner_layer"] = "cortex"
         return payload
 
@@ -151,8 +151,8 @@ class CortexContextAssemblerTests(unittest.TestCase):
         payload = build_context_packet_payload(root=root)
 
         self.assertEqual("atlas.cortex.context-packet.v1", payload["contract_version"])
-        self.assertEqual("context-pilot-cortex-worker-prompt-stack-consumption-wave7", payload["packet_id"])
-        self.assertEqual("pilot-cortex-worker-prompt-stack-consumption-wave7", payload["task_frame"]["lane_id"])
+        self.assertEqual("context-promote-cortex-stack-consumer-default-routing-wave8", payload["packet_id"])
+        self.assertEqual("promote-cortex-stack-consumer-default-routing-wave8", payload["task_frame"]["lane_id"])
         self.assertTrue(payload["task_frame"]["ready_to_execute"])
         self.assertIsNone(payload["deferred_lane"])
         self.assertEqual("cortex-mvp", payload["active_rail"])
@@ -215,7 +215,7 @@ class CortexContextAssemblerTests(unittest.TestCase):
         self.assertEqual("blocked", payload["task_frame"]["status"])
         self.assertEqual(["missing-codex-config"], payload["task_frame"]["blocked_by"])
         self.assertIsNotNone(payload["deferred_lane"])
-        self.assertEqual("pilot-cortex-worker-prompt-stack-consumption-wave7", payload["deferred_lane"]["lane_id"])
+        self.assertEqual("promote-cortex-stack-consumer-default-routing-wave8", payload["deferred_lane"]["lane_id"])
 
     def test_dirty_worktree_switches_immediate_lane(self) -> None:
         current_state_payload = self._base_current_state_payload()
@@ -248,7 +248,7 @@ class CortexContextAssemblerTests(unittest.TestCase):
         self.assertEqual("stabilize-root-worktree", payload["task_frame"]["lane_id"])
         self.assertEqual("stabilize-first", payload["task_frame"]["status"])
         self.assertFalse(payload["task_frame"]["ready_to_execute"])
-        self.assertEqual("pilot-cortex-worker-prompt-stack-consumption-wave7", payload["deferred_lane"]["lane_id"])
+        self.assertEqual("promote-cortex-stack-consumer-default-routing-wave8", payload["deferred_lane"]["lane_id"])
 
     def test_persist_writes_latest_json_and_markdown(self) -> None:
         root = self._temp_root()
@@ -260,7 +260,7 @@ class CortexContextAssemblerTests(unittest.TestCase):
         self.assertEqual(artifact.payload["packet_id"], payload["packet_id"])
         self.assertIn("# Cortex Context Packet", summary)
         self.assertIn("## Objective", summary)
-        self.assertIn("pilot-cortex-worker-prompt-stack-consumption-wave7", summary)
+        self.assertIn("promote-cortex-stack-consumer-default-routing-wave8", summary)
 
     def test_cli_fails_clearly_when_current_state_is_missing(self) -> None:
         temp_dir = tempfile.TemporaryDirectory()
