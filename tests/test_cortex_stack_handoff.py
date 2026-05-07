@@ -56,6 +56,9 @@ class CortexStackAdvisoryHandoffTests(unittest.TestCase):
             (cls.root / "runtime" / "cortex" / "kernel.proof-summary.examples.v1.json").read_text(encoding="utf-8")
         )
         cls.stack_lock_text = (cls.root / "stack.lock.yaml").read_text(encoding="utf-8")
+        cls.schema_payload = json.loads(
+            (cls.root / "schemas" / "atlas.cortex.stack-advisory-handoff.v2.json").read_text(encoding="utf-8")
+        )
 
     def _base_validation_payload(self) -> dict:
         return {
@@ -263,6 +266,20 @@ class CortexStackAdvisoryHandoffTests(unittest.TestCase):
         self.assertIn("execution authorized", summary.lower())
         self.assertIn("receipt authorized", summary.lower())
         self.assertIn("Authority Guards", summary)
+
+    def test_schema_declares_emitted_top_level_payload_shape(self) -> None:
+        root = self._temp_root()
+
+        payload = build_stack_advisory_handoff_payload(root=root)
+        schema = self.schema_payload
+
+        self.assertFalse(schema["additionalProperties"])
+        schema_properties = set(schema["properties"].keys())
+        payload_keys = set(payload.keys())
+
+        self.assertTrue(payload_keys.issubset(schema_properties))
+        for required_key in schema["required"]:
+            self.assertIn(required_key, payload)
 
     def test_missing_worker_prompt_fails_clearly(self) -> None:
         root = self._temp_root()

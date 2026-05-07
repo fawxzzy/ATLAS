@@ -18,6 +18,7 @@
     "advisory_assignment",
     "handoff_checks",
     "handoff_result",
+    "transcript_scraping",
     "authority_guards",
     "boundary_reminders",
     "source_refs"
@@ -295,6 +296,33 @@
           ]
         },
         "failed_checks": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "transcript_scraping": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "allowed",
+        "detected",
+        "detected_refs",
+        "forbidden_source_patterns"
+      ],
+      "properties": {
+        "allowed": {
+          "type": "boolean",
+          "const": false
+        },
+        "detected": {
+          "type": "boolean"
+        },
+        "detected_refs": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "forbidden_source_patterns": {
           "type": "array",
           "items": { "type": "string" }
         }

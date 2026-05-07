@@ -169,7 +169,6 @@ def _source_refs(
     ledger_ref: str,
     state_model_ref: str,
     rule_registry_ref: str,
-    stack_consumption_pilot_ref: str,
 ) -> list[str]:
     values: list[Any] = [
         worker_prompt_ref,
@@ -178,7 +177,6 @@ def _source_refs(
         ledger_ref,
         state_model_ref,
         rule_registry_ref,
-        stack_consumption_pilot_ref,
         *_list(worker_prompt_payload.get("source_refs")),
         *_list(worker_prompt_payload.get("top_evidence_refs")),
         _separation_ref(worker_prompt_payload, "planner"),
@@ -284,7 +282,6 @@ def build_stack_advisory_handoff_payload(
         ledger_ref=ledger_ref,
         state_model_ref=state_model_ref,
         rule_registry_ref=rule_registry_ref,
-        stack_consumption_pilot_ref=stack_consumption_pilot_ref,
     )
     transcript_refs = _transcript_refs(source_refs)
     separated_surfaces_present = all(
