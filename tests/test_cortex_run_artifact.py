@@ -55,11 +55,11 @@ class CortexRunArtifactTests(unittest.TestCase):
             summary = artifact.summary_path.read_text(encoding="utf-8") if artifact.summary_path is not None else ""
 
         self.assertEqual("promote-cortex-stack-consumer-default-routing-wave8", payload["selected_next_action"]["action_id"])
-        self.assertEqual("cortex_runtime_work", payload["worker_plan"]["template_id"])
+        self.assertEqual("cortex_stack_advisory_handoff_contract", payload["worker_plan"]["template_id"])
         self.assertTrue(payload["receipt_ready"])
         self.assertTrue(payload["known_ambient_debt"])
         self.assertIn("selected_next_action", json.dumps(payload, sort_keys=True))
-        self.assertIn("Worker plan template: cortex_runtime_work", summary)
+        self.assertIn("Worker plan template: cortex_stack_advisory_handoff_contract", summary)
         self.assertIn("Receipt ready: yes", summary)
         self.assertIn("Patterns applied:", summary)
         self.assertIn("implementation_plan", payload["worker_plan"])

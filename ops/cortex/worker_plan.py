@@ -137,6 +137,8 @@ def _select_template(posture: CortexPosture, next_action: NextAction) -> WorkerP
         return CORTEX_WORKER_PROMPT_CONTRACT_TEMPLATE
     if next_action.action_id == "pilot-cortex-worker-prompt-stack-consumption-wave7":
         return CORTEX_STACK_CONSUMPTION_PILOT_TEMPLATE
+    if next_action.action_id == "promote-cortex-stack-consumer-default-routing-wave8":
+        return CORTEX_STACK_ADVISORY_HANDOFF_CONTRACT_TEMPLATE
     if next_action.owner_layer == "cortex" or "cortex runtime" in action_text or "runtime work" in action_text:
         return CORTEX_RUNTIME_WORK_TEMPLATE
 
@@ -359,6 +361,46 @@ CORTEX_STACK_CONSUMPTION_PILOT_TEMPLATE = WorkerPlanTemplate(
         "Do not dispatch or execute _stack actions from the pilot.",
         "Do not scrape transcripts or conversations for pilot inputs.",
         "Do not treat the pilot as default consumer routing or receipt authority.",
+    ),
+)
+
+
+CORTEX_STACK_ADVISORY_HANDOFF_CONTRACT_TEMPLATE = WorkerPlanTemplate(
+    template_id="cortex_stack_advisory_handoff_contract",
+    objective="Promote the canonical Cortex -> _stack advisory handoff contract without widening authority.",
+    implementation_plan=(
+        "Add one canonical advisory handoff envelope that unifies worker-prompt and pilot concerns without becoming execution authority.",
+        "Refactor the stack-consumption pilot to reference or validate the canonical handoff instead of owning the handoff shape locally.",
+        "Keep planner, context, proof, pilot, receipt-draft, and final receipt surfaces separately referenceable by refs and digests.",
+    ),
+    default_files_to_modify=(
+        "ops/cortex/stack_handoff.py",
+        "ops/cortex/stack_consumption_pilot.py",
+        "ops/cortex/worker_plan.py",
+        "schemas/atlas.cortex.stack-advisory-handoff.v2.json",
+        "tests/test_cortex_stack_handoff.py",
+        "tests/test_cortex_stack_consumption_pilot.py",
+        "tests/test_cortex_worker_plan.py",
+    ),
+    default_files_to_avoid=(
+        "stack.yaml",
+        "repos/**",
+        "apps/**",
+        "packages/**",
+        "runtime/lifeline/**",
+        "runtime/atlas/conversations/**",
+        "runtime/atlas/sessions/**",
+    ),
+    documentation_summary=(
+        "Default routing in Cortex means a promoted advisory artifact-ref handoff contract for _stack, not automatic dispatch, execution, receipt authority, or owner-truth mutation."
+    ),
+    default_verification_steps=(
+        "python -m unittest tests.test_cortex_stack_handoff tests.test_cortex_stack_consumption_pilot tests.test_cortex_worker_prompt tests.test_cortex_worker_plan",
+    ),
+    default_failure_modes_to_avoid=(
+        "Do not enable automatic dispatch or treat the default consumer as execution authority.",
+        "Do not collapse worker prompt, context, proof, pilot, or receipt surfaces into one mutable truth store.",
+        "Do not give Cortex final receipt authority or scrape transcripts.",
     ),
 )
 

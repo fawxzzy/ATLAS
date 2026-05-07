@@ -127,6 +127,39 @@ class CortexWorkerPlanTests(unittest.TestCase):
             plan.implementation_plan,
         )
 
+    def test_stack_consumer_default_routing_next_action_produces_canonical_handoff_template(self) -> None:
+        posture, rail_state, next_action = self._with_state(
+            posture=replace(self.posture, classification="pivoted"),
+            rail_state=replace(
+                self.posture.rail_state,
+                owner_layer="cortex",
+                next_action=replace(
+                    self.posture.rail_state.next_action,
+                    action_id="promote-cortex-stack-consumer-default-routing-wave8",
+                    owner_layer="cortex",
+                    title="Promote Cortex _stack consumer default routing.",
+                    rationale="Cortex needs one canonical advisory handoff envelope for _stack consumption.",
+                    receipt_scope="Keep execution, routing, owner-truth mutation, and Lifeline receipt authority outside Cortex.",
+                    verification_plan=(
+                        "python -m unittest tests.test_cortex_stack_handoff tests.test_cortex_stack_consumption_pilot",
+                    ),
+                ),
+            ),
+        )
+
+        plan = build_worker_plan(posture, rail_state, next_action, self.rules)
+
+        self.assertEqual("cortex_stack_advisory_handoff_contract", plan.template_id)
+        self.assertIn("canonical", plan.prompt.lower())
+        self.assertIn("ops/cortex/stack_handoff.py", plan.files_to_modify)
+        self.assertIn("schemas/atlas.cortex.stack-advisory-handoff.v2.json", plan.files_to_modify)
+        self.assertIn("runtime/atlas/conversations/**", plan.files_to_avoid)
+        self.assertTrue(any("automatic dispatch" in item for item in plan.failure_modes_to_avoid))
+        self.assertIn(
+            "Respect receipt scope: Keep execution, routing, owner-truth mutation, and Lifeline receipt authority outside Cortex.",
+            plan.implementation_plan,
+        )
+
     def test_fitness_owner_adoption_next_action_produces_fitness_scoped_prompt(self) -> None:
         posture, rail_state, next_action = self._with_state(
             posture=replace(self.posture, classification="steady"),

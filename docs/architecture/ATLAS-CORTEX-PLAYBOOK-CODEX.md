@@ -106,6 +106,8 @@ CORTEX may read those files and make recommendations. It should not silently bec
 
 The active Cortex surface lives under `runtime/cortex/**`. It is not a repo-local execution surface and it must remain read-only unless a future contract explicitly expands it.
 
+CORTEX may promote a default advisory consumer contract for `_stack`, but only as an explicit artifact-ref handoff. That does not grant automatic dispatch, execution authority, owner-truth mutation, transcript scraping, or Lifeline final receipt authority.
+
 ### Playbook -> Codex
 
 Playbook may provide:
