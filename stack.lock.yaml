@@ -75,8 +75,8 @@ components:
     status: "active"
     remote: "https://github.com/fawxzzy/ATLAS.git"
     ref_type: "branch"
-    ref: "codex/cortex-rail-seed-progression-r13"
-    commit: "3ef14193917cf36bdec4da6c068f8a5f2cbaef55"
+    ref: "codex/cortex-stack-consumption-pilot-wave7"
+    commit: "84ad3a3e7f9852d6b760fd411f57051f0b2ab383"
     dirty: false
     trust_class: "trusted"
     release_eligible: false
@@ -127,4 +127,4 @@ excluded_surfaces:
     trust_class: "untrusted"
     release_eligible: false
     reason: "Token-bearing Verta checkout remains quarantined and untrusted until scrub and rotation are complete."
-lock_digest: "sha256:fa5e6963a39d7b1d1be678b87f88e0e666c2d37a4624eab606a05fa7b1792dce"
+lock_digest: "sha256:c5869132a5c51a4066710f2204f6c073e03bc22c50250d465f6754a6f0f88cdb"
