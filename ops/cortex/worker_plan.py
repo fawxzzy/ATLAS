@@ -17,6 +17,7 @@ class WorkerPlanTemplate:
     default_files_to_avoid: tuple[str, ...]
     documentation_summary: str
     default_verification_steps: tuple[str, ...]
+    default_failure_modes_to_avoid: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -25,10 +26,12 @@ class WorkerPlan:
     owner_layer: str
     objective: str
     prompt: str
+    implementation_plan: tuple[str, ...]
     files_to_modify: tuple[str, ...]
     files_to_avoid: tuple[str, ...]
     verification_steps: tuple[str, ...]
     matched_rule_ids: tuple[str, ...]
+    failure_modes_to_avoid: tuple[str, ...]
 
     def to_payload(self) -> dict[str, object]:
         return {
@@ -37,10 +40,12 @@ class WorkerPlan:
             "owner_layer": self.owner_layer,
             "objective": self.objective,
             "prompt": self.prompt,
+            "implementation_plan": list(self.implementation_plan),
             "files_to_modify": list(self.files_to_modify),
             "files_to_avoid": list(self.files_to_avoid),
             "verification_steps": list(self.verification_steps),
             "matched_rule_ids": list(self.matched_rule_ids),
+            "failure_modes_to_avoid": list(self.failure_modes_to_avoid),
         }
 
 
@@ -128,6 +133,8 @@ def _select_template(posture: CortexPosture, next_action: NextAction) -> WorkerP
         return FITNESS_OWNER_ADOPTION_TEMPLATE
     if next_action.action_id == "atlas-cortex-catch-up" or "catch-up" in action_text:
         return ATLAS_CORTEX_CATCH_UP_TEMPLATE
+    if next_action.action_id == "promote-cortex-worker-prompt-contract-wave6":
+        return CORTEX_WORKER_PROMPT_CONTRACT_TEMPLATE
     if next_action.owner_layer == "cortex" or "cortex runtime" in action_text or "runtime work" in action_text:
         return CORTEX_RUNTIME_WORK_TEMPLATE
 
@@ -214,6 +221,13 @@ class WorkerPlanGenerator:
         resolved_verification_steps = _dedupe_strings(
             [*next_action.verification_plan, *template.default_verification_steps]
         )
+        implementation_plan = list(template.implementation_plan)
+        if next_action.receipt_scope:
+            implementation_plan.append(f"Respect receipt scope: {next_action.receipt_scope}")
+        resolved_implementation_plan = _dedupe_strings(implementation_plan)
+        resolved_failure_modes_to_avoid = _dedupe_strings(
+            [failure_mode.statement, *template.default_failure_modes_to_avoid]
+        )
 
         prompt = _build_prompt(
             template=template,
@@ -233,10 +247,12 @@ class WorkerPlanGenerator:
             owner_layer=next_action.owner_layer,
             objective=objective,
             prompt=prompt,
+            implementation_plan=resolved_implementation_plan,
             files_to_modify=resolved_files_to_modify,
             files_to_avoid=resolved_files_to_avoid,
             verification_steps=resolved_verification_steps,
             matched_rule_ids=(rule.rule_id, pattern.rule_id, failure_mode.rule_id),
+            failure_modes_to_avoid=resolved_failure_modes_to_avoid,
         )
 
 
@@ -271,6 +287,39 @@ CORTEX_RUNTIME_WORK_TEMPLATE = WorkerPlanTemplate(
     default_files_to_avoid=("repos/**", "apps/**", "packages/**"),
     documentation_summary="Cortex runtime work stays inside deterministic kernel and planner primitives.",
     default_verification_steps=("python -m unittest tests.test_cortex_worker_plan",),
+)
+
+
+CORTEX_WORKER_PROMPT_CONTRACT_TEMPLATE = WorkerPlanTemplate(
+    template_id="cortex_worker_prompt_contract",
+    objective="Promote the Cortex worker-prompt contract as a bounded advisory handoff surface.",
+    implementation_plan=(
+        "Keep the lane inside Cortex root-owned runtime modules and direct tests only.",
+        "Emit one _stack-consumable worker-prompt artifact without turning Cortex into an executor.",
+        "Preserve planner, context, proof, receipt-draft, and final receipt as separate surfaces linked by refs and digests.",
+    ),
+    default_files_to_modify=(
+        "ops/cortex/worker_plan.py",
+        "ops/cortex/worker_prompt.py",
+        "tests/test_cortex_worker_plan.py",
+        "tests/test_cortex_worker_prompt.py",
+    ),
+    default_files_to_avoid=(
+        "stack.yaml",
+        "repos/**",
+        "apps/**",
+        "packages/**",
+        "runtime/lifeline/**",
+    ),
+    documentation_summary=(
+        "The Cortex worker-prompt contract is advisory scaffolding for _stack consumers and does not grant execution, "
+        "receipt, or owner-truth authority."
+    ),
+    default_verification_steps=("python -m unittest tests.test_cortex_worker_prompt tests.test_cortex_worker_plan",),
+    default_failure_modes_to_avoid=(
+        "Do not treat the worker prompt as execution authority.",
+        "Do not collapse planner, context, proof, or receipt surfaces into one mutable truth store.",
+    ),
 )
 
 
