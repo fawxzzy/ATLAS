@@ -85,7 +85,7 @@ class CortexStackConsumptionPilotTests(unittest.TestCase):
         self.assertEqual("ready", payload["pilot_result"]["status"])
         self.assertTrue(payload["pilot_result"]["ready_for_stack_consumer"])
         self.assertEqual(
-            "pilot-cortex-worker-prompt-stack-consumption-wave7",
+            "promote-cortex-stack-consumer-default-routing-wave8",
             payload["next_recommended_lane"]["lane_id"],
         )
         self.assertEqual("runtime/cortex/worker-prompts/latest.json", payload["stack_handoff"]["worker_prompt_ref"])
@@ -112,7 +112,7 @@ class CortexStackConsumptionPilotTests(unittest.TestCase):
 
         self.assertEqual(json.dumps(payload), json.dumps(artifact.payload))
         self.assertIn("# Cortex Stack Consumption Pilot", summary)
-        self.assertIn("pilot-cortex-worker-prompt-stack-consumption-wave7", summary)
+        self.assertIn("promote-cortex-stack-consumer-default-routing-wave8", summary)
         self.assertIn("Pilot Checks", summary)
         self.assertIn("Transcript scraping", summary)
         self.assertIn("Execution authorized", summary)
