@@ -54,8 +54,8 @@ components:
     remote: "https://github.com/fawxzzy/fawxzzy-playbook.git"
     ref_type: "branch"
     ref: "codex/changelog-generator"
-    commit: "bbd2ae74036f70240f7d580fc6340857bf8fdb26"
-    dirty: true
+    commit: "118f7379c71d97c15fd047b0dfe28adecb9078da"
+    dirty: false
     trust_class: "trusted"
     release_eligible: true
   playbook-demo:
@@ -75,9 +75,9 @@ components:
     status: "active"
     remote: "https://github.com/fawxzzy/ATLAS.git"
     ref_type: "branch"
-    ref: "codex/cortex-stack-consumer-default-routing-wave8"
-    commit: "384e1390ffa0098c652ea7c643f0059315f02785"
-    dirty: true
+    ref: "codex/cortex-rail-seed-progression-r17"
+    commit: "d6eba7ebace4fcb607bc399ad07156cacf651826"
+    dirty: false
     trust_class: "trusted"
     release_eligible: false
   stream:
@@ -127,4 +127,4 @@ excluded_surfaces:
     trust_class: "untrusted"
     release_eligible: false
     reason: "Token-bearing Verta checkout remains quarantined and untrusted until scrub and rotation are complete."
-lock_digest: "sha256:34d37512decec9e5a1d3a2d3a4e50393e689712dbd4294ebd23229b9d3c4275c"
+lock_digest: "sha256:d85a7c2882c5232989d7793e9e83fc336cf70ecf7f3958c2a805dc562324cfbd"
