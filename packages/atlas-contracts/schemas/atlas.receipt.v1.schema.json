@@ -72,13 +72,15 @@
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "minLength": 1
     },
     "event_id": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "minLength": 1
     }
   },
   "$defs": {
@@ -102,7 +104,8 @@
           "type": [
             "string",
             "null"
-          ]
+          ],
+          "minLength": 1
         }
       }
     },
@@ -126,13 +129,15 @@
           "type": [
             "string",
             "null"
-          ]
+          ],
+          "minLength": 1
         },
         "summary": {
           "type": [
             "string",
             "null"
-          ]
+          ],
+          "minLength": 1
         }
       }
     },

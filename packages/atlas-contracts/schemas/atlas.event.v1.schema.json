@@ -123,13 +123,15 @@
           "type": [
             "string",
             "null"
-          ]
+          ],
+          "minLength": 1
         },
         "host": {
           "type": [
             "string",
             "null"
-          ]
+          ],
+          "minLength": 1
         }
       }
     },
@@ -153,13 +155,15 @@
           "type": [
             "string",
             "null"
-          ]
+          ],
+          "minLength": 1
         },
         "run_label": {
           "type": [
             "string",
             "null"
-          ]
+          ],
+          "minLength": 1
         }
       }
     },
@@ -197,7 +201,8 @@
           "type": [
             "string",
             "null"
-          ]
+          ],
+          "minLength": 1
         }
       }
     },
@@ -248,7 +253,8 @@
           "type": [
             "string",
             "null"
-          ]
+          ],
+          "minLength": 1
         }
       }
     },

@@ -16,10 +16,15 @@
     ".": "./src/index.ts",
     "./constants": "./src/constants.ts",
     "./schemas/atlas.env.v1": "./schemas/atlas.env.v1.schema.json",
+    "./schemas/atlas.env.v1.schema.json": "./schemas/atlas.env.v1.schema.json",
     "./schemas/atlas.app-registration.v1": "./schemas/atlas.app-registration.v1.schema.json",
+    "./schemas/atlas.app-registration.v1.schema.json": "./schemas/atlas.app-registration.v1.schema.json",
     "./schemas/atlas.health.v1": "./schemas/atlas.health.v1.schema.json",
+    "./schemas/atlas.health.v1.schema.json": "./schemas/atlas.health.v1.schema.json",
     "./schemas/atlas.event.v1": "./schemas/atlas.event.v1.schema.json",
-    "./schemas/atlas.receipt.v1": "./schemas/atlas.receipt.v1.schema.json"
+    "./schemas/atlas.event.v1.schema.json": "./schemas/atlas.event.v1.schema.json",
+    "./schemas/atlas.receipt.v1": "./schemas/atlas.receipt.v1.schema.json",
+    "./schemas/atlas.receipt.v1.schema.json": "./schemas/atlas.receipt.v1.schema.json"
   },
   "scripts": {
     "validate": "node scripts/validate-contracts.mjs"
