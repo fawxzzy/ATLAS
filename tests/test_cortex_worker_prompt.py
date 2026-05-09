@@ -353,7 +353,7 @@ class CortexWorkerPromptTests(unittest.TestCase):
         self.assertEqual("read_only_advisory", payload["authority_level"])
         self.assertEqual("promote-cortex-receipt-interpretation-contract-wave9", payload["next_recommended_lane"]["lane_id"])
         self.assertEqual("context-promote-cortex-receipt-interpretation-contract-wave9", payload["context_packet_id"])
-        self.assertEqual("cortex_runtime_work", payload["planner_contract"]["template_id"])
+        self.assertEqual("cortex_receipt_interpretation_contract", payload["planner_contract"]["template_id"])
         self.assertIn("implementation_plan", payload["planner_contract"])
         self.assertIn("failure_modes_to_avoid", payload["planner_contract"])
         self.assertEqual("assignment-promote-cortex-receipt-interpretation-contract-wave9", payload["assignment_id"])

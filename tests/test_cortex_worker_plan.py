@@ -160,6 +160,39 @@ class CortexWorkerPlanTests(unittest.TestCase):
             plan.implementation_plan,
         )
 
+    def test_receipt_interpretation_next_action_produces_dedicated_template(self) -> None:
+        posture, rail_state, next_action = self._with_state(
+            posture=replace(self.posture, classification="pivoted"),
+            rail_state=replace(
+                self.posture.rail_state,
+                owner_layer="cortex",
+                next_action=replace(
+                    self.posture.rail_state.next_action,
+                    action_id="promote-cortex-receipt-interpretation-contract-wave9",
+                    owner_layer="cortex",
+                    title="Promote Cortex receipt interpretation contract.",
+                    rationale="Cortex needs one read-only receipt interpretation surface.",
+                    receipt_scope=(
+                        "Cortex may interpret explicit receipt artifacts and summarize proof posture only. "
+                        "Cortex must not issue final receipts, approve work, mutate owner truth, or replace Lifeline receipt authority."
+                    ),
+                    verification_plan=(
+                        "python -m unittest tests.test_cortex_receipt_interpreter tests.test_cortex_worker_plan",
+                    ),
+                ),
+            ),
+        )
+
+        plan = build_worker_plan(posture, rail_state, next_action, self.rules)
+
+        self.assertEqual("cortex_receipt_interpretation_contract", plan.template_id)
+        self.assertIn("receipt interpretation", plan.prompt.lower())
+        self.assertIn("ops/cortex/receipt_interpreter.py", plan.files_to_modify)
+        self.assertIn("schemas/atlas.cortex.receipt-interpretation.v1.json", plan.files_to_modify)
+        self.assertIn("runtime/lifeline/**", plan.files_to_avoid)
+        self.assertIn("Do not issue final receipts.", plan.failure_modes_to_avoid)
+        self.assertIn("Do not scrape transcripts.", plan.failure_modes_to_avoid)
+
     def test_fitness_owner_adoption_next_action_produces_fitness_scoped_prompt(self) -> None:
         posture, rail_state, next_action = self._with_state(
             posture=replace(self.posture, classification="steady"),
