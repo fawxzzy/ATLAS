@@ -76,7 +76,7 @@ components:
     remote: "https://github.com/fawxzzy/ATLAS.git"
     ref_type: "branch"
     ref: "codex/cortex-receipt-interpretation-contract-wave9"
-    commit: "27f8b111f38d08dd09c950a56929a9c9ca5a20b6"
+    commit: "105f36bde924419d77f7605d17378a159880944e"
     dirty: false
     trust_class: "trusted"
     release_eligible: false
@@ -127,4 +127,4 @@ excluded_surfaces:
     trust_class: "untrusted"
     release_eligible: false
     reason: "Token-bearing Verta checkout remains quarantined and untrusted until scrub and rotation are complete."
-lock_digest: "sha256:6d6cf426c42874d0dd6c51dcd320f854b5a919f843b66eb1aa3f215dea4f8880"
+lock_digest: "sha256:1694e758137150ad204bd68f0c0cc853a56cc35bd1d529c9f9c4e912e21bd8de"
