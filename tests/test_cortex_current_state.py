@@ -108,7 +108,7 @@ class CortexCurrentStateTests(unittest.TestCase):
         self.assertIn("missing-codex-config", blocker_codes)
         self.assertIn("dirty-worktree", blocker_codes)
         self.assertEqual("stabilize-stack-validation", payload["next_recommended_lane"]["lane_id"])
-        self.assertEqual("cortex-worker-prompt-stack-consumption-pilot-v0-1", payload["latest_clean_step"]["step_id"])
+        self.assertEqual("cortex-stack-consumer-default-routing-v0-1", payload["latest_clean_step"]["step_id"])
         self.assertEqual("unpublished_ahead_of_origin", payload["remote_publication_state"]["status"])
 
     def test_clean_inputs_route_to_seeded_cortex_lane(self) -> None:
@@ -143,9 +143,9 @@ class CortexCurrentStateTests(unittest.TestCase):
         )
 
         self.assertEqual([], payload["active_blockers"])
-        self.assertEqual("promote-cortex-stack-consumer-default-routing-wave8", payload["next_recommended_lane"]["lane_id"])
+        self.assertEqual("promote-cortex-receipt-interpretation-contract-wave9", payload["next_recommended_lane"]["lane_id"])
         self.assertEqual("cortex", payload["next_recommended_lane"]["owner_layer"])
-        self.assertEqual("cortex-worker-prompt-stack-consumption-pilot-v0-1", payload["latest_clean_step"]["step_id"])
+        self.assertEqual("cortex-stack-consumer-default-routing-v0-1", payload["latest_clean_step"]["step_id"])
         self.assertEqual("in_sync", payload["remote_publication_state"]["status"])
 
     def test_persist_writes_latest_json_and_markdown(self) -> None:
@@ -177,7 +177,7 @@ class CortexCurrentStateTests(unittest.TestCase):
         self.assertEqual(artifact.payload["head"], payload["head"])
         self.assertEqual("atlas.cortex.current-state.v1", payload["contract_version"])
         self.assertIn("# Cortex Current State", summary)
-        self.assertIn("promote-cortex-stack-consumer-default-routing-wave8", summary)
+        self.assertIn("promote-cortex-receipt-interpretation-contract-wave9", summary)
 
     def test_cli_fails_clearly_when_validation_receipt_is_missing(self) -> None:
         temp_dir = tempfile.TemporaryDirectory()

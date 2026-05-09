@@ -95,7 +95,7 @@ class CortexStackAdvisoryHandoffTests(unittest.TestCase):
         }
         payload["validation_counts"] = dict(payload["validation_receipt"]["counts"])
         payload["next_recommended_lane"] = {
-            "lane_id": "promote-cortex-stack-consumer-default-routing-wave8",
+            "lane_id": "promote-cortex-receipt-interpretation-contract-wave9",
             "owner_layer": "cortex",
             "rationale": "Cortex should promote one canonical advisory handoff envelope for _stack consumption.",
             "blocked_by": [],
@@ -111,7 +111,7 @@ class CortexStackAdvisoryHandoffTests(unittest.TestCase):
         payload["generated_at"] = "2026-05-07T17:02:00+00:00"
         payload["rail_status"] = "ready"
         payload["active_blockers"] = []
-        payload["dirty_lanes"] = ["cortex-stack-consumer-default-routing-v0-1"]
+        payload["dirty_lanes"] = ["cortex-receipt-interpretation-contract-v0-1"]
         payload["validation_posture"] = {
             "status": "ambient-debt-only",
             "counts": {
@@ -125,7 +125,7 @@ class CortexStackAdvisoryHandoffTests(unittest.TestCase):
             "receipt_path": "runtime/receipts/validation/stack-validation.latest.json",
         }
         payload["next_recommended_lane"] = {
-            "lane_id": "promote-cortex-stack-consumer-default-routing-wave8",
+            "lane_id": "promote-cortex-receipt-interpretation-contract-wave9",
             "owner_layer": "cortex",
             "rationale": "Cortex should promote one canonical advisory handoff envelope for _stack consumption.",
             "blocked_by": [],
@@ -140,8 +140,8 @@ class CortexStackAdvisoryHandoffTests(unittest.TestCase):
     def _base_context_payload(self) -> dict:
         payload = deepcopy(self.context_payload)
         payload["generated_at"] = "2026-05-07T17:03:00+00:00"
-        payload["packet_id"] = "context-promote-cortex-stack-consumer-default-routing-wave8"
-        payload["task_frame"]["lane_id"] = "promote-cortex-stack-consumer-default-routing-wave8"
+        payload["packet_id"] = "context-promote-cortex-receipt-interpretation-contract-wave9"
+        payload["task_frame"]["lane_id"] = "promote-cortex-receipt-interpretation-contract-wave9"
         payload["task_frame"]["owner_layer"] = "cortex"
         payload["task_frame"]["title"] = "Promote Cortex _stack consumer default routing."
         payload["task_frame"]["status"] = "ready"
@@ -153,9 +153,9 @@ class CortexStackAdvisoryHandoffTests(unittest.TestCase):
         payload["generated_at"] = "2026-05-07T17:04:00+00:00"
         payload["rail_status"] = "ready"
         payload["active_blockers"] = []
-        payload["dirty_lanes"] = ["cortex-stack-consumer-default-routing-v0-1"]
+        payload["dirty_lanes"] = ["cortex-receipt-interpretation-contract-v0-1"]
         payload["next_recommended_lane"] = {
-            "lane_id": "promote-cortex-stack-consumer-default-routing-wave8",
+            "lane_id": "promote-cortex-receipt-interpretation-contract-wave9",
             "owner_layer": "cortex",
             "rationale": "Cortex should promote one canonical advisory handoff envelope for _stack consumption.",
             "blocked_by": [],
@@ -165,8 +165,8 @@ class CortexStackAdvisoryHandoffTests(unittest.TestCase):
                 "runtime/cortex/kernel.rule-registry.seed.v1.json",
             ],
         }
-        payload["context_packet_id"] = "context-promote-cortex-stack-consumer-default-routing-wave8"
-        payload["task_frame_summary"]["lane_id"] = "promote-cortex-stack-consumer-default-routing-wave8"
+        payload["context_packet_id"] = "context-promote-cortex-receipt-interpretation-contract-wave9"
+        payload["task_frame_summary"]["lane_id"] = "promote-cortex-receipt-interpretation-contract-wave9"
         payload["task_frame_summary"]["owner_layer"] = "cortex"
         payload["task_frame_summary"]["title"] = "Promote Cortex _stack consumer default routing."
         payload["task_frame_summary"]["status"] = "ready"
@@ -176,13 +176,13 @@ class CortexStackAdvisoryHandoffTests(unittest.TestCase):
     def _base_ledger_payload(self) -> dict:
         payload = deepcopy(self.ledger_payload)
         payload["generated_at"] = "2026-05-07T17:05:00+00:00"
-        payload["ledger_id"] = "ledger-promote-cortex-stack-consumer-default-routing-wave8"
+        payload["ledger_id"] = "ledger-promote-cortex-receipt-interpretation-contract-wave9"
         payload["rail_status"] = "ready"
         payload["active_blockers"] = []
-        payload["dirty_lanes"] = ["cortex-stack-consumer-default-routing-v0-1"]
+        payload["dirty_lanes"] = ["cortex-receipt-interpretation-contract-v0-1"]
         payload["worktree_status"] = "clean"
         payload["next_recommended_lane"] = {
-            "lane_id": "promote-cortex-stack-consumer-default-routing-wave8",
+            "lane_id": "promote-cortex-receipt-interpretation-contract-wave9",
             "owner_layer": "cortex",
             "rationale": "Cortex should promote one canonical advisory handoff envelope for _stack consumption.",
             "blocked_by": [],
@@ -196,8 +196,8 @@ class CortexStackAdvisoryHandoffTests(unittest.TestCase):
                 "runtime/cortex/kernel.rule-registry.seed.v1.json",
             ],
         }
-        payload["context_packet_id"] = "context-promote-cortex-stack-consumer-default-routing-wave8"
-        payload["task_frame_summary"]["lane_id"] = "promote-cortex-stack-consumer-default-routing-wave8"
+        payload["context_packet_id"] = "context-promote-cortex-receipt-interpretation-contract-wave9"
+        payload["task_frame_summary"]["lane_id"] = "promote-cortex-receipt-interpretation-contract-wave9"
         payload["task_frame_summary"]["owner_layer"] = "cortex"
         payload["task_frame_summary"]["title"] = "Promote Cortex _stack consumer default routing."
         payload["task_frame_summary"]["status"] = "ready"
@@ -238,7 +238,7 @@ class CortexStackAdvisoryHandoffTests(unittest.TestCase):
         self.assertFalse(payload["routing_contract"]["owner_truth_mutation_authorized"])
         self.assertFalse(payload["routing_contract"]["transcript_scraping_allowed"])
         self.assertEqual(
-            "promote-cortex-stack-consumer-default-routing-wave8",
+            "promote-cortex-receipt-interpretation-contract-wave9",
             payload["next_recommended_lane"]["lane_id"],
         )
         self.assertEqual("ready", payload["handoff_result"]["status"])
@@ -259,7 +259,7 @@ class CortexStackAdvisoryHandoffTests(unittest.TestCase):
 
         self.assertEqual(json.dumps(payload), json.dumps(artifact.payload))
         self.assertIn("# Cortex Stack Advisory Handoff", summary)
-        self.assertIn("promote-cortex-stack-consumer-default-routing-wave8", summary)
+        self.assertIn("promote-cortex-receipt-interpretation-contract-wave9", summary)
         self.assertIn("_stack", summary)
         self.assertIn("artifact_refs_only", summary)
         self.assertIn("automatic dispatch", summary.lower())

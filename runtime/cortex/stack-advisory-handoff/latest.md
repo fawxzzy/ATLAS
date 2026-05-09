@@ -1,11 +1,11 @@
 # Cortex Stack Advisory Handoff
 
-- Generated: `2026-05-07T17:45:16.984666+00:00`
-- Handoff id: `stack-advisory-handoff-stabilize-stack-validation`
+- Generated: `2026-05-07T18:34:35.738780+00:00`
+- Handoff id: `stack-advisory-handoff-promote-cortex-receipt-interpretation-contract-wave9`
 - Authority level: `read_only_advisory`
 - Consumer: `_stack`
 - Consumption mode: `artifact_refs_only`
-- Next recommended lane: `stabilize-stack-validation` (atlas)
+- Next recommended lane: `promote-cortex-receipt-interpretation-contract-wave9` (cortex)
 - Handoff status: `ready`
 - Ready for _stack consumer: `yes`
 - Routing mode: `explicit_artifact_ref_handoff`
@@ -43,5 +43,8 @@
 - `runtime/receipts/validation/stack-validation.latest.json`
 - `runtime/cortex/kernel.proof-summary.examples.v1.json`
 - `stack.lock.yaml`
+- `runtime/cortex/stack-advisory-handoff/latest.json`
+- `runtime/cortex/stack-consumption-pilot/latest.json`
+- `docs/architecture/ATLAS-CORTEX-PLAYBOOK-CODEX.md`
 - `runtime/cortex/worker-prompts/latest.json#/planner_contract`
 - `runtime/cortex/worker-prompts/latest.json#/receipt_draft_preview`

@@ -3,7 +3,7 @@
   "posture": {
     "posture_id": "cortex-wave1-landed",
     "classification": "pivoted",
-    "summary": "Cortex current-state, rail-state, context assembly, operator surface, canonical ledger, worker-prompt contract, and bounded _stack stack-consumption pilot are landed; the active product lane remains Cortex, and the next tranche is promoting default _stack consumer routing while known stack validation debt stays ambient debt.",
+    "summary": "Cortex current-state, rail-state, context assembly, operator surface, canonical ledger, worker-prompt contract, canonical stack advisory handoff v2, and bounded _stack stack-consumption pilot proof are landed; the active product lane remains Cortex, the next tranche is receipt interpretation, and known stack validation debt stays ambient debt.",
     "handoff_summaries": [
       "docs/atlas/notes/cortex-priority-pivot-2026-04-26.md",
       "docs/atlas/notes/cortex-mvp-spec-2026-04-26.md",
@@ -22,44 +22,48 @@
       "rail_id": "cortex-mvp",
       "owner_layer": "cortex",
       "latest_clean_step": {
-        "step_id": "cortex-worker-prompt-stack-consumption-pilot-v0-1",
+        "step_id": "cortex-stack-consumer-default-routing-v0-1",
         "owner_layer": "cortex",
-        "summary": "Wave 7 landed the bounded _stack stack-consumption pilot as an artifact-ref-only proof that does not scrape transcripts, dispatch execution, mutate owner truth, enable default routing, or change receipt authority.",
+        "summary": "Wave 8 landed the canonical Cortex -> _stack stack-advisory-handoff v2 contract as explicit artifact-ref handoff only; it preserved read-only advisory authority, did not enable automatic dispatch, did not grant execution or receipt authority, did not mutate owner truth, and did not scrape transcripts.",
         "status": "clean",
         "evidence": [
+          "ops/cortex/stack_handoff.py",
           "ops/cortex/stack_consumption_pilot.py",
           "ops/cortex/worker_plan.py",
+          "schemas/atlas.cortex.stack-advisory-handoff.v2.json",
+          "runtime/cortex/stack-advisory-handoff/latest.json",
+          "runtime/cortex/stack-advisory-handoff/latest.md",
           "runtime/cortex/stack-consumption-pilot/latest.json",
-          "runtime/cortex/worker-prompts/latest.json",
+          "tests/test_cortex_stack_handoff.py",
           "tests/test_cortex_stack_consumption_pilot.py",
-          "tests/test_cortex_worker_plan.py"
+          "tests/test_cortex_worker_plan.py",
+          "docs/architecture/ATLAS-CORTEX-PLAYBOOK-CODEX.md"
         ],
         "source_inputs": [
-          "Wave 7 stack-consumption pilot artifact",
-          "targeted unittest proof"
+          "PR #17 Add Cortex stack advisory handoff",
+          "targeted Cortex unittest proof",
+          "stack validation receipt critical=0 error=0 warning=531 info=0"
         ],
         "completed_at": "2026-05-07"
       },
       "dirty_lanes": [
         {
-          "lane_id": "cortex-stack-consumer-default-routing-v0-1",
+          "lane_id": "cortex-receipt-interpretation-contract-v0-1",
           "owner_layer": "cortex",
-          "summary": "Cortex can now prove bounded _stack artifact consumption, but it still needs one promoted default consumer routing contract that remains explicit, read-only, and non-authoritative.",
+          "summary": "Cortex now has canonical advisory handoff into _stack, but it still needs a bounded receipt interpretation contract that reads explicit worker, _stack, and Lifeline receipt artifacts and emits interpreted proof summaries without issuing final receipts or changing Lifeline authority.",
           "status": "open",
-          "blocking_reason": "Wave 8 still needs a default _stack consumer routing contract before Cortex artifact consumption can become a normal routed path; execution, owner-truth mutation, and Lifeline receipt authority remain out of scope.",
+          "blocking_reason": "Wave 9 still needs a read-only receipt interpretation contract before Cortex can summarize what changed, what proved, and what remains blocked from execution receipts. Lifeline final receipt authority remains out of scope.",
           "evidence": [
-            "docs/atlas/notes/cortex-surface-reconciliation-2026-05-06.md",
-            "runtime/cortex/current-state/latest.json",
-            "runtime/cortex/rail-state/latest.json",
-            "runtime/cortex/context/latest.json",
-            "runtime/cortex/operator-surface/latest.json",
-            "runtime/cortex/ledger/latest.json",
+            "runtime/cortex/stack-advisory-handoff/latest.json",
+            "runtime/cortex/stack-consumption-pilot/latest.json",
             "runtime/cortex/worker-prompts/latest.json",
-            "runtime/cortex/stack-consumption-pilot/latest.json"
+            "runtime/cortex/ledger/latest.json",
+            "docs/architecture/ATLAS-CORTEX-PLAYBOOK-CODEX.md"
           ],
           "source_inputs": [
-            "Wave 7 stack-consumption pilot artifact",
-            "Cortex worker-prompt and stack-consumption lanes"
+            "Wave 8 stack-advisory-handoff artifact",
+            "Wave 8 stack-consumption-pilot proof",
+            "Cortex worker-prompt and ledger artifacts"
           ]
         }
       ],
@@ -67,24 +71,26 @@
         {
           "status": "completed_with_known_debt",
           "passed": [
-            "Wave 7 stack-consumption pilot is tracked as an advisory Cortex artifact.",
-            "python -m unittest tests.test_cortex_stack_consumption_pilot is green for artifact-ref-only _stack consumption."
+            "Wave 8 stack-advisory-handoff v2 is tracked as the canonical Cortex artifact.",
+            "The stack-consumption pilot proves the canonical advisory handoff.",
+            "Targeted Cortex suites are green.",
+            "python .\\ops\\validation\\validate_stack.py is critical=0 error=0."
           ],
           "failed": [],
           "known_debt": [
-            "Existing stack validation debt remains outside the active Cortex tranche."
+            "warning=531 remains ambient ATLAS root debt outside this Cortex seed-progression lane."
           ],
           "notes": [
-            "Do not classify unchanged stack debt as a new Cortex regression.",
-            "Wave 8 should promote routing intent without turning Cortex into _stack authority, Lifeline receipt authority, or owner truth."
+            "Do not classify unchanged warning debt as a Cortex regression.",
+            "Wave 9 should implement receipt interpretation only as read-only interpretation, not Lifeline final receipt authority."
           ]
         }
       ],
       "next_action": {
-        "action_id": "promote-cortex-stack-consumer-default-routing-wave8",
+        "action_id": "promote-cortex-receipt-interpretation-contract-wave9",
         "owner_layer": "cortex",
-        "title": "Promote Cortex _stack consumer default routing.",
-        "rationale": "The bounded _stack stack-consumption pilot is landed, but Cortex still needs one promoted default _stack consumer routing contract that consumes explicit Cortex worker-prompt, context, operator, ledger, and pilot artifacts without transcript scraping, execution authority, owner-truth mutation, or Lifeline receipt authority.",
+        "title": "Promote Cortex receipt interpretation contract.",
+        "rationale": "Cortex now emits worker prompts, a canonical stack advisory handoff, and a stack-consumption pilot proof. The next bounded contract is receipt interpretation: reading explicit worker, _stack, and Lifeline receipt artifacts and emitting deterministic interpreted proof summaries without executing work, approving work, mutating owner truth, or issuing final receipts.",
         "required_inputs": [
           "runtime/cortex/current-state/latest.json",
           "runtime/cortex/rail-state/latest.json",
@@ -92,16 +98,18 @@
           "runtime/cortex/operator-surface/latest.json",
           "runtime/cortex/ledger/latest.json",
           "runtime/cortex/worker-prompts/latest.json",
+          "runtime/cortex/stack-advisory-handoff/latest.json",
           "runtime/cortex/stack-consumption-pilot/latest.json",
           "runtime/cortex/kernel.state-model.seed.v1.json",
           "runtime/cortex/kernel.rule-registry.seed.v1.json",
-          "docs/atlas/notes/cortex-surface-reconciliation-2026-05-06.md"
+          "runtime/receipts/validation/stack-validation.latest.json",
+          "docs/architecture/ATLAS-CORTEX-PLAYBOOK-CODEX.md"
         ],
         "verification_plan": [
-          "python -m unittest tests.test_cortex_stack_consumption_pilot tests.test_cortex_worker_prompt tests.test_cortex_worker_plan tests.test_cortex_current_state tests.test_cortex_rail_state_reader tests.test_cortex_context_assembler tests.test_cortex_operator_surface tests.test_cortex_ledger tests.test_cortex_loop tests.test_cortex_run_artifact tests.test_cortex_run_ledger",
+          "python -m unittest tests.test_cortex_stack_handoff tests.test_cortex_stack_consumption_pilot tests.test_cortex_worker_prompt tests.test_cortex_worker_plan tests.test_cortex_current_state tests.test_cortex_rail_state_reader tests.test_cortex_context_assembler tests.test_cortex_operator_surface tests.test_cortex_ledger tests.test_cortex_loop tests.test_cortex_run_artifact tests.test_cortex_run_ledger -v",
           "python .\\ops\\validation\\validate_stack.py"
         ],
-        "receipt_scope": "Cortex should promote default _stack consumer routing only as an explicit artifact-ref routing contract; execution, owner-truth mutation, and Lifeline final receipt authority stay out of scope."
+        "receipt_scope": "Cortex may interpret explicit receipt artifacts and summarize proof posture only. Cortex must not issue final receipts, approve work, mutate owner truth, or replace Lifeline receipt authority."
       },
       "boundary_reminders": [
         "Fitness owns product UI truth.",
