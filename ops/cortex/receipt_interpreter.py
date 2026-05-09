@@ -164,41 +164,68 @@ def _guard_widened(value: dict[str, Any], *keys: str) -> bool:
     return any(bool(value.get(key)) for key in keys)
 
 
-def _final_receipt_owner_claim(payload: dict[str, Any]) -> str:
-    candidates: list[str] = []
-    for key in ("final_receipt_owner", "owner", "prepared_by"):
-        value = payload.get(key)
-        if isinstance(value, str):
-            candidates.append(value)
+def _owner_field_values(payload: dict[str, Any], field_name: str) -> list[str]:
+    values: list[str] = []
+    for container in (payload, _dict(payload.get("boundary"))):
+        value = _string(container.get(field_name)).lower()
+        if value:
+            values.append(value)
+    return values
+
+
+def _owner_field_means_receipt_ownership(payload: dict[str, Any]) -> bool:
+    contract_version = _string(payload.get("contract_version") or payload.get("schema_version")).lower()
+    if "receipt" in contract_version:
+        return True
+    if _string(payload.get("receipt_id")):
+        return True
+    if "final_receipt_written" in payload:
+        return True
     boundary = _dict(payload.get("boundary"))
-    for key in ("final_receipt_owner", "owner", "prepared_by"):
-        value = boundary.get(key)
-        if isinstance(value, str):
-            candidates.append(value)
-    return " ".join(candidates).lower()
+    return any(key in boundary for key in ("final_receipt_owner", "owner", "prepared_by", "statement"))
 
 
-def _receipt_observation_for_candidate(ref: str, payload: dict[str, Any]) -> dict[str, Any] | None:
+def _classify_final_receipt_owner(payload: dict[str, Any]) -> str:
+    final_receipt_owners = _owner_field_values(payload, "final_receipt_owner")
+    if "cortex" in final_receipt_owners:
+        return "cortex"
+    if "lifeline" in final_receipt_owners:
+        return "lifeline"
+
+    owner_values = _owner_field_values(payload, "owner")
+    if "cortex" in owner_values and _owner_field_means_receipt_ownership(payload):
+        return "cortex"
+    if "lifeline" in owner_values and _owner_field_means_receipt_ownership(payload):
+        return "lifeline"
+    return "unknown"
+
+
+def _receipt_observation_for_candidate(ref: str, payload: dict[str, Any]) -> tuple[dict[str, Any] | None, bool]:
+    if _classify_final_receipt_owner(payload) == "cortex":
+        return None, True
     if payload.get("contract_version") != LIFELINE_RECEIPT_CANDIDATE_CONTRACT_VERSION:
-        return None
+        return None, False
     if payload.get("final_receipt_owner") != "lifeline":
-        return None
+        return None, False
     if payload.get("final_receipt_written") is not False:
-        return None
-    return {
-        "role": "lifeline_receipt_candidate",
-        "ref": ref,
-        "contract_version": LIFELINE_RECEIPT_CANDIDATE_CONTRACT_VERSION,
-        "digest": stable_json_digest(payload),
-        "summary": "Cortex observed a Lifeline-owned receipt candidate; no final receipt was written by Cortex.",
-    }
+        return None, False
+    return (
+        {
+            "role": "lifeline_receipt_candidate",
+            "ref": ref,
+            "contract_version": LIFELINE_RECEIPT_CANDIDATE_CONTRACT_VERSION,
+            "digest": stable_json_digest(payload),
+            "summary": "Cortex observed a Lifeline-owned receipt candidate; no final receipt was written by Cortex.",
+        },
+        False,
+    )
 
 
 def _receipt_observation_for_explicit(ref: str, payload: dict[str, Any]) -> tuple[dict[str, Any] | None, bool]:
-    owner_claim = _final_receipt_owner_claim(payload)
-    if "cortex" in owner_claim and "lifeline" not in owner_claim:
+    final_receipt_owner = _classify_final_receipt_owner(payload)
+    if final_receipt_owner == "cortex":
         return None, True
-    if "lifeline" not in owner_claim:
+    if final_receipt_owner != "lifeline":
         return None, False
     return (
         {
@@ -264,12 +291,13 @@ def build_receipt_interpretation_payload(
     ]
 
     receipt_observations: list[dict[str, Any]] = []
-    explicit_cortex_owner_claim = False
+    cortex_final_receipt_authority_claimed = False
     candidate_payload = _optional_json_object(resolved_candidate)
     if candidate_payload is not None:
         candidate_ref = atlas_relative(resolved_candidate, root=base)
         artifact_inputs.append(_artifact_input(candidate_ref, "lifeline_receipt_candidate", candidate_payload))
-        candidate_observation = _receipt_observation_for_candidate(candidate_ref, candidate_payload)
+        candidate_observation, candidate_cortex_claim = _receipt_observation_for_candidate(candidate_ref, candidate_payload)
+        cortex_final_receipt_authority_claimed = cortex_final_receipt_authority_claimed or candidate_cortex_claim
         if candidate_observation is not None:
             receipt_observations.append(candidate_observation)
 
@@ -279,7 +307,7 @@ def build_receipt_interpretation_payload(
         receipt_ref = atlas_relative(resolved_receipt, root=base)
         artifact_inputs.append(_artifact_input(receipt_ref, "explicit_receipt", receipt_payload))
         observation, cortex_claim = _receipt_observation_for_explicit(receipt_ref, receipt_payload)
-        explicit_cortex_owner_claim = explicit_cortex_owner_claim or cortex_claim
+        cortex_final_receipt_authority_claimed = cortex_final_receipt_authority_claimed or cortex_claim
         if observation is not None:
             receipt_observations.append(observation)
 
@@ -344,8 +372,8 @@ def build_receipt_interpretation_payload(
         ),
         _check(
             "cortex-final-receipt-authority-absent",
-            not explicit_cortex_owner_claim,
-            "Observed receipt artifacts do not claim Cortex as final receipt owner.",
+            not cortex_final_receipt_authority_claimed,
+            "Consumed receipt-like artifacts do not claim Cortex as final receipt owner.",
         ),
     ]
     ready = all(check["status"] == "passed" for check in checks)
@@ -372,8 +400,8 @@ def build_receipt_interpretation_payload(
             "No final Lifeline receipt artifact observed; Cortex interpretation remains advisory."
             if not receipt_observations
             else "",
-            "Cortex final receipt authority was claimed by an explicit receipt artifact."
-            if explicit_cortex_owner_claim
+            "Cortex final receipt authority was claimed by a consumed receipt-like artifact."
+            if cortex_final_receipt_authority_claimed
             else "",
         ]
     )
