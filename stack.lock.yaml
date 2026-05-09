@@ -55,7 +55,7 @@ components:
     ref_type: "branch"
     ref: "codex/workflow-pack-environment-bridge-engine"
     commit: "0dad28cb553df5bfad43a4d3012234f210805929"
-    dirty: false
+    dirty: true
     trust_class: "trusted"
     release_eligible: true
   playbook-demo:
@@ -76,7 +76,7 @@ components:
     remote: "https://github.com/fawxzzy/ATLAS.git"
     ref_type: "branch"
     ref: "codex/cortex-receipt-interpretation-contract-wave9"
-    commit: "105f36bde924419d77f7605d17378a159880944e"
+    commit: "748100502636a65db9ad471f32b66987830daab4"
     dirty: false
     trust_class: "trusted"
     release_eligible: false
@@ -127,4 +127,4 @@ excluded_surfaces:
     trust_class: "untrusted"
     release_eligible: false
     reason: "Token-bearing Verta checkout remains quarantined and untrusted until scrub and rotation are complete."
-lock_digest: "sha256:1694e758137150ad204bd68f0c0cc853a56cc35bd1d529c9f9c4e912e21bd8de"
+lock_digest: "sha256:f8b3a194f97889602570a4f9a00dff207ae561cccfd30bf1b05f5b0c1b6bd795"
