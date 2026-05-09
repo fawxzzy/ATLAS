@@ -139,6 +139,8 @@ def _select_template(posture: CortexPosture, next_action: NextAction) -> WorkerP
         return CORTEX_STACK_CONSUMPTION_PILOT_TEMPLATE
     if next_action.action_id == "promote-cortex-stack-consumer-default-routing-wave8":
         return CORTEX_STACK_ADVISORY_HANDOFF_CONTRACT_TEMPLATE
+    if next_action.action_id == "promote-cortex-receipt-interpretation-contract-wave9":
+        return CORTEX_RECEIPT_INTERPRETATION_CONTRACT_TEMPLATE
     if next_action.owner_layer == "cortex" or "cortex runtime" in action_text or "runtime work" in action_text:
         return CORTEX_RUNTIME_WORK_TEMPLATE
 
@@ -401,6 +403,48 @@ CORTEX_STACK_ADVISORY_HANDOFF_CONTRACT_TEMPLATE = WorkerPlanTemplate(
         "Do not enable automatic dispatch or treat the default consumer as execution authority.",
         "Do not collapse worker prompt, context, proof, pilot, or receipt surfaces into one mutable truth store.",
         "Do not give Cortex final receipt authority or scrape transcripts.",
+    ),
+)
+
+
+CORTEX_RECEIPT_INTERPRETATION_CONTRACT_TEMPLATE = WorkerPlanTemplate(
+    template_id="cortex_receipt_interpretation_contract",
+    objective="Promote the Cortex receipt interpretation contract as a read-only proof-summary surface without replacing Lifeline receipt authority.",
+    implementation_plan=(
+        "Add one read-only receipt interpretation artifact that consumes explicit Cortex, _stack, validation, and Lifeline receipt-like artifacts.",
+        "Emit deterministic proof summaries for what changed, what proved, and what remains blocked without issuing final receipts.",
+        "Block interpretation when validation, handoff, pilot, or final-receipt authority guards are widened.",
+    ),
+    default_files_to_modify=(
+        "ops/cortex/receipt_interpreter.py",
+        "ops/cortex/worker_plan.py",
+        "schemas/atlas.cortex.receipt-interpretation.v1.json",
+        "tests/test_cortex_receipt_interpreter.py",
+        "tests/test_cortex_worker_plan.py",
+        "tests/test_cortex_worker_prompt.py",
+    ),
+    default_files_to_avoid=(
+        "stack.yaml",
+        "repos/**",
+        "apps/**",
+        "packages/**",
+        "runtime/lifeline/**",
+        "runtime/atlas/conversations/**",
+        "runtime/atlas/sessions/**",
+    ),
+    documentation_summary=(
+        "Cortex receipt interpretation summarizes explicit receipt and proof posture only; Lifeline remains final receipt authority."
+    ),
+    default_verification_steps=(
+        "python -m unittest tests.test_cortex_receipt_interpreter tests.test_cortex_worker_prompt tests.test_cortex_worker_plan",
+    ),
+    default_failure_modes_to_avoid=(
+        "Do not issue final receipts.",
+        "Do not approve work.",
+        "Do not mutate Lifeline truth or owner truth.",
+        "Do not treat receipt interpretation as execution authority.",
+        "Do not scrape transcripts.",
+        "Do not collapse receipt candidate, proof summary, final receipt, and interpretation into one mutable truth store.",
     ),
 )
 

@@ -108,6 +108,8 @@ The active Cortex surface lives under `runtime/cortex/**`. It is not a repo-loca
 
 CORTEX may promote a default advisory consumer contract for `_stack`, but only as an explicit artifact-ref handoff. That does not grant automatic dispatch, execution authority, owner-truth mutation, transcript scraping, or Lifeline final receipt authority.
 
+CORTEX may interpret explicit receipt artifacts and summarize proof posture, but Lifeline remains final receipt authority. Cortex receipt interpretation must not approve work, issue final receipts, mutate owner truth, execute work, dispatch `_stack` work, or scrape transcripts.
+
 ### Playbook -> Codex
 
 Playbook may provide:
