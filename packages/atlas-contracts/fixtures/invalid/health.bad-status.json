@@ -1,0 +1,12 @@
+{
+  "contract_version": "atlas.health.v1",
+  "repo_id": "trove",
+  "app_id": "fawxzzy-trove",
+  "checked_at": "2026-05-07T12:00:00Z",
+  "status": "green",
+  "environment": "preview",
+  "version": "1.2.3",
+  "commit": "9ce397e893e4007afbe93366770867ed64f66500",
+  "checks": [],
+  "receipts": []
+}

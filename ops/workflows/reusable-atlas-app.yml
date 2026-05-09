@@ -1,0 +1,131 @@
+name: reusable-atlas-app
+
+on:
+  workflow_call:
+    inputs:
+      repo_id:
+        description: Canonical ATLAS repo id.
+        required: true
+        type: string
+      app_id:
+        description: Canonical ATLAS app id.
+        required: true
+        type: string
+      repo_class:
+        description: ATLAS repo class for the caller.
+        required: true
+        type: string
+      node_version:
+        description: Node.js runtime version for the repo lane.
+        required: false
+        default: "22"
+        type: string
+      package_manager:
+        description: Package manager label used only for summary output.
+        required: false
+        default: pnpm
+        type: string
+      install_command:
+        description: Install command executed in the caller repo.
+        required: false
+        default: pnpm install --frozen-lockfile
+        type: string
+      verify_command:
+        description: Repo-local verify entrypoint.
+        required: true
+        type: string
+      contract_check_command:
+        description: Contract validation entrypoint.
+        required: true
+        type: string
+      artifact_glob:
+        description: Optional artifact glob uploaded after checks.
+        required: false
+        default: ""
+        type: string
+
+jobs:
+  contract-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node_version }}
+
+      - name: Enable Corepack
+        shell: bash
+        run: corepack enable
+
+      - name: Install
+        shell: bash
+        run: ${{ inputs.install_command }}
+
+      - name: Contract Check
+        shell: bash
+        run: ${{ inputs.contract_check_command }}
+
+  verify:
+    runs-on: ubuntu-latest
+    needs: contract-check
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node_version }}
+
+      - name: Enable Corepack
+        shell: bash
+        run: corepack enable
+
+      - name: Install
+        shell: bash
+        run: ${{ inputs.install_command }}
+
+      - name: Verify
+        shell: bash
+        run: ${{ inputs.verify_command }}
+
+  artifact-summary:
+    runs-on: ubuntu-latest
+    needs:
+      - contract-check
+      - verify
+    if: ${{ always() }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Summarize contract lane
+        shell: bash
+        run: |
+          {
+            echo "## ATLAS app workflow summary"
+            echo ""
+            echo "- repo_id: ${{ inputs.repo_id }}"
+            echo "- app_id: ${{ inputs.app_id }}"
+            echo "- repo_class: ${{ inputs.repo_class }}"
+            echo "- package_manager: ${{ inputs.package_manager }}"
+            echo "- node_version: ${{ inputs.node_version }}"
+            echo "- contract-check: ${{ needs.contract-check.result }}"
+            echo "- verify: ${{ needs.verify.result }}"
+            if [ -n "${{ inputs.artifact_glob }}" ]; then
+              echo "- artifact_glob: \`${{ inputs.artifact_glob }}\`"
+            else
+              echo "- artifact_glob: none"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload artifacts
+        if: ${{ inputs.artifact_glob != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: atlas-${{ inputs.repo_id }}-artifacts
+          path: ${{ inputs.artifact_glob }}
+          if-no-files-found: warn

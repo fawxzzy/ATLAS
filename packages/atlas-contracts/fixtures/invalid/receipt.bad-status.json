@@ -1,0 +1,15 @@
+{
+  "contract_version": "atlas.receipt.v1",
+  "receipt_id": "rcpt-20260507-002",
+  "recorded_at": "2026-05-07T12:45:00Z",
+  "repo_id": "mazer",
+  "app_id": "fawxzzy-mazer",
+  "kind": "observability-smoke",
+  "status": "complete",
+  "subject": {
+    "kind": "event-envelope",
+    "id": "atlas.event.v1"
+  },
+  "evidence": [],
+  "links": []
+}

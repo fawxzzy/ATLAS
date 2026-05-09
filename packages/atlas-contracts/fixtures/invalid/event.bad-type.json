@@ -1,0 +1,16 @@
+{
+  "contract_version": "atlas.event.v1",
+  "event_type": "Bad Type",
+  "event_id": "evt-20260507-002",
+  "occurred_at": "2026-05-07T12:30:00Z",
+  "repo_id": "trove",
+  "app_id": "fawxzzy-trove",
+  "environment": "preview",
+  "producer": {
+    "kind": "service",
+    "name": "trove-build"
+  },
+  "payload": {
+    "summary": "Invalid event type example."
+  }
+}

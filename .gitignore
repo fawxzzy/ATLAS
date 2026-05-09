@@ -14,6 +14,9 @@ runtime/cortex/**
 tmp/**
 secrets/**
 packages/**
+!packages/
+!packages/atlas-contracts/
+!packages/atlas-contracts/**
 data/**
 !data/**/
 !data/**/README.md

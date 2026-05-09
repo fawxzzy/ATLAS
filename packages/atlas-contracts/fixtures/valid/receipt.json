@@ -1,0 +1,30 @@
+{
+  "contract_version": "atlas.receipt.v1",
+  "receipt_id": "rcpt-20260507-001",
+  "recorded_at": "2026-05-07T12:45:00Z",
+  "repo_id": "mazer",
+  "app_id": "fawxzzy-mazer",
+  "kind": "observability-smoke",
+  "status": "passed",
+  "subject": {
+    "kind": "event-envelope",
+    "id": "atlas.event.v1",
+    "path": "runtime/receipts/mazer/observability"
+  },
+  "evidence": [
+    {
+      "kind": "json",
+      "ref": "runtime/receipts/mazer/observability/2026-05-07.json",
+      "digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+      "summary": "Observability smoke receipt."
+    }
+  ],
+  "links": [
+    {
+      "rel": "health",
+      "href": "runtime/receipts/mazer/health/latest.json"
+    }
+  ],
+  "summary": "Shared event envelope validated.",
+  "event_id": "evt-20260507-mazer-001"
+}
