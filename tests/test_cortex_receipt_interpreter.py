@@ -179,7 +179,48 @@ class CortexReceiptInterpreterTests(unittest.TestCase):
         )
         self.assertFalse(payload["authority"]["final_receipt_authorized"])
 
-    def test_cortex_final_receipt_authority_blocks(self) -> None:
+    def test_candidate_claiming_cortex_final_receipt_authority_blocks(self) -> None:
+        root = self._temp_root()
+        _write_json(
+            root / "runtime" / "cortex" / "lifeline-receipt-candidates" / "latest.json",
+            {
+                "contract_version": "atlas.cortex.lifeline-receipt-candidate.v1",
+                "run_id": "cortex-run-promote-cortex-receipt-interpretation-contract-wave9",
+                "final_receipt_owner": "cortex",
+                "final_receipt_written": False,
+                "candidate_payload_digest": "sha256:demo",
+                "source_cortex_artifact_refs": ["runtime/cortex/worker-prompts/latest.json"],
+            },
+        )
+
+        payload = build_receipt_interpretation_payload(root=root)
+
+        self.assertEqual("blocked", payload["interpretation_result"]["status"])
+        self.assertIn("cortex-final-receipt-authority-absent", payload["interpretation_result"]["failed_checks"])
+        self.assertFalse(payload["authority"]["final_receipt_authorized"])
+
+    def test_explicit_receipt_with_lifeline_final_owner_and_cortex_prepared_by_is_observed(self) -> None:
+        root = self._temp_root()
+        receipt_path = root / "tmp" / "lifeline-final-receipt.json"
+        _write_json(
+            receipt_path,
+            {
+                "contract_version": "demo.final-receipt.v1",
+                "receipt_id": "demo",
+                "boundary": {
+                    "final_receipt_owner": "lifeline",
+                    "prepared_by": "cortex",
+                },
+            },
+        )
+
+        payload = build_receipt_interpretation_payload(root=root, receipt_paths=[receipt_path])
+
+        self.assertEqual("ready", payload["interpretation_result"]["status"])
+        self.assertEqual("final_receipt_observed", payload["interpreted_proof_summary"]["status"])
+        self.assertFalse(payload["authority"]["final_receipt_authorized"])
+
+    def test_explicit_receipt_with_cortex_final_owner_blocks_even_with_lifeline_mentions(self) -> None:
         root = self._temp_root()
         receipt_path = root / "tmp" / "cortex-final-receipt.json"
         _write_json(
@@ -187,8 +228,10 @@ class CortexReceiptInterpreterTests(unittest.TestCase):
             {
                 "contract_version": "demo.final-receipt.v1",
                 "receipt_id": "demo",
-                "final_receipt_owner": "cortex",
-                "prepared_by": "cortex",
+                "boundary": {
+                    "final_receipt_owner": "cortex",
+                    "prepared_by": "lifeline",
+                },
             },
         )
 
@@ -196,6 +239,7 @@ class CortexReceiptInterpreterTests(unittest.TestCase):
 
         self.assertEqual("blocked", payload["interpretation_result"]["status"])
         self.assertIn("cortex-final-receipt-authority-absent", payload["interpretation_result"]["failed_checks"])
+        self.assertFalse(payload["authority"]["final_receipt_authorized"])
 
     def test_markdown_summary_includes_boundary_language(self) -> None:
         root = self._temp_root()
