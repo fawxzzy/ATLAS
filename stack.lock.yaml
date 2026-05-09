@@ -53,8 +53,8 @@ components:
     status: "active"
     remote: "https://github.com/fawxzzy/fawxzzy-playbook.git"
     ref_type: "branch"
-    ref: "codex/changelog-generator"
-    commit: "118f7379c71d97c15fd047b0dfe28adecb9078da"
+    ref: "codex/workflow-pack-environment-bridge-engine"
+    commit: "0dad28cb553df5bfad43a4d3012234f210805929"
     dirty: false
     trust_class: "trusted"
     release_eligible: true
@@ -75,8 +75,8 @@ components:
     status: "active"
     remote: "https://github.com/fawxzzy/ATLAS.git"
     ref_type: "branch"
-    ref: "codex/cortex-rail-seed-progression-r17"
-    commit: "d6eba7ebace4fcb607bc399ad07156cacf651826"
+    ref: "codex/cortex-receipt-interpretation-contract-wave9"
+    commit: "12de1c309141d12179ad6c74a50a44755aa899e0"
     dirty: false
     trust_class: "trusted"
     release_eligible: false
@@ -127,4 +127,4 @@ excluded_surfaces:
     trust_class: "untrusted"
     release_eligible: false
     reason: "Token-bearing Verta checkout remains quarantined and untrusted until scrub and rotation are complete."
-lock_digest: "sha256:d85a7c2882c5232989d7793e9e83fc336cf70ecf7f3958c2a805dc562324cfbd"
+lock_digest: "sha256:8ca0b46ce11c51b692e58950594a424254f31788ec02eee03b34c9edcd6e5e62"
