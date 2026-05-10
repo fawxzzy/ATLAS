@@ -1,9 +1,9 @@
 {
   "contract_version": "atlas.cortex.stack-advisory-handoff.v2",
-  "generated_at": "2026-05-09T21:28:58.314202+00:00",
+  "generated_at": "2026-05-10T04:51:21.412140+00:00",
   "authority_level": "read_only_advisory",
   "stack_root": "C:/ATLAS",
-  "handoff_id": "stack-advisory-handoff-promote-cortex-receipt-interpretation-contract-wave9",
+  "handoff_id": "stack-advisory-handoff-promote-cortex-receipt-interpretation-stack-consumption-wave10",
   "consumer": {
     "consumer_id": "_stack",
     "consumer_role": "advisory_artifact_consumer",
@@ -20,40 +20,40 @@
     "transcript_scraping_allowed": false
   },
   "next_recommended_lane": {
-    "lane_id": "promote-cortex-receipt-interpretation-contract-wave9",
+    "lane_id": "promote-cortex-receipt-interpretation-stack-consumption-wave10",
     "owner_layer": "cortex",
-    "rationale": "Cortex now emits worker prompts, a canonical stack advisory handoff, and a stack-consumption pilot proof. The next bounded contract is receipt interpretation: reading explicit worker, _stack, and Lifeline receipt artifacts and emitting deterministic interpreted proof summaries without executing work, approving work, mutating owner truth, or issuing final receipts."
+    "rationale": "Cortex now emits worker prompts, a canonical stack advisory handoff, a bounded stack-consumption pilot proof, and read-only receipt interpretation. The next bounded tranche is seed-only progression into the follow-on stack-consumption lane: ratchet the rail seed and deterministic artifacts without implementing new consumption, execution, approval, dispatch, owner-truth mutation, Lifeline-truth mutation, or final-receipt behavior."
   },
   "artifact_inputs": [
     {
       "role": "worker_prompt",
       "ref": "runtime/cortex/worker-prompts/latest.json",
       "contract_version": "atlas.cortex.worker-prompt.v1",
-      "digest": "sha256:adb58f82cb13ffde96673820a19a8f472d47025b162dc2d2b2cd5ff22ac9dd53"
+      "digest": "sha256:50e7ac9e12cd6dfe6f90f0d919825b2845d1d24632498ca4cfd35d1e86b3b651"
     },
     {
       "role": "context",
       "ref": "runtime/cortex/context/latest.json",
       "contract_version": "atlas.cortex.context-packet.v1",
-      "digest": "sha256:87356fcb5d31acebd8239bfe6d6fa8353ce5ce457f8fbfdceb1b4bcd26e747bc"
+      "digest": "sha256:8106eaa86eebbee718b2194226033dbda2dc01ce9609335aef7965f4a0219aa5"
     },
     {
       "role": "operator_surface",
       "ref": "runtime/cortex/operator-surface/latest.json",
       "contract_version": "atlas.cortex.operator-surface.v1",
-      "digest": "sha256:ea4072a25043f96fc577b6b9775285a7cd0a1eeecec4bb23ea968d8772e17a3e"
+      "digest": "sha256:b3137b83b01a4917c86bd99db9affa6519cfcd3bcaa091dd2da3f5c212cf3709"
     },
     {
       "role": "ledger",
       "ref": "runtime/cortex/ledger/latest.json",
       "contract_version": "atlas.cortex.ledger.v1",
-      "digest": "sha256:90ee29591370de01a8a623f3eda881cc8617bce8996f46e18ca7036a38a2311f"
+      "digest": "sha256:2306cdeb4228a16def0e4af88dbccacb8a9d4b54c5611ddc0ecca65cc0a60604"
     },
     {
       "role": "state_model_seed",
       "ref": "runtime/cortex/kernel.state-model.seed.v1.json",
       "contract_version": "atlas.cortex.kernel-state.v1",
-      "digest": "sha256:05ec08bf1d099e08c63180be86100575a2ad4e303cce4bcbf7fcaa49c3743004"
+      "digest": "sha256:f54ed91613e67271de5d6485e7e817362177337d7686ab9d6799644957f30960"
     },
     {
       "role": "rule_registry_seed",
@@ -72,22 +72,37 @@
     "rule_registry_seed": "runtime/cortex/kernel.rule-registry.seed.v1.json"
   },
   "advisory_assignment": {
-    "run_id": "cortex-run-promote-cortex-receipt-interpretation-contract-wave9",
-    "assignment_id": "assignment-promote-cortex-receipt-interpretation-contract-wave9",
-    "objective": "Promote the Cortex receipt interpretation contract as a read-only proof-summary surface without replacing Lifeline receipt authority. Selected next action: Promote Cortex receipt interpretation contract..",
+    "run_id": "cortex-run-promote-cortex-receipt-interpretation-stack-consumption-wave10",
+    "assignment_id": "assignment-promote-cortex-receipt-interpretation-stack-consumption-wave10",
+    "objective": "Advance the Cortex rail seed after receipt interpretation without implementing a new stack-consumption surface yet. Selected next action: Advance the Cortex rail seed after receipt interpretation..",
     "implementation_plan": [
-      "Add one read-only receipt interpretation artifact that consumes explicit Cortex, _stack, validation, and Lifeline receipt-like artifacts.",
-      "Emit deterministic proof summaries for what changed, what proved, and what remains blocked without issuing final receipts.",
-      "Block interpretation when validation, handoff, pilot, or final-receipt authority guards are widened.",
-      "Respect receipt scope: Cortex may interpret explicit receipt artifacts and summarize proof posture only. Cortex must not issue final receipts, approve work, mutate owner truth, or replace Lifeline receipt authority."
+      "Ratchet the seeded rail so receipt interpretation becomes the latest clean step and the next dirty lane becomes the follow-on stack-consumption tranche.",
+      "Regenerate deterministic root-owned Cortex artifacts so they point at the new bounded wave-10 lane without widening authority.",
+      "Keep the tranche seed-only: do not implement new stack consumption, dispatch, execution, approval, receipt issuance, owner-truth mutation, or transcript scraping behavior.",
+      "Respect receipt scope: Cortex may interpret explicit receipt artifacts and summarize proof posture only. final_receipt_authorized=false, approval_authorized=false, execution_authorized=false, dispatch_authorized=false, owner_truth_mutation_authorized=false, lifeline_truth_mutation_authorized=false, transcript_scraping_allowed=false."
     ],
     "files_to_modify": [
-      "ops/cortex/receipt_interpreter.py",
       "ops/cortex/worker_plan.py",
-      "schemas/atlas.cortex.receipt-interpretation.v1.json",
-      "tests/test_cortex_receipt_interpreter.py",
-      "tests/test_cortex_worker_plan.py",
-      "tests/test_cortex_worker_prompt.py"
+      "runtime/cortex/kernel.state-model.seed.v1.json",
+      "runtime/cortex/current-state/latest.json",
+      "runtime/cortex/current-state/latest.md",
+      "runtime/cortex/rail-state/latest.json",
+      "runtime/cortex/rail-state/latest.md",
+      "runtime/cortex/context/latest.json",
+      "runtime/cortex/context/latest.md",
+      "runtime/cortex/operator-surface/latest.json",
+      "runtime/cortex/operator-surface/latest.md",
+      "runtime/cortex/ledger/latest.json",
+      "runtime/cortex/ledger/latest.md",
+      "runtime/cortex/worker-prompts/latest.json",
+      "runtime/cortex/worker-prompts/latest.md",
+      "runtime/cortex/stack-advisory-handoff/latest.json",
+      "runtime/cortex/stack-advisory-handoff/latest.md",
+      "runtime/cortex/stack-consumption-pilot/latest.json",
+      "runtime/cortex/stack-consumption-pilot/latest.md",
+      "runtime/cortex/receipt-interpretation/latest.json",
+      "runtime/cortex/receipt-interpretation/latest.md",
+      "tests/test_cortex_*.py"
     ],
     "files_to_avoid": [
       "stack.yaml",
@@ -99,9 +114,9 @@
       "runtime/atlas/sessions/**"
     ],
     "verification_steps": [
-      "python -m unittest tests.test_cortex_stack_handoff tests.test_cortex_stack_consumption_pilot tests.test_cortex_worker_prompt tests.test_cortex_worker_plan tests.test_cortex_current_state tests.test_cortex_rail_state_reader tests.test_cortex_context_assembler tests.test_cortex_operator_surface tests.test_cortex_ledger tests.test_cortex_loop tests.test_cortex_run_artifact tests.test_cortex_run_ledger -v",
+      "python -m unittest tests.test_cortex_worker_plan tests.test_cortex_current_state tests.test_cortex_rail_state_reader tests.test_cortex_context_assembler tests.test_cortex_operator_surface tests.test_cortex_ledger tests.test_cortex_loop tests.test_cortex_run_artifact tests.test_cortex_worker_prompt tests.test_cortex_stack_handoff tests.test_cortex_stack_consumption_pilot tests.test_cortex_run_ledger -v",
       "python .\\ops\\validation\\validate_stack.py",
-      "python -m unittest tests.test_cortex_receipt_interpreter tests.test_cortex_worker_prompt tests.test_cortex_worker_plan"
+      "python -m unittest tests.test_cortex_worker_plan tests.test_cortex_current_state tests.test_cortex_rail_state_reader tests.test_cortex_context_assembler tests.test_cortex_operator_surface tests.test_cortex_ledger tests.test_cortex_loop tests.test_cortex_run_artifact tests.test_cortex_worker_prompt tests.test_cortex_stack_handoff tests.test_cortex_stack_consumption_pilot -v"
     ],
     "matched_rule_ids": [
       "known-validation-debt-stays-ambient-unless-regression",
@@ -111,12 +126,9 @@
     ],
     "failure_modes_to_avoid": [
       "Cortex observes, interprets, and proves; it does not own product, governance, receipt, or enforcement truth.",
-      "Do not issue final receipts.",
-      "Do not approve work.",
-      "Do not mutate Lifeline truth or owner truth.",
-      "Do not treat receipt interpretation as execution authority.",
-      "Do not scrape transcripts.",
-      "Do not collapse receipt candidate, proof summary, final receipt, and interpretation into one mutable truth store."
+      "Do not implement new receipt-interpretation stack consumption yet.",
+      "Do not widen final receipt, approval, execution, dispatch, owner-truth, Lifeline-truth, or transcript authority.",
+      "Do not treat the seed ratchet as permission to mutate owner repos or runtime/lifeline truth."
     ]
   },
   "handoff_checks": [
@@ -224,7 +236,10 @@
     "stack.lock.yaml",
     "runtime/cortex/stack-advisory-handoff/latest.json",
     "runtime/cortex/stack-consumption-pilot/latest.json",
+    "runtime/cortex/receipt-interpretation/latest.json",
     "docs/architecture/ATLAS-CORTEX-PLAYBOOK-CODEX.md",
+    "tmp/r19/publication-state.json",
+    "tmp/r19/git-state.json",
     "runtime/cortex/worker-prompts/latest.json#/planner_contract",
     "runtime/cortex/worker-prompts/latest.json#/receipt_draft_preview"
   ]
