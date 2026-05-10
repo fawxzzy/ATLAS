@@ -20,8 +20,8 @@ components:
     status: "active"
     remote: "https://github.com/fawxzzy/fawxzzy-lifeline.git"
     ref_type: "branch"
-    ref: "main"
-    commit: "39b15edbaec9597f60a586b5bbdb179afbc45582"
+    ref: "codex/lifeline-release-appname-path-hardening"
+    commit: "89357af70fc103137bd5f46c76d3c81549ba64fc"
     dirty: false
     trust_class: "trusted"
     release_eligible: true
@@ -75,9 +75,9 @@ components:
     status: "active"
     remote: "https://github.com/fawxzzy/ATLAS.git"
     ref_type: "branch"
-    ref: "codex/cortex-receipt-interpretation-contract-wave9"
-    commit: "748100502636a65db9ad471f32b66987830daab4"
-    dirty: false
+    ref: "codex/cortex-receipt-interpretation-stack-consumption-wave10"
+    commit: "1c085700a2afc01ff25f81c04616a29bb56bd7bf"
+    dirty: true
     trust_class: "trusted"
     release_eligible: false
   stream:
@@ -98,7 +98,7 @@ components:
     remote: "https://github.com/fawxzzy/fawxzzy-trove.git"
     ref_type: "branch"
     ref: "codex/trove-brand-asset-sync"
-    commit: "9ab7ba4f3582897c4aaadd41d7dcb17c3679d15b"
+    commit: "bce14fcc1ad6e826b0c0eac37e13af6707ee3a8e"
     dirty: true
     trust_class: "trusted"
     release_eligible: true
@@ -127,4 +127,4 @@ excluded_surfaces:
     trust_class: "untrusted"
     release_eligible: false
     reason: "Token-bearing Verta checkout remains quarantined and untrusted until scrub and rotation are complete."
-lock_digest: "sha256:f8b3a194f97889602570a4f9a00dff207ae561cccfd30bf1b05f5b0c1b6bd795"
+lock_digest: "sha256:47ef0e46c777d82cbe6597aac298d6ea8628188969fb8c5595ac45a0146a51b1"

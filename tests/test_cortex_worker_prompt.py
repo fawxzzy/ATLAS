@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import io
 import json
@@ -110,7 +110,7 @@ class CortexWorkerPromptTests(unittest.TestCase):
         payload["validation_counts"] = dict(payload["validation_receipt"]["counts"])
         payload["active_blockers"] = []
         payload["next_recommended_lane"] = {
-            "lane_id": "promote-cortex-receipt-interpretation-contract-wave9",
+            "lane_id": "promote-cortex-receipt-interpretation-stack-consumption-wave10",
             "owner_layer": "cortex",
             "rationale": "The bounded _stack stack-consumption pilot is landed, but Cortex still needs one promoted default _stack consumer routing contract that consumes explicit Cortex worker-prompt, context, operator, ledger, and pilot artifacts without transcript scraping, execution authority, owner-truth mutation, or Lifeline receipt authority.",
             "blocked_by": [],
@@ -126,7 +126,7 @@ class CortexWorkerPromptTests(unittest.TestCase):
         payload["generated_at"] = "2026-05-06T22:02:00+00:00"
         payload["rail_status"] = "ready"
         payload["active_blockers"] = []
-        payload["dirty_lanes"] = ["cortex-receipt-interpretation-contract-v0-1"]
+        payload["dirty_lanes"] = ["cortex-receipt-interpretation-stack-consumption-v0-1"]
         payload["validation_posture"] = {
             "status": "ambient-debt-only",
             "counts": {
@@ -140,7 +140,7 @@ class CortexWorkerPromptTests(unittest.TestCase):
             "receipt_path": "runtime/receipts/validation/stack-validation.latest.json",
         }
         payload["next_recommended_lane"] = {
-            "lane_id": "promote-cortex-receipt-interpretation-contract-wave9",
+            "lane_id": "promote-cortex-receipt-interpretation-stack-consumption-wave10",
             "owner_layer": "cortex",
             "rationale": "The bounded _stack stack-consumption pilot is landed, but Cortex still needs one promoted default _stack consumer routing contract that consumes explicit Cortex worker-prompt, context, operator, ledger, and pilot artifacts without transcript scraping, execution authority, owner-truth mutation, or Lifeline receipt authority.",
             "blocked_by": [],
@@ -155,12 +155,12 @@ class CortexWorkerPromptTests(unittest.TestCase):
     def _base_context_payload(self) -> dict:
         payload = json.loads(json.dumps(self.context_payload))
         payload["generated_at"] = "2026-05-06T22:03:00+00:00"
-        payload["packet_id"] = "context-promote-cortex-receipt-interpretation-contract-wave9"
+        payload["packet_id"] = "context-promote-cortex-receipt-interpretation-stack-consumption-wave10"
         payload["context_summary"] = (
-            "Cortex context packet for promote-cortex-receipt-interpretation-contract-wave9 derived from explicit current-state, "
+            "Cortex context packet for promote-cortex-receipt-interpretation-stack-consumption-wave10 derived from explicit current-state, "
             "rail-state, validation, and seed artifacts."
         )
-        payload["task_frame"]["lane_id"] = "promote-cortex-receipt-interpretation-contract-wave9"
+        payload["task_frame"]["lane_id"] = "promote-cortex-receipt-interpretation-stack-consumption-wave10"
         payload["task_frame"]["owner_layer"] = "cortex"
         payload["task_frame"]["title"] = "Promote Cortex _stack consumer default routing."
         payload["task_frame"]["status"] = "ready"
@@ -189,14 +189,14 @@ class CortexWorkerPromptTests(unittest.TestCase):
         payload = json.loads(json.dumps(self.operator_surface_payload))
         payload["generated_at"] = "2026-05-06T22:04:00+00:00"
         payload["operator_summary"] = (
-            "Cortex operator surface for promote-cortex-receipt-interpretation-contract-wave9 derived from explicit current-state, "
+            "Cortex operator surface for promote-cortex-receipt-interpretation-stack-consumption-wave10 derived from explicit current-state, "
             "rail-state, context, validation, and seed artifacts."
         )
         payload["rail_status"] = "ready"
         payload["active_blockers"] = []
-        payload["dirty_lanes"] = ["cortex-receipt-interpretation-contract-v0-1"]
+        payload["dirty_lanes"] = ["cortex-receipt-interpretation-stack-consumption-v0-1"]
         payload["next_recommended_lane"] = {
-            "lane_id": "promote-cortex-receipt-interpretation-contract-wave9",
+            "lane_id": "promote-cortex-receipt-interpretation-stack-consumption-wave10",
             "owner_layer": "cortex",
             "rationale": "The bounded _stack stack-consumption pilot is landed, but Cortex still needs one promoted default _stack consumer routing contract that consumes explicit Cortex worker-prompt, context, operator, ledger, and pilot artifacts without transcript scraping, execution authority, owner-truth mutation, or Lifeline receipt authority.",
             "blocked_by": [],
@@ -213,12 +213,12 @@ class CortexWorkerPromptTests(unittest.TestCase):
             "info": 1,
             "total": 5,
         }
-        payload["context_packet_id"] = "context-promote-cortex-receipt-interpretation-contract-wave9"
+        payload["context_packet_id"] = "context-promote-cortex-receipt-interpretation-stack-consumption-wave10"
         payload["context_summary"] = (
-            "Cortex context packet for promote-cortex-receipt-interpretation-contract-wave9 derived from explicit current-state, "
+            "Cortex context packet for promote-cortex-receipt-interpretation-stack-consumption-wave10 derived from explicit current-state, "
             "rail-state, validation, and seed artifacts."
         )
-        payload["task_frame_summary"]["lane_id"] = "promote-cortex-receipt-interpretation-contract-wave9"
+        payload["task_frame_summary"]["lane_id"] = "promote-cortex-receipt-interpretation-stack-consumption-wave10"
         payload["task_frame_summary"]["owner_layer"] = "cortex"
         payload["task_frame_summary"]["title"] = "Promote Cortex _stack consumer default routing."
         payload["task_frame_summary"]["status"] = "ready"
@@ -256,10 +256,10 @@ class CortexWorkerPromptTests(unittest.TestCase):
     def _base_ledger_payload(self) -> dict:
         payload = json.loads(json.dumps(self.ledger_payload))
         payload["generated_at"] = "2026-05-06T22:05:00+00:00"
-        payload["ledger_id"] = "ledger-promote-cortex-receipt-interpretation-contract-wave9"
+        payload["ledger_id"] = "ledger-promote-cortex-receipt-interpretation-stack-consumption-wave10"
         payload["rail_status"] = "ready"
         payload["active_blockers"] = []
-        payload["dirty_lanes"] = ["cortex-receipt-interpretation-contract-v0-1"]
+        payload["dirty_lanes"] = ["cortex-receipt-interpretation-stack-consumption-v0-1"]
         payload["validation_counts"] = {
             "critical": 0,
             "error": 0,
@@ -274,7 +274,7 @@ class CortexWorkerPromptTests(unittest.TestCase):
         payload["upstream"] = "origin/codex/cortex-worker-prompt-contract-wave6"
         payload["published"] = True
         payload["next_recommended_lane"] = {
-            "lane_id": "promote-cortex-receipt-interpretation-contract-wave9",
+            "lane_id": "promote-cortex-receipt-interpretation-stack-consumption-wave10",
             "owner_layer": "cortex",
             "rationale": "The bounded _stack stack-consumption pilot is landed, but Cortex still needs one promoted default _stack consumer routing contract that consumes explicit Cortex worker-prompt, context, operator, ledger, and pilot artifacts without transcript scraping, execution authority, owner-truth mutation, or Lifeline receipt authority.",
             "blocked_by": [],
@@ -288,8 +288,8 @@ class CortexWorkerPromptTests(unittest.TestCase):
                 "runtime/cortex/kernel.rule-registry.seed.v1.json",
             ],
         }
-        payload["context_packet_id"] = "context-promote-cortex-receipt-interpretation-contract-wave9"
-        payload["task_frame_summary"]["lane_id"] = "promote-cortex-receipt-interpretation-contract-wave9"
+        payload["context_packet_id"] = "context-promote-cortex-receipt-interpretation-stack-consumption-wave10"
+        payload["task_frame_summary"]["lane_id"] = "promote-cortex-receipt-interpretation-stack-consumption-wave10"
         payload["task_frame_summary"]["owner_layer"] = "cortex"
         payload["task_frame_summary"]["title"] = "Promote Cortex _stack consumer default routing."
         payload["task_frame_summary"]["status"] = "ready"
@@ -351,12 +351,15 @@ class CortexWorkerPromptTests(unittest.TestCase):
 
         self.assertEqual("atlas.cortex.worker-prompt.v1", payload["contract_version"])
         self.assertEqual("read_only_advisory", payload["authority_level"])
-        self.assertEqual("promote-cortex-receipt-interpretation-contract-wave9", payload["next_recommended_lane"]["lane_id"])
-        self.assertEqual("context-promote-cortex-receipt-interpretation-contract-wave9", payload["context_packet_id"])
-        self.assertEqual("cortex_receipt_interpretation_contract", payload["planner_contract"]["template_id"])
+        self.assertEqual("promote-cortex-receipt-interpretation-stack-consumption-wave10", payload["next_recommended_lane"]["lane_id"])
+        self.assertEqual("context-promote-cortex-receipt-interpretation-stack-consumption-wave10", payload["context_packet_id"])
+        self.assertEqual(
+            "cortex_receipt_interpretation_stack_consumption_seed",
+            payload["planner_contract"]["template_id"],
+        )
         self.assertIn("implementation_plan", payload["planner_contract"])
         self.assertIn("failure_modes_to_avoid", payload["planner_contract"])
-        self.assertEqual("assignment-promote-cortex-receipt-interpretation-contract-wave9", payload["assignment_id"])
+        self.assertEqual("assignment-promote-cortex-receipt-interpretation-stack-consumption-wave10", payload["assignment_id"])
         self.assertTrue(str(payload["stack_lock_digest"]).startswith("sha256:"))
         self.assertIn(
             "runtime/cortex/kernel.proof-summary.examples.v1.json",
@@ -382,7 +385,7 @@ class CortexWorkerPromptTests(unittest.TestCase):
 
         self.assertEqual(json.dumps(payload), json.dumps(artifact.payload))
         self.assertIn("# Cortex Worker Prompt", summary)
-        self.assertIn("promote-cortex-receipt-interpretation-contract-wave9", summary)
+        self.assertIn("promote-cortex-receipt-interpretation-stack-consumption-wave10", summary)
         self.assertIn("Verification Steps", summary)
         self.assertIn("Non-Execution Guards", summary)
         self.assertIn("Stack lock digest", summary)
@@ -403,3 +406,4 @@ class CortexWorkerPromptTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
