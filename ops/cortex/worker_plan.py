@@ -142,7 +142,7 @@ def _select_template(posture: CortexPosture, next_action: NextAction) -> WorkerP
     if next_action.action_id == "promote-cortex-receipt-interpretation-contract-wave9":
         return CORTEX_RECEIPT_INTERPRETATION_CONTRACT_TEMPLATE
     if next_action.action_id == "promote-cortex-receipt-interpretation-stack-consumption-wave10":
-        return CORTEX_RECEIPT_INTERPRETATION_STACK_CONSUMPTION_SEED_TEMPLATE
+        return CORTEX_RECEIPT_INTERPRETATION_STACK_CONSUMPTION_CONTRACT_TEMPLATE
     if next_action.owner_layer == "cortex" or "cortex runtime" in action_text or "runtime work" in action_text:
         return CORTEX_RUNTIME_WORK_TEMPLATE
 
@@ -451,36 +451,24 @@ CORTEX_RECEIPT_INTERPRETATION_CONTRACT_TEMPLATE = WorkerPlanTemplate(
 )
 
 
-CORTEX_RECEIPT_INTERPRETATION_STACK_CONSUMPTION_SEED_TEMPLATE = WorkerPlanTemplate(
-    template_id="cortex_receipt_interpretation_stack_consumption_seed",
-    objective="Advance the Cortex rail seed after receipt interpretation without implementing a new stack-consumption surface yet.",
+CORTEX_RECEIPT_INTERPRETATION_STACK_CONSUMPTION_CONTRACT_TEMPLATE = WorkerPlanTemplate(
+    template_id="cortex_receipt_interpretation_stack_consumption_contract",
+    objective=(
+        "Promote bounded _stack consumption of Cortex receipt interpretation artifacts without enabling dispatch, "
+        "execution, approval, final receipt authority, owner-truth mutation, Lifeline-truth mutation, or transcript scraping."
+    ),
     implementation_plan=(
-        "Ratchet the seeded rail so receipt interpretation becomes the latest clean step and the next dirty lane becomes the follow-on stack-consumption tranche.",
-        "Regenerate deterministic root-owned Cortex artifacts so they point at the new bounded wave-10 lane without widening authority.",
-        "Keep the tranche seed-only: do not implement new stack consumption, dispatch, execution, approval, receipt issuance, owner-truth mutation, or transcript scraping behavior.",
+        "Add one bounded receipt-interpretation stack-consumption artifact that consumes explicit artifact refs only.",
+        "Verify receipt interpretation, advisory handoff, stack-consumption pilot, and validation inputs stay ready while all authority-widening guards remain false.",
+        "Regenerate deterministic Cortex artifacts without turning stack consumption into dispatch, execution, approval, final receipt authority, owner-truth mutation, Lifeline-truth mutation, or transcript scraping.",
     ),
     default_files_to_modify=(
+        "ops/cortex/receipt_interpretation_stack_consumption.py",
         "ops/cortex/worker_plan.py",
-        "runtime/cortex/kernel.state-model.seed.v1.json",
-        "runtime/cortex/current-state/latest.json",
-        "runtime/cortex/current-state/latest.md",
-        "runtime/cortex/rail-state/latest.json",
-        "runtime/cortex/rail-state/latest.md",
-        "runtime/cortex/context/latest.json",
-        "runtime/cortex/context/latest.md",
-        "runtime/cortex/operator-surface/latest.json",
-        "runtime/cortex/operator-surface/latest.md",
-        "runtime/cortex/ledger/latest.json",
-        "runtime/cortex/ledger/latest.md",
-        "runtime/cortex/worker-prompts/latest.json",
-        "runtime/cortex/worker-prompts/latest.md",
-        "runtime/cortex/stack-advisory-handoff/latest.json",
-        "runtime/cortex/stack-advisory-handoff/latest.md",
-        "runtime/cortex/stack-consumption-pilot/latest.json",
-        "runtime/cortex/stack-consumption-pilot/latest.md",
-        "runtime/cortex/receipt-interpretation/latest.json",
-        "runtime/cortex/receipt-interpretation/latest.md",
-        "tests/test_cortex_*.py",
+        "schemas/atlas.cortex.receipt-interpretation-stack-consumption.v1.json",
+        "tests/test_cortex_receipt_interpretation_stack_consumption.py",
+        "tests/test_cortex_worker_plan.py",
+        "tests/test_cortex_worker_prompt.py",
     ),
     default_files_to_avoid=(
         "stack.yaml",
@@ -492,16 +480,21 @@ CORTEX_RECEIPT_INTERPRETATION_STACK_CONSUMPTION_SEED_TEMPLATE = WorkerPlanTempla
         "runtime/atlas/sessions/**",
     ),
     documentation_summary=(
-        "Wave 10 is a seed-progression tranche only. It ratchets the Cortex rail after receipt interpretation without introducing new execution, dispatch, approval, final-receipt, owner-truth, Lifeline-truth, or transcript authority."
+        "_stack may consume Cortex receipt interpretation artifacts through explicit artifact refs only; that consumption remains advisory and does not grant dispatch, execution, approval, final-receipt, owner-truth, Lifeline-truth, or transcript authority."
     ),
     default_verification_steps=(
-        "python -m unittest tests.test_cortex_worker_plan tests.test_cortex_current_state tests.test_cortex_rail_state_reader tests.test_cortex_context_assembler tests.test_cortex_operator_surface tests.test_cortex_ledger tests.test_cortex_loop tests.test_cortex_run_artifact tests.test_cortex_worker_prompt tests.test_cortex_stack_handoff tests.test_cortex_stack_consumption_pilot -v",
-        "python .\\ops\\validation\\validate_stack.py",
+        "python -m unittest tests.test_cortex_receipt_interpretation_stack_consumption tests.test_cortex_worker_prompt tests.test_cortex_worker_plan -v",
+        "python .\\ops\\validation\\validate_stack.py --ratchet",
     ),
     default_failure_modes_to_avoid=(
-        "Do not implement new receipt-interpretation stack consumption yet.",
-        "Do not widen final receipt, approval, execution, dispatch, owner-truth, Lifeline-truth, or transcript authority.",
-        "Do not treat the seed ratchet as permission to mutate owner repos or runtime/lifeline truth.",
+        "Do not dispatch _stack work.",
+        "Do not approve work.",
+        "Do not issue final receipts.",
+        "Do not mutate Lifeline truth.",
+        "Do not mutate owner truth.",
+        "Do not treat stack consumption as execution authority.",
+        "Do not scrape transcripts.",
+        "Do not collapse receipt interpretation and stack consumption into final receipt truth.",
     ),
 )
 

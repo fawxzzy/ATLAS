@@ -354,7 +354,7 @@ class CortexWorkerPromptTests(unittest.TestCase):
         self.assertEqual("promote-cortex-receipt-interpretation-stack-consumption-wave10", payload["next_recommended_lane"]["lane_id"])
         self.assertEqual("context-promote-cortex-receipt-interpretation-stack-consumption-wave10", payload["context_packet_id"])
         self.assertEqual(
-            "cortex_receipt_interpretation_stack_consumption_seed",
+            "cortex_receipt_interpretation_stack_consumption_contract",
             payload["planner_contract"]["template_id"],
         )
         self.assertIn("implementation_plan", payload["planner_contract"])
