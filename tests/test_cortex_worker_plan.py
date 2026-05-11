@@ -193,7 +193,7 @@ class CortexWorkerPlanTests(unittest.TestCase):
         self.assertIn("Do not issue final receipts.", plan.failure_modes_to_avoid)
         self.assertIn("Do not scrape transcripts.", plan.failure_modes_to_avoid)
 
-    def test_receipt_interpretation_stack_consumption_seed_next_action_produces_seed_only_template(self) -> None:
+    def test_receipt_interpretation_stack_consumption_next_action_produces_contract_template(self) -> None:
         posture, rail_state, next_action = self._with_state(
             posture=replace(self.posture, classification="pivoted"),
             rail_state=replace(
@@ -203,16 +203,15 @@ class CortexWorkerPlanTests(unittest.TestCase):
                     self.posture.rail_state.next_action,
                     action_id="promote-cortex-receipt-interpretation-stack-consumption-wave10",
                     owner_layer="cortex",
-                    title="Advance the Cortex rail seed after receipt interpretation.",
-                    rationale="Ratchet the seeded next lane without implementing new stack-consumption behavior yet.",
+                    title="Promote bounded _stack consumption of Cortex receipt interpretation artifacts.",
+                    rationale="Cortex needs one explicit artifact-ref stack-consumption contract over receipt interpretation.",
                     receipt_scope=(
-                        "Cortex may interpret explicit receipt artifacts and summarize proof posture only. "
-                        "final_receipt_authorized=false, approval_authorized=false, execution_authorized=false, "
-                        "dispatch_authorized=false, owner_truth_mutation_authorized=false, "
-                        "lifeline_truth_mutation_authorized=false, transcript_scraping_allowed=false."
+                        "_stack may consume Cortex receipt interpretation artifacts through explicit artifact refs only. "
+                        "Do not enable dispatch, execution, approval, final receipt authority, owner-truth mutation, "
+                        "Lifeline-truth mutation, or transcript scraping."
                     ),
                     verification_plan=(
-                        "python -m unittest tests.test_cortex_worker_plan tests.test_cortex_current_state",
+                        "python -m unittest tests.test_cortex_receipt_interpretation_stack_consumption tests.test_cortex_worker_plan",
                     ),
                 ),
             ),
@@ -220,12 +219,13 @@ class CortexWorkerPlanTests(unittest.TestCase):
 
         plan = build_worker_plan(posture, rail_state, next_action, self.rules)
 
-        self.assertEqual("cortex_receipt_interpretation_stack_consumption_seed", plan.template_id)
-        self.assertIn("seed-only", plan.prompt.lower())
-        self.assertIn("runtime/cortex/receipt-interpretation/latest.json", plan.files_to_modify)
+        self.assertEqual("cortex_receipt_interpretation_stack_consumption_contract", plan.template_id)
+        self.assertIn("artifact-ref", plan.prompt.lower())
+        self.assertIn("ops/cortex/receipt_interpretation_stack_consumption.py", plan.files_to_modify)
+        self.assertIn("schemas/atlas.cortex.receipt-interpretation-stack-consumption.v1.json", plan.files_to_modify)
         self.assertIn("runtime/lifeline/**", plan.files_to_avoid)
-        self.assertIn("Do not implement new receipt-interpretation stack consumption yet.", plan.failure_modes_to_avoid)
-        self.assertIn("Do not widen final receipt, approval, execution, dispatch, owner-truth, Lifeline-truth, or transcript authority.", plan.failure_modes_to_avoid)
+        self.assertIn("Do not dispatch _stack work.", plan.failure_modes_to_avoid)
+        self.assertIn("Do not treat stack consumption as execution authority.", plan.failure_modes_to_avoid)
 
     def test_fitness_owner_adoption_next_action_produces_fitness_scoped_prompt(self) -> None:
         posture, rail_state, next_action = self._with_state(

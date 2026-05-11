@@ -110,6 +110,8 @@ CORTEX may promote a default advisory consumer contract for `_stack`, but only a
 
 CORTEX may interpret explicit receipt artifacts and summarize proof posture, but Lifeline remains final receipt authority. Cortex receipt interpretation must not approve work, issue final receipts, mutate owner truth, execute work, dispatch `_stack` work, or scrape transcripts.
 
+Rule: `_stack` may consume Cortex receipt interpretation artifacts only through explicit artifact refs. This consumption does not grant dispatch, execution, approval, final receipt, owner-truth, Lifeline-truth, or transcript authority.
+
 ### Playbook -> Codex
 
 Playbook may provide:

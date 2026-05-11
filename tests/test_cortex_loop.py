@@ -69,7 +69,7 @@ class CortexLoopTests(unittest.TestCase):
         self.assertEqual("cortex", result.rail_state.next_layer)
         self.assertEqual("cortex", result.selected_next_action["owner_layer"])
         self.assertEqual("cortex", result.worker_plan.owner_layer)
-        self.assertEqual("cortex_receipt_interpretation_stack_consumption_seed", result.worker_plan.template_id)
+        self.assertEqual("cortex_receipt_interpretation_stack_consumption_contract", result.worker_plan.template_id)
         self.assertTrue(result.receipt_ready)
         self.assertEqual("cortex", result.next_required_layer)
         self.assertTrue(result.known_ambient_debt)

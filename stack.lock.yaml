@@ -75,9 +75,9 @@ components:
     status: "active"
     remote: "https://github.com/fawxzzy/ATLAS.git"
     ref_type: "branch"
-    ref: "codex/r19-main-land"
-    commit: "b5a45bbce6658935408bede0eaed9fa635a2d534"
-    dirty: false
+    ref: "codex/cortex-receipt-interpretation-stack-consumption-contract"
+    commit: "be4fdd7f4c3d4f7a3dc22ea997f42765e6b29d47"
+    dirty: true
     trust_class: "trusted"
     release_eligible: false
   stream:
@@ -127,4 +127,4 @@ excluded_surfaces:
     trust_class: "untrusted"
     release_eligible: false
     reason: "Token-bearing Verta checkout remains quarantined and untrusted until scrub and rotation are complete."
-lock_digest: "sha256:a736b291b9c12aa27cf7fcc33481ae98a6efc8dcd59f6658c4e78c9174e6ef8b"
+lock_digest: "sha256:1ebdc43633f4f330da021f186e303c42accb972dce0c57c301fd4e12e277e0ea"

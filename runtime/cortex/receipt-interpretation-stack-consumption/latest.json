@@ -1,0 +1,191 @@
+{
+  "contract_version": "atlas.cortex.receipt-interpretation-stack-consumption.v1",
+  "generated_at": "2026-05-11T21:49:19.601128+00:00",
+  "authority_level": "read_only_advisory",
+  "stack_root": "C:/ATLAS/tmp/r18-main-merge-20260511",
+  "consumption_id": "receipt-interpretation-stack-consumption-stabilize-root-worktree",
+  "consumer": {
+    "consumer_id": "_stack",
+    "consumer_role": "receipt_interpretation_artifact_consumer",
+    "consumption_mode": "artifact_refs_only"
+  },
+  "next_recommended_lane": {
+    "lane_id": "stabilize-root-worktree",
+    "owner_layer": "atlas",
+    "rationale": "The root worktree is dirty, so the rail must stabilize the checkout before advancing the next Cortex lane."
+  },
+  "authority": {
+    "stack_consumption_authorized": true,
+    "automatic_dispatch_enabled": false,
+    "final_receipt_authorized": false,
+    "approval_authorized": false,
+    "execution_authorized": false,
+    "dispatch_authorized": false,
+    "owner_truth_mutation_authorized": false,
+    "lifeline_truth_mutation_authorized": false,
+    "transcript_scraping_allowed": false
+  },
+  "artifact_inputs": [
+    {
+      "role": "receipt_interpretation",
+      "ref": "runtime/cortex/receipt-interpretation/latest.json",
+      "contract_version": "atlas.cortex.receipt-interpretation.v1",
+      "digest": "sha256:99b6782d00d41bc1c7333f07234e282ffe5c0c7c53ad5ad01719c51a0289e43e"
+    },
+    {
+      "role": "stack_advisory_handoff",
+      "ref": "runtime/cortex/stack-advisory-handoff/latest.json",
+      "contract_version": "atlas.cortex.stack-advisory-handoff.v2",
+      "digest": "sha256:5a2f0aa0e65c2b129a5d858e6d10c286e3dc4e5c001012aee68b430f1b194c0b"
+    },
+    {
+      "role": "stack_consumption_pilot",
+      "ref": "runtime/cortex/stack-consumption-pilot/latest.json",
+      "contract_version": "atlas.cortex.stack-consumption-pilot.v1",
+      "digest": "sha256:ebf2760791df595a88c7ec1abe5d7873724623a0d56d42388117600ec77f457d"
+    },
+    {
+      "role": "worker_prompt",
+      "ref": "runtime/cortex/worker-prompts/latest.json",
+      "contract_version": "atlas.cortex.worker-prompt.v1",
+      "digest": "sha256:fd0a4b3093b18608ba3d21af4ea27ff42aa2778aec2a9ec461fb96693287af24"
+    },
+    {
+      "role": "ledger",
+      "ref": "runtime/cortex/ledger/latest.json",
+      "contract_version": "atlas.cortex.ledger.v1",
+      "digest": "sha256:d46bd76d9714c1f42d9c004954d7382dba2b553706b9991c0189b45f5e1cdccf"
+    },
+    {
+      "role": "validation_receipt",
+      "ref": "runtime/receipts/validation/stack-validation.latest.json",
+      "contract_version": "",
+      "digest": "sha256:ad863947c2dba04ce4ad53fde4c41f0210dba2c199c366a068d85511424942ba"
+    },
+    {
+      "role": "state_model_seed",
+      "ref": "runtime/cortex/kernel.state-model.seed.v1.json",
+      "contract_version": "atlas.cortex.kernel-state.v1",
+      "digest": "sha256:55ae2992efa92c1727ad1c33945acb3445065c1001049bfe78337801e06a6ae9"
+    },
+    {
+      "role": "rule_registry_seed",
+      "ref": "runtime/cortex/kernel.rule-registry.seed.v1.json",
+      "contract_version": "atlas.cortex.rule-registry.v1",
+      "digest": "sha256:2fd682949c691e054aa160fd15bf6205a9f661d41022f22ef83e39c27b08ac54"
+    }
+  ],
+  "receipt_interpretation_ref": "runtime/cortex/receipt-interpretation/latest.json",
+  "receipt_interpretation_digest": "sha256:99b6782d00d41bc1c7333f07234e282ffe5c0c7c53ad5ad01719c51a0289e43e",
+  "consumption_checks": [
+    {
+      "check_id": "receipt-interpretation-ready",
+      "status": "passed",
+      "summary": "Receipt interpretation contract is present and ready for stack consumption.",
+      "source_ref": "runtime/cortex/receipt-interpretation/latest.json"
+    },
+    {
+      "check_id": "receipt-interpretation-authority-guard-clean",
+      "status": "passed",
+      "summary": "Receipt interpretation does not widen final receipt, approval, execution, dispatch, truth-mutation, or transcript authority.",
+      "source_ref": "runtime/cortex/receipt-interpretation/latest.json"
+    },
+    {
+      "check_id": "stack-advisory-handoff-ready",
+      "status": "passed",
+      "summary": "Stack advisory handoff is ready.",
+      "source_ref": "runtime/cortex/stack-advisory-handoff/latest.json"
+    },
+    {
+      "check_id": "stack-advisory-handoff-authority-guard-clean",
+      "status": "passed",
+      "summary": "Stack advisory handoff does not widen dispatch, execution, receipt, owner-truth, or transcript authority.",
+      "source_ref": "runtime/cortex/stack-advisory-handoff/latest.json"
+    },
+    {
+      "check_id": "stack-consumption-pilot-ready",
+      "status": "passed",
+      "summary": "Stack-consumption pilot is ready.",
+      "source_ref": "runtime/cortex/stack-consumption-pilot/latest.json"
+    },
+    {
+      "check_id": "stack-consumption-pilot-authority-guard-clean",
+      "status": "passed",
+      "summary": "Stack-consumption pilot does not widen dispatch, execution, receipt, owner-truth, or transcript authority.",
+      "source_ref": "runtime/cortex/stack-consumption-pilot/latest.json"
+    },
+    {
+      "check_id": "validation-critical-error-absent",
+      "status": "passed",
+      "summary": "Stack validation has no critical or error findings.",
+      "source_ref": "runtime/receipts/validation/stack-validation.latest.json"
+    },
+    {
+      "check_id": "transcript-scraping-absent",
+      "status": "passed",
+      "summary": "Consumed source refs and artifact refs do not include transcripts, runtime/atlas/conversations, or runtime/atlas/sessions.",
+      "source_ref": "runtime/cortex/receipt-interpretation/latest.json"
+    }
+  ],
+  "consumption_result": {
+    "status": "ready",
+    "ready_for_stack_consumer": true,
+    "blocked_reason": null,
+    "failed_checks": []
+  },
+  "consumption_summary": {
+    "interpreted_status": "proof_ready",
+    "what_changed": [
+      "_stack consumed the Cortex receipt interpretation artifact through explicit artifact refs only.",
+      "Cortex selected lane stabilize-root-worktree for read-only receipt interpretation.",
+      "Receipt interpretation joins worker prompt, stack handoff, stack pilot, ledger, validation, seed, and rule artifacts."
+    ],
+    "what_proved": [
+      "Receipt interpretation proof posture is proof_ready.",
+      "Stack advisory handoff is ready.",
+      "Stack-consumption pilot is ready.",
+      "Validation has no critical or error findings."
+    ],
+    "what_remains_blocked": [
+      "No final Lifeline receipt artifact observed; Cortex interpretation remains advisory."
+    ],
+    "receipt_authority_summary": "Lifeline owns final receipt authority; Cortex interpretation is advisory only."
+  },
+  "authority_guards": [
+    "_stack may consume Cortex receipt interpretation only through explicit artifact refs.",
+    "Receipt-interpretation stack consumption does not dispatch or execute _stack work.",
+    "Receipt-interpretation stack consumption does not approve work, issue final receipts, or mutate owner or Lifeline truth.",
+    "Receipt-interpretation stack consumption does not scrape transcripts."
+  ],
+  "boundary_reminders": [
+    "_stack may consume Cortex receipt interpretation artifacts only through explicit artifact refs.",
+    "_stack consumption ready does not mean dispatch, execution, approval, or final receipt authority.",
+    "Lifeline owns final receipt authority.",
+    "Cortex may interpret explicit receipt artifacts and summarize proof posture only.",
+    "_stack owns orchestration and dispatch truth.",
+    "Cortex must not issue final receipts, approve work, mutate owner truth, or scrape transcripts.",
+    "Cortex observes, interprets, and proves.",
+    "Cortex does not become owner truth for product, governance, or receipts.",
+    "Fitness owns product UI truth.",
+    "_stack owns orchestration and enforcement truth.",
+    "Lifeline owns receipt and approval truth."
+  ],
+  "source_refs": [
+    "runtime/cortex/receipt-interpretation/latest.json",
+    "runtime/cortex/stack-advisory-handoff/latest.json",
+    "runtime/cortex/stack-consumption-pilot/latest.json",
+    "runtime/cortex/worker-prompts/latest.json",
+    "runtime/cortex/ledger/latest.json",
+    "runtime/receipts/validation/stack-validation.latest.json",
+    "runtime/cortex/kernel.state-model.seed.v1.json",
+    "runtime/cortex/kernel.rule-registry.seed.v1.json",
+    "runtime/cortex/context/latest.json",
+    "runtime/cortex/operator-surface/latest.json",
+    "runtime/cortex/current-state/latest.json",
+    "runtime/cortex/rail-state/latest.json",
+    "runtime/cortex/kernel.proof-summary.examples.v1.json",
+    "stack.lock.yaml",
+    "runtime/cortex/worker-prompts/latest.json#/planner_contract",
+    "runtime/cortex/worker-prompts/latest.json#/receipt_draft_preview"
+  ]
+}

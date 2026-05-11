@@ -1,0 +1,201 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://schemas/atlas.cortex.receipt-interpretation-stack-consumption.v1.json",
+  "title": "ATLAS Cortex receipt interpretation stack consumption",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "generated_at",
+    "authority_level",
+    "stack_root",
+    "consumption_id",
+    "consumer",
+    "next_recommended_lane",
+    "authority",
+    "artifact_inputs",
+    "receipt_interpretation_ref",
+    "receipt_interpretation_digest",
+    "consumption_checks",
+    "consumption_result",
+    "consumption_summary",
+    "authority_guards",
+    "boundary_reminders",
+    "source_refs"
+  ],
+  "properties": {
+    "contract_version": {
+      "type": "string",
+      "const": "atlas.cortex.receipt-interpretation-stack-consumption.v1"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "authority_level": {
+      "type": "string",
+      "const": "read_only_advisory"
+    },
+    "stack_root": {
+      "type": "string",
+      "minLength": 1
+    },
+    "consumption_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "consumer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["consumer_id", "consumer_role", "consumption_mode"],
+      "properties": {
+        "consumer_id": { "type": "string", "const": "_stack" },
+        "consumer_role": { "type": "string", "minLength": 1 },
+        "consumption_mode": { "type": "string", "const": "artifact_refs_only" }
+      }
+    },
+    "next_recommended_lane": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["lane_id", "owner_layer", "rationale"],
+      "properties": {
+        "lane_id": { "type": "string", "minLength": 1 },
+        "owner_layer": { "type": "string", "minLength": 1 },
+        "rationale": { "type": "string" }
+      }
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stack_consumption_authorized",
+        "automatic_dispatch_enabled",
+        "final_receipt_authorized",
+        "approval_authorized",
+        "execution_authorized",
+        "dispatch_authorized",
+        "owner_truth_mutation_authorized",
+        "lifeline_truth_mutation_authorized",
+        "transcript_scraping_allowed"
+      ],
+      "properties": {
+        "stack_consumption_authorized": { "type": "boolean", "const": true },
+        "automatic_dispatch_enabled": { "type": "boolean", "const": false },
+        "final_receipt_authorized": { "type": "boolean", "const": false },
+        "approval_authorized": { "type": "boolean", "const": false },
+        "execution_authorized": { "type": "boolean", "const": false },
+        "dispatch_authorized": { "type": "boolean", "const": false },
+        "owner_truth_mutation_authorized": { "type": "boolean", "const": false },
+        "lifeline_truth_mutation_authorized": { "type": "boolean", "const": false },
+        "transcript_scraping_allowed": { "type": "boolean", "const": false }
+      }
+    },
+    "artifact_inputs": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/artifact_input" }
+    },
+    "receipt_interpretation_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "receipt_interpretation_digest": {
+      "type": "string",
+      "pattern": "^sha256:"
+    },
+    "consumption_checks": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/check" }
+    },
+    "consumption_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "ready_for_stack_consumer", "blocked_reason", "failed_checks"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["ready", "blocked"]
+        },
+        "ready_for_stack_consumer": { "type": "boolean" },
+        "blocked_reason": { "type": ["string", "null"] },
+        "failed_checks": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "consumption_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "interpreted_status",
+        "what_changed",
+        "what_proved",
+        "what_remains_blocked",
+        "receipt_authority_summary"
+      ],
+      "properties": {
+        "interpreted_status": { "type": "string", "minLength": 1 },
+        "what_changed": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "what_proved": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "what_remains_blocked": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "receipt_authority_summary": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "authority_guards": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "boundary_reminders": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "source_refs": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "$defs": {
+    "artifact_input": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["role", "ref", "contract_version", "digest"],
+      "properties": {
+        "role": { "type": "string", "minLength": 1 },
+        "ref": { "type": "string", "minLength": 1 },
+        "contract_version": { "type": "string" },
+        "digest": {
+          "type": "string",
+          "pattern": "^sha256:"
+        }
+      }
+    },
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["check_id", "status", "summary"],
+      "properties": {
+        "check_id": { "type": "string", "minLength": 1 },
+        "status": {
+          "type": "string",
+          "enum": ["passed", "failed"]
+        },
+        "summary": { "type": "string", "minLength": 1 },
+        "source_ref": {
+          "type": ["string", "null"]
+        }
+      }
+    }
+  }
+}
