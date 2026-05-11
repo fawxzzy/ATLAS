@@ -1,6 +1,6 @@
 {
   "contract_version": "atlas.cortex.receipt-interpretation.v1",
-  "generated_at": "2026-05-11T21:47:12.729542+00:00",
+  "generated_at": "2026-05-11T21:53:35.905044+00:00",
   "authority_level": "read_only_interpretation",
   "stack_root": "C:/ATLAS/tmp/r18-main-merge-20260511",
   "interpretation_id": "receipt-interpretation-stabilize-root-worktree",
@@ -24,31 +24,31 @@
       "role": "worker_prompt",
       "ref": "runtime/cortex/worker-prompts/latest.json",
       "contract_version": "atlas.cortex.worker-prompt.v1",
-      "digest": "sha256:fd0a4b3093b18608ba3d21af4ea27ff42aa2778aec2a9ec461fb96693287af24"
+      "digest": "sha256:f2ef22a1b37a0642d6071bfb3225af3bd4d41ab2dfb4466b4d196831767d7491"
     },
     {
       "role": "stack_advisory_handoff",
       "ref": "runtime/cortex/stack-advisory-handoff/latest.json",
       "contract_version": "atlas.cortex.stack-advisory-handoff.v2",
-      "digest": "sha256:5a2f0aa0e65c2b129a5d858e6d10c286e3dc4e5c001012aee68b430f1b194c0b"
+      "digest": "sha256:cee6f52eb9842fcc72f604ca795ce8d1ea8a93a8b8324bbdcd6ffb9e92906ad1"
     },
     {
       "role": "stack_consumption_pilot",
       "ref": "runtime/cortex/stack-consumption-pilot/latest.json",
       "contract_version": "atlas.cortex.stack-consumption-pilot.v1",
-      "digest": "sha256:ebf2760791df595a88c7ec1abe5d7873724623a0d56d42388117600ec77f457d"
+      "digest": "sha256:8a9902eb2f470c7bed02a0832db4069a93ca6bc4d7838bd6e153d12005679908"
     },
     {
       "role": "ledger",
       "ref": "runtime/cortex/ledger/latest.json",
       "contract_version": "atlas.cortex.ledger.v1",
-      "digest": "sha256:d46bd76d9714c1f42d9c004954d7382dba2b553706b9991c0189b45f5e1cdccf"
+      "digest": "sha256:294c0c2551f8b98da0d7434bb4a7caafd8d79fd86827cd4ca60b504b3220e24c"
     },
     {
       "role": "validation_receipt",
       "ref": "runtime/receipts/validation/stack-validation.latest.json",
       "contract_version": "",
-      "digest": "sha256:44136eb0a509cfcc21674032a2e959378fb42d0f49cfecc861e054ccdba3d9ec"
+      "digest": "sha256:d19a3687a609a2055e4193046dfc8327a1b61cc2ae2e0c35a0aabb90f651c098"
     },
     {
       "role": "state_model_seed",

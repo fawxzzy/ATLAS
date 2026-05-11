@@ -1,6 +1,6 @@
 {
   "contract_version": "atlas.cortex.stack-advisory-handoff.v2",
-  "generated_at": "2026-05-11T21:47:12.080760+00:00",
+  "generated_at": "2026-05-11T21:53:35.290734+00:00",
   "authority_level": "read_only_advisory",
   "stack_root": "C:/ATLAS/tmp/r18-main-merge-20260511",
   "handoff_id": "stack-advisory-handoff-stabilize-root-worktree",
@@ -29,25 +29,25 @@
       "role": "worker_prompt",
       "ref": "runtime/cortex/worker-prompts/latest.json",
       "contract_version": "atlas.cortex.worker-prompt.v1",
-      "digest": "sha256:fd0a4b3093b18608ba3d21af4ea27ff42aa2778aec2a9ec461fb96693287af24"
+      "digest": "sha256:f2ef22a1b37a0642d6071bfb3225af3bd4d41ab2dfb4466b4d196831767d7491"
     },
     {
       "role": "context",
       "ref": "runtime/cortex/context/latest.json",
       "contract_version": "atlas.cortex.context-packet.v1",
-      "digest": "sha256:9872857125d44a26bd6677ef26409e6ee43f2a517dfac8a008ddcacb7fade93e"
+      "digest": "sha256:de9850cdf13b5f3cb8561debf9c1bebde3618a9ecae128d36641149adfe96c84"
     },
     {
       "role": "operator_surface",
       "ref": "runtime/cortex/operator-surface/latest.json",
       "contract_version": "atlas.cortex.operator-surface.v1",
-      "digest": "sha256:da8f5c2874b9913e9bc877113a8484f704b4072faadf8ea0d870e18100f8f01b"
+      "digest": "sha256:a52f13b4f1b88eadfa2d95e9341cb72b709df640eecca70fb4a7fcfd5a1f150f"
     },
     {
       "role": "ledger",
       "ref": "runtime/cortex/ledger/latest.json",
       "contract_version": "atlas.cortex.ledger.v1",
-      "digest": "sha256:d46bd76d9714c1f42d9c004954d7382dba2b553706b9991c0189b45f5e1cdccf"
+      "digest": "sha256:294c0c2551f8b98da0d7434bb4a7caafd8d79fd86827cd4ca60b504b3220e24c"
     },
     {
       "role": "state_model_seed",
