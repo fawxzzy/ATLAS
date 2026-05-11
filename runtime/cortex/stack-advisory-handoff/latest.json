@@ -1,6 +1,6 @@
 {
   "contract_version": "atlas.cortex.stack-advisory-handoff.v2",
-  "generated_at": "2026-05-07T18:34:35.738780+00:00",
+  "generated_at": "2026-05-09T21:28:58.314202+00:00",
   "authority_level": "read_only_advisory",
   "stack_root": "C:/ATLAS",
   "handoff_id": "stack-advisory-handoff-promote-cortex-receipt-interpretation-contract-wave9",
@@ -29,25 +29,25 @@
       "role": "worker_prompt",
       "ref": "runtime/cortex/worker-prompts/latest.json",
       "contract_version": "atlas.cortex.worker-prompt.v1",
-      "digest": "sha256:3aa84507468f7e7dbbddaac85b3cff6297dad53929e9789f04701d83881925a0"
+      "digest": "sha256:adb58f82cb13ffde96673820a19a8f472d47025b162dc2d2b2cd5ff22ac9dd53"
     },
     {
       "role": "context",
       "ref": "runtime/cortex/context/latest.json",
       "contract_version": "atlas.cortex.context-packet.v1",
-      "digest": "sha256:64039c64d209dc04719ec339bf4410c215205cf2d7fad84cfe9c251ddf5f2779"
+      "digest": "sha256:87356fcb5d31acebd8239bfe6d6fa8353ce5ce457f8fbfdceb1b4bcd26e747bc"
     },
     {
       "role": "operator_surface",
       "ref": "runtime/cortex/operator-surface/latest.json",
       "contract_version": "atlas.cortex.operator-surface.v1",
-      "digest": "sha256:f19402b30df071decabda8b6c3a464cc5794d4d9839eee32eb529fe72150f652"
+      "digest": "sha256:ea4072a25043f96fc577b6b9775285a7cd0a1eeecec4bb23ea968d8772e17a3e"
     },
     {
       "role": "ledger",
       "ref": "runtime/cortex/ledger/latest.json",
       "contract_version": "atlas.cortex.ledger.v1",
-      "digest": "sha256:5fca332ac139d7376c2b0e46c90a3faf487ffdc00162527e88a16dfa70ea9e81"
+      "digest": "sha256:90ee29591370de01a8a623f3eda881cc8617bce8996f46e18ca7036a38a2311f"
     },
     {
       "role": "state_model_seed",
@@ -74,26 +74,34 @@
   "advisory_assignment": {
     "run_id": "cortex-run-promote-cortex-receipt-interpretation-contract-wave9",
     "assignment_id": "assignment-promote-cortex-receipt-interpretation-contract-wave9",
-    "objective": "Keep the next tranche inside Cortex-owned runtime work. Selected next action: Promote Cortex receipt interpretation contract..",
+    "objective": "Promote the Cortex receipt interpretation contract as a read-only proof-summary surface without replacing Lifeline receipt authority. Selected next action: Promote Cortex receipt interpretation contract..",
     "implementation_plan": [
-      "Stay inside Cortex runtime modules and their direct tests.",
-      "Preserve the active Cortex priority pivot and do not reopen other lanes.",
-      "Keep the change PR-sized and deterministic.",
+      "Add one read-only receipt interpretation artifact that consumes explicit Cortex, _stack, validation, and Lifeline receipt-like artifacts.",
+      "Emit deterministic proof summaries for what changed, what proved, and what remains blocked without issuing final receipts.",
+      "Block interpretation when validation, handoff, pilot, or final-receipt authority guards are widened.",
       "Respect receipt scope: Cortex may interpret explicit receipt artifacts and summarize proof posture only. Cortex must not issue final receipts, approve work, mutate owner truth, or replace Lifeline receipt authority."
     ],
     "files_to_modify": [
-      "ops/cortex/*.py",
-      "tests/test_cortex_*.py"
+      "ops/cortex/receipt_interpreter.py",
+      "ops/cortex/worker_plan.py",
+      "schemas/atlas.cortex.receipt-interpretation.v1.json",
+      "tests/test_cortex_receipt_interpreter.py",
+      "tests/test_cortex_worker_plan.py",
+      "tests/test_cortex_worker_prompt.py"
     ],
     "files_to_avoid": [
+      "stack.yaml",
       "repos/**",
       "apps/**",
-      "packages/**"
+      "packages/**",
+      "runtime/lifeline/**",
+      "runtime/atlas/conversations/**",
+      "runtime/atlas/sessions/**"
     ],
     "verification_steps": [
       "python -m unittest tests.test_cortex_stack_handoff tests.test_cortex_stack_consumption_pilot tests.test_cortex_worker_prompt tests.test_cortex_worker_plan tests.test_cortex_current_state tests.test_cortex_rail_state_reader tests.test_cortex_context_assembler tests.test_cortex_operator_surface tests.test_cortex_ledger tests.test_cortex_loop tests.test_cortex_run_artifact tests.test_cortex_run_ledger -v",
       "python .\\ops\\validation\\validate_stack.py",
-      "python -m unittest tests.test_cortex_worker_plan"
+      "python -m unittest tests.test_cortex_receipt_interpreter tests.test_cortex_worker_prompt tests.test_cortex_worker_plan"
     ],
     "matched_rule_ids": [
       "known-validation-debt-stays-ambient-unless-regression",
@@ -102,7 +110,13 @@
       "cortex-observes-interprets-proves-only"
     ],
     "failure_modes_to_avoid": [
-      "Cortex observes, interprets, and proves; it does not own product, governance, receipt, or enforcement truth."
+      "Cortex observes, interprets, and proves; it does not own product, governance, receipt, or enforcement truth.",
+      "Do not issue final receipts.",
+      "Do not approve work.",
+      "Do not mutate Lifeline truth or owner truth.",
+      "Do not treat receipt interpretation as execution authority.",
+      "Do not scrape transcripts.",
+      "Do not collapse receipt candidate, proof summary, final receipt, and interpretation into one mutable truth store."
     ]
   },
   "handoff_checks": [

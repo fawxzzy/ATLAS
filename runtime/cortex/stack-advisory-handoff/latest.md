@@ -1,6 +1,6 @@
 # Cortex Stack Advisory Handoff
 
-- Generated: `2026-05-07T18:34:35.738780+00:00`
+- Generated: `2026-05-09T21:28:58.314202+00:00`
 - Handoff id: `stack-advisory-handoff-promote-cortex-receipt-interpretation-contract-wave9`
 - Authority level: `read_only_advisory`
 - Consumer: `_stack`
