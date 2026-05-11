@@ -8,8 +8,8 @@ components:
     role: "workflow-operator"
     status: "active"
     remote: null
-    ref_type: "branch"
-    ref: "main"
+    ref_type: "commit"
+    ref: "ef5cfc84e583c616a89ce13694541207518f1206"
     commit: "ef5cfc84e583c616a89ce13694541207518f1206"
     dirty: false
     trust_class: "trusted"
@@ -19,9 +19,9 @@ components:
     role: "local-operator"
     status: "active"
     remote: "https://github.com/fawxzzy/fawxzzy-lifeline.git"
-    ref_type: "branch"
-    ref: "main"
-    commit: "39b15edbaec9597f60a586b5bbdb179afbc45582"
+    ref_type: "commit"
+    ref: "89357af70fc103137bd5f46c76d3c81549ba64fc"
+    commit: "89357af70fc103137bd5f46c76d3c81549ba64fc"
     dirty: false
     trust_class: "trusted"
     release_eligible: true
@@ -30,8 +30,8 @@ components:
     role: "application"
     status: "active"
     remote: "https://github.com/fawxzzy/fawxzzy-mazer.git"
-    ref_type: "branch"
-    ref: "codex/mazer-remove-pwa-install-surface"
+    ref_type: "commit"
+    ref: "021291d2b4f75379ab7e4c7891e302b54d4845c6"
     commit: "021291d2b4f75379ab7e4c7891e302b54d4845c6"
     dirty: false
     trust_class: "trusted"
@@ -41,10 +41,10 @@ components:
     role: "application"
     status: "incubating"
     remote: "https://github.com/ZachariahRedfield/nat1-games.git"
-    ref_type: "branch"
-    ref: "main"
+    ref_type: "commit"
+    ref: "412846a1baac6c0ce782ab9ab94530ccf4e89ff5"
     commit: "412846a1baac6c0ce782ab9ab94530ccf4e89ff5"
-    dirty: true
+    dirty: false
     trust_class: "trusted"
     release_eligible: false
   playbook:
@@ -52,10 +52,10 @@ components:
     role: "governance-runtime"
     status: "active"
     remote: "https://github.com/fawxzzy/fawxzzy-playbook.git"
-    ref_type: "branch"
-    ref: "codex/workflow-pack-environment-bridge-engine"
-    commit: "0dad28cb553df5bfad43a4d3012234f210805929"
-    dirty: true
+    ref_type: "commit"
+    ref: "bdd80eb19db1835cd97c8c2d1fbee2070f273a50"
+    commit: "bdd80eb19db1835cd97c8c2d1fbee2070f273a50"
+    dirty: false
     trust_class: "trusted"
     release_eligible: true
   playbook-demo:
@@ -63,8 +63,8 @@ components:
     role: "demo"
     status: "demo"
     remote: "https://github.com/ZachariahRedfield/playbook-demo.git"
-    ref_type: "branch"
-    ref: "main"
+    ref_type: "commit"
+    ref: "4d0444bcb14c3470fe0913a21c8739f0791a1827"
     commit: "4d0444bcb14c3470fe0913a21c8739f0791a1827"
     dirty: false
     trust_class: "trusted"
@@ -75,8 +75,8 @@ components:
     status: "active"
     remote: "https://github.com/fawxzzy/ATLAS.git"
     ref_type: "branch"
-    ref: "codex/cortex-receipt-interpretation-contract-wave9"
-    commit: "748100502636a65db9ad471f32b66987830daab4"
+    ref: "codex/r18-main-land"
+    commit: "23e560be798e3beab8dc8ff39ff5361292c0b01d"
     dirty: false
     trust_class: "trusted"
     release_eligible: false
@@ -85,8 +85,8 @@ components:
     role: "application"
     status: "incubating"
     remote: null
-    ref_type: "branch"
-    ref: "main"
+    ref_type: "commit"
+    ref: "1dd3298c556b4d0839e6bb43b3dde7c3527022f7"
     commit: "1dd3298c556b4d0839e6bb43b3dde7c3527022f7"
     dirty: false
     trust_class: "trusted"
@@ -96,10 +96,10 @@ components:
     role: "application"
     status: "active"
     remote: "https://github.com/fawxzzy/fawxzzy-trove.git"
-    ref_type: "branch"
-    ref: "codex/trove-brand-asset-sync"
-    commit: "9ab7ba4f3582897c4aaadd41d7dcb17c3679d15b"
-    dirty: true
+    ref_type: "commit"
+    ref: "bce14fcc1ad6e826b0c0eac37e13af6707ee3a8e"
+    commit: "bce14fcc1ad6e826b0c0eac37e13af6707ee3a8e"
+    dirty: false
     trust_class: "trusted"
     release_eligible: true
 excluded_surfaces:
@@ -127,4 +127,4 @@ excluded_surfaces:
     trust_class: "untrusted"
     release_eligible: false
     reason: "Token-bearing Verta checkout remains quarantined and untrusted until scrub and rotation are complete."
-lock_digest: "sha256:f8b3a194f97889602570a4f9a00dff207ae561cccfd30bf1b05f5b0c1b6bd795"
+lock_digest: "sha256:54c824ff42f040552b40e51bba424b19b4ee3889eb6a3e2c1002617eb5f9ecf2"
