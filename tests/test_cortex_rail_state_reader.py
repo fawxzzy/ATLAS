@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import io
 import json
@@ -81,7 +81,7 @@ class CortexRailStateReaderTests(unittest.TestCase):
         }
         payload["active_blockers"] = []
         payload["next_recommended_lane"] = {
-            "lane_id": "promote-cortex-receipt-interpretation-contract-wave9",
+            "lane_id": "promote-cortex-receipt-interpretation-stack-consumption-wave10",
             "owner_layer": "cortex",
             "rationale": "The bounded _stack stack-consumption pilot is landed, but Cortex still needs one promoted default _stack consumer routing contract that consumes explicit Cortex worker-prompt, context, operator, ledger, and pilot artifacts without transcript scraping, execution authority, owner-truth mutation, or Lifeline receipt authority.",
             "blocked_by": [],
@@ -119,9 +119,9 @@ class CortexRailStateReaderTests(unittest.TestCase):
 
         self.assertEqual("cortex-mvp", payload["active_rail"])
         self.assertEqual("ready", payload["rail_status"])
-        self.assertEqual("promote-cortex-receipt-interpretation-contract-wave9", payload["next_recommended_lane"]["lane_id"])
+        self.assertEqual("promote-cortex-receipt-interpretation-stack-consumption-wave10", payload["next_recommended_lane"]["lane_id"])
         self.assertEqual([], payload["active_blockers"])
-        self.assertIn("cortex-receipt-interpretation-contract-v0-1", payload["dirty_lanes"])
+        self.assertIn("cortex-receipt-interpretation-stack-consumption-v0-1", payload["dirty_lanes"])
 
     def test_validation_blocker_forces_stabilize_stack_validation(self) -> None:
         current_state_payload = self._base_current_state_payload()
@@ -142,7 +142,7 @@ class CortexRailStateReaderTests(unittest.TestCase):
 
         self.assertEqual("blocked", payload["rail_status"])
         self.assertEqual("stabilize-stack-validation", payload["next_recommended_lane"]["lane_id"])
-        self.assertEqual(["stabilize-stack-validation", "cortex-receipt-interpretation-contract-v0-1"], payload["dirty_lanes"])
+        self.assertEqual(["stabilize-stack-validation", "cortex-receipt-interpretation-stack-consumption-v0-1"], payload["dirty_lanes"])
 
     def test_dirty_worktree_forces_stabilize_root_worktree(self) -> None:
         current_state_payload = self._base_current_state_payload()
@@ -177,7 +177,7 @@ class CortexRailStateReaderTests(unittest.TestCase):
 
         self.assertEqual("stabilize-first", payload["rail_status"])
         self.assertEqual("stabilize-root-worktree", payload["next_recommended_lane"]["lane_id"])
-        self.assertEqual(["stabilize-root-worktree", "cortex-receipt-interpretation-contract-v0-1"], payload["dirty_lanes"])
+        self.assertEqual(["stabilize-root-worktree", "cortex-receipt-interpretation-stack-consumption-v0-1"], payload["dirty_lanes"])
 
     def test_missing_current_state_artifact_fails_clearly(self) -> None:
         temp_dir = tempfile.TemporaryDirectory()
@@ -204,7 +204,7 @@ class CortexRailStateReaderTests(unittest.TestCase):
         payload = build_rail_state_payload(root=root)
 
         self.assertEqual("bounded-fallback", payload["rail_status"])
-        self.assertEqual("promote-cortex-receipt-interpretation-contract-wave9", payload["next_recommended_lane"]["lane_id"])
+        self.assertEqual("promote-cortex-receipt-interpretation-stack-consumption-wave10", payload["next_recommended_lane"]["lane_id"])
         self.assertEqual(
             [
                 "runtime/cortex/current-state/latest.json",
@@ -267,3 +267,4 @@ class CortexRailStateReaderTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
