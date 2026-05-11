@@ -39,7 +39,7 @@
         "source_inputs": [
           "PR #20 Add Cortex receipt interpretation contract",
           "targeted Cortex unittest proof",
-          "stack validation receipt critical=0 error=0 warning=532 info=1"
+          "stack validation receipt critical=0 error=0 warning=16 info=1"
         ],
         "completed_at": "2026-05-10"
       },
@@ -77,7 +77,7 @@
           ],
           "failed": [],
           "known_debt": [
-            "warning=532 info=1 remain ambient ATLAS root debt outside this Cortex seed-progression lane."
+            "warning=16 info=1 remain ambient ATLAS root debt outside this Cortex seed-progression lane."
           ],
           "notes": [
             "Do not classify unchanged warning debt as a Cortex regression.",
