@@ -54,7 +54,7 @@ class CortexRunArtifactTests(unittest.TestCase):
             payload = json.loads(artifact.artifact_path.read_text(encoding="utf-8"))
             summary = artifact.summary_path.read_text(encoding="utf-8") if artifact.summary_path is not None else ""
 
-        self.assertEqual("promote-cortex-receipt-interpretation-stack-consumption-wave10", payload["selected_next_action"]["action_id"])
+        self.assertEqual("promote-cortex-receipt-interpretation-consumption-feedback-wave11", payload["selected_next_action"]["action_id"])
         self.assertEqual(
             "cortex_receipt_interpretation_stack_consumption_contract",
             payload["worker_plan"]["template_id"],

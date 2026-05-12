@@ -227,6 +227,40 @@ class CortexWorkerPlanTests(unittest.TestCase):
         self.assertIn("Do not dispatch _stack work.", plan.failure_modes_to_avoid)
         self.assertIn("Do not treat stack consumption as execution authority.", plan.failure_modes_to_avoid)
 
+    def test_receipt_interpretation_consumption_feedback_next_action_produces_contract_template(self) -> None:
+        posture, rail_state, next_action = self._with_state(
+            posture=replace(self.posture, classification="pivoted"),
+            rail_state=replace(
+                self.posture.rail_state,
+                owner_layer="cortex",
+                next_action=replace(
+                    self.posture.rail_state.next_action,
+                    action_id="promote-cortex-receipt-interpretation-consumption-feedback-wave11",
+                    owner_layer="cortex",
+                    title="Promote Cortex receipt interpretation consumption feedback.",
+                    rationale="Cortex needs one read-only feedback contract over receipt-interpretation stack consumption.",
+                    receipt_scope=(
+                        "Cortex may summarize receipt-interpretation stack consumption as read-only rail feedback only. "
+                        "Do not enable dispatch, execution, approval, final receipt authority, owner-truth mutation, "
+                        "Lifeline-truth mutation, or transcript scraping."
+                    ),
+                    verification_plan=(
+                        "python -m unittest tests.test_cortex_worker_prompt tests.test_cortex_worker_plan",
+                    ),
+                ),
+            ),
+        )
+
+        plan = build_worker_plan(posture, rail_state, next_action, self.rules)
+
+        self.assertEqual("cortex_receipt_interpretation_consumption_feedback_contract", plan.template_id)
+        self.assertIn("read-only", plan.prompt.lower())
+        self.assertIn("ops/cortex/receipt_interpretation_consumption_feedback.py", plan.files_to_modify)
+        self.assertIn("schemas/atlas.cortex.receipt-interpretation-consumption-feedback.v1.json", plan.files_to_modify)
+        self.assertIn("runtime/lifeline/**", plan.files_to_avoid)
+        self.assertIn("Do not scrape transcripts.", plan.failure_modes_to_avoid)
+        self.assertIn("Do not execute work.", plan.failure_modes_to_avoid)
+
     def test_fitness_owner_adoption_next_action_produces_fitness_scoped_prompt(self) -> None:
         posture, rail_state, next_action = self._with_state(
             posture=replace(self.posture, classification="steady"),

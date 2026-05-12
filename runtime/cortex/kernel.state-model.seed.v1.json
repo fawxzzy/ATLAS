@@ -3,7 +3,7 @@
   "posture": {
     "posture_id": "cortex-wave1-landed",
     "classification": "pivoted",
-    "summary": "Cortex current-state, rail-state, context assembly, operator surface, canonical ledger, worker-prompt contract, canonical stack advisory handoff v2, bounded _stack stack-consumption pilot proof, and read-only receipt interpretation are landed; the active product lane remains Cortex, the next tranche is seed-only rail progression toward the follow-on stack-consumption lane, and known stack validation debt stays ambient debt.",
+    "summary": "Cortex current-state, rail-state, context assembly, operator surface, canonical ledger, worker-prompt contract, canonical stack advisory handoff v2, bounded _stack stack-consumption pilot proof, read-only receipt interpretation, and bounded receipt-interpretation stack consumption are landed; the active product lane remains Cortex, the next tranche is seed-only rail progression toward read-only receipt-interpretation consumption feedback, and known stack validation debt stays ambient debt.",
     "handoff_summaries": [
       "docs/atlas/notes/cortex-priority-pivot-2026-04-26.md",
       "docs/atlas/notes/cortex-mvp-spec-2026-04-26.md",
@@ -22,44 +22,46 @@
       "rail_id": "cortex-mvp",
       "owner_layer": "cortex",
       "latest_clean_step": {
-        "step_id": "cortex-receipt-interpretation-contract-v0-1",
+        "step_id": "cortex-receipt-interpretation-stack-consumption-v0-1",
         "owner_layer": "cortex",
-        "summary": "Wave 9 landed the read-only Cortex receipt interpretation contract as an explicit proof-summary surface over worker, _stack, validation, and Lifeline receipt-like artifacts; it preserved Lifeline final receipt authority, did not approve work, did not dispatch or execute work, did not mutate owner truth, and did not scrape transcripts.",
+        "summary": "Wave 10 landed bounded _stack consumption of Cortex receipt interpretation artifacts through explicit artifact refs only. It did not dispatch work, execute work, approve work, issue final receipts, mutate owner truth, mutate Lifeline truth, or scrape transcripts.",
         "status": "clean",
         "evidence": [
-          "ops/cortex/receipt_interpreter.py",
-          "ops/cortex/worker_plan.py",
-          "schemas/atlas.cortex.receipt-interpretation.v1.json",
+          "ops/cortex/receipt_interpretation_stack_consumption.py",
+          "schemas/atlas.cortex.receipt-interpretation-stack-consumption.v1.json",
+          "runtime/cortex/receipt-interpretation-stack-consumption/latest.json",
+          "runtime/cortex/receipt-interpretation-stack-consumption/latest.md",
           "runtime/cortex/receipt-interpretation/latest.json",
-          "runtime/cortex/receipt-interpretation/latest.md",
-          "tests/test_cortex_receipt_interpreter.py",
+          "tests/test_cortex_receipt_interpretation_stack_consumption.py",
           "tests/test_cortex_worker_plan.py",
           "docs/architecture/ATLAS-CORTEX-PLAYBOOK-CODEX.md"
         ],
         "source_inputs": [
-          "PR #20 Add Cortex receipt interpretation contract",
+          "R20 direct main landing",
+          "post-R20 artifact normalization",
           "targeted Cortex unittest proof",
-          "stack validation receipt critical=0 error=0 warning=16 info=1"
+          "stack validation receipt critical=0 error=0 warning=17 info=1"
         ],
-        "completed_at": "2026-05-10"
+        "completed_at": "2026-05-12"
       },
       "dirty_lanes": [
         {
-          "lane_id": "cortex-receipt-interpretation-stack-consumption-v0-1",
+          "lane_id": "cortex-receipt-interpretation-consumption-feedback-v0-1",
           "owner_layer": "cortex",
-          "summary": "Cortex now has bounded read-only receipt interpretation, but it still needs a seed-only ratchet that opens the follow-on stack-consumption tranche without implementing new consumption behavior or widening authority.",
+          "summary": "Cortex now proves _stack can consume receipt interpretation artifacts, but it still needs a bounded feedback contract that summarizes consumed interpretation into deterministic rail feedback without dispatching work, issuing receipts, approving work, or mutating truth.",
           "status": "open",
-          "blocking_reason": "Wave 10 should advance the rail seed after receipt interpretation so the next bounded tranche is explicit, deterministic, and still non-authoritative. The tranche must not implement new stack consumption behavior yet.",
+          "blocking_reason": "Wave 11 should add a read-only feedback summary over receipt-interpretation stack consumption so Cortex can report what changed, what proved, and what remains blocked as next-lane guidance. Execution, dispatch, approval, final receipt, owner-truth mutation, Lifeline-truth mutation, and transcript scraping remain out of scope.",
           "evidence": [
+            "runtime/cortex/receipt-interpretation-stack-consumption/latest.json",
             "runtime/cortex/receipt-interpretation/latest.json",
             "runtime/cortex/stack-advisory-handoff/latest.json",
             "runtime/cortex/stack-consumption-pilot/latest.json",
             "runtime/cortex/worker-prompts/latest.json",
-            "runtime/cortex/ledger/latest.json",
-            "docs/architecture/ATLAS-CORTEX-PLAYBOOK-CODEX.md"
+            "runtime/cortex/ledger/latest.json"
           ],
           "source_inputs": [
-            "Wave 9 receipt-interpretation artifact",
+            "Wave 10 receipt-interpretation stack-consumption artifact",
+            "Wave 10 receipt-interpretation artifact",
             "Wave 8 stack-advisory-handoff artifact",
             "Wave 8 stack-consumption-pilot proof",
             "Cortex worker-prompt and ledger artifacts"
@@ -70,27 +72,28 @@
         {
           "status": "completed_with_known_debt",
           "passed": [
-            "Wave 9 receipt interpretation is tracked as the canonical Cortex proof-summary artifact.",
-            "Receipt interpretation preserves Lifeline final receipt authority and remains advisory only.",
+            "Wave 10 receipt-interpretation stack consumption is tracked as the canonical Cortex _stack-consumption artifact.",
+            "The artifact consumes receipt interpretation through explicit artifact refs only.",
+            "Receipt interpretation and stack consumption remain ready.",
             "Targeted Cortex suites are green.",
-            "python .\\ops\\validation\\validate_stack.py is critical=0 error=0."
+            "python .\\ops\\validation\\validate_stack.py --ratchet is critical=0 error=0."
           ],
           "failed": [],
           "known_debt": [
-            "warning=16 info=1 remain ambient ATLAS root debt outside this Cortex seed-progression lane."
+            "warning=17 info=1 remain ambient ATLAS root debt outside this Cortex seed-progression lane."
           ],
           "notes": [
             "Do not classify unchanged warning debt as a Cortex regression.",
-            "Wave 10 should advance the Cortex rail seed only; it must not implement new stack-consumption behavior.",
+            "Wave 11 should implement read-only feedback only, not dispatch, execution, approval, final receipt authority, owner-truth mutation, Lifeline-truth mutation, or transcript scraping.",
             "Final receipt authority, approval, execution, dispatch, owner-truth mutation, Lifeline-truth mutation, and transcript scraping remain out of scope."
           ]
         }
       ],
       "next_action": {
-        "action_id": "promote-cortex-receipt-interpretation-stack-consumption-wave10",
+        "action_id": "promote-cortex-receipt-interpretation-consumption-feedback-wave11",
         "owner_layer": "cortex",
-        "title": "Advance the Cortex rail seed after receipt interpretation.",
-        "rationale": "Cortex now emits worker prompts, a canonical stack advisory handoff, a bounded stack-consumption pilot proof, and read-only receipt interpretation. The next bounded tranche is seed-only progression into the follow-on stack-consumption lane: ratchet the rail seed and deterministic artifacts without implementing new consumption, execution, approval, dispatch, owner-truth mutation, Lifeline-truth mutation, or final-receipt behavior.",
+        "title": "Promote Cortex receipt interpretation consumption feedback.",
+        "rationale": "Cortex now emits receipt interpretation and proves _stack can consume it through explicit artifact refs. The next bounded contract is read-only feedback over that consumption: summarize what changed, what proved, and what remains blocked as deterministic next-lane guidance without dispatching work, executing work, approving work, issuing final receipts, mutating owner or Lifeline truth, or scraping transcripts.",
         "required_inputs": [
           "runtime/cortex/current-state/latest.json",
           "runtime/cortex/rail-state/latest.json",
@@ -101,16 +104,17 @@
           "runtime/cortex/stack-advisory-handoff/latest.json",
           "runtime/cortex/stack-consumption-pilot/latest.json",
           "runtime/cortex/receipt-interpretation/latest.json",
+          "runtime/cortex/receipt-interpretation-stack-consumption/latest.json",
           "runtime/cortex/kernel.state-model.seed.v1.json",
           "runtime/cortex/kernel.rule-registry.seed.v1.json",
           "runtime/receipts/validation/stack-validation.latest.json",
           "docs/architecture/ATLAS-CORTEX-PLAYBOOK-CODEX.md"
         ],
         "verification_plan": [
-          "python -m unittest tests.test_cortex_worker_plan tests.test_cortex_current_state tests.test_cortex_rail_state_reader tests.test_cortex_context_assembler tests.test_cortex_operator_surface tests.test_cortex_ledger tests.test_cortex_loop tests.test_cortex_run_artifact tests.test_cortex_worker_prompt tests.test_cortex_stack_handoff tests.test_cortex_stack_consumption_pilot tests.test_cortex_run_ledger -v",
-          "python .\\ops\\validation\\validate_stack.py"
+          "python -m unittest tests.test_cortex_receipt_interpretation_stack_consumption tests.test_cortex_receipt_interpreter tests.test_cortex_stack_handoff tests.test_cortex_stack_consumption_pilot tests.test_cortex_worker_prompt tests.test_cortex_worker_plan tests.test_cortex_current_state tests.test_cortex_rail_state_reader tests.test_cortex_context_assembler tests.test_cortex_operator_surface tests.test_cortex_ledger tests.test_cortex_loop tests.test_cortex_run_artifact tests.test_cortex_run_ledger -v",
+          "python .\\ops\\validation\\validate_stack.py --ratchet"
         ],
-        "receipt_scope": "Cortex may interpret explicit receipt artifacts and summarize proof posture only. final_receipt_authorized=false, approval_authorized=false, execution_authorized=false, dispatch_authorized=false, owner_truth_mutation_authorized=false, lifeline_truth_mutation_authorized=false, transcript_scraping_allowed=false."
+        "receipt_scope": "Cortex may summarize receipt-interpretation stack consumption as read-only rail feedback only. final_receipt_authorized=false, approval_authorized=false, execution_authorized=false, dispatch_authorized=false, owner_truth_mutation_authorized=false, lifeline_truth_mutation_authorized=false, transcript_scraping_allowed=false."
       },
       "boundary_reminders": [
         "Fitness owns product UI truth.",

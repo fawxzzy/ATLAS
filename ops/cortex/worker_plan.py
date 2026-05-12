@@ -143,6 +143,8 @@ def _select_template(posture: CortexPosture, next_action: NextAction) -> WorkerP
         return CORTEX_RECEIPT_INTERPRETATION_CONTRACT_TEMPLATE
     if next_action.action_id == "promote-cortex-receipt-interpretation-stack-consumption-wave10":
         return CORTEX_RECEIPT_INTERPRETATION_STACK_CONSUMPTION_CONTRACT_TEMPLATE
+    if next_action.action_id == "promote-cortex-receipt-interpretation-consumption-feedback-wave11":
+        return CORTEX_RECEIPT_INTERPRETATION_CONSUMPTION_FEEDBACK_CONTRACT_TEMPLATE
     if next_action.owner_layer == "cortex" or "cortex runtime" in action_text or "runtime work" in action_text:
         return CORTEX_RUNTIME_WORK_TEMPLATE
 
@@ -495,6 +497,52 @@ CORTEX_RECEIPT_INTERPRETATION_STACK_CONSUMPTION_CONTRACT_TEMPLATE = WorkerPlanTe
         "Do not treat stack consumption as execution authority.",
         "Do not scrape transcripts.",
         "Do not collapse receipt interpretation and stack consumption into final receipt truth.",
+    ),
+)
+
+
+CORTEX_RECEIPT_INTERPRETATION_CONSUMPTION_FEEDBACK_CONTRACT_TEMPLATE = WorkerPlanTemplate(
+    template_id="cortex_receipt_interpretation_consumption_feedback_contract",
+    objective=(
+        "Promote read-only Cortex feedback over receipt-interpretation stack consumption without enabling dispatch, "
+        "execution, approval, final receipt authority, owner-truth mutation, Lifeline-truth mutation, or transcript scraping."
+    ),
+    implementation_plan=(
+        "Add one read-only feedback artifact that consumes explicit receipt-interpretation stack-consumption refs and summarizes what changed, what proved, and what remains blocked.",
+        "Verify receipt interpretation, receipt-interpretation stack consumption, advisory handoff, pilot, and validation inputs stay ready while all authority-widening guards remain false.",
+        "Regenerate deterministic Cortex artifacts without turning feedback into dispatch, execution, approval, final receipt authority, owner-truth mutation, Lifeline-truth mutation, or transcript scraping.",
+    ),
+    default_files_to_modify=(
+        "ops/cortex/receipt_interpretation_consumption_feedback.py",
+        "ops/cortex/worker_plan.py",
+        "schemas/atlas.cortex.receipt-interpretation-consumption-feedback.v1.json",
+        "tests/test_cortex_receipt_interpretation_consumption_feedback.py",
+        "tests/test_cortex_worker_plan.py",
+        "tests/test_cortex_worker_prompt.py",
+    ),
+    default_files_to_avoid=(
+        "stack.yaml",
+        "repos/**",
+        "apps/**",
+        "packages/**",
+        "runtime/lifeline/**",
+        "runtime/atlas/conversations/**",
+        "runtime/atlas/sessions/**",
+    ),
+    documentation_summary=(
+        "Cortex receipt-interpretation consumption feedback is a read-only rail summary over explicit artifact refs only; it does not grant dispatch, execution, approval, final-receipt, owner-truth, Lifeline-truth, or transcript authority."
+    ),
+    default_verification_steps=(
+        "python -m unittest tests.test_cortex_worker_prompt tests.test_cortex_worker_plan -v",
+        "python .\\ops\\validation\\validate_stack.py --ratchet",
+    ),
+    default_failure_modes_to_avoid=(
+        "Do not dispatch _stack work.",
+        "Do not execute work.",
+        "Do not approve work or issue final receipts.",
+        "Do not mutate Lifeline truth or owner truth.",
+        "Do not scrape transcripts.",
+        "Do not collapse feedback, stack consumption, receipt interpretation, and final receipt truth into one mutable surface.",
     ),
 )
 

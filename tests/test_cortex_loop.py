@@ -79,7 +79,7 @@ class CortexLoopTests(unittest.TestCase):
         self.assertTrue(result.worker_plan.implementation_plan)
         self.assertTrue(result.worker_plan.failure_modes_to_avoid)
         self.assertTrue(any(rule.kind == "failure_mode" for rule in result.rules_applied))
-        self.assertEqual("promote-cortex-receipt-interpretation-stack-consumption-wave10", trace["selected_next_action_id"])
+        self.assertEqual("promote-cortex-receipt-interpretation-consumption-feedback-wave11", trace["selected_next_action_id"])
         self.assertIn("fitness-owner-adoption-resumes-unless-pivot", trace["pattern_ids"])
         self.assertIn("known-validation-debt-stays-ambient-unless-regression", trace["rule_ids"])
         self.assertIn("cortex-observes-interprets-proves-only", trace["failure_mode_ids"])
