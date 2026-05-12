@@ -1,9 +1,9 @@
 {
   "contract_version": "atlas.cortex.stack-advisory-handoff.v2",
-  "generated_at": "2026-05-11T21:53:35.290734+00:00",
+  "generated_at": "2026-05-12T00:54:59.493159+00:00",
   "authority_level": "read_only_advisory",
   "stack_root": "C:/ATLAS/tmp/r18-main-merge-20260511",
-  "handoff_id": "stack-advisory-handoff-stabilize-root-worktree",
+  "handoff_id": "stack-advisory-handoff-promote-cortex-receipt-interpretation-stack-consumption-wave10",
   "consumer": {
     "consumer_id": "_stack",
     "consumer_role": "advisory_artifact_consumer",
@@ -20,34 +20,34 @@
     "transcript_scraping_allowed": false
   },
   "next_recommended_lane": {
-    "lane_id": "stabilize-root-worktree",
-    "owner_layer": "atlas",
-    "rationale": "The root worktree is dirty, so the rail must stabilize the checkout before advancing the next Cortex lane."
+    "lane_id": "promote-cortex-receipt-interpretation-stack-consumption-wave10",
+    "owner_layer": "cortex",
+    "rationale": "Cortex now emits worker prompts, a canonical stack advisory handoff, a bounded stack-consumption pilot proof, and read-only receipt interpretation. The next bounded tranche is seed-only progression into the follow-on stack-consumption lane: ratchet the rail seed and deterministic artifacts without implementing new consumption, execution, approval, dispatch, owner-truth mutation, Lifeline-truth mutation, or final-receipt behavior."
   },
   "artifact_inputs": [
     {
       "role": "worker_prompt",
       "ref": "runtime/cortex/worker-prompts/latest.json",
       "contract_version": "atlas.cortex.worker-prompt.v1",
-      "digest": "sha256:f2ef22a1b37a0642d6071bfb3225af3bd4d41ab2dfb4466b4d196831767d7491"
+      "digest": "sha256:739cf513841cd9e786dbb3ac0efcf064d40db54c28b4df86ad4a474738f0bf2d"
     },
     {
       "role": "context",
       "ref": "runtime/cortex/context/latest.json",
       "contract_version": "atlas.cortex.context-packet.v1",
-      "digest": "sha256:de9850cdf13b5f3cb8561debf9c1bebde3618a9ecae128d36641149adfe96c84"
+      "digest": "sha256:f93aa0fca1956fa9e96b45ff74700733ce58ebf766d5da967d7bf0dd073f66ee"
     },
     {
       "role": "operator_surface",
       "ref": "runtime/cortex/operator-surface/latest.json",
       "contract_version": "atlas.cortex.operator-surface.v1",
-      "digest": "sha256:a52f13b4f1b88eadfa2d95e9341cb72b709df640eecca70fb4a7fcfd5a1f150f"
+      "digest": "sha256:413bcb8578ebe95459720ce7d5fb74a7307b1a492986f580bbeeab3332837445"
     },
     {
       "role": "ledger",
       "ref": "runtime/cortex/ledger/latest.json",
       "contract_version": "atlas.cortex.ledger.v1",
-      "digest": "sha256:294c0c2551f8b98da0d7434bb4a7caafd8d79fd86827cd4ca60b504b3220e24c"
+      "digest": "sha256:0f590e10e7ae87fb35a44c1f16e94394ff2151680cabc32b316bd4fd9869c08c"
     },
     {
       "role": "state_model_seed",
@@ -225,6 +225,10 @@
     "runtime/receipts/validation/stack-validation.latest.json",
     "runtime/cortex/kernel.proof-summary.examples.v1.json",
     "stack.lock.yaml",
+    "runtime/cortex/stack-advisory-handoff/latest.json",
+    "runtime/cortex/stack-consumption-pilot/latest.json",
+    "runtime/cortex/receipt-interpretation/latest.json",
+    "docs/architecture/ATLAS-CORTEX-PLAYBOOK-CODEX.md",
     "runtime/cortex/worker-prompts/latest.json#/planner_contract",
     "runtime/cortex/worker-prompts/latest.json#/receipt_draft_preview"
   ]

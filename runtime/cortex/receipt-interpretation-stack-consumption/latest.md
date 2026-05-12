@@ -1,12 +1,12 @@
 # Cortex Receipt Interpretation Stack Consumption
 
-- Generated: `2026-05-11T21:53:36.221256+00:00`
-- Consumption id: `receipt-interpretation-stack-consumption-stabilize-root-worktree`
+- Generated: `2026-05-12T00:55:00.522592+00:00`
+- Consumption id: `receipt-interpretation-stack-consumption-promote-cortex-receipt-interpretation-stack-consumption-wave10`
 - Authority level: `read_only_advisory`
 - Consumer: `_stack`
 - Consumer role: `receipt_interpretation_artifact_consumer`
 - Consumption mode: `artifact_refs_only`
-- Next recommended lane: `stabilize-root-worktree` (atlas)
+- Next recommended lane: `promote-cortex-receipt-interpretation-stack-consumption-wave10` (cortex)
 - Consumption status: `ready`
 - Ready for _stack consumer: `yes`
 - Stack consumption authorized: `yes`

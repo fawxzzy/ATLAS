@@ -1,9 +1,9 @@
 # Cortex Receipt Interpretation
 
-- Generated: `2026-05-11T21:53:35.905044+00:00`
-- Interpretation id: `receipt-interpretation-stabilize-root-worktree`
+- Generated: `2026-05-12T00:55:00.189652+00:00`
+- Interpretation id: `receipt-interpretation-promote-cortex-receipt-interpretation-stack-consumption-wave10`
 - Authority level: `read_only_interpretation`
-- Next recommended lane: `stabilize-root-worktree` (atlas)
+- Next recommended lane: `promote-cortex-receipt-interpretation-stack-consumption-wave10` (cortex)
 - Interpretation status: `ready`
 - Proof status: `proof_ready`
 - Ready for _stack consumer: `yes`

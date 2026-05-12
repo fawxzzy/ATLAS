@@ -1,18 +1,18 @@
 {
   "contract_version": "atlas.cortex.receipt-interpretation-stack-consumption.v1",
-  "generated_at": "2026-05-11T21:53:36.221256+00:00",
+  "generated_at": "2026-05-12T00:55:00.522592+00:00",
   "authority_level": "read_only_advisory",
   "stack_root": "C:/ATLAS/tmp/r18-main-merge-20260511",
-  "consumption_id": "receipt-interpretation-stack-consumption-stabilize-root-worktree",
+  "consumption_id": "receipt-interpretation-stack-consumption-promote-cortex-receipt-interpretation-stack-consumption-wave10",
   "consumer": {
     "consumer_id": "_stack",
     "consumer_role": "receipt_interpretation_artifact_consumer",
     "consumption_mode": "artifact_refs_only"
   },
   "next_recommended_lane": {
-    "lane_id": "stabilize-root-worktree",
-    "owner_layer": "atlas",
-    "rationale": "The root worktree is dirty, so the rail must stabilize the checkout before advancing the next Cortex lane."
+    "lane_id": "promote-cortex-receipt-interpretation-stack-consumption-wave10",
+    "owner_layer": "cortex",
+    "rationale": "Cortex now emits worker prompts, a canonical stack advisory handoff, a bounded stack-consumption pilot proof, and read-only receipt interpretation. The next bounded tranche is seed-only progression into the follow-on stack-consumption lane: ratchet the rail seed and deterministic artifacts without implementing new consumption, execution, approval, dispatch, owner-truth mutation, Lifeline-truth mutation, or final-receipt behavior."
   },
   "authority": {
     "stack_consumption_authorized": true,
@@ -30,37 +30,37 @@
       "role": "receipt_interpretation",
       "ref": "runtime/cortex/receipt-interpretation/latest.json",
       "contract_version": "atlas.cortex.receipt-interpretation.v1",
-      "digest": "sha256:0efffd1f52de74a12881be8336380c473ef22990b7c2445e891c1c618f2bf0a0"
+      "digest": "sha256:4f8756a0cfa8f2ad4c43a8027e0dafbc4cf9f8feba22899f5e47a2d5df662013"
     },
     {
       "role": "stack_advisory_handoff",
       "ref": "runtime/cortex/stack-advisory-handoff/latest.json",
       "contract_version": "atlas.cortex.stack-advisory-handoff.v2",
-      "digest": "sha256:cee6f52eb9842fcc72f604ca795ce8d1ea8a93a8b8324bbdcd6ffb9e92906ad1"
+      "digest": "sha256:3beabc3fdcd06a284ed6b4fcb68079ce954bb81bbafcee55864ae2c3062eec77"
     },
     {
       "role": "stack_consumption_pilot",
       "ref": "runtime/cortex/stack-consumption-pilot/latest.json",
       "contract_version": "atlas.cortex.stack-consumption-pilot.v1",
-      "digest": "sha256:8a9902eb2f470c7bed02a0832db4069a93ca6bc4d7838bd6e153d12005679908"
+      "digest": "sha256:ba592036008c0f077c0bb1eb4803de697b1d63dd91c0adf896744a39e853af1d"
     },
     {
       "role": "worker_prompt",
       "ref": "runtime/cortex/worker-prompts/latest.json",
       "contract_version": "atlas.cortex.worker-prompt.v1",
-      "digest": "sha256:f2ef22a1b37a0642d6071bfb3225af3bd4d41ab2dfb4466b4d196831767d7491"
+      "digest": "sha256:739cf513841cd9e786dbb3ac0efcf064d40db54c28b4df86ad4a474738f0bf2d"
     },
     {
       "role": "ledger",
       "ref": "runtime/cortex/ledger/latest.json",
       "contract_version": "atlas.cortex.ledger.v1",
-      "digest": "sha256:294c0c2551f8b98da0d7434bb4a7caafd8d79fd86827cd4ca60b504b3220e24c"
+      "digest": "sha256:0f590e10e7ae87fb35a44c1f16e94394ff2151680cabc32b316bd4fd9869c08c"
     },
     {
       "role": "validation_receipt",
       "ref": "runtime/receipts/validation/stack-validation.latest.json",
       "contract_version": "",
-      "digest": "sha256:d19a3687a609a2055e4193046dfc8327a1b61cc2ae2e0c35a0aabb90f651c098"
+      "digest": "sha256:3db762105e4a68c9895192919f4d946082f684c2aeb3f449642bc5986ce3c60a"
     },
     {
       "role": "state_model_seed",
@@ -76,7 +76,7 @@
     }
   ],
   "receipt_interpretation_ref": "runtime/cortex/receipt-interpretation/latest.json",
-  "receipt_interpretation_digest": "sha256:0efffd1f52de74a12881be8336380c473ef22990b7c2445e891c1c618f2bf0a0",
+  "receipt_interpretation_digest": "sha256:4f8756a0cfa8f2ad4c43a8027e0dafbc4cf9f8feba22899f5e47a2d5df662013",
   "consumption_checks": [
     {
       "check_id": "receipt-interpretation-ready",
@@ -137,7 +137,7 @@
     "interpreted_status": "proof_ready",
     "what_changed": [
       "_stack consumed the Cortex receipt interpretation artifact through explicit artifact refs only.",
-      "Cortex selected lane stabilize-root-worktree for read-only receipt interpretation.",
+      "Cortex selected lane promote-cortex-receipt-interpretation-stack-consumption-wave10 for read-only receipt interpretation.",
       "Receipt interpretation joins worker prompt, stack handoff, stack pilot, ledger, validation, seed, and rule artifacts."
     ],
     "what_proved": [
@@ -185,6 +185,7 @@
     "runtime/cortex/rail-state/latest.json",
     "runtime/cortex/kernel.proof-summary.examples.v1.json",
     "stack.lock.yaml",
+    "docs/architecture/ATLAS-CORTEX-PLAYBOOK-CODEX.md",
     "runtime/cortex/worker-prompts/latest.json#/planner_contract",
     "runtime/cortex/worker-prompts/latest.json#/receipt_draft_preview"
   ]
