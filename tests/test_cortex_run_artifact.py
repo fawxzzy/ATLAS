@@ -56,13 +56,13 @@ class CortexRunArtifactTests(unittest.TestCase):
 
         self.assertEqual("promote-cortex-receipt-interpretation-consumption-feedback-wave11", payload["selected_next_action"]["action_id"])
         self.assertEqual(
-            "cortex_receipt_interpretation_stack_consumption_contract",
+            "cortex_receipt_interpretation_consumption_feedback_contract",
             payload["worker_plan"]["template_id"],
         )
         self.assertTrue(payload["receipt_ready"])
         self.assertTrue(payload["known_ambient_debt"])
         self.assertIn("selected_next_action", json.dumps(payload, sort_keys=True))
-        self.assertIn("Worker plan template: cortex_receipt_interpretation_stack_consumption_contract", summary)
+        self.assertIn("Worker plan template: cortex_receipt_interpretation_consumption_feedback_contract", summary)
         self.assertIn("Receipt ready: yes", summary)
         self.assertIn("Patterns applied:", summary)
         self.assertIn("implementation_plan", payload["worker_plan"])

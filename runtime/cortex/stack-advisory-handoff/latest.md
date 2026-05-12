@@ -1,11 +1,11 @@
 # Cortex Stack Advisory Handoff
 
-- Generated: `2026-05-12T00:54:59.493159+00:00`
-- Handoff id: `stack-advisory-handoff-promote-cortex-receipt-interpretation-stack-consumption-wave10`
+- Generated: `2026-05-12T13:56:22.934544+00:00`
+- Handoff id: `stack-advisory-handoff-promote-cortex-receipt-interpretation-consumption-feedback-wave11`
 - Authority level: `read_only_advisory`
 - Consumer: `_stack`
 - Consumption mode: `artifact_refs_only`
-- Next recommended lane: `promote-cortex-receipt-interpretation-stack-consumption-wave10` (cortex)
+- Next recommended lane: `promote-cortex-receipt-interpretation-consumption-feedback-wave11` (cortex)
 - Handoff status: `ready`
 - Ready for _stack consumer: `yes`
 - Routing mode: `explicit_artifact_ref_handoff`
@@ -46,6 +46,7 @@
 - `runtime/cortex/stack-advisory-handoff/latest.json`
 - `runtime/cortex/stack-consumption-pilot/latest.json`
 - `runtime/cortex/receipt-interpretation/latest.json`
+- `runtime/cortex/receipt-interpretation-stack-consumption/latest.json`
 - `docs/architecture/ATLAS-CORTEX-PLAYBOOK-CODEX.md`
 - `runtime/cortex/worker-prompts/latest.json#/planner_contract`
 - `runtime/cortex/worker-prompts/latest.json#/receipt_draft_preview`

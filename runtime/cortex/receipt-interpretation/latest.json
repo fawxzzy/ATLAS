@@ -1,13 +1,13 @@
 {
   "contract_version": "atlas.cortex.receipt-interpretation.v1",
-  "generated_at": "2026-05-12T00:55:00.189652+00:00",
+  "generated_at": "2026-05-12T13:56:25.362433+00:00",
   "authority_level": "read_only_interpretation",
   "stack_root": "C:/ATLAS/tmp/r18-main-merge-20260511",
-  "interpretation_id": "receipt-interpretation-promote-cortex-receipt-interpretation-stack-consumption-wave10",
+  "interpretation_id": "receipt-interpretation-promote-cortex-receipt-interpretation-consumption-feedback-wave11",
   "next_recommended_lane": {
-    "lane_id": "promote-cortex-receipt-interpretation-stack-consumption-wave10",
+    "lane_id": "promote-cortex-receipt-interpretation-consumption-feedback-wave11",
     "owner_layer": "cortex",
-    "rationale": "Cortex now emits worker prompts, a canonical stack advisory handoff, a bounded stack-consumption pilot proof, and read-only receipt interpretation. The next bounded tranche is seed-only progression into the follow-on stack-consumption lane: ratchet the rail seed and deterministic artifacts without implementing new consumption, execution, approval, dispatch, owner-truth mutation, Lifeline-truth mutation, or final-receipt behavior."
+    "rationale": "Cortex now emits receipt interpretation and proves _stack can consume it through explicit artifact refs. The next bounded contract is read-only feedback over that consumption: summarize what changed, what proved, and what remains blocked as deterministic next-lane guidance without dispatching work, executing work, approving work, issuing final receipts, mutating owner or Lifeline truth, or scraping transcripts."
   },
   "authority": {
     "interpretation_authorized": true,
@@ -24,37 +24,37 @@
       "role": "worker_prompt",
       "ref": "runtime/cortex/worker-prompts/latest.json",
       "contract_version": "atlas.cortex.worker-prompt.v1",
-      "digest": "sha256:739cf513841cd9e786dbb3ac0efcf064d40db54c28b4df86ad4a474738f0bf2d"
+      "digest": "sha256:2baa8a633dc4aa2b1a9086acc2b401c78872371478cb87588e49b2d4be81a179"
     },
     {
       "role": "stack_advisory_handoff",
       "ref": "runtime/cortex/stack-advisory-handoff/latest.json",
       "contract_version": "atlas.cortex.stack-advisory-handoff.v2",
-      "digest": "sha256:3beabc3fdcd06a284ed6b4fcb68079ce954bb81bbafcee55864ae2c3062eec77"
+      "digest": "sha256:266db2646b751963d090f29c0933f6bdcd96257075e90e8033f12509f9cac21e"
     },
     {
       "role": "stack_consumption_pilot",
       "ref": "runtime/cortex/stack-consumption-pilot/latest.json",
       "contract_version": "atlas.cortex.stack-consumption-pilot.v1",
-      "digest": "sha256:ba592036008c0f077c0bb1eb4803de697b1d63dd91c0adf896744a39e853af1d"
+      "digest": "sha256:da375ec929e69af828eba44defb363732704f72742174beb6f0a975612735e78"
     },
     {
       "role": "ledger",
       "ref": "runtime/cortex/ledger/latest.json",
       "contract_version": "atlas.cortex.ledger.v1",
-      "digest": "sha256:0f590e10e7ae87fb35a44c1f16e94394ff2151680cabc32b316bd4fd9869c08c"
+      "digest": "sha256:f80bf57b49c70e6e5e1c6ec60c54b2e6cd509c33abb8b29f348cd16208feffb0"
     },
     {
       "role": "validation_receipt",
       "ref": "runtime/receipts/validation/stack-validation.latest.json",
       "contract_version": "",
-      "digest": "sha256:3db762105e4a68c9895192919f4d946082f684c2aeb3f449642bc5986ce3c60a"
+      "digest": "sha256:8dff0bbe12c4cbe7f266e19586617ba5d57ae2111b10fc4dfac1e03750b78e5c"
     },
     {
       "role": "state_model_seed",
       "ref": "runtime/cortex/kernel.state-model.seed.v1.json",
       "contract_version": "atlas.cortex.kernel-state.v1",
-      "digest": "sha256:55ae2992efa92c1727ad1c33945acb3445065c1001049bfe78337801e06a6ae9"
+      "digest": "sha256:e5b5541cc6aad444c94243f15bcc9a62324f429ecc2420fa1528a0ba61f3c4a8"
     },
     {
       "role": "rule_registry_seed",
@@ -67,7 +67,7 @@
   "interpreted_proof_summary": {
     "status": "proof_ready",
     "what_changed": [
-      "Cortex selected lane promote-cortex-receipt-interpretation-stack-consumption-wave10 for read-only receipt interpretation.",
+      "Cortex selected lane promote-cortex-receipt-interpretation-consumption-feedback-wave11 for read-only receipt interpretation.",
       "Receipt interpretation joins worker prompt, stack handoff, stack pilot, ledger, validation, seed, and rule artifacts."
     ],
     "what_proved": [
