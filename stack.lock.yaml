@@ -75,8 +75,8 @@ components:
     status: "active"
     remote: "https://github.com/fawxzzy/ATLAS.git"
     ref_type: "branch"
-    ref: "codex/r20-main-land"
-    commit: "f6b3fe8ac1ea0ac8753626711790332ea7740301"
+    ref: "codex/r21-main-land"
+    commit: "d6aab06439d9c51bc7ba751265225a688fb44970"
     dirty: false
     trust_class: "trusted"
     release_eligible: false
@@ -127,4 +127,4 @@ excluded_surfaces:
     trust_class: "untrusted"
     release_eligible: false
     reason: "Token-bearing Verta checkout remains quarantined and untrusted until scrub and rotation are complete."
-lock_digest: "sha256:8a557ce8a0e717bdd1a98c9b0d82d271f165cf23695adb98b09d0d9f221a14ee"
+lock_digest: "sha256:8936908e987ce22727a37b4a66764669d0f61850a3101706498cb3872e043109"
