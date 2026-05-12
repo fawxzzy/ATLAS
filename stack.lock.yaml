@@ -75,8 +75,8 @@ components:
     status: "active"
     remote: "https://github.com/fawxzzy/ATLAS.git"
     ref_type: "branch"
-    ref: "codex/r20-main-land"
-    commit: "9f8f3d01d75019b6c22aeb323f6b25848b486730"
+    ref: "codex/post-r20-cortex-artifact-normalization-land"
+    commit: "bb16755a4862eecee30a6dbe4fdb3c428109a234"
     dirty: false
     trust_class: "trusted"
     release_eligible: false
@@ -127,4 +127,4 @@ excluded_surfaces:
     trust_class: "untrusted"
     release_eligible: false
     reason: "Token-bearing Verta checkout remains quarantined and untrusted until scrub and rotation are complete."
-lock_digest: "sha256:dc4ef299f62e2118e0aada485eb38ee1a7cc025f40b231756393fbbde96bbe4d"
+lock_digest: "sha256:29a253fa827405cbd79f18b59bd03cabfc99fbe3c67568c9c7333bfd67a0beaf"
