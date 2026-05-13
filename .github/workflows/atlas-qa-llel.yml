@@ -189,6 +189,15 @@ jobs:
       - name: Run root QA unit tests
         run: python -m unittest tests.test_atlas_qa_pipeline
 
+      - name: Bootstrap release repos from stack lock
+        shell: bash
+        run: |
+          cmd=(python ops/atlas/qa/bootstrap_release_repos.py)
+          if [ -n "${{ inputs.release_repo }}" ]; then
+            cmd+=(--repo "${{ inputs.release_repo }}")
+          fi
+          "${cmd[@]}"
+
       - name: Refresh protected release receipts
         shell: bash
         env:
@@ -213,6 +222,8 @@ jobs:
         with:
           name: atlas-protected-release-refresh
           path: |
+            runtime/atlas/qa/bootstrap-release-repos.latest.json
+            runtime/atlas/qa/bootstrap-release-repos.latest.md
             runtime/atlas/qa/protected-release-refresh.latest.json
             runtime/atlas/qa/protected-release-refresh.latest.md
             runtime/atlas/qa/evidence-index.latest.json

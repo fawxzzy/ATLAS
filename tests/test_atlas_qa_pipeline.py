@@ -13,6 +13,7 @@ from PIL import Image
 from ops.atlas.qa.baselines import bless_baseline, propose_baselines
 from ops.atlas.qa.ci_gate import _materialize_runtime_waivers, _provider_status
 from ops.atlas.qa.adoption_drift import build_adoption_drift
+from ops.atlas.qa.bootstrap_release_repos import bootstrap_release_repos
 from ops.atlas.qa.compatibility_report import compatibility_report
 from ops.atlas.qa.evidence_index import build_evidence_index
 from ops.atlas.qa.manual_attestation import scaffold_manual_attestations, validate_attestations_for_run
@@ -42,6 +43,29 @@ def _png(path: Path) -> None:
 def _write_json(path: Path, payload: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+
+
+def _git(cwd: Path, *args: str) -> str:
+    completed = subprocess.run(
+        ["git", "-C", str(cwd), *args],
+        check=True,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+    return completed.stdout.strip()
+
+
+def _init_committed_repo(path: Path, *, filename: str = "README.md", content: str = "# repo\n") -> str:
+    path.mkdir(parents=True, exist_ok=True)
+    _git(path, "init")
+    _git(path, "config", "user.email", "atlas-test@example.com")
+    _git(path, "config", "user.name", "ATLAS Test")
+    (path / filename).write_text(content, encoding="utf-8")
+    _git(path, "add", filename)
+    _git(path, "commit", "-m", "init")
+    return _git(path, "rev-parse", "HEAD")
 
 
 def _write_waiver(
@@ -2447,6 +2471,90 @@ class AtlasQaPipelineTests(unittest.TestCase):
             provider=None,
             waiver_specs=waiver_specs,
         )
+
+    def test_bootstrap_release_repos_clones_exact_locked_commit(self) -> None:
+        root = self._temp_root()
+        source_repo = root / "fixtures" / "playbook-remote"
+        commit = _init_committed_repo(source_repo, content="# playbook\n")
+        _write_json(
+            root / "ops" / "atlas" / "qa" / "release_policy.v1.json",
+            {
+                "contract_version": "atlas.qa.release_policy.v1",
+                "profiles": {"docs_governance": {"display_name": "Docs Governance"}},
+                "repo_overrides": {"playbook": {"release_profile": "docs_governance"}},
+            },
+        )
+        (root / "stack.lock.yaml").write_text(
+            "\n".join(
+                [
+                    'schema_version: "atlas.stack.lock.v1"',
+                    'stack_manifest_path: "stack.yaml"',
+                    'stack_manifest_digest: "sha256:' + ("a" * 64) + '"',
+                    "component_count: 1",
+                    "components:",
+                    "  playbook:",
+                    '    path: "repos/fawxzzy-playbook"',
+                    '    role: "docs"',
+                    '    status: "active"',
+                    f'    remote: "{source_repo.as_posix()}"',
+                    '    ref_type: "commit"',
+                    f'    ref: "{commit}"',
+                    f'    commit: "{commit}"',
+                    "    dirty: false",
+                    '    trust_class: "trusted"',
+                    "    release_eligible: true",
+                    "excluded_surfaces: {}",
+                    'lock_digest: "sha256:' + ("b" * 64) + '"',
+                ]
+            ) + "\n",
+            encoding="utf-8",
+        )
+        result = bootstrap_release_repos(root=root, repo_ids=["playbook"])
+        self.assertTrue((root / result["bootstrap_release_repos_ref"]).exists())
+        target_repo = root / "repos" / "fawxzzy-playbook"
+        self.assertTrue(target_repo.exists())
+        self.assertEqual(commit, _git(target_repo, "rev-parse", "HEAD"))
+
+    def test_bootstrap_release_repos_fails_for_dirty_release_target(self) -> None:
+        root = self._temp_root()
+        source_repo = root / "fixtures" / "playbook-remote"
+        commit = _init_committed_repo(source_repo, content="# playbook\n")
+        _write_json(
+            root / "ops" / "atlas" / "qa" / "release_policy.v1.json",
+            {
+                "contract_version": "atlas.qa.release_policy.v1",
+                "profiles": {"docs_governance": {"display_name": "Docs Governance"}},
+                "repo_overrides": {"playbook": {"release_profile": "docs_governance"}},
+            },
+        )
+        (root / "stack.lock.yaml").write_text(
+            "\n".join(
+                [
+                    'schema_version: "atlas.stack.lock.v1"',
+                    'stack_manifest_path: "stack.yaml"',
+                    'stack_manifest_digest: "sha256:' + ("a" * 64) + '"',
+                    "component_count: 1",
+                    "components:",
+                    "  playbook:",
+                    '    path: "repos/fawxzzy-playbook"',
+                    '    role: "docs"',
+                    '    status: "active"',
+                    f'    remote: "{source_repo.as_posix()}"',
+                    '    ref_type: "commit"',
+                    f'    ref: "{commit}"',
+                    f'    commit: "{commit}"',
+                    "    dirty: true",
+                    '    trust_class: "trusted"',
+                    "    release_eligible: true",
+                    "excluded_surfaces: {}",
+                    'lock_digest: "sha256:' + ("b" * 64) + '"',
+                ]
+            ) + "\n",
+            encoding="utf-8",
+        )
+        with self.assertRaises(SystemExit) as exc:
+            bootstrap_release_repos(root=root, repo_ids=["playbook"])
+        self.assertIn("dirty", str(exc.exception))
 
     def test_release_snapshot_copies_fitness_waiver_pack(self) -> None:
         root = self._temp_root()
