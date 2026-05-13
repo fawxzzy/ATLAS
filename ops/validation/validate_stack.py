@@ -2402,7 +2402,8 @@ def build_findings(
                     trust_class = str(component.get("trust_class", ""))
                     if trust_class not in TRUST_CLASSES:
                         findings.append(Finding("error", "stack-lock-trust-class", component_path, f"Unsupported trust_class '{trust_class}' in stack lockfile."))
-                    ref_problem = None if component_id == accepted_root_refresh_repo_id else verify_locked_ref(
+                    skip_sparse_stack_root_ref_check = sparse_mode and component_id == "stack" and bool(component.get("dirty"))
+                    ref_problem = None if component_id == accepted_root_refresh_repo_id or skip_sparse_stack_root_ref_check else verify_locked_ref(
                         repo_path,
                         component,
                         allow_exact_head_without_ref=sparse_mode,

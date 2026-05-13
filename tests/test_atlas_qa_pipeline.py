@@ -400,7 +400,6 @@ class AtlasQaPipelineTests(unittest.TestCase):
         (playbook_repo / "AGENTS.md").write_text("# playbook\n", encoding="utf-8")
         (playbook_repo / ".codex").mkdir(exist_ok=True)
         (playbook_repo / ".codex" / "config.toml").write_text("model = 'gpt-5.4'\n", encoding="utf-8")
-        stack_commit = _git(root, "rev-parse", "HEAD")
         (root / "stack.lock.yaml").write_text(
             "\n".join(
                 [
@@ -416,8 +415,8 @@ class AtlasQaPipelineTests(unittest.TestCase):
                     "    remote: null",
                     '    ref_type: "branch"',
                     '    ref: "main"',
-                    f'    commit: "{stack_commit}"',
-                    "    dirty: false",
+                    '    commit: "' + ("e" * 40) + '"',
+                    "    dirty: true",
                     '    trust_class: "trusted"',
                     "    release_eligible: false",
                     "  _stack:",
@@ -597,6 +596,7 @@ class AtlasQaPipelineTests(unittest.TestCase):
         self.assertNotIn(("missing-repo-path", "repos/fawxzzy-fitness"), categories)
         self.assertNotIn(("missing-codex-config", "repos/fawxzzy-playbook"), categories)
         self.assertNotIn(("stack-lock-missing-ref", "stack.lock.yaml#playbook"), categories)
+        self.assertNotIn(("stack-lock-missing-ref", "stack.lock.yaml#stack"), categories)
 
     def test_invalid_image_file_fails_validation(self) -> None:
         root = self._temp_root()
