@@ -213,6 +213,15 @@ jobs:
           corepack prepare pnpm@10.23.0 --activate
           pnpm install --frozen-lockfile
 
+      - name: Install Foundation release dependencies
+        if: inputs.release_repo == 'foundation'
+        shell: bash
+        working-directory: repos/fawxzzy-foundation
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.23.0 --activate
+          pnpm install --frozen-lockfile
+
       - name: Refresh protected release receipts
         shell: bash
         env:
