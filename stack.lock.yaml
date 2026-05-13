@@ -87,7 +87,7 @@ components:
     remote: "https://github.com/fawxzzy/ATLAS.git"
     ref_type: "branch"
     ref: "codex/progression-layer-spec-update"
-    commit: "5bb1bf83f66a8034fa55b8b5e0f3e2d70ac5acd4"
+    commit: "c8f13c53280bddb3c80e92bfc9ba15a477532673"
     dirty: true
     trust_class: "trusted"
     release_eligible: false
@@ -162,4 +162,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "ZachariahRedfield checkout is an adjacent unmanaged repo and is outside the governed ATLAS release surface."
-lock_digest: "sha256:c4684387d53e8c5141043413db1020aad8ff8f3669b40038dd04bbd5fcc87d79"
+lock_digest: "sha256:6b984c969fd3c27552f82a7d22126f051ac0222e1f9e02182eb1ad1b52f2107b"
