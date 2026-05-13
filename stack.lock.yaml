@@ -65,8 +65,8 @@ components:
     remote: "https://github.com/fawxzzy/fawxzzy-playbook.git"
     ref_type: "branch"
     ref: "codex/workflow-pack-environment-bridge-dry-run-executor"
-    commit: "79a5da135faa796ec8aaba0a409932aaf1259264"
-    dirty: true
+    commit: "e41ff9477eae5762119a067c7a4aa9dc66a461de"
+    dirty: false
     trust_class: "trusted"
     release_eligible: true
   playbook-demo:
@@ -87,7 +87,7 @@ components:
     remote: "https://github.com/fawxzzy/ATLAS.git"
     ref_type: "branch"
     ref: "codex/progression-layer-spec-update"
-    commit: "f887315f5b51872212015f0e5f810f157e16d2c2"
+    commit: "22e6846a50440a9d171acbfa57d530e00b266f74"
     dirty: true
     trust_class: "trusted"
     release_eligible: false
@@ -162,4 +162,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "ZachariahRedfield checkout is an adjacent unmanaged repo and is outside the governed ATLAS release surface."
-lock_digest: "sha256:64b3a6366dcd0a1c2760e9b1bb439286ffe5a9782ff1c6b9bb8942df56321749"
+lock_digest: "sha256:efe89149be23c437f926c3c1e3067b46af0c3fdf43af343005c9ba4469560a98"
