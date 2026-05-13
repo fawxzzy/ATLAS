@@ -231,7 +231,7 @@ jobs:
             runtime/receipts/validation/stack-warning-budget.latest.md
 
   atlas-release-readiness:
-    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.enforce_release_readiness == true)
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.enforce_release_readiness == true && inputs.dispatch_scope != 'release_refresh')
     runs-on: ubuntu-latest
     steps:
       - name: Check out
