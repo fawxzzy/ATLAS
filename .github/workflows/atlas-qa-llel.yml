@@ -105,6 +105,9 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Install root QA Python dependencies
+        run: python -m pip install --upgrade pip Pillow
+
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
@@ -177,6 +180,9 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+
+      - name: Install root QA Python dependencies
+        run: python -m pip install --upgrade pip Pillow
 
       - name: Set up Node
         uses: actions/setup-node@v4
