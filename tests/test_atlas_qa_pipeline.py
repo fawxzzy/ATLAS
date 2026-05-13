@@ -27,7 +27,12 @@ from ops.atlas.qa.report_run import report_run
 from ops.atlas.qa.test_evidence import collect_test_evidence
 from ops.atlas.qa.waiver_monitor import build_waiver_monitor
 from ops.atlas.qa.visual_diff import evaluate_visual_diffs
-from ops.atlas.qa._common import load_json_object, validate_adapter_manifest, validate_provider_manifest
+from ops.atlas.qa._common import (
+    load_json_object,
+    validate_adapter_manifest,
+    validate_provider_manifest,
+    validate_scenario_manifest,
+)
 from ops.atlas.qa.providers import capture_with_provider
 from ops.atlas.qa.validate_artifacts import validate_artifact_manifest_file
 from ops.cortex._artifacts import sha256_bytes, write_json
@@ -1306,6 +1311,16 @@ class AtlasQaPipelineTests(unittest.TestCase):
         }
         errors = validate_adapter_manifest(adapter, root=ROOT)
         self.assertTrue(any(item == "prepare.command must be a non-empty string when prepare is present." for item in errors), errors)
+
+    def test_adapter_manifest_can_skip_repo_path_existence_for_root_only_ci(self) -> None:
+        adapter = load_json_object(ROOT / "ops" / "atlas" / "qa" / "adapters" / "fitness.web.json")
+        errors = validate_adapter_manifest(adapter, root=self._temp_root(), require_repo_path_exists=False)
+        self.assertFalse(any(item.startswith("repo_path does not exist:") for item in errors), errors)
+
+    def test_scenario_manifest_can_skip_repo_path_existence_for_root_only_ci(self) -> None:
+        scenario = load_json_object(ROOT / "ops" / "atlas" / "qa" / "scenarios" / "fitness.progression-pr-smoke.json")
+        errors = validate_scenario_manifest(scenario, root=self._temp_root(), require_repo_path_exists=False)
+        self.assertFalse(any(item.startswith("repo_path does not exist:") for item in errors), errors)
 
     def test_provider_manifest_validates(self) -> None:
         payload = load_json_object(ROOT / "ops" / "atlas" / "qa" / "providers" / "mock.physical-device.v1.json")

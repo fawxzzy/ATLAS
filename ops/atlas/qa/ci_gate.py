@@ -326,8 +326,13 @@ def ci_gate(
     waiver_specs: list[dict[str, Any]] | None = None,
 ) -> dict[str, object]:
     base_root = (root or atlas_root()).resolve()
+    dry_run = mode == "dry-run"
     scenario_payload, scenario_path = _load_scenario(root=base_root, scenario=scenario, scenario_file=scenario_file)
-    scenario_errors = validate_scenario_manifest(scenario_payload, root=base_root)
+    scenario_errors = validate_scenario_manifest(
+        scenario_payload,
+        root=base_root,
+        require_repo_path_exists=not dry_run,
+    )
     if scenario_errors:
         raise RuntimeError("; ".join(scenario_errors))
     adapter_payload, adapter_path = _load_adapter(
@@ -336,7 +341,11 @@ def ci_gate(
         adapter_file=adapter_file,
         scenario_payload=scenario_payload,
     )
-    adapter_errors = validate_adapter_manifest(adapter_payload, root=base_root)
+    adapter_errors = validate_adapter_manifest(
+        adapter_payload,
+        root=base_root,
+        require_repo_path_exists=not dry_run,
+    )
     if adapter_errors:
         raise RuntimeError("; ".join(adapter_errors))
     provider_status = _provider_status(root=base_root, provider=provider)
@@ -349,11 +358,13 @@ def ci_gate(
     if isinstance(override_path, Path):
         adapter_payload = load_json_object(override_path)
         adapter_path = override_path
-        adapter_errors = validate_adapter_manifest(adapter_payload, root=base_root)
+        adapter_errors = validate_adapter_manifest(
+            adapter_payload,
+            root=base_root,
+            require_repo_path_exists=not dry_run,
+        )
         if adapter_errors:
             raise RuntimeError("; ".join(adapter_errors))
-
-    dry_run = mode == "dry-run"
     server_process: subprocess.Popen[str] | None = None
     prepare_result: dict[str, object] | None = None
     run_id = ""

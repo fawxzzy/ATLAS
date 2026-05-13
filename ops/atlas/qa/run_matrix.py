@@ -90,7 +90,11 @@ def run_matrix(
         raise ValueError("; ".join(schema_errors))
 
     scenario = load_json_object(scenario_target)
-    scenario_errors = validate_scenario_manifest(scenario, root=base_root)
+    scenario_errors = validate_scenario_manifest(
+        scenario,
+        root=base_root,
+        require_repo_path_exists=not dry_run,
+    )
     if scenario_errors:
         raise ValueError("; ".join(scenario_errors))
 
@@ -100,7 +104,11 @@ def run_matrix(
         repo_id=str(scenario["repo_id"]),
         adapter_dir=adapter_dir.resolve() if isinstance(adapter_dir, Path) else None,
     )
-    adapter_errors = validate_adapter_manifest(adapter, root=base_root)
+    adapter_errors = validate_adapter_manifest(
+        adapter,
+        root=base_root,
+        require_repo_path_exists=not dry_run,
+    )
     if adapter_errors:
         raise ValueError("; ".join(adapter_errors))
 
