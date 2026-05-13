@@ -39,9 +39,20 @@ from ops.atlas.qa.validate_artifacts import validate_artifact_manifest_file
 from ops.cortex._artifacts import write_json
 
 
-def _stack_validation(root: Path) -> Path:
+def _stack_validation(
+    root: Path,
+    *,
+    allow_missing_locked_repos: bool = False,
+    required_present_repo_ids: list[str] | None = None,
+) -> Path:
+    command = ["python", "ops/validation/validate_stack.py"]
+    if allow_missing_locked_repos:
+        command.append("--allow-missing-locked-repos")
+        for repo_id in required_present_repo_ids or []:
+            if repo_id:
+                command.extend(["--require-present-repo-id", repo_id])
     completed = subprocess.run(
-        ["python", "ops/validation/validate_stack.py"],
+        command,
         cwd=str(root),
         capture_output=True,
         text=True,
@@ -324,6 +335,8 @@ def ci_gate(
     provider: str | None = None,
     attestation_files: list[str] | None = None,
     waiver_specs: list[dict[str, Any]] | None = None,
+    allow_missing_locked_repos: bool = False,
+    required_present_repo_ids: list[str] | None = None,
 ) -> dict[str, object]:
     base_root = (root or atlas_root()).resolve()
     dry_run = mode == "dry-run"
@@ -407,7 +420,15 @@ def ci_gate(
             scenario_id=str(scenario_payload["scenario_id"]),
             waiver_specs=list(waiver_specs or []),
         )
-        stack_validation_path = _stack_validation(base_root) if mode == "promotion" else None
+        stack_validation_path = (
+            _stack_validation(
+                base_root,
+                allow_missing_locked_repos=allow_missing_locked_repos,
+                required_present_repo_ids=required_present_repo_ids,
+            )
+            if mode == "promotion"
+            else None
+        )
         promotion = promote_run(
             root=base_root,
             run_id=run_id,

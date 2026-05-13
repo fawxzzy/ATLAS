@@ -2103,9 +2103,40 @@ def iter_scan_files(roots: list[Path]) -> list[Path]:
     return files
 
 
-def build_findings(stack_file: Path, config: dict[str, Any], *, lock_file_override: Path | None = None) -> list[Finding]:
+def build_findings(
+    stack_file: Path,
+    config: dict[str, Any],
+    *,
+    lock_file_override: Path | None = None,
+    allow_missing_locked_repos: bool = False,
+    required_present_repo_ids: set[str] | None = None,
+) -> list[Finding]:
     root = stack_file.parent.resolve()
     findings: list[Finding] = []
+    required_present_repo_ids = {
+        str(repo_id).strip()
+        for repo_id in (required_present_repo_ids or set())
+        if str(repo_id).strip()
+    }
+    lockfile_path = lock_file_override.resolve() if lock_file_override is not None else lockfile_output_path(stack_file, config)
+    lockfile_rel = relative_to_root(root, lockfile_path)
+    preloaded_lockfile: dict[str, Any] | None = None
+    allowed_missing_locked_repo_ids: set[str] = set()
+    if allow_missing_locked_repos and lockfile_path.exists():
+        try:
+            candidate_lockfile = load_lockfile(lockfile_path)
+        except Exception:
+            candidate_lockfile = None
+        if isinstance(candidate_lockfile, dict):
+            preloaded_lockfile = candidate_lockfile
+            locked_components = candidate_lockfile.get("components")
+            if isinstance(locked_components, dict):
+                allowed_missing_locked_repo_ids = {
+                    str(repo_id).strip()
+                    for repo_id, component in locked_components.items()
+                    if str(repo_id).strip() and isinstance(component, dict)
+                } - required_present_repo_ids
+
     findings.extend(validate_declared_surface_scan_coverage(root, config, stack_file))
     try:
         _, _, topology_issues = validate_atlas_topology_contract_files(stack_file=stack_file)
@@ -2148,6 +2179,8 @@ def build_findings(stack_file: Path, config: dict[str, Any], *, lock_file_overri
             repo_rel = "."
         is_stack_control_repo = repo_path == root
         if not repo_path.exists():
+            if allow_missing_locked_repos and repo_id in allowed_missing_locked_repo_ids:
+                continue
             findings.append(Finding("critical", "missing-repo-path", repo_rel, f"Repo path for '{repo_id}' does not exist.", {"status": status}))
             continue
         if not repo_path.is_dir():
@@ -2198,9 +2231,6 @@ def build_findings(stack_file: Path, config: dict[str, Any], *, lock_file_overri
             for file_path in repo_path.glob(pattern):
                 if file_path.is_file():
                     findings.append(Finding("warning", "capture-artifact-in-repo-root", normalize_slashes(str(file_path.relative_to(root))), "Likely review or capture artifact detected in repo root.", {"repo_id": repo_id, "pattern": pattern}))
-
-    lockfile_path = lock_file_override.resolve() if lock_file_override is not None else lockfile_output_path(stack_file, config)
-    lockfile_rel = relative_to_root(root, lockfile_path)
     if not lockfile_path.exists():
         findings.append(
             Finding(
@@ -2211,18 +2241,20 @@ def build_findings(stack_file: Path, config: dict[str, Any], *, lock_file_overri
             )
         )
     else:
-        try:
-            lockfile = load_lockfile(lockfile_path)
-        except Exception as exc:
-            findings.append(
-                Finding(
-                    "error",
-                    "invalid-stack-lockfile",
-                    lockfile_rel,
-                    f"Stack lockfile could not be loaded: {exc}",
+        lockfile = preloaded_lockfile
+        if lockfile is None:
+            try:
+                lockfile = load_lockfile(lockfile_path)
+            except Exception as exc:
+                findings.append(
+                    Finding(
+                        "error",
+                        "invalid-stack-lockfile",
+                        lockfile_rel,
+                        f"Stack lockfile could not be loaded: {exc}",
+                    )
                 )
-            )
-            lockfile = None
+                lockfile = None
         if isinstance(lockfile, dict):
             if lockfile.get("schema_version") != STACK_LOCK_SCHEMA_VERSION:
                 findings.append(
@@ -2233,18 +2265,21 @@ def build_findings(stack_file: Path, config: dict[str, Any], *, lock_file_overri
                         f"Stack lockfile schema_version must be '{STACK_LOCK_SCHEMA_VERSION}'.",
                     )
                 )
-            try:
-                canonical_lock = build_canonical_lockfile_artifacts(config=config, root=root)
-            except Exception as exc:
-                findings.append(
-                    Finding(
-                        "error",
-                        "stack-lock-build-failed",
-                        lockfile_rel,
-                        f"Current stack lock payload could not be rebuilt: {exc}",
-                    )
-                )
+            if allow_missing_locked_repos:
                 canonical_lock = None
+            else:
+                try:
+                    canonical_lock = build_canonical_lockfile_artifacts(config=config, root=root)
+                except Exception as exc:
+                    findings.append(
+                        Finding(
+                            "error",
+                            "stack-lock-build-failed",
+                            lockfile_rel,
+                            f"Current stack lock payload could not be rebuilt: {exc}",
+                        )
+                    )
+                    canonical_lock = None
             generated_lock = canonical_lock.get("payload") if isinstance(canonical_lock, dict) else None
             drift_report = describe_lock_payload_drift(lockfile, generated_lock) if isinstance(generated_lock, dict) else None
             canonical_bytes = canonical_lock.get("bytes") if isinstance(canonical_lock, dict) else None
@@ -2342,6 +2377,8 @@ def build_findings(stack_file: Path, config: dict[str, Any], *, lock_file_overri
                         )
                     repo_path = resolve_path(stack_file, str(component.get("path", "")))
                     if not repo_path.exists():
+                        if allow_missing_locked_repos and component_id in allowed_missing_locked_repo_ids:
+                            continue
                         findings.append(Finding("error", "stack-lock-missing-path", component_path, "Pinned component path does not exist on disk."))
                         continue
                     if not repo_path.is_dir():
@@ -2815,6 +2852,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--baseline-path")
     parser.add_argument("--write-baseline", action="store_true")
     parser.add_argument("--ratchet", action="store_true")
+    parser.add_argument("--allow-missing-locked-repos", action="store_true")
+    parser.add_argument("--require-present-repo-id", action="append", default=[])
     args = parser.parse_args(argv)
 
     stack_file = Path(args.stack_file).resolve()
@@ -2841,7 +2880,19 @@ def main(argv: list[str] | None = None) -> int:
             "stack_file": normalize_slashes(str(stack_file)),
             "stack_root": normalize_slashes(str(stack_file.parent.resolve())),
             "stack_lock_file": relative_to_root(stack_file.parent.resolve(), resolved_lock_file),
-            "summary": summarize_findings(findings := build_findings(stack_file, config, lock_file_override=lock_file)),
+            "summary": summarize_findings(
+                findings := build_findings(
+                    stack_file,
+                    config,
+                    lock_file_override=lock_file,
+                    allow_missing_locked_repos=bool(args.allow_missing_locked_repos),
+                    required_present_repo_ids={
+                        str(repo_id).strip()
+                        for repo_id in args.require_present_repo_id
+                        if str(repo_id).strip()
+                    },
+                )
+            ),
             "repo_ids": sorted(config.get("repo_registry", {}).keys()),
             "findings": [asdict(item) for item in findings],
         }
