@@ -2865,15 +2865,16 @@ def main(argv: list[str] | None = None) -> int:
     try:
         config = load_stack_config(stack_file)
         backfill_legacy_runtime_artifacts(root=stack_file.parent.resolve())
-        write_world_model_state(
-            descriptor_root=stack_file.parent.resolve() / "runtime" / "cortex" / "artifacts",
-            root=stack_file.parent.resolve(),
-        )
-        register_artifact_descriptors(
-            [world_model_state_root(stack_file.parent.resolve())],
-            output_dir=stack_file.parent.resolve() / "runtime" / "cortex" / "artifacts",
-            root=stack_file.parent.resolve(),
-        )
+        if not args.allow_missing_locked_repos:
+            write_world_model_state(
+                descriptor_root=stack_file.parent.resolve() / "runtime" / "cortex" / "artifacts",
+                root=stack_file.parent.resolve(),
+            )
+            register_artifact_descriptors(
+                [world_model_state_root(stack_file.parent.resolve())],
+                output_dir=stack_file.parent.resolve() / "runtime" / "cortex" / "artifacts",
+                root=stack_file.parent.resolve(),
+            )
         resolved_lock_file = lock_file or lockfile_output_path(stack_file, config)
         report = {
             "generated_at": datetime.now(timezone.utc).isoformat(),
