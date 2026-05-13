@@ -1,28 +1,39 @@
 schema_version: "atlas.stack.lock.v1"
 stack_manifest_path: "stack.yaml"
-stack_manifest_digest: "sha256:d50a1f74e584c9e55ab1127997781dd1e8086e6d5cdeed4b395373dfc6bacc43"
-component_count: 9
+stack_manifest_digest: "sha256:bfeea905ae7bb840701cc5dd753efeab878b4cbc0189fff41a1fa1292e1491a5"
+component_count: 10
 components:
   _stack:
     path: "repos/_stack"
     role: "workflow-operator"
     status: "active"
     remote: null
-    ref_type: "commit"
-    ref: "ef5cfc84e583c616a89ce13694541207518f1206"
+    ref_type: "branch"
+    ref: "main"
     commit: "ef5cfc84e583c616a89ce13694541207518f1206"
     dirty: false
     trust_class: "trusted"
     release_eligible: false
+  foundation:
+    path: "repos/fawxzzy-foundation"
+    role: "package"
+    status: "active"
+    remote: "https://github.com/fawxzzy/fawxzzy-foundation.git"
+    ref_type: "branch"
+    ref: "main"
+    commit: "2187fb27b744325e690113277d537951a8b11846"
+    dirty: true
+    trust_class: "trusted"
+    release_eligible: true
   lifeline:
     path: "repos/fawxzzy-lifeline"
     role: "local-operator"
     status: "active"
     remote: "https://github.com/fawxzzy/fawxzzy-lifeline.git"
-    ref_type: "commit"
-    ref: "89357af70fc103137bd5f46c76d3c81549ba64fc"
-    commit: "89357af70fc103137bd5f46c76d3c81549ba64fc"
-    dirty: false
+    ref_type: "branch"
+    ref: "codex/lifeline-release-replay-verification"
+    commit: "0592fc0b065189484af42630206ac223bd8270e0"
+    dirty: true
     trust_class: "trusted"
     release_eligible: true
   mazer:
@@ -30,8 +41,8 @@ components:
     role: "application"
     status: "active"
     remote: "https://github.com/fawxzzy/fawxzzy-mazer.git"
-    ref_type: "commit"
-    ref: "021291d2b4f75379ab7e4c7891e302b54d4845c6"
+    ref_type: "branch"
+    ref: "codex/mazer-remove-pwa-install-surface"
     commit: "021291d2b4f75379ab7e4c7891e302b54d4845c6"
     dirty: false
     trust_class: "trusted"
@@ -41,10 +52,10 @@ components:
     role: "application"
     status: "incubating"
     remote: "https://github.com/ZachariahRedfield/nat1-games.git"
-    ref_type: "commit"
-    ref: "412846a1baac6c0ce782ab9ab94530ccf4e89ff5"
+    ref_type: "branch"
+    ref: "main"
     commit: "412846a1baac6c0ce782ab9ab94530ccf4e89ff5"
-    dirty: false
+    dirty: true
     trust_class: "trusted"
     release_eligible: false
   playbook:
@@ -52,9 +63,9 @@ components:
     role: "governance-runtime"
     status: "active"
     remote: "https://github.com/fawxzzy/fawxzzy-playbook.git"
-    ref_type: "commit"
-    ref: "bdd80eb19db1835cd97c8c2d1fbee2070f273a50"
-    commit: "bdd80eb19db1835cd97c8c2d1fbee2070f273a50"
+    ref_type: "branch"
+    ref: "codex/workflow-pack-environment-bridge-dry-run-executor"
+    commit: "e41ff9477eae5762119a067c7a4aa9dc66a461de"
     dirty: false
     trust_class: "trusted"
     release_eligible: true
@@ -63,8 +74,8 @@ components:
     role: "demo"
     status: "demo"
     remote: "https://github.com/ZachariahRedfield/playbook-demo.git"
-    ref_type: "commit"
-    ref: "4d0444bcb14c3470fe0913a21c8739f0791a1827"
+    ref_type: "branch"
+    ref: "main"
     commit: "4d0444bcb14c3470fe0913a21c8739f0791a1827"
     dirty: false
     trust_class: "trusted"
@@ -75,9 +86,9 @@ components:
     status: "active"
     remote: "https://github.com/fawxzzy/ATLAS.git"
     ref_type: "branch"
-    ref: "codex/r21-main-land"
-    commit: "bdd20f668efa2c4768ede9e6bf1f5eaaf8066bd8"
-    dirty: false
+    ref: "codex/progression-layer-spec-update"
+    commit: "22e6846a50440a9d171acbfa57d530e00b266f74"
+    dirty: true
     trust_class: "trusted"
     release_eligible: false
   stream:
@@ -85,8 +96,8 @@ components:
     role: "application"
     status: "incubating"
     remote: null
-    ref_type: "commit"
-    ref: "1dd3298c556b4d0839e6bb43b3dde7c3527022f7"
+    ref_type: "branch"
+    ref: "main"
     commit: "1dd3298c556b4d0839e6bb43b3dde7c3527022f7"
     dirty: false
     trust_class: "trusted"
@@ -96,13 +107,31 @@ components:
     role: "application"
     status: "active"
     remote: "https://github.com/fawxzzy/fawxzzy-trove.git"
-    ref_type: "commit"
-    ref: "bce14fcc1ad6e826b0c0eac37e13af6707ee3a8e"
+    ref_type: "branch"
+    ref: "codex/trove-brand-asset-sync"
     commit: "bce14fcc1ad6e826b0c0eac37e13af6707ee3a8e"
-    dirty: false
+    dirty: true
     trust_class: "trusted"
     release_eligible: true
 excluded_surfaces:
+  cortex_adjacent_checkout:
+    path: "repos/fawxzzy-cortex"
+    present: false
+    trust_class: "adjacent"
+    release_eligible: false
+    reason: "Cortex checkout is present in the workspace as an adjacent repo but is not yet a governed ATLAS child-repo adoption target."
+  fitness_reclone_recovery_checkout:
+    path: "repos/fawxzzy-fitness.reclone.20260502-195639"
+    present: true
+    trust_class: "untrusted"
+    release_eligible: false
+    reason: "Fitness reclone remains a historical recovery checkout outside the canonical child repo and should not count as active stack adoption."
+  fitness_recovered_checkout:
+    path: "repos/fawxzzy-fitness-recovered"
+    present: true
+    trust_class: "untrusted"
+    release_eligible: false
+    reason: "Fitness recovered checkout remains a non-canonical recovery lane outside the governed child-repo release surface."
   lifeline_operator_evidence_worktree:
     path: "repos/fawxzzy-lifeline-operator-evidence"
     present: true
@@ -127,4 +156,10 @@ excluded_surfaces:
     trust_class: "untrusted"
     release_eligible: false
     reason: "Token-bearing Verta checkout remains quarantined and untrusted until scrub and rotation are complete."
-lock_digest: "sha256:41a152914f5c700de7444cf860cf72c77ddfc4debcf6a9900c14ff544a12a00d"
+  zachariah_redfield_adjacent_checkout:
+    path: "repos/ZachariahRedfield"
+    present: true
+    trust_class: "adjacent"
+    release_eligible: false
+    reason: "ZachariahRedfield checkout is an adjacent unmanaged repo and is outside the governed ATLAS release surface."
+lock_digest: "sha256:efe89149be23c437f926c3c1e3067b46af0c3fdf43af343005c9ba4469560a98"
