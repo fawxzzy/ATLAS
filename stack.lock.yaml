@@ -21,8 +21,8 @@ components:
     remote: "https://github.com/fawxzzy/fawxzzy-foundation.git"
     ref_type: "branch"
     ref: "main"
-    commit: "2187fb27b744325e690113277d537951a8b11846"
-    dirty: true
+    commit: "a016da2f08f167747f7ae7c804c0d6840cb9514d"
+    dirty: false
     trust_class: "trusted"
     release_eligible: true
   lifeline:
@@ -162,4 +162,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "ZachariahRedfield checkout is an adjacent unmanaged repo and is outside the governed ATLAS release surface."
-lock_digest: "sha256:563f4b2846e07752542921a3595041ee56c16e077e27046823bae066249dcd6b"
+lock_digest: "sha256:13541f5954fbd569f211a5838753a666e836e78c7c25ac1be3bff73c59212d8d"
