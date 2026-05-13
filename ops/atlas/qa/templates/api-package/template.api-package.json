@@ -1,0 +1,35 @@
+{
+  "contract_version": "atlas.qa.adapter.v1",
+  "adapter_id": "template.api-package",
+  "repo_id": "stream",
+  "repo_path": "repos/fawxzzy-stream",
+  "framework": "service-or-package",
+  "lens_manifest_ref": "ops/atlas/qa/lenses/atlas-default-web.v1.json",
+  "commands": {
+    "lint": {
+      "command": "npm run lint"
+    },
+    "verify": {
+      "command": "npm run verify"
+    },
+    "qa_api": {
+      "command": "npm run qa:api"
+    }
+  },
+  "lenses": [
+    {
+      "lens_id": "desktop.chromium.emulated",
+      "profile_id": "desktop.chromium",
+      "proof_kind": "emulated",
+      "evidence_kind": "emulated_browser",
+      "required_for": ["evidence", "promotion"],
+      "promotion_tier": "emulated_browser",
+      "fallback_behavior": "blocked",
+      "execution_mode": "repo_command",
+      "command_ref": "qa_api"
+    }
+  ],
+  "supported_scenarios": [
+    "template.api-package.contract"
+  ]
+}

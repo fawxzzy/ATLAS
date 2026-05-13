@@ -117,6 +117,24 @@ Action:
 - If an operator script is truly stack-wide, put it here or plan its migration here.
 - If the script is repo-specific, keep it in the repo.
 
+## `.github/workflows/`
+
+Use for:
+
+- root-owned orchestration workflows
+- QA LLEL CI gate entrypoints that call root scripts
+- reusable stack automation that stays generic across repos
+
+Do not use for:
+
+- repo-specific business logic copied out of a child repo
+- a second implementation of logic that already lives under `ops/`
+- broad authorization for other root `.github/**` surfaces
+
+Action:
+- Keep workflow logic thin and script-driven.
+- Route behavior through `ops/**` and keep `.github/workflows/**` as orchestration only.
+
 ## `tmp/`
 
 Use for:
@@ -163,3 +181,4 @@ Action:
 - Runtime state should move outside repos.
 - Packaging destinations must be explicit.
 - If a file does not clearly belong, classify it before creating it.
+- Declared-surface validation is only acceptable when required root governance surfaces remain covered. If a root-owned surface such as `README-STACK.md`, `AGENTS.md`, `.github/workflows/`, `docs/`, or `ops/` falls out of the declared scan set, stack validation must fail rather than silently narrowing governance.

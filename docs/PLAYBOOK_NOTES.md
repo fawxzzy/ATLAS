@@ -1,5 +1,20 @@
 # Playbook Notes
 
+## 2026-05-11 - QA LLEL adoption semantics
+
+- Rule: repo blockers exposed by QA LLEL should be fixed in the owning repo, not hidden in root QA logic.
+- Rule: package and docs repos should not report browser-emulation semantics unless browser evidence actually exists.
+- Rule: a failed preflight must block promotion for every evidence profile, including docs governance.
+- Rule: repo lint failures are repo-owned blockers; root QA should surface them, not bypass them.
+- Pattern: root-owned capture machinery should also own its runtime dependencies; child repos should declare only app or command intent.
+- Pattern: adoption means child-owned QA intent plus root-readable receipts, not root-side prototype manifests.
+- Pattern: warning counts should become a governed budget before they become promotion blockers.
+- Pattern: visual diff failures must be classified before either UI remediation or baseline blessing.
+- Failure Mode: blessing a baseline before classifying the diff turns QA into approval theater.
+- Failure Mode: letting non-visual repos report as browser-emulation passes creates semantic drift unless the evidence profile is shown separately from the promotion outcome.
+- Failure Mode: treating hundreds of warnings as harmless creates silent governance debt.
+- Failure Mode: fixing repo failures in root QA logic hides ownership and weakens the evidence model.
+
 ## 2026-04-28 - Fitness live UI and real mobile screenshot lane
 
 - Rule: for live mobile UI refinement on fitness, prefer the real signed-in local app on `http://127.0.0.1:3000` and use isolated browser sessions only.
@@ -156,6 +171,30 @@
 - If Vercel sees the correct team and project but a fresh pushed SHA creates no deployment object, classify it as a Git integration ingestion failure before diagnosing app code or retrying production deploys from the CLI.
 - After connector repair, prefer one fresh Git-triggered branch deployment as the proof path; only resume production shipping after Vercel creates and runs that branch deployment from Git.
 - Failure Mode: Repeated CLI production retries can mask the real issue when Git-connected preview creation is disabled or dead, which makes an ingestion outage look like an app or build failure.
-- Failure Mode: A mounted app folder under `C:\ATLAS` inherits the parent repo boundary and poisons Git recovery until the app is recloned as a real standalone repo.
+- Failure Mode: A mounted app folder under the ATLAS stack root inherits the parent repo boundary and poisons Git recovery until the app is recloned as a real standalone repo.
 - Failure Mode: Windows prebuilt deploy fallback can fail on symlink packaging; do not diagnose app code from that signal alone.
 
+## 2026-05-11 - QA release governance
+
+- Rule: Repo lint failures are repo-owned blockers; root QA should surface them, not bypass them.
+- Rule: Manual attestation may satisfy physical/manual review, but it must never be labeled as automated provider proof.
+- Rule: Promotion wording must match the evidence profile that actually passed.
+- Rule: Fitness must remain non-release-ready until real manual or provider-backed physical evidence exists.
+- Rule: No-credential provider readiness must never produce a false physical pass.
+- Rule: Release readiness must match the target SHA or stack lock pin, not just a recent receipt.
+- Rule: Release readiness may also require a trusted receipt origin when the release profile enables it.
+- Pattern: Release readiness is repo-tier specific; physical-device proof belongs to release-critical web flows, not every repo.
+- Pattern: Release policy turns QA receipts into operational gates.
+- Pattern: Local receipts prove logic; CI or protected receipts prove release trust.
+- Pattern: Receipt selection should prefer strongest valid evidence, not just newest evidence.
+- Pattern: Adoption drift scanning prevents root prototypes from masquerading as real child-repo adoption.
+- Pattern: Prototype QA configs must be explicitly labeled, adopted, or retired.
+- Pattern: Rehearse release gates with both passing and intentionally blocked repos.
+- Pattern: Warning-budget reporting gives governance debt shape before turning it into hard enforcement.
+- Failure Mode: Once release readiness exists, stale receipts can create false confidence unless adoption freshness is checked.
+- Failure Mode: Fresh receipts for the wrong commit can create false release confidence.
+- Failure Mode: Correct-SHA receipts can still be weak if they were produced outside the trusted release path.
+- Failure Mode: A newer `local_dev` receipt can overshadow a stronger trusted release receipt unless evidence ranking is explicit.
+- Failure Mode: Windows `.pyc` cache write failures can create false verification noise unless cache hygiene is part of the verification path.
+- Failure Mode: Treating `warning_count=559` as harmless forever turns governance debt into background noise.
+- Failure Mode: Using one generic promoted label hides whether a repo passed package, docs, web visual, manual physical, or provider physical evidence.

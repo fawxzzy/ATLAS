@@ -1,0 +1,98 @@
+{
+  "contract_version": "atlas.qa.scenario.v1",
+  "scenario_id": "template.web.smoke",
+  "title": "Template web smoke scenario",
+  "summary": "Minimal browser-facing template for repos that need multi-lens emulated evidence on pull requests and optional real-device certification later.",
+  "repo_id": "fitness",
+  "repo_path": "repos/fawxzzy-fitness",
+  "adapter_id": "template.web",
+  "criticality": "medium",
+  "tags": [
+    "template",
+    "web",
+    "visual-smoke"
+  ],
+  "entrypoint": {
+    "path": "/",
+    "ready_path": "/api/health"
+  },
+  "auth": {
+    "strategy": "anonymous"
+  },
+  "seed": {
+    "strategy": "none"
+  },
+  "proof": {
+    "lens_manifest_ref": "ops/atlas/qa/lenses/atlas-default-web.v1.json",
+    "pr_lenses": [
+      "desktop.chromium.emulated",
+      "android.chrome.emulated",
+      "iphone.webkit.emulated"
+    ],
+    "certify_lenses": [
+      "desktop.chromium.real",
+      "android.chrome.real",
+      "iphone.webkit.real"
+    ],
+    "real_device_strategy": "preview_first_local_tunnel_fallback"
+  },
+  "required_artifacts": [
+    {
+      "artifact_key": "screens",
+      "artifact_kind": "screenshot",
+      "step_id": "main",
+      "required_lenses": [
+        "desktop.chromium.emulated",
+        "android.chrome.emulated",
+        "iphone.webkit.emulated",
+        "desktop.chromium.real",
+        "android.chrome.real",
+        "iphone.webkit.real"
+      ]
+    },
+    {
+      "artifact_key": "traces",
+      "artifact_kind": "trace",
+      "step_id": "main",
+      "required_lenses": [
+        "desktop.chromium.emulated",
+        "android.chrome.emulated",
+        "iphone.webkit.emulated"
+      ],
+      "required_on_failure": true
+    },
+    {
+      "artifact_key": "execution",
+      "artifact_kind": "executable_report",
+      "step_id": "main",
+      "required_lenses": [
+        "desktop.chromium.emulated",
+        "android.chrome.emulated",
+        "iphone.webkit.emulated"
+      ]
+    }
+  ],
+  "execution": {
+    "preflight_command_sequence": [
+      "lint",
+      "typecheck"
+    ],
+    "pr_command_sequence": [
+      "verify",
+      "qa_visual"
+    ],
+    "certify_command_sequence": []
+  },
+  "promotion": {
+    "require_executable_truth": true,
+    "require_pr_artifacts": true,
+    "require_real_device_on": "release",
+    "allow_manual_certification": true,
+    "max_flaky_lenses": 0,
+    "blocking_artifact_kinds": [
+      "screenshot",
+      "trace",
+      "executable_report"
+    ]
+  }
+}

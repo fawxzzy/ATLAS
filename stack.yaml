@@ -115,6 +115,10 @@ repo_registry:
     path: repos/fawxzzy-lifeline
     role: local-operator
     status: active
+  foundation:
+    path: repos/fawxzzy-foundation
+    role: package
+    status: active
   fitness:
     path: repos/fawxzzy-fitness
     role: application
@@ -168,6 +172,7 @@ export_defaults:
     - repos/**
     - docs/**
     - ops/**
+    - .github/workflows/**
     - stack.yaml
     - stack.lock.yaml
     - README-STACK.md
@@ -193,6 +198,7 @@ stack_lock:
     - _stack
     - playbook
     - lifeline
+    - foundation
     - mazer
     - trove
     - stream
@@ -211,6 +217,9 @@ stack_lock:
     lifeline:
       trust_class: trusted
       release_eligible: true
+    foundation:
+      trust_class: trusted
+      release_eligible: true
     mazer:
       trust_class: trusted
       release_eligible: true
@@ -227,6 +236,21 @@ stack_lock:
       trust_class: trusted
       release_eligible: false
   excluded_surfaces:
+    cortex_adjacent_checkout:
+      path: repos/fawxzzy-cortex
+      trust_class: adjacent
+      release_eligible: false
+      reason: Cortex checkout is present in the workspace as an adjacent repo but is not yet a governed ATLAS child-repo adoption target.
+    fitness_reclone_recovery_checkout:
+      path: repos/fawxzzy-fitness.reclone.20260502-195639
+      trust_class: untrusted
+      release_eligible: false
+      reason: Fitness reclone remains a historical recovery checkout outside the canonical child repo and should not count as active stack adoption.
+    fitness_recovered_checkout:
+      path: repos/fawxzzy-fitness-recovered
+      trust_class: untrusted
+      release_eligible: false
+      reason: Fitness recovered checkout remains a non-canonical recovery lane outside the governed child-repo release surface.
     lifeline_operator_evidence_worktree:
       path: repos/fawxzzy-lifeline-operator-evidence
       trust_class: trusted
@@ -247,6 +271,11 @@ stack_lock:
       trust_class: untrusted
       release_eligible: false
       reason: Token-bearing Verta archive remains quarantined private evidence and must stay out of release sets.
+    zachariah_redfield_adjacent_checkout:
+      path: repos/ZachariahRedfield
+      trust_class: adjacent
+      release_eligible: false
+      reason: ZachariahRedfield checkout is an adjacent unmanaged repo and is outside the governed ATLAS release surface.
 
 session_defaults:
   root_agents: AGENTS.md

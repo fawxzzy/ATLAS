@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://schemas/atlas.qa.lens.v1.json",
+  "title": "ATLAS QA lens manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "lens_set_id",
+    "title",
+    "lenses"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "atlas.qa.lens.v1"
+    },
+    "lens_set_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "lenses": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "lens_id",
+          "browser_engine",
+          "viewport",
+          "mobile",
+          "has_touch"
+        ],
+        "properties": {
+          "lens_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "browser_engine": {
+            "type": "string",
+            "enum": [
+              "chromium",
+              "webkit",
+              "firefox"
+            ]
+          },
+          "viewport": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "width",
+              "height",
+              "device_scale_factor"
+            ],
+            "properties": {
+              "width": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "height": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "device_scale_factor": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            }
+          },
+          "mobile": {
+            "type": "boolean"
+          },
+          "has_touch": {
+            "type": "boolean"
+          },
+          "user_agent": {
+            "type": "string"
+          },
+          "emulation_profile": {
+            "type": "string"
+          },
+          "evidence_kind": {
+            "type": "string",
+            "enum": [
+              "emulated_browser",
+              "physical_device"
+            ]
+          },
+          "required_for": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "promotion_tier": {
+            "type": "string",
+            "enum": [
+              "emulated_browser",
+              "physical_device"
+            ]
+          },
+          "fallback_behavior": {
+            "type": "string",
+            "enum": [
+              "blocked",
+              "manual_review",
+              "manual_attestation",
+              "optional"
+            ]
+          },
+          "provider_manifest_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  }
+}

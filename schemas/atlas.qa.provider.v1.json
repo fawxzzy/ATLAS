@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://schemas/atlas.qa.provider.v1.json",
+  "title": "ATLAS QA provider v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "provider_id",
+    "provider_type",
+    "auth_env_vars",
+    "supported_lenses",
+    "artifact_capabilities"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "atlas.qa.provider.v1"
+    },
+    "provider_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "provider_type": {
+      "type": "string",
+      "minLength": 1
+    },
+    "auth_env_vars": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "supported_lenses": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "artifact_capabilities": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "screenshot",
+          "trace",
+          "console_log",
+          "network_log",
+          "video",
+          "executable_report",
+          "api_report",
+          "manual_note"
+        ]
+      }
+    }
+  }
+}

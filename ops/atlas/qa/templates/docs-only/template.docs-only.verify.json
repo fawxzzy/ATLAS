@@ -1,0 +1,67 @@
+{
+  "contract_version": "atlas.qa.scenario.v1",
+  "scenario_id": "template.docs-only.verify",
+  "title": "Template docs-only verification scenario",
+  "summary": "Minimal docs-first template that keeps visual evidence out of scope while still satisfying the current proof-lens contract.",
+  "repo_id": "playbook",
+  "repo_path": "repos/fawxzzy-playbook",
+  "adapter_id": "template.docs-only",
+  "criticality": "low",
+  "tags": [
+    "template",
+    "docs",
+    "nonvisual"
+  ],
+  "entrypoint": {
+    "path": "/"
+  },
+  "auth": {
+    "strategy": "anonymous"
+  },
+  "seed": {
+    "strategy": "none"
+  },
+  "proof": {
+    "lens_manifest_ref": "ops/atlas/qa/lenses/atlas-default-web.v1.json",
+    "pr_lenses": [
+      "desktop.chromium.emulated"
+    ],
+    "certify_lenses": [],
+    "real_device_strategy": "manual_only"
+  },
+  "required_artifacts": [
+    {
+      "artifact_key": "execution",
+      "artifact_kind": "executable_report",
+      "step_id": "docs",
+      "required_lenses": [
+        "desktop.chromium.emulated"
+      ]
+    },
+    {
+      "artifact_key": "manual-release-note",
+      "artifact_kind": "manual_note",
+      "step_id": "docs",
+      "required_lenses": [
+        "desktop.chromium.emulated"
+      ]
+    }
+  ],
+  "execution": {
+    "pr_command_sequence": [
+      "verify",
+      "qa_docs"
+    ],
+    "certify_command_sequence": []
+  },
+  "promotion": {
+    "require_executable_truth": true,
+    "require_pr_artifacts": true,
+    "require_real_device_on": "never",
+    "allow_manual_certification": true,
+    "max_flaky_lenses": 0,
+    "blocking_artifact_kinds": [
+      "executable_report"
+    ]
+  }
+}

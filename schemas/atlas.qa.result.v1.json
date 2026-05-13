@@ -1,0 +1,608 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://schemas/atlas.qa.result.v1.json",
+  "title": "ATLAS QA result v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "result_id",
+    "generated_at",
+    "runner_version",
+    "stage",
+    "run_id",
+    "scenario_ref",
+    "repo_id",
+    "repo_path",
+    "git_sha",
+    "adapter_id",
+    "adapter_ref",
+    "lens_manifest_ref",
+    "mode",
+    "summary",
+    "matrix",
+    "findings",
+    "artifact_manifest_refs"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "atlas.qa.result.v1"
+    },
+    "result_id": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "runner_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "stage": {
+      "type": "string",
+      "enum": [
+        "planned",
+        "executed",
+        "evaluated"
+      ]
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scenario_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "repo_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "repo_path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "git_sha": {
+      "type": "string",
+      "minLength": 1
+    },
+    "adapter_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "adapter_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "lens_manifest_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "dry_run",
+        "execute"
+      ]
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "overall_status",
+        "executable_status",
+        "artifact_status",
+        "certification_status",
+        "lens_count",
+        "failing_lens_count",
+        "finding_count"
+      ],
+      "properties": {
+        "overall_status": {
+          "type": "string",
+          "enum": [
+            "dry_run",
+            "ready",
+            "blocked"
+          ]
+        },
+        "executable_status": {
+          "type": "string",
+          "enum": [
+            "planned",
+            "clean",
+            "failed",
+            "not_run"
+          ]
+        },
+        "artifact_status": {
+          "type": "string",
+          "enum": [
+            "planned",
+            "complete",
+            "incomplete",
+            "not_collected"
+          ]
+        },
+        "certification_status": {
+          "type": "string",
+          "enum": [
+            "planned",
+            "satisfied",
+            "manual_attested",
+            "manual_required",
+            "missing"
+          ]
+        },
+        "highest_satisfied_tier": {
+          "type": "string",
+          "enum": [
+            "dry_run",
+            "emulated_browser",
+            "physical_device",
+            "manual_attestation"
+          ]
+        },
+        "satisfied_evidence_tiers": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "dry_run",
+              "emulated_browser",
+              "physical_device",
+              "manual_attestation"
+            ]
+          }
+        },
+        "missing_evidence_tiers": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "dry_run",
+              "emulated_browser",
+              "physical_device",
+              "manual_attestation"
+            ]
+          }
+        },
+        "manual_required_lanes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "visual_status": {
+          "type": "string",
+          "enum": [
+            "not_configured",
+            "planned",
+            "passed",
+            "baseline_required",
+            "failed"
+          ]
+        },
+        "visual_diff_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "test_evidence_status": {
+          "type": "string",
+          "enum": [
+            "not_configured",
+            "planned",
+            "clean",
+            "failed",
+            "missing"
+          ]
+        },
+        "evidence_profile": {
+          "type": "string",
+          "enum": [
+            "web_visual",
+            "package_contract",
+            "docs_governance"
+          ]
+        },
+        "required_test_evidence_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "lens_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "failing_lens_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "finding_count": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "matrix": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "lens_id",
+          "lens_profile_id",
+          "proof_kind",
+          "execution_mode",
+          "status"
+        ],
+        "properties": {
+          "lens_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "lens_profile_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "proof_kind": {
+            "type": "string",
+            "enum": [
+              "emulated",
+              "real"
+            ]
+          },
+          "evidence_kind": {
+            "type": "string",
+            "enum": [
+              "emulated_browser",
+              "physical_device"
+            ]
+          },
+          "promotion_tier": {
+            "type": "string",
+            "enum": [
+              "emulated_browser",
+              "physical_device"
+            ]
+          },
+          "fallback_behavior": {
+            "type": "string",
+            "enum": [
+              "blocked",
+              "manual_review",
+              "manual_attestation",
+              "optional"
+            ]
+          },
+          "execution_mode": {
+            "type": "string",
+            "enum": [
+              "repo_command",
+              "manual_external",
+              "browser_capture",
+              "provider_capture"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "planned",
+              "pass",
+              "fail",
+              "skipped",
+              "manual_required",
+              "not_run"
+            ]
+          },
+          "command_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "command": {
+            "type": "string",
+            "minLength": 1
+          },
+          "provider_hint": {
+            "type": "string",
+            "minLength": 1
+          },
+          "provider_manifest_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "required_for": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "url_target": {
+            "type": "string",
+            "minLength": 1
+          },
+          "git_sha": {
+            "type": "string",
+            "minLength": 1
+          },
+          "browser_engine": {
+            "type": "string",
+            "enum": [
+              "chromium",
+              "webkit",
+              "firefox",
+              ""
+            ]
+          },
+          "viewport": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "width",
+              "height",
+              "device_scale_factor"
+            ],
+            "properties": {
+              "width": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "height": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "device_scale_factor": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            }
+          },
+          "exit_code": {
+            "type": "integer"
+          },
+          "duration_ms": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "output_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "severity",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "severity": {
+            "type": "string",
+            "enum": [
+              "info",
+              "warning",
+              "error"
+            ]
+          },
+          "code": {
+            "type": "string",
+            "minLength": 1
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1
+          },
+          "lens_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "artifact_manifest_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "receipt_origin": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "origin_type",
+        "actor",
+        "runner_os",
+        "generated_at",
+        "repo",
+        "git_sha",
+        "qa_runner_version"
+      ],
+      "properties": {
+        "origin_type": {
+          "type": "string",
+          "enum": [
+            "local_dev",
+            "ci_pr",
+            "ci_release",
+            "protected_manual",
+            "provider"
+          ]
+        },
+        "actor": {
+          "type": "string",
+          "minLength": 1
+        },
+        "workflow_name": {
+          "type": "string"
+        },
+        "workflow_run_id": {
+          "type": "string"
+        },
+        "command": {
+          "type": "string"
+        },
+        "runner_os": {
+          "type": "string",
+          "minLength": 1
+        },
+        "generated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "repo": {
+          "type": "string",
+          "minLength": 1
+        },
+        "git_sha": {
+          "type": "string",
+          "minLength": 1
+        },
+        "stack_lock_hash": {
+          "type": "string"
+        },
+        "qa_runner_version": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "test_evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "visual_diffs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "lens_id",
+          "baseline_ref",
+          "max_pixel_delta",
+          "status",
+          "evaluated_at"
+        ],
+        "properties": {
+          "lens_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "baseline_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "max_pixel_delta": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "ignored_regions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "x",
+                "y",
+                "width",
+                "height"
+              ],
+              "properties": {
+                "x": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "y": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "width": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "height": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            }
+          },
+          "ignored_selectors": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "evaluated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "planned",
+              "passed",
+              "failed",
+              "baseline_required",
+              "candidate_missing",
+              "invalid_baseline",
+              "invalid_candidate",
+              "size_mismatch"
+            ]
+          },
+          "baseline_image_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "candidate_image_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "diff_image_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "receipt_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "changed_pixels": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "baseline_size": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "candidate_size": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "minItems": 2,
+            "maxItems": 2
+          }
+        }
+      }
+    }
+  }
+}

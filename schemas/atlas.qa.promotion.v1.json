@@ -1,0 +1,382 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://schemas/atlas.qa.promotion.v1.json",
+  "title": "ATLAS QA promotion v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "promotion_id",
+    "generated_at",
+    "evaluator_version",
+    "run_id",
+    "scenario_id",
+    "repo_id",
+    "criticality",
+    "promotion_status",
+    "highest_satisfied_tier",
+    "satisfied_evidence_tiers",
+    "missing_evidence_tiers",
+    "manual_required_lanes",
+    "waived_lanes",
+    "decision",
+    "summary",
+    "blocking_reasons",
+    "manual_gaps",
+    "governance",
+    "source_refs",
+    "operator_summary"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "atlas.qa.promotion.v1"
+    },
+    "promotion_id": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "evaluator_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scenario_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "repo_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "criticality": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ]
+    },
+    "promotion_status": {
+      "type": "string",
+      "enum": [
+        "dry_run",
+        "blocked",
+        "manual_review",
+        "promoted_emulated",
+        "promoted_physical",
+        "promoted_physical_manual",
+        "waived_promoted"
+      ]
+    },
+    "evidence_profile": {
+      "type": "string",
+      "enum": [
+        "web_visual",
+        "package_contract",
+        "docs_governance"
+      ]
+    },
+    "highest_satisfied_tier": {
+      "type": "string",
+      "enum": [
+        "dry_run",
+        "emulated_browser",
+        "physical_device",
+        "manual_attestation"
+      ]
+    },
+    "satisfied_evidence_tiers": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "dry_run",
+          "emulated_browser",
+          "physical_device",
+          "manual_attestation"
+        ]
+      }
+    },
+    "missing_evidence_tiers": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "dry_run",
+          "emulated_browser",
+          "physical_device",
+          "manual_attestation"
+        ]
+      }
+    },
+    "manual_required_lanes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "waived_lanes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "waiver_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "waiver_reasons": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "decision": {
+      "type": "string",
+      "enum": [
+        "promote",
+        "hold",
+        "manual_review"
+      ]
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "executable_truth",
+        "artifact_coverage",
+        "real_device_proof",
+        "visual_status",
+        "governance_status",
+        "flake_status"
+      ],
+      "properties": {
+        "executable_truth": {
+          "type": "string",
+          "enum": [
+            "clean",
+            "failed",
+            "unknown"
+          ]
+        },
+        "artifact_coverage": {
+          "type": "string",
+          "enum": [
+            "complete",
+            "incomplete",
+            "unknown"
+          ]
+        },
+        "real_device_proof": {
+          "type": "string",
+          "enum": [
+            "satisfied",
+            "manual_attested",
+            "waived",
+            "manual_required",
+            "missing",
+            "not_required",
+            "unknown"
+          ]
+        },
+        "visual_status": {
+          "type": "string",
+          "enum": [
+            "not_configured",
+            "planned",
+            "passed",
+            "baseline_required",
+            "failed"
+          ]
+        },
+        "test_evidence_status": {
+          "type": "string",
+          "enum": [
+            "not_configured",
+            "planned",
+            "clean",
+            "failed",
+            "missing"
+          ]
+        },
+        "evidence_profile": {
+          "type": "string",
+          "enum": [
+            "web_visual",
+            "package_contract",
+            "docs_governance"
+          ]
+        },
+        "governance_status": {
+          "type": "string",
+          "enum": [
+            "clean",
+            "blocking",
+            "not_run"
+          ]
+        },
+        "flake_status": {
+          "type": "string",
+          "enum": [
+            "none",
+            "observed",
+            "unknown"
+          ]
+        }
+      }
+    },
+    "blocking_reasons": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "manual_gaps": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "governance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "critical_count",
+        "error_count"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "clean",
+            "blocking",
+            "not_run"
+          ]
+        },
+        "critical_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "error_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "report_ref": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "source_refs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scenario_ref",
+        "result_ref",
+        "artifact_refs"
+      ],
+      "properties": {
+        "scenario_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "result_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "artifact_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "receipt_origin": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "origin_type",
+        "actor",
+        "runner_os",
+        "generated_at",
+        "repo",
+        "git_sha",
+        "qa_runner_version"
+      ],
+      "properties": {
+        "origin_type": {
+          "type": "string",
+          "enum": [
+            "local_dev",
+            "ci_pr",
+            "ci_release",
+            "protected_manual",
+            "provider"
+          ]
+        },
+        "actor": {
+          "type": "string",
+          "minLength": 1
+        },
+        "workflow_name": {
+          "type": "string"
+        },
+        "workflow_run_id": {
+          "type": "string"
+        },
+        "command": {
+          "type": "string"
+        },
+        "runner_os": {
+          "type": "string",
+          "minLength": 1
+        },
+        "generated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "repo": {
+          "type": "string",
+          "minLength": 1
+        },
+        "git_sha": {
+          "type": "string",
+          "minLength": 1
+        },
+        "stack_lock_hash": {
+          "type": "string"
+        },
+        "qa_runner_version": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "operator_summary": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  }
+}

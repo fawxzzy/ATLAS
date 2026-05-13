@@ -1,0 +1,32 @@
+{
+  "contract_version": "atlas.qa.adapter.v1",
+  "adapter_id": "template.docs-only",
+  "repo_id": "playbook",
+  "repo_path": "repos/fawxzzy-playbook",
+  "framework": "docs-or-content",
+  "lens_manifest_ref": "ops/atlas/qa/lenses/atlas-default-web.v1.json",
+  "commands": {
+    "verify": {
+      "command": "npm run verify"
+    },
+    "qa_docs": {
+      "command": "npm run docs:verify"
+    }
+  },
+  "lenses": [
+    {
+      "lens_id": "desktop.chromium.emulated",
+      "profile_id": "desktop.chromium",
+      "proof_kind": "emulated",
+      "evidence_kind": "emulated_browser",
+      "required_for": ["evidence", "promotion"],
+      "promotion_tier": "emulated_browser",
+      "fallback_behavior": "blocked",
+      "execution_mode": "repo_command",
+      "command_ref": "qa_docs"
+    }
+  ],
+  "supported_scenarios": [
+    "template.docs-only.verify"
+  ]
+}
