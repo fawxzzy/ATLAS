@@ -104,6 +104,8 @@ def refresh_protected_release_receipts(
             adapter=target["adapter_id"],
             provider=provider_value or None,
             waiver_specs=list(waiver_specs or []),
+            allow_missing_locked_repos=True,
+            required_present_repo_ids=[target["repo_id"]],
         )
         promotion = result.get("promotion", {}) if isinstance(result.get("promotion"), dict) else {}
         repo_results.append(

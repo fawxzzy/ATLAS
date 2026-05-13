@@ -36,7 +36,7 @@ from ops.atlas.qa._common import (
 from ops.atlas.qa.providers import capture_with_provider
 from ops.atlas.qa.validate_artifacts import validate_artifact_manifest_file
 from ops.cortex._artifacts import sha256_bytes, write_json
-from ops.validation.validate_stack import validate_declared_surface_scan_coverage
+from ops.validation.validate_stack import build_findings, validate_declared_surface_scan_coverage
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -356,6 +356,125 @@ class AtlasQaPipelineTests(unittest.TestCase):
         with mock.patch("ops.validation.validate_stack.collect_text_scan_roots", side_effect=_missing_docs):
             findings = validate_declared_surface_scan_coverage(root, {"repo_registry": {}}, root / "stack.yaml")
         self.assertTrue(any(item.category == "declared-scan-surface-missing" and item.path == "docs" for item in findings))
+
+    def test_build_findings_allows_missing_locked_repos_in_sparse_mode(self) -> None:
+        root = self._temp_root()
+        (root / "stack.yaml").write_text(
+            "\n".join(
+                [
+                    "repo_registry:",
+                    "  stack:",
+                    "    path: .",
+                    "    role: operator-layer",
+                    "    status: active",
+                    "  _stack:",
+                    "    path: repos/_stack",
+                    "    role: workflow-operator",
+                    "    status: active",
+                    "  playbook:",
+                    "    path: repos/fawxzzy-playbook",
+                    "    role: governance-runtime",
+                    "    status: active",
+                    "  foundation:",
+                    "    path: repos/fawxzzy-foundation",
+                    "    role: package",
+                    "    status: active",
+                    "stack_lock:",
+                    "  include_repo_ids:",
+                    "    - stack",
+                    "    - _stack",
+                    "    - playbook",
+                    "    - foundation",
+                ]
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        _git(root, "init")
+        _git(root, "config", "user.email", "atlas-test@example.com")
+        _git(root, "config", "user.name", "ATLAS Test")
+        _git(root, "add", "README-STACK.md", "AGENTS.md", "stack.yaml")
+        _git(root, "commit", "-m", "init")
+        playbook_repo = root / "repos" / "fawxzzy-playbook"
+        playbook_commit = _init_committed_repo(playbook_repo, content="# playbook\n")
+        (playbook_repo / "AGENTS.md").write_text("# playbook\n", encoding="utf-8")
+        (playbook_repo / ".codex").mkdir(exist_ok=True)
+        (playbook_repo / ".codex" / "config.toml").write_text("model = 'gpt-5.4'\n", encoding="utf-8")
+        stack_commit = _git(root, "rev-parse", "HEAD")
+        (root / "stack.lock.yaml").write_text(
+            "\n".join(
+                [
+                    'schema_version: "atlas.stack.lock.v1"',
+                    'stack_manifest_path: "stack.yaml"',
+                    'stack_manifest_digest: "sha256:' + ("a" * 64) + '"',
+                    "component_count: 4",
+                    "components:",
+                    "  stack:",
+                    '    path: "."',
+                    '    role: "operator-layer"',
+                    '    status: "active"',
+                    "    remote: null",
+                    '    ref_type: "branch"',
+                    '    ref: "main"',
+                    f'    commit: "{stack_commit}"',
+                    "    dirty: false",
+                    '    trust_class: "trusted"',
+                    "    release_eligible: false",
+                    "  _stack:",
+                    '    path: "repos/_stack"',
+                    '    role: "workflow-operator"',
+                    '    status: "active"',
+                    "    remote: null",
+                    '    ref_type: "branch"',
+                    '    ref: "main"',
+                    '    commit: "' + ("1" * 40) + '"',
+                    "    dirty: false",
+                    '    trust_class: "trusted"',
+                    "    release_eligible: false",
+                    "  playbook:",
+                    '    path: "repos/fawxzzy-playbook"',
+                    '    role: "governance-runtime"',
+                    '    status: "active"',
+                    "    remote: null",
+                    '    ref_type: "branch"',
+                    '    ref: "main"',
+                    f'    commit: "{playbook_commit}"',
+                    "    dirty: false",
+                    '    trust_class: "trusted"',
+                    "    release_eligible: true",
+                    "  foundation:",
+                    '    path: "repos/fawxzzy-foundation"',
+                    '    role: "package"',
+                    '    status: "active"',
+                    "    remote: null",
+                    '    ref_type: "branch"',
+                    '    ref: "main"',
+                    '    commit: "' + ("2" * 40) + '"',
+                    "    dirty: false",
+                    '    trust_class: "trusted"',
+                    "    release_eligible: true",
+                    "excluded_surfaces: {}",
+                    'lock_digest: "sha256:' + ("b" * 64) + '"',
+                ]
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        findings = build_findings(
+            root / "stack.yaml",
+            json.loads(json.dumps({"repo_registry": {
+                "stack": {"path": ".", "role": "operator-layer", "status": "active"},
+                "_stack": {"path": "repos/_stack", "role": "workflow-operator", "status": "active"},
+                "playbook": {"path": "repos/fawxzzy-playbook", "role": "governance-runtime", "status": "active"},
+                "foundation": {"path": "repos/fawxzzy-foundation", "role": "package", "status": "active"},
+            }, "stack_lock": {"include_repo_ids": ["stack", "_stack", "playbook", "foundation"]}})),
+            allow_missing_locked_repos=True,
+            required_present_repo_ids={"playbook"},
+        )
+        categories = {(item.category, item.path) for item in findings}
+        self.assertNotIn(("missing-repo-path", "repos/_stack"), categories)
+        self.assertNotIn(("missing-repo-path", "repos/fawxzzy-foundation"), categories)
+        self.assertFalse(any(item.category in {"stack-lock-build-failed", "stack-lock-drift"} for item in findings))
 
     def test_invalid_image_file_fails_validation(self) -> None:
         root = self._temp_root()
@@ -2520,6 +2639,8 @@ class AtlasQaPipelineTests(unittest.TestCase):
             adapter="fitness.web",
             provider=None,
             waiver_specs=waiver_specs,
+            allow_missing_locked_repos=True,
+            required_present_repo_ids=["fitness"],
         )
 
     def test_bootstrap_release_repos_clones_exact_locked_commit(self) -> None:
