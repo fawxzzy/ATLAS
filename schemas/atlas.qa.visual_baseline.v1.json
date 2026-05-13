@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://schemas/atlas.qa.visual_baseline.v1.json",
+  "title": "ATLAS QA visual baseline v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "baseline_id",
+    "scenario_id",
+    "adapter_id",
+    "lens_id",
+    "evidence_tier",
+    "source_run_id",
+    "git_sha",
+    "artifact_hash",
+    "state"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "atlas.qa.visual_baseline.v1"
+    },
+    "baseline_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scenario_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "adapter_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "lens_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evidence_tier": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "git_sha": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artifact_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "state": {
+      "enum": [
+        "proposed",
+        "blessed",
+        "superseded",
+        "rejected"
+      ]
+    },
+    "approved_by": {
+      "type": "string"
+    },
+    "approved_at": {
+      "type": "string"
+    }
+  }
+}

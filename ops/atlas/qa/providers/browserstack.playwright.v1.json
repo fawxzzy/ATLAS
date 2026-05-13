@@ -1,0 +1,18 @@
+{
+  "contract_version": "atlas.qa.provider.v1",
+  "provider_id": "browserstack.playwright",
+  "provider_type": "browserstack_automate",
+  "auth_env_vars": [
+    "BROWSERSTACK_USERNAME",
+    "BROWSERSTACK_ACCESS_KEY"
+  ],
+  "supported_lenses": [
+    "desktop.chromium.real",
+    "android.chrome.real"
+  ],
+  "artifact_capabilities": [
+    "screenshot",
+    "console_log",
+    "network_log"
+  ]
+}

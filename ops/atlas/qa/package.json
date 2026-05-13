@@ -1,0 +1,11 @@
+{
+  "name": "@atlas/qa-browser-capture",
+  "private": true,
+  "description": "Root-owned Playwright runtime for ATLAS QA browser capture.",
+  "scripts": {
+    "postinstall": "playwright install chromium webkit"
+  },
+  "dependencies": {
+    "playwright": "^1.59.1"
+  }
+}

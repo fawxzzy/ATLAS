@@ -1,0 +1,416 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://schemas/atlas.qa.scenario.v1.json",
+  "title": "ATLAS QA scenario v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "scenario_id",
+    "title",
+    "repo_id",
+    "repo_path",
+    "adapter_id",
+    "criticality",
+    "entrypoint",
+    "proof",
+    "required_artifacts",
+    "execution",
+    "promotion"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "atlas.qa.scenario.v1"
+    },
+    "scenario_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]*$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "summary": {
+      "type": "string"
+    },
+    "repo_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "repo_path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "adapter_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "criticality": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ]
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "entrypoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ready_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "preview_url_ref": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "auth": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "strategy"
+      ],
+      "properties": {
+        "strategy": {
+          "type": "string",
+          "enum": [
+            "anonymous",
+            "stored_state",
+            "bootstrap_command",
+            "manual"
+          ]
+        },
+        "bootstrap_command": {
+          "type": "string",
+          "minLength": 1
+        },
+        "state_ref": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "seed": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "strategy"
+      ],
+      "properties": {
+        "strategy": {
+          "type": "string",
+          "enum": [
+            "none",
+            "command",
+            "manual"
+          ]
+        },
+        "command": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "proof": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pr_lenses",
+        "certify_lenses",
+        "lens_manifest_ref",
+        "real_device_strategy"
+      ],
+      "properties": {
+        "pr_lenses": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "certify_lenses": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "lens_manifest_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "real_device_strategy": {
+          "type": "string",
+          "enum": [
+            "preview_first_local_tunnel_fallback",
+            "preview_only",
+            "tunnel_only",
+            "manual_only"
+          ]
+        }
+      }
+    },
+    "required_artifacts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "artifact_kind",
+          "required_lenses"
+        ],
+        "properties": {
+          "artifact_key": {
+            "type": "string",
+            "minLength": 1
+          },
+          "artifact_kind": {
+            "type": "string",
+            "enum": [
+              "screenshot",
+              "trace",
+              "console_log",
+              "network_log",
+              "video",
+              "executable_report",
+              "api_report",
+              "manual_note"
+            ]
+          },
+          "step_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "required_lenses": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required_on_failure": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "execution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pr_command_sequence",
+        "certify_command_sequence"
+      ],
+      "properties": {
+        "preflight_command_sequence": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "pr_command_sequence": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "certify_command_sequence": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "visual_assertions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "lens_id",
+          "baseline_ref",
+          "max_pixel_delta"
+        ],
+        "properties": {
+          "lens_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "baseline_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "max_pixel_delta": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "ignored_selectors": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "ignored_regions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "x",
+                "y",
+                "width",
+                "height"
+              ],
+              "properties": {
+                "x": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "y": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "width": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "height": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "test_evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "evidence_id",
+          "kind",
+          "runner",
+          "command_ref",
+          "required_for"
+        ],
+        "properties": {
+          "evidence_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "kind": {
+            "type": "string",
+            "minLength": 1
+          },
+          "runner": {
+            "type": "string",
+            "enum": [
+              "pytest",
+              "unittest",
+              "jest",
+              "vitest",
+              "npm",
+              "custom"
+            ]
+          },
+          "command_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "required_for": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "enum": [
+                "evidence",
+                "promotion"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "promotion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "require_executable_truth",
+        "require_pr_artifacts",
+        "require_real_device_on",
+        "allow_manual_certification",
+        "max_flaky_lenses"
+      ],
+      "properties": {
+        "require_executable_truth": {
+          "type": "boolean"
+        },
+        "require_pr_artifacts": {
+          "type": "boolean"
+        },
+        "require_real_device_on": {
+          "type": "string",
+          "enum": [
+            "never",
+            "merge",
+            "release",
+            "nightly"
+          ]
+        },
+        "allow_manual_certification": {
+          "type": "boolean"
+        },
+        "max_flaky_lenses": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "blocking_artifact_kinds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "screenshot",
+              "trace",
+              "console_log",
+              "network_log",
+              "video",
+              "executable_report",
+              "api_report",
+              "manual_note"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

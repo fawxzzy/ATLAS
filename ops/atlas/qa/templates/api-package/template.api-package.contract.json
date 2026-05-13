@@ -1,0 +1,72 @@
+{
+  "contract_version": "atlas.qa.scenario.v1",
+  "scenario_id": "template.api-package.contract",
+  "title": "Template API or package contract scenario",
+  "summary": "Minimal nonvisual template for repos that produce executable or API evidence without requiring screenshots.",
+  "repo_id": "stream",
+  "repo_path": "repos/fawxzzy-stream",
+  "adapter_id": "template.api-package",
+  "criticality": "medium",
+  "tags": [
+    "template",
+    "api",
+    "package",
+    "nonvisual"
+  ],
+  "entrypoint": {
+    "path": "/health-or-contract-anchor"
+  },
+  "auth": {
+    "strategy": "anonymous"
+  },
+  "seed": {
+    "strategy": "none"
+  },
+  "proof": {
+    "lens_manifest_ref": "ops/atlas/qa/lenses/atlas-default-web.v1.json",
+    "pr_lenses": [
+      "desktop.chromium.emulated"
+    ],
+    "certify_lenses": [],
+    "real_device_strategy": "manual_only"
+  },
+  "required_artifacts": [
+    {
+      "artifact_key": "api-report",
+      "artifact_kind": "api_report",
+      "step_id": "contract",
+      "required_lenses": [
+        "desktop.chromium.emulated"
+      ]
+    },
+    {
+      "artifact_key": "execution",
+      "artifact_kind": "executable_report",
+      "step_id": "contract",
+      "required_lenses": [
+        "desktop.chromium.emulated"
+      ]
+    }
+  ],
+  "execution": {
+    "preflight_command_sequence": [
+      "lint"
+    ],
+    "pr_command_sequence": [
+      "verify",
+      "qa_api"
+    ],
+    "certify_command_sequence": []
+  },
+  "promotion": {
+    "require_executable_truth": true,
+    "require_pr_artifacts": true,
+    "require_real_device_on": "never",
+    "allow_manual_certification": false,
+    "max_flaky_lenses": 0,
+    "blocking_artifact_kinds": [
+      "api_report",
+      "executable_report"
+    ]
+  }
+}

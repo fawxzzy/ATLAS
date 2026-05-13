@@ -53,6 +53,26 @@ MUTABLE_DIR_CANDIDATES = [
 ROOT_LOG_PATTERNS = ["*.log", "*.err.log", "*.out.log", "*.tmp", "*.db", "*.sqlite", "*.sqlite3"]
 ROOT_CAPTURE_PATTERNS = ["*screenshot*.png", "artifacts*.png", "*check*.png", "*review*.png"]
 BASELINE_VERSION = "atlas.stack.validation.baseline.v1"
+DECLARED_STACK_SURFACE_SCAN_CANDIDATES = [
+    "README-STACK.md",
+    "AGENTS.md",
+    "stack.yaml",
+    "stack.lock.yaml",
+    ".github/workflows",
+    "docs",
+    "ops",
+    "packages",
+    "data",
+]
+REQUIRED_STACK_GOVERNANCE_SCAN_SURFACES = [
+    "README-STACK.md",
+    "AGENTS.md",
+    "stack.yaml",
+    "stack.lock.yaml",
+    ".github/workflows",
+    "docs",
+    "ops",
+]
 PLAYBOOK_ENFORCEMENT_TRACKED_PATHS = [
     "packages/engine/src/verify/rules/atlasRootPolicyChecks.ts",
     "packages/engine/src/verify/rules/atlasRootPolicyChecks.test.ts",
@@ -347,6 +367,154 @@ def summarize_remediation_buckets(
             }
         )
     return summarized
+
+
+def warning_repo_id_for_finding(finding: dict[str, Any]) -> str:
+    details = finding.get("details")
+    if isinstance(details, dict):
+        repo_id = details.get("repo_id")
+        if isinstance(repo_id, str) and repo_id.strip():
+            return repo_id
+    path = str(finding.get("path", "")).replace("\\", "/")
+    if path.startswith("repos/"):
+        parts = path.split("/")
+        if len(parts) >= 2:
+            repo_root = parts[1]
+            mapping = {
+                "_stack": "_stack",
+                "fawxzzy-fitness": "fitness",
+                "fawxzzy-playbook": "playbook",
+                "fawxzzy-lifeline": "lifeline",
+                "fawxzzy-trove": "trove",
+                "fawxzzy-mazer": "mazer",
+                "fawxzzy-stack": "stack",
+                "fawxzzy-stream": "stream",
+                "Nat1-Games": "nat1-games",
+                "playbook-demo": "playbook-demo",
+            }
+            return mapping.get(repo_root, repo_root)
+    return "atlas-root"
+
+
+def build_warning_budget_summary(
+    report: dict[str, Any],
+    *,
+    stack_file: Path,
+    output_dir: Path,
+) -> dict[str, Any]:
+    findings = report.get("findings", []) if isinstance(report.get("findings"), list) else []
+    warnings = [item for item in findings if isinstance(item, dict) and item.get("severity") == "warning"]
+    category_counts = Counter(str(item.get("category", "unknown")) for item in warnings)
+    repo_counts = Counter(warning_repo_id_for_finding(item) for item in warnings)
+    top_category = category_counts.most_common(1)[0][0] if category_counts else ""
+    top_repo = repo_counts.most_common(1)[0][0] if repo_counts else ""
+    previous_path = output_dir / "stack-warning-budget.latest.json"
+    baseline_warning_count = len(warnings)
+    if previous_path.exists():
+        try:
+            previous = json.loads(previous_path.read_text(encoding="utf-8"))
+            previous_policy = previous.get("policy", {}) if isinstance(previous.get("policy"), dict) else {}
+            previous_baseline = previous_policy.get("baseline_warning_count")
+            if isinstance(previous_baseline, int) and previous_baseline >= 0:
+                baseline_warning_count = previous_baseline
+        except Exception:
+            baseline_warning_count = len(warnings)
+    previous_baseline_warning_count = baseline_warning_count
+    ratchet_applied = False
+    if len(warnings) < baseline_warning_count:
+        baseline_warning_count = len(warnings)
+        ratchet_applied = True
+    allowed_growth = 25
+    current_delta = len(warnings) - baseline_warning_count
+    within_budget = len(warnings) <= baseline_warning_count + allowed_growth
+    budget_status = "within_budget"
+    if current_delta > 0 and within_budget:
+        budget_status = "growth_within_budget"
+    elif not within_budget:
+        budget_status = "budget_exceeded"
+    recommended_next_fix = ""
+    if top_category:
+        recommended_next_fix = f"Reduce '{top_category}' warnings first"
+        if top_repo and top_repo != "atlas-root":
+            recommended_next_fix += f" in repo '{top_repo}'"
+        recommended_next_fix += "."
+    summary = {
+        "generated_at": report.get("generated_at"),
+        "stack_file": baseline_relpath(stack_file, stack_file),
+        "warning_count": len(warnings),
+        "warning_categories": dict(sorted(category_counts.items())),
+        "warnings_by_repo": dict(sorted(repo_counts.items())),
+        "top_5_warning_categories": [
+            {"category": category, "count": count}
+            for category, count in category_counts.most_common(5)
+        ],
+        "top_5_warning_repos": [
+            {"repo_id": repo_id, "count": count}
+            for repo_id, count in repo_counts.most_common(5)
+        ],
+        "top_recurring_warning": {
+            "category": top_category,
+            "count": int(category_counts.get(top_category, 0)),
+            "repo_id": top_repo,
+            "repo_warning_count": int(repo_counts.get(top_repo, 0)),
+        },
+        "policy": {
+            "previous_baseline_warning_count": previous_baseline_warning_count,
+            "baseline_warning_count": baseline_warning_count,
+            "allowed_growth": allowed_growth,
+            "current_delta": current_delta,
+            "within_budget": within_budget,
+            "budget_mode": "report_only",
+            "budget_status": budget_status,
+            "increase_requires_explanation": current_delta > 0,
+            "governance_review_required": current_delta > 0,
+            "hard_review_threshold": allowed_growth,
+            "ratchet_enabled": True,
+            "ratchet_applied": ratchet_applied,
+        },
+        "recommended_next_fix": recommended_next_fix,
+        "recommended_next_cleanup": recommended_next_fix,
+    }
+    json_path = output_dir / "stack-warning-budget.latest.json"
+    md_path = output_dir / "stack-warning-budget.latest.md"
+    json_path.write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
+    md_lines = [
+        "# ATLAS Stack Warning Budget",
+        "",
+        f"- Generated: `{summary['generated_at']}`",
+        f"- Warning count: `{summary['warning_count']}`",
+        f"- Baseline warning count: `{summary['policy']['baseline_warning_count']}`",
+        f"- Previous baseline warning count: `{summary['policy']['previous_baseline_warning_count']}`",
+        f"- Allowed growth: `{summary['policy']['allowed_growth']}`",
+        f"- Current delta: `{summary['policy']['current_delta']}`",
+        f"- Within budget: `{summary['policy']['within_budget']}`",
+        f"- Budget status: `{summary['policy']['budget_status']}`",
+        f"- Ratchet applied: `{summary['policy']['ratchet_applied']}`",
+        "",
+        "## By Category",
+        "",
+    ]
+    for category, count in sorted(category_counts.items(), key=lambda item: (-item[1], item[0])):
+        md_lines.append(f"- `{category}`: {count}")
+    md_lines += ["", "## By Repo", ""]
+    for repo_id, count in sorted(repo_counts.items(), key=lambda item: (-item[1], item[0])):
+        md_lines.append(f"- `{repo_id}`: {count}")
+    if summary["top_5_warning_categories"]:
+        md_lines += ["", "## Top 5 Categories", ""]
+        for item in summary["top_5_warning_categories"]:
+            md_lines.append(f"- `{item['category']}`: {item['count']}")
+    if summary["top_5_warning_repos"]:
+        md_lines += ["", "## Top 5 Repos", ""]
+        for item in summary["top_5_warning_repos"]:
+            md_lines.append(f"- `{item['repo_id']}`: {item['count']}")
+    if recommended_next_fix:
+        md_lines += ["", "## Recommendation", "", f"- {recommended_next_fix}"]
+    md_path.write_text("\n".join(md_lines) + "\n", encoding="utf-8")
+    return {
+        "warning_budget_ref": baseline_relpath(stack_file, json_path),
+        "warning_budget_md_ref": baseline_relpath(stack_file, md_path),
+        "warning_count": len(warnings),
+    }
 
 
 def parse_scalar(value: str) -> Any:
@@ -1878,13 +2046,15 @@ def is_import_evidence_file(root: Path, path: Path) -> bool:
 
 def collect_text_scan_roots(root: Path, config: dict[str, Any], stack_file: Path) -> list[Path]:
     roots: list[Path] = []
-    for candidate in ["README-STACK.md", "AGENTS.md", "stack.yaml", "docs", "ops"]:
+    for candidate in DECLARED_STACK_SURFACE_SCAN_CANDIDATES:
         candidate_path = root / candidate
         if candidate_path.exists():
             roots.append(candidate_path)
     for repo in config.get("repo_registry", {}).values():
         if isinstance(repo, dict) and isinstance(repo.get("path"), str) and repo.get("status") in {"active", "incubating", "unmanaged"}:
             repo_path = resolve_path(stack_file, repo["path"])
+            if repo_path.resolve() == root.resolve():
+                continue
             if repo_path.exists():
                 roots.append(repo_path)
     seen: set[Path] = set()
@@ -1894,6 +2064,26 @@ def collect_text_scan_roots(root: Path, config: dict[str, Any], stack_file: Path
             seen.add(item)
             result.append(item)
     return result
+
+
+def validate_declared_surface_scan_coverage(root: Path, config: dict[str, Any], stack_file: Path) -> list[Finding]:
+    scan_roots = {path.resolve() for path in collect_text_scan_roots(root, config, stack_file)}
+    findings: list[Finding] = []
+    for surface in REQUIRED_STACK_GOVERNANCE_SCAN_SURFACES:
+        surface_path = root / surface
+        if not surface_path.exists():
+            continue
+        if surface_path.resolve() not in scan_roots:
+            findings.append(
+                Finding(
+                    "error",
+                    "declared-scan-surface-missing",
+                    relative_to_root(root, surface_path),
+                    "Required root governance surface exists but is not covered by declared text scanning.",
+                    {"surface": surface},
+                )
+            )
+    return findings
 
 
 def iter_scan_files(roots: list[Path]) -> list[Path]:
@@ -1916,6 +2106,7 @@ def iter_scan_files(roots: list[Path]) -> list[Path]:
 def build_findings(stack_file: Path, config: dict[str, Any], *, lock_file_override: Path | None = None) -> list[Finding]:
     root = stack_file.parent.resolve()
     findings: list[Finding] = []
+    findings.extend(validate_declared_surface_scan_coverage(root, config, stack_file))
     try:
         _, _, topology_issues = validate_atlas_topology_contract_files(stack_file=stack_file)
     except Exception as exc:
@@ -2730,6 +2921,12 @@ def main(argv: list[str] | None = None) -> int:
     markdown_path = output_dir / args.markdown_name
     json_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
     write_markdown_report(report, markdown_path)
+    report["warning_budget"] = build_warning_budget_summary(
+        report,
+        stack_file=stack_file,
+        output_dir=output_dir,
+    )
+    json_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
     emit_validation_observations(report, json_path=json_path, root=stack_file.parent.resolve())
     summary = report["summary"]
     print(f"Stack validation complete: critical={summary['critical']} error={summary['error']} warning={summary['warning']} info={summary['info']}")

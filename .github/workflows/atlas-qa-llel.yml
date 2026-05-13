@@ -1,0 +1,350 @@
+name: ATLAS QA LLEL
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/atlas-qa-llel.yml"
+      - "AGENTS.md"
+      - "README-STACK.md"
+      - "stack.yaml"
+      - "stack.lock.yaml"
+      - "docs/standards/ATLAS-QA-LLEL.md"
+      - "docs/ops/ATLAS-QA-PROMOTION-RUNBOOK.md"
+      - "docs/codex/ATLAS-QA-LLEL-PROMPT-PACK.md"
+      - "ops/atlas/qa/**"
+      - "ops/validation/**"
+      - "schemas/atlas.qa.*.json"
+      - "tests/test_atlas_qa_pipeline.py"
+  push:
+    branches:
+      - "release/**"
+    tags:
+      - "*-v*"
+  workflow_dispatch:
+    inputs:
+      dispatch_scope:
+        description: "Protected run scope"
+        required: true
+        default: "single"
+        type: choice
+        options:
+          - single
+          - release_refresh
+      mode:
+        description: "QA gate mode"
+        required: true
+        default: "evidence"
+        type: choice
+        options:
+          - dry-run
+          - evidence
+          - promotion
+      scenario:
+        description: "Scenario id"
+        required: true
+        default: "fitness.progression-pr-smoke"
+        type: string
+      adapter:
+        description: "Adapter id"
+        required: true
+        default: "fitness.web"
+        type: string
+      provider:
+        description: "Optional QA provider for operator-triggered runs"
+        required: true
+        default: "none"
+        type: choice
+        options:
+          - none
+          - browserstack.playwright.v1
+      enforce_release_readiness:
+        description: "Enforce repo-tier release readiness"
+        required: true
+        default: false
+        type: boolean
+      release_repo:
+        description: "Repo id to enforce or refresh; leave blank to use the default release set"
+        required: false
+        default: ""
+        type: string
+      target_sha:
+        description: "Optional target SHA override for release readiness and rehearsal"
+        required: false
+        default: ""
+        type: string
+      max_receipt_age_hours:
+        description: "Maximum receipt age allowed for release readiness"
+        required: false
+        default: "168"
+        type: string
+      waiver_spec:
+        description: "Optional JSON waiver spec for protected manual refresh runs"
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  atlas-qa-llel:
+    if: github.event_name != 'push' && !(github.event_name == 'workflow_dispatch' && inputs.dispatch_scope == 'release_refresh')
+    runs-on: ubuntu-latest
+    env:
+      QA_MODE: ${{ github.event_name == 'pull_request' && 'dry-run' || inputs.mode }}
+      QA_SCENARIO: ${{ github.event_name == 'pull_request' && 'fitness.progression-pr-smoke' || inputs.scenario }}
+      QA_ADAPTER: ${{ github.event_name == 'pull_request' && 'fitness.web' || inputs.adapter }}
+      QA_PROVIDER: ${{ github.event_name == 'pull_request' && 'none' || inputs.provider }}
+      ATLAS_QA_ORIGIN_TYPE: ${{ github.event_name == 'pull_request' && 'ci_pr' || 'protected_manual' }}
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install root QA Python dependencies
+        run: python -m pip install --upgrade pip Pillow
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Compile root QA tools
+        run: python ops/validation/compile_python_tools.py --path ops/atlas/qa --path ops/validation
+
+      - name: Run root QA unit tests
+        run: python -m unittest tests.test_atlas_qa_pipeline
+
+      - name: Resolve adapter context
+        id: adapter
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          adapter_id = os.environ["QA_ADAPTER"]
+          path = Path("ops/atlas/qa/adapters") / f"{adapter_id}.json"
+          payload = json.loads(path.read_text(encoding="utf-8"))
+          capture_tool = ""
+          capture = payload.get("capture")
+          if isinstance(capture, dict):
+              capture_tool = str(capture.get("tool") or "")
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as handle:
+              handle.write(f"repo_path={payload['repo_path']}\n")
+              handle.write(f"capture_tool={capture_tool}\n")
+          PY
+
+      - name: Install browser runtime
+        if: env.QA_MODE != 'dry-run' && steps.adapter.outputs.capture_tool == 'playwright'
+        working-directory: ${{ steps.adapter.outputs.repo_path }}
+        run: npx playwright install --with-deps chromium webkit
+
+      - name: Run ATLAS QA gate
+        shell: bash
+        env:
+          BROWSERSTACK_USERNAME: ${{ github.event_name == 'workflow_dispatch' && secrets.BROWSERSTACK_USERNAME || '' }}
+          BROWSERSTACK_ACCESS_KEY: ${{ github.event_name == 'workflow_dispatch' && secrets.BROWSERSTACK_ACCESS_KEY || '' }}
+        run: |
+          if [ "${QA_PROVIDER}" = "none" ]; then
+            python ops/atlas/qa/ci_gate.py --mode "${QA_MODE}" --scenario "${QA_SCENARIO}" --adapter "${QA_ADAPTER}"
+          else
+            python ops/atlas/qa/ci_gate.py --mode "${QA_MODE}" --scenario "${QA_SCENARIO}" --adapter "${QA_ADAPTER}" --provider "${QA_PROVIDER}"
+          fi
+
+      - name: Upload QA artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: atlas-qa-${{ env.QA_MODE }}-${{ env.QA_SCENARIO }}
+          path: |
+            runtime/atlas/qa/runs/**
+            runtime/receipts/validation/stack-validation.latest.json
+            runtime/receipts/validation/stack-validation.latest.md
+            runtime/receipts/validation/stack-warning-budget.latest.json
+            runtime/receipts/validation/stack-warning-budget.latest.md
+
+  atlas-protected-release-refresh:
+    if: github.event_name == 'workflow_dispatch' && inputs.dispatch_scope == 'release_refresh'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install root QA Python dependencies
+        run: python -m pip install --upgrade pip Pillow
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Compile root QA tools
+        run: python ops/validation/compile_python_tools.py --path ops/atlas/qa --path ops/validation
+
+      - name: Run root QA unit tests
+        run: python -m unittest tests.test_atlas_qa_pipeline
+
+      - name: Bootstrap release repos from stack lock
+        shell: bash
+        run: |
+          cmd=(python ops/atlas/qa/bootstrap_release_repos.py)
+          if [ -n "${{ inputs.release_repo }}" ]; then
+            cmd+=(--repo "${{ inputs.release_repo }}")
+          fi
+          "${cmd[@]}"
+
+      - name: Refresh protected release receipts
+        shell: bash
+        env:
+          BROWSERSTACK_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME || '' }}
+          BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY || '' }}
+        run: |
+          cmd=(python ops/atlas/qa/protected_release_refresh.py --mode "${{ inputs.mode }}" --provider "${{ inputs.provider }}" --max-receipt-age-hours "${{ inputs.max_receipt_age_hours || '168' }}")
+          if [ -n "${{ inputs.release_repo }}" ]; then
+            cmd+=(--repo "${{ inputs.release_repo }}")
+          fi
+          if [ -n "${{ inputs.waiver_spec }}" ]; then
+            cmd+=(--waiver-spec "${{ inputs.waiver_spec }}")
+          fi
+          if [ "${{ inputs.enforce_release_readiness }}" = "true" ]; then
+            cmd+=(--enforce)
+          fi
+          "${cmd[@]}"
+
+      - name: Upload protected release artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: atlas-protected-release-refresh
+          path: |
+            runtime/atlas/qa/bootstrap-release-repos.latest.json
+            runtime/atlas/qa/bootstrap-release-repos.latest.md
+            runtime/atlas/qa/protected-release-refresh.latest.json
+            runtime/atlas/qa/protected-release-refresh.latest.md
+            runtime/atlas/qa/evidence-index.latest.json
+            runtime/atlas/qa/evidence-index.latest.md
+            runtime/atlas/qa/waiver-monitor.latest.json
+            runtime/atlas/qa/waiver-monitor.latest.md
+            runtime/atlas/qa/adoption-drift.latest.json
+            runtime/atlas/qa/adoption-drift.latest.md
+            runtime/atlas/qa/release-readiness.latest.json
+            runtime/atlas/qa/release-readiness.latest.md
+            runtime/atlas/qa/release-rehearsal.latest.json
+            runtime/atlas/qa/release-rehearsal.latest.md
+            runtime/receipts/validation/stack-validation.latest.json
+            runtime/receipts/validation/stack-validation.latest.md
+            runtime/receipts/validation/stack-warning-budget.latest.json
+            runtime/receipts/validation/stack-warning-budget.latest.md
+
+  atlas-release-readiness:
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.enforce_release_readiness == true && inputs.dispatch_scope != 'release_refresh')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Resolve release repo
+        id: release
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import re
+          import sys
+          from pathlib import Path
+
+          explicit = os.environ.get("RELEASE_REPO", "").strip()
+          ref_name = os.environ.get("GITHUB_REF_NAME", "").strip()
+          event_name = os.environ.get("GITHUB_EVENT_NAME", "").strip()
+          repo_id = explicit
+          if not repo_id and event_name == "workflow_dispatch":
+              adapter_id = os.environ.get("QA_ADAPTER", "").strip()
+              if adapter_id:
+                  payload = json.loads((Path("ops/atlas/qa/adapters") / f"{adapter_id}.json").read_text(encoding="utf-8"))
+                  repo_id = str(payload.get("repo_id") or "").strip()
+          if not repo_id and ref_name.startswith("release/"):
+              parts = [part for part in ref_name.split("/") if part]
+              if len(parts) >= 2:
+                  repo_id = parts[1].strip()
+          if not repo_id:
+              match = re.match(r"^(?P<repo>[a-z0-9-]+)-v.+$", ref_name)
+              if match:
+                  repo_id = match.group("repo").strip()
+          if not repo_id:
+              raise SystemExit("Unable to resolve release repo. Provide workflow_dispatch input release_repo or use a supported release branch/tag naming pattern.")
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as handle:
+              handle.write(f"repo_id={repo_id}\n")
+          PY
+        env:
+          RELEASE_REPO: ${{ inputs.release_repo }}
+          QA_ADAPTER: ${{ inputs.adapter }}
+
+      - name: Validate stack governance
+        run: python ops/validation/validate_stack.py
+
+      - name: Refresh evidence index
+        run: python ops/atlas/qa/evidence_index.py
+
+      - name: Build release readiness
+        run: |
+          if [ -n "${TARGET_SHA}" ]; then
+            python ops/atlas/qa/release_readiness.py --target-sha "${TARGET_SHA}" --max-receipt-age-hours "${MAX_RECEIPT_AGE_HOURS}"
+          else
+            python ops/atlas/qa/release_readiness.py --max-receipt-age-hours "${MAX_RECEIPT_AGE_HOURS}"
+          fi
+        env:
+          TARGET_SHA: ${{ inputs.target_sha }}
+          MAX_RECEIPT_AGE_HOURS: ${{ inputs.max_receipt_age_hours || '168' }}
+
+      - name: Scan adoption drift
+        run: python ops/atlas/qa/adoption_drift.py
+
+      - name: Build release rehearsal
+        run: python ops/atlas/qa/release_rehearsal.py
+
+      - name: Enforce repo-tier release readiness
+        run: |
+          if [ -n "${TARGET_SHA}" ]; then
+            python ops/atlas/qa/release_readiness.py --repo "${{ steps.release.outputs.repo_id }}" --mode release --enforce --target-sha "${TARGET_SHA}" --max-receipt-age-hours "${MAX_RECEIPT_AGE_HOURS}"
+          else
+            python ops/atlas/qa/release_readiness.py --repo "${{ steps.release.outputs.repo_id }}" --mode release --enforce --max-receipt-age-hours "${MAX_RECEIPT_AGE_HOURS}"
+          fi
+        env:
+          TARGET_SHA: ${{ inputs.target_sha }}
+          MAX_RECEIPT_AGE_HOURS: ${{ inputs.max_receipt_age_hours || '168' }}
+
+      - name: Upload release-governance artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: atlas-release-readiness-${{ steps.release.outputs.repo_id }}
+          path: |
+            runtime/atlas/qa/evidence-index.latest.json
+            runtime/atlas/qa/evidence-index.latest.md
+            runtime/atlas/qa/release-readiness.latest.json
+            runtime/atlas/qa/release-readiness.latest.md
+            runtime/atlas/qa/release-rehearsal.latest.json
+            runtime/atlas/qa/release-rehearsal.latest.md
+            runtime/atlas/qa/adoption-drift.latest.json
+            runtime/atlas/qa/adoption-drift.latest.md
+            runtime/receipts/validation/stack-validation.latest.json
+            runtime/receipts/validation/stack-validation.latest.md
+            runtime/receipts/validation/stack-warning-budget.latest.json
+            runtime/receipts/validation/stack-warning-budget.latest.md

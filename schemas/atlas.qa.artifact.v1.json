@@ -1,0 +1,495 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://schemas/atlas.qa.artifact.v1.json",
+  "title": "ATLAS QA artifact manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "artifact_manifest_id",
+    "generated_at",
+    "run_id",
+    "scenario_id",
+    "adapter_id",
+    "repo_id",
+    "repo_path",
+    "stage",
+    "mode",
+    "evidence_grade",
+    "git_sha",
+    "environment",
+    "lenses",
+    "artifacts",
+    "summary"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "atlas.qa.artifact.v1"
+    },
+    "artifact_manifest_id": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scenario_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "adapter_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "repo_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "repo_path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "stage": {
+      "type": "string",
+      "enum": [
+        "planned",
+        "collected"
+      ]
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "dry_run",
+        "execute"
+      ]
+    },
+    "evidence_grade": {
+      "type": "string",
+      "enum": [
+        "dry_run",
+        "evidence"
+      ]
+    },
+    "git_sha": {
+      "type": "string",
+      "minLength": 1
+    },
+    "environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "execution_root",
+        "target_url"
+      ],
+      "properties": {
+        "execution_root": {
+          "type": "string",
+          "minLength": 1
+        },
+        "target_url": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "lenses": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "minLength": 1
+      },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "browser_engine",
+          "viewport",
+          "mobile",
+          "has_touch"
+        ],
+        "properties": {
+          "browser_engine": {
+            "type": "string",
+            "enum": [
+              "chromium",
+              "webkit",
+              "firefox"
+            ]
+          },
+          "viewport": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "width",
+              "height",
+              "device_scale_factor"
+            ],
+            "properties": {
+              "width": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "height": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "device_scale_factor": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            }
+          },
+          "mobile": {
+            "type": "boolean"
+          },
+          "has_touch": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "attestations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "attestation_id",
+          "attestation_ref",
+          "run_id",
+          "scenario_id",
+          "adapter_id",
+          "lens_id",
+          "operator",
+          "capture_method",
+          "status"
+        ],
+        "properties": {
+          "attestation_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "attestation_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "run_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "scenario_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "adapter_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "lens_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "operator": {
+            "type": "string",
+            "minLength": 1
+          },
+          "capture_method": {
+            "type": "string",
+            "enum": [
+              "manual_attestation"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "valid",
+              "invalid"
+            ]
+          }
+        }
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "artifact_id",
+          "artifact_kind",
+          "lens_id",
+          "proof_kind",
+          "required",
+          "status"
+        ],
+        "properties": {
+          "artifact_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "artifact_kind": {
+            "type": "string",
+            "enum": [
+              "screenshot",
+              "trace",
+              "console_log",
+              "network_log",
+              "video",
+              "executable_report",
+              "api_report",
+              "manual_note"
+            ]
+          },
+          "step_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "lens_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "proof_kind": {
+            "type": "string",
+            "enum": [
+              "emulated",
+              "real"
+            ]
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "planned",
+              "present",
+              "missing",
+              "skipped",
+              "manual_required",
+              "manual_attested"
+            ]
+          },
+          "path_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "content_type": {
+            "type": "string",
+            "minLength": 1
+          },
+          "checksum_sha256": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "evidence": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "run_id",
+              "scenario_id",
+              "adapter_id",
+              "repo_id",
+              "git_sha",
+              "lens_id",
+              "viewport",
+              "browser_engine",
+              "captured_at",
+              "source_url",
+              "artifact_sha256"
+            ],
+            "properties": {
+              "run_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "scenario_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "adapter_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "repo_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "git_sha": {
+                "type": "string",
+                "minLength": 1
+              },
+              "lens_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "evidence_tier": {
+                "type": "string",
+                "enum": [
+                  "dry_run",
+                  "emulated_browser",
+                  "physical_device",
+                  "manual_attestation"
+                ]
+              },
+              "viewport": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "width",
+                  "height",
+                  "device_scale_factor",
+                  "mobile"
+                ],
+                "properties": {
+                  "width": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "height": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "device_scale_factor": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "mobile": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "browser_engine": {
+                "type": "string",
+                "enum": [
+                  "chromium",
+                  "webkit",
+                  "firefox"
+                ]
+              },
+              "captured_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "source_url": {
+                "type": "string",
+                "minLength": 1
+              },
+              "artifact_sha256": {
+                "type": "string",
+                "pattern": "^sha256:[0-9a-f]{64}$"
+              },
+              "capture_method": {
+                "type": "string",
+                "enum": [
+                  "browser_emulation",
+                  "provider_automation",
+                  "manual_attestation"
+                ]
+              },
+              "capture_backend": {
+                "type": "string",
+                "minLength": 1
+              },
+              "metadata_ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "provider_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "provider_run_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "device_model": {
+                "type": "string",
+                "minLength": 1
+              },
+              "os_name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "os_version": {
+                "type": "string",
+                "minLength": 1
+              },
+              "browser_name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "browser_version": {
+                "type": "string"
+              },
+              "operator": {
+                "type": "string",
+                "minLength": 1
+              },
+              "attestation_ref": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_count",
+        "required_count",
+        "present_count",
+        "missing_count",
+        "manual_required_count"
+      ],
+      "properties": {
+        "artifact_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "required_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "present_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "missing_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "manual_required_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "manual_attested_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "invalid_count": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://schemas/atlas.qa.adapter.v1.json",
+  "title": "ATLAS QA adapter v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "adapter_id",
+    "repo_id",
+    "repo_path",
+    "lens_manifest_ref",
+    "commands",
+    "lenses"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "atlas.qa.adapter.v1"
+    },
+    "adapter_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "repo_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "repo_path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "framework": {
+      "type": "string"
+    },
+    "lens_manifest_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "prepare": {
+      "type": "object"
+    },
+    "start": {
+      "type": "object"
+    },
+    "capture": {
+      "type": "object"
+    },
+    "commands": {
+      "type": "object"
+    },
+    "lenses": {
+      "type": "array"
+    },
+    "supported_scenarios": {
+      "type": "array"
+    }
+  }
+}

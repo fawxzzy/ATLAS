@@ -1,0 +1,239 @@
+{
+  "contract_version": "atlas.qa.release_policy.v1",
+  "policy_version": "1.0.0",
+  "profiles": {
+    "package_contract": {
+      "display_name": "Package Contract",
+      "require_trusted_origin": true,
+      "allowed_release_origins": [
+        "ci_release",
+        "protected_manual",
+        "provider"
+      ],
+      "allowed_pr_origins": [
+        "ci_pr",
+        "ci_release",
+        "protected_manual",
+        "local_dev"
+      ],
+      "enforcement_stage": "warn",
+      "mode_requirements": {
+        "pr": {
+          "required_evidence": [
+            "unit_or_command_evidence"
+          ],
+          "notes": [
+            "Require repo-native command or unit evidence for pull requests."
+          ]
+        },
+        "main": {
+          "required_evidence": [
+            "unit_or_command_evidence",
+            "contract_receipt"
+          ],
+          "notes": [
+            "Main branch requires root-readable contract evidence."
+          ]
+        },
+        "release": {
+          "allowed_statuses": [
+            "promoted_emulated",
+            "promoted_physical",
+            "promoted_physical_manual",
+            "waived_promoted"
+          ],
+          "notes": [
+            "Package and API repos do not require browser or physical-device evidence by default."
+          ]
+        },
+        "manual_promotion": {
+          "allowed_statuses": [
+            "promoted_emulated",
+            "promoted_physical",
+            "promoted_physical_manual",
+            "waived_promoted"
+          ]
+        }
+      }
+    },
+    "docs_governance": {
+      "display_name": "Docs Governance",
+      "require_trusted_origin": true,
+      "allowed_release_origins": [
+        "ci_release",
+        "protected_manual",
+        "provider"
+      ],
+      "allowed_pr_origins": [
+        "ci_pr",
+        "ci_release",
+        "protected_manual",
+        "local_dev"
+      ],
+      "enforcement_stage": "warn",
+      "mode_requirements": {
+        "pr": {
+          "required_evidence": [
+            "docs_audit",
+            "lint_or_command_evidence"
+          ],
+          "notes": [
+            "Governance repos must fail when managed docs drift or lint breaks."
+          ]
+        },
+        "main": {
+          "required_evidence": [
+            "docs_audit",
+            "lint_or_command_evidence"
+          ]
+        },
+        "release": {
+          "allowed_statuses": [
+            "promoted_emulated",
+            "promoted_physical",
+            "promoted_physical_manual",
+            "waived_promoted"
+          ],
+          "notes": [
+            "Docs/governance repos promote through contract evidence, not browser semantics."
+          ]
+        },
+        "manual_promotion": {
+          "allowed_statuses": [
+            "promoted_emulated",
+            "promoted_physical",
+            "promoted_physical_manual",
+            "waived_promoted"
+          ]
+        }
+      }
+    },
+    "web_visual": {
+      "display_name": "Web Visual",
+      "require_trusted_origin": true,
+      "allowed_release_origins": [
+        "ci_release",
+        "protected_manual",
+        "provider"
+      ],
+      "allowed_pr_origins": [
+        "ci_pr",
+        "ci_release",
+        "protected_manual",
+        "local_dev"
+      ],
+      "enforcement_stage": "warn",
+      "mode_requirements": {
+        "pr": {
+          "required_evidence": [
+            "unit_or_command_evidence",
+            "emulated_browser"
+          ],
+          "notes": [
+            "Normal web pull requests require emulated browser evidence, not physical-device proof."
+          ]
+        },
+        "main": {
+          "required_evidence": [
+            "unit_or_command_evidence",
+            "emulated_browser"
+          ]
+        },
+        "release": {
+          "allowed_statuses": [
+            "promoted_emulated",
+            "promoted_physical",
+            "promoted_physical_manual",
+            "waived_promoted"
+          ],
+          "notes": [
+            "Standard web releases require clean emulated evidence unless the repo is marked release-critical."
+          ]
+        },
+        "manual_promotion": {
+          "allowed_statuses": [
+            "promoted_emulated",
+            "promoted_physical",
+            "promoted_physical_manual",
+            "waived_promoted"
+          ]
+        }
+      }
+    },
+    "release_critical_web": {
+      "display_name": "Release-Critical Web",
+      "require_trusted_origin": true,
+      "allowed_release_origins": [
+        "ci_release",
+        "protected_manual",
+        "provider"
+      ],
+      "allowed_pr_origins": [
+        "ci_pr",
+        "ci_release",
+        "protected_manual",
+        "local_dev"
+      ],
+      "enforcement_stage": "warn",
+      "mode_requirements": {
+        "pr": {
+          "required_evidence": [
+            "unit_or_command_evidence",
+            "emulated_browser"
+          ],
+          "notes": [
+            "Pull requests stay on emulated evidence for feedback speed."
+          ]
+        },
+        "main": {
+          "required_evidence": [
+            "unit_or_command_evidence",
+            "emulated_browser"
+          ]
+        },
+        "release": {
+          "allowed_statuses": [
+            "promoted_physical",
+            "promoted_physical_manual",
+            "waived_promoted"
+          ],
+          "required_tiers": [
+            "physical_device",
+            "manual_attestation"
+          ],
+          "notes": [
+            "Release-critical web flows require provider-backed physical proof or valid manual attestation."
+          ]
+        },
+        "manual_promotion": {
+          "allowed_statuses": [
+            "promoted_physical",
+            "promoted_physical_manual",
+            "waived_promoted"
+          ],
+          "required_tiers": [
+            "physical_device",
+            "manual_attestation"
+          ]
+        }
+      }
+    }
+  },
+  "repo_overrides": {
+    "fitness": {
+      "release_profile": "release_critical_web"
+    },
+    "playbook": {
+      "release_profile": "docs_governance"
+    },
+    "lifeline": {
+      "release_profile": "package_contract"
+    },
+    "foundation": {
+      "release_profile": "package_contract"
+    },
+    "trove": {
+      "release_profile": "web_visual"
+    }
+  }
+}
