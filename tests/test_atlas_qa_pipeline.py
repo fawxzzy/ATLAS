@@ -476,6 +476,128 @@ class AtlasQaPipelineTests(unittest.TestCase):
         self.assertNotIn(("missing-repo-path", "repos/fawxzzy-foundation"), categories)
         self.assertFalse(any(item.category in {"stack-lock-build-failed", "stack-lock-drift"} for item in findings))
 
+    def test_build_findings_sparse_mode_skips_runtime_state_and_detached_ref_checks(self) -> None:
+        root = self._temp_root()
+        (root / "stack.yaml").write_text(
+            "\n".join(
+                [
+                    "repo_registry:",
+                    "  stack:",
+                    "    path: .",
+                    "    role: operator-layer",
+                    "    status: active",
+                    "  playbook:",
+                    "    path: repos/fawxzzy-playbook",
+                    "    role: governance-runtime",
+                    "    status: active",
+                    "  fitness:",
+                    "    path: repos/fawxzzy-fitness",
+                    "    role: application",
+                    "    status: active",
+                    "paths:",
+                    "  tmp: tmp",
+                    "  secrets: secrets",
+                    "subpaths:",
+                    "  runtime:",
+                    "    state: runtime/state",
+                    "    receipts: runtime/receipts",
+                    "stack_lock:",
+                    "  include_repo_ids:",
+                    "    - stack",
+                    "    - playbook",
+                ]
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        _git(root, "init")
+        _git(root, "config", "user.email", "atlas-test@example.com")
+        _git(root, "config", "user.name", "ATLAS Test")
+        _git(root, "add", "README-STACK.md", "AGENTS.md", "stack.yaml")
+        _git(root, "commit", "-m", "init")
+        playbook_repo = root / "repos" / "fawxzzy-playbook"
+        playbook_commit = _init_committed_repo(playbook_repo, content="# playbook\n")
+        (playbook_repo / "AGENTS.md").write_text("# playbook\n", encoding="utf-8")
+        _git(playbook_repo, "checkout", "--detach", playbook_commit)
+        stack_commit = _git(root, "rev-parse", "HEAD")
+        (root / "stack.lock.yaml").write_text(
+            "\n".join(
+                [
+                    'schema_version: "atlas.stack.lock.v1"',
+                    'stack_manifest_path: "stack.yaml"',
+                    'stack_manifest_digest: "sha256:' + ("c" * 64) + '"',
+                    "component_count: 2",
+                    "components:",
+                    "  stack:",
+                    '    path: "."',
+                    '    role: "operator-layer"',
+                    '    status: "active"',
+                    "    remote: null",
+                    '    ref_type: "branch"',
+                    '    ref: "main"',
+                    f'    commit: "{stack_commit}"',
+                    "    dirty: false",
+                    '    trust_class: "trusted"',
+                    "    release_eligible: false",
+                    "  playbook:",
+                    '    path: "repos/fawxzzy-playbook"',
+                    '    role: "governance-runtime"',
+                    '    status: "active"',
+                    "    remote: null",
+                    '    ref_type: "branch"',
+                    '    ref: "main"',
+                    f'    commit: "{playbook_commit}"',
+                    "    dirty: false",
+                    '    trust_class: "trusted"',
+                    "    release_eligible: true",
+                    "excluded_surfaces: {}",
+                    'lock_digest: "sha256:' + ("d" * 64) + '"',
+                ]
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        config = json.loads(
+            json.dumps(
+                {
+                    "repo_registry": {
+                        "stack": {"path": ".", "role": "operator-layer", "status": "active"},
+                        "playbook": {"path": "repos/fawxzzy-playbook", "role": "governance-runtime", "status": "active"},
+                        "fitness": {"path": "repos/fawxzzy-fitness", "role": "application", "status": "active"},
+                    },
+                    "paths": {"tmp": "tmp", "secrets": "secrets"},
+                    "subpaths": {"runtime": {"state": "runtime/state", "receipts": "runtime/receipts"}},
+                    "stack_lock": {"include_repo_ids": ["stack", "playbook"]},
+                }
+            )
+        )
+        with (
+            mock.patch("ops.validation.validate_stack.validate_declared_surface_scan_coverage", return_value=[]),
+            mock.patch("ops.validation.validate_stack.validate_atlas_topology_contract_files", return_value=(0, "", [])),
+            mock.patch("ops.validation.validate_stack.validate_tool_registry", return_value=[]),
+            mock.patch("ops.validation.validate_stack.validate_subsystem_registry", return_value=[]),
+            mock.patch("ops.validation.validate_stack.validate_playbook_enforcement_tracking", return_value=[]),
+            mock.patch("ops.validation.validate_stack.validate_execution_receipt_repairs", side_effect=AssertionError("sparse mode should skip execution receipt repair validation")),
+            mock.patch("ops.validation.validate_stack.validate_verta_trust_gate", side_effect=AssertionError("sparse mode should skip Verta trust-gate validation")),
+            mock.patch("ops.validation.validate_stack.validate_working_memory", side_effect=AssertionError("sparse mode should skip working-memory validation")),
+            mock.patch("ops.validation.validate_stack.validate_world_model_state", side_effect=AssertionError("sparse mode should skip world-model validation")),
+            mock.patch("ops.validation.validate_stack.validate_proposed_sessions", side_effect=AssertionError("sparse mode should skip proposed session validation")),
+        ):
+            findings = build_findings(
+                root / "stack.yaml",
+                config,
+                allow_missing_locked_repos=True,
+                required_present_repo_ids={"playbook"},
+            )
+        categories = {(item.category, item.path) for item in findings}
+        self.assertNotIn(("missing-directory", "tmp"), categories)
+        self.assertNotIn(("missing-directory", "secrets"), categories)
+        self.assertNotIn(("missing-directory", "runtime/state"), categories)
+        self.assertNotIn(("missing-directory", "runtime/receipts"), categories)
+        self.assertNotIn(("missing-repo-path", "repos/fawxzzy-fitness"), categories)
+        self.assertNotIn(("missing-codex-config", "repos/fawxzzy-playbook"), categories)
+        self.assertNotIn(("stack-lock-missing-ref", "stack.lock.yaml#playbook"), categories)
+
     def test_invalid_image_file_fails_validation(self) -> None:
         root = self._temp_root()
         manifest_path, screenshot = self._base_manifest(root=root)

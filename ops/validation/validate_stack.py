@@ -708,28 +708,38 @@ def lockfile_output_path(stack_file: Path, config: dict[str, Any]) -> Path:
     return default_lockfile_path(config=config, root=stack_file.parent.resolve())
 
 
-def verify_locked_ref(repo_path: Path, component: dict[str, Any]) -> str | None:
+def verify_locked_ref(
+    repo_path: Path,
+    component: dict[str, Any],
+    *,
+    allow_exact_head_without_ref: bool = False,
+) -> str | None:
     ref_type = str(component.get("ref_type", ""))
     ref = str(component.get("ref", ""))
     commit = str(component.get("commit", ""))
+    code, head_commit = git_output(repo_path, "rev-parse", "HEAD")
+    if code != 0 or not head_commit:
+        return "Unable to resolve current HEAD for pinned component."
     if ref_type == "branch":
         code, _ = git_output(repo_path, "show-ref", "--verify", "--quiet", f"refs/heads/{ref}")
         if code != 0:
+            if allow_exact_head_without_ref and commit and head_commit == commit:
+                return None
             return f"Pinned branch ref '{ref}' is missing."
     elif ref_type == "tag":
         code, _ = git_output(repo_path, "show-ref", "--verify", "--quiet", f"refs/tags/{ref}")
         if code != 0:
+            if allow_exact_head_without_ref and commit and head_commit == commit:
+                return None
             return f"Pinned tag ref '{ref}' is missing."
     elif ref_type == "commit":
         code, output = git_output(repo_path, "rev-parse", "--verify", f"{ref}^{{commit}}")
         if code != 0 or not output:
+            if allow_exact_head_without_ref and commit and head_commit == commit:
+                return None
             return f"Pinned commit ref '{ref}' is missing."
     else:
         return f"Unsupported ref_type '{ref_type}'."
-
-    code, head_commit = git_output(repo_path, "rev-parse", "HEAD")
-    if code != 0 or not head_commit:
-        return "Unable to resolve current HEAD for pinned component."
     if commit and head_commit != commit:
         return f"Pinned commit '{commit}' does not match current HEAD '{head_commit}'."
     return None
@@ -2113,6 +2123,7 @@ def build_findings(
 ) -> list[Finding]:
     root = stack_file.parent.resolve()
     findings: list[Finding] = []
+    sparse_mode = allow_missing_locked_repos
     required_present_repo_ids = {
         str(repo_id).strip()
         for repo_id in (required_present_repo_ids or set())
@@ -2153,20 +2164,21 @@ def build_findings(
         findings.extend(Finding(item.severity, item.category, item.path, item.message, item.details) for item in topology_issues)
     findings.extend(validate_tool_registry(root))
     findings.extend(validate_subsystem_registry(stack_file, config))
-    findings.extend(validate_execution_receipt_repairs(stack_file))
     findings.extend(validate_playbook_enforcement_tracking(stack_file, config))
-    findings.extend(validate_verta_trust_gate(stack_file, config))
-    findings.extend(validate_working_memory(stack_file))
-    findings.extend(validate_world_model_state(stack_file))
-    findings.extend(validate_proposed_sessions(stack_file))
+    if not sparse_mode:
+        findings.extend(validate_execution_receipt_repairs(stack_file))
+        findings.extend(validate_verta_trust_gate(stack_file, config))
+        findings.extend(validate_working_memory(stack_file))
+        findings.extend(validate_world_model_state(stack_file))
+        findings.extend(validate_proposed_sessions(stack_file))
 
-    for label, raw_path in iter_relative_directory_targets(config):
-        resolved = resolve_path(stack_file, raw_path)
-        rel = normalize_slashes(str(resolved.relative_to(root))) if resolved.is_relative_to(root) else normalize_slashes(str(resolved))
-        if not resolved.exists():
-            findings.append(Finding("critical", "missing-directory", rel, f"Required directory from {label} is missing.", {"config_value": raw_path}))
-        elif not resolved.is_dir():
-            findings.append(Finding("critical", "path-not-directory", rel, f"Configured directory target for {label} is not a directory.", {"config_value": raw_path}))
+        for label, raw_path in iter_relative_directory_targets(config):
+            resolved = resolve_path(stack_file, raw_path)
+            rel = normalize_slashes(str(resolved.relative_to(root))) if resolved.is_relative_to(root) else normalize_slashes(str(resolved))
+            if not resolved.exists():
+                findings.append(Finding("critical", "missing-directory", rel, f"Required directory from {label} is missing.", {"config_value": raw_path}))
+            elif not resolved.is_dir():
+                findings.append(Finding("critical", "path-not-directory", rel, f"Configured directory target for {label} is not a directory.", {"config_value": raw_path}))
 
     for repo_id, repo_info in config.get("repo_registry", {}).items():
         if not isinstance(repo_info, dict) or not isinstance(repo_info.get("path"), str):
@@ -2179,7 +2191,7 @@ def build_findings(
             repo_rel = "."
         is_stack_control_repo = repo_path == root
         if not repo_path.exists():
-            if allow_missing_locked_repos and repo_id in allowed_missing_locked_repo_ids:
+            if sparse_mode and repo_id not in required_present_repo_ids:
                 continue
             findings.append(Finding("critical", "missing-repo-path", repo_rel, f"Repo path for '{repo_id}' does not exist.", {"status": status}))
             continue
@@ -2208,7 +2220,7 @@ def build_findings(
                 message = "Expected AGENTS.md is missing; singular AGENT.md exists."
                 details["singular_agent_present"] = True
             findings.append(Finding("error" if status in ACTIVE_STATUSES else "warning", "missing-agents", repo_rel, message, details))
-        if status in CONFIG_EXPECTED_STATUSES and not config_path.exists() and not is_stack_control_repo:
+        if status in CONFIG_EXPECTED_STATUSES and not config_path.exists() and not is_stack_control_repo and not sparse_mode:
             findings.append(Finding("error", "missing-codex-config", repo_rel, "Expected .codex/config.toml is missing for an active repo.", {"status": status}))
         if status in ACTIVE_STATUSES and not readme_path.exists():
             readme_name = "README-STACK.md" if is_stack_control_repo else "README.md"
@@ -2377,7 +2389,7 @@ def build_findings(
                         )
                     repo_path = resolve_path(stack_file, str(component.get("path", "")))
                     if not repo_path.exists():
-                        if allow_missing_locked_repos and component_id in allowed_missing_locked_repo_ids:
+                        if sparse_mode and component_id not in required_present_repo_ids:
                             continue
                         findings.append(Finding("error", "stack-lock-missing-path", component_path, "Pinned component path does not exist on disk."))
                         continue
@@ -2390,7 +2402,11 @@ def build_findings(
                     trust_class = str(component.get("trust_class", ""))
                     if trust_class not in TRUST_CLASSES:
                         findings.append(Finding("error", "stack-lock-trust-class", component_path, f"Unsupported trust_class '{trust_class}' in stack lockfile."))
-                    ref_problem = None if component_id == accepted_root_refresh_repo_id else verify_locked_ref(repo_path, component)
+                    ref_problem = None if component_id == accepted_root_refresh_repo_id else verify_locked_ref(
+                        repo_path,
+                        component,
+                        allow_exact_head_without_ref=sparse_mode,
+                    )
                     if ref_problem:
                         findings.append(Finding("error", "stack-lock-missing-ref", component_path, ref_problem))
                     if bool(component.get("release_eligible")) and trust_class != "trusted":
