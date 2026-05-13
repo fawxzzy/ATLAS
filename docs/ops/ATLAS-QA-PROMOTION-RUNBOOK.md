@@ -247,6 +247,7 @@ Use `dispatch_scope=release_refresh` to refresh protected receipts for either on
 
 Protected dispatch should upload:
 
+- `bootstrap-release-repos.latest.json` and `.md`
 - `protected-release-refresh.latest.json` and `.md` when `dispatch_scope=release_refresh`
 - `release-readiness.latest.json` and `.md`
 - `release-rehearsal.latest.json` and `.md`
@@ -316,6 +317,24 @@ Trusted receipt origins are:
 - `provider`
 
 Protected manual dispatch can be used to produce a trusted non-PR receipt without putting provider secrets or operator identities into source files.
+
+Before `dispatch_scope=release_refresh`, bootstrap the requested child repos from `stack.lock.yaml`:
+
+```powershell
+python ops/atlas/qa/bootstrap_release_repos.py --repo playbook
+```
+
+Rules for protected bootstrap:
+
+- clone the repo from the locked `remote`
+- checkout the exact locked `commit`
+- fail if `remote` is missing
+- fail if `commit` is missing
+- fail if the requested release repo is still marked `dirty: true` in `stack.lock.yaml`
+- fail if the checked-out `HEAD` does not match the locked commit
+- fail if the checked-out worktree is dirty after bootstrap
+
+Protected release proof must run against a clean, pushed, exact-SHA child repo checkout. Local dirty child repo state cannot become trusted release evidence.
 
 When a protected manual refresh must preserve a scoped waiver, pass `waiver_spec` as JSON.
 The spec is reissued for the new protected run, so the new receipt stays visibly `waived_promoted` instead of silently degrading to `manual_review`.
