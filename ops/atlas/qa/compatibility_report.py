@@ -35,7 +35,11 @@ def compatibility_report(
     if scenario:
         scenario_path = (default_scenario_dir(root=root) / f"{scenario}.json").resolve()
         scenario_payload = load_json_object(scenario_path)
-        for message in validate_scenario_manifest(scenario_payload, root=root):
+        for message in validate_scenario_manifest(
+            scenario_payload,
+            root=root,
+            require_repo_path_exists=False,
+        ):
             findings.append({"severity": "error", "scope": "scenario", "message": message})
     if adapter or (scenario_payload and isinstance(scenario_payload.get("repo_id"), str)):
         adapter_payload, _ = load_adapter_manifest(
@@ -43,7 +47,11 @@ def compatibility_report(
             adapter_id=adapter or (str(scenario_payload["adapter_id"]) if scenario_payload else None),
             repo_id=(str(scenario_payload["repo_id"]) if scenario_payload else None),
         )
-        for message in validate_adapter_manifest(adapter_payload, root=root):
+        for message in validate_adapter_manifest(
+            adapter_payload,
+            root=root,
+            require_repo_path_exists=False,
+        ):
             findings.append({"severity": "error", "scope": "adapter", "message": message})
     schemas: dict[str, dict[str, object]] = {}
     for contract_version in sorted(SCHEMA_IDS):

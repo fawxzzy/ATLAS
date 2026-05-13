@@ -366,7 +366,12 @@ def validate_schema_metadata(schema: dict[str, Any], contract_version: str) -> l
     return errors
 
 
-def validate_scenario_manifest(payload: dict[str, Any], *, root: Path) -> list[str]:
+def validate_scenario_manifest(
+    payload: dict[str, Any],
+    *,
+    root: Path,
+    require_repo_path_exists: bool = True,
+) -> list[str]:
     errors: list[str] = []
     errors.extend(validate_declared_contract_version(payload.get("contract_version"), SCENARIO_CONTRACT_VERSION))
     for key in ("scenario_id", "title", "repo_id", "repo_path", "adapter_id", "criticality"):
@@ -374,7 +379,12 @@ def validate_scenario_manifest(payload: dict[str, Any], *, root: Path) -> list[s
         if not isinstance(value, str) or not value.strip():
             errors.append(f"{key} must be a non-empty string.")
     repo_path = payload.get("repo_path")
-    if isinstance(repo_path, str) and repo_path.strip() and not resolve_ref(repo_path, root=root).exists():
+    if (
+        require_repo_path_exists
+        and isinstance(repo_path, str)
+        and repo_path.strip()
+        and not resolve_ref(repo_path, root=root).exists()
+    ):
         errors.append(f"repo_path does not exist: {repo_path}")
     criticality = payload.get("criticality")
     if criticality not in {"low", "medium", "high", "critical"}:
@@ -796,7 +806,12 @@ def load_provider_manifest(*, root: Path, provider_manifest_ref: str | Path) -> 
     return payload, path
 
 
-def validate_adapter_manifest(payload: dict[str, Any], *, root: Path) -> list[str]:
+def validate_adapter_manifest(
+    payload: dict[str, Any],
+    *,
+    root: Path,
+    require_repo_path_exists: bool = True,
+) -> list[str]:
     errors: list[str] = []
     errors.extend(validate_declared_contract_version(payload.get("contract_version"), ADAPTER_CONTRACT_VERSION))
     registry = load_repo_registry(root=root)
@@ -806,7 +821,12 @@ def validate_adapter_manifest(payload: dict[str, Any], *, root: Path) -> list[st
         value = payload.get(key)
         if not isinstance(value, str) or not value.strip():
             errors.append(f"{key} must be a non-empty string.")
-    if isinstance(repo_path, str) and repo_path.strip() and not resolve_ref(repo_path, root=root).exists():
+    if (
+        require_repo_path_exists
+        and isinstance(repo_path, str)
+        and repo_path.strip()
+        and not resolve_ref(repo_path, root=root).exists()
+    ):
         errors.append(f"repo_path does not exist: {repo_path}")
     if isinstance(repo_id, str) and repo_id in registry and isinstance(repo_path, str):
         if normalize_slashes(repo_path) != registry[repo_id].atlas_path:

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import shutil
 import subprocess
 import tempfile
 import urllib.parse
@@ -1402,6 +1403,40 @@ class AtlasQaPipelineTests(unittest.TestCase):
     def test_compatibility_report_marks_fitness_contract_compatible(self) -> None:
         report = compatibility_report(root=ROOT, adapter="fitness.web", scenario="fitness.progression-pr-smoke")
         self.assertEqual("compatible", report["status"])
+
+    def test_compatibility_report_does_not_require_child_repo_checkout(self) -> None:
+        root = self._temp_root()
+        shutil.copy2(ROOT / "stack.yaml", root / "stack.yaml")
+        shutil.copytree(ROOT / "schemas", root / "schemas", dirs_exist_ok=True)
+        (root / "ops" / "atlas" / "qa" / "adapters").mkdir(parents=True, exist_ok=True)
+        (root / "ops" / "atlas" / "qa" / "scenarios").mkdir(parents=True, exist_ok=True)
+        (root / "ops" / "atlas" / "qa" / "lenses").mkdir(parents=True, exist_ok=True)
+        (root / "ops" / "atlas" / "qa").mkdir(parents=True, exist_ok=True)
+        shutil.copy2(
+            ROOT / "ops" / "atlas" / "qa" / "adapters" / "fitness.web.json",
+            root / "ops" / "atlas" / "qa" / "adapters" / "fitness.web.json",
+        )
+        shutil.copy2(
+            ROOT / "ops" / "atlas" / "qa" / "scenarios" / "fitness.progression-pr-smoke.json",
+            root / "ops" / "atlas" / "qa" / "scenarios" / "fitness.progression-pr-smoke.json",
+        )
+        shutil.copy2(
+            ROOT / "ops" / "atlas" / "qa" / "lenses" / "atlas-default-web.v1.json",
+            root / "ops" / "atlas" / "qa" / "lenses" / "atlas-default-web.v1.json",
+        )
+        shutil.copytree(
+            ROOT / "ops" / "atlas" / "qa" / "providers",
+            root / "ops" / "atlas" / "qa" / "providers",
+        )
+
+        report = compatibility_report(
+            root=root,
+            adapter="fitness.web",
+            scenario="fitness.progression-pr-smoke",
+        )
+
+        self.assertEqual("compatible", report["status"])
+        self.assertEqual([], report["findings"])
 
     def test_collect_test_evidence_records_passing_command(self) -> None:
         root = self._temp_root()
