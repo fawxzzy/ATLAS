@@ -16,7 +16,7 @@
         "protected_manual",
         "local_dev"
       ],
-      "enforcement_stage": "warn",
+      "enforcement_stage": "enforce",
       "mode_requirements": {
         "pr": {
           "required_evidence": [
