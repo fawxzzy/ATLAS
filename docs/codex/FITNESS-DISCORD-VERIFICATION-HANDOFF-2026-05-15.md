@@ -8,98 +8,167 @@ Workspace:
 
 Canonical implementation proof:
 - Fitness PR #21: Fitness-hosted Discord interactions endpoint
+- Fitness PR #22: final member-number, durable link, nickname sync, audit, and resync implementation
+
+ATLAS stack posture:
+- ATLAS currently registers Fitness as an application surface and still marks it `unmanaged` in `stack.yaml`.
+- This receipt documents the production Discord/Fitness integration without treating the old standalone bot as active infrastructure.
 
 Scope covered in this receipt:
-- project goal and final architecture
-- build history and decision sequence
-- implementation phases
-- production environment checklist
-- operator test checklist
-- failure modes and reusable doctrine
+- final active production architecture
+- source-of-truth correction for the old Gateway prototype
+- production endpoints and Supabase surfaces
+- member-number semantics and nickname-sync limits
+- operator commands, migration lessons, and future bot backlog
+- reusable rules, patterns, and failure modes
 
 ## Goal
 
-Build Discord server access verification where users must be signed up / authenticated in Fawxzzy Fitness before gaining Discord access.
+Build Discord server verification where Fitness owns identity proof, Discord consumes that proof, and the final production path stays available without a locally running Gateway bot.
 
-## Final architecture
+## Source-of-truth correction
 
-Final system:
+Old prototype repo:
+- `repos/fawxzzy-fitness-discord-bot`
+
+Status:
+- Gateway bot prototype and fallback/debug lane only
+- not the final active production path
+
+Final active production path:
 
 ```text
-Fitness app authenticated session
--> generates short-lived one-time Discord verification token
--> user pastes token into Discord modal
--> Discord sends signed interaction to Fitness app
--> Fitness verifies Discord signature
--> Fitness consumes token once
--> Fitness grants Discord Verified role through Discord REST API
+Discord
+-> signed HTTP interaction POST to Fitness /api/discord/interactions
+-> Fitness verifies Discord Ed25519 signature before JSON parsing
+-> Fitness handles PING, /setup-verify, button click, and modal submit
+-> Fitness consumes one-time token proof
+-> Fitness persists Discord/Fitness link state
+-> Fitness calls Discord REST for role and nickname side effects
 ```
 
-## Key decisions
+Current truth to preserve:
+- Active: Fitness-hosted Discord HTTP interactions endpoint
+- Prototype/fallback only: `fawxzzy-fitness-discord-bot` Gateway bot
+- Identity authority: Fitness plus Supabase profiles
+- Discord responsibilities: signed interaction transport, modal UI, role display, nickname display
+- Playbook and ATLAS responsibilities: patterns, receipts, triage, reviewed promotion, not noisy automatic writes
 
-- Rejected email-only verification because email knowledge is not identity proof.
-- Built one-time token flow instead.
-- Built Gateway bot first for speed.
-- Discovered Gateway bot requires an always-running process.
-- Considered always-on worker hosting.
-- Chose final Option B: Fitness-hosted Discord HTTP Interactions Endpoint.
-- Kept Discord as consumer of Fitness identity proof, not identity authority.
-- Kept token ephemeral and display-once in UI state.
-- Kept old bot repo only as fallback/debug, not active path.
+## Final active integration architecture
 
-## Implementation phases
+Fitness is the identity authority.
+
+Discord consumes Fitness proof.
+
+Discord Developer App sends signed HTTP interactions to the Fitness app.
+
+Fitness verifies Discord Ed25519 signatures before JSON parsing and handles:
+- `PING`
+- `/setup-verify`
+- `Verify Fitness Account` button
+- token modal submit
+- Verified role grant
+- member-number nickname sync
+
+The old Gateway bot remains useful only as a prototype/fallback reference. It is not active production infrastructure after the Interactions Endpoint URL is saved in the Discord Developer Portal.
+
+## Production endpoints
+
+Active Fitness app surfaces:
+
+- `POST /api/discord/verification-token`
+  - authenticated Fitness user creates a one-time token
+- `POST /api/discord/verify`
+  - legacy or server verification endpoint protected by shared secret
+- `POST /api/discord/interactions`
+  - active Discord Interactions Endpoint URL
+
+## Production data surfaces
+
+Supabase production tables and functions:
+
+- `public.discord_verification_tokens`
+  - stores hashed one-time tokens
+  - stores no raw token values
+- `public.discord_member_links`
+  - durable Discord/Fitness link
+  - stores Discord user id, Fitness user id, `user_number` snapshot, and nickname sync status
+- `public.compact_human_member_numbers_preserving_zero()`
+  - compacts positive human member numbers
+  - preserves Zac as `#0`
+- `profiles_compact_human_member_numbers_after_delete`
+  - trigger that compacts human member slots after deletes
+
+## Build history and decision sequence
 
 ### Phase 1: Fitness token backend
 
-- Supabase `discord_verification_tokens` table
-- token hash storage only
-- token pepper
-- bot shared secret for legacy verify endpoint
-- atomic token consume function
-- `/api/discord/verification-token`
-- `/api/discord/verify`
+- built `public.discord_verification_tokens` with hash-only storage
+- kept token display-once in UI state instead of durable profile data
+- added token pepper
+- added shared-secret path for legacy/server verification
+- added `/api/discord/verification-token`
+- added `/api/discord/verify`
 
-### Phase 2: Discord Gateway bot prototype
+### Phase 2: Gateway bot prototype
 
-- Discord developer app
-- roles/channels
-- `/setup-verify`
-- verify button
-- token modal
-- bot calls Fitness verify endpoint
-- role assignment
+- built the first Discord flow as a Gateway bot for speed
+- proved `/setup-verify`, button, modal, and role assignment interactions
+- learned that a local Gateway bot creates an availability dependency on an always-running process
 
-### Phase 3: Fitness Settings UI
+### Phase 3: Fitness-hosted HTTP interactions endpoint
 
-- `Settings -> Account -> Discord Access`
-- Generate token
-- readonly token field
-- right-side copy button
-- expiry text
-- no localStorage / URL / profile persistence
+- moved the active production path into `/api/discord/interactions`
+- verified Discord Ed25519 signatures before JSON parse
+- handled `PING`
+- handled `/setup-verify`
+- handled verify button and token modal submit
+- granted the Verified role through Discord REST from Fitness-hosted logic
+- confirmed the local Gateway bot was no longer required for the production path
 
-### Phase 4: Option B HTTP interactions endpoint
+### Phase 4: Production hardening
 
-- `/api/discord/interactions`
-- Ed25519 signature verification before JSON parse
-- PING returns `{ type: 1 }`
-- `/setup-verify` handled by Fitness
-- verify button opens modal
-- modal consumes token
-- Fitness grants Verified role through Discord REST
-- old local bot no longer required
+- fixed auth middleware and auth-session route classification so Discord probes no longer redirected to `/login`
+- hardened malformed signatures to fail closed with `401`
+- verified unsigned `POST` returns `{ error: "Invalid request signature." }` with HTTP `401`
 
-### Phase 5: Production blockers fixed
+### Phase 5: Member Number Bot v1 production reality
 
-- Endpoint initially redirected to `/login` due auth middleware / auth-session classification.
-- Patched Discord server routes as authless server routes.
-- Hardened malformed signatures to fail closed with `401`.
-- Verified unsigned `POST` returns `{ error: "Invalid request signature." }` with HTTP `401`.
-- Discord Developer Portal endpoint was accepted after fix.
+- durable Discord/Fitness links moved into `public.discord_member_links`
+- member-number nickname sync happens during verification-time linking
+- audit and resync scripts were added for drift handling
+- compact public member slots replaced any assumption that member numbers are stable identity history
+
+## Member-number semantics
+
+Current product rule:
+
+- Zac is always Member `#0`.
+- No one else gets `#0`.
+- Human users compact from `#1`.
+- Automation, Codex, and QA users do not receive public member numbers.
+- If a human member is deleted, higher positive numbers shift down.
+- Discord nicknames may need a resync after compaction.
+- The number is a compact public member slot, not permanent identity history.
+
+Previous wording that implied member numbers were stable identity numbers is incorrect for the production system and should not be reused.
+
+## Discord nickname limitation learned
+
+Fitness can verify a user and persist the `discord_member_links` row even if nickname sync fails.
+
+Discord can reject nickname updates with `403` when:
+- the target user is the server owner
+- the target user has a role equal to or higher than the bot or app role
+- the bot lacks `Manage Nicknames`
+
+Operational consequence:
+- Zac's `#0` owner nickname may need to be set manually
+- non-owner users are the valid proof case for automated nickname sync
 
 ## Env vars checklist
 
-Fitness production:
+Fitness production env names only:
 
 - `DISCORD_PUBLIC_KEY`
 - `DISCORD_APPLICATION_ID`
@@ -111,56 +180,138 @@ Fitness production:
 - `DISCORD_VERIFICATION_BOT_SECRET`
 - `DISCORD_VERIFICATION_TOKEN_PEPPER`
 - `SUPABASE_SERVICE_ROLE_KEY`
+- `FITNESS_ZAC_EMAIL` optional but recommended for audit confirmation
 
 Manual Discord portal:
-
 - Interactions Endpoint URL:
   `https://<fitness-domain>/api/discord/interactions`
 
+## Ops commands and scripts
+
+Use the Fitness repo commands:
+
+- `npm run audit:member-numbers`
+- `npm run sync:discord-member-numbers`
+- `npm run sync:discord-member-numbers -- --dry-run`
+- `npm run discord:commands:register`
+
+Clarifications:
+
+- `audit:member-numbers` is read-only
+- `sync:discord-member-numbers` requires a real Discord bot token in env
+- the old Gateway bot `npm run dev` process is not required after the Interactions Endpoint URL is saved
+
 ## Operational test checklist
 
-- Generate token in `Fitness Settings -> Account`.
-- Click Discord verify button.
-- Paste token.
+- Generate token in `Fitness Settings -> Account -> Discord Access`.
+- Click the Discord verify button.
+- Paste the token into the Discord modal.
 - Verified role is granted.
+- `public.discord_member_links` records the durable link.
 - Reusing token fails.
 - Expired token fails.
-- Local Gateway bot is stopped and flow still works.
-- Bot role is above Verified role.
-- Discord app has Manage Roles.
+- Local Gateway bot is stopped and the flow still works.
+- Nickname sync succeeds for a normal non-owner user.
+- Nickname sync failure on the owner or a higher-role user does not block verification persistence.
 
-## Failure modes
+## Migration lesson learned
 
-Rule: Email knowledge is not identity proof.
-Pattern: Fitness session creates proof; Discord consumes proof.
-Failure Mode: Email-only verification lets someone unlock Discord using another member's email.
+Production migration drift lesson:
 
-Rule: Gateway bots require an always-running process.
-Pattern: Fast prototype can use a Gateway bot, but production availability needs either worker hosting or signed HTTP interactions.
-Failure Mode: Local-only bot works during setup, then breaks when the terminal closes.
+- the Supabase project was correct
+- the CLI failed because production migration history had entries missing from the local migrations folder
+- urgent feature migrations `055` and `056` were applied surgically without migration repair
+- separate migration-history reconciliation is still needed for normal `supabase db push` health
+- do not opportunistically "repair" production migration history during urgent feature deployment
 
-Rule: Unsigned Discord interactions must never reach role-grant logic.
-Pattern: Verify Discord Ed25519 signature before parsing or executing payloads.
-Failure Mode: Accepting unsigned interaction payloads lets arbitrary callers attempt Discord role grants.
+## Future bot backlog
 
-Rule: Verification tokens are display-once session UI state, not account data.
-Pattern: Generate token from authenticated Fitness session, show readonly copy box, then consume once.
-Failure Mode: Persisting tokens turns short-lived proof into reusable account state.
+### Bug Report Bot
 
-Rule: Auth middleware must not redirect Discord server routes.
-Pattern: Server-to-server interaction routes are explicit authless exceptions protected by signature/secret verification.
-Failure Mode: Discord endpoint verification fails because the app redirects signed PING probes to /login.
+Desired shape:
+
+- Discord `/bug` modal
+- Fitness-hosted signed interaction endpoint
+- store reports in Supabase, not direct ATLAS commits
+- batch or triage into ATLAS and Playbook later
+- Playbook classifies, dedupes, and proposes issues
+
+Abuse controls:
+
+- rate limit
+- duplicate fingerprint
+- staff review
+- no automatic code changes
+- no automatic repo commits
+- no secrets or PII in public posts
+
+Rule:
+- Discord bug reports should enter a review queue before becoming ATLAS or GitHub truth.
+
+Pattern:
+- Discord report -> structured DB row -> Playbook triage -> reviewed issue or Codex task
+
+Failure Mode:
+- Writing every user report directly into ATLAS creates noisy, abusive repo history.
+
+### Curated Release Bot
+
+Desired shape:
+
+- admin-approved user-facing updates only
+- never raw changelog dump
+- no internal migration or infra noise unless it is user-visible
+- safe for any age or background
+- can draw from release ledger or PRs but requires manual curation
+
+Rule:
+- Release bot posts must be curated user-facing communication, not internal deploy logs.
+
+Pattern:
+- release ledger or PRs -> curated release copy -> Discord announcement
+
+Failure Mode:
+- Posting raw technical changes confuses users and leaks irrelevant implementation detail.
+
+## Rules, patterns, and failure modes
+
+Rules:
+
+- Fitness owns identity; Discord consumes proof.
+- Email knowledge is not identity proof.
+- Unsigned Discord interactions must never reach role-grant logic.
+- Public member numbers compact from `#1` while Zac remains `#0`.
+- Automation accounts must not consume public member numbers.
+- Discord bug reports should be queued and triaged before becoming repo truth.
+- Release posts must be curated for users, not copied from internal logs.
+
+Patterns:
+
+- authenticated Fitness session -> one-time token -> signed Discord modal submit -> token consume -> role grant
+- Fitness profile number -> Discord member link -> nickname sync
+- Discord support modal -> structured report -> Playbook triage -> reviewed issue or task
+- release ledger or PRs -> curated release copy -> Discord announcement
+
+Failure Modes:
+
+- local-only Gateway bots make verification unavailable when the process dies
+- auth middleware redirects make Discord endpoint verification fail before app logic runs
+- Discord owner or higher-role users verify correctly but cannot be renamed by the bot
+- changing DB member numbers without Discord resync leaves stale nicknames
+- direct-to-ATLAS bug commits from Discord create noisy, abusive history
+- raw release-log posts are not user communication
 
 ## References
 
 Reference:
 - Fitness PR #20: Discord verification token flow
 - Fitness PR #21: Fitness-hosted Discord interactions endpoint
+- Fitness PR #22: Discord member link persistence, verification-time nickname sync, compact public member slots, audit, and resync
 - Production endpoint path: `/api/discord/interactions`
 - Token generation path: `Settings -> Account -> Discord Access`
 
 ## High-signal summary
 
-- Rule: The source app owns identity; Discord consumes proof.
-- Pattern: Authenticated app session -> one-time token -> signed Discord interaction -> token consume -> role grant.
-- Failure Mode: Local-only Gateway bots make verification unavailable when the process dies.
+- Rule: Fitness owns identity; Discord consumes proof.
+- Pattern: Authenticated Fitness session -> one-time token -> signed Discord interaction -> token consume -> role grant and nickname sync.
+- Failure Mode: Mistaking the old Gateway prototype for production techstack hides the real Fitness-hosted endpoint and leads future work down the wrong lane.
