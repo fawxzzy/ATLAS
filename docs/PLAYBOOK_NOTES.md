@@ -198,3 +198,52 @@
 - Failure Mode: Windows `.pyc` cache write failures can create false verification noise unless cache hygiene is part of the verification path.
 - Failure Mode: Treating `warning_count=559` as harmless forever turns governance debt into background noise.
 - Failure Mode: Using one generic promoted label hides whether a repo passed package, docs, web visual, manual physical, or provider physical evidence.
+
+## 2026-05-15 - Discord verification, member numbers, and future bot doctrine
+
+- Type: Pattern
+- Summary: Discord should display source-app truth through signed Fitness-hosted interactions, durable member links, and governed side effects rather than running a local bot as system authority.
+- Current truth:
+  - Active: Fitness-hosted Discord HTTP interactions endpoint
+  - Prototype/fallback only: `fawxzzy-fitness-discord-bot` Gateway bot
+  - Identity authority: Fitness plus Supabase profiles
+  - Discord responsibilities: signed interaction transport, modal UI, role display, nickname display
+  - Playbook and ATLAS responsibilities: patterns, receipts, triage, reviewed promotion, not noisy automatic writes
+- Rule: Fitness owns identity; Discord consumes proof.
+- Rule: Email knowledge is not identity proof.
+- Rule: Unsigned Discord interaction payloads must never reach role-grant logic.
+- Rule: Public member numbers compact from `#1` while Zac remains `#0`.
+- Rule: Automation accounts must not consume public member numbers.
+- Rule: Discord bug reports should be queued and triaged before becoming repo truth.
+- Rule: Release posts must be curated for users, not copied from internal logs.
+- Pattern: Authenticated Fitness session -> one-time token -> signed Discord modal submit -> token consume -> role grant.
+- Pattern: Fitness profile number -> Discord member link -> nickname sync.
+- Pattern: Discord support modal -> structured DB queue -> Playbook triage -> reviewed issue or task.
+- Pattern: Release ledger or PRs -> curated release copy -> Discord announcement.
+- Failure Mode: Local Gateway bots, email-only checks, or auth middleware redirects make Discord verification unavailable or unsafe.
+- Failure Mode: Discord owner or higher-role users verify correctly but cannot be renamed by the bot.
+- Failure Mode: Changing DB member numbers without Discord resync leaves stale nicknames.
+- Failure Mode: Direct Discord-to-repo writes create noisy or abusive history.
+- Failure Mode: Raw technical release posts are hostile to normal users.
+- Future backlog:
+  - Bug Report Bot should use a signed Discord modal, store structured reports in Supabase, and enter a review queue before any Playbook, ATLAS, or GitHub promotion.
+  - Curated Release Bot should publish only admin-approved user-facing updates and must not dump raw deploy logs, migrations, or internal changelog noise.
+- Evidence: Fawxzzy Fitness Discord verification build, PR #20, PR #21, PR #22
+- Status: Proposed
+
+## 2026-05-16 - Discord community systems should close operations and doctrine before more bots ship
+
+- Rule: finish the operating system before adding another bot.
+- Rule: Discord is the community surface, not the ATLAS control plane.
+- Rule: deployment metadata is input, not release copy.
+- Rule: feedback attachments are Discord-hosted evidence, not app DB blobs.
+- Rule: optional Discord decoration must fail soft.
+- Rule: database triggers do not call Discord.
+- Pattern: production proof -> doctor command -> migration reconciliation -> docs truth -> doctrine update -> next feature.
+- Failure Mode: stacking more Discord features on undocumented production lessons creates brittle automation and stale docs.
+
+## 2026-05-16 - Supabase migration ledger repair should require schema evidence
+
+- Rule: migration ledger repair requires schema evidence first.
+- Pattern: verify production effects -> repair exact versions -> validate -> document.
+- Failure Mode: blind migration repair makes the ledger claim schema history that production does not actually have.
