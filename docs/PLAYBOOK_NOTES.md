@@ -230,3 +230,20 @@
   - Curated Release Bot should publish only admin-approved user-facing updates and must not dump raw deploy logs, migrations, or internal changelog noise.
 - Evidence: Fawxzzy Fitness Discord verification build, PR #20, PR #21, PR #22
 - Status: Proposed
+
+## 2026-05-16 - Discord community systems should close operations and doctrine before more bots ship
+
+- Rule: finish the operating system before adding another bot.
+- Rule: Discord is the community surface, not the ATLAS control plane.
+- Rule: deployment metadata is input, not release copy.
+- Rule: feedback attachments are Discord-hosted evidence, not app DB blobs.
+- Rule: optional Discord decoration must fail soft.
+- Rule: database triggers do not call Discord.
+- Pattern: production proof -> doctor command -> migration reconciliation -> docs truth -> doctrine update -> next feature.
+- Failure Mode: stacking more Discord features on undocumented production lessons creates brittle automation and stale docs.
+
+## 2026-05-16 - Supabase migration ledger repair should require schema evidence
+
+- Rule: migration ledger repair requires schema evidence first.
+- Pattern: verify production effects -> repair exact versions -> validate -> document.
+- Failure Mode: blind migration repair makes the ledger claim schema history that production does not actually have.

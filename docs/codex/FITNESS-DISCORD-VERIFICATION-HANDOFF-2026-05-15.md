@@ -19,7 +19,7 @@ Scope covered in this receipt:
 - source-of-truth correction for the old Gateway prototype
 - production endpoints and Supabase surfaces
 - member-number semantics and nickname-sync limits
-- operator commands, migration lessons, and future bot backlog
+- operator commands, migration lessons, and final Discord community tools
 - reusable rules, patterns, and failure modes
 
 ## Goal
@@ -72,6 +72,26 @@ Fitness verifies Discord Ed25519 signatures before JSON parsing and handles:
 
 The old Gateway bot remains useful only as a prototype/fallback reference. It is not active production infrastructure after the Interactions Endpoint URL is saved in the Discord Developer Portal.
 
+## Final production Discord community system
+
+Active community surfaces now proven in production:
+- Fitness-hosted Discord interactions endpoint
+- verification token generation and signed verify modal flow
+- compact member numbers with durable `discord_member_links`
+- member-number nickname sync queue plus audit and resync scripts
+- Feedback Bot with persistent panel and button-first user UX
+- feedback attachments stored as Discord-hosted evidence links with bounded Supabase metadata only
+- feedback status sync
+- feedback withdraw cleanup that prunes details and attachment metadata while removing the Discord thread
+- Curated Production Update Bot
+- Vercel deployment webhook -> bounded update draft -> curated publish
+- `@everyone` standard for public update posts
+
+Community-system rule:
+- Discord is the community surface.
+- Fitness and Supabase keep the bounded system truth.
+- ATLAS and Playbook receive reviewed promotion only.
+
 ## Production endpoints
 
 Active Fitness app surfaces:
@@ -93,6 +113,11 @@ Supabase production tables and functions:
 - `public.discord_member_links`
   - durable Discord/Fitness link
   - stores Discord user id, Fitness user id, `user_number` snapshot, and nickname sync status
+- `public.discord_feedback_reports`
+  - bounded queue for Bug and Feature reports
+  - stores duplicate counts, forum thread ids, bounded attachment metadata, and prune state
+- `public.discord_update_drafts`
+  - bounded queue for production deployment drafts and curated publish history
 - `public.compact_human_member_numbers_preserving_zero()`
   - compacts positive human member numbers
   - preserves Zac as `#0`
@@ -194,6 +219,23 @@ Use the Fitness repo commands:
 - `npm run sync:discord-member-numbers`
 - `npm run sync:discord-member-numbers -- --dry-run`
 - `npm run discord:commands:register`
+- `npm run doctor:discord-community`
+
+Final active command surface:
+- `/setup-verify`
+- `/setup-feedback`
+- `/feedback`
+- `/feedback-status`
+- `/feedback-withdraw`
+- `/update-latest`
+- `/update-publish`
+- `/update-skip`
+
+Removed command families:
+- `/bug`
+- `/bug-status`
+- `/feature`
+- `/fix`
 
 Clarifications:
 
@@ -221,57 +263,32 @@ Production migration drift lesson:
 - the Supabase project was correct
 - the CLI failed because production migration history had entries missing from the local migrations folder
 - urgent feature migrations `055` and `056` were applied surgically without migration repair
-- separate migration-history reconciliation is still needed for normal `supabase db push` health
+- the final Discord gap set `057` through `061` was repaired later by proving production schema effects first and then marking those exact versions applied in the remote ledger
+- `npm run migration:validate` now passes again and normal linked migration workflow is healthy
 - do not opportunistically "repair" production migration history during urgent feature deployment
+- migration ledger repair requires schema evidence first
 
-## Future bot backlog
+## Final env map
 
-### Bug Report Bot
-
-Desired shape:
-
-- Discord `/bug` modal
-- Fitness-hosted signed interaction endpoint
-- store reports in Supabase, not direct ATLAS commits
-- batch or triage into ATLAS and Playbook later
-- Playbook classifies, dedupes, and proposes issues
-
-Abuse controls:
-
-- rate limit
-- duplicate fingerprint
-- staff review
-- no automatic code changes
-- no automatic repo commits
-- no secrets or PII in public posts
-
-Rule:
-- Discord bug reports should enter a review queue before becoming ATLAS or GitHub truth.
-
-Pattern:
-- Discord report -> structured DB row -> Playbook triage -> reviewed issue or Codex task
-
-Failure Mode:
-- Writing every user report directly into ATLAS creates noisy, abusive repo history.
-
-### Curated Release Bot
-
-Desired shape:
-
-- admin-approved user-facing updates only
-- never raw changelog dump
-- no internal migration or infra noise unless it is user-visible
-- safe for any age or background
-- can draw from release ledger or PRs but requires manual curation
-
-Rule:
-- Release bot posts must be curated user-facing communication, not internal deploy logs.
-
-Pattern:
-- release ledger or PRs -> curated release copy -> Discord announcement
-
-Failure Mode:
-- Posting raw technical changes confuses users and leaks irrelevant implementation detail.
+Names only:
+- `DISCORD_PUBLIC_KEY`
+- `DISCORD_BOT_TOKEN`
+- `DISCORD_APPLICATION_ID`
+- `DISCORD_GUILD_ID`
+- `DISCORD_VERIFY_CHANNEL_ID`
+- `DISCORD_VERIFIED_ROLE_ID`
+- `DISCORD_BUG_REPORT_FORUM_CHANNEL_ID`
+- `DISCORD_UPDATES_CHANNEL_ID`
+- `DISCORD_MEMBER_SYNC_SECRET`
+- `DISCORD_FEEDBACK_BUG_EMOJI_ID` optional
+- `DISCORD_FEEDBACK_FEATURE_EMOJI_ID` optional
+- `VERCEL_DEPLOYMENT_WEBHOOK_SECRET`
+- `VERCEL_PROJECT_ID`
+- `DISCORD_UPDATE_BOT_ENABLED`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `DISCORD_VERIFICATION_TOKEN_PEPPER`
+- `DISCORD_VERIFICATION_BOT_SECRET`
+- `FITNESS_ZAC_EMAIL` optional
 
 ## Rules, patterns, and failure modes
 
@@ -282,15 +299,21 @@ Rules:
 - Unsigned Discord interactions must never reach role-grant logic.
 - Public member numbers compact from `#1` while Zac remains `#0`.
 - Automation accounts must not consume public member numbers.
-- Discord bug reports should be queued and triaged before becoming repo truth.
-- Release posts must be curated for users, not copied from internal logs.
+- Discord is the community surface, not engineering truth.
+- Feedback reports are signals, not repo truth.
+- Deployment metadata is input, not release copy.
+- Feedback attachments are Discord-hosted evidence, not app DB blobs.
+- Optional Discord decoration must fail soft.
+- Database triggers do not call Discord.
+- User-facing delete means withdraw, redact, and cleanup rather than unbounded history loss.
 
 Patterns:
 
 - authenticated Fitness session -> one-time token -> signed Discord modal submit -> token consume -> role grant
 - Fitness profile number -> Discord member link -> nickname sync
-- Discord support modal -> structured report -> Playbook triage -> reviewed issue or task
-- release ledger or PRs -> curated release copy -> Discord announcement
+- feedback modal -> bounded row -> forum thread -> status or withdraw sync -> reviewed promotion
+- production deploy -> bounded draft -> admin curated publish -> `@everyone` update post
+- profile compaction -> stale link marker -> protected member sync path -> nickname update
 
 Failure Modes:
 
@@ -298,8 +321,18 @@ Failure Modes:
 - auth middleware redirects make Discord endpoint verification fail before app logic runs
 - Discord owner or higher-role users verify correctly but cannot be renamed by the bot
 - changing DB member numbers without Discord resync leaves stale nicknames
-- direct-to-ATLAS bug commits from Discord create noisy, abusive history
-- raw release-log posts are not user communication
+- optional emoji or tag decoration can surface false failures after a valid feedback post
+- Supabase migration drift forces surgical deploy paths
+- direct Discord-to-ATLAS writes create noisy, abusive history
+- raw release logs are not user communication
+
+## Parked scope
+
+Explicitly parked:
+- no routine sharing
+- no workout sharing
+- no copy-to-app imports
+- no Discord workout editor
 
 ## References
 

@@ -27,8 +27,16 @@ Supabase surfaces:
 
 - `public.discord_verification_tokens`
 - `public.discord_member_links`
+- `public.discord_feedback_reports`
+- `public.discord_update_drafts`
 - `public.compact_human_member_numbers_preserving_zero()`
 - `profiles_compact_human_member_numbers_after_delete`
+
+Discord community surfaces:
+- persistent feedback panel
+- feedback forum tags and thread sync
+- curated updates channel posts
+- `@everyone` standard for public release updates
 
 ## Operator flow
 
@@ -60,6 +68,7 @@ Supabase surfaces:
 6. Register `/setup-verify` if needed:
    `npm run discord:commands:register`
 7. Test the token flow end to end.
+8. Run `npm run doctor:discord-community`.
 
 ## Member-number semantics
 
@@ -77,6 +86,17 @@ Supabase surfaces:
 - `npm run sync:discord-member-numbers`
 - `npm run sync:discord-member-numbers -- --dry-run`
 - `npm run discord:commands:register`
+- `npm run doctor:discord-community`
+
+Final active slash commands:
+- `/setup-verify`
+- `/setup-feedback`
+- `/feedback`
+- `/feedback-status`
+- `/feedback-withdraw`
+- `/update-latest`
+- `/update-publish`
+- `/update-skip`
 
 Command notes:
 
@@ -114,19 +134,31 @@ Command notes:
 - The Supabase project was correct.
 - The CLI failed because production migration history had entries missing from the local migrations folder.
 - Urgent feature migrations `055` and `056` were applied surgically without migration repair.
-- Separate migration-history reconciliation is still needed before normal `supabase db push` health is restored.
+- The final Discord gap set `057` through `061` was repaired later by proving production schema effects first and then marking those exact versions applied in the remote ledger.
+- `npm run migration:validate` now passes again and normal linked migration workflow is healthy.
 - Do not opportunistically repair production migration history during urgent feature deployment.
+- Migration ledger repair requires schema evidence first.
 
 ## Doctrine
 
 - Rule: Fitness owns identity; Discord consumes proof.
+- Rule: Discord is the community surface, not engineering truth.
 - Rule: Email knowledge is not identity proof.
 - Rule: Unsigned Discord interactions must never reach role-grant logic.
 - Rule: Public member numbers compact from `#1` while Zac remains `#0`.
 - Rule: Automation accounts must not consume public member numbers.
+- Rule: Feedback attachments are Discord-hosted evidence, not app DB blobs.
+- Rule: Deployment metadata is input, not release copy.
+- Rule: Optional Discord decoration must fail soft.
+- Rule: Database triggers do not call Discord directly.
 - Pattern: Authenticated Fitness session -> one-time token -> signed Discord modal submit -> token consume -> role grant.
 - Pattern: Fitness profile number -> Discord member link -> nickname sync.
+- Pattern: feedback modal -> bounded row -> forum thread -> status or withdraw sync -> reviewed promotion.
+- Pattern: production deployment event -> bounded draft -> admin curated publish -> `@everyone` update post.
 - Failure Mode: Local Gateway bots make verification unavailable when the process dies.
 - Failure Mode: Auth middleware redirects make Discord endpoint verification fail before app logic runs.
 - Failure Mode: Discord owner or higher-role users verify correctly but cannot be renamed by the bot.
 - Failure Mode: Changing DB member numbers without Discord resync leaves stale nicknames.
+- Failure Mode: Optional emoji or tag decoration causes a false failure after a valid feedback post.
+- Failure Mode: Raw Discord-to-ATLAS writes create noisy or abusive history.
+- Failure Mode: Raw technical release posts are not user communication.
