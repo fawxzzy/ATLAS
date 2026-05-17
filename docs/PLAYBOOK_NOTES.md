@@ -15,6 +15,22 @@
   - Added the rule that moderation changes must remain logged, restorable, and no-ban-by-default.
   - Added the explicit merge-back requirement when a live moderation polish ships from a branch first.
 
+## 2026-05-17 - Discord community ops should keep one board and low-noise channels
+
+- Rule: the Discord feedback board is the visible community board, not a second task system.
+- Rule: feedback card mutations stay in the forum thread as audit comments and board export artifacts; they do not auto-post to updates, ATLAS, or GitHub.
+- Rule: only `Updates` and `Main` are loud channels; other Discord workflows should avoid broad pings by default.
+- Rule: the bot must not claim it can force user-level channel or category mute settings, because those are personal Discord client preferences.
+- Pattern: feedback forum card -> audit comments -> board export -> reviewed Verta Core / Playbook planning input -> curated Update Bot promotion if user-facing.
+- Pattern: server inventory -> noise audit -> conservative dry-run recommendations -> reviewed permission or mention changes.
+- Pattern: moderation escalates through notice or warning -> logged case -> reversible Purgatory isolation if needed -> release or warning-clear.
+- Failure Mode: duplicating raw Discord cards into ATLAS or GitHub creates conflicting task truth and noisy sprint churn.
+- Failure Mode: claiming the bot can mute channels for users hides the real permission and allowed-mentions model.
+- Release-summary bullets:
+  - Added the one-board, reviewed-promotion Discord workflow doctrine.
+  - Added the low-noise rule that only `Updates` and `Main` are loud channels.
+  - Added the rule that inventory and audit tooling should enforce mention and permission truth without fake personal-mute claims.
+
 ## 2026-05-11 - QA LLEL adoption semantics
 
 - Rule: repo blockers exposed by QA LLEL should be fixed in the owning repo, not hidden in root QA logic.
