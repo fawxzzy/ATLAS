@@ -15,6 +15,16 @@
   - Added the rule that moderation changes must remain logged, restorable, and no-ban-by-default.
   - Added the explicit merge-back requirement when a live moderation polish ships from a branch first.
 
+## 2026-05-17 - Discord shipped-card promotion should use one public format only
+
+- Rule: a shipped Discord feedback card gets one public updates-channel post, not multiple overlapping update formats.
+- Rule: thread audit comments stay compact and operational inside the feedback thread.
+- Rule: when a specific feedback card ships, the public updates-channel post should use the short `Update:` card-promotion format and end with `Report ID: <short id>`.
+- Rule: do not also publish the broad `@everyone` release-summary template for that same shipped card unless the owner explicitly wants a separate aggregate release note.
+- Pattern: shipped card -> compact thread audit comment -> one public card-promotion update post.
+- Failure Mode: mixing thread-audit copy, broad release-summary copy, and card-promotion copy for the same shipped card creates duplicate logic and confusing public history.
+- Status: Proposed
+
 ## 2026-05-17 - Discord community ops should keep one board and low-noise channels
 
 - Rule: the Discord feedback board is the visible community board, not a second task system.
