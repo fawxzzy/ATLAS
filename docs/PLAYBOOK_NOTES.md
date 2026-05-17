@@ -1,5 +1,20 @@
 # Playbook Notes
 
+## 2026-05-17 - Discord moderation should stay reversible and explicit
+
+- Rule: community moderation should escalate through logged notice and warning lanes before punitive action whenever possible.
+- Rule: default Discord moderation should isolate through reversible role and channel changes, not through bans, kicks, or message deletion.
+- Rule: every moderation action must create or update a case record and keep a release or resolution path.
+- Pattern: notice or warning -> logged case -> Purgatory isolation if needed -> release or warning-clear -> safe role restoration.
+- Pattern: during Purgatory, remove access roles such as `Verified`, preserve unrelated non-access roles, and show only the Purgatory category and channel.
+- Pattern: branded moderation messages may DM the target fail-soft, but delivery failure must never block the case write or role transition.
+- Failure Mode: production behavior must not live only on an unmerged branch; merge the live-tested moderation polish back into `main` before treating it as stack truth.
+- Failure Mode: silent bans, destructive moderation, or missing restore paths create drama and make recovery harder than the original incident.
+- Release-summary bullets:
+  - Added the reversible Discord moderation doctrine with notice, warning, Purgatory, and release lanes.
+  - Added the rule that moderation changes must remain logged, restorable, and no-ban-by-default.
+  - Added the explicit merge-back requirement when a live moderation polish ships from a branch first.
+
 ## 2026-04-28 - Fitness live UI and real mobile screenshot lane
 
 - Rule: for live mobile UI refinement on fitness, prefer the real signed-in local app on `http://127.0.0.1:3000` and use isolated browser sessions only.

@@ -76,6 +76,14 @@ Current operating call:
 - Fitness owner truth now includes the first growth pack, the pilot-readiness threshold pack, and measured proof for one shadow-only placement in the Wave 2 growth lane
 - the pilot-readiness gate currently evaluates to `stay_shadow` in Fitness owner truth, so no pilot-live rollout is authorized at root
 - the next owner-repo work is evidence-surface completion in `repos/fawxzzy-fitness` so the frozen pilot thresholds can be measured from repo-owned receipts
+- Fitness Discord community truth now includes live feedback export/sync, update-post curation, emoji bootstrap, and Fawx Security reversible moderation
+- Fawx Security moderation is now proven live on non-owner users:
+  - warnings/severity are live
+  - Purgatory is reversible role isolation
+  - `Verified` is removed during jail and restored on release
+  - non-access roles such as `Fawxzzies` stay preserved
+  - no-ban default is enforced
+- the next Fitness Discord owner lane is server inventory and low-noise policy so only `Updates` and `Main` remain loud channels
 - auth, shared UI, cross-sell, and ML stay explicitly later
 - voice remains intentionally below the line unless explicitly chosen
 - the decision gate stays explicit: root sessions change projection truth; owner-repo sessions change owner truth
