@@ -72,19 +72,20 @@ Each `excluded_surfaces.<surface_id>` entry records:
 ## Trust Class Policy
 
 - `trusted`: normal managed repo surface that may participate in root-driven workflows
-- `adjacent`: known surface that exists beside the managed set but is not treated as a release candidate by default
+- `adjacent`: known surface that exists beside the managed set but is not treated as a release candidate by default; use this for deferred local checkouts, recovery clones, or sibling repos that should stay visible without becoming governed stack members
 - `untrusted`: quarantined or unsafe surface that must stay out of release sets and privileged orchestration
 
 Release rule:
 
 - only `trusted` components may be `release_eligible: true`
 
-Current explicit exclusions:
+Current explicit exclusions may include:
 
-- `repos/Verta-Core`
-- `repos/Verta-Core.zip`
+- trusted temporary worktrees
+- adjacent deferred local checkouts such as recovery clones or sibling repos that are present locally but not admitted
+- untrusted Verta surfaces
 
-Both remain `untrusted` and `release_eligible: false` until scrub and rotation are complete.
+`repos/Verta-Core` and `repos/Verta-Core.zip` remain `untrusted` and `release_eligible: false` until scrub and rotation are complete.
 
 ## Refresh Workflow
 

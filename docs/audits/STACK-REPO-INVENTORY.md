@@ -14,31 +14,40 @@ Operational rule:
 ## Summary
 
 - Repo count: `10`
-- Dirty repo count: `3`
+- Dirty repo count: `5`
 - Release-eligible repo count: `4`
-- Excluded surface count: `2`
+- Excluded surface count: `11`
 - Stack manifest: `stack.yaml`
 - Stack lock: `stack.lock.yaml`
-- Inventory digest: `sha256:b13fa8c9bd9503ba4d66fe5583f1102e171bf8ac21fba1b90a8c71cf97437849`
+- Inventory digest: `sha256:24318f29d0b22bd3328aa9a761fbc34629f8162c3c1734a8a4eec80eee4d9a04`
 
 ## Managed Repos
 
 | Repo id | Path | Branch | Pinned commit | Current commit | Dirty | Trust | Release | Related initiatives |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| _stack | repos/_stack | main | a91bfbddbb2a7e0f83983c52cac9f7027e18cc4c | 11d9ab7ab11329237bd6d832e4c7ecc9a881b196 | True | trusted | False | - |
+| _stack | repos/_stack | main | ef5cfc84e583c616a89ce13694541207518f1206 | ef5cfc84e583c616a89ce13694541207518f1206 | False | trusted | False | - |
 | fitness | repos/fawxzzy-fitness | - | - | - | - | adjacent | False | - |
-| lifeline | repos/fawxzzy-lifeline | codex/lifeline-hermetic-validation-wave1 | 632075b1bb65aed59839cb1f9e205b826e41995d | cd45f2ce8840160275a37fd5a690b0970c924468 | False | trusted | True | - |
-| mazer | repos/fawxzzy-mazer | main | 3f90b9d5b476642a565a91ea8619561356c52382 | 412d960497f596d91b4c474e93134f318cad2ec4 | False | trusted | True | initiative:initiative-mazer-d2-learning-scorer |
-| nat1-games | repos/Nat1-Games/nat1-games | main | ce9643465d69f76a46d92d0db6ed855d117e1bbd | ce9643465d69f76a46d92d0db6ed855d117e1bbd | True | trusted | False | - |
-| playbook | repos/fawxzzy-playbook | main | 96acb49a67fcf650f0cd331f0c98b0966bac237d | 75bde32b772e9486814c0970e69f30fd6fdcfb56 | False | trusted | True | - |
+| lifeline | repos/fawxzzy-lifeline | codex/lifeline-release-replay-verification | 4589b4f332247b32e01931907f803e5ea5991e34 | 4589b4f332247b32e01931907f803e5ea5991e34 | True | trusted | True | - |
+| mazer | repos/fawxzzy-mazer | codex/mazer-remove-pwa-install-surface | 021291d2b4f75379ab7e4c7891e302b54d4845c6 | 021291d2b4f75379ab7e4c7891e302b54d4845c6 | False | trusted | True | initiative:initiative-mazer-d2-learning-scorer |
+| nat1-games | repos/Nat1-Games/nat1-games | main | 412846a1baac6c0ce782ab9ab94530ccf4e89ff5 | 412846a1baac6c0ce782ab9ab94530ccf4e89ff5 | True | trusted | False | - |
+| playbook | repos/fawxzzy-playbook | codex/workflow-pack-environment-bridge-dry-run-executor | 7b62d6598e2f67cae62f9210c93e65eadbc4754f | 7b62d6598e2f67cae62f9210c93e65eadbc4754f | True | trusted | True | - |
 | playbook-demo | repos/playbook-demo/playbook-demo | main | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | False | trusted | False | - |
-| stack | . | main | cf2d9bf45ed7be820c85d45c124596e4479a8701 | 248daa44552cb744b8eeed48c0ec4177d9070116 | True | trusted | False | - |
-| stream | repos/fawxzzy-stream | codex/fstrm-wave3-surface-base | 2a03ef229bcb599855dcec31498cf8acfb6ee824 | 2a03ef229bcb599855dcec31498cf8acfb6ee824 | False | trusted | False | - |
-| trove | repos/fawxzzy-trove | codex/trove-one-page-cleanup | 9387e0b44d12df89eba0a2f36187648ceb1aa829 | c56ad8db3ed1a4f1e95c463ab0737fe2bf4925c6 | False | trusted | True | - |
+| stack | . | main | 0c5cac5ece46c8d04c47b2d55300b533d5607b34 | 0c5cac5ece46c8d04c47b2d55300b533d5607b34 | True | trusted | False | - |
+| stream | repos/fawxzzy-stream | main | 1dd3298c556b4d0839e6bb43b3dde7c3527022f7 | 1dd3298c556b4d0839e6bb43b3dde7c3527022f7 | False | trusted | False | - |
+| trove | repos/fawxzzy-trove | codex/trove-brand-asset-sync | bce14fcc1ad6e826b0c0eac37e13af6707ee3a8e | bce14fcc1ad6e826b0c0eac37e13af6707ee3a8e | True | trusted | True | - |
 
 ## Excluded Surfaces
 
 | Surface id | Path | Present | Trust | Release | Visibility | Reason |
 | --- | --- | --- | --- | --- | --- | --- |
+| atlas_adjacent_checkout | repos/ATLAS | True | adjacent | False | metadata_only | Local ATLAS sibling checkout remains an adjacent non-canonical repo root and is not part of the governed stack member set. |
+| fitness_parity_recovery_adjacent_checkout | repos/fawxzzy-fitness-parity-recovery | True | adjacent | False | metadata_only | Fitness parity recovery checkout remains an adjacent recovery surface and is excluded from the governed stack topology. |
+| fitness_reclone_adjacent_checkout | repos/fawxzzy-fitness.reclone.20260502-195639 | True | adjacent | False | metadata_only | Fitness reclone checkout remains an adjacent recovery surface and is excluded from the governed stack topology. |
+| fitness_recovered_adjacent_checkout | repos/fawxzzy-fitness-recovered | True | adjacent | False | metadata_only | Fitness recovered checkout remains an adjacent recovery surface and is excluded from the governed stack topology. |
+| foundation_adjacent_checkout | repos/fawxzzy-foundation | True | adjacent | False | metadata_only | Local Foundation checkout is explicitly deferred from the governed topology until an admission decision updates manifest, lock, inventory, and owner-usage surfaces together. |
+| lifeline_operator_evidence_worktree | repos/fawxzzy-lifeline-operator-evidence | True | trusted | False | full | Lifeline operator evidence is a branch worktree of the registered lifeline repo and remains a temporary non-canonical evidence lane outside the governed repo surface. |
+| playbook_codex_adjacent_checkout | repos/fawxzzy-playbook-codex | True | adjacent | False | metadata_only | Local Playbook Codex checkout remains an adjacent non-canonical helper surface outside the governed stack member set. |
+| trove_release_cutover_worktree | repos/fawxzzy-trove-release-cutover | True | trusted | False | full | Trove release cutover is a branch worktree of the registered trove repo and remains a temporary non-canonical cutover lane outside the governed repo surface. |
 | verta_core_archive | repos/Verta-Core.zip | True | untrusted | False | metadata_only | Token-bearing Verta archive remains quarantined private evidence and must stay out of release sets. |
 | verta_core_checkout | repos/Verta-Core | True | untrusted | False | metadata_only | Token-bearing Verta checkout remains quarantined and untrusted until scrub and rotation are complete. |
+| zachariahredfield_adjacent_checkout | repos/ZachariahRedfield | True | adjacent | False | metadata_only | Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set. |

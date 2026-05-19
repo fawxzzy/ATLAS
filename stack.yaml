@@ -261,6 +261,41 @@ stack_lock:
       trust_class: trusted
       release_eligible: false
       reason: Trove release cutover is a branch worktree of the registered trove repo and remains a temporary non-canonical cutover lane outside the governed repo surface.
+    atlas_adjacent_checkout:
+      path: repos/ATLAS
+      trust_class: adjacent
+      release_eligible: false
+      reason: Local ATLAS sibling checkout remains an adjacent non-canonical repo root and is not part of the governed stack member set.
+    foundation_adjacent_checkout:
+      path: repos/fawxzzy-foundation
+      trust_class: adjacent
+      release_eligible: false
+      reason: Local Foundation checkout is explicitly deferred from the governed topology until an admission decision updates manifest, lock, inventory, and owner-usage surfaces together.
+    fitness_parity_recovery_adjacent_checkout:
+      path: repos/fawxzzy-fitness-parity-recovery
+      trust_class: adjacent
+      release_eligible: false
+      reason: Fitness parity recovery checkout remains an adjacent recovery surface and is excluded from the governed stack topology.
+    fitness_recovered_adjacent_checkout:
+      path: repos/fawxzzy-fitness-recovered
+      trust_class: adjacent
+      release_eligible: false
+      reason: Fitness recovered checkout remains an adjacent recovery surface and is excluded from the governed stack topology.
+    fitness_reclone_adjacent_checkout:
+      path: repos/fawxzzy-fitness.reclone.20260502-195639
+      trust_class: adjacent
+      release_eligible: false
+      reason: Fitness reclone checkout remains an adjacent recovery surface and is excluded from the governed stack topology.
+    playbook_codex_adjacent_checkout:
+      path: repos/fawxzzy-playbook-codex
+      trust_class: adjacent
+      release_eligible: false
+      reason: Local Playbook Codex checkout remains an adjacent non-canonical helper surface outside the governed stack member set.
+    zachariahredfield_adjacent_checkout:
+      path: repos/ZachariahRedfield
+      trust_class: adjacent
+      release_eligible: false
+      reason: Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set.
     verta_core_checkout:
       path: repos/Verta-Core
       trust_class: untrusted
