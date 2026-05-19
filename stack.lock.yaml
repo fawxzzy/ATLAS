@@ -65,7 +65,7 @@ components:
     remote: "https://github.com/fawxzzy/fawxzzy-playbook.git"
     ref_type: "branch"
     ref: "main"
-    commit: "8fbf3e48b8e9fa78f0a54d08596cc9035bb070b1"
+    commit: "f3fbe4230bfbc58def97eb8ecbb6953c35f1573e"
     dirty: false
     trust_class: "trusted"
     release_eligible: true
@@ -87,8 +87,8 @@ components:
     remote: "https://github.com/fawxzzy/ATLAS.git"
     ref_type: "branch"
     ref: "main"
-    commit: "d80bd168e2eb340c62d42cf1410e3dc24fd2b7d1"
-    dirty: false
+    commit: "dbff9286f7cc77a93ef8cdb4ca64fca46398ed85"
+    dirty: true
     trust_class: "trusted"
     release_eligible: false
   stream:
@@ -204,4 +204,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:50a5a6cbc9deedd2096d26ed41dddae2941be673d3285b320230eb1067cb64ca"
+lock_digest: "sha256:54c0b6c5ff23d67ac19b8c82b5e31fac2d343d6b5af259ef68edb4c56e5719f5"
