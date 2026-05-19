@@ -1,6 +1,6 @@
 schema_version: "atlas.stack.lock.v1"
 stack_manifest_path: "stack.yaml"
-stack_manifest_digest: "sha256:bfeea905ae7bb840701cc5dd753efeab878b4cbc0189fff41a1fa1292e1491a5"
+stack_manifest_digest: "sha256:4a17c3608f84f13c0e38346b379924044fa800777c14c0ec5174111056a6f107"
 component_count: 10
 components:
   _stack:
@@ -33,7 +33,7 @@ components:
     ref_type: "branch"
     ref: "codex/lifeline-release-replay-verification"
     commit: "4589b4f332247b32e01931907f803e5ea5991e34"
-    dirty: false
+    dirty: true
     trust_class: "trusted"
     release_eligible: true
   mazer:
@@ -64,9 +64,9 @@ components:
     status: "active"
     remote: "https://github.com/fawxzzy/fawxzzy-playbook.git"
     ref_type: "branch"
-    ref: "codex/workflow-pack-environment-bridge-dry-run-executor"
-    commit: "a198ac62c2faf04c352bc81056e37efdf8d34e57"
-    dirty: false
+    ref: "codex/verta-derivative-doctrine-patterns"
+    commit: "239b9ee4457f17c4186126880f2639470d2f8cec"
+    dirty: true
     trust_class: "trusted"
     release_eligible: true
   playbook-demo:
@@ -86,9 +86,9 @@ components:
     status: "active"
     remote: "https://github.com/fawxzzy/ATLAS.git"
     ref_type: "branch"
-    ref: "codex/progression-layer-spec-update"
-    commit: "c4ba8893b6f10f2a92feb3a1b959f8ac12220c9b"
-    dirty: true
+    ref: "codex/verta-derivative-absorption-phase-gates"
+    commit: "a4fc87b5d320eec945b5182754cde82ceb9f6303"
+    dirty: false
     trust_class: "trusted"
     release_eligible: false
   stream:
@@ -114,30 +114,66 @@ components:
     trust_class: "trusted"
     release_eligible: true
 excluded_surfaces:
+  atlas_adjacent_checkout:
+    path: "repos/ATLAS"
+    present: true
+    trust_class: "adjacent"
+    release_eligible: false
+    reason: "Local ATLAS sibling checkout remains an adjacent non-canonical repo root and is not part of the governed stack member set."
   cortex_adjacent_checkout:
     path: "repos/fawxzzy-cortex"
     present: false
     trust_class: "adjacent"
     release_eligible: false
     reason: "Cortex checkout is present in the workspace as an adjacent repo but is not yet a governed ATLAS child-repo adoption target."
+  fitness_parity_recovery_adjacent_checkout:
+    path: "repos/fawxzzy-fitness-parity-recovery"
+    present: true
+    trust_class: "adjacent"
+    release_eligible: false
+    reason: "Fitness parity recovery checkout remains an adjacent recovery surface and is excluded from the governed stack topology."
+  fitness_reclone_adjacent_checkout:
+    path: "repos/fawxzzy-fitness.reclone.20260502-195639"
+    present: true
+    trust_class: "adjacent"
+    release_eligible: false
+    reason: "Fitness reclone checkout remains an adjacent recovery surface and is excluded from the governed stack topology."
   fitness_reclone_recovery_checkout:
     path: "repos/fawxzzy-fitness.reclone.20260502-195639"
     present: true
     trust_class: "untrusted"
     release_eligible: false
     reason: "Fitness reclone remains a historical recovery checkout outside the canonical child repo and should not count as active stack adoption."
+  fitness_recovered_adjacent_checkout:
+    path: "repos/fawxzzy-fitness-recovered"
+    present: true
+    trust_class: "adjacent"
+    release_eligible: false
+    reason: "Fitness recovered checkout remains an adjacent recovery surface and is excluded from the governed stack topology."
   fitness_recovered_checkout:
     path: "repos/fawxzzy-fitness-recovered"
     present: true
     trust_class: "untrusted"
     release_eligible: false
     reason: "Fitness recovered checkout remains a non-canonical recovery lane outside the governed child-repo release surface."
+  foundation_adjacent_checkout:
+    path: "repos/fawxzzy-foundation"
+    present: true
+    trust_class: "adjacent"
+    release_eligible: false
+    reason: "Local Foundation checkout is explicitly deferred from the governed topology until an admission decision updates manifest, lock, inventory, and owner-usage surfaces together."
   lifeline_operator_evidence_worktree:
     path: "repos/fawxzzy-lifeline-operator-evidence"
     present: true
     trust_class: "trusted"
     release_eligible: false
     reason: "Lifeline operator evidence is a branch worktree of the registered lifeline repo and remains a temporary non-canonical evidence lane outside the governed repo surface."
+  playbook_codex_adjacent_checkout:
+    path: "repos/fawxzzy-playbook-codex"
+    present: true
+    trust_class: "adjacent"
+    release_eligible: false
+    reason: "Local Playbook Codex checkout remains an adjacent non-canonical helper surface outside the governed stack member set."
   trove_release_cutover_worktree:
     path: "repos/fawxzzy-trove-release-cutover"
     present: true
@@ -162,4 +198,10 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "ZachariahRedfield checkout is an adjacent unmanaged repo and is outside the governed ATLAS release surface."
-lock_digest: "sha256:83a70bb491ce00710958c90383ddc3633a47143cb058c11b9dc3e07120dcb545"
+  zachariahredfield_adjacent_checkout:
+    path: "repos/ZachariahRedfield"
+    present: true
+    trust_class: "adjacent"
+    release_eligible: false
+    reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
+lock_digest: "sha256:817caede56bd5dcbe189bb511d23420323555e458809a6a0fe3786d03f176299"

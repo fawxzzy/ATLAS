@@ -135,6 +135,15 @@ The ids are canonical. Fitness is normalized on disk at `repos/fawxzzy-fitness`;
 
 `repos/**` remains untracked by the root repo as a code surface. The stack root tracks inventory and policy about those repos, not mirrored copies of their source trees.
 
+## Deferred Adjacent Surfaces
+
+Some local repo roots may exist under `repos/` without being admitted stack members.
+
+- current deferred adjacent examples include `repos/ATLAS`, `repos/fawxzzy-foundation`, `repos/fawxzzy-playbook-codex`, `repos/fawxzzy-fitness-parity-recovery`, `repos/fawxzzy-fitness-recovered`, `repos/fawxzzy-fitness.reclone.20260502-195639`, and `repos/ZachariahRedfield`
+- these surfaces are not canonical repo ids
+- they stay excluded from governed topology until an explicit admission decision updates `stack.yaml`, `stack.lock.yaml`, the published inventory, and owner-usage notes together
+- Verta-Core remains a separate quarantined trust-gate surface, not an adjacent managed repo
+
 ## Root-Owned Subsystems
 
 - `cortex` -> `runtime/cortex`
