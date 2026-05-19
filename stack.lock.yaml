@@ -86,8 +86,8 @@ components:
     status: "active"
     remote: "https://github.com/fawxzzy/ATLAS.git"
     ref_type: "branch"
-    ref: "codex/verta-gate-stack-lock-refresh"
-    commit: "28ee74f0f85c5300c53d1571beea60d565c4b6ca"
+    ref: "main"
+    commit: "d80bd168e2eb340c62d42cf1410e3dc24fd2b7d1"
     dirty: false
     trust_class: "trusted"
     release_eligible: false
@@ -204,4 +204,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:df2ac52c97bfd627ddff0a782999805cf742841b95e9320bdce4826a7e22bc7b"
+lock_digest: "sha256:50a5a6cbc9deedd2096d26ed41dddae2941be673d3285b320230eb1067cb64ca"
