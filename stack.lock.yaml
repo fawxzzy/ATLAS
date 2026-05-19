@@ -54,7 +54,7 @@ components:
     remote: "https://github.com/fawxzzy/fawxzzy-playbook.git"
     ref_type: "branch"
     ref: "codex/workflow-pack-environment-bridge-dry-run-executor"
-    commit: "7b62d6598e2f67cae62f9210c93e65eadbc4754f"
+    commit: "239b9ee4457f17c4186126880f2639470d2f8cec"
     dirty: true
     trust_class: "trusted"
     release_eligible: true
@@ -76,8 +76,8 @@ components:
     remote: "https://github.com/fawxzzy/ATLAS.git"
     ref_type: "branch"
     ref: "main"
-    commit: "0c5cac5ece46c8d04c47b2d55300b533d5607b34"
-    dirty: true
+    commit: "c990dc1ced1a365541b9262ee36859ba107447fa"
+    dirty: false
     trust_class: "trusted"
     release_eligible: false
   stream:
@@ -169,4 +169,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:61b4c52483441fbaa6b9e404cfda4b954ffd27188719d1f0ffd3f4c6da7c75eb"
+lock_digest: "sha256:6d4a94bf05a678746e6cf40b7b04a8fbbee777d81b04f5acedfb5e44ca29ab34"
