@@ -64,9 +64,9 @@ components:
     status: "active"
     remote: "https://github.com/fawxzzy/fawxzzy-playbook.git"
     ref_type: "branch"
-    ref: "codex/verta-derivative-doctrine-patterns"
-    commit: "239b9ee4457f17c4186126880f2639470d2f8cec"
-    dirty: true
+    ref: "main"
+    commit: "466b89ed310a7b9857973c9cf3d8c54cdeb36008"
+    dirty: false
     trust_class: "trusted"
     release_eligible: true
   playbook-demo:
@@ -86,8 +86,8 @@ components:
     status: "active"
     remote: "https://github.com/fawxzzy/ATLAS.git"
     ref_type: "branch"
-    ref: "codex/verta-derivative-absorption-phase-gates"
-    commit: "a4fc87b5d320eec945b5182754cde82ceb9f6303"
+    ref: "codex/verta-post-merge-stack-lock-refresh"
+    commit: "e8607afbcc1121c7a80f82e08cf56866571b16e1"
     dirty: false
     trust_class: "trusted"
     release_eligible: false
@@ -204,4 +204,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:817caede56bd5dcbe189bb511d23420323555e458809a6a0fe3786d03f176299"
+lock_digest: "sha256:1eedbd544b698d0d2a274dee2dd1c9eeb008ffef5934cbe0900cc752f9e6cc21"
