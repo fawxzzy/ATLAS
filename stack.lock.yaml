@@ -65,7 +65,7 @@ components:
     remote: "https://github.com/fawxzzy/fawxzzy-playbook.git"
     ref_type: "branch"
     ref: "main"
-    commit: "466b89ed310a7b9857973c9cf3d8c54cdeb36008"
+    commit: "6646e38d440cab7fa853844bc0aca136d59e99e3"
     dirty: false
     trust_class: "trusted"
     release_eligible: true
@@ -86,8 +86,8 @@ components:
     status: "active"
     remote: "https://github.com/fawxzzy/ATLAS.git"
     ref_type: "branch"
-    ref: "codex/verta-post-merge-stack-lock-refresh"
-    commit: "e8607afbcc1121c7a80f82e08cf56866571b16e1"
+    ref: "main"
+    commit: "620bfa297c9566dcdcfb2596014204921802512e"
     dirty: false
     trust_class: "trusted"
     release_eligible: false
@@ -204,4 +204,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:1eedbd544b698d0d2a274dee2dd1c9eeb008ffef5934cbe0900cc752f9e6cc21"
+lock_digest: "sha256:39275faff9aac434124b9eb4b4672e6195f1e8676ee01a8fe71c6dee98fe51b3"
