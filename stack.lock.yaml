@@ -65,7 +65,7 @@ components:
     remote: "https://github.com/fawxzzy/fawxzzy-playbook.git"
     ref_type: "branch"
     ref: "main"
-    commit: "6646e38d440cab7fa853844bc0aca136d59e99e3"
+    commit: "8fbf3e48b8e9fa78f0a54d08596cc9035bb070b1"
     dirty: false
     trust_class: "trusted"
     release_eligible: true
@@ -86,8 +86,8 @@ components:
     status: "active"
     remote: "https://github.com/fawxzzy/ATLAS.git"
     ref_type: "branch"
-    ref: "main"
-    commit: "620bfa297c9566dcdcfb2596014204921802512e"
+    ref: "codex/verta-gate-stack-lock-refresh"
+    commit: "28ee74f0f85c5300c53d1571beea60d565c4b6ca"
     dirty: false
     trust_class: "trusted"
     release_eligible: false
@@ -204,4 +204,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:39275faff9aac434124b9eb4b4672e6195f1e8676ee01a8fe71c6dee98fe51b3"
+lock_digest: "sha256:df2ac52c97bfd627ddff0a782999805cf742841b95e9320bdce4826a7e22bc7b"
