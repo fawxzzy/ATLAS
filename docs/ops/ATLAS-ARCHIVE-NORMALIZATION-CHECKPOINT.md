@@ -4,11 +4,10 @@
 
 This checkpoint records the current non-executable archive normalization state in ATLAS root.
 
-Current merged state:
+Current merged baseline:
 
 - archive registry added
 - archive admission runbook added
-- archive registry enforcement added to ATLAS root validation
 - `stack.yaml` and `stack.lock.yaml` normalized for archive governance
 - `repos/dev.zip` remains provenance-only and `present: false`
 - `repos/CORTEX-AND-PLAYBOOK-20260408.zip` remains provenance-only and `present: false`
@@ -18,6 +17,10 @@ Current merged state:
 - no raw archives were opened, moved, trusted, or absorbed
 - no executable seam was created
 - root ratchet is expected to stay green after lock self-refresh
+
+Current branch-state addition pending merge:
+
+- archive registry enforcement added to ATLAS root validation
 
 ## Current Boundary
 
@@ -44,7 +47,7 @@ Archive normalization merge and follow-up:
 - ATLAS PR `#43`: normalize archive admission surfaces
 - ATLAS commit `94c29b1`: refresh stack lock after archive normalization merge
 
-Governed proof surfaces:
+Governed proof surfaces for the merged baseline plus the current branch delta:
 
 - `docs/registry/ATLAS-ARCHIVE-REGISTRY.json`
 - `docs/ops/ATLAS-ARCHIVE-ADMISSION-RUNBOOK.md`
@@ -56,7 +59,7 @@ Governed proof surfaces:
 
 ## Validation
 
-Validation used for the merged state:
+Validation used for the merged baseline and current branch state:
 
 ```powershell
 python .\ops\validation\validate_stack.py

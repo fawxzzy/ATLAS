@@ -87,7 +87,7 @@ components:
     remote: "https://github.com/fawxzzy/ATLAS.git"
     ref_type: "branch"
     ref: "codex/validate-archive-registry-surfaces"
-    commit: "867809f3851d3568f4e1b34a22711e87f8248d13"
+    commit: "3cdafe9c98a35b3b41257fcc4e91342012bcd3b4"
     dirty: true
     trust_class: "trusted"
     release_eligible: false
@@ -140,31 +140,31 @@ excluded_surfaces:
     reason: "Generic legacy workspace snapshot remains manifest-visible for provenance only and must stay out of normal repo and release flows until cataloged."
   fitness_parity_recovery_adjacent_checkout:
     path: "repos/fawxzzy-fitness-parity-recovery"
-    present: true
+    present: false
     trust_class: "adjacent"
     release_eligible: false
     reason: "Fitness parity recovery checkout remains an adjacent recovery surface and is excluded from the governed stack topology."
   fitness_reclone_adjacent_checkout:
     path: "repos/fawxzzy-fitness.reclone.20260502-195639"
-    present: true
+    present: false
     trust_class: "adjacent"
     release_eligible: false
     reason: "Fitness reclone checkout remains an adjacent recovery surface and is excluded from the governed stack topology."
   fitness_reclone_recovery_checkout:
     path: "repos/fawxzzy-fitness.reclone.20260502-195639"
-    present: true
+    present: false
     trust_class: "untrusted"
     release_eligible: false
     reason: "Fitness reclone remains a historical recovery checkout outside the canonical child repo and should not count as active stack adoption."
   fitness_recovered_adjacent_checkout:
     path: "repos/fawxzzy-fitness-recovered"
-    present: true
+    present: false
     trust_class: "adjacent"
     release_eligible: false
     reason: "Fitness recovered checkout remains an adjacent recovery surface and is excluded from the governed stack topology."
   fitness_recovered_checkout:
     path: "repos/fawxzzy-fitness-recovered"
-    present: true
+    present: false
     trust_class: "untrusted"
     release_eligible: false
     reason: "Fitness recovered checkout remains a non-canonical recovery lane outside the governed child-repo release surface."
@@ -222,4 +222,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:90125d89dff1e05a765f763cc1c7715f8b347874bd29454bcb585bac5e3c4eea"
+lock_digest: "sha256:4b83c786b86ca3c6226cc02fb232fdedad6f016d6d0d55ea3136894663f361e8"
