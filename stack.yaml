@@ -273,11 +273,6 @@ stack_lock:
       trust_class: adjacent
       release_eligible: false
       reason: Local ATLAS sibling checkout remains an adjacent non-canonical repo root and is not part of the governed stack member set.
-    foundation_adjacent_checkout:
-      path: repos/fawxzzy-foundation
-      trust_class: adjacent
-      release_eligible: false
-      reason: Local Foundation checkout is explicitly deferred from the governed topology until an admission decision updates manifest, lock, inventory, and owner-usage surfaces together.
     fitness_parity_recovery_adjacent_checkout:
       path: repos/fawxzzy-fitness-parity-recovery
       trust_class: adjacent
