@@ -153,10 +153,17 @@ subsystem_registry:
     model: root-owned-subsystem
 
 archives:
+  archive_register: docs/registry/ATLAS-ARCHIVE-REGISTRY.json
+  admission_runbook: docs/ops/ATLAS-ARCHIVE-ADMISSION-RUNBOOK.md
+  intake_policy: manifest_first_selective_ingest
   backups: repos/repo-backups
+  canonical_backup_roots:
+    bundles: packages/bundles
+    patches: packages/patches
   media:
     - repos/Realm Blade
     - repos/Hard Pill To Swallow
+  zip_snapshot_root: packages/snapshots
   zip_snapshots:
     - repos/CORTEX-AND-PLAYBOOK-20260408.zip
     - repos/dev.zip
@@ -286,11 +293,26 @@ stack_lock:
       trust_class: adjacent
       release_eligible: false
       reason: Fitness reclone checkout remains an adjacent recovery surface and is excluded from the governed stack topology.
+    repo_backups_archive_surface:
+      path: repos/repo-backups
+      trust_class: trusted
+      release_eligible: false
+      reason: Legacy bundle and patch backup drop remains visible for recovery provenance but is not a source repo surface and should converge on packages/bundles and packages/patches.
     playbook_codex_adjacent_checkout:
       path: repos/fawxzzy-playbook-codex
       trust_class: adjacent
       release_eligible: false
       reason: Local Playbook Codex checkout remains an adjacent non-canonical helper surface outside the governed stack member set.
+    cortex_playbook_snapshot_archive:
+      path: repos/CORTEX-AND-PLAYBOOK-20260408.zip
+      trust_class: untrusted
+      release_eligible: false
+      reason: Mixed-owner snapshot reference remains manifest-visible for provenance only and must not be treated as owner truth before owner-split review.
+    dev_workspace_snapshot_archive:
+      path: repos/dev.zip
+      trust_class: untrusted
+      release_eligible: false
+      reason: Generic legacy workspace snapshot remains manifest-visible for provenance only and must stay out of normal repo and release flows until cataloged.
     zachariahredfield_adjacent_checkout:
       path: repos/ZachariahRedfield
       trust_class: adjacent

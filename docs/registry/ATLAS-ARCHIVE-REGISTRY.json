@@ -1,0 +1,97 @@
+{
+  "schema_version": "atlas.archive.registry.v1",
+  "kind": "atlas-archive-registry",
+  "stack_manifest_ref": "stack.yaml",
+  "published_refs": {
+    "json": "docs/registry/ATLAS-ARCHIVE-REGISTRY.json",
+    "runbook": "docs/ops/ATLAS-ARCHIVE-ADMISSION-RUNBOOK.md"
+  },
+  "policy": {
+    "admission_mode": "manifest_first_selective_ingest",
+    "default_raw_archive_posture": "provenance_only",
+    "canonical_snapshot_root": "packages/snapshots",
+    "canonical_bundle_root": "packages/bundles",
+    "canonical_patch_root": "packages/patches"
+  },
+  "scope_notes": [
+    "This registry covers the ATLAS archive-governance tranche reviewed at the stack root.",
+    "Mazer legacy zip surfaces remain tracked elsewhere and are intentionally not widened here."
+  ],
+  "entries": [
+    {
+      "surface_id": "cortex_playbook_snapshot_archive",
+      "path": "repos/CORTEX-AND-PLAYBOOK-20260408.zip",
+      "present": false,
+      "surface_kind": "source_snapshot",
+      "verification_state": "reference_only_manifest_surface",
+      "trust_class": "untrusted",
+      "release_eligible": false,
+      "owner_scope": "mixed_owner_unresolved",
+      "retention_reason": "provenance_only_until_owner_split",
+      "canonical_destination": "packages/snapshots",
+      "recommended_action": "catalog_and_owner_split_before_any_extract",
+      "notes": [
+        "The current local ATLAS checkout does not contain this zip file.",
+        "The path remains in stack.yaml as a governed provenance reference only."
+      ]
+    },
+    {
+      "surface_id": "dev_workspace_snapshot_archive",
+      "path": "repos/dev.zip",
+      "present": false,
+      "surface_kind": "source_snapshot",
+      "verification_state": "reference_only_manifest_surface",
+      "trust_class": "untrusted",
+      "release_eligible": false,
+      "owner_scope": "unknown",
+      "retention_reason": "provenance_only_until_cataloged",
+      "canonical_destination": "packages/snapshots",
+      "recommended_action": "catalog_before_any_extract_or_relocation",
+      "notes": [
+        "The current local ATLAS checkout does not contain this zip file.",
+        "The name is too generic to admit into any owner repo without a separate provenance review."
+      ]
+    },
+    {
+      "surface_id": "repo_backups_archive_surface",
+      "path": "repos/repo-backups",
+      "present": true,
+      "surface_kind": "bundle_patch_backup_drop",
+      "verification_state": "direct_current_surface",
+      "trust_class": "trusted",
+      "release_eligible": false,
+      "owner_scope": "stack_root",
+      "retention_reason": "recovery_artifacts",
+      "canonical_destination": [
+        "packages/bundles",
+        "packages/patches"
+      ],
+      "recommended_action": "treat_as_package_layer_backup_surface_and_relocate_when_convenient",
+      "observed_members": [
+        "assistant-reliability-safety-playbook.bundle",
+        "0001-docs-standards-add-assistant-reliability-and-safety-.patch"
+      ],
+      "notes": [
+        "This surface is retained for recovery value, not as source-repo truth.",
+        "New backup artifacts should land under packages/bundles or packages/patches instead of repos/."
+      ]
+    },
+    {
+      "surface_id": "verta_core_archive",
+      "path": "repos/Verta-Core.zip",
+      "present": true,
+      "surface_kind": "quarantined_archive",
+      "verification_state": "direct_current_surface",
+      "trust_class": "untrusted",
+      "release_eligible": false,
+      "owner_scope": "quarantined_adjacent_surface",
+      "retention_reason": "private_evidence_and_derivative_only_review",
+      "canonical_destination": null,
+      "recommended_action": "keep_quarantined_metadata_only",
+      "notes": [
+        "This surface remains protected by the standing Verta trust gate.",
+        "Derivative doctrine may be promoted only after rewrite into owner-repo truth with explicit provenance."
+      ]
+    }
+  ]
+}
