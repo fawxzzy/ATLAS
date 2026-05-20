@@ -86,9 +86,9 @@ components:
     status: "active"
     remote: "https://github.com/fawxzzy/ATLAS.git"
     ref_type: "branch"
-    ref: "codex/foundation-atlas-admission-alignment"
-    commit: "0619b118ffde848ec1aac5f3042f53de30295860"
-    dirty: true
+    ref: "main"
+    commit: "1c6d3035ac8b3c30b9f84093f4b315ed94f2f732"
+    dirty: false
     trust_class: "trusted"
     release_eligible: false
   stream:
@@ -216,4 +216,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:6fe4b2fe938256b1b85c0993ce59db54501c53cf73192a01dc381aadb4582fe6"
+lock_digest: "sha256:71c772087a11ded54282e44e1dbcd764c1bd70c49726fece56d9e55fd116392e"
