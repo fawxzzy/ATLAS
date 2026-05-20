@@ -6,6 +6,7 @@ See also:
 
 - `docs/ops/ATLAS-SESSION-RUNBOOK.md`
 - `docs/ops/ATLAS-ARTIFACT-DESCRIPTOR-RUNBOOK.md`
+- `docs/ops/ATLAS-ARCHIVE-ADMISSION-RUNBOOK.md`
 - `docs/ops/ATLAS-STATUS-RUNBOOK.md`
 - `docs/ops/VERTA-TRUST-GATE.md`
 
@@ -212,6 +213,16 @@ Every export contains:
 - `EXPORT-MANIFEST.json`
 
 Those manifest files state exactly what was included and what was excluded by default.
+
+## Archive Admission
+
+Use `docs/ops/ATLAS-ARCHIVE-ADMISSION-RUNBOOK.md` for any zip snapshot, backup drop, or historical archive that is not already normal owner-repo truth.
+
+Operational rule:
+
+- catalog first
+- keep raw archives provenance-only by default
+- route new bundles, patches, and source snapshots into `packages/**`, not `repos/`
 
 ## Restore
 

@@ -22,6 +22,7 @@ Do not use for:
 Action:
 - Keep active repos at a stable, documented path.
 - Treat nested or legacy repos as exceptions to be flattened or archived deliberately, not by accident.
+- If a legacy archive or backup surface must remain under `repos/` temporarily, declare it in `stack.yaml`, keep it out of release flows, and catalog it in `docs/registry/ATLAS-ARCHIVE-REGISTRY.json`.
 
 ## `runtime/`
 

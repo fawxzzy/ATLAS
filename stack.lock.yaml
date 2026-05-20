@@ -1,6 +1,6 @@
 schema_version: "atlas.stack.lock.v1"
 stack_manifest_path: "stack.yaml"
-stack_manifest_digest: "sha256:4a17c3608f84f13c0e38346b379924044fa800777c14c0ec5174111056a6f107"
+stack_manifest_digest: "sha256:d1d8aec47eb5809b9da00ad8e9f6efac1e286e9d56f5cb7f33e62d3008d9b57b"
 component_count: 10
 components:
   _stack:
@@ -86,9 +86,9 @@ components:
     status: "active"
     remote: "https://github.com/fawxzzy/ATLAS.git"
     ref_type: "branch"
-    ref: "main"
-    commit: "b714f78340fa6cb1d9f1612431af4e2b07bde647"
-    dirty: false
+    ref: "codex/archive-admission-normalization"
+    commit: "1e9fd0ff5c8194534c279b8568d2f87712708cf8"
+    dirty: true
     trust_class: "trusted"
     release_eligible: false
   stream:
@@ -126,6 +126,18 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Cortex checkout is present in the workspace as an adjacent repo but is not yet a governed ATLAS child-repo adoption target."
+  cortex_playbook_snapshot_archive:
+    path: "repos/CORTEX-AND-PLAYBOOK-20260408.zip"
+    present: false
+    trust_class: "untrusted"
+    release_eligible: false
+    reason: "Mixed-owner snapshot reference remains manifest-visible for provenance only and must not be treated as owner truth before owner-split review."
+  dev_workspace_snapshot_archive:
+    path: "repos/dev.zip"
+    present: false
+    trust_class: "untrusted"
+    release_eligible: false
+    reason: "Generic legacy workspace snapshot remains manifest-visible for provenance only and must stay out of normal repo and release flows until cataloged."
   fitness_parity_recovery_adjacent_checkout:
     path: "repos/fawxzzy-fitness-parity-recovery"
     present: true
@@ -174,6 +186,12 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local Playbook Codex checkout remains an adjacent non-canonical helper surface outside the governed stack member set."
+  repo_backups_archive_surface:
+    path: "repos/repo-backups"
+    present: true
+    trust_class: "trusted"
+    release_eligible: false
+    reason: "Legacy bundle and patch backup drop remains visible for recovery provenance but is not a source repo surface and should converge on packages/bundles and packages/patches."
   trove_release_cutover_worktree:
     path: "repos/fawxzzy-trove-release-cutover"
     present: true
@@ -204,4 +222,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:1cd3a097372cbcd175cf156fdba0d3b6ca0b5c7ed9a2a7db5e929b1b4001a6b3"
+lock_digest: "sha256:3785db4debf75e6280e0c861457fde154976d90d0773fb53a77b91f875fd99f0"
