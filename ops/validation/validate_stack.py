@@ -81,6 +81,28 @@ VERTA_SECRET_PATTERNS = [
     ("verta-live-secret", re.compile(r"gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|AKIA[0-9A-Z]{16}|sk-[A-Za-z0-9]{20,}|xox[baprs]-[A-Za-z0-9-]{10,}|-----BEGIN [A-Z ]*PRIVATE KEY-----|Bearer\s+[A-Za-z0-9._-]{16,}")),
 ]
 VERTA_SURFACE_TEXT_EXTENSIONS = {".bat", ".cmd", ".conf", ".cfg", ".ini", ".json", ".md", ".ps1", ".py", ".sh", ".txt", ".yaml", ".yml"}
+ARCHIVE_REGISTRY_REQUIRED_ENTRY_FIELDS = (
+    "surface_id",
+    "path",
+    "present",
+    "surface_kind",
+    "verification_state",
+    "trust_class",
+    "release_eligible",
+    "owner_scope",
+    "retention_reason",
+    "canonical_destination",
+    "recommended_action",
+)
+ARCHIVE_SURFACE_FILE_EXTENSIONS = {".zip", ".bundle", ".patch"}
+ARCHIVE_DIRECTORY_NAME_TOKENS = ("archive", "backup")
+ARCHIVE_SCOPE_EXEMPT_EXACT_PATHS = {
+    "repos/playbook-old.zip",
+}
+ARCHIVE_SCOPE_EXEMPT_PREFIXES = (
+    "repos/mazer-legacy-unreal",
+    "repos/mazer-legacy-unreal.zip",
+)
 
 ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
@@ -177,6 +199,11 @@ DEBT_CLASS_CONFIG = [
             "root-lock-refresh-pending",
             "playbook-enforcement-untracked",
             "playbook-enforcement-tracking-check-failed",
+            "archive-registry-missing",
+            "archive-registry-invalid",
+            "archive-registry-path-drift",
+            "archive-unregistered-surface",
+            "archive-present-state-drift",
         },
         "prefixes": [
             "stack-lock-",
@@ -1339,6 +1366,301 @@ def load_json_object(path: Path) -> dict[str, Any]:
     return payload
 
 
+def normalize_archive_destination_paths(value: Any) -> list[str]:
+    if isinstance(value, str):
+        trimmed = value.strip()
+        return [normalize_slashes(trimmed)] if trimmed else []
+    if not isinstance(value, list):
+        return []
+    results: list[str] = []
+    for item in value:
+        if not isinstance(item, str):
+            continue
+        trimmed = item.strip()
+        if trimmed:
+            results.append(normalize_slashes(trimmed))
+    return results
+
+
+def build_archive_declared_paths(
+    stack_file: Path,
+    config: dict[str, Any],
+) -> set[str]:
+    root = stack_file.parent.resolve()
+    declared: set[str] = set()
+    archives = config.get("archives", {})
+    if isinstance(archives, dict):
+        backups = archives.get("backups")
+        if isinstance(backups, str) and backups.strip():
+            declared.add(relative_to_root(root, resolve_path(stack_file, backups)))
+        for key in ("zip_snapshots", "media"):
+            values = archives.get(key)
+            if not isinstance(values, list):
+                continue
+            for item in values:
+                if not isinstance(item, str) or not item.strip():
+                    continue
+                relative = relative_to_root(root, resolve_path(stack_file, item))
+                declared.add(relative)
+                if key == "media" and Path(relative).suffix == "":
+                    declared.add(f"{relative}.zip")
+
+    lock_config = config.get("stack_lock", {})
+    if isinstance(lock_config, dict):
+        excluded_surfaces = lock_config.get("excluded_surfaces", {})
+        if isinstance(excluded_surfaces, dict):
+            for surface in excluded_surfaces.values():
+                if not isinstance(surface, dict):
+                    continue
+                raw_path = surface.get("path")
+                if isinstance(raw_path, str) and raw_path.strip():
+                    declared.add(relative_to_root(root, resolve_path(stack_file, raw_path)))
+    return declared
+
+
+def build_archive_scope_exempt_paths(
+    stack_file: Path,
+    config: dict[str, Any],
+) -> set[str]:
+    scope_exempt = set(ARCHIVE_SCOPE_EXEMPT_EXACT_PATHS)
+    archives = config.get("archives", {})
+    if isinstance(archives, dict):
+        media = archives.get("media")
+        if isinstance(media, list):
+            root = stack_file.parent.resolve()
+            for item in media:
+                if not isinstance(item, str) or not item.strip():
+                    continue
+                relative = relative_to_root(root, resolve_path(stack_file, item))
+                scope_exempt.add(relative)
+                if Path(relative).suffix == "":
+                    scope_exempt.add(f"{relative}.zip")
+    return scope_exempt
+
+
+def is_archive_scope_exempt(path: str, scope_exempt_paths: set[str]) -> bool:
+    normalized = normalize_slashes(path)
+    if normalized in scope_exempt_paths:
+        return True
+    return any(
+        normalized == prefix or normalized.startswith(f"{prefix}/")
+        for prefix in ARCHIVE_SCOPE_EXEMPT_PREFIXES
+    )
+
+
+def is_archive_like_repo_surface(candidate: Path) -> bool:
+    if candidate.is_file():
+        return candidate.suffix.lower() in ARCHIVE_SURFACE_FILE_EXTENSIONS
+    if candidate.is_dir():
+        name = candidate.name.lower()
+        return any(token in name for token in ARCHIVE_DIRECTORY_NAME_TOKENS)
+    return False
+
+
+def iter_repo_archive_surface_candidates(root: Path) -> list[Path]:
+    repos_root = root / "repos"
+    if not repos_root.exists():
+        return []
+    return [
+        candidate
+        for candidate in sorted(repos_root.iterdir())
+        if is_archive_like_repo_surface(candidate)
+    ]
+
+
+def validate_archive_registry(stack_file: Path, config: dict[str, Any]) -> list[Finding]:
+    root = stack_file.parent.resolve()
+    findings: list[Finding] = []
+    archives = config.get("archives", {})
+    if not isinstance(archives, dict):
+        findings.append(
+            Finding(
+                "error",
+                "archive-registry-missing",
+                "stack.yaml",
+                "ATLAS archive policy must declare archives.archive_register.",
+            )
+        )
+        return findings
+
+    archive_register_value = archives.get("archive_register")
+    if not isinstance(archive_register_value, str) or not archive_register_value.strip():
+        findings.append(
+            Finding(
+                "error",
+                "archive-registry-missing",
+                "stack.yaml",
+                "ATLAS archive policy must declare archives.archive_register.",
+            )
+        )
+        return findings
+
+    registry_path = resolve_path(stack_file, archive_register_value)
+    registry_rel = relative_to_root(root, registry_path)
+    if not registry_path.exists():
+        findings.append(
+            Finding(
+                "error",
+                "archive-registry-missing",
+                registry_rel,
+                "Archive registry file is missing.",
+            )
+        )
+        return findings
+
+    try:
+        registry_payload = load_json_object(registry_path)
+    except Exception as exc:
+        findings.append(
+            Finding(
+                "error",
+                "archive-registry-invalid",
+                registry_rel,
+                f"Archive registry could not be loaded: {exc}",
+            )
+        )
+        return findings
+
+    entries = registry_payload.get("entries")
+    if not isinstance(entries, list):
+        findings.append(
+            Finding(
+                "error",
+                "archive-registry-invalid",
+                registry_rel,
+                "Archive registry entries must be a list.",
+            )
+        )
+        return findings
+
+    declared_paths = build_archive_declared_paths(stack_file, config)
+    scope_exempt_paths = build_archive_scope_exempt_paths(stack_file, config)
+    registered_paths: set[str] = set()
+
+    for index, entry in enumerate(entries):
+        entry_path = f"{registry_rel}#entries[{index}]"
+        if not isinstance(entry, dict):
+            findings.append(
+                Finding(
+                    "error",
+                    "archive-registry-invalid",
+                    entry_path,
+                    "Archive registry entry must be a mapping.",
+                )
+            )
+            continue
+
+        missing_fields = sorted(field for field in ARCHIVE_REGISTRY_REQUIRED_ENTRY_FIELDS if field not in entry)
+        if missing_fields:
+            findings.append(
+                Finding(
+                    "error",
+                    "archive-registry-invalid",
+                    entry_path,
+                    f"Archive registry entry is missing required fields: {', '.join(missing_fields)}.",
+                )
+            )
+            continue
+
+        raw_path = str(entry.get("path", "")).strip()
+        if not raw_path:
+            findings.append(
+                Finding(
+                    "error",
+                    "archive-registry-invalid",
+                    entry_path,
+                    "Archive registry entry path must be a non-empty string.",
+                )
+            )
+            continue
+        relative_path = normalize_slashes(raw_path)
+        if relative_path in registered_paths:
+            findings.append(
+                Finding(
+                    "error",
+                    "archive-registry-invalid",
+                    entry_path,
+                    f"Archive registry path '{relative_path}' is duplicated.",
+                )
+            )
+            continue
+        registered_paths.add(relative_path)
+
+        trust_class = str(entry.get("trust_class", ""))
+        if trust_class not in TRUST_CLASSES:
+            findings.append(
+                Finding(
+                    "error",
+                    "archive-registry-invalid",
+                    entry_path,
+                    f"Archive registry entry uses unsupported trust_class '{trust_class}'.",
+                )
+            )
+
+        is_raw_archive_entry = Path(relative_path).suffix.lower() in ARCHIVE_SURFACE_FILE_EXTENSIONS
+        if is_raw_archive_entry and bool(entry.get("release_eligible")):
+            findings.append(
+                Finding(
+                    "error",
+                    "archive-registry-invalid",
+                    entry_path,
+                    "Raw archive registry entries must not be release eligible.",
+                )
+            )
+
+        destination_paths = normalize_archive_destination_paths(entry.get("canonical_destination"))
+        if trust_class == "untrusted" or "quarantined" in str(entry.get("surface_kind", "")).lower():
+            if any(path.startswith("repos/") for path in destination_paths):
+                findings.append(
+                    Finding(
+                        "error",
+                        "archive-registry-invalid",
+                        entry_path,
+                        "Untrusted or quarantined archive entries must not point to owner-repo truth under repos/.",
+                    )
+                )
+
+        if relative_path not in declared_paths and not is_archive_scope_exempt(relative_path, scope_exempt_paths):
+            findings.append(
+                Finding(
+                    "error",
+                    "archive-registry-path-drift",
+                    entry_path,
+                    f"Archive registry path '{relative_path}' is not declared in stack archive or excluded-surface policy.",
+                )
+            )
+
+        actual_exists = resolve_path(stack_file, relative_path).exists()
+        if bool(entry.get("present")) != actual_exists:
+            findings.append(
+                Finding(
+                    "error",
+                    "archive-present-state-drift",
+                    entry_path,
+                    f"Archive registry present flag for '{relative_path}' is {bool(entry.get('present'))!r} but filesystem existence is {actual_exists!r}.",
+                )
+            )
+
+    for candidate in iter_repo_archive_surface_candidates(root):
+        relative_path = relative_to_root(root, candidate)
+        if relative_path in registered_paths:
+            continue
+        if relative_path in declared_paths:
+            continue
+        if is_archive_scope_exempt(relative_path, scope_exempt_paths):
+            continue
+        findings.append(
+            Finding(
+                "error",
+                "archive-unregistered-surface",
+                relative_path,
+                "Archive-like surface under repos/ is not registered, declared, or explicitly scope-exempt.",
+            )
+        )
+
+    return findings
+
+
 def validate_verta_trust_gate(stack_file: Path, config: dict[str, Any]) -> list[Finding]:
     root = stack_file.parent.resolve()
     findings: list[Finding] = []
@@ -2165,6 +2487,7 @@ def build_findings(
     findings.extend(validate_tool_registry(root))
     findings.extend(validate_subsystem_registry(stack_file, config))
     findings.extend(validate_playbook_enforcement_tracking(stack_file, config))
+    findings.extend(validate_archive_registry(stack_file, config))
     if not sparse_mode:
         findings.extend(validate_execution_receipt_repairs(stack_file))
         findings.extend(validate_verta_trust_gate(stack_file, config))

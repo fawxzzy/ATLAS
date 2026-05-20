@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import tempfile
 import unittest
 from dataclasses import asdict
@@ -10,6 +11,7 @@ from ops.validation.validate_stack import (
     collect_excluded_surface_roots,
     summarize_excluded_surface_findings,
     summarize_findings,
+    validate_archive_registry,
 )
 
 
@@ -23,8 +25,33 @@ class ValidateStackQuarantinePolicyTests(unittest.TestCase):
 
     def _config(self) -> dict[str, object]:
         return {
+            "archives": {
+                "archive_register": "docs/registry/ATLAS-ARCHIVE-REGISTRY.json",
+                "backups": "repos/repo-backups",
+                "media": [
+                    "repos/Realm Blade",
+                    "repos/Hard Pill To Swallow",
+                ],
+                "zip_snapshots": [
+                    "repos/CORTEX-AND-PLAYBOOK-20260408.zip",
+                    "repos/dev.zip",
+                    "repos/mazer-legacy-unreal.zip",
+                ],
+            },
             "stack_lock": {
                 "excluded_surfaces": {
+                    "cortex_playbook_snapshot_archive": {
+                        "path": "repos/CORTEX-AND-PLAYBOOK-20260408.zip",
+                        "trust_class": "untrusted",
+                        "release_eligible": False,
+                        "reason": "Mixed-owner snapshot reference remains manifest-visible for provenance only.",
+                    },
+                    "dev_workspace_snapshot_archive": {
+                        "path": "repos/dev.zip",
+                        "trust_class": "untrusted",
+                        "release_eligible": False,
+                        "reason": "Generic legacy workspace snapshot remains manifest-visible for provenance only.",
+                    },
                     "verta_core_checkout": {
                         "path": "repos/Verta-Core",
                         "trust_class": "untrusted",
@@ -37,9 +64,102 @@ class ValidateStackQuarantinePolicyTests(unittest.TestCase):
                         "release_eligible": False,
                         "reason": "Temporary trusted evidence lane.",
                     },
+                    "repo_backups_archive_surface": {
+                        "path": "repos/repo-backups",
+                        "trust_class": "trusted",
+                        "release_eligible": False,
+                        "reason": "Legacy bundle and patch backup drop remains visible for recovery provenance.",
+                    },
+                    "verta_core_archive": {
+                        "path": "repos/Verta-Core.zip",
+                        "trust_class": "untrusted",
+                        "release_eligible": False,
+                        "reason": "Token-bearing Verta archive remains quarantined private evidence.",
+                    },
                 }
             }
         }
+
+    def _write_archive_registry(self, root: Path, entries: list[dict[str, object]]) -> None:
+        registry_path = root / "docs" / "registry" / "ATLAS-ARCHIVE-REGISTRY.json"
+        registry_path.parent.mkdir(parents=True, exist_ok=True)
+        payload = {
+            "schema_version": "atlas.archive.registry.v1",
+            "kind": "atlas-archive-registry",
+            "stack_manifest_ref": "stack.yaml",
+            "published_refs": {
+                "json": "docs/registry/ATLAS-ARCHIVE-REGISTRY.json",
+                "runbook": "docs/ops/ATLAS-ARCHIVE-ADMISSION-RUNBOOK.md",
+            },
+            "policy": {
+                "admission_mode": "manifest_first_selective_ingest",
+                "default_raw_archive_posture": "provenance_only",
+                "canonical_snapshot_root": "packages/snapshots",
+                "canonical_bundle_root": "packages/bundles",
+                "canonical_patch_root": "packages/patches",
+            },
+            "entries": entries,
+        }
+        registry_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+
+    def _current_archive_entries(self) -> list[dict[str, object]]:
+        return [
+            {
+                "surface_id": "cortex_playbook_snapshot_archive",
+                "path": "repos/CORTEX-AND-PLAYBOOK-20260408.zip",
+                "present": False,
+                "surface_kind": "source_snapshot",
+                "verification_state": "reference_only_manifest_surface",
+                "trust_class": "untrusted",
+                "release_eligible": False,
+                "owner_scope": "mixed_owner_unresolved",
+                "retention_reason": "provenance_only_until_owner_split",
+                "canonical_destination": "packages/snapshots",
+                "recommended_action": "catalog_and_owner_split_before_any_extract",
+            },
+            {
+                "surface_id": "dev_workspace_snapshot_archive",
+                "path": "repos/dev.zip",
+                "present": False,
+                "surface_kind": "source_snapshot",
+                "verification_state": "reference_only_manifest_surface",
+                "trust_class": "untrusted",
+                "release_eligible": False,
+                "owner_scope": "unknown",
+                "retention_reason": "provenance_only_until_cataloged",
+                "canonical_destination": "packages/snapshots",
+                "recommended_action": "catalog_before_any_extract_or_relocation",
+            },
+            {
+                "surface_id": "repo_backups_archive_surface",
+                "path": "repos/repo-backups",
+                "present": True,
+                "surface_kind": "bundle_patch_backup_drop",
+                "verification_state": "direct_current_surface",
+                "trust_class": "trusted",
+                "release_eligible": False,
+                "owner_scope": "stack_root",
+                "retention_reason": "recovery_artifacts",
+                "canonical_destination": [
+                    "packages/bundles",
+                    "packages/patches",
+                ],
+                "recommended_action": "treat_as_package_layer_backup_surface_and_relocate_when_convenient",
+            },
+            {
+                "surface_id": "verta_core_archive",
+                "path": "repos/Verta-Core.zip",
+                "present": True,
+                "surface_kind": "quarantined_archive",
+                "verification_state": "direct_current_surface",
+                "trust_class": "untrusted",
+                "release_eligible": False,
+                "owner_scope": "quarantined_adjacent_surface",
+                "retention_reason": "private_evidence_and_derivative_only_review",
+                "canonical_destination": None,
+                "recommended_action": "keep_quarantined_metadata_only",
+            },
+        ]
 
     def test_quarantined_path_leak_is_reported_as_warning(self) -> None:
         root = self._temp_root()
@@ -154,6 +274,122 @@ class ValidateStackQuarantinePolicyTests(unittest.TestCase):
             ],
             sorted(item["path"] for item in surface_summary["paths"]),
         )
+
+    def test_current_archive_registry_passes(self) -> None:
+        root = self._temp_root()
+        (root / "repos" / "repo-backups").mkdir(parents=True, exist_ok=True)
+        (root / "repos" / "Verta-Core.zip").write_text("archive", encoding="utf-8")
+        self._write_archive_registry(root, self._current_archive_entries())
+
+        findings = validate_archive_registry(root / "stack.yaml", self._config())
+
+        self.assertEqual([], findings)
+
+    def test_unregistered_archive_surface_fails(self) -> None:
+        root = self._temp_root()
+        (root / "repos" / "repo-backups").mkdir(parents=True, exist_ok=True)
+        (root / "repos" / "Verta-Core.zip").write_text("archive", encoding="utf-8")
+        (root / "repos" / "random.zip").write_text("archive", encoding="utf-8")
+        self._write_archive_registry(root, self._current_archive_entries())
+
+        findings = validate_archive_registry(root / "stack.yaml", self._config())
+
+        categories = {finding.category for finding in findings}
+        self.assertIn("archive-unregistered-surface", categories)
+        self.assertIn("repos/random.zip", {finding.path for finding in findings})
+
+    def test_archive_under_canonical_packages_is_ignored(self) -> None:
+        root = self._temp_root()
+        (root / "repos" / "repo-backups").mkdir(parents=True, exist_ok=True)
+        (root / "repos" / "Verta-Core.zip").write_text("archive", encoding="utf-8")
+        package_zip = root / "packages" / "snapshots" / "example.zip"
+        package_zip.parent.mkdir(parents=True, exist_ok=True)
+        package_zip.write_text("archive", encoding="utf-8")
+        self._write_archive_registry(root, self._current_archive_entries())
+
+        findings = validate_archive_registry(root / "stack.yaml", self._config())
+
+        self.assertEqual([], findings)
+
+    def test_duplicate_registry_paths_fail(self) -> None:
+        root = self._temp_root()
+        (root / "repos" / "repo-backups").mkdir(parents=True, exist_ok=True)
+        (root / "repos" / "Verta-Core.zip").write_text("archive", encoding="utf-8")
+        entries = self._current_archive_entries()
+        duplicate = dict(entries[0])
+        duplicate["surface_id"] = "duplicate-entry"
+        entries.append(duplicate)
+        self._write_archive_registry(root, entries)
+
+        findings = validate_archive_registry(root / "stack.yaml", self._config())
+
+        self.assertIn("archive-registry-invalid", {finding.category for finding in findings})
+        self.assertTrue(any("duplicated" in finding.message for finding in findings))
+
+    def test_release_eligible_raw_archive_fails(self) -> None:
+        root = self._temp_root()
+        (root / "repos" / "repo-backups").mkdir(parents=True, exist_ok=True)
+        (root / "repos" / "Verta-Core.zip").write_text("archive", encoding="utf-8")
+        entries = self._current_archive_entries()
+        entries[0] = dict(entries[0])
+        entries[0]["release_eligible"] = True
+        self._write_archive_registry(root, entries)
+
+        findings = validate_archive_registry(root / "stack.yaml", self._config())
+
+        self.assertIn("archive-registry-invalid", {finding.category for finding in findings})
+        self.assertTrue(any("must not be release eligible" in finding.message for finding in findings))
+
+    def test_present_false_reference_only_archives_are_allowed(self) -> None:
+        root = self._temp_root()
+        (root / "repos" / "repo-backups").mkdir(parents=True, exist_ok=True)
+        (root / "repos" / "Verta-Core.zip").write_text("archive", encoding="utf-8")
+        self._write_archive_registry(root, self._current_archive_entries())
+
+        findings = validate_archive_registry(root / "stack.yaml", self._config())
+
+        self.assertFalse(any(finding.path.endswith("repos/dev.zip") for finding in findings))
+        self.assertFalse(any("CORTEX-AND-PLAYBOOK-20260408.zip" in finding.path for finding in findings))
+
+    def test_mazer_legacy_archive_is_scope_exempt(self) -> None:
+        root = self._temp_root()
+        (root / "repos" / "repo-backups").mkdir(parents=True, exist_ok=True)
+        (root / "repos" / "Verta-Core.zip").write_text("archive", encoding="utf-8")
+        (root / "repos" / "mazer-legacy-unreal.zip").write_text("archive", encoding="utf-8")
+        self._write_archive_registry(root, self._current_archive_entries())
+
+        findings = validate_archive_registry(root / "stack.yaml", self._config())
+
+        self.assertFalse(any(finding.path == "repos/mazer-legacy-unreal.zip" for finding in findings))
+
+    def test_documented_media_and_legacy_zip_exemptions_are_allowed(self) -> None:
+        root = self._temp_root()
+        (root / "repos" / "repo-backups").mkdir(parents=True, exist_ok=True)
+        (root / "repos" / "Verta-Core.zip").write_text("archive", encoding="utf-8")
+        (root / "repos" / "Realm Blade.zip").write_text("archive", encoding="utf-8")
+        (root / "repos" / "Hard Pill To Swallow.zip").write_text("archive", encoding="utf-8")
+        (root / "repos" / "playbook-old.zip").write_text("archive", encoding="utf-8")
+        self._write_archive_registry(root, self._current_archive_entries())
+
+        findings = validate_archive_registry(root / "stack.yaml", self._config())
+
+        self.assertFalse(any(finding.path == "repos/Realm Blade.zip" for finding in findings))
+        self.assertFalse(any(finding.path == "repos/Hard Pill To Swallow.zip" for finding in findings))
+        self.assertFalse(any(finding.path == "repos/playbook-old.zip" for finding in findings))
+
+    def test_quarantined_archive_cannot_point_to_owner_repo_truth(self) -> None:
+        root = self._temp_root()
+        (root / "repos" / "repo-backups").mkdir(parents=True, exist_ok=True)
+        (root / "repos" / "Verta-Core.zip").write_text("archive", encoding="utf-8")
+        entries = self._current_archive_entries()
+        entries[3] = dict(entries[3])
+        entries[3]["canonical_destination"] = "repos/fawxzzy-playbook"
+        self._write_archive_registry(root, entries)
+
+        findings = validate_archive_registry(root / "stack.yaml", self._config())
+
+        self.assertIn("archive-registry-invalid", {finding.category for finding in findings})
+        self.assertTrue(any("must not point to owner-repo truth" in finding.message for finding in findings))
 
 
 if __name__ == "__main__":
