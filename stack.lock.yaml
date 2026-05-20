@@ -86,8 +86,8 @@ components:
     status: "active"
     remote: "https://github.com/fawxzzy/ATLAS.git"
     ref_type: "branch"
-    ref: "codex/archive-normalization-closeout"
-    commit: "94c29b163694b496e11cf4494cc915696c1ec2af"
+    ref: "main"
+    commit: "9535cd7d4430e3ff387fbc805525af9f7423951b"
     dirty: true
     trust_class: "trusted"
     release_eligible: false
@@ -222,4 +222,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:e2cde51bd7215a95ef1f9675f7c145984b52a08dfaa56ae1e09a95546a161f48"
+lock_digest: "sha256:26485514f3ecdd5ed9637c0d095bf8477c2c0f8c994b95970ad7dae0bd651235"
