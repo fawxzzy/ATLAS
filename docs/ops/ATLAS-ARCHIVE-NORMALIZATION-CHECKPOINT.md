@@ -8,6 +8,7 @@ Current merged state:
 
 - archive registry added
 - archive admission runbook added
+- archive registry enforcement added to ATLAS root validation
 - `stack.yaml` and `stack.lock.yaml` normalized for archive governance
 - `repos/dev.zip` remains provenance-only and `present: false`
 - `repos/CORTEX-AND-PLAYBOOK-20260408.zip` remains provenance-only and `present: false`
@@ -47,6 +48,7 @@ Governed proof surfaces:
 
 - `docs/registry/ATLAS-ARCHIVE-REGISTRY.json`
 - `docs/ops/ATLAS-ARCHIVE-ADMISSION-RUNBOOK.md`
+- `ops/validation/validate_stack.py`
 - `docs/architecture/PATH-POLICY.md`
 - `docs/ops/STACK-OPERATIONS.md`
 - `runtime/receipts/validation/stack-validation.latest.md`
@@ -68,6 +70,8 @@ Closeout documentation may summarize archive governance, but it must not create 
 ## Pattern
 
 Archive normalization can advance through manifest, registry, runbook, and lock projection hardening without opening raw archive contents.
+
+Known non-mazer archive governance is complete only when future archive-like surfaces under `repos/` are either registered, declared by stack archive or excluded-surface policy, or routed into canonical `packages/snapshots`, `packages/bundles`, or `packages/patches` destinations.
 
 ## Failure Mode
 

@@ -86,8 +86,8 @@ components:
     status: "active"
     remote: "https://github.com/fawxzzy/ATLAS.git"
     ref_type: "branch"
-    ref: "main"
-    commit: "9535cd7d4430e3ff387fbc805525af9f7423951b"
+    ref: "codex/validate-archive-registry-surfaces"
+    commit: "867809f3851d3568f4e1b34a22711e87f8248d13"
     dirty: true
     trust_class: "trusted"
     release_eligible: false
@@ -222,4 +222,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:26485514f3ecdd5ed9637c0d095bf8477c2c0f8c994b95970ad7dae0bd651235"
+lock_digest: "sha256:90125d89dff1e05a765f763cc1c7715f8b347874bd29454bcb585bac5e3c4eea"
