@@ -1,6 +1,6 @@
 schema_version: "atlas.stack.lock.v1"
 stack_manifest_path: "stack.yaml"
-stack_manifest_digest: "sha256:d1d8aec47eb5809b9da00ad8e9f6efac1e286e9d56f5cb7f33e62d3008d9b57b"
+stack_manifest_digest: "sha256:36c162a4774e63fd66e7c4e140ced0383e4f10b3dce145273b3cc1a0266268eb"
 component_count: 10
 components:
   _stack:
@@ -86,9 +86,9 @@ components:
     status: "active"
     remote: "https://github.com/fawxzzy/ATLAS.git"
     ref_type: "branch"
-    ref: "main"
-    commit: "04d1a4195213725088365f553ebd800aea7f850a"
-    dirty: false
+    ref: "codex/foundation-atlas-admission-alignment"
+    commit: "0619b118ffde848ec1aac5f3042f53de30295860"
+    dirty: true
     trust_class: "trusted"
     release_eligible: false
   stream:
@@ -168,12 +168,6 @@ excluded_surfaces:
     trust_class: "untrusted"
     release_eligible: false
     reason: "Fitness recovered checkout remains a non-canonical recovery lane outside the governed child-repo release surface."
-  foundation_adjacent_checkout:
-    path: "repos/fawxzzy-foundation"
-    present: true
-    trust_class: "adjacent"
-    release_eligible: false
-    reason: "Local Foundation checkout is explicitly deferred from the governed topology until an admission decision updates manifest, lock, inventory, and owner-usage surfaces together."
   lifeline_operator_evidence_worktree:
     path: "repos/fawxzzy-lifeline-operator-evidence"
     present: true
@@ -222,4 +216,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:85f450f6e78be78bb22df11dddfb0c478a40b044957a722d36b0e4cf7340bea8"
+lock_digest: "sha256:6fe4b2fe938256b1b85c0993ce59db54501c53cf73192a01dc381aadb4582fe6"
