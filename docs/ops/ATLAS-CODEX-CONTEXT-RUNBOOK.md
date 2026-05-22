@@ -33,6 +33,29 @@ Every root-launched Codex task should bootstrap in this order:
 
 The context-pack builder emits that order explicitly in `bootstrap_contract.ordered_reads`.
 
+## Branch And Worktree Discipline
+
+Every root-launched Codex lane must declare its execution surface before work starts.
+
+Rules:
+
+- no lane starts until the owner repo is explicit
+- no lane starts until the target branch or worktree is explicit
+- repo-specific lanes should use clean worktrees
+- ATLAS root branches are for stack-root docs, projection, policy, audit, and coordination work only
+
+Pattern:
+
+1. identify whether the lane changes root projection truth or owner-repo truth
+2. name the owner repo or root surface
+3. name the target branch or worktree
+4. open the minimum relevant context for that declared surface
+5. start implementation only inside that declared surface
+
+Failure Mode:
+
+- starting multiple root-launched chats without an explicit owner repo and target worktree lets unrelated work inherit the active branch and creates mixed replay branches that are difficult to classify or normalize later
+
 ## Named Session Bootstrap Contract
 
 Atlas may also expose named session modes for reusable Codex operating patterns.

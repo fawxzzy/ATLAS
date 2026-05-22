@@ -218,6 +218,24 @@
 ## 2026-05-11 - QA release governance
 
 - Rule: Repo lint failures are repo-owned blockers; root QA should surface them, not bypass them.
+
+## 2026-05-22 - Branch discipline for root-launched Codex lanes
+
+- Rule: no Codex lane starts until the owner repo and the target branch or worktree are explicit.
+- Rule: use clean worktrees for repo-specific lanes.
+- Rule: use ATLAS root branches only for stack-root docs, projection, standards, audits, and cross-repo coordination slices.
+- Pattern: root lane decides owner repo -> owner repo or root worktree is named -> target branch is named -> work starts only inside that declared surface.
+- Pattern: if a lane is repo-specific, prefer an isolated worktree over reusing whatever branch was already active in another chat.
+- Failure Mode: starting multiple Codex chats from the ATLAS root without an explicit owner repo and target branch lets unrelated work inherit the active branch and creates mixed replay branches that are hard to classify later.
+
+## 2026-05-22 - AI long-run batch orchestration must stay bounded and supervisor-led
+
+- Rule: long-run AI batching is a job-oriented orchestration problem, not an invitation to keep one giant interactive Codex session alive indefinitely.
+- Rule: unattended or multi-hour batching should use bounded jobs, isolated worktrees, durable checkpoints, and explicit verification gates.
+- Rule: root doctrine may define the lane and contracts first, but `_stack` should own execution-oriented orchestration contracts and Playbook should own reusable verification and workflow doctrine.
+- Pattern: research -> root doctrine -> lane or job contract -> supervised single-lane pilot -> only then wider unattended batching.
+- Pattern: each batch job should declare owner repo, target worktree, allowed write scope, checkpoint surface, and exit verification before execution begins.
+- Failure Mode: treating one large interactive ATLAS-root session as the default batching model recreates branch contamination, weakens verification boundaries, and hides partial failures until the lane is too large to review safely.
 - Rule: Manual attestation may satisfy physical/manual review, but it must never be labeled as automated provider proof.
 - Rule: Promotion wording must match the evidence profile that actually passed.
 - Rule: Fitness must remain non-release-ready until real manual or provider-backed physical evidence exists.
@@ -239,6 +257,35 @@
 - Failure Mode: Windows `.pyc` cache write failures can create false verification noise unless cache hygiene is part of the verification path.
 - Failure Mode: Treating `warning_count=559` as harmless forever turns governance debt into background noise.
 - Failure Mode: Using one generic promoted label hides whether a repo passed package, docs, web visual, manual physical, or provider physical evidence.
+
+## 2026-05-22 - Stack lock regeneration must wait for root normalization
+
+- Rule: do not repair or regenerate `stack.lock.yaml` while the ATLAS root is behind `origin/main` and preserved recovery residue is still intentionally present.
+- Rule: lock refresh belongs after preservation classification and root reconciliation, not during transitional branch-normalization posture.
+- Pattern: preserve replay evidence -> classify archive or recovery or package ownership -> reconcile root with `origin/main` -> regenerate `stack.lock.yaml` -> rerun validation.
+- Failure Mode: refreshing the lock during a dirty or transitional root phase bakes temporary branch, residue, or preservation state into the pinned stack contract.
+
+## 2026-05-22 - Strategic convergence lanes must be explicit near the front of the program
+
+- Rule: strategic lanes are part of the convergence program, not separate random work.
+- Rule: Vision Consolidation belongs near the front so later cleanup and convergence work optimize toward the real endgame instead of local hygiene only.
+- Rule: long-run doctrine lanes should be recorded in marker docs before implementation or cleanup widens.
+- Pattern: Vision Consolidation -> Inventory & Truth Map -> Branch & Worktree Normalization -> Workflow Convergence -> Dependency Untangling -> later adoption and publication lanes.
+- Pattern: every strategic lane should answer the same five questions:
+  - why does this exist
+  - what is the endgame
+  - what does done look like
+  - how does it align with ATLAS
+  - what should we stop doing
+- Vision Consolidation: defines the endgame, purpose, done-state, and ATLAS alignment for every lane.
+- Cortex Integration into Playbook: tracks how Cortex planning or admission work becomes Playbook-readable doctrine, contracts, patterns, or validation logic without moving runtime ownership too early.
+- Knowledge Capture: tracks whether key reasoning, rules, patterns, failures, and decisions are recorded in durable docs instead of trapped in chat.
+- Feedback Loop Readiness: tracks whether each lane can receive, process, and route user or system feedback into ATLAS, Playbook, Discord, or repo workflows.
+- Truth Map Book: consolidates documentation, roadmaps, notes, systems, concepts, and lane maps into one definitive cross-referenced guide.
+- Dependency Untangling: tracks hidden coupling between lanes and reduces it so future Fitness, Discord, and ATLAS work can run in parallel safely.
+- Knowledge Transfer Readiness: tracks whether a future teammate, Codex worker, or Cortex agent could continue the work from docs and receipts.
+- Future Self Alignment: periodic review that today’s work still serves the long-term vision.
+- Sandbox Simulation Readiness: ensures each lane has safe places to test bold ideas without risking core systems.
 
 ## 2026-05-15 - Discord verification, member numbers, and future bot doctrine
 
@@ -288,3 +335,18 @@
 - Rule: migration ledger repair requires schema evidence first.
 - Pattern: verify production effects -> repair exact versions -> validate -> document.
 - Failure Mode: blind migration repair makes the ledger claim schema history that production does not actually have.
+
+## 2026-05-22 - Marker consolidation should reduce noise without losing concepts
+
+- Rule: every future report ends with the full marker table, including future lanes at `0%`.
+- Rule: marker names should stay consolidated when multiple names describe the same endgame.
+- Pattern: keep historical completion markers separate, but collapse overlapping future-program markers into one stronger dashboard line.
+- Unified Workflow Convergence: combines overall integration, workflow convergence, Discord workflow unification, QA/LLEL workflow convergence, Fitness workflow integration, and `_stack` integration.
+- Truth Map & ATLAS Book: combines documentation connection web, Truth Map Book, and ATLAS Book.
+- Playbook Everywhere + Cortex Interface: combines Playbook Everywhere Adoption with Cortex Integration into Playbook.
+- Knowledge Capture & Transfer: combines knowledge capture and knowledge transfer readiness.
+- Vision & Future Alignment: combines Vision Consolidation and Future Self Alignment.
+- Full Stack Re-sync, Clean & Closeout: combines broad re-sync/clean work with final cleanup closeout.
+- Discord Workflow & Documentation Publishing: combines Discord workflow consolidation with documentation channel publishing.
+- Post-Convergence Lane Split Readiness: combines split preparation with future Fitness, Discord, and ATLAS lane readiness.
+- Failure Mode: marker sprawl makes the dashboard noisy enough that operators stop trusting it even when the underlying ideas are correct.

@@ -1,0 +1,95 @@
+# Stack Lane 0 Truth Map
+
+Date: 2026-05-22
+Status: Active planning surface
+Mode: Docs only
+
+## Purpose
+
+Record the lane map and consolidated marker definitions that the convergence program should use before cleanup and implementation continue.
+
+## Core Reading
+
+The convergence program is no longer just:
+
+- inventory
+- converge
+- clean
+
+It now also includes explicit strategic lanes that make the operating model durable enough to survive handoff, batching, and future lane splits.
+
+## Strategic Lane Map
+
+| Lane | Why it exists | Endgame |
+| --- | --- | --- |
+| Vision & Future Alignment | prevent local optimization against the wrong target and periodically check long-term fit | every lane has a stated purpose, done-state, ATLAS alignment, and future-self review |
+| Inventory & Truth Map | identify current truth before changes widen | one reliable map of owner truth, projections, duplicates, and unknowns |
+| Branch & Worktree Normalization | preserve and classify active branch state before cleanup | no meaningful work is lost while returning to intentional baselines |
+| Unified Workflow Convergence | reduce duplicated release and operating paths across stack and repos | one coherent operating model across the whole system |
+| Dependency Untangling | reduce hidden coupling between lanes | future Fitness, Discord, and ATLAS lanes can move in parallel safely |
+| Playbook Everywhere + Cortex Interface | align doctrine, verification surfaces, and Cortex-facing interpretation under one governance layer | Playbook becomes the readable interface for shared workflow and Cortex contract logic |
+| Knowledge Capture & Transfer | stop losing key reasoning in chat and make future continuation possible | rules, patterns, failures, decisions, and handoff context are durable |
+| Feedback Loop Readiness | route feedback back into the right system | user and system feedback are captured and assigned cleanly |
+| Sandbox Simulation Readiness | test bold ideas safely | experimental work happens in protected lanes, not on core surfaces |
+| AI Long-Run Batch Orchestration | define the future supervised batching architecture clearly before implementation | bounded jobs, isolated worktrees, checkpoints, and verification gates become the approved long-run model |
+| Truth Map & ATLAS Book | consolidate the cross-referenced guide | one definitive guide to systems, lanes, concepts, and maps |
+| Discord OS Extraction Review | classify the Discord OS surface before broader consolidation or publication | Discord system doctrine is understood and routed cleanly |
+| Discord Workflow & Documentation Publishing | converge Discord workflow and publish the right durable summaries | documentation reaches the intended community surface cleanly after workflow consolidation |
+| Full Stack Re-sync, Clean & Closeout | close the normalization program honestly from re-sync through closeout | root and repos return to intentional, auditable baselines |
+| Post-Convergence Lane Split Readiness | measure readiness to split the system back into product lanes | Fitness, Discord, and ATLAS can run as distinct lanes safely after convergence |
+
+## Lane Questions
+
+Every lane should answer:
+
+- why does this exist
+- what is the endgame
+- what does done look like
+- how does it align with ATLAS
+- what should we stop doing
+
+## Program Interpretation
+
+- Vision & Future Alignment belongs near the front because later cleanup without a stable endgame can optimize the wrong system.
+- Branch & Worktree Normalization belongs before broad re-sync because the current root still contains intentional preservation residue.
+- AI Long-Run Batch Orchestration belongs as doctrine and planning now, with later implementation routed through `_stack`, Playbook, and explicit lane contracts.
+- Knowledge Capture & Transfer is first-class because durable operations require reasoning to survive beyond one chat session.
+- The reduced marker model should be used going forward so progress reporting stays durable and readable.
+
+## Lockfile Deferral
+
+Lane 0 must preserve the current lockfile deferral doctrine:
+
+- do not regenerate `stack.lock.yaml` yet
+- do not treat current lock drift as the normalization target
+- regenerate the lock only after preservation classification and root reconciliation
+
+## Marker Table
+
+- Verta Absorption: `99%`
+- Archive Normalization: `100%`
+- ATLAS Core Phase: `92%`
+- `_stack` Readiness: `40%`
+- Foundation Alignment: `100%`
+- Lifeline Readiness: `97%`
+- Playbook Maturity: `92%`
+- Cortex Readiness: `35%`
+- Fitness Source-of-Truth Reset: `100%`
+- Fitness QA/LLEL Workflow: `96%`
+- Fitness Branch Cleanup / Main-Only Governance: `96%`
+- Fitness Recovery Preservation: `80%`
+- Branch & Worktree Normalization: `50%`
+- Unified Workflow Convergence: `0%`
+- Inventory & Truth Map: `15%`
+- Full Stack Re-sync, Clean & Closeout: `22% paused`
+- Vision & Future Alignment: `0%`
+- Dependency Untangling: `0%`
+- Playbook Everywhere + Cortex Interface: `0%`
+- Knowledge Capture & Transfer: `10%`
+- Feedback Loop Readiness: `0%`
+- Sandbox Simulation Readiness: `0%`
+- AI Long-Run Batch Orchestration: `20%`
+- Truth Map & ATLAS Book: `0%`
+- Discord OS Extraction Review: `0%`
+- Discord Workflow & Documentation Publishing: `0%`
+- Post-Convergence Lane Split Readiness: `0%`

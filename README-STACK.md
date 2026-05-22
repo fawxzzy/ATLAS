@@ -76,6 +76,8 @@ Current operating call:
 - Fitness owner truth now includes the first growth pack, the pilot-readiness threshold pack, and measured proof for one shadow-only placement in the Wave 2 growth lane
 - the pilot-readiness gate currently evaluates to `stay_shadow` in Fitness owner truth, so no pilot-live rollout is authorized at root
 - the next owner-repo work is evidence-surface completion in `repos/fawxzzy-fitness` so the frozen pilot thresholds can be measured from repo-owned receipts
+- Branch & Worktree Normalization is now an explicit active lane; preserved replay branches should be treated as preserved but not normalized until their contents are classified and packaged
+- AI Long-Run Batch Orchestration is now an explicit doctrine lane; long-run batching should converge toward bounded jobs, isolated worktrees, durable checkpoints, and verification gates rather than one giant root session
 - Fitness Discord community truth now includes live feedback export/sync, update-post curation, emoji bootstrap, Fawx Security reversible moderation, and server inventory/noise-audit tooling
 - the canonical feedback workflow is now locked as:
   - Feedback forum card
@@ -209,12 +211,13 @@ Consumer repos should receive generated or synced copies only. Do not hand-manag
 ## Working Rules
 
 1. Start at `C:\ATLAS` only for stack-wide work, audits, standards, packaging, or cross-repo routing.
-2. Do single-repo implementation work inside the target repo, not from the stack root.
-3. Do not commit machine-specific absolute paths in stack docs or config.
-4. Do not store logs, screenshots, or runtime state in repo roots when a stack bucket exists.
-5. Do not let default exports include `secrets/`, `.env*`, `runtime/`, or `tmp/`.
-6. Keep live implementation truth in the owning repo; ATLAS docs should stay lineage- and boundary-oriented.
-7. For recovered machine material, catalog first and delete originals only after verified-safe classification.
+2. No Codex lane starts until the owner repo and target branch or worktree are explicit.
+3. Do single-repo implementation work inside the target repo or its clean worktree, not from the stack root.
+4. Do not commit machine-specific absolute paths in stack docs or config.
+5. Do not store logs, screenshots, or runtime state in repo roots when a stack bucket exists.
+6. Do not let default exports include `secrets/`, `.env*`, `runtime/`, or `tmp/`.
+7. Keep live implementation truth in the owning repo; ATLAS docs should stay lineage- and boundary-oriented.
+8. For recovered machine material, catalog first and delete originals only after verified-safe classification.
 
 ## Packaging and Exports
 
