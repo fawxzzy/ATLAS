@@ -10,6 +10,8 @@ This report classifies every active ATLAS-root worktree after Branch Disposal Pa
 
 The immediate problem is no longer unknown branch contents. The remaining branch-deletion blockers are active worktree bindings, detached checkpoint worktrees, and a smaller set of dirty or broken worktree states that still need manual review.
 
+Execution of the first removal pass is recorded in `docs/ops/WORKTREE-DISPOSAL-RECEIPT-2026-05-22.md`.
+
 ## Current Root Posture
 
 - root branch: `main`

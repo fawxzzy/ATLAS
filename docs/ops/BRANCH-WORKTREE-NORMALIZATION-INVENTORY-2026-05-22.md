@@ -110,6 +110,7 @@ Routing output derived from those artifacts:
 - `docs/ops/BRANCH-DISPOSAL-INVENTORY-2026-05-22.md`
 - `docs/ops/BRANCH-DISPOSAL-RECEIPT-2026-05-22.md`
 - `docs/ops/WORKTREE-DISPOSAL-INVENTORY-2026-05-22.md`
+- `docs/ops/WORKTREE-DISPOSAL-RECEIPT-2026-05-22.md`
 - `docs/recovery/ARCHIVE_RETENTION_RECEIPT_2026-05-22.md`
 - `docs/recovery/REPLAY_STEPS_CARDIO_PRESERVATION_PACKAGE_2026-05-22.md`
 - `docs/recovery/FITNESS_PROGRESSION_PLAYBOOK_SPILLOVER_PACKAGE_2026-05-22.md`
@@ -462,7 +463,7 @@ Percentages below use the consolidated marker model going forward.
 - Fitness QA/LLEL Workflow: `96%`
 - Fitness Branch Cleanup / Main-Only Governance: `96%`
 - Fitness Recovery Preservation: `80%`
-- Branch & Worktree Normalization: `85%`
+- Branch & Worktree Normalization: `92%`
 - Unified Workflow Convergence: `0%`
 - Inventory & Truth Map: `15%`
 - Full Stack Re-sync, Clean & Closeout: `22% paused`
