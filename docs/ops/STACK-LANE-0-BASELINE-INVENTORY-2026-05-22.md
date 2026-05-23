@@ -23,25 +23,36 @@ Do not:
 
 The strategic and operational order is now:
 
-1. Vision & Future Alignment
-2. Inventory & Truth Map
-3. Branch & Worktree Normalization
-4. Unified Workflow Convergence
-5. Dependency Untangling
-6. Playbook Everywhere + Cortex Interface
-7. Knowledge Capture & Transfer
-8. Feedback Loop Readiness
-9. Sandbox Simulation Readiness
-10. Truth Map & ATLAS Book
-11. Discord OS Extraction Review
-12. Discord Workflow & Documentation Publishing
+1. Canonical Repo Restoration
+2. Tmp Dependency Elimination
+3. Duplicate Surface Decommission
+4. Branch & Worktree Normalization
+5. Brand Asset Canonicalization
+6. Preview Cache & Surface Consistency
+7. Operator Secret Path Hygiene
+8. Manual Deploy Exception Burn-Down
+9. Discord Workflow, Publication & Docs Reliability
+10. Unified Workflow Convergence
+11. Playbook Everywhere + Cortex Interface
+12. Truth Map & ATLAS Book
 13. Full Stack Re-sync, Clean & Closeout
 14. Post-Convergence Lane Split Readiness
+
+Cross-cutting doctrine lane:
+
+- AI Long-Run Batch Orchestration remains active as a planning and contract lane, but it should not outrank canonical repo and `tmp/` restoration work.
 
 ## Consolidated Marker Definitions
 
 - Vision & Future Alignment: defines the endgame, purpose, done-state, ATLAS alignment, and future-self review for the overall program.
+- Canonical Repo Restoration: tracks whether canonical repo roots exist again under `repos/`, especially Fitness, and whether production workflows truly point there.
+- Tmp Dependency Elimination: tracks removal of production-critical dependence on `tmp/` worktrees, deploy clones, and preservation checkouts.
+- Duplicate Surface Decommission: tracks duplicate or orphaned source surfaces until each is removed, archived, retained as evidence, or routed into a canonical repo.
 - Branch & Worktree Normalization: preserves and classifies branch, worktree, stash, and dirty-checkout state before cleanup or normalization.
+- Brand Asset Canonicalization: tracks whether ATLAS owns the canonical branding source and downstream apps consume reproducible generated outputs.
+- Preview Cache & Surface Consistency: tracks whether deployed icon, preview, PWA, and share surfaces match the canonical branding source and can be verified cleanly.
+- Operator Secret Path Hygiene: tracks whether secret-backed operator flows avoid spilling env or secret residue into repo roots.
+- Manual Deploy Exception Burn-Down: tracks the remaining risk from direct deploy behavior outside `_stack`.
 - Unified Workflow Convergence: makes disconnected workflows operate as one system across stack and owner repos.
 - Dependency Untangling: tracks hidden coupling between lanes and reduces it so later Fitness, Discord, and ATLAS work can run in parallel safely.
 - Playbook Everywhere + Cortex Interface: tracks how Playbook becomes the visible governance layer everywhere it belongs, including Cortex-facing doctrine, contracts, patterns, and validation logic.
@@ -49,7 +60,7 @@ The strategic and operational order is now:
 - Feedback Loop Readiness: tracks whether each lane can receive, process, and route user or system feedback into ATLAS, Playbook, Discord, or repo workflows.
 - Sandbox Simulation Readiness: ensures each lane has safe places to test bold ideas without risking core systems.
 - Truth Map & ATLAS Book: consolidates documentation, roadmaps, notes, systems, concepts, and lane maps into one definitive cross-referenced guide.
-- Discord Workflow & Documentation Publishing: converges Discord workflow first, then publishes the right user-facing and operator-facing docs.
+- Discord Workflow, Publication & Docs Reliability: converges Discord workflow first, stabilizes the public posting path and fallback path, then publishes the right user-facing and operator-facing docs.
 - Full Stack Re-sync, Clean & Closeout: covers the whole cleanup lifecycle from normalization through verified closeout.
 - Post-Convergence Lane Split Readiness: measures whether the program is ready to split safely back into Fitness, Discord, and ATLAS lanes.
 
@@ -69,6 +80,7 @@ Every lane should answer:
 - Lane 0 is the place where the convergence marker system becomes explicit enough to guide later cleanup.
 - New strategic lanes should be recorded here before cleanup widens, so future work is measured against the durable operating model instead of short-term hygiene only.
 - The reduced marker model keeps every idea but removes overlapping dashboard lines.
+- The next start point is explicit: Canonical Repo Restoration plus Tmp Dependency Elimination before broader cleanup or workflow convergence.
 
 ## Marker Table
 
@@ -84,7 +96,14 @@ Every lane should answer:
 - Fitness QA/LLEL Workflow: `96%`
 - Fitness Branch Cleanup / Main-Only Governance: `96%`
 - Fitness Recovery Preservation: `80%`
-- Branch & Worktree Normalization: `50%`
+- Canonical Repo Restoration: `0%`
+- Tmp Dependency Elimination: `0%`
+- Duplicate Surface Decommission: `0%`
+- Branch & Worktree Normalization: `92%`
+- Brand Asset Canonicalization: `0%`
+- Preview Cache & Surface Consistency: `0%`
+- Operator Secret Path Hygiene: `0%`
+- Manual Deploy Exception Burn-Down: `0%`
 - Unified Workflow Convergence: `0%`
 - Inventory & Truth Map: `15%`
 - Full Stack Re-sync, Clean & Closeout: `22% paused`
@@ -97,5 +116,5 @@ Every lane should answer:
 - AI Long-Run Batch Orchestration: `20%`
 - Truth Map & ATLAS Book: `0%`
 - Discord OS Extraction Review: `0%`
-- Discord Workflow & Documentation Publishing: `0%`
+- Discord Workflow, Publication & Docs Reliability: `0%`
 - Post-Convergence Lane Split Readiness: `0%`

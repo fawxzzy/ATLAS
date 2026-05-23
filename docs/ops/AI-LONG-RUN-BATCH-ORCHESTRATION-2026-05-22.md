@@ -132,19 +132,22 @@ This lane remains doctrine and planning only until root normalization is further
 
 This lane currently sits in the program as:
 
-1. Vision & Future Alignment
-2. Inventory & Truth Map
-3. Branch & Worktree Normalization
-4. Unified Workflow Convergence
-5. Dependency Untangling
-6. Playbook Everywhere + Cortex Interface
-7. Knowledge Capture & Transfer
-10. Feedback Loop Readiness
-11. Sandbox Simulation Readiness
+1. Canonical Repo Restoration
+2. Tmp Dependency Elimination
+3. Duplicate Surface Decommission
+4. Branch & Worktree Normalization
+5. Brand Asset Canonicalization
+6. Preview Cache & Surface Consistency
+7. Operator Secret Path Hygiene
+8. Manual Deploy Exception Burn-Down
+9. Discord Workflow, Publication & Docs Reliability
+10. Unified Workflow Convergence
+11. Playbook Everywhere + Cortex Interface
 12. Truth Map & ATLAS Book
-13. Discord Documentation Channel Publishing
-14. Full Stack Re-sync, Clean & Closeout
-15. Post-Convergence Lane Split Readiness
+13. Full Stack Re-sync, Clean & Closeout
+14. Post-Convergence Lane Split Readiness
+
+This AI lane remains cross-cutting doctrine rather than a reason to skip the earlier canonical repo and `tmp/` restoration work.
 
 ## Dependency On Branch Discipline
 
@@ -171,7 +174,14 @@ Long-run batching should not start until:
 - Fitness QA/LLEL Workflow: `96%`
 - Fitness Branch Cleanup / Main-Only Governance: `96%`
 - Fitness Recovery Preservation: `80%`
-- Branch & Worktree Normalization: `50%`
+- Canonical Repo Restoration: `0%`
+- Tmp Dependency Elimination: `0%`
+- Duplicate Surface Decommission: `0%`
+- Branch & Worktree Normalization: `92%`
+- Brand Asset Canonicalization: `0%`
+- Preview Cache & Surface Consistency: `0%`
+- Operator Secret Path Hygiene: `0%`
+- Manual Deploy Exception Burn-Down: `0%`
 - Unified Workflow Convergence: `0%`
 - Inventory & Truth Map: `15%`
 - Full Stack Re-sync, Clean & Closeout: `22% paused`
@@ -184,5 +194,5 @@ Long-run batching should not start until:
 - AI Long-Run Batch Orchestration: `20%`
 - Truth Map & ATLAS Book: `0%`
 - Discord OS Extraction Review: `0%`
-- Discord Workflow & Documentation Publishing: `0%`
+- Discord Workflow, Publication & Docs Reliability: `0%`
 - Post-Convergence Lane Split Readiness: `0%`

@@ -24,7 +24,14 @@ It now also includes explicit strategic lanes that make the operating model dura
 | --- | --- | --- |
 | Vision & Future Alignment | prevent local optimization against the wrong target and periodically check long-term fit | every lane has a stated purpose, done-state, ATLAS alignment, and future-self review |
 | Inventory & Truth Map | identify current truth before changes widen | one reliable map of owner truth, projections, duplicates, and unknowns |
+| Canonical Repo Restoration | restore canonical repo truth under `repos/` and remove ambiguity about the real production roots | production workflows point at the real canonical repos instead of temporary surfaces |
+| Tmp Dependency Elimination | remove production-critical dependence on `tmp/` worktrees and deploy clones | `tmp/` is no longer a hidden source-of-truth or deploy surface |
+| Duplicate Surface Decommission | classify and retire duplicate or orphaned source surfaces | no hidden parallel source roots remain outside canonical repos or documented evidence |
 | Branch & Worktree Normalization | preserve and classify active branch state before cleanup | no meaningful work is lost while returning to intentional baselines |
+| Brand Asset Canonicalization | make ATLAS the single governed branding source | app icons, OG images, favicons, launcher art, and Trove assets derive from one reproducible source |
+| Preview Cache & Surface Consistency | verify that deployed preview surfaces match the canonical branding source | icon and preview drift is either absent or classifiable as cache-only with a documented verification path |
+| Operator Secret Path Hygiene | keep secret-backed operator flows from polluting repo roots | temporary env pulls and secret-backed operations leave no ambiguous residue |
+| Manual Deploy Exception Burn-Down | remove direct deploy ambiguity outside `_stack` | deploy truth is singular, reproducible, and operator-readable |
 | Unified Workflow Convergence | reduce duplicated release and operating paths across stack and repos | one coherent operating model across the whole system |
 | Dependency Untangling | reduce hidden coupling between lanes | future Fitness, Discord, and ATLAS lanes can move in parallel safely |
 | Playbook Everywhere + Cortex Interface | align doctrine, verification surfaces, and Cortex-facing interpretation under one governance layer | Playbook becomes the readable interface for shared workflow and Cortex contract logic |
@@ -34,7 +41,7 @@ It now also includes explicit strategic lanes that make the operating model dura
 | AI Long-Run Batch Orchestration | define the future supervised batching architecture clearly before implementation | bounded jobs, isolated worktrees, checkpoints, and verification gates become the approved long-run model |
 | Truth Map & ATLAS Book | consolidate the cross-referenced guide | one definitive guide to systems, lanes, concepts, and maps |
 | Discord OS Extraction Review | classify the Discord OS surface before broader consolidation or publication | Discord system doctrine is understood and routed cleanly |
-| Discord Workflow & Documentation Publishing | converge Discord workflow and publish the right durable summaries | documentation reaches the intended community surface cleanly after workflow consolidation |
+| Discord Workflow, Publication & Docs Reliability | converge Discord workflow, stabilize `#updates` publication, and publish the right durable summaries | Discord workflow, public posting, fallback path, and docs publication become one stable operator surface |
 | Full Stack Re-sync, Clean & Closeout | close the normalization program honestly from re-sync through closeout | root and repos return to intentional, auditable baselines |
 | Post-Convergence Lane Split Readiness | measure readiness to split the system back into product lanes | Fitness, Discord, and ATLAS can run as distinct lanes safely after convergence |
 
@@ -51,6 +58,7 @@ Every lane should answer:
 ## Program Interpretation
 
 - Vision & Future Alignment belongs near the front because later cleanup without a stable endgame can optimize the wrong system.
+- Canonical Repo Restoration and Tmp Dependency Elimination now belong before broader convergence because the stack cannot safely converge workflows while production truth still depends on `tmp/` or missing canonical repo roots.
 - Branch & Worktree Normalization belongs before broad re-sync because the current root still contains intentional preservation residue.
 - AI Long-Run Batch Orchestration belongs as doctrine and planning now, with later implementation routed through `_stack`, Playbook, and explicit lane contracts.
 - Knowledge Capture & Transfer is first-class because durable operations require reasoning to survive beyond one chat session.
@@ -78,7 +86,14 @@ Lane 0 must preserve the current lockfile deferral doctrine:
 - Fitness QA/LLEL Workflow: `96%`
 - Fitness Branch Cleanup / Main-Only Governance: `96%`
 - Fitness Recovery Preservation: `80%`
-- Branch & Worktree Normalization: `50%`
+- Canonical Repo Restoration: `0%`
+- Tmp Dependency Elimination: `0%`
+- Duplicate Surface Decommission: `0%`
+- Branch & Worktree Normalization: `92%`
+- Brand Asset Canonicalization: `0%`
+- Preview Cache & Surface Consistency: `0%`
+- Operator Secret Path Hygiene: `0%`
+- Manual Deploy Exception Burn-Down: `0%`
 - Unified Workflow Convergence: `0%`
 - Inventory & Truth Map: `15%`
 - Full Stack Re-sync, Clean & Closeout: `22% paused`
@@ -91,5 +106,5 @@ Lane 0 must preserve the current lockfile deferral doctrine:
 - AI Long-Run Batch Orchestration: `20%`
 - Truth Map & ATLAS Book: `0%`
 - Discord OS Extraction Review: `0%`
-- Discord Workflow & Documentation Publishing: `0%`
+- Discord Workflow, Publication & Docs Reliability: `0%`
 - Post-Convergence Lane Split Readiness: `0%`

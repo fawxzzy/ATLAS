@@ -107,6 +107,7 @@ Routing output derived from those artifacts:
 
 - `docs/ops/BRANCH-WORKTREE-NORMALIZATION-ROUTING-2026-05-22.md`
 - `docs/ops/BRANCH-WORKTREE-ROOT-RECONCILIATION-PREFLIGHT-2026-05-22.md`
+- `docs/ops/BRANCH-WORKTREE-NORMALIZATION-CLOSEOUT-2026-05-23.md`
 - `docs/ops/BRANCH-DISPOSAL-INVENTORY-2026-05-22.md`
 - `docs/ops/BRANCH-DISPOSAL-RECEIPT-2026-05-22.md`
 - `docs/ops/WORKTREE-DISPOSAL-INVENTORY-2026-05-22.md`
@@ -463,7 +464,14 @@ Percentages below use the consolidated marker model going forward.
 - Fitness QA/LLEL Workflow: `96%`
 - Fitness Branch Cleanup / Main-Only Governance: `96%`
 - Fitness Recovery Preservation: `80%`
+- Canonical Repo Restoration: `0%`
+- Tmp Dependency Elimination: `0%`
+- Duplicate Surface Decommission: `0%`
 - Branch & Worktree Normalization: `92%`
+- Brand Asset Canonicalization: `0%`
+- Preview Cache & Surface Consistency: `0%`
+- Operator Secret Path Hygiene: `0%`
+- Manual Deploy Exception Burn-Down: `0%`
 - Unified Workflow Convergence: `0%`
 - Inventory & Truth Map: `15%`
 - Full Stack Re-sync, Clean & Closeout: `22% paused`
@@ -476,5 +484,5 @@ Percentages below use the consolidated marker model going forward.
 - AI Long-Run Batch Orchestration: `20%`
 - Truth Map & ATLAS Book: `0%`
 - Discord OS Extraction Review: `0%`
-- Discord Workflow & Documentation Publishing: `0%`
+- Discord Workflow, Publication & Docs Reliability: `0%`
 - Post-Convergence Lane Split Readiness: `0%`

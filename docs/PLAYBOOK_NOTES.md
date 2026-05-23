@@ -350,3 +350,18 @@
 - Discord Workflow & Documentation Publishing: combines Discord workflow consolidation with documentation channel publishing.
 - Post-Convergence Lane Split Readiness: combines split preparation with future Fitness, Discord, and ATLAS lane readiness.
 - Failure Mode: marker sprawl makes the dashboard noisy enough that operators stop trusting it even when the underlying ideas are correct.
+
+## 2026-05-23 - Canonical source and tmp dependency risks need first-class convergence markers
+
+- Rule: canonical repo truth must not drift into `tmp/`, deploy clones, or operator recovery worktrees.
+- Rule: duplicate source surfaces, branding sources, Discord publication reliability, secret hygiene, and manual deploy exceptions are convergence blockers, not side tasks.
+- Pattern: restore canonical repo roots first -> eliminate hidden `tmp/` dependency second -> decommission duplicate surfaces third -> only then widen cleanup and workflow convergence.
+- Canonical Repo Restoration: tracks whether canonical repo roots exist again under `repos/`, especially Fitness, and whether production workflows truly point there.
+- Duplicate Surface Decommission: tracks duplicate or orphaned source surfaces until each is removed, archived, retained as evidence, or routed into a canonical repo.
+- Tmp Dependency Elimination: tracks removal of production-critical dependence on `tmp/` worktrees, deploy clones, and preservation checkouts.
+- Brand Asset Canonicalization: tracks whether ATLAS owns the single canonical branding source and downstream apps consume reproducible generated outputs.
+- Preview Cache & Surface Consistency: tracks whether deployed icon, preview, PWA, and share surfaces match the canonical branding source and can be verified cleanly.
+- Operator Secret Path Hygiene: tracks whether secret-backed operator flows avoid spilling env or secret residue into repo roots.
+- Manual Deploy Exception Burn-Down: tracks the remaining risk from direct deploy behavior outside `_stack`.
+- Discord Workflow, Publication & Docs Reliability: combines Discord workflow reliability, `#updates` posting stability, fallback path clarity, and documentation-channel publication into one durable marker.
+- Failure Mode: if canonical repos, deploy truth, and `tmp/` dependency are not fixed before broader convergence, the stack keeps recreating the same wrong-repo, wrong-branch, wrong-deploy confusion.
