@@ -10,6 +10,8 @@ This receipt records the first reviewed branch disposal pass after root reconcil
 
 The pass followed the committed inventory at `docs/ops/BRANCH-DISPOSAL-INVENTORY-2026-05-22.md` and deleted only branches explicitly classified there as `safe delete candidate`.
 
+Follow-on worktree review is recorded in `docs/ops/WORKTREE-DISPOSAL-INVENTORY-2026-05-22.md`.
+
 ## Root Posture At Execution
 
 - current branch: `main`
