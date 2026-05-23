@@ -10,6 +10,8 @@ This receipt records the first reviewed worktree disposal pass after the committ
 
 The pass followed `docs/ops/WORKTREE-DISPOSAL-INVENTORY-2026-05-22.md` and removed only worktrees classified there as `safe to remove later`, plus one explicitly identified broken/prunable worktree registration.
 
+Follow-on retained-state classification is recorded in `docs/ops/BRANCH-WORKTREE-NORMALIZATION-CLOSEOUT-2026-05-23.md`.
+
 ## Root Posture At Execution
 
 - current branch: `main`
