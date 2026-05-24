@@ -32,7 +32,7 @@ components:
     remote: "https://github.com/fawxzzy/fawxzzy-fitness.git"
     ref_type: "branch"
     ref: "main"
-    commit: "de775e02ef4bee9a190689494890e43b7ce4a45f"
+    commit: "a89a807d1206f2a70905dcf6b3b32bbc6e650336"
     dirty: false
     trust_class: "trusted"
     release_eligible: true
