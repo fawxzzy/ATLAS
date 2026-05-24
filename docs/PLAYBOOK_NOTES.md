@@ -421,3 +421,13 @@
 - Manual Deploy Exception Burn-Down: tracks the remaining risk from direct deploy behavior outside `_stack`.
 - Discord Workflow, Publication & Docs Reliability: combines Discord workflow reliability, `#updates` posting stability, fallback path clarity, and documentation-channel publication into one durable marker.
 - Failure Mode: if canonical repos, deploy truth, and `tmp/` dependency are not fixed before broader convergence, the stack keeps recreating the same wrong-repo, wrong-branch, wrong-deploy confusion.
+
+## 2026-05-24 - Marker model should absorb Discord OS separation and data hygiene explicitly
+
+- Rule: when a cross-stack cleanup concern is really infrastructure ownership or data-governance work, it should get a durable marker instead of hiding inside a vague future lane.
+- Rule: stale Vercel project and deployment surfaces belong under existing deploy-authority and duplicate-surface lanes, not under a new one-off marker.
+- Pattern: reuse an existing marker when the work is fundamentally duplicate-surface or deploy-authority cleanup; add a new marker only when the concern has distinct ownership, sequencing, and done-state.
+- Discord OS Infrastructure Separation: supersedes the older Discord OS extraction-review framing and tracks separation of Discord OS code, Vercel, Supabase, env ownership, and shared-data contracts away from Fitness-hosted default coupling.
+- Fitness Supabase Profile/Data Hygiene: tracks inventory, cleanup planning, and governance of Fitness auth/profile/data surfaces, especially unknown, duplicate, and automation-linked identities.
+- Duplicate Surface Decommission and Manual Deploy Exception Burn-Down should both explicitly absorb stale Vercel surface cleanup targets when those surfaces can confuse source truth or deploy authority.
+- Failure Mode: if Discord OS separation and Fitness data hygiene stay implicit, later cleanup mixes repo, deploy, bot, and identity concerns into one vague migration lane and raises breakage risk.

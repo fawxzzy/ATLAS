@@ -32,6 +32,7 @@ It now also includes explicit strategic lanes that make the operating model dura
 | Preview Cache & Surface Consistency | verify that deployed preview surfaces match the canonical branding source | icon and preview drift is either absent or classifiable as cache-only with a documented verification path |
 | Operator Secret Path Hygiene | keep secret-backed operator flows from polluting repo roots | temporary env pulls and secret-backed operations leave no ambiguous residue |
 | Manual Deploy Exception Burn-Down | remove direct deploy ambiguity outside `_stack` | deploy truth is singular, reproducible, and operator-readable |
+| Fitness Supabase Profile/Data Hygiene | classify and govern Fitness identity/data cleanup before mutation | auth/profile/data truth is inventoried, cleanup is reviewable, and canonical profile usage is explicit |
 | Unified Workflow Convergence | reduce duplicated release and operating paths across stack and repos | one coherent operating model across the whole system |
 | Dependency Untangling | reduce hidden coupling between lanes | future Fitness, Discord, and ATLAS lanes can move in parallel safely |
 | Core Pattern Convergence | spread the strongest reusable concepts across the stack instead of leaving them trapped inside one repo or workflow | reusable rules, patterns, and failure modes from core lanes are mapped, owned, visible, and actually applied across stack systems |
@@ -42,7 +43,7 @@ It now also includes explicit strategic lanes that make the operating model dura
 | AI Long-Run Batch Orchestration | define the future supervised batching architecture clearly before implementation | bounded jobs, isolated worktrees, checkpoints, and verification gates become the approved long-run model |
 | AI Repetition-to-Automation Pipeline | convert repeated AI and operator asks into governed command surfaces before they waste more context and tokens | repeated safe workflows are detected, classified, and routed into `_stack`, Playbook, or bot commands with receipts and rollback paths |
 | Truth Map & ATLAS Book | consolidate the cross-referenced guide | one definitive guide to systems, lanes, concepts, and maps |
-| Discord OS Extraction Review | classify the Discord OS surface before broader consolidation or publication | Discord system doctrine is understood and routed cleanly |
+| Discord OS Infrastructure Separation | extract Discord OS from the Fitness-hosted default stack into explicit repo, Vercel, Supabase, env, and contract surfaces | Discord OS runs on governed standalone infrastructure without hidden Fitness coupling or broken live behavior |
 | Discord Workflow, Publication & Docs Reliability | converge Discord workflow, stabilize `#updates` publication, and publish the right durable summaries | Discord workflow, public posting, fallback path, and docs publication become one stable operator surface |
 | Full Stack Re-sync, Clean & Closeout | close the normalization program honestly from re-sync through closeout | root and repos return to intentional, auditable baselines |
 | Post-Convergence Lane Split Readiness | measure readiness to split the system back into product lanes | Fitness, Discord, and ATLAS can run as distinct lanes safely after convergence |
@@ -62,11 +63,29 @@ Every lane should answer:
 - Vision & Future Alignment belongs near the front because later cleanup without a stable endgame can optimize the wrong system.
 - Canonical Repo Restoration and Tmp Dependency Elimination now belong before broader convergence because the stack cannot safely converge workflows while production truth still depends on `tmp/` or missing canonical repo roots.
 - Branch & Worktree Normalization belongs before broad re-sync because the current root still contains intentional preservation residue.
+- Fitness Supabase Profile/Data Hygiene belongs after secret-path inventory because identity/data cleanup should not start until operator secret handling is mapped.
+- Discord OS Infrastructure Separation supersedes the older extraction-review framing because the real issue is infrastructure ownership and hidden coupling, not just doctrine classification.
 - AI Long-Run Batch Orchestration belongs as doctrine and planning now, with later implementation routed through `_stack`, Playbook, and explicit lane contracts.
 - AI Repetition-to-Automation Pipeline belongs alongside `_stack` readiness and AI batching, but stays distinct: batching governs long jobs, while this lane governs noticing repetition and converting it into commands.
 - Core Pattern Convergence belongs beside doctrine and knowledge lanes, but stays distinct: capture preserves ideas, interface makes them visible, and convergence measures whether the best ideas actually spread into shared operating practice.
 - Knowledge Capture & Transfer is first-class because durable operations require reasoning to survive beyond one chat session.
 - The reduced marker model should be used going forward so progress reporting stays durable and readable.
+
+## Explicit Existing-Lane Cleanup Targets
+
+Stale Vercel surface cleanup does not get its own marker.
+
+It is an explicit target set under:
+
+- `Duplicate Surface Decommission`
+- `Manual Deploy Exception Burn-Down`
+
+Current targets to inventory and later classify:
+
+- `spotify-club-phase-7-interaction-reliability`
+- `spotify-club-phase-7-interaction-re.vercel.app`
+- `spotify-board-hygiene-main`
+- `spotify-board-hygiene-main.vercel.app`
 
 ## Lockfile Deferral
 
@@ -96,21 +115,22 @@ Lane 0 must preserve the current lockfile deferral doctrine:
 - Branch & Worktree Normalization: `92%`
 - Brand Asset Canonicalization: `0%`
 - Preview Cache & Surface Consistency: `0%`
-- Operator Secret Path Hygiene: `0%`
-- Manual Deploy Exception Burn-Down: `0%`
-- Unified Workflow Convergence: `0%`
-- Inventory & Truth Map: `15%`
+- Operator Secret Path Hygiene: `10%`
+- Manual Deploy Exception Burn-Down: `65%`
+- Fitness Supabase Profile/Data Hygiene: `0%`
+- Unified Workflow Convergence: `60%`
+- Inventory & Truth Map: `20%`
 - Full Stack Re-sync, Clean & Closeout: `22% paused`
 - Vision & Future Alignment: `0%`
 - Dependency Untangling: `0%`
-- Core Pattern Convergence: `0%`
-- Playbook Everywhere + Cortex Interface: `0%`
-- Knowledge Capture & Transfer: `10%`
-- Feedback Loop Readiness: `0%`
+- Core Pattern Convergence: `35%`
+- Playbook Everywhere + Cortex Interface: `20%`
+- Knowledge Capture & Transfer: `35%`
+- Feedback Loop Readiness: `20%`
 - Sandbox Simulation Readiness: `0%`
 - AI Long-Run Batch Orchestration: `20%`
-- AI Repetition-to-Automation Pipeline: `0%`
+- AI Repetition-to-Automation Pipeline: `20%`
 - Truth Map & ATLAS Book: `0%`
-- Discord OS Extraction Review: `0%`
-- Discord Workflow, Publication & Docs Reliability: `0%`
+- Discord OS Infrastructure Separation: `0%`
+- Discord Workflow, Publication & Docs Reliability: `10%`
 - Post-Convergence Lane Split Readiness: `0%`

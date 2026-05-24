@@ -31,12 +31,14 @@ The strategic and operational order is now:
 6. Preview Cache & Surface Consistency
 7. Operator Secret Path Hygiene
 8. Manual Deploy Exception Burn-Down
-9. Discord Workflow, Publication & Docs Reliability
-10. Unified Workflow Convergence
-11. Playbook Everywhere + Cortex Interface
-12. Truth Map & ATLAS Book
-13. Full Stack Re-sync, Clean & Closeout
-14. Post-Convergence Lane Split Readiness
+9. Fitness Supabase Profile/Data Hygiene
+10. Discord OS Infrastructure Separation
+11. Discord Workflow, Publication & Docs Reliability
+12. Unified Workflow Convergence
+13. Playbook Everywhere + Cortex Interface
+14. Truth Map & ATLAS Book
+15. Full Stack Re-sync, Clean & Closeout
+16. Post-Convergence Lane Split Readiness
 
 Cross-cutting doctrine lane:
 
@@ -54,6 +56,8 @@ Cross-cutting doctrine lane:
 - Preview Cache & Surface Consistency: tracks whether deployed icon, preview, PWA, and share surfaces match the canonical branding source and can be verified cleanly.
 - Operator Secret Path Hygiene: tracks whether secret-backed operator flows avoid spilling env or secret residue into repo roots.
 - Manual Deploy Exception Burn-Down: tracks the remaining risk from direct deploy behavior outside `_stack`.
+- Fitness Supabase Profile/Data Hygiene: tracks cleanup and governance of Fitness Supabase identity/data surfaces, especially unknown, duplicate, or automation-linked profiles.
+- Discord OS Infrastructure Separation: tracks extraction of Discord OS out of the Fitness-hosted default stack into its own governed repo, Vercel, Supabase, env, and contract surfaces without breaking live Discord behavior.
 - Unified Workflow Convergence: makes disconnected workflows operate as one system across stack and owner repos.
 - Dependency Untangling: tracks hidden coupling between lanes and reduces it so later Fitness, Discord, and ATLAS work can run in parallel safely.
 - Core Pattern Convergence: tracks whether foundational reusable ideas from one lane actually spread across the stack instead of staying trapped inside a single repo, workflow, or operator habit.
@@ -66,6 +70,22 @@ Cross-cutting doctrine lane:
 - Full Stack Re-sync, Clean & Closeout: covers the whole cleanup lifecycle from normalization through verified closeout.
 - Post-Convergence Lane Split Readiness: measures whether the program is ready to split safely back into Fitness, Discord, and ATLAS lanes.
 - AI Repetition-to-Automation Pipeline: tracks how repeated AI, Codex, and operator tasks are identified and converted into simple governed command surfaces with verification, receipts, and rollback paths.
+
+## Explicit Cleanup Targets Added To Existing Lanes
+
+Do not add a separate marker for stale Vercel surface cleanup.
+
+These targets belong under both:
+
+- `Duplicate Surface Decommission`
+- `Manual Deploy Exception Burn-Down`
+
+Targets to review and later classify:
+
+- `spotify-club-phase-7-interaction-reliability`
+- `spotify-club-phase-7-interaction-re.vercel.app`
+- `spotify-board-hygiene-main`
+- `spotify-board-hygiene-main.vercel.app`
 
 ## Core Pattern Convergence Definition
 
@@ -129,21 +149,22 @@ Every lane should answer:
 - Branch & Worktree Normalization: `92%`
 - Brand Asset Canonicalization: `0%`
 - Preview Cache & Surface Consistency: `0%`
-- Operator Secret Path Hygiene: `0%`
-- Manual Deploy Exception Burn-Down: `0%`
-- Unified Workflow Convergence: `0%`
-- Inventory & Truth Map: `15%`
+- Operator Secret Path Hygiene: `10%`
+- Manual Deploy Exception Burn-Down: `65%`
+- Fitness Supabase Profile/Data Hygiene: `0%`
+- Unified Workflow Convergence: `60%`
+- Inventory & Truth Map: `20%`
 - Full Stack Re-sync, Clean & Closeout: `22% paused`
 - Vision & Future Alignment: `0%`
 - Dependency Untangling: `0%`
-- Core Pattern Convergence: `0%`
-- Playbook Everywhere + Cortex Interface: `0%`
-- Knowledge Capture & Transfer: `10%`
-- Feedback Loop Readiness: `0%`
+- Core Pattern Convergence: `35%`
+- Playbook Everywhere + Cortex Interface: `20%`
+- Knowledge Capture & Transfer: `35%`
+- Feedback Loop Readiness: `20%`
 - Sandbox Simulation Readiness: `0%`
 - AI Long-Run Batch Orchestration: `20%`
-- AI Repetition-to-Automation Pipeline: `0%`
+- AI Repetition-to-Automation Pipeline: `20%`
 - Truth Map & ATLAS Book: `0%`
-- Discord OS Extraction Review: `0%`
-- Discord Workflow, Publication & Docs Reliability: `0%`
+- Discord OS Infrastructure Separation: `0%`
+- Discord Workflow, Publication & Docs Reliability: `10%`
 - Post-Convergence Lane Split Readiness: `0%`

@@ -62,6 +62,23 @@ The lane is improved, but not closed:
 - Broader workflow convergence has not started.
 - Discord update or release-ledger automation is still not unified across deploy lanes.
 
+## Added Stale Vercel Surface Cleanup Targets
+
+This lane now explicitly absorbs stale Vercel surfaces when they can confuse deploy authority or look like shadow production paths.
+
+Do not delete them from this checkpoint. Inventory first.
+
+Targets:
+
+- `spotify-club-phase-7-interaction-reliability`
+- `spotify-club-phase-7-interaction-re.vercel.app`
+- `spotify-board-hygiene-main`
+- `spotify-board-hygiene-main.vercel.app`
+
+Expected next package for this subset:
+
+- `Vercel Stale Surface Decommission Inventory`
+
 ## Validation State
 
 At this checkpoint:

@@ -74,6 +74,24 @@ These were not the primary target set, but they are source-like surfaces worth f
 4. Not every outside-root surface is deletable just because it is non-canonical.
    Several surfaces are already retained evidence, historical archive, or temporary operator/cutover lanes that need explicit retention or archival policy first.
 
+## Added Stale Vercel Cleanup Targets
+
+This lane now explicitly includes stale Vercel project/deployment surfaces when they create duplicate or confusing public/deploy surfaces outside the canonical product path.
+
+Inventory targets to classify in a dedicated follow-up pass:
+
+- `spotify-club-phase-7-interaction-reliability`
+- `spotify-club-phase-7-interaction-re.vercel.app`
+- `spotify-board-hygiene-main`
+- `spotify-board-hygiene-main.vercel.app`
+
+These targets overlap with `Manual Deploy Exception Burn-Down` because they are both:
+
+- duplicate public/deploy surfaces
+- potential deploy-authority confusion
+
+No deletion or Vercel mutation occurs from this inventory update alone.
+
 ## Initial decommission priority
 
 ### Highest priority follow-up
