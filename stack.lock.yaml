@@ -109,7 +109,7 @@ components:
     remote: "https://github.com/fawxzzy/fawxzzy-trove.git"
     ref_type: "branch"
     ref: "codex/trove-brand-asset-sync"
-    commit: "3a60a7cb64e4d5979988bdd444a75157bb4cfc42"
+    commit: "0f5f9fe55bd21aa7f017173f1950d0bd063470c1"
     dirty: true
     trust_class: "trusted"
     release_eligible: true
