@@ -10,6 +10,7 @@ This roadmap is grounded in current stack doctrine and preserved artifacts:
 
 - `README-STACK.md` defines the root as a coordination layer, not an umbrella monorepo.
 - `docs/architecture/ATLAS-CORTEX-PLAYBOOK-CODEX.md` keeps Playbook as the repo-local governance owner.
+- `docs/ops/PLAYBOOK-ORIGIN-RESEARCH-TRAIL-2026-05-24.md` preserves the long-form product, governance, and doctrine trail as continuity context without turning it into live command truth.
 - `docs/architecture/CODEX-HANDOFF-CONTRACT.md` already defines a structured handoff lane under `runtime/receipts/handoffs/`.
 - `docs/architecture/ATLAS-RETENTION-AND-MEMORY-POLICY.md` explicitly rejects chat transcript state as canonical memory.
 - `docs/ops/ATLAS-CONVERSATION-RUNBOOK.md` already preserves grounded turn artifacts without treating raw transcript as durable truth.

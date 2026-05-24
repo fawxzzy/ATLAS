@@ -1,5 +1,35 @@
 # Playbook Notes
 
+## 2026-05-24 - Playbook origin and research trail should stay explicit
+
+- Rule: Playbook is not another AI coding assistant; it is the deterministic repo runtime and trust layer between humans or AI agents and real repositories.
+- Rule: verify before plan; plan before apply; apply before trust renewal.
+- Rule: mutation follows trust, not curiosity.
+- Rule: declared mutation scope must be enforced before apply succeeds.
+- Rule: knowledge must be promoted before it influences execution.
+- Rule: research doctrine and implemented runtime truth are separate layers.
+- Rule: CI is a release gate, not a place.
+- Rule: measure outcomes, not activity.
+- Rule: unsafe speed is not value.
+- Pattern: verify -> plan -> apply -> verify.
+- Pattern: state -> transformation -> enforcement.
+- Pattern: evidence -> compaction -> promoted doctrine -> bounded execution.
+- Pattern: declare scope -> enforce scope -> mutate -> receipt.
+- Pattern: local receipt -> optional publish sync -> optional deployment handoff.
+- Pattern: start read-only, expand by evidence.
+- Pattern: state -> narrative compression.
+- Failure Mode: AI mutation without evidence boundaries.
+- Failure Mode: command-surface drift between roadmap, generated docs, CLI help, and actual runtime behavior.
+- Failure Mode: correct-but-dense truth reduces adoption even when the underlying system is technically right.
+- Failure Mode: research-as-status lets speculative theory masquerade as implemented runtime capability.
+- Failure Mode: advisory scope bundles mistaken for real safety.
+- Release-summary bullets:
+  - Consolidated the Playbook origin story and research trail into one root-owned continuity artifact.
+  - Reaffirmed the canonical remediation loop as `verify -> plan -> apply -> verify`.
+  - Preserved the distinction between research doctrine, architecture framing, and live runtime truth.
+  - Captured the strongest reusable rules, patterns, and failure modes as stack-readable doctrine.
+- Continuity reference: `docs/ops/PLAYBOOK-ORIGIN-RESEARCH-TRAIL-2026-05-24.md`
+
 ## 2026-05-24 - Repeated AI work should graduate into explicit automation lanes
 
 - Rule: repeated Codex, AI, or operator asks should be noticed, classified, and routed toward safe automation instead of being re-executed manually forever.
