@@ -16,6 +16,9 @@ Adjacent but distinct lane:
   - detects repeated AI, Codex, and operator asks
   - converts safe repetitive workflows into governed command surfaces
   - is not the same problem as long-run batch execution
+- `Core Pattern Convergence`
+  - tracks whether the strongest reusable ideas from one lane actually spread into the rest of the stack
+  - is not the same problem as either batch execution or command-surface automation
 
 ## Current Read
 
@@ -208,6 +211,7 @@ Long-run batching should not start until:
 - Full Stack Re-sync, Clean & Closeout: `22% paused`
 - Vision & Future Alignment: `0%`
 - Dependency Untangling: `0%`
+- Core Pattern Convergence: `0%`
 - Playbook Everywhere + Cortex Interface: `0%`
 - Knowledge Capture & Transfer: `10%`
 - Feedback Loop Readiness: `0%`

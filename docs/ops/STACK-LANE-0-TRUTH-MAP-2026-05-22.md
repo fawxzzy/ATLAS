@@ -34,6 +34,7 @@ It now also includes explicit strategic lanes that make the operating model dura
 | Manual Deploy Exception Burn-Down | remove direct deploy ambiguity outside `_stack` | deploy truth is singular, reproducible, and operator-readable |
 | Unified Workflow Convergence | reduce duplicated release and operating paths across stack and repos | one coherent operating model across the whole system |
 | Dependency Untangling | reduce hidden coupling between lanes | future Fitness, Discord, and ATLAS lanes can move in parallel safely |
+| Core Pattern Convergence | spread the strongest reusable concepts across the stack instead of leaving them trapped inside one repo or workflow | reusable rules, patterns, and failure modes from core lanes are mapped, owned, visible, and actually applied across stack systems |
 | Playbook Everywhere + Cortex Interface | align doctrine, verification surfaces, and Cortex-facing interpretation under one governance layer | Playbook becomes the readable interface for shared workflow and Cortex contract logic |
 | Knowledge Capture & Transfer | stop losing key reasoning in chat and make future continuation possible | rules, patterns, failures, decisions, and handoff context are durable |
 | Feedback Loop Readiness | route feedback back into the right system | user and system feedback are captured and assigned cleanly |
@@ -63,6 +64,7 @@ Every lane should answer:
 - Branch & Worktree Normalization belongs before broad re-sync because the current root still contains intentional preservation residue.
 - AI Long-Run Batch Orchestration belongs as doctrine and planning now, with later implementation routed through `_stack`, Playbook, and explicit lane contracts.
 - AI Repetition-to-Automation Pipeline belongs alongside `_stack` readiness and AI batching, but stays distinct: batching governs long jobs, while this lane governs noticing repetition and converting it into commands.
+- Core Pattern Convergence belongs beside doctrine and knowledge lanes, but stays distinct: capture preserves ideas, interface makes them visible, and convergence measures whether the best ideas actually spread into shared operating practice.
 - Knowledge Capture & Transfer is first-class because durable operations require reasoning to survive beyond one chat session.
 - The reduced marker model should be used going forward so progress reporting stays durable and readable.
 
@@ -101,6 +103,7 @@ Lane 0 must preserve the current lockfile deferral doctrine:
 - Full Stack Re-sync, Clean & Closeout: `22% paused`
 - Vision & Future Alignment: `0%`
 - Dependency Untangling: `0%`
+- Core Pattern Convergence: `0%`
 - Playbook Everywhere + Cortex Interface: `0%`
 - Knowledge Capture & Transfer: `10%`
 - Feedback Loop Readiness: `0%`

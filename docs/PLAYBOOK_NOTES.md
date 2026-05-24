@@ -30,6 +30,19 @@
   - Captured the strongest reusable rules, patterns, and failure modes as stack-readable doctrine.
 - Continuity reference: `docs/ops/PLAYBOOK-ORIGIN-RESEARCH-TRAIL-2026-05-24.md`
 
+## 2026-05-24 - Core pattern convergence should be its own lane
+
+- Rule: strong reusable ideas should not stay trapped inside one repo, one workflow, or one operator habit when they clearly belong across the stack.
+- Rule: capturing patterns is not the same as spreading them; documentation alone does not prove convergence.
+- Rule: Playbook should hold reusable doctrine, while ATLAS should show where that doctrine applies and who owns each implementation boundary.
+- Pattern: extract reusable rule or pattern -> map owner and applicability -> route into doctrine and stack docs -> verify later adoption in implementation lanes.
+- Failure Mode: a stack can look well-documented while still behaving like isolated local habits because the best ideas never actually spread.
+- Failure Mode: treating Playbook Everywhere + Cortex Interface as sufficient hides whether the strongest ideas from Fitness, Lifeline, `_stack`, QA, release, or Discord have converged into shared practice.
+- Release-summary bullets:
+  - Added Core Pattern Convergence as a separate lane from knowledge capture and interface adoption.
+  - Defined the lane as stack-wide spread of reusable rules, patterns, and failure modes.
+  - Preserved the split between doctrine capture, doctrine visibility, and actual cross-stack application.
+
 ## 2026-05-24 - Repeated AI work should graduate into explicit automation lanes
 
 - Rule: repeated Codex, AI, or operator asks should be noticed, classified, and routed toward safe automation instead of being re-executed manually forever.

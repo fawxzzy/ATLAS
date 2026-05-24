@@ -56,6 +56,7 @@ Cross-cutting doctrine lane:
 - Manual Deploy Exception Burn-Down: tracks the remaining risk from direct deploy behavior outside `_stack`.
 - Unified Workflow Convergence: makes disconnected workflows operate as one system across stack and owner repos.
 - Dependency Untangling: tracks hidden coupling between lanes and reduces it so later Fitness, Discord, and ATLAS work can run in parallel safely.
+- Core Pattern Convergence: tracks whether foundational reusable ideas from one lane actually spread across the stack instead of staying trapped inside a single repo, workflow, or operator habit.
 - Playbook Everywhere + Cortex Interface: tracks how Playbook becomes the visible governance layer everywhere it belongs, including Cortex-facing doctrine, contracts, patterns, and validation logic.
 - Knowledge Capture & Transfer: tracks whether reasoning is written into durable docs and whether a future teammate, Codex worker, or Cortex agent could continue from docs and receipts.
 - Feedback Loop Readiness: tracks whether each lane can receive, process, and route user or system feedback into ATLAS, Playbook, Discord, or repo workflows.
@@ -65,6 +66,30 @@ Cross-cutting doctrine lane:
 - Full Stack Re-sync, Clean & Closeout: covers the whole cleanup lifecycle from normalization through verified closeout.
 - Post-Convergence Lane Split Readiness: measures whether the program is ready to split safely back into Fitness, Discord, and ATLAS lanes.
 - AI Repetition-to-Automation Pipeline: tracks how repeated AI, Codex, and operator tasks are identified and converted into simple governed command surfaces with verification, receipts, and rollback paths.
+
+## Core Pattern Convergence Definition
+
+This lane measures whether the strongest reusable concepts from key projects are systematically applied across the stack instead of remaining isolated inside one repo or workflow.
+
+It starts at `0%`.
+
+It reaches `100%` only when:
+
+- each core repo or lane has extracted its reusable rules, patterns, and failure modes
+- those patterns are mapped to where they apply across ATLAS, `_stack`, Foundation, Lifeline, Playbook, Cortex, Fitness, Discord OS, QA or LLEL, and release workflows
+- Playbook records the reusable doctrine
+- ATLAS docs show ownership boundaries and connection points
+- implementation workflows consistently apply the shared patterns where appropriate
+- old one-off local habits are replaced by governed stack-wide patterns where that spread is justified
+
+This lane is related to but different from:
+
+- Playbook Everywhere + Cortex Interface
+  - makes governance and interpretation surfaces visible and usable
+- Knowledge Capture & Transfer
+  - preserves reasoning and handoff continuity
+- Core Pattern Convergence
+  - proves the strongest patterns actually spread into stack-wide operating practice
 
 ## Lane Questions
 
@@ -111,6 +136,7 @@ Every lane should answer:
 - Full Stack Re-sync, Clean & Closeout: `22% paused`
 - Vision & Future Alignment: `0%`
 - Dependency Untangling: `0%`
+- Core Pattern Convergence: `0%`
 - Playbook Everywhere + Cortex Interface: `0%`
 - Knowledge Capture & Transfer: `10%`
 - Feedback Loop Readiness: `0%`
