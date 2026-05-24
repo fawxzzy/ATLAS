@@ -10,6 +10,13 @@ This lane turns the existing long-run AI batching research into explicit ATLAS d
 
 This is a doctrine and contract lane first, not an implementation sprint.
 
+Adjacent but distinct lane:
+
+- `AI Repetition-to-Automation Pipeline`
+  - detects repeated AI, Codex, and operator asks
+  - converts safe repetitive workflows into governed command surfaces
+  - is not the same problem as long-run batch execution
+
 ## Current Read
 
 - research and design direction exist
@@ -17,6 +24,7 @@ This is a doctrine and contract lane first, not an implementation sprint.
 - the lane is not yet integrated into `_stack`, Playbook, ATLAS lane manifests, or a single supervised pilot
 - no current root doctrine should imply that one giant interactive Codex session is the approved batching model
 - this lane is part of the convergence program, not a separate side project
+- this lane should not absorb the separate repetition-to-automation problem, because repeated short tasks and long supervised jobs have different contracts and risks
 
 ## Governing Rule
 
@@ -149,6 +157,19 @@ This lane currently sits in the program as:
 
 This AI lane remains cross-cutting doctrine rather than a reason to skip the earlier canonical repo and `tmp/` restoration work.
 
+## Distinction From Repetition Automation
+
+This lane answers:
+
+- how do we run bounded long jobs safely
+- how do we checkpoint and verify multi-hour execution
+
+The separate `AI Repetition-to-Automation Pipeline` lane answers:
+
+- which repeated asks should stop consuming fresh AI context
+- which workflows should become `_stack`, Playbook, or bot commands
+- what verification, receipt, and rollback rules those commands need
+
 ## Dependency On Branch Discipline
 
 This lane depends on explicit branch and worktree discipline.
@@ -192,6 +213,7 @@ Long-run batching should not start until:
 - Feedback Loop Readiness: `0%`
 - Sandbox Simulation Readiness: `0%`
 - AI Long-Run Batch Orchestration: `20%`
+- AI Repetition-to-Automation Pipeline: `0%`
 - Truth Map & ATLAS Book: `0%`
 - Discord OS Extraction Review: `0%`
 - Discord Workflow, Publication & Docs Reliability: `0%`

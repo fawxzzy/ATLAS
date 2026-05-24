@@ -41,6 +41,7 @@ The strategic and operational order is now:
 Cross-cutting doctrine lane:
 
 - AI Long-Run Batch Orchestration remains active as a planning and contract lane, but it should not outrank canonical repo and `tmp/` restoration work.
+- AI Repetition-to-Automation Pipeline remains active as a planning lane for converting repeated AI and operator asks into governed command surfaces, but it should not outrank canonical repo and `tmp/` restoration work.
 
 ## Consolidated Marker Definitions
 
@@ -63,6 +64,7 @@ Cross-cutting doctrine lane:
 - Discord Workflow, Publication & Docs Reliability: converges Discord workflow first, stabilizes the public posting path and fallback path, then publishes the right user-facing and operator-facing docs.
 - Full Stack Re-sync, Clean & Closeout: covers the whole cleanup lifecycle from normalization through verified closeout.
 - Post-Convergence Lane Split Readiness: measures whether the program is ready to split safely back into Fitness, Discord, and ATLAS lanes.
+- AI Repetition-to-Automation Pipeline: tracks how repeated AI, Codex, and operator tasks are identified and converted into simple governed command surfaces with verification, receipts, and rollback paths.
 
 ## Lane Questions
 
@@ -114,6 +116,7 @@ Every lane should answer:
 - Feedback Loop Readiness: `0%`
 - Sandbox Simulation Readiness: `0%`
 - AI Long-Run Batch Orchestration: `20%`
+- AI Repetition-to-Automation Pipeline: `0%`
 - Truth Map & ATLAS Book: `0%`
 - Discord OS Extraction Review: `0%`
 - Discord Workflow, Publication & Docs Reliability: `0%`

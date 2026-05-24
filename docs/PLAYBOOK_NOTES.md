@@ -1,5 +1,18 @@
 # Playbook Notes
 
+## 2026-05-24 - Repeated AI work should graduate into explicit automation lanes
+
+- Rule: repeated Codex, AI, or operator asks should be noticed, classified, and routed toward safe automation instead of being re-executed manually forever.
+- Rule: automation graduation is separate from long-run AI batching; one lane turns repetition into commands, while the other governs bounded multi-step job execution.
+- Rule: only safe, reviewable, owner-clear workflows should graduate into `_stack`, Playbook, or bot command surfaces.
+- Pattern: repeated request -> repetition receipt or marker -> owner and risk classification -> narrow command contract -> verification and rollback path -> documented operator surface.
+- Failure Mode: leaving repeated mechanical work in chat burns context and tokens while hiding the real opportunity for durable command surfaces.
+- Failure Mode: turning an unstable or ambiguous workflow into a command too early just automates confusion.
+- Release-summary bullets:
+  - Added the doctrine that repeated AI and operator work should feed an explicit automation-conversion lane.
+  - Distinguished repetition-to-automation from long-run batch orchestration.
+  - Added the rule that new command surfaces require owner clarity, verification, and rollback paths.
+
 ## 2026-05-17 - Discord moderation should stay reversible and explicit
 
 - Rule: community moderation should escalate through logged notice and warning lanes before punitive action whenever possible.

@@ -39,6 +39,7 @@ It now also includes explicit strategic lanes that make the operating model dura
 | Feedback Loop Readiness | route feedback back into the right system | user and system feedback are captured and assigned cleanly |
 | Sandbox Simulation Readiness | test bold ideas safely | experimental work happens in protected lanes, not on core surfaces |
 | AI Long-Run Batch Orchestration | define the future supervised batching architecture clearly before implementation | bounded jobs, isolated worktrees, checkpoints, and verification gates become the approved long-run model |
+| AI Repetition-to-Automation Pipeline | convert repeated AI and operator asks into governed command surfaces before they waste more context and tokens | repeated safe workflows are detected, classified, and routed into `_stack`, Playbook, or bot commands with receipts and rollback paths |
 | Truth Map & ATLAS Book | consolidate the cross-referenced guide | one definitive guide to systems, lanes, concepts, and maps |
 | Discord OS Extraction Review | classify the Discord OS surface before broader consolidation or publication | Discord system doctrine is understood and routed cleanly |
 | Discord Workflow, Publication & Docs Reliability | converge Discord workflow, stabilize `#updates` publication, and publish the right durable summaries | Discord workflow, public posting, fallback path, and docs publication become one stable operator surface |
@@ -61,6 +62,7 @@ Every lane should answer:
 - Canonical Repo Restoration and Tmp Dependency Elimination now belong before broader convergence because the stack cannot safely converge workflows while production truth still depends on `tmp/` or missing canonical repo roots.
 - Branch & Worktree Normalization belongs before broad re-sync because the current root still contains intentional preservation residue.
 - AI Long-Run Batch Orchestration belongs as doctrine and planning now, with later implementation routed through `_stack`, Playbook, and explicit lane contracts.
+- AI Repetition-to-Automation Pipeline belongs alongside `_stack` readiness and AI batching, but stays distinct: batching governs long jobs, while this lane governs noticing repetition and converting it into commands.
 - Knowledge Capture & Transfer is first-class because durable operations require reasoning to survive beyond one chat session.
 - The reduced marker model should be used going forward so progress reporting stays durable and readable.
 
@@ -104,6 +106,7 @@ Lane 0 must preserve the current lockfile deferral doctrine:
 - Feedback Loop Readiness: `0%`
 - Sandbox Simulation Readiness: `0%`
 - AI Long-Run Batch Orchestration: `20%`
+- AI Repetition-to-Automation Pipeline: `0%`
 - Truth Map & ATLAS Book: `0%`
 - Discord OS Extraction Review: `0%`
 - Discord Workflow, Publication & Docs Reliability: `0%`
