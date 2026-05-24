@@ -109,7 +109,7 @@ components:
     remote: "https://github.com/fawxzzy/fawxzzy-trove.git"
     ref_type: "branch"
     ref: "codex/trove-brand-asset-sync"
-    commit: "9a0f575c5e03723bd04c9b77fda42df128c1bc04"
+    commit: "865d62e4cef9d17141971ffc3baef86fecf9ac90"
     dirty: true
     trust_class: "trusted"
     release_eligible: true
@@ -216,4 +216,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:35e025cc644d6d340b33712cf868b5bba2872cb34c223c91f703a2f25f05a716"
+lock_digest: "sha256:0796ba0da8267aaec8f9cb75f42c9d7895d66d70a8338445f37ed4aafe60ae65"
