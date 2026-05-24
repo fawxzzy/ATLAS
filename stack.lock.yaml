@@ -25,6 +25,17 @@ components:
     dirty: false
     trust_class: "trusted"
     release_eligible: true
+  fitness:
+    path: "repos/fawxzzy-fitness"
+    role: "application"
+    status: "unmanaged"
+    remote: "https://github.com/fawxzzy/fawxzzy-fitness.git"
+    ref_type: "branch"
+    ref: "main"
+    commit: "7ceebde9d71564614df98e391b245a836d15c401"
+    dirty: false
+    trust_class: "trusted"
+    release_eligible: true
   lifeline:
     path: "repos/fawxzzy-lifeline"
     role: "local-operator"
