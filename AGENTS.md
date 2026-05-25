@@ -10,6 +10,11 @@ Purpose
 - Use it for standards, architecture, path policy, packaging rules, audits, and cross-repo planning.
 - Do not treat the ATLAS root as a normal application repo.
 
+Persistent context
+- Before planning Playbook, Cortex, Atlas, Codex-prompt, repo-architecture, or other stack-governance work, read the canonical Zachariah Workflow Profile:
+  - `docs/memory/profiles/zachariah_workflow_profile.md`
+- Treat that profile as the durable source of truth for assistant behavior and long-term operator/project context.
+
 Routing
 - Single-repo implementation work should be routed into the target repo root.
 - Cross-repo work may touch only the named repos plus stack-level files under the ATLAS root.

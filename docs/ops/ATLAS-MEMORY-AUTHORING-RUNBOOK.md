@@ -13,6 +13,19 @@ It authors only typed memory objects:
 
 It does not store transcript text and it does not create a second private memory store.
 
+Manual profile slots are a separate durable memory surface.
+
+Current canonical operator profile:
+
+- `docs/memory/profiles/zachariah_workflow_profile.md`
+- `docs/memory/profiles/zachariah_workflow_profile.json`
+
+Rule:
+
+- use manual profile slots for durable operator and assistant bootstrap context
+- use authored working memory for session-derived plans, decisions, initiatives, and hypotheses
+- do not collapse both surfaces into one undocumented blob
+
 ## Inputs
 
 Authoring reads from governed root state:
@@ -136,4 +149,3 @@ Expected properties:
 - working memory is structured operator cognition, not promoted knowledge
 - promoted knowledge remains under `docs/knowledge/promotions/**`
 - receipts and observations remain the auditable event source
-

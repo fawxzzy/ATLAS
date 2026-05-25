@@ -1,0 +1,21 @@
+{
+  "id": "zachariah_workflow_profile",
+  "title": "Zachariah Workflow Profile",
+  "type": "user_project_context",
+  "owner": "Zachariah",
+  "status": "active",
+  "canonical": true,
+  "last_updated": "2026-05-25",
+  "source": "manual_context_restore",
+  "tags": [
+    "zac",
+    "atlas",
+    "cortex",
+    "playbook",
+    "codex",
+    "assistant-profile",
+    "memory-slot"
+  ],
+  "summary": "Canonical durable context profile for Zachariah's assistant behavior preferences, Playbook facts, Cortex roadmap, Atlas memory strategy, and future project/product bootstrap context.",
+  "canonical_markdown_path": "docs/memory/profiles/zachariah_workflow_profile.md"
+}

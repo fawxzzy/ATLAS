@@ -851,6 +851,13 @@ def _bootstrap_records(
             why="Repo inventory is the root visibility surface over the polyrepo.",
             root=root,
         ),
+        _file_record(
+            "docs/memory/profiles/zachariah_workflow_profile.md",
+            owner="stack-root",
+            kind="persistent_context",
+            why="Zachariah Workflow Profile is the canonical durable operator and assistant bootstrap context.",
+            root=root,
+        ),
     ]
     records.extend(session_mode_records or [])
     records.extend(slice_records)

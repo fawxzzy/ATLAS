@@ -124,6 +124,11 @@ class AtlasCodexContextTests(unittest.TestCase):
         self.assertIn("Federate, don't duplicate.", prompt)
         self.assertIn("stack.yaml", prompt)
         self.assertIn("docs/registry/STACK-REPO-INVENTORY.json", prompt)
+        self.assertIn("docs/memory/profiles/zachariah_workflow_profile.md", prompt)
+
+    def test_bootstrap_includes_canonical_zachariah_profile(self) -> None:
+        refs = {item["ref"] for item in self.mazer_payload["bootstrap_contract"]["ordered_reads"]}
+        self.assertIn("docs/memory/profiles/zachariah_workflow_profile.md", refs)
 
     def test_write_codex_context_pack_writes_expected_files(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

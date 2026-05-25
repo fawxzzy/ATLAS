@@ -27,9 +27,10 @@ Every root-launched Codex task should bootstrap in this order:
 1. `stack.yaml`
 2. `stack.lock.yaml`
 3. `docs/registry/STACK-REPO-INVENTORY.json`
-4. the relevant awareness slices
-5. related initiative, proposal, and trust-posture refs
-6. only then the target repo docs or code
+4. `docs/memory/profiles/zachariah_workflow_profile.md`
+5. the relevant awareness slices
+6. related initiative, proposal, and trust-posture refs
+7. only then the target repo docs or code
 
 The context-pack builder emits that order explicitly in `bootstrap_contract.ordered_reads`.
 
