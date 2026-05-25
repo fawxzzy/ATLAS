@@ -32,6 +32,7 @@
 - [Discord OS Repo Bootstrap Plan](../ops/DISCORD-OS-REPO-BOOTSTRAP-PLAN-2026-05-24.md)
 - [Discord OS Repo Bootstrap Approval](../ops/DISCORD-OS-REPO-BOOTSTRAP-APPROVAL-2026-05-24.md)
 - [Discord OS Repo Bootstrap Receipt](../ops/DISCORD-OS-REPO-BOOTSTRAP-RECEIPT-2026-05-25.md)
+- [Discord OS Post-Bootstrap Code Inventory](../ops/DISCORD-OS-POST-BOOTSTRAP-CODE-INVENTORY-2026-05-25.md)
 
 ## Vercel Surface Decommission
 
