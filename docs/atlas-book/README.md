@@ -33,6 +33,7 @@ Start here:
 - [Workflow Recipes](08-workflow-recipes.md)
 - [Automation And Command Candidates](09-automation-and-command-candidates.md)
 - [Failure Modes And Recovery](10-failure-modes-and-recovery.md)
+- [Current System Map / Graph](11-system-map-graph.md)
 
 This chapter set now covers:
 
@@ -41,3 +42,4 @@ This chapter set now covers:
 - how common workflows should run
 - which repeated work is safe to automate later
 - how common failures should be prevented and recovered
+- how the current repos, runtimes, data systems, and approvals connect

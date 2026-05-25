@@ -24,6 +24,7 @@ It is meant to answer:
 8. [Workflow Recipes](08-workflow-recipes.md)
 9. [Automation And Command Candidates](09-automation-and-command-candidates.md)
 10. [Failure Modes And Recovery](10-failure-modes-and-recovery.md)
+11. [Current System Map / Graph](11-system-map-graph.md)
 
 ## Current Emphasis
 
@@ -64,3 +65,8 @@ The next expansion layer now adds:
 - common stack failure modes
 - bounded recovery playbooks
 - lane and receipt ownership for recovery work
+
+The current expansion layer now also adds:
+
+- a cross-system map for repos, runtime, Supabase, Vercel, and approvals
+- a machine-readable appendix for lane status, blockers, and next packages

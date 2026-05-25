@@ -1,0 +1,250 @@
+# Current System Map / Graph
+
+## Purpose
+
+This chapter is the compact cross-system map for the current stack.
+
+It shows:
+
+- which repos exist and who owns them
+- which runtime and data surfaces are live today
+- which future surfaces are planned but not active
+- which contracts and approval gates block the next mutations
+
+## Repo Map
+
+### Current canonical repo surfaces
+
+- `ATLAS`
+  - stack coordination, receipts, markers, and book truth
+- `repos/_stack`
+  - governed deploy authority and shared operator execution
+- `repos/fawxzzy-fitness`
+  - Fitness app/runtime truth
+  - current Discord-hosted runtime truth
+- `repos/fawxzzy-trove`
+  - Trove repo-local runtime truth
+- `repos/fawxzzy-mazer`
+  - Mazer repo-local runtime truth
+- `repos/fawxzzy-foundation`
+  - Foundation repo-local runtime truth
+- `repos/DiscordOS`
+  - future canonical DiscordOS repo
+  - not created locally yet
+
+## Runtime Map
+
+### Current live runtime shape
+
+- Fitness Vercel hosts:
+  - Fitness app runtime
+  - current Discord interaction/runtime
+  - current feedback/update/moderation runtime
+  - current Music Sesh runtime
+- `_stack` remains the governed deploy authority
+- ATLAS root does not host product runtime
+
+### Future runtime shape
+
+- Fitness runtime stays Fitness-owned
+- Discord runtime moves to DiscordOS-owned surfaces later
+- `_stack` remains shared deploy and execution authority
+
+## Supabase Project Map
+
+### Current
+
+- Fitness Supabase: `lpswxoyfniocuhljgzbc`
+  - live Fitness auth/profile truth
+  - verification issuance truth
+  - current live Discord/Music Sesh operational tables
+
+### Future
+
+- DiscordOS Supabase: `nwexsktuuenfdegzrbut`
+  - healthy
+  - empty
+  - no schema landing implemented yet
+  - future home for Discord-owned runtime/workflow tables
+
+## Vercel Project Map
+
+### Canonical active surfaces
+
+- `fawxzzy-fitness`
+  - current live operational hotspot
+  - latest production deploy: May 24, 2026
+- `fawxzzy-trove`
+  - active product surface
+  - latest production deploy: May 22, 2026
+- `fawxzzy-mazer`
+  - quieter active product surface
+  - latest production deploy: April 21, 2026
+- `fawxzzy-foundation`
+  - quieter systems/product surface
+  - latest production deploy: May 11, 2026
+
+### Known stale or duplicate-pressure surfaces
+
+- `fitness-deploy-green-panels`
+- `spotify-club-phase-7-interaction-reliability`
+- `spotify-board-hygiene-main`
+
+These are not yet deleted. They remain decommission-lane surfaces until final dependency checks and explicit deletion approval.
+
+## DiscordOS / Fitness Shared-Seam Map
+
+### Current shared seams
+
+- verification bridge
+- `discord_member_links`
+- member-number sync
+- deploy-to-update handoff
+- current Discord/Music Sesh tables inside Fitness Supabase
+
+### Future target posture
+
+- Fitness keeps:
+  - verification issuance
+  - Fitness auth/profile truth
+  - Fitness release proof
+- DiscordOS later owns:
+  - feedback runtime
+  - update draft/publication runtime
+  - moderation runtime
+  - Music Sesh runtime
+
+## `_stack` Command Ownership Map
+
+`_stack` currently owns or should later own:
+
+- governed deploy authority
+- validation and receipt packaging helpers
+- release-prep to deploy handoff
+- stale-surface audit helpers
+- future Vercel health classification helper
+
+`_stack` does not own product or Discord runtime truth.
+
+## Playbook Doctrine Flow
+
+Current doctrine flow:
+
+1. repeated receipt-backed rule appears in owner workflows
+2. ATLAS records the pattern and convergence consequence
+3. doctrine routing classifies it
+4. Playbook later owns the reusable governance framing
+
+Playbook does not become runtime owner at any step.
+
+## Cortex Planning-Context Flow
+
+Current planning-context flow:
+
+1. ATLAS and receipt surfaces record durable state
+2. ownership and seam docs create planning context
+3. Cortex can later consume that planning context
+4. Cortex does not currently mutate runtime or govern deploys
+
+## Receipt / Proof Flow
+
+Canonical flow:
+
+1. owner repo or owner lane creates proof
+2. `_stack` performs governed deploy where needed
+3. owner repo records release or runtime proof
+4. Discord publication consumes proof only after that
+5. ATLAS records the cross-repo checkpoint
+6. Playbook later extracts reusable doctrine
+
+## Approval-Gated Lanes
+
+Current approval-gated lanes:
+
+- DiscordOS repo bootstrap
+- Fitness Supabase mutation
+- remote preview / unfurl verification
+- stale Vercel surface deletion
+
+These gates remain closed until explicit approval reopens them.
+
+## Future Split
+
+### Fitness app lane
+
+- product and UX
+- QA/LLEL
+- local/mobile proof
+- Fitness profile/data hygiene when approved
+
+### Discord work lane
+
+- DiscordOS
+- bot/runtime
+- feedback/update/moderation workflows
+- Music Sesh
+- DiscordOS Supabase
+
+### ATLAS systems lane
+
+- ATLAS root
+- `_stack`
+- Foundation
+- Lifeline
+- Playbook
+- Cortex planning surfaces
+- markers, receipts, validation, and governance automation
+
+## System Graph
+
+```mermaid
+flowchart LR
+  ATLAS["ATLAS Root\nReceipts, markers, book, coordination"]
+  STACK["_stack\nGoverned deploy authority\nOperator execution"]
+  PLAYBOOK["Playbook\nDoctrine and governance"]
+  CORTEX["Cortex\nPlanning-context consumer"]
+  FITNESS_REPO["Fitness Repo\nrepos/fawxzzy-fitness"]
+  FITNESS_VERCEL["Fitness Vercel\nLive app + current Discord runtime"]
+  FITNESS_DB["Fitness Supabase\nlpswxoyfniocuhljgzbc"]
+  DISCORDOS_REPO["DiscordOS Repo\nrepos/DiscordOS\nplanned only"]
+  DISCORDOS_VERCEL["DiscordOS Vercel\nfuture runtime owner"]
+  DISCORDOS_DB["DiscordOS Supabase\nnwexsktuuenfdegzrbut\nhealthy, empty"]
+  DISCORD["Discord Surfaces\nFeedback, updates, moderation,\nMusic Sesh"]
+  STALE["Stale / duplicate Vercel surfaces\nreview only"]
+
+  FITNESS_REPO --> FITNESS_VERCEL
+  FITNESS_VERCEL --> DISCORD
+  FITNESS_REPO --> FITNESS_DB
+  STACK --> FITNESS_VERCEL
+  FITNESS_REPO --> ATLAS
+  FITNESS_VERCEL --> ATLAS
+  ATLAS --> PLAYBOOK
+  ATLAS --> CORTEX
+
+  FITNESS_DB -. "verification bridge,\nmember links,\nmember-number sync,\ndeploy-update handoff" .- DISCORDOS_DB
+  DISCORDOS_REPO -. "bootstrap approval-gated" .- DISCORDOS_VERCEL
+  DISCORDOS_VERCEL -. "future cutover" .- DISCORD
+  DISCORDOS_REPO -. "future schema + runtime move" .- DISCORDOS_DB
+
+  FITNESS_VERCEL -. "stale surface pressure" .- STALE
+```
+
+## Machine-Readable Appendix
+
+| Lane / surface | Owner | Source of truth | Current status | Blocker | Next package |
+| --- | --- | --- | --- | --- | --- |
+| Fitness app lane | Fitness | `repos/fawxzzy-fitness` plus Fitness release proof | active | none for normal product work | explicit Fitness lane reopen |
+| Discord work lane | Fitness-hosted now, DiscordOS later | Fitness repo/runtime now; DiscordOS docs as future target | planned split, not implemented | DiscordOS bootstrap approval | approved DiscordOS repo bootstrap only |
+| ATLAS systems lane | ATLAS root plus `_stack` and Playbook boundaries | ATLAS docs and receipts | active docs-first | none for docs work | further book or governance surfaces |
+| Fitness Supabase hygiene | Fitness | Fitness Supabase plus ATLAS approval packet chain | paused at approval gate | explicit mutation approval | approved Mutation Pass 1 only |
+| DiscordOS bootstrap | future DiscordOS | future `repos/DiscordOS` | paused at approval gate | explicit bootstrap approval | approved bootstrap only |
+| Stale Vercel decommission | ATLAS systems lane with owner confirmation | Vercel inventory receipts | inventory complete, not deleted | final dependency check and deletion approval | final dependency-check pass |
+| Lifeline health projection | Lifeline later, `_stack` first | current Vercel and stack health receipts | pressure identified, not implemented | no command surface yet | docs or command-design lane for `stack vercel-health` |
+
+## Non-Goals
+
+- no repo creation
+- no code movement
+- no data migration
+- no Vercel mutation
+- no Discord runtime change
