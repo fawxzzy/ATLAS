@@ -22,6 +22,7 @@ It is meant to answer:
 6. [System Ownership](06-system-ownership.md)
 7. [Contracts And Seams](07-contracts-and-seams.md)
 8. [Workflow Recipes](08-workflow-recipes.md)
+9. [Automation And Command Candidates](09-automation-and-command-candidates.md)
 
 ## Current Emphasis
 
@@ -44,3 +45,15 @@ The current expansion layer also adds:
 - reusable workflow recipes
 - allowed owner surfaces
 - proof, receipt, and approval expectations by workflow
+
+The next expansion layer adds:
+
+- repeated operator tasks worth tracking
+- candidate `_stack`, Playbook, and Discord command surfaces
+- automation boundaries that should remain human-reviewed or approval-gated
+
+The current expansion layer now also adds:
+
+- first safe automation candidates
+- explicit "never automate directly" rules
+- linkage from repeated work to the AI automation lanes

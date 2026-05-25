@@ -31,3 +31,11 @@ Start here:
 - [System Ownership](06-system-ownership.md)
 - [Contracts And Seams](07-contracts-and-seams.md)
 - [Workflow Recipes](08-workflow-recipes.md)
+- [Automation And Command Candidates](09-automation-and-command-candidates.md)
+
+This chapter set now covers:
+
+- what the stack is
+- who owns which surfaces
+- how common workflows should run
+- which repeated work is safe to automate later
