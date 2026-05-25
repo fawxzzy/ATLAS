@@ -119,6 +119,10 @@ repo_registry:
     path: repos/fawxzzy-foundation
     role: package
     status: active
+  discordos:
+    path: repos/DiscordOS
+    role: application
+    status: incubating
   fitness:
     path: repos/fawxzzy-fitness
     role: application
@@ -205,7 +209,7 @@ stack_lock:
     - _stack
     - playbook
     - lifeline
-    - foundation
+    - discordos
     - mazer
     - trove
     - stream
@@ -227,6 +231,9 @@ stack_lock:
     foundation:
       trust_class: trusted
       release_eligible: true
+    discordos:
+      trust_class: trusted
+      release_eligible: false
     mazer:
       trust_class: trusted
       release_eligible: true

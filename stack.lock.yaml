@@ -1,6 +1,6 @@
 schema_version: "atlas.stack.lock.v1"
 stack_manifest_path: "stack.yaml"
-stack_manifest_digest: "sha256:36c162a4774e63fd66e7c4e140ced0383e4f10b3dce145273b3cc1a0266268eb"
+stack_manifest_digest: "sha256:5c3987e5793da4ac9d866899f604b533ff508c23826e2b0e64117b056cea38cd"
 component_count: 10
 components:
   _stack:
@@ -14,28 +14,17 @@ components:
     dirty: false
     trust_class: "trusted"
     release_eligible: false
-  foundation:
-    path: "repos/fawxzzy-foundation"
-    role: "package"
-    status: "active"
-    remote: "https://github.com/fawxzzy/fawxzzy-foundation.git"
-    ref_type: "branch"
-    ref: "main"
-    commit: "a016da2f08f167747f7ae7c804c0d6840cb9514d"
-    dirty: false
-    trust_class: "trusted"
-    release_eligible: true
-  fitness:
-    path: "repos/fawxzzy-fitness"
+  discordos:
+    path: "repos/DiscordOS"
     role: "application"
-    status: "unmanaged"
-    remote: "https://github.com/fawxzzy/fawxzzy-fitness.git"
+    status: "incubating"
+    remote: "https://github.com/fawxzzy/DiscordOS.git"
     ref_type: "branch"
     ref: "main"
-    commit: "072fb3c04db1d84717ca1635895fed27ea7373da"
+    commit: "a0a71026b3b8c061571b48295ccf2ff93929eb3d"
     dirty: false
     trust_class: "trusted"
-    release_eligible: true
+    release_eligible: false
   lifeline:
     path: "repos/fawxzzy-lifeline"
     role: "local-operator"
@@ -98,7 +87,7 @@ components:
     remote: "https://github.com/fawxzzy/ATLAS.git"
     ref_type: "branch"
     ref: "main"
-    commit: "eeb8a84e9def10b9d3428affdeee55ac106eb4ef"
+    commit: "35a2382e9452032727067e6798d791227a2dd2ff"
     dirty: true
     trust_class: "trusted"
     release_eligible: false
@@ -121,13 +110,13 @@ components:
     ref_type: "branch"
     ref: "codex/trove-brand-asset-sync"
     commit: "0f5f9fe55bd21aa7f017173f1950d0bd063470c1"
-    dirty: true
+    dirty: false
     trust_class: "trusted"
     release_eligible: true
 excluded_surfaces:
   atlas_adjacent_checkout:
     path: "repos/ATLAS"
-    present: true
+    present: false
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ATLAS sibling checkout remains an adjacent non-canonical repo root and is not part of the governed stack member set."
@@ -227,4 +216,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:f8dad384209d539b9e6daf2205b74340c2a5003725ace77a280e5e64e554478c"
+lock_digest: "sha256:e768b1530bddc1b691368574594ae2bca8c915bade6e074012eb3f07f6156a23"
