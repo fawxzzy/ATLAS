@@ -30,3 +30,4 @@ Start here:
 - [Receipt Index](05-receipt-index.md)
 - [System Ownership](06-system-ownership.md)
 - [Contracts And Seams](07-contracts-and-seams.md)
+- [Workflow Recipes](08-workflow-recipes.md)

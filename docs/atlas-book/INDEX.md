@@ -21,6 +21,7 @@ It is meant to answer:
 5. [Receipt Index](05-receipt-index.md)
 6. [System Ownership](06-system-ownership.md)
 7. [Contracts And Seams](07-contracts-and-seams.md)
+8. [Workflow Recipes](08-workflow-recipes.md)
 
 ## Current Emphasis
 
@@ -37,3 +38,9 @@ The next expansion layer captures:
 - ownership by system
 - cross-system contracts and seams
 - approval-gated boundaries that must not be bypassed
+
+The current expansion layer also adds:
+
+- reusable workflow recipes
+- allowed owner surfaces
+- proof, receipt, and approval expectations by workflow
