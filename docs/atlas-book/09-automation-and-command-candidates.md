@@ -48,6 +48,8 @@ Best candidates:
   - render the current marker table from durable docs state
 - `stack stale-surface audit`
   - inventory duplicate deploy surfaces before deletion approval
+- `stack vercel-health`
+  - summarize canonical projects, churn, stale surfaces, and provenance drift for the current stack
 
 `_stack` should not become the default home for product-specific runtime logic.
 
@@ -162,6 +164,7 @@ These are the best first candidates because they prepare or summarize state with
 - marker checkpoint render command
 - receipt skeleton generator
 - stale-surface audit inventory command
+- Vercel health and churn summary command
 - doctrine routing template generator
 - release-proof to update-draft packaging helper
 - QA/LLEL proof packet generator
@@ -177,6 +180,7 @@ These are the best first candidates because they prepare or summarize state with
 | Discord feedback/panel helpers | DiscordOS later, Fitness-hosted now | runtime workflow surface |
 | Music Sesh setup helpers | DiscordOS later, Fitness-hosted now | runtime workflow surface |
 | data-hygiene export and approval prep | owner repo plus ATLAS docs | high-risk prep needs owner context |
+| Vercel health classification | Lifeline later, `_stack` first | operational health should become a first-class governed signal |
 
 ## Non-Goals
 

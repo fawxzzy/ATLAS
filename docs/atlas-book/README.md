@@ -32,6 +32,7 @@ Start here:
 - [Contracts And Seams](07-contracts-and-seams.md)
 - [Workflow Recipes](08-workflow-recipes.md)
 - [Automation And Command Candidates](09-automation-and-command-candidates.md)
+- [Failure Modes And Recovery](10-failure-modes-and-recovery.md)
 
 This chapter set now covers:
 
@@ -39,3 +40,4 @@ This chapter set now covers:
 - who owns which surfaces
 - how common workflows should run
 - which repeated work is safe to automate later
+- how common failures should be prevented and recovered

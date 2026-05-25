@@ -69,3 +69,23 @@ The stack is moving from convergence and cleanup toward explicit lane separation
 1. Fitness app lane
 2. Discord work lane
 3. ATLAS systems lane
+
+## Current Vercel Pressure
+
+The live Vercel surface is still showing the same structural pressure that justifies accelerating Lifeline work later.
+
+What is true right now:
+
+- `fawxzzy-fitness` remains the highest-churn operational project and is still carrying both product runtime and Discord-hosted runtime responsibilities.
+- stale or duplicate Vercel projects still exist and can blur deploy authority:
+  - `fitness-deploy-green-panels`
+  - `spotify-club-phase-7-interaction-reliability`
+  - `spotify-board-hygiene-main`
+- deployment provenance is still mixed between governed Git-backed deploys and more ad hoc `HEAD` or dirty-state style deploy metadata.
+- the recent 30-day Vercel overview is still polluted by the older Discord polling behavior, so short-window views matter more when checking whether the event-driven fix actually helped.
+
+Why this matters:
+
+- Lifeline should later classify every Vercel surface as canonical, stale, scratch, or cutover-target.
+- deploy provenance and stale-surface pressure should become visible health signals, not remembered context.
+- DiscordOS separation and stale-surface decommission become easier once Lifeline can show service ownership and deploy health clearly.

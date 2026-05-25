@@ -23,6 +23,7 @@ It is meant to answer:
 7. [Contracts And Seams](07-contracts-and-seams.md)
 8. [Workflow Recipes](08-workflow-recipes.md)
 9. [Automation And Command Candidates](09-automation-and-command-candidates.md)
+10. [Failure Modes And Recovery](10-failure-modes-and-recovery.md)
 
 ## Current Emphasis
 
@@ -57,3 +58,9 @@ The current expansion layer now also adds:
 - first safe automation candidates
 - explicit "never automate directly" rules
 - linkage from repeated work to the AI automation lanes
+
+The next expansion layer now adds:
+
+- common stack failure modes
+- bounded recovery playbooks
+- lane and receipt ownership for recovery work
