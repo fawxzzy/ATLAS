@@ -17,6 +17,16 @@ packages/**
 !packages/
 !packages/atlas-contracts/
 !packages/atlas-contracts/**
+!packages/bundles/
+!packages/bundles/.gitkeep
+!packages/patches/
+!packages/patches/.gitkeep
+!packages/prebuilt/
+!packages/prebuilt/.gitkeep
+!packages/releases/
+!packages/releases/.gitkeep
+!packages/snapshots/
+!packages/snapshots/.gitkeep
 data/**
 !data/**/
 !data/**/README.md

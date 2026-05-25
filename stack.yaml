@@ -209,6 +209,7 @@ stack_lock:
     - _stack
     - playbook
     - lifeline
+    - foundation
     - discordos
     - mazer
     - trove

@@ -1,7 +1,7 @@
 schema_version: "atlas.stack.lock.v1"
 stack_manifest_path: "stack.yaml"
-stack_manifest_digest: "sha256:5c3987e5793da4ac9d866899f604b533ff508c23826e2b0e64117b056cea38cd"
-component_count: 10
+stack_manifest_digest: "sha256:2c490ab48aa6bc7730e6aaa58b50f1a9ed4379dd4fcc69b18b1a782af18ae10d"
+component_count: 11
 components:
   _stack:
     path: "repos/_stack"
@@ -25,6 +25,17 @@ components:
     dirty: false
     trust_class: "trusted"
     release_eligible: false
+  foundation:
+    path: "repos/fawxzzy-foundation"
+    role: "package"
+    status: "active"
+    remote: "https://github.com/fawxzzy/fawxzzy-foundation.git"
+    ref_type: "branch"
+    ref: "main"
+    commit: "a016da2f08f167747f7ae7c804c0d6840cb9514d"
+    dirty: false
+    trust_class: "trusted"
+    release_eligible: true
   lifeline:
     path: "repos/fawxzzy-lifeline"
     role: "local-operator"
@@ -87,7 +98,7 @@ components:
     remote: "https://github.com/fawxzzy/ATLAS.git"
     ref_type: "branch"
     ref: "main"
-    commit: "e8086879d2b58e8c54b1c379fb9b2df626104ade"
+    commit: "624107e339f3fde3c889a2cbb8c31b3f0bc21587"
     dirty: true
     trust_class: "trusted"
     release_eligible: false
@@ -216,4 +227,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:62f09afc1a809858a8059a81ab7cf7ff00aaea83bbf078e16b92f0c3fba49cb4"
+lock_digest: "sha256:7a8f547d946a8df80ad13aab69489c6785d27c2bc7491e99cbf22083debe8054"
