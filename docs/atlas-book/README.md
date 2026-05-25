@@ -35,6 +35,7 @@ Start here:
 - [Failure Modes And Recovery](10-failure-modes-and-recovery.md)
 - [Current System Map / Graph](11-system-map-graph.md)
 - [Restart And Handoff Guide](12-restart-and-handoff-guide.md)
+- [Vision And Endgames](13-vision-and-endgames.md)
 
 This chapter set now covers:
 
@@ -45,3 +46,4 @@ This chapter set now covers:
 - how common failures should be prevented and recovered
 - how the current repos, runtimes, data systems, and approvals connect
 - how to restart the stack from a new chat without reconstruction
+- what each major lane is actually trying to finish

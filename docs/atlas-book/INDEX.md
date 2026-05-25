@@ -26,6 +26,7 @@ It is meant to answer:
 10. [Failure Modes And Recovery](10-failure-modes-and-recovery.md)
 11. [Current System Map / Graph](11-system-map-graph.md)
 12. [Restart And Handoff Guide](12-restart-and-handoff-guide.md)
+13. [Vision And Endgames](13-vision-and-endgames.md)
 
 ## Current Emphasis
 
@@ -77,3 +78,9 @@ The current expansion layer also now adds:
 - a restart path for new chats
 - exact approval phrases and handoff format
 - current recommended next packages
+
+The current expansion layer now also adds:
+
+- lane endgames
+- blocker-aware future alignment
+- a shared test for when the split is actually working
