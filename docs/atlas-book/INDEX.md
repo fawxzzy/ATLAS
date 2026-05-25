@@ -19,6 +19,8 @@ It is meant to answer:
 3. [Operating Model](03-operating-model.md)
 4. [Approval Gates](04-approval-gates.md)
 5. [Receipt Index](05-receipt-index.md)
+6. [System Ownership](06-system-ownership.md)
+7. [Contracts And Seams](07-contracts-and-seams.md)
 
 ## Current Emphasis
 
@@ -29,3 +31,9 @@ This seed structure reflects:
 - the Fitness / Discord / ATLAS lane split model
 - DiscordOS separation planning without implementation
 - Fitness Supabase cleanup planning without mutation
+
+The next expansion layer captures:
+
+- ownership by system
+- cross-system contracts and seams
+- approval-gated boundaries that must not be bypassed

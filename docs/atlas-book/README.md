@@ -28,3 +28,5 @@ Start here:
 - [Operating Model](03-operating-model.md)
 - [Approval Gates](04-approval-gates.md)
 - [Receipt Index](05-receipt-index.md)
+- [System Ownership](06-system-ownership.md)
+- [Contracts And Seams](07-contracts-and-seams.md)
