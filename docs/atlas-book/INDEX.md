@@ -25,6 +25,7 @@ It is meant to answer:
 9. [Automation And Command Candidates](09-automation-and-command-candidates.md)
 10. [Failure Modes And Recovery](10-failure-modes-and-recovery.md)
 11. [Current System Map / Graph](11-system-map-graph.md)
+12. [Restart And Handoff Guide](12-restart-and-handoff-guide.md)
 
 ## Current Emphasis
 
@@ -70,3 +71,9 @@ The current expansion layer now also adds:
 
 - a cross-system map for repos, runtime, Supabase, Vercel, and approvals
 - a machine-readable appendix for lane status, blockers, and next packages
+
+The current expansion layer also now adds:
+
+- a restart path for new chats
+- exact approval phrases and handoff format
+- current recommended next packages

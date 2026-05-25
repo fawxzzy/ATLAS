@@ -34,6 +34,7 @@ Start here:
 - [Automation And Command Candidates](09-automation-and-command-candidates.md)
 - [Failure Modes And Recovery](10-failure-modes-and-recovery.md)
 - [Current System Map / Graph](11-system-map-graph.md)
+- [Restart And Handoff Guide](12-restart-and-handoff-guide.md)
 
 This chapter set now covers:
 
@@ -43,3 +44,4 @@ This chapter set now covers:
 - which repeated work is safe to automate later
 - how common failures should be prevented and recovered
 - how the current repos, runtimes, data systems, and approvals connect
+- how to restart the stack from a new chat without reconstruction

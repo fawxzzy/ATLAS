@@ -23,22 +23,22 @@
 - Operator Secret Path Hygiene: `60%`
 - Manual Deploy Exception Burn-Down: `70%`
 - Fitness Supabase Profile/Data Hygiene: `50%`
-- Unified Workflow Convergence: `65%`
-- Inventory & Truth Map: `20%`
+- Unified Workflow Convergence: `70%`
+- Inventory & Truth Map: `30%`
 - Full Stack Re-sync, Clean & Closeout: `22% paused`
 - Vision & Future Alignment: `0%`
-- Dependency Untangling: `30%`
-- Core Pattern Convergence: `35%`
+- Dependency Untangling: `40%`
+- Core Pattern Convergence: `40%`
 - Playbook Everywhere + Cortex Interface: `20%`
-- Knowledge Capture & Transfer: `35%`
+- Knowledge Capture & Transfer: `65%`
 - Feedback Loop Readiness: `20%`
 - Sandbox Simulation Readiness: `0%`
 - AI Long-Run Batch Orchestration: `20%`
-- AI Repetition-to-Automation Pipeline: `20%`
-- Truth Map & ATLAS Book: `0%`
+- AI Repetition-to-Automation Pipeline: `30%`
+- Truth Map & ATLAS Book: `65%`
 - Discord OS Infrastructure Separation: `65%`
 - Discord Workflow, Publication & Docs Reliability: `10%`
-- Post-Convergence Lane Split Readiness: `15%`
+- Post-Convergence Lane Split Readiness: `20%`
 
 ## Key Lane Reads
 
@@ -56,12 +56,15 @@
 - Core Pattern Convergence
 - Knowledge Capture & Transfer
 - Discord OS Infrastructure Separation
+- Truth Map & ATLAS Book
 
 ### Approval-gated or paused execution lanes
 
 - Fitness Supabase Profile/Data Hygiene
 - Discord OS Infrastructure Separation implementation
 - Full Stack Re-sync, Clean & Closeout
+- stale Vercel surface deletion
+- remote preview / unfurl verification
 
 ## Current Split Read
 
