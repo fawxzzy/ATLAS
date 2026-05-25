@@ -118,9 +118,9 @@ DiscordOS is the future owner for:
 
 Current status:
 
-- planned
-- approval-gated bootstrap only
-- no local repo yet
+- bootstrapped
+- local repo now exists at `repos/DiscordOS`
+- governance scaffold only
 - no code moved
 - no runtime cutover
 

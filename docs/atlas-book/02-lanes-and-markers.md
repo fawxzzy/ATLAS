@@ -16,29 +16,29 @@
 - Fitness Recovery Preservation: `80%`
 - Canonical Repo Restoration: `100%`
 - Tmp Dependency Elimination: `85%`
-- Duplicate Surface Decommission: `88%`
+- Duplicate Surface Decommission: `94%`
 - Branch & Worktree Normalization: `96%`
 - Brand Asset Canonicalization: `80%`
 - Preview Cache & Surface Consistency: `70%`
 - Operator Secret Path Hygiene: `60%`
-- Manual Deploy Exception Burn-Down: `70%`
+- Manual Deploy Exception Burn-Down: `75%`
 - Fitness Supabase Profile/Data Hygiene: `50%`
 - Unified Workflow Convergence: `70%`
 - Inventory & Truth Map: `30%`
 - Full Stack Re-sync, Clean & Closeout: `22% paused`
-- Vision & Future Alignment: `0%`
-- Dependency Untangling: `40%`
+- Vision & Future Alignment: `25%`
+- Dependency Untangling: `45%`
 - Core Pattern Convergence: `40%`
 - Playbook Everywhere + Cortex Interface: `20%`
-- Knowledge Capture & Transfer: `65%`
+- Knowledge Capture & Transfer: `72%`
 - Feedback Loop Readiness: `20%`
 - Sandbox Simulation Readiness: `0%`
 - AI Long-Run Batch Orchestration: `20%`
 - AI Repetition-to-Automation Pipeline: `30%`
-- Truth Map & ATLAS Book: `65%`
-- Discord OS Infrastructure Separation: `65%`
+- Truth Map & ATLAS Book: `85%`
+- Discord OS Infrastructure Separation: `75%`
 - Discord Workflow, Publication & Docs Reliability: `10%`
-- Post-Convergence Lane Split Readiness: `20%`
+- Post-Convergence Lane Split Readiness: `50%`
 
 ## Key Lane Reads
 
@@ -61,17 +61,17 @@
 ### Approval-gated or paused execution lanes
 
 - Fitness Supabase Profile/Data Hygiene
-- Discord OS Infrastructure Separation implementation
+- Discord OS separation implementation after bootstrap
 - Full Stack Re-sync, Clean & Closeout
-- stale Vercel surface deletion
 - remote preview / unfurl verification
+- remaining duplicate-surface cleanup for surviving Vercel leftovers
 
 ## Current Split Read
 
-The marker model now supports a future three-lane operating split:
+The marker model now supports a now-actionable three-lane operating split:
 
 - Fitness app lane
 - Discord work lane
 - ATLAS systems lane
 
-That split is planned, not yet operational by implementation.
+That split is defined and partially operationalized by bootstrap and governance surfaces, but the major runtime/data lanes are not cut over yet.

@@ -42,9 +42,9 @@ Shared rules that survive the split:
 - exists to give Discord runtime and publication workflows their own home
 - done means DiscordOS owns runtime, Discord-owned env, and Discord-owned Supabase classes with explicit Fitness contracts only
 - should not depend on hidden Fitness coupling
-- currently blocked by bootstrap approval
+- bootstrap is complete, but runtime/data migration has not started
 - next valid package:
-  - approved DiscordOS repo bootstrap only
+  - bounded DiscordOS code inventory / extraction package
 
 ### ATLAS Systems Lane
 
@@ -61,7 +61,8 @@ Shared rules that survive the split:
 
 - done means repo, env, schema, runtime, and cutover all move into governed DiscordOS surfaces with explicit contracts
 - should not cut over before contract, schema, and rollback posture are durable
-- currently paused at bootstrap approval
+- bootstrap is complete
+- currently paused at post-bootstrap implementation sequencing
 
 ### Fitness Supabase Hygiene
 
@@ -103,7 +104,8 @@ Shared rules that survive the split:
 
 - done means duplicate or stale Vercel surfaces are dependency-checked and removed only when safe
 - should not delete by appearance alone
-- currently paused at deletion approval
+- two stale Spotify-era projects are already deleted
+- current remaining surface is `fitness-deploy-green-panels`
 
 ### Full Clean / Resync Closeout
 
@@ -122,11 +124,10 @@ Shared rules that survive the split:
 
 ## Current Blocker Summary
 
-- DiscordOS bootstrap approval
-- Fitness Supabase mutation approval
+- exact row-scoped Fitness Supabase mutation approval
 - remote preview/unfurl verification approval
-- stale Vercel deletion approval
-- deferred closeout until gated decisions are made
+- remaining duplicate-surface decision for `fitness-deploy-green-panels`
+- deferred closeout until the next bounded implementation lanes are chosen
 
 ## Next Valid Packages
 
@@ -139,10 +140,9 @@ Shared rules that survive the split:
 
 ### Reopen only with approval
 
-- DiscordOS repo bootstrap
 - Fitness Supabase mutation
 - remote preview/unfurl verification
-- stale Vercel deletion
+- any remaining stale Vercel deletion after dependency check
 
 ## Future Split Connection
 

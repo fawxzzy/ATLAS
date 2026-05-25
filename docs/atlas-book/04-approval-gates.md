@@ -2,24 +2,6 @@
 
 ## Current Approval-Gated Lanes
 
-### DiscordOS repo bootstrap
-
-Status:
-
-- paused until explicit approval
-
-Required phrase:
-
-`Approve DiscordOS repo bootstrap only into repos/DiscordOS, no code migration.`
-
-Current limit:
-
-- no local repo creation
-- no code movement
-- no Supabase mutation
-- no Vercel mutation
-- no bot/runtime change
-
 ### Fitness Supabase mutation
 
 Status:
@@ -43,28 +25,43 @@ Current limit:
 
 - no remote mutation or verification by implication from local proof work
 
-### Vercel stale surface deletion
+## Closed Gates Recently Resolved
+
+### DiscordOS repo bootstrap
 
 Status:
 
-- paused pending final dependency check and explicit deletion approval
+- completed on 2026-05-25
 
-Current limit:
+Result:
 
-- no project deletion
-- no alias removal
-- no DNS mutation
+- `repos/DiscordOS` now exists as the canonical local repo surface
+- governance scaffold only
+- no code migration
+- no env files
+- no runtime mutation
+
+### Vercel stale Spotify-surface deletion
+
+Status:
+
+- completed on 2026-05-25
+
+Result:
+
+- `spotify-club-phase-7-interaction-reliability` deleted
+- `spotify-board-hygiene-main` deleted
+- canonical Fitness project unchanged
 
 ## No-Mutation Defaults
 
 Without explicit approval:
 
-- no DiscordOS bootstrap implementation
 - no Fitness Supabase mutation
-- no DiscordOS schema implementation
-- no DiscordOS Vercel creation
+- no DiscordOS runtime cutover by implication from the completed bootstrap
+- no DiscordOS schema or Vercel mutation by implication from planning docs
 - no bot restart or retarget
-- no stale Vercel surface deletion
+- no remaining stale-Vercel cleanup by appearance alone
 
 ## Why These Gates Exist
 

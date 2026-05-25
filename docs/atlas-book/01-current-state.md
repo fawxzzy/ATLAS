@@ -7,7 +7,7 @@ The stack is currently at a clean docs-first convergence checkpoint.
 What is true right now:
 
 - Fitness remains the live app and the live Discord-hosted runtime owner.
-- DiscordOS separation is planned and bounded, but not implemented.
+- DiscordOS separation is planned and bounded, and the canonical local repo surface now exists.
 - Fitness Supabase cleanup is fully planned and approval-gated, but not mutated.
 - `_stack` remains the governed deploy authority for approved app lanes.
 - ATLAS root remains the coordination, receipt, and marker layer.
@@ -31,8 +31,8 @@ What is true right now:
 
 Current status:
 
-- planned only
-- no local repo yet
+- local repo now exists at `repos/DiscordOS`
+- governance scaffold only
 - no code moved
 - no runtime cutover
 
@@ -57,10 +57,10 @@ Current status:
 
 ## Current Paused Or Gated Work
 
-- DiscordOS bootstrap is approval-gated
 - Fitness Supabase mutation is approval-gated
 - remote preview/unfurl verification is approval-gated
-- stale Vercel surface deletion is still blocked on final dependency check and explicit approval
+- DiscordOS schema, runtime, and data migration remain unstarted and must stay receipt-bounded
+- remaining stale-Vercel cleanup is narrowed to the surviving duplicate-pressure surface, not the deleted Spotify-era projects
 
 ## Current Direction
 
@@ -77,10 +77,9 @@ The live Vercel surface is still showing the same structural pressure that justi
 What is true right now:
 
 - `fawxzzy-fitness` remains the highest-churn operational project and is still carrying both product runtime and Discord-hosted runtime responsibilities.
-- stale or duplicate Vercel projects still exist and can blur deploy authority:
+- the two stale Spotify-era Vercel projects were deleted on 2026-05-25 after dependency clearance.
+- one known duplicate-pressure Vercel surface still remains and can blur deploy authority:
   - `fitness-deploy-green-panels`
-  - `spotify-club-phase-7-interaction-reliability`
-  - `spotify-board-hygiene-main`
 - deployment provenance is still mixed between governed Git-backed deploys and more ad hoc `HEAD` or dirty-state style deploy metadata.
 - the recent 30-day Vercel overview is still polluted by the older Discord polling behavior, so short-window views matter more when checking whether the event-driven fix actually helped.
 

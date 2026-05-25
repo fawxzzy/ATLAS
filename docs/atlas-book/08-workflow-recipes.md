@@ -270,12 +270,12 @@ This chapter turns the current operating model into reusable “run this workflo
 
 ### Starting point
 
-- inventory, shared contracts, env/runtime ownership, schema landing plan, cutover plan, bootstrap approval
+- inventory, shared contracts, env/runtime ownership, schema landing plan, cutover plan, and completed bootstrap receipt
 
 ### Allowed commands / surfaces
 
-- docs-only planning until explicit bootstrap approval
-- later bounded repo bootstrap
+- docs-only planning
+- completed bounded repo bootstrap
 - later bounded schema and runtime lanes
 
 ### Proof required
@@ -284,21 +284,22 @@ This chapter turns the current operating model into reusable “run this workflo
 - env/runtime ownership split
 - schema landing plan
 - runtime/Vercel cutover plan
-- approval packet for bootstrap
+- bootstrap receipt
 
 ### Receipt required
 
 - each planning receipt in the separation chain
-- later bootstrap receipt
+- bootstrap receipt
 - later schema and cutover receipts
 
 ### Approval gates
 
-- bootstrap approval is required before local repo creation
+- bootstrap is complete
+- code migration or runtime mutation still requires a bounded implementation package and receipt
 
 ### Forbidden shortcuts
 
-- no code movement before bootstrap approval
+- no code movement by implication from bootstrap
 - no hidden Fitness coupling preserved as the default
 - no Vercel or Supabase mutation from planning docs
 
@@ -378,7 +379,7 @@ This chapter turns the current operating model into reusable “run this workflo
 
 ### Approval gates
 
-- stale Vercel surface deletion still requires explicit approval
+- any remaining stale Vercel surface deletion still requires explicit approval
 
 ### Forbidden shortcuts
 

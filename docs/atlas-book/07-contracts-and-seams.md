@@ -145,13 +145,7 @@ Rule:
 
 - runtime/Vercel ownership must split with env and data ownership, not before
 
-## Approval-Gated Seams
-
-### DiscordOS repo bootstrap
-
-Approval required:
-
-- `Approve DiscordOS repo bootstrap only into repos/DiscordOS, no code migration.`
+## Remaining Approval-Gated Seams
 
 ### Fitness Supabase mutation
 
@@ -169,7 +163,7 @@ Approval required:
 
 Approval required:
 
-- final dependency check plus deletion approval
+- only for any remaining deletion candidate after dependency check
 
 ## No-Hidden-Coupling Rules
 
@@ -188,8 +182,9 @@ The first safe moves after the current docs-only checkpoint are still bounded:
 
 1. approved DiscordOS repo bootstrap only
 2. approved Fitness Supabase mutation only
-3. later schema landing implementation
-4. later dual-read proof
-5. later bounded runtime cutover
+3. later DiscordOS code inventory/extraction package
+4. later schema landing implementation
+5. later dual-read proof
+6. later bounded runtime cutover
 
 None of those are implied by this contract map alone.

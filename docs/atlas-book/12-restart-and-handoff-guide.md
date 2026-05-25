@@ -60,12 +60,6 @@ Use this decision order:
 
 ## Approval-Gated Lanes And Exact Approval Phrases
 
-### DiscordOS repo bootstrap
-
-Approval phrase:
-
-`Approve DiscordOS repo bootstrap only into repos/DiscordOS, no code migration.`
-
 ### Fitness Supabase mutation
 
 Approval requirement:
@@ -170,17 +164,17 @@ If staying docs-only:
 
 If reopening an approved gated lane:
 
-- DiscordOS repo bootstrap only after exact bootstrap approval
 - Fitness Supabase Mutation Pass 1 only after exact mutation approval
-- stale Vercel deletion only after final dependency check and explicit deletion approval
+- remote preview / unfurl verification only after explicit deploy-backed lane opening
+- remaining stale Vercel duplicate-pressure review only for `fitness-deploy-green-panels`
 
 ## Current Fast Resume Summary
 
 At this checkpoint:
 
 - Fitness Supabase mutation is still paused at approval
-- DiscordOS bootstrap is still paused at approval
-- DiscordOS separation planning is durable but not implemented
+- DiscordOS bootstrap is complete and `repos/DiscordOS` now exists locally
+- DiscordOS separation planning is durable, but code and runtime migration have not started
 - the ATLAS Book is the primary restart surface
 - `_stack` remains deploy authority
 - Lifeline is justified as a future operational health surface, especially for Vercel classification and service-pressure visibility

@@ -31,6 +31,12 @@
 - [Discord OS Runtime / Vercel Cutover Plan](../ops/DISCORD-OS-RUNTIME-VERCEL-CUTOVER-PLAN-2026-05-24.md)
 - [Discord OS Repo Bootstrap Plan](../ops/DISCORD-OS-REPO-BOOTSTRAP-PLAN-2026-05-24.md)
 - [Discord OS Repo Bootstrap Approval](../ops/DISCORD-OS-REPO-BOOTSTRAP-APPROVAL-2026-05-24.md)
+- [Discord OS Repo Bootstrap Receipt](../ops/DISCORD-OS-REPO-BOOTSTRAP-RECEIPT-2026-05-25.md)
+
+## Vercel Surface Decommission
+
+- [Vercel Stale Surface Deletion Readiness](../ops/VERCEL-STALE-SURFACE-DELETION-READINESS-2026-05-25.md)
+- [Vercel Stale Surface Deletion](../ops/VERCEL-STALE-SURFACE-DELETION-2026-05-25.md)
 
 ## Lane Split
 

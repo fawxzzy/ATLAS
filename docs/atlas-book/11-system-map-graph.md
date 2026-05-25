@@ -29,8 +29,9 @@ It shows:
 - `repos/fawxzzy-foundation`
   - Foundation repo-local runtime truth
 - `repos/DiscordOS`
-  - future canonical DiscordOS repo
-  - not created locally yet
+  - canonical DiscordOS repo surface now exists locally
+  - governance scaffold only
+  - no migrated runtime code yet
 
 ## Runtime Map
 
@@ -87,10 +88,8 @@ It shows:
 ### Known stale or duplicate-pressure surfaces
 
 - `fitness-deploy-green-panels`
-- `spotify-club-phase-7-interaction-reliability`
-- `spotify-board-hygiene-main`
 
-These are not yet deleted. They remain decommission-lane surfaces until final dependency checks and explicit deletion approval.
+The stale Spotify-era Vercel projects were deleted on 2026-05-25 after dependency clearance. `fitness-deploy-green-panels` remains the known duplicate-pressure surface still needing its own dependency decision.
 
 ## DiscordOS / Fitness Shared-Seam Map
 
@@ -161,10 +160,9 @@ Canonical flow:
 
 Current approval-gated lanes:
 
-- DiscordOS repo bootstrap
 - Fitness Supabase mutation
 - remote preview / unfurl verification
-- stale Vercel surface deletion
+- any remaining duplicate-surface deletion after dependency check
 
 These gates remain closed until explicit approval reopens them.
 
@@ -206,11 +204,11 @@ flowchart LR
   FITNESS_REPO["Fitness Repo\nrepos/fawxzzy-fitness"]
   FITNESS_VERCEL["Fitness Vercel\nLive app + current Discord runtime"]
   FITNESS_DB["Fitness Supabase\nlpswxoyfniocuhljgzbc"]
-  DISCORDOS_REPO["DiscordOS Repo\nrepos/DiscordOS\nplanned only"]
+  DISCORDOS_REPO["DiscordOS Repo\nrepos/DiscordOS\nbootstrapped scaffold"]
   DISCORDOS_VERCEL["DiscordOS Vercel\nfuture runtime owner"]
   DISCORDOS_DB["DiscordOS Supabase\nnwexsktuuenfdegzrbut\nhealthy, empty"]
   DISCORD["Discord Surfaces\nFeedback, updates, moderation,\nMusic Sesh"]
-  STALE["Stale / duplicate Vercel surfaces\nreview only"]
+  STALE["Remaining duplicate-pressure Vercel surfaces\nmanual review"]
 
   FITNESS_REPO --> FITNESS_VERCEL
   FITNESS_VERCEL --> DISCORD
@@ -222,7 +220,7 @@ flowchart LR
   ATLAS --> CORTEX
 
   FITNESS_DB -. "verification bridge,\nmember links,\nmember-number sync,\ndeploy-update handoff" .- DISCORDOS_DB
-  DISCORDOS_REPO -. "bootstrap approval-gated" .- DISCORDOS_VERCEL
+  DISCORDOS_REPO -. "future code + runtime landing" .- DISCORDOS_VERCEL
   DISCORDOS_VERCEL -. "future cutover" .- DISCORD
   DISCORDOS_REPO -. "future schema + runtime move" .- DISCORDOS_DB
 
@@ -234,11 +232,11 @@ flowchart LR
 | Lane / surface | Owner | Source of truth | Current status | Blocker | Next package |
 | --- | --- | --- | --- | --- | --- |
 | Fitness app lane | Fitness | `repos/fawxzzy-fitness` plus Fitness release proof | active | none for normal product work | explicit Fitness lane reopen |
-| Discord work lane | Fitness-hosted now, DiscordOS later | Fitness repo/runtime now; DiscordOS docs as future target | planned split, not implemented | DiscordOS bootstrap approval | approved DiscordOS repo bootstrap only |
+| Discord work lane | Fitness-hosted now, DiscordOS later | Fitness repo/runtime now; `repos/DiscordOS` plus ATLAS separation receipts as future target | bootstrap complete, migration not started | no code extraction package yet | bounded DiscordOS code inventory / extraction package |
 | ATLAS systems lane | ATLAS root plus `_stack` and Playbook boundaries | ATLAS docs and receipts | active docs-first | none for docs work | further book or governance surfaces |
-| Fitness Supabase hygiene | Fitness | Fitness Supabase plus ATLAS approval packet chain | paused at approval gate | explicit mutation approval | approved Mutation Pass 1 only |
-| DiscordOS bootstrap | future DiscordOS | future `repos/DiscordOS` | paused at approval gate | explicit bootstrap approval | approved bootstrap only |
-| Stale Vercel decommission | ATLAS systems lane with owner confirmation | Vercel inventory receipts | inventory complete, not deleted | final dependency check and deletion approval | final dependency-check pass |
+| Fitness Supabase hygiene | Fitness | Fitness Supabase plus ATLAS approval packet chain | paused at approval gate | exact row-scoped mutation approval | row-scoped Mutation Pass 1 execution packet |
+| DiscordOS bootstrap | DiscordOS | `repos/DiscordOS` | completed with governance scaffold only | no migrated code yet | bounded post-bootstrap implementation plan |
+| Stale Vercel decommission | ATLAS systems lane with owner confirmation | Vercel inventory and deletion receipts | two stale projects deleted; one duplicate-pressure surface remains | remaining dependency decision for `fitness-deploy-green-panels` | final dependency-check pass for remaining surface |
 | Lifeline health projection | Lifeline later, `_stack` first | current Vercel and stack health receipts | pressure identified, not implemented | no command surface yet | docs or command-design lane for `stack vercel-health` |
 
 ## Non-Goals
