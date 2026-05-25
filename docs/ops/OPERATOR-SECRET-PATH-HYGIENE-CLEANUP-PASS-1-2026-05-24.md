@@ -13,20 +13,20 @@ Move the repo-root Discord worker env residue out of the Fitness repo root and i
 
 Source:
 
-- `C:\ATLAS\repos\fawxzzy-fitness\.env.discord-worker`
+- `repos/fawxzzy-fitness/.env.discord-worker`
 
 Governed destination:
 
-- `C:\ATLAS\secrets\local\fawxzzy-fitness-discord-worker.env`
+- `secrets/local/fawxzzy-fitness-discord-worker.env`
 
 Governed backup created during pass:
 
-- `C:\ATLAS\secrets\local\fawxzzy-fitness-discord-worker.pre-pass-1.backup.env`
+- `secrets/local/fawxzzy-fitness-discord-worker.pre-pass-1.backup.env`
 
 ## Preconditions Verified
 
 - source file existed before cleanup
-- destination directory existed: `C:\ATLAS\secrets\local`
+- destination directory existed: `secrets/local`
 - governed destination already existed before cleanup
 - source and destination had the same key-name inventory
 - source and destination were not byte-identical, so the preexisting governed destination was backed up before overwrite
@@ -111,9 +111,9 @@ Keys:
 
 Verified:
 
-- `C:\ATLAS\repos\fawxzzy-fitness\.env.discord-worker` no longer exists
-- `C:\ATLAS\secrets\local\fawxzzy-fitness-discord-worker.env` exists
-- `C:\ATLAS\secrets\local\fawxzzy-fitness-discord-worker.pre-pass-1.backup.env` exists
+- `repos/fawxzzy-fitness/.env.discord-worker` no longer exists
+- `secrets/local/fawxzzy-fitness-discord-worker.env` exists
+- `secrets/local/fawxzzy-fitness-discord-worker.pre-pass-1.backup.env` exists
 - destination is ignored by Git under root `.gitignore`
 - backup is ignored by Git under root `.gitignore`
 
@@ -129,7 +129,7 @@ Verified:
 
 Important note:
 
-- `C:\ATLAS\repos\fawxzzy-fitness` was not clean before or after this pass because of unrelated preexisting tracked modifications outside the scope of this cleanup
+- `repos/fawxzzy-fitness` was not clean before or after this pass because of unrelated preexisting tracked modifications outside the scope of this cleanup
 - this cleanup did not introduce a new tracked diff in the Fitness repo
 - the removed source file was ignored local residue, not a tracked file
 
