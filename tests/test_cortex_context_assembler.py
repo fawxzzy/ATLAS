@@ -38,6 +38,9 @@ class CortexContextAssemblerTests(unittest.TestCase):
         cls.rule_payload = json.loads(
             (cls.root / "runtime" / "cortex" / "kernel.rule-registry.seed.v1.json").read_text(encoding="utf-8")
         )
+        cls.workflow_profile_metadata = json.loads(
+            (cls.root / "docs" / "memory" / "profiles" / "zachariah_workflow_profile.json").read_text(encoding="utf-8")
+        )
 
     def _base_validation_payload(
         self,
@@ -163,8 +166,18 @@ class CortexContextAssemblerTests(unittest.TestCase):
                 "runtime/receipts/validation/stack-validation.latest.json",
                 "runtime/cortex/kernel.state-model.seed.v1.json",
                 "runtime/cortex/kernel.rule-registry.seed.v1.json",
+                "docs/memory/profiles/zachariah_workflow_profile.md",
+                "docs/memory/profiles/zachariah_workflow_profile.json",
             ],
             payload["source_refs"],
+        )
+        self.assertEqual(
+            self.workflow_profile_metadata["id"],
+            payload["workflow_profile"]["profile_id"],
+        )
+        self.assertEqual(
+            ["Done", "Now", "Next"],
+            payload["workflow_profile"]["response_contract"]["status_block_labels"],
         )
         self.assertTrue(payload["rule_highlights"])
         json.dumps(payload, sort_keys=True)
@@ -261,6 +274,7 @@ class CortexContextAssemblerTests(unittest.TestCase):
         self.assertIn("# Cortex Context Packet", summary)
         self.assertIn("## Objective", summary)
         self.assertIn("promote-cortex-receipt-interpretation-consumption-feedback-wave11", summary)
+        self.assertIn("## Workflow Profile", summary)
 
     def test_cli_fails_clearly_when_current_state_is_missing(self) -> None:
         temp_dir = tempfile.TemporaryDirectory()

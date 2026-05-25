@@ -31,6 +31,11 @@ This profile should be read by:
 
 Agents working in Atlas should read this profile before planning Playbook, Cortex, Atlas, Codex-prompt, or repo-architecture work.
 
+The current Cortex integration is intentionally small:
+- Cortex context assembly consumes the canonical workflow profile as an explicit read-model
+- Cortex worker prompts mirror the same response-contract and style guidance
+- this does not implement full Cortex ingestion, memory promotion, or runtime decisioning
+
 ## Memory architecture guidance
 
 Rule:
@@ -44,10 +49,10 @@ If profile context only lives in ChatGPT saved memory, it can be lost, compresse
 
 ## Scope note
 
-This change provides durable context storage and discovery only.
+This change provides durable context storage, discovery, and a minimal Cortex read-model.
 
 It does not:
-- implement Cortex ingestion
+- implement full Cortex ingestion or runtime memory orchestration
 - implement Playbook features
 - implement cross-repo pattern learning
 - introduce a second hidden memory system

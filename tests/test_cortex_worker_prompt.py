@@ -8,6 +8,7 @@ from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 
 from ops._atlas import atlas_root
+from ops.cortex.workflow_profile import build_workflow_profile_payload
 from ops.cortex.worker_prompt import (
     build_cortex_worker_prompt_payload,
     default_worker_prompt_latest_json_path,
@@ -183,6 +184,7 @@ class CortexWorkerPromptTests(unittest.TestCase):
             "docs/atlas/notes/cortex-surface-reconciliation-2026-05-06.md",
         ]
         payload["task_frame"]["ready_to_execute"] = True
+        payload["workflow_profile"] = build_workflow_profile_payload(root=self.root)
         return payload
 
     def _base_operator_surface_payload(self) -> dict:
@@ -374,6 +376,14 @@ class CortexWorkerPromptTests(unittest.TestCase):
         self.assertEqual("not_emitted_by_cortex", payload["separation_refs"]["final_receipt"]["status"])
         self.assertEqual([], payload["task_frame_summary"]["blocked_by"])
         self.assertTrue(payload["non_execution_guards"])
+        self.assertEqual(
+            "zachariah_workflow_profile",
+            payload["workflow_profile"]["profile_id"],
+        )
+        self.assertIn(
+            "docs/memory/profiles/zachariah_workflow_profile.md",
+            payload["source_refs"],
+        )
         json.dumps(payload, sort_keys=True)
 
     def test_markdown_summary_includes_lane_verification_and_guards(self) -> None:
@@ -387,6 +397,7 @@ class CortexWorkerPromptTests(unittest.TestCase):
         self.assertIn("# Cortex Worker Prompt", summary)
         self.assertIn("promote-cortex-receipt-interpretation-consumption-feedback-wave11", summary)
         self.assertIn("Verification Steps", summary)
+        self.assertIn("Workflow Profile", summary)
         self.assertIn("Non-Execution Guards", summary)
         self.assertIn("Stack lock digest", summary)
 

@@ -17,6 +17,7 @@ from ops.cortex._artifacts import stable_json_digest, write_json
 from ops.cortex.current_state import default_current_state_latest_json_path, default_validation_receipt_path
 from ops.cortex.kernel import default_rule_registry_path, default_state_model_path
 from ops.cortex.rail_state_reader import default_rail_state_latest_json_path
+from ops.cortex.workflow_profile import build_workflow_profile_payload
 
 CONTEXT_PACKET_CONTRACT_VERSION = "atlas.cortex.context-packet.v1"
 
@@ -233,6 +234,8 @@ def _evidence_list(
     state_model_payload: dict[str, Any],
     rule_registry_ref: str,
     rule_registry_payload: dict[str, Any],
+    workflow_profile_ref: str,
+    workflow_profile_payload: dict[str, Any],
 ) -> list[dict[str, Any]]:
     return [
         {
@@ -265,6 +268,12 @@ def _evidence_list(
             "role": "matched rules, patterns, and failure modes",
             "rule_count": len(rule_registry_payload.get("rules", [])) if isinstance(rule_registry_payload.get("rules"), list) else 0,
         },
+        {
+            "ref": workflow_profile_ref,
+            "kind": "workflow_profile",
+            "role": "canonical operator workflow profile for Cortex bootstrap and response-shape guidance",
+            "profile_id": str(workflow_profile_payload.get("profile_id", "")),
+        },
     ]
 
 
@@ -295,6 +304,9 @@ def build_context_packet_payload(
     validation_ref = atlas_relative(resolved_validation, root=base)
     state_model_ref = atlas_relative(resolved_state_model, root=base)
     rule_registry_ref = atlas_relative(resolved_rule_registry, root=base)
+    workflow_profile_payload = build_workflow_profile_payload(root=base)
+    workflow_profile_markdown_ref = str(workflow_profile_payload.get("canonical_refs", {}).get("markdown", "")).strip()
+    workflow_profile_metadata_ref = str(workflow_profile_payload.get("canonical_refs", {}).get("metadata", "")).strip()
 
     seeded_rail_state = (
         rail_state_payload.get("seeded_rail_state") if isinstance(rail_state_payload.get("seeded_rail_state"), dict) else {}
@@ -313,7 +325,15 @@ def build_context_packet_payload(
     validation_counts = _normalize_counts(
         validation_payload.get("summary", {}) if isinstance(validation_payload.get("summary"), dict) else {}
     )
-    evidence_refs = [current_state_ref, rail_state_ref, validation_ref, state_model_ref, rule_registry_ref]
+    evidence_refs = [
+        current_state_ref,
+        rail_state_ref,
+        validation_ref,
+        state_model_ref,
+        rule_registry_ref,
+        workflow_profile_markdown_ref,
+        workflow_profile_metadata_ref,
+    ]
     task_frame = _task_frame(
         immediate_lane=immediate_lane,
         seeded_next_action=seeded_next_action,
@@ -350,6 +370,7 @@ def build_context_packet_payload(
             seeded_source_refs=_ordered_unique_strings(seeded_rail_state.get("source_refs", [])),
         ),
         "rule_highlights": _rule_highlights(matched_rule_ids, rule_registry_payload),
+        "workflow_profile": workflow_profile_payload,
         "boundary_reminders": _boundary_reminders(
             rail_state_payload=rail_state_payload,
             current_state_payload=current_state_payload,
@@ -366,6 +387,8 @@ def build_context_packet_payload(
             state_model_payload=state_model_payload,
             rule_registry_ref=rule_registry_ref,
             rule_registry_payload=rule_registry_payload,
+            workflow_profile_ref=workflow_profile_markdown_ref,
+            workflow_profile_payload=workflow_profile_payload,
         ),
         "source_refs": evidence_refs,
     }
@@ -375,6 +398,7 @@ def render_context_packet_summary(payload: dict[str, Any]) -> str:
     task_frame = payload["task_frame"]
     posture = payload["posture_snapshot"]
     deferred_lane = payload.get("deferred_lane")
+    workflow_profile = payload.get("workflow_profile", {})
     lines = [
         "# Cortex Context Packet",
         "",
@@ -420,6 +444,25 @@ def render_context_packet_summary(payload: dict[str, Any]) -> str:
     if payload.get("rule_highlights"):
         for item in payload["rule_highlights"]:
             lines.append(f"- `{item['id']}` ({item['kind']}): {item['statement']}")
+    else:
+        lines.append("- none")
+    lines.extend(["", "## Workflow Profile"])
+    if isinstance(workflow_profile, dict) and workflow_profile:
+        response_contract = (
+            workflow_profile.get("response_contract")
+            if isinstance(workflow_profile.get("response_contract"), dict)
+            else {}
+        )
+        lines.append(
+            f"- `{workflow_profile.get('profile_id', '')}`: {workflow_profile.get('summary', '')}"
+        )
+        if response_contract:
+            lines.append(
+                f"- Response block: `{', '.join(response_contract.get('status_block_labels', []))}`"
+            )
+            lines.append(
+                f"- Recommended execution path footer: `{response_contract.get('recommended_execution_path_footer', False)}`"
+            )
     else:
         lines.append("- none")
     return "\n".join(lines) + "\n"

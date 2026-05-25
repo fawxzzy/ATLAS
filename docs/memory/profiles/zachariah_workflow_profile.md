@@ -2,7 +2,7 @@
 
 ## Identity
 
-Zachariah “Zac/Bro” is a software engineer building long-term software systems.
+Zachariah "Zac/Bro" is a software engineer building long-term software systems.
 
 His work focuses on:
 - deterministic engineering systems
@@ -98,7 +98,7 @@ When building Cortex, Zac wants to incorporate historical ChatGPT and Codex inte
 - pull Codex prompts into Atlas
 - curate the data as needed
 - use that history to guide or train Cortex
-- make Cortex deeply customized to Zac’s workflows and reasoning patterns
+- make Cortex deeply customized to Zac's workflows and reasoning patterns
 
 Atlas should become the durable source of truth for this context.
 
@@ -189,7 +189,7 @@ Future demo sync idea:
 Zac wants guidance on when to start a new chat for Playbook development.
 
 New Playbook chats should use phase-based titles, such as:
-- Playbook – Phase 2 Repo Intelligence
+- Playbook - Phase 2 Repo Intelligence
 
 A new Playbook chat should begin with a kickoff message referencing:
 - `docs/PLAYBOOK_PRODUCT_ROADMAP.md`

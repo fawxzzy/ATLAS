@@ -135,6 +135,7 @@ def _source_refs(
     rule_registry_ref: str,
     proof_examples_ref: str,
     stack_lock_ref: str,
+    workflow_profile_refs: list[str],
 ) -> list[str]:
     values: list[Any] = [
         current_ref,
@@ -147,6 +148,7 @@ def _source_refs(
         rule_registry_ref,
         proof_examples_ref,
         stack_lock_ref,
+        *workflow_profile_refs,
         *task_frame_required_inputs,
     ]
     return _ordered_unique_strings(values)
@@ -286,6 +288,10 @@ def build_cortex_worker_prompt_payload(
         rule_registry_ref=rule_registry_ref,
         proof_examples_ref=proof_examples_ref,
         stack_lock_ref=stack_lock_ref,
+        workflow_profile_refs=[
+            str(context_payload.get("workflow_profile", {}).get("canonical_refs", {}).get("markdown", "")).strip(),
+            str(context_payload.get("workflow_profile", {}).get("canonical_refs", {}).get("metadata", "")).strip(),
+        ],
     )
     next_lane = (
         ledger_payload.get("next_recommended_lane")
@@ -295,6 +301,19 @@ def build_cortex_worker_prompt_payload(
     validation_counts = (
         validation_payload.get("summary")
         if isinstance(validation_payload.get("summary"), dict)
+        else {}
+    )
+    workflow_profile = (
+        context_payload.get("workflow_profile") if isinstance(context_payload.get("workflow_profile"), dict) else {}
+    )
+    response_contract = (
+        workflow_profile.get("response_contract")
+        if isinstance(workflow_profile.get("response_contract"), dict)
+        else {}
+    )
+    style_preferences = (
+        workflow_profile.get("style_preferences")
+        if isinstance(workflow_profile.get("style_preferences"), dict)
         else {}
     )
 
@@ -331,6 +350,28 @@ def build_cortex_worker_prompt_payload(
             "total": int(validation_counts.get("total", 0) or 0),
         },
         "context_packet_id": str(context_payload.get("packet_id", "")).strip(),
+        "workflow_profile": {
+            "profile_id": str(workflow_profile.get("profile_id", "")).strip(),
+            "title": str(workflow_profile.get("title", "")).strip(),
+            "summary": str(workflow_profile.get("summary", "")).strip(),
+            "canonical_refs": workflow_profile.get("canonical_refs", {}),
+            "response_contract": response_contract,
+            "style_keywords": (
+                style_preferences.get("preferred_style")
+                if isinstance(style_preferences.get("preferred_style"), list)
+                else []
+            ),
+            "reasoning_routes": (
+                workflow_profile.get("reasoning_routes")
+                if isinstance(workflow_profile.get("reasoning_routes"), list)
+                else []
+            ),
+            "canonical_memory_rules": (
+                workflow_profile.get("canonical_memory_rules")
+                if isinstance(workflow_profile.get("canonical_memory_rules"), dict)
+                else {}
+            ),
+        },
         "task_frame_summary": ledger_payload.get("task_frame_summary") if isinstance(ledger_payload.get("task_frame_summary"), dict) else {},
         "publication_posture": ledger_payload.get("remote_status"),
         "top_evidence_refs": _ordered_unique_strings(top_evidence_refs),
@@ -398,6 +439,23 @@ def render_cortex_worker_prompt_summary(payload: dict[str, Any]) -> str:
     lines.extend(["", "## Source Refs"])
     for ref in payload["source_refs"]:
         lines.append(f"- `{ref}`")
+
+    workflow_profile = payload.get("workflow_profile")
+    if isinstance(workflow_profile, dict) and workflow_profile:
+        response_contract = (
+            workflow_profile.get("response_contract")
+            if isinstance(workflow_profile.get("response_contract"), dict)
+            else {}
+        )
+        lines.extend(["", "## Workflow Profile"])
+        lines.append(f"- `{workflow_profile.get('profile_id', '')}`: {workflow_profile.get('summary', '')}")
+        if response_contract:
+            lines.append(
+                f"- Response block: `{', '.join(response_contract.get('status_block_labels', []))}`"
+            )
+        style_keywords = workflow_profile.get("style_keywords")
+        if isinstance(style_keywords, list) and style_keywords:
+            lines.append(f"- Style keywords: `{', '.join(style_keywords)}`")
 
     lines.extend(["", "## Non-Execution Guards"])
     for guard in payload["non_execution_guards"]:
