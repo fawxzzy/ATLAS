@@ -21,8 +21,8 @@ components:
     remote: "https://github.com/fawxzzy/DiscordOS.git"
     ref_type: "branch"
     ref: "main"
-    commit: "02580df18fc20b7de38ee13d617cde6580295596"
-    dirty: true
+    commit: "b8060034892d2f4eaefb2fe843123aa1f52257ce"
+    dirty: false
     trust_class: "trusted"
     release_eligible: false
   lifeline:
@@ -87,7 +87,7 @@ components:
     remote: "https://github.com/fawxzzy/ATLAS.git"
     ref_type: "branch"
     ref: "main"
-    commit: "cb48db2e29de7e3bad3e340abc1029038b835777"
+    commit: "e8086879d2b58e8c54b1c379fb9b2df626104ade"
     dirty: true
     trust_class: "trusted"
     release_eligible: false
@@ -216,4 +216,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:7187cf05bde2f0c667a4e5b1c4be60bbf15cf4b161e74b279f7c2fe391ebdc2b"
+lock_digest: "sha256:62f09afc1a809858a8059a81ab7cf7ff00aaea83bbf078e16b92f0c3fba49cb4"
