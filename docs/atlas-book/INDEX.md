@@ -27,6 +27,7 @@ It is meant to answer:
 11. [Current System Map / Graph](11-system-map-graph.md)
 12. [Restart And Handoff Guide](12-restart-and-handoff-guide.md)
 13. [Vision And Endgames](13-vision-and-endgames.md)
+14. [Lane Split Execution](14-lane-split-execution.md)
 
 ## Current Emphasis
 
@@ -84,3 +85,9 @@ The current expansion layer now also adds:
 - lane endgames
 - blocker-aware future alignment
 - a shared test for when the split is actually working
+
+The current expansion layer now also adds:
+
+- lane reopen checklists
+- blocker and receipt expectations by lane
+- first safe package guidance for actual split execution

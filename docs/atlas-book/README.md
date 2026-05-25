@@ -36,6 +36,7 @@ Start here:
 - [Current System Map / Graph](11-system-map-graph.md)
 - [Restart And Handoff Guide](12-restart-and-handoff-guide.md)
 - [Vision And Endgames](13-vision-and-endgames.md)
+- [Lane Split Execution](14-lane-split-execution.md)
 
 This chapter set now covers:
 
@@ -47,3 +48,4 @@ This chapter set now covers:
 - how the current repos, runtimes, data systems, and approvals connect
 - how to restart the stack from a new chat without reconstruction
 - what each major lane is actually trying to finish
+- how each future lane should safely reopen
