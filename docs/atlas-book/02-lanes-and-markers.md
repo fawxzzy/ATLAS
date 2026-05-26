@@ -16,22 +16,22 @@
 - Fitness Recovery Preservation: `80%`
 - Canonical Repo Restoration: `100%`
 - Tmp Dependency Elimination: `90%`
-- Duplicate Surface Decommission: `94%`
-- Branch & Worktree Normalization: `98%`
-- Brand Asset Canonicalization: `80%`
-- Preview Cache & Surface Consistency: `70%`
+- Duplicate Surface Decommission: `98%`
+- Branch & Worktree Normalization: `99%`
+- Brand Asset Canonicalization: `90%`
+- Preview Cache & Surface Consistency: `78%`
 - Operator Secret Path Hygiene: `60%`
-- Manual Deploy Exception Burn-Down: `78%`
-- Fitness Supabase Profile/Data Hygiene: `94%`
+- Manual Deploy Exception Burn-Down: `84%`
+- Fitness Supabase Profile/Data Hygiene: `100%`
 - Local Data Gateway: `0%`
 - Unified Workflow Convergence: `70%`
-- Inventory & Truth Map: `70%`
-- Full Stack Re-sync, Clean & Closeout: `81%`
+- Inventory & Truth Map: `74%`
+- Full Stack Re-sync, Clean & Closeout: `85%`
 - Vision & Future Alignment: `25%`
 - Dependency Untangling: `70%`
 - Core Pattern Convergence: `40%`
 - Playbook Everywhere + Cortex Interface: `20%`
-- Knowledge Capture & Transfer: `78%`
+- Knowledge Capture & Transfer: `81%`
 - Feedback Loop Readiness: `42%`
 - Sandbox Simulation Readiness: `0%`
 - AI Long-Run Batch Orchestration: `20%`
@@ -39,7 +39,7 @@
 - Truth Map & ATLAS Book: `85%`
 - Discord OS Infrastructure Separation: `95%`
 - Discord Workflow, Publication & Docs Reliability: `25%`
-- Post-Convergence Lane Split Readiness: `62%`
+- Post-Convergence Lane Split Readiness: `60%`
 
 ## Key Lane Reads
 
@@ -62,12 +62,15 @@
 - Inventory & Truth Map
 - Local Data Gateway
 
-### Approval-gated or paused execution lanes
+### Closed but still boundary-sensitive lanes
 
 - Fitness Supabase Profile/Data Hygiene
+
+### Approval-gated or paused execution lanes
+
 - Discord OS separation runtime/data implementation after scaffold
 - remote preview / unfurl verification
-- helper-surface deletion for surviving Vercel helpers after retention review
+- external smoke / retained-surface disposal lanes after dependency review
 
 ## Current Split Read
 
@@ -86,6 +89,9 @@ The most important marker moves from the closeout queue were:
 - branch/worktree normalization moved from blocked to green-validation posture
 - tmp dependency elimination moved from source-truth concern to retained-surface cleanup concern
 - full stack closeout moved from paused baseline work to an active, receipt-backed closeout ladder
-- Fitness Supabase hygiene moved from class-level ambiguity into governed row classes and bounded mutation receipts
+- Fitness Supabase hygiene moved from class-level ambiguity into governed row classes, bounded mutation receipts, and a final lane closeout at `100%`
+- the remaining automation mismatches `candidate-01` through `candidate-04` are governed no-op, not unresolved cleanup debt
+- the remaining sign-in-bearing auth-only rows are governed heuristic exclusions, not human-style profile-repair candidates
+- Discord and Music Sesh profile/data concerns are explicitly transferred to `Discord OS Infrastructure Separation`, not left as open Fitness hygiene debt
 - Local Data Gateway was added as a first-class zero-percent lane so local preprocessing and minimal-payload export discipline are measured directly
 - DiscordOS separation stayed high-confidence but intentionally below runtime migration

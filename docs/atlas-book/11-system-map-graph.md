@@ -160,10 +160,12 @@ Canonical flow:
 
 Current approval-gated lanes:
 
-- Fitness Supabase mutation
 - remote preview / unfurl verification
 
-These gates remain closed until explicit approval reopens them.
+Historical note:
+
+- the Fitness Supabase mutation gate chain was fully exercised and then closed by `docs/ops/FITNESS-SUPABASE-PROFILE-DATA-HYGIENE-FINAL-CLOSEOUT-2026-05-25.md`
+- any future Fitness Supabase work must reopen as a new, narrower lane instead of treating profile/data hygiene as still generally open
 
 ## Future Split
 
@@ -233,7 +235,7 @@ flowchart LR
 | Fitness app lane | Fitness | `repos/fawxzzy-fitness` plus Fitness release proof | active | none for normal product work | explicit Fitness lane reopen |
 | Discord work lane | Fitness-hosted now, DiscordOS later | Fitness repo/runtime now; `repos/DiscordOS` plus ATLAS separation receipts as future target | scaffold complete, runtime migration not started | no runtime-shadow or adapter implementation package yet | next narrow DiscordOS scaffold or runtime-shadow plan |
 | ATLAS systems lane | ATLAS root plus `_stack` and Playbook boundaries | ATLAS docs and receipts | active closeout and governance lane | retained worktree, helper-surface, and residue cleanup pressure | closeout planning or bounded retained-surface package |
-| Fitness Supabase hygiene | Fitness | Fitness Supabase plus ATLAS approval packet chain | paused at approval gate | exact row-scoped mutation approval | row-scoped Mutation Pass 1 execution packet |
+| Fitness Supabase hygiene | Fitness | Fitness Supabase plus ATLAS closeout and governance receipts | closed at `100%`; remaining Discord/Music Sesh concerns transferred out of lane scope | none inside Fitness profile-core cleanup scope | defer any Discord/Music Sesh follow-on to Discord OS Infrastructure Separation |
 | DiscordOS bootstrap | DiscordOS | `repos/DiscordOS` | completed with governance scaffold only | no migrated code yet | bounded post-bootstrap implementation plan |
 | Helper Vercel decommission | ATLAS systems lane with owner confirmation | Vercel inventory and deletion receipts | stale Spotify-era and helper Fitness projects deleted | provenance clarity and future health classification only | preview/unfurl verification or Vercel health-design lane |
 | Lifeline health projection | Lifeline later, `_stack` first | current Vercel and stack health receipts | pressure identified, not implemented | no command surface yet | docs or command-design lane for `stack vercel-health` |

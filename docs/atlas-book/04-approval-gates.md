@@ -4,16 +4,23 @@
 
 ### Fitness Supabase mutation
 
-Status:
+Historical status:
 
-- paused until explicit approval of exact row subset and `create profile` scope
+- this gate chain was completed and closed on 2026-05-25 by `docs/ops/FITNESS-SUPABASE-PROFILE-DATA-HYGIENE-FINAL-CLOSEOUT-2026-05-25.md`
+- it remains documented here because future Supabase work must still use exact approval packets
 
-Current limit:
+At the time this gate was active, the posture was:
 
-- no Supabase writes
-- no auth deletion
-- no profile mutation
-- no Discord or Music Sesh table touch
+- Status:
+
+  - paused until explicit approval of exact row subset and `create profile` scope
+
+- Current limit:
+
+  - no Supabase writes
+  - no auth deletion
+  - no profile mutation
+  - no Discord or Music Sesh table touch
 
 ### Remote preview / unfurl verification
 
@@ -57,7 +64,7 @@ Result:
 
 Without explicit approval:
 
-- no Fitness Supabase mutation
+- no new Fitness Supabase mutation lane by implication from the now-closed 2026-05-25 hygiene chain
 - no DiscordOS runtime cutover by implication from the completed bootstrap
 - no DiscordOS schema or Vercel mutation by implication from planning docs
 - no bot restart or retarget

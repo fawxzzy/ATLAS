@@ -8,7 +8,8 @@ What is true right now:
 
 - Fitness remains the live app and the live Discord-hosted runtime owner.
 - DiscordOS separation is planned, scaffolded, and bounded, and the canonical local repo surface now exists.
-- Fitness Supabase cleanup is fully planned and approval-gated, but not mutated.
+- Fitness Supabase profile/data hygiene is closed as a governed lane at `100%`.
+- Discord and Music Sesh profile/data concerns are no longer Fitness hygiene debt and now belong to DiscordOS Infrastructure Separation.
 - `_stack` remains the governed deploy authority for approved app lanes.
 - ATLAS root remains the coordination, receipt, and marker layer.
 - Playbook remains the reusable governance and doctrine owner.
@@ -59,10 +60,10 @@ Current status:
 
 ## Current Paused Or Gated Work
 
-- Fitness Supabase mutation is approval-gated
 - remote preview/unfurl verification is approval-gated
 - DiscordOS schema, runtime, and data migration remain unstarted and must stay receipt-bounded
 - no helper-Vercel project deletion gate remains open after the 2026-05-25 helper-surface deletion pass
+- external smoke and retained-surface disposal still require explicit dependency-cleared lane opening
 
 ## Current Closeout Read
 
@@ -72,6 +73,9 @@ What the latest closeout passes proved:
 - `tmp` is no longer acting as production-critical source truth
 - the remaining helper Vercel project class is closed; duplicate-surface pressure is no longer centered on live helper projects
 - unrelated Fitness residue is classified enough to keep it out of DiscordOS, Supabase, and stack closeout lanes
+- Fitness profile-core cleanup is fully closed; no unresolved unknown-profile, never-signed-in auth-only, or legacy automation-mismatch class remains in that lane
+- the remaining automation mismatch class is governed no-op and the remaining sign-in-bearing auth-only class is governed heuristic exclusion
+- Discord and Music Sesh data concerns are now explicitly transferred to DiscordOS Infrastructure Separation instead of lingering as Fitness cleanup residue
 - root self-lock sequencing for `stack.lock.yaml#stack` has been resolved by policy, so the remaining pressure is retained-surface cleanup rather than root commitability
 
 ## Current Direction

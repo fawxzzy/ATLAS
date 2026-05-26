@@ -37,7 +37,7 @@ This seed structure reflects:
 - explicit approval gates before mutation
 - the Fitness / Discord / ATLAS lane split model
 - DiscordOS separation planning without implementation
-- Fitness Supabase cleanup planning without mutation
+- Fitness Supabase profile/data hygiene closed at `100%` with Discord and Music Sesh boundaries transferred to DiscordOS separation
 
 The next expansion layer captures:
 

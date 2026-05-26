@@ -21,6 +21,26 @@
 - [Fitness Supabase Profile/Data Hygiene Cleanup Plan 1](../ops/FITNESS-SUPABASE-PROFILE-DATA-HYGIENE-CLEANUP-PLAN-1-2026-05-24.md)
 - [Fitness Supabase Profile/Data Hygiene Export Packet 1](../ops/FITNESS-SUPABASE-PROFILE-DATA-HYGIENE-EXPORT-PACKET-1-2026-05-24.md)
 - [Fitness Supabase Mutation Pass 1 Approval Packet](../ops/FITNESS-SUPABASE-PROFILE-DATA-HYGIENE-MUTATION-PASS-1-APPROVAL-2026-05-24.md)
+- [Fitness Supabase Mutation Blocked: Missing Row Scope](../ops/FITNESS-SUPABASE-PROFILE-DATA-HYGIENE-MUTATION-BLOCKED-MISSING-ROW-SCOPE-2026-05-25.md)
+- [Fitness Supabase Mutation Pass 1 Row-Scope Supplement](../ops/FITNESS-SUPABASE-PROFILE-DATA-HYGIENE-MUTATION-PASS-1-ROW-SCOPE-SUPPLEMENT-2026-05-25.md)
+- [Fitness Supabase Mutation Pass 1](../ops/FITNESS-SUPABASE-PROFILE-DATA-HYGIENE-MUTATION-PASS-1-2026-05-25.md)
+- [Fitness Supabase Pass 1 Automation Heuristic Decision](../ops/FITNESS-SUPABASE-PASS-1-AUTOMATION-HEURISTIC-DECISION-2026-05-25.md)
+- [Fitness Supabase Automation Metadata / QA Visibility Decision](../ops/FITNESS-SUPABASE-AUTOMATION-METADATA-QA-VISIBILITY-DECISION-2026-05-25.md)
+- [Fitness Supabase Automation Identity Consolidation Review](../ops/FITNESS-SUPABASE-AUTOMATION-IDENTITY-CONSOLIDATION-REVIEW-2026-05-25.md)
+- [Fitness Supabase Selected Automation Auth-Metadata Alignment Decision](../ops/FITNESS-SUPABASE-SELECTED-AUTOMATION-AUTH-METADATA-ALIGNMENT-DECISION-2026-05-25.md)
+- [Fitness Supabase Automation Mismatch Row-Purpose Review](../ops/FITNESS-SUPABASE-AUTOMATION-MISMATCH-ROW-PURPOSE-REVIEW-2026-05-25.md)
+- [Fitness Supabase Selected Legacy Automation Auth-Metadata Alignment Approval](../ops/FITNESS-SUPABASE-SELECTED-LEGACY-AUTOMATION-AUTH-METADATA-ALIGNMENT-APPROVAL-2026-05-25.md)
+- [Fitness Supabase Selected Legacy Automation Auth-Metadata Alignment Mutation](../ops/FITNESS-SUPABASE-SELECTED-LEGACY-AUTOMATION-AUTH-METADATA-ALIGNMENT-MUTATION-2026-05-25.md)
+- [Fitness Supabase Profile/Data Hygiene Closeout Pass 1](../ops/FITNESS-SUPABASE-PROFILE-DATA-HYGIENE-CLOSEOUT-PASS-1-2026-05-25.md)
+- [Fitness Supabase Candidate-01-04 No-Op Governance](../ops/FITNESS-SUPABASE-CANDIDATE-01-04-NO-OP-GOVERNANCE-2026-05-25.md)
+- [Fitness Supabase Remaining Auth-Only Manual Review](../ops/FITNESS-SUPABASE-REMAINING-AUTH-ONLY-MANUAL-REVIEW-2026-05-25.md)
+- [Fitness Supabase Remaining Auth-Only Heuristic Automation Governance](../ops/FITNESS-SUPABASE-REMAINING-AUTH-ONLY-HEURISTIC-AUTOMATION-GOVERNANCE-2026-05-25.md)
+- [Fitness Supabase Never-Signed-In Auth-Only Delete-Later Approval](../ops/FITNESS-SUPABASE-NEVER-SIGNED-IN-AUTH-ONLY-DELETE-LATER-APPROVAL-2026-05-25.md)
+- [Fitness Supabase Never-Signed-In Auth-Only Deletion](../ops/FITNESS-SUPABASE-NEVER-SIGNED-IN-AUTH-ONLY-DELETION-2026-05-25.md)
+- [Fitness Supabase Unknown Profile Case Review](../ops/FITNESS-SUPABASE-UNKNOWN-PROFILE-CASE-REVIEW-2026-05-25.md)
+- [Fitness Supabase Unknown Profile Metadata Repair Approval](../ops/FITNESS-SUPABASE-UNKNOWN-PROFILE-METADATA-REPAIR-APPROVAL-2026-05-25.md)
+- [Fitness Supabase Unknown Profile Metadata Repair Mutation](../ops/FITNESS-SUPABASE-UNKNOWN-PROFILE-METADATA-REPAIR-MUTATION-2026-05-25.md)
+- [Fitness Supabase Profile/Data Hygiene Final Closeout](../ops/FITNESS-SUPABASE-PROFILE-DATA-HYGIENE-FINAL-CLOSEOUT-2026-05-25.md)
 
 ## DiscordOS Separation
 
@@ -44,11 +64,24 @@
 - [Vercel Helper Surface Final Review](../ops/VERCEL-HELPER-SURFACE-FINAL-REVIEW-2026-05-25.md)
 - [Fitness Residue Classification](../ops/FITNESS-RESIDUE-CLASSIFICATION-2026-05-25.md)
 - [Branch Tmp Vercel Closeout Consolidation](../ops/BRANCH-TMP-VERCEL-CLOSEOUT-CONSOLIDATION-2026-05-25.md)
+- [Playbook / Lifeline Retained Worktree Residue Plan](../ops/PLAYBOOK-LIFELINE-RETAINED-WORKTREE-RESIDUE-PLAN-2026-05-25.md)
+- [Playbook / Lifeline Retained Residue Disposal](../ops/PLAYBOOK-LIFELINE-RETAINED-RESIDUE-DISPOSAL-2026-05-25.md)
+- [Fitness Brand Preview Residue Pass](../ops/FITNESS-BRAND-PREVIEW-RESIDUE-PASS-2026-05-25.md)
+- [Fitness Brand Consumer Re-sync](../ops/FITNESS-BRAND-CONSUMER-RESYNC-2026-05-25.md)
+- [Fitness Brand Generator Contract Decision](../ops/FITNESS-BRAND-GENERATOR-CONTRACT-DECISION-2026-05-25.md)
+- [Fitness Brand Generator Alignment](../ops/FITNESS-BRAND-GENERATOR-ALIGNMENT-2026-05-25.md)
+- [Vercel Helper Surface Deletion Decision](../ops/VERCEL-HELPER-SURFACE-DELETION-DECISION-2026-05-25.md)
+- [Vercel Helper Surface Deletion](../ops/VERCEL-HELPER-SURFACE-DELETION-2026-05-25.md)
+- [Full Stack Re-sync Closeout Consolidation](../ops/FULL-STACK-RESYNC-CLOSEOUT-CONSOLIDATION-2026-05-26.md)
 
 ## Vercel Surface Decommission
 
 - [Vercel Stale Surface Deletion Readiness](../ops/VERCEL-STALE-SURFACE-DELETION-READINESS-2026-05-25.md)
 - [Vercel Stale Surface Deletion](../ops/VERCEL-STALE-SURFACE-DELETION-2026-05-25.md)
+
+## Local Data Gateway
+
+- [Local Data Gateway Marker](../ops/LOCAL-DATA-GATEWAY-MARKER-2026-05-25.md)
 
 ## Lane Split
 

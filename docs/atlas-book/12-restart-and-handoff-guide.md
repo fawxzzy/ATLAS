@@ -65,6 +65,7 @@ Use this decision order:
 Approval requirement:
 
 - explicit approval of the exact Pass 1 row subset and `create profile` scope
+- historical note: this gate chain is now closed by the 2026-05-25 final closeout receipt and should not be reopened without a new lane-specific reason
 
 ### Remote preview / unfurl verification
 
@@ -158,27 +159,27 @@ For approval-gated lanes, append the exact approval phrase or approval requireme
 
 Current best non-gated closeout ladder:
 
-- Playbook and Lifeline retained worktree / residue disposal planning pass
-- Fitness brand preview residue pass
-- helper Vercel deletion decision or execution pass when retained evidence is cleared
+- Full Stack Re-sync Closeout Consolidation
+- Playbook / Lifeline external smoke disposal decision
+- Fitness Supabase unknown-profile and DiscordOS boundary follow-through only through their owning lanes, not by reopening closed Fitness hygiene debt
 
 If reopening an approved gated lane:
 
-- Fitness Supabase Mutation Pass 1 only after exact mutation approval
 - remote preview / unfurl verification only after explicit deploy-backed lane opening
-- helper Vercel deletion only after an explicit retained-surface deletion decision
+- external smoke or retained-surface deletion only after an explicit dependency-cleared decision packet
 
 ## Current Fast Resume Summary
 
 At this checkpoint:
 
-- Fitness Supabase mutation is still paused at approval
+- Fitness Supabase profile/data hygiene is closed at `100%`
 - DiscordOS bootstrap and scaffold work are complete and `repos/DiscordOS` now exists locally
 - DiscordOS separation planning is durable, but runtime migration has not started
+- Discord and Music Sesh profile/data concerns remain open only under `Discord OS Infrastructure Separation`
 - the ATLAS Book is the primary restart surface
 - `_stack` remains deploy authority
 - normal stack validation is green in the current working state
-- ATLAS root self-lock sequencing has been resolved; the next pressure is retained-surface cleanup
+- ATLAS root self-lock sequencing has been resolved; the next pressure is retained-surface cleanup and final closeout consolidation
 
 ## Non-Goals
 

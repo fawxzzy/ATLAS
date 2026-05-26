@@ -250,7 +250,8 @@ This chapter turns the current operating model into reusable “run this workflo
 
 ### Approval gates
 
-- Fitness Supabase mutation remains explicitly approval-gated
+- historical note: the 2026-05-25 Fitness Supabase mutation chain is complete and closed
+- any future Supabase cleanup mutation must reopen as a new exact approval packet instead of inheriting this closed lane
 
 ### Forbidden shortcuts
 

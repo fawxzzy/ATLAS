@@ -7,7 +7,7 @@ It exists to cross-reference:
 - current stack state
 - lane and marker posture
 - operating model and owner boundaries
-- approval-gated mutation lanes
+- approval-gated mutation lanes and recently closed mutation chains
 - major receipts worth preserving beyond one repo
 
 This surface is docs-only.
