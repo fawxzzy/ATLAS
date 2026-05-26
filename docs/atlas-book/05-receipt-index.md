@@ -79,6 +79,7 @@
 - [Playbook External Smoke Preservation Export Packet](../ops/PLAYBOOK-EXTERNAL-SMOKE-PRESERVATION-EXPORT-PACKET-2026-05-26.md)
 - [Playbook Preserved Proof/Test Branch Disposal Decision](../ops/PLAYBOOK-PRESERVED-PROOF-TEST-BRANCH-DISPOSAL-DECISION-2026-05-26.md)
 - [Playbook Preserved Proof/Test Branch Disposal Execution](../ops/PLAYBOOK-PRESERVED-PROOF-TEST-BRANCH-DISPOSAL-EXECUTION-2026-05-26.md)
+- [Playbook Smoke-Home Stranded Checkout Disposal Manual-Review Packet](../ops/PLAYBOOK-SMOKE-HOME-STRANDED-CHECKOUT-DISPOSAL-MANUAL-REVIEW-PACKET-2026-05-26.md)
 
 ## Vercel Surface Decommission
 
