@@ -63,7 +63,7 @@ Current status:
 - remote preview/unfurl verification is approval-gated
 - DiscordOS schema, runtime, and data migration remain unstarted and must stay receipt-bounded
 - no helper-Vercel project deletion gate remains open after the 2026-05-25 helper-surface deletion pass
-- the delete-now external-smoke class from the 2026-05-26 Playbook/Lifeline decision packet is now consumed; the remaining Playbook external-smoke pressure is four preservation-first one-commit branches plus one stranded `smoke-home` manual-review checkout
+- the delete-now external-smoke class from the 2026-05-26 Playbook/Lifeline decision packet is now consumed; the four one-commit Playbook proof/test branches are preserved in an export packet and the remaining pressure is post-preservation branch disposition plus one stranded `smoke-home` manual-review checkout
 
 ## Current Closeout Read
 

@@ -76,6 +76,7 @@
 - [Playbook / Lifeline External Smoke Disposal Decision](../ops/PLAYBOOK-LIFELINE-EXTERNAL-SMOKE-DISPOSAL-DECISION-2026-05-26.md)
 - [Playbook / Lifeline Retained-Surface Disposal Execution Pass 2](../ops/PLAYBOOK-LIFELINE-RETAINED-SURFACE-DISPOSAL-EXECUTION-PASS-2-2026-05-26.md)
 - [Playbook External Smoke Export/Archive And Smoke-Home Manual-Review Decision](../ops/PLAYBOOK-EXTERNAL-SMOKE-EXPORT-ARCHIVE-AND-SMOKE-HOME-MANUAL-REVIEW-DECISION-2026-05-26.md)
+- [Playbook External Smoke Preservation Export Packet](../ops/PLAYBOOK-EXTERNAL-SMOKE-PRESERVATION-EXPORT-PACKET-2026-05-26.md)
 
 ## Vercel Surface Decommission
 

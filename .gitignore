@@ -21,6 +21,8 @@ packages/**
 !packages/bundles/.gitkeep
 !packages/patches/
 !packages/patches/.gitkeep
+!packages/patches/playbook-external-smoke-preservation-2026-05-26/
+!packages/patches/playbook-external-smoke-preservation-2026-05-26/**
 !packages/prebuilt/
 !packages/prebuilt/.gitkeep
 !packages/releases/

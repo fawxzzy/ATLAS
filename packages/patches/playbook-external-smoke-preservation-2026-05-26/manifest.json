@@ -1,0 +1,37 @@
+{
+  "packet": "playbook-external-smoke-preservation-2026-05-26",
+  "created_at": "2026-05-26",
+  "source_repo": "repos/fawxzzy-playbook",
+  "source_root_head": "9df0627a889342906f8767fb08014145ab63dfd7",
+  "format": "git-format-patch",
+  "artifacts": [
+    {
+      "branch": "codex/codex-inbox-proof-docs-touch-2",
+      "commit": "bce63a8634120189be5a5d379e055d21ed557a9f",
+      "summary": "docs: record codex inbox proof run",
+      "artifact_path": "packages/patches/playbook-external-smoke-preservation-2026-05-26/codex-codex-inbox-proof-docs-touch-2-bce63a86.patch",
+      "sha256": "BD1834FADC6329048827AF6D5CD4D97F1B31118D094C0AB53AA2CF654A9446FE"
+    },
+    {
+      "branch": "codex/mock-stdin-smoke-nine",
+      "commit": "cb77456666c7da45210c6ea655781432d5e8e10a",
+      "summary": "test: mock stdin smoke nine",
+      "artifact_path": "packages/patches/playbook-external-smoke-preservation-2026-05-26/codex-mock-stdin-smoke-nine-cb774566.patch",
+      "sha256": "C6DD836478093DBAC6F74908E9C01601231A9162F9D4A6AA57E203456FDE154F"
+    },
+    {
+      "branch": "codex/mock-watcher-smoke-five",
+      "commit": "c494750e7b3829a3f1f5c5feca8a02c8493c62b2",
+      "summary": "test: mock watcher smoke five",
+      "artifact_path": "packages/patches/playbook-external-smoke-preservation-2026-05-26/codex-mock-watcher-smoke-five-c494750e.patch",
+      "sha256": "3A2AA209C594693873A4B883736BF4D6CA655913C47143D5FBB2D5CBB257D2EB"
+    },
+    {
+      "branch": "codex/mock-watcher-smoke-six",
+      "commit": "245ed3a4dc13f690703d789783a7f4ad5f81fdf2",
+      "summary": "test: mock watcher smoke six",
+      "artifact_path": "packages/patches/playbook-external-smoke-preservation-2026-05-26/codex-mock-watcher-smoke-six-245ed3a4.patch",
+      "sha256": "B4C5781DCE2400A9967DDF12D2B093BDEE15EA3DBAA78F02F3EAFB8B94E84525"
+    }
+  ]
+}
