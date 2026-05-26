@@ -84,10 +84,12 @@ It shows:
 
 ### Known stale or duplicate-pressure surfaces
 
-- `fitness-deploy-green-panels`
-- `fitness-prod-rollout-20260525`
+No helper Vercel project remains in the active live set after the 2026-05-25 helper-surface deletion pass.
 
-The stale Spotify-era Vercel projects were deleted on 2026-05-25 after dependency clearance. The two helper projects above remain retain-temporarily helper surfaces pending a later deletion decision.
+Historical note:
+
+- the stale Spotify-era Vercel projects were deleted on 2026-05-25 after dependency clearance
+- the helper projects `fitness-deploy-green-panels` and `fitness-prod-rollout-20260525` were also deleted on 2026-05-25 after a clean dependency check
 
 ## DiscordOS / Fitness Shared-Seam Map
 
@@ -160,7 +162,6 @@ Current approval-gated lanes:
 
 - Fitness Supabase mutation
 - remote preview / unfurl verification
-- any remaining duplicate-surface deletion after dependency check
 
 These gates remain closed until explicit approval reopens them.
 
@@ -206,7 +207,7 @@ flowchart LR
   DISCORDOS_VERCEL["DiscordOS Vercel\nfuture runtime owner"]
   DISCORDOS_DB["DiscordOS Supabase\nnwexsktuuenfdegzrbut\nhealthy, empty"]
   DISCORD["Discord Surfaces\nFeedback, updates, moderation,\nMusic Sesh"]
-  STALE["Remaining helper Vercel surfaces\nretain temporarily"]
+  STALE["Historical stale/helper Vercel cleanup\nclosed on 2026-05-25"]
 
   FITNESS_REPO --> FITNESS_VERCEL
   FITNESS_VERCEL --> DISCORD
@@ -234,7 +235,7 @@ flowchart LR
 | ATLAS systems lane | ATLAS root plus `_stack` and Playbook boundaries | ATLAS docs and receipts | active closeout and governance lane | retained worktree, helper-surface, and residue cleanup pressure | closeout planning or bounded retained-surface package |
 | Fitness Supabase hygiene | Fitness | Fitness Supabase plus ATLAS approval packet chain | paused at approval gate | exact row-scoped mutation approval | row-scoped Mutation Pass 1 execution packet |
 | DiscordOS bootstrap | DiscordOS | `repos/DiscordOS` | completed with governance scaffold only | no migrated code yet | bounded post-bootstrap implementation plan |
-| Helper Vercel decommission | ATLAS systems lane with owner confirmation | Vercel inventory and deletion receipts | two stale projects deleted; two helper projects retained temporarily | later helper retention/deletion decision | helper-surface consolidation or deletion lane |
+| Helper Vercel decommission | ATLAS systems lane with owner confirmation | Vercel inventory and deletion receipts | stale Spotify-era and helper Fitness projects deleted | provenance clarity and future health classification only | preview/unfurl verification or Vercel health-design lane |
 | Lifeline health projection | Lifeline later, `_stack` first | current Vercel and stack health receipts | pressure identified, not implemented | no command surface yet | docs or command-design lane for `stack vercel-health` |
 
 ## Non-Goals

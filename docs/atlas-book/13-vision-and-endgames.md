@@ -105,7 +105,7 @@ Shared rules that survive the split:
 - done means duplicate or stale Vercel surfaces are dependency-checked and removed only when safe
 - should not delete by appearance alone
 - two stale Spotify-era projects are already deleted
-- current remaining surface is `fitness-deploy-green-panels`
+- the two remaining helper Fitness Vercel projects were also deleted on 2026-05-25 after dependency clearance
 
 ### Full Clean / Resync Closeout
 
@@ -126,7 +126,6 @@ Shared rules that survive the split:
 
 - exact row-scoped Fitness Supabase mutation approval
 - remote preview/unfurl verification approval
-- remaining duplicate-surface decision for `fitness-deploy-green-panels`
 - deferred closeout until the next bounded implementation lanes are chosen
 
 ## Next Valid Packages
@@ -142,7 +141,6 @@ Shared rules that survive the split:
 
 - Fitness Supabase mutation
 - remote preview/unfurl verification
-- any remaining stale Vercel deletion after dependency check
 
 ## Future Split Connection
 

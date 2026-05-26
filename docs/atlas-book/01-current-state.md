@@ -62,7 +62,7 @@ Current status:
 - Fitness Supabase mutation is approval-gated
 - remote preview/unfurl verification is approval-gated
 - DiscordOS schema, runtime, and data migration remain unstarted and must stay receipt-bounded
-- remaining helper-Vercel cleanup is narrowed to two retain-temporarily helper surfaces, not the deleted Spotify-era projects
+- no helper-Vercel project deletion gate remains open after the 2026-05-25 helper-surface deletion pass
 
 ## Current Closeout Read
 
@@ -70,7 +70,7 @@ What the latest closeout passes proved:
 
 - branch/worktree pressure is classified and no longer blocked by the Lifeline missing-config class
 - `tmp` is no longer acting as production-critical source truth
-- helper Vercel pressure is narrowed to recent retain-temporarily helper projects
+- the remaining helper Vercel project class is closed; duplicate-surface pressure is no longer centered on live helper projects
 - unrelated Fitness residue is classified enough to keep it out of DiscordOS, Supabase, and stack closeout lanes
 - root self-lock sequencing for `stack.lock.yaml#stack` has been resolved by policy, so the remaining pressure is retained-surface cleanup rather than root commitability
 
@@ -90,7 +90,7 @@ What is true right now:
 
 - `fawxzzy-fitness` remains the highest-churn operational project and is still carrying both product runtime and Discord-hosted runtime responsibilities.
 - the two stale Spotify-era Vercel projects were deleted on 2026-05-25 after dependency clearance.
-- two known helper surfaces still remain and can blur deploy authority if left ungoverned:
+- the two helper Fitness Vercel projects were also deleted on 2026-05-25 after a clean dependency check:
   - `fitness-deploy-green-panels`
   - `fitness-prod-rollout-20260525`
 - deployment provenance is still mixed between governed Git-backed deploys and more ad hoc `HEAD` or dirty-state style deploy metadata.
@@ -100,4 +100,4 @@ Why this matters:
 
 - Lifeline should later classify every Vercel surface as canonical, helper, stale, scratch, or cutover-target.
 - deploy provenance and stale-surface pressure should become visible health signals, not remembered context.
-- DiscordOS separation and helper-surface decommission become easier once Lifeline can show service ownership and deploy health clearly.
+- DiscordOS separation and later Vercel health classification become easier once Lifeline can show service ownership and deploy health clearly.
