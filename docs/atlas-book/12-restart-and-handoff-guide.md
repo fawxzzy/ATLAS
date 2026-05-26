@@ -160,7 +160,7 @@ For approval-gated lanes, append the exact approval phrase or approval requireme
 Current best non-gated closeout ladder:
 
 - Full Stack Re-sync Closeout Consolidation
-- Playbook external smoke export/archive and smoke-home manual-review decision
+- Playbook external smoke preservation export packet
 - Fitness Supabase unknown-profile and DiscordOS boundary follow-through only through their owning lanes, not by reopening closed Fitness hygiene debt
 
 If reopening an approved gated lane:
@@ -179,7 +179,7 @@ At this checkpoint:
 - the ATLAS Book is the primary restart surface
 - `_stack` remains deploy authority
 - normal stack validation is green in the current working state
-- ATLAS root self-lock sequencing has been resolved; the next pressure is the remaining export-first/manual-review external-smoke class plus later preview/unfurl and DiscordOS follow-on lanes
+- ATLAS root self-lock sequencing has been resolved; the next pressure is the remaining Playbook external-smoke preservation/manual-review chain plus later preview/unfurl and DiscordOS follow-on lanes
 
 ## Non-Goals
 
