@@ -88,6 +88,7 @@
 - [DiscordOS Feedback Thread-Sync Adapter-Consumer Planning Package 4](../ops/DISCORDOS-FEEDBACK-THREAD-SYNC-ADAPTER-CONSUMER-PLANNING-PACKAGE-4-2026-05-26.md)
 - [DiscordOS Feedback Audit Adapter-Consumer Planning Package 5](../ops/DISCORDOS-FEEDBACK-AUDIT-ADAPTER-CONSUMER-PLANNING-PACKAGE-5-2026-05-26.md)
 - [DiscordOS Feedback Seam-Chain Implementation-Readiness Checkpoint](../ops/DISCORDOS-FEEDBACK-SEAM-CHAIN-IMPLEMENTATION-READINESS-CHECKPOINT-2026-05-26.md)
+- [DiscordOS Feedback Lookup Adapter Implementation Planning Package 1](../ops/DISCORDOS-FEEDBACK-LOOKUP-ADAPTER-IMPLEMENTATION-PLANNING-PACKAGE-1-2026-05-26.md)
 
 ## Vercel Surface Decommission
 
