@@ -81,6 +81,7 @@
 - [Playbook Preserved Proof/Test Branch Disposal Execution](../ops/PLAYBOOK-PRESERVED-PROOF-TEST-BRANCH-DISPOSAL-EXECUTION-2026-05-26.md)
 - [Playbook Smoke-Home Stranded Checkout Disposal Manual-Review Packet](../ops/PLAYBOOK-SMOKE-HOME-STRANDED-CHECKOUT-DISPOSAL-MANUAL-REVIEW-PACKET-2026-05-26.md)
 - [Playbook Smoke-Home Stranded Checkout Disposal Execution](../ops/PLAYBOOK-SMOKE-HOME-STRANDED-CHECKOUT-DISPOSAL-EXECUTION-2026-05-26.md)
+- [Preview/Unfurl And DiscordOS Follow-On Queue Reassessment](../ops/PREVIEW-UNFURL-AND-DISCORDOS-FOLLOW-ON-QUEUE-REASSESSMENT-2026-05-26.md)
 
 ## Vercel Surface Decommission
 
