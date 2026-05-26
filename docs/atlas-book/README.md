@@ -49,3 +49,4 @@ This chapter set now covers:
 - how to restart the stack from a new chat without reconstruction
 - what each major lane is actually trying to finish
 - how each future lane should safely reopen
+- how the current closeout ladder is reducing branch, tmp, Vercel, and residue drift without reopening runtime mutation

@@ -96,6 +96,12 @@ or
 
 - approved DiscordOS repo bootstrap only
 
+Current reopen note:
+
+- bootstrap is already complete
+- the next Discord lane package should still be tiny: scaffold, runtime-shadow planning, or another explicit adapter/contract surface
+- do not jump from scaffold state to runtime migration by momentum
+
 ## ATLAS Systems Lane
 
 ### Start conditions
@@ -131,6 +137,11 @@ or
 or
 - `_stack` / Lifeline / doctrine design work
 
+Current reopen note:
+
+- the controlling ATLAS systems lane is now closeout and reconciliation
+- continue with narrow non-gated retained-surface cleanup packages before reopening broad mutation lanes
+
 ## Shared Handoff Rules
 
 - repo-local proof stays repo-local first
@@ -145,6 +156,7 @@ or
 - move markers only when durable ambiguity is reduced
 - keep approval-gated lanes flat unless readiness or gate posture changed
 - update the book-local marker table when the checkpoint changes marker truth
+- do not treat receipt-only or review-only progress as `100%` if retained surfaces still exist
 
 ## Quick Reopen Checklist
 

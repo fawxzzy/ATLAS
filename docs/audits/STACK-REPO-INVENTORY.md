@@ -19,7 +19,7 @@ Operational rule:
 - Excluded surface count: `17`
 - Stack manifest: `stack.yaml`
 - Stack lock: `stack.lock.yaml`
-- Inventory digest: `sha256:3e31e760d199c1ccc1374d96adb266c8f9317d8fd45be9d46103680927644d38`
+- Inventory digest: `sha256:433a894d88ba1e11e3680b8643b02c96c617a3b7ec8538538b65417e44d21bc9`
 
 ## Managed Repos
 
@@ -34,7 +34,7 @@ Operational rule:
 | nat1-games | repos/Nat1-Games/nat1-games | main | 412846a1baac6c0ce782ab9ab94530ccf4e89ff5 | 412846a1baac6c0ce782ab9ab94530ccf4e89ff5 | True | trusted | False | - |
 | playbook | repos/fawxzzy-playbook | codex/playbook-sustain-docs-audit | eeddaf75e59a6202c12bcf268221c5b469ac2b3a | eeddaf75e59a6202c12bcf268221c5b469ac2b3a | True | trusted | True | - |
 | playbook-demo | repos/playbook-demo/playbook-demo | main | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | False | trusted | False | - |
-| stack | . | main | 624107e339f3fde3c889a2cbb8c31b3f0bc21587 | 624107e339f3fde3c889a2cbb8c31b3f0bc21587 | True | trusted | False | - |
+| stack | . | main | - | 141ec496a66b558966170c8200864b64f2242b75 | True | trusted | False | - |
 | stream | repos/fawxzzy-stream | main | 1dd3298c556b4d0839e6bb43b3dde7c3527022f7 | 1dd3298c556b4d0839e6bb43b3dde7c3527022f7 | False | trusted | False | - |
 | trove | repos/fawxzzy-trove | codex/trove-brand-asset-sync | 0f5f9fe55bd21aa7f017173f1950d0bd063470c1 | 0f5f9fe55bd21aa7f017173f1950d0bd063470c1 | False | trusted | True | - |
 

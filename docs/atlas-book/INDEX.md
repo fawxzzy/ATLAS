@@ -91,3 +91,9 @@ The current expansion layer now also adds:
 - lane reopen checklists
 - blocker and receipt expectations by lane
 - first safe package guidance for actual split execution
+
+The current closeout layer now also adds:
+
+- green normal-validation confirmation after stack and registry repair
+- bounded classification for branch/worktree, tmp, helper Vercel, and Fitness residue pressure
+- a narrow next-package ladder toward 100 instead of another broad convergence pass

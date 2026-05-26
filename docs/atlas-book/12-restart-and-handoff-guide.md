@@ -53,7 +53,7 @@ If a new checkpoint changes markers, update the book-local marker table rather t
 Use this decision order:
 
 1. if the requested lane is approval-gated, do not reopen it by implication
-2. if a docs-only continuation exists, prefer it before mutation
+2. if a safe non-gated closeout package exists, continue with that package instead of holding globally
 3. if the user explicitly approves a gated lane, use the exact bounded approval packet
 4. if the question is cross-system, start from ATLAS root
 5. if the work is single-repo product work, route into the owner repo
@@ -156,28 +156,29 @@ For approval-gated lanes, append the exact approval phrase or approval requireme
 
 ## Current Recommended Next Packages
 
-If staying docs-only:
+Current best non-gated closeout ladder:
 
-- ATLAS Book expansion beyond the current spine
-- Lifeline-facing Vercel health command design
-- deeper receipt indexing or contract projection surfaces
+- Playbook and Lifeline retained worktree / residue disposal planning pass
+- Fitness brand preview residue pass
+- helper Vercel deletion decision or execution pass when retained evidence is cleared
 
 If reopening an approved gated lane:
 
 - Fitness Supabase Mutation Pass 1 only after exact mutation approval
 - remote preview / unfurl verification only after explicit deploy-backed lane opening
-- remaining stale Vercel duplicate-pressure review only for `fitness-deploy-green-panels`
+- helper Vercel deletion only after an explicit retained-surface deletion decision
 
 ## Current Fast Resume Summary
 
 At this checkpoint:
 
 - Fitness Supabase mutation is still paused at approval
-- DiscordOS bootstrap is complete and `repos/DiscordOS` now exists locally
-- DiscordOS separation planning is durable, but code and runtime migration have not started
+- DiscordOS bootstrap and scaffold work are complete and `repos/DiscordOS` now exists locally
+- DiscordOS separation planning is durable, but runtime migration has not started
 - the ATLAS Book is the primary restart surface
 - `_stack` remains deploy authority
-- Lifeline is justified as a future operational health surface, especially for Vercel classification and service-pressure visibility
+- normal stack validation is green in the current working state
+- ATLAS root self-lock sequencing has been resolved; the next pressure is retained-surface cleanup
 
 ## Non-Goals
 

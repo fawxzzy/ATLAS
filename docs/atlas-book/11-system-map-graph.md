@@ -74,22 +74,20 @@ It shows:
 
 - `fawxzzy-fitness`
   - current live operational hotspot
-  - latest production deploy: May 24, 2026
+  - canonical Fitness runtime truth
 - `fawxzzy-trove`
   - active product surface
-  - latest production deploy: May 22, 2026
 - `fawxzzy-mazer`
   - quieter active product surface
-  - latest production deploy: April 21, 2026
 - `fawxzzy-foundation`
   - quieter systems/product surface
-  - latest production deploy: May 11, 2026
 
 ### Known stale or duplicate-pressure surfaces
 
 - `fitness-deploy-green-panels`
+- `fitness-prod-rollout-20260525`
 
-The stale Spotify-era Vercel projects were deleted on 2026-05-25 after dependency clearance. `fitness-deploy-green-panels` remains the known duplicate-pressure surface still needing its own dependency decision.
+The stale Spotify-era Vercel projects were deleted on 2026-05-25 after dependency clearance. The two helper projects above remain retain-temporarily helper surfaces pending a later deletion decision.
 
 ## DiscordOS / Fitness Shared-Seam Map
 
@@ -208,7 +206,7 @@ flowchart LR
   DISCORDOS_VERCEL["DiscordOS Vercel\nfuture runtime owner"]
   DISCORDOS_DB["DiscordOS Supabase\nnwexsktuuenfdegzrbut\nhealthy, empty"]
   DISCORD["Discord Surfaces\nFeedback, updates, moderation,\nMusic Sesh"]
-  STALE["Remaining duplicate-pressure Vercel surfaces\nmanual review"]
+  STALE["Remaining helper Vercel surfaces\nretain temporarily"]
 
   FITNESS_REPO --> FITNESS_VERCEL
   FITNESS_VERCEL --> DISCORD
@@ -224,7 +222,7 @@ flowchart LR
   DISCORDOS_VERCEL -. "future cutover" .- DISCORD
   DISCORDOS_REPO -. "future schema + runtime move" .- DISCORDOS_DB
 
-  FITNESS_VERCEL -. "stale surface pressure" .- STALE
+  FITNESS_VERCEL -. "helper-surface pressure" .- STALE
 ```
 
 ## Machine-Readable Appendix
@@ -232,11 +230,11 @@ flowchart LR
 | Lane / surface | Owner | Source of truth | Current status | Blocker | Next package |
 | --- | --- | --- | --- | --- | --- |
 | Fitness app lane | Fitness | `repos/fawxzzy-fitness` plus Fitness release proof | active | none for normal product work | explicit Fitness lane reopen |
-| Discord work lane | Fitness-hosted now, DiscordOS later | Fitness repo/runtime now; `repos/DiscordOS` plus ATLAS separation receipts as future target | bootstrap complete, migration not started | no code extraction package yet | bounded DiscordOS code inventory / extraction package |
-| ATLAS systems lane | ATLAS root plus `_stack` and Playbook boundaries | ATLAS docs and receipts | active docs-first | none for docs work | further book or governance surfaces |
+| Discord work lane | Fitness-hosted now, DiscordOS later | Fitness repo/runtime now; `repos/DiscordOS` plus ATLAS separation receipts as future target | scaffold complete, runtime migration not started | no runtime-shadow or adapter implementation package yet | next narrow DiscordOS scaffold or runtime-shadow plan |
+| ATLAS systems lane | ATLAS root plus `_stack` and Playbook boundaries | ATLAS docs and receipts | active closeout and governance lane | retained worktree, helper-surface, and residue cleanup pressure | closeout planning or bounded retained-surface package |
 | Fitness Supabase hygiene | Fitness | Fitness Supabase plus ATLAS approval packet chain | paused at approval gate | exact row-scoped mutation approval | row-scoped Mutation Pass 1 execution packet |
 | DiscordOS bootstrap | DiscordOS | `repos/DiscordOS` | completed with governance scaffold only | no migrated code yet | bounded post-bootstrap implementation plan |
-| Stale Vercel decommission | ATLAS systems lane with owner confirmation | Vercel inventory and deletion receipts | two stale projects deleted; one duplicate-pressure surface remains | remaining dependency decision for `fitness-deploy-green-panels` | final dependency-check pass for remaining surface |
+| Helper Vercel decommission | ATLAS systems lane with owner confirmation | Vercel inventory and deletion receipts | two stale projects deleted; two helper projects retained temporarily | later helper retention/deletion decision | helper-surface consolidation or deletion lane |
 | Lifeline health projection | Lifeline later, `_stack` first | current Vercel and stack health receipts | pressure identified, not implemented | no command surface yet | docs or command-design lane for `stack vercel-health` |
 
 ## Non-Goals

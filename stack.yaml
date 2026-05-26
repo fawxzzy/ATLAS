@@ -205,7 +205,6 @@ export_defaults:
 stack_lock:
   path: stack.lock.yaml
   include_repo_ids:
-    - stack
     - _stack
     - playbook
     - lifeline
@@ -217,9 +216,6 @@ stack_lock:
     - nat1-games
     - playbook-demo
   repo_overrides:
-    stack:
-      trust_class: trusted
-      release_eligible: false
     _stack:
       trust_class: trusted
       release_eligible: false

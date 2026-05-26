@@ -34,6 +34,17 @@
 - [Discord OS Repo Bootstrap Receipt](../ops/DISCORD-OS-REPO-BOOTSTRAP-RECEIPT-2026-05-25.md)
 - [Discord OS Post-Bootstrap Code Inventory](../ops/DISCORD-OS-POST-BOOTSTRAP-CODE-INVENTORY-2026-05-25.md)
 
+## Closeout / Re-sync
+
+- [Full Stack Re-sync, Clean & Closeout Resume](../ops/FULL-STACK-RESYNC-CLEAN-CLOSEOUT-RESUME-2026-05-25.md)
+- [Full Stack Re-sync, Clean & Closeout Baseline Pass 2](../ops/FULL-STACK-RESYNC-CLEAN-CLOSEOUT-BASELINE-PASS-2-2026-05-25.md)
+- [Stack Lock Registry Reconciliation](../ops/STACK-LOCK-REGISTRY-RECONCILIATION-2026-05-25.md)
+- [Branch Worktree Normalization Closeout Pass 2](../ops/BRANCH-WORKTREE-NORMALIZATION-CLOSEOUT-PASS-2-2026-05-25.md)
+- [Tmp Surface Classification Closeout Pass 1](../ops/TMP-SURFACE-CLASSIFICATION-CLOSEOUT-PASS-1-2026-05-25.md)
+- [Vercel Helper Surface Final Review](../ops/VERCEL-HELPER-SURFACE-FINAL-REVIEW-2026-05-25.md)
+- [Fitness Residue Classification](../ops/FITNESS-RESIDUE-CLASSIFICATION-2026-05-25.md)
+- [Branch Tmp Vercel Closeout Consolidation](../ops/BRANCH-TMP-VERCEL-CLOSEOUT-CONSOLIDATION-2026-05-25.md)
+
 ## Vercel Surface Decommission
 
 - [Vercel Stale Surface Deletion Readiness](../ops/VERCEL-STALE-SURFACE-DELETION-READINESS-2026-05-25.md)
@@ -53,7 +64,7 @@
 
 ## Notes
 
-This index is a seed, not a full book yet.
+This index is a working spine, not an exhaustive archive.
 
 Its job is to make the current cross-reference spine visible:
 
@@ -62,3 +73,4 @@ Its job is to make the current cross-reference spine visible:
 - separation plans
 - approval gates
 - durable receipts
+- closeout-state receipts that change lane posture without reopening runtime mutation

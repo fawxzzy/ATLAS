@@ -2,16 +2,18 @@
 
 ## Snapshot
 
-The stack is currently at a clean docs-first convergence checkpoint.
+The stack is currently at a clean post-closeout-pass checkpoint.
 
 What is true right now:
 
 - Fitness remains the live app and the live Discord-hosted runtime owner.
-- DiscordOS separation is planned and bounded, and the canonical local repo surface now exists.
+- DiscordOS separation is planned, scaffolded, and bounded, and the canonical local repo surface now exists.
 - Fitness Supabase cleanup is fully planned and approval-gated, but not mutated.
 - `_stack` remains the governed deploy authority for approved app lanes.
 - ATLAS root remains the coordination, receipt, and marker layer.
 - Playbook remains the reusable governance and doctrine owner.
+- normal stack validation is green in the current working state.
+- `--allow-missing-locked-repos` is no longer needed for current validation.
 
 ## Canonical Source Truth By Surface
 
@@ -32,7 +34,7 @@ What is true right now:
 Current status:
 
 - local repo now exists at `repos/DiscordOS`
-- governance scaffold only
+- contract docs, typed seams, and adapter stubs exist
 - no code moved
 - no runtime cutover
 
@@ -60,7 +62,17 @@ Current status:
 - Fitness Supabase mutation is approval-gated
 - remote preview/unfurl verification is approval-gated
 - DiscordOS schema, runtime, and data migration remain unstarted and must stay receipt-bounded
-- remaining stale-Vercel cleanup is narrowed to the surviving duplicate-pressure surface, not the deleted Spotify-era projects
+- remaining helper-Vercel cleanup is narrowed to two retain-temporarily helper surfaces, not the deleted Spotify-era projects
+
+## Current Closeout Read
+
+What the latest closeout passes proved:
+
+- branch/worktree pressure is classified and no longer blocked by the Lifeline missing-config class
+- `tmp` is no longer acting as production-critical source truth
+- helper Vercel pressure is narrowed to recent retain-temporarily helper projects
+- unrelated Fitness residue is classified enough to keep it out of DiscordOS, Supabase, and stack closeout lanes
+- root self-lock sequencing for `stack.lock.yaml#stack` has been resolved by policy, so the remaining pressure is retained-surface cleanup rather than root commitability
 
 ## Current Direction
 
@@ -72,19 +84,20 @@ The stack is moving from convergence and cleanup toward explicit lane separation
 
 ## Current Vercel Pressure
 
-The live Vercel surface is still showing the same structural pressure that justifies accelerating Lifeline work later.
+The live Vercel surface is materially cleaner than the earlier convergence checkpoint, but not fully closed.
 
 What is true right now:
 
 - `fawxzzy-fitness` remains the highest-churn operational project and is still carrying both product runtime and Discord-hosted runtime responsibilities.
 - the two stale Spotify-era Vercel projects were deleted on 2026-05-25 after dependency clearance.
-- one known duplicate-pressure Vercel surface still remains and can blur deploy authority:
+- two known helper surfaces still remain and can blur deploy authority if left ungoverned:
   - `fitness-deploy-green-panels`
+  - `fitness-prod-rollout-20260525`
 - deployment provenance is still mixed between governed Git-backed deploys and more ad hoc `HEAD` or dirty-state style deploy metadata.
 - the recent 30-day Vercel overview is still polluted by the older Discord polling behavior, so short-window views matter more when checking whether the event-driven fix actually helped.
 
 Why this matters:
 
-- Lifeline should later classify every Vercel surface as canonical, stale, scratch, or cutover-target.
+- Lifeline should later classify every Vercel surface as canonical, helper, stale, scratch, or cutover-target.
 - deploy provenance and stale-surface pressure should become visible health signals, not remembered context.
-- DiscordOS separation and stale-surface decommission become easier once Lifeline can show service ownership and deploy health clearly.
+- DiscordOS separation and helper-surface decommission become easier once Lifeline can show service ownership and deploy health clearly.
