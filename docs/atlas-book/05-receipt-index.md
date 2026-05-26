@@ -94,6 +94,7 @@
 - [DiscordOS Feedback Thread-Sync Adapter Implementation Planning Package 4](../ops/DISCORDOS-FEEDBACK-THREAD-SYNC-ADAPTER-IMPLEMENTATION-PLANNING-PACKAGE-4-2026-05-26.md)
 - [DiscordOS Feedback Audit Adapter Implementation Planning Package 5](../ops/DISCORDOS-FEEDBACK-AUDIT-ADAPTER-IMPLEMENTATION-PLANNING-PACKAGE-5-2026-05-26.md)
 - [DiscordOS Feedback Adapter Implementation Planning Chain Checkpoint](../ops/DISCORDOS-FEEDBACK-ADAPTER-IMPLEMENTATION-PLANNING-CHAIN-CHECKPOINT-2026-05-26.md)
+- [DiscordOS Feedback Repo-Local Tooling And Execution-Readiness Package 1](../ops/DISCORDOS-FEEDBACK-REPO-LOCAL-TOOLING-AND-EXECUTION-READINESS-PACKAGE-1-2026-05-26.md)
 
 ## Vercel Surface Decommission
 
