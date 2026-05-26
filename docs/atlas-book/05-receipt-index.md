@@ -74,6 +74,7 @@
 - [Vercel Helper Surface Deletion](../ops/VERCEL-HELPER-SURFACE-DELETION-2026-05-25.md)
 - [Full Stack Re-sync Closeout Consolidation](../ops/FULL-STACK-RESYNC-CLOSEOUT-CONSOLIDATION-2026-05-26.md)
 - [Playbook / Lifeline External Smoke Disposal Decision](../ops/PLAYBOOK-LIFELINE-EXTERNAL-SMOKE-DISPOSAL-DECISION-2026-05-26.md)
+- [Playbook / Lifeline Retained-Surface Disposal Execution Pass 2](../ops/PLAYBOOK-LIFELINE-RETAINED-SURFACE-DISPOSAL-EXECUTION-PASS-2-2026-05-26.md)
 
 ## Vercel Surface Decommission
 
