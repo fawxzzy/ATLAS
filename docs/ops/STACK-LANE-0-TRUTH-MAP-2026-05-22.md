@@ -33,6 +33,7 @@ It now also includes explicit strategic lanes that make the operating model dura
 | Operator Secret Path Hygiene | keep secret-backed operator flows from polluting repo roots | temporary env pulls and secret-backed operations leave no ambiguous residue |
 | Manual Deploy Exception Burn-Down | remove direct deploy ambiguity outside `_stack` | deploy truth is singular, reproducible, and operator-readable |
 | Fitness Supabase Profile/Data Hygiene | classify and govern Fitness identity/data cleanup before mutation | auth/profile/data truth is inventoried, cleanup is reviewable, and canonical profile usage is explicit |
+| Local Data Gateway | make local preprocessing the default boundary before data leaves the machine or repo | raw inputs become minimal schema-aware packets with provenance, sensitivity labeling, and transformation history before remote refinement or sync |
 | Unified Workflow Convergence | reduce duplicated release and operating paths across stack and repos | one coherent operating model across the whole system |
 | Dependency Untangling | reduce hidden coupling between lanes | future Fitness, Discord, and ATLAS lanes can move in parallel safely |
 | Core Pattern Convergence | spread the strongest reusable concepts across the stack instead of leaving them trapped inside one repo or workflow | reusable rules, patterns, and failure modes from core lanes are mapped, owned, visible, and actually applied across stack systems |
@@ -64,6 +65,7 @@ Every lane should answer:
 - Canonical Repo Restoration and Tmp Dependency Elimination now belong before broader convergence because the stack cannot safely converge workflows while production truth still depends on `tmp/` or missing canonical repo roots.
 - Branch & Worktree Normalization belongs before broad re-sync because the current root still contains intentional preservation residue.
 - Fitness Supabase Profile/Data Hygiene belongs after secret-path inventory because identity/data cleanup should not start until operator secret handling is mapped.
+- Local Data Gateway belongs beside secret-path and data-hygiene lanes because the governing question is not only where secrets live, but whether raw data is refined locally before export.
 - Discord OS Infrastructure Separation supersedes the older extraction-review framing because the real issue is infrastructure ownership and hidden coupling, not just doctrine classification.
 - AI Long-Run Batch Orchestration belongs as doctrine and planning now, with later implementation routed through `_stack`, Playbook, and explicit lane contracts.
 - AI Repetition-to-Automation Pipeline belongs alongside `_stack` readiness and AI batching, but stays distinct: batching governs long jobs, while this lane governs noticing repetition and converting it into commands.
@@ -118,6 +120,7 @@ Lane 0 must preserve the current lockfile deferral doctrine:
 - Operator Secret Path Hygiene: `10%`
 - Manual Deploy Exception Burn-Down: `65%`
 - Fitness Supabase Profile/Data Hygiene: `0%`
+- Local Data Gateway: `0%`
 - Unified Workflow Convergence: `60%`
 - Inventory & Truth Map: `20%`
 - Full Stack Re-sync, Clean & Closeout: `22% paused`

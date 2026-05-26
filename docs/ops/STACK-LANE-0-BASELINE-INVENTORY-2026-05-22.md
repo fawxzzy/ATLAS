@@ -32,13 +32,14 @@ The strategic and operational order is now:
 7. Operator Secret Path Hygiene
 8. Manual Deploy Exception Burn-Down
 9. Fitness Supabase Profile/Data Hygiene
-10. Discord OS Infrastructure Separation
-11. Discord Workflow, Publication & Docs Reliability
-12. Unified Workflow Convergence
-13. Playbook Everywhere + Cortex Interface
-14. Truth Map & ATLAS Book
-15. Full Stack Re-sync, Clean & Closeout
-16. Post-Convergence Lane Split Readiness
+10. Local Data Gateway
+11. Discord OS Infrastructure Separation
+12. Discord Workflow, Publication & Docs Reliability
+13. Unified Workflow Convergence
+14. Playbook Everywhere + Cortex Interface
+15. Truth Map & ATLAS Book
+16. Full Stack Re-sync, Clean & Closeout
+17. Post-Convergence Lane Split Readiness
 
 Cross-cutting doctrine lane:
 
@@ -57,6 +58,7 @@ Cross-cutting doctrine lane:
 - Operator Secret Path Hygiene: tracks whether secret-backed operator flows avoid spilling env or secret residue into repo roots.
 - Manual Deploy Exception Burn-Down: tracks the remaining risk from direct deploy behavior outside `_stack`.
 - Fitness Supabase Profile/Data Hygiene: tracks cleanup and governance of Fitness Supabase identity/data surfaces, especially unknown, duplicate, or automation-linked profiles.
+- Local Data Gateway: tracks whether raw data is processed locally before it leaves the machine or repo boundary and whether exports become purpose-built, redacted, schema-aware packets instead of messy raw dumps.
 - Discord OS Infrastructure Separation: tracks extraction of Discord OS out of the Fitness-hosted default stack into its own governed repo, Vercel, Supabase, env, and contract surfaces without breaking live Discord behavior.
 - Unified Workflow Convergence: makes disconnected workflows operate as one system across stack and owner repos.
 - Dependency Untangling: tracks hidden coupling between lanes and reduces it so later Fitness, Discord, and ATLAS work can run in parallel safely.
@@ -70,6 +72,41 @@ Cross-cutting doctrine lane:
 - Full Stack Re-sync, Clean & Closeout: covers the whole cleanup lifecycle from normalization through verified closeout.
 - Post-Convergence Lane Split Readiness: measures whether the program is ready to split safely back into Fitness, Discord, and ATLAS lanes.
 - AI Repetition-to-Automation Pipeline: tracks how repeated AI, Codex, and operator tasks are identified and converted into simple governed command surfaces with verification, receipts, and rollback paths.
+
+## Local Data Gateway Definition
+
+This lane measures whether the stack treats local preprocessing as the default boundary before remote systems receive data.
+
+It starts at `0%`.
+
+It reaches `100%` only when:
+
+- raw data is local-by-default
+- workflows normalize, validate, remove noise, redact sensitive values, classify sensitivity, dedupe repeated content, extract useful signal, and package minimum useful payload before export
+- every exported payload records:
+  - purpose
+  - schema or version
+  - sensitivity label
+  - source or provenance
+  - transformation record
+- AI, model, API, SaaS, and remote database surfaces receive refined payloads rather than messy raw dumps
+- Supabase, Vercel, Discord, and automation exports use governed gateway receipts
+- repeated preprocessing steps become reusable `_stack`, Playbook, or bot command surfaces where justified
+
+This lane is related to but different from:
+
+- Operator Secret Path Hygiene
+  - protects secret-backed local handling and residue boundaries
+- Fitness Supabase Profile/Data Hygiene
+  - governs one high-risk data domain and its mutation classes
+- AI Repetition-to-Automation Pipeline
+  - graduates repeated preprocessing into reusable command surfaces
+- Core Pattern Convergence
+  - spreads the gateway rule across stack systems instead of leaving it local to one lane
+- Playbook Everywhere + Cortex Interface
+  - makes the doctrine visible and reusable
+- Truth Map & ATLAS Book
+  - records the durable operating model and receipts
 
 ## Explicit Cleanup Targets Added To Existing Lanes
 
@@ -152,6 +189,7 @@ Every lane should answer:
 - Operator Secret Path Hygiene: `10%`
 - Manual Deploy Exception Burn-Down: `65%`
 - Fitness Supabase Profile/Data Hygiene: `0%`
+- Local Data Gateway: `0%`
 - Unified Workflow Convergence: `60%`
 - Inventory & Truth Map: `20%`
 - Full Stack Re-sync, Clean & Closeout: `22% paused`

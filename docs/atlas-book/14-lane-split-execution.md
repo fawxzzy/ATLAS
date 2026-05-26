@@ -145,6 +145,7 @@ Current reopen note:
 ## Shared Handoff Rules
 
 - repo-local proof stays repo-local first
+- raw data stays local first and should be refined before remote export
 - `_stack` owns governed deploy execution
 - Discord publication stays downstream of proof
 - Fitness auth/profile truth stays Fitness-owned

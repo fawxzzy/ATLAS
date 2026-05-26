@@ -27,6 +27,7 @@ The stack already repeats these tasks often enough to justify command planning:
 - doctrine routing from repeated receipts and patterns
 - env or secret-path classification before cleanup
 - data-hygiene inventory, export, and approval packet preparation
+- local normalize, redact, classify, dedupe, and minimum-payload packaging before remote export
 
 ## Candidate `_stack` Commands
 
@@ -46,6 +47,8 @@ Best candidates:
   - build a consistent receipt skeleton for cross-repo lanes
 - `stack marker checkpoint`
   - render the current marker table from durable docs state
+- `stack data gateway packet <lane>`
+  - normalize, redact, classify, and package a minimum useful export packet with provenance metadata before remote handoff
 - `stack stale-surface audit`
   - inventory duplicate deploy surfaces before deletion approval
 - `stack vercel-health`
@@ -180,6 +183,7 @@ These are the best first candidates because they prepare or summarize state with
 | Discord feedback/panel helpers | DiscordOS later, Fitness-hosted now | runtime workflow surface |
 | Music Sesh setup helpers | DiscordOS later, Fitness-hosted now | runtime workflow surface |
 | data-hygiene export and approval prep | owner repo plus ATLAS docs | high-risk prep needs owner context |
+| local data gateway preprocessing | `_stack` first, owner repo as needed | cross-lane export discipline should become a governed shared surface before remote sync |
 | Vercel health classification | Lifeline later, `_stack` first | operational health should become a first-class governed signal |
 
 ## Non-Goals

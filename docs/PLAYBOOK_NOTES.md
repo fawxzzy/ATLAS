@@ -1,5 +1,19 @@
 # Playbook Notes
 
+## 2026-05-26 - Local data gateway should be a first-class stack marker
+
+- Rule: raw data lands locally first; remote systems receive purpose-built packets.
+- Rule: local preprocessing must happen before data leaves the machine or repo boundary for a model, API, SaaS tool, remote database, automation, teammate, or shared system.
+- Rule: exported payloads should carry purpose, schema or version, sensitivity label, source or provenance, transformation record, and minimum useful payload shape.
+- Pattern: raw input -> local normalize, validate, redact, classify, dedupe, extract -> minimum useful payload -> remote refinement, sync, collaboration, or specialized processing.
+- Failure Mode: sending messy raw data directly to an AI, API, SaaS tool, or remote database creates privacy risk, token waste, duplicate state, and weak provenance.
+- Failure Mode: repeated local preprocessing that never graduates into command surfaces recreates the same manual cleanup debt in every lane.
+- Local Data Gateway: tracks whether raw data is processed locally before export and whether repeated local preprocessing becomes governed reusable command surface.
+- Release-summary bullets:
+  - Added Local Data Gateway as a first-class convergence marker instead of leaving it as a hidden sub-note inside secret hygiene or data hygiene lanes.
+  - Defined the local-by-default boundary and the minimum payload contract for exports to remote systems.
+  - Connected the marker to secret hygiene, Supabase hygiene, automation graduation, core pattern spread, and truth-map doctrine.
+
 ## 2026-05-24 - Playbook origin and research trail should stay explicit
 
 - Rule: Playbook is not another AI coding assistant; it is the deterministic repo runtime and trust layer between humans or AI agents and real repositories.

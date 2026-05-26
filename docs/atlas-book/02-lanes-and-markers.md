@@ -22,10 +22,11 @@
 - Preview Cache & Surface Consistency: `70%`
 - Operator Secret Path Hygiene: `60%`
 - Manual Deploy Exception Burn-Down: `78%`
-- Fitness Supabase Profile/Data Hygiene: `50%`
+- Fitness Supabase Profile/Data Hygiene: `94%`
+- Local Data Gateway: `0%`
 - Unified Workflow Convergence: `70%`
-- Inventory & Truth Map: `50%`
-- Full Stack Re-sync, Clean & Closeout: `60%`
+- Inventory & Truth Map: `70%`
+- Full Stack Re-sync, Clean & Closeout: `81%`
 - Vision & Future Alignment: `25%`
 - Dependency Untangling: `70%`
 - Core Pattern Convergence: `40%`
@@ -59,6 +60,7 @@
 - Truth Map & ATLAS Book
 - Full Stack Re-sync, Clean & Closeout
 - Inventory & Truth Map
+- Local Data Gateway
 
 ### Approval-gated or paused execution lanes
 
@@ -84,4 +86,6 @@ The most important marker moves from the closeout queue were:
 - branch/worktree normalization moved from blocked to green-validation posture
 - tmp dependency elimination moved from source-truth concern to retained-surface cleanup concern
 - full stack closeout moved from paused baseline work to an active, receipt-backed closeout ladder
+- Fitness Supabase hygiene moved from class-level ambiguity into governed row classes and bounded mutation receipts
+- Local Data Gateway was added as a first-class zero-percent lane so local preprocessing and minimal-payload export discipline are measured directly
 - DiscordOS separation stayed high-confidence but intentionally below runtime migration

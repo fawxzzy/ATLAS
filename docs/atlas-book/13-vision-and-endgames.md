@@ -88,6 +88,14 @@ Shared rules that survive the split:
 - should not turn frequent work into unsafe unattended mutation
 - currently open for planning and later bounded command work
 
+### Local Data Gateway
+
+- done means raw data is local-by-default and remote systems receive minimum useful governed packets instead of raw dumps
+- should not become a license to export more data simply because a packet exists
+- currently open at doctrine stage only
+- next valid package:
+  - local gateway receipt and first automation-candidate design only
+
 ### ATLAS Book / Publishing
 
 - done means the book is good enough to restart the stack from docs, receipts, maps, and gates
@@ -126,6 +134,7 @@ Shared rules that survive the split:
 
 - exact row-scoped Fitness Supabase mutation approval
 - remote preview/unfurl verification approval
+- local-data preprocessing doctrine still needs reusable command-surface follow-through
 - deferred closeout until the next bounded implementation lanes are chosen
 
 ## Next Valid Packages

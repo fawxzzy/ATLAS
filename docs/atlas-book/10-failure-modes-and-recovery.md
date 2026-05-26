@@ -447,6 +447,47 @@ Each entry records:
 - Preview Cache & Surface Consistency
 - Inventory & Truth Map
 
+## 13. Raw Data Export Before Local Refinement
+
+### Symptoms
+
+- raw logs, tables, exports, or screenshots are sent directly to an AI, API, SaaS tool, remote database, or teammate
+- exported payloads have no clear purpose, provenance, or sensitivity boundary
+- the same noisy cleanup work repeats by hand in each lane
+
+### Root cause
+
+- local preprocessing was treated as optional instead of the default boundary
+
+### Prevention rule
+
+- raw data lands locally first
+- remote systems receive minimum useful packets, not messy raw dumps
+
+### Recovery steps
+
+1. stop further export or mutation
+2. identify the raw local source
+3. normalize, validate, redact, classify, dedupe, and extract useful signal locally
+4. rebuild the payload with purpose, schema or version, sensitivity label, provenance, and transformation record
+5. record the gateway receipt before resuming remote work
+
+### Owning lane
+
+- Local Data Gateway
+- Operator Secret Path Hygiene
+- Fitness Supabase Profile/Data Hygiene when the data domain is profile or auth state
+
+### Required receipt
+
+- local data gateway or export packet receipt
+
+### Marker impact
+
+- Local Data Gateway
+- Operator Secret Path Hygiene
+- Fitness Supabase Profile/Data Hygiene when applicable
+
 ## Recovery Pattern
 
 Across these failure modes, the common recovery order is:
