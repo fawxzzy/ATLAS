@@ -63,7 +63,7 @@ Current status:
 - remote preview/unfurl verification is approval-gated
 - DiscordOS schema, runtime, and data migration remain unstarted and must stay receipt-bounded
 - no helper-Vercel project deletion gate remains open after the 2026-05-25 helper-surface deletion pass
-- the Playbook external-smoke family opened by the 2026-05-26 decision chain is now fully consumed; the remaining closeout pressure is split between approval-gated preview/unfurl follow-on and DiscordOS-owned downstream work, with the DiscordOS feedback seam-planning chain now covering `FeedbackLookupPort` and `FeedbackReportStorePort`, and `FeedbackPermissionPort` as the clearest next non-gated ATLAS-root seam
+- the Playbook external-smoke family opened by the 2026-05-26 decision chain is now fully consumed; the remaining closeout pressure is split between approval-gated preview/unfurl follow-on and DiscordOS-owned downstream work, with the DiscordOS feedback seam-planning chain now covering `FeedbackLookupPort`, `FeedbackReportStorePort`, and `FeedbackPermissionPort`, and `FeedbackThreadSyncPort` as the clearest next non-gated ATLAS-root seam
 
 ## Current Closeout Read
 
