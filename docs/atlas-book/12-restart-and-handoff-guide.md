@@ -160,7 +160,7 @@ For approval-gated lanes, append the exact approval phrase or approval requireme
 Current best non-gated closeout ladder:
 
 - Full Stack Re-sync Closeout Consolidation
-- DiscordOS feedback audit adapter implementation planning package 5
+- DiscordOS feedback adapter implementation planning chain checkpoint
 - Fitness Supabase unknown-profile and DiscordOS boundary follow-through only through their owning lanes, not by reopening closed Fitness hygiene debt
 
 If reopening an approved gated lane:
@@ -179,7 +179,7 @@ At this checkpoint:
 - the ATLAS Book is the primary restart surface
 - `_stack` remains deploy authority
 - normal stack validation is green in the current working state
-- ATLAS root self-lock sequencing has been resolved; the Playbook external-smoke family is closed, preview/unfurl remains approval-gated and upstream-blocked by a Fitness owner-lane package, and the current non-gated DiscordOS planning chain is now fully packetized and checkpoint-cleared only for narrow repo-local adapter implementation planning, with `FeedbackLookupPort`, `FeedbackReportStorePort`, `FeedbackPermissionPort`, and `FeedbackThreadSyncPort` planning complete and `FeedbackAuditPort` next
+- ATLAS root self-lock sequencing has been resolved; the Playbook external-smoke family is closed, preview/unfurl remains approval-gated and upstream-blocked by a Fitness owner-lane package, and the current non-gated DiscordOS planning chain is now fully packetized and checkpoint-cleared only for narrow repo-local adapter implementation planning, with `FeedbackLookupPort`, `FeedbackReportStorePort`, `FeedbackPermissionPort`, `FeedbackThreadSyncPort`, and `FeedbackAuditPort` planning complete and an implementation-planning-chain checkpoint next
 
 ## Non-Goals
 
