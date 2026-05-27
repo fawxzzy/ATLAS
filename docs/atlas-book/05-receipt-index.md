@@ -120,6 +120,7 @@
 - [Discord OS Feedback Workflow Canonicalization](../ops/DISCORD-OS-FEEDBACK-WORKFLOW-CANONICALIZATION-2026-05-27.md)
 - [Discord OS Feedback Workflow Canonical Contracts Pass 1](../ops/DISCORD-OS-FEEDBACK-WORKFLOW-CANONICAL-CONTRACTS-PASS-1-2026-05-27.md)
 - [Discord OS Feedback Workflow Separation Boundary Decision Pass 1](../ops/DISCORD-OS-FEEDBACK-WORKFLOW-SEPARATION-BOUNDARY-DECISION-PASS-1-2026-05-27.md)
+- [Discord OS Feedback Workflow Live-Proof Criteria](../ops/DISCORD-OS-FEEDBACK-WORKFLOW-LIVE-PROOF-CRITERIA-2026-05-27.md)
 
 ## Durable Context Externalization
 
