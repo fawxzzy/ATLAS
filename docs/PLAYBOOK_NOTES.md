@@ -1,5 +1,15 @@
 # Playbook Notes
 
+## 2026-05-27 - Local data gateway proof packaging matures evidence, not handoff authority
+
+- Rule: local proof packaging is evidence packaging, not handoff authorization.
+- Rule: marker movement after proof packaging requires real-workflow proof that the packaged bundle preserves explicit no-send, no-execution, no remote-target, and no automatic-handoff state.
+- Pattern: contract -> validator -> dry-run emitter -> local review -> local proof package -> proof receipt -> marker ratchet.
+- Failure Mode: treating a packaged proof bundle as implied permission to send, sync, post, or execute downstream work collapses evidence packaging into hidden transport authority.
+- Release-summary bullets:
+  - Added the rule that proof packaging strengthens local evidence maturity without opening handoff authority.
+  - Preserved the send boundary by requiring explicit proof that packaged bundles still record no-send and no-authorization state on real workflows.
+
 ## 2026-05-27 - Local data gateway review proof ratchet requires explicit no-send approval evidence
 
 - Rule: local packet review is a governance checkpoint, not transport authority.

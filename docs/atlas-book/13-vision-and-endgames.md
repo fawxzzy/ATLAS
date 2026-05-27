@@ -92,9 +92,9 @@ Shared rules that survive the split:
 
 - done means raw data is local-by-default and remote systems receive minimum useful governed packets instead of raw dumps
 - should not become a license to export more data simply because a packet exists
-- currently open at proof-backed local-helper and local-review stage
+- currently open at proof-backed full local lifecycle stage through proof packaging
 - next valid package:
-  - Local Data Gateway lane proof packager package 4
+  - Local Data Gateway full wrapper planning checkpoint
 
 ### ATLAS Book / Publishing
 
@@ -134,7 +134,7 @@ Shared rules that survive the split:
 
 - exact row-scoped Fitness Supabase mutation approval
 - remote preview/unfurl verification approval
-- local-data preprocessing now has proof-backed validator, dry-run emitter, and local review helpers, but still needs receipt-ready proof packaging and a broader wrapper surface
+- local-data preprocessing now has proof-backed validator, dry-run emitter, local review, and proof packaging helpers, but still needs a broader wrapper surface before any separate send-authorization lane can even be considered
 - Full Stack Re-sync final closeout is complete; remaining pressure is no longer inside that lane
 - DiscordOS runtime/schema/data follow-on remains explicitly blocked outside the closed lookup lane
 
