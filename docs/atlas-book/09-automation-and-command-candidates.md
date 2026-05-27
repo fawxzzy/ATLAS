@@ -278,8 +278,16 @@ Current local artifact landing root:
 
 Deferred after this slice:
 
+- local packet review / approval checkpoint
 - lane proof packager
 - full `stack data gateway packet <lane>` wrapper
+
+Next safe boundary after the dry-run emitter:
+
+- operator-visible local packet review
+- explicit approval disposition
+- no-send attestation
+- receipt/proof-ready review metadata
 
 ## Non-Goals
 

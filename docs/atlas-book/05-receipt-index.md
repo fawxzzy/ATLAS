@@ -133,6 +133,7 @@
 - [Local Data Gateway Dry-Run Packet Emitter Package 2](../ops/LOCAL-DATA-GATEWAY-DRY-RUN-PACKET-EMITTER-PACKAGE-2-2026-05-27.md)
 - [Local Data Gateway Dry-Run Emitter Proof Pass](../ops/LOCAL-DATA-GATEWAY-DRY-RUN-EMITTER-PROOF-PASS-2026-05-27.md)
 - [Local Data Gateway Marker Ratchet Checkpoint 2](../ops/LOCAL-DATA-GATEWAY-MARKER-RATCHET-CHECKPOINT-2-2026-05-27.md)
+- [Local Data Gateway Packet Review / Approval Boundary Plan](../ops/LOCAL-DATA-GATEWAY-PACKET-REVIEW-APPROVAL-BOUNDARY-PLAN-2026-05-27.md)
 
 ## Lane Split
 

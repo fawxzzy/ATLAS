@@ -146,7 +146,8 @@ Current reopen note:
 - Local Data Gateway planning is a valid parallel docs-only ATLAS package as long as it stays contract/design-only and does not bypass owner-lane execution gates
 - Local Data Gateway contract work is valid here only when it defines packet boundaries, lifecycle, and invariants without implementing remote-facing helper behavior
 - Local Data Gateway helper-contract work is valid here only when it freezes local-only command modes and artifact boundaries without adding any send/sync/mutate path
-- Local Data Gateway helper-implementation planning is valid here only when it selects one smallest local-only slice, currently the local packet manifest generator, without widening into final packet emit or downstream handoff
+- Local Data Gateway helper implementation is now valid here only when it stays inside the already-landed local-only validator and dry-run emitter boundaries
+- Local Data Gateway next-surface planning is valid here only when it freezes an operator-visible review/approval checkpoint that remains local-only and does not imply downstream execution
 
 ## Shared Handoff Rules
 
