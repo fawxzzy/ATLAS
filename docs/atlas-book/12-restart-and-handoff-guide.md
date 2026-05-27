@@ -195,7 +195,7 @@ Current best non-gated docs / control-plane ladder:
 
 - Local Data Gateway wrapper implementation package 1
 - Discord OS Feedback Workflow No-Regression Extraction Checklist
-- Durable Context Externalization marker ratchet checkpoint 2
+- Durable Context Externalization continuity-manifest adoption pass 1
 - targeted book maintenance when a new durable receipt changes lane posture
 
 If reopening an approved gated lane:

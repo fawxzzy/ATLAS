@@ -125,6 +125,7 @@
 ## Durable Context Externalization
 
 - [Durable Context Externalization](../ops/DURABLE-CONTEXT-EXTERNALIZATION-2026-05-27.md)
+- [Durable Context Externalization Marker Ratchet Checkpoint 2](../ops/DURABLE-CONTEXT-EXTERNALIZATION-MARKER-RATCHET-CHECKPOINT-2-2026-05-27.md)
 - [Durable Context Externalization Continuity-Manifest Pass](../ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-PASS-2026-05-27.md)
 - [Durable Context Externalization Retrieval Surface Inventory](../ops/DURABLE-CONTEXT-EXTERNALIZATION-RETRIEVAL-SURFACE-INVENTORY-2026-05-27.md)
 - [Durable Context Externalization Prompt-Pack Normalization](../ops/DURABLE-CONTEXT-EXTERNALIZATION-PROMPT-PACK-NORMALIZATION-2026-05-27.md)
