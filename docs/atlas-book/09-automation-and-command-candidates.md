@@ -265,16 +265,21 @@ Why this slice lands first:
 Current `_stack` helper entry for this slice:
 
 - `pnpm --dir repos/_stack run data-gateway:packet:validate -- --input <packet.json>`
+- `pnpm --dir repos/_stack run data-gateway:packet:emit:dry-run -- --input <packet.json> --lane <lane>`
 
 Current proof surface for this slice:
 
 - `pnpm --dir repos/_stack run data-gateway:packet:validate:test`
+- `pnpm --dir repos/_stack run data-gateway:packet:emit:dry-run:test`
+
+Current local artifact landing root:
+
+- `runtime/gateway-packets/<lane>/<date>/<packet-id>/`
 
 Deferred after this slice:
 
-- dry-run packet emitter
-- packet manifest/artifact generation
 - lane proof packager
+- full `stack data gateway packet <lane>` wrapper
 
 ## Non-Goals
 
