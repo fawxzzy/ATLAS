@@ -92,9 +92,9 @@ Shared rules that survive the split:
 
 - done means raw data is local-by-default and remote systems receive minimum useful governed packets instead of raw dumps
 - should not become a license to export more data simply because a packet exists
-- currently open at doctrine-admitted, implementation-planning stage
+- currently open at proof-backed local-helper stage
 - next valid package:
-  - Local Data Gateway _stack packet field validator package 1
+  - Local Data Gateway lane proof packager package 3
 
 ### ATLAS Book / Publishing
 
@@ -134,7 +134,7 @@ Shared rules that survive the split:
 
 - exact row-scoped Fitness Supabase mutation approval
 - remote preview/unfurl verification approval
-- local-data preprocessing doctrine still needs first helper implementation proof
+- local-data preprocessing now has proof-backed validator and dry-run emitter helpers, but still needs receipt-ready proof packaging and a broader wrapper surface
 - Full Stack Re-sync final closeout is complete; remaining pressure is no longer inside that lane
 - DiscordOS runtime/schema/data follow-on remains explicitly blocked outside the closed lookup lane
 

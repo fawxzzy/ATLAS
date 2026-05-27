@@ -6,8 +6,11 @@
 - Rule: a governed packet must carry purpose, schema/version, sensitivity, provenance, transformation record, validation result, redaction status, dedupe status, exclusion summary, receipt/proof reference, and minimum useful payload.
 - Rule: packet quality depends on proving what stayed local, not only what was exported.
 - Rule: the first `_stack` helper boundary must stay local-only with `preview`, `emit`, and `validate` modes, and must not include `send`, `sync`, `post`, `submit`, or `mutate`.
+- Rule: marker movement beyond the first doctrine ratchet requires live helper proof on real workflows, not just packet doctrine or helper existence.
 - Pattern: local source -> packet contract -> real-workflow exemplar proof -> helper contract -> implementation planning -> local-only helper.
+- Pattern: validator proof -> dry-run emitter proof -> marker ratchet only after no-send local artifact behavior is proven on real workflows.
 - Failure Mode: moving the marker or helper ambition forward before a reusable packet contract, exemplar proof, and helper boundary are all durable confuses doctrine maturity with implementation maturity.
+- Failure Mode: moving the marker because the emitter exists, without proving its no-send local artifact behavior on real workflows, mistakes implementation presence for reusable governed behavior.
 - Release-summary bullets:
   - Admitted Local Data Gateway as durable doctrine rather than a marker-only idea.
   - Froze the required packet field set and the no-send helper boundary.
