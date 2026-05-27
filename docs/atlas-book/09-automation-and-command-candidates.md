@@ -267,12 +267,14 @@ Current `_stack` helper entry for this slice:
 - `pnpm --dir repos/_stack run data-gateway:packet:validate -- --input <packet.json>`
 - `pnpm --dir repos/_stack run data-gateway:packet:emit:dry-run -- --input <packet.json> --lane <lane>`
 - `pnpm --dir repos/_stack run data-gateway:packet:review -- --artifact-dir <dir> --reviewer <label> --disposition <approved|rejected|needs-revision|no-decision> [--note "<text>"]`
+- `pnpm --dir repos/_stack run data-gateway:packet:proof-package -- --artifact-dir <dir>`
 
 Current proof surface for this slice:
 
 - `pnpm --dir repos/_stack run data-gateway:packet:validate:test`
 - `pnpm --dir repos/_stack run data-gateway:packet:emit:dry-run:test`
 - `pnpm --dir repos/_stack run data-gateway:packet:review:test`
+- `pnpm --dir repos/_stack run data-gateway:packet:proof-package:test`
 
 Current local artifact landing root:
 
@@ -283,6 +285,11 @@ Current local review artifact set:
 - `packet-review.md`
 - `packet-review-metadata.json`
 
+Current local proof bundle set:
+
+- `proof-summary.md`
+- `proof-metadata.json`
+
 Review-only dispositions currently supported:
 
 - `approved`
@@ -292,7 +299,7 @@ Review-only dispositions currently supported:
 
 Deferred after this slice:
 
-- lane proof packager
+- proof-packager real-workflow proof pass
 - full `stack data gateway packet <lane>` wrapper
 - any downstream send/transport boundary
 
@@ -302,9 +309,9 @@ Still explicitly prohibited after this slice:
 - any `send`, `sync`, `post`, `submit`, or `mutate` helper mode
 - any interpretation that local `approved` review status authorizes downstream execution
 
-Next safe boundary after the local review surface:
+Next safe boundary after the proof-packager surface:
 
-- receipt-ready proof packaging over reviewed local packet artifacts
+- real-workflow proof over packaged reviewed local artifacts
 - still local-only
 - still no-send
 
