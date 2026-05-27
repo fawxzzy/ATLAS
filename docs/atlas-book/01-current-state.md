@@ -73,6 +73,7 @@ Current status:
   - no behind-only Playbook smoke branch residue remains
   - no Playbook-only retained-surface execution subset is currently open
   - the remaining pressure is Playbook stash/manual-review governed retains plus Lifeline safety/evidence/manual-review surfaces
+  - one exact Lifeline merged-checkpoint execution subset still remains open
 
 ## Current Closeout Read
 
@@ -87,6 +88,7 @@ What the latest closeout passes proved:
 - Discord and Music Sesh data concerns are now explicitly transferred to DiscordOS Infrastructure Separation instead of lingering as Fitness cleanup residue
 - the DiscordOS lookup-local planning and boundary chain is complete enough to stop widening without an explicit new authorization
 - root self-lock sequencing for `stack.lock.yaml#stack` has been resolved by policy, so the remaining pressure is retained-surface cleanup rather than root commitability
+- the retained-surface lane is no longer blocked by broad ambiguity; the only exact remaining cleanup subset is the Lifeline merged-checkpoint trio `lifeline-main-closeout`, `lifeline-main-closeout-2`, and `lifeline-main-closeout-3`
 
 ## Current Direction
 
