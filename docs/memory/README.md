@@ -115,7 +115,13 @@ Current first-adoption seeded manifests:
 - `docs/memory/initiatives/continuity-manifest-discord-os-feedback-workflow-canonicalization.json`
 - `docs/memory/initiatives/continuity-manifest-discord-os-infrastructure-separation.json`
 
-These seeded manifests make those lanes manifest-backed for restart routing.
+These seeded manifests are manifest-backed only while their freshness state remains current.
+
+Refresh passes should either:
+
+- revalidate the manifest as still `manifest-backed`
+- refresh it to the current decisive receipt and next-package posture
+- or downgrade it to `manifest-present only`
 
 They do not imply:
 

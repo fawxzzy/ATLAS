@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-05-27T00:00:00Z",
-  "updated_at": "2026-05-27T00:00:00Z",
+  "updated_at": "2026-05-27T21:29:21Z",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -22,6 +22,9 @@
     "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-2026-05-27.md",
     "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-ADOPTION-PASS-1-2026-05-27.md",
     "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-PASS-2026-05-27.md",
+    "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-SEEDING-PASS-1-2026-05-27.md",
+    "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-REFRESH-DISCIPLINE-PASS-1-2026-05-27.md",
+    "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-MARKER-RATCHET-CHECKPOINT-3-2026-05-27.md",
     "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-MARKER-RATCHET-CHECKPOINT-2-2026-05-27.md",
     "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-PROMPT-PACK-NORMALIZATION-2026-05-27.md",
     "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-RETRIEVAL-SURFACE-INVENTORY-2026-05-27.md"
@@ -32,14 +35,17 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "durable-context-externalization",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-ADOPTION-PASS-1-2026-05-27.md",
-    "checkpoint_commit": "2e8a8ae",
-    "checkpoint_summary": "Continuity-manifest adoption posture is frozen, first-adoption lanes are named, and the threshold for honest manifest-backed continuity is explicit.",
+    "current_checkpoint_receipt": "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-REFRESH-DISCIPLINE-PASS-1-2026-05-27.md",
+    "checkpoint_commit": "b89cfd1",
+    "checkpoint_summary": "The first-adoption seeded set exists, refresh discipline is durable, and manifest freshness is now part of the honest manifest-backed claim.",
     "governing_receipts": [
       "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-2026-05-27.md",
       "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-MARKER-RATCHET-CHECKPOINT-2-2026-05-27.md",
+      "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-MARKER-RATCHET-CHECKPOINT-3-2026-05-27.md",
       "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-PASS-2026-05-27.md",
       "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-ADOPTION-PASS-1-2026-05-27.md",
+      "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-SEEDING-PASS-1-2026-05-27.md",
+      "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-REFRESH-DISCIPLINE-PASS-1-2026-05-27.md",
       "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-RETRIEVAL-SURFACE-INVENTORY-2026-05-27.md",
       "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-PROMPT-PACK-NORMALIZATION-2026-05-27.md"
     ],
@@ -87,15 +93,19 @@
     ],
     "next_package_ladder": [
       {
-        "package": "Durable Context Externalization marker ratchet checkpoint 3",
+        "package": "Durable Context Externalization marker ratchet checkpoint 4",
         "mode": "docs-only marker ratchet",
-        "reason": "recompute whether seeded manifests materially increase implemented resumability"
+        "reason": "recompute whether refreshed first-adoption manifests and practiced freshness discipline justify another bounded marker move"
       }
     ],
+    "freshness_state": "manifest-backed",
+    "freshness_checked_receipt": "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-REFRESH-PASS-1-2026-05-27.md",
+    "freshness_checked_at": "2026-05-27T21:29:21Z",
+    "freshness_basis": "checkpoint, marker posture, blocked work, and next-package posture now match the current durable continuity lane state.",
     "marker_posture": [
       {
         "marker": "Durable Context Externalization",
-        "percent": 65,
+        "percent": 70,
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ]

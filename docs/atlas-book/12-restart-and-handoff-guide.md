@@ -65,6 +65,11 @@ If a continuity manifest exists but is stale:
 - use it as a hint to the lane surface, then fall through to the current decisive receipt chain
 - do not trust it over newer marker or receipt surfaces
 
+If a continuity manifest includes explicit freshness fields:
+
+- use `freshness_state` and `freshness_checked_receipt` as the first freshness cue
+- if those fields conflict with newer marker or receipt surfaces, trust the newer durable surfaces and refresh the manifest
+
 ## Required First Checks
 
 Before doing any substantial work:
@@ -208,9 +213,9 @@ For approval-gated lanes, append the exact approval phrase or approval requireme
 
 Current best non-gated docs / control-plane ladder:
 
-- Local Data Gateway wrapper package 2 planning checkpoint
-- Discord OS Feedback Workflow fresh-submit row-thread linkage proof packet
-- Durable Context Externalization continuity-manifest refresh-discipline pass 1
+- Local Data Gateway wrapper package 3 planning checkpoint
+- Discord OS Feedback Workflow fresh-submit live proof receipt
+- Durable Context Externalization marker ratchet checkpoint 4
 - targeted book maintenance when a new durable receipt changes lane posture
 
 If reopening an approved gated lane:
