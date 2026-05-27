@@ -319,6 +319,45 @@ Each entry records:
 
 - canonical source -> generated outputs -> consumer sync
 
+## 10. Raw Export / Packet Contract Drift
+
+### Symptoms
+
+- a remote consumer receives noisy raw input instead of a compact packet
+- provenance, sensitivity, or transformation history is missing from a shared payload
+- later reviewers cannot replay or audit what left local control
+
+### Root cause
+
+- Local Data Gateway doctrine was referenced, but no concrete packet contract was enforced
+
+### Prevention rule
+
+- raw data stays local-first
+- exported packets must carry purpose, schema/version, sensitivity, provenance, transformation record, validation result, redaction status, dedupe status, downstream target class, and minimum useful payload
+
+### Recovery steps
+
+1. stop further handoff from the malformed packet flow
+2. identify the local owner surface and original raw source
+3. rebuild the payload through the gateway lifecycle
+4. emit a contract-compliant packet
+5. record the corrected packet in a receipt or proof artifact
+
+### Owning lane
+
+- Local Data Gateway
+- AI Repetition-to-Automation Pipeline
+
+### Required receipt
+
+- Local Data Gateway packet contract or helper proof receipt
+
+### Marker impact
+
+- Local Data Gateway
+- AI Repetition-to-Automation Pipeline
+
 ### Recovery steps
 
 1. identify the canonical asset source

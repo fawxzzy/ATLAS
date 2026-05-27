@@ -214,8 +214,22 @@ Required packet fields for the first helper candidate:
 - provenance
 - transformation record
 - validation status
+- redaction status
+- dedupe status
+- downstream target class
 - payload summary
 - minimum useful payload
+
+Required packet lifecycle for the first helper candidate:
+
+1. raw capture
+2. local normalize
+3. local validate
+4. local redact/classify
+5. local dedupe/extract
+6. packet emit
+7. downstream handoff
+8. receipt/proof
 
 ## Non-Goals
 
