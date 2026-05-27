@@ -49,9 +49,19 @@ Meaning:
 - GPT/Codex are temporary reasoning workers, not the durable state substrate
 - repeated chat-to-chat or worker-to-worker handoff without checkpointing will accumulate stale or duplicated context unless it is bounded by receipts, promoted notes, truth maps, and continuation guides
 
+Preferred retrieval order:
+
+1. continuity manifest when one exists
+2. current book chapter
+3. governing receipt chain
+4. owner-repo truth-owner surface
+5. verification/adoption surface
+6. transcript nuance only when still unpromoted
+
 Continuity-manifest rule:
 
 - when a lane has a maintained continuity manifest, retrieve it before reconstructing state from chat recap or memory of the last session
+- a continuity manifest is a retrieval map, not a second truth store
 
 ## Retrieval surface taxonomy
 

@@ -6,7 +6,7 @@ This chapter is the shortest path for resuming the stack from a new chat without
 
 Use the book and receipts first.
 
-Do not start by inferring current state from stray repo residue, `tmp`, or memory of the last conversation.
+Do not start by inferring current state from stray repo residue, `tmp`, remembered transcript continuity, or memory of the last conversation.
 
 Rule:
 External Context First.
@@ -21,25 +21,34 @@ Recursive Context Rot Loop.
 
 Start in this order:
 
-1. read [Current State](01-current-state.md)
-2. read [Approval Gates](04-approval-gates.md)
-3. read [Current System Map / Graph](11-system-map-graph.md)
-4. read [Lanes And Markers](02-lanes-and-markers.md)
-5. read [Receipt Index](05-receipt-index.md)
-6. only then choose the next lane
+1. read the lane continuity manifest when one exists
+2. read [Current State](01-current-state.md)
+3. read [Approval Gates](04-approval-gates.md)
+4. read [Current System Map / Graph](11-system-map-graph.md)
+5. read [Lanes And Markers](02-lanes-and-markers.md)
+6. read [Receipt Index](05-receipt-index.md)
+7. only then choose the next lane
 
 If the task is lane-specific:
 
 - use the continuity manifest first when one exists
-- use the book chapter first
-- use the lane receipt chain second
-- use chat history last
+- use the current book chapter next
+- use the governing receipt chain next
+- use owner-repo truth-owner surfaces next
+- use verification/adoption surfaces next
+- use chat history last and only for unpromoted nuance
 
 If durable surfaces disagree with chat recap:
 
 - trust the durable surfaces
 - repair the docs if needed
 - do not treat the chat recap as authority
+
+If no continuity manifest exists yet:
+
+- prefer the receipt index and current system map over remembered package ordering
+- prefer promoted notes over copied recap blocks
+- package any critical chat-only fact into a receipt or governed note before using it as restart truth
 
 ## Required First Checks
 
@@ -143,11 +152,12 @@ Never start product implementation from ATLAS root just because the conversation
 Use this hierarchy:
 
 1. lane continuity manifest when one exists
-2. current owner surface
-3. current book chapter
-4. most recent durable receipt
-5. validation output
-6. chat history only for nuance that is not yet packaged
+2. current book chapter
+3. most recent durable receipt chain
+4. current owner surface
+5. verification/adoption surface
+6. validation output
+7. chat history only for nuance that is not yet packaged
 
 If something important only exists in chat, package it into the book or a receipt before treating it as durable truth.
 
@@ -181,9 +191,11 @@ For approval-gated lanes, append the exact approval phrase or approval requireme
 
 ## Current Recommended Next Packages
 
-Current best non-gated closeout ladder:
+Current best non-gated docs / control-plane ladder:
 
-- Local Data Gateway _stack packet field validator package 1
+- Local Data Gateway wrapper implementation package 1
+- Discord OS Feedback Workflow No-Regression Extraction Checklist
+- Durable Context Externalization marker ratchet checkpoint 2
 - targeted book maintenance when a new durable receipt changes lane posture
 
 If reopening an approved gated lane:
@@ -203,6 +215,7 @@ At this checkpoint:
 - the ATLAS Book is the primary restart surface
 - `_stack` remains deploy authority
 - normal stack validation is green in the current working state
+- continuity manifests, retrieval-surface taxonomy, and prompt-pack normalization are now durable enough that transcript recap should be treated as optional nuance rather than a restart substrate
 - ATLAS root self-lock sequencing has been resolved; preview/unfurl remains approval-gated, the Playbook external `.codex/worktrees/*` stranded-directory subset and the behind-only Playbook smoke branch class are now consumed, no Playbook-only retained-surface execution subset is currently open, the Lifeline stale-merged-checkpoint trio is now consumed, the remaining retained-surface pressure is governed-retain only, `Branch & Worktree Normalization` is now closed at `100%`, `Full Stack Re-sync, Clean & Closeout` is now closed at `100%`, and the DiscordOS lookup-local boundary chain is fully ratcheted shut with both transport-aware and externally-executing openings blocked until higher-level authorization reopens them
 
 ## Non-Goals

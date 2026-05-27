@@ -28,6 +28,17 @@
   - Froze the doctrine that workers should retrieve durable context before trusting chat continuity.
   - Named the recursive context-rot failure mode so future lanes can distinguish durable continuity from conversational carryover.
 
+## 2026-05-27 - Prompt packs should resume from durable context, not transcript continuity
+
+- Rule: canonical continuation prompts should treat prior chat continuity as non-authoritative.
+- Rule: active restart surfaces should prefer continuity manifests, receipt chains, truth maps, promoted notes, and owner verification/adoption surfaces before transcript recap.
+- Pattern: continuity manifest -> current book chapter -> receipt chain -> owner truth surface -> verification/adoption surface -> transcript nuance last.
+- Failure Mode: a restart prompt that still trusts remembered session state before durable retrieval recreates stale package ordering and wrong-lane continuation drift.
+- Release-summary bullets:
+  - Normalized the active ATLAS continuation pack so retrieval-first doctrine is expressed consistently instead of only implied.
+  - Removed stale restart guidance that still pointed at older Local Data Gateway package ordering.
+  - Reinforced that transcript carryover is optional nuance, not a canonical restart substrate.
+
 ## 2026-05-27 - Local data gateway proof packaging matures evidence, not handoff authority
 
 - Rule: local proof packaging is evidence packaging, not handoff authorization.

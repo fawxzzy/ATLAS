@@ -92,9 +92,9 @@ Shared rules that survive the split:
 
 - done means major stack work is resumable and reconstructable from ATLAS plus owner-repo artifacts rather than dependent on prior model or chat continuity
 - should not duplicate owner-repo source truth into ATLAS by convenience
-- currently open because the durable substrate is already strong, but retrieval-first use is still partly manual and uneven
+- currently open because the durable substrate is already strong, continuity-manifest doctrine and retrieval taxonomy are now explicit, and the active prompt pack is normalized, but retrieval-first use is still partly manual and not yet universal across all major lanes
 - next valid package:
-  - Durable Context Externalization continuity-manifest pass
+  - Durable Context Externalization marker ratchet checkpoint 2
 
 ### Local Data Gateway
 
@@ -144,7 +144,7 @@ Shared rules that survive the split:
 - exact row-scoped Fitness Supabase mutation approval
 - remote preview/unfurl verification approval
 - local-data preprocessing now has proof-backed validator, dry-run emitter, local review, and proof packaging helpers, but still needs a broader wrapper surface before any separate send-authorization lane can even be considered
-- critical continuity is already more externalized than before, but retrieval-first continuity is still not universal across all prompt packs, manifests, and owner-repo continuation surfaces
+- critical continuity is already more externalized than before, but continuity manifests are still not universal and retrieval-first continuation still depends on manual operator discipline in some lanes
 - Full Stack Re-sync final closeout is complete; remaining pressure is no longer inside that lane
 - DiscordOS runtime/schema/data follow-on remains explicitly blocked outside the closed lookup lane
 

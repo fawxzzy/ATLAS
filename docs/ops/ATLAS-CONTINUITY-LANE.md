@@ -14,6 +14,11 @@ The continuity lane exists so ATLAS can keep compounding prior work across sessi
 
 This is a root-owned coordination surface. It does not create a second truth store for child repos.
 
+Retrieval-first rule:
+
+- when a maintained continuity manifest or current receipt chain exists, retrieve it before trusting conversational carryover
+- transcript continuity is traceability and nuance, not authoritative restart state
+
 ## Contract Surface
 
 Structured handoffs use:
@@ -102,7 +107,7 @@ Promotion rules:
 
 ## Authoring Flow
 
-1. Ground the session on current awareness, memory, repo, and contract state.
+1. Ground the session on the continuity manifest, current awareness, receipt chain, repo, and contract state.
 2. Emit one `atlas.continuity.handoff.v1` artifact under `runtime/receipts/handoffs/`.
 3. Review the handoff for durable facts, decisions, next actions, and questions.
 4. Promote approved items into `docs/memory/**`, `docs/knowledge/**`, or the owner repo.
@@ -148,6 +153,7 @@ python .\ops\validation\validate_stack.py
 ## Anti-Patterns
 
 - treating transcripts as durable memory
+- trusting copied recap blocks before current receipts or manifests are checked
 - dropping durable facts only into chat summaries
 - copying child-repo contracts into root for convenience
 - storing serious handoffs in repo roots
