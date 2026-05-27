@@ -385,9 +385,14 @@ Wrapper behavior matrix now frozen at the docs layer:
   - hidden export
   - lane-specific branching logic
 
-Next safe wrapper layer after this draft:
+Current landed wrapper layer:
 
 - wrapper implementation package 1
+- package-1 modes now implemented:
+  - `validate-only`
+  - `emit-dry-run`
+- package 1 stays a thin no-send orchestrator over the existing validator and dry-run emitter helpers
+- package 1 explicitly rejects transport-shaped and send-capable flags at the wrapper entrypoint
 
 Wrapper implementation-planning checkpoint now frozen at the docs layer:
 
@@ -401,6 +406,10 @@ Wrapper implementation-planning checkpoint now frozen at the docs layer:
   - `full-local-chain`
   - reviewer/disposition orchestration
   - any send-capable or target-selecting surface
+
+Next safe wrapper layer after package 1:
+
+- wrapper package 1 proof pass
 
 ## Non-Goals
 

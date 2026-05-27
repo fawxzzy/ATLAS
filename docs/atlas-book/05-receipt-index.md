@@ -163,6 +163,7 @@
 - [Local Data Gateway Wrapper Command Contract Draft](../ops/LOCAL-DATA-GATEWAY-WRAPPER-COMMAND-CONTRACT-DRAFT-2026-05-27.md)
 - [Local Data Gateway Wrapper Behavior Matrix And Receipt-Output Draft](../ops/LOCAL-DATA-GATEWAY-WRAPPER-BEHAVIOR-MATRIX-RECEIPT-OUTPUT-DRAFT-2026-05-27.md)
 - [Local Data Gateway Wrapper Implementation Planning Checkpoint](../ops/LOCAL-DATA-GATEWAY-WRAPPER-IMPLEMENTATION-PLANNING-CHECKPOINT-2026-05-27.md)
+- [Local Data Gateway Wrapper Implementation Package 1](../ops/LOCAL-DATA-GATEWAY-WRAPPER-IMPLEMENTATION-PACKAGE-1-2026-05-27.md)
 
 ## Lane Split
 
