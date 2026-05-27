@@ -140,6 +140,7 @@
 - [Local Data Gateway Packet Review / Approval Boundary Plan](../ops/LOCAL-DATA-GATEWAY-PACKET-REVIEW-APPROVAL-BOUNDARY-PLAN-2026-05-27.md)
 - [Local Data Gateway Packet Review / Approval Surface Package 3](../ops/LOCAL-DATA-GATEWAY-PACKET-REVIEW-APPROVAL-SURFACE-PACKAGE-3-2026-05-27.md)
 - [Local Data Gateway Review Surface Proof Pass](../ops/LOCAL-DATA-GATEWAY-REVIEW-SURFACE-PROOF-PASS-2026-05-27.md)
+- [Local Data Gateway Marker Ratchet Checkpoint 3](../ops/LOCAL-DATA-GATEWAY-MARKER-RATCHET-CHECKPOINT-3-2026-05-27.md)
 
 ## Lane Split
 

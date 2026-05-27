@@ -1,5 +1,15 @@
 # Playbook Notes
 
+## 2026-05-27 - Local data gateway review proof ratchet requires explicit no-send approval evidence
+
+- Rule: local packet review is a governance checkpoint, not transport authority.
+- Rule: marker movement after review requires proof that approval remains local-only and records explicit no-send and no-execution attestation on real workflows.
+- Pattern: contract -> validator -> dry-run emitter -> local review -> proof receipt -> marker ratchet.
+- Failure Mode: treating a local `approved` disposition as implied authorization for downstream send or execution collapses the review boundary into hidden transport logic.
+- Release-summary bullets:
+  - Added the rule that review-proof maturity depends on explicit no-send and no-execution attestation, not just the existence of a review helper.
+  - Preserved the local-first boundary by separating review maturity from any future handoff or send lane.
+
 ## 2026-05-27 - Local data gateway is now admitted doctrine, not only a marker idea
 
 - Rule: raw data lands locally first, and downstream systems receive purpose-built packets rather than messy raw input by default.
