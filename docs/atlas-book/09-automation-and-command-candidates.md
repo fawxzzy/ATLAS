@@ -290,6 +290,14 @@ Current local proof bundle set:
 - `proof-summary.md`
 - `proof-metadata.json`
 
+Wrapper recommendation after the full local proof chain:
+
+- keep validator, emitter, review, and proof-packager as separate primitives
+- add one future thin orchestrating no-send wrapper:
+  - `stack data gateway packet <lane> --mode <validate-only|emit-only|review-only|proof-only|full-local>`
+- require the wrapper to delegate to the existing helper family rather than reimplementing packet logic
+- keep operator review explicit inside `full-local`
+
 Review-only dispositions currently supported:
 
 - `approved`
@@ -299,8 +307,8 @@ Review-only dispositions currently supported:
 
 Deferred after this slice:
 
-- proof-packager real-workflow proof pass
-- full `stack data gateway packet <lane>` wrapper
+- wrapper command contract draft
+- full `stack data gateway packet <lane>` wrapper implementation
 - any downstream send/transport boundary
 
 Still explicitly prohibited after this slice:
@@ -326,6 +334,11 @@ Send-capable work requires a separate authorization lane that names:
 - exact proof, rollback, and fail-closed posture
 - exact audit and receipt obligations
 - explicit no-hidden-transport guarantees
+
+The future wrapper must remain below that authorization line:
+
+- it may orchestrate only local validate/emit/review/proof-package behavior
+- it may not introduce endpoint arguments, target selectors, or any send-capable mode
 
 ## Non-Goals
 
