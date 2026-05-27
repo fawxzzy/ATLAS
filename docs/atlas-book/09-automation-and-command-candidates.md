@@ -307,7 +307,7 @@ Review-only dispositions currently supported:
 
 Deferred after this slice:
 
-- wrapper behavior matrix and receipt-output draft
+- wrapper implementation planning checkpoint
 - full `stack data gateway packet <lane>` wrapper implementation
 - any downstream send/transport boundary
 
@@ -355,6 +355,39 @@ Wrapper contract now frozen at the docs layer:
   - auth inputs
   - hidden transport toggles
   - lane-specific business logic
+
+Wrapper behavior matrix now frozen at the docs layer:
+
+- per-mode behavior admitted:
+  - `validate-only`
+  - `emit-dry-run`
+  - `review-only`
+  - `proof-only`
+  - `full-local-chain`
+- each mode now has explicit:
+  - required inputs
+  - prerequisite artifacts
+  - produced artifacts
+  - receipt-ready summary outputs
+  - failure exits
+  - forbidden behavior
+- wrapper receipt output must report:
+  - invocation summary
+  - artifact refs
+  - validation state
+  - review state
+  - proof state
+  - no-send attestation
+  - failure summary
+- wrapper still may not add:
+  - send-capable modes
+  - target selection semantics
+  - hidden export
+  - lane-specific branching logic
+
+Next safe wrapper layer after this draft:
+
+- wrapper implementation planning checkpoint
 
 ## Non-Goals
 
