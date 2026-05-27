@@ -71,6 +71,7 @@ Current status:
 - the Playbook external `.codex/worktrees/*` stranded-directory subset and the behind-only smoke branch class are now consumed:
   - no external Playbook stranded-directory residue remains in that filesystem-only class
   - no behind-only Playbook smoke branch residue remains
+  - no additional safe execution subset is currently open by implication
   - the remaining pressure is Playbook stash/manual-review residue plus Lifeline safety/evidence/manual-review surfaces
 
 ## Current Closeout Read

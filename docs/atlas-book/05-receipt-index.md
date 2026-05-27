@@ -79,6 +79,7 @@
 - [Playbook External Codex Worktree Stranded-Directory Disposal](../ops/PLAYBOOK-EXTERNAL-CODEX-WORKTREE-STRANDED-DIRECTORY-DISPOSAL-2026-05-27.md)
 - [Playbook / Lifeline External Worktree / Smoke Surface Closeout Recheck](../ops/PLAYBOOK-LIFELINE-EXTERNAL-WORKTREE-SMOKE-CLOSEOUT-RECHECK-2026-05-27.md)
 - [Playbook / Lifeline External Worktree / Smoke Surface Disposal Decision](../ops/PLAYBOOK-LIFELINE-EXTERNAL-WORKTREE-SMOKE-DISPOSAL-DECISION-2026-05-27.md)
+- [Playbook / Lifeline Retained Surface Final Gate Recheck](../ops/PLAYBOOK-LIFELINE-RETAINED-SURFACE-FINAL-GATE-RECHECK-2026-05-27.md)
 - [Playbook / Lifeline External Smoke Disposal Decision](../ops/PLAYBOOK-LIFELINE-EXTERNAL-SMOKE-DISPOSAL-DECISION-2026-05-26.md)
 - [Playbook / Lifeline Retained-Surface Disposal Execution Pass 2](../ops/PLAYBOOK-LIFELINE-RETAINED-SURFACE-DISPOSAL-EXECUTION-PASS-2-2026-05-26.md)
 - [Playbook External Smoke Export/Archive And Smoke-Home Manual-Review Decision](../ops/PLAYBOOK-EXTERNAL-SMOKE-EXPORT-ARCHIVE-AND-SMOKE-HOME-MANUAL-REVIEW-DECISION-2026-05-26.md)
