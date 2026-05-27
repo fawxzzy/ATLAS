@@ -253,19 +253,28 @@ Recommended first artifact root:
 
 Selected first implementation slice:
 
-- local packet manifest generator
+- packet field validator
 
 Why this slice lands first:
 
-- it proves source discovery, field population, exclusion reporting, and landing-path discipline
-- it stays smaller than a final packet emitter
-- it keeps `stack data gateway packet <lane>` bounded to local-only planning artifacts before any later packet emit proof
+- it is the smallest reusable contract gate
+- it proves required field enforcement before artifact emission
+- it stays safely below packet generation, manifest writing, or proof packaging
+- it avoids turning the first helper into a half-emitter under preview language
 
-First planning artifacts for that slice:
+Current `_stack` helper entry for this slice:
 
-- `packet-manifest.json`
-- `packet-plan.md`
-- `packet-proof-summary.json`
+- `pnpm --dir repos/_stack run data-gateway:packet:validate -- --input <packet.json>`
+
+Current proof surface for this slice:
+
+- `pnpm --dir repos/_stack run data-gateway:packet:validate:test`
+
+Deferred after this slice:
+
+- dry-run packet emitter
+- packet manifest/artifact generation
+- lane proof packager
 
 ## Non-Goals
 

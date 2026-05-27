@@ -128,6 +128,7 @@
 - [Local Data Gateway Doctrine Checkpoint](../ops/LOCAL-DATA-GATEWAY-DOCTRINE-CHECKPOINT-2026-05-27.md)
 - [Local Data Gateway `_stack` Helper Implementation Planning](../ops/LOCAL-DATA-GATEWAY-STACK-HELPER-IMPLEMENTATION-PLANNING-2026-05-27.md)
 - [Local Data Gateway First Implementation Selection](../ops/LOCAL-DATA-GATEWAY-FIRST-IMPLEMENTATION-SELECTION-2026-05-27.md)
+- [Local Data Gateway `_stack` Packet Field Validator Package 1](../ops/LOCAL-DATA-GATEWAY-STACK-PACKET-FIELD-VALIDATOR-PACKAGE-1-2026-05-27.md)
 
 ## Lane Split
 
