@@ -159,7 +159,7 @@ For approval-gated lanes, append the exact approval phrase or approval requireme
 
 Current best non-gated closeout ladder:
 
-- Playbook behind-only smoke branch disposal execution pass
+- Playbook / Lifeline Retained Surface Final Gate Recheck
 - Playbook stash and manual-review retained-surface decision pass
 - Branch & Worktree Normalization Final Closeout
 - Full Stack Re-sync Final Closeout
@@ -182,7 +182,7 @@ At this checkpoint:
 - the ATLAS Book is the primary restart surface
 - `_stack` remains deploy authority
 - normal stack validation is green in the current working state
-- ATLAS root self-lock sequencing has been resolved; preview/unfurl remains approval-gated, the Playbook external `.codex/worktrees/*` stranded-directory subset is now consumed, the behind-only Playbook smoke branch class is decision-cleared for a narrow branch-only execution pass, the remaining retained-surface pressure after that is expected to be stash/manual-review residue on the Playbook side plus later Lifeline manual-review/safety surfaces, and the DiscordOS lookup-local boundary chain is fully ratcheted shut with both transport-aware and externally-executing openings blocked until higher-level authorization reopens them
+- ATLAS root self-lock sequencing has been resolved; preview/unfurl remains approval-gated, the Playbook external `.codex/worktrees/*` stranded-directory subset and the behind-only Playbook smoke branch class are now consumed, the remaining retained-surface pressure is Playbook stash/manual-review residue plus later Lifeline manual-review/safety surfaces, and the DiscordOS lookup-local boundary chain is fully ratcheted shut with both transport-aware and externally-executing openings blocked until higher-level authorization reopens them
 
 ## Non-Goals
 

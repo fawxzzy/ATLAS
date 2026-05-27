@@ -68,9 +68,10 @@ Current status:
   - transport-aware opening: `no`
   - externally-executing opening: `no`
   - any further DiscordOS lookup widening now requires explicit higher-level authorization
-- the Playbook external `.codex/worktrees/*` stranded-directory subset is now consumed:
+- the Playbook external `.codex/worktrees/*` stranded-directory subset and the behind-only smoke branch class are now consumed:
   - no external Playbook stranded-directory residue remains in that filesystem-only class
-  - the remaining pressure is branch/stash/manual-review residue on the Playbook side plus Lifeline safety/evidence/manual-review surfaces
+  - no behind-only Playbook smoke branch residue remains
+  - the remaining pressure is Playbook stash/manual-review residue plus Lifeline safety/evidence/manual-review surfaces
 
 ## Current Closeout Read
 
