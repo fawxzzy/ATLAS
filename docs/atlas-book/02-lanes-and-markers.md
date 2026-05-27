@@ -38,6 +38,7 @@
 - AI Repetition-to-Automation Pipeline: `30%`
 - Truth Map & ATLAS Book: `85%`
 - Discord OS Infrastructure Separation: `95%`
+- Discord OS Feedback Workflow Canonicalization: `68%`
 - Discord Workflow, Publication & Docs Reliability: `25%`
 - Post-Convergence Lane Split Readiness: `60%`
 
@@ -57,6 +58,7 @@
 - Core Pattern Convergence
 - Knowledge Capture & Transfer
 - Discord OS Infrastructure Separation
+- Discord OS Feedback Workflow Canonicalization
 - Truth Map & ATLAS Book
 - Full Stack Re-sync, Clean & Closeout
 - Inventory & Truth Map
@@ -95,4 +97,5 @@ The most important marker moves from the closeout queue were:
 - the remaining sign-in-bearing auth-only rows are governed heuristic exclusions, not human-style profile-repair candidates
 - Discord and Music Sesh profile/data concerns are explicitly transferred to `Discord OS Infrastructure Separation`, not left as open Fitness hygiene debt
 - Local Data Gateway now has a durable packet contract, exemplar proof chain, no-send helper boundary, a live validator helper, and a real-workflow dry-run emitter proof chain, which justifies a second small implementation-backed move to `20%`
+- Discord feedback workflow now has its own canonicalization marker at `68%`: the live Fitness-hosted workflow is already governed and unusually strong, but its formatter, lifecycle, audit, completion-review, release-boundary, and separation-safe ownership contracts are still split across multiple docs rather than frozen as one canonical workflow package
 - DiscordOS separation stayed high-confidence but intentionally below runtime migration

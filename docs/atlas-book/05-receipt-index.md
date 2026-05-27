@@ -113,6 +113,10 @@
 - [DiscordOS Feedback Repo-Local Tooling And Execution-Readiness Package 1](../ops/DISCORDOS-FEEDBACK-REPO-LOCAL-TOOLING-AND-EXECUTION-READINESS-PACKAGE-1-2026-05-26.md)
 - [DiscordOS Feedback Lookup Adapter Execution-Readiness Package 2](../ops/DISCORDOS-FEEDBACK-LOOKUP-ADAPTER-EXECUTION-READINESS-PACKAGE-2-2026-05-26.md)
 
+## Discord Workflow Canonicalization
+
+- [Discord OS Feedback Workflow Canonicalization](../ops/DISCORD-OS-FEEDBACK-WORKFLOW-CANONICALIZATION-2026-05-27.md)
+
 ## Vercel Surface Decommission
 
 - [Vercel Stale Surface Deletion Readiness](../ops/VERCEL-STALE-SURFACE-DELETION-READINESS-2026-05-25.md)
