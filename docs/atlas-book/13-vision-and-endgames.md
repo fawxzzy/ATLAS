@@ -100,9 +100,9 @@ Shared rules that survive the split:
 
 - done means raw data is local-by-default and remote systems receive minimum useful governed packets instead of raw dumps
 - should not become a license to export more data simply because a packet exists
-- currently open at proof-backed full local lifecycle stage plus thin wrapper packages 1 and 2 through real wrapper-layer proof for `validate-only`, `emit-dry-run`, and `review-only`
+- currently open at proof-backed full local lifecycle stage plus thin wrapper packages 1 through 3 through real wrapper-layer proof for `validate-only`, `emit-dry-run`, `review-only`, and `proof-only`
 - next valid package:
-  - Local Data Gateway wrapper package 3 planning checkpoint
+  - Local Data Gateway wrapper package 4 planning checkpoint
 
 ### ATLAS Book / Publishing
 
