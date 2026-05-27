@@ -296,11 +296,24 @@ Deferred after this slice:
 - full `stack data gateway packet <lane>` wrapper
 - any downstream send/transport boundary
 
+Still explicitly prohibited after this slice:
+
+- any send to SaaS, API, model, database, queue, or webhook target
+- any `send`, `sync`, `post`, `submit`, or `mutate` helper mode
+- any interpretation that local `approved` review status authorizes downstream execution
+
 Next safe boundary after the local review surface:
 
 - receipt-ready proof packaging over reviewed local packet artifacts
 - still local-only
 - still no-send
+
+Send-capable work requires a separate authorization lane that names:
+
+- exact target class
+- exact owner surface
+- exact command surface
+- exact proof, rollback, and fail-closed posture
 
 ## Non-Goals
 
