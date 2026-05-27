@@ -32,7 +32,7 @@
 - Core Pattern Convergence: `40%`
 - Playbook Everywhere + Cortex Interface: `20%`
 - Knowledge Capture & Transfer: `81%`
-- Durable Context Externalization: `70%`
+- Durable Context Externalization: `72%`
 - Feedback Loop Readiness: `42%`
 - Sandbox Simulation Readiness: `0%`
 - AI Long-Run Batch Orchestration: `20%`
@@ -100,5 +100,5 @@ The most important marker moves from the closeout queue were:
 - Discord and Music Sesh profile/data concerns are explicitly transferred to `Discord OS Infrastructure Separation`, not left as open Fitness hygiene debt
 - Local Data Gateway now has a durable packet contract, exemplar proof chain, no-send helper boundary, a live validator helper, a dry-run emitter helper, a local review helper, and a proof-packager helper, all backed by real-workflow proof across the same three exemplar classes; it also now has thin wrapper packages 1 through 3 with real-workflow proof for `validate-only`, `emit-dry-run`, `review-only`, and `proof-only`, which justifies a seventh small implementation-backed move to `55%` without implying full-local-chain composition or any send/transport authority
 - Discord feedback workflow canonicalization now sits at `72%`: the live Fitness-hosted workflow is still the runtime truth, but the lane now has a dedicated canonical contract package, a first separation boundary, live-proof criteria, and a no-regression extraction checklist; what still blocks higher readiness is deploy-backed extraction parity and any proven owner-movement evidence
-- Durable Context Externalization now sits at `70%`: the first real continuity manifests are now published durably for the first-adoption major lane set, and restart routing can point workers to active manifest -> receipt -> owner-truth chains instead of transcript-first reconstruction; it stays below `75%` because coverage is still partial, refresh discipline is not yet proven over time, and some restart paths still depend on manual operator stitching
+- Durable Context Externalization now sits at `72%`: the first-adoption continuity manifests are not only durably seeded, but now governed by an explicit refresh discipline and refreshed in practice, so restart routing can rely on fresh manifest -> receipt -> owner-truth chains with a real downgrade path for stale manifests; it stays below `75%` because coverage is still partial, sustained refresh discipline is not yet proven across time, and some restart paths still depend on manual operator stitching
 - DiscordOS separation stayed high-confidence but intentionally below runtime migration

@@ -92,9 +92,9 @@ Shared rules that survive the split:
 
 - done means major stack work is resumable and reconstructable from ATLAS plus owner-repo artifacts rather than dependent on prior model or chat continuity
 - should not duplicate owner-repo source truth into ATLAS by convenience
-- currently open because the durable substrate is already strong, the first real continuity manifests are now durably seeded for the first-adoption major lane set, and restart routing can point to real manifest-backed retrieval maps, but retrieval-first use is still partly manual and not yet universal across all major lanes
+- currently open because the durable substrate is already strong, the first-adoption continuity manifests are durably seeded, refresh discipline is now explicit, and that refresh discipline has already been applied once to keep restart routing on fresh manifest-backed retrieval maps, but retrieval-first use is still partly manual and not yet universal across all major lanes
 - next valid package:
-  - Durable Context Externalization continuity-manifest refresh-discipline pass 1
+  - Durable Context Externalization continuity-manifest breadth-expansion pass 1
 
 ### Local Data Gateway
 
