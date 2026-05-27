@@ -320,7 +320,12 @@ Send-capable work requires a separate authorization lane that names:
 - exact target class
 - exact owner surface
 - exact command surface
+- explicit approval class
+- target type
+- allowed sensitivity constraints
 - exact proof, rollback, and fail-closed posture
+- exact audit and receipt obligations
+- explicit no-hidden-transport guarantees
 
 ## Non-Goals
 

@@ -146,6 +146,7 @@
 - [Local Data Gateway Proof Packager Package 4](../ops/LOCAL-DATA-GATEWAY-PROOF-PACKAGER-PACKAGE-4-2026-05-27.md)
 - [Local Data Gateway Proof Packager Proof Pass](../ops/LOCAL-DATA-GATEWAY-PROOF-PACKAGER-PROOF-PASS-2026-05-27.md)
 - [Local Data Gateway Marker Ratchet Checkpoint 4](../ops/LOCAL-DATA-GATEWAY-MARKER-RATCHET-CHECKPOINT-4-2026-05-27.md)
+- [Local Data Gateway Send Authorization Prerequisites](../ops/LOCAL-DATA-GATEWAY-SEND-AUTHORIZATION-PREREQUISITES-2026-05-27.md)
 
 ## Lane Split
 

@@ -149,6 +149,7 @@ Current reopen note:
 - Local Data Gateway helper implementation is now valid here only when it stays inside the already-landed local-only validator and dry-run emitter boundaries
 - Local Data Gateway next-surface planning is valid here only when it freezes an operator-visible review/approval checkpoint that remains local-only and does not imply downstream execution
 - Local Data Gateway send-boundary work is valid here only when it freezes prohibition and authorization prerequisites; it must not add transport, model, SaaS, or downstream execution behavior by implication
+- Local Data Gateway send-authorization work is valid here only when it names explicit approval class, target type, sensitivity constraints, rollback/fail-closed posture, audit receipts, and no-hidden-transport guarantees before any higher-level send lane is even proposed
 
 ## Shared Handoff Rules
 
