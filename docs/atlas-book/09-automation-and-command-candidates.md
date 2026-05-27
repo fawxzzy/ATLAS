@@ -266,28 +266,41 @@ Current `_stack` helper entry for this slice:
 
 - `pnpm --dir repos/_stack run data-gateway:packet:validate -- --input <packet.json>`
 - `pnpm --dir repos/_stack run data-gateway:packet:emit:dry-run -- --input <packet.json> --lane <lane>`
+- `pnpm --dir repos/_stack run data-gateway:packet:review -- --artifact-dir <dir> --reviewer <label> --disposition <approved|rejected|needs-revision|no-decision> [--note "<text>"]`
 
 Current proof surface for this slice:
 
 - `pnpm --dir repos/_stack run data-gateway:packet:validate:test`
 - `pnpm --dir repos/_stack run data-gateway:packet:emit:dry-run:test`
+- `pnpm --dir repos/_stack run data-gateway:packet:review:test`
 
 Current local artifact landing root:
 
 - `runtime/gateway-packets/<lane>/<date>/<packet-id>/`
 
+Current local review artifact set:
+
+- `packet-review.md`
+- `packet-review-metadata.json`
+
+Review-only dispositions currently supported:
+
+- `approved`
+- `rejected`
+- `needs-revision`
+- `no-decision`
+
 Deferred after this slice:
 
-- local packet review / approval checkpoint
 - lane proof packager
 - full `stack data gateway packet <lane>` wrapper
+- any downstream send/transport boundary
 
-Next safe boundary after the dry-run emitter:
+Next safe boundary after the local review surface:
 
-- operator-visible local packet review
-- explicit approval disposition
-- no-send attestation
-- receipt/proof-ready review metadata
+- receipt-ready proof packaging over reviewed local packet artifacts
+- still local-only
+- still no-send
 
 ## Non-Goals
 
