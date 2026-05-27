@@ -156,6 +156,7 @@ Current reopen note:
 - Local Data Gateway wrapper implementation-planning work is valid here only when it selects the smallest thin-orchestration slice over the existing helper family, keeps package 1 below review/proof wrapper modes, and preserves explicit no-send failure semantics
 - Local Data Gateway wrapper package-2 planning work is valid here only when it selects `review-only` as the next wrapper slice, keeps proof packaging and full-local-chain deferred, and preserves the rule that local `approved` review does not authorize send, handoff, or automatic downstream execution
 - Local Data Gateway wrapper package-3 planning work is valid here only when it selects `proof-only` as the next wrapper slice, keeps `full-local-chain` deferred, and preserves the rule that proof packaging remains local evidence packaging rather than send or handoff authority
+- Local Data Gateway wrapper package-4 planning work is valid here only when it selects `full-local-chain` as the next wrapper slice, composes only the already-proven local primitives in order, and preserves the rule that full-local orchestration still stops at proof packaging with no send, handoff, target-selection, or generic engine semantics
 
 ## Shared Handoff Rules
 

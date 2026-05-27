@@ -198,12 +198,20 @@ First concrete surfaces should land in this order:
 3. Playbook doctrine promotion
    - reusable rule language after the contract is stable
 
-Helper modes for the first `_stack` contract:
+Current admitted wrapper-stage modes:
 
-- `preview`
-- `emit`
-- `validate`
-- never `send`
+- `validate-only`
+- `emit-dry-run`
+- `review-only`
+- `proof-only`
+
+Next smallest planned wrapper composition:
+
+- `full-local-chain`
+
+Still never admitted:
+
+- `send`
 
 First workflow targets:
 
