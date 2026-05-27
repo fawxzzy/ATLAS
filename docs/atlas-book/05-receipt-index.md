@@ -79,6 +79,7 @@
 - [Full Stack Re-sync Closeout Advancement Checkpoint](../ops/FULL-STACK-RESYNC-CLOSEOUT-ADVANCEMENT-CHECKPOINT-2026-05-27.md)
 - [Full Stack Re-sync Closeout Refresh](../ops/FULL-STACK-RESYNC-CLOSEOUT-REFRESH-2026-05-27.md)
 - [Full Stack Re-sync Final Closeout](../ops/FULL-STACK-RESYNC-FINAL-CLOSEOUT-2026-05-27.md)
+- [ATLAS Cleanup & Re-sync Status Post](../ops/ATLAS-CLEANUP-RESYNC-STATUS-POST-2026-05-27.md)
 - [Playbook Behind-Only Smoke Branch Disposal](../ops/PLAYBOOK-BEHIND-ONLY-SMOKE-BRANCH-DISPOSAL-2026-05-27.md)
 - [Playbook Behind-Only Smoke Branch Disposal Decision](../ops/PLAYBOOK-BEHIND-ONLY-SMOKE-BRANCH-DISPOSAL-DECISION-2026-05-27.md)
 - [Playbook External Codex Worktree Stranded-Directory Disposal](../ops/PLAYBOOK-EXTERNAL-CODEX-WORKTREE-STRANDED-DIRECTORY-DISPOSAL-2026-05-27.md)
