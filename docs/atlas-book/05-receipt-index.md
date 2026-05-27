@@ -130,6 +130,7 @@
 
 - [Durable Context Externalization](../ops/DURABLE-CONTEXT-EXTERNALIZATION-2026-05-27.md)
 - [Durable Context Externalization Marker Ratchet Checkpoint 2](../ops/DURABLE-CONTEXT-EXTERNALIZATION-MARKER-RATCHET-CHECKPOINT-2-2026-05-27.md)
+- [Durable Context Externalization Marker Ratchet Checkpoint 3](../ops/DURABLE-CONTEXT-EXTERNALIZATION-MARKER-RATCHET-CHECKPOINT-3-2026-05-27.md)
 - [Durable Context Externalization Continuity-Manifest Pass](../ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-PASS-2026-05-27.md)
 - [Durable Context Externalization Continuity-Manifest Adoption Pass 1](../ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-ADOPTION-PASS-1-2026-05-27.md)
 - [Durable Context Externalization Continuity-Manifest Seeding Pass 1](../ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-SEEDING-PASS-1-2026-05-27.md)

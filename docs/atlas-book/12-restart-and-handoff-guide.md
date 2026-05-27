@@ -202,8 +202,8 @@ For approval-gated lanes, append the exact approval phrase or approval requireme
 Current best non-gated docs / control-plane ladder:
 
 - Local Data Gateway wrapper package 2 planning checkpoint
-- Discord OS Feedback Workflow fresh-intake live evidence packet
-- Durable Context Externalization marker ratchet checkpoint 3
+- Discord OS Feedback Workflow fresh-submit row-thread linkage proof packet
+- Durable Context Externalization continuity-manifest refresh-discipline pass 1
 - targeted book maintenance when a new durable receipt changes lane posture
 
 If reopening an approved gated lane:
