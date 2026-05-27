@@ -391,8 +391,11 @@ Current landed wrapper layer:
 - package-1 modes now implemented:
   - `validate-only`
   - `emit-dry-run`
-- package 1 stays a thin no-send orchestrator over the existing validator and dry-run emitter helpers
-- package 1 explicitly rejects transport-shaped and send-capable flags at the wrapper entrypoint
+- wrapper implementation package 2
+- package-2 mode now implemented:
+  - `review-only`
+- the wrapper remains a thin no-send orchestrator over the existing validator, dry-run emitter, and review helpers
+- package 2 keeps the wrapper thin over the existing review primitive and still rejects transport-shaped and send-capable flags at the wrapper entrypoint
 
 Wrapper implementation-planning checkpoint now frozen at the docs layer:
 
@@ -407,9 +410,9 @@ Wrapper implementation-planning checkpoint now frozen at the docs layer:
   - reviewer/disposition orchestration
   - any send-capable or target-selecting surface
 
-Next safe wrapper layer after package 1 proof:
+Next safe wrapper layer after package 2 implementation:
 
-- wrapper package 2 planning checkpoint
+- wrapper package 2 proof pass
 
 Selected package-2 wrapper slice:
 
@@ -417,7 +420,7 @@ Selected package-2 wrapper slice:
 - requires existing emitted packet artifacts plus explicit reviewer and disposition
 - must preserve explicit no-send and no automatic-proof behavior
 
-Still deferred after package 2 planning:
+Still deferred after package 2 implementation:
 
 - `proof-only`
 - `full-local-chain`
