@@ -159,7 +159,8 @@ For approval-gated lanes, append the exact approval phrase or approval requireme
 
 Current best non-gated closeout ladder:
 
-- Playbook external Codex worktree stranded-directory disposal execution pass
+- Playbook / Lifeline External Worktree / Smoke Surface Closeout Recheck
+- Branch & Worktree Normalization Final Closeout
 - Full Stack Re-sync Final Closeout
 - Local Data Gateway initial implementation planning
 
@@ -180,7 +181,7 @@ At this checkpoint:
 - the ATLAS Book is the primary restart surface
 - `_stack` remains deploy authority
 - normal stack validation is green in the current working state
-- ATLAS root self-lock sequencing has been resolved; preview/unfurl remains approval-gated, the remaining retained-surface pressure is now split between a narrow Playbook external `.codex/worktrees/*` stranded-directory execution subset and later Lifeline manual-review/safety surfaces, and the DiscordOS lookup-local boundary chain is fully ratcheted shut with both transport-aware and externally-executing openings blocked until higher-level authorization reopens them
+- ATLAS root self-lock sequencing has been resolved; preview/unfurl remains approval-gated, the Playbook external `.codex/worktrees/*` stranded-directory subset is now consumed, the remaining retained-surface pressure is branch/stash/manual-review residue on the Playbook side plus later Lifeline manual-review/safety surfaces, and the DiscordOS lookup-local boundary chain is fully ratcheted shut with both transport-aware and externally-executing openings blocked until higher-level authorization reopens them
 
 ## Non-Goals
 

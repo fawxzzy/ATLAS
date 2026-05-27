@@ -68,9 +68,9 @@ Current status:
   - transport-aware opening: `no`
   - externally-executing opening: `no`
   - any further DiscordOS lookup widening now requires explicit higher-level authorization
-- the retained Playbook/Lifeline external-smoke decision is now complete:
-  - a narrow Playbook external `.codex/worktrees/*` stranded-directory execution subset is open
-  - Lifeline remains limited to safety/evidence and manual-review surfaces with no delete-now subset yet
+- the Playbook external `.codex/worktrees/*` stranded-directory subset is now consumed:
+  - no external Playbook stranded-directory residue remains in that filesystem-only class
+  - the remaining pressure is branch/stash/manual-review residue on the Playbook side plus Lifeline safety/evidence/manual-review surfaces
 
 ## Current Closeout Read
 
