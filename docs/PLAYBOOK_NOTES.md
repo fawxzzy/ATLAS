@@ -42,9 +42,12 @@
 ## 2026-05-27 - Manifest-backed continuity requires active restart routing, not just manifest doctrine
 
 - Rule: a lane may claim `manifest-backed` continuity only when an active ATLAS-root manifest points to the current decisive receipt, owner truth surfaces, and relevant verification/adoption surfaces.
+- Rule: a lane may claim `manifest-backed` continuity only while that manifest is still fresh enough to match the lane's current checkpoint, marker posture, blocked-work posture, and next-package ladder.
 - Rule: continuity manifests are adoption-ready first for cross-repo or cross-surface lanes with dense receipt chains and non-trivial owner routing.
 - Pattern: restart guide -> active continuity manifest -> governing receipt chain -> owner truth surface -> verification/adoption surface -> transcript nuance last.
+- Pattern: manifest exists -> lane advances -> freshness check -> refresh or downgrade to manifest-present only until refreshed.
 - Failure Mode: calling a lane `manifest-backed` before restart can actually follow the manifest chain turns continuity doctrine into label theater.
+- Failure Mode: a manifest remains visible and plausible after the lane has moved past it, so workers trust a stale retrieval map instead of the current decisive receipt chain.
 - Release-summary bullets:
   - Froze the difference between a manifest contract existing and a lane actually being manifest-backed.
   - Named the first-adoption lane set for continuity-manifest seeding without pretending those manifests already exist.

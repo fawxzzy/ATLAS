@@ -56,7 +56,14 @@ If a lane claims `manifest-backed` continuity:
 - active continuity manifests currently live in `docs/memory/initiatives/continuity-manifest-*.json`
 - that manifest must point to the current decisive receipt
 - that manifest must point to owner truth and verification/adoption surfaces rather than copying them
+- that manifest must still be fresh enough that its checkpoint, marker posture, blocked work, and next package ladder match the current durable lane state
 - if those conditions are not true, treat the lane as receipt-backed or operator-stitched instead
+
+If a continuity manifest exists but is stale:
+
+- treat it as `manifest-present only`, not fully `manifest-backed`
+- use it as a hint to the lane surface, then fall through to the current decisive receipt chain
+- do not trust it over newer marker or receipt surfaces
 
 ## Required First Checks
 
@@ -225,6 +232,7 @@ At this checkpoint:
 - normal stack validation is green in the current working state
 - continuity manifests, retrieval-surface taxonomy, and prompt-pack normalization are now durable enough that transcript recap should be treated as optional nuance rather than a restart substrate
 - first-adoption continuity manifests now exist for Durable Context Externalization, Local Data Gateway, Discord OS Feedback Workflow Canonicalization, and Discord OS Infrastructure Separation under `docs/memory/initiatives/continuity-manifest-*.json`
+- seeded manifests must now also be checked for freshness; manifest presence alone is not enough to claim the lane is still fully manifest-backed
 - ATLAS root self-lock sequencing has been resolved; preview/unfurl remains approval-gated, the Playbook external `.codex/worktrees/*` stranded-directory subset and the behind-only Playbook smoke branch class are now consumed, no Playbook-only retained-surface execution subset is currently open, the Lifeline stale-merged-checkpoint trio is now consumed, the remaining retained-surface pressure is governed-retain only, `Branch & Worktree Normalization` is now closed at `100%`, `Full Stack Re-sync, Clean & Closeout` is now closed at `100%`, and the DiscordOS lookup-local boundary chain is fully ratcheted shut with both transport-aware and externally-executing openings blocked until higher-level authorization reopens them
 
 ## Non-Goals

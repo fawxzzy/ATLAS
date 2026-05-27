@@ -63,6 +63,7 @@ Continuity-manifest rule:
 - when a lane has a maintained continuity manifest, retrieve it before reconstructing state from chat recap or memory of the last session
 - a continuity manifest is a retrieval map, not a second truth store
 - a lane may claim `manifest-backed` continuity only when an active ATLAS-root manifest points to the current decisive receipt, owner truth-owner surfaces, and relevant verification/adoption surfaces
+- a lane may claim `manifest-backed` continuity only while that manifest is still fresh enough to match the current checkpoint, marker posture, blocked work, and next-package posture
 - otherwise treat the lane as receipt-backed or operator-stitched, not fully manifest-backed
 
 First adoption posture:
@@ -121,3 +122,10 @@ They do not imply:
 - universal manifest coverage across all lanes
 - automated restart
 - freedom to skip the cited owner truth-owner and verification/adoption surfaces
+- permanent freshness without later refresh work
+
+Refresh discipline:
+
+- a manifest becomes stale when a newer decisive receipt, newer marker posture, newer blocked-work posture, or newer next-package ladder exists than the manifest records
+- a stale manifest should be treated as `manifest-present only`
+- restart should then fall through to the current decisive receipt chain and current marker surfaces until the manifest is refreshed
