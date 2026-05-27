@@ -8,11 +8,12 @@
   - `docs/ops/LIFELINE-EVIDENCE-SAFETY-MANUAL-REVIEW-RETAINED-SURFACE-DECISION-2026-05-27.md`
   - `docs/ops/LIFELINE-MERGED-CHECKPOINT-DISPOSAL-2026-05-27.md`
   - `docs/ops/LIFELINE-RETAINED-SURFACE-GOVERNANCE-CHECKPOINT-2026-05-27.md`
-- Control-plane checkpoint: `main@fbe2628`
+  - `docs/ops/FULL-STACK-RESYNC-CLOSEOUT-REFRESH-2026-05-27.md`
+- Control-plane checkpoint: `main@432008b`
 
 ## Objective
 
-Recompute whether `Branch & Worktree Normalization` can finally move beyond `99%` after the Lifeline retained-surface execution and governance results.
+Recompute whether `Branch & Worktree Normalization` can finally move beyond `99%` after the Lifeline retained-surface execution and governance results, and confirm whether the resulting `100%` interpretation still stands after the later closeout refresh.
 
 This pass does not:
 
@@ -126,6 +127,18 @@ Why this move is now honest:
   - unknown-dependency retain
 - no residual exact cleanup subset remains hidden behind the retained-surface language
 
+## `100%` Interpretation Recheck
+
+The later stack-level closeout refresh does not weaken this result.
+
+Why the `100%` reading still holds:
+
+- the closeout refresh moved `Full Stack Re-sync, Clean & Closeout` from `85%` to `90%` without reopening any branch/worktree execution subset
+- the remaining pressure described by the refresh is governed-retain or approval-gated follow-on, not branch/worktree cleanup debt
+- no newer receipt has reopened a safe-delete subset on either the Playbook or Lifeline side
+
+That means `Branch & Worktree Normalization` should remain at `100%` as a governed closeout, not as a soft gate waiting for more residue execution.
+
 ## `100%` Reopen Conditions
 
 Now satisfied:
@@ -157,5 +170,5 @@ Current truth:
 
 - the Playbook side is governed-retain-only
 - the Lifeline side is now governed-retain-only
-- `Branch & Worktree Normalization` can now honestly move to `100%`
+- `Branch & Worktree Normalization` can now honestly move to `100%` and should remain there
 - the next correct move is stack-level final closeout, not further branch/worktree cleanup by momentum
