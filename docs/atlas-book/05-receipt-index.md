@@ -131,6 +131,7 @@
 - [Local Data Gateway `_stack` Packet Field Validator Package 1](../ops/LOCAL-DATA-GATEWAY-STACK-PACKET-FIELD-VALIDATOR-PACKAGE-1-2026-05-27.md)
 - [Local Data Gateway Validator Proof Pass](../ops/LOCAL-DATA-GATEWAY-VALIDATOR-PROOF-PASS-2026-05-27.md)
 - [Local Data Gateway Dry-Run Packet Emitter Package 2](../ops/LOCAL-DATA-GATEWAY-DRY-RUN-PACKET-EMITTER-PACKAGE-2-2026-05-27.md)
+- [Local Data Gateway Dry-Run Emitter Proof Pass](../ops/LOCAL-DATA-GATEWAY-DRY-RUN-EMITTER-PROOF-PASS-2026-05-27.md)
 
 ## Lane Split
 
