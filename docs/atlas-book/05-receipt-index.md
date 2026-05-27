@@ -178,6 +178,7 @@
 - [Local Data Gateway Wrapper Implementation Package 2](../ops/LOCAL-DATA-GATEWAY-WRAPPER-IMPLEMENTATION-PACKAGE-2-2026-05-27.md)
 - [Local Data Gateway Wrapper Package 2 Proof Pass](../ops/LOCAL-DATA-GATEWAY-WRAPPER-PACKAGE-2-PROOF-PASS-2026-05-27.md)
 - [Local Data Gateway Marker Ratchet Checkpoint 5](../ops/LOCAL-DATA-GATEWAY-MARKER-RATCHET-CHECKPOINT-5-2026-05-27.md)
+- [Local Data Gateway Marker Ratchet Checkpoint 6](../ops/LOCAL-DATA-GATEWAY-MARKER-RATCHET-CHECKPOINT-6-2026-05-27.md)
 
 ## Lane Split
 
