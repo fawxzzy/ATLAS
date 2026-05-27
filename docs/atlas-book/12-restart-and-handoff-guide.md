@@ -162,7 +162,6 @@ Current best non-gated closeout ladder:
 - Branch & Worktree Normalization Final Closeout
 - Full Stack Re-sync Final Closeout
 - Local Data Gateway _stack packet field validator package 1
-- Lifeline retained evidence/safety surface final gate recheck
 
 If reopening an approved gated lane:
 
