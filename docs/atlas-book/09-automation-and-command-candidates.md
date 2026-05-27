@@ -400,6 +400,7 @@ Current landed wrapper layer:
 - the wrapper remains a thin no-send orchestrator over the existing validator, dry-run emitter, review, and proof-packager helpers
 - package 2 keeps the wrapper thin over the existing review primitive and still rejects transport-shaped and send-capable flags at the wrapper entrypoint
 - package 3 keeps the wrapper thin over the existing proof-packager primitive and still rejects transport-shaped and send-capable flags at the wrapper entrypoint
+- package 3 proof now confirms `proof-only` across the same three admitted workflow classes already used by the helper family
 
 Wrapper implementation-planning checkpoint now frozen at the docs layer:
 
@@ -414,9 +415,9 @@ Wrapper implementation-planning checkpoint now frozen at the docs layer:
   - reviewer/disposition orchestration
   - any send-capable or target-selecting surface
 
-Next safe wrapper layer after package 3 implementation:
+Next safe wrapper layer after package 3 proof:
 
-- wrapper package 3 proof pass
+- wrapper package 4 planning checkpoint
 
 Selected package-3 wrapper slice now implemented:
 
@@ -424,7 +425,7 @@ Selected package-3 wrapper slice now implemented:
 - requires existing reviewed packet artifacts
 - must preserve explicit no-send and no automatic full-chain behavior
 
-Still deferred after package 3 implementation:
+Still deferred after package 3 proof:
 
 - `full-local-chain`
 - any target-selection or send-capable wrapper surface
