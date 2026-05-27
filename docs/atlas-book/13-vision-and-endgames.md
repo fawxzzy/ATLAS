@@ -119,7 +119,7 @@ Shared rules that survive the split:
 
 - done means the convergence wave is actually closed and lane-based work can continue without hidden residue
 - should not be forced closed before gated decisions are resolved
-- currently advanced beyond retained-surface ambiguity, but not final while preview/unfurl remains gated and DiscordOS runtime/schema/data follow-on remains blocked
+- now closed as a convergence-wave lane because the remaining pressure is governed-retain or separately approval-gated rather than closeout debt
 
 ## What The Vision Enables Later
 
@@ -135,7 +135,7 @@ Shared rules that survive the split:
 - exact row-scoped Fitness Supabase mutation approval
 - remote preview/unfurl verification approval
 - local-data preprocessing doctrine still needs first helper implementation proof
-- Full Stack Re-sync final closeout still needs its terminal stack-level ratchet
+- Full Stack Re-sync final closeout is complete; remaining pressure is no longer inside that lane
 - DiscordOS runtime/schema/data follow-on remains explicitly blocked outside the closed lookup lane
 
 ## Next Valid Packages

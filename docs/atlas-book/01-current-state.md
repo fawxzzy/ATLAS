@@ -90,6 +90,7 @@ What the latest closeout passes proved:
 - the DiscordOS lookup-local planning and boundary chain is complete enough to stop widening without an explicit new authorization
 - root self-lock sequencing for `stack.lock.yaml#stack` has been resolved by policy, so the remaining pressure is retained-surface cleanup rather than root commitability
 - the retained-surface lane is no longer blocked by broad ambiguity, the Lifeline merged-checkpoint trio `lifeline-main-closeout`, `lifeline-main-closeout-2`, and `lifeline-main-closeout-3` is now consumed, and the remaining pressure is governed-retain rather than an unconsumed exact cleanup subset
+- the convergence-wave closeout itself is now complete; the remaining pressure belongs to separate governed-retain or approval-gated lanes rather than residual closeout debt
 
 ## Current Direction
 
