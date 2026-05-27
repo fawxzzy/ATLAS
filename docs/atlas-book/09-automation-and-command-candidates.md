@@ -172,6 +172,7 @@ These are the best first candidates because they prepare or summarize state with
 - release-proof to update-draft packaging helper
 - QA/LLEL proof packet generator
 - branch/worktree normalization inventory helper
+- local data gateway packet scaffold with schema/version, sensitivity, provenance, and transformation-record fields
 
 ## Candidate Ownership Matrix
 
@@ -185,6 +186,36 @@ These are the best first candidates because they prepare or summarize state with
 | data-hygiene export and approval prep | owner repo plus ATLAS docs | high-risk prep needs owner context |
 | local data gateway preprocessing | `_stack` first, owner repo as needed | cross-lane export discipline should become a governed shared surface before remote sync |
 | Vercel health classification | Lifeline later, `_stack` first | operational health should become a first-class governed signal |
+
+## Local Data Gateway First Implementation Surfaces
+
+First concrete surfaces should land in this order:
+
+1. docs contract
+   - freeze the packet vocabulary before code
+2. `_stack` packet helper
+   - `stack data gateway packet <lane>`
+3. Playbook doctrine promotion
+   - reusable rule language after the contract is stable
+
+First workflow targets:
+
+- Supabase review/export packet
+- Vercel dependency-check packet
+- DiscordOS boundary handoff packet
+- future model-prompt input packet
+
+Required packet fields for the first helper candidate:
+
+- purpose
+- schema/version
+- sensitivity
+- owner surface
+- provenance
+- transformation record
+- validation status
+- payload summary
+- minimum useful payload
 
 ## Non-Goals
 
