@@ -8,6 +8,15 @@ Use the book and receipts first.
 
 Do not start by inferring current state from stray repo residue, `tmp`, or memory of the last conversation.
 
+Rule:
+External Context First.
+
+Pattern:
+Ephemeral Worker, Durable Substrate.
+
+Failure Mode:
+Recursive Context Rot Loop.
+
 ## How To Resume From A New Chat
 
 Start in this order:
@@ -24,6 +33,12 @@ If the task is lane-specific:
 - use the book chapter first
 - use the lane receipt chain second
 - use chat history last
+
+If durable surfaces disagree with chat recap:
+
+- trust the durable surfaces
+- repair the docs if needed
+- do not treat the chat recap as authority
 
 ## Required First Checks
 
@@ -133,6 +148,12 @@ Use this hierarchy:
 5. chat history only for nuance that is not yet packaged
 
 If something important only exists in chat, package it into the book or a receipt before treating it as durable truth.
+
+Interpretation:
+
+- GPT/Codex workers are ephemeral reasoning surfaces
+- ATLAS and owner repos are the durable continuity substrate
+- a restart is healthy only when the lane can be reconstructed from those external artifacts
 
 ## Expected Status Block Format
 

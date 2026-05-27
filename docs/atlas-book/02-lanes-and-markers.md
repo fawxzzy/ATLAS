@@ -32,6 +32,7 @@
 - Core Pattern Convergence: `40%`
 - Playbook Everywhere + Cortex Interface: `20%`
 - Knowledge Capture & Transfer: `81%`
+- Durable Context Externalization: `60%`
 - Feedback Loop Readiness: `42%`
 - Sandbox Simulation Readiness: `0%`
 - AI Long-Run Batch Orchestration: `20%`
@@ -57,6 +58,7 @@
 - Dependency Untangling
 - Core Pattern Convergence
 - Knowledge Capture & Transfer
+- Durable Context Externalization
 - Discord OS Infrastructure Separation
 - Discord OS Feedback Workflow Canonicalization
 - Truth Map & ATLAS Book
@@ -98,4 +100,5 @@ The most important marker moves from the closeout queue were:
 - Discord and Music Sesh profile/data concerns are explicitly transferred to `Discord OS Infrastructure Separation`, not left as open Fitness hygiene debt
 - Local Data Gateway now has a durable packet contract, exemplar proof chain, no-send helper boundary, a live validator helper, a dry-run emitter helper, a local review helper, and a proof-packager helper, all backed by real-workflow proof across the same three exemplar classes; that justifies a fourth small implementation-backed move to `40%` without implying any send or transport authority
 - Discord feedback workflow now has its own canonicalization marker at `68%`: the live Fitness-hosted workflow is already governed and unusually strong, but its formatter, lifecycle, audit, completion-review, release-boundary, and separation-safe ownership contracts are still split across multiple docs rather than frozen as one canonical workflow package
+- Durable Context Externalization now has its own marker at `60%`: ATLAS already has a strong book, receipt, and memory substrate for major lanes, but retrieval-first continuity is still partly manual and not yet uniformly normalized across every prompt, manifest, and owner-repo adoption surface
 - DiscordOS separation stayed high-confidence but intentionally below runtime migration

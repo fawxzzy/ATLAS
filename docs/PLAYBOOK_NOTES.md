@@ -1,5 +1,16 @@
 # Playbook Notes
 
+## 2026-05-27 - Durable context must externalize out of volatile worker continuity
+
+- Rule: External Context First.
+- Pattern: Ephemeral Worker, Durable Substrate.
+- Failure Mode: Recursive Context Rot Loop.
+- Durable Context Externalization: tracks whether critical continuity is reconstructable from ATLAS and owner-repo artifacts rather than trapped in GPT/Codex chats, prompt carryover, or operator memory.
+- Release-summary bullets:
+  - Added Durable Context Externalization as a first-class marker instead of leaving continuity durability implicit inside knowledge-capture or book-quality lanes.
+  - Froze the doctrine that workers should retrieve durable context before trusting chat continuity.
+  - Named the recursive context-rot failure mode so future lanes can distinguish durable continuity from conversational carryover.
+
 ## 2026-05-27 - Local data gateway proof packaging matures evidence, not handoff authority
 
 - Rule: local proof packaging is evidence packaging, not handoff authorization.

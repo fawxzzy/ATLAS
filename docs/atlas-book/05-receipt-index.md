@@ -119,6 +119,10 @@
 - [Discord OS Feedback Workflow Canonicalization](../ops/DISCORD-OS-FEEDBACK-WORKFLOW-CANONICALIZATION-2026-05-27.md)
 - [Discord OS Feedback Workflow Canonical Contracts Pass 1](../ops/DISCORD-OS-FEEDBACK-WORKFLOW-CANONICAL-CONTRACTS-PASS-1-2026-05-27.md)
 
+## Durable Context Externalization
+
+- [Durable Context Externalization](../ops/DURABLE-CONTEXT-EXTERNALIZATION-2026-05-27.md)
+
 ## Vercel Surface Decommission
 
 - [Vercel Stale Surface Deletion Readiness](../ops/VERCEL-STALE-SURFACE-DELETION-READINESS-2026-05-25.md)

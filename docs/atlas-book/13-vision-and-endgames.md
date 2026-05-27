@@ -88,6 +88,14 @@ Shared rules that survive the split:
 - should not turn frequent work into unsafe unattended mutation
 - currently open for planning and later bounded command work
 
+### Durable Context Externalization
+
+- done means major stack work is resumable and reconstructable from ATLAS plus owner-repo artifacts rather than dependent on prior model or chat continuity
+- should not duplicate owner-repo source truth into ATLAS by convenience
+- currently open because the durable substrate is already strong, but retrieval-first use is still partly manual and uneven
+- next valid package:
+  - Durable Context Externalization continuity-manifest pass
+
 ### Local Data Gateway
 
 - done means raw data is local-by-default and remote systems receive minimum useful governed packets instead of raw dumps
@@ -129,12 +137,14 @@ Shared rules that survive the split:
 - stronger `_stack` command ownership
 - clearer Playbook doctrine promotion
 - less chat-memory dependency
+- less continuity drift between sessions and workers
 
 ## Current Blocker Summary
 
 - exact row-scoped Fitness Supabase mutation approval
 - remote preview/unfurl verification approval
 - local-data preprocessing now has proof-backed validator, dry-run emitter, local review, and proof packaging helpers, but still needs a broader wrapper surface before any separate send-authorization lane can even be considered
+- critical continuity is already more externalized than before, but retrieval-first continuity is still not universal across all prompt packs, manifests, and owner-repo continuation surfaces
 - Full Stack Re-sync final closeout is complete; remaining pressure is no longer inside that lane
 - DiscordOS runtime/schema/data follow-on remains explicitly blocked outside the closed lookup lane
 

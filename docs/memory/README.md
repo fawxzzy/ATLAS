@@ -31,3 +31,20 @@ If profile context only lives in ChatGPT saved memory, it can be lost, compresse
 This is the current canonical durable source for Zachariah's assistant behavior preferences, long-term project context, Playbook facts, Cortex roadmap, Atlas memory strategy, and future bootstrap guidance.
 
 ChatGPT saved memory is a convenience cache only. Atlas is the durable source of truth.
+
+## Retrieval-first continuity doctrine
+
+Rule:
+External Context First.
+
+Pattern:
+Ephemeral Worker, Durable Substrate.
+
+Failure Mode:
+Recursive Context Rot Loop.
+
+Meaning:
+
+- workers should retrieve durable ATLAS and owner-repo context before trusting conversational continuity
+- GPT/Codex are temporary reasoning workers, not the durable state substrate
+- repeated chat-to-chat or worker-to-worker handoff without checkpointing will accumulate stale or duplicated context unless it is bounded by receipts, promoted notes, truth maps, and continuation guides
