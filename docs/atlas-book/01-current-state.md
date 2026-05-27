@@ -74,6 +74,7 @@ Current status:
   - no Playbook-only retained-surface execution subset is currently open
   - the Lifeline merged-checkpoint trio is now consumed
   - the remaining pressure is Playbook stash/manual-review governed retains plus Lifeline safety/evidence/manual-review surfaces only
+  - that remaining retained-surface pressure is now governed-retain truth rather than an exact open cleanup subset
 
 ## Current Closeout Read
 
@@ -88,7 +89,7 @@ What the latest closeout passes proved:
 - Discord and Music Sesh data concerns are now explicitly transferred to DiscordOS Infrastructure Separation instead of lingering as Fitness cleanup residue
 - the DiscordOS lookup-local planning and boundary chain is complete enough to stop widening without an explicit new authorization
 - root self-lock sequencing for `stack.lock.yaml#stack` has been resolved by policy, so the remaining pressure is retained-surface cleanup rather than root commitability
-- the retained-surface lane is no longer blocked by broad ambiguity, and the Lifeline merged-checkpoint trio `lifeline-main-closeout`, `lifeline-main-closeout-2`, and `lifeline-main-closeout-3` is now consumed
+- the retained-surface lane is no longer blocked by broad ambiguity, the Lifeline merged-checkpoint trio `lifeline-main-closeout`, `lifeline-main-closeout-2`, and `lifeline-main-closeout-3` is now consumed, and the remaining pressure is governed-retain rather than an unconsumed exact cleanup subset
 
 ## Current Direction
 

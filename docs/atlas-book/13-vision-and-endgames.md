@@ -94,7 +94,7 @@ Shared rules that survive the split:
 - should not become a license to export more data simply because a packet exists
 - currently open at doctrine-admitted, implementation-planning stage
 - next valid package:
-  - Local Data Gateway _stack helper implementation planning packet
+  - Local Data Gateway _stack packet field validator package 1
 
 ### ATLAS Book / Publishing
 
@@ -119,7 +119,7 @@ Shared rules that survive the split:
 
 - done means the convergence wave is actually closed and lane-based work can continue without hidden residue
 - should not be forced closed before gated decisions are resolved
-- currently intentionally paused
+- currently advanced beyond retained-surface ambiguity, but not final while preview/unfurl remains gated and DiscordOS runtime/schema/data follow-on remains blocked
 
 ## What The Vision Enables Later
 
@@ -134,9 +134,9 @@ Shared rules that survive the split:
 
 - exact row-scoped Fitness Supabase mutation approval
 - remote preview/unfurl verification approval
-- local-data preprocessing doctrine still needs reusable command-surface follow-through
-- Local Data Gateway still lacks helper implementation planning and first helper proof
-- deferred closeout until the next bounded implementation lanes are chosen
+- local-data preprocessing doctrine still needs first helper implementation proof
+- Full Stack Re-sync final closeout still needs its terminal stack-level ratchet
+- DiscordOS runtime/schema/data follow-on remains explicitly blocked outside the closed lookup lane
 
 ## Next Valid Packages
 

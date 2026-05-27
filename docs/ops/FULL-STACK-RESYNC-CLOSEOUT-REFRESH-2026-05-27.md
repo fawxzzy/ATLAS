@@ -7,12 +7,13 @@
   - `docs/ops/FULL-STACK-RESYNC-CLOSEOUT-CONSOLIDATION-2026-05-27.md`
   - `docs/ops/FULL-STACK-RESYNC-CLOSEOUT-ADVANCEMENT-CHECKPOINT-2026-05-27.md`
   - `docs/ops/BRANCH-WORKTREE-NORMALIZATION-FINAL-RATCHET-RECHECK-2026-05-27.md`
-  - `docs/ops/LIFELINE-EVIDENCE-SAFETY-MANUAL-REVIEW-RETAINED-SURFACE-DECISION-2026-05-27.md`
-- Control-plane checkpoint: `main@9c50276`
+  - `docs/ops/LIFELINE-MERGED-CHECKPOINT-DISPOSAL-2026-05-27.md`
+  - `docs/ops/LIFELINE-RETAINED-SURFACE-GOVERNANCE-CHECKPOINT-2026-05-27.md`
+- Control-plane checkpoint: `main@be5a6a4`
 
 ## Objective
 
-Refresh the stack-level closeout posture after the latest Playbook/Lifeline retained-surface ratchet, and decide whether `Full Stack Re-sync, Clean & Closeout` can now move honestly.
+Refresh the stack-level closeout posture after the latest Playbook/Lifeline retained-surface execution and governance results, and decide whether `Full Stack Re-sync, Clean & Closeout` can now move honestly.
 
 This pass does not:
 
@@ -26,7 +27,7 @@ This pass does not:
 ## Root State
 
 - branch: `main`
-- HEAD: `9c50276`
+- HEAD: `be5a6a4`
 - status: clean except intentional untracked `archive/`
 
 ## Validation Posture
@@ -39,11 +40,9 @@ Result:
 
 - `critical=0 error=0 warning=307`
 
-## Recomputed Closeout Posture
+## What Is Fully Closed
 
-### Fully closed
-
-These classes remain durably closed:
+These classes are now durably closed:
 
 - Fitness Supabase profile/data hygiene at `100%`
 - Fitness brand generator local alignment outcome
@@ -52,11 +51,20 @@ These classes remain durably closed:
 - broken internal `r18-main-merge-20260511` Playbook/Lifeline worktree registration class
 - Playbook external `.codex/worktrees/*` stranded-directory class
 - Playbook behind-only smoke branch class
+- Lifeline merged-checkpoint trio:
+  - `tmp/lifeline-main-closeout`
+  - `tmp/lifeline-main-closeout-2`
+  - `tmp/lifeline-main-closeout-3`
+- matching Lifeline merged-checkpoint local branch refs:
+  - `codex/lifeline-main-closeout`
+  - `codex/lifeline-main-closeout-2`
+  - `codex/lifeline-main-closeout-3`
+- `Branch & Worktree Normalization` at `100%`
 - DiscordOS lookup widening inside the current owner-repo lane
 
-### Governed no-op
+## Governed No-Op Classes
 
-These classes remain explicitly outside unresolved cleanup debt:
+These classes are explicitly not unresolved cleanup debt:
 
 - Fitness Supabase `candidate-01` through `candidate-04`
 - remaining sign-in-bearing auth-only heuristic rows
@@ -64,92 +72,126 @@ These classes remain explicitly outside unresolved cleanup debt:
   - transport-aware opening: `no`
   - externally-executing opening: `no`
 
-### Governed retain
+## Governed Retain Classes
 
-These classes remain intentional retained surfaces rather than accidental residue:
+### Playbook
 
-- Playbook stashes/manual-review/safety-checkpoint/no-op lineage retains
-- Lifeline evidence-bearing retains
-- Lifeline safety-checkpoint retains
-- Lifeline retained manual-review branch worktrees:
+- stashes:
+  - `codex-temp-playbook-agents-noise`
+  - `codex-temp-local-hygiene-playbook-docs`
+  - `qa residue before syncing main after PR 8`
+- manual-review retain:
+  - `tmp/playbook-fawx-den-os-doctrine`
+- no-op / lineage governed retain:
+  - `tmp/playbook-sustain-pr19-refresh`
+- safety-checkpoint retain:
+  - `tmp/playbook-main-closeout`
+- governed retained branch-worktrees:
+  - `tmp/fawxzzy-playbook-finding-identity`
+  - `tmp/fawxzzy-playbook-sarif-output`
+  - `tmp/fawxzzy-playbook-verify-baseline`
+  - `tmp/playbook-lint-debt-closeout`
+  - `tmp/playbook-pr9-worktree`
+  - `tmp/playbook-research-phase-grid-evidence`
+  - `tmp/playbook-research-phase-grid-math`
+
+### Lifeline
+
+- evidence retain:
+  - `repos/fawxzzy-lifeline-operator-evidence`
+  - `tmp/fawxzzy-lifeline-rollback-rehearsal-evidence`
+- safety-checkpoint retain:
+  - `tmp/lifeline-closeout-checkpoint`
+  - `tmp/lifeline-main-closeout-24`
+  - `tmp/lifeline-release-replay-verification-clean`
+  - `tmp/lifeline-wave2-scout`
+  - `tmp/lifeline-wave3-scout`
+- manual-review retain:
   - `tmp/lifeline-pr24-refresh`
   - `tmp/lifeline-release-cli-guardrails-worktree`
-- active owner-lane retain:
+- active owner-lane / unknown-dependency retain:
   - `repos/fawxzzy-lifeline`
 
-### Still approval-gated or higher-level blocked
+## Still Approval-Gated Or Higher-Level Blocked
 
-These lanes remain outside closeout execution:
+These lanes remain gated or externally blocked:
 
 - `Preview Cache Remote And Unfurl Verification`
 - DiscordOS runtime/schema/data mutation
 - any transport-aware or externally-executing DiscordOS reopening
 
-## Exact Remaining Non-Gated Cleanup Debt
+## Exact Remaining Non-Gated Cleanup Pressure
 
-The closeout story is now precise enough to isolate one remaining open subset:
+None.
 
-- `tmp/lifeline-main-closeout`
-- `tmp/lifeline-main-closeout-2`
-- `tmp/lifeline-main-closeout-3`
+The retained-surface story is no longer carrying an exact pending cleanup subset.
 
-This trio is decision-cleared but not yet consumed by an execution receipt.
+What remains is:
 
-That means the stack is no longer blocked by broad retained-surface ambiguity. It is blocked by one narrow unexecuted Lifeline merged-checkpoint subset plus the still-gated lanes above.
+- governed no-op classes
+- governed-retain classes
+- approval-gated or higher-level blocked follow-on lanes
 
 ## Can `Full Stack Re-sync, Clean & Closeout` Move?
 
-No.
+Yes, but only modestly.
 
-Keep `Full Stack Re-sync, Clean & Closeout` at `85%`.
+Move `Full Stack Re-sync, Clean & Closeout` from `85%` to `90%`.
 
-Why:
+Why this move is now honest:
 
-- the retained-surface truth is materially sharper than at the earlier consolidation checkpoint
-- but one exact non-gated cleanup subset is still open
+- the last exact Playbook/Lifeline cleanup subset is consumed
+- `Branch & Worktree Normalization` is closed at `100%`
+- the remaining retained surfaces are governed-retain truth rather than hidden cleanup debt
+- the remaining unresolved work is now either:
+  - stack-level final closeout packaging
+  - approval-gated preview/unfurl verification
+  - explicitly blocked DiscordOS runtime/schema/data follow-on
+
+Why this does **not** justify `100%` yet:
+
+- the final stack closeout receipt still has to ratchet the updated posture into a terminal convergence-state package
 - preview/unfurl remains approval-gated
-- DiscordOS runtime/schema/data follow-on remains blocked
-
-This is improved closeout precision, not additional closeout execution.
+- DiscordOS runtime/schema/data follow-on remains blocked outside the closed lookup lane
 
 ## Marker Recommendation
 
-Keep markers unchanged in this pass:
+Selected result:
 
-- `Branch & Worktree Normalization`: `99%`
-- `Full Stack Re-sync, Clean & Closeout`: `85%`
-- `Inventory & Truth Map`: `74%`
-- `Truth Map & ATLAS Book`: `85%`
+- `Branch & Worktree Normalization`: keep `100%`
+- `Full Stack Re-sync, Clean & Closeout`: `85% -> 90%`
+- `Inventory & Truth Map`: keep `74%`
+- `Truth Map & ATLAS Book`: keep `85%`
 
 ## Exact Next Top 3 Packages Toward `100%`
 
-Best non-gated next three:
+Best current next three:
 
-1. `Lifeline merged checkpoint disposal execution pass`
-2. `Branch & Worktree Normalization Final Closeout`
-3. `Full Stack Re-sync Final Closeout`
+1. `Full Stack Re-sync Final Closeout`
+2. `Local Data Gateway _stack packet field validator package 1`
+3. `Preview Cache Remote And Unfurl Verification`
 
-Highest-leverage gated lane still separate:
+Notes:
 
-- `Preview Cache Remote And Unfurl Verification`
+- package 1 is the direct closeout ratchet
+- package 2 is the best current non-gated forward-architecture implementation slice running in parallel
+- package 3 remains highest-leverage gated closeout follow-on once explicitly reopened
 
 ## Book / Restart Effect
 
-No marker or ladder rewrite is needed from this refresh.
+The story changes materially in three ways:
 
-Why:
-
-- `Current State` already reflects that the remaining exact cleanup subset is the Lifeline merged-checkpoint trio
-- the restart guide already routes to `Lifeline merged checkpoint disposal execution pass`
-- the new durable value here is stack-level closeout restatement, not a new queue change
+- the old “one exact Lifeline subset still remains” wording is no longer true
+- branch/worktree normalization is no longer part of open closeout pressure
+- full-stack closeout can now move modestly because the remaining pressure is governed-retain or approval-gated rather than unconsumed cleanup debt
 
 ## Outcome
 
-The stack closeout story is refreshed but not advanced.
+The closeout lane is not finished, but it is no longer waiting on hidden residue execution.
 
 Current truth:
 
-- the broad retained-surface ambiguity is gone
-- one exact Lifeline subset still needs execution
-- after that subset lands, the stack can recheck whether only governed retains remain
-- `Full Stack Re-sync, Clean & Closeout` therefore stays correctly pinned at `85%`
+- exact retained-surface cleanup debt is exhausted
+- governed-retain classes are explicit
+- approval-gated follow-on lanes remain explicit
+- `Full Stack Re-sync, Clean & Closeout` can now move honestly to `90%`

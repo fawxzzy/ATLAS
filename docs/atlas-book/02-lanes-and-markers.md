@@ -26,7 +26,7 @@
 - Local Data Gateway: `10%`
 - Unified Workflow Convergence: `70%`
 - Inventory & Truth Map: `74%`
-- Full Stack Re-sync, Clean & Closeout: `85%`
+- Full Stack Re-sync, Clean & Closeout: `90%`
 - Vision & Future Alignment: `25%`
 - Dependency Untangling: `70%`
 - Core Pattern Convergence: `40%`
@@ -88,7 +88,7 @@ The most important marker moves from the closeout queue were:
 
 - branch/worktree normalization is now fully ratcheted, with no remaining exact cleanup subset hiding behind retained-surface language
 - tmp dependency elimination moved from source-truth concern to retained-surface cleanup concern
-- full stack closeout moved from paused baseline work to an active, receipt-backed closeout ladder
+- full stack closeout moved from paused baseline work to an active, receipt-backed closeout ladder and can now advance modestly because the remaining pressure is governed-retain or approval-gated rather than hidden cleanup debt
 - Fitness Supabase hygiene moved from class-level ambiguity into governed row classes, bounded mutation receipts, and a final lane closeout at `100%`
 - the remaining automation mismatches `candidate-01` through `candidate-04` are governed no-op, not unresolved cleanup debt
 - the remaining sign-in-bearing auth-only rows are governed heuristic exclusions, not human-style profile-repair candidates
