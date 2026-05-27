@@ -251,6 +251,22 @@ Recommended first artifact root:
 
 - `runtime/gateway-packets/<lane>/<date>/`
 
+Selected first implementation slice:
+
+- local packet manifest generator
+
+Why this slice lands first:
+
+- it proves source discovery, field population, exclusion reporting, and landing-path discipline
+- it stays smaller than a final packet emitter
+- it keeps `stack data gateway packet <lane>` bounded to local-only planning artifacts before any later packet emit proof
+
+First planning artifacts for that slice:
+
+- `packet-manifest.json`
+- `packet-plan.md`
+- `packet-proof-summary.json`
+
 ## Non-Goals
 
 - no command implementation
