@@ -39,7 +39,7 @@
 - AI Repetition-to-Automation Pipeline: `30%`
 - Truth Map & ATLAS Book: `85%`
 - Discord OS Infrastructure Separation: `95%`
-- Discord OS Feedback Workflow Canonicalization: `68%`
+- Discord OS Feedback Workflow Canonicalization: `72%`
 - Discord Workflow, Publication & Docs Reliability: `25%`
 - Post-Convergence Lane Split Readiness: `60%`
 
@@ -99,6 +99,6 @@ The most important marker moves from the closeout queue were:
 - the remaining sign-in-bearing auth-only rows are governed heuristic exclusions, not human-style profile-repair candidates
 - Discord and Music Sesh profile/data concerns are explicitly transferred to `Discord OS Infrastructure Separation`, not left as open Fitness hygiene debt
 - Local Data Gateway now has a durable packet contract, exemplar proof chain, no-send helper boundary, a live validator helper, a dry-run emitter helper, a local review helper, and a proof-packager helper, all backed by real-workflow proof across the same three exemplar classes; that justifies a fourth small implementation-backed move to `40%` without implying any send or transport authority
-- Discord feedback workflow now has its own canonicalization marker at `68%`: the live Fitness-hosted workflow is already governed and unusually strong, but its formatter, lifecycle, audit, completion-review, release-boundary, and separation-safe ownership contracts are still split across multiple docs rather than frozen as one canonical workflow package
+- Discord feedback workflow canonicalization now sits at `72%`: the live Fitness-hosted workflow is still the runtime truth, but the lane now has a dedicated canonical contract package, a first separation boundary, live-proof criteria, and a no-regression extraction checklist; what still blocks higher readiness is deploy-backed extraction parity and any proven owner-movement evidence
 - Durable Context Externalization now sits at `65%`: ATLAS has a strong book, receipt, memory, retrieval-taxonomy, continuity-manifest, and prompt-pack substrate for major lanes, but continuity still depends too much on manual manifest absence, receipt-chain stitching, and operator discipline rather than universal retrieval-first lane practice
 - DiscordOS separation stayed high-confidence but intentionally below runtime migration

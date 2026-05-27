@@ -122,6 +122,7 @@
 - [Discord OS Feedback Workflow Separation Boundary Decision Pass 1](../ops/DISCORD-OS-FEEDBACK-WORKFLOW-SEPARATION-BOUNDARY-DECISION-PASS-1-2026-05-27.md)
 - [Discord OS Feedback Workflow Live-Proof Criteria](../ops/DISCORD-OS-FEEDBACK-WORKFLOW-LIVE-PROOF-CRITERIA-2026-05-27.md)
 - [Discord OS Feedback Workflow No-Regression Extraction Checklist](../ops/DISCORD-OS-FEEDBACK-WORKFLOW-NO-REGRESSION-EXTRACTION-CHECKLIST-2026-05-27.md)
+- [Discord OS Feedback Workflow Marker Ratchet Checkpoint 2](../ops/DISCORD-OS-FEEDBACK-WORKFLOW-MARKER-RATCHET-CHECKPOINT-2-2026-05-27.md)
 
 ## Durable Context Externalization
 
