@@ -99,8 +99,10 @@ or
 Current reopen note:
 
 - bootstrap is already complete
-- the next Discord lane package should still be tiny: scaffold, runtime-shadow planning, or another explicit adapter/contract surface
-- do not jump from scaffold state to runtime migration by momentum
+- the lookup-local boundary chain is already complete enough to pause
+- there is no valid next repo-local lookup package inside the current DiscordOS lane
+- do not jump from scaffold state to runtime, schema, transport-aware, or bridge-shaped work by momentum
+- any reopening now requires explicit higher-level authorization
 
 ## ATLAS Systems Lane
 

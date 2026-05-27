@@ -42,9 +42,9 @@ Shared rules that survive the split:
 - exists to give Discord runtime and publication workflows their own home
 - done means DiscordOS owns runtime, Discord-owned env, and Discord-owned Supabase classes with explicit Fitness contracts only
 - should not depend on hidden Fitness coupling
-- bootstrap is complete, but runtime/data migration has not started
+- bootstrap is complete, the lookup-local boundary chain is complete enough to pause, and runtime/data migration has not started
 - next valid package:
-  - bounded DiscordOS code inventory / extraction package
+  - none inside the current lookup lane without explicit higher-level authorization
 
 ### ATLAS Systems Lane
 
@@ -62,7 +62,7 @@ Shared rules that survive the split:
 - done means repo, env, schema, runtime, and cutover all move into governed DiscordOS surfaces with explicit contracts
 - should not cut over before contract, schema, and rollback posture are durable
 - bootstrap is complete
-- currently paused at post-bootstrap implementation sequencing
+- currently paused at a closed lookup boundary; any reopening now needs explicit authorization above transport-aware or externally-executing classes
 
 ### Fitness Supabase Hygiene
 

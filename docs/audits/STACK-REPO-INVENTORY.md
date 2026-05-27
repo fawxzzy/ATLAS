@@ -19,22 +19,22 @@ Operational rule:
 - Excluded surface count: `17`
 - Stack manifest: `stack.yaml`
 - Stack lock: `stack.lock.yaml`
-- Inventory digest: `sha256:433a894d88ba1e11e3680b8643b02c96c617a3b7ec8538538b65417e44d21bc9`
+- Inventory digest: `sha256:a330697afe521e68269ea8e8d0f82257b5c1f54b2a355273472d3354d933a95a`
 
 ## Managed Repos
 
 | Repo id | Path | Branch | Pinned commit | Current commit | Dirty | Trust | Release | Related initiatives |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | _stack | repos/_stack | main | b3f6159ec1688c787f5c351dc05c013f5882a5c4 | b3f6159ec1688c787f5c351dc05c013f5882a5c4 | False | trusted | False | - |
-| discordos | repos/DiscordOS | main | b8060034892d2f4eaefb2fe843123aa1f52257ce | b8060034892d2f4eaefb2fe843123aa1f52257ce | False | trusted | False | - |
-| fitness | repos/fawxzzy-fitness | main | - | 3f48f9c26135cbce46c487e64e0ce1ccbad3f793 | True | adjacent | False | - |
+| discordos | repos/DiscordOS | main | 721db1c5fe87db2aeee8419d8bdcef65fdd5d198 | 721db1c5fe87db2aeee8419d8bdcef65fdd5d198 | False | trusted | False | - |
+| fitness | repos/fawxzzy-fitness | main | - | b2a734fa64fb3b4f4994c6963bf8bb743af8876c | True | adjacent | False | - |
 | foundation | repos/fawxzzy-foundation | main | a016da2f08f167747f7ae7c804c0d6840cb9514d | a016da2f08f167747f7ae7c804c0d6840cb9514d | False | trusted | True | - |
 | lifeline | repos/fawxzzy-lifeline | codex/lifeline-release-replay-verification | 4589b4f332247b32e01931907f803e5ea5991e34 | 4589b4f332247b32e01931907f803e5ea5991e34 | True | trusted | True | - |
 | mazer | repos/fawxzzy-mazer | codex/mazer-remove-pwa-install-surface | 021291d2b4f75379ab7e4c7891e302b54d4845c6 | 021291d2b4f75379ab7e4c7891e302b54d4845c6 | False | trusted | True | initiative:initiative-mazer-d2-learning-scorer |
 | nat1-games | repos/Nat1-Games/nat1-games | main | 412846a1baac6c0ce782ab9ab94530ccf4e89ff5 | 412846a1baac6c0ce782ab9ab94530ccf4e89ff5 | True | trusted | False | - |
 | playbook | repos/fawxzzy-playbook | codex/playbook-sustain-docs-audit | eeddaf75e59a6202c12bcf268221c5b469ac2b3a | eeddaf75e59a6202c12bcf268221c5b469ac2b3a | True | trusted | True | - |
 | playbook-demo | repos/playbook-demo/playbook-demo | main | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | False | trusted | False | - |
-| stack | . | main | - | 141ec496a66b558966170c8200864b64f2242b75 | True | trusted | False | - |
+| stack | . | main | - | 0901eb17edb31dcd983db20aec3b12051ae8501c | True | trusted | False | - |
 | stream | repos/fawxzzy-stream | main | 1dd3298c556b4d0839e6bb43b3dde7c3527022f7 | 1dd3298c556b4d0839e6bb43b3dde7c3527022f7 | False | trusted | False | - |
 | trove | repos/fawxzzy-trove | codex/trove-brand-asset-sync | 0f5f9fe55bd21aa7f017173f1950d0bd063470c1 | 0f5f9fe55bd21aa7f017173f1950d0bd063470c1 | False | trusted | True | - |
 

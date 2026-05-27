@@ -159,14 +159,15 @@ For approval-gated lanes, append the exact approval phrase or approval requireme
 
 Current best non-gated closeout ladder:
 
-- Full Stack Re-sync Closeout Consolidation
-- DiscordOS repo-local tooling landing and lookup execution-preconditions package 3
-- Fitness Supabase unknown-profile and DiscordOS boundary follow-through only through their owning lanes, not by reopening closed Fitness hygiene debt
+- Playbook / Lifeline External Worktree / Smoke Surface Disposal Decision Pass
+- Full Stack Re-sync Final Closeout
+- Local Data Gateway initial implementation planning
 
 If reopening an approved gated lane:
 
 - remote preview / unfurl verification only after explicit deploy-backed lane opening
 - external smoke or retained-surface deletion only after an explicit dependency-cleared decision packet
+- any DiscordOS runtime/schema/data or transport-aware reopening only after explicit higher-level authorization beyond the closed lookup lane boundary
 
 ## Current Fast Resume Summary
 
@@ -179,7 +180,7 @@ At this checkpoint:
 - the ATLAS Book is the primary restart surface
 - `_stack` remains deploy authority
 - normal stack validation is green in the current working state
-- ATLAS root self-lock sequencing has been resolved; the Playbook external-smoke family is closed, preview/unfurl remains approval-gated and upstream-blocked by a Fitness owner-lane package, and the current non-gated DiscordOS planning chain is now fully packetized, with the lookup execution-readiness packet now proving that repo-local tooling landing in `repos/DiscordOS` must happen before any first lookup execution lane can open
+- ATLAS root self-lock sequencing has been resolved; preview/unfurl remains approval-gated, the remaining retained-surface pressure is mostly Playbook/Lifeline follow-on, and the DiscordOS lookup-local boundary chain is fully ratcheted shut with both transport-aware and externally-executing openings blocked until higher-level authorization reopens them
 
 ## Non-Goals
 

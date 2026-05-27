@@ -8,6 +8,7 @@ What is true right now:
 
 - Fitness remains the live app and the live Discord-hosted runtime owner.
 - DiscordOS separation is planned, scaffolded, and bounded, and the canonical local repo surface now exists.
+- the DiscordOS lookup-local boundary chain is fully ratcheted shut; no further repo-local lookup widening is open without higher-level authorization.
 - Fitness Supabase profile/data hygiene is closed as a governed lane at `100%`.
 - Discord and Music Sesh profile/data concerns are no longer Fitness hygiene debt and now belong to DiscordOS Infrastructure Separation.
 - `_stack` remains the governed deploy authority for approved app lanes.
@@ -35,7 +36,7 @@ What is true right now:
 Current status:
 
 - local repo now exists at `repos/DiscordOS`
-- contract docs, typed seams, and adapter stubs exist
+- contract docs, typed seams, adapter stubs, and lookup boundary receipts exist
 - no code moved
 - no runtime cutover
 
@@ -63,7 +64,11 @@ Current status:
 - remote preview/unfurl verification is approval-gated
 - DiscordOS schema, runtime, and data migration remain unstarted and must stay receipt-bounded
 - no helper-Vercel project deletion gate remains open after the 2026-05-25 helper-surface deletion pass
-- the Playbook external-smoke family opened by the 2026-05-26 decision chain is now fully consumed; the remaining closeout pressure is split between approval-gated preview/unfurl follow-on and DiscordOS-owned downstream work, with the DiscordOS feedback seam-planning chain now fully packetized, the seam-chain implementation-readiness checkpoint still limiting work to one-port repo-local adapter implementation planning, and the lookup execution-readiness packet now making the remaining pre-execution blockers explicit and routing the next safe move into `repos/DiscordOS` as `DiscordOS repo-local tooling landing and lookup execution-preconditions package 3`
+- DiscordOS lookup widening is closed at the owner-repo boundary:
+  - transport-aware opening: `no`
+  - externally-executing opening: `no`
+  - any further DiscordOS lookup widening now requires explicit higher-level authorization
+- retained Playbook/Lifeline external-smoke and manual-review surfaces still need a bounded closeout decision lane
 
 ## Current Closeout Read
 
@@ -76,6 +81,7 @@ What the latest closeout passes proved:
 - Fitness profile-core cleanup is fully closed; no unresolved unknown-profile, never-signed-in auth-only, or legacy automation-mismatch class remains in that lane
 - the remaining automation mismatch class is governed no-op and the remaining sign-in-bearing auth-only class is governed heuristic exclusion
 - Discord and Music Sesh data concerns are now explicitly transferred to DiscordOS Infrastructure Separation instead of lingering as Fitness cleanup residue
+- the DiscordOS lookup-local planning and boundary chain is complete enough to stop widening without an explicit new authorization
 - root self-lock sequencing for `stack.lock.yaml#stack` has been resolved by policy, so the remaining pressure is retained-surface cleanup rather than root commitability
 
 ## Current Direction
