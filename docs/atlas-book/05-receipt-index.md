@@ -124,6 +124,7 @@
 - [Discord OS Feedback Workflow No-Regression Extraction Checklist](../ops/DISCORD-OS-FEEDBACK-WORKFLOW-NO-REGRESSION-EXTRACTION-CHECKLIST-2026-05-27.md)
 - [Discord OS Feedback Workflow Marker Ratchet Checkpoint 2](../ops/DISCORD-OS-FEEDBACK-WORKFLOW-MARKER-RATCHET-CHECKPOINT-2-2026-05-27.md)
 - [Discord OS Feedback Workflow Deploy-Backed Evidence Inventory](../ops/DISCORD-OS-FEEDBACK-WORKFLOW-DEPLOY-BACKED-EVIDENCE-INVENTORY-2026-05-27.md)
+- [Discord OS Feedback Workflow Fresh-Intake Live Evidence Packet](../ops/DISCORD-OS-FEEDBACK-WORKFLOW-FRESH-INTAKE-LIVE-EVIDENCE-PACKET-2026-05-27.md)
 
 ## Durable Context Externalization
 
@@ -131,6 +132,7 @@
 - [Durable Context Externalization Marker Ratchet Checkpoint 2](../ops/DURABLE-CONTEXT-EXTERNALIZATION-MARKER-RATCHET-CHECKPOINT-2-2026-05-27.md)
 - [Durable Context Externalization Continuity-Manifest Pass](../ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-PASS-2026-05-27.md)
 - [Durable Context Externalization Continuity-Manifest Adoption Pass 1](../ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-ADOPTION-PASS-1-2026-05-27.md)
+- [Durable Context Externalization Continuity-Manifest Seeding Pass 1](../ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-SEEDING-PASS-1-2026-05-27.md)
 - [Durable Context Externalization Retrieval Surface Inventory](../ops/DURABLE-CONTEXT-EXTERNALIZATION-RETRIEVAL-SURFACE-INVENTORY-2026-05-27.md)
 - [Durable Context Externalization Prompt-Pack Normalization](../ops/DURABLE-CONTEXT-EXTERNALIZATION-PROMPT-PACK-NORMALIZATION-2026-05-27.md)
 

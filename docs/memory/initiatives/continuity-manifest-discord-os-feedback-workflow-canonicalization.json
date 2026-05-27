@@ -1,0 +1,117 @@
+{
+  "contract_version": "atlas.initiative.v1",
+  "id": "continuity-manifest-discord-os-feedback-workflow-canonicalization",
+  "title": "Continuity Manifest Discord OS Feedback Workflow Canonicalization",
+  "summary": "Active ATLAS-root retrieval map for the Discord OS Feedback Workflow Canonicalization lane.",
+  "status": "active",
+  "owner": "stack-root",
+  "created_at": "2026-05-27T00:00:00Z",
+  "updated_at": "2026-05-27T00:00:00Z",
+  "related_plan_refs": [],
+  "related_decision_refs": [],
+  "related_hypothesis_refs": [],
+  "related_session_refs": [],
+  "related_attention_refs": [],
+  "proposed_next_session_refs": [],
+  "evidence_refs": [
+    "docs/ops/DISCORD-COMPLETED-FEEDBACK-BOARD-FULL-RESTORE-2026-05-25.md",
+    "docs/ops/DISCORD-FEEDBACK-BOARD-STATE-REPAIR-2026-05-25.md",
+    "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-CANONICAL-CONTRACTS-PASS-1-2026-05-27.md",
+    "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-CANONICALIZATION-2026-05-27.md",
+    "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-DEPLOY-BACKED-EVIDENCE-INVENTORY-2026-05-27.md",
+    "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-LIVE-PROOF-CRITERIA-2026-05-27.md",
+    "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-MARKER-RATCHET-CHECKPOINT-2-2026-05-27.md",
+    "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-NO-REGRESSION-EXTRACTION-CHECKLIST-2026-05-27.md",
+    "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-SEPARATION-BOUNDARY-DECISION-PASS-1-2026-05-27.md",
+    "docs/ops/FITNESS-DISCORD-FEEDBACK-LIVE-ROLLOUT-2026-05-25.md",
+    "docs/ops/FITNESS-DISCORD-LIVE-REPAIR-AND-ATLAS-STATUS-POST-2026-05-25.md",
+    "repos/DiscordOS/docs/contracts/feedback-runtime.md",
+    "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-FEEDBACK.md",
+    "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-UPDATES.md",
+    "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-VERIFICATION.md",
+    "repos/fawxzzy-fitness/docs/ops/FITNESS-FEEDBACK-BOARD.md"
+  ],
+  "supersedes": [],
+  "superseded_by": [],
+  "metadata": {
+    "artifact_kind": "continuity_manifest",
+    "lane_id": "discord-os-feedback-workflow-canonicalization",
+    "scope_class": "cross-repo-governance-with-fitness-live-owner",
+    "current_checkpoint_receipt": "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-DEPLOY-BACKED-EVIDENCE-INVENTORY-2026-05-27.md",
+    "checkpoint_commit": "deb8f1f",
+    "checkpoint_summary": "Canonical contracts, separation boundary, live-proof criteria, and no-regression checklist are durable, and deploy-backed evidence is inventoried without implying owner transfer.",
+    "governing_receipts": [
+      "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-CANONICALIZATION-2026-05-27.md",
+      "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-CANONICAL-CONTRACTS-PASS-1-2026-05-27.md",
+      "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-SEPARATION-BOUNDARY-DECISION-PASS-1-2026-05-27.md",
+      "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-LIVE-PROOF-CRITERIA-2026-05-27.md",
+      "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-NO-REGRESSION-EXTRACTION-CHECKLIST-2026-05-27.md",
+      "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-MARKER-RATCHET-CHECKPOINT-2-2026-05-27.md",
+      "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-DEPLOY-BACKED-EVIDENCE-INVENTORY-2026-05-27.md"
+    ],
+    "owner_truth_surfaces": [
+      {
+        "path": "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-FEEDBACK.md",
+        "role": "current live workflow truth"
+      },
+      {
+        "path": "repos/fawxzzy-fitness/docs/ops/FITNESS-FEEDBACK-BOARD.md",
+        "role": "board and lifecycle truth"
+      },
+      {
+        "path": "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-UPDATES.md",
+        "role": "release-post boundary truth"
+      },
+      {
+        "path": "repos/DiscordOS/docs/contracts/feedback-runtime.md",
+        "role": "future-owner contract seam"
+      }
+    ],
+    "verification_adoption_surfaces": [
+      {
+        "path": "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-VERIFICATION.md",
+        "role": "current verification surface"
+      },
+      {
+        "path": "docs/ops/FITNESS-DISCORD-FEEDBACK-LIVE-ROLLOUT-2026-05-25.md",
+        "role": "live shipped-card proof"
+      },
+      {
+        "path": "docs/ops/FITNESS-DISCORD-LIVE-REPAIR-AND-ATLAS-STATUS-POST-2026-05-25.md",
+        "role": "live launcher repair and deploy evidence"
+      },
+      {
+        "path": "docs/ops/DISCORD-FEEDBACK-BOARD-STATE-REPAIR-2026-05-25.md",
+        "role": "live board-hygiene evidence"
+      }
+    ],
+    "blocked_or_gated_work": [
+      {
+        "item": "runtime migration",
+        "requirement": "blocked pending separate execution lane and deploy-backed parity proof"
+      },
+      {
+        "item": "schema migration and owner transfer",
+        "requirement": "blocked with no live DiscordOS runtime claim allowed"
+      },
+      {
+        "item": "fresh-intake parity and broad audit-comment proof",
+        "requirement": "still missing deploy-backed evidence"
+      }
+    ],
+    "next_package_ladder": [
+      {
+        "package": "Discord OS Feedback Workflow fresh-intake live evidence packet",
+        "mode": "docs-only live evidence packet",
+        "reason": "prove the highest-priority missing live invariant without implying migration approval"
+      }
+    ],
+    "marker_posture": [
+      {
+        "marker": "Discord OS Feedback Workflow Canonicalization",
+        "percent": 72,
+        "source": "docs/atlas-book/02-lanes-and-markers.md"
+      }
+    ]
+  }
+}

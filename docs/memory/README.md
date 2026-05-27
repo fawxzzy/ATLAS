@@ -88,6 +88,10 @@ Use this taxonomy when deciding what kind of durable context a surface provides:
 
 Continuity manifests are ATLAS-root retrieval maps for major lanes.
 
+Canonical active manifest location:
+
+- `docs/memory/initiatives/continuity-manifest-*.json`
+
 They should:
 
 - identify the active lane
@@ -102,3 +106,18 @@ They should not:
 - duplicate owner-repo source truth
 - copy full receipt bodies
 - become a parallel mutable truth store
+
+Current first-adoption seeded manifests:
+
+- `docs/memory/initiatives/continuity-manifest-durable-context-externalization.json`
+- `docs/memory/initiatives/continuity-manifest-local-data-gateway.json`
+- `docs/memory/initiatives/continuity-manifest-discord-os-feedback-workflow-canonicalization.json`
+- `docs/memory/initiatives/continuity-manifest-discord-os-infrastructure-separation.json`
+
+These seeded manifests make those lanes manifest-backed for restart routing.
+
+They do not imply:
+
+- universal manifest coverage across all lanes
+- automated restart
+- freedom to skip the cited owner truth-owner and verification/adoption surfaces

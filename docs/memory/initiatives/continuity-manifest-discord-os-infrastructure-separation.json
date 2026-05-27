@@ -1,0 +1,101 @@
+{
+  "contract_version": "atlas.initiative.v1",
+  "id": "continuity-manifest-discord-os-infrastructure-separation",
+  "title": "Continuity Manifest Discord OS Infrastructure Separation",
+  "summary": "Active ATLAS-root retrieval map for the Discord OS Infrastructure Separation lane.",
+  "status": "active",
+  "owner": "stack-root",
+  "created_at": "2026-05-27T00:00:00Z",
+  "updated_at": "2026-05-27T00:00:00Z",
+  "related_plan_refs": [],
+  "related_decision_refs": [],
+  "related_hypothesis_refs": [],
+  "related_session_refs": [],
+  "related_attention_refs": [],
+  "proposed_next_session_refs": [],
+  "evidence_refs": [
+    "docs/ops/DISCORD-FEEDBACK-DOMAIN-EXTRACTION-READINESS-2026-05-25.md",
+    "docs/ops/DISCORD-OS-INFRASTRUCTURE-SEPARATION-CHECKPOINT-2026-05-25.md",
+    "docs/ops/DISCORD-OS-INFRASTRUCTURE-SEPARATION-INVENTORY-2026-05-24.md",
+    "docs/ops/UNIFIED-DISCORD-OS-WORKFLOW-BOUNDARY-2026-05-24.md",
+    "repos/DiscordOS/docs/contracts/feedback-runtime.md",
+    "repos/DiscordOS/docs/ops/README.md",
+    "repos/DiscordOS/src/adapters/feedback/README.md",
+    "repos/DiscordOS/src/contracts/feedback.ts",
+    "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-FEEDBACK.md"
+  ],
+  "supersedes": [],
+  "superseded_by": [],
+  "metadata": {
+    "artifact_kind": "continuity_manifest",
+    "lane_id": "discord-os-infrastructure-separation",
+    "scope_class": "cross-repo-separation-governance",
+    "current_checkpoint_receipt": "docs/ops/DISCORD-OS-INFRASTRUCTURE-SEPARATION-CHECKPOINT-2026-05-25.md",
+    "checkpoint_commit": "0077cd8",
+    "checkpoint_summary": "Infrastructure separation is paused at a high-confidence seam: governance and scaffold surfaces exist, live runtime remains Fitness-owned, and migration classes stay blocked.",
+    "governing_receipts": [
+      "docs/ops/DISCORD-OS-INFRASTRUCTURE-SEPARATION-INVENTORY-2026-05-24.md",
+      "docs/ops/DISCORD-OS-INFRASTRUCTURE-SEPARATION-CHECKPOINT-2026-05-25.md"
+    ],
+    "owner_truth_surfaces": [
+      {
+        "path": "repos/DiscordOS/docs/contracts/feedback-runtime.md",
+        "role": "DiscordOS contract seam"
+      },
+      {
+        "path": "repos/DiscordOS/src/contracts/feedback.ts",
+        "role": "typed contract seam"
+      },
+      {
+        "path": "repos/DiscordOS/src/adapters/feedback/README.md",
+        "role": "adapter-boundary seam"
+      },
+      {
+        "path": "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-FEEDBACK.md",
+        "role": "current live runtime owner truth"
+      }
+    ],
+    "verification_adoption_surfaces": [
+      {
+        "path": "repos/DiscordOS/docs/ops/README.md",
+        "role": "DiscordOS repo-local ops surface"
+      },
+      {
+        "path": "docs/ops/DISCORD-FEEDBACK-DOMAIN-EXTRACTION-READINESS-2026-05-25.md",
+        "role": "feedback extraction readiness evidence"
+      },
+      {
+        "path": "docs/ops/UNIFIED-DISCORD-OS-WORKFLOW-BOUNDARY-2026-05-24.md",
+        "role": "shared workflow-boundary evidence"
+      }
+    ],
+    "blocked_or_gated_work": [
+      {
+        "item": "runtime migration, Vercel cutover, and worker retarget",
+        "requirement": "blocked without a new explicit lane and deploy-backed proof"
+      },
+      {
+        "item": "schema movement and env transfer",
+        "requirement": "blocked"
+      },
+      {
+        "item": "runtime activation inside DiscordOS by momentum",
+        "requirement": "prohibited"
+      }
+    ],
+    "next_package_ladder": [
+      {
+        "package": "narrow adapter-consumer or adapter-implementation planning package tied to one named port surface only",
+        "mode": "docs-only or explicitly reopened implementation planning",
+        "reason": "the checkpoint permits only the smallest seam-specific reopen"
+      }
+    ],
+    "marker_posture": [
+      {
+        "marker": "Discord OS Infrastructure Separation",
+        "percent": 95,
+        "source": "docs/atlas-book/02-lanes-and-markers.md"
+      }
+    ]
+  }
+}
