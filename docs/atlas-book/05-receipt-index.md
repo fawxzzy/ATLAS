@@ -74,6 +74,7 @@
 - [Vercel Helper Surface Deletion](../ops/VERCEL-HELPER-SURFACE-DELETION-2026-05-25.md)
 - [Full Stack Re-sync Closeout Consolidation](../ops/FULL-STACK-RESYNC-CLOSEOUT-CONSOLIDATION-2026-05-26.md)
 - [Full Stack Re-sync Closeout Consolidation](../ops/FULL-STACK-RESYNC-CLOSEOUT-CONSOLIDATION-2026-05-27.md)
+- [Playbook Behind-Only Smoke Branch Disposal Decision](../ops/PLAYBOOK-BEHIND-ONLY-SMOKE-BRANCH-DISPOSAL-DECISION-2026-05-27.md)
 - [Playbook External Codex Worktree Stranded-Directory Disposal](../ops/PLAYBOOK-EXTERNAL-CODEX-WORKTREE-STRANDED-DIRECTORY-DISPOSAL-2026-05-27.md)
 - [Playbook / Lifeline External Worktree / Smoke Surface Closeout Recheck](../ops/PLAYBOOK-LIFELINE-EXTERNAL-WORKTREE-SMOKE-CLOSEOUT-RECHECK-2026-05-27.md)
 - [Playbook / Lifeline External Worktree / Smoke Surface Disposal Decision](../ops/PLAYBOOK-LIFELINE-EXTERNAL-WORKTREE-SMOKE-DISPOSAL-DECISION-2026-05-27.md)
