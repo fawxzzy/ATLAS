@@ -122,6 +122,7 @@
 ## Durable Context Externalization
 
 - [Durable Context Externalization](../ops/DURABLE-CONTEXT-EXTERNALIZATION-2026-05-27.md)
+- [Durable Context Externalization Retrieval Surface Inventory](../ops/DURABLE-CONTEXT-EXTERNALIZATION-RETRIEVAL-SURFACE-INVENTORY-2026-05-27.md)
 
 ## Vercel Surface Decommission
 

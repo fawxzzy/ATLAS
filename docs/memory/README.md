@@ -48,3 +48,16 @@ Meaning:
 - workers should retrieve durable ATLAS and owner-repo context before trusting conversational continuity
 - GPT/Codex are temporary reasoning workers, not the durable state substrate
 - repeated chat-to-chat or worker-to-worker handoff without checkpointing will accumulate stale or duplicated context unless it is bounded by receipts, promoted notes, truth maps, and continuation guides
+
+## Retrieval surface taxonomy
+
+Use this taxonomy when deciding what kind of durable context a surface provides:
+
+- Canonical retrieval surface
+  - restart, marker, map, receipt-index, or memory-slot surfaces meant to be read first
+- Governed summary / promotion surface
+  - promoted doctrine notes and lane receipts that compress durable truth for reuse
+- Owner-repo truth-owner surface
+  - repo-owned docs, contracts, adoption notes, and verification surfaces that define repo-local truth directly
+- Non-authoritative memory / transcript residue
+  - chat recap, prompt carryover, and scratch narrative that may help with nuance but must never override the durable surfaces above

@@ -156,6 +156,31 @@ Canonical flow:
 5. ATLAS records the cross-repo checkpoint
 6. Playbook later extracts reusable doctrine
 
+## Continuity / Retrieval Map
+
+Retrieval-first continuity should be reconstructed in this order:
+
+1. ATLAS canonical retrieval surfaces
+   - marker table
+   - receipt index
+   - restart guide
+   - system map
+   - endgame surface
+2. owner-repo truth-owner surfaces
+   - repo READMEs
+   - repo-owned workflow docs
+   - repo-owned verification or adoption surfaces
+3. governed summary and promotion surfaces
+   - promoted doctrine notes
+   - lane receipts
+4. non-authoritative transcript residue last
+
+Rule:
+
+- ATLAS owns the retrieval spine
+- owner repos own repo-local truth
+- chat recap is optional nuance, not restart authority
+
 ## Approval-Gated Lanes
 
 Current approval-gated lanes:
