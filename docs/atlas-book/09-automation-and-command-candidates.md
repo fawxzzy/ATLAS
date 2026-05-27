@@ -307,7 +307,7 @@ Review-only dispositions currently supported:
 
 Deferred after this slice:
 
-- wrapper command contract draft
+- wrapper behavior matrix and receipt-output draft
 - full `stack data gateway packet <lane>` wrapper implementation
 - any downstream send/transport boundary
 
@@ -339,6 +339,22 @@ The future wrapper must remain below that authorization line:
 
 - it may orchestrate only local validate/emit/review/proof-package behavior
 - it may not introduce endpoint arguments, target selectors, or any send-capable mode
+
+Wrapper contract now frozen at the docs layer:
+
+- `stack data gateway packet <lane> --mode <validate-only|emit-only|review-only|proof-only|full-local>`
+- wrapper stays a thin no-send orchestrator over the existing helper family
+- wrapper preserves:
+  - explicit local input
+  - explicit review disposition
+  - canonical artifact root
+  - receipt-ready local summary output
+- wrapper must never add:
+  - endpoint args
+  - target selectors
+  - auth inputs
+  - hidden transport toggles
+  - lane-specific business logic
 
 ## Non-Goals
 

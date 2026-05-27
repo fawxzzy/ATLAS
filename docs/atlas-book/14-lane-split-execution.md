@@ -151,6 +151,7 @@ Current reopen note:
 - Local Data Gateway send-boundary work is valid here only when it freezes prohibition and authorization prerequisites; it must not add transport, model, SaaS, or downstream execution behavior by implication
 - Local Data Gateway send-authorization work is valid here only when it names explicit approval class, target type, sensitivity constraints, rollback/fail-closed posture, audit receipts, and no-hidden-transport guarantees before any higher-level send lane is even proposed
 - Local Data Gateway wrapper planning is valid here only when it freezes a thin no-send orchestrator over validate, emit, review, and proof-package stages without adding target selection, transport assumptions, or lane-specific business logic
+- Local Data Gateway wrapper command contract work is valid here only when it freezes arguments, modes, artifact paths, invariant checks, and receipt-ready local outputs without adding helper code or implying any transport-capable surface
 
 ## Shared Handoff Rules
 
