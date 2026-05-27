@@ -198,6 +198,13 @@ First concrete surfaces should land in this order:
 3. Playbook doctrine promotion
    - reusable rule language after the contract is stable
 
+Helper modes for the first `_stack` contract:
+
+- `preview`
+- `emit`
+- `validate`
+- never `send`
+
 First workflow targets:
 
 - Supabase review/export packet
@@ -232,6 +239,17 @@ Required packet lifecycle for the first helper candidate:
 6. packet emit
 7. downstream handoff
 8. receipt/proof
+
+Helper-specific non-goals:
+
+- no live SaaS/API send
+- no hidden export
+- no secret expansion
+- no direct AI/model prompt emission without packet review
+
+Recommended first artifact root:
+
+- `runtime/gateway-packets/<lane>/<date>/`
 
 ## Non-Goals
 

@@ -145,6 +145,7 @@ Current reopen note:
 - continue with narrow non-gated retained-surface cleanup packages before reopening broad mutation lanes
 - Local Data Gateway planning is a valid parallel docs-only ATLAS package as long as it stays contract/design-only and does not bypass owner-lane execution gates
 - Local Data Gateway contract work is valid here only when it defines packet boundaries, lifecycle, and invariants without implementing remote-facing helper behavior
+- Local Data Gateway helper-contract work is valid here only when it freezes local-only command modes and artifact boundaries without adding any send/sync/mutate path
 
 ## Shared Handoff Rules
 
