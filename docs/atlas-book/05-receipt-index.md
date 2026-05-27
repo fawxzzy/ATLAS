@@ -13,6 +13,7 @@
 
 - [Core Pattern Convergence Matrix](../ops/CORE-PATTERN-CONVERGENCE-MATRIX-2026-05-24.md)
 - [Core Pattern Doctrine Routing Pass 1](../ops/CORE-PATTERN-DOCTRINE-ROUTING-PASS-1-2026-05-24.md)
+- [Operator-Grade Governance Doctrine Ratification Review](../ops/OPERATOR-GRADE-GOVERNANCE-DOCTRINE-RATIFICATION-REVIEW-2026-05-27.md)
 
 ## Fitness Supabase Hygiene
 

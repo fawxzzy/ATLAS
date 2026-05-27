@@ -1,5 +1,19 @@
 # Playbook Notes
 
+## 2026-05-27 - Operator-grade governance doctrine still needs explicit invariants and trust semantics before ratification
+
+- Rule: ATLAS may project, index, verify, and coordinate; it may not silently absorb implementation ownership or mutable child state.
+- Rule: adoption is not verification.
+- Rule: transcript residue is not memory.
+- Rule: Cortex memory must be provenance-backed.
+- Rule: Lifeline is threshold-triggered, not identity-driven.
+- Pattern: coordination-only root -> owner-truth child repos -> provenance-backed memory -> explicit verification authority -> ratified governance only after trust-class and exception normalization.
+- Failure Mode: governance language sounds precise enough to feel final while still drifting because owners, trust classes, exception records, and metric contracts remain implicit.
+- Release-summary bullets:
+  - Packaged the ratification review durably instead of leaving it in chat.
+  - Elevated the reusable invariants that should constrain future doctrine work.
+  - Preserved the distinction between a strong v1 draft and final governed doctrine.
+
 ## 2026-05-27 - Durable context must externalize out of volatile worker continuity
 
 - Rule: External Context First.
