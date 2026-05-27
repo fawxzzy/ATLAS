@@ -307,7 +307,7 @@ Review-only dispositions currently supported:
 
 Deferred after this slice:
 
-- wrapper implementation planning checkpoint
+- wrapper implementation package 1
 - full `stack data gateway packet <lane>` wrapper implementation
 - any downstream send/transport boundary
 
@@ -387,7 +387,20 @@ Wrapper behavior matrix now frozen at the docs layer:
 
 Next safe wrapper layer after this draft:
 
-- wrapper implementation planning checkpoint
+- wrapper implementation package 1
+
+Wrapper implementation-planning checkpoint now frozen at the docs layer:
+
+- first actual wrapper slice is limited to:
+  - `validate-only`
+  - `emit-dry-run`
+- package 1 should prove only thin orchestration over the existing validator and dry-run emitter helpers
+- wrapper package 1 must not yet admit:
+  - `review-only`
+  - `proof-only`
+  - `full-local-chain`
+  - reviewer/disposition orchestration
+  - any send-capable or target-selecting surface
 
 ## Non-Goals
 

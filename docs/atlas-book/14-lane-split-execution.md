@@ -153,6 +153,7 @@ Current reopen note:
 - Local Data Gateway wrapper planning is valid here only when it freezes a thin no-send orchestrator over validate, emit, review, and proof-package stages without adding target selection, transport assumptions, or lane-specific business logic
 - Local Data Gateway wrapper command contract work is valid here only when it freezes arguments, modes, artifact paths, invariant checks, and receipt-ready local outputs without adding helper code or implying any transport-capable surface
 - Local Data Gateway wrapper behavior-matrix work is valid here only when it freezes per-mode prerequisites, artifact outputs, failure exits, and no-send receipt semantics without adding helper code or any target-selection meaning
+- Local Data Gateway wrapper implementation-planning work is valid here only when it selects the smallest thin-orchestration slice over the existing helper family, keeps package 1 below review/proof wrapper modes, and preserves explicit no-send failure semantics
 
 ## Shared Handoff Rules
 
