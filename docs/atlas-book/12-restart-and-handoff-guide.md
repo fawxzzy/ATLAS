@@ -50,6 +50,13 @@ If no continuity manifest exists yet:
 - prefer promoted notes over copied recap blocks
 - package any critical chat-only fact into a receipt or governed note before using it as restart truth
 
+If a lane claims `manifest-backed` continuity:
+
+- the lane must have an active ATLAS-root continuity manifest
+- that manifest must point to the current decisive receipt
+- that manifest must point to owner truth and verification/adoption surfaces rather than copying them
+- if those conditions are not true, treat the lane as receipt-backed or operator-stitched instead
+
 ## Required First Checks
 
 Before doing any substantial work:
@@ -195,7 +202,7 @@ Current best non-gated docs / control-plane ladder:
 
 - Local Data Gateway wrapper implementation package 1
 - Discord OS Feedback Workflow No-Regression Extraction Checklist
-- Durable Context Externalization continuity-manifest adoption pass 1
+- Durable Context Externalization continuity-manifest seeding pass 1
 - targeted book maintenance when a new durable receipt changes lane posture
 
 If reopening an approved gated lane:

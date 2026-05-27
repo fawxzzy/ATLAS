@@ -62,6 +62,14 @@ Continuity-manifest rule:
 
 - when a lane has a maintained continuity manifest, retrieve it before reconstructing state from chat recap or memory of the last session
 - a continuity manifest is a retrieval map, not a second truth store
+- a lane may claim `manifest-backed` continuity only when an active ATLAS-root manifest points to the current decisive receipt, owner truth-owner surfaces, and relevant verification/adoption surfaces
+- otherwise treat the lane as receipt-backed or operator-stitched, not fully manifest-backed
+
+First adoption posture:
+
+- seed manifests first for cross-repo or cross-surface lanes with dense receipt chains
+- prefer `Durable Context Externalization`, `Local Data Gateway`, `Discord OS Feedback Workflow Canonicalization`, and `Discord OS Infrastructure Separation` as first-adoption lanes
+- do not apply the label `manifest-backed` before restart can actually follow the manifest chain without transcript-first reconstruction
 
 ## Retrieval surface taxonomy
 

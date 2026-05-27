@@ -39,6 +39,17 @@
   - Removed stale restart guidance that still pointed at older Local Data Gateway package ordering.
   - Reinforced that transcript carryover is optional nuance, not a canonical restart substrate.
 
+## 2026-05-27 - Manifest-backed continuity requires active restart routing, not just manifest doctrine
+
+- Rule: a lane may claim `manifest-backed` continuity only when an active ATLAS-root manifest points to the current decisive receipt, owner truth surfaces, and relevant verification/adoption surfaces.
+- Rule: continuity manifests are adoption-ready first for cross-repo or cross-surface lanes with dense receipt chains and non-trivial owner routing.
+- Pattern: restart guide -> active continuity manifest -> governing receipt chain -> owner truth surface -> verification/adoption surface -> transcript nuance last.
+- Failure Mode: calling a lane `manifest-backed` before restart can actually follow the manifest chain turns continuity doctrine into label theater.
+- Release-summary bullets:
+  - Froze the difference between a manifest contract existing and a lane actually being manifest-backed.
+  - Named the first-adoption lane set for continuity-manifest seeding without pretending those manifests already exist.
+  - Preserved root as continuity routing only while keeping owner repos as truth owners.
+
 ## 2026-05-27 - Local data gateway proof packaging matures evidence, not handoff authority
 
 - Rule: local proof packaging is evidence packaging, not handoff authorization.
