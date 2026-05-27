@@ -23,7 +23,7 @@
 - Operator Secret Path Hygiene: `60%`
 - Manual Deploy Exception Burn-Down: `84%`
 - Fitness Supabase Profile/Data Hygiene: `100%`
-- Local Data Gateway: `0%`
+- Local Data Gateway: `10%`
 - Unified Workflow Convergence: `70%`
 - Inventory & Truth Map: `74%`
 - Full Stack Re-sync, Clean & Closeout: `85%`
@@ -93,5 +93,5 @@ The most important marker moves from the closeout queue were:
 - the remaining automation mismatches `candidate-01` through `candidate-04` are governed no-op, not unresolved cleanup debt
 - the remaining sign-in-bearing auth-only rows are governed heuristic exclusions, not human-style profile-repair candidates
 - Discord and Music Sesh profile/data concerns are explicitly transferred to `Discord OS Infrastructure Separation`, not left as open Fitness hygiene debt
-- Local Data Gateway was added as a first-class zero-percent lane so local preprocessing and minimal-payload export discipline are measured directly
+- Local Data Gateway now has a durable packet contract, exemplar proof chain, and no-send helper boundary, which justifies a first small doctrine-plus-proof move to `10%`
 - DiscordOS separation stayed high-confidence but intentionally below runtime migration

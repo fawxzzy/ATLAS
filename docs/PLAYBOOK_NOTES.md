@@ -1,5 +1,18 @@
 # Playbook Notes
 
+## 2026-05-27 - Local data gateway is now admitted doctrine, not only a marker idea
+
+- Rule: raw data lands locally first, and downstream systems receive purpose-built packets rather than messy raw input by default.
+- Rule: a governed packet must carry purpose, schema/version, sensitivity, provenance, transformation record, validation result, redaction status, dedupe status, exclusion summary, receipt/proof reference, and minimum useful payload.
+- Rule: packet quality depends on proving what stayed local, not only what was exported.
+- Rule: the first `_stack` helper boundary must stay local-only with `preview`, `emit`, and `validate` modes, and must not include `send`, `sync`, `post`, `submit`, or `mutate`.
+- Pattern: local source -> packet contract -> real-workflow exemplar proof -> helper contract -> implementation planning -> local-only helper.
+- Failure Mode: moving the marker or helper ambition forward before a reusable packet contract, exemplar proof, and helper boundary are all durable confuses doctrine maturity with implementation maturity.
+- Release-summary bullets:
+  - Admitted Local Data Gateway as durable doctrine rather than a marker-only idea.
+  - Froze the required packet field set and the no-send helper boundary.
+  - Limited the first honest marker move to a small doctrine-plus-proof ratchet rather than claiming implementation readiness.
+
 ## 2026-05-26 - Local data gateway should be a first-class stack marker
 
 - Rule: raw data lands locally first; remote systems receive purpose-built packets.

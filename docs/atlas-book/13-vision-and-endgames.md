@@ -92,9 +92,9 @@ Shared rules that survive the split:
 
 - done means raw data is local-by-default and remote systems receive minimum useful governed packets instead of raw dumps
 - should not become a license to export more data simply because a packet exists
-- currently open at implementation-planning stage
+- currently open at doctrine-admitted, implementation-planning stage
 - next valid package:
-  - Local Data Gateway packet contract draft
+  - Local Data Gateway _stack helper implementation planning packet
 
 ### ATLAS Book / Publishing
 
@@ -135,7 +135,7 @@ Shared rules that survive the split:
 - exact row-scoped Fitness Supabase mutation approval
 - remote preview/unfurl verification approval
 - local-data preprocessing doctrine still needs reusable command-surface follow-through
-- Local Data Gateway still lacks a packet contract and first helper proof
+- Local Data Gateway still lacks helper implementation planning and first helper proof
 - deferred closeout until the next bounded implementation lanes are chosen
 
 ## Next Valid Packages

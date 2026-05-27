@@ -122,6 +122,7 @@
 - [Local Data Gateway Packet Contract Draft](../ops/LOCAL-DATA-GATEWAY-PACKET-CONTRACT-DRAFT-2026-05-27.md)
 - [Local Data Gateway Proof Packet Exemplars](../ops/LOCAL-DATA-GATEWAY-PROOF-PACKET-EXEMPLARS-2026-05-27.md)
 - [Local Data Gateway `_stack` Helper Contract](../ops/LOCAL-DATA-GATEWAY-STACK-HELPER-CONTRACT-2026-05-27.md)
+- [Local Data Gateway Doctrine Checkpoint](../ops/LOCAL-DATA-GATEWAY-DOCTRINE-CHECKPOINT-2026-05-27.md)
 
 ## Lane Split
 
