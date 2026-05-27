@@ -410,19 +410,18 @@ Wrapper implementation-planning checkpoint now frozen at the docs layer:
   - reviewer/disposition orchestration
   - any send-capable or target-selecting surface
 
-Next safe wrapper layer after package 2 implementation:
+Next safe wrapper layer after package 2 proof:
 
-- wrapper package 2 proof pass
+- wrapper package 3 planning checkpoint
 
-Selected package-2 wrapper slice:
+Selected package-3 wrapper slice:
 
-- `review-only` only
-- requires existing emitted packet artifacts plus explicit reviewer and disposition
-- must preserve explicit no-send and no automatic-proof behavior
+- `proof-only` only
+- requires existing reviewed packet artifacts
+- must preserve explicit no-send and no automatic full-chain behavior
 
-Still deferred after package 2 implementation:
+Still deferred after package 3 planning:
 
-- `proof-only`
 - `full-local-chain`
 - any target-selection or send-capable wrapper surface
 
