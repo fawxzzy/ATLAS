@@ -162,7 +162,7 @@ Current best non-gated closeout ladder:
 - Lifeline merged checkpoint disposal execution pass
 - Branch & Worktree Normalization Final Closeout
 - Full Stack Re-sync Final Closeout
-- Local Data Gateway initial implementation planning
+- Local Data Gateway _stack packet field validator package 1
 
 If reopening an approved gated lane:
 
