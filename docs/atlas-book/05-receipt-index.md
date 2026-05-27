@@ -60,6 +60,7 @@
 - [Full Stack Re-sync, Clean & Closeout Baseline Pass 2](../ops/FULL-STACK-RESYNC-CLEAN-CLOSEOUT-BASELINE-PASS-2-2026-05-25.md)
 - [Stack Lock Registry Reconciliation](../ops/STACK-LOCK-REGISTRY-RECONCILIATION-2026-05-25.md)
 - [Branch Worktree Normalization Closeout Pass 2](../ops/BRANCH-WORKTREE-NORMALIZATION-CLOSEOUT-PASS-2-2026-05-25.md)
+- [Branch & Worktree Normalization Final Disposition Recheck](../ops/BRANCH-WORKTREE-NORMALIZATION-FINAL-DISPOSITION-RECHECK-2026-05-27.md)
 - [Tmp Surface Classification Closeout Pass 1](../ops/TMP-SURFACE-CLASSIFICATION-CLOSEOUT-PASS-1-2026-05-25.md)
 - [Vercel Helper Surface Final Review](../ops/VERCEL-HELPER-SURFACE-FINAL-REVIEW-2026-05-25.md)
 - [Fitness Residue Classification](../ops/FITNESS-RESIDUE-CLASSIFICATION-2026-05-25.md)
