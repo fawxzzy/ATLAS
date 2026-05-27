@@ -30,6 +30,7 @@ Start in this order:
 
 If the task is lane-specific:
 
+- use the continuity manifest first when one exists
 - use the book chapter first
 - use the lane receipt chain second
 - use chat history last
@@ -141,11 +142,12 @@ Never start product implementation from ATLAS root just because the conversation
 
 Use this hierarchy:
 
-1. current owner surface
-2. current book chapter
-3. most recent durable receipt
-4. validation output
-5. chat history only for nuance that is not yet packaged
+1. lane continuity manifest when one exists
+2. current owner surface
+3. current book chapter
+4. most recent durable receipt
+5. validation output
+6. chat history only for nuance that is not yet packaged
 
 If something important only exists in chat, package it into the book or a receipt before treating it as durable truth.
 
@@ -153,6 +155,7 @@ Interpretation:
 
 - GPT/Codex workers are ephemeral reasoning surfaces
 - ATLAS and owner repos are the durable continuity substrate
+- continuity manifests are the compact retrieval map that should point workers to the right durable surfaces before chat recap is trusted
 - a restart is healthy only when the lane can be reconstructed from those external artifacts
 
 ## Expected Status Block Format

@@ -17,8 +17,11 @@
 ## 2026-05-27 - Durable context must externalize out of volatile worker continuity
 
 - Rule: External Context First.
+- Rule: when a lane has a maintained continuity manifest, retrieve it before trusting chat recap or remembered session state.
 - Pattern: Ephemeral Worker, Durable Substrate.
+- Pattern: continuity manifest -> receipt chain -> owner truth surfaces -> verification/adoption surfaces -> chat nuance last.
 - Failure Mode: Recursive Context Rot Loop.
+- Failure Mode: a continuity manifest that starts copying owner truth instead of pointing to it becomes a second truth store and recreates drift under a more official name.
 - Durable Context Externalization: tracks whether critical continuity is reconstructable from ATLAS and owner-repo artifacts rather than trapped in GPT/Codex chats, prompt carryover, or operator memory.
 - Release-summary bullets:
   - Added Durable Context Externalization as a first-class marker instead of leaving continuity durability implicit inside knowledge-capture or book-quality lanes.

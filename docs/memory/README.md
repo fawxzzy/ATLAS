@@ -49,6 +49,10 @@ Meaning:
 - GPT/Codex are temporary reasoning workers, not the durable state substrate
 - repeated chat-to-chat or worker-to-worker handoff without checkpointing will accumulate stale or duplicated context unless it is bounded by receipts, promoted notes, truth maps, and continuation guides
 
+Continuity-manifest rule:
+
+- when a lane has a maintained continuity manifest, retrieve it before reconstructing state from chat recap or memory of the last session
+
 ## Retrieval surface taxonomy
 
 Use this taxonomy when deciding what kind of durable context a surface provides:
@@ -61,3 +65,22 @@ Use this taxonomy when deciding what kind of durable context a surface provides:
   - repo-owned docs, contracts, adoption notes, and verification surfaces that define repo-local truth directly
 - Non-authoritative memory / transcript residue
   - chat recap, prompt carryover, and scratch narrative that may help with nuance but must never override the durable surfaces above
+
+## Continuity manifests
+
+Continuity manifests are ATLAS-root retrieval maps for major lanes.
+
+They should:
+
+- identify the active lane
+- point to the current governing receipt chain
+- point to owner-repo truth-owner surfaces
+- point to verification/adoption surfaces
+- record current blocked or gated work
+- record the next package ladder
+
+They should not:
+
+- duplicate owner-repo source truth
+- copy full receipt bodies
+- become a parallel mutable truth store
