@@ -75,7 +75,9 @@ Recommended supporting fields:
 - `capture_timestamp`
 - `operator_or_process`
 - `payload_summary`
+- `export_exclusion_summary`
 - `handoff_constraints`
+- `receipt_or_proof_ref`
 
 ## Contract Field Definitions
 
@@ -188,6 +190,22 @@ Rule:
 - this payload is the exported unit
 - raw local input is never the exported unit by default
 
+### `export_exclusion_summary`
+
+Explicit summary of what intentionally stayed local or was omitted from the packet.
+
+Why:
+
+- real review and boundary workflows depend on proving not only what was sent, but what was intentionally not exported
+
+### `receipt_or_proof_ref`
+
+Link or identifier for the governing receipt, proof artifact, or approval packet that records packet use.
+
+Why:
+
+- real stack handoffs are only durable when the packet can be tied back to a receipt or proof chain
+
 ## Packet Lifecycle
 
 Every Local Data Gateway packet follows this lifecycle:
@@ -279,9 +297,13 @@ payload_summary:
   record_count: 0
   retained_fields: []
   dropped_fields: []
+export_exclusion_summary:
+  omitted_classes: []
+  reason: minimum-necessary
 handoff_constraints:
   remote_write_allowed: false
   onward_share_allowed: false
+receipt_or_proof_ref: docs/ops/example.md
 minimal_useful_payload: {}
 ```
 
@@ -314,6 +336,7 @@ To be considered governed, a packet should be auditable after the fact through:
 - transformation record
 - validation result
 - downstream target class
+- export exclusion summary
 - receipt or proof link
 
 Recommended later helper behavior:

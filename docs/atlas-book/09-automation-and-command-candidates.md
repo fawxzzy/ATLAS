@@ -218,6 +218,8 @@ Required packet fields for the first helper candidate:
 - dedupe status
 - downstream target class
 - payload summary
+- export exclusion summary
+- receipt or proof reference
 - minimum useful payload
 
 Required packet lifecycle for the first helper candidate:

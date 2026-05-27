@@ -120,6 +120,7 @@
 - [Local Data Gateway Marker](../ops/LOCAL-DATA-GATEWAY-MARKER-2026-05-25.md)
 - [Local Data Gateway Implementation Plan](../ops/LOCAL-DATA-GATEWAY-IMPLEMENTATION-PLAN-2026-05-27.md)
 - [Local Data Gateway Packet Contract Draft](../ops/LOCAL-DATA-GATEWAY-PACKET-CONTRACT-DRAFT-2026-05-27.md)
+- [Local Data Gateway Proof Packet Exemplars](../ops/LOCAL-DATA-GATEWAY-PROOF-PACKET-EXEMPLARS-2026-05-27.md)
 
 ## Lane Split
 
