@@ -6,11 +6,13 @@
 - Source receipts:
   - `docs/ops/PLAYBOOK-STASH-MANUAL-REVIEW-RETAINED-SURFACE-DECISION-2026-05-27.md`
   - `docs/ops/LIFELINE-EVIDENCE-SAFETY-MANUAL-REVIEW-RETAINED-SURFACE-DECISION-2026-05-27.md`
-- Control-plane checkpoint: `main@c9aaabe`
+  - `docs/ops/LIFELINE-MERGED-CHECKPOINT-DISPOSAL-2026-05-27.md`
+  - `docs/ops/LIFELINE-RETAINED-SURFACE-GOVERNANCE-CHECKPOINT-2026-05-27.md`
+- Control-plane checkpoint: `main@fbe2628`
 
 ## Objective
 
-Recompute whether `Branch & Worktree Normalization` can finally move beyond `99%` after the current Lifeline retained-surface decision result.
+Recompute whether `Branch & Worktree Normalization` can finally move beyond `99%` after the Lifeline retained-surface execution and governance results.
 
 This pass does not:
 
@@ -24,7 +26,7 @@ This pass does not:
 ## Root State
 
 - branch: `main`
-- HEAD: `c9aaabe`
+- HEAD: `fbe2628`
 - status: clean except intentional untracked `archive/`
 
 ## Validation Posture
@@ -41,10 +43,8 @@ Result:
 
 - `docs/ops/PLAYBOOK-STASH-MANUAL-REVIEW-RETAINED-SURFACE-DECISION-2026-05-27.md`
 - `docs/ops/LIFELINE-EVIDENCE-SAFETY-MANUAL-REVIEW-RETAINED-SURFACE-DECISION-2026-05-27.md`
-- landed follow-on execution receipt check:
-  - `docs/ops/LIFELINE-MERGED-CHECKPOINT-DISPOSAL-2026-05-27.md` -> not present
-- landed governance-checkpoint check:
-  - `docs/ops/LIFELINE-RETAINED-SURFACE-GOVERNANCE-CHECKPOINT-2026-05-27.md` -> not present
+- `docs/ops/LIFELINE-MERGED-CHECKPOINT-DISPOSAL-2026-05-27.md`
+- `docs/ops/LIFELINE-RETAINED-SURFACE-GOVERNANCE-CHECKPOINT-2026-05-27.md`
 
 ## Remaining Retained Classes
 
@@ -88,42 +88,50 @@ Result:
 
 ## Exact Cleanup Debt Still Open
 
-One exact safe execution subset is still open and unconsumed:
+None.
+
+The only previously cleared exact Lifeline subset:
 
 - `tmp/lifeline-main-closeout`
 - `tmp/lifeline-main-closeout-2`
 - `tmp/lifeline-main-closeout-3`
 
-This subset was cleared by the Lifeline retained-surface decision pass, but no execution receipt has landed yet.
+has now been consumed by `docs/ops/LIFELINE-MERGED-CHECKPOINT-DISPOSAL-2026-05-27.md`.
 
 ## Decision
 
-The remaining blockers are **not** "true governed retain only."
+The remaining blockers are now **true governed retain only**.
 
 They are:
 
 - governed-retain Playbook classes
 - governed-retain Lifeline evidence, safety, manual-review, and owner-lane classes
-- plus one still-unresolved cleanup debt subset already proven safe but not yet executed
 
-That means the lane has not yet crossed the final ratchet.
+No exact cleanup subset remains open.
+
+That means the lane has now crossed the final ratchet.
 
 ## Marker Recommendation
 
-Keep `Branch & Worktree Normalization` at `99%`.
+Move `Branch & Worktree Normalization` to `100%`.
 
-Why it cannot move to `100%` yet:
+Why this move is now honest:
 
-- the Lifeline merged-checkpoint subset is still pending execution
-- until that exact subset is consumed, the lane still contains open cleanup debt rather than only governed retains
-- after execution, a new ratchet recheck is still required to prove that only governed retains remain
+- the Playbook side is already governed-retain-only
+- the Lifeline merged-checkpoint trio is consumed
+- the Lifeline governance checkpoint now makes the remaining classes explicit as:
+  - evidence retain
+  - safety-checkpoint retain
+  - manual-review retain
+  - unknown-dependency retain
+- no residual exact cleanup subset remains hidden behind the retained-surface language
 
 ## `100%` Reopen Conditions
 
-`Branch & Worktree Normalization` can be reconsidered for `100%` only after:
+Now satisfied:
 
-1. `Lifeline merged checkpoint disposal execution pass` lands
-2. a follow-on recheck proves no further safe execution subset remains
+1. `Lifeline merged checkpoint disposal execution pass` landed
+2. the governance checkpoint proves no further safe execution subset remains
 3. the remaining surfaces are only:
    - evidence-bearing retain
    - safety-checkpoint retain
@@ -133,21 +141,21 @@ Why it cannot move to `100%` yet:
 
 ## Exact Next Package
 
-`Lifeline merged checkpoint disposal execution pass`
+`Full Stack Re-sync Final Closeout`
 
 Why:
 
-- it is the only still-open exact cleanup subset
-- it reduces the branch/worktree lane toward governed-retain-only posture
-- it avoids widening into evidence, safety-checkpoint, stash, or owner-root cleanup by implication
+- the branch/worktree lane is no longer blocked by unresolved cleanup debt
+- the remaining question is stack-level closeout disposition, not more branch/worktree execution
+- Local Data Gateway can continue in parallel, but the closeout ladder should now consume this `100%` marker result
 
 ## Outcome
 
-The final ratchet has not fired yet.
+The final ratchet has now fired.
 
 Current truth:
 
-- the Playbook side is already governed-retain-only
-- the Lifeline side is governed-retain-plus-one-safe-subset
-- `Branch & Worktree Normalization` therefore remains correctly pinned at `99%`
-- the next correct move is execution of the cleared Lifeline merged-checkpoint subset, followed by one more ratchet recheck
+- the Playbook side is governed-retain-only
+- the Lifeline side is now governed-retain-only
+- `Branch & Worktree Normalization` can now honestly move to `100%`
+- the next correct move is stack-level final closeout, not further branch/worktree cleanup by momentum

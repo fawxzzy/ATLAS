@@ -17,7 +17,7 @@
 - Canonical Repo Restoration: `100%`
 - Tmp Dependency Elimination: `90%`
 - Duplicate Surface Decommission: `98%`
-- Branch & Worktree Normalization: `99%`
+- Branch & Worktree Normalization: `100%`
 - Brand Asset Canonicalization: `90%`
 - Preview Cache & Surface Consistency: `78%`
 - Operator Secret Path Hygiene: `60%`
@@ -86,7 +86,7 @@ That split is defined and partially operationalized by bootstrap and governance 
 
 The most important marker moves from the closeout queue were:
 
-- branch/worktree normalization moved from blocked to green-validation posture
+- branch/worktree normalization is now fully ratcheted, with no remaining exact cleanup subset hiding behind retained-surface language
 - tmp dependency elimination moved from source-truth concern to retained-surface cleanup concern
 - full stack closeout moved from paused baseline work to an active, receipt-backed closeout ladder
 - Fitness Supabase hygiene moved from class-level ambiguity into governed row classes, bounded mutation receipts, and a final lane closeout at `100%`

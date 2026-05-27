@@ -159,7 +159,6 @@ For approval-gated lanes, append the exact approval phrase or approval requireme
 
 Current best non-gated closeout ladder:
 
-- Branch & Worktree Normalization Final Closeout
 - Full Stack Re-sync Final Closeout
 - Local Data Gateway _stack packet field validator package 1
 
