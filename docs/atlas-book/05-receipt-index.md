@@ -25,6 +25,7 @@
 - [Atlas-Owned Repo Naming Marker Ratchet Checkpoint 2](../ops/ATLAS-OWNED-REPO-NAMING-MARKER-RATCHET-CHECKPOINT-2-2026-05-27.md)
 - [Atlas-Owned Repo Naming Bounded Rewrite And Rollback Plan](../ops/ATLAS-OWNED-REPO-NAMING-BOUNDED-REWRITE-ROLLBACK-PLAN-2026-05-28.md)
 - [Atlas-Owned Repo Naming Safe-First Execution Approval](../ops/ATLAS-OWNED-REPO-NAMING-SAFE-FIRST-EXECUTION-APPROVAL-2026-05-28.md)
+- [Atlas-Owned Repo Naming Marker Ratchet Checkpoint 3](../ops/ATLAS-OWNED-REPO-NAMING-MARKER-RATCHET-CHECKPOINT-3-2026-05-28.md)
 
 ## Fitness Supabase Hygiene
 
