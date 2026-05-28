@@ -23,6 +23,7 @@
 - [Atlas-Owned Repo Naming Inventory And Dependency Map](../ops/ATLAS-OWNED-REPO-NAMING-INVENTORY-DEPENDENCY-MAP-2026-05-27.md)
 - [Atlas-Owned Repo Naming Safe-First Candidate Decision](../ops/ATLAS-OWNED-REPO-NAMING-SAFE-FIRST-CANDIDATE-DECISION-2026-05-27.md)
 - [Atlas-Owned Repo Naming Marker Ratchet Checkpoint 2](../ops/ATLAS-OWNED-REPO-NAMING-MARKER-RATCHET-CHECKPOINT-2-2026-05-27.md)
+- [Atlas-Owned Repo Naming Bounded Rewrite And Rollback Plan](../ops/ATLAS-OWNED-REPO-NAMING-BOUNDED-REWRITE-ROLLBACK-PLAN-2026-05-28.md)
 
 ## Fitness Supabase Hygiene
 

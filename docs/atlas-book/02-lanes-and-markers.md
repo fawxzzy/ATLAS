@@ -49,7 +49,8 @@ Read:
 Read:
 
 - naming policy and dependency mapping are durable
-- execution remains blocked until bounded rewrite and rollback order are frozen
+- bounded rewrite and rollback order are now frozen for the later-candidate set
+- execution still remains blocked except for a separate bounded first packet opening
 
 ## Active Front-Page Marker Table
 
@@ -130,9 +131,9 @@ That split is defined and partially operationalized by bootstrap and governance 
 - the continuity substrate is strong and real, but still not universal
 - the execution substrate is real at the no-send and governance level, but broader automation maturity is still early
 - the Discord workflow cluster has strong doctrine and stronger proof hygiene, but still lacks the missing positive fresh-submit live proof and broader live parity
-- naming and ownership hygiene are durable at the policy/mapping layer, but still blocked from execution without bounded rewrite and rollback order
+- naming and ownership hygiene are durable at the policy/mapping layer, and bounded rewrite/rollback order now exists, but execution still remains blocked except for a future narrow first packet
 - Local Data Gateway now sits at `65%`: the lane already had a durable packet contract, exemplar proof chain, no-send helper boundary, local validator/emitter/review/proof helpers, and thin wrapper packages 1 through 4 with a proven `full-local-chain`; it now also has a durable adoption inventory and durable adoption proof showing that the current no-send chain is honestly usable now for Supabase export / approval-prep packets, Vercel dependency / deletion decision packets, and DiscordOS trust-boundary / provenance proof packets, which justifies a ninth small adoption-backed move without implying blanket workflow rollout or any send/transport authority
 - Discord feedback workflow canonicalization now sits at `72%`: the live Fitness-hosted workflow is still the runtime truth, and the lane now has a dedicated canonical contract package, a first separation boundary, live-proof criteria, a no-regression extraction checklist, a deploy-backed evidence inventory, bounded edit/audit/completion-review/success-reaction/release-boundary evidence packets, a no-regression live parity-gap packet, and an explicit fresh-submit positive-proof recheck; it still stays flat because the newest work improved proof discipline and overclaim resistance, not the missing positive fresh-submit live proof, any broad live parity class, or any broader extraction/runtime-owner evidence
 - Durable Context Externalization now sits at `72%`: the first-adoption continuity manifests are not only durably seeded, but now governed by an explicit refresh discipline and refreshed in practice, so restart routing can rely on fresh manifest -> receipt -> owner-truth chains with a real downgrade path for stale manifests; it stays below `75%` because coverage is still partial, sustained refresh discipline is not yet proven across time, and some restart paths still depend on manual operator stitching
-- Atlas-owned Repo Naming Canonicalization now sits at `60%`: the lane now has durable naming policy, a durable internal target set, an explicit `fawxzzy-fitness` exception, durable execution-gate doctrine, a durable dependency map, and an explicit no-candidate-safe-first decision; it stays well below `75%` because no bounded rewrite order, rollback order, or execution-ready candidate package exists yet
+- Atlas-owned Repo Naming Canonicalization now sits at `60%`: the lane now has durable naming policy, a durable internal target set, an explicit `fawxzzy-fitness` exception, durable execution-gate doctrine, a durable dependency map, an explicit no-candidate-safe-first decision, and now one bounded rewrite/rollback plan with `stream` frozen as the first execution-packet-ready candidate; it stays well below `75%` because no rename has executed yet, remote-name assumptions remain blocked, and broader candidates still require stricter preflight
 - DiscordOS separation stayed high-confidence but intentionally below runtime migration

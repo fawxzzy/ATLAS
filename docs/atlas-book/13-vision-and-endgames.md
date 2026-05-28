@@ -53,7 +53,7 @@ Shared rules that survive the split:
 - should not become a product-runtime owner
 - currently open for docs and governance work, including read-model hygiene when the operator control-plane becomes slower than the underlying durable state
 - next valid package:
-  - Atlas-owned Repo Naming bounded rewrite-order and rollback planning pass 1, or other governance/book work only when it creates real durable value
+  - Atlas-owned Repo Naming stream execution-packet preflight pass 1, or other governance/book work only when it creates real durable value
 
 ## Key Endgames By Theme
 

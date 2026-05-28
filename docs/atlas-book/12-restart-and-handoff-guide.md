@@ -271,7 +271,7 @@ For approval-gated lanes, append the exact approval phrase or approval requireme
 
 Current best non-gated docs / control-plane ladder:
 
-- Atlas-owned Repo Naming bounded rewrite-order and rollback planning pass 1
+- Atlas-owned Repo Naming stream execution-packet preflight pass 1
 - Local Data Gateway workflow adoption expansion pass 2
 - targeted marker/book maintenance only when it materially improves operator read speed or restart truth
 
