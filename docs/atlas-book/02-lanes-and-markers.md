@@ -33,6 +33,7 @@
 - Playbook Everywhere + Cortex Interface: `20%`
 - Knowledge Capture & Transfer: `81%`
 - Durable Context Externalization: `72%`
+- Atlas-owned Repo Naming Canonicalization: `50%`
 - Feedback Loop Readiness: `42%`
 - Sandbox Simulation Readiness: `0%`
 - AI Long-Run Batch Orchestration: `20%`
@@ -101,4 +102,5 @@ The most important marker moves from the closeout queue were:
 - Local Data Gateway now has a durable packet contract, exemplar proof chain, no-send helper boundary, a live validator helper, a dry-run emitter helper, a local review helper, and a proof-packager helper, all backed by real-workflow proof across the same three exemplar classes; it also now has thin wrapper packages 1 through 4, with package 4 proving `full-local-chain` as thin no-send orchestration over `validate -> emit -> review -> proof`, which justifies an eighth small implementation-backed move to `60%` without implying broader workflow adoption or any send/transport authority
 - Discord feedback workflow canonicalization now sits at `72%`: the live Fitness-hosted workflow is still the runtime truth, and the lane now has a dedicated canonical contract package, a first separation boundary, live-proof criteria, a no-regression extraction checklist, a deploy-backed evidence inventory, and an explicit fresh-submit missing-proof receipt; it stays flat because the newest work improved proof discipline and overclaim resistance, not the missing positive fresh-submit live proof or any broader extraction/runtime-owner evidence
 - Durable Context Externalization now sits at `72%`: the first-adoption continuity manifests are not only durably seeded, but now governed by an explicit refresh discipline and refreshed in practice, so restart routing can rely on fresh manifest -> receipt -> owner-truth chains with a real downgrade path for stale manifests; it stays below `75%` because coverage is still partial, sustained refresh discipline is not yet proven across time, and some restart paths still depend on manual operator stitching
+- Atlas-owned Repo Naming Canonicalization is admitted at `50%`: the lane now has durable naming policy, a durable internal target set, and an explicit `fawxzzy-fitness` exception, but it does not yet have a rename-safe dependency map or execution sequence
 - DiscordOS separation stayed high-confidence but intentionally below runtime migration
