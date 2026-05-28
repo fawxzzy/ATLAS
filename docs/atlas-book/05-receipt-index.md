@@ -32,6 +32,7 @@
 - [Atlas-Owned Repo Naming Stream Worktree Dependency Closure Decision Pass 1](../ops/ATLAS-OWNED-REPO-NAMING-STREAM-WORKTREE-DEPENDENCY-CLOSURE-DECISION-PASS-1-2026-05-28.md)
 - [Atlas-Owned Repo Naming Stream Blocker Clearance Execution Pass 2](../ops/ATLAS-OWNED-REPO-NAMING-STREAM-BLOCKER-CLEARANCE-EXECUTION-PASS-2-2026-05-28.md)
 - [Atlas-Owned Repo Naming Stream Local Rename Execution Pass 2](../ops/ATLAS-OWNED-REPO-NAMING-STREAM-LOCAL-RENAME-EXECUTION-PASS-2-2026-05-28.md)
+- [Atlas-Owned Repo Naming Stream Local Rename Execution Pass 3](../ops/ATLAS-OWNED-REPO-NAMING-STREAM-LOCAL-RENAME-EXECUTION-PASS-3-2026-05-28.md)
 - [Atlas-Owned Repo Naming Stream Rename Proof And Reconciliation Pass 2](../ops/ATLAS-OWNED-REPO-NAMING-STREAM-RENAME-PROOF-RECONCILIATION-PASS-2-2026-05-28.md)
 - [Atlas-Owned Repo Naming Marker Ratchet Checkpoint 5](../ops/ATLAS-OWNED-REPO-NAMING-MARKER-RATCHET-CHECKPOINT-5-2026-05-28.md)
 - [Atlas-Owned Repo Naming Marker Ratchet Checkpoint 4](../ops/ATLAS-OWNED-REPO-NAMING-MARKER-RATCHET-CHECKPOINT-4-2026-05-28.md)
