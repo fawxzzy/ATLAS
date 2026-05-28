@@ -82,6 +82,14 @@ Before doing any substantial work:
 6. confirm whether a newer receipt already resolved the question
 7. confirm whether `_stack` owns the execution command
 
+Mandatory prompt preflight:
+
+- is this package already durable
+- is this root-owned or owner-repo-owned
+- is this a proof/inventory pass, ratchet pass, or implementation pass
+- which canonical shared files will be touched
+- what must remain explicitly blocked after this pass
+
 ## Where The Marker Table Lives
 
 The durable book-local marker table lives in:
@@ -103,6 +111,45 @@ Marker-system hygiene rule:
 - use `Closed / Locked Ratchets` only for historical boundary or restart context
 
 Do not spend first-scan attention on closed ratchets or lower-signal supporting markers when the question is about the next active lane.
+
+## Fast Safe Cadence
+
+Default cadence:
+
+1. cluster related proof or inventory passes first
+2. stop and decide whether operator reality materially changed
+3. run one ratchet only if that answer is yes
+4. refresh shared marker or restart surfaces only when the ratchet or proof changed canonical read state
+
+Do not default to:
+
+- one micro receipt
+- one micro ratchet
+- one micro shared-surface refresh
+
+when the underlying operator decision did not change.
+
+## Canonical File Collision Policy
+
+Treat these as serialized shared root spines:
+
+- [02-lanes-and-markers.md](02-lanes-and-markers.md)
+- [05-receipt-index.md](05-receipt-index.md)
+- [12-restart-and-handoff-guide.md](12-restart-and-handoff-guide.md)
+- [13-vision-and-endgames.md](13-vision-and-endgames.md)
+- [PLAYBOOK_NOTES.md](../PLAYBOOK_NOTES.md)
+
+Default operating split:
+
+- one root writer
+- one owner-repo writer
+- one read-only scout
+
+Rules:
+
+- do not let two active root-writing passes touch the same shared spine at once
+- if a receipt can land without an immediate shared-spine rewrite, prefer batching that rewrite with the next related ratchet or hygiene pass
+- do not let a read-only scout quietly become a writer without reclassifying the lane
 
 ## How To Choose The Next Lane
 

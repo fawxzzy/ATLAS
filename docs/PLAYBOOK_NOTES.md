@@ -1,5 +1,20 @@
 # Playbook Notes
 
+## 2026-05-28 - Fast safe cadence should be explicit when receipts are strong but operator drag is rising
+
+- Rule: cluster proof and inventory passes before running a ratchet.
+- Rule: do not ratchet just because a new receipt landed; ratchet only when operator reality materially changed.
+- Rule: every pass prompt must answer whether the package is already durable, who owns the surface, which shared canonical files it touches, and what remains blocked after it lands.
+- Rule: shared ATLAS root spine files should be treated as serialized write surfaces.
+- Pattern: proof cluster -> one ratchet -> one shared-surface refresh only when needed.
+- Pattern: one root writer -> one owner-repo writer -> one read-only scout.
+- Failure Mode: repeated micro-ratchets and overlapping root writers create more process drag than the underlying work justifies.
+- Failure Mode: a speed-up pass widens scope by turning proof growth into implied execution approval.
+- Release-summary bullets:
+  - Froze the default cluster-first cadence for marker-heavy governance work.
+  - Added a mandatory preflight checklist for durability, ownership, shared-file scope, and blocked-after-this-pass posture.
+  - Serialized shared ATLAS root spine writes to reduce merge collisions and restart-surface churn.
+
 ## 2026-05-27 - Operator-grade governance doctrine still needs explicit invariants and trust semantics before ratification
 
 - Rule: ATLAS may project, index, verify, and coordinate; it may not silently absorb implementation ownership or mutable child state.
