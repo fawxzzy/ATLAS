@@ -193,6 +193,7 @@
 - [Local Data Gateway Marker Ratchet Checkpoint 5](../ops/LOCAL-DATA-GATEWAY-MARKER-RATCHET-CHECKPOINT-5-2026-05-27.md)
 - [Local Data Gateway Marker Ratchet Checkpoint 6](../ops/LOCAL-DATA-GATEWAY-MARKER-RATCHET-CHECKPOINT-6-2026-05-27.md)
 - [Local Data Gateway Marker Ratchet Checkpoint 7](../ops/LOCAL-DATA-GATEWAY-MARKER-RATCHET-CHECKPOINT-7-2026-05-27.md)
+- [Local Data Gateway Marker Ratchet Checkpoint 8](../ops/LOCAL-DATA-GATEWAY-MARKER-RATCHET-CHECKPOINT-8-2026-05-27.md)
 
 ## Lane Split
 

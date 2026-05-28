@@ -23,7 +23,7 @@
 - Operator Secret Path Hygiene: `60%`
 - Manual Deploy Exception Burn-Down: `84%`
 - Fitness Supabase Profile/Data Hygiene: `100%`
-- Local Data Gateway: `55%`
+- Local Data Gateway: `60%`
 - Unified Workflow Convergence: `70%`
 - Inventory & Truth Map: `74%`
 - Full Stack Re-sync, Clean & Closeout: `100%`
@@ -98,7 +98,7 @@ The most important marker moves from the closeout queue were:
 - the remaining automation mismatches `candidate-01` through `candidate-04` are governed no-op, not unresolved cleanup debt
 - the remaining sign-in-bearing auth-only rows are governed heuristic exclusions, not human-style profile-repair candidates
 - Discord and Music Sesh profile/data concerns are explicitly transferred to `Discord OS Infrastructure Separation`, not left as open Fitness hygiene debt
-- Local Data Gateway now has a durable packet contract, exemplar proof chain, no-send helper boundary, a live validator helper, a dry-run emitter helper, a local review helper, and a proof-packager helper, all backed by real-workflow proof across the same three exemplar classes; it also now has thin wrapper packages 1 through 3 with real-workflow proof for `validate-only`, `emit-dry-run`, `review-only`, and `proof-only`, which justifies a seventh small implementation-backed move to `55%` without implying full-local-chain composition or any send/transport authority
+- Local Data Gateway now has a durable packet contract, exemplar proof chain, no-send helper boundary, a live validator helper, a dry-run emitter helper, a local review helper, and a proof-packager helper, all backed by real-workflow proof across the same three exemplar classes; it also now has thin wrapper packages 1 through 4, with package 4 proving `full-local-chain` as thin no-send orchestration over `validate -> emit -> review -> proof`, which justifies an eighth small implementation-backed move to `60%` without implying broader workflow adoption or any send/transport authority
 - Discord feedback workflow canonicalization now sits at `72%`: the live Fitness-hosted workflow is still the runtime truth, and the lane now has a dedicated canonical contract package, a first separation boundary, live-proof criteria, a no-regression extraction checklist, a deploy-backed evidence inventory, and an explicit fresh-submit missing-proof receipt; it stays flat because the newest work improved proof discipline and overclaim resistance, not the missing positive fresh-submit live proof or any broader extraction/runtime-owner evidence
 - Durable Context Externalization now sits at `72%`: the first-adoption continuity manifests are not only durably seeded, but now governed by an explicit refresh discipline and refreshed in practice, so restart routing can rely on fresh manifest -> receipt -> owner-truth chains with a real downgrade path for stale manifests; it stays below `75%` because coverage is still partial, sustained refresh discipline is not yet proven across time, and some restart paths still depend on manual operator stitching
 - DiscordOS separation stayed high-confidence but intentionally below runtime migration
