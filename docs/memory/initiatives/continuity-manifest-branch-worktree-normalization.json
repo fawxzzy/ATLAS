@@ -1,0 +1,109 @@
+{
+  "contract_version": "atlas.initiative.v1",
+  "id": "continuity-manifest-branch-worktree-normalization",
+  "title": "Continuity Manifest Branch Worktree Normalization",
+  "summary": "Active ATLAS-root retrieval map for the Branch & Worktree Normalization lane.",
+  "status": "active",
+  "owner": "stack-root",
+  "created_at": "2026-05-27T00:00:00Z",
+  "updated_at": "2026-05-28T01:24:46Z",
+  "related_plan_refs": [],
+  "related_decision_refs": [],
+  "related_hypothesis_refs": [],
+  "related_session_refs": [],
+  "related_attention_refs": [],
+  "proposed_next_session_refs": [],
+  "evidence_refs": [
+    "docs/atlas-book/02-lanes-and-markers.md",
+    "docs/atlas-book/05-receipt-index.md",
+    "docs/atlas-book/12-restart-and-handoff-guide.md",
+    "docs/ops/ATLAS-CLEANUP-RESYNC-STATUS-POST-REFRESH-2026-05-27.md",
+    "docs/ops/BRANCH-WORKTREE-NORMALIZATION-FINAL-DISPOSITION-RECHECK-2026-05-27.md",
+    "docs/ops/BRANCH-WORKTREE-NORMALIZATION-FINAL-RATCHET-RECHECK-2026-05-27.md",
+    "docs/ops/LIFELINE-EVIDENCE-SAFETY-MANUAL-REVIEW-RETAINED-SURFACE-DECISION-2026-05-27.md",
+    "docs/ops/LIFELINE-MERGED-CHECKPOINT-DISPOSAL-2026-05-27.md",
+    "docs/ops/LIFELINE-RETAINED-SURFACE-GOVERNANCE-CHECKPOINT-2026-05-27.md",
+    "docs/ops/PLAYBOOK-STASH-MANUAL-REVIEW-RETAINED-SURFACE-DECISION-2026-05-27.md"
+  ],
+  "supersedes": [],
+  "superseded_by": [],
+  "metadata": {
+    "artifact_kind": "continuity_manifest",
+    "lane_id": "branch-worktree-normalization",
+    "scope_class": "atlas-root-closeout-governance",
+    "current_checkpoint_receipt": "docs/ops/BRANCH-WORKTREE-NORMALIZATION-FINAL-RATCHET-RECHECK-2026-05-27.md",
+    "checkpoint_commit": "7d526ff",
+    "checkpoint_summary": "Branch & Worktree Normalization is durably closed at 100 percent; the remaining surfaces are governed retain only and no exact cleanup subset remains open.",
+    "governing_receipts": [
+      "docs/ops/PLAYBOOK-STASH-MANUAL-REVIEW-RETAINED-SURFACE-DECISION-2026-05-27.md",
+      "docs/ops/LIFELINE-EVIDENCE-SAFETY-MANUAL-REVIEW-RETAINED-SURFACE-DECISION-2026-05-27.md",
+      "docs/ops/LIFELINE-MERGED-CHECKPOINT-DISPOSAL-2026-05-27.md",
+      "docs/ops/LIFELINE-RETAINED-SURFACE-GOVERNANCE-CHECKPOINT-2026-05-27.md",
+      "docs/ops/BRANCH-WORKTREE-NORMALIZATION-FINAL-RATCHET-RECHECK-2026-05-27.md"
+    ],
+    "owner_truth_surfaces": [
+      {
+        "path": "docs/ops/PLAYBOOK-STASH-MANUAL-REVIEW-RETAINED-SURFACE-DECISION-2026-05-27.md",
+        "role": "Playbook governed-retain truth"
+      },
+      {
+        "path": "docs/ops/LIFELINE-EVIDENCE-SAFETY-MANUAL-REVIEW-RETAINED-SURFACE-DECISION-2026-05-27.md",
+        "role": "Lifeline governed-retain truth"
+      },
+      {
+        "path": "docs/ops/LIFELINE-MERGED-CHECKPOINT-DISPOSAL-2026-05-27.md",
+        "role": "exact cleanup subset consumption proof"
+      },
+      {
+        "path": "docs/ops/LIFELINE-RETAINED-SURFACE-GOVERNANCE-CHECKPOINT-2026-05-27.md",
+        "role": "retained-surface classification truth"
+      }
+    ],
+    "verification_adoption_surfaces": [
+      {
+        "path": "docs/atlas-book/02-lanes-and-markers.md",
+        "role": "canonical marker posture"
+      },
+      {
+        "path": "docs/atlas-book/05-receipt-index.md",
+        "role": "receipt spine"
+      },
+      {
+        "path": "docs/ops/ATLAS-CLEANUP-RESYNC-STATUS-POST-REFRESH-2026-05-27.md",
+        "role": "published closeout summary"
+      }
+    ],
+    "blocked_or_gated_work": [
+      {
+        "item": "reopening exact cleanup execution by momentum",
+        "requirement": "blocked; a new exact retained-surface evidence packet must exist first"
+      },
+      {
+        "item": "treating governed-retain surfaces as hidden cleanup debt",
+        "requirement": "prohibited"
+      },
+      {
+        "item": "routing follow-on work back into this lane when it belongs to separate active lanes",
+        "requirement": "blocked unless new branch/worktree cleanup debt appears"
+      }
+    ],
+    "next_package_ladder": [
+      {
+        "package": "No lane-internal package; reopen only with a new exact retained-surface evidence packet",
+        "mode": "blocked unless new cleanup debt emerges",
+        "reason": "the lane is closed at 100 percent and current follow-on work belongs elsewhere"
+      }
+    ],
+    "freshness_state": "manifest-backed",
+    "freshness_checked_receipt": "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-BREADTH-EXPANSION-PASS-1-2026-05-27.md",
+    "freshness_checked_at": "2026-05-28T01:24:46Z",
+    "freshness_basis": "the decisive closeout receipt, marker posture, governed-retain boundary, and no-reopen posture all match the current durable lane state at breadth-expansion pass 1.",
+    "marker_posture": [
+      {
+        "marker": "Branch & Worktree Normalization",
+        "percent": 100,
+        "source": "docs/atlas-book/02-lanes-and-markers.md"
+      }
+    ]
+  }
+}

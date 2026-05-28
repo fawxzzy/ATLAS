@@ -1,0 +1,110 @@
+{
+  "contract_version": "atlas.initiative.v1",
+  "id": "continuity-manifest-full-stack-resync-clean-closeout",
+  "title": "Continuity Manifest Full Stack Re-sync Clean Closeout",
+  "summary": "Active ATLAS-root retrieval map for the Full Stack Re-sync, Clean & Closeout lane.",
+  "status": "active",
+  "owner": "stack-root",
+  "created_at": "2026-05-27T00:00:00Z",
+  "updated_at": "2026-05-28T01:24:46Z",
+  "related_plan_refs": [],
+  "related_decision_refs": [],
+  "related_hypothesis_refs": [],
+  "related_session_refs": [],
+  "related_attention_refs": [],
+  "proposed_next_session_refs": [],
+  "evidence_refs": [
+    "docs/atlas-book/02-lanes-and-markers.md",
+    "docs/atlas-book/05-receipt-index.md",
+    "docs/atlas-book/12-restart-and-handoff-guide.md",
+    "docs/ops/ATLAS-CLEANUP-RESYNC-STATUS-POST-REFRESH-2026-05-27.md",
+    "docs/ops/BRANCH-WORKTREE-NORMALIZATION-FINAL-RATCHET-RECHECK-2026-05-27.md",
+    "docs/ops/FULL-STACK-RESYNC-CLOSEOUT-ADVANCEMENT-CHECKPOINT-2026-05-27.md",
+    "docs/ops/FULL-STACK-RESYNC-CLOSEOUT-CONSOLIDATION-2026-05-27.md",
+    "docs/ops/FULL-STACK-RESYNC-CLOSEOUT-REFRESH-2026-05-27.md",
+    "docs/ops/FULL-STACK-RESYNC-FINAL-CLOSEOUT-2026-05-27.md",
+    "docs/ops/LIFELINE-RETAINED-SURFACE-GOVERNANCE-CHECKPOINT-2026-05-27.md"
+  ],
+  "supersedes": [],
+  "superseded_by": [],
+  "metadata": {
+    "artifact_kind": "continuity_manifest",
+    "lane_id": "full-stack-resync-clean-closeout",
+    "scope_class": "atlas-root-closeout-governance",
+    "current_checkpoint_receipt": "docs/ops/FULL-STACK-RESYNC-FINAL-CLOSEOUT-2026-05-27.md",
+    "checkpoint_commit": "c91da43",
+    "checkpoint_summary": "Full Stack Re-sync, Clean & Closeout is durably closed at 100 percent; exact cleanup debt is exhausted and remaining pressure belongs to separate active or approval-gated lanes.",
+    "governing_receipts": [
+      "docs/ops/FULL-STACK-RESYNC-CLOSEOUT-CONSOLIDATION-2026-05-27.md",
+      "docs/ops/FULL-STACK-RESYNC-CLOSEOUT-ADVANCEMENT-CHECKPOINT-2026-05-27.md",
+      "docs/ops/FULL-STACK-RESYNC-CLOSEOUT-REFRESH-2026-05-27.md",
+      "docs/ops/BRANCH-WORKTREE-NORMALIZATION-FINAL-RATCHET-RECHECK-2026-05-27.md",
+      "docs/ops/LIFELINE-RETAINED-SURFACE-GOVERNANCE-CHECKPOINT-2026-05-27.md",
+      "docs/ops/FULL-STACK-RESYNC-FINAL-CLOSEOUT-2026-05-27.md"
+    ],
+    "owner_truth_surfaces": [
+      {
+        "path": "docs/ops/FULL-STACK-RESYNC-FINAL-CLOSEOUT-2026-05-27.md",
+        "role": "decisive closeout truth"
+      },
+      {
+        "path": "docs/ops/FULL-STACK-RESYNC-CLOSEOUT-REFRESH-2026-05-27.md",
+        "role": "latest pre-closeout lane state"
+      },
+      {
+        "path": "docs/ops/BRANCH-WORKTREE-NORMALIZATION-FINAL-RATCHET-RECHECK-2026-05-27.md",
+        "role": "branch/worktree prerequisite closure truth"
+      },
+      {
+        "path": "docs/ops/LIFELINE-RETAINED-SURFACE-GOVERNANCE-CHECKPOINT-2026-05-27.md",
+        "role": "governed-retain boundary truth"
+      }
+    ],
+    "verification_adoption_surfaces": [
+      {
+        "path": "docs/atlas-book/02-lanes-and-markers.md",
+        "role": "canonical marker posture"
+      },
+      {
+        "path": "docs/atlas-book/05-receipt-index.md",
+        "role": "receipt spine"
+      },
+      {
+        "path": "docs/ops/ATLAS-CLEANUP-RESYNC-STATUS-POST-REFRESH-2026-05-27.md",
+        "role": "published closeout summary"
+      }
+    ],
+    "blocked_or_gated_work": [
+      {
+        "item": "treating approval-gated follow-on work as closeout-lane debt",
+        "requirement": "prohibited"
+      },
+      {
+        "item": "reopening the lane without a new exact cleanup-debt class",
+        "requirement": "blocked"
+      },
+      {
+        "item": "routing separate active lanes back into convergence-wave closeout by convenience",
+        "requirement": "blocked"
+      }
+    ],
+    "next_package_ladder": [
+      {
+        "package": "No lane-internal package; route follow-on into separate active or approval-gated lanes",
+        "mode": "lane closed at 100 percent",
+        "reason": "remaining pressure is outside the closeout lane rather than pending inside it"
+      }
+    ],
+    "freshness_state": "manifest-backed",
+    "freshness_checked_receipt": "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-BREADTH-EXPANSION-PASS-1-2026-05-27.md",
+    "freshness_checked_at": "2026-05-28T01:24:46Z",
+    "freshness_basis": "the decisive closeout receipt, marker posture, exact no-debt outcome, and route-separate follow-on posture all match the current durable lane state at breadth-expansion pass 1.",
+    "marker_posture": [
+      {
+        "marker": "Full Stack Re-sync, Clean & Closeout",
+        "percent": 100,
+        "source": "docs/atlas-book/02-lanes-and-markers.md"
+      }
+    ]
+  }
+}

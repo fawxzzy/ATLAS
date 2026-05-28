@@ -236,7 +236,7 @@ At this checkpoint:
 - `_stack` remains deploy authority
 - normal stack validation is green in the current working state
 - continuity manifests, retrieval-surface taxonomy, and prompt-pack normalization are now durable enough that transcript recap should be treated as optional nuance rather than a restart substrate
-- first-adoption continuity manifests now exist for Durable Context Externalization, Local Data Gateway, Discord OS Feedback Workflow Canonicalization, and Discord OS Infrastructure Separation under `docs/memory/initiatives/continuity-manifest-*.json`
+- seeded continuity manifests now exist for Durable Context Externalization, Local Data Gateway, Discord OS Feedback Workflow Canonicalization, Discord OS Infrastructure Separation, Branch & Worktree Normalization, and Full Stack Re-sync, Clean & Closeout under `docs/memory/initiatives/continuity-manifest-*.json`
 - seeded manifests must now also be checked for freshness; manifest presence alone is not enough to claim the lane is still fully manifest-backed
 - ATLAS root self-lock sequencing has been resolved; preview/unfurl remains approval-gated, the Playbook external `.codex/worktrees/*` stranded-directory subset and the behind-only Playbook smoke branch class are now consumed, no Playbook-only retained-surface execution subset is currently open, the Lifeline stale-merged-checkpoint trio is now consumed, the remaining retained-surface pressure is governed-retain only, `Branch & Worktree Normalization` is now closed at `100%`, `Full Stack Re-sync, Clean & Closeout` is now closed at `100%`, and the DiscordOS lookup-local boundary chain is fully ratcheted shut with both transport-aware and externally-executing openings blocked until higher-level authorization reopens them
 

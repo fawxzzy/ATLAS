@@ -108,12 +108,14 @@ They should not:
 - copy full receipt bodies
 - become a parallel mutable truth store
 
-Current first-adoption seeded manifests:
+Current seeded manifest set:
 
 - `docs/memory/initiatives/continuity-manifest-durable-context-externalization.json`
 - `docs/memory/initiatives/continuity-manifest-local-data-gateway.json`
 - `docs/memory/initiatives/continuity-manifest-discord-os-feedback-workflow-canonicalization.json`
 - `docs/memory/initiatives/continuity-manifest-discord-os-infrastructure-separation.json`
+- `docs/memory/initiatives/continuity-manifest-branch-worktree-normalization.json`
+- `docs/memory/initiatives/continuity-manifest-full-stack-resync-clean-closeout.json`
 
 These seeded manifests are manifest-backed only while their freshness state remains current.
 
