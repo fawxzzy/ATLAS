@@ -51,9 +51,9 @@ Shared rules that survive the split:
 - exists to own cross-repo coordination, receipts, markers, validation, governance mapping, and restart surfaces
 - done means stack state is resumable from docs and receipts rather than memory
 - should not become a product-runtime owner
-- currently open for docs and governance work
+- currently open for docs and governance work, including read-model hygiene when the operator control-plane becomes slower than the underlying durable state
 - next valid package:
-  - additional governance or book work only when it creates real durable value
+  - Atlas-owned Repo Naming bounded rewrite-order and rollback planning pass 1, or other governance/book work only when it creates real durable value
 
 ## Key Endgames By Theme
 
@@ -108,7 +108,7 @@ Shared rules that survive the split:
 
 - done means the book is good enough to restart the stack from docs, receipts, maps, and gates
 - should not become a stale brochure disconnected from current receipts
-- currently open but lower urgency than before
+- currently open at lower volume than before, but marker/read-model hygiene is now one of the few book-level changes that still creates real durable operator value
 
 ### Preview / Cache Verification
 
@@ -143,6 +143,7 @@ Shared rules that survive the split:
 
 - exact row-scoped Fitness Supabase mutation approval
 - remote preview/unfurl verification approval
+- marker/read-model overhead can still slow operator routing even when the underlying receipts are already durable
 - local-data preprocessing now has a proof-backed full local no-send chain plus one durable bounded adoption set across three workflow classes, but still lacks broader workflow adoption breadth and any separately governed send-capable lane
 - critical continuity is already more externalized than before, but continuity manifests are still not universal and retrieval-first continuation still depends on manual operator discipline in some lanes
 - Full Stack Re-sync final closeout is complete; remaining pressure is no longer inside that lane

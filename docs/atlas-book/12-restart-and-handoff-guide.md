@@ -76,9 +76,11 @@ Before doing any substantial work:
 
 1. confirm the owner surface
 2. confirm whether the lane is docs-only, approval-gated, or open for mutation
-3. confirm the current marker posture
-4. confirm whether `_stack` owns the execution command
-5. confirm whether a newer receipt already resolved the question
+3. confirm whether the requested package is already durable
+4. confirm whether the work is a proof/inventory pass or a ratchet pass
+5. confirm the current marker posture from the active front-page marker set first
+6. confirm whether a newer receipt already resolved the question
+7. confirm whether `_stack` owns the execution command
 
 ## Where The Marker Table Lives
 
@@ -92,6 +94,15 @@ The surrounding lane posture also lives in:
 - [Current System Map / Graph](11-system-map-graph.md)
 
 If a new checkpoint changes markers, update the book-local marker table rather than leaving the latest truth stranded in chat.
+
+Marker-system hygiene rule:
+
+- read `Active Cluster Read` first
+- read `Active Front-Page Marker Table` second
+- use `Supporting Open Markers` only for lane-specific follow-up
+- use `Closed / Locked Ratchets` only for historical boundary or restart context
+
+Do not spend first-scan attention on closed ratchets when the question is about the next active lane.
 
 ## How To Choose The Next Lane
 
@@ -213,10 +224,9 @@ For approval-gated lanes, append the exact approval phrase or approval requireme
 
 Current best non-gated docs / control-plane ladder:
 
-- Local Data Gateway wrapper package 3 planning checkpoint
-- Discord OS Feedback Workflow fresh-submit live proof receipt
-- Durable Context Externalization continuity-manifest breadth-expansion pass 1
-- targeted book maintenance when a new durable receipt changes lane posture
+- Atlas-owned Repo Naming bounded rewrite-order and rollback planning pass 1
+- Local Data Gateway workflow adoption expansion pass 2
+- targeted marker/book maintenance only when it materially improves operator read speed or restart truth
 
 If reopening an approved gated lane:
 
@@ -235,6 +245,7 @@ At this checkpoint:
 - the ATLAS Book is the primary restart surface
 - `_stack` remains deploy authority
 - normal stack validation is green in the current working state
+- the marker system is now intentionally split into active front-page markers, supporting open markers, and closed/locked ratchets so restart scans can prioritize active steering signals first
 - continuity manifests, retrieval-surface taxonomy, and prompt-pack normalization are now durable enough that transcript recap should be treated as optional nuance rather than a restart substrate
 - seeded continuity manifests now exist for Durable Context Externalization, Local Data Gateway, Discord OS Feedback Workflow Canonicalization, Discord OS Infrastructure Separation, Branch & Worktree Normalization, and Full Stack Re-sync, Clean & Closeout under `docs/memory/initiatives/continuity-manifest-*.json`
 - seeded manifests must now also be checked for freshness; manifest presence alone is not enough to claim the lane is still fully manifest-backed
