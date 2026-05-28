@@ -63,10 +63,6 @@ Read:
 - Durable Context Externalization: `72%`
 - Discord OS Infrastructure Separation: `95%`
 - Discord OS Feedback Workflow Canonicalization: `72%`
-- Discord Workflow, Publication & Docs Reliability: `25%`
-- Playbook Everywhere + Cortex Interface: `20%`
-- AI Repetition-to-Automation Pipeline: `30%`
-- AI Long-Run Batch Orchestration: `20%`
 
 ## Supporting Open Markers
 
@@ -87,6 +83,10 @@ Read:
 - Unified Workflow Convergence: `70%`
 - Vision & Future Alignment: `25%`
 - Core Pattern Convergence: `40%`
+- Discord Workflow, Publication & Docs Reliability: `25%`
+- Playbook Everywhere + Cortex Interface: `20%`
+- AI Repetition-to-Automation Pipeline: `30%`
+- AI Long-Run Batch Orchestration: `20%`
 - Feedback Loop Readiness: `42%`
 - Sandbox Simulation Readiness: `0%`
 - Post-Convergence Lane Split Readiness: `60%`
@@ -124,7 +124,7 @@ That split is defined and partially operationalized by bootstrap and governance 
 
 ## Current Marker Read
 
-- the front-page marker read is now intentionally smaller so operator attention stays on active steering instruments rather than already-closed history
+- the front-page marker read is now capped to the smallest useful steering set so operator attention stays on the ten most decision-shaping live markers rather than broader open-marker drift
 - closed ratchets remain durable and visible, but no longer dominate the first scan
 - the continuity substrate is strong and real, but still not universal
 - the execution substrate is real at the no-send and governance level, but broader automation maturity is still early

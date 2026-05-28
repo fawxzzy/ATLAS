@@ -98,11 +98,11 @@ If a new checkpoint changes markers, update the book-local marker table rather t
 Marker-system hygiene rule:
 
 - read `Active Cluster Read` first
-- read `Active Front-Page Marker Table` second
+- read the capped `Active Front-Page Marker Table` second
 - use `Supporting Open Markers` only for lane-specific follow-up
 - use `Closed / Locked Ratchets` only for historical boundary or restart context
 
-Do not spend first-scan attention on closed ratchets when the question is about the next active lane.
+Do not spend first-scan attention on closed ratchets or lower-signal supporting markers when the question is about the next active lane.
 
 ## How To Choose The Next Lane
 

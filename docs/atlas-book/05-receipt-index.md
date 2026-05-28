@@ -15,6 +15,7 @@
 - [Core Pattern Doctrine Routing Pass 1](../ops/CORE-PATTERN-DOCTRINE-ROUTING-PASS-1-2026-05-24.md)
 - [Operator-Grade Governance Doctrine Ratification Review](../ops/OPERATOR-GRADE-GOVERNANCE-DOCTRINE-RATIFICATION-REVIEW-2026-05-27.md)
 - [Marker System Hygiene Pass 1](../ops/MARKER-SYSTEM-HYGIENE-PASS-1-2026-05-28.md)
+- [Marker System Hygiene Pass 2](../ops/MARKER-SYSTEM-HYGIENE-PASS-2-2026-05-28.md)
 - [Atlas-Owned Repo Naming Canonicalization](../ops/ATLAS-OWNED-REPO-NAMING-CANONICALIZATION-2026-05-27.md)
 - [Atlas-Owned Repo Naming Execution Gate Pass 1](../ops/ATLAS-OWNED-REPO-NAMING-EXECUTION-GATE-PASS-1-2026-05-27.md)
 - [Atlas-Owned Repo Naming Inventory And Dependency Map](../ops/ATLAS-OWNED-REPO-NAMING-INVENTORY-DEPENDENCY-MAP-2026-05-27.md)

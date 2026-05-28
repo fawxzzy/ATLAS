@@ -108,7 +108,7 @@ Shared rules that survive the split:
 
 - done means the book is good enough to restart the stack from docs, receipts, maps, and gates
 - should not become a stale brochure disconnected from current receipts
-- currently open at lower volume than before, but marker/read-model hygiene is now one of the few book-level changes that still creates real durable operator value
+- currently open at lower volume than before, but marker/read-model hygiene is now one of the few book-level changes that still creates real durable operator value, especially when it caps front-page marker space to the smallest useful steering set
 
 ### Preview / Cache Verification
 
@@ -143,7 +143,7 @@ Shared rules that survive the split:
 
 - exact row-scoped Fitness Supabase mutation approval
 - remote preview/unfurl verification approval
-- marker/read-model overhead can still slow operator routing even when the underlying receipts are already durable
+- marker/read-model overhead can still slow operator routing even when the underlying receipts are already durable, so front-page marker space must stay scarce
 - local-data preprocessing now has a proof-backed full local no-send chain plus one durable bounded adoption set across three workflow classes, but still lacks broader workflow adoption breadth and any separately governed send-capable lane
 - critical continuity is already more externalized than before, but continuity manifests are still not universal and retrieval-first continuation still depends on manual operator discipline in some lanes
 - Full Stack Re-sync final closeout is complete; remaining pressure is no longer inside that lane
