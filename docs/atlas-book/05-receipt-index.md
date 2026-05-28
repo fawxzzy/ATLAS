@@ -138,6 +138,7 @@
 - [Discord OS Feedback Workflow Broad Live-Proof Gap Inventory](../ops/DISCORD-OS-FEEDBACK-WORKFLOW-BROAD-LIVE-PROOF-GAP-INVENTORY-2026-05-27.md)
 - [Discord OS Feedback Workflow Edit-Flow Live Evidence Packet](../ops/DISCORD-OS-FEEDBACK-WORKFLOW-EDIT-FLOW-LIVE-EVIDENCE-PACKET-2026-05-27.md)
 - [Discord OS Feedback Workflow Audit-Comment Live Evidence Packet](../ops/DISCORD-OS-FEEDBACK-WORKFLOW-AUDIT-COMMENT-LIVE-EVIDENCE-PACKET-2026-05-27.md)
+- [Discord OS Feedback Workflow Completion-Review Live Evidence Packet](../ops/DISCORD-OS-FEEDBACK-WORKFLOW-COMPLETION-REVIEW-LIVE-EVIDENCE-PACKET-2026-05-27.md)
 
 ## Durable Context Externalization
 
