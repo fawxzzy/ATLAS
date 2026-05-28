@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-05-27T00:00:00Z",
-  "updated_at": "2026-05-28T16:17:39Z",
+  "updated_at": "2026-05-28T18:08:24Z",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -26,6 +26,10 @@
     "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-REFRESH-DISCIPLINE-PASS-1-2026-05-27.md",
     "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-REFRESH-PASS-1-2026-05-27.md",
     "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-BREADTH-EXPANSION-PASS-1-2026-05-27.md",
+    "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-BREADTH-EXPANSION-PASS-2-2026-05-28.md",
+    "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-BREADTH-EXPANSION-PASS-3-2026-05-28.md",
+    "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-REFRESH-PASS-2-2026-05-28.md",
+    "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-MARKER-RATCHET-CHECKPOINT-5-2026-05-28.md",
     "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-MARKER-RATCHET-CHECKPOINT-4-2026-05-27.md",
     "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-MARKER-RATCHET-CHECKPOINT-3-2026-05-27.md",
     "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-MARKER-RATCHET-CHECKPOINT-2-2026-05-27.md",
@@ -38,9 +42,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "durable-context-externalization",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-REFRESH-PASS-2-2026-05-28.md",
-    "checkpoint_commit": "d9adea5",
-    "checkpoint_summary": "The expanded six-manifest seeded set has now passed a second actual refresh cycle, so the lane still sits at 72 percent with freshness discipline proven across breadth expansion but not yet broad enough or time-tested enough for a higher ratchet.",
+    "current_checkpoint_receipt": "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-REFRESH-PASS-3-2026-05-28.md",
+    "checkpoint_commit": "58f00a6",
+    "checkpoint_summary": "The lane now sits at 74 percent with the full seven-manifest seeded set refreshed as one unit after breadth-expansion pass 3 held flat, proving broader manifest-backed continuity without widening coverage faster than freshness discipline.",
     "governing_receipts": [
       "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-2026-05-27.md",
       "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-MARKER-RATCHET-CHECKPOINT-2-2026-05-27.md",
@@ -50,7 +54,10 @@
       "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-REFRESH-DISCIPLINE-PASS-1-2026-05-27.md",
       "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-REFRESH-PASS-1-2026-05-27.md",
       "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-BREADTH-EXPANSION-PASS-1-2026-05-27.md",
+      "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-BREADTH-EXPANSION-PASS-2-2026-05-28.md",
       "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-REFRESH-PASS-2-2026-05-28.md",
+      "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-MARKER-RATCHET-CHECKPOINT-5-2026-05-28.md",
+      "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-BREADTH-EXPANSION-PASS-3-2026-05-28.md",
       "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-MARKER-RATCHET-CHECKPOINT-4-2026-05-27.md",
       "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-RETRIEVAL-SURFACE-INVENTORY-2026-05-27.md",
       "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-PROMPT-PACK-NORMALIZATION-2026-05-27.md"
@@ -99,19 +106,19 @@
     ],
     "next_package_ladder": [
       {
-        "package": "Durable Context Externalization marker ratchet checkpoint 5",
+        "package": "Durable Context Externalization marker ratchet checkpoint 6",
         "mode": "docs-only marker ratchet",
-        "reason": "recompute whether the second actual refresh pass across the expanded seeded set justifies another bounded marker move beyond 72 percent"
+        "reason": "recompute whether the 74 percent posture can move again now that the full seven-manifest seeded set has passed a full refresh cycle after breadth-expansion pass 3 held coverage flat"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-REFRESH-PASS-2-2026-05-28.md",
-    "freshness_checked_at": "2026-05-28T16:17:39Z",
-    "freshness_basis": "checkpoint, marker posture, blocked work, and next-package posture now match the current durable continuity lane state after breadth expansion and the second actual refresh cycle.",
+    "freshness_checked_receipt": "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-REFRESH-PASS-3-2026-05-28.md",
+    "freshness_checked_at": "2026-05-28T18:08:24Z",
+    "freshness_basis": "checkpoint, marker posture, blocked work, and next-package posture now match the current durable continuity lane state after marker ratchet checkpoint 5, breadth-expansion pass 3 holding flat, and a full seven-manifest refresh cycle.",
     "marker_posture": [
       {
         "marker": "Durable Context Externalization",
-        "percent": 72,
+        "percent": 74,
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ]
