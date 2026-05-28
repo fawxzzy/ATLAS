@@ -420,6 +420,7 @@ Not yet honest as blanket adoption targets:
 - Discord feedback evidence families without a dedicated evidence-packet schema
 - Atlas-owned repo naming execution/proof families without a rename-manifest and reconciliation schema
 - Atlas-owned repo naming execution/proof families remain below admission even after the rename-manifest contract checkpoint until one proof-backed no-send family path exists without gateway-specific rename logic
+- Atlas-owned repo naming families are now narrow `proof-admitted later` candidates because the rename-manifest contract is complete, but they remain below `adoptable now` until one bounded no-send proof path is shown without gateway-specific rename execution logic
 - destructive retained-surface disposal families without a delete-manifest contract
 
 Wrapper implementation-planning checkpoint now frozen at the docs layer:

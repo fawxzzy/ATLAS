@@ -244,6 +244,7 @@
 - [Local Data Gateway Marker Ratchet Checkpoint 9](../ops/LOCAL-DATA-GATEWAY-MARKER-RATCHET-CHECKPOINT-9-2026-05-27.md)
 - [Local Data Gateway Workflow Adoption Expansion Pass 2](../ops/LOCAL-DATA-GATEWAY-WORKFLOW-ADOPTION-EXPANSION-PASS-2-2026-05-28.md)
 - [Local Data Gateway Repo Naming Rename-Manifest Contract Checkpoint](../ops/LOCAL-DATA-GATEWAY-REPO-NAMING-RENAME-MANIFEST-CONTRACT-CHECKPOINT-2026-05-28.md)
+- [Local Data Gateway Repo Naming Rename-Manifest Proof-Admission Decision](../ops/LOCAL-DATA-GATEWAY-REPO-NAMING-RENAME-MANIFEST-PROOF-ADMISSION-DECISION-2026-05-28.md)
 
 ## Lane Split
 
