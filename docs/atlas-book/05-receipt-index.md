@@ -178,6 +178,7 @@
 - [Durable Context Externalization Continuity-Manifest Adoption Pass 1](../ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-ADOPTION-PASS-1-2026-05-27.md)
 - [Durable Context Externalization Continuity-Manifest Breadth-Expansion Pass 1](../ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-BREADTH-EXPANSION-PASS-1-2026-05-27.md)
 - [Durable Context Externalization Continuity-Manifest Breadth-Expansion Pass 2](../ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-BREADTH-EXPANSION-PASS-2-2026-05-28.md)
+- [Durable Context Externalization Continuity-Manifest Breadth-Expansion Pass 3](../ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-BREADTH-EXPANSION-PASS-3-2026-05-28.md)
 - [Durable Context Externalization Continuity-Manifest Refresh Pass 1](../ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-REFRESH-PASS-1-2026-05-27.md)
 - [Durable Context Externalization Continuity-Manifest Refresh Pass 2](../ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-REFRESH-PASS-2-2026-05-28.md)
 - [Durable Context Externalization Continuity-Manifest Refresh Discipline Pass 1](../ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-REFRESH-DISCIPLINE-PASS-1-2026-05-27.md)
