@@ -420,8 +420,8 @@ Not yet honest as blanket adoption targets:
 - Discord feedback evidence families without a dedicated evidence-packet schema
 - Atlas-owned repo naming execution/proof families without a rename-manifest and reconciliation schema
 - Atlas-owned repo naming execution/proof families remain below admission even after the rename-manifest contract checkpoint until one proof-backed no-send family path exists without gateway-specific rename logic
-- Atlas-owned repo naming families are now narrow `proof-admitted later` candidates because the rename-manifest contract is complete, but they remain below `adoptable now` until one bounded no-send proof path is shown without gateway-specific rename execution logic
-- Atlas-owned repo naming families now also have a frozen bounded proof shape for `blocked-before-rename` and `executed-and-reconciled` outcomes, but that still does not admit generic execution packaging or adopt-now status
+- Atlas-owned repo naming families are now narrow `real-workflow proof-admitted later` candidates because the rename-manifest contract is complete, the bounded proof shape is frozen, and one bounded blocked-workflow family path is now durable
+- Atlas-owned repo naming families still remain below `adoptable now` until the no-send chain proves reusable family carriage without gateway-specific rename execution logic
 - destructive retained-surface disposal families without a delete-manifest contract
 
 Wrapper implementation-planning checkpoint now frozen at the docs layer:
