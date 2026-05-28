@@ -124,6 +124,7 @@ That split is defined and partially operationalized by bootstrap and governance 
 
 ## Current Marker Read
 
+- active front-page rebaseline is now durably complete and held flat: the reduced front-page set is current, but the latest durable evidence did not justify any further active-value moves
 - the front-page marker read is now capped to the smallest useful steering set so operator attention stays on the ten most decision-shaping live markers rather than broader open-marker drift
 - closed ratchets remain durable and visible, but no longer dominate the first scan
 - the continuity substrate is strong and real, but still not universal
