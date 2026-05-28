@@ -187,6 +187,7 @@
 - [Local Data Gateway Wrapper Package 3 Planning Checkpoint](../ops/LOCAL-DATA-GATEWAY-WRAPPER-PACKAGE-3-PLANNING-CHECKPOINT-2026-05-27.md)
 - [Local Data Gateway Wrapper Package 4 Planning Checkpoint](../ops/LOCAL-DATA-GATEWAY-WRAPPER-PACKAGE-4-PLANNING-CHECKPOINT-2026-05-27.md)
 - [Local Data Gateway Wrapper Implementation Package 4](../ops/LOCAL-DATA-GATEWAY-WRAPPER-IMPLEMENTATION-PACKAGE-4-2026-05-27.md)
+- [Local Data Gateway Wrapper Package 4 Proof Pass](../ops/LOCAL-DATA-GATEWAY-WRAPPER-PACKAGE-4-PROOF-PASS-2026-05-27.md)
 - [Local Data Gateway Wrapper Implementation Package 3](../ops/LOCAL-DATA-GATEWAY-WRAPPER-IMPLEMENTATION-PACKAGE-3-2026-05-27.md)
 - [Local Data Gateway Wrapper Package 3 Proof Pass](../ops/LOCAL-DATA-GATEWAY-WRAPPER-PACKAGE-3-PROOF-PASS-2026-05-27.md)
 - [Local Data Gateway Marker Ratchet Checkpoint 5](../ops/LOCAL-DATA-GATEWAY-MARKER-RATCHET-CHECKPOINT-5-2026-05-27.md)
