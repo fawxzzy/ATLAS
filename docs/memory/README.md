@@ -116,6 +116,7 @@ Current seeded manifest set:
 - `docs/memory/initiatives/continuity-manifest-discord-os-infrastructure-separation.json`
 - `docs/memory/initiatives/continuity-manifest-branch-worktree-normalization.json`
 - `docs/memory/initiatives/continuity-manifest-full-stack-resync-clean-closeout.json`
+- `docs/memory/initiatives/continuity-manifest-atlas-owned-repo-naming-canonicalization.json`
 
 These seeded manifests are manifest-backed only while their freshness state remains current.
 

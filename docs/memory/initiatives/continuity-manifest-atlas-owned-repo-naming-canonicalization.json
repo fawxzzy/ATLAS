@@ -1,0 +1,133 @@
+{
+  "contract_version": "atlas.initiative.v1",
+  "id": "continuity-manifest-atlas-owned-repo-naming-canonicalization",
+  "title": "Continuity Manifest Atlas-Owned Repo Naming Canonicalization",
+  "summary": "Active ATLAS-root retrieval map for the Atlas-owned Repo Naming Canonicalization lane.",
+  "status": "active",
+  "owner": "stack-root",
+  "created_at": "2026-05-28T00:00:00Z",
+  "updated_at": "2026-05-28T00:00:00Z",
+  "related_plan_refs": [],
+  "related_decision_refs": [],
+  "related_hypothesis_refs": [],
+  "related_session_refs": [],
+  "related_attention_refs": [],
+  "proposed_next_session_refs": [],
+  "evidence_refs": [
+    "docs/atlas-book/02-lanes-and-markers.md",
+    "docs/atlas-book/05-receipt-index.md",
+    "docs/atlas-book/12-restart-and-handoff-guide.md",
+    "docs/ops/ATLAS-OWNED-REPO-NAMING-CANONICALIZATION-2026-05-27.md",
+    "docs/ops/ATLAS-OWNED-REPO-NAMING-EXECUTION-GATE-PASS-1-2026-05-27.md",
+    "docs/ops/ATLAS-OWNED-REPO-NAMING-INVENTORY-DEPENDENCY-MAP-2026-05-27.md",
+    "docs/ops/ATLAS-OWNED-REPO-NAMING-SAFE-FIRST-CANDIDATE-DECISION-2026-05-27.md",
+    "docs/ops/ATLAS-OWNED-REPO-NAMING-BOUNDED-REWRITE-ROLLBACK-PLAN-2026-05-28.md",
+    "docs/ops/ATLAS-OWNED-REPO-NAMING-SAFE-FIRST-EXECUTION-APPROVAL-2026-05-28.md",
+    "docs/ops/ATLAS-OWNED-REPO-NAMING-STREAM-WORKTREE-DEPENDENCY-CLEARANCE-PASS-1-2026-05-28.md",
+    "docs/ops/ATLAS-OWNED-REPO-NAMING-STREAM-LOCAL-RENAME-EXECUTION-PASS-2-2026-05-28.md",
+    "docs/ops/ATLAS-OWNED-REPO-NAMING-STREAM-RENAME-PROOF-RECONCILIATION-PASS-2-2026-05-28.md",
+    "docs/ops/ATLAS-OWNED-REPO-NAMING-MARKER-RATCHET-CHECKPOINT-5-2026-05-28.md",
+    "docs/ops/ATLAS-NEXT-BUILD-QUEUE.md",
+    "docs/registry/STACK-REPO-INVENTORY.json",
+    "docs/audits/STACK-REPO-INVENTORY.md",
+    "stack.yaml",
+    "stack.lock.yaml"
+  ],
+  "supersedes": [],
+  "superseded_by": [],
+  "metadata": {
+    "artifact_kind": "continuity_manifest",
+    "lane_id": "atlas-owned-repo-naming-canonicalization",
+    "scope_class": "atlas-root-governance",
+    "current_checkpoint_receipt": "docs/ops/ATLAS-OWNED-REPO-NAMING-MARKER-RATCHET-CHECKPOINT-5-2026-05-28.md",
+    "checkpoint_commit": "18dbbec",
+    "checkpoint_summary": "The lane sits at 70 percent with durable naming policy, a bounded rewrite and rollback plan, one approval-bounded stream packet, one cleared stale retained blocker, and a precise blocked execution/proof chain showing that only active linked-worktree dependency on 2b and 2c still blocks the first live rename.",
+    "governing_receipts": [
+      "docs/ops/ATLAS-OWNED-REPO-NAMING-CANONICALIZATION-2026-05-27.md",
+      "docs/ops/ATLAS-OWNED-REPO-NAMING-EXECUTION-GATE-PASS-1-2026-05-27.md",
+      "docs/ops/ATLAS-OWNED-REPO-NAMING-INVENTORY-DEPENDENCY-MAP-2026-05-27.md",
+      "docs/ops/ATLAS-OWNED-REPO-NAMING-SAFE-FIRST-CANDIDATE-DECISION-2026-05-27.md",
+      "docs/ops/ATLAS-OWNED-REPO-NAMING-MARKER-RATCHET-CHECKPOINT-2-2026-05-27.md",
+      "docs/ops/ATLAS-OWNED-REPO-NAMING-BOUNDED-REWRITE-ROLLBACK-PLAN-2026-05-28.md",
+      "docs/ops/ATLAS-OWNED-REPO-NAMING-SAFE-FIRST-EXECUTION-APPROVAL-2026-05-28.md",
+      "docs/ops/ATLAS-OWNED-REPO-NAMING-MARKER-RATCHET-CHECKPOINT-3-2026-05-28.md",
+      "docs/ops/ATLAS-OWNED-REPO-NAMING-STREAM-LOCAL-RENAME-EXECUTION-PASS-1-2026-05-28.md",
+      "docs/ops/ATLAS-OWNED-REPO-NAMING-STREAM-WORKTREE-DEPENDENCY-CLEARANCE-PASS-1-2026-05-28.md",
+      "docs/ops/ATLAS-OWNED-REPO-NAMING-STREAM-LOCAL-RENAME-EXECUTION-PASS-2-2026-05-28.md",
+      "docs/ops/ATLAS-OWNED-REPO-NAMING-STREAM-RENAME-PROOF-RECONCILIATION-PASS-2-2026-05-28.md",
+      "docs/ops/ATLAS-OWNED-REPO-NAMING-MARKER-RATCHET-CHECKPOINT-5-2026-05-28.md"
+    ],
+    "owner_truth_surfaces": [
+      {
+        "path": "stack.yaml",
+        "role": "canonical repo-registry path truth"
+      },
+      {
+        "path": "stack.lock.yaml",
+        "role": "current lock projection of repo paths"
+      },
+      {
+        "path": "docs/registry/STACK-REPO-INVENTORY.json",
+        "role": "current machine-readable repo inventory truth"
+      },
+      {
+        "path": "docs/audits/STACK-REPO-INVENTORY.md",
+        "role": "current published repo inventory truth"
+      }
+    ],
+    "verification_adoption_surfaces": [
+      {
+        "path": "docs/atlas-book/02-lanes-and-markers.md",
+        "role": "canonical marker posture and lane read"
+      },
+      {
+        "path": "docs/atlas-book/05-receipt-index.md",
+        "role": "receipt spine"
+      },
+      {
+        "path": "docs/atlas-book/12-restart-and-handoff-guide.md",
+        "role": "restart routing surface"
+      },
+      {
+        "path": "docs/ops/ATLAS-NEXT-BUILD-QUEUE.md",
+        "role": "current-truth queue surface for stream path checks"
+      }
+    ],
+    "blocked_or_gated_work": [
+      {
+        "item": "stream local rename execution",
+        "requirement": "blocked until active linked-worktree dependency on tmp/fawxzzy-stream-2b and tmp/fawxzzy-stream-2c is explicitly cleared or closed"
+      },
+      {
+        "item": "remote rename assumptions and GitHub-side rename assumptions",
+        "requirement": "prohibited in this local-only naming lane"
+      },
+      {
+        "item": "broader candidate execution beyond stream",
+        "requirement": "blocked until stream executes and proves cleanly, with additional candidate-specific blockers also still in force"
+      },
+      {
+        "item": "fawxzzy-fitness rename",
+        "requirement": "preserved exception; out of scope"
+      }
+    ],
+    "next_package_ladder": [
+      {
+        "package": "Atlas-owned Repo Naming stream worktree dependency closure decision pass 1",
+        "mode": "docs-only dependency governance pass",
+        "reason": "the remaining blockers are active worktrees with live changes, so the next honest move is explicit closure or preservation governance before any later rename retry"
+      }
+    ],
+    "freshness_state": "manifest-backed",
+    "freshness_checked_receipt": "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-BREADTH-EXPANSION-PASS-2-2026-05-28.md",
+    "freshness_checked_at": "2026-05-28T00:00:00Z",
+    "freshness_basis": "the checkpoint, marker posture, blocked work, and next-package posture match the current durable naming lane state at breadth-expansion time, and the lane now has a compact enough root-governed receipt chain for honest manifest-backed restart.",
+    "marker_posture": [
+      {
+        "marker": "Atlas-owned Repo Naming Canonicalization",
+        "percent": 70,
+        "source": "docs/atlas-book/02-lanes-and-markers.md"
+      }
+    ]
+  }
+}
