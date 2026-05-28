@@ -43,19 +43,19 @@ Read:
 
 ### Naming / ownership hygiene
 
-- `Atlas-owned Repo Naming Canonicalization: 70%`
+- `Atlas-owned Repo Naming Canonicalization: 74%`
 - `Dependency Untangling: 70%`
 
 Read:
 
 - naming policy and dependency mapping are durable
 - bounded rewrite and rollback order are now frozen for the later-candidate set
-- one exact bounded first packet is approval-bounded and has now been attempted, but execution is still blocked by linked-worktree dependency on the current path
+- one exact bounded first packet has now executed and been durably proven at the canonical-path layer
 
 ## Active Front-Page Marker Table
 
 - `_stack` Readiness: `60%`
-- Atlas-owned Repo Naming Canonicalization: `70%`
+- Atlas-owned Repo Naming Canonicalization: `74%`
 - Local Data Gateway: `65%`
 - Dependency Untangling: `70%`
 - Truth Map & ATLAS Book: `85%`
@@ -135,5 +135,5 @@ That split is defined and partially operationalized by bootstrap and governance 
 - Local Data Gateway now stays at `65%`: the lane already had a durable packet contract, exemplar proof chain, no-send helper boundary, local validator/emitter/review/proof helpers, and thin wrapper packages 1 through 4 with a proven `full-local-chain`, plus a durable adoption inventory and adoption proof for Supabase export / approval-prep packets, Vercel dependency / deletion decision packets, and DiscordOS trust-boundary / provenance proof packets; repo naming has now advanced into a sharper `proof-admitted later` middle class with a frozen bounded proof shape, but that does not yet widen the proven `adoptable now` set or justify a further marker move
 - Discord feedback workflow canonicalization now sits at `72%`: the live Fitness-hosted workflow is still the runtime truth, and the lane now has a dedicated canonical contract package, a first separation boundary, live-proof criteria, a no-regression extraction checklist, a deploy-backed evidence inventory, bounded edit/audit/completion-review/success-reaction/release-boundary evidence packets, a no-regression live parity-gap packet, and an explicit fresh-submit positive-proof recheck; it still stays flat because the newest work improved proof discipline and overclaim resistance, not the missing positive fresh-submit live proof, any broad live parity class, or any broader extraction/runtime-owner evidence
 - Durable Context Externalization now sits at `74%`: the lane now has a full seven-manifest seeded set refreshed as one unit, including Atlas-owned Repo Naming Canonicalization as the newest manifest-backed lane, and breadth expansion has already proven it can hold flat until freshness catches up; it still stays below `75%` because continuity coverage is still partial, refresh discipline is still short-horizon, and some restart paths still depend on manual operator stitching
-- Atlas-owned Repo Naming Canonicalization now sits at `70%`: the lane now has durable naming policy, a durable internal target set, an explicit `fawxzzy-fitness` exception, durable execution-gate doctrine, a durable dependency map, a bounded rewrite/rollback plan, one narrow safe-first execution approval for `repos/fawxzzy-stream -> repos/stream`, historical blocked execution/proof evidence, and a refreshed blocker-class read showing that both `2b` and `2c` are now consumed with zero live linked-worktree blockers remaining in the previously frozen blocker set; it still stays below `75%` because no rename has executed successfully, the canonical path has not changed, remote-name assumptions remain blocked, and the next honest move is bounded rename execution retry rather than more blocker interpretation
+- Atlas-owned Repo Naming Canonicalization now sits at `74%`: the lane now has durable naming policy, a durable internal target set, an explicit `fawxzzy-fitness` exception, durable execution-gate doctrine, a durable dependency map, a bounded rewrite/rollback plan, one narrow safe-first execution approval for `repos/fawxzzy-stream -> repos/stream`, one exact local rename execution receipt, and one exact positive proof/reconciliation receipt showing that `repos/stream` is now the canonical internal local path; it still stays below `75%` because only one bounded candidate has executed, broader second-candidate reuse is not yet proven, remote-name assumptions remain blocked, and `foundation`, `trove`, `mazer`, `lifeline`, and `playbook` all remain blocked or unadmitted for later separate packets
 - DiscordOS separation stayed high-confidence but intentionally below runtime migration
