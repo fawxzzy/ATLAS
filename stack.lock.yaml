@@ -170,13 +170,13 @@ excluded_surfaces:
     reason: "Fitness recovered checkout remains a non-canonical recovery lane outside the governed child-repo release surface."
   lifeline_operator_evidence_worktree:
     path: "repos/fawxzzy-lifeline-operator-evidence"
-    present: true
+    present: false
     trust_class: "trusted"
     release_eligible: false
     reason: "Lifeline operator evidence is a branch worktree of the registered lifeline repo and remains a temporary non-canonical evidence lane outside the governed repo surface."
   playbook_codex_adjacent_checkout:
     path: "repos/fawxzzy-playbook-codex"
-    present: true
+    present: false
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local Playbook Codex checkout remains an adjacent non-canonical helper surface outside the governed stack member set."
@@ -188,19 +188,19 @@ excluded_surfaces:
     reason: "Legacy bundle and patch backup drop remains visible for recovery provenance but is not a source repo surface and should converge on packages/bundles and packages/patches."
   trove_release_cutover_worktree:
     path: "repos/fawxzzy-trove-release-cutover"
-    present: true
+    present: false
     trust_class: "trusted"
     release_eligible: false
     reason: "Trove release cutover is a branch worktree of the registered trove repo and remains a temporary non-canonical cutover lane outside the governed repo surface."
   verta_core_archive:
     path: "repos/Verta-Core.zip"
-    present: true
+    present: false
     trust_class: "untrusted"
     release_eligible: false
     reason: "Token-bearing Verta archive remains quarantined private evidence and must stay out of release sets."
   verta_core_checkout:
     path: "repos/Verta-Core"
-    present: true
+    present: false
     trust_class: "untrusted"
     release_eligible: false
     reason: "Token-bearing Verta checkout remains quarantined and untrusted until scrub and rotation are complete."
@@ -216,4 +216,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:d3387095f3fe58bf487051cd44b851fe6da687b47052fafd390b6bdd653f6458"
+lock_digest: "sha256:e6a963824cbde48098b4ddfc38fb64ec4e145310ee3f5841edfac43aabe73fd6"

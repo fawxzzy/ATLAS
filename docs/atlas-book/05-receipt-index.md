@@ -92,6 +92,7 @@
 - [Lifeline Merged Checkpoint Disposal](../ops/LIFELINE-MERGED-CHECKPOINT-DISPOSAL-2026-05-27.md)
 - [Lifeline Retained Surface Governance Checkpoint](../ops/LIFELINE-RETAINED-SURFACE-GOVERNANCE-CHECKPOINT-2026-05-27.md)
 - [Playbook Stash And Manual-Review Retained-Surface Decision](../ops/PLAYBOOK-STASH-MANUAL-REVIEW-RETAINED-SURFACE-DECISION-2026-05-27.md)
+- [Retained Surface Manual Disposal Pass](../ops/RETAINED-SURFACE-MANUAL-DISPOSAL-PASS-2026-05-27.md)
 - [Playbook / Lifeline External Smoke Disposal Decision](../ops/PLAYBOOK-LIFELINE-EXTERNAL-SMOKE-DISPOSAL-DECISION-2026-05-26.md)
 - [Playbook / Lifeline Retained-Surface Disposal Execution Pass 2](../ops/PLAYBOOK-LIFELINE-RETAINED-SURFACE-DISPOSAL-EXECUTION-PASS-2-2026-05-26.md)
 - [Playbook External Smoke Export/Archive And Smoke-Home Manual-Review Decision](../ops/PLAYBOOK-EXTERNAL-SMOKE-EXPORT-ARCHIVE-AND-SMOKE-HOME-MANUAL-REVIEW-DECISION-2026-05-26.md)

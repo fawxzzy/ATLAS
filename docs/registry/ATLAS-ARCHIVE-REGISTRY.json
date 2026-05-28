@@ -79,9 +79,9 @@
     {
       "surface_id": "verta_core_archive",
       "path": "repos/Verta-Core.zip",
-      "present": true,
+      "present": false,
       "surface_kind": "quarantined_archive",
-      "verification_state": "direct_current_surface",
+      "verification_state": "reference_only_manifest_surface",
       "trust_class": "untrusted",
       "release_eligible": false,
       "owner_scope": "quarantined_adjacent_surface",
@@ -89,6 +89,7 @@
       "canonical_destination": null,
       "recommended_action": "keep_quarantined_metadata_only",
       "notes": [
+        "The current local ATLAS checkout no longer contains this zip file.",
         "This surface remains protected by the standing Verta trust gate.",
         "Derivative doctrine may be promoted only after rewrite into owner-repo truth with explicit provenance."
       ]
