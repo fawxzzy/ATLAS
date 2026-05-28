@@ -204,9 +204,6 @@ Current admitted wrapper-stage modes:
 - `emit-dry-run`
 - `review-only`
 - `proof-only`
-
-Next smallest planned wrapper composition:
-
 - `full-local-chain`
 
 Still never admitted:
