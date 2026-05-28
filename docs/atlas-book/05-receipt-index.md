@@ -130,6 +130,7 @@
 - [Discord OS Feedback Workflow Marker Ratchet Checkpoint 2](../ops/DISCORD-OS-FEEDBACK-WORKFLOW-MARKER-RATCHET-CHECKPOINT-2-2026-05-27.md)
 - [Discord OS Feedback Workflow Marker Ratchet Checkpoint 3](../ops/DISCORD-OS-FEEDBACK-WORKFLOW-MARKER-RATCHET-CHECKPOINT-3-2026-05-27.md)
 - [Discord OS Feedback Workflow Marker Ratchet Checkpoint 4](../ops/DISCORD-OS-FEEDBACK-WORKFLOW-MARKER-RATCHET-CHECKPOINT-4-2026-05-27.md)
+- [Discord OS Feedback Workflow Marker Ratchet Checkpoint 5](../ops/DISCORD-OS-FEEDBACK-WORKFLOW-MARKER-RATCHET-CHECKPOINT-5-2026-05-27.md)
 - [Discord OS Feedback Workflow Deploy-Backed Evidence Inventory](../ops/DISCORD-OS-FEEDBACK-WORKFLOW-DEPLOY-BACKED-EVIDENCE-INVENTORY-2026-05-27.md)
 - [Discord OS Feedback Workflow Fresh-Intake Live Evidence Packet](../ops/DISCORD-OS-FEEDBACK-WORKFLOW-FRESH-INTAKE-LIVE-EVIDENCE-PACKET-2026-05-27.md)
 - [Discord OS Feedback Workflow Fresh-Submit Row-Thread Linkage Proof Packet](../ops/DISCORD-OS-FEEDBACK-WORKFLOW-FRESH-SUBMIT-ROW-THREAD-LINKAGE-PROOF-PACKET-2026-05-27.md)
