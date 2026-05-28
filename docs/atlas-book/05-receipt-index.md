@@ -224,6 +224,7 @@
 - [Local Data Gateway Workflow Adoption Inventory Pass 1](../ops/LOCAL-DATA-GATEWAY-WORKFLOW-ADOPTION-INVENTORY-PASS-1-2026-05-27.md)
 - [Local Data Gateway Workflow Adoption Proof Pass 1](../ops/LOCAL-DATA-GATEWAY-WORKFLOW-ADOPTION-PROOF-PASS-1-2026-05-27.md)
 - [Local Data Gateway Marker Ratchet Checkpoint 9](../ops/LOCAL-DATA-GATEWAY-MARKER-RATCHET-CHECKPOINT-9-2026-05-27.md)
+- [Local Data Gateway Workflow Adoption Expansion Pass 2](../ops/LOCAL-DATA-GATEWAY-WORKFLOW-ADOPTION-EXPANSION-PASS-2-2026-05-28.md)
 
 ## Lane Split
 
