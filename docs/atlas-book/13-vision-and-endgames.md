@@ -100,9 +100,9 @@ Shared rules that survive the split:
 
 - done means raw data is local-by-default and remote systems receive minimum useful governed packets instead of raw dumps
 - should not become a license to export more data simply because a packet exists
-- currently open at proof-backed full local lifecycle stage plus proven bounded adoption: the lane has thin wrapper packages 1 through 4, a proven `full-local-chain` no-send composition across the same three admitted workflow classes, and a durable adoption inventory/proof showing that those exact classes are honestly adoptable now without send behavior
+- currently open at proof-backed full local lifecycle stage plus proven bounded adoption: the lane has thin wrapper packages 1 through 4, a proven `full-local-chain` no-send composition across the same three admitted workflow classes, a durable adoption inventory/proof showing that those exact classes are honestly adoptable now without send behavior, and one repo-naming family that is now `proof-admitted later` with a frozen bounded proof shape but still below adopt-now graduation
 - next valid package:
-  - Local Data Gateway workflow adoption expansion pass 2
+  - Local Data Gateway repo naming proof-family real-workflow proof decision
 
 ### ATLAS Book / Publishing
 

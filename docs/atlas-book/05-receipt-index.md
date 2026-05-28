@@ -246,6 +246,7 @@
 - [Local Data Gateway Repo Naming Rename-Manifest Contract Checkpoint](../ops/LOCAL-DATA-GATEWAY-REPO-NAMING-RENAME-MANIFEST-CONTRACT-CHECKPOINT-2026-05-28.md)
 - [Local Data Gateway Repo Naming Rename-Manifest Proof-Admission Decision](../ops/LOCAL-DATA-GATEWAY-REPO-NAMING-RENAME-MANIFEST-PROOF-ADMISSION-DECISION-2026-05-28.md)
 - [Local Data Gateway Repo Naming Bounded Proof-Shape Review](../ops/LOCAL-DATA-GATEWAY-REPO-NAMING-BOUNDED-PROOF-SHAPE-REVIEW-2026-05-28.md)
+- [Local Data Gateway Marker Ratchet Checkpoint 10](../ops/LOCAL-DATA-GATEWAY-MARKER-RATCHET-CHECKPOINT-10-2026-05-28.md)
 
 ## Lane Split
 
