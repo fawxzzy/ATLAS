@@ -15,6 +15,7 @@
 - [Core Pattern Doctrine Routing Pass 1](../ops/CORE-PATTERN-DOCTRINE-ROUTING-PASS-1-2026-05-24.md)
 - [Operator-Grade Governance Doctrine Ratification Review](../ops/OPERATOR-GRADE-GOVERNANCE-DOCTRINE-RATIFICATION-REVIEW-2026-05-27.md)
 - [Atlas-Owned Repo Naming Canonicalization](../ops/ATLAS-OWNED-REPO-NAMING-CANONICALIZATION-2026-05-27.md)
+- [Atlas-Owned Repo Naming Execution Gate Pass 1](../ops/ATLAS-OWNED-REPO-NAMING-EXECUTION-GATE-PASS-1-2026-05-27.md)
 
 ## Fitness Supabase Hygiene
 
