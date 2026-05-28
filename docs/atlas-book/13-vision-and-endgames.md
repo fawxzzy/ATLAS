@@ -53,7 +53,7 @@ Shared rules that survive the split:
 - should not become a product-runtime owner
 - currently open for docs and governance work, including read-model hygiene when the operator control-plane becomes slower than the underlying durable state
 - next valid package:
-  - Atlas-owned Repo Naming stream execution-packet preflight pass 1, or other governance/book work only when it creates real durable value
+  - Atlas-owned Repo Naming stream blocker disposition ratchet pass, or other governance/book work only when it creates real durable value
 
 ## Key Endgames By Theme
 
@@ -92,9 +92,9 @@ Shared rules that survive the split:
 
 - done means major stack work is resumable and reconstructable from ATLAS plus owner-repo artifacts rather than dependent on prior model or chat continuity
 - should not duplicate owner-repo source truth into ATLAS by convenience
-- currently open because the durable substrate is already strong, the continuity-manifest set has now broadened to six lanes, and refresh discipline has now been applied again across that expanded set to keep restart routing on fresh manifest-backed retrieval maps, but retrieval-first use is still partly manual and not yet universal across all major lanes
+- currently open because the durable substrate is already strong, the continuity-manifest set has now broadened to seven lanes, and the full seeded set has now passed a refresh cycle after the newest naming-lane manifest was added, but retrieval-first use is still partly manual and not yet universal across all major lanes
 - next valid package:
-  - Durable Context Externalization continuity-manifest breadth-expansion pass 2
+  - Durable Context Externalization continuity-manifest breadth-expansion pass 4 only after another lane becomes honestly seedable without outrunning refresh discipline
 
 ### Local Data Gateway
 
