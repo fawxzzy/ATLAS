@@ -134,6 +134,7 @@
 - [Discord OS Feedback Workflow Fresh-Submit Live Row-Thread Evidence Capture](../ops/DISCORD-OS-FEEDBACK-WORKFLOW-FRESH-SUBMIT-LIVE-ROW-THREAD-EVIDENCE-CAPTURE-2026-05-27.md)
 - [Discord OS Feedback Workflow Fresh-Submit Live Proof Receipt](../ops/DISCORD-OS-FEEDBACK-WORKFLOW-FRESH-SUBMIT-LIVE-PROOF-RECEIPT-2026-05-27.md)
 - [Discord OS Feedback Workflow Broad Live-Proof Gap Inventory](../ops/DISCORD-OS-FEEDBACK-WORKFLOW-BROAD-LIVE-PROOF-GAP-INVENTORY-2026-05-27.md)
+- [Discord OS Feedback Workflow Edit-Flow Live Evidence Packet](../ops/DISCORD-OS-FEEDBACK-WORKFLOW-EDIT-FLOW-LIVE-EVIDENCE-PACKET-2026-05-27.md)
 
 ## Durable Context Externalization
 
