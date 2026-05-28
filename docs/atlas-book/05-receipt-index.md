@@ -35,6 +35,7 @@
 - [Atlas-Owned Repo Naming Stream Worktree Blocker Resolution Assessment](../ops/ATLAS-OWNED-REPO-NAMING-STREAM-WORKTREE-BLOCKER-RESOLUTION-ASSESSMENT-2026-05-28.md)
 - [Atlas-Owned Repo Naming Stream Blocker Disposition Ratchet](../ops/ATLAS-OWNED-REPO-NAMING-STREAM-BLOCKER-DISPOSITION-RATCHET-2026-05-28.md)
 - [Atlas-Owned Repo Naming Stream Blocker Class Recheck](../ops/ATLAS-OWNED-REPO-NAMING-STREAM-BLOCKER-CLASS-RECHECK-2026-05-28.md)
+- [Atlas-Owned Repo Naming Stream Blocker Class Recheck Pass 2](../ops/ATLAS-OWNED-REPO-NAMING-STREAM-BLOCKER-CLASS-RECHECK-PASS-2-2026-05-28.md)
 - [Atlas-Owned Repo Naming Stream Local Rename Execution Pass 2](../ops/ATLAS-OWNED-REPO-NAMING-STREAM-LOCAL-RENAME-EXECUTION-PASS-2-2026-05-28.md)
 - [Atlas-Owned Repo Naming Stream Local Rename Execution Pass 3](../ops/ATLAS-OWNED-REPO-NAMING-STREAM-LOCAL-RENAME-EXECUTION-PASS-3-2026-05-28.md)
 - [Atlas-Owned Repo Naming Stream Rename Proof And Reconciliation Pass 2](../ops/ATLAS-OWNED-REPO-NAMING-STREAM-RENAME-PROOF-RECONCILIATION-PASS-2-2026-05-28.md)

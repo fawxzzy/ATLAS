@@ -271,7 +271,7 @@ For approval-gated lanes, append the exact approval phrase or approval requireme
 
 Current best non-gated docs / control-plane ladder:
 
-- owner-side `fawxzzy-stream` blocker resolution work on `tmp/fawxzzy-stream-2c`; `2b` is already consumed, so do not retry the ATLAS-root rename lane until `2c` changes class
+- `Atlas-owned Repo Naming stream local rename execution pass 4`, because the previously frozen linked-worktree blocker set is now cleared and the lane can reopen bounded execution on current facts
 - Durable Context Externalization continuity-manifest breadth-expansion pass 4 only after another lane becomes honestly seedable
 - targeted marker/book maintenance only when it materially improves operator read speed or restart truth
 
@@ -297,7 +297,7 @@ At this checkpoint:
 - seeded continuity manifests now exist for Durable Context Externalization, Local Data Gateway, Discord OS Feedback Workflow Canonicalization, Discord OS Infrastructure Separation, Branch & Worktree Normalization, Full Stack Re-sync, Clean & Closeout, and Atlas-owned Repo Naming Canonicalization under `docs/memory/initiatives/continuity-manifest-*.json`
 - the full seven-manifest seeded set has now passed a full refresh cycle after Atlas-owned Repo Naming Canonicalization was added conservatively as the newest manifest-backed root-governed lane
 - Durable Context Externalization now holds at `74%` after that seven-manifest refresh cycle because restart routing is broader and fresher, but still not broad or self-maintaining enough to cross the next threshold
-- Atlas-owned Repo Naming Canonicalization now holds at `70%` with one exact safe-first packet still blocked only by the intentionally preserved active linked worktree `2c`; `2b` is already merged and cleared, so owner-side `2c` completion or preservation work is now the real unblocker rather than another ATLAS-root rename retry
+- Atlas-owned Repo Naming Canonicalization now holds at `70%` with the previously frozen linked-worktree blocker set fully cleared: `2b` and `2c` are both consumed, no live linked-worktree blocker remains in that class, and the next honest move is `stream` local rename execution pass 4 rather than more owner-side blocker work
 - seeded manifests must still be checked for freshness; manifest presence alone is not enough to claim the lane is still fully manifest-backed
 - ATLAS root self-lock sequencing has been resolved; preview/unfurl remains approval-gated, the Playbook external `.codex/worktrees/*` stranded-directory subset and the behind-only Playbook smoke branch class are now consumed, no Playbook-only retained-surface execution subset is currently open, the Lifeline stale-merged-checkpoint trio is now consumed, the remaining retained-surface pressure is governed-retain only, `Branch & Worktree Normalization` is now closed at `100%`, `Full Stack Re-sync, Clean & Closeout` is now closed at `100%`, and the DiscordOS lookup-local boundary chain is fully ratcheted shut with both transport-aware and externally-executing openings blocked until higher-level authorization reopens them
 
