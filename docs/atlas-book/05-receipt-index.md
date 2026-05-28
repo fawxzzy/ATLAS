@@ -28,6 +28,7 @@
 - [Atlas-Owned Repo Naming Stream Local Rename Execution Pass 1](../ops/ATLAS-OWNED-REPO-NAMING-STREAM-LOCAL-RENAME-EXECUTION-PASS-1-2026-05-28.md)
 - [Atlas-Owned Repo Naming Marker Ratchet Checkpoint 3](../ops/ATLAS-OWNED-REPO-NAMING-MARKER-RATCHET-CHECKPOINT-3-2026-05-28.md)
 - [Atlas-Owned Repo Naming Stream Rename Proof And Reconciliation](../ops/ATLAS-OWNED-REPO-NAMING-STREAM-RENAME-PROOF-RECONCILIATION-2026-05-28.md)
+- [Atlas-Owned Repo Naming Stream Worktree Dependency Clearance Pass 1](../ops/ATLAS-OWNED-REPO-NAMING-STREAM-WORKTREE-DEPENDENCY-CLEARANCE-PASS-1-2026-05-28.md)
 - [Atlas-Owned Repo Naming Marker Ratchet Checkpoint 4](../ops/ATLAS-OWNED-REPO-NAMING-MARKER-RATCHET-CHECKPOINT-4-2026-05-28.md)
 
 ## Fitness Supabase Hygiene
