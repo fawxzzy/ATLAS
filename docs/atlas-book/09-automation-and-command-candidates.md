@@ -406,6 +406,19 @@ Current landed wrapper layer:
 - package 2 keeps the wrapper thin over the existing review primitive and still rejects transport-shaped and send-capable flags at the wrapper entrypoint
 - package 3 keeps the wrapper thin over the existing proof-packager primitive and still rejects transport-shaped and send-capable flags at the wrapper entrypoint
 - package 3 proof now confirms `proof-only` across the same three admitted workflow classes already used by the helper family
+- package 4 proof now confirms `full-local-chain` across the same three admitted workflow classes already used by the helper family
+
+Current adoptable-now workflow classes for the no-send chain:
+
+- Supabase export / approval-prep packet workflows
+- Vercel dependency / deletion decision workflows
+- DiscordOS trust-boundary / provenance proof workflows
+
+Not yet honest as blanket adoption targets:
+
+- docs-native marker or doctrine receipts
+- Discord feedback evidence families without a dedicated evidence-packet schema
+- destructive retained-surface disposal families without a delete-manifest contract
 
 Wrapper implementation-planning checkpoint now frozen at the docs layer:
 
