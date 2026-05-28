@@ -3,8 +3,8 @@
   "stack_manifest_ref": "stack.yaml",
   "stack_manifest_digest": "sha256:2d91d52cebe53e508848efba6323e7ceed96e49b5bf2b6ff90df12c26f5af6d2",
   "stack_lock_ref": "stack.lock.yaml",
-  "stack_lock_digest": "sha256:207fd06193c1f6300fede5ef32969607e86a86dd9082b3cef242f862fc34c21f",
-  "working_memory_digest": "sha256:3402601264084c023f12833514f81b4c8683b3cbc2700af3d4078a1926ab5305",
+  "stack_lock_digest": "sha256:e6a963824cbde48098b4ddfc38fb64ec4e145310ee3f5841edfac43aabe73fd6",
+  "working_memory_digest": "sha256:35339035b339f45faf21b4ad222621d091de56411a1a2f4ecbcc99d031eaa442",
   "published_refs": {
     "json": "docs/registry/STACK-REPO-INVENTORY.json",
     "markdown": "docs/audits/STACK-REPO-INVENTORY.md"
@@ -19,8 +19,8 @@
       "role": "workflow-operator",
       "status": "active",
       "remote_url": null,
-      "pinned_commit": "b3f6159ec1688c787f5c351dc05c013f5882a5c4",
-      "current_commit": "b3f6159ec1688c787f5c351dc05c013f5882a5c4",
+      "pinned_commit": "ae95be3f733736f51afe12fd539ebba81fadee45",
+      "current_commit": "ae95be3f733736f51afe12fd539ebba81fadee45",
       "pinned_ref_type": "branch",
       "pinned_ref": "main",
       "current_ref_type": "branch",
@@ -31,8 +31,17 @@
       "release_eligible": false,
       "exists": true,
       "is_git_root": true,
-      "related_initiatives": [],
-      "related_initiative_refs": []
+      "related_initiatives": [
+        {
+          "initiative_ref": "initiative:continuity-manifest-local-data-gateway",
+          "title": "Continuity Manifest Local Data Gateway",
+          "path": "docs/memory/initiatives/continuity-manifest-local-data-gateway.json",
+          "status": "active"
+        }
+      ],
+      "related_initiative_refs": [
+        "initiative:continuity-manifest-local-data-gateway"
+      ]
     },
     {
       "logical_id": "discordos",
@@ -52,8 +61,24 @@
       "release_eligible": false,
       "exists": true,
       "is_git_root": true,
-      "related_initiatives": [],
-      "related_initiative_refs": []
+      "related_initiatives": [
+        {
+          "initiative_ref": "initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization",
+          "title": "Continuity Manifest Discord OS Feedback Workflow Canonicalization",
+          "path": "docs/memory/initiatives/continuity-manifest-discord-os-feedback-workflow-canonicalization.json",
+          "status": "active"
+        },
+        {
+          "initiative_ref": "initiative:continuity-manifest-discord-os-infrastructure-separation",
+          "title": "Continuity Manifest Discord OS Infrastructure Separation",
+          "path": "docs/memory/initiatives/continuity-manifest-discord-os-infrastructure-separation.json",
+          "status": "active"
+        }
+      ],
+      "related_initiative_refs": [
+        "initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization",
+        "initiative:continuity-manifest-discord-os-infrastructure-separation"
+      ]
     },
     {
       "logical_id": "fitness",
@@ -73,8 +98,24 @@
       "release_eligible": false,
       "exists": true,
       "is_git_root": true,
-      "related_initiatives": [],
-      "related_initiative_refs": []
+      "related_initiatives": [
+        {
+          "initiative_ref": "initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization",
+          "title": "Continuity Manifest Discord OS Feedback Workflow Canonicalization",
+          "path": "docs/memory/initiatives/continuity-manifest-discord-os-feedback-workflow-canonicalization.json",
+          "status": "active"
+        },
+        {
+          "initiative_ref": "initiative:continuity-manifest-discord-os-infrastructure-separation",
+          "title": "Continuity Manifest Discord OS Infrastructure Separation",
+          "path": "docs/memory/initiatives/continuity-manifest-discord-os-infrastructure-separation.json",
+          "status": "active"
+        }
+      ],
+      "related_initiative_refs": [
+        "initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization",
+        "initiative:continuity-manifest-discord-os-infrastructure-separation"
+      ]
     },
     {
       "logical_id": "foundation",
@@ -218,7 +259,7 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "0901eb17edb31dcd983db20aec3b12051ae8501c",
+      "current_commit": "25a42163ff976c8112aa64170ad2bcefa40b5059",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
@@ -361,7 +402,7 @@
     {
       "surface_id": "lifeline_operator_evidence_worktree",
       "local_path": "repos/fawxzzy-lifeline-operator-evidence",
-      "present": true,
+      "present": false,
       "trust_class": "trusted",
       "release_eligible": false,
       "reason": "Lifeline operator evidence is a branch worktree of the registered lifeline repo and remains a temporary non-canonical evidence lane outside the governed repo surface.",
@@ -370,7 +411,7 @@
     {
       "surface_id": "playbook_codex_adjacent_checkout",
       "local_path": "repos/fawxzzy-playbook-codex",
-      "present": true,
+      "present": false,
       "trust_class": "adjacent",
       "release_eligible": false,
       "reason": "Local Playbook Codex checkout remains an adjacent non-canonical helper surface outside the governed stack member set.",
@@ -388,7 +429,7 @@
     {
       "surface_id": "trove_release_cutover_worktree",
       "local_path": "repos/fawxzzy-trove-release-cutover",
-      "present": true,
+      "present": false,
       "trust_class": "trusted",
       "release_eligible": false,
       "reason": "Trove release cutover is a branch worktree of the registered trove repo and remains a temporary non-canonical cutover lane outside the governed repo surface.",
@@ -397,7 +438,7 @@
     {
       "surface_id": "verta_core_archive",
       "local_path": "repos/Verta-Core.zip",
-      "present": true,
+      "present": false,
       "trust_class": "untrusted",
       "release_eligible": false,
       "reason": "Token-bearing Verta archive remains quarantined private evidence and must stay out of release sets.",
@@ -406,7 +447,7 @@
     {
       "surface_id": "verta_core_checkout",
       "local_path": "repos/Verta-Core",
-      "present": true,
+      "present": false,
       "trust_class": "untrusted",
       "release_eligible": false,
       "reason": "Token-bearing Verta checkout remains quarantined and untrusted until scrub and rotation are complete.",
@@ -431,5 +472,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:a330697afe521e68269ea8e8d0f82257b5c1f54b2a355273472d3354d933a95a"
+  "content_digest": "sha256:8c5d89a464bb3a77ec82828e5ef0b697c8afeb532bfc47df464d4b919a3b345e"
 }
