@@ -161,6 +161,7 @@ Current reopen note:
 - Local Data Gateway workflow adoption expansion work is valid here only when it re-evaluates adjacent packet families conservatively, keeps docs-native reconciliation receipts out of scope, and does not graduate a new class without a family-specific packet or manifest contract
 - Local Data Gateway repo-naming contract work is valid here only when it freezes rename candidate identity, rewrite-surface inventory, rollback order, no-send attestation, and proof/reconciliation expectations without implying admission, implementation, or rename execution
 - Local Data Gateway repo-naming proof-admission work is valid here only when it admits a bounded local-only proof class for the rename-manifest family, keeps blocked execution as an honest proof outcome, and still stops short of implementation, send behavior, or adopt-now graduation
+- Local Data Gateway repo-naming bounded proof-shape review is valid here only when it freezes minimum manifest fields, blocked-before-rename proof, executed-and-reconciled proof, no-send attestation, and proof-output expectations without implying implementation, send behavior, or adopt-now graduation
 
 ## Shared Handoff Rules
 
