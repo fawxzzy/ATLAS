@@ -159,6 +159,7 @@ Current reopen note:
 - Local Data Gateway wrapper package-4 planning work is valid here only when it selects `full-local-chain` as the next wrapper slice, composes only the already-proven local primitives in order, and preserves the rule that full-local orchestration still stops at proof packaging with no send, handoff, target-selection, or generic engine semantics
 - Local Data Gateway workflow adoption inventory work is valid here only when it classifies current workflow families for no-send local-chain reuse, keeps adoption claims tied to already-proven exemplars, and does not imply send-capable rollout or blanket platform adoption
 - Local Data Gateway workflow adoption expansion work is valid here only when it re-evaluates adjacent packet families conservatively, keeps docs-native reconciliation receipts out of scope, and does not graduate a new class without a family-specific packet or manifest contract
+- Local Data Gateway repo-naming contract work is valid here only when it freezes rename candidate identity, rewrite-surface inventory, rollback order, no-send attestation, and proof/reconciliation expectations without implying admission, implementation, or rename execution
 
 ## Shared Handoff Rules
 

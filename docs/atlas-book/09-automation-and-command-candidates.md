@@ -419,6 +419,7 @@ Not yet honest as blanket adoption targets:
 - docs-native marker or doctrine receipts
 - Discord feedback evidence families without a dedicated evidence-packet schema
 - Atlas-owned repo naming execution/proof families without a rename-manifest and reconciliation schema
+- Atlas-owned repo naming execution/proof families remain below admission even after the rename-manifest contract checkpoint until one proof-backed no-send family path exists without gateway-specific rename logic
 - destructive retained-surface disposal families without a delete-manifest contract
 
 Wrapper implementation-planning checkpoint now frozen at the docs layer:
