@@ -5,6 +5,7 @@
 - Mode: `docs-only proof and reconciliation attempt`
 - Marker posture: `Atlas-owned Repo Naming Canonicalization: 70%`
 - Source surfaces:
+  - `docs/ops/ATLAS-OWNED-REPO-NAMING-STREAM-LOCAL-RENAME-EXECUTION-PASS-1-2026-05-28.md`
   - `docs/ops/ATLAS-OWNED-REPO-NAMING-SAFE-FIRST-EXECUTION-APPROVAL-2026-05-28.md`
   - `docs/ops/ATLAS-OWNED-REPO-NAMING-BOUNDED-REWRITE-ROLLBACK-PLAN-2026-05-28.md`
   - `docs/ops/ATLAS-OWNED-REPO-NAMING-MARKER-RATCHET-CHECKPOINT-3-2026-05-28.md`
@@ -15,9 +16,7 @@
   - `docs/audits/STACK-REPO-INVENTORY.md`
   - `docs/atlas-book/11-system-map-graph.md`
   - `docs/atlas-book/12-restart-and-handoff-guide.md`
-- Missing expected source surface:
-  - `docs/ops/ATLAS-OWNED-REPO-NAMING-STREAM-LOCAL-RENAME-EXECUTION-PASS-1-2026-05-28.md` (`not present`)
-- Control-plane checkpoint: `main@de00550`
+- Control-plane checkpoint: `main@d7c24dc`
 
 ## Objective
 
@@ -33,7 +32,7 @@ Why:
 
 - `repos/fawxzzy-stream` still exists as the active local repo path
 - `repos/stream` does not exist
-- the expected execution receipt is not present
+- the execution receipt now exists and explicitly records `blocked before rename`
 - stack registry and active inventory surfaces still correctly point at `repos/fawxzzy-stream`
 
 This pass therefore becomes an explicit no-proof / no-reconciliation receipt rather than a positive rename-proof receipt.
@@ -41,7 +40,7 @@ This pass therefore becomes an explicit no-proof / no-reconciliation receipt rat
 ## Root State
 
 - branch: `main`
-- HEAD: `de00550`
+- HEAD: `d7c24dc`
 - status: clean except intentional untracked `archive/`
 
 ## Validation Posture
@@ -72,6 +71,24 @@ Observed repo posture:
 - result: `## main`
 
 That proves the old path still represents the active repo location.
+
+## Execution Receipt Dependency Check
+
+The execution receipt this proof pass depends on now exists:
+
+- `docs/ops/ATLAS-OWNED-REPO-NAMING-STREAM-LOCAL-RENAME-EXECUTION-PASS-1-2026-05-28.md`
+
+Its durable result is:
+
+- `blocked before rename`
+
+Why:
+
+- active linked worktrees and one retained/prunable linked surface still depend on `repos/fawxzzy-stream`
+
+That means this proof pass no longer fails because an execution receipt is missing.
+
+It fails because the execution receipt proves the rename did not happen.
 
 ## Control-Plane Proof
 
@@ -134,8 +151,8 @@ This pass did not introduce:
 
 This pass proves only the following:
 
-- the approved `stream` rename has not yet executed in the live workspace
-- the expected execution receipt is still missing
+- the approved `stream` rename still has not executed in the live workspace
+- the execution receipt exists and durably proves `blocked before rename`
 - the old path remains the active canonical local repo path
 - canonical current-truth surfaces do not currently need reconciliation
 
@@ -150,13 +167,13 @@ This pass does not prove:
 
 ## Exact Next Package
 
-`Atlas-owned Repo Naming stream local rename execution pass 1`
+`Atlas-owned Repo Naming stream worktree dependency clearance pass 1`
 
 Why:
 
-- the approval packet already exists
-- the proof layer cannot advance until the bounded local execution actually happens
-- reconciliation should only run after the execution receipt exists and the filesystem state changes
+- the execution packet now exists and proved the exact blocker
+- the blocker is linked-worktree dependency on the current repo path
+- reconciliation cannot become positive until that dependency class is cleared and a later rename packet actually changes the filesystem state
 
 ## Rule
 
