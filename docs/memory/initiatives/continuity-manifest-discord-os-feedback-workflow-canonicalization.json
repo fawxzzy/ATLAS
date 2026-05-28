@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-05-27T00:00:00Z",
-  "updated_at": "2026-05-27T21:29:21Z",
+  "updated_at": "2026-05-28T16:17:39Z",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -16,17 +16,26 @@
   "evidence_refs": [
     "docs/ops/DISCORD-COMPLETED-FEEDBACK-BOARD-FULL-RESTORE-2026-05-25.md",
     "docs/ops/DISCORD-FEEDBACK-BOARD-STATE-REPAIR-2026-05-25.md",
+    "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-AUDIT-COMMENT-LIVE-EVIDENCE-PACKET-2026-05-27.md",
+    "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-BROAD-LIVE-PROOF-GAP-INVENTORY-2026-05-27.md",
     "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-CANONICAL-CONTRACTS-PASS-1-2026-05-27.md",
     "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-CANONICALIZATION-2026-05-27.md",
+    "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-COMPLETION-REVIEW-LIVE-EVIDENCE-PACKET-2026-05-27.md",
     "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-DEPLOY-BACKED-EVIDENCE-INVENTORY-2026-05-27.md",
     "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-FRESH-INTAKE-LIVE-EVIDENCE-PACKET-2026-05-27.md",
+    "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-FRESH-SUBMIT-EVIDENCE-ACQUISITION-PREFLIGHT-2026-05-28.md",
     "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-FRESH-SUBMIT-LIVE-ROW-THREAD-EVIDENCE-CAPTURE-2026-05-27.md",
+    "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-FRESH-SUBMIT-POSITIVE-LIVE-PROOF-CAPTURE-2026-05-27.md",
     "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-FRESH-SUBMIT-ROW-THREAD-LINKAGE-PROOF-PACKET-2026-05-27.md",
     "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-LIVE-PROOF-CRITERIA-2026-05-27.md",
-    "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-MARKER-RATCHET-CHECKPOINT-3-2026-05-27.md",
     "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-MARKER-RATCHET-CHECKPOINT-2-2026-05-27.md",
+    "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-MARKER-RATCHET-CHECKPOINT-3-2026-05-27.md",
+    "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-MARKER-RATCHET-CHECKPOINT-6-2026-05-27.md",
+    "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-NO-REGRESSION-LIVE-PARITY-GAP-PACKET-2026-05-27.md",
     "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-NO-REGRESSION-EXTRACTION-CHECKLIST-2026-05-27.md",
+    "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-RELEASE-BOUNDARY-LIVE-EVIDENCE-PACKET-2026-05-27.md",
     "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-SEPARATION-BOUNDARY-DECISION-PASS-1-2026-05-27.md",
+    "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-SUCCESS-REACTION-CLOSURE-LIVE-EVIDENCE-PACKET-2026-05-27.md",
     "docs/ops/FITNESS-DISCORD-FEEDBACK-LIVE-ROLLOUT-2026-05-25.md",
     "docs/ops/FITNESS-DISCORD-LIVE-REPAIR-AND-ATLAS-STATUS-POST-2026-05-25.md",
     "repos/DiscordOS/docs/contracts/feedback-runtime.md",
@@ -41,9 +50,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "discord-os-feedback-workflow-canonicalization",
     "scope_class": "cross-repo-governance-with-fitness-live-owner",
-    "current_checkpoint_receipt": "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-FRESH-SUBMIT-LIVE-ROW-THREAD-EVIDENCE-CAPTURE-2026-05-27.md",
-    "checkpoint_commit": "178ac1b",
-    "checkpoint_summary": "The lane still sits at 72 percent, launcher and launcher-repair proof are real, one after-the-fact shipped-card linkage is real, and the exact missing fresh-submit live proof class is now frozen narrowly and honestly.",
+    "current_checkpoint_receipt": "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-FRESH-SUBMIT-EVIDENCE-ACQUISITION-PREFLIGHT-2026-05-28.md",
+    "checkpoint_commit": "4bcbe67",
+    "checkpoint_summary": "The lane still sits at 72 percent with the strongest blocker unchanged, but the missing fresh-submit proof class is now acquisition-ready at the governance layer with an exact same-event evidence bundle and fail-closed capture sequence frozen.",
     "governing_receipts": [
       "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-CANONICALIZATION-2026-05-27.md",
       "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-CANONICAL-CONTRACTS-PASS-1-2026-05-27.md",
@@ -51,10 +60,19 @@
       "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-LIVE-PROOF-CRITERIA-2026-05-27.md",
       "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-NO-REGRESSION-EXTRACTION-CHECKLIST-2026-05-27.md",
       "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-DEPLOY-BACKED-EVIDENCE-INVENTORY-2026-05-27.md",
+      "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-BROAD-LIVE-PROOF-GAP-INVENTORY-2026-05-27.md",
       "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-FRESH-INTAKE-LIVE-EVIDENCE-PACKET-2026-05-27.md",
       "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-FRESH-SUBMIT-ROW-THREAD-LINKAGE-PROOF-PACKET-2026-05-27.md",
       "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-MARKER-RATCHET-CHECKPOINT-3-2026-05-27.md",
-      "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-FRESH-SUBMIT-LIVE-ROW-THREAD-EVIDENCE-CAPTURE-2026-05-27.md"
+      "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-EDIT-FLOW-LIVE-EVIDENCE-PACKET-2026-05-27.md",
+      "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-AUDIT-COMMENT-LIVE-EVIDENCE-PACKET-2026-05-27.md",
+      "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-COMPLETION-REVIEW-LIVE-EVIDENCE-PACKET-2026-05-27.md",
+      "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-SUCCESS-REACTION-CLOSURE-LIVE-EVIDENCE-PACKET-2026-05-27.md",
+      "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-RELEASE-BOUNDARY-LIVE-EVIDENCE-PACKET-2026-05-27.md",
+      "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-NO-REGRESSION-LIVE-PARITY-GAP-PACKET-2026-05-27.md",
+      "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-MARKER-RATCHET-CHECKPOINT-6-2026-05-27.md",
+      "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-FRESH-SUBMIT-POSITIVE-LIVE-PROOF-CAPTURE-2026-05-27.md",
+      "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-FRESH-SUBMIT-EVIDENCE-ACQUISITION-PREFLIGHT-2026-05-28.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -103,20 +121,20 @@
       },
       {
         "item": "fresh-submit live row-thread-message proof and broader deploy-backed parity",
-        "requirement": "still missing a durable fresh live submit proof receipt and broader audit-comment, completion-review, and release-boundary proof"
+        "requirement": "still missing one owner-side positive fresh-submit live proof bundle plus broader audit-comment, completion-review, success-reaction, release-boundary, and no-regression parity"
       }
     ],
     "next_package_ladder": [
       {
-        "package": "Discord OS Feedback Workflow fresh-submit live proof receipt",
-        "mode": "docs-only live proof receipt",
-        "reason": "capture one truly fresh live submit event with bounded row first, thread second, and stable report-thread-message linkage"
+        "package": "Discord OS Feedback Workflow fresh-submit positive live proof receipt only after one owner-side evidence bundle is captured",
+        "mode": "docs-only live proof receipt after owner-side capture",
+        "reason": "the evidence standard and capture sequence are frozen; the next meaningful change is one actual same-event row-thread-message proof bundle"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-REFRESH-PASS-1-2026-05-27.md",
-    "freshness_checked_at": "2026-05-27T21:29:21Z",
-    "freshness_basis": "checkpoint, marker posture, blocked work, and next-package posture now match the current durable Discord feedback lane state.",
+    "freshness_checked_receipt": "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-REFRESH-PASS-2-2026-05-28.md",
+    "freshness_checked_at": "2026-05-28T16:17:39Z",
+    "freshness_basis": "checkpoint, marker posture, blocked work, and next-package posture now match the current durable Discord feedback lane state after the evidence-packet cluster, hold ratchets, and fresh-submit acquisition preflight.",
     "marker_posture": [
       {
         "marker": "Discord OS Feedback Workflow Canonicalization",

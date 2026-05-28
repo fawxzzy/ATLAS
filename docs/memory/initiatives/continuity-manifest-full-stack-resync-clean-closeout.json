@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-05-27T00:00:00Z",
-  "updated_at": "2026-05-28T01:24:46Z",
+  "updated_at": "2026-05-28T16:17:39Z",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -96,9 +96,9 @@
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-BREADTH-EXPANSION-PASS-1-2026-05-27.md",
-    "freshness_checked_at": "2026-05-28T01:24:46Z",
-    "freshness_basis": "the decisive closeout receipt, marker posture, exact no-debt outcome, and route-separate follow-on posture all match the current durable lane state at breadth-expansion pass 1.",
+    "freshness_checked_receipt": "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-REFRESH-PASS-2-2026-05-28.md",
+    "freshness_checked_at": "2026-05-28T16:17:39Z",
+    "freshness_basis": "the decisive closeout receipt, marker posture, exact no-debt outcome, and route-separate follow-on posture still match the current durable lane state through the second refresh cycle after breadth expansion.",
     "marker_posture": [
       {
         "marker": "Full Stack Re-sync, Clean & Closeout",

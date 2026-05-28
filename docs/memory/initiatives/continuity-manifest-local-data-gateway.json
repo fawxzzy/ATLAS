@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-05-27T00:00:00Z",
-  "updated_at": "2026-05-27T21:29:21Z",
+  "updated_at": "2026-05-28T16:17:39Z",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -16,8 +16,11 @@
   "evidence_refs": [
     "docs/atlas-book/02-lanes-and-markers.md",
     "docs/atlas-book/09-automation-and-command-candidates.md",
+    "docs/atlas-book/14-lane-split-execution.md",
     "docs/ops/LOCAL-DATA-GATEWAY-DRY-RUN-EMITTER-PROOF-PASS-2026-05-27.md",
     "docs/ops/LOCAL-DATA-GATEWAY-MARKER-RATCHET-CHECKPOINT-5-2026-05-27.md",
+    "docs/ops/LOCAL-DATA-GATEWAY-MARKER-RATCHET-CHECKPOINT-8-2026-05-27.md",
+    "docs/ops/LOCAL-DATA-GATEWAY-MARKER-RATCHET-CHECKPOINT-9-2026-05-27.md",
     "docs/ops/LOCAL-DATA-GATEWAY-PACKET-CONTRACT-DRAFT-2026-05-27.md",
     "docs/ops/LOCAL-DATA-GATEWAY-PROOF-PACKAGER-PROOF-PASS-2026-05-27.md",
     "docs/ops/LOCAL-DATA-GATEWAY-REVIEW-SURFACE-PROOF-PASS-2026-05-27.md",
@@ -25,10 +28,11 @@
     "docs/ops/LOCAL-DATA-GATEWAY-VALIDATOR-PROOF-PASS-2026-05-27.md",
     "docs/ops/LOCAL-DATA-GATEWAY-WRAPPER-IMPLEMENTATION-PACKAGE-1-2026-05-27.md",
     "docs/ops/LOCAL-DATA-GATEWAY-WRAPPER-IMPLEMENTATION-PACKAGE-2-2026-05-27.md",
-    "docs/ops/LOCAL-DATA-GATEWAY-WRAPPER-PACKAGE-2-PLANNING-CHECKPOINT-2026-05-27.md",
-    "docs/ops/LOCAL-DATA-GATEWAY-WRAPPER-PACKAGE-2-PROOF-PASS-2026-05-27.md",
     "docs/ops/LOCAL-DATA-GATEWAY-WRAPPER-PACKAGE-1-PROOF-PASS-2026-05-27.md",
     "docs/ops/LOCAL-DATA-GATEWAY-MARKER-RATCHET-CHECKPOINT-6-2026-05-27.md",
+    "docs/ops/LOCAL-DATA-GATEWAY-WORKFLOW-ADOPTION-INVENTORY-PASS-1-2026-05-27.md",
+    "docs/ops/LOCAL-DATA-GATEWAY-WORKFLOW-ADOPTION-PROOF-PASS-1-2026-05-27.md",
+    "docs/ops/LOCAL-DATA-GATEWAY-WORKFLOW-ADOPTION-EXPANSION-PASS-2-2026-05-28.md",
     "repos/_stack/scripts/data-gateway-packet-emitter.mjs",
     "repos/_stack/scripts/data-gateway-packet-emitter.test.mjs",
     "repos/_stack/scripts/data-gateway-packet-proof-packager.mjs",
@@ -44,9 +48,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "local-data-gateway",
     "scope_class": "cross-repo-governance-with-owner-repo-implementation",
-    "current_checkpoint_receipt": "docs/ops/LOCAL-DATA-GATEWAY-MARKER-RATCHET-CHECKPOINT-6-2026-05-27.md",
-    "checkpoint_commit": "8f10dda",
-    "checkpoint_summary": "The full local primitive chain is proven, wrapper package 2 is implemented and proven for review-only, and the lane now sits at 50 percent with send still blocked.",
+    "current_checkpoint_receipt": "docs/ops/LOCAL-DATA-GATEWAY-WORKFLOW-ADOPTION-EXPANSION-PASS-2-2026-05-28.md",
+    "checkpoint_commit": "4bcbe67",
+    "checkpoint_summary": "The lane now sits at 65 percent with a proven no-send local chain and a still-bounded adoption map: the original three adoptable-now classes remain real, adjacent families are classified more sharply, and no send-capable or family-specific wrapper creep is admitted.",
     "governing_receipts": [
       "docs/ops/LOCAL-DATA-GATEWAY-PACKET-CONTRACT-DRAFT-2026-05-27.md",
       "docs/ops/LOCAL-DATA-GATEWAY-VALIDATOR-PROOF-PASS-2026-05-27.md",
@@ -56,10 +60,13 @@
       "docs/ops/LOCAL-DATA-GATEWAY-SEND-AUTHORIZATION-PREREQUISITES-2026-05-27.md",
       "docs/ops/LOCAL-DATA-GATEWAY-WRAPPER-IMPLEMENTATION-PACKAGE-1-2026-05-27.md",
       "docs/ops/LOCAL-DATA-GATEWAY-WRAPPER-PACKAGE-1-PROOF-PASS-2026-05-27.md",
-      "docs/ops/LOCAL-DATA-GATEWAY-WRAPPER-PACKAGE-2-PLANNING-CHECKPOINT-2026-05-27.md",
-      "docs/ops/LOCAL-DATA-GATEWAY-WRAPPER-IMPLEMENTATION-PACKAGE-2-2026-05-27.md",
-      "docs/ops/LOCAL-DATA-GATEWAY-WRAPPER-PACKAGE-2-PROOF-PASS-2026-05-27.md",
-      "docs/ops/LOCAL-DATA-GATEWAY-MARKER-RATCHET-CHECKPOINT-6-2026-05-27.md"
+      "docs/ops/LOCAL-DATA-GATEWAY-WRAPPER-PACKAGE-4-PLANNING-CHECKPOINT-2026-05-27.md",
+      "docs/ops/LOCAL-DATA-GATEWAY-WRAPPER-IMPLEMENTATION-PACKAGE-4-2026-05-27.md",
+      "docs/ops/LOCAL-DATA-GATEWAY-WRAPPER-PACKAGE-4-PROOF-PASS-2026-05-27.md",
+      "docs/ops/LOCAL-DATA-GATEWAY-WORKFLOW-ADOPTION-INVENTORY-PASS-1-2026-05-27.md",
+      "docs/ops/LOCAL-DATA-GATEWAY-WORKFLOW-ADOPTION-PROOF-PASS-1-2026-05-27.md",
+      "docs/ops/LOCAL-DATA-GATEWAY-MARKER-RATCHET-CHECKPOINT-9-2026-05-27.md",
+      "docs/ops/LOCAL-DATA-GATEWAY-WORKFLOW-ADOPTION-EXPANSION-PASS-2-2026-05-28.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -99,6 +106,10 @@
       {
         "path": "docs/atlas-book/09-automation-and-command-candidates.md",
         "role": "root command-surface projection"
+      },
+      {
+        "path": "docs/atlas-book/14-lane-split-execution.md",
+        "role": "root adoption and lane-split projection"
       }
     ],
     "blocked_or_gated_work": [
@@ -111,25 +122,29 @@
         "requirement": "prohibited in the current wrapper family"
       },
       {
-        "item": "proof-only and full-local-chain wrapper modes",
-        "requirement": "deferred beyond package 2"
+        "item": "broader workflow-family graduation beyond the three proven adoptable-now classes",
+        "requirement": "blocked until a family has a stable packet contract and can be proven local-only without family-specific wrapper logic"
+      },
+      {
+        "item": "gateway-first rollout across docs-native governance receipts",
+        "requirement": "prohibited; control-plane reconciliation and marker receipts stay out of scope"
       }
     ],
     "next_package_ladder": [
       {
-        "package": "Local Data Gateway wrapper package 3 planning checkpoint",
-        "mode": "docs-only wrapper planning",
-        "reason": "freeze whether proof-only is the next admitted wrapper slice without widening into generic orchestration"
+        "package": "Local Data Gateway repo naming rename-manifest contract checkpoint",
+        "mode": "docs-only packet-contract checkpoint",
+        "reason": "the repo naming family is the closest blocked adjacent class to honest no-send packet reuse without implying rename execution"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-REFRESH-PASS-1-2026-05-27.md",
-    "freshness_checked_at": "2026-05-27T21:29:21Z",
-    "freshness_basis": "checkpoint, marker posture, blocked work, and next-package posture now match the current durable Local Data Gateway lane state.",
+    "freshness_checked_receipt": "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-REFRESH-PASS-2-2026-05-28.md",
+    "freshness_checked_at": "2026-05-28T16:17:39Z",
+    "freshness_basis": "checkpoint, marker posture, blocked work, and next-package posture now match the current durable Local Data Gateway lane state after the adoption proof and expansion receipts.",
     "marker_posture": [
       {
         "marker": "Local Data Gateway",
-        "percent": 50,
+        "percent": 65,
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ]
