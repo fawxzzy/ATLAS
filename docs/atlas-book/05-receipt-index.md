@@ -144,6 +144,7 @@
 - [Discord OS Feedback Workflow Completion-Review Live Evidence Packet](../ops/DISCORD-OS-FEEDBACK-WORKFLOW-COMPLETION-REVIEW-LIVE-EVIDENCE-PACKET-2026-05-27.md)
 - [Discord OS Feedback Workflow Success-Reaction Closure Live Evidence Packet](../ops/DISCORD-OS-FEEDBACK-WORKFLOW-SUCCESS-REACTION-CLOSURE-LIVE-EVIDENCE-PACKET-2026-05-27.md)
 - [Discord OS Feedback Workflow Release-Boundary Live Evidence Packet](../ops/DISCORD-OS-FEEDBACK-WORKFLOW-RELEASE-BOUNDARY-LIVE-EVIDENCE-PACKET-2026-05-27.md)
+- [Discord OS Feedback Workflow No-Regression Live Parity Gap Packet](../ops/DISCORD-OS-FEEDBACK-WORKFLOW-NO-REGRESSION-LIVE-PARITY-GAP-PACKET-2026-05-27.md)
 
 ## Durable Context Externalization
 
