@@ -7,7 +7,7 @@
 - `Truth Map & ATLAS Book: 85%`
 - `Inventory & Truth Map: 74%`
 - `Knowledge Capture & Transfer: 81%`
-- `Durable Context Externalization: 72%`
+- `Durable Context Externalization: 74%`
 
 Read:
 
@@ -61,7 +61,7 @@ Read:
 - Truth Map & ATLAS Book: `85%`
 - Inventory & Truth Map: `74%`
 - Knowledge Capture & Transfer: `81%`
-- Durable Context Externalization: `72%`
+- Durable Context Externalization: `74%`
 - Discord OS Infrastructure Separation: `95%`
 - Discord OS Feedback Workflow Canonicalization: `72%`
 
@@ -134,6 +134,6 @@ That split is defined and partially operationalized by bootstrap and governance 
 - naming and ownership hygiene now has real bounded execution-readiness plus one exact blocked execution/proof chain for one local packet, but the lane is still far from broad rename readiness
 - Local Data Gateway now sits at `65%`: the lane already had a durable packet contract, exemplar proof chain, no-send helper boundary, local validator/emitter/review/proof helpers, and thin wrapper packages 1 through 4 with a proven `full-local-chain`; it now also has a durable adoption inventory and durable adoption proof showing that the current no-send chain is honestly usable now for Supabase export / approval-prep packets, Vercel dependency / deletion decision packets, and DiscordOS trust-boundary / provenance proof packets, which justifies a ninth small adoption-backed move without implying blanket workflow rollout or any send/transport authority
 - Discord feedback workflow canonicalization now sits at `72%`: the live Fitness-hosted workflow is still the runtime truth, and the lane now has a dedicated canonical contract package, a first separation boundary, live-proof criteria, a no-regression extraction checklist, a deploy-backed evidence inventory, bounded edit/audit/completion-review/success-reaction/release-boundary evidence packets, a no-regression live parity-gap packet, and an explicit fresh-submit positive-proof recheck; it still stays flat because the newest work improved proof discipline and overclaim resistance, not the missing positive fresh-submit live proof, any broad live parity class, or any broader extraction/runtime-owner evidence
-- Durable Context Externalization now sits at `72%`: the first-adoption continuity manifests are not only durably seeded, but now governed by an explicit refresh discipline and refreshed in practice, so restart routing can rely on fresh manifest -> receipt -> owner-truth chains with a real downgrade path for stale manifests; it stays below `75%` because coverage is still partial, sustained refresh discipline is not yet proven across time, and some restart paths still depend on manual operator stitching
+- Durable Context Externalization now sits at `74%`: the lane now has a broader six-manifest seeded set, explicit refresh discipline, one earlier refresh cycle, and a second actual refresh pass across that breadth-expanded set, so restart routing can rely on broader fresh manifest -> receipt -> owner-truth chains with a real downgrade path for stale manifests; it still stays below `75%` because coverage is still partial, refresh discipline is not yet proven across longer time, and some restart paths still depend on manual operator stitching
 - Atlas-owned Repo Naming Canonicalization now sits at `70%`: the lane now has durable naming policy, a durable internal target set, an explicit `fawxzzy-fitness` exception, durable execution-gate doctrine, a durable dependency map, a bounded rewrite/rollback plan, one narrow safe-first execution approval for `repos/fawxzzy-stream -> repos/stream`, and one exact blocked execution/proof chain showing the current blocker cleanly; it still stays below `75%` because no rename has executed successfully, the canonical path has not changed, remote-name assumptions remain blocked, and broader candidates still require stricter preflight
 - DiscordOS separation stayed high-confidence but intentionally below runtime migration
