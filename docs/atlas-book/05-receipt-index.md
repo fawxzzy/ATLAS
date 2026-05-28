@@ -249,6 +249,7 @@
 - [Local Data Gateway Repo Naming Bounded Proof-Shape Review](../ops/LOCAL-DATA-GATEWAY-REPO-NAMING-BOUNDED-PROOF-SHAPE-REVIEW-2026-05-28.md)
 - [Local Data Gateway Marker Ratchet Checkpoint 10](../ops/LOCAL-DATA-GATEWAY-MARKER-RATCHET-CHECKPOINT-10-2026-05-28.md)
 - [Local Data Gateway Repo Naming Proof-Family Real-Workflow Decision](../ops/LOCAL-DATA-GATEWAY-REPO-NAMING-PROOF-FAMILY-REAL-WORKFLOW-DECISION-2026-05-28.md)
+- [Local Data Gateway Repo Naming Proof-Family Reuse Threshold Review](../ops/LOCAL-DATA-GATEWAY-REPO-NAMING-PROOF-FAMILY-REUSE-THRESHOLD-REVIEW-2026-05-28.md)
 
 ## Lane Split
 

@@ -163,6 +163,7 @@ Current reopen note:
 - Local Data Gateway repo-naming proof-admission work is valid here only when it admits a bounded local-only proof class for the rename-manifest family, keeps blocked execution as an honest proof outcome, and still stops short of implementation, send behavior, or adopt-now graduation
 - Local Data Gateway repo-naming bounded proof-shape review is valid here only when it freezes minimum manifest fields, blocked-before-rename proof, executed-and-reconciled proof, no-send attestation, and proof-output expectations without implying implementation, send behavior, or adopt-now graduation
 - Local Data Gateway repo-naming real-workflow proof-family decision is valid here only when it admits one bounded real local workflow family path for rename-manifest packets, keeps blocked execution as honest real-workflow proof, and still stops short of implementation, send behavior, or adopt-now graduation
+- Local Data Gateway repo-naming proof-family reuse-threshold review is valid here only when it freezes what counts as one proven instance, what counts as reusable family shape, and why a second bounded candidate is still required before any reuse or adopt-now claim
 
 ## Shared Handoff Rules
 
