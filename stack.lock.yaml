@@ -1,6 +1,6 @@
 schema_version: "atlas.stack.lock.v1"
 stack_manifest_path: "stack.yaml"
-stack_manifest_digest: "sha256:2d91d52cebe53e508848efba6323e7ceed96e49b5bf2b6ff90df12c26f5af6d2"
+stack_manifest_digest: "sha256:3e148aef77f7fee5532d3c8d3152b83df775709afc0d879016aec612844db85f"
 component_count: 10
 components:
   _stack:
@@ -92,7 +92,7 @@ components:
     trust_class: "trusted"
     release_eligible: false
   stream:
-    path: "repos/fawxzzy-stream"
+    path: "repos/stream"
     role: "application"
     status: "incubating"
     remote: null
@@ -216,4 +216,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:a6db9bd7e5511d611cb914c15db25203298ad7b1ba7e95cadbfe6f89817ed8fa"
+lock_digest: "sha256:6ebb98d88456ca35093e625bc4fe6dc2df139e85fd82c30167915023cc36480d"

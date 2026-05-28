@@ -36,7 +36,7 @@ It replaces the older pre-adoption sequencing that assumed Playbook export, root
 | --- | --- | --- | --- |
 | `fitness` | present at `repos/fawxzzy-fitness` | `origin` visible | repo-local adoption and targeted verification report are landed |
 | `mazer` | present at `repos/fawxzzy-mazer` | `origin` visible | repo-local adoption and targeted verification report are landed |
-| `stream` | present at `repos/fawxzzy-stream` | no remote visible in this workspace | incubating and still outside the first adopted tranche |
+| `stream` | present at `repos/stream` | no remote visible in this workspace | incubating and still outside the first adopted tranche |
 | `playbook-demo` | nested repo present at `repos/playbook-demo/playbook-demo` | `origin` visible | keep out of the critical path unless intentionally used as a contract demo surface |
 | `nat1-games` | nested repo present at `repos/Nat1-Games/nat1-games` | `origin` visible | still incubating from the convergence-program perspective |
 

@@ -1,9 +1,9 @@
 {
   "schema_version": "atlas.stack.repo-inventory.v1",
   "stack_manifest_ref": "stack.yaml",
-  "stack_manifest_digest": "sha256:2d91d52cebe53e508848efba6323e7ceed96e49b5bf2b6ff90df12c26f5af6d2",
+  "stack_manifest_digest": "sha256:3e148aef77f7fee5532d3c8d3152b83df775709afc0d879016aec612844db85f",
   "stack_lock_ref": "stack.lock.yaml",
-  "stack_lock_digest": "sha256:e6a963824cbde48098b4ddfc38fb64ec4e145310ee3f5841edfac43aabe73fd6",
+  "stack_lock_digest": "sha256:6ebb98d88456ca35093e625bc4fe6dc2df139e85fd82c30167915023cc36480d",
   "working_memory_digest": "sha256:35339035b339f45faf21b4ad222621d091de56411a1a2f4ecbcc99d031eaa442",
   "published_refs": {
     "json": "docs/registry/STACK-REPO-INVENTORY.json",
@@ -259,7 +259,7 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "25a42163ff976c8112aa64170ad2bcefa40b5059",
+      "current_commit": "8d94f4b1bb77f2066baca61216ae7cff9c5458f9",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
@@ -275,12 +275,12 @@
     },
     {
       "logical_id": "stream",
-      "local_path": "repos/fawxzzy-stream",
+      "local_path": "repos/stream",
       "role": "application",
       "status": "incubating",
       "remote_url": null,
-      "pinned_commit": "1dd3298c556b4d0839e6bb43b3dde7c3527022f7",
-      "current_commit": "1dd3298c556b4d0839e6bb43b3dde7c3527022f7",
+      "pinned_commit": "bf2c9551225e6d3555122da9a72306556f50cdd8",
+      "current_commit": "bf2c9551225e6d3555122da9a72306556f50cdd8",
       "pinned_ref_type": "branch",
       "pinned_ref": "main",
       "current_ref_type": "branch",
@@ -472,5 +472,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:8c5d89a464bb3a77ec82828e5ef0b697c8afeb532bfc47df464d4b919a3b345e"
+  "content_digest": "sha256:0e8c2fa79b8dc1ed43977db31a824af25cd9c9dfa678b5c37b4ade115b56c8c1"
 }

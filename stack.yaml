@@ -136,7 +136,7 @@ repo_registry:
     role: application
     status: active
   stream:
-    path: repos/fawxzzy-stream
+    path: repos/stream
     role: application
     status: incubating
   nat1-games:
