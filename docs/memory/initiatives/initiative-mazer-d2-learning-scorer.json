@@ -12,18 +12,18 @@
   "related_hypothesis_refs": [],
   "related_session_refs": [],
   "related_attention_refs": [
-    "attention:sha256:6a9aeb06d039913aeed84e9f24a209e53bdbcdb2285a1cf409a51c7c69a2f880"
+    "attention:sha256:cb5ccf1984aad5171a73a0c71e045c0fe9a55b598e2e6554fb0add8b939ef5d3"
   ],
   "evidence_refs": [
     "stack.yaml",
-    "repos/fawxzzy-mazer/artifacts/training/governed-candidate-experiment-pack.json",
-    "repos/fawxzzy-mazer/artifacts/training/manual-blessing-review-pack.json",
-    "repos/fawxzzy-mazer/artifacts/training/playbook-weight-registry.json",
-    "repos/fawxzzy-mazer/docs/INTEGRATION_SCOPE.md",
-    "repos/fawxzzy-mazer/scripts/lifeline/burn-in.ts",
-    "repos/fawxzzy-mazer/scripts/training/promote-weights.mjs",
-    "repos/fawxzzy-mazer/src/mazer-core/eval/RuntimeEval.ts",
-    "repos/fawxzzy-mazer/tests/core/training/promote-weights.test.ts"
+    "repos/mazer/artifacts/training/governed-candidate-experiment-pack.json",
+    "repos/mazer/artifacts/training/manual-blessing-review-pack.json",
+    "repos/mazer/artifacts/training/playbook-weight-registry.json",
+    "repos/mazer/docs/INTEGRATION_SCOPE.md",
+    "repos/mazer/scripts/lifeline/burn-in.ts",
+    "repos/mazer/scripts/training/promote-weights.mjs",
+    "repos/mazer/src/mazer-core/eval/RuntimeEval.ts",
+    "repos/mazer/tests/core/training/promote-weights.test.ts"
   ],
   "proposed_next_session_refs": [
     "runtime/atlas/proposed-sessions/session-proposed-mazer-d2-fixed-blessed-id-soak/session.manifest.json"
@@ -34,7 +34,7 @@
     "authoring_source": "operator-seeded-initiative",
     "repo_id": "mazer",
     "repo_refs": [
-      "repos/fawxzzy-mazer"
+      "repos/mazer"
     ],
     "branch_ref": "codex/mazer-d2-learning-scorer",
     "branch_summary": "AC landed. No blessing has occurred yet.",
