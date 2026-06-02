@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://schemas/atlas.cortex.shadow-agent-registry.v1.json",
+  "title": "ATLAS Cortex Shadow Agent Registry",
+  "type": "object",
+  "required": [
+    "contract_version",
+    "source_receipts",
+    "agents"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {
+      "const": "atlas.cortex.shadow-agent-registry.v1"
+    },
+    "source_receipts": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "agents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "contract_id",
+          "id",
+          "family_name",
+          "trigger",
+          "purpose",
+          "trigger_family",
+          "stable_inputs",
+          "expected_proof_artifact",
+          "fallback_path",
+          "fallback_behavior",
+          "owner_boundary",
+          "non_claim_boundary",
+          "admissibility_state",
+          "stage",
+          "runnable",
+          "source_refs"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "contract_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "family_name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "trigger": {
+            "type": "string",
+            "minLength": 1
+          },
+          "purpose": {
+            "type": "string",
+            "minLength": 1
+          },
+          "trigger_family": {
+            "type": "string",
+            "minLength": 1
+          },
+          "stable_inputs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "expected_proof_artifact": {
+            "type": "string",
+            "minLength": 1
+          },
+          "fallback_path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "fallback_behavior": {
+            "type": "string",
+            "minLength": 1
+          },
+          "owner_boundary": {
+            "type": "string",
+            "minLength": 1
+          },
+          "non_claim_boundary": {
+            "type": "string",
+            "minLength": 1
+          },
+          "admissibility_state": {
+            "enum": [
+              "exportable-now",
+              "shadow-only",
+              "blocked"
+            ]
+          },
+          "stage": {
+            "enum": [
+              "exportable-now",
+              "shadow-only",
+              "blocked"
+            ]
+          },
+          "runnable": {
+            "type": "boolean"
+          },
+          "blocked_reason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "source_refs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    }
+  }
+}

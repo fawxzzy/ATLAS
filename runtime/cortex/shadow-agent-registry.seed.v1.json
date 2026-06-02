@@ -1,0 +1,241 @@
+{
+  "contract_version": "atlas.cortex.shadow-agent-registry.v1",
+  "source_receipts": [
+    "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-AUTOMATION-CANDIDATE-THRESHOLD-PASS-1-2026-06-01.md",
+    "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CONTRACT-FIRST-AGENT-SHADOWING-PASS-1-2026-06-01.md",
+    "docs/ops/FEEDBACK-LOOP-READINESS-DETERMINISTIC-READINESS-THRESHOLD-PASS-1-2026-06-01.md"
+  ],
+  "agents": [
+    {
+      "contract_id": "atlas.cortex.contract.validation-summary-shadow.v1",
+      "id": "validation-summary-shadow",
+      "family_name": "validation summaries and delta reporting",
+      "trigger": "A stable stack validation receipt is present and a bounded local summary projection is requested.",
+      "purpose": "Summarize the current stack validation posture without mutating or reclassifying stack truth.",
+      "trigger_family": "validation summaries and delta reporting",
+      "stable_inputs": [
+        "runtime/receipts/validation/stack-validation.latest.json",
+        "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-AUTOMATION-CANDIDATE-THRESHOLD-PASS-1-2026-06-01.md"
+      ],
+      "expected_proof_artifact": "A local shadow summary that cites the validation receipt path and counts without waiving findings or changing release posture.",
+      "fallback_path": "operator:return-raw-validation-receipt-ref",
+      "fallback_behavior": "If the validation receipt is missing or contradictory, stop and route back to the operator with the raw receipt reference.",
+      "owner_boundary": "_stack validation and ATLAS docs remain the truth owners; this agent may summarize but may not waive findings or rewrite stack truth.",
+      "non_claim_boundary": "Not a deploy gate, not a release gate, and not a proof-admission authority surface.",
+      "admissibility_state": "shadow-only",
+      "stage": "shadow-only",
+      "runnable": true,
+      "blocked_reason": null,
+      "source_refs": [
+        "runtime/receipts/validation/stack-validation.latest.json",
+        "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-AUTOMATION-CANDIDATE-THRESHOLD-PASS-1-2026-06-01.md",
+        "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CONTRACT-FIRST-AGENT-SHADOWING-PASS-1-2026-06-01.md"
+      ]
+    },
+    {
+      "contract_id": "atlas.cortex.contract.marker-checkpoint-shadow.v1",
+      "id": "marker-checkpoint-shadow",
+      "family_name": "marker checkpoint rendering",
+      "trigger": "An operator requests a deterministic readback of current marker posture from ATLAS-owned state.",
+      "purpose": "Render the current marker posture from durable ATLAS state without inventing marker movement.",
+      "trigger_family": "marker checkpoint rendering",
+      "stable_inputs": [
+        "docs/atlas-book/02-lanes-and-markers.md",
+        "docs/atlas-book/12-restart-and-handoff-guide.md"
+      ],
+      "expected_proof_artifact": "A local checkpoint summary that repeats the current marker values and cites the durable ATLAS sources used.",
+      "fallback_path": "operator:return-conflicting-marker-refs",
+      "fallback_behavior": "If marker and restart surfaces disagree, stop and route back to the operator with the conflicting refs instead of reconciling by inference.",
+      "owner_boundary": "ATLAS marker docs remain the truth owners; this agent may render checkpoint summaries but may not ratchet markers or rewrite the read model.",
+      "non_claim_boundary": "Not a ratchet authority and not a lane-selection authority surface.",
+      "admissibility_state": "shadow-only",
+      "stage": "shadow-only",
+      "runnable": true,
+      "blocked_reason": null,
+      "source_refs": [
+        "docs/atlas-book/02-lanes-and-markers.md",
+        "docs/atlas-book/12-restart-and-handoff-guide.md",
+        "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CONTRACT-FIRST-AGENT-SHADOWING-PASS-1-2026-06-01.md"
+      ]
+    },
+    {
+      "contract_id": "atlas.cortex.contract.receipt-doctrine-draft-shadow.v1",
+      "id": "receipt-doctrine-draft-shadow",
+      "family_name": "receipt skeleton and doctrine-routing drafts",
+      "trigger": "Explicit governed inputs are present for a bounded draft-only projection with no admission authority.",
+      "purpose": "Draft bounded receipt skeletons or doctrine-routing summaries from explicit governed inputs without claiming truth admission.",
+      "trigger_family": "receipt skeleton and doctrine-routing drafts",
+      "stable_inputs": [
+        "docs/PLAYBOOK_NOTES.md",
+        "docs/atlas-book/10-failure-modes-and-recovery.md",
+        "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-AUTOMATION-CANDIDATE-THRESHOLD-PASS-1-2026-06-01.md"
+      ],
+      "expected_proof_artifact": "A local shadow draft that names the governing receipt and doctrine refs and leaves final admission to human review.",
+      "fallback_path": "operator:return-unresolved-doctrine-refs",
+      "fallback_behavior": "If source doctrine is ambiguous or under-specified, stop and return the unresolved references instead of drafting implied policy.",
+      "owner_boundary": "ATLAS and Playbook remain doctrine truth owners; this agent may draft but may not admit doctrine or finalize receipts.",
+      "non_claim_boundary": "Not a governance-admission surface and not a receipt-authority surface.",
+      "admissibility_state": "shadow-only",
+      "stage": "shadow-only",
+      "runnable": true,
+      "blocked_reason": null,
+      "source_refs": [
+        "docs/PLAYBOOK_NOTES.md",
+        "docs/atlas-book/10-failure-modes-and-recovery.md",
+        "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-AUTOMATION-CANDIDATE-THRESHOLD-PASS-1-2026-06-01.md",
+        "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CONTRACT-FIRST-AGENT-SHADOWING-PASS-1-2026-06-01.md"
+      ]
+    },
+    {
+      "contract_id": "atlas.cortex.contract.fresh-live-proof-capture-blocked.v1",
+      "id": "fresh-live-proof-capture-blocked",
+      "family_name": "fresh live proof capture through the frozen bridge path",
+      "trigger": "A request attempts fresh live proof capture before the frozen bridge blocker is cleared.",
+      "purpose": "Attempt fresh live proof capture.",
+      "trigger_family": "fresh live proof capture through the frozen bridge path",
+      "stable_inputs": [
+        "docs/ops/FEEDBACK-LOOP-READINESS-DETERMINISTIC-READINESS-THRESHOLD-PASS-1-2026-06-01.md",
+        "docs/ops/ROOT-BOUNDED-DISPATCHER-RECONCILIATION-AFTER-FITNESS-DISCORD-POST-INSTALL-CODEX-CHROME-BRIDGE-TIMEOUT-BOUNDARY-RECEIPT-CLOSEOUT-2026-06-01.md"
+      ],
+      "expected_proof_artifact": "A fresh positive live proof bundle.",
+      "fallback_path": "hold:frozen-bridge-boundary",
+      "fallback_behavior": "Route back to the frozen bridge boundary and wait for one successful live Codex-to-Chrome runtime call.",
+      "owner_boundary": "Fitness proof capture and ATLAS restart truth remain the owners.",
+      "non_claim_boundary": "Not admissible for agent shadowing or authority while the external/session bridge defect remains active.",
+      "admissibility_state": "blocked",
+      "stage": "blocked",
+      "runnable": false,
+      "blocked_reason": "Blocked by the frozen Codex desktop <-> Chrome extension handshake/runtime defect and by the deterministic proof-loop threshold.",
+      "source_refs": [
+        "docs/ops/FEEDBACK-LOOP-READINESS-DETERMINISTIC-READINESS-THRESHOLD-PASS-1-2026-06-01.md",
+        "docs/ops/ROOT-BOUNDED-DISPATCHER-RECONCILIATION-AFTER-FITNESS-DISCORD-POST-INSTALL-CODEX-CHROME-BRIDGE-TIMEOUT-BOUNDARY-RECEIPT-CLOSEOUT-2026-06-01.md"
+      ]
+    },
+    {
+      "contract_id": "atlas.cortex.contract.final-deploy-judgment-blocked.v1",
+      "id": "final-deploy-judgment-blocked",
+      "family_name": "final deploy judgment",
+      "trigger": "A workflow asks Cortex to make a final deploy go or no-go decision.",
+      "purpose": "Make the final deploy go or no-go call.",
+      "trigger_family": "final deploy judgment",
+      "stable_inputs": [
+        "docs/atlas-book/09-automation-and-command-candidates.md"
+      ],
+      "expected_proof_artifact": "A deployment decision.",
+      "fallback_path": "defer:human-deploy-authority",
+      "fallback_behavior": "Defer to the human operator and `_stack` governed deploy authority.",
+      "owner_boundary": "_stack and the human operator remain the deployment authority surfaces.",
+      "non_claim_boundary": "Never a Cortex authority surface.",
+      "admissibility_state": "blocked",
+      "stage": "blocked",
+      "runnable": false,
+      "blocked_reason": "Blocked because final deploy judgment remains permanently human-reviewed and approval-gated.",
+      "source_refs": [
+        "docs/atlas-book/09-automation-and-command-candidates.md",
+        "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CONTRACT-FIRST-AGENT-SHADOWING-PASS-1-2026-06-01.md"
+      ]
+    },
+    {
+      "contract_id": "atlas.cortex.contract.final-publication-judgment-blocked.v1",
+      "id": "final-publication-judgment-blocked",
+      "family_name": "final publication judgment",
+      "trigger": "A workflow asks Cortex to decide whether a public update should ship.",
+      "purpose": "Make the final public update or publication call.",
+      "trigger_family": "final publication judgment",
+      "stable_inputs": [
+        "docs/atlas-book/09-automation-and-command-candidates.md"
+      ],
+      "expected_proof_artifact": "A public publication decision.",
+      "fallback_path": "defer:human-publication-authority",
+      "fallback_behavior": "Defer to the human operator and the existing proof-gated publication boundary.",
+      "owner_boundary": "Discord publication truth remains operator- and proof-gated.",
+      "non_claim_boundary": "Never a Cortex authority surface.",
+      "admissibility_state": "blocked",
+      "stage": "blocked",
+      "runnable": false,
+      "blocked_reason": "Blocked because final publication wording and timing remain human-reviewed.",
+      "source_refs": [
+        "docs/atlas-book/09-automation-and-command-candidates.md",
+        "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CONTRACT-FIRST-AGENT-SHADOWING-PASS-1-2026-06-01.md"
+      ]
+    },
+    {
+      "contract_id": "atlas.cortex.contract.doctrine-admission-blocked.v1",
+      "id": "doctrine-admission-blocked",
+      "family_name": "doctrine admission",
+      "trigger": "A workflow asks Cortex to ratify doctrine instead of returning a draft-only projection.",
+      "purpose": "Admit or ratify doctrine directly.",
+      "trigger_family": "doctrine admission",
+      "stable_inputs": [
+        "docs/PLAYBOOK_NOTES.md",
+        "docs/atlas-book/10-failure-modes-and-recovery.md"
+      ],
+      "expected_proof_artifact": "A doctrine admission decision.",
+      "fallback_path": "defer:playbook-doctrine-review",
+      "fallback_behavior": "Return a shadow draft and defer final admission to Playbook or operator review.",
+      "owner_boundary": "ATLAS and Playbook remain doctrine truth owners.",
+      "non_claim_boundary": "Not a doctrine-admission authority surface.",
+      "admissibility_state": "blocked",
+      "stage": "blocked",
+      "runnable": false,
+      "blocked_reason": "Blocked because doctrine admission remains a human-reviewed governance act.",
+      "source_refs": [
+        "docs/PLAYBOOK_NOTES.md",
+        "docs/atlas-book/10-failure-modes-and-recovery.md",
+        "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CONTRACT-FIRST-AGENT-SHADOWING-PASS-1-2026-06-01.md"
+      ]
+    },
+    {
+      "contract_id": "atlas.cortex.contract.destructive-cleanup-or-secret-approval-blocked.v1",
+      "id": "destructive-cleanup-or-secret-approval-blocked",
+      "family_name": "destructive cleanup or secret-handling approval",
+      "trigger": "A workflow attempts destructive cleanup or secret-handling approval through Cortex.",
+      "purpose": "Approve destructive cleanup, secret handling, or other high-risk changes.",
+      "trigger_family": "destructive cleanup or secret-handling approval",
+      "stable_inputs": [
+        "docs/atlas-book/09-automation-and-command-candidates.md",
+        "AGENTS.md"
+      ],
+      "expected_proof_artifact": "An approval decision for high-risk mutation.",
+      "fallback_path": "escalate:operator-approval-gate",
+      "fallback_behavior": "Escalate back to the operator and the explicit approval gate.",
+      "owner_boundary": "The operator and the governing approval surface remain the authority.",
+      "non_claim_boundary": "Never a Cortex authority surface.",
+      "admissibility_state": "blocked",
+      "stage": "blocked",
+      "runnable": false,
+      "blocked_reason": "Blocked because destructive cleanup and secret handling remain approval-gated.",
+      "source_refs": [
+        "docs/atlas-book/09-automation-and-command-candidates.md",
+        "AGENTS.md",
+        "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CONTRACT-FIRST-AGENT-SHADOWING-PASS-1-2026-06-01.md"
+      ]
+    },
+    {
+      "contract_id": "atlas.cortex.contract.ambiguous-visual-or-acceptance-review-blocked.v1",
+      "id": "ambiguous-visual-or-acceptance-review-blocked",
+      "family_name": "ambiguous visual or acceptance-criteria review",
+      "trigger": "A workflow needs a judgment call on ambiguous visual or acceptance-quality evidence.",
+      "purpose": "Resolve ambiguous visual review or acceptance-criteria quality judgments.",
+      "trigger_family": "ambiguous visual or acceptance-criteria review",
+      "stable_inputs": [
+        "docs/atlas-book/09-automation-and-command-candidates.md",
+        "docs/PLAYBOOK_NOTES.md"
+      ],
+      "expected_proof_artifact": "A judgment call about ambiguous visual or acceptance quality.",
+      "fallback_path": "defer:human-review",
+      "fallback_behavior": "Return the evidence refs and defer to human review.",
+      "owner_boundary": "Owner-repo truth and human review remain the authority surfaces.",
+      "non_claim_boundary": "Not admissible for shadow authority because the judgment class is intentionally human-owned.",
+      "admissibility_state": "blocked",
+      "stage": "blocked",
+      "runnable": false,
+      "blocked_reason": "Blocked because ambiguous visual and acceptance review still require human judgment.",
+      "source_refs": [
+        "docs/atlas-book/09-automation-and-command-candidates.md",
+        "docs/PLAYBOOK_NOTES.md",
+        "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CONTRACT-FIRST-AGENT-SHADOWING-PASS-1-2026-06-01.md"
+      ]
+    }
+  ]
+}

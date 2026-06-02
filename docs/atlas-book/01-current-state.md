@@ -127,6 +127,8 @@ Current status:
   - the first mixed tracked support subtranche is now also frozen explicitly: canonical repo-path support refreshes across root docs, support tooling, repo-inventory validation, and delayed rename-aligned support surfaces may be preserved without pulling continuity-manifest refreshes, workflow cleanup residue, or held Cortex support into the same packet
   - the continuity-support bucket is now also frozen explicitly: the next honest memory-support preservation set is the memory README plus the seeded continuity manifests and the exact untracked root receipt support files they cite
   - `_stack Readiness` continuity is now also repaired explicitly inside that bucket: the seeded manifest may not preserve stale `61%` truth and instead now carries the already-durable `70%` restart posture before staging admission
+  - the held root-owned Cortex shadow-support carry is now also frozen explicitly: the Wave 1 Playbook/Cortex shadow receipts, the local shadow registry and consumers, the runtime seed and schema, the shadow tests, and the `.gitignore` seed exception form one exact preservation tranche separate from the later memory-path and QA workflow carries
+  - the later tracked carry is now correspondingly narrower: `docs/memory/initiatives/initiative-mazer-d2-learning-scorer.json` remains rename-aligned memory-path canonicalization carry, while `.github/workflows/atlas-qa-llel.yml` remains residual QA workflow carry outside the Cortex shadow-support tranche
 - no helper-Vercel project deletion gate remains open after the 2026-05-25 helper-surface deletion pass
 - DiscordOS lookup widening is closed at the owner-repo boundary:
   - transport-aware opening: `no`
