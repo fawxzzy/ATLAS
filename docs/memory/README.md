@@ -117,6 +117,11 @@ Current seeded manifest set:
 - `docs/memory/initiatives/continuity-manifest-branch-worktree-normalization.json`
 - `docs/memory/initiatives/continuity-manifest-full-stack-resync-clean-closeout.json`
 - `docs/memory/initiatives/continuity-manifest-atlas-owned-repo-naming-canonicalization.json`
+- `docs/memory/initiatives/continuity-manifest-dependency-untangling.json`
+- `docs/memory/initiatives/continuity-manifest-inventory-and-truth-map.json`
+- `docs/memory/initiatives/continuity-manifest-knowledge-capture-transfer.json`
+- `docs/memory/initiatives/continuity-manifest-stack-readiness.json`
+- `docs/memory/initiatives/continuity-manifest-post-convergence-lane-split-readiness.json`
 
 These seeded manifests are manifest-backed only while their freshness state remains current.
 

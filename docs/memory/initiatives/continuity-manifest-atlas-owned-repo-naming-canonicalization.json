@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-05-28T00:00:00Z",
-  "updated_at": "2026-05-28T18:08:24Z",
+  "updated_at": "2026-05-29T02:53:26.9411130-04:00",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -23,14 +23,17 @@
     "docs/ops/ATLAS-OWNED-REPO-NAMING-SAFE-FIRST-CANDIDATE-DECISION-2026-05-27.md",
     "docs/ops/ATLAS-OWNED-REPO-NAMING-BOUNDED-REWRITE-ROLLBACK-PLAN-2026-05-28.md",
     "docs/ops/ATLAS-OWNED-REPO-NAMING-SAFE-FIRST-EXECUTION-APPROVAL-2026-05-28.md",
-    "docs/ops/ATLAS-OWNED-REPO-NAMING-STREAM-WORKTREE-DEPENDENCY-CLEARANCE-PASS-1-2026-05-28.md",
-    "docs/ops/ATLAS-OWNED-REPO-NAMING-STREAM-WORKTREE-DEPENDENCY-CLOSURE-DECISION-PASS-1-2026-05-28.md",
-    "docs/ops/ATLAS-OWNED-REPO-NAMING-STREAM-BLOCKER-CLEARANCE-EXECUTION-PASS-2-2026-05-28.md",
-    "docs/ops/ATLAS-OWNED-REPO-NAMING-STREAM-LOCAL-RENAME-EXECUTION-PASS-2-2026-05-28.md",
-    "docs/ops/ATLAS-OWNED-REPO-NAMING-STREAM-LOCAL-RENAME-EXECUTION-PASS-3-2026-05-28.md",
-    "docs/ops/ATLAS-OWNED-REPO-NAMING-STREAM-RENAME-PROOF-RECONCILIATION-PASS-2-2026-05-28.md",
-    "docs/ops/ATLAS-OWNED-REPO-NAMING-MARKER-RATCHET-CHECKPOINT-5-2026-05-28.md",
-    "docs/ops/ATLAS-OWNED-REPO-NAMING-STREAM-WORKTREE-OWNER-DISPOSITION-PASS-1-2026-05-28.md",
+    "docs/ops/ATLAS-OWNED-REPO-NAMING-REMAINING-FAMILY-DELTA-RECHECK-PASS-6-2026-05-28.md",
+    "docs/ops/ATLAS-OWNED-REPO-NAMING-MAZER-EXECUTION-PREFLIGHT-APPROVAL-2026-05-29.md",
+    "docs/ops/ATLAS-OWNED-REPO-NAMING-MAZER-LOCAL-RENAME-EXECUTION-PASS-1-2026-05-29.md",
+    "docs/ops/ATLAS-OWNED-REPO-NAMING-MAZER-RENAME-PROOF-RECONCILIATION-PASS-1-2026-05-29.md",
+    "docs/ops/ATLAS-OWNED-REPO-NAMING-MARKER-RATCHET-CHECKPOINT-NEXT-4-2026-05-29.md",
+    "docs/ops/ATLAS-OWNED-REPO-NAMING-REMAINING-FAMILY-DELTA-RECHECK-PASS-7-2026-05-29.md",
+    "docs/ops/ATLAS-OWNED-REPO-NAMING-PLAYBOOK-EXECUTION-PREFLIGHT-APPROVAL-2026-05-29.md",
+    "docs/ops/ATLAS-OWNED-REPO-NAMING-PLAYBOOK-LOCAL-RENAME-EXECUTION-PASS-1-2026-05-29.md",
+    "docs/ops/ATLAS-OWNED-REPO-NAMING-PLAYBOOK-RENAME-PROOF-RECONCILIATION-PASS-1-2026-05-29.md",
+    "docs/ops/ATLAS-OWNED-REPO-NAMING-MARKER-RATCHET-CHECKPOINT-NEXT-5-2026-05-29.md",
+    "repos/playbook/docs/naming-blocker-compression-pass-6.md",
     "docs/ops/ATLAS-NEXT-BUILD-QUEUE.md",
     "docs/registry/STACK-REPO-INVENTORY.json",
     "docs/audits/STACK-REPO-INVENTORY.md",
@@ -43,9 +46,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "atlas-owned-repo-naming-canonicalization",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/ATLAS-OWNED-REPO-NAMING-STREAM-WORKTREE-OWNER-DISPOSITION-PASS-1-2026-05-28.md",
-    "checkpoint_commit": "58f00a6",
-    "checkpoint_summary": "The lane still sits at 70 percent with durable naming policy, a bounded rewrite and rollback plan, one approval-bounded stream packet, repeated fail-closed rename attempts, and an exact owner-side blocker read showing that 2b and 2c remain live linked-worktree blockers rather than safe-clear residue.",
+    "current_checkpoint_receipt": "docs/ops/ATLAS-OWNED-REPO-NAMING-MARKER-RATCHET-CHECKPOINT-NEXT-5-2026-05-29.md",
+    "checkpoint_commit": "9bb230c",
+    "checkpoint_summary": "The lane now sits at 79 percent with six executed-and-reconciled local rename packets closed green, Playbook durably moved to repos/playbook with root and owner-side proof restored, and the admitted local naming family closed except for the preserved fitness exception.",
     "governing_receipts": [
       "docs/ops/ATLAS-OWNED-REPO-NAMING-CANONICALIZATION-2026-05-27.md",
       "docs/ops/ATLAS-OWNED-REPO-NAMING-EXECUTION-GATE-PASS-1-2026-05-27.md",
@@ -55,15 +58,29 @@
       "docs/ops/ATLAS-OWNED-REPO-NAMING-BOUNDED-REWRITE-ROLLBACK-PLAN-2026-05-28.md",
       "docs/ops/ATLAS-OWNED-REPO-NAMING-SAFE-FIRST-EXECUTION-APPROVAL-2026-05-28.md",
       "docs/ops/ATLAS-OWNED-REPO-NAMING-MARKER-RATCHET-CHECKPOINT-3-2026-05-28.md",
-      "docs/ops/ATLAS-OWNED-REPO-NAMING-STREAM-LOCAL-RENAME-EXECUTION-PASS-1-2026-05-28.md",
-      "docs/ops/ATLAS-OWNED-REPO-NAMING-STREAM-WORKTREE-DEPENDENCY-CLEARANCE-PASS-1-2026-05-28.md",
-      "docs/ops/ATLAS-OWNED-REPO-NAMING-STREAM-WORKTREE-DEPENDENCY-CLOSURE-DECISION-PASS-1-2026-05-28.md",
-      "docs/ops/ATLAS-OWNED-REPO-NAMING-STREAM-BLOCKER-CLEARANCE-EXECUTION-PASS-2-2026-05-28.md",
-      "docs/ops/ATLAS-OWNED-REPO-NAMING-STREAM-LOCAL-RENAME-EXECUTION-PASS-2-2026-05-28.md",
-      "docs/ops/ATLAS-OWNED-REPO-NAMING-STREAM-LOCAL-RENAME-EXECUTION-PASS-3-2026-05-28.md",
-      "docs/ops/ATLAS-OWNED-REPO-NAMING-STREAM-RENAME-PROOF-RECONCILIATION-PASS-2-2026-05-28.md",
-      "docs/ops/ATLAS-OWNED-REPO-NAMING-MARKER-RATCHET-CHECKPOINT-5-2026-05-28.md",
-      "docs/ops/ATLAS-OWNED-REPO-NAMING-STREAM-WORKTREE-OWNER-DISPOSITION-PASS-1-2026-05-28.md"
+      "docs/ops/ATLAS-OWNED-REPO-NAMING-FOUNDATION-SAFE-SECOND-EXECUTION-APPROVAL-2026-05-28.md",
+      "docs/ops/ATLAS-OWNED-REPO-NAMING-FOUNDATION-LOCAL-RENAME-EXECUTION-PASS-1-2026-05-28.md",
+      "docs/ops/ATLAS-OWNED-REPO-NAMING-FOUNDATION-RENAME-PROOF-RECONCILIATION-PASS-1-2026-05-28.md",
+      "docs/ops/ATLAS-OWNED-REPO-NAMING-MARKER-RATCHET-CHECKPOINT-NEXT-2026-05-28.md",
+      "docs/ops/ATLAS-OWNED-REPO-NAMING-TROVE-SAFE-THIRD-EXECUTION-APPROVAL-2026-05-28.md",
+      "docs/ops/ATLAS-OWNED-REPO-NAMING-TROVE-LOCAL-RENAME-EXECUTION-PASS-1-2026-05-28.md",
+      "docs/ops/ATLAS-OWNED-REPO-NAMING-TROVE-RENAME-PROOF-RECONCILIATION-PASS-1-2026-05-28.md",
+      "docs/ops/ATLAS-OWNED-REPO-NAMING-MARKER-RATCHET-CHECKPOINT-NEXT-2-2026-05-28.md",
+      "docs/ops/ATLAS-OWNED-REPO-NAMING-LIFELINE-SAFE-NEXT-EXECUTION-APPROVAL-2026-05-28.md",
+      "docs/ops/ATLAS-OWNED-REPO-NAMING-LIFELINE-LOCAL-RENAME-EXECUTION-PASS-1-2026-05-28.md",
+      "docs/ops/ATLAS-OWNED-REPO-NAMING-LIFELINE-RENAME-PROOF-RECONCILIATION-PASS-1-2026-05-28.md",
+      "docs/ops/ATLAS-OWNED-REPO-NAMING-MARKER-RATCHET-CHECKPOINT-NEXT-3-2026-05-28.md",
+      "docs/ops/ATLAS-OWNED-REPO-NAMING-REMAINING-FAMILY-DELTA-RECHECK-PASS-6-2026-05-28.md",
+      "docs/ops/ATLAS-OWNED-REPO-NAMING-MAZER-EXECUTION-PREFLIGHT-APPROVAL-2026-05-29.md",
+      "docs/ops/ATLAS-OWNED-REPO-NAMING-MAZER-LOCAL-RENAME-EXECUTION-PASS-1-2026-05-29.md",
+      "docs/ops/ATLAS-OWNED-REPO-NAMING-MAZER-RENAME-PROOF-RECONCILIATION-PASS-1-2026-05-29.md",
+      "docs/ops/ATLAS-OWNED-REPO-NAMING-MARKER-RATCHET-CHECKPOINT-NEXT-4-2026-05-29.md",
+      "docs/ops/ATLAS-OWNED-REPO-NAMING-REMAINING-FAMILY-DELTA-RECHECK-PASS-7-2026-05-29.md",
+      "docs/ops/ATLAS-OWNED-REPO-NAMING-PLAYBOOK-EXECUTION-PREFLIGHT-APPROVAL-2026-05-29.md",
+      "docs/ops/ATLAS-OWNED-REPO-NAMING-PLAYBOOK-LOCAL-RENAME-EXECUTION-PASS-1-2026-05-29.md",
+      "docs/ops/ATLAS-OWNED-REPO-NAMING-PLAYBOOK-RENAME-PROOF-RECONCILIATION-PASS-1-2026-05-29.md",
+      "docs/ops/ATLAS-OWNED-REPO-NAMING-MARKER-RATCHET-CHECKPOINT-NEXT-5-2026-05-29.md",
+      "repos/playbook/docs/naming-blocker-compression-pass-6.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -98,21 +115,17 @@
       },
       {
         "path": "docs/ops/ATLAS-NEXT-BUILD-QUEUE.md",
-        "role": "current-truth queue surface for stream path checks"
+        "role": "current-truth queue surface for naming-path checks"
       }
     ],
     "blocked_or_gated_work": [
       {
-        "item": "stream local rename execution",
-        "requirement": "blocked until active linked-worktree dependency on tmp/fawxzzy-stream-2b and tmp/fawxzzy-stream-2c changes by explicit owner-side merge, preservation, archive, or discard approval"
-      },
-      {
         "item": "remote rename assumptions and GitHub-side rename assumptions",
-        "requirement": "prohibited in this local-only naming lane"
+        "requirement": "local canonicalization is complete, but remote-name and GitHub-side rename assumptions remain prohibited unless an explicit later lane reopens them"
       },
       {
-        "item": "broader candidate execution beyond stream",
-        "requirement": "blocked until stream executes and proves cleanly, with additional candidate-specific blockers also still in force"
+        "item": "broader naming-family reopen",
+        "requirement": "blocked because the admitted local naming family is now closed and no additional root naming packet is currently open"
       },
       {
         "item": "fawxzzy-fitness rename",
@@ -121,21 +134,22 @@
     ],
     "next_package_ladder": [
       {
-        "package": "Atlas-owned Repo Naming stream blocker-clearance execution pass 3 only after owner-side merge, preservation, archive, or discard approval changes the 2b/2c blocker class",
-        "mode": "bounded local execution after owner-side disposition change",
-        "reason": "the remaining blockers are still-active worktrees with tracked and untracked work, so no further rename retry is honest until owner-side disposition changes their blocker class"
+        "package": "none inside the current local naming family",
+        "mode": "hold closed unless a new exception or remote-name lane is explicitly opened",
+        "reason": "the admitted local naming family is now durably complete and no further safe-next candidate remains"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-REFRESH-PASS-3-2026-05-28.md",
-    "freshness_checked_at": "2026-05-28T18:08:24Z",
-    "freshness_basis": "the checkpoint, marker posture, blocked work, and next-package posture now match the current durable naming lane state after the blocked retry chain and owner-side blocker disposition pass.",
+    "freshness_checked_receipt": "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-REFRESH-PASS-4-2026-05-29.md",
+    "freshness_checked_at": "2026-05-29T02:53:26.9411130-04:00",
+    "freshness_basis": "the checkpoint, marker posture, blocked work, and next-package posture still match the current durable naming lane state across the full eight-manifest refresh cycle after Dependency Untangling admission.",
     "marker_posture": [
       {
         "marker": "Atlas-owned Repo Naming Canonicalization",
-        "percent": 70,
+        "percent": 79,
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ]
   }
 }
+

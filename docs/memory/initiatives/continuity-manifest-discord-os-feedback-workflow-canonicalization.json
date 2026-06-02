@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-05-27T00:00:00Z",
-  "updated_at": "2026-05-28T16:17:39Z",
+  "updated_at": "2026-06-01T14:12:00-04:00",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -38,6 +38,24 @@
     "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-SUCCESS-REACTION-CLOSURE-LIVE-EVIDENCE-PACKET-2026-05-27.md",
     "docs/ops/FITNESS-DISCORD-FEEDBACK-LIVE-ROLLOUT-2026-05-25.md",
     "docs/ops/FITNESS-DISCORD-LIVE-REPAIR-AND-ATLAS-STATUS-POST-2026-05-25.md",
+    "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-FRESH-SUBMIT-LIVE-PROOF-ATTEMPT-NOT-YET-PROVABLE-2026-06-01.md",
+    "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-AUTHENTICATED-SAME-EVENT-FRESH-SUBMIT-PROOF-PATH-BLOCKER-CONVERSION-PASS-1-2026-06-01.md",
+    "docs/ops/ROOT-BOUNDED-DISPATCHER-RECONCILIATION-AFTER-FITNESS-DISCORD-AUTHENTICATED-SAME-EVENT-FRESH-SUBMIT-PROOF-PATH-BLOCKER-CONVERSION-PASS-1-CLOSEOUT-2026-06-01.md",
+    "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-GOVERNED-AUTHENTICATED-SAME-EVENT-SUBMIT-ORIGIN-SESSION-PATH-CONVERSION-PASS-2-2026-06-01.md",
+    "docs/ops/ROOT-BOUNDED-DISPATCHER-RECONCILIATION-AFTER-FITNESS-DISCORD-GOVERNED-AUTHENTICATED-SAME-EVENT-SUBMIT-ORIGIN-SESSION-PATH-CONVERSION-PASS-2-CLOSEOUT-2026-06-01.md",
+    "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-GOVERNED-NON-AUTOMATION-MEMBER-BROWSER-SESSION-PATH-ENABLEMENT-PASS-3-2026-06-01.md",
+    "docs/ops/ROOT-BOUNDED-DISPATCHER-RECONCILIATION-AFTER-FITNESS-DISCORD-GOVERNED-NON-AUTOMATION-MEMBER-BROWSER-SESSION-PATH-ENABLEMENT-PASS-3-CLOSEOUT-2026-06-01.md",
+    "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-LOCAL-VERIFICATION-ENV-MIRROR-REPAIR-PASS-4-2026-06-01.md",
+    "docs/ops/ROOT-BOUNDED-DISPATCHER-RECONCILIATION-AFTER-FITNESS-DISCORD-LOCAL-VERIFICATION-ENV-MIRROR-REPAIR-PASS-4-CLOSEOUT-2026-06-01.md",
+    "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-GOVERNED-AUTHENTICATED-SAME-EVENT-FRESH-SUBMIT-POSITIVE-LIVE-PROOF-CAPTURE-PASS-5-2026-06-01.md",
+    "docs/ops/ROOT-BOUNDED-DISPATCHER-RECONCILIATION-AFTER-FITNESS-DISCORD-GOVERNED-AUTHENTICATED-SAME-EVENT-FRESH-SUBMIT-POSITIVE-LIVE-PROOF-CAPTURE-PASS-5-CLOSEOUT-2026-06-01.md",
+    "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-SELECTED-PROFILE-CHROME-EXTENSION-ENABLEMENT-PASS-6-2026-06-01.md",
+    "docs/ops/ROOT-BOUNDED-DISPATCHER-RECONCILIATION-AFTER-FITNESS-DISCORD-SELECTED-PROFILE-CHROME-EXTENSION-ENABLEMENT-PASS-6-CLOSEOUT-2026-06-01.md",
+    "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-DEFAULT-PROFILE-CODEX-CHROME-EXTENSION-INSTALLATION-READINESS-PASS-7-2026-06-01.md",
+    "docs/ops/ROOT-BOUNDED-DISPATCHER-RECONCILIATION-AFTER-FITNESS-DISCORD-DEFAULT-PROFILE-CODEX-CHROME-EXTENSION-INSTALLATION-READINESS-PASS-7-CLOSEOUT-2026-06-01.md",
+    "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-DEFAULT-PROFILE-CODEX-CHROME-EXTENSION-MANUAL-INSTALL-ACKNOWLEDGMENT-PASS-8-2026-06-01.md",
+    "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-POST-INSTALL-CODEX-CHROME-BRIDGE-TIMEOUT-BOUNDARY-RECEIPT-2026-06-01.md",
+    "docs/ops/ROOT-BOUNDED-DISPATCHER-RECONCILIATION-AFTER-FITNESS-DISCORD-POST-INSTALL-CODEX-CHROME-BRIDGE-TIMEOUT-BOUNDARY-RECEIPT-CLOSEOUT-2026-06-01.md",
     "repos/DiscordOS/docs/contracts/feedback-runtime.md",
     "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-FEEDBACK.md",
     "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-UPDATES.md",
@@ -50,9 +68,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "discord-os-feedback-workflow-canonicalization",
     "scope_class": "cross-repo-governance-with-fitness-live-owner",
-    "current_checkpoint_receipt": "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-FRESH-SUBMIT-EVIDENCE-ACQUISITION-PREFLIGHT-2026-05-28.md",
-    "checkpoint_commit": "4bcbe67",
-    "checkpoint_summary": "The lane still sits at 72 percent with the strongest blocker unchanged, but the missing fresh-submit proof class is now acquisition-ready at the governance layer with an exact same-event evidence bundle and fail-closed capture sequence frozen.",
+    "current_checkpoint_receipt": "docs/ops/ROOT-BOUNDED-DISPATCHER-RECONCILIATION-AFTER-FITNESS-DISCORD-POST-INSTALL-CODEX-CHROME-BRIDGE-TIMEOUT-BOUNDARY-RECEIPT-CLOSEOUT-2026-06-01.md",
+    "checkpoint_commit": "root-uncommitted",
+    "checkpoint_summary": "The lane still sits at 72 percent, and shared restart truth now absorbs the external/session-scoped bridge hold cleanly: launcher-channel presence, bounded row export, panel-helper contract alignment, the app-side non-automation verification-token requirement, one governed non-automation app-side subject, local dev env forwarding, non-empty active local verification env mirrors, local token minting, native-host presence, deterministic selected-profile identification, and extension install/enabled state in `Default` are proven, while the lane still lacks one governed authenticated same-event member submit bundle because the live Codex-to-Chrome bridge in this session is timing out and no further Fitness-local repair packet is honest before that bridge responds.",
     "governing_receipts": [
       "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-CANONICALIZATION-2026-05-27.md",
       "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-CANONICAL-CONTRACTS-PASS-1-2026-05-27.md",
@@ -72,7 +90,26 @@
       "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-NO-REGRESSION-LIVE-PARITY-GAP-PACKET-2026-05-27.md",
       "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-MARKER-RATCHET-CHECKPOINT-6-2026-05-27.md",
       "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-FRESH-SUBMIT-POSITIVE-LIVE-PROOF-CAPTURE-2026-05-27.md",
-      "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-FRESH-SUBMIT-EVIDENCE-ACQUISITION-PREFLIGHT-2026-05-28.md"
+      "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-FRESH-SUBMIT-EVIDENCE-ACQUISITION-PREFLIGHT-2026-05-28.md",
+      "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-FRESH-SUBMIT-LIVE-PROOF-ATTEMPT-NOT-YET-PROVABLE-2026-06-01.md",
+      "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-AUTHENTICATED-SAME-EVENT-FRESH-SUBMIT-PROOF-PATH-BLOCKER-CONVERSION-PASS-1-2026-06-01.md",
+      "docs/ops/ROOT-BOUNDED-DISPATCHER-RECONCILIATION-AFTER-FITNESS-DISCORD-AUTHENTICATED-SAME-EVENT-FRESH-SUBMIT-PROOF-PATH-BLOCKER-CONVERSION-PASS-1-CLOSEOUT-2026-06-01.md",
+      "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-GOVERNED-AUTHENTICATED-SAME-EVENT-SUBMIT-ORIGIN-SESSION-PATH-CONVERSION-PASS-2-2026-06-01.md",
+      "docs/ops/ROOT-BOUNDED-DISPATCHER-RECONCILIATION-AFTER-FITNESS-DISCORD-GOVERNED-AUTHENTICATED-SAME-EVENT-SUBMIT-ORIGIN-SESSION-PATH-CONVERSION-PASS-2-CLOSEOUT-2026-06-01.md",
+      "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-GOVERNED-NON-AUTOMATION-MEMBER-BROWSER-SESSION-PATH-ENABLEMENT-PASS-3-2026-06-01.md",
+      "docs/ops/ROOT-BOUNDED-DISPATCHER-RECONCILIATION-AFTER-FITNESS-DISCORD-GOVERNED-NON-AUTOMATION-MEMBER-BROWSER-SESSION-PATH-ENABLEMENT-PASS-3-CLOSEOUT-2026-06-01.md",
+      "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-LOCAL-VERIFICATION-ENV-MIRROR-REPAIR-PASS-4-2026-06-01.md",
+      "docs/ops/ROOT-BOUNDED-DISPATCHER-RECONCILIATION-AFTER-FITNESS-DISCORD-LOCAL-VERIFICATION-ENV-MIRROR-REPAIR-PASS-4-CLOSEOUT-2026-06-01.md",
+      "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-GOVERNED-AUTHENTICATED-SAME-EVENT-FRESH-SUBMIT-POSITIVE-LIVE-PROOF-CAPTURE-PASS-5-2026-06-01.md",
+      "docs/ops/ROOT-BOUNDED-DISPATCHER-RECONCILIATION-AFTER-FITNESS-DISCORD-GOVERNED-AUTHENTICATED-SAME-EVENT-FRESH-SUBMIT-POSITIVE-LIVE-PROOF-CAPTURE-PASS-5-CLOSEOUT-2026-06-01.md",
+      "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-SELECTED-PROFILE-CHROME-EXTENSION-ENABLEMENT-PASS-6-2026-06-01.md",
+      "docs/ops/ROOT-BOUNDED-DISPATCHER-RECONCILIATION-AFTER-FITNESS-DISCORD-SELECTED-PROFILE-CHROME-EXTENSION-ENABLEMENT-PASS-6-CLOSEOUT-2026-06-01.md",
+      "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-DEFAULT-PROFILE-CODEX-CHROME-EXTENSION-INSTALLATION-READINESS-PASS-7-2026-06-01.md",
+      "docs/ops/ROOT-BOUNDED-DISPATCHER-RECONCILIATION-AFTER-FITNESS-DISCORD-DEFAULT-PROFILE-CODEX-CHROME-EXTENSION-INSTALLATION-READINESS-PASS-7-CLOSEOUT-2026-06-01.md",
+      "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-DEFAULT-PROFILE-CODEX-CHROME-EXTENSION-MANUAL-INSTALL-ACKNOWLEDGMENT-PASS-8-2026-06-01.md",
+      "docs/ops/ROOT-BOUNDED-DISPATCHER-RECONCILIATION-AFTER-FITNESS-DISCORD-DEFAULT-PROFILE-CODEX-CHROME-EXTENSION-MANUAL-INSTALL-ACKNOWLEDGMENT-PASS-8-CLOSEOUT-2026-06-01.md",
+      "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-POST-INSTALL-CODEX-CHROME-BRIDGE-TIMEOUT-BOUNDARY-RECEIPT-2026-06-01.md",
+      "docs/ops/ROOT-BOUNDED-DISPATCHER-RECONCILIATION-AFTER-FITNESS-DISCORD-POST-INSTALL-CODEX-CHROME-BRIDGE-TIMEOUT-BOUNDARY-RECEIPT-CLOSEOUT-2026-06-01.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -121,20 +158,20 @@
       },
       {
         "item": "fresh-submit live row-thread-message proof and broader deploy-backed parity",
-        "requirement": "still missing one owner-side positive fresh-submit live proof bundle plus broader audit-comment, completion-review, success-reaction, release-boundary, and no-regression parity"
+        "requirement": "still missing one owner-side positive fresh-submit live proof bundle; launcher-channel presence, bounded row export, panel-helper contract alignment, the app-side non-automation verification-token requirement, one governed non-automation app-side subject, local dev env forwarding, non-empty active local verification env mirrors, local token minting, native-host presence, deterministic selected-profile identification, and extension install/enabled state in `Default` are now proven, but the lane still cannot claim one governed authenticated same-event member submit bundle because the live Codex-to-Chrome bridge in this session is timing out and no further Fitness-local repair packet is honest before that bridge responds, while the broader audit-comment, completion-review, success-reaction, release-boundary, and no-regression parity families also remain open"
       }
     ],
     "next_package_ladder": [
       {
-        "package": "Discord OS Feedback Workflow fresh-submit positive live proof receipt only after one owner-side evidence bundle is captured",
-        "mode": "docs-only live proof receipt after owner-side capture",
-        "reason": "the evidence standard and capture sequence are frozen; the next meaningful change is one actual same-event row-thread-message proof bundle"
+        "package": "Fitness Discord Default-profile post-install governed authenticated same-event fresh-submit positive live proof capture pass 9",
+        "mode": "owner-side post-install proof capture",
+        "reason": "the bridge-timeout boundary is now explicit and durable, so the next valid Codex packet remains direct post-install governed same-event proof capture, but only after a live Chrome runtime call succeeds from the current Codex session and proves the browser bridge is responsive again"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-REFRESH-PASS-2-2026-05-28.md",
-    "freshness_checked_at": "2026-05-28T16:17:39Z",
-    "freshness_basis": "checkpoint, marker posture, blocked work, and next-package posture now match the current durable Discord feedback lane state after the evidence-packet cluster, hold ratchets, and fresh-submit acquisition preflight.",
+    "freshness_checked_receipt": "docs/ops/ROOT-BOUNDED-DISPATCHER-RECONCILIATION-AFTER-FITNESS-DISCORD-POST-INSTALL-CODEX-CHROME-BRIDGE-TIMEOUT-BOUNDARY-RECEIPT-CLOSEOUT-2026-06-01.md",
+    "freshness_checked_at": "2026-06-01T14:12:00-04:00",
+    "freshness_basis": "checkpoint, blocked work, and next-package posture were refreshed again during root reconciliation after the owner-side bridge-timeout boundary receipt: launcher-channel presence, bounded row export, panel-helper contract alignment, the app-side non-automation verification-token requirement, one governed non-automation app-side subject, local dev env forwarding, non-empty active local verification env mirrors, local token minting, native-host presence, deterministic selected-profile identification, and extension install/enabled state in `Default` remain fresh durable proof, but the lane still lacks one positive governed same-event member submit bundle because the live Codex-to-Chrome bridge in this session is timing out and no further Fitness-local repair packet is honest before that bridge responds.",
     "marker_posture": [
       {
         "marker": "Discord OS Feedback Workflow Canonicalization",

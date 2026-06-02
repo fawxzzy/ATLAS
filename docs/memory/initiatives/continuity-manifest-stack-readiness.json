@@ -1,0 +1,169 @@
+{
+  "contract_version": "atlas.initiative.v1",
+  "id": "continuity-manifest-stack-readiness",
+  "title": "Continuity Manifest Stack Readiness",
+  "summary": "Active ATLAS-root retrieval map for the _stack Readiness lane.",
+  "status": "active",
+  "owner": "stack-root",
+  "created_at": "2026-05-29T00:00:00Z",
+  "updated_at": "2026-06-02T00:00:00-04:00",
+  "related_plan_refs": [],
+  "related_decision_refs": [],
+  "related_hypothesis_refs": [],
+  "related_session_refs": [],
+  "related_attention_refs": [],
+  "proposed_next_session_refs": [],
+  "evidence_refs": [
+    "docs/atlas-book/02-lanes-and-markers.md",
+    "docs/atlas-book/05-receipt-index.md",
+    "docs/atlas-book/09-automation-and-command-candidates.md",
+    "docs/atlas-book/11-system-map-graph.md",
+    "docs/atlas-book/12-restart-and-handoff-guide.md",
+    "docs/atlas-book/13-vision-and-endgames.md",
+    "docs/memory/README.md",
+    "docs/ops/STACK-READINESS-DECISIVE-RECEIPT-AND-BLOCKED-WORK-LADDER-SHAPING-PASS-1-2026-05-29.md",
+    "docs/ops/STACK-READINESS-BLOCKER-FAMILY-COMPRESSION-PASS-2-2026-05-29.md",
+    "docs/ops/STACK-READINESS-COMMAND-CANDIDATE-AND-HELPER-ADMISSION-COMPRESSION-FAMILY-SHAPING-PASS-3-2026-05-29.md",
+    "docs/ops/STACK-READINESS-OPERATOR-ENTRYPOINT-AND-OWNER-ROUTING-COMPRESSION-FAMILY-SHAPING-PASS-4-2026-05-29.md",
+    "docs/ops/STACK-READINESS-DEPLOY-AUTHORITY-AND-RELEASE-HANDOFF-COMPRESSION-FAMILY-SHAPING-PASS-5-2026-05-29.md",
+    "docs/ops/STACK-READINESS-HEALTH-SIGNAL-AND-LOCAL-TRUTH-GOVERNANCE-FAMILY-SHAPING-PASS-6-2026-05-29.md",
+    "docs/ops/STACK-READINESS-CONTINUITY-MANIFEST-REFRESH-AND-RATCHET-DECISION-PASS-7-2026-05-29.md",
+    "docs/ops/_STACK-READINESS-MARKER-PRESSURE-REOPEN-AND-REENTRY-PASS-8-2026-05-29.md",
+    "docs/ops/_STACK-READINESS-STACK-VERCEL-HEALTH-COMMAND-DESIGN-PASS-9-2026-05-29.md",
+    "docs/ops/_STACK-READINESS-STACK-VERCEL-HEALTH-EVIDENCE-ADMISSION-AND-FRESHNESS-PASS-10-2026-05-29.md",
+    "docs/ops/_STACK-READINESS-STACK-VERCEL-HEALTH-REPORT-CONTRACT-AND-CONTRADICTION-ROUTING-PASS-11-2026-05-29.md",
+    "docs/ops/_STACK-READINESS-STACK-VERCEL-HEALTH-IMPLEMENTATION-ADMISSION-AND-NO-EXECUTION-GUARD-PASS-12-2026-05-29.md",
+    "docs/ops/_STACK-READINESS-STACK-VERCEL-HEALTH-FIXTURE-PROOF-AND-STATIC-INPUT-BOUNDARY-PASS-13-2026-05-29.md",
+    "docs/ops/_STACK-READINESS-STACK-VERCEL-HEALTH-FIRST-IMPLEMENTATION-SLICE-AND-PROOF-MATRIX-ADMISSION-PASS-14-2026-05-29.md",
+    "docs/ops/_STACK-READINESS-STACK-VERCEL-HEALTH-FIRST-IMPLEMENTATION-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-15-2026-05-29.md",
+    "docs/ops/_STACK-READINESS-STACK-VERCEL-HEALTH-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-16-2026-05-29.md",
+    "docs/ops/WAVE-1-ROOT-RECONCILIATION-AFTER-WORKER-A-AND-WORKER-B-2026-05-30.md",
+    "docs/ops/WAVE-2-ROOT-RECONCILIATION-AFTER-WORKER-A-AND-WORKER-B-2026-05-31.md",
+    "docs/ops/UNIFIED-OPERATOR-ENTRYPOINT-COMMAND-LADDER-2026-05-24.md",
+    "docs/ops/UNIFIED-RELEASE-DEPLOY-UPDATE-HANDOFF-2026-05-24.md",
+    "docs/ops/UNIFIED-WORKFLOW-CONVERGENCE-INVENTORY-2026-05-24.md",
+    "docs/ops/VERCEL-HELPER-SURFACE-DELETION-DECISION-2026-05-25.md"
+  ],
+  "supersedes": [],
+  "superseded_by": [],
+  "metadata": {
+    "artifact_kind": "continuity_manifest",
+    "lane_id": "stack-readiness",
+    "scope_class": "atlas-root-governance",
+    "current_checkpoint_receipt": "docs/ops/WAVE-2-ROOT-RECONCILIATION-AFTER-WORKER-A-AND-WORKER-B-2026-05-31.md",
+    "checkpoint_commit": "root-uncommitted",
+    "checkpoint_summary": "The lane now sits at 70 percent with explicit deploy authority, one compact decisive receipt spine, one fully shaped blocker-family chain, one manifest-backed continuity map, one valid marker-pressure reopen decision, one compact stack-vercel-health contract chain through implementation-readiness closeout, one reconciled first implementation worker landing, and one reconciled proof-hardening follow-on, while later wave-2 reconciliation keeps the marker flat because proof hardened without widening adoption or clearing a new blocker class.",
+    "governing_receipts": [
+      "docs/ops/STACK-READINESS-DECISIVE-RECEIPT-AND-BLOCKED-WORK-LADDER-SHAPING-PASS-1-2026-05-29.md",
+      "docs/ops/STACK-READINESS-BLOCKER-FAMILY-COMPRESSION-PASS-2-2026-05-29.md",
+      "docs/ops/STACK-READINESS-COMMAND-CANDIDATE-AND-HELPER-ADMISSION-COMPRESSION-FAMILY-SHAPING-PASS-3-2026-05-29.md",
+      "docs/ops/STACK-READINESS-OPERATOR-ENTRYPOINT-AND-OWNER-ROUTING-COMPRESSION-FAMILY-SHAPING-PASS-4-2026-05-29.md",
+      "docs/ops/STACK-READINESS-DEPLOY-AUTHORITY-AND-RELEASE-HANDOFF-COMPRESSION-FAMILY-SHAPING-PASS-5-2026-05-29.md",
+      "docs/ops/STACK-READINESS-HEALTH-SIGNAL-AND-LOCAL-TRUTH-GOVERNANCE-FAMILY-SHAPING-PASS-6-2026-05-29.md",
+      "docs/ops/STACK-READINESS-CONTINUITY-MANIFEST-REFRESH-AND-RATCHET-DECISION-PASS-7-2026-05-29.md",
+      "docs/ops/_STACK-READINESS-MARKER-PRESSURE-REOPEN-AND-REENTRY-PASS-8-2026-05-29.md",
+      "docs/ops/_STACK-READINESS-STACK-VERCEL-HEALTH-COMMAND-DESIGN-PASS-9-2026-05-29.md",
+      "docs/ops/_STACK-READINESS-STACK-VERCEL-HEALTH-EVIDENCE-ADMISSION-AND-FRESHNESS-PASS-10-2026-05-29.md",
+      "docs/ops/_STACK-READINESS-STACK-VERCEL-HEALTH-REPORT-CONTRACT-AND-CONTRADICTION-ROUTING-PASS-11-2026-05-29.md",
+      "docs/ops/_STACK-READINESS-STACK-VERCEL-HEALTH-IMPLEMENTATION-ADMISSION-AND-NO-EXECUTION-GUARD-PASS-12-2026-05-29.md",
+      "docs/ops/_STACK-READINESS-STACK-VERCEL-HEALTH-FIXTURE-PROOF-AND-STATIC-INPUT-BOUNDARY-PASS-13-2026-05-29.md",
+      "docs/ops/_STACK-READINESS-STACK-VERCEL-HEALTH-FIRST-IMPLEMENTATION-SLICE-AND-PROOF-MATRIX-ADMISSION-PASS-14-2026-05-29.md",
+      "docs/ops/_STACK-READINESS-STACK-VERCEL-HEALTH-FIRST-IMPLEMENTATION-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-15-2026-05-29.md",
+      "docs/ops/_STACK-READINESS-STACK-VERCEL-HEALTH-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-16-2026-05-29.md",
+      "docs/ops/WAVE-1-ROOT-RECONCILIATION-AFTER-WORKER-A-AND-WORKER-B-2026-05-30.md",
+      "docs/ops/WAVE-2-ROOT-RECONCILIATION-AFTER-WORKER-A-AND-WORKER-B-2026-05-31.md"
+    ],
+    "owner_truth_surfaces": [
+      {
+        "path": "docs/ops/WAVE-2-ROOT-RECONCILIATION-AFTER-WORKER-A-AND-WORKER-B-2026-05-31.md",
+        "role": "current exact restart surface after implementation and proof-hardening reconciliation"
+      },
+      {
+        "path": "docs/ops/WAVE-1-ROOT-RECONCILIATION-AFTER-WORKER-A-AND-WORKER-B-2026-05-30.md",
+        "role": "marker-ratchet and first implementation worker reconciliation truth"
+      },
+      {
+        "path": "docs/ops/_STACK-READINESS-STACK-VERCEL-HEALTH-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-16-2026-05-29.md",
+        "role": "current stack-vercel-health design and worker-routing boundary"
+      },
+      {
+        "path": "docs/ops/UNIFIED-OPERATOR-ENTRYPOINT-COMMAND-LADDER-2026-05-24.md",
+        "role": "operator-entrypoint and command-boundary source truth"
+      },
+      {
+        "path": "docs/ops/UNIFIED-RELEASE-DEPLOY-UPDATE-HANDOFF-2026-05-24.md",
+        "role": "deploy-authority and release-handoff source truth"
+      },
+      {
+        "path": "docs/ops/UNIFIED-WORKFLOW-CONVERGENCE-INVENTORY-2026-05-24.md",
+        "role": "local-truth governance and _stack local-truth source surface"
+      },
+      {
+        "path": "docs/ops/VERCEL-HELPER-SURFACE-DELETION-DECISION-2026-05-25.md",
+        "role": "current stale-surface and provenance-pressure evidence surface"
+      }
+    ],
+    "verification_adoption_surfaces": [
+      {
+        "path": "docs/atlas-book/05-receipt-index.md",
+        "role": "receipt spine"
+      },
+      {
+        "path": "docs/atlas-book/09-automation-and-command-candidates.md",
+        "role": "shared health-command candidate and command-ownership surface"
+      },
+      {
+        "path": "docs/atlas-book/11-system-map-graph.md",
+        "role": "lane-state projection routing surface"
+      },
+      {
+        "path": "docs/atlas-book/12-restart-and-handoff-guide.md",
+        "role": "restart routing surface"
+      },
+      {
+        "path": "docs/atlas-book/13-vision-and-endgames.md",
+        "role": "current control-plane next-valid-package surface"
+      },
+      {
+        "path": "docs/atlas-book/02-lanes-and-markers.md",
+        "role": "current marker posture surface"
+      },
+      {
+        "path": "docs/memory/README.md",
+        "role": "manifest-backed continuity doctrine surface"
+      }
+    ],
+    "blocked_or_gated_work": [
+      {
+        "item": "new _stack command implementation or broader execution-surface work",
+        "requirement": "blocked until a distinct execution-facing or command-implementation lane is explicitly selected rather than implied by the current docs-only refresh result"
+      },
+      {
+        "item": "higher marker movement above the current refresh-backed ratchet",
+        "requirement": "blocked until broader automation adoption, stronger proof-backed execution maturity, or a new blocker-clearance class changes operator reality again"
+      },
+      {
+        "item": "docs-only _stack follow-on packets by momentum",
+        "requirement": "blocked because the current stack-vercel-health docs ladder is closed after implementation-readiness and later reconciliations moved the next honest root packet elsewhere"
+      }
+    ],
+    "next_package_ladder": [
+      {
+        "package": "No immediate _stack Readiness docs-only follow-on packet",
+        "mode": "hold-flat lane posture after worker reconciliation and proof hardening",
+        "reason": "the current implementation slice is already reconciled, the wave-2 proof hardening stayed below a new marker move, and later root selection already routed the next honest packet outside this docs-only lane"
+      }
+    ],
+    "freshness_state": "manifest-backed",
+    "freshness_checked_receipt": "docs/ops/WAVE-2-ROOT-RECONCILIATION-AFTER-WORKER-A-AND-WORKER-B-2026-05-31.md",
+    "freshness_checked_at": "2026-06-02T00:00:00-04:00",
+    "freshness_basis": "the current checkpoint, 70-percent marker posture, blocked-work posture, and no-immediate-docs-follow-on posture now match the implementation and proof-hardening reconciliations recorded by the current wave receipts.",
+    "marker_posture": [
+      {
+        "marker": "_stack Readiness",
+        "percent": 70,
+        "source": "docs/atlas-book/02-lanes-and-markers.md"
+      }
+    ]
+  }
+}

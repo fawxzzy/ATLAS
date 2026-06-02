@@ -1,0 +1,132 @@
+{
+  "contract_version": "atlas.initiative.v1",
+  "id": "continuity-manifest-post-convergence-lane-split-readiness",
+  "title": "Continuity Manifest Post-Convergence Lane Split Readiness",
+  "summary": "Active ATLAS-root retrieval map for the Post-Convergence Lane Split Readiness lane.",
+  "status": "active",
+  "owner": "stack-root",
+  "created_at": "2026-05-29T00:00:00Z",
+  "updated_at": "2026-05-29T20:59:57.8038507-04:00",
+  "related_plan_refs": [],
+  "related_decision_refs": [],
+  "related_hypothesis_refs": [],
+  "related_session_refs": [],
+  "related_attention_refs": [],
+  "proposed_next_session_refs": [],
+  "evidence_refs": [
+    "docs/atlas-book/02-lanes-and-markers.md",
+    "docs/atlas-book/05-receipt-index.md",
+    "docs/atlas-book/11-system-map-graph.md",
+    "docs/atlas-book/12-restart-and-handoff-guide.md",
+    "docs/atlas-book/13-vision-and-endgames.md",
+    "docs/memory/README.md",
+    "docs/ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-2026-05-24.md",
+    "docs/ops/LANE-SPLIT-EXECUTION-READINESS-2026-05-24.md",
+    "docs/ops/ATLAS-CONVERGENCE-PAUSE-CHECKPOINT-2026-05-24.md",
+    "docs/ops/UNIFIED-QA-LLEL-LOCAL-PROOF-HANDOFF-2026-05-24.md",
+    "docs/ops/UNIFIED-RELEASE-DEPLOY-UPDATE-HANDOFF-2026-05-24.md",
+    "docs/ops/UNIFIED-DISCORD-OS-WORKFLOW-BOUNDARY-2026-05-24.md",
+    "docs/ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-DECISIVE-RECEIPT-AND-BLOCKED-WORK-LADDER-SHAPING-PASS-1-2026-05-29.md",
+    "docs/ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-BLOCKER-FAMILY-COMPRESSION-PASS-2-2026-05-29.md",
+    "docs/ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-OWNER-ENTRYPOINT-AND-LANE-SELECTION-COMPRESSION-FAMILY-SHAPING-PASS-3-2026-05-29.md",
+    "docs/ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-APPROVAL-GATE-AND-PAUSED-LANE-PRESERVATION-COMPRESSION-FAMILY-SHAPING-PASS-4-2026-05-29.md",
+    "docs/ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-SHARED-CONTRACT-AND-CONSEQUENCE-ROUTING-COMPRESSION-FAMILY-SHAPING-PASS-5-2026-05-29.md",
+    "docs/ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-FIRST-SAFE-PACKAGE-AND-REOPEN-ORDER-COMPRESSION-FAMILY-SHAPING-PASS-6-2026-05-29.md",
+    "docs/ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-CONTINUITY-MANIFEST-REFRESH-AND-RATCHET-DECISION-PASS-7-2026-05-29.md"
+  ],
+  "supersedes": [],
+  "superseded_by": [],
+  "metadata": {
+    "artifact_kind": "continuity_manifest",
+    "lane_id": "post-convergence-lane-split-readiness",
+    "scope_class": "atlas-root-governance",
+    "current_checkpoint_receipt": "docs/ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-CONTINUITY-MANIFEST-REFRESH-AND-RATCHET-DECISION-PASS-7-2026-05-29.md",
+    "checkpoint_commit": "9bb230c",
+    "checkpoint_summary": "The lane now sits at 61 percent with one compact decisive receipt spine, one fully shaped exact blocker-family chain, one manifest-backed continuity map, and a shaped chain that has now passed one coherent refresh cycle as a single restart unit, without claiming any owner-side reopen or execution-surface widening.",
+    "governing_receipts": [
+      "docs/ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-DECISIVE-RECEIPT-AND-BLOCKED-WORK-LADDER-SHAPING-PASS-1-2026-05-29.md",
+      "docs/ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-BLOCKER-FAMILY-COMPRESSION-PASS-2-2026-05-29.md",
+      "docs/ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-OWNER-ENTRYPOINT-AND-LANE-SELECTION-COMPRESSION-FAMILY-SHAPING-PASS-3-2026-05-29.md",
+      "docs/ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-APPROVAL-GATE-AND-PAUSED-LANE-PRESERVATION-COMPRESSION-FAMILY-SHAPING-PASS-4-2026-05-29.md",
+      "docs/ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-SHARED-CONTRACT-AND-CONSEQUENCE-ROUTING-COMPRESSION-FAMILY-SHAPING-PASS-5-2026-05-29.md",
+      "docs/ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-FIRST-SAFE-PACKAGE-AND-REOPEN-ORDER-COMPRESSION-FAMILY-SHAPING-PASS-6-2026-05-29.md",
+      "docs/ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-CONTINUITY-MANIFEST-REFRESH-AND-RATCHET-DECISION-PASS-7-2026-05-29.md"
+    ],
+    "owner_truth_surfaces": [
+      {
+        "path": "docs/ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-CONTINUITY-MANIFEST-REFRESH-AND-RATCHET-DECISION-PASS-7-2026-05-29.md",
+        "role": "current exact refresh-and-ratchet restart surface"
+      },
+      {
+        "path": "docs/ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-2026-05-24.md",
+        "role": "original lane charter and split-governance source truth"
+      },
+      {
+        "path": "docs/ops/LANE-SPLIT-EXECUTION-READINESS-2026-05-24.md",
+        "role": "lane reopen checks, approval-gated blockers, and first-safe-package source truth"
+      },
+      {
+        "path": "docs/ops/UNIFIED-QA-LLEL-LOCAL-PROOF-HANDOFF-2026-05-24.md",
+        "role": "proof-boundary and owner-proof-first source truth"
+      },
+      {
+        "path": "docs/ops/UNIFIED-RELEASE-DEPLOY-UPDATE-HANDOFF-2026-05-24.md",
+        "role": "deploy authority and publish-after-proof source truth"
+      },
+      {
+        "path": "docs/ops/UNIFIED-DISCORD-OS-WORKFLOW-BOUNDARY-2026-05-24.md",
+        "role": "Discord-facing boundary and downstream publication source truth"
+      }
+    ],
+    "verification_adoption_surfaces": [
+      {
+        "path": "docs/atlas-book/05-receipt-index.md",
+        "role": "receipt spine"
+      },
+      {
+        "path": "docs/atlas-book/11-system-map-graph.md",
+        "role": "lane-state projection routing surface"
+      },
+      {
+        "path": "docs/atlas-book/12-restart-and-handoff-guide.md",
+        "role": "restart routing surface"
+      },
+      {
+        "path": "docs/atlas-book/13-vision-and-endgames.md",
+        "role": "current control-plane next-valid-package surface"
+      },
+      {
+        "path": "docs/memory/README.md",
+        "role": "manifest-backed continuity doctrine surface"
+      }
+    ],
+    "blocked_or_gated_work": [
+      {
+        "item": "any owner-side reopen or implementation lane",
+        "requirement": "blocked until an exact approval gate opens, a distinct owner-side execution pressure appears, or a new restart-truth change justifies reopening outside the closed docs-only ladder"
+      },
+      {
+        "item": "higher marker movement above the current refresh-backed ratchet",
+        "requirement": "blocked until broader proof-backed execution, owner-side reopen, or a new blocker-clearance class changes operator reality again"
+      }
+    ],
+    "next_package_ladder": [
+      {
+        "package": "No immediate Post-Convergence Lane Split Readiness docs-only follow-on packet",
+        "mode": "hold-flat lane posture after the smallest honest ratchet",
+        "reason": "the shaped family chain has now passed one coherent manifest-backed refresh cycle, so reopen only when a distinct restart-truth, marker, approval, or execution-surface question becomes explicit"
+      }
+    ],
+    "freshness_state": "manifest-backed",
+    "freshness_checked_receipt": "docs/ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-CONTINUITY-MANIFEST-REFRESH-AND-RATCHET-DECISION-PASS-7-2026-05-29.md",
+    "freshness_checked_at": "2026-05-29T20:59:57.8038507-04:00",
+    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture now match the refreshed and smallest-ratcheted lane state after pass 7.",
+    "marker_posture": [
+      {
+        "marker": "Post-Convergence Lane Split Readiness",
+        "percent": 61,
+        "source": "docs/atlas-book/02-lanes-and-markers.md"
+      }
+    ]
+  }
+}

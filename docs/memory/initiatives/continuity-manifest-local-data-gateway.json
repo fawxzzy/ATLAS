@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-05-27T00:00:00Z",
-  "updated_at": "2026-05-28T16:17:39Z",
+  "updated_at": "2026-06-01T03:25:00-04:00",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -33,6 +33,13 @@
     "docs/ops/LOCAL-DATA-GATEWAY-WORKFLOW-ADOPTION-INVENTORY-PASS-1-2026-05-27.md",
     "docs/ops/LOCAL-DATA-GATEWAY-WORKFLOW-ADOPTION-PROOF-PASS-1-2026-05-27.md",
     "docs/ops/LOCAL-DATA-GATEWAY-WORKFLOW-ADOPTION-EXPANSION-PASS-2-2026-05-28.md",
+    "docs/ops/LOCAL-DATA-GATEWAY-RETAINED-SURFACE-DESTRUCTIVE-DISPOSAL-FAMILY-ADOPTION-STATUS-FREEZE-CHECKPOINT-2026-05-31.md",
+    "docs/ops/LOCAL-DATA-GATEWAY-FAMILY-QUEUE-REPRIORITIZATION-CHECKPOINT-2026-05-31.md",
+    "docs/ops/LOCAL-DATA-GATEWAY-PARKED-ADOPTABLE-LATER-FAMILY-RE-ENTRY-SELECTION-CHECKPOINT-2026-05-31.md",
+    "docs/ops/LOCAL-DATA-GATEWAY-REPO-NAMING-PARKED-FAMILY-RE-ENTRY-THRESHOLD-CHECKPOINT-2026-05-31.md",
+    "docs/ops/LOCAL-DATA-GATEWAY-REPO-NAMING-PASSED-SECOND-INSTANCE-MARKER-APPLICATION-WORDING-CHECKPOINT-2026-05-31.md",
+    "docs/ops/LOCAL-DATA-GATEWAY-RETAINED-SURFACE-DESTRUCTIVE-DISPOSAL-RELATIONSHIP-SEAM-RECONCILIATION-AFTER-CLEAN-ROOT-RESELECTION-2026-06-01.md",
+    "docs/ops/LOCAL-DATA-GATEWAY-REPO-NAMING-REUSABLE-PROOF-FAMILY-ADOPTABLE-NOW-THRESHOLD-CHECKPOINT-2026-06-01.md",
     "repos/_stack/scripts/data-gateway-packet-emitter.mjs",
     "repos/_stack/scripts/data-gateway-packet-emitter.test.mjs",
     "repos/_stack/scripts/data-gateway-packet-proof-packager.mjs",
@@ -48,9 +55,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "local-data-gateway",
     "scope_class": "cross-repo-governance-with-owner-repo-implementation",
-    "current_checkpoint_receipt": "docs/ops/LOCAL-DATA-GATEWAY-WORKFLOW-ADOPTION-EXPANSION-PASS-2-2026-05-28.md",
-    "checkpoint_commit": "4bcbe67",
-    "checkpoint_summary": "The lane now sits at 65 percent with a proven no-send local chain and a still-bounded adoption map: the original three adoptable-now classes remain real, adjacent families are classified more sharply, and no send-capable or family-specific wrapper creep is admitted.",
+    "current_checkpoint_receipt": "docs/ops/LOCAL-DATA-GATEWAY-REPO-NAMING-REUSABLE-PROOF-FAMILY-ADOPTABLE-NOW-THRESHOLD-CHECKPOINT-2026-06-01.md",
+    "checkpoint_commit": "main",
+    "checkpoint_summary": "The retained-surface destructive-disposal relationship seam remains complete and parked, and the repo-naming adoptable-now threshold is now explicitly frozen as not crossed: current durable evidence proves bounded proof-family maturity and one admitted real-workflow proof lane, but still stops below adoptable now because broader reusable adopted workflow independence from rename-specific execution semantics is not yet durably proven.",
     "governing_receipts": [
       "docs/ops/LOCAL-DATA-GATEWAY-PACKET-CONTRACT-DRAFT-2026-05-27.md",
       "docs/ops/LOCAL-DATA-GATEWAY-VALIDATOR-PROOF-PASS-2026-05-27.md",
@@ -66,7 +73,21 @@
       "docs/ops/LOCAL-DATA-GATEWAY-WORKFLOW-ADOPTION-INVENTORY-PASS-1-2026-05-27.md",
       "docs/ops/LOCAL-DATA-GATEWAY-WORKFLOW-ADOPTION-PROOF-PASS-1-2026-05-27.md",
       "docs/ops/LOCAL-DATA-GATEWAY-MARKER-RATCHET-CHECKPOINT-9-2026-05-27.md",
-      "docs/ops/LOCAL-DATA-GATEWAY-WORKFLOW-ADOPTION-EXPANSION-PASS-2-2026-05-28.md"
+      "docs/ops/LOCAL-DATA-GATEWAY-WORKFLOW-ADOPTION-EXPANSION-PASS-2-2026-05-28.md",
+      "docs/ops/LOCAL-DATA-GATEWAY-REPO-NAMING-RENAME-MANIFEST-PROOF-ADMISSION-DECISION-2026-05-28.md",
+      "docs/ops/LOCAL-DATA-GATEWAY-REPO-NAMING-BOUNDED-PROOF-SHAPE-REVIEW-2026-05-28.md",
+      "docs/ops/LOCAL-DATA-GATEWAY-REPO-NAMING-PROOF-FAMILY-REAL-WORKFLOW-DECISION-2026-05-28.md",
+      "docs/ops/LOCAL-DATA-GATEWAY-REPO-NAMING-PROOF-FAMILY-REUSE-THRESHOLD-REVIEW-2026-05-28.md",
+      "docs/ops/LOCAL-DATA-GATEWAY-REPO-NAMING-REAL-WORKFLOW-PROOF-LANE-SELECTION-2026-05-29.md",
+      "docs/ops/LOCAL-DATA-GATEWAY-REPO-NAMING-REAL-WORKFLOW-PROOF-LANE-ADMISSION-PASS-1-2026-05-29.md",
+      "docs/ops/LOCAL-DATA-GATEWAY-RETAINED-SURFACE-DESTRUCTIVE-DISPOSAL-PACKET-REVIEW-TO-DELETE-APPROVAL-RELATIONSHIP-CHECKPOINT-2026-05-31.md",
+      "docs/ops/LOCAL-DATA-GATEWAY-RETAINED-SURFACE-DESTRUCTIVE-DISPOSAL-FAMILY-ADOPTION-STATUS-FREEZE-CHECKPOINT-2026-05-31.md",
+      "docs/ops/LOCAL-DATA-GATEWAY-FAMILY-QUEUE-REPRIORITIZATION-CHECKPOINT-2026-05-31.md",
+      "docs/ops/LOCAL-DATA-GATEWAY-PARKED-ADOPTABLE-LATER-FAMILY-RE-ENTRY-SELECTION-CHECKPOINT-2026-05-31.md",
+      "docs/ops/LOCAL-DATA-GATEWAY-REPO-NAMING-PARKED-FAMILY-RE-ENTRY-THRESHOLD-CHECKPOINT-2026-05-31.md",
+      "docs/ops/LOCAL-DATA-GATEWAY-REPO-NAMING-PASSED-SECOND-INSTANCE-MARKER-APPLICATION-WORDING-CHECKPOINT-2026-05-31.md",
+      "docs/ops/LOCAL-DATA-GATEWAY-RETAINED-SURFACE-DESTRUCTIVE-DISPOSAL-RELATIONSHIP-SEAM-RECONCILIATION-AFTER-CLEAN-ROOT-RESELECTION-2026-06-01.md",
+      "docs/ops/LOCAL-DATA-GATEWAY-REPO-NAMING-REUSABLE-PROOF-FAMILY-ADOPTABLE-NOW-THRESHOLD-CHECKPOINT-2026-06-01.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -110,6 +131,10 @@
       {
         "path": "docs/atlas-book/14-lane-split-execution.md",
         "role": "root adoption and lane-split projection"
+      },
+      {
+        "path": "docs/ops/ATLAS-OWNED-REPO-NAMING-MARKER-RATCHET-CHECKPOINT-NEXT-5-2026-05-29.md",
+        "role": "root-visible multi-candidate naming closeout evidence"
       }
     ],
     "blocked_or_gated_work": [
@@ -126,25 +151,33 @@
         "requirement": "blocked until a family has a stable packet contract and can be proven local-only without family-specific wrapper logic"
       },
       {
+        "item": "retained-surface destructive-disposal family promotion into the active queue",
+        "requirement": "held parked at adoptable later; the family is fully shaped but its claim ceiling stays narrow and does not currently outrank the repo-naming threshold frontier"
+      },
+      {
+        "item": "repo-naming graduation into adoptable-now status",
+        "requirement": "blocked until durable evidence proves the generic Local Data Gateway no-send chain carries repo naming as a broader reusable adopted workflow class independent of rename-specific execution and reconciliation semantics"
+      },
+      {
         "item": "gateway-first rollout across docs-native governance receipts",
         "requirement": "prohibited; control-plane reconciliation and marker receipts stay out of scope"
       }
     ],
     "next_package_ladder": [
       {
-        "package": "Local Data Gateway repo naming rename-manifest contract checkpoint",
-        "mode": "docs-only packet-contract checkpoint",
-        "reason": "the repo naming family is the closest blocked adjacent class to honest no-send packet reuse without implying rename execution"
+        "package": "Fitness app release-readiness evidence refresh pass 2",
+        "mode": "return control to the strongest already-exposed owner-side packet",
+        "reason": "the retained-surface family is already reconciled, the repo-naming adoptable-now threshold is now also frozen as not crossed, and the clean-root lane-selection result found no stronger immediate root-only packet than the active Fitness release-readiness evidence refresh lane"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-REFRESH-PASS-2-2026-05-28.md",
-    "freshness_checked_at": "2026-05-28T16:17:39Z",
-    "freshness_basis": "checkpoint, marker posture, blocked work, and next-package posture now match the current durable Local Data Gateway lane state after the adoption proof and expansion receipts.",
+    "freshness_checked_receipt": "docs/ops/ROOT-BOUNDED-LANE-SELECTION-PASS-AFTER-LOCAL-DATA-GATEWAY-REPO-NAMING-REUSABLE-PROOF-FAMILY-ADOPTABLE-NOW-THRESHOLD-CHECKPOINT-CLOSEOUT-2026-06-01.md",
+    "freshness_checked_at": "2026-06-01T03:25:00-04:00",
+    "freshness_basis": "checkpoint, marker posture, blocked work, and next-package posture now match the retained-surface reconciliation plus the repo-naming adoptable-now threshold freeze and the subsequent clean-root lane-selection result, which keeps the family below adoptable now and routes the next honest move back out to the stronger owner-side Fitness release-readiness packet.",
     "marker_posture": [
       {
         "marker": "Local Data Gateway",
-        "percent": 65,
+        "percent": 66,
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ]

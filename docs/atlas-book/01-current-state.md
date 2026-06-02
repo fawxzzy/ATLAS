@@ -125,6 +125,8 @@ Current status:
   - truth-mirror staging and commit path is now also frozen explicitly: the remaining seven-file mirror set is admitted, staged in isolation, and may now carry commit-intent as an exact next partial-commit question
   - the mixed tracked support backlog is now also frozen explicitly as three later buckets rather than one blob: a canonicalization-support tranche, a continuity-support tranche, and a residual QA/Cortex support carry
   - the first mixed tracked support subtranche is now also frozen explicitly: canonical repo-path support refreshes across root docs, support tooling, repo-inventory validation, and delayed rename-aligned support surfaces may be preserved without pulling continuity-manifest refreshes, workflow cleanup residue, or held Cortex support into the same packet
+  - the continuity-support bucket is now also frozen explicitly: the next honest memory-support preservation set is the memory README plus the seeded continuity manifests and the exact untracked root receipt support files they cite
+  - `_stack Readiness` continuity is now also repaired explicitly inside that bucket: the seeded manifest may not preserve stale `61%` truth and instead now carries the already-durable `70%` restart posture before staging admission
 - no helper-Vercel project deletion gate remains open after the 2026-05-25 helper-surface deletion pass
 - DiscordOS lookup widening is closed at the owner-repo boundary:
   - transport-aware opening: `no`

@@ -1,0 +1,126 @@
+{
+  "contract_version": "atlas.initiative.v1",
+  "id": "continuity-manifest-inventory-and-truth-map",
+  "title": "Continuity Manifest Inventory And Truth Map",
+  "summary": "Active ATLAS-root retrieval map for the Inventory & Truth Map lane.",
+  "status": "active",
+  "owner": "stack-root",
+  "created_at": "2026-05-29T00:00:00Z",
+  "updated_at": "2026-05-29T04:38:09.7922798-04:00",
+  "related_plan_refs": [],
+  "related_decision_refs": [],
+  "related_hypothesis_refs": [],
+  "related_session_refs": [],
+  "related_attention_refs": [],
+  "proposed_next_session_refs": [],
+  "evidence_refs": [
+    "docs/atlas-book/02-lanes-and-markers.md",
+    "docs/atlas-book/05-receipt-index.md",
+    "docs/atlas-book/11-system-map-graph.md",
+    "docs/atlas-book/12-restart-and-handoff-guide.md",
+    "docs/atlas-book/13-vision-and-endgames.md",
+    "docs/memory/README.md",
+    "docs/ops/STACK-LANE-0-BASELINE-INVENTORY-2026-05-22.md",
+    "docs/ops/STACK-LANE-0-TRUTH-MAP-2026-05-22.md",
+    "docs/ops/INVENTORY-AND-TRUTH-MAP-DECISIVE-RECEIPT-AND-BLOCKED-WORK-LADDER-SHAPING-PASS-1-2026-05-29.md",
+    "docs/ops/INVENTORY-AND-TRUTH-MAP-BLOCKER-FAMILY-COMPRESSION-PASS-2-2026-05-29.md",
+    "docs/ops/INVENTORY-AND-TRUTH-MAP-OWNER-TRUTH-AND-PROJECTION-COMPRESSION-FAMILY-SHAPING-PASS-3-2026-05-29.md",
+    "docs/ops/INVENTORY-AND-TRUTH-MAP-REGISTRY-CURRENT-STATE-SYSTEM-MAP-RECONCILIATION-FAMILY-SHAPING-PASS-4-2026-05-29.md",
+    "docs/ops/INVENTORY-AND-TRUTH-MAP-DUPLICATE-RESIDUE-CARRY-FORWARD-TRUTH-FAMILY-SHAPING-PASS-5-2026-05-29.md",
+    "docs/ops/INVENTORY-AND-TRUTH-MAP-RESTART-ROUTING-AND-NEXT-PACKAGE-COMPRESSION-FAMILY-SHAPING-PASS-6-2026-05-29.md",
+    "docs/ops/INVENTORY-AND-TRUTH-MAP-CONTINUITY-MANIFEST-REFRESH-AND-RATCHET-DECISION-PASS-7-2026-05-29.md"
+  ],
+  "supersedes": [],
+  "superseded_by": [],
+  "metadata": {
+    "artifact_kind": "continuity_manifest",
+    "lane_id": "inventory-and-truth-map",
+    "scope_class": "atlas-root-governance",
+    "current_checkpoint_receipt": "docs/ops/INVENTORY-AND-TRUTH-MAP-CONTINUITY-MANIFEST-REFRESH-AND-RATCHET-DECISION-PASS-7-2026-05-29.md",
+    "checkpoint_commit": "9bb230c",
+    "checkpoint_summary": "The lane now sits at 75 percent with one compact decisive receipt spine, one fully shaped exact blocker-family chain, one manifest-backed continuity map, and a shaped chain that has now passed one coherent refresh cycle as a single restart unit, without claiming broad inventory cleanup execution.",
+    "governing_receipts": [
+      "docs/ops/STACK-LANE-0-BASELINE-INVENTORY-2026-05-22.md",
+      "docs/ops/STACK-LANE-0-TRUTH-MAP-2026-05-22.md",
+      "docs/ops/INVENTORY-AND-TRUTH-MAP-DECISIVE-RECEIPT-AND-BLOCKED-WORK-LADDER-SHAPING-PASS-1-2026-05-29.md",
+      "docs/ops/INVENTORY-AND-TRUTH-MAP-BLOCKER-FAMILY-COMPRESSION-PASS-2-2026-05-29.md",
+      "docs/ops/INVENTORY-AND-TRUTH-MAP-OWNER-TRUTH-AND-PROJECTION-COMPRESSION-FAMILY-SHAPING-PASS-3-2026-05-29.md",
+      "docs/ops/INVENTORY-AND-TRUTH-MAP-REGISTRY-CURRENT-STATE-SYSTEM-MAP-RECONCILIATION-FAMILY-SHAPING-PASS-4-2026-05-29.md",
+      "docs/ops/INVENTORY-AND-TRUTH-MAP-DUPLICATE-RESIDUE-CARRY-FORWARD-TRUTH-FAMILY-SHAPING-PASS-5-2026-05-29.md",
+      "docs/ops/INVENTORY-AND-TRUTH-MAP-RESTART-ROUTING-AND-NEXT-PACKAGE-COMPRESSION-FAMILY-SHAPING-PASS-6-2026-05-29.md",
+      "docs/ops/INVENTORY-AND-TRUTH-MAP-CONTINUITY-MANIFEST-REFRESH-AND-RATCHET-DECISION-PASS-7-2026-05-29.md"
+    ],
+    "owner_truth_surfaces": [
+      {
+        "path": "docs/ops/INVENTORY-AND-TRUTH-MAP-CONTINUITY-MANIFEST-REFRESH-AND-RATCHET-DECISION-PASS-7-2026-05-29.md",
+        "role": "current exact refresh-and-ratchet restart surface"
+      },
+      {
+        "path": "docs/ops/STACK-LANE-0-TRUTH-MAP-2026-05-22.md",
+        "role": "original lane charter"
+      },
+      {
+        "path": "stack.yaml",
+        "role": "canonical topology and admission truth"
+      },
+      {
+        "path": "stack.lock.yaml",
+        "role": "governed lock and presence truth"
+      },
+      {
+        "path": "docs/registry/STACK-REPO-INVENTORY.json",
+        "role": "machine-readable registry truth"
+      }
+    ],
+    "verification_adoption_surfaces": [
+      {
+        "path": "docs/atlas-book/05-receipt-index.md",
+        "role": "receipt spine"
+      },
+      {
+        "path": "docs/atlas-book/11-system-map-graph.md",
+        "role": "lane-state projection routing surface"
+      },
+      {
+        "path": "docs/atlas-book/12-restart-and-handoff-guide.md",
+        "role": "restart routing surface"
+      },
+      {
+        "path": "docs/atlas-book/13-vision-and-endgames.md",
+        "role": "current control-plane next-valid-package surface"
+      },
+      {
+        "path": "docs/audits/STACK-REPO-INVENTORY.md",
+        "role": "human-readable parity projection"
+      }
+    ],
+    "blocked_or_gated_work": [
+      {
+        "item": "broader inventory cleanup or repo-local truth rewrite execution",
+        "requirement": "blocked until a distinct owner-facing or control-plane execution lane is explicitly selected rather than implied by the current docs-only refresh result"
+      },
+      {
+        "item": "higher marker movement above the current refresh-backed ratchet",
+        "requirement": "blocked until broader proof-backed adoption, wider continuity-read reuse, or a new blocker-clearance class changes operator reality again"
+      }
+    ],
+    "next_package_ladder": [
+      {
+        "package": "No immediate Inventory & Truth Map docs-only follow-on packet",
+        "mode": "hold-flat lane posture after the smallest honest ratchet",
+        "reason": "the shaped family chain has now passed one coherent manifest-backed refresh cycle, so reopen only when a distinct restart-truth, marker, or adjacent-lane question becomes explicit"
+      }
+    ],
+    "freshness_state": "manifest-backed",
+    "freshness_checked_receipt": "docs/ops/INVENTORY-AND-TRUTH-MAP-CONTINUITY-MANIFEST-REFRESH-AND-RATCHET-DECISION-PASS-7-2026-05-29.md",
+    "freshness_checked_at": "2026-05-29T04:38:09.7922798-04:00",
+    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture now match the refreshed and smallest-ratcheted lane state after pass 7.",
+    "marker_posture": [
+      {
+        "marker": "Inventory & Truth Map",
+        "percent": 75,
+        "source": "docs/atlas-book/02-lanes-and-markers.md"
+      }
+    ]
+  }
+}
