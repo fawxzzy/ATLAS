@@ -210,6 +210,7 @@ Each entry records:
 ### Prevention rule
 
 - secrets belong only in governed `secrets/**` lanes
+- quarantine is not normal retention
 
 ### Recovery steps
 
@@ -217,7 +218,9 @@ Each entry records:
 2. inventory key names only
 3. move the file into the governed secret lane
 4. verify source removal and git-ignore posture
-5. record cleanup receipt
+5. classify the resulting path as active local secret, quarantine-only, or local backup
+6. require explicit operator approval before deletion, broader archive mutation, or retention-policy change
+7. record cleanup or posture receipt
 
 ### Owning lane
 
@@ -225,7 +228,7 @@ Each entry records:
 
 ### Required receipt
 
-- secret-path inventory, decision, cleanup-plan, and cleanup-pass receipts
+- secret-path inventory, decision, cleanup-plan, cleanup-pass, or posture-hardening receipts
 
 ### Marker impact
 

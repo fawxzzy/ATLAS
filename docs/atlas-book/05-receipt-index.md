@@ -508,6 +508,7 @@
 - [Operator Secret Path Hygiene Fitness QA Auth Consumer-Path Proof Reconciliation Pass 3](../ops/OPERATOR-SECRET-PATH-HYGIENE-FITNESS-QA-AUTH-CONSUMER-PATH-PROOF-RECONCILIATION-PASS-3-2026-05-31.md)
 - [Operator Secret Path Hygiene Fitness QA Auth Proof Receipt Path-Discipline Normalization Reconciliation Pass 6](../ops/OPERATOR-SECRET-PATH-HYGIENE-FITNESS-QA-AUTH-PROOF-RECEIPT-PATH-DISCIPLINE-NORMALIZATION-RECONCILIATION-PASS-6-2026-06-01.md)
 - [Operator Secret Path Hygiene Archive Quarantine And Non-Secret Retention Reconciliation Pass 7](../ops/OPERATOR-SECRET-PATH-HYGIENE-ARCHIVE-QUARANTINE-AND-NON-SECRET-RETENTION-RECONCILIATION-PASS-7-2026-06-02.md)
+- [Operator Secret Path Hygiene Local Secret Boundary And Quarantine Posture Pass 8](../ops/OPERATOR-SECRET-PATH-HYGIENE-LOCAL-SECRET-BOUNDARY-AND-QUARANTINE-POSTURE-PASS-8-2026-06-02.md)
 - [Operator Secret Path Hygiene Fitness QA Auth Secret Provisioning Decision Pass 2](../ops/OPERATOR-SECRET-PATH-HYGIENE-FITNESS-QA-AUTH-SECRET-PROVISIONING-DECISION-PASS-2-2026-05-29.md)
 - [Operator Secret Path Hygiene Cleanup Plan 1](../ops/OPERATOR-SECRET-PATH-HYGIENE-CLEANUP-PLAN-1-2026-05-24.md)
 - [Operator Secret Path Hygiene Cleanup Pass 1](../ops/OPERATOR-SECRET-PATH-HYGIENE-CLEANUP-PASS-1-2026-05-24.md)

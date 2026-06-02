@@ -736,3 +736,9 @@
 - Fitness Supabase Profile/Data Hygiene: tracks inventory, cleanup planning, and governance of Fitness auth/profile/data surfaces, especially unknown, duplicate, and automation-linked identities.
 - Duplicate Surface Decommission and Manual Deploy Exception Burn-Down should both explicitly absorb stale Vercel surface cleanup targets when those surfaces can confuse source truth or deploy authority.
 - Failure Mode: if Discord OS separation and Fitness data hygiene stay implicit, later cleanup mixes repo, deploy, bot, and identity concerns into one vague migration lane and raises breakage risk.
+
+## 2026-06-02 - Quarantine posture must stay distinct from normal secret retention
+
+- Rule: quarantine is not normal retention; sensitive files moved under `secrets/**` quarantine must not be treated as ordinary archive evidence or routine operator source material.
+- Pattern: move sensitive residue out of ordinary archive carry -> keep it under ignored `secrets/**` quarantine -> verify adjacent retained metadata is non-secret -> freeze operator posture before any broader mutation.
+- Failure Mode: secret posture drift happens when retention posture, quarantine posture, ignore rules, and operator expectations stop matching, so a local secret path becomes implicitly trusted or casually mutated.

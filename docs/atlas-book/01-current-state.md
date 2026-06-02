@@ -141,7 +141,9 @@ Current status:
   - no broader archive mutation is implied from that result; the remaining `archive/*` backlog still requires a new explicit subfamily packet before any further mutation is honest
   - post-convergence lane reselection is now also frozen explicitly: the immediate lane is `Operator Secret Path Hygiene`, the supporting lane is `Playbook Everywhere + Cortex Interface`, and `archive follow-on`, the materially closed `stabilize-root-worktree` root-docs ladder, and Cortex authority widening are all explicit held lanes
   - `Operator Secret Path Hygiene` now also absorbs the archive sensitivity result directly: the `2` archived `.env.local` files are no longer normal archive carry and now live under ignored `secrets/local/archive-quarantine/**`, while the `3` archived `.playbook/last-run.json` files remain retained only because they were verified non-secret
-  - the exact next move is now the supporting `Playbook Everywhere + Cortex Interface` lane, not another archive or generic root-cleanup continuation
+  - local secret-path posture is now also frozen explicitly: ignored `secrets/*.env` and `secrets/local/*.env` remain the governed active local secret lanes, ignored `secrets/local/*.backup.env` remains local-only backup posture rather than canonical evidence, and `secrets/local/archive-quarantine/**` remains quarantine-only rather than ordinary retained archive evidence
+  - the supporting `Playbook Everywhere + Cortex Interface` slice is now also materially held at its current threshold; no further honest continuation exists there unless a new exportable family, cleared blocked family, or real contract drift appears
+  - no further immediate `Operator Secret Path Hygiene` packet is implied from this posture freeze alone; reopen only on new ambiguous secret-path evidence, archive-subfamily reopen, or explicit operator approval work
 - no helper-Vercel project deletion gate remains open after the 2026-05-25 helper-surface deletion pass
 - DiscordOS lookup widening is closed at the owner-repo boundary:
   - transport-aware opening: `no`
