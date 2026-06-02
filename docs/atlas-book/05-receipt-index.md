@@ -117,6 +117,7 @@
 - [Stabilize Root Worktree Non-LDG DocsOps Tail Staging Proof Pass 62](../ops/STABILIZE-ROOT-WORKTREE-NON-LDG-DOCSOPS-TAIL-STAGING-PROOF-PASS-62-2026-06-02.md)
 - [Stabilize Root Worktree Non-LDG DocsOps Tail Disposition Decision Pass 63](../ops/STABILIZE-ROOT-WORKTREE-NON-LDG-DOCSOPS-TAIL-DISPOSITION-DECISION-PASS-63-2026-06-02.md)
 - [Stabilize Root Worktree Non-LDG DocsOps Tail Commit-Intent Decision Pass 64](../ops/STABILIZE-ROOT-WORKTREE-NON-LDG-DOCSOPS-TAIL-COMMIT-INTENT-DECISION-PASS-64-2026-06-02.md)
+- [Stabilize Root Worktree Archive Retained-Evidence Classification Decision Pass 65](../ops/STABILIZE-ROOT-WORKTREE-ARCHIVE-RETAINED-EVIDENCE-CLASSIFICATION-DECISION-PASS-65-2026-06-02.md)
 - [Playbook Everywhere + Cortex Interface Contract-Export Surface Pass 3](../ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CONTRACT-EXPORT-SURFACE-PASS-3-2026-06-02.md)
 - [Root-Bounded Lane-Selection Pass After Discord Workflow, Publication & Docs Reliability Broader-Summary Parity-Proof Closeout](../ops/ROOT-BOUNDED-LANE-SELECTION-AFTER-DISCORD-WORKFLOW-PUBLICATION-AND-DOCS-RELIABILITY-BROADER-SUMMARY-PARITY-PROOF-CLOSEOUT-2026-05-29.md)
 - [Root-Bounded Lane-Selection Pass After Core Pattern Convergence Provisional Doctrine Promotion-Threshold And Hold-Boundary Closeout](../ops/ROOT-BOUNDED-LANE-SELECTION-AFTER-CORE-PATTERN-CONVERGENCE-PROVISIONAL-DOCTRINE-PROMOTION-THRESHOLD-AND-HOLD-BOUNDARY-CLOSEOUT-2026-05-29.md)
