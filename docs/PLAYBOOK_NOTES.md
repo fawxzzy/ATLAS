@@ -754,3 +754,9 @@
 - Rule: capture current closeout lessons before they decay into chat recap.
 - Pattern: recent bounded closeouts land -> restart truth becomes durable -> admit the cluster as transfer-ready KCT evidence -> hold flat until a distinct new capture or promotion question appears.
 - Failure Mode: current reusable lessons remain scattered across adjacent receipts and chat memory, so future workers can restart but still cannot inherit the distilled transfer value without reconstructing it themselves.
+
+## 2026-06-02 - Durable execution routing must refresh after adjacent-lane closure
+
+- Rule: refresh durable execution-state routing after an adjacent lane closes at a new threshold.
+- Pattern: externalize active spine -> adjacent supporting lane closes at a new threshold -> refresh the DCE spine so immediate lane, held lanes, and conditional supporting reopen rules stay durable.
+- Failure Mode: stale next-package drift happens when a manifest-backed restart spine still routes to a supporting packet that already closed or no longer opens automatically.

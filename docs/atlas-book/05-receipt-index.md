@@ -376,6 +376,7 @@
 - [Durable Context Externalization Retrieval Surface Inventory](../ops/DURABLE-CONTEXT-EXTERNALIZATION-RETRIEVAL-SURFACE-INVENTORY-2026-05-27.md)
 - [Durable Context Externalization Prompt-Pack Normalization](../ops/DURABLE-CONTEXT-EXTERNALIZATION-PROMPT-PACK-NORMALIZATION-2026-05-27.md)
 - [Durable Context Externalization Execution-State Spine Externalization Pass 7](../ops/DURABLE-CONTEXT-EXTERNALIZATION-EXECUTION-STATE-SPINE-EXTERNALIZATION-PASS-7-2026-06-02.md)
+- [Durable Context Externalization Post-KCT Execution-State Spine Refresh Pass 8](../ops/DURABLE-CONTEXT-EXTERNALIZATION-POST-KCT-EXECUTION-STATE-SPINE-REFRESH-PASS-8-2026-06-02.md)
 
 ## `_stack` Readiness
 
