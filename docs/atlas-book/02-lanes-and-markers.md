@@ -79,7 +79,7 @@ Read:
 - Duplicate Surface Decommission: `98%`
 - Brand Asset Canonicalization: `90%`
 - Preview Cache & Surface Consistency: `78%`
-- Operator Secret Path Hygiene: `63%`
+- Operator Secret Path Hygiene: `64%`
 - Manual Deploy Exception Burn-Down: `84%`
 - Unified Workflow Convergence: `72%`
 - Vision & Future Alignment: `25%`

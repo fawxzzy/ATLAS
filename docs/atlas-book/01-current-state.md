@@ -138,6 +138,9 @@ Current status:
   - the exact sensitivity-first subset is now frozen explicitly: `2` archived `.env.local` files plus `3` archived `.playbook/last-run.json` files under `20260522-final-cleanup`
   - the approved five-file archive mutation is now resolved: the `2` archived `.env.local` files no longer remain retained as-is in `archive/*` and now sit under ignored `secrets/local/archive-quarantine/**`, while the `3` archived `.playbook/last-run.json` files are verified non-secret and remain retained in place
   - no broader archive mutation is implied from that result; the remaining `archive/*` backlog still requires a new explicit subfamily packet before any further mutation is honest
+  - post-convergence lane reselection is now also frozen explicitly: the immediate lane is `Operator Secret Path Hygiene`, the supporting lane is `Playbook Everywhere + Cortex Interface`, and `archive follow-on`, the materially closed `stabilize-root-worktree` root-docs ladder, and Cortex authority widening are all explicit held lanes
+  - `Operator Secret Path Hygiene` now also absorbs the archive sensitivity result directly: the `2` archived `.env.local` files are no longer normal archive carry and now live under ignored `secrets/local/archive-quarantine/**`, while the `3` archived `.playbook/last-run.json` files remain retained only because they were verified non-secret
+  - the exact next move is now the supporting `Playbook Everywhere + Cortex Interface` lane, not another archive or generic root-cleanup continuation
 - no helper-Vercel project deletion gate remains open after the 2026-05-25 helper-surface deletion pass
 - DiscordOS lookup widening is closed at the owner-repo boundary:
   - transport-aware opening: `no`
