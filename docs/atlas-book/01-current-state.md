@@ -131,6 +131,7 @@ Current status:
   - the residual tracked pair is now also forced explicitly: `.github/workflows/atlas-qa-llel.yml` is the immediate blocker-facing carry because it is live governed verification routing with stale trigger-path truth, while `docs/memory/initiatives/initiative-mazer-d2-learning-scorer.json` remains later rename-aligned memory-path canonicalization carry
   - the immediate workflow carry is now also frozen explicitly as one exact preservation tranche: preserve the thin root QA orchestrator by removing the stale pull-request trigger path for the missing `docs/codex/ATLAS-QA-LLEL-PROMPT-PACK.md`, prove the trigger-path truth directly, and keep the later Mazer initiative carry outside the tranche
   - the remaining tracked carry is now also frozen explicitly as one exact memory-path preservation tranche: `docs/memory/initiatives/initiative-mazer-d2-learning-scorer.json` now reconciles its evidence and repo refs to canonical `repos/mazer` truth already published by the stack registry and inventory surfaces
+  - the remaining blocker pressure is now also forced explicitly into untracked classes only: untracked `docs/ops/*` durable control-plane backlog is the immediate blocker-facing carry, while retained `archive/*` evidence is later adjacent hold rather than the next preservation target
 - no helper-Vercel project deletion gate remains open after the 2026-05-25 helper-surface deletion pass
 - DiscordOS lookup widening is closed at the owner-repo boundary:
   - transport-aware opening: `no`

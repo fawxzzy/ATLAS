@@ -101,6 +101,7 @@
 - [Stabilize Root Worktree Mazer-Initiative Staging Proof Pass 46](../ops/STABILIZE-ROOT-WORKTREE-MAZER-INITIATIVE-STAGING-PROOF-PASS-46-2026-06-02.md)
 - [Stabilize Root Worktree Mazer-Initiative Disposition Decision Pass 47](../ops/STABILIZE-ROOT-WORKTREE-MAZER-INITIATIVE-DISPOSITION-DECISION-PASS-47-2026-06-02.md)
 - [Stabilize Root Worktree Mazer-Initiative Commit-Intent Decision Pass 48](../ops/STABILIZE-ROOT-WORKTREE-MAZER-INITIATIVE-COMMIT-INTENT-DECISION-PASS-48-2026-06-02.md)
+- [Stabilize Root Worktree Untracked-Backlog Forced Classification Decision Pass 49](../ops/STABILIZE-ROOT-WORKTREE-UNTRACKED-BACKLOG-FORCED-CLASSIFICATION-DECISION-PASS-49-2026-06-02.md)
 - [Playbook Everywhere + Cortex Interface Contract-Export Surface Pass 3](../ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CONTRACT-EXPORT-SURFACE-PASS-3-2026-06-02.md)
 - [Root-Bounded Lane-Selection Pass After Discord Workflow, Publication & Docs Reliability Broader-Summary Parity-Proof Closeout](../ops/ROOT-BOUNDED-LANE-SELECTION-AFTER-DISCORD-WORKFLOW-PUBLICATION-AND-DOCS-RELIABILITY-BROADER-SUMMARY-PARITY-PROOF-CLOSEOUT-2026-05-29.md)
 - [Root-Bounded Lane-Selection Pass After Core Pattern Convergence Provisional Doctrine Promotion-Threshold And Hold-Boundary Closeout](../ops/ROOT-BOUNDED-LANE-SELECTION-AFTER-CORE-PATTERN-CONVERGENCE-PROVISIONAL-DOCTRINE-PROMOTION-THRESHOLD-AND-HOLD-BOUNDARY-CLOSEOUT-2026-05-29.md)
