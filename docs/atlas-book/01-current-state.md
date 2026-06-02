@@ -136,7 +136,8 @@ Current status:
   - the only remaining dirty-root carry is now `archive/fitness-source-reset`, which is classified as retained evidence with mixed safety classes rather than a preservation-ready tranche
   - archive inventory is now also split durably at manifest level: two snapshot roots totaling `43,900` files, one large archived repo subtree, generated `.next` and `node_modules` residue, `.playbook` runtime state, and archived `.env.local` files all coexist inside the family
   - the exact sensitivity-first subset is now frozen explicitly: `2` archived `.env.local` files plus `3` archived `.playbook/last-run.json` files under `20260522-final-cleanup`
-  - because that subset includes archived `.env.local`, the next honest move is now an operator approval or policy decision rather than another autonomous Codex mutation slice; no bulk preserve, stage, delete, or cleanup claim is honest for `archive/*` yet
+  - the approved five-file archive mutation is now resolved: the `2` archived `.env.local` files no longer remain retained as-is in `archive/*` and now sit under ignored `secrets/local/archive-quarantine/**`, while the `3` archived `.playbook/last-run.json` files are verified non-secret and remain retained in place
+  - no broader archive mutation is implied from that result; the remaining `archive/*` backlog still requires a new explicit subfamily packet before any further mutation is honest
 - no helper-Vercel project deletion gate remains open after the 2026-05-25 helper-surface deletion pass
 - DiscordOS lookup widening is closed at the owner-repo boundary:
   - transport-aware opening: `no`
