@@ -135,7 +135,8 @@ Current status:
   - the immediate untracked control-plane carry is now also fully exhausted: the restart-referenced untracked `docs/ops/*` tranche is preserved, the colder untracked `LOCAL-DATA-GATEWAY-*` checkpoint family is preserved, and the two-file non-LDG colder `docs/ops/*` tail is preserved
   - the only remaining dirty-root carry is now `archive/fitness-source-reset`, which is classified as retained evidence with mixed safety classes rather than a preservation-ready tranche
   - archive inventory is now also split durably at manifest level: two snapshot roots totaling `43,900` files, one large archived repo subtree, generated `.next` and `node_modules` residue, `.playbook` runtime state, and archived `.env.local` files all coexist inside the family
-  - the next exact move is now one bounded sensitivity-first archive subfamily packet over secret-like/config-like files and tool-state residue; no bulk preserve, stage, delete, or cleanup claim is honest for `archive/*` yet
+  - the exact sensitivity-first subset is now frozen explicitly: `2` archived `.env.local` files plus `3` archived `.playbook/last-run.json` files under `20260522-final-cleanup`
+  - because that subset includes archived `.env.local`, the next honest move is now an operator approval or policy decision rather than another autonomous Codex mutation slice; no bulk preserve, stage, delete, or cleanup claim is honest for `archive/*` yet
 - no helper-Vercel project deletion gate remains open after the 2026-05-25 helper-surface deletion pass
 - DiscordOS lookup widening is closed at the owner-repo boundary:
   - transport-aware opening: `no`
