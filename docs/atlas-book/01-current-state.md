@@ -63,6 +63,60 @@ Current status:
 
 - remote preview/unfurl verification is approval-gated
 - DiscordOS schema, runtime, and data migration remain unstarted and must stay receipt-bounded
+- the Fitness Discord pass-9 proof lane is frozen under `Session-Scoped External Blocker Freeze`:
+  - not a default-browser issue
+  - not an ATLAS/root issue
+  - not a Fitness repo/runtime issue
+  - remaining fault domain is the Codex desktop <-> Chrome extension handshake/runtime in the current session
+  - reopen only after one successful live Codex-to-Chrome runtime call exists from a responsive session
+  - immediate next move once reopened: `Fitness Discord Default-profile post-install governed authenticated same-event fresh-submit positive live proof capture pass 9`
+- `Feedback Loop Readiness` now has one deterministic threshold packet:
+  - request/spec intake, mutation governance, local runtime truth, and receipt/truth update are already real
+  - deterministic proof capture remains the missing replayable link
+  - no marker movement is earned until one bounded loop reruns end to end without hidden operator stitching
+- `AI Repetition-to-Automation Pipeline` now has one automation-candidate threshold packet:
+  - first-safe candidate families are bounded preparation helpers such as validation summaries, marker checkpoints, receipt packaging, doctrine routing, release-proof packaging, and QA/LLEL proof-packet preparation when proof is already admissible
+  - fresh live proof capture across the frozen bridge path, final go or no-go judgment, final publication judgment, doctrine admission, and destructive cleanup approval remain explicitly non-automation families
+  - no marker movement is earned until one candidate family graduates into a real governed operator surface with repeatable proof and safe fallback
+- `Playbook Everywhere + Cortex Interface` now has one contract-first shadowing packet and one governed contract-export packet:
+  - ATLAS and Playbook remain the canonical truth surfaces for repetition families, proof expectations, fallbacks, owner boundaries, and non-claim boundaries
+  - every exportable Cortex-facing family contract now freezes `contract_id`, `family_name`, `trigger`, `stable_inputs`, `expected_proof_artifact`, `fallback_path`, `owner_boundary`, `non_claim_boundary`, and `admissibility_state`
+  - exportable-now families are `validation-summary-shadow`, `marker-checkpoint-shadow`, and `receipt-doctrine-draft-shadow`
+  - no additional family is frozen as `shadow-only` in this packet; later candidates stay outside the export surface until their exact proof artifact and fallback boundaries are frozen
+  - blocked families remain fresh live proof capture through the frozen bridge path, final deploy or publication judgment, doctrine admission, destructive cleanup or secret approval, and ambiguous visual or acceptance review
+  - Cortex may only consume exported contracts and shadow bounded preparation families such as validation summaries, marker checkpoints, and receipt or doctrine draft helpers
+  - `validation-summary-shadow` is now consumed safely into a local Cortex artifact with authority explicitly false, which clears the first interface threshold without widening production authority
+  - lane reselection is now clean: `stabilize-root-worktree` remains a held blocker family, but the active root truth packet is `Playbook Everywhere + Cortex Interface` Wave 1A rather than another root-worktree packet
+  - no marker movement is earned from the contract-export packet because it froze reusable truth without widening proof-backed consumption or owner authority
+- `Cortex Readiness` now has a second bounded shadow-consumption proof:
+  - `marker-checkpoint-shadow` now consumes the ATLAS marker and restart surfaces into a local Cortex artifact with ratchet authority explicitly false
+  - Cortex runtime breadth now includes two distinct authority-free consumer proofs without widening governance, receipt, or owner-truth ownership
+- `Cortex Readiness` now has a third bounded shadow-consumption proof:
+  - `receipt-doctrine-draft-shadow` now consumes governed doctrine and failure-mode sources into a local draft-only Cortex artifact with doctrine-admission and receipt-finalization authority explicitly false
+  - the current safe shadow family set is now fully consumed on the live Cortex surface without widening governance, receipt, or owner-truth ownership
+- `Cortex Readiness` now has one bounded read-model projection proof:
+  - `operator_surface` now projects the three current safe shadow-consumption artifacts into one existing Cortex status surface with authority still explicitly false
+  - broader `current-state`, `rail-state`, and `context` freshness remains a separate next step rather than implied by this projection
+- `Cortex Readiness` now has one bounded read-model freshness proof:
+  - `current-state`, `rail-state`, and `context` now all acknowledge the operator-surface shadow projection as explicit evidence
+  - the immediate blocker lane is now explicit as `stabilize-root-worktree`, while the deferred Cortex lane remains `promote-cortex-receipt-interpretation-consumption-feedback-wave11`
+  - reported validation posture remains `critical=0 error=0 warning=494 info=0`, but no new validation was run in the contract-export pass and the shared root checkout itself remains broad dirty state, so no worktree-cleanliness claim is reopened here
+  - the dirty-root posture is now durably split into active current-tranche restart surfaces, root registry/policy mirrors, mixed tracked governance support, durable-but-uncommitted `docs/ops/*` and continuity-manifest backlog, active Cortex support surfaces, and retained `archive/*` evidence, so later stabilization can classify preserve/disposition honestly instead of treating the whole checkout as one cleanup blob
+  - the dominant untracked buckets now have preserve/retain posture frozen explicitly: `docs/ops/*` stays durable control-plane backlog, `docs/memory/initiatives/*` stays durable continuity backlog, and `archive/*` stays retained evidence with no delete or move decision earned
+  - the tracked dirty-root surfaces now also have explicit hold classes: active current-tranche tracked work, coupled root truth mirrors/policy surfaces, and mixed tracked governance/memory/QA support backlog, so the blocker is fully classified and the remaining question is stabilization routing rather than more inventory churn
+  - the stabilization route is now also frozen explicitly: preserve the active current-tranche tracked work plus coupled root truth mirrors/policy surfaces as one intentional held root tranche, keep the mixed tracked governance/memory/QA support backlog as a later independent hold, and do not claim commit/staging readiness yet
+  - the first future stageable boundary is now also frozen explicitly: the minimum subset candidate is the root-worktree receipt chain plus `docs/PLAYBOOK_NOTES.md`, `docs/atlas-book/01-current-state.md`, `docs/atlas-book/05-receipt-index.md`, and `docs/atlas-book/12-restart-and-handoff-guide.md`; truth mirrors, older Cortex/read-model files, and mixed support backlog remain outside that subset by default
+  - truth-mirror carry is now also frozen explicitly: none of the seven coupled root truth mirrors or policy surfaces need to join that first future stageable subset, so they remain a later adjacent hold rather than part of the blocker-preservation minimum
+  - residual active-tranche carry is now also frozen explicitly: none of the earlier Cortex/read-model book or test surfaces join that first future stageable subset, so they also remain a later adjacent hold unless a new direct dependency is evidenced
+  - staging-honesty posture is now also frozen explicitly: that subset may be described only as a preserved future-stageable candidate, not as presently stage-ready or commit-ready
+  - blocker-facing reopen is now also frozen explicitly: the materially closed root-docs stabilization ladder stays closed, but the broader `stabilize-root-worktree` lane reopens at the dirty-worktree handling boundary because the refreshed Cortex read spine still surfaces the live blocker cleanly
+  - the active dirty-worktree blocker is now classified as a `selective-staging candidate`, not as stage-ready or commit-ready and not as a reason to reopen the closed wording ladder
+  - the exact next move is now one explicit selective-staging task over the minimum blocker-preservation subset: the root-worktree receipt chain through pass 10 plus `docs/PLAYBOOK_NOTES.md`, `docs/atlas-book/01-current-state.md`, `docs/atlas-book/05-receipt-index.md`, and `docs/atlas-book/12-restart-and-handoff-guide.md`
+  - truth mirrors, residual Cortex/read-model surfaces, mixed tracked governance support, durable-but-uncommitted `docs/ops/*` backlog outside the receipt chain, continuity-manifest backlog, and retained `archive/*` evidence all remain held outside that task by default
+  - selective-staging proof is now also frozen explicitly: the admitted minimum blocker-preservation subset has now been staged in isolation once without pulling truth mirrors, residual Cortex/read-model surfaces, mixed support backlog, continuity manifests, or retained `archive/*` evidence into the index
+  - the broader dirty-root blocker still remains active outside that staged subset, so this is a bounded index-isolation proof rather than a broader clean-root or commit-ready claim
+  - staged-subset disposition is now also frozen explicitly: the isolated staged subset remains held as the minimum blocker-preservation tranche, while commit-intent stays unopened and broader dirty-root state remains outside the tranche
+  - commit-intent is now also frozen explicitly: the exact staged blocker-preservation tranche may now be treated as an honest partial-commit question, but only for that exact subset and not as a broader root commitability claim
 - no helper-Vercel project deletion gate remains open after the 2026-05-25 helper-surface deletion pass
 - DiscordOS lookup widening is closed at the owner-repo boundary:
   - transport-aware opening: `no`

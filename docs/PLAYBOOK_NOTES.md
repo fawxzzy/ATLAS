@@ -1,5 +1,192 @@
 # Playbook Notes
 
+## 2026-06-02 - A future-stageable subset is not the same thing as a stage-ready subset
+
+- Rule: `Future-Stageable Is Not Stage-Ready`.
+- Rule: once a dirty-root subset is bounded coherently, it may be described as a preserved future-stageable candidate only; do not call it stage-ready or commit-ready until selective staging or equivalent operational proof exists.
+- Pattern: `Subset Honesty Checkpoint`.
+- Pattern: boundary freeze -> direct-dependency audit -> staging-honesty check -> hold until real stage intent or worktree change exists.
+- Failure Mode: `Staging Theater`.
+- Failure Mode: if workers translate subset coherence into implied staging readiness, restart truth begins promising operational safety that the current checkout has not proven.
+- Release-summary bullets:
+  - Froze the minimum blocker-preservation subset at a future-stageable-candidate ceiling only.
+  - Kept stage-ready and commit-ready claims explicitly out of bounds.
+  - Closed the current root-only docs ladder inside `stabilize-root-worktree` unless real stage intent or material checkout change appears.
+
+## 2026-06-02 - Cortex contract export must freeze before any new agent surface widens
+
+- Rule: `Contract Before Agent`.
+- Rule: no Cortex agent surface should exist without a governed contract exported from ATLAS/Playbook truth.
+- Pattern: `Truth-Owned Interface Export`.
+- Pattern: ATLAS defines agent contracts; Cortex consumes them without owning readiness truth.
+- Failure Mode: `Interface Drift Through Dual Ownership`.
+- Failure Mode: if both ATLAS and Cortex define agent truth independently, the system splits its contract model and loses determinism.
+- Release-summary bullets:
+  - Froze one reusable export surface for current Cortex-facing candidate families with exact fields: `contract_id`, `family_name`, `trigger`, `stable_inputs`, `expected_proof_artifact`, `fallback_path`, `owner_boundary`, `non_claim_boundary`, and `admissibility_state`.
+  - Froze the current exportable-now family set as `validation-summary-shadow`, `marker-checkpoint-shadow`, and `receipt-doctrine-draft-shadow`.
+  - Froze no additional family into `shadow-only` in this packet; the safe set is now either exported already or still blocked until a later family-specific contract packet lands.
+  - Preserved the blocked family set as fresh live proof capture through the frozen bridge path, final deploy or publication judgment, doctrine admission, destructive cleanup or secret approval, and ambiguous visual or acceptance review.
+  - Held marker posture flat because this packet froze reusable interface truth only; it did not widen live consumption proof, owner authority, or automation-ready scope.
+
+## 2026-06-02 - Residual active-tranche files should carry only on direct subset dependency
+
+- Rule: `Direct Dependency Before Carry`.
+- Rule: a file joins the first future stageable subset only when the already-frozen subset depends on it directly for coherence, not because it is nearby, historically related, or likely useful later.
+- Pattern: `Residual Boundary Audit`.
+- Pattern: once the main tranche is frozen, recheck leftover files as a small residual set instead of reopening the whole tranche question.
+- Failure Mode: `Residual Gravity`.
+- Failure Mode: if older adjacent files keep re-entering the active tranche through familiarity, completeness pressure, or "might as well" logic, the minimum subset inflates back into a broad dirty-root story.
+- Release-summary bullets:
+  - Froze the earlier Cortex/read-model book and test surfaces as a later adjacent hold rather than letting them re-enter the minimum blocker-preservation subset.
+  - Preserved direct-dependency admission as the only honest carry rule after the main tranche and mirror questions were already resolved.
+  - Routed the next slice toward subset honesty, not more adjacency expansion.
+
+## 2026-06-01 - Truth mirrors should travel only when the blocked subset directly depends on them
+
+- Rule: `Mirror Follows Direct Dependency`.
+- Rule: do not pull root truth mirrors into the first future stageable subset unless the blocked receipt or restart chain directly depends on those mirror updates to preserve honest state.
+- Pattern: `Adjacent Mirror Hold`.
+- Pattern: freeze the blocker-preservation subset first, then keep broader manifest, lock, registry, inventory, and policy mirrors as a later adjacent hold unless direct dependency is proven.
+- Failure Mode: `Mirror Adjacency Creep`.
+- Failure Mode: if nearby mirror files travel just because they are authoritative, the first bounded subset expands into broad topology reconciliation and loses its blocker-preservation purpose.
+- Release-summary bullets:
+  - Froze the seven coupled mirror surfaces as a later adjacent hold rather than carrying them with the first future stageable root-worktree subset.
+  - Preserved the distinction between blocker-preservation truth and broader stack-topology mirror refresh.
+  - Left later mirror travel as an explicit follow-up question instead of letting it happen by adjacency.
+
+## 2026-06-01 - Stage the minimum coherent shared-root subset before carrying adjacent mirrors
+
+- Rule: `Minimum Coherent Subset First`.
+- Rule: when a shared-root lane is still blocked, the first future stageable subset should be the smallest coherent receipt and restart-truth chain that preserves the blocker story without dragging adjacent mirrors or support backlog by implication.
+- Pattern: `Mirror Carry Later`.
+- Pattern: freeze the minimum receipt-and-restart subset first, then decide in a later packet whether adjacent truth mirrors must travel with it.
+- Failure Mode: `Boundary Inflation`.
+- Failure Mode: if workers widen the first stageable subset just because nearby files are related, the root lane starts narrating adjacency instead of evidence and turns one bounded hold into another broad dirty-root story.
+- Release-summary bullets:
+  - Froze the first future stageable candidate for `stabilize-root-worktree` as the root-worktree receipt chain plus the three shared restart/index surfaces and `PLAYBOOK_NOTES.md`.
+  - Kept coupled truth mirrors, older Cortex/read-model files, and mixed tracked support backlog explicitly outside that minimum subset by default.
+  - Preserved later truth-mirror carry as a separate question instead of widening the first boundary by implication.
+
+## 2026-06-01 - Shared-root stabilization should preserve held tranches before inventing commit-ready subsets
+
+- Rule: `Held Tranche Before Commit Story`.
+- Rule: after a dirty shared root checkout is fully classified, preserve the active tranche and its coupled truth mirrors as one intentional held tranche until a later packet proves a narrower stageable subset.
+- Pattern: `Support Backlog Later Hold`.
+- Pattern: separate mixed governance, memory, and QA support surfaces into an explicit later hold instead of smearing them across the active tranche by implication.
+- Failure Mode: `Synthetic Commitability`.
+- Failure Mode: if workers invent a commit-ready subset before tranche travel boundaries are explicit, restart truth overstates root stability and staging theater replaces real stabilization evidence.
+- Release-summary bullets:
+  - Froze the current root route: active restart surfaces plus coupled truth mirrors stay together as one intentional held stabilization tranche.
+  - Separated the mixed tracked governance/memory/QA support set into a later independent hold instead of letting it widen the active tranche or collapse into cleanup residue.
+  - Refused to imply commit/staging readiness from classification alone, so future sessions inherit one explicit route instead of another dirty-root reinventory pass.
+
+## 2026-06-01 - Green validation does not outrank a broad dirty shared root
+
+- Rule: `Shared Root Cleanliness Gate`.
+- Rule: when the ATLAS root is a shared active writer surface and `git status` shows broad modified or untracked root-owned state, freeze new lane claims and publication decisions until that dirty state is explicitly classified or intentionally preserved.
+- Pattern: `Classify Before Cleanup`.
+- Pattern: read-model blocker -> dirty-root inventory -> ownership and retention split -> explicit preserve/cleanup decision -> only then resume lane advancement.
+- Failure Mode: `Route Past Dirty Root`.
+- Failure Mode: if workers treat green validation as permission to keep opening new root lanes while the shared checkout is broadly dirty, restart truth drifts and unrelated residue gets reinterpreted as fresh lane work.
+- Release-summary bullets:
+  - Froze `stabilize-root-worktree` as the honest immediate lane once the Cortex read models exposed broad dirty-root state across shared ATLAS surfaces.
+  - Separated this blocker from the already-cleared `lock-registry-hygiene` family so future sessions do not reopen stale stack-lock narration.
+  - Preserved the deferred Cortex lane `promote-cortex-receipt-interpretation-consumption-feedback-wave11` without claiming it is honest to advance from the current checkout.
+  - Held marker posture flat because this packet classifies and freezes the blocker; it does not clear it.
+
+## 2026-06-01 - Cortex should consume governed repetition contracts, not invent its own readiness model
+
+- Rule: `Cortex Follows Governed Repetition`.
+- Rule: Cortex agents may only be introduced from already-governed repetition families with explicit trigger, input, proof, fallback, and owner-boundary truth.
+- Pattern: `Contract-First Agent Shadowing`.
+- Pattern: define the contract against the repetition ledger first, then let Cortex shadow the workflow without claiming production authority.
+- Failure Mode: `Agent Premature Entanglement`.
+- Failure Mode: if Cortex agents are introduced before contract and boundary truth are frozen, they become a new drift surface rather than a reduction in operator load.
+- Release-summary bullets:
+  - Froze one exact contract model for deriving Cortex agent families from the repetition ledger without letting Cortex become a second truth owner.
+  - Separated first-safe shadow families such as validation summaries, marker checkpoints, and receipt or doctrine draft helpers from blocked human-judgment or bridge-dependent families.
+  - Preserved the existing system boundary: ATLAS and Playbook govern truth, while Cortex only consumes exported contracts.
+  - The first live contract-consumption proof now exists for `validation-summary-shadow`: it loads the governed contract and emits a local artifact with authority flags explicitly false.
+  - That earns only the smallest honest move on the interface lane because one bounded preparation helper now crosses from doctrine into consumer proof without creating a second truth surface.
+  - The second live shadow-consumption proof now exists for `marker-checkpoint-shadow`: it projects the ATLAS marker and restart surfaces into a local Cortex artifact while keeping ratchet authority explicitly false.
+  - That earns only the smallest honest move on `Cortex Readiness` because runtime breadth widened by one more bounded consumer path without any authority growth.
+  - The third live shadow-consumption proof now exists for `receipt-doctrine-draft-shadow`: it drafts bounded receipt or doctrine structure from governed sources while keeping doctrine-admission and receipt-finalization authority explicitly false.
+  - That earns only the smallest honest move on `Cortex Readiness` because the current safe shadow family set is now fully consumed on the live runtime surface without changing ownership.
+
+## 2026-06-01 - Automation claims must follow stable repetition, not repeated frustration
+
+- Rule: `Automation Follows Stable Repetition`.
+- Rule: do not promote a repeated workflow into automation candidacy until its trigger, inputs, proof artifact, and fallback path are all explicit and stable.
+- Pattern: `Operator Repetition Ledger`.
+- Pattern: repeated operator actions should be captured as named families with trigger, boundary, proof expectation, and safe fallback so future helper work aims at real repetition instead of vague friction.
+- Pattern: `Bounded Automation Candidate Ladder`.
+- Pattern: manual repetition -> structured repetition -> automation candidate -> automation-ready.
+- Failure Mode: `Automation Claim Inflation`.
+- Failure Mode: if a workflow still depends on hidden toggles, ad hoc prompting, or unstable proof capture, calling it automation-ready creates false confidence and downstream churn.
+- Release-summary bullets:
+  - Froze one exact threshold for when repeated operator work is allowed to enter automation candidacy at all.
+  - Separated first-safe preparation families such as validation summaries, marker checkpoints, receipt packaging, doctrine routing, and proof-packet preparation from human-judgment or externally blocked families.
+  - Kept the frozen Codex <-> Chrome bridge lane explicitly outside automation honesty instead of letting repeated blockage masquerade as automation debt.
+  - Held marker posture flat because no candidate family graduated into a real governed operator surface.
+
+## 2026-06-01 - Feedback-loop readiness depends on deterministic proof loops, not just available proof parts
+
+- Rule: `Proof-Loop Before Pixel-Loop`.
+- Rule: do not claim UI iteration readiness until the proof-capture path is deterministic enough to verify Codex-applied changes without ad hoc operator stitching.
+- Pattern: `Local-First Verification Spine`.
+- Pattern: request/spec intake -> bounded mutation -> governed local runtime -> fresh proof capture -> receipt/truth update.
+- Failure Mode: `Manual Toggle Drift`.
+- Failure Mode: if the QA/LLEL loop depends on hidden toggles, one-off prompting, or inconsistent runtime setup, the system will overstate readiness and under-deliver repeatability.
+- Release-summary bullets:
+  - Froze one exact deterministic threshold for `Feedback Loop Readiness` instead of letting the lane drift between generic QA doctrine and bridge-specific blockage.
+  - Recorded that request/spec intake, mutation governance, local runtime truth, and receipt packaging are already real, while deterministic proof capture is the missing replayable link.
+  - Kept the bridge lane frozen as inherited background truth rather than misclassifying it as a fresh owner-side or ATLAS-side blocker.
+  - Held marker posture flat because no replayable end-to-end proof loop was actually re-run.
+
+## 2026-06-01 - Frozen bridge lanes should preserve external blocker doctrine instead of reopening green repo work
+
+- Rule: `Session-Scoped External Blocker Freeze`.
+- Rule: when repo/runtime truth is green and the only missing proof depends on a live external/session bridge, freeze all repo/root mutation until one live bridge success occurs.
+- Rule: `Upstream Product Fault Hold`.
+- Rule: when owner-scope setup has already been ruled out and the remaining blocker is a product/runtime defect outside repo truth, freeze the lane and preserve only restart-relevant truth.
+- Pattern: green repo/runtime -> live bridge timeout -> freeze shared restart truth -> wait for one successful live runtime call -> immediately rerun the exact blocked proof packet.
+- Failure Mode: `Fake Motion After Green`.
+- Failure Mode: do not generate reconciliation churn, cleanup passes, or repo-framed retries once the lane is blocked outside repo/runtime work.
+- Release-summary bullets:
+  - Froze the Codex <-> Chrome bridge lane as an external/session-scoped blocker rather than letting it drift back into ATLAS/root or Fitness-local repair work.
+  - Preserved the exact restart rule that pass 9 is not honest until one successful live Codex-to-Chrome runtime call exists from a responsive session.
+  - Linked the canonical bug packet instead of recreating duplicate blocked-state narration: `repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-POST-INSTALL-CODEX-CHROME-BRIDGE-TIMEOUT-BOUNDARY-RECEIPT-2026-06-01.md` plus `docs/ops/ROOT-BOUNDED-DISPATCHER-RECONCILIATION-AFTER-FITNESS-DISCORD-POST-INSTALL-CODEX-CHROME-BRIDGE-TIMEOUT-BOUNDARY-RECEIPT-CLOSEOUT-2026-06-01.md`.
+  - Made the remaining fault domain explicit: not a default-browser issue, not an ATLAS/root issue, not a Fitness repo/runtime issue, but the Codex desktop <-> Chrome extension handshake/runtime in the current session.
+
+## 2026-05-31 - Acceptance-criteria governance now spans `_stack` and the highest-signal owner prompt surfaces
+
+- Rule: mutating Codex tasks are not governed unless they declare `Acceptance Criteria`, `Expected Changed Paths`, `Expected Unchanged Paths`, and `Blocked / Skipped Reporting Rules`.
+- Rule: summary text is not proof.
+- Rule: maintained owner-repo mutating prompt generators and templates should emit the contract directly instead of relying on operator memory or adjacent docs.
+- Pattern: `Spec-to-Diff Verification Gate`.
+- Pattern: gate implementation -> `_stack` prompt migration -> owner-repo prompt-surface migration.
+- Failure Mode: `Summary-Truth Drift`.
+- Failure Mode: silent legacy fallback persists when a maintained mutating prompt surface ships without the acceptance-criteria contract even though the gate exists elsewhere.
+- Release-summary bullets:
+  - Closed the `_stack` gate lane, the `_stack` prompt-authoring migration lane, and the highest-signal owner-repo mutating prompt migration lane as one governance family.
+  - Widened the contract from `_stack` into Playbook prompt compilers/templates, Fitness reviewed-task prompt generation, and Mazer visual-evidence prompt authoring.
+  - Left historical, archived, runtime-generated, and otherwise intentionally out-of-scope prompt artifacts deferred on purpose rather than pretending universal governed coverage.
+  - Preserved the unrelated Mazer verify blocker as a separate repo-local dependency issue instead of misclassifying it as prompt-contract drift.
+
+## 2026-05-31 - Mutating Codex work needs criterion-level proof before completion claims
+
+- Rule: mutating Codex tasks are not considered governed unless they declare acceptance criteria.
+- Rule: a worker may not claim completion for mutating work unless every declared acceptance criterion is explicitly accounted for and each `satisfied` criterion is provable from the final repo diff.
+- Rule: legacy mutating prompts may stay on a compatibility path temporarily, but new mutating prompt surfaces must not ship without the acceptance-criteria contract.
+- Pattern: `Spec-to-Diff Verification Gate`.
+- Pattern: request intent -> explicit acceptance criteria -> structured completion artifact -> final diff proof -> success or blocked or failed.
+- Failure Mode: `Summary-Truth Drift`.
+- Failure Mode: a summary or final note sounds complete even though the repository diff does not prove that every requested edit actually landed.
+- Release-summary bullets:
+  - Closed the `_stack` spec-to-diff gate lane at mechanism level after proving one real success path and one real blocked failure path through the runner.
+  - Moved success authority from worker summary text to criterion-level diff proof for prompts that declare acceptance criteria.
+  - Separated mechanism closure from adoption closure so future work can focus on legacy prompt migration instead of re-litigating the runner design.
+
 ## 2026-05-28 - Fast safe cadence should be explicit when receipts are strong but operator drag is rising
 
 - Rule: cluster proof and inventory passes before running a ratchet.
