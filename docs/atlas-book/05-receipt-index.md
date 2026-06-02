@@ -122,6 +122,7 @@
 - [Stabilize Root Worktree Archive Sensitivity-First Subset Decision Pass 67](../ops/STABILIZE-ROOT-WORKTREE-ARCHIVE-SENSITIVITY-FIRST-SUBSET-DECISION-PASS-67-2026-06-02.md)
 - [Stabilize Root Worktree Archive Sensitivity Subset Mutation And Verification Pass 68](../ops/STABILIZE-ROOT-WORKTREE-ARCHIVE-SENSITIVITY-SUBSET-MUTATION-AND-VERIFICATION-PASS-68-2026-06-02.md)
 - [Playbook Everywhere + Cortex Interface Contract-Export Surface Pass 3](../ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CONTRACT-EXPORT-SURFACE-PASS-3-2026-06-02.md)
+- [Playbook Everywhere + Cortex Interface Exported-Family Consumption Reconciliation Pass 4](../ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-EXPORTED-FAMILY-CONSUMPTION-RECONCILIATION-PASS-4-2026-06-02.md)
 - [Root-Bounded Lane-Selection Pass After Discord Workflow, Publication & Docs Reliability Broader-Summary Parity-Proof Closeout](../ops/ROOT-BOUNDED-LANE-SELECTION-AFTER-DISCORD-WORKFLOW-PUBLICATION-AND-DOCS-RELIABILITY-BROADER-SUMMARY-PARITY-PROOF-CLOSEOUT-2026-05-29.md)
 - [Root-Bounded Lane-Selection Pass After Core Pattern Convergence Provisional Doctrine Promotion-Threshold And Hold-Boundary Closeout](../ops/ROOT-BOUNDED-LANE-SELECTION-AFTER-CORE-PATTERN-CONVERGENCE-PROVISIONAL-DOCTRINE-PROMOTION-THRESHOLD-AND-HOLD-BOUNDARY-CLOSEOUT-2026-05-29.md)
 - [Truth Map And ATLAS Book Marker-Scarcity And Closed-Ladder Carry-Forward Hygiene Pass 3](../ops/TRUTH-MAP-AND-ATLAS-BOOK-MARKER-SCARCITY-AND-CLOSED-LADDER-CARRY-FORWARD-HYGIENE-PASS-3-2026-05-29.md)

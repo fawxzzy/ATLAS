@@ -86,8 +86,9 @@ Current status:
   - blocked families remain fresh live proof capture through the frozen bridge path, final deploy or publication judgment, doctrine admission, destructive cleanup or secret approval, and ambiguous visual or acceptance review
   - Cortex may only consume exported contracts and shadow bounded preparation families such as validation summaries, marker checkpoints, and receipt or doctrine draft helpers
   - `validation-summary-shadow` is now consumed safely into a local Cortex artifact with authority explicitly false, which clears the first interface threshold without widening production authority
+  - the full current `exportable-now` family set is now also consumed safely and projected through the existing Cortex read-model spine: `marker-checkpoint-shadow` and `receipt-doctrine-draft-shadow` now join `validation-summary-shadow` as live bounded consumers, while `operator_surface`, `current-state`, `rail-state`, and `context` all acknowledge that set without widening authority
   - lane reselection is now clean: `stabilize-root-worktree` remains a held blocker family, but the active root truth packet is `Playbook Everywhere + Cortex Interface` Wave 1A rather than another root-worktree packet
-  - no marker movement is earned from the contract-export packet because it froze reusable truth without widening proof-backed consumption or owner authority
+  - the contract-export packet itself still earned no movement, but the later reconciliation of the fully consumed `exportable-now` set now widens interface breadth beyond the earlier single-family threshold without moving truth ownership into Cortex
 - `Cortex Readiness` now has a second bounded shadow-consumption proof:
   - `marker-checkpoint-shadow` now consumes the ATLAS marker and restart surfaces into a local Cortex artifact with ratchet authority explicitly false
   - Cortex runtime breadth now includes two distinct authority-free consumer proofs without widening governance, receipt, or owner-truth ownership

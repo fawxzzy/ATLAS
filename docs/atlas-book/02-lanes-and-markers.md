@@ -19,7 +19,7 @@ Read:
 
 - `_stack` Readiness: `70%`
 - `Local Data Gateway: 66%`
-- `Playbook Everywhere + Cortex Interface: 21%`
+- `Playbook Everywhere + Cortex Interface: 22%`
 - `AI Repetition-to-Automation Pipeline: 30%`
 - `AI Long-Run Batch Orchestration: 20%`
 
@@ -85,7 +85,7 @@ Read:
 - Vision & Future Alignment: `25%`
 - Core Pattern Convergence: `43%`
 - Discord Workflow, Publication & Docs Reliability: `32%`
-- Playbook Everywhere + Cortex Interface: `21%`
+- Playbook Everywhere + Cortex Interface: `22%`
 - AI Repetition-to-Automation Pipeline: `30%`
 - AI Long-Run Batch Orchestration: `20%`
 - Feedback Loop Readiness: `42%`
@@ -185,5 +185,5 @@ That split is defined and partially operationalized by bootstrap and governance 
 - Fitness release-readiness is now green on clean preserved truth, but the related supporting markers still hold flat: `Fitness QA/LLEL Workflow` remains `96%`, `Fitness Branch Cleanup / Main-Only Governance` remains `96%`, and `Fitness Recovery Preservation` remains `80%` because the owner-side result closes one exact release-readiness family gate without widening those supporting workflow families into a broader new operator reality
 - Feedback Loop Readiness stays at `42%`: request/spec intake, mutation governance, local runtime truth, and receipt/truth update now have one frozen deterministic-threshold read, but the stack still lacks one replayable end-to-end proof loop that runs fresh capture without hidden toggles or the frozen external/session bridge defect, so no marker movement is honest from this packet
 - AI Repetition-to-Automation Pipeline stays at `30%`: the lane now has one frozen automation-candidate threshold, one named repetition ledger posture, one bounded candidate ladder, and one explicit split between first-safe preparation helpers versus human-judgment or externally blocked families, but no candidate family has yet crossed into a real governed operator surface with repeatable proof, so no marker movement is honest from this packet
-- Playbook Everywhere + Cortex Interface now sits at `21%`: the lane already had one frozen contract-first shadowing model that keeps ATLAS and Playbook as truth owners while Cortex only consumes exported contracts for bounded preparation helpers, one live contract-consumption proof for `validation-summary-shadow`, and it now also has one frozen export surface that fixes the governed field set plus the current `exportable-now` / `shadow-only` / `blocked` family split; that keeps the lane restart-safer and clearer, but it still stays low because this packet froze reusable truth only, did not widen owner authority, and did not add a second interface-lane consumption threshold beyond the earlier first live consumer proof
+- Playbook Everywhere + Cortex Interface now sits at `22%`: the lane already had one frozen contract-first shadowing model that keeps ATLAS and Playbook as truth owners, one first live contract-consumption proof for `validation-summary-shadow`, and one frozen export surface that fixes the governed field set plus the current `exportable-now` / `shadow-only` / `blocked` family split; it now also absorbs the already-executed consumption of the full current `exportable-now` family set plus the existing read-model projection of that set, which is enough for the smallest honest move above `21%` because interface breadth is no longer backed by one example only, while still staying low because all current families remain bounded preparation helpers and all authority flags stay false
 - Cortex Readiness now sits at `39%`: the root-owned Cortex runtime already had the full current safe shadow-family set projected through `operator_surface`, and `current-state`, `rail-state`, and `context` now all acknowledge that projection while preserving the authority boundary and exposing the immediate-versus-deferred next-lane split; that is enough for the smallest honest move above `38%` because the broader Cortex restart spine is now fresher and more coherent, but it still stays low because the system now honestly stops on `stabilize-root-worktree` before the deferred read-only Cortex feedback lane can advance, and the follow-on dirty-root classification packet held markers flat because green validation does not erase a broad dirty shared checkout
