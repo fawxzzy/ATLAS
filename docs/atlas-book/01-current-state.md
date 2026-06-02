@@ -146,6 +146,7 @@ Current status:
   - no further immediate `Operator Secret Path Hygiene` packet is implied from this posture freeze alone; reopen only on new ambiguous secret-path evidence, archive-subfamily reopen, or explicit operator approval work
   - the current execution-state spine is now durably externalized rather than chat-held only: the immediate lane is `Durable Context Externalization`, the supporting lane is `Knowledge Capture & Transfer`, and the held set remains `archive follow-on`, `Operator Secret Path Hygiene`, `Playbook Everywhere + Cortex Interface`, the materially closed `stabilize-root-worktree` root-docs ladder, and Cortex authority widening
   - the recent archive closeout, secret-path hold, and interface-threshold hold now all count as DCE evidence surfaces rather than as coordination facts that must be reconstructed from conversation memory
+  - that same closeout cluster is now also admitted as current KCT carry-forward truth: future workers no longer need to reconstruct the reusable archive/secret/interface/execution-state lesson set from adjacent receipts or chat recap alone
 - no helper-Vercel project deletion gate remains open after the 2026-05-25 helper-surface deletion pass
 - DiscordOS lookup widening is closed at the owner-repo boundary:
   - transport-aware opening: `no`

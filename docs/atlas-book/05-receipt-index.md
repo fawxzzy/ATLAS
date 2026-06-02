@@ -426,6 +426,7 @@
 - [Knowledge Capture And Transfer Recipe And Promotion-Surface Routing Family Shaping Pass 5](../ops/KNOWLEDGE-CAPTURE-AND-TRANSFER-RECIPE-AND-PROMOTION-SURFACE-ROUTING-FAMILY-SHAPING-PASS-5-2026-05-29.md)
 - [Knowledge Capture And Transfer Manifest-Admission Compression Family Shaping Pass 6](../ops/KNOWLEDGE-CAPTURE-AND-TRANSFER-MANIFEST-ADMISSION-COMPRESSION-FAMILY-SHAPING-PASS-6-2026-05-29.md)
 - [Knowledge Capture And Transfer Continuity-Manifest Refresh And Ratchet Decision Pass 7](../ops/KNOWLEDGE-CAPTURE-AND-TRANSFER-CONTINUITY-MANIFEST-REFRESH-AND-RATCHET-DECISION-PASS-7-2026-05-29.md)
+- [Knowledge Capture And Transfer Current Closeout Cluster Carry-Forward Pass 8](../ops/KNOWLEDGE-CAPTURE-AND-TRANSFER-CURRENT-CLOSEOUT-CLUSTER-CARRY-FORWARD-PASS-8-2026-06-02.md)
 
 ## Vercel Surface Decommission
 

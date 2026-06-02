@@ -400,6 +400,7 @@ This chapter turns the current operating model into reusable “run this workflo
 ### Starting point
 
 - receipt-backed repeated rule, pattern, or failure mode
+- or one current bounded closeout cluster whose reusable lesson set is already durable but not yet explicitly transferred
 
 ### Allowed commands / surfaces
 
@@ -425,6 +426,7 @@ This chapter turns the current operating model into reusable “run this workflo
 ### Forbidden shortcuts
 
 - no promoting one-off chat comments into doctrine
+- no treating chat recap itself as the transferable artifact when the reusable lesson has not yet been captured in durable surfaces
 - no using Playbook as runtime owner
 
 ### Marker impact

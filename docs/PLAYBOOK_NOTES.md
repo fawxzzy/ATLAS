@@ -748,3 +748,9 @@
 - Rule: durable before convenient; do not treat session-local lane order or held-lane posture as durable until it is externalized into restart-safe surfaces that future workers actually retrieve.
 - Pattern: recent lane closeouts accumulate -> active execution order and held posture become chat-dependent -> externalize that spine into continuity manifest plus restart surfaces -> hand off to the next selected lane.
 - Failure Mode: context leakage through chat reliance happens when the current execution order, held-lane posture, or reopen rules still depend on conversation memory instead of durable restart surfaces.
+
+## 2026-06-02 - Current closeout lessons must be captured before they decay into recap
+
+- Rule: capture current closeout lessons before they decay into chat recap.
+- Pattern: recent bounded closeouts land -> restart truth becomes durable -> admit the cluster as transfer-ready KCT evidence -> hold flat until a distinct new capture or promotion question appears.
+- Failure Mode: current reusable lessons remain scattered across adjacent receipts and chat memory, so future workers can restart but still cannot inherit the distilled transfer value without reconstructing it themselves.
