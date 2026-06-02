@@ -29,10 +29,10 @@ Use logical ids in stack docs and automation. Current canonical ids:
 | `stack` | `.` | active |
 | `_stack` | `repos/_stack` | active |
 | `atlas` | `repos/fawxzzy-atlas` | active |
-| `playbook` | `repos/fawxzzy-playbook` | active |
+| `playbook` | `repos/playbook` | active |
 | `lifeline` | `repos/fawxzzy-lifeline` | active |
 | `fitness` | `repos/fawxzzy-fitness` | active |
-| `mazer` | `repos/fawxzzy-mazer` | active |
+| `mazer` | `repos/mazer` | active |
 | `cortex` | `runtime/cortex` | root-owned subsystem |
 | `nat1-games` | `repos/Nat1-Games/nat1-games` | incubating |
 
@@ -47,7 +47,7 @@ Do not hardcode branded disk names into new stack contracts when a repo id is su
 
 Good:
 
-- `repos/fawxzzy-playbook`
+- `repos/playbook`
 - `docs/architecture/STACK-STANDARDS.md`
 - `packages/releases`
 
@@ -185,3 +185,4 @@ When structural cleanup is needed, use this order:
 - For recovered machine material, prefer manifest-first or selective ingest until the content is classified.
 - Delete originals only when they are verified generated trash, dead shims, or safely superseded material.
 - See `docs/architecture/ATLAS-INGEST-AND-CLEANUP-GUARDRAILS.md` for the current operating detail.
+

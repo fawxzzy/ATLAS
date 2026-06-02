@@ -31,7 +31,7 @@ Fail closed before any `_stack` Mazer preview or production deploy path can reac
 
 ## Behavior
 
-1. Read `repos/fawxzzy-mazer/.vercel/project.json`.
+1. Read `repos/mazer/.vercel/project.json`.
 2. Fail closed if the file is missing.
 3. Fail closed if `orgId`, `projectId`, or `projectName` differ from the pinned identity.
 4. Print a clear operator message that includes expected and observed identity values plus the corrective local `vercel link` command.

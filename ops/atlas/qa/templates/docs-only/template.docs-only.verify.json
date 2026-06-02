@@ -4,7 +4,7 @@
   "title": "Template docs-only verification scenario",
   "summary": "Minimal docs-first template that keeps visual evidence out of scope while still satisfying the current proof-lens contract.",
   "repo_id": "playbook",
-  "repo_path": "repos/fawxzzy-playbook",
+  "repo_path": "repos/playbook",
   "adapter_id": "template.docs-only",
   "criticality": "low",
   "tags": [
@@ -65,3 +65,4 @@
     ]
   }
 }
+

@@ -36,7 +36,7 @@ class StackRepoInventoryTests(unittest.TestCase):
         ]
         self.assertTrue(repo_hits)
 
-        by_path = search("repos/fawxzzy-mazer", root=self.root, limit=20)
+        by_path = search("repos/mazer", root=self.root, limit=20)
         path_hits = [
             item
             for item in by_path["results"]
@@ -45,13 +45,13 @@ class StackRepoInventoryTests(unittest.TestCase):
         self.assertTrue(path_hits)
 
         repo_payload = fetch("repo:mazer", root=self.root)
-        path_payload = fetch("repo_path:repos/fawxzzy-mazer", root=self.root)
+        path_payload = fetch("repo_path:repos/mazer", root=self.root)
         repo_json = json.loads(repo_payload["text"])
         path_json = json.loads(path_payload["text"])
 
         self.assertEqual(repo_payload["metadata"]["source_kind"], "repo_inventory")
         self.assertEqual(repo_json["logical_id"], "mazer")
-        self.assertEqual(repo_json["local_path"], "repos/fawxzzy-mazer")
+        self.assertEqual(repo_json["local_path"], "repos/mazer")
         self.assertEqual(path_json["logical_id"], "mazer")
         self.assertIn(
             "initiative:initiative-mazer-d2-learning-scorer",

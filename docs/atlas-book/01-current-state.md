@@ -123,6 +123,8 @@ Current status:
   - residual active-tranche commit path is now also frozen explicitly: the staged tranche remains held, targeted read-model tests pass, validator posture still holds, and commit-intent is admissible for that exact tranche only
   - second partial-commit conversion is now also frozen explicitly: commit `c2b20be7` preserved the residual active tranche without touching the truth-mirror set, mixed tracked support backlog, or broader untracked backlog
   - truth-mirror staging and commit path is now also frozen explicitly: the remaining seven-file mirror set is admitted, staged in isolation, and may now carry commit-intent as an exact next partial-commit question
+  - the mixed tracked support backlog is now also frozen explicitly as three later buckets rather than one blob: a canonicalization-support tranche, a continuity-support tranche, and a residual QA/Cortex support carry
+  - the first mixed tracked support subtranche is now also frozen explicitly: canonical repo-path support refreshes across root docs, support tooling, repo-inventory validation, and delayed rename-aligned support surfaces may be preserved without pulling continuity-manifest refreshes, workflow cleanup residue, or held Cortex support into the same packet
 - no helper-Vercel project deletion gate remains open after the 2026-05-25 helper-surface deletion pass
 - DiscordOS lookup widening is closed at the owner-repo boundary:
   - transport-aware opening: `no`
