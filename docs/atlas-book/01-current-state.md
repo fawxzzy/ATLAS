@@ -121,6 +121,8 @@ Current status:
   - post-first-commit reselection is now also frozen explicitly: the next exact tracked candidate is the residual active tranche of six atlas-book restart surfaces, four Cortex read-model files, and four Cortex read-model tests
   - residual active-tranche staging is now also frozen explicitly: that fourteen-file tranche is admitted and staged in isolation without pulling truth mirrors, mixed tracked support backlog, or broader untracked backlog into the index
   - residual active-tranche commit path is now also frozen explicitly: the staged tranche remains held, targeted read-model tests pass, validator posture still holds, and commit-intent is admissible for that exact tranche only
+  - second partial-commit conversion is now also frozen explicitly: commit `c2b20be7` preserved the residual active tranche without touching the truth-mirror set, mixed tracked support backlog, or broader untracked backlog
+  - truth-mirror staging and commit path is now also frozen explicitly: the remaining seven-file mirror set is admitted, staged in isolation, and may now carry commit-intent as an exact next partial-commit question
 - no helper-Vercel project deletion gate remains open after the 2026-05-25 helper-surface deletion pass
 - DiscordOS lookup widening is closed at the owner-repo boundary:
   - transport-aware opening: `no`

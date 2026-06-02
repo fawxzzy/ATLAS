@@ -54,14 +54,14 @@
       "status": "source_verified_candidate",
       "summary": "Playbook already exposes the human and machine-readable governance contract, local verification receipt model, and workflow-pack style orchestration surfaces.",
       "evidence_refs": [
-        "repos/fawxzzy-playbook/README.md",
-        "repos/fawxzzy-playbook/exports/README.md",
-        "repos/fawxzzy-playbook/exports/playbook.contract.schema.v1.json",
-        "repos/fawxzzy-playbook/docs/contracts/PLAYBOOK-CONTRACT.md",
-        "repos/fawxzzy-playbook/docs/contracts/LOCAL_VERIFICATION_RECEIPT_CONTRACT.md",
-        "repos/fawxzzy-playbook/docs/contracts/OUTCOME_TELEMETRY.md",
-        "repos/fawxzzy-playbook/packages/contracts/src/local-verification-receipt.schema.json",
-        "repos/fawxzzy-playbook/packages/contracts/src/workflow-promotion.schema.json"
+        "repos/playbook/README.md",
+        "repos/playbook/exports/README.md",
+        "repos/playbook/exports/playbook.contract.schema.v1.json",
+        "repos/playbook/docs/contracts/PLAYBOOK-CONTRACT.md",
+        "repos/playbook/docs/contracts/LOCAL_VERIFICATION_RECEIPT_CONTRACT.md",
+        "repos/playbook/docs/contracts/OUTCOME_TELEMETRY.md",
+        "repos/playbook/packages/contracts/src/local-verification-receipt.schema.json",
+        "repos/playbook/packages/contracts/src/workflow-promotion.schema.json"
       ],
       "candidate_contracts": [
         "playbook contract export",
@@ -240,8 +240,8 @@
       "owner_repo_id": "playbook",
       "status": "source_verified_candidate",
       "evidence_refs": [
-        "repos/fawxzzy-playbook/docs/contracts/LOCAL_VERIFICATION_RECEIPT_CONTRACT.md",
-        "repos/fawxzzy-playbook/packages/contracts/src/local-verification-receipt.schema.json"
+        "repos/playbook/docs/contracts/LOCAL_VERIFICATION_RECEIPT_CONTRACT.md",
+        "repos/playbook/packages/contracts/src/local-verification-receipt.schema.json"
       ]
     },
     {
@@ -471,9 +471,9 @@
         "repos/fawxzzy-fitness/src/lib/ecosystem/fitness-shadow-warehouse.test.ts",
         "repos/fawxzzy-fitness/src/app/today/page.tsx",
         "repos/fawxzzy-fitness/src/lib/session-follow-up-jobs.ts",
-        "repos/fawxzzy-playbook/.github/workflows/event-contract-pack.yml",
-        "repos/fawxzzy-playbook/docs/contracts/EVENT_CONTRACT_WORKFLOW_CONSUMERS.md",
-        "repos/fawxzzy-playbook/docs/RELEASING.md"
+        "repos/playbook/.github/workflows/event-contract-pack.yml",
+        "repos/playbook/docs/contracts/EVENT_CONTRACT_WORKFLOW_CONSUMERS.md",
+        "repos/playbook/docs/RELEASING.md"
       ]
     },
     {
@@ -513,11 +513,11 @@
         "glossary_candidates.verification_receipt"
       ],
       "evidence_refs": [
-        "repos/fawxzzy-playbook/docs/contracts/PLAYBOOK-CONTRACT.md",
-        "repos/fawxzzy-playbook/exports/playbook.contract.schema.v1.json",
-        "repos/fawxzzy-playbook/packages/contracts/src/local-verification-receipt.schema.json",
-        "repos/fawxzzy-playbook/packages/contracts/src/workflow-promotion.schema.json",
-        "repos/fawxzzy-playbook/exports/lifeline/README.md"
+        "repos/playbook/docs/contracts/PLAYBOOK-CONTRACT.md",
+        "repos/playbook/exports/playbook.contract.schema.v1.json",
+        "repos/playbook/packages/contracts/src/local-verification-receipt.schema.json",
+        "repos/playbook/packages/contracts/src/workflow-promotion.schema.json",
+        "repos/playbook/exports/lifeline/README.md"
       ]
     }
   ],
@@ -535,8 +535,8 @@
       "playbook contract export + local verification receipt + workflow promotion contract"
     ],
     "top_workflow_pack_reuse_candidates": [
-      "repos/fawxzzy-playbook/exports/lifeline/**",
-      "repos/fawxzzy-playbook/packages/contracts/src/local-verification-receipt.schema.json",
+      "repos/playbook/exports/lifeline/**",
+      "repos/playbook/packages/contracts/src/local-verification-receipt.schema.json",
       "repos/_stack/ops/stack/StackWorkerArtifacts.ps1"
     ],
     "blockers_missing_owners_missing_tests": [
@@ -604,3 +604,4 @@
     "The current owner gate result is stay_shadow; root should point at Fitness evidence-surface completion rather than restate or bypass the growth contract."
   ]
 }
+

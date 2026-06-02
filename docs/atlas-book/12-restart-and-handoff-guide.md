@@ -494,7 +494,12 @@ At this checkpoint:
 - `docs/ops/STABILIZE-ROOT-WORKTREE-RESIDUAL-ACTIVE-TRANCHE-STAGING-PROOF-PASS-16-2026-06-02.md` is now durable and proves that residual active tranche stages in isolation without pulling truth mirrors, mixed tracked support backlog, or broader untracked backlog into the index
 - `docs/ops/STABILIZE-ROOT-WORKTREE-RESIDUAL-ACTIVE-TRANCHE-DISPOSITION-DECISION-PASS-17-2026-06-02.md` is now durable and keeps that exact staged tranche held in the index
 - `docs/ops/STABILIZE-ROOT-WORKTREE-RESIDUAL-ACTIVE-TRANCHE-COMMIT-INTENT-DECISION-PASS-18-2026-06-02.md` is now durable and freezes that commit-intent is admissible for the exact staged residual active tranche only
-- the exact next move is not another Cortex or docs-control-plane wave; it is one exact partial commit over the staged residual active tranche only
+- commit `c2b20be7` now preserves that exact residual active tranche on `main`
+- `docs/ops/STABILIZE-ROOT-WORKTREE-TRUTH-MIRROR-STAGING-ADMISSION-DECISION-PASS-19-2026-06-02.md` is now durable and admits the remaining seven-file truth-mirror set for selective staging only
+- `docs/ops/STABILIZE-ROOT-WORKTREE-TRUTH-MIRROR-STAGING-PROOF-PASS-20-2026-06-02.md` is now durable and proves that truth-mirror set stages in isolation without pulling the mixed tracked support backlog or broader untracked backlog into the index
+- `docs/ops/STABILIZE-ROOT-WORKTREE-TRUTH-MIRROR-DISPOSITION-DECISION-PASS-21-2026-06-02.md` is now durable and keeps that exact staged truth-mirror set held in the index
+- `docs/ops/STABILIZE-ROOT-WORKTREE-TRUTH-MIRROR-COMMIT-INTENT-DECISION-PASS-22-2026-06-02.md` is now durable and freezes that commit-intent is admissible for the exact staged truth-mirror set only
+- the exact next move is not another Cortex or docs-control-plane wave; it is one exact partial commit over the staged truth-mirror set only
 - `Shared Root Cleanliness Gate` now governs this posture: when the ATLAS root is a shared active writer surface and `git status` shows broad modified or untracked root-owned state, freeze new lane claims and publication decisions until that dirty state is explicitly classified or intentionally preserved
 - `Route Past Dirty Root` is now the explicit failure mode: do not treat green validation as permission to keep opening new root lanes while the shared checkout remains broadly dirty
 - the current root-side Discord Workflow, Publication & Docs Reliability broader-summary parity-proof ladder remains materially closed and does not beat the newly sharpened Discord feedback blocker class

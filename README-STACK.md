@@ -19,7 +19,7 @@ ATLAS root is the control repo and coordination layer. It is not a second umbrel
 
 - child repos under `repos/**` stay independent git roots
 - root-owned visibility for those repos is published through inventory and audits, not by vendoring repo content into root
-- repo-local commands should run against the child repo path directly, for example `pnpm -C repos/fawxzzy-playbook ...`
+- repo-local commands should run against the child repo path directly, for example `pnpm -C repos/playbook ...`
 - committed topology visibility lives in `docs/registry/STACK-REPO-INVENTORY.json` and `docs/audits/STACK-REPO-INVENTORY.md`
 
 Root rule:
@@ -125,11 +125,11 @@ Use these ids in stack docs, tickets, and automation:
 
 - `stack` -> `.`
 - `_stack` -> `repos/_stack`
-- `playbook` -> `repos/fawxzzy-playbook`
+- `playbook` -> `repos/playbook`
 - `lifeline` -> `repos/fawxzzy-lifeline`
 - `foundation` -> `repos/fawxzzy-foundation`
 - `fitness` -> `repos/fawxzzy-fitness`
-- `mazer` -> `repos/fawxzzy-mazer`
+- `mazer` -> `repos/mazer`
 - `trove` -> `repos/fawxzzy-trove`
 - `stream` -> `repos/fawxzzy-stream`
 - `nat1-games` -> `repos/Nat1-Games/nat1-games`
@@ -253,3 +253,4 @@ Examples:
 - `secrets/local/` is for machine-local material only
 
 Do not place secrets in docs, packages, runtime exports, or default snapshots.
+
