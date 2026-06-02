@@ -32,6 +32,9 @@ class CortexCurrentStateTests(unittest.TestCase):
         cls.rule_payload = json.loads(
             (cls.root / "runtime" / "cortex" / "kernel.rule-registry.seed.v1.json").read_text(encoding="utf-8")
         )
+        cls.operator_surface_payload = json.loads(
+            (cls.root / "runtime" / "cortex" / "operator-surface" / "latest.json").read_text(encoding="utf-8")
+        )
 
     def _base_validation_payload(
         self,
@@ -63,6 +66,7 @@ class CortexCurrentStateTests(unittest.TestCase):
         _write_json(root / "runtime" / "receipts" / "validation" / "stack-validation.latest.json", validation_payload)
         _write_json(root / "runtime" / "cortex" / "kernel.state-model.seed.v1.json", self.state_payload)
         _write_json(root / "runtime" / "cortex" / "kernel.rule-registry.seed.v1.json", self.rule_payload)
+        _write_json(root / "runtime" / "cortex" / "operator-surface" / "latest.json", self.operator_surface_payload)
         return root
 
     def test_validation_and_git_blockers_override_lane_selection(self) -> None:
@@ -110,6 +114,26 @@ class CortexCurrentStateTests(unittest.TestCase):
         self.assertEqual("stabilize-stack-validation", payload["next_recommended_lane"]["lane_id"])
         self.assertEqual("cortex-receipt-interpretation-stack-consumption-v0-1", payload["latest_clean_step"]["step_id"])
         self.assertEqual("unpublished_ahead_of_origin", payload["remote_publication_state"]["status"])
+        self.assertEqual(
+            [
+                "marker-checkpoint-shadow",
+                "receipt-doctrine-draft-shadow",
+                "validation-summary-shadow",
+            ],
+            payload["operator_surface_projection"]["projected_agent_ids"],
+        )
+        self.assertEqual(
+            [
+                "atlas.cortex.contract.marker-checkpoint-shadow.v1",
+                "atlas.cortex.contract.receipt-doctrine-draft-shadow.v1",
+                "atlas.cortex.contract.validation-summary-shadow.v1",
+            ],
+            payload["operator_surface_projection"]["projected_contract_ids"],
+        )
+        self.assertIn(
+            "fresh-live-proof-capture-blocked",
+            payload["operator_surface_projection"]["blocked_agent_ids"],
+        )
 
     def test_clean_inputs_route_to_seeded_cortex_lane(self) -> None:
         validation_payload = self._base_validation_payload(
@@ -147,6 +171,14 @@ class CortexCurrentStateTests(unittest.TestCase):
         self.assertEqual("cortex", payload["next_recommended_lane"]["owner_layer"])
         self.assertEqual("cortex-receipt-interpretation-stack-consumption-v0-1", payload["latest_clean_step"]["step_id"])
         self.assertEqual("in_sync", payload["remote_publication_state"]["status"])
+        self.assertEqual(
+            "runtime/cortex/operator-surface/latest.json",
+            payload["operator_surface_projection"]["artifact_ref"],
+        )
+        self.assertEqual(
+            "runtime/cortex/shadow-agent-registry.seed.v1.json",
+            payload["operator_surface_projection"]["registry_ref"],
+        )
 
     def test_persist_writes_latest_json_and_markdown(self) -> None:
         validation_payload = self._base_validation_payload(
@@ -178,6 +210,9 @@ class CortexCurrentStateTests(unittest.TestCase):
         self.assertEqual("atlas.cortex.current-state.v1", payload["contract_version"])
         self.assertIn("# Cortex Current State", summary)
         self.assertIn("promote-cortex-receipt-interpretation-consumption-feedback-wave11", summary)
+        self.assertIn("## Operator Surface", summary)
+        self.assertIn("validation-summary-shadow", summary)
+        self.assertIn("atlas.cortex.contract.validation-summary-shadow.v1", summary)
 
     def test_cli_fails_clearly_when_validation_receipt_is_missing(self) -> None:
         temp_dir = tempfile.TemporaryDirectory()

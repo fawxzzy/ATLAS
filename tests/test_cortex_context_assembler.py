@@ -41,6 +41,9 @@ class CortexContextAssemblerTests(unittest.TestCase):
         cls.workflow_profile_metadata = json.loads(
             (cls.root / "docs" / "memory" / "profiles" / "zachariah_workflow_profile.json").read_text(encoding="utf-8")
         )
+        cls.operator_surface_payload = json.loads(
+            (cls.root / "runtime" / "cortex" / "operator-surface" / "latest.json").read_text(encoding="utf-8")
+        )
 
     def _base_validation_payload(
         self,
@@ -96,6 +99,65 @@ class CortexContextAssemblerTests(unittest.TestCase):
                 "runtime/cortex/kernel.rule-registry.seed.v1.json",
             ],
         }
+        payload["operator_surface_projection"] = {
+            "artifact_ref": "runtime/cortex/operator-surface/latest.json",
+            "artifact_generated_at": "2026-06-02T02:50:56.638274+00:00",
+            "registry_ref": "runtime/cortex/shadow-agent-registry.seed.v1.json",
+            "artifact_root": "runtime/cortex/shadow-agent-consumption",
+            "shadow_contract_ids": [
+                "atlas.cortex.contract.validation-summary-shadow.v1",
+                "atlas.cortex.contract.marker-checkpoint-shadow.v1",
+                "atlas.cortex.contract.receipt-doctrine-draft-shadow.v1",
+            ],
+            "blocked_contract_ids": [
+                "atlas.cortex.contract.fresh-live-proof-capture-blocked.v1",
+                "atlas.cortex.contract.final-deploy-judgment-blocked.v1",
+            ],
+            "blocked_agent_ids": [
+                "fresh-live-proof-capture-blocked",
+                "final-deploy-judgment-blocked",
+            ],
+            "projected_agent_ids": [
+                "marker-checkpoint-shadow",
+                "receipt-doctrine-draft-shadow",
+                "validation-summary-shadow",
+            ],
+            "projected_contract_ids": [
+                "atlas.cortex.contract.marker-checkpoint-shadow.v1",
+                "atlas.cortex.contract.receipt-doctrine-draft-shadow.v1",
+                "atlas.cortex.contract.validation-summary-shadow.v1",
+            ],
+            "missing_eligible_agent_ids": [],
+            "missing_eligible_contract_ids": [],
+            "consumed_artifact_refs": [
+                "runtime/cortex/shadow-agent-consumption/marker-checkpoint.latest.json",
+                "runtime/cortex/shadow-agent-consumption/receipt-doctrine-draft.latest.json",
+                "runtime/cortex/shadow-agent-consumption/validation-summary.latest.json",
+            ],
+            "projected_agents": [
+                {
+                    "agent_id": "validation-summary-shadow",
+                    "contract_id": "atlas.cortex.contract.validation-summary-shadow.v1",
+                    "family_name": "validation summaries and delta reporting",
+                    "trigger": "ATLAS control-plane change or validation-receipt refresh that needs a bounded summary artifact",
+                    "admissibility_state": "shadow-only",
+                    "authority": {
+                        "can_mutate_truth": False,
+                        "can_waive_findings": False,
+                        "has_production_authority": False,
+                    },
+                }
+            ],
+            "blocked_agents": [
+                {
+                    "agent_id": "fresh-live-proof-capture-blocked",
+                    "contract_id": "atlas.cortex.contract.fresh-live-proof-capture-blocked.v1",
+                    "family_name": "fresh live proof capture through the frozen bridge path",
+                    "trigger": "A proof request that still depends on the frozen bridge path",
+                    "admissibility_state": "blocked",
+                }
+            ],
+        }
         return payload
 
     def _base_rail_state_payload(self) -> dict:
@@ -146,6 +208,7 @@ class CortexContextAssemblerTests(unittest.TestCase):
         _write_json(root / "runtime" / "receipts" / "validation" / "stack-validation.latest.json", validation_payload or self._base_validation_payload())
         _write_json(root / "runtime" / "cortex" / "kernel.state-model.seed.v1.json", self.state_payload)
         _write_json(root / "runtime" / "cortex" / "kernel.rule-registry.seed.v1.json", self.rule_payload)
+        _write_json(root / "runtime" / "cortex" / "operator-surface" / "latest.json", self.operator_surface_payload)
         return root
 
     def test_clean_posture_assembles_seeded_lane_packet(self) -> None:
@@ -166,10 +229,27 @@ class CortexContextAssemblerTests(unittest.TestCase):
                 "runtime/receipts/validation/stack-validation.latest.json",
                 "runtime/cortex/kernel.state-model.seed.v1.json",
                 "runtime/cortex/kernel.rule-registry.seed.v1.json",
+                "runtime/cortex/operator-surface/latest.json",
                 "docs/memory/profiles/zachariah_workflow_profile.md",
                 "docs/memory/profiles/zachariah_workflow_profile.json",
             ],
             payload["source_refs"],
+        )
+        self.assertEqual(
+            [
+                "marker-checkpoint-shadow",
+                "receipt-doctrine-draft-shadow",
+                "validation-summary-shadow",
+            ],
+            payload["operator_surface_projection"]["projected_agent_ids"],
+        )
+        self.assertEqual(
+            [
+                "atlas.cortex.contract.marker-checkpoint-shadow.v1",
+                "atlas.cortex.contract.receipt-doctrine-draft-shadow.v1",
+                "atlas.cortex.contract.validation-summary-shadow.v1",
+            ],
+            payload["operator_surface_projection"]["projected_contract_ids"],
         )
         self.assertEqual(
             self.workflow_profile_metadata["id"],
@@ -274,6 +354,8 @@ class CortexContextAssemblerTests(unittest.TestCase):
         self.assertIn("# Cortex Context Packet", summary)
         self.assertIn("## Objective", summary)
         self.assertIn("promote-cortex-receipt-interpretation-consumption-feedback-wave11", summary)
+        self.assertIn("## Operator Surface", summary)
+        self.assertIn("atlas.cortex.contract.validation-summary-shadow.v1", summary)
         self.assertIn("## Workflow Profile", summary)
 
     def test_cli_fails_clearly_when_current_state_is_missing(self) -> None:

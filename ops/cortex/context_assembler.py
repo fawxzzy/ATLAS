@@ -14,7 +14,11 @@ if str(ROOT) not in sys.path:
 
 from ops._atlas import atlas_relative, atlas_root, normalize_slashes
 from ops.cortex._artifacts import stable_json_digest, write_json
-from ops.cortex.current_state import default_current_state_latest_json_path, default_validation_receipt_path
+from ops.cortex.current_state import (
+    default_current_state_latest_json_path,
+    default_operator_surface_path,
+    default_validation_receipt_path,
+)
 from ops.cortex.kernel import default_rule_registry_path, default_state_model_path
 from ops.cortex.rail_state_reader import default_rail_state_latest_json_path
 from ops.cortex.workflow_profile import build_workflow_profile_payload
@@ -236,8 +240,10 @@ def _evidence_list(
     rule_registry_payload: dict[str, Any],
     workflow_profile_ref: str,
     workflow_profile_payload: dict[str, Any],
+    operator_surface_ref: str,
+    operator_surface_payload: dict[str, Any] | None,
 ) -> list[dict[str, Any]]:
-    return [
+    evidence = [
         {
             "ref": current_state_ref,
             "kind": "current_state",
@@ -275,6 +281,23 @@ def _evidence_list(
             "profile_id": str(workflow_profile_payload.get("profile_id", "")),
         },
     ]
+    if isinstance(operator_surface_payload, dict):
+        shadow_consumption = (
+            operator_surface_payload.get("shadow_consumption")
+            if isinstance(operator_surface_payload.get("shadow_consumption"), dict)
+            else {}
+        )
+        evidence.append(
+            {
+                "ref": operator_surface_ref,
+                "kind": "operator_surface",
+                "role": "existing Cortex operator read model with projected shadow-consumption state",
+                "generated_at": str(operator_surface_payload.get("generated_at", "")),
+                "projected_agent_ids": _ordered_unique_strings(shadow_consumption.get("projected_agent_ids", [])),
+                "projected_contract_ids": _ordered_unique_strings(shadow_consumption.get("projected_contract_ids", [])),
+            }
+        )
+    return evidence
 
 
 def build_context_packet_payload(
@@ -285,6 +308,7 @@ def build_context_packet_payload(
     validation_path: Path | None = None,
     state_model_path: Path | None = None,
     rule_registry_path: Path | None = None,
+    operator_surface_path: Path | None = None,
 ) -> dict[str, Any]:
     base = (root or atlas_root()).resolve()
     resolved_current_state = (current_state_path or default_current_state_latest_json_path(base)).resolve()
@@ -292,18 +316,21 @@ def build_context_packet_payload(
     resolved_validation = (validation_path or default_validation_receipt_path(base)).resolve()
     resolved_state_model = (state_model_path or default_state_model_path(base)).resolve()
     resolved_rule_registry = (rule_registry_path or default_rule_registry_path(base)).resolve()
+    resolved_operator_surface = (operator_surface_path or default_operator_surface_path(base)).resolve()
 
     current_state_payload = _require_json_object(resolved_current_state, label="Cortex current-state artifact")
     rail_state_payload = _require_json_object(resolved_rail_state, label="Cortex rail-state artifact")
     validation_payload = _require_json_object(resolved_validation, label="Stack validation receipt")
     state_model_payload = _require_json_object(resolved_state_model, label="Cortex state model seed")
     rule_registry_payload = _require_json_object(resolved_rule_registry, label="Cortex rule registry seed")
+    operator_surface_payload = _require_json_object(resolved_operator_surface, label="Cortex operator-surface artifact")
 
     current_state_ref = atlas_relative(resolved_current_state, root=base)
     rail_state_ref = atlas_relative(resolved_rail_state, root=base)
     validation_ref = atlas_relative(resolved_validation, root=base)
     state_model_ref = atlas_relative(resolved_state_model, root=base)
     rule_registry_ref = atlas_relative(resolved_rule_registry, root=base)
+    operator_surface_ref = atlas_relative(resolved_operator_surface, root=base)
     workflow_profile_payload = build_workflow_profile_payload(root=base)
     workflow_profile_markdown_ref = str(workflow_profile_payload.get("canonical_refs", {}).get("markdown", "")).strip()
     workflow_profile_metadata_ref = str(workflow_profile_payload.get("canonical_refs", {}).get("metadata", "")).strip()
@@ -331,6 +358,7 @@ def build_context_packet_payload(
         validation_ref,
         state_model_ref,
         rule_registry_ref,
+        operator_surface_ref,
         workflow_profile_markdown_ref,
         workflow_profile_metadata_ref,
     ]
@@ -371,6 +399,9 @@ def build_context_packet_payload(
         ),
         "rule_highlights": _rule_highlights(matched_rule_ids, rule_registry_payload),
         "workflow_profile": workflow_profile_payload,
+        "operator_surface_projection": current_state_payload.get("operator_surface_projection")
+        if isinstance(current_state_payload.get("operator_surface_projection"), dict)
+        else None,
         "boundary_reminders": _boundary_reminders(
             rail_state_payload=rail_state_payload,
             current_state_payload=current_state_payload,
@@ -389,6 +420,8 @@ def build_context_packet_payload(
             rule_registry_payload=rule_registry_payload,
             workflow_profile_ref=workflow_profile_markdown_ref,
             workflow_profile_payload=workflow_profile_payload,
+            operator_surface_ref=operator_surface_ref,
+            operator_surface_payload=operator_surface_payload,
         ),
         "source_refs": evidence_refs,
     }
@@ -446,6 +479,24 @@ def render_context_packet_summary(payload: dict[str, Any]) -> str:
             lines.append(f"- `{item['id']}` ({item['kind']}): {item['statement']}")
     else:
         lines.append("- none")
+    lines.extend(["", "## Operator Surface"])
+    operator_surface_projection = payload.get("operator_surface_projection")
+    if isinstance(operator_surface_projection, dict):
+        lines.append(f"- Artifact: `{operator_surface_projection.get('artifact_ref', '')}`")
+        lines.append(
+            f"- Projected shadow agents: `{', '.join(operator_surface_projection.get('projected_agent_ids', [])) or 'none'}`"
+        )
+        lines.append(
+            f"- Projected contracts: `{', '.join(operator_surface_projection.get('projected_contract_ids', [])) or 'none'}`"
+        )
+        lines.append(
+            f"- Missing eligible projections: `{', '.join(operator_surface_projection.get('missing_eligible_agent_ids', [])) or 'none'}`"
+        )
+        lines.append(
+            f"- Blocked shadow agents: `{', '.join(operator_surface_projection.get('blocked_agent_ids', [])) or 'none'}`"
+        )
+    else:
+        lines.append("- none")
     lines.extend(["", "## Workflow Profile"])
     if isinstance(workflow_profile, dict) and workflow_profile:
         response_contract = (
@@ -476,6 +527,7 @@ def persist_context_packet_artifact(
     validation_path: Path | None = None,
     state_model_path: Path | None = None,
     rule_registry_path: Path | None = None,
+    operator_surface_path: Path | None = None,
     output_json_path: Path | None = None,
     output_markdown_path: Path | None = None,
     write_markdown: bool = True,
@@ -492,6 +544,7 @@ def persist_context_packet_artifact(
         validation_path=validation_path.resolve() if validation_path is not None else None,
         state_model_path=state_model_path.resolve() if state_model_path is not None else None,
         rule_registry_path=rule_registry_path.resolve() if rule_registry_path is not None else None,
+        operator_surface_path=operator_surface_path.resolve() if operator_surface_path is not None else None,
     )
     summary = render_context_packet_summary(payload)
     write_json(artifact_path, payload)
@@ -515,6 +568,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--validation-path", type=Path)
     parser.add_argument("--state-model-path", type=Path)
     parser.add_argument("--rule-registry-path", type=Path)
+    parser.add_argument("--operator-surface-path", type=Path)
     parser.add_argument("--output-json", type=Path)
     parser.add_argument("--output-markdown", type=Path)
     parser.add_argument("--no-write-markdown", action="store_true")
@@ -530,6 +584,7 @@ def main(argv: list[str] | None = None) -> int:
             validation_path=args.validation_path.resolve() if args.validation_path else None,
             state_model_path=args.state_model_path.resolve() if args.state_model_path else None,
             rule_registry_path=args.rule_registry_path.resolve() if args.rule_registry_path else None,
+            operator_surface_path=args.operator_surface_path.resolve() if args.operator_surface_path else None,
             output_json_path=args.output_json.resolve() if args.output_json else None,
             output_markdown_path=args.output_markdown.resolve() if args.output_markdown else None,
             write_markdown=not args.no_write_markdown,

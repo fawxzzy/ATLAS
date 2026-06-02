@@ -16,6 +16,7 @@ from ops._atlas import atlas_relative, atlas_root, normalize_slashes
 from ops.cortex._artifacts import stable_json_digest, write_json
 from ops.cortex.current_state import (
     default_current_state_latest_json_path,
+    default_operator_surface_path,
     default_validation_receipt_path,
 )
 from ops.cortex.kernel import default_rule_registry_path, default_state_model_path
@@ -340,6 +341,35 @@ def _rail_status(*, blockers: list[dict[str, Any]], seeded_rail_state: dict[str,
     return READY_RAIL_STATUS
 
 
+def _operator_surface_projection_from_current_state(current_payload: dict[str, Any]) -> dict[str, Any] | None:
+    projection = current_payload.get("operator_surface_projection")
+    if not isinstance(projection, dict):
+        return None
+    return {
+        "artifact_ref": str(projection.get("artifact_ref", "")).strip(),
+        "artifact_generated_at": str(projection.get("artifact_generated_at", "")).strip(),
+        "registry_ref": str(projection.get("registry_ref", "")).strip(),
+        "shadow_contract_ids": _normalize_string_list(projection.get("shadow_contract_ids")),
+        "blocked_contract_ids": _normalize_string_list(projection.get("blocked_contract_ids")),
+        "blocked_agent_ids": _normalize_string_list(projection.get("blocked_agent_ids")),
+        "projected_agent_ids": _normalize_string_list(projection.get("projected_agent_ids")),
+        "projected_contract_ids": _normalize_string_list(projection.get("projected_contract_ids")),
+        "missing_eligible_agent_ids": _normalize_string_list(projection.get("missing_eligible_agent_ids")),
+        "missing_eligible_contract_ids": _normalize_string_list(projection.get("missing_eligible_contract_ids")),
+        "consumed_artifact_refs": _normalize_string_list(projection.get("consumed_artifact_refs")),
+        "projected_agents": [
+            item
+            for item in projection.get("projected_agents", [])
+            if isinstance(item, dict)
+        ],
+        "blocked_agents": [
+            item
+            for item in projection.get("blocked_agents", [])
+            if isinstance(item, dict)
+        ],
+    }
+
+
 def build_rail_state_payload(
     *,
     root: Path | None = None,
@@ -347,6 +377,7 @@ def build_rail_state_payload(
     validation_path: Path | None = None,
     state_model_path: Path | None = None,
     rule_registry_path: Path | None = None,
+    operator_surface_path: Path | None = None,
 ) -> dict[str, Any]:
     base = (root or atlas_root()).resolve()
     resolved_current_state = (current_state_path or default_current_state_latest_json_path(base)).resolve()
@@ -357,6 +388,10 @@ def build_rail_state_payload(
 
     current_state_ref = atlas_relative(resolved_current_state, root=base)
     validation_ref = atlas_relative(resolved_validation, root=base)
+    operator_surface_ref = atlas_relative(
+        (operator_surface_path or default_operator_surface_path(base)).resolve(),
+        root=base,
+    )
 
     validation_counts = _normalize_counts(
         validation_payload.get("summary", {}) if isinstance(validation_payload.get("summary"), dict) else {}
@@ -400,7 +435,8 @@ def build_rail_state_payload(
         _normalize_string_list(seeded_summary.get("boundary_reminders") if isinstance(seeded_summary, dict) else [])
         + _normalize_string_list(current_rail_state.get("boundary_reminders") if isinstance(current_rail_state, dict) else [])
     )
-    evidence_refs = _unique_refs([current_state_ref, validation_ref, *seeded_refs])
+    evidence_refs = _unique_refs([current_state_ref, validation_ref, *seeded_refs, operator_surface_ref])
+    operator_surface_projection = _operator_surface_projection_from_current_state(current_payload)
 
     return {
         "contract_version": RAIL_STATE_READER_CONTRACT_VERSION,
@@ -423,6 +459,7 @@ def build_rail_state_payload(
         "active_blockers": blockers,
         "next_recommended_lane": next_lane,
         "boundary_reminders": boundary_reminders,
+        "operator_surface_projection": operator_surface_projection,
         "evidence_refs": evidence_refs,
         "source_refs": evidence_refs,
         "current_state_ref": current_state_ref,
@@ -474,6 +511,20 @@ def render_rail_state_summary(payload: dict[str, Any]) -> str:
     else:
         lines.append("- none")
 
+    projection = payload.get("operator_surface_projection")
+    lines.extend(["", "## Operator Surface"])
+    if isinstance(projection, dict):
+        lines.append(f"- Artifact: `{projection.get('artifact_ref', '')}`")
+        lines.append(f"- Generated: `{projection.get('artifact_generated_at', '')}`")
+        lines.append(f"- Projected shadow agents: `{', '.join(projection.get('projected_agent_ids', [])) or 'none'}`")
+        lines.append(f"- Projected contracts: `{', '.join(projection.get('projected_contract_ids', [])) or 'none'}`")
+        lines.append(
+            f"- Missing eligible projections: `{', '.join(projection.get('missing_eligible_agent_ids', [])) or 'none'}`"
+        )
+        lines.append(f"- Blocked shadow agents: `{', '.join(projection.get('blocked_agent_ids', [])) or 'none'}`")
+    else:
+        lines.append("- none")
+
     lines.extend(["", "## Evidence"])
     for ref in payload.get("evidence_refs", []):
         lines.append(f"- `{ref}`")
@@ -487,6 +538,7 @@ def persist_rail_state_artifact(
     validation_path: Path | None = None,
     state_model_path: Path | None = None,
     rule_registry_path: Path | None = None,
+    operator_surface_path: Path | None = None,
     output_json_path: Path | None = None,
     output_markdown_path: Path | None = None,
     write_markdown: bool = True,
@@ -502,6 +554,7 @@ def persist_rail_state_artifact(
         validation_path=validation_path.resolve() if validation_path is not None else None,
         state_model_path=state_model_path.resolve() if state_model_path is not None else None,
         rule_registry_path=rule_registry_path.resolve() if rule_registry_path is not None else None,
+        operator_surface_path=operator_surface_path.resolve() if operator_surface_path is not None else None,
     )
     summary = render_rail_state_summary(payload)
     write_json(artifact_path, payload)
@@ -524,6 +577,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--validation-path", type=Path)
     parser.add_argument("--state-model-path", type=Path)
     parser.add_argument("--rule-registry-path", type=Path)
+    parser.add_argument("--operator-surface-path", type=Path)
     parser.add_argument("--output-json", type=Path)
     parser.add_argument("--output-markdown", type=Path)
     parser.add_argument("--no-write-markdown", action="store_true")
@@ -538,6 +592,7 @@ def main(argv: list[str] | None = None) -> int:
             validation_path=args.validation_path.resolve() if args.validation_path else None,
             state_model_path=args.state_model_path.resolve() if args.state_model_path else None,
             rule_registry_path=args.rule_registry_path.resolve() if args.rule_registry_path else None,
+            operator_surface_path=args.operator_surface_path.resolve() if args.operator_surface_path else None,
             output_json_path=args.output_json.resolve() if args.output_json else None,
             output_markdown_path=args.output_markdown.resolve() if args.output_markdown else None,
             write_markdown=not args.no_write_markdown,

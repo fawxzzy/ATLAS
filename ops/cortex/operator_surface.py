@@ -21,6 +21,7 @@ from ops.cortex.current_state import (
 )
 from ops.cortex.kernel import default_rule_registry_path, default_state_model_path
 from ops.cortex.rail_state_reader import default_rail_state_latest_json_path
+from ops.cortex.shadow_agent_registry import default_shadow_agent_registry_path, load_shadow_agent_registry
 
 OPERATOR_SURFACE_CONTRACT_VERSION = "atlas.cortex.operator-surface.v1"
 
@@ -36,6 +37,11 @@ def default_operator_surface_latest_json_path(root: Path | None = None) -> Path:
 
 def default_operator_surface_latest_markdown_path(root: Path | None = None) -> Path:
     return operator_surface_root(root) / "latest.md"
+
+
+def shadow_agent_consumption_root(root: Path | None = None) -> Path:
+    base = (root or atlas_root()).resolve()
+    return base / "runtime" / "cortex" / "shadow-agent-consumption"
 
 
 @dataclass(frozen=True)
@@ -194,6 +200,99 @@ def _top_evidence_refs(
     return _ordered_unique_strings(refs)[:8]
 
 
+def _shadow_agent_summary(record: Any) -> dict[str, Any]:
+    return {
+        "agent_id": record.agent_id,
+        "contract_id": record.contract_id,
+        "family_name": record.family_name,
+        "trigger": record.trigger,
+        "admissibility_state": record.admissibility_state,
+        "stage": record.stage,
+        "runnable": record.runnable,
+        "owner_boundary": record.owner_boundary,
+        "non_claim_boundary": record.non_claim_boundary,
+    }
+
+
+def _project_shadow_consumption(
+    *,
+    root: Path,
+    shadow_agent_registry: Any,
+) -> tuple[dict[str, Any], list[str]]:
+    consumption_root = shadow_agent_consumption_root(root)
+    refs: list[str] = []
+    consumed_agents: list[dict[str, Any]] = []
+    seen_agent_ids: set[str] = set()
+    registry_by_id = {item.agent_id: item for item in shadow_agent_registry.agents}
+    if consumption_root.exists():
+        for artifact_path in sorted(consumption_root.glob("*.latest.json")):
+            payload = _read_json_object(artifact_path)
+            agent_payload = payload.get("agent")
+            if not isinstance(agent_payload, dict):
+                continue
+            agent_id = str(agent_payload.get("id", "")).strip()
+            if not agent_id or agent_id in seen_agent_ids:
+                continue
+            seen_agent_ids.add(agent_id)
+            registry_record = registry_by_id.get(agent_id)
+            authority_payload = payload.get("authority")
+            authority = authority_payload if isinstance(authority_payload, dict) else {}
+            consumed_agents.append(
+                {
+                    "agent_id": agent_id,
+                    "contract_id": (
+                        registry_record.contract_id
+                        if registry_record is not None
+                        else str(agent_payload.get("contract_id", "")).strip()
+                    ),
+                    "family_name": (
+                        registry_record.family_name
+                        if registry_record is not None
+                        else str(agent_payload.get("family_name", "")).strip()
+                    ),
+                    "trigger": (
+                        registry_record.trigger
+                        if registry_record is not None
+                        else str(agent_payload.get("trigger", "")).strip()
+                    ),
+                    "admissibility_state": (
+                        registry_record.admissibility_state
+                        if registry_record is not None
+                        else str(agent_payload.get("admissibility_state", "")).strip()
+                    ),
+                    "artifact_ref": atlas_relative(artifact_path, root=root),
+                    "contract_version": str(payload.get("contract_version", "")).strip(),
+                    "generated_at": str(payload.get("generated_at", "")).strip(),
+                    "consumption_status": str(payload.get("consumption_status", "")).strip(),
+                    "stage": str(agent_payload.get("stage", "")).strip(),
+                    "authority": {
+                        key: bool(value)
+                        for key, value in sorted(authority.items())
+                        if isinstance(key, str) and isinstance(value, bool)
+                    },
+                }
+            )
+            refs.append(atlas_relative(artifact_path, root=root))
+    consumed_agents.sort(key=lambda item: item["agent_id"])
+    projected_agent_ids = [item["agent_id"] for item in consumed_agents]
+    projected_contract_ids = [item["contract_id"] for item in consumed_agents if item["contract_id"]]
+    missing_eligible_agent_ids = [
+        item.agent_id for item in shadow_agent_registry.eligible_agents if item.agent_id not in seen_agent_ids
+    ]
+    missing_eligible_contract_ids = [
+        item.contract_id for item in shadow_agent_registry.eligible_agents if item.agent_id not in seen_agent_ids
+    ]
+    projection = {
+        "artifact_root": atlas_relative(consumption_root, root=root),
+        "projected_agent_ids": projected_agent_ids,
+        "projected_contract_ids": projected_contract_ids,
+        "missing_eligible_agent_ids": missing_eligible_agent_ids,
+        "missing_eligible_contract_ids": missing_eligible_contract_ids,
+        "consumed_agents": consumed_agents,
+    }
+    return projection, refs
+
+
 def build_operator_surface_payload(
     *,
     root: Path | None = None,
@@ -203,6 +302,7 @@ def build_operator_surface_payload(
     validation_path: Path | None = None,
     state_model_path: Path | None = None,
     rule_registry_path: Path | None = None,
+    shadow_agent_registry_path: Path | None = None,
 ) -> dict[str, Any]:
     base = (root or atlas_root()).resolve()
     resolved_current_state = (current_state_path or default_current_state_latest_json_path(base)).resolve()
@@ -211,6 +311,9 @@ def build_operator_surface_payload(
     resolved_validation = (validation_path or default_validation_receipt_path(base)).resolve()
     resolved_state_model = (state_model_path or default_state_model_path(base)).resolve()
     resolved_rule_registry = (rule_registry_path or default_rule_registry_path(base)).resolve()
+    resolved_shadow_agent_registry = (
+        shadow_agent_registry_path or default_shadow_agent_registry_path(base)
+    ).resolve()
 
     current_payload = _require_json_object(resolved_current_state, label="Cortex current-state artifact")
     rail_payload = _require_json_object(resolved_rail_state, label="Cortex rail-state artifact")
@@ -218,6 +321,7 @@ def build_operator_surface_payload(
     validation_payload = _require_json_object(resolved_validation, label="Stack validation receipt")
     state_model_payload = _require_json_object(resolved_state_model, label="Cortex state model seed")
     rule_registry_payload = _require_json_object(resolved_rule_registry, label="Cortex rule registry seed")
+    shadow_agent_registry = load_shadow_agent_registry(path=resolved_shadow_agent_registry, root=base)
 
     current_ref = atlas_relative(resolved_current_state, root=base)
     rail_ref = atlas_relative(resolved_rail_state, root=base)
@@ -225,6 +329,7 @@ def build_operator_surface_payload(
     validation_ref = atlas_relative(resolved_validation, root=base)
     state_model_ref = atlas_relative(resolved_state_model, root=base)
     rule_registry_ref = atlas_relative(resolved_rule_registry, root=base)
+    shadow_agent_registry_ref = atlas_relative(resolved_shadow_agent_registry, root=base)
 
     validation_counts = _normalize_counts(
         validation_payload.get("summary", {}) if isinstance(validation_payload.get("summary"), dict) else {}
@@ -241,6 +346,10 @@ def build_operator_surface_payload(
         context_payload=context_payload,
         rail_payload=rail_payload,
         state_model_payload=state_model_payload,
+    )
+    shadow_consumption, shadow_consumption_refs = _project_shadow_consumption(
+        root=base,
+        shadow_agent_registry=shadow_agent_registry,
     )
 
     operator_summary = (
@@ -311,6 +420,18 @@ def build_operator_surface_payload(
             if isinstance(rule_registry_payload.get("rules"), list)
             else 0,
         },
+        "shadow_agents": {
+            "registry_ref": shadow_agent_registry_ref,
+            "source_receipts": list(shadow_agent_registry.source_receipts),
+            "exportable_contract_ids": [item.contract_id for item in shadow_agent_registry.exportable_agents],
+            "shadow_contract_ids": [item.contract_id for item in shadow_agent_registry.eligible_agents],
+            "blocked_contract_ids": [item.contract_id for item in shadow_agent_registry.blocked_agents],
+            "eligible_agent_ids": [item.agent_id for item in shadow_agent_registry.eligible_agents],
+            "blocked_agent_ids": [item.agent_id for item in shadow_agent_registry.blocked_agents],
+            "eligible_agents": [_shadow_agent_summary(item) for item in shadow_agent_registry.eligible_agents],
+            "blocked_agents": [_shadow_agent_summary(item) for item in shadow_agent_registry.blocked_agents],
+        },
+        "shadow_consumption": shadow_consumption,
         "source_refs": [
             current_ref,
             rail_ref,
@@ -318,6 +439,8 @@ def build_operator_surface_payload(
             validation_ref,
             state_model_ref,
             rule_registry_ref,
+            shadow_agent_registry_ref,
+            *shadow_consumption_refs,
         ],
     }
 
@@ -378,6 +501,54 @@ def render_operator_surface_summary(payload: dict[str, Any]) -> str:
             lines.append(f"- {reminder}")
     else:
         lines.append("- none")
+
+    shadow_agents = payload.get("shadow_agents", {})
+    lines.extend(["", "## Shadow Agents"])
+    lines.append(f"- Registry: `{shadow_agents.get('registry_ref', '')}`")
+    exportable_contract_ids = shadow_agents.get("exportable_contract_ids", [])
+    shadow_contract_ids = shadow_agents.get("shadow_contract_ids", [])
+    blocked_contract_ids = shadow_agents.get("blocked_contract_ids", [])
+    eligible_ids = shadow_agents.get("eligible_agent_ids", [])
+    blocked_ids = shadow_agents.get("blocked_agent_ids", [])
+    if exportable_contract_ids:
+        lines.append(f"- Exportable contracts: `{', '.join(exportable_contract_ids)}`")
+    else:
+        lines.append("- Exportable contracts: none")
+    if shadow_contract_ids:
+        lines.append(f"- Shadow contracts: `{', '.join(shadow_contract_ids)}`")
+    else:
+        lines.append("- Shadow contracts: none")
+    if blocked_contract_ids:
+        lines.append(f"- Blocked contracts: `{', '.join(blocked_contract_ids)}`")
+    else:
+        lines.append("- Blocked contracts: none")
+    if eligible_ids:
+        lines.append(f"- Eligible: `{', '.join(eligible_ids)}`")
+    else:
+        lines.append("- Eligible: none")
+    if blocked_ids:
+        lines.append(f"- Blocked: `{', '.join(blocked_ids)}`")
+    else:
+        lines.append("- Blocked: none")
+
+    shadow_consumption = payload.get("shadow_consumption", {})
+    projected_ids = shadow_consumption.get("projected_agent_ids", [])
+    missing_ids = shadow_consumption.get("missing_eligible_agent_ids", [])
+    lines.extend(["", "## Shadow Consumption"])
+    lines.append(f"- Artifact root: `{shadow_consumption.get('artifact_root', '')}`")
+    if projected_ids:
+        lines.append(f"- Projected: `{', '.join(projected_ids)}`")
+    else:
+        lines.append("- Projected: none")
+    if missing_ids:
+        lines.append(f"- Missing eligible projections: `{', '.join(missing_ids)}`")
+    else:
+        lines.append("- Missing eligible projections: none")
+    for item in shadow_consumption.get("consumed_agents", []):
+        lines.append(
+            f"- `{item['agent_id']}` / `{item['contract_id']}` -> `{item['artifact_ref']}` "
+            f"({item['admissibility_state'] or 'unknown'}, {item['consumption_status'] or 'unknown'}, {item['contract_version'] or 'unknown'})"
+        )
 
     lines.extend(["", "## Top Evidence"])
     for ref in payload["top_evidence_refs"]:

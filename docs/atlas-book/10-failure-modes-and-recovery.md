@@ -527,6 +527,229 @@ Each entry records:
 - Operator Secret Path Hygiene
 - Fitness Supabase Profile/Data Hygiene when applicable
 
+## 14. Fake Motion After Green
+
+### Symptoms
+
+- repo/runtime truth is already green, but workers keep opening new repair, install-readiness, or reconciliation packets anyway
+- a lane that is blocked only by a live external bridge keeps attracting more ATLAS/root or owner-repo churn
+- restart surfaces become noisy enough that future sessions cannot tell the remaining blocker is outside repo truth
+
+### Root cause
+
+- the blocker boundary was not frozen explicitly once owner-scope setup was already ruled out
+- operators kept treating an external/session bridge defect like a local repo/runtime defect
+
+### Prevention rule
+
+- `Session-Scoped External Blocker Freeze`: when repo/runtime truth is green and the only missing proof depends on a live external/session bridge, freeze all repo/root mutation until one live bridge success occurs
+- `Upstream Product Fault Hold`: when owner-scope setup has already been ruled out and the remaining blocker is a product/runtime defect outside repo truth, freeze the lane and preserve only restart-relevant truth
+
+### Recovery steps
+
+1. stop opening new owner-repo repair, install-readiness, or cleanup packets
+2. classify the remaining blocker explicitly as not a default-browser issue, not an ATLAS/root issue, and not a Fitness repo/runtime issue
+3. point restart surfaces to the canonical bug packet instead of recreating narrative churn
+4. reopen only after one successful live Codex-to-Chrome runtime call exists from a responsive session
+5. route immediately to `Fitness Discord Default-profile post-install governed authenticated same-event fresh-submit positive live proof capture pass 9`
+
+### Owning lane
+
+- Discord OS Feedback Workflow Canonicalization
+- Truth Map & ATLAS Book
+- Knowledge Capture & Transfer
+- Durable Context Externalization
+
+### Required receipt
+
+- `repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-POST-INSTALL-CODEX-CHROME-BRIDGE-TIMEOUT-BOUNDARY-RECEIPT-2026-06-01.md`
+- `docs/ops/ROOT-BOUNDED-DISPATCHER-RECONCILIATION-AFTER-FITNESS-DISCORD-POST-INSTALL-CODEX-CHROME-BRIDGE-TIMEOUT-BOUNDARY-RECEIPT-CLOSEOUT-2026-06-01.md`
+
+### Marker impact
+
+- Discord OS Feedback Workflow Canonicalization
+- Truth Map & ATLAS Book
+- Knowledge Capture & Transfer
+- Durable Context Externalization
+
+## 15. Manual Toggle Drift
+
+### Symptoms
+
+- a proof loop works only when the operator remembers hidden flags, prompts, browser state, or setup order
+- local runtime, proof capture, and receipt packaging all exist, but the end-to-end loop still cannot be replayed reliably
+- readiness claims sound stronger than the actual repeatability of the loop
+
+### Root cause
+
+- the proof parts were treated as equivalent to a deterministic proof loop
+- fresh capture still depends on one-off operator stitching instead of a governed local spine
+
+### Prevention rule
+
+- `Proof-Loop Before Pixel-Loop`: do not claim UI iteration readiness until the proof-capture path is deterministic enough to verify Codex-applied changes without ad hoc operator stitching
+- `Local-First Verification Spine`: when local runtime, proof capture, and truth update all exist, readiness still requires binding them into one deterministic loop
+
+### Recovery steps
+
+1. inventory the loop end to end: request/spec intake, mutation, local runtime, proof capture, receipt update
+2. separate already-proven segments from the still-manual links
+3. classify any blocker as owner-local, ATLAS/control-plane, or external/session-scoped
+4. freeze one exact readiness threshold before claiming promotion
+5. promote only after one bounded loop reruns end to end without hidden toggles
+
+### Owning lane
+
+- Feedback Loop Readiness
+- Fitness QA/LLEL Workflow
+- AI Repetition-to-Automation Pipeline
+
+### Required receipt
+
+- `docs/ops/FEEDBACK-LOOP-READINESS-DETERMINISTIC-READINESS-THRESHOLD-PASS-1-2026-06-01.md`
+
+### Marker impact
+
+- Feedback Loop Readiness
+- Fitness QA/LLEL Workflow
+- AI Repetition-to-Automation Pipeline
+
+## 16. Automation Claim Inflation
+
+### Symptoms
+
+- repeated operator work gets described as automation-ready even though the trigger or proof path is still unstable
+- a helper-friendly preparation step gets conflated with the full workflow it supports
+- externally blocked proof capture gets misclassified as local automation debt
+
+### Root cause
+
+- repetition was counted, but the trigger, inputs, proof artifact, failure boundary, and fallback path were not all frozen together
+- operator frustration was treated like automation evidence
+
+### Prevention rule
+
+- `Automation Follows Stable Repetition`: do not promote a repeated workflow into automation candidacy until its trigger, inputs, proof artifact, and fallback path are all explicit and stable
+- `Operator Repetition Ledger`: capture repeated operator actions as named families with trigger, boundary, proof expectation, and safe fallback so helper work targets real repetition instead of vague friction
+- `Bounded Automation Candidate Ladder`: manual repetition -> structured repetition -> automation candidate -> automation-ready
+
+### Recovery steps
+
+1. name the repeated family explicitly
+2. separate safe preparation helpers from full execution claims
+3. record the trigger surface, stable inputs, proof artifact, failure boundary, and safe fallback
+4. classify any dependency on hidden toggles, ad hoc prompting, or external/session defects as a non-automation boundary
+5. promote only after one real governed operator surface exists with repeatable proof
+
+### Owning lane
+
+- AI Repetition-to-Automation Pipeline
+- Playbook Everywhere + Cortex Interface
+- `_stack` Readiness
+
+### Required receipt
+
+- `docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-AUTOMATION-CANDIDATE-THRESHOLD-PASS-1-2026-06-01.md`
+- `docs/ops/FEEDBACK-LOOP-READINESS-DETERMINISTIC-READINESS-THRESHOLD-PASS-1-2026-06-01.md`
+
+### Marker impact
+
+- AI Repetition-to-Automation Pipeline
+- Playbook Everywhere + Cortex Interface
+- `_stack` Readiness
+
+## 17. Agent Premature Entanglement
+
+### Symptoms
+
+- Cortex agents start appearing as if they own workflow truth instead of consuming an explicit contract
+- prompt roles or repeated frustration are treated like agent readiness
+- a shadow scaffold implies authority over proof, deploy, publication, or owner-truth actions
+- ATLAS and Cortex both start defining readiness truth for the same family independently
+
+### Root cause
+
+- the agent family was introduced before the repetition contract, fallback, and owner boundary were frozen
+- Cortex was allowed to infer capability from prompts instead of loading explicit governed contracts
+- the export surface did not stay truth-owned by ATLAS/Playbook before Cortex consumption widened
+
+### Prevention rule
+
+- `Cortex Follows Governed Repetition`: Cortex agents may only be introduced from already-governed repetition families with explicit trigger, input, proof, fallback, and owner-boundary truth
+- `Contract-First Agent Shadowing`: define the contract first and let the agent shadow the workflow before any authority is granted
+- `Contract Before Agent`: no Cortex agent surface should exist without a governed contract exported from ATLAS/Playbook truth
+- `Truth-Owned Interface Export`: ATLAS defines the contract; Cortex consumes it without owning readiness truth
+
+### Recovery steps
+
+1. route the family back to the repetition ledger and freeze the missing contract fields
+2. strip any implied production authority from the agent surface
+3. separate bounded preparation helpers from human-judgment or externally blocked classes
+4. reload Cortex only from the exported contract surface
+5. collapse any duplicate readiness truth back into the ATLAS/Playbook export surface
+6. promote only after bounded consumption proof exists without drift
+
+### Owning lane
+
+- Playbook Everywhere + Cortex Interface
+- Cortex Readiness
+- AI Repetition-to-Automation Pipeline
+
+### Required receipt
+
+- `docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CONTRACT-FIRST-AGENT-SHADOWING-PASS-1-2026-06-01.md`
+- `docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CONTRACT-EXPORT-SURFACE-PASS-3-2026-06-02.md`
+- `docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-AUTOMATION-CANDIDATE-THRESHOLD-PASS-1-2026-06-01.md`
+
+### Marker impact
+
+- Playbook Everywhere + Cortex Interface
+- Cortex Readiness
+- AI Repetition-to-Automation Pipeline
+
+## 18. Route Past Dirty Root
+
+### Symptoms
+
+- validation is green, but the shared ATLAS root checkout is still broadly dirty
+- workers keep opening new root lanes or publication claims from the same dirty checkout anyway
+- future sessions cannot tell whether a changed root file is old residue, current execution, or unclassified retained state
+
+### Root cause
+
+- green validation was treated like permission to ignore shared checkout hygiene
+- dirty-root state was narrated indirectly through downstream lanes instead of being frozen as its own blocker
+
+### Prevention rule
+
+- `Shared Root Cleanliness Gate`: when the ATLAS root is a shared active writer surface and `git status` shows broad modified or untracked root-owned state, freeze new lane claims and publication decisions until that dirty state is explicitly classified or intentionally preserved
+- `Classify Before Cleanup`: read-model blocker -> dirty-root inventory -> ownership and retention split -> explicit preserve/cleanup decision -> only then resume lane advancement
+
+### Recovery steps
+
+1. stop opening new root execution or publication lanes from the same dirty checkout
+2. capture the dirty-root scope directly from `git status --porcelain=v1 --untracked-files=all`
+3. distinguish the blocker from any already-closed validator or stack-lock family
+4. record whether each surface is active work, retained evidence, or unclassified residue before any cleanup is proposed
+5. resume deferred lanes only after the root worktree is explicitly stabilized or intentionally preserved
+
+### Owning lane
+
+- Truth Map & ATLAS Book
+- Cortex Readiness
+- Branch & Worktree Normalization
+
+### Required receipt
+
+- `docs/ops/STABILIZE-ROOT-WORKTREE-BLOCKER-CLASSIFICATION-AND-HOLD-PASS-1-2026-06-01.md`
+- `docs/ops/CORTEX-READINESS-READ-MODEL-FRESHNESS-AND-DEFERRED-LANE-PASS-4-2026-06-01.md`
+
+### Marker impact
+
+- Truth Map & ATLAS Book
+- Cortex Readiness
+- Branch & Worktree Normalization
+
 ## Recovery Pattern
 
 Across these failure modes, the common recovery order is:

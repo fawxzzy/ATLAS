@@ -433,3 +433,51 @@ This chapter turns the current operating model into reusable “run this workflo
 - Playbook Everywhere + Cortex Interface
 - Knowledge Capture & Transfer
 - AI Repetition-to-Automation Pipeline
+
+## Recipe 11: Blocked Execution Lane Workflow
+
+### Owner
+
+- owner repo first
+- ATLAS root only for blocker classification, execution clusters, and cross-repo receipts
+
+### Starting point
+
+- one execution-ready lane that either just blocked or just changed blocker class
+
+### Allowed commands / surfaces
+
+- owner-repo blocker conversion when the blocker is implementation reality
+- one exact root blocker recheck when owner-side class change lands
+- one serial root execution cluster when the lane is honestly execution-ready
+- root read-model or doctrine work only when no executable owner-side work is ready
+
+### Proof required
+
+- blocked lanes: exact blocker class and exact owner surface
+- reopened lanes: execution proof and reconciliation before any ratchet
+
+### Receipt required
+
+- at most one blocked execution receipt and one blocked proof or blocker-recheck receipt for the same blocker class at root
+- then owner-side receipts until the blocker class changes
+- execution-ready reopenings should land as one cluster: execution, proof or reconciliation, ratchet
+
+### Approval gates
+
+- existing lane-specific approvals still apply
+- blocker-class change does not bypass a separate approval gate
+
+### Forbidden shortcuts
+
+- no third root retry after the blocker class is already durable
+- no duplicate root package when the exact receipt already exists durably
+- no ratchet after every small receipt unless operator reality materially changed
+- no widening owner-side cleanup before the smallest blocker slice is finished
+
+### Marker impact
+
+- Atlas-owned Repo Naming Canonicalization
+- Local Data Gateway
+- Durable Context Externalization
+- any future stack lane that alternates between root governance and owner-side conversion

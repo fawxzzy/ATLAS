@@ -22,11 +22,11 @@ It shows:
 - `repos/fawxzzy-fitness`
   - Fitness app/runtime truth
   - current Discord-hosted runtime truth
-- `repos/fawxzzy-trove`
+- `repos/trove`
   - Trove repo-local runtime truth
-- `repos/fawxzzy-mazer`
+- `repos/mazer`
   - Mazer repo-local runtime truth
-- `repos/fawxzzy-foundation`
+- `repos/foundation`
   - Foundation repo-local runtime truth
 - `repos/DiscordOS`
   - canonical DiscordOS repo surface now exists locally
@@ -132,7 +132,9 @@ Current doctrine flow:
 1. repeated receipt-backed rule appears in owner workflows
 2. ATLAS records the pattern and convergence consequence
 3. doctrine routing classifies it
-4. Playbook later owns the reusable governance framing
+4. operator-grade doctrine hardening ratifies only the receipt-backed, boundary-safe subset
+5. restart and book mirrors may restate that doctrine without redefining it
+6. Playbook later owns the reusable governance framing
 
 Playbook does not become runtime owner at any step.
 
@@ -155,6 +157,17 @@ Canonical flow:
 4. Discord publication consumes proof only after that
 5. ATLAS records the cross-repo checkpoint
 6. Playbook later extracts reusable doctrine
+
+### Blocked consequence flow
+
+When owner proof or release-readiness evidence freshness fails:
+
+1. the owner repo stays not release-ready
+2. `_stack` governed deploy authority stays blocked
+3. owner release-ledger narration may record blocked state only
+4. Discord publication stays blocked
+5. ATLAS root may package blocked consequence only
+6. blocked-work routing returns to the owner-side evidence-refresh packet
 
 ## Continuity / Retrieval Map
 
@@ -257,13 +270,14 @@ flowchart LR
 
 | Lane / surface | Owner | Source of truth | Current status | Blocker | Next package |
 | --- | --- | --- | --- | --- | --- |
-| Fitness app lane | Fitness | `repos/fawxzzy-fitness` plus Fitness release proof | active | none for normal product work | explicit Fitness lane reopen |
+| Fitness app lane | Fitness | `repos/fawxzzy-fitness` plus Fitness release proof | release-readiness lane now resting green on clean preserved truth | stale evidence, governed QA auth secret-lane consumption, protected-route auth consumption, seam-proof aborts, proof-run drift, the linked Supabase migration-validator crash, clean-state preservation, and the governed notes gate are now all cleared; no exact owner-side release-readiness blocker remains | none immediate inside the owner-side release-readiness family; await fresh root-bounded lane selection |
 | Discord work lane | Fitness-hosted now, DiscordOS later | Fitness repo/runtime now; `repos/DiscordOS` plus ATLAS separation receipts as future target | scaffold complete, lookup widening explicitly closed, runtime migration not started | higher-level authorization is required before any transport-aware, externally-executing, schema, or runtime follow-on | none inside the current lookup lane; reopen only through explicit higher-level authorization |
-| ATLAS systems lane | ATLAS root plus `_stack` and Playbook boundaries | ATLAS docs and receipts | active closeout and governance lane | retained worktree, helper-surface, and residue cleanup pressure | closeout planning or bounded retained-surface package |
+| ATLAS systems lane | ATLAS root plus `_stack` and Playbook boundaries | ATLAS docs and receipts | active closeout and governance lane | `_stack` Readiness now has one compact lane-owned decisive receipt spine, one fully shaped blocker-family chain, one manifest-backed continuity map, one valid marker-pressure reopen decision, one frozen `stack vercel-health` command-design spine, one frozen evidence-admission/freshness spine, one frozen report-contract/contradiction-routing spine, one frozen implementation-admission/no-execution guard spine, one frozen fixture/static-proof boundary, one frozen first implementation slice, one frozen worker prompt-pack / handoff contract, one frozen implementation-readiness closeout with exact worker-routing rule, one reconciled first implementation landing, and one reconciled proof-hardening follow-on; root validation is now back to `error=0`, the lock-refresh family is closed, the Local Data Gateway retained-surface relationship seam is already durably reconciled and parked at `adoptable later`, the repo-naming adoptable-now threshold is now also durably frozen as still below `adoptable now`, the refreshed Fitness owner-side release-readiness lane is now green on clean preserved truth, and the Discord feedback lane now has one explicit external/session-scoped bridge hold: launcher-channel presence, bounded row export, panel-helper contract alignment, the app-side non-automation verification-token requirement, one governed non-automation app-side subject, local dev env forwarding, non-empty active local verification env mirrors, local token minting, native-host presence, deterministic selected-profile identification, and extension install/enabled state in `Default` are proven, while the governed authenticated same-event member submit bundle is still missing because the live Codex-to-Chrome bridge in this session is timing out and no further Fitness-local repair packet is justified before that bridge responds | `Fitness Discord Default-profile post-install governed authenticated same-event fresh-submit positive live proof capture pass 9` |
+| Post-convergence lane split readiness | ATLAS root | lane-split receipts plus ATLAS Book restart surfaces | open at `61%`; one compact lane-owned decisive receipt spine, one fully shaped blocker-family chain, one manifest-backed continuity map, and a shaped chain that has now passed one coherent refresh cycle as a single restart unit | no immediate docs-only blocker family remains inside the lane | no immediate docs-only follow-on packet; reopen only with a distinct restart-truth, marker, approval, or execution-surface change |
 | Fitness Supabase hygiene | Fitness | Fitness Supabase plus ATLAS closeout and governance receipts | closed at `100%`; remaining Discord/Music Sesh concerns transferred out of lane scope | none inside Fitness profile-core cleanup scope | defer any Discord/Music Sesh follow-on to Discord OS Infrastructure Separation |
 | DiscordOS bootstrap | DiscordOS | `repos/DiscordOS` | completed with governance scaffold only | no migrated code yet | bounded post-bootstrap implementation plan |
 | Helper Vercel decommission | ATLAS systems lane with owner confirmation | Vercel inventory and deletion receipts | stale Spotify-era and helper Fitness projects deleted | provenance clarity and future health classification only | preview/unfurl verification or Vercel health-design lane |
-| Lifeline health projection | Lifeline later, `_stack` first | current Vercel and stack health receipts | pressure identified, not implemented | no command surface yet | docs or command-design lane for `stack vercel-health` |
+| Lifeline health projection | Lifeline later, `_stack` first | current Vercel and stack health receipts | pressure identified; `_stack`-first command design, evidence-admission rules, report contract, implementation guard, fixture/static-proof boundary, first implementation slice, worker handoff contract, readiness closeout, and the first proof-hardening follow-on are now all frozen or reconciled | no immediate root-only `_stack` follow-on is open for this first slice; future movement requires a broader implementation slice, a lock-refresh lane, or a changed guard boundary rather than more first-slice seam design | none immediate docs-only; reopen only on broader implementation, lock-refresh, or guard-boundary change |
 
 ## Non-Goals
 

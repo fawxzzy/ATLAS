@@ -117,6 +117,10 @@ Current status:
   - the broader dirty-root blocker still remains active outside that staged subset, so this is a bounded index-isolation proof rather than a broader clean-root or commit-ready claim
   - staged-subset disposition is now also frozen explicitly: the isolated staged subset remains held as the minimum blocker-preservation tranche, while commit-intent stays unopened and broader dirty-root state remains outside the tranche
   - commit-intent is now also frozen explicitly: the exact staged blocker-preservation tranche may now be treated as an honest partial-commit question, but only for that exact subset and not as a broader root commitability claim
+  - first partial-commit conversion is now also frozen explicitly: commit `1b25ba3` preserved the minimum blocker-preservation tranche without touching the broader dirty-root state
+  - post-first-commit reselection is now also frozen explicitly: the next exact tracked candidate is the residual active tranche of six atlas-book restart surfaces, four Cortex read-model files, and four Cortex read-model tests
+  - residual active-tranche staging is now also frozen explicitly: that fourteen-file tranche is admitted and staged in isolation without pulling truth mirrors, mixed tracked support backlog, or broader untracked backlog into the index
+  - residual active-tranche commit path is now also frozen explicitly: the staged tranche remains held, targeted read-model tests pass, validator posture still holds, and commit-intent is admissible for that exact tranche only
 - no helper-Vercel project deletion gate remains open after the 2026-05-25 helper-surface deletion pass
 - DiscordOS lookup widening is closed at the owner-repo boundary:
   - transport-aware opening: `no`

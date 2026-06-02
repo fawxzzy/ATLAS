@@ -41,6 +41,24 @@ class CortexOperatorSurfaceTests(unittest.TestCase):
         cls.rule_payload = json.loads(
             (cls.root / "runtime" / "cortex" / "kernel.rule-registry.seed.v1.json").read_text(encoding="utf-8")
         )
+        cls.shadow_agent_payload = json.loads(
+            (cls.root / "runtime" / "cortex" / "shadow-agent-registry.seed.v1.json").read_text(encoding="utf-8")
+        )
+        cls.shadow_validation_payload = json.loads(
+            (
+                cls.root / "runtime" / "cortex" / "shadow-agent-consumption" / "validation-summary.latest.json"
+            ).read_text(encoding="utf-8")
+        )
+        cls.shadow_marker_payload = json.loads(
+            (
+                cls.root / "runtime" / "cortex" / "shadow-agent-consumption" / "marker-checkpoint.latest.json"
+            ).read_text(encoding="utf-8")
+        )
+        cls.shadow_receipt_payload = json.loads(
+            (
+                cls.root / "runtime" / "cortex" / "shadow-agent-consumption" / "receipt-doctrine-draft.latest.json"
+            ).read_text(encoding="utf-8")
+        )
 
     def _base_validation_payload(
         self,
@@ -202,6 +220,19 @@ class CortexOperatorSurfaceTests(unittest.TestCase):
         )
         _write_json(root / "runtime" / "cortex" / "kernel.state-model.seed.v1.json", self.state_payload)
         _write_json(root / "runtime" / "cortex" / "kernel.rule-registry.seed.v1.json", self.rule_payload)
+        _write_json(root / "runtime" / "cortex" / "shadow-agent-registry.seed.v1.json", self.shadow_agent_payload)
+        _write_json(
+            root / "runtime" / "cortex" / "shadow-agent-consumption" / "validation-summary.latest.json",
+            self.shadow_validation_payload,
+        )
+        _write_json(
+            root / "runtime" / "cortex" / "shadow-agent-consumption" / "marker-checkpoint.latest.json",
+            self.shadow_marker_payload,
+        )
+        _write_json(
+            root / "runtime" / "cortex" / "shadow-agent-consumption" / "receipt-doctrine-draft.latest.json",
+            self.shadow_receipt_payload,
+        )
         return root
 
     def test_clean_posture_joins_existing_artifacts(self) -> None:
@@ -216,6 +247,53 @@ class CortexOperatorSurfaceTests(unittest.TestCase):
         self.assertEqual("context-promote-cortex-receipt-interpretation-consumption-feedback-wave11", payload["context_packet_id"])
         self.assertEqual([], payload["active_blockers"])
         self.assertEqual("in_sync", payload["publication_posture"]["remote_status"])
+        self.assertEqual(
+            [
+                "validation-summary-shadow",
+                "marker-checkpoint-shadow",
+                "receipt-doctrine-draft-shadow",
+            ],
+            payload["shadow_agents"]["eligible_agent_ids"],
+        )
+        self.assertEqual(
+            [
+                "atlas.cortex.contract.validation-summary-shadow.v1",
+                "atlas.cortex.contract.marker-checkpoint-shadow.v1",
+                "atlas.cortex.contract.receipt-doctrine-draft-shadow.v1",
+            ],
+            payload["shadow_agents"]["shadow_contract_ids"],
+        )
+        self.assertIn(
+            "fresh-live-proof-capture-blocked",
+            payload["shadow_agents"]["blocked_agent_ids"],
+        )
+        self.assertEqual(
+            [
+                "marker-checkpoint-shadow",
+                "receipt-doctrine-draft-shadow",
+                "validation-summary-shadow",
+            ],
+            payload["shadow_consumption"]["projected_agent_ids"],
+        )
+        self.assertEqual(
+            [
+                "atlas.cortex.contract.marker-checkpoint-shadow.v1",
+                "atlas.cortex.contract.receipt-doctrine-draft-shadow.v1",
+                "atlas.cortex.contract.validation-summary-shadow.v1",
+            ],
+            payload["shadow_consumption"]["projected_contract_ids"],
+        )
+        self.assertEqual([], payload["shadow_consumption"]["missing_eligible_agent_ids"])
+        self.assertEqual(
+            "runtime/cortex/shadow-agent-consumption",
+            payload["shadow_consumption"]["artifact_root"],
+        )
+        self.assertTrue(
+            all(item["admissibility_state"] == "shadow-only" for item in payload["shadow_consumption"]["consumed_agents"])
+        )
+        self.assertTrue(
+            all(not any(item["authority"].values()) for item in payload["shadow_consumption"]["consumed_agents"])
+        )
         self.assertEqual(
             [
                 "runtime/cortex/current-state/latest.json",
@@ -336,6 +414,11 @@ class CortexOperatorSurfaceTests(unittest.TestCase):
         self.assertEqual(json.dumps(payload), json.dumps(artifact.payload))
         self.assertIn("# Cortex Operator Surface", summary)
         self.assertIn("## Task Frame", summary)
+        self.assertIn("## Shadow Agents", summary)
+        self.assertIn("validation-summary-shadow", summary)
+        self.assertIn("atlas.cortex.contract.validation-summary-shadow.v1", summary)
+        self.assertIn("## Shadow Consumption", summary)
+        self.assertIn("receipt-doctrine-draft-shadow", summary)
         self.assertIn("## Top Evidence", summary)
         self.assertIn("stabilize-stack-validation", summary)
 
@@ -348,6 +431,19 @@ class CortexOperatorSurfaceTests(unittest.TestCase):
         _write_json(root / "runtime" / "receipts" / "validation" / "stack-validation.latest.json", self._base_validation_payload())
         _write_json(root / "runtime" / "cortex" / "kernel.state-model.seed.v1.json", self.state_payload)
         _write_json(root / "runtime" / "cortex" / "kernel.rule-registry.seed.v1.json", self.rule_payload)
+        _write_json(root / "runtime" / "cortex" / "shadow-agent-registry.seed.v1.json", self.shadow_agent_payload)
+        _write_json(
+            root / "runtime" / "cortex" / "shadow-agent-consumption" / "validation-summary.latest.json",
+            self.shadow_validation_payload,
+        )
+        _write_json(
+            root / "runtime" / "cortex" / "shadow-agent-consumption" / "marker-checkpoint.latest.json",
+            self.shadow_marker_payload,
+        )
+        _write_json(
+            root / "runtime" / "cortex" / "shadow-agent-consumption" / "receipt-doctrine-draft.latest.json",
+            self.shadow_receipt_payload,
+        )
 
         stdout = io.StringIO()
         stderr = io.StringIO()
