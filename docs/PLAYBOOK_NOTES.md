@@ -742,3 +742,9 @@
 - Rule: quarantine is not normal retention; sensitive files moved under `secrets/**` quarantine must not be treated as ordinary archive evidence or routine operator source material.
 - Pattern: move sensitive residue out of ordinary archive carry -> keep it under ignored `secrets/**` quarantine -> verify adjacent retained metadata is non-secret -> freeze operator posture before any broader mutation.
 - Failure Mode: secret posture drift happens when retention posture, quarantine posture, ignore rules, and operator expectations stop matching, so a local secret path becomes implicitly trusted or casually mutated.
+
+## 2026-06-02 - Current execution order must be durable before future workers depend on it
+
+- Rule: durable before convenient; do not treat session-local lane order or held-lane posture as durable until it is externalized into restart-safe surfaces that future workers actually retrieve.
+- Pattern: recent lane closeouts accumulate -> active execution order and held posture become chat-dependent -> externalize that spine into continuity manifest plus restart surfaces -> hand off to the next selected lane.
+- Failure Mode: context leakage through chat reliance happens when the current execution order, held-lane posture, or reopen rules still depend on conversation memory instead of durable restart surfaces.

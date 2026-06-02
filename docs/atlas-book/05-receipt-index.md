@@ -375,6 +375,7 @@
 - [Durable Context Externalization Continuity-Manifest Seeding Pass 1](../ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-SEEDING-PASS-1-2026-05-27.md)
 - [Durable Context Externalization Retrieval Surface Inventory](../ops/DURABLE-CONTEXT-EXTERNALIZATION-RETRIEVAL-SURFACE-INVENTORY-2026-05-27.md)
 - [Durable Context Externalization Prompt-Pack Normalization](../ops/DURABLE-CONTEXT-EXTERNALIZATION-PROMPT-PACK-NORMALIZATION-2026-05-27.md)
+- [Durable Context Externalization Execution-State Spine Externalization Pass 7](../ops/DURABLE-CONTEXT-EXTERNALIZATION-EXECUTION-STATE-SPINE-EXTERNALIZATION-PASS-7-2026-06-02.md)
 
 ## `_stack` Readiness
 

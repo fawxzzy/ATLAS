@@ -144,6 +144,8 @@ Current status:
   - local secret-path posture is now also frozen explicitly: ignored `secrets/*.env` and `secrets/local/*.env` remain the governed active local secret lanes, ignored `secrets/local/*.backup.env` remains local-only backup posture rather than canonical evidence, and `secrets/local/archive-quarantine/**` remains quarantine-only rather than ordinary retained archive evidence
   - the supporting `Playbook Everywhere + Cortex Interface` slice is now also materially held at its current threshold; no further honest continuation exists there unless a new exportable family, cleared blocked family, or real contract drift appears
   - no further immediate `Operator Secret Path Hygiene` packet is implied from this posture freeze alone; reopen only on new ambiguous secret-path evidence, archive-subfamily reopen, or explicit operator approval work
+  - the current execution-state spine is now durably externalized rather than chat-held only: the immediate lane is `Durable Context Externalization`, the supporting lane is `Knowledge Capture & Transfer`, and the held set remains `archive follow-on`, `Operator Secret Path Hygiene`, `Playbook Everywhere + Cortex Interface`, the materially closed `stabilize-root-worktree` root-docs ladder, and Cortex authority widening
+  - the recent archive closeout, secret-path hold, and interface-threshold hold now all count as DCE evidence surfaces rather than as coordination facts that must be reconstructed from conversation memory
 - no helper-Vercel project deletion gate remains open after the 2026-05-25 helper-surface deletion pass
 - DiscordOS lookup widening is closed at the owner-repo boundary:
   - transport-aware opening: `no`
