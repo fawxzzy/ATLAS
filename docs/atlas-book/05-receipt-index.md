@@ -22,6 +22,7 @@
 - [Local Data Gateway Retained-Surface Destructive Disposal Relationship-Seam Reconciliation After Clean-Root Reselection](../ops/LOCAL-DATA-GATEWAY-RETAINED-SURFACE-DESTRUCTIVE-DISPOSAL-RELATIONSHIP-SEAM-RECONCILIATION-AFTER-CLEAN-ROOT-RESELECTION-2026-06-01.md)
 - [Local Data Gateway Repo Naming Reusable-Proof-Family Adoptable-Now Threshold Checkpoint](../ops/LOCAL-DATA-GATEWAY-REPO-NAMING-REUSABLE-PROOF-FAMILY-ADOPTABLE-NOW-THRESHOLD-CHECKPOINT-2026-06-01.md)
 - [Root-Bounded Lane-Selection Pass After Local Data Gateway Repo Naming Reusable-Proof-Family Adoptable-Now Threshold Checkpoint Closeout](../ops/ROOT-BOUNDED-LANE-SELECTION-PASS-AFTER-LOCAL-DATA-GATEWAY-REPO-NAMING-REUSABLE-PROOF-FAMILY-ADOPTABLE-NOW-THRESHOLD-CHECKPOINT-CLOSEOUT-2026-06-01.md)
+- [Local Data Gateway Process-Where-It-Resides Boundary And Placement-Truth Reconciliation](../ops/LOCAL-DATA-GATEWAY-PROCESS-WHERE-IT-RESIDES-BOUNDARY-AND-PLACEMENT-TRUTH-RECONCILIATION-2026-06-02.md)
 - [Root-Bounded Dispatcher Reconciliation After Fitness App Clean-State Preservation And Release-Readiness Revalidation Pass 5 Closeout](../ops/ROOT-BOUNDED-DISPATCHER-RECONCILIATION-AFTER-FITNESS-APP-CLEAN-STATE-PRESERVATION-AND-RELEASE-READINESS-REVALIDATION-PASS-5-CLOSEOUT-2026-06-01.md)
 - [Root-Bounded Lane-Selection Pass After Fitness App Clean-State Preservation And Release-Readiness Revalidation Pass 5 Dispatcher Reconciliation Closeout](../ops/ROOT-BOUNDED-LANE-SELECTION-PASS-AFTER-FITNESS-APP-CLEAN-STATE-PRESERVATION-AND-RELEASE-READINESS-REVALIDATION-PASS-5-DISPATCHER-RECONCILIATION-CLOSEOUT-2026-06-01.md)
 - [Fitness Discord Fresh-Submit Live Proof Attempt Not Yet Provable](../../repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-FRESH-SUBMIT-LIVE-PROOF-ATTEMPT-NOT-YET-PROVABLE-2026-06-01.md)
@@ -493,6 +494,7 @@
 - [Local Data Gateway Repo Naming Real-Workflow Proof Lane Selection](../ops/LOCAL-DATA-GATEWAY-REPO-NAMING-REAL-WORKFLOW-PROOF-LANE-SELECTION-2026-05-29.md)
 - [Local Data Gateway Repo Naming Real-Workflow Proof-Lane Admission Pass 1](../ops/LOCAL-DATA-GATEWAY-REPO-NAMING-REAL-WORKFLOW-PROOF-LANE-ADMISSION-PASS-1-2026-05-29.md)
 - [Local Data Gateway Broader-Adoption Candidate Selection And Packet Admission Pass 2](../ops/LOCAL-DATA-GATEWAY-BROADER-ADOPTION-CANDIDATE-SELECTION-AND-PACKET-ADMISSION-PASS-2-2026-05-30.md)
+- [Local Data Gateway Process-Where-It-Resides Boundary And Placement-Truth Reconciliation](../ops/LOCAL-DATA-GATEWAY-PROCESS-WHERE-IT-RESIDES-BOUNDARY-AND-PLACEMENT-TRUTH-RECONCILIATION-2026-06-02.md)
 
 ## Lane Split
 
