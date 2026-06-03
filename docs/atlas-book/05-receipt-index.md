@@ -12,6 +12,7 @@
 - [Root-Bounded Lane Selection After Durable Context Externalization Refresh Pass 5 Closeout](../ops/ROOT-BOUNDED-LANE-SELECTION-AFTER-DURABLE-CONTEXT-EXTERNALIZATION-REFRESH-PASS-5-CLOSEOUT-2026-05-29.md)
 - [Unified Workflow Convergence Handoff-Map Pass 1](../ops/UNIFIED-WORKFLOW-CONVERGENCE-HANDOFF-MAP-PASS-1-2026-05-29.md)
 - [Unified Workflow Convergence Release-Ledger, Publish-Boundary, And Root-Packaging Consequence Pass 2](../ops/UNIFIED-WORKFLOW-CONVERGENCE-RELEASE-LEDGER-PUBLISH-BOUNDARY-AND-ROOT-PACKAGING-CONSEQUENCE-PASS-2-2026-05-29.md)
+- [Unified Workflow Convergence Boundary-Hardened Workflow Spine Pass 3](../ops/UNIFIED-WORKFLOW-CONVERGENCE-BOUNDARY-HARDENED-WORKFLOW-SPINE-PASS-3-2026-06-03.md)
 - [Fitness Owner-Lane Reopen Decision After UWC Handoff-Map Pass 1](../ops/FITNESS-OWNER-LANE-REOPEN-DECISION-AFTER-UWC-HANDOFF-MAP-PASS-1-2026-05-29.md)
 - [Root-Bounded Lane-Selection Pass After Unified Workflow Convergence Consequence Pass 2 Closeout](../ops/ROOT-BOUNDED-LANE-SELECTION-AFTER-UNIFIED-WORKFLOW-CONVERGENCE-CONSEQUENCE-PASS-2-CLOSEOUT-2026-05-29.md)
 - [Root-Bounded Lane-Selection Pass After Operator Secret Path Hygiene Fitness QA Auth Secret Provisioning Decision Pass 2 Closeout](../ops/ROOT-BOUNDED-LANE-SELECTION-AFTER-OPERATOR-SECRET-PATH-HYGIENE-FITNESS-QA-AUTH-SECRET-PROVISIONING-DECISION-PASS-2-CLOSEOUT-2026-05-29.md)

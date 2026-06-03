@@ -766,3 +766,9 @@
 - Rule: when all repo/runtime prerequisites are green and the remaining blocker is a live session bridge, stop repo repair and classify the blocker at the external/session boundary.
 - Pattern: clear repo-local prerequisites -> verify bridge-specific readiness -> reclassify the remaining blocker as external/session-scoped -> hold adjacent cleanup lanes flat unless a direct path or naming dependency reappears.
 - Failure Mode: repo repair churn continues after the active dependency has already crossed out of local code and into browser/session bridge state.
+
+## 2026-06-03 - Workflow convergence should consume hardened boundaries instead of reopening them
+
+- Rule: converge active workflow before adjacent cleanup; use canonical substrate and hardened boundary lanes as input to the current operating spine instead of reopening them by adjacency.
+- Pattern: substrate becomes durable -> one active lane is selected -> hardened adjacent lanes stay held -> supporting work opens only on direct dependency -> root packages the clarified workflow seam into restart-safe truth.
+- Failure Mode: workflow-convergence drift into cleanup happens when operators reopen naming, substrate, archive, or authority lanes just to make the current workflow feel connected.
