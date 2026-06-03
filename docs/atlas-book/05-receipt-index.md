@@ -417,6 +417,7 @@
 - [Inventory And Truth Map Duplicate/Residue Carry-Forward Truth Family Shaping Pass 5](../ops/INVENTORY-AND-TRUTH-MAP-DUPLICATE-RESIDUE-CARRY-FORWARD-TRUTH-FAMILY-SHAPING-PASS-5-2026-05-29.md)
 - [Inventory And Truth Map Restart-Routing And Next-Package Compression Family Shaping Pass 6](../ops/INVENTORY-AND-TRUTH-MAP-RESTART-ROUTING-AND-NEXT-PACKAGE-COMPRESSION-FAMILY-SHAPING-PASS-6-2026-05-29.md)
 - [Inventory And Truth Map Continuity-Manifest Refresh And Ratchet Decision Pass 7](../ops/INVENTORY-AND-TRUTH-MAP-CONTINUITY-MANIFEST-REFRESH-AND-RATCHET-DECISION-PASS-7-2026-05-29.md)
+- [Inventory And Truth Map Closeout Cluster Canonical Placement Pass 8](../ops/INVENTORY-AND-TRUTH-MAP-CLOSEOUT-CLUSTER-CANONICAL-PLACEMENT-PASS-8-2026-06-02.md)
 
 ## Knowledge Capture & Transfer
 
