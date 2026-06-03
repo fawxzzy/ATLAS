@@ -4,7 +4,7 @@
 
 ### Continuity substrate
 
-- `Truth Map & ATLAS Book: 86%`
+- `Truth Map & ATLAS Book: 87%`
 - `Inventory & Truth Map: 76%`
 - `Knowledge Capture & Transfer: 83%`
 - `Durable Context Externalization: 78%`
@@ -58,7 +58,7 @@ Read:
 - Atlas-owned Repo Naming Canonicalization: `79%`
 - Local Data Gateway: `66%`
 - Dependency Untangling: `71%`
-- Truth Map & ATLAS Book: `86%`
+- Truth Map & ATLAS Book: `87%`
 - Inventory & Truth Map: `76%`
 - Knowledge Capture & Transfer: `83%`
 - Durable Context Externalization: `78%`
@@ -180,7 +180,7 @@ That split is defined and partially operationalized by bootstrap and governance 
 - Unified Workflow Convergence now sits at `72%`: the lane now has one compact authoritative handoff map plus one compact downstream consequence map joining repo-local release prep, `_stack` deploy authority, owner release-ledger narration, Discord publish boundary, root receipt packaging, and the exact blocked-state route back to owner-side evidence refresh when proof freshness fails; that is enough for the smallest honest move above `71%` because one additional real convergence ambiguity class is now frozen into restart truth, but it still stays below higher territory because no owner-side execution widened, no live publication proof class changed, and no shared workflow runtime surface was implemented
 - Atlas-owned Repo Naming Canonicalization now sits at `79%`: the lane now has durable naming policy, a durable internal target set, an explicit `fawxzzy-fitness` exception, durable execution-gate doctrine, a durable dependency map, a bounded rewrite/rollback plan, and six exact executed-and-reconciled local packets for `repos/fawxzzy-stream -> repos/stream`, `repos/fawxzzy-foundation -> repos/foundation`, `repos/fawxzzy-trove -> repos/trove`, `repos/fawxzzy-lifeline -> repos/lifeline`, `repos/fawxzzy-mazer -> repos/mazer`, and `repos/fawxzzy-playbook -> repos/playbook`; that is enough to move one point above the earlier `78%` gate because the admitted local naming family is now fully proven across every non-exception candidate, but it still stays well below higher territory because remote-name assumptions remain blocked and the preserved `fawxzzy-fitness` exception remains out of scope
 - Core Pattern Convergence now sits at `43%`: the lane already had its doctrine-routing baseline, operator-grade governance spine, admit-now promotion hold, and threshold-and-hold map, and it now also has one named governed mutating-work pattern widened across `_stack`, Playbook, Fitness, and Mazer prompt-authoring surfaces; that is enough for the smallest honest move above `42%` because one real cross-repo pattern moved from local doctrine into maintained execution-facing authoring surfaces, but it still stays low because historical and legacy prompt coverage remains intentionally partial, no broader automation graduation happened, and no new command-runtime family shipped here
-- Truth Map & ATLAS Book now sits at `86%`: the lane already owned the canonical restart surface, and it now also has one explicit scarcity-and-carry-forward role map separating active front-page markers, supporting open markers, materially closed carry-forward families, and locked ratchets; that is enough for the smallest honest move above `85%` because one additional restart-safe read-model ambiguity class is now closed, but it still stays below higher territory because no owner truth widened, no live execution lane changed, and no broader continuity automation arrived
+- Truth Map & ATLAS Book now sits at `87%`: the lane already owned the canonical restart surface and the explicit scarcity-and-carry-forward role map, and it now also refreshes the canonical book-side projection after the closeout cluster was absorbed into the inventory spine so restart, endgame, marker, and system-map readers no longer have to reconcile stale pre-absorption package language by hand; that is enough for the smallest honest move above `86%` because one real restart-safe projection ambiguity class is now closed, but it still stays below higher territory because no owner truth widened, no live execution lane changed, and no broader continuity automation arrived
 - DiscordOS separation stayed high-confidence but intentionally below runtime migration
 - Fitness release-readiness is now green on clean preserved truth, but the related supporting markers still hold flat: `Fitness QA/LLEL Workflow` remains `96%`, `Fitness Branch Cleanup / Main-Only Governance` remains `96%`, and `Fitness Recovery Preservation` remains `80%` because the owner-side result closes one exact release-readiness family gate without widening those supporting workflow families into a broader new operator reality
 - Feedback Loop Readiness stays at `42%`: request/spec intake, mutation governance, local runtime truth, and receipt/truth update now have one frozen deterministic-threshold read, but the stack still lacks one replayable end-to-end proof loop that runs fresh capture without hidden toggles or the frozen external/session bridge defect, so no marker movement is honest from this packet

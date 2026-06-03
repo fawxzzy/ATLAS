@@ -126,6 +126,7 @@
 - [Root-Bounded Lane-Selection Pass After Discord Workflow, Publication & Docs Reliability Broader-Summary Parity-Proof Closeout](../ops/ROOT-BOUNDED-LANE-SELECTION-AFTER-DISCORD-WORKFLOW-PUBLICATION-AND-DOCS-RELIABILITY-BROADER-SUMMARY-PARITY-PROOF-CLOSEOUT-2026-05-29.md)
 - [Root-Bounded Lane-Selection Pass After Core Pattern Convergence Provisional Doctrine Promotion-Threshold And Hold-Boundary Closeout](../ops/ROOT-BOUNDED-LANE-SELECTION-AFTER-CORE-PATTERN-CONVERGENCE-PROVISIONAL-DOCTRINE-PROMOTION-THRESHOLD-AND-HOLD-BOUNDARY-CLOSEOUT-2026-05-29.md)
 - [Truth Map And ATLAS Book Marker-Scarcity And Closed-Ladder Carry-Forward Hygiene Pass 3](../ops/TRUTH-MAP-AND-ATLAS-BOOK-MARKER-SCARCITY-AND-CLOSED-LADDER-CARRY-FORWARD-HYGIENE-PASS-3-2026-05-29.md)
+- [Truth Map And ATLAS Book Post-Inventory Closeout-Cluster Projection Refresh Pass 4](../ops/TRUTH-MAP-AND-ATLAS-BOOK-POST-INVENTORY-CLOSEOUT-CLUSTER-PROJECTION-REFRESH-PASS-4-2026-06-02.md)
 - [Root-Bounded Lane-Selection Pass After Truth Map And ATLAS Book Marker-Scarcity And Closed-Ladder Carry-Forward Hygiene Pass 3 Closeout](../ops/ROOT-BOUNDED-LANE-SELECTION-AFTER-TRUTH-MAP-AND-ATLAS-BOOK-MARKER-SCARCITY-AND-CLOSED-LADDER-CARRY-FORWARD-HYGIENE-PASS-3-CLOSEOUT-2026-05-29.md)
 - [_Stack Readiness Marker-Pressure Reopen And Re-Entry Pass 8](../ops/_STACK-READINESS-MARKER-PRESSURE-REOPEN-AND-REENTRY-PASS-8-2026-05-29.md)
 - [_Stack Readiness Stack Vercel-Health Command-Design Pass 9](../ops/_STACK-READINESS-STACK-VERCEL-HEALTH-COMMAND-DESIGN-PASS-9-2026-05-29.md)
