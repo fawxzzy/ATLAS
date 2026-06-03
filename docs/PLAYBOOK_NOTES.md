@@ -760,3 +760,9 @@
 - Rule: refresh durable execution-state routing after an adjacent lane closes at a new threshold.
 - Pattern: externalize active spine -> adjacent supporting lane closes at a new threshold -> refresh the DCE spine so immediate lane, held lanes, and conditional supporting reopen rules stay durable.
 - Failure Mode: stale next-package drift happens when a manifest-backed restart spine still routes to a supporting packet that already closed or no longer opens automatically.
+
+## 2026-06-02 - External bridge blockers must not masquerade as repo repair
+
+- Rule: when all repo/runtime prerequisites are green and the remaining blocker is a live session bridge, stop repo repair and classify the blocker at the external/session boundary.
+- Pattern: clear repo-local prerequisites -> verify bridge-specific readiness -> reclassify the remaining blocker as external/session-scoped -> hold adjacent cleanup lanes flat unless a direct path or naming dependency reappears.
+- Failure Mode: repo repair churn continues after the active dependency has already crossed out of local code and into browser/session bridge state.

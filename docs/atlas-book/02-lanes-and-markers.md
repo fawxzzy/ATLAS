@@ -44,7 +44,7 @@ Read:
 ### Naming / ownership hygiene
 
 - `Atlas-owned Repo Naming Canonicalization: 79%`
-- `Dependency Untangling: 71%`
+- `Dependency Untangling: 72%`
 
 Read:
 
@@ -57,7 +57,7 @@ Read:
 - `_stack` Readiness: `70%`
 - Atlas-owned Repo Naming Canonicalization: `79%`
 - Local Data Gateway: `66%`
-- Dependency Untangling: `71%`
+- Dependency Untangling: `72%`
 - Truth Map & ATLAS Book: `87%`
 - Inventory & Truth Map: `76%`
 - Knowledge Capture & Transfer: `83%`

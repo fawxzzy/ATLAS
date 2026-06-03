@@ -408,6 +408,7 @@
 - [Dependency Untangling Runtime Cutover Dependency Family Shaping Pass 5](../ops/DEPENDENCY-UNTANGLING-RUNTIME-CUTOVER-DEPENDENCY-FAMILY-SHAPING-PASS-5-2026-05-29.md)
 - [Dependency Untangling Repo Bootstrap And Extraction Dependency Family Shaping Pass 6](../ops/DEPENDENCY-UNTANGLING-REPO-BOOTSTRAP-AND-EXTRACTION-DEPENDENCY-FAMILY-SHAPING-PASS-6-2026-05-29.md)
 - [Dependency Untangling Continuity-Manifest Refresh And Ratchet Decision Pass 7](../ops/DEPENDENCY-UNTANGLING-CONTINUITY-MANIFEST-REFRESH-AND-RATCHET-DECISION-PASS-7-2026-05-29.md)
+- [Dependency Untangling Verification-Bridge Seam External/Session Boundary Reconciliation Pass 8](../ops/DEPENDENCY-UNTANGLING-VERIFICATION-BRIDGE-SEAM-EXTERNAL-SESSION-BOUNDARY-RECONCILIATION-PASS-8-2026-06-02.md)
 
 ## Inventory & Truth Map
 
