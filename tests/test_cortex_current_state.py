@@ -112,7 +112,7 @@ class CortexCurrentStateTests(unittest.TestCase):
         self.assertIn("missing-codex-config", blocker_codes)
         self.assertIn("dirty-worktree", blocker_codes)
         self.assertEqual("stabilize-stack-validation", payload["next_recommended_lane"]["lane_id"])
-        self.assertEqual("cortex-receipt-interpretation-stack-consumption-v0-1", payload["latest_clean_step"]["step_id"])
+        self.assertEqual("cortex-receipt-interpretation-consumption-feedback-v0-1", payload["latest_clean_step"]["step_id"])
         self.assertEqual("unpublished_ahead_of_origin", payload["remote_publication_state"]["status"])
         self.assertEqual(
             [
@@ -167,9 +167,9 @@ class CortexCurrentStateTests(unittest.TestCase):
         )
 
         self.assertEqual([], payload["active_blockers"])
-        self.assertEqual("promote-cortex-receipt-interpretation-consumption-feedback-wave11", payload["next_recommended_lane"]["lane_id"])
-        self.assertEqual("cortex", payload["next_recommended_lane"]["owner_layer"])
-        self.assertEqual("cortex-receipt-interpretation-stack-consumption-v0-1", payload["latest_clean_step"]["step_id"])
+        self.assertEqual("atlas-cortex-catch-up", payload["next_recommended_lane"]["lane_id"])
+        self.assertEqual("atlas", payload["next_recommended_lane"]["owner_layer"])
+        self.assertEqual("cortex-receipt-interpretation-consumption-feedback-v0-1", payload["latest_clean_step"]["step_id"])
         self.assertEqual("in_sync", payload["remote_publication_state"]["status"])
         self.assertEqual(
             "runtime/cortex/operator-surface/latest.json",
@@ -213,7 +213,7 @@ class CortexCurrentStateTests(unittest.TestCase):
             payload["retained_untracked_files"],
         )
         self.assertEqual(
-            "promote-cortex-receipt-interpretation-consumption-feedback-wave11",
+            "atlas-cortex-catch-up",
             payload["next_recommended_lane"]["lane_id"],
         )
 
@@ -246,7 +246,7 @@ class CortexCurrentStateTests(unittest.TestCase):
         self.assertEqual(artifact.payload["head"], payload["head"])
         self.assertEqual("atlas.cortex.current-state.v1", payload["contract_version"])
         self.assertIn("# Cortex Current State", summary)
-        self.assertIn("promote-cortex-receipt-interpretation-consumption-feedback-wave11", summary)
+        self.assertIn("atlas-cortex-catch-up", summary)
         self.assertIn("## Operator Surface", summary)
         self.assertIn("validation-summary-shadow", summary)
         self.assertIn("atlas.cortex.contract.validation-summary-shadow.v1", summary)
