@@ -77,15 +77,186 @@ class CortexReceiptInterpretationStackConsumptionTests(unittest.TestCase):
         payload["findings"] = []
         return payload
 
+    def _base_current_state_payload(self) -> dict:
+        payload = deepcopy(self.current_state_payload)
+        payload["branch"] = "codex/cortex-receipt-interpretation-stack-consumption-wave10"
+        payload["head"] = "abc123def456"
+        payload["worktree_status"] = "clean"
+        payload["changed_files"] = []
+        payload["untracked_files"] = []
+        payload["remote_status"] = {
+            "status": "in_sync",
+            "upstream": "origin/codex/cortex-receipt-interpretation-stack-consumption-wave10",
+            "ahead": 0,
+            "behind": 0,
+        }
+        payload["remote_publication_state"] = {
+            "status": "in_sync",
+            "branch": "codex/cortex-receipt-interpretation-stack-consumption-wave10",
+            "head": "abc123def456",
+            "published": True,
+            "upstream": "origin/codex/cortex-receipt-interpretation-stack-consumption-wave10",
+            "pr_state": "open",
+            "pr_url": "https://example.invalid/pr/10",
+            "notes": [],
+        }
+        payload["active_blockers"] = []
+        payload["next_recommended_lane"] = {
+            "lane_id": "docs-adr-or-debt-slice",
+            "owner_layer": "atlas",
+            "rationale": "Wave 11 and the ATLAS catch-up are already complete. The next bounded lane is an ATLAS root projection slice that keeps the live Cortex read model aligned with AI Repetition-to-Automation Pipeline, specifically the bounded receipt skeleton drafts control-plane surface, without reopening Cortex capability implementation.",
+            "blocked_by": [],
+            "source_refs": [
+                "runtime/cortex/kernel.state-model.seed.v1.json",
+                "runtime/cortex/kernel.rule-registry.seed.v1.json",
+            ],
+        }
+        return payload
+
+    def _base_rail_state_payload(self) -> dict:
+        payload = deepcopy(self.rail_state_payload)
+        payload["rail_status"] = "ready"
+        payload["active_blockers"] = []
+        payload["dirty_lanes"] = []
+        payload["next_recommended_lane"] = {
+            "lane_id": "docs-adr-or-debt-slice",
+            "owner_layer": "atlas",
+            "rationale": "Wave 11 and the ATLAS catch-up are already complete. The next bounded lane is an ATLAS root projection slice that keeps the live Cortex read model aligned with AI Repetition-to-Automation Pipeline, specifically the bounded receipt skeleton drafts control-plane surface, without reopening Cortex capability implementation.",
+            "blocked_by": [],
+            "source_refs": [
+                "runtime/cortex/current-state/latest.json",
+                "runtime/cortex/kernel.state-model.seed.v1.json",
+                "runtime/cortex/kernel.rule-registry.seed.v1.json",
+            ],
+        }
+        return payload
+
+    def _base_context_payload(self) -> dict:
+        payload = deepcopy(self.context_payload)
+        payload["packet_id"] = "context-docs-adr-or-debt-slice"
+        payload["context_summary"] = (
+            "Cortex context packet for docs-adr-or-debt-slice derived from explicit current-state, "
+            "rail-state, validation, and seed artifacts."
+        )
+        payload["task_frame"]["lane_id"] = "docs-adr-or-debt-slice"
+        payload["task_frame"]["owner_layer"] = "atlas"
+        payload["task_frame"]["title"] = "Project the post-catch-up ATLAS systems lane."
+        payload["task_frame"]["status"] = "ready"
+        payload["task_frame"]["rationale"] = (
+            "Wave 11 and the ATLAS catch-up are already complete. The next bounded lane is an ATLAS root projection slice that keeps the live Cortex read model aligned with AI Repetition-to-Automation Pipeline, specifically the bounded receipt skeleton drafts control-plane surface, without reopening Cortex capability implementation."
+        )
+        payload["task_frame"]["blocked_by"] = []
+        payload["task_frame"]["ready_to_execute"] = True
+        return payload
+
+    def _base_operator_surface_payload(self) -> dict:
+        payload = deepcopy(self.operator_surface_payload)
+        payload["operator_summary"] = (
+            "Cortex operator surface for docs-adr-or-debt-slice derived from explicit current-state, "
+            "rail-state, context, validation, and seed artifacts."
+        )
+        payload["rail_status"] = "ready"
+        payload["active_blockers"] = []
+        payload["dirty_lanes"] = []
+        payload["next_recommended_lane"] = {
+            "lane_id": "docs-adr-or-debt-slice",
+            "owner_layer": "atlas",
+            "rationale": "Wave 11 and the ATLAS catch-up are already complete. The next bounded lane is an ATLAS root projection slice that keeps the live Cortex read model aligned with AI Repetition-to-Automation Pipeline, specifically the bounded receipt skeleton drafts control-plane surface, without reopening Cortex capability implementation.",
+            "blocked_by": [],
+            "source_refs": [
+                "runtime/cortex/current-state/latest.json",
+                "runtime/cortex/kernel.state-model.seed.v1.json",
+                "runtime/cortex/kernel.rule-registry.seed.v1.json",
+            ],
+        }
+        payload["context_packet_id"] = "context-docs-adr-or-debt-slice"
+        payload["context_summary"] = (
+            "Cortex context packet for docs-adr-or-debt-slice derived from explicit current-state, "
+            "rail-state, validation, and seed artifacts."
+        )
+        payload["task_frame_summary"]["lane_id"] = "docs-adr-or-debt-slice"
+        payload["task_frame_summary"]["owner_layer"] = "atlas"
+        payload["task_frame_summary"]["title"] = "Project the post-catch-up ATLAS systems lane."
+        payload["task_frame_summary"]["status"] = "ready"
+        payload["task_frame_summary"]["rationale"] = (
+            "Wave 11 and the ATLAS catch-up are already complete. The next bounded lane is an ATLAS root projection slice that keeps the live Cortex read model aligned with AI Repetition-to-Automation Pipeline, specifically the bounded receipt skeleton drafts control-plane surface, without reopening Cortex capability implementation."
+        )
+        payload["task_frame_summary"]["blocked_by"] = []
+        payload["task_frame_summary"]["ready_to_execute"] = True
+        payload["publication_posture"] = {
+            "branch": "codex/cortex-receipt-interpretation-stack-consumption-wave10",
+            "head": "abc123def456",
+            "worktree_status": "clean",
+            "remote_status": "in_sync",
+            "upstream": "origin/codex/cortex-receipt-interpretation-stack-consumption-wave10",
+            "published": True,
+            "pr_state": "open",
+            "pr_url": "https://example.invalid/pr/10",
+        }
+        return payload
+
+    def _base_ledger_payload(self) -> dict:
+        payload = deepcopy(self.ledger_payload)
+        payload["ledger_id"] = "ledger-docs-adr-or-debt-slice"
+        payload["rail_status"] = "ready"
+        payload["active_blockers"] = []
+        payload["dirty_lanes"] = []
+        payload["worktree_status"] = "clean"
+        payload["branch"] = "codex/cortex-receipt-interpretation-stack-consumption-wave10"
+        payload["head"] = "abc123def456"
+        payload["remote_status"] = "in_sync"
+        payload["upstream"] = "origin/codex/cortex-receipt-interpretation-stack-consumption-wave10"
+        payload["published"] = True
+        payload["next_recommended_lane"] = {
+            "lane_id": "docs-adr-or-debt-slice",
+            "owner_layer": "atlas",
+            "rationale": "Wave 11 and the ATLAS catch-up are already complete. The next bounded lane is an ATLAS root projection slice that keeps the live Cortex read model aligned with AI Repetition-to-Automation Pipeline, specifically the bounded receipt skeleton drafts control-plane surface, without reopening Cortex capability implementation.",
+            "blocked_by": [],
+            "source_refs": [
+                "runtime/cortex/current-state/latest.json",
+                "runtime/cortex/rail-state/latest.json",
+                "runtime/cortex/context/latest.json",
+                "runtime/cortex/operator-surface/latest.json",
+                "runtime/receipts/validation/stack-validation.latest.json",
+                "runtime/cortex/kernel.state-model.seed.v1.json",
+                "runtime/cortex/kernel.rule-registry.seed.v1.json",
+            ],
+        }
+        payload["context_packet_id"] = "context-docs-adr-or-debt-slice"
+        payload["task_frame_summary"]["lane_id"] = "docs-adr-or-debt-slice"
+        payload["task_frame_summary"]["owner_layer"] = "atlas"
+        payload["task_frame_summary"]["title"] = "Project the post-catch-up ATLAS systems lane."
+        payload["task_frame_summary"]["status"] = "ready"
+        payload["task_frame_summary"]["rationale"] = (
+            "Wave 11 and the ATLAS catch-up are already complete. The next bounded lane is an ATLAS root projection slice that keeps the live Cortex read model aligned with AI Repetition-to-Automation Pipeline, specifically the bounded receipt skeleton drafts control-plane surface, without reopening Cortex capability implementation."
+        )
+        payload["task_frame_summary"]["blocked_by"] = []
+        payload["task_frame_summary"]["ready_to_execute"] = True
+        payload["proof_or_receipt_readiness"] = {
+            "status": "unavailable",
+            "receipt_ready": None,
+            "latest_run_id": None,
+            "latest_run_path": None,
+            "selected_next_action": None,
+            "owner_layer": None,
+            "next_required_layer": None,
+            "blocked_reason": None,
+            "known_ambient_debt": [],
+            "current_validation_debt": [],
+            "applied_rule_ids": [],
+            "summary": "No Cortex run artifacts are available yet.",
+        }
+        return payload
+
     def _temp_root(self) -> Path:
         temp_dir = tempfile.TemporaryDirectory()
         self.addCleanup(temp_dir.cleanup)
         root = Path(temp_dir.name)
-        _write_json(root / "runtime" / "cortex" / "current-state" / "latest.json", self.current_state_payload)
-        _write_json(root / "runtime" / "cortex" / "rail-state" / "latest.json", self.rail_state_payload)
-        _write_json(root / "runtime" / "cortex" / "context" / "latest.json", self.context_payload)
-        _write_json(root / "runtime" / "cortex" / "operator-surface" / "latest.json", self.operator_surface_payload)
-        _write_json(root / "runtime" / "cortex" / "ledger" / "latest.json", self.ledger_payload)
+        _write_json(root / "runtime" / "cortex" / "current-state" / "latest.json", self._base_current_state_payload())
+        _write_json(root / "runtime" / "cortex" / "rail-state" / "latest.json", self._base_rail_state_payload())
+        _write_json(root / "runtime" / "cortex" / "context" / "latest.json", self._base_context_payload())
+        _write_json(root / "runtime" / "cortex" / "operator-surface" / "latest.json", self._base_operator_surface_payload())
+        _write_json(root / "runtime" / "cortex" / "ledger" / "latest.json", self._base_ledger_payload())
         _write_json(
             root / "runtime" / "receipts" / "validation" / "stack-validation.latest.json",
             self._base_validation_payload(),

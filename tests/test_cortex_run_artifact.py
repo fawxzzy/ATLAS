@@ -54,15 +54,15 @@ class CortexRunArtifactTests(unittest.TestCase):
             payload = json.loads(artifact.artifact_path.read_text(encoding="utf-8"))
             summary = artifact.summary_path.read_text(encoding="utf-8") if artifact.summary_path is not None else ""
 
-        self.assertEqual("atlas-cortex-catch-up", payload["selected_next_action"]["action_id"])
+        self.assertEqual("docs-adr-or-debt-slice", payload["selected_next_action"]["action_id"])
         self.assertEqual(
-            "atlas_cortex_catch_up",
+            "docs_adr_or_debt_slice",
             payload["worker_plan"]["template_id"],
         )
         self.assertTrue(payload["receipt_ready"])
         self.assertTrue(payload["known_ambient_debt"])
         self.assertIn("selected_next_action", json.dumps(payload, sort_keys=True))
-        self.assertIn("Worker plan template: atlas_cortex_catch_up", summary)
+        self.assertIn("Worker plan template: docs_adr_or_debt_slice", summary)
         self.assertIn("Receipt ready: yes", summary)
         self.assertIn("Patterns applied:", summary)
         self.assertIn("implementation_plan", payload["worker_plan"])
