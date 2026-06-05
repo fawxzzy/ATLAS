@@ -3,8 +3,9 @@
   "posture": {
     "posture_id": "cortex-wave1-landed",
     "classification": "steady",
-    "summary": "Cortex current-state, rail-state, context assembly, operator surface, canonical ledger, worker-prompt contract, canonical stack advisory handoff v2, bounded _stack stack-consumption pilot proof, read-only receipt interpretation, bounded receipt-interpretation stack consumption, and read-only receipt-interpretation consumption feedback are landed; the next bounded tranche is an ATLAS root post-catch-up projection slice that reseats the live Cortex recommendation onto the AI Repetition-to-Automation Pipeline control-plane lane without reopening capability work, and known stack validation debt stays ambient debt.",
+    "summary": "Cortex current-state, rail-state, context assembly, operator surface, canonical ledger, worker-prompt contract, canonical stack advisory handoff v2, bounded _stack stack-consumption pilot proof, read-only receipt interpretation, bounded receipt-interpretation stack consumption, and read-only receipt-interpretation consumption feedback are landed; the next bounded tranche is an ATLAS root post-catch-up projection slice that keeps the live Cortex recommendation aligned with the AI Repetition-to-Automation Pipeline control-plane lane, specifically the receipt skeleton drafts surface, without reopening capability work, and known stack validation debt stays ambient debt.",
     "handoff_summaries": [
+      "docs/atlas/notes/cortex-post-catch-up-atlas-systems-lane-2026-06-05.md",
       "docs/atlas/notes/cortex-priority-pivot-2026-04-26.md",
       "docs/atlas/notes/cortex-mvp-spec-2026-04-26.md",
       "docs/atlas/notes/cortex-surface-reconciliation-2026-05-06.md"

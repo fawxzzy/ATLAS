@@ -205,7 +205,7 @@ Current status:
   - the active dirty-worktree blocker is now classified as a `selective-staging candidate`, not as stage-ready or commit-ready and not as a reason to reopen the closed wording ladder
   - the exact next move is now one explicit selective-staging task over the minimum blocker-preservation subset: the root-worktree receipt chain through pass 10 plus `docs/PLAYBOOK_NOTES.md`, `docs/atlas-book/01-current-state.md`, `docs/atlas-book/05-receipt-index.md`, and `docs/atlas-book/12-restart-and-handoff-guide.md`
 - `Cortex Readiness` now has one bounded ATLAS catch-up and root-projection proof plus one bounded post-catch-up live-lane ratchet proof:
-  - `current-state`, `rail-state`, `context`, `operator_surface`, `ledger`, `worker-prompts`, and the latest Cortex run artifact now converge on one clean local branch posture: `codex/cortex-post-catch-up-pivot-ratchet @ c26d6cda`
+  - `current-state`, `rail-state`, `context`, `operator_surface`, `ledger`, `worker-prompts`, and the latest Cortex run artifact now converge on one clean local branch posture: `codex/cortex-post-catch-up-atlas-systems-note @ 4446bd61`
   - the live Cortex read model now reports `docs-adr-or-debt-slice` as the ready next lane with `0` active blockers, and that lane is explicitly scoped as the bounded ATLAS-root projection slice for `AI Repetition-to-Automation Pipeline`, specifically the `receipt skeleton drafts` control-plane surface
   - validation remains `critical=0 error=0 warning=498 info=0`, Wave 11 remains the latest clean Cortex step, and the widened runtime surface remains read-only, projection-only, and authority-free
   - truth mirrors, residual Cortex/read-model surfaces, mixed tracked governance support, durable-but-uncommitted `docs/ops/*` backlog outside the receipt chain, continuity-manifest backlog, and retained `archive/*` evidence all remain held outside that task by default
@@ -246,10 +246,10 @@ Current status:
   - `Local Data Gateway` now remains materially held at its current process-and-placement threshold: the generic no-send chain and the three proven `adoptable now` classes remain intact, the repo-naming proof family still stays below `adoptable now`, and `Atlas-owned Repo Naming Canonicalization` remains held unless one direct naming or path dependency is admitted later
   - `Unified Workflow Convergence` now remains held as the ATLAS-side workflow spine above those hardened boundaries: canonical substrate surfaces feed lane selection first, held lanes remain held by default, the Fitness Discord bridge blocker remains external/session-scoped rather than root-mutation work, and no supporting lane opens unless the active slice admits one direct dependency
   - the next durable ATLAS-side active lane is now `AI Repetition-to-Automation Pipeline`: the hardened workflow spine is explicit enough to evaluate real automation-candidate seams from canonical truth without reopening held families, the immediate focus is now the admitted `receipt skeleton drafts` subfamily inside the selected third-safe family, and `_stack Readiness` is now the direct supporting lane for the two already-closed first slices plus that exact receipt-skeleton subfamily
-- the current review surface for the post-catch-up Cortex ratchet tranche is now explicit:
-  - PR [#52](https://github.com/fawxzzy/ATLAS/pull/52) is now open against `main` and ready for review
-  - it remains `mergeable` and `unmerged`, its body matches the three-commit branch scope, and it currently carries `14` changed files
-  - the remaining publication boundary is now exactly `pr_52_merge_operator_owned`
+- the current review surface for the post-catch-up ATLAS projection-note tranche is now explicit:
+  - PR [#53](https://github.com/fawxzzy/ATLAS/pull/53) is now open against `main` and ready for review
+  - it is currently `ready-clean`, `mergeable`, and `unmerged`, and its body matches the bounded projection-note branch scope
+  - the remaining publication boundary is now exactly `pr_53_merge_operator_owned`
 - no helper-Vercel project deletion gate remains open after the 2026-05-25 helper-surface deletion pass
 - DiscordOS lookup widening is closed at the owner-repo boundary:
   - transport-aware opening: `no`
