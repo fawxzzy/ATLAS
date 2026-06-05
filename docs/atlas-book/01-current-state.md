@@ -16,7 +16,7 @@ What is true right now:
 - Playbook remains the reusable governance and doctrine owner.
 - normal stack validation is green in the current working state.
 - `--allow-missing-locked-repos` is no longer needed for current validation.
-- the current validator, cleanup, and lock-refresh branch has now removed root-validator false positives, tracked-surface overcounting, and the last safe ignored Playbook/Lifeline runtime residue, then repinned `stack.lock.yaml` to the current preserved warning-slice working set without touching Fitness: live validation now reads `critical=0 error=0 warning=43 info=0`, and the remaining non-Fitness warnings are narrowed to `.vercel` linkage surfaces plus repo-local secret files.
+- the merged warning-reduction tranche on `main` has now removed root-validator false positives, tracked-surface overcounting, and the last safe ignored Playbook/Lifeline runtime residue, then repinned `stack.lock.yaml` to the current merged working set without touching Fitness: live validation now reads `critical=0 error=0 warning=43 info=0`, and the remaining non-Fitness warnings are narrowed to `.vercel` linkage surfaces plus repo-local secret files.
 
 ## Canonical Source Truth By Surface
 
@@ -151,7 +151,7 @@ Current status:
   - the current validation snapshot is now `critical=0 error=4 warning=498 info=0`, and the four errors are limited to expected in-flight `_stack` `stack.lock.yaml` ref/commit drift against the preserved local-only branch state rather than canonical registry damage
   - no immediate supporting `_stack` packet remains open by default for this first receipt-package slice; further `_stack` follow-on now requires distinct later-slice admission, an explicit governed operator-proof opening, or a separate lock-refresh packet if dirty-state disposition changes
   - the preserved `_stack` publication tranche is now fully normalized for the current preserved state: `main` and `codex/preserve-stack-packaging-tranche-2026-06-05` both exist remotely at the same `eb1f7c4` commit, GitHub now reports `main` as the default branch, `_stack_remote_not_configured` and the temporary default-branch boundary are both cleared, and no meaningful PR surface remains because the branches are identical
-  - the ATLAS root preservation PR is now also ready-clean at its current boundary: PR `#50` remains open, ready for review, mergeable, and unmerged, the PR body still matches the normalized `_stack` posture, and final merge/publication judgment remains operator-owned rather than an automatic follow-on from the ready-state transition
+  - the ATLAS root preservation PR lane is now closed: PR `#50` is merged on `main`, the normalized `_stack` posture is preserved durably, and no work remains inside that publication family
   - `_stack Readiness` now moves from `96%` to `97%` because one additional operator-facing implementation landing plus reconciled closeout is now frozen for the third admitted support family, while `AI Repetition-to-Automation Pipeline` is now at `31%`
   - the repeated operator act of manually telling Codex to `continue` is now admitted as one separate guarded automation candidate only at the root control-plane level, with one machine-readable result contract, one dry-run-only gate skeleton, one explicit validator/scope stop boundary, and durable decision receipts under `runtime/receipts/codex-continuation/`
   - that guarded continuation candidate does not reopen the closed first receipt-package slice, does not admit unattended live execution by default, and stops immediately on missing next-move truth, widened scope, or explicitly non-automated classes
@@ -247,10 +247,10 @@ Current status:
   - `Local Data Gateway` now remains materially held at its current process-and-placement threshold: the generic no-send chain and the three proven `adoptable now` classes remain intact, the repo-naming proof family still stays below `adoptable now`, and `Atlas-owned Repo Naming Canonicalization` remains held unless one direct naming or path dependency is admitted later
   - `Unified Workflow Convergence` now remains held as the ATLAS-side workflow spine above those hardened boundaries: canonical substrate surfaces feed lane selection first, held lanes remain held by default, the Fitness Discord bridge blocker remains external/session-scoped rather than root-mutation work, and no supporting lane opens unless the active slice admits one direct dependency
   - the next durable ATLAS-side active lane is now `AI Repetition-to-Automation Pipeline`: the hardened workflow spine is explicit enough to evaluate real automation-candidate seams from canonical truth without reopening held families, the immediate focus is now the admitted `receipt skeleton drafts` subfamily inside the selected third-safe family, and `_stack Readiness` is now the direct supporting lane for the two already-closed first slices plus that exact receipt-skeleton subfamily
-- the current review surface for the root warning-reduction tranche is now explicit:
-  - PR [#54](https://github.com/fawxzzy/ATLAS/pull/54) is now open against `main` and ready for review
-  - it is currently `ready-clean`, `mergeable`, and `unmerged`, and its body matches the bounded published warning-slice branch scope
-  - the remaining publication boundary is now exactly `pr_54_merge_operator_owned`
+- the root warning-reduction tranche is now closed:
+  - PR [#54](https://github.com/fawxzzy/ATLAS/pull/54) is merged on `main`
+  - local `main` is synced to the merge result, and `codex/root-path-discipline-warning-slice-1` is deleted locally and on `origin`
+  - no remaining work exists inside that merge family; the remaining warning debt is approval-gated local-state cleanup or Fitness-owned debt
 - no helper-Vercel project deletion gate remains open after the 2026-05-25 helper-surface deletion pass
 - DiscordOS lookup widening is closed at the owner-repo boundary:
   - transport-aware opening: `no`
