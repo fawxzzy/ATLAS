@@ -1260,8 +1260,14 @@ def run_self_test(schema: dict[str, Any]) -> int:
         [synthetic_cmd_shim, "exec", "resume", "--last"],
         {"resolved_executable": synthetic_resolved_cmd_shim},
     )
-    cmd_launch_ok = cmd_launch_command[:3] == ["cmd.exe", "/c", synthetic_resolved_cmd_shim] and cmd_launch_mode == "windows_cmd_shim"
-    print(f"[{'PASS' if cmd_launch_ok else 'FAIL'}] Windows .cmd Codex surfaces launch through cmd.exe shims")
+    if os.name == "nt":
+        cmd_launch_ok = (
+            cmd_launch_command[:3] == ["cmd.exe", "/c", synthetic_resolved_cmd_shim]
+            and cmd_launch_mode == "windows_cmd_shim"
+        )
+    else:
+        cmd_launch_ok = cmd_launch_command == [synthetic_resolved_cmd_shim, "exec", "resume", "--last"] and cmd_launch_mode == "direct_executable"
+    print(f"[{'PASS' if cmd_launch_ok else 'FAIL'}] Platform-appropriate Codex launch mode is selected for .cmd surfaces")
     passed += 1 if cmd_launch_ok else 0
 
     stdin_required_completed = subprocess.CompletedProcess(

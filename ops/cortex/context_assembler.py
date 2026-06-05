@@ -66,6 +66,13 @@ def _require_json_object(path: Path, *, label: str) -> dict[str, Any]:
     return _read_json_object(resolved)
 
 
+def _optional_json_object(path: Path) -> dict[str, Any] | None:
+    resolved = path.resolve()
+    if not resolved.exists():
+        return None
+    return _read_json_object(resolved)
+
+
 def _normalize_counts(summary: dict[str, Any]) -> dict[str, int]:
     counts = {
         "critical": int(summary.get("critical", 0) or 0),
@@ -323,17 +330,21 @@ def build_context_packet_payload(
     validation_payload = _require_json_object(resolved_validation, label="Stack validation receipt")
     state_model_payload = _require_json_object(resolved_state_model, label="Cortex state model seed")
     rule_registry_payload = _require_json_object(resolved_rule_registry, label="Cortex rule registry seed")
-    operator_surface_payload = _require_json_object(resolved_operator_surface, label="Cortex operator-surface artifact")
+    operator_surface_payload = _optional_json_object(resolved_operator_surface)
 
     current_state_ref = atlas_relative(resolved_current_state, root=base)
     rail_state_ref = atlas_relative(resolved_rail_state, root=base)
     validation_ref = atlas_relative(resolved_validation, root=base)
     state_model_ref = atlas_relative(resolved_state_model, root=base)
     rule_registry_ref = atlas_relative(resolved_rule_registry, root=base)
-    operator_surface_ref = atlas_relative(resolved_operator_surface, root=base)
     workflow_profile_payload = build_workflow_profile_payload(root=base)
     workflow_profile_markdown_ref = str(workflow_profile_payload.get("canonical_refs", {}).get("markdown", "")).strip()
     workflow_profile_metadata_ref = str(workflow_profile_payload.get("canonical_refs", {}).get("metadata", "")).strip()
+    operator_surface_ref = (
+        atlas_relative(resolved_operator_surface, root=base)
+        if isinstance(operator_surface_payload, dict)
+        else ""
+    )
 
     seeded_rail_state = (
         rail_state_payload.get("seeded_rail_state") if isinstance(rail_state_payload.get("seeded_rail_state"), dict) else {}
@@ -358,10 +369,11 @@ def build_context_packet_payload(
         validation_ref,
         state_model_ref,
         rule_registry_ref,
-        operator_surface_ref,
         workflow_profile_markdown_ref,
         workflow_profile_metadata_ref,
     ]
+    if operator_surface_ref:
+        evidence_refs.insert(5, operator_surface_ref)
     task_frame = _task_frame(
         immediate_lane=immediate_lane,
         seeded_next_action=seeded_next_action,

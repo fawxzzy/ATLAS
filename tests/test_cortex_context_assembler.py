@@ -199,6 +199,7 @@ class CortexContextAssemblerTests(unittest.TestCase):
         current_state_payload: dict | None = None,
         rail_state_payload: dict | None = None,
         validation_payload: dict | None = None,
+        include_operator_surface: bool = True,
     ) -> Path:
         temp_dir = tempfile.TemporaryDirectory()
         self.addCleanup(temp_dir.cleanup)
@@ -208,7 +209,8 @@ class CortexContextAssemblerTests(unittest.TestCase):
         _write_json(root / "runtime" / "receipts" / "validation" / "stack-validation.latest.json", validation_payload or self._base_validation_payload())
         _write_json(root / "runtime" / "cortex" / "kernel.state-model.seed.v1.json", self.state_payload)
         _write_json(root / "runtime" / "cortex" / "kernel.rule-registry.seed.v1.json", self.rule_payload)
-        _write_json(root / "runtime" / "cortex" / "operator-surface" / "latest.json", self.operator_surface_payload)
+        if include_operator_surface:
+            _write_json(root / "runtime" / "cortex" / "operator-surface" / "latest.json", self.operator_surface_payload)
         return root
 
     def test_clean_posture_assembles_seeded_lane_packet(self) -> None:
@@ -261,6 +263,19 @@ class CortexContextAssemblerTests(unittest.TestCase):
         )
         self.assertTrue(payload["rule_highlights"])
         json.dumps(payload, sort_keys=True)
+
+    def test_clean_posture_bootstraps_without_operator_surface_artifact(self) -> None:
+        root = self._temp_root(include_operator_surface=False)
+
+        payload = build_context_packet_payload(root=root)
+
+        self.assertNotIn("runtime/cortex/operator-surface/latest.json", payload["source_refs"])
+        self.assertEqual(
+            self._base_current_state_payload()["operator_surface_projection"],
+            payload["operator_surface_projection"],
+        )
+        evidence_refs = [item["ref"] for item in payload["evidence_list"]]
+        self.assertNotIn("runtime/cortex/operator-surface/latest.json", evidence_refs)
 
     def test_validation_blocker_switches_immediate_lane_and_preserves_deferred_lane(self) -> None:
         current_state_payload = self._base_current_state_payload()
