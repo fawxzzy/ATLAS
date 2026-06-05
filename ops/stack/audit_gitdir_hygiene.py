@@ -17,7 +17,7 @@ from ops._atlas import atlas_root, normalize_slashes, resolve_atlas_path
 
 DEFAULT_TARGETS = [
     Path("repos/_stack"),
-    Path("repos/fawxzzy-lifeline"),
+    Path("repos/lifeline"),
 ]
 
 

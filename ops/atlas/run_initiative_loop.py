@@ -464,7 +464,7 @@ def build_proposal_payload(
             "executor_component": component_snapshot(
                 stack_lock_payload,
                 "lifeline",
-                fallback_path="repos/fawxzzy-lifeline",
+                fallback_path="repos/lifeline",
             ),
         },
         "governed_surfaces": {

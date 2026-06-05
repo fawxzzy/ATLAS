@@ -108,10 +108,10 @@ Roadmap addition:
 - the platform-cutover restart posture is tracked in `docs/ops/ATLAS-LIFELINE-PLATFORM-RESTART.md`
 - that restart keeps ATLAS root as coordinator, `lifeline` as execution owner, and `playbook` as codification owner; it does not move platform implementation truth into a separate umbrella repo
 - root execution docs should link to Lifeline's canonical contract set instead of restating those semantics locally:
-  - `repos/fawxzzy-lifeline/docs/contracts/privileged-execution-contract.md`
-  - `repos/fawxzzy-lifeline/docs/contracts/ui-proof-passed-receipt-contract.md`
-  - `repos/fawxzzy-lifeline/docs/ops/lifeline-operator-surface.md`
-  - `repos/fawxzzy-lifeline/docs/runbooks/hermetic-validation-operator-flow.md`
+  - `repos/lifeline/docs/contracts/privileged-execution-contract.md`
+  - `repos/lifeline/docs/contracts/ui-proof-passed-receipt-contract.md`
+  - `repos/lifeline/docs/ops/lifeline-operator-surface.md`
+  - `repos/lifeline/docs/runbooks/hermetic-validation-operator-flow.md`
 - the rapid localhost iteration workflow is now tracked in `docs/playbooks/RAPID-LOCALHOST-ITERATION-LOOP.md`
 - its default posture is two-speed validation: affected-screen checks every iteration, broader screenshot sweeps only at checkpoints
 - named session bootstraps are now tracked through `docs/registry/ATLAS-SESSION-MODE-REGISTRY.json`
@@ -126,7 +126,7 @@ Use these ids in stack docs, tickets, and automation:
 - `stack` -> `.`
 - `_stack` -> `repos/_stack`
 - `playbook` -> `repos/playbook`
-- `lifeline` -> `repos/fawxzzy-lifeline`
+- `lifeline` -> `repos/lifeline`
 - `foundation` -> `repos/fawxzzy-foundation`
 - `fitness` -> `repos/fawxzzy-fitness`
 - `mazer` -> `repos/mazer`
@@ -192,10 +192,10 @@ Intent routing:
 
 Execution contract refs:
 
-- canonical execution lineage -> `repos/fawxzzy-lifeline/docs/contracts/privileged-execution-contract.md`
-- canonical proof-pass receipt semantics -> `repos/fawxzzy-lifeline/docs/contracts/ui-proof-passed-receipt-contract.md`
-- canonical operator flow -> `repos/fawxzzy-lifeline/docs/ops/lifeline-operator-surface.md`
-- canonical hermetic validation flow -> `repos/fawxzzy-lifeline/docs/runbooks/hermetic-validation-operator-flow.md`
+- canonical execution lineage -> `repos/lifeline/docs/contracts/privileged-execution-contract.md`
+- canonical proof-pass receipt semantics -> `repos/lifeline/docs/contracts/ui-proof-passed-receipt-contract.md`
+- canonical operator flow -> `repos/lifeline/docs/ops/lifeline-operator-surface.md`
+- canonical hermetic validation flow -> `repos/lifeline/docs/runbooks/hermetic-validation-operator-flow.md`
 
 ## Branding
 

@@ -4,7 +4,7 @@
   "title": "Lifeline package contract smoke",
   "summary": "Root-owned QA contract for the lifeline package verify lane.",
   "repo_id": "lifeline",
-  "repo_path": "repos/fawxzzy-lifeline",
+  "repo_path": "repos/lifeline",
   "adapter_id": "lifeline.package",
   "criticality": "high",
   "tags": [

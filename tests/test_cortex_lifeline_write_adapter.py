@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import tempfile
 import unittest
+from copy import deepcopy
 from pathlib import Path
 
 from ops._atlas import atlas_root
@@ -75,6 +76,10 @@ class CortexLifelineWriteAdapterTests(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.root = atlas_root()
         cls.base_payload = load_and_run_cortex_loop(root=cls.root).to_payload()
+        cls.base_payload["selected_next_action"]["owner_layer"] = "cortex"
+        cls.base_payload["proof_receipt_draft"]["owner_layer"] = "cortex"
+        cls.base_payload["worker_plan"]["owner_layer"] = "cortex"
+        cls.base_payload["applied_rule_trace"]["selected_owner_layer"] = "cortex"
 
     def _temp_root(self) -> Path:
         temp_dir = tempfile.TemporaryDirectory()
@@ -83,7 +88,7 @@ class CortexLifelineWriteAdapterTests(unittest.TestCase):
 
     def _seed_run(self, root: Path, payload: dict | None = None, *, name: str = "cortex-run-result.latest.json") -> None:
         artifact_path = root / "runtime" / "cortex" / "runs" / name
-        _write_json(artifact_path, payload or self.base_payload)
+        _write_json(artifact_path, deepcopy(payload or self.base_payload))
 
     def _classify_feedback(
         self,
@@ -265,7 +270,7 @@ class CortexLifelineWriteAdapterTests(unittest.TestCase):
     def test_adapter_does_not_mutate_unrelated_owner_repos(self) -> None:
         root = self._temp_root()
         pack_path = self._seed_pack(root)
-        lifeline_repo = root / "repos" / "fawxzzy-lifeline"
+        lifeline_repo = root / "repos" / "lifeline"
         fitness_repo = root / "repos" / "fawxzzy-fitness"
         sentinel_paths = (
             lifeline_repo / "sentinel.txt",

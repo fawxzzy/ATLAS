@@ -8,7 +8,7 @@ from typing import Any
 from ops._atlas import atlas_relative, atlas_root, normalize_slashes, resolve_atlas_path
 
 DEFAULT_LIFELINE_AUDIT_INDEX_RELATIVE_PATH = (
-    "repos/fawxzzy-lifeline/.lifeline/audits/proof-reference-receipt-index.json"
+    "repos/lifeline/.lifeline/audits/proof-reference-receipt-index.json"
 )
 
 

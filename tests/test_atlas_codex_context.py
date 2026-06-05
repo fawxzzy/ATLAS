@@ -90,11 +90,11 @@ class AtlasCodexContextTests(unittest.TestCase):
         route_refs = {item["ref"] for item in payload["selected_refs"]["route_surfaces"]}
         self.assertIn("docs/registry/ATLAS-TOOL-REGISTRY.json", route_refs)
         self.assertIn(
-            "repos/fawxzzy-lifeline/examples/privileged-execution/read-only-scan.request.json",
+            "repos/lifeline/examples/privileged-execution/read-only-scan.request.json",
             route_refs,
         )
         self.assertIn(
-            "repos/fawxzzy-lifeline/examples/privileged-execution/read-only-scan.approval.json",
+            "repos/lifeline/examples/privileged-execution/read-only-scan.approval.json",
             route_refs,
         )
 

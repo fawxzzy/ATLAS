@@ -64,10 +64,10 @@ git -C repos/_stack rev-parse --show-toplevel
 git -C repos/_stack rev-parse --git-dir
 git -C repos/_stack worktree list
 
-git -C repos/fawxzzy-lifeline status --short
-git -C repos/fawxzzy-lifeline rev-parse --show-toplevel
-git -C repos/fawxzzy-lifeline rev-parse --git-dir
-git -C repos/fawxzzy-lifeline worktree list
+git -C repos/lifeline status --short
+git -C repos/lifeline rev-parse --show-toplevel
+git -C repos/lifeline rev-parse --git-dir
+git -C repos/lifeline worktree list
 ```
 
 ## Move / Rename Rule
