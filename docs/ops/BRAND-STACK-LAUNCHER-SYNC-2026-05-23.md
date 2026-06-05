@@ -24,10 +24,10 @@
 ## Commands Run
 
 ```powershell
-Get-FileHash C:\ATLAS\branding\generated\ico\atlas-sigil-core-launcher.ico -Algorithm SHA256
-Get-FileHash C:\ATLAS\repos\_stack\ops\assets\release-launcher.ico -Algorithm SHA256
-Copy-Item -LiteralPath C:\ATLAS\branding\generated\ico\atlas-sigil-core-launcher.ico -Destination C:\ATLAS\repos\_stack\ops\assets\release-launcher.ico -Force
-powershell -ExecutionPolicy Bypass -File C:\ATLAS\repos\_stack\ops\codex\Test-StackOperatorSurface.ps1
+Get-FileHash .\branding\generated\ico\atlas-sigil-core-launcher.ico -Algorithm SHA256
+Get-FileHash .\repos\_stack\ops\assets\release-launcher.ico -Algorithm SHA256
+Copy-Item -LiteralPath .\branding\generated\ico\atlas-sigil-core-launcher.ico -Destination .\repos\_stack\ops\assets\release-launcher.ico -Force
+powershell -ExecutionPolicy Bypass -File .\repos\_stack\ops\codex\Test-StackOperatorSurface.ps1
 python .\ops\validation\validate_stack.py --allow-missing-locked-repos
 ```
 

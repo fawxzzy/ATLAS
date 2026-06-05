@@ -83,9 +83,9 @@ Current durable posture:
 
 Remaining exact blocker set:
 
-- `C:\ATLAS\tmp\mazer-ak-v5`
-- `C:\ATLAS\tmp\mazer-o-two-shell`
-- `C:\ATLAS\tmp\mazer-y-script-typing`
+- `tmp/mazer-ak-v5`
+- `tmp/mazer-o-two-shell`
+- `tmp/mazer-y-script-typing`
 
 Interpretation:
 

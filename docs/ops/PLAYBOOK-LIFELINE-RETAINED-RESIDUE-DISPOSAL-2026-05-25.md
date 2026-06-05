@@ -61,9 +61,9 @@ Reason:
 ## Commands Run
 
 ```powershell
-git worktree remove "C:/ATLAS/tmp/r18-main-merge-20260511/repos/fawxzzy-lifeline"
-git worktree remove "C:/ATLAS/tmp/r18-main-merge-20260511/repos/fawxzzy-lifeline-operator-evidence"
-git worktree remove "C:/ATLAS/tmp/r18-main-merge-20260511/repos/fawxzzy-playbook"
+git worktree remove "tmp/r18-main-merge-20260511/repos/fawxzzy-lifeline"
+git worktree remove "tmp/r18-main-merge-20260511/repos/fawxzzy-lifeline-operator-evidence"
+git worktree remove "tmp/r18-main-merge-20260511/repos/fawxzzy-playbook"
 git worktree list --porcelain
 git branch -vv
 git status --branch --short
