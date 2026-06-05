@@ -88,6 +88,7 @@
 - [_Stack Readiness Remote Preservation Branch Publication And Base-Branch Posture Receipt Pass 2](../ops/_STACK-READINESS-REMOTE-PRESERVATION-BRANCH-PUBLICATION-AND-BASE-BRANCH-POSTURE-RECEIPT-PASS-2-2026-06-05.md)
 - [_Stack Readiness Base-Branch Posture Adoption And PR Surface Receipt Pass 3](../ops/_STACK-READINESS-BASE-BRANCH-POSTURE-ADOPTION-AND-PR-SURFACE-RECEIPT-PASS-3-2026-06-05.md)
 - [_Stack Readiness Default Branch Main Confirmation And ATLAS Root Receipt Pass 4](../ops/_STACK-READINESS-DEFAULT-BRANCH-MAIN-CONFIRMATION-AND-ATLAS-ROOT-RECEIPT-PASS-4-2026-06-05.md)
+- [PR #50 Draft Readiness Audit And Merge-Boundary Receipt Pass 1](../ops/PR-50-DRAFT-READINESS-AUDIT-AND-MERGE-BOUNDARY-RECEIPT-PASS-1-2026-06-05.md)
 - [_Stack Readiness Stack Marker Checkpoint Command-Design Pass 25](../ops/_STACK-READINESS-STACK-MARKER-CHECKPOINT-COMMAND-DESIGN-PASS-25-2026-06-04.md)
 - [_Stack Readiness Stack Marker Checkpoint Evidence-Admission And Restart-Surface Discipline Pass 26](../ops/_STACK-READINESS-STACK-MARKER-CHECKPOINT-EVIDENCE-ADMISSION-AND-RESTART-SURFACE-DISCIPLINE-PASS-26-2026-06-04.md)
 - [_Stack Readiness Stack Marker Checkpoint Report-Contract And Contradiction-Routing Pass 27](../ops/_STACK-READINESS-STACK-MARKER-CHECKPOINT-REPORT-CONTRACT-AND-CONTRADICTION-ROUTING-PASS-27-2026-06-04.md)
