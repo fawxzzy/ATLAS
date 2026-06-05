@@ -1,8 +1,8 @@
 {
   "contract_version": "atlas.cortex.receipt-interpretation-stack-consumption.v1",
-  "generated_at": "2026-05-12T13:56:25.814203+00:00",
+  "generated_at": "2026-06-05T08:33:37.321174+00:00",
   "authority_level": "read_only_advisory",
-  "stack_root": "C:/ATLAS/tmp/r18-main-merge-20260511",
+  "stack_root": "C:/ATLAS",
   "consumption_id": "receipt-interpretation-stack-consumption-promote-cortex-receipt-interpretation-consumption-feedback-wave11",
   "consumer": {
     "consumer_id": "_stack",
@@ -36,37 +36,37 @@
       "role": "stack_advisory_handoff",
       "ref": "runtime/cortex/stack-advisory-handoff/latest.json",
       "contract_version": "atlas.cortex.stack-advisory-handoff.v2",
-      "digest": "sha256:266db2646b751963d090f29c0933f6bdcd96257075e90e8033f12509f9cac21e"
+      "digest": "sha256:271bce923dd055339faaa603a6630fcc7fddc7a8b7fb2be5160f1af5b411516d"
     },
     {
       "role": "stack_consumption_pilot",
       "ref": "runtime/cortex/stack-consumption-pilot/latest.json",
       "contract_version": "atlas.cortex.stack-consumption-pilot.v1",
-      "digest": "sha256:da375ec929e69af828eba44defb363732704f72742174beb6f0a975612735e78"
+      "digest": "sha256:b6380191769ad587312ba0aa346183c49aa5af1e36c1844b72b1d75c509cd23e"
     },
     {
       "role": "worker_prompt",
       "ref": "runtime/cortex/worker-prompts/latest.json",
       "contract_version": "atlas.cortex.worker-prompt.v1",
-      "digest": "sha256:2baa8a633dc4aa2b1a9086acc2b401c78872371478cb87588e49b2d4be81a179"
+      "digest": "sha256:e23fd833fae9b64628f1f192c0a1e57628207ca3fc922b0dc38f14ff27697a91"
     },
     {
       "role": "ledger",
       "ref": "runtime/cortex/ledger/latest.json",
       "contract_version": "atlas.cortex.ledger.v1",
-      "digest": "sha256:f80bf57b49c70e6e5e1c6ec60c54b2e6cd509c33abb8b29f348cd16208feffb0"
+      "digest": "sha256:3f5669ef0b14b4280cbd569cb340fb4edf00909737cbe9d17bbe8d14a550acf0"
     },
     {
       "role": "validation_receipt",
       "ref": "runtime/receipts/validation/stack-validation.latest.json",
       "contract_version": "",
-      "digest": "sha256:8dff0bbe12c4cbe7f266e19586617ba5d57ae2111b10fc4dfac1e03750b78e5c"
+      "digest": "sha256:0b4784dc5e9945224fe428037c2ed0f96a2ada6555c287366a36fc919fc8497f"
     },
     {
       "role": "state_model_seed",
       "ref": "runtime/cortex/kernel.state-model.seed.v1.json",
       "contract_version": "atlas.cortex.kernel-state.v1",
-      "digest": "sha256:e5b5541cc6aad444c94243f15bcc9a62324f429ecc2420fa1528a0ba61f3c4a8"
+      "digest": "sha256:ba84cc1bedf49db2f4b915f00dad42104677cfb1e6766078cde119702be9baa9"
     },
     {
       "role": "rule_registry_seed",
@@ -185,8 +185,8 @@
     "runtime/cortex/rail-state/latest.json",
     "runtime/cortex/kernel.proof-summary.examples.v1.json",
     "stack.lock.yaml",
-    "runtime/cortex/receipt-interpretation-stack-consumption/latest.json",
-    "docs/architecture/ATLAS-CORTEX-PLAYBOOK-CODEX.md",
+    "docs/memory/profiles/zachariah_workflow_profile.md",
+    "docs/memory/profiles/zachariah_workflow_profile.json",
     "runtime/cortex/worker-prompts/latest.json#/planner_contract",
     "runtime/cortex/worker-prompts/latest.json#/receipt_draft_preview"
   ]
