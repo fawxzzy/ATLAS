@@ -323,6 +323,29 @@ def iter_unique_repo_root_files(repo_path: Path, patterns: list[str]) -> list[tu
     return matches
 
 
+def mutable_surface_requires_warning(repo_path: Path, relative_path: str) -> bool:
+    candidate = repo_path / relative_path
+    if not candidate.exists():
+        return False
+    tracked_code, tracked_output = git_output(repo_path, "ls-files", "--", relative_path)
+    if tracked_code != 0:
+        return True
+    status_code, status_output = git_output(
+        repo_path,
+        "status",
+        "--short",
+        "--ignored",
+        "--untracked-files=all",
+        "--",
+        relative_path,
+    )
+    if status_code != 0:
+        return True
+    if status_output.strip():
+        return True
+    return not bool(tracked_output.strip())
+
+
 def summarize_debt_classes(findings: list[dict[str, Any]]) -> list[dict[str, Any]]:
     buckets: dict[str, dict[str, Any]] = {}
     for finding in findings:
@@ -2572,7 +2595,7 @@ def build_findings(
 
         for relative_dir in MUTABLE_DIR_CANDIDATES:
             candidate = repo_path / relative_dir
-            if candidate.exists():
+            if candidate.exists() and mutable_surface_requires_warning(repo_path, relative_dir):
                 rel = normalize_slashes(str(candidate.relative_to(root)))
                 findings.append(Finding("warning", "mutable-state-in-repo", rel, "Mutable or generated state is present inside a repo path.", {"repo_id": repo_id, "state_path": relative_dir}))
         for env_candidate in list(repo_path.glob(".env")) + list(repo_path.glob(".env.*")):

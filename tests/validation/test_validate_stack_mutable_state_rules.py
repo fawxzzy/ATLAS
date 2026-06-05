@@ -3,10 +3,12 @@ from __future__ import annotations
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from ops.validation.validate_stack import (
     is_repo_local_secret_candidate,
     iter_unique_repo_root_files,
+    mutable_surface_requires_warning,
 )
 
 
@@ -42,6 +44,42 @@ class ValidateStackMutableStateRulesTests(unittest.TestCase):
             ],
             matches,
         )
+
+    def test_tracked_clean_mutable_surface_does_not_warn(self) -> None:
+        temp_dir = tempfile.TemporaryDirectory()
+        self.addCleanup(temp_dir.cleanup)
+        root = Path(temp_dir.name)
+        (root / ".playbook").mkdir(parents=True, exist_ok=True)
+        (root / ".playbook" / "repo-index.json").write_text("{}\n", encoding="utf-8")
+
+        def git_output_side_effect(repo_path: Path, *args: str) -> tuple[int, str]:
+            self.assertEqual(root, repo_path)
+            if args[:2] == ("ls-files", "--"):
+                return 0, ".playbook/repo-index.json\n"
+            if args[:4] == ("status", "--short", "--ignored", "--untracked-files=all"):
+                return 0, ""
+            raise AssertionError(f"Unexpected git invocation: {args!r}")
+
+        with patch("ops.validation.validate_stack.git_output", side_effect=git_output_side_effect):
+            self.assertFalse(mutable_surface_requires_warning(root, ".playbook"))
+
+    def test_ignored_mutable_surface_still_warns(self) -> None:
+        temp_dir = tempfile.TemporaryDirectory()
+        self.addCleanup(temp_dir.cleanup)
+        root = Path(temp_dir.name)
+        (root / ".playbook").mkdir(parents=True, exist_ok=True)
+        (root / ".playbook" / "repo-index.json").write_text("{}\n", encoding="utf-8")
+
+        def git_output_side_effect(repo_path: Path, *args: str) -> tuple[int, str]:
+            self.assertEqual(root, repo_path)
+            if args[:2] == ("ls-files", "--"):
+                return 0, ""
+            if args[:4] == ("status", "--short", "--ignored", "--untracked-files=all"):
+                return 0, "!! .playbook/repo-index.json\n"
+            raise AssertionError(f"Unexpected git invocation: {args!r}")
+
+        with patch("ops.validation.validate_stack.git_output", side_effect=git_output_side_effect):
+            self.assertTrue(mutable_surface_requires_warning(root, ".playbook"))
 
 
 if __name__ == "__main__":
