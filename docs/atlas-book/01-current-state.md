@@ -16,6 +16,7 @@ What is true right now:
 - Playbook remains the reusable governance and doctrine owner.
 - normal stack validation is green in the current working state.
 - `--allow-missing-locked-repos` is no longer needed for current validation.
+- the current validator-correctness warning-burn branch removed two root-validator false positives without touching Fitness: live validation now reads `critical=0 error=16 warning=57 info=0`, with the remaining errors still confined to stack-lock drift across active owner branches.
 
 ## Canonical Source Truth By Surface
 

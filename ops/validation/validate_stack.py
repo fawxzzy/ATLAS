@@ -228,7 +228,7 @@ DEBT_CLASS_CONFIG = [
         },
     },
 ]
-ENV_EXAMPLE_MARKERS = (".example", ".sample", ".template", ".dist")
+ENV_EXAMPLE_MARKERS = ("example", "sample", "template", "dist")
 REMEDIATION_BUCKET_CONFIG = [
     {
         "bucket_id": "execution-receipt-repair-invalid",
@@ -299,7 +299,28 @@ def is_repo_local_secret_candidate(path: Path) -> bool:
     if not name.startswith(".env."):
         return False
     suffix = name.removeprefix(".env.")
-    return not any(marker in suffix for marker in ENV_EXAMPLE_MARKERS)
+    normalized_suffix = suffix.strip(".")
+    if not normalized_suffix:
+        return False
+    suffix_parts = [part for part in normalized_suffix.split(".") if part]
+    if suffix_parts and suffix_parts[-1] in ENV_EXAMPLE_MARKERS:
+        return False
+    return True
+
+
+def iter_unique_repo_root_files(repo_path: Path, patterns: list[str]) -> list[tuple[Path, str]]:
+    seen_paths: set[Path] = set()
+    matches: list[tuple[Path, str]] = []
+    for pattern in patterns:
+        for file_path in sorted(repo_path.glob(pattern)):
+            if not file_path.is_file():
+                continue
+            resolved_path = file_path.resolve()
+            if resolved_path in seen_paths:
+                continue
+            seen_paths.add(resolved_path)
+            matches.append((file_path, pattern))
+    return matches
 
 
 def summarize_debt_classes(findings: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -2558,14 +2579,10 @@ def build_findings(
             if not is_repo_local_secret_candidate(env_candidate):
                 continue
             findings.append(Finding("warning", "repo-local-secret-material", normalize_slashes(str(env_candidate.relative_to(root))), "Repo-local environment file detected; secrets should not be part of default exports.", {"repo_id": repo_id}))
-        for pattern in ROOT_LOG_PATTERNS:
-            for file_path in repo_path.glob(pattern):
-                if file_path.is_file():
-                    findings.append(Finding("warning", "mutable-artifact-in-repo-root", normalize_slashes(str(file_path.relative_to(root))), "Mutable log, temp, or database artifact detected in repo root.", {"repo_id": repo_id, "pattern": pattern}))
-        for pattern in ROOT_CAPTURE_PATTERNS:
-            for file_path in repo_path.glob(pattern):
-                if file_path.is_file():
-                    findings.append(Finding("warning", "capture-artifact-in-repo-root", normalize_slashes(str(file_path.relative_to(root))), "Likely review or capture artifact detected in repo root.", {"repo_id": repo_id, "pattern": pattern}))
+        for file_path, pattern in iter_unique_repo_root_files(repo_path, ROOT_LOG_PATTERNS):
+            findings.append(Finding("warning", "mutable-artifact-in-repo-root", normalize_slashes(str(file_path.relative_to(root))), "Mutable log, temp, or database artifact detected in repo root.", {"repo_id": repo_id, "pattern": pattern}))
+        for file_path, pattern in iter_unique_repo_root_files(repo_path, ROOT_CAPTURE_PATTERNS):
+            findings.append(Finding("warning", "capture-artifact-in-repo-root", normalize_slashes(str(file_path.relative_to(root))), "Likely review or capture artifact detected in repo root.", {"repo_id": repo_id, "pattern": pattern}))
     if not lockfile_path.exists():
         findings.append(
             Finding(

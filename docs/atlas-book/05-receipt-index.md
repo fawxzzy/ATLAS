@@ -21,6 +21,7 @@
 - [Stack Lock And Pinned Dirty-State Drift Classification Checkpoint](../ops/STACK-LOCK-AND-PINNED-DIRTY-STATE-DRIFT-CLASSIFICATION-CHECKPOINT-2026-06-01.md)
 - [Root-Side Stack Lock Refresh And Reconciliation Pass After Owner-Side Dirty-State Disposition](../ops/ROOT-SIDE-STACK-LOCK-REFRESH-AND-RECONCILIATION-PASS-AFTER-OWNER-SIDE-DIRTY-STATE-DISPOSITION-2026-06-01.md)
 - [Root-Bounded Lane-Selection Pass After Root-Side Stack Lock Refresh And Reconciliation Closeout](../ops/ROOT-BOUNDED-LANE-SELECTION-PASS-AFTER-ROOT-SIDE-STACK-LOCK-REFRESH-AND-RECONCILIATION-CLOSEOUT-2026-06-01.md)
+- [Stack Validation Validator-Correctness Warning-Burn Pass 1](../ops/STACK-VALIDATION-VALIDATOR-CORRECTNESS-WARNING-BURN-PASS-1-2026-06-05.md)
 - [Local Data Gateway Retained-Surface Destructive Disposal Relationship-Seam Reconciliation After Clean-Root Reselection](../ops/LOCAL-DATA-GATEWAY-RETAINED-SURFACE-DESTRUCTIVE-DISPOSAL-RELATIONSHIP-SEAM-RECONCILIATION-AFTER-CLEAN-ROOT-RESELECTION-2026-06-01.md)
 - [Local Data Gateway Repo Naming Reusable-Proof-Family Adoptable-Now Threshold Checkpoint](../ops/LOCAL-DATA-GATEWAY-REPO-NAMING-REUSABLE-PROOF-FAMILY-ADOPTABLE-NOW-THRESHOLD-CHECKPOINT-2026-06-01.md)
 - [Root-Bounded Lane-Selection Pass After Local Data Gateway Repo Naming Reusable-Proof-Family Adoptable-Now Threshold Checkpoint Closeout](../ops/ROOT-BOUNDED-LANE-SELECTION-PASS-AFTER-LOCAL-DATA-GATEWAY-REPO-NAMING-REUSABLE-PROOF-FAMILY-ADOPTABLE-NOW-THRESHOLD-CHECKPOINT-CLOSEOUT-2026-06-01.md)
