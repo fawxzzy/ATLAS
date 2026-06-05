@@ -124,6 +124,7 @@
 - [Cortex Readiness Docs-ADR-Or-Debt-Slice Post-Merge Live Read-Model Reconciliation Pass 8](../ops/CORTEX-READINESS-DOCS-ADR-OR-DEBT-SLICE-POST-MERGE-LIVE-READ-MODEL-RECONCILIATION-PASS-8-2026-06-05.md)
 - [Cortex Readiness Docs-ADR-Or-Debt-Slice Post-PR-56-Merge Live Read-Model Reconciliation Pass 9](../ops/CORTEX-READINESS-DOCS-ADR-OR-DEBT-SLICE-POST-PR-56-MERGE-LIVE-READ-MODEL-RECONCILIATION-PASS-9-2026-06-05.md)
 - [PR #57 Draft Readiness Audit And Body Alignment Pass 1](../ops/PR-57-DRAFT-READINESS-AUDIT-AND-BODY-ALIGNMENT-PASS-1-2026-06-05.md)
+- [PR #57 Ready-State Transition And Posture Confirmation Pass 2](../ops/PR-57-READY-STATE-TRANSITION-AND-POSTURE-CONFIRMATION-PASS-2-2026-06-05.md)
 - [PR #56 Draft Readiness Audit And Body Alignment Pass 1](../ops/PR-56-DRAFT-READINESS-AUDIT-AND-BODY-ALIGNMENT-PASS-1-2026-06-05.md)
 - [PR #56 Ready-State Transition And Posture Confirmation Pass 2](../ops/PR-56-READY-STATE-TRANSITION-AND-POSTURE-CONFIRMATION-PASS-2-2026-06-05.md)
 - [PR #55 Draft Readiness Audit And Body Alignment Pass 1](../ops/PR-55-DRAFT-READINESS-AUDIT-AND-BODY-ALIGNMENT-PASS-1-2026-06-05.md)
