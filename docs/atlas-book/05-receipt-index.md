@@ -86,6 +86,7 @@
 - [_Stack Readiness Stack Receipt Package First-Implementation Worker Cluster Reconciliation](../ops/_STACK-READINESS-STACK-RECEIPT-PACKAGE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-04.md)
 - [_Stack Readiness Remote Publication Readiness And Blocker Receipt Pass 1](../ops/_STACK-READINESS-REMOTE-PUBLICATION-READINESS-AND-BLOCKER-RECEIPT-PASS-1-2026-06-05.md)
 - [_Stack Readiness Remote Preservation Branch Publication And Base-Branch Posture Receipt Pass 2](../ops/_STACK-READINESS-REMOTE-PRESERVATION-BRANCH-PUBLICATION-AND-BASE-BRANCH-POSTURE-RECEIPT-PASS-2-2026-06-05.md)
+- [_Stack Readiness Base-Branch Posture Adoption And PR Surface Receipt Pass 3](../ops/_STACK-READINESS-BASE-BRANCH-POSTURE-ADOPTION-AND-PR-SURFACE-RECEIPT-PASS-3-2026-06-05.md)
 - [_Stack Readiness Stack Marker Checkpoint Command-Design Pass 25](../ops/_STACK-READINESS-STACK-MARKER-CHECKPOINT-COMMAND-DESIGN-PASS-25-2026-06-04.md)
 - [_Stack Readiness Stack Marker Checkpoint Evidence-Admission And Restart-Surface Discipline Pass 26](../ops/_STACK-READINESS-STACK-MARKER-CHECKPOINT-EVIDENCE-ADMISSION-AND-RESTART-SURFACE-DISCIPLINE-PASS-26-2026-06-04.md)
 - [_Stack Readiness Stack Marker Checkpoint Report-Contract And Contradiction-Routing Pass 27](../ops/_STACK-READINESS-STACK-MARKER-CHECKPOINT-REPORT-CONTRACT-AND-CONTRADICTION-ROUTING-PASS-27-2026-06-04.md)
