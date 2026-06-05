@@ -12,9 +12,9 @@ Re-check whether `repos/fawxzzy-fitness` is now visible and clean from the activ
 ## Inputs Reviewed
 
 - `branding/manifest.json`
-- [BRAND-FITNESS-PATH-VISIBILITY-2026-05-23.md](/C:/ATLAS/docs/ops/BRAND-FITNESS-PATH-VISIBILITY-2026-05-23.md)
-- [CANONICAL-REPO-RESTORATION-CLOSEOUT-2026-05-23.md](/C:/ATLAS/docs/ops/CANONICAL-REPO-RESTORATION-CLOSEOUT-2026-05-23.md)
-- [TMP-DEPENDENCY-DEMOTION-RECEIPT-2026-05-23.md](/C:/ATLAS/docs/ops/TMP-DEPENDENCY-DEMOTION-RECEIPT-2026-05-23.md)
+- [BRAND-FITNESS-PATH-VISIBILITY-2026-05-23.md](./BRAND-FITNESS-PATH-VISIBILITY-2026-05-23.md)
+- [CANONICAL-REPO-RESTORATION-CLOSEOUT-2026-05-23.md](./CANONICAL-REPO-RESTORATION-CLOSEOUT-2026-05-23.md)
+- [TMP-DEPENDENCY-DEMOTION-RECEIPT-2026-05-23.md](./TMP-DEPENDENCY-DEMOTION-RECEIPT-2026-05-23.md)
 
 ## Current Root-Path Check
 
@@ -29,7 +29,7 @@ Result:
 Observed command result:
 
 ```text
-Test-Path 'C:\ATLAS\repos\fawxzzy-fitness' -> False
+Test-Path 'repos\fawxzzy-fitness' -> False
 ```
 
 ## What This Means
@@ -63,13 +63,13 @@ From `branding/manifest.json`:
 
 This does **not** reopen canonical source-truth recovery.
 
-[CANONICAL-REPO-RESTORATION-CLOSEOUT-2026-05-23.md](/C:/ATLAS/docs/ops/CANONICAL-REPO-RESTORATION-CLOSEOUT-2026-05-23.md) already records that the canonical Fitness repo was restored at `repos/fawxzzy-fitness`, verified locally, and proven through `_stack`.
+[CANONICAL-REPO-RESTORATION-CLOSEOUT-2026-05-23.md](./CANONICAL-REPO-RESTORATION-CLOSEOUT-2026-05-23.md) already records that the canonical Fitness repo was restored at `repos/fawxzzy-fitness`, verified locally, and proven through `_stack`.
 
 ### Tmp Dependency Elimination
 
 This also does **not** authorize `tmp` fallback.
 
-[TMP-DEPENDENCY-DEMOTION-RECEIPT-2026-05-23.md](/C:/ATLAS/docs/ops/TMP-DEPENDENCY-DEMOTION-RECEIPT-2026-05-23.md) already records that `tmp` is no longer part of the proven active Fitness verify/preflight path.
+[TMP-DEPENDENCY-DEMOTION-RECEIPT-2026-05-23.md](./TMP-DEPENDENCY-DEMOTION-RECEIPT-2026-05-23.md) already records that `tmp` is no longer part of the proven active Fitness verify/preflight path.
 
 ### Brand Lane Effect
 

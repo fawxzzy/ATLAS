@@ -11,17 +11,17 @@ Explain why canonical restoration receipts say `repos/fawxzzy-fitness` was resto
 
 ## Direct Root Checks
 
-### 1. Does `C:\ATLAS\repos\fawxzzy-fitness` exist?
+### 1. Does `repos\fawxzzy-fitness` exist?
 
 - no
 
 Observed result:
 
 ```text
-Test-Path 'C:\ATLAS\repos\fawxzzy-fitness' -> False
+Test-Path 'repos\fawxzzy-fitness' -> False
 ```
 
-### 2. Does `C:\ATLAS\repos` currently contain a Fitness child repo?
+### 2. Does `repos\` currently contain a Fitness child repo?
 
 - no
 
@@ -81,7 +81,7 @@ Interpretation:
 
 - yes
 
-[CANONICAL-REPO-RESTORATION-CLOSEOUT-2026-05-23.md](/C:/ATLAS/docs/ops/CANONICAL-REPO-RESTORATION-CLOSEOUT-2026-05-23.md) still states:
+[CANONICAL-REPO-RESTORATION-CLOSEOUT-2026-05-23.md](./CANONICAL-REPO-RESTORATION-CLOSEOUT-2026-05-23.md) still states:
 
 - canonical repo root exists at `repos/fawxzzy-fitness`
 - canonical verification passed there
@@ -94,8 +94,8 @@ No direct filesystem deletion receipt was found in this pass.
 The best bounded timeline from recorded evidence is:
 
 1. canonical presence was asserted in the restoration closeout on 2026-05-23
-2. active-root absence was already recorded later in [BRAND-FITNESS-PATH-VISIBILITY-2026-05-23.md](/C:/ATLAS/docs/ops/BRAND-FITNESS-PATH-VISIBILITY-2026-05-23.md)
-3. the same absence is still present in [BRAND-FITNESS-PATH-VISIBILITY-RECHECK-2026-05-24.md](/C:/ATLAS/docs/ops/BRAND-FITNESS-PATH-VISIBILITY-RECHECK-2026-05-24.md)
+2. active-root absence was already recorded later in [BRAND-FITNESS-PATH-VISIBILITY-2026-05-23.md](./BRAND-FITNESS-PATH-VISIBILITY-2026-05-23.md)
+3. the same absence is still present in [BRAND-FITNESS-PATH-VISIBILITY-RECHECK-2026-05-24.md](./BRAND-FITNESS-PATH-VISIBILITY-RECHECK-2026-05-24.md)
 
 Current conclusion:
 
@@ -110,12 +110,12 @@ Current conclusion:
 
 Observed `git worktree list` from ATLAS root shows only:
 
-- `C:/ATLAS`
+- `.`
 - several `tmp/` worktrees unrelated to canonical Fitness
 
 No active worktree is occupying `repos/fawxzzy-fitness`.
 
-### 8. Is canonical Fitness present somewhere else under `C:\ATLAS`?
+### 8. Is canonical Fitness present somewhere else under the ATLAS root?
 
 - yes, but not in the canonical `repos/` child path
 
@@ -152,7 +152,7 @@ The canonical Fitness repo is absent on disk from `repos/`, while:
 
 - `stack.yaml` still points at it as canonical
 - `stack.lock.yaml` no longer carries a live canonical Fitness pin
-- retained reference and snapshot evidence still exist elsewhere under `C:\ATLAS`
+- retained reference and snapshot evidence still exist elsewhere under the ATLAS root
 
 That makes this a combined:
 

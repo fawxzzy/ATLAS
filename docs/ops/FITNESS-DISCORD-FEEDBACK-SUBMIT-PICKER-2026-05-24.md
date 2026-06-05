@@ -4,7 +4,7 @@ Date:
 - 2026-05-24
 
 Scope:
-- `C:\ATLAS\repos\fawxzzy-fitness`
+- `repos/fawxzzy-fitness`
 
 Goal:
 - refine the public feedback launcher so `Submit` matches the dismissible picker pattern already used by `Edit`
@@ -25,13 +25,13 @@ What changed:
 - forum rendering now prefers stored section overrides and only falls back to deterministic generated copy when an explicit override was not supplied
 
 Files:
-- `C:\ATLAS\repos\fawxzzy-fitness\src\lib\discord\interactions.ts`
-- `C:\ATLAS\repos\fawxzzy-fitness\src\app\api\discord\interactions\route.ts`
-- `C:\ATLAS\repos\fawxzzy-fitness\src\lib\discord\bug-reports.ts`
-- `C:\ATLAS\repos\fawxzzy-fitness\src\lib\discord\interactions.test.ts`
-- `C:\ATLAS\repos\fawxzzy-fitness\src\lib\discord\interactions-route.test.ts`
-- `C:\ATLAS\repos\fawxzzy-fitness\src\lib\discord\bug-reports.test.ts`
-- `C:\ATLAS\repos\fawxzzy-fitness\docs\ops\FITNESS-DISCORD-FEEDBACK.md`
+- `repos/fawxzzy-fitness/src/lib/discord/interactions.ts`
+- `repos/fawxzzy-fitness/src/app/api/discord/interactions/route.ts`
+- `repos/fawxzzy-fitness/src/lib/discord/bug-reports.ts`
+- `repos/fawxzzy-fitness/src/lib/discord/interactions.test.ts`
+- `repos/fawxzzy-fitness/src/lib/discord/interactions-route.test.ts`
+- `repos/fawxzzy-fitness/src/lib/discord/bug-reports.test.ts`
+- `repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-FEEDBACK.md`
 
 Verification:
 - `node --import ./scripts/register-test-aliases.mjs --test src/lib/discord/interactions.test.ts`

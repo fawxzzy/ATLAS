@@ -18,10 +18,10 @@ Mode: governed Discord/runtime surface correction
 
 Key code surfaces:
 
-- `C:\ATLAS\repos\fawxzzy-fitness\src\app\api\discord\interactions\route.ts`
-- `C:\ATLAS\repos\fawxzzy-fitness\src\lib\discord\interactions-route.test.ts`
-- `C:\ATLAS\repos\fawxzzy-fitness\docs\ops\FITNESS-DISCORD-SPOTIFY-CLUB.md`
-- `C:\ATLAS\repos\fawxzzy-fitness\docs\ops\FITNESS-DISCORD-FEEDBACK.md`
+- `repos/fawxzzy-fitness/src/app/api/discord/interactions/route.ts`
+- `repos/fawxzzy-fitness/src/lib/discord/interactions-route.test.ts`
+- `repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-SPOTIFY-CLUB.md`
+- `repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-FEEDBACK.md`
 
 ## Runtime behavior
 

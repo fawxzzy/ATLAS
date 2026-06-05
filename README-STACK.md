@@ -210,7 +210,7 @@ Consumer repos should receive generated or synced copies only. Do not hand-manag
 
 ## Working Rules
 
-1. Start at `C:\ATLAS` only for stack-wide work, audits, standards, packaging, or cross-repo routing.
+1. Start at the ATLAS root (`.`) only for stack-wide work, audits, standards, packaging, or cross-repo routing.
 2. No Codex lane starts until the owner repo and target branch or worktree are explicit.
 3. Do single-repo implementation work inside the target repo or its clean worktree, not from the stack root.
 4. Do not commit machine-specific absolute paths in stack docs or config.

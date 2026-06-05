@@ -34,29 +34,29 @@ Execution of the first removal pass is recorded in `docs/ops/WORKTREE-DISPOSAL-R
 
 | Path | Branch | HEAD | Dirty state | Location class | Merged / preserved posture | Branch deletion blocker | Classification | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `C:/ATLAS` | `main` | `fda9e97` | dirty: untracked `archive/` | root | live root truth | n/a | `keep active` | not a disposal target in this lane |
-| `C:/ATLAS/tmp/archive-registry-pr45-clean` | detached | `3cdafe9` | clean | tmp worktree | detached commit already reachable from `main` | no | `safe to remove later` | clean verification snapshot |
-| `C:/ATLAS/tmp/atlas-adopt-fawx-den-os-techstack` | `codex/adopt-fawx-den-os-techstack` | `89cc250` | clean | tmp worktree | ahead of `main` by `1` unique commit | yes | `stale but not safe` | unique branch tip still outside `main` |
-| `C:/ATLAS/tmp/atlas-discord-workflow-memory` | `codex/discord-update-workflow-memory` | `a385024` | clean | tmp worktree | already merged into `main` | yes | `safe to remove later` | branch survived Pass 1 only because of this worktree |
-| `C:/ATLAS/tmp/atlas-foundation-lock-refresh` | `codex/foundation-pnpm-protected-refresh` | `3b9362d` | dirty: untracked artifact zip and extracted folder | tmp worktree | already merged into `main` | yes | `manual review` | generated artifact residue must be reviewed before removal |
-| `C:/ATLAS/tmp/atlas-moderation-receipt-clean` | `codex/discord-moderation-receipt-clean` | `debc3f4` | clean | tmp worktree | already merged into `main` | yes | `safe to remove later` | clean merged branch worktree |
-| `C:/ATLAS/tmp/atlas-playbook-lock-refresh` | `codex/sparse-protected-stack-validation` | `82fb59f` | dirty: untracked artifact zip and extracted folder | tmp worktree | already merged into `main` | yes | `manual review` | duplicate verification artifacts remain |
-| `C:/ATLAS/tmp/atlas-pnpm-protected-refresh` | `codex/pnpm-protected-refresh` | `10d6b77` | clean | tmp worktree | already merged into `main` | yes | `safe to remove later` | clean merged branch worktree |
-| `C:/ATLAS/tmp/atlas-qa-release-refresh-pr` | `codex/atlas-qa-release-refresh-pr` | `7d11cbe` | clean | tmp worktree | already merged into `main` | yes | `safe to remove later` | clean PR review worktree |
-| `C:/ATLAS/tmp/atlas-sparse-verify` | detached | `82fb59f` | clean | tmp worktree | detached commit already reachable from `main` | no | `safe to remove later` | redundant clean verification checkout of the same commit family as `atlas-playbook-lock-refresh` |
-| `C:/ATLAS/tmp/atlas-stack-checkpoint` | `codex/stack-progression-checkpoint` | `ce532ed` | clean | tmp worktree | already merged into `main` | yes | `safe to remove later` | clean merged checkpoint worktree |
-| `C:/ATLAS/tmp/cortex-admission-planning` | `codex/cortex-admission-planning` | `63e1fb4` | clean | tmp worktree | already merged into `main` | yes | `safe to remove later` | clean merged branch worktree |
-| `C:/ATLAS/tmp/cortex-surface-reconciliation` | `codex/cortex-surface-reconciliation` | `2183929` | missing / prunable registration | tmp worktree | already merged into `main` | yes | `manual review` | `git worktree list` reports `prunable gitdir file points to non-existent location` |
-| `C:/ATLAS/tmp/feedback-task-packet-filter-fix` | `codex/fix-feedback-task-packet-status-filter` | `6e6b7c7` | clean | tmp worktree | ahead of `main` by `1` unique commit | yes | `stale but not safe` | local-only unique branch tip remains |
-| `C:/ATLAS/tmp/pr45-clean` | detached | `3cdafe9` | dirty: modified doc and `stack.lock.yaml` | tmp worktree | detached snapshot not safe while dirty | no | `manual review` | shares commit with `archive-registry-pr45-clean` but has local modifications |
-| `C:/ATLAS/tmp/r18-main-merge-20260511` | `codex/r21-main-land` | `9e73779` | clean | tmp worktree | already merged into `main` | yes | `safe to remove later` | historical merge worktree retained only by branch binding |
-| `C:/ATLAS/tmp/r21-main-clean` | `codex/r21-main-clean` | `b73dc3c` | clean | tmp worktree | already merged into `main` | yes | `safe to remove later` | clean merged cleanup worktree |
-| `C:/ATLAS/tmp/r21-seed-wave11` | `codex/cortex-receipt-interpretation-consumption-feedback-wave11-seed` | `9366416` | clean | tmp worktree | ahead of `main` by `1` unique commit | yes | `stale but not safe` | unique seed branch tip remains |
-| `C:/ATLAS/tmp/rollback-check-1716271` | detached | `1716271` | clean | tmp worktree | detached rollback snapshot not reachable from `main` | no | `safety checkpoint` | explicit rollback evidence should not be removed without review |
-| `C:/ATLAS/tmp/rollback-check-420c5c3` | detached | `420c5c3` | clean | tmp worktree | detached rollback snapshot not reachable from `main` | no | `safety checkpoint` | recovery-era rollback evidence |
-| `C:/ATLAS/tmp/spotify-club-phase-3-queue-approval` | `codex/spotify-club-phase-3-queue-approval` | `620bfa2` | clean | tmp worktree | already merged into `main` | yes | `safe to remove later` | clean merged workflow worktree |
-| `C:/ATLAS-worktrees/fitness-dal-slice-2` | `codex/fitness-dal-slice-2` | `bb16755` | clean | external ATLAS worktree | already merged into `main` | yes | `safe to remove later` | external worktree path but no unique commits remain |
-| `C:/ATLAS-worktrees/pr1-stack-lock-refresh` | `codex/pr1-stack-lock-refresh` | `50b8b45` | clean | external ATLAS worktree | ahead of `main` by `3` unique commits | yes | `stale but not safe` | preserved PR review branch still outside `main` |
+| `.` | `main` | `fda9e97` | dirty: untracked `archive/` | root | live root truth | n/a | `keep active` | not a disposal target in this lane |
+| `tmp/archive-registry-pr45-clean` | detached | `3cdafe9` | clean | tmp worktree | detached commit already reachable from `main` | no | `safe to remove later` | clean verification snapshot |
+| `tmp/atlas-adopt-fawx-den-os-techstack` | `codex/adopt-fawx-den-os-techstack` | `89cc250` | clean | tmp worktree | ahead of `main` by `1` unique commit | yes | `stale but not safe` | unique branch tip still outside `main` |
+| `tmp/atlas-discord-workflow-memory` | `codex/discord-update-workflow-memory` | `a385024` | clean | tmp worktree | already merged into `main` | yes | `safe to remove later` | branch survived Pass 1 only because of this worktree |
+| `tmp/atlas-foundation-lock-refresh` | `codex/foundation-pnpm-protected-refresh` | `3b9362d` | dirty: untracked artifact zip and extracted folder | tmp worktree | already merged into `main` | yes | `manual review` | generated artifact residue must be reviewed before removal |
+| `tmp/atlas-moderation-receipt-clean` | `codex/discord-moderation-receipt-clean` | `debc3f4` | clean | tmp worktree | already merged into `main` | yes | `safe to remove later` | clean merged branch worktree |
+| `tmp/atlas-playbook-lock-refresh` | `codex/sparse-protected-stack-validation` | `82fb59f` | dirty: untracked artifact zip and extracted folder | tmp worktree | already merged into `main` | yes | `manual review` | duplicate verification artifacts remain |
+| `tmp/atlas-pnpm-protected-refresh` | `codex/pnpm-protected-refresh` | `10d6b77` | clean | tmp worktree | already merged into `main` | yes | `safe to remove later` | clean merged branch worktree |
+| `tmp/atlas-qa-release-refresh-pr` | `codex/atlas-qa-release-refresh-pr` | `7d11cbe` | clean | tmp worktree | already merged into `main` | yes | `safe to remove later` | clean PR review worktree |
+| `tmp/atlas-sparse-verify` | detached | `82fb59f` | clean | tmp worktree | detached commit already reachable from `main` | no | `safe to remove later` | redundant clean verification checkout of the same commit family as `atlas-playbook-lock-refresh` |
+| `tmp/atlas-stack-checkpoint` | `codex/stack-progression-checkpoint` | `ce532ed` | clean | tmp worktree | already merged into `main` | yes | `safe to remove later` | clean merged checkpoint worktree |
+| `tmp/cortex-admission-planning` | `codex/cortex-admission-planning` | `63e1fb4` | clean | tmp worktree | already merged into `main` | yes | `safe to remove later` | clean merged branch worktree |
+| `tmp/cortex-surface-reconciliation` | `codex/cortex-surface-reconciliation` | `2183929` | missing / prunable registration | tmp worktree | already merged into `main` | yes | `manual review` | `git worktree list` reports `prunable gitdir file points to non-existent location` |
+| `tmp/feedback-task-packet-filter-fix` | `codex/fix-feedback-task-packet-status-filter` | `6e6b7c7` | clean | tmp worktree | ahead of `main` by `1` unique commit | yes | `stale but not safe` | local-only unique branch tip remains |
+| `tmp/pr45-clean` | detached | `3cdafe9` | dirty: modified doc and `stack.lock.yaml` | tmp worktree | detached snapshot not safe while dirty | no | `manual review` | shares commit with `archive-registry-pr45-clean` but has local modifications |
+| `tmp/r18-main-merge-20260511` | `codex/r21-main-land` | `9e73779` | clean | tmp worktree | already merged into `main` | yes | `safe to remove later` | historical merge worktree retained only by branch binding |
+| `tmp/r21-main-clean` | `codex/r21-main-clean` | `b73dc3c` | clean | tmp worktree | already merged into `main` | yes | `safe to remove later` | clean merged cleanup worktree |
+| `tmp/r21-seed-wave11` | `codex/cortex-receipt-interpretation-consumption-feedback-wave11-seed` | `9366416` | clean | tmp worktree | ahead of `main` by `1` unique commit | yes | `stale but not safe` | unique seed branch tip remains |
+| `tmp/rollback-check-1716271` | detached | `1716271` | clean | tmp worktree | detached rollback snapshot not reachable from `main` | no | `safety checkpoint` | explicit rollback evidence should not be removed without review |
+| `tmp/rollback-check-420c5c3` | detached | `420c5c3` | clean | tmp worktree | detached rollback snapshot not reachable from `main` | no | `safety checkpoint` | recovery-era rollback evidence |
+| `tmp/spotify-club-phase-3-queue-approval` | `codex/spotify-club-phase-3-queue-approval` | `620bfa2` | clean | tmp worktree | already merged into `main` | yes | `safe to remove later` | clean merged workflow worktree |
+| `<ATLAS_WORKTREES>/fitness-dal-slice-2` | `codex/fitness-dal-slice-2` | `bb16755` | clean | external ATLAS worktree | already merged into `main` | yes | `safe to remove later` | external worktree path but no unique commits remain |
+| `<ATLAS_WORKTREES>/pr1-stack-lock-refresh` | `codex/pr1-stack-lock-refresh` | `50b8b45` | clean | external ATLAS worktree | ahead of `main` by `3` unique commits | yes | `stale but not safe` | preserved PR review branch still outside `main` |
 
 ## Safe-To-Remove Later Candidates
 
@@ -64,18 +64,18 @@ These are clean worktrees with no unique branch content beyond `main`, or detach
 
 | Path | Why safe later | Unique commits | Contents clean | Branch preserved elsewhere | Exact later removal command |
 | --- | --- | ---: | --- | --- | --- |
-| `C:/ATLAS/tmp/archive-registry-pr45-clean` | detached snapshot already reachable from `main` | `0` | yes | n/a | `git worktree remove \"C:/ATLAS/tmp/archive-registry-pr45-clean\"` |
-| `C:/ATLAS/tmp/atlas-discord-workflow-memory` | merged branch retained only because of worktree binding | `0` | yes | yes, on `main` | `git worktree remove \"C:/ATLAS/tmp/atlas-discord-workflow-memory\"; git branch -d codex/discord-update-workflow-memory` |
-| `C:/ATLAS/tmp/atlas-moderation-receipt-clean` | merged branch retained only because of worktree binding | `0` | yes | yes, on `main` | `git worktree remove \"C:/ATLAS/tmp/atlas-moderation-receipt-clean\"; git branch -d codex/discord-moderation-receipt-clean` |
-| `C:/ATLAS/tmp/atlas-pnpm-protected-refresh` | merged branch retained only because of worktree binding | `0` | yes | yes, on `main` | `git worktree remove \"C:/ATLAS/tmp/atlas-pnpm-protected-refresh\"; git branch -d codex/pnpm-protected-refresh` |
-| `C:/ATLAS/tmp/atlas-qa-release-refresh-pr` | merged branch retained only because of worktree binding | `0` | yes | yes, on `main` | `git worktree remove \"C:/ATLAS/tmp/atlas-qa-release-refresh-pr\"; git branch -d codex/atlas-qa-release-refresh-pr` |
-| `C:/ATLAS/tmp/atlas-sparse-verify` | detached clean verification checkout already reachable from `main` | `0` | yes | n/a | `git worktree remove \"C:/ATLAS/tmp/atlas-sparse-verify\"` |
-| `C:/ATLAS/tmp/atlas-stack-checkpoint` | merged branch retained only because of worktree binding | `0` | yes | yes, on `main` | `git worktree remove \"C:/ATLAS/tmp/atlas-stack-checkpoint\"; git branch -d codex/stack-progression-checkpoint` |
-| `C:/ATLAS/tmp/cortex-admission-planning` | merged branch retained only because of worktree binding | `0` | yes | yes, on `main` | `git worktree remove \"C:/ATLAS/tmp/cortex-admission-planning\"; git branch -d codex/cortex-admission-planning` |
-| `C:/ATLAS/tmp/r18-main-merge-20260511` | merged branch retained only because of worktree binding | `0` | yes | yes, on `main` | `git worktree remove \"C:/ATLAS/tmp/r18-main-merge-20260511\"; git branch -d codex/r21-main-land` |
-| `C:/ATLAS/tmp/r21-main-clean` | merged branch retained only because of worktree binding | `0` | yes | yes, on `main` | `git worktree remove \"C:/ATLAS/tmp/r21-main-clean\"; git branch -d codex/r21-main-clean` |
-| `C:/ATLAS/tmp/spotify-club-phase-3-queue-approval` | merged branch retained only because of worktree binding | `0` | yes | yes, on `main` | `git worktree remove \"C:/ATLAS/tmp/spotify-club-phase-3-queue-approval\"; git branch -d codex/spotify-club-phase-3-queue-approval` |
-| `C:/ATLAS-worktrees/fitness-dal-slice-2` | merged branch retained only because of worktree binding | `0` | yes | yes, on `main` | `git worktree remove \"C:/ATLAS-worktrees/fitness-dal-slice-2\"; git branch -d codex/fitness-dal-slice-2` |
+| `tmp/archive-registry-pr45-clean` | detached snapshot already reachable from `main` | `0` | yes | n/a | `git worktree remove \"tmp/archive-registry-pr45-clean\"` |
+| `tmp/atlas-discord-workflow-memory` | merged branch retained only because of worktree binding | `0` | yes | yes, on `main` | `git worktree remove \"tmp/atlas-discord-workflow-memory\"; git branch -d codex/discord-update-workflow-memory` |
+| `tmp/atlas-moderation-receipt-clean` | merged branch retained only because of worktree binding | `0` | yes | yes, on `main` | `git worktree remove \"tmp/atlas-moderation-receipt-clean\"; git branch -d codex/discord-moderation-receipt-clean` |
+| `tmp/atlas-pnpm-protected-refresh` | merged branch retained only because of worktree binding | `0` | yes | yes, on `main` | `git worktree remove \"tmp/atlas-pnpm-protected-refresh\"; git branch -d codex/pnpm-protected-refresh` |
+| `tmp/atlas-qa-release-refresh-pr` | merged branch retained only because of worktree binding | `0` | yes | yes, on `main` | `git worktree remove \"tmp/atlas-qa-release-refresh-pr\"; git branch -d codex/atlas-qa-release-refresh-pr` |
+| `tmp/atlas-sparse-verify` | detached clean verification checkout already reachable from `main` | `0` | yes | n/a | `git worktree remove \"tmp/atlas-sparse-verify\"` |
+| `tmp/atlas-stack-checkpoint` | merged branch retained only because of worktree binding | `0` | yes | yes, on `main` | `git worktree remove \"tmp/atlas-stack-checkpoint\"; git branch -d codex/stack-progression-checkpoint` |
+| `tmp/cortex-admission-planning` | merged branch retained only because of worktree binding | `0` | yes | yes, on `main` | `git worktree remove \"tmp/cortex-admission-planning\"; git branch -d codex/cortex-admission-planning` |
+| `tmp/r18-main-merge-20260511` | merged branch retained only because of worktree binding | `0` | yes | yes, on `main` | `git worktree remove \"tmp/r18-main-merge-20260511\"; git branch -d codex/r21-main-land` |
+| `tmp/r21-main-clean` | merged branch retained only because of worktree binding | `0` | yes | yes, on `main` | `git worktree remove \"tmp/r21-main-clean\"; git branch -d codex/r21-main-clean` |
+| `tmp/spotify-club-phase-3-queue-approval` | merged branch retained only because of worktree binding | `0` | yes | yes, on `main` | `git worktree remove \"tmp/spotify-club-phase-3-queue-approval\"; git branch -d codex/spotify-club-phase-3-queue-approval` |
+| `<ATLAS_WORKTREES>/fitness-dal-slice-2` | merged branch retained only because of worktree binding | `0` | yes | yes, on `main` | `git worktree remove \"<ATLAS_WORKTREES>/fitness-dal-slice-2\"; git branch -d codex/fitness-dal-slice-2` |
 
 ## Manual Review Worktrees
 
@@ -83,10 +83,10 @@ These worktrees should not be removed until their local state is resolved or exp
 
 | Path | Review blocker | Later likely action |
 | --- | --- | --- |
-| `C:/ATLAS/tmp/atlas-foundation-lock-refresh` | untracked artifact zip and extracted directory | review whether artifacts are disposable build residue, then remove worktree and branch if confirmed clean |
-| `C:/ATLAS/tmp/atlas-playbook-lock-refresh` | untracked artifact zip and extracted directory | review whether artifacts are disposable build residue, then remove worktree and branch if confirmed clean |
-| `C:/ATLAS/tmp/cortex-surface-reconciliation` | missing worktree path with prunable registration | inspect `git worktree list` anomaly, then prune or remove deliberately |
-| `C:/ATLAS/tmp/pr45-clean` | modified `docs/ops/ATLAS-ARCHIVE-NORMALIZATION-CHECKPOINT.md` and modified `stack.lock.yaml` | preserve or discard local modifications explicitly before any removal |
+| `tmp/atlas-foundation-lock-refresh` | untracked artifact zip and extracted directory | review whether artifacts are disposable build residue, then remove worktree and branch if confirmed clean |
+| `tmp/atlas-playbook-lock-refresh` | untracked artifact zip and extracted directory | review whether artifacts are disposable build residue, then remove worktree and branch if confirmed clean |
+| `tmp/cortex-surface-reconciliation` | missing worktree path with prunable registration | inspect `git worktree list` anomaly, then prune or remove deliberately |
+| `tmp/pr45-clean` | modified `docs/ops/ATLAS-ARCHIVE-NORMALIZATION-CHECKPOINT.md` and modified `stack.lock.yaml` | preserve or discard local modifications explicitly before any removal |
 
 ## Stale But Not Safe Worktrees
 
@@ -94,10 +94,10 @@ These worktrees are clean, but they still point at unique commits not on `main`,
 
 | Path | Branch or snapshot | Unique posture | Reason to retain |
 | --- | --- | --- | --- |
-| `C:/ATLAS/tmp/atlas-adopt-fawx-den-os-techstack` | `codex/adopt-fawx-den-os-techstack` | ahead of `main` by `1` | unique branch tip still outside `main` |
-| `C:/ATLAS/tmp/feedback-task-packet-filter-fix` | `codex/fix-feedback-task-packet-status-filter` | ahead of `main` by `1` | local-only branch with unique commit |
-| `C:/ATLAS/tmp/r21-seed-wave11` | `codex/cortex-receipt-interpretation-consumption-feedback-wave11-seed` | ahead of `main` by `1` | unique seed branch tip remains |
-| `C:/ATLAS-worktrees/pr1-stack-lock-refresh` | `codex/pr1-stack-lock-refresh` | ahead of `main` by `3` | preserved PR review branch still outside `main` |
+| `tmp/atlas-adopt-fawx-den-os-techstack` | `codex/adopt-fawx-den-os-techstack` | ahead of `main` by `1` | unique branch tip still outside `main` |
+| `tmp/feedback-task-packet-filter-fix` | `codex/fix-feedback-task-packet-status-filter` | ahead of `main` by `1` | local-only branch with unique commit |
+| `tmp/r21-seed-wave11` | `codex/cortex-receipt-interpretation-consumption-feedback-wave11-seed` | ahead of `main` by `1` | unique seed branch tip remains |
+| `<ATLAS_WORKTREES>/pr1-stack-lock-refresh` | `codex/pr1-stack-lock-refresh` | ahead of `main` by `3` | preserved PR review branch still outside `main` |
 
 ## Safety Checkpoint Worktrees
 
@@ -105,13 +105,13 @@ These detached rollback worktrees are not branch blockers, but they are explicit
 
 | Path | HEAD | Reason |
 | --- | --- | --- |
-| `C:/ATLAS/tmp/rollback-check-1716271` | `1716271` | detached rollback snapshot not reachable from `main` |
-| `C:/ATLAS/tmp/rollback-check-420c5c3` | `420c5c3` | detached recovery-era rollback snapshot not reachable from `main` |
+| `tmp/rollback-check-1716271` | `1716271` | detached rollback snapshot not reachable from `main` |
+| `tmp/rollback-check-420c5c3` | `420c5c3` | detached recovery-era rollback snapshot not reachable from `main` |
 
 ## Recommended Later Order
 
-1. Remove the clean `safe to remove later` worktrees under `C:/ATLAS/tmp`.
-2. Remove the clean external ATLAS worktree `C:/ATLAS-worktrees/fitness-dal-slice-2`.
+1. Remove the clean `safe to remove later` worktrees under `tmp/`.
+2. Remove the clean external ATLAS worktree `<ATLAS_WORKTREES>/fitness-dal-slice-2`.
 3. Delete the now-unbound merged branches from the same safe-remove set.
 4. Review the dirty or broken worktrees before any prune or branch disposal.
 5. Leave the unique-commit and rollback-check worktrees untouched until their preservation lanes close.
