@@ -4,7 +4,7 @@
   "title": "Playbook docs governance smoke",
   "summary": "Root-owned QA contract for Playbook managed-docs governance.",
   "repo_id": "playbook",
-  "repo_path": "repos/fawxzzy-playbook",
+  "repo_path": "repos/playbook",
   "adapter_id": "playbook.docs",
   "criticality": "medium",
   "tags": [
@@ -64,3 +64,4 @@
     ]
   }
 }
+

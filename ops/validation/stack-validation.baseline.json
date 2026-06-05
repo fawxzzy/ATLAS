@@ -321,7 +321,7 @@
     {
       "severity": "warning",
       "category": "atlas-root-path",
-      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_SURFACES.md",
+      "path": "repos/mazer/docs/research/MAZER_INSTALL_SURFACES.md",
       "message": "Absolute path leak detected in committed text.",
       "details": {
         "line_number": 24
@@ -330,7 +330,7 @@
     {
       "severity": "warning",
       "category": "atlas-root-path",
-      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_SURFACES.md",
+      "path": "repos/mazer/docs/research/MAZER_INSTALL_SURFACES.md",
       "message": "Absolute path leak detected in committed text.",
       "details": {
         "line_number": 24
@@ -339,7 +339,7 @@
     {
       "severity": "warning",
       "category": "atlas-root-path",
-      "path": "repos/fawxzzy-mazer/docs/research/MAZER_VARIETY_DIAGNOSIS.md",
+      "path": "repos/mazer/docs/research/MAZER_VARIETY_DIAGNOSIS.md",
       "message": "Absolute path leak detected in committed text.",
       "details": {
         "line_number": 24
@@ -348,7 +348,7 @@
     {
       "severity": "warning",
       "category": "atlas-root-path",
-      "path": "repos/fawxzzy-mazer/docs/research/MAZER_VARIETY_DIAGNOSIS.md",
+      "path": "repos/mazer/docs/research/MAZER_VARIETY_DIAGNOSIS.md",
       "message": "Absolute path leak detected in committed text.",
       "details": {
         "line_number": 24
@@ -708,7 +708,7 @@
     {
       "severity": "warning",
       "category": "atlas-root-path",
-      "path": "repos/fawxzzy-playbook/docs/repo-audit.md",
+      "path": "repos/playbook/docs/repo-audit.md",
       "message": "Absolute path leak detected in committed text.",
       "details": {
         "line_number": 7
@@ -717,7 +717,7 @@
     {
       "severity": "warning",
       "category": "atlas-root-path",
-      "path": "repos/fawxzzy-playbook/docs/repo-audit.md",
+      "path": "repos/playbook/docs/repo-audit.md",
       "message": "Absolute path leak detected in committed text.",
       "details": {
         "line_number": 7
@@ -789,7 +789,7 @@
     {
       "severity": "warning",
       "category": "atlas-root-path-alt",
-      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_DECISION_MATRIX.md",
+      "path": "repos/mazer/docs/research/MAZER_INSTALL_DECISION_MATRIX.md",
       "message": "Absolute path leak detected in committed text.",
       "details": {
         "line_number": 100
@@ -798,7 +798,7 @@
     {
       "severity": "warning",
       "category": "atlas-root-path-alt",
-      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_DECISION_MATRIX.md",
+      "path": "repos/mazer/docs/research/MAZER_INSTALL_DECISION_MATRIX.md",
       "message": "Absolute path leak detected in committed text.",
       "details": {
         "line_number": 100
@@ -807,7 +807,7 @@
     {
       "severity": "warning",
       "category": "atlas-root-path-alt",
-      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_DECISION_MATRIX.md",
+      "path": "repos/mazer/docs/research/MAZER_INSTALL_DECISION_MATRIX.md",
       "message": "Absolute path leak detected in committed text.",
       "details": {
         "line_number": 101
@@ -816,7 +816,7 @@
     {
       "severity": "warning",
       "category": "atlas-root-path-alt",
-      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_DECISION_MATRIX.md",
+      "path": "repos/mazer/docs/research/MAZER_INSTALL_DECISION_MATRIX.md",
       "message": "Absolute path leak detected in committed text.",
       "details": {
         "line_number": 101
@@ -825,7 +825,7 @@
     {
       "severity": "warning",
       "category": "atlas-root-path-alt",
-      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_DECISION_MATRIX.md",
+      "path": "repos/mazer/docs/research/MAZER_INSTALL_DECISION_MATRIX.md",
       "message": "Absolute path leak detected in committed text.",
       "details": {
         "line_number": 102
@@ -834,7 +834,7 @@
     {
       "severity": "warning",
       "category": "atlas-root-path-alt",
-      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_DECISION_MATRIX.md",
+      "path": "repos/mazer/docs/research/MAZER_INSTALL_DECISION_MATRIX.md",
       "message": "Absolute path leak detected in committed text.",
       "details": {
         "line_number": 102
@@ -843,7 +843,7 @@
     {
       "severity": "warning",
       "category": "atlas-root-path-alt",
-      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_DECISION_MATRIX.md",
+      "path": "repos/mazer/docs/research/MAZER_INSTALL_DECISION_MATRIX.md",
       "message": "Absolute path leak detected in committed text.",
       "details": {
         "line_number": 103
@@ -852,7 +852,7 @@
     {
       "severity": "warning",
       "category": "atlas-root-path-alt",
-      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_DECISION_MATRIX.md",
+      "path": "repos/mazer/docs/research/MAZER_INSTALL_DECISION_MATRIX.md",
       "message": "Absolute path leak detected in committed text.",
       "details": {
         "line_number": 103
@@ -861,7 +861,7 @@
     {
       "severity": "warning",
       "category": "atlas-root-path-alt",
-      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_DECISION_MATRIX.md",
+      "path": "repos/mazer/docs/research/MAZER_INSTALL_DECISION_MATRIX.md",
       "message": "Absolute path leak detected in committed text.",
       "details": {
         "line_number": 104
@@ -870,7 +870,7 @@
     {
       "severity": "warning",
       "category": "atlas-root-path-alt",
-      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_DECISION_MATRIX.md",
+      "path": "repos/mazer/docs/research/MAZER_INSTALL_DECISION_MATRIX.md",
       "message": "Absolute path leak detected in committed text.",
       "details": {
         "line_number": 104
@@ -879,7 +879,7 @@
     {
       "severity": "warning",
       "category": "atlas-root-path-alt",
-      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_DECISION_MATRIX.md",
+      "path": "repos/mazer/docs/research/MAZER_INSTALL_DECISION_MATRIX.md",
       "message": "Absolute path leak detected in committed text.",
       "details": {
         "line_number": 105
@@ -888,7 +888,7 @@
     {
       "severity": "warning",
       "category": "atlas-root-path-alt",
-      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_DECISION_MATRIX.md",
+      "path": "repos/mazer/docs/research/MAZER_INSTALL_DECISION_MATRIX.md",
       "message": "Absolute path leak detected in committed text.",
       "details": {
         "line_number": 105
@@ -897,7 +897,7 @@
     {
       "severity": "warning",
       "category": "atlas-root-path-alt",
-      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_SURFACES.md",
+      "path": "repos/mazer/docs/research/MAZER_INSTALL_SURFACES.md",
       "message": "Absolute path leak detected in committed text.",
       "details": {
         "line_number": 12
@@ -906,7 +906,7 @@
     {
       "severity": "warning",
       "category": "atlas-root-path-alt",
-      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_SURFACES.md",
+      "path": "repos/mazer/docs/research/MAZER_INSTALL_SURFACES.md",
       "message": "Absolute path leak detected in committed text.",
       "details": {
         "line_number": 12
@@ -915,7 +915,7 @@
     {
       "severity": "warning",
       "category": "atlas-root-path-alt",
-      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_SURFACES.md",
+      "path": "repos/mazer/docs/research/MAZER_INSTALL_SURFACES.md",
       "message": "Absolute path leak detected in committed text.",
       "details": {
         "line_number": 224
@@ -924,7 +924,7 @@
     {
       "severity": "warning",
       "category": "atlas-root-path-alt",
-      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_SURFACES.md",
+      "path": "repos/mazer/docs/research/MAZER_INSTALL_SURFACES.md",
       "message": "Absolute path leak detected in committed text.",
       "details": {
         "line_number": 224
@@ -933,7 +933,7 @@
     {
       "severity": "warning",
       "category": "atlas-root-path-alt",
-      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_SURFACES.md",
+      "path": "repos/mazer/docs/research/MAZER_INSTALL_SURFACES.md",
       "message": "Absolute path leak detected in committed text.",
       "details": {
         "line_number": 28
@@ -942,7 +942,7 @@
     {
       "severity": "warning",
       "category": "atlas-root-path-alt",
-      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_SURFACES.md",
+      "path": "repos/mazer/docs/research/MAZER_INSTALL_SURFACES.md",
       "message": "Absolute path leak detected in committed text.",
       "details": {
         "line_number": 28
@@ -951,7 +951,7 @@
     {
       "severity": "warning",
       "category": "atlas-root-path-alt",
-      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_SURFACES.md",
+      "path": "repos/mazer/docs/research/MAZER_INSTALL_SURFACES.md",
       "message": "Absolute path leak detected in committed text.",
       "details": {
         "line_number": 29
@@ -960,7 +960,7 @@
     {
       "severity": "warning",
       "category": "atlas-root-path-alt",
-      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_SURFACES.md",
+      "path": "repos/mazer/docs/research/MAZER_INSTALL_SURFACES.md",
       "message": "Absolute path leak detected in committed text.",
       "details": {
         "line_number": 29
@@ -969,7 +969,7 @@
     {
       "severity": "warning",
       "category": "atlas-root-path-alt",
-      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_SURFACES.md",
+      "path": "repos/mazer/docs/research/MAZER_INSTALL_SURFACES.md",
       "message": "Absolute path leak detected in committed text.",
       "details": {
         "line_number": 30
@@ -978,7 +978,7 @@
     {
       "severity": "warning",
       "category": "atlas-root-path-alt",
-      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_SURFACES.md",
+      "path": "repos/mazer/docs/research/MAZER_INSTALL_SURFACES.md",
       "message": "Absolute path leak detected in committed text.",
       "details": {
         "line_number": 30
@@ -987,7 +987,7 @@
     {
       "severity": "warning",
       "category": "atlas-root-path-alt",
-      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_SURFACES.md",
+      "path": "repos/mazer/docs/research/MAZER_INSTALL_SURFACES.md",
       "message": "Absolute path leak detected in committed text.",
       "details": {
         "line_number": 34
@@ -996,7 +996,7 @@
     {
       "severity": "warning",
       "category": "atlas-root-path-alt",
-      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_SURFACES.md",
+      "path": "repos/mazer/docs/research/MAZER_INSTALL_SURFACES.md",
       "message": "Absolute path leak detected in committed text.",
       "details": {
         "line_number": 34
@@ -1005,7 +1005,7 @@
     {
       "severity": "warning",
       "category": "atlas-root-path-alt",
-      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_SURFACES.md",
+      "path": "repos/mazer/docs/research/MAZER_INSTALL_SURFACES.md",
       "message": "Absolute path leak detected in committed text.",
       "details": {
         "line_number": 35
@@ -1014,7 +1014,7 @@
     {
       "severity": "warning",
       "category": "atlas-root-path-alt",
-      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_SURFACES.md",
+      "path": "repos/mazer/docs/research/MAZER_INSTALL_SURFACES.md",
       "message": "Absolute path leak detected in committed text.",
       "details": {
         "line_number": 35
@@ -1023,7 +1023,7 @@
     {
       "severity": "warning",
       "category": "atlas-root-path-alt",
-      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_SURFACES.md",
+      "path": "repos/mazer/docs/research/MAZER_INSTALL_SURFACES.md",
       "message": "Absolute path leak detected in committed text.",
       "details": {
         "line_number": 36
@@ -1032,7 +1032,7 @@
     {
       "severity": "warning",
       "category": "atlas-root-path-alt",
-      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_SURFACES.md",
+      "path": "repos/mazer/docs/research/MAZER_INSTALL_SURFACES.md",
       "message": "Absolute path leak detected in committed text.",
       "details": {
         "line_number": 36
@@ -1041,7 +1041,7 @@
     {
       "severity": "warning",
       "category": "atlas-root-path-alt",
-      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_SURFACES.md",
+      "path": "repos/mazer/docs/research/MAZER_INSTALL_SURFACES.md",
       "message": "Absolute path leak detected in committed text.",
       "details": {
         "line_number": 37
@@ -1050,7 +1050,7 @@
     {
       "severity": "warning",
       "category": "atlas-root-path-alt",
-      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_SURFACES.md",
+      "path": "repos/mazer/docs/research/MAZER_INSTALL_SURFACES.md",
       "message": "Absolute path leak detected in committed text.",
       "details": {
         "line_number": 37
@@ -1059,7 +1059,7 @@
     {
       "severity": "warning",
       "category": "atlas-root-path-alt",
-      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_SURFACES.md",
+      "path": "repos/mazer/docs/research/MAZER_INSTALL_SURFACES.md",
       "message": "Absolute path leak detected in committed text.",
       "details": {
         "line_number": 41
@@ -1068,7 +1068,7 @@
     {
       "severity": "warning",
       "category": "atlas-root-path-alt",
-      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_SURFACES.md",
+      "path": "repos/mazer/docs/research/MAZER_INSTALL_SURFACES.md",
       "message": "Absolute path leak detected in committed text.",
       "details": {
         "line_number": 41
@@ -1077,7 +1077,7 @@
     {
       "severity": "warning",
       "category": "atlas-root-path-alt",
-      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_SURFACES.md",
+      "path": "repos/mazer/docs/research/MAZER_INSTALL_SURFACES.md",
       "message": "Absolute path leak detected in committed text.",
       "details": {
         "line_number": 42
@@ -1086,7 +1086,7 @@
     {
       "severity": "warning",
       "category": "atlas-root-path-alt",
-      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_SURFACES.md",
+      "path": "repos/mazer/docs/research/MAZER_INSTALL_SURFACES.md",
       "message": "Absolute path leak detected in committed text.",
       "details": {
         "line_number": 42
@@ -1095,7 +1095,7 @@
     {
       "severity": "warning",
       "category": "atlas-root-path-alt",
-      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_SURFACES.md",
+      "path": "repos/mazer/docs/research/MAZER_INSTALL_SURFACES.md",
       "message": "Absolute path leak detected in committed text.",
       "details": {
         "line_number": 43
@@ -1104,7 +1104,7 @@
     {
       "severity": "warning",
       "category": "atlas-root-path-alt",
-      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_SURFACES.md",
+      "path": "repos/mazer/docs/research/MAZER_INSTALL_SURFACES.md",
       "message": "Absolute path leak detected in committed text.",
       "details": {
         "line_number": 43
@@ -1113,7 +1113,7 @@
     {
       "severity": "warning",
       "category": "atlas-root-path-alt",
-      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_DECISION_MATRIX.md",
+      "path": "repos/mazer/docs/research/MAZER_INSTALL_DECISION_MATRIX.md",
       "message": "Absolute path leak detected in committed text.",
       "details": {
         "line_number": 98
@@ -1122,7 +1122,7 @@
     {
       "severity": "warning",
       "category": "atlas-root-path-alt",
-      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_DECISION_MATRIX.md",
+      "path": "repos/mazer/docs/research/MAZER_INSTALL_DECISION_MATRIX.md",
       "message": "Absolute path leak detected in committed text.",
       "details": {
         "line_number": 98
@@ -1131,7 +1131,7 @@
     {
       "severity": "warning",
       "category": "atlas-root-path-alt",
-      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_DECISION_MATRIX.md",
+      "path": "repos/mazer/docs/research/MAZER_INSTALL_DECISION_MATRIX.md",
       "message": "Absolute path leak detected in committed text.",
       "details": {
         "line_number": 99
@@ -1140,7 +1140,7 @@
     {
       "severity": "warning",
       "category": "atlas-root-path-alt",
-      "path": "repos/fawxzzy-mazer/docs/research/MAZER_INSTALL_DECISION_MATRIX.md",
+      "path": "repos/mazer/docs/research/MAZER_INSTALL_DECISION_MATRIX.md",
       "message": "Absolute path leak detected in committed text.",
       "details": {
         "line_number": 99
@@ -1191,7 +1191,7 @@
     {
       "severity": "error",
       "category": "missing-codex-config",
-      "path": "repos/fawxzzy-mazer",
+      "path": "repos/mazer",
       "message": "Expected .codex/config.toml is missing for an active repo."
     },
     {
@@ -1209,55 +1209,55 @@
     {
       "severity": "warning",
       "category": "mutable-artifact-in-repo-root",
-      "path": "repos/fawxzzy-mazer/.codex-preview.err.log",
+      "path": "repos/mazer/.codex-preview.err.log",
       "message": "Mutable log, temp, or database artifact detected in repo root."
     },
     {
       "severity": "warning",
       "category": "mutable-artifact-in-repo-root",
-      "path": "repos/fawxzzy-mazer/.codex-preview.err.log",
+      "path": "repos/mazer/.codex-preview.err.log",
       "message": "Mutable log, temp, or database artifact detected in repo root."
     },
     {
       "severity": "warning",
       "category": "mutable-artifact-in-repo-root",
-      "path": "repos/fawxzzy-mazer/.codex-preview.log",
+      "path": "repos/mazer/.codex-preview.log",
       "message": "Mutable log, temp, or database artifact detected in repo root."
     },
     {
       "severity": "warning",
       "category": "mutable-artifact-in-repo-root",
-      "path": "repos/fawxzzy-mazer/.codex-vite-lane1.err.log",
+      "path": "repos/mazer/.codex-vite-lane1.err.log",
       "message": "Mutable log, temp, or database artifact detected in repo root."
     },
     {
       "severity": "warning",
       "category": "mutable-artifact-in-repo-root",
-      "path": "repos/fawxzzy-mazer/.codex-vite-lane1.err.log",
+      "path": "repos/mazer/.codex-vite-lane1.err.log",
       "message": "Mutable log, temp, or database artifact detected in repo root."
     },
     {
       "severity": "warning",
       "category": "mutable-artifact-in-repo-root",
-      "path": "repos/fawxzzy-mazer/.codex-vite-lane1.log",
+      "path": "repos/mazer/.codex-vite-lane1.log",
       "message": "Mutable log, temp, or database artifact detected in repo root."
     },
     {
       "severity": "warning",
       "category": "mutable-artifact-in-repo-root",
-      "path": "repos/fawxzzy-mazer/.codex-vite.err.log",
+      "path": "repos/mazer/.codex-vite.err.log",
       "message": "Mutable log, temp, or database artifact detected in repo root."
     },
     {
       "severity": "warning",
       "category": "mutable-artifact-in-repo-root",
-      "path": "repos/fawxzzy-mazer/.codex-vite.err.log",
+      "path": "repos/mazer/.codex-vite.err.log",
       "message": "Mutable log, temp, or database artifact detected in repo root."
     },
     {
       "severity": "warning",
       "category": "mutable-artifact-in-repo-root",
-      "path": "repos/fawxzzy-mazer/.codex-vite.log",
+      "path": "repos/mazer/.codex-vite.log",
       "message": "Mutable log, temp, or database artifact detected in repo root."
     },
     {
@@ -1329,37 +1329,37 @@
     {
       "severity": "warning",
       "category": "mutable-state-in-repo",
-      "path": "repos/fawxzzy-mazer/.vercel",
+      "path": "repos/mazer/.vercel",
       "message": "Mutable or generated state is present inside a repo path."
     },
     {
       "severity": "warning",
       "category": "mutable-state-in-repo",
-      "path": "repos/fawxzzy-mazer/dist",
+      "path": "repos/mazer/dist",
       "message": "Mutable or generated state is present inside a repo path."
     },
     {
       "severity": "warning",
       "category": "mutable-state-in-repo",
-      "path": "repos/fawxzzy-mazer/node_modules",
+      "path": "repos/mazer/node_modules",
       "message": "Mutable or generated state is present inside a repo path."
     },
     {
       "severity": "warning",
       "category": "mutable-state-in-repo",
-      "path": "repos/fawxzzy-playbook/.lifeline",
+      "path": "repos/playbook/.lifeline",
       "message": "Mutable or generated state is present inside a repo path."
     },
     {
       "severity": "warning",
       "category": "mutable-state-in-repo",
-      "path": "repos/fawxzzy-playbook/.playbook",
+      "path": "repos/playbook/.playbook",
       "message": "Mutable or generated state is present inside a repo path."
     },
     {
       "severity": "warning",
       "category": "mutable-state-in-repo",
-      "path": "repos/fawxzzy-playbook/node_modules",
+      "path": "repos/playbook/node_modules",
       "message": "Mutable or generated state is present inside a repo path."
     },
     {
@@ -1395,7 +1395,7 @@
     {
       "severity": "warning",
       "category": "repo-local-secret-material",
-      "path": "repos/fawxzzy-mazer/.env.local",
+      "path": "repos/mazer/.env.local",
       "message": "Repo-local environment file detected; secrets should not be part of default exports."
     },
     {
@@ -1887,7 +1887,7 @@
     {
       "severity": "critical",
       "category": "unix-home-path",
-      "path": "repos/fawxzzy-playbook/packages/cli/src/lib/repoRoot.test.ts",
+      "path": "repos/playbook/packages/cli/src/lib/repoRoot.test.ts",
       "message": "Absolute path leak detected in committed text.",
       "details": {
         "line_number": 53
@@ -1896,7 +1896,7 @@
     {
       "severity": "critical",
       "category": "unix-home-path",
-      "path": "repos/fawxzzy-playbook/packages/cli/src/lib/repoRoot.test.ts",
+      "path": "repos/playbook/packages/cli/src/lib/repoRoot.test.ts",
       "message": "Absolute path leak detected in committed text.",
       "details": {
         "line_number": 53
@@ -4842,7 +4842,7 @@
     {
       "severity": "critical",
       "category": "windows-user-path",
-      "path": "repos/fawxzzy-playbook/docs/CHANGELOG.md",
+      "path": "repos/playbook/docs/CHANGELOG.md",
       "message": "Absolute path leak detected in committed text.",
       "details": {
         "line_number": 913
@@ -4851,7 +4851,7 @@
     {
       "severity": "critical",
       "category": "windows-user-path",
-      "path": "repos/fawxzzy-playbook/docs/CHANGELOG.md",
+      "path": "repos/playbook/docs/CHANGELOG.md",
       "message": "Absolute path leak detected in committed text.",
       "details": {
         "line_number": 913
@@ -5309,3 +5309,4 @@
     }
   ]
 }
+

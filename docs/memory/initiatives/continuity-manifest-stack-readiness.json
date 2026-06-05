@@ -1,0 +1,289 @@
+{
+  "contract_version": "atlas.initiative.v1",
+  "id": "continuity-manifest-stack-readiness",
+  "title": "Continuity Manifest Stack Readiness",
+  "summary": "Active ATLAS-root retrieval map for the _stack Readiness lane.",
+  "status": "active",
+  "owner": "stack-root",
+  "created_at": "2026-05-29T00:00:00Z",
+  "updated_at": "2026-06-04T15:10:00-04:00",
+  "related_plan_refs": [],
+  "related_decision_refs": [],
+  "related_hypothesis_refs": [],
+  "related_session_refs": [],
+  "related_attention_refs": [],
+  "proposed_next_session_refs": [],
+  "evidence_refs": [
+    "docs/atlas-book/02-lanes-and-markers.md",
+    "docs/atlas-book/05-receipt-index.md",
+    "docs/atlas-book/09-automation-and-command-candidates.md",
+    "docs/atlas-book/11-system-map-graph.md",
+    "docs/atlas-book/12-restart-and-handoff-guide.md",
+    "docs/atlas-book/13-vision-and-endgames.md",
+    "docs/memory/README.md",
+    "docs/ops/STACK-READINESS-DECISIVE-RECEIPT-AND-BLOCKED-WORK-LADDER-SHAPING-PASS-1-2026-05-29.md",
+    "docs/ops/STACK-READINESS-BLOCKER-FAMILY-COMPRESSION-PASS-2-2026-05-29.md",
+    "docs/ops/STACK-READINESS-COMMAND-CANDIDATE-AND-HELPER-ADMISSION-COMPRESSION-FAMILY-SHAPING-PASS-3-2026-05-29.md",
+    "docs/ops/STACK-READINESS-OPERATOR-ENTRYPOINT-AND-OWNER-ROUTING-COMPRESSION-FAMILY-SHAPING-PASS-4-2026-05-29.md",
+    "docs/ops/STACK-READINESS-DEPLOY-AUTHORITY-AND-RELEASE-HANDOFF-COMPRESSION-FAMILY-SHAPING-PASS-5-2026-05-29.md",
+    "docs/ops/STACK-READINESS-HEALTH-SIGNAL-AND-LOCAL-TRUTH-GOVERNANCE-FAMILY-SHAPING-PASS-6-2026-05-29.md",
+    "docs/ops/STACK-READINESS-CONTINUITY-MANIFEST-REFRESH-AND-RATCHET-DECISION-PASS-7-2026-05-29.md",
+    "docs/ops/_STACK-READINESS-MARKER-PRESSURE-REOPEN-AND-REENTRY-PASS-8-2026-05-29.md",
+    "docs/ops/_STACK-READINESS-STACK-VERCEL-HEALTH-COMMAND-DESIGN-PASS-9-2026-05-29.md",
+    "docs/ops/_STACK-READINESS-STACK-VERCEL-HEALTH-EVIDENCE-ADMISSION-AND-FRESHNESS-PASS-10-2026-05-29.md",
+    "docs/ops/_STACK-READINESS-STACK-VERCEL-HEALTH-REPORT-CONTRACT-AND-CONTRADICTION-ROUTING-PASS-11-2026-05-29.md",
+    "docs/ops/_STACK-READINESS-STACK-VERCEL-HEALTH-IMPLEMENTATION-ADMISSION-AND-NO-EXECUTION-GUARD-PASS-12-2026-05-29.md",
+    "docs/ops/_STACK-READINESS-STACK-VERCEL-HEALTH-FIXTURE-PROOF-AND-STATIC-INPUT-BOUNDARY-PASS-13-2026-05-29.md",
+    "docs/ops/_STACK-READINESS-STACK-VERCEL-HEALTH-FIRST-IMPLEMENTATION-SLICE-AND-PROOF-MATRIX-ADMISSION-PASS-14-2026-05-29.md",
+    "docs/ops/_STACK-READINESS-STACK-VERCEL-HEALTH-FIRST-IMPLEMENTATION-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-15-2026-05-29.md",
+    "docs/ops/_STACK-READINESS-STACK-VERCEL-HEALTH-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-16-2026-05-29.md",
+    "docs/ops/WAVE-1-ROOT-RECONCILIATION-AFTER-WORKER-A-AND-WORKER-B-2026-05-30.md",
+    "docs/ops/WAVE-2-ROOT-RECONCILIATION-AFTER-WORKER-A-AND-WORKER-B-2026-05-31.md",
+    "docs/ops/_STACK-READINESS-STACK-VALIDATE-VALIDATION-SUMMARY-COMMAND-DESIGN-PASS-17-2026-06-03.md",
+    "docs/ops/_STACK-READINESS-STACK-VALIDATE-VALIDATION-SUMMARY-EVIDENCE-ADMISSION-AND-DELTA-DISCIPLINE-PASS-18-2026-06-03.md",
+    "docs/ops/_STACK-READINESS-STACK-VALIDATE-VALIDATION-SUMMARY-REPORT-CONTRACT-AND-CONTRADICTION-ROUTING-PASS-19-2026-06-03.md",
+    "docs/ops/_STACK-READINESS-STACK-VALIDATE-VALIDATION-SUMMARY-IMPLEMENTATION-ADMISSION-AND-NO-EXECUTION-GUARD-PASS-20-2026-06-03.md",
+    "docs/ops/_STACK-READINESS-STACK-VALIDATE-VALIDATION-SUMMARY-FIXTURE-PROOF-AND-STATIC-INPUT-BOUNDARY-PASS-21-2026-06-03.md",
+    "docs/ops/_STACK-READINESS-STACK-VALIDATE-VALIDATION-SUMMARY-FIRST-IMPLEMENTATION-SLICE-AND-PROOF-MATRIX-ADMISSION-PASS-22-2026-06-03.md",
+    "docs/ops/_STACK-READINESS-STACK-VALIDATE-VALIDATION-SUMMARY-FIRST-IMPLEMENTATION-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-23-2026-06-03.md",
+    "docs/ops/_STACK-READINESS-STACK-VALIDATE-VALIDATION-SUMMARY-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-24-2026-06-03.md",
+    "docs/ops/_STACK-READINESS-STACK-MARKER-CHECKPOINT-COMMAND-DESIGN-PASS-25-2026-06-04.md",
+    "docs/ops/_STACK-READINESS-STACK-MARKER-CHECKPOINT-EVIDENCE-ADMISSION-AND-RESTART-SURFACE-DISCIPLINE-PASS-26-2026-06-04.md",
+    "docs/ops/_STACK-READINESS-STACK-MARKER-CHECKPOINT-REPORT-CONTRACT-AND-CONTRADICTION-ROUTING-PASS-27-2026-06-04.md",
+    "docs/ops/_STACK-READINESS-STACK-MARKER-CHECKPOINT-IMPLEMENTATION-ADMISSION-AND-NO-EXECUTION-GUARD-PASS-28-2026-06-04.md",
+    "docs/ops/_STACK-READINESS-STACK-MARKER-CHECKPOINT-FIXTURE-PROOF-AND-STATIC-INPUT-BOUNDARY-PASS-29-2026-06-04.md",
+    "docs/ops/_STACK-READINESS-STACK-MARKER-CHECKPOINT-FIRST-IMPLEMENTATION-SLICE-AND-PROOF-MATRIX-ADMISSION-PASS-30-2026-06-04.md",
+    "docs/ops/_STACK-READINESS-STACK-MARKER-CHECKPOINT-FIRST-IMPLEMENTATION-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-31-2026-06-04.md",
+    "docs/ops/_STACK-READINESS-STACK-MARKER-CHECKPOINT-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-32-2026-06-04.md",
+    "docs/ops/_STACK-READINESS-STACK-MARKER-CHECKPOINT-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-04.md",
+    "docs/ops/UNIFIED-OPERATOR-ENTRYPOINT-COMMAND-LADDER-2026-05-24.md",
+    "docs/ops/UNIFIED-RELEASE-DEPLOY-UPDATE-HANDOFF-2026-05-24.md",
+    "docs/ops/UNIFIED-WORKFLOW-CONVERGENCE-INVENTORY-2026-05-24.md",
+    "docs/ops/VERCEL-HELPER-SURFACE-DELETION-DECISION-2026-05-25.md"
+  ],
+  "supersedes": [],
+  "superseded_by": [],
+  "metadata": {
+    "artifact_kind": "continuity_manifest",
+    "lane_id": "stack-readiness",
+    "scope_class": "atlas-root-governance",
+    "current_checkpoint_receipt": "docs/ops/_STACK-READINESS-STACK-RECEIPT-PACKAGE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-04.md",
+    "checkpoint_commit": "root-uncommitted",
+    "checkpoint_summary": "The lane now sits at 97 percent with explicit deploy authority, one compact decisive receipt spine, one fully shaped blocker-family chain, one manifest-backed continuity map, one valid marker-pressure reopen decision, one compact stack-vercel-health contract chain through proof-hardening closeout, one compact stack-validate validation-summary chain through first implementation landing plus proof-and-receipt closeout, one compact stack marker checkpoint chain through first implementation landing plus proof-and-receipt closeout, and one compact stack receipt package chain through first implementation landing plus proof-and-receipt closeout, while current validator pressure is explicitly classified as expected in-flight _stack dirty-state drift at warning baseline 498 and no immediate new _stack packet remains open by default for the first receipt-package slice.",
+    "governing_receipts": [
+      "docs/ops/STACK-READINESS-DECISIVE-RECEIPT-AND-BLOCKED-WORK-LADDER-SHAPING-PASS-1-2026-05-29.md",
+      "docs/ops/STACK-READINESS-BLOCKER-FAMILY-COMPRESSION-PASS-2-2026-05-29.md",
+      "docs/ops/STACK-READINESS-COMMAND-CANDIDATE-AND-HELPER-ADMISSION-COMPRESSION-FAMILY-SHAPING-PASS-3-2026-05-29.md",
+      "docs/ops/STACK-READINESS-OPERATOR-ENTRYPOINT-AND-OWNER-ROUTING-COMPRESSION-FAMILY-SHAPING-PASS-4-2026-05-29.md",
+      "docs/ops/STACK-READINESS-DEPLOY-AUTHORITY-AND-RELEASE-HANDOFF-COMPRESSION-FAMILY-SHAPING-PASS-5-2026-05-29.md",
+      "docs/ops/STACK-READINESS-HEALTH-SIGNAL-AND-LOCAL-TRUTH-GOVERNANCE-FAMILY-SHAPING-PASS-6-2026-05-29.md",
+      "docs/ops/STACK-READINESS-CONTINUITY-MANIFEST-REFRESH-AND-RATCHET-DECISION-PASS-7-2026-05-29.md",
+      "docs/ops/_STACK-READINESS-MARKER-PRESSURE-REOPEN-AND-REENTRY-PASS-8-2026-05-29.md",
+      "docs/ops/_STACK-READINESS-STACK-VERCEL-HEALTH-COMMAND-DESIGN-PASS-9-2026-05-29.md",
+      "docs/ops/_STACK-READINESS-STACK-VERCEL-HEALTH-EVIDENCE-ADMISSION-AND-FRESHNESS-PASS-10-2026-05-29.md",
+      "docs/ops/_STACK-READINESS-STACK-VERCEL-HEALTH-REPORT-CONTRACT-AND-CONTRADICTION-ROUTING-PASS-11-2026-05-29.md",
+      "docs/ops/_STACK-READINESS-STACK-VERCEL-HEALTH-IMPLEMENTATION-ADMISSION-AND-NO-EXECUTION-GUARD-PASS-12-2026-05-29.md",
+      "docs/ops/_STACK-READINESS-STACK-VERCEL-HEALTH-FIXTURE-PROOF-AND-STATIC-INPUT-BOUNDARY-PASS-13-2026-05-29.md",
+      "docs/ops/_STACK-READINESS-STACK-VERCEL-HEALTH-FIRST-IMPLEMENTATION-SLICE-AND-PROOF-MATRIX-ADMISSION-PASS-14-2026-05-29.md",
+      "docs/ops/_STACK-READINESS-STACK-VERCEL-HEALTH-FIRST-IMPLEMENTATION-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-15-2026-05-29.md",
+      "docs/ops/_STACK-READINESS-STACK-VERCEL-HEALTH-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-16-2026-05-29.md",
+      "docs/ops/WAVE-1-ROOT-RECONCILIATION-AFTER-WORKER-A-AND-WORKER-B-2026-05-30.md",
+      "docs/ops/WAVE-2-ROOT-RECONCILIATION-AFTER-WORKER-A-AND-WORKER-B-2026-05-31.md",
+      "docs/ops/_STACK-READINESS-STACK-VALIDATE-VALIDATION-SUMMARY-COMMAND-DESIGN-PASS-17-2026-06-03.md",
+      "docs/ops/_STACK-READINESS-STACK-VALIDATE-VALIDATION-SUMMARY-EVIDENCE-ADMISSION-AND-DELTA-DISCIPLINE-PASS-18-2026-06-03.md",
+      "docs/ops/_STACK-READINESS-STACK-VALIDATE-VALIDATION-SUMMARY-REPORT-CONTRACT-AND-CONTRADICTION-ROUTING-PASS-19-2026-06-03.md",
+      "docs/ops/_STACK-READINESS-STACK-VALIDATE-VALIDATION-SUMMARY-IMPLEMENTATION-ADMISSION-AND-NO-EXECUTION-GUARD-PASS-20-2026-06-03.md",
+      "docs/ops/_STACK-READINESS-STACK-VALIDATE-VALIDATION-SUMMARY-FIXTURE-PROOF-AND-STATIC-INPUT-BOUNDARY-PASS-21-2026-06-03.md",
+      "docs/ops/_STACK-READINESS-STACK-VALIDATE-VALIDATION-SUMMARY-FIRST-IMPLEMENTATION-SLICE-AND-PROOF-MATRIX-ADMISSION-PASS-22-2026-06-03.md",
+      "docs/ops/_STACK-READINESS-STACK-VALIDATE-VALIDATION-SUMMARY-FIRST-IMPLEMENTATION-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-23-2026-06-03.md",
+      "docs/ops/_STACK-READINESS-STACK-VALIDATE-VALIDATION-SUMMARY-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-24-2026-06-03.md",
+      "docs/ops/_STACK-READINESS-STACK-MARKER-CHECKPOINT-COMMAND-DESIGN-PASS-25-2026-06-04.md",
+      "docs/ops/_STACK-READINESS-STACK-MARKER-CHECKPOINT-EVIDENCE-ADMISSION-AND-RESTART-SURFACE-DISCIPLINE-PASS-26-2026-06-04.md",
+      "docs/ops/_STACK-READINESS-STACK-MARKER-CHECKPOINT-REPORT-CONTRACT-AND-CONTRADICTION-ROUTING-PASS-27-2026-06-04.md",
+      "docs/ops/_STACK-READINESS-STACK-MARKER-CHECKPOINT-IMPLEMENTATION-ADMISSION-AND-NO-EXECUTION-GUARD-PASS-28-2026-06-04.md",
+      "docs/ops/_STACK-READINESS-STACK-MARKER-CHECKPOINT-FIXTURE-PROOF-AND-STATIC-INPUT-BOUNDARY-PASS-29-2026-06-04.md",
+      "docs/ops/_STACK-READINESS-STACK-MARKER-CHECKPOINT-FIRST-IMPLEMENTATION-SLICE-AND-PROOF-MATRIX-ADMISSION-PASS-30-2026-06-04.md",
+      "docs/ops/_STACK-READINESS-STACK-MARKER-CHECKPOINT-FIRST-IMPLEMENTATION-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-31-2026-06-04.md",
+      "docs/ops/_STACK-READINESS-STACK-MARKER-CHECKPOINT-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-32-2026-06-04.md",
+      "docs/ops/_STACK-READINESS-STACK-MARKER-CHECKPOINT-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-04.md",
+      "docs/ops/_STACK-READINESS-STACK-VALIDATE-VALIDATION-SUMMARY-FIRST-IMPLEMENTATION-WORKER-PACKET-1-RECONCILIATION-2026-06-03.md",
+      "docs/ops/_STACK-READINESS-STACK-VALIDATE-VALIDATION-SUMMARY-FIRST-IMPLEMENTATION-WORKER-PROOF-AND-RECEIPT-PACKET-2-RECONCILIATION-2026-06-03.md"
+    ],
+    "owner_truth_surfaces": [
+      {
+        "path": "docs/ops/_STACK-READINESS-STACK-MARKER-CHECKPOINT-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-04.md",
+        "role": "current marker-checkpoint first-slice cluster closeout and post-cluster routing source"
+      },
+      {
+        "path": "repos/_stack/receipts/stack-marker-checkpoint-first-implementation-worker-proof-and-receipt-packet-2-2026-06-04.md",
+        "role": "current marker-checkpoint first-slice proof-hardening execution packet source"
+      },
+      {
+        "path": "repos/_stack/receipts/stack-marker-checkpoint-first-implementation-worker-packet-1-2026-06-04.md",
+        "role": "current marker-checkpoint first implementation execution packet source"
+      },
+      {
+        "path": "docs/ops/_STACK-READINESS-STACK-MARKER-CHECKPOINT-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-32-2026-06-04.md",
+        "role": "current marker-checkpoint implementation-readiness closeout and worker-routing source"
+      },
+      {
+        "path": "docs/ops/_STACK-READINESS-STACK-MARKER-CHECKPOINT-FIRST-IMPLEMENTATION-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-31-2026-06-04.md",
+        "role": "current marker-checkpoint worker handoff and prompt-pack contract source"
+      },
+      {
+        "path": "docs/ops/_STACK-READINESS-STACK-MARKER-CHECKPOINT-FIRST-IMPLEMENTATION-SLICE-AND-PROOF-MATRIX-ADMISSION-PASS-30-2026-06-04.md",
+        "role": "current marker-checkpoint first implementation slice and proof-matrix source"
+      },
+      {
+        "path": "docs/ops/_STACK-READINESS-STACK-MARKER-CHECKPOINT-FIXTURE-PROOF-AND-STATIC-INPUT-BOUNDARY-PASS-29-2026-06-04.md",
+        "role": "current marker-checkpoint local-proof boundary and truth-limit source"
+      },
+      {
+        "path": "docs/ops/_STACK-READINESS-STACK-MARKER-CHECKPOINT-IMPLEMENTATION-ADMISSION-AND-NO-EXECUTION-GUARD-PASS-28-2026-06-04.md",
+        "role": "current marker-checkpoint implementation-boundary and no-execution-guard truth"
+      },
+      {
+        "path": "docs/ops/_STACK-READINESS-STACK-MARKER-CHECKPOINT-REPORT-CONTRACT-AND-CONTRADICTION-ROUTING-PASS-27-2026-06-04.md",
+        "role": "marker-checkpoint report-shape and contradiction-routing truth"
+      },
+      {
+        "path": "docs/ops/_STACK-READINESS-STACK-MARKER-CHECKPOINT-EVIDENCE-ADMISSION-AND-RESTART-SURFACE-DISCIPLINE-PASS-26-2026-06-04.md",
+        "role": "marker-checkpoint evidence-hierarchy and restart-surface discipline truth"
+      },
+      {
+        "path": "docs/ops/_STACK-READINESS-STACK-MARKER-CHECKPOINT-COMMAND-DESIGN-PASS-25-2026-06-04.md",
+        "role": "marker-checkpoint command-design truth"
+      },
+      {
+        "path": "docs/ops/_STACK-READINESS-STACK-VALIDATE-VALIDATION-SUMMARY-FIRST-IMPLEMENTATION-WORKER-PROOF-AND-RECEIPT-PACKET-2-RECONCILIATION-2026-06-03.md",
+        "role": "current validation-summary proof-and-receipt closeout and post-cluster routing source"
+      },
+      {
+        "path": "repos/_stack/receipts/stack-validate-validation-summary-first-implementation-worker-proof-and-receipt-packet-2-2026-06-03.md",
+        "role": "current validation-summary first-slice proof-hardening execution packet source"
+      },
+      {
+        "path": "docs/ops/_STACK-READINESS-STACK-VALIDATE-VALIDATION-SUMMARY-FIRST-IMPLEMENTATION-WORKER-PACKET-1-RECONCILIATION-2026-06-03.md",
+        "role": "current validation-summary first implementation landing and drift-classification source"
+      },
+      {
+        "path": "repos/_stack/receipts/stack-validate-validation-summary-first-implementation-worker-packet-1-2026-06-03.md",
+        "role": "current validation-summary first implementation execution packet source"
+      },
+      {
+        "path": "docs/ops/_STACK-READINESS-STACK-VALIDATE-VALIDATION-SUMMARY-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-24-2026-06-03.md",
+        "role": "current validation-summary implementation-readiness closeout and worker-routing source"
+      },
+      {
+        "path": "docs/ops/_STACK-READINESS-STACK-VALIDATE-VALIDATION-SUMMARY-FIRST-IMPLEMENTATION-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-23-2026-06-03.md",
+        "role": "current validation-summary worker handoff and prompt-pack contract source"
+      },
+      {
+        "path": "docs/ops/_STACK-READINESS-STACK-VALIDATE-VALIDATION-SUMMARY-FIRST-IMPLEMENTATION-SLICE-AND-PROOF-MATRIX-ADMISSION-PASS-22-2026-06-03.md",
+        "role": "current validation-summary first implementation slice and proof-matrix source"
+      },
+      {
+        "path": "docs/ops/_STACK-READINESS-STACK-VALIDATE-VALIDATION-SUMMARY-FIXTURE-PROOF-AND-STATIC-INPUT-BOUNDARY-PASS-21-2026-06-03.md",
+        "role": "current validation-summary local-proof boundary and truth-limit source"
+      },
+      {
+        "path": "docs/ops/_STACK-READINESS-STACK-VALIDATE-VALIDATION-SUMMARY-IMPLEMENTATION-ADMISSION-AND-NO-EXECUTION-GUARD-PASS-20-2026-06-03.md",
+        "role": "current validation-summary implementation-boundary and no-execution-guard truth"
+      },
+      {
+        "path": "docs/ops/_STACK-READINESS-STACK-VALIDATE-VALIDATION-SUMMARY-REPORT-CONTRACT-AND-CONTRADICTION-ROUTING-PASS-19-2026-06-03.md",
+        "role": "validation-summary report-shape and contradiction-routing truth"
+      },
+      {
+        "path": "docs/ops/WAVE-2-ROOT-RECONCILIATION-AFTER-WORKER-A-AND-WORKER-B-2026-05-31.md",
+        "role": "current exact restart surface after implementation and proof-hardening reconciliation"
+      },
+      {
+        "path": "docs/ops/WAVE-1-ROOT-RECONCILIATION-AFTER-WORKER-A-AND-WORKER-B-2026-05-30.md",
+        "role": "marker-ratchet and first implementation worker reconciliation truth"
+      },
+      {
+        "path": "docs/ops/_STACK-READINESS-STACK-VERCEL-HEALTH-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-16-2026-05-29.md",
+        "role": "current stack-vercel-health design and worker-routing boundary"
+      },
+      {
+        "path": "docs/ops/UNIFIED-OPERATOR-ENTRYPOINT-COMMAND-LADDER-2026-05-24.md",
+        "role": "operator-entrypoint and command-boundary source truth"
+      },
+      {
+        "path": "docs/ops/UNIFIED-RELEASE-DEPLOY-UPDATE-HANDOFF-2026-05-24.md",
+        "role": "deploy-authority and release-handoff source truth"
+      },
+      {
+        "path": "docs/ops/UNIFIED-WORKFLOW-CONVERGENCE-INVENTORY-2026-05-24.md",
+        "role": "local-truth governance and _stack local-truth source surface"
+      },
+      {
+        "path": "docs/ops/VERCEL-HELPER-SURFACE-DELETION-DECISION-2026-05-25.md",
+        "role": "current stale-surface and provenance-pressure evidence surface"
+      }
+    ],
+    "verification_adoption_surfaces": [
+      {
+        "path": "docs/atlas-book/05-receipt-index.md",
+        "role": "receipt spine"
+      },
+      {
+        "path": "docs/atlas-book/09-automation-and-command-candidates.md",
+        "role": "shared health-command candidate and command-ownership surface"
+      },
+      {
+        "path": "docs/atlas-book/11-system-map-graph.md",
+        "role": "lane-state projection routing surface"
+      },
+      {
+        "path": "docs/atlas-book/12-restart-and-handoff-guide.md",
+        "role": "restart routing surface"
+      },
+      {
+        "path": "docs/atlas-book/13-vision-and-endgames.md",
+        "role": "current control-plane next-valid-package surface"
+      },
+      {
+        "path": "docs/atlas-book/02-lanes-and-markers.md",
+        "role": "current marker posture surface"
+      },
+      {
+        "path": "docs/memory/README.md",
+        "role": "manifest-backed continuity doctrine surface"
+      }
+    ],
+    "blocked_or_gated_work": [
+      {
+        "item": "broader _stack command implementation or broader execution-surface work beyond the admitted first marker-checkpoint slice",
+        "requirement": "blocked until a later marker-checkpoint slice is explicitly admitted or the AI-pipeline truth owner opens a governed operator-proof packet"
+      },
+      {
+        "item": "higher marker movement above the current refresh-backed ratchet",
+        "requirement": "blocked until stronger proof-backed execution maturity appears, adoption widens, or a new blocker-clearance class changes operator reality again"
+      },
+      {
+        "item": "docs-only _stack widening beyond the exact marker-checkpoint family",
+        "requirement": "blocked because no immediate docs-only _stack packet remains honest after the first-slice cluster closeout; reopen only on distinct later-slice admission, explicit governed operator-proof opening, or separate lock-refresh need"
+      }
+    ],
+    "next_package_ladder": [
+      {
+        "package": "none immediate inside _stack Readiness for this first marker-checkpoint slice",
+        "mode": "conditional reopen only",
+        "reason": "the first admitted marker-checkpoint slice is now landed, proof-hardened, and reconciled, so no new _stack packet is honest by default until a distinct later slice, governed operator-proof packet, or separate lock-refresh need is explicitly opened"
+      }
+    ],
+    "freshness_state": "manifest-backed",
+    "freshness_checked_receipt": "docs/ops/_STACK-READINESS-STACK-MARKER-CHECKPOINT-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-04.md",
+    "freshness_checked_at": "2026-06-04T15:10:00-04:00",
+    "freshness_basis": "the current checkpoint, 88-percent marker posture, blocked-work posture, and conditional next-package ladder now match the marker-checkpoint command-design, evidence, report-contract, implementation-boundary, local-proof-boundary, first-slice/proof-matrix, worker-handoff, implementation-readiness closeout, first-implementation worker cluster reconciliation, and proof-hardened post-cluster routing receipts.",
+    "marker_posture": [
+      {
+        "marker": "_stack Readiness",
+        "percent": 88,
+        "source": "docs/atlas-book/02-lanes-and-markers.md"
+      }
+    ]
+  }
+}

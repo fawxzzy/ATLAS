@@ -40,6 +40,11 @@ def default_validation_receipt_path(root: Path | None = None) -> Path:
     return base / "runtime" / "receipts" / "validation" / "stack-validation.latest.json"
 
 
+def default_operator_surface_path(root: Path | None = None) -> Path:
+    base = (root or atlas_root()).resolve()
+    return base / "runtime" / "cortex" / "operator-surface" / "latest.json"
+
+
 @dataclass(frozen=True)
 class PersistedCurrentStateArtifact:
     artifact_path: Path
@@ -445,6 +450,69 @@ def _next_recommended_lane(
     }
 
 
+def _load_operator_surface_projection(
+    *,
+    root: Path,
+    operator_surface_path: Path | None = None,
+) -> tuple[dict[str, Any] | None, str | None]:
+    resolved = (operator_surface_path or default_operator_surface_path(root)).resolve()
+    if not resolved.exists():
+        return None, None
+    payload = _read_json_object(resolved)
+    shadow_agents = payload.get("shadow_agents") if isinstance(payload.get("shadow_agents"), dict) else {}
+    shadow_consumption = payload.get("shadow_consumption")
+    if not isinstance(shadow_consumption, dict):
+        return None, atlas_relative(resolved, root=root)
+    consumed_agents = shadow_consumption.get("consumed_agents")
+    consumed_payload = consumed_agents if isinstance(consumed_agents, list) else []
+    blocked_agents = shadow_agents.get("blocked_agents")
+    blocked_payload = blocked_agents if isinstance(blocked_agents, list) else []
+    projection = {
+        "artifact_ref": atlas_relative(resolved, root=root),
+        "artifact_generated_at": str(payload.get("generated_at", "")).strip(),
+        "registry_ref": str(shadow_agents.get("registry_ref", "")).strip(),
+        "artifact_root": str(shadow_consumption.get("artifact_root", "")).strip(),
+        "shadow_contract_ids": _string_list(shadow_agents.get("shadow_contract_ids")),
+        "blocked_contract_ids": _string_list(shadow_agents.get("blocked_contract_ids")),
+        "blocked_agent_ids": _string_list(shadow_agents.get("blocked_agent_ids")),
+        "projected_agent_ids": _string_list(shadow_consumption.get("projected_agent_ids")),
+        "projected_contract_ids": _string_list(shadow_consumption.get("projected_contract_ids")),
+        "missing_eligible_agent_ids": _string_list(shadow_consumption.get("missing_eligible_agent_ids")),
+        "missing_eligible_contract_ids": _string_list(shadow_consumption.get("missing_eligible_contract_ids")),
+        "consumed_artifact_refs": _string_list(
+            [
+                item.get("artifact_ref")
+                for item in consumed_payload
+                if isinstance(item, dict) and isinstance(item.get("artifact_ref"), str)
+            ]
+        ),
+        "projected_agents": [
+            {
+                "agent_id": str(item.get("agent_id", "")).strip(),
+                "contract_id": str(item.get("contract_id", "")).strip(),
+                "family_name": str(item.get("family_name", "")).strip(),
+                "trigger": str(item.get("trigger", "")).strip(),
+                "admissibility_state": str(item.get("admissibility_state", "")).strip(),
+                "authority": item.get("authority") if isinstance(item.get("authority"), dict) else {},
+            }
+            for item in consumed_payload
+            if isinstance(item, dict)
+        ],
+        "blocked_agents": [
+            {
+                "agent_id": str(item.get("agent_id", "")).strip(),
+                "contract_id": str(item.get("contract_id", "")).strip(),
+                "family_name": str(item.get("family_name", "")).strip(),
+                "trigger": str(item.get("trigger", "")).strip(),
+                "admissibility_state": str(item.get("admissibility_state", "")).strip(),
+            }
+            for item in blocked_payload
+            if isinstance(item, dict)
+        ],
+    }
+    return projection, projection["artifact_ref"]
+
+
 def build_current_state_payload(
     *,
     root: Path | None = None,
@@ -455,6 +523,7 @@ def build_current_state_payload(
     publication_state_path: Path | None = None,
     state_model_path: Path | None = None,
     rule_registry_path: Path | None = None,
+    operator_surface_path: Path | None = None,
 ) -> dict[str, Any]:
     base = (root or atlas_root()).resolve()
     resolved_validation_path = (validation_path or default_validation_receipt_path(base)).resolve()
@@ -501,6 +570,12 @@ def build_current_state_payload(
         source_refs.append(atlas_relative(publication_state_path.resolve(), root=base))
     if git_state_path is not None:
         source_refs.append(atlas_relative(git_state_path.resolve(), root=base))
+    operator_surface_projection, operator_surface_ref = _load_operator_surface_projection(
+        root=base,
+        operator_surface_path=operator_surface_path,
+    )
+    if operator_surface_ref is not None:
+        source_refs.append(operator_surface_ref)
 
     next_lane = _next_recommended_lane(
         blockers=blockers,
@@ -529,6 +604,7 @@ def build_current_state_payload(
         "active_blockers": blockers,
         "latest_clean_step": latest_clean_step,
         "rail_state": rail_state,
+        "operator_surface_projection": operator_surface_projection,
         "next_recommended_lane": next_lane,
     }
 
@@ -568,6 +644,20 @@ def render_current_state_summary(payload: dict[str, Any]) -> str:
     else:
         lines.append("- none")
 
+    projection = payload.get("operator_surface_projection")
+    lines.extend(["", "## Operator Surface"])
+    if isinstance(projection, dict):
+        lines.append(f"- Artifact: `{projection.get('artifact_ref', '')}`")
+        lines.append(f"- Generated: `{projection.get('artifact_generated_at', '')}`")
+        lines.append(f"- Projected shadow agents: `{', '.join(projection.get('projected_agent_ids', [])) or 'none'}`")
+        lines.append(f"- Projected contracts: `{', '.join(projection.get('projected_contract_ids', [])) or 'none'}`")
+        lines.append(
+            f"- Missing eligible projections: `{', '.join(projection.get('missing_eligible_agent_ids', [])) or 'none'}`"
+        )
+        lines.append(f"- Blocked shadow agents: `{', '.join(projection.get('blocked_agent_ids', [])) or 'none'}`")
+    else:
+        lines.append("- none")
+
     lines.extend(
         [
             "",
@@ -589,6 +679,7 @@ def persist_current_state_artifact(
     publication_state_path: Path | None = None,
     state_model_path: Path | None = None,
     rule_registry_path: Path | None = None,
+    operator_surface_path: Path | None = None,
     output_json_path: Path | None = None,
     output_markdown_path: Path | None = None,
     write_markdown: bool = True,
@@ -607,6 +698,7 @@ def persist_current_state_artifact(
         publication_state_path=publication_state_path.resolve() if publication_state_path is not None else None,
         state_model_path=state_model_path.resolve() if state_model_path is not None else None,
         rule_registry_path=rule_registry_path.resolve() if rule_registry_path is not None else None,
+        operator_surface_path=operator_surface_path.resolve() if operator_surface_path is not None else None,
     )
     summary = render_current_state_summary(payload)
     write_json(artifact_path, payload)
@@ -630,6 +722,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--publication-state-path", type=Path)
     parser.add_argument("--state-model-path", type=Path)
     parser.add_argument("--rule-registry-path", type=Path)
+    parser.add_argument("--operator-surface-path", type=Path)
     parser.add_argument("--output-json", type=Path)
     parser.add_argument("--output-markdown", type=Path)
     parser.add_argument("--no-write-markdown", action="store_true")
@@ -645,6 +738,7 @@ def main(argv: list[str] | None = None) -> int:
             publication_state_path=args.publication_state_path.resolve() if args.publication_state_path else None,
             state_model_path=args.state_model_path.resolve() if args.state_model_path else None,
             rule_registry_path=args.rule_registry_path.resolve() if args.rule_registry_path else None,
+            operator_surface_path=args.operator_surface_path.resolve() if args.operator_surface_path else None,
             output_json_path=args.output_json.resolve() if args.output_json else None,
             output_markdown_path=args.output_markdown.resolve() if args.output_markdown else None,
             write_markdown=not args.no_write_markdown,

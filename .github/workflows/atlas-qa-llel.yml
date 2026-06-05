@@ -10,7 +10,6 @@ on:
       - "stack.lock.yaml"
       - "docs/standards/ATLAS-QA-LLEL.md"
       - "docs/ops/ATLAS-QA-PROMOTION-RUNBOOK.md"
-      - "docs/codex/ATLAS-QA-LLEL-PROMPT-PACK.md"
       - "ops/atlas/qa/**"
       - "ops/validation/**"
       - "schemas/atlas.qa.*.json"

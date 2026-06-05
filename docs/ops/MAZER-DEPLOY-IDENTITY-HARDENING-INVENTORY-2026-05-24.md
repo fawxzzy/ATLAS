@@ -13,10 +13,10 @@ This pass does not deploy, run `vercel link`, pull env, mutate Vercel, mutate Su
 
 ## Evidence Surfaces
 
-- `repos/fawxzzy-mazer/package.json`
-- `repos/fawxzzy-mazer/README.md`
-- `repos/fawxzzy-mazer/docs/ops/MAZER_HOSTED_PREVIEW_PROOF.md`
-- `repos/fawxzzy-mazer/.vercel/project.json`
+- `repos/mazer/package.json`
+- `repos/mazer/README.md`
+- `repos/mazer/docs/ops/MAZER_HOSTED_PREVIEW_PROOF.md`
+- `repos/mazer/.vercel/project.json`
 - `repos/_stack/package.json`
 - `repos/_stack/README.md`
 - `repos/_stack/config/release-targets.json`
@@ -30,7 +30,7 @@ This pass does not deploy, run `vercel link`, pull env, mutate Vercel, mutate Su
 
 ### Repo-local state
 
-- Canonical repo path is present at `repos/fawxzzy-mazer`
+- Canonical repo path is present at `repos/mazer`
 - Git remote is `https://github.com/fawxzzy/fawxzzy-mazer.git`
 - Current branch is `codex/mazer-remove-pwa-install-surface`
 - Current HEAD is `021291d` (`Remove PWA install surface`)
@@ -77,7 +77,7 @@ Mazer already has local Vercel link evidence:
 
 Source:
 
-- `repos/fawxzzy-mazer/.vercel/project.json`
+- `repos/mazer/.vercel/project.json`
 
 This is stronger than “identity unknown.” The repo is already locally linked to a concrete Vercel project.
 
@@ -104,7 +104,7 @@ This is a real fail-closed preflight, but it governs repo authorship rather than
 This pass did **not** find:
 
 - a checked-in Mazer deploy identity config in `_stack/config/`
-- an `_stack` preflight that validates `repos/fawxzzy-mazer/.vercel/project.json`
+- an `_stack` preflight that validates `repos/mazer/.vercel/project.json`
 - an immutable Mazer Vercel `projectId` contract enforced before preview/prod deploy
 - documented Git auto-deploy state for the Mazer Vercel project
 
@@ -123,7 +123,7 @@ That makes Mazer weaker than Fitness and now weaker than hardened Trove on proje
 
 ## Repo-Local Script Ambiguity
 
-This pass did not find repo-local deploy authority ambiguity inside `repos/fawxzzy-mazer/package.json`.
+This pass did not find repo-local deploy authority ambiguity inside `repos/mazer/package.json`.
 
 Unlike Fitness:
 
@@ -172,7 +172,7 @@ Mazer currently has:
 Smallest safe package:
 
 1. add `_stack` config for pinned Mazer Vercel identity
-2. add `_stack` preflight that reads `repos/fawxzzy-mazer/.vercel/project.json`
+2. add `_stack` preflight that reads `repos/mazer/.vercel/project.json`
 3. fail closed if `orgId`, `projectId`, or `projectName` differ from the pinned values
 4. wire that preflight before `_stack` Mazer preview/prod deploy wrappers reach Vercel
 5. update `_stack` docs and launcher metadata to reflect the stronger preflight

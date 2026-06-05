@@ -258,9 +258,73 @@ This chapter turns the current operating model into reusable “run this workflo
 - no bulk cleanup by implication
 - no touching deferred Discord/Music Sesh tables casually
 
+## Recipe 7: Guarded Codex Continuation Workflow
+
+### Owner
+
+- ATLAS root
+
+### Starting point
+
+- one bounded Codex slice has already finished
+- one machine-readable continuation result exists or is about to be emitted
+
+### Allowed commands / surfaces
+
+- `ops/codex/atlas_continue_gate.py`
+- `ops/codex/schemas/atlas_codex_result.schema.json`
+- `ops/codex/prompts/continue_gate_prompt.md`
+- one wrapper-bound live-shaped JSONL transcript when present
+- one bounded runtime-surface proof capture when the resolved Codex executable/runtime surface materially changes
+- `ops/validation/validate_stack.py`
+- durable decision receipts under `runtime/receipts/codex-continuation/`
+
+### Proof required
+
+- exact changed-path list
+- decisive receipt path when one exists
+- exact validation snapshot
+- exact marker movement or explicit no-movement
+- one exact next move with execution mode
+- explicit scope and non-automation guard fields
+
+### Receipt required
+
+- one gate-decision JSON receipt
+- one gate-decision Markdown receipt
+- one ATLAS root receipt when the continuation contract itself changes
+
+### Approval gates
+
+- default behavior remains dry-run only
+- live receipt capture may be admitted before live continuation is admitted
+- a materially changed executable/runtime surface must land one runtime-surface proof receipt before any new live resume proof is honest
+- live execution requires explicit operator allow plus wrapper-bound JSONL capture
+- live execution admits the exact real `codex exec resume --last` shape plus any separately admitted narrower prompt-bearing variant
+- if the exact resume command cannot start on the current host, write the blocked execution receipt with machine-readable runtime classification and stop instead of substituting another command
+- if the exact resume command starts but fails with command-level stderr, freeze that narrower blocker class before any further execution retry
+- if the stderr blocker is `resume_requires_stdin_prompt`, one bounded help-driven contract probe may freeze prompt-argument and dash-stdin support before any prompt-bearing live variant is considered
+- prompt-bearing command admission may admit one exact inline prompt argument shape before any dash-stdin prompt source is considered
+- bounded live proof must own its timeout classification and emit a receipt before the outer shell can kill the packet
+- after one blocked timeout execution receipt and one timeout-boundary recheck receipt for that same branch, no further root rerun is open until runtime state materially changes
+
+### Forbidden shortcuts
+
+- no blind `continue` macro
+- no chat-memory-only next move
+- no validator omission
+- no jumping from changed executable order straight into live continuation without a runtime-surface proof receipt
+- no arbitrary live command substitution
+- no treating `codex exec resume --help` as implicit permission for prompt-bearing live execution
+- no collapsing inline prompt arguments and dash-stdin into one admission event
+- no repeated root retries after one blocked execution receipt plus one blocker-recheck receipt for the same host-runtime class
+- no widened-scope continuation
+- no doctrine, deploy, destructive cleanup, secret approval, or ambiguous-review continuation
+
 ### Marker impact
 
-- Fitness Supabase Profile/Data Hygiene
+- usually none until repeatable governed operator proof exists
+- may later widen `AI Repetition-to-Automation Pipeline` only after real safe fallback and behavior proof exist
 - Operator Secret Path Hygiene
 
 ## Recipe 7: DiscordOS Separation Workflow
@@ -400,6 +464,7 @@ This chapter turns the current operating model into reusable “run this workflo
 ### Starting point
 
 - receipt-backed repeated rule, pattern, or failure mode
+- or one current bounded closeout cluster whose reusable lesson set is already durable but not yet explicitly transferred
 
 ### Allowed commands / surfaces
 
@@ -425,6 +490,7 @@ This chapter turns the current operating model into reusable “run this workflo
 ### Forbidden shortcuts
 
 - no promoting one-off chat comments into doctrine
+- no treating chat recap itself as the transferable artifact when the reusable lesson has not yet been captured in durable surfaces
 - no using Playbook as runtime owner
 
 ### Marker impact
@@ -433,3 +499,51 @@ This chapter turns the current operating model into reusable “run this workflo
 - Playbook Everywhere + Cortex Interface
 - Knowledge Capture & Transfer
 - AI Repetition-to-Automation Pipeline
+
+## Recipe 11: Blocked Execution Lane Workflow
+
+### Owner
+
+- owner repo first
+- ATLAS root only for blocker classification, execution clusters, and cross-repo receipts
+
+### Starting point
+
+- one execution-ready lane that either just blocked or just changed blocker class
+
+### Allowed commands / surfaces
+
+- owner-repo blocker conversion when the blocker is implementation reality
+- one exact root blocker recheck when owner-side class change lands
+- one serial root execution cluster when the lane is honestly execution-ready
+- root read-model or doctrine work only when no executable owner-side work is ready
+
+### Proof required
+
+- blocked lanes: exact blocker class and exact owner surface
+- reopened lanes: execution proof and reconciliation before any ratchet
+
+### Receipt required
+
+- at most one blocked execution receipt and one blocked proof or blocker-recheck receipt for the same blocker class at root
+- then owner-side receipts until the blocker class changes
+- execution-ready reopenings should land as one cluster: execution, proof or reconciliation, ratchet
+
+### Approval gates
+
+- existing lane-specific approvals still apply
+- blocker-class change does not bypass a separate approval gate
+
+### Forbidden shortcuts
+
+- no third root retry after the blocker class is already durable
+- no duplicate root package when the exact receipt already exists durably
+- no ratchet after every small receipt unless operator reality materially changed
+- no widening owner-side cleanup before the smallest blocker slice is finished
+
+### Marker impact
+
+- Atlas-owned Repo Naming Canonicalization
+- Local Data Gateway
+- Durable Context Externalization
+- any future stack lane that alternates between root governance and owner-side conversion

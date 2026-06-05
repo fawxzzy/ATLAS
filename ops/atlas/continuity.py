@@ -379,40 +379,40 @@ def build_continuity_source_manifest(*, root: Path | None = None) -> dict[str, A
         ),
         _source_entry(
             source_id="playbook_readme",
-            source_path="repos/fawxzzy-playbook/README.md",
+            source_path="repos/playbook/README.md",
             path_kind="file",
             lane="playbook_roadmap",
             content_class="structured_artifact",
             repo_scope="playbook",
             trust_posture="trusted",
-            status="indexed" if _path_exists("repos/fawxzzy-playbook/README.md", root=base_root) else "unknown",
+            status="indexed" if _path_exists("repos/playbook/README.md", root=base_root) else "unknown",
             promotion_candidate=True,
             promotion_targets=["knowledge"],
             source_summary="Owner-repo overview and roadmap entry point.",
         ),
         _source_entry(
             source_id="playbook_roadmap_json",
-            source_path="repos/fawxzzy-playbook/ROADMAP.json",
+            source_path="repos/playbook/ROADMAP.json",
             path_kind="file",
             lane="playbook_roadmap",
             content_class="structured_artifact",
             repo_scope="playbook",
             trust_posture="trusted",
-            status="indexed" if _path_exists("repos/fawxzzy-playbook/ROADMAP.json", root=base_root) else "unknown",
+            status="indexed" if _path_exists("repos/playbook/ROADMAP.json", root=base_root) else "unknown",
             promotion_candidate=True,
             promotion_targets=["plan", "knowledge"],
             source_summary="Owner-repo roadmap state for convergence follow-on work.",
         ),
         _source_entry(
             source_id="playbook_repo_roadmap_system",
-            source_path="repos/fawxzzy-playbook/REPO_ROADMAP_SYSTEM.md",
+            source_path="repos/playbook/REPO_ROADMAP_SYSTEM.md",
             path_kind="file",
             lane="playbook_roadmap",
             content_class="structured_artifact",
             repo_scope="playbook",
             trust_posture="trusted",
             status="indexed"
-            if _path_exists("repos/fawxzzy-playbook/REPO_ROADMAP_SYSTEM.md", root=base_root)
+            if _path_exists("repos/playbook/REPO_ROADMAP_SYSTEM.md", root=base_root)
             else "unknown",
             promotion_candidate=True,
             promotion_targets=["plan", "knowledge"],
@@ -420,14 +420,14 @@ def build_continuity_source_manifest(*, root: Path | None = None) -> dict[str, A
         ),
         _source_entry(
             source_id="playbook_next_four_weeks",
-            source_path="repos/fawxzzy-playbook/IMPLEMENTATION_PLAN_NEXT_4_WEEKS.md",
+            source_path="repos/playbook/IMPLEMENTATION_PLAN_NEXT_4_WEEKS.md",
             path_kind="file",
             lane="playbook_roadmap",
             content_class="structured_artifact",
             repo_scope="playbook",
             trust_posture="trusted",
             status="indexed"
-            if _path_exists("repos/fawxzzy-playbook/IMPLEMENTATION_PLAN_NEXT_4_WEEKS.md", root=base_root)
+            if _path_exists("repos/playbook/IMPLEMENTATION_PLAN_NEXT_4_WEEKS.md", root=base_root)
             else "unknown",
             promotion_candidate=True,
             promotion_targets=["plan", "knowledge"],
@@ -979,3 +979,4 @@ def build_continuity_status_slices(*, root: Path | None = None) -> tuple[dict[st
         "continuity_coverage": coverage | {"items": []},
     }
     return manifest, slices
+

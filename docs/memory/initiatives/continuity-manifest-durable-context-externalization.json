@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-05-27T00:00:00Z",
-  "updated_at": "2026-05-28T18:08:24Z",
+  "updated_at": "2026-06-02T18:08:08.0000000-04:00",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -28,6 +28,30 @@
     "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-BREADTH-EXPANSION-PASS-1-2026-05-27.md",
     "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-BREADTH-EXPANSION-PASS-2-2026-05-28.md",
     "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-BREADTH-EXPANSION-PASS-3-2026-05-28.md",
+    "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-BREADTH-EXPANSION-PASS-4-2026-05-29.md",
+    "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-BREADTH-EXPANSION-PASS-5-2026-05-29.md",
+    "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-BREADTH-EXPANSION-PASS-6-2026-05-29.md",
+    "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-REFRESH-PASS-5-2026-05-29.md",
+    "docs/ops/STABILIZE-ROOT-WORKTREE-ARCHIVE-SENSITIVITY-SUBSET-MUTATION-AND-VERIFICATION-PASS-68-2026-06-02.md",
+    "docs/ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-IMMEDIATE-SUPPORTING-HELD-RESELECTION-PASS-8-2026-06-02.md",
+    "docs/ops/OPERATOR-SECRET-PATH-HYGIENE-ARCHIVE-QUARANTINE-AND-NON-SECRET-RETENTION-RECONCILIATION-PASS-7-2026-06-02.md",
+    "docs/ops/OPERATOR-SECRET-PATH-HYGIENE-LOCAL-SECRET-BOUNDARY-AND-QUARANTINE-POSTURE-PASS-8-2026-06-02.md",
+    "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-EXPORTED-FAMILY-CONSUMPTION-RECONCILIATION-PASS-4-2026-06-02.md",
+    "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-EXECUTION-STATE-SPINE-EXTERNALIZATION-PASS-7-2026-06-02.md",
+    "docs/ops/KNOWLEDGE-CAPTURE-AND-TRANSFER-CURRENT-CLOSEOUT-CLUSTER-CARRY-FORWARD-PASS-8-2026-06-02.md",
+    "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-POST-KCT-EXECUTION-STATE-SPINE-REFRESH-PASS-8-2026-06-02.md",
+    "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-REFRESH-PASS-4-2026-05-29.md",
+    "docs/ops/DEPENDENCY-UNTANGLING-DECISIVE-RECEIPT-AND-BLOCKED-WORK-LADDER-SHAPING-PASS-1-2026-05-29.md",
+    "docs/memory/initiatives/continuity-manifest-dependency-untangling.json",
+    "docs/ops/INVENTORY-AND-TRUTH-MAP-CONTINUITY-MANIFEST-REFRESH-AND-RATCHET-DECISION-PASS-7-2026-05-29.md",
+    "docs/memory/initiatives/continuity-manifest-inventory-and-truth-map.json",
+    "docs/ops/KNOWLEDGE-CAPTURE-AND-TRANSFER-CONTINUITY-MANIFEST-REFRESH-AND-RATCHET-DECISION-PASS-7-2026-05-29.md",
+    "docs/memory/initiatives/continuity-manifest-knowledge-capture-transfer.json",
+    "docs/ops/STACK-READINESS-CONTINUITY-MANIFEST-REFRESH-AND-RATCHET-DECISION-PASS-7-2026-05-29.md",
+    "docs/memory/initiatives/continuity-manifest-stack-readiness.json",
+    "docs/ops/ROOT-BOUNDED-LANE-SELECTION-AFTER-POST-CONVERGENCE-CLOSEOUT-2026-05-29.md",
+    "docs/ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-CONTINUITY-MANIFEST-REFRESH-AND-RATCHET-DECISION-PASS-7-2026-05-29.md",
+    "docs/memory/initiatives/continuity-manifest-post-convergence-lane-split-readiness.json",
     "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-REFRESH-PASS-2-2026-05-28.md",
     "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-MARKER-RATCHET-CHECKPOINT-5-2026-05-28.md",
     "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-MARKER-RATCHET-CHECKPOINT-4-2026-05-27.md",
@@ -42,9 +66,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "durable-context-externalization",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-REFRESH-PASS-3-2026-05-28.md",
-    "checkpoint_commit": "58f00a6",
-    "checkpoint_summary": "The lane now sits at 74 percent with the full seven-manifest seeded set refreshed as one unit after breadth-expansion pass 3 held flat, proving broader manifest-backed continuity without widening coverage faster than freshness discipline.",
+    "current_checkpoint_receipt": "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-POST-KCT-EXECUTION-STATE-SPINE-REFRESH-PASS-8-2026-06-02.md",
+    "checkpoint_commit": "e1894261",
+    "checkpoint_summary": "The lane now sits at 78 percent after refreshing the current execution-state spine post-KCT: the immediate lane remains Durable Context Externalization, the held lanes remain explicit, the KCT supporting lane now reopens only conditionally, and the manifest-backed restart spine no longer depends on chat-held reselection after the recent adjacent closeout threshold.",
     "governing_receipts": [
       "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-2026-05-27.md",
       "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-MARKER-RATCHET-CHECKPOINT-2-2026-05-27.md",
@@ -57,8 +81,16 @@
       "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-BREADTH-EXPANSION-PASS-2-2026-05-28.md",
       "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-REFRESH-PASS-2-2026-05-28.md",
       "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-MARKER-RATCHET-CHECKPOINT-5-2026-05-28.md",
+      "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-MARKER-RATCHET-CHECKPOINT-6-2026-05-28.md",
       "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-BREADTH-EXPANSION-PASS-3-2026-05-28.md",
+      "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-BREADTH-EXPANSION-PASS-4-2026-05-29.md",
+      "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-BREADTH-EXPANSION-PASS-5-2026-05-29.md",
+      "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-BREADTH-EXPANSION-PASS-6-2026-05-29.md",
+      "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-REFRESH-PASS-5-2026-05-29.md",
+      "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-REFRESH-PASS-4-2026-05-29.md",
       "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-MARKER-RATCHET-CHECKPOINT-4-2026-05-27.md",
+      "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-EXECUTION-STATE-SPINE-EXTERNALIZATION-PASS-7-2026-06-02.md",
+      "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-POST-KCT-EXECUTION-STATE-SPINE-REFRESH-PASS-8-2026-06-02.md",
       "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-RETRIEVAL-SURFACE-INVENTORY-2026-05-27.md",
       "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-PROMPT-PACK-NORMALIZATION-2026-05-27.md"
     ],
@@ -102,23 +134,39 @@
       {
         "item": "claiming fully automatic resumability",
         "requirement": "blocked while continuity still requires operator interpretation across receipt chains"
+      },
+      {
+        "item": "pricing the Post-Convergence Lane Split Readiness breadth admission into the DCE marker",
+        "requirement": "blocked until the broadened seeded set passes one new full DCE refresh cycle as one unit"
+      },
+      {
+        "item": "claiming universal coverage or fully automatic continuity",
+        "requirement": "blocked while major lanes still require manual operator stitching and not every family is manifest-backed"
+      },
+      {
+        "item": "treating chat-held lane ordering as durable by default",
+        "requirement": "blocked unless the immediate lane, supporting lane, held posture, and recent closeout evidence are externalized into restart-safe continuity surfaces"
+      },
+      {
+        "item": "routing automatically into another KCT packet after its current closeout admission",
+        "requirement": "blocked unless the current DCE slice creates a distinct new transfer or carry-forward need rather than relying on the earlier supporting-lane selection alone"
       }
     ],
     "next_package_ladder": [
       {
-        "package": "Durable Context Externalization marker ratchet checkpoint 6",
-        "mode": "docs-only marker ratchet",
-        "reason": "recompute whether the 74 percent posture can move again now that the full seven-manifest seeded set has passed a full refresh cycle after breadth-expansion pass 3 held coverage flat"
+        "package": "No immediate Durable Context Externalization-only follow-on packet",
+        "mode": "hold-flat after post-KCT execution-state spine refresh",
+        "reason": "the current DCE gap is now refreshed durably, so reopen only when a new execution-state truth class becomes chat-held again, a real restart-truth drift appears, or the refreshed DCE slice creates one concrete new KCT transfer need"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-REFRESH-PASS-3-2026-05-28.md",
-    "freshness_checked_at": "2026-05-28T18:08:24Z",
-    "freshness_basis": "checkpoint, marker posture, blocked work, and next-package posture now match the current durable continuity lane state after marker ratchet checkpoint 5, breadth-expansion pass 3 holding flat, and a full seven-manifest refresh cycle.",
+    "freshness_checked_receipt": "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-POST-KCT-EXECUTION-STATE-SPINE-REFRESH-PASS-8-2026-06-02.md",
+    "freshness_checked_at": "2026-06-02T18:08:08.0000000-04:00",
+    "freshness_basis": "checkpoint, marker posture, active execution order, held-lane posture, conditional KCT supporting-lane reopen rule, and next-package posture now match the current durable DCE lane state after the post-KCT execution-state spine was refreshed.",
     "marker_posture": [
       {
         "marker": "Durable Context Externalization",
-        "percent": 74,
+        "percent": 78,
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ]

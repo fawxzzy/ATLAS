@@ -11,6 +11,7 @@ runtime/cortex/**
 !runtime/cortex/kernel.state-model.seed.v1.json
 !runtime/cortex/kernel.rule-registry.seed.v1.json
 !runtime/cortex/kernel.proof-summary.examples.v1.json
+!runtime/cortex/shadow-agent-registry.seed.v1.json
 tmp/**
 secrets/**
 packages/**

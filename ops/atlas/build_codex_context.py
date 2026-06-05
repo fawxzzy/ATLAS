@@ -43,31 +43,31 @@ INTENT_ROUTING = {
         "awareness_slices": ["trust_posture"],
         "route_surfaces": [
             {
-                "ref": "repos/fawxzzy-playbook/AGENTS.md",
+                "ref": "repos/playbook/AGENTS.md",
                 "owner": "playbook",
                 "kind": "owner_contract",
                 "why": "Playbook is the governance owner for rules, verify flow, and policy work.",
             },
             {
-                "ref": "repos/fawxzzy-playbook/README.md",
+                "ref": "repos/playbook/README.md",
                 "owner": "playbook",
                 "kind": "owner_overview",
                 "why": "Playbook README is the top-level command and governance surface overview.",
             },
             {
-                "ref": "repos/fawxzzy-playbook/docs/commands/verify.md",
+                "ref": "repos/playbook/docs/commands/verify.md",
                 "owner": "playbook",
                 "kind": "owner_runbook",
                 "why": "Verify is the canonical governance and policy entrypoint.",
             },
             {
-                "ref": "repos/fawxzzy-playbook/docs/rules/verify-rules.md",
+                "ref": "repos/playbook/docs/rules/verify-rules.md",
                 "owner": "playbook",
                 "kind": "owner_rules",
                 "why": "Verify rule inventory is the stable rules and bindings surface.",
             },
             {
-                "ref": "repos/fawxzzy-playbook/docs/contracts/verify-output.md",
+                "ref": "repos/playbook/docs/contracts/verify-output.md",
                 "owner": "playbook",
                 "kind": "owner_contract",
                 "why": "Verify output contract defines the machine-readable bindings this lane consumes.",
@@ -1359,3 +1359,4 @@ def main(argv: list[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

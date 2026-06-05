@@ -61,6 +61,18 @@ Parallelism
 - Use one agent per repo or one non-overlapping stack file slice.
 - Do not let multiple agents edit the same repo root without a clear ownership split.
 
+Execution Cadence
+- Treat root as governance, projection, and receipts only. Do not let root keep narrating a blocker once the bottleneck has moved into owner-repo work.
+- Two-strike blocker rule: if a lane already has one blocked execution receipt and one blocked proof or blocker-recheck receipt for the same blocker class, root is done. After that, only owner-side blocker conversion work is allowed until the blocker class materially changes.
+- No duplicate package rule: before opening a new pass, check whether the exact receipt already exists durably. If it does, do not rerun it unless state changed or scope changed.
+- Cluster execution rule: for execution-ready lanes, run execution, then proof or reconciliation, then ratchet as one serial cluster. Do not interleave unrelated root lanes between those steps unless execution becomes blocked.
+- One root writer only: at most one root writer, one owner-repo writer, and one optional read-only scout should be active at a time.
+- Marker ratchet threshold: a marker moves only when executed state changed, proof-backed adoption widened, manifest-backed restart got broader and stayed refreshed, or one real blocker was cleared. Cleaner wording alone is not enough.
+- Batch routing:
+  - owner-side unblock batch -> convert blocker, merge or preserve or archive, recheck blocker class
+  - root execution cluster -> blocker recheck if needed, execution, proof or reconciliation, ratchet
+  - root read-model or doctrine batch -> only when there is no executable owner-side work ready
+
 Escalation
 - Ask before moving or renaming active repos.
 - Ask before changing secrets handling, Vercel linkage, or retention policy for backups and installers.

@@ -35,6 +35,9 @@ class CortexRailStateReaderTests(unittest.TestCase):
         cls.current_state_payload = json.loads(
             (cls.root / "runtime" / "cortex" / "current-state" / "latest.json").read_text(encoding="utf-8")
         )
+        cls.operator_surface_payload = json.loads(
+            (cls.root / "runtime" / "cortex" / "operator-surface" / "latest.json").read_text(encoding="utf-8")
+        )
 
     def _base_validation_payload(
         self,
@@ -90,6 +93,65 @@ class CortexRailStateReaderTests(unittest.TestCase):
                 "runtime/cortex/kernel.rule-registry.seed.v1.json",
             ],
         }
+        payload["operator_surface_projection"] = {
+            "artifact_ref": "runtime/cortex/operator-surface/latest.json",
+            "artifact_generated_at": "2026-06-02T02:50:56.638274+00:00",
+            "registry_ref": "runtime/cortex/shadow-agent-registry.seed.v1.json",
+            "artifact_root": "runtime/cortex/shadow-agent-consumption",
+            "shadow_contract_ids": [
+                "atlas.cortex.contract.validation-summary-shadow.v1",
+                "atlas.cortex.contract.marker-checkpoint-shadow.v1",
+                "atlas.cortex.contract.receipt-doctrine-draft-shadow.v1",
+            ],
+            "blocked_contract_ids": [
+                "atlas.cortex.contract.fresh-live-proof-capture-blocked.v1",
+                "atlas.cortex.contract.final-deploy-judgment-blocked.v1",
+            ],
+            "blocked_agent_ids": [
+                "fresh-live-proof-capture-blocked",
+                "final-deploy-judgment-blocked",
+            ],
+            "projected_agent_ids": [
+                "marker-checkpoint-shadow",
+                "receipt-doctrine-draft-shadow",
+                "validation-summary-shadow",
+            ],
+            "projected_contract_ids": [
+                "atlas.cortex.contract.marker-checkpoint-shadow.v1",
+                "atlas.cortex.contract.receipt-doctrine-draft-shadow.v1",
+                "atlas.cortex.contract.validation-summary-shadow.v1",
+            ],
+            "missing_eligible_agent_ids": [],
+            "missing_eligible_contract_ids": [],
+            "consumed_artifact_refs": [
+                "runtime/cortex/shadow-agent-consumption/marker-checkpoint.latest.json",
+                "runtime/cortex/shadow-agent-consumption/receipt-doctrine-draft.latest.json",
+                "runtime/cortex/shadow-agent-consumption/validation-summary.latest.json",
+            ],
+            "projected_agents": [
+                {
+                    "agent_id": "marker-checkpoint-shadow",
+                    "contract_id": "atlas.cortex.contract.marker-checkpoint-shadow.v1",
+                    "family_name": "marker checkpoint rendering",
+                    "trigger": "ATLAS marker or restart-surface refresh that needs a bounded projection artifact",
+                    "admissibility_state": "shadow-only",
+                    "authority": {
+                        "can_mutate_truth": False,
+                        "can_ratchet_markers": False,
+                        "has_production_authority": False,
+                    },
+                }
+            ],
+            "blocked_agents": [
+                {
+                    "agent_id": "fresh-live-proof-capture-blocked",
+                    "contract_id": "atlas.cortex.contract.fresh-live-proof-capture-blocked.v1",
+                    "family_name": "fresh live proof capture through the frozen bridge path",
+                    "trigger": "A proof request that still depends on the frozen bridge path",
+                    "admissibility_state": "blocked",
+                }
+            ],
+        }
         return payload
 
     def _temp_root(
@@ -122,6 +184,22 @@ class CortexRailStateReaderTests(unittest.TestCase):
         self.assertEqual("promote-cortex-receipt-interpretation-consumption-feedback-wave11", payload["next_recommended_lane"]["lane_id"])
         self.assertEqual([], payload["active_blockers"])
         self.assertIn("cortex-receipt-interpretation-consumption-feedback-v0-1", payload["dirty_lanes"])
+        self.assertEqual(
+            [
+                "marker-checkpoint-shadow",
+                "receipt-doctrine-draft-shadow",
+                "validation-summary-shadow",
+            ],
+            payload["operator_surface_projection"]["projected_agent_ids"],
+        )
+        self.assertEqual(
+            [
+                "atlas.cortex.contract.marker-checkpoint-shadow.v1",
+                "atlas.cortex.contract.receipt-doctrine-draft-shadow.v1",
+                "atlas.cortex.contract.validation-summary-shadow.v1",
+            ],
+            payload["operator_surface_projection"]["projected_contract_ids"],
+        )
 
     def test_validation_blocker_forces_stabilize_stack_validation(self) -> None:
         current_state_payload = self._base_current_state_payload()
@@ -209,6 +287,7 @@ class CortexRailStateReaderTests(unittest.TestCase):
             [
                 "runtime/cortex/current-state/latest.json",
                 "runtime/receipts/validation/stack-validation.latest.json",
+                "runtime/cortex/operator-surface/latest.json",
             ],
             payload["evidence_refs"],
         )
@@ -261,6 +340,8 @@ class CortexRailStateReaderTests(unittest.TestCase):
         self.assertEqual(json.dumps(payload), json.dumps(artifact.payload))
         self.assertIn("# Cortex Rail State", summary)
         self.assertIn("## Active Blockers", summary)
+        self.assertIn("## Operator Surface", summary)
+        self.assertIn("atlas.cortex.contract.validation-summary-shadow.v1", summary)
         self.assertIn("## Evidence", summary)
         self.assertIn("stabilize-stack-validation", summary)
 

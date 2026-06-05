@@ -69,7 +69,7 @@ ATLAS root
 |   |   +-- src\
 |   |   +-- README.md
 |   |   `-- package.json
-|   +-- fawxzzy-mazer\                      [active Vite/TypeScript/Phaser app]
+|   +-- mazer\                      [active Vite/TypeScript/Phaser app]
 |   |   +-- docs\
 |   |   +-- legacy\
 |   |   +-- public\
@@ -79,7 +79,7 @@ ATLAS root
 |   |   +-- README.md
 |   |   `-- package.json
 |   |       note: repo root also contains committed screenshots/logs/temp files
-|   +-- fawxzzy-playbook\                   [active Playbook monorepo]
+|   +-- playbook\                           [active Playbook monorepo]
 |   |   +-- .codex\                         [has config.toml]
 |   |   +-- .github\
 |   |   +-- .husky\
@@ -135,8 +135,8 @@ ATLAS root
 | `repos\fawxzzy-atlas` | Architecture/docs repo | High | Docs-first README and stack-boundary docs. |
 | `repos\fawxzzy-fitness` | Next.js fitness app | High | `package.json`, `src`, `public`, Supabase, tests. |
 | `repos\fawxzzy-lifeline` | TypeScript CLI for local operator/runtime | High | CLI `bin`, examples, fixtures, large smoke suite. |
-| `repos\fawxzzy-mazer` | Rebuilt game/app in Vite + Phaser | High | README and package manifest. |
-| `repos\fawxzzy-playbook` | Playbook monorepo/runtime | High | Monorepo packages, docs, CLI scripts. |
+| `repos\mazer` | Rebuilt game/app in Vite + Phaser | High | README and package manifest. |
+| `repos\playbook` | Playbook monorepo/runtime | High | Monorepo packages, docs, CLI scripts. |
 | `repos\Hard Pill To Swallow` | Binary build/install drop | Medium | Installer and video only. |
 | `repos\mazer-legacy-unreal\Mazer` | Legacy Unreal source project | High | `.uproject`, `.sln`, Unreal directories. |
 | `repos\Nat1-Games\nat1-games` | App repo nested inside wrapper | Medium | `package.json`, app folders, Playwright, API. |

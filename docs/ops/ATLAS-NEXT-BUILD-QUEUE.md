@@ -25,7 +25,7 @@ It replaces the older pre-adoption sequencing that assumed Playbook export, root
 
 | Repo | Local visibility | Git remote visibility | Notes |
 | --- | --- | --- | --- |
-| `playbook` | present at `repos/fawxzzy-playbook` | `origin` visible | owner contract export and tests are already landed |
+| `playbook` | present at `repos/playbook` | `origin` visible | owner contract export and tests are already landed |
 | `lifeline` | present at `repos/fawxzzy-lifeline` | `origin` visible | still needs its own repo-local adoption tranche |
 | `_stack` | present at `repos/_stack` | no remote visible in this workspace | local-only visibility is still acceptable for repo-local adoption work |
 | `atlas` | present at `repos/fawxzzy-atlas` | no remote visible in this workspace | doctrine repo remains visible but not remotely proven here |
@@ -35,7 +35,7 @@ It replaces the older pre-adoption sequencing that assumed Playbook export, root
 | Repo | Local visibility | Git remote visibility | Notes |
 | --- | --- | --- | --- |
 | `fitness` | present at `repos/fawxzzy-fitness` | `origin` visible | repo-local adoption and targeted verification report are landed |
-| `mazer` | present at `repos/fawxzzy-mazer` | `origin` visible | repo-local adoption and targeted verification report are landed |
+| `mazer` | present at `repos/mazer` | `origin` visible | repo-local adoption and targeted verification report are landed |
 | `stream` | present at `repos/stream` | no remote visible in this workspace | incubating and still outside the first adopted tranche |
 | `playbook-demo` | nested repo present at `repos/playbook-demo/playbook-demo` | `origin` visible | keep out of the critical path unless intentionally used as a contract demo surface |
 | `nat1-games` | nested repo present at `repos/Nat1-Games/nat1-games` | `origin` visible | still incubating from the convergence-program perspective |
@@ -45,9 +45,9 @@ It replaces the older pre-adoption sequencing that assumed Playbook export, root
 The following items are concretely visible in this workspace now:
 
 - Playbook owner export:
-  - `repos/fawxzzy-playbook/exports/playbook.contract.example.v1.json`
-  - `repos/fawxzzy-playbook/exports/playbook.contract.schema.v1.json`
-  - `repos/fawxzzy-playbook/docs/contracts/PLAYBOOK-CONTRACT.md`
+  - `repos/playbook/exports/playbook.contract.example.v1.json`
+  - `repos/playbook/exports/playbook.contract.schema.v1.json`
+  - `repos/playbook/docs/contracts/PLAYBOOK-CONTRACT.md`
 - root read-only consumption:
   - `ops/atlas/playbook_contract.py`
   - `ops/atlas/awareness.py`
@@ -67,16 +67,16 @@ The following items are concretely visible in this workspace now:
   - `repos/fawxzzy-fitness/docs/ops/FITNESS-PLAYBOOK-VERIFICATION.md`
   - `repos/fawxzzy-fitness/tests/playbook-adoption-evidence.test.mjs`
   - `repos/fawxzzy-fitness/tests/playbook-verification-report.test.mjs`
-  - `repos/fawxzzy-mazer/exports/mazer.playbook.adoption.evidence.v1.json`
-  - `repos/fawxzzy-mazer/exports/mazer.playbook.verification.report.v1.json`
-  - `repos/fawxzzy-mazer/docs/ops/MAZER-PLAYBOOK-ADOPTION.md`
-  - `repos/fawxzzy-mazer/docs/ops/MAZER-PLAYBOOK-VERIFICATION.md`
-  - `repos/fawxzzy-mazer/tests/playbook-adoption-evidence.test.mjs`
-  - `repos/fawxzzy-mazer/tests/playbook-verification-report.test.mjs`
+  - `repos/mazer/exports/mazer.playbook.adoption.evidence.v1.json`
+  - `repos/mazer/exports/mazer.playbook.verification.report.v1.json`
+  - `repos/mazer/docs/ops/MAZER-PLAYBOOK-ADOPTION.md`
+  - `repos/mazer/docs/ops/MAZER-PLAYBOOK-VERIFICATION.md`
+  - `repos/mazer/tests/playbook-adoption-evidence.test.mjs`
+  - `repos/mazer/tests/playbook-verification-report.test.mjs`
 - wave-1 event-contract enforcement lane:
-  - `repos/fawxzzy-playbook/.github/workflows/event-contract-pack.yml`
-  - `repos/fawxzzy-playbook/docs/contracts/EVENT_CONTRACT_WORKFLOW_CONSUMERS.md`
-  - `repos/fawxzzy-playbook/docs/RELEASING.md`
+  - `repos/playbook/.github/workflows/event-contract-pack.yml`
+  - `repos/playbook/docs/contracts/EVENT_CONTRACT_WORKFLOW_CONSUMERS.md`
+  - `repos/playbook/docs/RELEASING.md`
   - `repos/fawxzzy-atlas/.github/workflows/event-contracts.yml`
   - `repos/fawxzzy-fitness/.github/workflows/event-contracts.yml`
   - `repos/fawxzzy-fitness/src/lib/ecosystem/fitness-shadow-warehouse.test.ts`
@@ -139,3 +139,4 @@ Target outcomes:
 - do not treat shadow-only measured proof as pilot-live promotion
 - do not jump to auth, shared UI, cross-sell, or ML before the Fitness pilot-readiness gate is green in owner truth
 - do not blur the decision gate: root work changes projection truth; owner-repo work changes owner truth
+

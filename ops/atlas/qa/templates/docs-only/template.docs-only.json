@@ -2,7 +2,7 @@
   "contract_version": "atlas.qa.adapter.v1",
   "adapter_id": "template.docs-only",
   "repo_id": "playbook",
-  "repo_path": "repos/fawxzzy-playbook",
+  "repo_path": "repos/playbook",
   "framework": "docs-or-content",
   "lens_manifest_ref": "ops/atlas/qa/lenses/atlas-default-web.v1.json",
   "commands": {
@@ -30,3 +30,4 @@
     "template.docs-only.verify"
   ]
 }
+

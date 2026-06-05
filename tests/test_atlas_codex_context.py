@@ -76,8 +76,8 @@ class AtlasCodexContextTests(unittest.TestCase):
     def test_playbook_governance_context_prefers_verify_surfaces_only(self) -> None:
         payload = self.playbook_payload
         route_refs = {item["ref"] for item in payload["selected_refs"]["route_surfaces"]}
-        self.assertIn("repos/fawxzzy-playbook/docs/commands/verify.md", route_refs)
-        self.assertIn("repos/fawxzzy-playbook/docs/rules/verify-rules.md", route_refs)
+        self.assertIn("repos/playbook/docs/commands/verify.md", route_refs)
+        self.assertIn("repos/playbook/docs/rules/verify-rules.md", route_refs)
         all_refs = {
             item["ref"]
             for group in payload["selected_refs"].values()
@@ -149,3 +149,4 @@ class AtlasCodexContextTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+

@@ -108,15 +108,15 @@ repo_registry:
     role: workflow-operator
     status: active
   playbook:
-    path: repos/fawxzzy-playbook
+    path: repos/playbook
     role: governance-runtime
     status: active
   lifeline:
-    path: repos/fawxzzy-lifeline
+    path: repos/lifeline
     role: local-operator
     status: active
   foundation:
-    path: repos/fawxzzy-foundation
+    path: repos/foundation
     role: package
     status: active
   discordos:
@@ -128,11 +128,11 @@ repo_registry:
     role: application
     status: unmanaged
   mazer:
-    path: repos/fawxzzy-mazer
+    path: repos/mazer
     role: application
     status: active
   trove:
-    path: repos/fawxzzy-trove
+    path: repos/trove
     role: application
     status: active
   stream:
@@ -263,12 +263,12 @@ stack_lock:
       release_eligible: false
       reason: Fitness recovered checkout remains a non-canonical recovery lane outside the governed child-repo release surface.
     lifeline_operator_evidence_worktree:
-      path: repos/fawxzzy-lifeline-operator-evidence
+      path: repos/lifeline-operator-evidence
       trust_class: trusted
       release_eligible: false
       reason: Lifeline operator evidence is a branch worktree of the registered lifeline repo and remains a temporary non-canonical evidence lane outside the governed repo surface.
     trove_release_cutover_worktree:
-      path: repos/fawxzzy-trove-release-cutover
+      path: repos/trove-release-cutover
       trust_class: trusted
       release_eligible: false
       reason: Trove release cutover is a branch worktree of the registered trove repo and remains a temporary non-canonical cutover lane outside the governed repo surface.
@@ -338,3 +338,4 @@ session_defaults:
   repo_agents_name: AGENTS.md
   repo_config_template: docs/codex/CONFIG-TEMPLATE.toml
   global_agents_proposal: docs/codex/GLOBAL-AGENTS.proposed.md
+

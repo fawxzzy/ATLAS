@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-05-27T00:00:00Z",
-  "updated_at": "2026-05-28T16:17:39Z",
+  "updated_at": "2026-05-29T02:53:26.9411130-04:00",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -95,9 +95,9 @@
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-REFRESH-PASS-2-2026-05-28.md",
-    "freshness_checked_at": "2026-05-28T16:17:39Z",
-    "freshness_basis": "the decisive closeout receipt, marker posture, governed-retain boundary, and no-reopen posture still match the current durable lane state through the second refresh cycle after breadth expansion.",
+    "freshness_checked_receipt": "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-REFRESH-PASS-4-2026-05-29.md",
+    "freshness_checked_at": "2026-05-29T02:53:26.9411130-04:00",
+    "freshness_basis": "the decisive closeout receipt, marker posture, governed-retain boundary, and no-reopen posture still match the current durable lane state across the full eight-manifest refresh cycle after Dependency Untangling admission.",
     "marker_posture": [
       {
         "marker": "Branch & Worktree Normalization",

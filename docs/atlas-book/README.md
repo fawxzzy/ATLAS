@@ -37,6 +37,7 @@ Start here:
 - [Restart And Handoff Guide](12-restart-and-handoff-guide.md)
 - [Vision And Endgames](13-vision-and-endgames.md)
 - [Lane Split Execution](14-lane-split-execution.md)
+- [Lifeline](15-lifeline.md)
 
 This chapter set now covers:
 

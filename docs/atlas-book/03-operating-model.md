@@ -65,6 +65,29 @@ Canonical flow:
 - Discord board state is operational signal, not engineering truth by itself
 - approval-gated lanes do not reopen by implication
 
+## Strict Execution Cadence
+
+Root is a control-plane surface, not a retry loop.
+
+Rules:
+
+- once a blocker is known and the remaining work belongs to an owner repo, root stops opening new retry receipts for that same blocker class
+- one blocked execution receipt plus one blocked proof or blocker-recheck receipt is the root stop signal for that blocker class
+- before any new pass, recheck whether the exact receipt already exists durably; identical reruns are not a speed strategy
+- when a lane is execution-ready, run execution -> proof or reconciliation -> ratchet as one serial cluster
+- keep one root writer, one owner-repo writer, and at most one read-only scout
+- marker movement requires stronger reality, not cleaner narration
+
+Batch types:
+
+- Batch A: owner-side unblock batch -> convert blocker, merge or preserve or archive, recheck blocker class
+- Batch B: root execution cluster -> execution, proof or reconciliation, marker ratchet
+- Batch C: root read-model or doctrine batch -> only when no executable owner-side work is ready
+
+Failure mode:
+
+- root keeps narrating a blocker that now belongs to an owner repo and pays the same blocked-retry tax again
+
 ## Current Canonical Repo / Source Truth
 
 - Fitness owner repo: `repos/fawxzzy-fitness`

@@ -4,19 +4,19 @@
   "contract_source": {
     "repo_id": "playbook",
     "repo_identity": "remote",
-    "repo_path": "repos/fawxzzy-playbook",
-    "export_relpath": "repos/fawxzzy-playbook/exports/playbook.contract.example.v1.json",
-    "schema_relpath": "repos/fawxzzy-playbook/exports/playbook.contract.schema.v1.json",
-    "doc_relpath": "repos/fawxzzy-playbook/docs/contracts/PLAYBOOK-CONTRACT.md",
+    "repo_path": "repos/playbook",
+    "export_relpath": "repos/playbook/exports/playbook.contract.example.v1.json",
+    "schema_relpath": "repos/playbook/exports/playbook.contract.schema.v1.json",
+    "doc_relpath": "repos/playbook/docs/contracts/PLAYBOOK-CONTRACT.md",
     "contract_id": "playbook_convergence_contract",
     "contract_version": "1.0.0",
     "contract_status": "candidate",
     "source_status": "present",
     "validation_state": "schema_valid",
     "evidence_refs": [
-      "repos/fawxzzy-playbook/exports/playbook.contract.example.v1.json",
-      "repos/fawxzzy-playbook/exports/playbook.contract.schema.v1.json",
-      "repos/fawxzzy-playbook/packages/engine/test/playbookContractExport.test.ts"
+      "repos/playbook/exports/playbook.contract.example.v1.json",
+      "repos/playbook/exports/playbook.contract.schema.v1.json",
+      "repos/playbook/packages/engine/test/playbookContractExport.test.ts"
     ],
     "warnings": []
   },
@@ -48,7 +48,7 @@
         "unit_test"
       ],
       "evidence_refs": [
-        "repos/fawxzzy-playbook/exports/playbook.contract.example.v1.json"
+        "repos/playbook/exports/playbook.contract.example.v1.json"
       ],
       "initiative_refs": [],
       "notes": [
@@ -78,3 +78,4 @@
     }
   ]
 }
+
