@@ -53,7 +53,7 @@ Observed result:
   - positive proof against the real local `.vercel/project.json`
   - negative proof using a temporary git fixture with a mismatched `projectId`
 
-From `C:\ATLAS` after root repin:
+From the ATLAS root (`.`) after root repin:
 
 - `python .\ops\validation\validate_stack.py --allow-missing-locked-repos`
 

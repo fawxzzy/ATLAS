@@ -49,7 +49,7 @@ Root-side readiness consumed:
 Owner-side watchlist consumed:
 
 - no exact owner-side pre-rename blocker exists
-- immediate post-rename watchlist is limited to path-sensitive tests and fixtures that hardcode `repos/playbook` or `C:\ATLAS\repos\fawxzzy-playbook`
+- immediate post-rename watchlist is limited to path-sensitive tests and fixtures that hardcode `repos/playbook` or `repos/fawxzzy-playbook`
 - no runtime or governance surface requires owner-side write-before-rename action
 
 ## Root-Side Execution Scope

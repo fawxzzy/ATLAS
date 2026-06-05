@@ -4,7 +4,7 @@ Date: 2026-05-23
 Lane: Duplicate Surface Decommission
 Mode: Manual-review decision pass
 Status: Initial decision complete
-Target worktree: `C:/ATLAS-worktrees/pr1-stack-lock-refresh`
+Target worktree: `<ATLAS_WORKTREES>/pr1-stack-lock-refresh`
 Target commits:
 
 - `bd3791f`
