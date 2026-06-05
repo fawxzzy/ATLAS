@@ -247,9 +247,9 @@ Current status:
   - `Unified Workflow Convergence` now remains held as the ATLAS-side workflow spine above those hardened boundaries: canonical substrate surfaces feed lane selection first, held lanes remain held by default, the Fitness Discord bridge blocker remains external/session-scoped rather than root-mutation work, and no supporting lane opens unless the active slice admits one direct dependency
   - the next durable ATLAS-side active lane is now `AI Repetition-to-Automation Pipeline`: the hardened workflow spine is explicit enough to evaluate real automation-candidate seams from canonical truth without reopening held families, the immediate focus is now the admitted `receipt skeleton drafts` subfamily inside the selected third-safe family, and `_stack Readiness` is now the direct supporting lane for the two already-closed first slices plus that exact receipt-skeleton subfamily
 - the current review surface for the post-catch-up ATLAS projection-note tranche is now explicit:
-  - PR [#53](https://github.com/fawxzzy/ATLAS/pull/53) is now open against `main` as a draft
-  - it is currently `draft-clean`, `mergeable`, and `unmerged`, and its body matches the bounded projection-note branch scope
-  - the remaining publication boundary is now exactly `pr_53_ready_or_merge_operator_owned`
+  - PR [#53](https://github.com/fawxzzy/ATLAS/pull/53) is now open against `main` and ready for review
+  - it is currently `ready-clean`, `mergeable`, and `unmerged`, and its body matches the bounded projection-note branch scope
+  - the remaining publication boundary is now exactly `pr_53_merge_operator_owned`
 - no helper-Vercel project deletion gate remains open after the 2026-05-25 helper-surface deletion pass
 - DiscordOS lookup widening is closed at the owner-repo boundary:
   - transport-aware opening: `no`
