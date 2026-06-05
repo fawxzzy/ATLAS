@@ -111,9 +111,9 @@ class CortexWorkerPromptTests(unittest.TestCase):
         payload["validation_counts"] = dict(payload["validation_receipt"]["counts"])
         payload["active_blockers"] = []
         payload["next_recommended_lane"] = {
-            "lane_id": "atlas-cortex-catch-up",
+            "lane_id": "docs-adr-or-debt-slice",
             "owner_layer": "atlas",
-            "rationale": "Wave 11 is landed as the latest clean Cortex step. The next bounded lane is an ATLAS root catch-up that records the widened Cortex rail surface, preserves stack-level runtime and receipt posture, and prepares any later owner-side routing without reopening Cortex capability implementation.",
+            "rationale": "Wave 11 and the ATLAS catch-up are already complete. The next bounded lane is an ATLAS root projection slice that keeps the live Cortex read model aligned with AI Repetition-to-Automation Pipeline, specifically the bounded receipt skeleton drafts control-plane surface, without reopening Cortex capability implementation.",
             "blocked_by": [],
             "source_refs": [
                 "runtime/cortex/kernel.state-model.seed.v1.json",
@@ -141,9 +141,9 @@ class CortexWorkerPromptTests(unittest.TestCase):
             "receipt_path": "runtime/receipts/validation/stack-validation.latest.json",
         }
         payload["next_recommended_lane"] = {
-            "lane_id": "atlas-cortex-catch-up",
+            "lane_id": "docs-adr-or-debt-slice",
             "owner_layer": "atlas",
-            "rationale": "Wave 11 is landed as the latest clean Cortex step. The next bounded lane is an ATLAS root catch-up that records the widened Cortex rail surface, preserves stack-level runtime and receipt posture, and prepares any later owner-side routing without reopening Cortex capability implementation.",
+            "rationale": "Wave 11 and the ATLAS catch-up are already complete. The next bounded lane is an ATLAS root projection slice that keeps the live Cortex read model aligned with AI Repetition-to-Automation Pipeline, specifically the bounded receipt skeleton drafts control-plane surface, without reopening Cortex capability implementation.",
             "blocked_by": [],
             "source_refs": [
                 "runtime/cortex/current-state/latest.json",
@@ -156,17 +156,17 @@ class CortexWorkerPromptTests(unittest.TestCase):
     def _base_context_payload(self) -> dict:
         payload = json.loads(json.dumps(self.context_payload))
         payload["generated_at"] = "2026-05-06T22:03:00+00:00"
-        payload["packet_id"] = "context-atlas-cortex-catch-up"
+        payload["packet_id"] = "context-docs-adr-or-debt-slice"
         payload["context_summary"] = (
-            "Cortex context packet for atlas-cortex-catch-up derived from explicit current-state, "
+            "Cortex context packet for docs-adr-or-debt-slice derived from explicit current-state, "
             "rail-state, validation, and seed artifacts."
         )
-        payload["task_frame"]["lane_id"] = "atlas-cortex-catch-up"
+        payload["task_frame"]["lane_id"] = "docs-adr-or-debt-slice"
         payload["task_frame"]["owner_layer"] = "atlas"
-        payload["task_frame"]["title"] = "Perform the matching ATLAS/Cortex catch-up."
+        payload["task_frame"]["title"] = "Project the post-catch-up ATLAS systems lane."
         payload["task_frame"]["status"] = "ready"
         payload["task_frame"]["rationale"] = (
-            "Wave 11 is landed as the latest clean Cortex step. The next bounded lane is an ATLAS root catch-up that records the widened Cortex rail surface, preserves stack-level runtime and receipt posture, and prepares any later owner-side routing without reopening Cortex capability implementation."
+            "Wave 11 and the ATLAS catch-up are already complete. The next bounded lane is an ATLAS root projection slice that keeps the live Cortex read model aligned with AI Repetition-to-Automation Pipeline, specifically the bounded receipt skeleton drafts control-plane surface, without reopening Cortex capability implementation."
         )
         payload["task_frame"]["blocked_by"] = []
         payload["task_frame"]["required_inputs"] = [
@@ -189,16 +189,16 @@ class CortexWorkerPromptTests(unittest.TestCase):
         payload = json.loads(json.dumps(self.operator_surface_payload))
         payload["generated_at"] = "2026-05-06T22:04:00+00:00"
         payload["operator_summary"] = (
-            "Cortex operator surface for atlas-cortex-catch-up derived from explicit current-state, "
+            "Cortex operator surface for docs-adr-or-debt-slice derived from explicit current-state, "
             "rail-state, context, validation, and seed artifacts."
         )
         payload["rail_status"] = "ready"
         payload["active_blockers"] = []
         payload["dirty_lanes"] = []
         payload["next_recommended_lane"] = {
-            "lane_id": "atlas-cortex-catch-up",
+            "lane_id": "docs-adr-or-debt-slice",
             "owner_layer": "atlas",
-            "rationale": "Wave 11 is landed as the latest clean Cortex step. The next bounded lane is an ATLAS root catch-up that records the widened Cortex rail surface, preserves stack-level runtime and receipt posture, and prepares any later owner-side routing without reopening Cortex capability implementation.",
+            "rationale": "Wave 11 and the ATLAS catch-up are already complete. The next bounded lane is an ATLAS root projection slice that keeps the live Cortex read model aligned with AI Repetition-to-Automation Pipeline, specifically the bounded receipt skeleton drafts control-plane surface, without reopening Cortex capability implementation.",
             "blocked_by": [],
             "source_refs": [
                 "runtime/cortex/current-state/latest.json",
@@ -213,17 +213,17 @@ class CortexWorkerPromptTests(unittest.TestCase):
             "info": 1,
             "total": 5,
         }
-        payload["context_packet_id"] = "context-atlas-cortex-catch-up"
+        payload["context_packet_id"] = "context-docs-adr-or-debt-slice"
         payload["context_summary"] = (
-            "Cortex context packet for atlas-cortex-catch-up derived from explicit current-state, "
+            "Cortex context packet for docs-adr-or-debt-slice derived from explicit current-state, "
             "rail-state, validation, and seed artifacts."
         )
-        payload["task_frame_summary"]["lane_id"] = "atlas-cortex-catch-up"
+        payload["task_frame_summary"]["lane_id"] = "docs-adr-or-debt-slice"
         payload["task_frame_summary"]["owner_layer"] = "atlas"
-        payload["task_frame_summary"]["title"] = "Perform the matching ATLAS/Cortex catch-up."
+        payload["task_frame_summary"]["title"] = "Project the post-catch-up ATLAS systems lane."
         payload["task_frame_summary"]["status"] = "ready"
         payload["task_frame_summary"]["rationale"] = (
-            "Wave 11 is landed as the latest clean Cortex step. The next bounded lane is an ATLAS root catch-up that records the widened Cortex rail surface, preserves stack-level runtime and receipt posture, and prepares any later owner-side routing without reopening Cortex capability implementation."
+            "Wave 11 and the ATLAS catch-up are already complete. The next bounded lane is an ATLAS root projection slice that keeps the live Cortex read model aligned with AI Repetition-to-Automation Pipeline, specifically the bounded receipt skeleton drafts control-plane surface, without reopening Cortex capability implementation."
         )
         payload["task_frame_summary"]["blocked_by"] = []
         payload["task_frame_summary"]["required_inputs"] = [
@@ -272,9 +272,9 @@ class CortexWorkerPromptTests(unittest.TestCase):
         payload["upstream"] = "origin/codex/cortex-worker-prompt-contract-wave6"
         payload["published"] = True
         payload["next_recommended_lane"] = {
-            "lane_id": "atlas-cortex-catch-up",
+            "lane_id": "docs-adr-or-debt-slice",
             "owner_layer": "atlas",
-            "rationale": "Wave 11 is landed as the latest clean Cortex step. The next bounded lane is an ATLAS root catch-up that records the widened Cortex rail surface, preserves stack-level runtime and receipt posture, and prepares any later owner-side routing without reopening Cortex capability implementation.",
+            "rationale": "Wave 11 and the ATLAS catch-up are already complete. The next bounded lane is an ATLAS root projection slice that keeps the live Cortex read model aligned with AI Repetition-to-Automation Pipeline, specifically the bounded receipt skeleton drafts control-plane surface, without reopening Cortex capability implementation.",
             "blocked_by": [],
             "source_refs": [
                 "runtime/cortex/current-state/latest.json",
@@ -286,15 +286,13 @@ class CortexWorkerPromptTests(unittest.TestCase):
                 "runtime/cortex/kernel.rule-registry.seed.v1.json",
             ],
         }
-        payload["context_packet_id"] = "context-atlas-cortex-catch-up"
-        payload["task_frame_summary"]["lane_id"] = "atlas-cortex-catch-up"
-        payload["task_frame_summary"]["owner_layer"] = "cortex"
-        payload["task_frame_summary"]["title"] = "Promote Cortex _stack consumer default routing."
+        payload["context_packet_id"] = "context-docs-adr-or-debt-slice"
+        payload["task_frame_summary"]["lane_id"] = "docs-adr-or-debt-slice"
+        payload["task_frame_summary"]["owner_layer"] = "atlas"
+        payload["task_frame_summary"]["title"] = "Project the post-catch-up ATLAS systems lane."
         payload["task_frame_summary"]["status"] = "ready"
         payload["task_frame_summary"]["rationale"] = (
-            "The worker-prompt contract is landed, but Cortex still needs one bounded _stack pilot that consumes current "
-            "context and planning artifacts without transcript scraping while planner, context, proof, receipt-draft, "
-            "and final receipt stay separate and linked by refs and digests."
+            "Wave 11 and the ATLAS catch-up are already complete. The next bounded lane is an ATLAS root projection slice that keeps the live Cortex read model aligned with AI Repetition-to-Automation Pipeline, specifically the bounded receipt skeleton drafts control-plane surface, without reopening Cortex capability implementation."
         )
         payload["task_frame_summary"]["blocked_by"] = []
         payload["task_frame_summary"]["required_inputs"] = [
@@ -349,15 +347,15 @@ class CortexWorkerPromptTests(unittest.TestCase):
 
         self.assertEqual("atlas.cortex.worker-prompt.v1", payload["contract_version"])
         self.assertEqual("read_only_advisory", payload["authority_level"])
-        self.assertEqual("atlas-cortex-catch-up", payload["next_recommended_lane"]["lane_id"])
-        self.assertEqual("context-atlas-cortex-catch-up", payload["context_packet_id"])
+        self.assertEqual("docs-adr-or-debt-slice", payload["next_recommended_lane"]["lane_id"])
+        self.assertEqual("context-docs-adr-or-debt-slice", payload["context_packet_id"])
         self.assertEqual(
-            "atlas_cortex_catch_up",
+            "docs_adr_or_debt_slice",
             payload["planner_contract"]["template_id"],
         )
         self.assertIn("implementation_plan", payload["planner_contract"])
         self.assertIn("failure_modes_to_avoid", payload["planner_contract"])
-        self.assertEqual("assignment-atlas-cortex-catch-up", payload["assignment_id"])
+        self.assertEqual("assignment-docs-adr-or-debt-slice", payload["assignment_id"])
         self.assertTrue(str(payload["stack_lock_digest"]).startswith("sha256:"))
         self.assertIn(
             "runtime/cortex/kernel.proof-summary.examples.v1.json",
@@ -391,7 +389,7 @@ class CortexWorkerPromptTests(unittest.TestCase):
 
         self.assertEqual(json.dumps(payload), json.dumps(artifact.payload))
         self.assertIn("# Cortex Worker Prompt", summary)
-        self.assertIn("atlas-cortex-catch-up", summary)
+        self.assertIn("docs-adr-or-debt-slice", summary)
         self.assertIn("Verification Steps", summary)
         self.assertIn("Workflow Profile", summary)
         self.assertIn("Non-Execution Guards", summary)

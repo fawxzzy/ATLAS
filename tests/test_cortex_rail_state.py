@@ -25,12 +25,13 @@ class CortexRailStateTests(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.root = atlas_root()
 
-    def test_priority_pivot_keeps_next_action_in_cortex(self) -> None:
+    def test_live_seed_routes_to_the_post_catch_up_atlas_projection_lane(self) -> None:
         assessment = load_and_classify_rail_state(root=self.root)
-        self.assertEqual("cortex", assessment.priority_owner_layer)
-        self.assertEqual("cortex", assessment.next_layer)
-        self.assertEqual("cortex", assessment.next_action.owner_layer)
-        self.assertIn(PIVOT_OVERRIDE_RULE_ID, assessment.matched_rule_ids)
+        self.assertEqual("atlas", assessment.priority_owner_layer)
+        self.assertEqual("atlas", assessment.next_layer)
+        self.assertEqual("atlas", assessment.next_action.owner_layer)
+        self.assertEqual("docs-adr-or-debt-slice", assessment.next_action.action_id)
+        self.assertIn(FOOTER_CATCH_UP_PATTERN_ID, assessment.matched_rule_ids)
         self.assertIn(KNOWN_DEBT_RULE_ID, assessment.matched_rule_ids)
 
     def test_known_stack_validation_debt_is_preserved_without_blocking_progress(self) -> None:

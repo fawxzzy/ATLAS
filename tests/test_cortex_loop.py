@@ -60,7 +60,7 @@ class CortexLoopTests(unittest.TestCase):
         _write_json(root / "runtime" / "cortex" / "kernel.proof-summary.examples.v1.json", self._proof_payload())
         return root
 
-    def test_priority_pivot_produces_cortex_runtime_run_result(self) -> None:
+    def test_live_post_catch_up_seed_produces_root_projection_run_result(self) -> None:
         result = load_and_run_cortex_loop(root=self.root)
         payload = result.to_payload()
         trace = payload["applied_rule_trace"]
@@ -69,7 +69,7 @@ class CortexLoopTests(unittest.TestCase):
         self.assertEqual("atlas", result.rail_state.next_layer)
         self.assertEqual("atlas", result.selected_next_action["owner_layer"])
         self.assertEqual("atlas", result.worker_plan.owner_layer)
-        self.assertEqual("atlas_cortex_catch_up", result.worker_plan.template_id)
+        self.assertEqual("docs_adr_or_debt_slice", result.worker_plan.template_id)
         self.assertTrue(result.receipt_ready)
         self.assertEqual("cortex", result.next_required_layer)
         self.assertTrue(result.known_ambient_debt)
@@ -79,7 +79,7 @@ class CortexLoopTests(unittest.TestCase):
         self.assertTrue(result.worker_plan.implementation_plan)
         self.assertTrue(result.worker_plan.failure_modes_to_avoid)
         self.assertTrue(any(rule.kind == "failure_mode" for rule in result.rules_applied))
-        self.assertEqual("atlas-cortex-catch-up", trace["selected_next_action_id"])
+        self.assertEqual("docs-adr-or-debt-slice", trace["selected_next_action_id"])
         self.assertIn("fitness-owner-adoption-resumes-unless-pivot", trace["pattern_ids"])
         self.assertIn("known-validation-debt-stays-ambient-unless-regression", trace["rule_ids"])
         self.assertIn("cortex-observes-interprets-proves-only", trace["failure_mode_ids"])

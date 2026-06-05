@@ -3,7 +3,7 @@
   "posture": {
     "posture_id": "cortex-wave1-landed",
     "classification": "steady",
-    "summary": "Cortex current-state, rail-state, context assembly, operator surface, canonical ledger, worker-prompt contract, canonical stack advisory handoff v2, bounded _stack stack-consumption pilot proof, read-only receipt interpretation, bounded receipt-interpretation stack consumption, and read-only receipt-interpretation consumption feedback are landed; the next bounded tranche is an ATLAS root catch-up that records the widened Cortex rail surface without reopening capability work, and known stack validation debt stays ambient debt.",
+    "summary": "Cortex current-state, rail-state, context assembly, operator surface, canonical ledger, worker-prompt contract, canonical stack advisory handoff v2, bounded _stack stack-consumption pilot proof, read-only receipt interpretation, bounded receipt-interpretation stack consumption, and read-only receipt-interpretation consumption feedback are landed; the next bounded tranche is an ATLAS root post-catch-up projection slice that reseats the live Cortex recommendation onto the AI Repetition-to-Automation Pipeline control-plane lane without reopening capability work, and known stack validation debt stays ambient debt.",
     "handoff_summaries": [
       "docs/atlas/notes/cortex-priority-pivot-2026-04-26.md",
       "docs/atlas/notes/cortex-mvp-spec-2026-04-26.md",
@@ -62,16 +62,16 @@
           "notes": [
             "Do not classify unchanged warning debt as a Cortex regression.",
             "Wave 11 stays read-only feedback only and does not widen dispatch, execution, approval, final receipt authority, owner-truth mutation, Lifeline-truth mutation, or transcript scraping.",
-            "The next bounded move is a root catch-up that preserves the widened Cortex rail posture without reopening capability implementation.",
+            "The next bounded move is a root projection slice that preserves the widened Cortex rail posture while reseating the live recommendation onto the AI Repetition-to-Automation Pipeline control-plane lane without reopening capability implementation.",
             "Final receipt authority, approval, execution, dispatch, owner-truth mutation, Lifeline-truth mutation, and transcript scraping remain out of scope."
           ]
         }
       ],
       "next_action": {
-        "action_id": "atlas-cortex-catch-up",
+        "action_id": "docs-adr-or-debt-slice",
         "owner_layer": "atlas",
-        "title": "Perform the matching ATLAS/Cortex catch-up.",
-        "rationale": "Wave 11 is landed as the latest clean Cortex step. The next bounded lane is an ATLAS root catch-up that records the widened Cortex rail surface, preserves stack-level runtime and receipt posture, and prepares any later owner-side routing without reopening Cortex capability implementation.",
+        "title": "Project the post-catch-up ATLAS systems lane.",
+        "rationale": "Wave 11 and the ATLAS catch-up are already complete. The next bounded lane is an ATLAS root projection slice that keeps the live Cortex read model aligned with AI Repetition-to-Automation Pipeline, specifically the bounded receipt skeleton drafts control-plane surface, without reopening Cortex capability implementation.",
         "required_inputs": [
           "runtime/cortex/current-state/latest.json",
           "runtime/cortex/rail-state/latest.json",
@@ -83,13 +83,15 @@
           "runtime/cortex/kernel.state-model.seed.v1.json",
           "runtime/cortex/kernel.rule-registry.seed.v1.json",
           "runtime/receipts/validation/stack-validation.latest.json",
+          "docs/atlas-book/01-current-state.md",
+          "docs/atlas-book/02-lanes-and-markers.md",
           "docs/architecture/ATLAS-CORTEX-PLAYBOOK-CODEX.md"
         ],
         "verification_plan": [
           "python -m unittest tests.test_cortex_receipt_interpretation_consumption_feedback tests.test_cortex_receipt_interpretation_stack_consumption tests.test_cortex_receipt_interpreter tests.test_cortex_stack_handoff tests.test_cortex_stack_consumption_pilot tests.test_cortex_worker_prompt tests.test_cortex_worker_plan tests.test_cortex_current_state tests.test_cortex_rail_state_reader tests.test_cortex_context_assembler tests.test_cortex_operator_surface tests.test_cortex_ledger tests.test_cortex_loop tests.test_cortex_run_artifact tests.test_cortex_run_ledger -v",
           "python .\\ops\\validation\\validate_stack.py --ratchet"
         ],
-        "receipt_scope": "ATLAS root may project and reconcile stack-level Cortex posture only. owner-repo truth, execution, approval, dispatch, final receipt authority, owner-truth mutation, Lifeline-truth mutation, and transcript scraping remain out of scope."
+        "receipt_scope": "ATLAS root may project and reconcile stack-level Cortex posture only. This slice may ratchet the live Cortex recommendation onto the bounded AI Repetition-to-Automation Pipeline control-plane lane, but owner-repo truth, execution, approval, dispatch, final receipt authority, owner-truth mutation, Lifeline-truth mutation, and transcript scraping remain out of scope."
       },
       "boundary_reminders": [
         "Fitness owns product UI truth.",
