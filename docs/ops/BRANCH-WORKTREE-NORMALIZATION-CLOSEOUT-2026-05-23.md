@@ -25,16 +25,16 @@ Remaining active worktrees: `10`
 
 | Path | Branch or state | Dirty state | Classification | Current decision |
 | --- | --- | --- | --- | --- |
-| `C:/ATLAS` | `main` | `13` unrelated modified branding files plus untracked `archive/` | `keep active` | live root surface; not a disposal target in this lane |
-| `C:/ATLAS/tmp/atlas-adopt-fawx-den-os-techstack` | `codex/adopt-fawx-den-os-techstack` | clean | `stale but not safe` | retain; branch is still `1` commit ahead of `main` |
-| `C:/ATLAS/tmp/atlas-foundation-lock-refresh` | `codex/foundation-pnpm-protected-refresh` | `2` untracked artifact surfaces | `manual review` | retain; branch is merged but artifact residue still needs explicit review |
-| `C:/ATLAS/tmp/atlas-playbook-lock-refresh` | `codex/sparse-protected-stack-validation` | `2` untracked artifact surfaces | `manual review` | retain; branch is merged but artifact residue still needs explicit review |
-| `C:/ATLAS/tmp/feedback-task-packet-filter-fix` | `codex/fix-feedback-task-packet-status-filter` | clean | `stale but not safe` | retain; local-only branch is still `1` commit ahead of `main` |
-| `C:/ATLAS/tmp/pr45-clean` | detached `HEAD` at `3cdafe9` | `2` modified files: `docs/ops/ATLAS-ARCHIVE-NORMALIZATION-CHECKPOINT.md`, `stack.lock.yaml` | `manual review` | retain; local modifications must be preserved or discarded explicitly |
-| `C:/ATLAS/tmp/r21-seed-wave11` | `codex/cortex-receipt-interpretation-consumption-feedback-wave11-seed` | clean | `stale but not safe` | retain; branch is still `1` commit ahead of `main` |
-| `C:/ATLAS/tmp/rollback-check-1716271` | detached `HEAD` at `1716271` | clean | `safety checkpoint` | retain intentionally as rollback evidence |
-| `C:/ATLAS/tmp/rollback-check-420c5c3` | detached `HEAD` at `420c5c3` | clean | `safety checkpoint` | retain intentionally as recovery-era rollback evidence |
-| `C:/ATLAS-worktrees/pr1-stack-lock-refresh` | `codex/pr1-stack-lock-refresh` | clean | `stale but not safe` | retain; branch is still `3` commits ahead of `main` |
+| `.` | `main` | `13` unrelated modified branding files plus untracked `archive/` | `keep active` | live root surface; not a disposal target in this lane |
+| `tmp/atlas-adopt-fawx-den-os-techstack` | `codex/adopt-fawx-den-os-techstack` | clean | `stale but not safe` | retain; branch is still `1` commit ahead of `main` |
+| `tmp/atlas-foundation-lock-refresh` | `codex/foundation-pnpm-protected-refresh` | `2` untracked artifact surfaces | `manual review` | retain; branch is merged but artifact residue still needs explicit review |
+| `tmp/atlas-playbook-lock-refresh` | `codex/sparse-protected-stack-validation` | `2` untracked artifact surfaces | `manual review` | retain; branch is merged but artifact residue still needs explicit review |
+| `tmp/feedback-task-packet-filter-fix` | `codex/fix-feedback-task-packet-status-filter` | clean | `stale but not safe` | retain; local-only branch is still `1` commit ahead of `main` |
+| `tmp/pr45-clean` | detached `HEAD` at `3cdafe9` | `2` modified files: `docs/ops/ATLAS-ARCHIVE-NORMALIZATION-CHECKPOINT.md`, `stack.lock.yaml` | `manual review` | retain; local modifications must be preserved or discarded explicitly |
+| `tmp/r21-seed-wave11` | `codex/cortex-receipt-interpretation-consumption-feedback-wave11-seed` | clean | `stale but not safe` | retain; branch is still `1` commit ahead of `main` |
+| `tmp/rollback-check-1716271` | detached `HEAD` at `1716271` | clean | `safety checkpoint` | retain intentionally as rollback evidence |
+| `tmp/rollback-check-420c5c3` | detached `HEAD` at `420c5c3` | clean | `safety checkpoint` | retain intentionally as recovery-era rollback evidence |
+| `<ATLAS_WORKTREES>/pr1-stack-lock-refresh` | `codex/pr1-stack-lock-refresh` | clean | `stale but not safe` | retain; branch is still `3` commits ahead of `main` |
 
 ## Remaining Local Branches
 

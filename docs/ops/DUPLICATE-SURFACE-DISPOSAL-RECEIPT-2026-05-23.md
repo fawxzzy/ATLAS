@@ -9,8 +9,8 @@ Status: Pass 1 complete
 
 Targets for this pass:
 
-- `C:/ATLAS-worktrees/pr1-stack-lock-refresh`
-- `C:/ATLAS-standalone/fitness-release-main`
+- `<ATLAS_WORKTREES>/pr1-stack-lock-refresh`
+- `<ATLAS_STANDALONE>/fitness-release-main`
 
 Out of scope for this pass:
 
@@ -23,7 +23,7 @@ Out of scope for this pass:
 
 ## Removed surfaces
 
-### `C:/ATLAS-worktrees/pr1-stack-lock-refresh`
+### `<ATLAS_WORKTREES>/pr1-stack-lock-refresh`
 
 - Status before removal:
   - active worktree: yes
@@ -37,7 +37,7 @@ Out of scope for this pass:
 
 ## Retained surfaces
 
-### `C:/ATLAS-standalone/fitness-release-main`
+### `<ATLAS_STANDALONE>/fitness-release-main`
 
 - Retained in this pass: yes
 - Reason:
@@ -101,7 +101,7 @@ Post-correction result:
 
 ## Why no source truth was lost
 
-1. The canonical ATLAS root remains `C:/ATLAS` on `main`.
+1. The canonical ATLAS root remains `.` on `main`.
 2. The removed `pr1` worktree was not treated as source truth; its commit intent was classified and preserved in receipts first.
 3. The only potentially useful idea from `bd3791f` was explicitly parked instead of silently discarded.
 4. `fitness-release-main` was retained rather than deleted because its evidence status is not fully closed yet.

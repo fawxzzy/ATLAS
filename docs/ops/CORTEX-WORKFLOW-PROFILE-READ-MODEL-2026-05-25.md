@@ -36,13 +36,13 @@ Not included:
 ## Verification
 
 Passed:
-- `python -m unittest C:\ATLAS\tests\test_cortex_context_assembler.py`
-- `python -m unittest C:\ATLAS\tests\test_cortex_worker_prompt.py`
+- `python -m unittest tests.test_cortex_context_assembler`
+- `python -m unittest tests.test_cortex_worker_prompt`
 - `python .\ops\validation\validate_stack.py --allow-missing-locked-repos`
 - direct payload sanity for `ops.cortex.workflow_profile.build_workflow_profile_payload()`
 
 Attempted but not re-ratified in this lane:
-- `python -m unittest C:\ATLAS\tests\test_atlas_codex_context.py`
+- `python -m unittest tests.test_atlas_codex_context`
 
 The Codex-context suite timed out twice as ambient test debt. This lane does not modify `ops/atlas/build_codex_context.py`, and Codex bootstrap already had the canonical profile wired before this Cortex read-model change.
 

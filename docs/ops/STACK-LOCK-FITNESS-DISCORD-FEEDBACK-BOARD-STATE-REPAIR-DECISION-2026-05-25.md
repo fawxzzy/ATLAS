@@ -2,11 +2,11 @@
 
 ## Decision
 
-Do not update `C:\ATLAS\stack.lock.yaml` for this package.
+Do not update `stack.lock.yaml` for this package.
 
 ## Reason
 
-- the implementation work happened inside `C:\ATLAS\repos\fawxzzy-fitness`
+- the implementation work happened inside `repos/fawxzzy-fitness`
 - current stack lock policy does not pin `fitness` in `stack.yaml#stack_lock.include_repo_ids`
 - there is no stack-lock tracked repo ref to refresh for this package
 

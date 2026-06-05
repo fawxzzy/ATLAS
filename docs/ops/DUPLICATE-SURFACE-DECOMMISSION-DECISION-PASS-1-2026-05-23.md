@@ -21,8 +21,8 @@ This pass converts the initial duplicate-surface inventory into explicit retenti
 
 | Surface | Current role | Decision | Why | Required verification before later removal or retention closeout |
 | --- | --- | --- | --- | --- |
-| `C:/ATLAS-standalone/fitness-release-main` | Standalone Fitness checkout outside canonical `repos/fawxzzy-fitness` | manual review, then either archive deeper or delete later | This is the most dangerous remaining duplicate-source surface because it is a dirty Fitness checkout outside canonical governance | Confirm whether the dirty delta contains unique retained evidence, release-cutover context, or unpreserved commits; if not, confirm it is fully superseded by canonical `repos/fawxzzy-fitness` and retained `tmp` evidence surfaces |
-| `C:/ATLAS-worktrees/pr1-stack-lock-refresh` | External ATLAS worktree outside root | delete later if no unique work remains | The surface looks like stale duplicate ATLAS lineage, not canonical root, but it still needs a unique-commit check before deletion | Confirm merge base against `main`, check for unique commits or docs not preserved elsewhere, then remove worktree and branch in a later disposal pass if clear |
+| `<ATLAS_STANDALONE>/fitness-release-main` | Standalone Fitness checkout outside canonical `repos/fawxzzy-fitness` | manual review, then either archive deeper or delete later | This is the most dangerous remaining duplicate-source surface because it is a dirty Fitness checkout outside canonical governance | Confirm whether the dirty delta contains unique retained evidence, release-cutover context, or unpreserved commits; if not, confirm it is fully superseded by canonical `repos/fawxzzy-fitness` and retained `tmp` evidence surfaces |
+| `<ATLAS_WORKTREES>/pr1-stack-lock-refresh` | External ATLAS worktree outside root | delete later if no unique work remains | The surface looks like stale duplicate ATLAS lineage, not canonical root, but it still needs a unique-commit check before deletion | Confirm merge base against `main`, check for unique commits or docs not preserved elsewhere, then remove worktree and branch in a later disposal pass if clear |
 | `repos/fawxzzy-trove-release-cutover` | Temporary Trove cutover lane | retain as evidence for now | It is a clean non-canonical cutover lane with documented purpose; deleting it before a Trove-specific cutover closeout would be blind cleanup | Confirm whether its cutover intent is still referenced by active Trove deployment or recovery docs; if not, convert it into explicit archived evidence or later-delete candidate |
 | `repos/fawxzzy-lifeline-operator-evidence` | Temporary Lifeline evidence lane | retain as evidence for now | It is documented as a non-canonical operator evidence surface rather than a mystery duplicate | Confirm whether any evidence inside still supports active Lifeline operator or recovery workflows; if not, archive or fold evidence into a governed retained-evidence structure |
 
@@ -42,7 +42,7 @@ These are not the main blocker set, but they should not remain ambiguous indefin
 
 | Surface | Decision | Why |
 | --- | --- | --- |
-| `C:/ATLAS-worktrees/remove-stale-cortex-contract-v2` | delete later after residue check | It no longer presents as a live worktree root and looks like orphaned residue |
+| `<ATLAS_WORKTREES>/remove-stale-cortex-contract-v2` | delete later after residue check | It no longer presents as a live worktree root and looks like orphaned residue |
 | `repos/fawxzzy-fitness-discord-bot` | manual review, likely delete later | Empty or placeholder surface should either be given a documented owner/purpose or removed |
 | `repos/fawxzzy-playbook-codex` | manual review | Adjacent non-canonical helper surface, but not an immediate production blocker |
 | `repos/playbook-demo` | manual review | Example/demo surface should be explicitly retained or later deleted |
@@ -64,8 +64,8 @@ These are not the main blocker set, but they should not remain ambiguous indefin
 
 Run `Duplicate Surface Decommission Verification Pass 2` focused only on:
 
-- `C:/ATLAS-standalone/fitness-release-main`
-- `C:/ATLAS-worktrees/pr1-stack-lock-refresh`
+- `<ATLAS_STANDALONE>/fitness-release-main`
+- `<ATLAS_WORKTREES>/pr1-stack-lock-refresh`
 - `repos/fawxzzy-trove-release-cutover`
 - `repos/fawxzzy-lifeline-operator-evidence`
 

@@ -30,10 +30,10 @@ def _base_audit_index(**overrides: object) -> dict[str, object]:
         "receipts_with_auto_approved_not_false": [],
         "invalid_receipts": [],
         "receipt_inventory": [],
-        "receipts_root": "repos/fawxzzy-lifeline/.lifeline/receipts/proof-reference-accepted",
-        "schema_path": "repos/fawxzzy-lifeline/schemas/proof-reference-receipt.schema.json",
+        "receipts_root": "repos/lifeline/.lifeline/receipts/proof-reference-accepted",
+        "schema_path": "repos/lifeline/schemas/proof-reference-receipt.schema.json",
         "audit_artifact_written": True,
-        "audit_artifact_path": "repos/fawxzzy-lifeline/.lifeline/audits/proof-reference-receipt-index.json",
+        "audit_artifact_path": "repos/lifeline/.lifeline/audits/proof-reference-receipt-index.json",
     }
     payload.update(overrides)
     return payload
@@ -105,7 +105,7 @@ class CortexLifelineAuditIndexTests(unittest.TestCase):
         self.assertEqual(1, summary.receipt_count)
         self.assertEqual(1, summary.valid_receipt_count)
         self.assertEqual(0, summary.invalid_receipt_count)
-        self.assertEqual("repos/fawxzzy-lifeline/.lifeline/audits/proof-reference-receipt-index.json", summary.lifeline_audit_index_path)
+        self.assertEqual("repos/lifeline/.lifeline/audits/proof-reference-receipt-index.json", summary.lifeline_audit_index_path)
         self.assertEqual((receipt_path,), summary.receipts_with_ambient_debt)
         self.assertFalse(summary.connector_publication_blocked)
 

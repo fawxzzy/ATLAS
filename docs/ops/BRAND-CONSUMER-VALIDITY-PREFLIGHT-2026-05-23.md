@@ -22,7 +22,7 @@ This preflight determines which declared brand consumers are valid sync targets 
 
 - `branding/**` is the active local lane residue.
 - `archive/` remains intentionally untracked and out of scope.
-- `repos/fawxzzy-fitness` is not present under `C:/ATLAS/repos` in this root session.
+- `repos/fawxzzy-fitness` is not present under `repos/` in this root session.
 - `_stack` and Trove consumer targets do exist locally.
 
 ## Consumer validity table

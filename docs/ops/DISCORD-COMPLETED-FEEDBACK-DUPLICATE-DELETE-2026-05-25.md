@@ -22,7 +22,7 @@ Implementation:
   - keeps completed-board copies intact
 
 Tests:
-- `node --test C:\ATLAS\repos\fawxzzy-fitness\scripts\archive-duplicate-completed-feedback-threads.test.mjs`
+- `node --test repos/fawxzzy-fitness/scripts/archive-duplicate-completed-feedback-threads.test.mjs`
 
 Live runs:
 1. Dry-run before delete:

@@ -93,8 +93,8 @@ Used the direct Fitness operator post path:
 
 - repo: `repos/fawxzzy-fitness`
 - command:
-  - `npm run discord:update:post -- --title "ATLAS Cleanup & Re-sync Status" --body-file C:\ATLAS\tmp\atlas-cleanup-resync-status-2026-05-27.md --dry-run --json`
-  - `npm run discord:update:post -- --title "ATLAS Cleanup & Re-sync Status" --body-file C:\ATLAS\tmp\atlas-cleanup-resync-status-2026-05-27.md --apply --json`
+  - `npm run discord:update:post -- --title "ATLAS Cleanup & Re-sync Status" --body-file tmp/atlas-cleanup-resync-status-2026-05-27.md --dry-run --json`
+  - `npm run discord:update:post -- --title "ATLAS Cleanup & Re-sync Status" --body-file tmp/atlas-cleanup-resync-status-2026-05-27.md --apply --json`
 
 The shell loaded the pulled production `.env.local` values into process env first so the script had:
 

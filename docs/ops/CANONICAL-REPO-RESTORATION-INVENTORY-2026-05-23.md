@@ -124,7 +124,7 @@ That is why both `Canonical Repo Restoration` and `Tmp Dependency Elimination` n
 
 The strongest regression signal is the current live Fitness release ledger inside the `tmp` checkout.
 
-It records that the standalone Fitness clone had already been promoted into `C:/ATLAS/repos/fawxzzy-fitness`, but that path is now missing. That means:
+It records that the standalone Fitness clone had already been promoted into `repos/fawxzzy-fitness`, but that path is now missing. That means:
 
 - the GitHub/Vercel/Supabase identity was successfully stabilized earlier
 - the canonical owner-repo root later regressed out of place

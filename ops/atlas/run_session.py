@@ -167,7 +167,7 @@ def session_manifest_template(
                 "path": "runtime/cortex",
                 "model": "root-owned-subsystem",
             },
-            "executor_component": component_snapshot(lock_payload, "lifeline", fallback_path="repos/fawxzzy-lifeline"),
+            "executor_component": component_snapshot(lock_payload, "lifeline", fallback_path="repos/lifeline"),
         },
         "governed_surfaces": {
             "registry_digest": registry_digest,

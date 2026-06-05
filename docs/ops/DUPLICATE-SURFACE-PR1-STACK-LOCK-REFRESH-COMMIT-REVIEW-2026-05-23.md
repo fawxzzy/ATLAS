@@ -4,7 +4,7 @@ Date: 2026-05-23
 Lane: Duplicate Surface Decommission
 Mode: Read-only commit classification
 Status: Initial classification complete
-Target: `C:/ATLAS-worktrees/pr1-stack-lock-refresh`
+Target: `<ATLAS_WORKTREES>/pr1-stack-lock-refresh`
 
 ## Purpose
 
@@ -12,7 +12,7 @@ This review classifies the three unique commits on `codex/pr1-stack-lock-refresh
 
 ## Branch state
 
-- Worktree: `C:/ATLAS-worktrees/pr1-stack-lock-refresh`
+- Worktree: `<ATLAS_WORKTREES>/pr1-stack-lock-refresh`
 - Branch: `codex/pr1-stack-lock-refresh`
 - HEAD: `50b8b459c29309d50863261b9787ca0ccb59b28f`
 - Remote: `https://github.com/fawxzzy/ATLAS.git`
@@ -113,4 +113,4 @@ Run a focused `PR1 Stack Lock Refresh Commit Disposition Pass` that decides, com
 - `fda89ab` should be replayed in full or part
 - both should be archived as historical evidence and explicitly discarded
 
-Only after that decision should `C:/ATLAS-worktrees/pr1-stack-lock-refresh` become a delete-later candidate.
+Only after that decision should `<ATLAS_WORKTREES>/pr1-stack-lock-refresh` become a delete-later candidate.

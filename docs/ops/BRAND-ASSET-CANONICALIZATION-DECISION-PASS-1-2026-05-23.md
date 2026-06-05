@@ -99,7 +99,7 @@ This pass decides which declared brand consumers are valid sync targets from the
   - `repos/fawxzzy-fitness/public/favicon.ico`
 - Current status: missing from this root session
 - Repo status:
-  - `repos/fawxzzy-fitness` does not currently exist under `C:/ATLAS/repos`
+  - `repos/fawxzzy-fitness` does not currently exist under `repos/`
 
 #### Decision
 

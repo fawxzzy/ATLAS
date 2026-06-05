@@ -13,7 +13,7 @@ Depends on:
 
 This pass inspects the two highest-risk external duplicate surfaces to determine whether they carry unique source truth, preserved evidence value, stale generated residue, or later-delete potential.
 
-## Review target: `C:/ATLAS-standalone/fitness-release-main`
+## Review target: `<ATLAS_STANDALONE>/fitness-release-main`
 
 ### Live state
 
@@ -70,7 +70,7 @@ Compared with canonical `repos/fawxzzy-fitness`, this surface overlaps the app/p
 2. Confirm whether `src/generated/appBuildManifest.json` and the generated/runtime surfaces are fully disposable.
 3. If no unique retained-evidence value exists, mark the surface as stale duplicate and later-delete candidate.
 
-## Review target: `C:/ATLAS-worktrees/pr1-stack-lock-refresh`
+## Review target: `<ATLAS_WORKTREES>/pr1-stack-lock-refresh`
 
 ### Live state
 
@@ -116,7 +116,7 @@ This is a full ATLAS root duplicate shape, including:
 
 - Purpose overlap: full
 - Source overlap: full stack root duplicate
-- Canonical-source value: not canonical; `C:/ATLAS` on `main` is canonical
+- Canonical-source value: not canonical; `.` on `main` is canonical
 - Duplicate-source risk: high because it is a near-complete ATLAS root outside the canonical workspace, with unique commits still not proven absorbed
 
 ### Recommended disposition

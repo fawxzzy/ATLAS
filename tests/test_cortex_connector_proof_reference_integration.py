@@ -145,7 +145,7 @@ def _candidate_set_payload(
         "owner_layer": "cortex",
         "source_inventory_path": "runtime/cortex/connector-evidence/latest.json",
         "source_inventory_run_id": "lane-ab-inventory",
-        "lifeline_audit_index_path": "repos/fawxzzy-lifeline/.lifeline/audits/proof-reference-receipt-index.json",
+        "lifeline_audit_index_path": "repos/lifeline/.lifeline/audits/proof-reference-receipt-index.json",
         "candidate_set_blocked": candidate_set_blocked,
         "candidate_set_blockers": candidate_set_blockers or [],
         "candidate_count": len(candidates),
@@ -562,7 +562,7 @@ class CortexConnectorProofReferenceIntegrationTests(unittest.TestCase):
                 )
             ],
         )
-        receipt_path = root / "repos" / "fawxzzy-lifeline" / ".lifeline" / "receipts" / "proof-reference-accepted" / "fitness" / "F11" / "sha256-one.json"
+        receipt_path = root / "repos" / "lifeline" / ".lifeline" / "receipts" / "proof-reference-accepted" / "fitness" / "F11" / "sha256-one.json"
         _write_json(receipt_path, {"receipt_id": "sha256:one"})
         before = {
             "base_pack": base_pack_path.read_text(encoding="utf-8"),

@@ -14,7 +14,7 @@ This note records the decision not to extract a fresh ATLAS-root rewrite from th
 
 The potentially useful idea in `bd3791f` was narrower than the full branch patch:
 
-- improve how sibling ATLAS-adjacent paths like `C:/ATLAS-worktrees/...` or `C:/ATLAS-standalone/...` display in diagnostics
+- improve how sibling ATLAS-adjacent paths like `<ATLAS_WORKTREES>/...` or `<ATLAS_STANDALONE>/...` display in diagnostics
 - avoid replaying the broader observation, lock-generation, and validation semantics bundled into the original commit
 
 ## Current-main check

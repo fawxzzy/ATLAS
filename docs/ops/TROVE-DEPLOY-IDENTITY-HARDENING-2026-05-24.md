@@ -51,7 +51,7 @@ Observed result:
 - Trove deploy preflight passed against the pinned local Vercel link.
 - `_stack` operator surface validation passed.
 
-From `C:\ATLAS` after root repin:
+From the ATLAS root (`.`) after root repin:
 
 - `python .\ops\validation\validate_stack.py --allow-missing-locked-repos`
 

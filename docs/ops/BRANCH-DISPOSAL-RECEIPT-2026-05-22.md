@@ -108,19 +108,19 @@ These branches were listed as safe-delete candidates in the inventory, but they 
 
 | Branch | Retained reason |
 | --- | --- |
-| `codex/atlas-qa-release-refresh-pr` | branch is attached to worktree `C:/ATLAS/tmp/atlas-qa-release-refresh-pr` |
-| `codex/cortex-admission-planning` | branch is attached to worktree `C:/ATLAS/tmp/cortex-admission-planning` |
-| `codex/cortex-surface-reconciliation` | branch is attached to worktree `C:/ATLAS/tmp/cortex-surface-reconciliation` |
-| `codex/discord-moderation-receipt-clean` | branch is attached to worktree `C:/ATLAS/tmp/atlas-moderation-receipt-clean` |
-| `codex/discord-update-workflow-memory` | branch is attached to worktree `C:/ATLAS/tmp/atlas-discord-workflow-memory` |
-| `codex/fitness-dal-slice-2` | branch is attached to worktree `C:/ATLAS-worktrees/fitness-dal-slice-2` |
-| `codex/foundation-pnpm-protected-refresh` | branch is attached to worktree `C:/ATLAS/tmp/atlas-foundation-lock-refresh` |
-| `codex/pnpm-protected-refresh` | branch is attached to worktree `C:/ATLAS/tmp/atlas-pnpm-protected-refresh` |
-| `codex/r21-main-clean` | branch is attached to worktree `C:/ATLAS/tmp/r21-main-clean` |
-| `codex/r21-main-land` | branch is attached to worktree `C:/ATLAS/tmp/r18-main-merge-20260511` |
-| `codex/sparse-protected-stack-validation` | branch is attached to worktree `C:/ATLAS/tmp/atlas-playbook-lock-refresh` |
-| `codex/spotify-club-phase-3-queue-approval` | branch is attached to worktree `C:/ATLAS/tmp/spotify-club-phase-3-queue-approval` |
-| `codex/stack-progression-checkpoint` | branch is attached to worktree `C:/ATLAS/tmp/atlas-stack-checkpoint` |
+| `codex/atlas-qa-release-refresh-pr` | branch is attached to worktree `tmp/atlas-qa-release-refresh-pr` |
+| `codex/cortex-admission-planning` | branch is attached to worktree `tmp/cortex-admission-planning` |
+| `codex/cortex-surface-reconciliation` | branch is attached to worktree `tmp/cortex-surface-reconciliation` |
+| `codex/discord-moderation-receipt-clean` | branch is attached to worktree `tmp/atlas-moderation-receipt-clean` |
+| `codex/discord-update-workflow-memory` | branch is attached to worktree `tmp/atlas-discord-workflow-memory` |
+| `codex/fitness-dal-slice-2` | branch is attached to local-only sibling worktree `<ATLAS_WORKTREES>/fitness-dal-slice-2` |
+| `codex/foundation-pnpm-protected-refresh` | branch is attached to worktree `tmp/atlas-foundation-lock-refresh` |
+| `codex/pnpm-protected-refresh` | branch is attached to worktree `tmp/atlas-pnpm-protected-refresh` |
+| `codex/r21-main-clean` | branch is attached to worktree `tmp/r21-main-clean` |
+| `codex/r21-main-land` | branch is attached to worktree `tmp/r18-main-merge-20260511` |
+| `codex/sparse-protected-stack-validation` | branch is attached to worktree `tmp/atlas-playbook-lock-refresh` |
+| `codex/spotify-club-phase-3-queue-approval` | branch is attached to worktree `tmp/spotify-club-phase-3-queue-approval` |
+| `codex/stack-progression-checkpoint` | branch is attached to worktree `tmp/atlas-stack-checkpoint` |
 
 ## Intentionally Retained Branches
 

@@ -168,7 +168,7 @@ class AtlasQaPipelineTests(unittest.TestCase):
                     "    role: package",
                     "    status: active",
                     "  lifeline:",
-                    "    path: repos/fawxzzy-lifeline",
+                    "    path: repos/lifeline",
                     "    role: package",
                     "    status: active",
                     "  playbook:",

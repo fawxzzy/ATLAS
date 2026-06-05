@@ -19,11 +19,11 @@ Mode: governed Discord/operator rollout
 
 Key code surfaces:
 
-- `C:\ATLAS\repos\fawxzzy-fitness\src\app\api\discord\interactions\route.ts`
-- `C:\ATLAS\repos\fawxzzy-fitness\src\lib\discord\interactions.ts`
-- `C:\ATLAS\repos\fawxzzy-fitness\scripts\discord-feedback-gateway-worker.mjs`
-- `C:\ATLAS\repos\fawxzzy-fitness\docs\ops\FITNESS-DISCORD-FEEDBACK.md`
-- `C:\ATLAS\repos\fawxzzy-fitness\docs\ops\FITNESS-DISCORD-SPOTIFY-CLUB.md`
+- `repos/fawxzzy-fitness/src/app/api/discord/interactions/route.ts`
+- `repos/fawxzzy-fitness/src/lib/discord/interactions.ts`
+- `repos/fawxzzy-fitness/scripts/discord-feedback-gateway-worker.mjs`
+- `repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-FEEDBACK.md`
+- `repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-SPOTIFY-CLUB.md`
 
 ## Live rollout
 

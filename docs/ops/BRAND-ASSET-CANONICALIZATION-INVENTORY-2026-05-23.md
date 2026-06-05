@@ -106,7 +106,7 @@ Known dry-run verification path:
    `repos/fawxzzy-trove/src/app/layout.tsx` uses `/brand/atlas-sigil-master.png` as the preview image and declares favicon/app icon metadata, so stale Trove public assets affect preview-cache and install surfaces directly.
 
 4. Fitness consumer targets are declared but absent from this root.
-   `sync-brand-assets.mjs --dry-run` reports all Fitness target paths as missing because `repos/fawxzzy-fitness` is not currently present under `C:/ATLAS/repos` in this session.
+   `sync-brand-assets.mjs --dry-run` reports all Fitness target paths as missing because `repos/fawxzzy-fitness` is not currently present under `repos/` in this session.
 
 5. `_stack` also has brand drift.
    `repos/_stack/ops/assets/release-launcher.ico` is stale relative to the generated launcher ico.

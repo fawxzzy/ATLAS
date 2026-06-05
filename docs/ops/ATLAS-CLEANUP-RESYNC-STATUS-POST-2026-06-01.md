@@ -80,7 +80,7 @@ Use the direct Fitness operator post path:
 
 The shell loaded the governed Discord operator env values in-process from:
 
-- `C:\ATLAS\secrets\fitness-doctor.env`
+- `secrets/fitness-doctor.env`
 
 Pinned for the post:
 

@@ -20,10 +20,10 @@
 
 Fitness repo changes:
 
-- Added [C:/ATLAS/repos/fawxzzy-fitness/scripts/repair-feedback-board-state.mjs](/C:/ATLAS/repos/fawxzzy-fitness/scripts/repair-feedback-board-state.mjs)
-- Added [C:/ATLAS/repos/fawxzzy-fitness/scripts/repair-feedback-board-state.test.mjs](/C:/ATLAS/repos/fawxzzy-fitness/scripts/repair-feedback-board-state.test.mjs)
+- Added `repos/fawxzzy-fitness/scripts/repair-feedback-board-state.mjs`
+- Added `repos/fawxzzy-fitness/scripts/repair-feedback-board-state.test.mjs`
 - Added `npm run feedback:repair-board-state`
-- Updated [C:/ATLAS/repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-FEEDBACK.md](/C:/ATLAS/repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-FEEDBACK.md)
+- Updated `repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-FEEDBACK.md`
 
 The repair script now:
 
@@ -40,23 +40,23 @@ The repair script now:
 
 - Supabase project: `lpswxoyfniocuhljgzbc`
 - Row snapshot written to local disposable path:
-  - `C:\ATLAS\tmp\discord-feedback-board-state-rows-2026-05-25.json`
+  - `tmp/discord-feedback-board-state-rows-2026-05-25.json`
 
 This file is runtime residue only and is not a committed source artifact.
 
 ## Commands run
 
-In `C:\ATLAS\repos\fawxzzy-fitness`:
+In `repos/fawxzzy-fitness`:
 
 ```txt
 node --test scripts/repair-feedback-board-state.test.mjs
-npm run feedback:repair-board-state -- --dry-run --rows-file C:\ATLAS\tmp\discord-feedback-board-state-rows-2026-05-25.json
-npm run feedback:repair-board-state -- --apply --rows-file C:\ATLAS\tmp\discord-feedback-board-state-rows-2026-05-25.json
-npm run feedback:repair-board-state -- --dry-run --rows-file C:\ATLAS\tmp\discord-feedback-board-state-rows-2026-05-25.json
+npm run feedback:repair-board-state -- --dry-run --rows-file tmp/discord-feedback-board-state-rows-2026-05-25.json
+npm run feedback:repair-board-state -- --apply --rows-file tmp/discord-feedback-board-state-rows-2026-05-25.json
+npm run feedback:repair-board-state -- --dry-run --rows-file tmp/discord-feedback-board-state-rows-2026-05-25.json
 npm run verify
 ```
 
-In `C:\ATLAS`:
+In the ATLAS root (`.`):
 
 ```txt
 python .\ops\validation\validate_stack.py --allow-missing-locked-repos
@@ -95,7 +95,7 @@ Meaning:
 
 - `node --test scripts/repair-feedback-board-state.test.mjs`: passed
 - `npm run verify`: passed
-- root validation: [C:/ATLAS/runtime/receipts/validation/stack-validation.latest.md](/C:/ATLAS/runtime/receipts/validation/stack-validation.latest.md)
+- root validation: [stack-validation.latest.md](../../runtime/receipts/validation/stack-validation.latest.md)
   - `critical=0 error=0 warning=289`
 
 ## Non-goals / unchanged
@@ -107,4 +107,4 @@ Meaning:
 - no bot restart
 - no `#updates` post
 - no change to unrelated tracked Fitness residue
-- no change to `C:\ATLAS\archive\`
+- no change to `archive/`

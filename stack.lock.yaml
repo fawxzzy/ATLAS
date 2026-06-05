@@ -9,8 +9,8 @@ components:
     status: "active"
     remote: "https://github.com/fawxzzy/_stack.git"
     ref_type: "branch"
-    ref: "codex/preserve-stack-packaging-tranche-2026-06-05"
-    commit: "eb1f7c49e4e887e52b465b3fdf4d9ab25affbc57"
+    ref: "codex/path-discipline-warning-slice-stack-pub"
+    commit: "6ebde947801ca6cbf9e15094d423d245028c2f99"
     dirty: false
     trust_class: "trusted"
     release_eligible: false
@@ -20,8 +20,8 @@ components:
     status: "incubating"
     remote: "https://github.com/fawxzzy/DiscordOS.git"
     ref_type: "branch"
-    ref: "main"
-    commit: "721db1c5fe87db2aeee8419d8bdcef65fdd5d198"
+    ref: "codex/path-discipline-warning-slice-discordos"
+    commit: "f1f87429e39309c9124c56909499941132e93a1a"
     dirty: false
     trust_class: "trusted"
     release_eligible: false
@@ -42,8 +42,8 @@ components:
     status: "active"
     remote: "https://github.com/fawxzzy/fawxzzy-lifeline.git"
     ref_type: "branch"
-    ref: "main"
-    commit: "31ef3ad92c775810b19cc565820664f3476a6719"
+    ref: "codex/path-discipline-warning-slice-lifeline"
+    commit: "1994e64a09128d848048ba57cfd76fba278cc655"
     dirty: false
     trust_class: "trusted"
     release_eligible: true
@@ -53,8 +53,8 @@ components:
     status: "active"
     remote: "https://github.com/fawxzzy/fawxzzy-mazer.git"
     ref_type: "branch"
-    ref: "main"
-    commit: "4aae7c023b7426353dc2fc3dca8b80967839b902"
+    ref: "codex/path-discipline-warning-slice-mazer-pub"
+    commit: "fcf7f5f22ac3656f4dcd1e260c54a78f570d1a32"
     dirty: false
     trust_class: "trusted"
     release_eligible: true
@@ -64,9 +64,9 @@ components:
     status: "incubating"
     remote: "https://github.com/ZachariahRedfield/nat1-games.git"
     ref_type: "branch"
-    ref: "main"
-    commit: "412846a1baac6c0ce782ab9ab94530ccf4e89ff5"
-    dirty: true
+    ref: "codex/path-discipline-warning-slice-nat1"
+    commit: "63a4a7c159c41a7e98ad8708891743acf71431ed"
+    dirty: false
     trust_class: "trusted"
     release_eligible: false
   playbook:
@@ -75,8 +75,8 @@ components:
     status: "active"
     remote: "https://github.com/fawxzzy/fawxzzy-playbook.git"
     ref_type: "branch"
-    ref: "main"
-    commit: "744d2a96f7e7564a5e9bb917cf6514dc67674b9b"
+    ref: "codex/path-discipline-warning-slice-playbook"
+    commit: "f27c36355da906a01a46a841779553002c259f9b"
     dirty: false
     trust_class: "trusted"
     release_eligible: true
@@ -108,8 +108,8 @@ components:
     status: "active"
     remote: "https://github.com/fawxzzy/fawxzzy-trove.git"
     ref_type: "branch"
-    ref: "main"
-    commit: "0f5f9fe55bd21aa7f017173f1950d0bd063470c1"
+    ref: "codex/path-discipline-warning-slice-trove"
+    commit: "d03309718335e45669d747ddb53799a3de26af5c"
     dirty: false
     trust_class: "trusted"
     release_eligible: true
@@ -216,4 +216,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:f0eab16a6d8ec7159eefdcccc300f0c52cdbe175a760f69141cf3c4d54118616"
+lock_digest: "sha256:65ddca59fd9e48e930506c58f2c54294569ea95f10776c5189a6e9082fb30d65"
