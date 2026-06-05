@@ -84,9 +84,9 @@ class CortexRailStateReaderTests(unittest.TestCase):
         }
         payload["active_blockers"] = []
         payload["next_recommended_lane"] = {
-            "lane_id": "promote-cortex-receipt-interpretation-consumption-feedback-wave11",
-            "owner_layer": "cortex",
-            "rationale": "The bounded _stack stack-consumption pilot is landed, but Cortex still needs one promoted default _stack consumer routing contract that consumes explicit Cortex worker-prompt, context, operator, ledger, and pilot artifacts without transcript scraping, execution authority, owner-truth mutation, or Lifeline receipt authority.",
+            "lane_id": "atlas-cortex-catch-up",
+            "owner_layer": "atlas",
+            "rationale": "Wave 11 is landed as the latest clean Cortex step. The next bounded lane is an ATLAS root catch-up that records the widened Cortex rail surface, preserves stack-level runtime and receipt posture, and prepares any later owner-side routing without reopening Cortex capability implementation.",
             "blocked_by": [],
             "source_refs": [
                 "runtime/cortex/kernel.state-model.seed.v1.json",
@@ -181,9 +181,9 @@ class CortexRailStateReaderTests(unittest.TestCase):
 
         self.assertEqual("cortex-mvp", payload["active_rail"])
         self.assertEqual("ready", payload["rail_status"])
-        self.assertEqual("promote-cortex-receipt-interpretation-consumption-feedback-wave11", payload["next_recommended_lane"]["lane_id"])
+        self.assertEqual("atlas-cortex-catch-up", payload["next_recommended_lane"]["lane_id"])
         self.assertEqual([], payload["active_blockers"])
-        self.assertIn("cortex-receipt-interpretation-consumption-feedback-v0-1", payload["dirty_lanes"])
+        self.assertEqual([], payload["dirty_lanes"])
         self.assertEqual(
             [
                 "marker-checkpoint-shadow",
@@ -220,7 +220,7 @@ class CortexRailStateReaderTests(unittest.TestCase):
 
         self.assertEqual("blocked", payload["rail_status"])
         self.assertEqual("stabilize-stack-validation", payload["next_recommended_lane"]["lane_id"])
-        self.assertEqual(["stabilize-stack-validation", "cortex-receipt-interpretation-consumption-feedback-v0-1"], payload["dirty_lanes"])
+        self.assertEqual(["stabilize-stack-validation"], payload["dirty_lanes"])
 
     def test_dirty_worktree_forces_stabilize_root_worktree(self) -> None:
         current_state_payload = self._base_current_state_payload()
@@ -255,7 +255,7 @@ class CortexRailStateReaderTests(unittest.TestCase):
 
         self.assertEqual("stabilize-first", payload["rail_status"])
         self.assertEqual("stabilize-root-worktree", payload["next_recommended_lane"]["lane_id"])
-        self.assertEqual(["stabilize-root-worktree", "cortex-receipt-interpretation-consumption-feedback-v0-1"], payload["dirty_lanes"])
+        self.assertEqual(["stabilize-root-worktree"], payload["dirty_lanes"])
 
     def test_missing_current_state_artifact_fails_clearly(self) -> None:
         temp_dir = tempfile.TemporaryDirectory()
@@ -282,7 +282,7 @@ class CortexRailStateReaderTests(unittest.TestCase):
         payload = build_rail_state_payload(root=root)
 
         self.assertEqual("bounded-fallback", payload["rail_status"])
-        self.assertEqual("promote-cortex-receipt-interpretation-consumption-feedback-wave11", payload["next_recommended_lane"]["lane_id"])
+        self.assertEqual("atlas-cortex-catch-up", payload["next_recommended_lane"]["lane_id"])
         self.assertEqual(
             [
                 "runtime/cortex/current-state/latest.json",

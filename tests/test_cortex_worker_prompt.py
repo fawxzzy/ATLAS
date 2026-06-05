@@ -111,9 +111,9 @@ class CortexWorkerPromptTests(unittest.TestCase):
         payload["validation_counts"] = dict(payload["validation_receipt"]["counts"])
         payload["active_blockers"] = []
         payload["next_recommended_lane"] = {
-            "lane_id": "promote-cortex-receipt-interpretation-consumption-feedback-wave11",
-            "owner_layer": "cortex",
-            "rationale": "The bounded _stack stack-consumption pilot is landed, but Cortex still needs one promoted default _stack consumer routing contract that consumes explicit Cortex worker-prompt, context, operator, ledger, and pilot artifacts without transcript scraping, execution authority, owner-truth mutation, or Lifeline receipt authority.",
+            "lane_id": "atlas-cortex-catch-up",
+            "owner_layer": "atlas",
+            "rationale": "Wave 11 is landed as the latest clean Cortex step. The next bounded lane is an ATLAS root catch-up that records the widened Cortex rail surface, preserves stack-level runtime and receipt posture, and prepares any later owner-side routing without reopening Cortex capability implementation.",
             "blocked_by": [],
             "source_refs": [
                 "runtime/cortex/kernel.state-model.seed.v1.json",
@@ -127,7 +127,7 @@ class CortexWorkerPromptTests(unittest.TestCase):
         payload["generated_at"] = "2026-05-06T22:02:00+00:00"
         payload["rail_status"] = "ready"
         payload["active_blockers"] = []
-        payload["dirty_lanes"] = ["cortex-receipt-interpretation-consumption-feedback-v0-1"]
+        payload["dirty_lanes"] = []
         payload["validation_posture"] = {
             "status": "ambient-debt-only",
             "counts": {
@@ -141,9 +141,9 @@ class CortexWorkerPromptTests(unittest.TestCase):
             "receipt_path": "runtime/receipts/validation/stack-validation.latest.json",
         }
         payload["next_recommended_lane"] = {
-            "lane_id": "promote-cortex-receipt-interpretation-consumption-feedback-wave11",
-            "owner_layer": "cortex",
-            "rationale": "The bounded _stack stack-consumption pilot is landed, but Cortex still needs one promoted default _stack consumer routing contract that consumes explicit Cortex worker-prompt, context, operator, ledger, and pilot artifacts without transcript scraping, execution authority, owner-truth mutation, or Lifeline receipt authority.",
+            "lane_id": "atlas-cortex-catch-up",
+            "owner_layer": "atlas",
+            "rationale": "Wave 11 is landed as the latest clean Cortex step. The next bounded lane is an ATLAS root catch-up that records the widened Cortex rail surface, preserves stack-level runtime and receipt posture, and prepares any later owner-side routing without reopening Cortex capability implementation.",
             "blocked_by": [],
             "source_refs": [
                 "runtime/cortex/current-state/latest.json",
@@ -156,19 +156,17 @@ class CortexWorkerPromptTests(unittest.TestCase):
     def _base_context_payload(self) -> dict:
         payload = json.loads(json.dumps(self.context_payload))
         payload["generated_at"] = "2026-05-06T22:03:00+00:00"
-        payload["packet_id"] = "context-promote-cortex-receipt-interpretation-consumption-feedback-wave11"
+        payload["packet_id"] = "context-atlas-cortex-catch-up"
         payload["context_summary"] = (
-            "Cortex context packet for promote-cortex-receipt-interpretation-consumption-feedback-wave11 derived from explicit current-state, "
+            "Cortex context packet for atlas-cortex-catch-up derived from explicit current-state, "
             "rail-state, validation, and seed artifacts."
         )
-        payload["task_frame"]["lane_id"] = "promote-cortex-receipt-interpretation-consumption-feedback-wave11"
-        payload["task_frame"]["owner_layer"] = "cortex"
-        payload["task_frame"]["title"] = "Promote Cortex _stack consumer default routing."
+        payload["task_frame"]["lane_id"] = "atlas-cortex-catch-up"
+        payload["task_frame"]["owner_layer"] = "atlas"
+        payload["task_frame"]["title"] = "Perform the matching ATLAS/Cortex catch-up."
         payload["task_frame"]["status"] = "ready"
         payload["task_frame"]["rationale"] = (
-            "The worker-prompt contract is landed, but Cortex still needs one bounded _stack pilot that consumes current "
-            "context and planning artifacts without transcript scraping while planner, context, proof, receipt-draft, "
-            "and final receipt stay separate and linked by refs and digests."
+            "Wave 11 is landed as the latest clean Cortex step. The next bounded lane is an ATLAS root catch-up that records the widened Cortex rail surface, preserves stack-level runtime and receipt posture, and prepares any later owner-side routing without reopening Cortex capability implementation."
         )
         payload["task_frame"]["blocked_by"] = []
         payload["task_frame"]["required_inputs"] = [
@@ -191,16 +189,16 @@ class CortexWorkerPromptTests(unittest.TestCase):
         payload = json.loads(json.dumps(self.operator_surface_payload))
         payload["generated_at"] = "2026-05-06T22:04:00+00:00"
         payload["operator_summary"] = (
-            "Cortex operator surface for promote-cortex-receipt-interpretation-consumption-feedback-wave11 derived from explicit current-state, "
+            "Cortex operator surface for atlas-cortex-catch-up derived from explicit current-state, "
             "rail-state, context, validation, and seed artifacts."
         )
         payload["rail_status"] = "ready"
         payload["active_blockers"] = []
-        payload["dirty_lanes"] = ["cortex-receipt-interpretation-consumption-feedback-v0-1"]
+        payload["dirty_lanes"] = []
         payload["next_recommended_lane"] = {
-            "lane_id": "promote-cortex-receipt-interpretation-consumption-feedback-wave11",
-            "owner_layer": "cortex",
-            "rationale": "The bounded _stack stack-consumption pilot is landed, but Cortex still needs one promoted default _stack consumer routing contract that consumes explicit Cortex worker-prompt, context, operator, ledger, and pilot artifacts without transcript scraping, execution authority, owner-truth mutation, or Lifeline receipt authority.",
+            "lane_id": "atlas-cortex-catch-up",
+            "owner_layer": "atlas",
+            "rationale": "Wave 11 is landed as the latest clean Cortex step. The next bounded lane is an ATLAS root catch-up that records the widened Cortex rail surface, preserves stack-level runtime and receipt posture, and prepares any later owner-side routing without reopening Cortex capability implementation.",
             "blocked_by": [],
             "source_refs": [
                 "runtime/cortex/current-state/latest.json",
@@ -215,19 +213,17 @@ class CortexWorkerPromptTests(unittest.TestCase):
             "info": 1,
             "total": 5,
         }
-        payload["context_packet_id"] = "context-promote-cortex-receipt-interpretation-consumption-feedback-wave11"
+        payload["context_packet_id"] = "context-atlas-cortex-catch-up"
         payload["context_summary"] = (
-            "Cortex context packet for promote-cortex-receipt-interpretation-consumption-feedback-wave11 derived from explicit current-state, "
+            "Cortex context packet for atlas-cortex-catch-up derived from explicit current-state, "
             "rail-state, validation, and seed artifacts."
         )
-        payload["task_frame_summary"]["lane_id"] = "promote-cortex-receipt-interpretation-consumption-feedback-wave11"
-        payload["task_frame_summary"]["owner_layer"] = "cortex"
-        payload["task_frame_summary"]["title"] = "Promote Cortex _stack consumer default routing."
+        payload["task_frame_summary"]["lane_id"] = "atlas-cortex-catch-up"
+        payload["task_frame_summary"]["owner_layer"] = "atlas"
+        payload["task_frame_summary"]["title"] = "Perform the matching ATLAS/Cortex catch-up."
         payload["task_frame_summary"]["status"] = "ready"
         payload["task_frame_summary"]["rationale"] = (
-            "The worker-prompt contract is landed, but Cortex still needs one bounded _stack pilot that consumes current "
-            "context and planning artifacts without transcript scraping while planner, context, proof, receipt-draft, "
-            "and final receipt stay separate and linked by refs and digests."
+            "Wave 11 is landed as the latest clean Cortex step. The next bounded lane is an ATLAS root catch-up that records the widened Cortex rail surface, preserves stack-level runtime and receipt posture, and prepares any later owner-side routing without reopening Cortex capability implementation."
         )
         payload["task_frame_summary"]["blocked_by"] = []
         payload["task_frame_summary"]["required_inputs"] = [
@@ -258,10 +254,10 @@ class CortexWorkerPromptTests(unittest.TestCase):
     def _base_ledger_payload(self) -> dict:
         payload = json.loads(json.dumps(self.ledger_payload))
         payload["generated_at"] = "2026-05-06T22:05:00+00:00"
-        payload["ledger_id"] = "ledger-promote-cortex-receipt-interpretation-consumption-feedback-wave11"
+        payload["ledger_id"] = "ledger-atlas-cortex-catch-up"
         payload["rail_status"] = "ready"
         payload["active_blockers"] = []
-        payload["dirty_lanes"] = ["cortex-receipt-interpretation-consumption-feedback-v0-1"]
+        payload["dirty_lanes"] = []
         payload["validation_counts"] = {
             "critical": 0,
             "error": 0,
@@ -276,9 +272,9 @@ class CortexWorkerPromptTests(unittest.TestCase):
         payload["upstream"] = "origin/codex/cortex-worker-prompt-contract-wave6"
         payload["published"] = True
         payload["next_recommended_lane"] = {
-            "lane_id": "promote-cortex-receipt-interpretation-consumption-feedback-wave11",
-            "owner_layer": "cortex",
-            "rationale": "The bounded _stack stack-consumption pilot is landed, but Cortex still needs one promoted default _stack consumer routing contract that consumes explicit Cortex worker-prompt, context, operator, ledger, and pilot artifacts without transcript scraping, execution authority, owner-truth mutation, or Lifeline receipt authority.",
+            "lane_id": "atlas-cortex-catch-up",
+            "owner_layer": "atlas",
+            "rationale": "Wave 11 is landed as the latest clean Cortex step. The next bounded lane is an ATLAS root catch-up that records the widened Cortex rail surface, preserves stack-level runtime and receipt posture, and prepares any later owner-side routing without reopening Cortex capability implementation.",
             "blocked_by": [],
             "source_refs": [
                 "runtime/cortex/current-state/latest.json",
@@ -290,8 +286,8 @@ class CortexWorkerPromptTests(unittest.TestCase):
                 "runtime/cortex/kernel.rule-registry.seed.v1.json",
             ],
         }
-        payload["context_packet_id"] = "context-promote-cortex-receipt-interpretation-consumption-feedback-wave11"
-        payload["task_frame_summary"]["lane_id"] = "promote-cortex-receipt-interpretation-consumption-feedback-wave11"
+        payload["context_packet_id"] = "context-atlas-cortex-catch-up"
+        payload["task_frame_summary"]["lane_id"] = "atlas-cortex-catch-up"
         payload["task_frame_summary"]["owner_layer"] = "cortex"
         payload["task_frame_summary"]["title"] = "Promote Cortex _stack consumer default routing."
         payload["task_frame_summary"]["status"] = "ready"
@@ -353,15 +349,15 @@ class CortexWorkerPromptTests(unittest.TestCase):
 
         self.assertEqual("atlas.cortex.worker-prompt.v1", payload["contract_version"])
         self.assertEqual("read_only_advisory", payload["authority_level"])
-        self.assertEqual("promote-cortex-receipt-interpretation-consumption-feedback-wave11", payload["next_recommended_lane"]["lane_id"])
-        self.assertEqual("context-promote-cortex-receipt-interpretation-consumption-feedback-wave11", payload["context_packet_id"])
+        self.assertEqual("atlas-cortex-catch-up", payload["next_recommended_lane"]["lane_id"])
+        self.assertEqual("context-atlas-cortex-catch-up", payload["context_packet_id"])
         self.assertEqual(
-            "cortex_receipt_interpretation_consumption_feedback_contract",
+            "atlas_cortex_catch_up",
             payload["planner_contract"]["template_id"],
         )
         self.assertIn("implementation_plan", payload["planner_contract"])
         self.assertIn("failure_modes_to_avoid", payload["planner_contract"])
-        self.assertEqual("assignment-promote-cortex-receipt-interpretation-consumption-feedback-wave11", payload["assignment_id"])
+        self.assertEqual("assignment-atlas-cortex-catch-up", payload["assignment_id"])
         self.assertTrue(str(payload["stack_lock_digest"]).startswith("sha256:"))
         self.assertIn(
             "runtime/cortex/kernel.proof-summary.examples.v1.json",
@@ -395,7 +391,7 @@ class CortexWorkerPromptTests(unittest.TestCase):
 
         self.assertEqual(json.dumps(payload), json.dumps(artifact.payload))
         self.assertIn("# Cortex Worker Prompt", summary)
-        self.assertIn("promote-cortex-receipt-interpretation-consumption-feedback-wave11", summary)
+        self.assertIn("atlas-cortex-catch-up", summary)
         self.assertIn("Verification Steps", summary)
         self.assertIn("Workflow Profile", summary)
         self.assertIn("Non-Execution Guards", summary)

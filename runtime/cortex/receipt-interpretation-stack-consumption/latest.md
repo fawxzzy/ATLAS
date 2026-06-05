@@ -1,6 +1,6 @@
 # Cortex Receipt Interpretation Stack Consumption
 
-- Generated: `2026-05-12T13:56:25.814203+00:00`
+- Generated: `2026-06-05T08:33:37.321174+00:00`
 - Consumption id: `receipt-interpretation-stack-consumption-promote-cortex-receipt-interpretation-consumption-feedback-wave11`
 - Authority level: `read_only_advisory`
 - Consumer: `_stack`

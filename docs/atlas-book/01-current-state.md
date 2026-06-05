@@ -204,6 +204,10 @@ Current status:
   - blocker-facing reopen is now also frozen explicitly: the materially closed root-docs stabilization ladder stays closed, but the broader `stabilize-root-worktree` lane reopens at the dirty-worktree handling boundary because the refreshed Cortex read spine still surfaces the live blocker cleanly
   - the active dirty-worktree blocker is now classified as a `selective-staging candidate`, not as stage-ready or commit-ready and not as a reason to reopen the closed wording ladder
   - the exact next move is now one explicit selective-staging task over the minimum blocker-preservation subset: the root-worktree receipt chain through pass 10 plus `docs/PLAYBOOK_NOTES.md`, `docs/atlas-book/01-current-state.md`, `docs/atlas-book/05-receipt-index.md`, and `docs/atlas-book/12-restart-and-handoff-guide.md`
+- `Cortex Readiness` now has one bounded ATLAS catch-up and root-projection proof:
+  - `current-state`, `rail-state`, `context`, `operator_surface`, `ledger`, and `worker-prompts` now converge on one clean published branch posture: `codex/current-state-archive-retain-and-lock-refresh @ d1b7216c`
+  - the live Cortex read model now reports `atlas-cortex-catch-up` as the ready next lane with `0` active blockers, while validation remains `critical=0 error=0 warning=498 info=0`
+  - Wave 11 remains the latest clean Cortex step, and the widened runtime surface remains read-only, projection-only, and authority-free
   - truth mirrors, residual Cortex/read-model surfaces, mixed tracked governance support, durable-but-uncommitted `docs/ops/*` backlog outside the receipt chain, continuity-manifest backlog, and retained `archive/*` evidence all remain held outside that task by default
   - selective-staging proof is now also frozen explicitly: the admitted minimum blocker-preservation subset has now been staged in isolation once without pulling truth mirrors, residual Cortex/read-model surfaces, mixed support backlog, continuity manifests, or retained `archive/*` evidence into the index
   - the broader dirty-root blocker still remains active outside that staged subset, so this is a bounded index-isolation proof rather than a broader clean-root or commit-ready claim
@@ -242,6 +246,10 @@ Current status:
   - `Local Data Gateway` now remains materially held at its current process-and-placement threshold: the generic no-send chain and the three proven `adoptable now` classes remain intact, the repo-naming proof family still stays below `adoptable now`, and `Atlas-owned Repo Naming Canonicalization` remains held unless one direct naming or path dependency is admitted later
   - `Unified Workflow Convergence` now remains held as the ATLAS-side workflow spine above those hardened boundaries: canonical substrate surfaces feed lane selection first, held lanes remain held by default, the Fitness Discord bridge blocker remains external/session-scoped rather than root-mutation work, and no supporting lane opens unless the active slice admits one direct dependency
   - the next durable ATLAS-side active lane is now `AI Repetition-to-Automation Pipeline`: the hardened workflow spine is explicit enough to evaluate real automation-candidate seams from canonical truth without reopening held families, the immediate focus is now the admitted `receipt skeleton drafts` subfamily inside the selected third-safe family, and `_stack Readiness` is now the direct supporting lane for the two already-closed first slices plus that exact receipt-skeleton subfamily
+- the current review surface for the Cortex catch-up tranche is now explicit:
+  - PR [#51](https://github.com/fawxzzy/ATLAS/pull/51) is now open against `main` and ready for review
+  - it remains `mergeable` and `unmerged`, its body matches the six-commit branch scope, and it currently carries `22` changed files
+  - the remaining publication boundary is now exactly `pr_51_merge_operator_owned`
 - no helper-Vercel project deletion gate remains open after the 2026-05-25 helper-surface deletion pass
 - DiscordOS lookup widening is closed at the owner-repo boundary:
   - transport-aware opening: `no`

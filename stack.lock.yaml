@@ -7,10 +7,10 @@ components:
     path: "repos/_stack"
     role: "workflow-operator"
     status: "active"
-    remote: null
+    remote: "https://github.com/fawxzzy/_stack.git"
     ref_type: "branch"
-    ref: "main"
-    commit: "a764585cedd06e14347da28e86eb11d1ddf28c70"
+    ref: "codex/preserve-stack-packaging-tranche-2026-06-05"
+    commit: "eb1f7c49e4e887e52b465b3fdf4d9ab25affbc57"
     dirty: false
     trust_class: "trusted"
     release_eligible: false
@@ -216,4 +216,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:5f3c5936a4e2d23ae2689f561b61714363ac960dbd25f3463cd35ab55ed8ff39"
+lock_digest: "sha256:f0eab16a6d8ec7159eefdcccc300f0c52cdbe175a760f69141cf3c4d54118616"

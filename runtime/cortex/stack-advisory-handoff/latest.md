@@ -1,11 +1,11 @@
 # Cortex Stack Advisory Handoff
 
-- Generated: `2026-05-12T13:56:22.934544+00:00`
-- Handoff id: `stack-advisory-handoff-promote-cortex-receipt-interpretation-consumption-feedback-wave11`
+- Generated: `2026-06-05T08:33:37.093359+00:00`
+- Handoff id: `stack-advisory-handoff-stabilize-root-worktree`
 - Authority level: `read_only_advisory`
 - Consumer: `_stack`
 - Consumption mode: `artifact_refs_only`
-- Next recommended lane: `promote-cortex-receipt-interpretation-consumption-feedback-wave11` (cortex)
+- Next recommended lane: `stabilize-root-worktree` (atlas)
 - Handoff status: `ready`
 - Ready for _stack consumer: `yes`
 - Routing mode: `explicit_artifact_ref_handoff`
@@ -43,10 +43,7 @@
 - `runtime/receipts/validation/stack-validation.latest.json`
 - `runtime/cortex/kernel.proof-summary.examples.v1.json`
 - `stack.lock.yaml`
-- `runtime/cortex/stack-advisory-handoff/latest.json`
-- `runtime/cortex/stack-consumption-pilot/latest.json`
-- `runtime/cortex/receipt-interpretation/latest.json`
-- `runtime/cortex/receipt-interpretation-stack-consumption/latest.json`
-- `docs/architecture/ATLAS-CORTEX-PLAYBOOK-CODEX.md`
+- `docs/memory/profiles/zachariah_workflow_profile.md`
+- `docs/memory/profiles/zachariah_workflow_profile.json`
 - `runtime/cortex/worker-prompts/latest.json#/planner_contract`
 - `runtime/cortex/worker-prompts/latest.json#/receipt_draft_preview`

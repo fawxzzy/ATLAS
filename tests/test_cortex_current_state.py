@@ -112,7 +112,7 @@ class CortexCurrentStateTests(unittest.TestCase):
         self.assertIn("missing-codex-config", blocker_codes)
         self.assertIn("dirty-worktree", blocker_codes)
         self.assertEqual("stabilize-stack-validation", payload["next_recommended_lane"]["lane_id"])
-        self.assertEqual("cortex-receipt-interpretation-stack-consumption-v0-1", payload["latest_clean_step"]["step_id"])
+        self.assertEqual("cortex-receipt-interpretation-consumption-feedback-v0-1", payload["latest_clean_step"]["step_id"])
         self.assertEqual("unpublished_ahead_of_origin", payload["remote_publication_state"]["status"])
         self.assertEqual(
             [
@@ -167,9 +167,9 @@ class CortexCurrentStateTests(unittest.TestCase):
         )
 
         self.assertEqual([], payload["active_blockers"])
-        self.assertEqual("promote-cortex-receipt-interpretation-consumption-feedback-wave11", payload["next_recommended_lane"]["lane_id"])
-        self.assertEqual("cortex", payload["next_recommended_lane"]["owner_layer"])
-        self.assertEqual("cortex-receipt-interpretation-stack-consumption-v0-1", payload["latest_clean_step"]["step_id"])
+        self.assertEqual("atlas-cortex-catch-up", payload["next_recommended_lane"]["lane_id"])
+        self.assertEqual("atlas", payload["next_recommended_lane"]["owner_layer"])
+        self.assertEqual("cortex-receipt-interpretation-consumption-feedback-v0-1", payload["latest_clean_step"]["step_id"])
         self.assertEqual("in_sync", payload["remote_publication_state"]["status"])
         self.assertEqual(
             "runtime/cortex/operator-surface/latest.json",
@@ -178,6 +178,43 @@ class CortexCurrentStateTests(unittest.TestCase):
         self.assertEqual(
             "runtime/cortex/shadow-agent-registry.seed.v1.json",
             payload["operator_surface_projection"]["registry_ref"],
+        )
+
+    def test_retained_archive_untracked_paths_do_not_force_dirty_worktree(self) -> None:
+        validation_payload = self._base_validation_payload(
+            counts={"critical": 0, "error": 0, "warning": 2, "info": 0, "total": 2},
+        )
+        root = self._temp_root(validation_payload)
+
+        payload = build_current_state_payload(
+            root=root,
+            git_state={
+                "branch": "main",
+                "head": "feedface1234",
+                "worktree_status": "clean",
+                "changed_files": [],
+                "untracked_files": [],
+                "retained_untracked_files": [
+                    "archive/fitness-source-reset/20260522-final-cleanup/fawxzzy-fitness-real/"
+                ],
+                "remote_status": {
+                    "status": "in_sync",
+                    "upstream": "origin/main",
+                    "ahead": 0,
+                    "behind": 0,
+                },
+            },
+        )
+
+        self.assertEqual("clean", payload["worktree_status"])
+        self.assertEqual([], payload["active_blockers"])
+        self.assertEqual(
+            ["archive/fitness-source-reset/20260522-final-cleanup/fawxzzy-fitness-real/"],
+            payload["retained_untracked_files"],
+        )
+        self.assertEqual(
+            "atlas-cortex-catch-up",
+            payload["next_recommended_lane"]["lane_id"],
         )
 
     def test_persist_writes_latest_json_and_markdown(self) -> None:
@@ -209,7 +246,7 @@ class CortexCurrentStateTests(unittest.TestCase):
         self.assertEqual(artifact.payload["head"], payload["head"])
         self.assertEqual("atlas.cortex.current-state.v1", payload["contract_version"])
         self.assertIn("# Cortex Current State", summary)
-        self.assertIn("promote-cortex-receipt-interpretation-consumption-feedback-wave11", summary)
+        self.assertIn("atlas-cortex-catch-up", summary)
         self.assertIn("## Operator Surface", summary)
         self.assertIn("validation-summary-shadow", summary)
         self.assertIn("atlas.cortex.contract.validation-summary-shadow.v1", summary)
