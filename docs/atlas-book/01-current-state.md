@@ -249,7 +249,7 @@ Current status:
   - the next durable ATLAS-side active lane is now `AI Repetition-to-Automation Pipeline`: the hardened workflow spine is explicit enough to evaluate real automation-candidate seams from canonical truth without reopening held families, the immediate focus is now the admitted `receipt skeleton drafts` subfamily inside the selected third-safe family, and `_stack Readiness` is now the direct supporting lane for the two already-closed first slices plus that exact receipt-skeleton subfamily
 - the current review surface for the root warning-reduction tranche is now explicit:
   - PR [#54](https://github.com/fawxzzy/ATLAS/pull/54) is now open against `main` and still draft
-  - it is currently `draft-clean`, `mergeable`, and `unmerged`, and its body matches the bounded nine-commit, sixty-five-file warning-slice branch scope
+  - it is currently `draft-clean`, `mergeable`, and `unmerged`, and its body matches the bounded ten-commit, sixty-six-file warning-slice branch scope
   - the remaining publication boundary is now exactly `pr_54_ready_or_merge_operator_owned`
 - no helper-Vercel project deletion gate remains open after the 2026-05-25 helper-surface deletion pass
 - DiscordOS lookup widening is closed at the owner-repo boundary:

@@ -17,6 +17,7 @@ Freeze the exact review surface for PR `#54` after the warning-budget reduction 
 ## Actions Run
 
 - fetch the current PR `#54` connector snapshot
+- re-save the PR `#54` body so the remote review surface matches the latest draft-audit branch scope
 - confirm the published branch head and body scope match the preserved warning-slice branch
 - `python .\ops\validation\validate_stack.py --ratchet`
 
@@ -29,9 +30,9 @@ Current connector snapshot:
 - mergeable: `true`
 - merged: `false`
 - base: `main @ 5653e6fb2fc76d27366928b4235eb92d694ce661`
-- head: `codex/root-path-discipline-warning-slice-1 @ f77dc27059d9bb0488b53e7e55924eada27a02bf`
-- commits: `9`
-- changed files: `65`
+- head: `codex/root-path-discipline-warning-slice-1 @ de93d18a0b42d78a4d0f54009cbf86c64072dd35`
+- commits: `10`
+- changed files: `66`
 
 Public review surface from the connector snapshot:
 
@@ -44,6 +45,7 @@ Public review surface from the connector snapshot:
 The PR body remains truthful to the live branch scope:
 
 - the summary matches the bounded warning-budget reduction tranche
+- the summary now includes the preserved PR `#54` draft-audit receipt
 - the verification block matches the preserved validator and lock-refresh proofs
 - the body does not overclaim ready-state, merge, Fitness mutation, Vercel linkage mutation, or secret-surface cleanup
 
@@ -65,7 +67,7 @@ Why:
 
 - the branch is published and in sync with origin
 - the PR is open, draft, and mergeable
-- the body matches the current nine-commit, sixty-five-file branch scope
+- the body matches the current ten-commit, sixty-six-file branch scope
 - no technical blocker is present inside this review-surface audit
 
 ## Remaining Boundary
