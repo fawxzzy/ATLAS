@@ -6,7 +6,7 @@ Owner: ATLAS
 ## Change
 
 - Accepted Fitness `main` commit `5ad340e0df6e62c4afcfaeba223330d38861578a` into stack truth.
-- Updated `C:\ATLAS\stack.lock.yaml` for `repos/fawxzzy-fitness`.
+- Updated `stack.lock.yaml` for `repos/fawxzzy-fitness`.
 
 ## Reason
 
@@ -17,7 +17,7 @@ Owner: ATLAS
 
 ## Receipts
 
-- `C:\ATLAS\docs\ops\FITNESS-MUSIC-SESH-MAIN-CHANNEL-SURFACE-2026-05-24.md`
+- `docs/ops/FITNESS-MUSIC-SESH-MAIN-CHANNEL-SURFACE-2026-05-24.md`
 
 ## Validation
 

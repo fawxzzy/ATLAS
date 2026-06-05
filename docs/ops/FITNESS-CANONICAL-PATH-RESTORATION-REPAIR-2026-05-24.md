@@ -30,7 +30,7 @@ Confirmed before repair:
 Canonical repo was recreated from GitHub, not by promoting `tmp`:
 
 ```powershell
-git clone https://github.com/fawxzzy/fawxzzy-fitness.git C:\ATLAS\repos\fawxzzy-fitness
+git clone https://github.com/fawxzzy/fawxzzy-fitness.git repos/fawxzzy-fitness
 ```
 
 ## Canonical Identity After Repair
@@ -137,7 +137,7 @@ Reason:
 
 ## Validation
 
-Ran from `C:\ATLAS`:
+Ran from the ATLAS root (`.`):
 
 ```powershell
 python .\ops\validation\validate_stack.py --allow-missing-locked-repos

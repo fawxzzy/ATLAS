@@ -20,7 +20,7 @@ This receipt converts the remaining retained duplicate or non-canonical surfaces
 
 | Surface | Current status | Owner | Why retained | Must never be used for | Deletion or archive prerequisite | Blocks Full Stack Re-sync, Clean & Closeout | Blocks Tmp Dependency Elimination | Blocks Duplicate Surface Decommission |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `C:/ATLAS-standalone/fitness-release-main` | Exists, standalone git root, local `main`, dirty in `src/generated/appBuildManifest.json` | Fitness / ATLAS recovery governance | Standalone snapshot or release-evidence surface outside canonical `repos/fawxzzy-fitness`; not yet proven safe to discard | Must never be treated as canonical Fitness source, deploy root, or active operator workspace | Verify whether its single snapshot commit carries retained evidence value beyond canonical Fitness and retained `tmp` evidence; if not, reclassify to stale duplicate and later-delete candidate | yes | yes | yes |
+| `<ATLAS_STANDALONE>/fitness-release-main` | Exists, standalone git root, local `main`, dirty in `src/generated/appBuildManifest.json` | Fitness / ATLAS recovery governance | Standalone snapshot or release-evidence surface outside canonical `repos/fawxzzy-fitness`; not yet proven safe to discard | Must never be treated as canonical Fitness source, deploy root, or active operator workspace | Verify whether its single snapshot commit carries retained evidence value beyond canonical Fitness and retained `tmp` evidence; if not, reclassify to stale duplicate and later-delete candidate | yes | yes | yes |
 | `repos/fawxzzy-trove-release-cutover` | Exists, clean git root, branch `codex/trove-preview-deploy-pipeline` tracking origin | Trove | Temporary non-canonical cutover lane already documented as retained evidence | Must never be treated as canonical Trove repo root or the default deploy workspace | Confirm cutover evidence is either still referenced by Trove recovery/deploy docs or archive it deeper and mark delete-later | yes | no | yes |
 | `repos/fawxzzy-lifeline-operator-evidence` | Exists, clean git root, branch `codex/lifeline-operator-evidence` tracking origin | Lifeline | Temporary non-canonical operator evidence lane already documented as retained evidence | Must never be treated as canonical Lifeline source or default operator workspace | Confirm evidence still supports active Lifeline recovery/operator flows; if not, archive deeper or fold into governed retained-evidence structure | no | no | yes |
 | `repos/Verta-Core` | Exists as quarantined non-canonical directory; not a current git root from this root session | Verta trust-gate governance | Raw quarantined Verta surface already documented as untrusted and non-release | Must never be treated as canonical ATLAS source, release repo, or ordinary cleanup target | Dedicated Verta trust-gate review only | yes | no | yes |
@@ -80,7 +80,7 @@ The remaining duplicate surfaces are no longer ambiguous. They now fall into fou
    - `tmp/fitness-main-post-merge`
 
 2. retained snapshot pending safe-delete proof:
-   - `C:/ATLAS-standalone/fitness-release-main`
+   - `<ATLAS_STANDALONE>/fitness-release-main`
 
 3. quarantined trust-gate surfaces:
    - `repos/Verta-Core`

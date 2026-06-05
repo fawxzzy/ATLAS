@@ -16,5 +16,5 @@ Accepted component update:
 - `fitness.commit`: `626bba9ed158e228ae5224187be8323901c50320` -> `d7040be8ebbddb2c9d340b0fe990c1ccf903a9c1`
 
 Verification:
-- `npm run verify` in `C:\ATLAS\repos\fawxzzy-fitness`
-- `python .\ops\validation\validate_stack.py --allow-missing-locked-repos` in `C:\ATLAS`
+- `npm run verify` in `repos/fawxzzy-fitness`
+- `python .\ops\validation\validate_stack.py --allow-missing-locked-repos` in the ATLAS root (`.`)
