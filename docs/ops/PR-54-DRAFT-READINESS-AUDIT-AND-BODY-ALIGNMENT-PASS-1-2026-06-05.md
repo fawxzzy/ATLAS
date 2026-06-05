@@ -30,9 +30,8 @@ Current connector snapshot:
 - mergeable: `true`
 - merged: `false`
 - base: `main @ 5653e6fb2fc76d27366928b4235eb92d694ce661`
-- head: `codex/root-path-discipline-warning-slice-1 @ de93d18a0b42d78a4d0f54009cbf86c64072dd35`
-- commits: `10`
-- changed files: `66`
+- head branch: `codex/root-path-discipline-warning-slice-1`
+- scope: `bounded published warning-slice branch`
 
 Public review surface from the connector snapshot:
 
@@ -47,6 +46,7 @@ The PR body remains truthful to the live branch scope:
 - the summary matches the bounded warning-budget reduction tranche
 - the summary now includes the preserved PR `#54` draft-audit receipt
 - the verification block matches the preserved validator and lock-refresh proofs
+- the body stays aligned without relying on self-invalidating exact head-count narration inside the committed receipt
 - the body does not overclaim ready-state, merge, Fitness mutation, Vercel linkage mutation, or secret-surface cleanup
 
 ## Verification Result
@@ -67,7 +67,7 @@ Why:
 
 - the branch is published and in sync with origin
 - the PR is open, draft, and mergeable
-- the body matches the current ten-commit, sixty-six-file branch scope
+- the body matches the current bounded published warning-slice branch scope
 - no technical blocker is present inside this review-surface audit
 
 ## Remaining Boundary
