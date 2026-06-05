@@ -180,6 +180,43 @@ class CortexCurrentStateTests(unittest.TestCase):
             payload["operator_surface_projection"]["registry_ref"],
         )
 
+    def test_retained_archive_untracked_paths_do_not_force_dirty_worktree(self) -> None:
+        validation_payload = self._base_validation_payload(
+            counts={"critical": 0, "error": 0, "warning": 2, "info": 0, "total": 2},
+        )
+        root = self._temp_root(validation_payload)
+
+        payload = build_current_state_payload(
+            root=root,
+            git_state={
+                "branch": "main",
+                "head": "feedface1234",
+                "worktree_status": "clean",
+                "changed_files": [],
+                "untracked_files": [],
+                "retained_untracked_files": [
+                    "archive/fitness-source-reset/20260522-final-cleanup/fawxzzy-fitness-real/"
+                ],
+                "remote_status": {
+                    "status": "in_sync",
+                    "upstream": "origin/main",
+                    "ahead": 0,
+                    "behind": 0,
+                },
+            },
+        )
+
+        self.assertEqual("clean", payload["worktree_status"])
+        self.assertEqual([], payload["active_blockers"])
+        self.assertEqual(
+            ["archive/fitness-source-reset/20260522-final-cleanup/fawxzzy-fitness-real/"],
+            payload["retained_untracked_files"],
+        )
+        self.assertEqual(
+            "promote-cortex-receipt-interpretation-consumption-feedback-wave11",
+            payload["next_recommended_lane"]["lane_id"],
+        )
+
     def test_persist_writes_latest_json_and_markdown(self) -> None:
         validation_payload = self._base_validation_payload(
             counts={"critical": 0, "error": 0, "warning": 1, "info": 0, "total": 1},

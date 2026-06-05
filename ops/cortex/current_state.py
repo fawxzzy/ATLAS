@@ -20,6 +20,7 @@ from ops.cortex.rail_state import FAILED_VERIFICATION_STATUS, load_and_classify_
 from ops.stack.generate_lockfile import parse_porcelain_path
 
 CURRENT_STATE_CONTRACT_VERSION = "atlas.cortex.current-state.v1"
+RETAINED_UNTRACKED_PREFIXES = ("archive/",)
 
 
 def current_state_root(root: Path | None = None) -> Path:
@@ -108,6 +109,18 @@ def _normalize_counts(summary: dict[str, Any]) -> dict[str, int]:
     return counts
 
 
+def _partition_untracked_files(paths: list[str]) -> tuple[list[str], list[str]]:
+    active: list[str] = []
+    retained: list[str] = []
+    for path in paths:
+        normalized = normalize_slashes(path)
+        if normalized.startswith(RETAINED_UNTRACKED_PREFIXES):
+            retained.append(normalized)
+        else:
+            active.append(normalized)
+    return active, retained
+
+
 def _git_output(repo_path: Path, *args: str) -> tuple[int, str, str]:
     completed = subprocess.run(
         ["git", "-C", str(repo_path), *args],
@@ -135,15 +148,16 @@ def _load_git_state_from_repo(root: Path) -> dict[str, Any]:
     status_code, porcelain, _ = _git_output(root, "status", "--porcelain=v1", "--untracked-files=all")
     status_lines = [line.rstrip("\r") for line in porcelain.splitlines() if line] if status_code == 0 else []
     changed_files: list[str] = []
-    untracked_files: list[str] = []
+    raw_untracked_files: list[str] = []
     for line in status_lines:
         path = parse_porcelain_path(line)
         if not path:
             continue
         if line.startswith("??"):
-            untracked_files.append(path)
+            raw_untracked_files.append(path)
         else:
             changed_files.append(path)
+    untracked_files, retained_untracked_files = _partition_untracked_files(raw_untracked_files)
 
     upstream_code, upstream, _ = _git_output(root, "rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{upstream}")
     remote_status: dict[str, Any]
@@ -185,6 +199,7 @@ def _load_git_state_from_repo(root: Path) -> dict[str, Any]:
         "worktree_status": worktree_status,
         "changed_files": changed_files,
         "untracked_files": untracked_files,
+        "retained_untracked_files": retained_untracked_files,
         "remote_status": remote_status,
     }
 
@@ -205,6 +220,7 @@ def _normalize_git_state(payload: dict[str, Any]) -> dict[str, Any]:
         raise ValueError("Git-state payload must include a non-empty head value.")
     changed_files = _string_list(payload.get("changed_files"))
     untracked_files = _string_list(payload.get("untracked_files"))
+    retained_untracked_files = _string_list(payload.get("retained_untracked_files"))
     worktree_status = str(payload.get("worktree_status", "")).strip().lower()
     if worktree_status not in {"clean", "dirty"}:
         worktree_status = "dirty" if changed_files or untracked_files else "clean"
@@ -216,6 +232,7 @@ def _normalize_git_state(payload: dict[str, Any]) -> dict[str, Any]:
         "worktree_status": worktree_status,
         "changed_files": changed_files,
         "untracked_files": untracked_files,
+        "retained_untracked_files": retained_untracked_files,
         "remote_status": _normalize_remote_status(payload.get("remote_status")),
     }
 
@@ -593,6 +610,7 @@ def build_current_state_payload(
         "worktree_status": normalized_git_state["worktree_status"],
         "changed_files": normalized_git_state["changed_files"],
         "untracked_files": normalized_git_state["untracked_files"],
+        "retained_untracked_files": normalized_git_state["retained_untracked_files"],
         "remote_status": normalized_git_state["remote_status"],
         "remote_publication_state": remote_publication_state,
         "validation_receipt": {
@@ -622,6 +640,7 @@ def render_current_state_summary(payload: dict[str, Any]) -> str:
         f"- Branch: `{payload['branch']}`",
         f"- HEAD: `{payload['head']}`",
         f"- Worktree: `{payload['worktree_status']}`",
+        f"- Retained untracked evidence: `{len(payload.get('retained_untracked_files', []))}`",
         (
             f"- Remote publication: `{publication['status']}`"
             f" (upstream={publication['upstream'] or 'none'}, published={'yes' if publication['published'] else 'no'})"
