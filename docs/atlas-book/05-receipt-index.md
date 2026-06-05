@@ -108,6 +108,7 @@
 - [Cortex Readiness Shadow-Consumption Read-Model Projection Pass 3](../ops/CORTEX-READINESS-SHADOW-CONSUMPTION-READ-MODEL-PROJECTION-PASS-3-2026-06-01.md)
 - [Cortex Readiness Read-Model Freshness And Deferred-Lane Pass 4](../ops/CORTEX-READINESS-READ-MODEL-FRESHNESS-AND-DEFERRED-LANE-PASS-4-2026-06-01.md)
 - [Cortex Readiness ATLAS Catch-Up And Root Projection Pass 5](../ops/CORTEX-READINESS-ATLAS-CATCH-UP-AND-ROOT-PROJECTION-PASS-5-2026-06-05.md)
+- [Cortex Readiness Post-Catch-Up Live Lane Ratchet Pass 6](../ops/CORTEX-READINESS-POST-CATCH-UP-LIVE-LANE-RATCHET-PASS-6-2026-06-05.md)
 - [Stabilize Root Worktree Blocker Classification And Hold Pass 1](../ops/STABILIZE-ROOT-WORKTREE-BLOCKER-CLASSIFICATION-AND-HOLD-PASS-1-2026-06-01.md)
 - [Stabilize Root Worktree Inventory And Ownership Split Pass 2](../ops/STABILIZE-ROOT-WORKTREE-INVENTORY-AND-OWNERSHIP-SPLIT-PASS-2-2026-06-01.md)
 - [Stabilize Root Worktree Preserve-Disposition Decision Pass 3](../ops/STABILIZE-ROOT-WORKTREE-PRESERVE-DISPOSITION-DECISION-PASS-3-2026-06-01.md)
