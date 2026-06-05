@@ -1,5 +1,747 @@
 # Playbook Notes
 
+# 2026-06-05 - Timeout recheck closes the root ladder
+
+- Rule: `Timeout Recheck Closes The Root Ladder`.
+- Rule: after one blocked execution receipt and one blocker-recheck receipt for the same timeout class, root stops until runtime state materially changes.
+- Pattern: `Blocked Execution -> Timeout Receipt Discipline -> Root Stop`.
+- Pattern: run one bounded live proof -> freeze the timeout class and receipt fields -> stop the root ladder for that blocker class.
+- Failure Mode: `Timeout Retry Narration Drift`.
+- Failure Mode: if root keeps rerunning the same timeout-bound branch after the blocker class is already frozen, the ladder starts narrating activity instead of creating new information.
+- Release-summary bullets:
+  - Closed the current inline-prompt timeout ladder on `resume_command_timeout`.
+  - Froze timeout receipt discipline fields inside the gate.
+  - Kept `AI Repetition-to-Automation Pipeline` flat at `31%`.
+  - Left no immediate next packet open inside guarded continuation for this blocker class.
+
+# 2026-06-05 - Execution proof must own its timeout
+
+- Rule: `Execution Proof Must Own Its Timeout`.
+- Rule: one bounded live proof must classify its own timeout durably inside the gate instead of relying on an outer shell timeout to end the run.
+- Pattern: `Admitted Shape -> Bounded Live Proof -> Timeout Receipt`.
+- Pattern: admit one exact command shape -> run one live proof with an internal timeout -> kill the local process tree if needed -> write the timeout receipt before leaving the packet.
+- Failure Mode: `Outer-Shell Timeout Drift`.
+- Failure Mode: if the outer shell kills the proof before the gate writes its receipt, ATLAS loses the real blocker class and cannot honestly route the next packet.
+- Release-summary bullets:
+  - Added durable `resume_command_timeout` classification for bounded live continuation proofs.
+  - Proved the admitted inline-prompt resume shape blocks on a 30-second bounded timeout rather than on stdin.
+  - Kept `AI Repetition-to-Automation Pipeline` flat at `31%`.
+  - Moved the exact next packet to `AI Repetition-to-Automation Pipeline Guarded Codex Continuation Gate Inline-Prompt Resume Timeout-Boundary And Receipt Discipline Pass 24`.
+
+# 2026-06-05 - Inline prompt first, dash-stdin later
+
+- Rule: `Inline Prompt First, Dash-stdin Later`.
+- Rule: when the resume family exposes multiple prompt-bearing surfaces, admit the smallest explicit inline prompt shape first and keep stdin-fed prompt injection deferred until its source boundary is frozen separately.
+- Pattern: `Help Contract -> Inline Prompt Admission -> Execution Proof`.
+- Pattern: prove prompt support -> admit one exact inline prompt shape -> defer dash-stdin -> run one bounded execution proof only after that.
+- Failure Mode: `Prompt-Source Collapsing`.
+- Failure Mode: if inline prompt arguments and dash-stdin are treated as the same admission event, the guarded lane loses prompt provenance and widens into a more ambiguous execution surface than the receipt claims.
+- Release-summary bullets:
+  - Admitted one exact prompt-bearing resume shape: `codex exec resume --last <inline-prompt>`.
+  - Kept `codex exec resume --last -` explicitly deferred.
+  - Kept `AI Repetition-to-Automation Pipeline` flat at `31%`.
+  - Moved the exact next packet to `AI Repetition-to-Automation Pipeline Guarded Codex Continuation Gate Inline-Prompt Resume Execution Proof Pass 23`.
+
+# 2026-06-05 - Help-surface proof must not become implicit prompt injection
+
+- Rule: `Help-Surface Proof Does Not Auto-Admit Prompt Injection`.
+- Rule: when the CLI help surface proves prompt-bearing resume variants exist, ATLAS must freeze that contract first and route next into exact prompt-bearing command admission instead of treating help text as permission to run live prompt-fed continuation.
+- Pattern: `stderr Boundary -> Help Contract Probe -> Prompt-Bearing Admission Packet`.
+- Pattern: freeze the stderr blocker -> prove prompt-argument and dash-stdin support from help -> keep live prompt execution closed -> admit one exact prompt-bearing variant only in the next bounded packet.
+- Failure Mode: `Prompt-Surface Overreach Drift`.
+- Failure Mode: if help text alone is treated as execution permission, the guarded continuation lane widens from contract proof into live mutation without freezing prompt source, exact shape, or fallback.
+- Release-summary bullets:
+  - Froze the resume help-surface contract as `resume_prompt_arg_and_stdin_dash_supported`.
+  - Preserved `resume_requires_stdin_prompt` as the blocker on the currently admitted promptless command shape only.
+  - Kept `AI Repetition-to-Automation Pipeline` flat at `31%`.
+  - Moved the exact next packet to `AI Repetition-to-Automation Pipeline Guarded Codex Continuation Gate Prompt-Bearing Resume Command Admission Pass 22`.
+
+# 2026-06-05 - Clear launch blockage before arguing about non-interactive resume semantics
+
+- Rule: `Launch Blocker Cleared Does Not Mean Resume Contract Cleared`.
+- Rule: once the exact admitted resume command launches through the active runtime surface, replace the old launch blocker with the narrower command-semantic blocker instead of keeping both alive or claiming success.
+- Pattern: `Changed Surface Proof -> Bounded Resume Launch -> Narrower Command-Semantic Blocker`.
+- Pattern: prove changed executable order -> run one explicitly enabled bounded resume proof -> freeze the actual stderr-driven blocker class -> route the next packet to the command contract, not another blind launch retry.
+- Failure Mode: `Post-Launch Overclaim Drift`.
+- Failure Mode: if the lane treats a started process as successful continuation without freezing the stderr-level blocker, automation maturity gets overstated and the next packet loses focus.
+- Release-summary bullets:
+  - Cleared the old non-packaged launch-path blocker by running the exact admitted resume command through the npm `.cmd` shim.
+  - Froze the remaining blocker as `resume_requires_stdin_prompt`.
+  - Ratcheted `AI Repetition-to-Automation Pipeline` from `30%` to `31%`.
+  - Moved the exact next packet to `AI Repetition-to-Automation Pipeline Guarded Codex Continuation Gate Resume-Stdin Boundary And Non-Interactive Contract Pass 21`.
+
+# 2026-06-04 - Reopen only on changed runtime surface, then prove that surface before live continuation
+
+- Rule: `Changed Runtime Surface Requires Runtime-Surface Proof Before Live Resume`.
+- Rule: once a guarded-continuation ladder is closed under the two-strike blocker rule, a materially changed executable/runtime surface may reopen the lane only through one narrower runtime-surface proof packet before any new live resume proof is honest.
+- Pattern: `Blocked Packaged Surface -> New Executable Order -> Runtime-Surface Proof -> Later Bounded Resume Proof`.
+- Pattern: preserve the historical blocker receipt -> prove the newly resolved executable order and launchability -> keep live continuation blocked by default -> only then consider one bounded real resume proof.
+- Failure Mode: `Changed-Surface Skip-Ahead Drift`.
+- Failure Mode: if a new Codex executable surface appears and root jumps straight back into live continuation without first freezing the changed-surface proof, the lane overclaims what actually changed and loses the durable contrast with the historical blocker.
+- Release-summary bullets:
+  - Preserved `windowsapps_packaged_codex_start_access_denied` as the historical packaged-surface blocker.
+  - Proved the active Codex runtime surface is now `non_packaged_npm_codex_launchable` with `codex-cli 0.137.0`.
+  - Confirmed WindowsApps Codex entries still exist but only as lower-priority command candidates.
+  - Kept `AI Repetition-to-Automation Pipeline` flat at `30%`.
+  - Moved the exact next packet to `AI Repetition-to-Automation Pipeline Guarded Codex Continuation Gate Non-Packaged Bounded Resume Execution Proof Pass 20`.
+
+# 2026-06-04 - Discord thread title patches must fail closed on punctuation encoding
+
+- Rule: `Discord Thread Titles Must Stay ASCII-Safe By Default`.
+- Rule: shell-driven Discord thread title edits should use ASCII-safe punctuation by default; intentional Unicode punctuation requires an explicit UTF-8-safe or escaped source plus exact Discord readback verification.
+- Pattern: `Draft Title -> Governed Patch Path -> Exact Readback Verification`.
+- Pattern: operator drafts the title -> governed thread-patch path validates title shape -> Discord patch runs -> exact stored title is read back immediately -> only then treat the edit as complete.
+- Failure Mode: `Discord Title Punctuation Degradation`.
+- Failure Mode: if non-ASCII punctuation is pushed through an ad hoc shell-piped Discord patch path, Discord can store a literal `?` and silently degrade the visible thread title.
+- Release-summary bullets:
+  - Fixed one live Fitness feedback thread title that had stored `?` instead of the intended separator punctuation.
+  - Added a governed `discord:thread:patch` operator path with default ASCII-title guarding and exact readback verification.
+  - Recorded the Discord title-encoding failure mode in both stack and Fitness feedback workflow docs.
+
+# 2026-06-04 - Stop the ladder after one exact host-runtime blocker recheck
+
+- Rule: `One Blocked Resume Execution Plus One Runtime Recheck Ends The Root Ladder`.
+- Rule: after one blocked real `codex exec resume --last` execution receipt and one narrower host-runtime boundary recheck for the same blocker class, root stops the guarded continuation ladder until runtime state materially changes.
+- Pattern: `Exact Resume Command -> Blocked Execution Receipt -> Runtime Boundary Classification -> Hold`.
+- Pattern: exact resume command -> blocked execution receipt -> machine-readable runtime classification -> no further root continuation packet by default.
+- Failure Mode: `Retry-The-Same-Blocked-Resume Drift`.
+- Failure Mode: if root keeps opening new continuation packets against the same Windows runtime-start blocker, the lane drifts into repetitive blocker narration instead of bounded control-plane truth.
+- Release-summary bullets:
+  - Classified the current host blocker as `windowsapps_packaged_codex_start_access_denied`.
+  - Proved the resolved executable path is the packaged WindowsApps Codex binary and preserved that in the decision receipt.
+  - Kept `AI Repetition-to-Automation Pipeline` flat at `30%`.
+  - Moved the exact next packet to `none immediate inside guarded continuation for the current Windows Codex runtime blocker`.
+
+# 2026-06-04 - Admit only the real resume command
+
+- Rule: `Admit Only The Real Resume Command`.
+- Rule: once live execution is enabled for the guarded continuation gate, the admitted command shape is the exact real `codex exec resume --last` family only; arbitrary local proof commands must fail closed.
+- Pattern: `Wrapper Capture -> Gate Decision -> Explicit Enable -> Exact Resume Command -> Host-Availability Receipt`.
+- Pattern: wrapper-bound capture -> gate decision -> explicit operator allow -> exact real resume command -> either bounded execution receipt or blocked host-availability receipt.
+- Failure Mode: `Arbitrary Live-Command Drift`.
+- Failure Mode: if explicit enablement still allows arbitrary commands, the continuation gate stops being a guarded Codex continuation seam and becomes a generic command runner.
+- Release-summary bullets:
+  - Froze live execution to the exact real `codex exec resume --last` command shape.
+  - Proved one blocked non-resume path and one blocked current-host runtime path with `[WinError 5] Access is denied`.
+  - Kept `AI Repetition-to-Automation Pipeline` flat at `30%`.
+  - Moved the exact next packet to `AI Repetition-to-Automation Pipeline Guarded Codex Continuation Gate Windows Codex Runtime Availability Boundary Pass 18`.
+
+# 2026-06-04 - Explicit enablement must stay separate from dry-run disablement
+
+- Rule: `No Live Execution Without Explicit Enable And Wrapper Capture`.
+- Rule: `--no-dry-run` alone must never be enough to run a continuation command; live execution requires both explicit operator allow and admitted wrapper-bound receipt capture.
+- Pattern: `Capture -> Decision -> Explicit Enable -> One Bounded Command`.
+- Pattern: wrapper-bound capture -> gate decision -> explicit operator allow -> one bounded command -> durable execution-status receipt.
+- Failure Mode: `No-Dry-Run Drift`.
+- Failure Mode: if `--no-dry-run` alone can run commands, the continuation gate silently collapses from guarded classifier into an accidental command runner.
+- Release-summary bullets:
+  - Froze the explicit enable boundary for the guarded continuation gate.
+  - Proved one blocked path for missing allow flag, one blocked path for non-wrapper input, and one admitted bounded local proof command.
+  - Kept `AI Repetition-to-Automation Pipeline` flat at `30%`.
+  - Moved the exact next packet to `AI Repetition-to-Automation Pipeline Guarded Codex Continuation Gate Real Codex Resume Command Admission Pass 17`.
+
+# 2026-06-04 - Admit live capture before explicit continuation enablement
+
+- Rule: `Admit Capture Before Enablement`.
+- Rule: a continuation gate may not discuss explicit live enablement until one wrapper-shaped transcript can be converted into the same durable decision contract as the dry-run result-file path.
+- Pattern: `Wrapper Transcript -> Extract Result -> Gate Decision`.
+- Pattern: wrapper/session transcript -> extract final ATLAS continuation result -> validate bounded truth -> emit durable decision receipts -> stop unless explicit enablement is separately admitted.
+- Failure Mode: `Captureless Auto-Continue Claim`.
+- Failure Mode: if live continuation is discussed before wrapper-shaped receipt capture is proven, the automation lane overclaims maturity and loses inspectable proof of what was actually evaluated.
+- Release-summary bullets:
+  - Admitted one wrapper-bound live-shaped JSONL receipt-capture path for the guarded continuation gate.
+  - Kept auto-continuation disabled by default while proving durable JSON and Markdown decision receipts from live-shaped input.
+  - Kept `AI Repetition-to-Automation Pipeline` flat at `30%`.
+  - Moved the exact next packet to `AI Repetition-to-Automation Pipeline Guarded Codex Continuation Gate Explicit-Enable Boundary And Wrapper-Chain Admission Pass 16`.
+
+# 2026-06-04 - Guarded continuation must freeze stop conditions before it becomes automation
+
+- Rule: `Guard Continue, Do Not Blind Continue`.
+- Rule: repeated Codex continuation asks may enter automation candidacy only after the result contract, validator baseline, stop conditions, and durable decision-receipt path are all explicit.
+- Pattern: `Bounded Result -> Gate Decision -> Continue Or Stop`.
+- Pattern: bounded Codex slice finishes -> emit exact changed-path and next-move result -> run validator-aware gate in dry-run -> continue only when scope, held-lane, and forbidden-class checks still pass.
+- Failure Mode: `Blind Continuation Drift`.
+- Failure Mode: if `continue` becomes a macro before machine-readable result shape and stop conditions are frozen, the automation lane silently widens into stale-slice replay, doctrine creep, deploy judgment, or destructive cleanup claims.
+- Release-summary bullets:
+  - Froze one exact guarded continuation contract for repeated manual Codex `continue` asks.
+  - Landed one dry-run-only ATLAS gate skeleton, result schema, and prompt template under `ops/codex`.
+  - Kept `AI Repetition-to-Automation Pipeline` flat at `30%`.
+  - Moved the exact next packet to `AI Repetition-to-Automation Pipeline Guarded Codex Continuation Gate Live Receipt-Capture Admission Pass 15`.
+
+# 2026-06-04 - Reconcile the receipt-package worker cluster once
+
+- Rule: `Reconcile the closed worker cluster once`.
+- Rule: after the admitted first slice lands and its proof-and-receipt follow-on closes, root reconciles the cluster once and does not keep replaying packet 1 or packet 2 as fresh next moves.
+- Pattern: `admit first slice -> land bounded worker -> harden proof and receipt discipline immediately -> root reconciles once -> no new slice opens by default`.
+- Failure Mode: `Third-Family Cluster Replay Drift`.
+- Failure Mode: if the already-closed receipt-package worker cluster gets replayed as separate new root steps, the restart spines narrate stale micro-steps instead of the current bounded truth.
+- Release-summary bullets:
+  - Reconciled the closed first receipt-package worker cluster at the root layer.
+  - Ratcheted `_stack Readiness` from `96%` to `97%`.
+  - Kept `AI Repetition-to-Automation Pipeline` flat at `30%`.
+  - Moved the exact next packet to `none immediate inside _stack Readiness for this first receipt-package slice`.
+
+# 2026-06-04 - Close receipt-package implementation-readiness before worker routing
+
+- Rule: `Receipt-Package Implementation-Ready Means Bounded And Guarded`.
+- Rule: implementation-ready for a receipt-package first slice means all design, proof, and handoff seams are frozen and the next move is one bounded worker, not broad automation maturity, doctrine authority, or receipt-finality authority.
+- Pattern: `Freeze Receipt-Package Design -> Proof -> Handoff -> Route Worker`.
+- Pattern: freeze command -> freeze evidence -> freeze report -> freeze implementation guard -> freeze proof boundary -> freeze first slice -> freeze handoff -> close readiness -> route to one bounded worker.
+- Failure Mode: `Receipt-Package Routing Drift After Handoff`.
+- Failure Mode: if worker-routing starts before closeout is explicit, the admitted first slice widens into broader execution, doctrine, or authority claims than the frozen receipt-package chain allows.
+- Release-summary bullets:
+  - Froze one exact implementation-readiness closeout and worker-routing rule for `stack receipt package <lane>`.
+  - Ratcheted `_stack Readiness` from `95%` to `96%`.
+  - Kept `AI Repetition-to-Automation Pipeline` flat at `30%`.
+  - Moved the exact next packet to `_stack stack receipt package first-implementation worker packet 1`.
+
+# 2026-06-04 - Freeze the receipt-package worker handoff before first-slice implementation
+
+- Rule: `Freeze Receipt-Package Worker Handoff Before First-Slice Implementation`.
+- Rule: do not authorize first-slice receipt-package implementation work until the worker inherits one exact objective, one exact output contract, one exact proof matrix, one verbatim no-execution guard, and exact stop conditions.
+- Pattern: `Guarded Receipt-Package Worker Handoff`.
+- Pattern: freeze first slice -> freeze proof matrix -> freeze prompt-pack and handoff contract -> only then decide whether the design chain is materially complete enough to route to implementation.
+- Failure Mode: `Receipt-Package Scope Bleed Through Handoff`.
+- Failure Mode: if the worker handoff stays implicit, the admitted first slice starts absorbing broader execution, doctrine, or authority claims than the frozen receipt-package chain allows.
+- Release-summary bullets:
+  - Froze one exact first-implementation prompt-pack and handoff contract for `stack receipt package <lane>`.
+  - Ratcheted `_stack Readiness` from `94%` to `95%`.
+  - Kept `AI Repetition-to-Automation Pipeline` flat at `30%`.
+  - Moved the exact next packet to `_stack Readiness stack receipt package implementation-readiness closeout and worker-routing pass 40`.
+
+# 2026-06-04 - Freeze the receipt-package first slice before worker handoff
+
+- Rule: `Receipt-Package Proof Matrix Before Slice Expansion`.
+- Rule: a first receipt-package implementation slice should not be treated as admitted until its proof matrix is explicit enough to bound what counts as success, contradiction, fallback, and non-admission.
+- Pattern: `Guarded Receipt-Package First Slice`.
+- Pattern: freeze command -> freeze evidence -> freeze report -> freeze implementation guard -> freeze fixture truth limits -> freeze first slice -> freeze worker handoff.
+- Failure Mode: `Receipt-Package Slice Inflation Through Support Work`.
+- Failure Mode: if a narrowly admitted receipt-package family starts absorbing broader execution or doctrine claims before the proof matrix is explicit, the lane fakes implementation maturity.
+- Release-summary bullets:
+  - Froze one exact first implementation slice and proof matrix for `stack receipt package <lane>`.
+  - Ratcheted `_stack Readiness` from `93%` to `94%`.
+  - Kept `AI Repetition-to-Automation Pipeline` flat at `30%`.
+  - Moved the exact next packet to `_stack Readiness stack receipt package first-implementation prompt-pack and handoff contract pass 39`.
+
+# 2026-06-04 - Freeze receipt-package fixture proof before first-slice planning
+
+- Rule: `Freeze Receipt-Package Fixture Proof Before Verified Claim`.
+- Rule: do not let receipt-package implementation claim to be verified until the exact fixture/static provenance and truth-limit boundary are frozen.
+- Pattern: `Receipt-Package Proof Boundary`.
+- Pattern: freeze implementation boundary -> freeze lane/marker/restart fixture provenance -> freeze allowed verification scope -> only then admit first code slice planning.
+- Failure Mode: `Synthetic Receipt Basis Truth Inflation`.
+- Failure Mode: if replayed Book or receipt-shaped fixtures start reading like live lane truth, the support lane begins overstating what local proof has actually established.
+- Release-summary bullets:
+  - Froze one exact fixture-proof and static-input boundary for `stack receipt package <lane>`.
+  - Ratcheted `_stack Readiness` from `92%` to `93%`.
+  - Kept `AI Repetition-to-Automation Pipeline` flat at `30%`.
+  - Moved the exact next packet to `_stack Readiness stack receipt package first-implementation-slice and proof-matrix admission pass 38`.
+
+# 2026-06-04 - Freeze the no-execution guard before fixture proof
+
+- Rule: `No Receipt-Package Execution Before Admission`.
+- Rule: a receipt-package family must not drift from contract, evidence, and report truth into implementation behavior until an explicit implementation-admission boundary is crossed.
+- Pattern: `Guarded Receipt-Package Support Lane`.
+- Pattern: supporting lane admitted -> command purpose frozen -> evidence gate frozen -> report contract frozen -> implementation boundary frozen -> fixture-only proof boundary next.
+- Failure Mode: `Receipt-Package Implementation Drift Through Support Work`.
+- Failure Mode: if a support lane smuggles in receipt-package execution behavior before the admitted boundary and verbatim no-execution guard are frozen, the lane starts claiming execution maturity it has not earned.
+- Release-summary bullets:
+  - Froze one exact implementation-admission boundary and verbatim no-execution guard for `stack receipt package <lane>`.
+  - Ratcheted `_stack Readiness` from `91%` to `92%`.
+  - Kept `AI Repetition-to-Automation Pipeline` flat at `30%`.
+  - Moved the exact next packet to `_stack Readiness stack receipt package fixture-proof and static-input boundary pass 37`.
+
+# 2026-06-04 - Freeze placeholder fallback before implementation admission
+
+- Rule: `Placeholder Fallback Must Stay Explicit`.
+- Rule: if restart or cited receipt context disagrees but authoritative lane and marker truth still hold, package the draft skeleton with placeholders and route one bounded reconciliation packet instead of smoothing the contradiction into filled receipt wording.
+- Pattern: `Authoritative Draft Skeleton, Fail-Closed Context`.
+- Pattern: authoritative lane and marker truth -> optional agreeing restart context -> optional same-story cited receipt -> placeholder fallback on context failure -> no finality or implementation claim.
+- Failure Mode: `Pretty Skeleton Overclaim`.
+- Failure Mode: if a draft skeleton collapses contradiction into polished prose, the helper starts sounding more certain than the governed lane and restart surfaces actually are.
+- Release-summary bullets:
+  - Froze one exact report contract and contradiction-routing rule for `stack receipt package <lane>`.
+  - Ratcheted `_stack Readiness` from `90%` to `91%`.
+  - Kept `AI Repetition-to-Automation Pipeline` flat at `30%`.
+  - Moved the exact next packet to `_stack Readiness stack receipt package implementation-admission and no-execution guard pass 36`.
+
+# 2026-06-04 - Freeze receipt-basis discipline before report shaping
+
+- Rule: `Receipt Skeleton Context Must Come From The Live Restart Spine`.
+- Rule: receipt-skeleton packaging may fill next-package or same-story support fields only when the current ATLAS restart spine agrees and any cited receipt belongs to that same bounded story.
+- Pattern: `Authoritative Lane, Authoritative Marker, Derivative Receipt Context`.
+- Pattern: current lane state -> current marker posture -> agreeing restart mirrors -> optional same-story cited receipt -> fail closed or placeholder fallback on contradiction.
+- Failure Mode: `Receipt Basis Drift Through Skeleton Packaging`.
+- Failure Mode: if a draft skeleton mixes current lane state with stale restart mirrors or superseded receipt context, the packager starts sounding governed while its basis is no longer durable.
+- Release-summary bullets:
+  - Froze one exact evidence-admission and receipt-basis spine for `stack receipt package <lane>`.
+  - Ratcheted `_stack Readiness` from `89%` to `90%`.
+  - Kept `AI Repetition-to-Automation Pipeline` flat at `30%`.
+  - Moved the exact next packet to `_stack Readiness stack receipt package report-contract and contradiction-routing pass 35`.
+
+# 2026-06-04 - Freeze the receipt-package command spine before receipt-basis routing
+
+- Rule: `Freeze Receipt Package Command Spine Before Evidence Routing`.
+- Rule: once a receipt-skeleton subfamily is admitted to `_stack`, support work should freeze the helper's purpose, inputs, outputs, and draft-only guard before opening evidence-admission or implementation questions.
+- Pattern: `Receipt Package Command Spine`.
+- Pattern: freeze subfamily contract -> admit supporting lane -> freeze command purpose, inputs, outputs, failure exits, and draft-only guard -> only then evaluate evidence admission or implementation readiness.
+- Failure Mode: `Receipt Skeleton Scope Inflation`.
+- Failure Mode: if a lane jumps from support admission straight into evidence or implementation work, the receipt-packaging helper starts sounding like final receipt authority instead of bounded draft structure.
+- Release-summary bullets:
+  - Froze one exact `_stack` command spine for `stack receipt package <lane>`.
+  - Ratcheted `_stack Readiness` from `88%` to `89%`.
+  - Kept `AI Repetition-to-Automation Pipeline` flat at `30%`.
+  - Moved the exact next packet to `_stack Readiness stack receipt package evidence-admission and receipt-basis discipline pass 34`.
+
+# 2026-06-04 - Admit subfamily support only after the receipt-skeleton contract exists
+
+- Rule: `Support Admission After Subfamily Contract`.
+- Rule: after a combined family is split, supporting-lane admission for the chosen subfamily should be decided only after that exact subfamily contract is frozen.
+- Pattern: `Subfamily Support Gate`.
+- Pattern: split the family -> choose one exact subfamily -> freeze its contract -> admit support separately -> then freeze the support-lane command seam.
+- Failure Mode: `Premature Support Assumption`.
+- Failure Mode: if a draft subfamily implies its supporting lane before the support boundary is explicitly admitted from durable owner and candidate truth, the lane fakes readiness and drifts into convenience routing.
+- Release-summary bullets:
+  - Admitted `_stack Readiness` as the direct supporting lane for `receipt skeleton drafts`.
+  - Kept `doctrine-routing drafts` explicitly deferred.
+  - Kept both `AI Repetition-to-Automation Pipeline` at `30%` and `_stack Readiness` at `88%`.
+  - Moved the exact next packet to `_stack Readiness stack receipt package command-design pass 33`.
+
+# 2026-06-04 - Freeze the chosen receipt-skeleton subfamily before support admission
+
+- Rule: `Subfamily Contract Before Subfamily Expansion`.
+- Rule: once a combined family is split, the next honest move is freezing the exact contract of the chosen subfamily before helper expansion or sibling-subfamily work.
+- Pattern: `Chosen-Subfamily Narrowing`.
+- Pattern: split the family -> choose the safer first subfamily -> freeze that subfamily contract -> only then ask whether support-lane admission is justified.
+- Failure Mode: `Split-Family Recombination Drift`.
+- Failure Mode: if a split family quietly recombines sibling subfamilies during follow-on work, the lane stops being restart-safe and the owner boundary drifts again.
+- Release-summary bullets:
+  - Froze the exact contract for `receipt skeleton drafts`.
+  - Kept `doctrine-routing drafts` explicitly deferred.
+  - Kept supporting-lane posture at `none yet`.
+  - Moved the exact next packet to `AI Repetition-to-Automation Pipeline Receipt Skeleton Drafts Supporting-Lane Admission Pass 13`.
+
+# 2026-06-04 - Split the combined third family before reopening support
+
+- Rule: `Split Combined Family Before Expansion`.
+- Rule: when a selected automation family spans multiple owner-facing surfaces, split it into exact subfamilies before reopening any support lane or subfamily implementation packet.
+- Pattern: `Owner-Boundary Subfamily Split`.
+- Pattern: freeze combined contract -> admit split owner boundary -> split exact subfamilies -> choose the safer first subfamily -> freeze that subfamily before reopening support.
+- Failure Mode: `False Single-Owner Collapse`.
+- Failure Mode: if multiple owner surfaces are compressed into one family story, the next implementation packet reopens the wrong lane and the draft family stops being restart-safe.
+- Release-summary bullets:
+  - Split the combined third family into `receipt skeleton drafts` and `doctrine-routing drafts`.
+  - Chose `receipt skeleton drafts` as the honest first subfamily to advance next.
+  - Kept supporting-lane posture at `none new yet`.
+  - Moved the exact next packet to `AI Repetition-to-Automation Pipeline Receipt Skeleton Drafts Subfamily Contract Freeze Pass 12`.
+
+# 2026-06-04 - Freeze the split owner surface before draft-family reopen
+
+- Rule: `Split Owner Surface Before Helper Reopen`.
+- Rule: when a selected automation family actually spans multiple best-owner surfaces, freeze that split before reopening any support lane or helper implementation packet.
+- Pattern: `ATLAS Truth, _stack Receipt Draft, Playbook Doctrine Draft`.
+- Pattern: contract-freeze the combined family -> admit the split owner-facing surfaces -> split into exact subfamilies -> only then reopen the relevant owner-side lane.
+- Failure Mode: `Merged Draft Owner Drift`.
+- Failure Mode: if receipt skeletons and doctrine routing are forced into one convenience owner surface, future implementation reopens the wrong lane or blurs execution ownership with doctrine ownership.
+- Release-summary bullets:
+  - Froze the split owner-facing admission for `receipt skeleton and doctrine-routing drafts`.
+  - Kept both `AI Repetition-to-Automation Pipeline` at `30%` and `_stack Readiness` at `88%`.
+  - Kept supporting-lane posture at `none new yet` at the combined-family level.
+  - Moved the exact next packet to `AI Repetition-to-Automation Pipeline Receipt Skeleton And Doctrine-Routing Drafts Subfamily Split Pass 11`.
+
+# 2026-06-04 - Freeze the receipt/doctrine draft contract before surface admission
+
+- Rule: `Contract Before Draft Execution`.
+- Rule: a draft-oriented automation family must freeze its structure, routing, and stop-condition contract before any helper-home or doctrine-facing admission is considered.
+- Pattern: `Receipt Skeleton As Safe Surface`.
+- Pattern: select the third safe family -> freeze draft trigger and output contract -> keep supporting lanes held -> ask owner-surface admission separately.
+- Failure Mode: `Draft Family Inflation`.
+- Failure Mode: if a receipt/doctrine draft family widens into doctrine admission, publication judgment, or proof-pack packaging before its own contract is explicit, the lane creates fake progress instead of safe bounded preparation truth.
+- Release-summary bullets:
+  - Froze the exact contract for `receipt skeleton and doctrine-routing drafts`.
+  - Kept both `AI Repetition-to-Automation Pipeline` at `30%` and `_stack Readiness` at `88%`.
+  - Kept supporting-lane posture at `none new yet` for the third family.
+  - Moved the exact next packet to `AI Repetition-to-Automation Pipeline Receipt Skeleton And Doctrine-Routing Drafts Owner-Surface Admission Pass 10`.
+
+# 2026-06-04 - Select the third safe automation family after two closed slices
+
+- Rule: `Third Safe Family After First Two Closeouts`.
+- Rule: once the first two admitted automation families are honestly closed at their current thresholds, continue the active automation lane by selecting the next safe family instead of forcing more `_stack` motion inside those closed slices.
+- Pattern: `Closed-Family Handoff`.
+- Pattern: close first family -> close second family -> keep `_stack Readiness` held -> promote the next docs-first candidate family that stays inside hardened truth and receipt surfaces.
+- Failure Mode: `Closed-Family Replay Drift`.
+- Failure Mode: if the automation lane keeps narrating more work inside already-closed first slices, the lane starts faking momentum instead of admitting that the honest next move is a new bounded family selection.
+- Release-summary bullets:
+  - Selected `receipt skeleton and doctrine-routing drafts` as the third safe candidate family for `AI Repetition-to-Automation Pipeline`.
+  - Kept both `AI Repetition-to-Automation Pipeline` at `30%` and `_stack Readiness` at `88%`.
+  - Kept release-proof packaging and QA/LLEL proof-packet preparation deferred below the selected third family.
+  - Moved the exact next packet to `AI Repetition-to-Automation Pipeline Receipt Skeleton And Doctrine-Routing Drafts Contract Freeze Pass 9`.
+
+# 2026-06-04 - Reconcile marker worker cluster after first-slice closeout
+
+- Rule: `Reconcile Closed Worker Cluster Once`.
+- Rule: once a bounded first-slice worker landing and its immediate proof-hardening follow-on are both already complete, root should reconcile the closed cluster once instead of replaying stale micro next-steps.
+- Pattern: `Land Marker Slice -> Harden Proof -> Reconcile Cluster -> Hold`.
+- Pattern: land the admitted first marker-checkpoint slice -> tighten receipt and proof discipline immediately -> ratchet once on executed-state change -> close the slice with conditional reopen rules.
+- Failure Mode: `Marker Cluster Replay Drift`.
+- Failure Mode: if root keeps narrating packet-1 and packet-2 as new moves after the worker cluster already closed, shared restart surfaces drift into duplicate package narration and stale next-packet claims.
+- Release-summary bullets:
+  - Reconciled the closed `_stack` marker-checkpoint worker cluster in one root receipt.
+  - Ratcheted `_stack Readiness` from `87%` to `88%` on the smallest honest executed-state change for the admitted second family.
+  - Refreshed current validation posture to `critical=0 error=3 warning=496 info=0`.
+  - Moved the exact next packet to `none immediate inside _stack Readiness for this first marker-checkpoint slice`.
+
+# 2026-06-04 - Close marker readiness before worker execution
+
+- Rule: `Marker Implementation-Ready Means Bounded And Guarded`.
+- Rule: implementation-ready for a marker-checkpoint first slice means all design, proof, and handoff seams are frozen and the next move is one bounded worker, not broad automation maturity or ratchet authority.
+- Pattern: `Freeze Marker Design -> Proof -> Handoff -> Route Worker`.
+- Pattern: freeze command -> freeze evidence -> freeze report -> freeze implementation guard -> freeze proof boundary -> freeze first slice -> freeze handoff -> close readiness -> route to one bounded worker.
+- Failure Mode: `Marker Routing Drift After Handoff`.
+- Failure Mode: if worker-routing begins before implementation-readiness closeout is explicit, prompt wording or adjacent urgency widens the admitted first slice into broader execution, broader mutation, or broader authority claims than the frozen marker-checkpoint chain actually allows.
+- Release-summary bullets:
+  - Closed the remaining docs-only implementation-readiness ambiguity for `_stack` marker-checkpoint first-slice work.
+  - Ratcheted `_stack Readiness` from `86%` to `87%` on the smallest honest readiness-closeout seam for the second admitted family.
+  - Moved the exact next packet to `_stack stack marker checkpoint first-implementation worker packet 1`.
+
+# 2026-06-04 - Freeze marker worker handoff before first-slice implementation
+
+- Rule: `Freeze Marker Worker Handoff Before First-Slice Implementation`.
+- Rule: do not authorize first-slice marker-checkpoint implementation work until the worker inherits one exact objective, one exact output contract, one exact proof matrix, one verbatim no-execution guard, and exact stop conditions.
+- Pattern: `Guarded Marker Worker Handoff`.
+- Pattern: freeze first slice -> freeze proof matrix -> freeze prompt-pack and handoff contract -> only then decide whether the design chain is materially complete enough to route to implementation.
+- Failure Mode: `Marker Scope Bleed Through Handoff`.
+- Failure Mode: if the worker handoff contract is left implicit, the admitted first slice expands through prompt wording into broader execution, broader mutation, or broader authority claims than the frozen marker-checkpoint chain actually allows.
+- Release-summary bullets:
+  - Froze the exact worker objective and inherited contract spine for `_stack` marker-checkpoint first-slice implementation.
+  - Ratcheted `_stack Readiness` from `85%` to `86%` on the smallest honest worker-handoff seam for the second admitted family.
+  - Moved the exact next packet to `_stack Readiness stack marker checkpoint implementation-readiness closeout and worker-routing pass 32`.
+
+# 2026-06-04 - Freeze marker proof matrix before first slice expansion
+
+- Rule: `Marker Proof Matrix Before Slice Expansion`.
+- Rule: a first marker-checkpoint implementation slice should not be treated as admitted until its proof matrix is explicit enough to bound what counts as success, contradiction, and non-admission.
+- Pattern: `Guarded Marker First Slice`.
+- Pattern: freeze command -> freeze evidence -> freeze report -> freeze implementation guard -> freeze fixture truth limits -> freeze first slice -> freeze worker handoff.
+- Failure Mode: `Marker Slice Inflation Through Support Work`.
+- Failure Mode: a support lane becomes fake progress when a narrowly admitted marker-checkpoint family expands into broader execution or adjacent automation claims without proof-matrix discipline.
+- Release-summary bullets:
+  - Froze the narrowest first implementation slice for `stack marker checkpoint` after the local-proof boundary closed.
+  - Ratcheted `_stack Readiness` from `84%` to `85%` on the smallest honest first-slice admission seam for the second admitted family.
+  - Moved the exact next packet to `_stack Readiness stack marker checkpoint first-implementation prompt-pack and handoff contract pass 31`.
+
+# 2026-06-04 - Freeze marker fixture proof before verified claim
+
+- Rule: `Freeze Marker Fixture Proof Before Verified Claim`.
+- Rule: do not let marker-checkpoint implementation claim to be verified until the exact fixture/static provenance and truth-limit boundary are frozen.
+- Pattern: `Checkpoint Fixture Proof Boundary`.
+- Pattern: freeze implementation boundary -> freeze marker/restart fixture provenance -> freeze allowed verification scope -> only then admit first code slice planning.
+- Failure Mode: `Synthetic Checkpoint Truth Inflation`.
+- Failure Mode: rich local fixtures or replayed book snapshots can start to look like live marker truth, so a future command appears proven even though it has only passed synthetic or replayed checkpoint-shape checks.
+- Release-summary bullets:
+  - Froze the exact fixture/static-input boundary for `stack marker checkpoint` after implementation admission closed.
+  - Ratcheted `_stack Readiness` from `83%` to `84%` on the smallest honest verification-boundary seam for the second admitted family.
+  - Moved the exact next packet to `_stack Readiness stack marker checkpoint first-implementation-slice and proof-matrix admission pass 30`.
+
+# 2026-06-04 - Freeze marker implementation admission before fixture proof
+
+- Rule: `No Marker-Checkpoint Execution Before Admission`.
+- Rule: a marker-checkpoint family must not drift from contract, evidence, and report truth into implementation behavior until an explicit implementation-admission boundary is crossed.
+- Pattern: `Guarded Marker Support Lane`.
+- Pattern: helper home admitted -> command purpose frozen -> evidence gate frozen -> report contract frozen -> implementation boundary frozen -> fixture-only proof boundary next.
+- Failure Mode: `Marker Implementation Drift Through Support Work`.
+- Failure Mode: a support lane becomes fake progress when it smuggles in checkpoint execution behavior before the admission boundary and no-execution guard are explicitly frozen.
+- Release-summary bullets:
+  - Froze the exact implementation-admission boundary for `stack marker checkpoint` after command, evidence, and report shape were already explicit.
+  - Ratcheted `_stack Readiness` from `82%` to `83%` on the smallest honest implementation-boundary seam for the second admitted family.
+  - Moved the exact next packet to `_stack Readiness stack marker checkpoint fixture-proof and static-input boundary pass 29`.
+
+# 2026-06-04 - Make checkpoint-only fallback explicit before implementation
+
+- Rule: `Checkpoint-Only Fallback Must Stay Explicit`.
+- Rule: if restart context disagrees but authoritative marker truth still holds, package the checkpoint only and route one bounded reconciliation packet instead of smoothing the contradiction into next-package prose.
+- Pattern: `Authoritative Checkpoint, Fail-Closed Context`.
+- Pattern: authoritative marker checkpoint -> optional agreeing restart context -> optional same-story cited receipt -> checkpoint-only fallback on context failure -> no ratchet or implementation claim.
+- Failure Mode: `Pretty Checkpoint Overclaim`.
+- Failure Mode: if the report contract lets restart-context failure collapse into polished prose instead of an explicit checkpoint-only fallback, the helper sounds more certain than the governed marker and restart surfaces actually are.
+- Release-summary bullets:
+  - Froze the receipt-ready report contract for `stack marker checkpoint` across checkpoint-only, checkpoint-plus-context, and explicit context-unavailable paths.
+  - Ratcheted `_stack Readiness` from `81%` to `82%` on the smallest honest report-contract seam for the second admitted family.
+  - Moved the exact next packet to `_stack Readiness stack marker checkpoint implementation-admission and no-execution guard pass 28`.
+
+# 2026-06-04 - Checkpoint context must come from the live restart spine
+
+- Rule: `Checkpoint Context Must Come From The Live Restart Spine`.
+- Rule: marker checkpoint rendering may cite next-package or hold-reason context only when the current restart spine agrees and the cited receipt belongs to that same bounded story.
+- Pattern: `Authoritative Marker, Derivative Restart Context`.
+- Pattern: current marker table -> agreeing restart mirrors -> optional same-story cited receipt -> fail closed on contradiction or stale context.
+- Failure Mode: `Restart Context Drift Through Checkpoint Rendering`.
+- Failure Mode: if marker-checkpoint wording is allowed to mix the current marker table with stale restart mirrors, uncited receipt memory, or superseded package ladders, the helper sounds precise while the routing truth is no longer governed.
+- Release-summary bullets:
+  - Froze the exact evidence hierarchy for `stack marker checkpoint`: authoritative marker truth from `02-lanes-and-markers.md`, derivative restart mirrors, and optional same-story cited receipt context.
+  - Ratcheted `_stack Readiness` from `80%` to `81%` on the smallest honest evidence-admission seam for the second admitted family.
+  - Moved the exact next packet to `_stack Readiness stack marker checkpoint report-contract and contradiction-routing pass 27`.
+
+# 2026-06-04 - Freeze marker command spine before evidence routing
+
+- Rule: `Freeze Marker Command Spine Before Evidence Routing`.
+- Rule: once a marker-checkpoint family is admitted to `_stack`, support work should freeze the helper's purpose, inputs, outputs, and no-ratchet guard before opening evidence-admission or implementation questions.
+- Pattern: `Marker Checkpoint Command Spine`.
+- Pattern: freeze family contract -> admit helper home -> freeze command purpose, inputs, outputs, failure exits, and no-ratchet guard -> only then evaluate evidence admission or implementation readiness.
+- Failure Mode: `Checkpoint Helper Scope Inflation`.
+- Failure Mode: if a lane skips the command spine and jumps straight from helper-home admission into evidence or implementation work, the marker-checkpoint helper starts sounding like ratchet authority or generalized coordination logic before its bounded operator surface is explicit.
+- Release-summary bullets:
+  - Froze one exact `_stack` command-design spine for `stack marker checkpoint` after helper-home admission landed.
+  - Ratcheted `_stack Readiness` from `79%` to `80%` on the smallest honest new operator-facing command seam.
+  - Moved the exact next packet to `_stack Readiness stack marker checkpoint evidence-admission and restart-surface discipline pass 26`.
+
+# 2026-06-04 - Marker truth owner and helper home can differ
+
+- Rule: `Marker Truth Owner And Helper Home Can Differ`.
+- Rule: a repeated marker-checkpoint family may keep truth ownership in ATLAS while assigning helper-home ownership to `_stack` when the work is shared operator execution rather than doctrine, product runtime, or consumer projection.
+- Pattern: `ATLAS Truth, _stack Marker Helper`.
+- Pattern: freeze marker-checkpoint contract in ATLAS -> admit `_stack` as helper home for shared execution -> keep marker truth, receipt consequence, and ratchet judgment in ATLAS.
+- Failure Mode: `Root Marker Helper Drift`.
+- Failure Mode: if ATLAS root keeps helper-home ownership for a marker-checkpoint family that already belongs on `_stack`, the system confuses marker truth recording with governed execution and future implementation work reopens the wrong lane.
+- Release-summary bullets:
+  - Admitted `_stack` as the helper home for `marker checkpoint rendering` while keeping ATLAS as the truth owner.
+  - Opened `_stack Readiness` as the direct supporting dependency for the second family.
+  - Moved the exact next packet to `_stack Readiness stack marker checkpoint command-design pass 25`.
+
+# 2026-06-03 - Freeze checkpoint render contract before helper admission
+
+- Rule: `Freeze Checkpoint Contract Before Helper Admission`.
+- Rule: do not bind marker checkpoint rendering to a helper home or ratchet-facing surface until the projection contract itself is explicit and restart-safe.
+- Pattern: `Marker Projection Before Surface Admission`.
+- Pattern: select second-safe seam -> freeze trigger, stable inputs, expected checkpoint artifact, failure boundary, safe fallback, owner boundary, and non-claim boundary -> only then decide whether `_stack` or another surface should host the helper.
+- Failure Mode: `Checkpoint Render Overclaim`.
+- Failure Mode: if a marker-checkpoint helper is admitted before its projection contract is explicit, the render path starts sounding like ratchet authority, supporting lanes reopen too early, and restart surfaces drift from decisive receipts.
+- Release-summary bullets:
+  - Froze `marker checkpoint rendering` as the second-family contract without reopening `_stack` or Playbook.
+  - Kept supporting-lane posture at `none new yet` for the second family while `_stack Readiness` stays held for the closed first family only.
+  - Moved the exact next packet to `AI Repetition-to-Automation Pipeline Marker Checkpoint Rendering Owner-Surface Admission Pass 7`.
+
+# 2026-06-03 - Promote the next safe family after the first one closes
+
+- Rule: `Second Safe Family After First Family Closeout`.
+- Rule: once a first admitted automation family reaches an honest stop point, continue the active lane by selecting the next safe family rather than forcing more motion inside the closed family.
+- Pattern: `Adjacent Safe Family Promotion`.
+- Pattern: close first family cleanly -> compare deferred families again -> pick the nearest family that reuses hardened truth surfaces without reopening execution, deploy, or authority lanes.
+- Failure Mode: `Family Replay Drift`.
+- Failure Mode: the automation lane loses honesty when it keeps replaying a closed first family instead of admitting that the next move is a different safe family.
+- Release-summary bullets:
+  - Kept the first validation-summary family closed at its current threshold instead of reopening `_stack` from momentum alone.
+  - Selected `marker checkpoint rendering` as the second safe family because it stays adjacent to hardened validation and marker truth without widening authority.
+  - Kept both `_stack Readiness` and `AI Repetition-to-Automation Pipeline` flat while moving the exact next packet to a second-family contract freeze.
+
+# 2026-06-03 - Tighten receipt discipline after first execution
+
+- Rule: `Receipt Discipline After First Execution`.
+- Rule: once a first admitted slice executes successfully, the next honest step is tightening proof and receipt discipline before opening any broader slice.
+- Pattern: `Executed Slice Reconciliation`.
+- Pattern: executed slice lands -> required and optional report fields get locked -> bounded path discipline gets proven -> root reconciles once -> no new slice opens by default.
+- Failure Mode: `Proof Drift After First Success`.
+- Failure Mode: if a first successful packet is not immediately followed by proof and receipt tightening, the lane starts sounding more mature than the frozen contract actually proves.
+- Release-summary bullets:
+  - Hardened the first `_stack` validation-summary slice with explicit required-field, optional-field, unavailable-delta, and bounded-path proof.
+  - Kept `_stack Readiness` flat because this was proof hardening inside the admitted slice, not a broader execution threshold.
+  - Closed the immediate `_stack` first-slice cluster with no new supporting packet open by default.
+
+# 2026-06-03 - Operate only inside admitted slice
+
+- Rule: `Operate Only Inside Admitted Slice`.
+- Rule: once a family becomes worker-routable, execution must remain inside the already-admitted slice until new evidence explicitly expands it.
+- Pattern: `Proof-Matrix-Bounded Worker Packet`.
+- Pattern: frozen contract spine -> frozen proof matrix -> bounded worker landing -> drift classification -> proof-and-receipt follow-on.
+- Failure Mode: `Worker Packet Scope Leak`.
+- Failure Mode: if a routable first slice expands into adjacent automation claims, broader repo mutation, or report semantics outside the frozen proof matrix, the packet creates fake progress instead of bounded execution truth.
+- Release-summary bullets:
+  - Landed the first bounded `_stack` validation-summary implementation slice inside the frozen report, proof, and no-execution guard.
+  - Classified the live `stack.lock.yaml` error triplet as expected in-flight `_stack` dirty-state drift rather than canonical corruption.
+  - Kept `AI Repetition-to-Automation Pipeline` flat and moved the exact next `_stack` packet to first-implementation worker proof-and-receipt packet 2.
+
+# 2026-06-03 - Close readiness before expansion
+
+- Rule: `Close Readiness Before Expansion`.
+- Rule: once a first implementation slice and handoff contract exist, the next honest move is implementation-readiness closeout and routing discipline before broader execution or adjacent family expansion.
+- Pattern: `Bounded Worker Routing`.
+- Pattern: freeze first slice -> freeze proof matrix -> freeze prompt-pack and handoff -> close implementation-readiness -> route to one bounded worker.
+- Failure Mode: `Routing Drift After Handoff`.
+- Failure Mode: if worker-routing starts before implementation-readiness closeout is explicit, the admitted slice widens through handoff ambiguity into broader execution or broader authority than the frozen chain actually allows.
+- Release-summary bullets:
+  - Closed the remaining docs-only implementation-readiness ambiguity for `_stack` validation-summary first-slice work.
+  - Froze the exact rule for leaving root docs-only and routing to one bounded implementation worker.
+  - Moved the next `_stack` packet to first-implementation worker packet 1.
+
+# 2026-06-03 - Freeze worker handoff before first-slice implementation
+
+- Rule: `Freeze Worker Handoff Before First-Slice Implementation`.
+- Rule: do not authorize first-slice implementation work until the worker inherits one exact objective, one exact output contract, one exact proof matrix, one verbatim no-execution guard, and exact stop conditions.
+- Pattern: `Guarded Worker Handoff`.
+- Pattern: freeze first slice -> freeze proof matrix -> freeze prompt-pack and handoff contract -> only then decide whether the design chain is materially complete enough to route to implementation.
+- Failure Mode: `Scope Bleed Through Handoff`.
+- Failure Mode: if the worker handoff contract is implicit, the admitted first slice expands through prompt wording into broader execution, broader mutation, or broader authority claims than the frozen design chain actually allows.
+- Release-summary bullets:
+  - Froze the exact worker objective and inherited contract spine for `_stack` validation-summary first-slice implementation.
+  - Froze the exact preserved payload surface, proof obligations, allowed-touch surfaces, forbidden surfaces, and stop conditions.
+  - Moved the next `_stack` packet to implementation-readiness closeout and worker-routing work.
+
+# 2026-06-03 - Freeze proof matrix before first slice expansion
+
+- Rule: `Proof Matrix Before Slice Expansion`.
+- Rule: a first implementation slice should not be treated as admitted until its proof matrix is explicit enough to bound what counts as success, contradiction, and non-admission.
+- Pattern: `Guarded First Slice`.
+- Pattern: freeze command -> freeze evidence -> freeze report -> freeze implementation guard -> freeze fixture truth limits -> freeze first slice -> freeze worker handoff.
+- Failure Mode: `Slice Inflation Through Support Work`.
+- Failure Mode: a support lane becomes fake progress when a narrowly admitted validation-summary family expands into broader execution or adjacent automation claims without proof-matrix discipline.
+- Release-summary bullets:
+  - Froze the narrowest first implementation slice for `_stack` validation-summary work after the local-proof boundary closed.
+  - Froze the exact proof matrix over snapshot-only, snapshot-plus-delta, baseline-unavailable, contradiction, invalid-input, and validator-failed branches.
+  - Moved the next `_stack` packet to first-implementation prompt-pack and handoff-contract work.
+
+# 2026-06-03 - Freeze fixture proof before verified claim
+
+- Rule: `Freeze Fixture Proof Before Verified Claim`.
+- Rule: do not let a validation-summary implementation claim to be verified until the exact fixture/static provenance and truth-limit boundary are frozen.
+- Pattern: `Artifact-Pair Proof Boundary`.
+- Pattern: freeze implementation boundary -> freeze artifact-pair and baseline-fixture provenance -> freeze allowed verification scope -> only then admit first code slice planning.
+- Failure Mode: `Synthetic Snapshot Truth Inflation`.
+- Failure Mode: rich local fixtures or replayed artifact snapshots can start to look like live stack truth, so a future command appears proven even though it has only passed synthetic or replayed evidence-shape checks.
+- Release-summary bullets:
+  - Froze the exact fixture/static-input boundary for `_stack` validation-summary work after implementation admission closed.
+  - Admitted only synthetic artifact-pair fixtures, synthetic baseline fixtures, and receipt-derived/static snapshots under explicit provenance and truth-limit labeling.
+  - Moved the next `_stack` packet to first-implementation-slice and proof-matrix admission work.
+
+# 2026-06-03 - No execution before admission
+
+- Rule: `No Execution Before Admission`.
+- Rule: a validation-summary family must not drift from contract/report truth into implementation behavior until an explicit implementation-admission boundary is crossed.
+- Pattern: `Guarded Support Lane`.
+- Pattern: supporting lane selected -> command purpose frozen -> evidence gate frozen -> report contract frozen -> implementation boundary frozen -> fixture-only proof boundary next.
+- Failure Mode: `Implementation Drift Through Support Work`.
+- Failure Mode: a support lane becomes fake progress when it smuggles in execution behavior before the admission boundary and no-execution guard are explicitly frozen.
+- Release-summary bullets:
+  - Froze the exact implementation-admission boundary for `_stack` validation-summary work after command, evidence, and report shape were already explicit.
+  - Admitted validator invocation and receipt-ready summary rendering only under the existing governed artifact path.
+  - Moved the next `_stack` packet to fixture-proof and static-input boundary work after the no-execution guard closed.
+
+# 2026-06-03 - Resume allowed does not mean replay allowed
+
+- Rule: `Do Not Replay Consumed Planning Class`.
+- Rule: if a generic next-package class has already been fully packetized and later boundary receipts paused further widening, a reopen decision may resume the lane without reopening the old class.
+- Pattern: `Reopen Without Replay`.
+- Pattern: bridge blocker narrows -> adjacent lane may resume -> previously consumed planning class is checked -> stale generic next package is removed instead of replayed.
+- Failure Mode: `Generic Next-Package Recursion`.
+- Failure Mode: if a reopen packet keeps pointing at an already-consumed planning class, the system mistakes historical packet names for fresh work and loops root coordination back into duplicate receipts.
+- Release-summary bullets:
+  - Reconciled the DiscordOS bridge-independent reopen against no-duplicate-package discipline.
+  - Confirmed the named-port planning class was already consumed across the May 26 consumer-planning, implementation-planning, tooling/readiness, and lookup execution-readiness chain.
+  - Removed the stale implication that root should reopen another generic DiscordOS planning packet by default.
+
+# 2026-06-03 - Resume independent lane work once the blocker leaves repo/runtime truth
+
+- Rule: `Resume Independent Lane, Park External Proof Seam`.
+- Rule: when a blocker has crossed out of repo/runtime truth and into an external/session seam, resume independent owner work now and keep only the proof seam parked.
+- Pattern: `Bridge-Independent Reopen`.
+- Pattern: repo/runtime prerequisites green -> blocker reclassified to external/session seam -> resume independent lane packages -> keep proof-seam reopen condition explicit.
+- Failure Mode: `Bridge Blocker Scope Inflation`.
+- Failure Mode: if one external/session proof blocker is allowed to freeze every adjacent lane, the system reopens the wrong repo, delays independent work, and mistakes a narrow bridge hold for a global separation blocker.
+- Release-summary bullets:
+  - Packaged the DiscordOS consequence of the Fitness bridge reclassification: bridge-independent DiscordOS work may resume now.
+  - Kept the Fitness Discord pass-9 seam explicitly parked behind live bridge recovery rather than declaring the whole Discord/Fitness boundary closed.
+  - Preserved the no-runtime/no-schema/no-cutover boundary while later reconciling the stale generic next-package ladder separately.
+
+# 2026-06-03 - Report shape must freeze before implementation admission
+
+- Rule: `Freeze Report Shape Before Command Admission`.
+- Rule: do not admit implementation work for a summary command until the success and failure payloads are specific enough that contradiction handling cannot drift into prose.
+- Pattern: `Snapshot Contract Before Implementation`.
+- Pattern: freeze command purpose -> freeze evidence gate -> freeze report contract -> freeze contradiction routing -> only then discuss implementation admission.
+- Failure Mode: `Pretty Output Contradiction Drift`.
+- Failure Mode: if a command reaches implementation before the report payload and routing notes are explicit, current snapshots, unavailable deltas, and contradictions get smoothed into prose that sounds safer than the governed evidence really is.
+- Release-summary bullets:
+  - Froze the receipt-ready report contract for `_stack` validation-summary work across both success and failure paths.
+  - Admitted one narrow partial-snapshot exception only for `delta-baseline-unavailable` when current paired artifacts still agree.
+  - Moved the next `_stack` packet to implementation-admission and no-execution guard work after report shape and contradiction routing closed.
+
+# 2026-06-03 - Delta summaries need one exact baseline, not narrative memory
+
+- Rule: `Delta Needs One Exact Baseline`.
+- Rule: count-delta reporting is allowed only when one cited durable baseline carries one exact attributable validator tuple from the same bounded story.
+- Pattern: `Receipt-Cited Count Delta`.
+- Pattern: current paired artifacts -> one cited durable baseline receipt -> exact four-count comparison -> fail closed on contradiction or ambiguity.
+- Failure Mode: `Narrative Delta Drift`.
+- Failure Mode: if validation-summary delta wording leans on recap prose, debt-class narration, or multiple ambiguous historical counts, the command sounds precise while the baseline truth is not actually governed.
+- Release-summary bullets:
+  - Froze the exact current validation-summary authority at the paired latest md/json artifacts, not at restart mirrors or receipt prose.
+  - Narrowed admitted `--delta-from` baselines to one cited durable receipt with one exact attributable four-count tuple from the same bounded story.
+  - Moved the next `_stack` packet to report-contract and contradiction-routing work after evidence admission and delta discipline closed.
+
+# 2026-06-03 - Normalize major ATLAS system surfaces into the Book without duplicating repo truth
+
+- Rule: `Normalize System Role, Not Repo Detail`.
+- Rule: when a major ATLAS system surface becomes important to restart, cross-system coordination, or lane selection, reconcile owner-repo truth into the ATLAS Book as restart-friendly system documentation without copying repo-local implementation detail into root doctrine.
+- Pattern: `ATLAS Systems-Doc Normalization`.
+- Pattern: identify one major ATLAS system surface -> read owner-repo README, architecture, and operator truth -> extract role, ownership boundaries, shipped-vs-planned surfaces, seams, and retrieval order -> publish one Book chapter plus bounded spine links -> keep repo-local command and implementation truth in the owner repo.
+- Failure Mode: `Book Mirrors The Repo`.
+- Failure Mode: if the Book starts duplicating command tables, implementation specifics, or repo-local contracts, root retrieval becomes noisy and drifts from the owner surface it is supposed to index.
+- Release-summary bullets:
+  - Made ATLAS systems-doc normalization explicit as a repeatable pattern rather than a one-off Lifeline note.
+  - Bound the pattern primarily to `Truth Map & ATLAS Book`, with secondary ties to `Inventory & Truth Map`, `Knowledge Capture & Transfer`, and `Durable Context Externalization`.
+  - Kept the active execution order unchanged: `AI Repetition-to-Automation Pipeline` remains active and `_stack Readiness stack validate validation-summary evidence-admission and delta-discipline pass 18` remains the next exact move.
+
+# 2026-06-03 - Support the frozen family before expanding the family set
+
+- Rule: `Support Frozen Family Before Expanding Family Set`.
+- Rule: once a first safe automation family is selected and admitted, support work should harden its execution surface before opening adjacent candidate families.
+- Pattern: `Validation Summary Command Spine`.
+- Pattern: freeze the family contract in ATLAS -> admit the `_stack` command home -> freeze command purpose, inputs, outputs, and fail-closed delta discipline -> only then evaluate evidence admission or implementation readiness.
+- Failure Mode: `Admission Replay Drift`.
+- Failure Mode: if a lane replays already-landed admission work instead of freezing the newly required command surface, the system spends motion on explanation while `_stack` readiness does not become more executable.
+- Release-summary bullets:
+  - Froze one exact `_stack` command-design spine for validation summary and delta reporting after pass 4 had already admitted the execution home.
+  - Kept `AI Repetition-to-Automation Pipeline` active at `30%` because no governed operator surface with repeatable proof exists yet.
+  - Moved the exact next question to admitted baseline and delta-discipline handling under `_stack Readiness`, rather than widening into adjacent automation families.
+
+# 2026-06-03 - Truth owner and command home can differ
+
+- Rule: `Truth Owner And Command Home Can Differ`.
+- Rule: a repeated family may keep truth ownership in ATLAS while assigning execution-home ownership to `_stack` when the work is shared operator execution rather than doctrine or product-runtime truth.
+- Pattern: `ATLAS Truth, _stack Execution`.
+- Pattern: freeze the family contract in ATLAS first, then admit `_stack` as the command home only when the family trigger, proof artifact, fallback, and non-claim boundary are already explicit.
+- Failure Mode: `Root Convenience Command Drift`.
+- Failure Mode: if ATLAS root keeps execution-home ownership for a family that already belongs on `_stack`, future implementation work reopens the wrong lane and confuses truth recording with governed execution.
+- Release-summary bullets:
+  - Admitted `_stack` as the execution home for validation summary and delta reporting while keeping ATLAS as the truth owner.
+  - Opened `_stack Readiness` as the first real supporting dependency because the owner-surface admission now routes future work through a shared command surface.
+  - Kept marker posture flat because owner-surface admission still stops short of implementation or repeatable proof.
+
+# 2026-06-03 - Freeze family contract before naming command home
+
+- Rule: `Freeze Family Contract Before Naming Command Home`.
+- Rule: do not bind a repeated family to `_stack`, Playbook, Cortex, or an owner repo until the family contract itself is explicit and restart-safe.
+- Pattern: `Contract Before Surface Admission`.
+- Pattern: select one repeated seam -> freeze trigger, stable inputs, proof artifact, failure boundary, safe fallback, owner boundary, and non-claim boundary -> only then evaluate owner-surface admission.
+- Failure Mode: `Owner-Surface Premature Binding`.
+- Failure Mode: if a repeated seam gets attached to an implementation home before its contract is explicit, adjacency pressure gets mislabeled as readiness and held lanes reopen too early.
+- Release-summary bullets:
+  - Froze validation summary and delta reporting as one exact ATLAS-side family contract rather than leaving it as a loosely selected seam.
+  - Kept supporting lane at `none yet` because contract freeze does not itself admit `_stack`, Playbook, or owner-repo dependency.
+  - Routed the next question to owner-surface admission only after the family contract became restart-safe.
+
+# 2026-06-03 - Promote repeated seams, not adjacent friction
+
+- Rule: `Automate Repeated Seams, Not Adjacent Friction`.
+- Rule: only promote a repeated seam when the repetition itself is the active, evidence-backed bottleneck rather than nearby workflow discomfort from held or blocked families.
+- Pattern: `Spine-Fed Automation Candidate`.
+- Pattern: derive automation-candidate truth from the hardened workflow spine and canonical restart/book substrate first, then select one bounded repeated seam before naming any implementation owner or support lane.
+- Failure Mode: `Automation Drift From Boundary Amnesia`.
+- Failure Mode: if a pipeline packet forgets which seams are still blocked by external/session conditions, human approval, or held-family boundaries, it starts narrating nearby friction as automation progress and reopens families that were supposed to stay held.
+- Release-summary bullets:
+  - Selected validation summary and delta reporting as the highest-leverage first-safe automation-candidate family from the active ATLAS-side lane.
+  - Kept marker checkpoints and receipt/doctrine drafts first-safe but deferred, rather than widening into multiple families at once.
+  - Preserved no supporting lane yet because the selected seam can still be frozen ATLAS-side before any implementation owner or adjacent lane needs to reopen.
+
 ## 2026-06-02 - A future-stageable subset is not the same thing as a stage-ready subset
 
 - Rule: `Future-Stageable Is Not Stage-Ready`.

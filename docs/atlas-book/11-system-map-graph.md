@@ -28,6 +28,9 @@ It shows:
   - Mazer repo-local runtime truth
 - `repos/foundation`
   - Foundation repo-local runtime truth
+- `repos/lifeline`
+  - Lifeline repo-local operator and execution truth
+  - manifest/runtime/release/startup/proof surface owner
 - `repos/DiscordOS`
   - canonical DiscordOS repo surface now exists locally
   - governance scaffold only
@@ -42,14 +45,44 @@ It shows:
   - current Discord interaction/runtime
   - current feedback/update/moderation runtime
   - current Music Sesh runtime
+- Lifeline provides:
+  - local execution/operator runtime for manifest-defined apps
+  - manifest validation and resolution
+  - local runtime lifecycle, release, startup, and proof surfaces
 - `_stack` remains the governed deploy authority
 - ATLAS root does not host product runtime
+- ATLAS root may host bounded continuation-classification helpers such as the guarded Codex continuation gate, but those remain control-plane receipt surfaces rather than product runtime; even its admitted live-command path stays operator-enabled, wrapper-bound, preserves the historical packaged WindowsApps blocker as a machine-readable host-runtime boundary, proves the active npm-installed Codex CLI surface is non-packaged and launchable, records the narrower `resume_requires_stdin_prompt` blocker when the bare resume command starts without prompt payload, separately freezes the help-surface truth that the broader resume family exposes `[PROMPT]` plus dash-stdin support, admits only the smaller prompt-bearing branch `codex exec resume --last <inline-prompt>` while still deferring dash-stdin prompt injection, owns the timeout boundary inside the gate itself so one hung live proof yields `resume_command_timeout` instead of an outer-shell-only failure, and now closes the root ladder for that blocker class after the timeout-boundary recheck packet lands
 
 ### Future runtime shape
 
 - Fitness runtime stays Fitness-owned
 - Discord runtime moves to DiscordOS-owned surfaces later
+- Lifeline stays a narrow local execution/operator plane rather than widening into a hosted control plane
 - `_stack` remains shared deploy and execution authority
+
+## Lifeline System Role
+
+Use [Lifeline](15-lifeline.md) for the full Book-level boundary.
+
+Current Lifeline role:
+
+- local execution/operator plane
+- manifest plus optional Playbook export consumer
+- deterministic receipt and proof emitter
+- ATLAS systems lane component
+
+Current non-goals:
+
+- hosted control plane
+- multi-node orchestrator
+- generic data platform
+
+Later work stays clearly separate:
+
+- Vercel/service-health classification
+- deploy provenance visibility
+- stale-surface pressure signals
+- broader ATLAS-facing health projection
 
 ## Supabase Project Map
 
@@ -118,6 +151,19 @@ Historical note:
 `_stack` currently owns or should later own:
 
 - governed deploy authority
+- `stack validate` validation-summary command execution for ATLAS-owned validation posture
+- admitted current-snapshot and delta-baseline validation-summary evidence discipline
+- receipt-ready validation-summary report contract and contradiction routing
+- bounded first validation-summary implementation slice plus proof-and-receipt closeout discipline
+- `stack marker checkpoint` command execution for ATLAS-owned marker posture
+- admitted marker-checkpoint restart-surface and cited-receipt discipline for ATLAS-owned marker posture
+- receipt-ready marker-checkpoint report contract and contradiction routing for ATLAS-owned marker posture
+- admitted marker-checkpoint implementation boundary and no-execution guard for ATLAS-owned marker posture
+- bounded first marker-checkpoint implementation slice plus proof-and-receipt closeout discipline for ATLAS-owned marker posture
+- admitted marker-checkpoint fixture/static proof boundary for ATLAS-owned marker posture
+- admitted marker-checkpoint first implementation slice and proof matrix for ATLAS-owned marker posture
+- admitted marker-checkpoint first implementation prompt-pack and handoff contract for ATLAS-owned marker posture
+- admitted marker-checkpoint implementation-readiness closeout and worker-routing boundary for ATLAS-owned marker posture
 - validation and receipt packaging helpers
 - release-prep to deploy handoff
 - stale-surface audit helpers
@@ -240,6 +286,7 @@ flowchart LR
   STACK["_stack\nGoverned deploy authority\nOperator execution"]
   PLAYBOOK["Playbook\nDoctrine and governance"]
   CORTEX["Cortex\nPlanning-context consumer"]
+  LIFELINE["Lifeline\nLocal execution/operator plane\nDeterministic receipts"]
   FITNESS_REPO["Fitness Repo\nrepos/fawxzzy-fitness"]
   FITNESS_VERCEL["Fitness Vercel\nLive app + current Discord runtime"]
   FITNESS_DB["Fitness Supabase\nlpswxoyfniocuhljgzbc"]
@@ -253,6 +300,8 @@ flowchart LR
   FITNESS_VERCEL --> DISCORD
   FITNESS_REPO --> FITNESS_DB
   STACK --> FITNESS_VERCEL
+  PLAYBOOK --> LIFELINE
+  LIFELINE --> ATLAS
   FITNESS_REPO --> ATLAS
   FITNESS_VERCEL --> ATLAS
   ATLAS --> PLAYBOOK
@@ -271,13 +320,13 @@ flowchart LR
 | Lane / surface | Owner | Source of truth | Current status | Blocker | Next package |
 | --- | --- | --- | --- | --- | --- |
 | Fitness app lane | Fitness | `repos/fawxzzy-fitness` plus Fitness release proof | release-readiness lane now resting green on clean preserved truth | stale evidence, governed QA auth secret-lane consumption, protected-route auth consumption, seam-proof aborts, proof-run drift, the linked Supabase migration-validator crash, clean-state preservation, and the governed notes gate are now all cleared; no exact owner-side release-readiness blocker remains | none immediate inside the owner-side release-readiness family; await fresh root-bounded lane selection |
-| Discord work lane | Fitness-hosted now, DiscordOS later | Fitness repo/runtime now; `repos/DiscordOS` plus ATLAS separation receipts as future target | scaffold complete, lookup widening explicitly closed, runtime migration not started | higher-level authorization is required before any transport-aware, externally-executing, schema, or runtime follow-on | none inside the current lookup lane; reopen only through explicit higher-level authorization |
-| ATLAS systems lane | ATLAS root plus `_stack` and Playbook boundaries | ATLAS docs, receipts, and canonical inventory surfaces | active governance lane with a boundary-hardened Unified Workflow Convergence spine on top of the current inventory and book substrate | the verification bridge seam no longer depends on Fitness repo/runtime repair and remains frozen as an external/session-scoped Codex-to-Chrome bridge blocker outside this lane; archive follow-on, Operator Secret Path Hygiene, Playbook Everywhere + Cortex Interface, Durable Context Externalization, Knowledge Capture & Transfer, Inventory & Truth Map, Truth Map & ATLAS Book, Local Data Gateway, the materially closed `stabilize-root-worktree` root-docs ladder, Cortex authority widening, and Atlas-owned Repo Naming Canonicalization all remain held rather than reopened | no immediate supporting lane is open; reopen support only if one direct dependency is admitted by the active Unified Workflow Convergence slice |
+| Discord work lane | Fitness-hosted now, DiscordOS later | Fitness repo/runtime now; `repos/DiscordOS` plus ATLAS separation receipts as future target | scaffold complete, bridge-independent DiscordOS work may resume, but the old root named-port planning ladder is already consumed and live runtime migration has not started | live Fitness Discord proof still depends on external/session bridge recovery; the May 26 planning and lookup-boundary chain already consumed the old generic next-package class; higher-level authorization is still required before any transport-aware, externally-executing, schema, or runtime follow-on | `none by default at ATLAS root; reopen only on explicit new DiscordOS named scope or higher-level authorization` |
+| ATLAS systems lane | ATLAS root plus `_stack` and Playbook boundaries | ATLAS docs, receipts, and canonical inventory surfaces | active governance lane now routes from the boundary-hardened Unified Workflow Convergence spine into `AI Repetition-to-Automation Pipeline`; validation summary and delta reporting remain the first safe family but are now closed at their current threshold for this slice, marker checkpoint rendering remains the selected second safe family and is now also closed at its current threshold for this slice with one exact ATLAS-side contract freeze plus one admitted `_stack` helper home plus one bounded `_stack` command-design spine plus one bounded `_stack` evidence-admission and restart-surface discipline spine plus one bounded `_stack` report-contract and contradiction-routing spine plus one bounded `_stack` implementation-admission and no-execution-guard spine plus one bounded `_stack` fixture/static-input proof spine plus one bounded `_stack` first-implementation-slice and proof-matrix spine plus one bounded `_stack` first-implementation prompt-pack and handoff-contract spine plus one bounded `_stack` implementation-readiness closeout and exact worker-routing spine plus one reconciled first implementation worker landing and one reconciled proof-and-receipt hardening follow-on, the first family remains backed by one bounded `_stack` command-design spine plus one bounded admitted-evidence and delta-baseline discipline spine plus one bounded report-contract/contradiction-routing spine plus one bounded implementation-admission/no-execution-guard spine plus one bounded fixture/static-input proof spine plus one bounded first-implementation-slice/proof-matrix spine plus one bounded first-implementation prompt-pack and handoff-contract spine plus one bounded implementation-readiness closeout and exact worker-routing spine plus one reconciled first implementation worker landing and one reconciled proof-and-receipt hardening follow-on, and `receipt skeleton and doctrine-routing drafts` is now the selected third safe family with one exact ATLAS-side contract freeze plus one exact split owner-facing admission boundary that now separates into `receipt skeleton drafts` and `doctrine-routing drafts`, with `receipt skeleton drafts` chosen as the first exact subfamily to advance and now carrying one exact bounded subfamily contract freeze plus one exact supporting-lane admission boundary plus one exact `_stack` command-design spine plus one exact evidence-admission spine plus one exact report-contract spine plus one exact implementation-admission spine plus one exact fixture-proof boundary spine plus one exact first-implementation-slice and proof-matrix spine plus one exact first-implementation prompt-pack and handoff-contract spine plus one exact implementation-readiness closeout and worker-routing spine plus one reconciled first implementation worker landing and one reconciled proof-and-receipt hardening follow-on | the verification bridge seam remains frozen as an external/session-scoped Codex-to-Chrome blocker outside this lane; the current `error=3` validator pressure is classified as expected in-flight `_stack` dirty-state drift rather than canonical corruption; unrelated Trove brand-consumer verify drift remains outside this lane; archive follow-on, Operator Secret Path Hygiene, Playbook Everywhere + Cortex Interface, Durable Context Externalization, Knowledge Capture & Transfer, Inventory & Truth Map, Truth Map & ATLAS Book, Local Data Gateway, `Unified Workflow Convergence`, the materially closed `stabilize-root-worktree` root-docs ladder, Cortex authority widening, and Atlas-owned Repo Naming Canonicalization all remain held rather than reopened; `_stack Readiness` now supports the first two admitted families plus the receipt-skeleton subfamily while ratchet authority remains in ATLAS and doctrine-routing work remains deferred | `none immediate inside _stack Readiness for this first receipt-package slice; reopen only on distinct later-slice admission, governed operator-proof opening, or separate lock-refresh packet` |
 | Post-convergence lane split readiness | ATLAS root | lane-split receipts plus ATLAS Book restart surfaces | open at `61%`; one compact lane-owned decisive receipt spine, one fully shaped blocker-family chain, one manifest-backed continuity map, and a shaped chain that has now passed one coherent refresh cycle as a single restart unit | no immediate docs-only blocker family remains inside the lane | no immediate docs-only follow-on packet; reopen only with a distinct restart-truth, marker, approval, or execution-surface change |
 | Fitness Supabase hygiene | Fitness | Fitness Supabase plus ATLAS closeout and governance receipts | closed at `100%`; remaining Discord/Music Sesh concerns transferred out of lane scope | none inside Fitness profile-core cleanup scope | defer any Discord/Music Sesh follow-on to Discord OS Infrastructure Separation |
 | DiscordOS bootstrap | DiscordOS | `repos/DiscordOS` | completed with governance scaffold only | no migrated code yet | bounded post-bootstrap implementation plan |
 | Helper Vercel decommission | ATLAS systems lane with owner confirmation | Vercel inventory and deletion receipts | stale Spotify-era and helper Fitness projects deleted | provenance clarity and future health classification only | preview/unfurl verification or Vercel health-design lane |
-| Lifeline health projection | Lifeline later, `_stack` first | current Vercel and stack health receipts | pressure identified; `_stack`-first command design, evidence-admission rules, report contract, implementation guard, fixture/static-proof boundary, first implementation slice, worker handoff contract, readiness closeout, and the first proof-hardening follow-on are now all frozen or reconciled | no immediate root-only `_stack` follow-on is open for this first slice; future movement requires a broader implementation slice, a lock-refresh lane, or a changed guard boundary rather than more first-slice seam design | none immediate docs-only; reopen only on broader implementation, lock-refresh, or guard-boundary change |
+| Lifeline local execution/operator plane | Lifeline | `repos/lifeline` plus repo-local README, architecture, operator-surface, and startup-contract docs | shipped as a narrow local-first execution plane for manifest validation/resolution, runtime lifecycle, release, startup, proof, and deterministic receipts; consumes optional Playbook exports from disk and emits ATLAS-visible consequence without becoming a hosted control plane | broader Vercel/service-health classification, deploy provenance visibility, stale-surface pressure signals, and richer ATLAS-facing health projection remain later work; `_stack` still owns governed deploy authority | start with [Lifeline](15-lifeline.md), then the Lifeline repo truth surfaces; no immediate root-only Lifeline mutation packet is opened by this Book pass |
 
 ## Non-Goals
 

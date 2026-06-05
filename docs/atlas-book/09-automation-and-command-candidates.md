@@ -56,6 +56,31 @@ Best candidates:
 
 `_stack` should not become the default home for product-specific runtime logic.
 
+## Candidate ATLAS Root Automation Helpers
+
+ATLAS root is the right home for automation helpers that classify cross-lane continuation safety without claiming repo-runtime ownership.
+
+Best candidates:
+
+- `atlas_continue_gate`
+  - read one machine-readable Codex result and decide whether bounded continuation is still honest
+  - admit one wrapper-bound live-shaped JSONL receipt-capture seam before any explicit execution enablement
+  - admit one bounded runtime-surface proof seam when executable order or host-runtime surface materially changes
+  - require explicit operator allow plus wrapper-bound JSONL capture before one bounded live command may run
+  - admit only the exact real `codex exec resume --last` command shape for live execution
+  - launch npm-installed Windows Codex `.cmd` shim surfaces through an explicit wrapper path instead of treating Python launcher artifacts like host-runtime truth
+  - classify current-host runtime-start failures as blocked decision receipts with stable runtime-boundary labels instead of silently swapping in arbitrary proof commands
+  - classify exact command-semantic failures such as `resume_requires_stdin_prompt` when live proof starts but still fails
+  - probe `codex exec resume --help` to freeze prompt-argument and dash-stdin contract truth before any prompt-bearing resume variant can be admitted
+  - admit one exact inline prompt argument variant before considering dash-stdin prompt injection
+  - classify bounded live-proof timeout as a durable blocker such as `resume_command_timeout` instead of relying on outer shell timeout behavior
+  - stop root retries after one timeout execution receipt plus one timeout-boundary recheck receipt for the same admitted branch
+  - stay dry-run by default
+  - stop on validator drift, widened scope, missing next move, or non-automated class attempts
+  - always write durable gate-decision receipts
+
+ATLAS root should not silently become a background job runner or unattended mutation daemon.
+
 ## Candidate Playbook Commands
 
 Playbook is the likely home for doctrine-facing commands that extract reusable operator rules from receipts.
@@ -166,6 +191,7 @@ These are the best first candidates because they prepare or summarize state with
 - root validation summary command
 - marker checkpoint render command
 - receipt skeleton generator
+- guarded Codex continuation gate
 - stale-surface audit inventory command
 - Vercel health and churn summary command
 - doctrine routing template generator

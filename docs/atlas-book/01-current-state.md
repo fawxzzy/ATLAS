@@ -59,10 +59,29 @@ Current status:
 - rules, patterns, and failure-mode promotion
 - contract semantics
 
+### Lifeline
+
+- self-hosted local execution/operator plane for manifest-defined applications
+- manifest validation, resolution, runtime, release, startup, and proof surfaces
+- deterministic local receipt and proof-pass emission
+
+Current status:
+
+- repo-local truth lives at `repos/lifeline`
+- shipped scope remains local-first and single-host
+- future Vercel/service-health classification remains later work rather than current shipped Lifeline scope
+- use [Lifeline](15-lifeline.md) first for Book-level boundaries, then the Lifeline repo docs for command-level truth
+
 ## Current Paused Or Gated Work
 
 - remote preview/unfurl verification is approval-gated
 - DiscordOS schema, runtime, and data migration remain unstarted and must stay receipt-bounded
+- DiscordOS bridge-independent work may resume now:
+  - the blocked Fitness Discord pass-9 proof seam is no longer a Fitness repo/runtime repair problem
+  - bridge-independent DiscordOS work does not need to wait on that proof seam
+  - still keep runtime cutover, schema movement, worker retarget, and Vercel mutation closed unless separately admitted
+  - do not replay the old ATLAS-root named-port planning class by default: that class was already consumed across the May 26 consumer-planning, implementation-planning, tooling/readiness, and lookup execution-readiness chain
+  - further DiscordOS follow-on now needs explicit new named scope or higher-level authorization rather than reuse of the stale generic next-package ladder
 - the Fitness Discord pass-9 proof lane is frozen under `Session-Scoped External Blocker Freeze`:
   - not a default-browser issue
   - not an ATLAS/root issue
@@ -75,9 +94,79 @@ Current status:
   - deterministic proof capture remains the missing replayable link
   - no marker movement is earned until one bounded loop reruns end to end without hidden operator stitching
 - `AI Repetition-to-Automation Pipeline` now has one automation-candidate threshold packet:
-  - first-safe candidate families are bounded preparation helpers such as validation summaries, marker checkpoints, receipt packaging, doctrine routing, release-proof packaging, and QA/LLEL proof-packet preparation when proof is already admissible
+  - the selected highest-leverage first-safe family is now validation summary and delta reporting after root docs, receipt, and governance updates
+  - that selected family now also has one exact ATLAS-side contract freeze covering trigger, stable inputs, expected proof artifact, failure boundary, safe fallback, owner boundary, and non-claim boundary
+  - `_stack` is now admitted as the execution home for that family while ATLAS root remains the truth owner for validation posture, validation receipts, and lane-state consequence
+  - owner-surface admission pass 4 remains satisfied already and must not be replayed as a new next move
+  - validation summary and delta reporting remain the first safe family, but that family is now closed at its current threshold for this slice
+  - marker checkpoint rendering is now the selected second safe family
+  - that selected second family now also has one exact ATLAS-side contract freeze covering trigger, stable inputs, expected checkpoint artifact, failure boundary, safe fallback, owner boundary, and non-claim boundary
+  - `_stack` is now admitted as the helper home for that second family while ATLAS root remains the truth owner for marker posture, restart projection, receipt narration, and ratchet-threshold judgment
+  - receipt skeleton and doctrine-routing drafts are now the selected third safe family
+  - that selected third family now also has one exact ATLAS-side contract freeze covering trigger, stable inputs, expected draft artifact, failure boundary, safe fallback, owner boundary, and non-claim boundary
+  - that selected third family now also has one exact split owner-facing admission boundary: `_stack` for receipt skeleton drafts, Playbook for doctrine-routing drafts, and ATLAS root retains truth ownership for receipt consequence, restart projection, and draft-only labeling
+  - that selected third family is now also split into two exact subfamilies:
+  - `receipt skeleton drafts`
+  - `doctrine-routing drafts`
+  - `receipt skeleton drafts` is now the honest first subfamily to advance next
+  - `receipt skeleton drafts` now also has one exact ATLAS-side subfamily contract freeze covering trigger, stable inputs, expected draft artifact shape, routing boundary, failure boundary, safe fallback, owner boundary, and non-claim boundary
+  - release-proof packaging and QA/LLEL proof-packet preparation remain bounded preparation helpers only when their owner-proof paths are already admissible, so they stay deferred below that selected third family
   - fresh live proof capture across the frozen bridge path, final go or no-go judgment, final publication judgment, doctrine admission, and destructive cleanup approval remain explicitly non-automation families
-  - no marker movement is earned until one candidate family graduates into a real governed operator surface with repeatable proof and safe fallback
+  - the first real supporting dependency is now `_stack Readiness` because future owner-surface work for this family must route through one shared command surface rather than ATLAS-only truth packaging
+  - that supporting lane now has one exact `_stack Readiness stack validate validation-summary` command-design spine covering command purpose, admitted inputs, exact summary outputs, fail-closed exits, the no-mutation guard, and bounded delta discipline
+  - that supporting lane now also has one exact evidence-admission and delta-discipline spine covering authoritative current snapshot surfaces, admitted baseline receipt shapes, and fail-closed contradiction handling for `--delta-from`
+  - that supporting lane now also has one exact report-contract and contradiction-routing spine covering receipt-ready success payloads, bounded failure payloads, and the narrow snapshot-only exception when delta baseline is unavailable but current artifact truth still holds
+  - that supporting lane now also has one exact implementation-admission and no-execution guard spine covering validator invocation, paired-artifact loading, one cited-baseline comparison, contradiction classification, and receipt-ready rendering while forbidding any new mutation beyond the validator's normal latest-artifact production
+  - that supporting lane now also has one exact fixture-proof and static-input boundary spine covering admitted artifact-pair fixtures, admitted baseline fixtures, provenance labeling, truth-limit notes, and the exact boundary between local proof and live stack truth
+  - that supporting lane now also has one exact first-implementation-slice and proof-matrix spine covering validator refresh, paired-artifact agreement checks, optional one-baseline delta extraction, fail-closed contradiction and invalid-input handling, receipt-ready rendering, and the exact required proof cases for the minimum slice
+  - that supporting lane now also has one exact first-implementation prompt-pack and handoff-contract spine covering the worker objective, inherited passes 17 through 22 as frozen inputs, exact preserved payload surface, proof obligations, allowed-touch surfaces, forbidden surfaces, and stop conditions
+  - that supporting lane now also has one exact implementation-readiness closeout and worker-routing spine covering control-plane completion for the admitted first slice, the exact rule for leaving root docs-only, continuing guard boundaries, and one bounded worker-routing result
+  - that supporting lane now also has one reconciled first implementation worker landing in `repos/_stack`: `package.json`, `scripts/validation-summary.mjs`, `scripts/validation-summary.test.mjs`, and one repo receipt now prove the admitted minimum slice is operable without widening scope
+  - that supporting lane now also has one proof-and-receipt follow-on in `repos/_stack` that locks required-field presence, optional-field absence, unavailable-delta discipline, and bounded-path invalid-input behavior without widening the slice
+  - that supporting lane now also has one exact `_stack Readiness stack marker checkpoint` command-design spine covering command purpose, admitted marker/restart inputs, exact checkpoint outputs, fail-closed exits, and the no-ratchet guard for the second family
+  - that supporting lane now also has one exact `_stack Readiness stack marker checkpoint` evidence-admission and restart-surface discipline spine covering authoritative marker truth, derivative restart mirrors, optional same-story cited receipt context, and fail-closed contradiction handling for next-package narration
+  - that supporting lane now also has one exact `_stack Readiness stack marker checkpoint` report-contract and contradiction-routing spine covering checkpoint-only output, checkpoint-plus-context output, the explicit partial-checkpoint exception when restart context is unavailable, and bounded contradiction routing
+  - that supporting lane now also has one exact `_stack Readiness stack marker checkpoint` implementation-admission and no-execution guard spine covering authoritative marker read, derivative restart-mirror agreement checks, one cited-receipt comparison, contradiction classification, receipt-ready rendering, and the explicit no-ratchet/no-mutation guard
+  - that supporting lane now also has one exact `_stack Readiness stack marker checkpoint` fixture-proof and static-input boundary spine covering admitted marker/restart/cited-receipt fixtures, provenance labeling, truth-limit notes, and the exact boundary between local checkpoint proof and live ATLAS marker truth
+  - that supporting lane now also has one exact `_stack Readiness stack marker checkpoint` first-implementation-slice and proof-matrix spine covering the minimum marker extraction, restart-mirror agreement, one cited-receipt comparison, fail-closed routing, receipt-ready rendering, and the exact required proof cases for that slice
+  - that supporting lane now also has one exact `_stack Readiness stack marker checkpoint` first-implementation prompt-pack and handoff-contract spine covering the worker objective, inherited passes 25 through 30 as frozen inputs, exact preserved payload surface, proof obligations, allowed-touch surfaces, forbidden surfaces, and stop conditions
+  - that supporting lane now also has one exact `_stack Readiness stack marker checkpoint` implementation-readiness closeout and worker-routing spine covering control-plane completion for the admitted first slice, the exact rule for leaving root docs-only, continuing guard boundaries, and one bounded worker-routing result
+  - that supporting lane now also has one reconciled first marker-checkpoint implementation worker landing in `repos/_stack`: `package.json`, `scripts/marker-checkpoint.mjs`, `scripts/marker-checkpoint.test.mjs`, and one repo receipt now prove the admitted minimum slice is operable without widening scope
+  - that supporting lane now also has one proof-and-receipt follow-on in `repos/_stack` that locks required-field presence, optional-field absence unless triggered, missing cited-receipt failure, competing next-packet contradiction handling, and bounded `--receipt-context` path discipline without widening the slice
+  - the current validation snapshot is now `critical=0 error=3 warning=496 info=0`, and the three errors are limited to expected in-flight `_stack` `stack.lock.yaml` dirty-state drift rather than canonical registry damage
+  - no immediate supporting `_stack` packet remains open by default for this first marker-checkpoint slice; further `_stack` follow-on now requires distinct later-slice admission, an explicit governed operator-proof opening, or a separate lock-refresh packet if dirty-state disposition changes
+  - `_stack Readiness` is now also the direct supporting dependency for the second safe family because future helper-home work for marker checkpoint rendering must now route through `_stack` command-surface doctrine
+  - `_stack Readiness` is now also the direct supporting dependency for `receipt skeleton drafts` because receipt skeleton generation is already named as a shared `_stack` receipt-packaging candidate and this subfamily now routes only to that shared execution surface while ATLAS root keeps truth projection and `doctrine-routing drafts` stays deferred
+  - that supporting lane now also has one exact `_stack Readiness stack receipt package` command-design spine covering command purpose, admitted lane/restart inputs, draft-only receipt skeleton outputs, fail-closed exits, and the no-finality guard for the receipt-skeleton subfamily
+  - that supporting lane now also has one exact `_stack Readiness stack receipt package` evidence-admission and receipt-basis discipline spine covering authoritative lane and marker truth, derivative restart mirrors, admitted same-story cited receipt context, and placeholder-vs-filled-field discipline for the receipt-skeleton subfamily
+  - that supporting lane now also has one exact `_stack Readiness stack receipt package` report-contract and contradiction-routing spine covering draft-skeleton-with-placeholders output, draft-skeleton-plus-context output, the explicit partial fallback when derivative restart or cited receipt context is unavailable, and bounded contradiction routing
+  - that supporting lane now also has one exact `_stack Readiness stack receipt package` implementation-admission and no-execution guard spine covering authoritative lane read, authoritative marker read, derivative restart-mirror agreement checks, one cited-receipt comparison, placeholder fallback, draft-only rendering, and the explicit no-execution/no-doctrine-creep guard for the receipt-skeleton subfamily
+  - that supporting lane now also has one exact `_stack Readiness stack receipt package` fixture-proof and static-input boundary spine covering allowed lane/marker/restart/cited-receipt fixture classes, provenance rules, truth-limit notes, and the exact local proof ceiling for the receipt-skeleton subfamily
+  - that supporting lane now also has one exact `_stack Readiness stack receipt package` first-implementation-slice and proof-matrix spine covering the minimum lane extraction, marker extraction, restart-mirror agreement, one cited-receipt comparison, placeholder fallback, draft-only rendering, and the exact required proof cases for that slice
+  - that supporting lane now also has one exact `_stack Readiness stack receipt package` first-implementation prompt-pack and handoff-contract spine covering the worker objective, inherited contract inputs, preserved payload surface, proof obligations, allowed-touch surfaces, forbidden surfaces, and exact stop conditions for that slice
+  - that supporting lane now also has one exact `_stack Readiness stack receipt package` implementation-readiness closeout and worker-routing spine covering control-plane completion for the admitted first slice, the exact rule for leaving root docs-only, continuing guard boundaries, and one bounded worker-routing result for that slice
+  - that supporting lane now also has one reconciled first receipt-package implementation worker landing in `repos/_stack`: `package.json`, `scripts/receipt-package.mjs`, `scripts/receipt-package.test.mjs`, and one repo receipt now prove the admitted minimum slice is operable without widening scope
+  - that supporting lane now also has one proof-and-receipt follow-on in `repos/_stack` that locks required-field presence, optional-field absence unless triggered, missing cited-receipt bounded failure, no-agreeing-restart-context bounded partial payload behavior, and same-story `Exact Next Package` parser discipline without widening the slice
+  - the current validation snapshot is now `critical=0 error=3 warning=498 info=0`, and the three errors are limited to expected in-flight `_stack` `stack.lock.yaml` dirty-state drift rather than canonical registry damage
+  - no immediate supporting `_stack` packet remains open by default for this first receipt-package slice; further `_stack` follow-on now requires distinct later-slice admission, an explicit governed operator-proof opening, or a separate lock-refresh packet if dirty-state disposition changes
+  - `_stack Readiness` now moves from `96%` to `97%` because one additional operator-facing implementation landing plus reconciled closeout is now frozen for the third admitted support family, while `AI Repetition-to-Automation Pipeline` is now at `31%`
+  - the repeated operator act of manually telling Codex to `continue` is now admitted as one separate guarded automation candidate only at the root control-plane level, with one machine-readable result contract, one dry-run-only gate skeleton, one explicit validator/scope stop boundary, and durable decision receipts under `runtime/receipts/codex-continuation/`
+  - that guarded continuation candidate does not reopen the closed first receipt-package slice, does not admit unattended live execution by default, and stops immediately on missing next-move truth, widened scope, or explicitly non-automated classes
+  - that guarded continuation candidate now also admits one wrapper-bound live-shaped JSONL receipt-capture seam: the gate may extract one final continuation result from a bounded ATLAS wrapper transcript and emit the same durable decision JSON and Markdown receipts without widening into unattended execution
+  - that guarded continuation candidate now also freezes one explicit enable boundary: `--no-dry-run` alone is insufficient, and one live command may run only with `--allow-live-execution` plus wrapper-bound JSONL capture
+  - that guarded continuation candidate now also freezes one exact live-command boundary: the admitted command shape is the real `codex exec resume --last` family only, and arbitrary local proof commands now fail closed even when explicit allow and wrapper capture are present
+  - the historical packaged WindowsApps blocker remains durable for that exact command: the earlier resolved executable was the packaged WindowsApps Codex binary, direct launch blocked with `windowsapps_packaged_codex_start_access_denied`, and that historical blocker classification remains preserved rather than overwritten
+  - the active Codex runtime surface is now separately proven as non-packaged and launchable: `Get-Command codex -All` and `where.exe codex` now resolve the user-scoped npm Codex shim surfaces before WindowsApps, `codex --version` starts cleanly as `codex-cli 0.137.0`, and the guarded-continuation gate now classifies that active surface as `non_packaged_npm_codex_launchable` while still reporting lower-priority WindowsApps candidates
+  - one bounded real resume execution now also launches through that non-packaged surface via the npm Windows `.cmd` shim, so the old launch blocker is cleared and replaced by the narrower command-semantic blocker `resume_requires_stdin_prompt`
+  - the guarded continuation gate now also freezes one help-driven resume contract proof: `codex exec resume --help` exposes `[PROMPT]` plus `-` stdin support, and the gate records that surface as `resume_prompt_arg_and_stdin_dash_supported`
+  - that means `resume_requires_stdin_prompt` is now frozen as a blocker on the currently admitted promptless shape `codex exec resume --last`, not as proof that the CLI lacks non-interactive prompt-bearing resume surfaces
+  - one exact additional prompt-bearing command shape is now admitted: `codex exec resume --last <inline-prompt>`
+  - `codex exec resume --last -` remains explicitly deferred because dash-stdin prompt injection still needs its own source-boundary packet
+  - one bounded live proof has now run on the admitted inline-prompt shape, and the gate now freezes that exact result as `resume_command_timeout` after a 30-second bounded wait with internal timeout handling and Windows process-tree teardown
+  - timeout receipt discipline is now explicit for that branch: timeout seconds, launch mode, resolved executable, and teardown method/returncode are part of the durable blocker story
+  - result-file-only input now remains blocked for live execution even when the decision is `continue`
+  - live unattended continuation remains not admitted, and no immediate further guarded-continuation packet is open for this same inline-prompt timeout blocker because the root two-strike blocker rule is now satisfied
+  - no marker movement is earned on the AI pipeline itself until one candidate family graduates into a real governed operator surface with repeatable proof and safe fallback
 - `Playbook Everywhere + Cortex Interface` now has one contract-first shadowing packet and one governed contract-export packet:
   - ATLAS and Playbook remain the canonical truth surfaces for repetition families, proof expectations, fallbacks, owner boundaries, and non-claim boundaries
   - every exportable Cortex-facing family contract now freezes `contract_id`, `family_name`, `trigger`, `stable_inputs`, `expected_proof_artifact`, `fallback_path`, `owner_boundary`, `non_claim_boundary`, and `admissibility_state`
@@ -87,7 +176,7 @@ Current status:
   - Cortex may only consume exported contracts and shadow bounded preparation families such as validation summaries, marker checkpoints, and receipt or doctrine draft helpers
   - `validation-summary-shadow` is now consumed safely into a local Cortex artifact with authority explicitly false, which clears the first interface threshold without widening production authority
   - the full current `exportable-now` family set is now also consumed safely and projected through the existing Cortex read-model spine: `marker-checkpoint-shadow` and `receipt-doctrine-draft-shadow` now join `validation-summary-shadow` as live bounded consumers, while `operator_surface`, `current-state`, `rail-state`, and `context` all acknowledge that set without widening authority
-  - lane reselection is now clean: `stabilize-root-worktree` remains a held blocker family, but the active root truth packet is `Playbook Everywhere + Cortex Interface` Wave 1A rather than another root-worktree packet
+  - that earlier interface reselection now remains durable held truth: `stabilize-root-worktree` stayed a held blocker family, the interface wave avoided another root-worktree reopen, and the current active root truth packet has since advanced onward into `AI Repetition-to-Automation Pipeline`
   - the contract-export packet itself still earned no movement, but the later reconciliation of the fully consumed `exportable-now` set now widens interface breadth beyond the earlier single-family threshold without moving truth ownership into Cortex
 - `Cortex Readiness` now has a second bounded shadow-consumption proof:
   - `marker-checkpoint-shadow` now consumes the ATLAS marker and restart surfaces into a local Cortex artifact with ratchet authority explicitly false
@@ -148,8 +237,9 @@ Current status:
   - the recent archive closeout, secret-path hold, interface-threshold hold, and KCT closeout threshold now all count as DCE evidence surfaces rather than as coordination facts that must be reconstructed from conversation memory
   - the current closeout cluster also remains admitted as KCT carry-forward truth: future workers no longer need to reconstruct the reusable archive/secret/interface/execution-state lesson set from adjacent receipts or chat recap alone, and no immediate KCT-only follow-on is implied from that admission
   - the canonical inventory spine now also absorbs that closeout cluster directly, and the book-side projection now mirrors it coherently: `Inventory & Truth Map` and `Truth Map & ATLAS Book` are both materially held at their current thresholds, the current held-family set is recoverable from root inventory plus restart surfaces rather than only from adjacent receipts plus chat-held coordination, and no immediate docs-only follow-on packet is open inside either lane
-  - `Local Data Gateway` is now the active ATLAS-side structural lane from that refreshed substrate: the lane currently owns process-and-placement truth rather than repo/runtime repair or external/session bridge recovery, the generic no-send chain and the three proven `adoptable now` classes remain intact, the repo-naming proof family still stays below `adoptable now`, and `Atlas-owned Repo Naming Canonicalization` remains held unless one direct naming or path dependency is admitted by a later gateway packet
-  - `Unified Workflow Convergence` now owns the active ATLAS-side workflow spine above those hardened boundaries: canonical substrate surfaces feed lane selection first, held lanes remain held by default, the Fitness Discord bridge blocker remains external/session-scoped rather than root-mutation work, and no supporting lane opens unless the active slice admits one direct dependency
+  - `Local Data Gateway` now remains materially held at its current process-and-placement threshold: the generic no-send chain and the three proven `adoptable now` classes remain intact, the repo-naming proof family still stays below `adoptable now`, and `Atlas-owned Repo Naming Canonicalization` remains held unless one direct naming or path dependency is admitted later
+  - `Unified Workflow Convergence` now remains held as the ATLAS-side workflow spine above those hardened boundaries: canonical substrate surfaces feed lane selection first, held lanes remain held by default, the Fitness Discord bridge blocker remains external/session-scoped rather than root-mutation work, and no supporting lane opens unless the active slice admits one direct dependency
+  - the next durable ATLAS-side active lane is now `AI Repetition-to-Automation Pipeline`: the hardened workflow spine is explicit enough to evaluate real automation-candidate seams from canonical truth without reopening held families, the immediate focus is now the admitted `receipt skeleton drafts` subfamily inside the selected third-safe family, and `_stack Readiness` is now the direct supporting lane for the two already-closed first slices plus that exact receipt-skeleton subfamily
 - no helper-Vercel project deletion gate remains open after the 2026-05-25 helper-surface deletion pass
 - DiscordOS lookup widening is closed at the owner-repo boundary:
   - transport-aware opening: `no`
@@ -175,6 +265,7 @@ What the latest closeout passes proved:
 - the remaining automation mismatch class is governed no-op and the remaining sign-in-bearing auth-only class is governed heuristic exclusion
 - Discord and Music Sesh data concerns are now explicitly transferred to DiscordOS Infrastructure Separation instead of lingering as Fitness cleanup residue
 - the DiscordOS lookup-local planning and boundary chain is complete enough to stop widening without an explicit new authorization
+- the older generic DiscordOS next-package ladder from the bridge-independent reopen receipt is now consumed and should not be replayed from root
 - root self-lock sequencing for `stack.lock.yaml#stack` has been resolved by policy, so the remaining pressure is retained-surface cleanup rather than root commitability
 - the retained-surface lane is no longer blocked by broad ambiguity, the Lifeline merged-checkpoint trio `lifeline-main-closeout`, `lifeline-main-closeout-2`, and `lifeline-main-closeout-3` is now consumed, and the remaining pressure is governed-retain rather than an unconsumed exact cleanup subset
 - the convergence-wave closeout itself is now complete; the remaining pressure belongs to separate governed-retain or approval-gated lanes rather than residual closeout debt

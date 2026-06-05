@@ -753,6 +753,66 @@ Each entry records:
 - Cortex Readiness
 - Branch & Worktree Normalization
 
+## 19. Blind Codex Continuation Drift
+
+### Symptoms
+
+- the operator keeps pressing `continue` without an explicit stop contract
+- Codex starts replaying stale micro-steps or widening scope across packets
+- doctrine, deploy, destructive cleanup, or ambiguous review pressure gets narrated as if it were safe automation
+
+### Root cause
+
+- repeated continuation was treated as a macro before result shape, validator posture, and stop conditions were frozen
+
+### Prevention rule
+
+- no blind auto-continue
+- guarded continuation must fail closed by default
+- live execution may admit only the exact real `codex exec resume --last` shape plus any separately frozen narrower prompt-bearing variant
+- after one blocked real resume execution plus one runtime-boundary recheck for the same blocker class, root stops that continuation ladder
+- if executable order or runtime surface materially changes after that stop, reopen first with one narrower runtime-surface proof receipt instead of jumping straight to live continuation
+- if the exact resume command starts on the new surface but fails at command semantics, freeze that new blocker class instead of narrating it as either launch failure or success
+- if help proves prompt-bearing resume surfaces exist after that stderr blocker, freeze that help-surface contract before admitting any prompt-bearing live variant
+- if one prompt-bearing variant is admitted, keep dash-stdin prompt source deferred until its provenance boundary is frozen separately
+- if one bounded live proof can hang, move the timeout boundary into the gate and write the timeout receipt there instead of depending on the outer shell
+- if one blocked timeout execution receipt and one timeout-boundary recheck receipt now exist for the same admitted branch, close the root ladder until runtime behavior materially changes
+
+### Recovery steps
+
+1. stop the continuation loop
+2. inspect the machine-readable result and the latest gate-decision receipt
+3. verify validator posture against the admitted dirty-state baseline
+4. verify the next move is still exact, bounded, and Codex-routable
+5. verify the live command shape is still the exact admitted real resume command rather than an arbitrary substitute
+6. if the real resume command cannot start on the current host, classify that as a blocked runtime boundary and stop instead of swapping commands
+7. if one blocked execution receipt and one blocker-recheck receipt now exist for that same host-runtime class, hold the root ladder closed until the runtime state materially changes
+8. if the runtime surface materially changed, freeze the new executable order, version, and launchability in one runtime-surface proof receipt before any new live resume proof packet
+9. if the new live proof starts but fails with a stable stderr contract, freeze that exact command-semantic blocker before any further retry
+10. if help then proves `[PROMPT]` or `-` stdin support on the resume family, freeze that contract and reopen only a prompt-bearing command-admission packet rather than another blind retry
+11. if one prompt-bearing variant is admitted, prefer one inline prompt argument proof before any stdin-fed prompt source proof
+12. if the bounded inline-prompt proof times out, freeze that as the current blocker class and route next into timeout-boundary/receipt discipline rather than rerunning blindly
+13. after the timeout-boundary packet lands for that same blocker class, stop the root ladder until runtime behavior materially changes
+14. reopen only one narrower continuation-gate packet if the stop rule itself needs adjustment after the blocker class changes
+
+### Owning lane
+
+- AI Repetition-to-Automation Pipeline
+- Truth Map & ATLAS Book
+
+### Required receipt
+
+- guarded continuation gate receipt
+- gate-decision receipt under `runtime/receipts/codex-continuation/`
+- live transcript capture receipt when the stop or continue decision came from JSONL extraction
+
+### Marker impact
+
+- usually none until repeatable governed operator proof exists
+- if `--no-dry-run` starts acting like implicit approval, treat that as a guarded-continuation regression and stop the lane
+- if arbitrary local proof commands start passing through live execution, treat that as a guarded-continuation regression and stop the lane
+- if root keeps opening new packets against the same machine-classified runtime blocker, treat that as blocker replay drift and stop the lane
+
 ## Recovery Pattern
 
 Across these failure modes, the common recovery order is:

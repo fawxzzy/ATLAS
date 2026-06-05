@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-05-27T00:00:00Z",
-  "updated_at": "2026-05-29T02:53:26.9411130-04:00",
+  "updated_at": "2026-06-03T22:20:00-04:00",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -16,6 +16,8 @@
   "evidence_refs": [
     "docs/ops/DISCORD-FEEDBACK-DOMAIN-EXTRACTION-READINESS-2026-05-25.md",
     "docs/ops/DISCORD-OS-INFRASTRUCTURE-SEPARATION-CHECKPOINT-2026-05-25.md",
+    "docs/ops/DISCORD-OS-INFRASTRUCTURE-SEPARATION-BRIDGE-INDEPENDENT-REOPEN-DECISION-2026-06-03.md",
+    "docs/ops/DISCORD-OS-INFRASTRUCTURE-SEPARATION-NAMED-PORT-PLANNING-CLASS-CONSUMPTION-AND-NO-REPLAY-DECISION-2026-06-03.md",
     "docs/ops/DISCORD-OS-INFRASTRUCTURE-SEPARATION-INVENTORY-2026-05-24.md",
     "docs/ops/UNIFIED-DISCORD-OS-WORKFLOW-BOUNDARY-2026-05-24.md",
     "repos/DiscordOS/docs/contracts/feedback-runtime.md",
@@ -30,12 +32,14 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "discord-os-infrastructure-separation",
     "scope_class": "cross-repo-separation-governance",
-    "current_checkpoint_receipt": "docs/ops/DISCORD-OS-INFRASTRUCTURE-SEPARATION-CHECKPOINT-2026-05-25.md",
-    "checkpoint_commit": "0077cd8",
-    "checkpoint_summary": "Infrastructure separation is paused at a high-confidence seam: governance and scaffold surfaces exist, live runtime remains Fitness-owned, and migration classes stay blocked.",
+    "current_checkpoint_receipt": "docs/ops/DISCORD-OS-INFRASTRUCTURE-SEPARATION-NAMED-PORT-PLANNING-CLASS-CONSUMPTION-AND-NO-REPLAY-DECISION-2026-06-03.md",
+    "checkpoint_commit": null,
+    "checkpoint_summary": "Bridge-independent DiscordOS work may resume now, but the old generic root named-port planning ladder is already consumed and should not be replayed; further follow-on now needs explicit new scope or higher-level authorization while the live Fitness Discord proof seam remains parked behind bridge recovery.",
     "governing_receipts": [
       "docs/ops/DISCORD-OS-INFRASTRUCTURE-SEPARATION-INVENTORY-2026-05-24.md",
-      "docs/ops/DISCORD-OS-INFRASTRUCTURE-SEPARATION-CHECKPOINT-2026-05-25.md"
+      "docs/ops/DISCORD-OS-INFRASTRUCTURE-SEPARATION-CHECKPOINT-2026-05-25.md",
+      "docs/ops/DISCORD-OS-INFRASTRUCTURE-SEPARATION-BRIDGE-INDEPENDENT-REOPEN-DECISION-2026-06-03.md",
+      "docs/ops/DISCORD-OS-INFRASTRUCTURE-SEPARATION-NAMED-PORT-PLANNING-CLASS-CONSUMPTION-AND-NO-REPLAY-DECISION-2026-06-03.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -75,6 +79,10 @@
         "requirement": "blocked without a new explicit lane and deploy-backed proof"
       },
       {
+        "item": "live Fitness Discord pass-9 proof capture",
+        "requirement": "blocked until one successful live Codex-to-Chrome runtime call exists from a responsive session"
+      },
+      {
         "item": "schema movement and env transfer",
         "requirement": "blocked"
       },
@@ -85,15 +93,15 @@
     ],
     "next_package_ladder": [
       {
-        "package": "narrow adapter-consumer or adapter-implementation planning package tied to one named port surface only",
-        "mode": "docs-only or explicitly reopened implementation planning",
-        "reason": "the checkpoint permits only the smallest seam-specific reopen"
+        "package": "none by default at ATLAS root; reopen only on explicit new DiscordOS named scope or higher-level authorization",
+        "mode": "routing hold",
+        "reason": "the previously named generic root planning class was already consumed across the May 26 planning and lookup-boundary chain, so replay would violate no-duplicate-package discipline"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-REFRESH-PASS-4-2026-05-29.md",
-    "freshness_checked_at": "2026-05-29T02:53:26.9411130-04:00",
-    "freshness_basis": "no newer decisive receipt, marker drift, blocked-work drift, or next-package drift was found across the full eight-manifest refresh cycle after Dependency Untangling admission.",
+    "freshness_checked_receipt": "docs/ops/DISCORD-OS-INFRASTRUCTURE-SEPARATION-NAMED-PORT-PLANNING-CLASS-CONSUMPTION-AND-NO-REPLAY-DECISION-2026-06-03.md",
+    "freshness_checked_at": "2026-06-03T22:20:00-04:00",
+    "freshness_basis": "the lane checkpoint, the bridge reclassification, the reopen consequence, and the May 26 DiscordOS planning plus lookup-boundary chain now agree: bridge-independent DiscordOS work may resume, but the generic root named-port planning class is already consumed and must not be replayed.",
     "marker_posture": [
       {
         "marker": "Discord OS Infrastructure Separation",

@@ -1,0 +1,255 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://codex/atlas_codex_result.schema.json",
+  "title": "ATLAS Codex continuation result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "result_id",
+    "generated_at",
+    "producer",
+    "lane_id",
+    "active_slice",
+    "summary",
+    "changed_files",
+    "validation_snapshot",
+    "marker_outcome",
+    "next_move",
+    "scope_guard"
+  ],
+  "properties": {
+    "contract_version": {
+      "type": "string",
+      "const": "atlas.codex.result.v1"
+    },
+    "result_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._:-]+$",
+      "minLength": 3
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "producer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "name",
+        "capture_mode"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "codex",
+            "wrapper",
+            "manual",
+            "test"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "capture_mode": {
+          "type": "string",
+          "enum": [
+            "schema_json",
+            "explicit_json_file",
+            "jsonl_final_message"
+          ]
+        },
+        "version": {
+          "type": "string"
+        }
+      }
+    },
+    "lane_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "active_slice": {
+      "type": "string",
+      "minLength": 1
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1
+    },
+    "changed_files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "summary",
+          "status"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(?![A-Za-z]:[\\\\/])(?!/)(?!file:).+"
+          },
+          "summary": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "decisive_receipt_path": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^(?![A-Za-z]:[\\\\/])(?!/)(?!file:).+"
+    },
+    "validation_snapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "command",
+        "critical",
+        "error",
+        "warning",
+        "info",
+        "classification",
+        "summary"
+      ],
+      "properties": {
+        "command": {
+          "type": "string",
+          "minLength": 1
+        },
+        "critical": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "error": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "warning": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "info": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "classification": {
+          "type": "string",
+          "minLength": 1
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "marker_outcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "justified",
+        "summary",
+        "items"
+      ],
+      "properties": {
+        "justified": {
+          "type": "boolean"
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "marker",
+              "movement"
+            ],
+            "properties": {
+              "marker": {
+                "type": "string",
+                "minLength": 1
+              },
+              "movement": {
+                "type": "string",
+                "minLength": 1
+              },
+              "reason": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "next_move": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "package",
+        "mode"
+      ],
+      "properties": {
+        "package": {
+          "type": "string",
+          "minLength": 1
+        },
+        "mode": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason": {
+          "type": "string"
+        }
+      }
+    },
+    "scope_guard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "widened_scope",
+        "held_lanes_preserved",
+        "non_automated_attempted",
+        "out_of_scope_admissions"
+      ],
+      "properties": {
+        "widened_scope": {
+          "type": "boolean"
+        },
+        "held_lanes_preserved": {
+          "type": "boolean"
+        },
+        "non_automated_attempted": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "out_of_scope_admissions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  }
+}

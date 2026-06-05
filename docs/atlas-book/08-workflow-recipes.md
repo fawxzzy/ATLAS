@@ -258,9 +258,73 @@ This chapter turns the current operating model into reusable “run this workflo
 - no bulk cleanup by implication
 - no touching deferred Discord/Music Sesh tables casually
 
+## Recipe 7: Guarded Codex Continuation Workflow
+
+### Owner
+
+- ATLAS root
+
+### Starting point
+
+- one bounded Codex slice has already finished
+- one machine-readable continuation result exists or is about to be emitted
+
+### Allowed commands / surfaces
+
+- `ops/codex/atlas_continue_gate.py`
+- `ops/codex/schemas/atlas_codex_result.schema.json`
+- `ops/codex/prompts/continue_gate_prompt.md`
+- one wrapper-bound live-shaped JSONL transcript when present
+- one bounded runtime-surface proof capture when the resolved Codex executable/runtime surface materially changes
+- `ops/validation/validate_stack.py`
+- durable decision receipts under `runtime/receipts/codex-continuation/`
+
+### Proof required
+
+- exact changed-path list
+- decisive receipt path when one exists
+- exact validation snapshot
+- exact marker movement or explicit no-movement
+- one exact next move with execution mode
+- explicit scope and non-automation guard fields
+
+### Receipt required
+
+- one gate-decision JSON receipt
+- one gate-decision Markdown receipt
+- one ATLAS root receipt when the continuation contract itself changes
+
+### Approval gates
+
+- default behavior remains dry-run only
+- live receipt capture may be admitted before live continuation is admitted
+- a materially changed executable/runtime surface must land one runtime-surface proof receipt before any new live resume proof is honest
+- live execution requires explicit operator allow plus wrapper-bound JSONL capture
+- live execution admits the exact real `codex exec resume --last` shape plus any separately admitted narrower prompt-bearing variant
+- if the exact resume command cannot start on the current host, write the blocked execution receipt with machine-readable runtime classification and stop instead of substituting another command
+- if the exact resume command starts but fails with command-level stderr, freeze that narrower blocker class before any further execution retry
+- if the stderr blocker is `resume_requires_stdin_prompt`, one bounded help-driven contract probe may freeze prompt-argument and dash-stdin support before any prompt-bearing live variant is considered
+- prompt-bearing command admission may admit one exact inline prompt argument shape before any dash-stdin prompt source is considered
+- bounded live proof must own its timeout classification and emit a receipt before the outer shell can kill the packet
+- after one blocked timeout execution receipt and one timeout-boundary recheck receipt for that same branch, no further root rerun is open until runtime state materially changes
+
+### Forbidden shortcuts
+
+- no blind `continue` macro
+- no chat-memory-only next move
+- no validator omission
+- no jumping from changed executable order straight into live continuation without a runtime-surface proof receipt
+- no arbitrary live command substitution
+- no treating `codex exec resume --help` as implicit permission for prompt-bearing live execution
+- no collapsing inline prompt arguments and dash-stdin into one admission event
+- no repeated root retries after one blocked execution receipt plus one blocker-recheck receipt for the same host-runtime class
+- no widened-scope continuation
+- no doctrine, deploy, destructive cleanup, secret approval, or ambiguous-review continuation
+
 ### Marker impact
 
-- Fitness Supabase Profile/Data Hygiene
+- usually none until repeatable governed operator proof exists
+- may later widen `AI Repetition-to-Automation Pipeline` only after real safe fallback and behavior proof exist
 - Operator Secret Path Hygiene
 
 ## Recipe 7: DiscordOS Separation Workflow

@@ -87,6 +87,8 @@ Define the one canonical visible card shape for the Discord feedback workflow so
 ### Required Fields / Invariants
 
 - title stays text-only and searchable
+- operator-edited thread titles should use ASCII-safe punctuation by default
+- any intentional non-ASCII title punctuation must come from an explicit UTF-8-safe or escaped source and must be read back from Discord immediately after the patch
 - visible type label must be `Bug` or `Feature`
 - forum card remains type-aware even when bounded storage is shared
 - `Fix` is not a valid new submission type
@@ -131,6 +133,7 @@ Define the one canonical visible card shape for the Discord feedback workflow so
 - do not treat the forum post as the canonical source if it disagrees with the bounded row
 - do not inject Jira-style field sprawl into the card body
 - do not use the public release-post format inside the feedback thread
+- do not patch forum thread titles through ad hoc shell-piped payloads when punctuation integrity matters
 
 ### Proof Expectations
 
@@ -409,6 +412,14 @@ Discord feedback contract work canonicalizes workflow rules without making Disco
 
 Discord card -> bounded row -> board sync -> export -> reviewed packet/prompt -> implementation -> completion review -> curated release update
 
+## Additional Pattern
+
+ASCII-safe thread title by default -> governed patch path for intentional Unicode -> immediate Discord readback verification
+
 ## Failure Mode
 
 Raw Discord card state becomes direct implementation authority, auto-announcement source, or duplicate engineering truth.
+
+## Additional Failure Mode
+
+Shell-piped non-ASCII punctuation can silently degrade into `?` inside stored Discord thread titles if the operator path does not verify exact readback.

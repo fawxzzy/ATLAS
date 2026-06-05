@@ -28,6 +28,7 @@ It is meant to answer:
 12. [Restart And Handoff Guide](12-restart-and-handoff-guide.md)
 13. [Vision And Endgames](13-vision-and-endgames.md)
 14. [Lane Split Execution](14-lane-split-execution.md)
+15. [Lifeline](15-lifeline.md)
 
 ## Current Emphasis
 

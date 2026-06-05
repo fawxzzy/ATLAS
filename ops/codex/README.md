@@ -7,6 +7,7 @@ This directory provides the explicit wrapper strategy for running Codex from ATL
 - `run_scoped_task.ps1`
 - `commit_stack_repos.ps1`
 - `commit_dirty_repos.ps1` (legacy alias)
+- `atlas_continue_gate.py`
 
 The wrapper is intentionally simple:
 
@@ -71,6 +72,38 @@ python ops/events/invoke_event.py --payload-file tmp/scratch/example-event.json 
 3. run validators explicitly
 4. inspect receipts after each run
 5. add future adapters by mapping them into the same event contract
+
+## Guarded Continuation Gate
+
+`atlas_continue_gate.py` is the bounded ATLAS-side continuation classifier for repeated Codex `continue` work.
+
+Current admitted modes:
+
+- result JSON input
+- wrapper-bound live-shaped JSONL transcript capture
+- bounded runtime-surface proof capture for changed executable/runtime order without live continuation
+- bounded resume-contract help probe for prompt-argument and dash-stdin support without live prompt-bearing continuation
+- default dry-run decision receipts
+- explicit-enable boundary requiring `--allow-live-execution` plus wrapper-bound JSONL capture before one bounded live command may run
+- exact live-command admission limited to the real `codex exec resume --last` family
+- one exact prompt-bearing admission variant now also exists: `codex exec resume --last <inline-prompt>`
+- dash-stdin prompt injection remains deferred even though the CLI help surface documents it
+- Windows `.cmd` Codex shim launch support for bounded live proof on npm-installed CLI surfaces
+- blocked host-availability receipts with stable runtime-boundary classification when that exact command cannot start on the current machine
+- exact command-semantic failure classification when the resume command starts but still fails, including `resume_requires_stdin_prompt`
+- bounded live execution timeout classification inside the gate, including `resume_command_timeout`
+- timeout teardown reporting in decision receipts for blocked live proofs
+
+Current non-goals:
+
+- blind unattended continuation
+- infinite session chaining
+- doctrine, deploy, publication, or destructive-cleanup automation
+
+Current durable outputs:
+
+- decision JSON receipts under `runtime/receipts/codex-continuation/`
+- decision Markdown receipts under `runtime/receipts/codex-continuation/`
 
 ## Multi-Repo Commit Helper
 
