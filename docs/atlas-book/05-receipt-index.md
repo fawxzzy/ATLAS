@@ -123,6 +123,7 @@
 - [Cortex Readiness Docs-ADR-Or-Debt-Slice Live Read-Model Refresh Pass 7](../ops/CORTEX-READINESS-DOCS-ADR-OR-DEBT-SLICE-LIVE-READ-MODEL-REFRESH-PASS-7-2026-06-05.md)
 - [Cortex Readiness Docs-ADR-Or-Debt-Slice Post-Merge Live Read-Model Reconciliation Pass 8](../ops/CORTEX-READINESS-DOCS-ADR-OR-DEBT-SLICE-POST-MERGE-LIVE-READ-MODEL-RECONCILIATION-PASS-8-2026-06-05.md)
 - [PR #56 Draft Readiness Audit And Body Alignment Pass 1](../ops/PR-56-DRAFT-READINESS-AUDIT-AND-BODY-ALIGNMENT-PASS-1-2026-06-05.md)
+- [PR #56 Ready-State Transition And Posture Confirmation Pass 2](../ops/PR-56-READY-STATE-TRANSITION-AND-POSTURE-CONFIRMATION-PASS-2-2026-06-05.md)
 - [PR #55 Draft Readiness Audit And Body Alignment Pass 1](../ops/PR-55-DRAFT-READINESS-AUDIT-AND-BODY-ALIGNMENT-PASS-1-2026-06-05.md)
 - [PR #55 Ready-State Transition And Posture Confirmation Pass 2](../ops/PR-55-READY-STATE-TRANSITION-AND-POSTURE-CONFIRMATION-PASS-2-2026-06-05.md)
 - [Stabilize Root Worktree Blocker Classification And Hold Pass 1](../ops/STABILIZE-ROOT-WORKTREE-BLOCKER-CLASSIFICATION-AND-HOLD-PASS-1-2026-06-01.md)
