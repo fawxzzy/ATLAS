@@ -295,6 +295,29 @@ class AtlasReceiptScaffoldTests(unittest.TestCase):
         payload = (root / output_ref).read_text(encoding="utf-8")
         self.assertIn(f"# AI Repetition-to-Automation Pipeline Receipt Scaffold - {date.today().isoformat()}", payload)
 
+    def test_main_can_write_deterministic_default_output_path(self) -> None:
+        root = self._temp_root()
+
+        def fake_contract_loader(**_: object) -> dict[str, object]:
+            return _contract_report()
+
+        exit_code = main(
+            [
+                "scaffold",
+                "--root",
+                str(root),
+                "--lane",
+                "AI Repetition-to-Automation Pipeline",
+                "--write-default-output",
+            ],
+            contract_loader=fake_contract_loader,
+        )
+
+        self.assertEqual(0, exit_code)
+        expected_ref = f"docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-RECEIPT-SCAFFOLD-{date.today().isoformat()}.md"
+        payload = (root / expected_ref).read_text(encoding="utf-8")
+        self.assertIn(f"# AI Repetition-to-Automation Pipeline Receipt Scaffold - {date.today().isoformat()}", payload)
+
 
 if __name__ == "__main__":
     unittest.main()
