@@ -271,6 +271,30 @@ class AtlasReceiptScaffoldTests(unittest.TestCase):
         payload = (root / output_ref).read_text(encoding="utf-8")
         self.assertIn(f"- Date: `{date.today().isoformat()}`", payload)
 
+    def test_main_defaults_title_when_omitted(self) -> None:
+        root = self._temp_root()
+        output_ref = "docs/ops/title-default-receipt.md"
+
+        def fake_contract_loader(**_: object) -> dict[str, object]:
+            return _contract_report()
+
+        exit_code = main(
+            [
+                "scaffold",
+                "--root",
+                str(root),
+                "--lane",
+                "AI Repetition-to-Automation Pipeline",
+                "--output",
+                output_ref,
+            ],
+            contract_loader=fake_contract_loader,
+        )
+
+        self.assertEqual(0, exit_code)
+        payload = (root / output_ref).read_text(encoding="utf-8")
+        self.assertIn(f"# AI Repetition-to-Automation Pipeline Receipt Scaffold - {date.today().isoformat()}", payload)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -38,6 +38,13 @@ class ReceiptScaffoldError(RuntimeError):
     pass
 
 
+def _default_title(*, lane: str, receipt_date: str, status: str) -> str:
+    normalized_lane = lane.strip()
+    if status == "blocked":
+        return f"{normalized_lane} Blocked Receipt Scaffold - {receipt_date}"
+    return f"{normalized_lane} Receipt Scaffold - {receipt_date}"
+
+
 def _default_objective(*, lane: str, status: str) -> str:
     normalized_lane = lane.strip()
     if status == "blocked":
@@ -131,6 +138,7 @@ def build_input(args: argparse.Namespace) -> ReceiptScaffoldInput:
     status = _non_empty(args.status, field_name="status")
     if status not in {"normal", "blocked"}:
         raise ReceiptScaffoldError("status must be 'normal' or 'blocked'.")
+    receipt_date = _non_empty(_normalized_optional(getattr(args, "date", None)) or date.today().isoformat(), field_name="date")
 
     blocker_code = _normalized_optional(args.blocker_code)
     blocker_summary = _normalized_optional(args.blocker_summary)
@@ -146,9 +154,12 @@ def build_input(args: argparse.Namespace) -> ReceiptScaffoldInput:
         output_ref = _validate_relative_ref(output_ref, field_name="output")
 
     return ReceiptScaffoldInput(
-        title=_non_empty(args.title, field_name="title"),
+        title=_non_empty(
+            _normalized_optional(getattr(args, "title", None)) or _default_title(lane=args.lane, receipt_date=receipt_date, status=status),
+            field_name="title",
+        ),
         lane=_non_empty(args.lane, field_name="lane"),
-        date=_non_empty(_normalized_optional(getattr(args, "date", None)) or date.today().isoformat(), field_name="date"),
+        date=receipt_date,
         status=status,
         objective=_normalized_optional(args.objective) or PLACEHOLDER_OBJECTIVE,
         scope=_normalized_optional(args.scope) or PLACEHOLDER_SCOPE,
@@ -377,7 +388,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     scaffold = subparsers.add_parser("scaffold", help="Render one draft-only operator-usable receipt scaffold.")
     scaffold.add_argument("--root", type=Path, default=atlas_root())
-    scaffold.add_argument("--title", required=True)
+    scaffold.add_argument("--title")
     scaffold.add_argument("--lane", required=True)
     scaffold.add_argument("--date")
     scaffold.add_argument("--status", default=DEFAULT_STATUS, choices=("normal", "blocked"))
