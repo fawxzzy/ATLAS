@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import tempfile
 import unittest
+from datetime import date
 from pathlib import Path
 
 from ops.atlas.receipt_scaffold import (
@@ -243,6 +244,32 @@ class AtlasReceiptScaffoldTests(unittest.TestCase):
         self.assertNotIn("REPLACE_ME_OBJECTIVE", payload)
         self.assertNotIn("REPLACE_ME_SCOPE", payload)
         self.assertNotIn("REPLACE_ME_VERIFICATION", payload)
+
+    def test_main_defaults_date_when_omitted(self) -> None:
+        root = self._temp_root()
+        output_ref = "docs/ops/date-default-receipt.md"
+
+        def fake_contract_loader(**_: object) -> dict[str, object]:
+            return _contract_report()
+
+        exit_code = main(
+            [
+                "scaffold",
+                "--root",
+                str(root),
+                "--title",
+                "Date Default Receipt",
+                "--lane",
+                "AI Repetition-to-Automation Pipeline",
+                "--output",
+                output_ref,
+            ],
+            contract_loader=fake_contract_loader,
+        )
+
+        self.assertEqual(0, exit_code)
+        payload = (root / output_ref).read_text(encoding="utf-8")
+        self.assertIn(f"- Date: `{date.today().isoformat()}`", payload)
 
 
 if __name__ == "__main__":
