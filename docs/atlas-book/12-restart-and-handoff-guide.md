@@ -139,6 +139,15 @@ Default cadence:
 3. run one ratchet only if that answer is yes
 4. refresh shared marker or restart surfaces only when the ratchet or proof changed canonical read state
 
+## Current Restart Truth
+
+- the current active ATLAS-side lane remains `AI Repetition-to-Automation Pipeline`
+- the active bounded subfamily remains `receipt skeleton drafts`
+- PR `#72` is now merged on `main`, so the first root-local operator-usable receipt scaffold surface is durable and the capability branch is closed
+- the derivative restart mirrors are now intentionally aligned for that scaffold path
+- the exact next ATLAS-side lane package is now `AI Repetition-to-Automation Pipeline receipt-scaffold restart-surface reconciliation merge judgment`
+- no immediate supporting `_stack` packet is open by default for the first receipt-package slice; supporting-lane reopen still requires distinct later-slice admission, governed operator-proof opening, or a separate lock-refresh packet
+
 Blocked-lane cadence:
 
 1. one blocked execution receipt is allowed
