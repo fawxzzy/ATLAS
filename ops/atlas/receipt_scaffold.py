@@ -23,6 +23,7 @@ PLACEHOLDER_OBJECTIVE = "REPLACE_ME_OBJECTIVE"
 PLACEHOLDER_SCOPE = "REPLACE_ME_SCOPE"
 PLACEHOLDER_VERIFICATION = "REPLACE_ME_VERIFICATION"
 PLACEHOLDER_NEXT_PACKAGE = "REPLACE_ME_NEXT_PACKAGE"
+DEFAULT_VERIFICATION_COMMAND = r"python .\ops\validation\validate_stack.py --ratchet"
 DEFAULT_MARKER_DECISION = "none"
 DEFAULT_PROTECTED_SURFACES = (
     "repos/fawxzzy-fitness",
@@ -70,6 +71,10 @@ def _default_scope(
     if status == "blocked":
         scope_lines.append("- stop after preserving the blocked scaffold until the blocker class materially changes")
     return "\n".join(scope_lines)
+
+
+def _default_verification_lines() -> tuple[str, ...]:
+    return (DEFAULT_VERIFICATION_COMMAND,)
 
 
 @dataclass(frozen=True)
@@ -252,6 +257,11 @@ def render_receipt_scaffold(
             status=scaffold_input.status,
         )
     )
+    verification_lines = (
+        scaffold_input.verification_lines
+        if scaffold_input.verification_lines != (PLACEHOLDER_VERIFICATION,)
+        else _default_verification_lines()
+    )
 
     lines: list[str] = [
         f"# {scaffold_input.title}",
@@ -324,7 +334,7 @@ def render_receipt_scaffold(
         )
 
     lines.extend(["", "## Verification", ""])
-    for item in scaffold_input.verification_lines:
+    for item in verification_lines:
         lines.append(f"- {item}")
 
     lines.extend(["", "## Marker Decision", "", f"- `{scaffold_input.marker_decision}`"])

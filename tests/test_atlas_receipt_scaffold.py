@@ -68,8 +68,10 @@ class AtlasReceiptScaffoldTests(unittest.TestCase):
         self.assertIn("Operator-Usable Scaffold Surface Pass 2", body)
         self.assertNotIn("REPLACE_ME_OBJECTIVE", body)
         self.assertNotIn("REPLACE_ME_SCOPE", body)
+        self.assertNotIn("REPLACE_ME_VERIFICATION", body)
         self.assertIn("Preserve one bounded draft-only operator-usable receipt scaffold", body)
         self.assertIn("preserve current marker posture `31%`", body)
+        self.assertIn(r"python .\ops\validation\validate_stack.py --ratchet", body)
 
     def test_blocked_lane_receipt_requires_and_renders_explicit_blocker_fields(self) -> None:
         args = build_input(
@@ -102,6 +104,7 @@ class AtlasReceiptScaffoldTests(unittest.TestCase):
         self.assertIn("stop after preserving the blocker receipt", body)
         self.assertNotIn("REPLACE_ME_OBJECTIVE", body)
         self.assertNotIn("REPLACE_ME_SCOPE", body)
+        self.assertNotIn("REPLACE_ME_VERIFICATION", body)
 
     def test_receipt_lists_protected_surfaces_not_touched(self) -> None:
         scaffold_input = ReceiptScaffoldInput(
@@ -239,6 +242,7 @@ class AtlasReceiptScaffoldTests(unittest.TestCase):
         self.assertIn("python .\\ops\\validation\\validate_stack.py --ratchet", payload)
         self.assertNotIn("REPLACE_ME_OBJECTIVE", payload)
         self.assertNotIn("REPLACE_ME_SCOPE", payload)
+        self.assertNotIn("REPLACE_ME_VERIFICATION", payload)
 
 
 if __name__ == "__main__":
