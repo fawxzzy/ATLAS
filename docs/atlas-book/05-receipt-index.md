@@ -134,6 +134,7 @@
 - [PR #63 Draft Readiness Audit And Body Alignment Pass 1](../ops/PR-63-DRAFT-READINESS-AUDIT-AND-BODY-ALIGNMENT-PASS-1-2026-06-05.md)
 - [PR #63 Ready-State Transition And Posture Confirmation Pass 2](../ops/PR-63-READY-STATE-TRANSITION-AND-POSTURE-CONFIRMATION-PASS-2-2026-06-05.md)
 - [Cortex Readiness Docs-ADR-Or-Debt-Slice Post-PR-63-Merge Live Read-Model Reconciliation Pass 16](../ops/CORTEX-READINESS-DOCS-ADR-OR-DEBT-SLICE-POST-PR-63-MERGE-LIVE-READ-MODEL-RECONCILIATION-PASS-16-2026-06-06.md)
+- [PR #64 Draft Readiness Audit And Body Alignment Pass 1](../ops/PR-64-DRAFT-READINESS-AUDIT-AND-BODY-ALIGNMENT-PASS-1-2026-06-06.md)
 - [PR #61 Draft Readiness Audit And Body Alignment Pass 1](../ops/PR-61-DRAFT-READINESS-AUDIT-AND-BODY-ALIGNMENT-PASS-1-2026-06-05.md)
 - [PR #61 Ready-State Transition And Posture Confirmation Pass 2](../ops/PR-61-READY-STATE-TRANSITION-AND-POSTURE-CONFIRMATION-PASS-2-2026-06-05.md)
 - [PR #61 Review Thread Resolution Pass 3](../ops/PR-61-REVIEW-THREAD-RESOLUTION-PASS-3-2026-06-05.md)
