@@ -173,6 +173,8 @@
 - [PR #77 Draft Readiness Audit And Body Alignment Pass 1](../ops/PR-77-DRAFT-READINESS-AUDIT-AND-BODY-ALIGNMENT-PASS-1-2026-06-06.md)
 - [PR #77 Ready-State Transition And Posture Confirmation Pass 2](../ops/PR-77-READY-STATE-TRANSITION-AND-POSTURE-CONFIRMATION-PASS-2-2026-06-06.md)
 - [AI Repetition-to-Automation Pipeline Receipt Scaffold Default Title Template Pass 31](../ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-RECEIPT-SCAFFOLD-DEFAULT-TITLE-TEMPLATE-PASS-31-2026-06-06.md)
+- [PR #78 Draft Readiness Audit And Body Alignment Pass 1](../ops/PR-78-DRAFT-READINESS-AUDIT-AND-BODY-ALIGNMENT-PASS-1-2026-06-06.md)
+- [PR #78 Ready-State Transition And Posture Confirmation Pass 2](../ops/PR-78-READY-STATE-TRANSITION-AND-POSTURE-CONFIRMATION-PASS-2-2026-06-06.md)
 - [PR #73 Draft Readiness Audit And Body Alignment Pass 1](../ops/PR-73-DRAFT-READINESS-AUDIT-AND-BODY-ALIGNMENT-PASS-1-2026-06-06.md)
 - [PR #73 Ready-State Transition And Posture Confirmation Pass 2](../ops/PR-73-READY-STATE-TRANSITION-AND-POSTURE-CONFIRMATION-PASS-2-2026-06-06.md)
 - [PR #73 Review Thread Resolution Pass 3](../ops/PR-73-REVIEW-THREAD-RESOLUTION-PASS-3-2026-06-06.md)
