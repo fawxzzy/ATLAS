@@ -36,6 +36,42 @@ class ReceiptScaffoldError(RuntimeError):
     pass
 
 
+def _default_objective(*, lane: str, status: str) -> str:
+    normalized_lane = lane.strip()
+    if status == "blocked":
+        return (
+            f"Preserve one bounded blocked draft-only receipt scaffold for `{normalized_lane}` "
+            f"using the admitted `{STACK_COMMAND_ID}` contract without widening into marker "
+            "movement, doctrine truth, publication readiness, or deploy authority."
+        )
+
+    return (
+        f"Preserve one bounded draft-only operator-usable receipt scaffold for `{normalized_lane}` "
+        f"using the admitted `{STACK_COMMAND_ID}` contract without widening into marker movement, "
+        "doctrine truth, publication readiness, or deploy authority."
+    )
+
+
+def _default_scope(
+    *,
+    next_package: str,
+    marker_percentage: str,
+    supporting_posture: str,
+    status: str,
+) -> str:
+    marker_text = marker_percentage or "unreported"
+    support_text = supporting_posture or "unreported"
+
+    scope_lines = [
+        "- render one draft-only receipt scaffold from the admitted `_stack` contract",
+        f"- preserve current marker posture `{marker_text}` and supporting posture `{support_text}`",
+        f"- carry the current exact next package `{next_package}` without widening into owner execution or authority claims",
+    ]
+    if status == "blocked":
+        scope_lines.append("- stop after preserving the blocked scaffold until the blocker class materially changes")
+    return "\n".join(scope_lines)
+
+
 @dataclass(frozen=True)
 class ReceiptScaffoldInput:
     title: str
@@ -201,6 +237,21 @@ def render_receipt_scaffold(
     receipt_context = str(contract_report.get("receipt_context") or "").strip()
     failure_scope = str(contract_report.get("failure_scope") or "").strip()
     contradiction_note = contract_report.get("contradiction_note")
+    objective = (
+        scaffold_input.objective
+        if scaffold_input.objective != PLACEHOLDER_OBJECTIVE
+        else _default_objective(lane=scaffold_input.lane, status=scaffold_input.status)
+    )
+    scope = (
+        scaffold_input.scope
+        if scaffold_input.scope != PLACEHOLDER_SCOPE
+        else _default_scope(
+            next_package=next_package,
+            marker_percentage=marker_percentage,
+            supporting_posture=supporting_posture,
+            status=scaffold_input.status,
+        )
+    )
 
     lines: list[str] = [
         f"# {scaffold_input.title}",
@@ -214,11 +265,11 @@ def render_receipt_scaffold(
         "",
         "## Objective",
         "",
-        scaffold_input.objective,
+        objective,
         "",
         "## Scope",
         "",
-        scaffold_input.scope,
+        scope,
         "",
         "## Source Surfaces",
         "",
