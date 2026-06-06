@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import subprocess
 import sys
 from dataclasses import dataclass
@@ -43,6 +44,11 @@ def _default_title(*, lane: str, receipt_date: str, status: str) -> str:
     if status == "blocked":
         return f"{normalized_lane} Blocked Receipt Scaffold - {receipt_date}"
     return f"{normalized_lane} Receipt Scaffold - {receipt_date}"
+
+
+def _default_output_ref(*, title: str) -> str:
+    slug = re.sub(r"[^A-Za-z0-9]+", "-", title.strip()).strip("-").upper()
+    return f"docs/ops/{slug}.md"
 
 
 def _default_objective(*, lane: str, status: str) -> str:
@@ -150,6 +156,8 @@ def build_input(args: argparse.Namespace) -> ReceiptScaffoldInput:
         receipt_context = _validate_relative_ref(receipt_context, field_name="receipt_context")
 
     output_ref = _normalized_optional(args.output)
+    if output_ref is None and bool(getattr(args, "write_default_output", False)):
+        output_ref = _default_output_ref(title=_normalized_optional(getattr(args, "title", None)) or _default_title(lane=args.lane, receipt_date=receipt_date, status=status))
     if output_ref is not None:
         output_ref = _validate_relative_ref(output_ref, field_name="output")
 
@@ -401,6 +409,7 @@ def build_parser() -> argparse.ArgumentParser:
     scaffold.add_argument("--verification", action="append")
     scaffold.add_argument("--protected-surface", action="append")
     scaffold.add_argument("--output")
+    scaffold.add_argument("--write-default-output", action="store_true")
     scaffold.add_argument("--force", action="store_true")
     return parser
 
