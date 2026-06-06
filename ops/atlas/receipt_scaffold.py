@@ -6,6 +6,7 @@ import os
 import subprocess
 import sys
 from dataclasses import dataclass
+from datetime import date
 from pathlib import Path
 from typing import Any, Callable
 
@@ -147,7 +148,7 @@ def build_input(args: argparse.Namespace) -> ReceiptScaffoldInput:
     return ReceiptScaffoldInput(
         title=_non_empty(args.title, field_name="title"),
         lane=_non_empty(args.lane, field_name="lane"),
-        date=_non_empty(args.date, field_name="date"),
+        date=_non_empty(_normalized_optional(getattr(args, "date", None)) or date.today().isoformat(), field_name="date"),
         status=status,
         objective=_normalized_optional(args.objective) or PLACEHOLDER_OBJECTIVE,
         scope=_normalized_optional(args.scope) or PLACEHOLDER_SCOPE,
@@ -378,7 +379,7 @@ def build_parser() -> argparse.ArgumentParser:
     scaffold.add_argument("--root", type=Path, default=atlas_root())
     scaffold.add_argument("--title", required=True)
     scaffold.add_argument("--lane", required=True)
-    scaffold.add_argument("--date", required=True)
+    scaffold.add_argument("--date")
     scaffold.add_argument("--status", default=DEFAULT_STATUS, choices=("normal", "blocked"))
     scaffold.add_argument("--objective")
     scaffold.add_argument("--scope")
