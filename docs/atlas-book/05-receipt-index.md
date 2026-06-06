@@ -160,6 +160,7 @@
 - [AI Repetition-to-Automation Pipeline Receipt Skeleton Drafts Operator-Usable Scaffold Surface Pass 25](../ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-RECEIPT-SKELETON-DRAFTS-OPERATOR-USABLE-SCAFFOLD-SURFACE-PASS-25-2026-06-06.md)
 - [AI Repetition-to-Automation Pipeline Receipt Skeleton Drafts Restart-Surface Reconciliation Pass 26](../ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-RECEIPT-SKELETON-DRAFTS-RESTART-SURFACE-RECONCILIATION-PASS-26-2026-06-06.md)
 - [PR #73 Draft Readiness Audit And Body Alignment Pass 1](../ops/PR-73-DRAFT-READINESS-AUDIT-AND-BODY-ALIGNMENT-PASS-1-2026-06-06.md)
+- [PR #73 Ready-State Transition And Posture Confirmation Pass 2](../ops/PR-73-READY-STATE-TRANSITION-AND-POSTURE-CONFIRMATION-PASS-2-2026-06-06.md)
 - [PR #72 Draft Readiness Audit And Body Alignment Pass 1](../ops/PR-72-DRAFT-READINESS-AUDIT-AND-BODY-ALIGNMENT-PASS-1-2026-06-06.md)
 - [PR #72 Ready-State Transition And Posture Confirmation Pass 2](../ops/PR-72-READY-STATE-TRANSITION-AND-POSTURE-CONFIRMATION-PASS-2-2026-06-06.md)
 - [PR #61 Draft Readiness Audit And Body Alignment Pass 1](../ops/PR-61-DRAFT-READINESS-AUDIT-AND-BODY-ALIGNMENT-PASS-1-2026-06-05.md)
