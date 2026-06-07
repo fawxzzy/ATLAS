@@ -145,7 +145,7 @@ Default cadence:
 - the active bounded subfamily remains `receipt skeleton drafts`
 - PR `#79` is now merged on `main`, so the bounded scaffold-output-path capability branch is durable and closed on the canonical branch
 - the derivative restart mirrors are now intentionally aligned for the scaffold path through the merged output-path capability and the live default-write adoption checkpoint
-- the exact next ATLAS-side lane package is now `AI Repetition-to-Automation Pipeline receipt-scaffold live default-write adoption checkpoint review-surface audit pass 1`
+- the exact next ATLAS-side lane package is now `AI Repetition-to-Automation Pipeline receipt-scaffold live default-write adoption checkpoint merge judgment`
 - no immediate supporting `_stack` packet is open by default for the first receipt-package slice; supporting-lane reopen still requires distinct later-slice admission, governed operator-proof opening, or a separate lock-refresh packet
 
 Blocked-lane cadence:
