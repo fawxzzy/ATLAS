@@ -40,6 +40,7 @@ class AtlasReceiptScaffoldTests(unittest.TestCase):
         self.addCleanup(temp_dir.cleanup)
         root = Path(temp_dir.name)
         (root / "docs" / "ops").mkdir(parents=True, exist_ok=True)
+        (root / "docs" / "atlas-book").mkdir(parents=True, exist_ok=True)
         return root
 
     def test_normal_no_marker_movement_receipt_renders_from_agreed_contract(self) -> None:
@@ -248,6 +249,10 @@ class AtlasReceiptScaffoldTests(unittest.TestCase):
     def test_main_defaults_date_when_omitted(self) -> None:
         root = self._temp_root()
         output_ref = "docs/ops/date-default-receipt.md"
+        (root / "docs" / "atlas-book" / "12-restart-and-handoff-guide.md").write_text(
+            "- the current active ATLAS-side lane remains `AI Repetition-to-Automation Pipeline`\n",
+            encoding="utf-8",
+        )
 
         def fake_contract_loader(**_: object) -> dict[str, object]:
             return _contract_report()
@@ -274,6 +279,10 @@ class AtlasReceiptScaffoldTests(unittest.TestCase):
     def test_main_defaults_title_when_omitted(self) -> None:
         root = self._temp_root()
         output_ref = "docs/ops/title-default-receipt.md"
+        (root / "docs" / "atlas-book" / "12-restart-and-handoff-guide.md").write_text(
+            "- the current active ATLAS-side lane remains `AI Repetition-to-Automation Pipeline`\n",
+            encoding="utf-8",
+        )
 
         def fake_contract_loader(**_: object) -> dict[str, object]:
             return _contract_report()
@@ -297,6 +306,10 @@ class AtlasReceiptScaffoldTests(unittest.TestCase):
 
     def test_main_can_write_deterministic_default_output_path(self) -> None:
         root = self._temp_root()
+        (root / "docs" / "atlas-book" / "12-restart-and-handoff-guide.md").write_text(
+            "- the current active ATLAS-side lane remains `AI Repetition-to-Automation Pipeline`\n",
+            encoding="utf-8",
+        )
 
         def fake_contract_loader(**_: object) -> dict[str, object]:
             return _contract_report()
@@ -317,6 +330,39 @@ class AtlasReceiptScaffoldTests(unittest.TestCase):
         expected_ref = f"docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-RECEIPT-SCAFFOLD-{date.today().isoformat()}.md"
         payload = (root / expected_ref).read_text(encoding="utf-8")
         self.assertIn(f"# AI Repetition-to-Automation Pipeline Receipt Scaffold - {date.today().isoformat()}", payload)
+
+    def test_main_defaults_lane_from_restart_truth_when_omitted(self) -> None:
+        root = self._temp_root()
+        output_ref = "docs/ops/current-lane-default-receipt.md"
+        (root / "docs" / "atlas-book" / "12-restart-and-handoff-guide.md").write_text(
+            "\n".join(
+                [
+                    "# Restart And Handoff Guide",
+                    "",
+                    "- the current active ATLAS-side lane remains `AI Repetition-to-Automation Pipeline`",
+                ]
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+
+        def fake_contract_loader(**_: object) -> dict[str, object]:
+            return _contract_report()
+
+        exit_code = main(
+            [
+                "scaffold",
+                "--root",
+                str(root),
+                "--output",
+                output_ref,
+            ],
+            contract_loader=fake_contract_loader,
+        )
+
+        self.assertEqual(0, exit_code)
+        payload = (root / output_ref).read_text(encoding="utf-8")
+        self.assertIn("- Lane: `AI Repetition-to-Automation Pipeline`", payload)
 
 
 if __name__ == "__main__":
