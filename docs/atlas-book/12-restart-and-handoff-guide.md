@@ -146,8 +146,9 @@ Default cadence:
 - PR `#80` is now merged on `main`, so the bounded live default-write adoption checkpoint branch is durable and closed on the canonical branch
 - the derivative restart mirrors are now intentionally aligned through that merged adoption checkpoint and the fresh day-of live scaffold proof on `main`
 - one bounded next-capability selection packet now chooses current-lane default resolution as the next scaffold slice because the helper still requires the operator to restate the active lane string even though that lane already exists in the durable restart surfaces
-- one bounded current-lane default packet now lands on the active branch and proves `ops/atlas/receipt_scaffold.py scaffold --write-default-output --force` works with no `--lane` argument by resolving the active lane from durable restart truth
-- the exact next ATLAS-side lane package is now `AI Repetition-to-Automation Pipeline receipt-scaffold current-lane default resolution review-surface audit pass 1`
+- one bounded current-lane default packet now lands and proves `ops/atlas/receipt_scaffold.py scaffold --write-default-output --force` works with no `--lane` argument by resolving the active lane from durable restart truth
+- PR `#83` now carries that bounded current-lane default branch as the ready-for-review remote surface
+- the exact next ATLAS-side lane package is now `AI Repetition-to-Automation Pipeline receipt-scaffold current-lane default resolution merge judgment`
 - no immediate supporting `_stack` packet is open by default for the first receipt-package slice; supporting-lane reopen still requires distinct later-slice admission, governed operator-proof opening, or a separate lock-refresh packet
 
 Blocked-lane cadence:
