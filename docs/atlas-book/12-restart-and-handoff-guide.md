@@ -160,8 +160,9 @@ Default cadence:
 - one bounded fourth-family supporting-lane admission packet now admits `_stack Readiness` as the exact direct support lane for that seam because future helper-home work must route through one shared `_stack` command surface rather than ATLAS-only truth packaging
 - one bounded fourth-family command-design packet now freezes the exact `stack update draft <repo>` seam around explicit repo identity, proof reference, release-ledger reference, downstream-package outputs, fail-closed exits, and the no-proof-creation/no-publication guard
 - one bounded fourth-family evidence-admission packet now keeps the admitted repo class Fitness-only until broader proof-plus-ledger handoff truth exists while freezing admitted owner proof basis, admitted owner ledger basis, subordinate same-story receipt-context rules, and fail-closed contradiction handling
-- the exact next ATLAS-side lane package is now `_stack Readiness stack update draft report-contract and contradiction-routing pass 49`
-- no immediate supporting `_stack` packet is open by default for the first receipt-package slice; that held receipt-skeleton threshold stays closed at its current level, the doctrine-routing branch is now also held at its current owner-admitted threshold, and the current honest move is the fourth-family report-contract packet rather than a forced Playbook-side reopen
+- one bounded fourth-family report-contract packet now freezes package-ready output, package-ready-plus-context output, receipt-context ignore-as-inadmissible behavior, and bounded fail-closed routing without implying publication authority or implementation permission
+- the exact next ATLAS-side lane package is now `_stack Readiness stack update draft implementation-admission and no-execution guard pass 50`
+- no immediate supporting `_stack` packet is open by default for the first receipt-package slice; that held receipt-skeleton threshold stays closed at its current level, the doctrine-routing branch is now also held at its current owner-admitted threshold, and the current honest move is the fourth-family implementation-admission packet rather than a forced Playbook-side reopen
 
 Blocked-lane cadence:
 
