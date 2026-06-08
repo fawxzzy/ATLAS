@@ -183,6 +183,8 @@
 - [AI Repetition-to-Automation Pipeline Receipt Scaffold Post-PR-83 Merge Closeout And Live Refresh Pass 37](../ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-RECEIPT-SCAFFOLD-POST-PR-83-MERGE-CLOSEOUT-AND-LIVE-REFRESH-PASS-37-2026-06-08.md)
 - [PR #83 Draft Readiness Audit And Body Alignment Pass 1](../ops/PR-83-DRAFT-READINESS-AUDIT-AND-BODY-ALIGNMENT-PASS-1-2026-06-07.md)
 - [PR #83 Ready-State Transition And Posture Confirmation Pass 2](../ops/PR-83-READY-STATE-TRANSITION-AND-POSTURE-CONFIRMATION-PASS-2-2026-06-07.md)
+- [PR #84 Draft Readiness Audit And Body Alignment Pass 1](../ops/PR-84-DRAFT-READINESS-AUDIT-AND-BODY-ALIGNMENT-PASS-1-2026-06-08.md)
+- [PR #84 Ready-State Transition And Posture Confirmation Pass 2](../ops/PR-84-READY-STATE-TRANSITION-AND-POSTURE-CONFIRMATION-PASS-2-2026-06-08.md)
 - [PR #80 Draft Readiness Audit And Body Alignment Pass 1](../ops/PR-80-DRAFT-READINESS-AUDIT-AND-BODY-ALIGNMENT-PASS-1-2026-06-06.md)
 - [PR #80 Ready-State Transition And Posture Confirmation Pass 2](../ops/PR-80-READY-STATE-TRANSITION-AND-POSTURE-CONFIRMATION-PASS-2-2026-06-06.md)
 - [PR #80 Review Thread Resolution Pass 3](../ops/PR-80-REVIEW-THREAD-RESOLUTION-PASS-3-2026-06-06.md)
