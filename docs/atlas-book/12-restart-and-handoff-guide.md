@@ -154,8 +154,9 @@ Default cadence:
 - one bounded doctrine-routing subfamily contract-freeze packet now makes the deferred Playbook-side sibling restart-safe without implying doctrine admission, implementation admission, or publication authority
 - one bounded doctrine-routing owner-surface admission packet now admits Playbook as the exact future doctrine-facing home for that subfamily while ATLAS root retains truth projection and draft-only labeling
 - one bounded doctrine-routing supporting-lane decision packet now proves no separate supporting lane honestly reopens from owner admission alone: the existing `Playbook Everywhere + Cortex Interface` slice remains held at its current exportable-family threshold and no new support seam is admitted here
-- the exact next ATLAS-side lane package is now `AI Repetition-to-Automation Pipeline fourth-safe candidate family selection pass 43`
-- no immediate supporting `_stack` packet is open by default for the first receipt-package slice; that held receipt-skeleton threshold stays closed at its current level, the doctrine-routing branch is now also held at its current owner-admitted threshold, and the next honest move returns to broader family reselection rather than a forced Playbook-side reopen
+- one bounded fourth-safe family selection packet now selects `release-proof to update-draft packaging helpers` as the strongest remaining safe preparation family because the release-to-update handoff spine is already hardened while QA/LLEL proof-packet preparation remains the more proof-shape-sensitive deferred helper
+- the exact next ATLAS-side lane package is now `AI Repetition-to-Automation Pipeline release-proof to update-draft packaging helpers contract freeze pass 44`
+- no immediate supporting `_stack` packet is open by default for the first receipt-package slice; that held receipt-skeleton threshold stays closed at its current level, the doctrine-routing branch is now also held at its current owner-admitted threshold, and the current honest move is the fourth-family contract freeze rather than a forced Playbook-side reopen
 
 Blocked-lane cadence:
 
