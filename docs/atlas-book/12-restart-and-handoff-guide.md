@@ -156,8 +156,9 @@ Default cadence:
 - one bounded doctrine-routing supporting-lane decision packet now proves no separate supporting lane honestly reopens from owner admission alone: the existing `Playbook Everywhere + Cortex Interface` slice remains held at its current exportable-family threshold and no new support seam is admitted here
 - one bounded fourth-safe family selection packet now selects `release-proof to update-draft packaging helpers` as the strongest remaining safe preparation family because the release-to-update handoff spine is already hardened while QA/LLEL proof-packet preparation remains the more proof-shape-sensitive deferred helper
 - one bounded fourth-family contract-freeze packet now makes that release-proof packaging seam restart-safe without implying proof creation, deploy approval, publication approval, or final update wording authority
-- the exact next ATLAS-side lane package is now `AI Repetition-to-Automation Pipeline release-proof to update-draft packaging helpers owner-surface admission pass 45`
-- no immediate supporting `_stack` packet is open by default for the first receipt-package slice; that held receipt-skeleton threshold stays closed at its current level, the doctrine-routing branch is now also held at its current owner-admitted threshold, and the current honest move is owner-surface admission for the contract-frozen fourth family rather than a forced Playbook-side reopen
+- one bounded fourth-family owner-surface admission packet now admits `_stack` as the exact helper home for that seam while keeping owner proof upstream and Discord-facing draft/publish surfaces downstream consumers only
+- the exact next ATLAS-side lane package is now `AI Repetition-to-Automation Pipeline release-proof to update-draft packaging helpers supporting-lane admission pass 46`
+- no immediate supporting `_stack` packet is open by default for the first receipt-package slice; that held receipt-skeleton threshold stays closed at its current level, the doctrine-routing branch is now also held at its current owner-admitted threshold, and the current honest move is supporting-lane admission for the owner-admitted fourth family rather than a forced Playbook-side reopen
 
 Blocked-lane cadence:
 
