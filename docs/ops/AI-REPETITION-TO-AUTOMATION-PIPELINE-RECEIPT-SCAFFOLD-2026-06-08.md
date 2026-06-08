@@ -15,7 +15,7 @@ Preserve one bounded draft-only operator-usable receipt scaffold for `AI Repetit
 
 - render one draft-only receipt scaffold from the admitted `_stack` contract
 - preserve current marker posture `32%` and supporting posture `immediate control-plane family`
-- carry the current exact next package `_stack Readiness stack update draft evidence-admission and proof-ledger discipline pass 48` without widening into owner execution or authority claims
+- carry the current exact next package `_stack Readiness stack update draft report-contract and contradiction-routing pass 49` without widening into owner execution or authority claims
 
 ## Source Surfaces
 
@@ -47,7 +47,7 @@ Preserve one bounded draft-only operator-usable receipt scaffold for `AI Repetit
 
 ## Exact Next Package
 
-- `_stack Readiness stack update draft evidence-admission and proof-ledger discipline pass 48`
+- `_stack Readiness stack update draft report-contract and contradiction-routing pass 49`
 
 ## Stop Conditions
 
