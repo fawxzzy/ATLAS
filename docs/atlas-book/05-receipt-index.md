@@ -186,6 +186,7 @@
 - [AI Repetition-to-Automation Pipeline Doctrine-Routing Drafts Subfamily Contract Freeze Pass 40](../ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-DOCTRINE-ROUTING-DRAFTS-SUBFAMILY-CONTRACT-FREEZE-PASS-40-2026-06-08.md)
 - [AI Repetition-to-Automation Pipeline Doctrine-Routing Drafts Owner-Surface Admission Pass 41](../ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-DOCTRINE-ROUTING-DRAFTS-OWNER-SURFACE-ADMISSION-PASS-41-2026-06-08.md)
 - [AI Repetition-to-Automation Pipeline Doctrine-Routing Drafts Supporting-Lane Admission Pass 42](../ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-DOCTRINE-ROUTING-DRAFTS-SUPPORTING-LANE-ADMISSION-PASS-42-2026-06-08.md)
+- [AI Repetition-to-Automation Pipeline Fourth-Safe Candidate Family Selection Pass 43](../ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-FOURTH-SAFE-CANDIDATE-FAMILY-SELECTION-PASS-43-2026-06-08.md)
 - [PR #83 Draft Readiness Audit And Body Alignment Pass 1](../ops/PR-83-DRAFT-READINESS-AUDIT-AND-BODY-ALIGNMENT-PASS-1-2026-06-07.md)
 - [PR #83 Ready-State Transition And Posture Confirmation Pass 2](../ops/PR-83-READY-STATE-TRANSITION-AND-POSTURE-CONFIRMATION-PASS-2-2026-06-07.md)
 - [PR #84 Draft Readiness Audit And Body Alignment Pass 1](../ops/PR-84-DRAFT-READINESS-AUDIT-AND-BODY-ALIGNMENT-PASS-1-2026-06-08.md)
