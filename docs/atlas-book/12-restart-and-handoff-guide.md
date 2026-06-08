@@ -158,8 +158,9 @@ Default cadence:
 - one bounded fourth-family contract-freeze packet now makes that release-proof packaging seam restart-safe without implying proof creation, deploy approval, publication approval, or final update wording authority
 - one bounded fourth-family owner-surface admission packet now admits `_stack` as the exact helper home for that seam while keeping owner proof upstream and Discord-facing draft/publish surfaces downstream consumers only
 - one bounded fourth-family supporting-lane admission packet now admits `_stack Readiness` as the exact direct support lane for that seam because future helper-home work must route through one shared `_stack` command surface rather than ATLAS-only truth packaging
-- the exact next ATLAS-side lane package is now `_stack Readiness stack update draft command-design pass 47`
-- no immediate supporting `_stack` packet is open by default for the first receipt-package slice; that held receipt-skeleton threshold stays closed at its current level, the doctrine-routing branch is now also held at its current owner-admitted threshold, and the current honest move is the fourth-family `_stack` command-design packet rather than a forced Playbook-side reopen
+- one bounded fourth-family command-design packet now freezes the exact `stack update draft <repo>` seam around explicit repo identity, proof reference, release-ledger reference, downstream-package outputs, fail-closed exits, and the no-proof-creation/no-publication guard
+- the exact next ATLAS-side lane package is now `_stack Readiness stack update draft evidence-admission and proof-ledger discipline pass 48`
+- no immediate supporting `_stack` packet is open by default for the first receipt-package slice; that held receipt-skeleton threshold stays closed at its current level, the doctrine-routing branch is now also held at its current owner-admitted threshold, and the current honest move is the fourth-family evidence-admission packet rather than a forced Playbook-side reopen
 
 Blocked-lane cadence:
 
