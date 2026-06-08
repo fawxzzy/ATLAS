@@ -181,6 +181,7 @@
 - [AI Repetition-to-Automation Pipeline Receipt Scaffold Next-Capability Lane Selection Pass 35](../ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-RECEIPT-SCAFFOLD-NEXT-CAPABILITY-LANE-SELECTION-PASS-35-2026-06-07.md)
 - [AI Repetition-to-Automation Pipeline Receipt Scaffold Current-Lane Default Resolution Pass 36](../ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-RECEIPT-SCAFFOLD-CURRENT-LANE-DEFAULT-RESOLUTION-PASS-36-2026-06-07.md)
 - [AI Repetition-to-Automation Pipeline Receipt Scaffold Post-PR-83 Merge Closeout And Live Refresh Pass 37](../ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-RECEIPT-SCAFFOLD-POST-PR-83-MERGE-CLOSEOUT-AND-LIVE-REFRESH-PASS-37-2026-06-08.md)
+- [AI Repetition-to-Automation Pipeline Receipt Scaffold Post-PR-84 Merge Closeout And Live Refresh Pass 38](../ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-RECEIPT-SCAFFOLD-POST-PR-84-MERGE-CLOSEOUT-AND-LIVE-REFRESH-PASS-38-2026-06-08.md)
 - [PR #83 Draft Readiness Audit And Body Alignment Pass 1](../ops/PR-83-DRAFT-READINESS-AUDIT-AND-BODY-ALIGNMENT-PASS-1-2026-06-07.md)
 - [PR #83 Ready-State Transition And Posture Confirmation Pass 2](../ops/PR-83-READY-STATE-TRANSITION-AND-POSTURE-CONFIRMATION-PASS-2-2026-06-07.md)
 - [PR #84 Draft Readiness Audit And Body Alignment Pass 1](../ops/PR-84-DRAFT-READINESS-AUDIT-AND-BODY-ALIGNMENT-PASS-1-2026-06-08.md)
