@@ -190,6 +190,7 @@
 - [AI Repetition-to-Automation Pipeline Release-Proof To Update-Draft Packaging Helpers Contract Freeze Pass 44](../ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-RELEASE-PROOF-TO-UPDATE-DRAFT-PACKAGING-HELPERS-CONTRACT-FREEZE-PASS-44-2026-06-08.md)
 - [AI Repetition-to-Automation Pipeline Release-Proof To Update-Draft Packaging Helpers Owner-Surface Admission Pass 45](../ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-RELEASE-PROOF-TO-UPDATE-DRAFT-PACKAGING-HELPERS-OWNER-SURFACE-ADMISSION-PASS-45-2026-06-08.md)
 - [AI Repetition-to-Automation Pipeline Release-Proof To Update-Draft Packaging Helpers Supporting-Lane Admission Pass 46](../ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-RELEASE-PROOF-TO-UPDATE-DRAFT-PACKAGING-HELPERS-SUPPORTING-LANE-ADMISSION-PASS-46-2026-06-08.md)
+- [_Stack Readiness Stack Update Draft Command-Design Pass 47](../ops/_STACK-READINESS-STACK-UPDATE-DRAFT-COMMAND-DESIGN-PASS-47-2026-06-08.md)
 - [PR #83 Draft Readiness Audit And Body Alignment Pass 1](../ops/PR-83-DRAFT-READINESS-AUDIT-AND-BODY-ALIGNMENT-PASS-1-2026-06-07.md)
 - [PR #83 Ready-State Transition And Posture Confirmation Pass 2](../ops/PR-83-READY-STATE-TRANSITION-AND-POSTURE-CONFIRMATION-PASS-2-2026-06-07.md)
 - [PR #84 Draft Readiness Audit And Body Alignment Pass 1](../ops/PR-84-DRAFT-READINESS-AUDIT-AND-BODY-ALIGNMENT-PASS-1-2026-06-08.md)
