@@ -142,7 +142,7 @@ Default cadence:
 ## Current Restart Truth
 
 - the current active ATLAS-side lane remains `AI Repetition-to-Automation Pipeline`
-- the active bounded subfamily remains `receipt skeleton drafts`
+- the active bounded subfamily now shifts to `doctrine-routing drafts` after the first `receipt skeleton drafts` threshold closed with no immediate `_stack` follow-on packet
 - PR `#80` is now merged on `main`, so the bounded live default-write adoption checkpoint branch is durable and closed on the canonical branch
 - the derivative restart mirrors are now intentionally aligned through that merged adoption checkpoint and the fresh day-of scaffold proof on `main`
 - one bounded next-capability selection packet now chooses current-lane default resolution as the next scaffold slice because the helper still requires the operator to restate the active lane string even though that lane already exists in the durable restart surfaces
@@ -151,8 +151,8 @@ Default cadence:
 - one bounded post-PR-83 merge closeout packet now clears the stale merge-judgment restart truth while refreshing the live day-of scaffold proof on merged `main`
 - PR `#84` is now merged on `main`, so that bounded post-PR-83 merge closeout branch is durable and closed on the canonical branch
 - one bounded post-PR-84 merge closeout packet now clears the stale merge-judgment restart truth while refreshing the live day-of scaffold proof on merged `main`
-- the exact next ATLAS-side lane package is now `none immediate inside AI Repetition-to-Automation Pipeline receipt-scaffold post-pr-83 merge closeout and live refresh family after PR #84 merge closeout`
-- no immediate supporting `_stack` packet is open by default for the first receipt-package slice; supporting-lane reopen still requires distinct later-slice admission, governed operator-proof opening, or a separate lock-refresh packet
+- the exact next ATLAS-side lane package is now `AI Repetition-to-Automation Pipeline doctrine-routing drafts subfamily contract freeze pass 40`
+- no immediate supporting `_stack` packet is open by default for the first receipt-package slice; that held receipt-skeleton threshold now returns control to root-side doctrine-routing selection, while any later `_stack` reopen still requires distinct later-slice admission, governed operator-proof opening, or a separate lock-refresh packet
 
 Blocked-lane cadence:
 
