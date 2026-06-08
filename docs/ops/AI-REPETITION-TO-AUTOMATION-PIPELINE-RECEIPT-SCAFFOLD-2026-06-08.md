@@ -15,7 +15,7 @@ Preserve one bounded draft-only operator-usable receipt scaffold for `AI Repetit
 
 - render one draft-only receipt scaffold from the admitted `_stack` contract
 - preserve current marker posture `32%` and supporting posture `immediate control-plane family`
-- carry the current exact next package `AI Repetition-to-Automation Pipeline receipt-scaffold post-pr-83 merge closeout and live refresh merge judgment` without widening into owner execution or authority claims
+- carry the current exact next package `none immediate inside AI Repetition-to-Automation Pipeline receipt-scaffold post-pr-83 merge closeout and live refresh family after PR #84 merge closeout` without widening into owner execution or authority claims
 
 ## Source Surfaces
 
@@ -47,7 +47,7 @@ Preserve one bounded draft-only operator-usable receipt scaffold for `AI Repetit
 
 ## Exact Next Package
 
-- `AI Repetition-to-Automation Pipeline receipt-scaffold post-pr-83 merge closeout and live refresh merge judgment`
+- `none immediate inside AI Repetition-to-Automation Pipeline receipt-scaffold post-pr-83 merge closeout and live refresh family after PR #84 merge closeout`
 
 ## Stop Conditions
 
