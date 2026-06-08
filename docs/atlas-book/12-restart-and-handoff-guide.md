@@ -151,8 +151,9 @@ Default cadence:
 - one bounded post-PR-83 merge closeout packet now clears the stale merge-judgment restart truth while refreshing the live day-of scaffold proof on merged `main`
 - PR `#84` is now merged on `main`, so that bounded post-PR-83 merge closeout branch is durable and closed on the canonical branch
 - one bounded post-PR-84 merge closeout packet now clears the stale merge-judgment restart truth while refreshing the live day-of scaffold proof on merged `main`
-- the exact next ATLAS-side lane package is now `AI Repetition-to-Automation Pipeline doctrine-routing drafts subfamily contract freeze pass 40`
-- no immediate supporting `_stack` packet is open by default for the first receipt-package slice; that held receipt-skeleton threshold now returns control to root-side doctrine-routing selection, while any later `_stack` reopen still requires distinct later-slice admission, governed operator-proof opening, or a separate lock-refresh packet
+- one bounded doctrine-routing subfamily contract-freeze packet now makes the deferred Playbook-side sibling restart-safe without implying doctrine admission, implementation admission, or publication authority
+- the exact next ATLAS-side lane package is now `AI Repetition-to-Automation Pipeline doctrine-routing drafts owner-surface admission pass 41`
+- no immediate supporting `_stack` packet is open by default for the first receipt-package slice; that held receipt-skeleton threshold stays closed at its current level, while the doctrine-routing side now advances to one bounded Playbook-side owner-surface admission question before any later implementation reopening
 
 Blocked-lane cadence:
 
