@@ -162,8 +162,9 @@ Default cadence:
 - one bounded fourth-family evidence-admission packet now keeps the admitted repo class Fitness-only until broader proof-plus-ledger handoff truth exists while freezing admitted owner proof basis, admitted owner ledger basis, subordinate same-story receipt-context rules, and fail-closed contradiction handling
 - one bounded fourth-family report-contract packet now freezes package-ready output, package-ready-plus-context output, receipt-context ignore-as-inadmissible behavior, and bounded fail-closed routing without implying publication authority or implementation permission
 - one bounded fourth-family implementation-admission packet now freezes admitted repo-target validation, one cited owner-proof load, one cited owner-ledger load, one optional receipt-context comparison, contradiction classification, downstream-only rendering, and the explicit no-execution guard without implying execution landing
-- the exact next ATLAS-side lane package is now `_stack Readiness stack update draft fixture-proof and static-input boundary pass 51`
-- no immediate supporting `_stack` packet is open by default for the first receipt-package slice; that held receipt-skeleton threshold stays closed at its current level, the doctrine-routing branch is now also held at its current owner-admitted threshold, and the current honest move is the fourth-family fixture-proof packet rather than a forced Playbook-side reopen
+- one bounded fourth-family fixture-proof packet now freezes admitted repo-target fixtures, admitted proof and ledger fixtures, admitted contradiction and receipt-context fixtures, provenance labeling, truth-limit notes, and the exact local proof ceiling without implying live owner release truth
+- the exact next ATLAS-side lane package is now `_stack Readiness stack update draft first-implementation-slice and proof-matrix admission pass 52`
+- no immediate supporting `_stack` packet is open by default for the first receipt-package slice; that held receipt-skeleton threshold stays closed at its current level, the doctrine-routing branch is now also held at its current owner-admitted threshold, and the current honest move is the fourth-family first-slice admission packet rather than a forced Playbook-side reopen
 
 Blocked-lane cadence:
 
