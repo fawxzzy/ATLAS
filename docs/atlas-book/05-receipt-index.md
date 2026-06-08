@@ -192,6 +192,7 @@
 - [AI Repetition-to-Automation Pipeline Release-Proof To Update-Draft Packaging Helpers Supporting-Lane Admission Pass 46](../ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-RELEASE-PROOF-TO-UPDATE-DRAFT-PACKAGING-HELPERS-SUPPORTING-LANE-ADMISSION-PASS-46-2026-06-08.md)
 - [_Stack Readiness Stack Update Draft Command-Design Pass 47](../ops/_STACK-READINESS-STACK-UPDATE-DRAFT-COMMAND-DESIGN-PASS-47-2026-06-08.md)
 - [_Stack Readiness Stack Update Draft Evidence-Admission And Proof-Ledger Discipline Pass 48](../ops/_STACK-READINESS-STACK-UPDATE-DRAFT-EVIDENCE-ADMISSION-AND-PROOF-LEDGER-DISCIPLINE-PASS-48-2026-06-08.md)
+- [_Stack Readiness Stack Update Draft Report-Contract And Contradiction-Routing Pass 49](../ops/_STACK-READINESS-STACK-UPDATE-DRAFT-REPORT-CONTRACT-AND-CONTRADICTION-ROUTING-PASS-49-2026-06-08.md)
 - [PR #83 Draft Readiness Audit And Body Alignment Pass 1](../ops/PR-83-DRAFT-READINESS-AUDIT-AND-BODY-ALIGNMENT-PASS-1-2026-06-07.md)
 - [PR #83 Ready-State Transition And Posture Confirmation Pass 2](../ops/PR-83-READY-STATE-TRANSITION-AND-POSTURE-CONFIRMATION-PASS-2-2026-06-07.md)
 - [PR #84 Draft Readiness Audit And Body Alignment Pass 1](../ops/PR-84-DRAFT-READINESS-AUDIT-AND-BODY-ALIGNMENT-PASS-1-2026-06-08.md)
