@@ -1,0 +1,161 @@
+# AI Long-Run Batch Orchestration Queue-Or-Registry Supporting-Lane Admission Pass 3 - 2026-06-09
+
+- Date: `2026-06-09`
+- Lane: `AI Long-Run Batch Orchestration`
+- Mode: `docs-only root-bounded supporting-lane admission`
+- Source surfaces:
+  - `docs/memory/profiles/zachariah_workflow_profile.md`
+  - `docs/atlas-book/01-current-state.md`
+  - `docs/atlas-book/05-receipt-index.md`
+  - `docs/atlas-book/09-automation-and-command-candidates.md`
+  - `docs/atlas-book/11-system-map-graph.md`
+  - `docs/atlas-book/12-restart-and-handoff-guide.md`
+  - `docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-2026-05-22.md`
+  - `docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-CONTRACT-FREEZE-PASS-1-2026-06-09.md`
+  - `docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-OWNER-SURFACE-ADMISSION-PASS-2-2026-06-09.md`
+  - `runtime/receipts/validation/stack-validation.latest.md`
+  - `runtime/receipts/validation/stack-validation.latest.json`
+- Control-plane checkpoint: `main`
+
+## Objective
+
+Decide whether the owner-admitted `queue-or-registry batch entry contract` now creates one honest separate supporting-lane dependency, freeze that support boundary if it does not, and keep the lane bounded below implementation, `_stack` command design, runtime state placement, or supervised pilot work.
+
+This pass does not:
+
+- admit `_stack` helper-home, command-design, or execution semantics
+- admit `runtime/` as a queue or registry storage home
+- admit Playbook doctrine export
+- admit owner-repo mutation, Fitness work, archive/delete work, deploy/publication work, `.env`, or secret work
+- claim that support posture alone earns marker movement
+
+## Root Health Baseline
+
+- the long-run lane remains doctrine and contract first
+- pass 1 already froze the batch-entry contract
+- pass 2 already admitted `ATLAS root control-plane surfaces` as the owner-facing home for that pre-execution contract
+- the unresolved question from pass 2 is whether that owner admission now honestly reopens one separate support seam
+- root validation remains clean at `critical=0 error=0 warning=50 info=0`
+- local `HEAD` remains in parity with `origin/main`
+
+## Supporting-Lane Candidates Considered
+
+### `none new yet`
+
+Why it wins:
+
+- the batch-entry contract is still pre-execution lane-definition truth
+- ATLAS root already owns the contract meaning, field rules, and restart projection
+- no shared execution seam, queue storage path, or supervisor behavior is admitted yet
+- reopening `_stack`, Playbook, or `runtime/` now would invent support for future execution semantics that are still explicitly deferred
+- the smallest honest next question is which first root-local implementation slice should exist, not which shared support lane should be reopened
+
+### `_stack Readiness`
+
+Why it does not win:
+
+- `_stack Readiness` is the support lane for shared operator execution surfaces
+- this family still stops before execution-ready transitions, worker flow, or supervised dispatch semantics
+- admitting `_stack Readiness` here would collapse pre-execution contract truth into command-design work too early
+
+### `runtime/`
+
+Why it does not win:
+
+- `runtime/` is a state-placement surface, not a supporting governance lane
+- choosing it now would decide queue or registry storage by implication
+- storage remains a later question after the first implementation slice is chosen explicitly
+
+### Playbook
+
+Why it does not win:
+
+- Playbook owns reusable doctrine later
+- this family is still below doctrine extraction and still does not require verification or closeout export semantics beyond the root contract
+- no separate doctrine-facing support seam reopens from the current owner admission alone
+
+### owner repos
+
+Why they do not win:
+
+- owner repos will be named inside individual entries, not as support owners of the cross-repo contract itself
+- the current family still lives at the root control-plane boundary before repo-local implementation questions are admitted
+
+## Admission Decision
+
+### Truth owner remains unchanged
+
+- ATLAS root remains the truth owner for:
+  - the contract field rules
+  - admissibility posture
+  - restart projection
+  - next-packet consequence
+
+### Supporting lane admitted now
+
+- `none new yet`
+
+Why this is the honest admission:
+
+- the family is now contract-frozen and owner-admitted without requiring any separate shared supporting lane
+- no real execution dependency has appeared yet
+- the next honest move is a bounded first implementation-slice selection inside the already admitted root-owned surface
+
+## Still Not Admitted In This Pass
+
+- `_stack` command design
+- runtime storage choice
+- queue or registry mutation helper
+- execution-ready transitions
+- supervised pilot implementation
+- marker movement
+
+## Exact Next Package
+
+- `AI Long-Run Batch Orchestration queue-or-registry first-implementation-slice selection pass 4`
+
+Why:
+
+- the contract is explicit
+- the owner-facing home is explicit
+- no separate support lane honestly reopens
+- the next honest question is the smallest root-local implementation slice that can prove the contract is useful without widening into supervisor behavior
+
+## Marker Decision
+
+- `none`
+
+Why:
+
+- this pass decides support posture only
+- it does not widen supervised adoption, execution proof, or repeatable operator use
+
+## Rule
+
+`No Shared Support Before Shared Semantics`
+
+Do not reopen `_stack`, Playbook, or runtime support for long-run batching until the family crosses from root-owned lane-definition truth into real shared execution, storage, or doctrine semantics.
+
+## Pattern
+
+contract freeze -> root owner admission -> support check -> hold support at none when no shared dependency appears -> choose the first bounded root-local implementation slice
+
+## Failure Mode
+
+`Support Inflation Before Semantics`
+
+This family becomes dishonest when future execution needs are used to justify reopening a support lane before any actual shared execution, storage, or doctrine dependency has been admitted.
+
+## What This Pass Proves
+
+This pass proves:
+
+- `queue-or-registry batch entry contract` does not now create one honest separate supporting lane
+- the family remains root-local at this stage
+- the next honest move is first implementation-slice selection rather than support-lane churn
+
+This pass does not prove:
+
+- that `_stack` should reopen now
+- that storage placement is admitted
+- that execution semantics or supervised pilot work are admitted
