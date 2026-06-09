@@ -207,6 +207,7 @@
 - [AI Repetition-to-Automation Pipeline Non-Fitness Marker Knockout Selector Surface Pass 52](../ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-SURFACE-PASS-52-2026-06-09.md)
 - [AI Long-Run Batch Orchestration](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-2026-05-22.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Contract Freeze Pass 1](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-CONTRACT-FREEZE-PASS-1-2026-06-09.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Owner-Surface Admission Pass 2](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-OWNER-SURFACE-ADMISSION-PASS-2-2026-06-09.md)
 - [_Stack Readiness Stack Update Draft Command-Design Pass 47](../ops/_STACK-READINESS-STACK-UPDATE-DRAFT-COMMAND-DESIGN-PASS-47-2026-06-08.md)
 - [_Stack Readiness Stack Update Draft Evidence-Admission And Proof-Ledger Discipline Pass 48](../ops/_STACK-READINESS-STACK-UPDATE-DRAFT-EVIDENCE-ADMISSION-AND-PROOF-LEDGER-DISCIPLINE-PASS-48-2026-06-08.md)
 - [_Stack Readiness Stack Update Draft Report-Contract And Contradiction-Routing Pass 49](../ops/_STACK-READINESS-STACK-UPDATE-DRAFT-REPORT-CONTRACT-AND-CONTRADICTION-ROUTING-PASS-49-2026-06-08.md)
