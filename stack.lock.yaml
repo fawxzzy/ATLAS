@@ -9,8 +9,8 @@ components:
     status: "active"
     remote: "https://github.com/fawxzzy/_stack.git"
     ref_type: "branch"
-    ref: "codex/path-discipline-warning-slice-stack-pub"
-    commit: "6ebde947801ca6cbf9e15094d423d245028c2f99"
+    ref: "main"
+    commit: "c72b47726f67b4e0474113229368106b41fbbf76"
     dirty: false
     trust_class: "trusted"
     release_eligible: false
@@ -216,4 +216,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:65ddca59fd9e48e930506c58f2c54294569ea95f10776c5189a6e9082fb30d65"
+lock_digest: "sha256:d4346cd712037cc7fd2659af94e234ba10b23d050b4da9815771b06a6ed6c69b"
