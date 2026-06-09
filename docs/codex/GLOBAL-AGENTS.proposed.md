@@ -32,6 +32,10 @@ Routing
 - Root stack sessions should focus on stack-wide files, standards, manifests, and cross-repo coordination.
 - Single-repo implementation work should happen inside the target repo root.
 
+Workflow Provenance
+- If the nearest stack or project rules require a visible response origin ID, emit that ID first in the response.
+- Treat any required origin ID as provenance metadata only. It does not replace receipts, SHAs, validation snapshots, or authority boundaries.
+
 Exports
 - Default source exports should exclude `secrets/`, `runtime/`, `tmp/`, `.env*`, build outputs, and dependency folders.
 ```
@@ -41,6 +45,7 @@ Exports
 - Keep this global file generic.
 - Put stack-specific rules in the stack root `AGENTS.md`.
 - Put repo-specific rules in repo-local `AGENTS.md`.
+- If a stack-specific response contract exists, let the nearer stack file define the exact prefix and reporting fields.
 
 ## Prompt Framing Update
 

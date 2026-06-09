@@ -30,6 +30,22 @@ It does not claim that the target repos are mounted, healthy, or ready.
 
 Each prompt is discovery-first and must inspect the target repo before editing.
 
+## ATLAS workflow response contract
+
+For ATLAS workflow use, every Codex-originated response produced from this prompt pack should begin with:
+
+```text
+CODEX-MSG-ID: CODEX-YYYY-MM-DD-###
+```
+
+If the exact ordinal is uncertain after a restart, emit a fresh unique suffix and keep the `CODEX-YYYY-MM-DD-` prefix.
+
+Treat the origin ID as provenance metadata only. It does not replace receipts, SHAs, validation snapshots, or authority boundaries.
+
+Canonical receipt:
+
+- `docs/ops/MESSAGE-ORIGIN-ID-WORKFLOW-RULE-2026-06-09.md`
+
 ## Execution order
 
 Run these in order:
@@ -57,6 +73,7 @@ Hard constraints
 - Keep browser install dismissal state session-scoped only.
 - Use runtime standalone detection as the source of truth for installed access on iOS.
 - Use "Share, then Add to Home Screen" wording unless the app already standardizes more specific Apple copy.
+- Begin every Codex-originated ATLAS workflow response with `CODEX-MSG-ID: CODEX-YYYY-MM-DD-###`.
 ```
 
 ## Master orchestrator prompt

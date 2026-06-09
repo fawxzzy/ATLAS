@@ -34,6 +34,10 @@ Verification
 - Optional strict verify command: `<command>`
 - Run verify before claiming completion for code changes.
 
+Workflow Reporting
+- If this repo participates in a stack with a root-owned workflow response contract, preserve that root reporting contract instead of redefining a conflicting one here.
+- Keep repo-local additions focused on repo-specific verification and scope boundaries.
+
 Do Not Commit
 - `.env`
 - `.env.*`

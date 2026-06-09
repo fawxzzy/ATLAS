@@ -54,6 +54,22 @@ Before starting review work, read these Atlas surfaces in order:
 6. this prompt doc
 7. only then the target repo docs or code
 
+## Message origin contract
+
+Every Codex-originated ATLAS workflow response in this mode must begin with:
+
+```text
+CODEX-MSG-ID: CODEX-YYYY-MM-DD-###
+```
+
+If the exact ordinal is uncertain after a restart, emit a fresh unique suffix and keep the `CODEX-YYYY-MM-DD-` prefix.
+
+After the origin ID, preserve the normal ATLAS response contract for the current mode.
+
+Canonical receipt:
+
+- `docs/ops/MESSAGE-ORIGIN-ID-WORKFLOW-RULE-2026-06-09.md`
+
 ## Startup operating instructions
 
 When `deep-review-mode` is active for a repo, Codex should:
@@ -96,6 +112,7 @@ When the opener is recognized and repo resolution succeeds, the first response s
 Preferred shape:
 
 ```text
+CODEX-MSG-ID: CODEX-YYYY-MM-DD-###
 repo recognized: <logical_id> -> <local_path>
 mode recognized: deep-review-mode
 review posture: findings-first
@@ -117,6 +134,7 @@ After each review pass in this mode, report:
 Preferred shape:
 
 ```text
+CODEX-MSG-ID: CODEX-YYYY-MM-DD-###
 findings:
 - <severity-ordered finding list>
 affected surfaces: <files, screens, or contracts>

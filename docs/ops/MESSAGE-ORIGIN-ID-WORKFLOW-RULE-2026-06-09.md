@@ -1,52 +1,43 @@
-# Message Origin ID Workflow Rule - 2026-06-09
+# Message Origin ID Workflow Rule
 
-- Date: `2026-06-09`
-- Owner: ATLAS root
-- Mode: `workflow-rule receipt`
-- Scope: `ChatGPT/Codex transcript origin labeling`
+Date: 2026-06-09
+Status: Active
+Scope: ATLAS workflow messaging metadata only
 
-## Objective
+## Purpose
 
-Freeze the operator-requested message-origin ID rule for the ATLAS ChatGPT and Codex workflow so mixed transcripts can be scanned without guessing which assistant generated a message.
+Freeze a visible origin-ID rule for assistant-authored ATLAS workflow messages so message provenance survives restarts, handoffs, and quoted cross-assistant receipts.
 
 ## Rule
 
-Every assistant-originated ATLAS workflow message must begin with a visible origin ID.
+Every assistant-originated ATLAS workflow response must begin with a visible origin ID.
 
-Required prefixes:
+- ChatGPT format: `CHATGPT-MSG-ID: CGPT-YYYY-MM-DD-###`
+- Codex format: `CODEX-MSG-ID: CODEX-YYYY-MM-DD-###`
+- Operator or user messages: no origin ID required
 
-- ChatGPT messages begin with `CHATGPT-MSG-ID: <id>`.
-- Codex messages begin with `CODEX-MSG-ID: <id>`.
+The origin ID identifies the source actor only. It does not replace receipts, commit SHAs, PR numbers, validation snapshots, marker breakdowns, or authority boundaries.
 
-Operator/user messages do not need an ID.
+## Sequencing Fallback
 
-## ID Shape
-
-Default ID shape:
-
-- `CHATGPT-MSG-ID: CGPT-YYYY-MM-DD-###`
-- `CODEX-MSG-ID: CODEX-YYYY-MM-DD-###`
-
-The numeric suffix is a per-day sequence for that actor when possible. If exact sequencing cannot be verified after a restart, the assistant should use a fresh unique suffix and keep the actor/date prefix rather than omitting the ID.
+If exact sequencing cannot be verified after a restart, the assistant should emit a fresh unique suffix while preserving the actor and date prefix. Do not omit the origin ID because the previous ordinal is uncertain.
 
 ## Workflow Requirements
 
-- The ID must appear at the start of each ChatGPT or Codex response before the substantive content.
-- The ID identifies the source actor, not the lane, marker, PR, or receipt.
-- The ID does not replace file receipts, commit SHAs, PR numbers, validation snapshots, or marker breakdowns.
+- The ID must appear at the start of each ChatGPT or Codex response before substantive content.
 - The ID must not be used to imply authority, verification, merge readiness, or marker movement.
 - If Codex quotes or summarizes a ChatGPT message, it must not reuse the ChatGPT ID as its own message ID.
 - If ChatGPT quotes or summarizes a Codex message, it must not reuse the Codex ID as its own message ID.
 
 ## Codex Standing Instruction
 
-When operating on ATLAS work, Codex should prefix every response with:
+Codex-originated ATLAS workflow responses should start with:
 
 ```text
 CODEX-MSG-ID: CODEX-YYYY-MM-DD-###
 ```
 
-Codex should preserve the existing ATLAS output requirements after the ID, including:
+After that ID, Codex should continue preserving normal ATLAS output requirements:
 
 - exact files changed
 - commands run
@@ -57,7 +48,7 @@ Codex should preserve the existing ATLAS output requirements after the ID, inclu
 
 ## ChatGPT Standing Instruction
 
-When operating on ATLAS work, ChatGPT should prefix every response with:
+ChatGPT-originated ATLAS workflow responses should start with:
 
 ```text
 CHATGPT-MSG-ID: CGPT-YYYY-MM-DD-###
@@ -65,33 +56,24 @@ CHATGPT-MSG-ID: CGPT-YYYY-MM-DD-###
 
 ChatGPT should keep the existing ATLAS closing requirements after the ID, including the full marker breakdown and `Completion: X%` line.
 
-## Protected Boundaries
+## Protected-Surface Boundary
 
-This rule is workflow metadata only. It does not admit touching:
+This rule is workflow metadata only. By itself it does not authorize touching:
 
-- `C:\ATLAS\repos\fawxzzy-fitness`
 - `archive/`
-- `.vercel` surfaces
-- `.env` surfaces
+- `.vercel`
+- `.env`
 - secret surfaces
 - deployment surfaces
+- Fitness or other owner-repo code
 
 ## Failure Mode
 
-`Originless Transcript Drift`:
-
-If assistant messages in a mixed ChatGPT/Codex workflow do not carry actor IDs, restart readers can confuse advice, execution reports, operator summaries, and Codex receipts, then route the next package from the wrong authority surface.
+`Originless Transcript Drift`: if assistant messages in a mixed ChatGPT/Codex workflow do not carry actor IDs, restart readers can confuse advice, execution reports, operator summaries, and Codex receipts, then route the next package from the wrong authority surface.
 
 ## Marker Decision
 
 - `_stack Readiness`: no movement
 - `AI Repetition-to-Automation Pipeline`: no movement
 
-Why:
-
-- this pass freezes a workflow-labeling rule only
-- it does not add new automation capability, proof breadth, or marker-closing behavior
-
-## Exact Next Package
-
-- continue the current admitted ATLAS lane only after preserving this message-origin rule in active workflow prompts/surfaces as needed
+Reason: this receipt freezes message-labeling policy only. It does not add automation capability, broaden proof, or close a blocker lane.

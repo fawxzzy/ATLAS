@@ -34,6 +34,30 @@ Every root-launched Codex task should bootstrap in this order:
 
 The context-pack builder emits that order explicitly in `bootstrap_contract.ordered_reads`.
 
+## Message Origin ID Contract
+
+Atlas workflow message provenance is explicit.
+
+Rules:
+
+- every Codex-originated ATLAS workflow response must begin with `CODEX-MSG-ID: CODEX-YYYY-MM-DD-###`
+- if exact ordinal sequencing is uncertain after a restart, emit a fresh unique suffix and keep the `CODEX-YYYY-MM-DD-` prefix
+- operator or user messages do not need an origin ID
+- the origin ID is provenance metadata only and does not replace receipts, SHAs, PR numbers, validation snapshots, marker outcomes, or authority boundaries
+
+After the origin ID, preserve the normal ATLAS response contract:
+
+- exact files changed
+- commands run
+- verification results
+- marker movement or no-movement
+- protected surfaces not touched
+- next admissible move
+
+Canonical receipt:
+
+- `docs/ops/MESSAGE-ORIGIN-ID-WORKFLOW-RULE-2026-06-09.md`
+
 ## Branch And Worktree Discipline
 
 Every root-launched Codex lane must declare its execution surface before work starts.

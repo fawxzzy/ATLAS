@@ -1289,6 +1289,12 @@ def render_codex_prompt(payload: dict[str, Any]) -> str:
             lines.append(f"- `{record['ref']}`")
     lines += [
         "",
+        "ATLAS workflow response contract:",
+        "- Begin every Codex-originated ATLAS workflow response with `CODEX-MSG-ID: CODEX-YYYY-MM-DD-###`.",
+        "- If the exact ordinal is uncertain after a restart, use a fresh unique suffix and preserve the actor/date prefix.",
+        "- After the origin ID, report exact files changed, commands run, verification results, marker movement or no-movement, protected surfaces not touched, and the next admissible move.",
+        "- Treat the origin ID as provenance metadata only; it does not replace receipts, SHAs, PR numbers, validation snapshots, or authority boundaries.",
+        "",
         "Rules:",
         "- Federate, don't duplicate.",
         "- Do not vendor child repos into ATLAS root.",
