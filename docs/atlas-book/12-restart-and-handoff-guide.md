@@ -141,8 +141,9 @@ Default cadence:
 
 ## Current Restart Truth
 
-- the current active ATLAS-side lane remains `AI Repetition-to-Automation Pipeline`
-- the active bounded subfamily now shifts to `doctrine-routing drafts` after the first `receipt skeleton drafts` threshold closed with no immediate `_stack` follow-on packet
+- the current active ATLAS-side lane is now `AI Long-Run Batch Orchestration`
+- the current bounded subfamily is now `queue-or-registry`
+- the immediately preceding ATLAS-side selector lane was `AI Repetition-to-Automation Pipeline`; its earlier scaffold, `receipt skeleton drafts`, and `doctrine-routing drafts` receipts remain durable carry-forward truth rather than the current immediate packet
 - PR `#80` is now merged on `main`, so the bounded live default-write adoption checkpoint branch is durable and closed on the canonical branch
 - the derivative restart mirrors are now intentionally aligned through that merged adoption checkpoint and the fresh day-of scaffold proof on `main`
 - one bounded next-capability selection packet now chooses current-lane default resolution as the next scaffold slice because the helper still requires the operator to restate the active lane string even though that lane already exists in the durable restart surfaces
@@ -178,8 +179,11 @@ Default cadence:
 - one bounded root validation timeout recheck packet now durably classifies the old non-completion boundary without reopening `_stack Readiness` content work
 - one bounded root runtime-budget closure packet now proves the validator completes deterministically and narrows the remaining blocker from timeout ambiguity to live `_stack` lock drift
 - one bounded clean closeout packet now refreshes `stack.lock.yaml` to the clean `_stack` `main` working set and closes root validation at the blocking level with `critical=0 error=0 warning=50 info=0`
+- one bounded non-Fitness marker knockout selector surface now consumes fresh operator authorization to classify the current non-Fitness marker field without widening into Fitness, archive/delete, deploy/publication, `.env`, secret, or `_stack Readiness` work
+- that selector now names `AI Long-Run Batch Orchestration` as the first honest next root-bounded family after the currently exhausted AI-pipeline family set
+- one bounded `AI Long-Run Batch Orchestration queue-or-registry contract-freeze pass 1` now lands the first long-run follow-on: one storage-agnostic batch-entry contract must name owner repo, target branch or worktree, write scope, checkpoint, verification, closeout, park, protected-surface exclusion, and bounded status truth before any queue-home or supervisor story is admitted
 - no immediate ATLAS-side AI-pipeline family packet is now open by default; reopen only on a distinct new automation-candidate family, cleared held family, or real contract drift
-- no immediate ATLAS-root lane packet is now open by default; reopen only on a distinct new root-bounded family, cleared held-family threshold, fresh approval-gated authorization, or real owner-side state change that creates one exact packet
+- the current immediate ATLAS-root lane packet is now `AI Long-Run Batch Orchestration queue-or-registry owner-surface admission pass 2`
 - if a later handoff needs remote-publication truth for this newest closeout chain, route to one exact remote-parity proof pass rather than treating local receipt durability as publication proof
 - no immediate supporting `_stack` packet is open by default for the first receipt-package slice, no immediate supporting `_stack` packet is open by default for the first update-draft slice, the held receipt-skeleton threshold stays closed at its current level, and the doctrine-routing branch is now also held at its current owner-admitted threshold rather than forcing a Playbook-side reopen
 
