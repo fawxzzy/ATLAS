@@ -4,6 +4,8 @@ import argparse
 import json
 import os
 import re
+import shutil
+import subprocess
 import sys
 from collections import Counter
 from dataclasses import asdict, dataclass
@@ -122,6 +124,7 @@ from ops.stack.generate_lockfile import (
     normalize_lock_payload,
     repo_is_git_root,
     render_lockfile_bytes,
+    status_paths,
 )
 from ops.stack.audit_gitdir_hygiene import build_report as build_gitdir_hygiene_report, default_target_paths as default_gitdir_hygiene_targets
 from ops.atlas.backfill_legacy_runtime_artifacts import backfill_legacy_runtime_artifacts
@@ -344,6 +347,53 @@ def mutable_surface_requires_warning(repo_path: Path, relative_path: str) -> boo
     if status_output.strip():
         return True
     return not bool(tracked_output.strip())
+
+
+def mutable_surface_warning_map(repo_path: Path) -> dict[str, bool]:
+    existing_paths = [
+        relative_path
+        for relative_path in MUTABLE_DIR_CANDIDATES
+        if (repo_path / relative_path).exists()
+    ]
+    if not existing_paths:
+        return {}
+
+    tracked_code, tracked_output = git_output(repo_path, "ls-files", "--", *existing_paths)
+    if tracked_code != 0:
+        return {relative_path: True for relative_path in existing_paths}
+
+    status_code, status_output = git_output(
+        repo_path,
+        "status",
+        "--short",
+        "--ignored",
+        "--untracked-files=all",
+        "--",
+        *existing_paths,
+    )
+    if status_code != 0:
+        return {relative_path: True for relative_path in existing_paths}
+
+    tracked_paths = [
+        normalize_slashes(line.strip())
+        for line in tracked_output.splitlines()
+        if line.strip()
+    ]
+    status_paths_found = status_paths(status_output.splitlines())
+
+    result: dict[str, bool] = {}
+    for relative_path in existing_paths:
+        normalized = normalize_slashes(relative_path)
+        has_tracked = any(
+            path == normalized or path.startswith(f"{normalized}/")
+            for path in tracked_paths
+        )
+        has_status = any(
+            path == normalized or path.startswith(f"{normalized}/")
+            for path in status_paths_found
+        )
+        result[relative_path] = has_status or not has_tracked
+    return result
 
 
 def summarize_debt_classes(findings: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -1048,6 +1098,8 @@ def discover_unregistered_git_roots(root: Path, config: dict[str, Any], stack_fi
 
     discovered: list[Path] = []
     for candidate in sorted(candidates):
+        if not (candidate / ".git").exists():
+            continue
         if not repo_is_git_root(candidate):
             continue
         resolved = candidate.resolve()
@@ -2479,6 +2531,110 @@ def iter_scan_files(roots: list[Path]) -> list[Path]:
     return files
 
 
+def rg_text_scan_patterns(root: Path) -> list[tuple[str, str, str]]:
+    return [
+        ("critical", "windows-user-path", build_home_path_pattern(separator=r"\\", directory=USER_HOME_DIRECTORY).pattern),
+        ("critical", "windows-user-path-alt", build_home_path_pattern(separator="/", directory=USER_HOME_DIRECTORY).pattern),
+        ("critical", "unix-home-path", re.compile("|".join(re.escape(f"/{directory}/") for directory in UNIX_HOME_DIRECTORIES)).pattern),
+        ("warning", "atlas-root-path", re.compile(re.escape(str(root))).pattern),
+        ("warning", "atlas-root-path-alt", re.compile(re.escape(normalize_slashes(str(root)))).pattern),
+    ]
+
+
+def rg_glob_args() -> list[str]:
+    args: list[str] = []
+    for extension in sorted(TEXT_EXTENSIONS):
+        args.extend(["-g", f"*{extension}"])
+    for skip_dir in sorted(SCAN_SKIP_DIRS):
+        args.extend(["-g", f"!**/{skip_dir}/**"])
+    return args
+
+
+def scan_absolute_path_findings_with_rg(
+    *,
+    root: Path,
+    config: dict[str, Any],
+    stack_file: Path,
+    excluded_surface_roots: list[dict[str, Any]],
+) -> list[Finding] | None:
+    rg_binary = shutil.which("rg")
+    if not rg_binary:
+        return None
+
+    scan_roots = collect_text_scan_roots(root, config, stack_file)
+    root_args = [str(path) for path in scan_roots if path.exists()]
+    if not root_args:
+        return []
+
+    findings: list[Finding] = []
+    seen_locations: set[tuple[Path, int]] = set()
+    base_args = [
+        rg_binary,
+        "--json",
+        "--line-number",
+        "--no-heading",
+        "--color",
+        "never",
+    ] + rg_glob_args()
+
+    for severity, category, pattern in rg_text_scan_patterns(root):
+        completed = subprocess.run(
+            base_args + [pattern, *root_args],
+            cwd=root,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="ignore",
+            check=False,
+        )
+        if completed.returncode not in {0, 1}:
+            return None
+        for raw_line in completed.stdout.splitlines():
+            try:
+                payload = json.loads(raw_line)
+            except json.JSONDecodeError:
+                return None
+            if payload.get("type") != "match":
+                continue
+            data = payload.get("data", {})
+            path_text = (
+                data.get("path", {}).get("text")
+                if isinstance(data.get("path"), dict)
+                else None
+            )
+            line_number = data.get("line_number")
+            line_text = (
+                data.get("lines", {}).get("text", "")
+                if isinstance(data.get("lines"), dict)
+                else ""
+            )
+            if not isinstance(path_text, str) or not isinstance(line_number, int):
+                continue
+            file_path = Path(path_text)
+            if not file_path.is_absolute():
+                file_path = (root / file_path).resolve()
+            else:
+                file_path = file_path.resolve()
+            if is_import_evidence_file(root, file_path):
+                continue
+            location_key = (file_path, line_number)
+            if location_key in seen_locations:
+                continue
+            seen_locations.add(location_key)
+            findings.append(
+                build_absolute_path_finding(
+                    root=root,
+                    file_path=file_path,
+                    severity=severity,
+                    category=category,
+                    line_number=line_number,
+                    line_preview=line_text.strip(),
+                    excluded_surface_roots=excluded_surface_roots,
+                )
+            )
+    return findings
+
+
 def build_findings(
     stack_file: Path,
     config: dict[str, Any],
@@ -2593,9 +2749,9 @@ def build_findings(
             readme_name = "README-STACK.md" if is_stack_control_repo else "README.md"
             findings.append(Finding("warning", "missing-readme", repo_rel, f"{readme_name} is missing for an active repo.", {"status": status}))
 
-        for relative_dir in MUTABLE_DIR_CANDIDATES:
-            candidate = repo_path / relative_dir
-            if candidate.exists() and mutable_surface_requires_warning(repo_path, relative_dir):
+        for relative_dir, requires_warning in mutable_surface_warning_map(repo_path).items():
+            if requires_warning:
+                candidate = repo_path / relative_dir
                 rel = normalize_slashes(str(candidate.relative_to(root)))
                 findings.append(Finding("warning", "mutable-state-in-repo", rel, "Mutable or generated state is present inside a repo path.", {"repo_id": repo_id, "state_path": relative_dir}))
         for env_candidate in list(repo_path.glob(".env")) + list(repo_path.glob(".env.*")):
@@ -2835,32 +2991,41 @@ def build_findings(
     findings.extend(validate_gitdir_hygiene(root))
 
     excluded_surface_roots = collect_excluded_surface_roots(stack_file, config)
-    root_abs_patterns = [
-        ("warning", "atlas-root-path", re.compile(re.escape(str(root)))),
-        ("warning", "atlas-root-path-alt", re.compile(re.escape(normalize_slashes(str(root))))),
-    ]
-    for file_path in iter_scan_files(collect_text_scan_roots(root, config, stack_file)):
-        if is_import_evidence_file(root, file_path):
-            continue
-        try:
-            text = file_path.read_text(encoding="utf-8", errors="ignore")
-        except OSError:
-            continue
-        for line_number, line in enumerate(text.splitlines(), start=1):
-            for severity, category, pattern in ABSOLUTE_PATTERNS + root_abs_patterns:
-                if pattern.search(line):
-                    findings.append(
-                        build_absolute_path_finding(
-                            root=root,
-                            file_path=file_path,
-                            severity=severity,
-                            category=category,
-                            line_number=line_number,
-                            line_preview=line.strip(),
-                            excluded_surface_roots=excluded_surface_roots,
+    rg_findings = scan_absolute_path_findings_with_rg(
+        root=root,
+        config=config,
+        stack_file=stack_file,
+        excluded_surface_roots=excluded_surface_roots,
+    )
+    if rg_findings is not None:
+        findings.extend(rg_findings)
+    else:
+        root_abs_patterns = [
+            ("warning", "atlas-root-path", re.compile(re.escape(str(root)))),
+            ("warning", "atlas-root-path-alt", re.compile(re.escape(normalize_slashes(str(root))))),
+        ]
+        for file_path in iter_scan_files(collect_text_scan_roots(root, config, stack_file)):
+            if is_import_evidence_file(root, file_path):
+                continue
+            try:
+                text = file_path.read_text(encoding="utf-8", errors="ignore")
+            except OSError:
+                continue
+            for line_number, line in enumerate(text.splitlines(), start=1):
+                for severity, category, pattern in ABSOLUTE_PATTERNS + root_abs_patterns:
+                    if pattern.search(line):
+                        findings.append(
+                            build_absolute_path_finding(
+                                root=root,
+                                file_path=file_path,
+                                severity=severity,
+                                category=category,
+                                line_number=line_number,
+                                line_preview=line.strip(),
+                                excluded_surface_roots=excluded_surface_roots,
+                            )
                         )
-                    )
-                    break
+                        break
 
     return findings
 
@@ -3234,6 +3399,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--ratchet", action="store_true")
     parser.add_argument("--allow-missing-locked-repos", action="store_true")
     parser.add_argument("--require-present-repo-id", action="append", default=[])
+    parser.add_argument(
+        "--refresh-runtime-artifacts",
+        action="store_true",
+        help="Regenerate legacy backfill and world-model runtime artifacts before validation.",
+    )
     args = parser.parse_args(argv)
 
     stack_file = Path(args.stack_file).resolve()
@@ -3244,16 +3414,27 @@ def main(argv: list[str] | None = None) -> int:
     should_exit_success = False
     try:
         config = load_stack_config(stack_file)
-        backfill_legacy_runtime_artifacts(root=stack_file.parent.resolve())
-        if not args.allow_missing_locked_repos:
+        root = stack_file.parent.resolve()
+        legacy_backfill_root = root / "runtime" / "state" / "atlas" / "legacy-backfill"
+        world_model_snapshot_path = root / "runtime" / "state" / "atlas" / "world-model.snapshot.latest.json"
+        world_model_attention_path = root / "runtime" / "state" / "atlas" / "world-model.attention.latest.json"
+        descriptor_root = root / "runtime" / "cortex" / "artifacts"
+        should_refresh_runtime = bool(args.refresh_runtime_artifacts)
+        if should_refresh_runtime or not any(legacy_backfill_root.glob("*.json")):
+            backfill_legacy_runtime_artifacts(root=root)
+        if not args.allow_missing_locked_repos and (
+            should_refresh_runtime
+            or not world_model_snapshot_path.exists()
+            or not world_model_attention_path.exists()
+        ):
             write_world_model_state(
-                descriptor_root=stack_file.parent.resolve() / "runtime" / "cortex" / "artifacts",
-                root=stack_file.parent.resolve(),
+                descriptor_root=descriptor_root,
+                root=root,
             )
             register_artifact_descriptors(
-                [world_model_state_root(stack_file.parent.resolve())],
-                output_dir=stack_file.parent.resolve() / "runtime" / "cortex" / "artifacts",
-                root=stack_file.parent.resolve(),
+                [world_model_state_root(root)],
+                output_dir=descriptor_root,
+                root=root,
             )
         resolved_lock_file = lock_file or lockfile_output_path(stack_file, config)
         report = {

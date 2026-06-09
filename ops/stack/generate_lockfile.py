@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import functools
 import hashlib
 import json
 import subprocess
@@ -94,9 +95,15 @@ def status_paths(status_lines: list[str]) -> list[str]:
     return [path for path in (parse_porcelain_path(line) for line in status_lines) if path]
 
 
+@functools.lru_cache(maxsize=None)
+def _repo_is_git_root_cached(repo_path_str: str) -> bool:
+    repo_path = Path(repo_path_str)
+    git_entry = repo_path / ".git"
+    return git_entry.exists()
+
+
 def repo_is_git_root(repo_path: Path) -> bool:
-    code, stdout = git_output(repo_path, "rev-parse", "--show-toplevel")
-    return code == 0 and Path(stdout).resolve() == repo_path.resolve()
+    return _repo_is_git_root_cached(str(repo_path.resolve()))
 
 
 def current_ref(repo_path: Path, commit: str) -> tuple[str, str]:
