@@ -1,0 +1,114 @@
+from __future__ import annotations
+
+import json
+import tempfile
+import unittest
+from pathlib import Path
+
+from ops.atlas.marker_knockout_selector import build_campaign, main
+
+
+MARKER_DOC = """# Lanes And Markers
+
+## Active Front-Page Marker Table
+
+- _stack Readiness: `100%`
+- Atlas-owned Repo Naming Canonicalization: `79%`
+- Local Data Gateway: `66%`
+- Dependency Untangling: `72%`
+- Truth Map & ATLAS Book: `87%`
+- Inventory & Truth Map: `76%`
+- Knowledge Capture & Transfer: `83%`
+- Durable Context Externalization: `78%`
+- Discord OS Infrastructure Separation: `95%`
+- Discord OS Feedback Workflow Canonicalization: `72%`
+
+## Supporting Open Markers
+
+- Verta Absorption: `99%`
+- ATLAS Core Phase: `95%`
+- Lifeline Readiness: `97%`
+- Playbook Maturity: `92%`
+- Cortex Readiness: `41%`
+- Fitness QA/LLEL Workflow: `96%`
+- Fitness Branch Cleanup / Main-Only Governance: `96%`
+- Fitness Recovery Preservation: `80%`
+- Tmp Dependency Elimination: `90%`
+- Duplicate Surface Decommission: `98%`
+- Brand Asset Canonicalization: `90%`
+- Preview Cache & Surface Consistency: `78%`
+- Operator Secret Path Hygiene: `64%`
+- Manual Deploy Exception Burn-Down: `84%`
+- Unified Workflow Convergence: `73%`
+- Vision & Future Alignment: `25%`
+- Core Pattern Convergence: `43%`
+- Discord Workflow, Publication & Docs Reliability: `32%`
+- Playbook Everywhere + Cortex Interface: `22%`
+- AI Repetition-to-Automation Pipeline: `32%`
+- AI Long-Run Batch Orchestration: `20%`
+- Feedback Loop Readiness: `42%`
+- Sandbox Simulation Readiness: `0%`
+- Post-Convergence Lane Split Readiness: `61%`
+
+## Closed / Locked Ratchets
+
+- Archive Normalization: `100%`
+"""
+
+
+class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
+    def _temp_root(self) -> Path:
+        temp_dir = tempfile.TemporaryDirectory()
+        self.addCleanup(temp_dir.cleanup)
+        root = Path(temp_dir.name)
+        (root / "docs" / "atlas-book").mkdir(parents=True, exist_ok=True)
+        return root
+
+    def test_build_campaign_selects_ai_pipeline_first(self) -> None:
+        root = self._temp_root()
+        (root / "docs" / "atlas-book" / "02-lanes-and-markers.md").write_text(MARKER_DOC, encoding="utf-8")
+
+        payload = build_campaign(root=root)
+
+        self.assertEqual("AI Repetition-to-Automation Pipeline", payload["selected_marker"])
+        self.assertEqual(32, payload["selected_percentage"])
+        self.assertEqual(
+            "AI Repetition-to-Automation Pipeline non-Fitness marker knockout selector surface",
+            payload["selected_next_packet"],
+        )
+
+    def test_build_campaign_classifies_fitness_and_secret_holds(self) -> None:
+        root = self._temp_root()
+        (root / "docs" / "atlas-book" / "02-lanes-and-markers.md").write_text(MARKER_DOC, encoding="utf-8")
+
+        payload = build_campaign(root=root)
+        records = {record["marker"]: record for record in payload["open_markers"]}
+
+        self.assertEqual("protected/Fitness hold", records["Fitness QA/LLEL Workflow"]["category"])
+        self.assertEqual("secret/.env hold", records["Operator Secret Path Hygiene"]["category"])
+        self.assertEqual("already closed / locked", records["_stack Readiness"]["category"])
+
+    def test_build_campaign_normalizes_inline_code_marker_names(self) -> None:
+        root = self._temp_root()
+        marker_doc = MARKER_DOC.replace("- _stack Readiness: `100%`", "- `_stack` Readiness: `100%`")
+        (root / "docs" / "atlas-book" / "02-lanes-and-markers.md").write_text(marker_doc, encoding="utf-8")
+
+        payload = build_campaign(root=root)
+        records = {record["marker"]: record for record in payload["open_markers"]}
+
+        self.assertIn("_stack Readiness", records)
+
+    def test_main_can_write_json_output(self) -> None:
+        root = self._temp_root()
+        (root / "docs" / "atlas-book" / "02-lanes-and-markers.md").write_text(MARKER_DOC, encoding="utf-8")
+        output_ref = "docs/ops/selector-output.json"
+
+        exit_code = main(["--root", str(root), "--format", "json", "--output", output_ref])
+
+        self.assertEqual(0, exit_code)
+        payload = json.loads((root / output_ref).read_text(encoding="utf-8"))
+        self.assertEqual("root-non-fitness-marker-knockout", payload["campaign_id"])
+
+
+if __name__ == "__main__":
+    unittest.main()
