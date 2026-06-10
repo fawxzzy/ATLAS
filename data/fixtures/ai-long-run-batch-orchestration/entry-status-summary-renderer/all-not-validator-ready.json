@@ -1,0 +1,70 @@
+[
+  {
+    "route": "not-validator-ready",
+    "scaffold_payload": {
+      "candidate_entry": {
+        "entry_id": "entry-status-summary-renderer-003",
+        "lane_name": "AI Long-Run Batch Orchestration",
+        "job_scope": "entry status summary renderer",
+        "owner_repo": "MISSING_OWNER_REPO",
+        "target_branch_or_worktree": "MISSING_TARGET_BRANCH_OR_WORKTREE",
+        "allowed_write_scope": [
+          "docs/ops"
+        ],
+        "checkpoint_surface": "docs/atlas-book/12-restart-and-handoff-guide.md",
+        "verification_gate": "MISSING_VERIFICATION_GATE",
+        "closeout_artifact": "docs/ops/example.md",
+        "park_or_escalation_rule": "operator-review",
+        "protected_surface_exclusions": [
+          "repos/fawxzzy-fitness",
+          "archive/",
+          "deploy/publication",
+          ".env",
+          "secrets"
+        ],
+        "status": "proposed",
+        "created_from_receipt": "docs/ops/source.md",
+        "last_reconciled_receipt": "docs/ops/source.md"
+      },
+      "missing_required_fields": [
+        "owner_repo",
+        "target_branch_or_worktree",
+        "verification_gate"
+      ],
+      "validator_readiness_note": "scaffold contains unresolved required fields and is not yet validator-ready"
+    }
+  },
+  {
+    "route": "not-validator-ready",
+    "scaffold_payload": {
+      "candidate_entry": {
+        "entry_id": "entry-status-summary-renderer-004",
+        "lane_name": "AI Long-Run Batch Orchestration",
+        "job_scope": "entry status summary renderer",
+        "owner_repo": "atlas-root",
+        "target_branch_or_worktree": "main",
+        "allowed_write_scope": [
+          "docs/ops"
+        ],
+        "checkpoint_surface": "docs/atlas-book/12-restart-and-handoff-guide.md",
+        "verification_gate": "MISSING_VERIFICATION_GATE",
+        "closeout_artifact": "docs/ops/example.md",
+        "park_or_escalation_rule": "operator-review",
+        "protected_surface_exclusions": [
+          "repos/fawxzzy-fitness",
+          "archive/",
+          "deploy/publication",
+          ".env",
+          "secrets"
+        ],
+        "status": "proposed",
+        "created_from_receipt": "docs/ops/source.md",
+        "last_reconciled_receipt": "docs/ops/source.md"
+      },
+      "missing_required_fields": [
+        "verification_gate"
+      ],
+      "validator_readiness_note": "scaffold contains unresolved required fields and is not yet validator-ready"
+    }
+  }
+]

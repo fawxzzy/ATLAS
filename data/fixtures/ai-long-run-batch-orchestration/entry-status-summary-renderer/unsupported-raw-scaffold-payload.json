@@ -1,0 +1,10 @@
+[
+  {
+    "candidate_entry": {
+      "entry_id": "entry-status-summary-renderer-007",
+      "status": "proposed"
+    },
+    "missing_required_fields": [],
+    "validator_readiness_note": "scaffold contains all required fields and is ready for validator input but has not been validated"
+  }
+]

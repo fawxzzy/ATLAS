@@ -1,0 +1,66 @@
+[
+  {
+    "route": "not-validator-ready",
+    "scaffold_payload": {
+      "candidate_entry": {
+        "entry_id": "entry-status-summary-renderer-001",
+        "lane_name": "AI Long-Run Batch Orchestration",
+        "job_scope": "entry status summary renderer",
+        "owner_repo": "MISSING_OWNER_REPO",
+        "target_branch_or_worktree": "main",
+        "allowed_write_scope": [
+          "docs/ops",
+          "ops/atlas"
+        ],
+        "checkpoint_surface": "docs/atlas-book/12-restart-and-handoff-guide.md",
+        "verification_gate": "MISSING_VERIFICATION_GATE",
+        "closeout_artifact": "docs/ops/example.md",
+        "park_or_escalation_rule": "operator-review",
+        "protected_surface_exclusions": [
+          "repos/fawxzzy-fitness",
+          "archive/",
+          "deploy/publication",
+          ".env",
+          "secrets"
+        ],
+        "status": "proposed",
+        "created_from_receipt": "docs/ops/source.md",
+        "last_reconciled_receipt": "docs/ops/source.md"
+      },
+      "missing_required_fields": [
+        "owner_repo",
+        "verification_gate"
+      ],
+      "validator_readiness_note": "scaffold contains unresolved required fields and is not yet validator-ready"
+    }
+  },
+  {
+    "route": "validator-input-ready",
+    "candidate_entry": {
+      "entry_id": "entry-status-summary-renderer-002",
+      "lane_name": "AI Long-Run Batch Orchestration",
+      "job_scope": "entry status summary renderer",
+      "owner_repo": "atlas-root",
+      "target_branch_or_worktree": "main",
+      "allowed_write_scope": [
+        "docs/ops",
+        "ops/atlas",
+        "data/fixtures/ai-long-run-batch-orchestration/entry-status-summary-renderer"
+      ],
+      "checkpoint_surface": "docs/atlas-book/12-restart-and-handoff-guide.md",
+      "verification_gate": "python -m unittest discover -s .\\ops\\atlas -p \"test_entry_status_summary_renderer.py\"",
+      "closeout_artifact": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-ENTRY-STATUS-SUMMARY-RENDERER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-10.md",
+      "park_or_escalation_rule": "operator-review",
+      "protected_surface_exclusions": [
+        "repos/fawxzzy-fitness",
+        "archive/",
+        "deploy/publication",
+        ".env",
+        "secrets"
+      ],
+      "status": "proposed",
+      "created_from_receipt": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-ENTRY-STATUS-SUMMARY-RENDERER-FIRST-IMPLEMENTATION-ADMISSION-PASS-26-2026-06-10.md",
+      "last_reconciled_receipt": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-ENTRY-STATUS-SUMMARY-RENDERER-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-27-2026-06-10.md"
+    }
+  }
+]

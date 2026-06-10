@@ -1,0 +1,57 @@
+[
+  {
+    "route": "validator-input-ready",
+    "candidate_entry": {
+      "entry_id": "entry-status-summary-renderer-005",
+      "lane_name": "AI Long-Run Batch Orchestration",
+      "job_scope": "entry status summary renderer",
+      "owner_repo": "atlas-root",
+      "target_branch_or_worktree": "main",
+      "allowed_write_scope": [
+        "docs/ops"
+      ],
+      "checkpoint_surface": "docs/atlas-book/12-restart-and-handoff-guide.md",
+      "verification_gate": "python -m unittest discover -s .\\ops\\atlas -p \"test_entry_status_summary_renderer.py\"",
+      "closeout_artifact": "docs/ops/example.md",
+      "park_or_escalation_rule": "operator-review",
+      "protected_surface_exclusions": [
+        "repos/fawxzzy-fitness",
+        "archive/",
+        "deploy/publication",
+        ".env",
+        "secrets"
+      ],
+      "status": "proposed",
+      "created_from_receipt": "docs/ops/source.md",
+      "last_reconciled_receipt": "docs/ops/source.md"
+    }
+  },
+  {
+    "route": "validator-input-ready",
+    "candidate_entry": {
+      "entry_id": "entry-status-summary-renderer-006",
+      "lane_name": "AI Long-Run Batch Orchestration",
+      "job_scope": "entry status summary renderer",
+      "owner_repo": "atlas-root",
+      "target_branch_or_worktree": "main",
+      "allowed_write_scope": [
+        "docs/ops",
+        "ops/atlas"
+      ],
+      "checkpoint_surface": "docs/atlas-book/12-restart-and-handoff-guide.md",
+      "verification_gate": "python -m unittest discover -s .\\ops\\atlas -p \"test_entry_status_summary_renderer.py\"",
+      "closeout_artifact": "docs/ops/example.md",
+      "park_or_escalation_rule": "operator-review",
+      "protected_surface_exclusions": [
+        "repos/fawxzzy-fitness",
+        "archive/",
+        "deploy/publication",
+        ".env",
+        "secrets"
+      ],
+      "status": "proposed",
+      "created_from_receipt": "docs/ops/source.md",
+      "last_reconciled_receipt": "docs/ops/source.md"
+    }
+  }
+]
