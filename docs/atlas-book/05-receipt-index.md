@@ -214,6 +214,7 @@
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Batch-Entry Validator Prompt-Pack And Handoff Contract Pass 6](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BATCH-ENTRY-VALIDATOR-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-6-2026-06-09.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Batch-Entry Validator Implementation-Readiness Closeout And Worker-Routing Pass 7](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BATCH-ENTRY-VALIDATOR-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-7-2026-06-09.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Batch-Entry Validator First-Implementation Worker Cluster Reconciliation](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BATCH-ENTRY-VALIDATOR-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-09.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Next-Slice Selection Pass 8](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-NEXT-SLICE-SELECTION-PASS-8-2026-06-09.md)
 - [_Stack Readiness Stack Update Draft Command-Design Pass 47](../ops/_STACK-READINESS-STACK-UPDATE-DRAFT-COMMAND-DESIGN-PASS-47-2026-06-08.md)
 - [_Stack Readiness Stack Update Draft Evidence-Admission And Proof-Ledger Discipline Pass 48](../ops/_STACK-READINESS-STACK-UPDATE-DRAFT-EVIDENCE-ADMISSION-AND-PROOF-LEDGER-DISCIPLINE-PASS-48-2026-06-08.md)
 - [_Stack Readiness Stack Update Draft Report-Contract And Contradiction-Routing Pass 49](../ops/_STACK-READINESS-STACK-UPDATE-DRAFT-REPORT-CONTRACT-AND-CONTRADICTION-ROUTING-PASS-49-2026-06-08.md)
