@@ -1,0 +1,27 @@
+{
+  "entry_id": "batch-entry-validator-001",
+  "lane_name": "AI Long-Run Batch Orchestration",
+  "job_scope": "Validate one bounded root-local batch-entry candidate",
+  "owner_repo": "ATLAS root control-plane surfaces",
+  "target_branch_or_worktree": "main",
+  "allowed_write_scope": [
+    "docs/ops",
+    "docs/atlas-book",
+    "ops/atlas",
+    "data/fixtures"
+  ],
+  "checkpoint_surface": "docs/atlas-book/12-restart-and-handoff-guide.md",
+  "verification_gate": "python .\\ops\\validation\\validate_stack.py --ratchet",
+  "closeout_artifact": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BATCH-ENTRY-VALIDATOR-FIRST-IMPLEMENTATION-WORKER-PACKET-1-RECONCILIATION-2026-06-09.md",
+  "park_or_escalation_rule": "Stop on scope widening or protected-surface pressure and return one bounded receipt.",
+  "protected_surface_exclusions": [
+    "repos/fawxzzy-fitness",
+    "archive/",
+    "deploy/publication surfaces",
+    ".env",
+    "secrets"
+  ],
+  "status": "admitted",
+  "created_from_receipt": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BATCH-ENTRY-VALIDATOR-FIRST-SLICE-ADMISSION-PASS-5-2026-06-09.md",
+  "last_reconciled_receipt": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BATCH-ENTRY-VALIDATOR-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-7-2026-06-09.md"
+}

@@ -1,0 +1,27 @@
+{
+  "entry_id": "batch-entry-validator-009",
+  "lane_name": "AI Long-Run Batch Orchestration",
+  "job_scope": "Validate one bounded root-local batch-entry candidate",
+  "owner_repo": "ATLAS root control-plane surfaces",
+  "target_branch_or_worktree": "main",
+  "allowed_write_scope": [
+    "docs/ops"
+  ],
+  "checkpoint_surface": "docs/atlas-book/12-restart-and-handoff-guide.md",
+  "verification_gate": "python .\\ops\\validation\\validate_stack.py --ratchet",
+  "closeout_artifact": "docs/ops/example.md",
+  "park_or_escalation_rule": "Stop and return one bounded receipt.",
+  "protected_surface_exclusions": [
+    "repos/fawxzzy-fitness",
+    "archive/",
+    "deploy/publication surfaces",
+    ".env",
+    "secrets"
+  ],
+  "status": "blocked",
+  "blocking_class": "waiting-on-human-review",
+  "human_review_hold": true,
+  "notes": "Hold until the next bounded owner decision is explicit.",
+  "created_from_receipt": "docs/ops/example-pass-5.md",
+  "last_reconciled_receipt": "docs/ops/example-pass-7.md"
+}
