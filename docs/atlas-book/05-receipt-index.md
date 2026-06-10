@@ -210,6 +210,7 @@
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Owner-Surface Admission Pass 2](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-OWNER-SURFACE-ADMISSION-PASS-2-2026-06-09.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Supporting-Lane Admission Pass 3](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-SUPPORTING-LANE-ADMISSION-PASS-3-2026-06-09.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry First-Implementation-Slice Selection Pass 4](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-FIRST-IMPLEMENTATION-SLICE-SELECTION-PASS-4-2026-06-09.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Batch-Entry Validator First-Slice Admission Pass 5](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BATCH-ENTRY-VALIDATOR-FIRST-SLICE-ADMISSION-PASS-5-2026-06-09.md)
 - [_Stack Readiness Stack Update Draft Command-Design Pass 47](../ops/_STACK-READINESS-STACK-UPDATE-DRAFT-COMMAND-DESIGN-PASS-47-2026-06-08.md)
 - [_Stack Readiness Stack Update Draft Evidence-Admission And Proof-Ledger Discipline Pass 48](../ops/_STACK-READINESS-STACK-UPDATE-DRAFT-EVIDENCE-ADMISSION-AND-PROOF-LEDGER-DISCIPLINE-PASS-48-2026-06-08.md)
 - [_Stack Readiness Stack Update Draft Report-Contract And Contradiction-Routing Pass 49](../ops/_STACK-READINESS-STACK-UPDATE-DRAFT-REPORT-CONTRACT-AND-CONTRADICTION-ROUTING-PASS-49-2026-06-08.md)
