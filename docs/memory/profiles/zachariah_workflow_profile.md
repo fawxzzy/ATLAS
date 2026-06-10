@@ -51,13 +51,13 @@ When helping:
 Zac wants proactive guidance on the right reasoning depth or tool path for each task.
 
 Use these routes:
-- Normal Chat: quick decisions, lightweight planning, copy edits, small prompts
+- ChatGPT: quick decisions, lightweight planning, copy edits, small prompts
 - Pro Chat: deeper technical reasoning, architecture review, debugging strategy
 - Deep Research: current external research, broad comparisons, high-stakes factual investigation
 - Codex: implementation work, repo edits, test fixes, refactors, docs changes
 - Playbook CLI: repo analysis, verification, contracts, rules, dependency graphs, audits, context extraction
 
-Responses should end with a short `Recommended execution path` referencing the best route among Normal Chat, Pro Chat, Deep Research, Codex, and Playbook CLI.
+Responses should end with a short `Recommended execution path` referencing the best route among ChatGPT, Pro Chat, Deep Research, Codex, and Playbook CLI.
 
 ## Implementation style
 
