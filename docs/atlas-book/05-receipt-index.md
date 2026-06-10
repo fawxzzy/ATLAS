@@ -32,6 +32,7 @@
 - [Root Validation Proof Closeout Restart-Surface Reconciliation](../ops/ROOT-VALIDATION-PROOF-CLOSEOUT-RESTART-SURFACE-RECONCILIATION-2026-06-08.md)
 - [Root Validation Proof Closeout Marker-Surface Reconciliation](../ops/ROOT-VALIDATION-PROOF-CLOSEOUT-MARKER-SURFACE-RECONCILIATION-2026-06-08.md)
 - [Near-100 Marker Closeout Selector And Root Cleanup Preservation Pass 1](../ops/NEAR-100-MARKER-CLOSEOUT-SELECTOR-AND-ROOT-CLEANUP-PRESERVATION-PASS-1-2026-06-09.md)
+- [FawxzzyFitness Feedback Board Ownership Check](../ops/FAWXZZY-FITNESS-FEEDBACK-BOARD-OWNERSHIP-CHECK-2026-06-10.md)
 - [Local Data Gateway Retained-Surface Destructive Disposal Relationship-Seam Reconciliation After Clean-Root Reselection](../ops/LOCAL-DATA-GATEWAY-RETAINED-SURFACE-DESTRUCTIVE-DISPOSAL-RELATIONSHIP-SEAM-RECONCILIATION-AFTER-CLEAN-ROOT-RESELECTION-2026-06-01.md)
 - [Local Data Gateway Repo Naming Reusable-Proof-Family Adoptable-Now Threshold Checkpoint](../ops/LOCAL-DATA-GATEWAY-REPO-NAMING-REUSABLE-PROOF-FAMILY-ADOPTABLE-NOW-THRESHOLD-CHECKPOINT-2026-06-01.md)
 - [Root-Bounded Lane-Selection Pass After Local Data Gateway Repo Naming Reusable-Proof-Family Adoptable-Now Threshold Checkpoint Closeout](../ops/ROOT-BOUNDED-LANE-SELECTION-PASS-AFTER-LOCAL-DATA-GATEWAY-REPO-NAMING-REUSABLE-PROOF-FAMILY-ADOPTABLE-NOW-THRESHOLD-CHECKPOINT-CLOSEOUT-2026-06-01.md)
