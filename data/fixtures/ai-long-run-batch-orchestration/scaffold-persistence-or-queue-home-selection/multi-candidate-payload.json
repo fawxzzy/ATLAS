@@ -1,0 +1,6 @@
+{
+  "candidate_paths": [
+    "runtime/",
+    "tmp/queue-or-registry-storage-home"
+  ]
+}
