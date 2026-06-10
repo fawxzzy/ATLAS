@@ -1,0 +1,29 @@
+{
+  "candidate_entry": {
+    "entry_id": "scaffold-to-validator-handoff-006",
+    "lane_name": "AI Long-Run Batch Orchestration",
+    "job_scope": "scaffold-to-validator handoff",
+    "owner_repo": "atlas-root",
+    "target_branch_or_worktree": "main",
+    "allowed_write_scope": [
+      "docs/ops"
+    ],
+    "checkpoint_surface": "docs/atlas-book/12-restart-and-handoff-guide.md",
+    "verification_gate": "python -m unittest",
+    "closeout_artifact": "docs/ops/reconciliation.md",
+    "park_or_escalation_rule": "operator-review",
+    "protected_surface_exclusions": [
+      "repos/fawxzzy-fitness",
+      "archive/",
+      "deploy/publication",
+      ".env",
+      "secrets"
+    ],
+    "status": "proposed",
+    "created_from_receipt": "docs/ops/source.md",
+    "last_reconciled_receipt": "docs/ops/source.md"
+  },
+  "missing_required_fields": [],
+  "validator_readiness_note": "scaffold contains all required fields and is ready for validator input but has not been validated",
+  "input_mode": "queue"
+}

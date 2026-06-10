@@ -1,0 +1,18 @@
+[
+  {
+    "candidate_entry": {
+      "entry_id": "scaffold-to-validator-handoff-007",
+      "status": "proposed"
+    },
+    "missing_required_fields": [],
+    "validator_readiness_note": "scaffold contains all required fields and is ready for validator input but has not been validated"
+  },
+  {
+    "candidate_entry": {
+      "entry_id": "scaffold-to-validator-handoff-008",
+      "status": "proposed"
+    },
+    "missing_required_fields": [],
+    "validator_readiness_note": "scaffold contains all required fields and is ready for validator input but has not been validated"
+  }
+]

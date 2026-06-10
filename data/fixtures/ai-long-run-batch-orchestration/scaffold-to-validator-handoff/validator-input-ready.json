@@ -1,0 +1,30 @@
+{
+  "candidate_entry": {
+    "entry_id": "scaffold-to-validator-handoff-002",
+    "lane_name": "AI Long-Run Batch Orchestration",
+    "job_scope": "scaffold-to-validator handoff",
+    "owner_repo": "atlas-root",
+    "target_branch_or_worktree": "main",
+    "allowed_write_scope": [
+      "docs/ops",
+      "ops/atlas",
+      "data/fixtures/ai-long-run-batch-orchestration/scaffold-to-validator-handoff"
+    ],
+    "checkpoint_surface": "docs/atlas-book/12-restart-and-handoff-guide.md",
+    "verification_gate": "python -m unittest discover -s .\\ops\\atlas -p \"test_scaffold_to_validator_handoff.py\"",
+    "closeout_artifact": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-SCAFFOLD-TO-VALIDATOR-HANDOFF-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-10.md",
+    "park_or_escalation_rule": "operator-review",
+    "protected_surface_exclusions": [
+      "repos/fawxzzy-fitness",
+      "archive/",
+      "deploy/publication",
+      ".env",
+      "secrets"
+    ],
+    "status": "proposed",
+    "created_from_receipt": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-SCAFFOLD-TO-VALIDATOR-HANDOFF-FIRST-IMPLEMENTATION-ADMISSION-PASS-19-2026-06-10.md",
+    "last_reconciled_receipt": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-SCAFFOLD-TO-VALIDATOR-HANDOFF-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-20-2026-06-10.md"
+  },
+  "missing_required_fields": [],
+  "validator_readiness_note": "scaffold contains all required fields and is ready for validator input but has not been validated"
+}
