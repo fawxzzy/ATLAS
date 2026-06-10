@@ -1,0 +1,24 @@
+{
+  "entry_id": "draft-entry-scaffold-002",
+  "lane_name": "AI Long-Run Batch Orchestration",
+  "job_scope": "queue-or-registry draft-entry scaffold",
+  "owner_repo": "atlas-root",
+  "target_branch_or_worktree": "main",
+  "allowed_write_scope": [
+    "docs/ops",
+    "docs/atlas-book"
+  ],
+  "checkpoint_surface": "docs/atlas-book/12-restart-and-handoff-guide.md",
+  "verification_gate": "python .\\ops\\validation\\validate_stack.py --ratchet",
+  "closeout_artifact": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-DRAFT-ENTRY-SCAFFOLD-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-09.md",
+  "park_or_escalation_rule": "stop on storage-home, execution-home, or owner-repo mutation drift",
+  "protected_surface_exclusions": [
+    "repos/fawxzzy-fitness",
+    "archive/",
+    ".env",
+    "secrets/"
+  ],
+  "status": "proposed",
+  "created_from_receipt": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-DRAFT-ENTRY-SCAFFOLD-CONTRACT-FREEZE-PASS-9-2026-06-09.md",
+  "last_reconciled_receipt": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-DRAFT-ENTRY-SCAFFOLD-OWNER-SURFACE-ADMISSION-PASS-10-2026-06-09.md"
+}
