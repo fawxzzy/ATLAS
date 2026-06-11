@@ -1,0 +1,6 @@
+{
+  "candidate_paths": [
+    "runtime/state/",
+    "runtime/receipts/"
+  ]
+}
