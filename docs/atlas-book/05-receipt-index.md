@@ -134,6 +134,7 @@
 - [Cortex Readiness Docs-ADR-Or-Debt-Slice Post-PR-58-Merge Live Read-Model Reconciliation Pass 11](../ops/CORTEX-READINESS-DOCS-ADR-OR-DEBT-SLICE-POST-PR-58-MERGE-LIVE-READ-MODEL-RECONCILIATION-PASS-11-2026-06-05.md)
 - [Cortex Readiness Docs-ADR-Or-Debt-Slice Post-PR-59-Merge Live Read-Model Reconciliation Pass 12](../ops/CORTEX-READINESS-DOCS-ADR-OR-DEBT-SLICE-POST-PR-59-MERGE-LIVE-READ-MODEL-RECONCILIATION-PASS-12-2026-06-05.md)
 - [Cortex Readiness Docs-ADR-Or-Debt-Slice Post-PR-60-Merge Live Read-Model Reconciliation Pass 13](../ops/CORTEX-READINESS-DOCS-ADR-OR-DEBT-SLICE-POST-PR-60-MERGE-LIVE-READ-MODEL-RECONCILIATION-PASS-13-2026-06-05.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Runtime-State Concrete-Layout Selection Contract Freeze Pass 44](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-RUNTIME-STATE-CONCRETE-LAYOUT-SELECTION-CONTRACT-FREEZE-PASS-44-2026-06-10.md)
 - [Cortex Readiness Docs-ADR-Or-Debt-Slice Post-PR-61-Merge Live Read-Model Reconciliation Pass 14](../ops/CORTEX-READINESS-DOCS-ADR-OR-DEBT-SLICE-POST-PR-61-MERGE-LIVE-READ-MODEL-RECONCILIATION-PASS-14-2026-06-05.md)
 - [Cortex Readiness Docs-ADR-Or-Debt-Slice Post-PR-62-Merge Live Read-Model Reconciliation Pass 15](../ops/CORTEX-READINESS-DOCS-ADR-OR-DEBT-SLICE-POST-PR-62-MERGE-LIVE-READ-MODEL-RECONCILIATION-PASS-15-2026-06-05.md)
 - [PR #62 Draft Readiness Audit And Body Alignment Pass 1](../ops/PR-62-DRAFT-READINESS-AUDIT-AND-BODY-ALIGNMENT-PASS-1-2026-06-05.md)
