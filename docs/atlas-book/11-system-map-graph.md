@@ -278,9 +278,9 @@ Historical note:
 - Cortex planning surfaces
 - markers, receipts, validation, and governance automation
 - latest ATLAS-root immediate lane packet:
-  - `AI Long-Run Batch Orchestration queue-or-registry runtime-state child-path or artifact-shape selection next-slice selection pass 57`
+  - `AI Long-Run Batch Orchestration queue-or-registry runtime-state child-path or artifact-shape selection contract-freeze pass 58`
 - current bounded seam progression:
-  - retained-state descendant-layout contract freeze -> owner-surface admission -> supporting-lane hold at `none yet` -> first-implementation admission -> prompt-pack and handoff contract -> implementation-readiness closeout -> reconciled first implementation landing -> queue-home or registry-home reselection -> queue-home or registry-home contract freeze -> owner-surface admission -> supporting-lane hold at `none yet` -> first-implementation admission -> prompt-pack and handoff contract -> implementation-readiness closeout -> reconciled first implementation landing
+  - retained-state descendant-layout contract freeze -> owner-surface admission -> supporting-lane hold at `none yet` -> first-implementation admission -> prompt-pack and handoff contract -> implementation-readiness closeout -> reconciled first implementation landing -> queue-home or registry-home reselection -> queue-home or registry-home contract freeze -> owner-surface admission -> supporting-lane hold at `none yet` -> first-implementation admission -> prompt-pack and handoff contract -> implementation-readiness closeout -> reconciled first implementation landing -> child-path or artifact-shape reselection
 
 ## System Graph
 
