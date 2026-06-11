@@ -95,6 +95,7 @@ Before doing any substantial work:
 7. confirm whether `_stack` owns the execution command
 8. confirm whether the lane already hit the two-strike blocker stop for the current blocker class
 9. confirm whether another writer already owns the shared root spine you would touch
+10. confirm whether another Codex chat is already `hot` or whether this pass must explicitly inherit or restart local services
 
 Mandatory prompt preflight:
 
@@ -138,6 +139,31 @@ Default cadence:
 2. stop and decide whether operator reality materially changed
 3. run one ratchet only if that answer is yes
 4. refresh shared marker or restart surfaces only when the ratchet or proof changed canonical read state
+
+## Workstation Resource Hygiene
+
+Supporting safety rule:
+
+- only one Codex chat may be `hot` at a time
+- `hot` means commands, browser automation, tests, dev servers, screenshots, or validation are actively running
+- another Codex chat may stay open only if it is idle
+
+If a chat ran dev servers, Playwright, browser automation, screenshots, tests, validators, or other long-running local helpers, close it out with:
+
+- `Processes started:`
+- `Processes still running:`
+- `Dev server status:`
+- `Browser/Playwright status:`
+- `Watch/test status:`
+- `Stop commands run:`
+- `Anything left intentionally running:`
+- `Should the next chat inherit or restart local services:`
+
+Read-only local helper:
+
+- `ops/atlas/workstation_resource_snapshot.ps1`
+
+Use that helper when local CPU/GPU pressure or lingering workflow residue is suspected. Do not commit raw machine-private output, especially if `-IncludePath` was used.
 
 ## Current Restart Truth
 
