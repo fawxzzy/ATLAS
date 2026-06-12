@@ -127,14 +127,14 @@ Use these ids in stack docs, tickets, and automation:
 - `_stack` -> `repos/_stack`
 - `playbook` -> `repos/playbook`
 - `lifeline` -> `repos/lifeline`
-- `foundation` -> `repos/fawxzzy-foundation`
+- `foundation` -> `repos/foundation`
 - `fitness` -> `repos/fawxzzy-fitness`
 - `mazer` -> `repos/mazer`
-- `trove` -> `repos/fawxzzy-trove`
-- `stream` -> `repos/fawxzzy-stream`
+- `trove` -> `repos/trove`
+- `stream` -> `repos/stream`
 - `nat1-games` -> `repos/Nat1-Games/nat1-games`
 
-The ids are canonical. Fitness is normalized on disk at `repos/fawxzzy-fitness`; other repo disk names may still differ where explicitly noted.
+The ids are canonical. The admitted Atlas-owned local repo paths are normalized except for the preserved Fitness exception at `repos/fawxzzy-fitness` and explicitly nested or external surfaces.
 
 `repos/**` remains untracked by the root repo as a code surface. The stack root tracks inventory and policy about those repos, not mirrored copies of their source trees.
 

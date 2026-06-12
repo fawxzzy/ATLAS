@@ -19,24 +19,24 @@ Operational rule:
 - Excluded surface count: `17`
 - Stack manifest: `stack.yaml`
 - Stack lock: `stack.lock.yaml`
-- Inventory digest: `sha256:929e8b22b45f461820fd2a42b60f8286d09a0b28c356767e8ad7e8cd72aa5df7`
+- Inventory digest: `sha256:5e9084794e1915080ae84412d4d39a17f35fc497ecdbcfff111b57f28bca00ea`
 
 ## Managed Repos
 
 | Repo id | Path | Branch | Pinned commit | Current commit | Dirty | Trust | Release | Related initiatives |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| _stack | repos/_stack | main | a764585cedd06e14347da28e86eb11d1ddf28c70 | a764585cedd06e14347da28e86eb11d1ddf28c70 | False | trusted | False | initiative:continuity-manifest-local-data-gateway |
-| discordos | repos/DiscordOS | main | 721db1c5fe87db2aeee8419d8bdcef65fdd5d198 | 721db1c5fe87db2aeee8419d8bdcef65fdd5d198 | False | trusted | False | initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-discord-os-infrastructure-separation |
-| fitness | repos/fawxzzy-fitness | main | - | ff07d77d0c8f2668cecfca27150fa5c556955413 | False | adjacent | False | initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-discord-os-infrastructure-separation |
+| _stack | repos/_stack | main | c72b47726f67b4e0474113229368106b41fbbf76 | c72b47726f67b4e0474113229368106b41fbbf76 | False | trusted | False | initiative:continuity-manifest-local-data-gateway<br>initiative:continuity-manifest-stack-readiness |
+| discordos | repos/DiscordOS | codex/path-discipline-warning-slice-discordos | f1f87429e39309c9124c56909499941132e93a1a | f1f87429e39309c9124c56909499941132e93a1a | False | trusted | False | initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-discord-os-infrastructure-separation |
+| fitness | repos/fawxzzy-fitness | main | - | f1f88a0bc9ff15f914df8fca28d37036f3c70fe0 | False | adjacent | False | initiative:continuity-manifest-dependency-untangling<br>initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-discord-os-infrastructure-separation |
 | foundation | repos/foundation | main | a016da2f08f167747f7ae7c804c0d6840cb9514d | a016da2f08f167747f7ae7c804c0d6840cb9514d | False | trusted | True | - |
-| lifeline | repos/lifeline | main | 31ef3ad92c775810b19cc565820664f3476a6719 | 31ef3ad92c775810b19cc565820664f3476a6719 | False | trusted | True | - |
-| mazer | repos/mazer | main | 4aae7c023b7426353dc2fc3dca8b80967839b902 | 4aae7c023b7426353dc2fc3dca8b80967839b902 | False | trusted | True | initiative:initiative-mazer-d2-learning-scorer |
-| nat1-games | repos/Nat1-Games/nat1-games | main | 412846a1baac6c0ce782ab9ab94530ccf4e89ff5 | 412846a1baac6c0ce782ab9ab94530ccf4e89ff5 | True | trusted | False | - |
-| playbook | repos/playbook | main | 744d2a96f7e7564a5e9bb917cf6514dc67674b9b | 744d2a96f7e7564a5e9bb917cf6514dc67674b9b | False | trusted | True | initiative:continuity-manifest-atlas-owned-repo-naming-canonicalization |
+| lifeline | repos/lifeline | codex/path-discipline-warning-slice-lifeline | 1994e64a09128d848048ba57cfd76fba278cc655 | 1994e64a09128d848048ba57cfd76fba278cc655 | False | trusted | True | - |
+| mazer | repos/mazer | codex/path-discipline-warning-slice-mazer-pub | fcf7f5f22ac3656f4dcd1e260c54a78f570d1a32 | fcf7f5f22ac3656f4dcd1e260c54a78f570d1a32 | False | trusted | True | initiative:initiative-mazer-d2-learning-scorer |
+| nat1-games | repos/Nat1-Games/nat1-games | codex/path-discipline-warning-slice-nat1 | 63a4a7c159c41a7e98ad8708891743acf71431ed | 63a4a7c159c41a7e98ad8708891743acf71431ed | False | trusted | False | - |
+| playbook | repos/playbook | codex/path-discipline-warning-slice-playbook | f27c36355da906a01a46a841779553002c259f9b | f27c36355da906a01a46a841779553002c259f9b | True | trusted | True | initiative:continuity-manifest-atlas-owned-repo-naming-canonicalization |
 | playbook-demo | repos/playbook-demo/playbook-demo | main | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | False | trusted | False | - |
-| stack | . | main | - | 9bb230cf1780702c01172fb5ef3f9ca7182d03e0 | True | trusted | False | - |
+| stack | . | main | - | 7173357871ebcb6f149ebe0142d52de637d9519b | True | trusted | False | - |
 | stream | repos/stream | main | bf2c9551225e6d3555122da9a72306556f50cdd8 | bf2c9551225e6d3555122da9a72306556f50cdd8 | False | trusted | False | - |
-| trove | repos/trove | main | 0f5f9fe55bd21aa7f017173f1950d0bd063470c1 | 0f5f9fe55bd21aa7f017173f1950d0bd063470c1 | False | trusted | True | - |
+| trove | repos/trove | codex/path-discipline-warning-slice-trove | d03309718335e45669d747ddb53799a3de26af5c | d03309718335e45669d747ddb53799a3de26af5c | False | trusted | True | - |
 
 ## Excluded Surfaces
 

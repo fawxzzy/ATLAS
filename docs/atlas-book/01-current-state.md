@@ -17,8 +17,9 @@ What is true right now:
 - normal stack validation is green in the current working state.
 - Verta Absorption is closed at `100%` only for trusted Verta-core absorption; raw Verta remains trust-gated, untrusted, non-release, and non-executable.
 - ATLAS Core Phase is closed at `100%` for the root coordination substrate; remaining owner/runtime/product work stays visible under its own markers.
+- Atlas-owned Repo Naming Canonicalization is closed at `100%` for local path truth plus GitHub remote-name truth across the admitted non-exception repos; `repos/fawxzzy-fitness` remains the explicit preserved exception, and `repos/stream` remains local/no-remote rather than a failed remote rename.
 - `--allow-missing-locked-repos` is no longer needed for current validation.
-- the merged warning-reduction tranche on `main` removed root-validator false positives, tracked-surface overcounting, and the last safe ignored Playbook/Lifeline runtime residue; the later closeouts also refreshed `stack.lock.yaml` to the current pinned working set, so live validation now reads `critical=0 error=0 warning=53 info=0`, with the remaining warning-only posture dominated by root-path references plus retained local-state and repo-local secret warnings rather than canonical registry damage.
+- the merged warning-reduction tranche on `main` removed root-validator false positives, tracked-surface overcounting, and the last safe ignored Playbook/Lifeline runtime residue; the later closeouts also refreshed `stack.lock.yaml` to the current pinned working set, so live validation now reads `critical=0 error=0 warning=54 info=0`, with the remaining warning-only posture dominated by root-path references plus retained local-state and repo-local secret warnings rather than canonical registry damage.
 
 ## Canonical Source Truth By Surface
 

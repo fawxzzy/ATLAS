@@ -477,6 +477,7 @@
 - [Atlas-Owned Repo Naming Mazer Rename Proof Reconciliation Pass 1](../ops/ATLAS-OWNED-REPO-NAMING-MAZER-RENAME-PROOF-RECONCILIATION-PASS-1-2026-05-29.md)
 - [Atlas-Owned Repo Naming Marker Ratchet Checkpoint Next 4](../ops/ATLAS-OWNED-REPO-NAMING-MARKER-RATCHET-CHECKPOINT-NEXT-4-2026-05-29.md)
 - [Atlas-Owned Repo Naming Marker Ratchet Checkpoint 4](../ops/ATLAS-OWNED-REPO-NAMING-MARKER-RATCHET-CHECKPOINT-4-2026-05-28.md)
+- [Atlas-Owned Repo Naming GitHub Remote Canonicalization Closeout](../ops/ATLAS-OWNED-REPO-NAMING-GITHUB-REMOTE-CANONICALIZATION-CLOSEOUT-2026-06-12.md)
 
 ## Fitness Supabase Hygiene
 
