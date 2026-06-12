@@ -167,6 +167,7 @@ Use that helper when local CPU/GPU pressure or lingering workflow residue is sus
 
 ## Current Restart Truth
 
+- DiscordOS post-99 secret handling now has one partial clearance only: after explicit operator admission, the Fitness Discord bot token was copied one-way into Vercel as sensitive `DISCORDOS_BOT_TOKEN` for production and the current preview branch, production deployment `dpl_37XtqBCUmCbwW6vdz6d1jGuvnbYr` is `READY`, and `/api/readiness` reports `discordBotTokenConfigured: true`; the marker still holds at `99%` because the inspected service-role candidates decode to Fitness Supabase ref `lpswxoyfniocuhljgzbc`, not DiscordOS ref `nwexsktuuenfdegzrbut`, and no DiscordOS writer activation, traffic transfer, rollback, or live parity proof exists
 - the current active ATLAS-side lane is now `AI Long-Run Batch Orchestration`
 - the current bounded subfamily is now `queue-or-registry`
 - the immediately preceding ATLAS-side selector lane was `AI Repetition-to-Automation Pipeline`; its earlier scaffold, `receipt skeleton drafts`, and `doctrine-routing drafts` receipts remain durable carry-forward truth rather than the current immediate packet

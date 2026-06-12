@@ -93,12 +93,14 @@ Later work stays clearly separate:
   - verification issuance truth
   - current live Discord/Music Sesh operational tables
 
-### Future
+### Active preparation / future ownership
 
 - DiscordOS Supabase: `nwexsktuuenfdegzrbut`
   - healthy
-  - empty
-  - no schema landing implemented yet
+  - private schema `discordos` exists
+  - RLS-enabled feedback runtime contract tables exist
+  - Supabase Edge Function `discordos-readiness` is active with JWT verification
+  - no DiscordOS service-role writer credential is configured in the live Vercel readiness surface yet
   - future home for Discord-owned runtime/workflow tables
 
 ## Vercel Project Map
@@ -114,6 +116,10 @@ Later work stays clearly separate:
   - quieter active product surface
 - `fawxzzy-foundation`
   - quieter systems/product surface
+- `fawxzzy-discordos`
+  - isolated DiscordOS readiness surface
+  - canonical alias `https://fawxzzy-discordos.vercel.app`
+  - not live Discord workflow owner yet
 
 ### Known stale or duplicate-pressure surfaces
 
