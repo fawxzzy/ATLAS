@@ -1,5 +1,19 @@
 # Playbook Notes
 
+# 2026-06-12 - 100 percent requires exact blocker clearance
+
+- Rule: `100 Percent Requires Exact Blocker Clearance`.
+- Rule: a marker may close at `100%` only when the last admitted blocker class is explicitly cleared with durable proof and all preserved exceptions remain visible.
+- Pattern: `Scoped Proof -> Exception Preservation -> Marker Closure`.
+- Pattern: prove the exact lane scope -> name the retained exception or untrusted surface -> refresh generated projections -> close only that scoped marker.
+- Failure Mode: `Clean Wording As Closure Drift`.
+- Failure Mode: if finality language hides retained exceptions, untrusted surfaces, owner-repo work, or local/no-remote boundaries, the marker reads as mature while the actual blocker class still exists.
+- Release-summary bullets:
+  - Captured the June 12 closeout cluster as KCT carry-forward truth.
+  - Preserved Verta-core trust scope, Fitness exception scope, owner/runtime lane boundaries, and local/no-remote repo naming truth.
+  - Ratcheted `Knowledge Capture & Transfer` from `83%` to `84%`.
+  - Kept `Knowledge Capture & Transfer` below `100%` because broader continuity-read automation and general capture/promotion execution are still open.
+
 # 2026-06-05 - Timeout recheck closes the root ladder
 
 - Rule: `Timeout Recheck Closes The Root Ladder`.

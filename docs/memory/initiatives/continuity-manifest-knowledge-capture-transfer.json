@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-05-29T00:00:00Z",
-  "updated_at": "2026-06-02T18:02:06.6231251-04:00",
+  "updated_at": "2026-06-12T03:00:54.0992176-04:00",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -35,7 +35,9 @@
     "docs/ops/OPERATOR-SECRET-PATH-HYGIENE-LOCAL-SECRET-BOUNDARY-AND-QUARANTINE-POSTURE-PASS-8-2026-06-02.md",
     "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-EXPORTED-FAMILY-CONSUMPTION-RECONCILIATION-PASS-4-2026-06-02.md",
     "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-EXECUTION-STATE-SPINE-EXTERNALIZATION-PASS-7-2026-06-02.md",
-    "docs/ops/KNOWLEDGE-CAPTURE-AND-TRANSFER-CURRENT-CLOSEOUT-CLUSTER-CARRY-FORWARD-PASS-8-2026-06-02.md"
+    "docs/ops/KNOWLEDGE-CAPTURE-AND-TRANSFER-CURRENT-CLOSEOUT-CLUSTER-CARRY-FORWARD-PASS-8-2026-06-02.md",
+    "docs/ops/KNOWLEDGE-CAPTURE-AND-TRANSFER-JUNE-12-CLOSEOUT-CLUSTER-CARRY-FORWARD-PASS-9-2026-06-12.md",
+    "docs/PLAYBOOK_NOTES.md"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -43,9 +45,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "knowledge-capture-transfer",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/KNOWLEDGE-CAPTURE-AND-TRANSFER-CURRENT-CLOSEOUT-CLUSTER-CARRY-FORWARD-PASS-8-2026-06-02.md",
-    "checkpoint_commit": "a945bd01",
-    "checkpoint_summary": "The lane now sits at 83 percent with one compact decisive receipt spine, one fully shaped exact blocker-family chain, one manifest-backed continuity map, one shaped chain that has already passed one coherent refresh cycle as a single restart unit, and one newly admitted current closeout cluster spanning archive sensitivity resolution, secret-path quarantine truth, interface-threshold hold, and execution-state-spine externalization as explicitly transferred reusable evidence.",
+    "current_checkpoint_receipt": "docs/ops/KNOWLEDGE-CAPTURE-AND-TRANSFER-JUNE-12-CLOSEOUT-CLUSTER-CARRY-FORWARD-PASS-9-2026-06-12.md",
+    "checkpoint_commit": "pending-closeout-publication",
+    "checkpoint_summary": "The lane now sits at 84 percent with one compact decisive receipt spine, one fully shaped exact blocker-family chain, one manifest-backed continuity map, one shaped chain that has already passed one coherent refresh cycle as a single restart unit, the earlier 2026-06-02 closeout cluster, and the June 12 closeout cluster admitted as current transfer-ready evidence with reusable closeout-finality rules promoted into docs/PLAYBOOK_NOTES.md.",
     "governing_receipts": [
       "docs/ops/STACK-LANE-0-BASELINE-INVENTORY-2026-05-22.md",
       "docs/ops/STACK-LANE-0-TRUTH-MAP-2026-05-22.md",
@@ -56,7 +58,8 @@
       "docs/ops/KNOWLEDGE-CAPTURE-AND-TRANSFER-RECIPE-AND-PROMOTION-SURFACE-ROUTING-FAMILY-SHAPING-PASS-5-2026-05-29.md",
       "docs/ops/KNOWLEDGE-CAPTURE-AND-TRANSFER-MANIFEST-ADMISSION-COMPRESSION-FAMILY-SHAPING-PASS-6-2026-05-29.md",
       "docs/ops/KNOWLEDGE-CAPTURE-AND-TRANSFER-CONTINUITY-MANIFEST-REFRESH-AND-RATCHET-DECISION-PASS-7-2026-05-29.md",
-      "docs/ops/KNOWLEDGE-CAPTURE-AND-TRANSFER-CURRENT-CLOSEOUT-CLUSTER-CARRY-FORWARD-PASS-8-2026-06-02.md"
+      "docs/ops/KNOWLEDGE-CAPTURE-AND-TRANSFER-CURRENT-CLOSEOUT-CLUSTER-CARRY-FORWARD-PASS-8-2026-06-02.md",
+      "docs/ops/KNOWLEDGE-CAPTURE-AND-TRANSFER-JUNE-12-CLOSEOUT-CLUSTER-CARRY-FORWARD-PASS-9-2026-06-12.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -86,6 +89,10 @@
       {
         "path": "docs/ops/KNOWLEDGE-CAPTURE-AND-TRANSFER-CURRENT-CLOSEOUT-CLUSTER-CARRY-FORWARD-PASS-8-2026-06-02.md",
         "role": "current transfer-ready closeout cluster truth boundary"
+      },
+      {
+        "path": "docs/ops/KNOWLEDGE-CAPTURE-AND-TRANSFER-JUNE-12-CLOSEOUT-CLUSTER-CARRY-FORWARD-PASS-9-2026-06-12.md",
+        "role": "June 12 transfer-ready closeout cluster truth boundary"
       }
     ],
     "verification_adoption_surfaces": [
@@ -112,6 +119,10 @@
       {
         "path": "docs/memory/README.md",
         "role": "manifest-backed continuity doctrine surface"
+      },
+      {
+        "path": "docs/PLAYBOOK_NOTES.md",
+        "role": "ATLAS-held reusable rule, pattern, and failure-mode promotion surface"
       }
     ],
     "blocked_or_gated_work": [
@@ -131,18 +142,18 @@
     "next_package_ladder": [
       {
         "package": "No immediate Knowledge Capture & Transfer-only follow-on packet",
-        "mode": "hold-flat lane posture after current closeout-cluster admission",
-        "reason": "the lane now owns the current transfer-ready closeout cluster explicitly, so reopen only when a distinct new transfer-ready cluster, doctrine-promotion question, or restart-truth drift becomes explicit"
+        "mode": "hold-flat lane posture after June 12 closeout-cluster admission",
+        "reason": "the lane now owns the June 12 transfer-ready closeout cluster explicitly, so reopen only when a distinct new transfer-ready cluster, doctrine-promotion question, broader continuity-read automation, general capture-promotion execution family, or restart-truth drift becomes explicit"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/KNOWLEDGE-CAPTURE-AND-TRANSFER-CURRENT-CLOSEOUT-CLUSTER-CARRY-FORWARD-PASS-8-2026-06-02.md",
-    "freshness_checked_at": "2026-06-02T18:02:06.6231251-04:00",
-    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture now match the lane state after the recent archive, secret-path, interface, and execution-state closeout cluster was explicitly admitted as transfer-ready KCT evidence.",
+    "freshness_checked_receipt": "docs/ops/KNOWLEDGE-CAPTURE-AND-TRANSFER-JUNE-12-CLOSEOUT-CLUSTER-CARRY-FORWARD-PASS-9-2026-06-12.md",
+    "freshness_checked_at": "2026-06-12T03:00:54.0992176-04:00",
+    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture now match the lane state after the June 12 closeout cluster was explicitly admitted as transfer-ready KCT evidence and promoted into ATLAS-held Playbook notes.",
     "marker_posture": [
       {
         "marker": "Knowledge Capture & Transfer",
-        "percent": 83,
+        "percent": 84,
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ]

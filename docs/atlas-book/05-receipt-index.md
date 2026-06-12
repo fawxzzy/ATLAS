@@ -710,6 +710,7 @@
 - [Knowledge Capture And Transfer Manifest-Admission Compression Family Shaping Pass 6](../ops/KNOWLEDGE-CAPTURE-AND-TRANSFER-MANIFEST-ADMISSION-COMPRESSION-FAMILY-SHAPING-PASS-6-2026-05-29.md)
 - [Knowledge Capture And Transfer Continuity-Manifest Refresh And Ratchet Decision Pass 7](../ops/KNOWLEDGE-CAPTURE-AND-TRANSFER-CONTINUITY-MANIFEST-REFRESH-AND-RATCHET-DECISION-PASS-7-2026-05-29.md)
 - [Knowledge Capture And Transfer Current Closeout Cluster Carry-Forward Pass 8](../ops/KNOWLEDGE-CAPTURE-AND-TRANSFER-CURRENT-CLOSEOUT-CLUSTER-CARRY-FORWARD-PASS-8-2026-06-02.md)
+- [Knowledge Capture And Transfer June 12 Closeout Cluster Carry-Forward Pass 9](../ops/KNOWLEDGE-CAPTURE-AND-TRANSFER-JUNE-12-CLOSEOUT-CLUSTER-CARRY-FORWARD-PASS-9-2026-06-12.md)
 
 ## Vercel Surface Decommission
 

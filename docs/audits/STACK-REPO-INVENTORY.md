@@ -19,7 +19,7 @@ Operational rule:
 - Excluded surface count: `17`
 - Stack manifest: `stack.yaml`
 - Stack lock: `stack.lock.yaml`
-- Inventory digest: `sha256:5e9084794e1915080ae84412d4d39a17f35fc497ecdbcfff111b57f28bca00ea`
+- Inventory digest: `sha256:e7de0f5cc0414eb26ef113266005bf0ecd60dfbddb2d5a6391fdf66fa412b1e7`
 
 ## Managed Repos
 
@@ -34,7 +34,7 @@ Operational rule:
 | nat1-games | repos/Nat1-Games/nat1-games | codex/path-discipline-warning-slice-nat1 | 63a4a7c159c41a7e98ad8708891743acf71431ed | 63a4a7c159c41a7e98ad8708891743acf71431ed | False | trusted | False | - |
 | playbook | repos/playbook | codex/path-discipline-warning-slice-playbook | f27c36355da906a01a46a841779553002c259f9b | f27c36355da906a01a46a841779553002c259f9b | True | trusted | True | initiative:continuity-manifest-atlas-owned-repo-naming-canonicalization |
 | playbook-demo | repos/playbook-demo/playbook-demo | main | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | False | trusted | False | - |
-| stack | . | main | - | 7173357871ebcb6f149ebe0142d52de637d9519b | True | trusted | False | - |
+| stack | . | main | - | 57093cb8d865ef0d2e1bcb8edf02193b1b3524d1 | True | trusted | False | - |
 | stream | repos/stream | main | bf2c9551225e6d3555122da9a72306556f50cdd8 | bf2c9551225e6d3555122da9a72306556f50cdd8 | False | trusted | False | - |
 | trove | repos/trove | codex/path-discipline-warning-slice-trove | d03309718335e45669d747ddb53799a3de26af5c | d03309718335e45669d747ddb53799a3de26af5c | False | trusted | True | - |
 
