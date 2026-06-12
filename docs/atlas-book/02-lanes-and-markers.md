@@ -32,7 +32,7 @@ Read:
 
 ### Discord workflow
 
-- `Discord OS Infrastructure Separation: 95%`
+- `Discord OS Infrastructure Separation: 98%`
 - `Discord OS Feedback Workflow Canonicalization: 72%`
 - `Discord Workflow, Publication & Docs Reliability: 32%`
 
@@ -63,7 +63,7 @@ Read:
 - Inventory & Truth Map: `77%`
 - Knowledge Capture & Transfer: `84%`
 - Durable Context Externalization: `79%`
-- Discord OS Infrastructure Separation: `95%`
+- Discord OS Infrastructure Separation: `98%`
 - Discord OS Feedback Workflow Canonicalization: `72%`
 
 ## Supporting Open Markers
@@ -195,6 +195,7 @@ Current AI Long-Run closeout read: `AI Long-Run Batch Orchestration` now sits at
 - that reopen consequence now also explicitly excludes replaying the older generic named-port planning class: the May 26 consumer-planning, implementation-planning, tooling/readiness, and lookup execution-readiness chain already consumed it, so any further DiscordOS follow-on must arrive as explicit new scope or higher-level authorization rather than duplicate root planning
 - DiscordOS Supabase setup now has one fresh live-state proof: the `DiscordOS` Supabase project is `ACTIVE_HEALTHY` after operator resume, but this clears only the inactive-project setup sub-blocker; no schema landing, Vercel project linkage, runtime ownership transfer, or live workflow parity proof landed, so the DiscordOS markers hold
 - DiscordOS repo-local feedback verification now has a fresh pass for `npm run verify:feedback-adapters` after installing the already-locked TypeScript dependency, but this is local execution-readiness proof only; it does not clear schema, Vercel, runtime, cutover, or live parity blockers, so the DiscordOS markers still hold
+- DiscordOS owner-side setup now has a real infrastructure ratchet: private Supabase schema landing exists for the feedback runtime contract, Vercel project `fawxzzy-discordos` exists and is linked to `fawxzzy/DiscordOS`, non-secret Supabase metadata env vars exist, and ATLAS lock/inventory pin the new DiscordOS commit; this moves `Discord OS Infrastructure Separation` to `98%`, while `Discord OS Feedback Workflow Canonicalization` remains `72%` because no runtime cutover or live workflow parity proof exists
 - Fitness release-readiness is now green on clean preserved truth, but the related supporting markers still hold flat: `Fitness QA/LLEL Workflow` remains `96%`, `Fitness Branch Cleanup / Main-Only Governance` remains `96%`, and `Fitness Recovery Preservation` remains `80%` because the owner-side result closes one exact release-readiness family gate without widening those supporting workflow families into a broader new operator reality
 - Workstation Resource Hygiene moved to `10%`: one bounded root baseline receipt is now durable, one read-only Windows snapshot helper now exists at `ops/atlas/workstation_resource_snapshot.ps1`, the restart surfaces now freeze the one-hot-chat rule plus required process-closeout reporting for chats that run dev servers, browser automation, screenshots, tests, or validators, and the lane still stays low because no repeated relief cycle or broader adoption proof exists yet
 - Feedback Loop Readiness stays at `42%`: request/spec intake, mutation governance, local runtime truth, and receipt/truth update now have one frozen deterministic-threshold read, but the stack still lacks one replayable end-to-end proof loop that runs fresh capture without hidden toggles or the frozen external/session bridge defect, so no marker movement is honest from this packet

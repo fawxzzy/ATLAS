@@ -3,7 +3,7 @@
   "stack_manifest_ref": "stack.yaml",
   "stack_manifest_digest": "sha256:0587ec9f23abdb48af68ccb99a8afa775fea50f108302d71053a7072ff247a18",
   "stack_lock_ref": "stack.lock.yaml",
-  "stack_lock_digest": "sha256:1540029dc8231fb8c01443c0c6252f77914ea4a5cca283eb1f226f92ffacc9fb",
+  "stack_lock_digest": "sha256:0eb83d5e1dc04089b60fa35caddbe8b8d4081ecbdc21d6026fd213b8661ba464",
   "working_memory_digest": "sha256:71de017c91e3bccfc9cf1b83bc6af152d42b7e99d992f8721589e635b74941a3",
   "published_refs": {
     "json": "docs/registry/STACK-REPO-INVENTORY.json",
@@ -56,8 +56,8 @@
       "role": "application",
       "status": "incubating",
       "remote_url": "https://github.com/fawxzzy/DiscordOS.git",
-      "pinned_commit": "f1f87429e39309c9124c56909499941132e93a1a",
-      "current_commit": "f1f87429e39309c9124c56909499941132e93a1a",
+      "pinned_commit": "b9a22ef371b17fad7f4a412b0948dd81497beaba",
+      "current_commit": "b9a22ef371b17fad7f4a412b0948dd81497beaba",
       "pinned_ref_type": "branch",
       "pinned_ref": "codex/path-discipline-warning-slice-discordos",
       "current_ref_type": "branch",
@@ -282,7 +282,7 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "47761afe139c4a5a3713ffae2bfb1d6e29bca7b6",
+      "current_commit": "36de1eb8355beed5d48e94af7717268e4c9ed54e",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
@@ -495,5 +495,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:f1b42ca2495dc4a3e7edd0e3b7e0205cb3d07dfc736a24584ae5faa17f6fe970"
+  "content_digest": "sha256:53a3a0edced038066aafd48ee860bec671085fd2eb5c494082a477f003dcc427"
 }

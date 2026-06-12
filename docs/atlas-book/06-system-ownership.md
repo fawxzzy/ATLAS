@@ -141,6 +141,13 @@ Owns:
 
 ### DiscordOS Supabase
 
+Current state:
+
+- Supabase project `DiscordOS` exists at ref `nwexsktuuenfdegzrbut`
+- private schema `discordos` exists
+- feedback runtime contract tables are landed with RLS enabled and no public policies
+- Fitness remains live runtime truth until an explicit cutover packet proves parity
+
 Project:
 
 - `nwexsktuuenfdegzrbut`
