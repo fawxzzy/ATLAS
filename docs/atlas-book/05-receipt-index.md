@@ -68,6 +68,7 @@
 - [DiscordOS Infrastructure Separation Bridge-Independent Reopen Decision](../ops/DISCORD-OS-INFRASTRUCTURE-SEPARATION-BRIDGE-INDEPENDENT-REOPEN-DECISION-2026-06-03.md)
 - [DiscordOS Infrastructure Separation Named-Port Planning Class Consumption And No-Replay Decision](../ops/DISCORD-OS-INFRASTRUCTURE-SEPARATION-NAMED-PORT-PLANNING-CLASS-CONSUMPTION-AND-NO-REPLAY-DECISION-2026-06-03.md)
 - [Discord OS Infrastructure Separation Supabase Resume Live-State Recheck](../ops/DISCORD-OS-INFRASTRUCTURE-SEPARATION-SUPABASE-RESUME-LIVE-STATE-RECHECK-2026-06-12.md)
+- [Discord OS Feedback Repo-Local Verify Restored](../ops/DISCORD-OS-FEEDBACK-REPO-LOCAL-VERIFY-RESTORED-2026-06-12.md)
 - [Feedback Loop Readiness Deterministic Readiness Threshold Pass 1](../ops/FEEDBACK-LOOP-READINESS-DETERMINISTIC-READINESS-THRESHOLD-PASS-1-2026-06-01.md)
 - [AI Repetition-to-Automation Pipeline Automation-Candidate Threshold Pass 1](../ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-AUTOMATION-CANDIDATE-THRESHOLD-PASS-1-2026-06-01.md)
 - [AI Repetition-to-Automation Pipeline First-Safe Candidate Family Selection Pass 2](../ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-FIRST-SAFE-CANDIDATE-FAMILY-SELECTION-PASS-2-2026-06-03.md)
