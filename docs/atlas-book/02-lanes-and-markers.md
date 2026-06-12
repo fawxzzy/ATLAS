@@ -33,14 +33,14 @@ Read:
 ### Discord workflow
 
 - `Discord OS Infrastructure Separation: 100%`
-- `Discord OS Feedback Workflow Canonicalization: 90%`
+- `Discord OS Feedback Workflow Canonicalization: 94%`
 - `Discord Workflow, Publication & Docs Reliability: 32%`
 
 Read:
 
 - separation infrastructure is closed
 - workflow doctrine and proof hygiene are strong
-- live proof is still partial, and the hardest fresh-submit class is now frozen at a session-scoped external bridge hold rather than a repo/runtime defect
+- production transfer infrastructure and live writer proof now exist, but final live cutover is still blocked on a real Discord-signed Fitness-origin event, rollback execution proof, and live parity receipt capture
 
 ### Naming / ownership hygiene
 
@@ -64,7 +64,7 @@ Read:
 - Knowledge Capture & Transfer: `84%`
 - Durable Context Externalization: `79%`
 - Discord OS Infrastructure Separation: `100%`
-- Discord OS Feedback Workflow Canonicalization: `90%`
+- Discord OS Feedback Workflow Canonicalization: `94%`
 
 ## Supporting Open Markers
 

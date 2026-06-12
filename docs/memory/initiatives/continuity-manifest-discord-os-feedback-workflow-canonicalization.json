@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-05-27T00:00:00Z",
-  "updated_at": "2026-06-12T14:35:00-04:00",
+  "updated_at": "2026-06-12T17:31:00-04:00",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -74,7 +74,8 @@
     "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-VERIFICATION.md",
     "repos/fawxzzy-fitness/docs/ops/FITNESS-FEEDBACK-BOARD.md",
     "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-ACTIVE-POSTURE-GUARD-PROOF-2026-06-12.md",
-    "repos/DiscordOS/docs/ops/discordos-active-posture-guard-proof-2026-06-12.md"
+    "repos/DiscordOS/docs/ops/discordos-active-posture-guard-proof-2026-06-12.md",
+    "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-FITNESS-PRODUCTION-TRANSFER-AND-EDGE-ALLOWLIST-PROOF-2026-06-12.md"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -82,9 +83,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "discord-os-feedback-workflow-canonicalization",
     "scope_class": "cross-repo-governance-with-fitness-live-owner",
-    "current_checkpoint_receipt": "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-ACTIVE-POSTURE-GUARD-PROOF-2026-06-12.md",
-    "checkpoint_commit": "c2e3785f6197accccc4d530fd82ffe1bd2dc5d8f",
-    "checkpoint_summary": "The lane now sits at 88 percent after DiscordOS owner commits `227c576` and `c2e3785`, Vercel production deployment `dpl_3Fiww7TkMFqX9ybqBSB99jafQwit`, and live `/api/activation` plus `/api/readiness` proved active writer posture, active traffic posture, rollback-ready posture, green Supabase Edge service-role proof, and green Discord bot proof. The stricter cutover guard still reports `liveWorkflowParityProved: false`, `liveTrafficProofIdPresent: false`, `rollbackExecutionProofIdPresent: false`, `writerActivationAllowed: false`, `liveCutover: false`, and `fitnessTrafficMoved: false`; `/api/feedback-transfer-proof` now fails closed with `409` under active posture. The exact remaining blocker class is live Fitness-to-DiscordOS traffic transfer plus rollback execution and live parity proof.",
+    "current_checkpoint_receipt": "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-FITNESS-PRODUCTION-TRANSFER-AND-EDGE-ALLOWLIST-PROOF-2026-06-12.md",
+    "checkpoint_commit": "d264b5004f3aa9ee92eab64cf23b84b9f16d2fb1",
+    "checkpoint_summary": "The lane now sits at 94 percent after Fitness PR `#95` reached `b6009b7bffb3b152b84a54197c1b82d996dc6824`, Fitness production deployment `dpl_DfEFZezEfryECX8nhRdd4BUaQntX` became READY with active transfer env, DiscordOS commit `d264b50` admitted `fitness-live-transfer-*` in the Edge writer, Supabase migration `discordos_feedback_fitness_live_transfer_proof_rpc` applied, Edge Function `discordos-feedback-persist` reached version 4 ACTIVE with `verify_jwt: true`, and live proof row `fitness-live-transfer-direct-discordos-writer-proof-20260612-173002` proved the Vercel plus Supabase Edge plus Postgres writer path. The stricter cutover guard still reports `liveWorkflowParityProved: false`, `liveTrafficProofIdPresent: false`, `rollbackExecutionProofIdPresent: false`, `writerActivationAllowed: false`, `liveCutover: false`, and `fitnessTrafficMoved: false`. The exact remaining blocker class is real Discord-signed Fitness-origin feedback traffic through deployed Fitness, rollback execution proof, and live parity receipt ID capture.",
     "governing_receipts": [
       "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-CANONICALIZATION-2026-05-27.md",
       "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-CANONICAL-CONTRACTS-PASS-1-2026-05-27.md",
@@ -137,7 +138,8 @@
       "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-SHADOW-TRANSFER-AND-PARITY-PROOF-2026-06-12.md",
       "repos/DiscordOS/docs/ops/discordos-shadow-transfer-and-parity-proof-2026-06-12.md",
       "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-ACTIVE-POSTURE-GUARD-PROOF-2026-06-12.md",
-      "repos/DiscordOS/docs/ops/discordos-active-posture-guard-proof-2026-06-12.md"
+      "repos/DiscordOS/docs/ops/discordos-active-posture-guard-proof-2026-06-12.md",
+      "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-FITNESS-PRODUCTION-TRANSFER-AND-EDGE-ALLOWLIST-PROOF-2026-06-12.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -229,37 +231,41 @@
       {
         "path": "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-ACTIVE-POSTURE-GUARD-PROOF-2026-06-12.md",
         "role": "DiscordOS active posture, stricter cutover guard, and fail-closed live proof blocker receipt"
+      },
+      {
+        "path": "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-FITNESS-PRODUCTION-TRANSFER-AND-EDGE-ALLOWLIST-PROOF-2026-06-12.md",
+        "role": "Fitness production transfer deployment, DiscordOS Edge/RPC allowlist, and live writer-path proof"
       }
     ],
     "blocked_or_gated_work": [
       {
         "item": "runtime migration",
-        "requirement": "blocked pending live Fitness-to-DiscordOS traffic transfer plus rollback execution and live parity proof"
+        "requirement": "blocked pending real Discord-signed Fitness-origin feedback traffic through deployed Fitness plus rollback execution and live parity proof"
       },
       {
         "item": "schema migration and owner transfer",
-        "requirement": "DiscordOS schema landing, read-only readiness, activation guard, no-persistence shadow writer proof, guarded persisted-writer implementation path, Edge-backed proof-only persistence, proof-only shadow transfer, shadow parity, active writer posture, active traffic posture, and rollback-ready posture exist, but live writer ownership transfer is still blocked until live traffic transfer, rollback execution, and live parity are proved"
+        "requirement": "DiscordOS schema landing, read-only readiness, activation guard, no-persistence shadow writer proof, guarded persisted-writer implementation path, Edge-backed proof-only persistence, proof-only shadow transfer, shadow parity, active writer posture, active traffic posture, rollback-ready posture, Fitness production transfer env, and live writer-path proof exist, but live writer ownership transfer is still blocked until real Discord-signed Fitness-origin traffic, rollback execution, and live parity receipt IDs are proved"
       },
       {
         "item": "fresh-submit live row-thread-message proof and broader deploy-backed parity",
-        "requirement": "bot credential readiness, activation guard readiness, no-persistence shadow writer readiness, guarded persisted-writer implementation, Edge-backed proof-only persistence, proof-only shadow transfer, shadow parity, and active posture are now proven in DiscordOS production, but no governed Fitness-origin release traffic has reached DiscordOS, no rollback execution proof exists, and broader audit-comment, completion-review, success-reaction, release-boundary, and no-regression parity families remain open"
+        "requirement": "bot credential readiness, activation guard readiness, no-persistence shadow writer readiness, guarded persisted-writer implementation, Edge-backed proof-only persistence, proof-only shadow transfer, shadow parity, active posture, Fitness production transfer deployment, Edge/RPC `fitness-live-transfer-*` allowlist, and direct live writer proof are now proven, but no real Discord-signed Fitness-origin release traffic has reached DiscordOS, no rollback execution proof exists, and broader audit-comment, completion-review, success-reaction, release-boundary, and no-regression parity families remain open"
       }
     ],
     "next_package_ladder": [
       {
-        "package": "Live Fitness-to-DiscordOS traffic transfer, rollback execution, and parity proof packet",
+        "package": "Discord-signed Fitness-origin transfer, rollback execution, and live parity proof packet",
         "mode": "owner-side cutover proof capture",
-        "reason": "DiscordOS production now has active writer posture, active traffic posture, rollback-ready posture, and a stricter fail-closed cutover guard, so the next real blocker-clearance work must route governed Fitness-origin Discord feedback traffic into DiscordOS, execute rollback, and capture live parity receipts."
+        "reason": "Fitness production transfer deployment, DiscordOS Edge/RPC allowlist, and the direct live writer path are now proven, so the next real blocker-clearance work must route one real Discord-signed Fitness-origin feedback event into DiscordOS, execute rollback, and capture live parity receipt IDs."
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-ACTIVE-POSTURE-GUARD-PROOF-2026-06-12.md",
-    "freshness_checked_at": "2026-06-12T14:35:00-04:00",
-    "freshness_basis": "checkpoint, blocked work, and next-package posture were refreshed after live DiscordOS production active posture proved writerMode active, trafficTransferMode active, rollbackMode discordos-primary-with-fitness-rollback, green Supabase Edge service-role proof, green Discord bot proof, and a fail-closed shadow-transfer endpoint under active posture; the lane still lacks live Fitness-origin traffic transfer, rollback execution proof, and live parity proof.",
+    "freshness_checked_receipt": "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-FITNESS-PRODUCTION-TRANSFER-AND-EDGE-ALLOWLIST-PROOF-2026-06-12.md",
+    "freshness_checked_at": "2026-06-12T17:31:00-04:00",
+    "freshness_basis": "checkpoint, blocked work, and next-package posture were refreshed after Fitness production deployment, transfer env activation, DiscordOS Edge/RPC `fitness-live-transfer-*` allowlist, and live direct writer proof; the lane still lacks a real Discord-signed Fitness-origin event through deployed Fitness, rollback execution proof, and live parity receipt IDs.",
     "marker_posture": [
       {
         "marker": "Discord OS Feedback Workflow Canonicalization",
-        "percent": 88,
+        "percent": 94,
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ]
