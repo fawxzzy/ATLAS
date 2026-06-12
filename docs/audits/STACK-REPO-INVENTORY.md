@@ -19,14 +19,14 @@ Operational rule:
 - Excluded surface count: `17`
 - Stack manifest: `stack.yaml`
 - Stack lock: `stack.lock.yaml`
-- Inventory digest: `sha256:b02aef6f3bf0a0101286f634734ff7a8a218eebef66cb727ae54a5763e525b9a`
+- Inventory digest: `sha256:cb4e1122c7bde3bffbc97a7ce75d691dfe9d0f41dad450fc1567ea7347c347a4`
 
 ## Managed Repos
 
 | Repo id | Path | Branch | Pinned commit | Current commit | Dirty | Trust | Release | Related initiatives |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | _stack | repos/_stack | main | c72b47726f67b4e0474113229368106b41fbbf76 | c72b47726f67b4e0474113229368106b41fbbf76 | False | trusted | False | initiative:continuity-manifest-local-data-gateway<br>initiative:continuity-manifest-stack-readiness |
-| discordos | repos/DiscordOS | codex/path-discipline-warning-slice-discordos | 8da40b7acaad946b554ea4f4a081d75749b8d83d | d264b5004f3aa9ee92eab64cf23b84b9f16d2fb1 | False | trusted | False | initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-discord-os-infrastructure-separation |
+| discordos | repos/DiscordOS | codex/path-discipline-warning-slice-discordos | a2c691c957fe5823da144a51687426e1c5a5f11d | a2c691c957fe5823da144a51687426e1c5a5f11d | False | trusted | False | initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-discord-os-infrastructure-separation |
 | fitness | repos/fawxzzy-fitness | main | - | f1f88a0bc9ff15f914df8fca28d37036f3c70fe0 | True | adjacent | False | initiative:continuity-manifest-dependency-untangling<br>initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-discord-os-infrastructure-separation |
 | foundation | repos/foundation | main | a016da2f08f167747f7ae7c804c0d6840cb9514d | a016da2f08f167747f7ae7c804c0d6840cb9514d | False | trusted | True | - |
 | lifeline | repos/lifeline | codex/path-discipline-warning-slice-lifeline | 1994e64a09128d848048ba57cfd76fba278cc655 | 1994e64a09128d848048ba57cfd76fba278cc655 | False | trusted | True | - |
@@ -34,7 +34,7 @@ Operational rule:
 | nat1-games | repos/Nat1-Games/nat1-games | codex/path-discipline-warning-slice-nat1 | 63a4a7c159c41a7e98ad8708891743acf71431ed | 63a4a7c159c41a7e98ad8708891743acf71431ed | False | trusted | False | - |
 | playbook | repos/playbook | codex/path-discipline-warning-slice-playbook | f27c36355da906a01a46a841779553002c259f9b | f27c36355da906a01a46a841779553002c259f9b | True | trusted | True | initiative:continuity-manifest-atlas-owned-repo-naming-canonicalization |
 | playbook-demo | repos/playbook-demo/playbook-demo | main | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | False | trusted | False | - |
-| stack | . | main | - | d5b4cc852abe2164007b3e6b72e3dc642d3aa288 | True | trusted | False | - |
+| stack | . | main | - | 5559038c4eef031707c6703f2b90775e7106c46f | True | trusted | False | - |
 | stream | repos/stream | main | bf2c9551225e6d3555122da9a72306556f50cdd8 | bf2c9551225e6d3555122da9a72306556f50cdd8 | False | trusted | False | - |
 | trove | repos/trove | codex/path-discipline-warning-slice-trove | d03309718335e45669d747ddb53799a3de26af5c | d03309718335e45669d747ddb53799a3de26af5c | False | trusted | True | - |
 

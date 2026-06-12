@@ -3,7 +3,7 @@
   "stack_manifest_ref": "stack.yaml",
   "stack_manifest_digest": "sha256:0587ec9f23abdb48af68ccb99a8afa775fea50f108302d71053a7072ff247a18",
   "stack_lock_ref": "stack.lock.yaml",
-  "stack_lock_digest": "sha256:b758b3a9f1efb1b3ee835469fc75ee3db81d7c86bce0dd5cebfd032fb1c7a6a9",
+  "stack_lock_digest": "sha256:3171e3f105bc6807dcaadcc9f87e8b2f9676830df5b88dad2f9e7ead85b316f5",
   "working_memory_digest": "sha256:71de017c91e3bccfc9cf1b83bc6af152d42b7e99d992f8721589e635b74941a3",
   "published_refs": {
     "json": "docs/registry/STACK-REPO-INVENTORY.json",
@@ -56,8 +56,8 @@
       "role": "application",
       "status": "incubating",
       "remote_url": "https://github.com/fawxzzy/DiscordOS.git",
-      "pinned_commit": "8da40b7acaad946b554ea4f4a081d75749b8d83d",
-      "current_commit": "d264b5004f3aa9ee92eab64cf23b84b9f16d2fb1",
+      "pinned_commit": "a2c691c957fe5823da144a51687426e1c5a5f11d",
+      "current_commit": "a2c691c957fe5823da144a51687426e1c5a5f11d",
       "pinned_ref_type": "branch",
       "pinned_ref": "codex/path-discipline-warning-slice-discordos",
       "current_ref_type": "branch",
@@ -282,7 +282,7 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "d5b4cc852abe2164007b3e6b72e3dc642d3aa288",
+      "current_commit": "5559038c4eef031707c6703f2b90775e7106c46f",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
@@ -495,5 +495,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:b02aef6f3bf0a0101286f634734ff7a8a218eebef66cb727ae54a5763e525b9a"
+  "content_digest": "sha256:cb4e1122c7bde3bffbc97a7ce75d691dfe9d0f41dad450fc1567ea7347c347a4"
 }
