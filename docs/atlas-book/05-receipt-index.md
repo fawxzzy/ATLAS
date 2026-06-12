@@ -395,6 +395,7 @@
 - [Root-Bounded Lane-Selection Pass After Core Pattern Convergence Provisional Doctrine Promotion-Threshold And Hold-Boundary Closeout](../ops/ROOT-BOUNDED-LANE-SELECTION-AFTER-CORE-PATTERN-CONVERGENCE-PROVISIONAL-DOCTRINE-PROMOTION-THRESHOLD-AND-HOLD-BOUNDARY-CLOSEOUT-2026-05-29.md)
 - [Truth Map And ATLAS Book Marker-Scarcity And Closed-Ladder Carry-Forward Hygiene Pass 3](../ops/TRUTH-MAP-AND-ATLAS-BOOK-MARKER-SCARCITY-AND-CLOSED-LADDER-CARRY-FORWARD-HYGIENE-PASS-3-2026-05-29.md)
 - [Truth Map And ATLAS Book Post-Inventory Closeout-Cluster Projection Refresh Pass 4](../ops/TRUTH-MAP-AND-ATLAS-BOOK-POST-INVENTORY-CLOSEOUT-CLUSTER-PROJECTION-REFRESH-PASS-4-2026-06-02.md)
+- [Truth Map And ATLAS Book June 12 Post-Inventory Projection Refresh Pass 5](../ops/TRUTH-MAP-AND-ATLAS-BOOK-JUNE-12-POST-INVENTORY-PROJECTION-REFRESH-PASS-5-2026-06-12.md)
 - [Root-Bounded Lane-Selection Pass After Truth Map And ATLAS Book Marker-Scarcity And Closed-Ladder Carry-Forward Hygiene Pass 3 Closeout](../ops/ROOT-BOUNDED-LANE-SELECTION-AFTER-TRUTH-MAP-AND-ATLAS-BOOK-MARKER-SCARCITY-AND-CLOSED-LADDER-CARRY-FORWARD-HYGIENE-PASS-3-CLOSEOUT-2026-05-29.md)
 - [_Stack Readiness Marker-Pressure Reopen And Re-Entry Pass 8](../ops/_STACK-READINESS-MARKER-PRESSURE-REOPEN-AND-REENTRY-PASS-8-2026-05-29.md)
 - [_Stack Readiness Stack Vercel-Health Command-Design Pass 9](../ops/_STACK-READINESS-STACK-VERCEL-HEALTH-COMMAND-DESIGN-PASS-9-2026-05-29.md)
@@ -700,6 +701,7 @@
 - [Inventory And Truth Map Restart-Routing And Next-Package Compression Family Shaping Pass 6](../ops/INVENTORY-AND-TRUTH-MAP-RESTART-ROUTING-AND-NEXT-PACKAGE-COMPRESSION-FAMILY-SHAPING-PASS-6-2026-05-29.md)
 - [Inventory And Truth Map Continuity-Manifest Refresh And Ratchet Decision Pass 7](../ops/INVENTORY-AND-TRUTH-MAP-CONTINUITY-MANIFEST-REFRESH-AND-RATCHET-DECISION-PASS-7-2026-05-29.md)
 - [Inventory And Truth Map Closeout Cluster Canonical Placement Pass 8](../ops/INVENTORY-AND-TRUTH-MAP-CLOSEOUT-CLUSTER-CANONICAL-PLACEMENT-PASS-8-2026-06-02.md)
+- [Inventory And Truth Map June 12 Closeout Cluster Canonical Placement Pass 9](../ops/INVENTORY-AND-TRUTH-MAP-JUNE-12-CLOSEOUT-CLUSTER-CANONICAL-PLACEMENT-PASS-9-2026-06-12.md)
 
 ## Knowledge Capture & Transfer
 

@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-05-29T00:00:00Z",
-  "updated_at": "2026-06-02T18:20:00.0000000-04:00",
+  "updated_at": "2026-06-12T03:22:00.0000000-04:00",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -34,7 +34,10 @@
     "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-EXPORTED-FAMILY-CONSUMPTION-RECONCILIATION-PASS-4-2026-06-02.md",
     "docs/ops/KNOWLEDGE-CAPTURE-AND-TRANSFER-CURRENT-CLOSEOUT-CLUSTER-CARRY-FORWARD-PASS-8-2026-06-02.md",
     "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-POST-KCT-EXECUTION-STATE-SPINE-REFRESH-PASS-8-2026-06-02.md",
-    "docs/ops/INVENTORY-AND-TRUTH-MAP-CLOSEOUT-CLUSTER-CANONICAL-PLACEMENT-PASS-8-2026-06-02.md"
+    "docs/ops/INVENTORY-AND-TRUTH-MAP-CLOSEOUT-CLUSTER-CANONICAL-PLACEMENT-PASS-8-2026-06-02.md",
+    "docs/ops/KNOWLEDGE-CAPTURE-AND-TRANSFER-JUNE-12-CLOSEOUT-CLUSTER-CARRY-FORWARD-PASS-9-2026-06-12.md",
+    "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-POST-KCT-JUNE-12-SPINE-REFRESH-PASS-9-2026-06-12.md",
+    "docs/ops/INVENTORY-AND-TRUTH-MAP-JUNE-12-CLOSEOUT-CLUSTER-CANONICAL-PLACEMENT-PASS-9-2026-06-12.md"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -42,9 +45,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "inventory-and-truth-map",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/INVENTORY-AND-TRUTH-MAP-CLOSEOUT-CLUSTER-CANONICAL-PLACEMENT-PASS-8-2026-06-02.md",
-    "checkpoint_commit": "4d927133",
-    "checkpoint_summary": "The lane now sits at 76 percent with one compact decisive receipt spine, one fully shaped exact blocker-family chain, one manifest-backed continuity map, and one newly absorbed closeout cluster covering archive sensitivity resolution, secret-path freeze, interface-threshold hold, KCT carry-forward admission, and DCE post-KCT spine refresh as canonical inventory truth rather than only adjacent receipt state.",
+    "current_checkpoint_receipt": "docs/ops/INVENTORY-AND-TRUTH-MAP-JUNE-12-CLOSEOUT-CLUSTER-CANONICAL-PLACEMENT-PASS-9-2026-06-12.md",
+    "checkpoint_commit": "pending-closeout-publication",
+    "checkpoint_summary": "The lane now sits at 77 percent with one compact decisive receipt spine, one fully shaped exact blocker-family chain, one manifest-backed continuity map, one earlier absorbed closeout cluster, and the June 12 KCT/DCE/naming closeout cluster absorbed as canonical inventory truth rather than only adjacent receipt state.",
     "governing_receipts": [
       "docs/ops/STACK-LANE-0-BASELINE-INVENTORY-2026-05-22.md",
       "docs/ops/STACK-LANE-0-TRUTH-MAP-2026-05-22.md",
@@ -55,7 +58,8 @@
       "docs/ops/INVENTORY-AND-TRUTH-MAP-DUPLICATE-RESIDUE-CARRY-FORWARD-TRUTH-FAMILY-SHAPING-PASS-5-2026-05-29.md",
       "docs/ops/INVENTORY-AND-TRUTH-MAP-RESTART-ROUTING-AND-NEXT-PACKAGE-COMPRESSION-FAMILY-SHAPING-PASS-6-2026-05-29.md",
       "docs/ops/INVENTORY-AND-TRUTH-MAP-CONTINUITY-MANIFEST-REFRESH-AND-RATCHET-DECISION-PASS-7-2026-05-29.md",
-      "docs/ops/INVENTORY-AND-TRUTH-MAP-CLOSEOUT-CLUSTER-CANONICAL-PLACEMENT-PASS-8-2026-06-02.md"
+      "docs/ops/INVENTORY-AND-TRUTH-MAP-CLOSEOUT-CLUSTER-CANONICAL-PLACEMENT-PASS-8-2026-06-02.md",
+      "docs/ops/INVENTORY-AND-TRUTH-MAP-JUNE-12-CLOSEOUT-CLUSTER-CANONICAL-PLACEMENT-PASS-9-2026-06-12.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -81,6 +85,10 @@
       {
         "path": "docs/ops/INVENTORY-AND-TRUTH-MAP-CLOSEOUT-CLUSTER-CANONICAL-PLACEMENT-PASS-8-2026-06-02.md",
         "role": "current closeout-cluster inventory placement boundary"
+      },
+      {
+        "path": "docs/ops/INVENTORY-AND-TRUTH-MAP-JUNE-12-CLOSEOUT-CLUSTER-CANONICAL-PLACEMENT-PASS-9-2026-06-12.md",
+        "role": "June 12 closeout-cluster inventory placement boundary"
       }
     ],
     "verification_adoption_surfaces": [
@@ -127,17 +135,17 @@
       {
         "package": "Truth Map & ATLAS Book bounded supporting slice",
         "mode": "supporting-lane follow-on after closeout-cluster canonical placement",
-        "reason": "the canonical inventory spine now absorbs the current closeout cluster, so the next honest move is truth-map and book projection refinement rather than another inventory-only packet"
+        "reason": "the canonical inventory spine now absorbs the June 12 closeout cluster, so the next honest move is truth-map and book projection refinement rather than another inventory-only packet"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/INVENTORY-AND-TRUTH-MAP-CLOSEOUT-CLUSTER-CANONICAL-PLACEMENT-PASS-8-2026-06-02.md",
-    "freshness_checked_at": "2026-06-02T18:20:00.0000000-04:00",
-    "freshness_basis": "the current checkpoint, marker posture, lane-state projection, blocked-work posture, and next-package posture now match the current inventory lane state after the recent closeout cluster was absorbed into canonical inventory surfaces.",
+    "freshness_checked_receipt": "docs/ops/INVENTORY-AND-TRUTH-MAP-JUNE-12-CLOSEOUT-CLUSTER-CANONICAL-PLACEMENT-PASS-9-2026-06-12.md",
+    "freshness_checked_at": "2026-06-12T03:22:00.0000000-04:00",
+    "freshness_basis": "the current checkpoint, marker posture, lane-state projection, blocked-work posture, and next-package posture now match the current inventory lane state after the June 12 closeout cluster was absorbed into canonical inventory surfaces.",
     "marker_posture": [
       {
         "marker": "Inventory & Truth Map",
-        "percent": 76,
+        "percent": 77,
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ]
