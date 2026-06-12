@@ -33,7 +33,7 @@ Read:
 ### Discord workflow
 
 - `Discord OS Infrastructure Separation: 100%`
-- `Discord OS Feedback Workflow Canonicalization: 75%`
+- `Discord OS Feedback Workflow Canonicalization: 76%`
 - `Discord Workflow, Publication & Docs Reliability: 32%`
 
 Read:
@@ -64,7 +64,7 @@ Read:
 - Knowledge Capture & Transfer: `84%`
 - Durable Context Externalization: `79%`
 - Discord OS Infrastructure Separation: `100%`
-- Discord OS Feedback Workflow Canonicalization: `75%`
+- Discord OS Feedback Workflow Canonicalization: `76%`
 
 ## Supporting Open Markers
 
@@ -205,6 +205,7 @@ Current AI Long-Run closeout read: `AI Long-Run Batch Orchestration` now sits at
 - DiscordOS feedback workflow canonicalization moves to `73%`: owner commit `3047ee8`, Vercel production deployment `dpl_GfGbiUKvUSWC3LMUxnFiezrN1rA2`, and live `/api/readiness` prove `discordBotTokenValid: true`, `discordBotUserOk: true`, Supabase Edge service-role proof still green, and `liveCutover: false` plus `fitnessTrafficMoved: false`; the exact remaining blocker is DiscordOS writer activation plus Fitness-to-DiscordOS traffic transfer, rollback proof, and live workflow parity proof
 - DiscordOS feedback workflow canonicalization moves to `74%`: owner commit `09f2eb5`, Vercel production deployment `dpl_DjbVDXr5GZVPxcm9LA6U8PsnBimT`, and live `/api/activation` prove the fail-closed activation guard exists with `writerMode: disabled`, `trafficTransferMode: none`, `rollbackMode: fitness-primary`, `writerActivationAllowed: false`, `liveCutover: false`, and `fitnessTrafficMoved: false`; the exact remaining blocker is DiscordOS writer implementation and activation plus Fitness-to-DiscordOS traffic transfer, rollback execution proof, and live workflow parity proof
 - DiscordOS feedback workflow canonicalization moves to `75%`: owner commit `3dd11f3`, Vercel production deployment `dpl_2m613XQpsC7rkUTL257rb59goNZD`, and live `/api/feedback-shadow` prove the no-persistence shadow writer can validate a future feedback row preview while reporting `persisted: false`, `writesDiscord: false`, `writesFitness: false`, and `trafficMoved: false`; Supabase still reports the DiscordOS feedback tables at `rows: 0`, and the exact remaining blocker is DiscordOS persisted writer implementation and activation plus Fitness-to-DiscordOS traffic transfer, rollback execution proof, and live workflow parity proof
+- DiscordOS feedback workflow canonicalization moves to `76%`: owner commit `e10238e`, Vercel production deployment `dpl_DnvFhkaPVss6HM8j5rrm9icXwXUd`, and live `/api/feedback-persist` prove the guarded persisted-writer implementation path is deployed but fail-closed with `persisted: false`, `persistenceAttempted: false`, `writerMode: disabled`, and `missing_service_role_key`; Supabase still reports rows at `0`, and the exact remaining blocker is DiscordOS persisted writer activation plus backend service-role availability, Fitness-to-DiscordOS traffic transfer, rollback execution proof, and live workflow parity proof
 - Fitness release-readiness is now green on clean preserved truth, but the related supporting markers still hold flat: `Fitness QA/LLEL Workflow` remains `96%`, `Fitness Branch Cleanup / Main-Only Governance` remains `96%`, and `Fitness Recovery Preservation` remains `80%` because the owner-side result closes one exact release-readiness family gate without widening those supporting workflow families into a broader new operator reality
 - Workstation Resource Hygiene moved to `10%`: one bounded root baseline receipt is now durable, one read-only Windows snapshot helper now exists at `ops/atlas/workstation_resource_snapshot.ps1`, the restart surfaces now freeze the one-hot-chat rule plus required process-closeout reporting for chats that run dev servers, browser automation, screenshots, tests, or validators, and the lane still stays low because no repeated relief cycle or broader adoption proof exists yet
 - Feedback Loop Readiness stays at `42%`: request/spec intake, mutation governance, local runtime truth, and receipt/truth update now have one frozen deterministic-threshold read, but the stack still lacks one replayable end-to-end proof loop that runs fresh capture without hidden toggles or the frozen external/session bridge defect, so no marker movement is honest from this packet
