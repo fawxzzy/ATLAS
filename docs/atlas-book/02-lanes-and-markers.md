@@ -33,7 +33,7 @@ Read:
 ### Discord workflow
 
 - `Discord OS Infrastructure Separation: 100%`
-- `Discord OS Feedback Workflow Canonicalization: 86%`
+- `Discord OS Feedback Workflow Canonicalization: 88%`
 - `Discord Workflow, Publication & Docs Reliability: 32%`
 
 Read:
@@ -64,7 +64,7 @@ Read:
 - Knowledge Capture & Transfer: `84%`
 - Durable Context Externalization: `79%`
 - Discord OS Infrastructure Separation: `100%`
-- Discord OS Feedback Workflow Canonicalization: `86%`
+- Discord OS Feedback Workflow Canonicalization: `88%`
 
 ## Supporting Open Markers
 
@@ -208,6 +208,7 @@ Current AI Long-Run closeout read: `AI Long-Run Batch Orchestration` now sits at
 - DiscordOS feedback workflow canonicalization moves to `76%`: owner commit `e10238e`, Vercel production deployment `dpl_DnvFhkaPVss6HM8j5rrm9icXwXUd`, and live `/api/feedback-persist` prove the guarded persisted-writer implementation path is deployed but fail-closed with `persisted: false`, `persistenceAttempted: false`, `writerMode: disabled`, and `missing_service_role_key`; Supabase still reports rows at `0`, and the exact remaining blocker is DiscordOS persisted writer activation plus backend service-role availability, Fitness-to-DiscordOS traffic transfer, rollback execution proof, and live workflow parity proof
 - DiscordOS feedback workflow canonicalization moves to `80%`: owner commit `1c4a0ac`, Supabase Edge Function `discordos-feedback-persist` version `2`, Vercel production deployment `dpl_4FUNXwMZDSPH3BLFJEaakA2mk9eg`, and live `/api/feedback-persist` prove Edge-backed proof-only persistence with `persisted: true`, `persistenceRuntime: supabase-edge-function`, and Supabase feedback rows at `2`; activation remains `writerMode: shadow`, `trafficTransferMode: none`, `liveCutover: false`, and `fitnessTrafficMoved: false`, so the exact remaining blocker is Fitness-to-DiscordOS traffic transfer, rollback execution proof, and live workflow parity proof
 - DiscordOS feedback workflow canonicalization moves to `86%`: owner commits `fb42852` and `160f6c1`, Supabase Edge Function `discordos-feedback-persist` version `3`, Vercel production deployment `dpl_FFefshFnQwUWUTeDakrHX4sDXUpD`, and live `/api/feedback-transfer-proof` prove proof-only `shadowTrafficTransferProved: true`, `shadowWorkflowParityProved: true`, and Supabase feedback rows at `4`; activation remains `writerMode: shadow`, `trafficTransferMode: shadow`, `rollbackMode: fitness-primary`, `liveWorkflowParityProved: false`, `liveCutover: false`, and `fitnessTrafficMoved: false`, so the exact remaining blocker is active Fitness-to-DiscordOS traffic transfer and rollback execution proof
+- DiscordOS feedback workflow canonicalization moves to `88%`: owner commits `227c576` and `c2e3785`, Vercel production deployment `dpl_3Fiww7TkMFqX9ybqBSB99jafQwit`, and live `/api/activation` plus `/api/readiness` prove active writer posture, active traffic posture, rollback-ready posture, green Supabase Edge service-role proof, and green Discord bot proof; the stricter cutover guard still reports `liveWorkflowParityProved: false`, `liveTrafficProofIdPresent: false`, `rollbackExecutionProofIdPresent: false`, `writerActivationAllowed: false`, `liveCutover: false`, and `fitnessTrafficMoved: false`, while `/api/feedback-transfer-proof` fails closed with `409` under active posture, so the exact remaining blocker is live Fitness-to-DiscordOS traffic transfer plus rollback execution and live parity proof
 - Fitness release-readiness is now green on clean preserved truth, but the related supporting markers still hold flat: `Fitness QA/LLEL Workflow` remains `96%`, `Fitness Branch Cleanup / Main-Only Governance` remains `96%`, and `Fitness Recovery Preservation` remains `80%` because the owner-side result closes one exact release-readiness family gate without widening those supporting workflow families into a broader new operator reality
 - Workstation Resource Hygiene moved to `10%`: one bounded root baseline receipt is now durable, one read-only Windows snapshot helper now exists at `ops/atlas/workstation_resource_snapshot.ps1`, the restart surfaces now freeze the one-hot-chat rule plus required process-closeout reporting for chats that run dev servers, browser automation, screenshots, tests, or validators, and the lane still stays low because no repeated relief cycle or broader adoption proof exists yet
 - Feedback Loop Readiness stays at `42%`: request/spec intake, mutation governance, local runtime truth, and receipt/truth update now have one frozen deterministic-threshold read, but the stack still lacks one replayable end-to-end proof loop that runs fresh capture without hidden toggles or the frozen external/session bridge defect, so no marker movement is honest from this packet
