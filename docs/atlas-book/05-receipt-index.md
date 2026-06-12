@@ -81,6 +81,7 @@
 - [Discord OS Feedback Workflow Activation Guard Readiness Proof](../ops/DISCORD-OS-FEEDBACK-WORKFLOW-ACTIVATION-GUARD-READINESS-PROOF-2026-06-12.md)
 - [Discord OS Feedback Workflow Shadow Writer Readiness Proof](../ops/DISCORD-OS-FEEDBACK-WORKFLOW-SHADOW-WRITER-READINESS-PROOF-2026-06-12.md)
 - [Discord OS Feedback Workflow Persisted Writer Implementation Proof](../ops/DISCORD-OS-FEEDBACK-WORKFLOW-PERSISTED-WRITER-IMPLEMENTATION-PROOF-2026-06-12.md)
+- [Discord OS Feedback Workflow Edge Persisted Writer Proof](../ops/DISCORD-OS-FEEDBACK-WORKFLOW-EDGE-PERSISTED-WRITER-PROOF-2026-06-12.md)
 - [Feedback Loop Readiness Deterministic Readiness Threshold Pass 1](../ops/FEEDBACK-LOOP-READINESS-DETERMINISTIC-READINESS-THRESHOLD-PASS-1-2026-06-01.md)
 - [AI Repetition-to-Automation Pipeline Automation-Candidate Threshold Pass 1](../ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-AUTOMATION-CANDIDATE-THRESHOLD-PASS-1-2026-06-01.md)
 - [AI Repetition-to-Automation Pipeline First-Safe Candidate Family Selection Pass 2](../ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-FIRST-SAFE-CANDIDATE-FAMILY-SELECTION-PASS-2-2026-06-03.md)
