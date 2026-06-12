@@ -1,5 +1,18 @@
 # Playbook Notes
 
+# 2026-06-12 - Refresh DCE after supporting-lane threshold changes
+
+- Rule: `Refresh Durable Routing After Supporting-Lane Ratchets`.
+- Rule: when a supporting lane closes at a new threshold, DCE must refresh the restart spine before future workers treat the new posture as durable.
+- Pattern: `Supporting Lane Ratchet -> DCE Spine Refresh -> Hold`.
+- Pattern: supporting lane ratchets -> restart posture becomes one step stale -> refresh DCE spine -> hold until distinct drift or automation appears.
+- Failure Mode: `Stale Restart Spine Drift`.
+- Failure Mode: current adjacent receipts can be durable while the manifest-backed restart path still routes workers through the previous supporting-lane state.
+- Release-summary bullets:
+  - Refreshed DCE after `Knowledge Capture & Transfer` moved from `83%` to `84%`.
+  - Ratcheted `Durable Context Externalization` from `78%` to `79%`.
+  - Kept DCE below `100%` because continuity coverage is still partial, operator-driven, and not broadly automated.
+
 # 2026-06-12 - 100 percent requires exact blocker clearance
 
 - Rule: `100 Percent Requires Exact Blocker Clearance`.

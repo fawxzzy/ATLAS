@@ -96,7 +96,7 @@ Shared rules that survive the split:
 
 - done means major stack work is resumable and reconstructable from ATLAS plus owner-repo artifacts rather than dependent on prior model or chat continuity
 - should not duplicate owner-repo source truth into ATLAS by convenience
-- currently open because the durable substrate is already strong and the currently seeded twelve-manifest continuity set has now passed one coherent shared refresh cycle as a single retrieval unit, but retrieval-first use is still partly manual and not yet universal across all major lanes
+- currently open because the durable substrate is already strong, the currently seeded twelve-manifest continuity set has passed one coherent shared refresh cycle as a single retrieval unit, and the DCE spine now reflects the June 12 post-KCT posture directly, but retrieval-first use is still partly manual and not yet universal across all major lanes
 - next valid package:
   - no immediate DCE-only follow-on packet is open; reopen only with distinct restart-truth drift, marker pressure, approval change, or execution-surface change
 
