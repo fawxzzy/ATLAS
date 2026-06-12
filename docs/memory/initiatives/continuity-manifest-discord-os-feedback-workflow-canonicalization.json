@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-05-27T00:00:00Z",
-  "updated_at": "2026-06-01T14:12:00-04:00",
+  "updated_at": "2026-06-12T10:35:00-04:00",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -56,6 +56,8 @@
     "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-DEFAULT-PROFILE-CODEX-CHROME-EXTENSION-MANUAL-INSTALL-ACKNOWLEDGMENT-PASS-8-2026-06-01.md",
     "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-POST-INSTALL-CODEX-CHROME-BRIDGE-TIMEOUT-BOUNDARY-RECEIPT-2026-06-01.md",
     "docs/ops/ROOT-BOUNDED-DISPATCHER-RECONCILIATION-AFTER-FITNESS-DISCORD-POST-INSTALL-CODEX-CHROME-BRIDGE-TIMEOUT-BOUNDARY-RECEIPT-CLOSEOUT-2026-06-01.md",
+    "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-BOT-CREDENTIAL-READINESS-PROOF-2026-06-12.md",
+    "repos/DiscordOS/docs/ops/discordos-bot-token-runtime-readiness-proof-2026-06-12.md",
     "repos/DiscordOS/docs/contracts/feedback-runtime.md",
     "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-FEEDBACK.md",
     "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-UPDATES.md",
@@ -68,9 +70,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "discord-os-feedback-workflow-canonicalization",
     "scope_class": "cross-repo-governance-with-fitness-live-owner",
-    "current_checkpoint_receipt": "docs/ops/ROOT-BOUNDED-DISPATCHER-RECONCILIATION-AFTER-FITNESS-DISCORD-POST-INSTALL-CODEX-CHROME-BRIDGE-TIMEOUT-BOUNDARY-RECEIPT-CLOSEOUT-2026-06-01.md",
+    "current_checkpoint_receipt": "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-BOT-CREDENTIAL-READINESS-PROOF-2026-06-12.md",
     "checkpoint_commit": "root-uncommitted",
-    "checkpoint_summary": "The lane still sits at 72 percent, and shared restart truth now absorbs the external/session-scoped bridge hold cleanly: launcher-channel presence, bounded row export, panel-helper contract alignment, the app-side non-automation verification-token requirement, one governed non-automation app-side subject, local dev env forwarding, non-empty active local verification env mirrors, local token minting, native-host presence, deterministic selected-profile identification, and extension install/enabled state in `Default` are proven, while the lane still lacks one governed authenticated same-event member submit bundle because the live Codex-to-Chrome bridge in this session is timing out and no further Fitness-local repair packet is honest before that bridge responds.",
+    "checkpoint_summary": "The lane now sits at 73 percent after DiscordOS owner commit `3047ee8`, Vercel production deployment `dpl_GfGbiUKvUSWC3LMUxnFiezrN1rA2`, and live `/api/readiness` proved `discordBotTokenValid: true`, `discordBotUserOk: true`, and the Supabase Edge service-role proof path remains green. This clears the bot-credential runtime-readiness blocker slice only. The lane still lacks DiscordOS writer activation, Fitness-to-DiscordOS traffic transfer, rollback proof, and live workflow parity proof; `liveCutover` and `fitnessTrafficMoved` remain false.",
     "governing_receipts": [
       "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-CANONICALIZATION-2026-05-27.md",
       "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-CANONICAL-CONTRACTS-PASS-1-2026-05-27.md",
@@ -109,7 +111,9 @@
       "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-DEFAULT-PROFILE-CODEX-CHROME-EXTENSION-MANUAL-INSTALL-ACKNOWLEDGMENT-PASS-8-2026-06-01.md",
       "docs/ops/ROOT-BOUNDED-DISPATCHER-RECONCILIATION-AFTER-FITNESS-DISCORD-DEFAULT-PROFILE-CODEX-CHROME-EXTENSION-MANUAL-INSTALL-ACKNOWLEDGMENT-PASS-8-CLOSEOUT-2026-06-01.md",
       "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-POST-INSTALL-CODEX-CHROME-BRIDGE-TIMEOUT-BOUNDARY-RECEIPT-2026-06-01.md",
-      "docs/ops/ROOT-BOUNDED-DISPATCHER-RECONCILIATION-AFTER-FITNESS-DISCORD-POST-INSTALL-CODEX-CHROME-BRIDGE-TIMEOUT-BOUNDARY-RECEIPT-CLOSEOUT-2026-06-01.md"
+      "docs/ops/ROOT-BOUNDED-DISPATCHER-RECONCILIATION-AFTER-FITNESS-DISCORD-POST-INSTALL-CODEX-CHROME-BRIDGE-TIMEOUT-BOUNDARY-RECEIPT-CLOSEOUT-2026-06-01.md",
+      "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-BOT-CREDENTIAL-READINESS-PROOF-2026-06-12.md",
+      "repos/DiscordOS/docs/ops/discordos-bot-token-runtime-readiness-proof-2026-06-12.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -127,6 +131,10 @@
       {
         "path": "repos/DiscordOS/docs/contracts/feedback-runtime.md",
         "role": "future-owner contract seam"
+      },
+      {
+        "path": "repos/DiscordOS/docs/ops/discordos-bot-token-runtime-readiness-proof-2026-06-12.md",
+        "role": "future-owner runtime-readiness proof"
       }
     ],
     "verification_adoption_surfaces": [
@@ -145,37 +153,41 @@
       {
         "path": "docs/ops/DISCORD-FEEDBACK-BOARD-STATE-REPAIR-2026-05-25.md",
         "role": "live board-hygiene evidence"
+      },
+      {
+        "path": "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-BOT-CREDENTIAL-READINESS-PROOF-2026-06-12.md",
+        "role": "DiscordOS bot credential readiness and marker ratchet proof"
       }
     ],
     "blocked_or_gated_work": [
       {
         "item": "runtime migration",
-        "requirement": "blocked pending separate execution lane and deploy-backed parity proof"
+        "requirement": "blocked pending DiscordOS writer activation, Fitness-to-DiscordOS traffic transfer, rollback proof, and deploy-backed live workflow parity proof"
       },
       {
         "item": "schema migration and owner transfer",
-        "requirement": "blocked with no live DiscordOS runtime claim allowed"
+        "requirement": "DiscordOS schema landing and read-only readiness exist, but live writer ownership transfer is still blocked until cutover and parity are proved"
       },
       {
         "item": "fresh-submit live row-thread-message proof and broader deploy-backed parity",
-        "requirement": "still missing one owner-side positive fresh-submit live proof bundle; launcher-channel presence, bounded row export, panel-helper contract alignment, the app-side non-automation verification-token requirement, one governed non-automation app-side subject, local dev env forwarding, non-empty active local verification env mirrors, local token minting, native-host presence, deterministic selected-profile identification, and extension install/enabled state in `Default` are now proven, but the lane still cannot claim one governed authenticated same-event member submit bundle because the live Codex-to-Chrome bridge in this session is timing out and no further Fitness-local repair packet is honest before that bridge responds, while the broader audit-comment, completion-review, success-reaction, release-boundary, and no-regression parity families also remain open"
+        "requirement": "bot credential readiness is now proven in DiscordOS production, but no DiscordOS writer has handled a governed fresh-submit flow, no Fitness traffic moved, no rollback packet exists, and broader audit-comment, completion-review, success-reaction, release-boundary, and no-regression parity families remain open"
       }
     ],
     "next_package_ladder": [
       {
-        "package": "Fitness Discord Default-profile post-install governed authenticated same-event fresh-submit positive live proof capture pass 9",
-        "mode": "owner-side post-install proof capture",
-        "reason": "the bridge-timeout boundary is now explicit and durable, so the next valid Codex packet remains direct post-install governed same-event proof capture, but only after a live Chrome runtime call succeeds from the current Codex session and proves the browser bridge is responsive again"
+        "package": "DiscordOS writer activation, Fitness traffic transfer, rollback, and live workflow parity packet",
+        "mode": "owner-side cutover proof capture",
+        "reason": "DiscordOS production can validate its Supabase service-role proof path and bot credential read-only, so the next real blocker-clearance work must activate a writer under explicit scope, transfer or mirror Fitness traffic safely, capture rollback proof, and prove live workflow parity"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/ROOT-BOUNDED-DISPATCHER-RECONCILIATION-AFTER-FITNESS-DISCORD-POST-INSTALL-CODEX-CHROME-BRIDGE-TIMEOUT-BOUNDARY-RECEIPT-CLOSEOUT-2026-06-01.md",
-    "freshness_checked_at": "2026-06-01T14:12:00-04:00",
-    "freshness_basis": "checkpoint, blocked work, and next-package posture were refreshed again during root reconciliation after the owner-side bridge-timeout boundary receipt: launcher-channel presence, bounded row export, panel-helper contract alignment, the app-side non-automation verification-token requirement, one governed non-automation app-side subject, local dev env forwarding, non-empty active local verification env mirrors, local token minting, native-host presence, deterministic selected-profile identification, and extension install/enabled state in `Default` remain fresh durable proof, but the lane still lacks one positive governed same-event member submit bundle because the live Codex-to-Chrome bridge in this session is timing out and no further Fitness-local repair packet is honest before that bridge responds.",
+    "freshness_checked_receipt": "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-BOT-CREDENTIAL-READINESS-PROOF-2026-06-12.md",
+    "freshness_checked_at": "2026-06-12T10:35:00-04:00",
+    "freshness_basis": "checkpoint, blocked work, and next-package posture were refreshed after live DiscordOS production readiness proved bot-token validity plus the existing Supabase Edge service-role proof path; the lane still lacks writer activation, Fitness-to-DiscordOS traffic transfer, rollback proof, and live workflow parity proof.",
     "marker_posture": [
       {
         "marker": "Discord OS Feedback Workflow Canonicalization",
-        "percent": 72,
+        "percent": 73,
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ]

@@ -100,7 +100,8 @@ Later work stays clearly separate:
   - private schema `discordos` exists
   - RLS-enabled feedback runtime contract tables exist
   - Supabase Edge Function `discordos-readiness` is active with JWT verification
-  - no DiscordOS service-role writer credential is configured in the live Vercel readiness surface yet
+  - service-role readiness proof is live through the Supabase Edge Function path
+  - no DiscordOS writer activation, traffic transfer, rollback, or live workflow parity proof exists yet
   - future home for Discord-owned runtime/workflow tables
 
 ## Vercel Project Map
@@ -121,6 +122,7 @@ Later work stays clearly separate:
   - canonical alias `https://fawxzzy-discordos.vercel.app`
   - service-role readiness now validates JWT role and DiscordOS project ref before reporting configured
   - service-role proof path is live through Supabase Edge Function runtime
+  - Discord bot credential now validates through a read-only `/users/@me` readiness probe
   - not live Discord workflow owner yet
 
 ### Known stale or duplicate-pressure surfaces
@@ -335,7 +337,7 @@ flowchart LR
 | Discord work lane | Fitness-hosted now, DiscordOS later | Fitness repo/runtime now; `repos/DiscordOS` plus ATLAS separation receipts as future target | scaffold complete, bridge-independent DiscordOS work may resume, but the old root named-port planning ladder is already consumed and live runtime migration has not started | live Fitness Discord proof still depends on external/session bridge recovery; the May 26 planning and lookup-boundary chain already consumed the old generic next-package class; higher-level authorization is still required before any transport-aware, externally-executing, schema, or runtime follow-on | `none by default at ATLAS root; reopen only on explicit new DiscordOS named scope or higher-level authorization` |
 | Post-convergence lane split readiness | ATLAS root | lane-split receipts plus ATLAS Book restart surfaces | open at `61%`; one compact lane-owned decisive receipt spine, one fully shaped blocker-family chain, one manifest-backed continuity map, and a shaped chain that has now passed one coherent refresh cycle as a single restart unit | no immediate docs-only blocker family remains inside the lane | no immediate docs-only follow-on packet; reopen only with a distinct restart-truth, marker, approval, or execution-surface change |
 | Fitness Supabase hygiene | Fitness | Fitness Supabase plus ATLAS closeout and governance receipts | closed at `100%`; remaining Discord/Music Sesh concerns transferred out of lane scope | none inside Fitness profile-core cleanup scope | defer any Discord/Music Sesh follow-on to Discord OS Infrastructure Separation |
-| DiscordOS bootstrap | DiscordOS | `repos/DiscordOS`, `fawxzzy-discordos`, DiscordOS Supabase `nwexsktuuenfdegzrbut` | governance scaffold complete; private feedback runtime schema landed; Vercel project exists, is GitHub-linked, and has a production readiness deployment | no migrated code, bot activation, Fitness traffic transfer, secret-backed writer, rollback packet, or live parity proof yet | bounded runtime ownership and live workflow parity packet |
+| DiscordOS bootstrap | DiscordOS | `repos/DiscordOS`, `fawxzzy-discordos`, DiscordOS Supabase `nwexsktuuenfdegzrbut` | governance scaffold complete; private feedback runtime schema landed; Vercel project exists, is GitHub-linked, has a production readiness deployment, proves service-role readiness through Supabase Edge Function, and validates the bot credential read-only | no migrated code, writer activation, Fitness traffic transfer, rollback packet, or live parity proof yet | bounded runtime ownership and live workflow parity packet |
 | Helper Vercel decommission | ATLAS systems lane with owner confirmation | Vercel inventory and deletion receipts | stale Spotify-era and helper Fitness projects deleted | provenance clarity and future health classification only | preview/unfurl verification or Vercel health-design lane |
 | Lifeline local execution/operator plane | Lifeline | `repos/lifeline` plus repo-local README, architecture, operator-surface, and startup-contract docs | shipped as a narrow local-first execution plane for manifest validation/resolution, runtime lifecycle, release, startup, proof, and deterministic receipts; consumes optional Playbook exports from disk and emits ATLAS-visible consequence without becoming a hosted control plane | broader Vercel/service-health classification, deploy provenance visibility, stale-surface pressure signals, and richer ATLAS-facing health projection remain later work; `_stack` still owns governed deploy authority | start with [Lifeline](15-lifeline.md), then the Lifeline repo truth surfaces; no immediate root-only Lifeline mutation packet is opened by this Book pass |
 
