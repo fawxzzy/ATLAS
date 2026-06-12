@@ -15,8 +15,10 @@ What is true right now:
 - ATLAS root remains the coordination, receipt, and marker layer.
 - Playbook remains the reusable governance and doctrine owner.
 - normal stack validation is green in the current working state.
+- Verta Absorption is closed at `100%` only for trusted Verta-core absorption; raw Verta remains trust-gated, untrusted, non-release, and non-executable.
+- ATLAS Core Phase is closed at `100%` for the root coordination substrate; remaining owner/runtime/product work stays visible under its own markers.
 - `--allow-missing-locked-repos` is no longer needed for current validation.
-- the merged warning-reduction tranche on `main` removed root-validator false positives, tracked-surface overcounting, and the last safe ignored Playbook/Lifeline runtime residue; the later clean closeout also refreshed `stack.lock.yaml` to the current clean `_stack` working set, so live validation now reads `critical=0 error=0 warning=50 info=0`, with the remaining warning-only posture dominated by root-path references plus retained local-state and repo-local secret warnings rather than canonical registry damage.
+- the merged warning-reduction tranche on `main` removed root-validator false positives, tracked-surface overcounting, and the last safe ignored Playbook/Lifeline runtime residue; the later closeouts also refreshed `stack.lock.yaml` to the current pinned working set, so live validation now reads `critical=0 error=0 warning=53 info=0`, with the remaining warning-only posture dominated by root-path references plus retained local-state and repo-local secret warnings rather than canonical registry damage.
 
 ## Canonical Source Truth By Surface
 
@@ -60,6 +62,11 @@ Current status:
 - rules, patterns, and failure-mode promotion
 - contract semantics
 
+Current status:
+
+- Playbook Maturity is closed at `100%` for the Playbook-owned governance, doctrine, deterministic repo-intelligence, and `verify -> plan -> apply -> verify` maturity surface.
+- this closeout does not close `Playbook Everywhere + Cortex Interface`, external pilot adoption, hosted service operation, live deploy execution, Discord runtime behavior, or other owner repos' product-proof lanes.
+
 ### Lifeline
 
 - self-hosted local execution/operator plane for manifest-defined applications
@@ -69,6 +76,7 @@ Current status:
 Current status:
 
 - repo-local truth lives at `repos/lifeline`
+- Lifeline Readiness is closed at `100%` for the shipped local-first, single-host operator scope
 - shipped scope remains local-first and single-host
 - future Vercel/service-health classification remains later work rather than current shipped Lifeline scope
 - use [Lifeline](15-lifeline.md) first for Book-level boundaries, then the Lifeline repo docs for command-level truth

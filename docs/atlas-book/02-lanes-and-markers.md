@@ -27,7 +27,7 @@ Read:
 Read:
 
 - the no-send Local Data Gateway chain is real and adoption-bounded
-- `_stack` execution governance is real, the first bounded validation-summary implementation slice is now landed, reconciled, and proof-hardened, one bounded marker-checkpoint command-design seam plus one bounded evidence-admission and restart-surface discipline seam plus one bounded report-contract and contradiction-routing seam plus one bounded implementation-admission and no-execution-guard seam plus one bounded fixture/static-input proof seam plus one bounded first-implementation-slice and proof-matrix seam plus one bounded prompt-pack and handoff-contract seam plus one bounded implementation-readiness closeout seam are now frozen for the second admitted family, root validation is now proof-closed again at the blocking level after the clean `_stack` lock refresh with `critical=0 error=0 warning=50 info=0`, and broader automation and implementation breadth are still mid-maturity
+- `_stack` execution governance is real, the first bounded validation-summary implementation slice is now landed, reconciled, and proof-hardened, one bounded marker-checkpoint command-design seam plus one bounded evidence-admission and restart-surface discipline seam plus one bounded report-contract and contradiction-routing seam plus one bounded implementation-admission and no-execution-guard seam plus one bounded fixture/static-input proof seam plus one bounded first-implementation-slice and proof-matrix seam plus one bounded prompt-pack and handoff-contract seam plus one bounded implementation-readiness closeout seam are now frozen for the second admitted family, root validation is now proof-closed again at the blocking level after the current lock refresh with `critical=0 error=0 warning=53 info=0`, and broader automation and implementation breadth are still mid-maturity
 - broader automation and long-run orchestration are still early
 
 ### Discord workflow
@@ -68,10 +68,6 @@ Read:
 
 ## Supporting Open Markers
 
-- Verta Absorption: `99%`
-- ATLAS Core Phase: `95%`
-- Lifeline Readiness: `97%`
-- Playbook Maturity: `92%`
 - Cortex Readiness: `41%`
 - Fitness QA/LLEL Workflow: `96%`
 - Fitness Branch Cleanup / Main-Only Governance: `96%`
@@ -115,6 +111,10 @@ Read:
 
 ## Closed / Locked Ratchets
 
+- Playbook Maturity: `100%`; Playbook-owned governance, doctrine, deterministic repo-intelligence, and verify/plan/apply maturity verified, while Playbook Everywhere + Cortex Interface remains separate
+- Lifeline Readiness: `100%`; shipped local-first single-host operator scope verified, future hosted/health-projection surfaces remain later
+- ATLAS Core Phase: `100%`; root coordination substrate closed, owner/runtime lanes remain tracked separately
+- Verta Absorption: `100%`; scoped to trusted Verta-core absorption only, while raw Verta remains trust-gated, untrusted, non-release, and non-executable
 - Archive Normalization: `100%`
 - Foundation Alignment: `100%`
 - Fitness Source-of-Truth Reset: `100%`
