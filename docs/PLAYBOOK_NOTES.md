@@ -1,5 +1,18 @@
 # Playbook Notes
 
+# 2026-06-12 - Fitness production deploy must preserve DiscordOS transfer seam
+
+- Rule: `Deploying Adjacent Fitness Work Must Preserve Active DiscordOS Seam`.
+- Rule: when Fitness product work is ready while DiscordOS transfer is active, deploy only a branch that contains both the product changes and the DiscordOS transfer seam.
+- Pattern: `Owner Work -> Seam Carry-Forward -> Production Proof -> Live Blocker Recheck`.
+- Pattern: preserve ready Fitness changes on a branch, carry forward the transfer seam, verify both test families, deploy production, then recheck DiscordOS readiness before any marker claim.
+- Failure Mode: `Product Deploy Regresses Transfer Path`.
+- Failure Mode: deploying Fitness history/analytics work from a branch without the DiscordOS transfer seam would silently replace the production artifact needed for live traffic transfer.
+- Release-summary bullets:
+  - Deployed Fitness production `dpl_DHtXDYBLVL9o8XxWCYCNa37Gmz2Q` from `codex/fitness-history-analytics-discordos-transfer`.
+  - Preserved the DiscordOS feedback transfer seam while publishing the ready history/analytics work.
+  - Kept `Discord OS Feedback Workflow Canonicalization` at `96%` because live readiness still reports `missing_live_workflow_parity_proof` and `missing_live_traffic_transfer_proof`.
+
 # 2026-06-12 - Refresh DCE after supporting-lane threshold changes
 
 - Rule: `Refresh Durable Routing After Supporting-Lane Ratchets`.
