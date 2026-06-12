@@ -1,5 +1,18 @@
 # Playbook Notes
 
+# 2026-06-12 - Proof-only transfer rows cannot close live cutover
+
+- Rule: `Proof-Only Transfer Rows Cannot Close Live Cutover`.
+- Rule: a live transfer marker cannot close at `100%` from automation rows marked `edge_persist_writer_proof_only`; it needs a real event path plus non-proof persistence and receipt IDs.
+- Pattern: `Live Status Recheck -> Non-Proof Row Check -> Proof ID Check -> Hold Or Close`.
+- Pattern: verify human/non-proof transfer counts, live traffic proof ID, and live workflow parity proof ID before any final cutover claim.
+- Failure Mode: `Proof Infrastructure Mistaken For Live Traffic`.
+- Failure Mode: Edge-backed proof rows can demonstrate the writer path without proving that real Discord-signed Fitness-origin traffic has moved.
+- Release-summary bullets:
+  - Rechecked Supabase, Vercel env, Vercel logs, `/api/readiness`, and `/api/live-transfer-status`.
+  - Confirmed `human_non_proof_fitness_live_transfer_count: 0`, `liveTrafficProofIdPresent: false`, and `liveWorkflowParityProved: false`.
+  - Kept `Discord OS Feedback Workflow Canonicalization` at `96%` because the remaining blocker is real Discord-signed Fitness-origin traffic plus non-proof persistence and live proof IDs.
+
 # 2026-06-12 - Fitness production deploy must preserve DiscordOS transfer seam
 
 - Rule: `Deploying Adjacent Fitness Work Must Preserve Active DiscordOS Seam`.

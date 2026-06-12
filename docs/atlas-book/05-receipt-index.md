@@ -88,6 +88,7 @@
 - [Discord OS Feedback Workflow Live Signed Event Recheck Hold](../ops/DISCORD-OS-FEEDBACK-WORKFLOW-LIVE-SIGNED-EVENT-RECHECK-HOLD-2026-06-12.md)
 - [Discord OS Feedback Workflow Live Transfer Status Proof Capture Surface](../ops/DISCORD-OS-FEEDBACK-WORKFLOW-LIVE-TRANSFER-STATUS-PROOF-CAPTURE-SURFACE-2026-06-12.md)
 - [Discord OS Feedback Workflow Fitness Rollback Execution Proof](../ops/DISCORD-OS-FEEDBACK-WORKFLOW-FITNESS-ROLLBACK-EXECUTION-PROOF-2026-06-12.md)
+- [Discord OS Feedback Workflow Non-Proof Live Row Blocker Recheck](../ops/DISCORD-OS-FEEDBACK-WORKFLOW-NON-PROOF-LIVE-ROW-BLOCKER-RECHECK-2026-06-12.md)
 - [Feedback Loop Readiness Deterministic Readiness Threshold Pass 1](../ops/FEEDBACK-LOOP-READINESS-DETERMINISTIC-READINESS-THRESHOLD-PASS-1-2026-06-01.md)
 - [AI Repetition-to-Automation Pipeline Automation-Candidate Threshold Pass 1](../ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-AUTOMATION-CANDIDATE-THRESHOLD-PASS-1-2026-06-01.md)
 - [AI Repetition-to-Automation Pipeline First-Safe Candidate Family Selection Pass 2](../ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-FIRST-SAFE-CANDIDATE-FAMILY-SELECTION-PASS-2-2026-06-03.md)

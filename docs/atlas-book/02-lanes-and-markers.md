@@ -40,7 +40,7 @@ Read:
 
 - separation infrastructure is closed
 - workflow doctrine and proof hygiene are strong
-- production transfer infrastructure and live writer proof now exist, but final live cutover is still blocked on a real Discord-signed Fitness-origin event, rollback execution proof, and live parity receipt capture
+- production transfer infrastructure, live writer proof, and rollback execution proof now exist, but final live cutover is still blocked on a real Discord-signed Fitness-origin event, a non-proof DiscordOS persistence path for that event, live traffic receipt ID capture, and live workflow parity receipt capture
 
 ### Naming / ownership hygiene
 
