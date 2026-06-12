@@ -608,6 +608,7 @@
 ## Discord Workflow Canonicalization
 
 - [Discord OS Feedback Workflow Canonicalization](../ops/DISCORD-OS-FEEDBACK-WORKFLOW-CANONICALIZATION-2026-05-27.md)
+- [Discord OS Feedback Workflow Fitness Delegation Seam Proof](../ops/DISCORD-OS-FEEDBACK-WORKFLOW-FITNESS-DELEGATION-SEAM-PROOF-2026-06-12.md)
 - [Discord Workflow, Publication & Docs Reliability Proof-Gated Publication-Boundary And Docs-Routing Pass 1](../ops/DISCORD-WORKFLOW-PUBLICATION-AND-DOCS-RELIABILITY-PROOF-GATED-PUBLICATION-BOUNDARY-AND-DOCS-ROUTING-PASS-1-2026-05-29.md)
 - [Discord Workflow, Publication & Docs Reliability Shipped-Card Promotion And Release-Summary Surface Split Pass 2](../ops/DISCORD-WORKFLOW-PUBLICATION-AND-DOCS-RELIABILITY-SHIPPED-CARD-PROMOTION-AND-RELEASE-SUMMARY-SURFACE-SPLIT-PASS-2-2026-05-29.md)
 - [Discord Workflow, Publication & Docs Reliability Shipped-Card Promotion And Release-Summary Evidence-Breadth Pass 3](../ops/DISCORD-WORKFLOW-PUBLICATION-AND-DOCS-RELIABILITY-SHIPPED-CARD-PROMOTION-AND-RELEASE-SUMMARY-EVIDENCE-BREADTH-PASS-3-2026-05-29.md)
