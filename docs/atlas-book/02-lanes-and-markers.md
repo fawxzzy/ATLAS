@@ -32,13 +32,13 @@ Read:
 
 ### Discord workflow
 
-- `Discord OS Infrastructure Separation: 99%`
+- `Discord OS Infrastructure Separation: 100%`
 - `Discord OS Feedback Workflow Canonicalization: 72%`
 - `Discord Workflow, Publication & Docs Reliability: 32%`
 
 Read:
 
-- separation posture is strong
+- separation infrastructure is closed
 - workflow doctrine and proof hygiene are strong
 - live proof is still partial, and the hardest fresh-submit class is now frozen at a session-scoped external bridge hold rather than a repo/runtime defect
 
@@ -63,7 +63,7 @@ Read:
 - Inventory & Truth Map: `77%`
 - Knowledge Capture & Transfer: `84%`
 - Durable Context Externalization: `79%`
-- Discord OS Infrastructure Separation: `99%`
+- Discord OS Infrastructure Separation: `100%`
 - Discord OS Feedback Workflow Canonicalization: `72%`
 
 ## Supporting Open Markers
@@ -112,6 +112,7 @@ Read:
 ## Closed / Locked Ratchets
 
 - Playbook Maturity: `100%`; Playbook-owned governance, doctrine, deterministic repo-intelligence, and verify/plan/apply maturity verified, while Playbook Everywhere + Cortex Interface remains separate
+- Discord OS Infrastructure Separation: `100%`; standalone DiscordOS repo, Supabase schema/function, Vercel project/env/deploy, bot token, and service-role proof path verified, while live workflow cutover and parity remain in `Discord OS Feedback Workflow Canonicalization`
 - Atlas-owned Repo Naming Canonicalization: `100%`; local path canonicalization plus GitHub remote-name canonicalization are proof-closed for the admitted non-exception repos, while `fawxzzy-fitness` remains the preserved exception and `stream` remains local/no-remote
 - Lifeline Readiness: `100%`; shipped local-first single-host operator scope verified, future hosted/health-projection surfaces remain later
 - ATLAS Core Phase: `100%`; root coordination substrate closed, owner/runtime lanes remain tracked separately
@@ -200,6 +201,7 @@ Current AI Long-Run closeout read: `AI Long-Run Batch Orchestration` now sits at
 - DiscordOS post-99 bot-token provisioning now has explicit operator admission and live production proof: `DISCORDOS_BOT_TOKEN` is set as a Vercel sensitive env value for production and the current preview branch, production deployment `dpl_37XtqBCUmCbwW6vdz6d1jGuvnbYr` is `READY`, and `/api/readiness` now reports `discordBotTokenConfigured: true`; the marker still holds at `99%` because the only inspected service-role candidates decode to Fitness Supabase ref `lpswxoyfniocuhljgzbc` rather than DiscordOS ref `nwexsktuuenfdegzrbut`, and no DiscordOS writer activation, traffic transfer, rollback packet, or live parity proof exists
 - DiscordOS connector-backed service-role proof now closes the possibility that the missing last percent is just an unchecked GitHub, Supabase, or Vercel setup surface: Supabase confirms the DiscordOS project/schema/function are healthy but exposes only publishable/anon key classes, Vercel confirms production lacks `DISCORDOS_SUPABASE_SERVICE_ROLE_KEY`, and GitHub confirms repo access; the marker still holds at `99%` until exact DiscordOS service-role provisioning and cutover/parity proof occur
 - DiscordOS service-role readiness hardening now clears the false-positive class where any non-empty service-role env value could satisfy readiness: owner commit `b145b30` and Vercel deployment `dpl_dDHaxkMcc4f4zd84z3RLBhcGNwhy` require decoded JWT metadata to match `role=service_role` and DiscordOS ref `nwexsktuuenfdegzrbut`; this does not move the marker because the real service-role key, writer activation, traffic transfer, rollback, and parity proof are still absent
+- DiscordOS infrastructure separation now closes at `100%`: owner commit `646dc09`, Supabase Edge Function `discordos-readiness` version `3`, and Vercel deployment `dpl_8mFUQyZFtRZJqtrrD8g5FeUwdTeM` prove the standalone repo, Supabase schema/function, Vercel project/env/deploy, bot token, and service-role proof path are all live without copying a service-role secret into Vercel; `Discord OS Feedback Workflow Canonicalization` still holds at `72%` because live cutover, rollback, and workflow parity are not proved
 - Fitness release-readiness is now green on clean preserved truth, but the related supporting markers still hold flat: `Fitness QA/LLEL Workflow` remains `96%`, `Fitness Branch Cleanup / Main-Only Governance` remains `96%`, and `Fitness Recovery Preservation` remains `80%` because the owner-side result closes one exact release-readiness family gate without widening those supporting workflow families into a broader new operator reality
 - Workstation Resource Hygiene moved to `10%`: one bounded root baseline receipt is now durable, one read-only Windows snapshot helper now exists at `ops/atlas/workstation_resource_snapshot.ps1`, the restart surfaces now freeze the one-hot-chat rule plus required process-closeout reporting for chats that run dev servers, browser automation, screenshots, tests, or validators, and the lane still stays low because no repeated relief cycle or broader adoption proof exists yet
 - Feedback Loop Readiness stays at `42%`: request/spec intake, mutation governance, local runtime truth, and receipt/truth update now have one frozen deterministic-threshold read, but the stack still lacks one replayable end-to-end proof loop that runs fresh capture without hidden toggles or the frozen external/session bridge defect, so no marker movement is honest from this packet

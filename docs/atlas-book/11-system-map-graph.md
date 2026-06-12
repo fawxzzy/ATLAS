@@ -33,7 +33,7 @@ It shows:
   - manifest/runtime/release/startup/proof surface owner
 - `repos/DiscordOS`
   - canonical DiscordOS repo surface now exists locally
-  - governance scaffold only
+  - infrastructure-ready DiscordOS owner surface
   - no migrated runtime code yet
 
 ## Runtime Map
@@ -120,6 +120,7 @@ Later work stays clearly separate:
   - isolated DiscordOS readiness surface
   - canonical alias `https://fawxzzy-discordos.vercel.app`
   - service-role readiness now validates JWT role and DiscordOS project ref before reporting configured
+  - service-role proof path is live through Supabase Edge Function runtime
   - not live Discord workflow owner yet
 
 ### Known stale or duplicate-pressure surfaces
