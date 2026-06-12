@@ -119,6 +119,7 @@ Later work stays clearly separate:
 - `fawxzzy-discordos`
   - isolated DiscordOS readiness surface
   - canonical alias `https://fawxzzy-discordos.vercel.app`
+  - service-role readiness now validates JWT role and DiscordOS project ref before reporting configured
   - not live Discord workflow owner yet
 
 ### Known stale or duplicate-pressure surfaces
