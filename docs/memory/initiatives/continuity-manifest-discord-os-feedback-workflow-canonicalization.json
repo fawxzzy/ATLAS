@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-05-27T00:00:00Z",
-  "updated_at": "2026-06-12T12:35:00-04:00",
+  "updated_at": "2026-06-12T14:00:00-04:00",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -61,11 +61,13 @@
     "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-SHADOW-WRITER-READINESS-PROOF-2026-06-12.md",
     "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-PERSISTED-WRITER-IMPLEMENTATION-PROOF-2026-06-12.md",
     "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-EDGE-PERSISTED-WRITER-PROOF-2026-06-12.md",
+    "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-SHADOW-TRANSFER-AND-PARITY-PROOF-2026-06-12.md",
     "repos/DiscordOS/docs/ops/discordos-bot-token-runtime-readiness-proof-2026-06-12.md",
     "repos/DiscordOS/docs/ops/discordos-activation-guard-readiness-proof-2026-06-12.md",
     "repos/DiscordOS/docs/ops/discordos-feedback-shadow-writer-readiness-proof-2026-06-12.md",
     "repos/DiscordOS/docs/ops/discordos-persisted-writer-implementation-proof-2026-06-12.md",
     "repos/DiscordOS/docs/ops/discordos-edge-persisted-writer-proof-2026-06-12.md",
+    "repos/DiscordOS/docs/ops/discordos-shadow-transfer-and-parity-proof-2026-06-12.md",
     "repos/DiscordOS/docs/contracts/feedback-runtime.md",
     "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-FEEDBACK.md",
     "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-UPDATES.md",
@@ -78,9 +80,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "discord-os-feedback-workflow-canonicalization",
     "scope_class": "cross-repo-governance-with-fitness-live-owner",
-    "current_checkpoint_receipt": "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-EDGE-PERSISTED-WRITER-PROOF-2026-06-12.md",
+    "current_checkpoint_receipt": "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-SHADOW-TRANSFER-AND-PARITY-PROOF-2026-06-12.md",
     "checkpoint_commit": "root-uncommitted",
-    "checkpoint_summary": "The lane now sits at 80 percent after DiscordOS owner commit `1c4a0ac`, Supabase Edge Function `discordos-feedback-persist` version `2`, Vercel production deployment `dpl_4FUNXwMZDSPH3BLFJEaakA2mk9eg`, and live `/api/feedback-persist` proved Edge-backed proof-only persistence through the Supabase Edge runtime. This clears the proof-only persisted writer and backend service-role availability blocker slice: `persisted` and `persistenceAttempted` are true for proof rows, `persistenceRuntime` is `supabase-edge-function`, and Supabase connector proof shows `discordos.discord_feedback_reports` at `rows: 2`. The lane still reports `writerMode: shadow`, `writesDiscord: false`, `writesFitness: false`, `trafficMoved: false`, `liveCutover: false`, and `fitnessTrafficMoved: false`; the exact remaining blocker class is Fitness-to-DiscordOS traffic transfer, rollback execution proof, and live workflow parity proof.",
+    "checkpoint_summary": "The lane now sits at 86 percent after DiscordOS owner commits `fb42852` and `160f6c1`, Supabase Edge Function `discordos-feedback-persist` version `3`, Vercel production deployment `dpl_FFefshFnQwUWUTeDakrHX4sDXUpD`, and live `/api/feedback-transfer-proof` proved proof-only shadow transfer and shadow parity through the Supabase Edge runtime. This clears the shadow traffic-transfer and shadow parity blocker slice: `shadowTrafficTransferProved` and `shadowWorkflowParityProved` are true for proof row `shadow-transfer-proof-2026-06-12-002`, `persistenceRuntime` is `supabase-edge-function`, and Supabase connector proof shows `discordos.discord_feedback_reports` at `rows: 4`. The lane still reports `liveWorkflowParityProved: false`, `liveTrafficMoved: false`, `writesDiscord: false`, `writesFitness: false`, `trafficMoved: false`, `rollbackExecutionProved: false`, and `fitnessTrafficMoved: false`; the exact remaining blocker class is active Fitness-to-DiscordOS traffic transfer and rollback execution proof.",
     "governing_receipts": [
       "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-CANONICALIZATION-2026-05-27.md",
       "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-CANONICAL-CONTRACTS-PASS-1-2026-05-27.md",
@@ -129,7 +131,9 @@
       "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-PERSISTED-WRITER-IMPLEMENTATION-PROOF-2026-06-12.md",
       "repos/DiscordOS/docs/ops/discordos-persisted-writer-implementation-proof-2026-06-12.md",
       "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-EDGE-PERSISTED-WRITER-PROOF-2026-06-12.md",
-      "repos/DiscordOS/docs/ops/discordos-edge-persisted-writer-proof-2026-06-12.md"
+      "repos/DiscordOS/docs/ops/discordos-edge-persisted-writer-proof-2026-06-12.md",
+      "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-SHADOW-TRANSFER-AND-PARITY-PROOF-2026-06-12.md",
+      "repos/DiscordOS/docs/ops/discordos-shadow-transfer-and-parity-proof-2026-06-12.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -167,6 +171,10 @@
       {
         "path": "repos/DiscordOS/docs/ops/discordos-edge-persisted-writer-proof-2026-06-12.md",
         "role": "future-owner Edge-backed proof-only persisted writer proof"
+      },
+      {
+        "path": "repos/DiscordOS/docs/ops/discordos-shadow-transfer-and-parity-proof-2026-06-12.md",
+        "role": "future-owner proof-only shadow transfer and shadow parity proof"
       }
     ],
     "verification_adoption_surfaces": [
@@ -205,37 +213,41 @@
       {
         "path": "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-EDGE-PERSISTED-WRITER-PROOF-2026-06-12.md",
         "role": "DiscordOS Edge-backed proof-only persistence and marker ratchet proof"
+      },
+      {
+        "path": "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-SHADOW-TRANSFER-AND-PARITY-PROOF-2026-06-12.md",
+        "role": "DiscordOS proof-only shadow transfer, shadow parity, and marker ratchet proof"
       }
     ],
     "blocked_or_gated_work": [
       {
         "item": "runtime migration",
-        "requirement": "blocked pending Fitness-to-DiscordOS traffic transfer, rollback execution proof, and deploy-backed live workflow parity proof"
+        "requirement": "blocked pending active Fitness-to-DiscordOS traffic transfer and rollback execution proof"
       },
       {
         "item": "schema migration and owner transfer",
-        "requirement": "DiscordOS schema landing, read-only readiness, activation guard, no-persistence shadow writer proof, guarded persisted-writer implementation path, and Edge-backed proof-only persistence exist, but live writer ownership transfer is still blocked until traffic transfer, rollback, and parity are proved"
+        "requirement": "DiscordOS schema landing, read-only readiness, activation guard, no-persistence shadow writer proof, guarded persisted-writer implementation path, Edge-backed proof-only persistence, proof-only shadow transfer, and shadow parity exist, but live writer ownership transfer is still blocked until active traffic transfer and rollback execution are proved"
       },
       {
         "item": "fresh-submit live row-thread-message proof and broader deploy-backed parity",
-        "requirement": "bot credential readiness, activation guard readiness, no-persistence shadow writer readiness, guarded persisted-writer implementation, and Edge-backed proof-only persistence are now proven in DiscordOS production, but no DiscordOS persisted writer has handled governed release traffic, no Fitness traffic moved, no rollback execution proof exists, and broader audit-comment, completion-review, success-reaction, release-boundary, and no-regression parity families remain open"
+        "requirement": "bot credential readiness, activation guard readiness, no-persistence shadow writer readiness, guarded persisted-writer implementation, Edge-backed proof-only persistence, proof-only shadow transfer, and shadow parity are now proven in DiscordOS production, but no DiscordOS persisted writer has handled governed release traffic, no Fitness traffic moved, no rollback execution proof exists, and broader audit-comment, completion-review, success-reaction, release-boundary, and no-regression parity families remain open"
       }
     ],
     "next_package_ladder": [
       {
-        "package": "Fitness-to-DiscordOS traffic transfer, rollback execution proof, and live workflow parity packet",
+        "package": "Active Fitness-to-DiscordOS traffic transfer and rollback execution proof packet",
         "mode": "owner-side cutover proof capture",
-        "reason": "DiscordOS production can validate its Supabase service-role proof path, bot credential, activation guard, no-persistence shadow writer row preview, deployed guarded persisted-writer implementation path, and Edge-backed proof-only persistence, so the next real blocker-clearance work must transfer or mirror Fitness traffic safely under explicit scope, capture rollback execution proof, and prove live workflow parity"
+        "reason": "DiscordOS production can validate its Supabase service-role proof path, bot credential, activation guard, no-persistence shadow writer row preview, deployed guarded persisted-writer implementation path, Edge-backed proof-only persistence, proof-only shadow transfer, and shadow parity, so the next real blocker-clearance work must actively transfer Fitness traffic under explicit scope and capture rollback execution proof"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-EDGE-PERSISTED-WRITER-PROOF-2026-06-12.md",
-    "freshness_checked_at": "2026-06-12T12:35:00-04:00",
-    "freshness_basis": "checkpoint, blocked work, and next-package posture were refreshed after live DiscordOS production readiness proved bot-token validity, Supabase Edge service-role proof, a fail-closed activation guard, a no-persistence shadow writer row preview, a deployed guarded persisted-writer implementation path, and Edge-backed proof-only persistence with Supabase feedback rows at 2; the lane still lacks Fitness-to-DiscordOS traffic transfer, rollback execution proof, and live workflow parity proof.",
+    "freshness_checked_receipt": "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-SHADOW-TRANSFER-AND-PARITY-PROOF-2026-06-12.md",
+    "freshness_checked_at": "2026-06-12T14:00:00-04:00",
+    "freshness_basis": "checkpoint, blocked work, and next-package posture were refreshed after live DiscordOS production readiness proved bot-token validity, Supabase Edge service-role proof, a fail-closed activation guard, a no-persistence shadow writer row preview, a deployed guarded persisted-writer implementation path, Edge-backed proof-only persistence, proof-only shadow transfer, and shadow parity with Supabase feedback rows at 4; the lane still lacks active Fitness-to-DiscordOS traffic transfer and rollback execution proof.",
     "marker_posture": [
       {
         "marker": "Discord OS Feedback Workflow Canonicalization",
-        "percent": 80,
+        "percent": 86,
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ]

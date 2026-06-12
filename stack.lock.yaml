@@ -21,7 +21,7 @@ components:
     remote: "https://github.com/fawxzzy/DiscordOS.git"
     ref_type: "branch"
     ref: "codex/path-discipline-warning-slice-discordos"
-    commit: "1c4a0ac0f47953cabe2559e10f44df9170198abf"
+    commit: "160f6c106d883cc6ffd08b9d655b3816a67c48ff"
     dirty: false
     trust_class: "trusted"
     release_eligible: false
@@ -216,4 +216,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:52b4b71d2f60c6fb8000e027c22065b74ece80d0b50b0bd2341c74b8c2f48e61"
+lock_digest: "sha256:f0223f736492fdf579ad0257d51531a507ec311f32bd284bea3145259ad396f7"
