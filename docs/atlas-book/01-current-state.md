@@ -421,6 +421,7 @@ Current status:
   - transport-aware opening: `no`
   - externally-executing opening: `no`
   - any further DiscordOS lookup widening now requires explicit higher-level authorization
+- DiscordOS Supabase setup is no longer inactive: live connector proof on 2026-06-12 shows the `DiscordOS` Supabase project at `ACTIVE_HEALTHY`, but this is setup-health proof only; no Supabase schema landing, Edge Function, Vercel project linkage, runtime ownership/cutover, worker retarget, or live workflow parity proof exists, so DiscordOS infrastructure remains below `100%`
 - the Playbook external `.codex/worktrees/*` stranded-directory subset and the behind-only smoke branch class are now consumed:
   - no external Playbook stranded-directory residue remains in that filesystem-only class
   - no behind-only Playbook smoke branch residue remains
