@@ -78,6 +78,7 @@
 - [Discord OS Infrastructure Separation Service-Role Readiness Guard Deployment Proof](../ops/DISCORD-OS-INFRASTRUCTURE-SEPARATION-SERVICE-ROLE-READINESS-GUARD-DEPLOYMENT-PROOF-2026-06-12.md)
 - [Discord OS Infrastructure Separation Final Infrastructure Closeout](../ops/DISCORD-OS-INFRASTRUCTURE-SEPARATION-FINAL-INFRASTRUCTURE-CLOSEOUT-2026-06-12.md)
 - [Discord OS Feedback Workflow Bot Credential Readiness Proof](../ops/DISCORD-OS-FEEDBACK-WORKFLOW-BOT-CREDENTIAL-READINESS-PROOF-2026-06-12.md)
+- [Discord OS Feedback Workflow Activation Guard Readiness Proof](../ops/DISCORD-OS-FEEDBACK-WORKFLOW-ACTIVATION-GUARD-READINESS-PROOF-2026-06-12.md)
 - [Feedback Loop Readiness Deterministic Readiness Threshold Pass 1](../ops/FEEDBACK-LOOP-READINESS-DETERMINISTIC-READINESS-THRESHOLD-PASS-1-2026-06-01.md)
 - [AI Repetition-to-Automation Pipeline Automation-Candidate Threshold Pass 1](../ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-AUTOMATION-CANDIDATE-THRESHOLD-PASS-1-2026-06-01.md)
 - [AI Repetition-to-Automation Pipeline First-Safe Candidate Family Selection Pass 2](../ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-FIRST-SAFE-CANDIDATE-FAMILY-SELECTION-PASS-2-2026-06-03.md)
