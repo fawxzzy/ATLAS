@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-05-27T00:00:00Z",
-  "updated_at": "2026-06-12T17:31:00-04:00",
+  "updated_at": "2026-06-12T18:12:00-04:00",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -75,7 +75,8 @@
     "repos/fawxzzy-fitness/docs/ops/FITNESS-FEEDBACK-BOARD.md",
     "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-ACTIVE-POSTURE-GUARD-PROOF-2026-06-12.md",
     "repos/DiscordOS/docs/ops/discordos-active-posture-guard-proof-2026-06-12.md",
-    "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-FITNESS-PRODUCTION-TRANSFER-AND-EDGE-ALLOWLIST-PROOF-2026-06-12.md"
+    "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-FITNESS-PRODUCTION-TRANSFER-AND-EDGE-ALLOWLIST-PROOF-2026-06-12.md",
+    "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-LIVE-SIGNED-EVENT-RECHECK-HOLD-2026-06-12.md"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -85,7 +86,7 @@
     "scope_class": "cross-repo-governance-with-fitness-live-owner",
     "current_checkpoint_receipt": "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-FITNESS-PRODUCTION-TRANSFER-AND-EDGE-ALLOWLIST-PROOF-2026-06-12.md",
     "checkpoint_commit": "d264b5004f3aa9ee92eab64cf23b84b9f16d2fb1",
-    "checkpoint_summary": "The lane now sits at 94 percent after Fitness PR `#95` reached `b6009b7bffb3b152b84a54197c1b82d996dc6824`, Fitness production deployment `dpl_DfEFZezEfryECX8nhRdd4BUaQntX` became READY with active transfer env, DiscordOS commit `d264b50` admitted `fitness-live-transfer-*` in the Edge writer, Supabase migration `discordos_feedback_fitness_live_transfer_proof_rpc` applied, Edge Function `discordos-feedback-persist` reached version 4 ACTIVE with `verify_jwt: true`, and live proof row `fitness-live-transfer-direct-discordos-writer-proof-20260612-173002` proved the Vercel plus Supabase Edge plus Postgres writer path. The stricter cutover guard still reports `liveWorkflowParityProved: false`, `liveTrafficProofIdPresent: false`, `rollbackExecutionProofIdPresent: false`, `writerActivationAllowed: false`, `liveCutover: false`, and `fitnessTrafficMoved: false`. The exact remaining blocker class is real Discord-signed Fitness-origin feedback traffic through deployed Fitness, rollback execution proof, and live parity receipt ID capture.",
+    "checkpoint_summary": "The lane remains at 94 percent after a live signed-event recheck: Fitness PR `#95` remains open/draft/mergeable at `b6009b7bffb3b152b84a54197c1b82d996dc6824`, Vercel runtime-log sweeps found no matching signed transfer invocation, Supabase reports only one `fitness-live-transfer-*` row and that row is the automation proof row with `edge_persist_writer_proof_only`, and the automation browser redirects to Discord login rather than an authenticated user session. The exact remaining blocker class is real Discord-signed Fitness-origin feedback traffic through deployed Fitness, rollback execution proof, and live parity receipt ID capture.",
     "governing_receipts": [
       "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-CANONICALIZATION-2026-05-27.md",
       "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-CANONICAL-CONTRACTS-PASS-1-2026-05-27.md",
@@ -139,7 +140,8 @@
       "repos/DiscordOS/docs/ops/discordos-shadow-transfer-and-parity-proof-2026-06-12.md",
       "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-ACTIVE-POSTURE-GUARD-PROOF-2026-06-12.md",
       "repos/DiscordOS/docs/ops/discordos-active-posture-guard-proof-2026-06-12.md",
-      "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-FITNESS-PRODUCTION-TRANSFER-AND-EDGE-ALLOWLIST-PROOF-2026-06-12.md"
+      "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-FITNESS-PRODUCTION-TRANSFER-AND-EDGE-ALLOWLIST-PROOF-2026-06-12.md",
+      "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-LIVE-SIGNED-EVENT-RECHECK-HOLD-2026-06-12.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -235,6 +237,10 @@
       {
         "path": "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-FITNESS-PRODUCTION-TRANSFER-AND-EDGE-ALLOWLIST-PROOF-2026-06-12.md",
         "role": "Fitness production transfer deployment, DiscordOS Edge/RPC allowlist, and live writer-path proof"
+      },
+      {
+        "path": "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-LIVE-SIGNED-EVENT-RECHECK-HOLD-2026-06-12.md",
+        "role": "live signed-event absence recheck and exact 94 percent hold proof"
       }
     ],
     "blocked_or_gated_work": [
@@ -259,9 +265,9 @@
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-FITNESS-PRODUCTION-TRANSFER-AND-EDGE-ALLOWLIST-PROOF-2026-06-12.md",
-    "freshness_checked_at": "2026-06-12T17:31:00-04:00",
-    "freshness_basis": "checkpoint, blocked work, and next-package posture were refreshed after Fitness production deployment, transfer env activation, DiscordOS Edge/RPC `fitness-live-transfer-*` allowlist, and live direct writer proof; the lane still lacks a real Discord-signed Fitness-origin event through deployed Fitness, rollback execution proof, and live parity receipt IDs.",
+    "freshness_checked_receipt": "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-LIVE-SIGNED-EVENT-RECHECK-HOLD-2026-06-12.md",
+    "freshness_checked_at": "2026-06-12T18:12:00-04:00",
+    "freshness_basis": "checkpoint, blocked work, and next-package posture were refreshed after connector-backed GitHub, Vercel, Supabase, and browser checks proved no real Discord-signed Fitness-origin transfer event is available in this session; the lane still lacks rollback execution proof and live parity receipt IDs.",
     "marker_posture": [
       {
         "marker": "Discord OS Feedback Workflow Canonicalization",

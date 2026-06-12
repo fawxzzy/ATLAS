@@ -85,6 +85,7 @@
 - [Discord OS Feedback Workflow Shadow Transfer And Parity Proof](../ops/DISCORD-OS-FEEDBACK-WORKFLOW-SHADOW-TRANSFER-AND-PARITY-PROOF-2026-06-12.md)
 - [Discord OS Feedback Workflow Active Posture Guard Proof](../ops/DISCORD-OS-FEEDBACK-WORKFLOW-ACTIVE-POSTURE-GUARD-PROOF-2026-06-12.md)
 - [Discord OS Feedback Workflow Fitness Production Transfer And Edge Allowlist Proof](../ops/DISCORD-OS-FEEDBACK-WORKFLOW-FITNESS-PRODUCTION-TRANSFER-AND-EDGE-ALLOWLIST-PROOF-2026-06-12.md)
+- [Discord OS Feedback Workflow Live Signed Event Recheck Hold](../ops/DISCORD-OS-FEEDBACK-WORKFLOW-LIVE-SIGNED-EVENT-RECHECK-HOLD-2026-06-12.md)
 - [Feedback Loop Readiness Deterministic Readiness Threshold Pass 1](../ops/FEEDBACK-LOOP-READINESS-DETERMINISTIC-READINESS-THRESHOLD-PASS-1-2026-06-01.md)
 - [AI Repetition-to-Automation Pipeline Automation-Candidate Threshold Pass 1](../ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-AUTOMATION-CANDIDATE-THRESHOLD-PASS-1-2026-06-01.md)
 - [AI Repetition-to-Automation Pipeline First-Safe Candidate Family Selection Pass 2](../ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-FIRST-SAFE-CANDIDATE-FAMILY-SELECTION-PASS-2-2026-06-03.md)
