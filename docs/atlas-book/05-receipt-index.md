@@ -33,6 +33,7 @@
 - [Root Validation Proof Closeout Marker-Surface Reconciliation](../ops/ROOT-VALIDATION-PROOF-CLOSEOUT-MARKER-SURFACE-RECONCILIATION-2026-06-08.md)
 - [Near-100 Marker Closeout Selector And Root Cleanup Preservation Pass 1](../ops/NEAR-100-MARKER-CLOSEOUT-SELECTOR-AND-ROOT-CLEANUP-PRESERVATION-PASS-1-2026-06-09.md)
 - [Near-100 Marker Closeout Selector After Naming And Discord Closeouts](../ops/NEAR-100-MARKER-CLOSEOUT-SELECTOR-AFTER-NAMING-AND-DISCORD-CLOSEOUTS-2026-06-12.md)
+- [Fitness Protected Marker Closeout After QA/LLEL Contract Refresh And Local Branch/Worktree Cleanup](../ops/FITNESS-PROTECTED-MARKER-CLOSEOUT-AFTER-QA-LLEL-CONTRACT-REFRESH-AND-LOCAL-BRANCH-WORKTREE-CLEANUP-2026-06-13.md)
 - [Brand Asset Canonicalization Trove Consumer Path Hash Parity Closeout](../ops/BRAND-ASSET-CANONICALIZATION-TROVE-CONSUMER-PATH-HASH-PARITY-CLOSEOUT-2026-06-12.md)
 - [Reduced Near-100 Marker Closeout Selector After Brand Closeout](../ops/REDUCED-NEAR-100-MARKER-CLOSEOUT-SELECTOR-AFTER-BRAND-CLOSEOUT-2026-06-12.md)
 - [FawxzzyFitness Feedback Board Ownership Check](../ops/FAWXZZY-FITNESS-FEEDBACK-BOARD-OWNERSHIP-CHECK-2026-06-10.md)
