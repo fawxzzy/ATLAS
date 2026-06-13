@@ -125,7 +125,7 @@ Later work stays clearly separate:
   - Discord bot credential now validates through a read-only `/users/@me` readiness probe
   - activation guard is live and fail-closed for writer, traffic-transfer, rollback, and parity-proof gates
   - feedback shadow writer proof endpoint is live and no-persistence
-  - guarded persisted-writer implementation endpoint is live, with proof-only Edge persistence available; final cutover still requires a real Discord-signed Fitness-origin event, a non-proof DiscordOS persistence path for that event, live traffic receipt ID capture, and live workflow parity receipt capture
+  - guarded persisted-writer implementation endpoint is live, with proof-only Edge persistence available and an authenticated Fitness-to-DiscordOS non-proof persistence path deployed; final cutover still requires one real Discord-signed Fitness-origin event that creates the human non-proof row plus live traffic receipt ID capture and live workflow parity receipt capture
   - not live Discord workflow owner yet
 
 ### Known stale or duplicate-pressure surfaces

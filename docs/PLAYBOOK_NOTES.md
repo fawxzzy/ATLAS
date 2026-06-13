@@ -1,5 +1,18 @@
 # Playbook Notes
 
+# 2026-06-12 - Authenticated non-proof path before live cutover
+
+- Rule: `Live Transfer Needs Authenticated Non-Proof Path Before Proof IDs`.
+- Rule: a non-proof live-transfer row must be accepted only from the verified Fitness-origin path, not from public Edge or Vercel calls that can spoof `fitness-live-transfer-*` payloads.
+- Pattern: `Discord Signature Verified By Fitness -> Shared Transfer Secret -> DiscordOS Non-Proof Persistence -> Live Row Recheck`.
+- Pattern: provision one shared transfer secret across Fitness Vercel, DiscordOS Vercel, and DiscordOS Supabase Edge, then prove no-secret spoof attempts fail before waiting for real live traffic.
+- Failure Mode: `Public Proof Endpoint Becomes Cutover Bypass`.
+- Failure Mode: if Edge persistence treats any human-looking `fitness-live-transfer-*` payload as non-proof, automation can fake cutover readiness without a Discord-signed Fitness-origin event.
+- Release-summary bullets:
+  - Deployed DiscordOS commit `1db8b1b`, Fitness commit `8e05d300`, and Fitness deployment `fawxzzy-fitness-ornettp9k-fawxzzy.vercel.app`.
+  - Provisioned `DISCORDOS_FEEDBACK_TRANSFER_SECRET` across DiscordOS Vercel, Fitness Vercel, and DiscordOS Supabase Edge without committing the value.
+  - Ratcheted `Discord OS Feedback Workflow Canonicalization` from `96%` to `98%`; `100%` still requires the real human non-proof row plus live traffic and live parity proof IDs.
+
 # 2026-06-12 - Proof-only transfer rows cannot close live cutover
 
 - Rule: `Proof-Only Transfer Rows Cannot Close Live Cutover`.
