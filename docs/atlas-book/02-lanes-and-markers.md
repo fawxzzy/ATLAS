@@ -33,14 +33,14 @@ Read:
 ### Discord workflow
 
 - `Discord OS Infrastructure Separation: 100%`
-- `Discord OS Feedback Workflow Canonicalization: 98%`
+- `Discord OS Feedback Workflow Canonicalization: 100%`
 - `Discord Workflow, Publication & Docs Reliability: 32%`
 
 Read:
 
 - separation infrastructure is closed
-- workflow doctrine and proof hygiene are strong
-- production transfer infrastructure, live writer proof, rollback execution proof, authenticated non-proof persistence path, first human proof-only live row, forum duplicate cleanup, the Vercel-to-Edge provenance fix, and the Fitness forum-post preservation fix now exist, but final live cutover is still blocked on one new post-fix Discord-signed Fitness-origin event that creates both the visible regular feedback forum card and the human non-proof row plus live traffic and live workflow parity receipt capture
+- workflow doctrine, proof hygiene, and the admitted live cutover are closed
+- production transfer infrastructure, live writer proof, rollback execution proof, authenticated non-proof persistence path, forum duplicate cleanup, Vercel-to-Edge provenance preservation, Fitness forum-post preservation, post-fix visible feedback card proof, human non-proof DiscordOS row proof, live traffic proof ID, live parity proof ID, and green live cutover guard now exist
 
 ### Naming / ownership hygiene
 
@@ -64,7 +64,7 @@ Read:
 - Knowledge Capture & Transfer: `84%`
 - Durable Context Externalization: `79%`
 - Discord OS Infrastructure Separation: `100%`
-- Discord OS Feedback Workflow Canonicalization: `98%`
+- Discord OS Feedback Workflow Canonicalization: `100%`
 
 ## Supporting Open Markers
 
@@ -112,7 +112,8 @@ Read:
 ## Closed / Locked Ratchets
 
 - Playbook Maturity: `100%`; Playbook-owned governance, doctrine, deterministic repo-intelligence, and verify/plan/apply maturity verified, while Playbook Everywhere + Cortex Interface remains separate
-- Discord OS Infrastructure Separation: `100%`; standalone DiscordOS repo, Supabase schema/function, Vercel project/env/deploy, bot token, and service-role proof path verified, while live workflow cutover and parity remain in `Discord OS Feedback Workflow Canonicalization`
+- Discord OS Infrastructure Separation: `100%`; standalone DiscordOS repo, Supabase schema/function, Vercel project/env/deploy, bot token, and service-role proof path verified; the formerly separate live workflow cutover and parity gate is now closed in `Discord OS Feedback Workflow Canonicalization`
+- Discord OS Feedback Workflow Canonicalization: `100%`; post-fix Fitness feedback submission `baae50a0`, visible feedback thread `1515161561684115609`, DiscordOS row `fitness-live-transfer-1515161549314986035`, proof IDs, deployment `dpl_BdRSCDcjSwNQnmaMRsr8G7kbEuws`, and live guards prove `writerActivationAllowed: true`, `liveCutover: true`, and `fitnessTrafficMoved: true`
 - Atlas-owned Repo Naming Canonicalization: `100%`; local path canonicalization plus GitHub remote-name canonicalization are proof-closed for the admitted non-exception repos, while `fawxzzy-fitness` remains the preserved exception and `stream` remains local/no-remote
 - Lifeline Readiness: `100%`; shipped local-first single-host operator scope verified, future hosted/health-projection surfaces remain later
 - ATLAS Core Phase: `100%`; root coordination substrate closed, owner/runtime lanes remain tracked separately

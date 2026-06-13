@@ -11,6 +11,7 @@ What is true right now:
 - the DiscordOS lookup-local boundary chain is fully ratcheted shut; no further repo-local lookup widening is open without higher-level authorization.
 - Fitness Supabase profile/data hygiene is closed as a governed lane at `100%`.
 - Discord and Music Sesh profile/data concerns are no longer Fitness hygiene debt and now belong to DiscordOS Infrastructure Separation.
+- Discord OS Feedback Workflow Canonicalization is closed at `100%`: a post-fix Fitness feedback submission created the visible regular feedback forum card, a human non-proof DiscordOS transfer row, live traffic proof ID, live parity proof ID, and green live cutover guard.
 - `_stack` remains the governed deploy authority for approved app lanes.
 - ATLAS root remains the coordination, receipt, and marker layer.
 - Playbook remains the reusable governance and doctrine owner.
@@ -42,8 +43,8 @@ Current status:
 - local repo now exists at `repos/DiscordOS`
 - contract docs, typed seams, adapter stubs, and lookup boundary receipts exist
 - DiscordOS production infrastructure is live, including Vercel, Supabase schema/function, bot-token readiness, and service-role proof through Supabase Edge
-- the Fitness-to-DiscordOS feedback transfer branch is deployed to Fitness production with active transfer env, DiscordOS accepts `fitness-live-transfer-*` proof rows through the deployed Vercel plus Supabase Edge writer path, and Fitness now creates the regular visible feedback forum card before mirroring to DiscordOS
-- final workflow cutover remains blocked until a new post-fix real Discord-signed Fitness-origin feedback event creates both the visible feedback forum card and a human non-proof DiscordOS transfer row, followed by live traffic and live workflow parity receipt IDs; rollback execution is now proven and wired into DiscordOS readiness
+- the Fitness-to-DiscordOS feedback workflow cutover is now proof-closed: Fitness row `baae50a0` created visible regular feedback forum thread `1515161561684115609`, DiscordOS row `fitness-live-transfer-1515161549314986035` is human and non-proof, and DiscordOS production reports `writerActivationAllowed: true`, `liveCutover: true`, and `fitnessTrafficMoved: true`
+- rollback execution remains proven and wired into DiscordOS readiness; broader Discord publication, moderation, Music Sesh, and future DiscordOS product workflows remain separate markers
 
 ### `_stack`
 

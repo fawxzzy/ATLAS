@@ -1,5 +1,17 @@
 # Playbook Notes
 
+# 2026-06-12 - DiscordOS feedback workflow live cutover closes
+
+- Rule: `Live Cutover Requires Visible Card Plus Non-Proof Row Plus Proof IDs`.
+- Rule: a DiscordOS feedback workflow marker can close only when the same post-fix user submission proves the visible feedback forum card, the human non-proof DiscordOS transfer row, and the live traffic/parity proof IDs.
+- Pattern: `Fitness Feedback Card -> Human Non-Proof DiscordOS Transfer Row -> Proof IDs -> Activation Guard Green`.
+- Failure Mode: `Partial Cutover Proof`.
+- Failure Mode: a backend transfer row without the visible board card, or a visible card without live guard proof IDs, is not enough for final workflow closure.
+- Release-summary bullets:
+  - User submission `baae50a0` created visible regular feedback forum thread `1515161561684115609` and DiscordOS row `fitness-live-transfer-1515161549314986035`.
+  - DiscordOS production deployment `dpl_BdRSCDcjSwNQnmaMRsr8G7kbEuws` reports `writerActivationAllowed: true`, `liveCutover: true`, and `fitnessTrafficMoved: true`.
+  - Ratcheted `Discord OS Feedback Workflow Canonicalization` from `98%` to `100%`.
+
 # 2026-06-12 - Transfer mirrors must preserve the visible feedback board
 
 - Rule: `Feedback Transfer Must Preserve Visible Board Post`.
