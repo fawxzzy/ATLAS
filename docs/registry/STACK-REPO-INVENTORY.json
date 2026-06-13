@@ -3,14 +3,14 @@
   "stack_manifest_ref": "stack.yaml",
   "stack_manifest_digest": "sha256:0587ec9f23abdb48af68ccb99a8afa775fea50f108302d71053a7072ff247a18",
   "stack_lock_ref": "stack.lock.yaml",
-  "stack_lock_digest": "sha256:3171e3f105bc6807dcaadcc9f87e8b2f9676830df5b88dad2f9e7ead85b316f5",
-  "working_memory_digest": "sha256:71de017c91e3bccfc9cf1b83bc6af152d42b7e99d992f8721589e635b74941a3",
+  "stack_lock_digest": "sha256:1bfd75fbcc479495783ab55b63a76fb8099cae8f0ed02889faabb044f71c2947",
+  "working_memory_digest": "sha256:2b68b9f9010818963b4fae5d5826656e72aa46f87be049e9aa9ff122b87d8681",
   "published_refs": {
     "json": "docs/registry/STACK-REPO-INVENTORY.json",
     "markdown": "docs/audits/STACK-REPO-INVENTORY.md"
   },
   "repo_count": 12,
-  "dirty_repo_count": 3,
+  "dirty_repo_count": 4,
   "release_eligible_count": 5,
   "repos": [
     {
@@ -56,14 +56,14 @@
       "role": "application",
       "status": "incubating",
       "remote_url": "https://github.com/fawxzzy/DiscordOS.git",
-      "pinned_commit": "a2c691c957fe5823da144a51687426e1c5a5f11d",
-      "current_commit": "a2c691c957fe5823da144a51687426e1c5a5f11d",
+      "pinned_commit": "9d71af5ca941ec5acfef2825ad83cb2d1d448ec0",
+      "current_commit": "9d71af5ca941ec5acfef2825ad83cb2d1d448ec0",
       "pinned_ref_type": "branch",
       "pinned_ref": "codex/path-discipline-warning-slice-discordos",
       "current_ref_type": "branch",
       "current_ref": "codex/path-discipline-warning-slice-discordos",
       "branch": "codex/path-discipline-warning-slice-discordos",
-      "dirty": false,
+      "dirty": true,
       "trust_class": "trusted",
       "release_eligible": false,
       "exists": true,
@@ -73,7 +73,7 @@
           "initiative_ref": "initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization",
           "title": "Continuity Manifest Discord OS Feedback Workflow Canonicalization",
           "path": "docs/memory/initiatives/continuity-manifest-discord-os-feedback-workflow-canonicalization.json",
-          "status": "active"
+          "status": "completed"
         },
         {
           "initiative_ref": "initiative:continuity-manifest-discord-os-infrastructure-separation",
@@ -94,12 +94,12 @@
       "status": "unmanaged",
       "remote_url": "https://github.com/fawxzzy/fawxzzy-fitness.git",
       "pinned_commit": null,
-      "current_commit": "f1f88a0bc9ff15f914df8fca28d37036f3c70fe0",
+      "current_commit": "93dbbbb1e1f5983812ce7170b07855a0c12d9370",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
-      "current_ref": "main",
-      "branch": "main",
+      "current_ref": "codex/logged-session-screen-pass",
+      "branch": "codex/logged-session-screen-pass",
       "dirty": true,
       "trust_class": "adjacent",
       "release_eligible": false,
@@ -116,7 +116,7 @@
           "initiative_ref": "initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization",
           "title": "Continuity Manifest Discord OS Feedback Workflow Canonicalization",
           "path": "docs/memory/initiatives/continuity-manifest-discord-os-feedback-workflow-canonicalization.json",
-          "status": "active"
+          "status": "completed"
         },
         {
           "initiative_ref": "initiative:continuity-manifest-discord-os-infrastructure-separation",
@@ -282,7 +282,7 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "5559038c4eef031707c6703f2b90775e7106c46f",
+      "current_commit": "a9555ea316c25bae8199f40b79af78406e748c04",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
@@ -323,8 +323,8 @@
       "role": "application",
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/trove.git",
-      "pinned_commit": "d03309718335e45669d747ddb53799a3de26af5c",
-      "current_commit": "d03309718335e45669d747ddb53799a3de26af5c",
+      "pinned_commit": "cd572452b627c6a03dbdb440f9b4e431d9b8ed98",
+      "current_commit": "cd572452b627c6a03dbdb440f9b4e431d9b8ed98",
       "pinned_ref_type": "branch",
       "pinned_ref": "codex/path-discipline-warning-slice-trove",
       "current_ref_type": "branch",
@@ -495,5 +495,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:cb4e1122c7bde3bffbc97a7ce75d691dfe9d0f41dad450fc1567ea7347c347a4"
+  "content_digest": "sha256:4eb89005697a5bb49316a0b0712a656c7d89bbad7fb9fef53968905a8c6d7641"
 }

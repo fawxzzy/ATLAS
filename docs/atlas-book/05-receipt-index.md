@@ -32,6 +32,8 @@
 - [Root Validation Proof Closeout Restart-Surface Reconciliation](../ops/ROOT-VALIDATION-PROOF-CLOSEOUT-RESTART-SURFACE-RECONCILIATION-2026-06-08.md)
 - [Root Validation Proof Closeout Marker-Surface Reconciliation](../ops/ROOT-VALIDATION-PROOF-CLOSEOUT-MARKER-SURFACE-RECONCILIATION-2026-06-08.md)
 - [Near-100 Marker Closeout Selector And Root Cleanup Preservation Pass 1](../ops/NEAR-100-MARKER-CLOSEOUT-SELECTOR-AND-ROOT-CLEANUP-PRESERVATION-PASS-1-2026-06-09.md)
+- [Near-100 Marker Closeout Selector After Naming And Discord Closeouts](../ops/NEAR-100-MARKER-CLOSEOUT-SELECTOR-AFTER-NAMING-AND-DISCORD-CLOSEOUTS-2026-06-12.md)
+- [Brand Asset Canonicalization Trove Consumer Path Hash Parity Closeout](../ops/BRAND-ASSET-CANONICALIZATION-TROVE-CONSUMER-PATH-HASH-PARITY-CLOSEOUT-2026-06-12.md)
 - [FawxzzyFitness Feedback Board Ownership Check](../ops/FAWXZZY-FITNESS-FEEDBACK-BOARD-OWNERSHIP-CHECK-2026-06-10.md)
 - [Workstation Resource Hygiene Baseline And Codex QALLL Closeout Contract Pass 1](../ops/WORKSTATION-RESOURCE-HYGIENE-BASELINE-AND-CODEX-QALLL-CLOSEOUT-CONTRACT-PASS-1-2026-06-11.md)
 - [Verta-Core Final Closeout Eligibility Pass 1](../ops/VERTA-CORE-FINAL-CLOSEOUT-ELIGIBILITY-PASS-1-2026-06-11.md)

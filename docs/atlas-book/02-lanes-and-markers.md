@@ -34,6 +34,7 @@ Read:
 
 - `Discord OS Infrastructure Separation: 100%`
 - `Discord OS Feedback Workflow Canonicalization: 100%`
+- `DiscordOS Runtime & Product Hardening: 15%`
 - `Discord Workflow, Publication & Docs Reliability: 32%`
 
 Read:
@@ -41,6 +42,7 @@ Read:
 - separation infrastructure is closed
 - workflow doctrine, proof hygiene, and the admitted live cutover are closed
 - production transfer infrastructure, live writer proof, rollback execution proof, authenticated non-proof persistence path, forum duplicate cleanup, Vercel-to-Edge provenance preservation, Fitness forum-post preservation, post-fix visible feedback card proof, human non-proof DiscordOS row proof, live traffic proof ID, live parity proof ID, and green live cutover guard now exist
+- runtime/product hardening is newly open as the broad DiscordOS improvement lane; pass 1 adds a repo-local runtime-health classifier for server, bot, service-role, writer, activation, and live-transfer posture without opening a named feature lane
 
 ### Naming / ownership hygiene
 
@@ -65,6 +67,7 @@ Read:
 - Durable Context Externalization: `79%`
 - Discord OS Infrastructure Separation: `100%`
 - Discord OS Feedback Workflow Canonicalization: `100%`
+- DiscordOS Runtime & Product Hardening: `15%`
 
 ## Supporting Open Markers
 
@@ -74,7 +77,6 @@ Read:
 - Fitness Recovery Preservation: `80%`
 - Tmp Dependency Elimination: `90%`
 - Duplicate Surface Decommission: `98%`
-- Brand Asset Canonicalization: `90%`
 - Preview Cache & Surface Consistency: `78%`
 - Operator Secret Path Hygiene: `64%`
 - Manual Deploy Exception Burn-Down: `84%`
@@ -82,6 +84,7 @@ Read:
 - Vision & Future Alignment: `25%`
 - Core Pattern Convergence: `43%`
 - Discord Workflow, Publication & Docs Reliability: `32%`
+- DiscordOS Runtime & Product Hardening: `15%`
 - Playbook Everywhere + Cortex Interface: `22%`
 - AI Repetition-to-Automation Pipeline: `32%`
 - AI Long-Run Batch Orchestration: `29%`
@@ -115,6 +118,7 @@ Read:
 - Discord OS Infrastructure Separation: `100%`; standalone DiscordOS repo, Supabase schema/function, Vercel project/env/deploy, bot token, and service-role proof path verified; the formerly separate live workflow cutover and parity gate is now closed in `Discord OS Feedback Workflow Canonicalization`
 - Discord OS Feedback Workflow Canonicalization: `100%`; post-fix Fitness feedback submission `baae50a0`, visible feedback thread `1515161561684115609`, DiscordOS row `fitness-live-transfer-1515161549314986035`, proof IDs, deployment `dpl_BdRSCDcjSwNQnmaMRsr8G7kbEuws`, and live guards prove `writerActivationAllowed: true`, `liveCutover: true`, and `fitnessTrafficMoved: true`
 - Atlas-owned Repo Naming Canonicalization: `100%`; local path canonicalization plus GitHub remote-name canonicalization are proof-closed for the admitted non-exception repos, while `fawxzzy-fitness` remains the preserved exception and `stream` remains local/no-remote
+- Brand Asset Canonicalization: `100%`; `_stack` launcher and all declared Fitness consumers already matched canonical ATLAS brand outputs, the Trove consumer manifest paths were reconciled from stale `repos/fawxzzy-trove/...` references to canonical `repos/trove/...` targets after repo naming closed, the seven canonical Trove public brand/icon/favicon consumers were re-synced from governed ATLAS outputs, and `npm run verify` passed in `repos/trove`, while downstream browser/cache proof remains explicitly split into `Preview Cache & Surface Consistency`
 - Lifeline Readiness: `100%`; shipped local-first single-host operator scope verified, future hosted/health-projection surfaces remain later
 - ATLAS Core Phase: `100%`; root coordination substrate closed, owner/runtime lanes remain tracked separately
 - Verta Absorption: `100%`; scoped to trusted Verta-core absorption only, while raw Verta remains trust-gated, untrusted, non-release, and non-executable

@@ -12,6 +12,7 @@ What is true right now:
 - Fitness Supabase profile/data hygiene is closed as a governed lane at `100%`.
 - Discord and Music Sesh profile/data concerns are no longer Fitness hygiene debt and now belong to DiscordOS Infrastructure Separation.
 - Discord OS Feedback Workflow Canonicalization is closed at `100%`: a post-fix Fitness feedback submission created the visible regular feedback forum card, a human non-proof DiscordOS transfer row, live traffic proof ID, live parity proof ID, and green live cutover guard.
+- DiscordOS Runtime & Product Hardening is newly open at `15%`: `repos/DiscordOS` now has a verified `/api/runtime-health` classifier for broad server, bot, service-role, writer, activation, and live-transfer posture without opening a named feature lane.
 - `_stack` remains the governed deploy authority for approved app lanes.
 - ATLAS root remains the coordination, receipt, and marker layer.
 - Playbook remains the reusable governance and doctrine owner.
@@ -45,6 +46,7 @@ Current status:
 - DiscordOS production infrastructure is live, including Vercel, Supabase schema/function, bot-token readiness, and service-role proof through Supabase Edge
 - the Fitness-to-DiscordOS feedback workflow cutover is now proof-closed: Fitness row `baae50a0` created visible regular feedback forum thread `1515161561684115609`, DiscordOS row `fitness-live-transfer-1515161549314986035` is human and non-proof, and DiscordOS production reports `writerActivationAllowed: true`, `liveCutover: true`, and `fitnessTrafficMoved: true`
 - rollback execution remains proven and wired into DiscordOS readiness; broader Discord publication, moderation, Music Sesh, and future DiscordOS product workflows remain separate markers
+- broad DiscordOS runtime/product hardening can now proceed through generic server, bot, runtime-health, observability, and operator-surface improvements without reopening the closed feedback workflow marker
 
 ### `_stack`
 
@@ -458,6 +460,7 @@ What the latest closeout passes proved:
 
 - branch/worktree pressure is classified and no longer blocked by the Lifeline missing-config class
 - `tmp` is no longer acting as production-critical source truth
+- Brand Asset Canonicalization is now closed at `100%`: `_stack` and Fitness consumers were already hash-aligned to canonical ATLAS outputs, the remaining blocker was stale Trove manifest path truth after repo naming plus seven drifted Trove public brand consumers, and that blocker is now cleared by canonical `repos/trove/...` manifest paths, seven-file Trove consumer re-sync, and passing `npm run verify` in `repos/trove`; downstream browser/cache/unfurl proof remains explicitly separate in `Preview Cache & Surface Consistency`
 - the remaining helper Vercel project class is closed; duplicate-surface pressure is no longer centered on live helper projects
 - unrelated Fitness residue is classified enough to keep it out of DiscordOS, Supabase, and stack closeout lanes
 - Fitness profile-core cleanup is fully closed; no unresolved unknown-profile, never-signed-in auth-only, or legacy automation-mismatch class remains in that lane

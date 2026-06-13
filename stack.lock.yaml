@@ -109,7 +109,7 @@ components:
     remote: "https://github.com/fawxzzy/trove.git"
     ref_type: "branch"
     ref: "codex/path-discipline-warning-slice-trove"
-    commit: "d03309718335e45669d747ddb53799a3de26af5c"
+    commit: "cd572452b627c6a03dbdb440f9b4e431d9b8ed98"
     dirty: false
     trust_class: "trusted"
     release_eligible: true
@@ -216,4 +216,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:6b9fa61d4df735c7b80818d20cb6ecd2694d1a9c91f118b5ba78f48240e648af"
+lock_digest: "sha256:1bfd75fbcc479495783ab55b63a76fb8099cae8f0ed02889faabb044f71c2947"

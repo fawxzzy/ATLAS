@@ -14,29 +14,29 @@ Operational rule:
 ## Summary
 
 - Repo count: `12`
-- Dirty repo count: `3`
+- Dirty repo count: `4`
 - Release-eligible repo count: `5`
 - Excluded surface count: `17`
 - Stack manifest: `stack.yaml`
 - Stack lock: `stack.lock.yaml`
-- Inventory digest: `sha256:cb4e1122c7bde3bffbc97a7ce75d691dfe9d0f41dad450fc1567ea7347c347a4`
+- Inventory digest: `sha256:4eb89005697a5bb49316a0b0712a656c7d89bbad7fb9fef53968905a8c6d7641`
 
 ## Managed Repos
 
 | Repo id | Path | Branch | Pinned commit | Current commit | Dirty | Trust | Release | Related initiatives |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | _stack | repos/_stack | main | c72b47726f67b4e0474113229368106b41fbbf76 | c72b47726f67b4e0474113229368106b41fbbf76 | False | trusted | False | initiative:continuity-manifest-local-data-gateway<br>initiative:continuity-manifest-stack-readiness |
-| discordos | repos/DiscordOS | codex/path-discipline-warning-slice-discordos | a2c691c957fe5823da144a51687426e1c5a5f11d | a2c691c957fe5823da144a51687426e1c5a5f11d | False | trusted | False | initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-discord-os-infrastructure-separation |
-| fitness | repos/fawxzzy-fitness | main | - | f1f88a0bc9ff15f914df8fca28d37036f3c70fe0 | True | adjacent | False | initiative:continuity-manifest-dependency-untangling<br>initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-discord-os-infrastructure-separation |
+| discordos | repos/DiscordOS | codex/path-discipline-warning-slice-discordos | 9d71af5ca941ec5acfef2825ad83cb2d1d448ec0 | 9d71af5ca941ec5acfef2825ad83cb2d1d448ec0 | True | trusted | False | initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-discord-os-infrastructure-separation |
+| fitness | repos/fawxzzy-fitness | codex/logged-session-screen-pass | - | 93dbbbb1e1f5983812ce7170b07855a0c12d9370 | True | adjacent | False | initiative:continuity-manifest-dependency-untangling<br>initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-discord-os-infrastructure-separation |
 | foundation | repos/foundation | main | a016da2f08f167747f7ae7c804c0d6840cb9514d | a016da2f08f167747f7ae7c804c0d6840cb9514d | False | trusted | True | - |
 | lifeline | repos/lifeline | codex/path-discipline-warning-slice-lifeline | 1994e64a09128d848048ba57cfd76fba278cc655 | 1994e64a09128d848048ba57cfd76fba278cc655 | False | trusted | True | - |
 | mazer | repos/mazer | codex/path-discipline-warning-slice-mazer-pub | fcf7f5f22ac3656f4dcd1e260c54a78f570d1a32 | fcf7f5f22ac3656f4dcd1e260c54a78f570d1a32 | False | trusted | True | initiative:initiative-mazer-d2-learning-scorer |
 | nat1-games | repos/Nat1-Games/nat1-games | codex/path-discipline-warning-slice-nat1 | 63a4a7c159c41a7e98ad8708891743acf71431ed | 63a4a7c159c41a7e98ad8708891743acf71431ed | False | trusted | False | - |
 | playbook | repos/playbook | codex/path-discipline-warning-slice-playbook | f27c36355da906a01a46a841779553002c259f9b | f27c36355da906a01a46a841779553002c259f9b | True | trusted | True | initiative:continuity-manifest-atlas-owned-repo-naming-canonicalization |
 | playbook-demo | repos/playbook-demo/playbook-demo | main | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | False | trusted | False | - |
-| stack | . | main | - | 5559038c4eef031707c6703f2b90775e7106c46f | True | trusted | False | - |
+| stack | . | main | - | a9555ea316c25bae8199f40b79af78406e748c04 | True | trusted | False | - |
 | stream | repos/stream | main | bf2c9551225e6d3555122da9a72306556f50cdd8 | bf2c9551225e6d3555122da9a72306556f50cdd8 | False | trusted | False | - |
-| trove | repos/trove | codex/path-discipline-warning-slice-trove | d03309718335e45669d747ddb53799a3de26af5c | d03309718335e45669d747ddb53799a3de26af5c | False | trusted | True | - |
+| trove | repos/trove | codex/path-discipline-warning-slice-trove | cd572452b627c6a03dbdb440f9b4e431d9b8ed98 | cd572452b627c6a03dbdb440f9b4e431d9b8ed98 | False | trusted | True | - |
 
 ## Excluded Surfaces
 
