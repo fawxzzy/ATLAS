@@ -1,5 +1,17 @@
 # Playbook Notes
 
+# 2026-06-12 - Preserve provenance across authenticated proxy hops
+
+- Rule: `Authenticated Transfer Proof Must Survive Every Hop`.
+- Rule: if Vercel authenticates a transfer and then delegates persistence to Edge, the delegated payload must preserve the provenance fields Edge uses for classification.
+- Pattern: `Signed Fitness interaction -> Vercel shared-secret auth -> preserved source/proof fields -> Edge non-proof classification`.
+- Failure Mode: `Authenticated Proxy Strips Provenance`.
+- Failure Mode: a real human submission can become proof-only when an intermediate service normalizes the row and drops the fields the downstream writer needs to classify the row as live.
+- Release-summary bullets:
+  - Live user test `fitness-live-transfer-1515148121418629341` reached DiscordOS as a human bug row but remained proof-only.
+  - DiscordOS commit `7cc0720` preserves Fitness provenance fields across the Vercel-to-Edge persistence hop and production deployment `fawxzzy-discordos-46qhobmd7-fawxzzy.vercel.app` passed `npm run verify`.
+  - The regular Discord `feedback` forum cleanup deleted 19 archived Fitness duplicate threads; the dedicated `fawxzzy-fitness` forum retained the migrated cards.
+
 # 2026-06-12 - Authenticated non-proof path before live cutover
 
 - Rule: `Live Transfer Needs Authenticated Non-Proof Path Before Proof IDs`.
