@@ -1,5 +1,17 @@
 # Playbook Notes
 
+# 2026-06-12 - Transfer mirrors must preserve the visible feedback board
+
+- Rule: `Feedback Transfer Must Preserve Visible Board Post`.
+- Rule: DiscordOS mirroring cannot bypass the normal feedback forum card; user-created feedback must post to the regular feedback channel first.
+- Pattern: `Discord Signature Verified By Fitness -> Fitness Feedback Row And Forum Thread -> DiscordOS Mirror With Forum Metadata`.
+- Failure Mode: `Transfer Mirror Bypasses Community Board`.
+- Failure Mode: treating the future-owner mirror as primary can make a submission reach backend transfer proof while the user-visible feedback channel stays empty.
+- Release-summary bullets:
+  - Fixed Fitness commit `93dbbbb1` so `discordos-primary` mode creates the normal Fitness feedback row and Discord forum thread before mirroring to DiscordOS.
+  - Deployed Fitness production `fawxzzy-fitness-88482z8ue-fawxzzy.vercel.app` and alias `fawxzzy-fitness-local.vercel.app`.
+  - Kept `Discord OS Feedback Workflow Canonicalization` at `98%`; `100%` still requires one new post-fix Discord-signed Fitness-origin submission that creates both the visible feedback card and a human non-proof DiscordOS transfer row plus live proof IDs.
+
 # 2026-06-12 - Preserve provenance across authenticated proxy hops
 
 - Rule: `Authenticated Transfer Proof Must Survive Every Hop`.

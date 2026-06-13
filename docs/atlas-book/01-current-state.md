@@ -42,8 +42,8 @@ Current status:
 - local repo now exists at `repos/DiscordOS`
 - contract docs, typed seams, adapter stubs, and lookup boundary receipts exist
 - DiscordOS production infrastructure is live, including Vercel, Supabase schema/function, bot-token readiness, and service-role proof through Supabase Edge
-- the Fitness-to-DiscordOS feedback transfer branch is deployed to Fitness production with active transfer env, and DiscordOS now accepts `fitness-live-transfer-*` proof rows through the deployed Vercel plus Supabase Edge writer path
-- final workflow cutover remains blocked until a real Discord-signed Fitness-origin feedback event plus live traffic and live workflow parity receipt IDs exist; rollback execution is now proven and wired into DiscordOS readiness
+- the Fitness-to-DiscordOS feedback transfer branch is deployed to Fitness production with active transfer env, DiscordOS accepts `fitness-live-transfer-*` proof rows through the deployed Vercel plus Supabase Edge writer path, and Fitness now creates the regular visible feedback forum card before mirroring to DiscordOS
+- final workflow cutover remains blocked until a new post-fix real Discord-signed Fitness-origin feedback event creates both the visible feedback forum card and a human non-proof DiscordOS transfer row, followed by live traffic and live workflow parity receipt IDs; rollback execution is now proven and wired into DiscordOS readiness
 
 ### `_stack`
 

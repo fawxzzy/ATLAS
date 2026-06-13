@@ -40,7 +40,7 @@ Read:
 
 - separation infrastructure is closed
 - workflow doctrine and proof hygiene are strong
-- production transfer infrastructure, live writer proof, rollback execution proof, authenticated non-proof persistence path, first human proof-only live row, forum duplicate cleanup, and the Vercel-to-Edge provenance fix now exist, but final live cutover is still blocked on one new post-fix Discord-signed Fitness-origin event that creates the human non-proof row plus live traffic and live workflow parity receipt capture
+- production transfer infrastructure, live writer proof, rollback execution proof, authenticated non-proof persistence path, first human proof-only live row, forum duplicate cleanup, the Vercel-to-Edge provenance fix, and the Fitness forum-post preservation fix now exist, but final live cutover is still blocked on one new post-fix Discord-signed Fitness-origin event that creates both the visible regular feedback forum card and the human non-proof row plus live traffic and live workflow parity receipt capture
 
 ### Naming / ownership hygiene
 

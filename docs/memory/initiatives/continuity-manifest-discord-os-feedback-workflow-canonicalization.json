@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-05-27T00:00:00Z",
-  "updated_at": "2026-06-12T20:35:00-04:00",
+  "updated_at": "2026-06-12T20:44:00-04:00",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -84,7 +84,8 @@
     "repos/DiscordOS/docs/ops/discordos-authenticated-fitness-live-transfer-path-2026-06-12.md",
     "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORDOS-AUTHENTICATED-LIVE-TRANSFER-HANDOFF-2026-06-12.md",
     "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-LIVE-HUMAN-PROOF-ONLY-RECHECK-AND-PROVENANCE-FIX-2026-06-12.md",
-    "repos/DiscordOS/docs/ops/discordos-fitness-transfer-provenance-edge-hop-fix-2026-06-12.md"
+    "repos/DiscordOS/docs/ops/discordos-fitness-transfer-provenance-edge-hop-fix-2026-06-12.md",
+    "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-FITNESS-FORUM-POST-PRESERVATION-FIX-2026-06-12.md"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -92,9 +93,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "discord-os-feedback-workflow-canonicalization",
     "scope_class": "cross-repo-governance-with-fitness-live-owner",
-    "current_checkpoint_receipt": "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-LIVE-HUMAN-PROOF-ONLY-RECHECK-AND-PROVENANCE-FIX-2026-06-12.md",
-    "checkpoint_commit": "ba6ecb6",
-    "checkpoint_summary": "The lane holds at 98 percent after the first real human Fitness-origin live transfer attempt. User submission `test 06-12-26` reached DiscordOS as `fitness-live-transfer-1515148121418629341`, `report_type: bug`, and `reporter_user_kind: human`, but the row retained `edge_persist_writer_proof_only`, leaving `humanNonProofFitnessLiveTransferCount: 0`. DiscordOS commit `7cc0720` fixed the Vercel-to-Edge provenance strip, owner receipt commit `ba6ecb6` recorded the fix, and production deployment `fawxzzy-discordos-46qhobmd7-fawxzzy.vercel.app` is live. The regular Discord `feedback` forum cleanup deleted 19 archived Fitness duplicate source threads and left zero title overlap with the `fawxzzy-fitness` forum. The exact remaining blocker is one new real Discord-signed Fitness-origin feedback interaction after that deployment that creates a human non-proof DiscordOS transfer row, followed by live traffic and live workflow parity proof ID capture.",
+    "current_checkpoint_receipt": "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-FITNESS-FORUM-POST-PRESERVATION-FIX-2026-06-12.md",
+    "checkpoint_commit": "93dbbbb1",
+    "checkpoint_summary": "The lane holds at 98 percent after the Fitness forum-post preservation fix. User submission `test 06-12-26` reached DiscordOS as `fitness-live-transfer-1515148121418629341`, `report_type: bug`, and `reporter_user_kind: human`, but the row retained `edge_persist_writer_proof_only`, leaving `humanNonProofFitnessLiveTransferCount: 0`. DiscordOS commit `7cc0720` fixed the Vercel-to-Edge provenance strip and production deployment `fawxzzy-discordos-46qhobmd7-fawxzzy.vercel.app` is live. Fitness commit `93dbbbb1` and production deployment `fawxzzy-fitness-88482z8ue-fawxzzy.vercel.app` now create the regular visible feedback row and Discord forum thread before mirroring to DiscordOS with forum metadata. The exact remaining blocker is one new real Discord-signed Fitness-origin feedback interaction after those deployments that creates both the visible regular feedback forum card and a human non-proof DiscordOS transfer row, followed by live traffic and live workflow parity proof ID capture.",
     "governing_receipts": [
       "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-CANONICALIZATION-2026-05-27.md",
       "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-CANONICAL-CONTRACTS-PASS-1-2026-05-27.md",
@@ -157,7 +158,8 @@
       "repos/DiscordOS/docs/ops/discordos-authenticated-fitness-live-transfer-path-2026-06-12.md",
       "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORDOS-AUTHENTICATED-LIVE-TRANSFER-HANDOFF-2026-06-12.md",
       "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-LIVE-HUMAN-PROOF-ONLY-RECHECK-AND-PROVENANCE-FIX-2026-06-12.md",
-      "repos/DiscordOS/docs/ops/discordos-fitness-transfer-provenance-edge-hop-fix-2026-06-12.md"
+      "repos/DiscordOS/docs/ops/discordos-fitness-transfer-provenance-edge-hop-fix-2026-06-12.md",
+      "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-FITNESS-FORUM-POST-PRESERVATION-FIX-2026-06-12.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -167,6 +169,10 @@
       {
         "path": "repos/fawxzzy-fitness/docs/ops/FITNESS-FEEDBACK-BOARD.md",
         "role": "board and lifecycle truth"
+      },
+      {
+        "path": "repos/fawxzzy-fitness/src/app/api/discord/interactions/route.ts",
+        "role": "current feedback submission implementation; creates visible forum card before DiscordOS mirror"
       },
       {
         "path": "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-UPDATES.md",
@@ -293,33 +299,37 @@
       {
         "path": "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-LIVE-HUMAN-PROOF-ONLY-RECHECK-AND-PROVENANCE-FIX-2026-06-12.md",
         "role": "live human Fitness-origin proof-only recheck, provenance fix, forum duplicate cleanup, and exact 98 percent hold proof"
+      },
+      {
+        "path": "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-FITNESS-FORUM-POST-PRESERVATION-FIX-2026-06-12.md",
+        "role": "Fitness forum-post preservation fix, DiscordOS mirror metadata proof, and exact 98 percent hold proof"
       }
     ],
     "blocked_or_gated_work": [
       {
         "item": "runtime migration",
-        "requirement": "blocked pending one new real Discord-signed Fitness-origin feedback interaction after DiscordOS deployment fawxzzy-discordos-46qhobmd7-fawxzzy.vercel.app that creates a human non-proof DiscordOS transfer row, followed by live traffic receipt ID capture and live workflow parity proof ID capture"
+        "requirement": "blocked pending one new real Discord-signed Fitness-origin feedback interaction after Fitness deployment fawxzzy-fitness-88482z8ue-fawxzzy.vercel.app and DiscordOS deployment fawxzzy-discordos-46qhobmd7-fawxzzy.vercel.app that creates both a visible regular feedback forum card and a human non-proof DiscordOS transfer row, followed by live traffic receipt ID capture and live workflow parity proof ID capture"
       },
       {
         "item": "schema migration and owner transfer",
-        "requirement": "DiscordOS schema landing, read-only readiness, activation guard, no-persistence shadow writer proof, guarded persisted-writer implementation path, Edge-backed proof-only persistence, proof-only shadow transfer, shadow parity, active writer posture, active traffic posture, rollback-ready posture, Fitness production transfer env, live writer-path proof, live-transfer status proof-capture surface, rollback execution proof, authenticated non-proof persistence path, and Vercel-to-Edge provenance handoff fix exist, but live writer ownership transfer is still blocked until one new real Discord-signed Fitness-origin feedback interaction creates a human non-proof DiscordOS transfer row and live traffic plus live workflow parity receipt IDs are captured"
+        "requirement": "DiscordOS schema landing, read-only readiness, activation guard, no-persistence shadow writer proof, guarded persisted-writer implementation path, Edge-backed proof-only persistence, proof-only shadow transfer, shadow parity, active writer posture, active traffic posture, rollback-ready posture, Fitness production transfer env, live writer-path proof, live-transfer status proof-capture surface, rollback execution proof, authenticated non-proof persistence path, Vercel-to-Edge provenance handoff fix, and Fitness forum-post preservation fix exist, but live writer ownership transfer is still blocked until one new real Discord-signed Fitness-origin feedback interaction creates both a visible regular feedback forum card and a human non-proof DiscordOS transfer row and live traffic plus live workflow parity receipt IDs are captured"
       },
       {
         "item": "fresh-submit live row-thread-message proof and broader deploy-backed parity",
-        "requirement": "bot credential readiness, activation guard readiness, no-persistence shadow writer readiness, guarded persisted-writer implementation, Edge-backed proof-only persistence, proof-only shadow transfer, shadow parity, active posture, Fitness production transfer deployment, Edge/RPC `fitness-live-transfer-*` allowlist, direct live writer proof, live-transfer status proof-capture, rollback execution proof, authenticated non-proof persistence path, live human proof-only recheck, and Vercel-to-Edge provenance handoff fix are now proven, but no post-fix real Discord-signed Fitness-origin release traffic has reached DiscordOS as a human non-proof persisted row, live traffic and live workflow parity receipt IDs are still absent, and broader audit-comment, completion-review, success-reaction, release-boundary, and no-regression parity families remain open"
+        "requirement": "bot credential readiness, activation guard readiness, no-persistence shadow writer readiness, guarded persisted-writer implementation, Edge-backed proof-only persistence, proof-only shadow transfer, shadow parity, active posture, Fitness production transfer deployment, Edge/RPC `fitness-live-transfer-*` allowlist, direct live writer proof, live-transfer status proof-capture, rollback execution proof, authenticated non-proof persistence path, live human proof-only recheck, Vercel-to-Edge provenance handoff fix, and Fitness forum-post preservation fix are now proven, but no post-fix real Discord-signed Fitness-origin release traffic has created both a visible regular feedback forum card and a DiscordOS human non-proof persisted row, live traffic and live workflow parity receipt IDs are still absent, and broader audit-comment, completion-review, success-reaction, release-boundary, and no-regression parity families remain open"
       }
     ],
     "next_package_ladder": [
       {
         "package": "Discord-signed Fitness-origin transfer and live parity proof packet",
         "mode": "owner-side cutover proof capture",
-        "reason": "Fitness production transfer deployment, DiscordOS Edge/RPC allowlist, the direct live writer path, the live-transfer status proof-capture surface, rollback execution, authenticated non-proof persistence path, and Vercel-to-Edge provenance handoff fix are now proven, so the next real blocker-clearance work must route one new real Discord-signed Fitness-origin feedback event into DiscordOS as a human non-proof persisted row and capture live traffic plus live workflow parity receipt IDs."
+        "reason": "Fitness production transfer deployment, DiscordOS Edge/RPC allowlist, the direct live writer path, the live-transfer status proof-capture surface, rollback execution, authenticated non-proof persistence path, Vercel-to-Edge provenance handoff fix, and Fitness forum-post preservation fix are now proven, so the next real blocker-clearance work must route one new real Discord-signed Fitness-origin feedback event into the visible feedback forum and DiscordOS as a human non-proof persisted row, then capture live traffic plus live workflow parity receipt IDs."
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-LIVE-HUMAN-PROOF-ONLY-RECHECK-AND-PROVENANCE-FIX-2026-06-12.md",
-    "freshness_checked_at": "2026-06-12T20:35:00-04:00",
-    "freshness_basis": "checkpoint, blocked work, and next-package posture were refreshed after the live user test reached DiscordOS as a human Fitness transfer row but remained proof-only, DiscordOS deployed the Vercel-to-Edge provenance handoff fix, the regular Discord feedback forum duplicate Fitness source threads were deleted, and readiness still lacked live traffic and live workflow parity proof IDs.",
+    "freshness_checked_receipt": "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-FITNESS-FORUM-POST-PRESERVATION-FIX-2026-06-12.md",
+    "freshness_checked_at": "2026-06-12T20:44:00-04:00",
+    "freshness_basis": "checkpoint, blocked work, and next-package posture were refreshed after Fitness deployed the forum-post preservation fix that keeps the regular feedback forum card path ahead of the DiscordOS mirror; the old live user test remains proof-only, and readiness still lacks a new post-fix visible feedback card plus human non-proof DiscordOS row plus live traffic and live workflow parity proof IDs.",
     "marker_posture": [
       {
         "marker": "Discord OS Feedback Workflow Canonicalization",
