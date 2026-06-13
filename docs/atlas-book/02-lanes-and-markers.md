@@ -18,7 +18,6 @@ Read:
 
 ### Execution substrate
 
-- `_stack` Readiness: `100%`
 - `Local Data Gateway: 66%`
 - `Playbook Everywhere + Cortex Interface: 22%`
 - `AI Repetition-to-Automation Pipeline: 32%`
@@ -27,68 +26,69 @@ Read:
 Read:
 
 - the no-send Local Data Gateway chain is real and adoption-bounded
-- `_stack` execution governance is real, the first bounded validation-summary implementation slice is now landed, reconciled, and proof-hardened, one bounded marker-checkpoint command-design seam plus one bounded evidence-admission and restart-surface discipline seam plus one bounded report-contract and contradiction-routing seam plus one bounded implementation-admission and no-execution-guard seam plus one bounded fixture/static-input proof seam plus one bounded first-implementation-slice and proof-matrix seam plus one bounded prompt-pack and handoff-contract seam plus one bounded implementation-readiness closeout seam are now frozen for the second admitted family, root validation is now proof-closed again at the blocking level after the current lock refresh with `critical=0 error=0 warning=54 info=0`, and broader automation and implementation breadth are still mid-maturity
+- `_stack` is now a closed enabling substrate rather than an active front-page marker; current execution-facing open work starts with Local Data Gateway plus the ATLAS-root automation lanes
+- root validation remains proof-closed at `critical=0 error=0 warning=58 info=0`
 - broader automation and long-run orchestration are still early
 
 ### Discord workflow
 
-- `Discord OS Infrastructure Separation: 100%`
-- `Discord OS Feedback Workflow Canonicalization: 100%`
 - `DiscordOS Runtime & Product Hardening: 15%`
 - `Discord Workflow, Publication & Docs Reliability: 32%`
 
 Read:
 
-- separation infrastructure is closed
-- workflow doctrine, proof hygiene, and the admitted live cutover are closed
-- production transfer infrastructure, live writer proof, rollback execution proof, authenticated non-proof persistence path, forum duplicate cleanup, Vercel-to-Edge provenance preservation, Fitness forum-post preservation, post-fix visible feedback card proof, human non-proof DiscordOS row proof, live traffic proof ID, live parity proof ID, and green live cutover guard now exist
-- runtime/product hardening is newly open as the broad DiscordOS improvement lane; pass 1 adds a repo-local runtime-health classifier for server, bot, service-role, writer, activation, and live-transfer posture without opening a named feature lane
+- DiscordOS infrastructure separation and feedback workflow canonicalization are closed ratchets; do not reopen them from taxonomy cleanup alone
+- runtime/product hardening remains a separate open DiscordOS improvement lane, but this local marker-board bundle does not move it from the current remote-published `15%`
+- publication/docs reliability stays separate because its proof class is still publication-facing rather than runtime-hardening-only
 
 ### Naming / ownership hygiene
 
-- `Atlas-owned Repo Naming Canonicalization: 100%`
 - `Dependency Untangling: 72%`
 
 Read:
 
-- naming policy, dependency mapping, and local path canonicalization are durable
-- six exact bounded local packets have executed and been durably proven at the canonical-path layer
-- GitHub remote-name canonicalization is now proof-closed for the admitted non-exception remote set; Fitness remains the explicit preserved exception, and `stream` remains local/no-remote
+- naming is now a closed ratchet; the active remaining surface here is dependency and blocker-family clarity
+- local path truth and remote-name truth are durable enough that the next honest packets must be bounded dependency or contract work, not naming replay
 
 ## Active Front-Page Marker Table
 
-- `_stack` Readiness: `100%`
-- Atlas-owned Repo Naming Canonicalization: `100%`
 - Local Data Gateway: `66%`
 - Dependency Untangling: `72%`
 - Truth Map & ATLAS Book: `88%`
 - Inventory & Truth Map: `77%`
 - Knowledge Capture & Transfer: `84%`
 - Durable Context Externalization: `79%`
-- Discord OS Infrastructure Separation: `100%`
-- Discord OS Feedback Workflow Canonicalization: `100%`
 - DiscordOS Runtime & Product Hardening: `15%`
 
 ## Supporting Open Markers
 
-- Cortex Readiness: `41%`
+### Cleanup / disposition blockers
+
 - Tmp Dependency Elimination: `90%`
-- Duplicate Surface Decommission: `98%`
+- Workstation Resource Hygiene: `10%`
+
+### Release / publication / surface reliability
+
+- Manual Deploy Exception Burn-Down: `84%`
 - Preview Cache & Surface Consistency: `78%`
 - Operator Secret Path Hygiene: `64%`
-- Manual Deploy Exception Burn-Down: `84%`
-- Unified Workflow Convergence: `73%`
-- Vision & Future Alignment: `25%`
-- Core Pattern Convergence: `43%`
 - Discord Workflow, Publication & Docs Reliability: `32%`
-- DiscordOS Runtime & Product Hardening: `15%`
-- Playbook Everywhere + Cortex Interface: `22%`
+
+### Automation / orchestration
+
+- Unified Workflow Convergence: `73%`
+- Feedback Loop Readiness: `42%`
+- Core Pattern Convergence: `43%`
+- Cortex Readiness: `41%`
 - AI Repetition-to-Automation Pipeline: `32%`
 - AI Long-Run Batch Orchestration: `29%`
-- Workstation Resource Hygiene: `10%`
-- Feedback Loop Readiness: `42%`
-- Sandbox Simulation Readiness: `0%`
+- Playbook Everywhere + Cortex Interface: `22%`
+
+### Future / lane-structure
+
 - Post-Convergence Lane Split Readiness: `61%`
+- Vision & Future Alignment: `25%`
+- Sandbox Simulation Readiness: `0%`
 
 ## Materially Closed Carry-Forward Families
 
@@ -111,20 +111,22 @@ Read:
 
 ## Closed / Locked Ratchets
 
-- Playbook Maturity: `100%`; Playbook-owned governance, doctrine, deterministic repo-intelligence, and verify/plan/apply maturity verified, while Playbook Everywhere + Cortex Interface remains separate
-- Discord OS Infrastructure Separation: `100%`; standalone DiscordOS repo, Supabase schema/function, Vercel project/env/deploy, bot token, and service-role proof path verified; the formerly separate live workflow cutover and parity gate is now closed in `Discord OS Feedback Workflow Canonicalization`
-- Discord OS Feedback Workflow Canonicalization: `100%`; post-fix Fitness feedback submission `baae50a0`, visible feedback thread `1515161561684115609`, DiscordOS row `fitness-live-transfer-1515161549314986035`, proof IDs, deployment `dpl_BdRSCDcjSwNQnmaMRsr8G7kbEuws`, and live guards prove `writerActivationAllowed: true`, `liveCutover: true`, and `fitnessTrafficMoved: true`
-- Atlas-owned Repo Naming Canonicalization: `100%`; local path canonicalization plus GitHub remote-name canonicalization are proof-closed for the admitted non-exception repos, while `fawxzzy-fitness` remains the preserved exception and `stream` remains local/no-remote
-- Brand Asset Canonicalization: `100%`; `_stack` launcher and all declared Fitness consumers already matched canonical ATLAS brand outputs, the Trove consumer manifest paths were reconciled from stale `repos/fawxzzy-trove/...` references to canonical `repos/trove/...` targets after repo naming closed, the seven canonical Trove public brand/icon/favicon consumers were re-synced from governed ATLAS outputs, and `npm run verify` passed in `repos/trove`, while downstream browser/cache proof remains explicitly split into `Preview Cache & Surface Consistency`
-- Lifeline Readiness: `100%`; shipped local-first single-host operator scope verified, future hosted/health-projection surfaces remain later
-- ATLAS Core Phase: `100%`; root coordination substrate closed, owner/runtime lanes remain tracked separately
-- Verta Absorption: `100%`; scoped to trusted Verta-core absorption only, while raw Verta remains trust-gated, untrusted, non-release, and non-executable
+- _stack Readiness: `100%`
+- Atlas-owned Repo Naming Canonicalization: `100%`
+- Discord OS Infrastructure Separation: `100%`
+- Discord OS Feedback Workflow Canonicalization: `100%`
+- Brand Asset Canonicalization: `100%`
+- Playbook Maturity: `100%`
+- Lifeline Readiness: `100%`
+- ATLAS Core Phase: `100%`
+- Verta Absorption: `100%`
 - Archive Normalization: `100%`
 - Foundation Alignment: `100%`
 - Fitness Source-of-Truth Reset: `100%`
-- Fitness QA/LLEL Workflow: `100%`; fresh `2026-06-13` owner-side LLEL/authenticated UI checkpoint proof plus clean-state release readiness now rest durably on committed `main`
-- Fitness Branch Cleanup / Main-Only Governance: `100%`; fresh `2026-06-13` local branch/worktree cleanup leaves Fitness at one local branch (`main`) and one local worktree while the clean local owner state remains release-ready
-- Fitness Recovery Preservation: `100%`; the quarantine recovery ledger still has `Still Pending: None`, and the preserved recovery truth now survives through current clean release-ready `main` without depending on retained local rollout worktrees
+- Fitness QA/LLEL Workflow: `100%`
+- Fitness Branch Cleanup / Main-Only Governance: `100%`
+- Fitness Recovery Preservation: `100%`
+- Duplicate Surface Decommission: `100%`
 - Canonical Repo Restoration: `100%`
 - Branch & Worktree Normalization: `100%`
 - Fitness Supabase Profile/Data Hygiene: `100%`
@@ -141,6 +143,11 @@ Use this order:
 5. consult `Closed / Locked Ratchets` only for historical boundary or restart questions
 
 Do not treat read-model cleanup by itself as marker movement.
+
+Closed-ratchet rule:
+
+- keep `Closed / Locked Ratchets` as compact one-line `100%` entries
+- route closeout evidence and restart detail to receipts plus [Receipt Index](05-receipt-index.md)
 
 ## Marker Ratchet Threshold
 
@@ -217,6 +224,7 @@ Current AI Long-Run closeout read: `AI Long-Run Batch Orchestration` now sits at
 - DiscordOS feedback workflow canonicalization moves to `90%`: DiscordOS commit `8da40b7`, Fitness draft PR `#95` at `06aa2ca6`, Vercel production deployment `dpl_AUqzCASLzx9CweswZZ5njeNXKNKL`, live `/api/readiness` plus `/api/activation`, Supabase Edge Function proof, GitHub connector proof, and Vercel connector proof now close the missing owner-side delegation-seam class: DiscordOS production can recognize `fitness-live-transfer-*` proof rows under active writer/traffic/rollback posture, and Fitness has a narrow tested transfer branch that posts to DiscordOS while bypassing the old Fitness feedback write when explicitly configured; the lane still cannot move to `100%` because Fitness production is not deployed through that seam, no real Discord-signed Fitness-origin feedback event has reached DiscordOS, no rollback execution proof exists, and the live guard still reports `missing_live_workflow_parity_proof`, `missing_live_traffic_transfer_proof`, and `missing_rollback_execution_proof`
 - DiscordOS feedback workflow canonicalization moves to `95%`: DiscordOS commit `a2c691c`, Supabase Edge Function `discordos-live-transfer-status` version `1`, Vercel production deployment `dpl_9EzJL6ofxxR4hjXqk8MztNj6rZet`, and live `/api/live-transfer-status` prove a deployed proof-capture surface now reports the exact live signed-event blocker deterministically; production currently reports `liveSignedTransferReady: false`, `fitnessLiveTransferCount: 1`, `humanFitnessLiveTransferCount: 0`, `nonProofFitnessLiveTransferCount: 0`, `humanNonProofFitnessLiveTransferCount: 0`, and latest row `fitness-live-transfer-direct-discordos-writer-proof-20260612-173002` as `proof_only: true`, so the exact remaining blocker remains real Discord-signed Fitness-origin feedback traffic through deployed Fitness, rollback execution proof, and live parity receipt ID capture
 - DiscordOS feedback workflow canonicalization moves to `96%`: Fitness rollback execution is now proven by Vercel rollback to `dpl_3k19YEKFxSByozpmVKLQtEfwpozS` followed by promotion back to transfer deployment `dpl_DfEFZezEfryECX8nhRdd4BUaQntX`; DiscordOS production deployment `dpl_41GhxXB37YjnKyaUtRJsxUgftufT` now reports `rollbackExecutionProofIdPresent: true`, while live status still reports `liveSignedTransferReady: false`, `humanFitnessLiveTransferCount: 0`, `nonProofFitnessLiveTransferCount: 0`, and `humanNonProofFitnessLiveTransferCount: 0`, so the exact remaining blocker is real Discord-signed Fitness-origin feedback traffic through deployed Fitness plus live traffic and live workflow parity receipt ID capture
+- Duplicate Surface Decommission moved to `100%`: the old dangerous duplicate-source family is fully consumed because `fitness-release-main`, `pr1-stack-lock-refresh`, `repos/fawxzzy-trove-release-cutover`, and `repos/fawxzzy-lifeline-operator-evidence` are gone at their prior live paths, while the remaining retained surfaces no longer function as duplicate-source blockers and now route cleanly to other owners: `tmp/fawxzzy-fitness-main-prod-source-3d00eac7`, `tmp/fitness-main-post-merge`, and `tmp/atlas-qa-release-refresh-pr` are now `Tmp Dependency Elimination` or manual-safe residue questions only, and `archive/fitness-source-reset` remains archive retained-evidence and sensitivity-follow-on rather than duplicate-surface governance
 - Fitness release-readiness remains green on clean preserved truth, and the formerly protected supporting Fitness markers are now closed because fresh `2026-06-13` owner-side proof plus explicit operator release cleared the exact protected-lane blocker class: `Fitness QA/LLEL Workflow` is `100%`, `Fitness Branch Cleanup / Main-Only Governance` is `100%`, and `Fitness Recovery Preservation` is `100%`
 - Workstation Resource Hygiene moved to `10%`: one bounded root baseline receipt is now durable, one read-only Windows snapshot helper now exists at `ops/atlas/workstation_resource_snapshot.ps1`, the restart surfaces now freeze the one-hot-chat rule plus required process-closeout reporting for chats that run dev servers, browser automation, screenshots, tests, or validators, and the lane still stays low because no repeated relief cycle or broader adoption proof exists yet
 - Feedback Loop Readiness stays at `42%`: request/spec intake, mutation governance, local runtime truth, and receipt/truth update now have one frozen deterministic-threshold read, but the stack still lacks one replayable end-to-end proof loop that runs fresh capture without hidden toggles or the frozen external/session bridge defect, so no marker movement is honest from this packet

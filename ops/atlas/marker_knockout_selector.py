@@ -34,6 +34,7 @@ CAMPAIGN_PRIORITY = (
     "Cortex Readiness",
     "Core Pattern Convergence",
     "Discord Workflow, Publication & Docs Reliability",
+    "DiscordOS Runtime & Product Hardening",
     "Discord OS Feedback Workflow Canonicalization",
     "Discord OS Infrastructure Separation",
     "Local Data Gateway",
@@ -218,6 +219,11 @@ POLICY_REGISTRY: dict[str, MarkerPolicy] = {
         rationale="The lane still lacks the missing live publication/parity evidence class and is not root-only from current truth.",
         expected_evidence="one new non-runtime publication/docs proof seam that does not require live publication authority",
     ),
+    "DiscordOS Runtime & Product Hardening": MarkerPolicy(
+        category="owner-repo hold",
+        rationale="The live hardening lane is real, but the open work still sits in DiscordOS owner-repo runtime, cron, alert, and audit surfaces rather than one immediate ATLAS-root packet.",
+        expected_evidence="one explicit root-routable contract or restart seam that improves the lane without mutating DiscordOS runtime or deploy surfaces",
+    ),
     "Playbook Everywhere + Cortex Interface": MarkerPolicy(
         category="admissible after current lane",
         rationale="The current exportable-now family set is materially held, but it can reopen if the current AI lane creates a new bounded exportable family.",
@@ -242,6 +248,11 @@ POLICY_REGISTRY: dict[str, MarkerPolicy] = {
         category="insufficient evidence / needs selector only",
         rationale="The marker is still at 0% and lacks one admitted root-owned starter packet in current truth.",
         expected_evidence="one bounded simulation-scope contract or harness design receipt",
+    ),
+    "Workstation Resource Hygiene": MarkerPolicy(
+        category="insufficient evidence / needs selector only",
+        rationale="The lane now has a baseline and one-hot-chat guard, but current truth still lacks one repeated relief cycle or broader adoption packet.",
+        expected_evidence="one replayed hygiene relief cycle or one bounded operator-surface improvement that proves broader reuse",
     ),
     "Post-Convergence Lane Split Readiness": MarkerPolicy(
         category="admissible after current lane",
