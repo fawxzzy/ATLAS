@@ -15,6 +15,11 @@ if str(ROOT) not in sys.path:
 from ops._atlas import atlas_relative, atlas_root
 
 MARKER_LINE_PATTERN = re.compile(r"^- ([^:]+): `(\d+)%`$")
+ACTIVE_LANE_PATTERNS = (
+    re.compile(r"the current active ATLAS-side lane is now `([^`]+)`", re.IGNORECASE),
+    re.compile(r"the next durable ATLAS-side active lane is now `([^`]+)`", re.IGNORECASE),
+    re.compile(r"the current immediate control-plane family is now `([^`]+)`", re.IGNORECASE),
+)
 SECTION_HEADERS = {
     "## Active Front-Page Marker Table": "active_front_page",
     "## Supporting Open Markers": "supporting_open",
@@ -315,8 +320,66 @@ def _priority_order(marker: str) -> int:
         return len(CAMPAIGN_PRIORITY) + sorted(POLICY_REGISTRY).index(marker)
 
 
+def load_active_lane(*, root: Path) -> str | None:
+    source_refs = (
+        root / "docs" / "atlas-book" / "01-current-state.md",
+        root / "docs" / "atlas-book" / "12-restart-and-handoff-guide.md",
+    )
+    discovered: dict[str, set[str]] = {}
+
+    for source_ref in source_refs:
+        if not source_ref.exists():
+            continue
+        text = source_ref.read_text(encoding="utf-8")
+        for pattern in ACTIVE_LANE_PATTERNS:
+            for match in pattern.finditer(text):
+                lane = _normalize_marker_name(match.group(1))
+                discovered.setdefault(lane, set()).add(atlas_relative(source_ref, root=root))
+
+    if not discovered:
+        return None
+
+    if len(discovered) > 1:
+        details = ", ".join(
+            f"{lane} ({', '.join(sorted(source_refs))})"
+            for lane, source_refs in sorted(discovered.items())
+        )
+        raise MarkerSelectorError(f"Durable active-lane sources disagree: {details}")
+
+    return next(iter(discovered))
+
+
+def effective_policy(*, marker: str, active_lane: str | None) -> MarkerPolicy:
+    policy = POLICY_REGISTRY[marker]
+    if not active_lane:
+        return policy
+    if marker == active_lane:
+        return MarkerPolicy(
+            category="admissible now",
+            rationale=(
+                "Current durable restart truth already names this as the active immediate ATLAS-root lane, "
+                "so it remains the first honest bounded execution-facing packet until its present subfamily exhausts or blocks."
+            ),
+            expected_evidence=(
+                "one bounded follow-on inside the active lane that preserves current root-owned proof discipline and does not widen "
+                "into owner-repo, deploy, secret, or protected-surface mutation"
+            ),
+        )
+    if policy.category == "admissible now":
+        return MarkerPolicy(
+            category="admissible after current lane",
+            rationale=(
+                f"Current durable restart truth now routes the immediate ATLAS-root lane through {active_lane}, "
+                "so this earlier selector family stays durable carry-forward truth rather than the first reopen."
+            ),
+            expected_evidence=policy.expected_evidence,
+        )
+    return policy
+
+
 def build_campaign(*, root: Path) -> dict[str, object]:
     sections = load_marker_sections(root=root)
+    active_lane = load_active_lane(root=root)
     open_markers = {**sections["active_front_page"], **sections["supporting_open"]}
 
     unknown_markers = sorted(set(open_markers) - set(POLICY_REGISTRY))
@@ -324,10 +387,14 @@ def build_campaign(*, root: Path) -> dict[str, object]:
         raise MarkerSelectorError(
             "Marker selector is missing policy entries for: " + ", ".join(unknown_markers)
         )
+    if active_lane and active_lane not in open_markers:
+        raise MarkerSelectorError(
+            f"Durable active lane is not present in the open marker field: {active_lane}"
+        )
 
     records: list[MarkerRecord] = []
     for marker, percentage in open_markers.items():
-        policy = POLICY_REGISTRY[marker]
+        policy = effective_policy(marker=marker, active_lane=active_lane)
         if policy.category not in ALLOWED_CATEGORIES:
             raise MarkerSelectorError(f"Unsupported category for {marker}: {policy.category}")
         section = "active front-page" if marker in sections["active_front_page"] else "supporting open"
@@ -345,7 +412,10 @@ def build_campaign(*, root: Path) -> dict[str, object]:
 
     records.sort(key=lambda item: (item.priority, item.marker.lower()))
 
-    selected = next((record for record in records if record.category == "admissible now"), None)
+    if active_lane:
+        selected = next((record for record in records if record.marker == active_lane), None)
+    else:
+        selected = next((record for record in records if record.category == "admissible now"), None)
     category_counts: dict[str, int] = {}
     for record in records:
         category_counts[record.category] = category_counts.get(record.category, 0) + 1
@@ -367,6 +437,7 @@ def build_campaign(*, root: Path) -> dict[str, object]:
         "campaign_id": "root-non-fitness-marker-knockout",
         "source_ref": "docs/atlas-book/02-lanes-and-markers.md",
         "source_digest_count": len(open_markers),
+        "active_lane": active_lane,
         "open_markers": [asdict(record) for record in records],
         "closed_markers": [asdict(record) for record in closed_markers],
         "category_counts": category_counts,
@@ -377,6 +448,8 @@ def build_campaign(*, root: Path) -> dict[str, object]:
         "selected_next_packet": (
             "AI Repetition-to-Automation Pipeline non-Fitness marker knockout selector surface"
             if selected and selected.marker == "AI Repetition-to-Automation Pipeline"
+            else "AI Long-Run Batch Orchestration queue-or-registry active follow-on"
+            if selected and selected.marker == "AI Long-Run Batch Orchestration"
             else None
         ),
     }

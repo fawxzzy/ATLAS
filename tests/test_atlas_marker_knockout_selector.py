@@ -56,6 +56,11 @@ MARKER_DOC = """# Lanes And Markers
 - Archive Normalization: `100%`
 """
 
+CURRENT_STATE_DOC = """# Current State
+
+- the next durable ATLAS-side active lane is now `AI Long-Run Batch Orchestration`
+"""
+
 
 class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
     def _temp_root(self) -> Path:
@@ -65,22 +70,24 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         (root / "docs" / "atlas-book").mkdir(parents=True, exist_ok=True)
         return root
 
-    def test_build_campaign_selects_ai_pipeline_first(self) -> None:
+    def test_build_campaign_selects_active_lane_from_durable_restart_truth(self) -> None:
         root = self._temp_root()
         (root / "docs" / "atlas-book" / "02-lanes-and-markers.md").write_text(MARKER_DOC, encoding="utf-8")
+        (root / "docs" / "atlas-book" / "01-current-state.md").write_text(CURRENT_STATE_DOC, encoding="utf-8")
 
         payload = build_campaign(root=root)
 
-        self.assertEqual("AI Repetition-to-Automation Pipeline", payload["selected_marker"])
-        self.assertEqual(32, payload["selected_percentage"])
+        self.assertEqual("AI Long-Run Batch Orchestration", payload["selected_marker"])
+        self.assertEqual(20, payload["selected_percentage"])
         self.assertEqual(
-            "AI Repetition-to-Automation Pipeline non-Fitness marker knockout selector surface",
+            "AI Long-Run Batch Orchestration queue-or-registry active follow-on",
             payload["selected_next_packet"],
         )
 
     def test_build_campaign_classifies_fitness_and_secret_holds(self) -> None:
         root = self._temp_root()
         (root / "docs" / "atlas-book" / "02-lanes-and-markers.md").write_text(MARKER_DOC, encoding="utf-8")
+        (root / "docs" / "atlas-book" / "01-current-state.md").write_text(CURRENT_STATE_DOC, encoding="utf-8")
 
         payload = build_campaign(root=root)
         records = {record["marker"]: record for record in payload["open_markers"]}
@@ -88,12 +95,15 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual("protected/Fitness hold", records["Fitness QA/LLEL Workflow"]["category"])
         self.assertEqual("secret/.env hold", records["Operator Secret Path Hygiene"]["category"])
         self.assertEqual("admissible after current lane", records["Vercel Hobby Cost Governance"]["category"])
+        self.assertEqual("admissible after current lane", records["AI Repetition-to-Automation Pipeline"]["category"])
+        self.assertEqual("admissible now", records["AI Long-Run Batch Orchestration"]["category"])
         self.assertEqual("already closed / locked", records["_stack Readiness"]["category"])
 
     def test_build_campaign_normalizes_inline_code_marker_names(self) -> None:
         root = self._temp_root()
         marker_doc = MARKER_DOC.replace("- _stack Readiness: `100%`", "- `_stack` Readiness: `100%`")
         (root / "docs" / "atlas-book" / "02-lanes-and-markers.md").write_text(marker_doc, encoding="utf-8")
+        (root / "docs" / "atlas-book" / "01-current-state.md").write_text(CURRENT_STATE_DOC, encoding="utf-8")
 
         payload = build_campaign(root=root)
         records = {record["marker"]: record for record in payload["open_markers"]}
@@ -103,6 +113,7 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
     def test_main_can_write_json_output(self) -> None:
         root = self._temp_root()
         (root / "docs" / "atlas-book" / "02-lanes-and-markers.md").write_text(MARKER_DOC, encoding="utf-8")
+        (root / "docs" / "atlas-book" / "01-current-state.md").write_text(CURRENT_STATE_DOC, encoding="utf-8")
         output_ref = "docs/ops/selector-output.json"
 
         exit_code = main(["--root", str(root), "--format", "json", "--output", output_ref])
