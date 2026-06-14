@@ -11,7 +11,7 @@ components:
     ref_type: "branch"
     ref: "codex/queue-or-registry-broader-execution-behavior"
     commit: "b8ca706f94fd625afb502a7c257ec4c50bec75e4"
-    dirty: false
+    dirty: true
     trust_class: "trusted"
     release_eligible: false
   discordos:
@@ -20,9 +20,9 @@ components:
     status: "incubating"
     remote: "https://github.com/fawxzzy/DiscordOS.git"
     ref_type: "branch"
-    ref: "codex/path-discipline-warning-slice-discordos"
-    commit: "f58432152d3a3d072c0f43d4d1b903d0bde9f133"
-    dirty: false
+    ref: "main"
+    commit: "7bb72a3844af3f2f52dc0b8fa94bdd7bab458dcd"
+    dirty: true
     trust_class: "trusted"
     release_eligible: false
   foundation:
@@ -66,7 +66,7 @@ components:
     ref_type: "branch"
     ref: "codex/path-discipline-warning-slice-nat1"
     commit: "63a4a7c159c41a7e98ad8708891743acf71431ed"
-    dirty: false
+    dirty: true
     trust_class: "trusted"
     release_eligible: false
   playbook:
@@ -216,4 +216,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:e21780486cfac1aa81a2a25a931b3ecb9f6baa90729f9e40a361223a329aa3da"
+lock_digest: "sha256:eb9fef77730c00bc7835497507204fbbfb199d66650a82de07b5337e6baf1725"
