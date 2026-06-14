@@ -1222,6 +1222,135 @@ def initiative_summary(items: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+def load_current_attention_refs() -> set[str] | None:
+    attention_path = atlas_root() / "runtime" / "state" / "atlas" / "world-model.attention.latest.json"
+    payload = load_source_payload(atlas_relative(attention_path, root=atlas_root()))
+    if not isinstance(payload, dict):
+        return None
+    attention_items = payload.get("attention_items", [])
+    if not isinstance(attention_items, list):
+        return None
+    return {
+        f"attention:{item.get('attention_id')}"
+        for item in attention_items
+        if isinstance(item, dict) and isinstance(item.get("attention_id"), str)
+    }
+
+
+def initiative_provenance_alerts(
+    items: list[dict[str, Any]],
+    *,
+    attention_refs: set[str] | None,
+) -> list[dict[str, Any]]:
+    if attention_refs is None:
+        return []
+    alerts: list[dict[str, Any]] = []
+    for item in items:
+        if not isinstance(item, dict) or str(item.get("memory_kind", "")).strip() != "initiative":
+            continue
+        related_attention_refs = item.get("related_attention_refs", [])
+        if not isinstance(related_attention_refs, list):
+            continue
+        stale_attention_refs: list[str] = []
+        missing_file_refs: list[str] = []
+        for ref in unique_strings(related_attention_refs):
+            if ref.startswith("attention:"):
+                if ref not in attention_refs:
+                    stale_attention_refs.append(ref)
+            elif not resolve_atlas_path(ref, root=atlas_root()).exists():
+                missing_file_refs.append(ref)
+        if not stale_attention_refs and not missing_file_refs:
+            continue
+        alerts.append(
+            {
+                "kind": "initiative_provenance_drift",
+                "initiative_id": item.get("id"),
+                "title": item.get("title"),
+                "source_ref": item.get("path"),
+                "stale_attention_refs": stale_attention_refs,
+                "missing_file_refs": missing_file_refs,
+            }
+        )
+    return alerts
+
+
+def proposed_session_provenance_alerts(
+    descriptors: list[dict[str, Any]],
+    *,
+    attention_refs: set[str] | None,
+) -> list[dict[str, Any]]:
+    if attention_refs is None:
+        return []
+    alerts: list[dict[str, Any]] = []
+    for descriptor in descriptors:
+        if descriptor.get("artifact_type") != "session_manifest":
+            continue
+        state = descriptor.get("state", {}) if isinstance(descriptor.get("state"), dict) else {}
+        if str(state.get("session_state", "")).strip() != "proposed":
+            continue
+        links = descriptor.get("links", {}) if isinstance(descriptor.get("links"), dict) else {}
+        triggering_attention_refs = links.get("triggering_attention_refs", [])
+        if not isinstance(triggering_attention_refs, list):
+            continue
+        stale_attention_refs = [
+            ref
+            for ref in unique_strings(triggering_attention_refs)
+            if ref.startswith("attention:") and ref not in attention_refs
+        ]
+        initiative_ref = str(links.get("initiative_ref") or "").strip() or None
+        missing_initiative_ref = (
+            initiative_ref
+            if initiative_ref is not None and not resolve_atlas_path(initiative_ref, root=atlas_root()).exists()
+            else None
+        )
+        if not stale_attention_refs and missing_initiative_ref is None:
+            continue
+        identity = descriptor.get("identity", {}) if isinstance(descriptor.get("identity"), dict) else {}
+        alerts.append(
+            {
+                "kind": "proposed_session_provenance_drift",
+                "session_id": identity.get("session_id"),
+                "task_id": identity.get("task_id"),
+                "source_ref": descriptor.get("source_ref"),
+                "stale_attention_refs": stale_attention_refs,
+                "missing_initiative_ref": missing_initiative_ref,
+            }
+        )
+    return alerts
+
+
+def provenance_alert_summary(
+    *,
+    working_memory_items: list[dict[str, Any]],
+    descriptors: list[dict[str, Any]],
+) -> dict[str, Any]:
+    attention_refs = load_current_attention_refs()
+    if attention_refs is None:
+        return {
+            "status": "unavailable",
+            "initiative_item_count": 0,
+            "proposal_item_count": 0,
+            "item_count": 0,
+            "items": [],
+        }
+    initiative_items = initiative_provenance_alerts(
+        working_memory_items,
+        attention_refs=attention_refs,
+    )
+    proposal_items = proposed_session_provenance_alerts(
+        descriptors,
+        attention_refs=attention_refs,
+    )
+    items = [*initiative_items, *proposal_items]
+    return {
+        "status": "drift_detected" if items else "clear",
+        "initiative_item_count": len(initiative_items),
+        "proposal_item_count": len(proposal_items),
+        "item_count": len(items),
+        "items": items[:10],
+    }
+
+
 def conversation_summary(descriptors: list[dict[str, Any]]) -> dict[str, Any]:
     conversations = [
         descriptor
@@ -1384,6 +1513,10 @@ def render_status_payload(
     trust_posture = trust_posture_summary(trust_surfaces_payload)
     working_memory = working_memory_summary()
     working_memory_items = working_memory.pop("_items", [])
+    provenance_alerts = provenance_alert_summary(
+        working_memory_items=working_memory_items,
+        descriptors=descriptors,
+    )
     conversations = conversation_summary(descriptors)
     canonical_lock_artifacts = build_canonical_lockfile_artifacts(root=atlas_root())
     repo_inventory = repo_inventory_summary_from_lock(
@@ -1437,6 +1570,7 @@ def render_status_payload(
         "trust_posture": trust_posture,
         "repo_inventory": repo_inventory,
         "working_memory": working_memory,
+        "provenance_alerts": provenance_alerts,
         "initiatives": working_memory.get("initiatives"),
         "slices": initiative_slices,
         "conversations": conversations,

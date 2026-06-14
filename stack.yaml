@@ -123,10 +123,24 @@ repo_registry:
     path: repos/DiscordOS
     role: application
     status: incubating
+    validation:
+      generated_state_cleanup:
+        command: npm run ops:repo-hygiene:cleanup
+        paths:
+          - .vercel
+          - node_modules
   fitness:
     path: repos/fawxzzy-fitness
     role: application
     status: unmanaged
+    validation:
+      generated_state_cleanup:
+        command: node scripts/cleanup-repo.mjs --include-build-cache --include-node-modules --include-playbook-state --relocate-to-tmp --report-path ../../runtime/state/repo-cleanup/fitness.validation.latest.json
+        report_path: ../../runtime/state/repo-cleanup/fitness.validation.latest.json
+        paths:
+          - .next
+          - node_modules
+          - .playbook
   mazer:
     path: repos/mazer
     role: application

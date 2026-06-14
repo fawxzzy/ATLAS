@@ -22,7 +22,6 @@
     "runtime/atlas/sessions/session-atlas-session-conflict-20260414T080843Z/session.manifest.json"
   ],
   "related_attention_refs": [
-    "attention:sha256:206ce0f2669fc997010203b65d5eaaa0cc941e4c95aee5b28fa3953aac5deb5c",
     "attention:sha256:dcfe6245b752460f0592d82377bb1837d873dde2a3fd628f8f2cc29a9281899c",
     "attention:sha256:dfb93b9a5b513383a5a1f460b9d3520a8df6637365cb70623d2e37731c053241",
     "runtime/atlas/sessions/session-atlas-session-conflict-20260414T080843Z/session.manifest.json",

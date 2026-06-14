@@ -559,6 +559,13 @@ def sync_session_outputs(
         output_dir=ROOT / "runtime" / "cortex" / "artifacts",
         root=ROOT,
     )
+    from ops.atlas.run_initiative_loop import run_initiative_loop
+
+    initiative_loop_summary = run_initiative_loop(
+        root=ROOT,
+        dry_run=False,
+        refresh_inputs=False,
+    )
     status_snapshot = render_status_payload(
         ROOT / "runtime" / "cortex" / "artifacts",
         session_id=session_id,
@@ -568,6 +575,7 @@ def sync_session_outputs(
     return {
         "descriptors": written_descriptors,
         "world_model_summary": world_model_summary,
+        "initiative_loop_summary": initiative_loop_summary,
         "status_snapshot": status_snapshot,
         "status_snapshot_ref": atlas_relative(status_snapshot_path, root=ROOT),
     }

@@ -361,8 +361,40 @@ def select_execution_surface(cluster: Cluster, tool_bundle: dict[str, Any]) -> d
     return select_tool_entry(tool_bundle, READ_ONLY_EXECUTION_TOOL_ID)
 
 
-def build_initiative_payload(cluster: Cluster) -> dict[str, Any]:
+def resolved_related_attention_refs(
+    values: set[str] | list[str],
+    *,
+    known_attention_refs: set[str],
+    root: Path,
+) -> list[str]:
+    resolved: list[str] = []
+    seen: set[str] = set()
+    for ref in sorted(unique_strings(list(values))):
+        if ref.startswith("attention:"):
+            if ref not in known_attention_refs:
+                continue
+        else:
+            if not resolve_atlas_path(ref, root=root).exists():
+                continue
+        if ref in seen:
+            continue
+        seen.add(ref)
+        resolved.append(ref)
+    return resolved
+
+
+def build_initiative_payload(
+    cluster: Cluster,
+    *,
+    root: Path,
+    known_attention_refs: set[str],
+) -> dict[str, Any]:
     existing = cluster.existing_payload or {}
+    filtered_related_attention_refs = resolved_related_attention_refs(
+        cluster.related_attention_refs,
+        known_attention_refs=known_attention_refs,
+        root=root,
+    )
     title = cluster.title or f"{humanize(cluster.task_id or cluster.initiative_id)} Initiative"
     summary = cluster.summary or (
         f"Keep the current {cluster.task_id or cluster.initiative_id} work owned above the session layer so "
@@ -370,7 +402,7 @@ def build_initiative_payload(cluster: Cluster) -> dict[str, Any]:
     )
     status = (
         "active"
-        if (cluster.related_attention_refs or cluster.related_hypothesis_refs or cluster.proposed_next_session_refs)
+        if (filtered_related_attention_refs or cluster.related_hypothesis_refs or cluster.proposed_next_session_refs)
         else str(existing.get("status") or "active")
     )
     return {
@@ -386,7 +418,7 @@ def build_initiative_payload(cluster: Cluster) -> dict[str, Any]:
         "related_decision_refs": sorted(cluster.related_decision_refs),
         "related_hypothesis_refs": sorted(cluster.related_hypothesis_refs),
         "related_session_refs": sorted(cluster.related_session_refs),
-        "related_attention_refs": sorted(cluster.related_attention_refs),
+        "related_attention_refs": filtered_related_attention_refs,
         "evidence_refs": sorted(cluster.evidence_refs),
         "proposed_next_session_refs": sorted(cluster.proposed_next_session_refs),
         "supersedes": unique_strings(cluster.supersedes),
@@ -596,46 +628,15 @@ def refresh_descriptors_and_world_model(root: Path) -> dict[str, Any]:
     return world_model_summary
 
 
-def attach_existing_relations(cluster: Cluster) -> None:
-    if not cluster.existing_payload:
-        return
-    payload = cluster.existing_payload
-    for field_name, target in (
-        ("related_plan_refs", cluster.related_plan_refs),
-        ("related_decision_refs", cluster.related_decision_refs),
-        ("related_hypothesis_refs", cluster.related_hypothesis_refs),
-        ("related_session_refs", cluster.related_session_refs),
-        ("related_attention_refs", cluster.related_attention_refs),
-        ("evidence_refs", cluster.evidence_refs),
-        ("proposed_next_session_refs", cluster.proposed_next_session_refs),
-    ):
-        for ref in payload.get(field_name, []):
-            if isinstance(ref, str) and ref.strip():
-                target.add(ref.strip())
-    if infer_timestamp(payload):
-        cluster.created_candidates.append(first_text(payload.get("created_at")) or "1970-01-01T00:00:00Z")
-        cluster.updated_candidates.append(infer_timestamp(payload) or "1970-01-01T00:00:00Z")
-
-
-def cluster_is_material(cluster: Cluster) -> bool:
-    return bool(
-        cluster.existing_payload
-        or cluster.related_attention_refs
-        or cluster.related_hypothesis_refs
-        or len(cluster.related_session_refs) > 1
-    )
-
-
-def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(
-        description="Convert durable ATLAS attention into initiatives and non-executing proposed sessions."
-    )
-    parser.add_argument("--root", type=Path, default=atlas_root())
-    parser.add_argument("--dry-run", action="store_true")
-    args = parser.parse_args(argv)
-
-    root = args.root.resolve()
-    refresh_descriptors_and_world_model(root)
+def run_initiative_loop(
+    *,
+    root: Path,
+    dry_run: bool = False,
+    refresh_inputs: bool = True,
+) -> dict[str, Any]:
+    root = root.resolve()
+    if refresh_inputs:
+        refresh_descriptors_and_world_model(root)
     attention_payload = load_latest_attention(root)
     tool_bundle = load_tool_registry_bundle(root=root)
     stack_lock_payload = load_stack_lock_payload()
@@ -860,7 +861,11 @@ def main(argv: list[str] | None = None) -> int:
                     "payload": proposal_payload,
                 }
             )
-        initiative_payload = build_initiative_payload(cluster)
+        initiative_payload = build_initiative_payload(
+            cluster,
+            root=root,
+            known_attention_refs=known_attention_refs,
+        )
         initiative_writes.append(
             {
                 "path": initiative_path(root, cluster.initiative_id),
@@ -871,15 +876,14 @@ def main(argv: list[str] | None = None) -> int:
         known_file_refs.add(cluster.initiative_ref)
 
     if errors:
-        print(json.dumps({"errors": errors}, indent=2))
-        return 1
+        raise ValueError(json.dumps({"errors": errors}, indent=2))
 
     written_initiatives: list[dict[str, Any]] = []
     written_proposals: list[dict[str, Any]] = []
 
     for item in initiative_writes:
         changed = False
-        if not args.dry_run:
+        if not dry_run:
             changed = write_json_if_changed(item["path"], item["payload"])
         written_initiatives.append(
             {
@@ -891,7 +895,7 @@ def main(argv: list[str] | None = None) -> int:
 
     for item in proposal_writes:
         changed = False
-        if not args.dry_run:
+        if not dry_run:
             changed = write_json_if_changed(item["path"], item["payload"])
         written_proposals.append(
             {
@@ -902,7 +906,7 @@ def main(argv: list[str] | None = None) -> int:
             }
         )
 
-    if not args.dry_run:
+    if not dry_run:
         catalog_summary = write_working_memory_catalog(root)
         world_model_summary = refresh_descriptors_and_world_model(root)
     else:
@@ -916,20 +920,63 @@ def main(argv: list[str] | None = None) -> int:
             "attention_ref": atlas_relative(root / "runtime" / "state" / "atlas" / "world-model.attention.latest.json", root=root),
         }
 
-    print(
-        json.dumps(
-            {
-                "dry_run": args.dry_run,
-                "initiative_count": len(written_initiatives),
-                "proposal_count": len(written_proposals),
-                "initiatives": written_initiatives,
-                "proposals": written_proposals,
-                "working_memory": catalog_summary,
-                "world_model": world_model_summary,
-            },
-            indent=2,
-        )
+    return {
+        "dry_run": dry_run,
+        "initiative_count": len(written_initiatives),
+        "proposal_count": len(written_proposals),
+        "initiatives": written_initiatives,
+        "proposals": written_proposals,
+        "working_memory": catalog_summary,
+        "world_model": world_model_summary,
+    }
+
+
+def attach_existing_relations(cluster: Cluster) -> None:
+    if not cluster.existing_payload:
+        return
+    payload = cluster.existing_payload
+    for field_name, target in (
+        ("related_plan_refs", cluster.related_plan_refs),
+        ("related_decision_refs", cluster.related_decision_refs),
+        ("related_hypothesis_refs", cluster.related_hypothesis_refs),
+        ("related_session_refs", cluster.related_session_refs),
+        ("related_attention_refs", cluster.related_attention_refs),
+        ("evidence_refs", cluster.evidence_refs),
+        ("proposed_next_session_refs", cluster.proposed_next_session_refs),
+    ):
+        for ref in payload.get(field_name, []):
+            if isinstance(ref, str) and ref.strip():
+                target.add(ref.strip())
+    if infer_timestamp(payload):
+        cluster.created_candidates.append(first_text(payload.get("created_at")) or "1970-01-01T00:00:00Z")
+        cluster.updated_candidates.append(infer_timestamp(payload) or "1970-01-01T00:00:00Z")
+
+
+def cluster_is_material(cluster: Cluster) -> bool:
+    return bool(
+        cluster.existing_payload
+        or cluster.related_attention_refs
+        or cluster.related_hypothesis_refs
+        or len(cluster.related_session_refs) > 1
     )
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        description="Convert durable ATLAS attention into initiatives and non-executing proposed sessions."
+    )
+    parser.add_argument("--root", type=Path, default=atlas_root())
+    parser.add_argument("--dry-run", action="store_true")
+    args = parser.parse_args(argv)
+
+    root = args.root.resolve()
+    try:
+        report = run_initiative_loop(root=root, dry_run=args.dry_run, refresh_inputs=True)
+    except ValueError as exc:
+        print(str(exc))
+        return 1
+
+    print(json.dumps(report, indent=2))
     return 0
 
 

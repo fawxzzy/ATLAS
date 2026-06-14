@@ -349,7 +349,11 @@ def mutable_surface_requires_warning(repo_path: Path, relative_path: str) -> boo
     return not bool(tracked_output.strip())
 
 
-def mutable_surface_warning_map(repo_path: Path) -> dict[str, bool]:
+def mutable_surface_warning_map(
+    repo_path: Path,
+    *,
+    suppressed_paths: set[str] | None = None,
+) -> dict[str, bool]:
     existing_paths = [
         relative_path
         for relative_path in MUTABLE_DIR_CANDIDATES
@@ -382,8 +386,12 @@ def mutable_surface_warning_map(repo_path: Path) -> dict[str, bool]:
     status_paths_found = status_paths(status_output.splitlines())
 
     result: dict[str, bool] = {}
+    suppressed = {normalize_slashes(item) for item in (suppressed_paths or set()) if str(item).strip()}
     for relative_path in existing_paths:
         normalized = normalize_slashes(relative_path)
+        if normalized in suppressed:
+            result[relative_path] = False
+            continue
         has_tracked = any(
             path == normalized or path.startswith(f"{normalized}/")
             for path in tracked_paths
@@ -394,6 +402,181 @@ def mutable_surface_warning_map(repo_path: Path) -> dict[str, bool]:
         )
         result[relative_path] = has_status or not has_tracked
     return result
+
+
+def generated_state_cleanup_report_path(
+    repo_path: Path,
+    cleanup_config: dict[str, Any],
+) -> Path | None:
+    report_path = cleanup_config.get("report_path")
+    if not isinstance(report_path, str) or not report_path.strip():
+        return None
+    return (repo_path / report_path.strip()).resolve()
+
+
+def load_generated_state_cleanup_report(
+    repo_path: Path,
+    cleanup_config: dict[str, Any],
+) -> dict[str, Any] | None:
+    report_path = generated_state_cleanup_report_path(repo_path, cleanup_config)
+    if report_path is None or not report_path.exists():
+        return None
+    try:
+        payload = json.loads(report_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    return payload if isinstance(payload, dict) else None
+
+
+def generated_state_cleanup_suppressed_paths(
+    report: dict[str, Any] | None,
+) -> set[str]:
+    if not isinstance(report, dict):
+        return set()
+    retained_paths = report.get("retained_paths")
+    if not isinstance(retained_paths, list):
+        return set()
+    suppressed: set[str] = set()
+    for item in retained_paths:
+        if not isinstance(item, dict):
+            continue
+        if not bool(item.get("suppress_validation_warning")):
+            continue
+        retained_path = item.get("path")
+        if isinstance(retained_path, str) and retained_path.strip():
+            suppressed.add(normalize_slashes(retained_path))
+    return suppressed
+
+
+def summarize_command_output(raw_output: str, *, limit: int = 280) -> str | None:
+    text = " ".join(line.strip() for line in raw_output.splitlines() if line.strip())
+    if not text:
+        return None
+    if len(text) <= limit:
+        return text
+    return f"{text[: limit - 3]}..."
+
+
+def apply_repo_generated_state_cleanup(
+    *,
+    repo_id: str,
+    repo_path: Path,
+    repo_rel: str,
+    repo_info: dict[str, Any],
+    run_command: Any = subprocess.run,
+) -> list[Finding]:
+    validation_config = repo_info.get("validation")
+    if validation_config is None:
+        return [], set()
+    if not isinstance(validation_config, dict):
+        return [
+            Finding(
+                "warning",
+                "generated-state-cleanup-invalid-config",
+                repo_rel,
+                "Repo validation config must be a mapping when generated-state cleanup is declared.",
+                {"repo_id": repo_id},
+            )
+        ], set()
+
+    cleanup_config = validation_config.get("generated_state_cleanup")
+    if cleanup_config is None:
+        return [], set()
+    if not isinstance(cleanup_config, dict):
+        return [
+            Finding(
+                "warning",
+                "generated-state-cleanup-invalid-config",
+                repo_rel,
+                "generated_state_cleanup must be a mapping with command and paths.",
+                {"repo_id": repo_id},
+            )
+        ], set()
+
+    if cleanup_config.get("enabled") is False:
+        return [], set()
+
+    command = cleanup_config.get("command")
+    if not isinstance(command, str) or not command.strip():
+        return [
+            Finding(
+                "warning",
+                "generated-state-cleanup-invalid-config",
+                repo_rel,
+                "generated_state_cleanup.command must be a non-empty shell command string.",
+                {"repo_id": repo_id},
+            )
+        ], set()
+
+    raw_paths = cleanup_config.get("paths")
+    if not isinstance(raw_paths, list) or not raw_paths:
+        return [
+            Finding(
+                "warning",
+                "generated-state-cleanup-invalid-config",
+                repo_rel,
+                "generated_state_cleanup.paths must be a non-empty list of repo-relative paths.",
+                {"repo_id": repo_id},
+            )
+        ], set()
+
+    target_paths = [
+        str(path).strip()
+        for path in raw_paths
+        if isinstance(path, str) and str(path).strip()
+    ]
+    if not target_paths:
+        return [
+            Finding(
+                "warning",
+                "generated-state-cleanup-invalid-config",
+                repo_rel,
+                "generated_state_cleanup.paths must contain at least one repo-relative path.",
+                {"repo_id": repo_id},
+            )
+        ], set()
+
+    if not any((repo_path / relative_path).exists() for relative_path in target_paths):
+        return [], set()
+
+    completed = run_command(
+        command.strip(),
+        cwd=repo_path,
+        shell=True,
+        capture_output=True,
+        text=True,
+    )
+    cleanup_report = load_generated_state_cleanup_report(repo_path, cleanup_config)
+    suppressed_paths = generated_state_cleanup_suppressed_paths(cleanup_report)
+    if int(getattr(completed, "returncode", 1) or 0) == 0:
+        return [], suppressed_paths
+
+    details: dict[str, Any] = {
+        "repo_id": repo_id,
+        "command": command.strip(),
+        "paths": target_paths,
+        "returncode": getattr(completed, "returncode", None),
+    }
+    if isinstance(cleanup_report, dict):
+        if isinstance(cleanup_report.get("status"), str):
+            details["report_status"] = cleanup_report["status"]
+        if suppressed_paths:
+            details["suppressed_paths"] = sorted(suppressed_paths)
+    stdout_excerpt = summarize_command_output(str(getattr(completed, "stdout", "") or ""))
+    stderr_excerpt = summarize_command_output(str(getattr(completed, "stderr", "") or ""))
+    if stdout_excerpt:
+        details["stdout_excerpt"] = stdout_excerpt
+    if stderr_excerpt:
+        details["stderr_excerpt"] = stderr_excerpt
+    return [
+        Finding(
+            "warning",
+            "generated-state-cleanup-failed",
+            repo_rel,
+            "Repo-owned generated-state cleanup command failed before validation.",
+            details,
+        )
+    ], suppressed_paths
 
 
 def summarize_debt_classes(findings: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -1356,10 +1539,11 @@ def validate_execution_receipt_repairs(stack_file: Path) -> list[Finding]:
         original_payload = receipt_payloads.get(original_ref)
         if not isinstance(original_payload, dict):
             continue
+
+        preferred_ref = resolve_preferred_execution_receipt_ref(original_ref, root=root)
         if str(original_payload.get("registry_digest") or "") == current_digest:
             continue
 
-        preferred_ref = resolve_preferred_execution_receipt_ref(original_ref, root=root)
         if preferred_ref == original_ref:
             findings.append(
                 Finding(
@@ -2306,18 +2490,7 @@ def validate_proposed_sessions(stack_file: Path) -> list[Finding]:
     if not proposed_root.exists():
         return findings
 
-    attention_ids: set[str] = set()
-    attention_path = root / "runtime" / "state" / "atlas" / "world-model.attention.latest.json"
-    if attention_path.exists():
-        try:
-            attention_payload = load_json_object(attention_path)
-            attention_ids = {
-                f"attention:{item.get('attention_id')}"
-                for item in attention_payload.get("attention_items", [])
-                if isinstance(item, dict) and isinstance(item.get("attention_id"), str)
-            }
-        except Exception:
-            attention_ids = set()
+    attention_ids = load_known_attention_refs(root)
 
     for path in sorted(proposed_root.rglob("session.manifest.json")):
         relative_path = relative_to_root(root, path)
@@ -2408,6 +2581,93 @@ def validate_proposed_sessions(stack_file: Path) -> list[Finding]:
                 if not (root / Path(ref)).resolve().exists():
                     findings.append(Finding("error", "missing-proposal-provenance", relative_path, f"proposal.{field} does not resolve: {ref}"))
 
+    return findings
+
+
+def load_known_attention_refs(root: Path) -> set[str]:
+    attention_path = root / "runtime" / "state" / "atlas" / "world-model.attention.latest.json"
+    if not attention_path.exists():
+        return set()
+    try:
+        attention_payload = load_json_object(attention_path)
+    except Exception:
+        return set()
+    return {
+        f"attention:{item.get('attention_id')}"
+        for item in attention_payload.get("attention_items", [])
+        if isinstance(item, dict) and isinstance(item.get("attention_id"), str)
+    }
+
+
+def validate_initiative_provenance(stack_file: Path) -> list[Finding]:
+    root = stack_file.parent.resolve()
+    findings: list[Finding] = []
+    initiative_root = root / "docs" / "memory" / "initiatives"
+    if not initiative_root.exists():
+        return findings
+
+    attention_ids = load_known_attention_refs(root)
+    for path in sorted(initiative_root.glob("*.json")):
+        relative_path = relative_to_root(root, path)
+        try:
+            payload = load_json_object(path)
+        except Exception as exc:
+            findings.append(
+                Finding(
+                    "error",
+                    "invalid-initiative-provenance",
+                    relative_path,
+                    f"Initiative could not be parsed: {exc}",
+                )
+            )
+            continue
+
+        if payload.get("contract_version") != "atlas.initiative.v1":
+            continue
+
+        related_attention_refs = payload.get("related_attention_refs", [])
+        if not isinstance(related_attention_refs, list):
+            findings.append(
+                Finding(
+                    "error",
+                    "stale-initiative-attention-provenance",
+                    relative_path,
+                    "related_attention_refs must be an array when present.",
+                )
+            )
+            continue
+
+        for ref in related_attention_refs:
+            if not isinstance(ref, str) or not ref.strip():
+                findings.append(
+                    Finding(
+                        "error",
+                        "stale-initiative-attention-provenance",
+                        relative_path,
+                        "related_attention_refs must contain non-empty strings.",
+                    )
+                )
+                continue
+            if ref.startswith("attention:"):
+                if ref not in attention_ids:
+                    findings.append(
+                        Finding(
+                            "error",
+                            "stale-initiative-attention-provenance",
+                            relative_path,
+                            f"related_attention_ref does not resolve: {ref}",
+                        )
+                    )
+                continue
+            if not (root / Path(ref)).resolve().exists():
+                findings.append(
+                    Finding(
+                        "error",
+                        "stale-initiative-attention-provenance",
+                        relative_path,
+                        f"related_attention_ref file does not resolve: {ref}",
+                    )
+                )
     return findings
 
 
@@ -2693,6 +2953,7 @@ def build_findings(
         findings.extend(validate_verta_trust_gate(stack_file, config))
         findings.extend(validate_working_memory(stack_file))
         findings.extend(validate_world_model_state(stack_file))
+        findings.extend(validate_initiative_provenance(stack_file))
         findings.extend(validate_proposed_sessions(stack_file))
 
         for label, raw_path in iter_relative_directory_targets(config):
@@ -2749,7 +3010,17 @@ def build_findings(
             readme_name = "README-STACK.md" if is_stack_control_repo else "README.md"
             findings.append(Finding("warning", "missing-readme", repo_rel, f"{readme_name} is missing for an active repo.", {"status": status}))
 
-        for relative_dir, requires_warning in mutable_surface_warning_map(repo_path).items():
+        cleanup_findings, cleanup_suppressed_paths = apply_repo_generated_state_cleanup(
+            repo_id=repo_id,
+            repo_path=repo_path,
+            repo_rel=repo_rel,
+            repo_info=repo_info,
+        )
+        findings.extend(cleanup_findings)
+        for relative_dir, requires_warning in mutable_surface_warning_map(
+            repo_path,
+            suppressed_paths=cleanup_suppressed_paths,
+        ).items():
             if requires_warning:
                 candidate = repo_path / relative_dir
                 rel = normalize_slashes(str(candidate.relative_to(root)))
