@@ -929,6 +929,21 @@
 - [Operator Secret Path Hygiene Cleanup Pass 1](../ops/OPERATOR-SECRET-PATH-HYGIENE-CLEANUP-PASS-1-2026-05-24.md)
 - [Operator Secret Path Hygiene Warning Delta](../ops/OPERATOR-SECRET-PATH-HYGIENE-WARNING-DELTA-2026-05-24.md)
 
+## Recent Queue-Or-Registry Receipts
+
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Root-Owned Resume Request-Or-Dispatch Behavior Contract Freeze Pass 273](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-ROOT-OWNED-RESUME-REQUEST-OR-DISPATCH-BEHAVIOR-CONTRACT-FREEZE-PASS-273-2026-06-14.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Root-Owned Resume Runtime Fixture And Primary-Source Lineage Pass 274](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-ROOT-OWNED-RESUME-RUNTIME-FIXTURE-AND-PRIMARY-SOURCE-LINEAGE-PASS-274-2026-06-14.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Queue-State History Read-Model Pass 275](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-QUEUE-STATE-HISTORY-READ-MODEL-PASS-275-2026-06-14.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Runtime-State Discovery Inventory Pass 276](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-RUNTIME-STATE-DISCOVERY-INVENTORY-PASS-276-2026-06-14.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Supervisor Runtime Inventory Pass 277](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-SUPERVISOR-RUNTIME-INVENTORY-PASS-277-2026-06-14.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Execution-Home Runtime Inventory Pass 278](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-EXECUTION-HOME-RUNTIME-INVENTORY-PASS-278-2026-06-14.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Canonical Execution Receipt Selection Pass 279](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-CANONICAL-EXECUTION-RECEIPT-SELECTION-PASS-279-2026-06-14.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Canonical Execution Receipt Writeback Pass 280](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-CANONICAL-EXECUTION-RECEIPT-WRITEBACK-PASS-280-2026-06-14.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Supervisor Merge-Request Lineage Selection Pass 281](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-SUPERVISOR-MERGE-REQUEST-LINEAGE-SELECTION-PASS-281-2026-06-14.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Initiative Provenance Refresh And Root Cleanup Command Hardening Pass 282](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-INITIATIVE-PROVENANCE-REFRESH-AND-ROOT-CLEANUP-COMMAND-HARDENING-PASS-282-2026-06-14.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Initiative Provenance Validator Hardening Pass 283](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-INITIATIVE-PROVENANCE-VALIDATOR-HARDENING-PASS-283-2026-06-14.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Provenance Status Surface Hardening Pass 284](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-PROVENANCE-STATUS-SURFACE-HARDENING-PASS-284-2026-06-14.md)
+
 ## Notes
 
 This index is a working spine, not an exhaustive archive.
