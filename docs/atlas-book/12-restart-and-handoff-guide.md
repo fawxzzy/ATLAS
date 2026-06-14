@@ -127,6 +127,7 @@ Marker-system hygiene rule:
 - read `Active Cluster Read` first
 - read the capped `Active Front-Page Marker Table` second; it should hold open front-page markers only
 - use `Supporting Open Markers` only for lane-specific follow-up; grouping subheads are fine as long as the marker lines remain parser-compatible
+- carry `Vercel Hobby Cost Governance` as a supporting open marker until repeatable usage snapshots and explicit Hobby-to-Pro thresholds become durable
 - use `Closed / Locked Ratchets` only for historical boundary or restart context
 - keep `Closed / Locked Ratchets` compact; route detailed closeout evidence through receipts and the receipt index instead of the live marker table
 
@@ -180,6 +181,7 @@ Use that helper when local CPU/GPU pressure or lingering workflow residue is sus
 - Brand Asset Canonicalization is now closed at `100%`: manifest consumer-path truth now matches canonical repo naming, `_stack` plus all declared Fitness consumers already matched canonical ATLAS outputs, the seven declared Trove public brand consumers were re-pointed from stale `repos/fawxzzy-trove/...` targets to canonical `repos/trove/...` targets, the seven-file Trove sync restored hash parity to canonical outputs, and `npm run verify` passed in `repos/trove`; downstream browser/cache/unfurl proof remains a separate `Preview Cache & Surface Consistency` lane
 - the current active ATLAS-side lane is now `AI Long-Run Batch Orchestration`
 - the current bounded subfamily is now `queue-or-registry`
+- `Vercel Hobby Cost Governance` is now an admitted supporting open marker at `35%`; it protects the Fitness cheap-by-design Vercel Hobby posture, Observability Plus or Pro gating, and threshold-based upgrade discipline
 - the immediately preceding ATLAS-side selector lane was `AI Repetition-to-Automation Pipeline`; its earlier scaffold, `receipt skeleton drafts`, and `doctrine-routing drafts` receipts remain durable carry-forward truth rather than the current immediate packet
 - PR `#80` is now merged on `main`, so the bounded live default-write adoption checkpoint branch is durable and closed on the canonical branch
 - the derivative restart mirrors are now intentionally aligned through that merged adoption checkpoint and the fresh day-of scaffold proof on `main`

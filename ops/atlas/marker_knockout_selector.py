@@ -41,6 +41,7 @@ CAMPAIGN_PRIORITY = (
     "Dependency Untangling",
     "Atlas-owned Repo Naming Canonicalization",
     "Preview Cache & Surface Consistency",
+    "Vercel Hobby Cost Governance",
     "Operator Secret Path Hygiene",
     "Manual Deploy Exception Burn-Down",
     "Post-Convergence Lane Split Readiness",
@@ -188,6 +189,11 @@ POLICY_REGISTRY: dict[str, MarkerPolicy] = {
         category="deploy/publication hold",
         rationale="Preview-surface truth still depends on deploy/runtime-facing evidence rather than a root-only lane.",
         expected_evidence="one non-deploy cache/projection contract or explicit preview authority",
+    ),
+    "Vercel Hobby Cost Governance": MarkerPolicy(
+        category="admissible after current lane",
+        rationale="The marker is now durably admitted, but current truth still keeps the AI and queue-or-registry execution-facing lanes ahead of a cost-governance follow-on by default.",
+        expected_evidence="one root-owned usage-snapshot or threshold-governance receipt that preserves Hobby posture without requiring Vercel setting mutation",
     ),
     "Operator Secret Path Hygiene": MarkerPolicy(
         category="secret/.env hold",

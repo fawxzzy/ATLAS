@@ -495,6 +495,7 @@ What is true right now:
   - `fitness-prod-rollout-20260525`
 - deployment provenance is still mixed between governed Git-backed deploys and more ad hoc `HEAD` or dirty-state style deploy metadata.
 - the recent 30-day Vercel overview is still polluted by the older Discord polling behavior, so short-window views matter more when checking whether the event-driven fix actually helped.
+- `Vercel Hobby Cost Governance` is now a supporting open marker at `35%`; Fitness should remain cheap-by-design on Hobby by default, with Pro and Observability Plus treated as threshold-based upgrades rather than assumed dependencies.
 
 Why this matters:
 

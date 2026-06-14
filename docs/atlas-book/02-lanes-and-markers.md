@@ -74,6 +74,10 @@ Read:
 - Operator Secret Path Hygiene: `64%`
 - Discord Workflow, Publication & Docs Reliability: `32%`
 
+### Cost / platform governance
+
+- Vercel Hobby Cost Governance: `35%`
+
 ### Automation / orchestration
 
 - Unified Workflow Convergence: `73%`

@@ -37,6 +37,7 @@ MARKER_DOC = """# Lanes And Markers
 - Duplicate Surface Decommission: `98%`
 - Brand Asset Canonicalization: `90%`
 - Preview Cache & Surface Consistency: `78%`
+- Vercel Hobby Cost Governance: `35%`
 - Operator Secret Path Hygiene: `64%`
 - Manual Deploy Exception Burn-Down: `84%`
 - Unified Workflow Convergence: `73%`
@@ -86,6 +87,7 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
 
         self.assertEqual("protected/Fitness hold", records["Fitness QA/LLEL Workflow"]["category"])
         self.assertEqual("secret/.env hold", records["Operator Secret Path Hygiene"]["category"])
+        self.assertEqual("admissible after current lane", records["Vercel Hobby Cost Governance"]["category"])
         self.assertEqual("already closed / locked", records["_stack Readiness"]["category"])
 
     def test_build_campaign_normalizes_inline_code_marker_names(self) -> None:

@@ -35,6 +35,7 @@
 - [Near-100 Marker Closeout Selector After Naming And Discord Closeouts](../ops/NEAR-100-MARKER-CLOSEOUT-SELECTOR-AFTER-NAMING-AND-DISCORD-CLOSEOUTS-2026-06-12.md)
 - [Fitness Protected Marker Closeout After QA/LLEL Contract Refresh And Local Branch/Worktree Cleanup](../ops/FITNESS-PROTECTED-MARKER-CLOSEOUT-AFTER-QA-LLEL-CONTRACT-REFRESH-AND-LOCAL-BRANCH-WORKTREE-CLEANUP-2026-06-13.md)
 - [Marker Board Taxonomy Hygiene And Atlas Clean-Re-sync Campaign Pass 1](../ops/MARKER-BOARD-TAXONOMY-HYGIENE-AND-ATLAS-CLEAN-RESYNC-CAMPAIGN-PASS-1-2026-06-13.md)
+- [Vercel Hobby Cost Governance Marker Admission Pass 1](../ops/VERCEL-HOBBY-COST-GOVERNANCE-MARKER-ADMISSION-PASS-1-2026-06-13.md)
 - [Duplicate Surface Decommission Final Closeout Pass 3](../ops/DUPLICATE-SURFACE-DECOMMISSION-FINAL-CLOSEOUT-PASS-3-2026-06-13.md)
 - [Remaining Closeout Queue Reselection After Duplicate Surface Closeout](../ops/REMAINING-CLOSEOUT-QUEUE-RESELECTION-AFTER-DUPLICATE-SURFACE-CLOSEOUT-2026-06-13.md)
 - [_Stack Readiness Stack Queue-Or-Registry Broader Execution Behavior First-Implementation Worker Cluster Reconciliation](../ops/_STACK-READINESS-STACK-QUEUE-OR-REGISTRY-BROADER-EXECUTION-BEHAVIOR-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-13.md)
