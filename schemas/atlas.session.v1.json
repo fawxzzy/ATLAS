@@ -66,6 +66,9 @@
         "execution_recorded",
         "merge_requested",
         "resume_ready",
+        "resume_requested",
+        "running",
+        "resume_failed",
         "completed",
         "failed"
       ]
@@ -334,7 +337,14 @@
       "properties": {
         "status": {
           "type": "string",
-          "minLength": 1
+          "enum": [
+            "not_requested",
+            "resume_ready",
+            "resume_requested",
+            "running",
+            "completed",
+            "resume_failed"
+          ]
         },
         "requested_at": {
           "type": [
@@ -400,6 +410,7 @@
           "enum": [
             "resume_ready",
             "completed",
+            "resume_failed",
             "failed",
             null
           ]

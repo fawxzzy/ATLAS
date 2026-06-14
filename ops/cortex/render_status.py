@@ -219,8 +219,9 @@ def classify_merge_requests(
     for descriptor in descriptors:
         if descriptor.get("artifact_type") != "merge_request":
             continue
-        conflict_key = str(descriptor.get("identity", {}).get("conflict_key") or descriptor.get("source_ref") or "")
-        grouped.setdefault(conflict_key, []).append(descriptor)
+        identity = descriptor.get("identity", {}) if isinstance(descriptor.get("identity"), dict) else {}
+        lineage_key = str(identity.get("lineage_key") or identity.get("conflict_key") or descriptor.get("source_ref") or "")
+        grouped.setdefault(lineage_key, []).append(descriptor)
 
     active: list[dict[str, Any]] = []
     residue: list[dict[str, Any]] = []

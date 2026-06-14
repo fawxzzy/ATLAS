@@ -207,6 +207,8 @@ DEBT_CLASS_CONFIG = [
             "archive-registry-path-drift",
             "archive-unregistered-surface",
             "archive-present-state-drift",
+            "execution-receipt-manifest-stale",
+            "execution-receipt-close-links-stale",
         },
         "prefixes": [
             "stack-lock-",
@@ -240,6 +242,8 @@ REMEDIATION_BUCKET_CONFIG = [
         "categories": {
             "execution-receipt-repair-required",
             "execution-receipt-repair-invalid",
+            "execution-receipt-manifest-stale",
+            "execution-receipt-close-links-stale",
         },
     },
     {
@@ -1533,14 +1537,54 @@ def validate_execution_receipt_repairs(stack_file: Path) -> list[Finding]:
         if not isinstance(epoch, dict) or epoch.get("epoch") == GOVERNED_ARTIFACT_EPOCH_LEGACY_PRE_REGISTRY:
             continue
         refs = session_payload.get("refs") if isinstance(session_payload.get("refs"), dict) else {}
+        completion = session_payload.get("completion") if isinstance(session_payload.get("completion"), dict) else {}
         original_ref = str(refs.get("execution_receipt_ref") or "").strip()
         if not original_ref:
             continue
+        close_receipt_refs = [
+            str(item).strip()
+            for item in completion.get("close_receipt_refs", [])
+            if isinstance(item, str) and str(item).strip()
+        ]
         original_payload = receipt_payloads.get(original_ref)
         if not isinstance(original_payload, dict):
             continue
 
         preferred_ref = resolve_preferred_execution_receipt_ref(original_ref, root=root)
+        if preferred_ref and preferred_ref != original_ref:
+            findings.append(
+                Finding(
+                    "error",
+                    "execution-receipt-manifest-stale",
+                    relative_to_root(root, session_path),
+                    "Session manifest execution receipt link is stale; a truthful superseding receipt exists and should be the canonical manifest link.",
+                    {
+                        "original_receipt_ref": original_ref,
+                        "preferred_receipt_ref": preferred_ref,
+                    },
+                )
+            )
+        if preferred_ref:
+            stale_close_receipt_refs = [
+                ref
+                for ref in close_receipt_refs
+                if ref != preferred_ref and resolve_preferred_execution_receipt_ref(ref, root=root) == preferred_ref
+            ]
+            if preferred_ref not in close_receipt_refs or stale_close_receipt_refs:
+                findings.append(
+                    Finding(
+                        "error",
+                        "execution-receipt-close-links-stale",
+                        relative_to_root(root, session_path),
+                        "Session manifest close_receipt_refs are stale; the canonical reconciled receipt should replace superseded receipt links.",
+                        {
+                            "preferred_receipt_ref": preferred_ref,
+                            "close_receipt_refs": close_receipt_refs,
+                            "stale_close_receipt_refs": stale_close_receipt_refs,
+                        },
+                    )
+                )
+
         if str(original_payload.get("registry_digest") or "") == current_digest:
             continue
 
@@ -2315,7 +2359,7 @@ def validate_world_model_state(stack_file: Path) -> list[Finding]:
         artifact_type = str(descriptor.get("artifact_type", ""))
         source_ref = str(descriptor.get("source_ref", ""))
         state = descriptor.get("state", {})
-        if artifact_type == "session_manifest" and str(state.get("final_status", "")) in {"completed", "resume_ready", "failed"}:
+        if artifact_type == "session_manifest" and str(state.get("final_status", "")) in {"completed", "resume_ready", "resume_failed", "failed"}:
             if source_ref not in observation_source_refs:
                 findings.append(
                     Finding(
@@ -2396,12 +2440,18 @@ def validate_world_model_state(stack_file: Path) -> list[Finding]:
                 continue
 
             refs = session_payload.get("refs") if isinstance(session_payload.get("refs"), dict) else {}
+            resume = session_payload.get("resume") if isinstance(session_payload.get("resume"), dict) else {}
             completion = session_payload.get("completion") if isinstance(session_payload.get("completion"), dict) else {}
 
             assignment_ref = optional_string(session_payload.get("worker", {}).get("assignment_ref")) or optional_string(refs.get("assignment_ref")) or optional_string(descriptor.get("links", {}).get("assignment_ref"))
             request_ref = optional_string(refs.get("request_ref")) or optional_string(descriptor.get("links", {}).get("request_ref"))
             approval_ref = optional_string(refs.get("approval_receipt_ref")) or optional_string(descriptor.get("links", {}).get("approval_receipt_ref"))
             execution_receipt_ref = optional_string(refs.get("execution_receipt_ref")) or optional_string(descriptor.get("links", {}).get("execution_receipt_ref"))
+            resume_request_ref = optional_string(refs.get("resume_request_ref")) or optional_string(descriptor.get("links", {}).get("resume_request_ref"))
+            resume_dispatch_ref = optional_string(refs.get("resume_dispatch_ref")) or optional_string(descriptor.get("links", {}).get("resume_dispatch_ref"))
+            resume_run_manifest_ref = optional_string(refs.get("resume_run_manifest_ref")) or optional_string(descriptor.get("links", {}).get("resume_run_manifest_ref"))
+            resumed_completed_status_ref = optional_string(refs.get("resumed_completed_status_ref")) or optional_string(descriptor.get("links", {}).get("resumed_completed_status_ref"))
+            resume_status = optional_string(resume.get("status"))
             final_status = optional_string(completion.get("final_status")) or optional_string(state.get("final_status"))
             final_status_ref = optional_string(completion.get("final_status_ref")) or optional_string(descriptor.get("links", {}).get("final_status_ref"))
             merge_request_refs = [
@@ -2458,6 +2508,22 @@ def validate_world_model_state(stack_file: Path) -> list[Finding]:
                     require_observation("resume_ready", resume_context_ref, owner_ref=source_ref)
             else:
                 require_observation("resume_ready", merge_completion_ref, owner_ref=source_ref)
+
+            resume_flow_started = bool(
+                resume_request_ref
+                or resume_dispatch_ref
+                or resume_status in {"resume_requested", "running", "completed", "resume_failed"}
+            )
+            if resume_flow_started:
+                require_observation("resume_requested", resume_request_ref, owner_ref=source_ref)
+            if resume_dispatch_ref or resume_status in {"running", "completed", "resume_failed"}:
+                require_observation("resume_dispatched", resume_dispatch_ref, owner_ref=source_ref)
+
+            resume_terminal_ref = final_status_ref or resumed_completed_status_ref or resume_run_manifest_ref
+            if final_status == "resume_failed" or resume_status == "resume_failed":
+                require_observation("resume_failed", resume_terminal_ref, owner_ref=source_ref)
+            elif resume_flow_started and final_status == "completed":
+                require_observation("resume_completed", resume_terminal_ref, owner_ref=source_ref)
 
     if isinstance(attention, dict):
         snapshot_attention_ids = sorted(

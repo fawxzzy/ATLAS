@@ -190,6 +190,34 @@ def merge_request_conflict_key(payload: dict[str, Any], *, source_ref: str) -> s
     )
 
 
+def merge_request_lineage_key(payload: dict[str, Any], *, source_ref: str) -> str:
+    overlaps = payload.get("overlaps") if isinstance(payload.get("overlaps"), list) else []
+    overlap_surfaces = []
+    for item in overlaps:
+        if not isinstance(item, dict):
+            continue
+        overlap_surfaces.append(
+            {
+                "repo_path": item.get("repo_path"),
+                "path": item.get("path"),
+                "file_digest_before": item.get("file_digest_before"),
+            }
+        )
+    overlap_surfaces.sort(
+        key=lambda item: (
+            str(item.get("repo_path", "")),
+            str(item.get("path", "")),
+            str(item.get("file_digest_before", "")),
+        )
+    )
+    return stable_json_digest(
+        {
+            "session_scope": source_session_scope(source_ref),
+            "overlap_surfaces": overlap_surfaces,
+        }
+    )
+
+
 def governed_surface_ref(value: Any) -> dict[str, Any]:
     if not isinstance(value, dict):
         return {
@@ -530,6 +558,7 @@ def build_merge_request_descriptor(payload: dict[str, Any], *, digest: str, size
             "merge_request_id": payload.get("merge_request_id"),
             "session_scope": source_session_scope(source_ref),
             "conflict_key": merge_request_conflict_key(payload, source_ref=source_ref),
+            "lineage_key": merge_request_lineage_key(payload, source_ref=source_ref),
             "tool_id": payload.get("tool_id"),
             "extension_id": payload.get("extension_id"),
         },

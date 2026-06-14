@@ -493,6 +493,8 @@ def resume_session(*, session_id: str, no_commit: bool = False) -> dict[str, Any
     resume_request = {
         "contract_version": RESUME_REQUEST_CONTRACT_VERSION,
         "session_id": session_id,
+        "worker_id": context["worker_id"],
+        "assignment_id": context["assignment_id"],
         "requested_at": resume_requested_at,
         "stack_lock_digest": context["stack_lock_digest"],
         "tool_id": context["tool_id"],
@@ -505,6 +507,16 @@ def resume_session(*, session_id: str, no_commit: bool = False) -> dict[str, Any
         "resume_context_ref": context["resume_context_ref"],
         "paused_handoff_refs": context["paused_handoff_refs"],
         "merge_handoff_ref": context["merge_handoff_ref"],
+        "source_artifact_refs": unique_refs(
+            [
+                atlas_relative(session_manifest_path, root=ROOT),
+                context["merge_completion_ref"],
+                context["merge_request_ref"],
+                context["resume_context_ref"],
+                *context["paused_handoff_refs"],
+                context["merge_handoff_ref"],
+            ]
+        ),
     }
     write_json(resume_request_path, resume_request)
     refs["resume_request_ref"] = atlas_relative(resume_request_path, root=ROOT)
@@ -542,13 +554,34 @@ def resume_session(*, session_id: str, no_commit: bool = False) -> dict[str, Any
     resume_dispatch = {
         "contract_version": RESUME_DISPATCH_CONTRACT_VERSION,
         "session_id": session_id,
+        "worker_id": context["worker_id"],
+        "assignment_id": context["assignment_id"],
         "dispatched_at": resume_dispatched_at,
         "stack_lock_digest": context["stack_lock_digest"],
         "tool_id": context["tool_id"],
         "extension_id": context["extension_id"],
         "registry_digest": context["registry_digest"],
         "automation_level": REQUEST_ACTION_AUTOMATION_LEVEL,
+        "session_manifest_ref": atlas_relative(session_manifest_path, root=ROOT),
+        "resume_request_ref": refs["resume_request_ref"],
         "prompt_ref": atlas_relative(resume_prompt_path, root=ROOT),
+        "merge_completion_ref": context["merge_completion_ref"],
+        "merge_request_ref": context["merge_request_ref"],
+        "resume_context_ref": context["resume_context_ref"],
+        "paused_handoff_refs": context["paused_handoff_refs"],
+        "merge_handoff_ref": context["merge_handoff_ref"],
+        "source_artifact_refs": unique_refs(
+            [
+                atlas_relative(session_manifest_path, root=ROOT),
+                refs["resume_request_ref"],
+                atlas_relative(resume_prompt_path, root=ROOT),
+                context["merge_completion_ref"],
+                context["merge_request_ref"],
+                context["resume_context_ref"],
+                *context["paused_handoff_refs"],
+                context["merge_handoff_ref"],
+            ]
+        ),
         "runner": {
             "entrypoint": atlas_relative(CODEX_RUNNER_PATH, root=ROOT),
             "adapter_ref": atlas_relative(ATLAS_ADAPTER_PATH, root=ROOT),
@@ -587,7 +620,6 @@ def resume_session(*, session_id: str, no_commit: bool = False) -> dict[str, Any
     resume_dispatch["run_manifest_ref"] = run_manifest_ref
     resume_dispatch["runner"]["exit_code"] = completed.returncode
     resume_dispatch["runner"]["status"] = optional_string(run_manifest_payload.get("status")) or "unknown"
-    write_json(resume_dispatch_path, resume_dispatch)
 
     worker_artifacts = (
         run_manifest_payload.get("workerArtifacts")
@@ -600,6 +632,19 @@ def resume_session(*, session_id: str, no_commit: bool = False) -> dict[str, Any
     refs["resumed_assignment_ref"] = resumed_assignment_ref
     refs["resumed_running_status_ref"] = resumed_running_status_ref
     refs["resumed_completed_status_ref"] = resumed_completed_status_ref
+    resume_dispatch["resumed_assignment_ref"] = resumed_assignment_ref
+    resume_dispatch["resumed_running_status_ref"] = resumed_running_status_ref
+    resume_dispatch["resumed_completed_status_ref"] = resumed_completed_status_ref
+    resume_dispatch["source_artifact_refs"] = unique_refs(
+        [
+            *string_list(resume_dispatch.get("source_artifact_refs")),
+            run_manifest_ref,
+            resumed_assignment_ref,
+            resumed_running_status_ref,
+            resumed_completed_status_ref,
+        ]
+    )
+    write_json(resume_dispatch_path, resume_dispatch)
     refs["status_refs"] = unique_refs(
         [
             *string_list(refs.get("status_refs")),
