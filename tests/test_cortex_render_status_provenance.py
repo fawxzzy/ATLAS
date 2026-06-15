@@ -94,6 +94,73 @@ class RenderStatusProvenanceTests(unittest.TestCase):
         self.assertEqual("medium", items[0]["severity"])
         self.assertEqual(["attention:sha256:stale"], items[0]["details"]["stale_attention_refs"])
 
+    def test_provenance_attention_items_cap_signals_and_surface_overflow(self) -> None:
+        items = provenance_attention_items(
+            {
+                "items": [
+                    {
+                        "kind": "initiative_provenance_drift",
+                        "initiative_id": "initiative-zeta",
+                        "source_ref": "docs/memory/initiatives/initiative-zeta.json",
+                        "stale_attention_refs": ["attention:sha256:zeta"],
+                        "missing_file_refs": [],
+                    },
+                    {
+                        "kind": "proposed_session_provenance_drift",
+                        "session_id": "session-bravo",
+                        "task_id": "task-bravo",
+                        "source_ref": "runtime/atlas/proposed-sessions/session-bravo/session.manifest.json",
+                        "stale_attention_refs": [],
+                        "missing_initiative_ref": "docs/memory/initiatives/missing-bravo.json",
+                    },
+                    {
+                        "kind": "initiative_provenance_drift",
+                        "initiative_id": "initiative-alpha",
+                        "source_ref": "docs/memory/initiatives/initiative-alpha.json",
+                        "stale_attention_refs": [],
+                        "missing_file_refs": ["docs/memory/initiatives/missing-alpha.json"],
+                    },
+                    {
+                        "kind": "proposed_session_provenance_drift",
+                        "session_id": "session-charlie",
+                        "task_id": "task-charlie",
+                        "source_ref": "runtime/atlas/proposed-sessions/session-charlie/session.manifest.json",
+                        "stale_attention_refs": ["attention:sha256:charlie"],
+                        "missing_initiative_ref": None,
+                    },
+                    {
+                        "kind": "initiative_provenance_drift",
+                        "initiative_id": "initiative-beta",
+                        "source_ref": "docs/memory/initiatives/initiative-beta.json",
+                        "stale_attention_refs": ["attention:sha256:beta"],
+                        "missing_file_refs": [],
+                    },
+                ]
+            }
+        )
+
+        self.assertEqual(4, len(items))
+        self.assertEqual(
+            [
+                "initiative_provenance_drift",
+                "proposed_session_provenance_drift",
+                "initiative_provenance_drift",
+                "provenance_alert_overflow",
+            ],
+            [item["kind"] for item in items],
+        )
+        self.assertEqual(
+            ["high", "high", "medium", "medium"],
+            [item["severity"] for item in items],
+        )
+        self.assertEqual("initiative-alpha", items[0]["details"]["initiative_id"])
+        self.assertEqual("session-bravo", items[1]["details"]["session_id"])
+        self.assertEqual("initiative-beta", items[2]["details"]["initiative_id"])
+        self.assertEqual(2, items[3]["details"]["suppressed_item_count"])
+        self.assertEqual(3, items[3]["details"]["signal_cap"])
+        self.assertEqual(5, items[3]["details"]["total_provenance_alert_count"])
+        self.assertEqual("medium", items[3]["details"]["highest_suppressed_severity"])
+
     def test_provenance_alerts_route_into_attention_queue(self) -> None:
         queue = attention_queue(
             descriptors=[],

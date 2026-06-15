@@ -45,6 +45,7 @@ SEVERITY_ORDER = {
     "medium": 2,
     "low": 3,
 }
+PROVENANCE_ALERT_QUEUE_SIGNAL_CAP = 3
 
 
 def unique_strings(values: list[Any]) -> list[str]:
@@ -519,6 +520,15 @@ def attention_item(
     return item
 
 
+def attention_item_sort_key(item: dict[str, Any]) -> tuple[int, str, str, str]:
+    return (
+        SEVERITY_ORDER.get(str(item.get("severity")), 99),
+        str(item.get("kind", "")),
+        str(item.get("source_ref", "")),
+        str(item.get("summary", "")),
+    )
+
+
 def validate_surface_ref(
     *,
     tool_id: Any,
@@ -789,14 +799,7 @@ def attention_queue(
             )
         )
 
-    items.sort(
-        key=lambda item: (
-            SEVERITY_ORDER.get(str(item.get("severity")), 99),
-            str(item.get("kind", "")),
-            str(item.get("source_ref", "")),
-            str(item.get("summary", "")),
-        )
-    )
+    items.sort(key=attention_item_sort_key)
     highest = items[0]["severity"] if items else None
     return {
         "status": "needs_review" if items else "clear",
@@ -1419,7 +1422,26 @@ def provenance_attention_items(provenance_alerts: dict[str, Any]) -> list[dict[s
                     },
                 )
             )
-    return items
+    items.sort(key=attention_item_sort_key)
+    if len(items) <= PROVENANCE_ALERT_QUEUE_SIGNAL_CAP:
+        return items
+
+    suppressed_items = items[PROVENANCE_ALERT_QUEUE_SIGNAL_CAP:]
+    bounded_items = items[:PROVENANCE_ALERT_QUEUE_SIGNAL_CAP]
+    bounded_items.append(
+        attention_item(
+            kind="provenance_alert_overflow",
+            severity=str(suppressed_items[0].get("severity") or "medium"),
+            summary=f"{len(suppressed_items)} additional provenance alerts remain in provenance_alerts.",
+            details={
+                "suppressed_item_count": len(suppressed_items),
+                "signal_cap": PROVENANCE_ALERT_QUEUE_SIGNAL_CAP,
+                "highest_suppressed_severity": suppressed_items[0].get("severity"),
+                "total_provenance_alert_count": len(items),
+            },
+        )
+    )
+    return bounded_items
 
 
 def conversation_summary(descriptors: list[dict[str, Any]]) -> dict[str, Any]:
