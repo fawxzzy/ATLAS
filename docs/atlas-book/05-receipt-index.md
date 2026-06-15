@@ -945,6 +945,7 @@
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Provenance Status Surface Hardening Pass 284](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-PROVENANCE-STATUS-SURFACE-HARDENING-PASS-284-2026-06-14.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Provenance-Alert Severity Routing Decision Pass 286](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-PROVENANCE-ALERT-SEVERITY-ROUTING-DECISION-PASS-286-2026-06-15.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Provenance-Alert Queue-Proof And Payload-Boundary Hardening Pass 287](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-PROVENANCE-ALERT-QUEUE-PROOF-AND-PAYLOAD-BOUNDARY-HARDENING-PASS-287-2026-06-15.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Provenance-Alert Render-Status Payload Integration Proof Pass 288](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-PROVENANCE-ALERT-RENDER-STATUS-PAYLOAD-INTEGRATION-PROOF-PASS-288-2026-06-15.md)
 
 ## Notes
 
