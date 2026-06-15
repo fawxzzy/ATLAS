@@ -1369,11 +1369,14 @@ def provenance_attention_items(provenance_alerts: dict[str, Any]) -> list[dict[s
         if kind == "initiative_provenance_drift":
             missing_file_refs = unique_strings(alert.get("missing_file_refs", []))
             stale_attention_refs = unique_strings(alert.get("stale_attention_refs", []))
+            initiative_id = str(alert.get("initiative_id") or "").strip() or None
+            if not stale_attention_refs and not missing_file_refs:
+                continue
             severity = "high" if missing_file_refs else "medium"
             summary = (
-                f"Initiative '{alert.get('initiative_id')}' has missing provenance refs."
+                f"Initiative '{initiative_id or 'unknown'}' has missing provenance refs."
                 if missing_file_refs
-                else f"Initiative '{alert.get('initiative_id')}' points to stale attention refs."
+                else f"Initiative '{initiative_id or 'unknown'}' points to stale attention refs."
             )
             items.append(
                 attention_item(
@@ -1382,7 +1385,7 @@ def provenance_attention_items(provenance_alerts: dict[str, Any]) -> list[dict[s
                     summary=summary,
                     source_ref=source_ref,
                     details={
-                        "initiative_id": alert.get("initiative_id"),
+                        "initiative_id": initiative_id,
                         "title": alert.get("title"),
                         "stale_attention_refs": stale_attention_refs,
                         "missing_file_refs": missing_file_refs,
@@ -1393,11 +1396,14 @@ def provenance_attention_items(provenance_alerts: dict[str, Any]) -> list[dict[s
         if kind == "proposed_session_provenance_drift":
             stale_attention_refs = unique_strings(alert.get("stale_attention_refs", []))
             missing_initiative_ref = str(alert.get("missing_initiative_ref") or "").strip() or None
+            session_id = str(alert.get("session_id") or "").strip() or None
+            if not stale_attention_refs and missing_initiative_ref is None:
+                continue
             severity = "high" if missing_initiative_ref else "medium"
             summary = (
-                f"Proposed session '{alert.get('session_id')}' points to a missing initiative ref."
+                f"Proposed session '{session_id or 'unknown'}' points to a missing initiative ref."
                 if missing_initiative_ref
-                else f"Proposed session '{alert.get('session_id')}' points to stale attention refs."
+                else f"Proposed session '{session_id or 'unknown'}' points to stale attention refs."
             )
             items.append(
                 attention_item(
@@ -1406,7 +1412,7 @@ def provenance_attention_items(provenance_alerts: dict[str, Any]) -> list[dict[s
                     summary=summary,
                     source_ref=source_ref,
                     details={
-                        "session_id": alert.get("session_id"),
+                        "session_id": session_id,
                         "task_id": alert.get("task_id"),
                         "stale_attention_refs": stale_attention_refs,
                         "missing_initiative_ref": missing_initiative_ref,
