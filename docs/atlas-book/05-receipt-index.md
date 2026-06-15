@@ -947,6 +947,7 @@
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Provenance-Alert Queue-Proof And Payload-Boundary Hardening Pass 287](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-PROVENANCE-ALERT-QUEUE-PROOF-AND-PAYLOAD-BOUNDARY-HARDENING-PASS-287-2026-06-15.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Provenance-Alert Render-Status Payload Integration Proof Pass 288](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-PROVENANCE-ALERT-RENDER-STATUS-PAYLOAD-INTEGRATION-PROOF-PASS-288-2026-06-15.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Provenance-Alert Queue Signal Budget Decision Pass 289](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-PROVENANCE-ALERT-QUEUE-SIGNAL-BUDGET-DECISION-PASS-289-2026-06-15.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Provenance-Alert Queue Signal Budget Integration Proof Pass 290](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-PROVENANCE-ALERT-QUEUE-SIGNAL-BUDGET-INTEGRATION-PROOF-PASS-290-2026-06-15.md)
 
 ## Notes
 

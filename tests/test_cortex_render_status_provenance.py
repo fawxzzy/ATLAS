@@ -70,6 +70,113 @@ class RenderStatusProvenanceTests(unittest.TestCase):
         self.assertEqual(1, payload["attention_queue"]["item_count"])
         self.assertEqual("initiative_provenance_drift", payload["attention_queue"]["items"][0]["kind"])
 
+    def test_render_status_payload_preserves_full_provenance_summary_while_bounding_queue_signals(self) -> None:
+        provenance_summary = {
+            "status": "drift_detected",
+            "initiative_item_count": 3,
+            "proposal_item_count": 2,
+            "item_count": 5,
+            "items": [
+                {
+                    "kind": "initiative_provenance_drift",
+                    "initiative_id": "initiative-zeta",
+                    "title": "Zeta",
+                    "source_ref": "docs/memory/initiatives/initiative-zeta.json",
+                    "stale_attention_refs": ["attention:sha256:zeta"],
+                    "missing_file_refs": [],
+                },
+                {
+                    "kind": "proposed_session_provenance_drift",
+                    "session_id": "session-bravo",
+                    "task_id": "task-bravo",
+                    "source_ref": "runtime/atlas/proposed-sessions/session-bravo/session.manifest.json",
+                    "stale_attention_refs": [],
+                    "missing_initiative_ref": "docs/memory/initiatives/missing-bravo.json",
+                },
+                {
+                    "kind": "initiative_provenance_drift",
+                    "initiative_id": "initiative-alpha",
+                    "title": "Alpha",
+                    "source_ref": "docs/memory/initiatives/initiative-alpha.json",
+                    "stale_attention_refs": [],
+                    "missing_file_refs": ["docs/memory/initiatives/missing-alpha.json"],
+                },
+                {
+                    "kind": "proposed_session_provenance_drift",
+                    "session_id": "session-charlie",
+                    "task_id": "task-charlie",
+                    "source_ref": "runtime/atlas/proposed-sessions/session-charlie/session.manifest.json",
+                    "stale_attention_refs": ["attention:sha256:charlie"],
+                    "missing_initiative_ref": None,
+                },
+                {
+                    "kind": "initiative_provenance_drift",
+                    "initiative_id": "initiative-beta",
+                    "title": "Beta",
+                    "source_ref": "docs/memory/initiatives/initiative-beta.json",
+                    "stale_attention_refs": ["attention:sha256:beta"],
+                    "missing_file_refs": [],
+                },
+            ],
+        }
+
+        with TemporaryDirectory() as temp_dir:
+            descriptor_root = Path(temp_dir)
+            (descriptor_root / "placeholder.json").write_text("{}", encoding="utf-8")
+            patch_specs = [
+                ("ops.cortex.render_status.load_descriptors", []),
+                ("ops.cortex.render_status.load_registry_state", {"ok": True}),
+                ("ops.cortex.render_status.choose_latest_session", None),
+                ("ops.cortex.render_status.session_overview", None),
+                ("ops.cortex.render_status.blocked_workers", []),
+                ("ops.cortex.render_status.classify_merge_requests", ([], [])),
+                ("ops.cortex.render_status.closure_receipts", []),
+                ("ops.cortex.render_status.execution_receipt_residue_records", []),
+                ("ops.cortex.render_status.governed_writes", []),
+                ("ops.cortex.render_status.legacy_compatibility_surfaces", []),
+                ("ops.cortex.render_status.trust_surfaces", []),
+                ("ops.cortex.render_status.trust_posture_summary", {}),
+                ("ops.cortex.render_status.working_memory_summary", {"_items": [], "initiatives": {}}),
+                ("ops.cortex.render_status.provenance_alert_summary", provenance_summary),
+                ("ops.cortex.render_status.conversation_summary", {}),
+                ("ops.cortex.render_status.build_canonical_lockfile_artifacts", {}),
+                ("ops.cortex.render_status.repo_inventory_summary_from_lock", {"items": []}),
+                ("ops.cortex.render_status.lock_worktree_hygiene", {"status": "frozen"}),
+                ("ops.cortex.render_status.registry_summary", {}),
+                ("ops.cortex.render_status.artifact_inventory", {}),
+                ("ops.cortex.render_status.proposal_only_state", {}),
+                ("ops.cortex.render_status.world_model_state", {}),
+            ]
+            with ExitStack() as stack:
+                for target, value in patch_specs:
+                    stack.enter_context(patch(target, return_value=value))
+                payload = render_status_payload(descriptor_root)
+
+        self.assertEqual(provenance_summary, payload["provenance_alerts"])
+        self.assertEqual(5, payload["provenance_alerts"]["item_count"])
+        self.assertEqual(5, len(payload["provenance_alerts"]["items"]))
+        self.assertEqual("needs_review", payload["attention_queue"]["status"])
+        self.assertEqual(4, payload["attention_queue"]["item_count"])
+        self.assertEqual("high", payload["attention_queue"]["highest_severity"])
+        self.assertEqual(
+            [
+                "initiative_provenance_drift",
+                "proposed_session_provenance_drift",
+                "initiative_provenance_drift",
+                "provenance_alert_overflow",
+            ],
+            [item["kind"] for item in payload["attention_queue"]["items"]],
+        )
+        self.assertEqual(
+            {
+                "suppressed_item_count": 2,
+                "signal_cap": 3,
+                "highest_suppressed_severity": "medium",
+                "total_provenance_alert_count": 5,
+            },
+            payload["attention_queue"]["items"][3]["details"],
+        )
+
     def test_provenance_attention_items_ignore_malformed_and_unknown_payloads(self) -> None:
         items = provenance_attention_items(
             {
