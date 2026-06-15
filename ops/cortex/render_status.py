@@ -573,6 +573,7 @@ def attention_queue(
     legacy_compatibility_payload: list[dict[str, Any]],
     trust_surfaces_payload: list[dict[str, Any]],
     working_memory_items: list[dict[str, Any]],
+    provenance_alerts: dict[str, Any],
     registry_state: dict[str, Any],
 ) -> dict[str, Any]:
     items: list[dict[str, Any]] = []
@@ -766,6 +767,7 @@ def attention_queue(
         )
 
     items.extend(initiative_attention_items(working_memory_items))
+    items.extend(provenance_attention_items(provenance_alerts))
 
     for descriptor in descriptors:
         if str(descriptor.get("artifact_type", "")) != "conversation_turn":
@@ -1352,6 +1354,68 @@ def provenance_alert_summary(
     }
 
 
+def provenance_attention_items(provenance_alerts: dict[str, Any]) -> list[dict[str, Any]]:
+    if not isinstance(provenance_alerts, dict):
+        return []
+    alerts = provenance_alerts.get("items", [])
+    if not isinstance(alerts, list):
+        return []
+    items: list[dict[str, Any]] = []
+    for alert in alerts:
+        if not isinstance(alert, dict):
+            continue
+        kind = str(alert.get("kind", "")).strip()
+        source_ref = str(alert.get("source_ref", "")).strip() or None
+        if kind == "initiative_provenance_drift":
+            missing_file_refs = unique_strings(alert.get("missing_file_refs", []))
+            stale_attention_refs = unique_strings(alert.get("stale_attention_refs", []))
+            severity = "high" if missing_file_refs else "medium"
+            summary = (
+                f"Initiative '{alert.get('initiative_id')}' has missing provenance refs."
+                if missing_file_refs
+                else f"Initiative '{alert.get('initiative_id')}' points to stale attention refs."
+            )
+            items.append(
+                attention_item(
+                    kind=kind,
+                    severity=severity,
+                    summary=summary,
+                    source_ref=source_ref,
+                    details={
+                        "initiative_id": alert.get("initiative_id"),
+                        "title": alert.get("title"),
+                        "stale_attention_refs": stale_attention_refs,
+                        "missing_file_refs": missing_file_refs,
+                    },
+                )
+            )
+            continue
+        if kind == "proposed_session_provenance_drift":
+            stale_attention_refs = unique_strings(alert.get("stale_attention_refs", []))
+            missing_initiative_ref = str(alert.get("missing_initiative_ref") or "").strip() or None
+            severity = "high" if missing_initiative_ref else "medium"
+            summary = (
+                f"Proposed session '{alert.get('session_id')}' points to a missing initiative ref."
+                if missing_initiative_ref
+                else f"Proposed session '{alert.get('session_id')}' points to stale attention refs."
+            )
+            items.append(
+                attention_item(
+                    kind=kind,
+                    severity=severity,
+                    summary=summary,
+                    source_ref=source_ref,
+                    details={
+                        "session_id": alert.get("session_id"),
+                        "task_id": alert.get("task_id"),
+                        "stale_attention_refs": stale_attention_refs,
+                        "missing_initiative_ref": missing_initiative_ref,
+                    },
+                )
+            )
+    return items
+
+
 def conversation_summary(descriptors: list[dict[str, Any]]) -> dict[str, Any]:
     conversations = [
         descriptor
@@ -1550,6 +1614,7 @@ def render_status_payload(
         legacy_compatibility_payload=legacy_compatibility_payload,
         trust_surfaces_payload=trust_surfaces_payload,
         working_memory_items=working_memory_items,
+        provenance_alerts=provenance_alerts,
         registry_state=registry_state,
     )
     proposal_only = proposal_only_state(attention_queue_payload)

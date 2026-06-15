@@ -943,6 +943,7 @@
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Initiative Provenance Refresh And Root Cleanup Command Hardening Pass 282](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-INITIATIVE-PROVENANCE-REFRESH-AND-ROOT-CLEANUP-COMMAND-HARDENING-PASS-282-2026-06-14.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Initiative Provenance Validator Hardening Pass 283](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-INITIATIVE-PROVENANCE-VALIDATOR-HARDENING-PASS-283-2026-06-14.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Provenance Status Surface Hardening Pass 284](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-PROVENANCE-STATUS-SURFACE-HARDENING-PASS-284-2026-06-14.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Provenance-Alert Severity Routing Decision Pass 286](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-PROVENANCE-ALERT-SEVERITY-ROUTING-DECISION-PASS-286-2026-06-15.md)
 
 ## Notes
 

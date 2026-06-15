@@ -4,10 +4,55 @@ from pathlib import Path
 import unittest
 from unittest.mock import patch
 
-from ops.cortex.render_status import provenance_alert_summary
+from ops.cortex.render_status import attention_queue, provenance_alert_summary
 
 
 class RenderStatusProvenanceTests(unittest.TestCase):
+    def test_provenance_alerts_route_into_attention_queue(self) -> None:
+        queue = attention_queue(
+            descriptors=[],
+            active_session=None,
+            blocked_workers_payload=[],
+            open_merge_requests_payload=[],
+            closure_receipts_payload=[],
+            legacy_compatibility_payload=[],
+            trust_surfaces_payload=[],
+            working_memory_items=[],
+            provenance_alerts={
+                "status": "drift_detected",
+                "initiative_item_count": 1,
+                "proposal_item_count": 1,
+                "item_count": 2,
+                "items": [
+                    {
+                        "kind": "initiative_provenance_drift",
+                        "initiative_id": "initiative-proof",
+                        "title": "Proof",
+                        "source_ref": "docs/memory/initiatives/initiative-proof.json",
+                        "stale_attention_refs": ["attention:sha256:stale"],
+                        "missing_file_refs": ["docs/memory/initiatives/missing.json"],
+                    },
+                    {
+                        "kind": "proposed_session_provenance_drift",
+                        "session_id": "session-proposed-proof",
+                        "task_id": "proof-task",
+                        "source_ref": "runtime/atlas/proposed-sessions/session-proposed-proof/session.manifest.json",
+                        "stale_attention_refs": ["attention:sha256:stale"],
+                        "missing_initiative_ref": None,
+                    },
+                ],
+            },
+            registry_state={"ok": True},
+        )
+
+        self.assertEqual("needs_review", queue["status"])
+        self.assertEqual(2, queue["item_count"])
+        self.assertEqual("high", queue["highest_severity"])
+        self.assertEqual("initiative_provenance_drift", queue["items"][0]["kind"])
+        self.assertEqual("high", queue["items"][0]["severity"])
+        self.assertEqual("proposed_session_provenance_drift", queue["items"][1]["kind"])
+        self.assertEqual("medium", queue["items"][1]["severity"])
+
     def test_provenance_summary_reports_initiative_and_proposal_drift(self) -> None:
         working_memory_items = [
             {
