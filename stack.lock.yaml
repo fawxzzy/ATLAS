@@ -21,7 +21,7 @@ components:
     remote: "https://github.com/fawxzzy/DiscordOS.git"
     ref_type: "branch"
     ref: "main"
-    commit: "88689ede24bb2f1561f1ad042a24d0d2c66e90ba"
+    commit: "cfbfc880fc9b6b28e25e13abbd0dad0c4fa985b2"
     dirty: false
     trust_class: "trusted"
     release_eligible: false
@@ -216,4 +216,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:8202598d87df7f4a59307b6b85244d380e7762e055cbd4bb1674336951f47891"
+lock_digest: "sha256:7655832402573ad7893f759f65c2f4635a266a334c0620730e10d1b6dac89b98"
