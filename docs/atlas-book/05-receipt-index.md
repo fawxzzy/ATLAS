@@ -1018,6 +1018,8 @@
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Missing-Closure-Receipt First-Implementation Admission Pass 345](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-MISSING-CLOSURE-RECEIPT-FIRST-IMPLEMENTATION-ADMISSION-PASS-345-2026-06-16.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Missing-Closure-Receipt Prompt-Pack And Handoff Contract Pass 346](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-MISSING-CLOSURE-RECEIPT-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-346-2026-06-16.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Missing-Closure-Receipt Implementation-Readiness Closeout And Worker-Routing Pass 347](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-MISSING-CLOSURE-RECEIPT-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-347-2026-06-16.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Missing-Closure-Receipt First-Implementation Worker Cluster Reconciliation](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-MISSING-CLOSURE-RECEIPT-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-16.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Post-Broader Attention-Queue Missing-Closure-Receipt Next-Slice Selection Pass 348](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-POST-BROADER-ATTENTION-QUEUE-MISSING-CLOSURE-RECEIPT-NEXT-SLICE-SELECTION-PASS-348-2026-06-16.md)
 
 ## Notes
 
