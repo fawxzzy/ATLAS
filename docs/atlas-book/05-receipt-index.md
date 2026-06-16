@@ -1044,6 +1044,7 @@
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Resume-Failed Implementation-Readiness Closeout And Worker-Routing Pass 368](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-RESUME-FAILED-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-368-2026-06-16.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Resume-Failed First-Implementation Worker Cluster Reconciliation](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-RESUME-FAILED-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-16.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Post-Broader Attention-Queue Resume-Failed Next-Slice Selection Pass 369](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-POST-BROADER-ATTENTION-QUEUE-RESUME-FAILED-NEXT-SLICE-SELECTION-PASS-369-2026-06-16.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Session-Failed Contract Freeze Pass 370](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-SESSION-FAILED-CONTRACT-FREEZE-PASS-370-2026-06-16.md)
 
 ## Notes
 
