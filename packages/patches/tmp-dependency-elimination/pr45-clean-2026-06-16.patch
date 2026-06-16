@@ -1,0 +1,277 @@
+diff --git a/docs/ops/ATLAS-ARCHIVE-NORMALIZATION-CHECKPOINT.md b/docs/ops/ATLAS-ARCHIVE-NORMALIZATION-CHECKPOINT.md
+index 27d10e5f..8f07a0e3 100644
+--- a/docs/ops/ATLAS-ARCHIVE-NORMALIZATION-CHECKPOINT.md
++++ b/docs/ops/ATLAS-ARCHIVE-NORMALIZATION-CHECKPOINT.md
+@@ -4,11 +4,10 @@
+ 
+ This checkpoint records the current non-executable archive normalization state in ATLAS root.
+ 
+-Current merged state:
++Current merged baseline:
+ 
+ - archive registry added
+ - archive admission runbook added
+-- archive registry enforcement added to ATLAS root validation
+ - `stack.yaml` and `stack.lock.yaml` normalized for archive governance
+ - `repos/dev.zip` remains provenance-only and `present: false`
+ - `repos/CORTEX-AND-PLAYBOOK-20260408.zip` remains provenance-only and `present: false`
+@@ -19,6 +18,10 @@ Current merged state:
+ - no executable seam was created
+ - root ratchet is expected to stay green after lock self-refresh
+ 
++Current branch-state addition pending merge:
++
++- archive registry enforcement added to ATLAS root validation
++
+ ## Current Boundary
+ 
+ The current archive normalization surfaces are limited to:
+@@ -44,7 +47,7 @@ Archive normalization merge and follow-up:
+ - ATLAS PR `#43`: normalize archive admission surfaces
+ - ATLAS commit `94c29b1`: refresh stack lock after archive normalization merge
+ 
+-Governed proof surfaces:
++Governed proof surfaces for the merged baseline plus the current branch delta:
+ 
+ - `docs/registry/ATLAS-ARCHIVE-REGISTRY.json`
+ - `docs/ops/ATLAS-ARCHIVE-ADMISSION-RUNBOOK.md`
+@@ -56,7 +59,7 @@ Governed proof surfaces:
+ 
+ ## Validation
+ 
+-Validation used for the merged state:
++Validation used for the merged baseline and current branch state:
+ 
+ ```powershell
+ python .\ops\validation\validate_stack.py
+diff --git a/stack.lock.yaml b/stack.lock.yaml
+index e9071f31..3cc8e3d2 100644
+--- a/stack.lock.yaml
++++ b/stack.lock.yaml
+@@ -4,7 +4,7 @@ stack_manifest_digest: "sha256:d1d8aec47eb5809b9da00ad8e9f6efac1e286e9d56f5cb7f3
+ component_count: 10
+ components:
+   _stack:
+-    path: "repos/_stack"
++    path: "C:/ATLAS/repos/_stack"
+     role: "workflow-operator"
+     status: "active"
+     remote: null
+@@ -15,7 +15,7 @@ components:
+     trust_class: "trusted"
+     release_eligible: false
+   foundation:
+-    path: "repos/fawxzzy-foundation"
++    path: "C:/ATLAS/repos/fawxzzy-foundation"
+     role: "package"
+     status: "active"
+     remote: "https://github.com/fawxzzy/fawxzzy-foundation.git"
+@@ -26,7 +26,7 @@ components:
+     trust_class: "trusted"
+     release_eligible: true
+   lifeline:
+-    path: "repos/fawxzzy-lifeline"
++    path: "C:/ATLAS/repos/fawxzzy-lifeline"
+     role: "local-operator"
+     status: "active"
+     remote: "https://github.com/fawxzzy/fawxzzy-lifeline.git"
+@@ -37,7 +37,7 @@ components:
+     trust_class: "trusted"
+     release_eligible: true
+   mazer:
+-    path: "repos/fawxzzy-mazer"
++    path: "C:/ATLAS/repos/fawxzzy-mazer"
+     role: "application"
+     status: "active"
+     remote: "https://github.com/fawxzzy/fawxzzy-mazer.git"
+@@ -48,7 +48,7 @@ components:
+     trust_class: "trusted"
+     release_eligible: true
+   nat1-games:
+-    path: "repos/Nat1-Games/nat1-games"
++    path: "C:/ATLAS/repos/Nat1-Games/nat1-games"
+     role: "application"
+     status: "incubating"
+     remote: "https://github.com/ZachariahRedfield/nat1-games.git"
+@@ -59,7 +59,7 @@ components:
+     trust_class: "trusted"
+     release_eligible: false
+   playbook:
+-    path: "repos/fawxzzy-playbook"
++    path: "C:/ATLAS/repos/fawxzzy-playbook"
+     role: "governance-runtime"
+     status: "active"
+     remote: "https://github.com/fawxzzy/fawxzzy-playbook.git"
+@@ -70,7 +70,7 @@ components:
+     trust_class: "trusted"
+     release_eligible: true
+   playbook-demo:
+-    path: "repos/playbook-demo/playbook-demo"
++    path: "C:/ATLAS/repos/playbook-demo/playbook-demo"
+     role: "demo"
+     status: "demo"
+     remote: "https://github.com/ZachariahRedfield/playbook-demo.git"
+@@ -85,14 +85,14 @@ components:
+     role: "operator-layer"
+     status: "active"
+     remote: "https://github.com/fawxzzy/ATLAS.git"
+-    ref_type: "branch"
+-    ref: "codex/validate-archive-registry-surfaces"
+-    commit: "867809f3851d3568f4e1b34a22711e87f8248d13"
++    ref_type: "commit"
++    ref: "3cdafe9c98a35b3b41257fcc4e91342012bcd3b4"
++    commit: "3cdafe9c98a35b3b41257fcc4e91342012bcd3b4"
+     dirty: true
+     trust_class: "trusted"
+     release_eligible: false
+   stream:
+-    path: "repos/fawxzzy-stream"
++    path: "C:/ATLAS/repos/fawxzzy-stream"
+     role: "application"
+     status: "incubating"
+     remote: null
+@@ -103,7 +103,7 @@ components:
+     trust_class: "trusted"
+     release_eligible: false
+   trove:
+-    path: "repos/fawxzzy-trove"
++    path: "C:/ATLAS/repos/fawxzzy-trove"
+     role: "application"
+     status: "active"
+     remote: "https://github.com/fawxzzy/fawxzzy-trove.git"
+@@ -115,111 +115,111 @@ components:
+     release_eligible: true
+ excluded_surfaces:
+   atlas_adjacent_checkout:
+-    path: "repos/ATLAS"
++    path: "C:/ATLAS/repos/ATLAS"
+     present: true
+     trust_class: "adjacent"
+     release_eligible: false
+     reason: "Local ATLAS sibling checkout remains an adjacent non-canonical repo root and is not part of the governed stack member set."
+   cortex_adjacent_checkout:
+-    path: "repos/fawxzzy-cortex"
++    path: "C:/ATLAS/repos/fawxzzy-cortex"
+     present: false
+     trust_class: "adjacent"
+     release_eligible: false
+     reason: "Cortex checkout is present in the workspace as an adjacent repo but is not yet a governed ATLAS child-repo adoption target."
+   cortex_playbook_snapshot_archive:
+-    path: "repos/CORTEX-AND-PLAYBOOK-20260408.zip"
++    path: "C:/ATLAS/repos/CORTEX-AND-PLAYBOOK-20260408.zip"
+     present: false
+     trust_class: "untrusted"
+     release_eligible: false
+     reason: "Mixed-owner snapshot reference remains manifest-visible for provenance only and must not be treated as owner truth before owner-split review."
+   dev_workspace_snapshot_archive:
+-    path: "repos/dev.zip"
++    path: "C:/ATLAS/repos/dev.zip"
+     present: false
+     trust_class: "untrusted"
+     release_eligible: false
+     reason: "Generic legacy workspace snapshot remains manifest-visible for provenance only and must stay out of normal repo and release flows until cataloged."
+   fitness_parity_recovery_adjacent_checkout:
+-    path: "repos/fawxzzy-fitness-parity-recovery"
+-    present: true
++    path: "C:/ATLAS/repos/fawxzzy-fitness-parity-recovery"
++    present: false
+     trust_class: "adjacent"
+     release_eligible: false
+     reason: "Fitness parity recovery checkout remains an adjacent recovery surface and is excluded from the governed stack topology."
+   fitness_reclone_adjacent_checkout:
+-    path: "repos/fawxzzy-fitness.reclone.20260502-195639"
+-    present: true
++    path: "C:/ATLAS/repos/fawxzzy-fitness.reclone.20260502-195639"
++    present: false
+     trust_class: "adjacent"
+     release_eligible: false
+     reason: "Fitness reclone checkout remains an adjacent recovery surface and is excluded from the governed stack topology."
+   fitness_reclone_recovery_checkout:
+-    path: "repos/fawxzzy-fitness.reclone.20260502-195639"
+-    present: true
++    path: "C:/ATLAS/repos/fawxzzy-fitness.reclone.20260502-195639"
++    present: false
+     trust_class: "untrusted"
+     release_eligible: false
+     reason: "Fitness reclone remains a historical recovery checkout outside the canonical child repo and should not count as active stack adoption."
+   fitness_recovered_adjacent_checkout:
+-    path: "repos/fawxzzy-fitness-recovered"
+-    present: true
++    path: "C:/ATLAS/repos/fawxzzy-fitness-recovered"
++    present: false
+     trust_class: "adjacent"
+     release_eligible: false
+     reason: "Fitness recovered checkout remains an adjacent recovery surface and is excluded from the governed stack topology."
+   fitness_recovered_checkout:
+-    path: "repos/fawxzzy-fitness-recovered"
+-    present: true
++    path: "C:/ATLAS/repos/fawxzzy-fitness-recovered"
++    present: false
+     trust_class: "untrusted"
+     release_eligible: false
+     reason: "Fitness recovered checkout remains a non-canonical recovery lane outside the governed child-repo release surface."
+   foundation_adjacent_checkout:
+-    path: "repos/fawxzzy-foundation"
++    path: "C:/ATLAS/repos/fawxzzy-foundation"
+     present: true
+     trust_class: "adjacent"
+     release_eligible: false
+     reason: "Local Foundation checkout is explicitly deferred from the governed topology until an admission decision updates manifest, lock, inventory, and owner-usage surfaces together."
+   lifeline_operator_evidence_worktree:
+-    path: "repos/fawxzzy-lifeline-operator-evidence"
++    path: "C:/ATLAS/repos/fawxzzy-lifeline-operator-evidence"
+     present: true
+     trust_class: "trusted"
+     release_eligible: false
+     reason: "Lifeline operator evidence is a branch worktree of the registered lifeline repo and remains a temporary non-canonical evidence lane outside the governed repo surface."
+   playbook_codex_adjacent_checkout:
+-    path: "repos/fawxzzy-playbook-codex"
++    path: "C:/ATLAS/repos/fawxzzy-playbook-codex"
+     present: true
+     trust_class: "adjacent"
+     release_eligible: false
+     reason: "Local Playbook Codex checkout remains an adjacent non-canonical helper surface outside the governed stack member set."
+   repo_backups_archive_surface:
+-    path: "repos/repo-backups"
++    path: "C:/ATLAS/repos/repo-backups"
+     present: true
+     trust_class: "trusted"
+     release_eligible: false
+     reason: "Legacy bundle and patch backup drop remains visible for recovery provenance but is not a source repo surface and should converge on packages/bundles and packages/patches."
+   trove_release_cutover_worktree:
+-    path: "repos/fawxzzy-trove-release-cutover"
++    path: "C:/ATLAS/repos/fawxzzy-trove-release-cutover"
+     present: true
+     trust_class: "trusted"
+     release_eligible: false
+     reason: "Trove release cutover is a branch worktree of the registered trove repo and remains a temporary non-canonical cutover lane outside the governed repo surface."
+   verta_core_archive:
+-    path: "repos/Verta-Core.zip"
++    path: "C:/ATLAS/repos/Verta-Core.zip"
+     present: true
+     trust_class: "untrusted"
+     release_eligible: false
+     reason: "Token-bearing Verta archive remains quarantined private evidence and must stay out of release sets."
+   verta_core_checkout:
+-    path: "repos/Verta-Core"
++    path: "C:/ATLAS/repos/Verta-Core"
+     present: true
+     trust_class: "untrusted"
+     release_eligible: false
+     reason: "Token-bearing Verta checkout remains quarantined and untrusted until scrub and rotation are complete."
+   zachariah_redfield_adjacent_checkout:
+-    path: "repos/ZachariahRedfield"
++    path: "C:/ATLAS/repos/ZachariahRedfield"
+     present: true
+     trust_class: "adjacent"
+     release_eligible: false
+     reason: "ZachariahRedfield checkout is an adjacent unmanaged repo and is outside the governed ATLAS release surface."
+   zachariahredfield_adjacent_checkout:
+-    path: "repos/ZachariahRedfield"
++    path: "C:/ATLAS/repos/ZachariahRedfield"
+     present: true
+     trust_class: "adjacent"
+     release_eligible: false
+     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
+-lock_digest: "sha256:90125d89dff1e05a765f763cc1c7715f8b347874bd29454bcb585bac5e3c4eea"
++lock_digest: "sha256:2dcdabe40a68993bd35ad85ae7d4ffaa50dca72044e3bd2d5496c9bc5e22d058"

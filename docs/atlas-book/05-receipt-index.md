@@ -38,6 +38,7 @@
 - [Vercel Hobby Cost Governance Marker Admission Pass 1](../ops/VERCEL-HOBBY-COST-GOVERNANCE-MARKER-ADMISSION-PASS-1-2026-06-13.md)
 - [Duplicate Surface Decommission Final Closeout Pass 3](../ops/DUPLICATE-SURFACE-DECOMMISSION-FINAL-CLOSEOUT-PASS-3-2026-06-13.md)
 - [Remaining Closeout Queue Reselection After Duplicate Surface Closeout](../ops/REMAINING-CLOSEOUT-QUEUE-RESELECTION-AFTER-DUPLICATE-SURFACE-CLOSEOUT-2026-06-13.md)
+- [Tmp Dependency Elimination Root Worktree Disposal And Fitness Link Blocker Recheck](../ops/TMP-DEPENDENCY-ELIMINATION-ROOT-WORKTREE-DISPOSAL-AND-FITNESS-LINK-BLOCKER-RECHECK-2026-06-16.md)
 - [_Stack Readiness Stack Queue-Or-Registry Broader Execution Behavior First-Implementation Worker Cluster Reconciliation](../ops/_STACK-READINESS-STACK-QUEUE-OR-REGISTRY-BROADER-EXECUTION-BEHAVIOR-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-13.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Post-Broader-Execution-Behavior Next-Slice Selection Pass 140](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-POST-BROADER-EXECUTION-BEHAVIOR-NEXT-SLICE-SELECTION-PASS-140-2026-06-13.md)
 - [Root-Side Stack Lock Refresh After DiscordOS Pin Drift Recheck](../ops/ROOT-SIDE-STACK-LOCK-REFRESH-AFTER-DISCORDOS-PIN-DRIFT-RECHECK-2026-06-13.md)
