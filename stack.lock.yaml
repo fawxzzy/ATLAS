@@ -22,7 +22,7 @@ components:
     ref_type: "branch"
     ref: "main"
     commit: "ff8f21cfec199f50728ddddea79ba7f546392663"
-    dirty: false
+    dirty: true
     trust_class: "trusted"
     release_eligible: false
   foundation:
@@ -216,4 +216,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:c8bd4fb70feb7afb5759e0d6edfaeeede699dfa26142f60cb9563010ac6f2bf7"
+lock_digest: "sha256:ac463bf6abdf2bbcc8b36c71e9d1887574cf18c2a8f9a5b123166c59c361ed3b"
