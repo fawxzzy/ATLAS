@@ -224,6 +224,45 @@ class RenderStatusProvenanceTests(unittest.TestCase):
             payload["attention_queue"]["items"][3]["details"],
         )
 
+    def test_render_status_payload_preserves_registry_error_attention_queue_handoff(self) -> None:
+        with TemporaryDirectory() as temp_dir:
+            descriptor_root = Path(temp_dir)
+            (descriptor_root / "placeholder.json").write_text("{}", encoding="utf-8")
+            patch_specs = [
+                ("ops.cortex.render_status.load_descriptors", []),
+                ("ops.cortex.render_status.load_registry_state", {"ok": False, "error": "registry unavailable"}),
+                ("ops.cortex.render_status.choose_latest_session", None),
+                ("ops.cortex.render_status.session_overview", None),
+                ("ops.cortex.render_status.blocked_workers", []),
+                ("ops.cortex.render_status.classify_merge_requests", ([], [])),
+                ("ops.cortex.render_status.closure_receipts", []),
+                ("ops.cortex.render_status.execution_receipt_residue_records", []),
+                ("ops.cortex.render_status.governed_writes", []),
+                ("ops.cortex.render_status.legacy_compatibility_surfaces", []),
+                ("ops.cortex.render_status.trust_surfaces", []),
+                ("ops.cortex.render_status.trust_posture_summary", {}),
+                ("ops.cortex.render_status.working_memory_summary", {"_items": [], "initiatives": {}}),
+                ("ops.cortex.render_status.provenance_alert_summary", {"status": "clear", "item_count": 0, "items": []}),
+                ("ops.cortex.render_status.conversation_summary", {}),
+                ("ops.cortex.render_status.build_canonical_lockfile_artifacts", {}),
+                ("ops.cortex.render_status.repo_inventory_summary_from_lock", {"items": []}),
+                ("ops.cortex.render_status.lock_worktree_hygiene", {"status": "frozen"}),
+                ("ops.cortex.render_status.registry_summary", {"status": "unavailable"}),
+                ("ops.cortex.render_status.artifact_inventory", {}),
+                ("ops.cortex.render_status.proposal_only_state", {}),
+                ("ops.cortex.render_status.world_model_state", {}),
+            ]
+            with ExitStack() as stack:
+                for target, value in patch_specs:
+                    stack.enter_context(patch(target, return_value=value))
+                payload = render_status_payload(descriptor_root)
+
+        self.assertEqual("needs_review", payload["attention_queue"]["status"])
+        self.assertEqual(1, payload["attention_queue"]["item_count"])
+        self.assertEqual("critical", payload["attention_queue"]["highest_severity"])
+        self.assertEqual("registry_error", payload["attention_queue"]["items"][0]["kind"])
+        self.assertEqual({"error": "registry unavailable"}, payload["attention_queue"]["items"][0]["details"])
+
     def test_provenance_attention_items_ignore_malformed_and_unknown_payloads(self) -> None:
         items = provenance_attention_items(
             {
@@ -378,6 +417,136 @@ class RenderStatusProvenanceTests(unittest.TestCase):
         self.assertEqual(0, queue["item_count"])
         self.assertIsNone(queue["highest_severity"])
         self.assertEqual([], queue["items"])
+
+    def test_attention_queue_emits_registry_error_when_registry_is_unavailable(self) -> None:
+        queue = attention_queue(
+            descriptors=[],
+            active_session=None,
+            blocked_workers_payload=[],
+            open_merge_requests_payload=[],
+            closure_receipts_payload=[],
+            legacy_compatibility_payload=[],
+            trust_surfaces_payload=[],
+            working_memory_items=[],
+            provenance_alerts={"status": "clear", "item_count": 0, "items": []},
+            registry_state={"ok": False, "error": "registry unavailable"},
+        )
+
+        self.assertEqual("needs_review", queue["status"])
+        self.assertEqual(1, queue["item_count"])
+        self.assertEqual("critical", queue["highest_severity"])
+        self.assertEqual(
+            {
+                "kind": "registry_error",
+                "severity": "critical",
+                "summary": "The governed tool registry could not be loaded.",
+                "source_ref": "docs/registry",
+                "details": {"error": "registry unavailable"},
+            },
+            queue["items"][0],
+        )
+
+    def test_attention_queue_omits_registry_error_when_registry_is_healthy(self) -> None:
+        queue = attention_queue(
+            descriptors=[],
+            active_session=None,
+            blocked_workers_payload=[],
+            open_merge_requests_payload=[],
+            closure_receipts_payload=[],
+            legacy_compatibility_payload=[],
+            trust_surfaces_payload=[],
+            working_memory_items=[],
+            provenance_alerts={"status": "clear", "item_count": 0, "items": []},
+            registry_state={"ok": True, "tool_ids": set(), "extension_ids": set()},
+        )
+
+        self.assertEqual("clear", queue["status"])
+        self.assertEqual(0, queue["item_count"])
+        self.assertIsNone(queue["highest_severity"])
+        self.assertEqual([], queue["items"])
+
+    def test_attention_queue_omits_registry_health_dependent_contradiction_items_when_registry_is_unavailable(self) -> None:
+        queue = attention_queue(
+            descriptors=[],
+            active_session={
+                "session_id": "session-registry-proof",
+                "task_id": "task-registry-proof",
+                "source_ref": "runtime/atlas/sessions/session-registry-proof/session.manifest.json",
+                "registry_digest": "stale-digest",
+                "governed_surfaces": {
+                    "context": {
+                        "tool_id": "missing-tool",
+                        "extension_id": "missing-extension",
+                    }
+                },
+            },
+            blocked_workers_payload=[],
+            open_merge_requests_payload=[],
+            closure_receipts_payload=[],
+            legacy_compatibility_payload=[],
+            trust_surfaces_payload=[],
+            working_memory_items=[],
+            provenance_alerts={"status": "clear", "item_count": 0, "items": []},
+            registry_state={
+                "ok": False,
+                "error": "registry unavailable",
+                "registry_digest": "current-digest",
+                "tool_ids": {"known-tool"},
+                "extension_ids": {"known-extension"},
+            },
+        )
+
+        self.assertEqual("needs_review", queue["status"])
+        self.assertEqual(["registry_error"], [item["kind"] for item in queue["items"]])
+
+    def test_attention_queue_preserves_order_for_registry_error_and_other_queue_families(self) -> None:
+        queue = attention_queue(
+            descriptors=[],
+            active_session=None,
+            blocked_workers_payload=[],
+            open_merge_requests_payload=[],
+            closure_receipts_payload=[],
+            legacy_compatibility_payload=[],
+            trust_surfaces_payload=[],
+            working_memory_items=[
+                {
+                    "memory_kind": "initiative",
+                    "id": "initiative-open",
+                    "title": "Open initiative",
+                    "path": "docs/memory/initiatives/initiative-open.json",
+                    "status": "active",
+                    "metadata": {
+                        "attention_summary": "Needs review",
+                        "attention_severity": "medium",
+                    },
+                }
+            ],
+            provenance_alerts={
+                "status": "drift_detected",
+                "initiative_item_count": 1,
+                "proposal_item_count": 0,
+                "item_count": 1,
+                "items": [
+                    {
+                        "kind": "initiative_provenance_drift",
+                        "initiative_id": "initiative-proof",
+                        "title": "Proof",
+                        "source_ref": "docs/memory/initiatives/initiative-proof.json",
+                        "stale_attention_refs": [],
+                        "missing_file_refs": ["docs/memory/initiatives/missing.json"],
+                    }
+                ],
+            },
+            registry_state={"ok": False, "error": "registry unavailable"},
+        )
+
+        self.assertEqual("needs_review", queue["status"])
+        self.assertEqual(3, queue["item_count"])
+        self.assertEqual("critical", queue["highest_severity"])
+        self.assertEqual(
+            ["registry_error", "initiative_provenance_drift", "initiative_open_attention"],
+            [item["kind"] for item in queue["items"]],
+        )
 
     def test_attention_queue_routes_initiative_open_attention_without_provenance(self) -> None:
         queue = attention_queue(
