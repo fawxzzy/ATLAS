@@ -698,6 +698,7 @@
 - [Playbook Smoke-Home Stranded Checkout Disposal Manual-Review Packet](../ops/PLAYBOOK-SMOKE-HOME-STRANDED-CHECKOUT-DISPOSAL-MANUAL-REVIEW-PACKET-2026-05-26.md)
 - [Playbook Smoke-Home Stranded Checkout Disposal Execution](../ops/PLAYBOOK-SMOKE-HOME-STRANDED-CHECKOUT-DISPOSAL-EXECUTION-2026-05-26.md)
 - [Preview/Unfurl And DiscordOS Follow-On Queue Reassessment](../ops/PREVIEW-UNFURL-AND-DISCORDOS-FOLLOW-ON-QUEUE-REASSESSMENT-2026-05-26.md)
+- [Preview Cache Remote And Unfurl Verification](../ops/PREVIEW-CACHE-REMOTE-UNFURL-VERIFICATION-2026-06-16.md)
 - [DiscordOS Feedback Adapter-Consumer Planning Package 1](../ops/DISCORDOS-FEEDBACK-ADAPTER-CONSUMER-PLANNING-PACKAGE-1-2026-05-26.md)
 - [DiscordOS Feedback Report-Store Adapter-Consumer Planning Package 2](../ops/DISCORDOS-FEEDBACK-REPORT-STORE-ADAPTER-CONSUMER-PLANNING-PACKAGE-2-2026-05-26.md)
 - [DiscordOS Feedback Permission Adapter-Consumer Planning Package 3](../ops/DISCORDOS-FEEDBACK-PERMISSION-ADAPTER-CONSUMER-PLANNING-PACKAGE-3-2026-05-26.md)

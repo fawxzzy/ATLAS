@@ -71,7 +71,6 @@ Read:
 ### Release / publication / surface reliability
 
 - Manual Deploy Exception Burn-Down: `84%`
-- Preview Cache & Surface Consistency: `78%`
 - Operator Secret Path Hygiene: `64%`
 - Discord Workflow, Publication & Docs Reliability: `32%`
 
@@ -121,6 +120,7 @@ Read:
 - Discord OS Infrastructure Separation: `100%`
 - Discord OS Feedback Workflow Canonicalization: `100%`
 - Brand Asset Canonicalization: `100%`
+- Preview Cache & Surface Consistency: `100%`
 - Playbook Maturity: `100%`
 - Lifeline Readiness: `100%`
 - ATLAS Core Phase: `100%`
