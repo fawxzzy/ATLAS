@@ -975,6 +975,7 @@
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Conversation-Action-Request First-Implementation Worker Cluster Reconciliation](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-CONVERSATION-ACTION-REQUEST-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-16.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Post-Broader Attention-Queue Conversation-Action-Request Next-Slice Selection Pass 313](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-POST-BROADER-ATTENTION-QUEUE-CONVERSATION-ACTION-REQUEST-NEXT-SLICE-SELECTION-PASS-313-2026-06-16.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Quarantined-Trust-Surface Contract Freeze Pass 314](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-QUARANTINED-TRUST-SURFACE-CONTRACT-FREEZE-PASS-314-2026-06-16.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Quarantined-Trust-Surface Owner-Surface Admission Pass 315](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-QUARANTINED-TRUST-SURFACE-OWNER-SURFACE-ADMISSION-PASS-315-2026-06-16.md)
 
 ## Notes
 
