@@ -966,6 +966,7 @@
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention_Queue Semantics Beyond Provenance Alerts Implementation-Readiness Closeout And Worker-Routing Pass 305](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION_QUEUE-SEMANTICS-BEYOND-PROVENANCE-ALERTS-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-305-2026-06-15.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention_Queue Semantics Beyond Provenance Alerts First-Implementation Worker Cluster Reconciliation](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION_QUEUE-SEMANTICS-BEYOND-PROVENANCE-ALERTS-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-15.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Post-Broader Attention_Queue Semantics Beyond Provenance Alerts Next-Slice Selection Pass 306](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-POST-BROADER-ATTENTION_QUEUE-SEMANTICS-BEYOND-PROVENANCE-ALERTS-NEXT-SLICE-SELECTION-PASS-306-2026-06-15.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Conversation-Action-Request Contract Freeze Pass 307](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-CONVERSATION-ACTION-REQUEST-CONTRACT-FREEZE-PASS-307-2026-06-16.md)
 
 ## Notes
 
