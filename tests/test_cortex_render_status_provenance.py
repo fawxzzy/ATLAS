@@ -9,6 +9,8 @@ from unittest.mock import patch
 from ops.cortex.render_status import (
     attention_queue,
     blocked_workers,
+    classify_merge_requests,
+    open_merge_requests,
     proposal_only_state,
     provenance_alert_summary,
     provenance_attention_items,
@@ -89,6 +91,72 @@ def _worker_status_descriptor(
             "heartbeat_at": heartbeat_at,
             "blocked_reason": blocked_reason,
             "registry_digest": registry_digest,
+        },
+    }
+
+
+def _merge_request_descriptor(
+    *,
+    merge_request_id: str,
+    source_ref: str,
+    lineage_key: str | None = None,
+    conflict_key: str | None = None,
+    tool_id: str | None = None,
+    extension_id: str | None = None,
+    registry_digest: str = "registry-digest-1",
+    conflicting_workers: list[str] | None = None,
+) -> dict[str, object]:
+    return {
+        "artifact_type": "merge_request",
+        "source_ref": source_ref,
+        "identity": {
+            "merge_request_id": merge_request_id,
+            "lineage_key": lineage_key,
+            "conflict_key": conflict_key or lineage_key or f"conflict-{merge_request_id}",
+            "tool_id": tool_id or f"tool-{merge_request_id}",
+            "extension_id": extension_id or f"extension-{merge_request_id}",
+        },
+        "state": {
+            "registry_digest": registry_digest,
+        },
+        "links": {
+            "conflicting_workers": conflicting_workers or [],
+        },
+    }
+
+
+def _merge_completion_descriptor(
+    *,
+    merge_request_id: str,
+    source_ref: str | None = None,
+) -> dict[str, object]:
+    return {
+        "artifact_type": "supervisor_merge_completion",
+        "source_ref": source_ref or f"runtime/atlas/merge-completions/{merge_request_id}.json",
+        "identity": {
+            "merge_request_id": merge_request_id,
+        },
+    }
+
+
+def _session_manifest_descriptor(
+    *,
+    session_id: str = "session-1",
+    merge_request_refs: list[str] | None = None,
+    source_ref: str = "runtime/atlas/sessions/session-1/session.manifest.json",
+) -> dict[str, object]:
+    return {
+        "artifact_type": "session_manifest",
+        "source_ref": source_ref,
+        "identity": {
+            "session_id": session_id,
+            "task_id": f"task-{session_id}",
+        },
+        "state": {
+            "session_state": "running",
+        },
+        "links": {
+            "merge_request_refs": merge_request_refs or [],
         },
     }
 
@@ -824,6 +892,93 @@ class RenderStatusProvenanceTests(unittest.TestCase):
             blocked_workers(descriptors),
         )
 
+    def test_classify_merge_requests_prefers_session_linked_canonical_request_per_lineage(self) -> None:
+        descriptors = [
+            _merge_request_descriptor(
+                merge_request_id="merge-request-older",
+                lineage_key="lineage-1",
+                source_ref="runtime/atlas/merge-requests/merge-request-older.json",
+                conflicting_workers=["worker-a", "worker-b"],
+            ),
+            _merge_request_descriptor(
+                merge_request_id="merge-request-linked",
+                lineage_key="lineage-1",
+                source_ref="runtime/atlas/merge-requests/merge-request-linked.json",
+                conflicting_workers=["worker-z"],
+            ),
+            _session_manifest_descriptor(
+                merge_request_refs=[
+                    "runtime/atlas/merge-requests/merge-request-linked.json",
+                ]
+            ),
+        ]
+
+        active, residue = classify_merge_requests(descriptors)
+
+        self.assertEqual(
+            [
+                {
+                    "merge_request_id": "merge-request-linked",
+                    "tool_id": "tool-merge-request-linked",
+                    "extension_id": "extension-merge-request-linked",
+                    "registry_digest": "registry-digest-1",
+                    "conflicting_workers": ["worker-z"],
+                    "source_ref": "runtime/atlas/merge-requests/merge-request-linked.json",
+                    "conflict_key": "lineage-1",
+                }
+            ],
+            active,
+        )
+        self.assertEqual(
+            [
+                {
+                    "merge_request_id": "merge-request-older",
+                    "source_ref": "runtime/atlas/merge-requests/merge-request-older.json",
+                    "conflict_key": "lineage-1",
+                    "status": "retained_residue",
+                    "canonical_merge_request_id": "merge-request-linked",
+                    "canonical_source_ref": "runtime/atlas/merge-requests/merge-request-linked.json",
+                }
+            ],
+            residue,
+        )
+        self.assertEqual(active, open_merge_requests(descriptors))
+
+    def test_classify_merge_requests_omits_completed_lineage_from_active_payload(self) -> None:
+        descriptors = [
+            _merge_request_descriptor(
+                merge_request_id="merge-request-completed",
+                lineage_key="lineage-1",
+                source_ref="runtime/atlas/merge-requests/merge-request-completed.json",
+                conflicting_workers=["worker-a"],
+            ),
+            _merge_request_descriptor(
+                merge_request_id="merge-request-residue",
+                lineage_key="lineage-1",
+                source_ref="runtime/atlas/merge-requests/merge-request-residue.json",
+                conflicting_workers=["worker-b", "worker-c"],
+            ),
+            _merge_completion_descriptor(merge_request_id="merge-request-completed"),
+        ]
+
+        active, residue = classify_merge_requests(descriptors)
+
+        self.assertEqual([], active)
+        self.assertEqual(
+            [
+                {
+                    "merge_request_id": "merge-request-residue",
+                    "source_ref": "runtime/atlas/merge-requests/merge-request-residue.json",
+                    "conflict_key": "lineage-1",
+                    "status": "superseded_residue",
+                    "canonical_merge_request_id": "merge-request-completed",
+                    "canonical_source_ref": "runtime/atlas/merge-requests/merge-request-completed.json",
+                }
+            ],
+            residue,
+        )
+        self.assertEqual([], open_merge_requests(descriptors))
+
     def test_attention_queue_emits_blocked_worker_with_admitted_details_and_high_severity(self) -> None:
         queue = attention_queue(
             descriptors=[],
@@ -939,6 +1094,82 @@ class RenderStatusProvenanceTests(unittest.TestCase):
 
         self.assertEqual("needs_review", queue["status"])
         self.assertEqual(["registry_error", "blocked_worker"], [item["kind"] for item in queue["items"]])
+
+    def test_attention_queue_emits_open_merge_request_with_admitted_details_and_high_severity(self) -> None:
+        queue = attention_queue(
+            descriptors=[],
+            active_session=None,
+            blocked_workers_payload=[],
+            open_merge_requests_payload=[
+                {
+                    "merge_request_id": "merge-request-open",
+                    "tool_id": "tool-merge-request-open",
+                    "extension_id": "extension-merge-request-open",
+                    "registry_digest": "registry-digest-1",
+                    "conflicting_workers": ["worker-a", "worker-b"],
+                    "source_ref": "runtime/atlas/merge-requests/merge-request-open.json",
+                    "conflict_key": "lineage-1",
+                }
+            ],
+            closure_receipts_payload=[],
+            legacy_compatibility_payload=[],
+            trust_surfaces_payload=[],
+            working_memory_items=[],
+            provenance_alerts={"status": "clear", "item_count": 0, "items": []},
+            registry_state={
+                "ok": True,
+                "tool_ids": {"tool-merge-request-open"},
+                "extension_ids": {"extension-merge-request-open"},
+            },
+        )
+
+        self.assertEqual("needs_review", queue["status"])
+        self.assertEqual(1, queue["item_count"])
+        self.assertEqual("high", queue["highest_severity"])
+        self.assertEqual(
+            {
+                "kind": "open_merge_request",
+                "severity": "high",
+                "summary": "Merge request 'merge-request-open' remains open.",
+                "source_ref": "runtime/atlas/merge-requests/merge-request-open.json",
+                "details": {
+                    "merge_request_id": "merge-request-open",
+                    "conflicting_workers": ["worker-a", "worker-b"],
+                },
+            },
+            queue["items"][0],
+        )
+
+    def test_attention_queue_preserves_open_merge_request_when_registry_is_unavailable(self) -> None:
+        queue = attention_queue(
+            descriptors=[],
+            active_session=None,
+            blocked_workers_payload=[],
+            open_merge_requests_payload=[
+                {
+                    "merge_request_id": "merge-request-open",
+                    "tool_id": "tool-merge-request-open",
+                    "extension_id": "extension-merge-request-open",
+                    "registry_digest": "registry-digest-1",
+                    "conflicting_workers": ["worker-a"],
+                    "source_ref": "runtime/atlas/merge-requests/merge-request-open.json",
+                    "conflict_key": "lineage-1",
+                }
+            ],
+            closure_receipts_payload=[],
+            legacy_compatibility_payload=[],
+            trust_surfaces_payload=[],
+            working_memory_items=[],
+            provenance_alerts={"status": "clear", "item_count": 0, "items": []},
+            registry_state={"ok": False, "error": "registry unavailable"},
+        )
+
+        self.assertEqual("needs_review", queue["status"])
+        self.assertEqual(2, queue["item_count"])
+        self.assertEqual(
+            ["registry_error", "open_merge_request"],
+            [item["kind"] for item in queue["items"]],
+        )
 
     def test_attention_queue_preserves_order_for_blocked_worker_and_other_queue_families(self) -> None:
         queue = attention_queue(
@@ -1076,6 +1307,100 @@ class RenderStatusProvenanceTests(unittest.TestCase):
                 "initiative_provenance_drift",
                 "proposed_session_provenance_drift",
                 "blocked_worker",
+                "initiative_provenance_drift",
+                "provenance_alert_overflow",
+            ],
+            [item["kind"] for item in queue["items"]],
+        )
+        self.assertEqual(
+            {
+                "suppressed_item_count": 2,
+                "signal_cap": 3,
+                "highest_suppressed_severity": "medium",
+                "total_provenance_alert_count": 5,
+            },
+            queue["items"][4]["details"],
+        )
+
+    def test_attention_queue_preserves_provenance_overflow_when_open_merge_request_is_present(self) -> None:
+        queue = attention_queue(
+            descriptors=[],
+            active_session=None,
+            blocked_workers_payload=[],
+            open_merge_requests_payload=[
+                {
+                    "merge_request_id": "merge-request-open",
+                    "tool_id": "tool-merge-request-open",
+                    "extension_id": "extension-merge-request-open",
+                    "registry_digest": "registry-digest-1",
+                    "conflicting_workers": ["worker-a"],
+                    "source_ref": "runtime/atlas/merge-requests/merge-request-open.json",
+                    "conflict_key": "lineage-1",
+                }
+            ],
+            closure_receipts_payload=[],
+            legacy_compatibility_payload=[],
+            trust_surfaces_payload=[],
+            working_memory_items=[],
+            provenance_alerts={
+                "status": "drift_detected",
+                "initiative_item_count": 3,
+                "proposal_item_count": 2,
+                "item_count": 5,
+                "items": [
+                    {
+                        "kind": "initiative_provenance_drift",
+                        "initiative_id": "initiative-zeta",
+                        "source_ref": "docs/memory/initiatives/initiative-zeta.json",
+                        "stale_attention_refs": ["attention:sha256:zeta"],
+                        "missing_file_refs": [],
+                    },
+                    {
+                        "kind": "proposed_session_provenance_drift",
+                        "session_id": "session-bravo",
+                        "task_id": "task-bravo",
+                        "source_ref": "runtime/atlas/proposed-sessions/session-bravo/session.manifest.json",
+                        "stale_attention_refs": [],
+                        "missing_initiative_ref": "docs/memory/initiatives/missing-bravo.json",
+                    },
+                    {
+                        "kind": "initiative_provenance_drift",
+                        "initiative_id": "initiative-alpha",
+                        "source_ref": "docs/memory/initiatives/initiative-alpha.json",
+                        "stale_attention_refs": [],
+                        "missing_file_refs": ["docs/memory/initiatives/missing-alpha.json"],
+                    },
+                    {
+                        "kind": "proposed_session_provenance_drift",
+                        "session_id": "session-charlie",
+                        "task_id": "task-charlie",
+                        "source_ref": "runtime/atlas/proposed-sessions/session-charlie/session.manifest.json",
+                        "stale_attention_refs": ["attention:sha256:charlie"],
+                        "missing_initiative_ref": None,
+                    },
+                    {
+                        "kind": "initiative_provenance_drift",
+                        "initiative_id": "initiative-beta",
+                        "source_ref": "docs/memory/initiatives/initiative-beta.json",
+                        "stale_attention_refs": ["attention:sha256:beta"],
+                        "missing_file_refs": [],
+                    },
+                ],
+            },
+            registry_state={
+                "ok": True,
+                "tool_ids": {"tool-merge-request-open"},
+                "extension_ids": {"extension-merge-request-open"},
+            },
+        )
+
+        self.assertEqual("needs_review", queue["status"])
+        self.assertEqual(5, queue["item_count"])
+        self.assertEqual(
+            [
+                "initiative_provenance_drift",
+                "open_merge_request",
+                "proposed_session_provenance_drift",
                 "initiative_provenance_drift",
                 "provenance_alert_overflow",
             ],
@@ -1625,6 +1950,85 @@ class RenderStatusProvenanceTests(unittest.TestCase):
         self.assertEqual(1, payload["attention_queue"]["item_count"])
         self.assertEqual("blocked_worker", payload["attention_queue"]["items"][0]["kind"])
         self.assertEqual("merge_wait", payload["attention_queue"]["items"][0]["details"]["state"])
+
+    def test_render_status_payload_preserves_open_merge_request_handoff(self) -> None:
+        descriptors = [
+            _merge_request_descriptor(
+                merge_request_id="merge-request-older",
+                lineage_key="lineage-1",
+                source_ref="runtime/atlas/merge-requests/merge-request-older.json",
+                conflicting_workers=["worker-a", "worker-b"],
+            ),
+            _merge_request_descriptor(
+                merge_request_id="merge-request-linked",
+                lineage_key="lineage-1",
+                source_ref="runtime/atlas/merge-requests/merge-request-linked.json",
+                conflicting_workers=["worker-z"],
+            ),
+            _session_manifest_descriptor(
+                merge_request_refs=[
+                    "runtime/atlas/merge-requests/merge-request-linked.json",
+                ]
+            ),
+        ]
+
+        with TemporaryDirectory() as temp_dir:
+            descriptor_root = Path(temp_dir)
+            (descriptor_root / "placeholder.json").write_text("{}", encoding="utf-8")
+            patch_specs = [
+                ("ops.cortex.render_status.load_descriptors", descriptors),
+                (
+                    "ops.cortex.render_status.load_registry_state",
+                    {
+                        "ok": True,
+                        "tool_ids": {"tool-merge-request-linked"},
+                        "extension_ids": {"extension-merge-request-linked"},
+                    },
+                ),
+                ("ops.cortex.render_status.choose_latest_session", None),
+                ("ops.cortex.render_status.session_overview", None),
+                ("ops.cortex.render_status.closure_receipts", []),
+                ("ops.cortex.render_status.execution_receipt_residue_records", []),
+                ("ops.cortex.render_status.governed_writes", []),
+                ("ops.cortex.render_status.legacy_compatibility_surfaces", []),
+                ("ops.cortex.render_status.trust_surfaces", []),
+                ("ops.cortex.render_status.trust_posture_summary", {}),
+                ("ops.cortex.render_status.working_memory_summary", {"_items": [], "initiatives": {}}),
+                ("ops.cortex.render_status.provenance_alert_summary", {"status": "clear", "item_count": 0, "items": []}),
+                ("ops.cortex.render_status.conversation_summary", {}),
+                ("ops.cortex.render_status.build_canonical_lockfile_artifacts", {}),
+                ("ops.cortex.render_status.repo_inventory_summary_from_lock", {"items": []}),
+                ("ops.cortex.render_status.lock_worktree_hygiene", {"status": "frozen"}),
+                ("ops.cortex.render_status.registry_summary", {}),
+                ("ops.cortex.render_status.artifact_inventory", {}),
+                ("ops.cortex.render_status.world_model_state", {}),
+            ]
+            with ExitStack() as stack:
+                for target, value in patch_specs:
+                    stack.enter_context(patch(target, return_value=value))
+                payload = render_status_payload(descriptor_root)
+
+        self.assertEqual(
+            [
+                {
+                    "merge_request_id": "merge-request-linked",
+                    "tool_id": "tool-merge-request-linked",
+                    "extension_id": "extension-merge-request-linked",
+                    "registry_digest": "registry-digest-1",
+                    "conflicting_workers": ["worker-z"],
+                    "source_ref": "runtime/atlas/merge-requests/merge-request-linked.json",
+                    "conflict_key": "lineage-1",
+                }
+            ],
+            payload["open_merge_requests"],
+        )
+        self.assertEqual("needs_review", payload["attention_queue"]["status"])
+        self.assertEqual(1, payload["attention_queue"]["item_count"])
+        self.assertEqual("open_merge_request", payload["attention_queue"]["items"][0]["kind"])
+        self.assertEqual(
+            "merge-request-linked",
+            payload["attention_queue"]["items"][0]["details"]["merge_request_id"],
+        )
 
     def test_provenance_summary_reports_initiative_and_proposal_drift(self) -> None:
         working_memory_items = [
