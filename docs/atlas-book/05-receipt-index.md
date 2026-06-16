@@ -963,6 +963,7 @@
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention_Queue Semantics Beyond Provenance Alerts Supporting-Lane Admission Pass 302](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION_QUEUE-SEMANTICS-BEYOND-PROVENANCE-ALERTS-SUPPORTING-LANE-ADMISSION-PASS-302-2026-06-15.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention_Queue Semantics Beyond Provenance Alerts First-Implementation Admission Pass 303](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION_QUEUE-SEMANTICS-BEYOND-PROVENANCE-ALERTS-FIRST-IMPLEMENTATION-ADMISSION-PASS-303-2026-06-15.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention_Queue Semantics Beyond Provenance Alerts Prompt-Pack And Handoff Contract Pass 304](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION_QUEUE-SEMANTICS-BEYOND-PROVENANCE-ALERTS-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-304-2026-06-15.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention_Queue Semantics Beyond Provenance Alerts Implementation-Readiness Closeout And Worker-Routing Pass 305](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION_QUEUE-SEMANTICS-BEYOND-PROVENANCE-ALERTS-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-305-2026-06-15.md)
 
 ## Notes
 
