@@ -980,6 +980,7 @@
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Quarantined-Trust-Surface First-Implementation Admission Pass 317](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-QUARANTINED-TRUST-SURFACE-FIRST-IMPLEMENTATION-ADMISSION-PASS-317-2026-06-16.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Quarantined-Trust-Surface Prompt-Pack And Handoff Contract Pass 318](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-QUARANTINED-TRUST-SURFACE-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-318-2026-06-16.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Quarantined-Trust-Surface Implementation-Readiness Closeout And Worker-Routing Pass 319](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-QUARANTINED-TRUST-SURFACE-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-319-2026-06-16.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Quarantined-Trust-Surface First-Implementation Worker Cluster Reconciliation](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-QUARANTINED-TRUST-SURFACE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-16.md)
 
 ## Notes
 
