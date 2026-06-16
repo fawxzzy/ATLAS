@@ -998,6 +998,10 @@
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Post-Broader Attention-Queue Registry-Error Next-Slice Selection Pass 327](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-POST-BROADER-ATTENTION-QUEUE-REGISTRY-ERROR-NEXT-SLICE-SELECTION-PASS-327-2026-06-16.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Blocked-Worker Contract Freeze Pass 328](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-BLOCKED-WORKER-CONTRACT-FREEZE-PASS-328-2026-06-16.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Blocked-Worker Owner-Surface Admission Pass 329](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-BLOCKED-WORKER-OWNER-SURFACE-ADMISSION-PASS-329-2026-06-16.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Blocked-Worker Supporting-Lane Admission Pass 330](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-BLOCKED-WORKER-SUPPORTING-LANE-ADMISSION-PASS-330-2026-06-16.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Blocked-Worker First-Implementation Admission Pass 331](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-BLOCKED-WORKER-FIRST-IMPLEMENTATION-ADMISSION-PASS-331-2026-06-16.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Blocked-Worker Prompt-Pack And Handoff Contract Pass 332](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-BLOCKED-WORKER-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-332-2026-06-16.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Blocked-Worker Implementation-Readiness Closeout And Worker-Routing Pass 333](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-BLOCKED-WORKER-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-333-2026-06-16.md)
 
 ## Notes
 
