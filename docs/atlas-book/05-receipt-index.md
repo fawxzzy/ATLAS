@@ -1010,6 +1010,8 @@
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Open-Merge-Request First-Implementation Admission Pass 338](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-OPEN-MERGE-REQUEST-FIRST-IMPLEMENTATION-ADMISSION-PASS-338-2026-06-16.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Open-Merge-Request Prompt-Pack And Handoff Contract Pass 339](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-OPEN-MERGE-REQUEST-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-339-2026-06-16.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Open-Merge-Request Implementation-Readiness Closeout And Worker-Routing Pass 340](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-OPEN-MERGE-REQUEST-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-340-2026-06-16.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Open-Merge-Request First-Implementation Worker Cluster Reconciliation](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-OPEN-MERGE-REQUEST-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-16.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Post-Broader Attention-Queue Open-Merge-Request Next-Slice Selection Pass 341](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-POST-BROADER-ATTENTION-QUEUE-OPEN-MERGE-REQUEST-NEXT-SLICE-SELECTION-PASS-341-2026-06-16.md)
 
 ## Notes
 
