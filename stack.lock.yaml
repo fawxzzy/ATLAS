@@ -10,7 +10,7 @@ components:
     remote: "https://github.com/fawxzzy/_stack.git"
     ref_type: "branch"
     ref: "codex/queue-or-registry-broader-execution-behavior"
-    commit: "b8ca706f94fd625afb502a7c257ec4c50bec75e4"
+    commit: "e4fcd7c607a4830d141634b8350e32d8dbaa47ef"
     dirty: true
     trust_class: "trusted"
     release_eligible: false
@@ -21,7 +21,7 @@ components:
     remote: "https://github.com/fawxzzy/DiscordOS.git"
     ref_type: "branch"
     ref: "main"
-    commit: "1c8540358085e2313ea00946b72503199d570d97"
+    commit: "8869e8bc32d6f6c3f38b56b781da6e6256c70965"
     dirty: false
     trust_class: "trusted"
     release_eligible: false
@@ -216,4 +216,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:ad03f772d9a2b9ce12f89ff4c883d2779e2cf873810a239b2d37437ac1163a54"
+lock_digest: "sha256:6116e3966aa25d2fd503a4c9591652688af2adf458d24765edba5be6b5e02c81"

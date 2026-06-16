@@ -17,12 +17,12 @@ What is true right now:
 - ATLAS root remains the coordination, receipt, and marker layer.
 - Playbook remains the reusable governance and doctrine owner.
 - normal stack validation is green in the current working state.
-- the latest root validation checkpoint now reads `critical=0 error=0 warning=2 info=0` after the DiscordOS stack-lock refresh to the current pinned working set; the remaining warnings are inherited non-blocking Fitness residue only.
+- the latest root validation checkpoint now reads `critical=0 error=0 warning=3 info=0` after the current stack-lock refresh to the pinned working set; the remaining warnings are inherited non-blocking Fitness residue plus one inherited `_stack` path-discipline warning.
 - Verta Absorption is closed at `100%` only for trusted Verta-core absorption; raw Verta remains trust-gated, untrusted, non-release, and non-executable.
 - ATLAS Core Phase is closed at `100%` for the root coordination substrate; remaining owner/runtime/product work stays visible under its own markers.
 - Atlas-owned Repo Naming Canonicalization is closed at `100%` for local path truth plus GitHub remote-name truth across the admitted non-exception repos; `repos/fawxzzy-fitness` remains the explicit preserved exception, and `repos/stream` remains local/no-remote rather than a failed remote rename.
 - `--allow-missing-locked-repos` is no longer needed for current validation.
-- the merged warning-reduction tranche on `main` removed root-validator false positives, tracked-surface overcounting, and the last safe ignored Playbook/Lifeline runtime residue; the current pinned working set is now refreshed again after the DiscordOS stack-lock sync, and the live root validation checkpoint is back to `critical=0 error=0 warning=2 info=0`.
+- the merged warning-reduction tranche on `main` removed root-validator false positives, tracked-surface overcounting, and the last safe ignored Playbook/Lifeline runtime residue; the current pinned working set is now refreshed again after the current lock sync, and the live root validation checkpoint is back to `critical=0 error=0 warning=3 info=0`.
 
 ## Canonical Source Truth By Surface
 
@@ -465,6 +465,7 @@ What the latest closeout passes proved:
 - `tmp` is no longer acting as production-critical source truth
 - Brand Asset Canonicalization is now closed at `100%`: `_stack` and Fitness consumers were already hash-aligned to canonical ATLAS outputs, the remaining blocker was stale Trove manifest path truth after repo naming plus seven drifted Trove public brand consumers, and that blocker is now cleared by canonical `repos/trove/...` manifest paths, seven-file Trove consumer re-sync, and passing `npm run verify` in `repos/trove`
 - Preview Cache & Surface Consistency is now closed at `100%`: deployed Trove and Fitness aliases now serve manifest, favicon, app-icon, apple-touch, and preview-image routes at the canonical ATLAS hashes, deployed root HTML advertises the expected manifest and OG/Twitter preview-image references, deployed page captures now exist for both live hosts, and `_stack` launcher consumer hash truth still matches the canonical launcher output; no active cache-only or unfurl blocker remains open after this deploy-backed proof
+- Manual Deploy Exception Burn-Down is now closed at `100%`: `_stack` commit `e4fcd7c` removed stale Trove and Mazer repo-path assumptions from governed deploy surfaces, Fitness deploy preflight now admits the canonical ATLAS-rooted `repos/fawxzzy-fitness` topology, Trove and Mazer preflights now fail closed only from the canonical repo paths when local `.vercel/project.json` is absent, and active governed deploy, QA, and recovery surfaces no longer re-enter `tmp` checkouts
 - the remaining helper Vercel project class is closed; duplicate-surface pressure is no longer centered on live helper projects
 - unrelated Fitness residue is classified enough to keep it out of DiscordOS, Supabase, and stack closeout lanes
 - Fitness profile-core cleanup is fully closed; no unresolved unknown-profile, never-signed-in auth-only, or legacy automation-mismatch class remains in that lane

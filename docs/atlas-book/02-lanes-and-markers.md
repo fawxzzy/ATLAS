@@ -27,7 +27,7 @@ Read:
 
 - the no-send Local Data Gateway chain is real and adoption-bounded
 - `_stack` is now a closed enabling substrate rather than an active front-page marker; current execution-facing open work starts with Local Data Gateway plus the ATLAS-root automation lanes
-- root validation remains proof-closed at `critical=0 error=0 warning=0 info=0`
+- root validation remains proof-closed at `critical=0 error=0 warning=3 info=0`
 - broader automation and long-run orchestration are still early
 
 ### Discord workflow
@@ -70,7 +70,6 @@ Read:
 
 ### Release / publication / surface reliability
 
-- Manual Deploy Exception Burn-Down: `84%`
 - Operator Secret Path Hygiene: `64%`
 - Discord Workflow, Publication & Docs Reliability: `32%`
 
@@ -121,6 +120,7 @@ Read:
 - Discord OS Feedback Workflow Canonicalization: `100%`
 - Brand Asset Canonicalization: `100%`
 - Preview Cache & Surface Consistency: `100%`
+- Manual Deploy Exception Burn-Down: `100%`
 - Playbook Maturity: `100%`
 - Lifeline Readiness: `100%`
 - ATLAS Core Phase: `100%`
