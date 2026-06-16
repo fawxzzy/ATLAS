@@ -961,6 +961,7 @@
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention_Queue Semantics Beyond Provenance Alerts Contract Freeze Pass 300](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION_QUEUE-SEMANTICS-BEYOND-PROVENANCE-ALERTS-CONTRACT-FREEZE-PASS-300-2026-06-15.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention_Queue Semantics Beyond Provenance Alerts Owner-Surface Admission Pass 301](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION_QUEUE-SEMANTICS-BEYOND-PROVENANCE-ALERTS-OWNER-SURFACE-ADMISSION-PASS-301-2026-06-15.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention_Queue Semantics Beyond Provenance Alerts Supporting-Lane Admission Pass 302](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION_QUEUE-SEMANTICS-BEYOND-PROVENANCE-ALERTS-SUPPORTING-LANE-ADMISSION-PASS-302-2026-06-15.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention_Queue Semantics Beyond Provenance Alerts First-Implementation Admission Pass 303](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION_QUEUE-SEMANTICS-BEYOND-PROVENANCE-ALERTS-FIRST-IMPLEMENTATION-ADMISSION-PASS-303-2026-06-15.md)
 
 ## Notes
 
