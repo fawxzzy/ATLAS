@@ -986,6 +986,7 @@
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Post-Broader Attention-Queue Quarantined-Trust-Surface Next-Slice Selection Pass 320](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-POST-BROADER-ATTENTION-QUEUE-QUARANTINED-TRUST-SURFACE-NEXT-SLICE-SELECTION-PASS-320-2026-06-16.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Registry-Error Contract Freeze Pass 321](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-REGISTRY-ERROR-CONTRACT-FREEZE-PASS-321-2026-06-16.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Registry-Error Owner-Surface Admission Pass 322](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-REGISTRY-ERROR-OWNER-SURFACE-ADMISSION-PASS-322-2026-06-16.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Registry-Error Supporting-Lane Admission Pass 323](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-REGISTRY-ERROR-SUPPORTING-LANE-ADMISSION-PASS-323-2026-06-16.md)
 
 ## Notes
 
