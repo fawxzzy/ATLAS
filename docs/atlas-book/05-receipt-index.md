@@ -958,6 +958,7 @@
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Provenance-Alert Top-Level Summary Boundary Implementation-Readiness Closeout And Worker-Routing Pass 298](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-PROVENANCE-ALERT-TOP-LEVEL-SUMMARY-BOUNDARY-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-298-2026-06-15.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Provenance-Alert Top-Level Summary Boundary First-Implementation Worker Cluster Reconciliation](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-PROVENANCE-ALERT-TOP-LEVEL-SUMMARY-BOUNDARY-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-15.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Post-Provenance-Alert Top-Level Summary Boundary Next-Slice Selection Pass 299](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-POST-PROVENANCE-ALERT-TOP-LEVEL-SUMMARY-BOUNDARY-NEXT-SLICE-SELECTION-PASS-299-2026-06-15.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention_Queue Semantics Beyond Provenance Alerts Contract Freeze Pass 300](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION_QUEUE-SEMANTICS-BEYOND-PROVENANCE-ALERTS-CONTRACT-FREEZE-PASS-300-2026-06-15.md)
 
 ## Notes
 
