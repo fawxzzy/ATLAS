@@ -952,6 +952,7 @@
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Post-Provenance-Alert Queue Signal Budget Next-Slice Selection Pass 292](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-POST-PROVENANCE-ALERT-QUEUE-SIGNAL-BUDGET-NEXT-SLICE-SELECTION-PASS-292-2026-06-15.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Provenance-Alert Top-Level Summary Boundary Contract Freeze Pass 293](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-PROVENANCE-ALERT-TOP-LEVEL-SUMMARY-BOUNDARY-CONTRACT-FREEZE-PASS-293-2026-06-15.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Provenance-Alert Top-Level Summary Boundary Owner-Surface Admission Pass 294](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-PROVENANCE-ALERT-TOP-LEVEL-SUMMARY-BOUNDARY-OWNER-SURFACE-ADMISSION-PASS-294-2026-06-15.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Provenance-Alert Top-Level Summary Boundary Supporting-Lane Admission Pass 295](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-PROVENANCE-ALERT-TOP-LEVEL-SUMMARY-BOUNDARY-SUPPORTING-LANE-ADMISSION-PASS-295-2026-06-15.md)
 
 ## Notes
 
