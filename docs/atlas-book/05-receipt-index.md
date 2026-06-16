@@ -949,6 +949,7 @@
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Provenance-Alert Queue Signal Budget Decision Pass 289](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-PROVENANCE-ALERT-QUEUE-SIGNAL-BUDGET-DECISION-PASS-289-2026-06-15.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Provenance-Alert Queue Signal Budget Integration Proof Pass 290](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-PROVENANCE-ALERT-QUEUE-SIGNAL-BUDGET-INTEGRATION-PROOF-PASS-290-2026-06-15.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Provenance-Alert Queue Signal Budget Restart Truth Receipt Pass 291](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-PROVENANCE-ALERT-QUEUE-SIGNAL-BUDGET-RESTART-TRUTH-RECEIPT-PASS-291-2026-06-15.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Post-Provenance-Alert Queue Signal Budget Next-Slice Selection Pass 292](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-POST-PROVENANCE-ALERT-QUEUE-SIGNAL-BUDGET-NEXT-SLICE-SELECTION-PASS-292-2026-06-15.md)
 
 ## Notes
 
