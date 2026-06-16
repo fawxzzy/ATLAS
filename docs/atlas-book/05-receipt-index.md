@@ -1035,6 +1035,7 @@
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Session-Needs-Resume Prompt-Pack And Handoff Contract Pass 360](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-SESSION-NEEDS-RESUME-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-360-2026-06-16.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Session-Needs-Resume Implementation-Readiness Closeout And Worker-Routing Pass 361](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-SESSION-NEEDS-RESUME-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-361-2026-06-16.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Session-Needs-Resume First-Implementation Worker Cluster Reconciliation](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-SESSION-NEEDS-RESUME-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-16.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Post-Broader Attention-Queue Session-Needs-Resume Next-Slice Selection Pass 362](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-POST-BROADER-ATTENTION-QUEUE-SESSION-NEEDS-RESUME-NEXT-SLICE-SELECTION-PASS-362-2026-06-16.md)
 
 ## Notes
 
