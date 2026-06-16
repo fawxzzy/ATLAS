@@ -1042,6 +1042,7 @@
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Resume-Failed First-Implementation Admission Pass 366](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-RESUME-FAILED-FIRST-IMPLEMENTATION-ADMISSION-PASS-366-2026-06-16.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Resume-Failed Prompt-Pack And Handoff Contract Pass 367](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-RESUME-FAILED-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-367-2026-06-16.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Resume-Failed Implementation-Readiness Closeout And Worker-Routing Pass 368](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-RESUME-FAILED-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-368-2026-06-16.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Resume-Failed First-Implementation Worker Cluster Reconciliation](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-RESUME-FAILED-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-16.md)
 
 ## Notes
 
