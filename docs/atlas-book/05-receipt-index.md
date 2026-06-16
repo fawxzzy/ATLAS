@@ -1030,6 +1030,7 @@
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Post-Broader Attention-Queue Closure-Receipt-Issue Next-Slice Selection Pass 355](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-POST-BROADER-ATTENTION-QUEUE-CLOSURE-RECEIPT-ISSUE-NEXT-SLICE-SELECTION-PASS-355-2026-06-16.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Session-Needs-Resume Contract Freeze Pass 356](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-SESSION-NEEDS-RESUME-CONTRACT-FREEZE-PASS-356-2026-06-16.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Session-Needs-Resume Owner-Surface Admission Pass 357](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-SESSION-NEEDS-RESUME-OWNER-SURFACE-ADMISSION-PASS-357-2026-06-16.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Session-Needs-Resume Supporting-Lane Admission Pass 358](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-SESSION-NEEDS-RESUME-SUPPORTING-LANE-ADMISSION-PASS-358-2026-06-16.md)
 
 ## Notes
 
