@@ -991,6 +991,7 @@
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Registry-Error Prompt-Pack And Handoff Contract Pass 325](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-REGISTRY-ERROR-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-325-2026-06-16.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Registry-Error Implementation-Readiness Closeout And Worker-Routing Pass 326](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-REGISTRY-ERROR-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-326-2026-06-16.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Registry-Error First-Implementation Worker Cluster Reconciliation](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-REGISTRY-ERROR-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-16.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Post-Broader Attention-Queue Registry-Error Next-Slice Selection Pass 327](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-POST-BROADER-ATTENTION-QUEUE-REGISTRY-ERROR-NEXT-SLICE-SELECTION-PASS-327-2026-06-16.md)
 
 ## Notes
 
