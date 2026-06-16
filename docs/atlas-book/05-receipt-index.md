@@ -968,6 +968,7 @@
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Post-Broader Attention_Queue Semantics Beyond Provenance Alerts Next-Slice Selection Pass 306](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-POST-BROADER-ATTENTION_QUEUE-SEMANTICS-BEYOND-PROVENANCE-ALERTS-NEXT-SLICE-SELECTION-PASS-306-2026-06-15.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Conversation-Action-Request Contract Freeze Pass 307](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-CONVERSATION-ACTION-REQUEST-CONTRACT-FREEZE-PASS-307-2026-06-16.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Conversation-Action-Request Owner-Surface Admission Pass 308](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-CONVERSATION-ACTION-REQUEST-OWNER-SURFACE-ADMISSION-PASS-308-2026-06-16.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Conversation-Action-Request Supporting-Lane Admission Pass 309](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-CONVERSATION-ACTION-REQUEST-SUPPORTING-LANE-ADMISSION-PASS-309-2026-06-16.md)
 
 ## Notes
 
