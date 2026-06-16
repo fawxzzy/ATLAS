@@ -8,6 +8,7 @@ from unittest.mock import patch
 
 from ops.cortex.render_status import (
     attention_queue,
+    blocked_workers,
     proposal_only_state,
     provenance_alert_summary,
     provenance_attention_items,
@@ -57,6 +58,37 @@ def _knowledge_catalog_descriptor(
         "state": {
             "indexing_profile": indexing_profile,
             "promotion_status": promotion_status,
+        },
+    }
+
+
+def _worker_status_descriptor(
+    *,
+    worker_id: str,
+    worker_state: str,
+    heartbeat_at: str,
+    assignment_id: str | None = None,
+    tool_id: str | None = None,
+    extension_id: str | None = None,
+    blocked_reason: str | None = None,
+    registry_digest: str = "registry-digest-1",
+    source_ref: str | None = None,
+) -> dict[str, object]:
+    worker_suffix = worker_id.replace("worker-", "")
+    return {
+        "artifact_type": "worker_status",
+        "source_ref": source_ref or f"runtime/atlas/workers/{worker_id}/status.json",
+        "identity": {
+            "worker_id": worker_id,
+            "assignment_id": assignment_id or f"assignment-{worker_suffix}",
+            "tool_id": tool_id or f"tool-{worker_id}",
+            "extension_id": extension_id or f"extension-{worker_id}",
+        },
+        "state": {
+            "worker_state": worker_state,
+            "heartbeat_at": heartbeat_at,
+            "blocked_reason": blocked_reason,
+            "registry_digest": registry_digest,
         },
     }
 
@@ -746,6 +778,319 @@ class RenderStatusProvenanceTests(unittest.TestCase):
             [item["kind"] for item in queue["items"]],
         )
 
+    def test_blocked_workers_select_latest_qualifying_worker_state_per_worker(self) -> None:
+        descriptors = [
+            _worker_status_descriptor(
+                worker_id="worker-1",
+                worker_state="blocked",
+                heartbeat_at="2026-06-16T12:00:00Z",
+                blocked_reason="waiting on secret",
+                source_ref="runtime/atlas/workers/worker-1/status-older.json",
+            ),
+            _worker_status_descriptor(
+                worker_id="worker-1",
+                worker_state="running",
+                heartbeat_at="2026-06-16T12:05:00Z",
+                source_ref="runtime/atlas/workers/worker-1/status-latest.json",
+            ),
+            _worker_status_descriptor(
+                worker_id="worker-2",
+                worker_state="running",
+                heartbeat_at="2026-06-16T12:01:00Z",
+                source_ref="runtime/atlas/workers/worker-2/status-older.json",
+            ),
+            _worker_status_descriptor(
+                worker_id="worker-2",
+                worker_state="merge_wait",
+                heartbeat_at="2026-06-16T12:06:00Z",
+                blocked_reason="waiting for merge",
+                source_ref="runtime/atlas/workers/worker-2/status-latest.json",
+            ),
+        ]
+
+        self.assertEqual(
+            [
+                {
+                    "worker_id": "worker-2",
+                    "assignment_id": "assignment-2",
+                    "tool_id": "tool-worker-2",
+                    "extension_id": "extension-worker-2",
+                    "state": "merge_wait",
+                    "blocked_reason": "waiting for merge",
+                    "registry_digest": "registry-digest-1",
+                    "source_ref": "runtime/atlas/workers/worker-2/status-latest.json",
+                }
+            ],
+            blocked_workers(descriptors),
+        )
+
+    def test_attention_queue_emits_blocked_worker_with_admitted_details_and_high_severity(self) -> None:
+        queue = attention_queue(
+            descriptors=[],
+            active_session=None,
+            blocked_workers_payload=[
+                {
+                    "worker_id": "worker-blocked",
+                    "assignment_id": "assignment-blocked",
+                    "tool_id": "tool-worker-blocked",
+                    "extension_id": "extension-worker-blocked",
+                    "state": "blocked",
+                    "blocked_reason": "waiting on operator input",
+                    "registry_digest": "registry-digest-1",
+                    "source_ref": "runtime/atlas/workers/worker-blocked/status.json",
+                }
+            ],
+            open_merge_requests_payload=[],
+            closure_receipts_payload=[],
+            legacy_compatibility_payload=[],
+            trust_surfaces_payload=[],
+            working_memory_items=[],
+            provenance_alerts={"status": "clear", "item_count": 0, "items": []},
+            registry_state={
+                "ok": True,
+                "tool_ids": {"tool-worker-blocked"},
+                "extension_ids": {"extension-worker-blocked"},
+            },
+        )
+
+        self.assertEqual("needs_review", queue["status"])
+        self.assertEqual(1, queue["item_count"])
+        self.assertEqual("high", queue["highest_severity"])
+        self.assertEqual(
+            {
+                "kind": "blocked_worker",
+                "severity": "high",
+                "summary": "Worker 'worker-blocked' is blocked.",
+                "source_ref": "runtime/atlas/workers/worker-blocked/status.json",
+                "details": {
+                    "worker_id": "worker-blocked",
+                    "assignment_id": "assignment-blocked",
+                    "state": "blocked",
+                    "blocked_reason": "waiting on operator input",
+                },
+            },
+            queue["items"][0],
+        )
+
+    def test_attention_queue_uses_medium_severity_for_paused_blocked_worker(self) -> None:
+        queue = attention_queue(
+            descriptors=[],
+            active_session=None,
+            blocked_workers_payload=[
+                {
+                    "worker_id": "worker-paused",
+                    "assignment_id": "assignment-paused",
+                    "tool_id": "tool-worker-paused",
+                    "extension_id": "extension-worker-paused",
+                    "state": "paused",
+                    "blocked_reason": "waiting on review",
+                    "registry_digest": "registry-digest-1",
+                    "source_ref": "runtime/atlas/workers/worker-paused/status.json",
+                }
+            ],
+            open_merge_requests_payload=[],
+            closure_receipts_payload=[],
+            legacy_compatibility_payload=[],
+            trust_surfaces_payload=[],
+            working_memory_items=[],
+            provenance_alerts={"status": "clear", "item_count": 0, "items": []},
+            registry_state={
+                "ok": True,
+                "tool_ids": {"tool-worker-paused"},
+                "extension_ids": {"extension-worker-paused"},
+            },
+        )
+
+        self.assertEqual("needs_review", queue["status"])
+        self.assertEqual("medium", queue["highest_severity"])
+        self.assertEqual("medium", queue["items"][0]["severity"])
+        self.assertEqual("paused", queue["items"][0]["details"]["state"])
+
+    def test_attention_queue_preserves_blocked_worker_when_registry_is_unavailable(self) -> None:
+        queue = attention_queue(
+            descriptors=[],
+            active_session=None,
+            blocked_workers_payload=[
+                {
+                    "worker_id": "worker-registry-outage",
+                    "assignment_id": "assignment-registry-outage",
+                    "tool_id": "missing-tool",
+                    "extension_id": "missing-extension",
+                    "state": "blocked",
+                    "blocked_reason": "registry unavailable",
+                    "registry_digest": "stale-digest",
+                    "source_ref": "runtime/atlas/workers/worker-registry-outage/status.json",
+                }
+            ],
+            open_merge_requests_payload=[],
+            closure_receipts_payload=[],
+            legacy_compatibility_payload=[],
+            trust_surfaces_payload=[],
+            working_memory_items=[],
+            provenance_alerts={"status": "clear", "item_count": 0, "items": []},
+            registry_state={
+                "ok": False,
+                "error": "registry unavailable",
+                "registry_digest": "current-digest",
+                "tool_ids": {"known-tool"},
+                "extension_ids": {"known-extension"},
+            },
+        )
+
+        self.assertEqual("needs_review", queue["status"])
+        self.assertEqual(["registry_error", "blocked_worker"], [item["kind"] for item in queue["items"]])
+
+    def test_attention_queue_preserves_order_for_blocked_worker_and_other_queue_families(self) -> None:
+        queue = attention_queue(
+            descriptors=[_conversation_descriptor(turn_id="turn-proposal", action_mode="proposal_required")],
+            active_session=None,
+            blocked_workers_payload=[
+                {
+                    "worker_id": "worker-paused",
+                    "assignment_id": "assignment-paused",
+                    "tool_id": "tool-worker-paused",
+                    "extension_id": "extension-worker-paused",
+                    "state": "paused",
+                    "blocked_reason": "waiting on review",
+                    "registry_digest": "registry-digest-1",
+                    "source_ref": "runtime/atlas/workers/worker-paused/status.json",
+                }
+            ],
+            open_merge_requests_payload=[],
+            closure_receipts_payload=[],
+            legacy_compatibility_payload=[],
+            trust_surfaces_payload=[],
+            working_memory_items=[
+                {
+                    "memory_kind": "initiative",
+                    "id": "initiative-open",
+                    "title": "Open initiative",
+                    "path": "docs/memory/initiatives/initiative-open.json",
+                    "status": "active",
+                    "metadata": {
+                        "attention_summary": "Needs review",
+                        "attention_severity": "medium",
+                    },
+                }
+            ],
+            provenance_alerts={"status": "clear", "item_count": 0, "items": []},
+            registry_state={
+                "ok": True,
+                "tool_ids": {"tool-worker-paused"},
+                "extension_ids": {"extension-worker-paused"},
+            },
+        )
+
+        self.assertEqual("needs_review", queue["status"])
+        self.assertEqual(3, queue["item_count"])
+        self.assertEqual(
+            [
+                "blocked_worker",
+                "conversation_action_request",
+                "initiative_open_attention",
+            ],
+            [item["kind"] for item in queue["items"]],
+        )
+
+    def test_attention_queue_preserves_provenance_overflow_when_blocked_worker_is_present(self) -> None:
+        queue = attention_queue(
+            descriptors=[],
+            active_session=None,
+            blocked_workers_payload=[
+                {
+                    "worker_id": "worker-paused",
+                    "assignment_id": "assignment-paused",
+                    "tool_id": "tool-worker-paused",
+                    "extension_id": "extension-worker-paused",
+                    "state": "paused",
+                    "blocked_reason": "waiting on review",
+                    "registry_digest": "registry-digest-1",
+                    "source_ref": "runtime/atlas/workers/worker-paused/status.json",
+                }
+            ],
+            open_merge_requests_payload=[],
+            closure_receipts_payload=[],
+            legacy_compatibility_payload=[],
+            trust_surfaces_payload=[],
+            working_memory_items=[],
+            provenance_alerts={
+                "status": "drift_detected",
+                "initiative_item_count": 3,
+                "proposal_item_count": 2,
+                "item_count": 5,
+                "items": [
+                    {
+                        "kind": "initiative_provenance_drift",
+                        "initiative_id": "initiative-zeta",
+                        "title": "Zeta",
+                        "source_ref": "docs/memory/initiatives/initiative-zeta.json",
+                        "stale_attention_refs": ["attention:sha256:zeta"],
+                        "missing_file_refs": [],
+                    },
+                    {
+                        "kind": "proposed_session_provenance_drift",
+                        "session_id": "session-bravo",
+                        "task_id": "task-bravo",
+                        "source_ref": "runtime/atlas/proposed-sessions/session-bravo/session.manifest.json",
+                        "stale_attention_refs": [],
+                        "missing_initiative_ref": "docs/memory/initiatives/missing-bravo.json",
+                    },
+                    {
+                        "kind": "initiative_provenance_drift",
+                        "initiative_id": "initiative-alpha",
+                        "title": "Alpha",
+                        "source_ref": "docs/memory/initiatives/initiative-alpha.json",
+                        "stale_attention_refs": [],
+                        "missing_file_refs": ["docs/memory/initiatives/missing-alpha.json"],
+                    },
+                    {
+                        "kind": "proposed_session_provenance_drift",
+                        "session_id": "session-charlie",
+                        "task_id": "task-charlie",
+                        "source_ref": "runtime/atlas/proposed-sessions/session-charlie/session.manifest.json",
+                        "stale_attention_refs": ["attention:sha256:charlie"],
+                        "missing_initiative_ref": None,
+                    },
+                    {
+                        "kind": "initiative_provenance_drift",
+                        "initiative_id": "initiative-beta",
+                        "title": "Beta",
+                        "source_ref": "docs/memory/initiatives/initiative-beta.json",
+                        "stale_attention_refs": ["attention:sha256:beta"],
+                        "missing_file_refs": [],
+                    },
+                ],
+            },
+            registry_state={
+                "ok": True,
+                "tool_ids": {"tool-worker-paused"},
+                "extension_ids": {"extension-worker-paused"},
+            },
+        )
+
+        self.assertEqual("needs_review", queue["status"])
+        self.assertEqual(5, queue["item_count"])
+        self.assertEqual("high", queue["highest_severity"])
+        self.assertEqual(
+            [
+                "initiative_provenance_drift",
+                "proposed_session_provenance_drift",
+                "blocked_worker",
+                "initiative_provenance_drift",
+                "provenance_alert_overflow",
+            ],
+            [item["kind"] for item in queue["items"]],
+        )
+        self.assertEqual(
+            {
+                "suppressed_item_count": 2,
+                "signal_cap": 3,
+                "highest_suppressed_severity": "medium",
+                "total_provenance_alert_count": 5,
+            },
+            queue["items"][4]["details"],
+        )
+
     def test_attention_queue_emits_quarantined_trust_surface_for_untrusted_knowledge_catalog(self) -> None:
         descriptors = [
             _knowledge_catalog_descriptor(
@@ -1199,6 +1544,87 @@ class RenderStatusProvenanceTests(unittest.TestCase):
         self.assertEqual("restricted", payload["trust_posture"]["status"])
         self.assertEqual(1, payload["trust_posture"]["untrusted_item_count"])
         self.assertEqual("archive-untrusted", payload["attention_queue"]["items"][0]["details"]["archive_id"])
+
+    def test_render_status_payload_preserves_blocked_worker_handoff(self) -> None:
+        descriptors = [
+            _worker_status_descriptor(
+                worker_id="worker-1",
+                worker_state="blocked",
+                heartbeat_at="2026-06-16T12:00:00Z",
+                blocked_reason="older state",
+                source_ref="runtime/atlas/workers/worker-1/status-older.json",
+            ),
+            _worker_status_descriptor(
+                worker_id="worker-1",
+                worker_state="running",
+                heartbeat_at="2026-06-16T12:05:00Z",
+                source_ref="runtime/atlas/workers/worker-1/status-latest.json",
+            ),
+            _worker_status_descriptor(
+                worker_id="worker-2",
+                worker_state="merge_wait",
+                heartbeat_at="2026-06-16T12:06:00Z",
+                blocked_reason="waiting for merge",
+                source_ref="runtime/atlas/workers/worker-2/status-latest.json",
+            ),
+        ]
+
+        with TemporaryDirectory() as temp_dir:
+            descriptor_root = Path(temp_dir)
+            (descriptor_root / "placeholder.json").write_text("{}", encoding="utf-8")
+            patch_specs = [
+                ("ops.cortex.render_status.load_descriptors", descriptors),
+                (
+                    "ops.cortex.render_status.load_registry_state",
+                    {
+                        "ok": True,
+                        "tool_ids": {"tool-worker-2"},
+                        "extension_ids": {"extension-worker-2"},
+                    },
+                ),
+                ("ops.cortex.render_status.choose_latest_session", None),
+                ("ops.cortex.render_status.session_overview", None),
+                ("ops.cortex.render_status.classify_merge_requests", ([], [])),
+                ("ops.cortex.render_status.closure_receipts", []),
+                ("ops.cortex.render_status.execution_receipt_residue_records", []),
+                ("ops.cortex.render_status.governed_writes", []),
+                ("ops.cortex.render_status.legacy_compatibility_surfaces", []),
+                ("ops.cortex.render_status.trust_surfaces", []),
+                ("ops.cortex.render_status.trust_posture_summary", {}),
+                ("ops.cortex.render_status.working_memory_summary", {"_items": [], "initiatives": {}}),
+                ("ops.cortex.render_status.provenance_alert_summary", {"status": "clear", "item_count": 0, "items": []}),
+                ("ops.cortex.render_status.conversation_summary", {}),
+                ("ops.cortex.render_status.build_canonical_lockfile_artifacts", {}),
+                ("ops.cortex.render_status.repo_inventory_summary_from_lock", {"items": []}),
+                ("ops.cortex.render_status.lock_worktree_hygiene", {"status": "frozen"}),
+                ("ops.cortex.render_status.registry_summary", {}),
+                ("ops.cortex.render_status.artifact_inventory", {}),
+                ("ops.cortex.render_status.world_model_state", {}),
+            ]
+            with ExitStack() as stack:
+                for target, value in patch_specs:
+                    stack.enter_context(patch(target, return_value=value))
+                payload = render_status_payload(descriptor_root)
+
+        self.assertEqual(
+            [
+                {
+                    "worker_id": "worker-2",
+                    "assignment_id": "assignment-2",
+                    "tool_id": "tool-worker-2",
+                    "extension_id": "extension-worker-2",
+                    "state": "merge_wait",
+                    "blocked_reason": "waiting for merge",
+                    "registry_digest": "registry-digest-1",
+                    "source_ref": "runtime/atlas/workers/worker-2/status-latest.json",
+                }
+            ],
+            payload["blocked_workers"],
+        )
+        self.assertEqual("needs_review", payload["attention_queue"]["status"])
+        self.assertEqual(1, payload["attention_queue"]["item_count"])
+        self.assertEqual("blocked_worker", payload["attention_queue"]["items"][0]["kind"])
+        self.assertEqual("merge_wait", payload["attention_queue"]["items"][0]["details"]["state"])
 
     def test_provenance_summary_reports_initiative_and_proposal_drift(self) -> None:
         working_memory_items = [

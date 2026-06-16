@@ -1002,6 +1002,7 @@
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Blocked-Worker First-Implementation Admission Pass 331](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-BLOCKED-WORKER-FIRST-IMPLEMENTATION-ADMISSION-PASS-331-2026-06-16.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Blocked-Worker Prompt-Pack And Handoff Contract Pass 332](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-BLOCKED-WORKER-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-332-2026-06-16.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Blocked-Worker Implementation-Readiness Closeout And Worker-Routing Pass 333](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-BLOCKED-WORKER-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-333-2026-06-16.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Blocked-Worker First-Implementation Worker Cluster Reconciliation](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-BLOCKED-WORKER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-16.md)
 
 ## Notes
 
