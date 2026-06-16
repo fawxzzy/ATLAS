@@ -414,6 +414,59 @@ class RenderStatusProvenanceTests(unittest.TestCase):
             payload["attention_queue"]["items"][0]["details"],
         )
 
+    def test_render_status_payload_preserves_resume_failed_handoff(self) -> None:
+        with TemporaryDirectory() as temp_dir:
+            descriptor_root = Path(temp_dir)
+            (descriptor_root / "placeholder.json").write_text("{}", encoding="utf-8")
+            active_session = {
+                "session_id": "session-resume-failed-payload",
+                "task_id": "task-resume-failed-payload",
+                "session_state": "resume_failed",
+                "final_status": "running",
+                "resume_failure_reason": "resume dispatch artifact missing",
+                "source_ref": "runtime/atlas/sessions/session-resume-failed-payload/session.manifest.json",
+            }
+            patch_specs = [
+                ("ops.cortex.render_status.load_descriptors", []),
+                ("ops.cortex.render_status.load_registry_state", {"ok": True}),
+                ("ops.cortex.render_status.choose_latest_session", None),
+                ("ops.cortex.render_status.session_overview", active_session),
+                ("ops.cortex.render_status.blocked_workers", []),
+                ("ops.cortex.render_status.classify_merge_requests", ([], [])),
+                ("ops.cortex.render_status.closure_receipts", []),
+                ("ops.cortex.render_status.execution_receipt_residue_records", []),
+                ("ops.cortex.render_status.governed_writes", []),
+                ("ops.cortex.render_status.legacy_compatibility_surfaces", []),
+                ("ops.cortex.render_status.trust_surfaces", []),
+                ("ops.cortex.render_status.trust_posture_summary", {}),
+                ("ops.cortex.render_status.working_memory_summary", {"_items": [], "initiatives": {}}),
+                ("ops.cortex.render_status.provenance_alert_summary", {"status": "clear", "item_count": 0, "items": []}),
+                ("ops.cortex.render_status.conversation_summary", {}),
+                ("ops.cortex.render_status.build_canonical_lockfile_artifacts", {}),
+                ("ops.cortex.render_status.repo_inventory_summary_from_lock", {"items": []}),
+                ("ops.cortex.render_status.lock_worktree_hygiene", {"status": "frozen"}),
+                ("ops.cortex.render_status.registry_summary", {}),
+                ("ops.cortex.render_status.artifact_inventory", {}),
+                ("ops.cortex.render_status.world_model_state", {}),
+            ]
+            with ExitStack() as stack:
+                for target, value in patch_specs:
+                    stack.enter_context(patch(target, return_value=value))
+                payload = render_status_payload(descriptor_root)
+
+        self.assertEqual(active_session, payload["active_session"])
+        self.assertEqual("needs_review", payload["attention_queue"]["status"])
+        self.assertEqual(1, payload["attention_queue"]["item_count"])
+        self.assertEqual("resume_failed", payload["attention_queue"]["items"][0]["kind"])
+        self.assertEqual(
+            {
+                "session_id": "session-resume-failed-payload",
+                "task_id": "task-resume-failed-payload",
+                "resume_failure_reason": "resume dispatch artifact missing",
+            },
+            payload["attention_queue"]["items"][0]["details"],
+        )
+
     def test_render_status_payload_preserves_registry_error_attention_queue_handoff(self) -> None:
         with TemporaryDirectory() as temp_dir:
             descriptor_root = Path(temp_dir)
@@ -800,6 +853,150 @@ class RenderStatusProvenanceTests(unittest.TestCase):
         self.assertEqual("session_needs_resume", queue["items"][0]["kind"])
         self.assertEqual("session-resume-final", queue["items"][0]["details"]["session_id"])
 
+    def test_attention_queue_emits_resume_failed_for_resume_failed_session_state(self) -> None:
+        queue = attention_queue(
+            descriptors=[],
+            active_session={
+                "session_id": "session-resume-failed",
+                "task_id": "task-resume-failed",
+                "session_state": "resume_failed",
+                "final_status": "running",
+                "resume_failure_reason": "resume dispatch artifact missing",
+                "source_ref": "runtime/atlas/sessions/session-resume-failed/session.manifest.json",
+            },
+            blocked_workers_payload=[],
+            open_merge_requests_payload=[],
+            closure_receipts_payload=[],
+            legacy_compatibility_payload=[],
+            trust_surfaces_payload=[],
+            working_memory_items=[],
+            provenance_alerts={"status": "clear", "item_count": 0, "items": []},
+            registry_state={"ok": True},
+        )
+
+        self.assertEqual("needs_review", queue["status"])
+        self.assertEqual(1, queue["item_count"])
+        self.assertEqual("high", queue["highest_severity"])
+        self.assertEqual(
+            {
+                "kind": "resume_failed",
+                "severity": "high",
+                "summary": "The active session resume path failed and needs operator review.",
+                "source_ref": "runtime/atlas/sessions/session-resume-failed/session.manifest.json",
+                "details": {
+                    "session_id": "session-resume-failed",
+                    "task_id": "task-resume-failed",
+                    "resume_failure_reason": "resume dispatch artifact missing",
+                },
+            },
+            queue["items"][0],
+        )
+
+    def test_attention_queue_emits_resume_failed_for_resume_failed_final_status(self) -> None:
+        queue = attention_queue(
+            descriptors=[],
+            active_session={
+                "session_id": "session-resume-failed-final",
+                "task_id": "task-resume-failed-final",
+                "session_state": "running",
+                "final_status": "resume_failed",
+                "resume_failure_reason": "resume merge completion missing",
+                "source_ref": "runtime/atlas/sessions/session-resume-failed-final/session.manifest.json",
+            },
+            blocked_workers_payload=[],
+            open_merge_requests_payload=[],
+            closure_receipts_payload=[],
+            legacy_compatibility_payload=[],
+            trust_surfaces_payload=[],
+            working_memory_items=[],
+            provenance_alerts={"status": "clear", "item_count": 0, "items": []},
+            registry_state={"ok": True},
+        )
+
+        self.assertEqual("needs_review", queue["status"])
+        self.assertEqual(1, queue["item_count"])
+        self.assertEqual("resume_failed", queue["items"][0]["kind"])
+        self.assertEqual("session-resume-failed-final", queue["items"][0]["details"]["session_id"])
+
+    def test_attention_queue_omits_resume_failed_when_resume_failed_is_absent(self) -> None:
+        queue = attention_queue(
+            descriptors=[],
+            active_session={
+                "session_id": "session-running",
+                "task_id": "task-running",
+                "session_state": "running",
+                "final_status": "running",
+                "source_ref": "runtime/atlas/sessions/session-running/session.manifest.json",
+            },
+            blocked_workers_payload=[],
+            open_merge_requests_payload=[],
+            closure_receipts_payload=[],
+            legacy_compatibility_payload=[],
+            trust_surfaces_payload=[],
+            working_memory_items=[],
+            provenance_alerts={"status": "clear", "item_count": 0, "items": []},
+            registry_state={"ok": True},
+        )
+
+        self.assertEqual("clear", queue["status"])
+        self.assertEqual(0, queue["item_count"])
+        self.assertEqual([], queue["items"])
+
+    def test_attention_queue_preserves_resume_failed_when_registry_is_unavailable(self) -> None:
+        queue = attention_queue(
+            descriptors=[],
+            active_session={
+                "session_id": "session-resume-failed-offline-registry",
+                "task_id": "task-resume-failed-offline-registry",
+                "session_state": "resume_failed",
+                "final_status": "running",
+                "resume_failure_reason": "resume request unresolved",
+                "source_ref": "runtime/atlas/sessions/session-resume-failed-offline-registry/session.manifest.json",
+            },
+            blocked_workers_payload=[],
+            open_merge_requests_payload=[],
+            closure_receipts_payload=[],
+            legacy_compatibility_payload=[],
+            trust_surfaces_payload=[],
+            working_memory_items=[],
+            provenance_alerts={"status": "clear", "item_count": 0, "items": []},
+            registry_state={"ok": False, "error": "registry unavailable"},
+        )
+
+        self.assertEqual("needs_review", queue["status"])
+        self.assertEqual(
+            ["registry_error", "resume_failed"],
+            [item["kind"] for item in queue["items"]],
+        )
+
+    def test_attention_queue_preserves_resume_failed_with_registry_drift(self) -> None:
+        queue = attention_queue(
+            descriptors=[],
+            active_session={
+                "session_id": "session-resume-failed-drift",
+                "task_id": "task-resume-failed-drift",
+                "session_state": "resume_failed",
+                "final_status": "running",
+                "registry_digest": "stale-digest",
+                "resume_failure_reason": "resume worker status missing",
+                "source_ref": "runtime/atlas/sessions/session-resume-failed-drift/session.manifest.json",
+            },
+            blocked_workers_payload=[],
+            open_merge_requests_payload=[],
+            closure_receipts_payload=[],
+            legacy_compatibility_payload=[],
+            trust_surfaces_payload=[],
+            working_memory_items=[],
+            provenance_alerts={"status": "clear", "item_count": 0, "items": []},
+            registry_state={"ok": True, "registry_digest": "current-digest"},
+        )
+
+        self.assertEqual("needs_review", queue["status"])
+        self.assertEqual(
+            ["registry_drift", "resume_failed"],
+            [item["kind"] for item in queue["items"]],
+        )
+
     def test_attention_queue_omits_session_needs_resume_when_resume_ready_is_absent(self) -> None:
         queue = attention_queue(
             descriptors=[],
@@ -1001,6 +1198,134 @@ class RenderStatusProvenanceTests(unittest.TestCase):
                 "total_provenance_alert_count": 5,
             },
             queue["items"][3]["details"],
+        )
+
+    def test_attention_queue_preserves_order_for_resume_failed_and_other_queue_families(self) -> None:
+        queue = attention_queue(
+            descriptors=[],
+            active_session={
+                "session_id": "session-resume-failed-order",
+                "task_id": "task-resume-failed-order",
+                "session_state": "resume_failed",
+                "final_status": "running",
+                "resume_failure_reason": "resume worker missing",
+                "source_ref": "runtime/atlas/sessions/session-resume-failed-order/session.manifest.json",
+            },
+            blocked_workers_payload=[],
+            open_merge_requests_payload=[],
+            closure_receipts_payload=[],
+            legacy_compatibility_payload=[],
+            trust_surfaces_payload=[],
+            working_memory_items=[
+                {
+                    "memory_kind": "initiative",
+                    "id": "initiative-open",
+                    "title": "Open initiative",
+                    "path": "docs/memory/initiatives/initiative-open.json",
+                    "status": "active",
+                    "metadata": {
+                        "attention_summary": "Needs review",
+                        "attention_severity": "medium",
+                    },
+                }
+            ],
+            provenance_alerts={"status": "clear", "item_count": 0, "items": []},
+            registry_state={"ok": True},
+        )
+
+        self.assertEqual("needs_review", queue["status"])
+        self.assertEqual(
+            ["resume_failed", "initiative_open_attention"],
+            [item["kind"] for item in queue["items"]],
+        )
+
+    def test_attention_queue_preserves_provenance_overflow_when_resume_failed_is_present(self) -> None:
+        queue = attention_queue(
+            descriptors=[],
+            active_session={
+                "session_id": "session-resume-failed-overflow",
+                "task_id": "task-resume-failed-overflow",
+                "session_state": "resume_failed",
+                "final_status": "running",
+                "resume_failure_reason": "resume dispatch missing",
+                "source_ref": "runtime/atlas/sessions/session-resume-failed-overflow/session.manifest.json",
+            },
+            blocked_workers_payload=[],
+            open_merge_requests_payload=[],
+            closure_receipts_payload=[],
+            legacy_compatibility_payload=[],
+            trust_surfaces_payload=[],
+            working_memory_items=[],
+            provenance_alerts={
+                "status": "drift_detected",
+                "initiative_item_count": 3,
+                "proposal_item_count": 2,
+                "item_count": 5,
+                "items": [
+                    {
+                        "kind": "initiative_provenance_drift",
+                        "initiative_id": "initiative-zeta",
+                        "title": "Zeta",
+                        "source_ref": "docs/memory/initiatives/initiative-zeta.json",
+                        "stale_attention_refs": ["attention:sha256:zeta"],
+                        "missing_file_refs": [],
+                    },
+                    {
+                        "kind": "proposed_session_provenance_drift",
+                        "session_id": "session-bravo",
+                        "task_id": "task-bravo",
+                        "source_ref": "runtime/atlas/proposed-sessions/session-bravo/session.manifest.json",
+                        "stale_attention_refs": [],
+                        "missing_initiative_ref": "docs/memory/initiatives/missing-bravo.json",
+                    },
+                    {
+                        "kind": "initiative_provenance_drift",
+                        "initiative_id": "initiative-alpha",
+                        "title": "Alpha",
+                        "source_ref": "docs/memory/initiatives/initiative-alpha.json",
+                        "stale_attention_refs": [],
+                        "missing_file_refs": ["docs/memory/initiatives/missing-alpha.json"],
+                    },
+                    {
+                        "kind": "proposed_session_provenance_drift",
+                        "session_id": "session-charlie",
+                        "task_id": "task-charlie",
+                        "source_ref": "runtime/atlas/proposed-sessions/session-charlie/session.manifest.json",
+                        "stale_attention_refs": ["attention:sha256:charlie"],
+                        "missing_initiative_ref": None,
+                    },
+                    {
+                        "kind": "initiative_provenance_drift",
+                        "initiative_id": "initiative-beta",
+                        "title": "Beta",
+                        "source_ref": "docs/memory/initiatives/initiative-beta.json",
+                        "stale_attention_refs": ["attention:sha256:beta"],
+                        "missing_file_refs": [],
+                    },
+                ],
+            },
+            registry_state={"ok": True},
+        )
+
+        self.assertEqual("needs_review", queue["status"])
+        self.assertEqual(
+            [
+                "initiative_provenance_drift",
+                "proposed_session_provenance_drift",
+                "resume_failed",
+                "initiative_provenance_drift",
+                "provenance_alert_overflow",
+            ],
+            [item["kind"] for item in queue["items"]],
+        )
+        self.assertEqual(
+            {
+                "suppressed_item_count": 2,
+                "signal_cap": 3,
+                "highest_suppressed_severity": "medium",
+                "total_provenance_alert_count": 5,
+            },
+            queue["items"][4]["details"],
         )
 
     def test_attention_queue_routes_initiative_open_attention_without_provenance(self) -> None:
