@@ -313,6 +313,132 @@ class RenderStatusProvenanceTests(unittest.TestCase):
         self.assertEqual("proposed_session_provenance_drift", queue["items"][1]["kind"])
         self.assertEqual("medium", queue["items"][1]["severity"])
 
+    def test_attention_queue_is_clear_without_initiative_or_provenance_items(self) -> None:
+        queue = attention_queue(
+            descriptors=[],
+            active_session=None,
+            blocked_workers_payload=[],
+            open_merge_requests_payload=[],
+            closure_receipts_payload=[],
+            legacy_compatibility_payload=[],
+            trust_surfaces_payload=[],
+            working_memory_items=[],
+            provenance_alerts={"status": "clear", "item_count": 0, "items": []},
+            registry_state={"ok": True},
+        )
+
+        self.assertEqual("clear", queue["status"])
+        self.assertEqual(0, queue["item_count"])
+        self.assertIsNone(queue["highest_severity"])
+        self.assertEqual([], queue["items"])
+
+    def test_attention_queue_routes_initiative_open_attention_without_provenance(self) -> None:
+        queue = attention_queue(
+            descriptors=[],
+            active_session=None,
+            blocked_workers_payload=[],
+            open_merge_requests_payload=[],
+            closure_receipts_payload=[],
+            legacy_compatibility_payload=[],
+            trust_surfaces_payload=[],
+            working_memory_items=[
+                {
+                    "memory_kind": "initiative",
+                    "id": "initiative-open",
+                    "title": "Open initiative",
+                    "path": "docs/memory/initiatives/initiative-open.json",
+                    "status": "active",
+                    "metadata": {
+                        "attention_summary": "Needs review",
+                        "attention_severity": "medium",
+                    },
+                }
+            ],
+            provenance_alerts={"status": "clear", "item_count": 0, "items": []},
+            registry_state={"ok": True},
+        )
+
+        self.assertEqual("needs_review", queue["status"])
+        self.assertEqual(1, queue["item_count"])
+        self.assertEqual("medium", queue["highest_severity"])
+        self.assertEqual("initiative_open_attention", queue["items"][0]["kind"])
+
+    def test_attention_queue_preserves_deterministic_order_for_mixed_initiative_and_provenance_items(self) -> None:
+        queue = attention_queue(
+            descriptors=[],
+            active_session=None,
+            blocked_workers_payload=[],
+            open_merge_requests_payload=[],
+            closure_receipts_payload=[],
+            legacy_compatibility_payload=[],
+            trust_surfaces_payload=[],
+            working_memory_items=[
+                {
+                    "memory_kind": "initiative",
+                    "id": "initiative-open",
+                    "title": "Open initiative",
+                    "path": "docs/memory/initiatives/initiative-open.json",
+                    "status": "active",
+                    "metadata": {
+                        "attention_summary": "Needs review",
+                        "attention_severity": "medium",
+                    },
+                }
+            ],
+            provenance_alerts={
+                "status": "drift_detected",
+                "initiative_item_count": 1,
+                "proposal_item_count": 0,
+                "item_count": 1,
+                "items": [
+                    {
+                        "kind": "initiative_provenance_drift",
+                        "initiative_id": "initiative-proof",
+                        "title": "Proof",
+                        "source_ref": "docs/memory/initiatives/initiative-proof.json",
+                        "stale_attention_refs": [],
+                        "missing_file_refs": ["docs/memory/initiatives/missing.json"],
+                    }
+                ],
+            },
+            registry_state={"ok": True},
+        )
+
+        self.assertEqual("needs_review", queue["status"])
+        self.assertEqual(2, queue["item_count"])
+        self.assertEqual("high", queue["highest_severity"])
+        self.assertEqual(
+            ["initiative_provenance_drift", "initiative_open_attention"],
+            [item["kind"] for item in queue["items"]],
+        )
+
+    def test_attention_queue_omits_initiatives_without_actionable_attention_summary(self) -> None:
+        queue = attention_queue(
+            descriptors=[],
+            active_session=None,
+            blocked_workers_payload=[],
+            open_merge_requests_payload=[],
+            closure_receipts_payload=[],
+            legacy_compatibility_payload=[],
+            trust_surfaces_payload=[],
+            working_memory_items=[
+                {
+                    "memory_kind": "initiative",
+                    "id": "initiative-idle",
+                    "title": "Idle initiative",
+                    "path": "docs/memory/initiatives/initiative-idle.json",
+                    "status": "active",
+                    "metadata": {},
+                }
+            ],
+            provenance_alerts={"status": "clear", "item_count": 0, "items": []},
+            registry_state={"ok": True},
+        )
+
+        self.assertEqual("clear", queue["status"])
+        self.assertEqual(0, queue["item_count"])
+        self.assertEqual([], queue["items"])
+
     def test_provenance_summary_reports_initiative_and_proposal_drift(self) -> None:
         working_memory_items = [
             {
