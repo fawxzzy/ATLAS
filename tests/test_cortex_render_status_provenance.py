@@ -8,10 +8,33 @@ from unittest.mock import patch
 
 from ops.cortex.render_status import (
     attention_queue,
+    proposal_only_state,
     provenance_alert_summary,
     provenance_attention_items,
     render_status_payload,
 )
+
+
+def _conversation_descriptor(
+    *,
+    turn_id: str,
+    action_mode: str,
+    intent: str = "propose_change",
+    conversation_id: str = "conversation-1",
+    source_ref: str = "runtime/atlas/conversations/conversation-1/turns/turn.json",
+) -> dict[str, object]:
+    return {
+        "artifact_type": "conversation_turn",
+        "source_ref": source_ref,
+        "identity": {
+            "conversation_id": conversation_id,
+            "turn_id": turn_id,
+        },
+        "state": {
+            "action_mode": action_mode,
+            "intent": intent,
+        },
+    }
 
 
 class RenderStatusProvenanceTests(unittest.TestCase):
@@ -438,6 +461,221 @@ class RenderStatusProvenanceTests(unittest.TestCase):
         self.assertEqual("clear", queue["status"])
         self.assertEqual(0, queue["item_count"])
         self.assertEqual([], queue["items"])
+
+    def test_attention_queue_emits_conversation_action_request_for_proposal_required_turn(self) -> None:
+        queue = attention_queue(
+            descriptors=[
+                _conversation_descriptor(
+                    turn_id="turn-proposal",
+                    action_mode="proposal_required",
+                    intent="write_receipt",
+                    conversation_id="conversation-governed",
+                    source_ref="runtime/atlas/conversations/conversation-governed/turns/turn-proposal.json",
+                )
+            ],
+            active_session=None,
+            blocked_workers_payload=[],
+            open_merge_requests_payload=[],
+            closure_receipts_payload=[],
+            legacy_compatibility_payload=[],
+            trust_surfaces_payload=[],
+            working_memory_items=[],
+            provenance_alerts={"status": "clear", "item_count": 0, "items": []},
+            registry_state={"ok": True},
+        )
+
+        self.assertEqual("needs_review", queue["status"])
+        self.assertEqual(1, queue["item_count"])
+        self.assertEqual("medium", queue["highest_severity"])
+        self.assertEqual("conversation_action_request", queue["items"][0]["kind"])
+        self.assertEqual(
+            {
+                "conversation_id": "conversation-governed",
+                "turn_id": "turn-proposal",
+                "intent": "write_receipt",
+            },
+            queue["items"][0]["details"],
+        )
+
+    def test_attention_queue_omits_non_qualifying_conversation_turn(self) -> None:
+        queue = attention_queue(
+            descriptors=[_conversation_descriptor(turn_id="turn-info", action_mode="informational")],
+            active_session=None,
+            blocked_workers_payload=[],
+            open_merge_requests_payload=[],
+            closure_receipts_payload=[],
+            legacy_compatibility_payload=[],
+            trust_surfaces_payload=[],
+            working_memory_items=[],
+            provenance_alerts={"status": "clear", "item_count": 0, "items": []},
+            registry_state={"ok": True},
+        )
+
+        self.assertEqual("clear", queue["status"])
+        self.assertEqual(0, queue["item_count"])
+        self.assertIsNone(queue["highest_severity"])
+        self.assertEqual([], queue["items"])
+
+    def test_attention_queue_preserves_order_for_provenance_and_conversation_request(self) -> None:
+        queue = attention_queue(
+            descriptors=[_conversation_descriptor(turn_id="turn-proposal", action_mode="proposal_required")],
+            active_session=None,
+            blocked_workers_payload=[],
+            open_merge_requests_payload=[],
+            closure_receipts_payload=[],
+            legacy_compatibility_payload=[],
+            trust_surfaces_payload=[],
+            working_memory_items=[],
+            provenance_alerts={
+                "status": "drift_detected",
+                "initiative_item_count": 1,
+                "proposal_item_count": 0,
+                "item_count": 1,
+                "items": [
+                    {
+                        "kind": "initiative_provenance_drift",
+                        "initiative_id": "initiative-proof",
+                        "title": "Proof",
+                        "source_ref": "docs/memory/initiatives/initiative-proof.json",
+                        "stale_attention_refs": [],
+                        "missing_file_refs": ["docs/memory/initiatives/missing.json"],
+                    }
+                ],
+            },
+            registry_state={"ok": True},
+        )
+
+        self.assertEqual("needs_review", queue["status"])
+        self.assertEqual(2, queue["item_count"])
+        self.assertEqual("high", queue["highest_severity"])
+        self.assertEqual(
+            ["initiative_provenance_drift", "conversation_action_request"],
+            [item["kind"] for item in queue["items"]],
+        )
+
+    def test_proposal_only_state_filters_request_items_and_preserves_fields(self) -> None:
+        proposal_only = proposal_only_state(
+            {
+                "items": [
+                    {
+                        "kind": "initiative_provenance_drift",
+                        "severity": "high",
+                        "summary": "Ignore me",
+                        "source_ref": "docs/memory/initiatives/initiative-proof.json",
+                        "details": {},
+                    },
+                    {
+                        "kind": "conversation_action_request",
+                        "severity": "medium",
+                        "summary": "Conversation turn 'turn-proposal' requested a governed action proposal.",
+                        "source_ref": "runtime/atlas/conversations/conversation-1/turns/turn-proposal.json",
+                        "details": {
+                            "conversation_id": "conversation-1",
+                            "turn_id": "turn-proposal",
+                            "intent": "write_receipt",
+                        },
+                    },
+                ]
+            }
+        )
+
+        self.assertEqual("pending", proposal_only["status"])
+        self.assertEqual(1, proposal_only["item_count"])
+        self.assertEqual(
+            {
+                "summary": "Conversation turn 'turn-proposal' requested a governed action proposal.",
+                "severity": "medium",
+                "source_ref": "runtime/atlas/conversations/conversation-1/turns/turn-proposal.json",
+                "conversation_id": "conversation-1",
+                "turn_id": "turn-proposal",
+                "intent": "write_receipt",
+            },
+            proposal_only["items"][0],
+        )
+
+    def test_proposal_only_state_is_clear_without_request_items(self) -> None:
+        proposal_only = proposal_only_state(
+            {
+                "items": [
+                    {
+                        "kind": "initiative_open_attention",
+                        "severity": "medium",
+                        "summary": "Open initiative",
+                        "source_ref": "docs/memory/initiatives/initiative-open.json",
+                        "details": {},
+                    }
+                ]
+            }
+        )
+
+        self.assertEqual("clear", proposal_only["status"])
+        self.assertEqual(0, proposal_only["item_count"])
+        self.assertEqual([], proposal_only["items"])
+
+    def test_proposal_only_state_caps_items_at_five(self) -> None:
+        queue_items = []
+        for index in range(6):
+            queue_items.append(
+                {
+                    "kind": "conversation_action_request",
+                    "severity": "medium",
+                    "summary": f"Conversation turn 'turn-{index}' requested a governed action proposal.",
+                    "source_ref": f"runtime/atlas/conversations/conversation-1/turns/turn-{index}.json",
+                    "details": {
+                        "conversation_id": "conversation-1",
+                        "turn_id": f"turn-{index}",
+                        "intent": "write_receipt",
+                    },
+                }
+            )
+
+        proposal_only = proposal_only_state({"items": queue_items})
+
+        self.assertEqual("pending", proposal_only["status"])
+        self.assertEqual(6, proposal_only["item_count"])
+        self.assertEqual(5, len(proposal_only["items"]))
+        self.assertEqual("turn-0", proposal_only["items"][0]["turn_id"])
+        self.assertEqual("turn-4", proposal_only["items"][-1]["turn_id"])
+
+    def test_render_status_payload_surfaces_proposal_only_projection(self) -> None:
+        with TemporaryDirectory() as temp_dir:
+            descriptor_root = Path(temp_dir)
+            (descriptor_root / "placeholder.json").write_text("{}", encoding="utf-8")
+            patch_specs = [
+                (
+                    "ops.cortex.render_status.load_descriptors",
+                    [_conversation_descriptor(turn_id="turn-proposal", action_mode="proposal_required")],
+                ),
+                ("ops.cortex.render_status.load_registry_state", {"ok": True}),
+                ("ops.cortex.render_status.choose_latest_session", None),
+                ("ops.cortex.render_status.session_overview", None),
+                ("ops.cortex.render_status.blocked_workers", []),
+                ("ops.cortex.render_status.classify_merge_requests", ([], [])),
+                ("ops.cortex.render_status.closure_receipts", []),
+                ("ops.cortex.render_status.execution_receipt_residue_records", []),
+                ("ops.cortex.render_status.governed_writes", []),
+                ("ops.cortex.render_status.legacy_compatibility_surfaces", []),
+                ("ops.cortex.render_status.trust_surfaces", []),
+                ("ops.cortex.render_status.trust_posture_summary", {}),
+                ("ops.cortex.render_status.working_memory_summary", {"_items": [], "initiatives": {}}),
+                ("ops.cortex.render_status.provenance_alert_summary", {"status": "clear", "item_count": 0, "items": []}),
+                ("ops.cortex.render_status.conversation_summary", {}),
+                ("ops.cortex.render_status.build_canonical_lockfile_artifacts", {}),
+                ("ops.cortex.render_status.repo_inventory_summary_from_lock", {"items": []}),
+                ("ops.cortex.render_status.lock_worktree_hygiene", {"status": "frozen"}),
+                ("ops.cortex.render_status.registry_summary", {}),
+                ("ops.cortex.render_status.artifact_inventory", {}),
+                ("ops.cortex.render_status.world_model_state", {}),
+            ]
+            with ExitStack() as stack:
+                for target, value in patch_specs:
+                    stack.enter_context(patch(target, return_value=value))
+                payload = render_status_payload(descriptor_root)
+
+        self.assertEqual("needs_review", payload["attention_queue"]["status"])
+        self.assertEqual("pending", payload["proposal_only"]["status"])
+        self.assertEqual(1, payload["proposal_only"]["item_count"])
+        self.assertEqual("turn-proposal", payload["proposal_only"]["items"][0]["turn_id"])
 
     def test_provenance_summary_reports_initiative_and_proposal_drift(self) -> None:
         working_memory_items = [
