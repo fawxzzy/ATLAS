@@ -1276,6 +1276,276 @@ class RenderStatusProvenanceTests(unittest.TestCase):
             queue["items"][4]["details"],
         )
 
+    def test_attention_queue_emits_closure_receipt_issue_with_high_severity_for_failed_result(self) -> None:
+        queue = attention_queue(
+            descriptors=[],
+            active_session=None,
+            blocked_workers_payload=[],
+            open_merge_requests_payload=[],
+            closure_receipts_payload=[
+                {
+                    "source_ref": "runtime/atlas/execution-receipts/receipt-failed.json",
+                    "receipt_id": "receipt-failed",
+                    "result": "failed",
+                    "details": {"should": "not-surface"},
+                }
+            ],
+            legacy_compatibility_payload=[],
+            trust_surfaces_payload=[],
+            working_memory_items=[],
+            provenance_alerts={"status": "clear", "item_count": 0, "items": []},
+            registry_state={"ok": True},
+        )
+
+        self.assertEqual("needs_review", queue["status"])
+        self.assertEqual(1, queue["item_count"])
+        self.assertEqual("high", queue["highest_severity"])
+        self.assertEqual(
+            {
+                "kind": "closure_receipt_issue",
+                "severity": "high",
+                "summary": "Closure receipt 'receipt-failed' ended with result 'failed'.",
+                "source_ref": "runtime/atlas/execution-receipts/receipt-failed.json",
+                "details": {
+                    "receipt_id": "receipt-failed",
+                    "result": "failed",
+                },
+            },
+            queue["items"][0],
+        )
+
+    def test_attention_queue_uses_medium_severity_for_non_failed_closure_receipt_issue(self) -> None:
+        queue = attention_queue(
+            descriptors=[],
+            active_session=None,
+            blocked_workers_payload=[],
+            open_merge_requests_payload=[],
+            closure_receipts_payload=[
+                {
+                    "source_ref": "runtime/atlas/execution-receipts/receipt-canceled.json",
+                    "receipt_id": "receipt-canceled",
+                    "result": "canceled",
+                }
+            ],
+            legacy_compatibility_payload=[],
+            trust_surfaces_payload=[],
+            working_memory_items=[],
+            provenance_alerts={"status": "clear", "item_count": 0, "items": []},
+            registry_state={"ok": True},
+        )
+
+        self.assertEqual("needs_review", queue["status"])
+        self.assertEqual(1, queue["item_count"])
+        self.assertEqual("medium", queue["highest_severity"])
+        self.assertEqual("closure_receipt_issue", queue["items"][0]["kind"])
+        self.assertEqual("medium", queue["items"][0]["severity"])
+        self.assertEqual(
+            {
+                "receipt_id": "receipt-canceled",
+                "result": "canceled",
+            },
+            queue["items"][0]["details"],
+        )
+
+    def test_attention_queue_omits_closure_receipt_issue_for_succeeded_result(self) -> None:
+        queue = attention_queue(
+            descriptors=[],
+            active_session=None,
+            blocked_workers_payload=[],
+            open_merge_requests_payload=[],
+            closure_receipts_payload=[
+                {
+                    "source_ref": "runtime/atlas/execution-receipts/receipt-succeeded.json",
+                    "receipt_id": "receipt-succeeded",
+                    "result": "succeeded",
+                }
+            ],
+            legacy_compatibility_payload=[],
+            trust_surfaces_payload=[],
+            working_memory_items=[],
+            provenance_alerts={"status": "clear", "item_count": 0, "items": []},
+            registry_state={"ok": True},
+        )
+
+        self.assertEqual("clear", queue["status"])
+        self.assertEqual(0, queue["item_count"])
+        self.assertIsNone(queue["highest_severity"])
+        self.assertEqual([], queue["items"])
+
+    def test_attention_queue_preserves_closure_receipt_issue_when_registry_is_unavailable(self) -> None:
+        queue = attention_queue(
+            descriptors=[],
+            active_session=None,
+            blocked_workers_payload=[],
+            open_merge_requests_payload=[],
+            closure_receipts_payload=[
+                {
+                    "source_ref": "runtime/atlas/execution-receipts/receipt-failed.json",
+                    "receipt_id": "receipt-failed",
+                    "result": "failed",
+                    "tool_id": "missing-tool",
+                    "extension_id": "missing-extension",
+                }
+            ],
+            legacy_compatibility_payload=[],
+            trust_surfaces_payload=[],
+            working_memory_items=[],
+            provenance_alerts={"status": "clear", "item_count": 0, "items": []},
+            registry_state={"ok": False, "error": "registry unavailable"},
+        )
+
+        self.assertEqual("needs_review", queue["status"])
+        self.assertEqual(2, queue["item_count"])
+        self.assertEqual("critical", queue["highest_severity"])
+        self.assertEqual(
+            ["registry_error", "closure_receipt_issue"],
+            [item["kind"] for item in queue["items"]],
+        )
+
+    def test_attention_queue_preserves_order_for_closure_receipt_issue_and_other_queue_families(self) -> None:
+        queue = attention_queue(
+            descriptors=[],
+            active_session=None,
+            blocked_workers_payload=[
+                {
+                    "worker_id": "worker-2",
+                    "assignment_id": "assignment-2",
+                    "tool_id": "tool-worker-2",
+                    "extension_id": "extension-worker-2",
+                    "state": "blocked",
+                    "blocked_reason": "waiting on merge",
+                    "source_ref": "runtime/atlas/workers/worker-2/status.json",
+                }
+            ],
+            open_merge_requests_payload=[],
+            closure_receipts_payload=[
+                {
+                    "source_ref": "runtime/atlas/execution-receipts/receipt-failed.json",
+                    "receipt_id": "receipt-failed",
+                    "result": "failed",
+                }
+            ],
+            legacy_compatibility_payload=[],
+            trust_surfaces_payload=[],
+            working_memory_items=[
+                {
+                    "memory_kind": "initiative",
+                    "id": "initiative-open",
+                    "title": "Open initiative",
+                    "path": "docs/memory/initiatives/initiative-open.json",
+                    "status": "active",
+                    "metadata": {
+                        "attention_summary": "Needs review",
+                        "attention_severity": "medium",
+                    },
+                }
+            ],
+            provenance_alerts={"status": "clear", "item_count": 0, "items": []},
+            registry_state={
+                "ok": True,
+                "tool_ids": {"tool-worker-2"},
+                "extension_ids": {"extension-worker-2"},
+            },
+        )
+
+        self.assertEqual("needs_review", queue["status"])
+        self.assertEqual(3, queue["item_count"])
+        self.assertEqual("high", queue["highest_severity"])
+        self.assertEqual(
+            ["blocked_worker", "closure_receipt_issue", "initiative_open_attention"],
+            [item["kind"] for item in queue["items"]],
+        )
+
+    def test_attention_queue_preserves_provenance_overflow_when_closure_receipt_issue_is_present(self) -> None:
+        queue = attention_queue(
+            descriptors=[],
+            active_session=None,
+            blocked_workers_payload=[],
+            open_merge_requests_payload=[],
+            closure_receipts_payload=[
+                {
+                    "source_ref": "runtime/atlas/execution-receipts/receipt-failed.json",
+                    "receipt_id": "receipt-failed",
+                    "result": "failed",
+                }
+            ],
+            legacy_compatibility_payload=[],
+            trust_surfaces_payload=[],
+            working_memory_items=[],
+            provenance_alerts={
+                "status": "drift_detected",
+                "initiative_item_count": 3,
+                "proposal_item_count": 2,
+                "item_count": 5,
+                "items": [
+                    {
+                        "kind": "initiative_provenance_drift",
+                        "initiative_id": "initiative-zeta",
+                        "title": "Zeta",
+                        "source_ref": "docs/memory/initiatives/initiative-zeta.json",
+                        "stale_attention_refs": ["attention:sha256:zeta"],
+                        "missing_file_refs": [],
+                    },
+                    {
+                        "kind": "proposed_session_provenance_drift",
+                        "session_id": "session-bravo",
+                        "task_id": "task-bravo",
+                        "source_ref": "runtime/atlas/proposed-sessions/session-bravo/session.manifest.json",
+                        "stale_attention_refs": [],
+                        "missing_initiative_ref": "docs/memory/initiatives/missing-bravo.json",
+                    },
+                    {
+                        "kind": "initiative_provenance_drift",
+                        "initiative_id": "initiative-alpha",
+                        "title": "Alpha",
+                        "source_ref": "docs/memory/initiatives/initiative-alpha.json",
+                        "stale_attention_refs": [],
+                        "missing_file_refs": ["docs/memory/initiatives/missing-alpha.json"],
+                    },
+                    {
+                        "kind": "proposed_session_provenance_drift",
+                        "session_id": "session-charlie",
+                        "task_id": "task-charlie",
+                        "source_ref": "runtime/atlas/proposed-sessions/session-charlie/session.manifest.json",
+                        "stale_attention_refs": ["attention:sha256:charlie"],
+                        "missing_initiative_ref": None,
+                    },
+                    {
+                        "kind": "initiative_provenance_drift",
+                        "initiative_id": "initiative-beta",
+                        "title": "Beta",
+                        "source_ref": "docs/memory/initiatives/initiative-beta.json",
+                        "stale_attention_refs": ["attention:sha256:beta"],
+                        "missing_file_refs": [],
+                    },
+                ],
+            },
+            registry_state={"ok": True},
+        )
+
+        self.assertEqual("needs_review", queue["status"])
+        self.assertEqual(5, queue["item_count"])
+        self.assertEqual("high", queue["highest_severity"])
+        self.assertEqual(
+            [
+                "closure_receipt_issue",
+                "initiative_provenance_drift",
+                "proposed_session_provenance_drift",
+                "initiative_provenance_drift",
+                "provenance_alert_overflow",
+            ],
+            [item["kind"] for item in queue["items"]],
+        )
+        self.assertEqual(
+            {
+                "suppressed_item_count": 2,
+                "signal_cap": 3,
+                "highest_suppressed_severity": "medium",
+                "total_provenance_alert_count": 5,
+            },
+            queue["items"][4]["details"],
+        )
+
     def test_attention_queue_emits_blocked_worker_with_admitted_details_and_high_severity(self) -> None:
         queue = attention_queue(
             descriptors=[],
@@ -2384,6 +2654,100 @@ class RenderStatusProvenanceTests(unittest.TestCase):
         self.assertEqual(1, payload["attention_queue"]["item_count"])
         self.assertEqual("missing_closure_receipt", payload["attention_queue"]["items"][0]["kind"])
         self.assertEqual(missing_ref, payload["attention_queue"]["items"][0]["source_ref"])
+
+    def test_render_status_payload_preserves_closure_receipt_issue_handoff(self) -> None:
+        receipt_ref = "runtime/atlas/execution-receipts/receipt-failed.json"
+        descriptors = [
+            _session_manifest_descriptor(
+                session_id="session-closure-issue-proof",
+                close_receipt_refs=[receipt_ref],
+                source_ref="runtime/atlas/sessions/session-closure-issue-proof/session.manifest.json",
+            ),
+            _execution_receipt_descriptor(
+                receipt_id="receipt-failed",
+                source_ref=receipt_ref,
+                result="failed",
+                tool_id="tool-receipt-failed",
+                extension_id="extension-receipt-failed",
+            ),
+        ]
+
+        with TemporaryDirectory() as temp_dir:
+            descriptor_root = Path(temp_dir)
+            (descriptor_root / "placeholder.json").write_text("{}", encoding="utf-8")
+            patch_specs = [
+                ("ops.cortex.render_status.load_descriptors", descriptors),
+                (
+                    "ops.cortex.render_status.load_registry_state",
+                    {
+                        "ok": True,
+                        "tool_ids": {"tool-receipt-failed"},
+                        "extension_ids": {"extension-receipt-failed"},
+                    },
+                ),
+                (
+                    "ops.cortex.render_status.session_overview",
+                    {
+                        "session_id": "session-closure-issue-proof",
+                        "task_id": "task-session-closure-issue-proof",
+                        "source_ref": "runtime/atlas/sessions/session-closure-issue-proof/session.manifest.json",
+                    },
+                ),
+                ("ops.cortex.render_status.blocked_workers", []),
+                ("ops.cortex.render_status.classify_merge_requests", ([], [])),
+                ("ops.cortex.render_status.execution_receipt_residue_records", []),
+                ("ops.cortex.render_status.governed_writes", []),
+                ("ops.cortex.render_status.legacy_compatibility_surfaces", []),
+                ("ops.cortex.render_status.trust_surfaces", []),
+                ("ops.cortex.render_status.trust_posture_summary", {}),
+                ("ops.cortex.render_status.working_memory_summary", {"_items": [], "initiatives": {}}),
+                ("ops.cortex.render_status.provenance_alert_summary", {"status": "clear", "item_count": 0, "items": []}),
+                ("ops.cortex.render_status.conversation_summary", {}),
+                ("ops.cortex.render_status.build_canonical_lockfile_artifacts", {}),
+                ("ops.cortex.render_status.repo_inventory_summary_from_lock", {"items": []}),
+                ("ops.cortex.render_status.lock_worktree_hygiene", {"status": "frozen"}),
+                ("ops.cortex.render_status.registry_summary", {}),
+                ("ops.cortex.render_status.artifact_inventory", {}),
+                ("ops.cortex.render_status.world_model_state", {}),
+            ]
+            with ExitStack() as stack:
+                for target, value in patch_specs:
+                    stack.enter_context(patch(target, return_value=value))
+                payload = render_status_payload(
+                    descriptor_root,
+                    session_id="session-closure-issue-proof",
+                )
+
+        self.assertEqual(
+            [
+                {
+                    "source_ref": receipt_ref,
+                    "original_source_ref": receipt_ref,
+                    "artifact_type": "execution_receipt",
+                    "receipt_id": "receipt-failed",
+                    "tool_id": "tool-receipt-failed",
+                    "extension_id": "extension-receipt-failed",
+                    "result": "failed",
+                    "registry_digest": "registry-digest-1",
+                    "supersedes_receipt_ref": None,
+                    "reconciled_at": "2026-06-16T12:00:00Z",
+                    "reconciled_by_tool_version": "tool-version-1",
+                    "repair_basis_refs": [],
+                }
+            ],
+            payload["closure_receipts"],
+        )
+        self.assertEqual("needs_review", payload["attention_queue"]["status"])
+        self.assertEqual(1, payload["attention_queue"]["item_count"])
+        self.assertEqual("closure_receipt_issue", payload["attention_queue"]["items"][0]["kind"])
+        self.assertEqual("high", payload["attention_queue"]["items"][0]["severity"])
+        self.assertEqual(
+            {
+                "receipt_id": "receipt-failed",
+                "result": "failed",
+            },
+            payload["attention_queue"]["items"][0]["details"],
+        )
 
     def test_provenance_summary_reports_initiative_and_proposal_drift(self) -> None:
         working_memory_items = [
