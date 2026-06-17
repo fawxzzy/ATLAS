@@ -1131,6 +1131,7 @@
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Registry Top-Level Summary Boundary Prompt-Pack And Handoff Contract Pass 444](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-REGISTRY-TOP-LEVEL-SUMMARY-BOUNDARY-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-444-2026-06-17.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Registry Top-Level Summary Boundary Implementation-Readiness Closeout And Worker-Routing Pass 445](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-REGISTRY-TOP-LEVEL-SUMMARY-BOUNDARY-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-445-2026-06-17.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Registry Top-Level Summary Boundary First-Implementation Worker Cluster Reconciliation](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-REGISTRY-TOP-LEVEL-SUMMARY-BOUNDARY-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-17.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Post-Registry Top-Level Summary Boundary Next-Slice Selection Pass 446](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-POST-REGISTRY-TOP-LEVEL-SUMMARY-BOUNDARY-NEXT-SLICE-SELECTION-PASS-446-2026-06-17.md)
 
 ## Notes
 
