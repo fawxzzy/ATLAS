@@ -1073,6 +1073,7 @@
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Unknown-Extension-Surface Supporting-Lane Admission Pass 393](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-UNKNOWN-EXTENSION-SURFACE-SUPPORTING-LANE-ADMISSION-PASS-393-2026-06-17.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Unknown-Extension-Surface First-Implementation Admission Pass 394](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-UNKNOWN-EXTENSION-SURFACE-FIRST-IMPLEMENTATION-ADMISSION-PASS-394-2026-06-17.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Unknown-Extension-Surface Prompt-Pack And Handoff Contract Pass 395](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-UNKNOWN-EXTENSION-SURFACE-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-395-2026-06-17.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Unknown-Extension-Surface Implementation-Readiness Closeout And Worker-Routing Pass 396](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-UNKNOWN-EXTENSION-SURFACE-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-396-2026-06-17.md)
 
 ## Notes
 
