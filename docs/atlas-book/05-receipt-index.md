@@ -1146,6 +1146,7 @@
 - [AI Long-Run Batch Orchestration Queue-Or-Registry World-Model Top-Level Payload Boundary First-Implementation Admission Pass 457](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-WORLD-MODEL-TOP-LEVEL-PAYLOAD-BOUNDARY-FIRST-IMPLEMENTATION-ADMISSION-PASS-457-2026-06-17.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry World-Model Top-Level Payload Boundary Prompt-Pack And Handoff Contract Pass 458](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-WORLD-MODEL-TOP-LEVEL-PAYLOAD-BOUNDARY-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-458-2026-06-17.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry World-Model Top-Level Payload Boundary Implementation-Readiness Closeout And Worker-Routing Pass 459](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-WORLD-MODEL-TOP-LEVEL-PAYLOAD-BOUNDARY-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-459-2026-06-17.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry World-Model Top-Level Payload Boundary First-Implementation Worker Cluster Reconciliation](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-WORLD-MODEL-TOP-LEVEL-PAYLOAD-BOUNDARY-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-17.md)
 
 ## Notes
 
