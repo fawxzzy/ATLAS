@@ -1063,6 +1063,7 @@
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Unknown-Tool-Surface Contract Freeze Pass 384](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-UNKNOWN-TOOL-SURFACE-CONTRACT-FREEZE-PASS-384-2026-06-17.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Unknown-Tool-Surface Owner-Surface Admission Pass 385](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-UNKNOWN-TOOL-SURFACE-OWNER-SURFACE-ADMISSION-PASS-385-2026-06-17.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Unknown-Tool-Surface Supporting-Lane Admission Pass 386](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-UNKNOWN-TOOL-SURFACE-SUPPORTING-LANE-ADMISSION-PASS-386-2026-06-17.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Unknown-Tool-Surface First-Implementation Admission Pass 387](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-UNKNOWN-TOOL-SURFACE-FIRST-IMPLEMENTATION-ADMISSION-PASS-387-2026-06-17.md)
 
 ## Notes
 
