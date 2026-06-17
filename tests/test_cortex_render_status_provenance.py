@@ -610,6 +610,77 @@ class RenderStatusProvenanceTests(unittest.TestCase):
             payload["attention_queue"]["items"][0]["details"],
         )
 
+    def test_render_status_payload_preserves_unknown_tool_surface_handoff(self) -> None:
+        with TemporaryDirectory() as temp_dir:
+            descriptor_root = Path(temp_dir)
+            (descriptor_root / "placeholder.json").write_text("{}", encoding="utf-8")
+            active_session = {
+                "session_id": "session-unknown-tool-payload",
+                "task_id": "task-unknown-tool-payload",
+                "session_state": "running",
+                "final_status": "running",
+                "source_ref": "runtime/atlas/sessions/session-unknown-tool-payload/session.manifest.json",
+                "governed_surfaces": {
+                    "context": {
+                        "tool_id": " missing-tool ",
+                        "extension_id": "known-extension",
+                    }
+                },
+            }
+            patch_specs = [
+                ("ops.cortex.render_status.load_descriptors", []),
+                (
+                    "ops.cortex.render_status.load_registry_state",
+                    {
+                        "ok": True,
+                        "tool_ids": {"known-tool"},
+                        "extension_ids": {"known-extension"},
+                    },
+                ),
+                ("ops.cortex.render_status.choose_latest_session", None),
+                ("ops.cortex.render_status.session_overview", active_session),
+                ("ops.cortex.render_status.blocked_workers", []),
+                ("ops.cortex.render_status.classify_merge_requests", ([], [])),
+                ("ops.cortex.render_status.closure_receipts", []),
+                ("ops.cortex.render_status.execution_receipt_residue_records", []),
+                ("ops.cortex.render_status.governed_writes", []),
+                ("ops.cortex.render_status.legacy_compatibility_surfaces", []),
+                ("ops.cortex.render_status.trust_surfaces", []),
+                ("ops.cortex.render_status.trust_posture_summary", {}),
+                ("ops.cortex.render_status.working_memory_summary", {"_items": [], "initiatives": {}}),
+                ("ops.cortex.render_status.provenance_alert_summary", {"status": "clear", "item_count": 0, "items": []}),
+                ("ops.cortex.render_status.conversation_summary", {}),
+                ("ops.cortex.render_status.build_canonical_lockfile_artifacts", {}),
+                ("ops.cortex.render_status.repo_inventory_summary_from_lock", {"items": []}),
+                ("ops.cortex.render_status.lock_worktree_hygiene", {"status": "frozen"}),
+                ("ops.cortex.render_status.registry_summary", {}),
+                ("ops.cortex.render_status.artifact_inventory", {}),
+                ("ops.cortex.render_status.world_model_state", {}),
+            ]
+            with ExitStack() as stack:
+                for target, value in patch_specs:
+                    stack.enter_context(patch(target, return_value=value))
+                payload = render_status_payload(descriptor_root)
+
+        self.assertEqual(active_session, payload["active_session"])
+        self.assertEqual("needs_review", payload["attention_queue"]["status"])
+        self.assertEqual(1, payload["attention_queue"]["item_count"])
+        self.assertEqual("high", payload["attention_queue"]["highest_severity"])
+        self.assertEqual(
+            {
+                "kind": "unknown_tool_surface",
+                "severity": "high",
+                "summary": "active_session.context references unknown tool_id 'missing-tool'.",
+                "source_ref": "runtime/atlas/sessions/session-unknown-tool-payload/session.manifest.json",
+                "details": {
+                    "scope": "active_session.context",
+                    "tool_id": "missing-tool",
+                    "extension_id": "known-extension",
+                },
+            },
+            payload["attention_queue"]["items"][0],
+        )
+
     def test_provenance_attention_items_ignore_malformed_and_unknown_payloads(self) -> None:
         items = provenance_attention_items(
             {
@@ -1045,6 +1116,359 @@ class RenderStatusProvenanceTests(unittest.TestCase):
         self.assertEqual(
             ["registry_drift", "initiative_open_attention"],
             [item["kind"] for item in queue["items"]],
+        )
+
+    def test_attention_queue_emits_unknown_tool_surface_for_active_session_governed_surface(self) -> None:
+        queue = attention_queue(
+            descriptors=[],
+            active_session={
+                "session_id": "session-unknown-tool",
+                "task_id": "task-unknown-tool",
+                "session_state": "running",
+                "final_status": "running",
+                "source_ref": "runtime/atlas/sessions/session-unknown-tool/session.manifest.json",
+                "governed_surfaces": {
+                    "context": {
+                        "tool_id": " missing-tool ",
+                        "extension_id": "known-extension",
+                    }
+                },
+            },
+            blocked_workers_payload=[],
+            open_merge_requests_payload=[],
+            closure_receipts_payload=[],
+            legacy_compatibility_payload=[],
+            trust_surfaces_payload=[],
+            working_memory_items=[],
+            provenance_alerts={"status": "clear", "item_count": 0, "items": []},
+            registry_state={
+                "ok": True,
+                "tool_ids": {"known-tool"},
+                "extension_ids": {"known-extension"},
+            },
+        )
+
+        self.assertEqual("needs_review", queue["status"])
+        self.assertEqual(1, queue["item_count"])
+        self.assertEqual("high", queue["highest_severity"])
+        self.assertEqual(
+            {
+                "kind": "unknown_tool_surface",
+                "severity": "high",
+                "summary": "active_session.context references unknown tool_id 'missing-tool'.",
+                "source_ref": "runtime/atlas/sessions/session-unknown-tool/session.manifest.json",
+                "details": {
+                    "scope": "active_session.context",
+                    "tool_id": "missing-tool",
+                    "extension_id": "known-extension",
+                },
+            },
+            queue["items"][0],
+        )
+
+    def test_attention_queue_omits_unknown_tool_surface_for_known_missing_empty_and_nondict_scope_values(self) -> None:
+        cases = [
+            (
+                "known-tool",
+                {"context": {"tool_id": "known-tool", "extension_id": "known-extension"}},
+            ),
+            (
+                "missing-tool-id",
+                {"context": {"extension_id": "known-extension"}},
+            ),
+            (
+                "empty-tool-id",
+                {"context": {"tool_id": "   ", "extension_id": "known-extension"}},
+            ),
+            (
+                "nondict-scope",
+                {"context": "not-a-dict"},
+            ),
+        ]
+
+        for case_name, governed_surfaces in cases:
+            with self.subTest(case=case_name):
+                queue = attention_queue(
+                    descriptors=[],
+                    active_session={
+                        "session_id": f"session-{case_name}",
+                        "task_id": f"task-{case_name}",
+                        "session_state": "running",
+                        "final_status": "running",
+                        "source_ref": f"runtime/atlas/sessions/session-{case_name}/session.manifest.json",
+                        "governed_surfaces": governed_surfaces,
+                    },
+                    blocked_workers_payload=[],
+                    open_merge_requests_payload=[],
+                    closure_receipts_payload=[],
+                    legacy_compatibility_payload=[],
+                    trust_surfaces_payload=[],
+                    working_memory_items=[],
+                    provenance_alerts={"status": "clear", "item_count": 0, "items": []},
+                    registry_state={
+                        "ok": True,
+                        "tool_ids": {"known-tool"},
+                        "extension_ids": {"known-extension"},
+                    },
+                )
+
+                self.assertEqual("clear", queue["status"])
+                self.assertEqual(0, queue["item_count"])
+                self.assertIsNone(queue["highest_severity"])
+                self.assertEqual([], queue["items"])
+
+    def test_attention_queue_preserves_unknown_tool_surface_with_unknown_extension_surface(self) -> None:
+        queue = attention_queue(
+            descriptors=[],
+            active_session={
+                "session_id": "session-unknown-siblings",
+                "task_id": "task-unknown-siblings",
+                "session_state": "running",
+                "final_status": "running",
+                "source_ref": "runtime/atlas/sessions/session-unknown-siblings/session.manifest.json",
+                "governed_surfaces": {
+                    "context": {
+                        "tool_id": "missing-tool",
+                        "extension_id": "missing-extension",
+                    }
+                },
+            },
+            blocked_workers_payload=[],
+            open_merge_requests_payload=[],
+            closure_receipts_payload=[],
+            legacy_compatibility_payload=[],
+            trust_surfaces_payload=[],
+            working_memory_items=[],
+            provenance_alerts={"status": "clear", "item_count": 0, "items": []},
+            registry_state={
+                "ok": True,
+                "tool_ids": {"known-tool"},
+                "extension_ids": {"known-extension"},
+            },
+        )
+
+        self.assertEqual("needs_review", queue["status"])
+        self.assertEqual(2, queue["item_count"])
+        self.assertEqual("high", queue["highest_severity"])
+        self.assertEqual(
+            ["unknown_extension_surface", "unknown_tool_surface"],
+            [item["kind"] for item in queue["items"]],
+        )
+        self.assertEqual(
+            {
+                "scope": "active_session.context",
+                "tool_id": "missing-tool",
+                "extension_id": "missing-extension",
+            },
+            queue["items"][0]["details"],
+        )
+        self.assertEqual(
+            {
+                "scope": "active_session.context",
+                "tool_id": "missing-tool",
+                "extension_id": "missing-extension",
+            },
+            queue["items"][1]["details"],
+        )
+
+    def test_attention_queue_preserves_unknown_tool_surface_with_admitted_session_state_families(self) -> None:
+        cases = [
+            ("resume_ready", "running", ["unknown_tool_surface", "session_needs_resume"]),
+            ("resume_failed", "running", ["resume_failed", "unknown_tool_surface"]),
+            ("failed", "running", ["session_failed", "unknown_tool_surface"]),
+        ]
+
+        for session_state, final_status, expected_kinds in cases:
+            with self.subTest(session_state=session_state, final_status=final_status):
+                queue = attention_queue(
+                    descriptors=[],
+                    active_session={
+                        "session_id": f"session-{session_state}-unknown-tool",
+                        "task_id": f"task-{session_state}-unknown-tool",
+                        "session_state": session_state,
+                        "final_status": final_status,
+                        "resume_failure_reason": "resume dispatch artifact missing",
+                        "source_ref": f"runtime/atlas/sessions/session-{session_state}-unknown-tool/session.manifest.json",
+                        "governed_surfaces": {
+                            "context": {
+                                "tool_id": "missing-tool",
+                                "extension_id": "known-extension",
+                            }
+                        },
+                    },
+                    blocked_workers_payload=[],
+                    open_merge_requests_payload=[],
+                    closure_receipts_payload=[],
+                    legacy_compatibility_payload=[],
+                    trust_surfaces_payload=[],
+                    working_memory_items=[],
+                    provenance_alerts={"status": "clear", "item_count": 0, "items": []},
+                    registry_state={
+                        "ok": True,
+                        "tool_ids": {"known-tool"},
+                        "extension_ids": {"known-extension"},
+                    },
+                )
+
+                self.assertEqual("needs_review", queue["status"])
+                self.assertEqual(expected_kinds, [item["kind"] for item in queue["items"]])
+
+    def test_attention_queue_preserves_order_for_unknown_tool_surface_and_other_queue_families(self) -> None:
+        queue = attention_queue(
+            descriptors=[],
+            active_session={
+                "session_id": "session-unknown-tool-order",
+                "task_id": "task-unknown-tool-order",
+                "session_state": "resume_ready",
+                "final_status": "running",
+                "registry_digest": "stale-digest",
+                "source_ref": "runtime/atlas/sessions/session-unknown-tool-order/session.manifest.json",
+                "governed_surfaces": {
+                    "context": {
+                        "tool_id": "missing-tool",
+                        "extension_id": "missing-extension",
+                    }
+                },
+            },
+            blocked_workers_payload=[],
+            open_merge_requests_payload=[],
+            closure_receipts_payload=[],
+            legacy_compatibility_payload=[],
+            trust_surfaces_payload=[],
+            working_memory_items=[
+                {
+                    "memory_kind": "initiative",
+                    "id": "initiative-open",
+                    "title": "Open initiative",
+                    "path": "docs/memory/initiatives/initiative-open.json",
+                    "status": "active",
+                    "metadata": {
+                        "attention_summary": "Needs review",
+                        "attention_severity": "medium",
+                    },
+                }
+            ],
+            provenance_alerts={"status": "clear", "item_count": 0, "items": []},
+            registry_state={
+                "ok": True,
+                "registry_digest": "current-digest",
+                "tool_ids": {"known-tool"},
+                "extension_ids": {"known-extension"},
+            },
+        )
+
+        self.assertEqual("needs_review", queue["status"])
+        self.assertEqual("high", queue["highest_severity"])
+        self.assertEqual(
+            [
+                "registry_drift",
+                "unknown_extension_surface",
+                "unknown_tool_surface",
+                "initiative_open_attention",
+                "session_needs_resume",
+            ],
+            [item["kind"] for item in queue["items"]],
+        )
+
+    def test_attention_queue_preserves_provenance_overflow_with_unknown_tool_surface(self) -> None:
+        provenance_summary = {
+            "status": "drift_detected",
+            "initiative_item_count": 3,
+            "proposal_item_count": 2,
+            "item_count": 5,
+            "items": [
+                {
+                    "kind": "initiative_provenance_drift",
+                    "initiative_id": "initiative-zeta",
+                    "title": "Zeta",
+                    "source_ref": "docs/memory/initiatives/initiative-zeta.json",
+                    "stale_attention_refs": ["attention:sha256:zeta"],
+                    "missing_file_refs": [],
+                },
+                {
+                    "kind": "proposed_session_provenance_drift",
+                    "session_id": "session-bravo",
+                    "task_id": "task-bravo",
+                    "source_ref": "runtime/atlas/proposed-sessions/session-bravo/session.manifest.json",
+                    "stale_attention_refs": [],
+                    "missing_initiative_ref": "docs/memory/initiatives/missing-bravo.json",
+                },
+                {
+                    "kind": "initiative_provenance_drift",
+                    "initiative_id": "initiative-alpha",
+                    "title": "Alpha",
+                    "source_ref": "docs/memory/initiatives/initiative-alpha.json",
+                    "stale_attention_refs": [],
+                    "missing_file_refs": ["docs/memory/initiatives/missing-alpha.json"],
+                },
+                {
+                    "kind": "proposed_session_provenance_drift",
+                    "session_id": "session-charlie",
+                    "task_id": "task-charlie",
+                    "source_ref": "runtime/atlas/proposed-sessions/session-charlie/session.manifest.json",
+                    "stale_attention_refs": ["attention:sha256:charlie"],
+                    "missing_initiative_ref": None,
+                },
+                {
+                    "kind": "initiative_provenance_drift",
+                    "initiative_id": "initiative-beta",
+                    "title": "Beta",
+                    "source_ref": "docs/memory/initiatives/initiative-beta.json",
+                    "stale_attention_refs": ["attention:sha256:beta"],
+                    "missing_file_refs": [],
+                },
+            ],
+        }
+
+        queue = attention_queue(
+            descriptors=[],
+            active_session={
+                "session_id": "session-unknown-tool-overflow",
+                "task_id": "task-unknown-tool-overflow",
+                "session_state": "running",
+                "final_status": "running",
+                "source_ref": "runtime/atlas/sessions/session-unknown-tool-overflow/session.manifest.json",
+                "governed_surfaces": {
+                    "context": {
+                        "tool_id": "missing-tool",
+                        "extension_id": "known-extension",
+                    }
+                },
+            },
+            blocked_workers_payload=[],
+            open_merge_requests_payload=[],
+            closure_receipts_payload=[],
+            legacy_compatibility_payload=[],
+            trust_surfaces_payload=[],
+            working_memory_items=[],
+            provenance_alerts=provenance_summary,
+            registry_state={
+                "ok": True,
+                "tool_ids": {"known-tool"},
+                "extension_ids": {"known-extension"},
+            },
+        )
+
+        self.assertEqual("needs_review", queue["status"])
+        self.assertEqual(5, queue["item_count"])
+        self.assertEqual(
+            [
+                "initiative_provenance_drift",
+                "proposed_session_provenance_drift",
+                "unknown_tool_surface",
+                "initiative_provenance_drift",
+                "provenance_alert_overflow",
+            ],
+            [item["kind"] for item in queue["items"]],
+        )
+        self.assertEqual(
+            {
+                "suppressed_item_count": 2,
+                "signal_cap": 3,
+                "highest_suppressed_severity": "medium",
+                "total_provenance_alert_count": 5,
+            },
+            queue["items"][4]["details"],
         )
 
     def test_attention_queue_emits_session_needs_resume_for_resume_ready_session_state(self) -> None:
