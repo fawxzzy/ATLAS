@@ -1141,6 +1141,7 @@
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Artifact-Inventory Top-Level Payload Boundary First-Implementation Worker Cluster Reconciliation](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-ARTIFACT-INVENTORY-TOP-LEVEL-PAYLOAD-BOUNDARY-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-17.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Post-Artifact-Inventory Top-Level Payload Boundary Next-Slice Selection Pass 453](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-POST-ARTIFACT-INVENTORY-TOP-LEVEL-PAYLOAD-BOUNDARY-NEXT-SLICE-SELECTION-PASS-453-2026-06-17.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry World-Model Top-Level Payload Boundary Contract Freeze Pass 454](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-WORLD-MODEL-TOP-LEVEL-PAYLOAD-BOUNDARY-CONTRACT-FREEZE-PASS-454-2026-06-17.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry World-Model Top-Level Payload Boundary Owner-Surface Admission Pass 455](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-WORLD-MODEL-TOP-LEVEL-PAYLOAD-BOUNDARY-OWNER-SURFACE-ADMISSION-PASS-455-2026-06-17.md)
 
 ## Notes
 
