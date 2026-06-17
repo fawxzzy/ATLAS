@@ -1108,6 +1108,7 @@
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Trust-Surfaces Top-Level Payload Boundary Implementation-Readiness Closeout And Worker-Routing Pass 424](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-TRUST-SURFACES-TOP-LEVEL-PAYLOAD-BOUNDARY-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-424-2026-06-17.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Trust-Surfaces Top-Level Payload Boundary First-Implementation Worker Cluster Reconciliation](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-TRUST-SURFACES-TOP-LEVEL-PAYLOAD-BOUNDARY-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-17.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Post-Trust-Surfaces Top-Level Payload Boundary Next-Slice Selection Pass 425](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-POST-TRUST-SURFACES-TOP-LEVEL-PAYLOAD-BOUNDARY-NEXT-SLICE-SELECTION-PASS-425-2026-06-17.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Conversations Top-Level Payload Boundary Contract Freeze Pass 426](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-CONVERSATIONS-TOP-LEVEL-PAYLOAD-BOUNDARY-CONTRACT-FREEZE-PASS-426-2026-06-17.md)
 
 ## Notes
 
