@@ -11,6 +11,7 @@ from ops.cortex.render_status import (
     blocked_workers,
     classify_merge_requests,
     closure_receipts,
+    legacy_compatibility_surfaces,
     open_merge_requests,
     proposal_only_state,
     provenance_alert_summary,
@@ -92,6 +93,39 @@ def _worker_status_descriptor(
             "heartbeat_at": heartbeat_at,
             "blocked_reason": blocked_reason,
             "registry_digest": registry_digest,
+        },
+    }
+
+
+def _legacy_runtime_backfill_descriptor(
+    *,
+    session_id: str,
+    source_ref: str,
+    original_session_ref: str | None = None,
+    compatibility_class: str = "legacy_pre_registry",
+    cutover_at: str | None = "2026-06-17T00:00:00Z",
+    observed_at: str | None = "2026-06-17T00:01:00Z",
+    recorded_at: str | None = "2026-06-17T00:02:00Z",
+    missing_governed_requirements: list[str] | None = None,
+    governed_identity: dict[str, object] | None = None,
+) -> dict[str, object]:
+    return {
+        "artifact_type": "legacy_runtime_backfill",
+        "source_ref": source_ref,
+        "identity": {
+            "session_id": session_id,
+        },
+        "state": {
+            "compatibility_class": compatibility_class,
+            "cutover_at": cutover_at,
+            "observed_at": observed_at,
+            "recorded_at": recorded_at,
+        },
+        "links": {
+            "original_session_ref": original_session_ref
+            or f"runtime/atlas/sessions/{session_id}/original.manifest.json",
+            "missing_governed_requirements": missing_governed_requirements or ["tool_id"],
+            "governed_identity": governed_identity or {"tool_id": f"tool-{session_id}"},
         },
     }
 
@@ -822,6 +856,159 @@ class RenderStatusProvenanceTests(unittest.TestCase):
                 },
             },
             payload["attention_queue"]["items"][0],
+        )
+
+    def test_render_status_payload_preserves_top_level_legacy_payload_separate_from_queue_signal(self) -> None:
+        with TemporaryDirectory() as temp_dir:
+            descriptor_root = Path(temp_dir)
+            (descriptor_root / "placeholder.json").write_text("{}", encoding="utf-8")
+            descriptors = [
+                _legacy_runtime_backfill_descriptor(
+                    session_id="session-legacy-separation",
+                    source_ref="runtime/atlas/sessions/session-legacy-separation/session.manifest.json",
+                    missing_governed_requirements=["tool_id", "extension_id"],
+                    governed_identity={"tool_id": "legacy-tool"},
+                )
+            ]
+            patch_specs = [
+                ("ops.cortex.render_status.load_descriptors", descriptors),
+                (
+                    "ops.cortex.render_status.load_registry_state",
+                    {
+                        "ok": True,
+                        "tool_ids": {"known-tool"},
+                        "extension_ids": {"known-extension"},
+                    },
+                ),
+                ("ops.cortex.render_status.choose_latest_session", None),
+                ("ops.cortex.render_status.session_overview", None),
+                ("ops.cortex.render_status.blocked_workers", []),
+                ("ops.cortex.render_status.classify_merge_requests", ([], [])),
+                ("ops.cortex.render_status.closure_receipts", []),
+                ("ops.cortex.render_status.execution_receipt_residue_records", []),
+                ("ops.cortex.render_status.governed_writes", []),
+                ("ops.cortex.render_status.trust_surfaces", []),
+                ("ops.cortex.render_status.trust_posture_summary", {}),
+                ("ops.cortex.render_status.working_memory_summary", {"_items": [], "initiatives": {}}),
+                ("ops.cortex.render_status.provenance_alert_summary", {"status": "clear", "item_count": 0, "items": []}),
+                ("ops.cortex.render_status.conversation_summary", {}),
+                ("ops.cortex.render_status.build_canonical_lockfile_artifacts", {}),
+                ("ops.cortex.render_status.repo_inventory_summary_from_lock", {"items": []}),
+                ("ops.cortex.render_status.lock_worktree_hygiene", {"status": "frozen"}),
+                ("ops.cortex.render_status.registry_summary", {}),
+                ("ops.cortex.render_status.artifact_inventory", {}),
+                ("ops.cortex.render_status.world_model_state", {}),
+            ]
+            with ExitStack() as stack:
+                for target, value in patch_specs:
+                    stack.enter_context(patch(target, return_value=value))
+                payload = render_status_payload(descriptor_root)
+
+        self.assertEqual(
+            [
+                {
+                    "session_id": "session-legacy-separation",
+                    "source_ref": "runtime/atlas/sessions/session-legacy-separation/session.manifest.json",
+                    "original_session_ref": "runtime/atlas/sessions/session-legacy-separation/original.manifest.json",
+                    "epoch": "legacy_pre_registry",
+                    "cutover_at": "2026-06-17T00:00:00Z",
+                    "observed_at": "2026-06-17T00:01:00Z",
+                    "recorded_at": "2026-06-17T00:02:00Z",
+                    "missing_governed_requirements": ["tool_id", "extension_id"],
+                    "governed_identity": {"tool_id": "legacy-tool"},
+                }
+            ],
+            payload["legacy_compatibility"],
+        )
+        self.assertEqual(
+            {
+                "kind": "legacy_compatibility_signal",
+                "severity": "low",
+                "summary": "Historical session 'session-legacy-separation' remains in legacy_pre_registry compatibility mode.",
+                "source_ref": "runtime/atlas/sessions/session-legacy-separation/session.manifest.json",
+                "details": {
+                    "session_id": "session-legacy-separation",
+                    "epoch": "legacy_pre_registry",
+                    "original_session_ref": "runtime/atlas/sessions/session-legacy-separation/original.manifest.json",
+                    "missing_governed_requirements": ["tool_id", "extension_id"],
+                },
+            },
+            payload["attention_queue"]["items"][0],
+        )
+
+    def test_legacy_compatibility_surfaces_omits_non_legacy_and_missing_source_ref(self) -> None:
+        items = legacy_compatibility_surfaces(
+            [
+                _conversation_descriptor(
+                    turn_id="legacy-non-qualifying",
+                    action_mode="proposal_required",
+                ),
+                _legacy_runtime_backfill_descriptor(
+                    session_id="session-empty-source-ref",
+                    source_ref="   ",
+                ),
+            ]
+        )
+
+        self.assertEqual([], items)
+
+    def test_legacy_compatibility_surfaces_preserves_exact_fields_for_qualifying_descriptor(self) -> None:
+        descriptor = _legacy_runtime_backfill_descriptor(
+            session_id="session-legacy-helper",
+            source_ref="runtime/atlas/sessions/session-legacy-helper/session.manifest.json",
+            missing_governed_requirements=["tool_id", "extension_id"],
+            governed_identity={"tool_id": "legacy-tool", "extension_id": "legacy-extension"},
+        )
+        descriptor["links"]["ignored_extra"] = "ignored"
+        descriptor["state"]["ignored_extra"] = "ignored"
+
+        items = legacy_compatibility_surfaces([descriptor])
+
+        self.assertEqual(
+            [
+                {
+                    "session_id": "session-legacy-helper",
+                    "source_ref": "runtime/atlas/sessions/session-legacy-helper/session.manifest.json",
+                    "original_session_ref": "runtime/atlas/sessions/session-legacy-helper/original.manifest.json",
+                    "epoch": "legacy_pre_registry",
+                    "cutover_at": "2026-06-17T00:00:00Z",
+                    "observed_at": "2026-06-17T00:01:00Z",
+                    "recorded_at": "2026-06-17T00:02:00Z",
+                    "missing_governed_requirements": ["tool_id", "extension_id"],
+                    "governed_identity": {"tool_id": "legacy-tool", "extension_id": "legacy-extension"},
+                }
+            ],
+            items,
+        )
+
+    def test_legacy_compatibility_surfaces_sorts_by_observed_at_session_id_and_source_ref(self) -> None:
+        items = legacy_compatibility_surfaces(
+            [
+                _legacy_runtime_backfill_descriptor(
+                    session_id="session-zulu",
+                    source_ref="runtime/atlas/sessions/session-zulu/session.manifest.json",
+                    observed_at="2026-06-17T00:03:00Z",
+                ),
+                _legacy_runtime_backfill_descriptor(
+                    session_id="session-alpha",
+                    source_ref="runtime/atlas/sessions/session-alpha/z.manifest.json",
+                    observed_at="2026-06-17T00:01:00Z",
+                ),
+                _legacy_runtime_backfill_descriptor(
+                    session_id="session-alpha",
+                    source_ref="runtime/atlas/sessions/session-alpha/a.manifest.json",
+                    observed_at="2026-06-17T00:01:00Z",
+                ),
+            ]
+        )
+
+        self.assertEqual(
+            [
+                "runtime/atlas/sessions/session-alpha/a.manifest.json",
+                "runtime/atlas/sessions/session-alpha/z.manifest.json",
+                "runtime/atlas/sessions/session-zulu/session.manifest.json",
+            ],
+            [item["source_ref"] for item in items],
         )
 
     def test_provenance_attention_items_ignore_malformed_and_unknown_payloads(self) -> None:
