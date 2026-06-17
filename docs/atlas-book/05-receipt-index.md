@@ -1046,6 +1046,7 @@
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Post-Broader Attention-Queue Resume-Failed Next-Slice Selection Pass 369](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-POST-BROADER-ATTENTION-QUEUE-RESUME-FAILED-NEXT-SLICE-SELECTION-PASS-369-2026-06-16.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Session-Failed Contract Freeze Pass 370](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-SESSION-FAILED-CONTRACT-FREEZE-PASS-370-2026-06-16.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Session-Failed Owner-Surface Admission Pass 371](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-SESSION-FAILED-OWNER-SURFACE-ADMISSION-PASS-371-2026-06-16.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Session-Failed Supporting-Lane Admission Pass 372](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-SESSION-FAILED-SUPPORTING-LANE-ADMISSION-PASS-372-2026-06-16.md)
 
 ## Notes
 
