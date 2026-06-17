@@ -1106,6 +1106,7 @@
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Trust-Surfaces Top-Level Payload Boundary First-Implementation Admission Pass 422](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-TRUST-SURFACES-TOP-LEVEL-PAYLOAD-BOUNDARY-FIRST-IMPLEMENTATION-ADMISSION-PASS-422-2026-06-17.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Trust-Surfaces Top-Level Payload Boundary Prompt-Pack And Handoff Contract Pass 423](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-TRUST-SURFACES-TOP-LEVEL-PAYLOAD-BOUNDARY-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-423-2026-06-17.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Trust-Surfaces Top-Level Payload Boundary Implementation-Readiness Closeout And Worker-Routing Pass 424](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-TRUST-SURFACES-TOP-LEVEL-PAYLOAD-BOUNDARY-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-424-2026-06-17.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Trust-Surfaces Top-Level Payload Boundary First-Implementation Worker Cluster Reconciliation](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-TRUST-SURFACES-TOP-LEVEL-PAYLOAD-BOUNDARY-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-17.md)
 
 ## Notes
 

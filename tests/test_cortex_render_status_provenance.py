@@ -4577,6 +4577,105 @@ class RenderStatusProvenanceTests(unittest.TestCase):
         self.assertEqual(0, queue["item_count"])
         self.assertEqual([], queue["items"])
 
+    def test_trust_surfaces_is_empty_without_qualifying_descriptors(self) -> None:
+        descriptors = [
+            {
+                "artifact_type": "session_manifest",
+                "source_ref": "runtime/atlas/sessions/session-proof/session.manifest.json",
+                "identity": {"session_id": "session-proof"},
+                "state": {"session_state": "proposed"},
+            },
+            _knowledge_catalog_descriptor(
+                archive_id="archive-trusted",
+                trust_class="trusted",
+                source_ref="data/knowledge/archive-trusted.descriptor.json",
+                indexing_profile="full_text",
+                promotion_status="promoted",
+            ),
+        ]
+
+        self.assertEqual([], trust_surfaces(descriptors))
+
+    def test_trust_surfaces_projects_exact_admitted_fields_for_restricted_surface(self) -> None:
+        descriptors = [
+            _knowledge_catalog_descriptor(
+                archive_id="archive-restricted",
+                trust_class="restricted",
+                source_ref="data/knowledge/archive-restricted.descriptor.json",
+                indexing_profile="metadata_only",
+                promotion_status="review_pending",
+            )
+        ]
+
+        self.assertEqual(
+            [
+                {
+                    "archive_id": "archive-restricted",
+                    "knowledge_ref": "knowledge:archive-restricted",
+                    "trust_class": "restricted",
+                    "indexing_profile": "metadata_only",
+                    "promotion_status": "review_pending",
+                    "source_ref": "data/knowledge/archive-restricted.descriptor.json",
+                }
+            ],
+            trust_surfaces(descriptors),
+        )
+
+    def test_trust_surfaces_projects_exact_admitted_fields_for_untrusted_surface(self) -> None:
+        descriptors = [
+            _knowledge_catalog_descriptor(
+                archive_id="archive-untrusted",
+                trust_class="untrusted",
+                source_ref="data/knowledge/archive-untrusted.descriptor.json",
+                indexing_profile="metadata_only",
+                promotion_status="quarantined",
+            )
+        ]
+
+        self.assertEqual(
+            [
+                {
+                    "archive_id": "archive-untrusted",
+                    "knowledge_ref": "knowledge:archive-untrusted",
+                    "trust_class": "untrusted",
+                    "indexing_profile": "metadata_only",
+                    "promotion_status": "quarantined",
+                    "source_ref": "data/knowledge/archive-untrusted.descriptor.json",
+                }
+            ],
+            trust_surfaces(descriptors),
+        )
+
+    def test_trust_surfaces_preserves_deterministic_ordering(self) -> None:
+        descriptors = [
+            _knowledge_catalog_descriptor(
+                archive_id="archive-zulu",
+                trust_class="untrusted",
+                source_ref="data/knowledge/archive-zulu.descriptor.json",
+                indexing_profile="metadata_only",
+                promotion_status="quarantined",
+            ),
+            _knowledge_catalog_descriptor(
+                archive_id="archive-bravo",
+                trust_class="restricted",
+                source_ref="data/knowledge/archive-bravo.descriptor.json",
+                indexing_profile="metadata_only",
+                promotion_status="review_pending",
+            ),
+            _knowledge_catalog_descriptor(
+                archive_id="archive-alpha",
+                trust_class="restricted",
+                source_ref="data/knowledge/archive-alpha.descriptor.json",
+                indexing_profile="metadata_only",
+                promotion_status="review_pending",
+            ),
+        ]
+
+        self.assertEqual(
+            ["archive-alpha", "archive-bravo", "archive-zulu"],
+            [item["archive_id"] for item in trust_surfaces(descriptors)],
+        )
+
     def test_trust_posture_summary_is_clear_without_admitted_trust_surfaces(self) -> None:
         descriptors = [
             _knowledge_catalog_descriptor(
@@ -5244,6 +5343,79 @@ class RenderStatusProvenanceTests(unittest.TestCase):
             ["archive-restricted", "archive-untrusted"],
             [item["archive_id"] for item in payload["slices"]["trust_posture"]["items"]],
         )
+
+    def test_render_status_payload_preserves_top_level_trust_surfaces_separately(self) -> None:
+        descriptors = [
+            _knowledge_catalog_descriptor(
+                archive_id="archive-untrusted",
+                trust_class="untrusted",
+                source_ref="data/knowledge/archive-untrusted.descriptor.json",
+                indexing_profile="metadata_only",
+                promotion_status="quarantined",
+            ),
+            _knowledge_catalog_descriptor(
+                archive_id="archive-restricted",
+                trust_class="restricted",
+                source_ref="data/knowledge/archive-restricted.descriptor.json",
+                indexing_profile="metadata_only",
+                promotion_status="review_pending",
+            ),
+        ]
+
+        with TemporaryDirectory() as temp_dir:
+            descriptor_root = Path(temp_dir)
+            (descriptor_root / "placeholder.json").write_text("{}", encoding="utf-8")
+            patch_specs = [
+                ("ops.cortex.render_status.load_descriptors", descriptors),
+                ("ops.cortex.render_status.load_registry_state", {"ok": True}),
+                ("ops.cortex.render_status.choose_latest_session", None),
+                ("ops.cortex.render_status.session_overview", None),
+                ("ops.cortex.render_status.blocked_workers", []),
+                ("ops.cortex.render_status.classify_merge_requests", ([], [])),
+                ("ops.cortex.render_status.closure_receipts", []),
+                ("ops.cortex.render_status.execution_receipt_residue_records", []),
+                ("ops.cortex.render_status.governed_writes", []),
+                ("ops.cortex.render_status.legacy_compatibility_surfaces", []),
+                ("ops.cortex.render_status.working_memory_summary", {"_items": [], "initiatives": {}}),
+                ("ops.cortex.render_status.provenance_alert_summary", {"status": "clear", "item_count": 0, "items": []}),
+                ("ops.cortex.render_status.conversation_summary", {}),
+                ("ops.cortex.render_status.build_canonical_lockfile_artifacts", {}),
+                ("ops.cortex.render_status.repo_inventory_summary_from_lock", {"items": []}),
+                ("ops.cortex.render_status.lock_worktree_hygiene", {"status": "frozen"}),
+                ("ops.cortex.render_status.registry_summary", {}),
+                ("ops.cortex.render_status.artifact_inventory", {}),
+                ("ops.cortex.render_status.world_model_state", {}),
+            ]
+            with ExitStack() as stack:
+                for target, value in patch_specs:
+                    stack.enter_context(patch(target, return_value=value))
+                payload = render_status_payload(descriptor_root)
+
+        self.assertEqual(
+            [
+                {
+                    "archive_id": "archive-restricted",
+                    "knowledge_ref": "knowledge:archive-restricted",
+                    "trust_class": "restricted",
+                    "indexing_profile": "metadata_only",
+                    "promotion_status": "review_pending",
+                    "source_ref": "data/knowledge/archive-restricted.descriptor.json",
+                },
+                {
+                    "archive_id": "archive-untrusted",
+                    "knowledge_ref": "knowledge:archive-untrusted",
+                    "trust_class": "untrusted",
+                    "indexing_profile": "metadata_only",
+                    "promotion_status": "quarantined",
+                    "source_ref": "data/knowledge/archive-untrusted.descriptor.json",
+                },
+            ],
+            payload["trust_surfaces"],
+        )
+        self.assertEqual("restricted", payload["trust_posture"]["status"])
+        self.assertEqual(2, payload["trust_posture"]["item_count"])
+        self.assertEqual(1, payload["attention_queue"]["item_count"])
+        self.assertEqual("quarantined_trust_surface", payload["attention_queue"]["items"][0]["kind"])
 
     def test_render_status_payload_preserves_blocked_worker_handoff(self) -> None:
         descriptors = [
