@@ -759,6 +759,31 @@ def attention_queue(
             )
         )
 
+    for legacy_surface in legacy_compatibility_payload:
+        if not isinstance(legacy_surface, dict):
+            continue
+        source_ref = str(legacy_surface.get("source_ref", "")).strip()
+        epoch = str(legacy_surface.get("epoch", "")).strip()
+        if not source_ref or epoch != "legacy_pre_registry":
+            continue
+        items.append(
+            attention_item(
+                kind="legacy_compatibility_signal",
+                severity="low",
+                summary=(
+                    f"Historical session '{legacy_surface.get('session_id')}' remains in "
+                    "legacy_pre_registry compatibility mode."
+                ),
+                source_ref=source_ref,
+                details={
+                    "session_id": legacy_surface.get("session_id"),
+                    "epoch": epoch,
+                    "original_session_ref": legacy_surface.get("original_session_ref"),
+                    "missing_governed_requirements": legacy_surface.get("missing_governed_requirements"),
+                },
+            )
+        )
+
     for trust_surface in trust_surfaces_payload:
         if trust_surface.get("trust_class") != "untrusted":
             continue
