@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from contextlib import ExitStack
+import json
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
@@ -23,6 +24,7 @@ from ops.cortex.render_status import (
     render_status_payload,
     trust_posture_summary,
     trust_surfaces,
+    world_model_state,
 )
 
 
@@ -5824,6 +5826,131 @@ class RenderStatusProvenanceTests(unittest.TestCase):
             artifact_inventory(descriptors),
         )
 
+    def test_world_model_state_returns_refs_and_false_presence_when_files_are_absent(self) -> None:
+        with TemporaryDirectory() as temp_dir:
+            atlas_root_path = Path(temp_dir)
+            with patch("ops.cortex.render_status.atlas_root", return_value=atlas_root_path):
+                payload = world_model_state()
+
+        self.assertEqual(
+            {
+                "snapshot_ref": "runtime/state/atlas/world-model.snapshot.latest.json",
+                "attention_ref": "runtime/state/atlas/world-model.attention.latest.json",
+                "snapshot_present": False,
+                "attention_present": False,
+            },
+            payload,
+        )
+
+    def test_world_model_state_projects_populated_snapshot_and_attention_dict_branches(self) -> None:
+        with TemporaryDirectory() as temp_dir:
+            atlas_root_path = Path(temp_dir)
+            state_dir = atlas_root_path / "runtime" / "state" / "atlas"
+            state_dir.mkdir(parents=True)
+            (state_dir / "world-model.snapshot.latest.json").write_text(
+                json.dumps(
+                    {
+                        "content_digest": "sha256:snapshot",
+                        "inventory_entries": [{"id": "entry-1"}, {"id": "entry-2"}],
+                        "observations": [{"id": "obs-1"}],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (state_dir / "world-model.attention.latest.json").write_text(
+                json.dumps(
+                    {
+                        "content_digest": "sha256:attention",
+                        "attention_items": [{"id": "item-1"}, {"id": "item-2"}, {"id": "item-3"}],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            with patch("ops.cortex.render_status.atlas_root", return_value=atlas_root_path):
+                payload = world_model_state()
+
+        self.assertEqual(
+            {
+                "snapshot_ref": "runtime/state/atlas/world-model.snapshot.latest.json",
+                "attention_ref": "runtime/state/atlas/world-model.attention.latest.json",
+                "snapshot_present": True,
+                "attention_present": True,
+                "snapshot_content_digest": "sha256:snapshot",
+                "inventory_entry_count": 2,
+                "observation_count": 1,
+                "attention_content_digest": "sha256:attention",
+                "attention_item_count": 3,
+            },
+            payload,
+        )
+
+    def test_world_model_state_uses_zero_fallback_for_missing_or_non_list_counts(self) -> None:
+        with TemporaryDirectory() as temp_dir:
+            atlas_root_path = Path(temp_dir)
+            state_dir = atlas_root_path / "runtime" / "state" / "atlas"
+            state_dir.mkdir(parents=True)
+            (state_dir / "world-model.snapshot.latest.json").write_text(
+                json.dumps(
+                    {
+                        "content_digest": "sha256:snapshot-fallback",
+                        "inventory_entries": "not-a-list",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (state_dir / "world-model.attention.latest.json").write_text(
+                json.dumps(
+                    {
+                        "content_digest": "sha256:attention-fallback",
+                        "attention_items": "not-a-list",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            with patch("ops.cortex.render_status.atlas_root", return_value=atlas_root_path):
+                payload = world_model_state()
+
+        self.assertEqual(
+            {
+                "snapshot_ref": "runtime/state/atlas/world-model.snapshot.latest.json",
+                "attention_ref": "runtime/state/atlas/world-model.attention.latest.json",
+                "snapshot_present": True,
+                "attention_present": True,
+                "snapshot_content_digest": "sha256:snapshot-fallback",
+                "inventory_entry_count": 0,
+                "observation_count": 0,
+                "attention_content_digest": "sha256:attention-fallback",
+                "attention_item_count": 0,
+            },
+            payload,
+        )
+
+    def test_world_model_state_omits_content_fields_for_undecodable_and_non_dict_files(self) -> None:
+        with TemporaryDirectory() as temp_dir:
+            atlas_root_path = Path(temp_dir)
+            state_dir = atlas_root_path / "runtime" / "state" / "atlas"
+            state_dir.mkdir(parents=True)
+            (state_dir / "world-model.snapshot.latest.json").write_text(
+                "{not-valid-json",
+                encoding="utf-8",
+            )
+            (state_dir / "world-model.attention.latest.json").write_text(
+                json.dumps(["not", "a", "dict"]),
+                encoding="utf-8",
+            )
+            with patch("ops.cortex.render_status.atlas_root", return_value=atlas_root_path):
+                payload = world_model_state()
+
+        self.assertEqual(
+            {
+                "snapshot_ref": "runtime/state/atlas/world-model.snapshot.latest.json",
+                "attention_ref": "runtime/state/atlas/world-model.attention.latest.json",
+                "snapshot_present": True,
+                "attention_present": True,
+            },
+            payload,
+        )
+
     def test_render_status_payload_preserves_top_level_artifact_inventory_separately_from_registry_and_world_model(
         self,
     ) -> None:
@@ -5920,6 +6047,124 @@ class RenderStatusProvenanceTests(unittest.TestCase):
         )
         self.assertEqual(
             {"status": "world-model-placeholder"},
+            payload["world_model"],
+        )
+
+    def test_render_status_payload_preserves_top_level_world_model_separately_from_artifact_inventory_and_registry(
+        self,
+    ) -> None:
+        descriptors = [
+            {
+                "artifact_type": "knowledge_catalog",
+                "source_ref": "runtime/atlas/artifacts/knowledge-catalog.json",
+                "digest": "sha256:knowledge",
+                "trust_class": "restricted",
+            },
+        ]
+
+        with TemporaryDirectory() as temp_dir:
+            atlas_root_path = Path(temp_dir)
+            state_dir = atlas_root_path / "runtime" / "state" / "atlas"
+            state_dir.mkdir(parents=True)
+            (state_dir / "world-model.snapshot.latest.json").write_text(
+                json.dumps(
+                    {
+                        "content_digest": "sha256:snapshot-payload",
+                        "inventory_entries": [{"id": "entry-1"}],
+                        "observations": [{"id": "obs-1"}, {"id": "obs-2"}],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (state_dir / "world-model.attention.latest.json").write_text(
+                json.dumps(
+                    {
+                        "content_digest": "sha256:attention-payload",
+                        "attention_items": [{"id": "attention-1"}],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            descriptor_root = atlas_root_path / "runtime" / "cortex" / "artifacts"
+            descriptor_root.mkdir(parents=True)
+            (descriptor_root / "placeholder.json").write_text("{}", encoding="utf-8")
+            patch_specs = [
+                ("ops.cortex.render_status.atlas_root", atlas_root_path),
+                ("ops.cortex.render_status.load_descriptors", descriptors),
+                (
+                    "ops.cortex.render_status.load_registry_state",
+                    {
+                        "ok": True,
+                        "registry_digest": "sha256:registry-current",
+                        "tool_registry_digest": "sha256:tools-current",
+                        "extension_registry_digest": "sha256:extensions-current",
+                        "tool_count": 5,
+                        "extension_count": 2,
+                    },
+                ),
+                ("ops.cortex.render_status.session_overview", {}),
+                ("ops.cortex.render_status.blocked_workers", []),
+                ("ops.cortex.render_status.classify_merge_requests", ([], [])),
+                ("ops.cortex.render_status.closure_receipts", []),
+                ("ops.cortex.render_status.execution_receipt_residue_records", []),
+                ("ops.cortex.render_status.governed_writes", []),
+                ("ops.cortex.render_status.legacy_compatibility_surfaces", []),
+                ("ops.cortex.render_status.trust_surfaces", []),
+                ("ops.cortex.render_status.trust_posture_summary", {"status": "restricted"}),
+                ("ops.cortex.render_status.working_memory_summary", {"_items": [], "initiatives": {}}),
+                ("ops.cortex.render_status.provenance_alert_summary", {"status": "clear", "item_count": 0, "items": []}),
+                ("ops.cortex.render_status.conversation_summary", {}),
+                ("ops.cortex.render_status.build_canonical_lockfile_artifacts", {}),
+                ("ops.cortex.render_status.repo_inventory_summary_from_lock", {"items": []}),
+                ("ops.cortex.render_status.lock_worktree_hygiene", {"status": "frozen"}),
+                ("ops.cortex.render_status.attention_queue", {"status": "clear", "item_count": 0, "highest_severity": None, "items": []}),
+                ("ops.cortex.render_status.proposal_only_state", {}),
+            ]
+            with ExitStack() as stack:
+                for target, value in patch_specs:
+                    stack.enter_context(patch(target, return_value=value))
+                payload = render_status_payload(descriptor_root)
+
+        self.assertEqual(
+            {
+                "descriptor_count": 1,
+                "by_type": {
+                    "knowledge_catalog": 1,
+                },
+                "artifacts": [
+                    {
+                        "artifact_type": "knowledge_catalog",
+                        "source_ref": "runtime/atlas/artifacts/knowledge-catalog.json",
+                        "digest": "sha256:knowledge",
+                        "trust_class": "restricted",
+                    },
+                ],
+            },
+            payload["artifact_inventory"],
+        )
+        self.assertEqual(
+            {
+                "ok": True,
+                "registry_digest": "sha256:registry-current",
+                "tool_registry_digest": "sha256:tools-current",
+                "extension_registry_digest": "sha256:extensions-current",
+                "tool_count": 5,
+                "extension_count": 2,
+            },
+            payload["registry"],
+        )
+        self.assertEqual(
+            {
+                "snapshot_ref": "runtime/state/atlas/world-model.snapshot.latest.json",
+                "attention_ref": "runtime/state/atlas/world-model.attention.latest.json",
+                "snapshot_present": True,
+                "attention_present": True,
+                "snapshot_content_digest": "sha256:snapshot-payload",
+                "inventory_entry_count": 1,
+                "observation_count": 2,
+                "attention_content_digest": "sha256:attention-payload",
+                "attention_item_count": 1,
+            },
             payload["world_model"],
         )
 
