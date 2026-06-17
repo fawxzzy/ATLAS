@@ -1094,6 +1094,7 @@
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Post-Legacy-Compatibility Top-Level Payload Boundary Next-Slice Selection Pass 411](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-POST-LEGACY-COMPATIBILITY-TOP-LEVEL-PAYLOAD-BOUNDARY-NEXT-SLICE-SELECTION-PASS-411-2026-06-17.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Trust-Posture Top-Level Summary Boundary Contract Freeze Pass 412](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-TRUST-POSTURE-TOP-LEVEL-SUMMARY-BOUNDARY-CONTRACT-FREEZE-PASS-412-2026-06-17.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Trust-Posture Top-Level Summary Boundary Owner-Surface Admission Pass 413](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-TRUST-POSTURE-TOP-LEVEL-SUMMARY-BOUNDARY-OWNER-SURFACE-ADMISSION-PASS-413-2026-06-17.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Trust-Posture Top-Level Summary Boundary Supporting-Lane Admission Pass 414](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-TRUST-POSTURE-TOP-LEVEL-SUMMARY-BOUNDARY-SUPPORTING-LANE-ADMISSION-PASS-414-2026-06-17.md)
 
 ## Notes
 
