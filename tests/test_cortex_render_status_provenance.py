@@ -18,6 +18,7 @@ from ops.cortex.render_status import (
     proposal_only_state,
     provenance_alert_summary,
     provenance_attention_items,
+    registry_summary,
     render_status_payload,
     trust_posture_summary,
     trust_surfaces,
@@ -5695,6 +5696,190 @@ class RenderStatusProvenanceTests(unittest.TestCase):
         self.assertEqual("pending", payload["proposal_only"]["status"])
         self.assertEqual(1, payload["proposal_only"]["item_count"])
         self.assertEqual("turn-proposal", payload["proposal_only"]["items"][0]["turn_id"])
+
+    def test_registry_summary_returns_unhealthy_surface_only(self) -> None:
+        state = {
+            "ok": False,
+            "error": "registry unavailable",
+            "registry_digest": "sha256:should-not-leak",
+            "tool_registry_digest": "sha256:tool-should-not-leak",
+            "extension_registry_digest": "sha256:extension-should-not-leak",
+            "tool_count": 10,
+            "extension_count": 4,
+            "bundle": {"unexpected": "ignored"},
+            "tool_ids": {"tool-alpha"},
+            "extension_ids": {"extension-alpha"},
+        }
+
+        self.assertEqual(
+            {
+                "ok": False,
+                "error": "registry unavailable",
+            },
+            registry_summary(state),
+        )
+
+    def test_registry_summary_projects_healthy_exact_fields_only(self) -> None:
+        state = {
+            "ok": True,
+            "registry_digest": "sha256:registry-current",
+            "tool_registry_digest": "sha256:tools-current",
+            "extension_registry_digest": "sha256:extensions-current",
+            "tool_count": 7,
+            "extension_count": 3,
+            "bundle": {"unexpected": "ignored"},
+            "tool_ids": {"tool-alpha"},
+            "extension_ids": {"extension-alpha"},
+            "unexpected_field": "ignored",
+        }
+
+        self.assertEqual(
+            {
+                "ok": True,
+                "registry_digest": "sha256:registry-current",
+                "tool_registry_digest": "sha256:tools-current",
+                "extension_registry_digest": "sha256:extensions-current",
+                "tool_count": 7,
+                "extension_count": 3,
+            },
+            registry_summary(state),
+        )
+
+    def test_render_status_payload_preserves_unhealthy_top_level_registry_separately_from_registry_error(self) -> None:
+        with TemporaryDirectory() as temp_dir:
+            descriptor_root = Path(temp_dir)
+            (descriptor_root / "placeholder.json").write_text("{}", encoding="utf-8")
+            patch_specs = [
+                ("ops.cortex.render_status.load_descriptors", []),
+                (
+                    "ops.cortex.render_status.load_registry_state",
+                    {
+                        "ok": False,
+                        "error": "registry unavailable",
+                        "registry_digest": "sha256:should-not-leak",
+                        "tool_registry_digest": "sha256:tool-should-not-leak",
+                        "extension_registry_digest": "sha256:extension-should-not-leak",
+                        "tool_count": 10,
+                        "extension_count": 4,
+                        "bundle": {"unexpected": "ignored"},
+                        "tool_ids": {"tool-alpha"},
+                        "extension_ids": {"extension-alpha"},
+                    },
+                ),
+                ("ops.cortex.render_status.execution_receipt_residue_records", []),
+                ("ops.cortex.render_status.governed_writes", []),
+                ("ops.cortex.render_status.legacy_compatibility_surfaces", []),
+                ("ops.cortex.render_status.trust_surfaces", []),
+                ("ops.cortex.render_status.trust_posture_summary", {}),
+                ("ops.cortex.render_status.working_memory_summary", {"_items": [], "initiatives": {}}),
+                ("ops.cortex.render_status.provenance_alert_summary", {"status": "clear", "item_count": 0, "items": []}),
+                ("ops.cortex.render_status.conversation_summary", {}),
+                ("ops.cortex.render_status.build_canonical_lockfile_artifacts", {}),
+                ("ops.cortex.render_status.repo_inventory_summary_from_lock", {"items": []}),
+                ("ops.cortex.render_status.lock_worktree_hygiene", {"status": "frozen"}),
+                ("ops.cortex.render_status.proposal_only_state", {}),
+                ("ops.cortex.render_status.world_model_state", {"status": "world-model-placeholder"}),
+            ]
+            with ExitStack() as stack:
+                for target, value in patch_specs:
+                    stack.enter_context(patch(target, return_value=value))
+                payload = render_status_payload(descriptor_root)
+
+        self.assertEqual(
+            {
+                "ok": False,
+                "error": "registry unavailable",
+            },
+            payload["registry"],
+        )
+        self.assertEqual("registry_error", payload["attention_queue"]["items"][0]["kind"])
+        self.assertEqual(
+            {"status": "world-model-placeholder"},
+            payload["world_model"],
+        )
+        self.assertEqual(
+            {
+                "descriptor_count": 0,
+                "by_type": {},
+                "artifacts": [],
+            },
+            payload["artifact_inventory"],
+        )
+
+    def test_render_status_payload_preserves_healthy_top_level_registry_separately_from_registry_drift(self) -> None:
+        with TemporaryDirectory() as temp_dir:
+            descriptor_root = Path(temp_dir)
+            (descriptor_root / "placeholder.json").write_text("{}", encoding="utf-8")
+            patch_specs = [
+                ("ops.cortex.render_status.load_descriptors", []),
+                (
+                    "ops.cortex.render_status.load_registry_state",
+                    {
+                        "ok": True,
+                        "registry_digest": "sha256:registry-current",
+                        "tool_registry_digest": "sha256:tools-current",
+                        "extension_registry_digest": "sha256:extensions-current",
+                        "tool_count": 7,
+                        "extension_count": 3,
+                        "bundle": {"unexpected": "ignored"},
+                        "tool_ids": {"tool-alpha"},
+                        "extension_ids": {"extension-alpha"},
+                    },
+                ),
+                (
+                    "ops.cortex.render_status.session_overview",
+                    {
+                        "session_id": "session-registry-drift",
+                        "task_id": "task-session-registry-drift",
+                        "session_state": "running",
+                        "final_status": "",
+                        "registry_digest": "sha256:registry-stale",
+                        "source_ref": "runtime/atlas/sessions/session-registry-drift/session.manifest.json",
+                    },
+                ),
+                ("ops.cortex.render_status.execution_receipt_residue_records", []),
+                ("ops.cortex.render_status.governed_writes", []),
+                ("ops.cortex.render_status.legacy_compatibility_surfaces", []),
+                ("ops.cortex.render_status.trust_surfaces", []),
+                ("ops.cortex.render_status.trust_posture_summary", {}),
+                ("ops.cortex.render_status.working_memory_summary", {"_items": [], "initiatives": {}}),
+                ("ops.cortex.render_status.provenance_alert_summary", {"status": "clear", "item_count": 0, "items": []}),
+                ("ops.cortex.render_status.conversation_summary", {}),
+                ("ops.cortex.render_status.build_canonical_lockfile_artifacts", {}),
+                ("ops.cortex.render_status.repo_inventory_summary_from_lock", {"items": []}),
+                ("ops.cortex.render_status.lock_worktree_hygiene", {"status": "frozen"}),
+                ("ops.cortex.render_status.proposal_only_state", {}),
+                ("ops.cortex.render_status.world_model_state", {"status": "world-model-placeholder"}),
+            ]
+            with ExitStack() as stack:
+                for target, value in patch_specs:
+                    stack.enter_context(patch(target, return_value=value))
+                payload = render_status_payload(descriptor_root)
+
+        self.assertEqual(
+            {
+                "ok": True,
+                "registry_digest": "sha256:registry-current",
+                "tool_registry_digest": "sha256:tools-current",
+                "extension_registry_digest": "sha256:extensions-current",
+                "tool_count": 7,
+                "extension_count": 3,
+            },
+            payload["registry"],
+        )
+        self.assertEqual("registry_drift", payload["attention_queue"]["items"][0]["kind"])
+        self.assertEqual(
+            {
+                "session_id": "session-registry-drift",
+                "session_registry_digest": "sha256:registry-stale",
+                "current_registry_digest": "sha256:registry-current",
+            },
+            payload["attention_queue"]["items"][0]["details"],
+        )
+        self.assertEqual(
+            {"status": "world-model-placeholder"},
+            payload["world_model"],
+        )
 
     def test_governed_writes_is_empty_without_qualifying_execution_receipts(self) -> None:
         descriptors = [
