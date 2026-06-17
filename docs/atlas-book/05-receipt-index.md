@@ -1056,6 +1056,7 @@
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Registry-Drift Owner-Surface Admission Pass 378](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-REGISTRY-DRIFT-OWNER-SURFACE-ADMISSION-PASS-378-2026-06-16.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Registry-Drift Supporting-Lane Admission Pass 379](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-REGISTRY-DRIFT-SUPPORTING-LANE-ADMISSION-PASS-379-2026-06-16.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Registry-Drift First-Implementation Admission Pass 380](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-REGISTRY-DRIFT-FIRST-IMPLEMENTATION-ADMISSION-PASS-380-2026-06-16.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Registry-Drift Prompt-Pack And Handoff Contract Pass 381](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-REGISTRY-DRIFT-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-381-2026-06-16.md)
 
 ## Notes
 
