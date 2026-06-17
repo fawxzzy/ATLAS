@@ -11,6 +11,7 @@ from ops.cortex.render_status import (
     blocked_workers,
     classify_merge_requests,
     closure_receipts,
+    conversation_summary,
     legacy_compatibility_surfaces,
     open_merge_requests,
     proposal_only_state,
@@ -40,6 +41,42 @@ def _conversation_descriptor(
         "state": {
             "action_mode": action_mode,
             "intent": intent,
+        },
+    }
+
+
+def _conversation_manifest_descriptor(
+    *,
+    conversation_id: str = "conversation-1",
+    mode: str = "governed",
+    status: str = "active",
+    turn_count: int = 3,
+    updated_at: str = "2026-06-17T12:00:00Z",
+    last_turn_at: str = "2026-06-17T11:59:00Z",
+    recent_turn_refs: list[str] | None = None,
+    active_initiative_refs: list[str] | None = None,
+    active_session_refs: list[str] | None = None,
+    source_ref: str | None = None,
+) -> dict[str, object]:
+    return {
+        "artifact_type": "conversation_manifest",
+        "source_ref": source_ref
+        or f"runtime/atlas/conversations/{conversation_id}/conversation.manifest.json",
+        "identity": {
+            "conversation_id": conversation_id,
+            "mode": mode,
+        },
+        "state": {
+            "status": status,
+            "turn_count": turn_count,
+            "updated_at": updated_at,
+            "last_turn_at": last_turn_at,
+        },
+        "links": {
+            "recent_turn_refs": recent_turn_refs
+            or [f"runtime/atlas/conversations/{conversation_id}/turns/turn-1.json"],
+            "active_initiative_refs": active_initiative_refs or [],
+            "active_session_refs": active_session_refs or [],
         },
     }
 
@@ -5416,6 +5453,231 @@ class RenderStatusProvenanceTests(unittest.TestCase):
         self.assertEqual(2, payload["trust_posture"]["item_count"])
         self.assertEqual(1, payload["attention_queue"]["item_count"])
         self.assertEqual("quarantined_trust_surface", payload["attention_queue"]["items"][0]["kind"])
+
+    def test_conversation_summary_is_empty_without_conversation_manifests(self) -> None:
+        self.assertEqual(
+            {
+                "item_count": 0,
+                "active_count": 0,
+                "recent_items": [],
+            },
+            conversation_summary([]),
+        )
+
+    def test_conversation_summary_omits_non_conversation_descriptors(self) -> None:
+        summary = conversation_summary(
+            [
+                _conversation_descriptor(turn_id="turn-proposal", action_mode="proposal_required"),
+                _knowledge_catalog_descriptor(
+                    archive_id="archive-restricted",
+                    trust_class="restricted",
+                    source_ref="data/knowledge/archive-restricted.descriptor.json",
+                ),
+            ]
+        )
+
+        self.assertEqual(0, summary["item_count"])
+        self.assertEqual(0, summary["active_count"])
+        self.assertEqual([], summary["recent_items"])
+
+    def test_conversation_summary_preserves_one_active_manifest_fields(self) -> None:
+        summary = conversation_summary(
+            [
+                _conversation_manifest_descriptor(
+                    conversation_id="conversation-active",
+                    mode="voice",
+                    status="active",
+                    turn_count=7,
+                    updated_at="2026-06-17T12:30:00Z",
+                    last_turn_at="2026-06-17T12:29:00Z",
+                    recent_turn_refs=[
+                        "runtime/atlas/conversations/conversation-active/turns/turn-6.json",
+                        "runtime/atlas/conversations/conversation-active/turns/turn-7.json",
+                    ],
+                    active_initiative_refs=[
+                        "docs/memory/initiatives/initiative-active.json",
+                    ],
+                    active_session_refs=[
+                        "runtime/atlas/sessions/session-active/session.manifest.json",
+                    ],
+                )
+            ]
+        )
+
+        self.assertEqual(1, summary["item_count"])
+        self.assertEqual(1, summary["active_count"])
+        self.assertEqual(
+            [
+                {
+                    "conversation_id": "conversation-active",
+                    "mode": "voice",
+                    "status": "active",
+                    "turn_count": 7,
+                    "last_turn_at": "2026-06-17T12:29:00Z",
+                    "recent_turn_refs": [
+                        "runtime/atlas/conversations/conversation-active/turns/turn-6.json",
+                        "runtime/atlas/conversations/conversation-active/turns/turn-7.json",
+                    ],
+                    "active_initiative_refs": [
+                        "docs/memory/initiatives/initiative-active.json",
+                    ],
+                    "active_session_refs": [
+                        "runtime/atlas/sessions/session-active/session.manifest.json",
+                    ],
+                    "source_ref": "runtime/atlas/conversations/conversation-active/conversation.manifest.json",
+                }
+            ],
+            summary["recent_items"],
+        )
+
+    def test_conversation_summary_preserves_one_non_active_manifest_without_incrementing_active_count(self) -> None:
+        summary = conversation_summary(
+            [
+                _conversation_manifest_descriptor(
+                    conversation_id="conversation-paused",
+                    mode="governed",
+                    status="paused",
+                    turn_count=2,
+                    updated_at="2026-06-17T10:00:00Z",
+                    last_turn_at="2026-06-17T09:55:00Z",
+                )
+            ]
+        )
+
+        self.assertEqual(1, summary["item_count"])
+        self.assertEqual(0, summary["active_count"])
+        self.assertEqual(
+            {
+                "conversation_id": "conversation-paused",
+                "mode": "governed",
+                "status": "paused",
+                "turn_count": 2,
+                "last_turn_at": "2026-06-17T09:55:00Z",
+                "recent_turn_refs": [
+                    "runtime/atlas/conversations/conversation-paused/turns/turn-1.json",
+                ],
+                "active_initiative_refs": [],
+                "active_session_refs": [],
+                "source_ref": "runtime/atlas/conversations/conversation-paused/conversation.manifest.json",
+            },
+            summary["recent_items"][0],
+        )
+
+    def test_conversation_summary_preserves_descending_order_and_caps_recent_items_at_five(self) -> None:
+        descriptors = [
+            _conversation_manifest_descriptor(
+                conversation_id=f"conversation-{index}",
+                updated_at=f"2026-06-17T12:0{index}:00Z",
+                last_turn_at=f"2026-06-17T12:0{index}:30Z",
+            )
+            for index in range(6)
+        ]
+        descriptors.append(
+            _conversation_manifest_descriptor(
+                conversation_id="conversation-z",
+                updated_at="2026-06-17T12:05:00Z",
+                last_turn_at="2026-06-17T12:05:30Z",
+            )
+        )
+
+        summary = conversation_summary(descriptors)
+
+        self.assertEqual(7, summary["item_count"])
+        self.assertEqual(7, summary["active_count"])
+        self.assertEqual(5, len(summary["recent_items"]))
+        self.assertEqual(
+            [
+                "conversation-z",
+                "conversation-5",
+                "conversation-4",
+                "conversation-3",
+                "conversation-2",
+            ],
+            [item["conversation_id"] for item in summary["recent_items"]],
+        )
+
+    def test_render_status_payload_preserves_top_level_conversations_separately(self) -> None:
+        descriptors = [
+            _conversation_manifest_descriptor(
+                conversation_id="conversation-top-level",
+                status="active",
+                turn_count=4,
+                updated_at="2026-06-17T14:00:00Z",
+                last_turn_at="2026-06-17T13:59:00Z",
+                active_initiative_refs=["docs/memory/initiatives/initiative-top-level.json"],
+                active_session_refs=[
+                    "runtime/atlas/sessions/session-top-level/session.manifest.json",
+                ],
+            ),
+            _conversation_descriptor(
+                turn_id="turn-proposal",
+                action_mode="proposal_required",
+                intent="write_receipt",
+                conversation_id="conversation-top-level",
+                source_ref="runtime/atlas/conversations/conversation-top-level/turns/turn-proposal.json",
+            ),
+        ]
+
+        with TemporaryDirectory() as temp_dir:
+            descriptor_root = Path(temp_dir)
+            (descriptor_root / "placeholder.json").write_text("{}", encoding="utf-8")
+            patch_specs = [
+                ("ops.cortex.render_status.load_descriptors", descriptors),
+                ("ops.cortex.render_status.load_registry_state", {"ok": True}),
+                ("ops.cortex.render_status.choose_latest_session", None),
+                ("ops.cortex.render_status.session_overview", None),
+                ("ops.cortex.render_status.blocked_workers", []),
+                ("ops.cortex.render_status.classify_merge_requests", ([], [])),
+                ("ops.cortex.render_status.closure_receipts", []),
+                ("ops.cortex.render_status.execution_receipt_residue_records", []),
+                ("ops.cortex.render_status.governed_writes", []),
+                ("ops.cortex.render_status.legacy_compatibility_surfaces", []),
+                ("ops.cortex.render_status.trust_surfaces", []),
+                ("ops.cortex.render_status.trust_posture_summary", {}),
+                ("ops.cortex.render_status.working_memory_summary", {"_items": [], "initiatives": {}}),
+                ("ops.cortex.render_status.provenance_alert_summary", {"status": "clear", "item_count": 0, "items": []}),
+                ("ops.cortex.render_status.build_canonical_lockfile_artifacts", {}),
+                ("ops.cortex.render_status.repo_inventory_summary_from_lock", {"items": []}),
+                ("ops.cortex.render_status.lock_worktree_hygiene", {"status": "frozen"}),
+                ("ops.cortex.render_status.registry_summary", {}),
+                ("ops.cortex.render_status.artifact_inventory", {}),
+                ("ops.cortex.render_status.world_model_state", {}),
+            ]
+            with ExitStack() as stack:
+                for target, value in patch_specs:
+                    stack.enter_context(patch(target, return_value=value))
+                payload = render_status_payload(descriptor_root)
+
+        self.assertEqual(
+            {
+                "item_count": 1,
+                "active_count": 1,
+                "recent_items": [
+                    {
+                        "conversation_id": "conversation-top-level",
+                        "mode": "governed",
+                        "status": "active",
+                        "turn_count": 4,
+                        "last_turn_at": "2026-06-17T13:59:00Z",
+                        "recent_turn_refs": [
+                            "runtime/atlas/conversations/conversation-top-level/turns/turn-1.json",
+                        ],
+                        "active_initiative_refs": [
+                            "docs/memory/initiatives/initiative-top-level.json",
+                        ],
+                        "active_session_refs": [
+                            "runtime/atlas/sessions/session-top-level/session.manifest.json",
+                        ],
+                        "source_ref": "runtime/atlas/conversations/conversation-top-level/conversation.manifest.json",
+                    }
+                ],
+            },
+            payload["conversations"],
+        )
+        self.assertEqual("conversation_action_request", payload["attention_queue"]["items"][0]["kind"])
+        self.assertEqual("pending", payload["proposal_only"]["status"])
+        self.assertEqual(1, payload["proposal_only"]["item_count"])
+        self.assertEqual("turn-proposal", payload["proposal_only"]["items"][0]["turn_id"])
 
     def test_render_status_payload_preserves_blocked_worker_handoff(self) -> None:
         descriptors = [
