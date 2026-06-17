@@ -1127,6 +1127,7 @@
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Registry Top-Level Summary Boundary Contract Freeze Pass 440](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-REGISTRY-TOP-LEVEL-SUMMARY-BOUNDARY-CONTRACT-FREEZE-PASS-440-2026-06-17.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Registry Top-Level Summary Boundary Owner-Surface Admission Pass 441](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-REGISTRY-TOP-LEVEL-SUMMARY-BOUNDARY-OWNER-SURFACE-ADMISSION-PASS-441-2026-06-17.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Registry Top-Level Summary Boundary Supporting-Lane Admission Pass 442](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-REGISTRY-TOP-LEVEL-SUMMARY-BOUNDARY-SUPPORTING-LANE-ADMISSION-PASS-442-2026-06-17.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Registry Top-Level Summary Boundary First-Implementation Admission Pass 443](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-REGISTRY-TOP-LEVEL-SUMMARY-BOUNDARY-FIRST-IMPLEMENTATION-ADMISSION-PASS-443-2026-06-17.md)
 
 ## Notes
 
