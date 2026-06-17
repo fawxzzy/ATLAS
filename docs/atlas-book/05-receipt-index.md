@@ -1067,6 +1067,7 @@
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Unknown-Tool-Surface Prompt-Pack And Handoff Contract Pass 388](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-UNKNOWN-TOOL-SURFACE-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-388-2026-06-17.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Unknown-Tool-Surface Implementation-Readiness Closeout And Worker-Routing Pass 389](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-UNKNOWN-TOOL-SURFACE-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-389-2026-06-17.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Unknown-Tool-Surface First-Implementation Worker Cluster Reconciliation](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-UNKNOWN-TOOL-SURFACE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-17.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Post-Broader Attention-Queue Unknown-Tool-Surface Next-Slice Selection Pass 390](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-POST-BROADER-ATTENTION-QUEUE-UNKNOWN-TOOL-SURFACE-NEXT-SLICE-SELECTION-PASS-390-2026-06-17.md)
 
 ## Notes
 
