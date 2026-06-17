@@ -1099,6 +1099,7 @@
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Trust-Posture Top-Level Summary Boundary Prompt-Pack And Handoff Contract Pass 416](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-TRUST-POSTURE-TOP-LEVEL-SUMMARY-BOUNDARY-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-416-2026-06-17.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Trust-Posture Top-Level Summary Boundary Implementation-Readiness Closeout And Worker-Routing Pass 417](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-TRUST-POSTURE-TOP-LEVEL-SUMMARY-BOUNDARY-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-417-2026-06-17.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Trust-Posture Top-Level Summary Boundary First-Implementation Worker Cluster Reconciliation](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-TRUST-POSTURE-TOP-LEVEL-SUMMARY-BOUNDARY-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-17.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Post-Trust-Posture Top-Level Summary Boundary Next-Slice Selection Pass 418](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-POST-TRUST-POSTURE-TOP-LEVEL-SUMMARY-BOUNDARY-NEXT-SLICE-SELECTION-PASS-418-2026-06-17.md)
 
 ## Notes
 
