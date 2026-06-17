@@ -1,0 +1,130 @@
+# AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Session-Failed First-Implementation Worker Cluster Reconciliation - 2026-06-16
+
+- Date: `2026-06-16`
+- Owner: `ATLAS root`
+- Mode: `root-bounded implementation reconciliation`
+- Scope: `session_failed first implementation worker cluster`
+- Source surfaces:
+  - `docs/memory/profiles/zachariah_workflow_profile.md`
+  - `docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-SESSION-FAILED-CONTRACT-FREEZE-PASS-370-2026-06-16.md`
+  - `docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-SESSION-FAILED-OWNER-SURFACE-ADMISSION-PASS-371-2026-06-16.md`
+  - `docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-SESSION-FAILED-SUPPORTING-LANE-ADMISSION-PASS-372-2026-06-16.md`
+  - `docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-SESSION-FAILED-FIRST-IMPLEMENTATION-ADMISSION-PASS-373-2026-06-16.md`
+  - `docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-SESSION-FAILED-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-374-2026-06-16.md`
+  - `docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-SESSION-FAILED-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-375-2026-06-16.md`
+  - `docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-PROVENANCE-ALERT-QUEUE-SIGNAL-BUDGET-INTEGRATION-PROOF-PASS-290-2026-06-15.md`
+  - `ops/cortex/render_status.py`
+  - `tests/test_cortex_render_status_provenance.py`
+  - `runtime/receipts/validation/stack-validation.latest.md`
+  - `runtime/receipts/validation/stack-validation.latest.json`
+- Control-plane checkpoint: `main@9b55268a`
+
+## Objective
+
+Reconcile the admitted `session_failed` first implementation worker cluster against the frozen pass-370-through-pass-375 chain, preserve the already-correct helper behavior, and record the explicit proof expansion that now lands this slice on canonical `main`.
+
+## Worker Ownership Check
+
+Frozen ownership was:
+
+- bounded helper behavior inside `ops/cortex/render_status.py`
+- bounded proof expansion inside `tests/test_cortex_render_status_provenance.py`
+- no queue mutation, registry mutation, runtime mutation, manifest mutation, execution-receipt mutation, session mutation, merge mutation, or owner-repo mutation
+
+Observed ownership stays inside that split.
+
+## Worker Cluster Reconciliation
+
+Implementation surfaces carrying the admitted slice are:
+
+- `ops/cortex/render_status.py`
+- `tests/test_cortex_render_status_provenance.py`
+
+Reconciliation decision:
+
+- `clean`
+
+Why:
+
+- `attention_queue(...)` already preserves the admitted `session_failed` qualifier by emitting only when the active session has `failed` in `session_state` or `final_status`
+- `attention_queue(...)` already preserves the admitted payload shape by carrying only `details.session_id` and `details.task_id` for this family
+- `attention_queue(...)` already preserves the admitted fixed `high` severity and bounded summary wording for this family
+- `attention_queue(...)` already preserves separate unhealthy-registry coexistence because `registry_error` remains a separate sentinel family while `session_failed` still emits from the active-session read model without contradiction-family widening
+- `attention_queue(...)` already preserves separate `registry_drift` coexistence because the active-session digest mismatch sentinel remains separate and higher in lexical sort precedence within the same severity band without widening the session-failed payload
+- `attention_queue(...)` already preserves deterministic mixed-family ordering, so this active-session family coexists with other admitted queue items without reopening order drift
+- `render_status_payload(...)` already preserves the admitted top-level handoff by surfacing only the bounded `active_session` payload plus the bounded `attention_queue` projection without widening into retry authority, resume execution, merge execution, registry repair, or owner-repo consequence
+- the pass-290 provenance overflow boundary remains unchanged and still coexists cleanly with this session-failed family
+- the new worker proof now covers the exact pass-373 gaps that were still implicit before this cluster:
+  - `session_state == "failed"` emission
+  - `final_status == "failed"` emission
+  - omission when neither admitted field qualifies
+  - unhealthy-registry coexistence with separate `registry_error`
+  - registry-drift coexistence with separate `registry_drift`
+  - deterministic mixed-family ordering with other admitted queue families
+  - pass-290 provenance overflow noninteraction when a session-failed item is present
+  - top-level `render_status_payload(...)` handoff preserving both `active_session` and `attention_queue`
+- no code change in `ops/cortex/render_status.py` was required, which confirms the worker packet was a bounded proof-and-reconciliation landing rather than a contract-widening refactor
+
+Result class:
+
+- `first implementation worker cluster landed and reconciled`
+
+## Validation And Proof
+
+Executed proof commands:
+
+- `python -m unittest tests.test_cortex_render_status_provenance`
+- `python .\ops\validation\validate_stack.py --ratchet`
+
+Observed results:
+
+- bounded unittest proof passed at `81` tests
+- root validation remained clean at `critical=0 error=0 warning=3 info=0`
+- canonical `main` returned to branch parity at `0` behind and `0` ahead after push
+- the admitted helper and proof surfaces now satisfy the full frozen session-failed first-implementation matrix
+
+## Shared Restart Spine Refresh
+
+Shared restart spines now refresh because the admitted worker cluster is real and no longer only a docs-only handoff:
+
+- `docs/atlas-book/01-current-state.md`
+- `docs/atlas-book/05-receipt-index.md`
+- `docs/atlas-book/12-restart-and-handoff-guide.md`
+
+## Marker Decision
+
+- `none`
+
+Why:
+
+- one bounded worker cluster landed and closed the explicit proof gap for this active-session terminal-failure slice
+- the lane already remains at its current threshold and this landing does not independently justify a broader marker move without a larger restart or adoption change
+
+## Exact Post-Cluster Routing
+
+- `AI Long-Run Batch Orchestration queue-or-registry post-broader attention_queue session_failed next-slice selection pass 376`
+
+Why:
+
+- the admitted session-failed slice is now implemented and proved
+- the next honest question is which remaining broader `attention_queue` family should advance next under the same bounded root-owned discipline
+
+## Health Check
+
+- protected surfaces remained untouched
+- no owner-repo work reopened
+- the broad untracked root backlog remains intentionally untouched
+
+## Rule
+
+When a bounded terminal-failure seam already has correct helper behavior, the worker packet may land as explicit proof expansion and reconciliation rather than a forced code edit.
+
+## Pattern
+
+freeze session-failed seam -> freeze handoff -> close readiness -> land exact proof matrix -> reconcile bounded worker cluster -> route the next queue family
+
+## Failure Mode
+
+`Implicit Session Failed Proof`
+
+If the session-failed slice stays only informally covered, later workers can reopen qualification, severity, registry coexistence, overflow coexistence, or top-level handoff questions that the helper already answered correctly, turning a narrow admitted slice back into avoidable doctrine churn.
