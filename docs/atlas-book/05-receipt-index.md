@@ -1122,6 +1122,8 @@
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Governed-Writes Top-Level Payload Boundary First-Implementation Admission Pass 436](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-GOVERNED-WRITES-TOP-LEVEL-PAYLOAD-BOUNDARY-FIRST-IMPLEMENTATION-ADMISSION-PASS-436-2026-06-17.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Governed-Writes Top-Level Payload Boundary Prompt-Pack And Handoff Contract Pass 437](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-GOVERNED-WRITES-TOP-LEVEL-PAYLOAD-BOUNDARY-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-437-2026-06-17.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Governed-Writes Top-Level Payload Boundary Implementation-Readiness Closeout And Worker-Routing Pass 438](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-GOVERNED-WRITES-TOP-LEVEL-PAYLOAD-BOUNDARY-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-438-2026-06-17.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Governed-Writes Top-Level Payload Boundary First-Implementation Worker Cluster Reconciliation](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-GOVERNED-WRITES-TOP-LEVEL-PAYLOAD-BOUNDARY-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-17.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Post-Governed-Writes Top-Level Payload Boundary Next-Slice Selection Pass 439](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-POST-GOVERNED-WRITES-TOP-LEVEL-PAYLOAD-BOUNDARY-NEXT-SLICE-SELECTION-PASS-439-2026-06-17.md)
 
 ## Notes
 

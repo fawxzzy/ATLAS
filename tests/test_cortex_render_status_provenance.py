@@ -12,6 +12,7 @@ from ops.cortex.render_status import (
     classify_merge_requests,
     closure_receipts,
     conversation_summary,
+    governed_writes,
     legacy_compatibility_surfaces,
     open_merge_requests,
     proposal_only_state,
@@ -248,7 +249,21 @@ def _execution_receipt_descriptor(
     executed_at: str = "2026-06-16T11:59:00Z",
     reconciled_by_tool_version: str = "tool-version-1",
     repair_basis_refs: list[str] | None = None,
+    execution_mode: str = "workspace_file_apply",
+    workspace_root: str = "C:/ATLAS",
+    target_path: str = "docs/example.md",
+    rollback_ref: str = "runtime/atlas/rollbacks/rollback-1.json",
+    prior_sha256: str = "sha256-before-1",
+    applied_at: str | None = "2026-06-16T12:00:30Z",
 ) -> dict[str, object]:
+    action: dict[str, object] = {
+        "workspace_root": workspace_root,
+        "target_path": target_path,
+        "rollback_ref": rollback_ref,
+        "prior_sha256": prior_sha256,
+    }
+    if applied_at is not None:
+        action["applied_at"] = applied_at
     return {
         "artifact_type": "execution_receipt",
         "source_ref": source_ref,
@@ -263,10 +278,12 @@ def _execution_receipt_descriptor(
             "reconciled_at": reconciled_at,
             "executed_at": executed_at,
             "reconciled_by_tool_version": reconciled_by_tool_version,
+            "execution_mode": execution_mode,
         },
         "links": {
             "supersedes_receipt_ref": supersedes_receipt_ref,
             "repair_basis_refs": repair_basis_refs or [],
+            "action": action,
         },
     }
 
@@ -5678,6 +5695,231 @@ class RenderStatusProvenanceTests(unittest.TestCase):
         self.assertEqual("pending", payload["proposal_only"]["status"])
         self.assertEqual(1, payload["proposal_only"]["item_count"])
         self.assertEqual("turn-proposal", payload["proposal_only"]["items"][0]["turn_id"])
+
+    def test_governed_writes_is_empty_without_qualifying_execution_receipts(self) -> None:
+        descriptors = [
+            _conversation_manifest_descriptor(conversation_id="conversation-non-write"),
+            _execution_receipt_descriptor(
+                receipt_id="receipt-non-qualifying",
+                source_ref="runtime/atlas/execution-receipts/receipt-non-qualifying.json",
+                execution_mode="dry_run",
+            ),
+        ]
+
+        with patch("ops.cortex.render_status.execution_receipt_residue_records", return_value=[]):
+            self.assertEqual([], governed_writes(descriptors))
+
+    def test_governed_writes_omits_non_execution_residue_and_non_workspace_apply_descriptors(self) -> None:
+        residue_ref = "runtime/atlas/execution-receipts/receipt-residue.json"
+        descriptors = [
+            _conversation_manifest_descriptor(conversation_id="conversation-non-write"),
+            _execution_receipt_descriptor(
+                receipt_id="receipt-residue",
+                source_ref=residue_ref,
+            ),
+            _execution_receipt_descriptor(
+                receipt_id="receipt-non-workspace-apply",
+                source_ref="runtime/atlas/execution-receipts/receipt-non-workspace-apply.json",
+                execution_mode="merge_request_apply",
+            ),
+            _execution_receipt_descriptor(
+                receipt_id="receipt-current",
+                source_ref="runtime/atlas/execution-receipts/receipt-current.json",
+                tool_id="tool-current",
+                registry_digest="registry-digest-current",
+                workspace_root="C:/ATLAS",
+                target_path="docs/current.md",
+                rollback_ref="runtime/atlas/rollbacks/rollback-current.json",
+                prior_sha256="sha256-current",
+                applied_at="2026-06-16T12:10:00Z",
+            ),
+        ]
+
+        with patch(
+            "ops.cortex.render_status.execution_receipt_residue_records",
+            return_value=[{"source_ref": residue_ref}],
+        ):
+            self.assertEqual(
+                [
+                    {
+                        "receipt_id": "receipt-current",
+                        "source_ref": "runtime/atlas/execution-receipts/receipt-current.json",
+                        "result": "succeeded",
+                        "tool_id": "tool-current",
+                        "registry_digest": "registry-digest-current",
+                        "workspace_root": "C:/ATLAS",
+                        "target_path": "docs/current.md",
+                        "rollback_ref": "runtime/atlas/rollbacks/rollback-current.json",
+                        "prior_sha256": "sha256-current",
+                        "applied_at": "2026-06-16T12:10:00Z",
+                    }
+                ],
+                governed_writes(descriptors),
+            )
+
+    def test_governed_writes_projects_exact_admitted_fields_from_action(self) -> None:
+        descriptors = [
+            _execution_receipt_descriptor(
+                receipt_id="receipt-action-fields",
+                source_ref="runtime/atlas/execution-receipts/receipt-action-fields.json",
+                result="succeeded",
+                tool_id="tool-action-fields",
+                registry_digest="registry-digest-action",
+                workspace_root="C:/ATLAS/repos/playbook",
+                target_path="packages/core/src/index.ts",
+                rollback_ref="runtime/atlas/rollbacks/rollback-action.json",
+                prior_sha256="sha256-action",
+                applied_at="2026-06-16T12:11:00Z",
+            )
+        ]
+
+        with patch("ops.cortex.render_status.execution_receipt_residue_records", return_value=[]):
+            self.assertEqual(
+                [
+                    {
+                        "receipt_id": "receipt-action-fields",
+                        "source_ref": "runtime/atlas/execution-receipts/receipt-action-fields.json",
+                        "result": "succeeded",
+                        "tool_id": "tool-action-fields",
+                        "registry_digest": "registry-digest-action",
+                        "workspace_root": "C:/ATLAS/repos/playbook",
+                        "target_path": "packages/core/src/index.ts",
+                        "rollback_ref": "runtime/atlas/rollbacks/rollback-action.json",
+                        "prior_sha256": "sha256-action",
+                        "applied_at": "2026-06-16T12:11:00Z",
+                    }
+                ],
+                governed_writes(descriptors),
+            )
+
+    def test_governed_writes_falls_back_to_executed_at_when_action_applied_at_is_missing(self) -> None:
+        descriptors = [
+            _execution_receipt_descriptor(
+                receipt_id="receipt-fallback",
+                source_ref="runtime/atlas/execution-receipts/receipt-fallback.json",
+                tool_id="tool-fallback",
+                applied_at=None,
+                executed_at="2026-06-16T12:12:00Z",
+            )
+        ]
+
+        with patch("ops.cortex.render_status.execution_receipt_residue_records", return_value=[]):
+            self.assertEqual(
+                "2026-06-16T12:12:00Z",
+                governed_writes(descriptors)[0]["applied_at"],
+            )
+
+    def test_governed_writes_preserves_descending_order_by_applied_at_then_source_ref(self) -> None:
+        descriptors = [
+            _execution_receipt_descriptor(
+                receipt_id="receipt-alpha",
+                source_ref="runtime/atlas/execution-receipts/receipt-alpha.json",
+                applied_at="2026-06-16T12:13:00Z",
+            ),
+            _execution_receipt_descriptor(
+                receipt_id="receipt-zulu",
+                source_ref="runtime/atlas/execution-receipts/receipt-zulu.json",
+                applied_at="2026-06-16T12:13:00Z",
+            ),
+            _execution_receipt_descriptor(
+                receipt_id="receipt-older",
+                source_ref="runtime/atlas/execution-receipts/receipt-older.json",
+                applied_at="2026-06-16T12:12:59Z",
+            ),
+        ]
+
+        with patch("ops.cortex.render_status.execution_receipt_residue_records", return_value=[]):
+            self.assertEqual(
+                [
+                    "runtime/atlas/execution-receipts/receipt-zulu.json",
+                    "runtime/atlas/execution-receipts/receipt-alpha.json",
+                    "runtime/atlas/execution-receipts/receipt-older.json",
+                ],
+                [item["source_ref"] for item in governed_writes(descriptors)],
+            )
+
+    def test_render_status_payload_preserves_top_level_governed_writes_separately(self) -> None:
+        residue_payload = [
+            {
+                "source_ref": "runtime/atlas/execution-receipts/receipt-residue.json",
+                "status": "superseded_residue",
+            }
+        ]
+        closure_payload = [
+            {
+                "source_ref": "runtime/atlas/execution-receipts/receipt-closure.json",
+                "missing": True,
+            }
+        ]
+        descriptors = [
+            _execution_receipt_descriptor(
+                receipt_id="receipt-governed-current",
+                source_ref="runtime/atlas/execution-receipts/receipt-governed-current.json",
+                tool_id="tool-governed-current",
+                registry_digest="registry-digest-governed",
+                workspace_root="C:/ATLAS",
+                target_path="docs/governed-current.md",
+                rollback_ref="runtime/atlas/rollbacks/rollback-governed-current.json",
+                prior_sha256="sha256-governed-current",
+                applied_at="2026-06-16T12:15:00Z",
+            ),
+            _execution_receipt_descriptor(
+                receipt_id="receipt-residue",
+                source_ref="runtime/atlas/execution-receipts/receipt-residue.json",
+                applied_at="2026-06-16T12:14:00Z",
+            ),
+        ]
+
+        with TemporaryDirectory() as temp_dir:
+            descriptor_root = Path(temp_dir)
+            (descriptor_root / "placeholder.json").write_text("{}", encoding="utf-8")
+            patch_specs = [
+                ("ops.cortex.render_status.load_descriptors", descriptors),
+                ("ops.cortex.render_status.load_registry_state", {"ok": True}),
+                ("ops.cortex.render_status.choose_latest_session", None),
+                ("ops.cortex.render_status.session_overview", None),
+                ("ops.cortex.render_status.blocked_workers", []),
+                ("ops.cortex.render_status.classify_merge_requests", ([], [])),
+                ("ops.cortex.render_status.closure_receipts", closure_payload),
+                ("ops.cortex.render_status.execution_receipt_residue_records", residue_payload),
+                ("ops.cortex.render_status.legacy_compatibility_surfaces", []),
+                ("ops.cortex.render_status.trust_surfaces", []),
+                ("ops.cortex.render_status.trust_posture_summary", {}),
+                ("ops.cortex.render_status.working_memory_summary", {"_items": [], "initiatives": {}}),
+                ("ops.cortex.render_status.provenance_alert_summary", {"status": "clear", "item_count": 0, "items": []}),
+                ("ops.cortex.render_status.conversation_summary", {"item_count": 0, "active_count": 0, "recent_items": []}),
+                ("ops.cortex.render_status.build_canonical_lockfile_artifacts", {}),
+                ("ops.cortex.render_status.repo_inventory_summary_from_lock", {"items": []}),
+                ("ops.cortex.render_status.lock_worktree_hygiene", {"status": "frozen"}),
+                ("ops.cortex.render_status.registry_summary", {}),
+                ("ops.cortex.render_status.artifact_inventory", {}),
+                ("ops.cortex.render_status.proposal_only_state", {}),
+                ("ops.cortex.render_status.world_model_state", {}),
+            ]
+            with ExitStack() as stack:
+                for target, value in patch_specs:
+                    stack.enter_context(patch(target, return_value=value))
+                payload = render_status_payload(descriptor_root)
+
+        self.assertEqual(
+            [
+                {
+                    "receipt_id": "receipt-governed-current",
+                    "source_ref": "runtime/atlas/execution-receipts/receipt-governed-current.json",
+                    "result": "succeeded",
+                    "tool_id": "tool-governed-current",
+                    "registry_digest": "registry-digest-governed",
+                    "workspace_root": "C:/ATLAS",
+                    "target_path": "docs/governed-current.md",
+                    "rollback_ref": "runtime/atlas/rollbacks/rollback-governed-current.json",
+                    "prior_sha256": "sha256-governed-current",
+                    "applied_at": "2026-06-16T12:15:00Z",
+                }
+            ],
+            payload["governed_writes"],
+        )
+        self.assertEqual(residue_payload, payload["execution_receipt_residue"])
+        self.assertEqual(closure_payload, payload["closure_receipts"])
 
     def test_render_status_payload_preserves_blocked_worker_handoff(self) -> None:
         descriptors = [
