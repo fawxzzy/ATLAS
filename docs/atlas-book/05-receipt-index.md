@@ -1091,6 +1091,7 @@
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Legacy-Compatibility Top-Level Payload Boundary Prompt-Pack And Handoff Contract Pass 409](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-LEGACY-COMPATIBILITY-TOP-LEVEL-PAYLOAD-BOUNDARY-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-409-2026-06-17.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Legacy-Compatibility Top-Level Payload Boundary Implementation-Readiness Closeout And Worker-Routing Pass 410](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-LEGACY-COMPATIBILITY-TOP-LEVEL-PAYLOAD-BOUNDARY-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-410-2026-06-17.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Legacy-Compatibility Top-Level Payload Boundary First-Implementation Worker Cluster Reconciliation](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-LEGACY-COMPATIBILITY-TOP-LEVEL-PAYLOAD-BOUNDARY-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-17.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Post-Legacy-Compatibility Top-Level Payload Boundary Next-Slice Selection Pass 411](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-POST-LEGACY-COMPATIBILITY-TOP-LEVEL-PAYLOAD-BOUNDARY-NEXT-SLICE-SELECTION-PASS-411-2026-06-17.md)
 
 ## Notes
 
