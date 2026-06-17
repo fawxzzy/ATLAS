@@ -1060,6 +1060,7 @@
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Registry-Drift Implementation-Readiness Closeout And Worker-Routing Pass 382](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-REGISTRY-DRIFT-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-382-2026-06-16.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Registry-Drift First-Implementation Worker Cluster Reconciliation](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-REGISTRY-DRIFT-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-17.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Post-Broader Attention-Queue Registry-Drift Next-Slice Selection Pass 383](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-POST-BROADER-ATTENTION-QUEUE-REGISTRY-DRIFT-NEXT-SLICE-SELECTION-PASS-383-2026-06-17.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Unknown-Tool-Surface Contract Freeze Pass 384](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-UNKNOWN-TOOL-SURFACE-CONTRACT-FREEZE-PASS-384-2026-06-17.md)
 
 ## Notes
 
