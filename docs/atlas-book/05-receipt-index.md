@@ -1048,6 +1048,7 @@
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Session-Failed Owner-Surface Admission Pass 371](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-SESSION-FAILED-OWNER-SURFACE-ADMISSION-PASS-371-2026-06-16.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Session-Failed Supporting-Lane Admission Pass 372](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-SESSION-FAILED-SUPPORTING-LANE-ADMISSION-PASS-372-2026-06-16.md)
 - [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Session-Failed First-Implementation Admission Pass 373](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-SESSION-FAILED-FIRST-IMPLEMENTATION-ADMISSION-PASS-373-2026-06-16.md)
+- [AI Long-Run Batch Orchestration Queue-Or-Registry Broader Attention-Queue Session-Failed Prompt-Pack And Handoff Contract Pass 374](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-BROADER-ATTENTION-QUEUE-SESSION-FAILED-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-374-2026-06-16.md)
 
 ## Notes
 
