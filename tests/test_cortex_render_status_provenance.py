@@ -8,6 +8,7 @@ from unittest.mock import patch
 
 from ops.cortex.render_status import (
     attention_queue,
+    artifact_inventory,
     blocked_workers,
     classify_merge_requests,
     closure_receipts,
@@ -5743,6 +5744,183 @@ class RenderStatusProvenanceTests(unittest.TestCase):
                 "extension_count": 3,
             },
             registry_summary(state),
+        )
+
+    def test_artifact_inventory_returns_exact_empty_surface_for_empty_descriptors(self) -> None:
+        self.assertEqual(
+            {
+                "descriptor_count": 0,
+                "by_type": {},
+                "artifacts": [],
+            },
+            artifact_inventory([]),
+        )
+
+    def test_artifact_inventory_projects_admitted_fields_with_fallback_and_deterministic_ordering(self) -> None:
+        descriptors = [
+            {
+                "artifact_type": "zeta_type",
+                "source_ref": "runtime/atlas/artifacts/zeta.json",
+                "digest": "sha256:zeta",
+                "trust_class": "restricted",
+                "unexpected": "drop-me",
+            },
+            {
+                "source_ref": "runtime/atlas/artifacts/unknown-second.json",
+                "digest": "sha256:unknown-second",
+                "trust_class": "untrusted",
+                "identity": {"artifact_id": "drop-me-too"},
+            },
+            {
+                "source_ref": "runtime/atlas/artifacts/unknown-first.json",
+                "digest": "sha256:unknown-first",
+                "trust_class": "restricted",
+                "state": {"nested": "drop-me"},
+            },
+            {
+                "artifact_type": "alpha_type",
+                "source_ref": "runtime/atlas/artifacts/alpha.json",
+                "digest": "sha256:alpha",
+                "trust_class": "trusted",
+                "links": {"extra": "drop-me"},
+            },
+        ]
+
+        self.assertEqual(
+            {
+                "descriptor_count": 4,
+                "by_type": {
+                    "alpha_type": 1,
+                    "unknown": 2,
+                    "zeta_type": 1,
+                },
+                "artifacts": [
+                    {
+                        "artifact_type": "alpha_type",
+                        "source_ref": "runtime/atlas/artifacts/alpha.json",
+                        "digest": "sha256:alpha",
+                        "trust_class": "trusted",
+                    },
+                    {
+                        "artifact_type": "unknown",
+                        "source_ref": "runtime/atlas/artifacts/unknown-first.json",
+                        "digest": "sha256:unknown-first",
+                        "trust_class": "restricted",
+                    },
+                    {
+                        "artifact_type": "unknown",
+                        "source_ref": "runtime/atlas/artifacts/unknown-second.json",
+                        "digest": "sha256:unknown-second",
+                        "trust_class": "untrusted",
+                    },
+                    {
+                        "artifact_type": "zeta_type",
+                        "source_ref": "runtime/atlas/artifacts/zeta.json",
+                        "digest": "sha256:zeta",
+                        "trust_class": "restricted",
+                    },
+                ],
+            },
+            artifact_inventory(descriptors),
+        )
+
+    def test_render_status_payload_preserves_top_level_artifact_inventory_separately_from_registry_and_world_model(
+        self,
+    ) -> None:
+        descriptors = [
+            {
+                "artifact_type": "knowledge_catalog",
+                "source_ref": "runtime/atlas/artifacts/knowledge-catalog.json",
+                "digest": "sha256:knowledge",
+                "trust_class": "restricted",
+                "archive_id": "archive-1",
+            },
+            {
+                "source_ref": "runtime/atlas/artifacts/unknown.json",
+                "digest": "sha256:unknown",
+                "trust_class": "untrusted",
+                "unexpected": "ignored",
+            },
+        ]
+
+        with TemporaryDirectory() as temp_dir:
+            descriptor_root = Path(temp_dir)
+            (descriptor_root / "placeholder.json").write_text("{}", encoding="utf-8")
+            patch_specs = [
+                ("ops.cortex.render_status.load_descriptors", descriptors),
+                (
+                    "ops.cortex.render_status.load_registry_state",
+                    {
+                        "ok": True,
+                        "registry_digest": "sha256:registry-current",
+                        "tool_registry_digest": "sha256:tools-current",
+                        "extension_registry_digest": "sha256:extensions-current",
+                        "tool_count": 5,
+                        "extension_count": 2,
+                    },
+                ),
+                ("ops.cortex.render_status.session_overview", {}),
+                ("ops.cortex.render_status.blocked_workers", []),
+                ("ops.cortex.render_status.classify_merge_requests", ([], [])),
+                ("ops.cortex.render_status.closure_receipts", []),
+                ("ops.cortex.render_status.execution_receipt_residue_records", []),
+                ("ops.cortex.render_status.governed_writes", []),
+                ("ops.cortex.render_status.legacy_compatibility_surfaces", []),
+                ("ops.cortex.render_status.trust_surfaces", []),
+                ("ops.cortex.render_status.trust_posture_summary", {"status": "restricted"}),
+                ("ops.cortex.render_status.working_memory_summary", {"_items": [], "initiatives": {}}),
+                ("ops.cortex.render_status.provenance_alert_summary", {"status": "clear", "item_count": 0, "items": []}),
+                ("ops.cortex.render_status.conversation_summary", {}),
+                ("ops.cortex.render_status.build_canonical_lockfile_artifacts", {}),
+                ("ops.cortex.render_status.repo_inventory_summary_from_lock", {"items": []}),
+                ("ops.cortex.render_status.lock_worktree_hygiene", {"status": "frozen"}),
+                ("ops.cortex.render_status.attention_queue", {"status": "clear", "item_count": 0, "highest_severity": None, "items": []}),
+                ("ops.cortex.render_status.proposal_only_state", {}),
+                ("ops.cortex.render_status.world_model_state", {"status": "world-model-placeholder"}),
+            ]
+            with ExitStack() as stack:
+                for target, value in patch_specs:
+                    stack.enter_context(patch(target, return_value=value))
+                payload = render_status_payload(descriptor_root)
+
+        self.assertEqual(
+            {
+                "descriptor_count": 2,
+                "by_type": {
+                    "knowledge_catalog": 1,
+                    "unknown": 1,
+                },
+                "artifacts": [
+                    {
+                        "artifact_type": "knowledge_catalog",
+                        "source_ref": "runtime/atlas/artifacts/knowledge-catalog.json",
+                        "digest": "sha256:knowledge",
+                        "trust_class": "restricted",
+                    },
+                    {
+                        "artifact_type": "unknown",
+                        "source_ref": "runtime/atlas/artifacts/unknown.json",
+                        "digest": "sha256:unknown",
+                        "trust_class": "untrusted",
+                    },
+                ],
+            },
+            payload["artifact_inventory"],
+        )
+        self.assertEqual(
+            {
+                "ok": True,
+                "registry_digest": "sha256:registry-current",
+                "tool_registry_digest": "sha256:tools-current",
+                "extension_registry_digest": "sha256:extensions-current",
+                "tool_count": 5,
+                "extension_count": 2,
+            },
+            payload["registry"],
+        )
+        self.assertEqual(
+            {"status": "world-model-placeholder"},
+            payload["world_model"],
         )
 
     def test_render_status_payload_preserves_unhealthy_top_level_registry_separately_from_registry_error(self) -> None:
