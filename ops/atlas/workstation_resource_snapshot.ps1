@@ -45,6 +45,40 @@ function Format-Megabytes {
     return [math]::Round($Bytes / 1MB, 1)
 }
 
+function Get-SafeCpuSeconds {
+    param(
+        [Parameter(Mandatory = $true)]
+        [System.Diagnostics.Process]$Process
+    )
+
+    try {
+        if ($null -eq $Process.CPU) {
+            return 0.0
+        }
+
+        return [double]$Process.CPU
+    } catch {
+        return 0.0
+    }
+}
+
+function Get-SafeWorkingSetBytes {
+    param(
+        [Parameter(Mandatory = $true)]
+        [System.Diagnostics.Process]$Process
+    )
+
+    try {
+        if ($null -eq $Process.WorkingSet64) {
+            return 0.0
+        }
+
+        return [double]$Process.WorkingSet64
+    } catch {
+        return 0.0
+    }
+}
+
 function Get-SafePath {
     param(
         [Parameter(Mandatory = $true)]
@@ -68,16 +102,16 @@ function Select-ProcessView {
         return $Processes | Select-Object `
             Name, `
             Id, `
-            @{ Name = "CPUSeconds"; Expression = { Format-CpuSeconds -Cpu $_.CPU } }, `
-            @{ Name = "WorkingSetMB"; Expression = { Format-Megabytes -Bytes $_.WorkingSet64 } }, `
+            @{ Name = "CPUSeconds"; Expression = { Format-CpuSeconds -Cpu (Get-SafeCpuSeconds -Process $_) } }, `
+            @{ Name = "WorkingSetMB"; Expression = { Format-Megabytes -Bytes (Get-SafeWorkingSetBytes -Process $_) } }, `
             @{ Name = "Path"; Expression = { Get-SafePath -Process $_ } }
     }
 
     return $Processes | Select-Object `
         Name, `
         Id, `
-        @{ Name = "CPUSeconds"; Expression = { Format-CpuSeconds -Cpu $_.CPU } }, `
-        @{ Name = "WorkingSetMB"; Expression = { Format-Megabytes -Bytes $_.WorkingSet64 } }
+        @{ Name = "CPUSeconds"; Expression = { Format-CpuSeconds -Cpu (Get-SafeCpuSeconds -Process $_) } }, `
+        @{ Name = "WorkingSetMB"; Expression = { Format-Megabytes -Bytes (Get-SafeWorkingSetBytes -Process $_) } }
 }
 
 function Write-Section {
@@ -100,6 +134,36 @@ function Write-Section {
     Select-ProcessView -Processes $Processes | Format-Table -AutoSize | Out-String -Width 220 | Write-Output
 }
 
+function Write-WorkflowSummary {
+    param(
+        [Parameter(Mandatory = $true)]
+        [System.Diagnostics.Process[]]$Processes
+    )
+
+    Write-Output ""
+    Write-Output "== Workflow summary =="
+
+    if (-not $Processes -or $Processes.Count -eq 0) {
+        Write-Output "(none)"
+        return
+    }
+
+    $totalWorkingSetBytes = ($Processes | Measure-Object -Property WorkingSet64 -Sum).Sum
+    if ($null -eq $totalWorkingSetBytes) {
+        $totalWorkingSetBytes = 0
+    }
+
+    $groupedNames = $Processes |
+        Group-Object { $_.ProcessName.ToLowerInvariant() } |
+        Sort-Object -Property @{ Expression = "Count"; Descending = $true }, @{ Expression = "Name"; Descending = $false } |
+        ForEach-Object { "{0}({1})" -f $_.Name, $_.Count }
+
+    Write-Output ("Workflow process count: {0}" -f $Processes.Count)
+    Write-Output ("Distinct workflow names: {0}" -f (($Processes | Group-Object { $_.ProcessName.ToLowerInvariant() }).Count))
+    Write-Output ("Workflow working set (MB): {0}" -f (Format-Megabytes -Bytes $totalWorkingSetBytes))
+    Write-Output ("Workflow names: {0}" -f ($groupedNames -join ", "))
+}
+
 $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss zzz"
 Write-Output "ATLAS workstation resource snapshot"
 Write-Output "Generated: $timestamp"
@@ -108,12 +172,14 @@ Write-Output "Privacy warning: process paths and window-title-adjacent context c
 
 $allProcesses = Get-Process
 $workflowProcesses = $allProcesses | Where-Object { $workflowNames -contains $_.ProcessName } | Sort-Object -Property `
-    @{ Expression = "CPU"; Descending = $true }, `
-    @{ Expression = "WorkingSet64"; Descending = $true } | Select-Object -First $Top
+    @{ Expression = { Get-SafeCpuSeconds -Process $_ }; Descending = $true }, `
+    @{ Expression = { Get-SafeWorkingSetBytes -Process $_ }; Descending = $true } | Select-Object -First $Top
+
+Write-WorkflowSummary -Processes $workflowProcesses
 
 if (-not $WorkflowOnly) {
-    $topCpu = $allProcesses | Sort-Object CPU -Descending | Select-Object -First $Top
-    $topMemory = $allProcesses | Sort-Object WorkingSet64 -Descending | Select-Object -First $Top
+    $topCpu = $allProcesses | Sort-Object -Property @{ Expression = { Get-SafeCpuSeconds -Process $_ }; Descending = $true } | Select-Object -First $Top
+    $topMemory = $allProcesses | Sort-Object -Property @{ Expression = { Get-SafeWorkingSetBytes -Process $_ }; Descending = $true } | Select-Object -First $Top
 
     Write-Section -Title "Top CPU processes" -Processes $topCpu
     Write-Section -Title "Top memory processes" -Processes $topMemory

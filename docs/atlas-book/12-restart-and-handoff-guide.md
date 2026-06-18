@@ -127,7 +127,7 @@ Marker-system hygiene rule:
 - read `Active Cluster Read` first
 - read the capped `Active Front-Page Marker Table` second; it should hold open front-page markers only
 - use `Supporting Open Markers` only for lane-specific follow-up; grouping subheads are fine as long as the marker lines remain parser-compatible
-- carry `Vercel Hobby Cost Governance` as a supporting open marker until repeatable usage snapshots and explicit Hobby-to-Pro thresholds become durable
+- carry `Vercel Hobby Cost Governance` as a supporting open marker until repeatable usage snapshots, route-pressure inventory, and release-check adoption become durable
 - use `Closed / Locked Ratchets` only for historical boundary or restart context
 - keep `Closed / Locked Ratchets` compact; route detailed closeout evidence through receipts and the receipt index instead of the live marker table
 
@@ -165,6 +165,12 @@ Read-only local helper:
 
 - `ops/atlas/workstation_resource_snapshot.ps1`
 
+Current helper posture:
+
+- emits one sanitized workflow summary by default
+- supports both workflow-only and full snapshot modes
+- keep `-IncludePath` opt-in only because paths are machine-private
+
 Use that helper when local CPU/GPU pressure or lingering workflow residue is suspected. Do not commit raw machine-private output, especially if `-IncludePath` was used.
 
 ## Current Restart Truth
@@ -184,7 +190,8 @@ Use that helper when local CPU/GPU pressure or lingering workflow residue is sus
 - the current active ATLAS-side lane is now `AI Repetition-to-Automation Pipeline`
 - the immediately preceding ATLAS-side lane was `AI Long-Run Batch Orchestration`, and its current bounded `queue-or-registry` subfamily is now exhausted through the reconciled top-level `world_model` branch
 - the broader `attention_queue` family is now exhausted through `legacy_compatibility_payload`, the adjacent top-level `legacy_compatibility` payload boundary is now reconciled, the top-level `trust_posture` summary boundary is now also reconciled on canonical `main`, and the raw top-level `trust_surfaces` payload boundary is now contract-frozen around non-`trusted` `knowledge_catalog` qualification, exact field projection, deterministic ordering, and explicit separation from the richer summary and narrower queue-side quarantine signal
-- `Vercel Hobby Cost Governance` is now an admitted supporting open marker at `35%`; it protects the Fitness cheap-by-design Vercel Hobby posture, Observability Plus or Pro gating, and threshold-based upgrade discipline
+- `Workstation Resource Hygiene` now sits at `22%`: the helper has now been replayed in a later session, the full snapshot path was hardened after a real CPU-sorting failure, both replay modes now succeed, and the default helper output now includes one sanitized workflow summary so closeout checks can reuse the lane without committing raw machine-private paths
+- `Vercel Hobby Cost Governance` now sits at `45%`: the first current Fitness usage-snapshot categories are durable, the official Hobby, Pro, and Observability Plus thresholds were revalidated on `2026-06-17`, current read-only evidence now explicitly carries recent deployment churn plus the sampled `/api/discord/interactions` polling shape, and the lane still remains below the next threshold because route, middleware, and fetch inventory plus repeat trend snapshots are not yet durable
 - the current immediate ATLAS-root packet is now `AI Repetition-to-Automation Pipeline non-Fitness marker knockout selector surface`
 - the immediately preceding ATLAS-side selector lane was also `AI Repetition-to-Automation Pipeline`; its earlier scaffold, `receipt skeleton drafts`, and `doctrine-routing drafts` receipts remain durable carry-forward truth rather than the current immediate packet
 - PR `#80` is now merged on `main`, so the bounded live default-write adoption checkpoint branch is durable and closed on the canonical branch
