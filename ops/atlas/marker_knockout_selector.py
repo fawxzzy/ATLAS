@@ -377,6 +377,14 @@ def effective_policy(*, marker: str, active_lane: str | None) -> MarkerPolicy:
     return policy
 
 
+def packet_for_marker(marker: str) -> str | None:
+    if marker == "AI Repetition-to-Automation Pipeline":
+        return "AI Repetition-to-Automation Pipeline non-Fitness marker knockout selector surface"
+    if marker == "AI Long-Run Batch Orchestration":
+        return "AI Long-Run Batch Orchestration queue-or-registry active follow-on"
+    return None
+
+
 def build_campaign(*, root: Path) -> dict[str, object]:
     sections = load_marker_sections(root=root)
     active_lane = load_active_lane(root=root)
@@ -416,6 +424,7 @@ def build_campaign(*, root: Path) -> dict[str, object]:
         selected = next((record for record in records if record.marker == active_lane), None)
     else:
         selected = next((record for record in records if record.category == "admissible now"), None)
+    next_after_current = next((record for record in records if record.category == "admissible after current lane"), None)
     category_counts: dict[str, int] = {}
     for record in records:
         category_counts[record.category] = category_counts.get(record.category, 0) + 1
@@ -445,13 +454,12 @@ def build_campaign(*, root: Path) -> dict[str, object]:
         "selected_percentage": selected.percentage if selected else None,
         "selected_expected_evidence": selected.expected_evidence if selected else None,
         "selected_reason": selected.rationale if selected else None,
-        "selected_next_packet": (
-            "AI Repetition-to-Automation Pipeline non-Fitness marker knockout selector surface"
-            if selected and selected.marker == "AI Repetition-to-Automation Pipeline"
-            else "AI Long-Run Batch Orchestration queue-or-registry active follow-on"
-            if selected and selected.marker == "AI Long-Run Batch Orchestration"
-            else None
-        ),
+        "selected_current_packet": packet_for_marker(selected.marker) if selected else None,
+        "next_after_current_marker": next_after_current.marker if next_after_current else None,
+        "next_after_current_percentage": next_after_current.percentage if next_after_current else None,
+        "next_after_current_expected_evidence": next_after_current.expected_evidence if next_after_current else None,
+        "next_after_current_reason": next_after_current.rationale if next_after_current else None,
+        "next_after_current_packet": packet_for_marker(next_after_current.marker) if next_after_current else None,
     }
 
 
@@ -476,17 +484,31 @@ def render_markdown(payload: dict[str, object]) -> str:
         )
 
     if payload.get("selected_marker"):
+        section_title = "## Current Active Marker" if payload.get("active_lane") else "## First Admissible Marker"
         lines += [
             "",
-            "## First Admissible Marker",
+            section_title,
             "",
             f"- marker: `{payload['selected_marker']}`",
             f"- current percentage: `{payload['selected_percentage']}%`",
             f"- why: {payload['selected_reason']}",
             f"- expected evidence: {payload['selected_expected_evidence']}",
         ]
-        if payload.get("selected_next_packet"):
-            lines.append(f"- selected next packet: `{payload['selected_next_packet']}`")
+        if payload.get("selected_current_packet"):
+            lines.append(f"- current packet: `{payload['selected_current_packet']}`")
+
+    if payload.get("next_after_current_marker"):
+        lines += [
+            "",
+            "## First Admissible After Current Lane",
+            "",
+            f"- marker: `{payload['next_after_current_marker']}`",
+            f"- current percentage: `{payload['next_after_current_percentage']}%`",
+            f"- why: {payload['next_after_current_reason']}",
+            f"- expected evidence: {payload['next_after_current_expected_evidence']}",
+        ]
+        if payload.get("next_after_current_packet"):
+            lines.append(f"- next packet after current lane: `{payload['next_after_current_packet']}`")
 
     return "\n".join(lines).rstrip() + "\n"
 

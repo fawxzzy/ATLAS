@@ -81,7 +81,15 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual(20, payload["selected_percentage"])
         self.assertEqual(
             "AI Long-Run Batch Orchestration queue-or-registry active follow-on",
-            payload["selected_next_packet"],
+            payload["selected_current_packet"],
+        )
+        self.assertEqual(
+            "AI Repetition-to-Automation Pipeline",
+            payload["next_after_current_marker"],
+        )
+        self.assertEqual(
+            "AI Repetition-to-Automation Pipeline non-Fitness marker knockout selector surface",
+            payload["next_after_current_packet"],
         )
 
     def test_build_campaign_classifies_fitness_and_secret_holds(self) -> None:
@@ -121,6 +129,24 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual(0, exit_code)
         payload = json.loads((root / output_ref).read_text(encoding="utf-8"))
         self.assertEqual("root-non-fitness-marker-knockout", payload["campaign_id"])
+
+    def test_main_markdown_separates_current_lane_from_next_follow_on(self) -> None:
+        root = self._temp_root()
+        (root / "docs" / "atlas-book" / "02-lanes-and-markers.md").write_text(MARKER_DOC, encoding="utf-8")
+        (root / "docs" / "atlas-book" / "01-current-state.md").write_text(CURRENT_STATE_DOC, encoding="utf-8")
+        output_ref = "docs/ops/selector-output.md"
+
+        exit_code = main(["--root", str(root), "--format", "markdown", "--output", output_ref])
+
+        self.assertEqual(0, exit_code)
+        markdown = (root / output_ref).read_text(encoding="utf-8")
+        self.assertIn("## Current Active Marker", markdown)
+        self.assertIn("current packet: `AI Long-Run Batch Orchestration queue-or-registry active follow-on`", markdown)
+        self.assertIn("## First Admissible After Current Lane", markdown)
+        self.assertIn(
+            "next packet after current lane: `AI Repetition-to-Automation Pipeline non-Fitness marker knockout selector surface`",
+            markdown,
+        )
 
 
 if __name__ == "__main__":
