@@ -66,6 +66,9 @@ def _evaluate_governance_checks(
         payload: dict[str, Any] = {}
         generated_at = ""
         age_hours = None
+        checkpoint_status = ""
+        decision = ""
+        decision_reason = ""
         max_age_hours = spec.get("max_age_hours")
         if not report_ref:
             blockers.append(f"Governance check '{check_id}' is missing report_ref.")
@@ -83,6 +86,9 @@ def _evaluate_governance_checks(
                         f"Governance check '{check_id}' expected contract '{contract_version}' but found '{observed_contract or 'missing'}'."
                     )
                 generated_at = str(payload.get("generated_at") or "")
+                checkpoint_status = str(payload.get("checkpoint_status") or "").strip()
+                decision = str(payload.get("decision") or "").strip()
+                decision_reason = str(payload.get("decision_reason") or "").strip()
                 generated_dt = _parse_utc(generated_at)
                 if isinstance(max_age_hours, (int, float)):
                     if generated_dt is None:
@@ -95,6 +101,13 @@ def _evaluate_governance_checks(
                             blockers.append(
                                 f"Governance check '{check_id}' report is stale ({age_hours}h > {float(max_age_hours)}h)."
                             )
+                if checkpoint_status and checkpoint_status != "ready":
+                    detail = f"Governance check '{check_id}' status is '{checkpoint_status}'."
+                    if decision:
+                        detail += f" Decision: '{decision}'."
+                    if decision_reason:
+                        detail += f" Reason: {decision_reason}"
+                    blockers.append(detail)
         guardrail_posture = payload.get("guardrail_posture") if isinstance(payload.get("guardrail_posture"), dict) else {}
         summary = payload.get("summary") if isinstance(payload.get("summary"), dict) else {}
         checks.append(
@@ -111,6 +124,9 @@ def _evaluate_governance_checks(
                 "max_age_hours": float(max_age_hours) if isinstance(max_age_hours, (int, float)) else None,
                 "status": "blocked" if blockers else "ready",
                 "blockers": blockers,
+                "checkpoint_status": checkpoint_status,
+                "decision": decision,
+                "decision_reason": decision_reason,
                 "guardrail_posture": guardrail_posture,
                 "summary": summary,
             }
@@ -634,6 +650,16 @@ def build_release_readiness(
                 )
                 if posture_summary:
                     md_lines.append(f"|  |  |  |  |  | governance posture: {posture_summary} |  |  |")
+            decision = str(check.get("decision") or "").strip()
+            decision_reason = str(check.get("decision_reason") or "").strip()
+            checkpoint_status = str(check.get("checkpoint_status") or "").strip()
+            if decision:
+                detail = f"governance decision: {decision}"
+                if checkpoint_status:
+                    detail += f" ({checkpoint_status})"
+                md_lines.append(f"|  |  |  |  |  | {detail} |  |  |")
+            if decision_reason:
+                md_lines.append(f"|  |  |  |  |  | governance decision reason: {decision_reason} |  |  |")
             for blocker in check.get("blockers", []):
                 md_lines.append(f"|  |  |  |  |  | governance blocker: {blocker} |  |  |")
         if item["release_blockers"]:

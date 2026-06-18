@@ -236,6 +236,20 @@
           "notes": [
             "Fitness release readiness must consume one fresh no-secret Vercel Hobby guardrail report."
           ]
+        },
+        {
+          "check_id": "fitness_vercel_hobby_decision",
+          "kind": "json_report",
+          "report_ref": "runtime/receipts/vercel-hobby-cost-governance/fitness-hobby-decision.latest.json",
+          "contract_version": "atlas.vercel_hobby_decision.v1",
+          "max_age_hours": 168.0,
+          "required_for_modes": [
+            "release",
+            "manual_promotion"
+          ],
+          "notes": [
+            "Fitness release readiness must consume one fresh keep-Hobby versus upgrade-review checkpoint built from preserved guardrail snapshots."
+          ]
         }
       ]
     },

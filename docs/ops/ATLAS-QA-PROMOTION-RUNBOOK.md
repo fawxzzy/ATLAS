@@ -277,11 +277,12 @@ Use `ops/atlas/qa/release_readiness.py` to map adopted repos onto their release 
 - `playbook` is governed as `docs_governance`.
 - `lifeline` and `foundation` are governed as `package_contract`.
 
-Fitness also carries one release-mode governance checkpoint:
+Fitness also carries two release-mode governance checkpoints:
 
 - `runtime/receipts/vercel-hobby-cost-governance/fitness-hobby-guardrail.latest.json`
+- `runtime/receipts/vercel-hobby-cost-governance/fitness-hobby-decision.latest.json`
 
-That guardrail report must stay fresh, match contract version `atlas.vercel_hobby_guardrail.v1`, and remain readable from root release-readiness before Fitness release enforcement can pass.
+Those governance artifacts must stay fresh, match contract versions `atlas.vercel_hobby_guardrail.v1` and `atlas.vercel_hobby_decision.v1`, remain readable from root release-readiness, and keep the decision checkpoint at `checkpoint_status: ready` before Fitness release enforcement can pass.
 
 The release-readiness report should mark a repo release-ready only when its latest meaningful receipt satisfies the repo's release profile.
 

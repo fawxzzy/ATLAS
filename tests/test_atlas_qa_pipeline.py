@@ -2372,6 +2372,184 @@ class AtlasQaPipelineTests(unittest.TestCase):
         self.assertEqual("blocked", repo["mode_requirements"]["release"]["governance_gate_status"])
         self.assertIn("could not load", repo["release_blockers"][0])
 
+    def test_release_readiness_consumes_fitness_vercel_hobby_decision_checkpoint(self) -> None:
+        root = self._temp_root()
+        (root / "ops" / "atlas" / "qa").mkdir(parents=True, exist_ok=True)
+        self._write_stack_lock(root=root, components={"fitness": "fitness-target"})
+        generated_at = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+        _write_json(
+            root / "ops" / "atlas" / "qa" / "release_policy.v1.json",
+            {
+                "contract_version": "atlas.qa.release_policy.v1",
+                "profiles": {
+                    "release_critical_web": {
+                        "display_name": "Release-Critical Web",
+                        "mode_requirements": {
+                            "release": {
+                                "allowed_statuses": ["promoted_physical", "promoted_physical_manual", "waived_promoted"],
+                            }
+                        },
+                    }
+                },
+                "repo_overrides": {
+                    "fitness": {
+                        "release_profile": "release_critical_web",
+                        "governance_checks": [
+                            {
+                                "check_id": "fitness_vercel_hobby_decision",
+                                "kind": "json_report",
+                                "report_ref": "runtime/receipts/vercel-hobby-cost-governance/fitness-hobby-decision.latest.json",
+                                "contract_version": "atlas.vercel_hobby_decision.v1",
+                                "max_age_hours": 168.0,
+                                "required_for_modes": ["release"],
+                            }
+                        ],
+                    }
+                },
+            },
+        )
+        _write_json(
+            root / "runtime" / "receipts" / "vercel-hobby-cost-governance" / "fitness-hobby-decision.latest.json",
+            {
+                "contract_version": "atlas.vercel_hobby_decision.v1",
+                "generated_at": generated_at,
+                "checkpoint_status": "ready",
+                "decision": "keep_hobby",
+                "decision_reason": "stable preserved trend and aligned rolling latest",
+            },
+        )
+        _write_json(
+            root / "runtime" / "atlas" / "qa" / "evidence-index.latest.json",
+            {
+                "contract_version": "atlas.qa.evidence_index.v1",
+                "generated_at": generated_at,
+                "runs": [
+                    {
+                        "run_id": "fitness-run",
+                        "repo_id": "fitness",
+                        "git_sha": "fitness-target",
+                        "promotion_generated_at": generated_at,
+                        "promotion_status": "promoted_physical_manual",
+                    }
+                ],
+                "adoption": [
+                    {
+                        "repo_id": "fitness",
+                        "adopted": True,
+                        "owner": "fitness",
+                        "adapter_refs": ["repos/fawxzzy-fitness/qa/adapters/fitness.web.json"],
+                        "scenario_refs": ["repos/fawxzzy-fitness/qa/scenarios/fitness.progression-pr-smoke.json"],
+                        "evidence_profile": "web_visual",
+                        "last_run_id": "fitness-run",
+                        "last_git_sha": "fitness-target",
+                        "last_promotion_status": "promoted_physical_manual",
+                        "root_runner_version": "atlas.qa.evaluate-run.v2",
+                        "contract_version": "atlas.qa.promotion.v1",
+                    }
+                ],
+                "summary": {},
+                "retention": {},
+            },
+        )
+
+        build_release_readiness(root=root)
+
+        payload = load_json_object(root / "runtime" / "atlas" / "qa" / "release-readiness.latest.json")
+        repo = payload["repos"][0]
+        self.assertTrue(repo["release_ready"])
+        self.assertEqual("ready", repo["release_gate_status"])
+        self.assertEqual("keep_hobby", repo["governance_checks"][0]["decision"])
+        self.assertEqual("ready", repo["governance_checks"][0]["checkpoint_status"])
+
+    def test_release_readiness_blocks_when_hobby_decision_checkpoint_requires_review(self) -> None:
+        root = self._temp_root()
+        (root / "ops" / "atlas" / "qa").mkdir(parents=True, exist_ok=True)
+        self._write_stack_lock(root=root, components={"fitness": "fitness-target"})
+        generated_at = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+        _write_json(
+            root / "ops" / "atlas" / "qa" / "release_policy.v1.json",
+            {
+                "contract_version": "atlas.qa.release_policy.v1",
+                "profiles": {
+                    "release_critical_web": {
+                        "display_name": "Release-Critical Web",
+                        "mode_requirements": {
+                            "release": {
+                                "allowed_statuses": ["promoted_physical", "promoted_physical_manual", "waived_promoted"],
+                            }
+                        },
+                    }
+                },
+                "repo_overrides": {
+                    "fitness": {
+                        "release_profile": "release_critical_web",
+                        "governance_checks": [
+                            {
+                                "check_id": "fitness_vercel_hobby_decision",
+                                "kind": "json_report",
+                                "report_ref": "runtime/receipts/vercel-hobby-cost-governance/fitness-hobby-decision.latest.json",
+                                "contract_version": "atlas.vercel_hobby_decision.v1",
+                                "max_age_hours": 168.0,
+                                "required_for_modes": ["release"],
+                            }
+                        ],
+                    }
+                },
+            },
+        )
+        _write_json(
+            root / "runtime" / "receipts" / "vercel-hobby-cost-governance" / "fitness-hobby-decision.latest.json",
+            {
+                "contract_version": "atlas.vercel_hobby_decision.v1",
+                "generated_at": generated_at,
+                "checkpoint_status": "blocked",
+                "decision": "upgrade_review_required",
+                "decision_reason": "preserved route pressure drift detected",
+            },
+        )
+        _write_json(
+            root / "runtime" / "atlas" / "qa" / "evidence-index.latest.json",
+            {
+                "contract_version": "atlas.qa.evidence_index.v1",
+                "generated_at": generated_at,
+                "runs": [
+                    {
+                        "run_id": "fitness-run",
+                        "repo_id": "fitness",
+                        "git_sha": "fitness-target",
+                        "promotion_generated_at": generated_at,
+                        "promotion_status": "promoted_physical_manual",
+                    }
+                ],
+                "adoption": [
+                    {
+                        "repo_id": "fitness",
+                        "adopted": True,
+                        "owner": "fitness",
+                        "adapter_refs": ["repos/fawxzzy-fitness/qa/adapters/fitness.web.json"],
+                        "scenario_refs": ["repos/fawxzzy-fitness/qa/scenarios/fitness.progression-pr-smoke.json"],
+                        "evidence_profile": "web_visual",
+                        "last_run_id": "fitness-run",
+                        "last_git_sha": "fitness-target",
+                        "last_promotion_status": "promoted_physical_manual",
+                        "root_runner_version": "atlas.qa.evaluate-run.v2",
+                        "contract_version": "atlas.qa.promotion.v1",
+                    }
+                ],
+                "summary": {},
+                "retention": {},
+            },
+        )
+
+        build_release_readiness(root=root)
+
+        payload = load_json_object(root / "runtime" / "atlas" / "qa" / "release-readiness.latest.json")
+        repo = payload["repos"][0]
+        self.assertFalse(repo["release_ready"])
+        self.assertEqual("blocked", repo["release_gate_status"])
+        self.assertEqual("blocked", repo["governance_checks"][0]["status"])
+        self.assertIn("upgrade_review_required", repo["mode_requirements"]["release"]["governance_blockers"][0])
+
     def test_release_readiness_reports_stale_receipt_age(self) -> None:
         root = self._temp_root()
         (root / "ops" / "atlas" / "qa").mkdir(parents=True, exist_ok=True)
