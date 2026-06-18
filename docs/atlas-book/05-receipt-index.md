@@ -947,6 +947,7 @@
 - [Operator Secret Path Hygiene Archive Quarantine And Non-Secret Retention Reconciliation Pass 7](../ops/OPERATOR-SECRET-PATH-HYGIENE-ARCHIVE-QUARANTINE-AND-NON-SECRET-RETENTION-RECONCILIATION-PASS-7-2026-06-02.md)
 - [Operator Secret Path Hygiene Local Secret Boundary And Quarantine Posture Pass 8](../ops/OPERATOR-SECRET-PATH-HYGIENE-LOCAL-SECRET-BOUNDARY-AND-QUARANTINE-POSTURE-PASS-8-2026-06-02.md)
 - [Operator Secret Path Hygiene Tmp Env Residue Classification And Approval Gate Pass 9](../ops/OPERATOR-SECRET-PATH-HYGIENE-TMP-ENV-RESIDUE-CLASSIFICATION-AND-APPROVAL-GATE-PASS-9-2026-06-18.md)
+- [Operator Secret Path Hygiene Tmp Env Residue Quarantine Relocation And Lane Closeout Pass 10](../ops/OPERATOR-SECRET-PATH-HYGIENE-TMP-ENV-RESIDUE-QUARANTINE-RELOCATION-AND-LANE-CLOSEOUT-PASS-10-2026-06-18.md)
 - [Operator Secret Path Hygiene Fitness QA Auth Secret Provisioning Decision Pass 2](../ops/OPERATOR-SECRET-PATH-HYGIENE-FITNESS-QA-AUTH-SECRET-PROVISIONING-DECISION-PASS-2-2026-05-29.md)
 - [Operator Secret Path Hygiene Cleanup Plan 1](../ops/OPERATOR-SECRET-PATH-HYGIENE-CLEANUP-PLAN-1-2026-05-24.md)
 - [Operator Secret Path Hygiene Cleanup Pass 1](../ops/OPERATOR-SECRET-PATH-HYGIENE-CLEANUP-PASS-1-2026-05-24.md)
