@@ -57,6 +57,81 @@ class AtlasWorkstationResourceSnapshotTests(unittest.TestCase):
         self.assertNotEqual(0, completed.returncode)
         self.assertIn("cannot be combined with -IncludePath", completed.stderr)
 
+    def test_json_closeout_is_sanitized_and_ties_closeout_to_residue_summary(self) -> None:
+        completed = self._run(
+            "-JsonCloseout",
+            "-WorkflowOnly",
+            "-Top",
+            "5",
+            "-ProcessesStarted",
+            "codex",
+            "-ProcessesStillRunning",
+            "none",
+            "-DevServerStatus",
+            "not-run-in-this-pass",
+            "-BrowserPlaywrightStatus",
+            "not-run-in-this-pass",
+            "-WatchTestStatus",
+            "not-run-in-this-pass",
+            "-StopCommandsRun",
+            "none",
+            "-AnythingLeftIntentionallyRunning",
+            "none",
+            "-NextChatServiceAction",
+            "restart",
+            "-NextChatServiceNote",
+            "restart services only if needed",
+        )
+
+        self.assertEqual(0, completed.returncode, msg=completed.stderr)
+        payload = json.loads(completed.stdout)
+        self.assertEqual("atlas.workstation_resource_closeout.v1", payload["contract_version"])
+        self.assertIn("closeout", payload)
+        self.assertIn("residue_summary", payload)
+        self.assertEqual("atlas.workstation_closeout_fields.v1", payload["closeout"]["closeout_fields_version"])
+        self.assertEqual(["codex"], payload["closeout"]["processes_started"])
+        self.assertEqual(["none"], payload["closeout"]["processes_still_running"])
+        self.assertEqual("not-run-in-this-pass", payload["closeout"]["dev_server_status"])
+        self.assertEqual("restart", payload["closeout"]["next_chat_service_action"])
+        self.assertEqual(
+            "atlas.workstation_resource_snapshot.summary.v1",
+            payload["residue_summary"]["contract_version"],
+        )
+        self.assertTrue(payload["residue_summary"]["workflow_only"])
+        self.assertTrue(
+            all("path" not in process for process in payload["residue_summary"]["workflow_processes"]),
+            msg=completed.stdout,
+        )
+        self.assertNotIn("top_cpu_processes", payload["residue_summary"])
+        self.assertNotIn("top_memory_processes", payload["residue_summary"])
+
+    def test_json_closeout_rejects_include_path(self) -> None:
+        completed = self._run(
+            "-JsonCloseout",
+            "-IncludePath",
+            "-DevServerStatus",
+            "stopped",
+            "-BrowserPlaywrightStatus",
+            "stopped",
+            "-WatchTestStatus",
+            "stopped",
+        )
+
+        self.assertNotEqual(0, completed.returncode)
+        self.assertIn("cannot be combined with -IncludePath", completed.stderr)
+
+    def test_json_closeout_requires_status_fields(self) -> None:
+        completed = self._run(
+            "-JsonCloseout",
+            "-BrowserPlaywrightStatus",
+            "stopped",
+            "-WatchTestStatus",
+            "stopped",
+        )
+
+        self.assertNotEqual(0, completed.returncode)
+        self.assertIn("-DevServerStatus is required", completed.stderr)
+
 
 if __name__ == "__main__":
     unittest.main()

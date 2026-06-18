@@ -7,7 +7,28 @@ param(
 
     [switch]$IncludePath,
 
-    [switch]$JsonSummary
+    [switch]$JsonSummary,
+
+    [switch]$JsonCloseout,
+
+    [string[]]$ProcessesStarted = @(),
+
+    [string[]]$ProcessesStillRunning = @(),
+
+    [string]$DevServerStatus = "",
+
+    [string]$BrowserPlaywrightStatus = "",
+
+    [string]$WatchTestStatus = "",
+
+    [string[]]$StopCommandsRun = @(),
+
+    [string[]]$AnythingLeftIntentionallyRunning = @(),
+
+    [ValidateSet("inherit", "restart", "not_applicable")]
+    [string]$NextChatServiceAction = "restart",
+
+    [string]$NextChatServiceNote = ""
 )
 
 Set-StrictMode -Version Latest
@@ -182,6 +203,69 @@ function Get-ReviewGuidance {
     )
 }
 
+function New-SummaryPayload {
+    param(
+        [Parameter(Mandatory = $true)]
+        [System.Diagnostics.Process[]]$AllProcesses,
+
+        [Parameter(Mandatory = $true)]
+        [System.Diagnostics.Process[]]$WorkflowProcesses,
+
+        [Parameter(Mandatory = $true)]
+        [bool]$WorkflowOnlyMode,
+
+        [Parameter(Mandatory = $true)]
+        [int]$TopCount
+    )
+
+    $payload = [ordered]@{
+        contract_version = "atlas.workstation_resource_snapshot.summary.v1"
+        generated_at = [DateTimeOffset]::Now.ToString("o")
+        workflow_only = $WorkflowOnlyMode
+        include_path = $false
+        top = $TopCount
+        workflow_summary = Get-WorkflowSummaryRecord -Processes $WorkflowProcesses
+        workflow_processes = @($WorkflowProcesses | ForEach-Object { Get-ProcessRecord -Process $_ })
+        review_guidance = @(Get-ReviewGuidance)
+    }
+
+    if (-not $WorkflowOnlyMode) {
+        $topCpu = $AllProcesses | Sort-Object -Property @{ Expression = { Get-SafeCpuSeconds -Process $_ }; Descending = $true } | Select-Object -First $TopCount
+        $topMemory = $AllProcesses | Sort-Object -Property @{ Expression = { Get-SafeWorkingSetBytes -Process $_ }; Descending = $true } | Select-Object -First $TopCount
+        $payload.top_cpu_processes = @($topCpu | ForEach-Object { Get-ProcessRecord -Process $_ })
+        $payload.top_memory_processes = @($topMemory | ForEach-Object { Get-ProcessRecord -Process $_ })
+    }
+
+    return [pscustomobject]$payload
+}
+
+function New-CloseoutPayload {
+    param(
+        [Parameter(Mandatory = $true)]
+        [pscustomobject]$ResidueSummary
+    )
+
+    $closeout = [ordered]@{
+        closeout_fields_version = "atlas.workstation_closeout_fields.v1"
+        processes_started = @($ProcessesStarted)
+        processes_still_running = @($ProcessesStillRunning)
+        dev_server_status = [string]$DevServerStatus.Trim()
+        browser_playwright_status = [string]$BrowserPlaywrightStatus.Trim()
+        watch_test_status = [string]$WatchTestStatus.Trim()
+        stop_commands_run = @($StopCommandsRun)
+        anything_left_intentionally_running = @($AnythingLeftIntentionallyRunning)
+        next_chat_service_action = [string]$NextChatServiceAction
+        next_chat_service_note = [string]$NextChatServiceNote
+    }
+
+    return [pscustomobject]([ordered]@{
+        contract_version = "atlas.workstation_resource_closeout.v1"
+        generated_at = [DateTimeOffset]::Now.ToString("o")
+        closeout = [pscustomobject]$closeout
+        residue_summary = $ResidueSummary
+    })
+}
+
 function Write-Section {
     param(
         [Parameter(Mandatory = $true)]
@@ -232,8 +316,26 @@ function Write-WorkflowSummary {
     Write-Output ("Workflow names: {0}" -f ($groupedNames -join ", "))
 }
 
-if ($JsonSummary -and $IncludePath) {
-    throw "-JsonSummary cannot be combined with -IncludePath because JSON output must stay privacy-bounded."
+if ($JsonSummary -and $JsonCloseout) {
+    throw "-JsonSummary cannot be combined with -JsonCloseout because only one JSON output mode may be used at a time."
+}
+
+if (($JsonSummary -or $JsonCloseout) -and $IncludePath) {
+    throw "JSON output modes cannot be combined with -IncludePath because JSON output must stay privacy-bounded."
+}
+
+if ($JsonCloseout) {
+    $requiredCloseoutFields = [ordered]@{
+        "-DevServerStatus" = $DevServerStatus
+        "-BrowserPlaywrightStatus" = $BrowserPlaywrightStatus
+        "-WatchTestStatus" = $WatchTestStatus
+    }
+
+    foreach ($requiredField in $requiredCloseoutFields.GetEnumerator()) {
+        if ([string]::IsNullOrWhiteSpace([string]$requiredField.Value)) {
+            throw "$($requiredField.Key) is required when -JsonCloseout is used."
+        }
+    }
 }
 
 $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss zzz"
@@ -242,26 +344,15 @@ $workflowProcesses = $allProcesses | Where-Object { $workflowNames -contains $_.
     @{ Expression = { Get-SafeCpuSeconds -Process $_ }; Descending = $true }, `
     @{ Expression = { Get-SafeWorkingSetBytes -Process $_ }; Descending = $true } | Select-Object -First $Top
 
+$summaryPayload = New-SummaryPayload -AllProcesses $allProcesses -WorkflowProcesses $workflowProcesses -WorkflowOnlyMode ([bool]$WorkflowOnly) -TopCount $Top
+
 if ($JsonSummary) {
-    $payload = [ordered]@{
-        contract_version = "atlas.workstation_resource_snapshot.summary.v1"
-        generated_at = [DateTimeOffset]::Now.ToString("o")
-        workflow_only = [bool]$WorkflowOnly
-        include_path = $false
-        top = [int]$Top
-        workflow_summary = Get-WorkflowSummaryRecord -Processes $workflowProcesses
-        workflow_processes = @($workflowProcesses | ForEach-Object { Get-ProcessRecord -Process $_ })
-        review_guidance = @(Get-ReviewGuidance)
-    }
+    $summaryPayload | ConvertTo-Json -Depth 6
+    return
+}
 
-    if (-not $WorkflowOnly) {
-        $topCpu = $allProcesses | Sort-Object -Property @{ Expression = { Get-SafeCpuSeconds -Process $_ }; Descending = $true } | Select-Object -First $Top
-        $topMemory = $allProcesses | Sort-Object -Property @{ Expression = { Get-SafeWorkingSetBytes -Process $_ }; Descending = $true } | Select-Object -First $Top
-        $payload.top_cpu_processes = @($topCpu | ForEach-Object { Get-ProcessRecord -Process $_ })
-        $payload.top_memory_processes = @($topMemory | ForEach-Object { Get-ProcessRecord -Process $_ })
-    }
-
-    $payload | ConvertTo-Json -Depth 6
+if ($JsonCloseout) {
+    (New-CloseoutPayload -ResidueSummary $summaryPayload) | ConvertTo-Json -Depth 8
     return
 }
 
