@@ -70,10 +70,47 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         (root / "docs" / "atlas-book").mkdir(parents=True, exist_ok=True)
         return root
 
+    def _write_packet_receipts(self, root: Path) -> None:
+        current_receipt = root / "docs" / "ops" / (
+            "ROOT-BOUNDED-LANE-SELECTION-AFTER-AI-LONG-RUN-BATCH-ORCHESTRATION-"
+            "QUEUE-OR-REGISTRY-FAMILY-EXHAUSTION-CLOSEOUT-2026-06-17.md"
+        )
+        current_receipt.parent.mkdir(parents=True, exist_ok=True)
+        current_receipt.write_text(
+            "\n".join(
+                [
+                    "# Current Packet",
+                    "",
+                    "- Mode: `docs-only root-bounded lane selection`",
+                    "- Scope: `select the next honest ATLAS-root packet after the current AI Long-Run queue-or-registry family exhausts`",
+                    "",
+                ]
+            ),
+            encoding="utf-8",
+        )
+
+        fallback_receipt = root / "docs" / "ops" / (
+            "AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-"
+            "ACTIVE-LANE-FOLLOW-ON-DISAMBIGUATION-2026-06-17.md"
+        )
+        fallback_receipt.write_text(
+            "\n".join(
+                [
+                    "# Fallback Packet",
+                    "",
+                    "- Mode: `root-owned selector-surface refinement`",
+                    "- Scope: `remove the current-lane self-reference from the non-Fitness marker knockout helper by separating the active packet from the first admissible downstream follow-on`",
+                    "",
+                ]
+            ),
+            encoding="utf-8",
+        )
+
     def test_build_campaign_selects_active_lane_from_durable_restart_truth(self) -> None:
         root = self._temp_root()
         (root / "docs" / "atlas-book" / "02-lanes-and-markers.md").write_text(MARKER_DOC, encoding="utf-8")
         (root / "docs" / "atlas-book" / "01-current-state.md").write_text(CURRENT_STATE_DOC, encoding="utf-8")
+        self._write_packet_receipts(root)
 
         payload = build_campaign(root=root)
 
@@ -88,6 +125,11 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
             "docs/ops/ROOT-BOUNDED-LANE-SELECTION-AFTER-AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-FAMILY-EXHAUSTION-CLOSEOUT-2026-06-17.md",
             payload["selected_current_packet_basis_ref"],
         )
+        self.assertEqual("docs-only root-bounded lane selection", payload["selected_current_packet_mode"])
+        self.assertEqual(
+            "select the next honest ATLAS-root packet after the current AI Long-Run queue-or-registry family exhausts",
+            payload["selected_current_packet_scope"],
+        )
         self.assertEqual(
             "AI Repetition-to-Automation Pipeline",
             payload["next_after_current_marker"],
@@ -100,11 +142,17 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
             "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-ACTIVE-LANE-FOLLOW-ON-DISAMBIGUATION-2026-06-17.md",
             payload["next_after_current_packet_basis_ref"],
         )
+        self.assertEqual("root-owned selector-surface refinement", payload["next_after_current_packet_mode"])
+        self.assertEqual(
+            "remove the current-lane self-reference from the non-Fitness marker knockout helper by separating the active packet from the first admissible downstream follow-on",
+            payload["next_after_current_packet_scope"],
+        )
 
     def test_build_campaign_classifies_fitness_and_secret_holds(self) -> None:
         root = self._temp_root()
         (root / "docs" / "atlas-book" / "02-lanes-and-markers.md").write_text(MARKER_DOC, encoding="utf-8")
         (root / "docs" / "atlas-book" / "01-current-state.md").write_text(CURRENT_STATE_DOC, encoding="utf-8")
+        self._write_packet_receipts(root)
 
         payload = build_campaign(root=root)
         records = {record["marker"]: record for record in payload["open_markers"]}
@@ -121,6 +169,7 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         marker_doc = MARKER_DOC.replace("- _stack Readiness: `100%`", "- `_stack` Readiness: `100%`")
         (root / "docs" / "atlas-book" / "02-lanes-and-markers.md").write_text(marker_doc, encoding="utf-8")
         (root / "docs" / "atlas-book" / "01-current-state.md").write_text(CURRENT_STATE_DOC, encoding="utf-8")
+        self._write_packet_receipts(root)
 
         payload = build_campaign(root=root)
         records = {record["marker"]: record for record in payload["open_markers"]}
@@ -131,6 +180,7 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         root = self._temp_root()
         (root / "docs" / "atlas-book" / "02-lanes-and-markers.md").write_text(MARKER_DOC, encoding="utf-8")
         (root / "docs" / "atlas-book" / "01-current-state.md").write_text(CURRENT_STATE_DOC, encoding="utf-8")
+        self._write_packet_receipts(root)
         output_ref = "docs/ops/selector-output.json"
 
         exit_code = main(["--root", str(root), "--format", "json", "--output", output_ref])
@@ -144,6 +194,7 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         root = self._temp_root()
         (root / "docs" / "atlas-book" / "02-lanes-and-markers.md").write_text(MARKER_DOC, encoding="utf-8")
         (root / "docs" / "atlas-book" / "01-current-state.md").write_text(CURRENT_STATE_DOC, encoding="utf-8")
+        self._write_packet_receipts(root)
         output_ref = "docs/ops/selector-output.md"
 
         exit_code = main(["--root", str(root), "--format", "markdown", "--output", output_ref])
@@ -156,6 +207,11 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
             "current packet basis receipt: `docs/ops/ROOT-BOUNDED-LANE-SELECTION-AFTER-AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-FAMILY-EXHAUSTION-CLOSEOUT-2026-06-17.md`",
             markdown,
         )
+        self.assertIn("current packet mode: `docs-only root-bounded lane selection`", markdown)
+        self.assertIn(
+            "current packet scope: `select the next honest ATLAS-root packet after the current AI Long-Run queue-or-registry family exhausts`",
+            markdown,
+        )
         self.assertIn("## Current Active Marker", markdown)
         self.assertIn("current packet: `AI Long-Run Batch Orchestration queue-or-registry active follow-on`", markdown)
         self.assertIn("## First Admissible After Current Lane", markdown)
@@ -165,6 +221,11 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         )
         self.assertIn(
             "next packet basis receipt: `docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-ACTIVE-LANE-FOLLOW-ON-DISAMBIGUATION-2026-06-17.md`",
+            markdown,
+        )
+        self.assertIn("next packet mode: `root-owned selector-surface refinement`", markdown)
+        self.assertIn(
+            "next packet scope: `remove the current-lane self-reference from the non-Fitness marker knockout helper by separating the active packet from the first admissible downstream follow-on`",
             markdown,
         )
 

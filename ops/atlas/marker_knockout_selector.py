@@ -90,6 +90,13 @@ class PacketDescriptor:
     basis_receipt_ref: str
 
 
+@dataclass(frozen=True)
+class PacketReceiptContext:
+    basis_receipt_ref: str
+    mode: str
+    scope: str
+
+
 POLICY_REGISTRY: dict[str, MarkerPolicy] = {
     "_stack Readiness": MarkerPolicy(
         category="already closed / locked",
@@ -416,6 +423,37 @@ def packet_basis_ref_for_marker(marker: str) -> str | None:
     return descriptor.basis_receipt_ref
 
 
+def load_packet_receipt_context(*, root: Path, basis_receipt_ref: str) -> PacketReceiptContext:
+    receipt_path = (root / basis_receipt_ref).resolve()
+    if not receipt_path.exists():
+        raise MarkerSelectorError(
+            f"Missing packet basis receipt: {atlas_relative(receipt_path, root=root)}"
+        )
+
+    mode: str | None = None
+    scope: str | None = None
+    for raw_line in receipt_path.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if line.startswith("- Mode: `") and line.endswith("`"):
+            mode = line[len("- Mode: `") : -1]
+        elif line.startswith("- Scope: `") and line.endswith("`"):
+            scope = line[len("- Scope: `") : -1]
+        if mode and scope:
+            break
+
+    if not mode or not scope:
+        raise MarkerSelectorError(
+            "Packet basis receipt is missing required Mode/Scope metadata: "
+            + atlas_relative(receipt_path, root=root)
+        )
+
+    return PacketReceiptContext(
+        basis_receipt_ref=basis_receipt_ref,
+        mode=mode,
+        scope=scope,
+    )
+
+
 def build_campaign(*, root: Path) -> dict[str, object]:
     sections = load_marker_sections(root=root)
     active_lane = load_active_lane(root=root)
@@ -487,6 +525,24 @@ def build_campaign(*, root: Path) -> dict[str, object]:
             "No active lane is already named in durable restart truth, so open the first admissible selected lane."
         )
 
+    selected_packet_receipt_context = None
+    if selected:
+        selected_basis_ref = packet_basis_ref_for_marker(selected.marker)
+        if selected_basis_ref:
+            selected_packet_receipt_context = load_packet_receipt_context(
+                root=root,
+                basis_receipt_ref=selected_basis_ref,
+            )
+
+    next_packet_receipt_context = None
+    if next_after_current:
+        next_basis_ref = packet_basis_ref_for_marker(next_after_current.marker)
+        if next_basis_ref:
+            next_packet_receipt_context = load_packet_receipt_context(
+                root=root,
+                basis_receipt_ref=next_basis_ref,
+            )
+
     return {
         "campaign_id": "root-non-fitness-marker-knockout",
         "source_ref": "docs/atlas-book/02-lanes-and-markers.md",
@@ -503,6 +559,12 @@ def build_campaign(*, root: Path) -> dict[str, object]:
         "operator_action_reason": operator_action_reason,
         "selected_current_packet": packet_for_marker(selected.marker) if selected else None,
         "selected_current_packet_basis_ref": packet_basis_ref_for_marker(selected.marker) if selected else None,
+        "selected_current_packet_mode": (
+            selected_packet_receipt_context.mode if selected_packet_receipt_context else None
+        ),
+        "selected_current_packet_scope": (
+            selected_packet_receipt_context.scope if selected_packet_receipt_context else None
+        ),
         "next_after_current_marker": next_after_current.marker if next_after_current else None,
         "next_after_current_percentage": next_after_current.percentage if next_after_current else None,
         "next_after_current_expected_evidence": next_after_current.expected_evidence if next_after_current else None,
@@ -510,6 +572,12 @@ def build_campaign(*, root: Path) -> dict[str, object]:
         "next_after_current_packet": packet_for_marker(next_after_current.marker) if next_after_current else None,
         "next_after_current_packet_basis_ref": (
             packet_basis_ref_for_marker(next_after_current.marker) if next_after_current else None
+        ),
+        "next_after_current_packet_mode": (
+            next_packet_receipt_context.mode if next_packet_receipt_context else None
+        ),
+        "next_after_current_packet_scope": (
+            next_packet_receipt_context.scope if next_packet_receipt_context else None
         ),
     }
 
@@ -546,12 +614,20 @@ def render_markdown(payload: dict[str, object]) -> str:
             lines.append(f"- do now: `{payload['selected_current_packet']}`")
         if payload.get("selected_current_packet_basis_ref"):
             lines.append(f"- current packet basis receipt: `{payload['selected_current_packet_basis_ref']}`")
+        if payload.get("selected_current_packet_mode"):
+            lines.append(f"- current packet mode: `{payload['selected_current_packet_mode']}`")
+        if payload.get("selected_current_packet_scope"):
+            lines.append(f"- current packet scope: `{payload['selected_current_packet_scope']}`")
         if payload.get("next_after_current_packet"):
             lines.append(f"- fallback after current lane: `{payload['next_after_current_packet']}`")
         if payload.get("next_after_current_packet_basis_ref"):
             lines.append(
                 f"- fallback packet basis receipt: `{payload['next_after_current_packet_basis_ref']}`"
             )
+        if payload.get("next_after_current_packet_mode"):
+            lines.append(f"- fallback packet mode: `{payload['next_after_current_packet_mode']}`")
+        if payload.get("next_after_current_packet_scope"):
+            lines.append(f"- fallback packet scope: `{payload['next_after_current_packet_scope']}`")
 
     if payload.get("selected_marker"):
         section_title = "## Current Active Marker" if payload.get("active_lane") else "## First Admissible Marker"
@@ -568,6 +644,10 @@ def render_markdown(payload: dict[str, object]) -> str:
             lines.append(f"- current packet: `{payload['selected_current_packet']}`")
         if payload.get("selected_current_packet_basis_ref"):
             lines.append(f"- current packet basis receipt: `{payload['selected_current_packet_basis_ref']}`")
+        if payload.get("selected_current_packet_mode"):
+            lines.append(f"- current packet mode: `{payload['selected_current_packet_mode']}`")
+        if payload.get("selected_current_packet_scope"):
+            lines.append(f"- current packet scope: `{payload['selected_current_packet_scope']}`")
 
     if payload.get("next_after_current_marker"):
         lines += [
@@ -585,6 +665,10 @@ def render_markdown(payload: dict[str, object]) -> str:
             lines.append(
                 f"- next packet basis receipt: `{payload['next_after_current_packet_basis_ref']}`"
             )
+        if payload.get("next_after_current_packet_mode"):
+            lines.append(f"- next packet mode: `{payload['next_after_current_packet_mode']}`")
+        if payload.get("next_after_current_packet_scope"):
+            lines.append(f"- next packet scope: `{payload['next_after_current_packet_scope']}`")
 
     return "\n".join(lines).rstrip() + "\n"
 
