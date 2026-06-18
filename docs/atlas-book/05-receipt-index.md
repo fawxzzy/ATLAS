@@ -37,6 +37,7 @@
 - [Marker Board Taxonomy Hygiene And Atlas Clean-Re-sync Campaign Pass 1](../ops/MARKER-BOARD-TAXONOMY-HYGIENE-AND-ATLAS-CLEAN-RESYNC-CAMPAIGN-PASS-1-2026-06-13.md)
 - [Vercel Hobby Cost Governance Marker Admission Pass 1](../ops/VERCEL-HOBBY-COST-GOVERNANCE-MARKER-ADMISSION-PASS-1-2026-06-13.md)
 - [Vercel Hobby Cost Governance Current Usage Snapshot And Threshold Checkpoint](../ops/VERCEL-HOBBY-COST-GOVERNANCE-CURRENT-USAGE-SNAPSHOT-AND-THRESHOLD-CHECKPOINT-2026-06-17.md)
+- [Vercel Hobby Cost Governance Route, Middleware, And Fetch Pressure Inventory](../ops/VERCEL-HOBBY-COST-GOVERNANCE-ROUTE-MIDDLEWARE-AND-FETCH-PRESSURE-INVENTORY-2026-06-17.md)
 - [Duplicate Surface Decommission Final Closeout Pass 3](../ops/DUPLICATE-SURFACE-DECOMMISSION-FINAL-CLOSEOUT-PASS-3-2026-06-13.md)
 - [Remaining Closeout Queue Reselection After Duplicate Surface Closeout](../ops/REMAINING-CLOSEOUT-QUEUE-RESELECTION-AFTER-DUPLICATE-SURFACE-CLOSEOUT-2026-06-13.md)
 - [Tmp Dependency Elimination Root Worktree Disposal And Fitness Link Blocker Recheck](../ops/TMP-DEPENDENCY-ELIMINATION-ROOT-WORKTREE-DISPOSAL-AND-FITNESS-LINK-BLOCKER-RECHECK-2026-06-16.md)
