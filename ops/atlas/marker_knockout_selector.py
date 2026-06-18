@@ -84,6 +84,12 @@ class MarkerRecord:
     priority: int
 
 
+@dataclass(frozen=True)
+class PacketDescriptor:
+    packet: str
+    basis_receipt_ref: str
+
+
 POLICY_REGISTRY: dict[str, MarkerPolicy] = {
     "_stack Readiness": MarkerPolicy(
         category="already closed / locked",
@@ -272,6 +278,25 @@ POLICY_REGISTRY: dict[str, MarkerPolicy] = {
     ),
 }
 
+PACKET_REGISTRY: dict[str, PacketDescriptor] = {
+    "AI Repetition-to-Automation Pipeline": PacketDescriptor(
+        packet="AI Repetition-to-Automation Pipeline non-Fitness marker knockout selector surface",
+        basis_receipt_ref=(
+            "docs/ops/"
+            "AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-"
+            "ACTIVE-LANE-FOLLOW-ON-DISAMBIGUATION-2026-06-17.md"
+        ),
+    ),
+    "AI Long-Run Batch Orchestration": PacketDescriptor(
+        packet="AI Long-Run Batch Orchestration queue-or-registry active follow-on",
+        basis_receipt_ref=(
+            "docs/ops/"
+            "ROOT-BOUNDED-LANE-SELECTION-AFTER-AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-"
+            "FAMILY-EXHAUSTION-CLOSEOUT-2026-06-17.md"
+        ),
+    ),
+}
+
 
 class MarkerSelectorError(RuntimeError):
     pass
@@ -378,11 +403,17 @@ def effective_policy(*, marker: str, active_lane: str | None) -> MarkerPolicy:
 
 
 def packet_for_marker(marker: str) -> str | None:
-    if marker == "AI Repetition-to-Automation Pipeline":
-        return "AI Repetition-to-Automation Pipeline non-Fitness marker knockout selector surface"
-    if marker == "AI Long-Run Batch Orchestration":
-        return "AI Long-Run Batch Orchestration queue-or-registry active follow-on"
-    return None
+    descriptor = PACKET_REGISTRY.get(marker)
+    if descriptor is None:
+        return None
+    return descriptor.packet
+
+
+def packet_basis_ref_for_marker(marker: str) -> str | None:
+    descriptor = PACKET_REGISTRY.get(marker)
+    if descriptor is None:
+        return None
+    return descriptor.basis_receipt_ref
 
 
 def build_campaign(*, root: Path) -> dict[str, object]:
@@ -442,6 +473,20 @@ def build_campaign(*, root: Path) -> dict[str, object]:
         for marker, percentage in sorted(sections["closed_locked"].items())
     ]
 
+    operator_action = None
+    operator_action_reason = None
+    if selected and active_lane:
+        operator_action = "continue_current_lane"
+        operator_action_reason = (
+            "Durable restart truth already names the active ATLAS-root lane, so continue the current packet "
+            "before falling through to the first downstream admissible lane."
+        )
+    elif selected:
+        operator_action = "open_selected_lane"
+        operator_action_reason = (
+            "No active lane is already named in durable restart truth, so open the first admissible selected lane."
+        )
+
     return {
         "campaign_id": "root-non-fitness-marker-knockout",
         "source_ref": "docs/atlas-book/02-lanes-and-markers.md",
@@ -454,12 +499,18 @@ def build_campaign(*, root: Path) -> dict[str, object]:
         "selected_percentage": selected.percentage if selected else None,
         "selected_expected_evidence": selected.expected_evidence if selected else None,
         "selected_reason": selected.rationale if selected else None,
+        "operator_action": operator_action,
+        "operator_action_reason": operator_action_reason,
         "selected_current_packet": packet_for_marker(selected.marker) if selected else None,
+        "selected_current_packet_basis_ref": packet_basis_ref_for_marker(selected.marker) if selected else None,
         "next_after_current_marker": next_after_current.marker if next_after_current else None,
         "next_after_current_percentage": next_after_current.percentage if next_after_current else None,
         "next_after_current_expected_evidence": next_after_current.expected_evidence if next_after_current else None,
         "next_after_current_reason": next_after_current.rationale if next_after_current else None,
         "next_after_current_packet": packet_for_marker(next_after_current.marker) if next_after_current else None,
+        "next_after_current_packet_basis_ref": (
+            packet_basis_ref_for_marker(next_after_current.marker) if next_after_current else None
+        ),
     }
 
 
@@ -483,6 +534,25 @@ def render_markdown(payload: dict[str, object]) -> str:
             f"`{record['category']}` | {record['rationale']} | {record['expected_evidence']} |"
         )
 
+    if payload.get("operator_action"):
+        lines += [
+            "",
+            "## Operator Action",
+            "",
+            f"- action: `{payload['operator_action']}`",
+            f"- why: {payload['operator_action_reason']}",
+        ]
+        if payload.get("selected_current_packet"):
+            lines.append(f"- do now: `{payload['selected_current_packet']}`")
+        if payload.get("selected_current_packet_basis_ref"):
+            lines.append(f"- current packet basis receipt: `{payload['selected_current_packet_basis_ref']}`")
+        if payload.get("next_after_current_packet"):
+            lines.append(f"- fallback after current lane: `{payload['next_after_current_packet']}`")
+        if payload.get("next_after_current_packet_basis_ref"):
+            lines.append(
+                f"- fallback packet basis receipt: `{payload['next_after_current_packet_basis_ref']}`"
+            )
+
     if payload.get("selected_marker"):
         section_title = "## Current Active Marker" if payload.get("active_lane") else "## First Admissible Marker"
         lines += [
@@ -496,6 +566,8 @@ def render_markdown(payload: dict[str, object]) -> str:
         ]
         if payload.get("selected_current_packet"):
             lines.append(f"- current packet: `{payload['selected_current_packet']}`")
+        if payload.get("selected_current_packet_basis_ref"):
+            lines.append(f"- current packet basis receipt: `{payload['selected_current_packet_basis_ref']}`")
 
     if payload.get("next_after_current_marker"):
         lines += [
@@ -509,6 +581,10 @@ def render_markdown(payload: dict[str, object]) -> str:
         ]
         if payload.get("next_after_current_packet"):
             lines.append(f"- next packet after current lane: `{payload['next_after_current_packet']}`")
+        if payload.get("next_after_current_packet_basis_ref"):
+            lines.append(
+                f"- next packet basis receipt: `{payload['next_after_current_packet_basis_ref']}`"
+            )
 
     return "\n".join(lines).rstrip() + "\n"
 

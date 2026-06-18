@@ -79,9 +79,14 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
 
         self.assertEqual("AI Long-Run Batch Orchestration", payload["selected_marker"])
         self.assertEqual(20, payload["selected_percentage"])
+        self.assertEqual("continue_current_lane", payload["operator_action"])
         self.assertEqual(
             "AI Long-Run Batch Orchestration queue-or-registry active follow-on",
             payload["selected_current_packet"],
+        )
+        self.assertEqual(
+            "docs/ops/ROOT-BOUNDED-LANE-SELECTION-AFTER-AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-FAMILY-EXHAUSTION-CLOSEOUT-2026-06-17.md",
+            payload["selected_current_packet_basis_ref"],
         )
         self.assertEqual(
             "AI Repetition-to-Automation Pipeline",
@@ -90,6 +95,10 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual(
             "AI Repetition-to-Automation Pipeline non-Fitness marker knockout selector surface",
             payload["next_after_current_packet"],
+        )
+        self.assertEqual(
+            "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-ACTIVE-LANE-FOLLOW-ON-DISAMBIGUATION-2026-06-17.md",
+            payload["next_after_current_packet_basis_ref"],
         )
 
     def test_build_campaign_classifies_fitness_and_secret_holds(self) -> None:
@@ -129,6 +138,7 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual(0, exit_code)
         payload = json.loads((root / output_ref).read_text(encoding="utf-8"))
         self.assertEqual("root-non-fitness-marker-knockout", payload["campaign_id"])
+        self.assertEqual("continue_current_lane", payload["operator_action"])
 
     def test_main_markdown_separates_current_lane_from_next_follow_on(self) -> None:
         root = self._temp_root()
@@ -140,11 +150,21 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
 
         self.assertEqual(0, exit_code)
         markdown = (root / output_ref).read_text(encoding="utf-8")
+        self.assertIn("## Operator Action", markdown)
+        self.assertIn("action: `continue_current_lane`", markdown)
+        self.assertIn(
+            "current packet basis receipt: `docs/ops/ROOT-BOUNDED-LANE-SELECTION-AFTER-AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-FAMILY-EXHAUSTION-CLOSEOUT-2026-06-17.md`",
+            markdown,
+        )
         self.assertIn("## Current Active Marker", markdown)
         self.assertIn("current packet: `AI Long-Run Batch Orchestration queue-or-registry active follow-on`", markdown)
         self.assertIn("## First Admissible After Current Lane", markdown)
         self.assertIn(
             "next packet after current lane: `AI Repetition-to-Automation Pipeline non-Fitness marker knockout selector surface`",
+            markdown,
+        )
+        self.assertIn(
+            "next packet basis receipt: `docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-ACTIVE-LANE-FOLLOW-ON-DISAMBIGUATION-2026-06-17.md`",
             markdown,
         )
 
