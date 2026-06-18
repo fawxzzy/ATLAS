@@ -62,6 +62,7 @@
 - [Workstation Resource Hygiene Machine-Readable Closeout Artifact Surface](../ops/WORKSTATION-RESOURCE-HYGIENE-MACHINE-READABLE-CLOSEOUT-ARTIFACT-SURFACE-2026-06-18.md)
 - [AI Repetition-to-Automation Pipeline Non-Fitness Marker Knockout Selector Active-Lane Follow-On Disambiguation](../ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-ACTIVE-LANE-FOLLOW-ON-DISAMBIGUATION-2026-06-17.md)
 - [AI Repetition-to-Automation Pipeline Selector Packet Brief Surface](../ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-SELECTOR-PACKET-BRIEF-SURFACE-2026-06-18.md)
+- [AI Repetition-to-Automation Pipeline Selector Lane Exhaustion Or Fallback Routing](../ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-SELECTOR-LANE-EXHAUSTION-OR-FALLBACK-ROUTING-2026-06-18.md)
 - [Verta-Core Final Closeout Eligibility Pass 1](../ops/VERTA-CORE-FINAL-CLOSEOUT-ELIGIBILITY-PASS-1-2026-06-11.md)
 - [ATLAS Core Phase Final Closeout Pass 1](../ops/ATLAS-CORE-PHASE-FINAL-CLOSEOUT-PASS-1-2026-06-12.md)
 - [Lifeline Readiness Final Closeout Pass 1](../ops/LIFELINE-READINESS-FINAL-CLOSEOUT-PASS-1-2026-06-12.md)
