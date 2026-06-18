@@ -35,6 +35,89 @@ ORIGIN_PRIORITY = {
 }
 
 
+def _evaluate_governance_checks(
+    *,
+    base_root: Path,
+    repo_id: str,
+    override: dict[str, Any],
+) -> list[dict[str, Any]]:
+    specs = override.get("governance_checks", [])
+    if not isinstance(specs, list):
+        return []
+    checks: list[dict[str, Any]] = []
+    for index, spec in enumerate(specs):
+        if not isinstance(spec, dict):
+            continue
+        check_id = str(spec.get("check_id") or f"{repo_id}-governance-check-{index + 1}")
+        kind = str(spec.get("kind") or "json_report")
+        report_ref = str(spec.get("report_ref") or "").strip()
+        contract_version = str(spec.get("contract_version") or "").strip()
+        required_for_modes = [
+            str(value)
+            for value in spec.get("required_for_modes", [])
+            if isinstance(value, str) and value.strip()
+        ]
+        notes = [
+            str(value)
+            for value in spec.get("notes", [])
+            if isinstance(value, str) and value.strip()
+        ]
+        blockers: list[str] = []
+        payload: dict[str, Any] = {}
+        generated_at = ""
+        age_hours = None
+        max_age_hours = spec.get("max_age_hours")
+        if not report_ref:
+            blockers.append(f"Governance check '{check_id}' is missing report_ref.")
+        elif kind != "json_report":
+            blockers.append(f"Governance check '{check_id}' uses unsupported kind '{kind}'.")
+        else:
+            try:
+                payload = load_json_object(resolve_ref(report_ref, root=base_root))
+            except Exception as exc:
+                blockers.append(f"Governance check '{check_id}' could not load '{report_ref}': {exc}")
+            else:
+                observed_contract = str(payload.get("contract_version") or payload.get("report_version") or "").strip()
+                if contract_version and observed_contract != contract_version:
+                    blockers.append(
+                        f"Governance check '{check_id}' expected contract '{contract_version}' but found '{observed_contract or 'missing'}'."
+                    )
+                generated_at = str(payload.get("generated_at") or "")
+                generated_dt = _parse_utc(generated_at)
+                if isinstance(max_age_hours, (int, float)):
+                    if generated_dt is None:
+                        blockers.append(
+                            f"Governance check '{check_id}' report timestamp is missing or unreadable."
+                        )
+                    else:
+                        age_hours = round((datetime.now(timezone.utc) - generated_dt).total_seconds() / 3600, 3)
+                        if age_hours > float(max_age_hours):
+                            blockers.append(
+                                f"Governance check '{check_id}' report is stale ({age_hours}h > {float(max_age_hours)}h)."
+                            )
+        guardrail_posture = payload.get("guardrail_posture") if isinstance(payload.get("guardrail_posture"), dict) else {}
+        summary = payload.get("summary") if isinstance(payload.get("summary"), dict) else {}
+        checks.append(
+            {
+                "check_id": check_id,
+                "kind": kind,
+                "report_ref": report_ref,
+                "contract_version": contract_version,
+                "observed_contract_version": str(payload.get("contract_version") or payload.get("report_version") or "").strip(),
+                "required_for_modes": required_for_modes,
+                "notes": notes,
+                "generated_at": generated_at,
+                "age_hours": age_hours,
+                "max_age_hours": float(max_age_hours) if isinstance(max_age_hours, (int, float)) else None,
+                "status": "blocked" if blockers else "ready",
+                "blockers": blockers,
+                "guardrail_posture": guardrail_posture,
+                "summary": summary,
+            }
+        )
+    return checks
+
+
 def _mode_gate_status(*, promotion_status: str, allowed_statuses: set[str]) -> str:
     if promotion_status in allowed_statuses:
         return "ready"
@@ -287,6 +370,7 @@ def build_release_readiness(
         release_profile = str(override.get("release_profile") or evidence_profile or "package_contract")
         profile_policy = profiles.get(release_profile, {}) if isinstance(profiles.get(release_profile), dict) else {}
         mode_requirements = profile_policy.get("mode_requirements", {}) if isinstance(profile_policy.get("mode_requirements"), dict) else {}
+        governance_checks = _evaluate_governance_checks(base_root=base_root, repo_id=repo_id, override=override)
         target = _resolve_target_sha(
             repo_id=repo_id,
             explicit_target_sha=target_sha,
@@ -332,6 +416,33 @@ def build_release_readiness(
                 "trusted_origins": list(mode_policy.get("trusted_origins", [])),
                 "notes": list(mode_policy.get("notes", [])),
             }
+        for mode_name, mode_entry in per_mode.items():
+            mode_governance = [
+                {
+                    "check_id": check["check_id"],
+                    "status": check["status"],
+                    "report_ref": check["report_ref"],
+                    "generated_at": check["generated_at"],
+                    "age_hours": check["age_hours"],
+                    "max_age_hours": check["max_age_hours"],
+                    "blockers": list(check["blockers"]),
+                }
+                for check in governance_checks
+                if mode_name in check["required_for_modes"]
+            ]
+            governance_blockers = [
+                blocker
+                for check in mode_governance
+                for blocker in check["blockers"]
+            ]
+            governance_gate_status = "not_required"
+            if mode_governance:
+                governance_gate_status = "blocked" if governance_blockers else "ready"
+                if governance_gate_status == "blocked":
+                    mode_entry["gate_status"] = "blocked"
+            mode_entry["governance_checks"] = mode_governance
+            mode_entry["governance_gate_status"] = governance_gate_status
+            mode_entry["governance_blockers"] = governance_blockers
         release_gate = per_mode.get("release", {})
         legacy_release_origins = _string_list(release_gate.get("trusted_origins"))
         allowed_release_origins = _string_list(profile_policy.get("allowed_release_origins")) or legacy_release_origins
@@ -345,6 +456,11 @@ def build_release_readiness(
         release_gate_status = str(release_gate.get("gate_status") or "policy_only")
         release_ready = release_gate_status == "ready"
         release_blockers: list[str] = []
+        release_blockers.extend(
+            str(item)
+            for item in release_gate.get("governance_blockers", [])
+            if isinstance(item, str) and item.strip()
+        )
         waiver_refs = [str(value) for value in (latest_run or {}).get("waiver_refs", []) if isinstance(value, str) and value.strip()]
         waived_lanes = [str(value) for value in (latest_run or {}).get("waived_lanes", []) if isinstance(value, str) and value.strip()]
         validated_waivers, waiver_findings = _validate_runtime_waivers(
@@ -441,6 +557,7 @@ def build_release_readiness(
                 "selection_source_run_id": str((latest_run or {}).get("run_id") or ""),
                 "selection_newest_run_id": str(selection_meta.get("newest_run_id") or ""),
                 "selection_reason": str(selection_meta.get("selection_reason") or ""),
+                "governance_checks": governance_checks,
                 "waiver_refs": waiver_refs,
                 "waived_lanes": waived_lanes,
                 "waiver_valid": waiver_valid,
@@ -502,6 +619,23 @@ def build_release_readiness(
         )
         if item.get("selection_reason"):
             md_lines.append(f"|  |  |  |  |  | selection: {item['selection_reason']} |  |  |")
+        for check in item.get("governance_checks", []):
+            if not isinstance(check, dict):
+                continue
+            md_lines.append(
+                f"|  |  |  |  |  | governance `{check.get('check_id') or '-'}`: {check.get('status') or '-'} via `{check.get('report_ref') or '-'}` |  |  |"
+            )
+            guardrail_posture = check.get("guardrail_posture")
+            if isinstance(guardrail_posture, dict) and guardrail_posture:
+                posture_summary = ", ".join(
+                    f"{key}={value}"
+                    for key, value in sorted(guardrail_posture.items())
+                    if isinstance(value, str) and value.strip()
+                )
+                if posture_summary:
+                    md_lines.append(f"|  |  |  |  |  | governance posture: {posture_summary} |  |  |")
+            for blocker in check.get("blockers", []):
+                md_lines.append(f"|  |  |  |  |  | governance blocker: {blocker} |  |  |")
         if item["release_blockers"]:
             for blocker in item["release_blockers"]:
                 md_lines.append(f"|  |  |  |  |  | blocker: {blocker} |  |  |")

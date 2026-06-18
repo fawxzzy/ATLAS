@@ -221,7 +221,23 @@
   },
   "repo_overrides": {
     "fitness": {
-      "release_profile": "release_critical_web"
+      "release_profile": "release_critical_web",
+      "governance_checks": [
+        {
+          "check_id": "fitness_vercel_hobby_guardrail",
+          "kind": "json_report",
+          "report_ref": "runtime/receipts/vercel-hobby-cost-governance/fitness-hobby-guardrail.latest.json",
+          "contract_version": "atlas.vercel_hobby_guardrail.v1",
+          "max_age_hours": 168.0,
+          "required_for_modes": [
+            "release",
+            "manual_promotion"
+          ],
+          "notes": [
+            "Fitness release readiness must consume one fresh no-secret Vercel Hobby guardrail report."
+          ]
+        }
+      ]
     },
     "playbook": {
       "release_profile": "docs_governance"

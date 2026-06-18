@@ -39,6 +39,7 @@
 - [Vercel Hobby Cost Governance Current Usage Snapshot And Threshold Checkpoint](../ops/VERCEL-HOBBY-COST-GOVERNANCE-CURRENT-USAGE-SNAPSHOT-AND-THRESHOLD-CHECKPOINT-2026-06-17.md)
 - [Vercel Hobby Cost Governance Route, Middleware, And Fetch Pressure Inventory](../ops/VERCEL-HOBBY-COST-GOVERNANCE-ROUTE-MIDDLEWARE-AND-FETCH-PRESSURE-INVENTORY-2026-06-17.md)
 - [Vercel Hobby Cost Governance No-Secret Rerunnable Guardrail Report](../ops/VERCEL-HOBBY-COST-GOVERNANCE-NO-SECRET-RERUNNABLE-GUARDRAIL-REPORT-2026-06-17.md)
+- [Vercel Hobby Cost Governance Release-Readiness Guardrail Checkpoint](../ops/VERCEL-HOBBY-COST-GOVERNANCE-RELEASE-READINESS-GUARDRAIL-CHECKPOINT-2026-06-18.md)
 - [Duplicate Surface Decommission Final Closeout Pass 3](../ops/DUPLICATE-SURFACE-DECOMMISSION-FINAL-CLOSEOUT-PASS-3-2026-06-13.md)
 - [Remaining Closeout Queue Reselection After Duplicate Surface Closeout](../ops/REMAINING-CLOSEOUT-QUEUE-RESELECTION-AFTER-DUPLICATE-SURFACE-CLOSEOUT-2026-06-13.md)
 - [Tmp Dependency Elimination Root Worktree Disposal And Fitness Link Blocker Recheck](../ops/TMP-DEPENDENCY-ELIMINATION-ROOT-WORKTREE-DISPOSAL-AND-FITNESS-LINK-BLOCKER-RECHECK-2026-06-16.md)

@@ -6,6 +6,7 @@ import subprocess
 import tempfile
 import urllib.parse
 import unittest
+from datetime import datetime, timezone
 from pathlib import Path
 from unittest import mock
 
@@ -2114,6 +2115,7 @@ class AtlasQaPipelineTests(unittest.TestCase):
         root = self._temp_root()
         (root / "ops" / "atlas" / "qa").mkdir(parents=True, exist_ok=True)
         self._write_stack_lock(root=root, components={"fitness": "fitness-target", "foundation": "foundation-target"})
+        generated_at = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
         _write_json(
             root / "ops" / "atlas" / "qa" / "release_policy.v1.json",
             {
@@ -2147,10 +2149,10 @@ class AtlasQaPipelineTests(unittest.TestCase):
             root / "runtime" / "atlas" / "qa" / "evidence-index.latest.json",
             {
                 "contract_version": "atlas.qa.evidence_index.v1",
-                "generated_at": "2026-05-11T00:00:00Z",
+                "generated_at": generated_at,
                 "runs": [
-                    {"run_id": "fitness-run", "repo_id": "fitness", "git_sha": "fitness-target", "promotion_generated_at": "2026-05-11T00:00:00Z"},
-                    {"run_id": "foundation-run", "repo_id": "foundation", "git_sha": "foundation-target", "promotion_generated_at": "2026-05-11T00:00:00Z"},
+                    {"run_id": "fitness-run", "repo_id": "fitness", "git_sha": "fitness-target", "promotion_generated_at": generated_at},
+                    {"run_id": "foundation-run", "repo_id": "foundation", "git_sha": "foundation-target", "promotion_generated_at": generated_at},
                 ],
                 "adoption": [
                     {
@@ -2193,6 +2195,182 @@ class AtlasQaPipelineTests(unittest.TestCase):
         self.assertTrue(repos["foundation"]["release_ready"])
         self.assertEqual("promoted_contract", repos["foundation"]["promotion_display_status"])
         self.assertTrue(repos["foundation"]["sha_match"])
+
+    def test_release_readiness_consumes_fitness_vercel_guardrail_report(self) -> None:
+        root = self._temp_root()
+        (root / "ops" / "atlas" / "qa").mkdir(parents=True, exist_ok=True)
+        self._write_stack_lock(root=root, components={"fitness": "fitness-target"})
+        generated_at = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+        _write_json(
+            root / "ops" / "atlas" / "qa" / "release_policy.v1.json",
+            {
+                "contract_version": "atlas.qa.release_policy.v1",
+                "profiles": {
+                    "release_critical_web": {
+                        "display_name": "Release-Critical Web",
+                        "mode_requirements": {
+                            "release": {
+                                "allowed_statuses": ["promoted_physical", "promoted_physical_manual", "waived_promoted"],
+                                "required_tiers": ["physical_device", "manual_attestation"],
+                            }
+                        },
+                    }
+                },
+                "repo_overrides": {
+                    "fitness": {
+                        "release_profile": "release_critical_web",
+                        "governance_checks": [
+                            {
+                                "check_id": "fitness_vercel_hobby_guardrail",
+                                "kind": "json_report",
+                                "report_ref": "runtime/receipts/vercel-hobby-cost-governance/fitness-hobby-guardrail.latest.json",
+                                "contract_version": "atlas.vercel_hobby_guardrail.v1",
+                                "max_age_hours": 168.0,
+                                "required_for_modes": ["release"],
+                            }
+                        ],
+                    }
+                },
+            },
+        )
+        _write_json(
+            root / "runtime" / "receipts" / "vercel-hobby-cost-governance" / "fitness-hobby-guardrail.latest.json",
+            {
+                "report_version": "atlas.vercel_hobby_guardrail.v1",
+                "generated_at": generated_at,
+                "summary": {"total_routes": 31, "force_dynamic_routes": 29},
+                "guardrail_posture": {
+                    "deployment_posture": "ok",
+                    "route_pressure_posture": "watch",
+                    "middleware_pressure_posture": "watch",
+                    "integration_pressure_posture": "watch",
+                    "hot_route_watch_posture": "watch",
+                },
+            },
+        )
+        _write_json(
+            root / "runtime" / "atlas" / "qa" / "evidence-index.latest.json",
+            {
+                "contract_version": "atlas.qa.evidence_index.v1",
+                "generated_at": generated_at,
+                "runs": [
+                    {
+                        "run_id": "fitness-run",
+                        "repo_id": "fitness",
+                        "git_sha": "fitness-target",
+                        "promotion_generated_at": generated_at,
+                        "promotion_status": "promoted_physical_manual",
+                    }
+                ],
+                "adoption": [
+                    {
+                        "repo_id": "fitness",
+                        "adopted": True,
+                        "owner": "fitness",
+                        "adapter_refs": ["repos/fawxzzy-fitness/qa/adapters/fitness.web.json"],
+                        "scenario_refs": ["repos/fawxzzy-fitness/qa/scenarios/fitness.progression-pr-smoke.json"],
+                        "evidence_profile": "web_visual",
+                        "last_run_id": "fitness-run",
+                        "last_git_sha": "fitness-target",
+                        "last_promotion_status": "promoted_physical_manual",
+                        "root_runner_version": "atlas.qa.evaluate-run.v2",
+                        "contract_version": "atlas.qa.promotion.v1",
+                    }
+                ],
+                "summary": {},
+                "retention": {},
+            },
+        )
+
+        build_release_readiness(root=root)
+
+        payload = load_json_object(root / "runtime" / "atlas" / "qa" / "release-readiness.latest.json")
+        repo = payload["repos"][0]
+        self.assertTrue(repo["release_ready"])
+        self.assertEqual("ready", repo["release_gate_status"])
+        self.assertEqual(1, len(repo["governance_checks"]))
+        self.assertEqual("ready", repo["governance_checks"][0]["status"])
+        self.assertEqual("ready", repo["mode_requirements"]["release"]["governance_gate_status"])
+
+    def test_release_readiness_blocks_fitness_when_guardrail_report_missing(self) -> None:
+        root = self._temp_root()
+        (root / "ops" / "atlas" / "qa").mkdir(parents=True, exist_ok=True)
+        self._write_stack_lock(root=root, components={"fitness": "fitness-target"})
+        generated_at = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+        _write_json(
+            root / "ops" / "atlas" / "qa" / "release_policy.v1.json",
+            {
+                "contract_version": "atlas.qa.release_policy.v1",
+                "profiles": {
+                    "release_critical_web": {
+                        "display_name": "Release-Critical Web",
+                        "mode_requirements": {
+                            "release": {
+                                "allowed_statuses": ["promoted_physical", "promoted_physical_manual", "waived_promoted"],
+                            }
+                        },
+                    }
+                },
+                "repo_overrides": {
+                    "fitness": {
+                        "release_profile": "release_critical_web",
+                        "governance_checks": [
+                            {
+                                "check_id": "fitness_vercel_hobby_guardrail",
+                                "kind": "json_report",
+                                "report_ref": "runtime/receipts/vercel-hobby-cost-governance/fitness-hobby-guardrail.latest.json",
+                                "contract_version": "atlas.vercel_hobby_guardrail.v1",
+                                "max_age_hours": 168.0,
+                                "required_for_modes": ["release"],
+                            }
+                        ],
+                    }
+                },
+            },
+        )
+        _write_json(
+            root / "runtime" / "atlas" / "qa" / "evidence-index.latest.json",
+            {
+                "contract_version": "atlas.qa.evidence_index.v1",
+                "generated_at": generated_at,
+                "runs": [
+                    {
+                        "run_id": "fitness-run",
+                        "repo_id": "fitness",
+                        "git_sha": "fitness-target",
+                        "promotion_generated_at": generated_at,
+                        "promotion_status": "promoted_physical_manual",
+                    }
+                ],
+                "adoption": [
+                    {
+                        "repo_id": "fitness",
+                        "adopted": True,
+                        "owner": "fitness",
+                        "adapter_refs": ["repos/fawxzzy-fitness/qa/adapters/fitness.web.json"],
+                        "scenario_refs": ["repos/fawxzzy-fitness/qa/scenarios/fitness.progression-pr-smoke.json"],
+                        "evidence_profile": "web_visual",
+                        "last_run_id": "fitness-run",
+                        "last_git_sha": "fitness-target",
+                        "last_promotion_status": "promoted_physical_manual",
+                        "root_runner_version": "atlas.qa.evaluate-run.v2",
+                        "contract_version": "atlas.qa.promotion.v1",
+                    }
+                ],
+                "summary": {},
+                "retention": {},
+            },
+        )
+
+        build_release_readiness(root=root)
+
+        payload = load_json_object(root / "runtime" / "atlas" / "qa" / "release-readiness.latest.json")
+        repo = payload["repos"][0]
+        self.assertFalse(repo["release_ready"])
+        self.assertEqual("blocked", repo["release_gate_status"])
+        self.assertEqual("blocked", repo["governance_checks"][0]["status"])
+        self.assertEqual("blocked", repo["mode_requirements"]["release"]["governance_gate_status"])
+        self.assertIn("could not load", repo["release_blockers"][0])
 
     def test_release_readiness_reports_stale_receipt_age(self) -> None:
         root = self._temp_root()
