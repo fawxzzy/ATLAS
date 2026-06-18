@@ -132,6 +132,70 @@ class AtlasWorkstationResourceSnapshotTests(unittest.TestCase):
         self.assertNotEqual(0, completed.returncode)
         self.assertIn("-DevServerStatus is required", completed.stderr)
 
+    def test_markdown_closeout_renders_paste_ready_contract_and_summary(self) -> None:
+        completed = self._run(
+            "-MarkdownCloseout",
+            "-WorkflowOnly",
+            "-Top",
+            "5",
+            "-ProcessesStarted",
+            "codex",
+            "-ProcessesStillRunning",
+            "none",
+            "-DevServerStatus",
+            "stopped",
+            "-BrowserPlaywrightStatus",
+            "stopped",
+            "-WatchTestStatus",
+            "stopped",
+            "-StopCommandsRun",
+            "Stop-Process codex",
+            "-AnythingLeftIntentionallyRunning",
+            "none",
+            "-NextChatServiceAction",
+            "restart",
+            "-NextChatServiceNote",
+            "restart services only if needed",
+        )
+
+        self.assertEqual(0, completed.returncode, msg=completed.stderr)
+        self.assertIn("# Workstation Closeout", completed.stdout)
+        self.assertIn("## Closeout Contract", completed.stdout)
+        self.assertIn("- Processes started: `codex`", completed.stdout)
+        self.assertIn("- Browser/Playwright status: `stopped`", completed.stdout)
+        self.assertIn("- Should the next chat inherit or restart local services: `restart`", completed.stdout)
+        self.assertIn("## Sanitized Residue Summary", completed.stdout)
+        self.assertIn("atlas.workstation_resource_snapshot.summary.v1", completed.stdout)
+        self.assertNotIn("Path", completed.stdout)
+        self.assertNotIn("\\", completed.stdout)
+
+    def test_markdown_closeout_rejects_include_path(self) -> None:
+        completed = self._run(
+            "-MarkdownCloseout",
+            "-IncludePath",
+            "-DevServerStatus",
+            "stopped",
+            "-BrowserPlaywrightStatus",
+            "stopped",
+            "-WatchTestStatus",
+            "stopped",
+        )
+
+        self.assertNotEqual(0, completed.returncode)
+        self.assertIn("cannot be combined with -IncludePath", completed.stderr)
+
+    def test_markdown_closeout_requires_status_fields(self) -> None:
+        completed = self._run(
+            "-MarkdownCloseout",
+            "-DevServerStatus",
+            "stopped",
+            "-WatchTestStatus",
+            "stopped",
+        )
+
+        self.assertNotEqual(0, completed.returncode)
+        self.assertIn("-BrowserPlaywrightStatus is required", completed.stderr)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -11,6 +11,8 @@ param(
 
     [switch]$JsonCloseout,
 
+    [switch]$MarkdownCloseout,
+
     [string[]]$ProcessesStarted = @(),
 
     [string[]]$ProcessesStillRunning = @(),
@@ -203,6 +205,42 @@ function Get-ReviewGuidance {
     )
 }
 
+function Format-ListValue {
+    param(
+        [AllowNull()]
+        [object[]]$Values
+    )
+
+    if (-not $Values -or $Values.Count -eq 0) {
+        return "none"
+    }
+
+    $filtered = @(
+        $Values |
+            ForEach-Object { [string]$_ } |
+            Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+    )
+
+    if ($filtered.Count -eq 0) {
+        return "none"
+    }
+
+    return ($filtered -join ", ")
+}
+
+function Format-WorkflowNameSummary {
+    param(
+        [Parameter(Mandatory = $true)]
+        [pscustomobject[]]$WorkflowNames
+    )
+
+    if (-not $WorkflowNames -or $WorkflowNames.Count -eq 0) {
+        return "none"
+    }
+
+    return (($WorkflowNames | ForEach-Object { "{0}({1})" -f $_.name, $_.count }) -join ", ")
+}
+
 function New-SummaryPayload {
     param(
         [Parameter(Mandatory = $true)]
@@ -266,6 +304,53 @@ function New-CloseoutPayload {
     })
 }
 
+function Write-MarkdownCloseout {
+    param(
+        [Parameter(Mandatory = $true)]
+        [pscustomobject]$CloseoutPayload
+    )
+
+    $closeout = $CloseoutPayload.closeout
+    $residueSummary = $CloseoutPayload.residue_summary
+    $workflowSummary = $residueSummary.workflow_summary
+
+    $lines = @()
+    $lines += "# Workstation Closeout"
+    $lines += ""
+    $lines += ("- Contract version: ``{0}``" -f $CloseoutPayload.contract_version)
+    $lines += ("- Generated at: ``{0}``" -f $CloseoutPayload.generated_at)
+    $lines += ""
+    $lines += "## Closeout Contract"
+    $lines += ""
+    $lines += ("- Processes started: ``{0}``" -f (Format-ListValue -Values $closeout.processes_started))
+    $lines += ("- Processes still running: ``{0}``" -f (Format-ListValue -Values $closeout.processes_still_running))
+    $lines += ("- Dev server status: ``{0}``" -f $closeout.dev_server_status)
+    $lines += ("- Browser/Playwright status: ``{0}``" -f $closeout.browser_playwright_status)
+    $lines += ("- Watch/test status: ``{0}``" -f $closeout.watch_test_status)
+    $lines += ("- Stop commands run: ``{0}``" -f (Format-ListValue -Values $closeout.stop_commands_run))
+    $lines += ("- Anything left intentionally running: ``{0}``" -f (Format-ListValue -Values $closeout.anything_left_intentionally_running))
+    $lines += ("- Should the next chat inherit or restart local services: ``{0}``" -f $closeout.next_chat_service_action)
+    $lines += ("- Next chat service note: ``{0}``" -f $closeout.next_chat_service_note)
+    $lines += ""
+    $lines += "## Sanitized Residue Summary"
+    $lines += ""
+    $lines += ("- Contract version: ``{0}``" -f $residueSummary.contract_version)
+    $lines += ("- Workflow-only mode: ``{0}``" -f $residueSummary.workflow_only.ToString().ToLowerInvariant())
+    $lines += ("- Workflow process count: ``{0}``" -f $workflowSummary.workflow_process_count)
+    $lines += ("- Distinct workflow names: ``{0}``" -f $workflowSummary.distinct_workflow_names)
+    $lines += ("- Workflow working set (MB): ``{0}``" -f $workflowSummary.workflow_working_set_mb)
+    $lines += ("- Workflow names: ``{0}``" -f (Format-WorkflowNameSummary -WorkflowNames $workflowSummary.workflow_names))
+    $lines += ""
+    $lines += "## Review Guidance"
+    $lines += ""
+
+    foreach ($guidance in $residueSummary.review_guidance) {
+        $lines += "- $guidance"
+    }
+
+    $lines | Write-Output
+}
+
 function Write-Section {
     param(
         [Parameter(Mandatory = $true)]
@@ -316,15 +401,24 @@ function Write-WorkflowSummary {
     Write-Output ("Workflow names: {0}" -f ($groupedNames -join ", "))
 }
 
-if ($JsonSummary -and $JsonCloseout) {
-    throw "-JsonSummary cannot be combined with -JsonCloseout because only one JSON output mode may be used at a time."
+$selectedOutputModes = @(
+    @(
+        [pscustomobject]@{ enabled = [bool]$JsonSummary; name = "JsonSummary" },
+        [pscustomobject]@{ enabled = [bool]$JsonCloseout; name = "JsonCloseout" },
+        [pscustomobject]@{ enabled = [bool]$MarkdownCloseout; name = "MarkdownCloseout" }
+    ) | Where-Object { $_.enabled }
+)
+
+if ($selectedOutputModes.Count -gt 1) {
+    $modeNames = $selectedOutputModes | ForEach-Object { "-$($_.name)" }
+    throw ("Only one governed output mode may be used at a time: {0}" -f ($modeNames -join ", "))
 }
 
-if (($JsonSummary -or $JsonCloseout) -and $IncludePath) {
-    throw "JSON output modes cannot be combined with -IncludePath because JSON output must stay privacy-bounded."
+if (($JsonSummary -or $JsonCloseout -or $MarkdownCloseout) -and $IncludePath) {
+    throw "Governed output modes cannot be combined with -IncludePath because shared closeout output must stay privacy-bounded."
 }
 
-if ($JsonCloseout) {
+if ($JsonCloseout -or $MarkdownCloseout) {
     $requiredCloseoutFields = [ordered]@{
         "-DevServerStatus" = $DevServerStatus
         "-BrowserPlaywrightStatus" = $BrowserPlaywrightStatus
@@ -353,6 +447,11 @@ if ($JsonSummary) {
 
 if ($JsonCloseout) {
     (New-CloseoutPayload -ResidueSummary $summaryPayload) | ConvertTo-Json -Depth 8
+    return
+}
+
+if ($MarkdownCloseout) {
+    Write-MarkdownCloseout -CloseoutPayload (New-CloseoutPayload -ResidueSummary $summaryPayload)
     return
 }
 
