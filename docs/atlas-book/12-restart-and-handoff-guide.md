@@ -169,6 +169,8 @@ Current helper posture:
 
 - emits one sanitized workflow summary by default
 - supports both workflow-only and full snapshot modes
+- supports one privacy-bounded `-JsonSummary` mode for machine-readable residue reads
+- rejects `-JsonSummary` plus `-IncludePath` so machine-readable output cannot carry committed path leakage by accident
 - keep `-IncludePath` opt-in only because paths are machine-private
 
 Use that helper when local CPU/GPU pressure or lingering workflow residue is suspected. Do not commit raw machine-private output, especially if `-IncludePath` was used.
@@ -190,7 +192,7 @@ Use that helper when local CPU/GPU pressure or lingering workflow residue is sus
 - the current active ATLAS-side lane is now `AI Repetition-to-Automation Pipeline`
 - the immediately preceding ATLAS-side lane was `AI Long-Run Batch Orchestration`, and its current bounded `queue-or-registry` subfamily is now exhausted through the reconciled top-level `world_model` branch
 - the broader `attention_queue` family is now exhausted through `legacy_compatibility_payload`, the adjacent top-level `legacy_compatibility` payload boundary is now reconciled, the top-level `trust_posture` summary boundary is now also reconciled on canonical `main`, and the raw top-level `trust_surfaces` payload boundary is now contract-frozen around non-`trusted` `knowledge_catalog` qualification, exact field projection, deterministic ordering, and explicit separation from the richer summary and narrower queue-side quarantine signal
-- `Workstation Resource Hygiene` now sits at `22%`: the helper has now been replayed in a later session, the full snapshot path was hardened after a real CPU-sorting failure, both replay modes now succeed, and the default helper output now includes one sanitized workflow summary so closeout checks can reuse the lane without committing raw machine-private paths
+- `Workstation Resource Hygiene` now sits at `50%`: the helper has now moved beyond replay-only hardening into one durable machine-readable residue-summary surface, `-JsonSummary` emits bounded structured workflow/process truth with no path output, the privacy boundary is test-backed and fail-closed against `-IncludePath`, and later closeout work can now consume governed structured residue truth without committing raw machine-private paths
 - `Vercel Hobby Cost Governance` now sits at `45%`: the first current Fitness usage-snapshot categories are durable, the official Hobby, Pro, and Observability Plus thresholds were revalidated on `2026-06-17`, current read-only evidence now explicitly carries recent deployment churn plus the sampled `/api/discord/interactions` polling shape, and the lane still remains below the next threshold because route, middleware, and fetch inventory plus repeat trend snapshots are not yet durable
 - the current immediate ATLAS-root packet is now `AI Repetition-to-Automation Pipeline non-Fitness marker knockout selector surface`
 - the current selector helper now renders that active packet separately from the first downstream admissible follow-on, so active-lane truth no longer collapses into a self-referential next-packet result; the current downstream follow-on remains `AI Long-Run Batch Orchestration queue-or-registry active follow-on`

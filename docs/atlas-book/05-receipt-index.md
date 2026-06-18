@@ -52,6 +52,7 @@
 - [FawxzzyFitness Feedback Board Ownership Check](../ops/FAWXZZY-FITNESS-FEEDBACK-BOARD-OWNERSHIP-CHECK-2026-06-10.md)
 - [Workstation Resource Hygiene Baseline And Codex QALLL Closeout Contract Pass 1](../ops/WORKSTATION-RESOURCE-HYGIENE-BASELINE-AND-CODEX-QALLL-CLOSEOUT-CONTRACT-PASS-1-2026-06-11.md)
 - [Workstation Resource Hygiene Replay And Snapshot Helper Hardening](../ops/WORKSTATION-RESOURCE-HYGIENE-REPLAY-AND-SNAPSHOT-HELPER-HARDENING-2026-06-17.md)
+- [Workstation Resource Hygiene Machine-Readable Residue Summary Surface](../ops/WORKSTATION-RESOURCE-HYGIENE-MACHINE-READABLE-RESIDUE-SUMMARY-SURFACE-2026-06-17.md)
 - [AI Repetition-to-Automation Pipeline Non-Fitness Marker Knockout Selector Active-Lane Follow-On Disambiguation](../ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-ACTIVE-LANE-FOLLOW-ON-DISAMBIGUATION-2026-06-17.md)
 - [Verta-Core Final Closeout Eligibility Pass 1](../ops/VERTA-CORE-FINAL-CLOSEOUT-ELIGIBILITY-PASS-1-2026-06-11.md)
 - [ATLAS Core Phase Final Closeout Pass 1](../ops/ATLAS-CORE-PHASE-FINAL-CLOSEOUT-PASS-1-2026-06-12.md)
