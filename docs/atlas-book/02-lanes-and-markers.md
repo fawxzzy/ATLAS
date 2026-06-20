@@ -57,7 +57,7 @@ Read:
 - Knowledge Capture & Transfer: `100%`
 - Durable Context Externalization: `100%`
 - AI Repetition-to-Automation Pipeline: `35%`
-- AI Long-Run Batch Orchestration: `59%`
+- AI Long-Run Batch Orchestration: `60%`
 - DiscordOS Runtime & Product Hardening: `100%`
 
 ## Supporting Open Markers
@@ -70,7 +70,7 @@ Read:
 
 - Cortex Readiness: `41%`
 - AI Repetition-to-Automation Pipeline: `35%`
-- AI Long-Run Batch Orchestration: `59%`
+- AI Long-Run Batch Orchestration: `60%`
 - Playbook Everywhere + Cortex Interface: `22%`
 
 ### Future / lane-structure
