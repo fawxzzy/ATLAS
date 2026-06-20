@@ -53,7 +53,7 @@ Shared rules that survive the split:
 - should not become a product-runtime owner
 - currently open for bounded root-owned orchestration doctrine, shared restart-surface refresh when no-overlap wave outputs are ready, and freezing the exact owner-facing home for post-comparison winner conversion now that the pilot-selection criteria, comparison slice, bounded helper proof, and conversion contract are explicit
 - next valid package:
-  - `AI Long-Run Batch Orchestration single supervised pilot winner conversion owner-surface admission pass 475`
+  - `AI Long-Run Batch Orchestration single supervised pilot winner conversion supporting-lane admission pass 476`
 
 ## Key Endgames By Theme
 
