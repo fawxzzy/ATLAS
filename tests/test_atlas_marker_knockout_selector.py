@@ -72,9 +72,8 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
 
     def _write_packet_receipts(self, root: Path) -> None:
         current_receipt = root / "docs" / "ops" / (
-            "AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-CANDIDATE-"
-            "COMPARISON-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-"
-            "2026-06-20.md"
+            "AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-"
+            "WINNER-CONVERSION-CONTRACT-FREEZE-PASS-474-2026-06-20.md"
         )
         current_receipt.parent.mkdir(parents=True, exist_ok=True)
         current_receipt.write_text(
@@ -82,8 +81,8 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
                 [
                     "# Current Packet",
                     "",
-                    "- Mode: `root-owned bounded implementation and proof reconciliation`",
-                    "- Scope: `pilot-candidate comparison helper and proof worker cluster`",
+                    "- Mode: `docs-only root-bounded contract freeze`",
+                    "- Scope: `freeze the exact root-owned conversion contract for mapping one labeled preferred pilot-candidate comparison result into one real pilot-winner decision without widening into execution-home or owner-repo implementation semantics`",
                     "",
                 ]
             ),
@@ -119,19 +118,19 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual(20, payload["selected_percentage"])
         self.assertEqual("continue_current_lane", payload["operator_action"])
         self.assertEqual(
-            "AI Long-Run Batch Orchestration single supervised pilot candidate comparison first-implementation worker cluster reconciliation",
+            "AI Long-Run Batch Orchestration single supervised pilot winner conversion contract freeze pass 474",
             payload["selected_current_packet"],
         )
         self.assertEqual(
-            "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-CANDIDATE-COMPARISON-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-20.md",
+            "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-WINNER-CONVERSION-CONTRACT-FREEZE-PASS-474-2026-06-20.md",
             payload["selected_current_packet_basis_ref"],
         )
         self.assertEqual(
-            "root-owned bounded implementation and proof reconciliation",
+            "docs-only root-bounded contract freeze",
             payload["selected_current_packet_mode"],
         )
         self.assertEqual(
-            "pilot-candidate comparison helper and proof worker cluster",
+            "freeze the exact root-owned conversion contract for mapping one labeled preferred pilot-candidate comparison result into one real pilot-winner decision without widening into execution-home or owner-repo implementation semantics",
             payload["selected_current_packet_scope"],
         )
         self.assertEqual(
@@ -208,20 +207,20 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertIn("## Operator Action", markdown)
         self.assertIn("action: `continue_current_lane`", markdown)
         self.assertIn(
-            "current packet basis receipt: `docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-CANDIDATE-COMPARISON-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-20.md`",
+            "current packet basis receipt: `docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-WINNER-CONVERSION-CONTRACT-FREEZE-PASS-474-2026-06-20.md`",
             markdown,
         )
         self.assertIn(
-            "current packet mode: `root-owned bounded implementation and proof reconciliation`",
+            "current packet mode: `docs-only root-bounded contract freeze`",
             markdown,
         )
         self.assertIn(
-            "current packet scope: `pilot-candidate comparison helper and proof worker cluster`",
+            "current packet scope: `freeze the exact root-owned conversion contract for mapping one labeled preferred pilot-candidate comparison result into one real pilot-winner decision without widening into execution-home or owner-repo implementation semantics`",
             markdown,
         )
         self.assertIn("## Current Active Marker", markdown)
         self.assertIn(
-            "current packet: `AI Long-Run Batch Orchestration single supervised pilot candidate comparison first-implementation worker cluster reconciliation`",
+            "current packet: `AI Long-Run Batch Orchestration single supervised pilot winner conversion contract freeze pass 474`",
             markdown,
         )
         self.assertIn("## First Admissible After Current Lane", markdown)
