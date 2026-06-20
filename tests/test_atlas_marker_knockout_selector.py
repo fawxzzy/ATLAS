@@ -73,7 +73,7 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
     def _write_packet_receipts(self, root: Path) -> None:
         current_receipt = root / "docs" / "ops" / (
             "AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-CANDIDATE-"
-            "COMPARISON-FIRST-IMPLEMENTATION-ADMISSION-PASS-471-2026-06-20.md"
+            "COMPARISON-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-472-2026-06-20.md"
         )
         current_receipt.parent.mkdir(parents=True, exist_ok=True)
         current_receipt.write_text(
@@ -81,8 +81,8 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
                 [
                     "# Current Packet",
                     "",
-                    "- Mode: `docs-only root-bounded first-implementation admission`",
-                    "- Scope: `freeze the smallest fail-closed implementation slice for the root-owned pilot-candidate comparison family without choosing any real pilot winner, repo, worktree, branch, or execution home`",
+                    "- Mode: `docs-only root-bounded prompt-pack and handoff contract`",
+                    "- Scope: `freeze the exact worker objective, proof obligations, allowed-touch boundary, and stop conditions for the already-admitted fail-closed pilot-candidate comparison slice`",
                     "",
                 ]
             ),
@@ -118,19 +118,19 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual(20, payload["selected_percentage"])
         self.assertEqual("continue_current_lane", payload["operator_action"])
         self.assertEqual(
-            "AI Long-Run Batch Orchestration single supervised pilot candidate comparison first-implementation admission pass 471",
+            "AI Long-Run Batch Orchestration single supervised pilot candidate comparison prompt-pack and handoff contract pass 472",
             payload["selected_current_packet"],
         )
         self.assertEqual(
-            "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-CANDIDATE-COMPARISON-FIRST-IMPLEMENTATION-ADMISSION-PASS-471-2026-06-20.md",
+            "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-CANDIDATE-COMPARISON-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-472-2026-06-20.md",
             payload["selected_current_packet_basis_ref"],
         )
         self.assertEqual(
-            "docs-only root-bounded first-implementation admission",
+            "docs-only root-bounded prompt-pack and handoff contract",
             payload["selected_current_packet_mode"],
         )
         self.assertEqual(
-            "freeze the smallest fail-closed implementation slice for the root-owned pilot-candidate comparison family without choosing any real pilot winner, repo, worktree, branch, or execution home",
+            "freeze the exact worker objective, proof obligations, allowed-touch boundary, and stop conditions for the already-admitted fail-closed pilot-candidate comparison slice",
             payload["selected_current_packet_scope"],
         )
         self.assertEqual(
@@ -207,20 +207,20 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertIn("## Operator Action", markdown)
         self.assertIn("action: `continue_current_lane`", markdown)
         self.assertIn(
-            "current packet basis receipt: `docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-CANDIDATE-COMPARISON-FIRST-IMPLEMENTATION-ADMISSION-PASS-471-2026-06-20.md`",
+            "current packet basis receipt: `docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-CANDIDATE-COMPARISON-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-472-2026-06-20.md`",
             markdown,
         )
         self.assertIn(
-            "current packet mode: `docs-only root-bounded first-implementation admission`",
+            "current packet mode: `docs-only root-bounded prompt-pack and handoff contract`",
             markdown,
         )
         self.assertIn(
-            "current packet scope: `freeze the smallest fail-closed implementation slice for the root-owned pilot-candidate comparison family without choosing any real pilot winner, repo, worktree, branch, or execution home`",
+            "current packet scope: `freeze the exact worker objective, proof obligations, allowed-touch boundary, and stop conditions for the already-admitted fail-closed pilot-candidate comparison slice`",
             markdown,
         )
         self.assertIn("## Current Active Marker", markdown)
         self.assertIn(
-            "current packet: `AI Long-Run Batch Orchestration single supervised pilot candidate comparison first-implementation admission pass 471`",
+            "current packet: `AI Long-Run Batch Orchestration single supervised pilot candidate comparison prompt-pack and handoff contract pass 472`",
             markdown,
         )
         self.assertIn("## First Admissible After Current Lane", markdown)
