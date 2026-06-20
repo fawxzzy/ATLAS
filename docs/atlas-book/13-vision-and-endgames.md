@@ -53,7 +53,7 @@ Shared rules that survive the split:
 - should not become a product-runtime owner
 - currently open for bounded root-owned orchestration doctrine, shared restart-surface refresh when no-overlap wave outputs are ready, and selecting the next exact concrete supervised-pilot move only after the pilot-selection criteria, support posture, first implementation slice, worker-routing boundary, and validator proof are explicit
 - next valid package:
-  - `AI Long-Run Batch Orchestration single supervised pilot candidate comparison supporting-lane admission pass 470`
+  - `AI Long-Run Batch Orchestration single supervised pilot candidate comparison first-implementation admission pass 471`
 
 ## Key Endgames By Theme
 

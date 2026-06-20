@@ -37,6 +37,7 @@
     "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTION-CRITERIA-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-19.md",
     "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-CANDIDATE-COMPARISON-CONTRACT-FREEZE-PASS-468-2026-06-20.md",
     "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-CANDIDATE-COMPARISON-OWNER-SURFACE-ADMISSION-PASS-469-2026-06-20.md",
+    "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-CANDIDATE-COMPARISON-SUPPORTING-LANE-ADMISSION-PASS-470-2026-06-20.md",
     "ops/atlas/pilot_selection_criteria.py",
     "tests/test_atlas_pilot_selection_criteria.py"
   ],
@@ -46,9 +47,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "ai-long-run-batch-orchestration",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-CANDIDATE-COMPARISON-OWNER-SURFACE-ADMISSION-PASS-469-2026-06-20.md",
+    "current_checkpoint_receipt": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-CANDIDATE-COMPARISON-SUPPORTING-LANE-ADMISSION-PASS-470-2026-06-20.md",
     "checkpoint_commit": "main",
-    "checkpoint_summary": "The lane now has one active continuity manifest, one exact post-exhaustion non-queue criteria contract, one exact owner-surface admission packet, one exact support admission packet that honestly holds support at `none yet`, one exact first-implementation admission packet that freezes the smallest fail-closed pilot-admission-card slice, one exact prompt-pack and handoff contract, one exact implementation-readiness closeout, one exact worker-cluster reconciliation that lands the bounded validator helper plus direct proof in the current ATLAS working tree, one exact candidate-comparison contract freeze that makes the admitted evidence classes, rejection rules, and tie discipline explicit, and one exact owner-surface admission that keeps that comparison seam rooted in ATLAS control-plane surfaces: restart truth agrees that AI Long-Run remains the active ATLAS-side control-plane family, the criteria and comparison families still stay root-local, and the next exact question is now the supporting-lane admission for that comparison seam.",
+    "checkpoint_summary": "The lane now has one active continuity manifest, one exact post-exhaustion non-queue criteria contract, one exact owner-surface admission packet, one exact support admission packet that honestly holds support at `none yet`, one exact first-implementation admission packet that freezes the smallest fail-closed pilot-admission-card slice, one exact prompt-pack and handoff contract, one exact implementation-readiness closeout, one exact worker-cluster reconciliation that lands the bounded validator helper plus direct proof in the current ATLAS working tree, one exact candidate-comparison contract freeze that makes the admitted evidence classes, rejection rules, and tie discipline explicit, one exact owner-surface admission that keeps that comparison seam rooted in ATLAS control-plane surfaces, and one exact support-admission packet that honestly holds comparison support at `none yet`: restart truth agrees that AI Long-Run remains the active ATLAS-side control-plane family, the criteria and comparison families still stay root-local, and the next exact question is now the first-implementation admission for that comparison seam.",
     "governing_receipts": [
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-2026-05-22.md",
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-POST-WORLD-MODEL-TOP-LEVEL-PAYLOAD-BOUNDARY-NEXT-SLICE-SELECTION-PASS-460-2026-06-17.md",
@@ -65,7 +66,8 @@
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTION-CRITERIA-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-467-2026-06-19.md",
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTION-CRITERIA-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-19.md",
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-CANDIDATE-COMPARISON-CONTRACT-FREEZE-PASS-468-2026-06-20.md",
-      "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-CANDIDATE-COMPARISON-OWNER-SURFACE-ADMISSION-PASS-469-2026-06-20.md"
+      "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-CANDIDATE-COMPARISON-OWNER-SURFACE-ADMISSION-PASS-469-2026-06-20.md",
+      "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-CANDIDATE-COMPARISON-SUPPORTING-LANE-ADMISSION-PASS-470-2026-06-20.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -107,6 +109,10 @@
       {
         "path": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-CANDIDATE-COMPARISON-OWNER-SURFACE-ADMISSION-PASS-469-2026-06-20.md",
         "role": "current exact pilot-candidate comparison owner-surface admission"
+      },
+      {
+        "path": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-CANDIDATE-COMPARISON-SUPPORTING-LANE-ADMISSION-PASS-470-2026-06-20.md",
+        "role": "current exact pilot-candidate comparison support admission"
       },
       {
         "path": "ops/atlas/pilot_selection_criteria.py",
@@ -174,7 +180,7 @@
     "blocked_or_gated_work": [
       {
         "item": "choosing one concrete first supervised pilot candidate by adjacency",
-        "requirement": "blocked until one later explicit candidate-selection packet compares real candidates against the now-admitted comparison contract, the already admitted criteria contract, the owner-facing home, and the support posture"
+        "requirement": "blocked until one later explicit candidate-selection packet compares real candidates against the now-admitted comparison contract, the already admitted criteria contract, the owner-facing home, and the now-explicit support posture"
       },
       {
         "item": "higher marker movement above the current continuity-backed ratchet",
@@ -187,15 +193,15 @@
     ],
     "next_package_ladder": [
       {
-        "package": "AI Long-Run Batch Orchestration single supervised pilot candidate comparison supporting-lane admission pass 470",
-        "mode": "docs-only root-bounded supporting-lane admission",
-        "reason": "the pilot-selection criteria contract, owner-facing home, support posture, validator slice, handoff contract, readiness posture, bounded helper proof, candidate-comparison contract, and comparison owner-surface admission are now all durable, and the next honest question is whether one separate supporting seam reopens before winner selection or execution-home widening"
+        "package": "AI Long-Run Batch Orchestration single supervised pilot candidate comparison first-implementation admission pass 471",
+        "mode": "docs-only root-bounded first-implementation admission",
+        "reason": "the pilot-selection criteria contract, owner-facing home, support posture, validator slice, handoff contract, readiness posture, bounded helper proof, candidate-comparison contract, comparison owner-surface admission, and comparison support posture are now all durable, and the next honest question is the smallest implementation and proof matrix for that already root-owned comparison family before winner selection or execution-home widening"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-CANDIDATE-COMPARISON-OWNER-SURFACE-ADMISSION-PASS-469-2026-06-20.md",
+    "freshness_checked_receipt": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-CANDIDATE-COMPARISON-SUPPORTING-LANE-ADMISSION-PASS-470-2026-06-20.md",
     "freshness_checked_at": "2026-06-20T00:00:00Z",
-    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture now match the active AI Long-Run lane after the criteria family gained a real bounded validator helper plus direct proof, the comparison seam gained an explicit contract, the owner-facing home for that comparison seam became explicit, and the next exact packet shifted to supporting-lane admission for that comparison family.",
+    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture now match the active AI Long-Run lane after the criteria family gained a real bounded validator helper plus direct proof, the comparison seam gained an explicit contract, the owner-facing home for that comparison seam became explicit, support for that comparison seam was explicitly held at `none yet`, and the next exact packet shifted to first-implementation admission for that comparison family.",
     "marker_posture": [
       {
         "marker": "AI Long-Run Batch Orchestration",
