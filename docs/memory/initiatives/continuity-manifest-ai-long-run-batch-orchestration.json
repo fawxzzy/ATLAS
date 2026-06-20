@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-06-18T16:50:07.5884334-04:00",
-  "updated_at": "2026-06-20T00:00:00Z",
+  "updated_at": "2026-06-20T16:40:56.5311818-04:00",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -57,6 +57,7 @@
     "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-WINNER-SELECTION-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-485-2026-06-20.md",
     "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-WINNER-SELECTION-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-20.md",
     "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-SINGLE-SUPERVISED-PILOT-WINNER-SELECTION-NEXT-SLICE-SELECTION-PASS-486-2026-06-20.md",
+    "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-IMPLEMENTATION-ROUTING-CONTRACT-FREEZE-PASS-487-2026-06-20.md",
     "ops/atlas/pilot_selection_criteria.py",
     "ops/atlas/pilot_candidate_comparison.py",
     "ops/atlas/pilot_winner_conversion.py",
@@ -72,9 +73,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "ai-long-run-batch-orchestration",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-SINGLE-SUPERVISED-PILOT-WINNER-SELECTION-NEXT-SLICE-SELECTION-PASS-486-2026-06-20.md",
+    "current_checkpoint_receipt": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-IMPLEMENTATION-ROUTING-CONTRACT-FREEZE-PASS-487-2026-06-20.md",
     "checkpoint_commit": "main",
-    "checkpoint_summary": "The lane now has one active continuity manifest, one exact post-exhaustion non-queue criteria contract, one exact owner-surface admission packet, one exact support admission packet that honestly holds support at `none yet`, one exact first-implementation admission packet that freezes the smallest fail-closed pilot-admission-card slice, one exact prompt-pack and handoff contract, one exact implementation-readiness closeout, and one exact worker-cluster reconciliation that lands the bounded validator helper plus direct proof in the current ATLAS working tree; one exact candidate-comparison contract freeze that makes the admitted evidence classes, rejection rules, and tie discipline explicit, one exact owner-surface admission that keeps that comparison seam rooted in ATLAS control-plane surfaces, one exact support-admission packet that honestly holds comparison support at `none yet`, one exact first-implementation admission packet that freezes the smallest labeled-candidate comparison slice and proof matrix without converting a preferred label into one real pilot winner, one exact prompt-pack and handoff contract that freezes the worker objective, proof obligations, no-discovery/no-winner-conversion guard, and stop conditions for that same comparison seam, one exact implementation-readiness closeout that freezes the exact rule for leaving root docs-only mode and routing one bounded comparison helper-and-test worker packet, and one exact worker-cluster reconciliation that now lands the bounded comparison helper plus direct proof in the current ATLAS working tree; one exact winner-conversion contract freeze that makes the admissible mapping from preferred comparison label to one real pilot-winner decision explicit without widening into owner-repo implementation or execution-home doctrine, one exact winner-conversion owner-surface admission that keeps that conversion seam rooted in ATLAS control-plane surfaces before support, concrete winner selection, or execution-home widening, one exact winner-conversion support-admission packet that now honestly holds separate support at `none yet` before first implementation or concrete winner selection, one exact winner-conversion first-implementation admission packet that now freezes the smallest fail-closed conversion slice and proof matrix without allowing repo discovery, owner-readiness tie-breaking, or execution-home widening, one exact winner-conversion prompt-pack and handoff contract that now freezes the worker objective, proof obligations, no-mutation/no-discovery/no-live-pilot-selection-by-adjacency guard, and stop conditions for that same conversion seam, one exact winner-conversion implementation-readiness closeout that freezes the exact rule for leaving root docs-only mode and routing one bounded conversion helper-and-test worker packet, and one exact winner-conversion worker-cluster reconciliation that now lands the bounded conversion helper plus direct proof in the current ATLAS working tree; one exact winner-selection contract freeze that now makes the admissible selection evidence classes, fail-closed rejection classes, and explicit no-owner-repo/no-execution-home boundary durable, one exact winner-selection owner-surface admission that now keeps the producing and consuming home for that seam root-local before support, owner-repo implementation, or `_stack` execution-home doctrine reopens, one exact winner-selection support-admission packet that now honestly holds separate support at `none yet` before first implementation, owner-repo implementation, or execution-home widening, one exact winner-selection first-implementation-admission packet that now freezes the smallest fail-closed selection slice and proof matrix without allowing repo discovery, owner-readiness tie-breaking, owner-repo mutation authority, or execution-home widening, one exact winner-selection prompt-pack and handoff contract that now freezes the exact worker objective, proof obligations, no-mutation/no-discovery/no-owner-routing-by-adjacency guard, and stop conditions for that same selection seam, one exact winner-selection implementation-readiness closeout that now freezes the exact rule for leaving root docs-only mode and routing one bounded winner-selection helper-and-test worker packet, one exact winner-selection worker-cluster reconciliation that now lands the bounded winner-selection helper plus direct proof in the current ATLAS working tree, and one exact post-winner-selection next-slice selector that now keeps the downstream seam root-local and docs-only by freezing `AI Long-Run Batch Orchestration single supervised pilot selected-pilot implementation-routing contract freeze pass 487` as the exact next package: restart truth agrees that AI Long-Run remains the active ATLAS-side control-plane family, the criteria, comparison, conversion, selection-contract, selection-owner, selection-support, selection-first-implementation, selection-handoff, selection-readiness, and selection-worker families still stay root-local, and the next exact question is now the selected-pilot implementation-routing contract above that landed concrete-pilot-selection boundary.",
+    "checkpoint_summary": "The lane now has one active continuity manifest, one exact post-exhaustion non-queue criteria contract, one exact owner-surface admission packet, one exact support admission packet that honestly holds support at `none yet`, one exact first-implementation admission packet that freezes the smallest fail-closed pilot-admission-card slice, one exact prompt-pack and handoff contract, one exact implementation-readiness closeout, and one exact worker-cluster reconciliation that lands the bounded validator helper plus direct proof in the current ATLAS working tree; one exact candidate-comparison contract freeze plus landed helper and proof; one exact winner-conversion contract freeze plus landed helper and proof; one exact winner-selection contract, owner-surface admission, support-admission, first-implementation admission, prompt-pack, readiness closeout, and worker-cluster reconciliation; one exact post-winner-selection next-slice selector that froze selected-pilot implementation routing as the next honest downstream seam; and one exact selected-pilot implementation-routing contract freeze that now makes the admitted input, evidence classes, forbidden evidence classes, and no-owner-routing/no-execution-home boundary durable while naming owner-surface admission as the exact next package. Restart truth agrees that AI Long-Run remains the active ATLAS-side control-plane family, the criteria/comparison/conversion/selection helper-and-proof chain stays root-local, and the next exact question is now the selected-pilot implementation-routing owner-facing home above that landed concrete-pilot-selection boundary.",
     "governing_receipts": [
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-2026-05-22.md",
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-POST-WORLD-MODEL-TOP-LEVEL-PAYLOAD-BOUNDARY-NEXT-SLICE-SELECTION-PASS-460-2026-06-17.md",
@@ -111,7 +112,8 @@
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-WINNER-SELECTION-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-484-2026-06-20.md",
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-WINNER-SELECTION-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-485-2026-06-20.md",
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-WINNER-SELECTION-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-20.md",
-      "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-SINGLE-SUPERVISED-PILOT-WINNER-SELECTION-NEXT-SLICE-SELECTION-PASS-486-2026-06-20.md"
+      "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-SINGLE-SUPERVISED-PILOT-WINNER-SELECTION-NEXT-SLICE-SELECTION-PASS-486-2026-06-20.md",
+      "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-IMPLEMENTATION-ROUTING-CONTRACT-FREEZE-PASS-487-2026-06-20.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -235,6 +237,10 @@
         "role": "current exact post-winner-selection next-slice selector"
       },
       {
+        "path": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-IMPLEMENTATION-ROUTING-CONTRACT-FREEZE-PASS-487-2026-06-20.md",
+        "role": "current exact selected-pilot implementation-routing contract freeze"
+      },
+      {
         "path": "ops/atlas/pilot_selection_criteria.py",
         "role": "current exact pilot-criteria validator helper"
       },
@@ -327,6 +333,10 @@
         "requirement": "blocked until one later explicit post-worker selection or downstream contract packet selects owner-side pilot routing or execution-home doctrine after the bounded winner-selection helper is reconciled"
       },
       {
+        "item": "owner-surface admission, owner-repo mutation, or implementation routing by adjacency from one explicit selected_pilot card",
+        "requirement": "blocked until the selected-pilot implementation-routing owner-surface admission packet explicitly freezes the producing and consuming home before any support, implementation, or execution-home widening"
+      },
+      {
         "item": "higher marker movement above the current continuity-backed ratchet",
         "requirement": "blocked until broader execution, proof-backed adoption, or another real blocker-clearance class changes operator reality again"
       },
@@ -337,15 +347,15 @@
     ],
     "next_package_ladder": [
       {
-        "package": "AI Long-Run Batch Orchestration single supervised pilot selected-pilot implementation-routing contract freeze pass 487",
-        "mode": "docs-only root-bounded next-slice selection",
-        "reason": "the pilot-selection criteria, comparison, winner-conversion, and winner-selection helper-and-proof seams are now all landed on canonical `main`, and the durable post-winner-selection selector has already proved the next honest blocker is freezing the selected-pilot implementation-routing boundary before owner-repo mutation authority or `_stack` execution-home doctrine may reopen"
+        "package": "AI Long-Run Batch Orchestration single supervised pilot selected-pilot implementation-routing owner-surface admission pass 488",
+        "mode": "docs-only root-bounded owner-surface admission",
+        "reason": "the selected-pilot implementation-routing contract is now durable, so the next honest blocker is freezing which root-local surface owns the producing and consuming home for that routing seam before support, owner-repo mutation, Playbook export, or `_stack` execution-home doctrine may reopen"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-SINGLE-SUPERVISED-PILOT-WINNER-SELECTION-NEXT-SLICE-SELECTION-PASS-486-2026-06-20.md",
-    "freshness_checked_at": "2026-06-20T00:00:00Z",
-    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture now match the active AI Long-Run lane after the criteria family gained a real bounded validator helper plus direct proof, the comparison seam gained an explicit contract plus a landed bounded helper and proof, the conversion seam gained an explicit contract plus a landed bounded helper and proof, the winner-selection seam from one contract-local `pilot_winner` to one lane-level concrete first supervised pilot is now explicitly contract-frozen, the producing and consuming home for that selection seam is now explicitly owned by ATLAS root control-plane surfaces, separate support for that selection seam is now explicitly held at `none yet`, the smallest fail-closed selection slice is now explicitly admitted, the exact winner-selection worker objective and stop boundary are now explicitly frozen, the exact rule for leaving root docs-only mode is now explicitly frozen, the bounded winner-selection helper plus direct proof are now landed on canonical `main`, the post-winner-selection next-slice selector is now itself durable, and the next exact packet now shifts to the selected-pilot implementation-routing contract above that landed concrete-pilot-selection boundary.",
+    "freshness_checked_receipt": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-IMPLEMENTATION-ROUTING-CONTRACT-FREEZE-PASS-487-2026-06-20.md",
+    "freshness_checked_at": "2026-06-20T16:40:56.5311818-04:00",
+    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture now match the active AI Long-Run lane after the criteria family gained a real bounded validator helper plus direct proof, the comparison seam gained an explicit contract plus a landed bounded helper and proof, the conversion seam gained an explicit contract plus a landed bounded helper and proof, the winner-selection seam from one contract-local `pilot_winner` to one lane-level concrete first supervised pilot is now fully frozen and landed through contract, owner, support, implementation, handoff, readiness, and worker-proof surfaces, the post-winner-selection next-slice selector is durable, the selected-pilot implementation-routing contract is now durable too, and the next exact packet now shifts to the selected-pilot implementation-routing owner-surface admission above that landed concrete-pilot-selection boundary.",
     "marker_posture": [
       {
         "marker": "AI Long-Run Batch Orchestration",

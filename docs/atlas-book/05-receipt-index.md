@@ -1294,6 +1294,7 @@
 - [AI Long-Run Batch Orchestration Single Supervised Pilot Winner Selection Implementation-Readiness Closeout And Worker-Routing Pass 485](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-WINNER-SELECTION-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-485-2026-06-20.md)
 - [AI Long-Run Batch Orchestration Single Supervised Pilot Winner Selection First-Implementation Worker Cluster Reconciliation](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-WINNER-SELECTION-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-20.md)
 - [AI Long-Run Batch Orchestration Post-Single Supervised Pilot Winner Selection Next-Slice Selection Pass 486](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-SINGLE-SUPERVISED-PILOT-WINNER-SELECTION-NEXT-SLICE-SELECTION-PASS-486-2026-06-20.md)
+- [AI Long-Run Batch Orchestration Single Supervised Pilot Selected-Pilot Implementation-Routing Contract Freeze Pass 487](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-IMPLEMENTATION-ROUTING-CONTRACT-FREEZE-PASS-487-2026-06-20.md)
 
 ## Notes
 
