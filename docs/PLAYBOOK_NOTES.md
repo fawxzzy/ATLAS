@@ -1,5 +1,284 @@
 # Playbook Notes
 
+# 2026-06-19 - Capture, retrieval, and promotion seams should preserve doctrine pairing directly
+
+- Rule: `Capture Retrieval And Promotion Seams Should Preserve Doctrine Pairing Directly`.
+- Rule: if memory, knowledge, or promote seams are legitimate machine-readable continuity surfaces, they should preserve the continuity doctrine role plus its registered owner doc and canonical export on both success and deterministic failure.
+- Pattern: `Bootstrap and read surfaces -> capture/retrieval/promotion surfaces -> doctrine pairing carry-forward -> broader transfer-ready execution widening -> Root closeout`.
+- Failure Mode: `Machine-Readable Capture Or Promotion Surfaces Still Drop Doctrine Pairing`.
+- Failure Mode: downstream consumers can recover doctrine identity from bootstrap, proof, run/session, or trusted repo-context surfaces, but still have to reconstruct it again once they cross into machine-readable memory, knowledge, or promote workflows.
+- Release-summary bullets:
+  - Playbook `memory --json`, `knowledge --json`, and `promote --json` now each publish additive `continuity.doctrine.role`, `path`, `export_path`, and fail-closed `registration_state` on both success and deterministic failure envelopes.
+  - Built owner-side validation passed across the widened family: `39/39` targeted tests, successful CLI smokes for `memory` and `knowledge`, and deterministic failure-envelope proof for `promote`.
+  - Closed `Knowledge Capture & Transfer` from `99%` to `100%`.
+  - Closed `Durable Context Externalization` from `99%` to `100%`.
+
+# 2026-06-19 - Bootstrap and trusted repo-context surfaces should carry doctrine pairing directly
+
+- Rule: `Bootstrap And Trusted Repo-Context Surfaces Should Carry Doctrine Pairing Directly`.
+- Rule: if AI bootstrap or trusted repo-context entrypoints are legitimate restart surfaces, they should carry the continuity doctrine role plus its registered owner doc and canonical export directly, and cached repo-context shapes should invalidate deterministically when that doctrine-carrying surface widens.
+- Pattern: `Bootstrap family or trusted repo-context bundle -> doctrine doc/export carry-forward -> cache-shape ratchet -> lower-friction restart retrieval -> Root refresh`.
+- Failure Mode: `Bootstrap Or Trusted Repo-Context Retrieval Still Drops Doctrine Pairing`.
+- Failure Mode: downstream bootstrap or trusted repo-context consumers can recover repository context, but still have to reconstruct which owner continuity doctrine and canonical export govern that context, or they silently reuse stale cached shapes after the trusted bundle widens.
+- Release-summary bullets:
+  - Playbook `ai-context --json`, `context --json`, and `ai-contract --json` now publish additive `continuity.doctrine.role`, `path`, `export_path`, and fail-closed `registration_state`.
+  - Playbook `ask --repo-context --json` now preserves `docs/contracts/PLAYBOOK-CONTRACT.md` plus `exports/playbook.contract.example.v1.json` inside the trusted source bundle and reports `shapeVersion: "2"` in `repoContext.cacheLifecycle`.
+  - Kept `Knowledge Capture & Transfer` at `99%`; the broader capture/promotion execution blocker class still did not land.
+  - Ratcheted `Durable Context Externalization` from `98%` to `99%`.
+
+# 2026-06-19 - Continuity read surfaces should carry doctrine pairing directly
+
+- Rule: `Continuity Read Surfaces Should Carry Doctrine Pairing Directly`.
+- Rule: if continuity readers can legitimately begin from `query runs` or `session show`, those read surfaces should carry the continuity doctrine role plus its registered owner doc and canonical export directly instead of forcing a second doctrine reconstruction step.
+- Pattern: `Query/session read surface -> doctrine pairing -> read-first continuity recovery -> Root refresh`.
+- Failure Mode: `Continuity Read Surfaces Still Require Separate Doctrine Reconstruction`.
+- Failure Mode: downstream continuity readers can recover run/session state from the canonical read surfaces, but still have to leave those surfaces to reconstruct which owner continuity doctrine and canonical export govern that same restart context.
+- Release-summary bullets:
+  - Playbook `query runs --json` now publishes additive `continuity.doctrine.role`, `path`, `export_path`, and fail-closed `registration_state`.
+  - Playbook `session show --json` now publishes the same additive `continuity.doctrine` payload and also exposes doctrine identity in its top-level findings stream.
+  - Kept `Knowledge Capture & Transfer` at `99%`; the broader capture/promotion execution blocker class still did not land.
+  - Ratcheted `Durable Context Externalization` from `97%` to `98%`.
+
+# 2026-06-19 - Bootstrap proof should carry continuity doctrine identity directly
+
+- Rule: `Bootstrap Proof Should Carry Continuity Doctrine Identity Directly`.
+- Rule: if `status proof` is the canonical external bootstrap surface, it should carry the continuity doctrine role plus its registered owner doc and canonical export directly instead of forcing a second registry lookup after continuity lineage is loaded.
+- Pattern: `Status proof continuity lineage -> doctrine bootstrap pairing -> one-surface restart retrieval -> Root refresh`.
+- Failure Mode: `Bootstrap Proof Still Requires Separate Doctrine Registry Reconstruction`.
+- Failure Mode: downstream bootstrap consumers can recover session and receipt lineage from `status proof`, but still have to leave that surface to reconstruct which owner continuity doctrine and canonical export govern the same restart context.
+- Release-summary bullets:
+  - Playbook `status proof --json` now publishes additive `continuity.doctrine.role`, `path`, `export_path`, and fail-closed `registration_state`.
+  - Playbook proof text now also exposes the same continuity-doctrine bootstrap pairing in the compact operator brief.
+  - Kept `Knowledge Capture & Transfer` at `99%`; the broader capture/promotion execution blocker class still did not land.
+  - Ratcheted `Durable Context Externalization` from `96%` to `97%`.
+
+# 2026-06-19 - Continuity report families should carry canonical export pairing directly
+
+- Rule: `Continuity Report Families Should Carry Canonical Export Pairing Directly`.
+- Rule: if a higher-level continuity or posture artifact already preserves semantic owner-contract identity, it should also preserve the paired canonical machine export path instead of forcing a second registry lookup.
+- Pattern: `Tagged owner truth -> semantic report/input metadata -> paired export-path carry-forward -> lower-friction restart retrieval -> Root refresh`.
+- Failure Mode: `Semantic Report Retrieval Still Requires Second Registry Lookup`.
+- Failure Mode: downstream readers can recover the owner continuity doctrine role from report or scorecard surfaces, but still have to perform a separate registry round-trip to learn which canonical machine export belongs to that doctrine.
+- Release-summary bullets:
+  - Playbook convergence source-inventory input and report artifacts now preserve additive `contractExportPath` metadata for the tagged owner continuity contract.
+  - Playbook repo-scorecard input and report artifacts now preserve additive `contractExportPaths` metadata when owner-truth evidence cites that doctrine.
+  - Playbook validator and builder paths now fail closed when those higher-level export-path declarations drift from the tagged owner-truth evidence.
+  - Kept `Knowledge Capture & Transfer` at `99%`; the broader capture/promotion execution blocker class still did not land.
+  - Ratcheted `Durable Context Externalization` from `95%` to `96%`.
+
+# 2026-06-19 - Continuity doctrine registry lookup should pair human and machine surfaces
+
+- Rule: `Continuity Doctrine Registry Lookup Should Pair Human And Machine Surfaces`.
+- Rule: if semantic registry lookup is the supported discovery path for the owner continuity doctrine, that lookup should recover both the human owner contract and the canonical machine export instead of requiring separate path recall for the export.
+- Pattern: `Semantic role lookup -> owner contract doc + canonical export pair -> transfer-ready continuity reuse -> Root refresh`.
+- Failure Mode: `Registry Lookup Still Requires Separate Export Recall`.
+- Failure Mode: continuity identity is semantically discoverable and the export self-describes that identity, but downstream consumers still have to remember or reconstruct which machine export belongs to the role after resolving the registry row.
+- Release-summary bullets:
+  - Playbook contracts registry now publishes paired `exportPath: "exports/playbook.contract.example.v1.json"` metadata on the `core_continuity_doctrine` row and tagged owner contract entry.
+  - Playbook consumer and workflow-pack doctrine now treat semantic continuity lookup as one doc-plus-export pairing surface instead of a doc-only lookup.
+  - Kept `Knowledge Capture & Transfer` at `99%`; the broader capture/promotion execution blocker class still did not land.
+  - Ratcheted `Durable Context Externalization` from `94%` to `95%`.
+
+# 2026-06-19 - Continuity doctrine identity should survive export-only retrieval
+
+- Rule: `Continuity Doctrine Identity Should Survive Export-Only Retrieval`.
+- Rule: if a worker starts from the canonical Playbook contract export alone, the owner continuity doctrine should still be recoverable semantically instead of requiring separate registry or path recall first.
+- Pattern: `Tagged owner truth -> canonical contract export role -> export-only semantic recovery -> Root ratchet`.
+- Failure Mode: `Export-Only Continuity Retrieval Still Depends On Registry Recall`.
+- Failure Mode: continuity identity is published in the registry, inherited by downstream doctrine, preserved in input artifacts, and preserved in report outputs, but the canonical contract export itself still omits that identity, so export-only readers have to reconstruct the doctrine from adjacent surfaces.
+- Release-summary bullets:
+  - Playbook canonical contract export schema/example now publish additive `continuity_requirements.contract_role: "core_continuity_doctrine"`.
+  - Playbook export test and contract docs now preserve that same export-level semantic identity explicitly.
+  - Ratcheted `Knowledge Capture & Transfer` from `98%` to `99%`.
+  - Refreshed `Durable Context Externalization` from `93%` to `94%`.
+
+# 2026-06-19 - Continuity doctrine identity should survive authoring and validation
+
+- Rule: `Continuity Doctrine Identity Should Survive Authoring And Validation`.
+- Rule: if a published continuity-sensitive input artifact declares owner-contract semantics, that declaration should survive validator checks and engine ingestion instead of appearing only after report projection.
+- Pattern: `Tagged owner truth -> published input role metadata -> validator agreement -> engine ingestion -> report projection -> Root ratchet`.
+- Failure Mode: `Projection-Only Semantic Continuity`.
+- Failure Mode: continuity identity is available in the registry and output reports, but published input artifacts and validators still seed the doctrine by raw path alone, so semantics arrive late and drift checks stay incomplete.
+- Release-summary bullets:
+  - Playbook source-inventory input schema/example now preserve additive `contractRole` metadata for the tagged owner continuity contract.
+  - Playbook repo-scorecard input schema/example now preserve additive `contractRoles` metadata when owner-truth evidence cites that doctrine.
+  - Playbook input validators and engine builders now fail closed when declared semantic continuity roles drift from the tagged owner-truth path or evidence set.
+  - Ratcheted `Knowledge Capture & Transfer` from `97%` to `98%`.
+  - Refreshed `Durable Context Externalization` from `92%` to `93%`.
+
+# 2026-06-19 - Continuity doctrine identity should survive report projection
+
+- Rule: `Continuity Doctrine Identity Should Survive Report Projection`.
+- Rule: if a machine-consumed report cites the owner continuity doctrine, it should preserve that doctrine semantically instead of collapsing it back into path-only evidence.
+- Pattern: `Owner registry role -> machine-consumed report projection -> downstream semantic continuity reuse -> Root ratchet`.
+- Failure Mode: `Path-Only Report Projection Erases Owner Continuity Identity`.
+- Failure Mode: the owner continuity doctrine is published, inherited, tagged, and directly resolvable, but downstream report readers still lose that identity because convergence and posture reports flatten it back into plain file paths.
+- Release-summary bullets:
+  - Playbook source-inventory report rows now preserve additive `contractRole` metadata for semantically tagged owner contracts.
+  - Playbook repo-scorecard dimensions now preserve additive `contractRoles` metadata when evidence cites the tagged owner continuity contract.
+  - Playbook now reuses one shared contract-role source across registry publication and report-family projection.
+  - Ratcheted `Knowledge Capture & Transfer` from `96%` to `97%`.
+  - Refreshed `Durable Context Externalization` from `91%` to `92%`.
+
+# 2026-06-19 - Continuity doctrine lookup should resolve by role
+
+- Rule: `Continuity Doctrine Lookup Should Resolve By Role`.
+- Rule: if a downstream surface needs the owner continuity contract after loading the registry, it should resolve that contract through a direct role lookup instead of rescanning the full contract inventory or depending on path recall.
+- Pattern: `Owner registry -> contractRoles lookup -> downstream continuity resolution -> Root ratchet`.
+- Failure Mode: `Tagged But Still Scan-Only Continuity Discovery`.
+- Failure Mode: the owner continuity contract is published, inherited, and semantically tagged, but downstream tooling still has to walk the whole contracts list or remember the tagged path because no compact role lookup exists.
+- Release-summary bullets:
+  - Playbook contracts registry now publishes `artifacts.contractRoles` with `core_continuity_doctrine -> docs/contracts/PLAYBOOK-CONTRACT.md`.
+  - Consumer and workflow-pack doctrine now point continuity discovery at the direct role lookup instead of path-first recall.
+  - Ratcheted `Knowledge Capture & Transfer` from `95%` to `96%`.
+  - Refreshed `Durable Context Externalization` from `90%` to `91%`.
+
+# 2026-06-19 - Continuity doctrine discovery should be semantic, not path-inferred
+
+- Rule: `Continuity Doctrine Discovery Should Be Semantic, Not Path-Inferred`.
+- Rule: if a downstream surface must locate the owner continuity contract reliably, the owner registry should publish a machine-readable continuity role instead of forcing path inference from memory or convention alone.
+- Pattern: `Owner registry -> role-tagged continuity contract -> downstream semantic discovery -> Root ratchet`.
+- Failure Mode: `Path-Only Continuity Discovery`.
+- Failure Mode: the owner continuity contract is published and inherited, but tooling still has to guess which contract governs continuity because the registry exposes only paths and not the doctrine role itself.
+- Release-summary bullets:
+  - Playbook contracts registry now tags `docs/contracts/PLAYBOOK-CONTRACT.md` with `role: "core_continuity_doctrine"`.
+  - Playbook schema, docs, tests, and contract snapshot now all preserve that additive role-tagged discovery seam.
+  - Ratcheted `Knowledge Capture & Transfer` from `94%` to `95%`.
+  - Refreshed `Durable Context Externalization` from `89%` to `90%`.
+
+# 2026-06-19 - Consumer continuity doctrine should inherit from the owner registry
+
+- Rule: `Consumer Continuity Doctrine Should Inherit From The Owner Registry`.
+- Rule: when consumer or workflow-pack doctrine exposes handoff, restart, or promotion-routing semantics, it should inherit those continuity rules from the registry-published Playbook contract rather than restating them locally.
+- Pattern: `Registry-published owner contract -> consumer/workflow-pack inheritance -> Root ratchet`.
+- Failure Mode: `Registry Discovery Without Consumer Inheritance`.
+- Failure Mode: the owner contract is published and discoverable, but downstream doctrine still rebuilds continuity fields or transcript-memory rules locally because the inheritance step stays implicit.
+- Release-summary bullets:
+  - Playbook consumer doctrine now explicitly routes continuity, handoff, and promotion-routing semantics through the registry-published `docs/contracts/PLAYBOOK-CONTRACT.md`.
+  - Playbook workflow-pack reuse doctrine now treats continuity-doctrine inheritance as part of the reusable downstream bundle.
+  - Ratcheted `Knowledge Capture & Transfer` from `93%` to `94%`.
+  - Refreshed `Durable Context Externalization` from `88%` to `89%`.
+
+# 2026-06-19 - Owner continuity doctrine should be registry-discoverable
+
+- Rule: `Owner Continuity Doctrine Should Be Registry-Discoverable`.
+- Rule: if downstream consumers need a continuity contract often enough to govern structured handoff and promotion-target behavior, the owner repo should publish that contract through its canonical registry surface instead of relying on direct-link recall alone.
+- Pattern: `Owner contract -> contracts registry -> consumer discovery path -> Root ratchet`.
+- Failure Mode: `Direct-Link Doctrine Masquerades As Discoverable Owner Truth`.
+- Failure Mode: future workers know the owner contract exists, but still have to remember or rediscover the exact document path manually because the canonical owner registry omits it.
+- Release-summary bullets:
+  - Playbook now publishes `docs/contracts/PLAYBOOK-CONTRACT.md` through `pnpm playbook contracts --json`.
+  - Playbook registry docs and command docs now describe that owner continuity-contract discovery path explicitly.
+  - Ratcheted `Knowledge Capture & Transfer` from `92%` to `93%`.
+  - Refreshed `Durable Context Externalization` from `87%` to `88%`.
+
+# 2026-06-19 - Current continuity closeouts should land a trace-only handoff and validate it
+
+- Rule: `Current Continuity Closeouts Should Land A Trace-Only Handoff And Validate It`.
+- Rule: if a continuity closeout is serious enough to move marker posture or restart truth, it should emit one current `atlas.continuity.handoff.v1` artifact, validate that handoff explicitly, and index it into the live continuity source inventory instead of leaving the handoff contract as doctrine plus old examples only.
+- Pattern: `Current Closeout State -> trace_only handoff -> validator pass -> indexed continuity source -> Ratchet`.
+- Failure Mode: `Receipt-Only Continuity Masquerades As A Live Handoff Workflow`.
+- Failure Mode: future workers see receipts and runbook language but still lack one current trace-only handoff artifact for the active closeout family, so restart continuity depends on prose reconstruction instead of the admitted handoff path.
+- Release-summary bullets:
+  - Added `ops/atlas/validate_continuity_handoff.py` as a reusable validator command for `atlas.continuity.handoff.v1`.
+  - Added `runtime/receipts/handoffs/playbook-convergence-zero-queue-validation-20260619t160235z.handoff.json` as the current zero-queue continuity handoff.
+  - Registered that handoff in `data/imports/knowledge/continuity/harvest-manifest.json` as `handoff_zero_queue_validation`.
+  - Ratcheted `Knowledge Capture & Transfer` from `91%` to `92%`.
+  - Refreshed `Durable Context Externalization` from `86%` to `87%`.
+
+# 2026-06-19 - Owner proof should retire packet residue and quarantine inventory should not stay live review debt
+
+- Rule: `Owner Truth Surfaces Should Retire Packet Residue And Quarantined Discovery Roots Should Not Stay Pending Review`.
+- Rule: when a repo-owned adoption or verification surface is visibly landed and test-backed, packet or prompt residue for that tranche should become `superseded`; when a raw discovery root is already quarantined by review and policy, it should stay indexed inventory instead of masquerading as live promotion debt.
+- Pattern: `Quarantined Glob -> indexed-only; Owner Surfaces Land And Validate -> Packet Residue superseded_by -> Queue Reaches Zero -> Ratchet`.
+- Failure Mode: `Projected Owner Truth Or Quarantine Inventory Masquerades As Live Continuity Debt`.
+- Failure Mode: future workers keep re-reading quarantined raw globs or stale packet residue even after the real owner evidence is landed and machine-validated, which inflates the continuity queue and hides the actual remaining lane gap.
+- Release-summary bullets:
+  - `imports_verta_core_glob` now stays indexed-only as quarantined trust-bounded inventory instead of live review debt.
+  - `downloads_fitness_adoption_packet` and `downloads_fitness_adoption_prompt` now resolve through `owner_fitness_playbook_truth_surfaces`.
+  - The continuity source inventory now records `14` explicit source-level supersessions.
+  - `pending_review_count` fell from `2` to `0`, and the active continuity promotion queue fell from `2` items to `0`.
+  - Ratcheted `Knowledge Capture & Transfer` from `89%` to `90%`.
+  - Refreshed `Durable Context Externalization` from `84%` to `85%`.
+
+# 2026-06-19 - Retire harvested packet residue and remove control scaffolds from live queue pressure
+
+- Rule: `Promoted Harvest Outputs Should Retire Packet Residue And Control Surfaces Should Not Stay Queue-Active`.
+- Rule: once Downloads packet residue has already been harvested into a durable promoted note, mark that residue `superseded`; if a source only describes backlog routing or trust posture, keep it indexed but remove it from active promotion pressure.
+- Pattern: `Packet -> Promoted Harvest Note -> superseded_by; Control Surface -> indexed-only -> Queue Shrinks -> Ratchet`.
+- Failure Mode: `Already-Harvested Residue Masquerades As Live Promotion Debt`.
+- Failure Mode: future workers keep seeing historical packet residue and queue-control artifacts in the live queue and wrongly infer that the underlying harvest or trust-boundary work never landed durably.
+- Release-summary bullets:
+  - `downloads_continuity_packet` and `downloads_continuity_prompt` now resolve through `promotion_historical_harvest_note`.
+  - `root_continuity_backlog`, `playbook_next_four_weeks`, and `imports_verta_core_sanitized_evaluation` remain indexed but no longer claim active promotion pressure.
+  - The continuity source inventory now records `12` explicit source-level supersessions.
+  - `pending_review_count` fell from `5` to `3`, and the active continuity promotion queue fell from `8` items to `3`.
+  - Ratcheted `Knowledge Capture & Transfer` from `88%` to `89%`.
+  - Refreshed `Durable Context Externalization` from `83%` to `84%`.
+
+# 2026-06-19 - Clear exact source families, but leave different residue classes visible
+
+- Rule: `Close Exact Source Families, Leave Distinct Residue Classes Visible`.
+- Rule: when one remaining high-signal raw source family can be converted into exact reviewed derivatives, close that family fully but do not treat broad glob, evaluation, or download residue as implicitly cleared.
+- Pattern: `Review One High-Signal Raw Family -> Link Exact Derivatives -> Queue Shrinks -> Hold On Different Residue Classes`.
+- Failure Mode: `One Cleared Source Family Masquerades As Full Continuity Closure`.
+- Failure Mode: future workers see one pending source family disappear from the continuity queue and wrongly infer that unrelated residue classes are also closed.
+- Release-summary bullets:
+  - Added reviewed derivative notes for `ATLAS_ABSORPTION_GATE.md`, `NEXT_MOVES_20260413.md`, and `RUN_NEXT.md`.
+  - The continuity source inventory now records `10` explicit source-level supersessions.
+  - `pending_review_count` fell from `8` to `5`, and the active continuity promotion queue fell from `11` items to `8`.
+  - Ratcheted `Knowledge Capture & Transfer` from `87%` to `88%`.
+  - Refreshed `Durable Context Externalization` from `82%` to `83%`.
+
+# 2026-06-19 - Reviewed derivatives must clear raw review debt explicitly
+
+- Rule: `Exact Reviewed Derivatives Should Supersede Matching Raw Review Debt`.
+- Rule: when a raw continuity source already has an exact reviewed derivative or dedicated promotion-safe summary, the source inventory should mark the raw item `superseded` with `superseded_by` instead of leaving it `pending_review`.
+- Pattern: `Raw Source -> Reviewed Derivative Or Promotion-Safe Summary -> superseded_by -> Queue Shrinks -> Ratchet`.
+- Failure Mode: `Reviewed Promotion Masquerades As Unresolved Review Debt`.
+- Failure Mode: future workers can already answer from a trusted derivative or promotion-safe summary, but the live continuity inventory still reports the matching raw source as open review debt and inflates the active queue.
+- Release-summary bullets:
+  - The continuity source inventory now records `7` explicit source-level supersessions through machine-readable `superseded_by` links.
+  - `pending_review_count` fell from `15` to `8`, and the active continuity promotion queue fell from `18` items to `11`.
+  - Ratcheted `Knowledge Capture & Transfer` from `86%` to `87%`.
+  - Refreshed `Durable Context Externalization` from `81%` to `82%` after the source-resolution layer became durable.
+
+# 2026-06-19 - Open-marker restart truth is not full maintained-manifest restart truth
+
+- Rule: `Open-Marker Restart Truth Must Widen To The Full Maintained Set Before It Counts As Full Restart Visibility`.
+- Rule: proving restart readiness for the still-open marker set does not by itself prove that the whole maintained initiative manifest set is queryable from one machine-readable surface.
+- Pattern: `Open-Marker Restart Index -> Maintained-Manifest Restart Index -> Ratchet`.
+- Failure Mode: `Live Open-Marker Restart Truth Masquerades As Full Maintained Restart Truth`.
+- Failure Mode: future workers can restart the live still-open marker set cleanly while closed or supporting maintained lanes still require per-manifest reconstruction unless one maintained-manifest restart index exists.
+- Release-summary bullets:
+  - Added `ops/atlas/continuity_maintained_manifest_restart_index.py` and the awareness slice `continuity_maintained_manifest_restart_index`.
+  - The maintained initiative continuity set now proves `18 / 18` manifests restart-ready from one machine-readable index.
+  - Ratcheted `Knowledge Capture & Transfer` from `85%` to `86%`.
+
+# 2026-06-19 - Healthy manifests are not the same thing as restart-ready continuity
+
+- Rule: `Continuity Automation Must Graduate From Health To Coverage To Restart Index`.
+- Rule: broader continuity-read automation claims should progress through three distinct machine-readable reads: maintained-manifest health, eligible-open-marker manifest coverage, and eligible-open-marker restart index.
+- Pattern: `Manifest Health -> Open-Marker Coverage -> Restart Index -> Ratchet`.
+- Failure Mode: `Healthy Manifests Masquerade As Restart-Ready Continuity`.
+- Failure Mode: a clean maintained-manifest set can still leave future workers reconstructing whether live eligible markers are covered and restart-queryable unless coverage and restart indexing are made explicit too.
+- Release-summary bullets:
+  - The seeded initiative continuity set now proves `18 / 18` manifest health, `8 / 8` eligible open-marker manifest coverage, and `8 / 8` eligible open-marker restart readiness through three machine-readable reads.
+  - KCT admitted that cluster as transfer-ready evidence on 2026-06-19 instead of leaving the lesson distributed across adjacent continuity receipts only.
+  - Ratcheted `Knowledge Capture & Transfer` from `84%` to `85%`.
+
+# 2026-06-18 - DiscordOS repo presence must not masquerade as live bot admission
+
+- Rule: `DiscordOS Exists` is not the same claim as `This Session Can Operate The Bot`.
+- Rule: before a worker claims live Discord update or feature-thread edit ability through DiscordOS, it must first prove operator env admission from `repos/DiscordOS` with `npm run ops:production-env:run -- npm run ops:discordos:env-readiness:json`.
+- Pattern: `Need Live Discord Change -> Enter repos/DiscordOS -> Run production-env readiness proof -> If ready, use bot-backed command or admitted API call -> If blocked, record the exact missing env/control path instead of falling back to wrong assumptions`.
+- Failure Mode: `Repo Presence Masquerades As Operator Access`.
+- Failure Mode: when ATLAS remembers DiscordOS infrastructure, bot ownership, and prior publication receipts but does not also force a session-local readiness proof, future chats can wrongly conclude that browser automation is required, or wrongly claim a live card update happened when the active shell never had admitted bot env.
+- Release-summary bullets:
+  - `repos/DiscordOS` already had the correct operator wrapper and bot-backed publication tooling; the miss was retrieval/doctrine, not missing capability.
+  - `npm run ops:production-env:run -- npm run ops:discordos:env-readiness:json` returned `status: ready` on 2026-06-18 in the current Codex session.
+  - Live bot reachability to Fitness feature thread `1508144630779347015` was re-proved, and a new thread update for card `8ed05d76` was posted through the admitted bot path.
+
 # 2026-06-12 - DiscordOS feedback workflow live cutover closes
 
 - Rule: `Live Cutover Requires Visible Card Plus Non-Proof Row Plus Proof IDs`.

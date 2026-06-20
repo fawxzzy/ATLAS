@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-05-29T00:00:00Z",
-  "updated_at": "2026-06-12T03:22:00.0000000-04:00",
+  "updated_at": "2026-06-19T09:00:00Z",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -37,7 +37,23 @@
     "docs/ops/INVENTORY-AND-TRUTH-MAP-CLOSEOUT-CLUSTER-CANONICAL-PLACEMENT-PASS-8-2026-06-02.md",
     "docs/ops/KNOWLEDGE-CAPTURE-AND-TRANSFER-JUNE-12-CLOSEOUT-CLUSTER-CARRY-FORWARD-PASS-9-2026-06-12.md",
     "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-POST-KCT-JUNE-12-SPINE-REFRESH-PASS-9-2026-06-12.md",
-    "docs/ops/INVENTORY-AND-TRUTH-MAP-JUNE-12-CLOSEOUT-CLUSTER-CANONICAL-PLACEMENT-PASS-9-2026-06-12.md"
+    "docs/ops/INVENTORY-AND-TRUTH-MAP-JUNE-12-CLOSEOUT-CLUSTER-CANONICAL-PLACEMENT-PASS-9-2026-06-12.md",
+    "docs/ops/UNIFIED-WORKFLOW-CONVERGENCE-LIVE-OPERATING-MODEL-CLOSEOUT-PASS-4-2026-06-18.md",
+    "docs/ops/DEPENDENCY-UNTANGLING-LIVE-OWNER-SURFACE-ABSORPTION-FINAL-CLOSEOUT-PASS-10-2026-06-18.md",
+    "docs/ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-LIVE-POLL-SURFACE-ABSORPTION-FINAL-CLOSEOUT-PASS-11-2026-06-18.md",
+    "docs/ops/VISION-FUTURE-ALIGNMENT-LIVE-POLL-SURFACE-ABSORPTION-FINAL-CLOSEOUT-PASS-5-2026-06-18.md",
+    "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-CONTINUITY-MANIFEST-SEED-AND-RATCHET-DECISION-PASS-461-2026-06-18.md",
+    "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTION-CRITERIA-CONTRACT-FREEZE-PASS-462-2026-06-18.md",
+    "docs/ops/LOCAL-DATA-GATEWAY-ROOT-RELATIVE-PACKET-REF-DISCIPLINE-CLOSEOUT-2026-06-19.md",
+    "docs/ops/INVENTORY-AND-TRUTH-MAP-JUNE-18-AND-19-CLOSEOUT-CLUSTER-CANONICAL-PLACEMENT-PASS-10-2026-06-19.md",
+    "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-JUNE-18-AND-19-PROJECTION-REFRESH-AND-CONTINUITY-MANIFEST-SEED-PASS-6-2026-06-19.md",
+    "docs/ops/INITIATIVE-CONTINUITY-MANIFEST-HEALTH-WIDENING-AND-ACTIVE-CONTINUITY-LANE-RATCHET-2026-06-19.md",
+    "docs/ops/INITIATIVE-CONTINUITY-MANIFEST-HEALTH-ZERO-WARNING-CLOSEOUT-AND-ACTIVE-CONTINUITY-LANE-RATCHET-2026-06-19.md",
+    "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md",
+    "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md",
+    "docs/ops/CORTEX-READINESS-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md",
+    "docs/ops/OPEN-MARKER-MANIFEST-COVERAGE-CLOSEOUT-AND-ACTIVE-CONTINUITY-LANE-RATCHET-2026-06-19.md",
+    "docs/ops/OPEN-MARKER-RESTART-INDEX-CLOSEOUT-AND-ACTIVE-CONTINUITY-LANE-RATCHET-2026-06-19.md"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -45,9 +61,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "inventory-and-truth-map",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/INVENTORY-AND-TRUTH-MAP-JUNE-12-CLOSEOUT-CLUSTER-CANONICAL-PLACEMENT-PASS-9-2026-06-12.md",
+    "current_checkpoint_receipt": "docs/ops/OPEN-MARKER-RESTART-INDEX-CLOSEOUT-AND-ACTIVE-CONTINUITY-LANE-RATCHET-2026-06-19.md",
     "checkpoint_commit": "pending-closeout-publication",
-    "checkpoint_summary": "The lane now sits at 77 percent with one compact decisive receipt spine, one fully shaped exact blocker-family chain, one manifest-backed continuity map, one earlier absorbed closeout cluster, and the June 12 KCT/DCE/naming closeout cluster absorbed as canonical inventory truth rather than only adjacent receipt state.",
+    "checkpoint_summary": "The lane now sits at 85 percent because the June 18 and 19 closeout cluster remains canonically absorbed, the seeded initiative continuity-manifest set remains clean at 18 of 18 ok with zero warnings and zero errors, all 8 of 8 eligible still-open markers are manifest-backed, and all 8 of 8 eligible still-open markers are now restart-ready from one machine-readable index.",
     "governing_receipts": [
       "docs/ops/STACK-LANE-0-BASELINE-INVENTORY-2026-05-22.md",
       "docs/ops/STACK-LANE-0-TRUTH-MAP-2026-05-22.md",
@@ -59,12 +75,40 @@
       "docs/ops/INVENTORY-AND-TRUTH-MAP-RESTART-ROUTING-AND-NEXT-PACKAGE-COMPRESSION-FAMILY-SHAPING-PASS-6-2026-05-29.md",
       "docs/ops/INVENTORY-AND-TRUTH-MAP-CONTINUITY-MANIFEST-REFRESH-AND-RATCHET-DECISION-PASS-7-2026-05-29.md",
       "docs/ops/INVENTORY-AND-TRUTH-MAP-CLOSEOUT-CLUSTER-CANONICAL-PLACEMENT-PASS-8-2026-06-02.md",
-      "docs/ops/INVENTORY-AND-TRUTH-MAP-JUNE-12-CLOSEOUT-CLUSTER-CANONICAL-PLACEMENT-PASS-9-2026-06-12.md"
+      "docs/ops/INVENTORY-AND-TRUTH-MAP-JUNE-12-CLOSEOUT-CLUSTER-CANONICAL-PLACEMENT-PASS-9-2026-06-12.md",
+      "docs/ops/INVENTORY-AND-TRUTH-MAP-JUNE-18-AND-19-CLOSEOUT-CLUSTER-CANONICAL-PLACEMENT-PASS-10-2026-06-19.md",
+      "docs/ops/INITIATIVE-CONTINUITY-MANIFEST-HEALTH-WIDENING-AND-ACTIVE-CONTINUITY-LANE-RATCHET-2026-06-19.md",
+      "docs/ops/INITIATIVE-CONTINUITY-MANIFEST-HEALTH-ZERO-WARNING-CLOSEOUT-AND-ACTIVE-CONTINUITY-LANE-RATCHET-2026-06-19.md",
+      "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md",
+      "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md",
+      "docs/ops/CORTEX-READINESS-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md",
+      "docs/ops/OPEN-MARKER-MANIFEST-COVERAGE-CLOSEOUT-AND-ACTIVE-CONTINUITY-LANE-RATCHET-2026-06-19.md",
+      "docs/ops/OPEN-MARKER-RESTART-INDEX-CLOSEOUT-AND-ACTIVE-CONTINUITY-LANE-RATCHET-2026-06-19.md"
     ],
     "owner_truth_surfaces": [
       {
-        "path": "docs/ops/INVENTORY-AND-TRUTH-MAP-CONTINUITY-MANIFEST-REFRESH-AND-RATCHET-DECISION-PASS-7-2026-05-29.md",
-        "role": "current exact refresh-and-ratchet restart surface"
+        "path": "docs/ops/OPEN-MARKER-RESTART-INDEX-CLOSEOUT-AND-ACTIVE-CONTINUITY-LANE-RATCHET-2026-06-19.md",
+        "role": "current exact eligible-open-marker restart-index closeout and ratchet surface"
+      },
+      {
+        "path": "docs/ops/OPEN-MARKER-MANIFEST-COVERAGE-CLOSEOUT-AND-ACTIVE-CONTINUITY-LANE-RATCHET-2026-06-19.md",
+        "role": "current exact eligible-open-marker coverage closeout and ratchet surface"
+      },
+      {
+        "path": "docs/ops/INITIATIVE-CONTINUITY-MANIFEST-HEALTH-ZERO-WARNING-CLOSEOUT-AND-ACTIVE-CONTINUITY-LANE-RATCHET-2026-06-19.md",
+        "role": "current exact initiative-manifest health zero-warning closeout and ratchet surface"
+      },
+      {
+        "path": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md",
+        "role": "current exact continuity-manifest widening and ratchet surface"
+      },
+      {
+        "path": "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md",
+        "role": "current exact continuity-manifest widening and ratchet surface"
+      },
+      {
+        "path": "docs/ops/CORTEX-READINESS-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md",
+        "role": "current exact continuity-manifest widening and ratchet surface"
       },
       {
         "path": "docs/ops/STACK-LANE-0-TRUTH-MAP-2026-05-22.md",
@@ -89,6 +133,10 @@
       {
         "path": "docs/ops/INVENTORY-AND-TRUTH-MAP-JUNE-12-CLOSEOUT-CLUSTER-CANONICAL-PLACEMENT-PASS-9-2026-06-12.md",
         "role": "June 12 closeout-cluster inventory placement boundary"
+      },
+      {
+        "path": "docs/ops/INVENTORY-AND-TRUTH-MAP-JUNE-18-AND-19-CLOSEOUT-CLUSTER-CANONICAL-PLACEMENT-PASS-10-2026-06-19.md",
+        "role": "June 18 and 19 closeout-cluster inventory placement boundary"
       }
     ],
     "verification_adoption_surfaces": [
@@ -115,6 +163,18 @@
       {
         "path": "docs/atlas-book/01-current-state.md",
         "role": "current lane posture projection"
+      },
+      {
+        "path": "ops/atlas/continuity_manifest_health.py",
+        "role": "machine-readable initiative continuity health read"
+      },
+      {
+        "path": "ops/atlas/continuity_open_marker_manifest_coverage.py",
+        "role": "machine-readable eligible-open-marker manifest coverage read"
+      },
+      {
+        "path": "ops/atlas/continuity_open_marker_restart_index.py",
+        "role": "machine-readable eligible-open-marker restart index"
       }
     ],
     "blocked_or_gated_work": [
@@ -124,28 +184,32 @@
       },
       {
         "item": "higher marker movement above the current refresh-backed ratchet",
-        "requirement": "blocked until broader proof-backed adoption, wider continuity-read reuse, or a new blocker-clearance class changes operator reality again"
+        "requirement": "blocked until continuity-read automation widens beyond the current 18-manifest health plus 8-of-8 eligible-open-marker coverage plus 8-of-8 restart-index surface, broader proof-backed adoption lands, or a distinct new blocker-clearance class changes operator reality again"
       },
       {
         "item": "treating adjacent closeout receipts as already canonically placed by default",
         "requirement": "blocked unless the current closeout cluster is explicitly absorbed into the inventory spine, lane-state projection, and current checkpoint posture"
+      },
+      {
+        "item": "higher marker movement above the current refresh-backed ratchet",
+        "requirement": "blocked until broader proof-backed adoption, wider continuity-read reuse, or a new blocker-clearance class changes operator reality again"
       }
     ],
     "next_package_ladder": [
       {
-        "package": "Truth Map & ATLAS Book bounded supporting slice",
-        "mode": "supporting-lane follow-on after closeout-cluster canonical placement",
-        "reason": "the canonical inventory spine now absorbs the June 12 closeout cluster, so the next honest move is truth-map and book projection refinement rather than another inventory-only packet"
+        "package": "No immediate Inventory & Truth Map docs-only follow-on packet",
+        "mode": "hold-flat after open-marker restart-index closeout",
+        "reason": "the current inventory freshness gap is cleared, seeded initiative manifest health is fully clean at 18 of 18, all 8 of 8 eligible open markers are manifest-backed, and all 8 of 8 eligible open markers are restart-ready from one machine-readable index; reopen only with distinct restart-truth drift, marker pressure, owner-truth widening, or broader continuity-read automation than the current health-plus-coverage-plus-restart-index surface"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/INVENTORY-AND-TRUTH-MAP-JUNE-12-CLOSEOUT-CLUSTER-CANONICAL-PLACEMENT-PASS-9-2026-06-12.md",
-    "freshness_checked_at": "2026-06-12T03:22:00.0000000-04:00",
-    "freshness_basis": "the current checkpoint, marker posture, lane-state projection, blocked-work posture, and next-package posture now match the current inventory lane state after the June 12 closeout cluster was absorbed into canonical inventory surfaces.",
+    "freshness_checked_receipt": "docs/ops/OPEN-MARKER-RESTART-INDEX-CLOSEOUT-AND-ACTIVE-CONTINUITY-LANE-RATCHET-2026-06-19.md",
+    "freshness_checked_at": "2026-06-19T09:00:00Z",
+    "freshness_basis": "the current checkpoint, marker posture, lane-state projection, blocked-work posture, and next-package posture now match the current inventory lane state after the June 18 and 19 closeout cluster absorption, the initiative manifest-health surface at 18 ok / 0 warning / 0 error, the eligible-open-marker coverage surface at 8 of 8 manifest-backed, and the eligible-open-marker restart index at 8 of 8 restart-ready.",
     "marker_posture": [
       {
         "marker": "Inventory & Truth Map",
-        "percent": 77,
+        "percent": 85,
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ]

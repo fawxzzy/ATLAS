@@ -1,0 +1,141 @@
+{
+  "contract_version": "atlas.initiative.v1",
+  "id": "continuity-manifest-cortex-readiness",
+  "title": "Continuity Manifest Cortex Readiness",
+  "summary": "Maintained ATLAS-root retrieval map for the current Cortex Readiness lane.",
+  "status": "active",
+  "owner": "stack-root",
+  "created_at": "2026-06-19T07:00:00Z",
+  "updated_at": "2026-06-19T07:00:00Z",
+  "related_plan_refs": [],
+  "related_decision_refs": [],
+  "related_hypothesis_refs": [],
+  "related_session_refs": [],
+  "related_attention_refs": [],
+  "proposed_next_session_refs": [],
+  "evidence_refs": [
+    "docs/atlas-book/01-current-state.md",
+    "docs/atlas-book/02-lanes-and-markers.md",
+    "docs/atlas-book/05-receipt-index.md",
+    "docs/atlas-book/11-system-map-graph.md",
+    "docs/atlas-book/12-restart-and-handoff-guide.md",
+    "docs/atlas-book/13-vision-and-endgames.md",
+    "docs/memory/README.md",
+    "docs/ops/CORTEX-READINESS-MARKER-CHECKPOINT-SHADOW-CONSUMPTION-PASS-1-2026-06-01.md",
+    "docs/ops/CORTEX-READINESS-RECEIPT-DOCTRINE-DRAFT-SHADOW-CONSUMPTION-PASS-2-2026-06-01.md",
+    "docs/ops/CORTEX-READINESS-SHADOW-CONSUMPTION-READ-MODEL-PROJECTION-PASS-3-2026-06-01.md",
+    "docs/ops/CORTEX-READINESS-READ-MODEL-FRESHNESS-AND-DEFERRED-LANE-PASS-4-2026-06-01.md",
+    "docs/ops/CORTEX-READINESS-ATLAS-CATCH-UP-AND-ROOT-PROJECTION-PASS-5-2026-06-05.md",
+    "docs/ops/CORTEX-READINESS-POST-CATCH-UP-LIVE-LANE-RATCHET-PASS-6-2026-06-05.md",
+    "docs/ops/CORTEX-READINESS-DOCS-ADR-OR-DEBT-SLICE-POST-PR-70-MERGE-LIVE-READ-MODEL-RECONCILIATION-PASS-23-2026-06-06.md",
+    "docs/ops/CORTEX-READINESS-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md"
+  ],
+  "supersedes": [],
+  "superseded_by": [],
+  "metadata": {
+    "artifact_kind": "continuity_manifest",
+    "lane_id": "cortex-readiness",
+    "scope_class": "atlas-root-governance",
+    "current_checkpoint_receipt": "docs/ops/CORTEX-READINESS-DOCS-ADR-OR-DEBT-SLICE-POST-PR-70-MERGE-LIVE-READ-MODEL-RECONCILIATION-PASS-23-2026-06-06.md",
+    "checkpoint_commit": "main",
+    "checkpoint_summary": "The lane currently holds at 41 percent: the live seeded and generated Cortex read model remains aligned on the bounded docs-adr-or-debt-slice ATLAS projection, the runtime surfaces are refreshed again after merged-main movement, and the lane remains advisory and projection-only with no authority widening.",
+    "governing_receipts": [
+      "docs/ops/CORTEX-READINESS-MARKER-CHECKPOINT-SHADOW-CONSUMPTION-PASS-1-2026-06-01.md",
+      "docs/ops/CORTEX-READINESS-RECEIPT-DOCTRINE-DRAFT-SHADOW-CONSUMPTION-PASS-2-2026-06-01.md",
+      "docs/ops/CORTEX-READINESS-SHADOW-CONSUMPTION-READ-MODEL-PROJECTION-PASS-3-2026-06-01.md",
+      "docs/ops/CORTEX-READINESS-READ-MODEL-FRESHNESS-AND-DEFERRED-LANE-PASS-4-2026-06-01.md",
+      "docs/ops/CORTEX-READINESS-ATLAS-CATCH-UP-AND-ROOT-PROJECTION-PASS-5-2026-06-05.md",
+      "docs/ops/CORTEX-READINESS-POST-CATCH-UP-LIVE-LANE-RATCHET-PASS-6-2026-06-05.md",
+      "docs/ops/CORTEX-READINESS-DOCS-ADR-OR-DEBT-SLICE-POST-PR-70-MERGE-LIVE-READ-MODEL-RECONCILIATION-PASS-23-2026-06-06.md",
+      "docs/ops/CORTEX-READINESS-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md"
+    ],
+    "owner_truth_surfaces": [
+      {
+        "path": "docs/ops/CORTEX-READINESS-POST-CATCH-UP-LIVE-LANE-RATCHET-PASS-6-2026-06-05.md",
+        "role": "current marker threshold and live lane-selection truth"
+      },
+      {
+        "path": "docs/ops/CORTEX-READINESS-DOCS-ADR-OR-DEBT-SLICE-POST-PR-70-MERGE-LIVE-READ-MODEL-RECONCILIATION-PASS-23-2026-06-06.md",
+        "role": "latest live read-model reconciliation truth"
+      },
+      {
+        "path": "runtime/cortex/current-state/latest.json",
+        "role": "current Cortex read-model state surface"
+      },
+      {
+        "path": "runtime/cortex/operator-surface/latest.json",
+        "role": "current operator-visible Cortex projection surface"
+      },
+      {
+        "path": "runtime/cortex/context/latest.json",
+        "role": "current runtime context projection surface"
+      },
+      {
+        "path": "docs/ops/CORTEX-READINESS-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md",
+        "role": "continuity-manifest seed and machine-readable widening closeout"
+      }
+    ],
+    "verification_adoption_surfaces": [
+      {
+        "path": "docs/atlas-book/01-current-state.md",
+        "role": "current lane posture projection surface"
+      },
+      {
+        "path": "docs/atlas-book/02-lanes-and-markers.md",
+        "role": "marker table and lane-state projection surface"
+      },
+      {
+        "path": "docs/atlas-book/05-receipt-index.md",
+        "role": "receipt spine"
+      },
+      {
+        "path": "docs/atlas-book/11-system-map-graph.md",
+        "role": "lane-state projection routing surface"
+      },
+      {
+        "path": "docs/atlas-book/12-restart-and-handoff-guide.md",
+        "role": "restart routing surface"
+      },
+      {
+        "path": "docs/atlas-book/13-vision-and-endgames.md",
+        "role": "current endgame and next-valid-package surface"
+      },
+      {
+        "path": "docs/memory/README.md",
+        "role": "manifest-backed continuity doctrine surface"
+      }
+    ],
+    "blocked_or_gated_work": [
+      {
+        "item": "claiming execution or authority widening from projection refresh alone",
+        "requirement": "blocked unless a distinct explicit authority or execution packet is opened and proves more than advisory read-model alignment"
+      },
+      {
+        "item": "higher marker movement above the current 41 percent advisory threshold",
+        "requirement": "blocked until broader live read-model adoption, fresher runtime reconciliation that changes operator reality, or distinct authority widening lands"
+      },
+      {
+        "item": "continuing this lane through stale publication-branch residue",
+        "requirement": "blocked unless live runtime surfaces drift again, a new bounded docs-adr-or-debt-slice question opens, or a real branch/reconciliation blocker returns"
+      }
+    ],
+    "next_package_ladder": [
+      {
+        "package": "No immediate Cortex Readiness same-lane packet",
+        "mode": "hold-flat after live read-model reconciliation and continuity-manifest seed",
+        "reason": "the bounded post-catch-up projection lane is aligned and refresh-safe for now; reopen only with new read-model drift, broader adoption, or explicit authority widening"
+      }
+    ],
+    "freshness_state": "manifest-backed",
+    "freshness_checked_receipt": "docs/ops/CORTEX-READINESS-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md",
+    "freshness_checked_at": "2026-06-19T07:00:00Z",
+    "freshness_basis": "The manifest now matches the current 41 percent advisory Cortex posture after the June 5 and June 6 ratchet and reconciliation chain, while the June 19 continuity widening pass adds one maintained retrieval map without widening authority.",
+    "marker_posture": [
+      {
+        "marker": "Cortex Readiness",
+        "percent": 41,
+        "source": "docs/atlas-book/02-lanes-and-markers.md"
+      }
+    ]
+  }
+}

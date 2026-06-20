@@ -35,10 +35,44 @@ class AtlasHistoricalPlanningHarvestTests(unittest.TestCase):
             items["playbook_product_roadmap"]["source_path"],
             "repos/fawxzzy-playbook/docs/PLAYBOOK_PRODUCT_ROADMAP.md",
         )
-        self.assertEqual(items["imports_verta_core_glob"]["status"], "pending_review")
+        self.assertEqual(items["imports_verta_core_glob"]["status"], "indexed")
+        self.assertFalse(items["imports_verta_core_glob"]["promotion_candidate"])
+        self.assertFalse(items["root_continuity_backlog"]["promotion_candidate"])
+        self.assertFalse(items["playbook_next_four_weeks"]["promotion_candidate"])
+        self.assertFalse(items["imports_verta_core_sanitized_evaluation"]["promotion_candidate"])
+        self.assertEqual(items["imports_verta_architecture_summary"]["status"], "superseded")
+        self.assertEqual(
+            items["imports_verta_architecture_summary"]["superseded_by"],
+            ["promotion_verta_historical_scope_boundaries"],
+        )
+        self.assertEqual(items["imports_verta_core_run_next"]["status"], "superseded")
+        self.assertEqual(
+            items["imports_verta_core_run_next"]["superseded_by"],
+            ["promotion_verta_historical_evidence_enrichment_loop"],
+        )
         self.assertEqual(
             items["downloads_continuity_packet"]["source_path"],
             "Downloads/ATLAS-HISTORICAL-PLANNING-HARVEST-PACKET.md",
+        )
+        self.assertEqual(items["downloads_continuity_packet"]["status"], "superseded")
+        self.assertEqual(
+            items["downloads_continuity_packet"]["superseded_by"],
+            ["promotion_historical_harvest_note"],
+        )
+        self.assertEqual(items["downloads_continuity_prompt"]["status"], "superseded")
+        self.assertEqual(
+            items["downloads_continuity_prompt"]["superseded_by"],
+            ["promotion_historical_harvest_note"],
+        )
+        self.assertEqual(items["downloads_fitness_adoption_packet"]["status"], "superseded")
+        self.assertEqual(
+            items["downloads_fitness_adoption_packet"]["superseded_by"],
+            ["owner_fitness_playbook_truth_surfaces"],
+        )
+        self.assertEqual(items["downloads_fitness_adoption_prompt"]["status"], "superseded")
+        self.assertEqual(
+            items["downloads_fitness_adoption_prompt"]["superseded_by"],
+            ["owner_fitness_playbook_truth_surfaces"],
         )
 
     def test_handoff_and_promotion_capture_provenance_and_trust_posture(self) -> None:

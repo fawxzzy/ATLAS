@@ -1,0 +1,131 @@
+{
+  "contract_version": "atlas.initiative.v1",
+  "id": "continuity-manifest-playbook-everywhere-cortex-interface",
+  "title": "Continuity Manifest Playbook Everywhere Plus Cortex Interface",
+  "summary": "Maintained ATLAS-root retrieval map for the held Playbook Everywhere + Cortex Interface lane.",
+  "status": "active",
+  "owner": "stack-root",
+  "created_at": "2026-06-19T06:00:00Z",
+  "updated_at": "2026-06-19T06:00:00Z",
+  "related_plan_refs": [],
+  "related_decision_refs": [],
+  "related_hypothesis_refs": [],
+  "related_session_refs": [],
+  "related_attention_refs": [],
+  "proposed_next_session_refs": [],
+  "evidence_refs": [
+    "docs/atlas-book/01-current-state.md",
+    "docs/atlas-book/02-lanes-and-markers.md",
+    "docs/atlas-book/05-receipt-index.md",
+    "docs/atlas-book/11-system-map-graph.md",
+    "docs/atlas-book/12-restart-and-handoff-guide.md",
+    "docs/atlas-book/13-vision-and-endgames.md",
+    "docs/memory/README.md",
+    "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CONTRACT-FIRST-AGENT-SHADOWING-PASS-1-2026-06-01.md",
+    "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-VALIDATION-SUMMARY-SHADOW-CONSUMPTION-PASS-2-2026-06-01.md",
+    "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CONTRACT-EXPORT-SURFACE-PASS-3-2026-06-02.md",
+    "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-EXPORTED-FAMILY-CONSUMPTION-RECONCILIATION-PASS-4-2026-06-02.md",
+    "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md"
+  ],
+  "supersedes": [],
+  "superseded_by": [],
+  "metadata": {
+    "artifact_kind": "continuity_manifest",
+    "lane_id": "playbook-everywhere-cortex-interface",
+    "scope_class": "atlas-root-governance",
+    "current_checkpoint_receipt": "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-EXPORTED-FAMILY-CONSUMPTION-RECONCILIATION-PASS-4-2026-06-02.md",
+    "checkpoint_commit": "main",
+    "checkpoint_summary": "The lane currently holds at 22 percent after the full current exportable-now family set was consumed safely and projected through the existing Cortex read-model spine. No immediate same-lane packet remains open by default unless a new exportable family, a cleared blocked family, or real contract drift appears.",
+    "governing_receipts": [
+      "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CONTRACT-FIRST-AGENT-SHADOWING-PASS-1-2026-06-01.md",
+      "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-VALIDATION-SUMMARY-SHADOW-CONSUMPTION-PASS-2-2026-06-01.md",
+      "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CONTRACT-EXPORT-SURFACE-PASS-3-2026-06-02.md",
+      "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-EXPORTED-FAMILY-CONSUMPTION-RECONCILIATION-PASS-4-2026-06-02.md",
+      "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md"
+    ],
+    "owner_truth_surfaces": [
+      {
+        "path": "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CONTRACT-FIRST-AGENT-SHADOWING-PASS-1-2026-06-01.md",
+        "role": "contract-first interface model"
+      },
+      {
+        "path": "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-VALIDATION-SUMMARY-SHADOW-CONSUMPTION-PASS-2-2026-06-01.md",
+        "role": "first live consumer threshold"
+      },
+      {
+        "path": "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CONTRACT-EXPORT-SURFACE-PASS-3-2026-06-02.md",
+        "role": "governed export-surface truth"
+      },
+      {
+        "path": "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-EXPORTED-FAMILY-CONSUMPTION-RECONCILIATION-PASS-4-2026-06-02.md",
+        "role": "current exported-family breadth and hold posture"
+      },
+      {
+        "path": "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md",
+        "role": "continuity-manifest seed and machine-readable widening closeout"
+      }
+    ],
+    "verification_adoption_surfaces": [
+      {
+        "path": "docs/atlas-book/01-current-state.md",
+        "role": "current held-lane projection surface"
+      },
+      {
+        "path": "docs/atlas-book/02-lanes-and-markers.md",
+        "role": "marker table and held-lane projection surface"
+      },
+      {
+        "path": "docs/atlas-book/05-receipt-index.md",
+        "role": "receipt spine"
+      },
+      {
+        "path": "docs/atlas-book/11-system-map-graph.md",
+        "role": "lane-state projection routing surface"
+      },
+      {
+        "path": "docs/atlas-book/12-restart-and-handoff-guide.md",
+        "role": "restart routing surface"
+      },
+      {
+        "path": "docs/atlas-book/13-vision-and-endgames.md",
+        "role": "current endgame and next-valid-package surface"
+      },
+      {
+        "path": "docs/memory/README.md",
+        "role": "manifest-backed continuity doctrine surface"
+      }
+    ],
+    "blocked_or_gated_work": [
+      {
+        "item": "continuing this lane by adjacency alone",
+        "requirement": "blocked unless a new exportable family, a cleared blocked-family admissibility boundary, or real contract/read-model drift appears"
+      },
+      {
+        "item": "higher marker movement above the current held interface threshold",
+        "requirement": "blocked until broader governed export breadth, a new live safe consumer class, or real owner-boundary change alters operator reality again"
+      },
+      {
+        "item": "claiming Cortex authority widening from safe shadow consumption alone",
+        "requirement": "blocked unless a distinct explicit authority packet is opened and proves more than bounded contract consumption"
+      }
+    ],
+    "next_package_ladder": [
+      {
+        "package": "No immediate Playbook Everywhere + Cortex Interface same-lane packet",
+        "mode": "hold-flat after exported-family reconciliation and continuity-manifest seed",
+        "reason": "the current exported-family threshold is already consumed and restart-safe; reopen only with a new exportable family, a cleared blocked family, or real contract drift"
+      }
+    ],
+    "freshness_state": "manifest-backed",
+    "freshness_checked_receipt": "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md",
+    "freshness_checked_at": "2026-06-19T06:00:00Z",
+    "freshness_basis": "The manifest now matches the held 22 percent interface posture after the June 1 and 2 contract, export, and full-family reconciliation chain, while the June 19 continuity widening pass adds one maintained retrieval map without changing the lane's no-immediate-packet posture.",
+    "marker_posture": [
+      {
+        "marker": "Playbook Everywhere + Cortex Interface",
+        "percent": 22,
+        "source": "docs/atlas-book/02-lanes-and-markers.md"
+      }
+    ]
+  }
+}

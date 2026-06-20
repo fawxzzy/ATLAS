@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-05-29T00:00:00Z",
-  "updated_at": "2026-05-29T20:59:57.8038507-04:00",
+  "updated_at": "2026-06-18T20:35:00Z",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -32,7 +32,13 @@
     "docs/ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-APPROVAL-GATE-AND-PAUSED-LANE-PRESERVATION-COMPRESSION-FAMILY-SHAPING-PASS-4-2026-05-29.md",
     "docs/ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-SHARED-CONTRACT-AND-CONSEQUENCE-ROUTING-COMPRESSION-FAMILY-SHAPING-PASS-5-2026-05-29.md",
     "docs/ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-FIRST-SAFE-PACKAGE-AND-REOPEN-ORDER-COMPRESSION-FAMILY-SHAPING-PASS-6-2026-05-29.md",
-    "docs/ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-CONTINUITY-MANIFEST-REFRESH-AND-RATCHET-DECISION-PASS-7-2026-05-29.md"
+    "docs/ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-CONTINUITY-MANIFEST-REFRESH-AND-RATCHET-DECISION-PASS-7-2026-05-29.md",
+    "docs/ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-IMMEDIATE-SUPPORTING-HELD-RESELECTION-PASS-8-2026-06-02.md",
+    "docs/ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-MANIFEST-FRESHNESS-RECHECK-AND-HOLD-BOUNDARY-PASS-9-2026-06-18.md",
+    "docs/ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-LIVE-LANE-OPERABILITY-RATCHET-PASS-10-2026-06-18.md",
+    "docs/ops/POST-CONVERGENCE-AND-VISION-FITNESS-DISCORD-POLL-SURFACE-SEPARATION-RECHECK-2026-06-18.md",
+    "repos/_stack/receipts/FITNESS-DISCORD-FEEDBACK-WORKER-GOVERNED-POLL-SURFACE-RUNTIME-PROOF-2026-06-18.md",
+    "docs/ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-LIVE-POLL-SURFACE-ABSORPTION-FINAL-CLOSEOUT-PASS-11-2026-06-18.md"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -40,9 +46,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "post-convergence-lane-split-readiness",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-CONTINUITY-MANIFEST-REFRESH-AND-RATCHET-DECISION-PASS-7-2026-05-29.md",
-    "checkpoint_commit": "9bb230c",
-    "checkpoint_summary": "The lane now sits at 61 percent with one compact decisive receipt spine, one fully shaped exact blocker-family chain, one manifest-backed continuity map, and a shaped chain that has now passed one coherent refresh cycle as a single restart unit, without claiming any owner-side reopen or execution-surface widening.",
+    "current_checkpoint_receipt": "docs/ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-LIVE-POLL-SURFACE-ABSORPTION-FINAL-CLOSEOUT-PASS-11-2026-06-18.md",
+    "checkpoint_commit": "main",
+    "checkpoint_summary": "The lane is now closed at 100 percent because the last named live lane-structure blocker is cleared: the dedicated Fitness poll surface is live on production, consumed by the governed recurring worker path, and held as one explicit retained seam rather than one mixed-runtime ambiguity.",
     "governing_receipts": [
       "docs/ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-DECISIVE-RECEIPT-AND-BLOCKED-WORK-LADDER-SHAPING-PASS-1-2026-05-29.md",
       "docs/ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-BLOCKER-FAMILY-COMPRESSION-PASS-2-2026-05-29.md",
@@ -50,12 +56,28 @@
       "docs/ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-APPROVAL-GATE-AND-PAUSED-LANE-PRESERVATION-COMPRESSION-FAMILY-SHAPING-PASS-4-2026-05-29.md",
       "docs/ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-SHARED-CONTRACT-AND-CONSEQUENCE-ROUTING-COMPRESSION-FAMILY-SHAPING-PASS-5-2026-05-29.md",
       "docs/ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-FIRST-SAFE-PACKAGE-AND-REOPEN-ORDER-COMPRESSION-FAMILY-SHAPING-PASS-6-2026-05-29.md",
-      "docs/ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-CONTINUITY-MANIFEST-REFRESH-AND-RATCHET-DECISION-PASS-7-2026-05-29.md"
+      "docs/ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-CONTINUITY-MANIFEST-REFRESH-AND-RATCHET-DECISION-PASS-7-2026-05-29.md",
+      "docs/ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-IMMEDIATE-SUPPORTING-HELD-RESELECTION-PASS-8-2026-06-02.md",
+      "docs/ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-MANIFEST-FRESHNESS-RECHECK-AND-HOLD-BOUNDARY-PASS-9-2026-06-18.md",
+      "docs/ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-LIVE-LANE-OPERABILITY-RATCHET-PASS-10-2026-06-18.md",
+      "docs/ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-LIVE-POLL-SURFACE-ABSORPTION-FINAL-CLOSEOUT-PASS-11-2026-06-18.md"
     ],
     "owner_truth_surfaces": [
       {
-        "path": "docs/ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-CONTINUITY-MANIFEST-REFRESH-AND-RATCHET-DECISION-PASS-7-2026-05-29.md",
-        "role": "current exact refresh-and-ratchet restart surface"
+        "path": "docs/ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-LIVE-POLL-SURFACE-ABSORPTION-FINAL-CLOSEOUT-PASS-11-2026-06-18.md",
+        "role": "current exact lane closeout surface"
+      },
+      {
+        "path": "repos/_stack/receipts/FITNESS-DISCORD-FEEDBACK-WORKER-GOVERNED-POLL-SURFACE-RUNTIME-PROOF-2026-06-18.md",
+        "role": "current live recurring worker and poll-surface proof"
+      },
+      {
+        "path": "docs/ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-LIVE-LANE-OPERABILITY-RATCHET-PASS-10-2026-06-18.md",
+        "role": "prior live-operability ratchet surface"
+      },
+      {
+        "path": "docs/ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-IMMEDIATE-SUPPORTING-HELD-RESELECTION-PASS-8-2026-06-02.md",
+        "role": "current post-closeout immediate/supporting/held split source truth"
       },
       {
         "path": "docs/ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-2026-05-24.md",
@@ -102,29 +124,25 @@
     ],
     "blocked_or_gated_work": [
       {
-        "item": "any owner-side reopen or implementation lane",
-        "requirement": "blocked until an exact approval gate opens, a distinct owner-side execution pressure appears, or a new restart-truth change justifies reopening outside the closed docs-only ladder"
-      },
-      {
-        "item": "higher marker movement above the current refresh-backed ratchet",
-        "requirement": "blocked until broader proof-backed execution, owner-side reopen, or a new blocker-clearance class changes operator reality again"
+        "item": "reopening this lane-structure family",
+        "requirement": "only if a new owner-boundary ambiguity appears, the retained seam stops being explicit or governed, or one future runtime change reintroduces mixed-operability uncertainty"
       }
     ],
     "next_package_ladder": [
       {
-        "package": "No immediate Post-Convergence Lane Split Readiness docs-only follow-on packet",
-        "mode": "hold-flat lane posture after the smallest honest ratchet",
-        "reason": "the shaped family chain has now passed one coherent manifest-backed refresh cycle, so reopen only when a distinct restart-truth, marker, approval, or execution-surface question becomes explicit"
+        "package": "No immediate Post-Convergence Lane Split Readiness follow-on packet",
+        "mode": "closed ratchet",
+        "reason": "the family is now closed; future runtime migration or owner changes open as new scope rather than as continuation of this lane"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-CONTINUITY-MANIFEST-REFRESH-AND-RATCHET-DECISION-PASS-7-2026-05-29.md",
-    "freshness_checked_at": "2026-05-29T20:59:57.8038507-04:00",
-    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture now match the refreshed and smallest-ratcheted lane state after pass 7.",
+    "freshness_checked_receipt": "docs/ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-LIVE-POLL-SURFACE-ABSORPTION-FINAL-CLOSEOUT-PASS-11-2026-06-18.md",
+    "freshness_checked_at": "2026-06-18T20:35:00Z",
+    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture now match the lane closeout after live poll-surface absorption and governed worker proof.",
     "marker_posture": [
       {
         "marker": "Post-Convergence Lane Split Readiness",
-        "percent": 61,
+        "percent": 100,
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ]

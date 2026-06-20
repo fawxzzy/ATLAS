@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-05-27T00:00:00Z",
-  "updated_at": "2026-06-02T16:15:00-04:00",
+  "updated_at": "2026-06-19T10:05:00-04:00",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -41,6 +41,78 @@
     "docs/ops/LOCAL-DATA-GATEWAY-RETAINED-SURFACE-DESTRUCTIVE-DISPOSAL-RELATIONSHIP-SEAM-RECONCILIATION-AFTER-CLEAN-ROOT-RESELECTION-2026-06-01.md",
     "docs/ops/LOCAL-DATA-GATEWAY-REPO-NAMING-REUSABLE-PROOF-FAMILY-ADOPTABLE-NOW-THRESHOLD-CHECKPOINT-2026-06-01.md",
     "docs/ops/LOCAL-DATA-GATEWAY-PROCESS-WHERE-IT-RESIDES-BOUNDARY-AND-PLACEMENT-TRUTH-RECONCILIATION-2026-06-02.md",
+    "docs/ops/ATLAS-OWNED-REPO-NAMING-GITHUB-REMOTE-CANONICALIZATION-CLOSEOUT-2026-06-12.md",
+    "docs/ops/LOCAL-DATA-GATEWAY-CONTINUITY-MANIFEST-FRESHNESS-RECHECK-AND-RESTART-TRUTH-RATCHET-PASS-1-2026-06-18.md",
+    "docs/ops/LOCAL-DATA-GATEWAY-NO-SEND-ADOPTABLE-NOW-SET-WIDENING-PASS-3-2026-06-18.md",
+    "docs/ops/LOCAL-DATA-GATEWAY-NO-SEND-ADOPTABLE-NOW-SET-WIDENING-PASS-4-2026-06-18.md",
+    "docs/ops/LOCAL-DATA-GATEWAY-NO-SEND-ADOPTABLE-NOW-SET-WIDENING-PASS-5-2026-06-18.md",
+    "docs/ops/LOCAL-DATA-GATEWAY-NO-SEND-ADOPTABLE-NOW-SET-WIDENING-PASS-6-2026-06-18.md",
+    "docs/ops/LOCAL-DATA-GATEWAY-NO-SEND-ADOPTABLE-NOW-SET-WIDENING-PASS-7-2026-06-18.md",
+    "docs/ops/LOCAL-DATA-GATEWAY-NO-SEND-ADOPTABLE-NOW-SET-WIDENING-PASS-8-2026-06-18.md",
+    "docs/ops/LOCAL-DATA-GATEWAY-NO-SEND-ADOPTABLE-NOW-SET-WIDENING-PASS-9-2026-06-18.md",
+    "docs/ops/LOCAL-DATA-GATEWAY-NO-SEND-ADOPTABLE-NOW-SET-WIDENING-PASS-10-2026-06-19.md",
+    "docs/ops/LOCAL-DATA-GATEWAY-NO-SEND-ADOPTABLE-NOW-SET-WIDENING-PASS-11-2026-06-19.md",
+    "docs/ops/LOCAL-DATA-GATEWAY-NO-SEND-ADOPTABLE-NOW-SET-WIDENING-PASS-12-2026-06-19.md",
+    "docs/ops/LOCAL-DATA-GATEWAY-NO-SEND-ADOPTABLE-NOW-SET-WIDENING-PASS-13-2026-06-19.md",
+    "docs/ops/LOCAL-DATA-GATEWAY-ROOT-RELATIVE-PACKET-REF-DISCIPLINE-CLOSEOUT-2026-06-19.md",
+    "repos/_stack/receipts/stack-update-draft-first-implementation-worker-proof-and-receipt-packet-2-2026-06-08.md",
+    "runtime/fitness/llel-captures/latest/report.json",
+    "runtime/receipts/dev/dev-server.latest.json",
+    "runtime/fitness/qa-auth-summary.json",
+    "repos/fawxzzy-fitness/runtime/discord-inventory/latest.json",
+    "repos/fawxzzy-fitness/runtime/discord-inventory/latest.md",
+    "repos/fawxzzy-fitness/runtime/discord-noise/latest.json",
+    "repos/fawxzzy-fitness/runtime/discord-noise/latest.md",
+    "repos/fawxzzy-fitness/runtime/discord-feedback/latest.json",
+    "repos/fawxzzy-fitness/runtime/discord-feedback/latest.md",
+    "repos/fawxzzy-fitness/runtime/fitness/release-readiness.latest.json",
+    "repos/fawxzzy-fitness/runtime/fitness/release-readiness.latest.md",
+    "repos/fawxzzy-fitness/runtime/feedback-phase/latest.json",
+    "repos/fawxzzy-fitness/runtime/feedback-phase/latest.md",
+    "repos/fawxzzy-fitness/runtime/discord-community/latest.json",
+    "repos/fawxzzy-fitness/runtime/discord-community/latest.md",
+    "runtime/receipts/typecheck/typecheck-debt.latest.json",
+    "runtime/receipts/typecheck/typecheck-debt.latest.md",
+    "runtime/fitness/pilot-readiness/latest.json",
+    "runtime/fitness/pilot-readiness/latest.md",
+    "repos/fawxzzy-fitness/runtime/feedback-board/monetization-seeded.json",
+    "repos/fawxzzy-fitness/runtime/feedback-board/monetization-seeded.md",
+    "repos/fawxzzy-fitness/runtime/feedback-board/codex-drafts.md",
+    "repos/fawxzzy-fitness/runtime/feedback-tasks/latest.json",
+    "repos/fawxzzy-fitness/runtime/feedback-tasks/latest.md",
+    "repos/fawxzzy-fitness/runtime/feedback-tasks/codex-prompts.md",
+    "repos/fawxzzy-fitness/docs/ops/FITNESS-FEEDBACK-BOARD-EXPORTS.md",
+    "repos/fawxzzy-fitness/scripts/export-feedback-board.mjs",
+    "repos/fawxzzy-fitness/scripts/export-feedback-board.test.mjs",
+    "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-INVENTORY-NOISE-AUDITS.md",
+    "repos/fawxzzy-fitness/scripts/discord-server-inventory.mjs",
+    "repos/fawxzzy-fitness/scripts/discord-server-inventory.test.mjs",
+    "repos/fawxzzy-fitness/scripts/discord-noise-audit.mjs",
+    "repos/fawxzzy-fitness/scripts/discord-noise-audit.test.mjs",
+    "repos/fawxzzy-fitness/scripts/discord-noise-apply.mjs",
+    "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-FEEDBACK-EXPORTS.md",
+    "repos/fawxzzy-fitness/scripts/export-discord-bug-reports.mjs",
+    "repos/fawxzzy-fitness/scripts/export-discord-bug-reports.test.mjs",
+    "repos/fawxzzy-fitness/docs/ops/FITNESS-RELEASE-READINESS-REPORTS.md",
+    "repos/fawxzzy-fitness/scripts/release/fitness-release-readiness.mjs",
+    "repos/fawxzzy-fitness/scripts/release/fitness-release-readiness.test.mjs",
+    "repos/fawxzzy-fitness/docs/ops/FITNESS-FEEDBACK-PHASE-READINESS-REPORTS.md",
+    "repos/fawxzzy-fitness/scripts/check-feedback-phase-readiness.mjs",
+    "repos/fawxzzy-fitness/scripts/check-feedback-phase-readiness.test.mjs",
+    "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-COMMUNITY-DOCTOR-REPORTS.md",
+    "repos/fawxzzy-fitness/scripts/doctor-discord-community.mjs",
+    "repos/fawxzzy-fitness/scripts/doctor-discord-community.test.mjs",
+    "repos/fawxzzy-fitness/docs/ops/FITNESS-TYPECHECK-DEBT-INVENTORY-REPORTS.md",
+    "repos/fawxzzy-fitness/scripts/typecheck-debt-inventory.mjs",
+    "repos/fawxzzy-fitness/scripts/typecheck-debt-inventory.test.mjs",
+    "repos/fawxzzy-fitness/docs/ops/FITNESS-PILOT-READINESS-REPORTS.md",
+    "repos/fawxzzy-fitness/scripts/evaluate-fitness-pilot-readiness.mjs",
+    "repos/fawxzzy-fitness/scripts/evaluate-fitness-pilot-readiness.test.mjs",
+    "repos/fawxzzy-fitness/docs/ops/FITNESS-FEEDBACK-REVIEWED-TASKS.md",
+    "repos/fawxzzy-fitness/scripts/generate-feedback-task-packets.mjs",
+    "repos/fawxzzy-fitness/scripts/generate-feedback-task-packets.test.mjs",
+    "repos/fawxzzy-fitness/scripts/qa/progression-visual-receipt.mjs",
+    "repos/fawxzzy-fitness/scripts/qa/fitness-ui-checkpoint.mjs",
     "repos/_stack/scripts/data-gateway-packet-emitter.mjs",
     "repos/_stack/scripts/data-gateway-packet-emitter.test.mjs",
     "repos/_stack/scripts/data-gateway-packet-proof-packager.mjs",
@@ -56,9 +128,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "local-data-gateway",
     "scope_class": "cross-repo-governance-with-owner-repo-implementation",
-    "current_checkpoint_receipt": "docs/ops/LOCAL-DATA-GATEWAY-PROCESS-WHERE-IT-RESIDES-BOUNDARY-AND-PLACEMENT-TRUTH-RECONCILIATION-2026-06-02.md",
+    "current_checkpoint_receipt": "docs/ops/LOCAL-DATA-GATEWAY-ROOT-RELATIVE-PACKET-REF-DISCIPLINE-CLOSEOUT-2026-06-19.md",
     "checkpoint_commit": "main",
-    "checkpoint_summary": "The retained-surface destructive-disposal relationship seam remains complete and parked, the repo-naming adoptable-now threshold remains explicitly not crossed, and the current active Local Data Gateway frontier is now process-and-placement truth only: the older owner-side Fitness release-readiness next-package ladder is stale for this lane, the external/session-scoped Codex-to-Chrome bridge blocker remains outside Local Data Gateway scope, and Atlas-owned Repo Naming Canonicalization stays held unless one direct naming/path dependency is admitted later.",
+    "checkpoint_summary": "Local Data Gateway is now closed at 100% for the current no-send packet scope. The generic chain already proved fifteen adoptable-now workflow classes, and the shared validator now also fail-closes `source_provenance.owner_surface`, `source_provenance.source_refs[*]`, and `receipt_or_proof_ref` unless they stay normalized and ATLAS-root-relative. That clears the last held naming/path blocker inside the generic no-send contract without widening into send-capable behavior, repo-naming promotion, or retained-surface destructive disposal, and the fifteen admitted workflow classes still pass across the wrapper proof matrix under the stricter contract.",
     "governing_receipts": [
       "docs/ops/LOCAL-DATA-GATEWAY-PACKET-CONTRACT-DRAFT-2026-05-27.md",
       "docs/ops/LOCAL-DATA-GATEWAY-VALIDATOR-PROOF-PASS-2026-05-27.md",
@@ -89,7 +161,21 @@
       "docs/ops/LOCAL-DATA-GATEWAY-REPO-NAMING-PASSED-SECOND-INSTANCE-MARKER-APPLICATION-WORDING-CHECKPOINT-2026-05-31.md",
       "docs/ops/LOCAL-DATA-GATEWAY-RETAINED-SURFACE-DESTRUCTIVE-DISPOSAL-RELATIONSHIP-SEAM-RECONCILIATION-AFTER-CLEAN-ROOT-RESELECTION-2026-06-01.md",
       "docs/ops/LOCAL-DATA-GATEWAY-REPO-NAMING-REUSABLE-PROOF-FAMILY-ADOPTABLE-NOW-THRESHOLD-CHECKPOINT-2026-06-01.md",
-      "docs/ops/LOCAL-DATA-GATEWAY-PROCESS-WHERE-IT-RESIDES-BOUNDARY-AND-PLACEMENT-TRUTH-RECONCILIATION-2026-06-02.md"
+      "docs/ops/LOCAL-DATA-GATEWAY-PROCESS-WHERE-IT-RESIDES-BOUNDARY-AND-PLACEMENT-TRUTH-RECONCILIATION-2026-06-02.md",
+      "docs/ops/ATLAS-OWNED-REPO-NAMING-GITHUB-REMOTE-CANONICALIZATION-CLOSEOUT-2026-06-12.md",
+      "docs/ops/LOCAL-DATA-GATEWAY-CONTINUITY-MANIFEST-FRESHNESS-RECHECK-AND-RESTART-TRUTH-RATCHET-PASS-1-2026-06-18.md",
+      "docs/ops/LOCAL-DATA-GATEWAY-NO-SEND-ADOPTABLE-NOW-SET-WIDENING-PASS-3-2026-06-18.md",
+      "docs/ops/LOCAL-DATA-GATEWAY-NO-SEND-ADOPTABLE-NOW-SET-WIDENING-PASS-4-2026-06-18.md",
+      "docs/ops/LOCAL-DATA-GATEWAY-NO-SEND-ADOPTABLE-NOW-SET-WIDENING-PASS-5-2026-06-18.md",
+      "docs/ops/LOCAL-DATA-GATEWAY-NO-SEND-ADOPTABLE-NOW-SET-WIDENING-PASS-6-2026-06-18.md",
+      "docs/ops/LOCAL-DATA-GATEWAY-NO-SEND-ADOPTABLE-NOW-SET-WIDENING-PASS-7-2026-06-18.md",
+      "docs/ops/LOCAL-DATA-GATEWAY-NO-SEND-ADOPTABLE-NOW-SET-WIDENING-PASS-8-2026-06-18.md",
+      "docs/ops/LOCAL-DATA-GATEWAY-NO-SEND-ADOPTABLE-NOW-SET-WIDENING-PASS-9-2026-06-18.md",
+      "docs/ops/LOCAL-DATA-GATEWAY-NO-SEND-ADOPTABLE-NOW-SET-WIDENING-PASS-10-2026-06-19.md",
+      "docs/ops/LOCAL-DATA-GATEWAY-NO-SEND-ADOPTABLE-NOW-SET-WIDENING-PASS-11-2026-06-19.md",
+      "docs/ops/LOCAL-DATA-GATEWAY-NO-SEND-ADOPTABLE-NOW-SET-WIDENING-PASS-12-2026-06-19.md",
+      "docs/ops/LOCAL-DATA-GATEWAY-NO-SEND-ADOPTABLE-NOW-SET-WIDENING-PASS-13-2026-06-19.md",
+      "docs/ops/LOCAL-DATA-GATEWAY-ROOT-RELATIVE-PACKET-REF-DISCIPLINE-CLOSEOUT-2026-06-19.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -137,6 +223,10 @@
       {
         "path": "docs/ops/ATLAS-OWNED-REPO-NAMING-MARKER-RATCHET-CHECKPOINT-NEXT-5-2026-05-29.md",
         "role": "root-visible multi-candidate naming closeout evidence"
+      },
+      {
+        "path": "docs/ops/ATLAS-OWNED-REPO-NAMING-GITHUB-REMOTE-CANONICALIZATION-CLOSEOUT-2026-06-12.md",
+        "role": "adjacent closed-ratchet naming truth now absorbed into restart surfaces"
       }
     ],
     "blocked_or_gated_work": [
@@ -149,20 +239,12 @@
         "requirement": "prohibited in the current wrapper family"
       },
       {
-        "item": "broader workflow-family graduation beyond the three proven adoptable-now classes",
-        "requirement": "blocked until a family has a stable packet contract and can be proven local-only without family-specific wrapper logic"
+        "item": "future broader-export or materially different workflow families",
+        "requirement": "new scope only; do not reopen the closed no-send lane for another wording-only or duplicate-family replay"
       },
       {
         "item": "retained-surface destructive-disposal family promotion into the active queue",
-        "requirement": "held parked at adoptable later; the family is fully shaped but its claim ceiling stays narrow and does not currently outrank the repo-naming threshold frontier"
-      },
-      {
-        "item": "repo-naming graduation into adoptable-now status",
-        "requirement": "blocked until durable evidence proves the generic Local Data Gateway no-send chain carries repo naming as a broader reusable adopted workflow class independent of rename-specific execution and reconciliation semantics"
-      },
-      {
-        "item": "automatic naming-support follow-on",
-        "requirement": "held unless one current Local Data Gateway packet admits a direct naming or path dependency rather than only adjacent family strength"
+        "requirement": "still held parked at adoptable later; this remains a separate bounded family rather than open debt inside the closed no-send lane"
       },
       {
         "item": "gateway-first rollout across docs-native governance receipts",
@@ -171,19 +253,19 @@
     ],
     "next_package_ladder": [
       {
-        "package": "none immediate inside Local Data Gateway",
-        "mode": "hold flat after boundary-and-placement reconciliation",
-        "reason": "the current pass corrected stale lane placement and boundary truth only; it did not widen the proven adoptable-now set, did not admit a direct naming/path dependency, and did not surface a new gateway-owned implementation or promotion packet"
+        "package": "none inside the current Local Data Gateway closeout scope",
+        "mode": "closed after root-relative packet-ref discipline landed in the shared validator and proof stayed green",
+        "reason": "the current pass clears the last held naming/path blocker inside the generic no-send contract by enforcing ATLAS-root-relative packet refs across shared provenance surfaces; future send-capable or materially broader export work must open as new explicit scope instead of as continuation of this closed lane"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/LOCAL-DATA-GATEWAY-PROCESS-WHERE-IT-RESIDES-BOUNDARY-AND-PLACEMENT-TRUTH-RECONCILIATION-2026-06-02.md",
-    "freshness_checked_at": "2026-06-02T16:15:00-04:00",
-    "freshness_basis": "checkpoint, marker posture, blocked work, and next-package posture now match the refreshed canonical substrate after the dependency-seam reconciliation: Local Data Gateway is active again only as a process-and-placement boundary lane, the owner-side Fitness release-readiness ladder is stale for this lane, the external/session bridge blocker is explicitly outside lane scope, and naming support remains held until one direct naming/path dependency appears.",
+    "freshness_checked_receipt": "docs/ops/LOCAL-DATA-GATEWAY-ROOT-RELATIVE-PACKET-REF-DISCIPLINE-CLOSEOUT-2026-06-19.md",
+    "freshness_checked_at": "2026-06-19T10:05:00-04:00",
+    "freshness_basis": "checkpoint, marker posture, blocked work, and next-package posture now match current June 19 durable truth: Local Data Gateway closes at 100% for the current no-send packet scope because the fifteen-class adoptable-now chain now also machine-checks ATLAS-root-relative packet refs in the shared validator, clearing the last held naming/path blocker without widening into send behavior; the external or session bridge blocker remains outside lane scope, the adjacent naming lane remains absorbed as a closed ratchet, and future send-capable or broader-export work must open as new scope.",
     "marker_posture": [
       {
         "marker": "Local Data Gateway",
-        "percent": 66,
+        "percent": 100,
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ]

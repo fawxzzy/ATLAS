@@ -31,6 +31,7 @@ Continuity source inventory uses:
 - schema: `schemas/atlas.continuity.source.manifest.v1.json`
 - loader: `ops/atlas/continuity.py`
 - source typing: imported docs/PDFs, promotion notes, handoffs, reviews, and residue stay distinguishable in manifest-backed query results
+- source-resolution rule: when a raw source already has an exact reviewed derivative or dedicated promotion-safe summary, mark the raw item `superseded` with `superseded_by` instead of leaving it in `pending_review`
 - historical query preference: reviewed derivative notes first, then existing promotion notes, then grounded docs and handoffs, then import metadata
 - read-only slices:
   - `continuity_source_inventory`
@@ -38,6 +39,10 @@ Continuity source inventory uses:
   - `continuity_source_groups`
   - `continuity_search_status`
   - `continuity_historical_query_coverage`
+  - `continuity_initiative_manifest_health`
+  - `continuity_open_marker_manifest_coverage`
+  - `continuity_open_marker_restart_index`
+  - `continuity_maintained_manifest_restart_index`
   - `continuity_coverage`
 
 Related existing surfaces:
@@ -109,9 +114,10 @@ Promotion rules:
 
 1. Ground the session on the continuity manifest, current awareness, receipt chain, repo, and contract state.
 2. Emit one `atlas.continuity.handoff.v1` artifact under `runtime/receipts/handoffs/`.
-3. Review the handoff for durable facts, decisions, next actions, and questions.
-4. Promote approved items into `docs/memory/**`, `docs/knowledge/**`, or the owner repo.
-5. Leave transcript references as trace-only links, not as the durable endpoint.
+3. Validate the handoff explicitly before promotion or marker movement.
+4. Review the handoff for durable facts, decisions, next actions, and questions.
+5. Promote approved items into `docs/memory/**`, `docs/knowledge/**`, or the owner repo.
+6. Leave transcript references as trace-only links, not as the durable endpoint.
 
 ## Promotion Routing
 
@@ -147,6 +153,7 @@ Minimum continuity checks:
 Suggested validation command:
 
 ```powershell
+python .\ops\atlas\validate_continuity_handoff.py --handoff-file .\runtime\receipts\handoffs\<artifact>.handoff.json
 python .\ops\validation\validate_stack.py
 ```
 

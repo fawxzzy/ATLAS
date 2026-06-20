@@ -1,0 +1,111 @@
+{
+  "contract_version": "atlas.initiative.v1",
+  "id": "continuity-manifest-vision-future-alignment",
+  "title": "Continuity Manifest Vision & Future Alignment",
+  "summary": "Active ATLAS-root retrieval map for the Vision & Future Alignment lane.",
+  "status": "active",
+  "owner": "stack-root",
+  "created_at": "2026-06-18T00:00:00Z",
+  "updated_at": "2026-06-18T20:35:00Z",
+  "related_plan_refs": [],
+  "related_decision_refs": [],
+  "related_hypothesis_refs": [],
+  "related_session_refs": [],
+  "related_attention_refs": [],
+  "proposed_next_session_refs": [],
+  "evidence_refs": [
+    "docs/atlas-book/02-lanes-and-markers.md",
+    "docs/atlas-book/05-receipt-index.md",
+    "docs/atlas-book/12-restart-and-handoff-guide.md",
+    "docs/atlas-book/13-vision-and-endgames.md",
+    "docs/memory/README.md",
+    "docs/ops/VISION-FUTURE-ALIGNMENT-REVIEW-2026-05-24.md",
+    "docs/ops/VISION-FUTURE-ALIGNMENT-BOUNDED-SELECTOR-AND-RATCHET-THRESHOLD-PASS-2-2026-06-18.md",
+    "docs/ops/VISION-FUTURE-ALIGNMENT-CONTINUITY-MANIFEST-SEED-AND-RATCHET-DECISION-PASS-3-2026-06-18.md",
+    "docs/ops/VISION-FUTURE-ALIGNMENT-THREE-LANE-ADOPTION-RATCHET-PASS-4-2026-06-18.md",
+    "docs/ops/POST-CONVERGENCE-AND-VISION-FITNESS-DISCORD-POLL-SURFACE-SEPARATION-RECHECK-2026-06-18.md",
+    "repos/_stack/receipts/FITNESS-DISCORD-FEEDBACK-WORKER-GOVERNED-POLL-SURFACE-RUNTIME-PROOF-2026-06-18.md",
+    "docs/ops/VISION-FUTURE-ALIGNMENT-LIVE-POLL-SURFACE-ABSORPTION-FINAL-CLOSEOUT-PASS-5-2026-06-18.md"
+  ],
+  "supersedes": [],
+  "superseded_by": [],
+  "metadata": {
+    "artifact_kind": "continuity_manifest",
+    "lane_id": "vision-future-alignment",
+    "scope_class": "atlas-root-governance",
+    "current_checkpoint_receipt": "docs/ops/VISION-FUTURE-ALIGNMENT-LIVE-POLL-SURFACE-ABSORPTION-FINAL-CLOSEOUT-PASS-5-2026-06-18.md",
+    "checkpoint_commit": "main",
+    "checkpoint_summary": "The lane is now closed at 100 percent because the last live future-state ambiguity on the recurring Fitness Discord poll seam is gone: the dedicated poll route is live, the governed worker consumes it, and the remaining work is new owner implementation scope rather than unresolved end-state alignment debt.",
+    "governing_receipts": [
+      "docs/ops/VISION-FUTURE-ALIGNMENT-REVIEW-2026-05-24.md",
+      "docs/ops/VISION-FUTURE-ALIGNMENT-BOUNDED-SELECTOR-AND-RATCHET-THRESHOLD-PASS-2-2026-06-18.md",
+      "docs/ops/VISION-FUTURE-ALIGNMENT-CONTINUITY-MANIFEST-SEED-AND-RATCHET-DECISION-PASS-3-2026-06-18.md",
+      "docs/ops/VISION-FUTURE-ALIGNMENT-THREE-LANE-ADOPTION-RATCHET-PASS-4-2026-06-18.md",
+      "docs/ops/VISION-FUTURE-ALIGNMENT-LIVE-POLL-SURFACE-ABSORPTION-FINAL-CLOSEOUT-PASS-5-2026-06-18.md"
+    ],
+    "owner_truth_surfaces": [
+      {
+        "path": "docs/ops/VISION-FUTURE-ALIGNMENT-LIVE-POLL-SURFACE-ABSORPTION-FINAL-CLOSEOUT-PASS-5-2026-06-18.md",
+        "role": "current exact lane closeout surface"
+      },
+      {
+        "path": "repos/_stack/receipts/FITNESS-DISCORD-FEEDBACK-WORKER-GOVERNED-POLL-SURFACE-RUNTIME-PROOF-2026-06-18.md",
+        "role": "current live poll-surface and recurring-worker proof"
+      },
+      {
+        "path": "docs/ops/VISION-FUTURE-ALIGNMENT-THREE-LANE-ADOPTION-RATCHET-PASS-4-2026-06-18.md",
+        "role": "prior three-lane adoption ratchet surface"
+      },
+      {
+        "path": "docs/ops/VISION-FUTURE-ALIGNMENT-BOUNDED-SELECTOR-AND-RATCHET-THRESHOLD-PASS-2-2026-06-18.md",
+        "role": "current exact selector, reopen-trigger, and hold-boundary surface"
+      },
+      {
+        "path": "docs/ops/VISION-FUTURE-ALIGNMENT-REVIEW-2026-05-24.md",
+        "role": "original lane review and future-state source truth"
+      }
+    ],
+    "verification_adoption_surfaces": [
+      {
+        "path": "docs/atlas-book/05-receipt-index.md",
+        "role": "receipt spine"
+      },
+      {
+        "path": "docs/atlas-book/12-restart-and-handoff-guide.md",
+        "role": "restart routing surface"
+      },
+      {
+        "path": "docs/atlas-book/13-vision-and-endgames.md",
+        "role": "future-state projection surface"
+      },
+      {
+        "path": "docs/memory/README.md",
+        "role": "manifest-backed continuity doctrine surface"
+      }
+    ],
+    "blocked_or_gated_work": [
+      {
+        "item": "reopening this future-alignment family",
+        "requirement": "only if one new owner-boundary ambiguity, retained-seam regression, or materially different future target appears"
+      }
+    ],
+    "next_package_ladder": [
+      {
+        "package": "No immediate Vision & Future Alignment follow-on packet",
+        "mode": "closed ratchet",
+        "reason": "the family is now closed; future runtime migration or product expansion opens as new scope rather than as continuation of this alignment lane"
+      }
+    ],
+    "freshness_state": "manifest-backed",
+    "freshness_checked_receipt": "docs/ops/VISION-FUTURE-ALIGNMENT-LIVE-POLL-SURFACE-ABSORPTION-FINAL-CLOSEOUT-PASS-5-2026-06-18.md",
+    "freshness_checked_at": "2026-06-18T20:35:00Z",
+    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture now match the lane closeout after live poll-surface absorption and governed worker proof.",
+    "marker_posture": [
+      {
+        "marker": "Vision & Future Alignment",
+        "percent": 100,
+        "source": "docs/atlas-book/02-lanes-and-markers.md"
+      }
+    ]
+  }
+}

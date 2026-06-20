@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-05-27T00:00:00Z",
-  "updated_at": "2026-06-03T22:20:00-04:00",
+  "updated_at": "2026-06-12T21:00:00-04:00",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -18,13 +18,16 @@
     "docs/ops/DISCORD-OS-INFRASTRUCTURE-SEPARATION-CHECKPOINT-2026-05-25.md",
     "docs/ops/DISCORD-OS-INFRASTRUCTURE-SEPARATION-BRIDGE-INDEPENDENT-REOPEN-DECISION-2026-06-03.md",
     "docs/ops/DISCORD-OS-INFRASTRUCTURE-SEPARATION-NAMED-PORT-PLANNING-CLASS-CONSUMPTION-AND-NO-REPLAY-DECISION-2026-06-03.md",
+    "docs/ops/DISCORD-OS-INFRASTRUCTURE-SEPARATION-OWNER-SIDE-SCHEMA-AND-VERCEL-LINKAGE-2026-06-12.md",
+    "docs/ops/DISCORD-OS-INFRASTRUCTURE-SEPARATION-RUNTIME-READINESS-DEPLOYMENT-PROOF-2026-06-12.md",
+    "docs/ops/DISCORD-OS-INFRASTRUCTURE-SEPARATION-FINAL-INFRASTRUCTURE-CLOSEOUT-2026-06-12.md",
     "docs/ops/DISCORD-OS-INFRASTRUCTURE-SEPARATION-INVENTORY-2026-05-24.md",
     "docs/ops/UNIFIED-DISCORD-OS-WORKFLOW-BOUNDARY-2026-05-24.md",
     "repos/DiscordOS/docs/contracts/feedback-runtime.md",
     "repos/DiscordOS/docs/ops/README.md",
     "repos/DiscordOS/src/adapters/feedback/README.md",
     "repos/DiscordOS/src/contracts/feedback.ts",
-    "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-FEEDBACK.md"
+    "repos/fawxzzy-fitness/src/app/api/discord/interactions/route.ts"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -32,14 +35,17 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "discord-os-infrastructure-separation",
     "scope_class": "cross-repo-separation-governance",
-    "current_checkpoint_receipt": "docs/ops/DISCORD-OS-INFRASTRUCTURE-SEPARATION-NAMED-PORT-PLANNING-CLASS-CONSUMPTION-AND-NO-REPLAY-DECISION-2026-06-03.md",
+    "current_checkpoint_receipt": "docs/ops/DISCORD-OS-INFRASTRUCTURE-SEPARATION-FINAL-INFRASTRUCTURE-CLOSEOUT-2026-06-12.md",
     "checkpoint_commit": null,
-    "checkpoint_summary": "Bridge-independent DiscordOS work may resume now, but the old generic root named-port planning ladder is already consumed and should not be replayed; further follow-on now needs explicit new scope or higher-level authorization while the live Fitness Discord proof seam remains parked behind bridge recovery.",
+    "checkpoint_summary": "The lane is now closed at 100 percent because the standalone DiscordOS repo, Supabase schema/function, Vercel env and deployment, bot-token readiness, and service-role readiness proof path are all live on the admitted owner surfaces; feedback cutover remains its own separately closed downstream lane rather than an infrastructure blocker here.",
     "governing_receipts": [
       "docs/ops/DISCORD-OS-INFRASTRUCTURE-SEPARATION-INVENTORY-2026-05-24.md",
       "docs/ops/DISCORD-OS-INFRASTRUCTURE-SEPARATION-CHECKPOINT-2026-05-25.md",
       "docs/ops/DISCORD-OS-INFRASTRUCTURE-SEPARATION-BRIDGE-INDEPENDENT-REOPEN-DECISION-2026-06-03.md",
-      "docs/ops/DISCORD-OS-INFRASTRUCTURE-SEPARATION-NAMED-PORT-PLANNING-CLASS-CONSUMPTION-AND-NO-REPLAY-DECISION-2026-06-03.md"
+      "docs/ops/DISCORD-OS-INFRASTRUCTURE-SEPARATION-NAMED-PORT-PLANNING-CLASS-CONSUMPTION-AND-NO-REPLAY-DECISION-2026-06-03.md",
+      "docs/ops/DISCORD-OS-INFRASTRUCTURE-SEPARATION-OWNER-SIDE-SCHEMA-AND-VERCEL-LINKAGE-2026-06-12.md",
+      "docs/ops/DISCORD-OS-INFRASTRUCTURE-SEPARATION-RUNTIME-READINESS-DEPLOYMENT-PROOF-2026-06-12.md",
+      "docs/ops/DISCORD-OS-INFRASTRUCTURE-SEPARATION-FINAL-INFRASTRUCTURE-CLOSEOUT-2026-06-12.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -55,8 +61,8 @@
         "role": "adapter-boundary seam"
       },
       {
-        "path": "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-FEEDBACK.md",
-        "role": "current live runtime owner truth"
+        "path": "repos/fawxzzy-fitness/src/app/api/discord/interactions/route.ts",
+        "role": "current retained Fitness Discord seam truth"
       }
     ],
     "verification_adoption_surfaces": [
@@ -99,13 +105,13 @@
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/DISCORD-OS-INFRASTRUCTURE-SEPARATION-NAMED-PORT-PLANNING-CLASS-CONSUMPTION-AND-NO-REPLAY-DECISION-2026-06-03.md",
-    "freshness_checked_at": "2026-06-03T22:20:00-04:00",
-    "freshness_basis": "the lane checkpoint, the bridge reclassification, the reopen consequence, and the May 26 DiscordOS planning plus lookup-boundary chain now agree: bridge-independent DiscordOS work may resume, but the generic root named-port planning class is already consumed and must not be replayed.",
+    "freshness_checked_receipt": "docs/ops/DISCORD-OS-INFRASTRUCTURE-SEPARATION-FINAL-INFRASTRUCTURE-CLOSEOUT-2026-06-12.md",
+    "freshness_checked_at": "2026-06-12T21:00:00-04:00",
+    "freshness_basis": "the current checkpoint, marker posture, and owner-surface routing now match the final infrastructure closeout: DiscordOS infrastructure is live and closed at the stack-governance level, while later Discord runtime and product work must open as separate owner scope.",
     "marker_posture": [
       {
         "marker": "Discord OS Infrastructure Separation",
-        "percent": 95,
+        "percent": 100,
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ]

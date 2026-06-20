@@ -965,6 +965,10 @@ def _slice_titles() -> dict[str, str]:
         "continuity_source_groups": "Continuity Source Groups",
         "continuity_search_status": "Continuity Search Status",
         "continuity_historical_query_coverage": "Continuity Historical Query Coverage",
+        "continuity_initiative_manifest_health": "Continuity Initiative Manifest Health",
+        "continuity_open_marker_manifest_coverage": "Continuity Open Marker Manifest Coverage",
+        "continuity_open_marker_restart_index": "Continuity Open Marker Restart Index",
+        "continuity_maintained_manifest_restart_index": "Continuity Maintained Manifest Restart Index",
         "continuity_coverage": "Continuity Coverage",
     }
 

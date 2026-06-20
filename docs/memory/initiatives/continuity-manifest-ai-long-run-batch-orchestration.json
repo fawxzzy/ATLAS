@@ -1,0 +1,195 @@
+{
+  "contract_version": "atlas.initiative.v1",
+  "id": "continuity-manifest-ai-long-run-batch-orchestration",
+  "title": "Continuity Manifest AI Long-Run Batch Orchestration",
+  "summary": "Active ATLAS-root retrieval map for the AI Long-Run Batch Orchestration lane.",
+  "status": "active",
+  "owner": "stack-root",
+  "created_at": "2026-06-18T16:50:07.5884334-04:00",
+  "updated_at": "2026-06-19T00:00:00Z",
+  "related_plan_refs": [],
+  "related_decision_refs": [],
+  "related_hypothesis_refs": [],
+  "related_session_refs": [],
+  "related_attention_refs": [],
+  "proposed_next_session_refs": [],
+  "evidence_refs": [
+    "docs/atlas-book/01-current-state.md",
+    "docs/atlas-book/02-lanes-and-markers.md",
+    "docs/atlas-book/05-receipt-index.md",
+    "docs/atlas-book/11-system-map-graph.md",
+    "docs/atlas-book/12-restart-and-handoff-guide.md",
+    "docs/atlas-book/13-vision-and-endgames.md",
+    "docs/memory/README.md",
+    "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-2026-05-22.md",
+    "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-POST-WORLD-MODEL-TOP-LEVEL-PAYLOAD-BOUNDARY-NEXT-SLICE-SELECTION-PASS-460-2026-06-17.md",
+    "docs/ops/ROOT-BOUNDED-LANE-SELECTION-AFTER-AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-FAMILY-EXHAUSTION-CLOSEOUT-2026-06-17.md",
+    "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-ACTIVE-LANE-FOLLOW-ON-DISAMBIGUATION-2026-06-17.md",
+    "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-SELECTOR-OPERATOR-ACTION-AND-PACKET-BASIS-2026-06-18.md",
+    "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-SELECTOR-LANE-EXHAUSTION-OR-FALLBACK-ROUTING-2026-06-18.md",
+    "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-CONTINUITY-MANIFEST-SEED-AND-RATCHET-DECISION-PASS-461-2026-06-18.md",
+    "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTION-CRITERIA-CONTRACT-FREEZE-PASS-462-2026-06-18.md",
+    "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTION-CRITERIA-OWNER-SURFACE-ADMISSION-PASS-463-2026-06-19.md",
+    "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTION-CRITERIA-SUPPORTING-LANE-ADMISSION-PASS-464-2026-06-19.md",
+    "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTION-CRITERIA-FIRST-IMPLEMENTATION-ADMISSION-PASS-465-2026-06-19.md",
+    "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTION-CRITERIA-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-466-2026-06-19.md",
+    "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTION-CRITERIA-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-467-2026-06-19.md",
+    "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTION-CRITERIA-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-19.md",
+    "ops/atlas/pilot_selection_criteria.py",
+    "tests/test_atlas_pilot_selection_criteria.py"
+  ],
+  "supersedes": [],
+  "superseded_by": [],
+  "metadata": {
+    "artifact_kind": "continuity_manifest",
+    "lane_id": "ai-long-run-batch-orchestration",
+    "scope_class": "atlas-root-governance",
+    "current_checkpoint_receipt": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTION-CRITERIA-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-19.md",
+    "checkpoint_commit": "main",
+    "checkpoint_summary": "The lane now has one active continuity manifest, one exact post-exhaustion non-queue criteria contract, one exact owner-surface admission packet, one exact support admission packet that honestly holds support at `none yet`, one exact first-implementation admission packet that freezes the smallest fail-closed pilot-admission-card slice, one exact prompt-pack and handoff contract, one exact implementation-readiness closeout, and one exact worker-cluster reconciliation that lands the bounded validator helper plus direct proof in the current ATLAS working tree: restart truth agrees that AI Long-Run remains the active ATLAS-side control-plane family, the criteria family still stays root-local, and the next exact question is now the candidate-comparison contract freeze that should consume the implemented criteria surface.",
+    "governing_receipts": [
+      "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-2026-05-22.md",
+      "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-POST-WORLD-MODEL-TOP-LEVEL-PAYLOAD-BOUNDARY-NEXT-SLICE-SELECTION-PASS-460-2026-06-17.md",
+      "docs/ops/ROOT-BOUNDED-LANE-SELECTION-AFTER-AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-FAMILY-EXHAUSTION-CLOSEOUT-2026-06-17.md",
+      "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-ACTIVE-LANE-FOLLOW-ON-DISAMBIGUATION-2026-06-17.md",
+      "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-SELECTOR-OPERATOR-ACTION-AND-PACKET-BASIS-2026-06-18.md",
+      "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-SELECTOR-LANE-EXHAUSTION-OR-FALLBACK-ROUTING-2026-06-18.md",
+      "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-CONTINUITY-MANIFEST-SEED-AND-RATCHET-DECISION-PASS-461-2026-06-18.md",
+      "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTION-CRITERIA-CONTRACT-FREEZE-PASS-462-2026-06-18.md",
+      "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTION-CRITERIA-OWNER-SURFACE-ADMISSION-PASS-463-2026-06-19.md",
+      "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTION-CRITERIA-SUPPORTING-LANE-ADMISSION-PASS-464-2026-06-19.md",
+      "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTION-CRITERIA-FIRST-IMPLEMENTATION-ADMISSION-PASS-465-2026-06-19.md",
+      "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTION-CRITERIA-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-466-2026-06-19.md",
+      "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTION-CRITERIA-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-467-2026-06-19.md",
+      "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTION-CRITERIA-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-19.md"
+    ],
+    "owner_truth_surfaces": [
+      {
+        "path": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-CONTINUITY-MANIFEST-SEED-AND-RATCHET-DECISION-PASS-461-2026-06-18.md",
+        "role": "current exact continuity-manifest seed and ratchet surface"
+      },
+      {
+        "path": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTION-CRITERIA-CONTRACT-FREEZE-PASS-462-2026-06-18.md",
+        "role": "current exact non-queue pilot-criteria contract freeze"
+      },
+      {
+        "path": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTION-CRITERIA-OWNER-SURFACE-ADMISSION-PASS-463-2026-06-19.md",
+        "role": "current exact pilot-criteria owner-surface admission"
+      },
+      {
+        "path": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTION-CRITERIA-SUPPORTING-LANE-ADMISSION-PASS-464-2026-06-19.md",
+        "role": "current exact pilot-criteria support admission"
+      },
+      {
+        "path": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTION-CRITERIA-FIRST-IMPLEMENTATION-ADMISSION-PASS-465-2026-06-19.md",
+        "role": "current exact pilot-criteria first-implementation admission"
+      },
+      {
+        "path": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTION-CRITERIA-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-466-2026-06-19.md",
+        "role": "current exact pilot-criteria prompt-pack and handoff contract"
+      },
+      {
+        "path": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTION-CRITERIA-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-467-2026-06-19.md",
+        "role": "current exact pilot-criteria implementation-readiness closeout"
+      },
+      {
+        "path": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTION-CRITERIA-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-19.md",
+        "role": "current exact pilot-criteria worker-cluster reconciliation"
+      },
+      {
+        "path": "ops/atlas/pilot_selection_criteria.py",
+        "role": "current exact pilot-criteria validator helper"
+      },
+      {
+        "path": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-2026-05-22.md",
+        "role": "original lane definition and endgame"
+      },
+      {
+        "path": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-POST-WORLD-MODEL-TOP-LEVEL-PAYLOAD-BOUNDARY-NEXT-SLICE-SELECTION-PASS-460-2026-06-17.md",
+        "role": "current queue-or-registry exhaustion truth boundary"
+      },
+      {
+        "path": "docs/ops/ROOT-BOUNDED-LANE-SELECTION-AFTER-AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-FAMILY-EXHAUSTION-CLOSEOUT-2026-06-17.md",
+        "role": "current post-exhaustion lane-selection truth boundary"
+      },
+      {
+        "path": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-ACTIVE-LANE-FOLLOW-ON-DISAMBIGUATION-2026-06-17.md",
+        "role": "current active-packet versus fallback separation truth boundary"
+      },
+      {
+        "path": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-SELECTOR-OPERATOR-ACTION-AND-PACKET-BASIS-2026-06-18.md",
+        "role": "current operator-action and packet-basis truth boundary"
+      },
+      {
+        "path": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-SELECTOR-LANE-EXHAUSTION-OR-FALLBACK-ROUTING-2026-06-18.md",
+        "role": "current fallback reactivation truth boundary"
+      }
+    ],
+    "verification_adoption_surfaces": [
+      {
+        "path": "docs/atlas-book/01-current-state.md",
+        "role": "current active-lane projection surface"
+      },
+      {
+        "path": "docs/atlas-book/02-lanes-and-markers.md",
+        "role": "marker table and active-lane projection surface"
+      },
+      {
+        "path": "docs/atlas-book/05-receipt-index.md",
+        "role": "receipt spine"
+      },
+      {
+        "path": "docs/atlas-book/11-system-map-graph.md",
+        "role": "lane-state projection routing surface"
+      },
+      {
+        "path": "docs/atlas-book/12-restart-and-handoff-guide.md",
+        "role": "restart routing surface"
+      },
+      {
+        "path": "docs/atlas-book/13-vision-and-endgames.md",
+        "role": "current endgame and next-valid-package surface"
+      },
+      {
+        "path": "docs/memory/README.md",
+        "role": "manifest-backed continuity doctrine surface"
+      },
+      {
+        "path": "tests/test_atlas_pilot_selection_criteria.py",
+        "role": "current exact pilot-criteria validator proof"
+      }
+    ],
+    "blocked_or_gated_work": [
+      {
+        "item": "choosing one concrete first supervised pilot candidate by adjacency",
+        "requirement": "blocked until the bounded pilot-criteria validator slice lands and one later explicit candidate-selection packet compares real candidates against the already admitted criteria contract, owner-facing home, and support posture"
+      },
+      {
+        "item": "higher marker movement above the current continuity-backed ratchet",
+        "requirement": "blocked until broader execution, proof-backed adoption, or another real blocker-clearance class changes operator reality again"
+      },
+      {
+        "item": "widening this lane into owner-repo, deploy, secret, or protected-surface work",
+        "requirement": "blocked unless a separate owner-side or approval-gated packet is explicitly selected"
+      }
+    ],
+    "next_package_ladder": [
+      {
+        "package": "AI Long-Run Batch Orchestration single supervised pilot candidate comparison contract freeze pass 468",
+        "mode": "docs-only root-bounded contract freeze",
+        "reason": "the pilot-selection criteria contract, owner-facing home, support posture, validator slice, handoff contract, readiness posture, and bounded helper proof are now all durable, and the next honest question is the exact contract for comparing real pilot candidates against that now-implemented criteria surface"
+      }
+    ],
+    "freshness_state": "manifest-backed",
+    "freshness_checked_receipt": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTION-CRITERIA-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-19.md",
+    "freshness_checked_at": "2026-06-19T00:00:00Z",
+    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture now match the active AI Long-Run lane after the criteria family gained a real bounded validator helper plus direct proof and shifted the next exact packet to candidate-comparison contract freeze.",
+    "marker_posture": [
+      {
+        "marker": "AI Long-Run Batch Orchestration",
+        "percent": 54,
+        "source": "docs/atlas-book/02-lanes-and-markers.md"
+      }
+    ]
+  }
+}

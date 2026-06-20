@@ -39,6 +39,7 @@
     "docs/audits/STACK-REPO-INVENTORY.md",
     "stack.yaml",
     "stack.lock.yaml",
+    "docs/ops/DURABLE-CONTEXT-EXTERNALIZATION-CONTINUITY-MANIFEST-REFRESH-PASS-4-2026-05-29.md",
     "docs/ops/ATLAS-OWNED-REPO-NAMING-GITHUB-REMOTE-CANONICALIZATION-CLOSEOUT-2026-06-12.md"
   ],
   "supersedes": [],

@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-05-29T00:00:00Z",
-  "updated_at": "2026-06-02T00:00:00Z",
+  "updated_at": "2026-06-18T21:04:53-04:00",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -36,7 +36,10 @@
     "docs/ops/DEPENDENCY-UNTANGLING-REPO-BOOTSTRAP-AND-EXTRACTION-DEPENDENCY-FAMILY-SHAPING-PASS-6-2026-05-29.md",
     "docs/ops/DEPENDENCY-UNTANGLING-CONTINUITY-MANIFEST-REFRESH-AND-RATCHET-DECISION-PASS-7-2026-05-29.md",
     "docs/ops/DEPENDENCY-UNTANGLING-VERIFICATION-BRIDGE-SEAM-EXTERNAL-SESSION-BOUNDARY-RECONCILIATION-PASS-8-2026-06-02.md",
-    "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-POST-INSTALL-CODEX-CHROME-BRIDGE-TIMEOUT-BOUNDARY-RECEIPT-2026-06-01.md"
+    "docs/ops/ATLAS-OWNED-REPO-NAMING-GITHUB-REMOTE-CANONICALIZATION-CLOSEOUT-2026-06-12.md",
+    "docs/ops/VISION-FUTURE-ALIGNMENT-LIVE-POLL-SURFACE-ABSORPTION-FINAL-CLOSEOUT-PASS-5-2026-06-18.md",
+    "docs/ops/DEPENDENCY-UNTANGLING-CONTINUITY-MANIFEST-FRESHNESS-RECHECK-AND-RESTART-TRUTH-RATCHET-PASS-9-2026-06-18.md",
+    "docs/ops/DEPENDENCY-UNTANGLING-LIVE-OWNER-SURFACE-ABSORPTION-FINAL-CLOSEOUT-PASS-10-2026-06-18.md"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -44,9 +47,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "dependency-untangling",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/DEPENDENCY-UNTANGLING-VERIFICATION-BRIDGE-SEAM-EXTERNAL-SESSION-BOUNDARY-RECONCILIATION-PASS-8-2026-06-02.md",
-    "checkpoint_commit": "a6dad1c5",
-    "checkpoint_summary": "The lane now sits at 72 percent with one compact decisive receipt spine, one exact seam-family map, one exact ownership map, one exact runtime-cutover map, one exact repo extraction map, one manifest-backed continuity map, and one newly reconciled verification-bridge seam boundary showing that the active blocker no longer lives inside Fitness repo/runtime repair but at an explicit external/session-scoped Codex-to-Chrome bridge state.",
+    "current_checkpoint_receipt": "docs/ops/DEPENDENCY-UNTANGLING-LIVE-OWNER-SURFACE-ABSORPTION-FINAL-CLOSEOUT-PASS-10-2026-06-18.md",
+    "checkpoint_commit": "46cb0d53",
+    "checkpoint_summary": "The lane is now closed at 100 percent because live owner-state absorption proves the old 73 percent blocker model was stale: DiscordOS owns live runtime/publication/feedback surfaces, feedback cutover is proof-closed, Fitness interaction handling is decomposed into named domain dispatch plus an explicit DiscordOS transfer seam, and the remaining Fitness routes are explicit retained seams rather than hidden mixed-runtime ambiguity.",
     "governing_receipts": [
       "docs/ops/STACK-LANE-0-TRUTH-MAP-2026-05-22.md",
       "docs/ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-2026-05-24.md",
@@ -65,24 +68,31 @@
       "docs/ops/DEPENDENCY-UNTANGLING-REPO-BOOTSTRAP-AND-EXTRACTION-DEPENDENCY-FAMILY-SHAPING-PASS-6-2026-05-29.md",
       "docs/ops/DEPENDENCY-UNTANGLING-CONTINUITY-MANIFEST-REFRESH-AND-RATCHET-DECISION-PASS-7-2026-05-29.md",
       "docs/ops/DEPENDENCY-UNTANGLING-VERIFICATION-BRIDGE-SEAM-EXTERNAL-SESSION-BOUNDARY-RECONCILIATION-PASS-8-2026-06-02.md",
-      "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-POST-INSTALL-CODEX-CHROME-BRIDGE-TIMEOUT-BOUNDARY-RECEIPT-2026-06-01.md"
+      "docs/ops/ATLAS-OWNED-REPO-NAMING-GITHUB-REMOTE-CANONICALIZATION-CLOSEOUT-2026-06-12.md",
+      "docs/ops/VISION-FUTURE-ALIGNMENT-LIVE-POLL-SURFACE-ABSORPTION-FINAL-CLOSEOUT-PASS-5-2026-06-18.md",
+      "docs/ops/DEPENDENCY-UNTANGLING-CONTINUITY-MANIFEST-FRESHNESS-RECHECK-AND-RESTART-TRUTH-RATCHET-PASS-9-2026-06-18.md",
+      "docs/ops/DEPENDENCY-UNTANGLING-LIVE-OWNER-SURFACE-ABSORPTION-FINAL-CLOSEOUT-PASS-10-2026-06-18.md"
     ],
     "owner_truth_surfaces": [
       {
-        "path": "docs/ops/DEPENDENCY-UNTANGLING-CONTINUITY-MANIFEST-REFRESH-AND-RATCHET-DECISION-PASS-7-2026-05-29.md",
-        "role": "current exact refresh-and-ratchet restart surface"
+        "path": "docs/ops/DEPENDENCY-UNTANGLING-LIVE-OWNER-SURFACE-ABSORPTION-FINAL-CLOSEOUT-PASS-10-2026-06-18.md",
+        "role": "current exact lane closeout surface"
       },
       {
-        "path": "docs/ops/DISCORD-OS-POST-BOOTSTRAP-CODE-INVENTORY-2026-05-25.md",
-        "role": "strongest current concrete coupling inventory"
+        "path": "repos/DiscordOS/docs/ops/discordos-live-cutover-proof-capture-2026-06-12.md",
+        "role": "current live cutover proof and traffic-moved source truth"
       },
       {
-        "path": "docs/ops/DEPENDENCY-UNTANGLING-REPO-BOOTSTRAP-AND-EXTRACTION-DEPENDENCY-FAMILY-SHAPING-PASS-6-2026-05-29.md",
-        "role": "upstream exact repo-bootstrap-and-extraction-family restart surface"
+        "path": "repos/DiscordOS/docs/README.md",
+        "role": "current retained-boundary statement for live DiscordOS ownership and no Fitness product-code migration"
       },
       {
         "path": "docs/ops/DEPENDENCY-UNTANGLING-VERIFICATION-BRIDGE-SEAM-EXTERNAL-SESSION-BOUNDARY-RECONCILIATION-PASS-8-2026-06-02.md",
-        "role": "current exact seam-boundary reconciliation surface"
+        "role": "current retained verification-bridge seam boundary"
+      },
+      {
+        "path": "repos/fawxzzy-fitness/src/app/api/discord/interactions/route.ts",
+        "role": "current named-domain dispatch and explicit DiscordOS transfer seam source truth"
       },
       {
         "path": "docs/ops/STACK-LANE-0-TRUTH-MAP-2026-05-22.md",
@@ -107,43 +117,31 @@
         "role": "manifest-backed breadth admission proof"
       },
       {
-        "path": "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-POST-INSTALL-CODEX-CHROME-BRIDGE-TIMEOUT-BOUNDARY-RECEIPT-2026-06-01.md",
-        "role": "owner-side proof that the active verification-bridge blocker is external/session-scoped rather than repo/runtime-scoped"
+        "path": "docs/atlas-book/01-current-state.md",
+        "role": "current stack-level absorbed owner-truth projection"
       }
     ],
     "blocked_or_gated_work": [
       {
-        "item": "verification bridge seam now stops at external/session-scoped bridge state",
-        "requirement": "blocked while the owner-side post-install proof lane still depends on a live Codex-to-Chrome bridge that is responsive in-session; do not reopen Fitness repo/runtime repair or count naming cleanup as progress against this seam unless a direct path dependency changes"
-      },
-      {
-        "item": "env/runtime ownership split remains unexecuted",
-        "requirement": "blocked while the six frozen ownership classes remain planning-owned rather than moved into durable owner lanes"
-      },
-      {
-        "item": "runtime cutover remains unexecuted",
-        "requirement": "blocked while dual-run proof, bounded live slice cutover, retargeting, and rollback-safe observation remain shaped stages rather than completed runtime changes"
-      },
-      {
-        "item": "repo extraction remains unexecuted",
-        "requirement": "blocked while route decomposition, low-risk utility extraction, domain extraction order, and explicit no-move-yet boundaries remain shaped extraction doctrine rather than executed repo-local moves"
+        "item": "reopening this hidden-coupling family",
+        "requirement": "only if one new hidden cross-repo dependency appears, one retained seam stops being explicit or governed, or one owner change reintroduces mixed-runtime ambiguity"
       }
     ],
     "next_package_ladder": [
       {
-        "package": "No immediate Dependency Untangling docs-only follow-on packet",
-        "mode": "hold-flat lane posture",
-        "reason": "the lane now incorporates the distinct restart-truth change created by the owner-side post-install bridge-timeout boundary, so the docs-only ladder should stay closed again until a distinct execution-readiness, execution-authorization, or fresh seam-boundary change is explicit"
+        "package": "No immediate Dependency Untangling follow-on packet",
+        "mode": "closed ratchet",
+        "reason": "the remaining cross-repo seams are now explicit retained boundaries, so future repo extraction or Discord feature growth should open as new owner scope rather than continuation of this lane"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/DEPENDENCY-UNTANGLING-VERIFICATION-BRIDGE-SEAM-EXTERNAL-SESSION-BOUNDARY-RECONCILIATION-PASS-8-2026-06-02.md",
-    "freshness_checked_at": "2026-06-02T00:00:00Z",
-    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture now match the refreshed lane state after the verification-bridge seam was reclassified away from repo/runtime repair and into an explicit external/session boundary.",
+    "freshness_checked_receipt": "docs/ops/DEPENDENCY-UNTANGLING-LIVE-OWNER-SURFACE-ABSORPTION-FINAL-CLOSEOUT-PASS-10-2026-06-18.md",
+    "freshness_checked_at": "2026-06-18T21:04:53-04:00",
+    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture now match current June 18 durable truth: the old 73 percent blocker model is retired as stale projection, live DiscordOS runtime/publication/feedback ownership is absorbed, and the remaining Fitness routes are governed retained seams rather than hidden dependency debt.",
     "marker_posture": [
       {
         "marker": "Dependency Untangling",
-        "percent": 72,
+        "percent": 100,
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ]

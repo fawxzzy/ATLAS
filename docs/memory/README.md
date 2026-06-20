@@ -108,6 +108,10 @@ They should not:
 - copy full receipt bodies
 - become a parallel mutable truth store
 
+Continuity source-inventory rule:
+
+- when a raw continuity source already has an exact reviewed derivative or dedicated promotion-safe summary, mark the raw item `superseded` with `superseded_by` instead of leaving already-resolved review debt in `pending_review`
+
 Current seeded manifest set:
 
 - `docs/memory/initiatives/continuity-manifest-durable-context-externalization.json`
@@ -119,11 +123,28 @@ Current seeded manifest set:
 - `docs/memory/initiatives/continuity-manifest-atlas-owned-repo-naming-canonicalization.json`
 - `docs/memory/initiatives/continuity-manifest-dependency-untangling.json`
 - `docs/memory/initiatives/continuity-manifest-inventory-and-truth-map.json`
+- `docs/memory/initiatives/continuity-manifest-truth-map-and-atlas-book.json`
 - `docs/memory/initiatives/continuity-manifest-knowledge-capture-transfer.json`
 - `docs/memory/initiatives/continuity-manifest-stack-readiness.json`
+- `docs/memory/initiatives/continuity-manifest-ai-repetition-to-automation-pipeline.json`
+- `docs/memory/initiatives/continuity-manifest-ai-long-run-batch-orchestration.json`
+- `docs/memory/initiatives/continuity-manifest-cortex-readiness.json`
+- `docs/memory/initiatives/continuity-manifest-playbook-everywhere-cortex-interface.json`
 - `docs/memory/initiatives/continuity-manifest-post-convergence-lane-split-readiness.json`
+- `docs/memory/initiatives/continuity-manifest-vision-future-alignment.json`
 
 These seeded manifests are manifest-backed only while their freshness state remains current.
+
+Machine-readable continuity surfaces for the seeded set:
+
+- CLI: `python ops/atlas/continuity_manifest_health.py`
+- Awareness slice: `continuity_initiative_manifest_health`
+- CLI: `python ops/atlas/continuity_open_marker_manifest_coverage.py`
+- Awareness slice: `continuity_open_marker_manifest_coverage`
+- CLI: `python ops/atlas/continuity_open_marker_restart_index.py`
+- Awareness slice: `continuity_open_marker_restart_index`
+- CLI: `python ops/atlas/continuity_maintained_manifest_restart_index.py`
+- Awareness slice: `continuity_maintained_manifest_restart_index`
 
 Refresh passes should either:
 

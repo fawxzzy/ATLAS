@@ -1,0 +1,167 @@
+{
+  "contract_version": "atlas.initiative.v1",
+  "id": "continuity-manifest-truth-map-and-atlas-book",
+  "title": "Continuity Manifest Truth Map And ATLAS Book",
+  "summary": "Active ATLAS-root retrieval map for the Truth Map & ATLAS Book lane.",
+  "status": "active",
+  "owner": "stack-root",
+  "created_at": "2026-06-19T00:00:00Z",
+  "updated_at": "2026-06-19T09:00:00Z",
+  "related_plan_refs": [],
+  "related_decision_refs": [],
+  "related_hypothesis_refs": [],
+  "related_session_refs": [],
+  "related_attention_refs": [],
+  "proposed_next_session_refs": [],
+  "evidence_refs": [
+    "docs/atlas-book/01-current-state.md",
+    "docs/atlas-book/02-lanes-and-markers.md",
+    "docs/atlas-book/05-receipt-index.md",
+    "docs/atlas-book/11-system-map-graph.md",
+    "docs/atlas-book/12-restart-and-handoff-guide.md",
+    "docs/atlas-book/13-vision-and-endgames.md",
+    "docs/memory/README.md",
+    "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-MARKER-SCARCITY-AND-CLOSED-LADDER-CARRY-FORWARD-HYGIENE-PASS-3-2026-05-29.md",
+    "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-POST-INVENTORY-CLOSEOUT-CLUSTER-PROJECTION-REFRESH-PASS-4-2026-06-02.md",
+    "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-JUNE-12-POST-INVENTORY-PROJECTION-REFRESH-PASS-5-2026-06-12.md",
+    "docs/ops/INVENTORY-AND-TRUTH-MAP-JUNE-18-AND-19-CLOSEOUT-CLUSTER-CANONICAL-PLACEMENT-PASS-10-2026-06-19.md",
+    "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-JUNE-18-AND-19-PROJECTION-REFRESH-AND-CONTINUITY-MANIFEST-SEED-PASS-6-2026-06-19.md",
+    "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTION-CRITERIA-OWNER-SURFACE-ADMISSION-PASS-463-2026-06-19.md",
+    "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-MACHINE-READABLE-AI-LONG-RUN-CURRENT-PACKET-BASIS-REPAIR-PASS-7-2026-06-19.md",
+    "docs/ops/INITIATIVE-CONTINUITY-MANIFEST-HEALTH-WIDENING-AND-ACTIVE-CONTINUITY-LANE-RATCHET-2026-06-19.md",
+    "docs/ops/INITIATIVE-CONTINUITY-MANIFEST-HEALTH-ZERO-WARNING-CLOSEOUT-AND-ACTIVE-CONTINUITY-LANE-RATCHET-2026-06-19.md",
+    "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md",
+    "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md",
+    "docs/ops/CORTEX-READINESS-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md",
+    "docs/ops/OPEN-MARKER-MANIFEST-COVERAGE-CLOSEOUT-AND-ACTIVE-CONTINUITY-LANE-RATCHET-2026-06-19.md",
+    "docs/ops/OPEN-MARKER-RESTART-INDEX-CLOSEOUT-AND-ACTIVE-CONTINUITY-LANE-RATCHET-2026-06-19.md"
+  ],
+  "supersedes": [],
+  "superseded_by": [],
+  "metadata": {
+    "artifact_kind": "continuity_manifest",
+    "lane_id": "truth-map-and-atlas-book",
+    "scope_class": "atlas-root-governance",
+    "current_checkpoint_receipt": "docs/ops/OPEN-MARKER-RESTART-INDEX-CLOSEOUT-AND-ACTIVE-CONTINUITY-LANE-RATCHET-2026-06-19.md",
+    "checkpoint_commit": "pending-closeout-publication",
+    "checkpoint_summary": "The lane now sits at 97 percent because the June 18 and 19 inventory absorption still mirrors coherently across the canonical Book surfaces, the AI Long-Run current-packet basis drift remains cleared, the seeded initiative continuity-manifest set remains clean at 18 of 18 ok with zero warnings and zero errors, all 8 of 8 eligible still-open markers are manifest-backed, and all 8 of 8 eligible still-open markers are now restart-ready from one machine-readable index.",
+    "governing_receipts": [
+      "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-MARKER-SCARCITY-AND-CLOSED-LADDER-CARRY-FORWARD-HYGIENE-PASS-3-2026-05-29.md",
+      "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-POST-INVENTORY-CLOSEOUT-CLUSTER-PROJECTION-REFRESH-PASS-4-2026-06-02.md",
+      "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-JUNE-12-POST-INVENTORY-PROJECTION-REFRESH-PASS-5-2026-06-12.md",
+      "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-JUNE-18-AND-19-PROJECTION-REFRESH-AND-CONTINUITY-MANIFEST-SEED-PASS-6-2026-06-19.md",
+      "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-MACHINE-READABLE-AI-LONG-RUN-CURRENT-PACKET-BASIS-REPAIR-PASS-7-2026-06-19.md",
+      "docs/ops/INITIATIVE-CONTINUITY-MANIFEST-HEALTH-WIDENING-AND-ACTIVE-CONTINUITY-LANE-RATCHET-2026-06-19.md",
+      "docs/ops/INITIATIVE-CONTINUITY-MANIFEST-HEALTH-ZERO-WARNING-CLOSEOUT-AND-ACTIVE-CONTINUITY-LANE-RATCHET-2026-06-19.md",
+      "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md",
+      "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md",
+      "docs/ops/CORTEX-READINESS-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md",
+      "docs/ops/OPEN-MARKER-MANIFEST-COVERAGE-CLOSEOUT-AND-ACTIVE-CONTINUITY-LANE-RATCHET-2026-06-19.md",
+      "docs/ops/OPEN-MARKER-RESTART-INDEX-CLOSEOUT-AND-ACTIVE-CONTINUITY-LANE-RATCHET-2026-06-19.md"
+    ],
+    "owner_truth_surfaces": [
+      {
+        "path": "docs/ops/OPEN-MARKER-RESTART-INDEX-CLOSEOUT-AND-ACTIVE-CONTINUITY-LANE-RATCHET-2026-06-19.md",
+        "role": "current exact eligible-open-marker restart-index closeout and ratchet surface"
+      },
+      {
+        "path": "docs/ops/OPEN-MARKER-MANIFEST-COVERAGE-CLOSEOUT-AND-ACTIVE-CONTINUITY-LANE-RATCHET-2026-06-19.md",
+        "role": "current exact eligible-open-marker coverage closeout and ratchet surface"
+      },
+      {
+        "path": "docs/ops/INITIATIVE-CONTINUITY-MANIFEST-HEALTH-ZERO-WARNING-CLOSEOUT-AND-ACTIVE-CONTINUITY-LANE-RATCHET-2026-06-19.md",
+        "role": "current exact initiative-manifest health zero-warning closeout and ratchet surface"
+      },
+      {
+        "path": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md",
+        "role": "current exact continuity-manifest widening and ratchet surface"
+      },
+      {
+        "path": "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md",
+        "role": "current exact continuity-manifest widening and ratchet surface"
+      },
+      {
+        "path": "docs/ops/CORTEX-READINESS-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md",
+        "role": "current exact continuity-manifest widening and ratchet surface"
+      },
+      {
+        "path": "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-JUNE-18-AND-19-PROJECTION-REFRESH-AND-CONTINUITY-MANIFEST-SEED-PASS-6-2026-06-19.md",
+        "role": "current upstream lane refresh and manifest-seed surface"
+      },
+      {
+        "path": "docs/ops/INVENTORY-AND-TRUTH-MAP-JUNE-18-AND-19-CLOSEOUT-CLUSTER-CANONICAL-PLACEMENT-PASS-10-2026-06-19.md",
+        "role": "current upstream inventory placement boundary"
+      },
+      {
+        "path": "docs/atlas-book/02-lanes-and-markers.md",
+        "role": "current marker and continuity-substrate truth"
+      },
+      {
+        "path": "docs/atlas-book/01-current-state.md",
+        "role": "current posture summary truth"
+      },
+      {
+        "path": "docs/atlas-book/11-system-map-graph.md",
+        "role": "current machine-readable lane-state projection truth"
+      },
+      {
+        "path": "docs/atlas-book/12-restart-and-handoff-guide.md",
+        "role": "current restart routing truth"
+      },
+      {
+        "path": "docs/atlas-book/13-vision-and-endgames.md",
+        "role": "current endgame and next-package truth"
+      }
+    ],
+    "verification_adoption_surfaces": [
+      {
+        "path": "docs/atlas-book/05-receipt-index.md",
+        "role": "receipt spine"
+      },
+      {
+        "path": "docs/memory/README.md",
+        "role": "manifest-backed continuity doctrine surface"
+      },
+      {
+        "path": "ops/atlas/continuity_manifest_health.py",
+        "role": "machine-readable initiative continuity health read"
+      },
+      {
+        "path": "ops/atlas/continuity_open_marker_manifest_coverage.py",
+        "role": "machine-readable eligible-open-marker manifest coverage read"
+      },
+      {
+        "path": "ops/atlas/continuity_open_marker_restart_index.py",
+        "role": "machine-readable eligible-open-marker restart index"
+      }
+    ],
+    "blocked_or_gated_work": [
+      {
+        "item": "broader book projection cleanup",
+        "requirement": "blocked until a distinct current-state drift, broader normalization cluster, or wider restart-surface cleanup is explicitly selected rather than implied by the current projection, basis-repair, and open-marker coverage closeout passes"
+      },
+      {
+        "item": "higher marker movement above the current refresh-backed ratchet",
+        "requirement": "blocked until owner truth widens, continuity automation expands materially beyond the current fully clean 18-manifest health plus 8-of-8 eligible-open-marker coverage plus 8-of-8 restart-index surface, or a new projection blocker class is cleared"
+      }
+    ],
+    "next_package_ladder": [
+      {
+        "package": "No immediate Truth Map & ATLAS Book docs-only follow-on packet",
+        "mode": "hold-flat after open-marker restart-index closeout",
+        "reason": "the current projection drift, manifest-gap class, current-packet basis drift, seeded initiative manifest-health warning/error class, eligible-open-marker coverage gap, and eligible-open-marker restart-index gap are now cleared at 18 of 18 plus 8 of 8 plus 8 of 8; reopen only with distinct projection drift, marker pressure, owner-truth widening, or broader continuity automation"
+      }
+    ],
+    "freshness_state": "manifest-backed",
+    "freshness_checked_receipt": "docs/ops/OPEN-MARKER-RESTART-INDEX-CLOSEOUT-AND-ACTIVE-CONTINUITY-LANE-RATCHET-2026-06-19.md",
+    "freshness_checked_at": "2026-06-19T09:00:00Z",
+    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture now match the refreshed June 18 and 19 Book-side projection, the cleared machine-readable AI Long-Run current-packet basis drift, the initiative manifest-health surface at 18 ok / 0 warning / 0 error, the eligible-open-marker coverage surface at 8 of 8 manifest-backed, and the eligible-open-marker restart index at 8 of 8 restart-ready.",
+    "marker_posture": [
+      {
+        "marker": "Truth Map & ATLAS Book",
+        "percent": 97,
+        "source": "docs/atlas-book/02-lanes-and-markers.md"
+      }
+    ]
+  }
+}

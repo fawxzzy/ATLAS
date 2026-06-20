@@ -7,14 +7,30 @@ from pathlib import Path
 import re
 from typing import Any
 
-from ops._atlas import atlas_root
+from ops._atlas import atlas_relative, atlas_root
 
 MANIFEST_SCHEMA_VERSION = "atlas.continuity.source.manifest.v1"
+CONTINUITY_HANDOFF_SCHEMA_VERSION = "atlas.continuity.handoff.v1"
 CONTINUITY_MANIFEST_PATH = "data/imports/knowledge/continuity/harvest-manifest.json"
 PLAYBOOK_INITIATIVE_REF = "initiative-playbook-convergence-and-continuity"
 PLAYBOOK_PLAN_REF = "wave-9b-playbook-convergence-and-continuity"
 SOURCE_TEXT_LIMIT = 40000
 HISTORICAL_QUERY_HIT_LIMIT = 5
+INITIATIVE_CONTINUITY_MANIFEST_GLOB = "docs/memory/initiatives/continuity-manifest-*.json"
+_BOOK_MARKER_LINE_PATTERN = re.compile(r"^- ([^:]+): `(\d+)%`$")
+_CONTINUITY_HANDOFF_SOURCE_CHANNELS = {"codex", "chatgpt", "mixed", "manual"}
+_CONTINUITY_HANDOFF_PROMOTION_TARGETS = {"initiative", "working_memory", "plan", "knowledge", "receipt"}
+_CONTINUITY_HANDOFF_EVIDENCE_KINDS = {
+    "code_change",
+    "test",
+    "manual_observation",
+    "repo_doc",
+    "runtime_artifact",
+    "chat_summary",
+}
+_CONTINUITY_HANDOFF_DECISION_STATUSES = {"accepted", "proposed", "deferred", "rejected"}
+_CONTINUITY_HANDOFF_PRIORITIES = {"p0", "p1", "p2", "p3"}
+_CONTINUITY_HANDOFF_RISK_SEVERITIES = {"low", "medium", "high", "critical"}
 
 _STOPWORDS = {
     "a",
@@ -220,6 +236,7 @@ def _source_entry(
     source_summary: str,
     source_type: str | None = None,
     notes: list[str] | None = None,
+    superseded_by: list[str] | None = None,
 ) -> dict[str, Any]:
     artifact_type = _artifact_type(source_path, path_kind=path_kind)
     return {
@@ -239,6 +256,7 @@ def _source_entry(
         "promotion_targets": promotion_targets,
         "source_summary": source_summary,
         "notes": notes or [],
+        "superseded_by": superseded_by or [],
     }
 
 
@@ -308,6 +326,235 @@ def validate_continuity_source_manifest(payload: dict[str, Any]) -> list[str]:
             errors.append(f"sources[{index}].trust_posture is invalid.")
         if item.get("status") not in valid_status:
             errors.append(f"sources[{index}].status is invalid.")
+        if "superseded_by" in item:
+            superseded_by = item.get("superseded_by")
+            if not isinstance(superseded_by, list) or any(
+                not isinstance(value, str) or not value.strip() for value in superseded_by
+            ):
+                errors.append(f"sources[{index}].superseded_by must be an array of non-empty strings.")
+    return errors
+
+
+def _is_non_empty_string(value: Any) -> bool:
+    return isinstance(value, str) and bool(value.strip())
+
+
+def _validate_handoff_string_list(
+    payload: dict[str, Any],
+    key: str,
+    *,
+    errors: list[str],
+    required: bool = True,
+) -> list[str]:
+    value = payload.get(key)
+    if value is None and not required:
+        return []
+    if not isinstance(value, list):
+        errors.append(f"{key} must be an array.")
+        return []
+    normalized: list[str] = []
+    for index, item in enumerate(value):
+        if not _is_non_empty_string(item):
+            errors.append(f"{key}[{index}] must be a non-empty string.")
+            continue
+        normalized.append(str(item))
+    return normalized
+
+
+def validate_continuity_handoff(payload: dict[str, Any]) -> list[str]:
+    errors: list[str] = []
+    if not isinstance(payload, dict):
+        return ["Continuity handoff must be a JSON object."]
+
+    required_fields = (
+        "contract_version",
+        "artifact_id",
+        "created_at",
+        "source_channel",
+        "summary",
+        "repo_refs",
+        "initiative_refs",
+        "durable_facts",
+        "decisions",
+        "next_actions",
+        "open_questions",
+        "risks",
+        "promotion_targets",
+        "transcript_role",
+        "transcript_refs",
+    )
+    for field in required_fields:
+        if field not in payload:
+            errors.append(f"Missing top-level field: {field}")
+    if errors:
+        return errors
+
+    if payload.get("contract_version") != CONTINUITY_HANDOFF_SCHEMA_VERSION:
+        errors.append(f"contract_version must be '{CONTINUITY_HANDOFF_SCHEMA_VERSION}'.")
+    if not _is_non_empty_string(payload.get("artifact_id")):
+        errors.append("artifact_id must be a non-empty string.")
+    created_at = payload.get("created_at")
+    if not _is_non_empty_string(created_at):
+        errors.append("created_at must be an ISO 8601 timestamp.")
+    else:
+        try:
+            datetime.fromisoformat(str(created_at).replace("Z", "+00:00"))
+        except ValueError:
+            errors.append("created_at must be an ISO 8601 timestamp.")
+    if payload.get("source_channel") not in _CONTINUITY_HANDOFF_SOURCE_CHANNELS:
+        errors.append(
+            "source_channel must be one of: "
+            + ", ".join(sorted(_CONTINUITY_HANDOFF_SOURCE_CHANNELS))
+            + "."
+        )
+    if not _is_non_empty_string(payload.get("summary")):
+        errors.append("summary must be a non-empty string.")
+
+    repo_refs = _validate_handoff_string_list(payload, "repo_refs", errors=errors)
+    initiative_refs = _validate_handoff_string_list(payload, "initiative_refs", errors=errors)
+    if not repo_refs and not initiative_refs:
+        errors.append("At least one repo_ref or initiative_ref is required.")
+
+    durable_facts = payload.get("durable_facts")
+    if not isinstance(durable_facts, list) or not durable_facts:
+        errors.append("durable_facts must be a non-empty array.")
+    elif isinstance(durable_facts, list):
+        for index, item in enumerate(durable_facts):
+            if not isinstance(item, dict):
+                errors.append(f"durable_facts[{index}] must be an object.")
+                continue
+            if not _is_non_empty_string(item.get("id")):
+                errors.append(f"durable_facts[{index}].id must be a non-empty string.")
+            if not _is_non_empty_string(item.get("statement")):
+                errors.append(f"durable_facts[{index}].statement must be a non-empty string.")
+            confidence = item.get("confidence")
+            if confidence is not None and confidence not in {"low", "medium", "high"}:
+                errors.append(f"durable_facts[{index}].confidence must be low, medium, or high.")
+            evidence_kind = item.get("evidence_kind")
+            if evidence_kind is not None and evidence_kind not in _CONTINUITY_HANDOFF_EVIDENCE_KINDS:
+                errors.append(
+                    f"durable_facts[{index}].evidence_kind must be one of: "
+                    + ", ".join(sorted(_CONTINUITY_HANDOFF_EVIDENCE_KINDS))
+                    + "."
+                )
+            evidence_refs = item.get("evidence_refs")
+            if evidence_refs is not None and not isinstance(evidence_refs, list):
+                errors.append(f"durable_facts[{index}].evidence_refs must be an array when present.")
+            elif isinstance(evidence_refs, list):
+                for evidence_index, evidence_ref in enumerate(evidence_refs):
+                    if not _is_non_empty_string(evidence_ref):
+                        errors.append(
+                            f"durable_facts[{index}].evidence_refs[{evidence_index}] must be a non-empty string."
+                        )
+            if item.get("promotion_target") not in _CONTINUITY_HANDOFF_PROMOTION_TARGETS:
+                errors.append(
+                    f"durable_facts[{index}].promotion_target must be one of: "
+                    + ", ".join(sorted(_CONTINUITY_HANDOFF_PROMOTION_TARGETS))
+                    + "."
+                )
+
+    decisions = payload.get("decisions")
+    if not isinstance(decisions, list):
+        errors.append("decisions must be an array.")
+    elif isinstance(decisions, list):
+        for index, item in enumerate(decisions):
+            if not isinstance(item, dict):
+                errors.append(f"decisions[{index}] must be an object.")
+                continue
+            if not _is_non_empty_string(item.get("id")):
+                errors.append(f"decisions[{index}].id must be a non-empty string.")
+            if not _is_non_empty_string(item.get("statement")):
+                errors.append(f"decisions[{index}].statement must be a non-empty string.")
+            if item.get("status") not in _CONTINUITY_HANDOFF_DECISION_STATUSES:
+                errors.append(
+                    f"decisions[{index}].status must be one of: "
+                    + ", ".join(sorted(_CONTINUITY_HANDOFF_DECISION_STATUSES))
+                    + "."
+                )
+
+    next_actions = payload.get("next_actions")
+    if not isinstance(next_actions, list):
+        errors.append("next_actions must be an array.")
+    elif isinstance(next_actions, list):
+        for index, item in enumerate(next_actions):
+            if not isinstance(item, dict):
+                errors.append(f"next_actions[{index}] must be an object.")
+                continue
+            if not _is_non_empty_string(item.get("id")):
+                errors.append(f"next_actions[{index}].id must be a non-empty string.")
+            if not _is_non_empty_string(item.get("title")):
+                errors.append(f"next_actions[{index}].title must be a non-empty string.")
+            acceptance = item.get("acceptance")
+            if acceptance is not None and not isinstance(acceptance, list):
+                errors.append(f"next_actions[{index}].acceptance must be an array when present.")
+            elif isinstance(acceptance, list):
+                for acceptance_index, acceptance_item in enumerate(acceptance):
+                    if not _is_non_empty_string(acceptance_item):
+                        errors.append(
+                            f"next_actions[{index}].acceptance[{acceptance_index}] must be a non-empty string."
+                        )
+            priority = item.get("priority")
+            if priority is not None and priority not in _CONTINUITY_HANDOFF_PRIORITIES:
+                errors.append(
+                    f"next_actions[{index}].priority must be one of: "
+                    + ", ".join(sorted(_CONTINUITY_HANDOFF_PRIORITIES))
+                    + "."
+                )
+
+    open_questions = payload.get("open_questions")
+    if not isinstance(open_questions, list):
+        errors.append("open_questions must be an array.")
+    elif isinstance(open_questions, list):
+        for index, item in enumerate(open_questions):
+            if not isinstance(item, dict):
+                errors.append(f"open_questions[{index}] must be an object.")
+                continue
+            if not _is_non_empty_string(item.get("id")):
+                errors.append(f"open_questions[{index}].id must be a non-empty string.")
+            if not _is_non_empty_string(item.get("question")):
+                errors.append(f"open_questions[{index}].question must be a non-empty string.")
+            blocking = item.get("blocking")
+            if blocking is not None and not isinstance(blocking, bool):
+                errors.append(f"open_questions[{index}].blocking must be a boolean when present.")
+
+    risks = payload.get("risks")
+    if not isinstance(risks, list):
+        errors.append("risks must be an array.")
+    elif isinstance(risks, list):
+        for index, item in enumerate(risks):
+            if not isinstance(item, dict):
+                errors.append(f"risks[{index}] must be an object.")
+                continue
+            if not _is_non_empty_string(item.get("id")):
+                errors.append(f"risks[{index}].id must be a non-empty string.")
+            if not _is_non_empty_string(item.get("statement")):
+                errors.append(f"risks[{index}].statement must be a non-empty string.")
+            if item.get("severity") not in _CONTINUITY_HANDOFF_RISK_SEVERITIES:
+                errors.append(
+                    f"risks[{index}].severity must be one of: "
+                    + ", ".join(sorted(_CONTINUITY_HANDOFF_RISK_SEVERITIES))
+                    + "."
+                )
+
+    promotion_targets = _validate_handoff_string_list(payload, "promotion_targets", errors=errors)
+    invalid_targets = [
+        item for item in promotion_targets if item not in _CONTINUITY_HANDOFF_PROMOTION_TARGETS
+    ]
+    if invalid_targets:
+        errors.append(
+            "promotion_targets may contain only: "
+            + ", ".join(sorted(_CONTINUITY_HANDOFF_PROMOTION_TARGETS))
+            + "."
+        )
+
+    if payload.get("transcript_role") != "trace_only":
+        errors.append("transcript_role must be 'trace_only'.")
+    _validate_handoff_string_list(payload, "transcript_refs", errors=errors)
+
+    metadata = payload.get("metadata")
+    if metadata is not None and not isinstance(metadata, dict):
+        errors.append("metadata must be an object when present.")
+
     return errors
 
 
@@ -863,10 +1110,741 @@ def build_historical_query_coverage(*, root: Path | None = None) -> dict[str, An
     }
 
 
+def _load_book_marker_posture(*, root: Path) -> dict[str, int]:
+    marker_path = root / "docs" / "atlas-book" / "02-lanes-and-markers.md"
+    if not marker_path.exists():
+        return {}
+    markers: dict[str, int] = {}
+    for raw_line in marker_path.read_text(encoding="utf-8").splitlines():
+        match = _BOOK_MARKER_LINE_PATTERN.match(raw_line.strip())
+        if not match:
+            continue
+        marker = match.group(1).replace("`", "").strip()
+        markers[marker] = int(match.group(2))
+    return markers
+
+
+def _load_open_marker_groups(*, root: Path) -> list[dict[str, Any]]:
+    marker_path = root / "docs" / "atlas-book" / "02-lanes-and-markers.md"
+    if not marker_path.exists():
+        return []
+
+    section: str | None = None
+    supporting_group: str | None = None
+    items: list[dict[str, Any]] = []
+    for raw_line in marker_path.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if line == "## Active Front-Page Marker Table":
+            section = "active_front_page"
+            supporting_group = None
+            continue
+        if line == "## Supporting Open Markers":
+            section = "supporting_open"
+            supporting_group = None
+            continue
+        if line.startswith("## "):
+            section = None
+            supporting_group = None
+            continue
+        if section == "supporting_open" and line.startswith("### "):
+            supporting_group = line.removeprefix("### ").strip()
+            continue
+
+        match = _BOOK_MARKER_LINE_PATTERN.match(line)
+        if not match or section is None:
+            continue
+
+        marker = match.group(1).replace("`", "").strip()
+        percent = int(match.group(2))
+        items.append(
+            {
+                "marker": marker,
+                "percent": percent,
+                "section": section,
+                "group": supporting_group if section == "supporting_open" else "front_page",
+            }
+        )
+    return items
+
+
+def _path_list_health(
+    values: Any,
+    *,
+    root: Path,
+    field_name: str,
+    require_non_empty: bool,
+) -> tuple[list[str], list[str]]:
+    errors: list[str] = []
+    refs: list[str] = []
+    if not isinstance(values, list):
+        return [f"{field_name} must be an array of path refs."], refs
+    for index, value in enumerate(values):
+        if not isinstance(value, str) or not value.strip():
+            errors.append(f"{field_name}[{index}] must be a non-empty string.")
+            continue
+        ref = value.strip()
+        refs.append(ref)
+        if not _path_exists(ref, root=root):
+            errors.append(f"{field_name}[{index}] does not exist: {ref}")
+    if require_non_empty and not refs:
+        errors.append(f"{field_name} must not be empty.")
+    return errors, refs
+
+
+def _surface_list_health(
+    values: Any,
+    *,
+    root: Path,
+    field_name: str,
+) -> tuple[list[str], list[dict[str, str]]]:
+    errors: list[str] = []
+    surfaces: list[dict[str, str]] = []
+    if not isinstance(values, list):
+        return [f"{field_name} must be an array of surface objects."], surfaces
+    for index, value in enumerate(values):
+        if not isinstance(value, dict):
+            errors.append(f"{field_name}[{index}] must be an object.")
+            continue
+        path_text = value.get("path")
+        role_text = value.get("role")
+        if not isinstance(path_text, str) or not path_text.strip():
+            errors.append(f"{field_name}[{index}].path must be a non-empty string.")
+            continue
+        if not isinstance(role_text, str) or not role_text.strip():
+            errors.append(f"{field_name}[{index}].role must be a non-empty string.")
+            continue
+        normalized = {"path": path_text.strip(), "role": role_text.strip()}
+        surfaces.append(normalized)
+        if not _path_exists(normalized["path"], root=root):
+            errors.append(f"{field_name}[{index}].path does not exist: {normalized['path']}")
+    if not surfaces:
+        errors.append(f"{field_name} must not be empty.")
+    return errors, surfaces
+
+
+def _marker_posture_health(
+    values: Any,
+    *,
+    root: Path,
+    marker_posture: dict[str, int],
+) -> tuple[list[str], list[str], list[dict[str, Any]]]:
+    errors: list[str] = []
+    warnings: list[str] = []
+    items: list[dict[str, Any]] = []
+    if not isinstance(values, list):
+        return [f"metadata.marker_posture must be an array."], warnings, items
+    for index, value in enumerate(values):
+        if not isinstance(value, dict):
+            errors.append(f"metadata.marker_posture[{index}] must be an object.")
+            continue
+        marker = value.get("marker")
+        percent = value.get("percent")
+        source = value.get("source")
+        if not isinstance(marker, str) or not marker.strip():
+            errors.append(f"metadata.marker_posture[{index}].marker must be a non-empty string.")
+            continue
+        if not isinstance(percent, int):
+            errors.append(f"metadata.marker_posture[{index}].percent must be an integer.")
+            continue
+        if not isinstance(source, str) or not source.strip():
+            errors.append(f"metadata.marker_posture[{index}].source must be a non-empty string.")
+            continue
+        normalized = {
+            "marker": marker.strip(),
+            "percent": percent,
+            "source": source.strip(),
+        }
+        items.append(normalized)
+        if not _path_exists(normalized["source"], root=root):
+            errors.append(
+                f"metadata.marker_posture[{index}].source does not exist: {normalized['source']}"
+            )
+        current_percent = marker_posture.get(normalized["marker"])
+        if current_percent is None:
+            errors.append(
+                f"metadata.marker_posture[{index}].marker is not present in the Book marker table: {normalized['marker']}"
+            )
+            continue
+        if current_percent != normalized["percent"]:
+            errors.append(
+                f"metadata.marker_posture[{index}] drift: manifest says {normalized['marker']}={normalized['percent']} but Book says {current_percent}."
+            )
+    if not items:
+        errors.append("metadata.marker_posture must not be empty.")
+    return errors, warnings, items
+
+
+def _initiative_manifest_health_item(path: Path, *, root: Path, marker_posture: dict[str, int]) -> dict[str, Any]:
+    relative_path = atlas_relative(path, root=root)
+    errors: list[str] = []
+    warnings: list[str] = []
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        return {
+            "manifest_id": path.stem,
+            "path": relative_path,
+            "status": "error",
+            "error_count": 1,
+            "warning_count": 0,
+            "errors": [f"manifest could not be parsed as JSON ({exc})"],
+            "warnings": [],
+        }
+    if not isinstance(payload, dict):
+        return {
+            "manifest_id": path.stem,
+            "path": relative_path,
+            "status": "error",
+            "error_count": 1,
+            "warning_count": 0,
+            "errors": ["manifest must be a JSON object"],
+            "warnings": [],
+        }
+
+    manifest_id = str(payload.get("id") or path.stem)
+    if payload.get("contract_version") != "atlas.initiative.v1":
+        errors.append("contract_version must be 'atlas.initiative.v1'.")
+    if not manifest_id.startswith("continuity-manifest-"):
+        errors.append("id must start with 'continuity-manifest-'.")
+    status_value = str(payload.get("status") or "")
+    if status_value not in {"active", "completed"}:
+        warnings.append("status is neither 'active' nor 'completed'.")
+    if str(payload.get("owner") or "") != "stack-root":
+        warnings.append("owner is not 'stack-root'.")
+
+    metadata = payload.get("metadata")
+    if not isinstance(metadata, dict):
+        errors.append("metadata must be an object.")
+        metadata = {}
+    elif str(metadata.get("artifact_kind") or "") != "continuity_manifest":
+        errors.append("metadata.artifact_kind must be 'continuity_manifest'.")
+
+    evidence_errors, evidence_refs = _path_list_health(
+        payload.get("evidence_refs"),
+        root=root,
+        field_name="evidence_refs",
+        require_non_empty=True,
+    )
+    errors.extend(evidence_errors)
+
+    governing_errors, governing_refs = _path_list_health(
+        metadata.get("governing_receipts"),
+        root=root,
+        field_name="metadata.governing_receipts",
+        require_non_empty=True,
+    )
+    errors.extend(governing_errors)
+
+    owner_surface_errors, owner_surfaces = _surface_list_health(
+        metadata.get("owner_truth_surfaces"),
+        root=root,
+        field_name="metadata.owner_truth_surfaces",
+    )
+    errors.extend(owner_surface_errors)
+
+    verification_surface_errors, verification_surfaces = _surface_list_health(
+        metadata.get("verification_adoption_surfaces"),
+        root=root,
+        field_name="metadata.verification_adoption_surfaces",
+    )
+    errors.extend(verification_surface_errors)
+
+    marker_errors, marker_warnings, marker_items = _marker_posture_health(
+        metadata.get("marker_posture"),
+        root=root,
+        marker_posture=marker_posture,
+    )
+    errors.extend(marker_errors)
+    warnings.extend(marker_warnings)
+
+    current_checkpoint_receipt = metadata.get("current_checkpoint_receipt")
+    if not isinstance(current_checkpoint_receipt, str) or not current_checkpoint_receipt.strip():
+        errors.append("metadata.current_checkpoint_receipt must be a non-empty string.")
+    else:
+        current_checkpoint_receipt = current_checkpoint_receipt.strip()
+        if not _path_exists(current_checkpoint_receipt, root=root):
+            errors.append(
+                f"metadata.current_checkpoint_receipt does not exist: {current_checkpoint_receipt}"
+            )
+        if current_checkpoint_receipt not in evidence_refs:
+            errors.append(
+                "metadata.current_checkpoint_receipt must also appear in evidence_refs."
+            )
+        if current_checkpoint_receipt not in governing_refs:
+            warnings.append(
+                "metadata.current_checkpoint_receipt is not listed in metadata.governing_receipts."
+            )
+
+    freshness_checked_receipt = metadata.get("freshness_checked_receipt")
+    if not isinstance(freshness_checked_receipt, str) or not freshness_checked_receipt.strip():
+        errors.append("metadata.freshness_checked_receipt must be a non-empty string.")
+    else:
+        freshness_checked_receipt = freshness_checked_receipt.strip()
+        if not _path_exists(freshness_checked_receipt, root=root):
+            errors.append(
+                f"metadata.freshness_checked_receipt does not exist: {freshness_checked_receipt}"
+            )
+        if freshness_checked_receipt not in evidence_refs:
+            warnings.append(
+                "metadata.freshness_checked_receipt is not listed in evidence_refs."
+            )
+
+    next_package_ladder = metadata.get("next_package_ladder")
+    if not isinstance(next_package_ladder, list) or not next_package_ladder:
+        warnings.append("metadata.next_package_ladder is empty.")
+
+    status = "ok"
+    if errors:
+        status = "error"
+    elif warnings:
+        status = "warning"
+
+    return {
+        "manifest_id": manifest_id,
+        "path": relative_path,
+        "status": status,
+        "error_count": len(errors),
+        "warning_count": len(warnings),
+        "current_checkpoint_receipt": current_checkpoint_receipt,
+        "freshness_checked_receipt": freshness_checked_receipt,
+        "freshness_state": metadata.get("freshness_state"),
+        "marker_posture": marker_items,
+        "owner_truth_surface_count": len(owner_surfaces),
+        "verification_adoption_surface_count": len(verification_surfaces),
+        "errors": errors,
+        "warnings": warnings,
+    }
+
+
+def build_initiative_continuity_manifest_health(*, root: Path | None = None) -> dict[str, Any]:
+    base_root = (root or atlas_root()).resolve()
+    marker_posture = _load_book_marker_posture(root=base_root)
+    items = [
+        _initiative_manifest_health_item(path.resolve(), root=base_root, marker_posture=marker_posture)
+        for path in sorted(base_root.glob(INITIATIVE_CONTINUITY_MANIFEST_GLOB))
+        if path.is_file()
+    ]
+    status_counts = Counter(str(item.get("status") or "unknown") for item in items)
+    overall_status = "ok"
+    if status_counts.get("error", 0) > 0:
+        overall_status = "error"
+    elif status_counts.get("warning", 0) > 0:
+        overall_status = "warning"
+    return {
+        "status": overall_status,
+        "item_count": len(items),
+        "manifest_count": len(items),
+        "ok_count": status_counts.get("ok", 0),
+        "warning_count": status_counts.get("warning", 0),
+        "error_count": status_counts.get("error", 0),
+        "items": items,
+        "marker_table_ref": "docs/atlas-book/02-lanes-and-markers.md",
+        "manifest_glob": INITIATIVE_CONTINUITY_MANIFEST_GLOB,
+    }
+
+
+def build_open_marker_manifest_coverage(*, root: Path | None = None) -> dict[str, Any]:
+    base_root = (root or atlas_root()).resolve()
+    manifest_health = build_initiative_continuity_manifest_health(root=base_root)
+    manifest_items = manifest_health.get("items", [])
+    manifest_by_marker: dict[str, dict[str, Any]] = {}
+    for item in manifest_items:
+        if not isinstance(item, dict):
+            continue
+        for marker_item in item.get("marker_posture", []):
+            if not isinstance(marker_item, dict):
+                continue
+            marker_name = str(marker_item.get("marker") or "").strip()
+            if marker_name and marker_name not in manifest_by_marker:
+                manifest_by_marker[marker_name] = item
+
+    open_marker_groups = _load_open_marker_groups(root=base_root)
+    items: list[dict[str, Any]] = []
+    seen_markers: set[str] = set()
+    for marker_item in open_marker_groups:
+        marker = str(marker_item.get("marker") or "").strip()
+        if not marker or marker in seen_markers:
+            continue
+        seen_markers.add(marker)
+        percent = int(marker_item.get("percent") or 0)
+        section = str(marker_item.get("section") or "")
+        group = str(marker_item.get("group") or "")
+        if percent == 0:
+            items.append(
+                {
+                    "marker": marker,
+                    "percent": percent,
+                    "section": section,
+                    "group": group,
+                    "eligibility": "excluded_zero",
+                    "coverage_status": "not_required",
+                    "manifest_id": None,
+                    "manifest_path": None,
+                }
+            )
+            continue
+        if percent >= 100:
+            items.append(
+                {
+                    "marker": marker,
+                    "percent": percent,
+                    "section": section,
+                    "group": group,
+                    "eligibility": "excluded_closed",
+                    "coverage_status": "not_required",
+                    "manifest_id": None,
+                    "manifest_path": None,
+                }
+            )
+            continue
+
+        manifest_item = manifest_by_marker.get(marker)
+        coverage_status = "missing"
+        manifest_id: str | None = None
+        manifest_path: str | None = None
+        manifest_health_status: str | None = None
+        if manifest_item:
+            manifest_id = str(manifest_item.get("manifest_id") or "")
+            manifest_path = str(manifest_item.get("path") or "")
+            manifest_health_status = str(manifest_item.get("status") or "")
+            if manifest_health_status == "ok":
+                coverage_status = "manifest_backed"
+            elif manifest_health_status == "warning":
+                coverage_status = "manifest_warning"
+            else:
+                coverage_status = "manifest_error"
+
+        items.append(
+            {
+                "marker": marker,
+                "percent": percent,
+                "section": section,
+                "group": group,
+                "eligibility": "eligible_open_marker",
+                "coverage_status": coverage_status,
+                "manifest_id": manifest_id,
+                "manifest_path": manifest_path,
+                "manifest_health_status": manifest_health_status,
+            }
+        )
+
+    counts = Counter(str(item.get("coverage_status") or "unknown") for item in items)
+    eligible_count = sum(1 for item in items if item.get("eligibility") == "eligible_open_marker")
+    covered_count = counts.get("manifest_backed", 0)
+    status = "ok"
+    if counts.get("manifest_error", 0) > 0 or counts.get("missing", 0) > 0:
+        status = "error"
+    elif counts.get("manifest_warning", 0) > 0:
+        status = "warning"
+
+    return {
+        "status": status,
+        "item_count": len(items),
+        "eligible_open_marker_count": eligible_count,
+        "manifest_backed_count": covered_count,
+        "missing_count": counts.get("missing", 0),
+        "warning_count": counts.get("manifest_warning", 0),
+        "error_count": counts.get("manifest_error", 0),
+        "excluded_zero_count": counts.get("not_required", 0),
+        "coverage_percent": 0 if eligible_count == 0 else round((covered_count / eligible_count) * 100, 2),
+        "items": items,
+        "marker_table_ref": "docs/atlas-book/02-lanes-and-markers.md",
+        "manifest_glob": INITIATIVE_CONTINUITY_MANIFEST_GLOB,
+        "health_slice": "continuity_initiative_manifest_health",
+    }
+
+
+def _load_initiative_manifest_bundles(*, root: Path) -> list[dict[str, Any]]:
+    manifest_health = build_initiative_continuity_manifest_health(root=root)
+    manifest_items = manifest_health.get("items", [])
+    bundles: list[dict[str, Any]] = []
+    for item in manifest_items:
+        if not isinstance(item, dict):
+            continue
+        path_text = str(item.get("path") or "").strip()
+        if not path_text:
+            continue
+        manifest_path = (root / path_text).resolve()
+        if not manifest_path.exists():
+            continue
+        try:
+            manifest_payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            manifest_payload = {}
+        bundles.append(
+            {
+                "health": item,
+                "payload": manifest_payload,
+            }
+        )
+    return bundles
+
+
+def build_open_marker_restart_index(*, root: Path | None = None) -> dict[str, Any]:
+    base_root = (root or atlas_root()).resolve()
+    manifest_by_marker: dict[str, dict[str, Any]] = {}
+    for bundle in _load_initiative_manifest_bundles(root=base_root):
+        health_item = bundle.get("health") if isinstance(bundle.get("health"), dict) else {}
+        manifest_payload = bundle.get("payload") if isinstance(bundle.get("payload"), dict) else {}
+        for marker_item in health_item.get("marker_posture", []):
+            if not isinstance(marker_item, dict):
+                continue
+            marker_name = str(marker_item.get("marker") or "").strip()
+            if marker_name and marker_name not in manifest_by_marker:
+                manifest_by_marker[marker_name] = {
+                    "health": health_item,
+                    "payload": manifest_payload,
+                }
+
+    open_marker_groups = _load_open_marker_groups(root=base_root)
+    items: list[dict[str, Any]] = []
+    seen_markers: set[str] = set()
+    for marker_item in open_marker_groups:
+        marker = str(marker_item.get("marker") or "").strip()
+        if not marker or marker in seen_markers:
+            continue
+        seen_markers.add(marker)
+        percent = int(marker_item.get("percent") or 0)
+        section = str(marker_item.get("section") or "")
+        group = str(marker_item.get("group") or "")
+        if percent == 0:
+            items.append(
+                {
+                    "marker": marker,
+                    "percent": percent,
+                    "section": section,
+                    "group": group,
+                    "eligibility": "excluded_zero",
+                    "restart_status": "not_required",
+                    "manifest_id": None,
+                    "manifest_path": None,
+                    "current_checkpoint_receipt": None,
+                    "freshness_checked_receipt": None,
+                    "next_package": None,
+                    "blocked_item_count": 0,
+                }
+            )
+            continue
+        if percent >= 100:
+            items.append(
+                {
+                    "marker": marker,
+                    "percent": percent,
+                    "section": section,
+                    "group": group,
+                    "eligibility": "excluded_closed",
+                    "restart_status": "not_required",
+                    "manifest_id": None,
+                    "manifest_path": None,
+                    "current_checkpoint_receipt": None,
+                    "freshness_checked_receipt": None,
+                    "next_package": None,
+                    "blocked_item_count": 0,
+                }
+            )
+            continue
+
+        manifest_bundle = manifest_by_marker.get(marker)
+        restart_status = "missing"
+        manifest_id: str | None = None
+        manifest_path: str | None = None
+        current_checkpoint_receipt: str | None = None
+        freshness_checked_receipt: str | None = None
+        next_package: dict[str, Any] | None = None
+        blocked_item_count = 0
+        owner_truth_surface_count = 0
+        verification_adoption_surface_count = 0
+        manifest_health_status: str | None = None
+        if manifest_bundle:
+            health_item = (
+                manifest_bundle.get("health") if isinstance(manifest_bundle.get("health"), dict) else {}
+            )
+            payload = manifest_bundle.get("payload") if isinstance(manifest_bundle.get("payload"), dict) else {}
+            metadata = payload.get("metadata") if isinstance(payload.get("metadata"), dict) else {}
+            manifest_id = str(health_item.get("manifest_id") or "") or None
+            manifest_path = str(health_item.get("path") or "") or None
+            manifest_health_status = str(health_item.get("status") or "")
+            current_checkpoint_receipt = (
+                str(metadata.get("current_checkpoint_receipt") or "").strip() or None
+            )
+            freshness_checked_receipt = (
+                str(metadata.get("freshness_checked_receipt") or "").strip() or None
+            )
+            blocked_or_gated_work = (
+                metadata.get("blocked_or_gated_work")
+                if isinstance(metadata.get("blocked_or_gated_work"), list)
+                else []
+            )
+            blocked_item_count = len(blocked_or_gated_work)
+            next_package_ladder = (
+                metadata.get("next_package_ladder")
+                if isinstance(metadata.get("next_package_ladder"), list)
+                else []
+            )
+            owner_truth_surface_count = int(health_item.get("owner_truth_surface_count") or 0)
+            verification_adoption_surface_count = int(
+                health_item.get("verification_adoption_surface_count") or 0
+            )
+            if next_package_ladder and isinstance(next_package_ladder[0], dict):
+                first_next_package = next_package_ladder[0]
+                next_package = {
+                    "package": str(first_next_package.get("package") or "").strip(),
+                    "mode": str(first_next_package.get("mode") or "").strip(),
+                    "reason": str(first_next_package.get("reason") or "").strip(),
+                }
+
+            if manifest_health_status == "ok":
+                if current_checkpoint_receipt and freshness_checked_receipt and next_package:
+                    restart_status = "restart_ready"
+                else:
+                    restart_status = "restart_partial"
+            elif manifest_health_status == "warning":
+                restart_status = "manifest_warning"
+            else:
+                restart_status = "manifest_error"
+
+        items.append(
+            {
+                "marker": marker,
+                "percent": percent,
+                "section": section,
+                "group": group,
+                "eligibility": "eligible_open_marker",
+                "restart_status": restart_status,
+                "manifest_id": manifest_id,
+                "manifest_path": manifest_path,
+                "manifest_health_status": manifest_health_status,
+                "current_checkpoint_receipt": current_checkpoint_receipt,
+                "freshness_checked_receipt": freshness_checked_receipt,
+                "next_package": next_package,
+                "blocked_item_count": blocked_item_count,
+                "owner_truth_surface_count": owner_truth_surface_count,
+                "verification_adoption_surface_count": verification_adoption_surface_count,
+            }
+        )
+
+    counts = Counter(str(item.get("restart_status") or "unknown") for item in items)
+    eligible_count = sum(1 for item in items if item.get("eligibility") == "eligible_open_marker")
+    ready_count = counts.get("restart_ready", 0)
+    status = "ok"
+    if counts.get("missing", 0) > 0 or counts.get("manifest_error", 0) > 0:
+        status = "error"
+    elif counts.get("manifest_warning", 0) > 0 or counts.get("restart_partial", 0) > 0:
+        status = "warning"
+
+    return {
+        "status": status,
+        "item_count": len(items),
+        "eligible_open_marker_count": eligible_count,
+        "restart_ready_count": ready_count,
+        "partial_count": counts.get("restart_partial", 0),
+        "missing_count": counts.get("missing", 0),
+        "warning_count": counts.get("manifest_warning", 0),
+        "error_count": counts.get("manifest_error", 0),
+        "excluded_zero_count": counts.get("not_required", 0),
+        "restart_ready_percent": 0 if eligible_count == 0 else round((ready_count / eligible_count) * 100, 2),
+        "items": items,
+        "marker_table_ref": "docs/atlas-book/02-lanes-and-markers.md",
+        "manifest_glob": INITIATIVE_CONTINUITY_MANIFEST_GLOB,
+        "coverage_slice": "continuity_open_marker_manifest_coverage",
+        "health_slice": "continuity_initiative_manifest_health",
+    }
+
+
+def build_maintained_manifest_restart_index(*, root: Path | None = None) -> dict[str, Any]:
+    base_root = (root or atlas_root()).resolve()
+    bundles = _load_initiative_manifest_bundles(root=base_root)
+    items: list[dict[str, Any]] = []
+    for bundle in bundles:
+        health_item = bundle.get("health") if isinstance(bundle.get("health"), dict) else {}
+        payload = bundle.get("payload") if isinstance(bundle.get("payload"), dict) else {}
+        metadata = payload.get("metadata") if isinstance(payload.get("metadata"), dict) else {}
+        manifest_id = str(health_item.get("manifest_id") or "").strip() or None
+        manifest_path = str(health_item.get("path") or "").strip() or None
+        manifest_health_status = str(health_item.get("status") or "").strip()
+        current_checkpoint_receipt = str(metadata.get("current_checkpoint_receipt") or "").strip() or None
+        freshness_checked_receipt = str(metadata.get("freshness_checked_receipt") or "").strip() or None
+        marker_posture = health_item.get("marker_posture") if isinstance(health_item.get("marker_posture"), list) else []
+        marker_names = [
+            str(item.get("marker") or "").strip()
+            for item in marker_posture
+            if isinstance(item, dict) and str(item.get("marker") or "").strip()
+        ]
+        next_package_ladder = metadata.get("next_package_ladder") if isinstance(metadata.get("next_package_ladder"), list) else []
+        next_package: dict[str, Any] | None = None
+        if next_package_ladder and isinstance(next_package_ladder[0], dict):
+            first_next_package = next_package_ladder[0]
+            next_package = {
+                "package": str(first_next_package.get("package") or "").strip(),
+                "mode": str(first_next_package.get("mode") or "").strip(),
+                "reason": str(first_next_package.get("reason") or "").strip(),
+            }
+        blocked_or_gated_work = metadata.get("blocked_or_gated_work") if isinstance(metadata.get("blocked_or_gated_work"), list) else []
+        blocked_item_count = len(blocked_or_gated_work)
+        owner_truth_surface_count = int(health_item.get("owner_truth_surface_count") or 0)
+        verification_adoption_surface_count = int(health_item.get("verification_adoption_surface_count") or 0)
+        manifest_status = str(payload.get("status") or "").strip() or None
+
+        restart_status = "missing"
+        if manifest_health_status == "ok":
+            if current_checkpoint_receipt and freshness_checked_receipt and next_package:
+                restart_status = "restart_ready"
+            else:
+                restart_status = "restart_partial"
+        elif manifest_health_status == "warning":
+            restart_status = "manifest_warning"
+        elif manifest_health_status:
+            restart_status = "manifest_error"
+
+        items.append(
+            {
+                "manifest_id": manifest_id,
+                "manifest_path": manifest_path,
+                "manifest_status": manifest_status,
+                "manifest_health_status": manifest_health_status,
+                "marker_names": marker_names,
+                "current_checkpoint_receipt": current_checkpoint_receipt,
+                "freshness_checked_receipt": freshness_checked_receipt,
+                "next_package": next_package,
+                "blocked_item_count": blocked_item_count,
+                "owner_truth_surface_count": owner_truth_surface_count,
+                "verification_adoption_surface_count": verification_adoption_surface_count,
+                "restart_status": restart_status,
+            }
+        )
+
+    counts = Counter(str(item.get("restart_status") or "unknown") for item in items)
+    ready_count = counts.get("restart_ready", 0)
+    status = "ok"
+    if counts.get("missing", 0) > 0 or counts.get("manifest_error", 0) > 0:
+        status = "error"
+    elif counts.get("manifest_warning", 0) > 0 or counts.get("restart_partial", 0) > 0:
+        status = "warning"
+
+    return {
+        "status": status,
+        "item_count": len(items),
+        "maintained_manifest_count": len(items),
+        "restart_ready_count": ready_count,
+        "partial_count": counts.get("restart_partial", 0),
+        "missing_count": counts.get("missing", 0),
+        "warning_count": counts.get("manifest_warning", 0),
+        "error_count": counts.get("manifest_error", 0),
+        "restart_ready_percent": 0 if len(items) == 0 else round((ready_count / len(items)) * 100, 2),
+        "items": items,
+        "manifest_glob": INITIATIVE_CONTINUITY_MANIFEST_GLOB,
+        "health_slice": "continuity_initiative_manifest_health",
+    }
+
+
 def build_continuity_status_slices(*, root: Path | None = None) -> tuple[dict[str, Any], dict[str, Any]]:
     base_root = (root or atlas_root()).resolve()
     manifest = build_continuity_source_manifest(root=base_root)
     historical_query_coverage = build_historical_query_coverage(root=base_root)
+    initiative_manifest_health = build_initiative_continuity_manifest_health(root=base_root)
+    open_marker_manifest_coverage = build_open_marker_manifest_coverage(root=base_root)
+    open_marker_restart_index = build_open_marker_restart_index(root=base_root)
+    maintained_manifest_restart_index = build_maintained_manifest_restart_index(root=base_root)
     sources = manifest.get("sources", []) if isinstance(manifest.get("sources"), list) else []
 
     lane_counts = Counter(str(item.get("lane") or "other") for item in sources if isinstance(item, dict))
@@ -879,6 +1857,7 @@ def build_continuity_status_slices(*, root: Path | None = None) -> tuple[dict[st
             "source_path": item.get("source_path"),
             "lane": item.get("lane"),
             "status": item.get("status"),
+            "superseded_by": item.get("superseded_by", []),
             "promotion_targets": item.get("promotion_targets", []),
             "content_class": item.get("content_class"),
             "source_summary": item.get("source_summary"),
@@ -886,7 +1865,7 @@ def build_continuity_status_slices(*, root: Path | None = None) -> tuple[dict[st
         for item in sources
         if isinstance(item, dict)
         and bool(item.get("promotion_candidate"))
-        and str(item.get("status") or "") != "promoted"
+        and str(item.get("status") or "") not in {"promoted", "superseded"}
     ]
     lane_priority = {"root_docs_ops": 0, "playbook_roadmap": 1, "imports": 2, "downloads": 3, "other": 4}
     queue_items.sort(
@@ -934,6 +1913,7 @@ def build_continuity_status_slices(*, root: Path | None = None) -> tuple[dict[st
         "pending_review_count": status_counts.get("pending_review", 0),
         "indexed_count": status_counts.get("indexed", 0),
         "promoted_count": status_counts.get("promoted", 0),
+        "superseded_count": status_counts.get("superseded", 0),
         "handoff_schema_ref": handoff_schema_ref,
         "handoff_receipt_count": handoff_receipt_count,
         "lane_doc_refs": [
@@ -944,6 +1924,20 @@ def build_continuity_status_slices(*, root: Path | None = None) -> tuple[dict[st
         "historical_answered_count": historical_query_coverage.get("answered_count"),
         "historical_partial_count": historical_query_coverage.get("partial_count"),
         "historical_missing_count": historical_query_coverage.get("missing_count"),
+        "initiative_manifest_status": initiative_manifest_health.get("status"),
+        "initiative_manifest_count": initiative_manifest_health.get("manifest_count"),
+        "initiative_manifest_warning_count": initiative_manifest_health.get("warning_count"),
+        "initiative_manifest_error_count": initiative_manifest_health.get("error_count"),
+        "open_marker_manifest_coverage_status": open_marker_manifest_coverage.get("status"),
+        "open_marker_manifest_coverage_percent": open_marker_manifest_coverage.get("coverage_percent"),
+        "eligible_open_marker_count": open_marker_manifest_coverage.get("eligible_open_marker_count"),
+        "open_marker_restart_index_status": open_marker_restart_index.get("status"),
+        "open_marker_restart_ready_percent": open_marker_restart_index.get("restart_ready_percent"),
+        "open_marker_restart_ready_count": open_marker_restart_index.get("restart_ready_count"),
+        "maintained_manifest_restart_index_status": maintained_manifest_restart_index.get("status"),
+        "maintained_manifest_restart_ready_percent": maintained_manifest_restart_index.get("restart_ready_percent"),
+        "maintained_manifest_restart_ready_count": maintained_manifest_restart_index.get("restart_ready_count"),
+        "maintained_manifest_count": maintained_manifest_restart_index.get("maintained_manifest_count"),
         "transcript_role": "trace_only",
         "transcript_memory": False,
     }
@@ -969,6 +1963,7 @@ def build_continuity_status_slices(*, root: Path | None = None) -> tuple[dict[st
             "status": coverage_status,
             "indexed_count": status_counts.get("indexed", 0),
             "pending_review_count": status_counts.get("pending_review", 0),
+            "superseded_count": status_counts.get("superseded", 0),
             "raw_evidence_count": content_counts.get("raw_evidence", 0),
             "structured_artifact_count": content_counts.get("structured_artifact", 0),
             "residue_count": content_counts.get("residue", 0),
@@ -976,6 +1971,10 @@ def build_continuity_status_slices(*, root: Path | None = None) -> tuple[dict[st
             "historical_query_slice": "continuity_historical_query_coverage",
         },
         "continuity_historical_query_coverage": historical_query_coverage,
+        "continuity_initiative_manifest_health": initiative_manifest_health,
+        "continuity_open_marker_manifest_coverage": open_marker_manifest_coverage,
+        "continuity_open_marker_restart_index": open_marker_restart_index,
+        "continuity_maintained_manifest_restart_index": maintained_manifest_restart_index,
         "continuity_coverage": coverage | {"items": []},
     }
     return manifest, slices

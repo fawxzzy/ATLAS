@@ -1,0 +1,137 @@
+{
+  "contract_version": "atlas.initiative.v1",
+  "id": "continuity-manifest-ai-repetition-to-automation-pipeline",
+  "title": "Continuity Manifest AI Repetition To Automation Pipeline",
+  "summary": "Maintained ATLAS-root retrieval map for the held front-page AI Repetition-to-Automation Pipeline lane.",
+  "status": "active",
+  "owner": "stack-root",
+  "created_at": "2026-06-19T05:00:00Z",
+  "updated_at": "2026-06-19T05:00:00Z",
+  "related_plan_refs": [],
+  "related_decision_refs": [],
+  "related_hypothesis_refs": [],
+  "related_session_refs": [],
+  "related_attention_refs": [],
+  "proposed_next_session_refs": [],
+  "evidence_refs": [
+    "docs/atlas-book/01-current-state.md",
+    "docs/atlas-book/02-lanes-and-markers.md",
+    "docs/atlas-book/05-receipt-index.md",
+    "docs/atlas-book/11-system-map-graph.md",
+    "docs/atlas-book/12-restart-and-handoff-guide.md",
+    "docs/atlas-book/13-vision-and-endgames.md",
+    "docs/memory/README.md",
+    "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-SURFACE-PASS-52-2026-06-09.md",
+    "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-ACTIVE-LANE-FOLLOW-ON-DISAMBIGUATION-2026-06-17.md",
+    "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-SELECTOR-OPERATOR-ACTION-AND-PACKET-BASIS-2026-06-18.md",
+    "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-SELECTOR-PACKET-BRIEF-SURFACE-2026-06-18.md",
+    "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-SELECTOR-LANE-EXHAUSTION-OR-FALLBACK-ROUTING-2026-06-18.md",
+    "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md"
+  ],
+  "supersedes": [],
+  "superseded_by": [],
+  "metadata": {
+    "artifact_kind": "continuity_manifest",
+    "lane_id": "ai-repetition-to-automation-pipeline",
+    "scope_class": "atlas-root-governance",
+    "current_checkpoint_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-SELECTOR-LANE-EXHAUSTION-OR-FALLBACK-ROUTING-2026-06-18.md",
+    "checkpoint_commit": "main",
+    "checkpoint_summary": "The lane currently holds at 35 percent with no immediate same-lane selector packet open by default: the selector surface already emits the operator decision, decisive packet-basis refs, and packet mode-plus-scope brief, so restart truth now treats the lane as held while AI Long-Run reactivates as the downstream fallback.",
+    "governing_receipts": [
+      "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-SURFACE-PASS-52-2026-06-09.md",
+      "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-ACTIVE-LANE-FOLLOW-ON-DISAMBIGUATION-2026-06-17.md",
+      "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-SELECTOR-OPERATOR-ACTION-AND-PACKET-BASIS-2026-06-18.md",
+      "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-SELECTOR-PACKET-BRIEF-SURFACE-2026-06-18.md",
+      "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-SELECTOR-LANE-EXHAUSTION-OR-FALLBACK-ROUTING-2026-06-18.md",
+      "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md"
+    ],
+    "owner_truth_surfaces": [
+      {
+        "path": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-SURFACE-PASS-52-2026-06-09.md",
+        "role": "selector-surface baseline"
+      },
+      {
+        "path": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-ACTIVE-LANE-FOLLOW-ON-DISAMBIGUATION-2026-06-17.md",
+        "role": "current-lane versus fallback separation truth"
+      },
+      {
+        "path": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-SELECTOR-OPERATOR-ACTION-AND-PACKET-BASIS-2026-06-18.md",
+        "role": "operator-action and packet-basis truth"
+      },
+      {
+        "path": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-SELECTOR-PACKET-BRIEF-SURFACE-2026-06-18.md",
+        "role": "packet-brief truth"
+      },
+      {
+        "path": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-SELECTOR-LANE-EXHAUSTION-OR-FALLBACK-ROUTING-2026-06-18.md",
+        "role": "current held-lane and downstream-fallback truth"
+      },
+      {
+        "path": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md",
+        "role": "continuity-manifest seed and machine-readable widening closeout"
+      }
+    ],
+    "verification_adoption_surfaces": [
+      {
+        "path": "docs/atlas-book/01-current-state.md",
+        "role": "current held-lane projection surface"
+      },
+      {
+        "path": "docs/atlas-book/02-lanes-and-markers.md",
+        "role": "marker table and held-lane projection surface"
+      },
+      {
+        "path": "docs/atlas-book/05-receipt-index.md",
+        "role": "receipt spine"
+      },
+      {
+        "path": "docs/atlas-book/11-system-map-graph.md",
+        "role": "lane-state projection routing surface"
+      },
+      {
+        "path": "docs/atlas-book/12-restart-and-handoff-guide.md",
+        "role": "restart routing surface"
+      },
+      {
+        "path": "docs/atlas-book/13-vision-and-endgames.md",
+        "role": "current endgame and next-valid-package surface"
+      },
+      {
+        "path": "docs/memory/README.md",
+        "role": "manifest-backed continuity doctrine surface"
+      }
+    ],
+    "blocked_or_gated_work": [
+      {
+        "item": "reopening selector-only work by adjacency",
+        "requirement": "blocked unless a distinct new proof-backed selector seam appears beyond the current decision, basis-ref, and packet-brief surface"
+      },
+      {
+        "item": "higher marker movement above the current held restart posture",
+        "requirement": "blocked until a new automation family is admitted, one owner-side or _stack execution widening lands, or broader repeated governed adoption changes operator reality again"
+      },
+      {
+        "item": "treating the AI Long-Run fallback as continuation of this lane",
+        "requirement": "blocked unless a new exact AI Repetition family is explicitly selected instead of the currently held selector posture"
+      }
+    ],
+    "next_package_ladder": [
+      {
+        "package": "No immediate AI Repetition-to-Automation Pipeline same-lane packet",
+        "mode": "hold-flat after selector exhaustion and continuity-manifest seed",
+        "reason": "the current selector family is exhausted for now and now has one maintained retrieval map; reopen only with a distinct new AI Repetition family, broader adoption, or wider execution reality than the current held selector posture"
+      }
+    ],
+    "freshness_state": "manifest-backed",
+    "freshness_checked_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md",
+    "freshness_checked_at": "2026-06-19T05:00:00Z",
+    "freshness_basis": "the manifest now matches the held 35 percent selector posture after the June 18 packet-brief and exhaustion receipts, while the June 19 continuity widening pass adds one maintained retrieval map without changing the lane's no-immediate-packet posture.",
+    "marker_posture": [
+      {
+        "marker": "AI Repetition-to-Automation Pipeline",
+        "percent": 35,
+        "source": "docs/atlas-book/02-lanes-and-markers.md"
+      }
+    ]
+  }
+}

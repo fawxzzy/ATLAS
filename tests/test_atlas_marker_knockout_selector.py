@@ -72,8 +72,8 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
 
     def _write_packet_receipts(self, root: Path) -> None:
         current_receipt = root / "docs" / "ops" / (
-            "ROOT-BOUNDED-LANE-SELECTION-AFTER-AI-LONG-RUN-BATCH-ORCHESTRATION-"
-            "QUEUE-OR-REGISTRY-FAMILY-EXHAUSTION-CLOSEOUT-2026-06-17.md"
+            "AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTION-"
+            "CRITERIA-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-19.md"
         )
         current_receipt.parent.mkdir(parents=True, exist_ok=True)
         current_receipt.write_text(
@@ -81,8 +81,8 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
                 [
                     "# Current Packet",
                     "",
-                    "- Mode: `docs-only root-bounded lane selection`",
-                    "- Scope: `select the next honest ATLAS-root packet after the current AI Long-Run queue-or-registry family exhausts`",
+                    "- Mode: `root-owned bounded implementation and proof reconciliation`",
+                    "- Scope: `reconcile the bounded pilot-selection-criteria validator helper and direct proof worker without widening into candidate comparison, execution-home inference, or protected-surface work`",
                     "",
                 ]
             ),
@@ -118,16 +118,19 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual(20, payload["selected_percentage"])
         self.assertEqual("continue_current_lane", payload["operator_action"])
         self.assertEqual(
-            "AI Long-Run Batch Orchestration queue-or-registry active follow-on",
+            "AI Long-Run Batch Orchestration single supervised pilot selection criteria first-implementation worker cluster reconciliation",
             payload["selected_current_packet"],
         )
         self.assertEqual(
-            "docs/ops/ROOT-BOUNDED-LANE-SELECTION-AFTER-AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-FAMILY-EXHAUSTION-CLOSEOUT-2026-06-17.md",
+            "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTION-CRITERIA-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-19.md",
             payload["selected_current_packet_basis_ref"],
         )
-        self.assertEqual("docs-only root-bounded lane selection", payload["selected_current_packet_mode"])
         self.assertEqual(
-            "select the next honest ATLAS-root packet after the current AI Long-Run queue-or-registry family exhausts",
+            "root-owned bounded implementation and proof reconciliation",
+            payload["selected_current_packet_mode"],
+        )
+        self.assertEqual(
+            "reconcile the bounded pilot-selection-criteria validator helper and direct proof worker without widening into candidate comparison, execution-home inference, or protected-surface work",
             payload["selected_current_packet_scope"],
         )
         self.assertEqual(
@@ -204,16 +207,22 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertIn("## Operator Action", markdown)
         self.assertIn("action: `continue_current_lane`", markdown)
         self.assertIn(
-            "current packet basis receipt: `docs/ops/ROOT-BOUNDED-LANE-SELECTION-AFTER-AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-FAMILY-EXHAUSTION-CLOSEOUT-2026-06-17.md`",
+            "current packet basis receipt: `docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTION-CRITERIA-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-19.md`",
             markdown,
         )
-        self.assertIn("current packet mode: `docs-only root-bounded lane selection`", markdown)
         self.assertIn(
-            "current packet scope: `select the next honest ATLAS-root packet after the current AI Long-Run queue-or-registry family exhausts`",
+            "current packet mode: `root-owned bounded implementation and proof reconciliation`",
+            markdown,
+        )
+        self.assertIn(
+            "current packet scope: `reconcile the bounded pilot-selection-criteria validator helper and direct proof worker without widening into candidate comparison, execution-home inference, or protected-surface work`",
             markdown,
         )
         self.assertIn("## Current Active Marker", markdown)
-        self.assertIn("current packet: `AI Long-Run Batch Orchestration queue-or-registry active follow-on`", markdown)
+        self.assertIn(
+            "current packet: `AI Long-Run Batch Orchestration single supervised pilot selection criteria first-implementation worker cluster reconciliation`",
+            markdown,
+        )
         self.assertIn("## First Admissible After Current Lane", markdown)
         self.assertIn(
             "next packet after current lane: `AI Repetition-to-Automation Pipeline non-Fitness marker knockout selector surface`",
