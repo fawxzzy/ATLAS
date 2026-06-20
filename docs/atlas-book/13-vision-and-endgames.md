@@ -51,9 +51,9 @@ Shared rules that survive the split:
 - exists to own cross-repo coordination, receipts, markers, validation, governance mapping, and restart surfaces
 - done means stack state is resumable from docs and receipts rather than memory
 - should not become a product-runtime owner
-- currently open for bounded root-owned orchestration doctrine, shared restart-surface refresh when no-overlap wave outputs are ready, and freezing the exact worker handoff boundary for concrete pilot selection now that the pilot-selection criteria, comparison slice, bounded helper proof, conversion contract, conversion helper proof, winner-selection contract, winner-selection owner-facing home, winner-selection support hold at `none yet`, and the smallest winner-selection implementation slice are explicit
+- currently open for bounded root-owned orchestration doctrine, shared restart-surface refresh when no-overlap wave outputs are ready, and freezing the exact readiness routing boundary for concrete pilot selection now that the pilot-selection criteria, comparison slice, bounded helper proof, conversion contract, conversion helper proof, winner-selection contract, winner-selection owner-facing home, winner-selection support hold at `none yet`, the smallest winner-selection implementation slice, and the exact worker handoff boundary are explicit
 - next valid package:
-  - `AI Long-Run Batch Orchestration single supervised pilot winner selection prompt-pack and handoff contract pass 484`
+  - `AI Long-Run Batch Orchestration single supervised pilot winner selection implementation-readiness closeout and worker-routing pass 485`
 
 ## Key Endgames By Theme
 
