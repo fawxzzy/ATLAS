@@ -73,7 +73,7 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
     def _write_packet_receipts(self, root: Path) -> None:
         current_receipt = root / "docs" / "ops" / (
             "AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-"
-            "WINNER-SELECTION-CONTRACT-FREEZE-PASS-480-2026-06-20.md"
+            "WINNER-SELECTION-OWNER-SURFACE-ADMISSION-PASS-481-2026-06-20.md"
         )
         current_receipt.parent.mkdir(parents=True, exist_ok=True)
         current_receipt.write_text(
@@ -81,8 +81,8 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
                 [
                     "# Current Packet",
                     "",
-                    "- Mode: `docs-only root-bounded contract freeze`",
-                    "- Scope: `freeze the exact root-owned selection contract for turning one contract-local pilot_winner result into one lane-level concrete first supervised pilot selection without widening into owner-repo implementation or execution-home doctrine`",
+                    "- Mode: `docs-only root-bounded owner-surface admission`",
+                    "- Scope: `freeze the exact root-owned producing and consuming home for the winner-selection family before supporting-lane admission, owner-repo implementation, or execution-home widening`",
                     "",
                 ]
             ),
@@ -118,19 +118,19 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual(20, payload["selected_percentage"])
         self.assertEqual("continue_current_lane", payload["operator_action"])
         self.assertEqual(
-            "AI Long-Run Batch Orchestration single supervised pilot winner selection contract freeze pass 480",
+            "AI Long-Run Batch Orchestration single supervised pilot winner selection owner-surface admission pass 481",
             payload["selected_current_packet"],
         )
         self.assertEqual(
-            "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-WINNER-SELECTION-CONTRACT-FREEZE-PASS-480-2026-06-20.md",
+            "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-WINNER-SELECTION-OWNER-SURFACE-ADMISSION-PASS-481-2026-06-20.md",
             payload["selected_current_packet_basis_ref"],
         )
         self.assertEqual(
-            "docs-only root-bounded contract freeze",
+            "docs-only root-bounded owner-surface admission",
             payload["selected_current_packet_mode"],
         )
         self.assertEqual(
-            "freeze the exact root-owned selection contract for turning one contract-local pilot_winner result into one lane-level concrete first supervised pilot selection without widening into owner-repo implementation or execution-home doctrine",
+            "freeze the exact root-owned producing and consuming home for the winner-selection family before supporting-lane admission, owner-repo implementation, or execution-home widening",
             payload["selected_current_packet_scope"],
         )
         self.assertEqual(
@@ -207,20 +207,20 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertIn("## Operator Action", markdown)
         self.assertIn("action: `continue_current_lane`", markdown)
         self.assertIn(
-            "current packet basis receipt: `docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-WINNER-SELECTION-CONTRACT-FREEZE-PASS-480-2026-06-20.md`",
+            "current packet basis receipt: `docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-WINNER-SELECTION-OWNER-SURFACE-ADMISSION-PASS-481-2026-06-20.md`",
             markdown,
         )
         self.assertIn(
-            "current packet mode: `docs-only root-bounded contract freeze`",
+            "current packet mode: `docs-only root-bounded owner-surface admission`",
             markdown,
         )
         self.assertIn(
-            "current packet scope: `freeze the exact root-owned selection contract for turning one contract-local pilot_winner result into one lane-level concrete first supervised pilot selection without widening into owner-repo implementation or execution-home doctrine`",
+            "current packet scope: `freeze the exact root-owned producing and consuming home for the winner-selection family before supporting-lane admission, owner-repo implementation, or execution-home widening`",
             markdown,
         )
         self.assertIn("## Current Active Marker", markdown)
         self.assertIn(
-            "current packet: `AI Long-Run Batch Orchestration single supervised pilot winner selection contract freeze pass 480`",
+            "current packet: `AI Long-Run Batch Orchestration single supervised pilot winner selection owner-surface admission pass 481`",
             markdown,
         )
         self.assertIn("## First Admissible After Current Lane", markdown)
