@@ -1300,6 +1300,7 @@
 - [AI Long-Run Batch Orchestration Single Supervised Pilot Selected-Pilot Implementation-Routing First-Implementation Admission Pass 490](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-IMPLEMENTATION-ROUTING-FIRST-IMPLEMENTATION-ADMISSION-PASS-490-2026-06-20.md)
 - [AI Long-Run Batch Orchestration Single Supervised Pilot Selected-Pilot Implementation-Routing Prompt-Pack And Handoff Contract Pass 491](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-IMPLEMENTATION-ROUTING-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-491-2026-06-20.md)
 - [AI Long-Run Batch Orchestration Single Supervised Pilot Selected-Pilot Implementation-Routing Implementation-Readiness Closeout And Worker-Routing Pass 492](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-IMPLEMENTATION-ROUTING-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-492-2026-06-20.md)
+- [AI Long-Run Batch Orchestration Single Supervised Pilot Selected-Pilot Implementation-Routing First-Implementation Worker Cluster Reconciliation](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-IMPLEMENTATION-ROUTING-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-20.md)
 
 ## Notes
 
