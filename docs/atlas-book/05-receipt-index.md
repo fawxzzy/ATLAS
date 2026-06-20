@@ -1289,6 +1289,7 @@
 - [AI Long-Run Batch Orchestration Single Supervised Pilot Winner Selection Contract Freeze Pass 480](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-WINNER-SELECTION-CONTRACT-FREEZE-PASS-480-2026-06-20.md)
 - [AI Long-Run Batch Orchestration Single Supervised Pilot Winner Selection Owner-Surface Admission Pass 481](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-WINNER-SELECTION-OWNER-SURFACE-ADMISSION-PASS-481-2026-06-20.md)
 - [AI Long-Run Batch Orchestration Single Supervised Pilot Winner Selection Supporting-Lane Admission Pass 482](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-WINNER-SELECTION-SUPPORTING-LANE-ADMISSION-PASS-482-2026-06-20.md)
+- [AI Long-Run Batch Orchestration Single Supervised Pilot Winner Selection First-Implementation Admission Pass 483](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-WINNER-SELECTION-FIRST-IMPLEMENTATION-ADMISSION-PASS-483-2026-06-20.md)
 
 ## Notes
 
