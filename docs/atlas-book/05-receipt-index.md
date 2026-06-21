@@ -1314,6 +1314,7 @@
 - [AI Long-Run Batch Orchestration Single Supervised Pilot Selected-Pilot Owner-Repo Mutation Owner-Surface Admission Pass 502](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-OWNER-REPO-MUTATION-OWNER-SURFACE-ADMISSION-PASS-502-2026-06-21.md)
 - [AI Long-Run Batch Orchestration Single Supervised Pilot Selected-Pilot Owner-Repo Mutation Supporting-Lane Admission Pass 503](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-OWNER-REPO-MUTATION-SUPPORTING-LANE-ADMISSION-PASS-503-2026-06-21.md)
 - [AI Long-Run Batch Orchestration Single Supervised Pilot Selected-Pilot Owner-Repo Mutation First-Implementation Admission Pass 504](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-OWNER-REPO-MUTATION-FIRST-IMPLEMENTATION-ADMISSION-PASS-504-2026-06-21.md)
+- [AI Long-Run Batch Orchestration Single Supervised Pilot Selected-Pilot Owner-Repo Mutation Prompt-Pack And Handoff Contract Pass 505](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-OWNER-REPO-MUTATION-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-505-2026-06-21.md)
 
 ## Notes
 
