@@ -51,9 +51,9 @@ Shared rules that survive the split:
 - exists to own cross-repo coordination, receipts, markers, validation, governance mapping, and restart surfaces
 - done means stack state is resumable from docs and receipts rather than memory
 - should not become a product-runtime owner
-- currently open for bounded root-owned orchestration doctrine, shared restart-surface refresh when no-overlap wave outputs are ready, and keeping selected-pilot implementation routing plus the downstream owner-repo implementation, owner-repo mutation, and actual owner-side mutation seams in explicit root-owned control-plane posture now that the implementation contract, mutation contract, mutation owner-facing home, mutation support posture, mutation first-slice boundary, actual owner-side mutation contract, actual owner-side mutation owner-facing home, and actual owner-side mutation support posture are durable above the landed pilot-selection criteria, comparison, conversion, winner-selection, and selected-pilot routing helper-proof chain
+- currently open for bounded root-owned orchestration doctrine, shared restart-surface refresh when no-overlap wave outputs are ready, and keeping selected-pilot implementation routing plus the downstream owner-repo implementation, owner-repo mutation, and actual owner-side mutation seams in explicit root-owned control-plane posture now that the implementation contract, mutation contract, mutation owner-facing home, mutation support posture, mutation first-slice boundary, actual owner-side mutation contract, actual owner-side mutation owner-facing home, actual owner-side mutation support posture, and actual owner-side mutation first-slice boundary are durable above the landed pilot-selection criteria, comparison, conversion, winner-selection, and selected-pilot routing helper-proof chain
 - next valid package:
-  - `AI Long-Run Batch Orchestration single supervised pilot selected-pilot actual owner-side mutation first-implementation admission pass 511`
+  - `AI Long-Run Batch Orchestration single supervised pilot selected-pilot actual owner-side mutation prompt-pack and handoff contract pass 512`
 
 ## Key Endgames By Theme
 
