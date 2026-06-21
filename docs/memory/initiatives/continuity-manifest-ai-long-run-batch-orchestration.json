@@ -107,6 +107,7 @@
     "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-COMMAND-HOME-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-530-2026-06-21.md",
     "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-COMMAND-HOME-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-21.md",
     "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-COMMAND-HOME-SELECTION-NEXT-SLICE-SELECTION-PASS-531-2026-06-21.md",
+    "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-COMMAND-HOME-SELECTION-CONTRACT-FREEZE-PASS-532-2026-06-21.md",
     "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-OWNER-REPO-MUTATION-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-21.md",
     "ops/atlas/pilot_selected_owner_repo_mutation.py",
     "tests/test_atlas_pilot_selected_owner_repo_mutation.py",
@@ -129,9 +130,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "ai-long-run-batch-orchestration",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-COMMAND-HOME-SELECTION-NEXT-SLICE-SELECTION-PASS-531-2026-06-21.md",
+    "current_checkpoint_receipt": "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-COMMAND-HOME-SELECTION-CONTRACT-FREEZE-PASS-532-2026-06-21.md",
     "checkpoint_commit": "main",
-    "checkpoint_summary": "The lane now has the post-command-home-selection selector durably landed too: the admitted command-home-selection helper and proof remain reconciled on canonical `main`, `AI Long-Run Batch Orchestration` stays at `66%`, the current packet is now `AI Long-Run Batch Orchestration post-command-home-selection next-slice selection pass 531`, and the exact next package is now `_stack Readiness supervised execution-home concrete command-home selection contract freeze pass 532`.",
+    "checkpoint_summary": "The lane now has the concrete-command-home contract freeze durably landed too: the admitted command-home-selection helper and proof remain reconciled on canonical `main`, `AI Long-Run Batch Orchestration` stays at `66%`, the current packet is now `_stack Readiness supervised execution-home concrete command-home selection contract freeze pass 532`, and the exact next package is now `_stack Readiness supervised execution-home concrete command-home owner-surface admission pass 533`.",
     "governing_receipts": [
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-2026-05-22.md",
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-POST-WORLD-MODEL-TOP-LEVEL-PAYLOAD-BOUNDARY-NEXT-SLICE-SELECTION-PASS-460-2026-06-17.md",
@@ -219,6 +220,7 @@
       "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-COMMAND-HOME-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-530-2026-06-21.md",
       "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-COMMAND-HOME-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-21.md",
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-COMMAND-HOME-SELECTION-NEXT-SLICE-SELECTION-PASS-531-2026-06-21.md",
+      "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-COMMAND-HOME-SELECTION-CONTRACT-FREEZE-PASS-532-2026-06-21.md",
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-OWNER-REPO-MUTATION-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-21.md"
     ],
     "owner_truth_surfaces": [
@@ -673,15 +675,15 @@
     ],
     "next_package_ladder": [
       {
-        "package": "_stack Readiness supervised execution-home concrete command-home selection contract freeze pass 532",
-        "mode": "docs-only root-bounded concrete command-home boundary packet",
-        "reason": "the command-home-selection helper is now reconciled, so the next honest blocker is freezing whether any concrete command-home choice may now be selected before any command-file or runtime-home seam is discussed"
+        "package": "_stack Readiness supervised execution-home concrete command-home owner-surface admission pass 533",
+        "mode": "docs-only root-bounded owner-surface admission packet",
+        "reason": "the concrete-command-home contract is now exact, so the next honest blocker is freezing the producing and consuming owner-facing home for that seam before support, command-file, or runtime-home packets are discussed"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-COMMAND-HOME-SELECTION-NEXT-SLICE-SELECTION-PASS-531-2026-06-21.md",
-    "freshness_checked_at": "2026-06-21T20:05:00.0000000-04:00",
-    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture now match the active AI Long-Run lane because the command-home helper-and-proof slice is reconciled on canonical `main`, the post-command-home-selection selector is now durable, the marker stays at `66%`, and the exact next package is now `_stack Readiness supervised execution-home concrete command-home selection contract freeze pass 532`.",
+    "freshness_checked_receipt": "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-COMMAND-HOME-SELECTION-CONTRACT-FREEZE-PASS-532-2026-06-21.md",
+    "freshness_checked_at": "2026-06-21T20:20:00.0000000-04:00",
+    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture now match the active AI Long-Run lane because the command-home helper-and-proof slice is reconciled on canonical `main`, the concrete-command-home contract is now durable, the marker stays at `66%`, and the exact next package is now `_stack Readiness supervised execution-home concrete command-home owner-surface admission pass 533`.",
     "marker_posture": [
       {
         "marker": "AI Long-Run Batch Orchestration",
