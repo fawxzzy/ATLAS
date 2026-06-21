@@ -19,7 +19,7 @@ Read:
 
 - `Playbook Everywhere + Cortex Interface: 22%`
 - `AI Repetition-to-Automation Pipeline: 35%`
-- `AI Long-Run Batch Orchestration: 65%`
+- `AI Long-Run Batch Orchestration: 66%`
 
 Read:
 
@@ -48,7 +48,7 @@ Read:
 - Truth Map & ATLAS Book: `97%`
 - Inventory & Truth Map: `85%`
 - AI Repetition-to-Automation Pipeline: `35%`
-- AI Long-Run Batch Orchestration: `65%`
+- AI Long-Run Batch Orchestration: `66%`
 
 ## Supporting Open Markers
 
@@ -56,7 +56,7 @@ Read:
 
 - Cortex Readiness: `41%`
 - AI Repetition-to-Automation Pipeline: `35%`
-- AI Long-Run Batch Orchestration: `65%`
+- AI Long-Run Batch Orchestration: `66%`
 - Playbook Everywhere + Cortex Interface: `22%`
 
 ### Future / lane-structure
