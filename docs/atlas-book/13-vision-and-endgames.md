@@ -53,7 +53,7 @@ Shared rules that survive the split:
 - should not become a product-runtime owner
 - currently open for bounded root-owned orchestration doctrine, shared restart-surface refresh when no-overlap wave outputs are ready, and keeping selected-pilot implementation routing plus the downstream owner-repo implementation and owner-repo mutation seams in explicit root-owned control-plane posture now that the implementation contract, mutation contract, mutation owner-facing home, mutation support posture, and mutation first-slice boundary are durable above the landed pilot-selection criteria, comparison, conversion, winner-selection, and selected-pilot routing helper-proof chain
 - next valid package:
-  - `AI Long-Run Batch Orchestration single supervised pilot selected-pilot owner-repo mutation first-implementation worker cluster reconciliation`
+  - `AI Long-Run Batch Orchestration post-single supervised pilot selected-pilot owner-repo mutation next-slice selection pass 507`
 
 ## Key Endgames By Theme
 
