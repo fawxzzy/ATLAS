@@ -1307,6 +1307,7 @@
 - [AI Long-Run Batch Orchestration Single Supervised Pilot Selected-Pilot Owner-Repo Implementation Supporting-Lane Admission Pass 496](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-OWNER-REPO-IMPLEMENTATION-SUPPORTING-LANE-ADMISSION-PASS-496-2026-06-20.md)
 - [AI Long-Run Batch Orchestration Single Supervised Pilot Selected-Pilot Owner-Repo Implementation First-Implementation Admission Pass 497](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-OWNER-REPO-IMPLEMENTATION-FIRST-IMPLEMENTATION-ADMISSION-PASS-497-2026-06-20.md)
 - [AI Long-Run Batch Orchestration Single Supervised Pilot Selected-Pilot Owner-Repo Implementation Prompt-Pack And Handoff Contract Pass 498](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-OWNER-REPO-IMPLEMENTATION-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-498-2026-06-20.md)
+- [AI Long-Run Batch Orchestration Single Supervised Pilot Selected-Pilot Owner-Repo Implementation Implementation-Readiness Closeout And Worker-Routing Pass 499](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-OWNER-REPO-IMPLEMENTATION-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-499-2026-06-20.md)
 
 ## Notes
 
