@@ -72,7 +72,7 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
 
     def _write_packet_receipts(self, root: Path) -> None:
         current_receipt = root / "docs" / "ops" / (
-            "AI-LONG-RUN-BATCH-ORCHESTRATION-POST-SUPERVISED-EXECUTION-HOME-NEXT-SLICE-SELECTION-PASS-524-2026-06-21.md"
+            "_STACK-READINESS-SUPERVISED-EXECUTION-HOME-COMMAND-HOME-SELECTION-CONTRACT-FREEZE-PASS-525-2026-06-21.md"
         )
         current_receipt.parent.mkdir(parents=True, exist_ok=True)
         current_receipt.write_text(
@@ -80,8 +80,8 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
                 [
                     "# Current Packet",
                     "",
-                    "- Mode: `docs-only root-bounded next-slice selection`",
-                    "- Scope: `choose the strongest bounded downstream seam now that the supervised execution-home helper and proof slice is directly reconciled on canonical main`",
+                    "- Mode: `docs-only root-bounded contract freeze`",
+                    "- Scope: `freeze the exact root-owned contract for when the reconciled supervised execution-home posture may or may not reopen one bounded command-home selection question without widening into concrete command files, runtime-home choice, _stack runtime mutation, worker authority, owner-repo edits, actual owner-side mutation authority, Playbook doctrine export, deploy or publication, or protected-surface touch`",
                     "",
                 ]
             ),
@@ -117,19 +117,19 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual(20, payload["selected_percentage"])
         self.assertEqual("continue_current_lane", payload["operator_action"])
         self.assertEqual(
-            "AI Long-Run Batch Orchestration post-supervised execution-home next-slice selection pass 524",
+            "_stack Readiness supervised execution-home command-home selection contract freeze pass 525",
             payload["selected_current_packet"],
         )
         self.assertEqual(
-            "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-SUPERVISED-EXECUTION-HOME-NEXT-SLICE-SELECTION-PASS-524-2026-06-21.md",
+            "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-COMMAND-HOME-SELECTION-CONTRACT-FREEZE-PASS-525-2026-06-21.md",
             payload["selected_current_packet_basis_ref"],
         )
         self.assertEqual(
-            "docs-only root-bounded next-slice selection",
+            "docs-only root-bounded contract freeze",
             payload["selected_current_packet_mode"],
         )
         self.assertEqual(
-            "choose the strongest bounded downstream seam now that the supervised execution-home helper and proof slice is directly reconciled on canonical main",
+            "freeze the exact root-owned contract for when the reconciled supervised execution-home posture may or may not reopen one bounded command-home selection question without widening into concrete command files, runtime-home choice, _stack runtime mutation, worker authority, owner-repo edits, actual owner-side mutation authority, Playbook doctrine export, deploy or publication, or protected-surface touch",
             payload["selected_current_packet_scope"],
         )
         self.assertEqual(
@@ -206,20 +206,20 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertIn("## Operator Action", markdown)
         self.assertIn("action: `continue_current_lane`", markdown)
         self.assertIn(
-            "current packet basis receipt: `docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-SUPERVISED-EXECUTION-HOME-NEXT-SLICE-SELECTION-PASS-524-2026-06-21.md`",
+            "current packet basis receipt: `docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-COMMAND-HOME-SELECTION-CONTRACT-FREEZE-PASS-525-2026-06-21.md`",
             markdown,
         )
         self.assertIn(
-            "current packet mode: `docs-only root-bounded next-slice selection`",
+            "current packet mode: `docs-only root-bounded contract freeze`",
             markdown,
         )
         self.assertIn(
-            "current packet scope: `choose the strongest bounded downstream seam now that the supervised execution-home helper and proof slice is directly reconciled on canonical main`",
+            "current packet scope: `freeze the exact root-owned contract for when the reconciled supervised execution-home posture may or may not reopen one bounded command-home selection question without widening into concrete command files, runtime-home choice, _stack runtime mutation, worker authority, owner-repo edits, actual owner-side mutation authority, Playbook doctrine export, deploy or publication, or protected-surface touch`",
             markdown,
         )
         self.assertIn("## Current Active Marker", markdown)
         self.assertIn(
-            "current packet: `AI Long-Run Batch Orchestration post-supervised execution-home next-slice selection pass 524`",
+            "current packet: `_stack Readiness supervised execution-home command-home selection contract freeze pass 525`",
             markdown,
         )
         self.assertIn("## First Admissible After Current Lane", markdown)
