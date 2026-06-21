@@ -295,11 +295,10 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "AI Long-Run Batch Orchestration": PacketDescriptor(
-        packet="AI Long-Run Batch Orchestration post-single supervised pilot selected-pilot actual owner-side mutation next-slice selection pass 514",
+        packet="_stack Readiness supervised execution-home contract freeze pass 515",
         basis_receipt_ref=(
             "docs/ops/"
-            "AI-LONG-RUN-BATCH-ORCHESTRATION-POST-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-"
-            "ACTUAL-OWNER-SIDE-MUTATION-NEXT-SLICE-SELECTION-PASS-514-2026-06-21.md"
+            "_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONTRACT-FREEZE-PASS-515-2026-06-21.md"
         ),
     ),
 }
