@@ -1320,6 +1320,7 @@
 - [AI Long-Run Batch Orchestration Single Supervised Pilot Selected-Pilot Owner-Repo Mutation First-Implementation Worker Cluster Reconciliation](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-OWNER-REPO-MUTATION-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-21.md)
 - [AI Long-Run Batch Orchestration Post-Single Supervised Pilot Selected-Pilot Owner-Repo Mutation Next-Slice Selection Pass 507](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-OWNER-REPO-MUTATION-NEXT-SLICE-SELECTION-PASS-507-2026-06-21.md)
 - [AI Long-Run Batch Orchestration Single Supervised Pilot Selected-Pilot Actual Owner-Side Mutation Contract Freeze Pass 508](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-ACTUAL-OWNER-SIDE-MUTATION-CONTRACT-FREEZE-PASS-508-2026-06-21.md)
+- [AI Long-Run Batch Orchestration Single Supervised Pilot Selected-Pilot Actual Owner-Side Mutation Owner-Surface Admission Pass 509](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-ACTUAL-OWNER-SIDE-MUTATION-OWNER-SURFACE-ADMISSION-PASS-509-2026-06-21.md)
 
 ## Notes
 

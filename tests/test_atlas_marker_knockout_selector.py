@@ -73,7 +73,7 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
     def _write_packet_receipts(self, root: Path) -> None:
         current_receipt = root / "docs" / "ops" / (
             "AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-"
-            "ACTUAL-OWNER-SIDE-MUTATION-CONTRACT-FREEZE-PASS-508-2026-06-21.md"
+            "ACTUAL-OWNER-SIDE-MUTATION-OWNER-SURFACE-ADMISSION-PASS-509-2026-06-21.md"
         )
         current_receipt.parent.mkdir(parents=True, exist_ok=True)
         current_receipt.write_text(
@@ -81,8 +81,8 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
                 [
                     "# Current Packet",
                     "",
-                    "- Mode: `docs-only root-bounded contract freeze`",
-                    "- Scope: `freeze the exact root-owned contract for deciding when one preserved selected-pilot owner_repo_mutation card may or may not become one bounded downstream actual owner-side mutation question without widening into actual owner-side mutation authority, _stack execution-home doctrine, Playbook export, deploy/publication, or protected-surface touch`",
+                    "- Mode: `docs-only root-bounded owner-surface admission`",
+                    "- Scope: `freeze the exact root-owned producing and consuming home for the selected-pilot actual owner-side mutation family before supporting-lane admission, concrete actual owner-side mutation admission, or execution-home widening`",
                     "",
                 ]
             ),
@@ -118,19 +118,19 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual(20, payload["selected_percentage"])
         self.assertEqual("continue_current_lane", payload["operator_action"])
         self.assertEqual(
-            "AI Long-Run Batch Orchestration single supervised pilot selected-pilot actual owner-side mutation contract freeze pass 508",
+            "AI Long-Run Batch Orchestration single supervised pilot selected-pilot actual owner-side mutation owner-surface admission pass 509",
             payload["selected_current_packet"],
         )
         self.assertEqual(
-            "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-ACTUAL-OWNER-SIDE-MUTATION-CONTRACT-FREEZE-PASS-508-2026-06-21.md",
+            "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-ACTUAL-OWNER-SIDE-MUTATION-OWNER-SURFACE-ADMISSION-PASS-509-2026-06-21.md",
             payload["selected_current_packet_basis_ref"],
         )
         self.assertEqual(
-            "docs-only root-bounded contract freeze",
+            "docs-only root-bounded owner-surface admission",
             payload["selected_current_packet_mode"],
         )
         self.assertEqual(
-            "freeze the exact root-owned contract for deciding when one preserved selected-pilot owner_repo_mutation card may or may not become one bounded downstream actual owner-side mutation question without widening into actual owner-side mutation authority, _stack execution-home doctrine, Playbook export, deploy/publication, or protected-surface touch",
+            "freeze the exact root-owned producing and consuming home for the selected-pilot actual owner-side mutation family before supporting-lane admission, concrete actual owner-side mutation admission, or execution-home widening",
             payload["selected_current_packet_scope"],
         )
         self.assertEqual(
@@ -207,20 +207,20 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertIn("## Operator Action", markdown)
         self.assertIn("action: `continue_current_lane`", markdown)
         self.assertIn(
-            "current packet basis receipt: `docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-ACTUAL-OWNER-SIDE-MUTATION-CONTRACT-FREEZE-PASS-508-2026-06-21.md`",
+            "current packet basis receipt: `docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-ACTUAL-OWNER-SIDE-MUTATION-OWNER-SURFACE-ADMISSION-PASS-509-2026-06-21.md`",
             markdown,
         )
         self.assertIn(
-            "current packet mode: `docs-only root-bounded contract freeze`",
+            "current packet mode: `docs-only root-bounded owner-surface admission`",
             markdown,
         )
         self.assertIn(
-            "current packet scope: `freeze the exact root-owned contract for deciding when one preserved selected-pilot owner_repo_mutation card may or may not become one bounded downstream actual owner-side mutation question without widening into actual owner-side mutation authority, _stack execution-home doctrine, Playbook export, deploy/publication, or protected-surface touch`",
+            "current packet scope: `freeze the exact root-owned producing and consuming home for the selected-pilot actual owner-side mutation family before supporting-lane admission, concrete actual owner-side mutation admission, or execution-home widening`",
             markdown,
         )
         self.assertIn("## Current Active Marker", markdown)
         self.assertIn(
-            "current packet: `AI Long-Run Batch Orchestration single supervised pilot selected-pilot actual owner-side mutation contract freeze pass 508`",
+            "current packet: `AI Long-Run Batch Orchestration single supervised pilot selected-pilot actual owner-side mutation owner-surface admission pass 509`",
             markdown,
         )
         self.assertIn("## First Admissible After Current Lane", markdown)
