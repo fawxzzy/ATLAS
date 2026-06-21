@@ -295,10 +295,10 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "AI Long-Run Batch Orchestration": PacketDescriptor(
-        packet="_stack Readiness supervised execution-home first-implementation worker cluster reconciliation",
+        packet="AI Long-Run Batch Orchestration post-supervised execution-home next-slice selection pass 524",
         basis_receipt_ref=(
             "docs/ops/"
-            "_STACK-READINESS-SUPERVISED-EXECUTION-HOME-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-21.md"
+            "AI-LONG-RUN-BATCH-ORCHESTRATION-POST-SUPERVISED-EXECUTION-HOME-NEXT-SLICE-SELECTION-PASS-524-2026-06-21.md"
         ),
     ),
 }
