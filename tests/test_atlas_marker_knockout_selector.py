@@ -72,8 +72,8 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
 
     def _write_packet_receipts(self, root: Path) -> None:
         current_receipt = root / "docs" / "ops" / (
-            "AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-"
-            "OWNER-REPO-IMPLEMENTATION-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-20.md"
+            "AI-LONG-RUN-BATCH-ORCHESTRATION-POST-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-"
+            "OWNER-REPO-IMPLEMENTATION-NEXT-SLICE-SELECTION-PASS-500-2026-06-20.md"
         )
         current_receipt.parent.mkdir(parents=True, exist_ok=True)
         current_receipt.write_text(
@@ -81,8 +81,8 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
                 [
                     "# Current Packet",
                     "",
-                    "- Mode: `root-owned bounded implementation and proof reconciliation`",
-                    "- Scope: `selected-pilot owner-repo implementation helper and proof worker cluster`",
+                    "- Mode: `docs-only root-bounded next-slice selection`",
+                    "- Scope: `choose the strongest bounded downstream seam now that the selected-pilot owner-repo implementation helper and proof are landed on canonical main`",
                     "",
                 ]
             ),
@@ -118,19 +118,19 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual(20, payload["selected_percentage"])
         self.assertEqual("continue_current_lane", payload["operator_action"])
         self.assertEqual(
-            "AI Long-Run Batch Orchestration single supervised pilot selected-pilot owner-repo implementation first-implementation worker cluster reconciliation",
+            "AI Long-Run Batch Orchestration post-single supervised pilot selected-pilot owner-repo implementation next-slice selection pass 500",
             payload["selected_current_packet"],
         )
         self.assertEqual(
-            "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-OWNER-REPO-IMPLEMENTATION-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-20.md",
+            "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-OWNER-REPO-IMPLEMENTATION-NEXT-SLICE-SELECTION-PASS-500-2026-06-20.md",
             payload["selected_current_packet_basis_ref"],
         )
         self.assertEqual(
-            "root-owned bounded implementation and proof reconciliation",
+            "docs-only root-bounded next-slice selection",
             payload["selected_current_packet_mode"],
         )
         self.assertEqual(
-            "selected-pilot owner-repo implementation helper and proof worker cluster",
+            "choose the strongest bounded downstream seam now that the selected-pilot owner-repo implementation helper and proof are landed on canonical main",
             payload["selected_current_packet_scope"],
         )
         self.assertEqual(
@@ -207,20 +207,20 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertIn("## Operator Action", markdown)
         self.assertIn("action: `continue_current_lane`", markdown)
         self.assertIn(
-            "current packet basis receipt: `docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-OWNER-REPO-IMPLEMENTATION-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-20.md`",
+            "current packet basis receipt: `docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-OWNER-REPO-IMPLEMENTATION-NEXT-SLICE-SELECTION-PASS-500-2026-06-20.md`",
             markdown,
         )
         self.assertIn(
-            "current packet mode: `root-owned bounded implementation and proof reconciliation`",
+            "current packet mode: `docs-only root-bounded next-slice selection`",
             markdown,
         )
         self.assertIn(
-            "current packet scope: `selected-pilot owner-repo implementation helper and proof worker cluster`",
+            "current packet scope: `choose the strongest bounded downstream seam now that the selected-pilot owner-repo implementation helper and proof are landed on canonical main`",
             markdown,
         )
         self.assertIn("## Current Active Marker", markdown)
         self.assertIn(
-            "current packet: `AI Long-Run Batch Orchestration single supervised pilot selected-pilot owner-repo implementation first-implementation worker cluster reconciliation`",
+            "current packet: `AI Long-Run Batch Orchestration post-single supervised pilot selected-pilot owner-repo implementation next-slice selection pass 500`",
             markdown,
         )
         self.assertIn("## First Admissible After Current Lane", markdown)
