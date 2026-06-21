@@ -1312,6 +1312,7 @@
 - [AI Long-Run Batch Orchestration Post-Single Supervised Pilot Selected-Pilot Owner-Repo Implementation Next-Slice Selection Pass 500](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-OWNER-REPO-IMPLEMENTATION-NEXT-SLICE-SELECTION-PASS-500-2026-06-20.md)
 - [AI Long-Run Batch Orchestration Single Supervised Pilot Selected-Pilot Owner-Repo Mutation Contract Freeze Pass 501](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-OWNER-REPO-MUTATION-CONTRACT-FREEZE-PASS-501-2026-06-20.md)
 - [AI Long-Run Batch Orchestration Single Supervised Pilot Selected-Pilot Owner-Repo Mutation Owner-Surface Admission Pass 502](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-OWNER-REPO-MUTATION-OWNER-SURFACE-ADMISSION-PASS-502-2026-06-21.md)
+- [AI Long-Run Batch Orchestration Single Supervised Pilot Selected-Pilot Owner-Repo Mutation Supporting-Lane Admission Pass 503](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-OWNER-REPO-MUTATION-SUPPORTING-LANE-ADMISSION-PASS-503-2026-06-21.md)
 
 ## Notes
 

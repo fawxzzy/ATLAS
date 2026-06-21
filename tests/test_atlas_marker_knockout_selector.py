@@ -73,7 +73,7 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
     def _write_packet_receipts(self, root: Path) -> None:
         current_receipt = root / "docs" / "ops" / (
             "AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-"
-            "OWNER-REPO-MUTATION-OWNER-SURFACE-ADMISSION-PASS-502-2026-06-21.md"
+            "OWNER-REPO-MUTATION-SUPPORTING-LANE-ADMISSION-PASS-503-2026-06-21.md"
         )
         current_receipt.parent.mkdir(parents=True, exist_ok=True)
         current_receipt.write_text(
@@ -81,8 +81,8 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
                 [
                     "# Current Packet",
                     "",
-                    "- Mode: `docs-only root-bounded owner-surface admission`",
-                    "- Scope: `freeze the exact root-owned producing and consuming home for the selected-pilot owner-repo mutation family before supporting-lane admission, concrete mutation admission, or execution-home widening`",
+                    "- Mode: `docs-only root-bounded supporting-lane admission`",
+                    "- Scope: `decide whether the root-owned selected-pilot owner-repo mutation family honestly reopens any separate supporting seam before first-implementation admission, owner-side mutation authority, or execution-home widening`",
                     "",
                 ]
             ),
@@ -118,19 +118,19 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual(20, payload["selected_percentage"])
         self.assertEqual("continue_current_lane", payload["operator_action"])
         self.assertEqual(
-            "AI Long-Run Batch Orchestration single supervised pilot selected-pilot owner-repo mutation owner-surface admission pass 502",
+            "AI Long-Run Batch Orchestration single supervised pilot selected-pilot owner-repo mutation supporting-lane admission pass 503",
             payload["selected_current_packet"],
         )
         self.assertEqual(
-            "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-OWNER-REPO-MUTATION-OWNER-SURFACE-ADMISSION-PASS-502-2026-06-21.md",
+            "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-OWNER-REPO-MUTATION-SUPPORTING-LANE-ADMISSION-PASS-503-2026-06-21.md",
             payload["selected_current_packet_basis_ref"],
         )
         self.assertEqual(
-            "docs-only root-bounded owner-surface admission",
+            "docs-only root-bounded supporting-lane admission",
             payload["selected_current_packet_mode"],
         )
         self.assertEqual(
-            "freeze the exact root-owned producing and consuming home for the selected-pilot owner-repo mutation family before supporting-lane admission, concrete mutation admission, or execution-home widening",
+            "decide whether the root-owned selected-pilot owner-repo mutation family honestly reopens any separate supporting seam before first-implementation admission, owner-side mutation authority, or execution-home widening",
             payload["selected_current_packet_scope"],
         )
         self.assertEqual(
@@ -207,20 +207,20 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertIn("## Operator Action", markdown)
         self.assertIn("action: `continue_current_lane`", markdown)
         self.assertIn(
-            "current packet basis receipt: `docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-OWNER-REPO-MUTATION-OWNER-SURFACE-ADMISSION-PASS-502-2026-06-21.md`",
+            "current packet basis receipt: `docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-OWNER-REPO-MUTATION-SUPPORTING-LANE-ADMISSION-PASS-503-2026-06-21.md`",
             markdown,
         )
         self.assertIn(
-            "current packet mode: `docs-only root-bounded owner-surface admission`",
+            "current packet mode: `docs-only root-bounded supporting-lane admission`",
             markdown,
         )
         self.assertIn(
-            "current packet scope: `freeze the exact root-owned producing and consuming home for the selected-pilot owner-repo mutation family before supporting-lane admission, concrete mutation admission, or execution-home widening`",
+            "current packet scope: `decide whether the root-owned selected-pilot owner-repo mutation family honestly reopens any separate supporting seam before first-implementation admission, owner-side mutation authority, or execution-home widening`",
             markdown,
         )
         self.assertIn("## Current Active Marker", markdown)
         self.assertIn(
-            "current packet: `AI Long-Run Batch Orchestration single supervised pilot selected-pilot owner-repo mutation owner-surface admission pass 502`",
+            "current packet: `AI Long-Run Batch Orchestration single supervised pilot selected-pilot owner-repo mutation supporting-lane admission pass 503`",
             markdown,
         )
         self.assertIn("## First Admissible After Current Lane", markdown)
