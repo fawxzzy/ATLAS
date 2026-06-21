@@ -72,7 +72,7 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
 
     def _write_packet_receipts(self, root: Path) -> None:
         current_receipt = root / "docs" / "ops" / (
-            "_STACK-READINESS-SUPERVISED-EXECUTION-HOME-REPORT-CONTRACT-AND-NO-MUTATION-GUARD-PASS-520-2026-06-21.md"
+            "_STACK-READINESS-SUPERVISED-EXECUTION-HOME-IMPLEMENTATION-ADMISSION-AND-NO-MUTATION-GUARD-PASS-521-2026-06-21.md"
         )
         current_receipt.parent.mkdir(parents=True, exist_ok=True)
         current_receipt.write_text(
@@ -80,8 +80,8 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
                 [
                     "# Current Packet",
                     "",
-                    "- Mode: `docs-only root-bounded report-contract and no-mutation guard`",
-                    "- Scope: `freeze the exact supervised execution-home posture report envelope, bounded degraded output, and no-mutation routing note discipline without selecting command-home, runtime-home, worker authority, owner-repo edits, or actual owner-side mutation authority`",
+                    "- Mode: `docs-only root-bounded implementation-admission and no-mutation guard`",
+                    "- Scope: `freeze the smallest fail-closed implementation slice that can render one supervised execution-home posture from admitted root-owned evidence without selecting command-home, runtime-home, worker authority, owner-repo edits, or actual owner-side mutation authority`",
                     "",
                 ]
             ),
@@ -117,19 +117,19 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual(20, payload["selected_percentage"])
         self.assertEqual("continue_current_lane", payload["operator_action"])
         self.assertEqual(
-            "_stack Readiness supervised execution-home report-contract and no-mutation guard pass 520",
+            "_stack Readiness supervised execution-home implementation-admission and no-mutation guard pass 521",
             payload["selected_current_packet"],
         )
         self.assertEqual(
-            "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-REPORT-CONTRACT-AND-NO-MUTATION-GUARD-PASS-520-2026-06-21.md",
+            "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-IMPLEMENTATION-ADMISSION-AND-NO-MUTATION-GUARD-PASS-521-2026-06-21.md",
             payload["selected_current_packet_basis_ref"],
         )
         self.assertEqual(
-            "docs-only root-bounded report-contract and no-mutation guard",
+            "docs-only root-bounded implementation-admission and no-mutation guard",
             payload["selected_current_packet_mode"],
         )
         self.assertEqual(
-            "freeze the exact supervised execution-home posture report envelope, bounded degraded output, and no-mutation routing note discipline without selecting command-home, runtime-home, worker authority, owner-repo edits, or actual owner-side mutation authority",
+            "freeze the smallest fail-closed implementation slice that can render one supervised execution-home posture from admitted root-owned evidence without selecting command-home, runtime-home, worker authority, owner-repo edits, or actual owner-side mutation authority",
             payload["selected_current_packet_scope"],
         )
         self.assertEqual(
@@ -206,20 +206,20 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertIn("## Operator Action", markdown)
         self.assertIn("action: `continue_current_lane`", markdown)
         self.assertIn(
-            "current packet basis receipt: `docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-REPORT-CONTRACT-AND-NO-MUTATION-GUARD-PASS-520-2026-06-21.md`",
+            "current packet basis receipt: `docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-IMPLEMENTATION-ADMISSION-AND-NO-MUTATION-GUARD-PASS-521-2026-06-21.md`",
             markdown,
         )
         self.assertIn(
-            "current packet mode: `docs-only root-bounded report-contract and no-mutation guard`",
+            "current packet mode: `docs-only root-bounded implementation-admission and no-mutation guard`",
             markdown,
         )
         self.assertIn(
-            "current packet scope: `freeze the exact supervised execution-home posture report envelope, bounded degraded output, and no-mutation routing note discipline without selecting command-home, runtime-home, worker authority, owner-repo edits, or actual owner-side mutation authority`",
+            "current packet scope: `freeze the smallest fail-closed implementation slice that can render one supervised execution-home posture from admitted root-owned evidence without selecting command-home, runtime-home, worker authority, owner-repo edits, or actual owner-side mutation authority`",
             markdown,
         )
         self.assertIn("## Current Active Marker", markdown)
         self.assertIn(
-            "current packet: `_stack Readiness supervised execution-home report-contract and no-mutation guard pass 520`",
+            "current packet: `_stack Readiness supervised execution-home implementation-admission and no-mutation guard pass 521`",
             markdown,
         )
         self.assertIn("## First Admissible After Current Lane", markdown)
