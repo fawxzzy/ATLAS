@@ -1347,6 +1347,7 @@
 - [_Stack Readiness Supervised Execution-Home Command-Home First-Implementation Worker Cluster Reconciliation](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-COMMAND-HOME-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-21.md)
 - [AI Long-Run Batch Orchestration Post-Command-Home-Selection Next-Slice Selection Pass 531](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-COMMAND-HOME-SELECTION-NEXT-SLICE-SELECTION-PASS-531-2026-06-21.md)
 - [_Stack Readiness Supervised Execution-Home Concrete Command-Home Selection Contract Freeze Pass 532](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-COMMAND-HOME-SELECTION-CONTRACT-FREEZE-PASS-532-2026-06-21.md)
+- [_Stack Readiness Supervised Execution-Home Concrete Command-Home Owner-Surface Admission Pass 533](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-COMMAND-HOME-OWNER-SURFACE-ADMISSION-PASS-533-2026-06-21.md)
 
 ## Notes
 
