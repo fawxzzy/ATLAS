@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-06-18T16:50:07.5884334-04:00",
-  "updated_at": "2026-06-21T18:10:00.0000000-04:00",
+  "updated_at": "2026-06-21T18:20:00.0000000-04:00",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -101,6 +101,7 @@
     "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-SUPERVISED-EXECUTION-HOME-NEXT-SLICE-SELECTION-PASS-524-2026-06-21.md",
     "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-COMMAND-HOME-SELECTION-CONTRACT-FREEZE-PASS-525-2026-06-21.md",
     "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-COMMAND-HOME-OWNER-SURFACE-ADMISSION-PASS-526-2026-06-21.md",
+    "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-COMMAND-HOME-SUPPORTING-LANE-ADMISSION-PASS-527-2026-06-21.md",
     "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-OWNER-REPO-MUTATION-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-21.md",
     "ops/atlas/pilot_selected_owner_repo_mutation.py",
     "tests/test_atlas_pilot_selected_owner_repo_mutation.py",
@@ -123,9 +124,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "ai-long-run-batch-orchestration",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-COMMAND-HOME-OWNER-SURFACE-ADMISSION-PASS-526-2026-06-21.md",
+    "current_checkpoint_receipt": "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-COMMAND-HOME-SUPPORTING-LANE-ADMISSION-PASS-527-2026-06-21.md",
     "checkpoint_commit": "main",
-    "checkpoint_summary": "The lane now has the command-home-selection owner-facing home durably frozen too: the seam belongs to `_stack Readiness` control-plane surfaces in ATLAS root without choosing concrete `_stack` command files, runtime home, owner-repo mutation, or Playbook doctrine export; the marker holds at `65%`; and the exact next package is now `_stack Readiness supervised execution-home command-home supporting-lane admission pass 527`.",
+    "checkpoint_summary": "The lane now has the command-home-selection support posture durably frozen too: separate support still honestly holds at `none yet` without choosing concrete `_stack` command files, runtime home, owner-repo mutation, or Playbook doctrine export; the marker holds at `65%`; and the exact next package is now `_stack Readiness supervised execution-home command-home first-implementation admission pass 528`.",
     "governing_receipts": [
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-2026-05-22.md",
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-POST-WORLD-MODEL-TOP-LEVEL-PAYLOAD-BOUNDARY-NEXT-SLICE-SELECTION-PASS-460-2026-06-17.md",
@@ -207,6 +208,7 @@
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-SUPERVISED-EXECUTION-HOME-NEXT-SLICE-SELECTION-PASS-524-2026-06-21.md",
       "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-COMMAND-HOME-SELECTION-CONTRACT-FREEZE-PASS-525-2026-06-21.md",
       "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-COMMAND-HOME-OWNER-SURFACE-ADMISSION-PASS-526-2026-06-21.md",
+      "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-COMMAND-HOME-SUPPORTING-LANE-ADMISSION-PASS-527-2026-06-21.md",
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-OWNER-REPO-MUTATION-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-21.md"
     ],
     "owner_truth_surfaces": [
@@ -511,6 +513,10 @@
         "role": "current exact command-home owner-surface admission"
       },
       {
+        "path": "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-COMMAND-HOME-SUPPORTING-LANE-ADMISSION-PASS-527-2026-06-21.md",
+        "role": "current exact command-home supporting-lane admission"
+      },
+      {
         "path": "ops/atlas/pilot_selected_actual_owner_side_mutation.py",
         "role": "current exact selected-pilot actual owner-side mutation helper"
       },
@@ -649,15 +655,15 @@
     ],
     "next_package_ladder": [
       {
-        "package": "_stack Readiness supervised execution-home command-home supporting-lane admission pass 527",
-        "mode": "root-owned bounded command-home support-admission packet",
-        "reason": "the command-home-selection owner-facing home is now durable, so the next honest blocker is deciding whether any separate supporting seam reopens before implementation-admission or runtime-home widening"
+        "package": "_stack Readiness supervised execution-home command-home first-implementation admission pass 528",
+        "mode": "root-owned bounded command-home implementation-admission packet",
+        "reason": "the command-home-selection support posture now honestly holds at none yet, so the next honest blocker is freezing the smallest fail-closed implementation slice before concrete command-home or runtime-home widening"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-COMMAND-HOME-OWNER-SURFACE-ADMISSION-PASS-526-2026-06-21.md",
-    "freshness_checked_at": "2026-06-21T18:10:00.0000000-04:00",
-    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture now match the active AI Long-Run lane because the supervised execution-home helper-and-proof slice is reconciled on canonical `main`, the post-supervised-execution-home next-slice selector, command-home-selection contract, and command-home owner-facing home are durable, the marker holds at `65%`, and the exact next package is now `_stack Readiness supervised execution-home command-home supporting-lane admission pass 527`.",
+    "freshness_checked_receipt": "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-COMMAND-HOME-SUPPORTING-LANE-ADMISSION-PASS-527-2026-06-21.md",
+    "freshness_checked_at": "2026-06-21T18:20:00.0000000-04:00",
+    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture now match the active AI Long-Run lane because the supervised execution-home helper-and-proof slice is reconciled on canonical `main`, the post-supervised-execution-home next-slice selector, command-home-selection contract, command-home owner-facing home, and command-home support posture are durable, the marker holds at `65%`, and the exact next package is now `_stack Readiness supervised execution-home command-home first-implementation admission pass 528`.",
     "marker_posture": [
       {
         "marker": "AI Long-Run Batch Orchestration",
