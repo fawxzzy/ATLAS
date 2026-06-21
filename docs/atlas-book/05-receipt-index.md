@@ -1326,6 +1326,7 @@
 - [AI Long-Run Batch Orchestration Single Supervised Pilot Selected-Pilot Actual Owner-Side Mutation Prompt-Pack And Handoff Contract Pass 512](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-ACTUAL-OWNER-SIDE-MUTATION-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-512-2026-06-21.md)
 - [AI Long-Run Batch Orchestration Single Supervised Pilot Selected-Pilot Actual Owner-Side Mutation Implementation-Readiness Closeout And Worker-Routing Pass 513](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-ACTUAL-OWNER-SIDE-MUTATION-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-513-2026-06-21.md)
 - [AI Long-Run Batch Orchestration Single Supervised Pilot Selected-Pilot Actual Owner-Side Mutation First-Implementation Worker Cluster Reconciliation](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-ACTUAL-OWNER-SIDE-MUTATION-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-21.md)
+- [AI Long-Run Batch Orchestration Post-Single Supervised Pilot Selected-Pilot Actual Owner-Side Mutation Next-Slice Selection Pass 514](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-ACTUAL-OWNER-SIDE-MUTATION-NEXT-SLICE-SELECTION-PASS-514-2026-06-21.md)
 
 ## Notes
 
