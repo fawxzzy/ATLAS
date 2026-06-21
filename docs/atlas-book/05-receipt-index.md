@@ -1341,6 +1341,7 @@
 - [_Stack Readiness Supervised Execution-Home Command-Home Selection Contract Freeze Pass 525](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-COMMAND-HOME-SELECTION-CONTRACT-FREEZE-PASS-525-2026-06-21.md)
 - [_Stack Readiness Supervised Execution-Home Command-Home Owner-Surface Admission Pass 526](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-COMMAND-HOME-OWNER-SURFACE-ADMISSION-PASS-526-2026-06-21.md)
 - [_Stack Readiness Supervised Execution-Home Command-Home Supporting-Lane Admission Pass 527](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-COMMAND-HOME-SUPPORTING-LANE-ADMISSION-PASS-527-2026-06-21.md)
+- [_Stack Readiness Supervised Execution-Home Command-Home First-Implementation Admission Pass 528](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-COMMAND-HOME-FIRST-IMPLEMENTATION-ADMISSION-PASS-528-2026-06-21.md)
 
 ## Notes
 
