@@ -6,14 +6,13 @@
 
 - `Truth Map & ATLAS Book: 97%`
 - `Inventory & Truth Map: 85%`
-- `Knowledge Capture & Transfer: 100%`
-- `Durable Context Externalization: 100%`
 
 Read:
 
 - the continuity substrate is strong enough to restart from durable surfaces first
 - continuity manifests, truth maps, and retrieval hygiene are real, and the seeded initiative set now also has four machine-readable continuity reads: `18` covered manifests at `18 ok / 0 warning / 0 error`, `8 / 8` eligible open markers are manifest-backed, `8 / 8` eligible open markers are restart-ready from one machine-readable index, and `18 / 18` maintained initiative manifests are restart-ready from one machine-readable index; `Truth Map & ATLAS Book` still owns the canonical restart surface, and `AI Repetition-to-Automation Pipeline`, `Playbook Everywhere + Cortex Interface`, and `Cortex Readiness` now also have maintained manifest-backed retrieval maps
 - continuity is still not universal across every future lane, but the current KCT and DCE continuity family is now closed for its admitted scope because bootstrap, trusted repo-context, run/session, memory, knowledge, and promote seams all preserve doctrine identity directly
+- `Knowledge Capture & Transfer` and `Durable Context Externalization` now stay discoverable through `Closed / Locked Ratchets` plus receipts rather than the live active/open marker display
 - one explicit reusable work item now sits inside this substrate: `ATLAS systems-doc normalization`, meaning owner-repo system truth gets reconciled into restart-friendly Book chapters without duplicating repo-local implementation detail; `Lifeline` is the first concrete example
 
 ### Execution substrate
@@ -31,9 +30,6 @@ Read:
 
 ### Discord workflow
 
-- `DiscordOS Runtime & Product Hardening: 100%`
-- `Discord Workflow, Publication & Docs Reliability: 100%`
-
 Read:
 
 - DiscordOS infrastructure separation and feedback workflow canonicalization are closed ratchets; do not reopen them from taxonomy cleanup alone
@@ -42,8 +38,6 @@ Read:
 
 ### Naming / ownership hygiene
 
-- `Dependency Untangling: 100%`
-
 Read:
 
 - naming is now a closed ratchet, and dependency untangling is now also a closed ratchet because the remaining cross-repo seams are explicit retained boundaries rather than hidden mixed-runtime coupling
@@ -51,20 +45,12 @@ Read:
 
 ## Active Front-Page Marker Table
 
-- Dependency Untangling: `100%`
 - Truth Map & ATLAS Book: `97%`
 - Inventory & Truth Map: `85%`
-- Knowledge Capture & Transfer: `100%`
-- Durable Context Externalization: `100%`
 - AI Repetition-to-Automation Pipeline: `35%`
 - AI Long-Run Batch Orchestration: `63%`
-- DiscordOS Runtime & Product Hardening: `100%`
 
 ## Supporting Open Markers
-
-### Cleanup / disposition blockers
-
-- Tmp Dependency Elimination: `100%`
 
 ### Automation / orchestration
 
@@ -103,6 +89,7 @@ Read:
 - Discord OS Infrastructure Separation: `100%`
 - Discord OS Feedback Workflow Canonicalization: `100%`
 - Discord Workflow, Publication & Docs Reliability: `100%`
+- DiscordOS Runtime & Product Hardening: `100%`
 - Brand Asset Canonicalization: `100%`
 - Preview Cache & Surface Consistency: `100%`
 - Manual Deploy Exception Burn-Down: `100%`
@@ -121,6 +108,10 @@ Read:
 - Workstation Resource Hygiene: `100%`
 - Vercel Hobby Cost Governance: `100%`
 - Local Data Gateway: `100%`
+- Dependency Untangling: `100%`
+- Knowledge Capture & Transfer: `100%`
+- Durable Context Externalization: `100%`
+- Tmp Dependency Elimination: `100%`
 - Canonical Repo Restoration: `100%`
 - Branch & Worktree Normalization: `100%`
 - Fitness Supabase Profile/Data Hygiene: `100%`

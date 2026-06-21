@@ -36,6 +36,7 @@
 - [Near-100 Marker Closeout Selector After Naming And Discord Closeouts](../ops/NEAR-100-MARKER-CLOSEOUT-SELECTOR-AFTER-NAMING-AND-DISCORD-CLOSEOUTS-2026-06-12.md)
 - [Fitness Protected Marker Closeout After QA/LLEL Contract Refresh And Local Branch/Worktree Cleanup](../ops/FITNESS-PROTECTED-MARKER-CLOSEOUT-AFTER-QA-LLEL-CONTRACT-REFRESH-AND-LOCAL-BRANCH-WORKTREE-CLEANUP-2026-06-13.md)
 - [Marker Board Taxonomy Hygiene And Atlas Clean-Re-sync Campaign Pass 1](../ops/MARKER-BOARD-TAXONOMY-HYGIENE-AND-ATLAS-CLEAN-RESYNC-CAMPAIGN-PASS-1-2026-06-13.md)
+- [Marker Board Completed Marker Compaction And Active List Cleanup](../ops/MARKER-BOARD-COMPLETED-MARKER-COMPACTION-AND-ACTIVE-LIST-CLEANUP-2026-06-21.md)
 - [Vercel Hobby Cost Governance Marker Admission Pass 1](../ops/VERCEL-HOBBY-COST-GOVERNANCE-MARKER-ADMISSION-PASS-1-2026-06-13.md)
 - [Vercel Hobby Cost Governance Current Usage Snapshot And Threshold Checkpoint](../ops/VERCEL-HOBBY-COST-GOVERNANCE-CURRENT-USAGE-SNAPSHOT-AND-THRESHOLD-CHECKPOINT-2026-06-17.md)
 - [Vercel Hobby Cost Governance Route, Middleware, And Fetch Pressure Inventory](../ops/VERCEL-HOBBY-COST-GOVERNANCE-ROUTE-MIDDLEWARE-AND-FETCH-PRESSURE-INVENTORY-2026-06-17.md)
