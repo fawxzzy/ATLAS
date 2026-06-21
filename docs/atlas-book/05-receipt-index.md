@@ -1336,6 +1336,7 @@
 - [_Stack Readiness Supervised Execution-Home Implementation-Admission And No-Mutation Guard Pass 521](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-IMPLEMENTATION-ADMISSION-AND-NO-MUTATION-GUARD-PASS-521-2026-06-21.md)
 - [_Stack Readiness Supervised Execution-Home Prompt-Pack And Handoff Contract Pass 522](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-522-2026-06-21.md)
 - [_Stack Readiness Supervised Execution-Home Implementation-Readiness Closeout And Worker-Routing Pass 523](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-523-2026-06-21.md)
+- [_Stack Readiness Supervised Execution-Home First-Implementation Worker Cluster Reconciliation](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-21.md)
 
 ## Notes
 

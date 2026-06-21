@@ -19,13 +19,13 @@ Read:
 
 - `Playbook Everywhere + Cortex Interface: 22%`
 - `AI Repetition-to-Automation Pipeline: 35%`
-- `AI Long-Run Batch Orchestration: 64%`
+- `AI Long-Run Batch Orchestration: 65%`
 
 Read:
 
 - Local Data Gateway is now a closed ratchet for the current no-send packet scope: the fifteen admitted workflow classes remain proven, and path discipline is now machine-checked in the shared packet contract
 - `_stack` is now a closed enabling substrate rather than an active front-page marker; current execution-facing open work starts with the ATLAS-root automation lanes
-- root validation remains proof-closed at `critical=0 error=0 warning=10 info=0`
+- root validation remains proof-closed at `critical=0 error=0 warning=21 info=0`
 - broader automation and long-run orchestration are still early
 
 ### Discord workflow
@@ -48,7 +48,7 @@ Read:
 - Truth Map & ATLAS Book: `97%`
 - Inventory & Truth Map: `85%`
 - AI Repetition-to-Automation Pipeline: `35%`
-- AI Long-Run Batch Orchestration: `64%`
+- AI Long-Run Batch Orchestration: `65%`
 
 ## Supporting Open Markers
 
@@ -56,7 +56,7 @@ Read:
 
 - Cortex Readiness: `41%`
 - AI Repetition-to-Automation Pipeline: `35%`
-- AI Long-Run Batch Orchestration: `64%`
+- AI Long-Run Batch Orchestration: `65%`
 - Playbook Everywhere + Cortex Interface: `22%`
 
 ### Future / lane-structure
