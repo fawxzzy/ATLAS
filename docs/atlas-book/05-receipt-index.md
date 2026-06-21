@@ -1329,6 +1329,7 @@
 - [AI Long-Run Batch Orchestration Post-Single Supervised Pilot Selected-Pilot Actual Owner-Side Mutation Next-Slice Selection Pass 514](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-ACTUAL-OWNER-SIDE-MUTATION-NEXT-SLICE-SELECTION-PASS-514-2026-06-21.md)
 - [_Stack Readiness Supervised Execution-Home Contract Freeze Pass 515](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONTRACT-FREEZE-PASS-515-2026-06-21.md)
 - [_Stack Readiness Supervised Execution-Home Owner-Surface Admission Pass 516](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-OWNER-SURFACE-ADMISSION-PASS-516-2026-06-21.md)
+- [_Stack Readiness Supervised Execution-Home Supporting-Lane Admission Pass 517](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-SUPPORTING-LANE-ADMISSION-PASS-517-2026-06-21.md)
 
 ## Notes
 
