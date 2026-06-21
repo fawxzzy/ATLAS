@@ -72,7 +72,7 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
 
     def _write_packet_receipts(self, root: Path) -> None:
         current_receipt = root / "docs" / "ops" / (
-            "_STACK-READINESS-SUPERVISED-EXECUTION-HOME-COMMAND-HOME-SELECTION-CONTRACT-FREEZE-PASS-525-2026-06-21.md"
+            "_STACK-READINESS-SUPERVISED-EXECUTION-HOME-COMMAND-HOME-OWNER-SURFACE-ADMISSION-PASS-526-2026-06-21.md"
         )
         current_receipt.parent.mkdir(parents=True, exist_ok=True)
         current_receipt.write_text(
@@ -80,8 +80,8 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
                 [
                     "# Current Packet",
                     "",
-                    "- Mode: `docs-only root-bounded contract freeze`",
-                    "- Scope: `freeze the exact root-owned contract for when the reconciled supervised execution-home posture may or may not reopen one bounded command-home selection question without widening into concrete command files, runtime-home choice, _stack runtime mutation, worker authority, owner-repo edits, actual owner-side mutation authority, Playbook doctrine export, deploy or publication, or protected-surface touch`",
+                    "- Mode: `docs-only root-bounded owner-surface admission`",
+                    "- Scope: `freeze the exact owner-facing producing and consuming home for the command-home-selection family before supporting-lane admission, concrete command-home choice, runtime-home selection, _stack command implementation, worker authority, or owner-repo widening`",
                     "",
                 ]
             ),
@@ -117,19 +117,19 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual(20, payload["selected_percentage"])
         self.assertEqual("continue_current_lane", payload["operator_action"])
         self.assertEqual(
-            "_stack Readiness supervised execution-home command-home selection contract freeze pass 525",
+            "_stack Readiness supervised execution-home command-home owner-surface admission pass 526",
             payload["selected_current_packet"],
         )
         self.assertEqual(
-            "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-COMMAND-HOME-SELECTION-CONTRACT-FREEZE-PASS-525-2026-06-21.md",
+            "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-COMMAND-HOME-OWNER-SURFACE-ADMISSION-PASS-526-2026-06-21.md",
             payload["selected_current_packet_basis_ref"],
         )
         self.assertEqual(
-            "docs-only root-bounded contract freeze",
+            "docs-only root-bounded owner-surface admission",
             payload["selected_current_packet_mode"],
         )
         self.assertEqual(
-            "freeze the exact root-owned contract for when the reconciled supervised execution-home posture may or may not reopen one bounded command-home selection question without widening into concrete command files, runtime-home choice, _stack runtime mutation, worker authority, owner-repo edits, actual owner-side mutation authority, Playbook doctrine export, deploy or publication, or protected-surface touch",
+            "freeze the exact owner-facing producing and consuming home for the command-home-selection family before supporting-lane admission, concrete command-home choice, runtime-home selection, _stack command implementation, worker authority, or owner-repo widening",
             payload["selected_current_packet_scope"],
         )
         self.assertEqual(
@@ -206,20 +206,20 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertIn("## Operator Action", markdown)
         self.assertIn("action: `continue_current_lane`", markdown)
         self.assertIn(
-            "current packet basis receipt: `docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-COMMAND-HOME-SELECTION-CONTRACT-FREEZE-PASS-525-2026-06-21.md`",
+            "current packet basis receipt: `docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-COMMAND-HOME-OWNER-SURFACE-ADMISSION-PASS-526-2026-06-21.md`",
             markdown,
         )
         self.assertIn(
-            "current packet mode: `docs-only root-bounded contract freeze`",
+            "current packet mode: `docs-only root-bounded owner-surface admission`",
             markdown,
         )
         self.assertIn(
-            "current packet scope: `freeze the exact root-owned contract for when the reconciled supervised execution-home posture may or may not reopen one bounded command-home selection question without widening into concrete command files, runtime-home choice, _stack runtime mutation, worker authority, owner-repo edits, actual owner-side mutation authority, Playbook doctrine export, deploy or publication, or protected-surface touch`",
+            "current packet scope: `freeze the exact owner-facing producing and consuming home for the command-home-selection family before supporting-lane admission, concrete command-home choice, runtime-home selection, _stack command implementation, worker authority, or owner-repo widening`",
             markdown,
         )
         self.assertIn("## Current Active Marker", markdown)
         self.assertIn(
-            "current packet: `_stack Readiness supervised execution-home command-home selection contract freeze pass 525`",
+            "current packet: `_stack Readiness supervised execution-home command-home owner-surface admission pass 526`",
             markdown,
         )
         self.assertIn("## First Admissible After Current Lane", markdown)
