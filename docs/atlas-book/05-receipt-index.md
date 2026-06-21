@@ -1343,6 +1343,7 @@
 - [_Stack Readiness Supervised Execution-Home Command-Home Supporting-Lane Admission Pass 527](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-COMMAND-HOME-SUPPORTING-LANE-ADMISSION-PASS-527-2026-06-21.md)
 - [_Stack Readiness Supervised Execution-Home Command-Home First-Implementation Admission Pass 528](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-COMMAND-HOME-FIRST-IMPLEMENTATION-ADMISSION-PASS-528-2026-06-21.md)
 - [_Stack Readiness Supervised Execution-Home Command-Home Prompt-Pack And Handoff Contract Pass 529](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-COMMAND-HOME-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-529-2026-06-21.md)
+- [_Stack Readiness Supervised Execution-Home Command-Home Implementation-Readiness Closeout And Worker-Routing Pass 530](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-COMMAND-HOME-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-530-2026-06-21.md)
 
 ## Notes
 
