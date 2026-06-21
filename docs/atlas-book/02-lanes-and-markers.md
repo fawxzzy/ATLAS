@@ -20,7 +20,7 @@ Read:
 
 - `Playbook Everywhere + Cortex Interface: 22%`
 - `AI Repetition-to-Automation Pipeline: 35%`
-- `AI Long-Run Batch Orchestration: 61%`
+- `AI Long-Run Batch Orchestration: 62%`
 
 Read:
 
@@ -57,7 +57,7 @@ Read:
 - Knowledge Capture & Transfer: `100%`
 - Durable Context Externalization: `100%`
 - AI Repetition-to-Automation Pipeline: `35%`
-- AI Long-Run Batch Orchestration: `61%`
+- AI Long-Run Batch Orchestration: `62%`
 - DiscordOS Runtime & Product Hardening: `100%`
 
 ## Supporting Open Markers
@@ -70,7 +70,7 @@ Read:
 
 - Cortex Readiness: `41%`
 - AI Repetition-to-Automation Pipeline: `35%`
-- AI Long-Run Batch Orchestration: `61%`
+- AI Long-Run Batch Orchestration: `62%`
 - Playbook Everywhere + Cortex Interface: `22%`
 
 ### Future / lane-structure
