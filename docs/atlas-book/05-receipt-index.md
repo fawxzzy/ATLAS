@@ -1360,6 +1360,7 @@
 - [_Stack Readiness Supervised Execution-Home Concrete _Stack Command-Home First-Implementation Admission Pass 542](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-STACK-COMMAND-HOME-FIRST-IMPLEMENTATION-ADMISSION-PASS-542-2026-06-22.md)
 - [_Stack Readiness Supervised Execution-Home Concrete _Stack Command-Home Prompt-Pack And Handoff Contract Pass 543](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-STACK-COMMAND-HOME-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-543-2026-06-22.md)
 - [_Stack Readiness Supervised Execution-Home Concrete _Stack Command-Home Implementation-Readiness Closeout And Worker-Routing Pass 544](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-STACK-COMMAND-HOME-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-544-2026-06-22.md)
+- [_Stack Readiness Supervised Execution-Home Concrete _Stack Command-Home First-Implementation Worker Cluster Reconciliation](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-STACK-COMMAND-HOME-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-22.md)
 
 ## Notes
 
