@@ -1350,6 +1350,7 @@
 - [_Stack Readiness Supervised Execution-Home Concrete Command-Home Owner-Surface Admission Pass 533](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-COMMAND-HOME-OWNER-SURFACE-ADMISSION-PASS-533-2026-06-21.md)
 - [_Stack Readiness Supervised Execution-Home Concrete Command-Home Supporting-Lane Admission Pass 534](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-COMMAND-HOME-SUPPORTING-LANE-ADMISSION-PASS-534-2026-06-21.md)
 - [_Stack Readiness Supervised Execution-Home Concrete Command-Home First-Implementation Admission Pass 535](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-COMMAND-HOME-FIRST-IMPLEMENTATION-ADMISSION-PASS-535-2026-06-21.md)
+- [_Stack Readiness Supervised Execution-Home Concrete Command-Home Prompt-Pack And Handoff Contract Pass 536](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-COMMAND-HOME-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-536-2026-06-21.md)
 
 ## Notes
 
