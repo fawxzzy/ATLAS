@@ -59,10 +59,10 @@
     "repos/DiscordOS/docs/ops/discordos-edge-persisted-writer-proof-2026-06-12.md",
     "repos/DiscordOS/docs/ops/discordos-shadow-transfer-and-parity-proof-2026-06-12.md",
     "repos/DiscordOS/docs/contracts/feedback-runtime.md",
-    "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-FEEDBACK-EXPORTS.md",
-    "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-COMMUNITY-DOCTOR-REPORTS.md",
-    "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-MESSAGE-COMMAND-POLL-SURFACE-SEPARATION-PASS-1-2026-06-18.md",
-    "repos/fawxzzy-fitness/docs/ops/FITNESS-FEEDBACK-BOARD-EXPORTS.md",
+    "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-FEEDBACK.md",
+    "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-SERVER-OPS.md",
+    "docs/ops/POST-CONVERGENCE-AND-VISION-FITNESS-DISCORD-POLL-SURFACE-SEPARATION-RECHECK-2026-06-18.md",
+    "repos/fawxzzy-fitness/docs/ops/FITNESS-FEEDBACK-BOARD.md",
     "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-ACTIVE-POSTURE-GUARD-PROOF-2026-06-12.md",
     "repos/DiscordOS/docs/ops/discordos-active-posture-guard-proof-2026-06-12.md",
     "docs/ops/DISCORD-OS-FEEDBACK-WORKFLOW-FITNESS-PRODUCTION-TRANSFER-AND-EDGE-ALLOWLIST-PROOF-2026-06-12.md",
@@ -145,11 +145,11 @@
     ],
     "owner_truth_surfaces": [
       {
-        "path": "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-FEEDBACK-EXPORTS.md",
-        "role": "bounded current feedback export truth"
+        "path": "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-FEEDBACK.md",
+        "role": "bounded current feedback workflow truth"
       },
       {
-        "path": "repos/fawxzzy-fitness/docs/ops/FITNESS-FEEDBACK-BOARD-EXPORTS.md",
+        "path": "repos/fawxzzy-fitness/docs/ops/FITNESS-FEEDBACK-BOARD.md",
         "role": "bounded current feedback-board truth"
       },
       {
@@ -157,8 +157,8 @@
         "role": "current feedback submission implementation; creates visible forum card before DiscordOS mirror"
       },
       {
-        "path": "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-COMMUNITY-DOCTOR-REPORTS.md",
-        "role": "bounded current Discord-community health truth"
+        "path": "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-SERVER-OPS.md",
+        "role": "bounded current Discord server operations truth"
       },
       {
         "path": "repos/DiscordOS/docs/contracts/feedback-runtime.md",
@@ -211,8 +211,8 @@
     ],
     "verification_adoption_surfaces": [
       {
-        "path": "repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-MESSAGE-COMMAND-POLL-SURFACE-SEPARATION-PASS-1-2026-06-18.md",
-        "role": "current retained Fitness Discord poll-seam proof"
+        "path": "repos/_stack/receipts/FITNESS-DISCORD-FEEDBACK-WORKER-GOVERNED-POLL-SURFACE-RUNTIME-PROOF-2026-06-18.md",
+        "role": "current retained Fitness Discord poll-seam runtime proof"
       },
       {
         "path": "docs/ops/FITNESS-DISCORD-FEEDBACK-LIVE-ROLLOUT-2026-05-25.md",

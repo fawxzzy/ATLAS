@@ -1053,7 +1053,6 @@
 - [Post-Convergence Lane Split Readiness Shared-Contract And Consequence-Routing Compression Family Shaping Pass 5](../ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-SHARED-CONTRACT-AND-CONSEQUENCE-ROUTING-COMPRESSION-FAMILY-SHAPING-PASS-5-2026-05-29.md)
 - [Post-Convergence Lane Split Readiness First-Safe-Package And Reopen-Order Compression Family Shaping Pass 6](../ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-FIRST-SAFE-PACKAGE-AND-REOPEN-ORDER-COMPRESSION-FAMILY-SHAPING-PASS-6-2026-05-29.md)
 - [Post-Convergence Lane Split Readiness Continuity-Manifest Refresh And Ratchet Decision Pass 7](../ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-CONTINUITY-MANIFEST-REFRESH-AND-RATCHET-DECISION-PASS-7-2026-05-29.md)
-- [Fitness Discord Message Command Poll Surface Separation Pass 1](../../repos/fawxzzy-fitness/docs/ops/FITNESS-DISCORD-MESSAGE-COMMAND-POLL-SURFACE-SEPARATION-PASS-1-2026-06-18.md)
 - [Post-Convergence Lane Split Readiness Immediate-Supporting-Held Reselection Pass 8](../ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-IMMEDIATE-SUPPORTING-HELD-RESELECTION-PASS-8-2026-06-02.md)
 - [Post-Convergence Lane Split Readiness Manifest-Freshness Recheck And Hold-Boundary Pass 9](../ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-MANIFEST-FRESHNESS-RECHECK-AND-HOLD-BOUNDARY-PASS-9-2026-06-18.md)
 - [Post-Convergence Lane Split Readiness Live Lane Operability Ratchet Pass 10](../ops/POST-CONVERGENCE-LANE-SPLIT-READINESS-LIVE-LANE-OPERABILITY-RATCHET-PASS-10-2026-06-18.md)
@@ -1370,6 +1369,7 @@
 - [_Stack Readiness Supervised Execution-Home Concrete Command-File Implementation-Readiness Closeout And Worker-Routing Pass 551](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-COMMAND-FILE-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-551-2026-06-22.md)
 - [_Stack Readiness Supervised Execution-Home Concrete Command-File First-Implementation Worker Cluster Reconciliation](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-COMMAND-FILE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-22.md)
 - [AI Long-Run Batch Orchestration Post-Concrete-Command-File Next-Slice Selection Pass 552](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-CONCRETE-COMMAND-FILE-NEXT-SLICE-SELECTION-PASS-552-2026-06-22.md)
+- [_Stack Readiness Supervised Execution-Home Concrete _Stack Command Implementation Surface Selection Contract Freeze Pass 553](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-STACK-COMMAND-IMPLEMENTATION-SURFACE-SELECTION-CONTRACT-FREEZE-PASS-553-2026-06-22.md)
 
 ## Notes
 
