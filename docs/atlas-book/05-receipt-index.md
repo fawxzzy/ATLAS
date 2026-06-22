@@ -1365,6 +1365,7 @@
 - [_Stack Readiness Supervised Execution-Home Concrete Command-File Selection Contract Freeze Pass 546](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-COMMAND-FILE-SELECTION-CONTRACT-FREEZE-PASS-546-2026-06-22.md)
 - [_Stack Readiness Supervised Execution-Home Concrete Command-File Owner-Surface Admission Pass 547](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-COMMAND-FILE-OWNER-SURFACE-ADMISSION-PASS-547-2026-06-22.md)
 - [_Stack Readiness Supervised Execution-Home Concrete Command-File Supporting-Lane Admission Pass 548](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-COMMAND-FILE-SUPPORTING-LANE-ADMISSION-PASS-548-2026-06-22.md)
+- [_Stack Readiness Supervised Execution-Home Concrete Command-File First-Implementation Admission Pass 549](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-COMMAND-FILE-FIRST-IMPLEMENTATION-ADMISSION-PASS-549-2026-06-22.md)
 
 ## Notes
 

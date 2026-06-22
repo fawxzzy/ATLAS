@@ -295,10 +295,10 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "AI Long-Run Batch Orchestration": PacketDescriptor(
-        packet="_stack Readiness supervised execution-home concrete command-file supporting-lane admission pass 548",
+        packet="_stack Readiness supervised execution-home concrete command-file first-implementation admission pass 549",
         basis_receipt_ref=(
             "docs/ops/"
-            "_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-COMMAND-FILE-SUPPORTING-LANE-ADMISSION-PASS-548-2026-06-22.md"
+            "_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-COMMAND-FILE-FIRST-IMPLEMENTATION-ADMISSION-PASS-549-2026-06-22.md"
         ),
     ),
 }
