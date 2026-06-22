@@ -1369,6 +1369,7 @@
 - [_Stack Readiness Supervised Execution-Home Concrete Command-File Prompt-Pack And Handoff Contract Pass 550](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-COMMAND-FILE-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-550-2026-06-22.md)
 - [_Stack Readiness Supervised Execution-Home Concrete Command-File Implementation-Readiness Closeout And Worker-Routing Pass 551](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-COMMAND-FILE-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-551-2026-06-22.md)
 - [_Stack Readiness Supervised Execution-Home Concrete Command-File First-Implementation Worker Cluster Reconciliation](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-COMMAND-FILE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-22.md)
+- [AI Long-Run Batch Orchestration Post-Concrete-Command-File Next-Slice Selection Pass 552](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-CONCRETE-COMMAND-FILE-NEXT-SLICE-SELECTION-PASS-552-2026-06-22.md)
 
 ## Notes
 
