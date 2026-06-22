@@ -72,7 +72,7 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
 
     def _write_packet_receipts(self, root: Path) -> None:
         current_receipt = root / "docs" / "ops" / (
-            "_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-COMMAND-HOME-OWNER-SURFACE-ADMISSION-PASS-533-2026-06-21.md"
+            "_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-COMMAND-HOME-SUPPORTING-LANE-ADMISSION-PASS-534-2026-06-21.md"
         )
         current_receipt.parent.mkdir(parents=True, exist_ok=True)
         current_receipt.write_text(
@@ -80,8 +80,8 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
                 [
                     "# Current Packet",
                     "",
-                    "- Mode: `docs-only root-bounded owner-surface admission`",
-                    "- Scope: `freeze the exact owner-facing home for the concrete-command-home selection seam`",
+                    "- Mode: `docs-only root-bounded supporting-lane admission`",
+                    "- Scope: `decide whether the owner-admitted concrete-command-home family honestly reopens any separate supporting seam before concrete command-home choice, command-file choice, runtime-home selection, _stack command implementation, worker authority, or owner-repo widening`",
                     "",
                 ]
             ),
@@ -117,19 +117,19 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual(20, payload["selected_percentage"])
         self.assertEqual("continue_current_lane", payload["operator_action"])
         self.assertEqual(
-            "_stack Readiness supervised execution-home concrete command-home owner-surface admission pass 533",
+            "_stack Readiness supervised execution-home concrete command-home supporting-lane admission pass 534",
             payload["selected_current_packet"],
         )
         self.assertEqual(
-            "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-COMMAND-HOME-OWNER-SURFACE-ADMISSION-PASS-533-2026-06-21.md",
+            "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-COMMAND-HOME-SUPPORTING-LANE-ADMISSION-PASS-534-2026-06-21.md",
             payload["selected_current_packet_basis_ref"],
         )
         self.assertEqual(
-            "docs-only root-bounded owner-surface admission",
+            "docs-only root-bounded supporting-lane admission",
             payload["selected_current_packet_mode"],
         )
         self.assertEqual(
-            "freeze the exact owner-facing home for the concrete-command-home selection seam",
+            "decide whether the owner-admitted concrete-command-home family honestly reopens any separate supporting seam before concrete command-home choice, command-file choice, runtime-home selection, _stack command implementation, worker authority, or owner-repo widening",
             payload["selected_current_packet_scope"],
         )
         self.assertEqual(
@@ -206,20 +206,20 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertIn("## Operator Action", markdown)
         self.assertIn("action: `continue_current_lane`", markdown)
         self.assertIn(
-            "current packet basis receipt: `docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-COMMAND-HOME-OWNER-SURFACE-ADMISSION-PASS-533-2026-06-21.md`",
+            "current packet basis receipt: `docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-COMMAND-HOME-SUPPORTING-LANE-ADMISSION-PASS-534-2026-06-21.md`",
             markdown,
         )
         self.assertIn(
-            "current packet mode: `docs-only root-bounded owner-surface admission`",
+            "current packet mode: `docs-only root-bounded supporting-lane admission`",
             markdown,
         )
         self.assertIn(
-            "current packet scope: `freeze the exact owner-facing home for the concrete-command-home selection seam`",
+            "current packet scope: `decide whether the owner-admitted concrete-command-home family honestly reopens any separate supporting seam before concrete command-home choice, command-file choice, runtime-home selection, _stack command implementation, worker authority, or owner-repo widening`",
             markdown,
         )
         self.assertIn("## Current Active Marker", markdown)
         self.assertIn(
-            "current packet: `_stack Readiness supervised execution-home concrete command-home owner-surface admission pass 533`",
+            "current packet: `_stack Readiness supervised execution-home concrete command-home supporting-lane admission pass 534`",
             markdown,
         )
         self.assertIn("## First Admissible After Current Lane", markdown)
