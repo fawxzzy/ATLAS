@@ -154,6 +154,7 @@
     "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-RUNTIME-HOME-CHOICE-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-571-2026-06-22.md",
     "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-RUNTIME-HOME-CHOICE-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-572-2026-06-22.md",
     "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-RUNTIME-HOME-CHOICE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-22.md",
+    "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-RUNTIME-HOME-CHOICE-NEXT-SLICE-SELECTION-PASS-573-2026-06-23.md",
     "ops/atlas/supervised_execution_home_concrete_stack_command_home.py",
     "tests/test_atlas_supervised_execution_home_concrete_stack_command_home.py",
     "ops/atlas/supervised_execution_home_concrete_command_home.py",
@@ -180,9 +181,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "ai-long-run-batch-orchestration",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-RUNTIME-HOME-CHOICE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-22.md",
+    "current_checkpoint_receipt": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-RUNTIME-HOME-CHOICE-NEXT-SLICE-SELECTION-PASS-573-2026-06-23.md",
     "checkpoint_commit": "main",
-    "checkpoint_summary": "The lane now carries the post-runtime-home-selection selector plus the full runtime-home-choice control-plane chain durably on canonical `main`: passes 567 through 572 now freeze the runtime-home-choice contract, owner-facing home, support posture, first implementation slice, worker handoff contract, and implementation-readiness closeout, and the bounded runtime-home-choice helper-and-proof worker cluster is now reconciled on canonical `main`; `AI Long-Run Batch Orchestration` stays at `66%`; the current packet is now `_stack Readiness supervised execution-home runtime-home choice first-implementation worker cluster reconciliation`; and the exact next package is now `AI Long-Run Batch Orchestration post-runtime-home-choice next-slice selection pass 573`.",
+    "checkpoint_summary": "The lane now carries the full runtime-home-choice control-plane chain plus the post-runtime-home-choice selector durably on canonical `main`: passes 567 through 572 now freeze the runtime-home-choice contract, owner-facing home, support posture, first implementation slice, worker handoff contract, and implementation-readiness closeout, the bounded runtime-home-choice helper-and-proof worker cluster is now reconciled on canonical `main`, and pass 573 now selects the concrete-runtime-home-choice contract as the next narrower current-family blocker; `AI Long-Run Batch Orchestration` stays at `66%`; the current packet is now `AI Long-Run Batch Orchestration post-runtime-home-choice next-slice selection pass 573`; and the exact next package is now `_stack Readiness supervised execution-home concrete runtime-home choice contract freeze pass 574`.",
     "governing_receipts": [
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-2026-05-22.md",
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-POST-WORLD-MODEL-TOP-LEVEL-PAYLOAD-BOUNDARY-NEXT-SLICE-SELECTION-PASS-460-2026-06-17.md",
@@ -317,6 +318,7 @@
       "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-RUNTIME-HOME-CHOICE-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-571-2026-06-22.md",
       "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-RUNTIME-HOME-CHOICE-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-572-2026-06-22.md",
       "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-RUNTIME-HOME-CHOICE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-22.md",
+      "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-RUNTIME-HOME-CHOICE-NEXT-SLICE-SELECTION-PASS-573-2026-06-23.md",
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-OWNER-REPO-MUTATION-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-21.md"
     ],
     "owner_truth_surfaces": [
@@ -771,15 +773,15 @@
     ],
     "next_package_ladder": [
       {
-        "package": "AI Long-Run Batch Orchestration post-runtime-home-choice next-slice selection pass 573",
-        "mode": "root-owned post-worker next-slice selection packet",
-        "reason": "the runtime-home-choice contract, owner-facing home, support posture, first implementation slice, exact worker handoff contract, readiness closeout, and bounded helper-and-proof worker cluster are now all durable on canonical `main`, so the remaining gap is selecting the next narrow downstream seam rather than landing the helper itself"
+        "package": "_stack Readiness supervised execution-home concrete runtime-home choice contract freeze pass 574",
+        "mode": "docs-only root-bounded contract freeze",
+        "reason": "the runtime-home-choice contract family and bounded helper-and-proof worker cluster are now durable on canonical `main`, and pass 573 proves the next honest blocker is whether any later admitted surface may choose one concrete runtime home for that already-admitted runtime-home-choice seam"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-RUNTIME-HOME-CHOICE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-22.md",
+    "freshness_checked_receipt": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-RUNTIME-HOME-CHOICE-NEXT-SLICE-SELECTION-PASS-573-2026-06-23.md",
     "freshness_checked_at": "2026-06-23T09:57:01.1570637-04:00",
-    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture now match the active AI Long-Run lane because the runtime-home-choice contract, owner-facing home, support posture, first implementation slice, worker handoff contract, readiness closeout, and bounded helper-and-proof worker cluster are all durable on canonical `main`, the marker stays at `66%`, and the exact next package is now `AI Long-Run Batch Orchestration post-runtime-home-choice next-slice selection pass 573`.",
+    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture now match the active AI Long-Run lane because the runtime-home-choice contract, owner-facing home, support posture, first implementation slice, worker handoff contract, readiness closeout, bounded helper-and-proof worker cluster, and post-runtime-home-choice next-slice selector are all durable on canonical `main`, the marker stays at `66%`, and the exact next package is now `_stack Readiness supervised execution-home concrete runtime-home choice contract freeze pass 574`.",
     "marker_posture": [
       {
         "marker": "AI Long-Run Batch Orchestration",
