@@ -73,7 +73,7 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
     def _write_packet_receipts(self, root: Path) -> None:
         current_receipt = root / "docs" / "ops" / (
             "_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-RUNTIME-HOME-"
-            "CHOICE-SUPPORTING-LANE-ADMISSION-PASS-576-2026-06-23.md"
+            "CHOICE-FIRST-IMPLEMENTATION-ADMISSION-PASS-577-2026-06-23.md"
         )
         current_receipt.parent.mkdir(parents=True, exist_ok=True)
         current_receipt.write_text(
@@ -81,8 +81,8 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
                 [
                     "# Current Packet",
                     "",
-                    "- Mode: `docs-only root-bounded supporting-lane admission`",
-                    "- Scope: `decide whether the owner-admitted concrete-runtime-home-choice seam honestly reopens any separate supporting seam before one concrete runtime-home choice or one bounded first-implementation packet`",
+                    "- Mode: `docs-only root-bounded first-implementation admission`",
+                    "- Scope: `freeze the smallest fail-closed concrete-runtime-home-choice implementation slice and proof matrix without choosing one concrete runtime home, one concrete _stack command implementation surface, or _stack command behavior by adjacency`",
                     "",
                 ]
             ),
@@ -118,19 +118,19 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual(20, payload["selected_percentage"])
         self.assertEqual("continue_current_lane", payload["operator_action"])
         self.assertEqual(
-            "_stack Readiness supervised execution-home concrete runtime-home choice supporting-lane admission pass 576",
+            "_stack Readiness supervised execution-home concrete runtime-home choice first-implementation admission pass 577",
             payload["selected_current_packet"],
         )
         self.assertEqual(
-            "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-RUNTIME-HOME-CHOICE-SUPPORTING-LANE-ADMISSION-PASS-576-2026-06-23.md",
+            "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-RUNTIME-HOME-CHOICE-FIRST-IMPLEMENTATION-ADMISSION-PASS-577-2026-06-23.md",
             payload["selected_current_packet_basis_ref"],
         )
         self.assertEqual(
-            "docs-only root-bounded supporting-lane admission",
+            "docs-only root-bounded first-implementation admission",
             payload["selected_current_packet_mode"],
         )
         self.assertEqual(
-            "decide whether the owner-admitted concrete-runtime-home-choice seam honestly reopens any separate supporting seam before one concrete runtime-home choice or one bounded first-implementation packet",
+            "freeze the smallest fail-closed concrete-runtime-home-choice implementation slice and proof matrix without choosing one concrete runtime home, one concrete _stack command implementation surface, or _stack command behavior by adjacency",
             payload["selected_current_packet_scope"],
         )
         self.assertEqual(
@@ -207,20 +207,20 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertIn("## Operator Action", markdown)
         self.assertIn("action: `continue_current_lane`", markdown)
         self.assertIn(
-            "current packet basis receipt: `docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-RUNTIME-HOME-CHOICE-SUPPORTING-LANE-ADMISSION-PASS-576-2026-06-23.md`",
+            "current packet basis receipt: `docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-RUNTIME-HOME-CHOICE-FIRST-IMPLEMENTATION-ADMISSION-PASS-577-2026-06-23.md`",
             markdown,
         )
         self.assertIn(
-            "current packet mode: `docs-only root-bounded supporting-lane admission`",
+            "current packet mode: `docs-only root-bounded first-implementation admission`",
             markdown,
         )
         self.assertIn(
-            "current packet scope: `decide whether the owner-admitted concrete-runtime-home-choice seam honestly reopens any separate supporting seam before one concrete runtime-home choice or one bounded first-implementation packet`",
+            "current packet scope: `freeze the smallest fail-closed concrete-runtime-home-choice implementation slice and proof matrix without choosing one concrete runtime home, one concrete _stack command implementation surface, or _stack command behavior by adjacency`",
             markdown,
         )
         self.assertIn("## Current Active Marker", markdown)
         self.assertIn(
-            "current packet: `_stack Readiness supervised execution-home concrete runtime-home choice supporting-lane admission pass 576`",
+            "current packet: `_stack Readiness supervised execution-home concrete runtime-home choice first-implementation admission pass 577`",
             markdown,
         )
         self.assertIn("## First Admissible After Current Lane", markdown)
