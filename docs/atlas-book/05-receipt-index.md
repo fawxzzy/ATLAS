@@ -1401,6 +1401,7 @@
 - [_Stack Readiness Supervised Execution-Home Concrete Runtime-Home Choice Implementation-Readiness Closeout And Worker-Routing Pass 579](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-RUNTIME-HOME-CHOICE-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-579-2026-06-23.md)
 - [_Stack Readiness Supervised Execution-Home Concrete Runtime-Home Choice First-Implementation Worker Cluster Reconciliation](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-RUNTIME-HOME-CHOICE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-23.md)
 - [AI Long-Run Batch Orchestration Post-Concrete-Runtime-Home-Choice Next-Slice Selection Pass 580](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-CONCRETE-RUNTIME-HOME-CHOICE-NEXT-SLICE-SELECTION-PASS-580-2026-06-23.md)
+- [_Stack Readiness Supervised Execution-Home Actual Concrete Runtime-Home Choice Contract Freeze Pass 581](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-ACTUAL-CONCRETE-RUNTIME-HOME-CHOICE-CONTRACT-FREEZE-PASS-581-2026-06-23.md)
 
 ## Notes
 
