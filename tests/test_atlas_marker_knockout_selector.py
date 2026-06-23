@@ -73,7 +73,8 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
     def _write_packet_receipts(self, root: Path) -> None:
         current_receipt = root / "docs" / "ops" / (
             "_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-RUNTIME-HOME-"
-            "CHOICE-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-578-2026-06-23.md"
+            "CHOICE-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-"
+            "PASS-579-2026-06-23.md"
         )
         current_receipt.parent.mkdir(parents=True, exist_ok=True)
         current_receipt.write_text(
@@ -118,11 +119,11 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual(20, payload["selected_percentage"])
         self.assertEqual("continue_current_lane", payload["operator_action"])
         self.assertEqual(
-            "_stack Readiness supervised execution-home concrete runtime-home choice prompt-pack and handoff contract pass 578",
+            "_stack Readiness supervised execution-home concrete runtime-home choice implementation-readiness closeout and worker-routing pass 579",
             payload["selected_current_packet"],
         )
         self.assertEqual(
-            "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-RUNTIME-HOME-CHOICE-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-578-2026-06-23.md",
+            "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-RUNTIME-HOME-CHOICE-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-579-2026-06-23.md",
             payload["selected_current_packet_basis_ref"],
         )
         self.assertEqual(
@@ -207,7 +208,7 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertIn("## Operator Action", markdown)
         self.assertIn("action: `continue_current_lane`", markdown)
         self.assertIn(
-            "current packet basis receipt: `docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-RUNTIME-HOME-CHOICE-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-578-2026-06-23.md`",
+            "current packet basis receipt: `docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-RUNTIME-HOME-CHOICE-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-579-2026-06-23.md`",
             markdown,
         )
         self.assertIn(
@@ -220,7 +221,7 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         )
         self.assertIn("## Current Active Marker", markdown)
         self.assertIn(
-            "current packet: `_stack Readiness supervised execution-home concrete runtime-home choice prompt-pack and handoff contract pass 578`",
+            "current packet: `_stack Readiness supervised execution-home concrete runtime-home choice implementation-readiness closeout and worker-routing pass 579`",
             markdown,
         )
         self.assertIn("## First Admissible After Current Lane", markdown)
