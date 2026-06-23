@@ -73,7 +73,7 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
     def _write_packet_receipts(self, root: Path) -> None:
         current_receipt = root / "docs" / "ops" / (
             "_STACK-READINESS-SUPERVISED-EXECUTION-HOME-RUNTIME-HOME-"
-            "SELECTION-CONTRACT-FREEZE-PASS-560-2026-06-22.md"
+            "SELECTION-OWNER-SURFACE-ADMISSION-PASS-561-2026-06-22.md"
         )
         current_receipt.parent.mkdir(parents=True, exist_ok=True)
         current_receipt.write_text(
@@ -81,8 +81,8 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
                 [
                     "# Current Packet",
                     "",
-                    "- Mode: `docs-only root-bounded contract freeze`",
-                    "- Scope: `freeze the exact admissible runtime-home selection question above the landed concrete _stack command implementation-surface helper result`",
+                    "- Mode: `docs-only root-bounded owner-surface admission`",
+                    "- Scope: `freeze the exact owner-facing home for the runtime-home selection seam`",
                     "",
                 ]
             ),
@@ -118,19 +118,19 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual(20, payload["selected_percentage"])
         self.assertEqual("continue_current_lane", payload["operator_action"])
         self.assertEqual(
-            "_stack Readiness supervised execution-home runtime-home selection contract freeze pass 560",
+            "_stack Readiness supervised execution-home runtime-home selection owner-surface admission pass 561",
             payload["selected_current_packet"],
         )
         self.assertEqual(
-            "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-RUNTIME-HOME-SELECTION-CONTRACT-FREEZE-PASS-560-2026-06-22.md",
+            "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-RUNTIME-HOME-SELECTION-OWNER-SURFACE-ADMISSION-PASS-561-2026-06-22.md",
             payload["selected_current_packet_basis_ref"],
         )
         self.assertEqual(
-            "docs-only root-bounded contract freeze",
+            "docs-only root-bounded owner-surface admission",
             payload["selected_current_packet_mode"],
         )
         self.assertEqual(
-            "freeze the exact admissible runtime-home selection question above the landed concrete _stack command implementation-surface helper result",
+            "freeze the exact owner-facing home for the runtime-home selection seam",
             payload["selected_current_packet_scope"],
         )
         self.assertEqual(
@@ -207,20 +207,20 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertIn("## Operator Action", markdown)
         self.assertIn("action: `continue_current_lane`", markdown)
         self.assertIn(
-            "current packet basis receipt: `docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-RUNTIME-HOME-SELECTION-CONTRACT-FREEZE-PASS-560-2026-06-22.md`",
+            "current packet basis receipt: `docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-RUNTIME-HOME-SELECTION-OWNER-SURFACE-ADMISSION-PASS-561-2026-06-22.md`",
             markdown,
         )
         self.assertIn(
-            "current packet mode: `docs-only root-bounded contract freeze`",
+            "current packet mode: `docs-only root-bounded owner-surface admission`",
             markdown,
         )
         self.assertIn(
-            "current packet scope: `freeze the exact admissible runtime-home selection question above the landed concrete _stack command implementation-surface helper result`",
+            "current packet scope: `freeze the exact owner-facing home for the runtime-home selection seam`",
             markdown,
         )
         self.assertIn("## Current Active Marker", markdown)
         self.assertIn(
-            "current packet: `_stack Readiness supervised execution-home runtime-home selection contract freeze pass 560`",
+            "current packet: `_stack Readiness supervised execution-home runtime-home selection owner-surface admission pass 561`",
             markdown,
         )
         self.assertIn("## First Admissible After Current Lane", markdown)
