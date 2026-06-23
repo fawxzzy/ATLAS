@@ -296,13 +296,13 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
     ),
     "AI Long-Run Batch Orchestration": PacketDescriptor(
         packet=(
-            "_stack Readiness supervised execution-home concrete _stack command "
-            "implementation surface first-implementation worker cluster reconciliation"
+            "AI Long-Run Batch Orchestration post-concrete-stack-command-"
+            "implementation-surface next-slice selection pass 559"
         ),
         basis_receipt_ref=(
             "docs/ops/"
-            "_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-STACK-COMMAND-"
-            "IMPLEMENTATION-SURFACE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-22.md"
+            "AI-LONG-RUN-BATCH-ORCHESTRATION-POST-CONCRETE-STACK-COMMAND-"
+            "IMPLEMENTATION-SURFACE-NEXT-SLICE-SELECTION-PASS-559-2026-06-22.md"
         ),
     ),
 }
