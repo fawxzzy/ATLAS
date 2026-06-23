@@ -72,9 +72,8 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
 
     def _write_packet_receipts(self, root: Path) -> None:
         current_receipt = root / "docs" / "ops" / (
-            "_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-RUNTIME-HOME-"
-            "CHOICE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-"
-            "2026-06-23.md"
+            "AI-LONG-RUN-BATCH-ORCHESTRATION-POST-CONCRETE-RUNTIME-HOME-CHOICE-"
+            "NEXT-SLICE-SELECTION-PASS-580-2026-06-23.md"
         )
         current_receipt.parent.mkdir(parents=True, exist_ok=True)
         current_receipt.write_text(
@@ -82,8 +81,8 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
                 [
                     "# Current Packet",
                     "",
-                    "- Mode: `root-owned bounded implementation and proof reconciliation`",
-                    "- Scope: `supervised execution-home concrete runtime-home choice helper and proof worker cluster`",
+                    "- Mode: `docs-only root-bounded next-slice selection`",
+                    "- Scope: `choose the strongest bounded downstream seam now that the concrete-runtime-home-choice helper and direct proof are landed on canonical main`",
                     "",
                 ]
             ),
@@ -119,19 +118,19 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual(20, payload["selected_percentage"])
         self.assertEqual("continue_current_lane", payload["operator_action"])
         self.assertEqual(
-            "_stack Readiness supervised execution-home concrete runtime-home choice first-implementation worker cluster reconciliation",
+            "AI Long-Run Batch Orchestration post-concrete-runtime-home-choice next-slice selection pass 580",
             payload["selected_current_packet"],
         )
         self.assertEqual(
-            "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-RUNTIME-HOME-CHOICE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-23.md",
+            "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-CONCRETE-RUNTIME-HOME-CHOICE-NEXT-SLICE-SELECTION-PASS-580-2026-06-23.md",
             payload["selected_current_packet_basis_ref"],
         )
         self.assertEqual(
-            "root-owned bounded implementation and proof reconciliation",
+            "docs-only root-bounded next-slice selection",
             payload["selected_current_packet_mode"],
         )
         self.assertEqual(
-            "supervised execution-home concrete runtime-home choice helper and proof worker cluster",
+            "choose the strongest bounded downstream seam now that the concrete-runtime-home-choice helper and direct proof are landed on canonical main",
             payload["selected_current_packet_scope"],
         )
         self.assertEqual(
@@ -208,20 +207,20 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertIn("## Operator Action", markdown)
         self.assertIn("action: `continue_current_lane`", markdown)
         self.assertIn(
-            "current packet basis receipt: `docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-RUNTIME-HOME-CHOICE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-23.md`",
+            "current packet basis receipt: `docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-CONCRETE-RUNTIME-HOME-CHOICE-NEXT-SLICE-SELECTION-PASS-580-2026-06-23.md`",
             markdown,
         )
         self.assertIn(
-            "current packet mode: `root-owned bounded implementation and proof reconciliation`",
+            "current packet mode: `docs-only root-bounded next-slice selection`",
             markdown,
         )
         self.assertIn(
-            "current packet scope: `supervised execution-home concrete runtime-home choice helper and proof worker cluster`",
+            "current packet scope: `choose the strongest bounded downstream seam now that the concrete-runtime-home-choice helper and direct proof are landed on canonical main`",
             markdown,
         )
         self.assertIn("## Current Active Marker", markdown)
         self.assertIn(
-            "current packet: `_stack Readiness supervised execution-home concrete runtime-home choice first-implementation worker cluster reconciliation`",
+            "current packet: `AI Long-Run Batch Orchestration post-concrete-runtime-home-choice next-slice selection pass 580`",
             markdown,
         )
         self.assertIn("## First Admissible After Current Lane", markdown)
