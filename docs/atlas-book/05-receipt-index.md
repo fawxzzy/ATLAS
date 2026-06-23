@@ -1406,6 +1406,7 @@
 - [_Stack Readiness Supervised Execution-Home Actual Concrete Runtime-Home Choice Supporting-Lane Admission Pass 583](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-ACTUAL-CONCRETE-RUNTIME-HOME-CHOICE-SUPPORTING-LANE-ADMISSION-PASS-583-2026-06-23.md)
 - [_Stack Readiness Supervised Execution-Home Actual Concrete Runtime-Home Choice First-Implementation Admission Pass 584](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-ACTUAL-CONCRETE-RUNTIME-HOME-CHOICE-FIRST-IMPLEMENTATION-ADMISSION-PASS-584-2026-06-23.md)
 - [_Stack Readiness Supervised Execution-Home Actual Concrete Runtime-Home Choice Prompt-Pack And Handoff Contract Pass 585](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-ACTUAL-CONCRETE-RUNTIME-HOME-CHOICE-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-585-2026-06-23.md)
+- [_Stack Readiness Supervised Execution-Home Actual Concrete Runtime-Home Choice Implementation-Readiness Closeout And Worker-Routing Pass 586](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-ACTUAL-CONCRETE-RUNTIME-HOME-CHOICE-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-586-2026-06-23.md)
 
 ## Notes
 
