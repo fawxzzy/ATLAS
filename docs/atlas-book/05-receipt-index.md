@@ -1381,6 +1381,7 @@
 - [_Stack Readiness Supervised Execution-Home Runtime-Home Selection Owner-Surface Admission Pass 561](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-RUNTIME-HOME-SELECTION-OWNER-SURFACE-ADMISSION-PASS-561-2026-06-22.md)
 - [_Stack Readiness Supervised Execution-Home Runtime-Home Selection Supporting-Lane Admission Pass 562](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-RUNTIME-HOME-SELECTION-SUPPORTING-LANE-ADMISSION-PASS-562-2026-06-22.md)
 - [_Stack Readiness Supervised Execution-Home Runtime-Home Selection First-Implementation Admission Pass 563](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-RUNTIME-HOME-SELECTION-FIRST-IMPLEMENTATION-ADMISSION-PASS-563-2026-06-22.md)
+- [_Stack Readiness Supervised Execution-Home Runtime-Home Selection Prompt-Pack And Handoff Contract Pass 564](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-RUNTIME-HOME-SELECTION-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-564-2026-06-22.md)
 
 ## Notes
 
