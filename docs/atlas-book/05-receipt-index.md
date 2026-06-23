@@ -1384,6 +1384,9 @@
 - [_Stack Readiness Supervised Execution-Home Runtime-Home Selection Prompt-Pack And Handoff Contract Pass 564](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-RUNTIME-HOME-SELECTION-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-564-2026-06-22.md)
 - [_Stack Readiness Supervised Execution-Home Runtime-Home Selection Implementation-Readiness Closeout And Worker-Routing Pass 565](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-RUNTIME-HOME-SELECTION-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-565-2026-06-22.md)
 - [_Stack Readiness Supervised Execution-Home Runtime-Home Selection First-Implementation Worker Cluster Reconciliation](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-RUNTIME-HOME-SELECTION-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-22.md)
+- [AI Long-Run Batch Orchestration Post-Runtime-Home-Selection Next-Slice Selection Pass 566](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-RUNTIME-HOME-SELECTION-NEXT-SLICE-SELECTION-PASS-566-2026-06-22.md)
+- [_Stack Readiness Supervised Execution-Home Runtime-Home Choice Contract Freeze Pass 567](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-RUNTIME-HOME-CHOICE-CONTRACT-FREEZE-PASS-567-2026-06-22.md)
+- [_Stack Readiness Supervised Execution-Home Runtime-Home Choice Owner-Surface Admission Pass 568](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-RUNTIME-HOME-CHOICE-OWNER-SURFACE-ADMISSION-PASS-568-2026-06-22.md)
 
 ## Notes
 
