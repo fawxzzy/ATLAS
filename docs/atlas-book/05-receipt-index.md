@@ -1383,6 +1383,7 @@
 - [_Stack Readiness Supervised Execution-Home Runtime-Home Selection First-Implementation Admission Pass 563](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-RUNTIME-HOME-SELECTION-FIRST-IMPLEMENTATION-ADMISSION-PASS-563-2026-06-22.md)
 - [_Stack Readiness Supervised Execution-Home Runtime-Home Selection Prompt-Pack And Handoff Contract Pass 564](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-RUNTIME-HOME-SELECTION-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-564-2026-06-22.md)
 - [_Stack Readiness Supervised Execution-Home Runtime-Home Selection Implementation-Readiness Closeout And Worker-Routing Pass 565](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-RUNTIME-HOME-SELECTION-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-565-2026-06-22.md)
+- [_Stack Readiness Supervised Execution-Home Runtime-Home Selection First-Implementation Worker Cluster Reconciliation](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-RUNTIME-HOME-SELECTION-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-22.md)
 
 ## Notes
 
