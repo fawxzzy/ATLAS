@@ -1395,6 +1395,7 @@
 - [AI Long-Run Batch Orchestration Post-Runtime-Home-Choice Next-Slice Selection Pass 573](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-RUNTIME-HOME-CHOICE-NEXT-SLICE-SELECTION-PASS-573-2026-06-23.md)
 - [_Stack Readiness Supervised Execution-Home Concrete Runtime-Home Choice Contract Freeze Pass 574](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-RUNTIME-HOME-CHOICE-CONTRACT-FREEZE-PASS-574-2026-06-23.md)
 - [_Stack Readiness Supervised Execution-Home Concrete Runtime-Home Choice Owner-Surface Admission Pass 575](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-RUNTIME-HOME-CHOICE-OWNER-SURFACE-ADMISSION-PASS-575-2026-06-23.md)
+- [_Stack Readiness Supervised Execution-Home Concrete Runtime-Home Choice Supporting-Lane Admission Pass 576](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-RUNTIME-HOME-CHOICE-SUPPORTING-LANE-ADMISSION-PASS-576-2026-06-23.md)
 
 ## Notes
 
