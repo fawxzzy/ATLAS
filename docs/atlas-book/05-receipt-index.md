@@ -1372,6 +1372,9 @@
 - [_Stack Readiness Supervised Execution-Home Concrete _Stack Command Implementation Surface Selection Contract Freeze Pass 553](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-STACK-COMMAND-IMPLEMENTATION-SURFACE-SELECTION-CONTRACT-FREEZE-PASS-553-2026-06-22.md)
 - [_Stack Readiness Supervised Execution-Home Concrete _Stack Command Implementation Surface Owner-Surface Admission Pass 554](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-STACK-COMMAND-IMPLEMENTATION-SURFACE-OWNER-SURFACE-ADMISSION-PASS-554-2026-06-22.md)
 - [_Stack Readiness Supervised Execution-Home Concrete _Stack Command Implementation Surface Supporting-Lane Admission Pass 555](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-STACK-COMMAND-IMPLEMENTATION-SURFACE-SUPPORTING-LANE-ADMISSION-PASS-555-2026-06-22.md)
+- [_Stack Readiness Supervised Execution-Home Concrete _Stack Command Implementation Surface First-Implementation Admission Pass 556](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-STACK-COMMAND-IMPLEMENTATION-SURFACE-FIRST-IMPLEMENTATION-ADMISSION-PASS-556-2026-06-22.md)
+- [_Stack Readiness Supervised Execution-Home Concrete _Stack Command Implementation Surface Prompt-Pack And Handoff Contract Pass 557](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-STACK-COMMAND-IMPLEMENTATION-SURFACE-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-557-2026-06-22.md)
+- [_Stack Readiness Supervised Execution-Home Concrete _Stack Command Implementation Surface Implementation-Readiness Closeout And Worker-Routing Pass 558](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-STACK-COMMAND-IMPLEMENTATION-SURFACE-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-558-2026-06-22.md)
 
 ## Notes
 
