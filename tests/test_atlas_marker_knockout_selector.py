@@ -73,7 +73,7 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
     def _write_packet_receipts(self, root: Path) -> None:
         current_receipt = root / "docs" / "ops" / (
             "_STACK-READINESS-SUPERVISED-EXECUTION-HOME-ACTUAL-CONCRETE-RUNTIME-HOME-"
-            "CHOICE-OWNER-SURFACE-ADMISSION-PASS-582-2026-06-23.md"
+            "CHOICE-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-585-2026-06-23.md"
         )
         current_receipt.parent.mkdir(parents=True, exist_ok=True)
         current_receipt.write_text(
@@ -81,8 +81,8 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
                 [
                     "# Current Packet",
                     "",
-                    "- Mode: `docs-only root-bounded owner-surface admission`",
-                    "- Scope: `freeze the exact owner-facing home for the actual-concrete-runtime-home-value seam`",
+                    "- Mode: `docs-only root-bounded prompt-pack and handoff contract`",
+                    "- Scope: `freeze the exact worker objective, proof obligations, allowed-touch boundary, and stop conditions for the already-admitted fail-closed actual-concrete-runtime-home-choice slice`",
                     "",
                 ]
             ),
@@ -118,19 +118,19 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual(20, payload["selected_percentage"])
         self.assertEqual("continue_current_lane", payload["operator_action"])
         self.assertEqual(
-            "_stack Readiness supervised execution-home actual concrete runtime-home choice owner-surface admission pass 582",
+            "_stack Readiness supervised execution-home actual concrete runtime-home choice prompt-pack and handoff contract pass 585",
             payload["selected_current_packet"],
         )
         self.assertEqual(
-            "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-ACTUAL-CONCRETE-RUNTIME-HOME-CHOICE-OWNER-SURFACE-ADMISSION-PASS-582-2026-06-23.md",
+            "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-ACTUAL-CONCRETE-RUNTIME-HOME-CHOICE-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-585-2026-06-23.md",
             payload["selected_current_packet_basis_ref"],
         )
         self.assertEqual(
-            "docs-only root-bounded owner-surface admission",
+            "docs-only root-bounded prompt-pack and handoff contract",
             payload["selected_current_packet_mode"],
         )
         self.assertEqual(
-            "freeze the exact owner-facing home for the actual-concrete-runtime-home-value seam",
+            "freeze the exact worker objective, proof obligations, allowed-touch boundary, and stop conditions for the already-admitted fail-closed actual-concrete-runtime-home-choice slice",
             payload["selected_current_packet_scope"],
         )
         self.assertEqual(
@@ -207,20 +207,20 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertIn("## Operator Action", markdown)
         self.assertIn("action: `continue_current_lane`", markdown)
         self.assertIn(
-            "current packet basis receipt: `docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-ACTUAL-CONCRETE-RUNTIME-HOME-CHOICE-OWNER-SURFACE-ADMISSION-PASS-582-2026-06-23.md`",
+            "current packet basis receipt: `docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-ACTUAL-CONCRETE-RUNTIME-HOME-CHOICE-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-585-2026-06-23.md`",
             markdown,
         )
         self.assertIn(
-            "current packet mode: `docs-only root-bounded owner-surface admission`",
+            "current packet mode: `docs-only root-bounded prompt-pack and handoff contract`",
             markdown,
         )
         self.assertIn(
-            "current packet scope: `freeze the exact owner-facing home for the actual-concrete-runtime-home-value seam`",
+            "current packet scope: `freeze the exact worker objective, proof obligations, allowed-touch boundary, and stop conditions for the already-admitted fail-closed actual-concrete-runtime-home-choice slice`",
             markdown,
         )
         self.assertIn("## Current Active Marker", markdown)
         self.assertIn(
-            "current packet: `_stack Readiness supervised execution-home actual concrete runtime-home choice owner-surface admission pass 582`",
+            "current packet: `_stack Readiness supervised execution-home actual concrete runtime-home choice prompt-pack and handoff contract pass 585`",
             markdown,
         )
         self.assertIn("## First Admissible After Current Lane", markdown)
