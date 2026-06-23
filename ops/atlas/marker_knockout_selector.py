@@ -297,12 +297,12 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
     "AI Long-Run Batch Orchestration": PacketDescriptor(
         packet=(
             "_stack Readiness supervised execution-home concrete _stack command "
-            "implementation surface owner-surface admission pass 554"
+            "implementation surface supporting-lane admission pass 555"
         ),
         basis_receipt_ref=(
             "docs/ops/"
             "_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-STACK-COMMAND-"
-            "IMPLEMENTATION-SURFACE-OWNER-SURFACE-ADMISSION-PASS-554-2026-06-22.md"
+            "IMPLEMENTATION-SURFACE-SUPPORTING-LANE-ADMISSION-PASS-555-2026-06-22.md"
         ),
     ),
 }

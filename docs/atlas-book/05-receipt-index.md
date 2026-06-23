@@ -1371,6 +1371,7 @@
 - [AI Long-Run Batch Orchestration Post-Concrete-Command-File Next-Slice Selection Pass 552](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-CONCRETE-COMMAND-FILE-NEXT-SLICE-SELECTION-PASS-552-2026-06-22.md)
 - [_Stack Readiness Supervised Execution-Home Concrete _Stack Command Implementation Surface Selection Contract Freeze Pass 553](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-STACK-COMMAND-IMPLEMENTATION-SURFACE-SELECTION-CONTRACT-FREEZE-PASS-553-2026-06-22.md)
 - [_Stack Readiness Supervised Execution-Home Concrete _Stack Command Implementation Surface Owner-Surface Admission Pass 554](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-STACK-COMMAND-IMPLEMENTATION-SURFACE-OWNER-SURFACE-ADMISSION-PASS-554-2026-06-22.md)
+- [_Stack Readiness Supervised Execution-Home Concrete _Stack Command Implementation Surface Supporting-Lane Admission Pass 555](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-STACK-COMMAND-IMPLEMENTATION-SURFACE-SUPPORTING-LANE-ADMISSION-PASS-555-2026-06-22.md)
 
 ## Notes
 
