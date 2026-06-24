@@ -1410,6 +1410,7 @@
 - [_Stack Readiness Supervised Execution-Home Actual Concrete Runtime-Home Choice First-Implementation Worker Cluster Reconciliation](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-ACTUAL-CONCRETE-RUNTIME-HOME-CHOICE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-23.md)
 - [AI Long-Run Batch Orchestration Post-Actual-Concrete-Runtime-Home-Choice Next-Slice Selection Pass 587](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-ACTUAL-CONCRETE-RUNTIME-HOME-CHOICE-NEXT-SLICE-SELECTION-PASS-587-2026-06-23.md)
 - [_Stack Readiness Supervised Execution-Home Actual Concrete Runtime-Home Value Choice Contract Freeze Pass 588](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-ACTUAL-CONCRETE-RUNTIME-HOME-VALUE-CHOICE-CONTRACT-FREEZE-PASS-588-2026-06-23.md)
+- [_Stack Readiness Supervised Execution-Home Actual Concrete Runtime-Home Value Choice Owner-Surface Admission Pass 589](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-ACTUAL-CONCRETE-RUNTIME-HOME-VALUE-CHOICE-OWNER-SURFACE-ADMISSION-PASS-589-2026-06-23.md)
 
 ## Notes
 
