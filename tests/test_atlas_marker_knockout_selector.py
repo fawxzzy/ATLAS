@@ -73,7 +73,7 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
     def _write_packet_receipts(self, root: Path) -> None:
         current_receipt = root / "docs" / "ops" / (
             "_STACK-READINESS-SUPERVISED-EXECUTION-HOME-ACTUAL-CONCRETE-COMMAND-FILE-"
-            "CHOICE-FIRST-IMPLEMENTATION-ADMISSION-PASS-626-2026-06-24.md"
+            "CHOICE-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-627-2026-06-24.md"
         )
         current_receipt.parent.mkdir(parents=True, exist_ok=True)
         current_receipt.write_text(
@@ -81,8 +81,8 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
                 [
                     "# Current Packet",
                     "",
-                    "- Mode: `docs-only root-bounded first-implementation admission`",
-                    "- Scope: `freeze the smallest fail-closed actual-concrete-command-file-choice implementation slice and proof matrix without choosing one actual concrete command file, one actual concrete runtime-home value placement, or _stack command behavior by adjacency`",
+                    "- Mode: `docs-only root-bounded prompt-pack and handoff contract`",
+                    "- Scope: `freeze the exact worker objective, proof obligations, allowed-touch boundary, and stop conditions for the already-admitted fail-closed actual-concrete-command-file-choice slice`",
                     "",
                 ]
             ),
@@ -118,19 +118,19 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual(20, payload["selected_percentage"])
         self.assertEqual("continue_current_lane", payload["operator_action"])
         self.assertEqual(
-            "_stack Readiness supervised execution-home actual concrete command-file choice first-implementation admission pass 626",
+            "_stack Readiness supervised execution-home actual concrete command-file choice prompt-pack and handoff contract pass 627",
             payload["selected_current_packet"],
         )
         self.assertEqual(
-            "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-ACTUAL-CONCRETE-COMMAND-FILE-CHOICE-FIRST-IMPLEMENTATION-ADMISSION-PASS-626-2026-06-24.md",
+            "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-ACTUAL-CONCRETE-COMMAND-FILE-CHOICE-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-627-2026-06-24.md",
             payload["selected_current_packet_basis_ref"],
         )
         self.assertEqual(
-            "docs-only root-bounded first-implementation admission",
+            "docs-only root-bounded prompt-pack and handoff contract",
             payload["selected_current_packet_mode"],
         )
         self.assertEqual(
-            "freeze the smallest fail-closed actual-concrete-command-file-choice implementation slice and proof matrix without choosing one actual concrete command file, one actual concrete runtime-home value placement, or _stack command behavior by adjacency",
+            "freeze the exact worker objective, proof obligations, allowed-touch boundary, and stop conditions for the already-admitted fail-closed actual-concrete-command-file-choice slice",
             payload["selected_current_packet_scope"],
         )
         self.assertEqual(
@@ -207,20 +207,20 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertIn("## Operator Action", markdown)
         self.assertIn("action: `continue_current_lane`", markdown)
         self.assertIn(
-            "current packet basis receipt: `docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-ACTUAL-CONCRETE-COMMAND-FILE-CHOICE-FIRST-IMPLEMENTATION-ADMISSION-PASS-626-2026-06-24.md`",
+            "current packet basis receipt: `docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-ACTUAL-CONCRETE-COMMAND-FILE-CHOICE-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-627-2026-06-24.md`",
             markdown,
         )
         self.assertIn(
-            "current packet mode: `docs-only root-bounded first-implementation admission`",
+            "current packet mode: `docs-only root-bounded prompt-pack and handoff contract`",
             markdown,
         )
         self.assertIn(
-            "current packet scope: `freeze the smallest fail-closed actual-concrete-command-file-choice implementation slice and proof matrix without choosing one actual concrete command file, one actual concrete runtime-home value placement, or _stack command behavior by adjacency`",
+            "current packet scope: `freeze the exact worker objective, proof obligations, allowed-touch boundary, and stop conditions for the already-admitted fail-closed actual-concrete-command-file-choice slice`",
             markdown,
         )
         self.assertIn("## Current Active Marker", markdown)
         self.assertIn(
-            "current packet: `_stack Readiness supervised execution-home actual concrete command-file choice first-implementation admission pass 626`",
+            "current packet: `_stack Readiness supervised execution-home actual concrete command-file choice prompt-pack and handoff contract pass 627`",
             markdown,
         )
         self.assertIn("## First Admissible After Current Lane", markdown)
