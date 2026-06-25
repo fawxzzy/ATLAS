@@ -1447,6 +1447,8 @@
 - [_Stack Readiness Supervised Execution-Home Concrete Command-File Choice First-Implementation Admission Pass 619](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-COMMAND-FILE-CHOICE-FIRST-IMPLEMENTATION-ADMISSION-PASS-619-2026-06-24.md)
 - [_Stack Readiness Supervised Execution-Home Concrete Command-File Choice Prompt-Pack And Handoff Contract Pass 620](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-COMMAND-FILE-CHOICE-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-620-2026-06-24.md)
 - [_Stack Readiness Supervised Execution-Home Concrete Command-File Choice Implementation-Readiness Closeout And Worker-Routing Pass 621](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-COMMAND-FILE-CHOICE-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-621-2026-06-24.md)
+- [_Stack Readiness Supervised Execution-Home Concrete Command-File Choice First-Implementation Worker Cluster Reconciliation](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-COMMAND-FILE-CHOICE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-24.md)
+- [AI Long-Run Batch Orchestration Post-Concrete-Command-File-Choice Next-Slice Selection Pass 622](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-CONCRETE-COMMAND-FILE-CHOICE-NEXT-SLICE-SELECTION-PASS-622-2026-06-24.md)
 
 ## Notes
 
