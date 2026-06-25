@@ -72,8 +72,8 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
 
     def _write_packet_receipts(self, root: Path) -> None:
         current_receipt = root / "docs" / "ops" / (
-            "AI-LONG-RUN-BATCH-ORCHESTRATION-POST-CONCRETE-COMMAND-FILE-CHOICE-"
-            "NEXT-SLICE-SELECTION-PASS-622-2026-06-24.md"
+            "_STACK-READINESS-SUPERVISED-EXECUTION-HOME-ACTUAL-CONCRETE-COMMAND-FILE-"
+            "CHOICE-CONTRACT-FREEZE-PASS-623-2026-06-24.md"
         )
         current_receipt.parent.mkdir(parents=True, exist_ok=True)
         current_receipt.write_text(
@@ -81,8 +81,8 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
                 [
                     "# Current Packet",
                     "",
-                    "- Mode: `docs-only root-bounded next-slice selection`",
-                    "- Scope: `choose the strongest bounded downstream seam now that the concrete command-file choice helper and direct proof are landed on canonical main`",
+                    "- Mode: `docs-only root-bounded contract freeze`",
+                    "- Scope: `freeze the exact admissible actual-concrete-command-file-choice question above the landed concrete command-file choice helper result`",
                     "",
                 ]
             ),
@@ -118,19 +118,19 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual(20, payload["selected_percentage"])
         self.assertEqual("continue_current_lane", payload["operator_action"])
         self.assertEqual(
-            "AI Long-Run Batch Orchestration post-concrete-command-file-choice next-slice selection pass 622",
+            "_stack Readiness supervised execution-home actual concrete command-file choice contract freeze pass 623",
             payload["selected_current_packet"],
         )
         self.assertEqual(
-            "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-CONCRETE-COMMAND-FILE-CHOICE-NEXT-SLICE-SELECTION-PASS-622-2026-06-24.md",
+            "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-ACTUAL-CONCRETE-COMMAND-FILE-CHOICE-CONTRACT-FREEZE-PASS-623-2026-06-24.md",
             payload["selected_current_packet_basis_ref"],
         )
         self.assertEqual(
-            "docs-only root-bounded next-slice selection",
+            "docs-only root-bounded contract freeze",
             payload["selected_current_packet_mode"],
         )
         self.assertEqual(
-            "choose the strongest bounded downstream seam now that the concrete command-file choice helper and direct proof are landed on canonical main",
+            "freeze the exact admissible actual-concrete-command-file-choice question above the landed concrete command-file choice helper result",
             payload["selected_current_packet_scope"],
         )
         self.assertEqual(
@@ -207,20 +207,20 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertIn("## Operator Action", markdown)
         self.assertIn("action: `continue_current_lane`", markdown)
         self.assertIn(
-            "current packet basis receipt: `docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-CONCRETE-COMMAND-FILE-CHOICE-NEXT-SLICE-SELECTION-PASS-622-2026-06-24.md`",
+            "current packet basis receipt: `docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-ACTUAL-CONCRETE-COMMAND-FILE-CHOICE-CONTRACT-FREEZE-PASS-623-2026-06-24.md`",
             markdown,
         )
         self.assertIn(
-            "current packet mode: `docs-only root-bounded next-slice selection`",
+            "current packet mode: `docs-only root-bounded contract freeze`",
             markdown,
         )
         self.assertIn(
-            "current packet scope: `choose the strongest bounded downstream seam now that the concrete command-file choice helper and direct proof are landed on canonical main`",
+            "current packet scope: `freeze the exact admissible actual-concrete-command-file-choice question above the landed concrete command-file choice helper result`",
             markdown,
         )
         self.assertIn("## Current Active Marker", markdown)
         self.assertIn(
-            "current packet: `AI Long-Run Batch Orchestration post-concrete-command-file-choice next-slice selection pass 622`",
+            "current packet: `_stack Readiness supervised execution-home actual concrete command-file choice contract freeze pass 623`",
             markdown,
         )
         self.assertIn("## First Admissible After Current Lane", markdown)
