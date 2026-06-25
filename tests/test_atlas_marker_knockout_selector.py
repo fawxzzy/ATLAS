@@ -73,8 +73,8 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
     def _write_packet_receipts(self, root: Path) -> None:
         current_receipt = root / "docs" / "ops" / (
             "_STACK-READINESS-SUPERVISED-EXECUTION-HOME-ACTUAL-CONCRETE-COMMAND-"
-            "FILE-DOWNSTREAM-RUNTIME-HOME-VALUE-PLACEMENT-PROMPT-PACK-AND-"
-            "HANDOFF-CONTRACT-PASS-634-2026-06-25.md"
+            "FILE-DOWNSTREAM-RUNTIME-HOME-VALUE-PLACEMENT-IMPLEMENTATION-"
+            "READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-635-2026-06-25.md"
         )
         current_receipt.parent.mkdir(parents=True, exist_ok=True)
         current_receipt.write_text(
@@ -82,8 +82,8 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
                 [
                     "# Current Packet",
                     "",
-                    "- Mode: `docs-only root-bounded prompt-pack and handoff contract`",
-                    "- Scope: `freeze the exact worker objective, proof obligations, allowed-touch boundary, and stop conditions for the already-admitted fail-closed actual concrete command-file downstream runtime-home value placement slice`",
+                    "- Mode: `docs-only root-bounded implementation-readiness closeout and worker-routing`",
+                    "- Scope: `close the remaining root-only readiness question for the admitted actual-concrete-command-file-downstream-runtime-home-value-placement slice and freeze the exact bounded worker-routing result`",
                     "",
                 ]
             ),
@@ -119,19 +119,19 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual(20, payload["selected_percentage"])
         self.assertEqual("continue_current_lane", payload["operator_action"])
         self.assertEqual(
-            "_stack Readiness supervised execution-home actual concrete command-file downstream runtime-home value placement prompt-pack and handoff contract pass 634",
+            "_stack Readiness supervised execution-home actual concrete command-file downstream runtime-home value placement implementation-readiness closeout and worker-routing pass 635",
             payload["selected_current_packet"],
         )
         self.assertEqual(
-            "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-ACTUAL-CONCRETE-COMMAND-FILE-DOWNSTREAM-RUNTIME-HOME-VALUE-PLACEMENT-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-634-2026-06-25.md",
+            "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-ACTUAL-CONCRETE-COMMAND-FILE-DOWNSTREAM-RUNTIME-HOME-VALUE-PLACEMENT-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-635-2026-06-25.md",
             payload["selected_current_packet_basis_ref"],
         )
         self.assertEqual(
-            "docs-only root-bounded prompt-pack and handoff contract",
+            "docs-only root-bounded implementation-readiness closeout and worker-routing",
             payload["selected_current_packet_mode"],
         )
         self.assertEqual(
-            "freeze the exact worker objective, proof obligations, allowed-touch boundary, and stop conditions for the already-admitted fail-closed actual concrete command-file downstream runtime-home value placement slice",
+            "close the remaining root-only readiness question for the admitted actual-concrete-command-file-downstream-runtime-home-value-placement slice and freeze the exact bounded worker-routing result",
             payload["selected_current_packet_scope"],
         )
         self.assertEqual(
@@ -208,20 +208,20 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertIn("## Operator Action", markdown)
         self.assertIn("action: `continue_current_lane`", markdown)
         self.assertIn(
-            "current packet basis receipt: `docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-ACTUAL-CONCRETE-COMMAND-FILE-DOWNSTREAM-RUNTIME-HOME-VALUE-PLACEMENT-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-634-2026-06-25.md`",
+            "current packet basis receipt: `docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-ACTUAL-CONCRETE-COMMAND-FILE-DOWNSTREAM-RUNTIME-HOME-VALUE-PLACEMENT-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-635-2026-06-25.md`",
             markdown,
         )
         self.assertIn(
-            "current packet mode: `docs-only root-bounded prompt-pack and handoff contract`",
+            "current packet mode: `docs-only root-bounded implementation-readiness closeout and worker-routing`",
             markdown,
         )
         self.assertIn(
-            "current packet scope: `freeze the exact worker objective, proof obligations, allowed-touch boundary, and stop conditions for the already-admitted fail-closed actual concrete command-file downstream runtime-home value placement slice`",
+            "current packet scope: `close the remaining root-only readiness question for the admitted actual-concrete-command-file-downstream-runtime-home-value-placement slice and freeze the exact bounded worker-routing result`",
             markdown,
         )
         self.assertIn("## Current Active Marker", markdown)
         self.assertIn(
-            "current packet: `_stack Readiness supervised execution-home actual concrete command-file downstream runtime-home value placement prompt-pack and handoff contract pass 634`",
+            "current packet: `_stack Readiness supervised execution-home actual concrete command-file downstream runtime-home value placement implementation-readiness closeout and worker-routing pass 635`",
             markdown,
         )
         self.assertIn("## First Admissible After Current Lane", markdown)
