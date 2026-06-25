@@ -1460,6 +1460,7 @@
 - [_Stack Readiness Supervised Execution-Home Actual Concrete Command-File Downstream Runtime-Home Value Placement Contract Freeze Pass 630](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-ACTUAL-CONCRETE-COMMAND-FILE-DOWNSTREAM-RUNTIME-HOME-VALUE-PLACEMENT-CONTRACT-FREEZE-PASS-630-2026-06-25.md)
 - [_Stack Readiness Supervised Execution-Home Actual Concrete Command-File Downstream Runtime-Home Value Placement Owner-Surface Admission Pass 631](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-ACTUAL-CONCRETE-COMMAND-FILE-DOWNSTREAM-RUNTIME-HOME-VALUE-PLACEMENT-OWNER-SURFACE-ADMISSION-PASS-631-2026-06-25.md)
 - [_Stack Readiness Supervised Execution-Home Actual Concrete Command-File Downstream Runtime-Home Value Placement Supporting-Lane Admission Pass 632](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-ACTUAL-CONCRETE-COMMAND-FILE-DOWNSTREAM-RUNTIME-HOME-VALUE-PLACEMENT-SUPPORTING-LANE-ADMISSION-PASS-632-2026-06-25.md)
+- [_Stack Readiness Supervised Execution-Home Actual Concrete Command-File Downstream Runtime-Home Value Placement First-Implementation Admission Pass 633](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-ACTUAL-CONCRETE-COMMAND-FILE-DOWNSTREAM-RUNTIME-HOME-VALUE-PLACEMENT-FIRST-IMPLEMENTATION-ADMISSION-PASS-633-2026-06-25.md)
 
 ## Notes
 
