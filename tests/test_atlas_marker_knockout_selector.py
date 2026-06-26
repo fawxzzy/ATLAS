@@ -73,8 +73,8 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
     def _write_packet_receipts(self, root: Path) -> None:
         current_receipt = root / "docs" / "ops" / (
             "_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-"
-            "ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-CHOICE-CONTRACT-FREEZE-"
-            "PASS-749-"
+            "ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-CHOICE-OWNER-SURFACE-ADMISSION-"
+            "PASS-750-"
             "2026-06-26.md"
         )
         current_receipt.parent.mkdir(parents=True, exist_ok=True)
@@ -83,8 +83,8 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
                 [
                     "# Current Packet",
                     "",
-                    "- Mode: `docs-only root-bounded contract freeze`",
-                    "- Scope: `freeze the exact admissible actual owner-side mutation authority-class-choice question above the landed actual owner-side mutation surface-choice helper`",
+                    "- Mode: `docs-only root-bounded owner-surface admission`",
+                    "- Scope: `freeze the exact producing and consuming owner-facing home for the actual owner-side mutation authority-class-choice seam`",
                     "",
                 ]
             ),
@@ -120,19 +120,19 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual(20, payload["selected_percentage"])
         self.assertEqual("continue_current_lane", payload["operator_action"])
         self.assertEqual(
-            "_stack Readiness supervised execution-home _stack command implementation actual owner-side mutation authority class choice contract freeze pass 749",
+            "_stack Readiness supervised execution-home _stack command implementation actual owner-side mutation authority class choice owner-surface admission pass 750",
             payload["selected_current_packet"],
         )
         self.assertEqual(
-            "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-CHOICE-CONTRACT-FREEZE-PASS-749-2026-06-26.md",
+            "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-CHOICE-OWNER-SURFACE-ADMISSION-PASS-750-2026-06-26.md",
             payload["selected_current_packet_basis_ref"],
         )
         self.assertEqual(
-            "docs-only root-bounded contract freeze",
+            "docs-only root-bounded owner-surface admission",
             payload["selected_current_packet_mode"],
         )
         self.assertEqual(
-            "freeze the exact admissible actual owner-side mutation authority-class-choice question above the landed actual owner-side mutation surface-choice helper",
+            "freeze the exact producing and consuming owner-facing home for the actual owner-side mutation authority-class-choice seam",
             payload["selected_current_packet_scope"],
         )
         self.assertEqual(
@@ -209,20 +209,20 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertIn("## Operator Action", markdown)
         self.assertIn("action: `continue_current_lane`", markdown)
         self.assertIn(
-            "current packet basis receipt: `docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-CHOICE-CONTRACT-FREEZE-PASS-749-2026-06-26.md`",
+            "current packet basis receipt: `docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-CHOICE-OWNER-SURFACE-ADMISSION-PASS-750-2026-06-26.md`",
             markdown,
         )
         self.assertIn(
-            "current packet mode: `docs-only root-bounded contract freeze`",
+            "current packet mode: `docs-only root-bounded owner-surface admission`",
             markdown,
         )
         self.assertIn(
-            "current packet scope: `freeze the exact admissible actual owner-side mutation authority-class-choice question above the landed actual owner-side mutation surface-choice helper`",
+            "current packet scope: `freeze the exact producing and consuming owner-facing home for the actual owner-side mutation authority-class-choice seam`",
             markdown,
         )
         self.assertIn("## Current Active Marker", markdown)
         self.assertIn(
-            "current packet: `_stack Readiness supervised execution-home _stack command implementation actual owner-side mutation authority class choice contract freeze pass 749`",
+            "current packet: `_stack Readiness supervised execution-home _stack command implementation actual owner-side mutation authority class choice owner-surface admission pass 750`",
             markdown,
         )
         self.assertIn("## First Admissible After Current Lane", markdown)

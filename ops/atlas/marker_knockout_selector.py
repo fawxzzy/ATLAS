@@ -295,12 +295,12 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "AI Long-Run Batch Orchestration": PacketDescriptor(
-        packet="_stack Readiness supervised execution-home _stack command implementation actual owner-side mutation authority class choice contract freeze pass 749",
+        packet="_stack Readiness supervised execution-home _stack command implementation actual owner-side mutation authority class choice owner-surface admission pass 750",
         basis_receipt_ref=(
             "docs/ops/"
             "_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-"
-            "ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-CHOICE-CONTRACT-FREEZE-"
-            "PASS-749-"
+            "ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-CHOICE-OWNER-SURFACE-ADMISSION-"
+            "PASS-750-"
             "2026-06-26.md"
         ),
     ),
