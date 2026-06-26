@@ -1473,6 +1473,15 @@
 - [_Stack Readiness Supervised Execution-Home Concrete _Stack Command Implementation Surface Implementation-Readiness Closeout And Worker-Routing Pass 642](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-STACK-COMMAND-IMPLEMENTATION-SURFACE-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-642-2026-06-25.md)
 - [_Stack Readiness Supervised Execution-Home Concrete _Stack Command Implementation Surface First-Implementation Worker Cluster Reconciliation](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-STACK-COMMAND-IMPLEMENTATION-SURFACE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-25.md)
 
+- [AI Long-Run Batch Orchestration Post-Concrete-Stack-Command-Implementation-Surface Next-Slice Selection Pass 644](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-CONCRETE-STACK-COMMAND-IMPLEMENTATION-SURFACE-NEXT-SLICE-SELECTION-PASS-644-2026-06-25.md)
+- [_Stack Readiness Supervised Execution-Home Concrete _Stack Command Implementation Surface Choice Contract Freeze Pass 645](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-STACK-COMMAND-IMPLEMENTATION-SURFACE-CHOICE-CONTRACT-FREEZE-PASS-645-2026-06-25.md)
+- [_Stack Readiness Supervised Execution-Home Concrete _Stack Command Implementation Surface Choice Owner-Surface Admission Pass 646](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-STACK-COMMAND-IMPLEMENTATION-SURFACE-CHOICE-OWNER-SURFACE-ADMISSION-PASS-646-2026-06-25.md)
+- [_Stack Readiness Supervised Execution-Home Concrete _Stack Command Implementation Surface Choice Supporting-Lane Admission Pass 647](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-STACK-COMMAND-IMPLEMENTATION-SURFACE-CHOICE-SUPPORTING-LANE-ADMISSION-PASS-647-2026-06-25.md)
+- [_Stack Readiness Supervised Execution-Home Concrete _Stack Command Implementation Surface Choice First-Implementation Admission Pass 648](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-STACK-COMMAND-IMPLEMENTATION-SURFACE-CHOICE-FIRST-IMPLEMENTATION-ADMISSION-PASS-648-2026-06-25.md)
+- [_Stack Readiness Supervised Execution-Home Concrete _Stack Command Implementation Surface Choice Prompt-Pack And Handoff Contract Pass 649](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-STACK-COMMAND-IMPLEMENTATION-SURFACE-CHOICE-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-649-2026-06-25.md)
+- [_Stack Readiness Supervised Execution-Home Concrete _Stack Command Implementation Surface Choice Implementation-Readiness Closeout And Worker-Routing Pass 650](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-STACK-COMMAND-IMPLEMENTATION-SURFACE-CHOICE-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-650-2026-06-25.md)
+- [_Stack Readiness Supervised Execution-Home Concrete _Stack Command Implementation Surface Choice First-Implementation Worker Cluster Reconciliation](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-STACK-COMMAND-IMPLEMENTATION-SURFACE-CHOICE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-25.md)
+
 ## Notes
 
 This index is a working spine, not an exhaustive archive.
