@@ -73,7 +73,7 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
     def _write_packet_receipts(self, root: Path) -> None:
         current_receipt = root / "docs" / "ops" / (
             "_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-STACK-COMMAND-"
-            "IMPLEMENTATION-SURFACE-SELECTION-CONTRACT-FREEZE-PASS-637-2026-06-25.md"
+            "IMPLEMENTATION-SURFACE-OWNER-SURFACE-ADMISSION-PASS-638-2026-06-25.md"
         )
         current_receipt.parent.mkdir(parents=True, exist_ok=True)
         current_receipt.write_text(
@@ -81,8 +81,8 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
                 [
                     "# Current Packet",
                     "",
-                    "- Mode: `docs-only root-bounded contract freeze`",
-                    "- Scope: `freeze the exact admissible concrete _stack command implementation-surface selection question above the landed actual-concrete-command-file-downstream-runtime-home-value-placement helper`",
+                    "- Mode: `docs-only root-bounded owner-surface admission`",
+                    "- Scope: `freeze the exact owner-facing home for the concrete _stack command implementation-surface selection seam above the landed actual-concrete-command-file-downstream-runtime-home-value-placement helper`",
                     "",
                 ]
             ),
@@ -118,19 +118,19 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual(20, payload["selected_percentage"])
         self.assertEqual("continue_current_lane", payload["operator_action"])
         self.assertEqual(
-            "_stack Readiness supervised execution-home concrete _stack command implementation surface selection contract freeze pass 637",
+            "_stack Readiness supervised execution-home concrete _stack command implementation surface owner-surface admission pass 638",
             payload["selected_current_packet"],
         )
         self.assertEqual(
-            "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-STACK-COMMAND-IMPLEMENTATION-SURFACE-SELECTION-CONTRACT-FREEZE-PASS-637-2026-06-25.md",
+            "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-STACK-COMMAND-IMPLEMENTATION-SURFACE-OWNER-SURFACE-ADMISSION-PASS-638-2026-06-25.md",
             payload["selected_current_packet_basis_ref"],
         )
         self.assertEqual(
-            "docs-only root-bounded contract freeze",
+            "docs-only root-bounded owner-surface admission",
             payload["selected_current_packet_mode"],
         )
         self.assertEqual(
-            "freeze the exact admissible concrete _stack command implementation-surface selection question above the landed actual-concrete-command-file-downstream-runtime-home-value-placement helper",
+            "freeze the exact owner-facing home for the concrete _stack command implementation-surface selection seam above the landed actual-concrete-command-file-downstream-runtime-home-value-placement helper",
             payload["selected_current_packet_scope"],
         )
         self.assertEqual(
@@ -207,20 +207,20 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertIn("## Operator Action", markdown)
         self.assertIn("action: `continue_current_lane`", markdown)
         self.assertIn(
-            "current packet basis receipt: `docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-STACK-COMMAND-IMPLEMENTATION-SURFACE-SELECTION-CONTRACT-FREEZE-PASS-637-2026-06-25.md`",
+            "current packet basis receipt: `docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-STACK-COMMAND-IMPLEMENTATION-SURFACE-OWNER-SURFACE-ADMISSION-PASS-638-2026-06-25.md`",
             markdown,
         )
         self.assertIn(
-            "current packet mode: `docs-only root-bounded contract freeze`",
+            "current packet mode: `docs-only root-bounded owner-surface admission`",
             markdown,
         )
         self.assertIn(
-            "current packet scope: `freeze the exact admissible concrete _stack command implementation-surface selection question above the landed actual-concrete-command-file-downstream-runtime-home-value-placement helper`",
+            "current packet scope: `freeze the exact owner-facing home for the concrete _stack command implementation-surface selection seam above the landed actual-concrete-command-file-downstream-runtime-home-value-placement helper`",
             markdown,
         )
         self.assertIn("## Current Active Marker", markdown)
         self.assertIn(
-            "current packet: `_stack Readiness supervised execution-home concrete _stack command implementation surface selection contract freeze pass 637`",
+            "current packet: `_stack Readiness supervised execution-home concrete _stack command implementation surface owner-surface admission pass 638`",
             markdown,
         )
         self.assertIn("## First Admissible After Current Lane", markdown)
