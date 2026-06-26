@@ -12,15 +12,25 @@ from ops.atlas.supervised_execution_home import (
     SUCCESS_ROUTING_NOTE,
     SUPPORT_POSTURE,
 )
+from ops.atlas.supervised_execution_home_actual_concrete_command_file_choice import (
+    evaluate_supervised_execution_home_actual_concrete_command_file_choice,
+)
+from ops.atlas.supervised_execution_home_actual_concrete_command_file_downstream_runtime_home_value_placement import (
+    ACTUAL_CONCRETE_COMMAND_FILE_DOWNSTREAM_RUNTIME_HOME_VALUE_PLACEMENT_STATUS_ADMISSIBLE,
+    CONTRACT_RECEIPT_REFS as ACTUAL_CONCRETE_COMMAND_FILE_DOWNSTREAM_RUNTIME_HOME_VALUE_PLACEMENT_CONTRACT_RECEIPT_REFS,
+    QUESTION_PROMPT as ACTUAL_CONCRETE_COMMAND_FILE_DOWNSTREAM_RUNTIME_HOME_VALUE_PLACEMENT_QUESTION_PROMPT,
+    evaluate_supervised_execution_home_actual_concrete_command_file_downstream_runtime_home_value_placement,
+)
 from ops.atlas.supervised_execution_home_command_home import (
     COMMAND_HOME_SELECTION_STATUS_ADMISSIBLE,
     CONTRACT_RECEIPT_REFS as COMMAND_HOME_CONTRACT_RECEIPT_REFS,
     QUESTION_PROMPT as COMMAND_HOME_QUESTION_PROMPT,
 )
 from ops.atlas.supervised_execution_home_concrete_command_file import (
-    CONTRACT_RECEIPT_REFS as CONCRETE_COMMAND_FILE_CONTRACT_RECEIPT_REFS,
-    QUESTION_PROMPT as CONCRETE_COMMAND_FILE_QUESTION_PROMPT,
     evaluate_supervised_execution_home_concrete_command_file,
+)
+from ops.atlas.supervised_execution_home_concrete_command_file_choice import (
+    evaluate_supervised_execution_home_concrete_command_file_choice,
 )
 from ops.atlas.supervised_execution_home_concrete_command_home import (
     CONCRETE_COMMAND_HOME_STATUS_ADMISSIBLE,
@@ -31,6 +41,9 @@ from ops.atlas.supervised_execution_home_concrete_stack_command_home import (
     CONCRETE_STACK_COMMAND_HOME_SELECTION_STATUS_ADMISSIBLE,
     CONTRACT_RECEIPT_REFS as CONCRETE_STACK_COMMAND_HOME_CONTRACT_RECEIPT_REFS,
     QUESTION_PROMPT as CONCRETE_STACK_COMMAND_HOME_QUESTION_PROMPT,
+)
+from ops.atlas.supervised_execution_home_concrete_stack_command_home_choice import (
+    evaluate_supervised_execution_home_concrete_stack_command_home_choice,
 )
 from ops.atlas.supervised_execution_home_concrete_stack_command_implementation_surface import (
     CONCRETE_STACK_COMMAND_IMPLEMENTATION_SURFACE_SELECTION_STATUS_ADMISSIBLE,
@@ -104,7 +117,84 @@ def _upstream_bundle() -> dict[str, object]:
 
 
 def _base_result() -> dict[str, object]:
-    return evaluate_supervised_execution_home_concrete_command_file(_upstream_bundle())
+    bundle = _upstream_bundle()
+    concrete_command_file_result = evaluate_supervised_execution_home_concrete_command_file(
+        bundle
+    )
+    concrete_stack_command_home_choice_result = (
+        evaluate_supervised_execution_home_concrete_stack_command_home_choice(bundle)
+    )
+    concrete_command_file_choice_input = {
+        **concrete_command_file_result,
+        "concrete_stack_command_home_choice_status": (
+            concrete_stack_command_home_choice_result[
+                "concrete_stack_command_home_choice_status"
+            ]
+        ),
+        "concrete_stack_command_home_choice_question": (
+            concrete_stack_command_home_choice_result[
+                "concrete_stack_command_home_choice_question"
+            ]
+        ),
+        "concrete_stack_command_home_choice_reasons": (
+            concrete_stack_command_home_choice_result[
+                "concrete_stack_command_home_choice_reasons"
+            ]
+        ),
+    }
+    concrete_command_file_choice_result = (
+        evaluate_supervised_execution_home_concrete_command_file_choice(
+            concrete_command_file_choice_input
+        )
+    )
+    actual_concrete_command_file_choice_result = (
+        evaluate_supervised_execution_home_actual_concrete_command_file_choice(
+            concrete_command_file_choice_result
+        )
+    )
+    return evaluate_supervised_execution_home_actual_concrete_command_file_downstream_runtime_home_value_placement(
+        actual_concrete_command_file_choice_result
+    )
+
+
+EXPECTED_KEYS = {
+    "command",
+    "normalized_candidate_path",
+    "result_class",
+    "owner_surface",
+    "support_posture",
+    "admitted_evidence_refs",
+    "blocked_questions",
+    "routing_note",
+    "payload",
+    "command_home_selection_status",
+    "command_home_selection_question",
+    "command_home_selection_reasons",
+    "concrete_command_home_status",
+    "concrete_command_home_question",
+    "concrete_command_home_reasons",
+    "concrete_stack_command_home_selection_status",
+    "concrete_stack_command_home_selection_question",
+    "concrete_stack_command_home_selection_reasons",
+    "concrete_command_file_selection_status",
+    "concrete_command_file_selection_question",
+    "concrete_command_file_selection_reasons",
+    "concrete_stack_command_home_choice_status",
+    "concrete_stack_command_home_choice_question",
+    "concrete_stack_command_home_choice_reasons",
+    "concrete_command_file_choice_status",
+    "concrete_command_file_choice_question",
+    "concrete_command_file_choice_reasons",
+    "actual_concrete_command_file_choice_status",
+    "actual_concrete_command_file_choice_question",
+    "actual_concrete_command_file_choice_reasons",
+    "actual_concrete_command_file_downstream_runtime_home_value_placement_status",
+    "actual_concrete_command_file_downstream_runtime_home_value_placement_question",
+    "actual_concrete_command_file_downstream_runtime_home_value_placement_reasons",
+    "concrete_stack_command_implementation_surface_selection_status",
+    "concrete_stack_command_implementation_surface_selection_question",
+    "concrete_stack_command_implementation_surface_selection_reasons",
+}
 
 
 class SupervisedExecutionHomeConcreteStackCommandImplementationSurfaceTests(
@@ -116,40 +206,26 @@ class SupervisedExecutionHomeConcreteStackCommandImplementationSurfaceTests(
                 bundle
             )
         )
-        self.assertEqual(
-            {
-                "command",
-                "normalized_candidate_path",
-                "result_class",
-                "owner_surface",
-                "support_posture",
-                "admitted_evidence_refs",
-                "blocked_questions",
-                "routing_note",
-                "payload",
-                "command_home_selection_status",
-                "command_home_selection_question",
-                "command_home_selection_reasons",
-                "concrete_command_home_status",
-                "concrete_command_home_question",
-                "concrete_command_home_reasons",
-                "concrete_stack_command_home_selection_status",
-                "concrete_stack_command_home_selection_question",
-                "concrete_stack_command_home_selection_reasons",
-                "concrete_command_file_selection_status",
-                "concrete_command_file_selection_question",
-                "concrete_command_file_selection_reasons",
-                "concrete_stack_command_implementation_surface_selection_status",
-                "concrete_stack_command_implementation_surface_selection_question",
-                "concrete_stack_command_implementation_surface_selection_reasons",
-            },
-            set(payload.keys()),
-        )
+        self.assertEqual(EXPECTED_KEYS, set(payload.keys()))
         return payload
 
     def test_admissible_result_reopens_one_contract_local_question(self) -> None:
         payload = self._evaluate(_base_result())
 
+        self.assertEqual(
+            ACTUAL_CONCRETE_COMMAND_FILE_DOWNSTREAM_RUNTIME_HOME_VALUE_PLACEMENT_STATUS_ADMISSIBLE,
+            payload["actual_concrete_command_file_downstream_runtime_home_value_placement_status"],
+        )
+        self.assertEqual(
+            {
+                "question": ACTUAL_CONCRETE_COMMAND_FILE_DOWNSTREAM_RUNTIME_HOME_VALUE_PLACEMENT_QUESTION_PROMPT,
+                "candidate_ref": "repos/example/.worktrees/pilot-a",
+                "authoritative_receipt_refs": list(
+                    ACTUAL_CONCRETE_COMMAND_FILE_DOWNSTREAM_RUNTIME_HOME_VALUE_PLACEMENT_CONTRACT_RECEIPT_REFS
+                ),
+            },
+            payload["actual_concrete_command_file_downstream_runtime_home_value_placement_question"],
+        )
         self.assertEqual(
             CONCRETE_STACK_COMMAND_IMPLEMENTATION_SURFACE_SELECTION_STATUS_ADMISSIBLE,
             payload["concrete_stack_command_implementation_surface_selection_status"],
@@ -186,9 +262,13 @@ class SupervisedExecutionHomeConcreteStackCommandImplementationSurfaceTests(
 
     def test_non_admissible_upstream_status_fails_closed(self) -> None:
         bundle = _base_result()
-        bundle["concrete_command_file_selection_status"] = (
-            "no_concrete_command_file_selection"
+        bundle["actual_concrete_command_file_downstream_runtime_home_value_placement_status"] = (
+            "no_actual_concrete_command_file_downstream_runtime_home_value_placement"
         )
+        bundle["actual_concrete_command_file_downstream_runtime_home_value_placement_question"] = None
+        bundle["actual_concrete_command_file_downstream_runtime_home_value_placement_reasons"] = [
+            "actual_concrete_command_file_downstream_runtime_home_value_placement_question_not_explicit"
+        ]
 
         payload = self._evaluate(bundle)
 
@@ -200,7 +280,9 @@ class SupervisedExecutionHomeConcreteStackCommandImplementationSurfaceTests(
             payload["concrete_stack_command_implementation_surface_selection_question"]
         )
         self.assertEqual(
-            ["concrete_command_file_selection_status_not_admissible"],
+            [
+                "actual_concrete_command_file_downstream_runtime_home_value_placement_status_not_admissible"
+            ],
             payload["concrete_stack_command_implementation_surface_selection_reasons"],
         )
 
@@ -209,28 +291,42 @@ class SupervisedExecutionHomeConcreteStackCommandImplementationSurfaceTests(
             (
                 "question_card_missing_field",
                 {
-                    "concrete_command_file_selection_question": {
-                        "question": CONCRETE_COMMAND_FILE_QUESTION_PROMPT,
+                    "actual_concrete_command_file_downstream_runtime_home_value_placement_question": {
+                        "question": ACTUAL_CONCRETE_COMMAND_FILE_DOWNSTREAM_RUNTIME_HOME_VALUE_PLACEMENT_QUESTION_PROMPT,
                         "candidate_ref": "repos/example/.worktrees/pilot-a",
                     }
                 },
-                ["concrete_command_file_selection_question_not_explicit"],
+                [
+                    "actual_concrete_command_file_downstream_runtime_home_value_placement_question_not_explicit"
+                ],
             ),
             (
                 "question_card_wrong_receipts",
                 {
-                    "concrete_command_file_selection_question": {
-                        "question": CONCRETE_COMMAND_FILE_QUESTION_PROMPT,
+                    "actual_concrete_command_file_downstream_runtime_home_value_placement_question": {
+                        "question": ACTUAL_CONCRETE_COMMAND_FILE_DOWNSTREAM_RUNTIME_HOME_VALUE_PLACEMENT_QUESTION_PROMPT,
                         "candidate_ref": "repos/example/.worktrees/pilot-a",
-                        "authoritative_receipt_refs": list(CONCRETE_COMMAND_FILE_CONTRACT_RECEIPT_REFS[:-1]),
+                        "authoritative_receipt_refs": list(
+                            ACTUAL_CONCRETE_COMMAND_FILE_DOWNSTREAM_RUNTIME_HOME_VALUE_PLACEMENT_CONTRACT_RECEIPT_REFS[
+                                :-1
+                            ]
+                        ),
                     }
                 },
-                ["concrete_command_file_selection_question_not_explicit"],
+                [
+                    "actual_concrete_command_file_downstream_runtime_home_value_placement_question_not_explicit"
+                ],
             ),
             (
                 "upstream_reasons_present",
-                {"concrete_command_file_selection_reasons": ["forbidden_evidence_class_used"]},
-                ["concrete_command_file_selection_reasons_present"],
+                {
+                    "actual_concrete_command_file_downstream_runtime_home_value_placement_reasons": [
+                        "forbidden_evidence_class_used"
+                    ]
+                },
+                [
+                    "actual_concrete_command_file_downstream_runtime_home_value_placement_reasons_present"
+                ],
             ),
         )
         for _, updates, expected_reasons in cases:
@@ -297,21 +393,30 @@ class SupervisedExecutionHomeConcreteStackCommandImplementationSurfaceTests(
     def test_attempted_choice_runtime_authority_or_exception_fail_closed(self) -> None:
         cases = (
             (
-                "concrete_stack_command_home",
-                "_stack",
-                ["concrete_stack_command_home_choice_attempted"],
+                "actual_concrete_command_file",
+                "repos/_stack/ops/codex/stack.py",
+                ["actual_concrete_command_file_choice_attempted"],
             ),
             (
-                "command_file",
-                "repos/_stack/cmd.py",
-                ["concrete_command_file_choice_attempted"],
+                "actual_command_file_path",
+                "repos/_stack/ops/codex/stack.py",
+                ["actual_concrete_command_file_choice_attempted"],
             ),
             (
-                "stack_command_implementation_surface",
-                "repos/_stack/ops/codex/stack-supervised.py",
-                ["stack_command_implementation_surface_choice_attempted"],
+                "actual_concrete_command_file_downstream_runtime_home_value_placement",
+                "runtime/supervised-execution-home.json",
+                ["actual_concrete_command_file_downstream_runtime_home_value_placement_attempted"],
             ),
-            ("runtime_home", "_stack", ["runtime_home_inference_attempted"]),
+            (
+                "concrete_stack_command_implementation_surface_selection_status",
+                "concrete_stack_command_implementation_surface_selection_admissible",
+                ["concrete_stack_command_implementation_surface_choice_attempted"],
+            ),
+            (
+                "stack_command_implementation",
+                "implemented",
+                ["stack_command_implementation_attempted"],
+            ),
             ("worker_authority", "launch", ["worker_authority_attempted"]),
             (
                 "owner_repo_edit_authority",

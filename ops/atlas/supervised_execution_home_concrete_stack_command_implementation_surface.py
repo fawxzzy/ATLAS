@@ -10,10 +10,10 @@ from ops.atlas.supervised_execution_home import (
     SUCCESS_ROUTING_NOTE,
     SUPPORT_POSTURE,
 )
-from ops.atlas.supervised_execution_home_concrete_command_file import (
-    CONCRETE_COMMAND_FILE_SELECTION_STATUS_ADMISSIBLE,
-    CONTRACT_RECEIPT_REFS as CONCRETE_COMMAND_FILE_CONTRACT_RECEIPT_REFS,
-    QUESTION_PROMPT as CONCRETE_COMMAND_FILE_QUESTION_PROMPT,
+from ops.atlas.supervised_execution_home_actual_concrete_command_file_downstream_runtime_home_value_placement import (
+    ACTUAL_CONCRETE_COMMAND_FILE_DOWNSTREAM_RUNTIME_HOME_VALUE_PLACEMENT_STATUS_ADMISSIBLE,
+    CONTRACT_RECEIPT_REFS as ACTUAL_CONCRETE_COMMAND_FILE_DOWNSTREAM_RUNTIME_HOME_VALUE_PLACEMENT_CONTRACT_RECEIPT_REFS,
+    QUESTION_PROMPT as ACTUAL_CONCRETE_COMMAND_FILE_DOWNSTREAM_RUNTIME_HOME_VALUE_PLACEMENT_QUESTION_PROMPT,
 )
 
 CONCRETE_STACK_COMMAND_IMPLEMENTATION_SURFACE_SELECTION_STATUS_ADMISSIBLE = (
@@ -23,17 +23,20 @@ NO_CONCRETE_STACK_COMMAND_IMPLEMENTATION_SURFACE_SELECTION = (
     "no_concrete_stack_command_implementation_surface_selection"
 )
 QUESTION_PROMPT = (
-    "Which later admitted surface, if any, can choose the concrete _stack command "
-    "implementation surface for `stack supervised-execution-home` without choosing one "
-    "runtime home, one _stack command implementation, one worker authority class, one "
-    "owner-repo edit authority, one actual owner-side mutation authority, one Playbook "
-    "doctrine export path, or one protected-surface exception?"
+    "Which later admitted surface, if any, may choose the concrete _stack command "
+    "implementation surface for the already-admitted actual concrete command-file "
+    "downstream runtime-home value placement seam for `stack supervised-execution-home` "
+    "without choosing it now or widening into one actual concrete command file, one "
+    "actual downstream runtime-home value placement, one _stack command implementation, "
+    "one worker authority class, one owner-repo edit authority, one actual owner-side "
+    "mutation authority, one Playbook doctrine export path, or one protected-surface "
+    "exception?"
 )
 CONTRACT_RECEIPT_REFS = (
-    "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-STACK-COMMAND-IMPLEMENTATION-SURFACE-CONTRACT-FREEZE-PASS-553-2026-06-22.md",
-    "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-STACK-COMMAND-IMPLEMENTATION-SURFACE-OWNER-SURFACE-ADMISSION-PASS-554-2026-06-22.md",
-    "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-STACK-COMMAND-IMPLEMENTATION-SURFACE-SUPPORTING-LANE-ADMISSION-PASS-555-2026-06-22.md",
-    "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-STACK-COMMAND-IMPLEMENTATION-SURFACE-FIRST-IMPLEMENTATION-ADMISSION-PASS-556-2026-06-22.md",
+    "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-STACK-COMMAND-IMPLEMENTATION-SURFACE-SELECTION-CONTRACT-FREEZE-PASS-637-2026-06-25.md",
+    "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-STACK-COMMAND-IMPLEMENTATION-SURFACE-OWNER-SURFACE-ADMISSION-PASS-638-2026-06-25.md",
+    "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-STACK-COMMAND-IMPLEMENTATION-SURFACE-SUPPORTING-LANE-ADMISSION-PASS-639-2026-06-25.md",
+    "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-STACK-COMMAND-IMPLEMENTATION-SURFACE-FIRST-IMPLEMENTATION-ADMISSION-PASS-640-2026-06-25.md",
 )
 ALLOWED_PAYLOAD_KEYS = {
     "candidate_ref",
@@ -43,33 +46,37 @@ ALLOWED_PAYLOAD_KEYS = {
     "blocked_question_summary",
     "authoritative_receipt_refs",
 }
-CONCRETE_STACK_COMMAND_HOME_KEYS = {
-    "concrete_stack_command_home",
-    "concrete_stack_command_home_choice",
-    "stack_command_home",
-    "stack_command_home_choice",
+ACTUAL_CONCRETE_COMMAND_FILE_CHOICE_ATTEMPT_KEYS = {
+    "actual_command_file",
+    "actual_command_file_choice",
+    "actual_command_file_path",
+    "actual_concrete_command_file",
+    "actual_concrete_command_file_choice_candidate",
+    "actual_concrete_command_file_choice_path",
 }
-CONCRETE_COMMAND_FILE_KEYS = {
-    "command_file",
-    "command_file_choice",
-    "command_file_path",
-    "concrete_command_file",
-    "stack_command_file",
+ACTUAL_CONCRETE_COMMAND_FILE_DOWNSTREAM_RUNTIME_HOME_VALUE_PLACEMENT_ATTEMPT_KEYS = {
+    "actual_concrete_command_file_downstream_runtime_home_value_placement",
+    "downstream_runtime_home_value_location",
+    "downstream_runtime_home_value_placement",
+    "runtime_home_value_location",
+    "runtime_home_value_placement",
 }
 STACK_COMMAND_IMPLEMENTATION_SURFACE_KEYS = {
     "concrete_stack_command_implementation_surface",
     "concrete_stack_command_implementation_surface_choice",
+    "concrete_stack_command_implementation_surface_selection_question",
+    "concrete_stack_command_implementation_surface_selection_reasons",
+    "concrete_stack_command_implementation_surface_selection_status",
     "stack_command_implementation_surface",
     "stack_command_implementation_surface_choice",
     "stack_command_surface",
     "stack_command_surface_choice",
 }
-RUNTIME_HOME_KEYS = {
-    "_stack_home",
-    "execution_home",
-    "execution_home_inference",
-    "helper_home",
-    "runtime_home",
+STACK_COMMAND_IMPLEMENTATION_KEYS = {
+    "_stack_command_implementation",
+    "stack_command_behavior",
+    "stack_command_implementation",
+    "stack_supervised_execution_home_implementation",
 }
 WORKER_AUTHORITY_KEYS = {
     "dispatch_worker",
@@ -186,10 +193,12 @@ def _question_card_is_explicit(value: Any, candidate_path: str) -> bool:
         set(question_card.keys())
         == {"question", "candidate_ref", "authoritative_receipt_refs"}
         and _normalized_text(question_card.get("question"))
-        == CONCRETE_COMMAND_FILE_QUESTION_PROMPT
+        == ACTUAL_CONCRETE_COMMAND_FILE_DOWNSTREAM_RUNTIME_HOME_VALUE_PLACEMENT_QUESTION_PROMPT
         and _normalized_path(question_card.get("candidate_ref")) == candidate_path
         and _normalized_string_list(question_card.get("authoritative_receipt_refs"))
-        == list(CONCRETE_COMMAND_FILE_CONTRACT_RECEIPT_REFS)
+        == list(
+            ACTUAL_CONCRETE_COMMAND_FILE_DOWNSTREAM_RUNTIME_HOME_VALUE_PLACEMENT_CONTRACT_RECEIPT_REFS
+        )
     )
 
 
@@ -213,15 +222,18 @@ def _attempt_reasons(bundle: Mapping[str, Any]) -> list[str]:
     reasons: list[str] = []
     checks = (
         (
-            CONCRETE_STACK_COMMAND_HOME_KEYS,
-            "concrete_stack_command_home_choice_attempted",
+            ACTUAL_CONCRETE_COMMAND_FILE_CHOICE_ATTEMPT_KEYS,
+            "actual_concrete_command_file_choice_attempted",
         ),
-        (CONCRETE_COMMAND_FILE_KEYS, "concrete_command_file_choice_attempted"),
+        (
+            ACTUAL_CONCRETE_COMMAND_FILE_DOWNSTREAM_RUNTIME_HOME_VALUE_PLACEMENT_ATTEMPT_KEYS,
+            "actual_concrete_command_file_downstream_runtime_home_value_placement_attempted",
+        ),
         (
             STACK_COMMAND_IMPLEMENTATION_SURFACE_KEYS,
-            "stack_command_implementation_surface_choice_attempted",
+            "concrete_stack_command_implementation_surface_choice_attempted",
         ),
-        (RUNTIME_HOME_KEYS, "runtime_home_inference_attempted"),
+        (STACK_COMMAND_IMPLEMENTATION_KEYS, "stack_command_implementation_attempted"),
         (WORKER_AUTHORITY_KEYS, "worker_authority_attempted"),
         (
             OWNER_OR_MUTATION_AUTHORITY_KEYS,
@@ -241,19 +253,32 @@ def _selection_reasons(
     candidate_path: str,
     payload: dict[str, Any],
 ) -> list[str]:
-    reasons: list[str] = []
     if (
-        _normalized_text(bundle.get("concrete_command_file_selection_status"))
-        != CONCRETE_COMMAND_FILE_SELECTION_STATUS_ADMISSIBLE
+        _normalized_text(
+            bundle.get(
+                "actual_concrete_command_file_downstream_runtime_home_value_placement_status"
+            )
+        )
+        != ACTUAL_CONCRETE_COMMAND_FILE_DOWNSTREAM_RUNTIME_HOME_VALUE_PLACEMENT_STATUS_ADMISSIBLE
     ):
-        reasons.append("concrete_command_file_selection_status_not_admissible")
+        return [
+            "actual_concrete_command_file_downstream_runtime_home_value_placement_status_not_admissible"
+        ]
+
+    reasons: list[str] = []
     if not _question_card_is_explicit(
-        bundle.get("concrete_command_file_selection_question"),
+        bundle.get("actual_concrete_command_file_downstream_runtime_home_value_placement_question"),
         candidate_path,
     ):
-        reasons.append("concrete_command_file_selection_question_not_explicit")
-    if _normalized_string_list(bundle.get("concrete_command_file_selection_reasons")):
-        reasons.append("concrete_command_file_selection_reasons_present")
+        reasons.append(
+            "actual_concrete_command_file_downstream_runtime_home_value_placement_question_not_explicit"
+        )
+    if _normalized_string_list(
+        bundle.get("actual_concrete_command_file_downstream_runtime_home_value_placement_reasons")
+    ):
+        reasons.append(
+            "actual_concrete_command_file_downstream_runtime_home_value_placement_reasons_present"
+        )
     if _contains_key(bundle, LIVE_REPO_OR_TRANSCRIPT_KEYS):
         reasons.append("live_repo_discovery_or_hidden_transcript_dependency")
 
@@ -287,6 +312,18 @@ def evaluate_supervised_execution_home_concrete_stack_command_implementation_sur
     )
     concrete_command_file_selection_question = bundle.get(
         "concrete_command_file_selection_question"
+    )
+    concrete_stack_command_home_choice_question = bundle.get(
+        "concrete_stack_command_home_choice_question"
+    )
+    concrete_command_file_choice_question = bundle.get(
+        "concrete_command_file_choice_question"
+    )
+    actual_concrete_command_file_choice_question = bundle.get(
+        "actual_concrete_command_file_choice_question"
+    )
+    actual_concrete_command_file_downstream_runtime_home_value_placement_question = bundle.get(
+        "actual_concrete_command_file_downstream_runtime_home_value_placement_question"
     )
     reasons = _selection_reasons(bundle, candidate_path, payload)
 
@@ -341,6 +378,53 @@ def evaluate_supervised_execution_home_concrete_stack_command_implementation_sur
         ),
         "concrete_command_file_selection_reasons": _normalized_string_list(
             bundle.get("concrete_command_file_selection_reasons")
+        ),
+        "concrete_stack_command_home_choice_status": _normalized_text(
+            bundle.get("concrete_stack_command_home_choice_status")
+        ),
+        "concrete_stack_command_home_choice_question": (
+            dict(concrete_stack_command_home_choice_question)
+            if isinstance(concrete_stack_command_home_choice_question, Mapping)
+            else None
+        ),
+        "concrete_stack_command_home_choice_reasons": _normalized_string_list(
+            bundle.get("concrete_stack_command_home_choice_reasons")
+        ),
+        "concrete_command_file_choice_status": _normalized_text(
+            bundle.get("concrete_command_file_choice_status")
+        ),
+        "concrete_command_file_choice_question": (
+            dict(concrete_command_file_choice_question)
+            if isinstance(concrete_command_file_choice_question, Mapping)
+            else None
+        ),
+        "concrete_command_file_choice_reasons": _normalized_string_list(
+            bundle.get("concrete_command_file_choice_reasons")
+        ),
+        "actual_concrete_command_file_choice_status": _normalized_text(
+            bundle.get("actual_concrete_command_file_choice_status")
+        ),
+        "actual_concrete_command_file_choice_question": (
+            dict(actual_concrete_command_file_choice_question)
+            if isinstance(actual_concrete_command_file_choice_question, Mapping)
+            else None
+        ),
+        "actual_concrete_command_file_choice_reasons": _normalized_string_list(
+            bundle.get("actual_concrete_command_file_choice_reasons")
+        ),
+        "actual_concrete_command_file_downstream_runtime_home_value_placement_status": _normalized_text(
+            bundle.get("actual_concrete_command_file_downstream_runtime_home_value_placement_status")
+        ),
+        "actual_concrete_command_file_downstream_runtime_home_value_placement_question": (
+            dict(actual_concrete_command_file_downstream_runtime_home_value_placement_question)
+            if isinstance(
+                actual_concrete_command_file_downstream_runtime_home_value_placement_question,
+                Mapping,
+            )
+            else None
+        ),
+        "actual_concrete_command_file_downstream_runtime_home_value_placement_reasons": _normalized_string_list(
+            bundle.get("actual_concrete_command_file_downstream_runtime_home_value_placement_reasons")
         ),
         "concrete_stack_command_implementation_surface_selection_status": (
             CONCRETE_STACK_COMMAND_IMPLEMENTATION_SURFACE_SELECTION_STATUS_ADMISSIBLE
