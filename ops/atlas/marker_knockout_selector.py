@@ -295,12 +295,12 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "AI Long-Run Batch Orchestration": PacketDescriptor(
-        packet="_stack Readiness supervised execution-home _stack command implementation actual owner-side mutation surface first-implementation worker cluster reconciliation",
+        packet="AI Long-Run Batch Orchestration post-stack-command-implementation-actual-owner-side-mutation-surface next-slice selection pass 718",
         basis_receipt_ref=(
             "docs/ops/"
-            "_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-"
-            "IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-SURFACE-FIRST-"
-            "IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-26.md"
+            "AI-LONG-RUN-BATCH-ORCHESTRATION-POST-STACK-COMMAND-IMPLEMENTATION-"
+            "ACTUAL-OWNER-SIDE-MUTATION-SURFACE-NEXT-SLICE-SELECTION-PASS-718-"
+            "2026-06-26.md"
         ),
     ),
 }
