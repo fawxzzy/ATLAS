@@ -1491,6 +1491,14 @@
 - [_Stack Readiness Supervised Execution-Home Actual Concrete _Stack Command Implementation Surface Choice Implementation-Readiness Closeout And Worker-Routing Pass 657](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-ACTUAL-CONCRETE-STACK-COMMAND-IMPLEMENTATION-SURFACE-CHOICE-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-657-2026-06-25.md)
 - [_Stack Readiness Supervised Execution-Home Actual Concrete _Stack Command Implementation Surface Choice First-Implementation Worker Cluster Reconciliation](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-ACTUAL-CONCRETE-STACK-COMMAND-IMPLEMENTATION-SURFACE-CHOICE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-25.md)
 
+- [AI Long-Run Batch Orchestration Post-Actual-Concrete-Stack-Command-Implementation-Surface-Choice Next-Slice Selection Pass 658](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-ACTUAL-CONCRETE-STACK-COMMAND-IMPLEMENTATION-SURFACE-CHOICE-NEXT-SLICE-SELECTION-PASS-658-2026-06-25.md)
+- [_Stack Readiness Supervised Execution-Home _Stack Command Implementation Contract Freeze Pass 659](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-CONTRACT-FREEZE-PASS-659-2026-06-25.md)
+- [_Stack Readiness Supervised Execution-Home _Stack Command Implementation Owner-Surface Admission Pass 660](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-OWNER-SURFACE-ADMISSION-PASS-660-2026-06-25.md)
+- [_Stack Readiness Supervised Execution-Home _Stack Command Implementation Supporting-Lane Admission Pass 661](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-SUPPORTING-LANE-ADMISSION-PASS-661-2026-06-25.md)
+- [_Stack Readiness Supervised Execution-Home _Stack Command Implementation First-Implementation Admission Pass 662](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-FIRST-IMPLEMENTATION-ADMISSION-PASS-662-2026-06-25.md)
+- [_Stack Readiness Supervised Execution-Home _Stack Command Implementation Prompt-Pack And Handoff Contract Pass 663](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-663-2026-06-25.md)
+- [_Stack Readiness Supervised Execution-Home _Stack Command Implementation Implementation-Readiness Closeout And Worker-Routing Pass 664](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-664-2026-06-25.md)
+- [_Stack Readiness Supervised Execution-Home _Stack Command Implementation First-Implementation Worker Cluster Reconciliation](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-25.md)
 ## Notes
 
 This index is a working spine, not an exhaustive archive.
@@ -1503,4 +1511,5 @@ Its job is to make the current cross-reference spine visible:
 - approval gates
 - durable receipts
 - closeout-state receipts that change lane posture without reopening runtime mutation
+
 

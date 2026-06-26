@@ -295,11 +295,11 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "AI Long-Run Batch Orchestration": PacketDescriptor(
-        packet="_stack Readiness supervised execution-home actual concrete _stack command implementation surface choice first-implementation worker cluster reconciliation",
+        packet="_stack Readiness supervised execution-home _stack command implementation first-implementation worker cluster reconciliation",
         basis_receipt_ref=(
             "docs/ops/"
-            "_STACK-READINESS-SUPERVISED-EXECUTION-HOME-ACTUAL-CONCRETE-STACK-COMMAND-"
-            "IMPLEMENTATION-SURFACE-CHOICE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-"
+            "_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-"
+            "IMPLEMENTATION-FIRST-IMPLEMENTATION-WORKER-CLUSTER-"
             "RECONCILIATION-2026-06-25.md"
         ),
     ),
@@ -709,3 +709,5 @@ def main(argv: Iterable[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
+

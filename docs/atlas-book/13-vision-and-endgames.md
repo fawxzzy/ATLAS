@@ -51,9 +51,9 @@ Shared rules that survive the split:
 - exists to own cross-repo coordination, receipts, markers, validation, governance mapping, and restart surfaces
 - done means stack state is resumable from docs and receipts rather than memory
 - should not become a product-runtime owner
-- currently open for bounded root-owned orchestration doctrine, shared restart-surface refresh when no-overlap wave outputs are ready, and keeping the supervised execution-home downstream chain in explicit control-plane posture now that the concrete `_stack` command implementation-surface selection family, the concrete `_stack` command implementation-surface choice family, the actual concrete `_stack` command implementation-surface choice family, and their worker-cluster reconciliations are all durable on canonical `main` above the landed pilot-selection criteria, comparison, conversion, winner-selection, and selected-pilot routing helper-proof chain
+- currently open for bounded root-owned orchestration doctrine, shared restart-surface refresh when no-overlap wave outputs are ready, and keeping the supervised execution-home downstream chain in explicit control-plane posture now that the concrete `_stack` command implementation-surface selection family, the concrete `_stack` command implementation-surface choice family, the actual concrete `_stack` command implementation-surface choice family, the `_stack` command implementation family, and their worker-cluster reconciliations are all durable on canonical `main` above the landed pilot-selection criteria, comparison, conversion, winner-selection, and selected-pilot routing helper-proof chain
 - next valid package:
-  - `AI Long-Run Batch Orchestration post-actual-concrete-stack-command-implementation-surface-choice next-slice selection pass 658`
+  - `AI Long-Run Batch Orchestration post-stack-command-implementation next-slice selection pass 666`
 
 ## Key Endgames By Theme
 
@@ -229,4 +229,6 @@ Every lane in this chapter should be judged by whether it makes the future split
 - no mutation
 - no gate bypass
 - no treating “more work” as a substitute for lane endgames
+
+
 
