@@ -1465,6 +1465,7 @@
 - [_Stack Readiness Supervised Execution-Home Actual Concrete Command-File Downstream Runtime-Home Value Placement Implementation-Readiness Closeout And Worker-Routing Pass 635](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-ACTUAL-CONCRETE-COMMAND-FILE-DOWNSTREAM-RUNTIME-HOME-VALUE-PLACEMENT-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-635-2026-06-25.md)
 - [_Stack Readiness Supervised Execution-Home Actual Concrete Command-File Downstream Runtime-Home Value Placement First-Implementation Worker Cluster Reconciliation](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-ACTUAL-CONCRETE-COMMAND-FILE-DOWNSTREAM-RUNTIME-HOME-VALUE-PLACEMENT-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-25.md)
 - [AI Long-Run Batch Orchestration Post-Actual-Concrete-Command-File-Downstream-Runtime-Home-Value-Placement Next-Slice Selection Pass 636](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-ACTUAL-CONCRETE-COMMAND-FILE-DOWNSTREAM-RUNTIME-HOME-VALUE-PLACEMENT-NEXT-SLICE-SELECTION-PASS-636-2026-06-25.md)
+- [_Stack Readiness Supervised Execution-Home Concrete _Stack Command Implementation Surface Selection Contract Freeze Pass 637](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-CONCRETE-STACK-COMMAND-IMPLEMENTATION-SURFACE-SELECTION-CONTRACT-FREEZE-PASS-637-2026-06-25.md)
 
 ## Notes
 
