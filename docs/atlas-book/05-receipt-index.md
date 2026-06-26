@@ -1579,6 +1579,7 @@
 - [_Stack Readiness Supervised Execution-Home _Stack Command Implementation Actual Owner-Side Mutation Authority-Class Realization Prompt-Pack And Handoff Contract Pass 737](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-REALIZATION-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-737-2026-06-26.md)
 - [_Stack Readiness Supervised Execution-Home _Stack Command Implementation Actual Owner-Side Mutation Authority-Class Realization Implementation-Readiness Closeout And Worker-Routing Pass 738](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-REALIZATION-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-738-2026-06-26.md)
 - [_Stack Readiness Supervised Execution-Home _Stack Command Implementation Actual Owner-Side Mutation Authority-Class Realization First-Implementation Worker Cluster Reconciliation](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-REALIZATION-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-26.md)
+- [AI Long-Run Batch Orchestration Post-Stack-Command-Implementation-Actual-Owner-Side-Mutation-Authority-Class-Realization Next-Slice Selection Pass 740](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-STACK-COMMAND-IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-REALIZATION-NEXT-SLICE-SELECTION-PASS-740-2026-06-26.md)
 ## Notes
 
 This index is a working spine, not an exhaustive archive.
