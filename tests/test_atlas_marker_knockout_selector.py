@@ -73,7 +73,7 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
     def _write_packet_receipts(self, root: Path) -> None:
         current_receipt = root / "docs" / "ops" / (
             "_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-"
-            "IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-SURFACE-REALIZATION-"
+            "IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-REALIZATION-"
             "FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-"
             "2026-06-26.md"
         )
@@ -84,7 +84,7 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
                     "# Current Packet",
                     "",
                     "- Mode: `root-owned bounded implementation and proof reconciliation`",
-                    "- Scope: `supervised execution-home _stack command implementation actual owner-side mutation surface realization helper and proof worker cluster`",
+                    "- Scope: `supervised execution-home _stack command implementation actual owner-side mutation authority-class realization helper and proof worker cluster`",
                     "",
                 ]
             ),
@@ -120,11 +120,11 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual(20, payload["selected_percentage"])
         self.assertEqual("continue_current_lane", payload["operator_action"])
         self.assertEqual(
-            "_stack Readiness supervised execution-home _stack command implementation actual owner-side mutation surface realization first-implementation worker cluster reconciliation",
+            "_stack Readiness supervised execution-home _stack command implementation actual owner-side mutation authority class realization first-implementation worker cluster reconciliation",
             payload["selected_current_packet"],
         )
         self.assertEqual(
-            "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-SURFACE-REALIZATION-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-26.md",
+            "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-REALIZATION-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-26.md",
             payload["selected_current_packet_basis_ref"],
         )
         self.assertEqual(
@@ -132,7 +132,7 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
             payload["selected_current_packet_mode"],
         )
         self.assertEqual(
-            "supervised execution-home _stack command implementation actual owner-side mutation surface realization helper and proof worker cluster",
+            "supervised execution-home _stack command implementation actual owner-side mutation authority-class realization helper and proof worker cluster",
             payload["selected_current_packet_scope"],
         )
         self.assertEqual(
@@ -209,7 +209,7 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertIn("## Operator Action", markdown)
         self.assertIn("action: `continue_current_lane`", markdown)
         self.assertIn(
-            "current packet basis receipt: `docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-SURFACE-REALIZATION-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-26.md`",
+            "current packet basis receipt: `docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-REALIZATION-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-26.md`",
             markdown,
         )
         self.assertIn(
@@ -217,12 +217,12 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
             markdown,
         )
         self.assertIn(
-            "current packet scope: `supervised execution-home _stack command implementation actual owner-side mutation surface realization helper and proof worker cluster`",
+            "current packet scope: `supervised execution-home _stack command implementation actual owner-side mutation authority-class realization helper and proof worker cluster`",
             markdown,
         )
         self.assertIn("## Current Active Marker", markdown)
         self.assertIn(
-            "current packet: `_stack Readiness supervised execution-home _stack command implementation actual owner-side mutation surface realization first-implementation worker cluster reconciliation`",
+            "current packet: `_stack Readiness supervised execution-home _stack command implementation actual owner-side mutation authority class realization first-implementation worker cluster reconciliation`",
             markdown,
         )
         self.assertIn("## First Admissible After Current Lane", markdown)
