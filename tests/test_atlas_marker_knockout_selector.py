@@ -73,7 +73,7 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
     def _write_packet_receipts(self, root: Path) -> None:
         current_receipt = root / "docs" / "ops" / (
             "_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-"
-            "OWNER-REPO-MUTATION-FIRST-IMPLEMENTATION-ADMISSION-PASS-694-2026-06-26.md"
+            "OWNER-REPO-MUTATION-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-695-2026-06-26.md"
         )
         current_receipt.parent.mkdir(parents=True, exist_ok=True)
         current_receipt.write_text(
@@ -81,8 +81,8 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
                 [
                     "# Current Packet",
                     "",
-                    "- Mode: `docs-only root-bounded first-implementation admission`",
-                    "- Scope: `freeze the smallest fail-closed implementation slice and proof matrix for the _stack command implementation owner-repo mutation seam`",
+                    "- Mode: `docs-only root-bounded prompt-pack and handoff contract`",
+                    "- Scope: `freeze the exact worker objective, proof obligations, and stop conditions for the _stack command implementation owner-repo mutation helper slice`",
                     "",
                 ]
             ),
@@ -118,19 +118,19 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual(20, payload["selected_percentage"])
         self.assertEqual("continue_current_lane", payload["operator_action"])
         self.assertEqual(
-            "_stack Readiness supervised execution-home _stack command implementation owner-repo mutation first-implementation admission pass 694",
+            "_stack Readiness supervised execution-home _stack command implementation owner-repo mutation prompt-pack and handoff contract pass 695",
             payload["selected_current_packet"],
         )
         self.assertEqual(
-            "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-OWNER-REPO-MUTATION-FIRST-IMPLEMENTATION-ADMISSION-PASS-694-2026-06-26.md",
+            "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-OWNER-REPO-MUTATION-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-695-2026-06-26.md",
             payload["selected_current_packet_basis_ref"],
         )
         self.assertEqual(
-            "docs-only root-bounded first-implementation admission",
+            "docs-only root-bounded prompt-pack and handoff contract",
             payload["selected_current_packet_mode"],
         )
         self.assertEqual(
-            "freeze the smallest fail-closed implementation slice and proof matrix for the _stack command implementation owner-repo mutation seam",
+            "freeze the exact worker objective, proof obligations, and stop conditions for the _stack command implementation owner-repo mutation helper slice",
             payload["selected_current_packet_scope"],
         )
         self.assertEqual(
@@ -207,20 +207,20 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertIn("## Operator Action", markdown)
         self.assertIn("action: `continue_current_lane`", markdown)
         self.assertIn(
-            "current packet basis receipt: `docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-OWNER-REPO-MUTATION-FIRST-IMPLEMENTATION-ADMISSION-PASS-694-2026-06-26.md`",
+            "current packet basis receipt: `docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-OWNER-REPO-MUTATION-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-695-2026-06-26.md`",
             markdown,
         )
         self.assertIn(
-            "current packet mode: `docs-only root-bounded first-implementation admission`",
+            "current packet mode: `docs-only root-bounded prompt-pack and handoff contract`",
             markdown,
         )
         self.assertIn(
-            "current packet scope: `freeze the smallest fail-closed implementation slice and proof matrix for the _stack command implementation owner-repo mutation seam`",
+            "current packet scope: `freeze the exact worker objective, proof obligations, and stop conditions for the _stack command implementation owner-repo mutation helper slice`",
             markdown,
         )
         self.assertIn("## Current Active Marker", markdown)
         self.assertIn(
-            "current packet: `_stack Readiness supervised execution-home _stack command implementation owner-repo mutation first-implementation admission pass 694`",
+            "current packet: `_stack Readiness supervised execution-home _stack command implementation owner-repo mutation prompt-pack and handoff contract pass 695`",
             markdown,
         )
         self.assertIn("## First Admissible After Current Lane", markdown)
