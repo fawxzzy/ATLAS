@@ -1529,6 +1529,7 @@
 - [_Stack Readiness Supervised Execution-Home _Stack Command Implementation Owner-Repo Mutation Supporting-Lane Admission Pass 693](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-OWNER-REPO-MUTATION-SUPPORTING-LANE-ADMISSION-PASS-693-2026-06-26.md)
 - [_Stack Readiness Supervised Execution-Home _Stack Command Implementation Owner-Repo Mutation First-Implementation Admission Pass 694](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-OWNER-REPO-MUTATION-FIRST-IMPLEMENTATION-ADMISSION-PASS-694-2026-06-26.md)
 - [_Stack Readiness Supervised Execution-Home _Stack Command Implementation Owner-Repo Mutation Prompt-Pack And Handoff Contract Pass 695](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-OWNER-REPO-MUTATION-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-695-2026-06-26.md)
+- [_Stack Readiness Supervised Execution-Home _Stack Command Implementation Owner-Repo Mutation Implementation-Readiness Closeout And Worker-Routing Pass 696](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-OWNER-REPO-MUTATION-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-696-2026-06-26.md)
 ## Notes
 
 This index is a working spine, not an exhaustive archive.

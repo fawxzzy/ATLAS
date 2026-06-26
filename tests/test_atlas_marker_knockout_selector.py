@@ -73,7 +73,8 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
     def _write_packet_receipts(self, root: Path) -> None:
         current_receipt = root / "docs" / "ops" / (
             "_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-"
-            "OWNER-REPO-MUTATION-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-695-2026-06-26.md"
+            "OWNER-REPO-MUTATION-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-"
+            "PASS-696-2026-06-26.md"
         )
         current_receipt.parent.mkdir(parents=True, exist_ok=True)
         current_receipt.write_text(
@@ -81,8 +82,8 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
                 [
                     "# Current Packet",
                     "",
-                    "- Mode: `docs-only root-bounded prompt-pack and handoff contract`",
-                    "- Scope: `freeze the exact worker objective, proof obligations, and stop conditions for the _stack command implementation owner-repo mutation helper slice`",
+                    "- Mode: `docs-only root-bounded implementation-readiness closeout`",
+                    "- Scope: `close the remaining root-only readiness question and freeze the exact worker-routing result for the _stack command implementation owner-repo mutation seam`",
                     "",
                 ]
             ),
@@ -118,19 +119,19 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual(20, payload["selected_percentage"])
         self.assertEqual("continue_current_lane", payload["operator_action"])
         self.assertEqual(
-            "_stack Readiness supervised execution-home _stack command implementation owner-repo mutation prompt-pack and handoff contract pass 695",
+            "_stack Readiness supervised execution-home _stack command implementation owner-repo mutation implementation-readiness closeout and worker-routing pass 696",
             payload["selected_current_packet"],
         )
         self.assertEqual(
-            "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-OWNER-REPO-MUTATION-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-695-2026-06-26.md",
+            "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-OWNER-REPO-MUTATION-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-696-2026-06-26.md",
             payload["selected_current_packet_basis_ref"],
         )
         self.assertEqual(
-            "docs-only root-bounded prompt-pack and handoff contract",
+            "docs-only root-bounded implementation-readiness closeout",
             payload["selected_current_packet_mode"],
         )
         self.assertEqual(
-            "freeze the exact worker objective, proof obligations, and stop conditions for the _stack command implementation owner-repo mutation helper slice",
+            "close the remaining root-only readiness question and freeze the exact worker-routing result for the _stack command implementation owner-repo mutation seam",
             payload["selected_current_packet_scope"],
         )
         self.assertEqual(
@@ -207,20 +208,20 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertIn("## Operator Action", markdown)
         self.assertIn("action: `continue_current_lane`", markdown)
         self.assertIn(
-            "current packet basis receipt: `docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-OWNER-REPO-MUTATION-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-695-2026-06-26.md`",
+            "current packet basis receipt: `docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-OWNER-REPO-MUTATION-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-696-2026-06-26.md`",
             markdown,
         )
         self.assertIn(
-            "current packet mode: `docs-only root-bounded prompt-pack and handoff contract`",
+            "current packet mode: `docs-only root-bounded implementation-readiness closeout`",
             markdown,
         )
         self.assertIn(
-            "current packet scope: `freeze the exact worker objective, proof obligations, and stop conditions for the _stack command implementation owner-repo mutation helper slice`",
+            "current packet scope: `close the remaining root-only readiness question and freeze the exact worker-routing result for the _stack command implementation owner-repo mutation seam`",
             markdown,
         )
         self.assertIn("## Current Active Marker", markdown)
         self.assertIn(
-            "current packet: `_stack Readiness supervised execution-home _stack command implementation owner-repo mutation prompt-pack and handoff contract pass 695`",
+            "current packet: `_stack Readiness supervised execution-home _stack command implementation owner-repo mutation implementation-readiness closeout and worker-routing pass 696`",
             markdown,
         )
         self.assertIn("## First Admissible After Current Lane", markdown)
