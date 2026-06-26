@@ -1534,6 +1534,10 @@
 - [AI Long-Run Batch Orchestration Post-Stack-Command-Implementation-Owner-Repo-Mutation Next-Slice Selection Pass 697](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-STACK-COMMAND-IMPLEMENTATION-OWNER-REPO-MUTATION-NEXT-SLICE-SELECTION-PASS-697-2026-06-26.md)
 - [_Stack Readiness Supervised Execution-Home _Stack Command Implementation Actual Owner-Side Mutation Contract Freeze Pass 698](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-CONTRACT-FREEZE-PASS-698-2026-06-26.md)
 - [_Stack Readiness Supervised Execution-Home _Stack Command Implementation Actual Owner-Side Mutation Owner-Surface Admission Pass 699](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-OWNER-SURFACE-ADMISSION-PASS-699-2026-06-26.md)
+- [_Stack Readiness Supervised Execution-Home _Stack Command Implementation Actual Owner-Side Mutation Supporting-Lane Admission Pass 700](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-SUPPORTING-LANE-ADMISSION-PASS-700-2026-06-26.md)
+- [_Stack Readiness Supervised Execution-Home _Stack Command Implementation Actual Owner-Side Mutation First-Implementation Admission Pass 701](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-FIRST-IMPLEMENTATION-ADMISSION-PASS-701-2026-06-26.md)
+- [_Stack Readiness Supervised Execution-Home _Stack Command Implementation Actual Owner-Side Mutation Prompt-Pack And Handoff Contract Pass 702](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-702-2026-06-26.md)
+- [_Stack Readiness Supervised Execution-Home _Stack Command Implementation Actual Owner-Side Mutation Implementation-Readiness Closeout And Worker-Routing Pass 703](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-703-2026-06-26.md)
 ## Notes
 
 This index is a working spine, not an exhaustive archive.
