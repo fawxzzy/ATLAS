@@ -1526,6 +1526,7 @@
 - [AI Long-Run Batch Orchestration Post-Stack-Command-Implementation-Owner-Repo-Implementation-Routing-Card Next-Slice Selection Pass 690](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-STACK-COMMAND-IMPLEMENTATION-OWNER-REPO-IMPLEMENTATION-ROUTING-CARD-NEXT-SLICE-SELECTION-PASS-690-2026-06-26.md)
 - [_Stack Readiness Supervised Execution-Home _Stack Command Implementation Owner-Repo Mutation Contract Freeze Pass 691](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-OWNER-REPO-MUTATION-CONTRACT-FREEZE-PASS-691-2026-06-26.md)
 - [_Stack Readiness Supervised Execution-Home _Stack Command Implementation Owner-Repo Mutation Owner-Surface Admission Pass 692](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-OWNER-REPO-MUTATION-OWNER-SURFACE-ADMISSION-PASS-692-2026-06-26.md)
+- [_Stack Readiness Supervised Execution-Home _Stack Command Implementation Owner-Repo Mutation Supporting-Lane Admission Pass 693](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-OWNER-REPO-MUTATION-SUPPORTING-LANE-ADMISSION-PASS-693-2026-06-26.md)
 ## Notes
 
 This index is a working spine, not an exhaustive archive.
