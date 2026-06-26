@@ -1596,6 +1596,7 @@
 - [_Stack Readiness Supervised Execution-Home _Stack Command Implementation Actual Owner-Side Mutation Authority-Class Choice Implementation-Readiness Closeout And Worker-Routing Pass 754](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-CHOICE-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-754-2026-06-26.md)
 - [_Stack Readiness Supervised Execution-Home _Stack Command Implementation Actual Owner-Side Mutation Authority-Class Choice First-Implementation Worker Cluster Reconciliation](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-CHOICE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-26.md)
 - [AI Long-Run Batch Orchestration Post-Stack-Command-Implementation-Actual-Owner-Side-Mutation-Authority-Class-Choice Next-Slice Selection Pass 756](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-STACK-COMMAND-IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-CHOICE-NEXT-SLICE-SELECTION-PASS-756-2026-06-26.md)
+- [_Stack Readiness Supervised Execution-Home _Stack Command Implementation Actual Owner-Side Mutation Authority-Class Value Contract Freeze Pass 757](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-VALUE-CONTRACT-FREEZE-PASS-757-2026-06-26.md)
 ## Notes
 
 This index is a working spine, not an exhaustive archive.
