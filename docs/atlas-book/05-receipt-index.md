@@ -1587,6 +1587,7 @@
 - [_Stack Readiness Supervised Execution-Home _Stack Command Implementation Actual Owner-Side Mutation Surface Choice Prompt-Pack And Handoff Contract Pass 745](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-SURFACE-CHOICE-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-745-2026-06-26.md)
 - [_Stack Readiness Supervised Execution-Home _Stack Command Implementation Actual Owner-Side Mutation Surface Choice Implementation-Readiness Closeout And Worker-Routing Pass 746](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-SURFACE-CHOICE-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-746-2026-06-26.md)
 - [_Stack Readiness Supervised Execution-Home _Stack Command Implementation Actual Owner-Side Mutation Surface Choice First-Implementation Worker Cluster Reconciliation](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-SURFACE-CHOICE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-26.md)
+- [AI Long-Run Batch Orchestration Post-Stack-Command-Implementation-Actual-Owner-Side-Mutation-Surface-Choice Next-Slice Selection Pass 748](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-STACK-COMMAND-IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-SURFACE-CHOICE-NEXT-SLICE-SELECTION-PASS-748-2026-06-26.md)
 ## Notes
 
 This index is a working spine, not an exhaustive archive.
