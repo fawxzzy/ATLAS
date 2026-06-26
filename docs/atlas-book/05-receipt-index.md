@@ -1533,6 +1533,7 @@
 - [_Stack Readiness Supervised Execution-Home _Stack Command Implementation Owner-Repo Mutation First-Implementation Worker Cluster Reconciliation](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-OWNER-REPO-MUTATION-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-26.md)
 - [AI Long-Run Batch Orchestration Post-Stack-Command-Implementation-Owner-Repo-Mutation Next-Slice Selection Pass 697](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-STACK-COMMAND-IMPLEMENTATION-OWNER-REPO-MUTATION-NEXT-SLICE-SELECTION-PASS-697-2026-06-26.md)
 - [_Stack Readiness Supervised Execution-Home _Stack Command Implementation Actual Owner-Side Mutation Contract Freeze Pass 698](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-CONTRACT-FREEZE-PASS-698-2026-06-26.md)
+- [_Stack Readiness Supervised Execution-Home _Stack Command Implementation Actual Owner-Side Mutation Owner-Surface Admission Pass 699](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-OWNER-SURFACE-ADMISSION-PASS-699-2026-06-26.md)
 ## Notes
 
 This index is a working spine, not an exhaustive archive.
