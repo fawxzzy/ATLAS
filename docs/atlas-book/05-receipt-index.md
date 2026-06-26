@@ -1527,6 +1527,7 @@
 - [_Stack Readiness Supervised Execution-Home _Stack Command Implementation Owner-Repo Mutation Contract Freeze Pass 691](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-OWNER-REPO-MUTATION-CONTRACT-FREEZE-PASS-691-2026-06-26.md)
 - [_Stack Readiness Supervised Execution-Home _Stack Command Implementation Owner-Repo Mutation Owner-Surface Admission Pass 692](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-OWNER-REPO-MUTATION-OWNER-SURFACE-ADMISSION-PASS-692-2026-06-26.md)
 - [_Stack Readiness Supervised Execution-Home _Stack Command Implementation Owner-Repo Mutation Supporting-Lane Admission Pass 693](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-OWNER-REPO-MUTATION-SUPPORTING-LANE-ADMISSION-PASS-693-2026-06-26.md)
+- [_Stack Readiness Supervised Execution-Home _Stack Command Implementation Owner-Repo Mutation First-Implementation Admission Pass 694](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-OWNER-REPO-MUTATION-FIRST-IMPLEMENTATION-ADMISSION-PASS-694-2026-06-26.md)
 ## Notes
 
 This index is a working spine, not an exhaustive archive.
