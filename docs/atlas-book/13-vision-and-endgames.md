@@ -53,7 +53,7 @@ Shared rules that survive the split:
 - should not become a product-runtime owner
 - currently open for bounded root-owned orchestration doctrine, shared restart-surface refresh when no-overlap wave outputs are ready, and keeping the supervised execution-home downstream chain in explicit control-plane posture now that the concrete `_stack` command implementation-surface selection family, the concrete `_stack` command implementation-surface choice family, the actual concrete `_stack` command implementation-surface choice family, the `_stack` command implementation family, the `_stack` command implementation worker-authority family, the `_stack` command implementation owner-repo implementation-routing family, the post-owner-repo-implementation-routing selector, and their worker-cluster reconciliations are all durable on canonical `main` above the landed pilot-selection criteria, comparison, conversion, winner-selection, and selected-pilot routing helper-proof chain
 - next valid package:
-  - `_stack Readiness supervised execution-home _stack command implementation actual owner-side mutation authority class choice supporting-lane admission pass 751`
+  - `_stack Readiness supervised execution-home _stack command implementation actual owner-side mutation authority class choice first-implementation admission pass 752`
 
 ## Key Endgames By Theme
 

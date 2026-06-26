@@ -1590,6 +1590,7 @@
 - [AI Long-Run Batch Orchestration Post-Stack-Command-Implementation-Actual-Owner-Side-Mutation-Surface-Choice Next-Slice Selection Pass 748](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-STACK-COMMAND-IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-SURFACE-CHOICE-NEXT-SLICE-SELECTION-PASS-748-2026-06-26.md)
 - [_Stack Readiness Supervised Execution-Home _Stack Command Implementation Actual Owner-Side Mutation Authority-Class Choice Contract Freeze Pass 749](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-CHOICE-CONTRACT-FREEZE-PASS-749-2026-06-26.md)
 - [_Stack Readiness Supervised Execution-Home _Stack Command Implementation Actual Owner-Side Mutation Authority-Class Choice Owner-Surface Admission Pass 750](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-CHOICE-OWNER-SURFACE-ADMISSION-PASS-750-2026-06-26.md)
+- [_Stack Readiness Supervised Execution-Home _Stack Command Implementation Actual Owner-Side Mutation Authority-Class Choice Supporting-Lane Admission Pass 751](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-CHOICE-SUPPORTING-LANE-ADMISSION-PASS-751-2026-06-26.md)
 ## Notes
 
 This index is a working spine, not an exhaustive archive.
