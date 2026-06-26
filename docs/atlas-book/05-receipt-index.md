@@ -1523,6 +1523,7 @@
 - [_Stack Readiness Supervised Execution-Home _Stack Command Implementation Owner-Repo Implementation-Routing Card Prompt-Pack And Handoff Contract Pass 687](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-OWNER-REPO-IMPLEMENTATION-ROUTING-CARD-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-687-2026-06-26.md)
 - [_Stack Readiness Supervised Execution-Home _Stack Command Implementation Owner-Repo Implementation-Routing Card Implementation-Readiness Closeout And Worker-Routing Pass 688](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-OWNER-REPO-IMPLEMENTATION-ROUTING-CARD-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-688-2026-06-26.md)
 - [_Stack Readiness Supervised Execution-Home _Stack Command Implementation Owner-Repo Implementation-Routing Card First-Implementation Worker Cluster Reconciliation](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-OWNER-REPO-IMPLEMENTATION-ROUTING-CARD-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-26.md)
+- [AI Long-Run Batch Orchestration Post-Stack-Command-Implementation-Owner-Repo-Implementation-Routing-Card Next-Slice Selection Pass 690](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-STACK-COMMAND-IMPLEMENTATION-OWNER-REPO-IMPLEMENTATION-ROUTING-CARD-NEXT-SLICE-SELECTION-PASS-690-2026-06-26.md)
 ## Notes
 
 This index is a working spine, not an exhaustive archive.
