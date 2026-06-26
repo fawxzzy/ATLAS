@@ -1531,6 +1531,7 @@
 - [_Stack Readiness Supervised Execution-Home _Stack Command Implementation Owner-Repo Mutation Prompt-Pack And Handoff Contract Pass 695](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-OWNER-REPO-MUTATION-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-695-2026-06-26.md)
 - [_Stack Readiness Supervised Execution-Home _Stack Command Implementation Owner-Repo Mutation Implementation-Readiness Closeout And Worker-Routing Pass 696](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-OWNER-REPO-MUTATION-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-696-2026-06-26.md)
 - [_Stack Readiness Supervised Execution-Home _Stack Command Implementation Owner-Repo Mutation First-Implementation Worker Cluster Reconciliation](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-OWNER-REPO-MUTATION-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-26.md)
+- [AI Long-Run Batch Orchestration Post-Stack-Command-Implementation-Owner-Repo-Mutation Next-Slice Selection Pass 697](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-STACK-COMMAND-IMPLEMENTATION-OWNER-REPO-MUTATION-NEXT-SLICE-SELECTION-PASS-697-2026-06-26.md)
 ## Notes
 
 This index is a working spine, not an exhaustive archive.
