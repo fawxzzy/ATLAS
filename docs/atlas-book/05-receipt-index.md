@@ -1520,6 +1520,7 @@
 - [_Stack Readiness Supervised Execution-Home _Stack Command Implementation Owner-Repo Implementation-Routing Card Owner-Surface Admission Pass 684](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-OWNER-REPO-IMPLEMENTATION-ROUTING-CARD-OWNER-SURFACE-ADMISSION-PASS-684-2026-06-25.md)
 - [_Stack Readiness Supervised Execution-Home _Stack Command Implementation Owner-Repo Implementation-Routing Card Supporting-Lane Admission Pass 685](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-OWNER-REPO-IMPLEMENTATION-ROUTING-CARD-SUPPORTING-LANE-ADMISSION-PASS-685-2026-06-26.md)
 - [_Stack Readiness Supervised Execution-Home _Stack Command Implementation Owner-Repo Implementation-Routing Card First-Implementation Admission Pass 686](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-OWNER-REPO-IMPLEMENTATION-ROUTING-CARD-FIRST-IMPLEMENTATION-ADMISSION-PASS-686-2026-06-26.md)
+- [_Stack Readiness Supervised Execution-Home _Stack Command Implementation Owner-Repo Implementation-Routing Card Prompt-Pack And Handoff Contract Pass 687](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-OWNER-REPO-IMPLEMENTATION-ROUTING-CARD-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-687-2026-06-26.md)
 ## Notes
 
 This index is a working spine, not an exhaustive archive.
