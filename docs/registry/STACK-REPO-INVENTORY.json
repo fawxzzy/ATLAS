@@ -3,14 +3,14 @@
   "stack_manifest_ref": "stack.yaml",
   "stack_manifest_digest": "sha256:e5ac73c00983975b59e4b8e7f8541160d479087f5dc95ad1d642568116bd7d10",
   "stack_lock_ref": "stack.lock.yaml",
-  "stack_lock_digest": "sha256:3523ed888cf6f8ddad15da0228aa870afc2ef61cdaa771cd9e4b9ede5d1fbf5c",
+  "stack_lock_digest": "sha256:b9e2932f6595dea62f3d11e25eb5240ee3e035074edd4e1a5b85f051a25bc0a4",
   "working_memory_digest": "sha256:fe4f4902e2b2c475974b050ba1bf3f5e740439aa41df2f844555c2c0dc3b310f",
   "published_refs": {
     "json": "docs/registry/STACK-REPO-INVENTORY.json",
     "markdown": "docs/audits/STACK-REPO-INVENTORY.md"
   },
   "repo_count": 12,
-  "dirty_repo_count": 1,
+  "dirty_repo_count": 2,
   "release_eligible_count": 5,
   "repos": [
     {
@@ -77,8 +77,8 @@
       "role": "application",
       "status": "incubating",
       "remote_url": "https://github.com/fawxzzy/DiscordOS.git",
-      "pinned_commit": "6acdb0ac42c3385820a7a1b07113b2eb91c30dec",
-      "current_commit": "6acdb0ac42c3385820a7a1b07113b2eb91c30dec",
+      "pinned_commit": "de32a80729a2883181f2901dd135adf0ea2db080",
+      "current_commit": "de32a80729a2883181f2901dd135adf0ea2db080",
       "pinned_ref_type": "branch",
       "pinned_ref": "codex/message-command-poll-status",
       "current_ref_type": "branch",
@@ -272,7 +272,7 @@
       "current_ref_type": "branch",
       "current_ref": "codex/path-discipline-warning-slice-playbook",
       "branch": "codex/path-discipline-warning-slice-playbook",
-      "dirty": false,
+      "dirty": true,
       "trust_class": "trusted",
       "release_eligible": true,
       "exists": true,
@@ -317,7 +317,7 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "4d467e274f5a005ae262e326923cd2e3ec55a884",
+      "current_commit": "316b26fd56ae50d08ccf557d769f885047345474",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
@@ -530,5 +530,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:2d81943c6706adaeb4f17e1cebc238cb80e55d7d2561780385c49965efee7b38"
+  "content_digest": "sha256:95ea8ffdad5133056d8e59ee0a116fcb8aff07097bd0f6acd7a8712a13d5517b"
 }

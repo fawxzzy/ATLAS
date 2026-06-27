@@ -21,7 +21,7 @@ components:
     remote: "https://github.com/fawxzzy/DiscordOS.git"
     ref_type: "branch"
     ref: "codex/message-command-poll-status"
-    commit: "6acdb0ac42c3385820a7a1b07113b2eb91c30dec"
+    commit: "de32a80729a2883181f2901dd135adf0ea2db080"
     dirty: false
     trust_class: "trusted"
     release_eligible: false
@@ -77,7 +77,7 @@ components:
     ref_type: "branch"
     ref: "codex/path-discipline-warning-slice-playbook"
     commit: "945fef9bd6ef2dacd5c003c5a11299ff0122b15d"
-    dirty: false
+    dirty: true
     trust_class: "trusted"
     release_eligible: true
   playbook-demo:
@@ -216,4 +216,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:3523ed888cf6f8ddad15da0228aa870afc2ef61cdaa771cd9e4b9ede5d1fbf5c"
+lock_digest: "sha256:b9e2932f6595dea62f3d11e25eb5240ee3e035074edd4e1a5b85f051a25bc0a4"
