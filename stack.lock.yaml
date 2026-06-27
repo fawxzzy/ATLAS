@@ -20,8 +20,8 @@ components:
     status: "incubating"
     remote: "https://github.com/fawxzzy/DiscordOS.git"
     ref_type: "branch"
-    ref: "main"
-    commit: "4fe3091a192a02077f58c2b40854a49205e057b9"
+    ref: "codex/message-command-poll-status"
+    commit: "8542442e45aa9869ba5f7880591bc9b52f0a8f84"
     dirty: false
     trust_class: "trusted"
     release_eligible: false
@@ -76,7 +76,7 @@ components:
     remote: "https://github.com/fawxzzy/playbook.git"
     ref_type: "branch"
     ref: "codex/path-discipline-warning-slice-playbook"
-    commit: "003091d9d798c69afbf1419db021c50667dfb5d3"
+    commit: "ce0e509d6f31a960d79ef7955c85e91a0970281f"
     dirty: false
     trust_class: "trusted"
     release_eligible: true
@@ -216,4 +216,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:26a622113ba212dc53d82e0bfac1009cdf03dc2e707434ebe5050ee0f04c37f0"
+lock_digest: "sha256:cb532f48ef2a8190579666badb109174365e40b26114f2d488ce2bdf3615d0d3"

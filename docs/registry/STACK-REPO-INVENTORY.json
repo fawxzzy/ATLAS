@@ -3,7 +3,7 @@
   "stack_manifest_ref": "stack.yaml",
   "stack_manifest_digest": "sha256:e5ac73c00983975b59e4b8e7f8541160d479087f5dc95ad1d642568116bd7d10",
   "stack_lock_ref": "stack.lock.yaml",
-  "stack_lock_digest": "sha256:26a622113ba212dc53d82e0bfac1009cdf03dc2e707434ebe5050ee0f04c37f0",
+  "stack_lock_digest": "sha256:cb532f48ef2a8190579666badb109174365e40b26114f2d488ce2bdf3615d0d3",
   "working_memory_digest": "sha256:fe4f4902e2b2c475974b050ba1bf3f5e740439aa41df2f844555c2c0dc3b310f",
   "published_refs": {
     "json": "docs/registry/STACK-REPO-INVENTORY.json",
@@ -77,13 +77,13 @@
       "role": "application",
       "status": "incubating",
       "remote_url": "https://github.com/fawxzzy/DiscordOS.git",
-      "pinned_commit": "4fe3091a192a02077f58c2b40854a49205e057b9",
-      "current_commit": "4fe3091a192a02077f58c2b40854a49205e057b9",
+      "pinned_commit": "8542442e45aa9869ba5f7880591bc9b52f0a8f84",
+      "current_commit": "8542442e45aa9869ba5f7880591bc9b52f0a8f84",
       "pinned_ref_type": "branch",
-      "pinned_ref": "main",
+      "pinned_ref": "codex/message-command-poll-status",
       "current_ref_type": "branch",
-      "current_ref": "main",
-      "branch": "main",
+      "current_ref": "codex/message-command-poll-status",
+      "branch": "codex/message-command-poll-status",
       "dirty": false,
       "trust_class": "trusted",
       "release_eligible": false,
@@ -265,8 +265,8 @@
       "role": "governance-runtime",
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/playbook.git",
-      "pinned_commit": "003091d9d798c69afbf1419db021c50667dfb5d3",
-      "current_commit": "003091d9d798c69afbf1419db021c50667dfb5d3",
+      "pinned_commit": "ce0e509d6f31a960d79ef7955c85e91a0970281f",
+      "current_commit": "ce0e509d6f31a960d79ef7955c85e91a0970281f",
       "pinned_ref_type": "branch",
       "pinned_ref": "codex/path-discipline-warning-slice-playbook",
       "current_ref_type": "branch",
@@ -317,7 +317,7 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "92abe742382cd2073d5f373bfa88e87dc9a48c69",
+      "current_commit": "bcf8d12e112bbba09efb673b1691e0f88b699fda",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
@@ -530,5 +530,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:71f4797fe5ea5e9237479732bab249405cd061df534863c38db2181baed30d7b"
+  "content_digest": "sha256:df70268a5e5724f75baafb11612de64fe5251bb4abd31e8a9e5e0b1ca10e2d19"
 }
