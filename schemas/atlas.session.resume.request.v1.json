@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://schemas/atlas.session.resume.request.v1.json",
+  "title": "ATLAS session resume request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "session_id",
+    "worker_id",
+    "assignment_id",
+    "requested_at",
+    "stack_lock_digest",
+    "tool_id",
+    "extension_id",
+    "registry_digest",
+    "automation_level",
+    "session_manifest_ref",
+    "merge_completion_ref",
+    "merge_request_ref",
+    "resume_context_ref",
+    "paused_handoff_refs",
+    "merge_handoff_ref",
+    "source_artifact_refs"
+  ],
+  "properties": {
+    "contract_version": {
+      "type": "string",
+      "const": "atlas.session.resume.request.v1"
+    },
+    "session_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "worker_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "assignment_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "requested_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "stack_lock_digest": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tool_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "extension_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "registry_digest": {
+      "type": "string",
+      "minLength": 1
+    },
+    "automation_level": {
+      "type": "string",
+      "minLength": 1
+    },
+    "session_manifest_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "merge_completion_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "merge_request_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "resume_context_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "paused_handoff_refs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "merge_handoff_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_artifact_refs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  }
+}
