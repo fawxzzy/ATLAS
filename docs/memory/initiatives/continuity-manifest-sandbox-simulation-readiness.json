@@ -42,7 +42,8 @@
     "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-DESCRIPTOR-STUB-ADMISSION-2026-06-27.md",
     "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-REPORT-CONTRACT-FREEZE-2026-06-27.md",
     "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-REPORT-STUB-ADMISSION-2026-06-27.md",
-    "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-STATUS-SEMANTICS-CONTRACT-FREEZE-2026-06-27.md"
+    "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-STATUS-SEMANTICS-CONTRACT-FREEZE-2026-06-27.md",
+    "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-COMPARISON-BOUNDARY-CONTRACT-FREEZE-2026-06-27.md"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -50,9 +51,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "sandbox-simulation-readiness",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-STATUS-SEMANTICS-CONTRACT-FREEZE-2026-06-27.md",
+    "current_checkpoint_receipt": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-COMPARISON-BOUNDARY-CONTRACT-FREEZE-2026-06-27.md",
     "checkpoint_commit": "main",
-    "checkpoint_summary": "The lane now holds at 39 percent: the admitted Sandbox validator-report status vocabulary now has frozen local-only meaning, `not_run` is the only currently honest stub status, `match`, `mismatch`, and `blocked` are now explicitly reserved for later behavior-admission work, and the exact next package is now one local-only first validator-comparison boundary contract freeze.",
+    "checkpoint_summary": "The lane now holds at 42 percent: the admitted Sandbox example root now has one frozen comparison boundary over `expected_output.payload.mode`, `expected_output.payload.status`, and `expected_output.payload.observations`, the input fixture is now explicitly contextual rather than pass/fail oracle truth, and the exact next package is now one local-only first validator-candidate-output shape contract freeze.",
     "governing_receipts": [
       "docs/ops/STACK-LANE-0-BASELINE-INVENTORY-2026-05-22.md",
       "docs/ops/STACK-LANE-0-TRUTH-MAP-2026-05-22.md",
@@ -68,7 +69,8 @@
       "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-DESCRIPTOR-STUB-ADMISSION-2026-06-27.md",
       "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-REPORT-CONTRACT-FREEZE-2026-06-27.md",
       "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-REPORT-STUB-ADMISSION-2026-06-27.md",
-      "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-STATUS-SEMANTICS-CONTRACT-FREEZE-2026-06-27.md"
+      "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-STATUS-SEMANTICS-CONTRACT-FREEZE-2026-06-27.md",
+      "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-COMPARISON-BOUNDARY-CONTRACT-FREEZE-2026-06-27.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -158,6 +160,10 @@
       {
         "path": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-STATUS-SEMANTICS-CONTRACT-FREEZE-2026-06-27.md",
         "role": "current validator-status semantics truth and next-step routing"
+      },
+      {
+        "path": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-COMPARISON-BOUNDARY-CONTRACT-FREEZE-2026-06-27.md",
+        "role": "current validator-comparison-boundary truth and next-step routing"
       }
     ],
     "verification_adoption_surfaces": [
@@ -192,8 +198,8 @@
     ],
     "blocked_or_gated_work": [
       {
-        "item": "first local-only validator-comparison boundary over the admitted report stub",
-        "requirement": "blocked until one later explicit packet freezes exactly what a future local-only validator may compare between the admitted input and expected-output surfaces without widening into execution behavior"
+        "item": "first local-only validator-candidate-output shape under the frozen comparison boundary",
+        "requirement": "blocked until one later explicit packet freezes the future candidate-output shape that a local-only validator may project into the admitted comparison boundary"
       },
       {
         "item": "validator implementation or runner behavior",
@@ -204,25 +210,25 @@
         "requirement": "blocked unless a separate later packet explicitly widens the lane beyond root-owned local-only simulation posture"
       },
       {
-        "item": "higher marker movement above the current 39 percent validator-status-semantics threshold",
+        "item": "higher marker movement above the current 42 percent validator-comparison-boundary threshold",
         "requirement": "blocked until another real contract, implementation, proof-backed adoption, or blocker-clearance class changes operator reality again"
       }
     ],
     "next_package_ladder": [
       {
-        "package": "Sandbox Simulation Readiness local-only first validator-comparison boundary contract freeze",
-        "mode": "root-owned docs-only validator-comparison-boundary follow-on",
-        "reason": "one bounded validator-report stub now has frozen status meaning, so the next honest move is to freeze exactly what a future local-only validator may compare between the admitted input and expected-output surfaces before validator behavior, runner behavior, or `_stack` claims become honest"
+        "package": "Sandbox Simulation Readiness local-only first validator-candidate-output shape contract freeze",
+        "mode": "root-owned docs-only validator-candidate-output follow-on",
+        "reason": "one bounded comparison boundary now exists over the admitted oracle fields, so the next honest move is to freeze the future candidate-output shape that a local-only validator would project into that boundary before validator behavior, runner behavior, or `_stack` claims become honest"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-STATUS-SEMANTICS-CONTRACT-FREEZE-2026-06-27.md",
+    "freshness_checked_receipt": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-COMPARISON-BOUNDARY-CONTRACT-FREEZE-2026-06-27.md",
     "freshness_checked_at": "2026-06-27T00:00:00-04:00",
-    "freshness_basis": "The manifest now matches the current 39 percent Sandbox posture because the lane no longer stops at validator-report shape alone: one bounded status-semantics layer now exists over the admitted local-only validator-report stub, the Book and restart surfaces project that broader validator-meaning truth, and the next package is now one explicit local-only first validator-comparison boundary contract freeze.",
+    "freshness_basis": "The manifest now matches the current 42 percent Sandbox posture because the lane no longer stops at status semantics alone: one bounded comparison boundary now exists over the admitted expected-output oracle fields, the input fixture is now explicitly contextual only, the Book and restart surfaces project that broader comparison-boundary truth, and the next package is now one explicit local-only first validator-candidate-output shape contract freeze.",
     "marker_posture": [
       {
         "marker": "Sandbox Simulation Readiness",
-        "percent": 39,
+        "percent": 42,
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ]
