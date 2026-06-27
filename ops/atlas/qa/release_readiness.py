@@ -212,14 +212,21 @@ def _resolve_target_sha(
     adapter_refs: list[str] | None = None,
 ) -> dict[str, str]:
     stack_lock_pin = ""
+    stack_remote = ""
+    release_eligible = True
     if isinstance(stack_lock_file, Path) and stack_lock_file.exists():
         try:
             lockfile = load_lockfile(stack_lock_file)
             components = lockfile.get("components", {}) if isinstance(lockfile.get("components"), dict) else {}
             component = components.get(repo_id, {}) if isinstance(components.get(repo_id), dict) else {}
             stack_lock_pin = str(component.get("commit") or "").strip()
+            stack_remote = str(component.get("remote") or "").strip()
+            if "release_eligible" in component:
+                release_eligible = bool(component.get("release_eligible"))
         except Exception:
             stack_lock_pin = ""
+            stack_remote = ""
+            release_eligible = True
     current_repo_sha = ""
     repo_registry = load_repo_registry(root=base_root)
     repo_entry = repo_registry.get(repo_id)
@@ -256,6 +263,8 @@ def _resolve_target_sha(
         "target_source": target_source,
         "stack_lock_pin": stack_lock_pin,
         "current_repo_sha": current_repo_sha,
+        "stack_remote": stack_remote,
+        "release_eligible": release_eligible,
     }
 
 
@@ -459,6 +468,11 @@ def build_release_readiness(
             mode_entry["governance_checks"] = mode_governance
             mode_entry["governance_gate_status"] = governance_gate_status
             mode_entry["governance_blockers"] = governance_blockers
+        release_eligible = bool(target.get("release_eligible", True))
+        if not release_eligible:
+            for mode_name in ("release", "manual_promotion"):
+                if mode_name in per_mode:
+                    per_mode[mode_name]["gate_status"] = "not_applicable"
         release_gate = per_mode.get("release", {})
         legacy_release_origins = _string_list(release_gate.get("trusted_origins"))
         allowed_release_origins = _string_list(profile_policy.get("allowed_release_origins")) or legacy_release_origins
@@ -469,14 +483,16 @@ def build_release_readiness(
             profile_policy.get("enforcement_stage")
             or ("enforce" if legacy_origin_policy else "observe")
         )
-        release_gate_status = str(release_gate.get("gate_status") or "policy_only")
+        release_gate_status = "not_applicable" if not release_eligible else str(release_gate.get("gate_status") or "policy_only")
         release_ready = release_gate_status == "ready"
+        release_scope_status = "release_eligible" if release_eligible else "not_applicable"
         release_blockers: list[str] = []
-        release_blockers.extend(
-            str(item)
-            for item in release_gate.get("governance_blockers", [])
-            if isinstance(item, str) and item.strip()
-        )
+        if release_eligible:
+            release_blockers.extend(
+                str(item)
+                for item in release_gate.get("governance_blockers", [])
+                if isinstance(item, str) and item.strip()
+            )
         waiver_refs = [str(value) for value in (latest_run or {}).get("waiver_refs", []) if isinstance(value, str) and value.strip()]
         waived_lanes = [str(value) for value in (latest_run or {}).get("waived_lanes", []) if isinstance(value, str) and value.strip()]
         validated_waivers, waiver_findings = _validate_runtime_waivers(
@@ -503,45 +519,46 @@ def build_release_readiness(
         receipt_origin = (latest_run or {}).get("receipt_origin") if isinstance((latest_run or {}).get("receipt_origin"), dict) else {}
         receipt_origin_type = str(receipt_origin.get("origin_type") or "")
         trusted_origins = set(allowed_release_origins)
-        if not receipt_fresh:
-            release_ready = False
-            release_gate_status = "blocked"
-            if age_hours is None:
-                release_blockers.append("Latest receipt timestamp is missing or unreadable.")
-            else:
-                release_blockers.append(f"Latest receipt is stale ({age_hours}h > {max_receipt_age_hours}h).")
-        if target["target_sha"] and not sha_match:
-            release_ready = False
-            release_gate_status = "blocked"
-            release_blockers.append("Latest receipt is for the wrong SHA and does not match the target release SHA or stack pin.")
-        elif not target["target_sha"]:
-            release_ready = False
-            release_gate_status = "blocked"
-            release_blockers.append("No target release SHA could be resolved for provenance.")
-        trusted_origin_required = require_trusted_origin and bool(trusted_origins)
+        trusted_origin_required = release_eligible and require_trusted_origin and bool(trusted_origins)
         trusted_origin_match = not trusted_origin_required or receipt_origin_type in trusted_origins
         trusted_origin_status = "not_required"
-        if trusted_origin_required:
-            if trusted_origin_match:
-                trusted_origin_status = "trusted"
-            elif origin_enforcement_stage == "observe":
-                trusted_origin_status = "observe"
-            elif origin_enforcement_stage == "warn":
-                trusted_origin_status = "warn"
-            elif release_gate_status == "ready":
-                trusted_origin_status = "blocked"
+        if release_eligible:
+            if not receipt_fresh:
                 release_ready = False
                 release_gate_status = "blocked"
-                release_blockers.append("Latest receipt origin is not trusted for release enforcement.")
-            else:
-                trusted_origin_status = "warn"
-        if not release_ready and not release_blockers:
-            if promotion_status == "manual_review":
-                release_blockers.append("Release gate still requires manual or provider-backed physical proof.")
-            elif promotion_status == "dry_run":
-                release_blockers.append("Latest repo receipt is dry-run only; evidence-grade execution is still required.")
-            else:
-                release_blockers.append(f"Latest promotion status '{promotion_status}' does not satisfy the release gate.")
+                if age_hours is None:
+                    release_blockers.append("Latest receipt timestamp is missing or unreadable.")
+                else:
+                    release_blockers.append(f"Latest receipt is stale ({age_hours}h > {max_receipt_age_hours}h).")
+            if target["target_sha"] and not sha_match:
+                release_ready = False
+                release_gate_status = "blocked"
+                release_blockers.append("Latest receipt is for the wrong SHA and does not match the target release SHA or stack pin.")
+            elif not target["target_sha"]:
+                release_ready = False
+                release_gate_status = "blocked"
+                release_blockers.append("No target release SHA could be resolved for provenance.")
+            if trusted_origin_required:
+                if trusted_origin_match:
+                    trusted_origin_status = "trusted"
+                elif origin_enforcement_stage == "observe":
+                    trusted_origin_status = "observe"
+                elif origin_enforcement_stage == "warn":
+                    trusted_origin_status = "warn"
+                elif release_gate_status == "ready":
+                    trusted_origin_status = "blocked"
+                    release_ready = False
+                    release_gate_status = "blocked"
+                    release_blockers.append("Latest receipt origin is not trusted for release enforcement.")
+                else:
+                    trusted_origin_status = "warn"
+            if not release_ready and not release_blockers:
+                if promotion_status == "manual_review":
+                    release_blockers.append("Release gate still requires manual or provider-backed physical proof.")
+                elif promotion_status == "dry_run":
+                    release_blockers.append("Latest repo receipt is dry-run only; evidence-grade execution is still required.")
+                else:
+                    release_blockers.append(f"Latest promotion status '{promotion_status}' does not satisfy the release gate.")
         repos.append(
             {
                 "repo_id": repo_id,
@@ -559,6 +576,9 @@ def build_release_readiness(
                 "receipt_sha": receipt_sha,
                 "sha_match": sha_match,
                 "stack_lock_pin": target["stack_lock_pin"],
+                "stack_remote": target["stack_remote"],
+                "release_eligible": release_eligible,
+                "release_scope_status": release_scope_status,
                 "current_repo_sha": target["current_repo_sha"],
                 "promotion_status": promotion_status,
                 "promotion_display_status": promotion_display_status,
@@ -604,6 +624,7 @@ def build_release_readiness(
             "release_ready_count": sum(1 for item in repos if item.get("release_ready")),
             "manual_review_count": sum(1 for item in repos if item.get("release_gate_status") == "manual_review"),
             "blocked_count": sum(1 for item in repos if item.get("release_gate_status") == "blocked"),
+            "not_applicable_count": sum(1 for item in repos if item.get("release_gate_status") == "not_applicable"),
         },
     }
     target = output_file.resolve() if isinstance(output_file, Path) else default_release_readiness_path(root=base_root)
@@ -622,6 +643,7 @@ def build_release_readiness(
         f"- Release ready: `{payload['summary']['release_ready_count']}`",
         f"- Manual review: `{payload['summary']['manual_review_count']}`",
         f"- Blocked: `{payload['summary']['blocked_count']}`",
+        f"- Not applicable: `{payload['summary']['not_applicable_count']}`",
         "",
         "| Repo | Profile | Release Tier | Status | Display | Origin | Origin Stage | Origin Status | Release Gate | Ready | Waiver | Waiver Expiry | SHA Match |",
         "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
@@ -716,6 +738,8 @@ def enforce_release_repo_readiness(
         raise SystemExit(f"Repo '{repo_id}' is not present in release readiness.")
     mode_requirements = repo_entry.get("mode_requirements", {}) if isinstance(repo_entry.get("mode_requirements"), dict) else {}
     mode_entry = mode_requirements.get(mode, {}) if isinstance(mode_requirements.get(mode), dict) else {}
+    if mode in ("release", "manual_promotion") and not bool(repo_entry.get("release_eligible", True)):
+        raise SystemExit(f"Repo '{repo_id}' is not release-eligible according to stack.lock.yaml.")
     gate_status = str(
         repo_entry.get("release_gate_status") if mode == "release" else mode_entry.get("gate_status") or "blocked"
     )

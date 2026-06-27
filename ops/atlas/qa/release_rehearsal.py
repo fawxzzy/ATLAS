@@ -38,6 +38,11 @@ def build_release_rehearsal(
             continue
         repo_id = str(item.get("repo_id") or "")
         release_gate_status = str(item.get("release_gate_status") or "blocked")
+        release_scope_status = str(item.get("release_scope_status") or "")
+        if release_gate_status == "not_applicable" or release_scope_status == "not_applicable":
+            readiness_status = "not_applicable"
+        else:
+            readiness_status = "pass" if bool(item.get("release_ready")) else "fail"
         rehearsals.append(
             {
                 "repo_id": repo_id,
@@ -46,8 +51,9 @@ def build_release_rehearsal(
                 "target_sha": str(item.get("target_sha") or ""),
                 "receipt_sha": str(item.get("receipt_sha") or ""),
                 "sha_match": bool(item.get("sha_match")),
-                "readiness_status": "pass" if bool(item.get("release_ready")) else "fail",
+                "readiness_status": readiness_status,
                 "release_gate_status": release_gate_status,
+                "release_scope_status": release_scope_status,
                 "receipt_origin_type": str(item.get("receipt_origin_type") or ""),
                 "trusted_origin_status": str(item.get("trusted_origin_status") or ""),
                 "origin_enforcement_stage": str(item.get("origin_enforcement_stage") or ""),
@@ -71,6 +77,7 @@ def build_release_rehearsal(
             "repo_count": len(rehearsals),
             "pass_count": sum(1 for item in rehearsals if item["readiness_status"] == "pass"),
             "fail_count": sum(1 for item in rehearsals if item["readiness_status"] == "fail"),
+            "not_applicable_count": sum(1 for item in rehearsals if item["readiness_status"] == "not_applicable"),
         },
     }
     target = output_file.resolve() if isinstance(output_file, Path) else default_release_rehearsal_path(root=base_root)
@@ -85,6 +92,7 @@ def build_release_rehearsal(
         f"- Repos: `{payload['summary']['repo_count']}`",
         f"- Pass: `{payload['summary']['pass_count']}`",
         f"- Fail: `{payload['summary']['fail_count']}`",
+        f"- Not applicable: `{payload['summary']['not_applicable_count']}`",
         "",
         "| Repo | Release Tier | Trigger | Target SHA | Receipt SHA | Origin | Origin Status | Waiver | Status | Receipt |",
         "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",

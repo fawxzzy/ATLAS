@@ -2648,6 +2648,87 @@ class AtlasQaPipelineTests(unittest.TestCase):
         payload = load_json_object(root / "runtime" / "atlas" / "qa" / "release-readiness.latest.json")
         self.assertGreater(payload["repos"][0]["last_receipt_age_hours"], 1)
 
+    def test_release_readiness_marks_non_release_eligible_repo_not_applicable(self) -> None:
+        root = self._temp_root()
+        (root / "ops" / "atlas" / "qa").mkdir(parents=True, exist_ok=True)
+        (root / "stack.lock.yaml").write_text(
+            "\n".join(
+                [
+                    'schema_version: "atlas.stack.lock.v1"',
+                    "components:",
+                    "  stream:",
+                    '    commit: "stream-target"',
+                    "    remote: null",
+                    "    release_eligible: false",
+                ]
+            ) + "\n",
+            encoding="utf-8",
+        )
+        _write_json(
+            root / "ops" / "atlas" / "qa" / "release_policy.v1.json",
+            {
+                "contract_version": "atlas.qa.release_policy.v1",
+                "profiles": {
+                    "package_contract": {
+                        "display_name": "Package Contract",
+                        "require_trusted_origin": True,
+                        "enforcement_stage": "enforce",
+                        "allowed_release_origins": ["protected_manual"],
+                        "mode_requirements": {
+                            "release": {"allowed_statuses": ["promoted_emulated"]}
+                        },
+                    }
+                },
+                "repo_overrides": {"stream": {"release_profile": "package_contract"}},
+            },
+        )
+        _write_json(
+            root / "runtime" / "atlas" / "qa" / "evidence-index.latest.json",
+            {
+                "contract_version": "atlas.qa.evidence_index.v1",
+                "generated_at": "2026-06-27T07:41:33Z",
+                "runs": [
+                    {
+                        "run_id": "stream-run",
+                        "repo_id": "stream",
+                        "git_sha": "stream-target",
+                        "promotion_generated_at": "2026-06-27T07:41:33Z",
+                        "promotion_status": "promoted_emulated",
+                        "receipt_origin": {"origin_type": "local_dev"},
+                    }
+                ],
+                "adoption": [
+                    {
+                        "repo_id": "stream",
+                        "adopted": True,
+                        "owner": "stream",
+                        "adapter_refs": ["repos/stream/qa/adapters/stream.package.json"],
+                        "scenario_refs": ["repos/stream/qa/scenarios/stream.contract-smoke.json"],
+                        "evidence_profile": "package_contract",
+                        "last_run_id": "stream-run",
+                        "last_git_sha": "stream-target",
+                        "last_promotion_status": "promoted_emulated",
+                        "root_runner_version": "atlas.qa.evaluate-run.v2",
+                        "contract_version": "atlas.qa.promotion.v1",
+                    }
+                ],
+                "summary": {},
+                "retention": {},
+            },
+        )
+
+        build_release_readiness(root=root)
+
+        payload = load_json_object(root / "runtime" / "atlas" / "qa" / "release-readiness.latest.json")
+        repo = payload["repos"][0]
+        self.assertFalse(repo["release_eligible"])
+        self.assertEqual("not_applicable", repo["release_scope_status"])
+        self.assertEqual("not_applicable", repo["release_gate_status"])
+        self.assertFalse(repo["release_ready"])
+        self.assertEqual([], repo["release_blockers"])
+        self.assertEqual(0, payload["summary"]["blocked_count"])
+        self.assertEqual(1, payload["summary"]["not_applicable_count"])
+
     def test_release_readiness_blocks_wrong_target_sha(self) -> None:
         root = self._temp_root()
         (root / "ops" / "atlas" / "qa").mkdir(parents=True, exist_ok=True)
@@ -3566,10 +3647,29 @@ class AtlasQaPipelineTests(unittest.TestCase):
         self.assertEqual("repos/playbook/docs/qa.md", repo["docs_ref"])
         self.assertTrue(repo["docs_present"])
 
-    def test_release_rehearsal_reflects_ready_and_blocked_repos(self) -> None:
+    def test_release_rehearsal_reflects_ready_blocked_and_not_applicable_repos(self) -> None:
         root = self._temp_root()
         (root / "ops" / "atlas" / "qa").mkdir(parents=True, exist_ok=True)
-        self._write_stack_lock(root=root, components={"fitness": "fitness-sha", "playbook": "playbook-sha"})
+        generated_at = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+        (root / "stack.lock.yaml").write_text(
+            "\n".join(
+                [
+                    'schema_version: "atlas.stack.lock.v1"',
+                    "components:",
+                    "  fitness:",
+                    '    commit: "fitness-sha"',
+                    "    release_eligible: true",
+                    "  playbook:",
+                    '    commit: "playbook-sha"',
+                    "    release_eligible: true",
+                    "  stream:",
+                    '    commit: "stream-sha"',
+                    "    release_eligible: false",
+                    "    remote: null",
+                ]
+            ) + "\n",
+            encoding="utf-8",
+        )
         _write_json(
             root / "ops" / "atlas" / "qa" / "release_policy.v1.json",
             {
@@ -3583,10 +3683,18 @@ class AtlasQaPipelineTests(unittest.TestCase):
                         "display_name": "Docs Governance",
                         "mode_requirements": {"release": {"allowed_statuses": ["promoted_emulated"]}},
                     },
+                    "package_contract": {
+                        "display_name": "Package Contract",
+                        "require_trusted_origin": True,
+                        "enforcement_stage": "enforce",
+                        "allowed_release_origins": ["protected_manual"],
+                        "mode_requirements": {"release": {"allowed_statuses": ["promoted_emulated"]}},
+                    },
                 },
                 "repo_overrides": {
                     "fitness": {"release_profile": "release_critical_web"},
                     "playbook": {"release_profile": "docs_governance"},
+                    "stream": {"release_profile": "package_contract"},
                 },
             },
         )
@@ -3594,10 +3702,11 @@ class AtlasQaPipelineTests(unittest.TestCase):
             root / "runtime" / "atlas" / "qa" / "evidence-index.latest.json",
             {
                 "contract_version": "atlas.qa.evidence_index.v1",
-                "generated_at": "2026-05-11T00:00:00Z",
+                "generated_at": generated_at,
                 "runs": [
-                    {"run_id": "fitness-run", "repo_id": "fitness", "git_sha": "fitness-sha", "promotion_generated_at": "2026-05-11T00:00:00Z"},
-                    {"run_id": "playbook-run", "repo_id": "playbook", "git_sha": "playbook-sha", "promotion_generated_at": "2026-05-11T00:00:00Z"},
+                    {"run_id": "fitness-run", "repo_id": "fitness", "git_sha": "fitness-sha", "promotion_generated_at": generated_at},
+                    {"run_id": "playbook-run", "repo_id": "playbook", "git_sha": "playbook-sha", "promotion_generated_at": generated_at},
+                    {"run_id": "stream-run", "repo_id": "stream", "git_sha": "stream-sha", "promotion_generated_at": generated_at, "receipt_origin": {"origin_type": "local_dev"}},
                 ],
                 "adoption": [
                     {
@@ -3626,6 +3735,19 @@ class AtlasQaPipelineTests(unittest.TestCase):
                         "root_runner_version": "atlas.qa.evaluate-run.v2",
                         "contract_version": "atlas.qa.promotion.v1",
                     },
+                    {
+                        "repo_id": "stream",
+                        "adopted": True,
+                        "owner": "stream",
+                        "adapter_refs": ["repos/stream/qa/adapters/stream.package.json"],
+                        "scenario_refs": ["repos/stream/qa/scenarios/stream.contract-smoke.json"],
+                        "evidence_profile": "package_contract",
+                        "last_run_id": "stream-run",
+                        "last_git_sha": "stream-sha",
+                        "last_promotion_status": "promoted_emulated",
+                        "root_runner_version": "atlas.qa.evaluate-run.v2",
+                        "contract_version": "atlas.qa.promotion.v1",
+                    },
                 ],
                 "summary": {},
                 "retention": {},
@@ -3637,6 +3759,8 @@ class AtlasQaPipelineTests(unittest.TestCase):
         repos = {item["repo_id"]: item for item in payload["repos"]}
         self.assertEqual("fail", repos["fitness"]["readiness_status"])
         self.assertEqual("pass", repos["playbook"]["readiness_status"])
+        self.assertEqual("not_applicable", repos["stream"]["readiness_status"])
+        self.assertEqual(1, payload["summary"]["not_applicable_count"])
 
 
 if __name__ == "__main__":
