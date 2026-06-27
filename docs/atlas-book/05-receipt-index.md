@@ -1601,6 +1601,7 @@
 - [_Stack Readiness Supervised Execution-Home _Stack Command Implementation Actual Owner-Side Mutation Authority-Class Value Supporting-Lane Admission Pass 759](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-VALUE-SUPPORTING-LANE-ADMISSION-PASS-759-2026-06-26.md)
 - [_Stack Readiness Supervised Execution-Home _Stack Command Implementation Actual Owner-Side Mutation Authority-Class Value First-Implementation Admission Pass 760](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-VALUE-FIRST-IMPLEMENTATION-ADMISSION-PASS-760-2026-06-26.md)
 - [_Stack Readiness Supervised Execution-Home _Stack Command Implementation Actual Owner-Side Mutation Authority-Class Value Prompt-Pack And Handoff Contract Pass 761](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-VALUE-PROMPT-PACK-AND-HANDOFF-CONTRACT-PASS-761-2026-06-26.md)
+- [_Stack Readiness Supervised Execution-Home _Stack Command Implementation Actual Owner-Side Mutation Authority-Class Value Implementation-Readiness Closeout And Worker-Routing Pass 762](../ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-VALUE-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-PASS-762-2026-06-26.md)
 ## Notes
 
 This index is a working spine, not an exhaustive archive.
