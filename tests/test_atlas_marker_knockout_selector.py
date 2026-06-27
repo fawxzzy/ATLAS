@@ -114,8 +114,8 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         )
 
         sandbox_receipt = root / "docs" / "ops" / (
-            "SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-OWNER-"
-            "SURFACE-EXECUTION-ADMISSION-BOUNDARY-NEXT-SLICE-SELECTION-2026-06-27.md"
+            "SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-DEPLOY-"
+            "SURFACE-RUNTIME-ADMISSION-BOUNDARY-NEXT-SLICE-SELECTION-2026-06-27.md"
         )
         sandbox_receipt.write_text(
             "\n".join(
@@ -123,7 +123,7 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
                     "# Sandbox Packet",
                     "",
                     "- Mode: `docs-only root-bounded next-slice selection`",
-                    "- Scope: `choose the strongest bounded Sandbox follow-on now that the local-only first validator owner-surface execution admission boundary is directly frozen on canonical main`",
+                    "- Scope: `choose the strongest bounded Sandbox follow-on now that the local-only first validator deploy-surface runtime admission boundary is directly frozen on canonical main`",
                     "",
                 ]
             ),
@@ -312,7 +312,7 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
 
         self.assertEqual("hold_current_lane", payload["operator_action"])
 
-    def test_build_campaign_promotes_sandbox_after_owner_surface_execution_admission_boundary_contract(self) -> None:
+    def test_build_campaign_promotes_sandbox_after_deploy_surface_runtime_admission_boundary_contract(self) -> None:
         root = self._temp_root()
         marker_doc = MARKER_DOC.replace(
             "- Sandbox Simulation Readiness: `0%`",
@@ -344,23 +344,23 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
             records["Sandbox Simulation Readiness"]["category"],
         )
         self.assertIn(
-            "owner-surface execution admission boundary contract",
+            "deploy-surface runtime admission boundary contract",
             records["Sandbox Simulation Readiness"]["rationale"],
         )
         self.assertEqual(
-            "Sandbox Simulation Readiness local-only first validator deploy-surface runtime admission boundary contract freeze",
+            "Sandbox Simulation Readiness local-only first validator unattended-runtime proof admission boundary contract freeze",
             payload["next_after_current_packet"],
         )
         self.assertEqual(
-            "docs/ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-OWNER-SURFACE-EXECUTION-ADMISSION-BOUNDARY-NEXT-SLICE-SELECTION-2026-06-27.md",
+            "docs/ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-DEPLOY-SURFACE-RUNTIME-ADMISSION-BOUNDARY-NEXT-SLICE-SELECTION-2026-06-27.md",
             payload["next_after_current_packet_basis_ref"],
         )
         self.assertEqual(
-            "root-owned docs-only validator-deploy-surface-runtime-admission-boundary contract freeze",
+            "root-owned docs-only validator-unattended-runtime-proof-admission-boundary contract freeze",
             payload["next_after_current_packet_mode"],
         )
         self.assertIn(
-            "whether any deploy/runtime home may exist above that frozen owner-home family at all",
+            "whether any unattended-runtime proof may exist above that frozen runtime-home family at all",
             payload["next_after_current_packet_scope"],
         )
 
