@@ -77,6 +77,7 @@
 - [Sandbox Simulation Readiness Local-Only First Validator-Behavior Owner-Surface Admission](../ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-OWNER-SURFACE-ADMISSION-2026-06-27.md)
 - [Sandbox Simulation Readiness Local-Only First Validator-Behavior Supporting-Lane Admission](../ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-SUPPORTING-LANE-ADMISSION-2026-06-27.md)
 - [Sandbox Simulation Readiness Local-Only First Validator-Behavior First-Implementation Admission](../ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-FIRST-IMPLEMENTATION-ADMISSION-2026-06-27.md)
+- [Sandbox Simulation Readiness Local-Only First Validator-Behavior Prompt-Pack And Handoff Contract](../ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-PROMPT-PACK-AND-HANDOFF-CONTRACT-2026-06-27.md)
 - [AI Repetition-to-Automation Pipeline Selector Operator Action And Packet Basis](../ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-SELECTOR-OPERATOR-ACTION-AND-PACKET-BASIS-2026-06-18.md)
 - [Duplicate Surface Decommission Final Closeout Pass 3](../ops/DUPLICATE-SURFACE-DECOMMISSION-FINAL-CLOSEOUT-PASS-3-2026-06-13.md)
 - [Remaining Closeout Queue Reselection After Duplicate Surface Closeout](../ops/REMAINING-CLOSEOUT-QUEUE-RESELECTION-AFTER-DUPLICATE-SURFACE-CLOSEOUT-2026-06-13.md)

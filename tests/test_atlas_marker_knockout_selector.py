@@ -114,16 +114,16 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         )
 
         sandbox_receipt = root / "docs" / "ops" / (
-            "SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-FIRST-IMPLEMENTATION-"
-            "ADMISSION-2026-06-27.md"
+            "SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-PROMPT-PACK-AND-"
+            "HANDOFF-CONTRACT-2026-06-27.md"
         )
         sandbox_receipt.write_text(
             "\n".join(
                 [
                     "# Sandbox Packet",
                     "",
-                    "- Mode: `root-owned docs-only validator-behavior first-implementation admission`",
-                    "- Scope: `freeze the smallest pre-verdict root-local helper slice and proof matrix for the already admitted validator-behavior family without admitting validator execution or verdict-bearing statuses`",
+                    "- Mode: `root-owned docs-only validator-behavior prompt-pack and handoff contract`",
+                    "- Scope: `freeze the exact worker objective proof obligations allowed-touch boundary and stop conditions for the already admitted first validator-behavior implementation slice`",
                     "",
                 ]
             ),
@@ -312,7 +312,7 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
 
         self.assertEqual("hold_current_lane", payload["operator_action"])
 
-    def test_build_campaign_promotes_sandbox_after_validator_behavior_first_implementation_admission(self) -> None:
+    def test_build_campaign_promotes_sandbox_after_validator_behavior_prompt_pack_contract(self) -> None:
         root = self._temp_root()
         marker_doc = MARKER_DOC.replace(
             "- Sandbox Simulation Readiness: `0%`",
@@ -344,23 +344,23 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
             records["Sandbox Simulation Readiness"]["category"],
         )
         self.assertIn(
-            "first-implementation admission",
+            "prompt-pack and handoff contract",
             records["Sandbox Simulation Readiness"]["rationale"],
         )
         self.assertEqual(
-            "Sandbox Simulation Readiness local-only first validator-behavior prompt-pack and handoff contract",
+            "Sandbox Simulation Readiness local-only first validator-behavior implementation-readiness closeout and worker-routing",
             payload["next_after_current_packet"],
         )
         self.assertEqual(
-            "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-FIRST-IMPLEMENTATION-ADMISSION-2026-06-27.md",
+            "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-PROMPT-PACK-AND-HANDOFF-CONTRACT-2026-06-27.md",
             payload["next_after_current_packet_basis_ref"],
         )
         self.assertEqual(
-            "root-owned docs-only validator-behavior prompt-pack and handoff contract",
+            "root-owned docs-only validator-behavior implementation-readiness closeout and worker-routing",
             payload["next_after_current_packet_mode"],
         )
         self.assertIn(
-            "worker objective",
+            "worker-routing result",
             payload["next_after_current_packet_scope"],
         )
 
