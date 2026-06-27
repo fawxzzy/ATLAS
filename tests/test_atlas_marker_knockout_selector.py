@@ -123,7 +123,7 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
                     "# Sandbox Packet",
                     "",
                     "- Mode: `docs-only root-bounded next-slice selection`",
-                    "- Scope: `choose the strongest bounded Sandbox follow-on now that the local-only first validator public-release-truth admission boundary is directly frozen on canonical main`",
+                    "- Scope: `choose the strongest bounded Sandbox follow-on now that the local-only first validator owner-repo-mutation admission boundary is directly frozen on canonical main`",
                     "",
                 ]
             ),
@@ -344,23 +344,23 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
             records["Sandbox Simulation Readiness"]["category"],
         )
         self.assertIn(
-            "public-release-truth admission boundary contract",
+            "owner-repo-mutation admission boundary contract",
             records["Sandbox Simulation Readiness"]["rationale"],
         )
         self.assertEqual(
-            "Sandbox Simulation Readiness local-only first validator owner-repo mutation admission boundary contract freeze",
+            "Sandbox Simulation Readiness local-only first validator actual owner-side mutation admission boundary contract freeze",
             payload["next_after_current_packet"],
         )
         self.assertEqual(
-            "docs/ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-PUBLIC-RELEASE-TRUTH-ADMISSION-BOUNDARY-NEXT-SLICE-SELECTION-2026-06-27.md",
+            "docs/ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-OWNER-REPO-MUTATION-ADMISSION-BOUNDARY-NEXT-SLICE-SELECTION-2026-06-27.md",
             payload["next_after_current_packet_basis_ref"],
         )
         self.assertEqual(
-            "root-owned docs-only validator-owner-repo-mutation-admission-boundary contract freeze",
+            "root-owned docs-only validator-actual-owner-side-mutation-admission-boundary contract freeze",
             payload["next_after_current_packet_mode"],
         )
         self.assertIn(
-            "whether any owner-repo mutation may exist above that frozen public-release family at all",
+            "whether any actual owner-side mutation may exist above that frozen owner-repo-mutation family at all",
             payload["next_after_current_packet_scope"],
         )
 
