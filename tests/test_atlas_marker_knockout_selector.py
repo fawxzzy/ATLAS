@@ -123,7 +123,7 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
                     "# Sandbox Packet",
                     "",
                     "- Mode: `docs-only root-bounded next-slice selection`",
-                    "- Scope: `choose the strongest bounded Sandbox follow-on now that the local-only first validator live-unattended execution admission boundary is directly frozen on canonical main`",
+                    "- Scope: `choose the strongest bounded Sandbox follow-on now that the local-only first validator secret-bearing automation admission boundary is directly frozen on canonical main`",
                     "",
                 ]
             ),
@@ -312,7 +312,7 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
 
         self.assertEqual("hold_current_lane", payload["operator_action"])
 
-    def test_build_campaign_promotes_sandbox_after_live_unattended_execution_admission_boundary_contract(self) -> None:
+    def test_build_campaign_promotes_sandbox_after_secret_bearing_automation_admission_boundary_contract(self) -> None:
         root = self._temp_root()
         marker_doc = MARKER_DOC.replace(
             "- Sandbox Simulation Readiness: `0%`",
@@ -344,23 +344,23 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
             records["Sandbox Simulation Readiness"]["category"],
         )
         self.assertIn(
-            "live-unattended execution admission boundary contract",
+            "secret-bearing automation admission boundary contract",
             records["Sandbox Simulation Readiness"]["rationale"],
         )
         self.assertEqual(
-            "Sandbox Simulation Readiness local-only first validator secret-bearing automation admission boundary contract freeze",
+            "Sandbox Simulation Readiness local-only first validator deploy-surface mutation admission boundary contract freeze",
             payload["next_after_current_packet"],
         )
         self.assertEqual(
-            "docs/ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-LIVE-UNATTENDED-EXECUTION-ADMISSION-BOUNDARY-NEXT-SLICE-SELECTION-2026-06-27.md",
+            "docs/ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-SECRET-BEARING-AUTOMATION-ADMISSION-BOUNDARY-NEXT-SLICE-SELECTION-2026-06-27.md",
             payload["next_after_current_packet_basis_ref"],
         )
         self.assertEqual(
-            "root-owned docs-only validator-secret-bearing-automation-admission-boundary contract freeze",
+            "root-owned docs-only validator-deploy-surface-mutation-admission-boundary contract freeze",
             payload["next_after_current_packet_mode"],
         )
         self.assertIn(
-            "whether any secret-bearing automation may exist above that frozen live-execution family at all",
+            "whether any deploy-surface mutation may exist above that frozen secret-automation family at all",
             payload["next_after_current_packet_scope"],
         )
 
