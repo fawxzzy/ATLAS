@@ -308,6 +308,14 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
             "2026-06-26.md"
         ),
     ),
+    "Sandbox Simulation Readiness": PacketDescriptor(
+        packet="Sandbox Simulation Readiness local-only artifact-home and scenario-manifest contract freeze",
+        basis_receipt_ref=(
+            "docs/ops/"
+            "SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-ARTIFACT-HOME-AND-SCENARIO-MANIFEST-"
+            "CONTRACT-FREEZE-2026-06-27.md"
+        ),
+    ),
 }
 
 
@@ -393,11 +401,11 @@ def effective_policy(*, marker: str, percentage: int, active_lane: str | None) -
         policy = MarkerPolicy(
             category="admissible after current lane",
             rationale=(
-                "The lane now has one admitted root-owned starter packet and one exact docs-only follow-on, "
+                "The lane now has one admitted root-owned starter packet and one durable docs-only contract freeze, "
                 "but current durable restart truth still keeps the active ATLAS-root lane ahead of it."
             ),
             expected_evidence=(
-                "one bounded local-only artifact-home and scenario-manifest contract packet that preserves "
+                "one bounded local-only scenario-fixture pack contract packet that preserves "
                 "no owner-repo, deploy, secret, or live-data widening"
             ),
         )

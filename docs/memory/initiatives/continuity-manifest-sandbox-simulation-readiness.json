@@ -24,7 +24,8 @@
     "docs/ops/STACK-LANE-0-BASELINE-INVENTORY-2026-05-22.md",
     "docs/ops/STACK-LANE-0-TRUTH-MAP-2026-05-22.md",
     "docs/ops/ROOT-NON-FITNESS-MARKER-KNOCKOUT-CAMPAIGN-2026-06-09.md",
-    "docs/ops/SANDBOX-SIMULATION-READINESS-STARTER-PACKET-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-27.md"
+    "docs/ops/SANDBOX-SIMULATION-READINESS-STARTER-PACKET-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-27.md",
+    "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-ARTIFACT-HOME-AND-SCENARIO-MANIFEST-CONTRACT-FREEZE-2026-06-27.md"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -32,14 +33,15 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "sandbox-simulation-readiness",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/SANDBOX-SIMULATION-READINESS-STARTER-PACKET-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-27.md",
+    "current_checkpoint_receipt": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-ARTIFACT-HOME-AND-SCENARIO-MANIFEST-CONTRACT-FREEZE-2026-06-27.md",
     "checkpoint_commit": "main",
-    "checkpoint_summary": "The lane now holds at 5 percent: one first bounded root-owned starter packet now admits a local-only sandbox posture, preserves no owner-repo or live-system mutation boundaries, and fixes one exact next package around artifact-home and scenario-manifest contract shape.",
+    "checkpoint_summary": "The lane now holds at 8 percent: the Sandbox starter posture is preserved, the committed scenario-manifest home is now frozen at `data/atlas/sandbox/scenarios/<scenario_id>.json`, the generated runtime artifact home is now frozen at `runtime/atlas/sandbox/runs/<scenario_id>/<run_id>/`, all mutation and execution guards stay false, and the exact next package is now one local-only scenario-fixture pack contract freeze.",
     "governing_receipts": [
       "docs/ops/STACK-LANE-0-BASELINE-INVENTORY-2026-05-22.md",
       "docs/ops/STACK-LANE-0-TRUTH-MAP-2026-05-22.md",
       "docs/ops/ROOT-NON-FITNESS-MARKER-KNOCKOUT-CAMPAIGN-2026-06-09.md",
-      "docs/ops/SANDBOX-SIMULATION-READINESS-STARTER-PACKET-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-27.md"
+      "docs/ops/SANDBOX-SIMULATION-READINESS-STARTER-PACKET-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-27.md",
+      "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-ARTIFACT-HOME-AND-SCENARIO-MANIFEST-CONTRACT-FREEZE-2026-06-27.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -57,6 +59,10 @@
       {
         "path": "docs/ops/SANDBOX-SIMULATION-READINESS-STARTER-PACKET-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-27.md",
         "role": "current starter-packet contract and continuity-widening truth"
+      },
+      {
+        "path": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-ARTIFACT-HOME-AND-SCENARIO-MANIFEST-CONTRACT-FREEZE-2026-06-27.md",
+        "role": "current artifact-home and scenario-manifest contract truth"
       }
     ],
     "verification_adoption_surfaces": [
@@ -91,37 +97,37 @@
     ],
     "blocked_or_gated_work": [
       {
-        "item": "exact local-only artifact-home and scenario-manifest contract shape",
-        "requirement": "blocked until one later explicit docs-only packet freezes the exact `runtime/atlas/sandbox/**` artifact-home and scenario-manifest boundary"
+        "item": "first local-only scenario-fixture pack contract",
+        "requirement": "blocked until one later explicit docs-only packet freezes the minimum future `data/atlas/sandbox/fixtures/**` boundary and its manifest-reference discipline"
       },
       {
         "item": "simulation fixtures, harness validator, or runner behavior",
-        "requirement": "blocked until one later explicit packet admits concrete local-only fixture, validator, or runner scope beyond this starter contract"
+        "requirement": "blocked until one later explicit packet admits concrete local-only fixture, validator, or runner scope beyond the current artifact-home and manifest contract"
       },
       {
         "item": "_stack`, owner-repo, deploy, secret, or live-data widening",
         "requirement": "blocked unless a separate later packet explicitly widens the lane beyond root-owned local-only simulation posture"
       },
       {
-        "item": "higher marker movement above the current 5 percent starter threshold",
+        "item": "higher marker movement above the current 8 percent contract threshold",
         "requirement": "blocked until another real contract, implementation, proof-backed adoption, or blocker-clearance class changes operator reality again"
       }
     ],
     "next_package_ladder": [
       {
-        "package": "Sandbox Simulation Readiness local-only artifact-home and scenario-manifest contract freeze",
-        "mode": "root-owned docs-only contract follow-on",
-        "reason": "the lane now has one real starter packet, but it still lacks one exact future local-only runtime artifact-home and scenario-manifest contract before fixture, validator, runner, or `_stack` claims become honest"
+        "package": "Sandbox Simulation Readiness local-only scenario-fixture pack contract freeze",
+        "mode": "root-owned docs-only fixture-contract follow-on",
+        "reason": "the scenario-manifest home and generated runtime artifact home are now fixed, so the next honest question is the minimum durable fixture boundary before any validator, runner, or `_stack` claim becomes honest"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/SANDBOX-SIMULATION-READINESS-STARTER-PACKET-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-27.md",
+    "freshness_checked_receipt": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-ARTIFACT-HOME-AND-SCENARIO-MANIFEST-CONTRACT-FREEZE-2026-06-27.md",
     "freshness_checked_at": "2026-06-27T00:00:00-04:00",
-    "freshness_basis": "The manifest now matches the newly admitted 5 percent Sandbox posture because one starter receipt now exists, the lane is no longer excluded at zero, the Book and restart surfaces project that posture, and one exact next package is fixed around local-only artifact-home and scenario-manifest contract shape.",
+    "freshness_basis": "The manifest now matches the current 8 percent Sandbox posture because the lane no longer stops at the starter packet: the committed scenario-manifest home and generated runtime artifact home are both now contract-frozen, the Book and restart surfaces project that narrower truth, and the next package is now one explicit local-only scenario-fixture pack contract freeze.",
     "marker_posture": [
       {
         "marker": "Sandbox Simulation Readiness",
-        "percent": 5,
+        "percent": 8,
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ]

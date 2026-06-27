@@ -113,6 +113,23 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
             encoding="utf-8",
         )
 
+        sandbox_receipt = root / "docs" / "ops" / (
+            "SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-ARTIFACT-HOME-AND-SCENARIO-MANIFEST-"
+            "CONTRACT-FREEZE-2026-06-27.md"
+        )
+        sandbox_receipt.write_text(
+            "\n".join(
+                [
+                    "# Sandbox Packet",
+                    "",
+                    "- Mode: `root-owned docs-only sandbox contract freeze`",
+                    "- Scope: `freeze the exact local-only sandbox runtime artifact home and scenario-manifest contract without admitting fixture execution, validator behavior, runner behavior, or any owner-repo, deploy, secret, or live-data widening`",
+                    "",
+                ]
+            ),
+            encoding="utf-8",
+        )
+
     def _write_manifest(
         self,
         root: Path,
@@ -295,15 +312,29 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
 
         self.assertEqual("hold_current_lane", payload["operator_action"])
 
-    def test_build_campaign_promotes_sandbox_after_starter_packet(self) -> None:
+    def test_build_campaign_promotes_sandbox_after_contract_freeze(self) -> None:
         root = self._temp_root()
         marker_doc = MARKER_DOC.replace(
             "- Sandbox Simulation Readiness: `0%`",
-            "- Sandbox Simulation Readiness: `5%`",
+            "- Sandbox Simulation Readiness: `8%`",
         )
         (root / "docs" / "atlas-book" / "02-lanes-and-markers.md").write_text(marker_doc, encoding="utf-8")
         (root / "docs" / "atlas-book" / "01-current-state.md").write_text(CURRENT_STATE_DOC, encoding="utf-8")
         self._write_packet_receipts(root)
+        self._write_manifest(
+            root,
+            manifest_name="continuity-manifest-ai-repetition-to-automation-pipeline.json",
+            marker="AI Repetition-to-Automation Pipeline",
+            percent=32,
+            checkpoint_ref=(
+                "docs/ops/"
+                "AI-REPETITION-TO-AUTOMATION-PIPELINE-SELECTOR-LANE-EXHAUSTION-OR-FALLBACK-ROUTING-"
+                "2026-06-18.md"
+            ),
+            next_package="No immediate AI Repetition-to-Automation Pipeline same-lane packet",
+            mode="hold-flat after selector exhaustion",
+            reason="selector family is currently held",
+        )
 
         payload = build_campaign(root=root)
         records = {record["marker"]: record for record in payload["open_markers"]}
@@ -313,8 +344,20 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
             records["Sandbox Simulation Readiness"]["category"],
         )
         self.assertIn(
-            "admitted root-owned starter packet",
+            "durable docs-only contract freeze",
             records["Sandbox Simulation Readiness"]["rationale"],
+        )
+        self.assertEqual(
+            "Sandbox Simulation Readiness local-only artifact-home and scenario-manifest contract freeze",
+            payload["next_after_current_packet"],
+        )
+        self.assertEqual(
+            "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-ARTIFACT-HOME-AND-SCENARIO-MANIFEST-CONTRACT-FREEZE-2026-06-27.md",
+            payload["next_after_current_packet_basis_ref"],
+        )
+        self.assertEqual(
+            "root-owned docs-only sandbox contract freeze",
+            payload["next_after_current_packet_mode"],
         )
 
     def test_build_campaign_normalizes_inline_code_marker_names(self) -> None:

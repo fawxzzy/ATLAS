@@ -55,6 +55,7 @@
 - [ATLAS Root UI Mutation Discipline And Live Data Safety Doctrine Refresh](../ops/ATLAS-ROOT-UI-MUTATION-DISCIPLINE-AND-LIVE-DATA-SAFETY-DOCTRINE-REFRESH-2026-06-27.md)
 - [ATLAS Book Automation Candidate Workflow Adoption Reconciliation](../ops/ATLAS-BOOK-AUTOMATION-CANDIDATE-WORKFLOW-ADOPTION-RECONCILIATION-2026-06-27.md)
 - [Sandbox Simulation Readiness Starter Packet And Active Continuity Widening](../ops/SANDBOX-SIMULATION-READINESS-STARTER-PACKET-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-27.md)
+- [Sandbox Simulation Readiness Local-Only Artifact-Home And Scenario-Manifest Contract Freeze](../ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-ARTIFACT-HOME-AND-SCENARIO-MANIFEST-CONTRACT-FREEZE-2026-06-27.md)
 - [AI Repetition-to-Automation Pipeline Selector Operator Action And Packet Basis](../ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-SELECTOR-OPERATOR-ACTION-AND-PACKET-BASIS-2026-06-18.md)
 - [Duplicate Surface Decommission Final Closeout Pass 3](../ops/DUPLICATE-SURFACE-DECOMMISSION-FINAL-CLOSEOUT-PASS-3-2026-06-13.md)
 - [Remaining Closeout Queue Reselection After Duplicate Surface Closeout](../ops/REMAINING-CLOSEOUT-QUEUE-RESELECTION-AFTER-DUPLICATE-SURFACE-CLOSEOUT-2026-06-13.md)
