@@ -43,4 +43,5 @@ Date: 2026-06-27
 ## Notes
 
 - A stray deploy briefly landed on a separate Vercel project named `doscut`; the canonical deploy was immediately corrected back onto `fawxzzy-discordos`.
+- The stray `doscut` Vercel project was removed after the canonical DiscordOS project was re-aliased.
 - Fitness still contains historical Discord code residue, but the hosted command/runtime ownership moved further into DiscordOS during this pass.
