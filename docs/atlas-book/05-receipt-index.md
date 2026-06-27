@@ -1705,6 +1705,8 @@
 - [Sandbox Simulation Readiness Local-Only First Validator Broader Runtime Assertions Admission Boundary Contract Freeze](../ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BROADER-RUNTIME-ASSERTIONS-ADMISSION-BOUNDARY-CONTRACT-FREEZE-2026-06-27.md)
 - [Sandbox Simulation Readiness Post-Local-Only First Validator Broader Runtime Assertions Admission Boundary Hold Or Top-Level Lane Reselection](../ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-BROADER-RUNTIME-ASSERTIONS-ADMISSION-BOUNDARY-HOLD-OR-TOP-LEVEL-LANE-RESELECTION-2026-06-27.md)
 - [Root-Bounded Lane Selection After Sandbox Simulation Readiness Broader-Runtime-Assertions Hold Closeout](../ops/ROOT-BOUNDED-LANE-SELECTION-AFTER-SANDBOX-SIMULATION-READINESS-BROADER-RUNTIME-ASSERTIONS-HOLD-CLOSEOUT-2026-06-27.md)
+- [Stack Lock Mazer Dirty-State Refresh](../ops/STACK-LOCK-MAZER-DIRTY-STATE-REFRESH-2026-06-27.md)
+- [DiscordOS Feedback Extraction Closeout](../ops/discordos-feedback-extraction-closeout-2026-06-27.md)
 ## Notes
 
 This index is a working spine, not an exhaustive archive.

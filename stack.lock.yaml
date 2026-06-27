@@ -55,7 +55,7 @@ components:
     ref_type: "branch"
     ref: "codex/path-discipline-warning-slice-mazer-pub"
     commit: "fcf7f5f22ac3656f4dcd1e260c54a78f570d1a32"
-    dirty: false
+    dirty: true
     trust_class: "trusted"
     release_eligible: true
   nat1-games:
@@ -216,4 +216,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:a995a2c26420e9b07d9bb837a5322cd9c4b3ea59c350cf950e75ae1917890e1d"
+lock_digest: "sha256:b8971a0a427917ffd1103c4a0e2e53139b3006f19029bafa26d7c53d653d7beb"
