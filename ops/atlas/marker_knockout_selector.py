@@ -13,6 +13,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from ops._atlas import atlas_relative, atlas_root
+from ops.atlas.continuity import build_open_marker_restart_index
 
 MARKER_LINE_PATTERN = re.compile(r"^- ([^:]+): `(\d+)%`$")
 ACTIVE_LANE_PATTERNS = (
@@ -295,12 +296,15 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "AI Long-Run Batch Orchestration": PacketDescriptor(
-        packet="AI Long-Run Batch Orchestration post-stack-command-implementation-actual-owner-side-mutation-authority-class-value next-slice selection pass 763",
+        packet=(
+            "AI Long-Run Batch Orchestration "
+            "post-stack-command-implementation-actual-owner-side-mutation-authority-class-value "
+            "downstream hold recheck"
+        ),
         basis_receipt_ref=(
             "docs/ops/"
             "AI-LONG-RUN-BATCH-ORCHESTRATION-POST-STACK-COMMAND-IMPLEMENTATION-"
-            "ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-VALUE-NEXT-SLICE-SELECTION-"
-            "PASS-763-"
+            "ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-VALUE-DOWNSTREAM-HOLD-RECHECK-"
             "2026-06-26.md"
         ),
     ),
@@ -411,6 +415,27 @@ def effective_policy(*, marker: str, active_lane: str | None) -> MarkerPolicy:
     return policy
 
 
+def _explicit_no_immediate_hold_markers(*, root: Path) -> set[str]:
+    payload = build_open_marker_restart_index(root=root)
+    items = payload.get("items") if isinstance(payload.get("items"), list) else []
+    held_markers: set[str] = set()
+
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        marker = str(item.get("marker") or "").strip()
+        if not marker:
+            continue
+        if str(item.get("restart_status") or "").strip() != "restart_ready":
+            continue
+        next_package = item.get("next_package") if isinstance(item.get("next_package"), dict) else {}
+        package_name = str(next_package.get("package") or "").strip()
+        if package_name.startswith("No immediate "):
+            held_markers.add(marker)
+
+    return held_markers
+
+
 def packet_for_marker(marker: str) -> str | None:
     descriptor = PACKET_REGISTRY.get(marker)
     if descriptor is None:
@@ -459,6 +484,7 @@ def load_packet_receipt_context(*, root: Path, basis_receipt_ref: str) -> Packet
 def build_campaign(*, root: Path) -> dict[str, object]:
     sections = load_marker_sections(root=root)
     active_lane = load_active_lane(root=root)
+    explicit_hold_markers = _explicit_no_immediate_hold_markers(root=root)
     open_markers = {**sections["active_front_page"], **sections["supporting_open"]}
 
     unknown_markers = sorted(set(open_markers) - set(POLICY_REGISTRY))
@@ -494,8 +520,23 @@ def build_campaign(*, root: Path) -> dict[str, object]:
     if active_lane:
         selected = next((record for record in records if record.marker == active_lane), None)
     else:
-        selected = next((record for record in records if record.category == "admissible now"), None)
-    next_after_current = next((record for record in records if record.category == "admissible after current lane"), None)
+        selected = next(
+            (
+                record
+                for record in records
+                if record.category == "admissible now" and record.marker not in explicit_hold_markers
+            ),
+            None,
+        )
+    next_after_current = next(
+        (
+            record
+            for record in records
+            if record.category == "admissible after current lane"
+            and record.marker not in explicit_hold_markers
+        ),
+        None,
+    )
     category_counts: dict[str, int] = {}
     for record in records:
         category_counts[record.category] = category_counts.get(record.category, 0) + 1
@@ -513,9 +554,17 @@ def build_campaign(*, root: Path) -> dict[str, object]:
         for marker, percentage in sorted(sections["closed_locked"].items())
     ]
 
+    active_lane_is_held = bool(selected and selected.marker in explicit_hold_markers)
+
     operator_action = None
     operator_action_reason = None
-    if selected and active_lane:
+    if selected and active_lane and active_lane_is_held:
+        operator_action = "hold_current_lane"
+        operator_action_reason = (
+            "Durable restart truth still names the active ATLAS-root lane, but its own manifest-backed "
+            "next-package ladder explicitly says no immediate same-lane packet is open."
+        )
+    elif selected and active_lane:
         operator_action = "continue_current_lane"
         operator_action_reason = (
             "Durable restart truth already names the active ATLAS-root lane, so continue the current packet "

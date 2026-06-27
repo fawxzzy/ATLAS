@@ -62,19 +62,24 @@ CURRENT_STATE_DOC = """# Current State
 """
 
 
+def _write_json(path: Path, payload: dict[str, object]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+
+
 class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
     def _temp_root(self) -> Path:
         temp_dir = tempfile.TemporaryDirectory()
         self.addCleanup(temp_dir.cleanup)
         root = Path(temp_dir.name)
         (root / "docs" / "atlas-book").mkdir(parents=True, exist_ok=True)
+        (root / "docs" / "memory" / "initiatives").mkdir(parents=True, exist_ok=True)
         return root
 
     def _write_packet_receipts(self, root: Path) -> None:
         current_receipt = root / "docs" / "ops" / (
             "AI-LONG-RUN-BATCH-ORCHESTRATION-POST-STACK-COMMAND-IMPLEMENTATION-"
-            "ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-VALUE-NEXT-SLICE-SELECTION-"
-            "PASS-763-"
+            "ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-VALUE-DOWNSTREAM-HOLD-RECHECK-"
             "2026-06-26.md"
         )
         current_receipt.parent.mkdir(parents=True, exist_ok=True)
@@ -83,8 +88,8 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
                 [
                     "# Current Packet",
                     "",
-                    "- Mode: `docs-only root-bounded next-slice selection`",
-                    "- Scope: `choose the strongest bounded downstream move now that the _stack command implementation actual owner-side mutation authority-class-value helper and direct proof are landed on canonical main`",
+                    "- Mode: `docs-only root-bounded downstream hold recheck`",
+                    "- Scope: `re-evaluate the post-authority-class-value downstream fall-through against manifest-backed no-immediate packet holds and decide whether any honest root-bounded follow-on remains`",
                     "",
                 ]
             ),
@@ -108,6 +113,78 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
             encoding="utf-8",
         )
 
+    def _write_manifest(
+        self,
+        root: Path,
+        *,
+        manifest_name: str,
+        marker: str,
+        percent: int,
+        checkpoint_ref: str,
+        next_package: str,
+        mode: str,
+        reason: str,
+    ) -> None:
+        checkpoint_path = root / checkpoint_ref
+        checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
+        if not checkpoint_path.exists():
+            checkpoint_path.write_text("# checkpoint\n", encoding="utf-8")
+
+        supporting_ref = "docs/ops/supporting.md"
+        supporting_path = root / supporting_ref
+        supporting_path.parent.mkdir(parents=True, exist_ok=True)
+        if not supporting_path.exists():
+            supporting_path.write_text("# supporting\n", encoding="utf-8")
+
+        _write_json(
+            root / "docs" / "memory" / "initiatives" / manifest_name,
+            {
+                "contract_version": "atlas.initiative.v1",
+                "id": manifest_name.removesuffix(".json"),
+                "title": manifest_name.removesuffix(".json"),
+                "summary": "summary",
+                "status": "active",
+                "owner": "stack-root",
+                "created_at": "2026-06-19T00:00:00Z",
+                "updated_at": "2026-06-19T00:00:00Z",
+                "related_plan_refs": [],
+                "related_decision_refs": [],
+                "related_hypothesis_refs": [],
+                "related_session_refs": [],
+                "related_attention_refs": [],
+                "proposed_next_session_refs": [],
+                "evidence_refs": [checkpoint_ref, supporting_ref],
+                "supersedes": [],
+                "superseded_by": [],
+                "metadata": {
+                    "artifact_kind": "continuity_manifest",
+                    "lane_id": manifest_name.removesuffix(".json").removeprefix("continuity-manifest-"),
+                    "scope_class": "atlas-root-governance",
+                    "current_checkpoint_receipt": checkpoint_ref,
+                    "checkpoint_commit": "main",
+                    "checkpoint_summary": "summary",
+                    "governing_receipts": [checkpoint_ref],
+                    "owner_truth_surfaces": [{"path": checkpoint_ref, "role": "checkpoint"}],
+                    "verification_adoption_surfaces": [{"path": supporting_ref, "role": "supporting"}],
+                    "blocked_or_gated_work": [],
+                    "next_package_ladder": [
+                        {"package": next_package, "mode": mode, "reason": reason}
+                    ],
+                    "freshness_state": "manifest-backed",
+                    "freshness_checked_receipt": checkpoint_ref,
+                    "freshness_checked_at": "2026-06-19T00:00:00Z",
+                    "freshness_basis": "basis",
+                    "marker_posture": [
+                        {
+                            "marker": marker,
+                            "percent": percent,
+                            "source": "docs/atlas-book/02-lanes-and-markers.md",
+                        }
+                    ],
+                },
+            },
+        )
+
     def test_build_campaign_selects_active_lane_from_durable_restart_truth(self) -> None:
         root = self._temp_root()
         (root / "docs" / "atlas-book" / "02-lanes-and-markers.md").write_text(MARKER_DOC, encoding="utf-8")
@@ -120,19 +197,19 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual(20, payload["selected_percentage"])
         self.assertEqual("continue_current_lane", payload["operator_action"])
         self.assertEqual(
-            "AI Long-Run Batch Orchestration post-stack-command-implementation-actual-owner-side-mutation-authority-class-value next-slice selection pass 763",
+            "AI Long-Run Batch Orchestration post-stack-command-implementation-actual-owner-side-mutation-authority-class-value downstream hold recheck",
             payload["selected_current_packet"],
         )
         self.assertEqual(
-            "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-STACK-COMMAND-IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-VALUE-NEXT-SLICE-SELECTION-PASS-763-2026-06-26.md",
+            "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-STACK-COMMAND-IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-VALUE-DOWNSTREAM-HOLD-RECHECK-2026-06-26.md",
             payload["selected_current_packet_basis_ref"],
         )
         self.assertEqual(
-            "docs-only root-bounded next-slice selection",
+            "docs-only root-bounded downstream hold recheck",
             payload["selected_current_packet_mode"],
         )
         self.assertEqual(
-            "choose the strongest bounded downstream move now that the _stack command implementation actual owner-side mutation authority-class-value helper and direct proof are landed on canonical main",
+            "re-evaluate the post-authority-class-value downstream fall-through against manifest-backed no-immediate packet holds and decide whether any honest root-bounded follow-on remains",
             payload["selected_current_packet_scope"],
         )
         self.assertEqual(
@@ -168,6 +245,55 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual("admissible after current lane", records["AI Repetition-to-Automation Pipeline"]["category"])
         self.assertEqual("admissible now", records["AI Long-Run Batch Orchestration"]["category"])
         self.assertEqual("already closed / locked", records["_stack Readiness"]["category"])
+
+    def test_build_campaign_skips_manifest_held_follow_on_marker(self) -> None:
+        root = self._temp_root()
+        (root / "docs" / "atlas-book" / "02-lanes-and-markers.md").write_text(MARKER_DOC, encoding="utf-8")
+        (root / "docs" / "atlas-book" / "01-current-state.md").write_text(CURRENT_STATE_DOC, encoding="utf-8")
+        self._write_packet_receipts(root)
+        self._write_manifest(
+            root,
+            manifest_name="continuity-manifest-ai-repetition-to-automation-pipeline.json",
+            marker="AI Repetition-to-Automation Pipeline",
+            percent=32,
+            checkpoint_ref=(
+                "docs/ops/"
+                "AI-REPETITION-TO-AUTOMATION-PIPELINE-SELECTOR-LANE-EXHAUSTION-OR-FALLBACK-ROUTING-"
+                "2026-06-18.md"
+            ),
+            next_package="No immediate AI Repetition-to-Automation Pipeline same-lane packet",
+            mode="hold-flat after selector exhaustion",
+            reason="selector family is currently held",
+        )
+
+        payload = build_campaign(root=root)
+
+        self.assertEqual("Durable Context Externalization", payload["next_after_current_marker"])
+        self.assertNotEqual("AI Repetition-to-Automation Pipeline", payload["next_after_current_marker"])
+
+    def test_build_campaign_holds_active_lane_when_its_manifest_has_no_immediate_packet(self) -> None:
+        root = self._temp_root()
+        (root / "docs" / "atlas-book" / "02-lanes-and-markers.md").write_text(MARKER_DOC, encoding="utf-8")
+        (root / "docs" / "atlas-book" / "01-current-state.md").write_text(CURRENT_STATE_DOC, encoding="utf-8")
+        self._write_packet_receipts(root)
+        self._write_manifest(
+            root,
+            manifest_name="continuity-manifest-ai-long-run-batch-orchestration.json",
+            marker="AI Long-Run Batch Orchestration",
+            percent=20,
+            checkpoint_ref=(
+                "docs/ops/"
+                "AI-LONG-RUN-BATCH-ORCHESTRATION-POST-STACK-COMMAND-IMPLEMENTATION-"
+                "ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-VALUE-DOWNSTREAM-HOLD-RECHECK-2026-06-26.md"
+            ),
+            next_package="No immediate AI Long-Run Batch Orchestration same-lane packet",
+            mode="hold-flat after downstream follow-on recheck",
+            reason="current lane is intentionally held",
+        )
+
+        payload = build_campaign(root=root)
+
+        self.assertEqual("hold_current_lane", payload["operator_action"])
 
     def test_build_campaign_normalizes_inline_code_marker_names(self) -> None:
         root = self._temp_root()
@@ -209,20 +335,20 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertIn("## Operator Action", markdown)
         self.assertIn("action: `continue_current_lane`", markdown)
         self.assertIn(
-            "current packet basis receipt: `docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-STACK-COMMAND-IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-VALUE-NEXT-SLICE-SELECTION-PASS-763-2026-06-26.md`",
+            "current packet basis receipt: `docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-STACK-COMMAND-IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-VALUE-DOWNSTREAM-HOLD-RECHECK-2026-06-26.md`",
             markdown,
         )
         self.assertIn(
-            "current packet mode: `docs-only root-bounded next-slice selection`",
+            "current packet mode: `docs-only root-bounded downstream hold recheck`",
             markdown,
         )
         self.assertIn(
-            "current packet scope: `choose the strongest bounded downstream move now that the _stack command implementation actual owner-side mutation authority-class-value helper and direct proof are landed on canonical main`",
+            "current packet scope: `re-evaluate the post-authority-class-value downstream fall-through against manifest-backed no-immediate packet holds and decide whether any honest root-bounded follow-on remains`",
             markdown,
         )
         self.assertIn("## Current Active Marker", markdown)
         self.assertIn(
-            "current packet: `AI Long-Run Batch Orchestration post-stack-command-implementation-actual-owner-side-mutation-authority-class-value next-slice selection pass 763`",
+            "current packet: `AI Long-Run Batch Orchestration post-stack-command-implementation-actual-owner-side-mutation-authority-class-value downstream hold recheck`",
             markdown,
         )
         self.assertIn("## First Admissible After Current Lane", markdown)
