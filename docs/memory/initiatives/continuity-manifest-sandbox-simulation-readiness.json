@@ -50,7 +50,8 @@
     "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-CANDIDATE-OUTPUT-REPORT-LINK-CONTRACT-FREEZE-2026-06-27.md",
     "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-PAIR-COHERENCE-SEMANTICS-CONTRACT-FREEZE-2026-06-27.md",
     "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-VERDICT-ACTIVATION-GATE-CONTRACT-FREEZE-2026-06-27.md",
-    "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-BOUNDARY-CONTRACT-FREEZE-2026-06-27.md"
+    "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-BOUNDARY-CONTRACT-FREEZE-2026-06-27.md",
+    "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-OWNER-SURFACE-ADMISSION-2026-06-27.md"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -58,9 +59,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "sandbox-simulation-readiness",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-BOUNDARY-CONTRACT-FREEZE-2026-06-27.md",
+    "current_checkpoint_receipt": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-OWNER-SURFACE-ADMISSION-2026-06-27.md",
     "checkpoint_commit": "main",
-    "checkpoint_summary": "The lane now holds at 60 percent: one bounded future validator-behavior family now exists over the admitted validation pair and frozen oracle boundary, the comparison boundary still stays limited to `expected_output.payload.mode`, `expected_output.payload.status`, and `expected_output.payload.observations`, and the exact next package is now one local-only first validator-behavior owner-surface admission.",
+    "checkpoint_summary": "The lane still holds at 60 percent: the bounded future validator-behavior family now also has one exact root-local owner-facing home over the admitted validator descriptor, validation pair, and frozen oracle boundary, and the exact next package is now one local-only first validator-behavior supporting-lane admission.",
     "governing_receipts": [
       "docs/ops/STACK-LANE-0-BASELINE-INVENTORY-2026-05-22.md",
       "docs/ops/STACK-LANE-0-TRUTH-MAP-2026-05-22.md",
@@ -83,7 +84,8 @@
       "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-CANDIDATE-OUTPUT-REPORT-LINK-CONTRACT-FREEZE-2026-06-27.md",
       "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-PAIR-COHERENCE-SEMANTICS-CONTRACT-FREEZE-2026-06-27.md",
       "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-VERDICT-ACTIVATION-GATE-CONTRACT-FREEZE-2026-06-27.md",
-      "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-BOUNDARY-CONTRACT-FREEZE-2026-06-27.md"
+      "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-BOUNDARY-CONTRACT-FREEZE-2026-06-27.md",
+      "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-OWNER-SURFACE-ADMISSION-2026-06-27.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -205,6 +207,10 @@
       {
         "path": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-BOUNDARY-CONTRACT-FREEZE-2026-06-27.md",
         "role": "current validator-behavior boundary truth and next-step routing"
+      },
+      {
+        "path": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-OWNER-SURFACE-ADMISSION-2026-06-27.md",
+        "role": "current validator-behavior owner-surface truth and next-step routing"
       }
     ],
     "verification_adoption_surfaces": [
@@ -239,33 +245,33 @@
     ],
     "blocked_or_gated_work": [
       {
-        "item": "first local-only validator-behavior owner surface",
-        "requirement": "blocked until one later explicit packet admits the exact local owner-facing surface that would hold the frozen validator-behavior family"
+        "item": "first local-only validator-behavior supporting lane",
+        "requirement": "blocked until one later explicit packet admits whether the newly exact root-local owner surface reopens one separate support seam or stays fully root-local"
       },
       {
         "item": "validator implementation or runner behavior",
-        "requirement": "blocked until one later explicit packet admits real validator behavior or runner scope beyond the current scenario, pack, note, input, expected-output, validator-boundary, and validator-descriptor contracts"
+        "requirement": "blocked until one later explicit packet admits support or implementation scope beyond the current scenario, pack, note, input, expected-output, validator-boundary, validator-descriptor, validation-pair, and owner-surface contracts"
       },
       {
         "item": "_stack`, owner-repo, deploy, secret, or live-data widening",
         "requirement": "blocked unless a separate later packet explicitly widens the lane beyond root-owned local-only simulation posture"
       },
       {
-        "item": "higher marker movement above the current 60 percent validator-behavior-boundary threshold",
+        "item": "higher marker movement above the current 60 percent validator-behavior-owner-surface threshold",
         "requirement": "blocked until another real contract, implementation, proof-backed adoption, or blocker-clearance class changes operator reality again"
       }
     ],
     "next_package_ladder": [
       {
-        "package": "Sandbox Simulation Readiness local-only first validator-behavior owner-surface admission",
-        "mode": "root-owned docs-only validator-behavior owner-surface admission",
-        "reason": "one bounded future validator-behavior family now exists, so the next honest move is to admit the exact local owner-facing surface that would hold that behavior before any implementation, helper, or worker routing becomes honest"
+        "package": "Sandbox Simulation Readiness local-only first validator-behavior supporting-lane admission",
+        "mode": "root-owned docs-only validator-behavior supporting-lane admission",
+        "reason": "the root-local owner-facing surface is now exact, so the next honest move is to decide whether one separate support seam reopens before any helper, worker, or implementation routing becomes honest"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-BOUNDARY-CONTRACT-FREEZE-2026-06-27.md",
+    "freshness_checked_receipt": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-OWNER-SURFACE-ADMISSION-2026-06-27.md",
     "freshness_checked_at": "2026-06-27T00:00:00-04:00",
-    "freshness_basis": "The manifest now matches the current 60 percent Sandbox posture because the lane no longer stops at verdict-gate alone: one bounded future validator-behavior family now exists over the admitted validation pair and frozen oracle boundary, the Book and restart surfaces project that broader validator-behavior-boundary truth, and the next package is now one explicit local-only first validator-behavior owner-surface admission.",
+    "freshness_basis": "The manifest now matches the current 60 percent Sandbox posture because the lane now has both one bounded future validator-behavior family and one exact root-local owner-facing home for that family over the admitted validator descriptor and validation pair, while the Book and restart surfaces project the still-flat 60 percent state and the next package moves to one explicit local-only first validator-behavior supporting-lane admission.",
     "marker_posture": [
       {
         "marker": "Sandbox Simulation Readiness",
