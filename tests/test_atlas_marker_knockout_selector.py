@@ -310,9 +310,11 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         )
 
         payload = build_campaign(root=root)
+        records = {record["marker"]: record for record in payload["open_markers"]}
 
         self.assertEqual("hold_current_lane", payload["operator_action"])
         self.assertTrue(payload["active_lane_is_held"])
+        self.assertEqual("held active lane", records["AI Long-Run Batch Orchestration"]["category"])
 
     def test_build_campaign_reports_no_immediate_root_packet_when_all_open_markers_are_held(self) -> None:
         root = self._temp_root()
@@ -368,9 +370,13 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         )
 
         payload = build_campaign(root=root)
+        records = {record["marker"]: record for record in payload["open_markers"]}
 
         self.assertEqual("no_immediate_root_packet", payload["operator_action"])
         self.assertIsNone(payload["next_after_current_marker"])
+        self.assertEqual("held active lane", records["AI Long-Run Batch Orchestration"]["category"])
+        self.assertEqual(1, payload["category_counts"]["held active lane"])
+        self.assertNotIn("admissible now", payload["category_counts"])
 
     def test_build_campaign_promotes_sandbox_after_deploy_surface_mutation_admission_boundary_contract(self) -> None:
         root = self._temp_root()
@@ -499,6 +505,7 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         markdown = (root / output_ref).read_text(encoding="utf-8")
         self.assertIn("action: `hold_current_lane`", markdown)
         self.assertIn("- no immediate same-lane packet is open.", markdown)
+        self.assertIn("`held active lane`", markdown)
         self.assertNotIn("- do now:", markdown)
 
     def test_main_markdown_reports_no_immediate_root_packet_when_everything_is_held(self) -> None:
@@ -561,6 +568,7 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         markdown = (root / output_ref).read_text(encoding="utf-8")
         self.assertIn("action: `no_immediate_root_packet`", markdown)
         self.assertIn("- no immediate ATLAS-root packet is open.", markdown)
+        self.assertIn("`held active lane`", markdown)
         self.assertIn(
             "current packet scope: `re-evaluate the post-authority-class-value downstream fall-through against manifest-backed no-immediate packet holds and decide whether any honest root-bounded follow-on remains`",
             markdown,

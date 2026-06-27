@@ -57,6 +57,7 @@ CAMPAIGN_PRIORITY = (
 ALLOWED_CATEGORIES = {
     "admissible now",
     "admissible after current lane",
+    "held active lane",
     "protected/Fitness hold",
     "owner-repo hold",
     "archive/delete hold",
@@ -402,7 +403,9 @@ def load_active_lane(*, root: Path) -> str | None:
     return next(iter(discovered))
 
 
-def effective_policy(*, marker: str, percentage: int, active_lane: str | None) -> MarkerPolicy:
+def effective_policy(
+    *, marker: str, percentage: int, active_lane: str | None, explicitly_held: bool = False
+) -> MarkerPolicy:
     policy = POLICY_REGISTRY[marker]
     if marker == "Sandbox Simulation Readiness" and percentage > 0:
         policy = MarkerPolicy(
@@ -473,6 +476,19 @@ def effective_policy(*, marker: str, percentage: int, active_lane: str | None) -
     if not active_lane:
         return policy
     if marker == active_lane:
+        if explicitly_held:
+            return MarkerPolicy(
+                category="held active lane",
+                rationale=(
+                    "Durable restart truth still names this as the latest ATLAS-root family, but its "
+                    "manifest-backed next-package ladder explicitly says no immediate same-lane packet is open, "
+                    "so it stays restart-relevant hold truth rather than an admissible-now packet."
+                ),
+                expected_evidence=(
+                    "one distinct new root-bounded widening inside the current family or one explicit restart-truth "
+                    "change that reopens a real immediate packet"
+                ),
+            )
         return MarkerPolicy(
             category="admissible now",
             rationale=(
@@ -604,7 +620,12 @@ def build_campaign(*, root: Path) -> dict[str, object]:
 
     records: list[MarkerRecord] = []
     for marker, percentage in open_markers.items():
-        policy = effective_policy(marker=marker, percentage=percentage, active_lane=active_lane)
+        policy = effective_policy(
+            marker=marker,
+            percentage=percentage,
+            active_lane=active_lane,
+            explicitly_held=marker in explicit_hold_markers,
+        )
         if policy.category not in ALLOWED_CATEGORIES:
             raise MarkerSelectorError(f"Unsupported category for {marker}: {policy.category}")
         section = "active front-page" if marker in sections["active_front_page"] else "supporting open"

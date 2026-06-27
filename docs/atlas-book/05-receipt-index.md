@@ -11,6 +11,7 @@
 - [Root-Bounded Lane Selection After Post-Convergence Closeout](../ops/ROOT-BOUNDED-LANE-SELECTION-AFTER-POST-CONVERGENCE-CLOSEOUT-2026-05-29.md)
 - [Root-Bounded Lane Selection After Durable Context Externalization Refresh Pass 5 Closeout](../ops/ROOT-BOUNDED-LANE-SELECTION-AFTER-DURABLE-CONTEXT-EXTERNALIZATION-REFRESH-PASS-5-CLOSEOUT-2026-05-29.md)
 - [ATLAS Root No-Immediate-Packet Hold And Stack Re-Sync](../ops/ATLAS-ROOT-NO-IMMEDIATE-PACKET-HOLD-AND-STACK-RESYNC-2026-06-27.md)
+- [ATLAS Root Held-Active-Lane Selector Truth Alignment](../ops/ATLAS-ROOT-HELD-ACTIVE-LANE-SELECTOR-TRUTH-ALIGNMENT-2026-06-27.md)
 - [Unified Workflow Convergence Handoff-Map Pass 1](../ops/UNIFIED-WORKFLOW-CONVERGENCE-HANDOFF-MAP-PASS-1-2026-05-29.md)
 - [Unified Workflow Convergence Release-Ledger, Publish-Boundary, And Root-Packaging Consequence Pass 2](../ops/UNIFIED-WORKFLOW-CONVERGENCE-RELEASE-LEDGER-PUBLISH-BOUNDARY-AND-ROOT-PACKAGING-CONSEQUENCE-PASS-2-2026-05-29.md)
 - [Unified Workflow Convergence Boundary-Hardened Workflow Spine Pass 3](../ops/UNIFIED-WORKFLOW-CONVERGENCE-BOUNDARY-HARDENED-WORKFLOW-SPINE-PASS-3-2026-06-03.md)
