@@ -311,16 +311,16 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "Sandbox Simulation Readiness": PacketDescriptor(
-        packet="Sandbox Simulation Readiness local-only first validator owner-surface execution admission boundary contract freeze",
+        packet="Sandbox Simulation Readiness local-only first validator deploy-surface runtime admission boundary contract freeze",
         basis_receipt_ref=(
             "docs/ops/"
-            "SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-STACK-"
-            "ROUTING-ADMISSION-BOUNDARY-NEXT-SLICE-SELECTION-2026-06-27.md"
+            "SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-OWNER-"
+            "SURFACE-EXECUTION-ADMISSION-BOUNDARY-NEXT-SLICE-SELECTION-2026-06-27.md"
         ),
-        mode="root-owned docs-only validator-owner-surface-execution-admission-boundary contract freeze",
+        mode="root-owned docs-only validator-deploy-surface-runtime-admission-boundary contract freeze",
         scope=(
-            "freeze the smallest later rule that may govern whether any owner-side execution home may exist above that frozen routing family at all "
-            "without widening into deploy/runtime placement or broader unattended claims"
+            "freeze the smallest later rule that may govern whether any deploy/runtime home may exist above that frozen owner-home family at all "
+            "without widening into unattended execution, secrets, or broader publication claims"
         ),
     ),
 }
@@ -437,11 +437,13 @@ def effective_policy(*, marker: str, percentage: int, active_lane: str | None) -
                 "and one post-runner-behavior-admission-boundary next-slice selection, "
                 "one stack-routing admission boundary contract, "
                 "and one post-stack-routing-admission-boundary next-slice selection, "
+                "one owner-surface execution admission boundary contract, "
+                "and one post-owner-surface-execution-admission-boundary next-slice selection, "
                 "but current durable restart truth still keeps the active ATLAS-root lane ahead of it."
             ),
             expected_evidence=(
-                "one bounded validator-owner-surface-execution-admission-boundary contract or later downstream contract that preserves "
-                "no owner-repo, deploy, secret, or live-data widening"
+                "one bounded validator-deploy-surface-runtime-admission-boundary contract or later downstream contract that preserves "
+                "no unattended-runtime, secret, or live-data widening"
             ),
         )
     if not active_lane:
