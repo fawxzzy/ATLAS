@@ -63,7 +63,7 @@
     "scope_class": "atlas-root-governance",
     "current_checkpoint_receipt": "docs/ops/OPEN-MARKER-RESTART-INDEX-CLOSEOUT-AND-ACTIVE-CONTINUITY-LANE-RATCHET-2026-06-19.md",
     "checkpoint_commit": "pending-closeout-publication",
-    "checkpoint_summary": "The lane now sits at 85 percent because the June 18 and 19 closeout cluster remains canonically absorbed, the seeded initiative continuity-manifest set remains clean at 18 of 18 ok with zero warnings and zero errors, all 8 of 8 eligible still-open markers are manifest-backed, and all 8 of 8 eligible still-open markers are now restart-ready from one machine-readable index.",
+    "checkpoint_summary": "The lane now sits at 85 percent because the June 18 and 19 closeout cluster remains canonically absorbed, the seeded initiative continuity-manifest set remains clean at 18 of 18 ok with zero warnings and zero errors, all 6 of 6 eligible still-open markers are manifest-backed, and all 6 of 6 eligible still-open markers are now restart-ready from one machine-readable index.",
     "governing_receipts": [
       "docs/ops/STACK-LANE-0-BASELINE-INVENTORY-2026-05-22.md",
       "docs/ops/STACK-LANE-0-TRUTH-MAP-2026-05-22.md",
@@ -199,13 +199,13 @@
       {
         "package": "No immediate Inventory & Truth Map docs-only follow-on packet",
         "mode": "hold-flat after open-marker restart-index closeout",
-        "reason": "the current inventory freshness gap is cleared, seeded initiative manifest health is fully clean at 18 of 18, all 8 of 8 eligible open markers are manifest-backed, and all 8 of 8 eligible open markers are restart-ready from one machine-readable index; reopen only with distinct restart-truth drift, marker pressure, owner-truth widening, or broader continuity-read automation than the current health-plus-coverage-plus-restart-index surface"
+        "reason": "the current inventory freshness gap is cleared, seeded initiative manifest health is fully clean at 18 of 18, all 6 of 6 eligible open markers are manifest-backed, and all 6 of 6 eligible open markers are restart-ready from one machine-readable index; reopen only with distinct restart-truth drift, marker pressure, owner-truth widening, or broader continuity-read automation than the current health-plus-coverage-plus-restart-index surface"
       }
     ],
     "freshness_state": "manifest-backed",
     "freshness_checked_receipt": "docs/ops/OPEN-MARKER-RESTART-INDEX-CLOSEOUT-AND-ACTIVE-CONTINUITY-LANE-RATCHET-2026-06-19.md",
     "freshness_checked_at": "2026-06-19T09:00:00Z",
-    "freshness_basis": "the current checkpoint, marker posture, lane-state projection, blocked-work posture, and next-package posture now match the current inventory lane state after the June 18 and 19 closeout cluster absorption, the initiative manifest-health surface at 18 ok / 0 warning / 0 error, the eligible-open-marker coverage surface at 8 of 8 manifest-backed, and the eligible-open-marker restart index at 8 of 8 restart-ready.",
+    "freshness_basis": "the current checkpoint, marker posture, lane-state projection, blocked-work posture, and next-package posture now match the current inventory lane state after the June 18 and 19 closeout cluster absorption, the initiative manifest-health surface at 18 ok / 0 warning / 0 error, the eligible-open-marker coverage surface at 6 of 6 manifest-backed, and the eligible-open-marker restart index at 6 of 6 restart-ready.",
     "marker_posture": [
       {
         "marker": "Inventory & Truth Map",

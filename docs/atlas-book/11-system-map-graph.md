@@ -239,8 +239,8 @@ Retrieval-first continuity should be reconstructed in this order:
    - system map
    - endgame surface
    - seeded initiative manifest health via `ops/atlas/continuity_manifest_health.py` or the awareness slice `continuity_initiative_manifest_health`; current seeded-set posture is `18 ok / 0 warning / 0 error`
-   - eligible open-marker manifest coverage via `ops/atlas/continuity_open_marker_manifest_coverage.py` or the awareness slice `continuity_open_marker_manifest_coverage`; current posture is `8 / 8` eligible open markers manifest-backed
-   - eligible open-marker restart index via `ops/atlas/continuity_open_marker_restart_index.py` or the awareness slice `continuity_open_marker_restart_index`; current posture is `8 / 8` eligible open markers restart-ready from one machine-readable index
+   - eligible open-marker manifest coverage via `ops/atlas/continuity_open_marker_manifest_coverage.py` or the awareness slice `continuity_open_marker_manifest_coverage`; current posture is `6 / 6` eligible open markers manifest-backed
+   - eligible open-marker restart index via `ops/atlas/continuity_open_marker_restart_index.py` or the awareness slice `continuity_open_marker_restart_index`; current posture is `6 / 6` eligible open markers restart-ready from one machine-readable index
    - maintained-manifest restart index via `ops/atlas/continuity_maintained_manifest_restart_index.py` or the awareness slice `continuity_maintained_manifest_restart_index`; current posture is `18 / 18` maintained initiative manifests restart-ready from one machine-readable index
 2. owner-repo truth-owner surfaces
    - repo READMEs
