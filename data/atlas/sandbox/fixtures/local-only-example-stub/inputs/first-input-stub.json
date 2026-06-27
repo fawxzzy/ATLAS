@@ -1,0 +1,17 @@
+{
+  "contract_version": "atlas.sandbox.fixture-input.v1",
+  "fixture_id": "local-only-example-stub-input-001",
+  "scenario_id": "local-only-example-stub",
+  "kind": "input",
+  "summary": "First bounded Sandbox input fixture stub for the local-only example root. This is structural sample data only and does not imply validator, runner, or expected-output truth.",
+  "payload": {
+    "mode": "stub",
+    "prompt": "example local-only sandbox input",
+    "constraints": [
+      "no owner-repo mutation",
+      "no deploy mutation",
+      "no secret use",
+      "no live-data mutation"
+    ]
+  }
+}

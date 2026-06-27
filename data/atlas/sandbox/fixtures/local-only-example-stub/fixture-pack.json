@@ -4,13 +4,19 @@
   "fixture_pack_id": "local-only-example-stub-pack",
   "title": "Local-Only Example Stub Fixture Pack",
   "status": "draft",
-  "purpose": "Admit one concrete but still empty fixture-pack stub under the frozen Sandbox boundaries before any leaf fixture payload, validator, or runner claim becomes honest.",
+  "purpose": "Admit one concrete Sandbox fixture pack under the frozen local-only boundaries with only bounded note and input stubs before any expected-output, validator, or runner claim becomes honest.",
   "items": [
     {
       "fixture_id": "local-only-example-stub-note-001",
       "kind": "note",
       "path": "data/atlas/sandbox/fixtures/local-only-example-stub/notes/first-note-stub.md",
       "format": "md"
+    },
+    {
+      "fixture_id": "local-only-example-stub-input-001",
+      "kind": "input",
+      "path": "data/atlas/sandbox/fixtures/local-only-example-stub/inputs/first-input-stub.json",
+      "format": "json"
     }
   ],
   "guards": {
@@ -21,7 +27,7 @@
     "_stack_execution": false
   },
   "non_goals": [
-    "No leaf fixture payloads are admitted yet.",
+    "No expected-output fixture payloads are admitted yet.",
     "No validator or runner behavior is admitted yet.",
     "No owner-repo, deploy, secret, or live-data mutation is admitted."
   ]

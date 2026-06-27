@@ -23,6 +23,7 @@
     "data/atlas/sandbox/scenarios/local-only-example-stub.json",
     "data/atlas/sandbox/fixtures/local-only-example-stub/fixture-pack.json",
     "data/atlas/sandbox/fixtures/local-only-example-stub/notes/first-note-stub.md",
+    "data/atlas/sandbox/fixtures/local-only-example-stub/inputs/first-input-stub.json",
     "docs/memory/README.md",
     "docs/ops/STACK-LANE-0-BASELINE-INVENTORY-2026-05-22.md",
     "docs/ops/STACK-LANE-0-TRUTH-MAP-2026-05-22.md",
@@ -31,7 +32,8 @@
     "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-ARTIFACT-HOME-AND-SCENARIO-MANIFEST-CONTRACT-FREEZE-2026-06-27.md",
     "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-SCENARIO-FIXTURE-PACK-CONTRACT-FREEZE-2026-06-27.md",
     "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-EXAMPLE-SCENARIO-AND-FIXTURE-PACK-STUB-ADMISSION-2026-06-27.md",
-    "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-NOTE-ONLY-LEAF-FIXTURE-STUB-ADMISSION-2026-06-27.md"
+    "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-NOTE-ONLY-LEAF-FIXTURE-STUB-ADMISSION-2026-06-27.md",
+    "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-INPUT-FIXTURE-STUB-ADMISSION-2026-06-27.md"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -39,9 +41,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "sandbox-simulation-readiness",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-NOTE-ONLY-LEAF-FIXTURE-STUB-ADMISSION-2026-06-27.md",
+    "current_checkpoint_receipt": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-INPUT-FIXTURE-STUB-ADMISSION-2026-06-27.md",
     "checkpoint_commit": "main",
-    "checkpoint_summary": "The lane now holds at 18 percent: one note-only Sandbox leaf fixture now exists at `data/atlas/sandbox/fixtures/local-only-example-stub/notes/first-note-stub.md`, the admitted example pack now references one real leaf payload rather than an empty `items` array, the scenario-to-pack-to-leaf read path is now concrete while all mutation and execution guards stay false, and the exact next package is now one local-only first input fixture stub admission.",
+    "checkpoint_summary": "The lane now holds at 21 percent: one structured Sandbox input fixture now exists at `data/atlas/sandbox/fixtures/local-only-example-stub/inputs/first-input-stub.json`, the admitted example pack now references both one note-only leaf and one input stub, the scenario-to-pack-to-fixture read path is now concrete across two fixture kinds while all mutation and execution guards stay false, and the exact next package is now one local-only first expected-output fixture stub admission.",
     "governing_receipts": [
       "docs/ops/STACK-LANE-0-BASELINE-INVENTORY-2026-05-22.md",
       "docs/ops/STACK-LANE-0-TRUTH-MAP-2026-05-22.md",
@@ -50,7 +52,8 @@
       "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-ARTIFACT-HOME-AND-SCENARIO-MANIFEST-CONTRACT-FREEZE-2026-06-27.md",
       "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-SCENARIO-FIXTURE-PACK-CONTRACT-FREEZE-2026-06-27.md",
       "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-EXAMPLE-SCENARIO-AND-FIXTURE-PACK-STUB-ADMISSION-2026-06-27.md",
-      "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-NOTE-ONLY-LEAF-FIXTURE-STUB-ADMISSION-2026-06-27.md"
+      "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-NOTE-ONLY-LEAF-FIXTURE-STUB-ADMISSION-2026-06-27.md",
+      "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-INPUT-FIXTURE-STUB-ADMISSION-2026-06-27.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -90,12 +93,20 @@
         "role": "current first note-only leaf fixture truth"
       },
       {
+        "path": "data/atlas/sandbox/fixtures/local-only-example-stub/inputs/first-input-stub.json",
+        "role": "current first input fixture truth"
+      },
+      {
         "path": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-EXAMPLE-SCENARIO-AND-FIXTURE-PACK-STUB-ADMISSION-2026-06-27.md",
         "role": "current example-pair admission truth"
       },
       {
         "path": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-NOTE-ONLY-LEAF-FIXTURE-STUB-ADMISSION-2026-06-27.md",
         "role": "current note-only leaf admission and next-step truth"
+      },
+      {
+        "path": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-INPUT-FIXTURE-STUB-ADMISSION-2026-06-27.md",
+        "role": "current input-stub admission and next-step truth"
       }
     ],
     "verification_adoption_surfaces": [
@@ -130,37 +141,37 @@
     ],
     "blocked_or_gated_work": [
       {
-        "item": "first local-only input fixture stub inside the admitted example pack",
-        "requirement": "blocked until one later explicit packet admits one bounded JSON input fixture under `data/atlas/sandbox/fixtures/local-only-example-stub/**` without widening into validator, runner, or mutation behavior"
+        "item": "first local-only expected-output fixture stub inside the admitted example pack",
+        "requirement": "blocked until one later explicit packet admits one bounded JSON expected-output fixture under `data/atlas/sandbox/fixtures/local-only-example-stub/**` without widening into validator, runner, or mutation behavior"
       },
       {
-        "item": "expected-output fixture payloads, harness validator, or runner behavior",
-        "requirement": "blocked until one later explicit packet admits expected-output fixture contents or admits validator behavior or runner scope beyond the current scenario, pack, note-only leaf, and future input-stub contracts"
+        "item": "harness validator or runner behavior",
+        "requirement": "blocked until one later explicit packet admits validator behavior or runner scope beyond the current scenario, pack, note-only leaf, input-stub, and future expected-output-stub contracts"
       },
       {
         "item": "_stack`, owner-repo, deploy, secret, or live-data widening",
         "requirement": "blocked unless a separate later packet explicitly widens the lane beyond root-owned local-only simulation posture"
       },
       {
-        "item": "higher marker movement above the current 18 percent leaf-fixture threshold",
+        "item": "higher marker movement above the current 21 percent input-fixture threshold",
         "requirement": "blocked until another real contract, implementation, proof-backed adoption, or blocker-clearance class changes operator reality again"
       }
     ],
     "next_package_ladder": [
       {
-        "package": "Sandbox Simulation Readiness local-only first input fixture stub admission",
-        "mode": "root-owned local fixture-input follow-on",
-        "reason": "one note-only leaf fixture now occupies the first committed pack slot, so the next honest move is one bounded JSON input fixture under that same root before expected-output, validator, runner, or `_stack` claims become honest"
+        "package": "Sandbox Simulation Readiness local-only first expected-output fixture stub admission",
+        "mode": "root-owned local fixture-output follow-on",
+        "reason": "one bounded input fixture now exists under the admitted example root, so the next honest move is one bounded JSON expected-output fixture under that same root before validator, runner, or `_stack` claims become honest"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-NOTE-ONLY-LEAF-FIXTURE-STUB-ADMISSION-2026-06-27.md",
+    "freshness_checked_receipt": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-INPUT-FIXTURE-STUB-ADMISSION-2026-06-27.md",
     "freshness_checked_at": "2026-06-27T00:00:00-04:00",
-    "freshness_basis": "The manifest now matches the current 18 percent Sandbox posture because the lane no longer stops at scenario-plus-pack structure only: one note-only leaf fixture now exists under the admitted root, the pack manifest points at that leaf payload directly, the Book and restart surfaces project that concrete three-layer read path, and the next package is now one explicit local-only first input fixture stub admission.",
+    "freshness_basis": "The manifest now matches the current 21 percent Sandbox posture because the lane no longer stops at note-only leaf structure: one bounded JSON input fixture now exists under the admitted root, the pack manifest now carries both note and input descriptors directly, the Book and restart surfaces project that broader concrete fixture-kind truth, and the next package is now one explicit local-only first expected-output fixture stub admission.",
     "marker_posture": [
       {
         "marker": "Sandbox Simulation Readiness",
-        "percent": 18,
+        "percent": 21,
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ]
