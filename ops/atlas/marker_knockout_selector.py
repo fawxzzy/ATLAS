@@ -89,6 +89,8 @@ class MarkerRecord:
 class PacketDescriptor:
     packet: str
     basis_receipt_ref: str
+    mode: str | None = None
+    scope: str | None = None
 
 
 @dataclass(frozen=True)
@@ -309,11 +311,16 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "Sandbox Simulation Readiness": PacketDescriptor(
-        packet="Sandbox Simulation Readiness local-only artifact-home and scenario-manifest contract freeze",
+        packet="Sandbox Simulation Readiness local-only example scenario and fixture-pack stub admission",
         basis_receipt_ref=(
             "docs/ops/"
-            "SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-ARTIFACT-HOME-AND-SCENARIO-MANIFEST-"
+            "SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-SCENARIO-FIXTURE-PACK-"
             "CONTRACT-FREEZE-2026-06-27.md"
+        ),
+        mode="root-owned local data-stub follow-on",
+        scope=(
+            "add one example scenario and one paired fixture-pack stub under `data/atlas/sandbox/**` "
+            "while preserving the current no-validator, no-runner, no-_stack, and no-mutation guards"
         ),
     ),
 }
@@ -401,11 +408,11 @@ def effective_policy(*, marker: str, percentage: int, active_lane: str | None) -
         policy = MarkerPolicy(
             category="admissible after current lane",
             rationale=(
-                "The lane now has one admitted root-owned starter packet and one durable docs-only contract freeze, "
+                "The lane now has one admitted root-owned starter packet plus durable scenario, runtime, and fixture-pack contract freezes, "
                 "but current durable restart truth still keeps the active ATLAS-root lane ahead of it."
             ),
             expected_evidence=(
-                "one bounded local-only scenario-fixture pack contract packet that preserves "
+                "one bounded local-only example scenario and fixture-pack stub packet that preserves "
                 "no owner-repo, deploy, secret, or live-data widening"
             ),
         )
@@ -468,6 +475,30 @@ def packet_basis_ref_for_marker(marker: str) -> str | None:
     if descriptor is None:
         return None
     return descriptor.basis_receipt_ref
+
+
+def packet_mode_for_marker(*, root: Path, marker: str) -> str | None:
+    descriptor = PACKET_REGISTRY.get(marker)
+    if descriptor is None:
+        return None
+    if descriptor.mode is not None:
+        return descriptor.mode
+    basis_ref = descriptor.basis_receipt_ref
+    if not basis_ref:
+        return None
+    return load_packet_receipt_context(root=root, basis_receipt_ref=basis_ref).mode
+
+
+def packet_scope_for_marker(*, root: Path, marker: str) -> str | None:
+    descriptor = PACKET_REGISTRY.get(marker)
+    if descriptor is None:
+        return None
+    if descriptor.scope is not None:
+        return descriptor.scope
+    basis_ref = descriptor.basis_receipt_ref
+    if not basis_ref:
+        return None
+    return load_packet_receipt_context(root=root, basis_receipt_ref=basis_ref).scope
 
 
 def load_packet_receipt_context(*, root: Path, basis_receipt_ref: str) -> PacketReceiptContext:
@@ -596,24 +627,6 @@ def build_campaign(*, root: Path) -> dict[str, object]:
             "No active lane is already named in durable restart truth, so open the first admissible selected lane."
         )
 
-    selected_packet_receipt_context = None
-    if selected:
-        selected_basis_ref = packet_basis_ref_for_marker(selected.marker)
-        if selected_basis_ref:
-            selected_packet_receipt_context = load_packet_receipt_context(
-                root=root,
-                basis_receipt_ref=selected_basis_ref,
-            )
-
-    next_packet_receipt_context = None
-    if next_after_current:
-        next_basis_ref = packet_basis_ref_for_marker(next_after_current.marker)
-        if next_basis_ref:
-            next_packet_receipt_context = load_packet_receipt_context(
-                root=root,
-                basis_receipt_ref=next_basis_ref,
-            )
-
     return {
         "campaign_id": "root-non-fitness-marker-knockout",
         "source_ref": "docs/atlas-book/02-lanes-and-markers.md",
@@ -631,10 +644,10 @@ def build_campaign(*, root: Path) -> dict[str, object]:
         "selected_current_packet": packet_for_marker(selected.marker) if selected else None,
         "selected_current_packet_basis_ref": packet_basis_ref_for_marker(selected.marker) if selected else None,
         "selected_current_packet_mode": (
-            selected_packet_receipt_context.mode if selected_packet_receipt_context else None
+            packet_mode_for_marker(root=root, marker=selected.marker) if selected else None
         ),
         "selected_current_packet_scope": (
-            selected_packet_receipt_context.scope if selected_packet_receipt_context else None
+            packet_scope_for_marker(root=root, marker=selected.marker) if selected else None
         ),
         "next_after_current_marker": next_after_current.marker if next_after_current else None,
         "next_after_current_percentage": next_after_current.percentage if next_after_current else None,
@@ -645,10 +658,10 @@ def build_campaign(*, root: Path) -> dict[str, object]:
             packet_basis_ref_for_marker(next_after_current.marker) if next_after_current else None
         ),
         "next_after_current_packet_mode": (
-            next_packet_receipt_context.mode if next_packet_receipt_context else None
+            packet_mode_for_marker(root=root, marker=next_after_current.marker) if next_after_current else None
         ),
         "next_after_current_packet_scope": (
-            next_packet_receipt_context.scope if next_packet_receipt_context else None
+            packet_scope_for_marker(root=root, marker=next_after_current.marker) if next_after_current else None
         ),
     }
 

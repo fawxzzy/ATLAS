@@ -114,7 +114,7 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         )
 
         sandbox_receipt = root / "docs" / "ops" / (
-            "SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-ARTIFACT-HOME-AND-SCENARIO-MANIFEST-"
+            "SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-SCENARIO-FIXTURE-PACK-"
             "CONTRACT-FREEZE-2026-06-27.md"
         )
         sandbox_receipt.write_text(
@@ -122,8 +122,8 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
                 [
                     "# Sandbox Packet",
                     "",
-                    "- Mode: `root-owned docs-only sandbox contract freeze`",
-                    "- Scope: `freeze the exact local-only sandbox runtime artifact home and scenario-manifest contract without admitting fixture execution, validator behavior, runner behavior, or any owner-repo, deploy, secret, or live-data widening`",
+                    "- Mode: `root-owned docs-only fixture-pack contract freeze`",
+                    "- Scope: `freeze the exact committed Sandbox fixture-pack home and manifest-reference discipline without admitting example fixture payloads, validator behavior, runner behavior, or any owner-repo, deploy, secret, or live-data widening`",
                     "",
                 ]
             ),
@@ -312,11 +312,11 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
 
         self.assertEqual("hold_current_lane", payload["operator_action"])
 
-    def test_build_campaign_promotes_sandbox_after_contract_freeze(self) -> None:
+    def test_build_campaign_promotes_sandbox_after_fixture_pack_contract_freeze(self) -> None:
         root = self._temp_root()
         marker_doc = MARKER_DOC.replace(
             "- Sandbox Simulation Readiness: `0%`",
-            "- Sandbox Simulation Readiness: `8%`",
+            "- Sandbox Simulation Readiness: `11%`",
         )
         (root / "docs" / "atlas-book" / "02-lanes-and-markers.md").write_text(marker_doc, encoding="utf-8")
         (root / "docs" / "atlas-book" / "01-current-state.md").write_text(CURRENT_STATE_DOC, encoding="utf-8")
@@ -344,20 +344,24 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
             records["Sandbox Simulation Readiness"]["category"],
         )
         self.assertIn(
-            "durable docs-only contract freeze",
+            "fixture-pack contract freezes",
             records["Sandbox Simulation Readiness"]["rationale"],
         )
         self.assertEqual(
-            "Sandbox Simulation Readiness local-only artifact-home and scenario-manifest contract freeze",
+            "Sandbox Simulation Readiness local-only example scenario and fixture-pack stub admission",
             payload["next_after_current_packet"],
         )
         self.assertEqual(
-            "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-ARTIFACT-HOME-AND-SCENARIO-MANIFEST-CONTRACT-FREEZE-2026-06-27.md",
+            "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-SCENARIO-FIXTURE-PACK-CONTRACT-FREEZE-2026-06-27.md",
             payload["next_after_current_packet_basis_ref"],
         )
         self.assertEqual(
-            "root-owned docs-only sandbox contract freeze",
+            "root-owned local data-stub follow-on",
             payload["next_after_current_packet_mode"],
+        )
+        self.assertIn(
+            "example scenario and one paired fixture-pack stub",
+            payload["next_after_current_packet_scope"],
         )
 
     def test_build_campaign_normalizes_inline_code_marker_names(self) -> None:
