@@ -1607,6 +1607,7 @@
 - [AI Long-Run Batch Orchestration Post-Stack-Command-Implementation-Actual-Owner-Side-Mutation-Authority-Class-Value Downstream Hold Recheck](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-STACK-COMMAND-IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-VALUE-DOWNSTREAM-HOLD-RECHECK-2026-06-26.md)
 - [Truth Map And ATLAS Book Root Validation Warning Drift Closeout And Stack Re-Sync](../ops/TRUTH-MAP-AND-ATLAS-BOOK-ROOT-VALIDATION-WARNING-DRIFT-CLOSEOUT-AND-STACK-RESYNC-2026-06-26.md)
 - [Truth Map And ATLAS Book Local Warning Floor Reduction And Stack Re-Sync](../ops/TRUTH-MAP-AND-ATLAS-BOOK-LOCAL-WARNING-FLOOR-REDUCTION-AND-STACK-RESYNC-2026-06-26.md)
+- [Truth Map And ATLAS Book Playbook Dependency Residue Reduction And Stack Re-Sync](../ops/TRUTH-MAP-AND-ATLAS-BOOK-PLAYBOOK-DEPENDENCY-RESIDUE-REDUCTION-AND-STACK-RESYNC-2026-06-26.md)
 ## Notes
 
 This index is a working spine, not an exhaustive archive.
