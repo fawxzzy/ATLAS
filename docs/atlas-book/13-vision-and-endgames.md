@@ -51,9 +51,9 @@ Shared rules that survive the split:
 - exists to own cross-repo coordination, receipts, markers, validation, governance mapping, and restart surfaces
 - done means stack state is resumable from docs and receipts rather than memory
 - should not become a product-runtime owner
-- currently open for bounded root-owned orchestration doctrine, shared restart-surface refresh when no-overlap wave outputs are ready, and keeping the supervised execution-home downstream chain in explicit control-plane posture now that the concrete `_stack` command implementation-surface selection family, the concrete `_stack` command implementation-surface choice family, the actual concrete `_stack` command implementation-surface choice family, the `_stack` command implementation family, the `_stack` command implementation worker-authority family, the `_stack` command implementation owner-repo implementation-routing family, the post-owner-repo-implementation-routing selector, and their worker-cluster reconciliations are all durable on canonical `main` above the landed pilot-selection criteria, comparison, conversion, winner-selection, and selected-pilot routing helper-proof chain
+- currently open for bounded root-owned orchestration doctrine, shared restart-surface refresh when no-overlap wave outputs are ready, keeping the held AI Long-Run supervised execution-home downstream chain explicit for restart truth, and advancing the now-active root-local Sandbox validator-behavior ladder without widening into runner or owner-side execution
 - next valid package:
-  - `No immediate AI Long-Run Batch Orchestration same-lane packet`
+  - `Sandbox Simulation Readiness local-only first validator-behavior first-implementation worker cluster reconciliation`
 
 ## Key Endgames By Theme
 
@@ -191,7 +191,7 @@ Shared rules that survive the split:
 - no immediate Dependency Untangling follow-on packet is open; reopen only if one new hidden cross-repo dependency appears or one retained seam stops being explicit and governed
 - no immediate Inventory & Truth Map docs-only follow-on packet is open after the open-marker restart-index closeout
 - no immediate Truth Map & ATLAS Book docs-only follow-on packet is open after the open-marker restart-index closeout
-- `Sandbox Simulation Readiness local-only first validator-behavior implementation-readiness closeout and worker-routing`
+- `Sandbox Simulation Readiness local-only first validator-behavior first-implementation worker cluster reconciliation`
 - no immediate Post-Convergence Lane Split Readiness docs-only follow-on packet
 - no immediate Vision & Future Alignment docs-only follow-on packet; reopen only with one major lane-state, shared-authority, or future-target ambiguity change
 - the current `lock-registry-hygiene` blocker class from `stack.lock.yaml` and `_stack` / `mazer` / `playbook` pin drift is now closed after owner-side disposition plus bounded root lock refresh
