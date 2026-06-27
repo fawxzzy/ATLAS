@@ -1682,6 +1682,8 @@
 - [Truth Map And ATLAS Book Zero-Warning Validation Closeout And Stack Re-Sync](../ops/TRUTH-MAP-AND-ATLAS-BOOK-ZERO-WARNING-VALIDATION-CLOSEOUT-AND-STACK-RESYNC-2026-06-26.md)
 - [Truth Map And ATLAS Book Current Continuity Restore And Open-Marker Count Reconciliation](../ops/TRUTH-MAP-AND-ATLAS-BOOK-CURRENT-CONTINUITY-RESTORE-AND-OPEN-MARKER-COUNT-RECONCILIATION-2026-06-26.md)
 - [Truth Map And ATLAS Book Stale Owner-Side Packet And Parity Caveat Reconciliation](../ops/TRUTH-MAP-AND-ATLAS-BOOK-STALE-OWNER-SIDE-PACKET-AND-PARITY-CAVEAT-RECONCILIATION-2026-06-26.md)
+- [Sandbox Simulation Readiness Local-Only First Validator Publication-Surface Claim Admission Boundary Contract Freeze](../ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-PUBLICATION-SURFACE-CLAIM-ADMISSION-BOUNDARY-CONTRACT-FREEZE-2026-06-27.md)
+- [Sandbox Simulation Readiness Post-Local-Only First Validator Publication-Surface Claim Admission Boundary Next-Slice Selection](../ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-PUBLICATION-SURFACE-CLAIM-ADMISSION-BOUNDARY-NEXT-SLICE-SELECTION-2026-06-27.md)
 ## Notes
 
 This index is a working spine, not an exhaustive archive.
