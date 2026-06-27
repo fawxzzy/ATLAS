@@ -191,7 +191,7 @@ Shared rules that survive the split:
 - no immediate Dependency Untangling follow-on packet is open; reopen only if one new hidden cross-repo dependency appears or one retained seam stops being explicit and governed
 - no immediate Inventory & Truth Map docs-only follow-on packet is open after the open-marker restart-index closeout
 - no immediate Truth Map & ATLAS Book docs-only follow-on packet is open after the open-marker restart-index closeout
-- `Sandbox Simulation Readiness local-only first validator-report contract freeze`
+- `Sandbox Simulation Readiness local-only first validator-report stub admission`
 - no immediate Post-Convergence Lane Split Readiness docs-only follow-on packet
 - no immediate Vision & Future Alignment docs-only follow-on packet; reopen only with one major lane-state, shared-authority, or future-target ambiguity change
 - the current `lock-registry-hygiene` blocker class from `stack.lock.yaml` and `_stack` / `mazer` / `playbook` pin drift is now closed after owner-side disposition plus bounded root lock refresh

@@ -311,16 +311,16 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "Sandbox Simulation Readiness": PacketDescriptor(
-        packet="Sandbox Simulation Readiness local-only first validator-report contract freeze",
+        packet="Sandbox Simulation Readiness local-only first validator-report stub admission",
         basis_receipt_ref=(
             "docs/ops/"
-            "SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-DESCRIPTOR-"
-            "STUB-ADMISSION-2026-06-27.md"
+            "SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-REPORT-"
+            "CONTRACT-FREEZE-2026-06-27.md"
         ),
-        mode="root-owned docs-only validator-report follow-on",
+        mode="root-owned local validation-report admission",
         scope=(
-            "freeze the first non-executing validator-report contract around the admitted local-only validator "
-            "descriptor without admitting validator execution, runner behavior, no-_stack widening, or mutation behavior"
+            "admit one bounded non-executing validator-report stub under the frozen local-only validator-report "
+            "contract without admitting validator execution, runner behavior, no-_stack widening, or mutation behavior"
         ),
     ),
 }
@@ -408,11 +408,11 @@ def effective_policy(*, marker: str, percentage: int, active_lane: str | None) -
         policy = MarkerPolicy(
             category="admissible after current lane",
             rationale=(
-                "The lane now has one admitted root-owned starter packet plus durable scenario, runtime, and fixture-pack contract freezes, one admitted example pair, one note-only leaf fixture, one input fixture stub, one expected-output fixture stub, one validator-boundary contract freeze, and one validator descriptor stub, "
+                "The lane now has one admitted root-owned starter packet plus durable scenario, runtime, and fixture-pack contract freezes, one admitted example pair, one note-only leaf fixture, one input fixture stub, one expected-output fixture stub, one validator-boundary contract freeze, one validator descriptor stub, and one validator-report contract freeze, "
                 "but current durable restart truth still keeps the active ATLAS-root lane ahead of it."
             ),
             expected_evidence=(
-                "one bounded local-only first validator-report contract freeze that preserves "
+                "one bounded local-only first validator-report stub admission that preserves "
                 "no owner-repo, deploy, secret, or live-data widening"
             ),
         )
