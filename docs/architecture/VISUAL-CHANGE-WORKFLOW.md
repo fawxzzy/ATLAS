@@ -9,16 +9,19 @@ Hard rule
 
 Workflow
 1. Predict affected routes and surfaces from the token map.
-2. Apply the code change.
-3. Run local verification:
+2. Identify the canonical surface or component when the request implies cross-screen normalization.
+3. Convert the requested visual edits into an explicit checklist before mutating code.
+4. Apply the code change.
+5. Run local verification:
    - `npm run test:app-theme`
    - `npm run build`
-4. Start the intended app server.
-5. Confirm the intended route returns the expected page.
-6. Capture screenshots in a Codex-owned browser context.
-7. Compare expected vs actual surface mutations.
-8. Record each route family as `passed`, `failed`, or `blocked`.
-9. Patch and repeat until the changed family is explained.
+6. Start the intended app server.
+7. Confirm the intended route returns the expected page.
+8. Capture screenshots in a Codex-owned browser context.
+9. Compare expected vs actual surface mutations.
+10. Reconcile the requested-edit checklist item-by-item as `passed`, `failed`, `blocked`, or `deferred`.
+11. Record each route family as `passed`, `failed`, or `blocked`.
+12. Patch and repeat until the changed family is explained.
 
 Capture contract
 - Every live capture should identify:
@@ -30,6 +33,13 @@ Capture contract
   - setup action
   - expected surface family
   - screenshot output path
+  - canonical surface under test when normalization is in scope
+  - requested-edit checklist id or note
+  - data lane: `qa_fixture`, `automation_user`, or `live_user_bounded`
+
+Mobile-first rule
+- For mobile-first Fitness surfaces, proof should include at least one mobile lens in addition to desktop sanity.
+- Desktop-only captures may support debugging, but they should not be treated as full UI-closeout proof for mobile-first work.
 
 Current Fitness execution
 - Verified repo-local command:
@@ -68,6 +78,8 @@ Classification rules for misses
 - unmapped surface
 - component-specific styling debt
 - invalid capture environment
+- requested edit not landed
+- canonical surface mismatch
 
 Reliable recovery sequence
 1. Confirm the intended route directly on `127.0.0.1:3000`.
@@ -79,11 +91,17 @@ Reliable recovery sequence
 4. Use a fresh screenshot filename for every recapture.
 5. Inspect the resulting image before treating it as evidence.
 
+Mutable data rule
+- Prefer QA fixtures or automation-user data for visual work that requires product mutations.
+- If live user data is touched during investigation, record the targeted records first and restore or explicitly report any residual changes before closeout.
+
 Failure modes
 - Using the user's browser creates privacy risk, session confusion, stale state, and unreliable screenshots.
 - Single screenshot edits without route/state expectation recreate the human-memory bottleneck.
 - A green screenshot on the wrong route or wrong server is invalid proof.
 - A preview build can be READY while isolated protected auth is still unavailable and the local `:3000` lane is too stalled to produce fresh trustworthy proof.
+- Patching sibling routes independently instead of normalizing from the canonical surface creates repeating drift and false `fixed` states.
+- Passing tests with no requested-edit reconciliation can still leave the actual UI batch partially unfinished.
 
 Promotion posture
 - Preview deploy only while Pass 2.5 App Theme work is active.

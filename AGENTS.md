@@ -57,6 +57,17 @@ Verification
 - For repo changes, run the repo-local verify command before claiming completion.
 - If `_stack` owns an existing operator command for the task, prefer using it instead of inventing a new cross-repo flow.
 
+UI Mutation Discipline
+- For governed UI edit batches, convert every explicit requested edit into an internal checklist before mutating code.
+- Completion claims for UI work must reconcile that checklist item-by-item as `landed`, `blocked`, or `intentionally deferred`.
+- When the request implies normalization across sibling screens, identify the canonical surface or component first and propagate from there instead of patching each sibling ad hoc.
+- Visual claims should be backed by route-aware proof on the actual touched surface family; summary text alone is not sufficient.
+
+Live Data Safety
+- Prefer QA accounts, fixture lanes, or dedicated dev routes before mutating user-owned product data during investigation or visual QA.
+- If live user data must be touched, record the targeted records first, keep the mutation bounded, and restore or explicitly report any residual state before claiming completion.
+- Do not treat exploratory product mutations as disposable if they can affect user-visible ordering, naming, history, or active-state truth.
+
 Parallelism
 - Use one agent per repo or one non-overlapping stack file slice.
 - Do not let multiple agents edit the same repo root without a clear ownership split.
@@ -68,6 +79,7 @@ Execution Cadence
 - Cluster execution rule: for execution-ready lanes, run execution, then proof or reconciliation, then ratchet as one serial cluster. Do not interleave unrelated root lanes between those steps unless execution becomes blocked.
 - One root writer only: at most one root writer, one owner-repo writer, and one optional read-only scout should be active at a time.
 - Marker ratchet threshold: a marker moves only when executed state changed, proof-backed adoption widened, manifest-backed restart got broader and stayed refreshed, or one real blocker was cleared. Cleaner wording alone is not enough.
+- If one lane blocks and another execution-ready lane remains open, switch lanes and keep the batch moving instead of narrating the same blocker repeatedly.
 - Batch routing:
   - owner-side unblock batch -> convert blocker, merge or preserve or archive, recheck blocker class
   - root execution cluster -> blocker recheck if needed, execution, proof or reconciliation, ratchet

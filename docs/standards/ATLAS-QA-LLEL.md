@@ -30,6 +30,7 @@ ATLAS QA LLEL defines quality evidence, not just tests.
 - Dry-run evidence proves pipeline wiring only.
 - Evidence-grade QA requires real artifacts.
 - Promotion-grade QA requires real artifacts plus validated evaluation plus a root promotion receipt.
+- For governed UI mutation work, evidence should also reconcile the requested edit checklist, not only the final route health.
 
 ## Contract Versioning
 
@@ -58,6 +59,7 @@ Repo-native unit and integration tests feed QA LLEL as evidence.
 
 - Pattern: unit tests remain repo-native; QA LLEL makes their results root-readable and promotion-aware.
 - Rule: failed required test evidence blocks promotion the same way failed executable truth does.
+- Rule: when a task requests normalization across sibling UI surfaces, QA should identify the canonical surface under test and verify propagated siblings against that source, not as isolated one-off routes.
 
 - Pattern: standardize contracts, adapters, artifacts, CLI verbs, and reports before standardizing repo runtime code.
 - Failure Mode: shared runtime before shared boundary increases cross-repo coupling without increasing trust.
@@ -170,6 +172,8 @@ Default required visual lens profiles:
 - `android.chrome`
 - `iphone.webkit`
 
+Mobile-first web repos may add more lenses, but they should not skip the mobile pair and still call the run complete.
+
 - Pattern: one QA scenario should fan out across multiple user lenses instead of creating separate scenario files for every device archetype.
 - Rule: a missing required lens is a promotion failure unless the scenario policy explicitly allows a manual certification lane.
 - Rule: each adapter lens must declare `evidence_kind`, `required_for`, `promotion_tier`, and `fallback_behavior`.
@@ -227,6 +231,8 @@ Screenshots must be browser or device-backed artifacts.
 - Rule: dry-run or synthetic evidence may not satisfy promotion.
 - Rule: emulated browser capture may satisfy evidence-grade QA for fast proof, but it does not satisfy a scenario that explicitly requires physical-device proof.
 - Rule: physical-device artifacts must record provider or attestation lineage, device identity, capture method, and artifact hash.
+- Rule: UI mutation proof is incomplete if it shows the route loaded but does not confirm the specific requested deltas actually landed.
+- Rule: when mutable product data is used for QA, the evidence bundle must identify the data lane as `qa_fixture`, `automation_user`, or `live_user_bounded`.
 - Failure Mode: visual QA without browser-backed screenshots gives false confidence and must not be promotable.
 
 ## Visual Diffs
@@ -250,6 +256,10 @@ Each run should emit an operator-facing evidence report alongside machine-readab
   - `report.html`
   - `report.summary.json`
 - Reports must show promotion tier, missing evidence tiers, per-lens artifacts, and visual diff results when configured.
+- Reports for governed UI mutation passes should also show:
+  - canonical surface under test
+  - requested edit checklist status
+  - whether proof was gathered on QA data or bounded live user data
 - Pattern: one run produces receipts; the evidence index shows QA health over time.
 
 ## Governance Rules
@@ -257,6 +267,14 @@ Each run should emit an operator-facing evidence report alongside machine-readab
 ### Executable truth first
 
 Executable pass or fail comes from deterministic assertions, API checks, contract checks, and explicit visual diffs. The QA LLEL may summarize or rank risk, but it must not overrule a failed executable check.
+
+### Checklist truth for UI mutation passes
+
+When the task is a bounded UI edit batch, repo checks plus screenshots are still not enough on their own.
+
+- Rule: the run must preserve a requested-edit checklist and reconcile each requested edit as `passed`, `failed`, `blocked`, or `deferred`.
+- Rule: `page loads` or `tests passed` may not be used as shorthand for `every requested UI edit landed`.
+- Failure Mode: the route becomes generally healthier while specific requested deltas silently regress or never land.
 
 ### Artifact-first review
 
