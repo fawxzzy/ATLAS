@@ -65,8 +65,8 @@ components:
     remote: "https://github.com/ZachariahRedfield/nat1-games.git"
     ref_type: "branch"
     ref: "codex/path-discipline-warning-slice-nat1"
-    commit: "63a4a7c159c41a7e98ad8708891743acf71431ed"
-    dirty: true
+    commit: "404460d3717fab389407582048a9b9f228f26d39"
+    dirty: false
     trust_class: "trusted"
     release_eligible: false
   playbook:
@@ -98,8 +98,8 @@ components:
     remote: null
     ref_type: "branch"
     ref: "main"
-    commit: "bf2c9551225e6d3555122da9a72306556f50cdd8"
-    dirty: true
+    commit: "43769ba86d4c6ebc419ab9e7847c3843460a094f"
+    dirty: false
     trust_class: "trusted"
     release_eligible: false
   trove:
@@ -109,8 +109,8 @@ components:
     remote: "https://github.com/fawxzzy/trove.git"
     ref_type: "branch"
     ref: "codex/path-discipline-warning-slice-trove"
-    commit: "cd572452b627c6a03dbdb440f9b4e431d9b8ed98"
-    dirty: true
+    commit: "112715291a1d9f3b21c9a830d1dab68e6751b815"
+    dirty: false
     trust_class: "trusted"
     release_eligible: true
 excluded_surfaces:
@@ -216,4 +216,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:73cd76d41bc610df1cefcd384752a05301a3fdd42a5378f92758ebd3b9496e3d"
+lock_digest: "sha256:c627ac4e41b97223b03a2afcca776c04ab6f6c50b4836bee0547e44e11d1374a"
