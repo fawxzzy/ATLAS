@@ -76,7 +76,7 @@ components:
     remote: "https://github.com/fawxzzy/playbook.git"
     ref_type: "branch"
     ref: "codex/path-discipline-warning-slice-playbook"
-    commit: "5960b9457b9ac96b0ae6ac4b1ef623759e1720b3"
+    commit: "7d603cbaf0f6b60a8ca15376f75c6aadadb68215"
     dirty: false
     trust_class: "trusted"
     release_eligible: true
@@ -216,4 +216,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:7bf516307a0d8daf1891a6b1740f19dd3204516b096edffb08a1ae69d91fea42"
+lock_digest: "sha256:4d3851a6e295d61bab0b6483b1a621c29557ca3e4aaa3f08701b5b42ec08ea20"
