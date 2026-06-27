@@ -77,7 +77,13 @@
     "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-VERDICT-BEARING-ARTIFACT-ACTIVATION-GATE-CONTRACT-FREEZE-2026-06-27.md",
     "docs/ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-VERDICT-BEARING-ARTIFACT-ACTIVATION-GATE-NEXT-SLICE-SELECTION-2026-06-27.md",
     "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-SYNCHRONIZED-ARTIFACT-WRITEBACK-BOUNDARY-CONTRACT-FREEZE-2026-06-27.md",
-    "docs/ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-SYNCHRONIZED-ARTIFACT-WRITEBACK-BOUNDARY-NEXT-SLICE-SELECTION-2026-06-27.md"
+    "docs/ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-SYNCHRONIZED-ARTIFACT-WRITEBACK-BOUNDARY-NEXT-SLICE-SELECTION-2026-06-27.md",
+    "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-VALIDATOR-EXECUTION-ADMISSION-BOUNDARY-CONTRACT-FREEZE-2026-06-27.md",
+    "docs/ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-VALIDATOR-EXECUTION-ADMISSION-BOUNDARY-NEXT-SLICE-SELECTION-2026-06-27.md",
+    "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-RUNNER-BEHAVIOR-ADMISSION-BOUNDARY-CONTRACT-FREEZE-2026-06-27.md",
+    "docs/ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-RUNNER-BEHAVIOR-ADMISSION-BOUNDARY-NEXT-SLICE-SELECTION-2026-06-27.md",
+    "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-STACK-ROUTING-ADMISSION-BOUNDARY-CONTRACT-FREEZE-2026-06-27.md",
+    "docs/ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-STACK-ROUTING-ADMISSION-BOUNDARY-NEXT-SLICE-SELECTION-2026-06-27.md"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -85,9 +91,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "sandbox-simulation-readiness",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-SYNCHRONIZED-ARTIFACT-WRITEBACK-BOUNDARY-NEXT-SLICE-SELECTION-2026-06-27.md",
+    "current_checkpoint_receipt": "docs/ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-STACK-ROUTING-ADMISSION-BOUNDARY-NEXT-SLICE-SELECTION-2026-06-27.md",
     "checkpoint_commit": "main",
-    "checkpoint_summary": "The lane now sits at 94 percent: the bounded root-local pre-verdict validator-behavior helper remains explicitly tied to the frozen comparison boundary, the future verdict-assignment rule and the later verdict-activation reopening rule remain frozen above that helper chain, the future report-status activation mapping, the later report-status activation gate, the later report-result mutation boundary, the later candidate-output verdict-artifact mutation boundary, the later paired-artifact writeback boundary, the later report-and-candidate-output synchronization boundary, the later verdict-bearing artifact activation gate, and the later synchronized artifact writeback boundary are now all frozen above that verdict path, the post-writeback selector is now exact on canonical main, and the exact next package is now Sandbox Simulation Readiness local-only first validator validator-execution admission boundary contract freeze.",
+    "checkpoint_summary": "The lane remains at 99 percent: the bounded root-local pre-verdict validator-behavior helper remains explicitly tied to the frozen comparison boundary, the future verdict-assignment rule and the later verdict-activation reopening rule remain frozen above that helper chain, the future report-status activation mapping, the later report-status activation gate, the later report-result mutation boundary, the later candidate-output verdict-artifact mutation boundary, the later paired-artifact writeback boundary, the later report-and-candidate-output synchronization boundary, the later verdict-bearing artifact activation gate, the later synchronized artifact writeback boundary, the later validator-execution admission boundary, the later runner-behavior admission boundary, and the later `_stack`-routing admission boundary are now all frozen above that verdict path, the post-routing selector is now exact on canonical main, and the exact next package is now Sandbox Simulation Readiness local-only first validator owner-surface execution admission boundary contract freeze.",
     "governing_receipts": [
       "docs/ops/STACK-LANE-0-BASELINE-INVENTORY-2026-05-22.md",
       "docs/ops/STACK-LANE-0-TRUTH-MAP-2026-05-22.md",
@@ -137,7 +143,13 @@
       "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-VERDICT-BEARING-ARTIFACT-ACTIVATION-GATE-CONTRACT-FREEZE-2026-06-27.md",
       "docs/ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-VERDICT-BEARING-ARTIFACT-ACTIVATION-GATE-NEXT-SLICE-SELECTION-2026-06-27.md",
       "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-SYNCHRONIZED-ARTIFACT-WRITEBACK-BOUNDARY-CONTRACT-FREEZE-2026-06-27.md",
-      "docs/ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-SYNCHRONIZED-ARTIFACT-WRITEBACK-BOUNDARY-NEXT-SLICE-SELECTION-2026-06-27.md"
+      "docs/ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-SYNCHRONIZED-ARTIFACT-WRITEBACK-BOUNDARY-NEXT-SLICE-SELECTION-2026-06-27.md",
+      "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-VALIDATOR-EXECUTION-ADMISSION-BOUNDARY-CONTRACT-FREEZE-2026-06-27.md",
+      "docs/ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-VALIDATOR-EXECUTION-ADMISSION-BOUNDARY-NEXT-SLICE-SELECTION-2026-06-27.md",
+      "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-RUNNER-BEHAVIOR-ADMISSION-BOUNDARY-CONTRACT-FREEZE-2026-06-27.md",
+      "docs/ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-RUNNER-BEHAVIOR-ADMISSION-BOUNDARY-NEXT-SLICE-SELECTION-2026-06-27.md",
+      "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-STACK-ROUTING-ADMISSION-BOUNDARY-CONTRACT-FREEZE-2026-06-27.md",
+      "docs/ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-STACK-ROUTING-ADMISSION-BOUNDARY-NEXT-SLICE-SELECTION-2026-06-27.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -367,6 +379,30 @@
       {
         "path": "docs/ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-SYNCHRONIZED-ARTIFACT-WRITEBACK-BOUNDARY-NEXT-SLICE-SELECTION-2026-06-27.md",
         "role": "current post-validator synchronized artifact writeback boundary next-slice selection truth and next-step routing"
+      },
+      {
+        "path": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-VALIDATOR-EXECUTION-ADMISSION-BOUNDARY-CONTRACT-FREEZE-2026-06-27.md",
+        "role": "current validator-execution admission boundary truth and next-step routing"
+      },
+      {
+        "path": "docs/ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-VALIDATOR-EXECUTION-ADMISSION-BOUNDARY-NEXT-SLICE-SELECTION-2026-06-27.md",
+        "role": "current post-validator validator-execution admission boundary next-slice selection truth and next-step routing"
+      },
+      {
+        "path": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-RUNNER-BEHAVIOR-ADMISSION-BOUNDARY-CONTRACT-FREEZE-2026-06-27.md",
+        "role": "current validator runner-behavior admission boundary truth and next-step routing"
+      },
+      {
+        "path": "docs/ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-RUNNER-BEHAVIOR-ADMISSION-BOUNDARY-NEXT-SLICE-SELECTION-2026-06-27.md",
+        "role": "current post-validator runner-behavior admission boundary next-slice selection truth and next-step routing"
+      },
+      {
+        "path": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-STACK-ROUTING-ADMISSION-BOUNDARY-CONTRACT-FREEZE-2026-06-27.md",
+        "role": "current validator _stack-routing admission boundary truth and next-step routing"
+      },
+      {
+        "path": "docs/ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-STACK-ROUTING-ADMISSION-BOUNDARY-NEXT-SLICE-SELECTION-2026-06-27.md",
+        "role": "current post-validator _stack-routing admission boundary next-slice selection truth and next-step routing"
       }
     ],
     "verification_adoption_surfaces": [
@@ -401,8 +437,8 @@
     ],
     "blocked_or_gated_work": [
       {
-        "item": "validator-execution admission boundary above the frozen synchronized writeback family",
-        "requirement": "blocked until one later explicit packet freezes the smallest later rule that may govern whether the bounded local-only validator may execute at all without widening into runner behavior, _stack routing, owner-repo mutation, or broader runtime claims"
+        "item": "owner-surface execution admission boundary above the frozen _stack-routing family",
+        "requirement": "blocked until one later explicit packet freezes the smallest later rule that may govern whether any owner-side execution home may exist above that frozen routing family at all without widening into deploy/runtime placement or broader unattended claims"
       },
       {
         "item": "validator execution, runner behavior, or wider shared routing",
@@ -419,19 +455,19 @@
     ],
     "next_package_ladder": [
       {
-        "package": "Sandbox Simulation Readiness local-only first validator validator-execution admission boundary contract freeze",
-        "mode": "root-owned docs-only validator-execution-admission-boundary contract freeze",
-        "reason": "the later verdict path, the later report-status activation mapping, the later report-status activation gate, the later report-result mutation boundary, the later candidate-output verdict-artifact mutation boundary, the later paired-artifact writeback boundary, the later report-and-candidate-output synchronization boundary, the later verdict-bearing artifact activation gate, and the later synchronized artifact writeback boundary are now exact above the fully frozen pre-verdict chain, so the next honest move is to freeze the smallest later rule that may govern whether the bounded local-only validator may execute at all without widening into runner behavior, _stack routing, owner-repo mutation, or broader runtime claims"
+        "package": "Sandbox Simulation Readiness local-only first validator owner-surface execution admission boundary contract freeze",
+        "mode": "root-owned docs-only validator-owner-surface-execution-admission-boundary contract freeze",
+        "reason": "the later verdict path, the later report-status activation mapping, the later report-status activation gate, the later report-result mutation boundary, the later candidate-output verdict-artifact mutation boundary, the later paired-artifact writeback boundary, the later report-and-candidate-output synchronization boundary, the later verdict-bearing artifact activation gate, the later synchronized artifact writeback boundary, the later validator-execution admission boundary, the later runner-behavior admission boundary, and the later `_stack`-routing admission boundary are now exact above the fully frozen pre-verdict chain, so the next honest move is to freeze the smallest later rule that may govern whether any owner-side execution home may exist above that frozen routing family at all without widening into deploy/runtime placement or broader unattended claims"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-SYNCHRONIZED-ARTIFACT-WRITEBACK-BOUNDARY-NEXT-SLICE-SELECTION-2026-06-27.md",
+    "freshness_checked_receipt": "docs/ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-STACK-ROUTING-ADMISSION-BOUNDARY-NEXT-SLICE-SELECTION-2026-06-27.md",
     "freshness_checked_at": "2026-06-27T00:00:00-04:00",
-    "freshness_basis": "The manifest now matches the current 94 percent Sandbox posture because the lane now has one bounded future validator-behavior family, one exact root-local owner-facing home for that family, one explicit support posture held at none yet, one exact first implementation slice plus proof matrix for a pre-verdict root-local helper, one explicit worker handoff contract over that slice, one explicit implementation-readiness closeout with worker-routing result, one reconciled helper-plus-proof landing on canonical main, one explicit post-helper next-slice selector, one explicit link contract tying the landed helper to the already frozen comparison boundary, one explicit future verdict-assignment rule above that helper chain, one explicit selector that chose the smallest downstream gate-reopening seam, one explicit verdict-activation reopening rule contract, one explicit report-status activation mapping contract above that verdict path, one explicit report-status activation gate contract above that mapped status family, one explicit report-result mutation boundary contract above that status family, one explicit candidate-output verdict-artifact mutation boundary contract beside that report-side boundary, one explicit paired-artifact writeback boundary contract above the two single-artifact boundaries, one explicit report-and-candidate-output synchronization boundary contract above that paired writeback family, one explicit verdict-bearing artifact activation gate contract above that synchronization family, one explicit synchronized artifact writeback boundary contract above that activation family, and one explicit post-writeback selector that chose the smallest downstream validator-execution seam, while the Book and restart surfaces project that still-bounded 94 percent state and the next package moves to Sandbox Simulation Readiness local-only first validator validator-execution admission boundary contract freeze.",
+    "freshness_basis": "The manifest now matches the current held 99 percent Sandbox posture because the lane now has one bounded future validator-behavior family, one exact root-local owner-facing home for that family, one explicit support posture held at none yet, one exact first implementation slice plus proof matrix for a pre-verdict root-local helper, one explicit worker handoff contract over that slice, one explicit implementation-readiness closeout with worker-routing result, one reconciled helper-plus-proof landing on canonical main, one explicit post-helper next-slice selector, one explicit link contract tying the landed helper to the already frozen comparison boundary, one explicit future verdict-assignment rule above that helper chain, one explicit selector that chose the smallest downstream gate-reopening seam, one explicit verdict-activation reopening rule contract, one explicit report-status activation mapping contract above that verdict path, one explicit report-status activation gate contract above that mapped status family, one explicit report-result mutation boundary contract above that status family, one explicit candidate-output verdict-artifact mutation boundary contract beside that report-side boundary, one explicit paired-artifact writeback boundary contract above the two single-artifact boundaries, one explicit report-and-candidate-output synchronization boundary contract above that paired writeback family, one explicit verdict-bearing artifact activation gate contract above that synchronization family, one explicit synchronized artifact writeback boundary contract above that activation family, one explicit validator-execution admission boundary contract above that writeback family, one explicit runner-behavior admission boundary contract above that execution family, one explicit `_stack`-routing admission boundary contract above that runner family, and one explicit post-routing selector that chose the smallest downstream owner-surface execution seam, while the Book and restart surfaces project that still-held 99 percent state and the next package moves to Sandbox Simulation Readiness local-only first validator owner-surface execution admission boundary contract freeze.",
     "marker_posture": [
       {
         "marker": "Sandbox Simulation Readiness",
-        "percent": 94,
+        "percent": 99,
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ]
