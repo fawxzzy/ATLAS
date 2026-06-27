@@ -311,16 +311,16 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "Sandbox Simulation Readiness": PacketDescriptor(
-        packet="Sandbox Simulation Readiness local-only first validator broader runtime assertions admission boundary contract freeze",
+        packet="Sandbox Simulation Readiness post-local-only first validator broader-runtime-assertions admission boundary hold or top-level lane reselection",
         basis_receipt_ref=(
             "docs/ops/"
-            "SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-DEPLOY-"
-            "EXECUTION-ADMISSION-BOUNDARY-NEXT-SLICE-SELECTION-2026-06-27.md"
+            "SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-BROADER-"
+            "RUNTIME-ASSERTIONS-ADMISSION-BOUNDARY-HOLD-OR-TOP-LEVEL-LANE-"
+            "RESELECTION-2026-06-27.md"
         ),
-        mode="root-owned docs-only validator-broader-runtime-assertions-admission-boundary contract freeze",
+        mode="docs-only root-bounded hold or top-level lane reselection",
         scope=(
-            "freeze the smallest later rule that may govern whether any broader runtime assertions may exist above that frozen deploy-execution family at all "
-            "without widening into closeout or top-level lane reselection"
+            "decide whether Sandbox stays held or returns to broader campaign routing now that the local-only first validator broader-runtime-assertions admission boundary is directly frozen on canonical main"
         ),
     ),
 }
@@ -461,11 +461,13 @@ def effective_policy(*, marker: str, percentage: int, active_lane: str | None) -
                 "and one post-live-owner-repo-edits-admission-boundary next-slice selection, "
                 "one deploy-execution admission boundary contract, "
                 "and one post-deploy-execution-admission-boundary next-slice selection, "
+                "one broader-runtime-assertions admission boundary contract, "
+                "and one post-broader-runtime-assertions-admission-boundary hold-or-top-level-lane-reselection selector, "
                 "but current durable restart truth still keeps the active ATLAS-root lane ahead of it."
             ),
             expected_evidence=(
-                "one bounded validator-broader-runtime-assertions-admission-boundary contract or later downstream contract that preserves "
-                "no closeout-by-adjacency, top-level-lane-reselection widening, or live-data widening"
+                "one bounded post-broader-runtime-assertions hold selector or later downstream truth that preserves "
+                "no same-lane reopen-by-adjacency, no premature top-level-lane claim, and no live-data widening"
             ),
         )
     if not active_lane:

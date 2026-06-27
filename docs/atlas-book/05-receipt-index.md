@@ -1700,6 +1700,8 @@
 - [Sandbox Simulation Readiness Post-Local-Only First Validator Live Owner-Repo Edits Admission Boundary Next-Slice Selection](../ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-LIVE-OWNER-REPO-EDITS-ADMISSION-BOUNDARY-NEXT-SLICE-SELECTION-2026-06-27.md)
 - [Sandbox Simulation Readiness Local-Only First Validator Deploy Execution Admission Boundary Contract Freeze](../ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-DEPLOY-EXECUTION-ADMISSION-BOUNDARY-CONTRACT-FREEZE-2026-06-27.md)
 - [Sandbox Simulation Readiness Post-Local-Only First Validator Deploy Execution Admission Boundary Next-Slice Selection](../ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-DEPLOY-EXECUTION-ADMISSION-BOUNDARY-NEXT-SLICE-SELECTION-2026-06-27.md)
+- [Sandbox Simulation Readiness Local-Only First Validator Broader Runtime Assertions Admission Boundary Contract Freeze](../ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BROADER-RUNTIME-ASSERTIONS-ADMISSION-BOUNDARY-CONTRACT-FREEZE-2026-06-27.md)
+- [Sandbox Simulation Readiness Post-Local-Only First Validator Broader Runtime Assertions Admission Boundary Hold Or Top-Level Lane Reselection](../ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-BROADER-RUNTIME-ASSERTIONS-ADMISSION-BOUNDARY-HOLD-OR-TOP-LEVEL-LANE-RESELECTION-2026-06-27.md)
 ## Notes
 
 This index is a working spine, not an exhaustive archive.
