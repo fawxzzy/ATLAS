@@ -14,12 +14,12 @@ Operational rule:
 ## Summary
 
 - Repo count: `12`
-- Dirty repo count: `2`
+- Dirty repo count: `1`
 - Release-eligible repo count: `5`
 - Excluded surface count: `17`
 - Stack manifest: `stack.yaml`
 - Stack lock: `stack.lock.yaml`
-- Inventory digest: `sha256:1365a829b74e988916951817d2aa6795151c8051159f02d406abf8d79e11d960`
+- Inventory digest: `sha256:b412f9f4f15b45453b37aad59fcd7f06f576d7f761287191848a6a305ae4154f`
 
 ## Managed Repos
 
@@ -32,9 +32,9 @@ Operational rule:
 | lifeline | repos/lifeline | codex/path-discipline-warning-slice-lifeline | 538f623a84b003e70dadd234e6ea3af642446a5f | 538f623a84b003e70dadd234e6ea3af642446a5f | False | trusted | True | - |
 | mazer | repos/mazer | main | 269b02b955451ca1847efb5dde1e172b4c887bb8 | 269b02b955451ca1847efb5dde1e172b4c887bb8 | False | trusted | True | initiative:initiative-mazer-d2-learning-scorer |
 | nat1-games | repos/Nat1-Games/nat1-games | codex/path-discipline-warning-slice-nat1 | 404460d3717fab389407582048a9b9f228f26d39 | 404460d3717fab389407582048a9b9f228f26d39 | False | trusted | False | - |
-| playbook | repos/playbook | codex/path-discipline-warning-slice-playbook | f27c36355da906a01a46a841779553002c259f9b | f27c36355da906a01a46a841779553002c259f9b | True | trusted | True | initiative:continuity-manifest-atlas-owned-repo-naming-canonicalization |
+| playbook | repos/playbook | codex/path-discipline-warning-slice-playbook | 5960b9457b9ac96b0ae6ac4b1ef623759e1720b3 | 5960b9457b9ac96b0ae6ac4b1ef623759e1720b3 | False | trusted | True | initiative:continuity-manifest-atlas-owned-repo-naming-canonicalization |
 | playbook-demo | repos/playbook-demo/playbook-demo | main | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | False | trusted | False | - |
-| stack | . | main | - | 73578bff3f6caf54d89d285bda3416314e39e914 | True | trusted | False | - |
+| stack | . | main | - | be5e23a191129e276e8ffdbefdf80da448a8061e | True | trusted | False | - |
 | stream | repos/stream | main | 43769ba86d4c6ebc419ab9e7847c3843460a094f | 43769ba86d4c6ebc419ab9e7847c3843460a094f | False | trusted | False | - |
 | trove | repos/trove | codex/path-discipline-warning-slice-trove | 112715291a1d9f3b21c9a830d1dab68e6751b815 | 112715291a1d9f3b21c9a830d1dab68e6751b815 | False | trusted | True | - |
 

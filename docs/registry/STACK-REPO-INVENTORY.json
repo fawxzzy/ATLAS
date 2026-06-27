@@ -3,14 +3,14 @@
   "stack_manifest_ref": "stack.yaml",
   "stack_manifest_digest": "sha256:e5ac73c00983975b59e4b8e7f8541160d479087f5dc95ad1d642568116bd7d10",
   "stack_lock_ref": "stack.lock.yaml",
-  "stack_lock_digest": "sha256:4aece1ce08edb6f51bbfd7e65a9492788da72ef8c9b94049ff04d6d8299007b0",
+  "stack_lock_digest": "sha256:7bf516307a0d8daf1891a6b1740f19dd3204516b096edffb08a1ae69d91fea42",
   "working_memory_digest": "sha256:fe4f4902e2b2c475974b050ba1bf3f5e740439aa41df2f844555c2c0dc3b310f",
   "published_refs": {
     "json": "docs/registry/STACK-REPO-INVENTORY.json",
     "markdown": "docs/audits/STACK-REPO-INVENTORY.md"
   },
   "repo_count": 12,
-  "dirty_repo_count": 2,
+  "dirty_repo_count": 1,
   "release_eligible_count": 5,
   "repos": [
     {
@@ -265,14 +265,14 @@
       "role": "governance-runtime",
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/playbook.git",
-      "pinned_commit": "f27c36355da906a01a46a841779553002c259f9b",
-      "current_commit": "f27c36355da906a01a46a841779553002c259f9b",
+      "pinned_commit": "5960b9457b9ac96b0ae6ac4b1ef623759e1720b3",
+      "current_commit": "5960b9457b9ac96b0ae6ac4b1ef623759e1720b3",
       "pinned_ref_type": "branch",
       "pinned_ref": "codex/path-discipline-warning-slice-playbook",
       "current_ref_type": "branch",
       "current_ref": "codex/path-discipline-warning-slice-playbook",
       "branch": "codex/path-discipline-warning-slice-playbook",
-      "dirty": true,
+      "dirty": false,
       "trust_class": "trusted",
       "release_eligible": true,
       "exists": true,
@@ -317,7 +317,7 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "73578bff3f6caf54d89d285bda3416314e39e914",
+      "current_commit": "be5e23a191129e276e8ffdbefdf80da448a8061e",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
@@ -530,5 +530,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:1365a829b74e988916951817d2aa6795151c8051159f02d406abf8d79e11d960"
+  "content_digest": "sha256:b412f9f4f15b45453b37aad59fcd7f06f576d7f761287191848a6a305ae4154f"
 }
