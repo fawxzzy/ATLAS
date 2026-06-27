@@ -2111,6 +2111,52 @@ class AtlasQaPipelineTests(unittest.TestCase):
         self.assertEqual("run-execute", adoption["last_run_id"])
         self.assertEqual("manual_review", adoption["last_promotion_status"])
 
+    def test_evidence_index_merges_root_owned_and_repo_local_contracts(self) -> None:
+        root = self._temp_root()
+        (root / "ops" / "atlas" / "qa" / "adapters").mkdir(parents=True, exist_ok=True)
+        (root / "ops" / "atlas" / "qa" / "scenarios").mkdir(parents=True, exist_ok=True)
+        (root / "repos" / "foundation" / "qa" / "adapters").mkdir(parents=True, exist_ok=True)
+        (root / "repos" / "foundation" / "qa" / "scenarios").mkdir(parents=True, exist_ok=True)
+        _write_json(
+            root / "ops" / "atlas" / "qa" / "adapters" / "playbook.docs.json",
+            {"contract_version": "atlas.qa.adapter.v1", "adapter_id": "playbook.docs", "repo_id": "playbook"},
+        )
+        _write_json(
+            root / "ops" / "atlas" / "qa" / "scenarios" / "playbook.docs-governance.json",
+            {"contract_version": "atlas.qa.scenario.v1", "scenario_id": "playbook.docs-governance", "repo_id": "playbook"},
+        )
+        _write_json(
+            root / "repos" / "foundation" / "qa" / "adapters" / "foundation.package.json",
+            {"contract_version": "atlas.qa.adapter.v1", "adapter_id": "foundation.package", "repo_id": "foundation"},
+        )
+        _write_json(
+            root / "repos" / "foundation" / "qa" / "scenarios" / "foundation.contract-smoke.json",
+            {"contract_version": "atlas.qa.scenario.v1", "scenario_id": "foundation.contract-smoke", "repo_id": "foundation"},
+        )
+
+        build_evidence_index(root=root)
+        payload = load_json_object(root / "runtime" / "atlas" / "qa" / "evidence-index.latest.json")
+        adoption_by_repo = {item["repo_id"]: item for item in payload["adoption"]}
+
+        self.assertIn("playbook", adoption_by_repo)
+        self.assertEqual(
+            ["ops/atlas/qa/adapters/playbook.docs.json"],
+            adoption_by_repo["playbook"]["adapter_refs"],
+        )
+        self.assertEqual(
+            ["ops/atlas/qa/scenarios/playbook.docs-governance.json"],
+            adoption_by_repo["playbook"]["scenario_refs"],
+        )
+        self.assertIn("foundation", adoption_by_repo)
+        self.assertEqual(
+            ["repos/foundation/qa/adapters/foundation.package.json"],
+            adoption_by_repo["foundation"]["adapter_refs"],
+        )
+        self.assertEqual(
+            ["repos/foundation/qa/scenarios/foundation.contract-smoke.json"],
+            adoption_by_repo["foundation"]["scenario_refs"],
+        )
+
     def test_release_readiness_applies_repo_tier_policy(self) -> None:
         root = self._temp_root()
         (root / "ops" / "atlas" / "qa").mkdir(parents=True, exist_ok=True)
@@ -3458,6 +3504,67 @@ class AtlasQaPipelineTests(unittest.TestCase):
         payload = load_json_object(root / "runtime" / "atlas" / "qa" / "adoption-drift.latest.json")
         self.assertEqual(["stream"], payload["summary"]["prototype_only_repos"])
         self.assertEqual("prototype_only_root_config", payload["prototype_only"][0]["disposition"])
+
+    def test_adoption_drift_uses_repo_registry_for_root_owned_docs_path(self) -> None:
+        root = self._temp_root()
+        (root / "repos" / "playbook" / "docs").mkdir(parents=True, exist_ok=True)
+        (root / "repos" / "playbook" / "docs" / "qa.md").write_text("# qa\n", encoding="utf-8")
+        (root / "ops" / "atlas" / "qa").mkdir(parents=True, exist_ok=True)
+        (root / "ops" / "atlas" / "qa" / "adapters").mkdir(parents=True, exist_ok=True)
+        (root / "ops" / "atlas" / "qa" / "scenarios").mkdir(parents=True, exist_ok=True)
+        (root / "stack.yaml").write_text(
+            "\n".join(
+                [
+                    "repo_registry:",
+                    "  playbook:",
+                    "    path: repos/playbook",
+                    "    role: docs",
+                    "    status: active",
+                ]
+            ) + "\n",
+            encoding="utf-8",
+        )
+        _write_json(root / "ops" / "atlas" / "qa" / "adapters" / "playbook.docs.json", {"repo_id": "playbook"})
+        _write_json(root / "ops" / "atlas" / "qa" / "scenarios" / "playbook.docs-governance.json", {"repo_id": "playbook"})
+        _write_json(
+            root / "ops" / "atlas" / "qa" / "release_policy.v1.json",
+            {
+                "contract_version": "atlas.qa.release_policy.v1",
+                "profiles": {"docs_governance": {"display_name": "Docs Governance"}},
+                "repo_overrides": {"playbook": {"release_profile": "docs_governance"}},
+            },
+        )
+        _write_json(
+            root / "runtime" / "atlas" / "qa" / "evidence-index.latest.json",
+            {
+                "contract_version": "atlas.qa.evidence_index.v1",
+                "generated_at": "2026-05-11T00:00:00Z",
+                "runs": [{"run_id": "playbook-run", "repo_id": "playbook", "promotion_generated_at": "2026-05-11T00:00:00Z"}],
+                "adoption": [
+                    {
+                        "repo_id": "playbook",
+                        "adopted": True,
+                        "owner": "playbook",
+                        "adapter_refs": ["ops/atlas/qa/adapters/playbook.docs.json"],
+                        "scenario_refs": ["ops/atlas/qa/scenarios/playbook.docs-governance.json"],
+                        "evidence_profile": "docs_governance",
+                        "last_run_id": "playbook-run",
+                        "last_promotion_status": "promoted_emulated",
+                        "last_promotion_display_status": "promoted_docs_governance",
+                        "root_runner_version": "atlas.qa.evaluate-run.v2",
+                        "contract_version": "atlas.qa.promotion.v1",
+                    }
+                ],
+                "summary": {},
+                "retention": {},
+            },
+        )
+
+        build_adoption_drift(root=root)
+        payload = load_json_object(root / "runtime" / "atlas" / "qa" / "adoption-drift.latest.json")
+        repo = payload["repos"][0]
+        self.assertEqual("repos/playbook/docs/qa.md", repo["docs_ref"])
+        self.assertTrue(repo["docs_present"])
 
     def test_release_rehearsal_reflects_ready_and_blocked_repos(self) -> None:
         root = self._temp_root()

@@ -4,7 +4,7 @@
   "title": "Trove homepage smoke",
   "summary": "Root-owned QA contract for the Trove homepage visual smoke lane.",
   "repo_id": "trove",
-  "repo_path": "repos/fawxzzy-trove",
+  "repo_path": "repos/trove",
   "adapter_id": "trove.web",
   "criticality": "medium",
   "tags": [

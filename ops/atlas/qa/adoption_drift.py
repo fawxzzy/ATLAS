@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from ops._atlas import atlas_relative, atlas_root
+from ops._atlas import atlas_relative, atlas_root, load_repo_registry
 from ops.atlas.qa._common import (
     default_adoption_drift_path,
     default_evidence_index_path,
@@ -68,6 +68,14 @@ def _root_prototype_scenarios(base_root: Path) -> dict[str, list[str]]:
     return prototype_refs
 
 
+def _repo_docs_ref(*, repo_id: str, base_root: Path) -> str:
+    registry = load_repo_registry(root=base_root)
+    repo_entry = registry.get(repo_id)
+    if repo_entry is not None:
+        return f"{repo_entry.atlas_path}/docs/qa.md"
+    return f"repos/fawxzzy-{repo_id}/docs/qa.md"
+
+
 def build_adoption_drift(
     *,
     root: Path | None = None,
@@ -103,6 +111,7 @@ def build_adoption_drift(
 
     prototypes = _root_prototype_repos(base_root)
     prototype_scenarios = _root_prototype_scenarios(base_root)
+    repo_registry = load_repo_registry(root=base_root)
     schema_errors = {
         "adapter": validate_schema_definition("atlas.qa.adapter.v1", root=base_root),
         "scenario": validate_schema_definition("atlas.qa.scenario.v1", root=base_root),
@@ -114,7 +123,7 @@ def build_adoption_drift(
         repo_id = str(item.get("repo_id") or "")
         adapter_refs = [str(value) for value in item.get("adapter_refs", []) if isinstance(value, str)]
         scenario_refs = [str(value) for value in item.get("scenario_refs", []) if isinstance(value, str)]
-        docs_ref = f"repos/fawxzzy-{repo_id}/docs/qa.md"
+        docs_ref = _repo_docs_ref(repo_id=repo_id, base_root=base_root)
         docs_path = (base_root / docs_ref).resolve()
         receipt_run_id = str(item.get("last_run_id") or "")
         repo_runs = runs_by_repo.get(repo_id, [])
@@ -126,11 +135,19 @@ def build_adoption_drift(
             receipt_age_hours = round((datetime.now(timezone.utc) - latest_dt).total_seconds() / 3600, 3)
         adapter_validation_errors: list[str] = [*schema_errors["adapter"]]
         for ref in adapter_refs:
-            payload = load_json_object((base_root / ref).resolve())
+            try:
+                payload = load_json_object((base_root / ref).resolve())
+            except Exception as exc:
+                adapter_validation_errors.append(f"{ref}: {exc}")
+                continue
             adapter_validation_errors.extend(validate_adapter_manifest(payload, root=base_root))
         scenario_validation_errors: list[str] = [*schema_errors["scenario"]]
         for ref in scenario_refs:
-            payload = load_json_object((base_root / ref).resolve())
+            try:
+                payload = load_json_object((base_root / ref).resolve())
+            except Exception as exc:
+                scenario_validation_errors.append(f"{ref}: {exc}")
+                continue
             scenario_validation_errors.extend(validate_scenario_manifest(payload, root=base_root))
 
         evidence_profile = str(item.get("evidence_profile") or "")
@@ -161,9 +178,11 @@ def build_adoption_drift(
             findings.append("latest receipt timestamp missing or unreadable")
         elif receipt_age_hours > max_receipt_age_hours:
             findings.append(f"latest meaningful receipt is stale ({receipt_age_hours}h > {max_receipt_age_hours}h)")
+        repo_entry = repo_registry.get(repo_id)
+        repo_prefix = repo_entry.atlas_path if repo_entry is not None else f"repos/fawxzzy-{repo_id}"
         root_only_prototypes = [
             ref for ref in prototypes.get(repo_id, [])
-            if not ref.startswith(f"repos/fawxzzy-{repo_id}/")
+            if not ref.startswith(f"{repo_prefix}/")
         ]
         status = "clean" if not findings else "drift"
         repos.append(

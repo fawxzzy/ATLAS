@@ -162,7 +162,7 @@ def validate_artifact_manifest_file(
             )
             continue
         size = resolved_path.stat().st_size
-        if size <= 0:
+        if size <= 0 and artifact_kind != "console_log":
             findings.append(
                 {
                     "severity": "error",

@@ -2,7 +2,7 @@
 
 ## Snapshot
 
-The stack is currently at a clean post-closeout-pass checkpoint.
+The stack is currently at a repaired QA read-model checkpoint, not a fully clean workspace checkpoint.
 
 What is true right now:
 
@@ -24,13 +24,13 @@ What is true right now:
 - seeded initiative continuity manifests now also have four machine-readable continuity surfaces: `ops/atlas/continuity_manifest_health.py` plus the awareness slice `continuity_initiative_manifest_health`, `ops/atlas/continuity_open_marker_manifest_coverage.py` plus the awareness slice `continuity_open_marker_manifest_coverage`, `ops/atlas/continuity_open_marker_restart_index.py` plus the awareness slice `continuity_open_marker_restart_index`, and `ops/atlas/continuity_maintained_manifest_restart_index.py` plus the awareness slice `continuity_maintained_manifest_restart_index`; the current seeded set reads `18` manifests at `18 ok / 0 warning / 0 error`, all `6 / 6` eligible open markers are manifest-backed, all `6 / 6` eligible open markers are restart-ready from one machine-readable index, and all `18 / 18` maintained initiative manifests are restart-ready from one machine-readable index.
 - the current continuity closeout family now also spans the main Playbook machine-readable execution seams: `pnpm playbook memory --json`, `pnpm playbook knowledge --json`, and `pnpm playbook promote --json` each preserve additive `continuity.doctrine` on both success and deterministic failure, so the current KCT and DCE lanes are closed at `100%` for their admitted scope instead of stopping at bootstrap and read-only continuity surfaces.
 - Playbook remains the reusable governance and doctrine owner.
-- normal stack validation is green in the current working state.
-- the latest root validation checkpoint now reads `critical=0 error=0 warning=0 info=0` in the current working state; the former retained mutable-state warning floor is now carried through repo-owned generated-state cleanup reports at `runtime/state/repo-cleanup/playbook.validation.latest.json` and `runtime/state/repo-cleanup/fitness.validation.latest.json` instead of remaining as live validator debt.
+- the current protected-QA truth now rests on four June 27 receipts together: `docs/ops/ATLAS-QA-FOUNDATION-AND-TROVE-FRESH-RECEIPT-CONVERSION-AND-READINESS-RESYNC-2026-06-27.md` converted `foundation`, `lifeline`, `stream`, and `trove` back to fresh current-SHA truth, `docs/ops/ATLAS-QA-FITNESS-PROGRESSION-ROUTE-CONTRACT-CONVERSION-AND-OWNER-SIDE-VISUAL-BLOCKER-RESYNC-2026-06-27.md` converted `fitness` from stale and wrong-SHA truth into a fresh current-SHA blocker on the progression-status seam, `docs/ops/ATLAS-QA-FITNESS-PROGRESSION-READINESS-MARKER-ROUTE-HARDENING-BASELINE-RESYNC-AND-MANUAL-REVIEW-CLOSEOUT-2026-06-27.md` closed that emulated blocker into clean governed proof, and `docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-DESKTOP-MANUAL-ATTESTATION-MOBILE-GATE-REFRESH-CONTINUITY-RESYNC-2026-06-27.md` converted the desktop real-browser lane into valid manual attestation; `playbook` plus `trove` are release-ready, `fitness` now sits at `manual_review` with only the Android and iPhone real-device lanes still open, and `foundation` plus `lifeline` plus `stream` remain blocked only by trusted-origin enforcement.
+- root validation is stable rather than zero-warning clean: `runtime/receipts/validation/stack-validation.latest.json` now reads `critical=0 error=0 warning=4 info=0`, and those four warnings remain the inherited mutable-state residue class in `repos/lifeline` plus `repos/stream` rather than a new blocker introduced by the QA receipt conversion pass.
 - Verta Absorption is closed at `100%` only for trusted Verta-core absorption; raw Verta remains trust-gated, untrusted, non-release, and non-executable.
 - ATLAS Core Phase is closed at `100%` for the root coordination substrate; remaining owner/runtime/product work stays visible under its own markers.
 - Atlas-owned Repo Naming Canonicalization is closed at `100%` for local path truth plus GitHub remote-name truth across the admitted non-exception repos; `repos/fawxzzy-fitness` remains the explicit preserved exception, and `repos/stream` remains local/no-remote rather than a failed remote rename.
 - `--allow-missing-locked-repos` is no longer needed for current validation.
-- the merged warning-reduction tranche on `main` removed root-validator false positives, tracked-surface overcounting, and the last safe ignored Playbook/Lifeline runtime residue; the current pinned working set is now refreshed again after the current lock sync, and the live root validation checkpoint is now `critical=0 error=0 warning=0 info=0` because the disposable root `*check*.png` captures have been relocated into `tmp/`, the local `_stack` receipt path literals no longer leak one machine-specific absolute path, the disposable Playbook dependency tree has been removed, and the final retained Playbook `.playbook` plus local Fitness `.vercel` surfaces now route through validator-supported repo-owned cleanup reports instead of remaining live warning classes.
+- the merged warning-reduction tranche on `main` remains an important historical checkpoint: it removed root-validator false positives, tracked-surface overcounting, and the last safe ignored Playbook/Lifeline runtime residue, and it previously reached a live `critical=0 error=0 warning=0 info=0` checkpoint before the current owner-side QA manifest/path edits in `repos/foundation` and `repos/lifeline` reintroduced stack-lock drift.
 - one exact Truth Map & ATLAS Book zero-warning validation closeout packet is now durable too: `Truth Map & ATLAS Book zero-warning validation closeout and stack re-sync` adds a root-owned generated-state cleanup wrapper, teaches stack policy to retain Playbook `.playbook` as owned runtime state and Fitness `.vercel` as protected local linkage through cleanup reports, refreshes `stack.lock.yaml` after the policy change, and leaves the lane held with `No immediate Truth Map & ATLAS Book docs-only follow-on packet` at a live `critical=0 error=0 warning=0 info=0` checkpoint
 - one exact Truth Map & ATLAS Book current continuity restore and open-marker count reconciliation packet is now durable too: `Truth Map And ATLAS Book current continuity restore and open-marker count reconciliation` absorbs the later published root frontier at `e19ac39d`, confirms the restart-referenced promotion/docs tranche and the `atlas.session.resume.dispatch` plus `atlas.session.resume.request` schemas are present again on canonical `main`, reconciles the Book-side machine-readable continuity count to the live `6 / 6` eligible-open-marker posture, and leaves the lane held with `No immediate Truth Map & ATLAS Book docs-only follow-on packet`
 - one exact Truth Map & ATLAS Book stale owner-side packet and parity caveat reconciliation packet is now durable too: `Truth Map And ATLAS Book stale owner-side packet and parity caveat reconciliation` keeps the June 1 Fitness Discord owner-side ladder as historical evidence only, records that the later DiscordOS feedback cutover closeout consumed that blocker family at `100%`, retires the older `8a2cb5db` local-vs-remote caveat in favor of the current published parity at `7240617a`, and leaves the lane held with `No immediate Truth Map & ATLAS Book docs-only follow-on packet`
@@ -47,9 +47,9 @@ What is true right now:
 
 ### DiscordOS
 
-- future Discord-first runtime owner
-- future feedback/update/moderation/Music Sesh runtime owner
-- future DiscordOS Supabase owner for Discord-owned tables
+- live Discord-first runtime/publication/feedback owner for the cutovered Discord-owned surfaces
+- live owner for the closed feedback workflow and publication/runtime-hardening lanes
+- future broader DiscordOS Supabase owner for additional Discord-owned tables and workflows
 
 Current status:
 
@@ -115,13 +115,8 @@ Current status:
 ## Current Paused Or Gated Work
 
 - remote preview/unfurl verification is approval-gated
-- DiscordOS schema, runtime, and data migration remain unstarted and must stay receipt-bounded
-- DiscordOS bridge-independent work may resume now:
-  - the blocked Fitness Discord pass-9 proof seam is no longer a Fitness repo/runtime repair problem
-  - bridge-independent DiscordOS work does not need to wait on that proof seam
-  - still keep runtime cutover, schema movement, worker retarget, and Vercel mutation closed unless separately admitted
-  - do not replay the old ATLAS-root named-port planning class by default: that class was already consumed across the May 26 consumer-planning, implementation-planning, tooling/readiness, and lookup execution-readiness chain
-  - further DiscordOS follow-on now needs explicit new named scope or higher-level authorization rather than reuse of the stale generic next-package ladder
+- DiscordOS feedback/runtime/publication cutover is already live and proof-closed, but broader new DiscordOS feature or runtime scope must still stay receipt-bounded and explicitly admitted rather than inferred from the closed lanes
+- DiscordOS follow-on should not replay the old ATLAS-root generic named-port or bridge-independent planning classes; those were already consumed, and any new work now needs one explicit named scope or higher-level authorization
 - the Fitness Discord pass-9 proof lane is frozen under `Session-Scoped External Blocker Freeze`:
   - not a default-browser issue
   - not an ATLAS/root issue
@@ -153,7 +148,7 @@ Current status:
   - `doctrine-routing drafts` now also has one exact ATLAS-side subfamily contract freeze covering trigger, stable inputs, expected doctrine-routing draft shape, routing boundary, failure boundary, safe fallback, owner boundary, and non-claim boundary
   - Playbook is now the exact admitted owner-facing surface for that contract-frozen doctrine-routing subfamily while ATLAS root retains truth projection, draft-only labeling, and lane consequence
   - no separate supporting lane now honestly reopens for that doctrine-routing branch: `Playbook Everywhere + Cortex Interface` remains materially held at its current exported-family threshold, no new exportable family or blocked-family clearance was created by owner admission alone, and forcing a support reopen here would be duplicate-package churn
-  - release-proof to update-draft packaging helpers are now the selected fourth safe family because the release-to-update handoff spine is already hardened and current owner-side release-readiness rests green
+  - release-proof to update-draft packaging helpers were historically selected as the fourth safe family because the release-to-update handoff spine was already hardened and the then-current owner-side release-readiness posture rested green
   - that selected fourth family now also has one exact ATLAS-side contract freeze covering trigger, stable inputs, expected update-draft-ready packaging artifact, failure boundary, safe fallback, owner boundary, and non-claim boundary
   - `_stack` is now the exact admitted owner-facing helper surface for that contract-frozen fourth family while owner repos keep release proof and release-ledger truth, Discord-facing update-draft and publish surfaces remain downstream consumers only, and ATLAS root retains truth projection and non-claim boundaries
   - `_stack Readiness` is now the exact admitted supporting lane for that owner-admitted fourth family because future helper-home work for post-proof update-draft packaging must route through one shared `_stack` command surface rather than ATLAS-only truth packaging
@@ -976,6 +971,7 @@ What the latest closeout passes proved:
 - root self-lock sequencing for `stack.lock.yaml#stack` has been resolved by policy, so the remaining pressure is retained-surface cleanup rather than root commitability
 - the retained-surface lane is no longer blocked by broad ambiguity, the Lifeline merged-checkpoint trio `lifeline-main-closeout`, `lifeline-main-closeout-2`, and `lifeline-main-closeout-3` is now consumed, and the remaining pressure is governed-retain rather than an unconsumed exact cleanup subset
 - the convergence-wave closeout itself is now complete; the remaining pressure belongs to separate governed-retain or approval-gated lanes rather than residual closeout debt
+- the current QA closeout pressure is now root-readable and narrower: topology repair and read-model re-sync are durable, all six adopted repos are now fresh and SHA-aligned in `adoption-drift.latest.json`, `playbook` plus `trove` are release-ready, `foundation` plus `lifeline` plus `stream` are trusted-origin blocked only, and the remaining Fitness gate is mobile real-device proof for `android.chrome.real` plus `iphone.webkit.real` rather than more root topology surgery, desktop real-browser proof, or current emulated-visual instability
 
 ## Current Direction
 
@@ -987,7 +983,7 @@ The stack is moving from convergence and cleanup toward explicit lane separation
 
 What is true right now:
 
-- Fitness now has one durable `release-ready` owner resting state on clean preserved truth.
+- Fitness and the broader adopted QA set are back under one repaired protected-QA read-model: `playbook` plus `trove` are currently release-ready, `foundation` plus `lifeline` plus `stream` have fresh current-SHA receipts blocked only by trusted-origin enforcement, and `fitness` now has fresh current-SHA emulated proof plus one valid desktop real-browser manual attestation with promotion state `manual_review` rather than a stale provenance, stale Hobby-governance, owner-side visual blocker, or unresolved desktop physical-proof gap.
 - Discord now has one standalone repo, data plane, deploy plane, and owner workflow surface rather than only a planned future home.
 - ATLAS now has one live stack-wide operating model instead of only a doctrine-backed workflow spine.
 - the split is therefore partially operationalized, but not complete, because live runtime and traffic responsibilities are still not fully separated.
@@ -1008,7 +1004,7 @@ What is true right now:
 - the official `2026-06-17` Hobby checkpoint was revalidated against current Vercel docs: `1M / month` Edge Requests, `100 GB / month` Fast Data Transfer, `4 hours / month` Active CPU, `360 GB-hrs / month` Provisioned Memory, `1M / month` Invocations, `6,000` build-execution minutes, `10,000 / month` Speed Insights data points, `50,000 / month` Web Analytics events, and `1 hour` Hobby runtime-log retention remain the key cheap-by-design limits
 - a current read-only Fitness snapshot now exists: the last `7` days include `7` production deployments, the first `30`-day connector page returns at least `20` deployments, and a recent production runtime-log sample is dominated by repeated `GET /api/discord/interactions 200` lines at roughly `30` second cadence
 - if that sampled polling cadence persisted continuously for `30` days, that one endpoint alone would imply about `86,400` requests over `30` days, or about `8.64%` of the current `1M / month` Edge Requests allowance; that figure is an inference from the sampled cadence rather than a measured billing counter
-- `Vercel Hobby Cost Governance` is now closed at `100%`; Fitness should remain cheap-by-design on Hobby by default, with Pro and Observability Plus treated as threshold-based upgrades rather than assumed dependencies, and the lane now has the exact governed checkpoint it previously lacked: the preserved local `2026-06-17` and `2026-06-18` guardrail snapshots now feed one machine-readable `fitness-hobby-decision.latest.json` artifact, that checkpoint currently resolves to `keep_hobby`, release-readiness now consumes both the fresh guardrail report and the explicit decision checkpoint, and the overall Fitness release gate remains blocked only by stale and wrong-SHA receipt provenance rather than any remaining cost-governance gap
+- `Vercel Hobby Cost Governance` is now closed at `100%`; Fitness should remain cheap-by-design on Hobby by default, with Pro and Observability Plus treated as threshold-based upgrades rather than assumed dependencies, and the current guardrail plus decision checkpoints are refreshed and ready, so the remaining Fitness release gate is no longer a stale-governance, emulated-visual, or desktop-browser-proof problem and instead sits only on the two remaining release-critical mobile real-device lanes
 
 Why this matters:
 

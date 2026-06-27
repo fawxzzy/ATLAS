@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-05-29T00:00:00Z",
-  "updated_at": "2026-06-19T09:00:00Z",
+  "updated_at": "2026-06-27T07:20:00.000000Z",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -53,7 +53,9 @@
     "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md",
     "docs/ops/CORTEX-READINESS-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md",
     "docs/ops/OPEN-MARKER-MANIFEST-COVERAGE-CLOSEOUT-AND-ACTIVE-CONTINUITY-LANE-RATCHET-2026-06-19.md",
-    "docs/ops/OPEN-MARKER-RESTART-INDEX-CLOSEOUT-AND-ACTIVE-CONTINUITY-LANE-RATCHET-2026-06-19.md"
+    "docs/ops/OPEN-MARKER-RESTART-INDEX-CLOSEOUT-AND-ACTIVE-CONTINUITY-LANE-RATCHET-2026-06-19.md",
+    "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-PROTECTED-QA-AND-DISCORDOS-PROJECTION-REFRESH-CONTINUITY-RESYNC-2026-06-27.md",
+    "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-DESKTOP-MANUAL-ATTESTATION-MOBILE-GATE-REFRESH-CONTINUITY-RESYNC-2026-06-27.md"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -61,9 +63,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "inventory-and-truth-map",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/OPEN-MARKER-RESTART-INDEX-CLOSEOUT-AND-ACTIVE-CONTINUITY-LANE-RATCHET-2026-06-19.md",
+    "current_checkpoint_receipt": "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-DESKTOP-MANUAL-ATTESTATION-MOBILE-GATE-REFRESH-CONTINUITY-RESYNC-2026-06-27.md",
     "checkpoint_commit": "pending-closeout-publication",
-    "checkpoint_summary": "The lane now sits at 85 percent because the June 18 and 19 closeout cluster remains canonically absorbed, the seeded initiative continuity-manifest set remains clean at 18 of 18 ok with zero warnings and zero errors, all 6 of 6 eligible still-open markers are manifest-backed, and all 6 of 6 eligible still-open markers are now restart-ready from one machine-readable index.",
+    "checkpoint_summary": "The lane now sits at 85 percent because the canonical inventory and projection spine still holds while the current system-map and restart mirrors are re-synced to the June 27 protected-QA and DiscordOS truth, current Fitness protected-QA posture now includes one valid desktop real-browser manual attestation with only Android and iPhone real-device proof still open, the seeded initiative continuity-manifest set remains clean at 18 of 18 ok with zero warnings and zero errors, all 6 of 6 eligible still-open markers are manifest-backed, and all 6 of 6 eligible still-open markers are restart-ready from one machine-readable index.",
     "governing_receipts": [
       "docs/ops/STACK-LANE-0-BASELINE-INVENTORY-2026-05-22.md",
       "docs/ops/STACK-LANE-0-TRUTH-MAP-2026-05-22.md",
@@ -83,7 +85,9 @@
       "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md",
       "docs/ops/CORTEX-READINESS-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md",
       "docs/ops/OPEN-MARKER-MANIFEST-COVERAGE-CLOSEOUT-AND-ACTIVE-CONTINUITY-LANE-RATCHET-2026-06-19.md",
-      "docs/ops/OPEN-MARKER-RESTART-INDEX-CLOSEOUT-AND-ACTIVE-CONTINUITY-LANE-RATCHET-2026-06-19.md"
+      "docs/ops/OPEN-MARKER-RESTART-INDEX-CLOSEOUT-AND-ACTIVE-CONTINUITY-LANE-RATCHET-2026-06-19.md",
+      "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-PROTECTED-QA-AND-DISCORDOS-PROJECTION-REFRESH-CONTINUITY-RESYNC-2026-06-27.md",
+      "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-DESKTOP-MANUAL-ATTESTATION-MOBILE-GATE-REFRESH-CONTINUITY-RESYNC-2026-06-27.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -137,6 +141,14 @@
       {
         "path": "docs/ops/INVENTORY-AND-TRUTH-MAP-JUNE-18-AND-19-CLOSEOUT-CLUSTER-CANONICAL-PLACEMENT-PASS-10-2026-06-19.md",
         "role": "June 18 and 19 closeout-cluster inventory placement boundary"
+      },
+      {
+        "path": "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-PROTECTED-QA-AND-DISCORDOS-PROJECTION-REFRESH-CONTINUITY-RESYNC-2026-06-27.md",
+        "role": "current exact projection refresh and continuity re-sync surface for inventory-facing mirrors"
+      },
+      {
+        "path": "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-DESKTOP-MANUAL-ATTESTATION-MOBILE-GATE-REFRESH-CONTINUITY-RESYNC-2026-06-27.md",
+        "role": "current exact projection refresh surface for the narrowed Fitness mobile-only release gate"
       }
     ],
     "verification_adoption_surfaces": [
@@ -203,9 +215,9 @@
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/OPEN-MARKER-RESTART-INDEX-CLOSEOUT-AND-ACTIVE-CONTINUITY-LANE-RATCHET-2026-06-19.md",
-    "freshness_checked_at": "2026-06-19T09:00:00Z",
-    "freshness_basis": "the current checkpoint, marker posture, lane-state projection, blocked-work posture, and next-package posture now match the current inventory lane state after the June 18 and 19 closeout cluster absorption, the initiative manifest-health surface at 18 ok / 0 warning / 0 error, the eligible-open-marker coverage surface at 6 of 6 manifest-backed, and the eligible-open-marker restart index at 6 of 6 restart-ready.",
+    "freshness_checked_receipt": "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-DESKTOP-MANUAL-ATTESTATION-MOBILE-GATE-REFRESH-CONTINUITY-RESYNC-2026-06-27.md",
+    "freshness_checked_at": "2026-06-27T07:20:00.000000Z",
+    "freshness_basis": "the current checkpoint, marker posture, lane-state projection, blocked-work posture, and next-package posture now match the refreshed inventory-facing mirrors after the June 27 protected-QA and DiscordOS projection re-sync: the current system map now projects live DiscordOS runtime/publication/feedback ownership with explicit retained Fitness seams, the current restart and endgame mirrors now project the current protected-QA manual-review and trusted-origin posture accurately, including the cleared desktop real-browser lane and the remaining Android plus iPhone mobile real-device gate for fitness, the initiative manifest-health surface remains at 18 ok / 0 warning / 0 error, the eligible-open-marker coverage surface remains at 6 of 6 manifest-backed, and the eligible-open-marker restart index remains at 6 of 6 restart-ready.",
     "marker_posture": [
       {
         "marker": "Inventory & Truth Map",

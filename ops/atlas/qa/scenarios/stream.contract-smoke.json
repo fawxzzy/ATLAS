@@ -4,7 +4,7 @@
   "title": "Stream package contract smoke",
   "summary": "Root-owned QA contract for the stream package verify lane.",
   "repo_id": "stream",
-  "repo_path": "repos/fawxzzy-stream",
+  "repo_path": "repos/stream",
   "adapter_id": "stream.package",
   "criticality": "medium",
   "tags": [

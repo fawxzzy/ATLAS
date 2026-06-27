@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-06-19T00:00:00Z",
-  "updated_at": "2026-06-27T03:56:00.000000Z",
+  "updated_at": "2026-06-27T07:20:00.000000Z",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -40,7 +40,9 @@
     "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-PLAYBOOK-DEPENDENCY-RESIDUE-REDUCTION-AND-STACK-RESYNC-2026-06-26.md",
     "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-ZERO-WARNING-VALIDATION-CLOSEOUT-AND-STACK-RESYNC-2026-06-26.md",
     "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-CURRENT-CONTINUITY-RESTORE-AND-OPEN-MARKER-COUNT-RECONCILIATION-2026-06-26.md",
-    "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-STALE-OWNER-SIDE-PACKET-AND-PARITY-CAVEAT-RECONCILIATION-2026-06-26.md"
+    "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-STALE-OWNER-SIDE-PACKET-AND-PARITY-CAVEAT-RECONCILIATION-2026-06-26.md",
+    "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-PROTECTED-QA-AND-DISCORDOS-PROJECTION-REFRESH-CONTINUITY-RESYNC-2026-06-27.md",
+    "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-DESKTOP-MANUAL-ATTESTATION-MOBILE-GATE-REFRESH-CONTINUITY-RESYNC-2026-06-27.md"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -48,9 +50,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "truth-map-and-atlas-book",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-STALE-OWNER-SIDE-PACKET-AND-PARITY-CAVEAT-RECONCILIATION-2026-06-26.md",
-    "checkpoint_commit": "7240617a",
-    "checkpoint_summary": "The lane still sits at 97 percent because the June 18 and 19 inventory absorption still mirrors coherently across the canonical Book surfaces, the AI Long-Run current-packet basis drift remains cleared, the Book-side validation checkpoint remains re-synced at critical 0 / error 0 / warning 0 / info 0, the later published root frontier is now on canonical main through commit 7240617a, the older June 1 Fitness Discord owner-side ladder is now explicitly historical after the later DiscordOS feedback cutover closeout, the older 8a2cb5db local-vs-remote parity caveat is consumed by current published parity, the seeded initiative continuity-manifest set remains clean at 18 of 18 ok with zero warnings and zero errors, and all 6 of 6 eligible still-open markers remain both manifest-backed and restart-ready from one machine-readable index.",
+    "current_checkpoint_receipt": "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-DESKTOP-MANUAL-ATTESTATION-MOBILE-GATE-REFRESH-CONTINUITY-RESYNC-2026-06-27.md",
+    "checkpoint_commit": "pending-closeout-publication",
+    "checkpoint_summary": "The lane still sits at 97 percent because the canonical Book surfaces now mirror the June 27 protected-QA cluster and current DiscordOS cutover truth coherently, current Fitness posture is projected as clean emulated proof plus one desktop real-browser manual attestation at manual review with only Android and iPhone real-device proof still open, the current root validation floor is projected as critical 0 / error 0 / warning 4 / info 0, the older stale protected-QA and pre-cutover DiscordOS wording is cleared from the live restart surfaces, the seeded initiative continuity-manifest set remains clean at 18 of 18 ok with zero warnings and zero errors, and all 6 of 6 eligible still-open markers remain both manifest-backed and restart-ready from one machine-readable index.",
     "governing_receipts": [
       "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-MARKER-SCARCITY-AND-CLOSED-LADDER-CARRY-FORWARD-HYGIENE-PASS-3-2026-05-29.md",
       "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-POST-INVENTORY-CLOSEOUT-CLUSTER-PROJECTION-REFRESH-PASS-4-2026-06-02.md",
@@ -69,7 +71,9 @@
       "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-PLAYBOOK-DEPENDENCY-RESIDUE-REDUCTION-AND-STACK-RESYNC-2026-06-26.md",
       "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-ZERO-WARNING-VALIDATION-CLOSEOUT-AND-STACK-RESYNC-2026-06-26.md",
       "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-CURRENT-CONTINUITY-RESTORE-AND-OPEN-MARKER-COUNT-RECONCILIATION-2026-06-26.md",
-      "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-STALE-OWNER-SIDE-PACKET-AND-PARITY-CAVEAT-RECONCILIATION-2026-06-26.md"
+      "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-STALE-OWNER-SIDE-PACKET-AND-PARITY-CAVEAT-RECONCILIATION-2026-06-26.md",
+      "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-PROTECTED-QA-AND-DISCORDOS-PROJECTION-REFRESH-CONTINUITY-RESYNC-2026-06-27.md",
+      "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-DESKTOP-MANUAL-ATTESTATION-MOBILE-GATE-REFRESH-CONTINUITY-RESYNC-2026-06-27.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -99,6 +103,14 @@
       {
         "path": "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-STALE-OWNER-SIDE-PACKET-AND-PARITY-CAVEAT-RECONCILIATION-2026-06-26.md",
         "role": "current exact Book-side stale owner-side packet and consumed parity-caveat reconciliation surface"
+      },
+      {
+        "path": "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-PROTECTED-QA-AND-DISCORDOS-PROJECTION-REFRESH-CONTINUITY-RESYNC-2026-06-27.md",
+        "role": "current exact Book-side protected-QA and DiscordOS projection refresh plus continuity re-sync surface"
+      },
+      {
+        "path": "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-DESKTOP-MANUAL-ATTESTATION-MOBILE-GATE-REFRESH-CONTINUITY-RESYNC-2026-06-27.md",
+        "role": "current exact Book-side Fitness desktop manual-attestation narrowing plus mobile-gate projection refresh surface"
       },
       {
         "path": "docs/ops/OPEN-MARKER-MANIFEST-COVERAGE-CLOSEOUT-AND-ACTIVE-CONTINUITY-LANE-RATCHET-2026-06-19.md",
@@ -189,9 +201,9 @@
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-STALE-OWNER-SIDE-PACKET-AND-PARITY-CAVEAT-RECONCILIATION-2026-06-26.md",
-    "freshness_checked_at": "2026-06-27T03:56:00.000000Z",
-    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture now match the refreshed Book-side validation checkpoint at critical 0 / error 0 / warning 0 / info 0, the still-cleared machine-readable AI Long-Run current-packet basis drift, the post-closeout continuity restore now mirrored on canonical main, the stale owner-side Discord packet ladder now retired from current routing, the older local-vs-remote parity caveat now consumed by current published parity at 7240617a, the initiative manifest-health surface at 18 ok / 0 warning / 0 error, the eligible-open-marker coverage surface at 6 of 6 manifest-backed, and the eligible-open-marker restart index at 6 of 6 restart-ready.",
+    "freshness_checked_receipt": "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-DESKTOP-MANUAL-ATTESTATION-MOBILE-GATE-REFRESH-CONTINUITY-RESYNC-2026-06-27.md",
+    "freshness_checked_at": "2026-06-27T07:20:00.000000Z",
+    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture now match the refreshed current-state, marker, restart, system-map, and endgame mirrors: current protected-QA truth projects playbook and trove as ready, fitness as manual review with the desktop real-browser lane cleared by manual attestation and only the Android plus iPhone real-device lanes still open, foundation plus lifeline plus stream as trusted-origin blocked, current DiscordOS truth projects live runtime/publication/feedback cutover with explicit retained Fitness seams, the root validation floor projects critical 0 / error 0 / warning 4 / info 0, the initiative manifest-health surface remains at 18 ok / 0 warning / 0 error, the eligible-open-marker coverage surface remains at 6 of 6 manifest-backed, and the eligible-open-marker restart index remains at 6 of 6 restart-ready.",
     "marker_posture": [
       {
         "marker": "Truth Map & ATLAS Book",

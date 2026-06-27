@@ -33,8 +33,8 @@ It shows:
   - manifest/runtime/release/startup/proof surface owner
 - `repos/DiscordOS`
   - canonical DiscordOS repo surface now exists locally
-  - infrastructure-ready DiscordOS owner surface
-  - no migrated runtime code yet
+  - live DiscordOS runtime, publication, and feedback owner surface
+  - runtime-health and operator-proof surface owner
 
 ## Runtime Map
 
@@ -42,9 +42,12 @@ It shows:
 
 - Fitness Vercel hosts:
   - Fitness app runtime
-  - current Discord interaction/runtime
-  - current feedback/update/moderation runtime
-  - current Music Sesh runtime
+  - retained Fitness Discord interaction/runtime seams
+  - retained verification, member-sync, deploy-update, and poll-path execution seams
+- DiscordOS Vercel hosts:
+  - live DiscordOS feedback/runtime/publication surfaces
+  - live runtime-health and alerting surfaces
+  - broader Discord-owned workflow runtime
 - Lifeline provides:
   - local execution/operator runtime for manifest-defined apps
   - manifest validation and resolution
@@ -56,7 +59,8 @@ It shows:
 ### Future runtime shape
 
 - Fitness runtime stays Fitness-owned
-- Discord runtime moves to DiscordOS-owned surfaces later
+- retained Fitness Discord seams stay Fitness-owned unless a new owner-scope transfer is explicitly admitted
+- broader Discord runtime already lives on DiscordOS-owned surfaces
 - Lifeline stays a narrow local execution/operator plane rather than widening into a hosted control plane
 - `_stack` remains shared deploy and execution authority
 
@@ -93,7 +97,7 @@ Later work stays clearly separate:
   - verification issuance truth
   - current live Discord/Music Sesh operational tables
 
-### Active preparation / future ownership
+### Active Discord-owned surface / future broader ownership
 
 - DiscordOS Supabase: `nwexsktuuenfdegzrbut`
   - healthy
@@ -101,8 +105,9 @@ Later work stays clearly separate:
   - RLS-enabled feedback runtime contract tables exist
   - Supabase Edge Function `discordos-readiness` is active with JWT verification
   - service-role readiness proof is live through the Supabase Edge Function path
-  - no DiscordOS writer activation, traffic transfer, rollback, or live workflow parity proof exists yet
-  - future home for Discord-owned runtime/workflow tables
+  - live feedback transfer, rollback, and workflow parity proof are already closed
+  - active home for Discord-owned feedback workflow tables
+  - future home for broader Discord-owned runtime/workflow tables
 
 ## Vercel Project Map
 
@@ -118,15 +123,15 @@ Later work stays clearly separate:
 - `fawxzzy-foundation`
   - quieter systems/product surface
 - `fawxzzy-discordos`
-  - isolated DiscordOS readiness surface
+  - live DiscordOS production surface
   - canonical alias `https://fawxzzy-discordos.vercel.app`
   - service-role readiness now validates JWT role and DiscordOS project ref before reporting configured
   - service-role proof path is live through Supabase Edge Function runtime
   - Discord bot credential now validates through a read-only `/users/@me` readiness probe
   - activation guard is live and fail-closed for writer, traffic-transfer, rollback, and parity-proof gates
-  - feedback shadow writer proof endpoint is live and no-persistence
-  - guarded persisted-writer implementation endpoint is live, with proof-only Edge persistence available and an authenticated Fitness-to-DiscordOS non-proof persistence path deployed; final cutover still requires one real Discord-signed Fitness-origin event that creates the human non-proof row plus live traffic receipt ID capture and live workflow parity receipt capture
-  - not live Discord workflow owner yet
+  - feedback cutover is proof-closed, with live transfer, rollback, and parity proof already admitted
+  - publication and runtime-health surfaces are live and operator-verified
+  - retained Fitness-owned Discord seams remain outside this closed surface unless a new transfer lane is admitted
 
 ### Known stale or duplicate-pressure surfaces
 
@@ -320,9 +325,9 @@ flowchart LR
   FITNESS_REPO["Fitness Repo\nrepos/fawxzzy-fitness"]
   FITNESS_VERCEL["Fitness Vercel\nLive app + current Discord runtime"]
   FITNESS_DB["Fitness Supabase\nlpswxoyfniocuhljgzbc"]
-  DISCORDOS_REPO["DiscordOS Repo\nrepos/DiscordOS\nbootstrapped scaffold"]
-  DISCORDOS_VERCEL["DiscordOS Vercel\nfawxzzy-discordos\nreadiness deployed, not cut over"]
-  DISCORDOS_DB["DiscordOS Supabase\nnwexsktuuenfdegzrbut\nhealthy, private schema landed"]
+  DISCORDOS_REPO["DiscordOS Repo\nrepos/DiscordOS\nlive owner surface"]
+  DISCORDOS_VERCEL["DiscordOS Vercel\nfawxzzy-discordos\nlive runtime + publication"]
+  DISCORDOS_DB["DiscordOS Supabase\nnwexsktuuenfdegzrbut\nlive Discord-owned tables"]
   DISCORD["Discord Surfaces\nFeedback, updates, moderation,\nMusic Sesh"]
   STALE["Historical stale/helper Vercel cleanup\nclosed on 2026-05-25"]
 
@@ -338,9 +343,9 @@ flowchart LR
   ATLAS --> CORTEX
 
   FITNESS_DB -. "verification bridge,\nmember links,\nmember-number sync,\ndeploy-update handoff" .- DISCORDOS_DB
-  DISCORDOS_REPO -. "future code + runtime landing" .- DISCORDOS_VERCEL
-  DISCORDOS_VERCEL -. "future cutover" .- DISCORD
-  DISCORDOS_REPO -. "future schema + runtime move" .- DISCORDOS_DB
+  DISCORDOS_REPO --> DISCORDOS_VERCEL
+  DISCORDOS_VERCEL --> DISCORD
+  DISCORDOS_REPO --> DISCORDOS_DB
 
   FITNESS_VERCEL -. "helper-surface pressure" .- STALE
 ```
@@ -349,11 +354,11 @@ flowchart LR
 
 | Lane / surface | Owner | Source of truth | Current status | Blocker | Next package |
 | --- | --- | --- | --- | --- | --- |
-| Fitness app lane | Fitness | `repos/fawxzzy-fitness` plus Fitness release proof | release-readiness lane now resting green on clean preserved truth | stale evidence, governed QA auth secret-lane consumption, protected-route auth consumption, seam-proof aborts, proof-run drift, the linked Supabase migration-validator crash, clean-state preservation, and the governed notes gate are now all cleared; no exact owner-side release-readiness blocker remains | none immediate inside the owner-side release-readiness family; await fresh root-bounded lane selection |
-| Discord work lane | Fitness-hosted now, DiscordOS later | Fitness repo/runtime now; `repos/DiscordOS` plus ATLAS separation receipts as future target | scaffold complete, bridge-independent DiscordOS work may resume, but the old root named-port planning ladder is already consumed and live runtime migration has not started | live Fitness Discord proof still depends on external/session bridge recovery; the May 26 planning and lookup-boundary chain already consumed the old generic next-package class; higher-level authorization is still required before any transport-aware, externally-executing, schema, or runtime follow-on | `none by default at ATLAS root; reopen only on explicit new DiscordOS named scope or higher-level authorization` |
+| Fitness app lane | Fitness | `repos/fawxzzy-fitness` plus protected QA read-model receipts | adopted protected-QA topology is repaired and current: `playbook` plus `trove` are release-ready, `fitness` holds clean emulated proof plus a valid desktop real-browser manual attestation at `manual_review`, and `foundation` plus `lifeline` plus `stream` are trusted-origin blocked only | `fitness` still needs mobile real-device proof for `android.chrome.real` and `iphone.webkit.real`; `foundation`, `lifeline`, and `stream` still need trusted release-origin evidence | Android and iPhone real-device proof or manual attestation for `fitness`; trusted-origin enforcement resolution for `foundation`, `lifeline`, and `stream` |
+| Discord work lane | retained Fitness seams plus live DiscordOS owner surfaces | retained Fitness repo/runtime seams now; `repos/DiscordOS` plus DiscordOS production/runtime receipts for the broader Discord-owned surface | feedback transfer cutover, publication, and runtime-hardening are already live and proof-closed; remaining Fitness-owned Discord seams are explicit retained boundaries rather than migration debt | none inside the closed feedback/publication/runtime-hardening lanes; reopen only with a new named DiscordOS scope or higher-level authorization | `none by default at ATLAS root; reopen only on explicit new DiscordOS named scope or higher-level authorization` |
 | Post-convergence lane split readiness | ATLAS root | lane-split receipts plus ATLAS Book restart surfaces | closed at `100%`; the dedicated Fitness poll surface is live on production, consumed by the governed recurring worker path, and no longer acts as one mixed-runtime lane-structure ambiguity | none inside the current closed lane | none immediate; reopen only with a new owner-boundary ambiguity, retained-seam regression, or materially different runtime change |
 | Fitness Supabase hygiene | Fitness | Fitness Supabase plus ATLAS closeout and governance receipts | closed at `100%`; remaining Discord/Music Sesh concerns transferred out of lane scope | none inside Fitness profile-core cleanup scope | defer any Discord/Music Sesh follow-on to Discord OS Infrastructure Separation |
-| DiscordOS bootstrap | DiscordOS | `repos/DiscordOS`, `fawxzzy-discordos`, DiscordOS Supabase `nwexsktuuenfdegzrbut` | governance scaffold complete; private feedback runtime schema landed; Vercel project exists, is GitHub-linked, has a production readiness deployment, proves service-role readiness through Supabase Edge Function, validates the bot credential read-only, exposes a fail-closed activation guard, has a no-persistence feedback shadow writer proof endpoint, has a deployed guarded persisted-writer implementation path, proves Edge-backed proof-only persistence through Vercel, and now proves proof-only shadow transfer plus shadow parity | active Fitness traffic transfer and rollback execution proof remain open | active Fitness-to-DiscordOS traffic transfer and rollback execution packet |
+| DiscordOS bootstrap | DiscordOS | `repos/DiscordOS`, `fawxzzy-discordos`, DiscordOS Supabase `nwexsktuuenfdegzrbut` | closed at the admitted infrastructure/feedback/runtime-hardening scope: repo, schema, deploy, service-role proof path, feedback cutover, publication, and runtime-health surfaces are all live and proven | none inside the closed admitted scope; future DiscordOS work must open as a new explicit feature or runtime lane | `none inside the closed bootstrap/cutover family; reopen only with explicit new DiscordOS scope` |
 | Helper Vercel decommission | ATLAS systems lane with owner confirmation | Vercel inventory and deletion receipts | stale Spotify-era and helper Fitness projects deleted | provenance clarity and future health classification only | preview/unfurl verification or Vercel health-design lane |
 | Lifeline local execution/operator plane | Lifeline | `repos/lifeline` plus repo-local README, architecture, operator-surface, and startup-contract docs | shipped as a narrow local-first execution plane for manifest validation/resolution, runtime lifecycle, release, startup, proof, and deterministic receipts; consumes optional Playbook exports from disk and emits ATLAS-visible consequence without becoming a hosted control plane | broader Vercel/service-health classification, deploy provenance visibility, stale-surface pressure signals, and richer ATLAS-facing health projection remain later work; `_stack` still owns governed deploy authority | start with [Lifeline](15-lifeline.md), then the Lifeline repo truth surfaces; no immediate root-only Lifeline mutation packet is opened by this Book pass |
 

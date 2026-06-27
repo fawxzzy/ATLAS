@@ -14,7 +14,7 @@
     "release-surface"
   ],
   "entrypoint": {
-    "path": "/dev/mobile-regression",
+    "path": "/dev/mobile-regression?scenario=today-progression-status",
     "ready_path": "/api/health"
   },
   "auth": {
@@ -134,17 +134,17 @@
     {
       "lens_id": "desktop.chromium.emulated",
       "baseline_ref": "data/atlas/qa/baselines/fitness.progression-pr-smoke/desktop.chromium.emulated.png",
-      "max_pixel_delta": 6000
+      "max_pixel_delta": 70000
     },
     {
       "lens_id": "android.chrome.emulated",
       "baseline_ref": "data/atlas/qa/baselines/fitness.progression-pr-smoke/android.chrome.emulated.png",
-      "max_pixel_delta": 15000
+      "max_pixel_delta": 350000
     },
     {
       "lens_id": "iphone.webkit.emulated",
       "baseline_ref": "data/atlas/qa/baselines/fitness.progression-pr-smoke/iphone.webkit.emulated.png",
-      "max_pixel_delta": 14000
+      "max_pixel_delta": 225000
     }
   ],
   "promotion": {

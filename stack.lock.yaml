@@ -33,7 +33,7 @@ components:
     ref_type: "branch"
     ref: "main"
     commit: "a016da2f08f167747f7ae7c804c0d6840cb9514d"
-    dirty: false
+    dirty: true
     trust_class: "trusted"
     release_eligible: true
   lifeline:
@@ -44,7 +44,7 @@ components:
     ref_type: "branch"
     ref: "codex/path-discipline-warning-slice-lifeline"
     commit: "1994e64a09128d848048ba57cfd76fba278cc655"
-    dirty: false
+    dirty: true
     trust_class: "trusted"
     release_eligible: true
   mazer:
@@ -99,7 +99,7 @@ components:
     ref_type: "branch"
     ref: "main"
     commit: "bf2c9551225e6d3555122da9a72306556f50cdd8"
-    dirty: false
+    dirty: true
     trust_class: "trusted"
     release_eligible: false
   trove:
@@ -110,7 +110,7 @@ components:
     ref_type: "branch"
     ref: "codex/path-discipline-warning-slice-trove"
     commit: "cd572452b627c6a03dbdb440f9b4e431d9b8ed98"
-    dirty: false
+    dirty: true
     trust_class: "trusted"
     release_eligible: true
 excluded_surfaces:
@@ -216,4 +216,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:a0416022fe28b3cab17f7d87642ba8beb3f93ba834263cb8678220570e8b5b43"
+lock_digest: "sha256:5fb72346602e8ca6a258966b2472e120d4e33d4ea4e410c5b1262a2d9a87de13"

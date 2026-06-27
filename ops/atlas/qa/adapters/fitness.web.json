@@ -8,7 +8,7 @@
   "start": {
     "kind": "command",
     "command": "npm run qa:dev",
-    "default_url": "http://127.0.0.1:3000",
+    "default_url": "http://127.0.0.1:3002",
     "ready_path": "/api/health"
   },
   "prepare": {
@@ -42,6 +42,8 @@
     "tool": "playwright",
     "wait_until": "networkidle",
     "settle_ms": 750,
+    "ready_selector": "body[data-mobile-regression-today-shell-ready='true']",
+    "ready_timeout_ms": 30000,
     "full_page": false,
     "disable_animations": true
   },

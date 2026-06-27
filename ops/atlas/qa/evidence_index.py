@@ -22,23 +22,82 @@ from ops.atlas.qa._common import (
 from ops.cortex._artifacts import write_json
 
 
+def _append_contract_ref(
+    contracts: dict[str, dict[str, list[str]]],
+    *,
+    repo_id: str,
+    key: str,
+    ref: str,
+) -> None:
+    if not repo_id or not ref:
+        return
+    repo_entry = contracts.setdefault(repo_id, {"adapter_refs": [], "scenario_refs": []})
+    if ref not in repo_entry[key]:
+        repo_entry[key].append(ref)
+
+
+def _collect_contract_refs(
+    *,
+    base_root: Path,
+    contracts: dict[str, dict[str, list[str]]],
+    manifest_dir: Path,
+    key: str,
+    repo_id_fallback: str = "",
+) -> None:
+    if not manifest_dir.exists():
+        return
+    for path in sorted(manifest_dir.glob("*.json")):
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        repo_id = str(payload.get("repo_id") or repo_id_fallback or "").strip()
+        _append_contract_ref(
+            contracts,
+            repo_id=repo_id,
+            key=key,
+            ref=atlas_relative(path, root=base_root),
+        )
+
+
 def _repo_contracts(base_root: Path) -> dict[str, dict[str, list[str]]]:
     contracts: dict[str, dict[str, list[str]]] = {}
+    _collect_contract_refs(
+        base_root=base_root,
+        contracts=contracts,
+        manifest_dir=base_root / "ops" / "atlas" / "qa" / "adapters",
+        key="adapter_refs",
+    )
+    _collect_contract_refs(
+        base_root=base_root,
+        contracts=contracts,
+        manifest_dir=base_root / "ops" / "atlas" / "qa" / "scenarios",
+        key="scenario_refs",
+    )
     repos_root = base_root / "repos"
     if not repos_root.exists():
         return contracts
     for repo_root in repos_root.iterdir():
         if not repo_root.is_dir():
             continue
-        adapters = sorted((repo_root / "qa" / "adapters").glob("*.json")) if (repo_root / "qa" / "adapters").exists() else []
-        scenarios = sorted((repo_root / "qa" / "scenarios").glob("*.json")) if (repo_root / "qa" / "scenarios").exists() else []
-        if not adapters and not scenarios:
-            continue
-        repo_id = repo_root.name.removeprefix("fawxzzy-")
-        contracts[repo_id] = {
-            "adapter_refs": [atlas_relative(path, root=base_root) for path in adapters],
-            "scenario_refs": [atlas_relative(path, root=base_root) for path in scenarios],
-        }
+        repo_id_fallback = repo_root.name.removeprefix("fawxzzy-")
+        _collect_contract_refs(
+            base_root=base_root,
+            contracts=contracts,
+            manifest_dir=repo_root / "qa" / "adapters",
+            key="adapter_refs",
+            repo_id_fallback=repo_id_fallback,
+        )
+        _collect_contract_refs(
+            base_root=base_root,
+            contracts=contracts,
+            manifest_dir=repo_root / "qa" / "scenarios",
+            key="scenario_refs",
+            repo_id_fallback=repo_id_fallback,
+        )
+    for repo_entry in contracts.values():
+        repo_entry["adapter_refs"].sort()
+        repo_entry["scenario_refs"].sort()
     return contracts
 
 
