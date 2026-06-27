@@ -311,15 +311,15 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "Sandbox Simulation Readiness": PacketDescriptor(
-        packet="Sandbox Simulation Readiness local-only first note-only leaf fixture stub admission",
+        packet="Sandbox Simulation Readiness local-only first input fixture stub admission",
         basis_receipt_ref=(
             "docs/ops/"
-            "SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-EXAMPLE-SCENARIO-AND-FIXTURE-PACK-"
+            "SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-NOTE-ONLY-LEAF-FIXTURE-"
             "STUB-ADMISSION-2026-06-27.md"
         ),
-        mode="root-owned local fixture-note follow-on",
+        mode="root-owned local fixture-input follow-on",
         scope=(
-            "add one note-only leaf fixture stub under `data/atlas/sandbox/fixtures/local-only-example-stub/**` "
+            "add one JSON input fixture stub under `data/atlas/sandbox/fixtures/local-only-example-stub/**` "
             "and wire it through the admitted fixture-pack manifest while preserving the current no-validator, "
             "no-runner, no-_stack, and no-mutation guards"
         ),
@@ -409,11 +409,11 @@ def effective_policy(*, marker: str, percentage: int, active_lane: str | None) -
         policy = MarkerPolicy(
             category="admissible after current lane",
             rationale=(
-                "The lane now has one admitted root-owned starter packet plus durable scenario, runtime, and fixture-pack contract freezes and one admitted example pair, "
+                "The lane now has one admitted root-owned starter packet plus durable scenario, runtime, and fixture-pack contract freezes, one admitted example pair, and one note-only leaf fixture, "
                 "but current durable restart truth still keeps the active ATLAS-root lane ahead of it."
             ),
             expected_evidence=(
-                "one bounded local-only first note-only leaf fixture stub packet that preserves "
+                "one bounded local-only first input fixture stub packet that preserves "
                 "no owner-repo, deploy, secret, or live-data widening"
             ),
         )

@@ -58,6 +58,7 @@
 - [Sandbox Simulation Readiness Local-Only Artifact-Home And Scenario-Manifest Contract Freeze](../ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-ARTIFACT-HOME-AND-SCENARIO-MANIFEST-CONTRACT-FREEZE-2026-06-27.md)
 - [Sandbox Simulation Readiness Local-Only Scenario-Fixture Pack Contract Freeze](../ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-SCENARIO-FIXTURE-PACK-CONTRACT-FREEZE-2026-06-27.md)
 - [Sandbox Simulation Readiness Local-Only Example Scenario And Fixture-Pack Stub Admission](../ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-EXAMPLE-SCENARIO-AND-FIXTURE-PACK-STUB-ADMISSION-2026-06-27.md)
+- [Sandbox Simulation Readiness Local-Only First Note-Only Leaf Fixture Stub Admission](../ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-NOTE-ONLY-LEAF-FIXTURE-STUB-ADMISSION-2026-06-27.md)
 - [AI Repetition-to-Automation Pipeline Selector Operator Action And Packet Basis](../ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-SELECTOR-OPERATOR-ACTION-AND-PACKET-BASIS-2026-06-18.md)
 - [Duplicate Surface Decommission Final Closeout Pass 3](../ops/DUPLICATE-SURFACE-DECOMMISSION-FINAL-CLOSEOUT-PASS-3-2026-06-13.md)
 - [Remaining Closeout Queue Reselection After Duplicate Surface Closeout](../ops/REMAINING-CLOSEOUT-QUEUE-RESELECTION-AFTER-DUPLICATE-SURFACE-CLOSEOUT-2026-06-13.md)

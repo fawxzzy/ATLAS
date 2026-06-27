@@ -5,7 +5,14 @@
   "title": "Local-Only Example Stub Fixture Pack",
   "status": "draft",
   "purpose": "Admit one concrete but still empty fixture-pack stub under the frozen Sandbox boundaries before any leaf fixture payload, validator, or runner claim becomes honest.",
-  "items": [],
+  "items": [
+    {
+      "fixture_id": "local-only-example-stub-note-001",
+      "kind": "note",
+      "path": "data/atlas/sandbox/fixtures/local-only-example-stub/notes/first-note-stub.md",
+      "format": "md"
+    }
+  ],
   "guards": {
     "owner_repo_mutation": false,
     "deploy_mutation": false,

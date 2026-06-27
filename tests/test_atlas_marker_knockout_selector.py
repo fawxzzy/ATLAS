@@ -114,7 +114,7 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         )
 
         sandbox_receipt = root / "docs" / "ops" / (
-            "SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-EXAMPLE-SCENARIO-AND-FIXTURE-PACK-"
+            "SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-NOTE-ONLY-LEAF-FIXTURE-"
             "STUB-ADMISSION-2026-06-27.md"
         )
         sandbox_receipt.write_text(
@@ -122,8 +122,8 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
                 [
                     "# Sandbox Packet",
                     "",
-                    "- Mode: `root-owned local data-stub admission`",
-                    "- Scope: `admit one concrete local-only Sandbox scenario manifest plus one paired empty fixture-pack stub without admitting leaf fixture payloads, validator behavior, runner behavior, or any owner-repo, deploy, secret, or live-data widening`",
+                    "- Mode: `root-owned local fixture-note admission`",
+                    "- Scope: `admit one note-only leaf fixture stub under the already admitted Sandbox example root without admitting input fixture payloads, expected-output payloads, validator behavior, runner behavior, or any owner-repo, deploy, secret, or live-data widening`",
                     "",
                 ]
             ),
@@ -312,11 +312,11 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
 
         self.assertEqual("hold_current_lane", payload["operator_action"])
 
-    def test_build_campaign_promotes_sandbox_after_example_pair_admission(self) -> None:
+    def test_build_campaign_promotes_sandbox_after_note_leaf_stub_admission(self) -> None:
         root = self._temp_root()
         marker_doc = MARKER_DOC.replace(
             "- Sandbox Simulation Readiness: `0%`",
-            "- Sandbox Simulation Readiness: `15%`",
+            "- Sandbox Simulation Readiness: `18%`",
         )
         (root / "docs" / "atlas-book" / "02-lanes-and-markers.md").write_text(marker_doc, encoding="utf-8")
         (root / "docs" / "atlas-book" / "01-current-state.md").write_text(CURRENT_STATE_DOC, encoding="utf-8")
@@ -344,23 +344,23 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
             records["Sandbox Simulation Readiness"]["category"],
         )
         self.assertIn(
-            "admitted example pair",
+            "note-only leaf fixture",
             records["Sandbox Simulation Readiness"]["rationale"],
         )
         self.assertEqual(
-            "Sandbox Simulation Readiness local-only first note-only leaf fixture stub admission",
+            "Sandbox Simulation Readiness local-only first input fixture stub admission",
             payload["next_after_current_packet"],
         )
         self.assertEqual(
-            "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-EXAMPLE-SCENARIO-AND-FIXTURE-PACK-STUB-ADMISSION-2026-06-27.md",
+            "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-NOTE-ONLY-LEAF-FIXTURE-STUB-ADMISSION-2026-06-27.md",
             payload["next_after_current_packet_basis_ref"],
         )
         self.assertEqual(
-            "root-owned local fixture-note follow-on",
+            "root-owned local fixture-input follow-on",
             payload["next_after_current_packet_mode"],
         )
         self.assertIn(
-            "note-only leaf fixture stub",
+            "JSON input fixture stub",
             payload["next_after_current_packet_scope"],
         )
 
