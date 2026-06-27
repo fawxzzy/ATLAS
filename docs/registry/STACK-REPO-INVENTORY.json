@@ -3,7 +3,7 @@
   "stack_manifest_ref": "stack.yaml",
   "stack_manifest_digest": "sha256:e5ac73c00983975b59e4b8e7f8541160d479087f5dc95ad1d642568116bd7d10",
   "stack_lock_ref": "stack.lock.yaml",
-  "stack_lock_digest": "sha256:f11d59a3fa67a356f504a1bce36eca7a6c92b472f6547cf04d8e59b2d3a1f0c4",
+  "stack_lock_digest": "sha256:faa4f2bf15a1a9a58e6f1b0b1e17ae659a22b53ee717499afb3f2bf8b707aab1",
   "working_memory_digest": "sha256:fe4f4902e2b2c475974b050ba1bf3f5e740439aa41df2f844555c2c0dc3b310f",
   "published_refs": {
     "json": "docs/registry/STACK-REPO-INVENTORY.json",
@@ -214,8 +214,8 @@
       "role": "application",
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/mazer.git",
-      "pinned_commit": "3d813771c26f159e7fc55645c3809dedbc2314b0",
-      "current_commit": "3d813771c26f159e7fc55645c3809dedbc2314b0",
+      "pinned_commit": "e1b40f1c4de6e9fe25dcd6595a542e22c2a0c335",
+      "current_commit": "e1b40f1c4de6e9fe25dcd6595a542e22c2a0c335",
       "pinned_ref_type": "branch",
       "pinned_ref": "codex/mazer-design-recovery-pass-1",
       "current_ref_type": "branch",
@@ -317,7 +317,7 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "abd5103ae3a19af4d4b2bb06bff27dc794656b7f",
+      "current_commit": "4f12f500ead487d164b3d6ac827e5df7e0f32b8a",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
@@ -530,5 +530,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:0e05c1c034e7b1dc58ed7a58716295270de15dcb8ab3c8aa08f53f7034d9484a"
+  "content_digest": "sha256:440e24e84480568ac51f5b93e051214f29ab96ed833bd5699bf83e49958b36e3"
 }
