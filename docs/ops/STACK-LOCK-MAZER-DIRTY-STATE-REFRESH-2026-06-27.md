@@ -21,15 +21,15 @@ Clear the live `lock-registry-hygiene` blocker class by refreshing `stack.lock.y
 
 - verified the live blocker was limited to `stack.lock.yaml` drift plus `stack.lock.yaml#mazer` dirty-state mismatch
 - verified the current `mazer` worktree carries real owner-side modifications rather than a generator bug or missing checkout
-- generated one canonical temporary lockfile for the current working set and confirmed validation returned `critical=0 error=0 warning=1 info=0`
+- generated one canonical temporary lockfile for the current working set and confirmed validation returned `critical=0 error=0 warning=1 info=0` before the later retained `dist` residue also surfaced in the live warning set
 - refreshed the committed `stack.lock.yaml` to the same canonical working-set payload
 
 ## Current Read
 
 - `mazer` is currently pinned as `dirty: true` in stack truth
 - the lockfile once again matches the current intended managed working set
-- root validation returns to `critical=0 error=0 warning=1 info=0`
-- the remaining warning is retained mutable-state residue at `repos/mazer/node_modules`, not a blocking stack-lock defect
+- root validation returns to `critical=0 error=0 warning=2 info=0`
+- the remaining warnings are retained mutable-state residue at `repos/mazer/node_modules` and `repos/mazer/dist`, not blocking stack-lock defects
 
 ## Marker Decision
 
