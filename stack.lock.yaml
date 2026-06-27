@@ -21,7 +21,7 @@ components:
     remote: "https://github.com/fawxzzy/DiscordOS.git"
     ref_type: "branch"
     ref: "codex/message-command-poll-status"
-    commit: "8542442e45aa9869ba5f7880591bc9b52f0a8f84"
+    commit: "6acdb0ac42c3385820a7a1b07113b2eb91c30dec"
     dirty: false
     trust_class: "trusted"
     release_eligible: false
@@ -216,4 +216,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:67d263321bb8c3899174d2ea427bd385427e758311443c94f29349e7989a948e"
+lock_digest: "sha256:3523ed888cf6f8ddad15da0228aa870afc2ef61cdaa771cd9e4b9ede5d1fbf5c"
