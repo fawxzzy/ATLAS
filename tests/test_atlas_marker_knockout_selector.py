@@ -114,16 +114,16 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         )
 
         sandbox_receipt = root / "docs" / "ops" / (
-            "SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-REPORT-"
-            "STUB-ADMISSION-2026-06-27.md"
+            "SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-STATUS-"
+            "SEMANTICS-CONTRACT-FREEZE-2026-06-27.md"
         )
         sandbox_receipt.write_text(
             "\n".join(
                 [
                     "# Sandbox Packet",
                     "",
-                    "- Mode: `root-owned local validation-report admission`",
-                    "- Scope: `admit one bounded local-only validator-report stub under the frozen Sandbox validation-report contract without admitting validator execution, runner behavior, or any owner-repo, deploy, secret, or live-data widening`",
+                    "- Mode: `root-owned docs-only validator-status-semantics contract freeze`",
+                    "- Scope: `freeze how a future local-only Sandbox validator may assign and interpret the admitted not_run, match, mismatch, and blocked statuses without admitting validator execution, runner behavior, or any owner-repo, deploy, secret, or live-data widening`",
                     "",
                 ]
             ),
@@ -312,11 +312,11 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
 
         self.assertEqual("hold_current_lane", payload["operator_action"])
 
-    def test_build_campaign_promotes_sandbox_after_validator_report_stub_admission(self) -> None:
+    def test_build_campaign_promotes_sandbox_after_validator_status_semantics_contract_freeze(self) -> None:
         root = self._temp_root()
         marker_doc = MARKER_DOC.replace(
             "- Sandbox Simulation Readiness: `0%`",
-            "- Sandbox Simulation Readiness: `36%`",
+            "- Sandbox Simulation Readiness: `39%`",
         )
         (root / "docs" / "atlas-book" / "02-lanes-and-markers.md").write_text(marker_doc, encoding="utf-8")
         (root / "docs" / "atlas-book" / "01-current-state.md").write_text(CURRENT_STATE_DOC, encoding="utf-8")
@@ -344,23 +344,23 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
             records["Sandbox Simulation Readiness"]["category"],
         )
         self.assertIn(
-            "validator-report stub",
+            "validator-status semantics contract",
             records["Sandbox Simulation Readiness"]["rationale"],
         )
         self.assertEqual(
-            "Sandbox Simulation Readiness local-only first validator-status semantics contract freeze",
+            "Sandbox Simulation Readiness local-only first validator-comparison boundary contract freeze",
             payload["next_after_current_packet"],
         )
         self.assertEqual(
-            "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-REPORT-STUB-ADMISSION-2026-06-27.md",
+            "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-STATUS-SEMANTICS-CONTRACT-FREEZE-2026-06-27.md",
             payload["next_after_current_packet_basis_ref"],
         )
         self.assertEqual(
-            "root-owned docs-only validator-status-semantics follow-on",
+            "root-owned docs-only validator-comparison-boundary follow-on",
             payload["next_after_current_packet_mode"],
         )
         self.assertIn(
-            "not_run, match, mismatch, and blocked",
+            "input and expected-output surfaces",
             payload["next_after_current_packet_scope"],
         )
 
