@@ -35,7 +35,8 @@
     "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-EXAMPLE-SCENARIO-AND-FIXTURE-PACK-STUB-ADMISSION-2026-06-27.md",
     "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-NOTE-ONLY-LEAF-FIXTURE-STUB-ADMISSION-2026-06-27.md",
     "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-INPUT-FIXTURE-STUB-ADMISSION-2026-06-27.md",
-    "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-EXPECTED-OUTPUT-FIXTURE-STUB-ADMISSION-2026-06-27.md"
+    "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-EXPECTED-OUTPUT-FIXTURE-STUB-ADMISSION-2026-06-27.md",
+    "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BOUNDARY-CONTRACT-FREEZE-2026-06-27.md"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -43,9 +44,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "sandbox-simulation-readiness",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-EXPECTED-OUTPUT-FIXTURE-STUB-ADMISSION-2026-06-27.md",
+    "current_checkpoint_receipt": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BOUNDARY-CONTRACT-FREEZE-2026-06-27.md",
     "checkpoint_commit": "main",
-    "checkpoint_summary": "The lane now holds at 24 percent: one structured Sandbox expected-output fixture now exists at `data/atlas/sandbox/fixtures/local-only-example-stub/expected-output/first-expected-output-stub.json`, the admitted example pack now references note, input, and expected-output stubs together, the scenario-to-pack-to-fixture read path is now concrete across three fixture kinds while all mutation and execution guards stay false, and the exact next package is now one local-only first validator-boundary contract freeze.",
+    "checkpoint_summary": "The lane now holds at 27 percent: one future Sandbox validator boundary is now frozen above the admitted note/input/expected-output example root, the first validator descriptor home is now reserved at `data/atlas/sandbox/validators/<scenario_id>/validator.json`, the future validation artifact home is now reserved at `runtime/atlas/sandbox/runs/<scenario_id>/<run_id>/validation/`, the validator read path is bounded to the paired scenario, pack, and listed leaf fixtures only, and the exact next package is now one local-only first validator-descriptor stub admission.",
     "governing_receipts": [
       "docs/ops/STACK-LANE-0-BASELINE-INVENTORY-2026-05-22.md",
       "docs/ops/STACK-LANE-0-TRUTH-MAP-2026-05-22.md",
@@ -56,7 +57,8 @@
       "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-EXAMPLE-SCENARIO-AND-FIXTURE-PACK-STUB-ADMISSION-2026-06-27.md",
       "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-NOTE-ONLY-LEAF-FIXTURE-STUB-ADMISSION-2026-06-27.md",
       "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-INPUT-FIXTURE-STUB-ADMISSION-2026-06-27.md",
-      "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-EXPECTED-OUTPUT-FIXTURE-STUB-ADMISSION-2026-06-27.md"
+      "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-EXPECTED-OUTPUT-FIXTURE-STUB-ADMISSION-2026-06-27.md",
+      "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BOUNDARY-CONTRACT-FREEZE-2026-06-27.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -118,6 +120,10 @@
       {
         "path": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-EXPECTED-OUTPUT-FIXTURE-STUB-ADMISSION-2026-06-27.md",
         "role": "current expected-output admission and next-step truth"
+      },
+      {
+        "path": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BOUNDARY-CONTRACT-FREEZE-2026-06-27.md",
+        "role": "current validator-boundary contract truth and next-step routing"
       }
     ],
     "verification_adoption_surfaces": [
@@ -152,37 +158,37 @@
     ],
     "blocked_or_gated_work": [
       {
-        "item": "first local-only validator-boundary contract across the admitted example pack",
-        "requirement": "blocked until one later explicit packet freezes how a future local-only validator may read the current scenario, pack, note, input, and expected-output stubs without widening into execution behavior"
+        "item": "first local-only validator descriptor stub under the frozen boundary",
+        "requirement": "blocked until one later explicit packet admits one committed validator descriptor stub under the frozen local-only validator home without widening into execution behavior"
       },
       {
         "item": "validator implementation or runner behavior",
-        "requirement": "blocked until one later explicit packet admits real validator behavior or runner scope beyond the current scenario, pack, note, input, and expected-output contracts"
+        "requirement": "blocked until one later explicit packet admits real validator behavior or runner scope beyond the current scenario, pack, note, input, expected-output, and validator-boundary contracts"
       },
       {
         "item": "_stack`, owner-repo, deploy, secret, or live-data widening",
         "requirement": "blocked unless a separate later packet explicitly widens the lane beyond root-owned local-only simulation posture"
       },
       {
-        "item": "higher marker movement above the current 24 percent example-input-output threshold",
+        "item": "higher marker movement above the current 27 percent validator-boundary threshold",
         "requirement": "blocked until another real contract, implementation, proof-backed adoption, or blocker-clearance class changes operator reality again"
       }
     ],
     "next_package_ladder": [
       {
-        "package": "Sandbox Simulation Readiness local-only first validator-boundary contract freeze",
-        "mode": "root-owned docs-only validator-boundary follow-on",
-        "reason": "one bounded input/output pair now exists under the admitted example root, so the next honest move is to freeze the first non-executing validator boundary before validator implementation, runner behavior, or `_stack` claims become honest"
+        "package": "Sandbox Simulation Readiness local-only first validator-descriptor stub admission",
+        "mode": "root-owned local validator-descriptor admission",
+        "reason": "one future validator home and read boundary are now frozen above the admitted example root, so the next honest move is to admit one committed non-executing validator descriptor stub before report shape, validator behavior, runner behavior, or `_stack` claims become honest"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-EXPECTED-OUTPUT-FIXTURE-STUB-ADMISSION-2026-06-27.md",
+    "freshness_checked_receipt": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BOUNDARY-CONTRACT-FREEZE-2026-06-27.md",
     "freshness_checked_at": "2026-06-27T00:00:00-04:00",
-    "freshness_basis": "The manifest now matches the current 24 percent Sandbox posture because the lane no longer stops at one-sided fixture structure: one bounded JSON expected-output fixture now exists under the admitted root, the pack manifest now carries note, input, and expected-output descriptors directly, the Book and restart surfaces project that broader concrete example-pair truth, and the next package is now one explicit local-only first validator-boundary contract freeze.",
+    "freshness_basis": "The manifest now matches the current 27 percent Sandbox posture because the lane no longer stops at the example input/output pair alone: one future validator descriptor home is now frozen, the read path is now explicitly bounded to the paired scenario, pack, and listed leaf fixtures, the future validation artifact home is now reserved under the run root, the Book and restart surfaces project that broader validator-boundary truth, and the next package is now one explicit local-only first validator-descriptor stub admission.",
     "marker_posture": [
       {
         "marker": "Sandbox Simulation Readiness",
-        "percent": 24,
+        "percent": 27,
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ]
