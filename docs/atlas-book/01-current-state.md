@@ -2,7 +2,7 @@
 
 ## Snapshot
 
-The stack is currently at a clean managed-child-repo checkpoint with one root self-sequencing writeback edge, not a child-repo dirtiness checkpoint.
+The stack is currently at a clean zero-issue checkpoint: managed child repos are clean, root validation is clean, and no immediate ATLAS-root packet is open.
 
 What is true right now:
 
@@ -23,8 +23,9 @@ What is true right now:
 - ATLAS root remains the coordination, receipt, and marker layer.
 - the current active ATLAS-side lane is now `Sandbox Simulation Readiness`.
 - no immediate ATLAS-root packet is now open.
-- `docs/ops/STACK-LOCK-AND-INVENTORY-PLAYBOOK-CLEANUP-AND-ROOT-SELF-SEQUENCING-CLOSEOUT-2026-06-27.md` now carries the latest stack-lock and inventory truth refresh: `playbook` is pinned clean on `codex/path-discipline-warning-slice-playbook` at `003091d93c1cf5f55db6b7e9d907f675fda7ee01`, every managed child repo is now clean, the published dirty-repo count drops to `1`, that remaining dirty signal is frozen as root self-sequencing during generated writeback, and ATLAS root validation remains at `critical=0 error=0 warning=0 info=0`.
-- `docs/ops/STACK-LOCK-AND-INVENTORY-DISCORDOS-MAIN-CLEANUP-RESYNC-2026-06-27.md` now carries the latest stack-lock and inventory truth refresh: `discordos` is pinned clean on `main` at `4fe3091a192a02077f58c2b40854a49205e057b9`, the published dirty-repo count drops to `2`, and ATLAS root validation remains at `critical=0 error=0 warning=0 info=0`.
+- `docs/ops/STACK-LOCK-AND-INVENTORY-DISCORDOS-POLL-CLEANUP-ZERO-ISSUE-RESYNC-2026-06-27.md` now carries the latest stack-lock and inventory truth refresh: `discordos` is pinned clean on `codex/message-command-poll-status` at `de32a8081bb1ce2355781b34a910a2c438ce23a7`, `playbook` is pinned clean on `codex/path-discipline-warning-slice-playbook` at `945fef9bd6ef2dacd5c003c5a11299ff0122b15d`, the published inventory reflects those owner-side cleanup branch heads, and ATLAS root validation remains at `critical=0 error=0 warning=0 info=0`.
+- `docs/ops/STACK-LOCK-AND-INVENTORY-PLAYBOOK-CLEANUP-AND-ROOT-SELF-SEQUENCING-CLOSEOUT-2026-06-27.md` remains the earlier intermediary stack-lock checkpoint: it froze the then-current Playbook branch head at `003091d93c1cf5f55db6b7e9d907f675fda7ee01` and classified the temporary root self-sequencing edge honestly before the later zero-issue closeout consumed it.
+- `docs/ops/STACK-LOCK-AND-INVENTORY-DISCORDOS-MAIN-CLEANUP-RESYNC-2026-06-27.md` remains the earlier intermediary DiscordOS stack-lock checkpoint: it froze the then-current clean `main` head at `4fe3091a192a02077f58c2b40854a49205e057b9` before the later branch-based poll cleanup advanced the canonical managed working set.
 - `docs/ops/STACK-LOCK-AND-INVENTORY-STREAM-TROVE-AND-NAT1-CLEANUP-RESYNC-2026-06-27.md` now carries the latest stack-lock and inventory truth refresh: `stream` is pinned clean at `43769ba86d4c6ebc419ab9e7847c3843460a094f`, `trove` is pinned clean at `112715291a1d9f3b21c9a830d1dab68e6751b815`, `nat1-games` is pinned clean at `404460d3717fab389407582048a9b9f228f26d39`, the published dirty-repo count drops to `3`, and ATLAS root validation remains at `critical=0 error=0 warning=0 info=0`.
 - `docs/ops/STACK-LOCK-AND-INVENTORY-_STACK-ADVANCE-AND-ROOT-TRUTH-RESYNC-2026-06-27.md` now carries the latest stack-lock and inventory truth refresh: `_stack` is pinned clean at `3450e463b1e666c9e7f8caa2bf990338882aeca4`, the published dirty-repo count drops to `6`, the published root inventory checkpoint advances to `3da371cdaea691219e760a44750a82e9428b48e9`, and ATLAS root validation remains at `critical=0 error=0 warning=0 info=0`.
 - `docs/ops/STACK-LOCK-MAZER-MAIN-CLEAN-RESYNC-2026-06-27.md` remains the earlier `mazer` convergence receipt: `mazer` is pinned clean on `main` at `269b02b955451ca1847efb5dde1e172b4c887bb8`, and the old warning-slice branch truth is no longer the canonical stack read.

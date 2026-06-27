@@ -54,6 +54,7 @@
 - [Inventory And Truth Map And ATLAS Book Protected QA And DiscordOS Projection Refresh Continuity Re-Sync](../ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-PROTECTED-QA-AND-DISCORDOS-PROJECTION-REFRESH-CONTINUITY-RESYNC-2026-06-27.md)
 - [Inventory And Truth Map And ATLAS Book Fitness Desktop Manual Attestation Mobile Gate Refresh Continuity Re-Sync](../ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-DESKTOP-MANUAL-ATTESTATION-MOBILE-GATE-REFRESH-CONTINUITY-RESYNC-2026-06-27.md)
 - [Truth Map And ATLAS Book Lifeline Runtime Residue Zero-Warning Closeout And Stack Re-Sync](../ops/TRUTH-MAP-AND-ATLAS-BOOK-LIFELINE-RUNTIME-RESIDUE-ZERO-WARNING-CLOSEOUT-AND-STACK-RESYNC-2026-06-27.md)
+- [Stack Lock And Inventory DiscordOS Poll Cleanup Zero-Issue Re-Sync](../ops/STACK-LOCK-AND-INVENTORY-DISCORDOS-POLL-CLEANUP-ZERO-ISSUE-RESYNC-2026-06-27.md)
 - [ATLAS Root Worktree Hygiene Re-Sync](../ops/ATLAS-ROOT-WORKTREE-HYGIENE-RESYNC-2026-06-27.md)
 - [ATLAS Root UI Mutation Discipline And Live Data Safety Doctrine Refresh](../ops/ATLAS-ROOT-UI-MUTATION-DISCIPLINE-AND-LIVE-DATA-SAFETY-DOCTRINE-REFRESH-2026-06-27.md)
 - [ATLAS Book Automation Candidate Workflow Adoption Reconciliation](../ops/ATLAS-BOOK-AUTOMATION-CANDIDATE-WORKFLOW-ADOPTION-RECONCILIATION-2026-06-27.md)
