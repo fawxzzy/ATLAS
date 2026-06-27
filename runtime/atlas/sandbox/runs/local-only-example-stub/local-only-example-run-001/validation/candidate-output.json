@@ -1,0 +1,17 @@
+{
+  "contract_version": "atlas.sandbox.validator-candidate-output.v1",
+  "validator_id": "local-only-example-stub-validator-001",
+  "scenario_id": "local-only-example-stub",
+  "run_id": "local-only-example-run-001",
+  "validator_ref": "data/atlas/sandbox/validators/local-only-example-stub/validator.json",
+  "source_input_fixture_id": "local-only-example-stub-input-001",
+  "oracle_ref": "data/atlas/sandbox/fixtures/local-only-example-stub/expected-output/first-expected-output-stub.json",
+  "payload": {
+    "mode": "stub",
+    "status": "placeholder",
+    "observations": [
+      "example output shape recorded",
+      "no validator evaluation has run"
+    ]
+  }
+}

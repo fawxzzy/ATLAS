@@ -68,6 +68,7 @@
 - [Sandbox Simulation Readiness Local-Only First Validator-Status Semantics Contract Freeze](../ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-STATUS-SEMANTICS-CONTRACT-FREEZE-2026-06-27.md)
 - [Sandbox Simulation Readiness Local-Only First Validator-Comparison Boundary Contract Freeze](../ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-COMPARISON-BOUNDARY-CONTRACT-FREEZE-2026-06-27.md)
 - [Sandbox Simulation Readiness Local-Only First Validator-Candidate-Output Shape Contract Freeze](../ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-CANDIDATE-OUTPUT-SHAPE-CONTRACT-FREEZE-2026-06-27.md)
+- [Sandbox Simulation Readiness Local-Only First Validator-Candidate-Output Stub Admission](../ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-CANDIDATE-OUTPUT-STUB-ADMISSION-2026-06-27.md)
 - [AI Repetition-to-Automation Pipeline Selector Operator Action And Packet Basis](../ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-SELECTOR-OPERATOR-ACTION-AND-PACKET-BASIS-2026-06-18.md)
 - [Duplicate Surface Decommission Final Closeout Pass 3](../ops/DUPLICATE-SURFACE-DECOMMISSION-FINAL-CLOSEOUT-PASS-3-2026-06-13.md)
 - [Remaining Closeout Queue Reselection After Duplicate Surface Closeout](../ops/REMAINING-CLOSEOUT-QUEUE-RESELECTION-AFTER-DUPLICATE-SURFACE-CLOSEOUT-2026-06-13.md)
