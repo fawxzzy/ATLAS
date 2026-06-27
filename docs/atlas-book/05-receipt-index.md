@@ -1610,6 +1610,7 @@
 - [Truth Map And ATLAS Book Playbook Dependency Residue Reduction And Stack Re-Sync](../ops/TRUTH-MAP-AND-ATLAS-BOOK-PLAYBOOK-DEPENDENCY-RESIDUE-REDUCTION-AND-STACK-RESYNC-2026-06-26.md)
 - [Truth Map And ATLAS Book Zero-Warning Validation Closeout And Stack Re-Sync](../ops/TRUTH-MAP-AND-ATLAS-BOOK-ZERO-WARNING-VALIDATION-CLOSEOUT-AND-STACK-RESYNC-2026-06-26.md)
 - [Truth Map And ATLAS Book Current Continuity Restore And Open-Marker Count Reconciliation](../ops/TRUTH-MAP-AND-ATLAS-BOOK-CURRENT-CONTINUITY-RESTORE-AND-OPEN-MARKER-COUNT-RECONCILIATION-2026-06-26.md)
+- [Truth Map And ATLAS Book Stale Owner-Side Packet And Parity Caveat Reconciliation](../ops/TRUTH-MAP-AND-ATLAS-BOOK-STALE-OWNER-SIDE-PACKET-AND-PARITY-CAVEAT-RECONCILIATION-2026-06-26.md)
 ## Notes
 
 This index is a working spine, not an exhaustive archive.

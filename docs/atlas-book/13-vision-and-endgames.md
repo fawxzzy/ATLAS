@@ -205,9 +205,8 @@ Shared rules that survive the split:
 
 ### Return owner-side
 
-- `Fitness Discord authenticated same-event fresh-submit proof-path blocker conversion pass 1`
-- `Root-bounded dispatcher reconciliation after Fitness Discord authenticated same-event fresh-submit proof-path blocker conversion pass 1 closeout`
-- `Fitness Discord governed authenticated same-event submit-origin session-path conversion pass 2`
+- no immediate owner-side packet is currently stronger than the held root posture
+- reopen owner-side only if one fresh owner-state change, one newly admitted owner-repo packet, or one approval-gated mutation class materially changes the current restart truth
 
 ### Reopen only with approval
 

@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-06-19T00:00:00Z",
-  "updated_at": "2026-06-27T03:34:41.015090Z",
+  "updated_at": "2026-06-27T03:56:00.000000Z",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -39,7 +39,8 @@
     "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-LOCAL-WARNING-FLOOR-REDUCTION-AND-STACK-RESYNC-2026-06-26.md",
     "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-PLAYBOOK-DEPENDENCY-RESIDUE-REDUCTION-AND-STACK-RESYNC-2026-06-26.md",
     "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-ZERO-WARNING-VALIDATION-CLOSEOUT-AND-STACK-RESYNC-2026-06-26.md",
-    "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-CURRENT-CONTINUITY-RESTORE-AND-OPEN-MARKER-COUNT-RECONCILIATION-2026-06-26.md"
+    "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-CURRENT-CONTINUITY-RESTORE-AND-OPEN-MARKER-COUNT-RECONCILIATION-2026-06-26.md",
+    "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-STALE-OWNER-SIDE-PACKET-AND-PARITY-CAVEAT-RECONCILIATION-2026-06-26.md"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -47,9 +48,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "truth-map-and-atlas-book",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-CURRENT-CONTINUITY-RESTORE-AND-OPEN-MARKER-COUNT-RECONCILIATION-2026-06-26.md",
-    "checkpoint_commit": "e19ac39d",
-    "checkpoint_summary": "The lane still sits at 97 percent because the June 18 and 19 inventory absorption still mirrors coherently across the canonical Book surfaces, the AI Long-Run current-packet basis drift remains cleared, the Book-side validation checkpoint remains re-synced at critical 0 / error 0 / warning 0 / info 0, the later published root frontier at e19ac39d restored the restart-referenced promotion/docs tranche plus the root resume dispatch and request schemas on canonical main, the seeded initiative continuity-manifest set remains clean at 18 of 18 ok with zero warnings and zero errors, and all 6 of 6 eligible still-open markers remain both manifest-backed and restart-ready from one machine-readable index.",
+    "current_checkpoint_receipt": "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-STALE-OWNER-SIDE-PACKET-AND-PARITY-CAVEAT-RECONCILIATION-2026-06-26.md",
+    "checkpoint_commit": "7240617a",
+    "checkpoint_summary": "The lane still sits at 97 percent because the June 18 and 19 inventory absorption still mirrors coherently across the canonical Book surfaces, the AI Long-Run current-packet basis drift remains cleared, the Book-side validation checkpoint remains re-synced at critical 0 / error 0 / warning 0 / info 0, the later published root frontier is now on canonical main through commit 7240617a, the older June 1 Fitness Discord owner-side ladder is now explicitly historical after the later DiscordOS feedback cutover closeout, the older 8a2cb5db local-vs-remote parity caveat is consumed by current published parity, the seeded initiative continuity-manifest set remains clean at 18 of 18 ok with zero warnings and zero errors, and all 6 of 6 eligible still-open markers remain both manifest-backed and restart-ready from one machine-readable index.",
     "governing_receipts": [
       "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-MARKER-SCARCITY-AND-CLOSED-LADDER-CARRY-FORWARD-HYGIENE-PASS-3-2026-05-29.md",
       "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-POST-INVENTORY-CLOSEOUT-CLUSTER-PROJECTION-REFRESH-PASS-4-2026-06-02.md",
@@ -67,7 +68,8 @@
       "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-LOCAL-WARNING-FLOOR-REDUCTION-AND-STACK-RESYNC-2026-06-26.md",
       "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-PLAYBOOK-DEPENDENCY-RESIDUE-REDUCTION-AND-STACK-RESYNC-2026-06-26.md",
       "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-ZERO-WARNING-VALIDATION-CLOSEOUT-AND-STACK-RESYNC-2026-06-26.md",
-      "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-CURRENT-CONTINUITY-RESTORE-AND-OPEN-MARKER-COUNT-RECONCILIATION-2026-06-26.md"
+      "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-CURRENT-CONTINUITY-RESTORE-AND-OPEN-MARKER-COUNT-RECONCILIATION-2026-06-26.md",
+      "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-STALE-OWNER-SIDE-PACKET-AND-PARITY-CAVEAT-RECONCILIATION-2026-06-26.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -93,6 +95,10 @@
       {
         "path": "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-CURRENT-CONTINUITY-RESTORE-AND-OPEN-MARKER-COUNT-RECONCILIATION-2026-06-26.md",
         "role": "current exact Book-side continuity-restore reconciliation and eligible-open-marker count repair surface"
+      },
+      {
+        "path": "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-STALE-OWNER-SIDE-PACKET-AND-PARITY-CAVEAT-RECONCILIATION-2026-06-26.md",
+        "role": "current exact Book-side stale owner-side packet and consumed parity-caveat reconciliation surface"
       },
       {
         "path": "docs/ops/OPEN-MARKER-MANIFEST-COVERAGE-CLOSEOUT-AND-ACTIVE-CONTINUITY-LANE-RATCHET-2026-06-19.md",
@@ -168,7 +174,7 @@
     "blocked_or_gated_work": [
       {
         "item": "broader book projection cleanup",
-        "requirement": "blocked again now that the current validation-count projection drift is cleared, the stack-level snapshot path-leak slice is consumed, the disposable root capture-artifact slice is relocated into tmp, the local _stack receipt path-literal slice is consumed, the disposable Playbook dependency-residue slice is consumed, the final retained Playbook/Fitness mutable-state warning class is converted into validator-supported repo-owned cleanup reports with refreshed lock-backed stack truth, the post-closeout continuity restore on canonical main is mirrored again, and the eligible-open-marker count drift is reconciled to 6 of 6; reopen only with a new distinct current-state drift, broader normalization cluster, or wider restart-surface cleanup explicitly selected rather than implied by the current projection, basis-repair, restart-index, warning-drift closeout, local warning-floor reduction, Playbook dependency-residue reduction, zero-warning validation closeout, and current continuity-restore reconciliation passes"
+        "requirement": "blocked again now that the current validation-count projection drift is cleared, the stack-level snapshot path-leak slice is consumed, the disposable root capture-artifact slice is relocated into tmp, the local _stack receipt path-literal slice is consumed, the disposable Playbook dependency-residue slice is consumed, the final retained Playbook/Fitness mutable-state warning class is converted into validator-supported repo-owned cleanup reports with refreshed lock-backed stack truth, the post-closeout continuity restore on canonical main is mirrored again, the eligible-open-marker count drift is reconciled to 6 of 6, the stale owner-side Discord packet ladder is retired from current restart routing, and the older local-vs-remote parity caveat is consumed by current published parity; reopen only with a new distinct current-state drift, broader normalization cluster, or wider restart-surface cleanup explicitly selected rather than implied by the current projection, basis-repair, restart-index, warning-drift closeout, local warning-floor reduction, Playbook dependency-residue reduction, zero-warning validation closeout, current continuity-restore reconciliation, and stale owner-side/parity-caveat reconciliation passes"
       },
       {
         "item": "higher marker movement above the current refresh-backed ratchet",
@@ -178,14 +184,14 @@
     "next_package_ladder": [
       {
         "package": "No immediate Truth Map & ATLAS Book docs-only follow-on packet",
-        "mode": "hold-flat after current continuity-restore reconciliation",
-        "reason": "the current projection drift, manifest-gap class, current-packet basis drift, seeded initiative manifest-health warning/error class, eligible-open-marker coverage gap, eligible-open-marker restart-index gap, the current Book-side root-validation warning-count drift, the root-owned snapshot handoff path-leak slice, the disposable root capture-artifact slice, the local _stack receipt path-literal slice, the disposable Playbook dependency-residue slice, the final retained Playbook/Fitness mutable-state warning class, the post-closeout continuity-restore projection gap, and the eligible-open-marker count drift are now cleared; reopen only with distinct projection drift, marker pressure, owner-truth widening, or broader continuity automation"
+        "mode": "hold-flat after stale owner-side packet and parity-caveat reconciliation",
+        "reason": "the current projection drift, manifest-gap class, current-packet basis drift, seeded initiative manifest-health warning/error class, eligible-open-marker coverage gap, eligible-open-marker restart-index gap, the current Book-side root-validation warning-count drift, the root-owned snapshot handoff path-leak slice, the disposable root capture-artifact slice, the local _stack receipt path-literal slice, the disposable Playbook dependency-residue slice, the final retained Playbook/Fitness mutable-state warning class, the post-closeout continuity-restore projection gap, the eligible-open-marker count drift, the stale owner-side Discord packet routing, and the consumed local-vs-remote parity caveat are now cleared; reopen only with distinct projection drift, marker pressure, owner-truth widening, or broader continuity automation"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-CURRENT-CONTINUITY-RESTORE-AND-OPEN-MARKER-COUNT-RECONCILIATION-2026-06-26.md",
-    "freshness_checked_at": "2026-06-27T03:34:41.015090Z",
-    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture now match the refreshed Book-side validation checkpoint at critical 0 / error 0 / warning 0 / info 0, the still-cleared machine-readable AI Long-Run current-packet basis drift, the post-closeout continuity restore now mirrored on canonical main, the initiative manifest-health surface at 18 ok / 0 warning / 0 error, the eligible-open-marker coverage surface at 6 of 6 manifest-backed, and the eligible-open-marker restart index at 6 of 6 restart-ready.",
+    "freshness_checked_receipt": "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-STALE-OWNER-SIDE-PACKET-AND-PARITY-CAVEAT-RECONCILIATION-2026-06-26.md",
+    "freshness_checked_at": "2026-06-27T03:56:00.000000Z",
+    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture now match the refreshed Book-side validation checkpoint at critical 0 / error 0 / warning 0 / info 0, the still-cleared machine-readable AI Long-Run current-packet basis drift, the post-closeout continuity restore now mirrored on canonical main, the stale owner-side Discord packet ladder now retired from current routing, the older local-vs-remote parity caveat now consumed by current published parity at 7240617a, the initiative manifest-health surface at 18 ok / 0 warning / 0 error, the eligible-open-marker coverage surface at 6 of 6 manifest-backed, and the eligible-open-marker restart index at 6 of 6 restart-ready.",
     "marker_posture": [
       {
         "marker": "Truth Map & ATLAS Book",
