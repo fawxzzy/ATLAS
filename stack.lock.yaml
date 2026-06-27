@@ -21,7 +21,7 @@ components:
     remote: "https://github.com/fawxzzy/DiscordOS.git"
     ref_type: "branch"
     ref: "codex/message-command-poll-status"
-    commit: "de32a80729a2883181f2901dd135adf0ea2db080"
+    commit: "76b699269b724070f548ca7841d36ec1505727f8"
     dirty: false
     trust_class: "trusted"
     release_eligible: false
@@ -53,8 +53,8 @@ components:
     status: "active"
     remote: "https://github.com/fawxzzy/mazer.git"
     ref_type: "branch"
-    ref: "main"
-    commit: "269b02b955451ca1847efb5dde1e172b4c887bb8"
+    ref: "codex/mazer-design-recovery-pass-1"
+    commit: "3d813771c26f159e7fc55645c3809dedbc2314b0"
     dirty: false
     trust_class: "trusted"
     release_eligible: true
@@ -216,4 +216,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:b9e2932f6595dea62f3d11e25eb5240ee3e035074edd4e1a5b85f051a25bc0a4"
+lock_digest: "sha256:f11d59a3fa67a356f504a1bce36eca7a6c92b472f6547cf04d8e59b2d3a1f0c4"
