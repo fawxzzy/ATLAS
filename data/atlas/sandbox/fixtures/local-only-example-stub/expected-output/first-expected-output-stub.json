@@ -1,0 +1,15 @@
+{
+  "contract_version": "atlas.sandbox.fixture-expected-output.v1",
+  "fixture_id": "local-only-example-stub-expected-output-001",
+  "scenario_id": "local-only-example-stub",
+  "kind": "expected_output",
+  "summary": "First bounded Sandbox expected-output fixture stub for the local-only example root. This is comparison-shape sample data only and does not imply validator, runner, or execution truth.",
+  "payload": {
+    "mode": "stub",
+    "status": "placeholder",
+    "observations": [
+      "example output shape recorded",
+      "no validator evaluation has run"
+    ]
+  }
+}

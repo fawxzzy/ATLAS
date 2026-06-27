@@ -114,7 +114,7 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         )
 
         sandbox_receipt = root / "docs" / "ops" / (
-            "SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-INPUT-FIXTURE-"
+            "SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-EXPECTED-OUTPUT-FIXTURE-"
             "STUB-ADMISSION-2026-06-27.md"
         )
         sandbox_receipt.write_text(
@@ -122,8 +122,8 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
                 [
                     "# Sandbox Packet",
                     "",
-                    "- Mode: `root-owned local fixture-input admission`",
-                    "- Scope: `admit one bounded JSON input fixture stub under the already admitted Sandbox example root without admitting expected-output payloads, validator behavior, runner behavior, or any owner-repo, deploy, secret, or live-data widening`",
+                    "- Mode: `root-owned local fixture-output admission`",
+                    "- Scope: `admit one bounded JSON expected-output fixture stub under the already admitted Sandbox example root without admitting validator behavior, runner behavior, or any owner-repo, deploy, secret, or live-data widening`",
                     "",
                 ]
             ),
@@ -312,11 +312,11 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
 
         self.assertEqual("hold_current_lane", payload["operator_action"])
 
-    def test_build_campaign_promotes_sandbox_after_input_stub_admission(self) -> None:
+    def test_build_campaign_promotes_sandbox_after_expected_output_stub_admission(self) -> None:
         root = self._temp_root()
         marker_doc = MARKER_DOC.replace(
             "- Sandbox Simulation Readiness: `0%`",
-            "- Sandbox Simulation Readiness: `21%`",
+            "- Sandbox Simulation Readiness: `24%`",
         )
         (root / "docs" / "atlas-book" / "02-lanes-and-markers.md").write_text(marker_doc, encoding="utf-8")
         (root / "docs" / "atlas-book" / "01-current-state.md").write_text(CURRENT_STATE_DOC, encoding="utf-8")
@@ -344,23 +344,23 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
             records["Sandbox Simulation Readiness"]["category"],
         )
         self.assertIn(
-            "input fixture stub",
+            "expected-output fixture stub",
             records["Sandbox Simulation Readiness"]["rationale"],
         )
         self.assertEqual(
-            "Sandbox Simulation Readiness local-only first expected-output fixture stub admission",
+            "Sandbox Simulation Readiness local-only first validator-boundary contract freeze",
             payload["next_after_current_packet"],
         )
         self.assertEqual(
-            "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-INPUT-FIXTURE-STUB-ADMISSION-2026-06-27.md",
+            "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-EXPECTED-OUTPUT-FIXTURE-STUB-ADMISSION-2026-06-27.md",
             payload["next_after_current_packet_basis_ref"],
         )
         self.assertEqual(
-            "root-owned local fixture-output follow-on",
+            "root-owned docs-only validator-boundary follow-on",
             payload["next_after_current_packet_mode"],
         )
         self.assertIn(
-            "JSON expected-output fixture stub",
+            "future local-only validator may read",
             payload["next_after_current_packet_scope"],
         )
 

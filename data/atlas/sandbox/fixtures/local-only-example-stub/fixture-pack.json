@@ -4,7 +4,7 @@
   "fixture_pack_id": "local-only-example-stub-pack",
   "title": "Local-Only Example Stub Fixture Pack",
   "status": "draft",
-  "purpose": "Admit one concrete Sandbox fixture pack under the frozen local-only boundaries with only bounded note and input stubs before any expected-output, validator, or runner claim becomes honest.",
+  "purpose": "Admit one concrete Sandbox fixture pack under the frozen local-only boundaries with bounded note, input, and expected-output stubs before any validator or runner claim becomes honest.",
   "items": [
     {
       "fixture_id": "local-only-example-stub-note-001",
@@ -17,6 +17,12 @@
       "kind": "input",
       "path": "data/atlas/sandbox/fixtures/local-only-example-stub/inputs/first-input-stub.json",
       "format": "json"
+    },
+    {
+      "fixture_id": "local-only-example-stub-expected-output-001",
+      "kind": "expected_output",
+      "path": "data/atlas/sandbox/fixtures/local-only-example-stub/expected-output/first-expected-output-stub.json",
+      "format": "json"
     }
   ],
   "guards": {
@@ -27,7 +33,6 @@
     "_stack_execution": false
   },
   "non_goals": [
-    "No expected-output fixture payloads are admitted yet.",
     "No validator or runner behavior is admitted yet.",
     "No owner-repo, deploy, secret, or live-data mutation is admitted."
   ]

@@ -23,7 +23,6 @@
     "_stack_execution": false
   },
   "non_goals": [
-    "No expected-output fixture payloads are admitted yet.",
     "No validator or runner behavior is admitted yet.",
     "No owner-repo, deploy, secret, or live-data mutation is admitted."
   ]
