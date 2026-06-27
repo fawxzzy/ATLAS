@@ -1688,6 +1688,8 @@
 - [Sandbox Simulation Readiness Post-Local-Only First Validator Live-Unattended Execution Admission Boundary Next-Slice Selection](../ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-LIVE-UNATTENDED-EXECUTION-ADMISSION-BOUNDARY-NEXT-SLICE-SELECTION-2026-06-27.md)
 - [Sandbox Simulation Readiness Local-Only First Validator Secret-Bearing Automation Admission Boundary Contract Freeze](../ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-SECRET-BEARING-AUTOMATION-ADMISSION-BOUNDARY-CONTRACT-FREEZE-2026-06-27.md)
 - [Sandbox Simulation Readiness Post-Local-Only First Validator Secret-Bearing Automation Admission Boundary Next-Slice Selection](../ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-SECRET-BEARING-AUTOMATION-ADMISSION-BOUNDARY-NEXT-SLICE-SELECTION-2026-06-27.md)
+- [Sandbox Simulation Readiness Local-Only First Validator Deploy-Surface Mutation Admission Boundary Contract Freeze](../ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-DEPLOY-SURFACE-MUTATION-ADMISSION-BOUNDARY-CONTRACT-FREEZE-2026-06-27.md)
+- [Sandbox Simulation Readiness Post-Local-Only First Validator Deploy-Surface Mutation Admission Boundary Next-Slice Selection](../ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-DEPLOY-SURFACE-MUTATION-ADMISSION-BOUNDARY-NEXT-SLICE-SELECTION-2026-06-27.md)
 ## Notes
 
 This index is a working spine, not an exhaustive archive.
