@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-06-18T16:50:07.5884334-04:00",
-  "updated_at": "2026-06-26T00:00:00.0000000-04:00",
+  "updated_at": "2026-06-27T00:00:00.0000000-04:00",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -405,6 +405,7 @@
     "docs/ops/_STACK-READINESS-SUPERVISED-EXECUTION-HOME-STACK-COMMAND-IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-VALUE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-26.md",
     "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-STACK-COMMAND-IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-VALUE-NEXT-SLICE-SELECTION-PASS-763-2026-06-26.md",
     "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-STACK-COMMAND-IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-VALUE-DOWNSTREAM-HOLD-RECHECK-2026-06-26.md",
+    "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-RESTART-SURFACE-ACTIVE-PACKET-RECONCILIATION-2026-06-27.md",
     "ops/atlas/supervised_execution_home_stack_command_implementation_actual_owner_side_mutation_authority_class_choice.py",
     "tests/test_atlas_supervised_execution_home_stack_command_implementation_actual_owner_side_mutation_authority_class_choice.py"
   ],
@@ -414,9 +415,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "ai-long-run-batch-orchestration",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-STACK-COMMAND-IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-VALUE-DOWNSTREAM-HOLD-RECHECK-2026-06-26.md",
+    "current_checkpoint_receipt": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-RESTART-SURFACE-ACTIVE-PACKET-RECONCILIATION-2026-06-27.md",
     "checkpoint_commit": "main",
-    "checkpoint_summary": "The lane now carries the full supervised-execution-home downstream chain durably on canonical `main` through the post-stack-command-implementation-actual-owner-side-mutation-authority-class-value selector in pass 763 plus the downstream hold recheck. `AI Long-Run Batch Orchestration` stays at `66%`; the current decisive packet is now `AI Long-Run Batch Orchestration post-stack-command-implementation-actual-owner-side-mutation-authority-class-value downstream hold recheck`, the previously selected AI Repetition selector surface remains manifest-held, the remaining restart-ready fallback lanes are also currently manifest-held, and no immediate same-lane packet is honestly open by default.",
+    "checkpoint_summary": "The lane now carries the full supervised-execution-home downstream chain durably on canonical `main` through the post-stack-command-implementation-actual-owner-side-mutation-authority-class-value selector in pass 763 plus the downstream hold recheck, and the shared restart surfaces are reconciled to that same truth. `AI Long-Run Batch Orchestration` stays at `66%`; the current decisive packet remains `AI Long-Run Batch Orchestration post-stack-command-implementation-actual-owner-side-mutation-authority-class-value downstream hold recheck`, the previously selected AI Repetition selector surface remains manifest-held, the remaining restart-ready fallback lanes are also currently manifest-held, and no immediate same-lane packet is honestly open by default.",
     "governing_receipts": [
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-2026-05-22.md",
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-POST-WORLD-MODEL-TOP-LEVEL-PAYLOAD-BOUNDARY-NEXT-SLICE-SELECTION-PASS-460-2026-06-17.md",
@@ -426,6 +427,7 @@
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-SELECTOR-LANE-EXHAUSTION-OR-FALLBACK-ROUTING-2026-06-18.md",
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-CONTINUITY-MANIFEST-SEED-AND-RATCHET-DECISION-PASS-461-2026-06-18.md",
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-STACK-COMMAND-IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-VALUE-DOWNSTREAM-HOLD-RECHECK-2026-06-26.md",
+      "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-RESTART-SURFACE-ACTIVE-PACKET-RECONCILIATION-2026-06-27.md",
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTION-CRITERIA-CONTRACT-FREEZE-PASS-462-2026-06-18.md",
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTION-CRITERIA-OWNER-SURFACE-ADMISSION-PASS-463-2026-06-19.md",
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTION-CRITERIA-SUPPORTING-LANE-ADMISSION-PASS-464-2026-06-19.md",
@@ -1240,9 +1242,9 @@
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-STACK-COMMAND-IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-VALUE-DOWNSTREAM-HOLD-RECHECK-2026-06-26.md",
-    "freshness_checked_at": "2026-06-26T00:00:00.0000000-04:00",
-    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture now match the active AI Long-Run lane because the supervised-execution-home downstream chain is durable on canonical `main` through the post-stack-command-implementation-actual-owner-side-mutation-authority-class-value selector in pass 763 plus the downstream hold recheck, the previously selected AI Repetition selector surface remains manifest-held, the remaining restart-ready fallback lanes are also currently manifest-held, the marker still stays at `66%`, and no immediate same-lane packet is honestly open by default.",
+    "freshness_checked_receipt": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-RESTART-SURFACE-ACTIVE-PACKET-RECONCILIATION-2026-06-27.md",
+    "freshness_checked_at": "2026-06-27T00:00:00.0000000-04:00",
+    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture now match the active AI Long-Run lane because the supervised-execution-home downstream chain is durable on canonical `main` through the post-stack-command-implementation-actual-owner-side-mutation-authority-class-value selector in pass 763 plus the downstream hold recheck, the shared restart surfaces are now reconciled to that same truth, the previously selected AI Repetition selector surface remains manifest-held, the remaining restart-ready fallback lanes are also currently manifest-held, the marker still stays at `66%`, and no immediate same-lane packet is honestly open by default.",
     "marker_posture": [
       {
         "marker": "AI Long-Run Batch Orchestration",
