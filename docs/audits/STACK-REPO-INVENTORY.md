@@ -14,27 +14,27 @@ Operational rule:
 ## Summary
 
 - Repo count: `12`
-- Dirty repo count: `7`
+- Dirty repo count: `6`
 - Release-eligible repo count: `5`
 - Excluded surface count: `17`
 - Stack manifest: `stack.yaml`
 - Stack lock: `stack.lock.yaml`
-- Inventory digest: `sha256:764f38e6f4f636989eaad4e96beb8f7f5581feef66c093024a0809a4f4d1ddda`
+- Inventory digest: `sha256:5c2888760f6318a38f294664f290136af8fed6234df8978c938be66cd936cc74`
 
 ## Managed Repos
 
 | Repo id | Path | Branch | Pinned commit | Current commit | Dirty | Trust | Release | Related initiatives |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| _stack | repos/_stack | codex/queue-or-registry-broader-execution-behavior | e4fcd7c607a4830d141634b8350e32d8dbaa47ef | e4fcd7c607a4830d141634b8350e32d8dbaa47ef | True | trusted | False | initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-local-data-gateway<br>initiative:continuity-manifest-post-convergence-lane-split-readiness<br>initiative:continuity-manifest-stack-readiness<br>initiative:continuity-manifest-vision-future-alignment |
+| _stack | repos/_stack | codex/queue-or-registry-broader-execution-behavior | 3450e463b1e666c9e7f8caa2bf990338882aeca4 | 3450e463b1e666c9e7f8caa2bf990338882aeca4 | False | trusted | False | initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-local-data-gateway<br>initiative:continuity-manifest-post-convergence-lane-split-readiness<br>initiative:continuity-manifest-stack-readiness<br>initiative:continuity-manifest-vision-future-alignment |
 | discordos | repos/DiscordOS | main | ff8f21cfec199f50728ddddea79ba7f546392663 | ff8f21cfec199f50728ddddea79ba7f546392663 | True | trusted | False | initiative:continuity-manifest-dependency-untangling<br>initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-discord-os-infrastructure-separation |
-| fitness | repos/fawxzzy-fitness | main | - | 616443b69c9d203efee8e3c7dd3f2a1a4f9cd1e3 | True | adjacent | False | initiative:continuity-manifest-dependency-untangling<br>initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-discord-os-infrastructure-separation<br>initiative:continuity-manifest-local-data-gateway |
+| fitness | repos/fawxzzy-fitness | codex/feedback-forum-state-and-target-hints | - | b019494d36bb77dbf78e5f64aa51dd3b98919073 | False | adjacent | False | initiative:continuity-manifest-dependency-untangling<br>initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-discord-os-infrastructure-separation<br>initiative:continuity-manifest-local-data-gateway |
 | foundation | repos/foundation | main | fd1cf0650cdbb732f1231aa47a6e43138dab9062 | fd1cf0650cdbb732f1231aa47a6e43138dab9062 | False | trusted | True | - |
 | lifeline | repos/lifeline | codex/path-discipline-warning-slice-lifeline | 538f623a84b003e70dadd234e6ea3af642446a5f | 538f623a84b003e70dadd234e6ea3af642446a5f | False | trusted | True | - |
 | mazer | repos/mazer | main | 269b02b955451ca1847efb5dde1e172b4c887bb8 | 269b02b955451ca1847efb5dde1e172b4c887bb8 | False | trusted | True | initiative:initiative-mazer-d2-learning-scorer |
 | nat1-games | repos/Nat1-Games/nat1-games | codex/path-discipline-warning-slice-nat1 | 63a4a7c159c41a7e98ad8708891743acf71431ed | 63a4a7c159c41a7e98ad8708891743acf71431ed | True | trusted | False | - |
 | playbook | repos/playbook | codex/path-discipline-warning-slice-playbook | f27c36355da906a01a46a841779553002c259f9b | f27c36355da906a01a46a841779553002c259f9b | True | trusted | True | initiative:continuity-manifest-atlas-owned-repo-naming-canonicalization |
 | playbook-demo | repos/playbook-demo/playbook-demo | main | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | False | trusted | False | - |
-| stack | . | main | - | f7f279573f81280e2f951e5d9b53b36dad6f932e | False | trusted | False | - |
+| stack | . | main | - | 3da371cdaea691219e760a44750a82e9428b48e9 | True | trusted | False | - |
 | stream | repos/stream | main | bf2c9551225e6d3555122da9a72306556f50cdd8 | bf2c9551225e6d3555122da9a72306556f50cdd8 | True | trusted | False | - |
 | trove | repos/trove | codex/path-discipline-warning-slice-trove | cd572452b627c6a03dbdb440f9b4e431d9b8ed98 | cd572452b627c6a03dbdb440f9b4e431d9b8ed98 | True | trusted | True | - |
 
