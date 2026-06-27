@@ -311,16 +311,16 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "Sandbox Simulation Readiness": PacketDescriptor(
-        packet="Sandbox Simulation Readiness local-only first validator report-status activation gate contract freeze",
+        packet="Sandbox Simulation Readiness local-only first validator report-result mutation boundary contract freeze",
         basis_receipt_ref=(
             "docs/ops/"
             "SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-REPORT-STATUS-"
-            "ACTIVATION-MAPPING-NEXT-SLICE-SELECTION-2026-06-27.md"
+            "ACTIVATION-GATE-NEXT-SLICE-SELECTION-2026-06-27.md"
         ),
-        mode="root-owned docs-only validator-report-status-activation-gate contract freeze",
+        mode="root-owned docs-only validator-report-result-mutation-boundary contract freeze",
         scope=(
-            "freeze the smallest later rule that may let the frozen report-status activation mapping leave `not_run` at all "
-            "without widening into validator execution, runner behavior, report mutation, or broader routing"
+            "freeze the smallest later rule that may govern how an admitted status change could appear in `report.json` "
+            "without widening into validator execution, runner behavior, broader mutation, or broader routing"
         ),
     ),
 }
@@ -417,10 +417,12 @@ def effective_policy(*, marker: str, percentage: int, active_lane: str | None) -
                 "and one verdict-activation reopening rule contract, "
                 "one report-status activation mapping contract, "
                 "and one post-report-status-activation-mapping next-slice selection, "
+                "one report-status activation gate contract, "
+                "and one post-report-status-activation-gate next-slice selection, "
                 "but current durable restart truth still keeps the active ATLAS-root lane ahead of it."
             ),
             expected_evidence=(
-                "one bounded validator-report-status-activation-gate contract or later downstream contract that preserves "
+                "one bounded validator-report-result-mutation-boundary contract or later downstream contract that preserves "
                 "no owner-repo, deploy, secret, or live-data widening"
             ),
         )
