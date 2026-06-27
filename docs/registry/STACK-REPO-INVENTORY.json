@@ -3,7 +3,7 @@
   "stack_manifest_ref": "stack.yaml",
   "stack_manifest_digest": "sha256:e5ac73c00983975b59e4b8e7f8541160d479087f5dc95ad1d642568116bd7d10",
   "stack_lock_ref": "stack.lock.yaml",
-  "stack_lock_digest": "sha256:cb532f48ef2a8190579666badb109174365e40b26114f2d488ce2bdf3615d0d3",
+  "stack_lock_digest": "sha256:67d263321bb8c3899174d2ea427bd385427e758311443c94f29349e7989a948e",
   "working_memory_digest": "sha256:fe4f4902e2b2c475974b050ba1bf3f5e740439aa41df2f844555c2c0dc3b310f",
   "published_refs": {
     "json": "docs/registry/STACK-REPO-INVENTORY.json",
@@ -265,8 +265,8 @@
       "role": "governance-runtime",
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/playbook.git",
-      "pinned_commit": "ce0e509d6f31a960d79ef7955c85e91a0970281f",
-      "current_commit": "ce0e509d6f31a960d79ef7955c85e91a0970281f",
+      "pinned_commit": "945fef9bd6ef2dacd5c003c5a11299ff0122b15d",
+      "current_commit": "945fef9bd6ef2dacd5c003c5a11299ff0122b15d",
       "pinned_ref_type": "branch",
       "pinned_ref": "codex/path-discipline-warning-slice-playbook",
       "current_ref_type": "branch",
@@ -317,7 +317,7 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "bcf8d12e112bbba09efb673b1691e0f88b699fda",
+      "current_commit": "5dcbb5035545d3934d2606642149c02cc442b1b5",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
@@ -530,5 +530,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:df70268a5e5724f75baafb11612de64fe5251bb4abd31e8a9e5e0b1ca10e2d19"
+  "content_digest": "sha256:a0004f12268bad726e442617a4e28eaf5269571f28713100a409b690d5291fbb"
 }

@@ -19,7 +19,7 @@ Operational rule:
 - Excluded surface count: `17`
 - Stack manifest: `stack.yaml`
 - Stack lock: `stack.lock.yaml`
-- Inventory digest: `sha256:df70268a5e5724f75baafb11612de64fe5251bb4abd31e8a9e5e0b1ca10e2d19`
+- Inventory digest: `sha256:a0004f12268bad726e442617a4e28eaf5269571f28713100a409b690d5291fbb`
 
 ## Managed Repos
 
@@ -32,9 +32,9 @@ Operational rule:
 | lifeline | repos/lifeline | codex/path-discipline-warning-slice-lifeline | 538f623a84b003e70dadd234e6ea3af642446a5f | 538f623a84b003e70dadd234e6ea3af642446a5f | False | trusted | True | - |
 | mazer | repos/mazer | main | 269b02b955451ca1847efb5dde1e172b4c887bb8 | 269b02b955451ca1847efb5dde1e172b4c887bb8 | False | trusted | True | initiative:initiative-mazer-d2-learning-scorer |
 | nat1-games | repos/Nat1-Games/nat1-games | codex/path-discipline-warning-slice-nat1 | 404460d3717fab389407582048a9b9f228f26d39 | 404460d3717fab389407582048a9b9f228f26d39 | False | trusted | False | - |
-| playbook | repos/playbook | codex/path-discipline-warning-slice-playbook | ce0e509d6f31a960d79ef7955c85e91a0970281f | ce0e509d6f31a960d79ef7955c85e91a0970281f | False | trusted | True | initiative:continuity-manifest-atlas-owned-repo-naming-canonicalization |
+| playbook | repos/playbook | codex/path-discipline-warning-slice-playbook | 945fef9bd6ef2dacd5c003c5a11299ff0122b15d | 945fef9bd6ef2dacd5c003c5a11299ff0122b15d | False | trusted | True | initiative:continuity-manifest-atlas-owned-repo-naming-canonicalization |
 | playbook-demo | repos/playbook-demo/playbook-demo | main | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | False | trusted | False | - |
-| stack | . | main | - | bcf8d12e112bbba09efb673b1691e0f88b699fda | True | trusted | False | - |
+| stack | . | main | - | 5dcbb5035545d3934d2606642149c02cc442b1b5 | True | trusted | False | - |
 | stream | repos/stream | main | 43769ba86d4c6ebc419ab9e7847c3843460a094f | 43769ba86d4c6ebc419ab9e7847c3843460a094f | False | trusted | False | - |
 | trove | repos/trove | codex/path-discipline-warning-slice-trove | 112715291a1d9f3b21c9a830d1dab68e6751b815 | 112715291a1d9f3b21c9a830d1dab68e6751b815 | False | trusted | True | - |
 
