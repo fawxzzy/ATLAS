@@ -114,16 +114,16 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         )
 
         sandbox_receipt = root / "docs" / "ops" / (
-            "SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-IMPLEMENTATION-"
-            "READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-06-27.md"
+            "SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-FIRST-IMPLEMENTATION-"
+            "WORKER-CLUSTER-RECONCILIATION-2026-06-27.md"
         )
         sandbox_receipt.write_text(
             "\n".join(
                 [
                     "# Sandbox Packet",
                     "",
-                    "- Mode: `root-owned docs-only validator-behavior implementation-readiness closeout and worker-routing`",
-                    "- Scope: `close the remaining root-only readiness question and freeze the exact worker-routing result for the already admitted first validator-behavior implementation slice`",
+                    "- Mode: `root-owned bounded validator-behavior helper implementation and proof reconciliation`",
+                    "- Scope: `land and prove the admitted root-local pre-verdict validator-behavior helper slice without widening into verdict activation, report mutation, or broader routing`",
                     "",
                 ]
             ),
@@ -312,11 +312,11 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
 
         self.assertEqual("hold_current_lane", payload["operator_action"])
 
-    def test_build_campaign_promotes_sandbox_after_validator_behavior_readiness_closeout(self) -> None:
+    def test_build_campaign_promotes_sandbox_after_validator_behavior_worker_cluster_reconciliation(self) -> None:
         root = self._temp_root()
         marker_doc = MARKER_DOC.replace(
             "- Sandbox Simulation Readiness: `0%`",
-            "- Sandbox Simulation Readiness: `60%`",
+            "- Sandbox Simulation Readiness: `61%`",
         )
         (root / "docs" / "atlas-book" / "02-lanes-and-markers.md").write_text(marker_doc, encoding="utf-8")
         (root / "docs" / "atlas-book" / "01-current-state.md").write_text(CURRENT_STATE_DOC, encoding="utf-8")
@@ -344,23 +344,23 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
             records["Sandbox Simulation Readiness"]["category"],
         )
         self.assertIn(
-            "implementation-readiness closeout",
+            "reconciled first implementation landing",
             records["Sandbox Simulation Readiness"]["rationale"],
         )
         self.assertEqual(
-            "Sandbox Simulation Readiness local-only first validator-behavior first-implementation worker cluster reconciliation",
+            "Sandbox Simulation Readiness post-local-only first validator-behavior next-slice selection",
             payload["next_after_current_packet"],
         )
         self.assertEqual(
-            "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-06-27.md",
+            "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-27.md",
             payload["next_after_current_packet_basis_ref"],
         )
         self.assertEqual(
-            "root-owned bounded helper implementation and proof reconciliation",
+            "root-owned docs-only post-validator-behavior next-slice selection",
             payload["next_after_current_packet_mode"],
         )
         self.assertIn(
-            "helper landing",
+            "landed pre-verdict validator-behavior helper",
             payload["next_after_current_packet_scope"],
         )
 

@@ -55,7 +55,8 @@
     "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-SUPPORTING-LANE-ADMISSION-2026-06-27.md",
     "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-FIRST-IMPLEMENTATION-ADMISSION-2026-06-27.md",
     "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-PROMPT-PACK-AND-HANDOFF-CONTRACT-2026-06-27.md",
-    "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-06-27.md"
+    "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-06-27.md",
+    "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-27.md"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -63,9 +64,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "sandbox-simulation-readiness",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-06-27.md",
+    "current_checkpoint_receipt": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-27.md",
     "checkpoint_commit": "main",
-    "checkpoint_summary": "The lane still holds at 60 percent: the bounded future validator-behavior family is now implementation-ready for one root-local pre-verdict helper slice, and the exact next package is now one local-only first validator-behavior first-implementation worker cluster reconciliation.",
+    "checkpoint_summary": "The lane now sits at 61 percent: one bounded root-local pre-verdict validator-behavior helper plus direct proof is now landed on canonical main, and the exact next package is now Sandbox Simulation Readiness post-local-only first validator-behavior next-slice selection.",
     "governing_receipts": [
       "docs/ops/STACK-LANE-0-BASELINE-INVENTORY-2026-05-22.md",
       "docs/ops/STACK-LANE-0-TRUTH-MAP-2026-05-22.md",
@@ -93,7 +94,8 @@
       "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-SUPPORTING-LANE-ADMISSION-2026-06-27.md",
       "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-FIRST-IMPLEMENTATION-ADMISSION-2026-06-27.md",
       "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-PROMPT-PACK-AND-HANDOFF-CONTRACT-2026-06-27.md",
-      "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-06-27.md"
+      "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-06-27.md",
+      "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-27.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -235,6 +237,10 @@
       {
         "path": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-06-27.md",
         "role": "current validator-behavior readiness truth and worker-routing result"
+      },
+      {
+        "path": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-27.md",
+        "role": "current validator-behavior worker-cluster reconciliation truth and next-step routing"
       }
     ],
     "verification_adoption_surfaces": [
@@ -269,8 +275,8 @@
     ],
     "blocked_or_gated_work": [
       {
-        "item": "first local-only validator-behavior implemented helper and proof",
-        "requirement": "blocked until one later explicit packet lands and reconciles the bounded root-local helper plus direct proof under the admitted worker-routing result"
+        "item": "next downstream slice above the landed local-only validator-behavior helper",
+        "requirement": "blocked until one later explicit packet selects or admits the smallest honest next scope above the reconciled pre-verdict helper and proof"
       },
       {
         "item": "validator execution, runner behavior, or wider shared routing",
@@ -281,25 +287,25 @@
         "requirement": "blocked unless a separate later packet explicitly widens the lane beyond root-owned local-only simulation posture"
       },
       {
-        "item": "higher marker movement above the current 60 percent validator-behavior-readiness threshold",
+        "item": "higher marker movement above the current 61 percent validator-behavior first-worker threshold",
         "requirement": "blocked until another real contract, implementation, proof-backed adoption, or blocker-clearance class changes operator reality again"
       }
     ],
     "next_package_ladder": [
       {
-        "package": "Sandbox Simulation Readiness local-only first validator-behavior first-implementation worker cluster reconciliation",
-        "mode": "root-owned bounded helper implementation and proof reconciliation",
-        "reason": "the root-only design ambiguity is now closed, so the next honest move is to land and prove the admitted root-local helper slice itself"
+        "package": "Sandbox Simulation Readiness post-local-only first validator-behavior next-slice selection",
+        "mode": "root-owned docs-only post-validator-behavior next-slice selection",
+        "reason": "the admitted pre-verdict helper slice is now real and directly proved, so the next honest move is to choose the smallest downstream Sandbox blocker above that landed helper instead of replaying the worker cluster or jumping into verdict, runner, or owner-side widening"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-06-27.md",
+    "freshness_checked_receipt": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-27.md",
     "freshness_checked_at": "2026-06-27T00:00:00-04:00",
-    "freshness_basis": "The manifest now matches the current 60 percent Sandbox posture because the lane now has one bounded future validator-behavior family, one exact root-local owner-facing home for that family, one explicit support posture held at none yet, one exact first implementation slice plus proof matrix for a pre-verdict root-local helper, one explicit worker handoff contract over that slice, and one explicit implementation-readiness closeout with worker-routing result, while the Book and restart surfaces project the still-flat 60 percent state and the next package moves to one explicit local-only first validator-behavior first-implementation worker cluster reconciliation.",
+    "freshness_basis": "The manifest now matches the current 61 percent Sandbox posture because the lane now has one bounded future validator-behavior family, one exact root-local owner-facing home for that family, one explicit support posture held at none yet, one exact first implementation slice plus proof matrix for a pre-verdict root-local helper, one explicit worker handoff contract over that slice, one explicit implementation-readiness closeout with worker-routing result, and one reconciled helper-plus-proof landing on canonical main, while the Book and restart surfaces project the new 61 percent state and the next package moves to Sandbox Simulation Readiness post-local-only first validator-behavior next-slice selection.",
     "marker_posture": [
       {
         "marker": "Sandbox Simulation Readiness",
-        "percent": 60,
+        "percent": 61,
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ]

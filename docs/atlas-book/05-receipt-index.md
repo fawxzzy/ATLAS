@@ -79,6 +79,7 @@
 - [Sandbox Simulation Readiness Local-Only First Validator-Behavior First-Implementation Admission](../ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-FIRST-IMPLEMENTATION-ADMISSION-2026-06-27.md)
 - [Sandbox Simulation Readiness Local-Only First Validator-Behavior Prompt-Pack And Handoff Contract](../ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-PROMPT-PACK-AND-HANDOFF-CONTRACT-2026-06-27.md)
 - [Sandbox Simulation Readiness Local-Only First Validator-Behavior Implementation-Readiness Closeout And Worker-Routing](../ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-06-27.md)
+- [Sandbox Simulation Readiness Local-Only First Validator-Behavior First-Implementation Worker-Cluster Reconciliation](../ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-27.md)
 - [Root-Bounded Lane Selection After AI Long-Run Batch Orchestration Downstream Hold Closeout](../ops/ROOT-BOUNDED-LANE-SELECTION-AFTER-AI-LONG-RUN-BATCH-ORCHESTRATION-DOWNSTREAM-HOLD-CLOSEOUT-2026-06-27.md)
 - [AI Repetition-to-Automation Pipeline Selector Operator Action And Packet Basis](../ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-SELECTOR-OPERATOR-ACTION-AND-PACKET-BASIS-2026-06-18.md)
 - [Duplicate Surface Decommission Final Closeout Pass 3](../ops/DUPLICATE-SURFACE-DECOMMISSION-FINAL-CLOSEOUT-PASS-3-2026-06-13.md)
