@@ -114,16 +114,16 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         )
 
         sandbox_receipt = root / "docs" / "ops" / (
-            "SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-CANDIDATE-OUTPUT-"
-            "REPORT-LINK-CONTRACT-FREEZE-2026-06-27.md"
+            "SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-PAIR-COHERENCE-"
+            "SEMANTICS-CONTRACT-FREEZE-2026-06-27.md"
         )
         sandbox_receipt.write_text(
             "\n".join(
                 [
                     "# Sandbox Packet",
                     "",
-                    "- Mode: `root-owned docs-only validator-candidate-output-report-link contract freeze`",
-                    "- Scope: `freeze how the admitted local-only Sandbox validator-report stub may cite or remain coupled to the admitted validator-candidate-output stub without admitting validator execution, runner behavior, or any owner-repo, deploy, secret, or live-data widening`",
+                    "- Mode: `root-owned docs-only validator-pair-coherence-semantics contract freeze`",
+                    "- Scope: `freeze how the admitted local-only Sandbox validator-report stub and validator-candidate-output stub may coexist under result.status not_run without admitting validator execution, runner behavior, or any owner-repo, deploy, secret, or live-data widening`",
                     "",
                 ]
             ),
@@ -312,11 +312,11 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
 
         self.assertEqual("hold_current_lane", payload["operator_action"])
 
-    def test_build_campaign_promotes_sandbox_after_validator_candidate_output_report_link_contract_freeze(self) -> None:
+    def test_build_campaign_promotes_sandbox_after_validator_pair_coherence_semantics_contract_freeze(self) -> None:
         root = self._temp_root()
         marker_doc = MARKER_DOC.replace(
             "- Sandbox Simulation Readiness: `0%`",
-            "- Sandbox Simulation Readiness: `51%`",
+            "- Sandbox Simulation Readiness: `54%`",
         )
         (root / "docs" / "atlas-book" / "02-lanes-and-markers.md").write_text(marker_doc, encoding="utf-8")
         (root / "docs" / "atlas-book" / "01-current-state.md").write_text(CURRENT_STATE_DOC, encoding="utf-8")
@@ -344,23 +344,23 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
             records["Sandbox Simulation Readiness"]["category"],
         )
         self.assertIn(
-            "validator-candidate-output report link",
+            "validator-pair coherence semantic layer",
             records["Sandbox Simulation Readiness"]["rationale"],
         )
         self.assertEqual(
-            "Sandbox Simulation Readiness local-only first validator-pair coherence semantics contract freeze",
+            "Sandbox Simulation Readiness local-only first validator-verdict activation gate contract freeze",
             payload["next_after_current_packet"],
         )
         self.assertEqual(
-            "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-CANDIDATE-OUTPUT-REPORT-LINK-CONTRACT-FREEZE-2026-06-27.md",
+            "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-PAIR-COHERENCE-SEMANTICS-CONTRACT-FREEZE-2026-06-27.md",
             payload["next_after_current_packet_basis_ref"],
         )
         self.assertEqual(
-            "root-owned docs-only validator-pair-coherence-semantics follow-on",
+            "root-owned docs-only validator-verdict-activation-gate follow-on",
             payload["next_after_current_packet_mode"],
         )
         self.assertIn(
-            "`result.status: not_run`",
+            "`match`, `mismatch`, or `blocked`",
             payload["next_after_current_packet_scope"],
         )
 

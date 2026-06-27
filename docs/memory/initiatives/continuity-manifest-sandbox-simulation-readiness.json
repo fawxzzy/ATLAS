@@ -47,7 +47,8 @@
     "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-COMPARISON-BOUNDARY-CONTRACT-FREEZE-2026-06-27.md",
     "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-CANDIDATE-OUTPUT-SHAPE-CONTRACT-FREEZE-2026-06-27.md",
     "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-CANDIDATE-OUTPUT-STUB-ADMISSION-2026-06-27.md",
-    "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-CANDIDATE-OUTPUT-REPORT-LINK-CONTRACT-FREEZE-2026-06-27.md"
+    "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-CANDIDATE-OUTPUT-REPORT-LINK-CONTRACT-FREEZE-2026-06-27.md",
+    "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-PAIR-COHERENCE-SEMANTICS-CONTRACT-FREEZE-2026-06-27.md"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -55,9 +56,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "sandbox-simulation-readiness",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-CANDIDATE-OUTPUT-REPORT-LINK-CONTRACT-FREEZE-2026-06-27.md",
+    "current_checkpoint_receipt": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-PAIR-COHERENCE-SEMANTICS-CONTRACT-FREEZE-2026-06-27.md",
     "checkpoint_commit": "main",
-    "checkpoint_summary": "The lane now holds at 51 percent: one bounded link now exists between the admitted validator-report stub and validator-candidate-output stub under the same validation root, the comparison boundary still stays limited to `expected_output.payload.mode`, `expected_output.payload.status`, and `expected_output.payload.observations`, and the exact next package is now one local-only first validator-pair coherence semantics contract freeze.",
+    "checkpoint_summary": "The lane now holds at 54 percent: one bounded semantic rule now exists for the admitted validator-report stub and validator-candidate-output stub while `result.status` remains `not_run`, the comparison boundary still stays limited to `expected_output.payload.mode`, `expected_output.payload.status`, and `expected_output.payload.observations`, and the exact next package is now one local-only first validator-verdict activation gate contract freeze.",
     "governing_receipts": [
       "docs/ops/STACK-LANE-0-BASELINE-INVENTORY-2026-05-22.md",
       "docs/ops/STACK-LANE-0-TRUTH-MAP-2026-05-22.md",
@@ -77,7 +78,8 @@
       "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-COMPARISON-BOUNDARY-CONTRACT-FREEZE-2026-06-27.md",
       "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-CANDIDATE-OUTPUT-SHAPE-CONTRACT-FREEZE-2026-06-27.md",
       "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-CANDIDATE-OUTPUT-STUB-ADMISSION-2026-06-27.md",
-      "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-CANDIDATE-OUTPUT-REPORT-LINK-CONTRACT-FREEZE-2026-06-27.md"
+      "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-CANDIDATE-OUTPUT-REPORT-LINK-CONTRACT-FREEZE-2026-06-27.md",
+      "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-PAIR-COHERENCE-SEMANTICS-CONTRACT-FREEZE-2026-06-27.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -187,6 +189,10 @@
       {
         "path": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-CANDIDATE-OUTPUT-REPORT-LINK-CONTRACT-FREEZE-2026-06-27.md",
         "role": "current validator-candidate-output report-link truth and next-step routing"
+      },
+      {
+        "path": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-PAIR-COHERENCE-SEMANTICS-CONTRACT-FREEZE-2026-06-27.md",
+        "role": "current validator-pair coherence semantics truth and next-step routing"
       }
     ],
     "verification_adoption_surfaces": [
@@ -221,8 +227,8 @@
     ],
     "blocked_or_gated_work": [
       {
-        "item": "first local-only validator-pair coherence semantics under `result.status: not_run`",
-        "requirement": "blocked until one later explicit packet freezes how the linked validator-report stub and validator-candidate-output stub may coexist without implying comparison or execution"
+        "item": "first local-only validator-verdict activation gate above `result.status: not_run`",
+        "requirement": "blocked until one later explicit packet freezes the exact gate that must open before any future `match`, `mismatch`, or `blocked` validator report becomes honest"
       },
       {
         "item": "validator implementation or runner behavior",
@@ -233,25 +239,25 @@
         "requirement": "blocked unless a separate later packet explicitly widens the lane beyond root-owned local-only simulation posture"
       },
       {
-        "item": "higher marker movement above the current 51 percent validator-candidate-output-report-link threshold",
+        "item": "higher marker movement above the current 54 percent validator-pair-coherence-semantics threshold",
         "requirement": "blocked until another real contract, implementation, proof-backed adoption, or blocker-clearance class changes operator reality again"
       }
     ],
     "next_package_ladder": [
       {
-        "package": "Sandbox Simulation Readiness local-only first validator-pair coherence semantics contract freeze",
-        "mode": "root-owned docs-only validator-pair-coherence-semantics follow-on",
-        "reason": "one bounded report-link now exists between the admitted validator-report stub and validator-candidate-output stub, so the next honest move is to freeze how that linked pair may coexist under `result.status: not_run` before validator behavior, runner behavior, or `_stack` claims become honest"
+        "package": "Sandbox Simulation Readiness local-only first validator-verdict activation gate contract freeze",
+        "mode": "root-owned docs-only validator-verdict-activation-gate follow-on",
+        "reason": "one bounded semantic rule now exists for the admitted validator-report stub and validator-candidate-output stub while `result.status` remains `not_run`, so the next honest move is to freeze the exact gate that would have to open before any future `match`, `mismatch`, or `blocked` report becomes honest"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-CANDIDATE-OUTPUT-REPORT-LINK-CONTRACT-FREEZE-2026-06-27.md",
+    "freshness_checked_receipt": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-PAIR-COHERENCE-SEMANTICS-CONTRACT-FREEZE-2026-06-27.md",
     "freshness_checked_at": "2026-06-27T00:00:00-04:00",
-    "freshness_basis": "The manifest now matches the current 51 percent Sandbox posture because the lane no longer stops at candidate-output stub alone: one bounded report-link now exists between the admitted validator-report stub and validator-candidate-output stub under the validation root, the comparison boundary remains frozen over the admitted expected-output oracle fields, the Book and restart surfaces project that broader pair-link truth, and the next package is now one explicit local-only first validator-pair coherence semantics contract freeze.",
+    "freshness_basis": "The manifest now matches the current 54 percent Sandbox posture because the lane no longer stops at report-link alone: one bounded semantic rule now exists for the admitted validator-report stub and validator-candidate-output stub while `result.status` remains `not_run`, the comparison boundary remains frozen over the admitted expected-output oracle fields, the Book and restart surfaces project that broader pair-coherence truth, and the next package is now one explicit local-only first validator-verdict activation gate contract freeze.",
     "marker_posture": [
       {
         "marker": "Sandbox Simulation Readiness",
-        "percent": 51,
+        "percent": 54,
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ]
