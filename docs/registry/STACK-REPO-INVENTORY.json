@@ -3,14 +3,14 @@
   "stack_manifest_ref": "stack.yaml",
   "stack_manifest_digest": "sha256:e5ac73c00983975b59e4b8e7f8541160d479087f5dc95ad1d642568116bd7d10",
   "stack_lock_ref": "stack.lock.yaml",
-  "stack_lock_digest": "sha256:c627ac4e41b97223b03a2afcca776c04ab6f6c50b4836bee0547e44e11d1374a",
+  "stack_lock_digest": "sha256:4aece1ce08edb6f51bbfd7e65a9492788da72ef8c9b94049ff04d6d8299007b0",
   "working_memory_digest": "sha256:fe4f4902e2b2c475974b050ba1bf3f5e740439aa41df2f844555c2c0dc3b310f",
   "published_refs": {
     "json": "docs/registry/STACK-REPO-INVENTORY.json",
     "markdown": "docs/audits/STACK-REPO-INVENTORY.md"
   },
   "repo_count": 12,
-  "dirty_repo_count": 3,
+  "dirty_repo_count": 2,
   "release_eligible_count": 5,
   "repos": [
     {
@@ -77,14 +77,14 @@
       "role": "application",
       "status": "incubating",
       "remote_url": "https://github.com/fawxzzy/DiscordOS.git",
-      "pinned_commit": "ff8f21cfec199f50728ddddea79ba7f546392663",
-      "current_commit": "ff8f21cfec199f50728ddddea79ba7f546392663",
+      "pinned_commit": "4fe3091a192a02077f58c2b40854a49205e057b9",
+      "current_commit": "4fe3091a192a02077f58c2b40854a49205e057b9",
       "pinned_ref_type": "branch",
       "pinned_ref": "main",
       "current_ref_type": "branch",
       "current_ref": "main",
       "branch": "main",
-      "dirty": true,
+      "dirty": false,
       "trust_class": "trusted",
       "release_eligible": false,
       "exists": true,
@@ -317,7 +317,7 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "0671e2573517b826e8b29bcf96f240410a419b77",
+      "current_commit": "73578bff3f6caf54d89d285bda3416314e39e914",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
@@ -530,5 +530,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:3efefd9d6c720d151957e40a556ebf90860d4bee8c37f1fbd33a80001d3d2b0c"
+  "content_digest": "sha256:1365a829b74e988916951817d2aa6795151c8051159f02d406abf8d79e11d960"
 }
