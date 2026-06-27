@@ -311,16 +311,16 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "Sandbox Simulation Readiness": PacketDescriptor(
-        packet="Sandbox Simulation Readiness local-only first validator actual owner-side mutation admission boundary contract freeze",
+        packet="Sandbox Simulation Readiness local-only first validator deploy execution admission boundary contract freeze",
         basis_receipt_ref=(
             "docs/ops/"
-            "SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-OWNER-"
-            "REPO-MUTATION-ADMISSION-BOUNDARY-NEXT-SLICE-SELECTION-2026-06-27.md"
+            "SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-LIVE-"
+            "OWNER-REPO-EDITS-ADMISSION-BOUNDARY-NEXT-SLICE-SELECTION-2026-06-27.md"
         ),
-        mode="root-owned docs-only validator-actual-owner-side-mutation-admission-boundary contract freeze",
+        mode="root-owned docs-only validator-deploy-execution-admission-boundary contract freeze",
         scope=(
-            "freeze the smallest later rule that may govern whether any actual owner-side mutation may exist above that frozen owner-repo-mutation family at all "
-            "without widening into live owner-repo edits, deploy execution, or broader runtime assertions"
+            "freeze the smallest later rule that may govern whether any deploy execution may exist above that frozen live-owner-repo-edits family at all "
+            "without widening into broader runtime assertions"
         ),
     ),
 }
@@ -455,11 +455,15 @@ def effective_policy(*, marker: str, percentage: int, active_lane: str | None) -
                 "and one post-public-release-truth-admission-boundary next-slice selection, "
                 "one owner-repo-mutation admission boundary contract, "
                 "and one post-owner-repo-mutation-admission-boundary next-slice selection, "
+                "one actual-owner-side-mutation admission boundary contract, "
+                "and one post-actual-owner-side-mutation-admission-boundary next-slice selection, "
+                "one live-owner-repo-edits admission boundary contract, "
+                "and one post-live-owner-repo-edits-admission-boundary next-slice selection, "
                 "but current durable restart truth still keeps the active ATLAS-root lane ahead of it."
             ),
             expected_evidence=(
-                "one bounded validator-actual-owner-side-mutation-admission-boundary contract or later downstream contract that preserves "
-                "no live owner-repo edits, closeout-by-adjacency, or live-data widening"
+                "one bounded validator-deploy-execution-admission-boundary contract or later downstream contract that preserves "
+                "no broader-runtime widening, closeout-by-adjacency, or live-data widening"
             ),
         )
     if not active_lane:

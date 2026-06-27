@@ -1694,6 +1694,10 @@
 - [Sandbox Simulation Readiness Post-Local-Only First Validator Public-Release-Truth Admission Boundary Next-Slice Selection](../ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-PUBLIC-RELEASE-TRUTH-ADMISSION-BOUNDARY-NEXT-SLICE-SELECTION-2026-06-27.md)
 - [Sandbox Simulation Readiness Local-Only First Validator Owner-Repo Mutation Admission Boundary Contract Freeze](../ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-OWNER-REPO-MUTATION-ADMISSION-BOUNDARY-CONTRACT-FREEZE-2026-06-27.md)
 - [Sandbox Simulation Readiness Post-Local-Only First Validator Owner-Repo Mutation Admission Boundary Next-Slice Selection](../ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-OWNER-REPO-MUTATION-ADMISSION-BOUNDARY-NEXT-SLICE-SELECTION-2026-06-27.md)
+- [Sandbox Simulation Readiness Local-Only First Validator Actual Owner-Side Mutation Admission Boundary Contract Freeze](../ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-ACTUAL-OWNER-SIDE-MUTATION-ADMISSION-BOUNDARY-CONTRACT-FREEZE-2026-06-27.md)
+- [Sandbox Simulation Readiness Post-Local-Only First Validator Actual Owner-Side Mutation Admission Boundary Next-Slice Selection](../ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-ACTUAL-OWNER-SIDE-MUTATION-ADMISSION-BOUNDARY-NEXT-SLICE-SELECTION-2026-06-27.md)
+- [Sandbox Simulation Readiness Local-Only First Validator Live Owner-Repo Edits Admission Boundary Contract Freeze](../ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-LIVE-OWNER-REPO-EDITS-ADMISSION-BOUNDARY-CONTRACT-FREEZE-2026-06-27.md)
+- [Sandbox Simulation Readiness Post-Local-Only First Validator Live Owner-Repo Edits Admission Boundary Next-Slice Selection](../ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-LIVE-OWNER-REPO-EDITS-ADMISSION-BOUNDARY-NEXT-SLICE-SELECTION-2026-06-27.md)
 ## Notes
 
 This index is a working spine, not an exhaustive archive.
