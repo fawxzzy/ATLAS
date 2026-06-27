@@ -311,17 +311,16 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "Sandbox Simulation Readiness": PacketDescriptor(
-        packet="Sandbox Simulation Readiness local-only first validator-behavior boundary contract freeze",
+        packet="Sandbox Simulation Readiness local-only first validator-behavior owner-surface admission",
         basis_receipt_ref=(
             "docs/ops/"
-            "SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-VERDICT-ACTIVATION-"
-            "GATE-CONTRACT-FREEZE-2026-06-27.md"
+            "SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-BOUNDARY-"
+            "CONTRACT-FREEZE-2026-06-27.md"
         ),
-        mode="root-owned docs-only validator-behavior-boundary follow-on",
+        mode="root-owned docs-only validator-behavior owner-surface admission",
         scope=(
-            "freeze the smallest behavior family that a future local-only validator would be allowed to perform "
-            "before any linked validator-report may move beyond `result.status: not_run` without admitting validator execution, runner behavior, "
-            "no-_stack widening, or mutation behavior"
+            "admit the exact local owner-facing surface that would hold the frozen validator-behavior family "
+            "before any implementation helper, worker routing, validator execution, or no-_stack widening becomes honest"
         ),
     ),
 }
@@ -409,11 +408,11 @@ def effective_policy(*, marker: str, percentage: int, active_lane: str | None) -
         policy = MarkerPolicy(
             category="admissible after current lane",
             rationale=(
-                "The lane now has one admitted root-owned starter packet plus durable scenario, runtime, and fixture-pack contract freezes, one admitted example pair, one note-only leaf fixture, one input fixture stub, one expected-output fixture stub, one validator-boundary contract freeze, one validator descriptor stub, one validator-report contract freeze, one validator-report stub, one validator-status semantics contract, one validator-comparison boundary, one validator-candidate-output shape, one validator-candidate-output stub, one validator-candidate-output report link, one validator-pair coherence semantic layer, and one validator-verdict activation gate, "
+                "The lane now has one admitted root-owned starter packet plus durable scenario, runtime, and fixture-pack contract freezes, one admitted example pair, one note-only leaf fixture, one input fixture stub, one expected-output fixture stub, one validator-boundary contract freeze, one validator descriptor stub, one validator-report contract freeze, one validator-report stub, one validator-status semantics contract, one validator-comparison boundary, one validator-candidate-output shape, one validator-candidate-output stub, one validator-candidate-output report link, one validator-pair coherence semantic layer, one validator-verdict activation gate, and one validator-behavior boundary, "
                 "but current durable restart truth still keeps the active ATLAS-root lane ahead of it."
             ),
             expected_evidence=(
-                "one bounded local-only first validator-behavior boundary contract freeze that preserves "
+                "one bounded local-only first validator-behavior owner-surface admission that preserves "
                 "no owner-repo, deploy, secret, or live-data widening"
             ),
         )

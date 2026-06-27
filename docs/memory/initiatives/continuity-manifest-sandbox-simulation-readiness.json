@@ -49,7 +49,8 @@
     "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-CANDIDATE-OUTPUT-STUB-ADMISSION-2026-06-27.md",
     "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-CANDIDATE-OUTPUT-REPORT-LINK-CONTRACT-FREEZE-2026-06-27.md",
     "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-PAIR-COHERENCE-SEMANTICS-CONTRACT-FREEZE-2026-06-27.md",
-    "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-VERDICT-ACTIVATION-GATE-CONTRACT-FREEZE-2026-06-27.md"
+    "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-VERDICT-ACTIVATION-GATE-CONTRACT-FREEZE-2026-06-27.md",
+    "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-BOUNDARY-CONTRACT-FREEZE-2026-06-27.md"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -57,9 +58,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "sandbox-simulation-readiness",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-VERDICT-ACTIVATION-GATE-CONTRACT-FREEZE-2026-06-27.md",
+    "current_checkpoint_receipt": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-BOUNDARY-CONTRACT-FREEZE-2026-06-27.md",
     "checkpoint_commit": "main",
-    "checkpoint_summary": "The lane now holds at 57 percent: one bounded activation gate now exists for all future non-`not_run` validator verdicts, the comparison boundary still stays limited to `expected_output.payload.mode`, `expected_output.payload.status`, and `expected_output.payload.observations`, and the exact next package is now one local-only first validator-behavior boundary contract freeze.",
+    "checkpoint_summary": "The lane now holds at 60 percent: one bounded future validator-behavior family now exists over the admitted validation pair and frozen oracle boundary, the comparison boundary still stays limited to `expected_output.payload.mode`, `expected_output.payload.status`, and `expected_output.payload.observations`, and the exact next package is now one local-only first validator-behavior owner-surface admission.",
     "governing_receipts": [
       "docs/ops/STACK-LANE-0-BASELINE-INVENTORY-2026-05-22.md",
       "docs/ops/STACK-LANE-0-TRUTH-MAP-2026-05-22.md",
@@ -81,7 +82,8 @@
       "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-CANDIDATE-OUTPUT-STUB-ADMISSION-2026-06-27.md",
       "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-CANDIDATE-OUTPUT-REPORT-LINK-CONTRACT-FREEZE-2026-06-27.md",
       "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-PAIR-COHERENCE-SEMANTICS-CONTRACT-FREEZE-2026-06-27.md",
-      "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-VERDICT-ACTIVATION-GATE-CONTRACT-FREEZE-2026-06-27.md"
+      "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-VERDICT-ACTIVATION-GATE-CONTRACT-FREEZE-2026-06-27.md",
+      "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-BOUNDARY-CONTRACT-FREEZE-2026-06-27.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -199,6 +201,10 @@
       {
         "path": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-VERDICT-ACTIVATION-GATE-CONTRACT-FREEZE-2026-06-27.md",
         "role": "current validator-verdict activation gate truth and next-step routing"
+      },
+      {
+        "path": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-BOUNDARY-CONTRACT-FREEZE-2026-06-27.md",
+        "role": "current validator-behavior boundary truth and next-step routing"
       }
     ],
     "verification_adoption_surfaces": [
@@ -233,8 +239,8 @@
     ],
     "blocked_or_gated_work": [
       {
-        "item": "first local-only validator-behavior boundary above the closed verdict-activation gate",
-        "requirement": "blocked until one later explicit packet freezes the smallest behavior family that a future local-only validator may perform before any non-`not_run` verdict becomes honest"
+        "item": "first local-only validator-behavior owner surface",
+        "requirement": "blocked until one later explicit packet admits the exact local owner-facing surface that would hold the frozen validator-behavior family"
       },
       {
         "item": "validator implementation or runner behavior",
@@ -245,25 +251,25 @@
         "requirement": "blocked unless a separate later packet explicitly widens the lane beyond root-owned local-only simulation posture"
       },
       {
-        "item": "higher marker movement above the current 57 percent validator-verdict-activation-gate threshold",
+        "item": "higher marker movement above the current 60 percent validator-behavior-boundary threshold",
         "requirement": "blocked until another real contract, implementation, proof-backed adoption, or blocker-clearance class changes operator reality again"
       }
     ],
     "next_package_ladder": [
       {
-        "package": "Sandbox Simulation Readiness local-only first validator-behavior boundary contract freeze",
-        "mode": "root-owned docs-only validator-behavior-boundary follow-on",
-        "reason": "one bounded activation gate now exists for all future non-`not_run` verdict statuses, so the next honest move is to freeze the smallest behavior family that a later local-only validator would actually be allowed to perform before any verdict report becomes honest"
+        "package": "Sandbox Simulation Readiness local-only first validator-behavior owner-surface admission",
+        "mode": "root-owned docs-only validator-behavior owner-surface admission",
+        "reason": "one bounded future validator-behavior family now exists, so the next honest move is to admit the exact local owner-facing surface that would hold that behavior before any implementation, helper, or worker routing becomes honest"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-VERDICT-ACTIVATION-GATE-CONTRACT-FREEZE-2026-06-27.md",
+    "freshness_checked_receipt": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-BOUNDARY-CONTRACT-FREEZE-2026-06-27.md",
     "freshness_checked_at": "2026-06-27T00:00:00-04:00",
-    "freshness_basis": "The manifest now matches the current 57 percent Sandbox posture because the lane no longer stops at pair-coherence alone: one bounded activation gate now exists for all future non-`not_run` verdict statuses, the comparison boundary remains frozen over the admitted expected-output oracle fields, the Book and restart surfaces project that broader verdict-gate truth, and the next package is now one explicit local-only first validator-behavior boundary contract freeze.",
+    "freshness_basis": "The manifest now matches the current 60 percent Sandbox posture because the lane no longer stops at verdict-gate alone: one bounded future validator-behavior family now exists over the admitted validation pair and frozen oracle boundary, the Book and restart surfaces project that broader validator-behavior-boundary truth, and the next package is now one explicit local-only first validator-behavior owner-surface admission.",
     "marker_posture": [
       {
         "marker": "Sandbox Simulation Readiness",
-        "percent": 57,
+        "percent": 60,
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ]
