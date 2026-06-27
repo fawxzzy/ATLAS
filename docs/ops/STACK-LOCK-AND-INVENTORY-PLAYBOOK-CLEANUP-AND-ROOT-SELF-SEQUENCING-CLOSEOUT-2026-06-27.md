@@ -20,7 +20,7 @@ Refresh the root lock and published inventory after `playbook` settles clean, th
 
 ## Done
 
-- confirmed `repos/playbook` settled clean on `codex/path-discipline-warning-slice-playbook` at `5960b9457b9ac96b0ae6ac4b1ef623759e1720b3`
+- confirmed `repos/playbook` settled clean on `codex/path-discipline-warning-slice-playbook` at `7d603cbaf0f6b60a8ca15376f75c6aadadb68215`
 - regenerated `stack.lock.yaml` to the current managed working set
 - regenerated `docs/registry/STACK-REPO-INVENTORY.json` and `docs/audits/STACK-REPO-INVENTORY.md` from the same live working set
 - lowered the published dirty-repo count from `2` to `1`
@@ -30,7 +30,7 @@ Refresh the root lock and published inventory after `playbook` settles clean, th
 
 ## Current Read
 
-- `playbook` is now lock-pinned clean on `codex/path-discipline-warning-slice-playbook` at `5960b9457b9ac96b0ae6ac4b1ef623759e1720b3`
+- `playbook` is now lock-pinned clean on `codex/path-discipline-warning-slice-playbook` at `7d603cbaf0f6b60a8ca15376f75c6aadadb68215`
 - every managed child repo is now clean
 - the published dirty-repo count is now `1` because `stack` dirties itself while writing `stack.lock.yaml` and the published inventory surfaces
 - the remaining dirty signal is a root self-sequencing writeback edge, not another owner-repo cleanup packet
