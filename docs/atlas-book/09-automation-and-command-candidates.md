@@ -241,7 +241,9 @@ First workflow targets:
 - Supabase review/export packet
 - Vercel dependency-check packet
 - DiscordOS boundary handoff packet
-- future model-prompt input packet
+- model-prompt input packet
+- `_stack` release-proof / update-draft downstream package packet
+- Fitness QA/LLEL proof packet
 
 Required packet fields for the first helper candidate:
 
@@ -431,14 +433,26 @@ Current landed wrapper layer:
 - the wrapper remains a thin no-send orchestrator over the existing validator, dry-run emitter, review, and proof-packager helpers
 - package 2 keeps the wrapper thin over the existing review primitive and still rejects transport-shaped and send-capable flags at the wrapper entrypoint
 - package 3 keeps the wrapper thin over the existing proof-packager primitive and still rejects transport-shaped and send-capable flags at the wrapper entrypoint
-- package 3 proof now confirms `proof-only` across the same three admitted workflow classes already used by the helper family
-- package 4 proof now confirms `full-local-chain` across the same three admitted workflow classes already used by the helper family
+- package 3 proof now confirms `proof-only` across the same fifteen admitted workflow classes already used by the helper family
+- package 4 proof now confirms `full-local-chain` across the same fifteen admitted workflow classes already used by the helper family
 
 Current adoptable-now workflow classes for the no-send chain:
 
 - Supabase export / approval-prep packet workflows
 - Vercel dependency / deletion decision workflows
 - DiscordOS trust-boundary / provenance proof workflows
+- model-prompt input / prompt-ready context packet workflows
+- `_stack` release-proof / update-draft downstream package workflows
+- Fitness QA/LLEL proof / release-readiness preparation packet workflows
+- Fitness feedback-board reviewed-task packet / codex-prompt preparation workflows
+- Fitness feedback-board export / codex-draft preparation workflows
+- Fitness Discord inventory / noise-audit review workflows
+- Fitness Discord feedback raw-export workflows
+- Fitness release-readiness report workflows
+- Fitness feedback phase-readiness report workflows
+- Fitness Discord community doctor report workflows
+- Fitness typecheck debt inventory report workflows
+- Fitness pilot-readiness report workflows
 
 Not yet honest as blanket adoption targets:
 
