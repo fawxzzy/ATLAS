@@ -117,13 +117,13 @@ It does not admit:
 
 ## Ratchet Decision
 
-`Sandbox Simulation Readiness` moves from `61%` to `62%`.
+`Sandbox Simulation Readiness` moves from `61%` to `64%`.
 
 Why:
 
 - the lane already had one landed bounded pre-verdict helper plus direct proof on canonical `main`
-- the next exact ambiguity was the smallest rule tying that helper output to the already frozen comparison boundary
-- this packet clears one real blocker by freezing that rule without widening into verdict activation or execution
+- the next exact ambiguity was the second verdict-activation precondition: the smallest rule tying that helper output to the already frozen comparison boundary
+- this packet clears that blocker class decisively enough to move the lane to the current `64%` checkpoint without widening into verdict activation or execution
 
 It stays low because:
 
