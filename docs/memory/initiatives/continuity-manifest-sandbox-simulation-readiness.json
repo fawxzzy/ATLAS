@@ -1,0 +1,129 @@
+{
+  "contract_version": "atlas.initiative.v1",
+  "id": "continuity-manifest-sandbox-simulation-readiness",
+  "title": "Continuity Manifest Sandbox Simulation Readiness",
+  "summary": "Maintained ATLAS-root retrieval map for the newly admitted Sandbox Simulation Readiness lane.",
+  "status": "active",
+  "owner": "stack-root",
+  "created_at": "2026-06-27T00:00:00-04:00",
+  "updated_at": "2026-06-27T00:00:00-04:00",
+  "related_plan_refs": [],
+  "related_decision_refs": [],
+  "related_hypothesis_refs": [],
+  "related_session_refs": [],
+  "related_attention_refs": [],
+  "proposed_next_session_refs": [],
+  "evidence_refs": [
+    "docs/atlas-book/01-current-state.md",
+    "docs/atlas-book/02-lanes-and-markers.md",
+    "docs/atlas-book/05-receipt-index.md",
+    "docs/atlas-book/11-system-map-graph.md",
+    "docs/atlas-book/12-restart-and-handoff-guide.md",
+    "docs/atlas-book/13-vision-and-endgames.md",
+    "docs/memory/README.md",
+    "docs/ops/STACK-LANE-0-BASELINE-INVENTORY-2026-05-22.md",
+    "docs/ops/STACK-LANE-0-TRUTH-MAP-2026-05-22.md",
+    "docs/ops/ROOT-NON-FITNESS-MARKER-KNOCKOUT-CAMPAIGN-2026-06-09.md",
+    "docs/ops/SANDBOX-SIMULATION-READINESS-STARTER-PACKET-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-27.md"
+  ],
+  "supersedes": [],
+  "superseded_by": [],
+  "metadata": {
+    "artifact_kind": "continuity_manifest",
+    "lane_id": "sandbox-simulation-readiness",
+    "scope_class": "atlas-root-governance",
+    "current_checkpoint_receipt": "docs/ops/SANDBOX-SIMULATION-READINESS-STARTER-PACKET-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-27.md",
+    "checkpoint_commit": "main",
+    "checkpoint_summary": "The lane now holds at 5 percent: one first bounded root-owned starter packet now admits a local-only sandbox posture, preserves no owner-repo or live-system mutation boundaries, and fixes one exact next package around artifact-home and scenario-manifest contract shape.",
+    "governing_receipts": [
+      "docs/ops/STACK-LANE-0-BASELINE-INVENTORY-2026-05-22.md",
+      "docs/ops/STACK-LANE-0-TRUTH-MAP-2026-05-22.md",
+      "docs/ops/ROOT-NON-FITNESS-MARKER-KNOCKOUT-CAMPAIGN-2026-06-09.md",
+      "docs/ops/SANDBOX-SIMULATION-READINESS-STARTER-PACKET-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-27.md"
+    ],
+    "owner_truth_surfaces": [
+      {
+        "path": "docs/ops/STACK-LANE-0-BASELINE-INVENTORY-2026-05-22.md",
+        "role": "original lane baseline and purpose"
+      },
+      {
+        "path": "docs/ops/STACK-LANE-0-TRUTH-MAP-2026-05-22.md",
+        "role": "original lane end-state and non-goal truth"
+      },
+      {
+        "path": "docs/ops/ROOT-NON-FITNESS-MARKER-KNOCKOUT-CAMPAIGN-2026-06-09.md",
+        "role": "current pre-starter exclusion and exact blocker basis"
+      },
+      {
+        "path": "docs/ops/SANDBOX-SIMULATION-READINESS-STARTER-PACKET-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-27.md",
+        "role": "current starter-packet contract and continuity-widening truth"
+      }
+    ],
+    "verification_adoption_surfaces": [
+      {
+        "path": "docs/atlas-book/01-current-state.md",
+        "role": "current lane posture projection surface"
+      },
+      {
+        "path": "docs/atlas-book/02-lanes-and-markers.md",
+        "role": "marker table and lane-state projection surface"
+      },
+      {
+        "path": "docs/atlas-book/05-receipt-index.md",
+        "role": "receipt spine"
+      },
+      {
+        "path": "docs/atlas-book/11-system-map-graph.md",
+        "role": "lane-state projection routing surface"
+      },
+      {
+        "path": "docs/atlas-book/12-restart-and-handoff-guide.md",
+        "role": "restart routing surface"
+      },
+      {
+        "path": "docs/atlas-book/13-vision-and-endgames.md",
+        "role": "current endgame and next-valid-package surface"
+      },
+      {
+        "path": "docs/memory/README.md",
+        "role": "manifest-backed continuity doctrine surface"
+      }
+    ],
+    "blocked_or_gated_work": [
+      {
+        "item": "exact local-only artifact-home and scenario-manifest contract shape",
+        "requirement": "blocked until one later explicit docs-only packet freezes the exact `runtime/atlas/sandbox/**` artifact-home and scenario-manifest boundary"
+      },
+      {
+        "item": "simulation fixtures, harness validator, or runner behavior",
+        "requirement": "blocked until one later explicit packet admits concrete local-only fixture, validator, or runner scope beyond this starter contract"
+      },
+      {
+        "item": "_stack`, owner-repo, deploy, secret, or live-data widening",
+        "requirement": "blocked unless a separate later packet explicitly widens the lane beyond root-owned local-only simulation posture"
+      },
+      {
+        "item": "higher marker movement above the current 5 percent starter threshold",
+        "requirement": "blocked until another real contract, implementation, proof-backed adoption, or blocker-clearance class changes operator reality again"
+      }
+    ],
+    "next_package_ladder": [
+      {
+        "package": "Sandbox Simulation Readiness local-only artifact-home and scenario-manifest contract freeze",
+        "mode": "root-owned docs-only contract follow-on",
+        "reason": "the lane now has one real starter packet, but it still lacks one exact future local-only runtime artifact-home and scenario-manifest contract before fixture, validator, runner, or `_stack` claims become honest"
+      }
+    ],
+    "freshness_state": "manifest-backed",
+    "freshness_checked_receipt": "docs/ops/SANDBOX-SIMULATION-READINESS-STARTER-PACKET-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-27.md",
+    "freshness_checked_at": "2026-06-27T00:00:00-04:00",
+    "freshness_basis": "The manifest now matches the newly admitted 5 percent Sandbox posture because one starter receipt now exists, the lane is no longer excluded at zero, the Book and restart surfaces project that posture, and one exact next package is fixed around local-only artifact-home and scenario-manifest contract shape.",
+    "marker_posture": [
+      {
+        "marker": "Sandbox Simulation Readiness",
+        "percent": 5,
+        "source": "docs/atlas-book/02-lanes-and-markers.md"
+      }
+    ]
+  }
+}

@@ -387,8 +387,20 @@ def load_active_lane(*, root: Path) -> str | None:
     return next(iter(discovered))
 
 
-def effective_policy(*, marker: str, active_lane: str | None) -> MarkerPolicy:
+def effective_policy(*, marker: str, percentage: int, active_lane: str | None) -> MarkerPolicy:
     policy = POLICY_REGISTRY[marker]
+    if marker == "Sandbox Simulation Readiness" and percentage > 0:
+        policy = MarkerPolicy(
+            category="admissible after current lane",
+            rationale=(
+                "The lane now has one admitted root-owned starter packet and one exact docs-only follow-on, "
+                "but current durable restart truth still keeps the active ATLAS-root lane ahead of it."
+            ),
+            expected_evidence=(
+                "one bounded local-only artifact-home and scenario-manifest contract packet that preserves "
+                "no owner-repo, deploy, secret, or live-data widening"
+            ),
+        )
     if not active_lane:
         return policy
     if marker == active_lane:
@@ -499,7 +511,7 @@ def build_campaign(*, root: Path) -> dict[str, object]:
 
     records: list[MarkerRecord] = []
     for marker, percentage in open_markers.items():
-        policy = effective_policy(marker=marker, active_lane=active_lane)
+        policy = effective_policy(marker=marker, percentage=percentage, active_lane=active_lane)
         if policy.category not in ALLOWED_CATEGORIES:
             raise MarkerSelectorError(f"Unsupported category for {marker}: {policy.category}")
         section = "active front-page" if marker in sections["active_front_page"] else "supporting open"

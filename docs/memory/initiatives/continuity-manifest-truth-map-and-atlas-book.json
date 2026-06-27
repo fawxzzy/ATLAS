@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-06-19T00:00:00Z",
-  "updated_at": "2026-06-27T07:20:00.000000Z",
+  "updated_at": "2026-06-27T00:00:00-04:00",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -43,7 +43,8 @@
     "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-STALE-OWNER-SIDE-PACKET-AND-PARITY-CAVEAT-RECONCILIATION-2026-06-26.md",
     "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-PROTECTED-QA-AND-DISCORDOS-PROJECTION-REFRESH-CONTINUITY-RESYNC-2026-06-27.md",
     "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-DESKTOP-MANUAL-ATTESTATION-MOBILE-GATE-REFRESH-CONTINUITY-RESYNC-2026-06-27.md",
-    "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-LIFELINE-RUNTIME-RESIDUE-ZERO-WARNING-CLOSEOUT-AND-STACK-RESYNC-2026-06-27.md"
+    "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-LIFELINE-RUNTIME-RESIDUE-ZERO-WARNING-CLOSEOUT-AND-STACK-RESYNC-2026-06-27.md",
+    "docs/ops/SANDBOX-SIMULATION-READINESS-STARTER-PACKET-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-27.md"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -51,9 +52,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "truth-map-and-atlas-book",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-LIFELINE-RUNTIME-RESIDUE-ZERO-WARNING-CLOSEOUT-AND-STACK-RESYNC-2026-06-27.md",
-    "checkpoint_commit": "pending-closeout-publication",
-    "checkpoint_summary": "The lane still sits at 97 percent because the canonical Book surfaces now mirror the June 27 protected-QA cluster and current DiscordOS cutover truth coherently, current Fitness posture is projected as clean emulated proof plus one desktop real-browser manual attestation at manual review with only Android and iPhone real-device proof still open, the current root validation floor is restored to critical 0 / error 0 / warning 0 / info 0 after removing the last confirmed ignored Lifeline runtime residue, the older stale protected-QA and pre-cutover DiscordOS wording is cleared from the live restart surfaces, the seeded initiative continuity-manifest set remains clean at 18 of 18 ok with zero warnings and zero errors, and all 6 of 6 eligible still-open markers remain both manifest-backed and restart-ready from one machine-readable index.",
+    "current_checkpoint_receipt": "docs/ops/SANDBOX-SIMULATION-READINESS-STARTER-PACKET-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-27.md",
+    "checkpoint_commit": "main",
+    "checkpoint_summary": "The lane now sits at 98 percent because the canonical Book surfaces still mirror the June 27 protected-QA cluster and current DiscordOS cutover truth coherently, the root validation floor remains at critical 0 / error 0 / warning 0 / info 0 after the Lifeline residue cleanup, and the continuity substrate widens again to 19 of 19 clean manifests with all 7 of 7 eligible still-open markers both manifest-backed and restart-ready after Sandbox Simulation Readiness gained its first starter packet.",
     "governing_receipts": [
       "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-MARKER-SCARCITY-AND-CLOSED-LADDER-CARRY-FORWARD-HYGIENE-PASS-3-2026-05-29.md",
       "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-POST-INVENTORY-CLOSEOUT-CLUSTER-PROJECTION-REFRESH-PASS-4-2026-06-02.md",
@@ -75,7 +76,8 @@
       "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-STALE-OWNER-SIDE-PACKET-AND-PARITY-CAVEAT-RECONCILIATION-2026-06-26.md",
       "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-PROTECTED-QA-AND-DISCORDOS-PROJECTION-REFRESH-CONTINUITY-RESYNC-2026-06-27.md",
       "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-DESKTOP-MANUAL-ATTESTATION-MOBILE-GATE-REFRESH-CONTINUITY-RESYNC-2026-06-27.md",
-      "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-LIFELINE-RUNTIME-RESIDUE-ZERO-WARNING-CLOSEOUT-AND-STACK-RESYNC-2026-06-27.md"
+      "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-LIFELINE-RUNTIME-RESIDUE-ZERO-WARNING-CLOSEOUT-AND-STACK-RESYNC-2026-06-27.md",
+      "docs/ops/SANDBOX-SIMULATION-READINESS-STARTER-PACKET-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-27.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -161,6 +163,10 @@
       {
         "path": "docs/atlas-book/13-vision-and-endgames.md",
         "role": "current endgame and next-package truth"
+      },
+      {
+        "path": "docs/ops/SANDBOX-SIMULATION-READINESS-STARTER-PACKET-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-27.md",
+        "role": "current exact continuity widening surface for the newly admitted Sandbox lane"
       }
     ],
     "verification_adoption_surfaces": [
@@ -192,7 +198,7 @@
       },
       {
         "item": "higher marker movement above the current refresh-backed ratchet",
-        "requirement": "blocked until owner truth widens, continuity automation expands materially beyond the current fully clean 18-manifest health plus 8-of-8 eligible-open-marker coverage plus 8-of-8 restart-index surface, or a new projection blocker class is cleared"
+        "requirement": "blocked until owner truth widens, continuity automation expands materially beyond the current fully clean 19-manifest health plus 7-of-7 eligible-open-marker coverage plus 7-of-7 restart-index surface, or a new projection blocker class is cleared"
       }
     ],
     "next_package_ladder": [
@@ -203,13 +209,13 @@
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-LIFELINE-RUNTIME-RESIDUE-ZERO-WARNING-CLOSEOUT-AND-STACK-RESYNC-2026-06-27.md",
-    "freshness_checked_at": "2026-06-27T09:20:00.000000Z",
-    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture now match the refreshed current-state, marker, restart, system-map, and endgame mirrors: current protected-QA truth projects playbook and trove as ready, fitness as manual review with the desktop real-browser lane cleared by manual attestation and only the Android plus iPhone real-device lanes still open, foundation plus lifeline plus stream as trusted-origin blocked, current DiscordOS truth projects live runtime/publication/feedback cutover with explicit retained Fitness seams, the root validation floor now projects critical 0 / error 0 / warning 0 / info 0 after the Lifeline runtime-residue cleanup, the initiative manifest-health surface remains at 18 ok / 0 warning / 0 error, the eligible-open-marker coverage surface remains at 6 of 6 manifest-backed, and the eligible-open-marker restart index remains at 6 of 6 restart-ready.",
+    "freshness_checked_receipt": "docs/ops/SANDBOX-SIMULATION-READINESS-STARTER-PACKET-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-27.md",
+    "freshness_checked_at": "2026-06-27T00:00:00-04:00",
+    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture now match the refreshed current-state, marker, restart, system-map, and endgame mirrors after the June 27 Sandbox starter-packet widening: current protected-QA truth still projects playbook and trove as ready, fitness as manual review with only the Android plus iPhone real-device lanes still open, current DiscordOS truth still projects live runtime/publication/feedback cutover with explicit retained Fitness seams, the root validation floor projects critical 0 / error 0 / warning 0 / info 0, the initiative manifest-health surface now reads 19 ok / 0 warning / 0 error, and both the eligible-open-marker coverage and restart-index surfaces now read 7 of 7.",
     "marker_posture": [
       {
         "marker": "Truth Map & ATLAS Book",
-        "percent": 97,
+        "percent": 98,
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ]

@@ -295,6 +295,28 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
 
         self.assertEqual("hold_current_lane", payload["operator_action"])
 
+    def test_build_campaign_promotes_sandbox_after_starter_packet(self) -> None:
+        root = self._temp_root()
+        marker_doc = MARKER_DOC.replace(
+            "- Sandbox Simulation Readiness: `0%`",
+            "- Sandbox Simulation Readiness: `5%`",
+        )
+        (root / "docs" / "atlas-book" / "02-lanes-and-markers.md").write_text(marker_doc, encoding="utf-8")
+        (root / "docs" / "atlas-book" / "01-current-state.md").write_text(CURRENT_STATE_DOC, encoding="utf-8")
+        self._write_packet_receipts(root)
+
+        payload = build_campaign(root=root)
+        records = {record["marker"]: record for record in payload["open_markers"]}
+
+        self.assertEqual(
+            "admissible after current lane",
+            records["Sandbox Simulation Readiness"]["category"],
+        )
+        self.assertIn(
+            "admitted root-owned starter packet",
+            records["Sandbox Simulation Readiness"]["rationale"],
+        )
+
     def test_build_campaign_normalizes_inline_code_marker_names(self) -> None:
         root = self._temp_root()
         marker_doc = MARKER_DOC.replace("- _stack Readiness: `100%`", "- `_stack` Readiness: `100%`")
