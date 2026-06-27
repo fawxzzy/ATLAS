@@ -26,6 +26,7 @@
     "data/atlas/sandbox/fixtures/local-only-example-stub/inputs/first-input-stub.json",
     "data/atlas/sandbox/fixtures/local-only-example-stub/expected-output/first-expected-output-stub.json",
     "data/atlas/sandbox/validators/local-only-example-stub/validator.json",
+    "runtime/atlas/sandbox/runs/local-only-example-stub/local-only-example-run-001/validation/report.json",
     "docs/memory/README.md",
     "docs/ops/STACK-LANE-0-BASELINE-INVENTORY-2026-05-22.md",
     "docs/ops/STACK-LANE-0-TRUTH-MAP-2026-05-22.md",
@@ -39,7 +40,8 @@
     "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-EXPECTED-OUTPUT-FIXTURE-STUB-ADMISSION-2026-06-27.md",
     "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BOUNDARY-CONTRACT-FREEZE-2026-06-27.md",
     "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-DESCRIPTOR-STUB-ADMISSION-2026-06-27.md",
-    "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-REPORT-CONTRACT-FREEZE-2026-06-27.md"
+    "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-REPORT-CONTRACT-FREEZE-2026-06-27.md",
+    "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-REPORT-STUB-ADMISSION-2026-06-27.md"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -47,9 +49,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "sandbox-simulation-readiness",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-REPORT-CONTRACT-FREEZE-2026-06-27.md",
+    "current_checkpoint_receipt": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-REPORT-STUB-ADMISSION-2026-06-27.md",
     "checkpoint_commit": "main",
-    "checkpoint_summary": "The lane now holds at 33 percent: one future Sandbox validator-report contract is now frozen at `runtime/atlas/sandbox/runs/<scenario_id>/<run_id>/validation/report.json`, the minimum report shape now preserves bounded result vocabulary and derivative-only truth, the validator descriptor and read boundary remain non-executing and authority-false, and the exact next package is now one local-only first validator-report stub admission.",
+    "checkpoint_summary": "The lane now holds at 36 percent: one concrete Sandbox validator-report stub now exists at `runtime/atlas/sandbox/runs/local-only-example-stub/local-only-example-run-001/validation/report.json`, the admitted example root now instantiates non-executing validation output shape as committed data, the validator descriptor and report contract remain authority-false, and the exact next package is now one local-only first validator-status semantics contract freeze.",
     "governing_receipts": [
       "docs/ops/STACK-LANE-0-BASELINE-INVENTORY-2026-05-22.md",
       "docs/ops/STACK-LANE-0-TRUTH-MAP-2026-05-22.md",
@@ -63,7 +65,8 @@
       "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-EXPECTED-OUTPUT-FIXTURE-STUB-ADMISSION-2026-06-27.md",
       "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BOUNDARY-CONTRACT-FREEZE-2026-06-27.md",
       "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-DESCRIPTOR-STUB-ADMISSION-2026-06-27.md",
-      "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-REPORT-CONTRACT-FREEZE-2026-06-27.md"
+      "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-REPORT-CONTRACT-FREEZE-2026-06-27.md",
+      "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-REPORT-STUB-ADMISSION-2026-06-27.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -115,6 +118,10 @@
         "role": "current first validator descriptor truth"
       },
       {
+        "path": "runtime/atlas/sandbox/runs/local-only-example-stub/local-only-example-run-001/validation/report.json",
+        "role": "current first validator-report stub truth"
+      },
+      {
         "path": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-EXAMPLE-SCENARIO-AND-FIXTURE-PACK-STUB-ADMISSION-2026-06-27.md",
         "role": "current example-pair admission truth"
       },
@@ -141,6 +148,10 @@
       {
         "path": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-REPORT-CONTRACT-FREEZE-2026-06-27.md",
         "role": "current validator-report contract truth and next-step routing"
+      },
+      {
+        "path": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-REPORT-STUB-ADMISSION-2026-06-27.md",
+        "role": "current validator-report stub admission truth and next-step routing"
       }
     ],
     "verification_adoption_surfaces": [
@@ -175,8 +186,8 @@
     ],
     "blocked_or_gated_work": [
       {
-        "item": "first local-only validator-report stub under the frozen report contract",
-        "requirement": "blocked until one later explicit packet admits one bounded non-executing validator-report stub under the frozen runtime validation home"
+        "item": "first local-only validator-status semantics contract over the admitted report stub",
+        "requirement": "blocked until one later explicit packet freezes how a future local-only validator may assign and interpret the admitted `not_run`, `match`, `mismatch`, and `blocked` statuses without widening into execution behavior"
       },
       {
         "item": "validator implementation or runner behavior",
@@ -187,25 +198,25 @@
         "requirement": "blocked unless a separate later packet explicitly widens the lane beyond root-owned local-only simulation posture"
       },
       {
-        "item": "higher marker movement above the current 33 percent validator-report-contract threshold",
+        "item": "higher marker movement above the current 36 percent validator-report-stub threshold",
         "requirement": "blocked until another real contract, implementation, proof-backed adoption, or blocker-clearance class changes operator reality again"
       }
     ],
     "next_package_ladder": [
       {
-        "package": "Sandbox Simulation Readiness local-only first validator-report stub admission",
-        "mode": "root-owned local validation-report admission",
-        "reason": "one future validator-report contract now exists above the admitted example root, so the next honest move is to admit one bounded non-executing validator-report stub before validator behavior, runner behavior, or `_stack` claims become honest"
+        "package": "Sandbox Simulation Readiness local-only first validator-status semantics contract freeze",
+        "mode": "root-owned docs-only validator-status-semantics follow-on",
+        "reason": "one bounded validator-report stub now exists above the admitted example root, so the next honest move is to freeze how future local-only validation may use the admitted status vocabulary before validator behavior, runner behavior, or `_stack` claims become honest"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-REPORT-CONTRACT-FREEZE-2026-06-27.md",
+    "freshness_checked_receipt": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-REPORT-STUB-ADMISSION-2026-06-27.md",
     "freshness_checked_at": "2026-06-27T00:00:00-04:00",
-    "freshness_basis": "The manifest now matches the current 33 percent Sandbox posture because the lane no longer stops at validator descriptor data alone: one future validator-report contract is now frozen under the bounded runtime validation home, the minimum report shape now preserves derivative-only truth and bounded result vocabulary, the Book and restart surfaces project that broader validator-report truth, and the next package is now one explicit local-only first validator-report stub admission.",
+    "freshness_basis": "The manifest now matches the current 36 percent Sandbox posture because the lane no longer stops at validator-report doctrine alone: one concrete validator-report stub now exists under the bounded runtime validation home, the Book and restart surfaces project that broader local-only validation artifact truth, and the next package is now one explicit local-only first validator-status semantics contract freeze.",
     "marker_posture": [
       {
         "marker": "Sandbox Simulation Readiness",
-        "percent": 33,
+        "percent": 36,
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ]

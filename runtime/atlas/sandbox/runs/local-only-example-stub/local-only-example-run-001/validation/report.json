@@ -1,0 +1,19 @@
+{
+  "contract_version": "atlas.sandbox.validation-report.v1",
+  "validator_id": "local-only-example-stub-validator-001",
+  "scenario_id": "local-only-example-stub",
+  "run_id": "local-only-example-run-001",
+  "validator_ref": "data/atlas/sandbox/validators/local-only-example-stub/validator.json",
+  "result": {
+    "status": "not_run",
+    "summary": "Placeholder validation report shape only; no validator evaluation has run."
+  },
+  "compared_fixture_ids": [
+    "local-only-example-stub-input-001",
+    "local-only-example-stub-expected-output-001"
+  ],
+  "observations": [
+    "report shape recorded",
+    "no validator evaluation has run"
+  ]
+}
