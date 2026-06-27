@@ -311,16 +311,16 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "Sandbox Simulation Readiness": PacketDescriptor(
-        packet="Sandbox Simulation Readiness local-only first validator public release truth admission boundary contract freeze",
+        packet="Sandbox Simulation Readiness local-only first validator owner-repo mutation admission boundary contract freeze",
         basis_receipt_ref=(
             "docs/ops/"
-            "SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-DEPLOY-"
-            "SURFACE-MUTATION-ADMISSION-BOUNDARY-NEXT-SLICE-SELECTION-2026-06-27.md"
+            "SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-PUBLIC-"
+            "RELEASE-TRUTH-ADMISSION-BOUNDARY-NEXT-SLICE-SELECTION-2026-06-27.md"
         ),
-        mode="root-owned docs-only validator-public-release-truth-admission-boundary contract freeze",
+        mode="root-owned docs-only validator-owner-repo-mutation-admission-boundary contract freeze",
         scope=(
-            "freeze the smallest later rule that may govern whether any public release truth may exist above that frozen deploy-mutation family at all "
-            "without widening into owner-repo mutation, hold-flat closeout, or broader runtime assertions"
+            "freeze the smallest later rule that may govern whether any owner-repo mutation may exist above that frozen public-release-truth family at all "
+            "without widening into actual owner-side mutation, hold-flat closeout, or broader runtime assertions"
         ),
     ),
 }
@@ -451,11 +451,13 @@ def effective_policy(*, marker: str, percentage: int, active_lane: str | None) -
                 "and one post-secret-bearing-automation-admission-boundary next-slice selection, "
                 "one deploy-surface mutation admission boundary contract, "
                 "and one post-deploy-surface-mutation-admission-boundary next-slice selection, "
+                "one public-release-truth admission boundary contract, "
+                "and one post-public-release-truth-admission-boundary next-slice selection, "
                 "but current durable restart truth still keeps the active ATLAS-root lane ahead of it."
             ),
             expected_evidence=(
-                "one bounded validator-public-release-truth-admission-boundary contract or later downstream contract that preserves "
-                "no owner-repo, closeout-by-adjacency, or live-data widening"
+                "one bounded validator-owner-repo-mutation-admission-boundary contract or later downstream contract that preserves "
+                "no closeout-by-adjacency or live-data widening"
             ),
         )
     if not active_lane:
