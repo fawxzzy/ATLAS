@@ -311,16 +311,16 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "Sandbox Simulation Readiness": PacketDescriptor(
-        packet="Sandbox Simulation Readiness local-only first validator unattended-runtime proof admission boundary contract freeze",
+        packet="Sandbox Simulation Readiness local-only first validator publication-surface claim admission boundary contract freeze",
         basis_receipt_ref=(
             "docs/ops/"
-            "SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-DEPLOY-"
-            "SURFACE-RUNTIME-ADMISSION-BOUNDARY-NEXT-SLICE-SELECTION-2026-06-27.md"
+            "SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-UNATTENDED-"
+            "RUNTIME-PROOF-ADMISSION-BOUNDARY-NEXT-SLICE-SELECTION-2026-06-27.md"
         ),
-        mode="root-owned docs-only validator-unattended-runtime-proof-admission-boundary contract freeze",
+        mode="root-owned docs-only validator-publication-surface-claim-admission-boundary contract freeze",
         scope=(
-            "freeze the smallest later rule that may govern whether any unattended-runtime proof may exist above that frozen runtime-home family at all "
-            "without widening into secret-bearing automation, publication-safe runtime claims, or broader execution assertions"
+            "freeze the smallest later rule that may govern whether any publication-safe runtime claim may exist above that frozen proof family at all "
+            "without widening into live unattended execution, secret-bearing automation, or broader runtime assertions"
         ),
     ),
 }
@@ -441,11 +441,13 @@ def effective_policy(*, marker: str, percentage: int, active_lane: str | None) -
                 "and one post-owner-surface-execution-admission-boundary next-slice selection, "
                 "one deploy-surface runtime admission boundary contract, "
                 "and one post-deploy-surface-runtime-admission-boundary next-slice selection, "
+                "one unattended-runtime proof admission boundary contract, "
+                "and one post-unattended-runtime-proof-admission-boundary next-slice selection, "
                 "but current durable restart truth still keeps the active ATLAS-root lane ahead of it."
             ),
             expected_evidence=(
-                "one bounded validator-unattended-runtime-proof-admission-boundary contract or later downstream contract that preserves "
-                "no secret-bearing, publication-safe, or live-data widening"
+                "one bounded validator-publication-surface-claim-admission-boundary contract or later downstream contract that preserves "
+                "no live-unattended, secret-bearing, or live-data widening"
             ),
         )
     if not active_lane:
