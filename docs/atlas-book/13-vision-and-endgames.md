@@ -53,7 +53,7 @@ Shared rules that survive the split:
 - should not become a product-runtime owner
 - currently open for bounded root-owned orchestration doctrine, shared restart-surface refresh when no-overlap wave outputs are ready, keeping the held AI Long-Run supervised execution-home downstream chain explicit for restart truth, and preserving the now-held root-local Sandbox boundary family without widening into closeout or top-level lane reselection
 - next valid package:
-  - `No immediate Sandbox Simulation Readiness same-lane packet`
+  - `No immediate ATLAS-root packet is open`
 
 ## Key Endgames By Theme
 
@@ -191,7 +191,7 @@ Shared rules that survive the split:
 - no immediate Dependency Untangling follow-on packet is open; reopen only if one new hidden cross-repo dependency appears or one retained seam stops being explicit and governed
 - no immediate Inventory & Truth Map docs-only follow-on packet is open after the open-marker restart-index closeout
 - no immediate Truth Map & ATLAS Book docs-only follow-on packet is open after the open-marker restart-index closeout
-- `No immediate Sandbox Simulation Readiness same-lane packet`
+- `No immediate ATLAS-root packet is open`
 - no immediate Post-Convergence Lane Split Readiness docs-only follow-on packet
 - no immediate Vision & Future Alignment docs-only follow-on packet; reopen only with one major lane-state, shared-authority, or future-target ambiguity change
 - the current `lock-registry-hygiene` blocker class from `stack.lock.yaml` and `_stack` / `mazer` / `playbook` pin drift is now closed after owner-side disposition plus bounded root lock refresh

@@ -664,11 +664,18 @@ def build_campaign(*, root: Path) -> dict[str, object]:
     operator_action = None
     operator_action_reason = None
     if selected and active_lane and active_lane_is_held:
-        operator_action = "hold_current_lane"
-        operator_action_reason = (
-            "Durable restart truth still names the active ATLAS-root lane, but its own manifest-backed "
-            "next-package ladder explicitly says no immediate same-lane packet is open."
-        )
+        if next_after_current is None:
+            operator_action = "no_immediate_root_packet"
+            operator_action_reason = (
+                "Durable restart truth still names the latest held ATLAS-root family, but every eligible open "
+                "marker is now manifest-held, so no immediate root packet is honestly open."
+            )
+        else:
+            operator_action = "hold_current_lane"
+            operator_action_reason = (
+                "Durable restart truth still names the active ATLAS-root lane, but its own manifest-backed "
+                "next-package ladder explicitly says no immediate same-lane packet is open."
+            )
     elif selected and active_lane:
         operator_action = "continue_current_lane"
         operator_action_reason = (
@@ -749,7 +756,9 @@ def render_markdown(payload: dict[str, object]) -> str:
             f"- action: `{payload['operator_action']}`",
             f"- why: {payload['operator_action_reason']}",
         ]
-        if payload.get("operator_action") == "hold_current_lane":
+        if payload.get("operator_action") == "no_immediate_root_packet":
+            lines.append("- no immediate ATLAS-root packet is open.")
+        elif payload.get("operator_action") == "hold_current_lane":
             lines.append("- no immediate same-lane packet is open.")
         elif payload.get("selected_current_packet"):
             lines.append(f"- do now: `{payload['selected_current_packet']}`")

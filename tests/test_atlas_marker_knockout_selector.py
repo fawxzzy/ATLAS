@@ -314,6 +314,64 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual("hold_current_lane", payload["operator_action"])
         self.assertTrue(payload["active_lane_is_held"])
 
+    def test_build_campaign_reports_no_immediate_root_packet_when_all_open_markers_are_held(self) -> None:
+        root = self._temp_root()
+        marker_doc = """# Lanes And Markers
+
+## Active Front-Page Marker Table
+
+- AI Repetition-to-Automation Pipeline: `35%`
+- AI Long-Run Batch Orchestration: `20%`
+
+## Supporting Open Markers
+
+- Fitness QA/LLEL Workflow: `96%`
+
+## Closed / Locked Ratchets
+
+- _stack Readiness: `100%`
+"""
+        current_state_doc = """# Current State
+
+- the current active ATLAS-side lane is now `AI Long-Run Batch Orchestration`
+"""
+        (root / "docs" / "atlas-book" / "02-lanes-and-markers.md").write_text(marker_doc, encoding="utf-8")
+        (root / "docs" / "atlas-book" / "01-current-state.md").write_text(current_state_doc, encoding="utf-8")
+        self._write_packet_receipts(root)
+        self._write_manifest(
+            root,
+            manifest_name="continuity-manifest-ai-long-run-batch-orchestration.json",
+            marker="AI Long-Run Batch Orchestration",
+            percent=20,
+            checkpoint_ref=(
+                "docs/ops/"
+                "AI-LONG-RUN-BATCH-ORCHESTRATION-POST-STACK-COMMAND-IMPLEMENTATION-"
+                "ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-VALUE-DOWNSTREAM-HOLD-RECHECK-2026-06-26.md"
+            ),
+            next_package="No immediate AI Long-Run Batch Orchestration same-lane packet",
+            mode="hold-flat after downstream follow-on recheck",
+            reason="current lane is intentionally held",
+        )
+        self._write_manifest(
+            root,
+            manifest_name="continuity-manifest-ai-repetition-to-automation-pipeline.json",
+            marker="AI Repetition-to-Automation Pipeline",
+            percent=35,
+            checkpoint_ref=(
+                "docs/ops/"
+                "AI-REPETITION-TO-AUTOMATION-PIPELINE-SELECTOR-LANE-EXHAUSTION-OR-FALLBACK-ROUTING-"
+                "2026-06-18.md"
+            ),
+            next_package="No immediate AI Repetition-to-Automation Pipeline same-lane packet",
+            mode="hold-flat after selector exhaustion and continuity-manifest seed",
+            reason="fallback lane is intentionally held",
+        )
+
+        payload = build_campaign(root=root)
+
+        self.assertEqual("no_immediate_root_packet", payload["operator_action"])
+        self.assertIsNone(payload["next_after_current_marker"])
+
     def test_build_campaign_promotes_sandbox_after_deploy_surface_mutation_admission_boundary_contract(self) -> None:
         root = self._temp_root()
         marker_doc = MARKER_DOC.replace(
@@ -442,6 +500,67 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertIn("action: `hold_current_lane`", markdown)
         self.assertIn("- no immediate same-lane packet is open.", markdown)
         self.assertNotIn("- do now:", markdown)
+
+    def test_main_markdown_reports_no_immediate_root_packet_when_everything_is_held(self) -> None:
+        root = self._temp_root()
+        marker_doc = """# Lanes And Markers
+
+## Active Front-Page Marker Table
+
+- AI Repetition-to-Automation Pipeline: `35%`
+- AI Long-Run Batch Orchestration: `20%`
+
+## Supporting Open Markers
+
+- Fitness QA/LLEL Workflow: `96%`
+
+## Closed / Locked Ratchets
+
+- _stack Readiness: `100%`
+"""
+        current_state_doc = """# Current State
+
+- the current active ATLAS-side lane is now `AI Long-Run Batch Orchestration`
+"""
+        (root / "docs" / "atlas-book" / "02-lanes-and-markers.md").write_text(marker_doc, encoding="utf-8")
+        (root / "docs" / "atlas-book" / "01-current-state.md").write_text(current_state_doc, encoding="utf-8")
+        self._write_packet_receipts(root)
+        self._write_manifest(
+            root,
+            manifest_name="continuity-manifest-ai-long-run-batch-orchestration.json",
+            marker="AI Long-Run Batch Orchestration",
+            percent=20,
+            checkpoint_ref=(
+                "docs/ops/"
+                "AI-LONG-RUN-BATCH-ORCHESTRATION-POST-STACK-COMMAND-IMPLEMENTATION-"
+                "ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-VALUE-DOWNSTREAM-HOLD-RECHECK-2026-06-26.md"
+            ),
+            next_package="No immediate AI Long-Run Batch Orchestration same-lane packet",
+            mode="hold-flat after downstream follow-on recheck",
+            reason="current lane is intentionally held",
+        )
+        self._write_manifest(
+            root,
+            manifest_name="continuity-manifest-ai-repetition-to-automation-pipeline.json",
+            marker="AI Repetition-to-Automation Pipeline",
+            percent=35,
+            checkpoint_ref=(
+                "docs/ops/"
+                "AI-REPETITION-TO-AUTOMATION-PIPELINE-SELECTOR-LANE-EXHAUSTION-OR-FALLBACK-ROUTING-"
+                "2026-06-18.md"
+            ),
+            next_package="No immediate AI Repetition-to-Automation Pipeline same-lane packet",
+            mode="hold-flat after selector exhaustion and continuity-manifest seed",
+            reason="fallback lane is intentionally held",
+        )
+        output_ref = "docs/ops/selector-no-immediate-root-output.md"
+
+        exit_code = main(["--root", str(root), "--format", "markdown", "--output", output_ref])
+
+        self.assertEqual(0, exit_code)
+        markdown = (root / output_ref).read_text(encoding="utf-8")
+        self.assertIn("action: `no_immediate_root_packet`", markdown)
+        self.assertIn("- no immediate ATLAS-root packet is open.", markdown)
         self.assertIn(
             "current packet scope: `re-evaluate the post-authority-class-value downstream fall-through against manifest-backed no-immediate packet holds and decide whether any honest root-bounded follow-on remains`",
             markdown,
@@ -451,20 +570,9 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
             "current packet: `AI Long-Run Batch Orchestration post-stack-command-implementation-actual-owner-side-mutation-authority-class-value downstream hold recheck`",
             markdown,
         )
-        self.assertIn("## First Admissible After Current Lane", markdown)
-        self.assertIn(
-            "next packet after current lane: `AI Repetition-to-Automation Pipeline non-Fitness marker knockout selector surface`",
-            markdown,
-        )
-        self.assertIn(
-            "next packet basis receipt: `docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-ACTIVE-LANE-FOLLOW-ON-DISAMBIGUATION-2026-06-17.md`",
-            markdown,
-        )
-        self.assertIn("next packet mode: `root-owned selector-surface refinement`", markdown)
-        self.assertIn(
-            "next packet scope: `remove the current-lane self-reference from the non-Fitness marker knockout helper by separating the active packet from the first admissible downstream follow-on`",
-            markdown,
-        )
+        self.assertNotIn("## First Admissible After Current Lane", markdown)
+        self.assertNotIn("next packet mode:", markdown)
+        self.assertNotIn("next packet scope:", markdown)
 
 
 if __name__ == "__main__":
