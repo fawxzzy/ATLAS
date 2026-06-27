@@ -1,0 +1,21 @@
+{
+  "contract_version": "atlas.sandbox.fixture-pack.v1",
+  "scenario_id": "local-only-example-stub",
+  "fixture_pack_id": "local-only-example-stub-pack",
+  "title": "Local-Only Example Stub Fixture Pack",
+  "status": "draft",
+  "purpose": "Admit one concrete but still empty fixture-pack stub under the frozen Sandbox boundaries before any leaf fixture payload, validator, or runner claim becomes honest.",
+  "items": [],
+  "guards": {
+    "owner_repo_mutation": false,
+    "deploy_mutation": false,
+    "secret_use": false,
+    "live_data_mutation": false,
+    "_stack_execution": false
+  },
+  "non_goals": [
+    "No leaf fixture payloads are admitted yet.",
+    "No validator or runner behavior is admitted yet.",
+    "No owner-repo, deploy, secret, or live-data mutation is admitted."
+  ]
+}

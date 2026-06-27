@@ -1,0 +1,30 @@
+{
+  "contract_version": "atlas.sandbox.scenario.v1",
+  "scenario_id": "local-only-example-stub",
+  "title": "Local-Only Example Stub",
+  "status": "draft",
+  "purpose": "Admit one concrete Sandbox scenario descriptor under the frozen local-only contract without implying validator, runner, or mutation behavior.",
+  "source_refs": [
+    "docs/ops/SANDBOX-SIMULATION-READINESS-STARTER-PACKET-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-27.md",
+    "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-ARTIFACT-HOME-AND-SCENARIO-MANIFEST-CONTRACT-FREEZE-2026-06-27.md",
+    "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-SCENARIO-FIXTURE-PACK-CONTRACT-FREEZE-2026-06-27.md"
+  ],
+  "fixture_refs": [
+    "data/atlas/sandbox/fixtures/local-only-example-stub/fixture-pack.json"
+  ],
+  "artifact_home": {
+    "run_root": "runtime/atlas/sandbox/runs/local-only-example-stub/<run_id>/"
+  },
+  "guards": {
+    "owner_repo_mutation": false,
+    "deploy_mutation": false,
+    "secret_use": false,
+    "live_data_mutation": false,
+    "_stack_execution": false
+  },
+  "non_goals": [
+    "No leaf fixture payloads are admitted yet.",
+    "No validator or runner behavior is admitted yet.",
+    "No owner-repo, deploy, secret, or live-data mutation is admitted."
+  ]
+}

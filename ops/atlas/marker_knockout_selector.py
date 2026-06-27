@@ -311,16 +311,17 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "Sandbox Simulation Readiness": PacketDescriptor(
-        packet="Sandbox Simulation Readiness local-only example scenario and fixture-pack stub admission",
+        packet="Sandbox Simulation Readiness local-only first note-only leaf fixture stub admission",
         basis_receipt_ref=(
             "docs/ops/"
-            "SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-SCENARIO-FIXTURE-PACK-"
-            "CONTRACT-FREEZE-2026-06-27.md"
+            "SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-EXAMPLE-SCENARIO-AND-FIXTURE-PACK-"
+            "STUB-ADMISSION-2026-06-27.md"
         ),
-        mode="root-owned local data-stub follow-on",
+        mode="root-owned local fixture-note follow-on",
         scope=(
-            "add one example scenario and one paired fixture-pack stub under `data/atlas/sandbox/**` "
-            "while preserving the current no-validator, no-runner, no-_stack, and no-mutation guards"
+            "add one note-only leaf fixture stub under `data/atlas/sandbox/fixtures/local-only-example-stub/**` "
+            "and wire it through the admitted fixture-pack manifest while preserving the current no-validator, "
+            "no-runner, no-_stack, and no-mutation guards"
         ),
     ),
 }
@@ -408,11 +409,11 @@ def effective_policy(*, marker: str, percentage: int, active_lane: str | None) -
         policy = MarkerPolicy(
             category="admissible after current lane",
             rationale=(
-                "The lane now has one admitted root-owned starter packet plus durable scenario, runtime, and fixture-pack contract freezes, "
+                "The lane now has one admitted root-owned starter packet plus durable scenario, runtime, and fixture-pack contract freezes and one admitted example pair, "
                 "but current durable restart truth still keeps the active ATLAS-root lane ahead of it."
             ),
             expected_evidence=(
-                "one bounded local-only example scenario and fixture-pack stub packet that preserves "
+                "one bounded local-only first note-only leaf fixture stub packet that preserves "
                 "no owner-repo, deploy, secret, or live-data widening"
             ),
         )
