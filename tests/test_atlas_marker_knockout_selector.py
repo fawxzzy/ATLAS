@@ -114,8 +114,8 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         )
 
         sandbox_receipt = root / "docs" / "ops" / (
-            "SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-REPORT-STATUS-"
-            "ACTIVATION-GATE-NEXT-SLICE-SELECTION-2026-06-27.md"
+            "SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-PAIRED-ARTIFACT-"
+            "WRITEBACK-BOUNDARY-NEXT-SLICE-SELECTION-2026-06-27.md"
         )
         sandbox_receipt.write_text(
             "\n".join(
@@ -123,7 +123,7 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
                     "# Sandbox Packet",
                     "",
                     "- Mode: `docs-only root-bounded next-slice selection`",
-                    "- Scope: `choose the strongest bounded Sandbox follow-on now that the local-only first validator report-status activation gate is directly frozen on canonical main`",
+                    "- Scope: `choose the strongest bounded Sandbox follow-on now that the local-only first validator paired-artifact writeback boundary is directly frozen on canonical main`",
                     "",
                 ]
             ),
@@ -312,11 +312,11 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
 
         self.assertEqual("hold_current_lane", payload["operator_action"])
 
-    def test_build_campaign_promotes_sandbox_after_report_status_activation_gate_contract(self) -> None:
+    def test_build_campaign_promotes_sandbox_after_paired_artifact_writeback_boundary_contract(self) -> None:
         root = self._temp_root()
         marker_doc = MARKER_DOC.replace(
             "- Sandbox Simulation Readiness: `0%`",
-            "- Sandbox Simulation Readiness: `76%`",
+            "- Sandbox Simulation Readiness: `85%`",
         )
         (root / "docs" / "atlas-book" / "02-lanes-and-markers.md").write_text(marker_doc, encoding="utf-8")
         (root / "docs" / "atlas-book" / "01-current-state.md").write_text(CURRENT_STATE_DOC, encoding="utf-8")
@@ -344,23 +344,23 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
             records["Sandbox Simulation Readiness"]["category"],
         )
         self.assertIn(
-            "report-status activation gate contract",
+            "paired-artifact writeback boundary contract",
             records["Sandbox Simulation Readiness"]["rationale"],
         )
         self.assertEqual(
-            "Sandbox Simulation Readiness local-only first validator report-result mutation boundary contract freeze",
+            "Sandbox Simulation Readiness local-only first validator report-and-candidate-output synchronization boundary contract freeze",
             payload["next_after_current_packet"],
         )
         self.assertEqual(
-            "docs/ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-REPORT-STATUS-ACTIVATION-GATE-NEXT-SLICE-SELECTION-2026-06-27.md",
+            "docs/ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-PAIRED-ARTIFACT-WRITEBACK-BOUNDARY-NEXT-SLICE-SELECTION-2026-06-27.md",
             payload["next_after_current_packet_basis_ref"],
         )
         self.assertEqual(
-            "root-owned docs-only validator-report-result-mutation-boundary contract freeze",
+            "root-owned docs-only validator-report-and-candidate-output-synchronization-boundary contract freeze",
             payload["next_after_current_packet_mode"],
         )
         self.assertIn(
-            "govern how an admitted status change could appear in `report.json`",
+            "govern how the paired artifacts may coordinate at all",
             payload["next_after_current_packet_scope"],
         )
 

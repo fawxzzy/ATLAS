@@ -311,16 +311,16 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "Sandbox Simulation Readiness": PacketDescriptor(
-        packet="Sandbox Simulation Readiness local-only first validator report-result mutation boundary contract freeze",
+        packet="Sandbox Simulation Readiness local-only first validator report-and-candidate-output synchronization boundary contract freeze",
         basis_receipt_ref=(
             "docs/ops/"
-            "SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-REPORT-STATUS-"
-            "ACTIVATION-GATE-NEXT-SLICE-SELECTION-2026-06-27.md"
+            "SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-PAIRED-ARTIFACT-"
+            "WRITEBACK-BOUNDARY-NEXT-SLICE-SELECTION-2026-06-27.md"
         ),
-        mode="root-owned docs-only validator-report-result-mutation-boundary contract freeze",
+        mode="root-owned docs-only validator-report-and-candidate-output-synchronization-boundary contract freeze",
         scope=(
-            "freeze the smallest later rule that may govern how an admitted status change could appear in `report.json` "
-            "without widening into validator execution, runner behavior, broader mutation, or broader routing"
+            "freeze the smallest later rule that may govern how the paired artifacts may coordinate at all "
+            "without widening into validator execution, runner behavior, broader verdict-bearing activation, or broader routing"
         ),
     ),
 }
@@ -419,10 +419,16 @@ def effective_policy(*, marker: str, percentage: int, active_lane: str | None) -
                 "and one post-report-status-activation-mapping next-slice selection, "
                 "one report-status activation gate contract, "
                 "and one post-report-status-activation-gate next-slice selection, "
+                "one report-result mutation boundary contract, "
+                "and one post-report-result-mutation-boundary next-slice selection, "
+                "one candidate-output verdict-artifact mutation boundary contract, "
+                "and one post-candidate-output-verdict-artifact-mutation-boundary next-slice selection, "
+                "one paired-artifact writeback boundary contract, "
+                "and one post-paired-artifact-writeback-boundary next-slice selection, "
                 "but current durable restart truth still keeps the active ATLAS-root lane ahead of it."
             ),
             expected_evidence=(
-                "one bounded validator-report-result-mutation-boundary contract or later downstream contract that preserves "
+                "one bounded validator-report-and-candidate-output-synchronization-boundary contract or later downstream contract that preserves "
                 "no owner-repo, deploy, secret, or live-data widening"
             ),
         )
