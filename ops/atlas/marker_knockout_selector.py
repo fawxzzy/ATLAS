@@ -311,16 +311,16 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "Sandbox Simulation Readiness": PacketDescriptor(
-        packet="Sandbox Simulation Readiness local-only first validator verdict-bearing artifact activation gate contract freeze",
+        packet="Sandbox Simulation Readiness local-only first validator synchronized artifact writeback boundary contract freeze",
         basis_receipt_ref=(
             "docs/ops/"
-            "SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-REPORT-AND-"
-            "CANDIDATE-OUTPUT-SYNCHRONIZATION-BOUNDARY-NEXT-SLICE-SELECTION-2026-06-27.md"
+            "SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-VERDICT-"
+            "BEARING-ARTIFACT-ACTIVATION-GATE-NEXT-SLICE-SELECTION-2026-06-27.md"
         ),
-        mode="root-owned docs-only validator-verdict-bearing-artifact-activation-gate contract freeze",
+        mode="root-owned docs-only validator-synchronized-artifact-writeback-boundary contract freeze",
         scope=(
-            "freeze the smallest later rule that may govern when coordinated artifact truth may count as verdict-bearing at all "
-            "without widening into actual artifact mutation, validator execution, runner behavior, or broader routing"
+            "freeze the smallest later rule that may govern how coordinated verdict-bearing artifact truth may later write back at all "
+            "without widening into validator execution, runner behavior, or broader routing"
         ),
     ),
 }
@@ -427,10 +427,12 @@ def effective_policy(*, marker: str, percentage: int, active_lane: str | None) -
                 "and one post-paired-artifact-writeback-boundary next-slice selection, "
                 "one report-and-candidate-output synchronization boundary contract, "
                 "and one post-report-and-candidate-output-synchronization-boundary next-slice selection, "
+                "one verdict-bearing artifact activation gate contract, "
+                "and one post-verdict-bearing-artifact-activation-gate next-slice selection, "
                 "but current durable restart truth still keeps the active ATLAS-root lane ahead of it."
             ),
             expected_evidence=(
-                "one bounded validator-verdict-bearing-artifact-activation-gate contract or later downstream contract that preserves "
+                "one bounded validator-synchronized-artifact-writeback-boundary contract or later downstream contract that preserves "
                 "no owner-repo, deploy, secret, or live-data widening"
             ),
         )
