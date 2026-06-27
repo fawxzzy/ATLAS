@@ -312,11 +312,11 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
 
         self.assertEqual("hold_current_lane", payload["operator_action"])
 
-    def test_build_campaign_promotes_sandbox_after_verdict_assignment_next_slice_selection(self) -> None:
+    def test_build_campaign_promotes_sandbox_after_verdict_activation_reopening_rule_contract(self) -> None:
         root = self._temp_root()
         marker_doc = MARKER_DOC.replace(
             "- Sandbox Simulation Readiness: `0%`",
-            "- Sandbox Simulation Readiness: `67%`",
+            "- Sandbox Simulation Readiness: `70%`",
         )
         (root / "docs" / "atlas-book" / "02-lanes-and-markers.md").write_text(marker_doc, encoding="utf-8")
         (root / "docs" / "atlas-book" / "01-current-state.md").write_text(CURRENT_STATE_DOC, encoding="utf-8")
@@ -344,23 +344,23 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
             records["Sandbox Simulation Readiness"]["category"],
         )
         self.assertIn(
-            "verdict-assignment rule contract",
+            "verdict-activation reopening rule contract",
             records["Sandbox Simulation Readiness"]["rationale"],
         )
         self.assertEqual(
-            "Sandbox Simulation Readiness local-only first validator verdict-activation reopening rule contract freeze",
+            "Sandbox Simulation Readiness local-only first validator report-status activation mapping contract freeze",
             payload["next_after_current_packet"],
         )
         self.assertEqual(
-            "docs/ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-VERDICT-ASSIGNMENT-NEXT-SLICE-SELECTION-2026-06-27.md",
+            "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-VERDICT-ACTIVATION-REOPENING-RULE-CONTRACT-FREEZE-2026-06-27.md",
             payload["next_after_current_packet_basis_ref"],
         )
         self.assertEqual(
-            "root-owned docs-only validator-verdict-activation-reopening-rule contract freeze",
+            "root-owned docs-only validator-report-status-activation-mapping contract freeze",
             payload["next_after_current_packet_mode"],
         )
         self.assertIn(
-            "still-closed verdict-activation gate could later reopen",
+            "map the frozen verdict-activation reopening path into explicit report-status activation semantics",
             payload["next_after_current_packet_scope"],
         )
 

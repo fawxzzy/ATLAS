@@ -311,16 +311,16 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "Sandbox Simulation Readiness": PacketDescriptor(
-        packet="Sandbox Simulation Readiness local-only first validator verdict-activation reopening rule contract freeze",
+        packet="Sandbox Simulation Readiness local-only first validator report-status activation mapping contract freeze",
         basis_receipt_ref=(
             "docs/ops/"
-            "SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-VERDICT-"
-            "ASSIGNMENT-NEXT-SLICE-SELECTION-2026-06-27.md"
+            "SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-VERDICT-"
+            "ACTIVATION-REOPENING-RULE-CONTRACT-FREEZE-2026-06-27.md"
         ),
-        mode="root-owned docs-only validator-verdict-activation-reopening-rule contract freeze",
+        mode="root-owned docs-only validator-report-status-activation-mapping contract freeze",
         scope=(
-            "freeze the smallest rule by which the still-closed verdict-activation gate could later reopen above the admitted pre-verdict helper, "
-            "the frozen comparison-boundary link, and the frozen verdict-assignment rule without widening into validator execution, runner behavior, report mutation, or broader routing"
+            "freeze the smallest later rule that may map the frozen verdict-activation reopening path into explicit report-status activation semantics "
+            "without widening into validator execution, runner behavior, report mutation, or broader routing"
         ),
     ),
 }
@@ -413,11 +413,12 @@ def effective_policy(*, marker: str, percentage: int, active_lane: str | None) -
                 "one post-helper next-slice selection, "
                 "and one validator-behavior comparison-boundary link contract, "
                 "one validator verdict-assignment rule contract, "
-                "and one post-verdict-assignment next-slice selection, "
+                "one post-verdict-assignment next-slice selection, "
+                "and one verdict-activation reopening rule contract, "
                 "but current durable restart truth still keeps the active ATLAS-root lane ahead of it."
             ),
             expected_evidence=(
-                "one bounded validator-verdict-activation-reopening-rule contract or later downstream contract that preserves "
+                "one bounded validator-report-status-activation-mapping contract or later downstream contract that preserves "
                 "no owner-repo, deploy, secret, or live-data widening"
             ),
         )

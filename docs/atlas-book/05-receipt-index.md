@@ -84,6 +84,7 @@
 - [Sandbox Simulation Readiness Local-Only First Validator-Behavior Comparison-Boundary Link Contract Freeze](../ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-COMPARISON-BOUNDARY-LINK-CONTRACT-FREEZE-2026-06-27.md)
 - [Sandbox Simulation Readiness Local-Only First Validator Verdict-Assignment Rule Contract Freeze](../ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-VERDICT-ASSIGNMENT-RULE-CONTRACT-FREEZE-2026-06-27.md)
 - [Sandbox Simulation Readiness Post-Local-Only First Validator Verdict-Assignment Next-Slice Selection](../ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-VERDICT-ASSIGNMENT-NEXT-SLICE-SELECTION-2026-06-27.md)
+- [Sandbox Simulation Readiness Local-Only First Validator Verdict-Activation Reopening Rule Contract Freeze](../ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-VERDICT-ACTIVATION-REOPENING-RULE-CONTRACT-FREEZE-2026-06-27.md)
 - [Root-Bounded Lane Selection After AI Long-Run Batch Orchestration Downstream Hold Closeout](../ops/ROOT-BOUNDED-LANE-SELECTION-AFTER-AI-LONG-RUN-BATCH-ORCHESTRATION-DOWNSTREAM-HOLD-CLOSEOUT-2026-06-27.md)
 - [AI Repetition-to-Automation Pipeline Selector Operator Action And Packet Basis](../ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-SELECTOR-OPERATOR-ACTION-AND-PACKET-BASIS-2026-06-18.md)
 - [Duplicate Surface Decommission Final Closeout Pass 3](../ops/DUPLICATE-SURFACE-DECOMMISSION-FINAL-CLOSEOUT-PASS-3-2026-06-13.md)
