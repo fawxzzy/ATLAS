@@ -14,12 +14,12 @@ Operational rule:
 ## Summary
 
 - Repo count: `12`
-- Dirty repo count: `8`
+- Dirty repo count: `7`
 - Release-eligible repo count: `5`
 - Excluded surface count: `17`
 - Stack manifest: `stack.yaml`
 - Stack lock: `stack.lock.yaml`
-- Inventory digest: `sha256:15db474a116ea3360bf0298eaa0e1bf997e5307e9ad2acf66ed232d7001d76d2`
+- Inventory digest: `sha256:764f38e6f4f636989eaad4e96beb8f7f5581feef66c093024a0809a4f4d1ddda`
 
 ## Managed Repos
 
@@ -34,7 +34,7 @@ Operational rule:
 | nat1-games | repos/Nat1-Games/nat1-games | codex/path-discipline-warning-slice-nat1 | 63a4a7c159c41a7e98ad8708891743acf71431ed | 63a4a7c159c41a7e98ad8708891743acf71431ed | True | trusted | False | - |
 | playbook | repos/playbook | codex/path-discipline-warning-slice-playbook | f27c36355da906a01a46a841779553002c259f9b | f27c36355da906a01a46a841779553002c259f9b | True | trusted | True | initiative:continuity-manifest-atlas-owned-repo-naming-canonicalization |
 | playbook-demo | repos/playbook-demo/playbook-demo | main | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | False | trusted | False | - |
-| stack | . | main | - | e79d48fcf1b1f4b21d0b4720291006f61c0d472f | True | trusted | False | - |
+| stack | . | main | - | f7f279573f81280e2f951e5d9b53b36dad6f932e | False | trusted | False | - |
 | stream | repos/stream | main | bf2c9551225e6d3555122da9a72306556f50cdd8 | bf2c9551225e6d3555122da9a72306556f50cdd8 | True | trusted | False | - |
 | trove | repos/trove | codex/path-discipline-warning-slice-trove | cd572452b627c6a03dbdb440f9b4e431d9b8ed98 | cd572452b627c6a03dbdb440f9b4e431d9b8ed98 | True | trusted | True | - |
 

@@ -10,7 +10,7 @@
     "markdown": "docs/audits/STACK-REPO-INVENTORY.md"
   },
   "repo_count": 12,
-  "dirty_repo_count": 8,
+  "dirty_repo_count": 7,
   "release_eligible_count": 5,
   "repos": [
     {
@@ -317,13 +317,13 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "e79d48fcf1b1f4b21d0b4720291006f61c0d472f",
+      "current_commit": "f7f279573f81280e2f951e5d9b53b36dad6f932e",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
       "current_ref": "main",
       "branch": "main",
-      "dirty": true,
+      "dirty": false,
       "trust_class": "trusted",
       "release_eligible": false,
       "exists": true,
@@ -530,5 +530,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:15db474a116ea3360bf0298eaa0e1bf997e5307e9ad2acf66ed232d7001d76d2"
+  "content_digest": "sha256:764f38e6f4f636989eaad4e96beb8f7f5581feef66c093024a0809a4f4d1ddda"
 }
