@@ -114,16 +114,16 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         )
 
         sandbox_receipt = root / "docs" / "ops" / (
-            "SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-FIRST-IMPLEMENTATION-"
-            "WORKER-CLUSTER-RECONCILIATION-2026-06-27.md"
+            "SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-"
+            "NEXT-SLICE-SELECTION-2026-06-27.md"
         )
         sandbox_receipt.write_text(
             "\n".join(
                 [
                     "# Sandbox Packet",
                     "",
-                    "- Mode: `root-owned bounded validator-behavior helper implementation and proof reconciliation`",
-                    "- Scope: `land and prove the admitted root-local pre-verdict validator-behavior helper slice without widening into verdict activation, report mutation, or broader routing`",
+                    "- Mode: `root-owned docs-only post-validator-behavior next-slice selection`",
+                    "- Scope: `choose the smallest honest downstream Sandbox packet after the landed pre-verdict validator-behavior helper without widening into verdict activation, validator execution, runner behavior, report mutation, or broader routing`",
                     "",
                 ]
             ),
@@ -312,7 +312,7 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
 
         self.assertEqual("hold_current_lane", payload["operator_action"])
 
-    def test_build_campaign_promotes_sandbox_after_validator_behavior_worker_cluster_reconciliation(self) -> None:
+    def test_build_campaign_promotes_sandbox_after_post_validator_behavior_next_slice_selection(self) -> None:
         root = self._temp_root()
         marker_doc = MARKER_DOC.replace(
             "- Sandbox Simulation Readiness: `0%`",
@@ -344,23 +344,23 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
             records["Sandbox Simulation Readiness"]["category"],
         )
         self.assertIn(
-            "reconciled first implementation landing",
+            "post-helper next-slice selection",
             records["Sandbox Simulation Readiness"]["rationale"],
         )
         self.assertEqual(
-            "Sandbox Simulation Readiness post-local-only first validator-behavior next-slice selection",
+            "Sandbox Simulation Readiness local-only first validator-behavior comparison-boundary link contract freeze",
             payload["next_after_current_packet"],
         )
         self.assertEqual(
-            "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-27.md",
+            "docs/ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-NEXT-SLICE-SELECTION-2026-06-27.md",
             payload["next_after_current_packet_basis_ref"],
         )
         self.assertEqual(
-            "root-owned docs-only post-validator-behavior next-slice selection",
+            "root-owned docs-only validator-behavior-comparison-boundary-link contract freeze",
             payload["next_after_current_packet_mode"],
         )
         self.assertIn(
-            "landed pre-verdict validator-behavior helper",
+            "tying the landed pre-verdict validator-behavior helper",
             payload["next_after_current_packet_scope"],
         )
 
