@@ -32,8 +32,8 @@ components:
     remote: "https://github.com/fawxzzy/foundation.git"
     ref_type: "branch"
     ref: "main"
-    commit: "a016da2f08f167747f7ae7c804c0d6840cb9514d"
-    dirty: true
+    commit: "fd1cf0650cdbb732f1231aa47a6e43138dab9062"
+    dirty: false
     trust_class: "trusted"
     release_eligible: true
   lifeline:
@@ -43,8 +43,8 @@ components:
     remote: "https://github.com/fawxzzy/lifeline.git"
     ref_type: "branch"
     ref: "codex/path-discipline-warning-slice-lifeline"
-    commit: "1994e64a09128d848048ba57cfd76fba278cc655"
-    dirty: true
+    commit: "538f623a84b003e70dadd234e6ea3af642446a5f"
+    dirty: false
     trust_class: "trusted"
     release_eligible: true
   mazer:
@@ -216,4 +216,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:5fb72346602e8ca6a258966b2472e120d4e33d4ea4e410c5b1262a2d9a87de13"
+lock_digest: "sha256:a995a2c26420e9b07d9bb837a5322cd9c4b3ea59c350cf950e75ae1917890e1d"
