@@ -57,7 +57,8 @@
     "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-PROMPT-PACK-AND-HANDOFF-CONTRACT-2026-06-27.md",
     "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-06-27.md",
     "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-27.md",
-    "docs/ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-NEXT-SLICE-SELECTION-2026-06-27.md"
+    "docs/ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-NEXT-SLICE-SELECTION-2026-06-27.md",
+    "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-COMPARISON-BOUNDARY-LINK-CONTRACT-FREEZE-2026-06-27.md"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -65,9 +66,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "sandbox-simulation-readiness",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-NEXT-SLICE-SELECTION-2026-06-27.md",
+    "current_checkpoint_receipt": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-COMPARISON-BOUNDARY-LINK-CONTRACT-FREEZE-2026-06-27.md",
     "checkpoint_commit": "main",
-    "checkpoint_summary": "The lane remains at 61 percent: the bounded root-local pre-verdict validator-behavior helper plus direct proof is already landed on canonical main, and the exact next package is now Sandbox Simulation Readiness local-only first validator-behavior comparison-boundary link contract freeze.",
+    "checkpoint_summary": "The lane now sits at 64 percent: the bounded root-local pre-verdict validator-behavior helper is now explicitly tied to the already frozen comparison boundary on canonical main, and the exact next package is now Sandbox Simulation Readiness local-only first validator verdict-assignment rule contract freeze.",
     "governing_receipts": [
       "docs/ops/STACK-LANE-0-BASELINE-INVENTORY-2026-05-22.md",
       "docs/ops/STACK-LANE-0-TRUTH-MAP-2026-05-22.md",
@@ -97,7 +98,8 @@
       "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-PROMPT-PACK-AND-HANDOFF-CONTRACT-2026-06-27.md",
       "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-06-27.md",
       "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-27.md",
-      "docs/ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-NEXT-SLICE-SELECTION-2026-06-27.md"
+      "docs/ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-NEXT-SLICE-SELECTION-2026-06-27.md",
+      "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-COMPARISON-BOUNDARY-LINK-CONTRACT-FREEZE-2026-06-27.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -247,6 +249,10 @@
       {
         "path": "docs/ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-NEXT-SLICE-SELECTION-2026-06-27.md",
         "role": "current post-validator-behavior next-slice selection truth and next-step routing"
+      },
+      {
+        "path": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-COMPARISON-BOUNDARY-LINK-CONTRACT-FREEZE-2026-06-27.md",
+        "role": "current validator-behavior comparison-boundary link truth and next-step routing"
       }
     ],
     "verification_adoption_surfaces": [
@@ -281,8 +287,8 @@
     ],
     "blocked_or_gated_work": [
       {
-        "item": "validator-behavior comparison-boundary link contract above the landed pre-verdict helper",
-        "requirement": "blocked until one later explicit packet freezes the smallest rule tying the landed validator-behavior helper to the already frozen comparison boundary without widening into verdict activation"
+        "item": "validator verdict-assignment rule above the landed pre-verdict helper plus comparison-boundary link",
+        "requirement": "blocked until one later explicit packet freezes the smallest rule tying any later verdict-bearing status assignment to admitted comparison-backed behavior rather than to artifact presence alone"
       },
       {
         "item": "validator execution, runner behavior, or wider shared routing",
@@ -299,19 +305,19 @@
     ],
     "next_package_ladder": [
       {
-        "package": "Sandbox Simulation Readiness local-only first validator-behavior comparison-boundary link contract freeze",
-        "mode": "root-owned docs-only validator-behavior-comparison-boundary-link contract freeze",
-        "reason": "the verdict-activation gate precondition for one bounded validator-behavior family is now satisfied by the landed pre-verdict helper, so the next honest move is to freeze the smallest rule tying that landed behavior to the already frozen comparison boundary before any verdict-assignment rule is allowed to reopen"
+        "package": "Sandbox Simulation Readiness local-only first validator verdict-assignment rule contract freeze",
+        "mode": "root-owned docs-only validator-verdict-assignment-rule contract freeze",
+        "reason": "the landed pre-verdict helper is now explicitly tied to the already frozen comparison boundary, so the next honest move is to freeze the smallest later rule that could assign verdict-bearing status only from admitted comparison-backed behavior rather than from artifact presence alone"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-NEXT-SLICE-SELECTION-2026-06-27.md",
+    "freshness_checked_receipt": "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-COMPARISON-BOUNDARY-LINK-CONTRACT-FREEZE-2026-06-27.md",
     "freshness_checked_at": "2026-06-27T00:00:00-04:00",
-    "freshness_basis": "The manifest now matches the current 61 percent Sandbox posture because the lane now has one bounded future validator-behavior family, one exact root-local owner-facing home for that family, one explicit support posture held at none yet, one exact first implementation slice plus proof matrix for a pre-verdict root-local helper, one explicit worker handoff contract over that slice, one explicit implementation-readiness closeout with worker-routing result, one reconciled helper-plus-proof landing on canonical main, and one explicit post-helper next-slice selector, while the Book and restart surfaces project the still-flat 61 percent state and the next package moves to Sandbox Simulation Readiness local-only first validator-behavior comparison-boundary link contract freeze.",
+    "freshness_basis": "The manifest now matches the current 64 percent Sandbox posture because the lane now has one bounded future validator-behavior family, one exact root-local owner-facing home for that family, one explicit support posture held at none yet, one exact first implementation slice plus proof matrix for a pre-verdict root-local helper, one explicit worker handoff contract over that slice, one explicit implementation-readiness closeout with worker-routing result, one reconciled helper-plus-proof landing on canonical main, one explicit post-helper next-slice selector, and one explicit link contract tying the landed helper to the already frozen comparison boundary, while the Book and restart surfaces project that still-bounded 64 percent state and the next package moves to Sandbox Simulation Readiness local-only first validator verdict-assignment rule contract freeze.",
     "marker_posture": [
       {
         "marker": "Sandbox Simulation Readiness",
-        "percent": 61,
+        "percent": 64,
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ]

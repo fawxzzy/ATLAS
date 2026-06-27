@@ -311,16 +311,16 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "Sandbox Simulation Readiness": PacketDescriptor(
-        packet="Sandbox Simulation Readiness local-only first validator-behavior comparison-boundary link contract freeze",
+        packet="Sandbox Simulation Readiness local-only first validator verdict-assignment rule contract freeze",
         basis_receipt_ref=(
             "docs/ops/"
-            "SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-"
-            "NEXT-SLICE-SELECTION-2026-06-27.md"
+            "SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-"
+            "COMPARISON-BOUNDARY-LINK-CONTRACT-FREEZE-2026-06-27.md"
         ),
-        mode="root-owned docs-only validator-behavior-comparison-boundary-link contract freeze",
+        mode="root-owned docs-only validator-verdict-assignment-rule contract freeze",
         scope=(
-            "freeze the smallest rule tying the landed pre-verdict validator-behavior helper to the already frozen comparison boundary "
-            "without widening into verdict activation, validator execution, runner behavior, report mutation, or broader routing"
+            "freeze the smallest rule that may later assign verdict-bearing status only from the admitted pre-verdict helper "
+            "plus the frozen comparison-boundary link without widening into validator execution, runner behavior, report mutation, or broader routing"
         ),
     ),
 }
@@ -410,11 +410,12 @@ def effective_policy(*, marker: str, percentage: int, active_lane: str | None) -
             rationale=(
                 "The lane now has one admitted root-owned starter packet plus durable scenario, runtime, and fixture-pack contract freezes, one admitted example pair, one note-only leaf fixture, one input fixture stub, one expected-output fixture stub, one validator-boundary contract freeze, one validator descriptor stub, one validator-report contract freeze, one validator-report stub, one validator-status semantics contract, one validator-comparison boundary, one validator-candidate-output shape, one validator-candidate-output stub, one validator-candidate-output report link, one validator-pair coherence semantic layer, one validator-verdict activation gate, one validator-behavior boundary, one exact validator-behavior owner surface, one supporting-lane decision held at none yet, one first-implementation admission, one prompt-pack and handoff contract, and one implementation-readiness closeout, "
                 "one reconciled first implementation landing, "
-                "and one post-helper next-slice selection, "
+                "one post-helper next-slice selection, "
+                "and one validator-behavior comparison-boundary link contract, "
                 "but current durable restart truth still keeps the active ATLAS-root lane ahead of it."
             ),
             expected_evidence=(
-                "one bounded validator-behavior-comparison-boundary contract or later downstream contract that preserves "
+                "one bounded validator-verdict-assignment-rule contract or later downstream contract that preserves "
                 "no owner-repo, deploy, secret, or live-data widening"
             ),
         )

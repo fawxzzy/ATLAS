@@ -114,16 +114,16 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         )
 
         sandbox_receipt = root / "docs" / "ops" / (
-            "SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-"
-            "NEXT-SLICE-SELECTION-2026-06-27.md"
+            "SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-"
+            "COMPARISON-BOUNDARY-LINK-CONTRACT-FREEZE-2026-06-27.md"
         )
         sandbox_receipt.write_text(
             "\n".join(
                 [
                     "# Sandbox Packet",
                     "",
-                    "- Mode: `root-owned docs-only post-validator-behavior next-slice selection`",
-                    "- Scope: `choose the smallest honest downstream Sandbox packet after the landed pre-verdict validator-behavior helper without widening into verdict activation, validator execution, runner behavior, report mutation, or broader routing`",
+                    "- Mode: `root-owned docs-only validator-behavior-comparison-boundary-link contract freeze`",
+                    "- Scope: `freeze the smallest rule tying the landed pre-verdict validator-behavior helper to the already frozen comparison boundary without widening into verdict activation, validator execution, runner behavior, report mutation, or broader routing`",
                     "",
                 ]
             ),
@@ -312,11 +312,11 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
 
         self.assertEqual("hold_current_lane", payload["operator_action"])
 
-    def test_build_campaign_promotes_sandbox_after_post_validator_behavior_next_slice_selection(self) -> None:
+    def test_build_campaign_promotes_sandbox_after_behavior_comparison_boundary_link_contract(self) -> None:
         root = self._temp_root()
         marker_doc = MARKER_DOC.replace(
             "- Sandbox Simulation Readiness: `0%`",
-            "- Sandbox Simulation Readiness: `61%`",
+            "- Sandbox Simulation Readiness: `64%`",
         )
         (root / "docs" / "atlas-book" / "02-lanes-and-markers.md").write_text(marker_doc, encoding="utf-8")
         (root / "docs" / "atlas-book" / "01-current-state.md").write_text(CURRENT_STATE_DOC, encoding="utf-8")
@@ -344,23 +344,23 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
             records["Sandbox Simulation Readiness"]["category"],
         )
         self.assertIn(
-            "post-helper next-slice selection",
+            "comparison-boundary link contract",
             records["Sandbox Simulation Readiness"]["rationale"],
         )
         self.assertEqual(
-            "Sandbox Simulation Readiness local-only first validator-behavior comparison-boundary link contract freeze",
+            "Sandbox Simulation Readiness local-only first validator verdict-assignment rule contract freeze",
             payload["next_after_current_packet"],
         )
         self.assertEqual(
-            "docs/ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-NEXT-SLICE-SELECTION-2026-06-27.md",
+            "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BEHAVIOR-COMPARISON-BOUNDARY-LINK-CONTRACT-FREEZE-2026-06-27.md",
             payload["next_after_current_packet_basis_ref"],
         )
         self.assertEqual(
-            "root-owned docs-only validator-behavior-comparison-boundary-link contract freeze",
+            "root-owned docs-only validator-verdict-assignment-rule contract freeze",
             payload["next_after_current_packet_mode"],
         )
         self.assertIn(
-            "tying the landed pre-verdict validator-behavior helper",
+            "assign verdict-bearing status only from the admitted pre-verdict helper",
             payload["next_after_current_packet_scope"],
         )
 

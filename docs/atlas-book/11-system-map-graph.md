@@ -301,7 +301,7 @@ Historical note:
 - Cortex planning surfaces
 - markers, receipts, validation, and governance automation
 - latest ATLAS-root immediate lane packet:
-- `Sandbox Simulation Readiness local-only first validator-behavior comparison-boundary link contract freeze`
+- `Sandbox Simulation Readiness local-only first validator verdict-assignment rule contract freeze`
   - superseding current-family update: the AI Long-Run downstream chain remains durably held through the post-stack-command-implementation-actual-owner-side-mutation-authority-class-value downstream hold recheck, the root-bounded lane-selection closeout now routes the active ATLAS-side lane into Sandbox, the prompt-pack and handoff contract is already exact, the implementation-readiness closeout is already exact, the bounded validator-behavior helper landing is now reconciled on canonical `main`, the post-behavior next-slice selector is now durable too, and the current immediate root-local question is the smallest rule that may tie the landed pre-verdict helper to the already frozen comparison boundary without widening into verdict activation or runner behavior
   - prior active-family carry-forward: `AI Long-Run Batch Orchestration post-stack-command-implementation-actual-owner-side-mutation-authority-class-value downstream hold recheck` remains restart-relevant history, but it is no longer the current immediate lane packet because the same-lane next package is explicitly `No immediate AI Long-Run Batch Orchestration same-lane packet`
 - current bounded seam progression:
