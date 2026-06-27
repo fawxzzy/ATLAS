@@ -1706,6 +1706,7 @@
 - [Sandbox Simulation Readiness Post-Local-Only First Validator Broader Runtime Assertions Admission Boundary Hold Or Top-Level Lane Reselection](../ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-BROADER-RUNTIME-ASSERTIONS-ADMISSION-BOUNDARY-HOLD-OR-TOP-LEVEL-LANE-RESELECTION-2026-06-27.md)
 - [Root-Bounded Lane Selection After Sandbox Simulation Readiness Broader-Runtime-Assertions Hold Closeout](../ops/ROOT-BOUNDED-LANE-SELECTION-AFTER-SANDBOX-SIMULATION-READINESS-BROADER-RUNTIME-ASSERTIONS-HOLD-CLOSEOUT-2026-06-27.md)
 - [Stack Lock Mazer Dirty-State Refresh](../ops/STACK-LOCK-MAZER-DIRTY-STATE-REFRESH-2026-06-27.md)
+- [Stack Lock Mazer Main Clean Re-Sync](../ops/STACK-LOCK-MAZER-MAIN-CLEAN-RESYNC-2026-06-27.md)
 - [Mazer Generated State Zero-Warning Cleanup](../ops/MAZER-GENERATED-STATE-ZERO-WARNING-CLEANUP-2026-06-27.md)
 - [DiscordOS Feedback Extraction Closeout](../ops/discordos-feedback-extraction-closeout-2026-06-27.md)
 ## Notes

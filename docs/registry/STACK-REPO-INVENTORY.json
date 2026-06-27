@@ -1,16 +1,16 @@
 {
   "schema_version": "atlas.stack.repo-inventory.v1",
   "stack_manifest_ref": "stack.yaml",
-  "stack_manifest_digest": "sha256:0587ec9f23abdb48af68ccb99a8afa775fea50f108302d71053a7072ff247a18",
+  "stack_manifest_digest": "sha256:e5ac73c00983975b59e4b8e7f8541160d479087f5dc95ad1d642568116bd7d10",
   "stack_lock_ref": "stack.lock.yaml",
-  "stack_lock_digest": "sha256:1bfd75fbcc479495783ab55b63a76fb8099cae8f0ed02889faabb044f71c2947",
-  "working_memory_digest": "sha256:2b68b9f9010818963b4fae5d5826656e72aa46f87be049e9aa9ff122b87d8681",
+  "stack_lock_digest": "sha256:13e04684ba74d5f7e63a816d661503a2c6d0c7a5bf710295f169482fb0282ba9",
+  "working_memory_digest": "sha256:fe4f4902e2b2c475974b050ba1bf3f5e740439aa41df2f844555c2c0dc3b310f",
   "published_refs": {
     "json": "docs/registry/STACK-REPO-INVENTORY.json",
     "markdown": "docs/audits/STACK-REPO-INVENTORY.md"
   },
   "repo_count": 12,
-  "dirty_repo_count": 4,
+  "dirty_repo_count": 8,
   "release_eligible_count": 5,
   "repos": [
     {
@@ -19,50 +19,13 @@
       "role": "workflow-operator",
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/_stack.git",
-      "pinned_commit": "c72b47726f67b4e0474113229368106b41fbbf76",
-      "current_commit": "c72b47726f67b4e0474113229368106b41fbbf76",
+      "pinned_commit": "e4fcd7c607a4830d141634b8350e32d8dbaa47ef",
+      "current_commit": "e4fcd7c607a4830d141634b8350e32d8dbaa47ef",
       "pinned_ref_type": "branch",
-      "pinned_ref": "main",
+      "pinned_ref": "codex/queue-or-registry-broader-execution-behavior",
       "current_ref_type": "branch",
-      "current_ref": "main",
-      "branch": "main",
-      "dirty": false,
-      "trust_class": "trusted",
-      "release_eligible": false,
-      "exists": true,
-      "is_git_root": true,
-      "related_initiatives": [
-        {
-          "initiative_ref": "initiative:continuity-manifest-local-data-gateway",
-          "title": "Continuity Manifest Local Data Gateway",
-          "path": "docs/memory/initiatives/continuity-manifest-local-data-gateway.json",
-          "status": "active"
-        },
-        {
-          "initiative_ref": "initiative:continuity-manifest-stack-readiness",
-          "title": "Continuity Manifest Stack Readiness",
-          "path": "docs/memory/initiatives/continuity-manifest-stack-readiness.json",
-          "status": "active"
-        }
-      ],
-      "related_initiative_refs": [
-        "initiative:continuity-manifest-local-data-gateway",
-        "initiative:continuity-manifest-stack-readiness"
-      ]
-    },
-    {
-      "logical_id": "discordos",
-      "local_path": "repos/DiscordOS",
-      "role": "application",
-      "status": "incubating",
-      "remote_url": "https://github.com/fawxzzy/DiscordOS.git",
-      "pinned_commit": "9d71af5ca941ec5acfef2825ad83cb2d1d448ec0",
-      "current_commit": "9d71af5ca941ec5acfef2825ad83cb2d1d448ec0",
-      "pinned_ref_type": "branch",
-      "pinned_ref": "codex/path-discipline-warning-slice-discordos",
-      "current_ref_type": "branch",
-      "current_ref": "codex/path-discipline-warning-slice-discordos",
-      "branch": "codex/path-discipline-warning-slice-discordos",
+      "current_ref": "codex/queue-or-registry-broader-execution-behavior",
+      "branch": "codex/queue-or-registry-broader-execution-behavior",
       "dirty": true,
       "trust_class": "trusted",
       "release_eligible": false,
@@ -76,32 +39,53 @@
           "status": "completed"
         },
         {
-          "initiative_ref": "initiative:continuity-manifest-discord-os-infrastructure-separation",
-          "title": "Continuity Manifest Discord OS Infrastructure Separation",
-          "path": "docs/memory/initiatives/continuity-manifest-discord-os-infrastructure-separation.json",
+          "initiative_ref": "initiative:continuity-manifest-local-data-gateway",
+          "title": "Continuity Manifest Local Data Gateway",
+          "path": "docs/memory/initiatives/continuity-manifest-local-data-gateway.json",
+          "status": "active"
+        },
+        {
+          "initiative_ref": "initiative:continuity-manifest-post-convergence-lane-split-readiness",
+          "title": "Continuity Manifest Post-Convergence Lane Split Readiness",
+          "path": "docs/memory/initiatives/continuity-manifest-post-convergence-lane-split-readiness.json",
+          "status": "active"
+        },
+        {
+          "initiative_ref": "initiative:continuity-manifest-stack-readiness",
+          "title": "Continuity Manifest Stack Readiness",
+          "path": "docs/memory/initiatives/continuity-manifest-stack-readiness.json",
+          "status": "active"
+        },
+        {
+          "initiative_ref": "initiative:continuity-manifest-vision-future-alignment",
+          "title": "Continuity Manifest Vision & Future Alignment",
+          "path": "docs/memory/initiatives/continuity-manifest-vision-future-alignment.json",
           "status": "active"
         }
       ],
       "related_initiative_refs": [
         "initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization",
-        "initiative:continuity-manifest-discord-os-infrastructure-separation"
+        "initiative:continuity-manifest-local-data-gateway",
+        "initiative:continuity-manifest-post-convergence-lane-split-readiness",
+        "initiative:continuity-manifest-stack-readiness",
+        "initiative:continuity-manifest-vision-future-alignment"
       ]
     },
     {
-      "logical_id": "fitness",
-      "local_path": "repos/fawxzzy-fitness",
+      "logical_id": "discordos",
+      "local_path": "repos/DiscordOS",
       "role": "application",
-      "status": "unmanaged",
-      "remote_url": "https://github.com/fawxzzy/fawxzzy-fitness.git",
-      "pinned_commit": null,
-      "current_commit": "93dbbbb1e1f5983812ce7170b07855a0c12d9370",
-      "pinned_ref_type": null,
-      "pinned_ref": null,
+      "status": "incubating",
+      "remote_url": "https://github.com/fawxzzy/DiscordOS.git",
+      "pinned_commit": "ff8f21cfec199f50728ddddea79ba7f546392663",
+      "current_commit": "ff8f21cfec199f50728ddddea79ba7f546392663",
+      "pinned_ref_type": "branch",
+      "pinned_ref": "main",
       "current_ref_type": "branch",
-      "current_ref": "codex/logged-session-screen-pass",
-      "branch": "codex/logged-session-screen-pass",
+      "current_ref": "main",
+      "branch": "main",
       "dirty": true,
-      "trust_class": "adjacent",
+      "trust_class": "trusted",
       "release_eligible": false,
       "exists": true,
       "is_git_root": true,
@@ -132,13 +116,64 @@
       ]
     },
     {
+      "logical_id": "fitness",
+      "local_path": "repos/fawxzzy-fitness",
+      "role": "application",
+      "status": "unmanaged",
+      "remote_url": "https://github.com/fawxzzy/fawxzzy-fitness.git",
+      "pinned_commit": null,
+      "current_commit": "616443b69c9d203efee8e3c7dd3f2a1a4f9cd1e3",
+      "pinned_ref_type": null,
+      "pinned_ref": null,
+      "current_ref_type": "branch",
+      "current_ref": "main",
+      "branch": "main",
+      "dirty": true,
+      "trust_class": "adjacent",
+      "release_eligible": false,
+      "exists": true,
+      "is_git_root": true,
+      "related_initiatives": [
+        {
+          "initiative_ref": "initiative:continuity-manifest-dependency-untangling",
+          "title": "Continuity Manifest Dependency Untangling",
+          "path": "docs/memory/initiatives/continuity-manifest-dependency-untangling.json",
+          "status": "active"
+        },
+        {
+          "initiative_ref": "initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization",
+          "title": "Continuity Manifest Discord OS Feedback Workflow Canonicalization",
+          "path": "docs/memory/initiatives/continuity-manifest-discord-os-feedback-workflow-canonicalization.json",
+          "status": "completed"
+        },
+        {
+          "initiative_ref": "initiative:continuity-manifest-discord-os-infrastructure-separation",
+          "title": "Continuity Manifest Discord OS Infrastructure Separation",
+          "path": "docs/memory/initiatives/continuity-manifest-discord-os-infrastructure-separation.json",
+          "status": "active"
+        },
+        {
+          "initiative_ref": "initiative:continuity-manifest-local-data-gateway",
+          "title": "Continuity Manifest Local Data Gateway",
+          "path": "docs/memory/initiatives/continuity-manifest-local-data-gateway.json",
+          "status": "active"
+        }
+      ],
+      "related_initiative_refs": [
+        "initiative:continuity-manifest-dependency-untangling",
+        "initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization",
+        "initiative:continuity-manifest-discord-os-infrastructure-separation",
+        "initiative:continuity-manifest-local-data-gateway"
+      ]
+    },
+    {
       "logical_id": "foundation",
       "local_path": "repos/foundation",
       "role": "package",
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/foundation.git",
-      "pinned_commit": "a016da2f08f167747f7ae7c804c0d6840cb9514d",
-      "current_commit": "a016da2f08f167747f7ae7c804c0d6840cb9514d",
+      "pinned_commit": "fd1cf0650cdbb732f1231aa47a6e43138dab9062",
+      "current_commit": "fd1cf0650cdbb732f1231aa47a6e43138dab9062",
       "pinned_ref_type": "branch",
       "pinned_ref": "main",
       "current_ref_type": "branch",
@@ -158,8 +193,8 @@
       "role": "local-operator",
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/lifeline.git",
-      "pinned_commit": "1994e64a09128d848048ba57cfd76fba278cc655",
-      "current_commit": "1994e64a09128d848048ba57cfd76fba278cc655",
+      "pinned_commit": "538f623a84b003e70dadd234e6ea3af642446a5f",
+      "current_commit": "538f623a84b003e70dadd234e6ea3af642446a5f",
       "pinned_ref_type": "branch",
       "pinned_ref": "codex/path-discipline-warning-slice-lifeline",
       "current_ref_type": "branch",
@@ -179,13 +214,13 @@
       "role": "application",
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/mazer.git",
-      "pinned_commit": "fcf7f5f22ac3656f4dcd1e260c54a78f570d1a32",
-      "current_commit": "fcf7f5f22ac3656f4dcd1e260c54a78f570d1a32",
+      "pinned_commit": "269b02b955451ca1847efb5dde1e172b4c887bb8",
+      "current_commit": "269b02b955451ca1847efb5dde1e172b4c887bb8",
       "pinned_ref_type": "branch",
-      "pinned_ref": "codex/path-discipline-warning-slice-mazer-pub",
+      "pinned_ref": "main",
       "current_ref_type": "branch",
-      "current_ref": "codex/path-discipline-warning-slice-mazer-pub",
-      "branch": "codex/path-discipline-warning-slice-mazer-pub",
+      "current_ref": "main",
+      "branch": "main",
       "dirty": false,
       "trust_class": "trusted",
       "release_eligible": true,
@@ -216,7 +251,7 @@
       "current_ref_type": "branch",
       "current_ref": "codex/path-discipline-warning-slice-nat1",
       "branch": "codex/path-discipline-warning-slice-nat1",
-      "dirty": false,
+      "dirty": true,
       "trust_class": "trusted",
       "release_eligible": false,
       "exists": true,
@@ -282,7 +317,7 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "a9555ea316c25bae8199f40b79af78406e748c04",
+      "current_commit": "e79d48fcf1b1f4b21d0b4720291006f61c0d472f",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
@@ -309,7 +344,7 @@
       "current_ref_type": "branch",
       "current_ref": "main",
       "branch": "main",
-      "dirty": false,
+      "dirty": true,
       "trust_class": "trusted",
       "release_eligible": false,
       "exists": true,
@@ -330,7 +365,7 @@
       "current_ref_type": "branch",
       "current_ref": "codex/path-discipline-warning-slice-trove",
       "branch": "codex/path-discipline-warning-slice-trove",
-      "dirty": false,
+      "dirty": true,
       "trust_class": "trusted",
       "release_eligible": true,
       "exists": true,
@@ -495,5 +530,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:4eb89005697a5bb49316a0b0712a656c7d89bbad7fb9fef53968905a8c6d7641"
+  "content_digest": "sha256:15db474a116ea3360bf0298eaa0e1bf997e5307e9ad2acf66ed232d7001d76d2"
 }

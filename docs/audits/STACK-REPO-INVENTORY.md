@@ -14,29 +14,29 @@ Operational rule:
 ## Summary
 
 - Repo count: `12`
-- Dirty repo count: `4`
+- Dirty repo count: `8`
 - Release-eligible repo count: `5`
 - Excluded surface count: `17`
 - Stack manifest: `stack.yaml`
 - Stack lock: `stack.lock.yaml`
-- Inventory digest: `sha256:4eb89005697a5bb49316a0b0712a656c7d89bbad7fb9fef53968905a8c6d7641`
+- Inventory digest: `sha256:15db474a116ea3360bf0298eaa0e1bf997e5307e9ad2acf66ed232d7001d76d2`
 
 ## Managed Repos
 
 | Repo id | Path | Branch | Pinned commit | Current commit | Dirty | Trust | Release | Related initiatives |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| _stack | repos/_stack | main | c72b47726f67b4e0474113229368106b41fbbf76 | c72b47726f67b4e0474113229368106b41fbbf76 | False | trusted | False | initiative:continuity-manifest-local-data-gateway<br>initiative:continuity-manifest-stack-readiness |
-| discordos | repos/DiscordOS | codex/path-discipline-warning-slice-discordos | 9d71af5ca941ec5acfef2825ad83cb2d1d448ec0 | 9d71af5ca941ec5acfef2825ad83cb2d1d448ec0 | True | trusted | False | initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-discord-os-infrastructure-separation |
-| fitness | repos/fawxzzy-fitness | codex/logged-session-screen-pass | - | 93dbbbb1e1f5983812ce7170b07855a0c12d9370 | True | adjacent | False | initiative:continuity-manifest-dependency-untangling<br>initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-discord-os-infrastructure-separation |
-| foundation | repos/foundation | main | a016da2f08f167747f7ae7c804c0d6840cb9514d | a016da2f08f167747f7ae7c804c0d6840cb9514d | False | trusted | True | - |
-| lifeline | repos/lifeline | codex/path-discipline-warning-slice-lifeline | 1994e64a09128d848048ba57cfd76fba278cc655 | 1994e64a09128d848048ba57cfd76fba278cc655 | False | trusted | True | - |
-| mazer | repos/mazer | codex/path-discipline-warning-slice-mazer-pub | fcf7f5f22ac3656f4dcd1e260c54a78f570d1a32 | fcf7f5f22ac3656f4dcd1e260c54a78f570d1a32 | False | trusted | True | initiative:initiative-mazer-d2-learning-scorer |
-| nat1-games | repos/Nat1-Games/nat1-games | codex/path-discipline-warning-slice-nat1 | 63a4a7c159c41a7e98ad8708891743acf71431ed | 63a4a7c159c41a7e98ad8708891743acf71431ed | False | trusted | False | - |
+| _stack | repos/_stack | codex/queue-or-registry-broader-execution-behavior | e4fcd7c607a4830d141634b8350e32d8dbaa47ef | e4fcd7c607a4830d141634b8350e32d8dbaa47ef | True | trusted | False | initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-local-data-gateway<br>initiative:continuity-manifest-post-convergence-lane-split-readiness<br>initiative:continuity-manifest-stack-readiness<br>initiative:continuity-manifest-vision-future-alignment |
+| discordos | repos/DiscordOS | main | ff8f21cfec199f50728ddddea79ba7f546392663 | ff8f21cfec199f50728ddddea79ba7f546392663 | True | trusted | False | initiative:continuity-manifest-dependency-untangling<br>initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-discord-os-infrastructure-separation |
+| fitness | repos/fawxzzy-fitness | main | - | 616443b69c9d203efee8e3c7dd3f2a1a4f9cd1e3 | True | adjacent | False | initiative:continuity-manifest-dependency-untangling<br>initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-discord-os-infrastructure-separation<br>initiative:continuity-manifest-local-data-gateway |
+| foundation | repos/foundation | main | fd1cf0650cdbb732f1231aa47a6e43138dab9062 | fd1cf0650cdbb732f1231aa47a6e43138dab9062 | False | trusted | True | - |
+| lifeline | repos/lifeline | codex/path-discipline-warning-slice-lifeline | 538f623a84b003e70dadd234e6ea3af642446a5f | 538f623a84b003e70dadd234e6ea3af642446a5f | False | trusted | True | - |
+| mazer | repos/mazer | main | 269b02b955451ca1847efb5dde1e172b4c887bb8 | 269b02b955451ca1847efb5dde1e172b4c887bb8 | False | trusted | True | initiative:initiative-mazer-d2-learning-scorer |
+| nat1-games | repos/Nat1-Games/nat1-games | codex/path-discipline-warning-slice-nat1 | 63a4a7c159c41a7e98ad8708891743acf71431ed | 63a4a7c159c41a7e98ad8708891743acf71431ed | True | trusted | False | - |
 | playbook | repos/playbook | codex/path-discipline-warning-slice-playbook | f27c36355da906a01a46a841779553002c259f9b | f27c36355da906a01a46a841779553002c259f9b | True | trusted | True | initiative:continuity-manifest-atlas-owned-repo-naming-canonicalization |
 | playbook-demo | repos/playbook-demo/playbook-demo | main | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | False | trusted | False | - |
-| stack | . | main | - | a9555ea316c25bae8199f40b79af78406e748c04 | True | trusted | False | - |
-| stream | repos/stream | main | bf2c9551225e6d3555122da9a72306556f50cdd8 | bf2c9551225e6d3555122da9a72306556f50cdd8 | False | trusted | False | - |
-| trove | repos/trove | codex/path-discipline-warning-slice-trove | cd572452b627c6a03dbdb440f9b4e431d9b8ed98 | cd572452b627c6a03dbdb440f9b4e431d9b8ed98 | False | trusted | True | - |
+| stack | . | main | - | e79d48fcf1b1f4b21d0b4720291006f61c0d472f | True | trusted | False | - |
+| stream | repos/stream | main | bf2c9551225e6d3555122da9a72306556f50cdd8 | bf2c9551225e6d3555122da9a72306556f50cdd8 | True | trusted | False | - |
+| trove | repos/trove | codex/path-discipline-warning-slice-trove | cd572452b627c6a03dbdb440f9b4e431d9b8ed98 | cd572452b627c6a03dbdb440f9b4e431d9b8ed98 | True | trusted | True | - |
 
 ## Excluded Surfaces
 
