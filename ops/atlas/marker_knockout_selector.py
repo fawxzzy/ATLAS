@@ -686,6 +686,7 @@ def build_campaign(*, root: Path) -> dict[str, object]:
         "source_ref": "docs/atlas-book/02-lanes-and-markers.md",
         "source_digest_count": len(open_markers),
         "active_lane": active_lane,
+        "active_lane_is_held": active_lane_is_held,
         "open_markers": [asdict(record) for record in records],
         "closed_markers": [asdict(record) for record in closed_markers],
         "category_counts": category_counts,
@@ -748,7 +749,9 @@ def render_markdown(payload: dict[str, object]) -> str:
             f"- action: `{payload['operator_action']}`",
             f"- why: {payload['operator_action_reason']}",
         ]
-        if payload.get("selected_current_packet"):
+        if payload.get("operator_action") == "hold_current_lane":
+            lines.append("- no immediate same-lane packet is open.")
+        elif payload.get("selected_current_packet"):
             lines.append(f"- do now: `{payload['selected_current_packet']}`")
         if payload.get("selected_current_packet_basis_ref"):
             lines.append(f"- current packet basis receipt: `{payload['selected_current_packet_basis_ref']}`")

@@ -312,6 +312,7 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         payload = build_campaign(root=root)
 
         self.assertEqual("hold_current_lane", payload["operator_action"])
+        self.assertTrue(payload["active_lane_is_held"])
 
     def test_build_campaign_promotes_sandbox_after_deploy_surface_mutation_admission_boundary_contract(self) -> None:
         root = self._temp_root()
@@ -412,6 +413,35 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
             "current packet mode: `docs-only root-bounded downstream hold recheck`",
             markdown,
         )
+
+    def test_main_markdown_omits_do_now_when_active_lane_is_held(self) -> None:
+        root = self._temp_root()
+        (root / "docs" / "atlas-book" / "02-lanes-and-markers.md").write_text(MARKER_DOC, encoding="utf-8")
+        (root / "docs" / "atlas-book" / "01-current-state.md").write_text(CURRENT_STATE_DOC, encoding="utf-8")
+        self._write_packet_receipts(root)
+        self._write_manifest(
+            root,
+            manifest_name="continuity-manifest-ai-long-run-batch-orchestration.json",
+            marker="AI Long-Run Batch Orchestration",
+            percent=20,
+            checkpoint_ref=(
+                "docs/ops/"
+                "AI-LONG-RUN-BATCH-ORCHESTRATION-POST-STACK-COMMAND-IMPLEMENTATION-"
+                "ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-VALUE-DOWNSTREAM-HOLD-RECHECK-2026-06-26.md"
+            ),
+            next_package="No immediate AI Long-Run Batch Orchestration same-lane packet",
+            mode="hold-flat after downstream follow-on recheck",
+            reason="current lane is intentionally held",
+        )
+        output_ref = "docs/ops/selector-held-output.md"
+
+        exit_code = main(["--root", str(root), "--format", "markdown", "--output", output_ref])
+
+        self.assertEqual(0, exit_code)
+        markdown = (root / output_ref).read_text(encoding="utf-8")
+        self.assertIn("action: `hold_current_lane`", markdown)
+        self.assertIn("- no immediate same-lane packet is open.", markdown)
+        self.assertNotIn("- do now:", markdown)
         self.assertIn(
             "current packet scope: `re-evaluate the post-authority-class-value downstream fall-through against manifest-backed no-immediate packet holds and decide whether any honest root-bounded follow-on remains`",
             markdown,
