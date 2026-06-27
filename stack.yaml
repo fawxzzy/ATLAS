@@ -111,6 +111,13 @@ repo_registry:
     path: repos/playbook
     role: governance-runtime
     status: active
+    validation:
+      generated_state_cleanup:
+        command: node ../../ops/validation/repo_generated_state_cleanup_wrapper.mjs --delete node_modules --retain .playbook=playbook_owned_runtime_state --report-path ../../runtime/state/repo-cleanup/playbook.validation.latest.json
+        report_path: ../../runtime/state/repo-cleanup/playbook.validation.latest.json
+        paths:
+          - node_modules
+          - .playbook
   lifeline:
     path: repos/lifeline
     role: local-operator
@@ -135,12 +142,13 @@ repo_registry:
     status: unmanaged
     validation:
       generated_state_cleanup:
-        command: node scripts/cleanup-repo.mjs --include-build-cache --include-node-modules --include-playbook-state --relocate-to-tmp --report-path ../../runtime/state/repo-cleanup/fitness.validation.latest.json
+        command: node ../../ops/validation/repo_generated_state_cleanup_wrapper.mjs --run "node scripts/cleanup-repo.mjs --include-build-cache --include-node-modules --include-playbook-state --relocate-to-tmp --report-path ../../runtime/state/repo-cleanup/fitness.validation.latest.json" --retain .vercel=protected_local_vercel_linkage --report-path ../../runtime/state/repo-cleanup/fitness.validation.latest.json
         report_path: ../../runtime/state/repo-cleanup/fitness.validation.latest.json
         paths:
           - .next
           - node_modules
           - .playbook
+          - .vercel
   mazer:
     path: repos/mazer
     role: application
