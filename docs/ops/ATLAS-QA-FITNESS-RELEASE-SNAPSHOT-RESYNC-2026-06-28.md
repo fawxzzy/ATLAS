@@ -41,16 +41,16 @@ All passed on 2026-06-28.
 - Evidence present:
   - `android.chrome.emulated`
   - `desktop.chromium.emulated`
+  - `desktop.chromium.real.manual`
   - `iphone.webkit.emulated`
 - Evidence missing:
   - `android.chrome.real.manual`
-  - `desktop.chromium.real.manual`
   - `iphone.webkit.real.manual`
 
 ## Remaining Blocker
 
 - Fitness release readiness is now narrowed to one blocker class only:
-  - physical/manual proof is still missing for `desktop.chromium.real`, `android.chrome.real`, and `iphone.webkit.real`
+  - physical/manual proof is still missing for `android.chrome.real` and `iphone.webkit.real`
 - The current gate remains `manual_review` because release still requires:
   - fresh physical/manual proof on those lanes for the current committed SHA
   - or a trusted provider/protected-manual upstream run that satisfies them
@@ -58,5 +58,5 @@ All passed on 2026-06-28.
 ## Notes
 
 - The snapshot pack now truthfully reflects the current run state after the current-SHA Fitness resync.
-- The older desktop manual attestation remains historical evidence on the older run and does not satisfy the new committed-SHA release snapshot automatically.
+- The current run now has a valid desktop manual attestation; only the Android and iPhone manual lanes remain open on the current committed SHA.
 - This receipt does not claim release readiness; it freezes the current post-resync handoff boundary.

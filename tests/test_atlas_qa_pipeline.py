@@ -1511,6 +1511,239 @@ class AtlasQaPipelineTests(unittest.TestCase):
         self.assertEqual("clean", report["status"])
         self.assertTrue((root / "runtime" / "atlas" / "qa" / "runs" / "run-1" / "manual_attestation.result.json").exists())
 
+    def test_report_run_marks_valid_manual_attestation_in_per_lens(self) -> None:
+        root = self._temp_root()
+        run_root = root / "runtime" / "atlas" / "qa" / "runs" / "run-1"
+        screenshot = run_root / "captures" / "desktop.chromium.real" / "manual.png"
+        _png(screenshot)
+        _write_json(
+            run_root / "matrix.result.json",
+            {
+                "contract_version": "atlas.qa.result.v1",
+                "generated_at": "2026-05-11T00:00:00Z",
+                "runner_version": "test",
+                "stage": "executed",
+                "run_id": "run-1",
+                "scenario_ref": "ops/atlas/qa/scenarios/fitness.progression-pr-smoke.json",
+                "repo_id": "fitness",
+                "repo_path": "repos/fawxzzy-fitness",
+                "git_sha": "abcdef1234567890",
+                "adapter_id": "fitness.web",
+                "adapter_ref": "ops/atlas/qa/adapters/fitness.web.json",
+                "lens_manifest_ref": "ops/atlas/qa/lenses/atlas-default-web.v1.json",
+                "mode": "execute",
+                "summary": {
+                    "overall_status": "ready",
+                    "executable_status": "clean",
+                    "artifact_status": "complete",
+                    "certification_status": "manual_required",
+                    "highest_satisfied_tier": "emulated_browser",
+                    "satisfied_evidence_tiers": ["emulated_browser"],
+                    "missing_evidence_tiers": ["physical_device"],
+                    "manual_required_lanes": ["desktop.chromium.real", "iphone.webkit.real"],
+                    "visual_status": "passed",
+                    "visual_diff_count": 0,
+                    "lens_count": 2,
+                    "failing_lens_count": 0,
+                    "finding_count": 0,
+                },
+                "matrix": [
+                    {
+                        "lens_id": "desktop.chromium.real",
+                        "proof_kind": "real",
+                        "evidence_kind": "physical_device",
+                        "status": "manual_required",
+                    },
+                    {
+                        "lens_id": "iphone.webkit.real",
+                        "proof_kind": "real",
+                        "evidence_kind": "physical_device",
+                        "status": "manual_required",
+                    },
+                ],
+                "findings": [],
+                "artifact_manifest_refs": [],
+            },
+        )
+        _write_json(
+            run_root / "evaluated.result.json",
+            {
+                "contract_version": "atlas.qa.result.v1",
+                "generated_at": "2026-05-11T00:00:00Z",
+                "runner_version": "test",
+                "stage": "evaluated",
+                "run_id": "run-1",
+                "scenario_ref": "ops/atlas/qa/scenarios/fitness.progression-pr-smoke.json",
+                "repo_id": "fitness",
+                "repo_path": "repos/fawxzzy-fitness",
+                "git_sha": "abcdef1234567890",
+                "adapter_id": "fitness.web",
+                "adapter_ref": "ops/atlas/qa/adapters/fitness.web.json",
+                "lens_manifest_ref": "ops/atlas/qa/lenses/atlas-default-web.v1.json",
+                "mode": "execute",
+                "summary": {
+                    "overall_status": "ready",
+                    "executable_status": "clean",
+                    "artifact_status": "complete",
+                    "certification_status": "manual_required",
+                    "highest_satisfied_tier": "emulated_browser",
+                    "satisfied_evidence_tiers": ["emulated_browser"],
+                    "missing_evidence_tiers": ["physical_device"],
+                    "manual_required_lanes": ["desktop.chromium.real", "iphone.webkit.real"],
+                    "visual_status": "passed",
+                    "visual_diff_count": 0,
+                    "lens_count": 2,
+                    "failing_lens_count": 0,
+                    "finding_count": 0,
+                },
+                "matrix": [],
+                "findings": [],
+                "artifact_manifest_refs": [],
+                "visual_diffs": [],
+            },
+        )
+        _write_json(
+            run_root / "artifacts.manifest.json",
+            {
+                "contract_version": "atlas.qa.artifact.v1",
+                "generated_at": "2026-05-11T00:00:00Z",
+                "run_id": "run-1",
+                "scenario_id": "fitness.progression-pr-smoke",
+                "adapter_id": "fitness.web",
+                "repo_id": "fitness",
+                "repo_path": "repos/fawxzzy-fitness",
+                "stage": "collected",
+                "mode": "execute",
+                "evidence_grade": "evidence",
+                "git_sha": "abcdef1234567890",
+                "environment": {"execution_root": "runtime/atlas/qa/runs/run-1", "target_url": "http://127.0.0.1:3002"},
+                "lenses": {},
+                "attestations": [],
+                "artifacts": [],
+                "summary": {
+                    "artifact_count": 0,
+                    "required_count": 0,
+                    "present_count": 0,
+                    "missing_count": 0,
+                    "manual_required_count": 0,
+                    "manual_attested_count": 0,
+                    "invalid_count": 0,
+                },
+            },
+        )
+        _write_json(
+            run_root / "promotion.record.json",
+            {
+                "contract_version": "atlas.qa.promotion.v1",
+                "promotion_id": "sha256:" + ("9" * 64),
+                "generated_at": "2026-05-11T00:00:00Z",
+                "evaluator_version": "test",
+                "run_id": "run-1",
+                "scenario_id": "fitness.progression-pr-smoke",
+                "repo_id": "fitness",
+                "criticality": "high",
+                "promotion_status": "manual_review",
+                "evidence_profile": "web_visual",
+                "highest_satisfied_tier": "emulated_browser",
+                "missing_evidence_tiers": ["physical_device"],
+                "manual_required_lanes": ["iphone.webkit.real"],
+                "waived_lanes": [],
+                "waiver_refs": [],
+                "waiver_reasons": [],
+                "decision": "manual_review",
+                "summary": {
+                    "executable_truth": "clean",
+                    "artifact_coverage": "complete",
+                    "real_device_proof": "manual_required",
+                    "visual_status": "passed",
+                    "test_evidence_status": "clean",
+                    "evidence_profile": "web_visual",
+                    "governance_status": "clean",
+                    "flake_status": "none",
+                },
+                "blocking_reasons": [],
+                "manual_gaps": ["Real-device certification still requires manual completion."],
+                "governance": {"status": "clean", "critical_count": 0, "error_count": 0},
+                "source_refs": {
+                    "scenario_ref": "ops/atlas/qa/scenarios/fitness.progression-pr-smoke.json",
+                    "result_ref": "runtime/atlas/qa/runs/run-1/evaluated.result.json",
+                    "artifact_refs": ["runtime/atlas/qa/runs/run-1/artifacts.manifest.json"],
+                },
+                "operator_summary": ["Manual review required before promotion."],
+            },
+        )
+        _write_json(
+            run_root / "manual-attestations" / "desktop.chromium.real.manual.json",
+            {
+                "contract_version": "atlas.qa.manual_attestation.v1",
+                "attestation_id": "att-1",
+                "operator": "atlas-operator",
+                "operator_identity": "local:test",
+                "scenario_id": "fitness.progression-pr-smoke",
+                "adapter_id": "fitness.web",
+                "run_id": "run-1",
+                "lens_id": "desktop.chromium.real",
+                "device_model": "Desktop Browser",
+                "os_name": "Windows",
+                "os_version": "11",
+                "browser_name": "chromium",
+                "browser_version": "1.0",
+                "capture_timestamp": "2026-05-11T00:00:00Z",
+                "expires_at": "2099-01-01T00:00:00Z",
+                "screenshot_artifacts": [
+                    {
+                        "path_ref": "runtime/atlas/qa/runs/run-1/captures/desktop.chromium.real/manual.png",
+                        "checksum_sha256": "sha256:" + sha256_bytes(screenshot.read_bytes()),
+                    }
+                ],
+                "supporting_artifacts": [],
+                "notes": [],
+            },
+        )
+        _write_json(
+            run_root / "manual_attestation.result.json",
+            {
+                "runner_version": "atlas.qa.manual-attestation.validate.v1",
+                "generated_at": "2026-05-12T00:00:00Z",
+                "run_id": "run-1",
+                "status": "invalid",
+                "attestation_count": 2,
+                "attestations": [
+                    {
+                        "attestation_id": "att-1",
+                        "attestation_ref": "runtime/atlas/qa/runs/run-1/manual-attestations/desktop.chromium.real.manual.json",
+                        "run_id": "run-1",
+                        "scenario_id": "fitness.progression-pr-smoke",
+                        "adapter_id": "fitness.web",
+                        "lens_id": "desktop.chromium.real",
+                        "operator": "atlas-operator",
+                        "capture_method": "manual_attestation",
+                        "status": "valid",
+                    },
+                    {
+                        "attestation_id": "att-2",
+                        "attestation_ref": "runtime/atlas/qa/runs/run-1/manual-attestations/iphone.webkit.real.manual.json",
+                        "run_id": "run-1",
+                        "scenario_id": "fitness.progression-pr-smoke",
+                        "adapter_id": "fitness.web",
+                        "lens_id": "iphone.webkit.real",
+                        "operator": "atlas-operator",
+                        "capture_method": "manual_attestation",
+                        "status": "invalid",
+                    },
+                ],
+                "finding_count": 1,
+                "findings": [{"severity": "error", "code": "missing_attestation_screenshot", "message": "iphone missing"}],
+            },
+        )
+        report = report_run(root=root, run_id="run-1")
+        payload = load_json_object(root / report["report_summary_ref"])
+        desktop = next(item for item in payload["per_lens"] if item["lens_id"] == "desktop.chromium.real")
+        iphone = next(item for item in payload["per_lens"] if item["lens_id"] == "iphone.webkit.real")
+        self.assertEqual("manual_attested", desktop["status"])
+        self.assertEqual("runtime/atlas/qa/runs/run-1/captures/desktop.chromium.real/manual.png", desktop["screenshot_ref"])
+        self.assertEqual("manual_required", iphone["status"])
+
     def test_adapter_prepare_command_is_accepted(self) -> None:
         adapter = {
             "contract_version": "atlas.qa.adapter.v1",

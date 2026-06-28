@@ -27,6 +27,36 @@ def _rel(target: str | Path | None, *, base: Path, root: Path) -> str:
         return atlas_relative(resolved, root=root)
 
 
+def _load_valid_manual_attestations(*, run_root: Path, root: Path) -> dict[str, dict[str, str]]:
+    result_path = run_root / "manual_attestation.result.json"
+    if not result_path.exists():
+        return {}
+    payload = load_json_object(result_path)
+    details: dict[str, dict[str, str]] = {}
+    for item in payload.get("attestations", []):
+        if not isinstance(item, dict) or str(item.get("status") or "") != "valid":
+            continue
+        lens_id = str(item.get("lens_id") or "")
+        attestation_ref = str(item.get("attestation_ref") or "")
+        if not lens_id or not attestation_ref:
+            continue
+        attestation_path = (root / attestation_ref).resolve()
+        if not attestation_path.exists():
+            continue
+        attestation_payload = load_json_object(attestation_path)
+        screenshot_ref = ""
+        screenshots = attestation_payload.get("screenshot_artifacts")
+        if isinstance(screenshots, list) and screenshots:
+            first = screenshots[0]
+            if isinstance(first, dict):
+                screenshot_ref = str(first.get("path_ref") or "")
+        details[lens_id] = {
+            "status": "manual_attested",
+            "screenshot_ref": screenshot_ref,
+        }
+    return details
+
+
 def report_run(*, root: Path | None = None, run_id: str, output_dir: Path | None = None) -> dict[str, Any]:
     base_root = (root or atlas_root()).resolve()
     run_root = (default_run_root(root=base_root) / run_id).resolve()
@@ -37,6 +67,7 @@ def report_run(*, root: Path | None = None, run_id: str, output_dir: Path | None
     test_evidence = load_json_object(run_root / "test-evidence.json") if (run_root / "test-evidence.json").exists() else {"receipts": [], "summary": {"status": "not_configured"}}
     report_root = output_dir.resolve() if isinstance(output_dir, Path) else run_root
     report_root.mkdir(parents=True, exist_ok=True)
+    manual_attestations = _load_valid_manual_attestations(run_root=run_root, root=base_root)
 
     screenshots = [
         item for item in artifacts.get("artifacts", [])
@@ -49,13 +80,20 @@ def report_run(*, root: Path | None = None, run_id: str, output_dir: Path | None
         lens_id = str(lane.get("lens_id") or "")
         lens_shots = [item for item in screenshots if item.get("lens_id") == lens_id]
         shot = lens_shots[0] if lens_shots else None
+        manual_attestation = manual_attestations.get(lens_id, {})
+        screenshot_ref = str(shot.get("path_ref") or "") if isinstance(shot, dict) else ""
+        if not screenshot_ref and manual_attestation.get("screenshot_ref"):
+            screenshot_ref = manual_attestation["screenshot_ref"]
+        status = str(lane.get("status") or "")
+        if status == "manual_required" and manual_attestation.get("status") == "manual_attested":
+            status = "manual_attested"
         per_lens.append(
             {
                 "lens_id": lens_id,
-                "status": str(lane.get("status") or ""),
+                "status": status,
                 "proof_kind": str(lane.get("proof_kind") or ""),
                 "evidence_kind": str(lane.get("evidence_kind") or ""),
-                "screenshot_ref": str(shot.get("path_ref") or "") if isinstance(shot, dict) else "",
+                "screenshot_ref": screenshot_ref,
                 "trace_ref": next((str(item.get("path_ref") or "") for item in artifacts.get("artifacts", []) if isinstance(item, dict) and item.get("lens_id") == lens_id and item.get("artifact_kind") == "trace"), ""),
                 "console_ref": next((str(item.get("path_ref") or "") for item in artifacts.get("artifacts", []) if isinstance(item, dict) and item.get("lens_id") == lens_id and item.get("artifact_kind") == "console_log"), ""),
                 "network_ref": next((str(item.get("path_ref") or "") for item in artifacts.get("artifacts", []) if isinstance(item, dict) and item.get("lens_id") == lens_id and item.get("artifact_kind") == "network_log"), ""),
