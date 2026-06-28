@@ -72,6 +72,7 @@
 - [ATLAS Root Zero-Warning Floor After Mazer Generated-State Cleanup Re-Sync](../ops/ATLAS-ROOT-ZERO-WARNING-FLOOR-AFTER-MAZER-GENERATED-STATE-CLEANUP-RESYNC-2026-06-28.md)
 - [ATLAS Root Stack Lock Canonical Line-Ending Guard And Validation Re-Sync](../ops/ATLAS-ROOT-STACK-LOCK-CANONICAL-LINE-ENDING-GUARD-AND-VALIDATION-RESYNC-2026-06-28.md)
 - [ATLAS Root Repo Inventory Self-Dirty False-Positive Closeout](../ops/ATLAS-ROOT-REPO-INVENTORY-SELF-DIRTY-FALSE-POSITIVE-CLOSEOUT-2026-06-28.md)
+- [ATLAS Book Historical Current-Packet Label And Endgame Encoding Cleanup](../ops/ATLAS-BOOK-HISTORICAL-CURRENT-PACKET-LABEL-AND-ENDGAME-ENCODING-CLEANUP-2026-06-28.md)
 - [Inventory And Truth Map And ATLAS Book Fitness Release-Gate Packet Re-Sync](../ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-RELEASE-GATE-PACKET-RESYNC-2026-06-28.md)
 - [Truth Map And ATLAS Book Cortex Held-Root Projection Cleanup](../ops/TRUTH-MAP-AND-ATLAS-BOOK-CORTEX-HELD-ROOT-PROJECTION-CLEANUP-2026-06-28.md)
 - [Truth Map And ATLAS Book Lifeline Runtime Residue Zero-Warning Closeout And Stack Re-Sync](../ops/TRUTH-MAP-AND-ATLAS-BOOK-LIFELINE-RUNTIME-RESIDUE-ZERO-WARNING-CLOSEOUT-AND-STACK-RESYNC-2026-06-27.md)

@@ -7,7 +7,7 @@ This chapter turns the current convergence checkpoint into explicit endgames.
 It answers:
 
 - why each major lane exists
-- what “done” looks like
+- what `done` looks like
 - what should stay out of scope
 - what blocks the next real move
 
