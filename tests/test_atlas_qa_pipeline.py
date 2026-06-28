@@ -6,7 +6,7 @@ import subprocess
 import tempfile
 import urllib.parse
 import unittest
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from unittest import mock
 
@@ -2732,6 +2732,7 @@ class AtlasQaPipelineTests(unittest.TestCase):
     def test_release_readiness_blocks_wrong_target_sha(self) -> None:
         root = self._temp_root()
         (root / "ops" / "atlas" / "qa").mkdir(parents=True, exist_ok=True)
+        generated_at = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
         self._write_stack_lock(root=root, components={"playbook": "target-sha"})
         _write_json(
             root / "ops" / "atlas" / "qa" / "release_policy.v1.json",
@@ -2752,13 +2753,13 @@ class AtlasQaPipelineTests(unittest.TestCase):
             root / "runtime" / "atlas" / "qa" / "evidence-index.latest.json",
             {
                 "contract_version": "atlas.qa.evidence_index.v1",
-                "generated_at": "2026-05-11T00:00:00Z",
+                "generated_at": generated_at,
                 "runs": [
                     {
                         "run_id": "playbook-run",
                         "repo_id": "playbook",
                         "git_sha": "wrong-sha",
-                        "promotion_generated_at": "2026-05-11T00:00:00Z",
+                        "promotion_generated_at": generated_at,
                     }
                 ],
                 "adoption": [
@@ -2790,6 +2791,7 @@ class AtlasQaPipelineTests(unittest.TestCase):
     def test_release_readiness_blocks_untrusted_origin_when_policy_enabled(self) -> None:
         root = self._temp_root()
         (root / "ops" / "atlas" / "qa").mkdir(parents=True, exist_ok=True)
+        generated_at = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
         self._write_stack_lock(root=root, components={"playbook": "target-sha"})
         _write_json(
             root / "ops" / "atlas" / "qa" / "release_policy.v1.json",
@@ -2813,13 +2815,13 @@ class AtlasQaPipelineTests(unittest.TestCase):
             root / "runtime" / "atlas" / "qa" / "evidence-index.latest.json",
             {
                 "contract_version": "atlas.qa.evidence_index.v1",
-                "generated_at": "2026-05-11T00:00:00Z",
+                "generated_at": generated_at,
                 "runs": [
                     {
                         "run_id": "playbook-run",
                         "repo_id": "playbook",
                         "git_sha": "target-sha",
-                        "promotion_generated_at": "2026-05-11T00:00:00Z",
+                        "promotion_generated_at": generated_at,
                         "receipt_origin": {
                             "origin_type": "local_dev",
                             "actor": "atlas-local",
@@ -2827,7 +2829,7 @@ class AtlasQaPipelineTests(unittest.TestCase):
                             "workflow_run_id": "",
                             "command": "python ops/atlas/qa/ci_gate.py --mode promotion",
                             "runner_os": "Windows",
-                            "generated_at": "2026-05-11T00:00:00Z",
+                            "generated_at": generated_at,
                             "repo": "playbook",
                             "git_sha": "target-sha",
                             "stack_lock_hash": "sha256:" + ("a" * 64),
@@ -2869,6 +2871,7 @@ class AtlasQaPipelineTests(unittest.TestCase):
     def test_release_readiness_warn_stage_reports_untrusted_origin_without_blocking(self) -> None:
         root = self._temp_root()
         (root / "ops" / "atlas" / "qa").mkdir(parents=True, exist_ok=True)
+        generated_at = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
         self._write_stack_lock(root=root, components={"playbook": "target-sha"})
         _write_json(
             root / "ops" / "atlas" / "qa" / "release_policy.v1.json",
@@ -2895,13 +2898,13 @@ class AtlasQaPipelineTests(unittest.TestCase):
             root / "runtime" / "atlas" / "qa" / "evidence-index.latest.json",
             {
                 "contract_version": "atlas.qa.evidence_index.v1",
-                "generated_at": "2026-05-11T00:00:00Z",
+                "generated_at": generated_at,
                 "runs": [
                     {
                         "run_id": "playbook-run",
                         "repo_id": "playbook",
                         "git_sha": "target-sha",
-                        "promotion_generated_at": "2026-05-11T00:00:00Z",
+                        "promotion_generated_at": generated_at,
                         "receipt_origin": {
                             "origin_type": "local_dev",
                             "actor": "atlas-local",
@@ -2909,7 +2912,7 @@ class AtlasQaPipelineTests(unittest.TestCase):
                             "workflow_run_id": "",
                             "command": "python ops/atlas/qa/ci_gate.py --mode promotion",
                             "runner_os": "Windows",
-                            "generated_at": "2026-05-11T00:00:00Z",
+                            "generated_at": generated_at,
                             "repo": "playbook",
                             "git_sha": "target-sha",
                             "stack_lock_hash": "sha256:" + ("a" * 64),
@@ -2948,6 +2951,10 @@ class AtlasQaPipelineTests(unittest.TestCase):
     def test_release_readiness_prefers_stronger_trusted_receipt_over_newer_local(self) -> None:
         root = self._temp_root()
         (root / "ops" / "atlas" / "qa").mkdir(parents=True, exist_ok=True)
+        trusted_generated_at = datetime.now(timezone.utc).replace(microsecond=0)
+        local_generated_at = trusted_generated_at + timedelta(minutes=30)
+        trusted_generated_at_text = trusted_generated_at.isoformat().replace("+00:00", "Z")
+        local_generated_at_text = local_generated_at.isoformat().replace("+00:00", "Z")
         self._write_stack_lock(root=root, components={"playbook": "target-sha"})
         _write_json(
             root / "ops" / "atlas" / "qa" / "release_policy.v1.json",
@@ -2977,7 +2984,7 @@ class AtlasQaPipelineTests(unittest.TestCase):
             "workflow_run_id": "1234",
             "command": "python ops/atlas/qa/ci_gate.py --mode promotion",
             "runner_os": "Linux",
-            "generated_at": "2026-05-11T00:00:00Z",
+            "generated_at": trusted_generated_at_text,
             "repo": "playbook",
             "git_sha": "target-sha",
             "stack_lock_hash": "sha256:" + ("b" * 64),
@@ -2990,7 +2997,7 @@ class AtlasQaPipelineTests(unittest.TestCase):
             "workflow_run_id": "",
             "command": "python ops/atlas/qa/ci_gate.py --mode promotion",
             "runner_os": "Windows",
-            "generated_at": "2026-05-11T00:30:00Z",
+            "generated_at": local_generated_at_text,
             "repo": "playbook",
             "git_sha": "target-sha",
             "stack_lock_hash": "sha256:" + ("c" * 64),
@@ -3000,13 +3007,13 @@ class AtlasQaPipelineTests(unittest.TestCase):
             root / "runtime" / "atlas" / "qa" / "evidence-index.latest.json",
             {
                 "contract_version": "atlas.qa.evidence_index.v1",
-                "generated_at": "2026-05-11T00:30:00Z",
+                "generated_at": local_generated_at_text,
                 "runs": [
                     {
                         "run_id": "playbook-trusted",
                         "repo_id": "playbook",
                         "git_sha": "target-sha",
-                        "promotion_generated_at": "2026-05-11T00:00:00Z",
+                        "promotion_generated_at": trusted_generated_at_text,
                         "promotion_status": "promoted_emulated",
                         "evidence_profile": "docs_governance",
                         "receipt_origin": trusted_origin,
@@ -3015,7 +3022,7 @@ class AtlasQaPipelineTests(unittest.TestCase):
                         "run_id": "playbook-local",
                         "repo_id": "playbook",
                         "git_sha": "target-sha",
-                        "promotion_generated_at": "2026-05-11T00:30:00Z",
+                        "promotion_generated_at": local_generated_at_text,
                         "promotion_status": "promoted_emulated",
                         "evidence_profile": "docs_governance",
                         "receipt_origin": local_origin,
@@ -3397,7 +3404,13 @@ class AtlasQaPipelineTests(unittest.TestCase):
                 "contract_version": "atlas.qa.report.v1",
                 "run_id": snapshot_run,
                 "promotion_status": "waived_promoted",
-                "waived_lanes": ["android.chrome.real.manual"]
+                "waived_lanes": ["android.chrome.real.manual"],
+                "per_lens": [
+                    {"lens_id": "desktop.chromium.emulated", "status": "pass"},
+                    {"lens_id": "android.chrome.emulated", "status": "pass"},
+                    {"lens_id": "iphone.webkit.emulated", "status": "pass"},
+                    {"lens_id": "android.chrome.real", "status": "manual_required"},
+                ],
             },
         )
         _write_json(root / "runtime" / "receipts" / "validation" / "stack-validation.latest.json", {"summary": {"critical": 0, "error": 0, "warning": 1}})
@@ -3480,6 +3493,232 @@ class AtlasQaPipelineTests(unittest.TestCase):
         payload = load_json_object(root / result["snapshot_summary_ref"])
         self.assertTrue(payload["release_ready_with_waiver"])
         self.assertEqual(["android.chrome.real.manual"], payload["waived_lanes"])
+        self.assertEqual(
+            ["android.chrome.emulated", "desktop.chromium.emulated", "iphone.webkit.emulated"],
+            payload["evidence_present"],
+        )
+        self.assertEqual(["android.chrome.real.manual"], payload["evidence_missing"])
+
+    def test_release_snapshot_derives_valid_manual_attestation_and_missing_lanes(self) -> None:
+        root = self._temp_root()
+        snapshot_run = "run-1"
+        run_root = root / "runtime" / "atlas" / "qa" / "runs" / snapshot_run
+        _write_json(
+            run_root / "promotion.record.json",
+            {
+                "contract_version": "atlas.qa.promotion.v1",
+                "generated_at": "2026-05-12T00:00:00Z",
+                "promotion_id": "sha256:" + ("b" * 64),
+                "evaluator_version": "atlas.qa.promote-run.v3",
+                "run_id": snapshot_run,
+                "scenario_id": "fitness.progression-pr-smoke",
+                "repo_id": "fitness",
+                "criticality": "high",
+                "promotion_status": "manual_review",
+                "evidence_profile": "web_visual",
+                "highest_satisfied_tier": "emulated_browser",
+                "satisfied_evidence_tiers": ["emulated_browser"],
+                "missing_evidence_tiers": ["physical_device"],
+                "manual_required_lanes": ["android.chrome.real", "iphone.webkit.real"],
+                "waived_lanes": [],
+                "waiver_refs": [],
+                "waiver_reasons": [],
+                "decision": "manual_review",
+                "summary": {
+                    "executable_truth": "clean",
+                    "artifact_coverage": "complete",
+                    "real_device_proof": "manual_required",
+                    "visual_status": "passed",
+                    "test_evidence_status": "clean",
+                    "evidence_profile": "web_visual",
+                    "governance_status": "clean",
+                    "flake_status": "none",
+                },
+                "blocking_reasons": [],
+                "manual_gaps": ["Real-device certification still requires manual completion."],
+                "governance": {"status": "clean", "critical_count": 0, "error_count": 0},
+                "source_refs": {
+                    "scenario_ref": "repos/fawxzzy-fitness/qa/scenarios/fitness.progression-pr-smoke.json",
+                    "result_ref": f"runtime/atlas/qa/runs/{snapshot_run}/evaluated.result.json",
+                    "artifact_refs": [f"runtime/atlas/qa/runs/{snapshot_run}/artifacts.manifest.json"],
+                },
+                "operator_summary": ["Manual review required before promotion."],
+                "receipt_origin": {
+                    "origin_type": "local_dev",
+                    "actor": "atlas-local",
+                    "workflow_name": "",
+                    "workflow_run_id": "",
+                    "command": "python ops/atlas/qa/promote_run.py",
+                    "runner_os": "Windows",
+                    "generated_at": "2026-05-12T00:00:00Z",
+                    "repo": "fitness",
+                    "git_sha": "target-sha",
+                    "stack_lock_hash": "sha256:" + ("a" * 64),
+                    "qa_runner_version": "atlas.qa.promote-run.v3",
+                },
+            },
+        )
+        _write_json(
+            run_root / "report.summary.json",
+            {
+                "contract_version": "atlas.qa.report.v1",
+                "run_id": snapshot_run,
+                "promotion_status": "manual_review",
+                "manual_required_lanes": [
+                    "desktop.chromium.real",
+                    "android.chrome.real",
+                    "iphone.webkit.real",
+                ],
+                "waived_lanes": [],
+                "per_lens": [
+                    {"lens_id": "desktop.chromium.emulated", "status": "pass"},
+                    {"lens_id": "android.chrome.emulated", "status": "pass"},
+                    {"lens_id": "iphone.webkit.emulated", "status": "pass"},
+                    {"lens_id": "desktop.chromium.real", "status": "manual_required"},
+                    {"lens_id": "android.chrome.real", "status": "manual_required"},
+                    {"lens_id": "iphone.webkit.real", "status": "manual_required"},
+                ],
+            },
+        )
+        _write_json(
+            run_root / "manual_attestation.result.json",
+            {
+                "runner_version": "atlas.qa.manual-attestation.validate.v1",
+                "generated_at": "2026-05-12T00:00:00Z",
+                "run_id": snapshot_run,
+                "status": "invalid",
+                "attestation_count": 3,
+                "attestations": [
+                    {
+                        "attestation_id": f"{snapshot_run}:desktop.chromium.real:manual",
+                        "attestation_ref": f"runtime/atlas/qa/runs/{snapshot_run}/manual-attestations/desktop.chromium.real.manual.json",
+                        "run_id": snapshot_run,
+                        "scenario_id": "fitness.progression-pr-smoke",
+                        "adapter_id": "fitness.web",
+                        "lens_id": "desktop.chromium.real",
+                        "operator": "atlas-operator",
+                        "capture_method": "manual_attestation",
+                        "status": "valid",
+                    },
+                    {
+                        "attestation_id": f"{snapshot_run}:android.chrome.real:manual",
+                        "attestation_ref": f"runtime/atlas/qa/runs/{snapshot_run}/manual-attestations/android.chrome.real.manual.json",
+                        "run_id": snapshot_run,
+                        "scenario_id": "fitness.progression-pr-smoke",
+                        "adapter_id": "fitness.web",
+                        "lens_id": "android.chrome.real",
+                        "operator": "atlas-operator",
+                        "capture_method": "manual_attestation",
+                        "status": "invalid",
+                    },
+                    {
+                        "attestation_id": f"{snapshot_run}:iphone.webkit.real:manual",
+                        "attestation_ref": f"runtime/atlas/qa/runs/{snapshot_run}/manual-attestations/iphone.webkit.real.manual.json",
+                        "run_id": snapshot_run,
+                        "scenario_id": "fitness.progression-pr-smoke",
+                        "adapter_id": "fitness.web",
+                        "lens_id": "iphone.webkit.real",
+                        "operator": "atlas-operator",
+                        "capture_method": "manual_attestation",
+                        "status": "invalid",
+                    },
+                ],
+                "finding_count": 2,
+                "findings": [
+                    {"severity": "error", "code": "missing_attestation_screenshot", "message": "missing"},
+                    {"severity": "error", "code": "missing_attestation_screenshot", "message": "missing"},
+                ],
+            },
+        )
+        _write_json(root / "runtime" / "receipts" / "validation" / "stack-validation.latest.json", {"summary": {"critical": 0, "error": 0, "warning": 0}})
+        _write_json(root / "runtime" / "receipts" / "validation" / "stack-warning-budget.latest.json", {"warning_count": 0})
+        _write_json(
+            root / "runtime" / "atlas" / "qa" / "evidence-index.latest.json",
+            {
+                "contract_version": "atlas.qa.evidence_index.v1",
+                "generated_at": "2026-05-12T00:00:00Z",
+                "runs": [
+                    {
+                        "run_id": snapshot_run,
+                        "repo_id": "fitness",
+                        "scenario_id": "fitness.progression-pr-smoke",
+                        "git_sha": "target-sha",
+                        "promotion_generated_at": "2026-05-12T00:00:00Z",
+                        "promotion_status": "manual_review",
+                        "evidence_profile": "web_visual",
+                        "waived_lanes": [],
+                        "waiver_refs": [],
+                        "receipt_origin": {
+                            "origin_type": "local_dev",
+                            "actor": "atlas-local",
+                            "workflow_name": "",
+                            "workflow_run_id": "",
+                            "command": "python ops/atlas/qa/promote_run.py",
+                            "runner_os": "Windows",
+                            "generated_at": "2026-05-12T00:00:00Z",
+                            "repo": "fitness",
+                            "git_sha": "target-sha",
+                            "stack_lock_hash": "sha256:" + ("a" * 64),
+                            "qa_runner_version": "atlas.qa.promote-run.v3",
+                        },
+                    }
+                ],
+                "adoption": [
+                    {
+                        "repo_id": "fitness",
+                        "adopted": True,
+                        "owner": "fitness",
+                        "adapter_refs": ["repos/fawxzzy-fitness/qa/adapters/fitness.web.json"],
+                        "scenario_refs": ["repos/fawxzzy-fitness/qa/scenarios/fitness.progression-pr-smoke.json"],
+                        "evidence_profile": "web_visual",
+                        "last_run_id": snapshot_run,
+                        "last_git_sha": "target-sha",
+                        "last_promotion_status": "manual_review",
+                        "last_promotion_display_status": "manual_review",
+                        "root_runner_version": "atlas.qa.evaluate-run.v2",
+                        "contract_version": "atlas.qa.promotion.v1",
+                        "receipt_origin_type": "local_dev",
+                        "waived_lanes": [],
+                    }
+                ],
+                "summary": {},
+                "retention": {},
+            },
+        )
+        _write_json(
+            root / "ops" / "atlas" / "qa" / "release_policy.v1.json",
+            {
+                "contract_version": "atlas.qa.release_policy.v1",
+                "profiles": {
+                    "release_critical_web": {
+                        "display_name": "Release-Critical Web",
+                        "require_trusted_origin": True,
+                        "allowed_release_origins": ["ci_release", "protected_manual", "provider"],
+                        "allowed_pr_origins": ["ci_pr", "local_dev"],
+                        "enforcement_stage": "warn",
+                        "mode_requirements": {"release": {"allowed_statuses": ["promoted_physical_manual"]}},
+                    }
+                },
+                "repo_overrides": {"fitness": {"release_profile": "release_critical_web"}},
+            },
+        )
+        self._write_stack_lock(root=root, components={"fitness": "target-sha"})
+        build_release_readiness(root=root)
+        result = build_release_snapshot(root=root, repo_id="fitness")
+        payload = load_json_object(root / result["snapshot_summary_ref"])
+        self.assertEqual(
+            [
+                "android.chrome.emulated",
+                "desktop.chromium.emulated",
+                "desktop.chromium.real.manual",
+                "iphone.webkit.emulated",
+            ],
+            payload["evidence_present"],
+        )
+        self.assertEqual(
+            ["android.chrome.real.manual", "iphone.webkit.real.manual"],
+            payload["evidence_missing"],
+        )
 
     def test_adoption_drift_detects_stale_and_missing_docs(self) -> None:
         root = self._temp_root()

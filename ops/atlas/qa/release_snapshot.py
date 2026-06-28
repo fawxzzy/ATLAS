@@ -31,6 +31,52 @@ def _copy_ref(*, base_root: Path, ref: str, target_dir: Path) -> str:
     return atlas_relative(destination, root=base_root)
 
 
+def _load_manual_attestation_statuses(*, run_root: Path) -> dict[str, str]:
+    result_path = run_root / "manual_attestation.result.json"
+    if not result_path.exists():
+        return {}
+    payload = json.loads(result_path.read_text(encoding="utf-8"))
+    statuses: dict[str, str] = {}
+    for item in payload.get("attestations", []):
+        if not isinstance(item, dict):
+            continue
+        lens_id = str(item.get("lens_id") or "")
+        status = str(item.get("status") or "")
+        if lens_id:
+            statuses[lens_id] = status
+    return statuses
+
+
+def _manual_evidence_token(lens_id: str) -> str:
+    return lens_id if lens_id.endswith(".manual") else f"{lens_id}.manual"
+
+
+def _derive_evidence_summary(*, run_root: Path, promotion: dict[str, Any], report_summary: dict[str, Any]) -> tuple[list[str], list[str]]:
+    evidence_present: set[str] = set()
+    for item in report_summary.get("per_lens", []):
+        if not isinstance(item, dict):
+            continue
+        lens_id = str(item.get("lens_id") or "")
+        if lens_id and str(item.get("status") or "") == "pass":
+            evidence_present.add(lens_id)
+    manual_statuses = _load_manual_attestation_statuses(run_root=run_root)
+    for lens_id, status in manual_statuses.items():
+        if status == "valid":
+            evidence_present.add(_manual_evidence_token(lens_id))
+
+    evidence_missing = {
+        _manual_evidence_token(str(lens_id))
+        for lens_id in promotion.get("manual_required_lanes", [])
+        if isinstance(lens_id, str) and lens_id.strip()
+    }
+    evidence_missing.update(
+        _manual_evidence_token(str(lens_id))
+        for lens_id in promotion.get("waived_lanes", [])
+        if isinstance(lens_id, str) and lens_id.strip()
+    )
+    return sorted(evidence_present), sorted(evidence_missing)
+
+
 def build_release_snapshot(
     *,
     root: Path | None = None,
@@ -51,6 +97,8 @@ def build_release_snapshot(
     if not selected_run_id:
         raise ValueError(f"Repo '{repo_id}' has no selected readiness run.")
     run_root = default_run_root(root=base_root) / selected_run_id
+    promotion_payload = json.loads((run_root / "promotion.record.json").read_text(encoding="utf-8"))
+    report_summary_payload = json.loads((run_root / "report.summary.json").read_text(encoding="utf-8"))
     timestamp = selected_run_id if output_dir is None else ""
     snapshot_root = output_dir.resolve() if isinstance(output_dir, Path) else (base_root / "runtime" / "atlas" / "releases" / repo_id / timestamp).resolve()
     snapshot_root.mkdir(parents=True, exist_ok=True)
@@ -65,6 +113,11 @@ def build_release_snapshot(
     }
     waiver_refs = [str(value) for value in repo_entry.get("waiver_refs", []) if isinstance(value, str) and value.strip()]
     copied_waivers = [_copy_ref(base_root=base_root, ref=ref, target_dir=snapshot_root) for ref in waiver_refs]
+    evidence_present, evidence_missing = _derive_evidence_summary(
+        run_root=run_root,
+        promotion=promotion_payload,
+        report_summary=report_summary_payload,
+    )
 
     summary = {
         "contract_version": "atlas.qa.release_snapshot.v1",
@@ -82,12 +135,8 @@ def build_release_snapshot(
         "waived_lanes": list(repo_entry.get("validated_waived_lanes", [])),
         "waiver_expires_at": str(repo_entry.get("waiver_expires_at") or ""),
         "days_until_expiry": repo_entry.get("days_until_expiry"),
-        "evidence_present": [
-            "desktop.chromium.real.manual",
-            "iphone.webkit.real.manual",
-            "android.chrome.emulated",
-        ] if str(repo_id) == "fitness" else [],
-        "evidence_missing": ["android.chrome.real.manual"] if copied_waivers else [],
+        "evidence_present": evidence_present,
+        "evidence_missing": evidence_missing,
         "copied_refs": copied_refs,
         "waiver_refs": copied_waivers,
     }
