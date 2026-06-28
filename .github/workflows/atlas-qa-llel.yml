@@ -136,8 +136,22 @@ jobs:
               capture_tool = str(capture.get("tool") or "")
           with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as handle:
               handle.write(f"repo_path={payload['repo_path']}\n")
+              handle.write(f"repo_id={payload['repo_id']}\n")
               handle.write(f"capture_tool={capture_tool}\n")
           PY
+
+      - name: Bootstrap adapter repo
+        if: github.event_name == 'workflow_dispatch' && inputs.dispatch_scope == 'single'
+        shell: bash
+        env:
+          QA_ADAPTER: ${{ inputs.adapter }}
+          TARGET_SHA: ${{ inputs.target_sha }}
+        run: |
+          cmd=(python ops/atlas/qa/bootstrap_adapter_repo.py --adapter "${QA_ADAPTER}")
+          if [ -n "${TARGET_SHA}" ]; then
+            cmd+=(--target-sha "${TARGET_SHA}")
+          fi
+          "${cmd[@]}"
 
       - name: Install browser runtime
         if: env.QA_MODE != 'dry-run' && steps.adapter.outputs.capture_tool == 'playwright'
@@ -150,11 +164,14 @@ jobs:
           BROWSERSTACK_USERNAME: ${{ github.event_name == 'workflow_dispatch' && secrets.BROWSERSTACK_USERNAME || '' }}
           BROWSERSTACK_ACCESS_KEY: ${{ github.event_name == 'workflow_dispatch' && secrets.BROWSERSTACK_ACCESS_KEY || '' }}
         run: |
-          if [ "${QA_PROVIDER}" = "none" ]; then
-            python ops/atlas/qa/ci_gate.py --mode "${QA_MODE}" --scenario "${QA_SCENARIO}" --adapter "${QA_ADAPTER}"
-          else
-            python ops/atlas/qa/ci_gate.py --mode "${QA_MODE}" --scenario "${QA_SCENARIO}" --adapter "${QA_ADAPTER}" --provider "${QA_PROVIDER}"
+          cmd=(python ops/atlas/qa/ci_gate.py --mode "${QA_MODE}" --scenario "${QA_SCENARIO}" --adapter "${QA_ADAPTER}")
+          if [ "${QA_PROVIDER}" != "none" ]; then
+            cmd+=(--provider "${QA_PROVIDER}")
           fi
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.dispatch_scope }}" = "single" ]; then
+            cmd+=(--allow-missing-locked-repos --require-present-repo-id "${{ steps.adapter.outputs.repo_id }}")
+          fi
+          "${cmd[@]}"
 
       - name: Upload QA artifacts
         if: always()
@@ -163,6 +180,8 @@ jobs:
           name: atlas-qa-${{ env.QA_MODE }}-${{ env.QA_SCENARIO }}
           path: |
             runtime/atlas/qa/runs/**
+            runtime/atlas/qa/bootstrap-adapter-repo.latest.json
+            runtime/atlas/qa/bootstrap-adapter-repo.latest.md
             runtime/receipts/validation/stack-validation.latest.json
             runtime/receipts/validation/stack-validation.latest.md
             runtime/receipts/validation/stack-warning-budget.latest.json
@@ -323,7 +342,7 @@ jobs:
           QA_ADAPTER: ${{ inputs.adapter }}
 
       - name: Validate stack governance
-        run: python ops/validation/validate_stack.py
+        run: python ops/validation/validate_stack.py --allow-missing-locked-repos
 
       - name: Refresh evidence index
         run: python ops/atlas/qa/evidence_index.py

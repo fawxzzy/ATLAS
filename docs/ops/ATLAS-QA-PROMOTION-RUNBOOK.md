@@ -253,8 +253,11 @@ Use GitHub Actions `workflow_dispatch` to generate trusted release receipts. Cur
 Use `dispatch_scope=single` for the existing one-scenario QA gate.
 Use `dispatch_scope=release_refresh` to refresh protected receipts for either one release repo or the default release set from `ops/atlas/qa/release_policy.v1.json`.
 
+For `dispatch_scope=single`, when the target repo lives under ignored `repos/**` rather than the tracked ATLAS snapshot, bootstrap the adapter repo from `docs/registry/STACK-REPO-INVENTORY.json` first and pass `target_sha` for exact-SHA proof. Protected single dispatch must fail closed if the inventory has no `remote_url`, the target commit cannot be fetched, or the bootstrapped checkout is dirty.
+
 Protected dispatch should upload:
 
+- `bootstrap-adapter-repo.latest.json` and `.md` when `dispatch_scope=single` bootstraps an ignored child repo
 - `bootstrap-release-repos.latest.json` and `.md`
 - `protected-release-refresh.latest.json` and `.md` when `dispatch_scope=release_refresh`
 - `release-readiness.latest.json` and `.md`

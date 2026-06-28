@@ -479,6 +479,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--provider")
     parser.add_argument("--attestation-file", action="append", default=[])
     parser.add_argument("--waiver-spec", action="append", default=[])
+    parser.add_argument("--allow-missing-locked-repos", action="store_true")
+    parser.add_argument("--require-present-repo-id", action="append", default=[])
     args = parser.parse_args(argv)
 
     result = ci_gate(
@@ -491,6 +493,12 @@ def main(argv: list[str] | None = None) -> int:
         provider=args.provider,
         attestation_files=list(args.attestation_file),
         waiver_specs=_parse_waiver_specs(list(args.waiver_spec), root=args.root.resolve()),
+        allow_missing_locked_repos=bool(args.allow_missing_locked_repos),
+        required_present_repo_ids=[
+            str(repo_id).strip()
+            for repo_id in args.require_present_repo_id
+            if str(repo_id).strip()
+        ],
     )
     print(json.dumps(result, indent=2))
     promotion_status = result["promotion"]["promotion_status"]

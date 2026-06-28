@@ -13,6 +13,7 @@ from unittest import mock
 from PIL import Image
 
 from ops.atlas.qa.baselines import bless_baseline, propose_baselines
+from ops.atlas.qa.bootstrap_adapter_repo import bootstrap_adapter_repo
 from ops.atlas.qa.ci_gate import _materialize_runtime_waivers, _provider_override_file, _provider_status
 from ops.atlas.qa.adoption_drift import build_adoption_drift
 from ops.atlas.qa.bootstrap_release_repos import bootstrap_release_repos
@@ -76,6 +77,17 @@ def _init_committed_repo(path: Path, *, filename: str = "README.md", content: st
     _git(path, "add", filename)
     _git(path, "commit", "-m", "init")
     return _git(path, "rev-parse", "HEAD")
+
+
+def _write_repo_inventory(root: Path, *, repos: list[dict]) -> None:
+    _write_json(
+        root / "docs" / "registry" / "STACK-REPO-INVENTORY.json",
+        {
+            "schema_version": "atlas.stack.repo-inventory.v1",
+            "repos": repos,
+            "excluded_surfaces": [],
+        },
+    )
 
 
 def _write_waiver(
@@ -342,6 +354,70 @@ class AtlasQaPipelineTests(unittest.TestCase):
         report = validate_artifact_manifest_file(root=root, artifact_path=manifest_path, promotion_strict=False)
         self.assertEqual("invalid", report["status"])
         self.assertTrue(any(item["code"] == "zero_byte_artifact" for item in report["findings"]))
+
+    def test_bootstrap_adapter_repo_clones_exact_sha_from_inventory_remote(self) -> None:
+        root = self._temp_root()
+        remote_repo = root / "tmp-remote-fitness"
+        commit = _init_committed_repo(remote_repo, content="# fitness\n")
+        (root / "ops" / "atlas" / "qa" / "adapters").mkdir(parents=True, exist_ok=True)
+        _write_json(
+            root / "ops" / "atlas" / "qa" / "adapters" / "fitness.web.json",
+            {
+                "contract_version": "atlas.qa.adapter.v1",
+                "adapter_id": "fitness.web",
+                "repo_id": "fitness",
+                "repo_path": "repos/fawxzzy-fitness",
+                "framework": "nextjs",
+                "commands": {
+                    "verify": {
+                        "command": "npm run verify",
+                    }
+                },
+                "prepare": {
+                    "kind": "command",
+                    "command": "npm install",
+                },
+                "lens_manifest_ref": "ops/atlas/qa/lenses/atlas-default-web.v1.json",
+                "lenses": [
+                    {
+                        "lens_id": "desktop.chromium.emulated",
+                        "profile_id": "desktop.chromium",
+                        "proof_kind": "emulated",
+                        "evidence_kind": "emulated_browser",
+                        "required_for": ["evidence"],
+                        "promotion_tier": "emulated_browser",
+                        "fallback_behavior": "blocked",
+                        "execution_mode": "browser_capture",
+                    }
+                ],
+            },
+        )
+        (root / "ops" / "atlas" / "qa" / "lenses").mkdir(parents=True, exist_ok=True)
+        _write_json(
+            root / "ops" / "atlas" / "qa" / "lenses" / "atlas-default-web.v1.json",
+            {
+                "contract_version": "atlas.qa.lens_manifest.v1",
+                "lenses": [
+                    {"lens_id": "desktop.chromium"},
+                ],
+            },
+        )
+        _write_repo_inventory(
+            root,
+            repos=[
+                {
+                    "logical_id": "fitness",
+                    "local_path": "repos/fawxzzy-fitness",
+                    "remote_url": str(remote_repo.resolve()),
+                    "current_commit": commit,
+                }
+            ],
+        )
+
+        result = bootstrap_adapter_repo(root=root, adapter="fitness.web", target_sha=commit)
+        self.assertEqual(commit, result["checkout_sha"])
+        self.assertTrue((root / result["bootstrap_adapter_repo_ref"]).exists())
+        self.assertEqual(commit, _git(root / "repos" / "fawxzzy-fitness", "rev-parse", "HEAD"))
 
     def test_declared_surface_scan_coverage_accepts_required_surfaces(self) -> None:
         root = self._temp_root()
