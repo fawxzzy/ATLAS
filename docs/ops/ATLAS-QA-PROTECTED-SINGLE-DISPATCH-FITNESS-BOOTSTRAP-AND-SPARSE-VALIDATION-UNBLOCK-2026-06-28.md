@@ -81,10 +81,44 @@ Results:
 - QA unit suite: `71` tests passed
 - stack validation: `critical=0 error=0 warning=0 info=0`
 
+## Live GitHub Proof
+
+Protected dispatches executed after publish:
+
+- `28315893818` on ATLAS commit `9dc9f872c556a0812595b7987fb3c19a17656f72`
+- `28316073769` on ATLAS commit `ab08e0f8ee1a1f8e62a0716bb7548c6d4a60ef6e`
+
+Observed live outcomes:
+
+- hosted `atlas-qa-llel` passed:
+  - adapter repo bootstrap
+  - sparse stack validation path
+  - browser/runtime install
+- hosted `atlas-release-readiness` passed:
+  - stack validation
+  - evidence index refresh
+  - release readiness build
+  - adoption drift
+  - release rehearsal
+- hosted `atlas-release-readiness` still failed at final enforce, which is expected until a new protected/manual/provider-backed physical-proof receipt exists
+
+Final live blocker after the last hardened dispatch:
+
+- `Validate provider readiness` failed before QA execution because GitHub exposed:
+  - `BROWSERSTACK_USERNAME: missing`
+  - `BROWSERSTACK_ACCESS_KEY: missing`
+
+That means the protected lane is no longer blocked by ATLAS workflow topology or validator posture. It is now blocked only by missing BrowserStack credentials on the ATLAS GitHub Actions side.
+
 ## Next Move
 
-Push the root workflow/tooling changes to `origin/main`, then re-dispatch the protected Fitness provider-backed run for SHA:
+Provide the missing ATLAS GitHub Actions secrets, then re-dispatch the protected Fitness provider-backed run for SHA:
 
 - `b5f29793eb87dc7538a15160180f159688acd1b4`
 
-That rerun should prove whether the remaining blocker is now only provider/mobile evidence rather than missing hosted-runner topology.
+Required secrets:
+
+- `BROWSERSTACK_USERNAME`
+- `BROWSERSTACK_ACCESS_KEY`
+
+Once those are present, the next protected dispatch should enter real provider execution instead of failing at preflight.
