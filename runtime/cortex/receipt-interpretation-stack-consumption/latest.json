@@ -1,6 +1,6 @@
 {
   "contract_version": "atlas.cortex.receipt-interpretation-stack-consumption.v1",
-  "generated_at": "2026-06-28T08:53:39.377929+00:00",
+  "generated_at": "2026-06-28T09:06:31.507570+00:00",
   "authority_level": "read_only_advisory",
   "stack_root": "C:/ATLAS",
   "consumption_id": "receipt-interpretation-stack-consumption-stabilize-root-worktree",
@@ -36,7 +36,7 @@
       "role": "stack_advisory_handoff",
       "ref": "runtime/cortex/stack-advisory-handoff/latest.json",
       "contract_version": "atlas.cortex.stack-advisory-handoff.v2",
-      "digest": "sha256:7f1f083e3ce7d68b3cf1756c99f1c10e6044f540b92bacbb5a528e134e292b74"
+      "digest": "sha256:d9720451ff4613e15bbcf7e3f61a7596a59eadcd87f31529de34b7f08dda9148"
     },
     {
       "role": "stack_consumption_pilot",
@@ -48,19 +48,19 @@
       "role": "worker_prompt",
       "ref": "runtime/cortex/worker-prompts/latest.json",
       "contract_version": "atlas.cortex.worker-prompt.v1",
-      "digest": "sha256:1b2fdcb7d6355cd836b73507322499cafda74f57f27e16571b27f627a370430a"
+      "digest": "sha256:a3ac6a55768e8830a9a89f00aac3279aa6f989a3eefeb6a551f451baedb81c0a"
     },
     {
       "role": "ledger",
       "ref": "runtime/cortex/ledger/latest.json",
       "contract_version": "atlas.cortex.ledger.v1",
-      "digest": "sha256:ab1490e2bb79db735858ac9d367869833e1e90d1db446ef8c4f1dc1f4c047c46"
+      "digest": "sha256:117d848fd01197e9b0ebac7994cca3abac3f4d77cfa68b93b1df5fe5564c4fea"
     },
     {
       "role": "validation_receipt",
       "ref": "runtime/receipts/validation/stack-validation.latest.json",
       "contract_version": "",
-      "digest": "sha256:58f6354cfc479279f26df7d35e0a6ad5d0a50c027f8c6decb593810b3e760131"
+      "digest": "sha256:914dd8126c89e719e03d5afbfcab019ceb54429842334e4166b0a766a4aece94"
     },
     {
       "role": "state_model_seed",

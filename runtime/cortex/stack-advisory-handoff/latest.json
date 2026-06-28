@@ -1,6 +1,6 @@
 {
   "contract_version": "atlas.cortex.stack-advisory-handoff.v2",
-  "generated_at": "2026-06-28T08:53:38.301067+00:00",
+  "generated_at": "2026-06-28T09:06:24.187019+00:00",
   "authority_level": "read_only_advisory",
   "stack_root": "C:/ATLAS",
   "handoff_id": "stack-advisory-handoff-stabilize-root-worktree",
@@ -35,19 +35,19 @@
       "role": "context",
       "ref": "runtime/cortex/context/latest.json",
       "contract_version": "atlas.cortex.context-packet.v1",
-      "digest": "sha256:5d025b470f3b9c4a9d0d9a0ab8116b2bca57252e060b2bb273451c8183043092"
+      "digest": "sha256:98e75ce41e34c09c740accccc57f23857ec4b3cd90af688ad76a93cf27eb75c8"
     },
     {
       "role": "operator_surface",
       "ref": "runtime/cortex/operator-surface/latest.json",
       "contract_version": "atlas.cortex.operator-surface.v1",
-      "digest": "sha256:a0d5aa9d1015c665ebb3415f1487aa6debc7621f854074a6ad95398e31b9f4aa"
+      "digest": "sha256:b26fcae9db165420d4a67fb7a00b6e41915a257460c80713cee3460b4c152d6f"
     },
     {
       "role": "ledger",
       "ref": "runtime/cortex/ledger/latest.json",
       "contract_version": "atlas.cortex.ledger.v1",
-      "digest": "sha256:ab1490e2bb79db735858ac9d367869833e1e90d1db446ef8c4f1dc1f4c047c46"
+      "digest": "sha256:a74b935ca7ab5cd547e2a0f17b8c46028b4fd5dbe1e4779ff6eccf24b3c1ac3b"
     },
     {
       "role": "state_model_seed",

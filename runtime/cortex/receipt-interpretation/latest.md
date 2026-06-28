@@ -1,6 +1,6 @@
 # Cortex Receipt Interpretation
 
-- Generated: `2026-06-28T08:53:38.929204+00:00`
+- Generated: `2026-06-28T09:06:31.508282+00:00`
 - Interpretation id: `receipt-interpretation-stabilize-root-worktree`
 - Authority level: `read_only_interpretation`
 - Next recommended lane: `stabilize-root-worktree` (atlas)

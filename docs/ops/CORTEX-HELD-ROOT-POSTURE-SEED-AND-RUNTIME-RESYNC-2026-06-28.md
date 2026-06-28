@@ -55,6 +55,7 @@ That mismatch mattered because Cortex is a restart and operator-consumption surf
 3. Updated the focused Cortex tests that asserted the old `docs-adr-or-debt-slice` lane or old ambient-debt wording.
 4. Regenerated the live Cortex runtime chain so the seed, run artifact, current-state, context, operator surface, ledger, receipt interpretation, and handoff surfaces all agree again.
 5. Refreshed the Book and continuity-manifest restart surfaces so the durable restart story cites this resync instead of leaving it only in runtime artifacts.
+6. After preserving the substantive resync on `main`, reran the bounded Cortex state chain once more on the clean checkout so `runtime/cortex/current-state/latest.json` now reports `worktree_status: clean` and the stack-advisory handoff digests roll forward to the preserved runtime set.
 
 ## What Changed
 
@@ -87,6 +88,11 @@ The generated run artifact now uses:
 - `template_id: hold_current_root_posture`
 - `verification_status: passed`
 - `known_validation_debt: []`
+
+The post-preservation rerun also leaves the highest-signal live state surface clean again:
+
+- `runtime/cortex/current-state/latest.json` now reports `branch: main` and `worktree_status: clean`
+- `runtime/cortex/stack-advisory-handoff/latest.json` and `.md` now carry fresh digests for the preserved context, operator-surface, and ledger surfaces
 
 ## What This Proves
 
@@ -137,6 +143,15 @@ Commands run:
 - `python ops\cortex\receipt_interpreter.py --quiet`
 - `python ops\cortex\receipt_interpretation_stack_consumption.py --quiet`
 - `python ops\cortex\receipt_interpretation_consumption_feedback.py --quiet`
+- `git commit -m "Resync Cortex held-root posture and restart surfaces"`
+- `python ops\cortex\current_state.py --quiet`
+- `python ops\cortex\rail_state_reader.py --quiet`
+- `python ops\cortex\context_assembler.py --quiet`
+- `python ops\cortex\operator_surface.py --quiet`
+- `python ops\cortex\run_artifact.py --quiet`
+- `python ops\cortex\ledger.py --quiet`
+- `python ops\cortex\worker_prompt.py --quiet`
+- `python ops\cortex\stack_handoff.py --quiet`
 
 Results:
 
@@ -144,3 +159,4 @@ Results:
 - root validation: `critical=0 error=0 warning=0 info=0`
 - live Cortex seed and run artifact now both select `hold-current-root-posture`
 - live generated runtime surfaces no longer carry known validation debt for the current root posture
+- the preserved follow-on rerun leaves `runtime/cortex/current-state/latest.json` back at `worktree_status: clean`

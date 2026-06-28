@@ -1,6 +1,6 @@
 # Cortex Stack Advisory Handoff
 
-- Generated: `2026-06-28T08:53:38.301067+00:00`
+- Generated: `2026-06-28T09:06:24.187019+00:00`
 - Handoff id: `stack-advisory-handoff-stabilize-root-worktree`
 - Authority level: `read_only_advisory`
 - Consumer: `_stack`

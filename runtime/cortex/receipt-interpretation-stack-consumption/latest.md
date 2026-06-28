@@ -1,6 +1,6 @@
 # Cortex Receipt Interpretation Stack Consumption
 
-- Generated: `2026-06-28T08:53:39.377929+00:00`
+- Generated: `2026-06-28T09:06:31.507570+00:00`
 - Consumption id: `receipt-interpretation-stack-consumption-stabilize-root-worktree`
 - Authority level: `read_only_advisory`
 - Consumer: `_stack`
