@@ -10,7 +10,7 @@
     "markdown": "docs/audits/STACK-REPO-INVENTORY.md"
   },
   "repo_count": 12,
-  "dirty_repo_count": 1,
+  "dirty_repo_count": 0,
   "release_eligible_count": 5,
   "repos": [
     {
@@ -317,13 +317,13 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "8d0cbab6d98bf25610a852c77ec0c31b91b5562c",
+      "current_commit": "3b62ad6262b1467d556d366d9033327d5e708c99",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
-      "current_ref": "main",
-      "branch": "main",
-      "dirty": true,
+      "current_ref": "codex/atlas-root-fitness-manual-review-resync",
+      "branch": "codex/atlas-root-fitness-manual-review-resync",
+      "dirty": false,
       "trust_class": "trusted",
       "release_eligible": false,
       "exists": true,
@@ -530,5 +530,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:b1da7c65441697fefb330330b33211acd1b56c511256b76282a81c222402631a"
+  "content_digest": "sha256:714a95450994da10bc3818e6c01260cbd7295ed1b22c0b8fa1abf1507edf48c9"
 }
