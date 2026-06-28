@@ -20,6 +20,7 @@ from ops.stack.generate_lockfile import (
     git_output,
     git_status_lines,
     load_lockfile,
+    parse_porcelain_path,
     repo_is_git_root,
     repo_release_eligible,
     repo_trust_class,
@@ -136,7 +137,16 @@ def _initiative_index(root: Path, repo_paths: dict[str, str]) -> tuple[dict[str,
     return by_repo_id, stable_json_digest(digest_payload)
 
 
-def _live_repo_state(repo_path: Path) -> dict[str, Any]:
+def _is_repo_dirty(repo_path: Path, *, ignored_paths: set[str] | None = None) -> bool:
+    ignored = {normalize_slashes(path).strip() for path in (ignored_paths or set()) if path.strip()}
+    for line in git_status_lines(repo_path):
+        path = parse_porcelain_path(line)
+        if not path or path not in ignored:
+            return True
+    return False
+
+
+def _live_repo_state(repo_path: Path, *, ignored_dirty_paths: set[str] | None = None) -> dict[str, Any]:
     if not repo_path.exists() or not repo_path.is_dir():
         return {
             "exists": False,
@@ -171,7 +181,7 @@ def _live_repo_state(repo_path: Path) -> dict[str, Any]:
         "current_ref_type": ref_type,
         "current_ref": ref,
         "branch": ref if ref_type == "branch" else None,
-        "dirty": bool(git_status_lines(repo_path)),
+        "dirty": _is_repo_dirty(repo_path, ignored_paths=ignored_dirty_paths),
     }
 
 
@@ -206,7 +216,15 @@ def build_repo_inventory(
         if not isinstance(repo_info, dict) or not isinstance(repo_info.get("path"), str):
             continue
         repo_path = resolve_atlas_path(repo_info["path"], root=base_root)
-        live_state = _live_repo_state(repo_path)
+        ignored_dirty_paths: set[str] = set()
+        if repo_id == "stack" and repo_path == base_root:
+            # The exporter writes these two published surfaces itself, so they
+            # should not make the stack entry look dirty in the same read.
+            ignored_dirty_paths = {
+                normalize_slashes(str(DEFAULT_JSON_OUTPUT)),
+                normalize_slashes(str(DEFAULT_MARKDOWN_OUTPUT)),
+            }
+        live_state = _live_repo_state(repo_path, ignored_dirty_paths=ignored_dirty_paths)
         lock_component = lock_components.get(repo_id) if isinstance(lock_components.get(repo_id), dict) else {}
         related_initiatives = initiative_index.get(repo_id, [])
         repos.append(

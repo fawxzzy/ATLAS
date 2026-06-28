@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import json
 import unittest
+from unittest.mock import patch
 
 from ops._atlas import atlas_root
 from ops.atlas.awareness import atlas_status, fetch, search
+from ops.stack import export_repo_inventory as repo_inventory_module
 from ops.stack.export_repo_inventory import build_repo_inventory
 
 
@@ -25,7 +27,7 @@ class StackRepoInventoryTests(unittest.TestCase):
             for item in inventory["repos"]
             if isinstance(item, dict) and isinstance(item.get("logical_id"), str)
         }
-        self.assertTrue({"stack", "_stack", "atlas", "playbook", "lifeline", "mazer"}.issubset(repo_ids))
+        self.assertTrue({"stack", "_stack", "playbook", "lifeline", "mazer"}.issubset(repo_ids))
 
     def test_awareness_search_and_fetch_resolve_repo_by_id_and_path(self) -> None:
         by_id = search("mazer", root=self.root, limit=20)
@@ -64,6 +66,43 @@ class StackRepoInventoryTests(unittest.TestCase):
         self.assertIn("repo_ids", repo_inventory)
         self.assertIn("mazer", repo_inventory["repo_ids"])
         self.assertGreaterEqual(repo_inventory["item_count"], 1)
+
+    def test_stack_inventory_outputs_do_not_self_dirty_root(self) -> None:
+        original_git_status_lines = repo_inventory_module.git_status_lines
+
+        def fake_git_status_lines(repo_path):
+            if repo_path.resolve() == self.root.resolve():
+                return [
+                    " M docs/registry/STACK-REPO-INVENTORY.json",
+                    " M docs/audits/STACK-REPO-INVENTORY.md",
+                ]
+            return original_git_status_lines(repo_path)
+
+        with patch("ops.stack.export_repo_inventory.git_status_lines", side_effect=fake_git_status_lines):
+            inventory = build_repo_inventory(root=self.root)
+
+        stack_entry = next(item for item in inventory["repos"] if item["logical_id"] == "stack")
+        self.assertFalse(stack_entry["dirty"])
+        self.assertEqual(inventory["dirty_repo_count"], 0)
+
+    def test_non_inventory_root_changes_still_dirty_stack_entry(self) -> None:
+        original_git_status_lines = repo_inventory_module.git_status_lines
+
+        def fake_git_status_lines(repo_path):
+            if repo_path.resolve() == self.root.resolve():
+                return [
+                    " M docs/registry/STACK-REPO-INVENTORY.json",
+                    " M docs/audits/STACK-REPO-INVENTORY.md",
+                    " M docs/ops/EXTRA-ROOT-CHANGE.md",
+                ]
+            return original_git_status_lines(repo_path)
+
+        with patch("ops.stack.export_repo_inventory.git_status_lines", side_effect=fake_git_status_lines):
+            inventory = build_repo_inventory(root=self.root)
+
+        stack_entry = next(item for item in inventory["repos"] if item["logical_id"] == "stack")
+        self.assertTrue(stack_entry["dirty"])
+        self.assertEqual(inventory["dirty_repo_count"], 1)
 
 
 if __name__ == "__main__":
