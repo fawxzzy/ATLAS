@@ -51,6 +51,18 @@ Expected screenshot targets are now frozen explicitly:
 - `runtime/atlas/qa/runs/fitness-progression-pr-smoke-20260628T014030459839Z/captures/android.chrome.real/manual.png`
 - `runtime/atlas/qa/runs/fitness-progression-pr-smoke-20260628T014030459839Z/captures/iphone.webkit.real/manual.png`
 
+The scaffold-only packet was then validated to freeze the exact blocker class on the current run:
+
+```powershell
+python ops/atlas/qa/manual_attestation.py validate --root . --run fitness-progression-pr-smoke-20260628T014030459839Z
+```
+
+Validation result:
+
+- `status`: `invalid`
+- `finding_count`: `3`
+- `code`: `missing_attestation_screenshot`
+
 ## Read-Model Result
 
 The blocker did not clear, but it is now restart-safe on the current committed SHA:
@@ -58,13 +70,14 @@ The blocker did not clear, but it is now restart-safe on the current committed S
 - `fitness` remains `manual_review`
 - emulated evidence remains green on the current run
 - all remaining release blockers are now bound to three exact manual-attestation files and three exact screenshot targets
+- the current invalidation reason is frozen exactly: the three expected screenshot files do not exist yet
 
 ## Important Guard
 
 This packet does **not** claim physical proof landed.
 
 - placeholder signatures, versions, and screenshot checksums remain unresolved in the three scaffolded files
-- no validation rerun was performed for those placeholders
+- validation was rerun only to prove the exact missing-screenshot blocker on the current run
 - no promotion rerun was performed from scaffold-only data
 
 ## Exact Next Honest Move
