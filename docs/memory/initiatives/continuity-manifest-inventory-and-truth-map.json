@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-05-29T00:00:00Z",
-  "updated_at": "2026-06-28T16:30:22.5354165-04:00",
+  "updated_at": "2026-06-28T18:08:27-04:00",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -75,6 +75,9 @@
     "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-HEAD-AND-ROOT-CLEAN-SYNC-RESYNC-2026-06-28.md",
     "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-LATEST-CLEAN-HEAD-RESYNC-2026-06-28.md",
     "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-MOBILE-RECAP-CARDS-CLEAN-HEAD-RESYNC-2026-06-28.md",
+    "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-LIVE-DIRTY-WORKING-SET-STACK-LOCK-RESYNC-2026-06-28.md",
+    "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-MAZER-LEGACY-PARITY-CLEAN-HEAD-RESYNC-2026-06-28.md",
+    "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-MAZER-README-PATH-AND-DIRTY-HEAD-RESYNC-2026-06-28.md",
     "ops/atlas/qa/release_gate_packet.py",
     "ops/atlas/qa/github_secret_readiness.py",
     "runtime/atlas/qa/github-secret-readiness.latest.json"
@@ -85,9 +88,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "inventory-and-truth-map",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-MOBILE-RECAP-CARDS-CLEAN-HEAD-RESYNC-2026-06-28.md",
-    "checkpoint_commit": "bd55e99b8dd7a16ce3c413540c3415709e2058bc",
-    "checkpoint_summary": "The lane stays at 94 percent because the canonical inventory and projection spine already absorbed the post-Cortex held-root main-checkpoint re-sync, the published-checkpoint semantics hardening, the warning-floor truth re-sync, the later zero-warning closeout, the combined blocked-run handoff packet, the earlier clean-sync projection refresh, and the earlier latest-clean-head projection refresh, and this follow-on now refreshes the mobile-recap-cards clean owner-head projection without clearing any blocker: clean Fitness head is now `e2295f166aa3afb0104f657a0b3affe99ae733cc`, the clean published ATLAS root checkpoint consumed by this refresh is `bd55e99b8dd7a16ce3c413540c3415709e2058bc`, the current blocked run still has one exact handoff at `runtime/atlas/qa/runs/fitness-progression-pr-smoke-20260628T072049067050Z/release-gate.packet-prep.md`, `fitness` still remains `manual_review`, and root validation still remains `critical=0 error=0 warning=0 info=0`.",
+    "current_checkpoint_receipt": "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-MAZER-README-PATH-AND-DIRTY-HEAD-RESYNC-2026-06-28.md",
+    "checkpoint_commit": "9db850c108008bc0ebac5a790b197df77d922b99",
+    "checkpoint_summary": "The lane stays at 95 percent because the canonical inventory and projection spine already absorbed the post-Cortex held-root main-checkpoint re-sync, the published-checkpoint semantics hardening, the warning-floor truth re-sync, the later zero-warning closeout, the combined blocked-run handoff packet, the earlier clean-sync projection refresh, the earlier latest-clean-head projection refresh, the later mobile-recap-cards clean-head projection refresh, the later live dirty-working-set resync, the later clean-mazer parity resync, and this follow-on now restores honest dirty-mazer live truth after the pushed README path normalization: dirty Fitness head is still `09dfac80ad0fd51794425e3111d98b2660522060`, pushed dirty `mazer` head is now `34b806a2a8325eae965524c1b1ff92c9d4db8e20` on `codex/legacy-web-port-truth`, published inventory now reports `dirty_repo_count: 3`, the clean published ATLAS root checkpoint still consumed by this refresh is `9db850c108008bc0ebac5a790b197df77d922b99`, the current blocked run still has one exact handoff at `runtime/atlas/qa/runs/fitness-progression-pr-smoke-20260628T072049067050Z/release-gate.packet-prep.md`, `fitness` still remains `manual_review`, and root validation still remains `critical=0 error=0 warning=0 info=0`.",
     "governing_receipts": [
       "docs/ops/STACK-LANE-0-BASELINE-INVENTORY-2026-05-22.md",
       "docs/ops/STACK-LANE-0-TRUTH-MAP-2026-05-22.md",
@@ -128,7 +131,10 @@
       "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-RELEASE-GATE-PACKET-RESYNC-2026-06-28.md",
       "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-HEAD-AND-ROOT-CLEAN-SYNC-RESYNC-2026-06-28.md",
       "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-LATEST-CLEAN-HEAD-RESYNC-2026-06-28.md",
-      "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-MOBILE-RECAP-CARDS-CLEAN-HEAD-RESYNC-2026-06-28.md"
+      "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-MOBILE-RECAP-CARDS-CLEAN-HEAD-RESYNC-2026-06-28.md",
+      "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-LIVE-DIRTY-WORKING-SET-STACK-LOCK-RESYNC-2026-06-28.md",
+      "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-MAZER-LEGACY-PARITY-CLEAN-HEAD-RESYNC-2026-06-28.md",
+      "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-MAZER-README-PATH-AND-DIRTY-HEAD-RESYNC-2026-06-28.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -232,8 +238,12 @@
         "role": "current exact inventory-facing zero-warning closeout and preserved live mazer stack-lock truth surface"
       },
       {
-        "path": "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-MOBILE-RECAP-CARDS-CLEAN-HEAD-RESYNC-2026-06-28.md",
-        "role": "current exact inventory-facing projection refresh for the mobile-recap-cards clean Fitness head, the latest clean published root checkpoint consumed by this refresh, and the still-blocked combined release-gate packet"
+        "path": "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-LIVE-DIRTY-WORKING-SET-STACK-LOCK-RESYNC-2026-06-28.md",
+        "role": "current exact inventory-facing projection refresh for the live dirty Fitness plus Mazer working set, the latest clean published root checkpoint consumed by this refresh, and the still-blocked combined release-gate packet"
+      },
+      {
+        "path": "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-MAZER-LEGACY-PARITY-CLEAN-HEAD-RESYNC-2026-06-28.md",
+        "role": "current exact inventory-facing projection refresh for dirty Fitness plus clean pushed Mazer truth, updated dirty-repo count, and the still-blocked combined release-gate packet"
       },
       {
         "path": "ops/atlas/qa/release_gate_packet.py",
@@ -305,7 +315,7 @@
     "blocked_or_gated_work": [
       {
         "item": "promoting the current Fitness release lane beyond `manual_review`",
-        "requirement": "blocked until the remaining `android.chrome.real` and `iphone.webkit.real` lanes are completed; the live protected-refresh latest now sits at `manual_review` on clean committed head `e2295f166aa3afb0104f657a0b3affe99ae733cc` via run `fitness-progression-pr-smoke-20260628T072049067050Z`, all emulated lenses pass, `desktop.chromium.real.manual` is now valid on that same protected run, `runtime/atlas/qa/runs/fitness-progression-pr-smoke-20260628T072049067050Z/release-gate.packet-prep.md` now compresses the blocked run into one exact handoff, protected dispatch run `28316073769` still proves the ATLAS GitHub Actions blocker is missing `BROWSERSTACK_USERNAME` and `BROWSERSTACK_ACCESS_KEY`, and `runtime/atlas/qa/github-secret-readiness.latest.json` currently reports `available_secret_count: 0`"
+        "requirement": "blocked until the remaining `android.chrome.real` and `iphone.webkit.real` lanes are completed; the live protected-refresh latest now sits at `manual_review` on dirty owner-side head `09dfac80ad0fd51794425e3111d98b2660522060` via run `fitness-progression-pr-smoke-20260628T072049067050Z`, all emulated lenses pass, `desktop.chromium.real.manual` is now valid on that same protected run, `runtime/atlas/qa/runs/fitness-progression-pr-smoke-20260628T072049067050Z/release-gate.packet-prep.md` now compresses the blocked run into one exact handoff, protected dispatch run `28316073769` still proves the ATLAS GitHub Actions blocker is missing `BROWSERSTACK_USERNAME` and `BROWSERSTACK_ACCESS_KEY`, and `runtime/atlas/qa/github-secret-readiness.latest.json` currently reports `available_secret_count: 0`"
       },
       {
         "item": "broader inventory cleanup or repo-local truth rewrite execution",
@@ -328,17 +338,17 @@
       {
         "package": "No immediate Inventory & Truth Map docs-only follow-on packet",
         "mode": "hold-flat after post-Cortex held-root main-checkpoint re-sync",
-        "reason": "the published inventory and Book-side protected-QA mirrors now match current zero-dirty-repo / Fitness-clean-current-head / latest-published-Atlas-root checkpoint / Trove-preserved / Fitness-manual-review truth, the hosted protected-dispatch seam is repaired, the exact ATLAS GitHub Actions secret blocker is now machine-readably captured through `runtime/atlas/qa/github-secret-readiness.latest.json`, the current blocked run is now also compressed into one exact operator handoff at `runtime/atlas/qa/runs/fitness-progression-pr-smoke-20260628T072049067050Z/release-gate.packet-prep.md`, seeded initiative manifest health remains fully clean at 19 of 19, and all 7 of 7 eligible open markers remain manifest-backed and restart-ready from one machine-readable index; reopen only with distinct restart-truth drift, owner-side blocker conversion, owner-truth widening, or broader continuity-read automation than the current health-plus-coverage-plus-restart-index-plus-blocked-run-packet surface"
+        "reason": "the published inventory and Book-side protected-QA mirrors now match current dirty-working-set / Fitness-dirty-current-head / Mazer-clean-pushed-head / latest-published-Atlas-root checkpoint / Trove-preserved / Fitness-manual-review truth, the hosted protected-dispatch seam is repaired, the exact ATLAS GitHub Actions secret blocker is now machine-readably captured through `runtime/atlas/qa/github-secret-readiness.latest.json`, the current blocked run is now also compressed into one exact operator handoff at `runtime/atlas/qa/runs/fitness-progression-pr-smoke-20260628T072049067050Z/release-gate.packet-prep.md`, seeded initiative manifest health remains fully clean at 19 of 19, and all 7 of 7 eligible open markers remain manifest-backed and restart-ready from one machine-readable index; reopen only with distinct restart-truth drift, owner-side blocker conversion, owner-truth widening, or broader continuity-read automation than the current health-plus-coverage-plus-restart-index-plus-blocked-run-packet surface"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-MOBILE-RECAP-CARDS-CLEAN-HEAD-RESYNC-2026-06-28.md",
-    "freshness_checked_at": "2026-06-28T16:30:22.5354165-04:00",
-    "freshness_basis": "the current checkpoint, marker posture, lane-state projection, blocked-work posture, and next-package posture now match the refreshed inventory-facing mirrors after the zero-warning closeout, the combined blocked-run handoff absorption, the earlier clean-sync projection refresh, the earlier latest-clean-head refresh, and this later mobile-recap-cards clean-head refresh: published inventory still reflects zero dirty managed repos, `fitness` remains clean on branch `codex/fitness-main-progression-summary-reapply` at commit `e2295f166aa3afb0104f657a0b3affe99ae733cc`, the clean published ATLAS root checkpoint consumed by this refresh is `bd55e99b8dd7a16ce3c413540c3415709e2058bc`, the live stack lock now pins `mazer` clean on `codex/mazer-pass-2-recovery-tightening` at `bc6bba2c79a884721451501b11aad647504082d3`, the protected-QA mirrors still republish Fitness at `manual_review` on run `fitness-progression-pr-smoke-20260628T072049067050Z`, `desktop.chromium.real.manual` is now valid on that same protected run, only `android.chrome.real` and `iphone.webkit.real` remain open, `runtime/atlas/qa/runs/fitness-progression-pr-smoke-20260628T072049067050Z/release-gate.packet-prep.md` still provides one exact operator handoff for that blocked run, preserved Trove still pins `437c7604adee02e0403d77f75162a6c5f232221f`, release readiness still reads 4 ready / 1 manual review / 0 blocked / 1 not applicable, protected dispatch run `28316073769` still proves the remaining hosted blocker is only missing ATLAS GitHub Actions secrets `BROWSERSTACK_USERNAME` and `BROWSERSTACK_ACCESS_KEY`, `runtime/atlas/qa/github-secret-readiness.latest.json` currently reports `available_secret_count: 0`, current root validation now reads `critical=0 / error=0 / warning=0 / info=0`, the initiative manifest-health surface still reads 19 ok / 0 warning / 0 error, the eligible-open-marker coverage surface still reads 7 of 7 manifest-backed, and the eligible-open-marker restart index still reads 7 of 7 restart-ready, while later root-only publication commits are no longer misread as mandatory same-story checkpoint ratchets.",
+    "freshness_checked_receipt": "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-MAZER-README-PATH-AND-DIRTY-HEAD-RESYNC-2026-06-28.md",
+    "freshness_checked_at": "2026-06-28T18:08:27-04:00",
+    "freshness_basis": "the current checkpoint, marker posture, lane-state projection, blocked-work posture, and next-package posture now match the refreshed inventory-facing mirrors after the zero-warning closeout, the combined blocked-run handoff absorption, the earlier clean-sync projection refresh, the earlier latest-clean-head refresh, the later mobile-recap-cards clean-head refresh, the later live dirty-working-set resync, the later clean-mazer parity resync, and this later README-path dirty-head resync: published inventory now reflects dirty managed repos `stack`, `fitness`, and `mazer`, `fitness` is dirty on branch `codex/fitness-main-progression-summary-reapply` at commit `09dfac80ad0fd51794425e3111d98b2660522060`, the clean published ATLAS root checkpoint still consumed by this refresh is `9db850c108008bc0ebac5a790b197df77d922b99`, the live stack lock now pins pushed dirty `mazer` on `codex/legacy-web-port-truth` at `34b806a2a8325eae965524c1b1ff92c9d4db8e20`, the protected-QA mirrors still republish Fitness at `manual_review` on run `fitness-progression-pr-smoke-20260628T072049067050Z`, `desktop.chromium.real.manual` is now valid on that same protected run, only `android.chrome.real` and `iphone.webkit.real` remain open, `runtime/atlas/qa/runs/fitness-progression-pr-smoke-20260628T072049067050Z/release-gate.packet-prep.md` still provides one exact operator handoff for that blocked run, preserved Trove still pins `437c7604adee02e0403d77f75162a6c5f232221f`, release readiness still reads 4 ready / 1 manual review / 0 blocked / 1 not applicable, protected dispatch run `28316073769` still proves the remaining hosted blocker is only missing ATLAS GitHub Actions secrets `BROWSERSTACK_USERNAME` and `BROWSERSTACK_ACCESS_KEY`, `runtime/atlas/qa/github-secret-readiness.latest.json` currently reports `available_secret_count: 0`, current root validation now reads `critical=0 / error=0 / warning=0 / info=0`, the initiative manifest-health surface still reads 19 ok / 0 warning / 0 error, and the eligible-open-marker coverage surface plus restart index still read 7 of 7 manifest-backed and 7 of 7 restart-ready.",
     "marker_posture": [
       {
         "marker": "Inventory & Truth Map",
-        "percent": 94,
+        "percent": 95,
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ]
