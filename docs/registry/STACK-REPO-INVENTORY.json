@@ -3,14 +3,14 @@
   "stack_manifest_ref": "stack.yaml",
   "stack_manifest_digest": "sha256:e5ac73c00983975b59e4b8e7f8541160d479087f5dc95ad1d642568116bd7d10",
   "stack_lock_ref": "stack.lock.yaml",
-  "stack_lock_digest": "sha256:244d7762bf8751484918a8c0328c6aadacad5e22018b54a92a05c885aeb6554d",
+  "stack_lock_digest": "sha256:909181ee4cad7668ed85194a537e6bda0b35b0478ed4896dfb9474829713a9a9",
   "working_memory_digest": "sha256:fe4f4902e2b2c475974b050ba1bf3f5e740439aa41df2f844555c2c0dc3b310f",
   "published_refs": {
     "json": "docs/registry/STACK-REPO-INVENTORY.json",
     "markdown": "docs/audits/STACK-REPO-INVENTORY.md"
   },
   "repo_count": 12,
-  "dirty_repo_count": 0,
+  "dirty_repo_count": 1,
   "release_eligible_count": 5,
   "repos": [
     {
@@ -214,13 +214,13 @@
       "role": "application",
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/mazer.git",
-      "pinned_commit": "1b5a3c0bca1051117f257366c409533ce1915e15",
-      "current_commit": "1b5a3c0bca1051117f257366c409533ce1915e15",
+      "pinned_commit": "8bb27b8447cab22bccb3c040ac4eba025708d665",
+      "current_commit": "8bb27b8447cab22bccb3c040ac4eba025708d665",
       "pinned_ref_type": "branch",
-      "pinned_ref": "codex/mazer-design-recovery-pass-1",
+      "pinned_ref": "main",
       "current_ref_type": "branch",
-      "current_ref": "codex/mazer-design-recovery-pass-1",
-      "branch": "codex/mazer-design-recovery-pass-1",
+      "current_ref": "main",
+      "branch": "main",
       "dirty": false,
       "trust_class": "trusted",
       "release_eligible": true,
@@ -317,13 +317,13 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "f8602f51e16dd80e5f5dc7058bb78b5159e1b06f",
+      "current_commit": "c1725f87def092c5eb8819611d0e33a600c8b21c",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
       "current_ref": "codex/stack-lock-refresh-post-playbook-resync",
       "branch": "codex/stack-lock-refresh-post-playbook-resync",
-      "dirty": false,
+      "dirty": true,
       "trust_class": "trusted",
       "release_eligible": false,
       "exists": true,
@@ -530,5 +530,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:462409792e8fe72a73033a6a351680cb7f30088578ac6989e6e3fb5fb42d7e3d"
+  "content_digest": "sha256:6cff78a9ac5ee473320c3eb766b7645be62f3c906d55296697734975a56b9c5c"
 }
