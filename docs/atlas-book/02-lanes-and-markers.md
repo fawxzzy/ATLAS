@@ -18,7 +18,7 @@ Read:
 ### Execution substrate
 
 - `Playbook Everywhere + Cortex Interface: 22%`
-- `AI Repetition-to-Automation Pipeline: 35%`
+- `AI Repetition-to-Automation Pipeline: 36%`
 - `AI Long-Run Batch Orchestration: 66%`
 - `Sandbox Simulation Readiness: 99%`
 
@@ -48,7 +48,7 @@ Read:
 
 - Truth Map & ATLAS Book: `98%`
 - Inventory & Truth Map: `86%`
-- AI Repetition-to-Automation Pipeline: `35%`
+- AI Repetition-to-Automation Pipeline: `36%`
 - AI Long-Run Batch Orchestration: `66%`
 - Sandbox Simulation Readiness: `99%`
 
@@ -57,7 +57,7 @@ Read:
 ### Automation / orchestration
 
 - Cortex Readiness: `41%`
-- AI Repetition-to-Automation Pipeline: `35%`
+- AI Repetition-to-Automation Pipeline: `36%`
 - AI Long-Run Batch Orchestration: `66%`
 - Playbook Everywhere + Cortex Interface: `22%`
 
@@ -229,7 +229,7 @@ Current AI Long-Run closeout read: `AI Long-Run Batch Orchestration` stays at `6
 - Operator Secret Path Hygiene closes at `100%`: the exact reopened blocker class from pass 9 is now fully cleared because the four secret-bearing `tmp/*.env` files were moved under the already-admitted quarantine-only path `secrets/local/archive-quarantine/tmp-env-residue/2026-06-18/**`, post-move inspection proves no `tmp/*.env` residue remains, and `git check-ignore -v` proves the relocated files stay governed under ignored `secrets/**`; that satisfies the lane's explicit boundary rule that placement matters, not just git exposure
 - Vercel Hobby Cost Governance moved to `100%`: the lane still owns the correct governed decision shape because one bounded no-secret `fitness-hobby-decision.latest.json` artifact compares the preserved local `2026-06-17` and `2026-06-18` guardrail snapshots against the rolling `latest` guardrail surface and resolves the current repo-local decision to `keep_hobby`; that governance family is fresh again and no longer blocks current Fitness release-readiness, whose remaining gate is now current-run physical/manual proof for `android.chrome.real` and `iphone.webkit.real`, with the remaining local provider-side blocker reduced to real BrowserStack credential availability rather than stale provider-routing truth
 - Feedback Loop Readiness now closes at `100%`: the lane no longer rests on one narrow no-send loop. It now has multiple replayable feedback loops across materially different proof classes: the earlier DiscordOS publication-control loop, the live Fitness feature-thread mutation loop through the DiscordOS bot path with durable message metadata, the `_stack` marker-checkpoint operator loop, the `_stack` receipt-package loop, and the `_stack` update-draft helper's exact fail-closed package-basis boundary. Fresh env-readiness proof now confirms the current session had a live authenticated DiscordOS bot path, so the earlier Fitness Codex-to-Chrome bridge defect is no longer the lane-wide blocker; it remains an alternate browser-path issue only. That is enough to close the lane because stack-level local-first feedback loops are now real across control, mutation, packaging, and truth-update surfaces
-- AI Repetition-to-Automation Pipeline now sits at `35%`: the lane now also has one additional bounded operator-surface refinement in the current active non-Fitness marker knockout selector, so the helper no longer stops at operator decision plus receipt pointer only; it now emits the packet mode and packet scope for both the current lane and the downstream fallback directly from the decisive basis receipts, which removes one more manual receipt-open step from the root control-plane surface. That is enough for the smallest honest move above `34%` because one more proof-backed root-local operator helper is now materially more execution-ready on canonical `main`, but the lane still remains low because no new automation family is admitted, no owner-repo or `_stack` execution widening happened, and no broader multi-operator adoption class is proven yet
+- AI Repetition-to-Automation Pipeline now sits at `36%`: the lane no longer stops at selector classification plus packet-brief output alone. `ops/atlas/receipt_scaffold.py` can now consume that durable selector truth directly through `--selector-target` so the operator no longer has to restate the lane and packet-basis receipt manually when one actionable packet exists, and the live held root now also proves the safety boundary because both selector-target modes fail closed under `no_immediate_root_packet` instead of minting stale scaffolds. That is enough for the smallest honest move above `35%` because one distinct new proof-backed root-local operator seam now bridges selector truth into the receipt-packaging workflow itself, but the lane still remains low because no new automation family is admitted, no owner-repo or `_stack` execution widening happened, no broader multi-operator adoption class is proven yet, and no immediate same-lane packet is open by default
 - AI Long-Run Batch Orchestration moved to `21%`: the lane now has one exact `queue-or-registry batch entry contract`, one exact owner-facing root home, one explicit `none new yet` support decision, one exact first-slice selection in `batch-entry validator`, one exact first-slice admission and proof matrix for that validator, one exact prompt-pack and handoff contract for that same slice, one exact implementation-readiness closeout and worker-routing result, and now one reconciled first validator worker cluster with real executed state change plus immediate proof hardening inside the admitted slice
 - AI Long-Run Batch Orchestration stays intentionally low at `21%`: the worker cluster did not admit queue-home or registry-home semantics, `_stack` execution-home semantics, supervised pilot proof, broader operator adoption, or later-slice widening
 - AI Long-Run Batch Orchestration moved to `22%`: the lane now also has one exact draft-entry scaffold first-implementation admission and proof matrix, one exact scaffold prompt-pack and handoff contract, one exact implementation-readiness closeout and worker-routing result, and one reconciled first draft-entry scaffold worker cluster with real executed state change plus proof for placeholder rendering, full explicit scaffold rendering, non-`proposed` status rejection, optional-field rejection, unsupported-input rejection, and multi-entry fail-closed handling

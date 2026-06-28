@@ -16,6 +16,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from ops._atlas import atlas_relative, atlas_root, normalize_slashes
+from ops.atlas.marker_knockout_selector import build_campaign
 
 HELPER_VERSION = "atlas.receipt-scaffold.v1"
 STACK_COMMAND_ID = "stack receipt package"
@@ -34,6 +35,7 @@ DEFAULT_PROTECTED_SURFACES = (
     ".env",
 )
 CURRENT_LANE_PATTERN = re.compile(r"^- the current active ATLAS-side lane remains `([^`]+)`$", re.MULTILINE)
+SELECTOR_TARGET_CHOICES = ("do-now", "fallback-after-current")
 
 
 class ReceiptScaffoldError(RuntimeError):
@@ -123,7 +125,9 @@ class ReceiptScaffoldInput:
     marker_decision: str
     verification_lines: tuple[str, ...]
     protected_surfaces: tuple[str, ...]
-    output_ref: str | None
+    selector_target: str | None = None
+    selector_operator_action: str | None = None
+    output_ref: str | None = None
 
 
 def _non_empty(value: str, *, field_name: str) -> str:
@@ -158,20 +162,76 @@ def _validate_relative_ref(value: str, *, field_name: str) -> str:
     return normalized
 
 
+def _resolve_selector_target(
+    *,
+    root: Path,
+    selector_target: str,
+) -> tuple[str, str, str]:
+    payload = build_campaign(root=root)
+    operator_action = str(payload.get("operator_action") or "").strip()
+    if selector_target == "do-now":
+        if operator_action not in {"continue_current_lane", "open_selected_lane"}:
+            raise ReceiptScaffoldError(
+                "selector-target `do-now` requires an immediate current packet, "
+                f"but durable selector truth is `{operator_action or 'unresolved'}`."
+            )
+        lane = _non_empty(str(payload.get("selected_marker") or ""), field_name="selector selected_marker")
+        receipt_context = _validate_relative_ref(
+            str(payload.get("selected_current_packet_basis_ref") or ""),
+            field_name="selector selected_current_packet_basis_ref",
+        )
+        return lane, receipt_context, operator_action
+    if selector_target == "fallback-after-current":
+        lane = _normalized_optional(str(payload.get("next_after_current_marker") or ""))
+        receipt_context = _normalized_optional(str(payload.get("next_after_current_packet_basis_ref") or ""))
+        if not lane or not receipt_context:
+            raise ReceiptScaffoldError(
+                "selector-target `fallback-after-current` requires one durable downstream packet, "
+                f"but current selector truth is `{operator_action or 'unresolved'}` with no fallback packet."
+            )
+        return (
+            _non_empty(lane, field_name="selector next_after_current_marker"),
+            _validate_relative_ref(receipt_context, field_name="selector next_after_current_packet_basis_ref"),
+            operator_action,
+        )
+    raise ReceiptScaffoldError(
+        "selector_target must be one of: " + ", ".join(SELECTOR_TARGET_CHOICES)
+    )
+
+
 def build_input(args: argparse.Namespace) -> ReceiptScaffoldInput:
     root = Path(getattr(args, "root", atlas_root())).resolve()
     status = _non_empty(args.status, field_name="status")
     if status not in {"normal", "blocked"}:
         raise ReceiptScaffoldError("status must be 'normal' or 'blocked'.")
     receipt_date = _non_empty(_normalized_optional(getattr(args, "date", None)) or date.today().isoformat(), field_name="date")
-    lane = _normalized_optional(getattr(args, "lane", None)) or _default_lane_from_restart_truth(root=root)
+    selector_target = _normalized_optional(getattr(args, "selector_target", None))
+    selector_operator_action: str | None = None
+    if selector_target and selector_target not in SELECTOR_TARGET_CHOICES:
+        raise ReceiptScaffoldError(
+            "selector_target must be one of: " + ", ".join(SELECTOR_TARGET_CHOICES)
+        )
+    if selector_target and _normalized_optional(getattr(args, "lane", None)):
+        raise ReceiptScaffoldError("Do not pass --lane when --selector-target is set; lane is resolved from durable selector truth.")
+    if selector_target and _normalized_optional(getattr(args, "receipt_context", None)):
+        raise ReceiptScaffoldError(
+            "Do not pass --receipt-context when --selector-target is set; receipt context is resolved from durable selector truth."
+        )
+    if selector_target:
+        lane, selector_receipt_context, selector_operator_action = _resolve_selector_target(
+            root=root,
+            selector_target=selector_target,
+        )
+    else:
+        lane = _normalized_optional(getattr(args, "lane", None)) or _default_lane_from_restart_truth(root=root)
+        selector_receipt_context = None
 
     blocker_code = _normalized_optional(args.blocker_code)
     blocker_summary = _normalized_optional(args.blocker_summary)
     if status == "blocked" and (not blocker_code or not blocker_summary):
         raise ReceiptScaffoldError("blocked status requires both --blocker-code and --blocker-summary.")
 
-    receipt_context = _normalized_optional(args.receipt_context)
+    receipt_context = selector_receipt_context or _normalized_optional(args.receipt_context)
     if receipt_context is not None:
         receipt_context = _validate_relative_ref(receipt_context, field_name="receipt_context")
 
@@ -200,6 +260,8 @@ def build_input(args: argparse.Namespace) -> ReceiptScaffoldInput:
         marker_decision=_normalized_optional(args.marker_decision) or DEFAULT_MARKER_DECISION,
         verification_lines=_normalize_lines(args.verification, default=PLACEHOLDER_VERIFICATION),
         protected_surfaces=_normalize_surfaces(args.protected_surface),
+        selector_target=selector_target,
+        selector_operator_action=selector_operator_action,
         output_ref=output_ref,
     )
 
@@ -341,6 +403,10 @@ def render_receipt_scaffold(
             f"- context status: `{context_status}`",
         ]
     )
+    if scaffold_input.selector_target:
+        lines.append(f"- selector target: `{scaffold_input.selector_target}`")
+    if scaffold_input.selector_operator_action:
+        lines.append(f"- selector operator action: `{scaffold_input.selector_operator_action}`")
     if marker_percentage:
         lines.append(f"- current marker posture: `{marker_percentage}`")
     if supporting_posture:
@@ -431,6 +497,7 @@ def build_parser() -> argparse.ArgumentParser:
     scaffold.add_argument("--marker-decision", default=DEFAULT_MARKER_DECISION)
     scaffold.add_argument("--verification", action="append")
     scaffold.add_argument("--protected-surface", action="append")
+    scaffold.add_argument("--selector-target", choices=SELECTOR_TARGET_CHOICES)
     scaffold.add_argument("--output")
     scaffold.add_argument("--write-default-output", action="store_true")
     scaffold.add_argument("--force", action="store_true")
@@ -470,6 +537,8 @@ def main(
                     "lane": scaffold_input.lane,
                     "status": scaffold_input.status,
                     "marker_decision": scaffold_input.marker_decision,
+                    "selector_target": scaffold_input.selector_target,
+                    "selector_operator_action": scaffold_input.selector_operator_action,
                 },
                 indent=2,
             ))
