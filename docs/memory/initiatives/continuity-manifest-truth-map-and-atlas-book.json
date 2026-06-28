@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-06-19T00:00:00Z",
-  "updated_at": "2026-06-28T04:31:13-04:00",
+  "updated_at": "2026-06-28T12:45:00-04:00",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -54,6 +54,7 @@
     "docs/ops/ATLAS-ROOT-CLEAN-BRANCH-ZERO-DIRTY-REPO-INVENTORY-RESYNC-2026-06-28.md",
     "docs/ops/ATLAS-ROOT-MAIN-AND-FITNESS-POST-VERIFY-ZERO-DIRTY-INVENTORY-RESYNC-2026-06-28.md",
     "docs/ops/ATLAS-QA-PROTECTED-SINGLE-DISPATCH-FITNESS-BOOTSTRAP-AND-SPARSE-VALIDATION-UNBLOCK-2026-06-28.md",
+    "docs/ops/CORTEX-HELD-ROOT-POSTURE-SEED-AND-RUNTIME-RESYNC-2026-06-28.md",
     "ops/atlas/qa/github_secret_readiness.py",
     "runtime/atlas/qa/github-secret-readiness.latest.json"
   ],
@@ -97,7 +98,8 @@
       "docs/ops/ATLAS-ROOT-CLEAN-BRANCH-ZERO-DIRTY-REPO-INVENTORY-RESYNC-2026-06-28.md",
       "docs/ops/ATLAS-ROOT-MAIN-AND-FITNESS-POST-VERIFY-ZERO-DIRTY-INVENTORY-RESYNC-2026-06-28.md",
       "docs/ops/ATLAS-QA-FITNESS-CURRENT-RUN-DESKTOP-CLOSEOUT-AND-MOBILE-ONLY-GATE-RESYNC-2026-06-28.md",
-      "docs/ops/ATLAS-QA-PROTECTED-SINGLE-DISPATCH-FITNESS-BOOTSTRAP-AND-SPARSE-VALIDATION-UNBLOCK-2026-06-28.md"
+      "docs/ops/ATLAS-QA-PROTECTED-SINGLE-DISPATCH-FITNESS-BOOTSTRAP-AND-SPARSE-VALIDATION-UNBLOCK-2026-06-28.md",
+      "docs/ops/CORTEX-HELD-ROOT-POSTURE-SEED-AND-RUNTIME-RESYNC-2026-06-28.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -225,6 +227,10 @@
         "role": "current exact Book-side hosted protected-dispatch unblock and GitHub-secret blocker projection surface"
       },
       {
+        "path": "docs/ops/CORTEX-HELD-ROOT-POSTURE-SEED-AND-RUNTIME-RESYNC-2026-06-28.md",
+        "role": "current exact Book-side Cortex held-root projection and runtime-resync surface"
+      },
+      {
         "path": "ops/atlas/qa/github_secret_readiness.py",
         "role": "current exact operator helper for repeatable GitHub Actions secret-name readiness auditing"
       },
@@ -273,9 +279,9 @@
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/ATLAS-QA-PROTECTED-SINGLE-DISPATCH-FITNESS-BOOTSTRAP-AND-SPARSE-VALIDATION-UNBLOCK-2026-06-28.md",
-    "freshness_checked_at": "2026-06-28T04:31:13-04:00",
-    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture now match the refreshed current-state, marker, restart, system-map, and endgame mirrors after the hosted protected-dispatch unblock plus GitHub-secret audit: current protected-QA truth projects playbook, trove, foundation, and lifeline as ready, Fitness at `manual_review` on clean committed head `b5f29793eb87dc7538a15160180f159688acd1b4` via run `fitness-progression-pr-smoke-20260628T072049067050Z` with `desktop.chromium.real.manual` now valid and only `android.chrome.real` plus `iphone.webkit.real` remaining open, protected dispatch run `28315893818` proved the hosted bootstrap and sparse-validation seam is repaired, protected dispatch run `28316073769` proved the remaining ATLAS GitHub Actions blocker is only missing `BROWSERSTACK_USERNAME` and `BROWSERSTACK_ACCESS_KEY`, `runtime/atlas/qa/github-secret-readiness.latest.json` now reports `available_secret_count: 0`, the ATLAS root itself still projects the protected-QA secret-audit state landed on `main` at `28cde650d1228da14e659fe27f009e4084711317` and the Book-side restart mirrors refreshed through `83ae7197abb19ce3fdfc828e4a139e693c7ff834`, current DiscordOS truth still projects live runtime, publication, and feedback cutover with explicit retained Fitness seams, the root validation floor still projects `critical=0 / error=0 / warning=0 / info=0`, the initiative manifest-health surface still reads 19 ok / 0 warning / 0 error, the eligible-open-marker coverage and restart-index surfaces still read 7 of 7, and the canonical Book mirrors now also absorb that machine-readable secret blocker instead of leaving the final protected-QA state only at the leaf receipt and workflow-log level.",
+    "freshness_checked_receipt": "docs/ops/CORTEX-HELD-ROOT-POSTURE-SEED-AND-RUNTIME-RESYNC-2026-06-28.md",
+    "freshness_checked_at": "2026-06-28T12:45:00-04:00",
+    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture still match the refreshed current-state, marker, restart, system-map, and endgame mirrors after the hosted protected-dispatch unblock plus GitHub-secret audit, and those canonical Book mirrors now also absorb the Cortex held-root resync: current protected-QA truth still projects playbook, trove, foundation, and lifeline as ready, Fitness at `manual_review` on clean committed head `b5f29793eb87dc7538a15160180f159688acd1b4` via run `fitness-progression-pr-smoke-20260628T072049067050Z` with `desktop.chromium.real.manual` now valid and only `android.chrome.real` plus `iphone.webkit.real` remaining open, protected dispatch run `28315893818` proved the hosted bootstrap and sparse-validation seam is repaired, protected dispatch run `28316073769` proved the remaining ATLAS GitHub Actions blocker is only missing `BROWSERSTACK_USERNAME` and `BROWSERSTACK_ACCESS_KEY`, `runtime/atlas/qa/github-secret-readiness.latest.json` now reports `available_secret_count: 0`, the root validation floor still projects `critical=0 / error=0 / warning=0 / info=0`, the initiative manifest-health surface still reads 19 ok / 0 warning / 0 error, the eligible-open-marker coverage and restart-index surfaces still read 7 of 7, and the live Cortex seed plus runtime chain now also truthfully project `hold-current-root-posture` instead of the stale docs-ADR lane.",
     "marker_posture": [
       {
         "marker": "Truth Map & ATLAS Book",

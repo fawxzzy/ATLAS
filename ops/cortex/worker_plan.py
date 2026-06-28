@@ -125,6 +125,10 @@ def _ensure_same_rail(posture: CortexPosture, rail_state: RailState) -> None:
 def _select_template(posture: CortexPosture, next_action: NextAction) -> WorkerPlanTemplate:
     action_text = _action_text(next_action)
 
+    if next_action.action_id == "hold-current-root-posture" or (
+        "no immediate atlas-root packet is open" in action_text and "held root posture" in action_text
+    ):
+        return HOLD_CURRENT_ROOT_POSTURE_TEMPLATE
     if any(token in action_text for token in ("docs adr", "docs/adr", "adr", "debt slice", "debt-slice")):
         return DOCS_ADR_OR_DEBT_SLICE_TEMPLATE
     if next_action.action_id in {"fitness-owner-adoption", "resume-fitness-owner-adoption"} or any(
@@ -580,6 +584,36 @@ FITNESS_OWNER_ADOPTION_TEMPLATE = WorkerPlanTemplate(
     default_files_to_avoid=("ops/cortex/**", "runtime/cortex/**", "AGENTS.md", "stack.yaml", "README-STACK.md"),
     documentation_summary="Fitness owns product adoption work; Cortex only guides and verifies.",
     default_verification_steps=("python -m unittest tests.test_atlas_playbook_contract_consumption",),
+)
+
+
+HOLD_CURRENT_ROOT_POSTURE_TEMPLATE = WorkerPlanTemplate(
+    template_id="hold_current_root_posture",
+    objective="Preserve the current held ATLAS root posture without fabricating a new root lane.",
+    implementation_plan=(
+        "Keep the work at the ATLAS root and on stack-level runtime, docs, or receipt surfaces only.",
+        "Resynchronize read models or restart surfaces only when they lag the already-held dispatcher truth.",
+        "Do not reopen a root packet unless the blocker class or execution-ready state materially changes.",
+    ),
+    default_files_to_modify=(
+        "docs/atlas-book/*.md",
+        "docs/ops/*.md",
+        "ops/cortex/*.py",
+        "runtime/cortex/*.json",
+        "tests/test_cortex_*.py",
+    ),
+    default_files_to_avoid=("repos/**", "apps/**", "packages/**", "src/**"),
+    documentation_summary=(
+        "Held-root posture work keeps ATLAS restart truth, Cortex mirrors, and receipts synchronized without inventing a new execution lane."
+    ),
+    default_verification_steps=(
+        "python -m unittest tests.test_cortex_current_state tests.test_cortex_rail_state tests.test_cortex_rail_state_reader tests.test_cortex_context_assembler tests.test_cortex_operator_surface tests.test_cortex_worker_plan",
+        "python .\\ops\\validation\\validate_stack.py",
+    ),
+    default_failure_modes_to_avoid=(
+        "Do not invent a new root packet while the dispatcher remains held.",
+        "Do not widen into repo-owned implementation work from the ATLAS root.",
+    ),
 )
 
 

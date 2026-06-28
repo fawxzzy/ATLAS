@@ -312,28 +312,29 @@ class CortexWorkerPlanTests(unittest.TestCase):
         self.assertIn("stack.yaml", plan.prompt)
         self.assertIn("Root proof work should validate stack posture", plan.prompt)
 
-    def test_docs_adr_next_action_avoids_broad_stack_cleanup(self) -> None:
+    def test_held_root_posture_next_action_avoids_fabricating_new_root_lane(self) -> None:
         posture, rail_state, next_action = self._with_state(
             posture=replace(self.posture, classification="steady"),
             rail_state=replace(
                 self.posture.rail_state,
-                owner_layer="cortex",
+                owner_layer="atlas",
                 next_action=replace(
                     self.posture.rail_state.next_action,
-                    action_id="docs-adr-or-debt-slice",
-                    owner_layer="cortex",
-                    title="Draft the Cortex docs ADR slice.",
-                    rationale="Capture the narrow docs slice without broad stack cleanup.",
-                    verification_plan=("python -m unittest tests.test_cortex_worker_plan",),
+                    action_id="hold-current-root-posture",
+                    owner_layer="atlas",
+                    title="Hold the current ATLAS root posture until a distinct root packet opens.",
+                    rationale="Keep the held dispatcher truth synchronized without fabricating a new root lane.",
+                    verification_plan=("python .\\ops\\validation\\validate_stack.py",),
                 ),
             ),
         )
 
         plan = build_worker_plan(posture, rail_state, next_action, self.rules)
 
-        self.assertEqual("docs_adr_or_debt_slice", plan.template_id)
+        self.assertEqual("hold_current_root_posture", plan.template_id)
         self.assertTrue(all(not path.startswith("repos/") for path in plan.files_to_modify))
-        self.assertIn("broad stack cleanup", plan.prompt.lower())
+        self.assertIn("held atlas root posture", plan.prompt.lower())
+        self.assertIn("do not invent a new root packet", " ".join(plan.failure_modes_to_avoid).lower())
 
     def test_generated_prompt_includes_files_to_avoid_when_provided(self) -> None:
         posture, rail_state, next_action = self._with_state(

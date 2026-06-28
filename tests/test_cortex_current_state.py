@@ -135,7 +135,7 @@ class CortexCurrentStateTests(unittest.TestCase):
             payload["operator_surface_projection"]["blocked_agent_ids"],
         )
 
-    def test_clean_inputs_route_to_seeded_post_catch_up_atlas_lane(self) -> None:
+    def test_clean_inputs_route_to_seeded_held_root_posture(self) -> None:
         validation_payload = self._base_validation_payload(
             counts={"critical": 0, "error": 0, "warning": 2, "info": 0, "total": 2},
             findings=[
@@ -167,7 +167,7 @@ class CortexCurrentStateTests(unittest.TestCase):
         )
 
         self.assertEqual([], payload["active_blockers"])
-        self.assertEqual("docs-adr-or-debt-slice", payload["next_recommended_lane"]["lane_id"])
+        self.assertEqual("hold-current-root-posture", payload["next_recommended_lane"]["lane_id"])
         self.assertEqual("atlas", payload["next_recommended_lane"]["owner_layer"])
         self.assertEqual("cortex-receipt-interpretation-consumption-feedback-v0-1", payload["latest_clean_step"]["step_id"])
         self.assertEqual("in_sync", payload["remote_publication_state"]["status"])
@@ -213,7 +213,7 @@ class CortexCurrentStateTests(unittest.TestCase):
             payload["retained_untracked_files"],
         )
         self.assertEqual(
-            "docs-adr-or-debt-slice",
+            "hold-current-root-posture",
             payload["next_recommended_lane"]["lane_id"],
         )
 
@@ -246,7 +246,7 @@ class CortexCurrentStateTests(unittest.TestCase):
         self.assertEqual(artifact.payload["head"], payload["head"])
         self.assertEqual("atlas.cortex.current-state.v1", payload["contract_version"])
         self.assertIn("# Cortex Current State", summary)
-        self.assertIn("docs-adr-or-debt-slice", summary)
+        self.assertIn("hold-current-root-posture", summary)
         self.assertIn("## Operator Surface", summary)
         self.assertIn("validation-summary-shadow", summary)
         self.assertIn("atlas.cortex.contract.validation-summary-shadow.v1", summary)

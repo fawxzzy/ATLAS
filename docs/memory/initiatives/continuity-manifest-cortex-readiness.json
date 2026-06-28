@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-06-19T07:00:00Z",
-  "updated_at": "2026-06-19T07:00:00Z",
+  "updated_at": "2026-06-28T12:45:00-04:00",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -28,7 +28,8 @@
     "docs/ops/CORTEX-READINESS-ATLAS-CATCH-UP-AND-ROOT-PROJECTION-PASS-5-2026-06-05.md",
     "docs/ops/CORTEX-READINESS-POST-CATCH-UP-LIVE-LANE-RATCHET-PASS-6-2026-06-05.md",
     "docs/ops/CORTEX-READINESS-DOCS-ADR-OR-DEBT-SLICE-POST-PR-70-MERGE-LIVE-READ-MODEL-RECONCILIATION-PASS-23-2026-06-06.md",
-    "docs/ops/CORTEX-READINESS-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md"
+    "docs/ops/CORTEX-READINESS-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md",
+    "docs/ops/CORTEX-HELD-ROOT-POSTURE-SEED-AND-RUNTIME-RESYNC-2026-06-28.md"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -36,9 +37,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "cortex-readiness",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/CORTEX-READINESS-DOCS-ADR-OR-DEBT-SLICE-POST-PR-70-MERGE-LIVE-READ-MODEL-RECONCILIATION-PASS-23-2026-06-06.md",
+    "current_checkpoint_receipt": "docs/ops/CORTEX-HELD-ROOT-POSTURE-SEED-AND-RUNTIME-RESYNC-2026-06-28.md",
     "checkpoint_commit": "main",
-    "checkpoint_summary": "The lane currently holds at 41 percent: the live seeded and generated Cortex read model remains aligned on the bounded docs-adr-or-debt-slice ATLAS projection, the runtime surfaces are refreshed again after merged-main movement, and the lane remains advisory and projection-only with no authority widening.",
+    "checkpoint_summary": "The lane still holds at 41 percent, but the live seeded and generated Cortex read model now agrees with the current held-root dispatcher truth: the stale docs-adr-or-debt-slice next action and ambient warning-debt wording are cleared, `hold-current-root-posture` is now the truthful bounded next action, current validation is back at critical=0 error=0 warning=0 info=0, and the lane remains advisory and projection-only with no authority widening.",
     "governing_receipts": [
       "docs/ops/CORTEX-READINESS-MARKER-CHECKPOINT-SHADOW-CONSUMPTION-PASS-1-2026-06-01.md",
       "docs/ops/CORTEX-READINESS-RECEIPT-DOCTRINE-DRAFT-SHADOW-CONSUMPTION-PASS-2-2026-06-01.md",
@@ -47,7 +48,8 @@
       "docs/ops/CORTEX-READINESS-ATLAS-CATCH-UP-AND-ROOT-PROJECTION-PASS-5-2026-06-05.md",
       "docs/ops/CORTEX-READINESS-POST-CATCH-UP-LIVE-LANE-RATCHET-PASS-6-2026-06-05.md",
       "docs/ops/CORTEX-READINESS-DOCS-ADR-OR-DEBT-SLICE-POST-PR-70-MERGE-LIVE-READ-MODEL-RECONCILIATION-PASS-23-2026-06-06.md",
-      "docs/ops/CORTEX-READINESS-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md"
+      "docs/ops/CORTEX-READINESS-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md",
+      "docs/ops/CORTEX-HELD-ROOT-POSTURE-SEED-AND-RUNTIME-RESYNC-2026-06-28.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -56,7 +58,11 @@
       },
       {
         "path": "docs/ops/CORTEX-READINESS-DOCS-ADR-OR-DEBT-SLICE-POST-PR-70-MERGE-LIVE-READ-MODEL-RECONCILIATION-PASS-23-2026-06-06.md",
-        "role": "latest live read-model reconciliation truth"
+        "role": "historical live read-model reconciliation truth before the held-root dispatcher resync"
+      },
+      {
+        "path": "docs/ops/CORTEX-HELD-ROOT-POSTURE-SEED-AND-RUNTIME-RESYNC-2026-06-28.md",
+        "role": "current exact held-root seed and runtime resync truth"
       },
       {
         "path": "runtime/cortex/current-state/latest.json",
@@ -107,29 +113,29 @@
     ],
     "blocked_or_gated_work": [
       {
-        "item": "claiming execution or authority widening from projection refresh alone",
-        "requirement": "blocked unless a distinct explicit authority or execution packet is opened and proves more than advisory read-model alignment"
+        "item": "claiming execution or authority widening from the held-root resync alone",
+        "requirement": "blocked unless a distinct explicit authority or execution packet is opened and proves more than advisory seed and read-model alignment"
       },
       {
         "item": "higher marker movement above the current 41 percent advisory threshold",
         "requirement": "blocked until broader live read-model adoption, fresher runtime reconciliation that changes operator reality, or distinct authority widening lands"
       },
       {
-        "item": "continuing this lane through stale publication-branch residue",
-        "requirement": "blocked unless live runtime surfaces drift again, a new bounded docs-adr-or-debt-slice question opens, or a real branch/reconciliation blocker returns"
+        "item": "continuing this lane after the held-root resync without a new distinct drift class",
+        "requirement": "blocked unless live runtime surfaces drift again, a new bounded held-root preservation question opens, or a real branch or reconciliation blocker returns"
       }
     ],
     "next_package_ladder": [
       {
         "package": "No immediate Cortex Readiness same-lane packet",
-        "mode": "hold-flat after live read-model reconciliation and continuity-manifest seed",
-        "reason": "the bounded post-catch-up projection lane is aligned and refresh-safe for now; reopen only with new read-model drift, broader adoption, or explicit authority widening"
+        "mode": "hold-flat after held-root seed and runtime resync",
+        "reason": "the bounded advisory lane is aligned and refresh-safe again; reopen only with new read-model drift, broader adoption, or explicit authority widening"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/CORTEX-READINESS-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md",
-    "freshness_checked_at": "2026-06-19T07:00:00Z",
-    "freshness_basis": "The manifest now matches the current 41 percent advisory Cortex posture after the June 5 and June 6 ratchet and reconciliation chain, while the June 19 continuity widening pass adds one maintained retrieval map without widening authority.",
+    "freshness_checked_receipt": "docs/ops/CORTEX-HELD-ROOT-POSTURE-SEED-AND-RUNTIME-RESYNC-2026-06-28.md",
+    "freshness_checked_at": "2026-06-28T12:45:00-04:00",
+    "freshness_basis": "The manifest now matches the current 41 percent advisory Cortex posture after the June 28 held-root resync: the live seed and generated runtime chain now agree that no immediate ATLAS-root packet is open, `hold-current-root-posture` is the truthful bounded next action, current validation is back at critical=0 error=0 warning=0 info=0, and the lane still remains advisory only without authority widening.",
     "marker_posture": [
       {
         "marker": "Cortex Readiness",

@@ -102,9 +102,9 @@ class CortexReceiptInterpretationStackConsumptionTests(unittest.TestCase):
         }
         payload["active_blockers"] = []
         payload["next_recommended_lane"] = {
-            "lane_id": "docs-adr-or-debt-slice",
+            "lane_id": "hold-current-root-posture",
             "owner_layer": "atlas",
-            "rationale": "Wave 11 and the ATLAS catch-up are already complete. The next bounded lane is an ATLAS root projection slice that keeps the live Cortex read model aligned with AI Repetition-to-Automation Pipeline, specifically the bounded receipt skeleton drafts control-plane surface, without reopening Cortex capability implementation.",
+            "rationale": "The current ATLAS Book and dispatcher truth show no immediate ATLAS-root packet is open, so the next bounded Cortex move is to preserve that held root posture, keep the shadow/runtime read model synchronized, and avoid fabricating a new root lane before the blocker class or execution-ready state materially changes.",
             "blocked_by": [],
             "source_refs": [
                 "runtime/cortex/kernel.state-model.seed.v1.json",
@@ -119,9 +119,9 @@ class CortexReceiptInterpretationStackConsumptionTests(unittest.TestCase):
         payload["active_blockers"] = []
         payload["dirty_lanes"] = []
         payload["next_recommended_lane"] = {
-            "lane_id": "docs-adr-or-debt-slice",
+            "lane_id": "hold-current-root-posture",
             "owner_layer": "atlas",
-            "rationale": "Wave 11 and the ATLAS catch-up are already complete. The next bounded lane is an ATLAS root projection slice that keeps the live Cortex read model aligned with AI Repetition-to-Automation Pipeline, specifically the bounded receipt skeleton drafts control-plane surface, without reopening Cortex capability implementation.",
+            "rationale": "The current ATLAS Book and dispatcher truth show no immediate ATLAS-root packet is open, so the next bounded Cortex move is to preserve that held root posture, keep the shadow/runtime read model synchronized, and avoid fabricating a new root lane before the blocker class or execution-ready state materially changes.",
             "blocked_by": [],
             "source_refs": [
                 "runtime/cortex/current-state/latest.json",
@@ -133,17 +133,17 @@ class CortexReceiptInterpretationStackConsumptionTests(unittest.TestCase):
 
     def _base_context_payload(self) -> dict:
         payload = deepcopy(self.context_payload)
-        payload["packet_id"] = "context-docs-adr-or-debt-slice"
+        payload["packet_id"] = "context-hold-current-root-posture"
         payload["context_summary"] = (
-            "Cortex context packet for docs-adr-or-debt-slice derived from explicit current-state, "
+            "Cortex context packet for hold-current-root-posture derived from explicit current-state, "
             "rail-state, validation, and seed artifacts."
         )
-        payload["task_frame"]["lane_id"] = "docs-adr-or-debt-slice"
+        payload["task_frame"]["lane_id"] = "hold-current-root-posture"
         payload["task_frame"]["owner_layer"] = "atlas"
-        payload["task_frame"]["title"] = "Project the post-catch-up ATLAS systems lane."
+        payload["task_frame"]["title"] = "Hold the current ATLAS root posture until a distinct root packet opens."
         payload["task_frame"]["status"] = "ready"
         payload["task_frame"]["rationale"] = (
-            "Wave 11 and the ATLAS catch-up are already complete. The next bounded lane is an ATLAS root projection slice that keeps the live Cortex read model aligned with AI Repetition-to-Automation Pipeline, specifically the bounded receipt skeleton drafts control-plane surface, without reopening Cortex capability implementation."
+            "The current ATLAS Book and dispatcher truth show no immediate ATLAS-root packet is open, so the next bounded Cortex move is to preserve that held root posture, keep the shadow/runtime read model synchronized, and avoid fabricating a new root lane before the blocker class or execution-ready state materially changes."
         )
         payload["task_frame"]["blocked_by"] = []
         payload["task_frame"]["ready_to_execute"] = True
@@ -152,16 +152,16 @@ class CortexReceiptInterpretationStackConsumptionTests(unittest.TestCase):
     def _base_operator_surface_payload(self) -> dict:
         payload = deepcopy(self.operator_surface_payload)
         payload["operator_summary"] = (
-            "Cortex operator surface for docs-adr-or-debt-slice derived from explicit current-state, "
+            "Cortex operator surface for hold-current-root-posture derived from explicit current-state, "
             "rail-state, context, validation, and seed artifacts."
         )
         payload["rail_status"] = "ready"
         payload["active_blockers"] = []
         payload["dirty_lanes"] = []
         payload["next_recommended_lane"] = {
-            "lane_id": "docs-adr-or-debt-slice",
+            "lane_id": "hold-current-root-posture",
             "owner_layer": "atlas",
-            "rationale": "Wave 11 and the ATLAS catch-up are already complete. The next bounded lane is an ATLAS root projection slice that keeps the live Cortex read model aligned with AI Repetition-to-Automation Pipeline, specifically the bounded receipt skeleton drafts control-plane surface, without reopening Cortex capability implementation.",
+            "rationale": "The current ATLAS Book and dispatcher truth show no immediate ATLAS-root packet is open, so the next bounded Cortex move is to preserve that held root posture, keep the shadow/runtime read model synchronized, and avoid fabricating a new root lane before the blocker class or execution-ready state materially changes.",
             "blocked_by": [],
             "source_refs": [
                 "runtime/cortex/current-state/latest.json",
@@ -169,17 +169,17 @@ class CortexReceiptInterpretationStackConsumptionTests(unittest.TestCase):
                 "runtime/cortex/kernel.rule-registry.seed.v1.json",
             ],
         }
-        payload["context_packet_id"] = "context-docs-adr-or-debt-slice"
+        payload["context_packet_id"] = "context-hold-current-root-posture"
         payload["context_summary"] = (
-            "Cortex context packet for docs-adr-or-debt-slice derived from explicit current-state, "
+            "Cortex context packet for hold-current-root-posture derived from explicit current-state, "
             "rail-state, validation, and seed artifacts."
         )
-        payload["task_frame_summary"]["lane_id"] = "docs-adr-or-debt-slice"
+        payload["task_frame_summary"]["lane_id"] = "hold-current-root-posture"
         payload["task_frame_summary"]["owner_layer"] = "atlas"
-        payload["task_frame_summary"]["title"] = "Project the post-catch-up ATLAS systems lane."
+        payload["task_frame_summary"]["title"] = "Hold the current ATLAS root posture until a distinct root packet opens."
         payload["task_frame_summary"]["status"] = "ready"
         payload["task_frame_summary"]["rationale"] = (
-            "Wave 11 and the ATLAS catch-up are already complete. The next bounded lane is an ATLAS root projection slice that keeps the live Cortex read model aligned with AI Repetition-to-Automation Pipeline, specifically the bounded receipt skeleton drafts control-plane surface, without reopening Cortex capability implementation."
+            "The current ATLAS Book and dispatcher truth show no immediate ATLAS-root packet is open, so the next bounded Cortex move is to preserve that held root posture, keep the shadow/runtime read model synchronized, and avoid fabricating a new root lane before the blocker class or execution-ready state materially changes."
         )
         payload["task_frame_summary"]["blocked_by"] = []
         payload["task_frame_summary"]["ready_to_execute"] = True
@@ -197,7 +197,7 @@ class CortexReceiptInterpretationStackConsumptionTests(unittest.TestCase):
 
     def _base_ledger_payload(self) -> dict:
         payload = deepcopy(self.ledger_payload)
-        payload["ledger_id"] = "ledger-docs-adr-or-debt-slice"
+        payload["ledger_id"] = "ledger-hold-current-root-posture"
         payload["rail_status"] = "ready"
         payload["active_blockers"] = []
         payload["dirty_lanes"] = []
@@ -208,9 +208,9 @@ class CortexReceiptInterpretationStackConsumptionTests(unittest.TestCase):
         payload["upstream"] = "origin/codex/cortex-receipt-interpretation-stack-consumption-wave10"
         payload["published"] = True
         payload["next_recommended_lane"] = {
-            "lane_id": "docs-adr-or-debt-slice",
+            "lane_id": "hold-current-root-posture",
             "owner_layer": "atlas",
-            "rationale": "Wave 11 and the ATLAS catch-up are already complete. The next bounded lane is an ATLAS root projection slice that keeps the live Cortex read model aligned with AI Repetition-to-Automation Pipeline, specifically the bounded receipt skeleton drafts control-plane surface, without reopening Cortex capability implementation.",
+            "rationale": "The current ATLAS Book and dispatcher truth show no immediate ATLAS-root packet is open, so the next bounded Cortex move is to preserve that held root posture, keep the shadow/runtime read model synchronized, and avoid fabricating a new root lane before the blocker class or execution-ready state materially changes.",
             "blocked_by": [],
             "source_refs": [
                 "runtime/cortex/current-state/latest.json",
@@ -222,13 +222,13 @@ class CortexReceiptInterpretationStackConsumptionTests(unittest.TestCase):
                 "runtime/cortex/kernel.rule-registry.seed.v1.json",
             ],
         }
-        payload["context_packet_id"] = "context-docs-adr-or-debt-slice"
-        payload["task_frame_summary"]["lane_id"] = "docs-adr-or-debt-slice"
+        payload["context_packet_id"] = "context-hold-current-root-posture"
+        payload["task_frame_summary"]["lane_id"] = "hold-current-root-posture"
         payload["task_frame_summary"]["owner_layer"] = "atlas"
-        payload["task_frame_summary"]["title"] = "Project the post-catch-up ATLAS systems lane."
+        payload["task_frame_summary"]["title"] = "Hold the current ATLAS root posture until a distinct root packet opens."
         payload["task_frame_summary"]["status"] = "ready"
         payload["task_frame_summary"]["rationale"] = (
-            "Wave 11 and the ATLAS catch-up are already complete. The next bounded lane is an ATLAS root projection slice that keeps the live Cortex read model aligned with AI Repetition-to-Automation Pipeline, specifically the bounded receipt skeleton drafts control-plane surface, without reopening Cortex capability implementation."
+            "The current ATLAS Book and dispatcher truth show no immediate ATLAS-root packet is open, so the next bounded Cortex move is to preserve that held root posture, keep the shadow/runtime read model synchronized, and avoid fabricating a new root lane before the blocker class or execution-ready state materially changes."
         )
         payload["task_frame_summary"]["blocked_by"] = []
         payload["task_frame_summary"]["ready_to_execute"] = True

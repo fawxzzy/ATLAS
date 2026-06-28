@@ -1,6 +1,6 @@
 {
   "contract_version": "atlas.cortex.stack-advisory-handoff.v2",
-  "generated_at": "2026-06-05T08:33:37.093359+00:00",
+  "generated_at": "2026-06-28T08:53:38.301067+00:00",
   "authority_level": "read_only_advisory",
   "stack_root": "C:/ATLAS",
   "handoff_id": "stack-advisory-handoff-stabilize-root-worktree",
@@ -29,31 +29,31 @@
       "role": "worker_prompt",
       "ref": "runtime/cortex/worker-prompts/latest.json",
       "contract_version": "atlas.cortex.worker-prompt.v1",
-      "digest": "sha256:a34b7f8d723ec5246522e5c1f6f43fb283f74d305180c1b6005e6fcfee66c260"
+      "digest": "sha256:1b2fdcb7d6355cd836b73507322499cafda74f57f27e16571b27f627a370430a"
     },
     {
       "role": "context",
       "ref": "runtime/cortex/context/latest.json",
       "contract_version": "atlas.cortex.context-packet.v1",
-      "digest": "sha256:0c49bf9be868b15bf37c6cfb192a2cfe0ab1607be75f8957cbcac4f39550effd"
+      "digest": "sha256:5d025b470f3b9c4a9d0d9a0ab8116b2bca57252e060b2bb273451c8183043092"
     },
     {
       "role": "operator_surface",
       "ref": "runtime/cortex/operator-surface/latest.json",
       "contract_version": "atlas.cortex.operator-surface.v1",
-      "digest": "sha256:37577ef68ba50c45791d8984795e9a143efa2646221e55871a7b827b6cd5c8fa"
+      "digest": "sha256:a0d5aa9d1015c665ebb3415f1487aa6debc7621f854074a6ad95398e31b9f4aa"
     },
     {
       "role": "ledger",
       "ref": "runtime/cortex/ledger/latest.json",
       "contract_version": "atlas.cortex.ledger.v1",
-      "digest": "sha256:245d3cb31aafabee3027674a509fc50d08f74f1683fb0a84761cbdd3357157a9"
+      "digest": "sha256:ab1490e2bb79db735858ac9d367869833e1e90d1db446ef8c4f1dc1f4c047c46"
     },
     {
       "role": "state_model_seed",
       "ref": "runtime/cortex/kernel.state-model.seed.v1.json",
       "contract_version": "atlas.cortex.kernel-state.v1",
-      "digest": "sha256:ba84cc1bedf49db2f4b915f00dad42104677cfb1e6766078cde119702be9baa9"
+      "digest": "sha256:35d7b38e6e0ebcffb9d2ff49cd114f871a450caedfa77e5cb50542f107c4ace0"
     },
     {
       "role": "rule_registry_seed",
@@ -72,21 +72,21 @@
     "rule_registry_seed": "runtime/cortex/kernel.rule-registry.seed.v1.json"
   },
   "advisory_assignment": {
-    "run_id": "cortex-run-atlas-cortex-catch-up",
-    "assignment_id": "assignment-atlas-cortex-catch-up",
-    "objective": "Prepare the root-level ATLAS/Cortex catch-up proof as a narrow stack tranche. Selected next action: Perform the matching ATLAS/Cortex catch-up..",
+    "run_id": "cortex-run-hold-current-root-posture",
+    "assignment_id": "assignment-hold-current-root-posture",
+    "objective": "Preserve the current held ATLAS root posture without fabricating a new root lane. Selected next action: Hold the current ATLAS root posture until a distinct root packet opens..",
     "implementation_plan": [
-      "Keep the work at the ATLAS root and in runtime proof artifacts only.",
-      "Treat the lane as coordination and proof, not repo implementation truth.",
-      "Avoid pulling product repositories into the change set.",
-      "Respect receipt scope: ATLAS root may project and reconcile stack-level Cortex posture only. owner-repo truth, execution, approval, dispatch, final receipt authority, owner-truth mutation, Lifeline-truth mutation, and transcript scraping remain out of scope."
+      "Keep the work at the ATLAS root and on stack-level runtime, docs, or receipt surfaces only.",
+      "Resynchronize read models or restart surfaces only when they lag the already-held dispatcher truth.",
+      "Do not reopen a root packet unless the blocker class or execution-ready state materially changes.",
+      "Respect receipt scope: ATLAS root may project and reconcile stack-level Cortex posture only. This held slice may preserve the truthful no-immediate-root-packet state and keep runtime mirrors synchronized, but it must not invent a new root packet, widen owner-repo truth, execution, approval, dispatch, final receipt authority, owner-truth mutation, Lifeline-truth mutation, or transcript scraping."
     ],
     "files_to_modify": [
-      "AGENTS.md",
-      "README-STACK.md",
-      "stack.yaml",
-      "docs/atlas/notes/*.md",
-      "runtime/cortex/*.json"
+      "docs/atlas-book/*.md",
+      "docs/ops/*.md",
+      "ops/cortex/*.py",
+      "runtime/cortex/*.json",
+      "tests/test_cortex_*.py"
     ],
     "files_to_avoid": [
       "repos/**",
@@ -97,16 +97,18 @@
     "verification_steps": [
       "python -m unittest tests.test_cortex_receipt_interpretation_consumption_feedback tests.test_cortex_receipt_interpretation_stack_consumption tests.test_cortex_receipt_interpreter tests.test_cortex_stack_handoff tests.test_cortex_stack_consumption_pilot tests.test_cortex_worker_prompt tests.test_cortex_worker_plan tests.test_cortex_current_state tests.test_cortex_rail_state_reader tests.test_cortex_context_assembler tests.test_cortex_operator_surface tests.test_cortex_ledger tests.test_cortex_loop tests.test_cortex_run_artifact tests.test_cortex_run_ledger -v",
       "python .\\ops\\validation\\validate_stack.py --ratchet",
+      "python -m unittest tests.test_cortex_current_state tests.test_cortex_rail_state tests.test_cortex_rail_state_reader tests.test_cortex_context_assembler tests.test_cortex_operator_surface tests.test_cortex_worker_plan",
       "python .\\ops\\validation\\validate_stack.py"
     ],
     "matched_rule_ids": [
-      "known-validation-debt-stays-ambient-unless-regression",
-      "fitness-owner-adoption-resumes-unless-pivot",
       "root-validates-proves-projects",
-      "cortex-observes-interprets-proves-only"
+      "cortex-observes-interprets-proves-only",
+      "footer-catch-up-precedes-pivot"
     ],
     "failure_modes_to_avoid": [
-      "Do not create root shadow capture families that duplicate repo-owned product evidence."
+      "Do not create root shadow capture families that duplicate repo-owned product evidence.",
+      "Do not invent a new root packet while the dispatcher remains held.",
+      "Do not widen into repo-owned implementation work from the ATLAS root."
     ]
   },
   "handoff_checks": [

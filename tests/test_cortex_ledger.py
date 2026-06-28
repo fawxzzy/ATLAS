@@ -317,7 +317,7 @@ class CortexLedgerTests(unittest.TestCase):
         proof = payload["proof_or_receipt_readiness"]
         self.assertEqual("passed", proof["status"])
         self.assertTrue(proof["receipt_ready"])
-        self.assertEqual("docs-adr-or-debt-slice", proof["selected_next_action"])
+        self.assertEqual("hold-current-root-posture", proof["selected_next_action"])
         labels = [item["label"] for item in payload["evidence_refs"]]
         self.assertIn("run_ledger.latest_run", labels)
 

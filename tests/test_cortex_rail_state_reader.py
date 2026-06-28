@@ -84,9 +84,9 @@ class CortexRailStateReaderTests(unittest.TestCase):
         }
         payload["active_blockers"] = []
         payload["next_recommended_lane"] = {
-            "lane_id": "docs-adr-or-debt-slice",
+            "lane_id": "hold-current-root-posture",
             "owner_layer": "atlas",
-            "rationale": "Wave 11 and the ATLAS catch-up are already complete. The next bounded lane is an ATLAS root projection slice that keeps the live Cortex read model aligned with AI Repetition-to-Automation Pipeline, specifically the bounded receipt skeleton drafts control-plane surface, without reopening Cortex capability implementation.",
+            "rationale": "The current ATLAS Book and dispatcher truth show no immediate ATLAS-root packet is open, so the next bounded Cortex move is to preserve that held root posture, keep the shadow/runtime read model synchronized, and avoid fabricating a new root lane before the blocker class or execution-ready state materially changes.",
             "blocked_by": [],
             "source_refs": [
                 "runtime/cortex/kernel.state-model.seed.v1.json",
@@ -171,7 +171,7 @@ class CortexRailStateReaderTests(unittest.TestCase):
             _write_json(root / "runtime" / "cortex" / "kernel.rule-registry.seed.v1.json", self.rule_payload)
         return root
 
-    def test_clean_current_state_routes_to_seeded_post_catch_up_lane(self) -> None:
+    def test_clean_current_state_routes_to_seeded_held_root_posture(self) -> None:
         root = self._temp_root(
             current_state_payload=self._base_current_state_payload(),
             validation_payload=self._base_validation_payload(),
@@ -181,7 +181,7 @@ class CortexRailStateReaderTests(unittest.TestCase):
 
         self.assertEqual("cortex-mvp", payload["active_rail"])
         self.assertEqual("ready", payload["rail_status"])
-        self.assertEqual("docs-adr-or-debt-slice", payload["next_recommended_lane"]["lane_id"])
+        self.assertEqual("hold-current-root-posture", payload["next_recommended_lane"]["lane_id"])
         self.assertEqual([], payload["active_blockers"])
         self.assertEqual([], payload["dirty_lanes"])
         self.assertEqual(
@@ -282,7 +282,7 @@ class CortexRailStateReaderTests(unittest.TestCase):
         payload = build_rail_state_payload(root=root)
 
         self.assertEqual("bounded-fallback", payload["rail_status"])
-        self.assertEqual("docs-adr-or-debt-slice", payload["next_recommended_lane"]["lane_id"])
+        self.assertEqual("hold-current-root-posture", payload["next_recommended_lane"]["lane_id"])
         self.assertEqual(
             [
                 "runtime/cortex/current-state/latest.json",
