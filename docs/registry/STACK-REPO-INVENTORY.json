@@ -3,14 +3,14 @@
   "stack_manifest_ref": "stack.yaml",
   "stack_manifest_digest": "sha256:e5ac73c00983975b59e4b8e7f8541160d479087f5dc95ad1d642568116bd7d10",
   "stack_lock_ref": "stack.lock.yaml",
-  "stack_lock_digest": "sha256:ae0c359381516f0f3f0358b1f6e13740c80b437a0bc215d6eb441a253a00985f",
+  "stack_lock_digest": "sha256:a887b5764279946dd767770c6abae05c22c82206a54983dc561d5a043a77cba6",
   "working_memory_digest": "sha256:fe4f4902e2b2c475974b050ba1bf3f5e740439aa41df2f844555c2c0dc3b310f",
   "published_refs": {
     "json": "docs/registry/STACK-REPO-INVENTORY.json",
     "markdown": "docs/audits/STACK-REPO-INVENTORY.md"
   },
   "repo_count": 12,
-  "dirty_repo_count": 2,
+  "dirty_repo_count": 1,
   "release_eligible_count": 5,
   "repos": [
     {
@@ -214,14 +214,14 @@
       "role": "application",
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/mazer.git",
-      "pinned_commit": "f79187f212bbaca96c221dd8de963af8506540b3",
-      "current_commit": "f79187f212bbaca96c221dd8de963af8506540b3",
+      "pinned_commit": "579d1bb64ba9db75d878fb5ea311fa34cb3ab215",
+      "current_commit": "579d1bb64ba9db75d878fb5ea311fa34cb3ab215",
       "pinned_ref_type": "branch",
       "pinned_ref": "codex/mazer-design-recovery-pass-1",
       "current_ref_type": "branch",
       "current_ref": "codex/mazer-design-recovery-pass-1",
       "branch": "codex/mazer-design-recovery-pass-1",
-      "dirty": true,
+      "dirty": false,
       "trust_class": "trusted",
       "release_eligible": true,
       "exists": true,
@@ -317,7 +317,7 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "e9ffaed26f2aa94b57c3eeef75eea12c0b2978e9",
+      "current_commit": "dd5c8df2a6c7e8e4c00dc880742b53542a1b97fd",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
@@ -530,5 +530,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:07c9f5d103a6562bbbd0292d6c3a44ea52a9021c1c85adfa73aef1ab8273fc1b"
+  "content_digest": "sha256:d400b55aee6e450611b8a11781e81492055d6d24ee328043b7e36c9cc4d62805"
 }

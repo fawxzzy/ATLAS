@@ -54,8 +54,8 @@ components:
     remote: "https://github.com/fawxzzy/mazer.git"
     ref_type: "branch"
     ref: "codex/mazer-design-recovery-pass-1"
-    commit: "f79187f212bbaca96c221dd8de963af8506540b3"
-    dirty: true
+    commit: "579d1bb64ba9db75d878fb5ea311fa34cb3ab215"
+    dirty: false
     trust_class: "trusted"
     release_eligible: true
   nat1-games:
@@ -216,4 +216,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:ae0c359381516f0f3f0358b1f6e13740c80b437a0bc215d6eb441a253a00985f"
+lock_digest: "sha256:a887b5764279946dd767770c6abae05c22c82206a54983dc561d5a043a77cba6"
