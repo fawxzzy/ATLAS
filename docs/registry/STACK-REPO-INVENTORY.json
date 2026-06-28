@@ -122,7 +122,7 @@
       "status": "unmanaged",
       "remote_url": "https://github.com/fawxzzy/fawxzzy-fitness.git",
       "pinned_commit": null,
-      "current_commit": "6ab5bbd49821952b7d2810550a141de74619142d",
+      "current_commit": "b5f29793eb87dc7538a15160180f159688acd1b4",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
@@ -317,12 +317,12 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "3b62ad6262b1467d556d366d9033327d5e708c99",
+      "current_commit": "327e2bb8e0c8c74f440f8425df56e7488ab11672",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
-      "current_ref": "codex/atlas-root-fitness-manual-review-resync",
-      "branch": "codex/atlas-root-fitness-manual-review-resync",
+      "current_ref": "main",
+      "branch": "main",
       "dirty": false,
       "trust_class": "trusted",
       "release_eligible": false,
@@ -530,5 +530,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:714a95450994da10bc3818e6c01260cbd7295ed1b22c0b8fa1abf1507edf48c9"
+  "content_digest": "sha256:a5de8445233a5c87a47418b08b48ede8a0a559be74a6aa979ba3b7e6904c524b"
 }

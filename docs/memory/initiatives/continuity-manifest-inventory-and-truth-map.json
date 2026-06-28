@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-05-29T00:00:00Z",
-  "updated_at": "2026-06-28T04:10:00-04:00",
+  "updated_at": "2026-06-28T03:26:00-04:00",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -63,7 +63,8 @@
     "docs/ops/ATLAS-QA-FITNESS-CURRENT-MAIN-BLOCKED-VISUAL-GATE-AND-INVENTORY-RESYNC-2026-06-28.md",
     "docs/ops/ATLAS-QA-FITNESS-DIRTY-BRANCH-MANUAL-REVIEW-AND-INVENTORY-RESYNC-2026-06-28.md",
     "docs/ops/ATLAS-QA-FITNESS-CLEAN-BRANCH-MANUAL-REVIEW-AND-INVENTORY-RESYNC-2026-06-28.md",
-    "docs/ops/ATLAS-ROOT-CLEAN-BRANCH-ZERO-DIRTY-REPO-INVENTORY-RESYNC-2026-06-28.md"
+    "docs/ops/ATLAS-ROOT-CLEAN-BRANCH-ZERO-DIRTY-REPO-INVENTORY-RESYNC-2026-06-28.md",
+    "docs/ops/ATLAS-ROOT-MAIN-AND-FITNESS-POST-VERIFY-ZERO-DIRTY-INVENTORY-RESYNC-2026-06-28.md"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -71,9 +72,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "inventory-and-truth-map",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/ATLAS-ROOT-CLEAN-BRANCH-ZERO-DIRTY-REPO-INVENTORY-RESYNC-2026-06-28.md",
-    "checkpoint_commit": "3b62ad6262b1467d556d366d9033327d5e708c99",
-    "checkpoint_summary": "The lane now sits at 90 percent because the canonical inventory and projection spine now absorbs one zero-dirty-repo Atlas-root clean-branch resync on top of the earlier clean-branch `fitness` manual-review checkpoint: the published inventory now truthfully shows zero dirty managed repos, `fitness` remains clean on branch `codex/fitness-main-progression-summary-reapply` at committed head `6ab5bbd49821952b7d2810550a141de74619142d`, the ATLAS root is now clean on branch `codex/atlas-root-fitness-manual-review-resync` at committed head `3b62ad6262b1467d556d366d9033327d5e708c99`, and the protected-QA handoff mirrors still converge on `4` release-ready repos, `1` manual-review repo, `0` blocked repos, and `1` not-applicable repo with all emulated Fitness lenses passing and only the three real-device/manual lanes still open while the seeded initiative continuity-manifest set remains 19 of 19 ok with zero warnings and zero errors and all 7 of 7 eligible still-open markers remain both manifest-backed and restart-ready from one machine-readable index.",
+    "current_checkpoint_receipt": "docs/ops/ATLAS-ROOT-MAIN-AND-FITNESS-POST-VERIFY-ZERO-DIRTY-INVENTORY-RESYNC-2026-06-28.md",
+    "checkpoint_commit": "327e2bb8e0c8c74f440f8425df56e7488ab11672",
+    "checkpoint_summary": "The lane now sits at 90 percent because the canonical inventory and projection spine now absorbs one post-verify zero-dirty-repo Atlas-root main-state resync on top of the earlier clean-branch `fitness` manual-review checkpoint: the published inventory now truthfully shows zero dirty managed repos, `fitness` remains clean on branch `codex/fitness-main-progression-summary-reapply` at committed head `b5f29793eb87dc7538a15160180f159688acd1b4`, the protected-QA mirrors now republish `fitness` at `manual_review` on run `fitness-progression-pr-smoke-20260628T072049067050Z`, the ATLAS root is now clean on `main` at committed head `327e2bb8e0c8c74f440f8425df56e7488ab11672`, and the protected-QA handoff mirrors still converge on `4` release-ready repos, `1` manual-review repo, `0` blocked repos, and `1` not-applicable repo with all emulated Fitness lenses passing and only the three real-device/manual lanes still open while the seeded initiative continuity-manifest set remains 19 of 19 ok with zero warnings and zero errors and all 7 of 7 eligible still-open markers remain both manifest-backed and restart-ready from one machine-readable index.",
     "governing_receipts": [
       "docs/ops/STACK-LANE-0-BASELINE-INVENTORY-2026-05-22.md",
       "docs/ops/STACK-LANE-0-TRUTH-MAP-2026-05-22.md",
@@ -103,7 +104,8 @@
       "docs/ops/ATLAS-QA-FITNESS-CURRENT-MAIN-BLOCKED-VISUAL-GATE-AND-INVENTORY-RESYNC-2026-06-28.md",
       "docs/ops/ATLAS-QA-FITNESS-DIRTY-BRANCH-MANUAL-REVIEW-AND-INVENTORY-RESYNC-2026-06-28.md",
       "docs/ops/ATLAS-QA-FITNESS-CLEAN-BRANCH-MANUAL-REVIEW-AND-INVENTORY-RESYNC-2026-06-28.md",
-      "docs/ops/ATLAS-ROOT-CLEAN-BRANCH-ZERO-DIRTY-REPO-INVENTORY-RESYNC-2026-06-28.md"
+      "docs/ops/ATLAS-ROOT-CLEAN-BRANCH-ZERO-DIRTY-REPO-INVENTORY-RESYNC-2026-06-28.md",
+      "docs/ops/ATLAS-ROOT-MAIN-AND-FITNESS-POST-VERIFY-ZERO-DIRTY-INVENTORY-RESYNC-2026-06-28.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -184,7 +186,11 @@
       },
       {
         "path": "docs/ops/ATLAS-ROOT-CLEAN-BRANCH-ZERO-DIRTY-REPO-INVENTORY-RESYNC-2026-06-28.md",
-        "role": "current exact zero-dirty-repo Atlas-root clean-branch, current inventory, and protected-QA resync surface"
+        "role": "earlier exact zero-dirty-repo Atlas-root clean-branch, current inventory, and protected-QA resync surface"
+      },
+      {
+        "path": "docs/ops/ATLAS-ROOT-MAIN-AND-FITNESS-POST-VERIFY-ZERO-DIRTY-INVENTORY-RESYNC-2026-06-28.md",
+        "role": "current exact post-verify zero-dirty-repo Atlas-root main-state, current inventory, and protected-QA resync surface"
       },
       {
         "path": "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-DESKTOP-MANUAL-ATTESTATION-MOBILE-GATE-REFRESH-CONTINUITY-RESYNC-2026-06-27.md",
@@ -236,7 +242,7 @@
     "blocked_or_gated_work": [
       {
         "item": "promoting the current Fitness release lane beyond `manual_review`",
-        "requirement": "blocked until the remaining `desktop.chromium.real`, `android.chrome.real`, and `iphone.webkit.real` lanes are completed; the live protected-refresh latest now sits at `manual_review` on clean committed head `6ab5bbd49821952b7d2810550a141de74619142d` via run `fitness-progression-pr-smoke-20260628T064605661368Z`, all emulated lenses pass, and BrowserStack credentials are still absent on this machine"
+        "requirement": "blocked until the remaining `desktop.chromium.real`, `android.chrome.real`, and `iphone.webkit.real` lanes are completed; the live protected-refresh latest now sits at `manual_review` on clean committed head `b5f29793eb87dc7538a15160180f159688acd1b4` via run `fitness-progression-pr-smoke-20260628T072049067050Z`, all emulated lenses pass, and BrowserStack credentials are still absent on this machine"
       },
       {
         "item": "broader inventory cleanup or repo-local truth rewrite execution",
@@ -259,13 +265,13 @@
       {
         "package": "No immediate Inventory & Truth Map docs-only follow-on packet",
         "mode": "hold-flat after open-marker restart-index closeout",
-        "reason": "the published inventory and Book-side protected-QA mirrors now match current zero-dirty-repo / Fitness-clean-branch / Atlas-root-clean-branch / Trove-preserved / Fitness-manual-review truth, seeded initiative manifest health remains fully clean at 19 of 19, and all 7 of 7 eligible open markers remain manifest-backed and restart-ready from one machine-readable index; reopen only with distinct restart-truth drift, owner-side blocker conversion, owner-truth widening, or broader continuity-read automation than the current health-plus-coverage-plus-restart-index surface"
+        "reason": "the published inventory and Book-side protected-QA mirrors now match current zero-dirty-repo / Fitness-clean-current-head / Atlas-root-main / Trove-preserved / Fitness-manual-review truth, seeded initiative manifest health remains fully clean at 19 of 19, and all 7 of 7 eligible open markers remain manifest-backed and restart-ready from one machine-readable index; reopen only with distinct restart-truth drift, owner-side blocker conversion, owner-truth widening, or broader continuity-read automation than the current health-plus-coverage-plus-restart-index surface"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/ATLAS-ROOT-CLEAN-BRANCH-ZERO-DIRTY-REPO-INVENTORY-RESYNC-2026-06-28.md",
-    "freshness_checked_at": "2026-06-28T04:10:00-04:00",
-    "freshness_basis": "the current checkpoint, marker posture, lane-state projection, blocked-work posture, and next-package posture now match the refreshed inventory-facing mirrors after the zero-dirty-repo Atlas-root clean-branch resync: published inventory now reflects zero dirty managed repos, `fitness` remains clean on branch `codex/fitness-main-progression-summary-reapply` at commit `6ab5bbd49821952b7d2810550a141de74619142d`, the ATLAS root is now clean on branch `codex/atlas-root-fitness-manual-review-resync` at commit `3b62ad6262b1467d556d366d9033327d5e708c99`, preserved Trove still pinned at `437c7604adee02e0403d77f75162a6c5f232221f`, release readiness still reads 4 ready / 1 manual review / 0 blocked / 1 not applicable with Fitness at `manual_review` on run `fitness-progression-pr-smoke-20260628T064605661368Z`, the initiative manifest-health surface still reads 19 ok / 0 warning / 0 error, the eligible-open-marker coverage surface still reads 7 of 7 manifest-backed, and the eligible-open-marker restart index still reads 7 of 7 restart-ready.",
+    "freshness_checked_receipt": "docs/ops/ATLAS-ROOT-MAIN-AND-FITNESS-POST-VERIFY-ZERO-DIRTY-INVENTORY-RESYNC-2026-06-28.md",
+    "freshness_checked_at": "2026-06-28T03:26:00-04:00",
+    "freshness_basis": "the current checkpoint, marker posture, lane-state projection, blocked-work posture, and next-package posture now match the refreshed inventory-facing mirrors after the post-verify zero-dirty-repo Atlas-root main-state resync: published inventory now reflects zero dirty managed repos, `fitness` remains clean on branch `codex/fitness-main-progression-summary-reapply` at commit `b5f29793eb87dc7538a15160180f159688acd1b4`, the protected-QA mirrors now republish Fitness at `manual_review` on run `fitness-progression-pr-smoke-20260628T072049067050Z`, the ATLAS root is now clean on `main` at commit `327e2bb8e0c8c74f440f8425df56e7488ab11672`, preserved Trove still pinned at `437c7604adee02e0403d77f75162a6c5f232221f`, release readiness still reads 4 ready / 1 manual review / 0 blocked / 1 not applicable, the initiative manifest-health surface still reads 19 ok / 0 warning / 0 error, the eligible-open-marker coverage surface still reads 7 of 7 manifest-backed, and the eligible-open-marker restart index still reads 7 of 7 restart-ready.",
     "marker_posture": [
       {
         "marker": "Inventory & Truth Map",
