@@ -202,16 +202,28 @@ def stack_lock_hash(*, root: Path | None = None) -> str:
 
 
 def _default_receipt_origin_type() -> str:
+    return resolve_receipt_origin_type()
+
+
+def resolve_receipt_origin_type(origin_type: str | None = None) -> str:
+    explicit = str(origin_type or "").strip()
     override = str(os.environ.get("ATLAS_QA_ORIGIN_TYPE", "")).strip()
-    if override in RECEIPT_ORIGIN_TYPES:
-        return override
-    if str(os.environ.get("GITHUB_ACTIONS", "")).lower() == "true":
+    github_actions = str(os.environ.get("GITHUB_ACTIONS", "")).lower() == "true"
+
+    if github_actions:
+        if explicit in RECEIPT_ORIGIN_TYPES:
+            return explicit
+        if override in RECEIPT_ORIGIN_TYPES:
+            return override
         event_name = str(os.environ.get("GITHUB_EVENT_NAME", "")).strip().lower()
         if event_name == "pull_request":
             return "ci_pr"
         if event_name == "workflow_dispatch":
             return "protected_manual"
         return "ci_release"
+
+    if explicit == "local_dev" or override == "local_dev":
+        return "local_dev"
     return "local_dev"
 
 
@@ -225,7 +237,7 @@ def build_receipt_origin(
     origin_type: str | None = None,
 ) -> dict[str, str]:
     base = (root or atlas_root()).resolve()
-    resolved_origin = (origin_type or _default_receipt_origin_type()).strip() or "local_dev"
+    resolved_origin = resolve_receipt_origin_type(origin_type)
     actor = (
         str(os.environ.get("GITHUB_ACTOR", "")).strip()
         or str(os.environ.get("USERNAME", "")).strip()

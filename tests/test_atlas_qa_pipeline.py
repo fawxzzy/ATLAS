@@ -29,6 +29,7 @@ from ops.atlas.qa.test_evidence import collect_test_evidence
 from ops.atlas.qa.waiver_monitor import build_waiver_monitor
 from ops.atlas.qa.visual_diff import evaluate_visual_diffs
 from ops.atlas.qa._common import (
+    build_receipt_origin,
     load_json_object,
     validate_adapter_manifest,
     validate_provider_manifest,
@@ -2728,6 +2729,41 @@ class AtlasQaPipelineTests(unittest.TestCase):
         self.assertEqual([], repo["release_blockers"])
         self.assertEqual(0, payload["summary"]["blocked_count"])
         self.assertEqual(1, payload["summary"]["not_applicable_count"])
+
+    def test_build_receipt_origin_ignores_trusted_override_outside_github_actions(self) -> None:
+        with mock.patch.dict(
+            "os.environ",
+            {
+                "ATLAS_QA_ORIGIN_TYPE": "protected_manual",
+                "GITHUB_ACTIONS": "false",
+            },
+            clear=False,
+        ):
+            origin = build_receipt_origin(
+                runner_version="atlas.qa.promote-run.v3",
+                repo_id="fitness",
+                git_sha="target-sha",
+                command="python ops/atlas/qa/promote_run.py",
+                origin_type="ci_release",
+            )
+        self.assertEqual("local_dev", origin["origin_type"])
+
+    def test_build_receipt_origin_accepts_workflow_dispatch_inside_github_actions(self) -> None:
+        with mock.patch.dict(
+            "os.environ",
+            {
+                "GITHUB_ACTIONS": "true",
+                "GITHUB_EVENT_NAME": "workflow_dispatch",
+            },
+            clear=False,
+        ):
+            origin = build_receipt_origin(
+                runner_version="atlas.qa.promote-run.v3",
+                repo_id="fitness",
+                git_sha="target-sha",
+                command="python ops/atlas/qa/promote_run.py",
+            )
+        self.assertEqual("protected_manual", origin["origin_type"])
 
     def test_release_readiness_blocks_wrong_target_sha(self) -> None:
         root = self._temp_root()
