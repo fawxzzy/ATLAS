@@ -20,7 +20,7 @@ components:
     status: "incubating"
     remote: "https://github.com/fawxzzy/DiscordOS.git"
     ref_type: "branch"
-    ref: "codex/message-command-poll-status"
+    ref: "main"
     commit: "76b699269b724070f548ca7841d36ec1505727f8"
     dirty: false
     trust_class: "trusted"
@@ -54,8 +54,8 @@ components:
     remote: "https://github.com/fawxzzy/mazer.git"
     ref_type: "branch"
     ref: "codex/mazer-design-recovery-pass-1"
-    commit: "e1b40f1c4de6e9fe25dcd6595a542e22c2a0c335"
-    dirty: false
+    commit: "f79187f212bbaca96c221dd8de963af8506540b3"
+    dirty: true
     trust_class: "trusted"
     release_eligible: true
   nat1-games:
@@ -216,4 +216,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:2480a13cb6c3df1d4b0659d02cebc57d3918431b2450875969d87a572516ff51"
+lock_digest: "sha256:ae0c359381516f0f3f0358b1f6e13740c80b437a0bc215d6eb441a253a00985f"

@@ -19,22 +19,22 @@ Operational rule:
 - Excluded surface count: `17`
 - Stack manifest: `stack.yaml`
 - Stack lock: `stack.lock.yaml`
-- Inventory digest: `sha256:440e24e84480568ac51f5b93e051214f29ab96ed833bd5699bf83e49958b36e3`
+- Inventory digest: `sha256:07c9f5d103a6562bbbd0292d6c3a44ea52a9021c1c85adfa73aef1ab8273fc1b`
 
 ## Managed Repos
 
 | Repo id | Path | Branch | Pinned commit | Current commit | Dirty | Trust | Release | Related initiatives |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | _stack | repos/_stack | codex/queue-or-registry-broader-execution-behavior | 3450e463b1e666c9e7f8caa2bf990338882aeca4 | 3450e463b1e666c9e7f8caa2bf990338882aeca4 | False | trusted | False | initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-local-data-gateway<br>initiative:continuity-manifest-post-convergence-lane-split-readiness<br>initiative:continuity-manifest-stack-readiness<br>initiative:continuity-manifest-vision-future-alignment |
-| discordos | repos/DiscordOS | codex/message-command-poll-status | 76b699269b724070f548ca7841d36ec1505727f8 | 76b699269b724070f548ca7841d36ec1505727f8 | False | trusted | False | initiative:continuity-manifest-dependency-untangling<br>initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-discord-os-infrastructure-separation |
-| fitness | repos/fawxzzy-fitness | codex/discordos-compat-shims | - | f30511b6f5b9470a6b82753380c4d5c5ccf03495 | False | adjacent | False | initiative:continuity-manifest-dependency-untangling<br>initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-discord-os-infrastructure-separation<br>initiative:continuity-manifest-local-data-gateway |
+| discordos | repos/DiscordOS | main | 76b699269b724070f548ca7841d36ec1505727f8 | 76b699269b724070f548ca7841d36ec1505727f8 | False | trusted | False | initiative:continuity-manifest-dependency-untangling<br>initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-discord-os-infrastructure-separation |
+| fitness | repos/fawxzzy-fitness | main | - | b1b850cc29f42a1e39287a9cc6ed5d9e70e964e5 | False | adjacent | False | initiative:continuity-manifest-dependency-untangling<br>initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-discord-os-infrastructure-separation<br>initiative:continuity-manifest-local-data-gateway |
 | foundation | repos/foundation | main | fd1cf0650cdbb732f1231aa47a6e43138dab9062 | fd1cf0650cdbb732f1231aa47a6e43138dab9062 | False | trusted | True | - |
 | lifeline | repos/lifeline | codex/path-discipline-warning-slice-lifeline | 538f623a84b003e70dadd234e6ea3af642446a5f | 538f623a84b003e70dadd234e6ea3af642446a5f | False | trusted | True | - |
-| mazer | repos/mazer | codex/mazer-design-recovery-pass-1 | e1b40f1c4de6e9fe25dcd6595a542e22c2a0c335 | e1b40f1c4de6e9fe25dcd6595a542e22c2a0c335 | False | trusted | True | initiative:initiative-mazer-d2-learning-scorer |
+| mazer | repos/mazer | codex/mazer-design-recovery-pass-1 | f79187f212bbaca96c221dd8de963af8506540b3 | f79187f212bbaca96c221dd8de963af8506540b3 | True | trusted | True | initiative:initiative-mazer-d2-learning-scorer |
 | nat1-games | repos/Nat1-Games/nat1-games | codex/path-discipline-warning-slice-nat1 | 404460d3717fab389407582048a9b9f228f26d39 | 404460d3717fab389407582048a9b9f228f26d39 | False | trusted | False | - |
-| playbook | repos/playbook | codex/path-discipline-warning-slice-playbook | 945fef9bd6ef2dacd5c003c5a11299ff0122b15d | 945fef9bd6ef2dacd5c003c5a11299ff0122b15d | True | trusted | True | initiative:continuity-manifest-atlas-owned-repo-naming-canonicalization |
+| playbook | repos/playbook | codex/path-discipline-warning-slice-playbook | 10b8f0ac044a7f9c66b4aa8dd08f6abd2d1c5269 | 10b8f0ac044a7f9c66b4aa8dd08f6abd2d1c5269 | False | trusted | True | initiative:continuity-manifest-atlas-owned-repo-naming-canonicalization |
 | playbook-demo | repos/playbook-demo/playbook-demo | main | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | False | trusted | False | - |
-| stack | . | main | - | 4f12f500ead487d164b3d6ac827e5df7e0f32b8a | True | trusted | False | - |
+| stack | . | codex/stack-lock-refresh-post-playbook-resync | - | e9ffaed26f2aa94b57c3eeef75eea12c0b2978e9 | True | trusted | False | - |
 | stream | repos/stream | main | 43769ba86d4c6ebc419ab9e7847c3843460a094f | 43769ba86d4c6ebc419ab9e7847c3843460a094f | False | trusted | False | - |
 | trove | repos/trove | codex/path-discipline-warning-slice-trove | 112715291a1d9f3b21c9a830d1dab68e6751b815 | 112715291a1d9f3b21c9a830d1dab68e6751b815 | False | trusted | True | - |
 

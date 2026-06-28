@@ -18,8 +18,8 @@
 ## Verification
 
 - `python -m unittest tests.test_atlas_qa_pipeline`
-- `python C:\ATLAS\ops\atlas\qa\release_snapshot.py --root C:\ATLAS --repo fitness --run fitness-progression-pr-smoke-20260628T000707356239Z`
-- `python C:\ATLAS\ops\validation\validate_stack.py`
+- `python ops/atlas/qa/release_snapshot.py --root . --repo fitness --run fitness-progression-pr-smoke-20260628T000707356239Z`
+- `python ops/validation/validate_stack.py`
 
 All passed on 2026-06-28.
 
