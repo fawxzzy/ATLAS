@@ -18,6 +18,7 @@ It exists to answer:
 The stack already repeats these tasks often enough to justify command planning:
 
 - validation after docs, receipt, and governance updates
+- checkpoint or since-checkpoint handoff recaps for ChatGPT or Codex continuity
 - release prep followed by governed deploy authority
 - release proof followed by Discord update drafting or publication
 - feedback board sync, board exports, and card closeout review
@@ -78,6 +79,11 @@ Best candidates:
   - stay dry-run by default
   - stop on validator drift, widened scope, missing next move, or non-automated class attempts
   - always write durable gate-decision receipts
+- `checkpoint_handoff_summary`
+  - summarize committed work between two ATLAS git checkpoints
+  - classify changed receipts, Book surfaces, helpers, tests, runtime refs, and remaining root files
+  - report current worktree cleanliness explicitly
+  - stay commit-range only with no marker inference, no restart mutation, and no owner/runtime truth claims
 
 ATLAS root should not silently become a background job runner or unattended mutation daemon.
 

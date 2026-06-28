@@ -161,6 +161,7 @@
 - [AI Repetition-to-Automation Pipeline Selector Packet Brief Surface](../ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-SELECTOR-PACKET-BRIEF-SURFACE-2026-06-18.md)
 - [AI Repetition-to-Automation Pipeline Selector Lane Exhaustion Or Fallback Routing](../ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-SELECTOR-LANE-EXHAUSTION-OR-FALLBACK-ROUTING-2026-06-18.md)
 - [AI Repetition-to-Automation Pipeline Selector-To-Receipt Scaffold Routing](../ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-SELECTOR-TO-RECEIPT-SCAFFOLD-ROUTING-2026-06-28.md)
+- [AI Repetition-to-Automation Pipeline Checkpoint Handoff Summary Helper](../ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CHECKPOINT-HANDOFF-SUMMARY-HELPER-2026-06-28.md)
 - [AI Long-Run Batch Orchestration Continuity-Manifest Seed And Ratchet Decision Pass 461](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-CONTINUITY-MANIFEST-SEED-AND-RATCHET-DECISION-PASS-461-2026-06-18.md)
 - [AI Long-Run Batch Orchestration Single Supervised Pilot Selection Criteria Contract Freeze Pass 462](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTION-CRITERIA-CONTRACT-FREEZE-PASS-462-2026-06-18.md)
 - [AI Long-Run Batch Orchestration Single Supervised Pilot Selection Criteria Owner-Surface Admission Pass 463](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTION-CRITERIA-OWNER-SURFACE-ADMISSION-PASS-463-2026-06-19.md)
