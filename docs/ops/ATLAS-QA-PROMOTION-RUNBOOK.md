@@ -348,6 +348,7 @@ Rules for protected bootstrap:
 - fail if the requested release repo is still marked `dirty: true` in `stack.lock.yaml`
 - fail if the checked-out `HEAD` does not match the locked commit
 - fail if the checked-out worktree is dirty after bootstrap
+- when protected dispatch needs repo-local dependency installation, run it from the exact canonical repo path declared by `stack.lock.yaml` after bootstrap rather than from historical `repos/fawxzzy-*` aliases
 
 Protected release proof must run against a clean, pushed, exact-SHA child repo checkout. Local dirty child repo state cannot become trusted release evidence.
 

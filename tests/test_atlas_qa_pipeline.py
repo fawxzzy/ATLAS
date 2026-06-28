@@ -3717,6 +3717,15 @@ console.log(JSON.stringify(caps));
             bootstrap_release_repos(root=root, repo_ids=["playbook"])
         self.assertIn("dirty", str(exc.exception))
 
+    def test_atlas_qa_workflow_uses_canonical_release_repo_paths(self) -> None:
+        workflow = (ROOT / ".github" / "workflows" / "atlas-qa-llel.yml").read_text(encoding="utf-8")
+        self.assertIn("working-directory: repos/playbook", workflow)
+        self.assertIn("working-directory: repos/foundation", workflow)
+        self.assertIn("working-directory: repos/lifeline", workflow)
+        self.assertNotIn("working-directory: repos/fawxzzy-playbook", workflow)
+        self.assertNotIn("working-directory: repos/fawxzzy-foundation", workflow)
+        self.assertNotIn("working-directory: repos/fawxzzy-lifeline", workflow)
+
     def test_release_snapshot_copies_fitness_waiver_pack(self) -> None:
         root = self._temp_root()
         snapshot_run = "run-1"

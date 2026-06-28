@@ -206,7 +206,7 @@ jobs:
       - name: Install Playbook release dependencies
         if: inputs.release_repo == 'playbook'
         shell: bash
-        working-directory: repos/fawxzzy-playbook
+        working-directory: repos/playbook
         run: |
           corepack enable
           corepack prepare pnpm@10.23.0 --activate
@@ -215,7 +215,7 @@ jobs:
       - name: Install Foundation release dependencies
         if: inputs.release_repo == 'foundation'
         shell: bash
-        working-directory: repos/fawxzzy-foundation
+        working-directory: repos/foundation
         run: |
           corepack enable
           corepack prepare pnpm@10.23.0 --activate
@@ -224,7 +224,7 @@ jobs:
       - name: Install Lifeline release dependencies
         if: inputs.release_repo == 'lifeline'
         shell: bash
-        working-directory: repos/fawxzzy-lifeline
+        working-directory: repos/lifeline
         run: |
           corepack enable
           corepack prepare pnpm@10.23.0 --activate
