@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-05-29T00:00:00Z",
-  "updated_at": "2026-06-28T06:48:02-04:00",
+  "updated_at": "2026-06-28T07:09:44-04:00",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -69,6 +69,7 @@
     "docs/ops/ATLAS-QA-PROTECTED-SINGLE-DISPATCH-FITNESS-BOOTSTRAP-AND-SPARSE-VALIDATION-UNBLOCK-2026-06-28.md",
     "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-POST-CORTEX-HELD-ROOT-MAIN-CHECKPOINT-RESYNC-2026-06-28.md",
     "docs/ops/ATLAS-ROOT-PUBLISHED-CHECKPOINT-SEMANTICS-HARDENING-AND-RESTART-TRUTH-RESYNC-2026-06-28.md",
+    "docs/ops/ATLAS-ROOT-VALIDATION-WARNING-FLOOR-AND-LIVE-MAZER-LOCK-TRUTH-RESYNC-2026-06-28.md",
     "ops/atlas/qa/github_secret_readiness.py",
     "runtime/atlas/qa/github-secret-readiness.latest.json"
   ],
@@ -78,9 +79,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "inventory-and-truth-map",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/ATLAS-ROOT-PUBLISHED-CHECKPOINT-SEMANTICS-HARDENING-AND-RESTART-TRUTH-RESYNC-2026-06-28.md",
+    "current_checkpoint_receipt": "docs/ops/ATLAS-ROOT-VALIDATION-WARNING-FLOOR-AND-LIVE-MAZER-LOCK-TRUTH-RESYNC-2026-06-28.md",
     "checkpoint_commit": "26ceaaa4e50ec67122c65a7a26f29e0e7344e722",
-    "checkpoint_summary": "The lane still sits at 93 percent because the canonical inventory and projection spine already absorbed the post-Cortex held-root main-checkpoint re-sync, and this follow-on now hardens the self-referential root publication rule without widening the lane: the published inventory still truthfully shows zero dirty managed repos, `fitness` remains clean on branch `codex/fitness-main-progression-summary-reapply` at committed head `b5f29793eb87dc7538a15160180f159688acd1b4`, the latest published clean ATLAS root checkpoint remains `26ceaaa4e50ec67122c65a7a26f29e0e7344e722`, the protected-QA mirrors still republish `fitness` at `manual_review` on run `fitness-progression-pr-smoke-20260628T072049067050Z`, the protected-QA handoff mirrors still converge on `4` release-ready repos, `1` manual-review repo, `0` blocked repos, and `1` not-applicable repo, protected dispatch run `28316073769` still reduces the remaining hosted blocker to only missing ATLAS GitHub Actions secrets `BROWSERSTACK_USERNAME` and `BROWSERSTACK_ACCESS_KEY`, `runtime/atlas/qa/github-secret-readiness.latest.json` still keeps that exact repo-side secret-state blocker restart-ready with `available_secret_count: 0`, and the seeded initiative continuity-manifest set remains 19 of 19 ok with zero warnings and zero errors while all 7 of 7 eligible still-open markers remain both manifest-backed and restart-ready from one machine-readable index.",
+    "checkpoint_summary": "The lane still sits at 93 percent because the canonical inventory and projection spine already absorbed the post-Cortex held-root main-checkpoint re-sync and the later published-checkpoint semantics hardening, and this follow-on now freezes the live warning-only validation floor without widening the lane: the published inventory still truthfully shows zero dirty managed repos, `fitness` remains clean on branch `codex/fitness-main-progression-summary-reapply` at committed head `b5f29793eb87dc7538a15160180f159688acd1b4`, the latest published clean ATLAS root checkpoint remains `26ceaaa4e50ec67122c65a7a26f29e0e7344e722`, the live stack lock now also pins `mazer` on `codex/mazer-pass-2-recovery-tightening` with active dirty state, current root validation now reads `critical=0 error=0 warning=2 info=0`, the protected-QA mirrors still republish `fitness` at `manual_review` on run `fitness-progression-pr-smoke-20260628T072049067050Z`, the protected-QA handoff mirrors still converge on `4` release-ready repos, `1` manual-review repo, `0` blocked repos, and `1` not-applicable repo, protected dispatch run `28316073769` still reduces the remaining hosted blocker to only missing ATLAS GitHub Actions secrets `BROWSERSTACK_USERNAME` and `BROWSERSTACK_ACCESS_KEY`, `runtime/atlas/qa/github-secret-readiness.latest.json` still keeps that exact repo-side secret-state blocker restart-ready with `available_secret_count: 0`, and the seeded initiative continuity-manifest set remains 19 of 19 ok with zero warnings and zero errors while all 7 of 7 eligible still-open markers remain both manifest-backed and restart-ready from one machine-readable index.",
     "governing_receipts": [
       "docs/ops/STACK-LANE-0-BASELINE-INVENTORY-2026-05-22.md",
       "docs/ops/STACK-LANE-0-TRUTH-MAP-2026-05-22.md",
@@ -115,7 +116,8 @@
       "docs/ops/ATLAS-QA-FITNESS-CURRENT-RUN-DESKTOP-CLOSEOUT-AND-MOBILE-ONLY-GATE-RESYNC-2026-06-28.md",
       "docs/ops/ATLAS-QA-PROTECTED-SINGLE-DISPATCH-FITNESS-BOOTSTRAP-AND-SPARSE-VALIDATION-UNBLOCK-2026-06-28.md",
       "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-POST-CORTEX-HELD-ROOT-MAIN-CHECKPOINT-RESYNC-2026-06-28.md",
-      "docs/ops/ATLAS-ROOT-PUBLISHED-CHECKPOINT-SEMANTICS-HARDENING-AND-RESTART-TRUTH-RESYNC-2026-06-28.md"
+      "docs/ops/ATLAS-ROOT-PUBLISHED-CHECKPOINT-SEMANTICS-HARDENING-AND-RESTART-TRUTH-RESYNC-2026-06-28.md",
+      "docs/ops/ATLAS-ROOT-VALIDATION-WARNING-FLOOR-AND-LIVE-MAZER-LOCK-TRUTH-RESYNC-2026-06-28.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -211,6 +213,10 @@
         "role": "current exact published-checkpoint semantics hardening and restart-truth resync surface for the self-referential root publication class"
       },
       {
+        "path": "docs/ops/ATLAS-ROOT-VALIDATION-WARNING-FLOOR-AND-LIVE-MAZER-LOCK-TRUTH-RESYNC-2026-06-28.md",
+        "role": "current exact inventory-facing warning-floor and live mazer stack-lock truth resync surface"
+      },
+      {
         "path": "docs/ops/ATLAS-QA-FITNESS-CURRENT-RUN-DESKTOP-CLOSEOUT-AND-MOBILE-ONLY-GATE-RESYNC-2026-06-28.md",
         "role": "current exact current-run desktop manual-attestation closeout and narrowed mobile-only protected-QA gate surface"
       },
@@ -303,9 +309,9 @@
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/ATLAS-ROOT-PUBLISHED-CHECKPOINT-SEMANTICS-HARDENING-AND-RESTART-TRUTH-RESYNC-2026-06-28.md",
-    "freshness_checked_at": "2026-06-28T06:48:02-04:00",
-    "freshness_basis": "the current checkpoint, marker posture, lane-state projection, blocked-work posture, and next-package posture now match the refreshed inventory-facing mirrors after the published-checkpoint semantics hardening pass: published inventory still reflects zero dirty managed repos, `fitness` remains clean on branch `codex/fitness-main-progression-summary-reapply` at commit `b5f29793eb87dc7538a15160180f159688acd1b4`, the latest published clean ATLAS root checkpoint remains `26ceaaa4e50ec67122c65a7a26f29e0e7344e722`, the protected-QA mirrors still republish Fitness at `manual_review` on run `fitness-progression-pr-smoke-20260628T072049067050Z`, `desktop.chromium.real.manual` is now valid on that same protected run, only `android.chrome.real` and `iphone.webkit.real` remain open, preserved Trove still pinned at `437c7604adee02e0403d77f75162a6c5f232221f`, release readiness still reads 4 ready / 1 manual review / 0 blocked / 1 not applicable, protected dispatch run `28316073769` still proves the remaining hosted blocker is only missing ATLAS GitHub Actions secrets `BROWSERSTACK_USERNAME` and `BROWSERSTACK_ACCESS_KEY`, `runtime/atlas/qa/github-secret-readiness.latest.json` currently reports `available_secret_count: 0`, the initiative manifest-health surface still reads 19 ok / 0 warning / 0 error, the eligible-open-marker coverage surface still reads 7 of 7 manifest-backed, and the eligible-open-marker restart index still reads 7 of 7 restart-ready, while later root-only publication commits are no longer misread as mandatory same-story checkpoint ratchets.",
+    "freshness_checked_receipt": "docs/ops/ATLAS-ROOT-VALIDATION-WARNING-FLOOR-AND-LIVE-MAZER-LOCK-TRUTH-RESYNC-2026-06-28.md",
+    "freshness_checked_at": "2026-06-28T07:09:44-04:00",
+    "freshness_basis": "the current checkpoint, marker posture, lane-state projection, blocked-work posture, and next-package posture now match the refreshed inventory-facing mirrors after the warning-floor and live-lock truth re-sync: published inventory still reflects zero dirty managed repos, `fitness` remains clean on branch `codex/fitness-main-progression-summary-reapply` at commit `b5f29793eb87dc7538a15160180f159688acd1b4`, the latest published clean ATLAS root checkpoint remains `26ceaaa4e50ec67122c65a7a26f29e0e7344e722`, the live stack lock now also pins `mazer` on `codex/mazer-pass-2-recovery-tightening` with `dirty: true`, the protected-QA mirrors still republish Fitness at `manual_review` on run `fitness-progression-pr-smoke-20260628T072049067050Z`, `desktop.chromium.real.manual` is now valid on that same protected run, only `android.chrome.real` and `iphone.webkit.real` remain open, preserved Trove still pinned at `437c7604adee02e0403d77f75162a6c5f232221f`, release readiness still reads 4 ready / 1 manual review / 0 blocked / 1 not applicable, protected dispatch run `28316073769` still proves the remaining hosted blocker is only missing ATLAS GitHub Actions secrets `BROWSERSTACK_USERNAME` and `BROWSERSTACK_ACCESS_KEY`, `runtime/atlas/qa/github-secret-readiness.latest.json` currently reports `available_secret_count: 0`, current root validation now reads `critical=0 / error=0 / warning=2 / info=0`, the initiative manifest-health surface still reads 19 ok / 0 warning / 0 error, the eligible-open-marker coverage surface still reads 7 of 7 manifest-backed, and the eligible-open-marker restart index still reads 7 of 7 restart-ready, while later root-only publication commits are no longer misread as mandatory same-story checkpoint ratchets.",
     "marker_posture": [
       {
         "marker": "Inventory & Truth Map",
