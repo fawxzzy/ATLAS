@@ -19,6 +19,7 @@ from ops.atlas.qa.adoption_drift import build_adoption_drift
 from ops.atlas.qa.bootstrap_release_repos import bootstrap_release_repos
 from ops.atlas.qa.compatibility_report import compatibility_report
 from ops.atlas.qa.evidence_index import build_evidence_index
+from ops.atlas.qa.github_secret_readiness import github_secret_readiness
 from ops.atlas.qa.manual_attestation import scaffold_manual_attestations, validate_attestations_for_run
 from ops.atlas.qa.provider_readiness import provider_readiness
 from ops.atlas.qa.promote_run import promote_run
@@ -1932,6 +1933,48 @@ class AtlasQaPipelineTests(unittest.TestCase):
         )
         self.assertEqual([], report["unsupported_requested_lenses"])
         self.assertTrue(report["live_smoke_eligible"])
+
+    def test_github_secret_readiness_reports_missing_required_secrets(self) -> None:
+        root = self._temp_root()
+        report = github_secret_readiness(
+            root=root,
+            repo="fawxzzy/ATLAS",
+            required_secret_names=["BROWSERSTACK_USERNAME", "BROWSERSTACK_ACCESS_KEY"],
+            token="test-token",
+            secret_names_fetcher=lambda repo, token: [],
+        )
+        self.assertEqual("blocked", report["status"])
+        self.assertEqual(
+            ["BROWSERSTACK_ACCESS_KEY", "BROWSERSTACK_USERNAME"],
+            report["missing_required_secret_names"],
+        )
+        latest = load_json_object(root / "runtime" / "atlas" / "qa" / "github-secret-readiness.latest.json")
+        self.assertEqual(0, latest["available_secret_count"])
+        self.assertEqual("missing", latest["required_secret_statuses"]["BROWSERSTACK_USERNAME"])
+        self.assertEqual("missing", latest["required_secret_statuses"]["BROWSERSTACK_ACCESS_KEY"])
+
+    def test_github_secret_readiness_reports_present_required_secrets(self) -> None:
+        root = self._temp_root()
+        report = github_secret_readiness(
+            root=root,
+            repo="fawxzzy/ATLAS",
+            required_secret_names=["BROWSERSTACK_USERNAME", "BROWSERSTACK_ACCESS_KEY"],
+            token="test-token",
+            secret_names_fetcher=lambda repo, token: [
+                "BROWSERSTACK_ACCESS_KEY",
+                "BROWSERSTACK_USERNAME",
+                "UNRELATED_SECRET",
+            ],
+        )
+        self.assertEqual("ready", report["status"])
+        self.assertEqual([], report["missing_required_secret_names"])
+        latest = load_json_object(root / "runtime" / "atlas" / "qa" / "github-secret-readiness.latest.json")
+        self.assertEqual("ready", latest["status"])
+        self.assertEqual(3, latest["available_secret_count"])
+        self.assertEqual(
+            ["BROWSERSTACK_ACCESS_KEY", "BROWSERSTACK_USERNAME"],
+            latest["browserstack_named_secret_names"],
+        )
 
     def test_provider_override_only_mutates_supported_real_lenses(self) -> None:
         root = self._temp_root()

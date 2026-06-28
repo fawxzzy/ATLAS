@@ -404,6 +404,16 @@ Use `ops/atlas/qa/release_rehearsal.py` before relying on the gate operationally
   - `android.chrome.real`
   - `iphone.webkit.real`
 - Store `BROWSERSTACK_USERNAME` and `BROWSERSTACK_ACCESS_KEY` in GitHub Actions secrets. Do not place them in committed files, workflow inputs, logs, issue comments, or ad hoc command history.
+- Audit the ATLAS repo secret-name posture before dispatching a protected provider run:
+
+```powershell
+python ops/atlas/qa/github_secret_readiness.py `
+  --repo fawxzzy/ATLAS `
+  --require-secret BROWSERSTACK_USERNAME `
+  --require-secret BROWSERSTACK_ACCESS_KEY
+```
+
+- That helper writes `runtime/atlas/qa/github-secret-readiness.latest.json` and `.md`, reports the exact required secret names as `present` or `missing`, and fails closed when the protected repo is not ready for BrowserStack-backed dispatch.
 - If the provider is requested without credentials, the expected result is `provider_unavailable`. That status should preserve the normal QA/manual-review semantics instead of converting BrowserStack absence into a default developer blocker.
 - Provider errors must redact credential values before surfacing stderr or stdout back to the operator.
 

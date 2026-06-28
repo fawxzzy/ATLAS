@@ -107,6 +107,13 @@ Final live blocker after the last hardened dispatch:
 - `Validate provider readiness` failed before QA execution because GitHub exposed:
   - `BROWSERSTACK_USERNAME: missing`
   - `BROWSERSTACK_ACCESS_KEY: missing`
+- follow-on local repo audit `python ops/atlas/qa/github_secret_readiness.py --repo fawxzzy/ATLAS --require-secret BROWSERSTACK_USERNAME --require-secret BROWSERSTACK_ACCESS_KEY` wrote:
+  - `runtime/atlas/qa/github-secret-readiness.latest.json`
+  - `runtime/atlas/qa/github-secret-readiness.latest.md`
+  - `available_secret_count: 0`
+  - required-secret status:
+    - `BROWSERSTACK_USERNAME: missing`
+    - `BROWSERSTACK_ACCESS_KEY: missing`
 
 That means the protected lane is no longer blocked by ATLAS workflow topology or validator posture. It is now blocked only by missing BrowserStack credentials on the ATLAS GitHub Actions side.
 
