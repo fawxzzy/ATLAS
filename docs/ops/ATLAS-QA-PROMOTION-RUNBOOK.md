@@ -51,6 +51,14 @@ Check whether a provider is live-smoke ready:
 python ops/atlas/qa/provider_readiness.py --provider ops/atlas/qa/providers/browserstack.playwright.v1.json --adapter fitness.web --scenario fitness.progression-pr-smoke
 ```
 
+Expected current Fitness provider-readiness truth when credentials are present:
+
+- `requested_physical_lenses` should include:
+  - `desktop.chromium.real`
+  - `android.chrome.real`
+  - `iphone.webkit.real`
+- `unsupported_requested_lenses` should be `[]`
+
 Evaluate a run:
 
 ```powershell
@@ -387,6 +395,10 @@ Use `ops/atlas/qa/release_rehearsal.py` before relying on the gate operationally
 - Use BrowserStack only from protected manual flows. The root workflow exposes it as the `provider` input on `ATLAS QA LLEL`.
 - Leave `provider` set to `none` for normal PR validation and for any manual run that does not need provider-backed real-device evidence.
 - Select `browserstack.playwright.v1` only for operator-triggered `evidence` or `promotion` runs that are explicitly exercising the provider lane.
+- For the current Fitness scenario, the BrowserStack provider manifest now truthfully supports all three governed real-device lenses:
+  - `desktop.chromium.real`
+  - `android.chrome.real`
+  - `iphone.webkit.real`
 - Store `BROWSERSTACK_USERNAME` and `BROWSERSTACK_ACCESS_KEY` in GitHub Actions secrets. Do not place them in committed files, workflow inputs, logs, issue comments, or ad hoc command history.
 - If the provider is requested without credentials, the expected result is `provider_unavailable`. That status should preserve the normal QA/manual-review semantics instead of converting BrowserStack absence into a default developer blocker.
 - Provider errors must redact credential values before surfacing stderr or stdout back to the operator.

@@ -55,6 +55,7 @@
 - [Inventory And Truth Map And ATLAS Book Fitness Desktop Manual Attestation Mobile Gate Refresh Continuity Re-Sync](../ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-DESKTOP-MANUAL-ATTESTATION-MOBILE-GATE-REFRESH-CONTINUITY-RESYNC-2026-06-27.md)
 - [ATLAS QA Fitness Desktop Manual Attestation Closeout And Mobile Gate Re-Sync](../ops/ATLAS-QA-FITNESS-DESKTOP-MANUAL-ATTESTATION-CLOSEOUT-AND-MOBILE-GATE-RESYNC-2026-06-28.md)
 - [ATLAS QA BrowserStack Provider Mobile Readiness And Dry-Run Re-Sync](../ops/ATLAS-QA-BROWSERSTACK-PROVIDER-MOBILE-READINESS-AND-DRY-RUN-RESYNC-2026-06-28.md)
+- [ATLAS QA Fitness Provider Blocker Truth Projection Re-Sync](../ops/ATLAS-QA-FITNESS-PROVIDER-BLOCKER-TRUTH-PROJECTION-RESYNC-2026-06-28.md)
 - [Truth Map And ATLAS Book Lifeline Runtime Residue Zero-Warning Closeout And Stack Re-Sync](../ops/TRUTH-MAP-AND-ATLAS-BOOK-LIFELINE-RUNTIME-RESIDUE-ZERO-WARNING-CLOSEOUT-AND-STACK-RESYNC-2026-06-27.md)
 - [Stack Lock And Inventory DiscordOS Poll Cleanup Zero-Issue Re-Sync](../ops/STACK-LOCK-AND-INVENTORY-DISCORDOS-POLL-CLEANUP-ZERO-ISSUE-RESYNC-2026-06-27.md)
 - [ATLAS Root Worktree Hygiene Re-Sync](../ops/ATLAS-ROOT-WORKTREE-HYGIENE-RESYNC-2026-06-27.md)
