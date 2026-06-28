@@ -26,6 +26,7 @@ from ops.atlas.qa.manual_attestation import (
     validate_attestations_for_run,
 )
 from ops.atlas.qa.provider_readiness import provider_readiness
+from ops.atlas.qa.release_gate_packet import build_release_gate_packet
 from ops.atlas.qa.promote_run import promote_run
 from ops.atlas.qa.protected_release_refresh import refresh_protected_release_receipts
 from ops.atlas.qa.release_snapshot import build_release_snapshot
@@ -2048,6 +2049,99 @@ class AtlasQaPipelineTests(unittest.TestCase):
             ["BROWSERSTACK_ACCESS_KEY", "BROWSERSTACK_USERNAME"],
             latest["browserstack_named_secret_names"],
         )
+
+    def test_release_gate_packet_renders_combined_operator_packet(self) -> None:
+        root = self._temp_root()
+        run_root = root / "runtime" / "atlas" / "qa" / "runs" / "run-1"
+        provider_src = ROOT / "ops" / "atlas" / "qa" / "providers" / "browserstack.playwright.v1.json"
+        adapter_src = ROOT / "ops" / "atlas" / "qa" / "adapters" / "fitness.web.json"
+        scenario_src = ROOT / "ops" / "atlas" / "qa" / "scenarios" / "fitness.progression-pr-smoke.json"
+        provider_schema_src = ROOT / "schemas" / "atlas.qa.provider.v1.json"
+        provider_dst = root / "ops" / "atlas" / "qa" / "providers" / "browserstack.playwright.v1.json"
+        adapter_dst = root / "ops" / "atlas" / "qa" / "adapters" / "fitness.web.json"
+        scenario_dst = root / "ops" / "atlas" / "qa" / "scenarios" / "fitness.progression-pr-smoke.json"
+        provider_schema_dst = root / "schemas" / "atlas.qa.provider.v1.json"
+        provider_dst.parent.mkdir(parents=True, exist_ok=True)
+        adapter_dst.parent.mkdir(parents=True, exist_ok=True)
+        scenario_dst.parent.mkdir(parents=True, exist_ok=True)
+        provider_schema_dst.parent.mkdir(parents=True, exist_ok=True)
+        provider_dst.write_text(provider_src.read_text(encoding="utf-8"), encoding="utf-8")
+        adapter_dst.write_text(adapter_src.read_text(encoding="utf-8"), encoding="utf-8")
+        scenario_dst.write_text(scenario_src.read_text(encoding="utf-8"), encoding="utf-8")
+        provider_schema_dst.write_text(provider_schema_src.read_text(encoding="utf-8"), encoding="utf-8")
+        _write_json(
+            run_root / "evaluated.result.json",
+            {
+                "contract_version": "atlas.qa.result.v1",
+                "result_id": "sha256:" + ("c" * 64),
+                "generated_at": "2026-05-11T00:00:00Z",
+                "runner_version": "test",
+                "stage": "evaluated",
+                "run_id": "run-1",
+                "scenario_ref": "ops/atlas/qa/scenarios/fitness.progression-pr-smoke.json",
+                "repo_id": "fitness",
+                "repo_path": "repos/fawxzzy-fitness",
+                "git_sha": "abcdef1234567890",
+                "adapter_id": "fitness.web",
+                "adapter_ref": "ops/atlas/qa/adapters/fitness.web.json",
+                "lens_manifest_ref": "ops/atlas/qa/lenses/atlas-default-web.v1.json",
+                "mode": "execute",
+                "summary": {
+                    "overall_status": "ready",
+                    "executable_status": "clean",
+                    "artifact_status": "complete",
+                    "certification_status": "manual_required",
+                    "highest_satisfied_tier": "emulated_browser",
+                    "satisfied_evidence_tiers": ["emulated_browser"],
+                    "missing_evidence_tiers": ["physical_device"],
+                    "manual_required_lanes": ["android.chrome.real", "iphone.webkit.real"],
+                    "visual_status": "not_configured",
+                    "visual_diff_count": 0,
+                    "lens_count": 2,
+                    "failing_lens_count": 0,
+                    "finding_count": 0,
+                },
+                "matrix": [
+                    {
+                        "lens_id": "android.chrome.real",
+                        "status": "manual_required",
+                        "browser_engine": "chromium",
+                    },
+                    {
+                        "lens_id": "iphone.webkit.real",
+                        "status": "manual_required",
+                        "browser_engine": "webkit",
+                    },
+                ],
+                "findings": [],
+                "artifact_manifest_refs": [],
+            },
+        )
+        _write_json(
+            run_root / "promotion.record.json",
+            {
+                "promotion_status": "manual_review",
+                "manual_required_lanes": ["android.chrome.real", "iphone.webkit.real"],
+            },
+        )
+        report = build_release_gate_packet(
+            root=root,
+            run_id="run-1",
+            repo="fawxzzy/ATLAS",
+            provider_manifest_ref="ops/atlas/qa/providers/browserstack.playwright.v1.json",
+            adapter_id="fitness.web",
+            scenario_id="fitness.progression-pr-smoke",
+            required_secret_names=["BROWSERSTACK_USERNAME", "BROWSERSTACK_ACCESS_KEY"],
+            token="test-token",
+            secret_names_fetcher=lambda repo, token: [],
+        )
+        packet_path = root / report["output_ref"]
+        self.assertTrue(packet_path.exists())
+        body = packet_path.read_text(encoding="utf-8")
+        self.assertIn("manual_review", body)
+        self.assertIn("BROWSERSTACK_USERNAME", body)
+        self.assertIn("android.chrome.real", body)
+        self.assertEqual("blocked", report["github_secret_status"])
 
     def test_provider_override_only_mutates_supported_real_lenses(self) -> None:
         root = self._temp_root()

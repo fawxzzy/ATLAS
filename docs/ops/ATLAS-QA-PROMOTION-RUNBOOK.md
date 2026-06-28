@@ -51,6 +51,12 @@ Render the current operator packet for manual-review lanes:
 python ops/atlas/qa/manual_attestation.py packet-prep --run <run-id>
 ```
 
+Render the combined release-gate packet for the current blocked run:
+
+```powershell
+python ops/atlas/qa/release_gate_packet.py --run <run-id> --repo fawxzzy/ATLAS --provider ops/atlas/qa/providers/browserstack.playwright.v1.json --adapter fitness.web --scenario fitness.progression-pr-smoke --require-secret BROWSERSTACK_USERNAME --require-secret BROWSERSTACK_ACCESS_KEY
+```
+
 Check whether a provider is live-smoke ready:
 
 ```powershell
