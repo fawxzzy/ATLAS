@@ -3,7 +3,7 @@
 - Date: `2026-06-28`
 - Lane: `AI Repetition-to-Automation Pipeline`
 - Mode: `root-owned operator-surface refinement`
-- Scope: `land one bounded checkpoint-summary helper that turns committed ATLAS git history into a deterministic handoff recap without inferring marker movement or touching owner/runtime truth`
+- Scope: `promote one already-landed checkpoint-summary helper into durable AI repetition restart truth and live adoption proof without inferring marker movement or touching owner/runtime truth`
 - Source surfaces:
   - `docs/memory/profiles/zachariah_workflow_profile.md`
   - `docs/atlas-book/01-current-state.md`
@@ -17,15 +17,15 @@
 
 ## Objective
 
-Remove one repeated manual recap seam from the held ATLAS-root posture.
+Remove one repeated manual recap seam from the held ATLAS-root posture by absorbing an already-landed helper into the canonical ATLAS restart surfaces.
 
 The recurring operator need was not another selector or receipt-packaging refinement. It was reconstructing "what changed since the last checkpoint" from raw git history, scattered receipt paths, and ad hoc chat summaries whenever a ChatGPT or Codex handoff was needed.
 
-This pass lands one bounded helper that reads committed ATLAS git history directly, classifies the touched root-owned surfaces, and renders a deterministic recap without pretending it can infer marker movement, owner-repo consequence, or deploy/runtime truth.
+The helper already existed on the current branch, but it was not yet carried into the AI repetition receipt spine, manifest-backed restart truth, or marker posture. This pass absorbs that existing operator surface into durable lane truth and proves it live against the current branch history without pretending it can infer marker movement, owner-repo consequence, or deploy/runtime truth.
 
-## Landed Surface
+## Current Helper Surface
 
-`ops/atlas/checkpoint_handoff_summary.py` now provides one root-local handoff helper:
+`ops/atlas/checkpoint_handoff_summary.py` already provides one root-local handoff helper on the current branch:
 
 - required `--since-ref`
 - optional `--until-ref` with default `HEAD`
@@ -62,7 +62,7 @@ That live run currently summarizes:
 - the exact changed receipt, Book, and stack-lock/inventory surfaces across that checkpoint range
 - the current dirty worktree honestly, because the newly landed helper and tests are still uncommitted during this pass
 
-This is the intended operator value: the helper can now replace manual "since last checkpoint" reconstruction with one deterministic recap from durable git truth.
+This is the intended operator value: the already-landed helper can now replace manual "since last checkpoint" reconstruction with one deterministic recap from durable git truth, and that behavior is now durably projected into the AI repetition lane.
 
 ## Proof
 
@@ -78,8 +78,8 @@ Targeted tests now prove:
 
 Why this is enough:
 
-- one distinct new automation family is now admitted and proven beyond selector and receipt-scaffold routing
-- the seam is execution-backed on the live root, not only fixture-shaped
+- one distinct AI repetition helper family is now durably admitted and proven beyond selector and receipt-scaffold routing
+- the seam is execution-backed on the live root and now absorbed into manifest-backed restart truth instead of remaining branch-local only
 - the helper removes one repeated operator recap task without widening into execution authority
 
 Why the lane still stays low:
