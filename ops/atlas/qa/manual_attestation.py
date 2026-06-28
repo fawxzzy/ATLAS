@@ -40,6 +40,24 @@ def _validate_png(path: Path) -> str | None:
         return str(exc)
 
 
+def _load_result_payload(*, run_root: Path) -> dict[str, Any]:
+    result_path = run_root / "evaluated.result.json"
+    if not result_path.exists():
+        result_path = run_root / "matrix.result.json"
+    return load_json_object(result_path)
+
+
+def _manual_required_lanes_from_result(result_payload: dict[str, Any]) -> list[str]:
+    unresolved = list(result_payload.get("summary", {}).get("manual_required_lanes", []))
+    if unresolved:
+        return [str(item) for item in unresolved if isinstance(item, str) and item.strip()]
+    return [
+        str(item.get("lens_id"))
+        for item in result_payload.get("matrix", [])
+        if isinstance(item, dict) and item.get("status") == "manual_required" and isinstance(item.get("lens_id"), str)
+    ]
+
+
 def validate_attestation_file(*, root: Path, attestation_path: Path) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     payload = load_json_object(attestation_path.resolve())
     findings: list[dict[str, Any]] = []
@@ -91,17 +109,8 @@ def scaffold_manual_attestations(
     force: bool = False,
 ) -> dict[str, Any]:
     run_root = (default_run_root(root=root) / run_id).resolve()
-    result_path = run_root / "evaluated.result.json"
-    if not result_path.exists():
-        result_path = run_root / "matrix.result.json"
-    result_payload = load_json_object(result_path)
-    unresolved = list(result_payload.get("summary", {}).get("manual_required_lanes", []))
-    if not unresolved:
-        unresolved = [
-            str(item.get("lens_id"))
-            for item in result_payload.get("matrix", [])
-            if isinstance(item, dict) and item.get("status") == "manual_required"
-        ]
+    result_payload = _load_result_payload(run_root=run_root)
+    unresolved = _manual_required_lanes_from_result(result_payload)
     matrix_by_lens = {
         str(item.get("lens_id")): item
         for item in result_payload.get("matrix", [])
@@ -207,6 +216,113 @@ def validate_attestations_for_run(*, root: Path, run_id: str) -> dict[str, Any]:
     return report
 
 
+def build_manual_attestation_packet_prep(
+    *,
+    root: Path,
+    run_id: str,
+    output_path: Path | None = None,
+) -> dict[str, Any]:
+    run_root = (default_run_root(root=root) / run_id).resolve()
+    result_payload = _load_result_payload(run_root=run_root)
+    scenario_ref = str(result_payload.get("scenario_ref") or "")
+    scenario_id = scenario_ref.rsplit("/", 1)[-1].replace(".json", "") if scenario_ref else "unknown"
+    promotion_path = run_root / "promotion.record.json"
+    promotion = load_json_object(promotion_path) if promotion_path.exists() else {}
+    scaffold_path = run_root / "manual-attestation.scaffold.json"
+    scaffold_report = load_json_object(scaffold_path) if scaffold_path.exists() else scaffold_manual_attestations(root=root, run_id=run_id)
+    validation_path = run_root / "manual_attestation.result.json"
+    validation_report = load_json_object(validation_path) if validation_path.exists() else validate_attestations_for_run(root=root, run_id=run_id)
+    manual_required_lanes = [
+        str(item)
+        for item in promotion.get("manual_required_lanes", _manual_required_lanes_from_result(result_payload))
+        if isinstance(item, str) and item.strip()
+    ]
+    attestation_status_by_lens = {
+        str(item.get("lens_id")): str(item.get("status"))
+        for item in validation_report.get("attestations", [])
+        if isinstance(item, dict) and isinstance(item.get("lens_id"), str)
+    }
+    file_entries: list[dict[str, Any]] = []
+    for item in scaffold_report.get("files", []):
+        if not isinstance(item, dict):
+            continue
+        lens_id = item.get("lens_id")
+        if not isinstance(lens_id, str) or not lens_id.strip():
+            continue
+        attestation_ref = str(item.get("attestation_ref") or f"runtime/atlas/qa/runs/{run_id}/manual-attestations/{lens_id}.manual.json")
+        expected_screenshot_ref = str(item.get("expected_screenshot_ref") or f"runtime/atlas/qa/runs/{run_id}/captures/{lens_id}/manual.png")
+        screenshot_exists = resolve_ref(expected_screenshot_ref, root=root).exists()
+        file_entries.append(
+            {
+                "lens_id": lens_id,
+                "attestation_ref": attestation_ref,
+                "expected_screenshot_ref": expected_screenshot_ref,
+                "attestation_status": attestation_status_by_lens.get(lens_id, "unknown"),
+                "screenshot_exists": screenshot_exists,
+            }
+        )
+    findings = [item for item in validation_report.get("findings", []) if isinstance(item, dict)]
+    output = (run_root / "manual-attestation.packet-prep.md") if output_path is None else output_path.resolve()
+    lines = [
+        "# ATLAS QA Manual Attestation Packet Prep",
+        "",
+        f"- Generated: `{utc_now()}`",
+        f"- Run: `{run_id}`",
+        f"- Scenario: `{scenario_id}`",
+        f"- Promotion status: `{promotion.get('promotion_status', 'unknown')}`",
+        f"- Validation status: `{validation_report.get('status', 'unknown')}`",
+        f"- Manual-required lanes: `{', '.join(manual_required_lanes) or 'none'}`",
+        "",
+        "## Current Packet",
+        "",
+    ]
+    for item in file_entries:
+        lines.append(
+            f"- `{item['lens_id']}`: attestation `{item['attestation_ref']}`, screenshot `{item['expected_screenshot_ref']}`, validation `{item['attestation_status']}`, screenshot file `{'present' if item['screenshot_exists'] else 'missing'}`"
+        )
+    if not file_entries:
+        lines.append("- No scaffolded attestation files were found for this run.")
+    lines.extend(
+        [
+            "",
+            "## Findings",
+            "",
+        ]
+    )
+    if findings:
+        for item in findings:
+            lines.append(f"- `{item.get('code', 'unknown')}`: {item.get('message', '')}")
+    else:
+        lines.append("- No validation findings.")
+    lines.extend(
+        [
+            "",
+            "## Next Honest Move",
+            "",
+            "1. Capture real screenshots for each lane whose screenshot file is still missing.",
+            "2. Replace placeholder metadata, signature, and checksum fields inside the matching manual-attestation JSON files.",
+            f"3. Re-run validation: `python ops/atlas/qa/manual_attestation.py validate --run {run_id}`",
+            f"4. Re-run promotion after the attestation files are valid: `python ops/atlas/qa/promote_run.py --root . --run {run_id} --scenario-file ops/atlas/qa/scenarios/{scenario_id}.json --stack-validation-file runtime/receipts/validation/stack-validation.latest.json`",
+            "",
+        ]
+    )
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text("\n".join(lines), encoding="utf-8")
+    report = {
+        "runner_version": "atlas.qa.manual-attestation.packet-prep.v1",
+        "generated_at": utc_now(),
+        "run_id": run_id,
+        "scenario_id": scenario_id,
+        "promotion_status": str(promotion.get("promotion_status") or "unknown"),
+        "validation_status": str(validation_report.get("status") or "unknown"),
+        "manual_required_lanes": manual_required_lanes,
+        "output_ref": atlas_relative(output, root=root),
+        "finding_count": len(findings),
+    }
+    write_json(run_root / "manual-attestation.packet-prep.json", report)
+    return report
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Create or validate manual ATLAS QA device attestations.")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -222,6 +338,11 @@ def main(argv: list[str] | None = None) -> int:
     validate_parser.add_argument("--root", type=Path, default=atlas_root())
     validate_parser.add_argument("--run")
     validate_parser.add_argument("--file", type=Path)
+
+    packet_parser = subparsers.add_parser("packet-prep", help="Render an operator packet for the current manual-attestation state.")
+    packet_parser.add_argument("--root", type=Path, default=atlas_root())
+    packet_parser.add_argument("--run", required=True)
+    packet_parser.add_argument("--output", type=Path)
 
     args = parser.parse_args(argv)
     if args.command == "scaffold":
@@ -253,6 +374,14 @@ def main(argv: list[str] | None = None) -> int:
         report = validate_attestations_for_run(root=root, run_id=args.run)
         print(json.dumps(report, indent=2))
         return 0 if report["status"] == "clean" else 1
+    if args.command == "packet-prep":
+        report = build_manual_attestation_packet_prep(
+            root=args.root.resolve(),
+            run_id=args.run,
+            output_path=args.output,
+        )
+        print(json.dumps(report, indent=2))
+        return 0
     raise SystemExit("Unsupported command.")
 
 

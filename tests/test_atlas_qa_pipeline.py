@@ -20,7 +20,11 @@ from ops.atlas.qa.bootstrap_release_repos import bootstrap_release_repos
 from ops.atlas.qa.compatibility_report import compatibility_report
 from ops.atlas.qa.evidence_index import build_evidence_index
 from ops.atlas.qa.github_secret_readiness import github_secret_readiness
-from ops.atlas.qa.manual_attestation import scaffold_manual_attestations, validate_attestations_for_run
+from ops.atlas.qa.manual_attestation import (
+    build_manual_attestation_packet_prep,
+    scaffold_manual_attestations,
+    validate_attestations_for_run,
+)
 from ops.atlas.qa.provider_readiness import provider_readiness
 from ops.atlas.qa.promote_run import promote_run
 from ops.atlas.qa.protected_release_refresh import refresh_protected_release_receipts
@@ -1589,6 +1593,75 @@ class AtlasQaPipelineTests(unittest.TestCase):
         report = validate_attestations_for_run(root=root, run_id="run-1")
         self.assertEqual("clean", report["status"])
         self.assertTrue((root / "runtime" / "atlas" / "qa" / "runs" / "run-1" / "manual_attestation.result.json").exists())
+
+    def test_manual_attestation_packet_prep_renders_markdown(self) -> None:
+        root = self._temp_root()
+        run_root = root / "runtime" / "atlas" / "qa" / "runs" / "run-1"
+        _write_json(
+            run_root / "evaluated.result.json",
+            {
+                "contract_version": "atlas.qa.result.v1",
+                "result_id": "sha256:" + ("b" * 64),
+                "generated_at": "2026-05-11T00:00:00Z",
+                "runner_version": "test",
+                "stage": "evaluated",
+                "run_id": "run-1",
+                "scenario_ref": "ops/atlas/qa/scenarios/fitness.progression-pr-smoke.json",
+                "repo_id": "fitness",
+                "repo_path": "repos/fawxzzy-fitness",
+                "git_sha": "abcdef1234567890",
+                "adapter_id": "fitness.web",
+                "adapter_ref": "ops/atlas/qa/adapters/fitness.web.json",
+                "lens_manifest_ref": "ops/atlas/qa/lenses/atlas-default-web.v1.json",
+                "mode": "execute",
+                "summary": {
+                    "overall_status": "ready",
+                    "executable_status": "clean",
+                    "artifact_status": "complete",
+                    "certification_status": "manual_required",
+                    "highest_satisfied_tier": "emulated_browser",
+                    "satisfied_evidence_tiers": ["emulated_browser"],
+                    "missing_evidence_tiers": ["physical_device"],
+                    "manual_required_lanes": ["iphone.webkit.real"],
+                    "visual_status": "not_configured",
+                    "visual_diff_count": 0,
+                    "lens_count": 1,
+                    "failing_lens_count": 0,
+                    "finding_count": 0,
+                },
+                "matrix": [
+                    {
+                        "lens_id": "iphone.webkit.real",
+                        "lens_profile_id": "iphone.webkit",
+                        "proof_kind": "real",
+                        "evidence_kind": "physical_device",
+                        "promotion_tier": "physical_device",
+                        "fallback_behavior": "manual_attestation",
+                        "execution_mode": "manual_external",
+                        "status": "manual_required",
+                        "browser_engine": "webkit",
+                    }
+                ],
+                "findings": [],
+                "artifact_manifest_refs": [],
+            },
+        )
+        _write_json(
+            run_root / "promotion.record.json",
+            {
+                "promotion_status": "manual_review",
+                "manual_required_lanes": ["iphone.webkit.real"],
+            },
+        )
+        report = build_manual_attestation_packet_prep(root=root, run_id="run-1")
+        markdown_path = root / report["output_ref"]
+        self.assertTrue(markdown_path.exists())
+        body = markdown_path.read_text(encoding="utf-8")
+        self.assertIn("run-1", body)
+        self.assertIn("iphone.webkit.real", body)
+        self.assertIn("captures/iphone.webkit.real/manual.png", body)
+        self.assertEqual("manual_review", report["promotion_status"])
+        self.assertEqual("invalid", report["validation_status"])
 
     def test_report_run_marks_valid_manual_attestation_in_per_lens(self) -> None:
         root = self._temp_root()

@@ -45,6 +45,12 @@ Validate manual attestations:
 python ops/atlas/qa/manual_attestation.py validate --run <run-id>
 ```
 
+Render the current operator packet for manual-review lanes:
+
+```powershell
+python ops/atlas/qa/manual_attestation.py packet-prep --run <run-id>
+```
+
 Check whether a provider is live-smoke ready:
 
 ```powershell
