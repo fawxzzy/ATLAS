@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-06-19T07:00:00Z",
-  "updated_at": "2026-06-28T07:09:44-04:00",
+  "updated_at": "2026-06-28T07:19:45-04:00",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -31,7 +31,8 @@
     "docs/ops/CORTEX-READINESS-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md",
     "docs/ops/CORTEX-HELD-ROOT-POSTURE-SEED-AND-RUNTIME-RESYNC-2026-06-28.md",
     "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-CORTEX-HELD-ROOT-PROJECTION-CLEANUP-2026-06-28.md",
-    "docs/ops/ATLAS-ROOT-VALIDATION-WARNING-FLOOR-AND-LIVE-MAZER-LOCK-TRUTH-RESYNC-2026-06-28.md"
+    "docs/ops/ATLAS-ROOT-VALIDATION-WARNING-FLOOR-AND-LIVE-MAZER-LOCK-TRUTH-RESYNC-2026-06-28.md",
+    "docs/ops/ATLAS-ROOT-ZERO-WARNING-FLOOR-AFTER-MAZER-GENERATED-STATE-CLEANUP-RESYNC-2026-06-28.md"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -41,7 +42,7 @@
     "scope_class": "atlas-root-governance",
     "current_checkpoint_receipt": "docs/ops/CORTEX-HELD-ROOT-POSTURE-SEED-AND-RUNTIME-RESYNC-2026-06-28.md",
     "checkpoint_commit": "main",
-    "checkpoint_summary": "The lane still holds at 41 percent, and the live seeded and generated Cortex read model still agrees with the current held-root dispatcher truth: the stale docs-adr-or-debt-slice next action and ambient warning-debt wording are cleared, `hold-current-root-posture` is now the truthful bounded next action, current validation now reads `critical=0 error=0 warning=2 info=0`, the live stack lock now also pins `mazer` dirty on `codex/mazer-pass-2-recovery-tightening`, and the lane remains advisory and projection-only with no authority widening.",
+    "checkpoint_summary": "The lane still holds at 41 percent, and the live seeded and generated Cortex read model still agrees with the current held-root dispatcher truth: the stale docs-adr-or-debt-slice next action and ambient warning-debt wording are cleared, `hold-current-root-posture` is now the truthful bounded next action, current validation now reads `critical=0 error=0 warning=0 info=0`, the live stack lock now pins `mazer` clean on `codex/mazer-pass-2-recovery-tightening`, and the lane remains advisory and projection-only with no authority widening.",
     "governing_receipts": [
       "docs/ops/CORTEX-READINESS-MARKER-CHECKPOINT-SHADOW-CONSUMPTION-PASS-1-2026-06-01.md",
       "docs/ops/CORTEX-READINESS-RECEIPT-DOCTRINE-DRAFT-SHADOW-CONSUMPTION-PASS-2-2026-06-01.md",
@@ -53,7 +54,8 @@
       "docs/ops/CORTEX-READINESS-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md",
       "docs/ops/CORTEX-HELD-ROOT-POSTURE-SEED-AND-RUNTIME-RESYNC-2026-06-28.md",
       "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-CORTEX-HELD-ROOT-PROJECTION-CLEANUP-2026-06-28.md",
-      "docs/ops/ATLAS-ROOT-VALIDATION-WARNING-FLOOR-AND-LIVE-MAZER-LOCK-TRUTH-RESYNC-2026-06-28.md"
+      "docs/ops/ATLAS-ROOT-VALIDATION-WARNING-FLOOR-AND-LIVE-MAZER-LOCK-TRUTH-RESYNC-2026-06-28.md",
+      "docs/ops/ATLAS-ROOT-ZERO-WARNING-FLOOR-AFTER-MAZER-GENERATED-STATE-CLEANUP-RESYNC-2026-06-28.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -75,6 +77,10 @@
       {
         "path": "docs/ops/ATLAS-ROOT-VALIDATION-WARNING-FLOOR-AND-LIVE-MAZER-LOCK-TRUTH-RESYNC-2026-06-28.md",
         "role": "current exact warning-floor and live lock-truth refresh surface consumed by the held-root Cortex posture"
+      },
+      {
+        "path": "docs/ops/ATLAS-ROOT-ZERO-WARNING-FLOOR-AFTER-MAZER-GENERATED-STATE-CLEANUP-RESYNC-2026-06-28.md",
+        "role": "current exact zero-warning closeout and preserved live lock-truth refresh surface consumed by the held-root Cortex posture"
       },
       {
         "path": "runtime/cortex/current-state/latest.json",
@@ -145,9 +151,9 @@
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/ATLAS-ROOT-VALIDATION-WARNING-FLOOR-AND-LIVE-MAZER-LOCK-TRUTH-RESYNC-2026-06-28.md",
-    "freshness_checked_at": "2026-06-28T07:09:44-04:00",
-    "freshness_basis": "The manifest now matches the current 41 percent advisory Cortex posture after the June 28 held-root resync, the immediate Book-side cleanup, and the later warning-floor truth re-sync: the live seed and generated runtime chain agree that no immediate ATLAS-root packet is open, `hold-current-root-posture` is the truthful bounded next action, current validation now reads `critical=0 error=0 warning=2 info=0`, the live stack lock now also pins `mazer` dirty on `codex/mazer-pass-2-recovery-tightening`, and the canonical marker plus posture mirrors no longer narrate the stale docs-ADR slice as the live Cortex next move.",
+    "freshness_checked_receipt": "docs/ops/ATLAS-ROOT-ZERO-WARNING-FLOOR-AFTER-MAZER-GENERATED-STATE-CLEANUP-RESYNC-2026-06-28.md",
+    "freshness_checked_at": "2026-06-28T07:19:45-04:00",
+    "freshness_basis": "The manifest now matches the current 41 percent advisory Cortex posture after the June 28 held-root resync, the immediate Book-side cleanup, the later warning-floor truth re-sync, and the later zero-warning closeout: the live seed and generated runtime chain agree that no immediate ATLAS-root packet is open, `hold-current-root-posture` is the truthful bounded next action, current validation now reads `critical=0 error=0 warning=0 info=0`, the live stack lock now pins `mazer` clean on `codex/mazer-pass-2-recovery-tightening`, and the canonical marker plus posture mirrors no longer narrate the stale docs-ADR slice as the live Cortex next move.",
     "marker_posture": [
       {
         "marker": "Cortex Readiness",

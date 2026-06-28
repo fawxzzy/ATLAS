@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-06-19T00:00:00Z",
-  "updated_at": "2026-06-28T07:09:44-04:00",
+  "updated_at": "2026-06-28T07:19:45-04:00",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -59,6 +59,7 @@
     "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-POST-CORTEX-HELD-ROOT-MAIN-CHECKPOINT-RESYNC-2026-06-28.md",
     "docs/ops/ATLAS-ROOT-PUBLISHED-CHECKPOINT-SEMANTICS-HARDENING-AND-RESTART-TRUTH-RESYNC-2026-06-28.md",
     "docs/ops/ATLAS-ROOT-VALIDATION-WARNING-FLOOR-AND-LIVE-MAZER-LOCK-TRUTH-RESYNC-2026-06-28.md",
+    "docs/ops/ATLAS-ROOT-ZERO-WARNING-FLOOR-AFTER-MAZER-GENERATED-STATE-CLEANUP-RESYNC-2026-06-28.md",
     "ops/atlas/qa/github_secret_readiness.py",
     "runtime/atlas/qa/github-secret-readiness.latest.json"
   ],
@@ -68,9 +69,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "truth-map-and-atlas-book",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/ATLAS-ROOT-VALIDATION-WARNING-FLOOR-AND-LIVE-MAZER-LOCK-TRUTH-RESYNC-2026-06-28.md",
+    "current_checkpoint_receipt": "docs/ops/ATLAS-ROOT-ZERO-WARNING-FLOOR-AFTER-MAZER-GENERATED-STATE-CLEANUP-RESYNC-2026-06-28.md",
     "checkpoint_commit": "26ceaaa4e50ec67122c65a7a26f29e0e7344e722",
-    "checkpoint_summary": "The lane still sits at 99 percent because the canonical Book surfaces already mirrored the current June 27 and June 28 stack, QA, and continuity truth through the hosted protected-dispatch unblock, machine-readable GitHub-secret audit, held-root Cortex cleanup, and published-checkpoint semantics hardening, and this follow-on now freezes the live warning-only validation floor and mazer lock posture without widening the lane: the latest published clean ATLAS root checkpoint still remains `26ceaaa4e50ec67122c65a7a26f29e0e7344e722`, the live stack lock now also pins `mazer` with active dirty state, and the current validation floor now reads `critical=0 error=0 warning=2 info=0` while restart truth stays otherwise unchanged.",
+    "checkpoint_summary": "The lane still sits at 99 percent because the canonical Book surfaces already mirrored the current June 27 and June 28 stack, QA, and continuity truth through the hosted protected-dispatch unblock, machine-readable GitHub-secret audit, held-root Cortex cleanup, published-checkpoint semantics hardening, and the warning-floor truth re-sync, and this follow-on now closes that residual warning class without widening the lane: the latest published clean ATLAS root checkpoint still remains `26ceaaa4e50ec67122c65a7a26f29e0e7344e722`, the live stack lock now pins `mazer` clean on the active codex branch, and the current validation floor is now back at `critical=0 error=0 warning=0 info=0` while restart truth stays otherwise unchanged.",
     "governing_receipts": [
       "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-MARKER-SCARCITY-AND-CLOSED-LADDER-CARRY-FORWARD-HYGIENE-PASS-3-2026-05-29.md",
       "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-POST-INVENTORY-CLOSEOUT-CLUSTER-PROJECTION-REFRESH-PASS-4-2026-06-02.md",
@@ -107,7 +108,8 @@
       "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-CORTEX-HELD-ROOT-PROJECTION-CLEANUP-2026-06-28.md",
       "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-POST-CORTEX-HELD-ROOT-MAIN-CHECKPOINT-RESYNC-2026-06-28.md",
       "docs/ops/ATLAS-ROOT-PUBLISHED-CHECKPOINT-SEMANTICS-HARDENING-AND-RESTART-TRUTH-RESYNC-2026-06-28.md",
-      "docs/ops/ATLAS-ROOT-VALIDATION-WARNING-FLOOR-AND-LIVE-MAZER-LOCK-TRUTH-RESYNC-2026-06-28.md"
+      "docs/ops/ATLAS-ROOT-VALIDATION-WARNING-FLOOR-AND-LIVE-MAZER-LOCK-TRUTH-RESYNC-2026-06-28.md",
+      "docs/ops/ATLAS-ROOT-ZERO-WARNING-FLOOR-AFTER-MAZER-GENERATED-STATE-CLEANUP-RESYNC-2026-06-28.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -255,6 +257,10 @@
         "role": "current exact Book-side validation warning-floor and live mazer stack-lock truth resync surface"
       },
       {
+        "path": "docs/ops/ATLAS-ROOT-ZERO-WARNING-FLOOR-AFTER-MAZER-GENERATED-STATE-CLEANUP-RESYNC-2026-06-28.md",
+        "role": "current exact Book-side zero-warning closeout and preserved live mazer stack-lock truth surface"
+      },
+      {
         "path": "ops/atlas/qa/github_secret_readiness.py",
         "role": "current exact operator helper for repeatable GitHub Actions secret-name readiness auditing"
       },
@@ -303,9 +309,9 @@
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/ATLAS-ROOT-VALIDATION-WARNING-FLOOR-AND-LIVE-MAZER-LOCK-TRUTH-RESYNC-2026-06-28.md",
-    "freshness_checked_at": "2026-06-28T07:09:44-04:00",
-    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture still match the refreshed current-state, marker, restart, system-map, and endgame mirrors after the hosted protected-dispatch unblock, GitHub-secret audit, held-root Cortex cleanup, post-Cortex held-root main-checkpoint re-sync, later published-checkpoint semantics hardening pass, and this final warning-floor truth re-sync: current protected-QA truth still projects playbook, trove, foundation, and lifeline as ready, Fitness at `manual_review` on clean committed head `b5f29793eb87dc7538a15160180f159688acd1b4` via run `fitness-progression-pr-smoke-20260628T072049067050Z` with `desktop.chromium.real.manual` now valid and only `android.chrome.real` plus `iphone.webkit.real` remaining open, the latest published clean ATLAS root checkpoint remains `26ceaaa4e50ec67122c65a7a26f29e0e7344e722`, the live stack lock now also pins `mazer` on `codex/mazer-pass-2-recovery-tightening` with `dirty: true`, protected dispatch run `28316073769` still proves the remaining ATLAS GitHub Actions blocker is only missing `BROWSERSTACK_USERNAME` and `BROWSERSTACK_ACCESS_KEY`, `runtime/atlas/qa/github-secret-readiness.latest.json` now reports `available_secret_count: 0`, the root validation floor now projects `critical=0 / error=0 / warning=2 / info=0` with retained non-blocking `mazer` generated-state warnings only, the initiative manifest-health surface still reads 19 ok / 0 warning / 0 error, the eligible-open-marker coverage and restart-index surfaces still read 7 of 7, and the canonical marker plus posture mirrors no longer narrate either the stale docs-ADR slice or the self-referential publication-commit rollover as the live next move.",
+    "freshness_checked_receipt": "docs/ops/ATLAS-ROOT-ZERO-WARNING-FLOOR-AFTER-MAZER-GENERATED-STATE-CLEANUP-RESYNC-2026-06-28.md",
+    "freshness_checked_at": "2026-06-28T07:19:45-04:00",
+    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture still match the refreshed current-state, marker, restart, system-map, and endgame mirrors after the hosted protected-dispatch unblock, GitHub-secret audit, held-root Cortex cleanup, post-Cortex held-root main-checkpoint re-sync, later published-checkpoint semantics hardening pass, the warning-floor truth re-sync, and the later zero-warning closeout: current protected-QA truth still projects playbook, trove, foundation, and lifeline as ready, Fitness at `manual_review` on clean committed head `b5f29793eb87dc7538a15160180f159688acd1b4` via run `fitness-progression-pr-smoke-20260628T072049067050Z` with `desktop.chromium.real.manual` now valid and only `android.chrome.real` plus `iphone.webkit.real` remaining open, the latest published clean ATLAS root checkpoint remains `26ceaaa4e50ec67122c65a7a26f29e0e7344e722`, the live stack lock now pins `mazer` clean on `codex/mazer-pass-2-recovery-tightening` at `bc6bba2c79a884721451501b11aad647504082d3`, protected dispatch run `28316073769` still proves the remaining ATLAS GitHub Actions blocker is only missing `BROWSERSTACK_USERNAME` and `BROWSERSTACK_ACCESS_KEY`, `runtime/atlas/qa/github-secret-readiness.latest.json` now reports `available_secret_count: 0`, the root validation floor now projects `critical=0 / error=0 / warning=0 / info=0`, the initiative manifest-health surface still reads 19 ok / 0 warning / 0 error, the eligible-open-marker coverage and restart-index surfaces still read 7 of 7, and the canonical marker plus posture mirrors no longer narrate either the stale docs-ADR slice or the self-referential publication-commit rollover as the live next move.",
     "marker_posture": [
       {
         "marker": "Truth Map & ATLAS Book",
