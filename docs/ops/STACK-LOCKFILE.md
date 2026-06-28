@@ -37,6 +37,7 @@ Shared comparison contract:
 - generator normalization and validator drift comparison both flow through the same canonical payload diff helpers in `ops/stack/generate_lockfile.py`
 - generator writes the canonical lockfile bytes from that shared path, and validation compares the on-disk file against those exact canonical bytes
 - lock refresh bugs are treated as normalization bugs first, not as operator excuses to repin blindly
+- repo root `.gitattributes` pins `stack.lock.yaml` to `LF` with `stack.lock.yaml text eol=lf` so Windows checkout normalization does not fabricate byte-level lock drift
 
 ## Schema
 
