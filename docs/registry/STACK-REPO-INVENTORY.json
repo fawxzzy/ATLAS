@@ -10,7 +10,7 @@
     "markdown": "docs/audits/STACK-REPO-INVENTORY.md"
   },
   "repo_count": 12,
-  "dirty_repo_count": 1,
+  "dirty_repo_count": 0,
   "release_eligible_count": 5,
   "repos": [
     {
@@ -122,7 +122,7 @@
       "status": "unmanaged",
       "remote_url": "https://github.com/fawxzzy/fawxzzy-fitness.git",
       "pinned_commit": null,
-      "current_commit": "b5f29793eb87dc7538a15160180f159688acd1b4",
+      "current_commit": "382781df3b05d1a326862dc9e4d6c54ecf5f4aec",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
@@ -317,13 +317,13 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "162905011a4684ad45991eead4cc1923af066aa6",
+      "current_commit": "87902ffe39c654170885454ad64bdefd02d28893",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
-      "current_ref": "codex/stack-lock-refresh-after-mazer-pr6",
-      "branch": "codex/stack-lock-refresh-after-mazer-pr6",
-      "dirty": true,
+      "current_ref": "main",
+      "branch": "main",
+      "dirty": false,
       "trust_class": "trusted",
       "release_eligible": false,
       "exists": true,
@@ -530,5 +530,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:14e86b9171023168dad5785572921eb1e2b4961c780cdd6daee7cd80bf2601c9"
+  "content_digest": "sha256:7f9a9fcfbc83a1f782d8a51bc67c667b7f4a75a1bff3399018cbc0cab3c24b0b"
 }
