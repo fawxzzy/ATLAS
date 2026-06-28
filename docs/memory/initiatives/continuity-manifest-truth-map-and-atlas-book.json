@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-06-19T00:00:00Z",
-  "updated_at": "2026-06-28T15:47:24.8489889-04:00",
+  "updated_at": "2026-06-28T16:30:22.5354165-04:00",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -63,6 +63,7 @@
     "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-RELEASE-GATE-PACKET-RESYNC-2026-06-28.md",
     "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-HEAD-AND-ROOT-CLEAN-SYNC-RESYNC-2026-06-28.md",
     "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-LATEST-CLEAN-HEAD-RESYNC-2026-06-28.md",
+    "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-MOBILE-RECAP-CARDS-CLEAN-HEAD-RESYNC-2026-06-28.md",
     "ops/atlas/qa/release_gate_packet.py",
     "ops/atlas/qa/github_secret_readiness.py",
     "runtime/atlas/qa/github-secret-readiness.latest.json"
@@ -73,9 +74,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "truth-map-and-atlas-book",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-LATEST-CLEAN-HEAD-RESYNC-2026-06-28.md",
-    "checkpoint_commit": "44c1934e696b2f702dd5cb0cce29355c287eff72",
-    "checkpoint_summary": "The lane still sits at 99 percent because the canonical Book surfaces already mirrored the current June 27 and June 28 stack, QA, and continuity truth through the hosted protected-dispatch unblock, machine-readable GitHub-secret audit, held-root Cortex cleanup, published-checkpoint semantics hardening, the warning-floor truth re-sync, the later zero-warning closeout, the combined blocked-run handoff packet, and the earlier clean-sync projection refresh, and this follow-on now refreshes the latest clean owner-head projection without widening the lane: clean Fitness head is now `8d05c2431680fd7ae6f381b09433dabfdf60b13d`, the clean published ATLAS root checkpoint consumed by this refresh is `44c1934e696b2f702dd5cb0cce29355c287eff72`, the current blocked run still has one exact handoff at `runtime/atlas/qa/runs/fitness-progression-pr-smoke-20260628T072049067050Z/release-gate.packet-prep.md`, the protected run still remains `manual_review`, and root validation still remains `critical=0 error=0 warning=0 info=0`.",
+    "current_checkpoint_receipt": "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-MOBILE-RECAP-CARDS-CLEAN-HEAD-RESYNC-2026-06-28.md",
+    "checkpoint_commit": "bd55e99b8dd7a16ce3c413540c3415709e2058bc",
+    "checkpoint_summary": "The lane still sits at 99 percent because the canonical Book surfaces already mirrored the current June 27 and June 28 stack, QA, and continuity truth through the hosted protected-dispatch unblock, machine-readable GitHub-secret audit, held-root Cortex cleanup, published-checkpoint semantics hardening, the warning-floor truth re-sync, the later zero-warning closeout, the combined blocked-run handoff packet, the earlier clean-sync projection refresh, and the earlier latest-clean-head projection refresh, and this follow-on now refreshes the mobile-recap-cards clean owner-head projection without widening the lane: clean Fitness head is now `e2295f166aa3afb0104f657a0b3affe99ae733cc`, the clean published ATLAS root checkpoint consumed by this refresh is `bd55e99b8dd7a16ce3c413540c3415709e2058bc`, the current blocked run still has one exact handoff at `runtime/atlas/qa/runs/fitness-progression-pr-smoke-20260628T072049067050Z/release-gate.packet-prep.md`, the protected run still remains `manual_review`, and root validation still remains `critical=0 error=0 warning=0 info=0`.",
     "governing_receipts": [
       "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-MARKER-SCARCITY-AND-CLOSED-LADDER-CARRY-FORWARD-HYGIENE-PASS-3-2026-05-29.md",
       "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-POST-INVENTORY-CLOSEOUT-CLUSTER-PROJECTION-REFRESH-PASS-4-2026-06-02.md",
@@ -116,7 +117,8 @@
       "docs/ops/ATLAS-ROOT-ZERO-WARNING-FLOOR-AFTER-MAZER-GENERATED-STATE-CLEANUP-RESYNC-2026-06-28.md",
       "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-RELEASE-GATE-PACKET-RESYNC-2026-06-28.md",
       "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-HEAD-AND-ROOT-CLEAN-SYNC-RESYNC-2026-06-28.md",
-      "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-LATEST-CLEAN-HEAD-RESYNC-2026-06-28.md"
+      "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-LATEST-CLEAN-HEAD-RESYNC-2026-06-28.md",
+      "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-MOBILE-RECAP-CARDS-CLEAN-HEAD-RESYNC-2026-06-28.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -268,8 +270,8 @@
         "role": "current exact Book-side zero-warning closeout and preserved live mazer stack-lock truth surface"
       },
       {
-        "path": "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-LATEST-CLEAN-HEAD-RESYNC-2026-06-28.md",
-        "role": "current exact Book-side projection refresh for the latest clean Fitness head, the latest clean published root checkpoint consumed by this refresh, and the still-blocked combined release-gate packet"
+        "path": "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-MOBILE-RECAP-CARDS-CLEAN-HEAD-RESYNC-2026-06-28.md",
+        "role": "current exact Book-side projection refresh for the mobile-recap-cards clean Fitness head, the latest clean published root checkpoint consumed by this refresh, and the still-blocked combined release-gate packet"
       },
       {
         "path": "ops/atlas/qa/release_gate_packet.py",
@@ -324,9 +326,9 @@
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-LATEST-CLEAN-HEAD-RESYNC-2026-06-28.md",
-    "freshness_checked_at": "2026-06-28T15:47:24.8489889-04:00",
-    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture still match the refreshed current-state, marker, restart, system-map, and endgame mirrors after the hosted protected-dispatch unblock, GitHub-secret audit, held-root Cortex cleanup, post-Cortex held-root main-checkpoint re-sync, later published-checkpoint semantics hardening pass, the warning-floor truth re-sync, the later zero-warning closeout, the combined release-gate packet absorption, the earlier clean-sync projection refresh, and this later latest-clean-head projection refresh: current protected-QA truth still projects playbook, trove, foundation, and lifeline as ready, Fitness at `manual_review` on clean committed head `8d05c2431680fd7ae6f381b09433dabfdf60b13d` via run `fitness-progression-pr-smoke-20260628T072049067050Z` with `desktop.chromium.real.manual` now valid and only `android.chrome.real` plus `iphone.webkit.real` remaining open, `runtime/atlas/qa/runs/fitness-progression-pr-smoke-20260628T072049067050Z/release-gate.packet-prep.md` still carries one exact blocked-run operator handoff, the clean published root checkpoint consumed by this refresh is `44c1934e696b2f702dd5cb0cce29355c287eff72`, protected dispatch run `28316073769` still proves the remaining ATLAS GitHub Actions blocker is only missing `BROWSERSTACK_USERNAME` and `BROWSERSTACK_ACCESS_KEY`, `runtime/atlas/qa/github-secret-readiness.latest.json` now reports `available_secret_count: 0`, the root validation floor now projects `critical=0 / error=0 / warning=0 / info=0`, the initiative manifest-health surface still reads 19 ok / 0 warning / 0 error, the eligible-open-marker coverage and restart-index surfaces still read 7 of 7, and the canonical marker plus posture mirrors no longer narrate the blocked run through split helper surfaces only.",
+    "freshness_checked_receipt": "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-MOBILE-RECAP-CARDS-CLEAN-HEAD-RESYNC-2026-06-28.md",
+    "freshness_checked_at": "2026-06-28T16:30:22.5354165-04:00",
+    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture still match the refreshed current-state, marker, restart, system-map, and endgame mirrors after the hosted protected-dispatch unblock, GitHub-secret audit, held-root Cortex cleanup, post-Cortex held-root main-checkpoint re-sync, later published-checkpoint semantics hardening pass, the warning-floor truth re-sync, the later zero-warning closeout, the combined release-gate packet absorption, the earlier clean-sync projection refresh, the earlier latest-clean-head projection refresh, and this later mobile-recap-cards clean-head projection refresh: current protected-QA truth still projects playbook, trove, foundation, and lifeline as ready, Fitness at `manual_review` on clean committed head `e2295f166aa3afb0104f657a0b3affe99ae733cc` via run `fitness-progression-pr-smoke-20260628T072049067050Z` with `desktop.chromium.real.manual` now valid and only `android.chrome.real` plus `iphone.webkit.real` remaining open, `runtime/atlas/qa/runs/fitness-progression-pr-smoke-20260628T072049067050Z/release-gate.packet-prep.md` still carries one exact blocked-run operator handoff, the clean published root checkpoint consumed by this refresh is `bd55e99b8dd7a16ce3c413540c3415709e2058bc`, protected dispatch run `28316073769` still proves the remaining ATLAS GitHub Actions blocker is only missing `BROWSERSTACK_USERNAME` and `BROWSERSTACK_ACCESS_KEY`, `runtime/atlas/qa/github-secret-readiness.latest.json` now reports `available_secret_count: 0`, the root validation floor now projects `critical=0 / error=0 / warning=0 / info=0`, the initiative manifest-health surface still reads 19 ok / 0 warning / 0 error, the eligible-open-marker coverage and restart-index surfaces still read 7 of 7, and the canonical marker plus posture mirrors no longer narrate the blocked run through split helper surfaces only.",
     "marker_posture": [
       {
         "marker": "Truth Map & ATLAS Book",
