@@ -22,7 +22,11 @@ MARKER_CHECKPOINT_AGENT_ID = "marker-checkpoint-shadow"
 ACTIVE_FRONT_PAGE_HEADER = "## Active Front-Page Marker Table"
 SUPPORTING_OPEN_HEADER = "## Supporting Open Markers"
 MARKER_LINE_RE = re.compile(r"^- (?P<name>.+?): `(?P<value>\d+%)`$")
-NEXT_LANE_LINE_RE = re.compile(r"the exact next lane now routes to `(?P<lane>[^`]+)`", re.IGNORECASE)
+NEXT_LANE_LINE_RES = (
+    re.compile(r"the exact next lane now routes to `(?P<lane>[^`]+)`", re.IGNORECASE),
+    re.compile(r"the exact next lane package is now `(?P<lane>[^`]+)`", re.IGNORECASE),
+    re.compile(r"the current active ATLAS-side lane is now `(?P<lane>[^`]+)`", re.IGNORECASE),
+)
 
 
 def default_marker_checkpoint_json_path(root: Path | None = None) -> Path:
@@ -84,9 +88,10 @@ def _parse_marker_section(text: str, header: str) -> list[dict[str, str]]:
 
 def _extract_next_lane(restart_text: str) -> str:
     for line in restart_text.splitlines():
-        match = NEXT_LANE_LINE_RE.search(line)
-        if match is not None:
-            return match.group("lane").strip()
+        for pattern in NEXT_LANE_LINE_RES:
+            match = pattern.search(line)
+            if match is not None:
+                return match.group("lane").strip()
     raise ValueError("Restart surface does not contain the expected next-lane route line.")
 
 

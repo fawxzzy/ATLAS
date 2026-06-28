@@ -102,6 +102,15 @@ class CortexShadowMarkerCheckpointTests(unittest.TestCase):
         self.assertIn("Can ratchet markers: `no`", summary)
         self.assertIn("## Active Front-Page Markers", summary)
 
+    def test_current_active_lane_wording_is_accepted(self) -> None:
+        root = self._seed_temp_root(
+            restart_surface_text="# Restart\n\n- the current active ATLAS-side lane is now `Sandbox Simulation Readiness`\n"
+        )
+
+        payload = build_shadow_marker_checkpoint_payload(root=root)
+
+        self.assertEqual("Sandbox Simulation Readiness", payload["marker_checkpoint"]["next_lane_route"])
+
     def test_missing_next_lane_fails_clearly(self) -> None:
         root = self._seed_temp_root(restart_surface_text="# Restart\n\n- no lane route here\n")
 
