@@ -122,13 +122,13 @@
       "status": "unmanaged",
       "remote_url": "https://github.com/fawxzzy/fawxzzy-fitness.git",
       "pinned_commit": null,
-      "current_commit": "9403472d200e7d620fc1ba8e00d6d9509f00510f",
+      "current_commit": "12d726b57edc1c8cb81128eac9e47daabec97cd1",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
       "current_ref": "main",
       "branch": "main",
-      "dirty": false,
+      "dirty": true,
       "trust_class": "adjacent",
       "release_eligible": false,
       "exists": true,
@@ -317,13 +317,13 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "c1725f87def092c5eb8819611d0e33a600c8b21c",
+      "current_commit": "0f991f2e6100a314b354b3d4630cad2ee60cff58",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
       "current_ref": "codex/stack-lock-refresh-post-playbook-resync",
       "branch": "codex/stack-lock-refresh-post-playbook-resync",
-      "dirty": true,
+      "dirty": false,
       "trust_class": "trusted",
       "release_eligible": false,
       "exists": true,
@@ -530,5 +530,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:6cff78a9ac5ee473320c3eb766b7645be62f3c906d55296697734975a56b9c5c"
+  "content_digest": "sha256:d0904855c4eb18c51d209f761e28d706e6aaf17a8a2b7c619635306aec9e29e9"
 }

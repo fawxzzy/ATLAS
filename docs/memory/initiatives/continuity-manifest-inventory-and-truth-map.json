@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-05-29T00:00:00Z",
-  "updated_at": "2026-06-27T00:00:00-04:00",
+  "updated_at": "2026-06-28T00:00:00-04:00",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -57,7 +57,8 @@
     "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-PROTECTED-QA-AND-DISCORDOS-PROJECTION-REFRESH-CONTINUITY-RESYNC-2026-06-27.md",
     "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-DESKTOP-MANUAL-ATTESTATION-MOBILE-GATE-REFRESH-CONTINUITY-RESYNC-2026-06-27.md",
     "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-LIFELINE-RUNTIME-RESIDUE-ZERO-WARNING-CLOSEOUT-AND-STACK-RESYNC-2026-06-27.md",
-    "docs/ops/SANDBOX-SIMULATION-READINESS-STARTER-PACKET-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-27.md"
+    "docs/ops/SANDBOX-SIMULATION-READINESS-STARTER-PACKET-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-27.md",
+    "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-CURRENT-SHA-BLOCKED-READINESS-AND-INVENTORY-RESYNC-2026-06-28.md"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -65,9 +66,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "inventory-and-truth-map",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/SANDBOX-SIMULATION-READINESS-STARTER-PACKET-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-27.md",
+    "current_checkpoint_receipt": "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-CURRENT-SHA-BLOCKED-READINESS-AND-INVENTORY-RESYNC-2026-06-28.md",
     "checkpoint_commit": "main",
-    "checkpoint_summary": "The lane now sits at 86 percent because the canonical inventory and projection spine still holds while the current system-map and restart mirrors stay aligned to the June 27 protected-QA and DiscordOS truth, the root validation floor remains at critical 0 / error 0 / warning 0 / info 0 after the Lifeline residue cleanup, the seeded initiative continuity-manifest set is now widened to 19 of 19 ok with zero warnings and zero errors, and all 7 of 7 eligible still-open markers are now both manifest-backed and restart-ready from one machine-readable index after Sandbox Simulation Readiness gained its first starter packet.",
+    "checkpoint_summary": "The lane now sits at 87 percent because the canonical inventory and projection spine now also absorbs one real current-state resync: published inventory now reflects clean root commit `0f991f2e6100a314b354b3d4630cad2ee60cff58`, dirty Fitness `main` at `12d726b57edc1c8cb81128eac9e47daabec97cd1`, and the protected-QA handoff mirrors now state current-SHA Fitness `blocked` truth on run `fitness-progression-pr-smoke-20260628T033301205065Z` instead of stale `manual_review` wording, while the seeded initiative continuity-manifest set remains 19 of 19 ok with zero warnings and zero errors and all 7 of 7 eligible still-open markers remain both manifest-backed and restart-ready from one machine-readable index.",
     "governing_receipts": [
       "docs/ops/STACK-LANE-0-BASELINE-INVENTORY-2026-05-22.md",
       "docs/ops/STACK-LANE-0-TRUTH-MAP-2026-05-22.md",
@@ -91,7 +92,8 @@
       "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-PROTECTED-QA-AND-DISCORDOS-PROJECTION-REFRESH-CONTINUITY-RESYNC-2026-06-27.md",
       "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-DESKTOP-MANUAL-ATTESTATION-MOBILE-GATE-REFRESH-CONTINUITY-RESYNC-2026-06-27.md",
       "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-LIFELINE-RUNTIME-RESIDUE-ZERO-WARNING-CLOSEOUT-AND-STACK-RESYNC-2026-06-27.md",
-      "docs/ops/SANDBOX-SIMULATION-READINESS-STARTER-PACKET-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-27.md"
+      "docs/ops/SANDBOX-SIMULATION-READINESS-STARTER-PACKET-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-27.md",
+      "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-CURRENT-SHA-BLOCKED-READINESS-AND-INVENTORY-RESYNC-2026-06-28.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -151,6 +153,10 @@
         "role": "current exact projection refresh and continuity re-sync surface for inventory-facing mirrors"
       },
       {
+        "path": "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-CURRENT-SHA-BLOCKED-READINESS-AND-INVENTORY-RESYNC-2026-06-28.md",
+        "role": "current exact inventory-facing projection refresh and blocked-Fitness current-SHA re-sync surface"
+      },
+      {
         "path": "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-DESKTOP-MANUAL-ATTESTATION-MOBILE-GATE-REFRESH-CONTINUITY-RESYNC-2026-06-27.md",
         "role": "historical projection refresh surface for the earlier narrowed Fitness mobile-only release gate before the June 28 current-SHA resync"
       },
@@ -199,6 +205,10 @@
     ],
     "blocked_or_gated_work": [
       {
+        "item": "re-publishing current protected-release-refresh latest for the Fitness release lane",
+        "requirement": "blocked until owner-side Fitness execution repair clears the current prepare and preflight failure class surfaced on 2026-06-28, including `next` command-resolution failure and `DevMobileRegressionRoute.tsx` `TS2448` / `TS2454` typecheck failure"
+      },
+      {
         "item": "broader inventory cleanup or repo-local truth rewrite execution",
         "requirement": "blocked until a distinct owner-facing or control-plane execution lane is explicitly selected rather than implied by the current docs-only refresh result"
       },
@@ -219,17 +229,17 @@
       {
         "package": "No immediate Inventory & Truth Map docs-only follow-on packet",
         "mode": "hold-flat after open-marker restart-index closeout",
-        "reason": "the current inventory freshness gap is cleared, seeded initiative manifest health is fully clean at 19 of 19, all 7 of 7 eligible open markers are manifest-backed, and all 7 of 7 eligible open markers are restart-ready from one machine-readable index; reopen only with distinct restart-truth drift, marker pressure, owner-truth widening, or broader continuity-read automation than the current health-plus-coverage-plus-restart-index surface"
+        "reason": "the published inventory and Book-side protected-QA mirrors now match current root-clean / Fitness-dirty / Fitness-blocked truth, seeded initiative manifest health remains fully clean at 19 of 19, and all 7 of 7 eligible open markers remain manifest-backed and restart-ready from one machine-readable index; reopen only with distinct restart-truth drift, owner-side blocker conversion, owner-truth widening, or broader continuity-read automation than the current health-plus-coverage-plus-restart-index surface"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/SANDBOX-SIMULATION-READINESS-STARTER-PACKET-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-27.md",
-    "freshness_checked_at": "2026-06-27T00:00:00-04:00",
-    "freshness_basis": "the current checkpoint, marker posture, lane-state projection, blocked-work posture, and next-package posture now match the refreshed inventory-facing mirrors after the June 27 Sandbox starter-packet widening on top of the protected-QA and DiscordOS projection re-sync: the root validation floor remains at critical 0 / error 0 / warning 0 / info 0, the initiative manifest-health surface now reads 19 ok / 0 warning / 0 error, the eligible-open-marker coverage surface now reads 7 of 7 manifest-backed, and the eligible-open-marker restart index now reads 7 of 7 restart-ready.",
+    "freshness_checked_receipt": "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-CURRENT-SHA-BLOCKED-READINESS-AND-INVENTORY-RESYNC-2026-06-28.md",
+    "freshness_checked_at": "2026-06-28T00:00:00-04:00",
+    "freshness_basis": "the current checkpoint, marker posture, lane-state projection, blocked-work posture, and next-package posture now match the refreshed inventory-facing mirrors after the June 28 current-SHA blocked-Fitness resync: published inventory now reflects clean root `0f991f2e6100a314b354b3d4630cad2ee60cff58`, dirty Fitness `main` at `12d726b57edc1c8cb81128eac9e47daabec97cd1`, release readiness now reads 4 ready / 1 blocked / 1 not applicable with Fitness blocked on run `fitness-progression-pr-smoke-20260628T033301205065Z`, the initiative manifest-health surface still reads 19 ok / 0 warning / 0 error, the eligible-open-marker coverage surface still reads 7 of 7 manifest-backed, and the eligible-open-marker restart index still reads 7 of 7 restart-ready.",
     "marker_posture": [
       {
         "marker": "Inventory & Truth Map",
-        "percent": 86,
+        "percent": 87,
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ]
