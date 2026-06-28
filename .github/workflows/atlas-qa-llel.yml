@@ -153,6 +153,15 @@ jobs:
           fi
           "${cmd[@]}"
 
+      - name: Validate provider readiness
+        if: env.QA_PROVIDER != 'none'
+        shell: bash
+        env:
+          BROWSERSTACK_USERNAME: ${{ github.event_name == 'workflow_dispatch' && secrets.BROWSERSTACK_USERNAME || '' }}
+          BROWSERSTACK_ACCESS_KEY: ${{ github.event_name == 'workflow_dispatch' && secrets.BROWSERSTACK_ACCESS_KEY || '' }}
+        run: |
+          python ops/atlas/qa/provider_readiness.py --provider "ops/atlas/qa/providers/${QA_PROVIDER}.json" --adapter "${QA_ADAPTER}" --scenario "${QA_SCENARIO}"
+
       - name: Install browser runtime
         if: env.QA_MODE != 'dry-run' && steps.adapter.outputs.capture_tool == 'playwright'
         working-directory: ${{ steps.adapter.outputs.repo_path }}

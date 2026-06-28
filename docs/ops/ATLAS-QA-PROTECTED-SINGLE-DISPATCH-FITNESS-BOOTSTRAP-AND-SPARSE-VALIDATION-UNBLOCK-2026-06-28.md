@@ -45,6 +45,7 @@ Changes:
 - uploaded artifacts now include `bootstrap-adapter-repo.latest.json` and `.md`
 - the protected single-dispatch `ci_gate.py` invocation now runs in sparse stack-validation mode and requires the bootstrapped adapter repo to be present
 - `atlas-release-readiness` now uses `python ops/validation/validate_stack.py --allow-missing-locked-repos` on the hosted runner
+- provider-requested workflow runs now execute `provider_readiness.py` before browser/runtime startup so missing BrowserStack credentials fail at the correct seam
 
 ### CI gate CLI support
 
@@ -58,6 +59,7 @@ Changes:
   - `--allow-missing-locked-repos`
   - `--require-present-repo-id`
 - passed those flags through to the existing sparse validator path already used by protected release refresh logic
+- provider-requested runs now fail immediately when the requested provider is unavailable instead of silently falling back to local execution
 
 ### Runbook update
 

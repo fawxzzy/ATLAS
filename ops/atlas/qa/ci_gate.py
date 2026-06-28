@@ -372,6 +372,10 @@ def ci_gate(
     if adapter_errors:
         raise RuntimeError("; ".join(adapter_errors))
     provider_status = _provider_status(root=base_root, provider=provider)
+    if provider and provider_status["status"] != "ready":
+        missing = ", ".join(str(item) for item in provider_status.get("missing_env_vars", []) if str(item).strip())
+        detail = f"missing environment variables: {missing}" if missing else f"status={provider_status['status']}"
+        raise RuntimeError(f"Requested provider '{provider}' is unavailable: {detail}.")
     override_path, override_handle = _provider_override_file(
         root=base_root,
         adapter_payload=adapter_payload,
