@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-06-19T00:00:00Z",
-  "updated_at": "2026-06-28T03:47:00-04:00",
+  "updated_at": "2026-06-28T04:31:13-04:00",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -52,7 +52,10 @@
     "docs/ops/ATLAS-QA-FITNESS-DIRTY-BRANCH-MANUAL-REVIEW-AND-INVENTORY-RESYNC-2026-06-28.md",
     "docs/ops/ATLAS-QA-FITNESS-CLEAN-BRANCH-MANUAL-REVIEW-AND-INVENTORY-RESYNC-2026-06-28.md",
     "docs/ops/ATLAS-ROOT-CLEAN-BRANCH-ZERO-DIRTY-REPO-INVENTORY-RESYNC-2026-06-28.md",
-    "docs/ops/ATLAS-ROOT-MAIN-AND-FITNESS-POST-VERIFY-ZERO-DIRTY-INVENTORY-RESYNC-2026-06-28.md"
+    "docs/ops/ATLAS-ROOT-MAIN-AND-FITNESS-POST-VERIFY-ZERO-DIRTY-INVENTORY-RESYNC-2026-06-28.md",
+    "docs/ops/ATLAS-QA-PROTECTED-SINGLE-DISPATCH-FITNESS-BOOTSTRAP-AND-SPARSE-VALIDATION-UNBLOCK-2026-06-28.md",
+    "ops/atlas/qa/github_secret_readiness.py",
+    "runtime/atlas/qa/github-secret-readiness.latest.json"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -60,9 +63,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "truth-map-and-atlas-book",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/ATLAS-QA-FITNESS-CURRENT-RUN-DESKTOP-CLOSEOUT-AND-MOBILE-ONLY-GATE-RESYNC-2026-06-28.md",
-    "checkpoint_commit": "327e2bb8e0c8c74f440f8425df56e7488ab11672",
-    "checkpoint_summary": "The lane still sits at 99 percent because the canonical Book surfaces now mirror the current June 27 and June 28 stack, QA, and continuity truth coherently through the narrowed current-run Fitness desktop closeout while preserving the truthful held dispatcher result of no immediate ATLAS-root packet open and the still-open mobile-only `fitness` gate.",
+    "current_checkpoint_receipt": "docs/ops/ATLAS-QA-PROTECTED-SINGLE-DISPATCH-FITNESS-BOOTSTRAP-AND-SPARSE-VALIDATION-UNBLOCK-2026-06-28.md",
+    "checkpoint_commit": "83ae7197abb19ce3fdfc828e4a139e693c7ff834",
+    "checkpoint_summary": "The lane still sits at 99 percent because the canonical Book surfaces now mirror the current June 27 and June 28 stack, QA, and continuity truth coherently through the hosted protected-dispatch unblock plus machine-readable GitHub-secret audit while preserving the truthful held dispatcher result of no immediate ATLAS-root packet open and the still-open mobile-only `fitness` gate plus upstream BrowserStack secret blocker.",
     "governing_receipts": [
       "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-MARKER-SCARCITY-AND-CLOSED-LADDER-CARRY-FORWARD-HYGIENE-PASS-3-2026-05-29.md",
       "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-POST-INVENTORY-CLOSEOUT-CLUSTER-PROJECTION-REFRESH-PASS-4-2026-06-02.md",
@@ -93,7 +96,8 @@
       "docs/ops/ATLAS-QA-FITNESS-CLEAN-BRANCH-MANUAL-REVIEW-AND-INVENTORY-RESYNC-2026-06-28.md",
       "docs/ops/ATLAS-ROOT-CLEAN-BRANCH-ZERO-DIRTY-REPO-INVENTORY-RESYNC-2026-06-28.md",
       "docs/ops/ATLAS-ROOT-MAIN-AND-FITNESS-POST-VERIFY-ZERO-DIRTY-INVENTORY-RESYNC-2026-06-28.md",
-      "docs/ops/ATLAS-QA-FITNESS-CURRENT-RUN-DESKTOP-CLOSEOUT-AND-MOBILE-ONLY-GATE-RESYNC-2026-06-28.md"
+      "docs/ops/ATLAS-QA-FITNESS-CURRENT-RUN-DESKTOP-CLOSEOUT-AND-MOBILE-ONLY-GATE-RESYNC-2026-06-28.md",
+      "docs/ops/ATLAS-QA-PROTECTED-SINGLE-DISPATCH-FITNESS-BOOTSTRAP-AND-SPARSE-VALIDATION-UNBLOCK-2026-06-28.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -215,6 +219,18 @@
       {
         "path": "docs/ops/ATLAS-QA-FITNESS-CURRENT-RUN-DESKTOP-CLOSEOUT-AND-MOBILE-ONLY-GATE-RESYNC-2026-06-28.md",
         "role": "current exact Book-side current-run desktop closeout and narrowed mobile-only Fitness gate projection surface"
+      },
+      {
+        "path": "docs/ops/ATLAS-QA-PROTECTED-SINGLE-DISPATCH-FITNESS-BOOTSTRAP-AND-SPARSE-VALIDATION-UNBLOCK-2026-06-28.md",
+        "role": "current exact Book-side hosted protected-dispatch unblock and GitHub-secret blocker projection surface"
+      },
+      {
+        "path": "ops/atlas/qa/github_secret_readiness.py",
+        "role": "current exact operator helper for repeatable GitHub Actions secret-name readiness auditing"
+      },
+      {
+        "path": "runtime/atlas/qa/github-secret-readiness.latest.json",
+        "role": "current exact machine-readable ATLAS GitHub Actions secret-name blocker surface"
       }
     ],
     "verification_adoption_surfaces": [
@@ -246,20 +262,20 @@
       },
       {
         "item": "higher marker movement above the current refresh-backed ratchet",
-        "requirement": "blocked until owner truth widens, continuity automation expands materially beyond the current fully clean 19-manifest health plus 7-of-7 eligible-open-marker coverage plus 7-of-7 restart-index surface, or a new projection blocker class beyond the freshly absorbed AI repetition selector-to-receipt widening is cleared"
+        "requirement": "blocked until owner truth widens, continuity automation expands materially beyond the current fully clean 19-manifest health plus 7-of-7 eligible-open-marker coverage plus 7-of-7 restart-index surface plus the newly added repeatable GitHub-secret blocker audit, or a new projection blocker class beyond the freshly absorbed AI repetition selector-to-receipt widening and protected-QA secret-readiness projection is cleared"
       }
     ],
     "next_package_ladder": [
       {
         "package": "No immediate Truth Map & ATLAS Book docs-only follow-on packet",
         "mode": "hold-flat after AI repetition selector-to-receipt projection refresh",
-        "reason": "the current projection drift, manifest-gap class, current-packet basis drift, seeded initiative manifest-health warning/error class, eligible-open-marker coverage gap, eligible-open-marker restart-index gap, the current Book-side root-validation warning-count drift, the root-owned snapshot handoff path-leak slice, the disposable root capture-artifact slice, the local _stack receipt path-literal slice, the disposable Playbook dependency-residue slice, the final retained Playbook/Fitness mutable-state warning class, the post-closeout continuity-restore projection gap, the eligible-open-marker count drift, the stale owner-side Discord packet routing, the consumed local-vs-remote parity caveat, the newly landed AI repetition selector-to-receipt operator widening, the preserved Trove unblock, the current-main Fitness visual-gate reversal, the dirty-branch Fitness manual-review resync, the clean-branch Fitness manual-review resync, the zero-dirty-repo Atlas-root clean-branch inventory resync, the later post-verify Atlas-root main-state plus current-Fitness-head inventory resync, and the current-run Fitness desktop closeout are now projected canonically; reopen only with distinct projection drift, marker pressure, owner-truth widening, or broader continuity automation"
+        "reason": "the current projection drift, manifest-gap class, current-packet basis drift, seeded initiative manifest-health warning/error class, eligible-open-marker coverage gap, eligible-open-marker restart-index gap, the current Book-side root-validation warning-count drift, the root-owned snapshot handoff path-leak slice, the disposable root capture-artifact slice, the local _stack receipt path-literal slice, the disposable Playbook dependency-residue slice, the final retained Playbook/Fitness mutable-state warning class, the post-closeout continuity-restore projection gap, the eligible-open-marker count drift, the stale owner-side Discord packet routing, the consumed local-vs-remote parity caveat, the newly landed AI repetition selector-to-receipt operator widening, the preserved Trove unblock, the current-main Fitness visual-gate reversal, the dirty-branch Fitness manual-review resync, the clean-branch Fitness manual-review resync, the zero-dirty-repo Atlas-root clean-branch inventory resync, the later post-verify Atlas-root main-state plus current-Fitness-head inventory resync, the current-run Fitness desktop closeout, and the repeatable GitHub-secret blocker audit are now projected canonically; reopen only with distinct projection drift, marker pressure, owner-truth widening, or broader continuity automation"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/ATLAS-QA-FITNESS-CURRENT-RUN-DESKTOP-CLOSEOUT-AND-MOBILE-ONLY-GATE-RESYNC-2026-06-28.md",
-    "freshness_checked_at": "2026-06-28T03:47:00-04:00",
-    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture now match the refreshed current-state, marker, restart, system-map, and endgame mirrors after the current-run desktop closeout: current protected-QA truth projects playbook, trove, foundation, and lifeline as ready, Fitness at `manual_review` on clean committed head `b5f29793eb87dc7538a15160180f159688acd1b4` via run `fitness-progression-pr-smoke-20260628T072049067050Z` with `desktop.chromium.real.manual` now valid and only `android.chrome.real` plus `iphone.webkit.real` remaining open, the ATLAS root itself still projects clean on `main` at `327e2bb8e0c8c74f440f8425df56e7488ab11672`, current DiscordOS truth still projects live runtime, publication, and feedback cutover with explicit retained Fitness seams, the root validation floor still projects `critical=0 / error=0 / warning=0 / info=0`, the initiative manifest-health surface still reads 19 ok / 0 warning / 0 error, the eligible-open-marker coverage and restart-index surfaces still read 7 of 7, and the canonical Book mirrors now also absorb that narrowed current-run Fitness gate instead of leaving the execution change only at the leaf receipt level.",
+    "freshness_checked_receipt": "docs/ops/ATLAS-QA-PROTECTED-SINGLE-DISPATCH-FITNESS-BOOTSTRAP-AND-SPARSE-VALIDATION-UNBLOCK-2026-06-28.md",
+    "freshness_checked_at": "2026-06-28T04:31:13-04:00",
+    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture now match the refreshed current-state, marker, restart, system-map, and endgame mirrors after the hosted protected-dispatch unblock plus GitHub-secret audit: current protected-QA truth projects playbook, trove, foundation, and lifeline as ready, Fitness at `manual_review` on clean committed head `b5f29793eb87dc7538a15160180f159688acd1b4` via run `fitness-progression-pr-smoke-20260628T072049067050Z` with `desktop.chromium.real.manual` now valid and only `android.chrome.real` plus `iphone.webkit.real` remaining open, protected dispatch run `28315893818` proved the hosted bootstrap and sparse-validation seam is repaired, protected dispatch run `28316073769` proved the remaining ATLAS GitHub Actions blocker is only missing `BROWSERSTACK_USERNAME` and `BROWSERSTACK_ACCESS_KEY`, `runtime/atlas/qa/github-secret-readiness.latest.json` now reports `available_secret_count: 0`, the ATLAS root itself still projects the protected-QA secret-audit state landed on `main` at `28cde650d1228da14e659fe27f009e4084711317` and the Book-side restart mirrors refreshed through `83ae7197abb19ce3fdfc828e4a139e693c7ff834`, current DiscordOS truth still projects live runtime, publication, and feedback cutover with explicit retained Fitness seams, the root validation floor still projects `critical=0 / error=0 / warning=0 / info=0`, the initiative manifest-health surface still reads 19 ok / 0 warning / 0 error, the eligible-open-marker coverage and restart-index surfaces still read 7 of 7, and the canonical Book mirrors now also absorb that machine-readable secret blocker instead of leaving the final protected-QA state only at the leaf receipt and workflow-log level.",
     "marker_posture": [
       {
         "marker": "Truth Map & ATLAS Book",
