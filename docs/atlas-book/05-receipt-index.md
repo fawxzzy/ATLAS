@@ -66,6 +66,7 @@
 - [ATLAS Root Clean Branch Zero Dirty Repo Inventory Re-Sync](../ops/ATLAS-ROOT-CLEAN-BRANCH-ZERO-DIRTY-REPO-INVENTORY-RESYNC-2026-06-28.md)
 - [ATLAS Root Main And Fitness Post-Verify Zero Dirty Inventory Re-Sync](../ops/ATLAS-ROOT-MAIN-AND-FITNESS-POST-VERIFY-ZERO-DIRTY-INVENTORY-RESYNC-2026-06-28.md)
 - [ATLAS QA Fitness Current Run Desktop Closeout And Mobile-Only Gate Re-Sync](../ops/ATLAS-QA-FITNESS-CURRENT-RUN-DESKTOP-CLOSEOUT-AND-MOBILE-ONLY-GATE-RESYNC-2026-06-28.md)
+- [Inventory And Truth Map And ATLAS Book Post-Cortex Held-Root Main Checkpoint Re-Sync](../ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-POST-CORTEX-HELD-ROOT-MAIN-CHECKPOINT-RESYNC-2026-06-28.md)
 - [Truth Map And ATLAS Book Cortex Held-Root Projection Cleanup](../ops/TRUTH-MAP-AND-ATLAS-BOOK-CORTEX-HELD-ROOT-PROJECTION-CLEANUP-2026-06-28.md)
 - [Truth Map And ATLAS Book Lifeline Runtime Residue Zero-Warning Closeout And Stack Re-Sync](../ops/TRUTH-MAP-AND-ATLAS-BOOK-LIFELINE-RUNTIME-RESIDUE-ZERO-WARNING-CLOSEOUT-AND-STACK-RESYNC-2026-06-27.md)
 - [Stack Lock And Inventory DiscordOS Poll Cleanup Zero-Issue Re-Sync](../ops/STACK-LOCK-AND-INVENTORY-DISCORDOS-POLL-CLEANUP-ZERO-ISSUE-RESYNC-2026-06-27.md)
