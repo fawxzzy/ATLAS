@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-06-19T00:00:00Z",
-  "updated_at": "2026-06-28T03:26:00-04:00",
+  "updated_at": "2026-06-28T03:47:00-04:00",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -60,9 +60,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "truth-map-and-atlas-book",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/ATLAS-ROOT-MAIN-AND-FITNESS-POST-VERIFY-ZERO-DIRTY-INVENTORY-RESYNC-2026-06-28.md",
+    "current_checkpoint_receipt": "docs/ops/ATLAS-QA-FITNESS-CURRENT-RUN-DESKTOP-CLOSEOUT-AND-MOBILE-ONLY-GATE-RESYNC-2026-06-28.md",
     "checkpoint_commit": "327e2bb8e0c8c74f440f8425df56e7488ab11672",
-    "checkpoint_summary": "The lane still sits at 99 percent because the canonical Book surfaces now mirror the current June 27 and June 28 stack, QA, and continuity truth coherently through the stronger post-verify zero-dirty-repo Atlas-root main-state checkpoint while preserving the truthful held dispatcher result of no immediate ATLAS-root packet open and the still-open real-device-only `fitness` gate.",
+    "checkpoint_summary": "The lane still sits at 99 percent because the canonical Book surfaces now mirror the current June 27 and June 28 stack, QA, and continuity truth coherently through the narrowed current-run Fitness desktop closeout while preserving the truthful held dispatcher result of no immediate ATLAS-root packet open and the still-open mobile-only `fitness` gate.",
     "governing_receipts": [
       "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-MARKER-SCARCITY-AND-CLOSED-LADDER-CARRY-FORWARD-HYGIENE-PASS-3-2026-05-29.md",
       "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-POST-INVENTORY-CLOSEOUT-CLUSTER-PROJECTION-REFRESH-PASS-4-2026-06-02.md",
@@ -92,7 +92,8 @@
       "docs/ops/ATLAS-QA-FITNESS-DIRTY-BRANCH-MANUAL-REVIEW-AND-INVENTORY-RESYNC-2026-06-28.md",
       "docs/ops/ATLAS-QA-FITNESS-CLEAN-BRANCH-MANUAL-REVIEW-AND-INVENTORY-RESYNC-2026-06-28.md",
       "docs/ops/ATLAS-ROOT-CLEAN-BRANCH-ZERO-DIRTY-REPO-INVENTORY-RESYNC-2026-06-28.md",
-      "docs/ops/ATLAS-ROOT-MAIN-AND-FITNESS-POST-VERIFY-ZERO-DIRTY-INVENTORY-RESYNC-2026-06-28.md"
+      "docs/ops/ATLAS-ROOT-MAIN-AND-FITNESS-POST-VERIFY-ZERO-DIRTY-INVENTORY-RESYNC-2026-06-28.md",
+      "docs/ops/ATLAS-QA-FITNESS-CURRENT-RUN-DESKTOP-CLOSEOUT-AND-MOBILE-ONLY-GATE-RESYNC-2026-06-28.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -210,6 +211,10 @@
       {
         "path": "docs/ops/ATLAS-ROOT-MAIN-AND-FITNESS-POST-VERIFY-ZERO-DIRTY-INVENTORY-RESYNC-2026-06-28.md",
         "role": "current exact Book-side post-verify zero-dirty-repo Atlas-root main-state and inventory resync projection surface"
+      },
+      {
+        "path": "docs/ops/ATLAS-QA-FITNESS-CURRENT-RUN-DESKTOP-CLOSEOUT-AND-MOBILE-ONLY-GATE-RESYNC-2026-06-28.md",
+        "role": "current exact Book-side current-run desktop closeout and narrowed mobile-only Fitness gate projection surface"
       }
     ],
     "verification_adoption_surfaces": [
@@ -248,13 +253,13 @@
       {
         "package": "No immediate Truth Map & ATLAS Book docs-only follow-on packet",
         "mode": "hold-flat after AI repetition selector-to-receipt projection refresh",
-        "reason": "the current projection drift, manifest-gap class, current-packet basis drift, seeded initiative manifest-health warning/error class, eligible-open-marker coverage gap, eligible-open-marker restart-index gap, the current Book-side root-validation warning-count drift, the root-owned snapshot handoff path-leak slice, the disposable root capture-artifact slice, the local _stack receipt path-literal slice, the disposable Playbook dependency-residue slice, the final retained Playbook/Fitness mutable-state warning class, the post-closeout continuity-restore projection gap, the eligible-open-marker count drift, the stale owner-side Discord packet routing, the consumed local-vs-remote parity caveat, the newly landed AI repetition selector-to-receipt operator widening, the preserved Trove unblock, the current-main Fitness visual-gate reversal, the dirty-branch Fitness manual-review resync, the clean-branch Fitness manual-review resync, the zero-dirty-repo Atlas-root clean-branch inventory resync, and the later post-verify Atlas-root main-state plus current-Fitness-head inventory resync are now projected canonically; reopen only with distinct projection drift, marker pressure, owner-truth widening, or broader continuity automation"
+        "reason": "the current projection drift, manifest-gap class, current-packet basis drift, seeded initiative manifest-health warning/error class, eligible-open-marker coverage gap, eligible-open-marker restart-index gap, the current Book-side root-validation warning-count drift, the root-owned snapshot handoff path-leak slice, the disposable root capture-artifact slice, the local _stack receipt path-literal slice, the disposable Playbook dependency-residue slice, the final retained Playbook/Fitness mutable-state warning class, the post-closeout continuity-restore projection gap, the eligible-open-marker count drift, the stale owner-side Discord packet routing, the consumed local-vs-remote parity caveat, the newly landed AI repetition selector-to-receipt operator widening, the preserved Trove unblock, the current-main Fitness visual-gate reversal, the dirty-branch Fitness manual-review resync, the clean-branch Fitness manual-review resync, the zero-dirty-repo Atlas-root clean-branch inventory resync, the later post-verify Atlas-root main-state plus current-Fitness-head inventory resync, and the current-run Fitness desktop closeout are now projected canonically; reopen only with distinct projection drift, marker pressure, owner-truth widening, or broader continuity automation"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/ATLAS-ROOT-MAIN-AND-FITNESS-POST-VERIFY-ZERO-DIRTY-INVENTORY-RESYNC-2026-06-28.md",
-    "freshness_checked_at": "2026-06-28T03:26:00-04:00",
-    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture now match the refreshed current-state, marker, restart, system-map, and endgame mirrors after the post-verify zero-dirty-repo Atlas-root main-state resync: current protected-QA truth projects playbook, trove, foundation, and lifeline as ready, Fitness at `manual_review` on clean committed head `b5f29793eb87dc7538a15160180f159688acd1b4` via run `fitness-progression-pr-smoke-20260628T072049067050Z` with only the still-open desktop, Android, and iPhone physical or manual lanes remaining, the ATLAS root itself now projects clean on `main` at `327e2bb8e0c8c74f440f8425df56e7488ab11672`, current DiscordOS truth still projects live runtime, publication, and feedback cutover with explicit retained Fitness seams, the root validation floor still projects `critical=0 / error=0 / warning=0 / info=0`, the initiative manifest-health surface still reads 19 ok / 0 warning / 0 error, the eligible-open-marker coverage and restart-index surfaces still read 7 of 7, and the canonical Book mirrors now also absorb the post-verify zero-dirty inventory and current-Fitness-head truth instead of leaving that execution change only at the leaf receipt level.",
+    "freshness_checked_receipt": "docs/ops/ATLAS-QA-FITNESS-CURRENT-RUN-DESKTOP-CLOSEOUT-AND-MOBILE-ONLY-GATE-RESYNC-2026-06-28.md",
+    "freshness_checked_at": "2026-06-28T03:47:00-04:00",
+    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture now match the refreshed current-state, marker, restart, system-map, and endgame mirrors after the current-run desktop closeout: current protected-QA truth projects playbook, trove, foundation, and lifeline as ready, Fitness at `manual_review` on clean committed head `b5f29793eb87dc7538a15160180f159688acd1b4` via run `fitness-progression-pr-smoke-20260628T072049067050Z` with `desktop.chromium.real.manual` now valid and only `android.chrome.real` plus `iphone.webkit.real` remaining open, the ATLAS root itself still projects clean on `main` at `327e2bb8e0c8c74f440f8425df56e7488ab11672`, current DiscordOS truth still projects live runtime, publication, and feedback cutover with explicit retained Fitness seams, the root validation floor still projects `critical=0 / error=0 / warning=0 / info=0`, the initiative manifest-health surface still reads 19 ok / 0 warning / 0 error, the eligible-open-marker coverage and restart-index surfaces still read 7 of 7, and the canonical Book mirrors now also absorb that narrowed current-run Fitness gate instead of leaving the execution change only at the leaf receipt level.",
     "marker_posture": [
       {
         "marker": "Truth Map & ATLAS Book",
