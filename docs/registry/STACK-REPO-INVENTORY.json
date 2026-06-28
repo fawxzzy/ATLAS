@@ -122,7 +122,7 @@
       "status": "unmanaged",
       "remote_url": "https://github.com/fawxzzy/fawxzzy-fitness.git",
       "pinned_commit": null,
-      "current_commit": "382781df3b05d1a326862dc9e4d6c54ecf5f4aec",
+      "current_commit": "bc48b6ab20789b2f603f5e45bb5d9a82f6e92e59",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
@@ -317,7 +317,7 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "87902ffe39c654170885454ad64bdefd02d28893",
+      "current_commit": "0a58b173de92634f634e685aa4c3fcf917fb3a6f",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
@@ -530,5 +530,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:7f9a9fcfbc83a1f782d8a51bc67c667b7f4a75a1bff3399018cbc0cab3c24b0b"
+  "content_digest": "sha256:57ce74b233f8d04fabb774583442da8f14e5f46df978a2d1fe4cf9b0ff414e2b"
 }
