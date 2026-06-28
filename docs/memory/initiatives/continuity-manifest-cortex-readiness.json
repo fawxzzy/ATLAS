@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-06-19T07:00:00Z",
-  "updated_at": "2026-06-28T12:45:00-04:00",
+  "updated_at": "2026-06-28T13:20:00-04:00",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -29,7 +29,8 @@
     "docs/ops/CORTEX-READINESS-POST-CATCH-UP-LIVE-LANE-RATCHET-PASS-6-2026-06-05.md",
     "docs/ops/CORTEX-READINESS-DOCS-ADR-OR-DEBT-SLICE-POST-PR-70-MERGE-LIVE-READ-MODEL-RECONCILIATION-PASS-23-2026-06-06.md",
     "docs/ops/CORTEX-READINESS-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md",
-    "docs/ops/CORTEX-HELD-ROOT-POSTURE-SEED-AND-RUNTIME-RESYNC-2026-06-28.md"
+    "docs/ops/CORTEX-HELD-ROOT-POSTURE-SEED-AND-RUNTIME-RESYNC-2026-06-28.md",
+    "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-CORTEX-HELD-ROOT-PROJECTION-CLEANUP-2026-06-28.md"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -49,7 +50,8 @@
       "docs/ops/CORTEX-READINESS-POST-CATCH-UP-LIVE-LANE-RATCHET-PASS-6-2026-06-05.md",
       "docs/ops/CORTEX-READINESS-DOCS-ADR-OR-DEBT-SLICE-POST-PR-70-MERGE-LIVE-READ-MODEL-RECONCILIATION-PASS-23-2026-06-06.md",
       "docs/ops/CORTEX-READINESS-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md",
-      "docs/ops/CORTEX-HELD-ROOT-POSTURE-SEED-AND-RUNTIME-RESYNC-2026-06-28.md"
+      "docs/ops/CORTEX-HELD-ROOT-POSTURE-SEED-AND-RUNTIME-RESYNC-2026-06-28.md",
+      "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-CORTEX-HELD-ROOT-PROJECTION-CLEANUP-2026-06-28.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -63,6 +65,10 @@
       {
         "path": "docs/ops/CORTEX-HELD-ROOT-POSTURE-SEED-AND-RUNTIME-RESYNC-2026-06-28.md",
         "role": "current exact held-root seed and runtime resync truth"
+      },
+      {
+        "path": "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-CORTEX-HELD-ROOT-PROJECTION-CLEANUP-2026-06-28.md",
+        "role": "current exact canonical marker and posture projection cleanup for the held-root Cortex truth"
       },
       {
         "path": "runtime/cortex/current-state/latest.json",
@@ -133,9 +139,9 @@
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/CORTEX-HELD-ROOT-POSTURE-SEED-AND-RUNTIME-RESYNC-2026-06-28.md",
-    "freshness_checked_at": "2026-06-28T12:45:00-04:00",
-    "freshness_basis": "The manifest now matches the current 41 percent advisory Cortex posture after the June 28 held-root resync: the live seed and generated runtime chain now agree that no immediate ATLAS-root packet is open, `hold-current-root-posture` is the truthful bounded next action, current validation is back at critical=0 error=0 warning=0 info=0, and the lane still remains advisory only without authority widening.",
+    "freshness_checked_receipt": "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-CORTEX-HELD-ROOT-PROJECTION-CLEANUP-2026-06-28.md",
+    "freshness_checked_at": "2026-06-28T13:20:00-04:00",
+    "freshness_basis": "The manifest now matches the current 41 percent advisory Cortex posture after the June 28 held-root resync plus the immediate Book-side cleanup: the live seed and generated runtime chain agree that no immediate ATLAS-root packet is open, `hold-current-root-posture` is the truthful bounded next action, current validation is back at critical=0 error=0 warning=0 info=0, and the canonical marker plus posture mirrors no longer narrate the stale docs-ADR slice as the live Cortex next move.",
     "marker_posture": [
       {
         "marker": "Cortex Readiness",
