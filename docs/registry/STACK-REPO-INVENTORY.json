@@ -3,14 +3,14 @@
   "stack_manifest_ref": "stack.yaml",
   "stack_manifest_digest": "sha256:e5ac73c00983975b59e4b8e7f8541160d479087f5dc95ad1d642568116bd7d10",
   "stack_lock_ref": "stack.lock.yaml",
-  "stack_lock_digest": "sha256:f918e2dc4c24f965862964f242a2faa6da171e508149c21ce7ffdd36dfd8fd1e",
+  "stack_lock_digest": "sha256:90ad99d909b205e23d260a196a25edca3d7323fcc76752901f2a25c1c48c9287",
   "working_memory_digest": "sha256:fe4f4902e2b2c475974b050ba1bf3f5e740439aa41df2f844555c2c0dc3b310f",
   "published_refs": {
     "json": "docs/registry/STACK-REPO-INVENTORY.json",
     "markdown": "docs/audits/STACK-REPO-INVENTORY.md"
   },
   "repo_count": 12,
-  "dirty_repo_count": 0,
+  "dirty_repo_count": 1,
   "release_eligible_count": 5,
   "repos": [
     {
@@ -214,13 +214,13 @@
       "role": "application",
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/mazer.git",
-      "pinned_commit": "8bb27b8447cab22bccb3c040ac4eba025708d665",
-      "current_commit": "8bb27b8447cab22bccb3c040ac4eba025708d665",
+      "pinned_commit": "55741b3ecffc3aabe044366aadbb61367bb98ebe",
+      "current_commit": "55741b3ecffc3aabe044366aadbb61367bb98ebe",
       "pinned_ref_type": "branch",
-      "pinned_ref": "main",
+      "pinned_ref": "codex/mazer-pass-2-recovery-tightening",
       "current_ref_type": "branch",
-      "current_ref": "main",
-      "branch": "main",
+      "current_ref": "codex/mazer-pass-2-recovery-tightening",
+      "branch": "codex/mazer-pass-2-recovery-tightening",
       "dirty": false,
       "trust_class": "trusted",
       "release_eligible": true,
@@ -317,13 +317,13 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "26ceaaa4e50ec67122c65a7a26f29e0e7344e722",
+      "current_commit": "ff7d83b3db1dfe9f8e33619c72e9bfbaadee6803",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
-      "current_ref": "main",
-      "branch": "main",
-      "dirty": false,
+      "current_ref": "codex/stack-lock-refresh-after-mazer-pr6",
+      "branch": "codex/stack-lock-refresh-after-mazer-pr6",
+      "dirty": true,
       "trust_class": "trusted",
       "release_eligible": false,
       "exists": true,
@@ -530,5 +530,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:2fc8973a4ea10e84f49c5f1075aff8586494bc3cd0cbc39176f0050bea395cba"
+  "content_digest": "sha256:45282ddd3415e5869b4b0a486b7a8b1d36bbb765b9c7cff014a11e03e9fd7d7c"
 }
