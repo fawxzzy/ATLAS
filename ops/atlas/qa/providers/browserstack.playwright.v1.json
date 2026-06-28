@@ -8,7 +8,8 @@
   ],
   "supported_lenses": [
     "desktop.chromium.real",
-    "android.chrome.real"
+    "android.chrome.real",
+    "iphone.webkit.real"
   ],
   "artifact_capabilities": [
     "screenshot",

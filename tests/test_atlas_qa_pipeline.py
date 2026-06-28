@@ -13,18 +13,20 @@ from unittest import mock
 from PIL import Image
 
 from ops.atlas.qa.baselines import bless_baseline, propose_baselines
-from ops.atlas.qa.ci_gate import _materialize_runtime_waivers, _provider_status
+from ops.atlas.qa.ci_gate import _materialize_runtime_waivers, _provider_override_file, _provider_status
 from ops.atlas.qa.adoption_drift import build_adoption_drift
 from ops.atlas.qa.bootstrap_release_repos import bootstrap_release_repos
 from ops.atlas.qa.compatibility_report import compatibility_report
 from ops.atlas.qa.evidence_index import build_evidence_index
 from ops.atlas.qa.manual_attestation import scaffold_manual_attestations, validate_attestations_for_run
+from ops.atlas.qa.provider_readiness import provider_readiness
 from ops.atlas.qa.promote_run import promote_run
 from ops.atlas.qa.protected_release_refresh import refresh_protected_release_receipts
 from ops.atlas.qa.release_snapshot import build_release_snapshot
 from ops.atlas.qa.release_rehearsal import build_release_rehearsal
 from ops.atlas.qa.release_readiness import build_release_readiness
 from ops.atlas.qa.report_run import report_run
+from ops.atlas.qa.run_matrix import run_matrix
 from ops.atlas.qa.test_evidence import collect_test_evidence
 from ops.atlas.qa.waiver_monitor import build_waiver_monitor
 from ops.atlas.qa.visual_diff import evaluate_visual_diffs
@@ -1839,6 +1841,113 @@ class AtlasQaPipelineTests(unittest.TestCase):
             ["BROWSERSTACK_USERNAME", "BROWSERSTACK_ACCESS_KEY"],
             status["missing_env_vars"],
         )
+
+    def test_provider_readiness_reports_browserstack_ready_for_fitness_release_lenses(self) -> None:
+        with mock.patch.dict("os.environ", {"BROWSERSTACK_USERNAME": "user", "BROWSERSTACK_ACCESS_KEY": "key"}, clear=False):
+            report = provider_readiness(
+                root=ROOT,
+                provider_manifest_ref="ops/atlas/qa/providers/browserstack.playwright.v1.json",
+                adapter_id="fitness.web",
+                scenario_id="fitness.progression-pr-smoke",
+            )
+        self.assertEqual(
+            ["desktop.chromium.real", "android.chrome.real", "iphone.webkit.real"],
+            report["requested_physical_lenses"],
+        )
+        self.assertEqual([], report["unsupported_requested_lenses"])
+        self.assertTrue(report["live_smoke_eligible"])
+
+    def test_provider_override_only_mutates_supported_real_lenses(self) -> None:
+        root = self._temp_root()
+        (root / "ops" / "atlas" / "qa" / "providers").mkdir(parents=True, exist_ok=True)
+        provider_path = root / "ops" / "atlas" / "qa" / "providers" / "limited.provider.json"
+        _write_json(
+            provider_path,
+            {
+                "contract_version": "atlas.qa.provider.v1",
+                "provider_id": "mock.physical-device",
+                "provider_type": "mock",
+                "auth_env_vars": [],
+                "supported_lenses": ["desktop.chromium.real"],
+                "artifact_capabilities": ["screenshot", "console_log", "network_log"],
+            },
+        )
+        adapter_path = root / "ops" / "atlas" / "qa" / "adapters" / "fitness.web.json"
+        adapter_path.parent.mkdir(parents=True, exist_ok=True)
+        adapter_payload = load_json_object(ROOT / "ops" / "atlas" / "qa" / "adapters" / "fitness.web.json")
+        _write_json(adapter_path, adapter_payload)
+        override_path, handle = _provider_override_file(
+            root=root,
+            adapter_payload=adapter_payload,
+            adapter_path=adapter_path,
+            provider="limited.provider",
+        )
+        self.addCleanup(lambda: handle.cleanup() if handle is not None else None)
+        self.assertIsNotNone(override_path)
+        overridden = load_json_object(override_path)
+        by_lens = {item["lens_id"]: item for item in overridden["lenses"]}
+        self.assertEqual("provider_capture", by_lens["desktop.chromium.real"]["execution_mode"])
+        self.assertEqual("manual_external", by_lens["android.chrome.real"]["execution_mode"])
+        self.assertEqual("manual_external", by_lens["iphone.webkit.real"]["execution_mode"])
+
+    def test_browserstack_capture_builds_ios_capabilities_without_desktop_flags(self) -> None:
+        script = """
+import { buildCapabilities } from './ops/atlas/qa/capture_browserstack.mjs';
+const caps = buildCapabilities({}, {
+  runId: 'run-1',
+  scenarioId: 'fitness.progression-pr-smoke',
+  lensId: 'iphone.webkit.real',
+  browserEngine: 'webkit',
+  viewport: { width: 393, height: 852 },
+  deviceModel: 'iPhone 15',
+  osName: 'iOS',
+  osVersion: '17',
+  browserName: 'safari',
+  browserVersion: '17'
+});
+console.log(JSON.stringify(caps));
+"""
+        completed = subprocess.run(
+            ["node", "--input-type=module", "-e", script],
+            cwd=str(ROOT),
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            check=False,
+        )
+        self.assertEqual(0, completed.returncode, completed.stderr)
+        caps = json.loads(completed.stdout)
+        self.assertEqual("safari", caps["browser"])
+        self.assertEqual("iPhone 15", caps["deviceName"])
+        self.assertEqual("17", caps["osVersion"])
+        self.assertEqual("true", caps["realMobile"])
+        self.assertNotIn("resolution", caps)
+        self.assertNotIn("browserstack.console", caps)
+
+    def test_run_matrix_dry_run_honors_explicit_real_lens_command_ref(self) -> None:
+        temp_dir = tempfile.TemporaryDirectory()
+        self.addCleanup(temp_dir.cleanup)
+        adapter_dir = Path(temp_dir.name)
+        adapter_payload = load_json_object(ROOT / "ops" / "atlas" / "qa" / "adapters" / "fitness.web.json")
+        for item in adapter_payload["lenses"]:
+            if isinstance(item, dict) and item.get("proof_kind") == "real":
+                item["execution_mode"] = "provider_capture"
+                item["provider_manifest_ref"] = "ops/atlas/qa/providers/browserstack.playwright.v1.json"
+                item["command_ref"] = "qa_visual"
+        _write_json(adapter_dir / "fitness.web.json", adapter_payload)
+        result = run_matrix(
+            root=ROOT,
+            scenario_path=ROOT / "ops" / "atlas" / "qa" / "scenarios" / "fitness.progression-pr-smoke.json",
+            adapter_id="fitness.web",
+            adapter_dir=adapter_dir,
+            output_root=adapter_dir,
+            dry_run=True,
+        )
+        self.assertFalse(any(item["code"] == "missing_command_ref" for item in result["findings"]))
+        real_lenses = [item for item in result["matrix"] if item["proof_kind"] == "real"]
+        self.assertTrue(real_lenses)
+        self.assertTrue(all(item.get("command_ref") == "qa_visual" for item in real_lenses))
 
     def test_browserstack_provider_redacts_credentials_from_subprocess_failure(self) -> None:
         username = "atlas-browserstack-user"

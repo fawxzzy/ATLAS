@@ -71,12 +71,28 @@ def provider_readiness(
         key for key in provider_payload.get("auth_env_vars", [])
         if isinstance(key, str) and key.strip()
     ]
+    supported_lenses = [
+        str(item)
+        for item in provider_payload.get("supported_lenses", [])
+        if isinstance(item, str) and item.strip()
+    ]
+    unsupported_requested_lenses = [
+        lens_id
+        for lens_id in requested_physical_lenses
+        if lens_id not in supported_lenses
+    ]
     env_status = {
         key: ("present" if os.environ.get(key) else "missing")
         for key in required_env
     }
     missing_env = [key for key, status in env_status.items() if status == "missing"]
-    live_smoke_eligible = not schema_errors and not provider_errors and not missing_env and bool(requested_physical_lenses)
+    live_smoke_eligible = (
+        not schema_errors
+        and not provider_errors
+        and not missing_env
+        and not unsupported_requested_lenses
+        and bool(requested_physical_lenses)
+    )
     return {
         "generated_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         "provider_id": str(provider_payload.get("provider_id") or ""),
@@ -86,6 +102,8 @@ def provider_readiness(
         "provider_schema_errors": schema_errors,
         "provider_manifest_errors": provider_errors,
         "requested_physical_lenses": requested_physical_lenses,
+        "supported_lenses": supported_lenses,
+        "unsupported_requested_lenses": unsupported_requested_lenses,
         "credentials": env_status,
         "missing_env_vars": missing_env,
         "live_smoke_eligible": live_smoke_eligible,

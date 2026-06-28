@@ -189,6 +189,13 @@ def _provider_override_file(
 ) -> tuple[Path, tempfile.TemporaryDirectory[str]] | tuple[None, None]:
     if not provider:
         return None, None
+    provider_ref = f"ops/atlas/qa/providers/{provider}.json" if not provider.endswith(".json") else provider
+    provider_payload, _ = load_provider_config(root=root, provider_manifest_ref=provider_ref)
+    supported_lenses = {
+        str(item).strip()
+        for item in provider_payload.get("supported_lenses", [])
+        if isinstance(item, str) and str(item).strip()
+    }
     override_payload = json.loads(json.dumps(adapter_payload))
     fallback_command_ref = ""
     for item in override_payload.get("lenses", []):
@@ -202,8 +209,11 @@ def _provider_override_file(
     for item in override_payload.get("lenses", []):
         if not isinstance(item, dict) or item.get("proof_kind") != "real":
             continue
+        lens_id = str(item.get("lens_id") or "").strip()
+        if lens_id not in supported_lenses:
+            continue
         item["execution_mode"] = "provider_capture"
-        item["provider_manifest_ref"] = f"ops/atlas/qa/providers/{provider}.json" if not provider.endswith(".json") else provider
+        item["provider_manifest_ref"] = provider_ref
         if fallback_command_ref and (not isinstance(item.get("command_ref"), str) or not str(item.get("command_ref")).strip()):
             item["command_ref"] = fallback_command_ref
         mutated = True

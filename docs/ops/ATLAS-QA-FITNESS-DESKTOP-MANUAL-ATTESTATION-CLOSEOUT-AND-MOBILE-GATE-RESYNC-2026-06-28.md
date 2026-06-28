@@ -94,6 +94,7 @@ Only these remaining bounded paths are still open on the current run:
 
 1. Capture Android and iPhone real/manual screenshots plus metadata, then rerun validation and promotion.
 2. Dispatch a protected/provider-backed upstream lane that satisfies those two remaining mobile requirements.
+   - Provider-control-plane truth is now resynced by `docs/ops/ATLAS-QA-BROWSERSTACK-PROVIDER-MOBILE-READINESS-AND-DRY-RUN-RESYNC-2026-06-28.md`; the remaining provider-side blocker is real credential availability, not stale iPhone or command-routing support.
 
 ## Guard
 

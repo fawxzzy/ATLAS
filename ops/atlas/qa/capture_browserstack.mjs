@@ -3,6 +3,7 @@ import path from "node:path";
 import process from "node:process";
 import { createHash } from "node:crypto";
 import { createRequire } from "node:module";
+import { fileURLToPath } from "node:url";
 import childProcess from "node:child_process";
 
 function parseArgs(argv) {
@@ -36,31 +37,49 @@ function localPlaywrightVersion() {
   }
 }
 
-function buildCapabilities(providerPayload, config) {
+function isAndroid(config) {
+  return String(config.osName || "").toLowerCase().startsWith("android");
+}
+
+function isIos(config) {
+  return String(config.osName || "").toLowerCase().startsWith("ios");
+}
+
+export function buildCapabilities(providerPayload, config) {
   const defaults = {
     project: "ATLAS QA LLEL",
     build: config.runId,
     name: `${config.scenarioId}:${config.lensId}`,
     "browserstack.username": process.env.BROWSERSTACK_USERNAME,
     "browserstack.accessKey": process.env.BROWSERSTACK_ACCESS_KEY,
-    "browserstack.console": "info",
     "browserstack.networkLogs": "true",
     "browserstack.debug": "true",
     "browserstack.playwrightVersion": "1.latest",
     "client.playwrightVersion": localPlaywrightVersion(),
   };
-  const osName = String(config.osName || "").toLowerCase();
   const browserName = String(config.browserName || config.browserEngine || "chrome").toLowerCase();
-  if (osName.startsWith("android")) {
+  if (isAndroid(config)) {
     return {
       ...defaults,
       browser: browserName === "chromium" ? "chrome" : browserName,
       deviceName: config.deviceModel,
-      os_version: config.osVersion,
+      osVersion: config.osVersion,
+      realMobile: "true",
+      "browserstack.console": "info",
+    };
+  }
+  if (isIos(config)) {
+    return {
+      ...defaults,
+      browser: browserName === "webkit" ? "safari" : browserName,
+      deviceName: config.deviceModel,
+      osVersion: config.osVersion,
+      realMobile: "true",
     };
   }
   return {
     ...defaults,
+    "browserstack.console": "info",
     os: config.osName || "Windows",
     os_version: config.osVersion || "11",
     browser: browserName === "chromium" ? "chrome" : browserName,
@@ -184,7 +203,11 @@ async function main() {
   );
 }
 
-main().catch((error) => {
-  console.error(error instanceof Error ? error.stack || error.message : String(error));
-  process.exitCode = 1;
-});
+const isDirectExecution = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+
+if (isDirectExecution) {
+  main().catch((error) => {
+    console.error(error instanceof Error ? error.stack || error.message : String(error));
+    process.exitCode = 1;
+  });
+}

@@ -190,7 +190,12 @@ def run_matrix(
             profile = lens_profiles.get(profile_id, {})
             command_value = None
             if execution_mode in {"repo_command", "browser_capture", "provider_capture"}:
-                selected_ref = str(command_ref or command_refs[-1] if command_refs else "")
+                if isinstance(command_ref, str) and command_ref.strip():
+                    selected_ref = str(command_ref)
+                elif command_refs:
+                    selected_ref = str(command_refs[-1])
+                else:
+                    selected_ref = ""
                 command_def = adapter.get("commands", {}).get(selected_ref)
                 if isinstance(command_def, dict):
                     command_value = str(command_def["command"])

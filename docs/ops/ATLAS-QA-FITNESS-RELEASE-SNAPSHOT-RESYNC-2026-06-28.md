@@ -59,4 +59,5 @@ All passed on 2026-06-28.
 
 - The snapshot pack now truthfully reflects the current run state after the current-SHA Fitness resync.
 - The current run now has a valid desktop manual attestation; only the Android and iPhone manual lanes remain open on the current committed SHA.
+- The BrowserStack provider lane is now also root-valid for `desktop.chromium.real`, `android.chrome.real`, and `iphone.webkit.real` after `ATLAS-QA-BROWSERSTACK-PROVIDER-MOBILE-READINESS-AND-DRY-RUN-RESYNC-2026-06-28.md`; actual provider closure still depends on real credentials and a live protected run.
 - This receipt does not claim release readiness; it freezes the current post-resync handoff boundary.
