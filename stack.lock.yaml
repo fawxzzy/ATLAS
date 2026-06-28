@@ -53,7 +53,7 @@ components:
     status: "active"
     remote: "https://github.com/fawxzzy/mazer.git"
     ref_type: "branch"
-    ref: "codex/mazer-pass-2-recovery-tightening"
+    ref: "main"
     commit: "55741b3ecffc3aabe044366aadbb61367bb98ebe"
     dirty: false
     trust_class: "trusted"
@@ -216,4 +216,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:90ad99d909b205e23d260a196a25edca3d7323fcc76752901f2a25c1c48c9287"
+lock_digest: "sha256:0f6b9fc49c031c62947141b499c41afef57b6ea37d8c8886b65c36af0729cce2"

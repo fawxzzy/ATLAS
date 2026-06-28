@@ -3,7 +3,7 @@
   "stack_manifest_ref": "stack.yaml",
   "stack_manifest_digest": "sha256:e5ac73c00983975b59e4b8e7f8541160d479087f5dc95ad1d642568116bd7d10",
   "stack_lock_ref": "stack.lock.yaml",
-  "stack_lock_digest": "sha256:90ad99d909b205e23d260a196a25edca3d7323fcc76752901f2a25c1c48c9287",
+  "stack_lock_digest": "sha256:0f6b9fc49c031c62947141b499c41afef57b6ea37d8c8886b65c36af0729cce2",
   "working_memory_digest": "sha256:fe4f4902e2b2c475974b050ba1bf3f5e740439aa41df2f844555c2c0dc3b310f",
   "published_refs": {
     "json": "docs/registry/STACK-REPO-INVENTORY.json",
@@ -217,10 +217,10 @@
       "pinned_commit": "55741b3ecffc3aabe044366aadbb61367bb98ebe",
       "current_commit": "55741b3ecffc3aabe044366aadbb61367bb98ebe",
       "pinned_ref_type": "branch",
-      "pinned_ref": "codex/mazer-pass-2-recovery-tightening",
+      "pinned_ref": "main",
       "current_ref_type": "branch",
-      "current_ref": "codex/mazer-pass-2-recovery-tightening",
-      "branch": "codex/mazer-pass-2-recovery-tightening",
+      "current_ref": "main",
+      "branch": "main",
       "dirty": false,
       "trust_class": "trusted",
       "release_eligible": true,
@@ -317,7 +317,7 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "ff7d83b3db1dfe9f8e33619c72e9bfbaadee6803",
+      "current_commit": "162905011a4684ad45991eead4cc1923af066aa6",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
@@ -530,5 +530,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:45282ddd3415e5869b4b0a486b7a8b1d36bbb765b9c7cff014a11e03e9fd7d7c"
+  "content_digest": "sha256:14e86b9171023168dad5785572921eb1e2b4961c780cdd6daee7cd80bf2601c9"
 }
