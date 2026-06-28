@@ -46,7 +46,8 @@
     "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-LIFELINE-RUNTIME-RESIDUE-ZERO-WARNING-CLOSEOUT-AND-STACK-RESYNC-2026-06-27.md",
     "docs/ops/SANDBOX-SIMULATION-READINESS-STARTER-PACKET-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-27.md",
     "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-SELECTOR-TO-RECEIPT-SCAFFOLD-ROUTING-2026-06-28.md",
-    "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-AI-REPETITION-SELECTOR-TO-RECEIPT-PROJECTION-REFRESH-2026-06-28.md"
+    "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-AI-REPETITION-SELECTOR-TO-RECEIPT-PROJECTION-REFRESH-2026-06-28.md",
+    "docs/ops/ATLAS-QA-TROVE-PROTECTED-REFRESH-UNBLOCK-AND-FITNESS-VISUAL-MANUAL-GATE-RESYNC-2026-06-28.md"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -54,9 +55,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "truth-map-and-atlas-book",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-AI-REPETITION-SELECTOR-TO-RECEIPT-PROJECTION-REFRESH-2026-06-28.md",
+    "current_checkpoint_receipt": "docs/ops/ATLAS-QA-TROVE-PROTECTED-REFRESH-UNBLOCK-AND-FITNESS-VISUAL-MANUAL-GATE-RESYNC-2026-06-28.md",
     "checkpoint_commit": "main",
-    "checkpoint_summary": "The lane now sits at 99 percent because the canonical Book surfaces still mirror the clean June 27 and June 28 stack, QA, and continuity truth coherently, and they now also absorb the newly executed AI repetition selector-to-receipt scaffold widening while preserving the truthful held dispatcher result of no immediate ATLAS-root packet open.",
+    "checkpoint_summary": "The lane now sits at 99 percent because the canonical Book surfaces still mirror the current June 27 and June 28 stack, QA, and continuity truth coherently, and they now also absorb the preserved Trove unblock, the narrowed Fitness visual/manual gate, and the current warning-floor/dirty-repo posture while preserving the truthful held dispatcher result of no immediate ATLAS-root packet open.",
     "governing_receipts": [
       "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-MARKER-SCARCITY-AND-CLOSED-LADDER-CARRY-FORWARD-HYGIENE-PASS-3-2026-05-29.md",
       "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-POST-INVENTORY-CLOSEOUT-CLUSTER-PROJECTION-REFRESH-PASS-4-2026-06-02.md",
@@ -80,7 +81,8 @@
       "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-DESKTOP-MANUAL-ATTESTATION-MOBILE-GATE-REFRESH-CONTINUITY-RESYNC-2026-06-27.md",
       "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-LIFELINE-RUNTIME-RESIDUE-ZERO-WARNING-CLOSEOUT-AND-STACK-RESYNC-2026-06-27.md",
       "docs/ops/SANDBOX-SIMULATION-READINESS-STARTER-PACKET-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-27.md",
-      "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-AI-REPETITION-SELECTOR-TO-RECEIPT-PROJECTION-REFRESH-2026-06-28.md"
+      "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-AI-REPETITION-SELECTOR-TO-RECEIPT-PROJECTION-REFRESH-2026-06-28.md",
+      "docs/ops/ATLAS-QA-TROVE-PROTECTED-REFRESH-UNBLOCK-AND-FITNESS-VISUAL-MANUAL-GATE-RESYNC-2026-06-28.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -174,6 +176,10 @@
       {
         "path": "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-AI-REPETITION-SELECTOR-TO-RECEIPT-PROJECTION-REFRESH-2026-06-28.md",
         "role": "current exact Book-side projection refresh for the AI repetition selector-to-receipt widening"
+      },
+      {
+        "path": "docs/ops/ATLAS-QA-TROVE-PROTECTED-REFRESH-UNBLOCK-AND-FITNESS-VISUAL-MANUAL-GATE-RESYNC-2026-06-28.md",
+        "role": "current exact Book-side protected-QA projection refresh after the preserved Trove unblock and narrowed Fitness gate"
       }
     ],
     "verification_adoption_surfaces": [
@@ -212,13 +218,13 @@
       {
         "package": "No immediate Truth Map & ATLAS Book docs-only follow-on packet",
         "mode": "hold-flat after AI repetition selector-to-receipt projection refresh",
-        "reason": "the current projection drift, manifest-gap class, current-packet basis drift, seeded initiative manifest-health warning/error class, eligible-open-marker coverage gap, eligible-open-marker restart-index gap, the current Book-side root-validation warning-count drift, the root-owned snapshot handoff path-leak slice, the disposable root capture-artifact slice, the local _stack receipt path-literal slice, the disposable Playbook dependency-residue slice, the final retained Playbook/Fitness mutable-state warning class, the post-closeout continuity-restore projection gap, the eligible-open-marker count drift, the stale owner-side Discord packet routing, the consumed local-vs-remote parity caveat, and the newly landed AI repetition selector-to-receipt operator widening are now projected canonically; reopen only with distinct projection drift, marker pressure, owner-truth widening, or broader continuity automation"
+        "reason": "the current projection drift, manifest-gap class, current-packet basis drift, seeded initiative manifest-health warning/error class, eligible-open-marker coverage gap, eligible-open-marker restart-index gap, the current Book-side root-validation warning-count drift, the root-owned snapshot handoff path-leak slice, the disposable root capture-artifact slice, the local _stack receipt path-literal slice, the disposable Playbook dependency-residue slice, the final retained Playbook/Fitness mutable-state warning class, the post-closeout continuity-restore projection gap, the eligible-open-marker count drift, the stale owner-side Discord packet routing, the consumed local-vs-remote parity caveat, the newly landed AI repetition selector-to-receipt operator widening, and the preserved Trove unblock plus narrowed Fitness gate are now projected canonically; reopen only with distinct projection drift, marker pressure, owner-truth widening, or broader continuity automation"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-AI-REPETITION-SELECTOR-TO-RECEIPT-PROJECTION-REFRESH-2026-06-28.md",
-    "freshness_checked_at": "2026-06-28T00:28:00-04:00",
-    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture now match the refreshed current-state, marker, restart, system-map, and endgame mirrors after the AI repetition selector-to-receipt routing landing: current protected-QA truth still projects playbook, trove, foundation, and lifeline as ready, fitness as manual review with only fresh Android Chrome and iPhone WebKit manual proof still open, current DiscordOS truth still projects live runtime/publication/feedback cutover with explicit retained Fitness seams, the root validation floor projects critical 0 / error 0 / warning 0 / info 0, the initiative manifest-health surface still reads 19 ok / 0 warning / 0 error, the eligible-open-marker coverage and restart-index surfaces still read 7 of 7, and the canonical Book mirrors now also absorb the newly executed AI repetition operator-surface widening instead of leaving it only at the leaf receipt level.",
+    "freshness_checked_receipt": "docs/ops/ATLAS-QA-TROVE-PROTECTED-REFRESH-UNBLOCK-AND-FITNESS-VISUAL-MANUAL-GATE-RESYNC-2026-06-28.md",
+    "freshness_checked_at": "2026-06-28T00:47:00-04:00",
+    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture now match the refreshed current-state, marker, restart, system-map, and endgame mirrors after the preserved Trove unblock and final June 28 protected-refresh resync: current protected-QA truth projects playbook, trove, foundation, and lifeline as ready, fitness as blocked on run `fitness-progression-pr-smoke-20260628T044154077263Z` with one `iphone.webkit.emulated` visual diff plus the still-open desktop, Android, and iPhone physical/manual lanes, current DiscordOS truth still projects live runtime/publication/feedback cutover with explicit retained Fitness seams, the root validation floor now projects `critical=0 / error=0 / warning=6 / info=0`, the initiative manifest-health surface still reads 19 ok / 0 warning / 0 error, the eligible-open-marker coverage and restart-index surfaces still read 7 of 7, and the canonical Book mirrors now also absorb the preserved Trove unblock and current warning-floor truth instead of leaving that execution change only at the leaf receipt level.",
     "marker_posture": [
       {
         "marker": "Truth Map & ATLAS Book",

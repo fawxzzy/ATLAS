@@ -3,14 +3,14 @@
   "stack_manifest_ref": "stack.yaml",
   "stack_manifest_digest": "sha256:e5ac73c00983975b59e4b8e7f8541160d479087f5dc95ad1d642568116bd7d10",
   "stack_lock_ref": "stack.lock.yaml",
-  "stack_lock_digest": "sha256:909181ee4cad7668ed85194a537e6bda0b35b0478ed4896dfb9474829713a9a9",
+  "stack_lock_digest": "sha256:f918e2dc4c24f965862964f242a2faa6da171e508149c21ce7ffdd36dfd8fd1e",
   "working_memory_digest": "sha256:fe4f4902e2b2c475974b050ba1bf3f5e740439aa41df2f844555c2c0dc3b310f",
   "published_refs": {
     "json": "docs/registry/STACK-REPO-INVENTORY.json",
     "markdown": "docs/audits/STACK-REPO-INVENTORY.md"
   },
   "repo_count": 12,
-  "dirty_repo_count": 1,
+  "dirty_repo_count": 2,
   "release_eligible_count": 5,
   "repos": [
     {
@@ -317,13 +317,13 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "0f991f2e6100a314b354b3d4630cad2ee60cff58",
+      "current_commit": "bdc861fe563d753bb0ae79ea1e09ea779c8e4e51",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
       "current_ref": "codex/stack-lock-refresh-post-playbook-resync",
       "branch": "codex/stack-lock-refresh-post-playbook-resync",
-      "dirty": false,
+      "dirty": true,
       "trust_class": "trusted",
       "release_eligible": false,
       "exists": true,
@@ -358,8 +358,8 @@
       "role": "application",
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/trove.git",
-      "pinned_commit": "112715291a1d9f3b21c9a830d1dab68e6751b815",
-      "current_commit": "112715291a1d9f3b21c9a830d1dab68e6751b815",
+      "pinned_commit": "437c7604adee02e0403d77f75162a6c5f232221f",
+      "current_commit": "437c7604adee02e0403d77f75162a6c5f232221f",
       "pinned_ref_type": "branch",
       "pinned_ref": "codex/path-discipline-warning-slice-trove",
       "current_ref_type": "branch",
@@ -530,5 +530,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:d0904855c4eb18c51d209f761e28d706e6aaf17a8a2b7c619635306aec9e29e9"
+  "content_digest": "sha256:5a7a1fb7fb798e481379a1c3ed37913747a8b7542a2fdd2fbf943f62fe7ad53f"
 }

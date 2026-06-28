@@ -23,7 +23,7 @@
       "command": "npm run verify"
     },
     "qa_visual": {
-      "command": "npm run verify"
+      "command": "npm run qa:home-smoke"
     }
   },
   "capture": {
