@@ -122,6 +122,7 @@
 - [Sandbox Simulation Readiness Post-Local-Only First Validator Unattended-Runtime Proof Admission Boundary Next-Slice Selection](../ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-UNATTENDED-RUNTIME-PROOF-ADMISSION-BOUNDARY-NEXT-SLICE-SELECTION-2026-06-27.md)
 - [Root-Bounded Lane Selection After AI Long-Run Batch Orchestration Downstream Hold Closeout](../ops/ROOT-BOUNDED-LANE-SELECTION-AFTER-AI-LONG-RUN-BATCH-ORCHESTRATION-DOWNSTREAM-HOLD-CLOSEOUT-2026-06-27.md)
 - [AI Repetition-to-Automation Pipeline Selector Operator Action And Packet Basis](../ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-SELECTOR-OPERATOR-ACTION-AND-PACKET-BASIS-2026-06-18.md)
+- [Truth Map And ATLAS Book AI Repetition Selector-To-Receipt Projection Refresh](../ops/TRUTH-MAP-AND-ATLAS-BOOK-AI-REPETITION-SELECTOR-TO-RECEIPT-PROJECTION-REFRESH-2026-06-28.md)
 - [Duplicate Surface Decommission Final Closeout Pass 3](../ops/DUPLICATE-SURFACE-DECOMMISSION-FINAL-CLOSEOUT-PASS-3-2026-06-13.md)
 - [Remaining Closeout Queue Reselection After Duplicate Surface Closeout](../ops/REMAINING-CLOSEOUT-QUEUE-RESELECTION-AFTER-DUPLICATE-SURFACE-CLOSEOUT-2026-06-13.md)
 - [Tmp Dependency Elimination Root Worktree Disposal And Fitness Link Blocker Recheck](../ops/TMP-DEPENDENCY-ELIMINATION-ROOT-WORKTREE-DISPOSAL-AND-FITNESS-LINK-BLOCKER-RECHECK-2026-06-16.md)
