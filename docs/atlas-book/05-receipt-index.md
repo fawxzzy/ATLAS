@@ -55,6 +55,7 @@
 - [Inventory And Truth Map And ATLAS Book Fitness Desktop Manual Attestation Mobile Gate Refresh Continuity Re-Sync](../ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-DESKTOP-MANUAL-ATTESTATION-MOBILE-GATE-REFRESH-CONTINUITY-RESYNC-2026-06-27.md)
 - [ATLAS QA Fitness Desktop Manual Attestation Closeout And Mobile Gate Re-Sync](../ops/ATLAS-QA-FITNESS-DESKTOP-MANUAL-ATTESTATION-CLOSEOUT-AND-MOBILE-GATE-RESYNC-2026-06-28.md)
 - [ATLAS QA BrowserStack Provider Mobile Readiness And Dry-Run Re-Sync](../ops/ATLAS-QA-BROWSERSTACK-PROVIDER-MOBILE-READINESS-AND-DRY-RUN-RESYNC-2026-06-28.md)
+- [ATLAS QA Protected Single Dispatch Fitness Bootstrap And Sparse Validation Unblock](../ops/ATLAS-QA-PROTECTED-SINGLE-DISPATCH-FITNESS-BOOTSTRAP-AND-SPARSE-VALIDATION-UNBLOCK-2026-06-28.md)
 - [ATLAS QA Fitness Provider Blocker Truth Projection Re-Sync](../ops/ATLAS-QA-FITNESS-PROVIDER-BLOCKER-TRUTH-PROJECTION-RESYNC-2026-06-28.md)
 - [ATLAS QA Protected Workflow Canonical Repo Path Re-Sync](../ops/ATLAS-QA-PROTECTED-WORKFLOW-CANONICAL-REPO-PATH-RESYNC-2026-06-28.md)
 - [Inventory And Truth Map And ATLAS Book Fitness Current-SHA Blocked Readiness And Inventory Re-Sync](../ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-CURRENT-SHA-BLOCKED-READINESS-AND-INVENTORY-RESYNC-2026-06-28.md)
