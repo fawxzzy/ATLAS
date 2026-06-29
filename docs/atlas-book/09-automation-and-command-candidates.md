@@ -81,6 +81,7 @@ Best candidates:
   - always write durable gate-decision receipts
 - `checkpoint_handoff_summary`
   - summarize committed work between two ATLAS git checkpoints
+  - or derive the inclusive base from a cited receipt's `Control-plane checkpoint`
   - classify changed receipts, Book surfaces, helpers, tests, runtime refs, and remaining root files
   - report current worktree cleanliness explicitly
   - stay commit-range only with no marker inference, no restart mutation, and no owner/runtime truth claims

@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-06-19T05:00:00Z",
-  "updated_at": "2026-06-28T12:29:39Z",
+  "updated_at": "2026-06-29T08:26:18Z",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -28,7 +28,8 @@
     "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-SELECTOR-LANE-EXHAUSTION-OR-FALLBACK-ROUTING-2026-06-18.md",
     "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md",
     "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-SELECTOR-TO-RECEIPT-SCAFFOLD-ROUTING-2026-06-28.md",
-    "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CHECKPOINT-HANDOFF-SUMMARY-HELPER-2026-06-28.md"
+    "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CHECKPOINT-HANDOFF-SUMMARY-HELPER-2026-06-28.md",
+    "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-RECEIPT-DERIVED-CHECKPOINT-HANDOFF-SUMMARY-HELPER-2026-06-29.md"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -36,9 +37,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "ai-repetition-to-automation-pipeline",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CHECKPOINT-HANDOFF-SUMMARY-HELPER-2026-06-28.md",
-    "checkpoint_commit": "codex/stack-lock-refresh-after-mazer-pr6",
-    "checkpoint_summary": "The lane now holds at 37 percent with no immediate same-lane packet open by default: selector truth already flows into receipt scaffolds when an actionable packet exists, and one distinct new checkpoint-handoff helper family now also turns committed ATLAS git history into one deterministic handoff recap without inferring marker movement, owner/runtime truth, or execution authority.",
+    "current_checkpoint_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-RECEIPT-DERIVED-CHECKPOINT-HANDOFF-SUMMARY-HELPER-2026-06-29.md",
+    "checkpoint_commit": "codex/atlas-root-mazer-dirty-head-resync@1eb47c9e",
+    "checkpoint_summary": "The lane now holds at 38 percent with no immediate same-lane packet open by default: selector truth already flows into receipt scaffolds when an actionable packet exists, the checkpoint-handoff helper still turns committed ATLAS git history into one deterministic handoff recap, and the helper can now also derive its inclusive base directly from a cited receipt checkpoint without inferring marker movement, owner/runtime truth, or execution authority.",
     "governing_receipts": [
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-SURFACE-PASS-52-2026-06-09.md",
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-ACTIVE-LANE-FOLLOW-ON-DISAMBIGUATION-2026-06-17.md",
@@ -47,7 +48,8 @@
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-SELECTOR-LANE-EXHAUSTION-OR-FALLBACK-ROUTING-2026-06-18.md",
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md",
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-SELECTOR-TO-RECEIPT-SCAFFOLD-ROUTING-2026-06-28.md",
-      "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CHECKPOINT-HANDOFF-SUMMARY-HELPER-2026-06-28.md"
+      "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CHECKPOINT-HANDOFF-SUMMARY-HELPER-2026-06-28.md",
+      "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-RECEIPT-DERIVED-CHECKPOINT-HANDOFF-SUMMARY-HELPER-2026-06-29.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -81,6 +83,10 @@
       {
         "path": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CHECKPOINT-HANDOFF-SUMMARY-HELPER-2026-06-28.md",
         "role": "checkpoint-range handoff summary helper and live committed-history proof"
+      },
+      {
+        "path": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-RECEIPT-DERIVED-CHECKPOINT-HANDOFF-SUMMARY-HELPER-2026-06-29.md",
+        "role": "receipt-derived checkpoint basis widening for the handoff summary helper with live committed-history proof"
       }
     ],
     "verification_adoption_surfaces": [
@@ -116,7 +122,7 @@
     "blocked_or_gated_work": [
       {
         "item": "reopening selector-only work by adjacency",
-        "requirement": "blocked unless a distinct new proof-backed selector seam appears beyond the current selector-to-receipt scaffold routing and checkpoint-handoff summary helper surfaces"
+        "requirement": "blocked unless a distinct new proof-backed selector seam appears beyond the current selector-to-receipt scaffold routing and the two current checkpoint-handoff helper surfaces"
       },
       {
         "item": "higher marker movement above the current held restart posture",
@@ -130,18 +136,18 @@
     "next_package_ladder": [
       {
         "package": "No immediate AI Repetition-to-Automation Pipeline same-lane packet",
-        "mode": "hold-flat after selector-to-scaffold routing plus checkpoint-handoff summary helper proof",
-        "reason": "the current admitted AI repetition families now cover direct selector-to-scaffold routing and deterministic checkpoint handoff recap, while the held root still proves no immediate same-lane packet is honestly open; reopen only with another distinct AI Repetition family, broader adoption, or wider execution reality than the current held posture"
+        "mode": "hold-flat after selector-to-scaffold routing plus receipt-derived checkpoint-handoff helper proof",
+        "reason": "the current admitted AI repetition families now cover direct selector-to-scaffold routing, deterministic checkpoint handoff recap, and receipt-derived inclusive checkpoint recovery, while the held root still proves no immediate same-lane packet is honestly open; reopen only with another distinct AI Repetition family, broader adoption, or wider execution reality than the current held posture"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CHECKPOINT-HANDOFF-SUMMARY-HELPER-2026-06-28.md",
-    "freshness_checked_at": "2026-06-28T12:29:39Z",
-    "freshness_basis": "the manifest now matches the held 37 percent AI repetition posture after the selector output was widened into receipt-scaffold routing, the live held root still proved those selector-target modes fail closed, and the new checkpoint-handoff helper family landed with live committed-history proof on the current branch.",
+    "freshness_checked_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-RECEIPT-DERIVED-CHECKPOINT-HANDOFF-SUMMARY-HELPER-2026-06-29.md",
+    "freshness_checked_at": "2026-06-29T08:26:18Z",
+    "freshness_basis": "the manifest now matches the held 38 percent AI repetition posture after selector output widened into receipt-scaffold routing, the original checkpoint-handoff helper landed with live committed-history proof, and the helper now also derives its inclusive base directly from a cited receipt checkpoint on the current branch.",
     "marker_posture": [
       {
         "marker": "AI Repetition-to-Automation Pipeline",
-        "percent": 37,
+        "percent": 38,
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ]

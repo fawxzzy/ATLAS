@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -14,6 +15,8 @@ if str(ROOT) not in sys.path:
 from ops._atlas import atlas_relative, normalize_slashes
 
 CONTRACT_VERSION = "atlas.checkpoint_handoff_summary.v1"
+CONTROL_PLANE_CHECKPOINT_PATTERN = re.compile(r"control-plane checkpoint:\s*`?([^`\r\n]+)`?", re.IGNORECASE)
+CHECKPOINT_SUFFIX_SHA_PATTERN = re.compile(r"^(?P<prefix>.+)@(?P<sha>[0-9a-fA-F]{7,40})$")
 
 CATEGORY_PREFIXES: tuple[tuple[str, str], ...] = (
     ("receipt_refs", "docs/ops/"),
@@ -68,6 +71,52 @@ def _resolve_commit(root: Path, ref: str, git_runner: Callable[..., str]) -> dic
     }
 
 
+def _read_text(path: Path) -> str:
+    return path.read_text(encoding="utf-8")
+
+
+def _derive_ref_from_control_plane_checkpoint(checkpoint_value: str) -> str:
+    stripped = checkpoint_value.strip()
+    match = CHECKPOINT_SUFFIX_SHA_PATTERN.match(stripped)
+    if match:
+        return match.group("sha")
+    return stripped
+
+
+def _resolve_since_source(
+    *,
+    root: Path,
+    since_ref: str | None,
+    since_receipt: str | None,
+    receipt_reader: Callable[[Path], str],
+) -> dict[str, str]:
+    if since_receipt:
+        receipt_path = Path(since_receipt)
+        if not receipt_path.is_absolute():
+            receipt_path = root / since_receipt
+        if not receipt_path.is_file():
+            raise CheckpointHandoffSummaryError(f"Receipt path `{since_receipt}` does not exist.")
+        receipt_text = receipt_reader(receipt_path)
+        match = CONTROL_PLANE_CHECKPOINT_PATTERN.search(receipt_text)
+        if not match:
+            raise CheckpointHandoffSummaryError(
+                f"Receipt `{atlas_relative(receipt_path, root=root)}` does not contain a `Control-plane checkpoint` line."
+            )
+        checkpoint_value = match.group(1).strip()
+        return {
+            "mode": "receipt",
+            "receipt_ref": atlas_relative(receipt_path, root=root),
+            "control_plane_checkpoint": checkpoint_value,
+            "resolved_ref": _derive_ref_from_control_plane_checkpoint(checkpoint_value),
+        }
+    if not since_ref:
+        raise CheckpointHandoffSummaryError("One of `since_ref` or `since_receipt` is required.")
+    return {
+        "mode": "ref",
+        "resolved_ref": since_ref,
+    }
+
+
 def _list_commits(root: Path, since_ref: str, until_ref: str, git_runner: Callable[..., str]) -> list[dict[str, str]]:
     raw = git_runner(root, "log", "--format=%H%x1f%s", f"{since_ref}..{until_ref}")
     commits: list[dict[str, str]] = []
@@ -116,11 +165,19 @@ def _categorize_paths(paths: list[str]) -> dict[str, list[str]]:
 def build_summary(
     *,
     root: Path,
-    since_ref: str,
+    since_ref: str | None = None,
+    since_receipt: str | None = None,
     until_ref: str = "HEAD",
     git_runner: Callable[..., str] = _run_git,
+    receipt_reader: Callable[[Path], str] = _read_text,
 ) -> dict[str, Any]:
-    since_commit = _resolve_commit(root, since_ref, git_runner)
+    since_source = _resolve_since_source(
+        root=root,
+        since_ref=since_ref,
+        since_receipt=since_receipt,
+        receipt_reader=receipt_reader,
+    )
+    since_commit = _resolve_commit(root, since_source["resolved_ref"], git_runner)
     until_commit = _resolve_commit(root, until_ref, git_runner)
     commits = _list_commits(root, since_commit["sha"], until_commit["sha"], git_runner)
     changed_files = _list_changed_files(root, since_commit["sha"], until_commit["sha"], git_runner)
@@ -130,6 +187,7 @@ def build_summary(
     return {
         "contract_version": CONTRACT_VERSION,
         "root": atlas_relative(root, root=root),
+        "since_source": since_source,
         "since_commit": since_commit,
         "until_commit": until_commit,
         "commit_count": len(commits),
@@ -142,6 +200,7 @@ def build_summary(
 
 
 def render_markdown(summary: dict[str, Any]) -> str:
+    since_source = summary.get("since_source") or {"mode": "ref"}
     lines = [
         "# Checkpoint Handoff Summary",
         "",
@@ -154,6 +213,9 @@ def render_markdown(summary: dict[str, Any]) -> str:
         "## Commits",
         "",
     ]
+    if since_source.get("mode") == "receipt":
+        lines.insert(3, f"- since receipt: `{since_source['receipt_ref']}`")
+        lines.insert(4, f"- checkpoint basis: `{since_source['control_plane_checkpoint']}`")
     commits = summary.get("commits", [])
     if commits:
         for commit in commits:
@@ -192,7 +254,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         description="Summarize committed ATLAS-root work between two git checkpoints for handoff or ChatGPT recap."
     )
     parser.add_argument("--root", default=str(ROOT), help="ATLAS root path")
-    parser.add_argument("--since-ref", required=True, help="Inclusive base git ref or commit")
+    since_group = parser.add_mutually_exclusive_group(required=True)
+    since_group.add_argument("--since-ref", help="Inclusive base git ref or commit")
+    since_group.add_argument(
+        "--since-receipt",
+        help="Receipt path whose `Control-plane checkpoint` should provide the inclusive base ref",
+    )
     parser.add_argument("--until-ref", default="HEAD", help="Ending git ref or commit")
     parser.add_argument("--format", choices=("json", "markdown"), default="markdown")
     parser.add_argument("--output", help="Optional output path")
@@ -202,7 +269,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     root = Path(args.root).resolve()
-    summary = build_summary(root=root, since_ref=args.since_ref, until_ref=args.until_ref)
+    summary = build_summary(
+        root=root,
+        since_ref=args.since_ref,
+        since_receipt=args.since_receipt,
+        until_ref=args.until_ref,
+    )
     rendered = json.dumps(summary, indent=2) + "\n" if args.format == "json" else render_markdown(summary)
     if args.output:
         output_path = Path(args.output)

@@ -18,7 +18,7 @@ Read:
 ### Execution substrate
 
 - `Playbook Everywhere + Cortex Interface: 22%`
-- `AI Repetition-to-Automation Pipeline: 37%`
+- `AI Repetition-to-Automation Pipeline: 38%`
 - `AI Long-Run Batch Orchestration: 66%`
 - `Sandbox Simulation Readiness: 99%`
 
@@ -48,7 +48,7 @@ Read:
 
 - Truth Map & ATLAS Book: `99%`
 - Inventory & Truth Map: `98%`
-- AI Repetition-to-Automation Pipeline: `37%`
+- AI Repetition-to-Automation Pipeline: `38%`
 - AI Long-Run Batch Orchestration: `66%`
 - Sandbox Simulation Readiness: `99%`
 
@@ -57,7 +57,7 @@ Read:
 ### Automation / orchestration
 
 - Cortex Readiness: `41%`
-- AI Repetition-to-Automation Pipeline: `37%`
+- AI Repetition-to-Automation Pipeline: `38%`
 - AI Long-Run Batch Orchestration: `66%`
 - Playbook Everywhere + Cortex Interface: `22%`
 
@@ -232,7 +232,7 @@ Current AI Long-Run closeout read: `AI Long-Run Batch Orchestration` stays at `6
 - Operator Secret Path Hygiene closes at `100%`: the exact reopened blocker class from pass 9 is now fully cleared because the four secret-bearing `tmp/*.env` files were moved under the already-admitted quarantine-only path `secrets/local/archive-quarantine/tmp-env-residue/2026-06-18/**`, post-move inspection proves no `tmp/*.env` residue remains, and `git check-ignore -v` proves the relocated files stay governed under ignored `secrets/**`; that satisfies the lane's explicit boundary rule that placement matters, not just git exposure
 - Vercel Hobby Cost Governance moved to `100%`: the lane still owns the correct governed decision shape because one bounded no-secret `fitness-hobby-decision.latest.json` artifact compares the preserved local `2026-06-17` and `2026-06-18` guardrail snapshots against the rolling `latest` guardrail surface and resolves the current repo-local decision to `keep_hobby`; that governance family is fresh again and no longer blocks current Fitness release-readiness, whose remaining gate is now the three real-device/manual lanes `desktop.chromium.real`, `android.chrome.real`, and `iphone.webkit.real`, with the remaining local provider-side blocker reduced to real BrowserStack credential availability rather than stale provider-routing truth
 - Feedback Loop Readiness now closes at `100%`: the lane no longer rests on one narrow no-send loop. It now has multiple replayable feedback loops across materially different proof classes: the earlier DiscordOS publication-control loop, the live Fitness feature-thread mutation loop through the DiscordOS bot path with durable message metadata, the `_stack` marker-checkpoint operator loop, the `_stack` receipt-package loop, and the `_stack` update-draft helper's exact fail-closed package-basis boundary. Fresh env-readiness proof now confirms the current session had a live authenticated DiscordOS bot path, so the earlier Fitness Codex-to-Chrome bridge defect is no longer the lane-wide blocker; it remains an alternate browser-path issue only. That is enough to close the lane because stack-level local-first feedback loops are now real across control, mutation, packaging, and truth-update surfaces
-- AI Repetition-to-Automation Pipeline now sits at `37%`: the lane no longer stops at selector truth flowing into receipt scaffolds alone. `ops/atlas/checkpoint_handoff_summary.py` now turns committed ATLAS git history into one deterministic checkpoint recap across receipts, Book surfaces, helpers, tests, runtime refs, and live worktree cleanliness, so the operator no longer has to reconstruct "what changed since the last checkpoint" by hand when handing work back to ChatGPT or another Codex pass. Live proof on the current branch already summarizes the committed `5c4e7f61..HEAD` release-gate-packet and stack-lock-resync range directly from durable git truth. That is enough for the smallest honest move above `36%` because one distinct new proof-backed root-local automation family is now admitted and execution-proven, but the lane still remains low because no owner-repo or `_stack` execution widening happened, no long-run continuation authority changed, and no immediate same-lane packet is open by default
+- AI Repetition-to-Automation Pipeline now sits at `38%`: the lane no longer stops at selector truth flowing into receipt scaffolds plus a manual-ref checkpoint recap helper. `ops/atlas/checkpoint_handoff_summary.py` now turns committed ATLAS git history into one deterministic checkpoint recap across receipts, Book surfaces, helpers, tests, runtime refs, and live worktree cleanliness, and it can now derive the inclusive base directly from one cited receipt's `Control-plane checkpoint`, so the operator no longer has to reconstruct "what changed since the last checkpoint" by hand or manually strip a prior receipt back into `--since-ref`. Live proof on the current branch already derives `codex/stack-lock-refresh-after-mazer-pr6@4c7212e0` from the June 28 helper receipt and summarizes the committed `4c7212e0..1eb47c9e` range directly from durable git truth. That is enough for the smallest honest move above `37%` because one distinct new proof-backed root-local automation refinement is now admitted and execution-proven, but the lane still remains low because no owner-repo or `_stack` execution widening happened, no long-run continuation authority changed, and no immediate same-lane packet is open by default
 - AI Long-Run Batch Orchestration moved to `21%`: the lane now has one exact `queue-or-registry batch entry contract`, one exact owner-facing root home, one explicit `none new yet` support decision, one exact first-slice selection in `batch-entry validator`, one exact first-slice admission and proof matrix for that validator, one exact prompt-pack and handoff contract for that same slice, one exact implementation-readiness closeout and worker-routing result, and now one reconciled first validator worker cluster with real executed state change plus immediate proof hardening inside the admitted slice
 - AI Long-Run Batch Orchestration stays intentionally low at `21%`: the worker cluster did not admit queue-home or registry-home semantics, `_stack` execution-home semantics, supervised pilot proof, broader operator adoption, or later-slice widening
 - AI Long-Run Batch Orchestration moved to `22%`: the lane now also has one exact draft-entry scaffold first-implementation admission and proof matrix, one exact scaffold prompt-pack and handoff contract, one exact implementation-readiness closeout and worker-routing result, and one reconciled first draft-entry scaffold worker cluster with real executed state change plus proof for placeholder rendering, full explicit scaffold rendering, non-`proposed` status rejection, optional-field rejection, unsupported-input rejection, and multi-entry fail-closed handling

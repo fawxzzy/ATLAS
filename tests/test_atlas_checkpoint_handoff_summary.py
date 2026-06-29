@@ -75,6 +75,7 @@ class AtlasCheckpointHandoffSummaryTests(unittest.TestCase):
     def test_render_markdown_reports_dirty_worktree(self) -> None:
         rendered = render_markdown(
             {
+                "since_source": {"mode": "ref", "resolved_ref": "base"},
                 "since_commit": {"ref": "base", "short_sha": "11111111", "subject": "Base"},
                 "until_commit": {"ref": "HEAD", "short_sha": "22222222", "subject": "Head"},
                 "commit_count": 0,
@@ -90,14 +91,75 @@ class AtlasCheckpointHandoffSummaryTests(unittest.TestCase):
         self.assertIn("- ` M docs/atlas-book/01-current-state.md`", rendered)
         self.assertIn("- no commits in range", rendered)
 
+    def test_build_summary_can_resolve_since_ref_from_receipt_checkpoint(self) -> None:
+        root = self._temp_root()
+        receipt_path = root / "docs" / "ops" / "EXAMPLE-RECEIPT.md"
+        receipt_path.parent.mkdir(parents=True, exist_ok=True)
+        receipt_path.write_text(
+            "# Example\n\n- Control-plane checkpoint: `codex/example-branch@4c7212e0`\n",
+            encoding="utf-8",
+        )
+        git_runner = self._git_runner(
+            {
+                ("rev-parse", "--verify", "4c7212e0"): "4c7212e012345678901234567890123456789012\n",
+                ("rev-parse", "--verify", "HEAD"): "2222222222222222222222222222222222222222\n",
+                ("log", "-1", "--format=%s", "4c7212e012345678901234567890123456789012"): "Base commit\n",
+                ("log", "-1", "--format=%s", "2222222222222222222222222222222222222222"): "Head commit\n",
+                (
+                    "log",
+                    "--format=%H%x1f%s",
+                    "4c7212e012345678901234567890123456789012..2222222222222222222222222222222222222222",
+                ): "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\x1fAdd helper\n",
+                (
+                    "diff",
+                    "--name-only",
+                    "4c7212e012345678901234567890123456789012..2222222222222222222222222222222222222222",
+                ): "docs/ops/EXAMPLE-RECEIPT.md\n",
+                ("status", "--short"): "",
+            }
+        )
+
+        summary = build_summary(root=root, since_receipt="docs/ops/EXAMPLE-RECEIPT.md", git_runner=git_runner)
+
+        self.assertEqual("receipt", summary["since_source"]["mode"])
+        self.assertEqual("docs/ops/EXAMPLE-RECEIPT.md", summary["since_source"]["receipt_ref"])
+        self.assertEqual("codex/example-branch@4c7212e0", summary["since_source"]["control_plane_checkpoint"])
+        self.assertEqual("4c7212e0", summary["since_source"]["resolved_ref"])
+        self.assertEqual("4c7212e0", summary["since_commit"]["ref"])
+
+    def test_render_markdown_reports_receipt_basis_when_present(self) -> None:
+        rendered = render_markdown(
+            {
+                "since_source": {
+                    "mode": "receipt",
+                    "receipt_ref": "docs/ops/EXAMPLE-RECEIPT.md",
+                    "control_plane_checkpoint": "codex/example-branch@4c7212e0",
+                    "resolved_ref": "4c7212e0",
+                },
+                "since_commit": {"ref": "4c7212e0", "short_sha": "4c7212e0", "subject": "Base"},
+                "until_commit": {"ref": "HEAD", "short_sha": "22222222", "subject": "Head"},
+                "commit_count": 1,
+                "changed_file_count": 1,
+                "worktree_clean": True,
+                "worktree_status": [],
+                "commits": [{"sha": "2" * 40, "short_sha": "22222222", "subject": "Head"}],
+                "categories": {key: [] for key in ("receipt_refs", "book_refs", "atlas_helper_refs", "stack_helper_refs", "test_refs", "runtime_refs", "other_refs")},
+            }
+        )
+
+        self.assertIn("- since receipt: `docs/ops/EXAMPLE-RECEIPT.md`", rendered)
+        self.assertIn("- checkpoint basis: `codex/example-branch@4c7212e0`", rendered)
+
     def test_main_writes_json_output(self) -> None:
         root = self._temp_root()
 
-        def fake_build_summary(*, root: Path, since_ref: str, until_ref: str = "HEAD", git_runner=None):
+        def fake_build_summary(*, root: Path, since_ref: str | None = None, since_receipt: str | None = None, until_ref: str = "HEAD", git_runner=None, receipt_reader=None):
             self.assertEqual("base", since_ref)
+            self.assertIsNone(since_receipt)
             self.assertEqual("HEAD", until_ref)
             return {
                 "contract_version": "atlas.checkpoint_handoff_summary.v1",
+                "since_source": {"mode": "ref", "resolved_ref": "base"},
                 "since_commit": {"ref": "base", "sha": "1" * 40, "short_sha": "11111111", "subject": "Base"},
                 "until_commit": {"ref": "HEAD", "sha": "2" * 40, "short_sha": "22222222", "subject": "Head"},
                 "commit_count": 1,
