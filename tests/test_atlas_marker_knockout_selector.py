@@ -133,15 +133,15 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
 
         ai_work_receipt = root / "docs" / "ops" / (
             "AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-PREFLIGHT-AGGREGATOR-"
-            "FIRST-IMPLEMENTATION-ADMISSION-2026-06-29.md"
+            "PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-06-29.md"
         )
         ai_work_receipt.write_text(
             "\n".join(
                 [
                     "# AI Work Packet",
                     "",
-                    "- Mode: `docs-only prompt-pack and worker handoff contract`",
-                    "- Scope: `freeze the exact worker objective, proof wording, allowed-touch surfaces, forbidden-touch surfaces, and stop conditions before implementing ops/atlas/ai_work_session_preflight.py`",
+                    "- Mode: `docs-only implementation-readiness closeout and worker-routing`",
+                    "- Scope: `decide whether the read-only ai_work_session_preflight worker can be routed with its current guards and proof contract, or whether any docs-only ambiguity still blocks worker admission`",
                     "",
                 ]
             ),
@@ -660,11 +660,11 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual("hold_current_lane", payload["operator_action"])
         self.assertEqual("AI Work Session Stability & Auto-Sync Loop", payload["next_after_current_marker"])
         self.assertEqual(
-            "AI Work Session Stability & Auto-Sync Loop read-only preflight aggregator prompt-pack and worker handoff contract",
+            "AI Work Session Stability & Auto-Sync Loop read-only preflight aggregator implementation-readiness closeout and worker-routing",
             payload["next_after_current_packet"],
         )
         self.assertEqual(
-            "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-PREFLIGHT-AGGREGATOR-FIRST-IMPLEMENTATION-ADMISSION-2026-06-29.md",
+            "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-PREFLIGHT-AGGREGATOR-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-06-29.md",
             payload["next_after_current_packet_basis_ref"],
         )
 

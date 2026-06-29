@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-06-29T00:00:00Z",
-  "updated_at": "2026-06-29T18:00:00Z",
+  "updated_at": "2026-06-29T20:15:00Z",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -22,7 +22,8 @@
     "docs/atlas-book/13-vision-and-endgames.md",
     "docs/memory/README.md",
     "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-CONTRACT-FREEZE-2026-06-29.md",
-    "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-PREFLIGHT-AGGREGATOR-FIRST-IMPLEMENTATION-ADMISSION-2026-06-29.md"
+    "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-PREFLIGHT-AGGREGATOR-FIRST-IMPLEMENTATION-ADMISSION-2026-06-29.md",
+    "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-PREFLIGHT-AGGREGATOR-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-06-29.md"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -30,14 +31,19 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "ai-work-session-stability-auto-sync-loop",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-PREFLIGHT-AGGREGATOR-FIRST-IMPLEMENTATION-ADMISSION-2026-06-29.md",
-    "checkpoint_commit": "codex/atlas-root-mazer-dirty-head-resync@ee82a10e",
-    "checkpoint_summary": "The lane now sits at 10 percent after freezing the first admitted read-only preflight aggregator slice, its structured JSON output contract, strict exit semantics, explicit no-side-effects guard, and the exact downstream prompt-pack handoff boundary without implementing the command or widening into owner or platform mutation.",
+    "current_checkpoint_receipt": "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-PREFLIGHT-AGGREGATOR-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-06-29.md",
+    "checkpoint_commit": "codex/atlas-root-mazer-dirty-head-resync@81e2a38f",
+    "checkpoint_summary": "The lane now still sits at 10 percent after freezing the exact future worker handoff for the read-only preflight aggregator on top of the already-admitted first slice, including the worker objective, proof matrix, allowed-touch surfaces, forbidden-touch surfaces, stop conditions, and preserved read-only output contract without implementing the command or widening into owner or platform mutation.",
     "governing_receipts": [
       "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-CONTRACT-FREEZE-2026-06-29.md",
-      "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-PREFLIGHT-AGGREGATOR-FIRST-IMPLEMENTATION-ADMISSION-2026-06-29.md"
+      "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-PREFLIGHT-AGGREGATOR-FIRST-IMPLEMENTATION-ADMISSION-2026-06-29.md",
+      "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-PREFLIGHT-AGGREGATOR-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-06-29.md"
     ],
     "owner_truth_surfaces": [
+      {
+        "path": "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-PREFLIGHT-AGGREGATOR-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-06-29.md",
+        "role": "exact worker objective, proof matrix, allowed-touch surfaces, forbidden-touch surfaces, and stop conditions"
+      },
       {
         "path": "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-PREFLIGHT-AGGREGATOR-FIRST-IMPLEMENTATION-ADMISSION-2026-06-29.md",
         "role": "first admitted preflight slice, output contract, exit semantics, and no-side-effects guard"
@@ -93,15 +99,15 @@
     ],
     "next_package_ladder": [
       {
-        "package": "AI Work Session Stability & Auto-Sync Loop read-only preflight aggregator prompt-pack and worker handoff contract",
-        "mode": "docs-only prompt-pack and worker handoff contract",
-        "reason": "the first slice, JSON contract, exit semantics, and no-side-effects guard are now frozen; the next honest slice is the exact worker objective, proof wording, allowed-touch surfaces, forbidden-touch surfaces, and stop conditions before implementation"
+        "package": "AI Work Session Stability & Auto-Sync Loop read-only preflight aggregator implementation-readiness closeout and worker-routing",
+        "mode": "docs-only implementation-readiness closeout and worker-routing",
+        "reason": "the worker objective, report contract, proof matrix, and read-only boundary are now frozen; the next honest slice is to decide whether the first worker can be routed without widening into implementation or mutation drift"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-PREFLIGHT-AGGREGATOR-FIRST-IMPLEMENTATION-ADMISSION-2026-06-29.md",
-    "freshness_checked_at": "2026-06-29T18:00:00Z",
-    "freshness_basis": "The manifest now mirrors the first-implementation admission receipt, the 10 percent marker posture, and the downstream prompt-pack handoff package without claiming code landing.",
+    "freshness_checked_receipt": "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-PREFLIGHT-AGGREGATOR-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-06-29.md",
+    "freshness_checked_at": "2026-06-29T20:15:00Z",
+    "freshness_basis": "The manifest now mirrors the prompt-pack receipt, the unchanged 10 percent marker posture, and the downstream implementation-readiness routing package without claiming code landing.",
     "marker_posture": [
       {
         "marker": "AI Work Session Stability & Auto-Sync Loop",
