@@ -10,7 +10,7 @@
     "markdown": "docs/audits/STACK-REPO-INVENTORY.md"
   },
   "repo_count": 12,
-  "dirty_repo_count": 2,
+  "dirty_repo_count": 1,
   "release_eligible_count": 5,
   "repos": [
     {
@@ -215,7 +215,7 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/mazer.git",
       "pinned_commit": "c48d38a69d84198c2763d04bc633339b7ce952e3",
-      "current_commit": "c48d38a69d84198c2763d04bc633339b7ce952e3",
+      "current_commit": "df18457f718dc119bf307e893c7642252e74e445",
       "pinned_ref_type": "branch",
       "pinned_ref": "codex/mazer-pass2-menu-parity",
       "current_ref_type": "branch",
@@ -317,13 +317,13 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "dd9dab84c0589cb9f68868b8e20ad93139b7f508",
+      "current_commit": "c7d4dc19c320670a9b62be8bb40edfec5e0b951b",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
       "current_ref": "codex/atlas-root-mazer-dirty-head-resync",
       "branch": "codex/atlas-root-mazer-dirty-head-resync",
-      "dirty": true,
+      "dirty": false,
       "trust_class": "trusted",
       "release_eligible": false,
       "exists": true,
@@ -530,5 +530,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:cddeba56e46997ca4448b023dd57f422b4ae1dc13225b2250519adff5e21cfe0"
+  "content_digest": "sha256:ecf19f2b262f4f849357595b9fbee9eeb1c1e53398896b03fb958d5ba816d218"
 }
