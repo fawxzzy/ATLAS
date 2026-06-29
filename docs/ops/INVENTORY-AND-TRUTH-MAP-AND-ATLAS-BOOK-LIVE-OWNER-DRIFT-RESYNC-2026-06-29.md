@@ -4,7 +4,7 @@
 
 - preserve the newest adjacent and managed owner truth after the latest June 29 Fitness and Mazer clean pushes
 - refresh the canonical Book, Inventory, and continuity-manifest mirrors so they describe current Fitness and Mazer reality exactly
-- keep marker posture flat because this pass improves truth precision only and does not widen adoption, clear a blocker, or move the closeout frontier
+- ratchet `Inventory & Truth Map` once the current clean owner truth and refreshed governed Fitness run are republished coherently
 
 ## Why
 
@@ -13,7 +13,7 @@ The earlier June 29 owner-truth refresh became stale again once both owner repos
 - `repos/fawxzzy-fitness` latest pushed clean head is now `7d8163d2c143d58b5eba8209eda8b93ddefb70d8`
 - inventory now records that same clean Fitness head on branch `codex/fitness-main-progression-summary-reapply`
 - the local Fitness worktree is now clean again
-- `repos/mazer` latest pushed clean head is now `bd69b0376a2d599a01a7d4c478af940be50916be`
+- `repos/mazer` latest pushed clean head is now `06b4e2c18947df7ffedfb34277aadadf23aa8e2b`
 - the local Mazer worktree is clean on `codex/mazer-pass2-menu-parity`
 - root validation and control-plane parity returned to the non-blocking warning floor: published inventory now reports `dirty_repo_count: 1` because only the stack root writeback remains dirty during this root pass
 
@@ -30,9 +30,9 @@ The earlier June 29 owner-truth refresh became stale again once both owner repos
   - local branch matches origin
   - worktree is clean
 - `git -C repos/mazer rev-parse HEAD`
-  - `bd69b0376a2d599a01a7d4c478af940be50916be`
+  - `06b4e2c18947df7ffedfb34277aadadf23aa8e2b`
 - `git -C repos/mazer rev-parse "@{u}"`
-  - `bd69b0376a2d599a01a7d4c478af940be50916be`
+  - `06b4e2c18947df7ffedfb34277aadadf23aa8e2b`
 - `git -C repos/mazer status --short --branch`
   - branch is `codex/mazer-pass2-menu-parity`
   - latest pushed clean head matches local head
@@ -56,7 +56,7 @@ Result:
   - Fitness `status: unmanaged`
   - Mazer `current_commit: 06b4e2c18947df7ffedfb34277aadadf23aa8e2b`
   - Mazer `dirty: false`
-- `stack.lock.yaml` now truthfully records `mazer.ref: codex/mazer-pass2-menu-parity` and `mazer.commit: bd69b0376a2d599a01a7d4c478af940be50916be`
+- `stack.lock.yaml` now truthfully records `mazer.ref: codex/mazer-pass2-menu-parity` and `mazer.commit: 06b4e2c18947df7ffedfb34277aadadf23aa8e2b`
 - one intermediate working-memory mismatch reopened during root writeback and was repaired by rerunning `python ops/cortex/index_working_memory.py` followed by `python ops/validation/validate_stack.py`
 - root validation is back at the non-blocking warning floor `critical=0 error=0 warning=3 info=0`
 
@@ -66,7 +66,7 @@ Result:
 - `repos/fawxzzy-fitness` latest pushed clean head is now `7d8163d2c143d58b5eba8209eda8b93ddefb70d8`
 - inventory now records that same clean Fitness head on `codex/fitness-main-progression-summary-reapply`
 - the local Fitness worktree is clean again
-- `repos/mazer` latest pushed clean head is now `bd69b0376a2d599a01a7d4c478af940be50916be` on `codex/mazer-pass2-menu-parity`
+- `repos/mazer` latest pushed clean head is now `06b4e2c18947df7ffedfb34277aadadf23aa8e2b` on `codex/mazer-pass2-menu-parity`
 - the local Mazer worktree is clean
 - published inventory now reports `dirty_repo_count: 1`
 - the governed Fitness protected run still remains `manual_review` on `fitness-progression-pr-smoke-20260629T074949197509Z`
