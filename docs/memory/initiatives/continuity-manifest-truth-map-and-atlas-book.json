@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-06-19T00:00:00Z",
-  "updated_at": "2026-06-29T01:31:30.6555627-04:00",
+  "updated_at": "2026-06-29T06:21:59Z",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -71,6 +71,7 @@
     "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-SESSION-COPILOT-DRIFT-AND-MAZER-LATEST-CLEAN-HEAD-RESYNC-2026-06-28.md",
     "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-LOGGER-PRESERVE-AND-MAZER-VERIFY-PROOF-SPINE-RESYNC-2026-06-28.md",
     "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-EFFORT-FIXTURE-COVERAGE-AND-MAZER-SYSTEM-MAP-RESYNC-2026-06-29.md",
+    "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-LIVE-OWNER-DRIFT-RESYNC-2026-06-29.md",
     "ops/atlas/qa/release_gate_packet.py",
     "ops/atlas/qa/github_secret_readiness.py",
     "runtime/atlas/qa/github-secret-readiness.latest.json"
@@ -81,9 +82,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "truth-map-and-atlas-book",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-EFFORT-FIXTURE-COVERAGE-AND-MAZER-SYSTEM-MAP-RESYNC-2026-06-29.md",
+    "current_checkpoint_receipt": "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-LIVE-OWNER-DRIFT-RESYNC-2026-06-29.md",
     "checkpoint_commit": "9a5d78b8d8ca35491ce8abe463bd37a5ce945020",
-    "checkpoint_summary": "The lane still sits at 99 percent because the canonical Book surfaces already mirrored the current June 27, June 28, and now later June 29 stack, QA, and continuity truth through the hosted protected-dispatch unblock, machine-readable GitHub-secret audit, held-root Cortex cleanup, published-checkpoint semantics hardening, the warning-floor truth re-sync, the later zero-warning closeout, the combined blocked-run handoff packet, the earlier clean-sync projection refresh, the earlier latest-clean-head projection refresh, the later mobile-recap-cards clean-head projection refresh, the later live dirty-working-set resync, the later clean-mazer parity resync, the later README-path dirty-head resync, the later Fitness latest-clean-head resync, the later dual-clean-head resync, the later owner-follow-on preserve, the later Fitness-logger-preserve plus Mazer-verify-proof-spine closeout, and this follow-on now refreshes the current projection after the later Fitness-effort-fixture-coverage plus Mazer-system-map closeout: latest pushed clean Fitness head is now `db175f08e2bbd15d38eb65d2a6432ad138d2319f`, the Fitness worktree is clean again, latest pushed clean Mazer head is now `eaa80c80877002fc1ead928900d36c0914a92b6a` on `codex/legacy-web-port-truth`, the Mazer worktree is clean again, the reset-lane system map plus fixed-snapshot preroll hardening are now mirrored at root, published inventory now reports `dirty_repo_count: 1`, the clean published ATLAS root checkpoint still consumed by this refresh is `9a5d78b8d8ca35491ce8abe463bd37a5ce945020`, the current blocked run still has one exact handoff at `runtime/atlas/qa/runs/fitness-progression-pr-smoke-20260628T072049067050Z/release-gate.packet-prep.md`, the protected run still remains `manual_review`, and root validation now reads `critical=0 error=0 warning=3 info=0`.",
+    "checkpoint_summary": "The lane still sits at 99 percent because the canonical Book surfaces now also preserve the newer June 29 live owner-drift nuance exactly: latest pushed clean Fitness head still remains `db175f08e2bbd15d38eb65d2a6432ad138d2319f`, inventory now records newer local clean head `94de051415c527de37a6114e88671f6b44fa0feb` on branch `ahead 2`, latest pushed clean Mazer head is now `4d7af0aad751a819acf713e1ebf42576d97528f2` while the local Mazer worktree is clean again, published inventory now reports `dirty_repo_count: 1`, the clean published ATLAS root checkpoint still consumed by this refresh is `9a5d78b8d8ca35491ce8abe463bd37a5ce945020`, the current blocked run still has one exact handoff at `runtime/atlas/qa/runs/fitness-progression-pr-smoke-20260628T072049067050Z/release-gate.packet-prep.md`, the protected run still remains `manual_review`, and root validation now reads `critical=0 error=0 warning=3 info=0`.",
     "governing_receipts": [
       "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-MARKER-SCARCITY-AND-CLOSED-LADDER-CARRY-FORWARD-HYGIENE-PASS-3-2026-05-29.md",
       "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-POST-INVENTORY-CLOSEOUT-CLUSTER-PROJECTION-REFRESH-PASS-4-2026-06-02.md",
@@ -132,7 +133,8 @@
       "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-LATEST-CLEAN-HEAD-AND-MAZER-LATEST-CLEAN-HEAD-RESYNC-2026-06-28.md",
       "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-SESSION-COPILOT-DRIFT-AND-MAZER-LATEST-CLEAN-HEAD-RESYNC-2026-06-28.md",
       "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-LOGGER-PRESERVE-AND-MAZER-VERIFY-PROOF-SPINE-RESYNC-2026-06-28.md",
-      "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-EFFORT-FIXTURE-COVERAGE-AND-MAZER-SYSTEM-MAP-RESYNC-2026-06-29.md"
+      "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-EFFORT-FIXTURE-COVERAGE-AND-MAZER-SYSTEM-MAP-RESYNC-2026-06-29.md",
+      "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-LIVE-OWNER-DRIFT-RESYNC-2026-06-29.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -352,9 +354,9 @@
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-EFFORT-FIXTURE-COVERAGE-AND-MAZER-SYSTEM-MAP-RESYNC-2026-06-29.md",
-    "freshness_checked_at": "2026-06-29T01:31:30.6555627-04:00",
-    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture still match the refreshed current-state, marker, restart, system-map, and endgame mirrors after the hosted protected-dispatch unblock, GitHub-secret audit, held-root Cortex cleanup, post-Cortex held-root main-checkpoint re-sync, later published-checkpoint semantics hardening pass, the warning-floor truth re-sync, the later zero-warning closeout, the combined release-gate packet absorption, the earlier clean-sync projection refresh, the earlier latest-clean-head projection refresh, the later mobile-recap-cards clean-head projection refresh, the later live dirty-working-set stack-lock resync, the later clean-mazer parity resync, the later README-path dirty-head resync, the later Fitness latest-clean-head resync, the later dual-clean-head resync, the later owner-follow-on preserve, the later Fitness-logger-preserve plus Mazer-verify-proof-spine truth refresh, and this later Fitness-effort-fixture-coverage plus Mazer-system-map truth refresh: current protected-QA truth still projects playbook, trove, foundation, and lifeline as ready, Fitness at `manual_review` on the current governed run `fitness-progression-pr-smoke-20260628T072049067050Z` with `desktop.chromium.real.manual` now valid and only `android.chrome.real` plus `iphone.webkit.real` remaining open, latest pushed clean `fitness` is `db175f08e2bbd15d38eb65d2a6432ad138d2319f`, the Fitness worktree is clean again, latest pushed clean `mazer` is `eaa80c80877002fc1ead928900d36c0914a92b6a`, the Mazer worktree is clean again, the reset-lane system map plus fixed-snapshot preroll hardening are now mirrored at root, `runtime/atlas/qa/runs/fitness-progression-pr-smoke-20260628T072049067050Z/release-gate.packet-prep.md` still carries one exact blocked-run operator handoff, the clean published root checkpoint still consumed by this refresh is `9a5d78b8d8ca35491ce8abe463bd37a5ce945020`, protected dispatch run `28316073769` still proves the remaining ATLAS GitHub Actions blocker is only missing `BROWSERSTACK_USERNAME` and `BROWSERSTACK_ACCESS_KEY`, `runtime/atlas/qa/github-secret-readiness.latest.json` now reports `available_secret_count: 0`, the root validation floor now projects `critical=0 / error=0 / warning=3 / info=0`, the initiative manifest-health surface still reads 19 ok / 0 warning / 0 error, and the eligible-open-marker coverage and restart-index surfaces still read 7 of 7.",
+    "freshness_checked_receipt": "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-LIVE-OWNER-DRIFT-RESYNC-2026-06-29.md",
+    "freshness_checked_at": "2026-06-29T06:21:59Z",
+    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture still match the refreshed current-state, marker, restart, system-map, and endgame mirrors after the newer June 29 live owner-drift clarification: current protected-QA truth still projects playbook, trove, foundation, and lifeline as ready, Fitness stays at `manual_review` on the current governed run `fitness-progression-pr-smoke-20260628T072049067050Z` with `desktop.chromium.real.manual` now valid and only `android.chrome.real` plus `iphone.webkit.real` remaining open, latest pushed clean `fitness` still remains `db175f08e2bbd15d38eb65d2a6432ad138d2319f`, inventory now records newer local clean Fitness head `94de051415c527de37a6114e88671f6b44fa0feb` on branch `ahead 2`, latest pushed clean `mazer` is `4d7af0aad751a819acf713e1ebf42576d97528f2` and the local Mazer worktree is clean again, the reset-lane system map plus menu parity follow-ons remain mirrored at root, `runtime/atlas/qa/runs/fitness-progression-pr-smoke-20260628T072049067050Z/release-gate.packet-prep.md` still carries one exact blocked-run operator handoff, the clean published root checkpoint still consumed by this refresh is `9a5d78b8d8ca35491ce8abe463bd37a5ce945020`, protected dispatch run `28316073769` still proves the remaining ATLAS GitHub Actions blocker is only missing `BROWSERSTACK_USERNAME` and `BROWSERSTACK_ACCESS_KEY`, `runtime/atlas/qa/github-secret-readiness.latest.json` now reports `available_secret_count: 0`, the root validation floor now projects `critical=0 / error=0 / warning=3 / info=0`, the initiative manifest-health surface still reads 19 ok / 0 warning / 0 error, and the eligible-open-marker coverage and restart-index surfaces still read 7 of 7.",
     "marker_posture": [
       {
         "marker": "Truth Map & ATLAS Book",

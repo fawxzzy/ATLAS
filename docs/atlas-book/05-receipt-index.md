@@ -69,6 +69,7 @@
 - [Inventory And Truth Map And ATLAS Book Fitness Latest Clean Head And Mazer Latest Clean Head Re-Sync](../ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-LATEST-CLEAN-HEAD-AND-MAZER-LATEST-CLEAN-HEAD-RESYNC-2026-06-28.md)
 - [Inventory And Truth Map And ATLAS Book Fitness Logger Preserve And Mazer Verify Proof Spine Re-Sync](../ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-LOGGER-PRESERVE-AND-MAZER-VERIFY-PROOF-SPINE-RESYNC-2026-06-28.md)
 - [Inventory And Truth Map And ATLAS Book Fitness Effort Fixture Coverage And Mazer System Map Re-Sync](../ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-EFFORT-FIXTURE-COVERAGE-AND-MAZER-SYSTEM-MAP-RESYNC-2026-06-29.md)
+- [Inventory And Truth Map And ATLAS Book Live Owner Drift Re-Sync](../ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-LIVE-OWNER-DRIFT-RESYNC-2026-06-29.md)
 - [Inventory And Truth Map And ATLAS Book Fitness Session Copilot Drift And Mazer Latest Clean Head Re-Sync](../ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-SESSION-COPILOT-DRIFT-AND-MAZER-LATEST-CLEAN-HEAD-RESYNC-2026-06-28.md)
 - [ATLAS Root Main And Fitness Post-Verify Zero Dirty Inventory Re-Sync](../ops/ATLAS-ROOT-MAIN-AND-FITNESS-POST-VERIFY-ZERO-DIRTY-INVENTORY-RESYNC-2026-06-28.md)
 - [ATLAS QA Fitness Current Run Desktop Closeout And Mobile-Only Gate Re-Sync](../ops/ATLAS-QA-FITNESS-CURRENT-RUN-DESKTOP-CLOSEOUT-AND-MOBILE-ONLY-GATE-RESYNC-2026-06-28.md)
@@ -1044,6 +1045,7 @@
 - [Inventory And Truth Map Closeout Cluster Canonical Placement Pass 8](../ops/INVENTORY-AND-TRUTH-MAP-CLOSEOUT-CLUSTER-CANONICAL-PLACEMENT-PASS-8-2026-06-02.md)
 - [Inventory And Truth Map June 12 Closeout Cluster Canonical Placement Pass 9](../ops/INVENTORY-AND-TRUTH-MAP-JUNE-12-CLOSEOUT-CLUSTER-CANONICAL-PLACEMENT-PASS-9-2026-06-12.md)
 - [Inventory And Truth Map June 18 And 19 Closeout Cluster Canonical Placement Pass 10](../ops/INVENTORY-AND-TRUTH-MAP-JUNE-18-AND-19-CLOSEOUT-CLUSTER-CANONICAL-PLACEMENT-PASS-10-2026-06-19.md)
+- [Inventory And Truth Map And ATLAS Book Live Owner Drift Re-Sync](../ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-LIVE-OWNER-DRIFT-RESYNC-2026-06-29.md)
 
 ## Knowledge Capture & Transfer
 
