@@ -19,7 +19,7 @@ Operational rule:
 - Excluded surface count: `17`
 - Stack manifest: `stack.yaml`
 - Stack lock: `stack.lock.yaml`
-- Inventory digest: `sha256:cbca3424ac287ef9a007859e5bb672f319cc856a1353e7c6e7fcf0d4e4ce29be`
+- Inventory digest: `sha256:b62f1a3cadc1b00a92244fab66c09a598155de21bff1702e4af6cf5784e83f5e`
 
 ## Managed Repos
 
@@ -27,14 +27,14 @@ Operational rule:
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | _stack | repos/_stack | codex/queue-or-registry-broader-execution-behavior | 3450e463b1e666c9e7f8caa2bf990338882aeca4 | 3450e463b1e666c9e7f8caa2bf990338882aeca4 | False | trusted | False | initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-local-data-gateway<br>initiative:continuity-manifest-post-convergence-lane-split-readiness<br>initiative:continuity-manifest-stack-readiness<br>initiative:continuity-manifest-vision-future-alignment |
 | discordos | repos/DiscordOS | main | 76b699269b724070f548ca7841d36ec1505727f8 | 76b699269b724070f548ca7841d36ec1505727f8 | False | trusted | False | initiative:continuity-manifest-dependency-untangling<br>initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-discord-os-infrastructure-separation |
-| fitness | repos/fawxzzy-fitness | codex/fitness-main-progression-summary-reapply | - | 94de051415c527de37a6114e88671f6b44fa0feb | False | adjacent | False | initiative:continuity-manifest-dependency-untangling<br>initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-discord-os-infrastructure-separation<br>initiative:continuity-manifest-local-data-gateway |
+| fitness | repos/fawxzzy-fitness | codex/fitness-main-progression-summary-reapply | - | e6111245ef64bb5a56e560df301e6cc0bfebf39f | False | adjacent | False | initiative:continuity-manifest-dependency-untangling<br>initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-discord-os-infrastructure-separation<br>initiative:continuity-manifest-local-data-gateway |
 | foundation | repos/foundation | main | fd1cf0650cdbb732f1231aa47a6e43138dab9062 | fd1cf0650cdbb732f1231aa47a6e43138dab9062 | False | trusted | True | - |
 | lifeline | repos/lifeline | codex/path-discipline-warning-slice-lifeline | 538f623a84b003e70dadd234e6ea3af642446a5f | 538f623a84b003e70dadd234e6ea3af642446a5f | False | trusted | True | - |
-| mazer | repos/mazer | codex/legacy-web-port-truth | 4d7af0aad751a819acf713e1ebf42576d97528f2 | 4d7af0aad751a819acf713e1ebf42576d97528f2 | False | trusted | True | initiative:initiative-mazer-d2-learning-scorer |
+| mazer | repos/mazer | codex/legacy-web-port-truth | a7cb12d281e450a6d8f4ea3a766378cacb7e1e3d | a7cb12d281e450a6d8f4ea3a766378cacb7e1e3d | False | trusted | True | initiative:initiative-mazer-d2-learning-scorer |
 | nat1-games | repos/Nat1-Games/nat1-games | codex/path-discipline-warning-slice-nat1 | 404460d3717fab389407582048a9b9f228f26d39 | 404460d3717fab389407582048a9b9f228f26d39 | False | trusted | False | - |
 | playbook | repos/playbook | codex/path-discipline-warning-slice-playbook | 10b8f0ac044a7f9c66b4aa8dd08f6abd2d1c5269 | 10b8f0ac044a7f9c66b4aa8dd08f6abd2d1c5269 | False | trusted | True | initiative:continuity-manifest-atlas-owned-repo-naming-canonicalization |
 | playbook-demo | repos/playbook-demo/playbook-demo | main | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | False | trusted | False | - |
-| stack | . | codex/atlas-root-mazer-dirty-head-resync | - | defb19185f1114015a3b9cf52f87fd16989b0fb6 | True | trusted | False | - |
+| stack | . | codex/atlas-root-mazer-dirty-head-resync | - | 7c37d691fdf893377dcc4c76f36b9ad4ad3bddd6 | True | trusted | False | - |
 | stream | repos/stream | main | 43769ba86d4c6ebc419ab9e7847c3843460a094f | 43769ba86d4c6ebc419ab9e7847c3843460a094f | False | trusted | False | - |
 | trove | repos/trove | codex/path-discipline-warning-slice-trove | 437c7604adee02e0403d77f75162a6c5f232221f | 437c7604adee02e0403d77f75162a6c5f232221f | False | trusted | True | - |
 

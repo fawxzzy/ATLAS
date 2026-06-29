@@ -54,7 +54,7 @@ components:
     remote: "https://github.com/fawxzzy/mazer.git"
     ref_type: "branch"
     ref: "codex/legacy-web-port-truth"
-    commit: "4d7af0aad751a819acf713e1ebf42576d97528f2"
+    commit: "a7cb12d281e450a6d8f4ea3a766378cacb7e1e3d"
     dirty: false
     trust_class: "trusted"
     release_eligible: true
@@ -216,4 +216,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:09bca9dbdfc68f645bf2fa528daab9d694218d477d0c19a33a6e31193c13ebfb"
+lock_digest: "sha256:8d44bb87bcc8dae265da5b60f451add30fc04f2d7ec067f293e4e1f9022918b1"
