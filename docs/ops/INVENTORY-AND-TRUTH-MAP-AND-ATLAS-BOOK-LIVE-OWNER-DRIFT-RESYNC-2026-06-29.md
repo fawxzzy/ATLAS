@@ -8,14 +8,14 @@
 
 ## Why
 
-The earlier June 29 owner-truth refresh became stale again once both owner repos moved to newer clean heads:
+The earlier June 29 owner-truth refresh became stale again once Mazer landed on `main` and adjacent local Fitness drift reopened:
 
 - `repos/fawxzzy-fitness` latest pushed clean head is now `e6111245ef64bb5a56e560df301e6cc0bfebf39f`
 - inventory now records that same clean Fitness head on branch `codex/fitness-main-progression-summary-reapply`
-- the local Fitness worktree is now dirty again because source changes are present even though branch parity is restored
+- the local Fitness worktree is now dirty again on `src/app/login/page.tsx`, with untracked `src/app/login/LocalDevAutoLoginRedirect.tsx`, even though branch parity is restored
 - `repos/mazer` latest pushed clean head is now `a7cb12d281e450a6d8f4ea3a766378cacb7e1e3d`
-- the local Mazer worktree is clean again on `main`
-- root validation and control-plane parity returned to the non-blocking warning floor: published inventory now reports `dirty_repo_count: 2` because the stack root writeback and the local Fitness source changes are both dirty during this root pass
+- the local Mazer worktree is clean on `main`
+- root validation and control-plane parity returned to the non-blocking warning floor: published inventory now reports `dirty_repo_count: 2` because the stack root writeback and adjacent unmanaged Fitness login-path drift are both dirty during this root pass
 
 ## Executed Proof
 
@@ -65,9 +65,9 @@ Result:
 - the clean published ATLAS root checkpoint still consumed by this refresh remains `9860ebb3218a65d10f039108adf413bcefc57ddb`
 - `repos/fawxzzy-fitness` latest pushed clean head is now `e6111245ef64bb5a56e560df301e6cc0bfebf39f`
 - inventory now records that same clean Fitness head on `codex/fitness-main-progression-summary-reapply`
-- the local Fitness worktree is dirty again even though branch parity is restored
+- the local Fitness worktree is dirty again on `src/app/login/page.tsx`, with untracked `src/app/login/LocalDevAutoLoginRedirect.tsx`, even though branch parity is restored
 - `repos/mazer` latest pushed clean head is now `a7cb12d281e450a6d8f4ea3a766378cacb7e1e3d` on `main`
-- the local Mazer worktree is clean again
+- the local Mazer worktree is clean
 - published inventory now reports `dirty_repo_count: 2`
 - the governed Fitness protected run still remains `manual_review` on `fitness-progression-pr-smoke-20260629T071238943390Z`
 - the remaining protected-QA blocker class is still unchanged:
