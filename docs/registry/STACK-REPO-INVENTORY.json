@@ -3,14 +3,14 @@
   "stack_manifest_ref": "stack.yaml",
   "stack_manifest_digest": "sha256:e5ac73c00983975b59e4b8e7f8541160d479087f5dc95ad1d642568116bd7d10",
   "stack_lock_ref": "stack.lock.yaml",
-  "stack_lock_digest": "sha256:c670778e1ff1a854ee59f3774c7d6dcd316940a2f4a9dd10a13502f5a85efebd",
+  "stack_lock_digest": "sha256:1908004e08dcc6939850ead44c60ddcc0bb19ad3577f61a02ed8a49fa555d847",
   "working_memory_digest": "sha256:fe4f4902e2b2c475974b050ba1bf3f5e740439aa41df2f844555c2c0dc3b310f",
   "published_refs": {
     "json": "docs/registry/STACK-REPO-INVENTORY.json",
     "markdown": "docs/audits/STACK-REPO-INVENTORY.md"
   },
   "repo_count": 12,
-  "dirty_repo_count": 2,
+  "dirty_repo_count": 1,
   "release_eligible_count": 5,
   "repos": [
     {
@@ -122,13 +122,13 @@
       "status": "unmanaged",
       "remote_url": "https://github.com/fawxzzy/fawxzzy-fitness.git",
       "pinned_commit": null,
-      "current_commit": "e6111245ef64bb5a56e560df301e6cc0bfebf39f",
+      "current_commit": "7d8163d2c143d58b5eba8209eda8b93ddefb70d8",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
       "current_ref": "codex/fitness-main-progression-summary-reapply",
       "branch": "codex/fitness-main-progression-summary-reapply",
-      "dirty": true,
+      "dirty": false,
       "trust_class": "adjacent",
       "release_eligible": false,
       "exists": true,
@@ -214,13 +214,13 @@
       "role": "application",
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/mazer.git",
-      "pinned_commit": "a7cb12d281e450a6d8f4ea3a766378cacb7e1e3d",
-      "current_commit": "a7cb12d281e450a6d8f4ea3a766378cacb7e1e3d",
+      "pinned_commit": "06b4e2c18947df7ffedfb34277aadadf23aa8e2b",
+      "current_commit": "06b4e2c18947df7ffedfb34277aadadf23aa8e2b",
       "pinned_ref_type": "branch",
-      "pinned_ref": "main",
+      "pinned_ref": "codex/mazer-pass2-menu-parity",
       "current_ref_type": "branch",
-      "current_ref": "main",
-      "branch": "main",
+      "current_ref": "codex/mazer-pass2-menu-parity",
+      "branch": "codex/mazer-pass2-menu-parity",
       "dirty": false,
       "trust_class": "trusted",
       "release_eligible": true,
@@ -317,7 +317,7 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "9860ebb3218a65d10f039108adf413bcefc57ddb",
+      "current_commit": "d8306fbf52642dc516fa4acdbfbd5cd5b0a740b8",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
@@ -530,5 +530,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:c1818445f6baaabd8e55d3c8f042e7856b8fd77679531c292ec8c75e29908566"
+  "content_digest": "sha256:c2daa63c4b33f857c2ed9286f9b1d5e0d0b0f85f96966c5d361e1f1df1c87e73"
 }
