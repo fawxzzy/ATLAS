@@ -74,6 +74,7 @@
     "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-LIVE-OWNER-DRIFT-RESYNC-2026-06-29.md",
     "docs/ops/TRUTH-MAP-AND-INVENTORY-CONTINUITY-COVERAGE-ROLLUP-AND-RATCHET-2026-06-29.md",
     "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-POST-MAZER-PASS2-OWNER-DRIFT-RESYNC-2026-06-29.md",
+    "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-MAZER-COMPOSITION-PARITY-PR8-OWNER-DRIFT-RESYNC-2026-06-29.md",
     "ops/atlas/continuity_coverage.py",
     "ops/atlas/qa/release_gate_packet.py",
     "ops/atlas/qa/github_secret_readiness.py",
@@ -85,9 +86,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "truth-map-and-atlas-book",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-POST-MAZER-PASS2-OWNER-DRIFT-RESYNC-2026-06-29.md",
-    "checkpoint_commit": "c23adc1200a046841099f71c99078eacd68d9141",
-    "checkpoint_summary": "The lane remains closed at 100 percent because the canonical Book restart surface now also preserves the post-Mazer-pass2 live owner drift without reopening the continuity closeout: latest pushed clean Fitness head is still `7d8163d2c143d58b5eba8209eda8b93ddefb70d8`, latest pushed clean Mazer head is now `bf38ceb95740ae111c8fdfd37371b2184b556ec0` on `codex/mazer-pass2-menu-parity`, published inventory now reports `dirty_repo_count: 2`, the protected Fitness run still remains `manual_review`, root validation still reads `critical=0 error=0 warning=3 info=0`, initiative continuity health still reads `19 ok / 0 warning / 0 error`, eligible open-marker coverage and restart readiness still read `6 / 6`, maintained manifest restart readiness still reads `19 / 19`, and the structured rollup still reports `pending_review_count: 0`.",
+    "current_checkpoint_receipt": "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-MAZER-COMPOSITION-PARITY-PR8-OWNER-DRIFT-RESYNC-2026-06-29.md",
+    "checkpoint_commit": "dd9dab84c0589cb9f68868b8e20ad93139b7f508",
+    "checkpoint_summary": "The lane remains closed at 100 percent because the canonical Book restart surface now also preserves the Mazer composition-parity and PR-8 live owner drift without reopening the continuity closeout: latest pushed clean Fitness head is still `7d8163d2c143d58b5eba8209eda8b93ddefb70d8`, latest pushed clean Mazer head is now `c48d38a69d84198c2763d04bc633339b7ce952e3` on `codex/mazer-pass2-menu-parity` with draft PR `#8` open, published inventory now reports `dirty_repo_count: 2`, the protected Fitness run still remains `manual_review`, root validation still reads `critical=0 error=0 warning=3 info=0`, initiative continuity health still reads `20 ok / 0 warning / 0 error`, eligible open-marker coverage and restart readiness still read `6 / 6`, maintained manifest restart readiness still reads `20 / 20`, and the structured rollup still reports `pending_review_count: 0`.",
     "governing_receipts": [
       "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-MARKER-SCARCITY-AND-CLOSED-LADDER-CARRY-FORWARD-HYGIENE-PASS-3-2026-05-29.md",
       "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-POST-INVENTORY-CLOSEOUT-CLUSTER-PROJECTION-REFRESH-PASS-4-2026-06-02.md",
@@ -139,7 +140,8 @@
       "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-EFFORT-FIXTURE-COVERAGE-AND-MAZER-SYSTEM-MAP-RESYNC-2026-06-29.md",
       "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-LIVE-OWNER-DRIFT-RESYNC-2026-06-29.md",
       "docs/ops/TRUTH-MAP-AND-INVENTORY-CONTINUITY-COVERAGE-ROLLUP-AND-RATCHET-2026-06-29.md",
-      "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-POST-MAZER-PASS2-OWNER-DRIFT-RESYNC-2026-06-29.md"
+      "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-POST-MAZER-PASS2-OWNER-DRIFT-RESYNC-2026-06-29.md",
+      "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-MAZER-COMPOSITION-PARITY-PR8-OWNER-DRIFT-RESYNC-2026-06-29.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -352,20 +354,20 @@
     "blocked_or_gated_work": [
       {
         "item": "broader book projection cleanup",
-        "requirement": "reopen only with a new distinct current-state drift, broader normalization cluster, or wider restart-surface cleanup beyond the current structured continuity_coverage rollup, the live 19-manifest health read, the 6-of-6 eligible-open-marker coverage and restart-index reads, the 19-of-19 maintained-manifest restart index, and the preserved protected-QA blocker topology"
+        "requirement": "reopen only with a new distinct current-state drift, broader normalization cluster, or wider restart-surface cleanup beyond the current structured continuity_coverage rollup, the live 20-manifest health read, the 6-of-6 eligible-open-marker coverage and restart-index reads, the 20-of-20 maintained-manifest restart index, and the preserved protected-QA blocker topology"
       }
     ],
     "next_package_ladder": [
       {
         "package": "No immediate Truth Map & ATLAS Book docs-only follow-on packet",
         "mode": "closed-ratchet hold after continuity-coverage rollup closeout",
-        "reason": "the canonical Book restart surface now projects the live June 29 owner-drift clarification, the structured continuity_coverage rollup, the clean 19-manifest health read, the 6-of-6 eligible-open-marker coverage and restart-index reads, the 19-of-19 maintained-manifest restart index, the repeatable GitHub-secret blocker audit, and the combined blocked-run handoff packet canonically; reopen only with distinct projection drift, owner-truth widening, broader normalization, or continuity automation beyond the current structured rollup"
+        "reason": "the canonical Book restart surface now projects the live June 29 owner-drift clarification, the structured continuity_coverage rollup, the clean 20-manifest health read, the 6-of-6 eligible-open-marker coverage and restart-index reads, the 20-of-20 maintained-manifest restart index, the repeatable GitHub-secret blocker audit, and the combined blocked-run handoff packet canonically; reopen only with distinct projection drift, owner-truth widening, broader normalization, or continuity automation beyond the current structured rollup"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-POST-MAZER-PASS2-OWNER-DRIFT-RESYNC-2026-06-29.md",
+    "freshness_checked_receipt": "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-MAZER-COMPOSITION-PARITY-PR8-OWNER-DRIFT-RESYNC-2026-06-29.md",
     "freshness_checked_at": "2026-06-29T09:35:17Z",
-    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture now match the refreshed current-state, marker, restart, system-map, and endgame mirrors after the post-Mazer-pass2 owner-drift resync: current protected-QA truth still projects playbook, trove, foundation, and lifeline as ready, Fitness stays at `manual_review` on the current governed run `fitness-progression-pr-smoke-20260629T074949197509Z` with `desktop.chromium.real`, `android.chrome.real`, and `iphone.webkit.real` all still remaining open, latest pushed clean `fitness` is still `7d8163d2c143d58b5eba8209eda8b93ddefb70d8`, inventory records that same Fitness head while the local worktree is dirty again in three files, latest pushed clean `mazer` is now `bf38ceb95740ae111c8fdfd37371b2184b556ec0` on `codex/mazer-pass2-menu-parity` and the local Mazer worktree is clean, the reset-lane system map plus menu parity follow-ons remain mirrored at root, `runtime/atlas/qa/runs/fitness-progression-pr-smoke-20260629T074949197509Z/release-gate.packet-prep.md` still carries one exact blocked-run operator handoff, the current committed ATLAS root checkpoint still consumed by this refresh is `c23adc1200a046841099f71c99078eacd68d9141`, the remaining ATLAS GitHub Actions blocker is only missing `BROWSERSTACK_USERNAME` and `BROWSERSTACK_ACCESS_KEY`, `runtime/atlas/qa/github-secret-readiness.latest.json` still reports `available_secret_count: 0`, the root validation floor still projects `critical=0 / error=0 / warning=3 / info=0`, the initiative manifest-health surface still reads 19 ok / 0 warning / 0 error, the eligible-open-marker coverage and restart-index surfaces still read 6 of 6, the maintained-manifest restart index still reads 19 of 19, and the structured rollup still reports `pending_review_count: 0`.",
+    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture now match the refreshed current-state, marker, restart, system-map, and endgame mirrors after the Mazer composition-parity and PR-8 owner-drift resync: current protected-QA truth still projects playbook, trove, foundation, and lifeline as ready, Fitness stays at `manual_review` on the current governed run `fitness-progression-pr-smoke-20260629T074949197509Z` with `desktop.chromium.real`, `android.chrome.real`, and `iphone.webkit.real` all still remaining open, latest pushed clean `fitness` is still `7d8163d2c143d58b5eba8209eda8b93ddefb70d8`, inventory records that same Fitness head while the local worktree is dirty again in three files, latest pushed clean `mazer` is now `c48d38a69d84198c2763d04bc633339b7ce952e3` on `codex/mazer-pass2-menu-parity` with draft PR `#8` open and the local Mazer worktree is clean, the reset-lane system map plus menu parity follow-ons remain mirrored at root, `runtime/atlas/qa/runs/fitness-progression-pr-smoke-20260629T074949197509Z/release-gate.packet-prep.md` still carries one exact blocked-run operator handoff, the current committed ATLAS root checkpoint still consumed by this refresh is `dd9dab84c0589cb9f68868b8e20ad93139b7f508`, the remaining ATLAS GitHub Actions blocker is only missing `BROWSERSTACK_USERNAME` and `BROWSERSTACK_ACCESS_KEY`, `runtime/atlas/qa/github-secret-readiness.latest.json` still reports `available_secret_count: 0`, the root validation floor still projects `critical=0 / error=0 / warning=3 / info=0`, the initiative manifest-health surface now reads 20 ok / 0 warning / 0 error, the eligible-open-marker coverage and restart-index surfaces still read 6 of 6, the maintained-manifest restart index now reads 20 of 20, and the structured rollup still reports `pending_review_count: 0`.",
     "marker_posture": [
       {
         "marker": "Truth Map & ATLAS Book",
