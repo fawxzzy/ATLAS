@@ -3,14 +3,14 @@
   "stack_manifest_ref": "stack.yaml",
   "stack_manifest_digest": "sha256:e5ac73c00983975b59e4b8e7f8541160d479087f5dc95ad1d642568116bd7d10",
   "stack_lock_ref": "stack.lock.yaml",
-  "stack_lock_digest": "sha256:0e9144208886cc77138a16e1fc7341a707640492957fda0d558b86fb4d893e74",
+  "stack_lock_digest": "sha256:de0f48de2b420bb8c92c5d75208bc37bb8f71ebd7c307f47204328413db96192",
   "working_memory_digest": "sha256:fe4f4902e2b2c475974b050ba1bf3f5e740439aa41df2f844555c2c0dc3b310f",
   "published_refs": {
     "json": "docs/registry/STACK-REPO-INVENTORY.json",
     "markdown": "docs/audits/STACK-REPO-INVENTORY.md"
   },
   "repo_count": 12,
-  "dirty_repo_count": 0,
+  "dirty_repo_count": 1,
   "release_eligible_count": 5,
   "repos": [
     {
@@ -214,8 +214,8 @@
       "role": "application",
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/mazer.git",
-      "pinned_commit": "ec0fd31eed29194bbb0645aacd04c970a16103fe",
-      "current_commit": "ec0fd31eed29194bbb0645aacd04c970a16103fe",
+      "pinned_commit": "31ef2304568f1e201883e397ece28cc5cfabc596",
+      "current_commit": "31ef2304568f1e201883e397ece28cc5cfabc596",
       "pinned_ref_type": "branch",
       "pinned_ref": "codex/mazer-pass2-menu-parity",
       "current_ref_type": "branch",
@@ -317,13 +317,13 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "12c09cf62496d6f69ed3204bed8869837227777c",
+      "current_commit": "fa9831e82ebfa3fa185188cc5e8ed2fefbdf9cff",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
       "current_ref": "main",
       "branch": "main",
-      "dirty": false,
+      "dirty": true,
       "trust_class": "trusted",
       "release_eligible": false,
       "exists": true,
@@ -530,5 +530,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:af3f3c8c600a4e1c85e702b69c8c3b1f57a552c1e00a932841a4724e81733aef"
+  "content_digest": "sha256:4bf8b97cb1ae7e285ae718732085f3783dbed1a7c659b0284978636f43c1e9d4"
 }

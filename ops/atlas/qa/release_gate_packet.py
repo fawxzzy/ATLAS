@@ -78,6 +78,16 @@ def build_release_gate_packet(
         for item in promotion.get("manual_required_lanes", [])
         if isinstance(item, str) and item.strip()
     ]
+    open_manual_required_lanes = [
+        str(item)
+        for item in attestation_packet.get("open_manual_required_lanes", [])
+        if isinstance(item, str) and item.strip()
+    ]
+    validated_manual_attestation_lanes = [
+        str(item)
+        for item in attestation_packet.get("validated_manual_attestation_lanes", [])
+        if isinstance(item, str) and item.strip()
+    ]
     output = (run_root / "release-gate.packet-prep.md") if output_path is None else output_path.resolve()
 
     lines = [
@@ -94,7 +104,8 @@ def build_release_gate_packet(
         "",
         f"- Packet: `{attestation_packet['output_ref']}`",
         f"- Validation status: `{attestation_packet['validation_status']}`",
-        f"- Manual-required lanes still open: `{', '.join(attestation_packet['manual_required_lanes']) or 'none'}`",
+        f"- Manual-required lanes still open: `{', '.join(open_manual_required_lanes) or 'none'}`",
+        f"- Validated manual lanes: `{', '.join(validated_manual_attestation_lanes) or 'none'}`",
         "",
         "## Provider Readiness",
         "",
@@ -141,6 +152,8 @@ def build_release_gate_packet(
         "scenario_id": scenario_id,
         "promotion_status": str(promotion.get("promotion_status") or "unknown"),
         "manual_required_lanes": manual_required_lanes,
+        "open_manual_required_lanes": open_manual_required_lanes,
+        "validated_manual_attestation_lanes": validated_manual_attestation_lanes,
         "manual_attestation_packet_ref": attestation_packet["output_ref"],
         "provider_live_smoke_eligible": bool(provider.get("live_smoke_eligible")),
         "missing_provider_env_vars": list(provider.get("missing_env_vars", [])),

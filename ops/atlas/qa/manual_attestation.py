@@ -58,6 +58,20 @@ def _manual_required_lanes_from_result(result_payload: dict[str, Any]) -> list[s
     ]
 
 
+def _partition_manual_required_lanes(
+    manual_required_lanes: list[str],
+    attestation_status_by_lens: dict[str, str],
+) -> tuple[list[str], list[str]]:
+    validated_lanes: list[str] = []
+    open_lanes: list[str] = []
+    for lens_id in manual_required_lanes:
+        if attestation_status_by_lens.get(lens_id) == "valid":
+            validated_lanes.append(lens_id)
+            continue
+        open_lanes.append(lens_id)
+    return validated_lanes, open_lanes
+
+
 def validate_attestation_file(*, root: Path, attestation_path: Path) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     payload = load_json_object(attestation_path.resolve())
     findings: list[dict[str, Any]] = []
@@ -242,6 +256,10 @@ def build_manual_attestation_packet_prep(
         for item in validation_report.get("attestations", [])
         if isinstance(item, dict) and isinstance(item.get("lens_id"), str)
     }
+    validated_manual_attestation_lanes, open_manual_required_lanes = _partition_manual_required_lanes(
+        manual_required_lanes,
+        attestation_status_by_lens,
+    )
     file_entries: list[dict[str, Any]] = []
     for item in scaffold_report.get("files", []):
         if not isinstance(item, dict):
@@ -272,6 +290,8 @@ def build_manual_attestation_packet_prep(
         f"- Promotion status: `{promotion.get('promotion_status', 'unknown')}`",
         f"- Validation status: `{validation_report.get('status', 'unknown')}`",
         f"- Manual-required lanes: `{', '.join(manual_required_lanes) or 'none'}`",
+        f"- Still-open manual lanes: `{', '.join(open_manual_required_lanes) or 'none'}`",
+        f"- Validated manual lanes: `{', '.join(validated_manual_attestation_lanes) or 'none'}`",
         "",
         "## Current Packet",
         "",
@@ -299,8 +319,8 @@ def build_manual_attestation_packet_prep(
             "",
             "## Next Honest Move",
             "",
-            "1. Capture real screenshots for each lane whose screenshot file is still missing.",
-            "2. Replace placeholder metadata, signature, and checksum fields inside the matching manual-attestation JSON files.",
+            "1. Capture real screenshots for each still-open lane whose screenshot file is still missing.",
+            "2. Replace placeholder metadata, signature, and checksum fields inside the matching still-open manual-attestation JSON files.",
             f"3. Re-run validation: `python ops/atlas/qa/manual_attestation.py validate --run {run_id}`",
             f"4. Re-run promotion after the attestation files are valid: `python ops/atlas/qa/promote_run.py --root . --run {run_id} --scenario-file ops/atlas/qa/scenarios/{scenario_id}.json --stack-validation-file runtime/receipts/validation/stack-validation.latest.json`",
             "",
@@ -316,6 +336,8 @@ def build_manual_attestation_packet_prep(
         "promotion_status": str(promotion.get("promotion_status") or "unknown"),
         "validation_status": str(validation_report.get("status") or "unknown"),
         "manual_required_lanes": manual_required_lanes,
+        "open_manual_required_lanes": open_manual_required_lanes,
+        "validated_manual_attestation_lanes": validated_manual_attestation_lanes,
         "output_ref": atlas_relative(output, root=root),
         "finding_count": len(findings),
     }

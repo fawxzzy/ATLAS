@@ -1663,6 +1663,132 @@ class AtlasQaPipelineTests(unittest.TestCase):
         self.assertIn("captures/iphone.webkit.real/manual.png", body)
         self.assertEqual("manual_review", report["promotion_status"])
         self.assertEqual("invalid", report["validation_status"])
+        self.assertEqual(["iphone.webkit.real"], report["open_manual_required_lanes"])
+        self.assertEqual([], report["validated_manual_attestation_lanes"])
+
+    def test_manual_attestation_packet_prep_partitions_validated_and_open_lanes(self) -> None:
+        root = self._temp_root()
+        run_root = root / "runtime" / "atlas" / "qa" / "runs" / "run-1"
+        _write_json(
+            run_root / "evaluated.result.json",
+            {
+                "contract_version": "atlas.qa.result.v1",
+                "result_id": "sha256:" + ("b" * 64),
+                "generated_at": "2026-05-11T00:00:00Z",
+                "runner_version": "test",
+                "stage": "evaluated",
+                "run_id": "run-1",
+                "scenario_ref": "ops/atlas/qa/scenarios/fitness.progression-pr-smoke.json",
+                "repo_id": "fitness",
+                "repo_path": "repos/fawxzzy-fitness",
+                "git_sha": "abcdef1234567890",
+                "adapter_id": "fitness.web",
+                "adapter_ref": "ops/atlas/qa/adapters/fitness.web.json",
+                "lens_manifest_ref": "ops/atlas/qa/lenses/atlas-default-web.v1.json",
+                "mode": "execute",
+                "summary": {
+                    "overall_status": "ready",
+                    "executable_status": "clean",
+                    "artifact_status": "complete",
+                    "certification_status": "manual_required",
+                    "highest_satisfied_tier": "emulated_browser",
+                    "satisfied_evidence_tiers": ["emulated_browser"],
+                    "missing_evidence_tiers": ["physical_device"],
+                    "manual_required_lanes": ["desktop.chromium.real", "iphone.webkit.real"],
+                    "visual_status": "not_configured",
+                    "visual_diff_count": 0,
+                    "lens_count": 2,
+                    "failing_lens_count": 0,
+                    "finding_count": 0,
+                },
+                "matrix": [
+                    {
+                        "lens_id": "desktop.chromium.real",
+                        "lens_profile_id": "desktop.chromium",
+                        "proof_kind": "real",
+                        "evidence_kind": "physical_device",
+                        "promotion_tier": "physical_device",
+                        "fallback_behavior": "manual_attestation",
+                        "execution_mode": "manual_external",
+                        "status": "manual_required",
+                        "browser_engine": "chromium",
+                    },
+                    {
+                        "lens_id": "iphone.webkit.real",
+                        "lens_profile_id": "iphone.webkit",
+                        "proof_kind": "real",
+                        "evidence_kind": "physical_device",
+                        "promotion_tier": "physical_device",
+                        "fallback_behavior": "manual_attestation",
+                        "execution_mode": "manual_external",
+                        "status": "manual_required",
+                        "browser_engine": "webkit",
+                    },
+                ],
+                "findings": [],
+                "artifact_manifest_refs": [],
+            },
+        )
+        _write_json(
+            run_root / "promotion.record.json",
+            {
+                "promotion_status": "manual_review",
+                "manual_required_lanes": ["desktop.chromium.real", "iphone.webkit.real"],
+            },
+        )
+        _write_json(
+            run_root / "manual-attestation.scaffold.json",
+            {
+                "runner_version": "atlas.qa.manual-attestation.scaffold.v1",
+                "generated_at": "2026-05-11T00:00:00Z",
+                "run_id": "run-1",
+                "created_count": 0,
+                "manual_required_lanes": ["desktop.chromium.real", "iphone.webkit.real"],
+                "files": [
+                    {
+                        "lens_id": "desktop.chromium.real",
+                        "attestation_ref": "runtime/atlas/qa/runs/run-1/manual-attestations/desktop.chromium.real.manual.json",
+                        "expected_screenshot_ref": "runtime/atlas/qa/runs/run-1/captures/desktop.chromium.real/manual.png",
+                        "status": "existing",
+                    },
+                    {
+                        "lens_id": "iphone.webkit.real",
+                        "attestation_ref": "runtime/atlas/qa/runs/run-1/manual-attestations/iphone.webkit.real.manual.json",
+                        "expected_screenshot_ref": "runtime/atlas/qa/runs/run-1/captures/iphone.webkit.real/manual.png",
+                        "status": "existing",
+                    },
+                ],
+            },
+        )
+        _write_json(
+            run_root / "manual_attestation.result.json",
+            {
+                "runner_version": "atlas.qa.manual-attestation.validate.v1",
+                "generated_at": "2026-05-11T00:00:00Z",
+                "run_id": "run-1",
+                "status": "invalid",
+                "attestation_count": 2,
+                "attestations": [
+                    {"lens_id": "desktop.chromium.real", "status": "valid"},
+                    {"lens_id": "iphone.webkit.real", "status": "invalid"},
+                ],
+                "finding_count": 1,
+                "findings": [
+                    {
+                        "severity": "error",
+                        "code": "missing_attestation_screenshot",
+                        "message": "iphone missing",
+                    }
+                ],
+            },
+        )
+
+        report = build_manual_attestation_packet_prep(root=root, run_id="run-1")
+        self.assertEqual(["desktop.chromium.real"], report["validated_manual_attestation_lanes"])
+        self.assertEqual(["iphone.webkit.real"], report["open_manual_required_lanes"])
+        body = (root / report["output_ref"]).read_text(encoding="utf-8")
+        self.assertIn("Still-open manual lanes: `iphone.webkit.real`", body)
+        self.assertIn("Validated manual lanes: `desktop.chromium.real`", body)
 
     def test_report_run_marks_valid_manual_attestation_in_per_lens(self) -> None:
         root = self._temp_root()
@@ -2124,6 +2250,24 @@ class AtlasQaPipelineTests(unittest.TestCase):
                 "manual_required_lanes": ["android.chrome.real", "iphone.webkit.real"],
             },
         )
+        _write_json(
+            run_root / "manual_attestation.result.json",
+            {
+                "runner_version": "atlas.qa.manual-attestation.validate.v1",
+                "generated_at": "2026-05-11T00:00:00Z",
+                "run_id": "run-1",
+                "status": "invalid",
+                "attestation_count": 2,
+                "attestations": [
+                    {"lens_id": "android.chrome.real", "status": "invalid"},
+                    {"lens_id": "iphone.webkit.real", "status": "valid"},
+                ],
+                "finding_count": 1,
+                "findings": [
+                    {"severity": "error", "code": "missing_attestation_screenshot", "message": "android missing"}
+                ],
+            },
+        )
         report = build_release_gate_packet(
             root=root,
             run_id="run-1",
@@ -2141,7 +2285,11 @@ class AtlasQaPipelineTests(unittest.TestCase):
         self.assertIn("manual_review", body)
         self.assertIn("BROWSERSTACK_USERNAME", body)
         self.assertIn("android.chrome.real", body)
+        self.assertIn("Manual-required lanes still open: `android.chrome.real`", body)
+        self.assertIn("Validated manual lanes: `iphone.webkit.real`", body)
         self.assertEqual("blocked", report["github_secret_status"])
+        self.assertEqual(["android.chrome.real"], report["open_manual_required_lanes"])
+        self.assertEqual(["iphone.webkit.real"], report["validated_manual_attestation_lanes"])
 
     def test_provider_override_only_mutates_supported_real_lenses(self) -> None:
         root = self._temp_root()
