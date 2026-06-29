@@ -148,6 +148,23 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
             encoding="utf-8",
         )
 
+        ai_work_readiness_receipt = root / "docs" / "ops" / (
+            "AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-PREFLIGHT-AGGREGATOR-"
+            "IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-06-29.md"
+        )
+        ai_work_readiness_receipt.write_text(
+            "\n".join(
+                [
+                    "# AI Work Readiness Packet",
+                    "",
+                    "- Mode: `docs-only root-bounded implementation-readiness closeout and worker-routing`",
+                    "- Scope: `decide whether the read-only ai_work_session_preflight worker can now leave root docs-only planning, route exactly one bounded worker packet if so, and preserve the frozen read-only contract without implementing code in this receipt`",
+                    "",
+                ]
+            ),
+            encoding="utf-8",
+        )
+
     def _write_manifest(
         self,
         root: Path,
@@ -660,12 +677,20 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual("hold_current_lane", payload["operator_action"])
         self.assertEqual("AI Work Session Stability & Auto-Sync Loop", payload["next_after_current_marker"])
         self.assertEqual(
-            "AI Work Session Stability & Auto-Sync Loop read-only preflight aggregator implementation-readiness closeout and worker-routing",
+            "AI Work Session Stability & Auto-Sync Loop read-only preflight aggregator first-implementation worker packet 1",
             payload["next_after_current_packet"],
         )
         self.assertEqual(
-            "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-PREFLIGHT-AGGREGATOR-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-06-29.md",
+            "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-PREFLIGHT-AGGREGATOR-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-06-29.md",
             payload["next_after_current_packet_basis_ref"],
+        )
+        self.assertEqual(
+            "root-owned bounded first-implementation worker",
+            payload["next_after_current_packet_mode"],
+        )
+        self.assertIn(
+            "implement only ops/atlas/ai_work_session_preflight.py",
+            payload["next_after_current_packet_scope"],
         )
 
 

@@ -271,14 +271,15 @@ POLICY_REGISTRY: dict[str, MarkerPolicy] = {
     "AI Work Session Stability & Auto-Sync Loop": MarkerPolicy(
         category="admissible after current lane",
         rationale=(
-            "The lane now has one admitted read-only first slice plus a frozen worker handoff; it should not "
-            "outrank the held active Sandbox family, but it is still the first honest downstream automation "
-            "package once the current hold posture allows fall-through."
+            "The lane now has one admitted read-only first slice, one frozen worker handoff, and one "
+            "implementation-readiness closeout; it should not outrank the held active Sandbox family, but it "
+            "is still the first honest downstream automation package once the current hold posture allows "
+            "fall-through."
         ),
         expected_evidence=(
-            "one docs-only implementation-readiness closeout and worker-routing packet for the read-only "
-            "preflight aggregator, with exact worker-routing decision, preserved guards, and no premature "
-            "implementation widening"
+            "one bounded first-implementation worker packet for the read-only preflight aggregator, with the "
+            "helper/test touch surface preserved, the read-only contract preserved, and no owner/platform "
+            "mutation widening"
         ),
     ),
     "Feedback Loop Readiness": MarkerPolicy(
@@ -339,16 +340,17 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "AI Work Session Stability & Auto-Sync Loop": PacketDescriptor(
-        packet="AI Work Session Stability & Auto-Sync Loop read-only preflight aggregator implementation-readiness closeout and worker-routing",
+        packet="AI Work Session Stability & Auto-Sync Loop read-only preflight aggregator first-implementation worker packet 1",
         basis_receipt_ref=(
             "docs/ops/"
             "AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-PREFLIGHT-AGGREGATOR-"
-            "PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-06-29.md"
+            "IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-06-29.md"
         ),
-        mode="docs-only implementation-readiness closeout and worker-routing",
+        mode="root-owned bounded first-implementation worker",
         scope=(
-            "decide whether the read-only ai_work_session_preflight worker can be routed with its current "
-            "guards and proof contract, or whether any docs-only ambiguity still blocks worker admission"
+            "implement only ops/atlas/ai_work_session_preflight.py and "
+            "tests/test_atlas_ai_work_session_preflight.py under the frozen read-only contract, output-path "
+            "guard, status vocabulary, and proof matrix"
         ),
     ),
 }
