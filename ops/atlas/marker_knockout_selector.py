@@ -271,13 +271,14 @@ POLICY_REGISTRY: dict[str, MarkerPolicy] = {
     "AI Work Session Stability & Auto-Sync Loop": MarkerPolicy(
         category="admissible after current lane",
         rationale=(
-            "The lane is newly opened as supporting contract-only scope; it should not outrank the held active "
-            "Sandbox family, but it is the first honest downstream automation package once the current hold posture "
+            "The lane now has one admitted read-only first slice; it should not outrank the held active Sandbox "
+            "family, but it is still the first honest downstream automation package once the current hold posture "
             "allows fall-through."
         ),
         expected_evidence=(
-            "one docs-only first-implementation admission receipt for the read-only preflight aggregator, with "
-            "explicit no-mutation defaults, proof matrix, and worker-routing boundary"
+            "one docs-only prompt-pack and worker handoff contract for the read-only preflight aggregator, with "
+            "exact worker objective, proof wording, allowed-touch surfaces, forbidden-touch surfaces, and stop "
+            "conditions"
         ),
     ),
     "Feedback Loop Readiness": MarkerPolicy(
@@ -338,12 +339,16 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "AI Work Session Stability & Auto-Sync Loop": PacketDescriptor(
-        packet="AI Work Session Stability & Auto-Sync Loop read-only preflight aggregator first-implementation admission",
-        basis_receipt_ref="docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-CONTRACT-FREEZE-2026-06-29.md",
-        mode="docs-only first-implementation admission",
+        packet="AI Work Session Stability & Auto-Sync Loop read-only preflight aggregator prompt-pack and worker handoff contract",
+        basis_receipt_ref=(
+            "docs/ops/"
+            "AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-PREFLIGHT-AGGREGATOR-"
+            "FIRST-IMPLEMENTATION-ADMISSION-2026-06-29.md"
+        ),
+        mode="docs-only prompt-pack and worker handoff contract",
         scope=(
-            "freeze the read-only preflight aggregator behavior, proof matrix, no-mutation defaults, and "
-            "worker-routing boundary before implementing ops/atlas/ai_work_session_preflight.py"
+            "freeze the exact worker objective, proof wording, allowed-touch surfaces, forbidden-touch surfaces, "
+            "and stop conditions before implementing ops/atlas/ai_work_session_preflight.py"
         ),
     ),
 }

@@ -131,6 +131,23 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
             encoding="utf-8",
         )
 
+        ai_work_receipt = root / "docs" / "ops" / (
+            "AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-PREFLIGHT-AGGREGATOR-"
+            "FIRST-IMPLEMENTATION-ADMISSION-2026-06-29.md"
+        )
+        ai_work_receipt.write_text(
+            "\n".join(
+                [
+                    "# AI Work Packet",
+                    "",
+                    "- Mode: `docs-only prompt-pack and worker handoff contract`",
+                    "- Scope: `freeze the exact worker objective, proof wording, allowed-touch surfaces, forbidden-touch surfaces, and stop conditions before implementing ops/atlas/ai_work_session_preflight.py`",
+                    "",
+                ]
+            ),
+            encoding="utf-8",
+        )
+
     def _write_manifest(
         self,
         root: Path,
@@ -593,7 +610,7 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
 
 ## Supporting Open Markers
 
-- AI Work Session Stability & Auto-Sync Loop: `0%`
+- AI Work Session Stability & Auto-Sync Loop: `10%`
 
 ## Closed / Locked Ratchets
 
@@ -643,11 +660,11 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual("hold_current_lane", payload["operator_action"])
         self.assertEqual("AI Work Session Stability & Auto-Sync Loop", payload["next_after_current_marker"])
         self.assertEqual(
-            "AI Work Session Stability & Auto-Sync Loop read-only preflight aggregator first-implementation admission",
+            "AI Work Session Stability & Auto-Sync Loop read-only preflight aggregator prompt-pack and worker handoff contract",
             payload["next_after_current_packet"],
         )
         self.assertEqual(
-            "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-CONTRACT-FREEZE-2026-06-29.md",
+            "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-PREFLIGHT-AGGREGATOR-FIRST-IMPLEMENTATION-ADMISSION-2026-06-29.md",
             payload["next_after_current_packet_basis_ref"],
         )
 
