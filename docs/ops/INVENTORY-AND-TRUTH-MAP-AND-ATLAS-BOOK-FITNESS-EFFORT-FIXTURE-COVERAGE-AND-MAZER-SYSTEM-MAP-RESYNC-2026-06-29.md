@@ -23,7 +23,7 @@ This pass preserves that newer owner truth honestly instead of treating the earl
 - `repos/fawxzzy-fitness`
   - branch remains `codex/fitness-main-progression-summary-reapply`
   - current pushed head is `db175f08e2bbd15d38eb65d2a6432ad138d2319f`
-  - the worktree is clean again
+  - the worktree is clean again and inventory now records newer local clean head `2fd692853163da3015cb325fc06a21c65e66ee27`
   - the later preserve now includes expanded session-regression effort feedback coverage plus the dedicated fixture test follow-on
 - `repos/mazer`
   - branch remains `codex/legacy-web-port-truth`
@@ -48,7 +48,7 @@ Result:
 
 - the clean published ATLAS root checkpoint still consumed by this refresh is `9a5d78b8d8ca35491ce8abe463bd37a5ce945020`
 - `repos/fawxzzy-fitness` latest pushed clean head is `db175f08e2bbd15d38eb65d2a6432ad138d2319f` on `codex/fitness-main-progression-summary-reapply`
-- `repos/fawxzzy-fitness` is clean again at that pushed head, and the session-regression fixture surface now includes widened effort-feedback coverage plus dedicated follow-on tests
+- `repos/fawxzzy-fitness` is clean again, the latest pushed clean head remains `db175f08e2bbd15d38eb65d2a6432ad138d2319f`, inventory now records newer local clean head `2fd692853163da3015cb325fc06a21c65e66ee27`, and the session-regression fixture surface now includes widened effort-feedback coverage plus dedicated follow-on tests
 - `repos/mazer` latest pushed clean head is `eaa80c80877002fc1ead928900d36c0914a92b6a` on `codex/legacy-web-port-truth`
 - `repos/mazer` is clean again at that pushed head, the legacy snapshot blueprint is now extracted into its own runtime module, the reset-lane architecture plus system-map docs now project the current owner truth directly, and the fixed legacy snapshot now uses a dedicated deep-preroll helper with explicit tests
 - published inventory now reports `dirty_repo_count: 1`

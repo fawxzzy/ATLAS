@@ -2,7 +2,7 @@
 
 ## Snapshot
 
-The stack is currently at a clean-governance but still-dirty-working-set checkpoint: the latest published clean checkpoint remains intact as historical baseline, root validation remains at the non-blocking warning floor `critical=0 error=0 warning=3 info=0`, the live managed working set now truthfully carries only stack-owned writeback drift while both `fitness` and `mazer` are clean again on their latest pushed heads, and no immediate ATLAS-root packet is open.
+The stack is currently at a clean-governance but still-dirty-working-set checkpoint: the latest published clean checkpoint remains intact as historical baseline, root validation remains at the non-blocking warning floor `critical=0 error=0 warning=3 info=0`, the live managed working set now truthfully carries only stack-owned writeback drift while both `fitness` and `mazer` are clean again, and no immediate ATLAS-root packet is open.
 
 What is true right now:
 
