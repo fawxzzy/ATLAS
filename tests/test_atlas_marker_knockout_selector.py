@@ -582,6 +582,75 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertNotIn("next packet mode:", markdown)
         self.assertNotIn("next packet scope:", markdown)
 
+    def test_build_campaign_routes_new_ai_work_session_loop_after_current_hold(self) -> None:
+        root = self._temp_root()
+        marker_doc = """# Lanes And Markers
+
+## Active Front-Page Marker Table
+
+- AI Long-Run Batch Orchestration: `20%`
+- Sandbox Simulation Readiness: `99%`
+
+## Supporting Open Markers
+
+- AI Work Session Stability & Auto-Sync Loop: `0%`
+
+## Closed / Locked Ratchets
+
+- _stack Readiness: `100%`
+"""
+        current_state_doc = """# Current State
+
+- the current active ATLAS-side lane is now `Sandbox Simulation Readiness`
+"""
+        (root / "docs" / "atlas-book" / "02-lanes-and-markers.md").write_text(marker_doc, encoding="utf-8")
+        (root / "docs" / "atlas-book" / "01-current-state.md").write_text(current_state_doc, encoding="utf-8")
+        self._write_packet_receipts(root)
+        contract_receipt = root / "docs" / "ops" / "AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-CONTRACT-FREEZE-2026-06-29.md"
+        contract_receipt.write_text("# contract\n", encoding="utf-8")
+        self._write_manifest(
+            root,
+            manifest_name="continuity-manifest-sandbox-simulation-readiness.json",
+            marker="Sandbox Simulation Readiness",
+            percent=99,
+            checkpoint_ref=(
+                "docs/ops/"
+                "SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-BROADER-"
+                "RUNTIME-ASSERTIONS-ADMISSION-BOUNDARY-HOLD-OR-TOP-LEVEL-LANE-"
+                "RESELECTION-2026-06-27.md"
+            ),
+            next_package="No immediate Sandbox Simulation Readiness same-lane packet",
+            mode="hold-flat after broader-runtime-assertions admission boundary freeze",
+            reason="current sandbox lane is intentionally held",
+        )
+        self._write_manifest(
+            root,
+            manifest_name="continuity-manifest-ai-long-run-batch-orchestration.json",
+            marker="AI Long-Run Batch Orchestration",
+            percent=20,
+            checkpoint_ref=(
+                "docs/ops/"
+                "AI-LONG-RUN-BATCH-ORCHESTRATION-POST-STACK-COMMAND-IMPLEMENTATION-"
+                "ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-VALUE-DOWNSTREAM-HOLD-RECHECK-2026-06-26.md"
+            ),
+            next_package="No immediate AI Long-Run Batch Orchestration same-lane packet",
+            mode="hold-flat after downstream follow-on recheck",
+            reason="fallback lane is intentionally held",
+        )
+
+        payload = build_campaign(root=root)
+
+        self.assertEqual("hold_current_lane", payload["operator_action"])
+        self.assertEqual("AI Work Session Stability & Auto-Sync Loop", payload["next_after_current_marker"])
+        self.assertEqual(
+            "AI Work Session Stability & Auto-Sync Loop read-only preflight aggregator first-implementation admission",
+            payload["next_after_current_packet"],
+        )
+        self.assertEqual(
+            "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-CONTRACT-FREEZE-2026-06-29.md",
+            payload["next_after_current_packet_basis_ref"],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

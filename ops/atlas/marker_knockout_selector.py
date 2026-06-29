@@ -31,6 +31,7 @@ CAMPAIGN_PRIORITY = (
     "AI Repetition-to-Automation Pipeline",
     "AI Long-Run Batch Orchestration",
     "Sandbox Simulation Readiness",
+    "AI Work Session Stability & Auto-Sync Loop",
     "Feedback Loop Readiness",
     "Durable Context Externalization",
     "Knowledge Capture & Transfer",
@@ -267,6 +268,18 @@ POLICY_REGISTRY: dict[str, MarkerPolicy] = {
         rationale="The lane is a plausible next automation beneficiary, but current truth still needs a first repeatable selector surface before queue or batch semantics become honest.",
         expected_evidence="one queue/registry or batch-scaffold contract that is clearly downstream of the first selector landing",
     ),
+    "AI Work Session Stability & Auto-Sync Loop": MarkerPolicy(
+        category="admissible after current lane",
+        rationale=(
+            "The lane is newly opened as supporting contract-only scope; it should not outrank the held active "
+            "Sandbox family, but it is the first honest downstream automation package once the current hold posture "
+            "allows fall-through."
+        ),
+        expected_evidence=(
+            "one docs-only first-implementation admission receipt for the read-only preflight aggregator, with "
+            "explicit no-mutation defaults, proof matrix, and worker-routing boundary"
+        ),
+    ),
     "Feedback Loop Readiness": MarkerPolicy(
         category="insufficient evidence / needs selector only",
         rationale="Current truth explicitly says deterministic replayable proof capture is still missing.",
@@ -322,6 +335,15 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         mode="docs-only root-bounded hold or top-level lane reselection",
         scope=(
             "decide whether Sandbox stays held or returns to broader campaign routing now that the local-only first validator broader-runtime-assertions admission boundary is directly frozen on canonical main"
+        ),
+    ),
+    "AI Work Session Stability & Auto-Sync Loop": PacketDescriptor(
+        packet="AI Work Session Stability & Auto-Sync Loop read-only preflight aggregator first-implementation admission",
+        basis_receipt_ref="docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-CONTRACT-FREEZE-2026-06-29.md",
+        mode="docs-only first-implementation admission",
+        scope=(
+            "freeze the read-only preflight aggregator behavior, proof matrix, no-mutation defaults, and "
+            "worker-routing boundary before implementing ops/atlas/ai_work_session_preflight.py"
         ),
     ),
 }
