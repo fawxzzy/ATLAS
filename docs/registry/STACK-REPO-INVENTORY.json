@@ -10,7 +10,7 @@
     "markdown": "docs/audits/STACK-REPO-INVENTORY.md"
   },
   "repo_count": 12,
-  "dirty_repo_count": 2,
+  "dirty_repo_count": 1,
   "release_eligible_count": 5,
   "repos": [
     {
@@ -122,7 +122,7 @@
       "status": "unmanaged",
       "remote_url": "https://github.com/fawxzzy/fawxzzy-fitness.git",
       "pinned_commit": null,
-      "current_commit": "7d8163d2c143d58b5eba8209eda8b93ddefb70d8",
+      "current_commit": "b0453c7d6227073cfbacf4a3f2961cc0ec4c840a",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
@@ -317,13 +317,13 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "ee82a10e26cf02232d3e23014d45bcfbc2d6b387",
+      "current_commit": "81e2a38f89dcfb9e3cb0d21e57bd2af49b3388cf",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
       "current_ref": "codex/atlas-root-mazer-dirty-head-resync",
       "branch": "codex/atlas-root-mazer-dirty-head-resync",
-      "dirty": true,
+      "dirty": false,
       "trust_class": "trusted",
       "release_eligible": false,
       "exists": true,
@@ -530,5 +530,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:331daeb940f1f99748c2e919026763213a3e905da02372dbdebe138db8586884"
+  "content_digest": "sha256:be896d0d0b54d67c557eccf174db5da5655f5417e8f67e5e77117b83630a1940"
 }

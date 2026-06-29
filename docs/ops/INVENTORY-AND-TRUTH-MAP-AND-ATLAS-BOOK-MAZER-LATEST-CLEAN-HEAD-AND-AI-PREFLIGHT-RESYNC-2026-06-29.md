@@ -25,7 +25,7 @@
   - `ops/atlas/continuity_manifest_health.py`
   - `ops/atlas/continuity_open_marker_restart_index.py`
   - `ops/validation/validate_stack.py`
-- Control-plane checkpoint: `codex/atlas-root-mazer-dirty-head-resync@ee82a10e`
+- Control-plane checkpoint: `codex/atlas-root-mazer-dirty-head-resync@81e2a38f`
 
 ## Objective
 
@@ -53,7 +53,8 @@ This pass is projection refresh and generated-surface cleanup only. It does not 
 - `AI Work Session Stability & Auto-Sync Loop` now sits at supporting `10%`.
 - The next exact AI work-session packet remains:
   - `AI Work Session Stability & Auto-Sync Loop read-only preflight aggregator prompt-pack and worker handoff contract`
-- `repos/fawxzzy-fitness` latest pushed clean head remains `7d8163d2c143d58b5eba8209eda8b93ddefb70d8`.
+- `repos/fawxzzy-fitness` inventory truth now records local head `b0453c7d6227073cfbacf4a3f2961cc0ec4c840a` on `codex/fitness-main-progression-summary-reapply`.
+- The adjacent Fitness branch is ahead of origin by one commit and dirty in one file.
 - `repos/fawxzzy-fitness` local worktree remains dirty in three files.
 - `repos/mazer` latest pushed clean head is now `41f85075f4254fef0f1f91ee05e5e76d17f52f9f` on `codex/mazer-pass2-menu-parity`.
 - Mazer draft PR `#8` remains open.
