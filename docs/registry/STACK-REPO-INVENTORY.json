@@ -3,7 +3,7 @@
   "stack_manifest_ref": "stack.yaml",
   "stack_manifest_digest": "sha256:e5ac73c00983975b59e4b8e7f8541160d479087f5dc95ad1d642568116bd7d10",
   "stack_lock_ref": "stack.lock.yaml",
-  "stack_lock_digest": "sha256:8b59938b0479a5c951818d9bfd47642091401d91dd1ccb6f1dbb8eee32886aab",
+  "stack_lock_digest": "sha256:0e9144208886cc77138a16e1fc7341a707640492957fda0d558b86fb4d893e74",
   "working_memory_digest": "sha256:fe4f4902e2b2c475974b050ba1bf3f5e740439aa41df2f844555c2c0dc3b310f",
   "published_refs": {
     "json": "docs/registry/STACK-REPO-INVENTORY.json",
@@ -128,7 +128,7 @@
       "current_ref_type": "branch",
       "current_ref": "codex/fitness-main-progression-summary-reapply",
       "branch": "codex/fitness-main-progression-summary-reapply",
-      "dirty": false,
+      "dirty": true,
       "trust_class": "adjacent",
       "release_eligible": false,
       "exists": true,
@@ -214,14 +214,14 @@
       "role": "application",
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/mazer.git",
-      "pinned_commit": "57c852a81a51cd4e8d162647e80427532b74831e",
-      "current_commit": "57c852a81a51cd4e8d162647e80427532b74831e",
+      "pinned_commit": "ec0fd31eed29194bbb0645aacd04c970a16103fe",
+      "current_commit": "ec0fd31eed29194bbb0645aacd04c970a16103fe",
       "pinned_ref_type": "branch",
       "pinned_ref": "codex/mazer-pass2-menu-parity",
       "current_ref_type": "branch",
       "current_ref": "codex/mazer-pass2-menu-parity",
       "branch": "codex/mazer-pass2-menu-parity",
-      "dirty": true,
+      "dirty": false,
       "trust_class": "trusted",
       "release_eligible": true,
       "exists": true,
@@ -317,7 +317,7 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "ddc5c7aec020b38854a7376e73b5d5f1d6c9d261",
+      "current_commit": "0ff3522cb6f2d9ac3515df89ef0f80230b929b48",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
@@ -530,5 +530,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:1cf1c5fa1262c542aeb828990811dfd8eb7a2184fb89de24f549a07e3f84858a"
+  "content_digest": "sha256:1f72574da152d8274aec76fccf23706e829d517d70ed2a38e16f38d5740b7283"
 }
