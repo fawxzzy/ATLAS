@@ -16,6 +16,7 @@
 - [AI Work Session Stability Auto-Sync Loop Read-Only Preflight Aggregator First-Implementation Admission](../ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-PREFLIGHT-AGGREGATOR-FIRST-IMPLEMENTATION-ADMISSION-2026-06-29.md)
 - [AI Work Session Stability Auto-Sync Loop Read-Only Preflight Aggregator Prompt-Pack And Worker Handoff Contract](../ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-PREFLIGHT-AGGREGATOR-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-06-29.md)
 - [AI Work Session Stability Auto-Sync Loop Read-Only Preflight Aggregator Implementation-Readiness Closeout And Worker-Routing](../ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-PREFLIGHT-AGGREGATOR-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-06-29.md)
+- [AI Work Session Stability Auto-Sync Loop Read-Only Preflight Aggregator First-Implementation Worker-Cluster Reconciliation](../ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-PREFLIGHT-AGGREGATOR-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-29.md)
 - [Unified Workflow Convergence Handoff-Map Pass 1](../ops/UNIFIED-WORKFLOW-CONVERGENCE-HANDOFF-MAP-PASS-1-2026-05-29.md)
 - [Unified Workflow Convergence Release-Ledger, Publish-Boundary, And Root-Packaging Consequence Pass 2](../ops/UNIFIED-WORKFLOW-CONVERGENCE-RELEASE-LEDGER-PUBLISH-BOUNDARY-AND-ROOT-PACKAGING-CONSEQUENCE-PASS-2-2026-05-29.md)
 - [Unified Workflow Convergence Boundary-Hardened Workflow Spine Pass 3](../ops/UNIFIED-WORKFLOW-CONVERGENCE-BOUNDARY-HARDENED-WORKFLOW-SPINE-PASS-3-2026-06-03.md)

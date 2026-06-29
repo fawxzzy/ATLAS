@@ -112,9 +112,9 @@ Mandatory prompt preflight:
 
 ## Required AI Work Session Loop
 
-The supporting marker `AI Work Session Stability & Auto-Sync Loop` now sits at `10%` through `docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-PREFLIGHT-AGGREGATOR-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-06-29.md`, while the opening contract remains at `docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-CONTRACT-FREEZE-2026-06-29.md`.
+The supporting marker `AI Work Session Stability & Auto-Sync Loop` now sits at `25%` through `docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-PREFLIGHT-AGGREGATOR-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-29.md`, while the opening contract remains at `docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-CONTRACT-FREEZE-2026-06-29.md`.
 
-Until the first preflight command exists, use the contract manually:
+The first preflight command now exists as `ops/atlas/ai_work_session_preflight.py`. Use the command first, and fall back to the manual contract only when the helper cannot answer the requested scope honestly:
 
 1. read root/profile/Book/receipt/index context
 2. classify root versus owner-repo versus platform scope
@@ -132,7 +132,7 @@ Until the first preflight command exists, use the contract manually:
 14. commit, push, fetch, and prove parity when mutation was admitted
 15. report residue, blockers, validation, and next exact package
 
-The next exact package is `AI Work Session Stability & Auto-Sync Loop read-only preflight aggregator first-implementation worker packet 1`.
+The next exact package is `No immediate AI Work Session Stability & Auto-Sync Loop same-lane packet`.
 
 ## Where The Marker Table Lives
 
@@ -221,7 +221,7 @@ Use that helper when local CPU/GPU pressure or lingering workflow residue is sus
 - `ATLAS-ROOT-REPO-INVENTORY-SELF-DIRTY-FALSE-POSITIVE-CLOSEOUT-2026-06-28.md` is now the latest repo-inventory hygiene receipt: the published inventory exporter no longer marks the stack root dirty solely because it rewrote `docs/registry/STACK-REPO-INVENTORY.json` plus `docs/audits/STACK-REPO-INVENTORY.md`, the targeted tests now prove that only those two exporter-owned paths are ignored while any other root delta still keeps the stack entry dirty, and root validation remains non-blocking at `critical=0 error=0 warning=3 info=0`
 - `ATLAS-BOOK-HISTORICAL-CURRENT-PACKET-LABEL-AND-ENDGAME-ENCODING-CLEANUP-2026-06-28.md` is now the latest bounded Book cleanup receipt: one older `_stack` packet line in `01-current-state.md` is now explicitly marked as historical lineage instead of live current-packet truth, the visible mojibake phrase in `13-vision-and-endgames.md` is now removed, and the top-level dispatcher result still remains `No immediate ATLAS-root packet is open`
 - `TRUTH-MAP-AND-INVENTORY-CONTINUITY-COVERAGE-ROLLUP-AND-RATCHET-2026-06-29.md` is now the latest Truth Map & ATLAS Book receipt: the canonical restart mirrors and the Truth Map plus Inventory continuity manifests now absorb the June 29 clean-owner-head topology, the unchanged protected-QA blocker class, one first-class CLI for the structured `continuity_coverage` rollup, and the later AI work-session preflight first-implementation admission, so restart truth can now retrieve source inventory, handoff coverage, initiative-manifest health, open-marker coverage, open-marker restart readiness, and maintained-manifest restart readiness from one machine-readable surface with `pending_review_count: 0`
-- `AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-PREFLIGHT-AGGREGATOR-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-06-29.md` is now the latest AI work-session stability receipt: the supporting lane no longer rests on prompt-pack truth alone, because the exact control-plane readiness answer is now frozen too; the helper is implementation-ready for the admitted read-only slice, one bounded worker route is explicit, the marker still sits at `10%`, the lane remains restart-ready as an eligible open marker, and the next exact package is the first-implementation worker packet rather than more docs-only readiness work
+- `AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-PREFLIGHT-AGGREGATOR-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-29.md` is now the latest AI work-session stability receipt: the supporting lane no longer rests on routing truth alone, because the helper and direct proof now land too; the marker now sits at `25%`, the lane remains restart-ready as an eligible open marker, and the exact same-lane follow-on is now held flat at `No immediate AI Work Session Stability & Auto-Sync Loop same-lane packet`
 - `CORTEX-HELD-ROOT-POSTURE-SEED-AND-RUNTIME-RESYNC-2026-06-28.md` is now the latest Cortex restart receipt: the live seed, worker-plan template, focused tests, and regenerated runtime mirrors now all project the held dispatcher truth directly, so Cortex selects `hold-current-root-posture`, carries no ambient validation debt for the current root posture, and no longer fabricates the stale `docs-adr-or-debt-slice` packet as the next root move
 - `TRUTH-MAP-AND-ATLAS-BOOK-CORTEX-HELD-ROOT-PROJECTION-CLEANUP-2026-06-28.md` now clears the last Book-side residue from that same drift: the canonical marker and posture mirrors no longer narrate the old docs-ADR slice as the live Cortex next move, and now agree with the already-landed held-root runtime truth
 - older Fitness `release-ready` restart bullets lower in this section are now historical only; use the `2026-06-27` QA re-sync receipt above as the current source of truth for protected-QA and release-readiness state
