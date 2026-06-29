@@ -10,7 +10,7 @@
     "markdown": "docs/audits/STACK-REPO-INVENTORY.md"
   },
   "repo_count": 12,
-  "dirty_repo_count": 2,
+  "dirty_repo_count": 0,
   "release_eligible_count": 5,
   "repos": [
     {
@@ -122,13 +122,13 @@
       "status": "unmanaged",
       "remote_url": "https://github.com/fawxzzy/fawxzzy-fitness.git",
       "pinned_commit": null,
-      "current_commit": "8dc37401777691c5d06c8f09b9bd4ec8f4c9c5c5",
+      "current_commit": "369eefb369a5f1410ce21efbb57b69a8b2cf5404",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
       "current_ref": "codex/fitness-main-progression-summary-reapply",
       "branch": "codex/fitness-main-progression-summary-reapply",
-      "dirty": true,
+      "dirty": false,
       "trust_class": "adjacent",
       "release_eligible": false,
       "exists": true,
@@ -317,13 +317,13 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "0ff3522cb6f2d9ac3515df89ef0f80230b929b48",
+      "current_commit": "12c09cf62496d6f69ed3204bed8869837227777c",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
       "current_ref": "main",
       "branch": "main",
-      "dirty": true,
+      "dirty": false,
       "trust_class": "trusted",
       "release_eligible": false,
       "exists": true,
@@ -530,5 +530,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:1f72574da152d8274aec76fccf23706e829d517d70ed2a38e16f38d5740b7283"
+  "content_digest": "sha256:af3f3c8c600a4e1c85e702b69c8c3b1f57a552c1e00a932841a4724e81733aef"
 }
