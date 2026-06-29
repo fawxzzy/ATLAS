@@ -71,6 +71,8 @@
 - [Inventory And Truth Map And ATLAS Book Fitness Effort Fixture Coverage And Mazer System Map Re-Sync](../ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-EFFORT-FIXTURE-COVERAGE-AND-MAZER-SYSTEM-MAP-RESYNC-2026-06-29.md)
 - [Inventory And Truth Map And ATLAS Book Fitness Auth Return And QA Proof Hardening Re-Sync](../ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-AUTH-RETURN-AND-QA-PROOF-HARDENING-RESYNC-2026-06-29.md)
 - [Inventory And Truth Map And ATLAS Book Live Owner Drift Re-Sync](../ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-LIVE-OWNER-DRIFT-RESYNC-2026-06-29.md)
+- [Inventory And Truth Map And ATLAS Book Post-Mazer Pass2 Owner Drift Re-Sync](../ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-POST-MAZER-PASS2-OWNER-DRIFT-RESYNC-2026-06-29.md)
+- [Truth Map And Inventory Continuity Coverage Rollup And Ratchet](../ops/TRUTH-MAP-AND-INVENTORY-CONTINUITY-COVERAGE-ROLLUP-AND-RATCHET-2026-06-29.md)
 - [Inventory And Truth Map And ATLAS Book Fitness Session Copilot Drift And Mazer Latest Clean Head Re-Sync](../ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-SESSION-COPILOT-DRIFT-AND-MAZER-LATEST-CLEAN-HEAD-RESYNC-2026-06-28.md)
 - [ATLAS Root Main And Fitness Post-Verify Zero Dirty Inventory Re-Sync](../ops/ATLAS-ROOT-MAIN-AND-FITNESS-POST-VERIFY-ZERO-DIRTY-INVENTORY-RESYNC-2026-06-28.md)
 - [ATLAS QA Fitness Current Run Desktop Closeout And Mobile-Only Gate Re-Sync](../ops/ATLAS-QA-FITNESS-CURRENT-RUN-DESKTOP-CLOSEOUT-AND-MOBILE-ONLY-GATE-RESYNC-2026-06-28.md)
@@ -1048,6 +1050,7 @@
 - [Inventory And Truth Map June 12 Closeout Cluster Canonical Placement Pass 9](../ops/INVENTORY-AND-TRUTH-MAP-JUNE-12-CLOSEOUT-CLUSTER-CANONICAL-PLACEMENT-PASS-9-2026-06-12.md)
 - [Inventory And Truth Map June 18 And 19 Closeout Cluster Canonical Placement Pass 10](../ops/INVENTORY-AND-TRUTH-MAP-JUNE-18-AND-19-CLOSEOUT-CLUSTER-CANONICAL-PLACEMENT-PASS-10-2026-06-19.md)
 - [Inventory And Truth Map And ATLAS Book Live Owner Drift Re-Sync](../ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-LIVE-OWNER-DRIFT-RESYNC-2026-06-29.md)
+- [Truth Map And Inventory Continuity Coverage Rollup And Ratchet](../ops/TRUTH-MAP-AND-INVENTORY-CONTINUITY-COVERAGE-ROLLUP-AND-RATCHET-2026-06-29.md)
 
 ## Knowledge Capture & Transfer
 
@@ -1725,6 +1728,7 @@
 - [Truth Map And ATLAS Book Zero-Warning Validation Closeout And Stack Re-Sync](../ops/TRUTH-MAP-AND-ATLAS-BOOK-ZERO-WARNING-VALIDATION-CLOSEOUT-AND-STACK-RESYNC-2026-06-26.md)
 - [Truth Map And ATLAS Book Current Continuity Restore And Open-Marker Count Reconciliation](../ops/TRUTH-MAP-AND-ATLAS-BOOK-CURRENT-CONTINUITY-RESTORE-AND-OPEN-MARKER-COUNT-RECONCILIATION-2026-06-26.md)
 - [Truth Map And ATLAS Book Stale Owner-Side Packet And Parity Caveat Reconciliation](../ops/TRUTH-MAP-AND-ATLAS-BOOK-STALE-OWNER-SIDE-PACKET-AND-PARITY-CAVEAT-RECONCILIATION-2026-06-26.md)
+- [Truth Map And Inventory Continuity Coverage Rollup And Ratchet](../ops/TRUTH-MAP-AND-INVENTORY-CONTINUITY-COVERAGE-ROLLUP-AND-RATCHET-2026-06-29.md)
 - [Sandbox Simulation Readiness Local-Only First Validator Publication-Surface Claim Admission Boundary Contract Freeze](../ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-PUBLICATION-SURFACE-CLAIM-ADMISSION-BOUNDARY-CONTRACT-FREEZE-2026-06-27.md)
 - [Sandbox Simulation Readiness Post-Local-Only First Validator Publication-Surface Claim Admission Boundary Next-Slice Selection](../ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-PUBLICATION-SURFACE-CLAIM-ADMISSION-BOUNDARY-NEXT-SLICE-SELECTION-2026-06-27.md)
 - [Sandbox Simulation Readiness Local-Only First Validator Live-Unattended Execution Admission Boundary Contract Freeze](../ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-LIVE-UNATTENDED-EXECUTION-ADMISSION-BOUNDARY-CONTRACT-FREEZE-2026-06-27.md)

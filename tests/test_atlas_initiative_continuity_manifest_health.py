@@ -9,6 +9,7 @@ from ops._atlas import atlas_root
 from ops.atlas.awareness import atlas_status, fetch_status_slice, search
 from ops.atlas.continuity import (
     build_maintained_manifest_restart_index,
+    build_continuity_status_slices,
     build_initiative_continuity_manifest_health,
     build_open_marker_manifest_coverage,
     build_open_marker_restart_index,
@@ -497,6 +498,19 @@ class AtlasInitiativeContinuityManifestHealthTests(unittest.TestCase):
         self.assertEqual(item["restart_status"], "restart_ready")
         self.assertIn("Truth Map & ATLAS Book", item["marker_names"])
         self.assertEqual(item["next_package"]["package"], "none")
+
+    def test_continuity_coverage_rollup_reports_structured_status(self) -> None:
+        root = atlas_root()
+
+        _, slices = build_continuity_status_slices(root=root)
+        payload = slices["continuity_coverage"]
+
+        self.assertEqual(payload["status"], "structured")
+        self.assertEqual(payload["pending_review_count"], 0)
+        self.assertEqual(payload["initiative_manifest_status"], "ok")
+        self.assertEqual(payload["open_marker_manifest_coverage_status"], "ok")
+        self.assertEqual(payload["open_marker_restart_index_status"], "ok")
+        self.assertEqual(payload["maintained_manifest_restart_index_status"], "ok")
 
 
 if __name__ == "__main__":

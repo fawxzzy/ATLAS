@@ -3,14 +3,14 @@
   "stack_manifest_ref": "stack.yaml",
   "stack_manifest_digest": "sha256:e5ac73c00983975b59e4b8e7f8541160d479087f5dc95ad1d642568116bd7d10",
   "stack_lock_ref": "stack.lock.yaml",
-  "stack_lock_digest": "sha256:1908004e08dcc6939850ead44c60ddcc0bb19ad3577f61a02ed8a49fa555d847",
+  "stack_lock_digest": "sha256:550f002950da71ae1981fe99c9afd789c797ebc093ed9bbe35002381e23c31fc",
   "working_memory_digest": "sha256:fe4f4902e2b2c475974b050ba1bf3f5e740439aa41df2f844555c2c0dc3b310f",
   "published_refs": {
     "json": "docs/registry/STACK-REPO-INVENTORY.json",
     "markdown": "docs/audits/STACK-REPO-INVENTORY.md"
   },
   "repo_count": 12,
-  "dirty_repo_count": 1,
+  "dirty_repo_count": 2,
   "release_eligible_count": 5,
   "repos": [
     {
@@ -128,7 +128,7 @@
       "current_ref_type": "branch",
       "current_ref": "codex/fitness-main-progression-summary-reapply",
       "branch": "codex/fitness-main-progression-summary-reapply",
-      "dirty": false,
+      "dirty": true,
       "trust_class": "adjacent",
       "release_eligible": false,
       "exists": true,
@@ -214,8 +214,8 @@
       "role": "application",
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/mazer.git",
-      "pinned_commit": "06b4e2c18947df7ffedfb34277aadadf23aa8e2b",
-      "current_commit": "06b4e2c18947df7ffedfb34277aadadf23aa8e2b",
+      "pinned_commit": "bf38ceb95740ae111c8fdfd37371b2184b556ec0",
+      "current_commit": "bf38ceb95740ae111c8fdfd37371b2184b556ec0",
       "pinned_ref_type": "branch",
       "pinned_ref": "codex/mazer-pass2-menu-parity",
       "current_ref_type": "branch",
@@ -317,7 +317,7 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "d8306fbf52642dc516fa4acdbfbd5cd5b0a740b8",
+      "current_commit": "c23adc1200a046841099f71c99078eacd68d9141",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
@@ -530,5 +530,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:c2daa63c4b33f857c2ed9286f9b1d5e0d0b0f85f96966c5d361e1f1df1c87e73"
+  "content_digest": "sha256:15fe5f9b9630923aede7c1740b654838c7d76c9cc50dbda7db108b3f603e964f"
 }

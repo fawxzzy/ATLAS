@@ -103,6 +103,19 @@ class AtlasContinuitySearchTests(unittest.TestCase):
         )
         self.assertIn("maintained_manifest_count", maintained_payload["text"])
 
+        coverage_rollup_results = search("continuity coverage rollup", root=self.root, limit=20)
+        coverage_rollup_ids = {
+            item["id"]
+            for item in coverage_rollup_results["results"]
+            if isinstance(item, dict) and isinstance(item.get("id"), str)
+        }
+        self.assertIn("slice:continuity_coverage", coverage_rollup_ids)
+
+        coverage_rollup_payload = fetch_status_slice("continuity_coverage", root=self.root)
+        self.assertEqual(coverage_rollup_payload["metadata"]["slice_name"], "continuity_coverage")
+        self.assertIn('"status": "structured"', coverage_rollup_payload["text"])
+        self.assertIn('"pending_review_count": 0', coverage_rollup_payload["text"])
+
 
 if __name__ == "__main__":
     unittest.main()

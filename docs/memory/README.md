@@ -146,6 +146,8 @@ Machine-readable continuity surfaces for the seeded set:
 - Awareness slice: `continuity_open_marker_restart_index`
 - CLI: `python ops/atlas/continuity_maintained_manifest_restart_index.py`
 - Awareness slice: `continuity_maintained_manifest_restart_index`
+- CLI: `python ops/atlas/continuity_coverage.py`
+- Awareness slice: `continuity_coverage`
 
 Refresh passes should either:
 
