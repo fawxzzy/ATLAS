@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-06-19T00:00:00Z",
-  "updated_at": "2026-06-29T06:21:59Z",
+  "updated_at": "2026-06-29T06:35:46Z",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -355,7 +355,7 @@
     ],
     "freshness_state": "manifest-backed",
     "freshness_checked_receipt": "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-LIVE-OWNER-DRIFT-RESYNC-2026-06-29.md",
-    "freshness_checked_at": "2026-06-29T06:21:59Z",
+    "freshness_checked_at": "2026-06-29T06:35:46Z",
     "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture still match the refreshed current-state, marker, restart, system-map, and endgame mirrors after the newer June 29 live owner-drift clarification: current protected-QA truth still projects playbook, trove, foundation, and lifeline as ready, Fitness stays at `manual_review` on the current governed run `fitness-progression-pr-smoke-20260628T072049067050Z` with `desktop.chromium.real.manual` now valid and only `android.chrome.real` plus `iphone.webkit.real` remaining open, latest pushed clean `fitness` still remains `db175f08e2bbd15d38eb65d2a6432ad138d2319f`, inventory now records newer local clean Fitness head `94de051415c527de37a6114e88671f6b44fa0feb` on branch `ahead 2`, latest pushed clean `mazer` is `4d7af0aad751a819acf713e1ebf42576d97528f2` and the local Mazer worktree is clean again, the reset-lane system map plus menu parity follow-ons remain mirrored at root, `runtime/atlas/qa/runs/fitness-progression-pr-smoke-20260628T072049067050Z/release-gate.packet-prep.md` still carries one exact blocked-run operator handoff, the clean published root checkpoint still consumed by this refresh is `9a5d78b8d8ca35491ce8abe463bd37a5ce945020`, protected dispatch run `28316073769` still proves the remaining ATLAS GitHub Actions blocker is only missing `BROWSERSTACK_USERNAME` and `BROWSERSTACK_ACCESS_KEY`, `runtime/atlas/qa/github-secret-readiness.latest.json` now reports `available_secret_count: 0`, the root validation floor now projects `critical=0 / error=0 / warning=3 / info=0`, the initiative manifest-health surface still reads 19 ok / 0 warning / 0 error, and the eligible-open-marker coverage and restart-index surfaces still read 7 of 7.",
     "marker_posture": [
       {
