@@ -3,14 +3,14 @@
   "stack_manifest_ref": "stack.yaml",
   "stack_manifest_digest": "sha256:e5ac73c00983975b59e4b8e7f8541160d479087f5dc95ad1d642568116bd7d10",
   "stack_lock_ref": "stack.lock.yaml",
-  "stack_lock_digest": "sha256:2b92609c7730b3ec7f9b955e72ed93d035cdeb5944a400308382e74748ec1223",
+  "stack_lock_digest": "sha256:b4658605907462672402fa2e34a8b8ccc3e231eafa22e3e9b7647f2b45117ce8",
   "working_memory_digest": "sha256:fe4f4902e2b2c475974b050ba1bf3f5e740439aa41df2f844555c2c0dc3b310f",
   "published_refs": {
     "json": "docs/registry/STACK-REPO-INVENTORY.json",
     "markdown": "docs/audits/STACK-REPO-INVENTORY.md"
   },
   "repo_count": 12,
-  "dirty_repo_count": 1,
+  "dirty_repo_count": 2,
   "release_eligible_count": 5,
   "repos": [
     {
@@ -122,13 +122,13 @@
       "status": "unmanaged",
       "remote_url": "https://github.com/fawxzzy/fawxzzy-fitness.git",
       "pinned_commit": null,
-      "current_commit": "af8ad0ca91d69061ff8b9f4772e4daa82ca93b27",
+      "current_commit": "5a69c28078475a3a457ab6b8f9f71cbabab2dba7",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
       "current_ref": "codex/fitness-main-progression-summary-reapply",
       "branch": "codex/fitness-main-progression-summary-reapply",
-      "dirty": false,
+      "dirty": true,
       "trust_class": "adjacent",
       "release_eligible": false,
       "exists": true,
@@ -214,8 +214,8 @@
       "role": "application",
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/mazer.git",
-      "pinned_commit": "2545cfe5cdbc3cd7d20bc5013abc25ef3c56a93c",
-      "current_commit": "2545cfe5cdbc3cd7d20bc5013abc25ef3c56a93c",
+      "pinned_commit": "1181dba05cc32d9c00bfb9369f5fcc39a92f4bd6",
+      "current_commit": "1181dba05cc32d9c00bfb9369f5fcc39a92f4bd6",
       "pinned_ref_type": "branch",
       "pinned_ref": "codex/legacy-web-port-truth",
       "current_ref_type": "branch",
@@ -317,7 +317,7 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "b35acd3e781f08da41c75db019dbba4c34163e84",
+      "current_commit": "b3df3cd3a19a13cd6fbcfb4b246a7c6facb82c54",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
@@ -530,5 +530,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:33a061c38fa07391ce294c8b862b23b5f1437301ccaaa14638cd27f6bdbaee48"
+  "content_digest": "sha256:c8ab1b52c06d533f5e61880f31d3de167386628be189fc626ec751daa90a7cbb"
 }
