@@ -14,8 +14,10 @@ What changed:
 
 - expanded the deterministic mobile-regression harness to cover the remaining routine chooser surfaces
 - verified `57` mobile-regression scenarios and `108` green fixture tests
-- rebuilt board captures for the mobile normalization lane
-- re-audited the remaining scope down to residual cross-view polish plus final closeout proof
+- fixed the `CreateRoutineClient` hydration mismatch that was surfacing as the mobile duplicate-route `3 errors` toast
+- normalized the routine duplicate chooser metric lane to the same mobile horizontal-scroll contract as the workout-plan duplicate chooser
+- rebuilt the full mobile-regression capture pack and board set against the real local QA lane on `http://127.0.0.1:3002`
+- re-audited the remaining routines mobile scope down to no known blocker on the duplicate/create surfaces
 
 Proof:
 
@@ -26,12 +28,23 @@ Proof:
 - repo head: `48453c915b17f13a24898f50ebdfd79e581c2174`
 - mobile-regression fixture tests: `108/108`
 - mobile regression scenario count: `57`
-- board proof manifest: `repos/fawxzzy-fitness/.codex/qa/mobile-regression/manifest.json`
+- mobile regression manifest: `repos/fawxzzy-fitness/.codex/qa/mobile-regression/manifest.json`
+- mobile regression manifest base url: `http://127.0.0.1:3002`
+- rebuilt board proofs:
+  - `repos/fawxzzy-fitness/.codex/qa/mobile-regression/exercise-cards-board.png`
+  - `repos/fawxzzy-fitness/.codex/qa/mobile-regression/session-logging-board.png`
+  - `repos/fawxzzy-fitness/.codex/qa/mobile-regression/session-summaries-board.png`
+  - `repos/fawxzzy-fitness/.codex/qa/mobile-regression/settings-detail-board.png`
+  - `repos/fawxzzy-fitness/.codex/qa/mobile-regression/mega-board.png`
+- targeted Playwright proof on `routines-list-create-duplicate` after the hydration fix:
+  - page status: `200`
+  - console errors: `0`
+  - page errors: `0`
 
 Current production state:
 
-- this is an in-progress lifecycle update, not a feature closeout
-- the remaining work is residual cross-view polish and final closeout proof
+- this receipt now covers the closeout-grade proof pass for the mobile normalization lane
+- the remaining work, if any, is future subjective polish rather than an unresolved mobile regression blocker
 
 <!-- discordos-update-post-receipt:start -->
 ## Discord Publication
