@@ -42,7 +42,7 @@
     "tool": "playwright",
     "wait_until": "networkidle",
     "settle_ms": 750,
-    "ready_selector": "body[data-mobile-regression-today-shell-ready='true']",
+    "ready_selector": "body:has([data-mobile-regression-root='true'])",
     "ready_timeout_ms": 30000,
     "full_page": false,
     "disable_animations": true
