@@ -84,7 +84,6 @@ export function buildCapabilities(providerPayload, config) {
     os_version: config.osVersion || "11",
     browser: browserName === "chromium" ? "chrome" : browserName,
     browser_version: config.browserVersion || "latest",
-    resolution: `${config.viewport.width}x${config.viewport.height}`,
   };
 }
 
@@ -109,14 +108,25 @@ async function main() {
 
   const capabilities = buildCapabilities(providerPayload, config);
   const endpoint = `wss://cdp.browserstack.com/playwright?caps=${encodeURIComponent(JSON.stringify(capabilities))}`;
+  const androidSession = isAndroid(config);
   const browserType = String(config.browserEngine || "").toLowerCase() === "webkit" ? playwright.webkit : playwright.chromium;
-  const browser = await browserType.connect({ wsEndpoint: endpoint });
-  const context = await browser.newContext({
-    viewport: {
-      width: config.viewport.width,
-      height: config.viewport.height,
-    },
-  });
+  const browser = androidSession ? null : await browserType.connect({ wsEndpoint: endpoint });
+  const device = androidSession ? await playwright._android.connect(endpoint) : null;
+  if (device) {
+    try {
+      await device.shell("am force-stop com.android.chrome");
+    } catch {
+      // Best effort only.
+    }
+  }
+  const context = androidSession
+    ? await device.launchBrowser()
+    : await browser.newContext({
+      viewport: {
+        width: config.viewport.width,
+        height: config.viewport.height,
+      },
+    });
   const page = await context.newPage();
   const consoleLines = [];
   const networkEntries = [];
@@ -190,7 +200,11 @@ async function main() {
   await fs.writeFile(metadataPath, metadataBody, "utf8");
 
   await context.close();
-  await browser.close();
+  if (device) {
+    await device.close();
+  } else if (browser) {
+    await browser.close();
+  }
 
   process.stdout.write(
     JSON.stringify({

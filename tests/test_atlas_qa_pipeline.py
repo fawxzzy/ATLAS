@@ -18,6 +18,7 @@ from ops.atlas.qa.ci_gate import _materialize_runtime_waivers, _provider_overrid
 from ops.atlas.qa.adoption_drift import build_adoption_drift
 from ops.atlas.qa.bootstrap_release_repos import bootstrap_release_repos
 from ops.atlas.qa.compatibility_report import compatibility_report
+from ops.atlas.qa.collect_artifacts import _capture_cache
 from ops.atlas.qa.evidence_index import build_evidence_index
 from ops.atlas.qa.github_secret_readiness import github_secret_readiness
 from ops.atlas.qa.manual_attestation import (
@@ -2358,6 +2359,132 @@ console.log(JSON.stringify(caps));
         self.assertEqual("true", caps["realMobile"])
         self.assertNotIn("resolution", caps)
         self.assertNotIn("browserstack.console", caps)
+
+    def test_browserstack_capture_builds_android_capabilities_for_real_mobile(self) -> None:
+        script = """
+import { buildCapabilities } from './ops/atlas/qa/capture_browserstack.mjs';
+const caps = buildCapabilities({}, {
+  runId: 'run-1',
+  scenarioId: 'fitness.progression-pr-smoke',
+  lensId: 'android.chrome.real',
+  browserEngine: 'chromium',
+  viewport: { width: 412, height: 915 },
+  deviceModel: 'Samsung Galaxy S23',
+  osName: 'Android',
+  osVersion: '13.0',
+  browserName: 'chrome',
+  browserVersion: 'latest'
+});
+console.log(JSON.stringify(caps));
+"""
+        completed = subprocess.run(
+            ["node", "--input-type=module", "-e", script],
+            cwd=str(ROOT),
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            check=False,
+        )
+        self.assertEqual(0, completed.returncode, completed.stderr)
+        caps = json.loads(completed.stdout)
+        self.assertEqual("chrome", caps["browser"])
+        self.assertEqual("Samsung Galaxy S23", caps["deviceName"])
+        self.assertEqual("13.0", caps["osVersion"])
+        self.assertEqual("true", caps["realMobile"])
+        self.assertNotIn("resolution", caps)
+
+    def test_browserstack_capture_builds_desktop_capabilities_without_provider_resolution(self) -> None:
+        script = """
+import { buildCapabilities } from './ops/atlas/qa/capture_browserstack.mjs';
+const caps = buildCapabilities({}, {
+  runId: 'run-1',
+  scenarioId: 'fitness.progression-pr-smoke',
+  lensId: 'desktop.chromium.real',
+  browserEngine: 'chromium',
+  viewport: { width: 1440, height: 1024 },
+  deviceModel: 'Windows Desktop',
+  osName: 'Windows',
+  osVersion: '11',
+  browserName: 'chrome',
+  browserVersion: 'latest'
+});
+console.log(JSON.stringify(caps));
+"""
+        completed = subprocess.run(
+            ["node", "--input-type=module", "-e", script],
+            cwd=str(ROOT),
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            check=False,
+        )
+        self.assertEqual(0, completed.returncode, completed.stderr)
+        caps = json.loads(completed.stdout)
+        self.assertEqual("chrome", caps["browser"])
+        self.assertEqual("Windows", caps["os"])
+        self.assertEqual("11", caps["os_version"])
+        self.assertEqual("latest", caps["browser_version"])
+        self.assertNotIn("resolution", caps)
+
+    def test_capture_cache_uses_provider_safe_defaults_for_browserstack_real_lenses(self) -> None:
+        adapter_payload = load_json_object(ROOT / "ops" / "atlas" / "qa" / "adapters" / "fitness.web.json")
+        for item in adapter_payload["lenses"]:
+            if isinstance(item, dict) and item.get("proof_kind") == "real":
+                item["execution_mode"] = "provider_capture"
+                item["provider_manifest_ref"] = "ops/atlas/qa/providers/browserstack.playwright.v1.json"
+
+        lens_payload = load_json_object(ROOT / "ops" / "atlas" / "qa" / "lenses" / "atlas-default-web.v1.json")
+        lens_profiles = {
+            str(item["lens_id"]): item
+            for item in lens_payload["lenses"]
+            if isinstance(item, dict) and isinstance(item.get("lens_id"), str)
+        }
+        result_payload = {
+            "run_id": "run-1",
+            "scenario_id": "fitness.progression-pr-smoke",
+            "adapter_id": "fitness.web",
+            "repo_id": "fitness",
+            "git_sha": "abcdef1234567890",
+        }
+        scenario_payload = {"scenario_id": "fitness.progression-pr-smoke", "entrypoint": {"path": "/dev/mobile-regression"}}
+        result_by_lens = {
+            "desktop.chromium.real": {"execution_mode": "provider_capture"},
+            "android.chrome.real": {"execution_mode": "provider_capture"},
+            "iphone.webkit.real": {"execution_mode": "provider_capture"},
+        }
+        captured: dict[str, dict] = {}
+
+        def _fake_capture_with_provider(*, root: Path, provider_manifest_ref: str, config: dict[str, object]) -> dict[str, object]:
+            captured[str(config["lensId"])] = dict(config)
+            return {"metadata_path": str(root / "tmp" / f"{config['lensId']}.metadata.json"), "outputs": {}}
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            with mock.patch("ops.atlas.qa.collect_artifacts.capture_with_provider", side_effect=_fake_capture_with_provider):
+                _capture_cache(
+                    execute=True,
+                    repo_root=ROOT / "repos" / "fawxzzy-fitness",
+                    run_root=Path(temp_dir),
+                    adapter=adapter_payload,
+                    scenario=scenario_payload,
+                    result_payload=result_payload,
+                    lens_payload=lens_payload,
+                    lens_profiles=lens_profiles,
+                    result_by_lens=result_by_lens,
+                )
+
+        self.assertEqual("Windows Desktop", captured["desktop.chromium.real"]["deviceModel"])
+        self.assertEqual("Windows", captured["desktop.chromium.real"]["osName"])
+        self.assertEqual("11", captured["desktop.chromium.real"]["osVersion"])
+        self.assertEqual("chrome", captured["desktop.chromium.real"]["browserName"])
+        self.assertEqual("latest", captured["desktop.chromium.real"]["browserVersion"])
+        self.assertEqual("Samsung Galaxy S23", captured["android.chrome.real"]["deviceModel"])
+        self.assertEqual("Android", captured["android.chrome.real"]["osName"])
+        self.assertEqual("13.0", captured["android.chrome.real"]["osVersion"])
+        self.assertEqual("iPhone 15", captured["iphone.webkit.real"]["deviceModel"])
+        self.assertEqual("iOS", captured["iphone.webkit.real"]["osName"])
+        self.assertEqual("17", captured["iphone.webkit.real"]["osVersion"])
 
     def test_run_matrix_dry_run_honors_explicit_real_lens_command_ref(self) -> None:
         temp_dir = tempfile.TemporaryDirectory()

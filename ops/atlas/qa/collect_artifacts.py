@@ -171,6 +171,72 @@ def _build_capture_config(
     }
 
 
+def _provider_capture_config(
+    *,
+    base_config: dict[str, Any],
+    lens_id: str,
+    lens: dict[str, Any],
+    lens_profile: dict[str, Any],
+    provider_type: str,
+) -> dict[str, Any]:
+    explicit_values = {
+        "deviceModel": lens.get("device_model"),
+        "osName": lens.get("os_name"),
+        "osVersion": lens.get("os_version"),
+        "browserName": lens.get("browser_name"),
+        "browserVersion": lens.get("browser_version"),
+    }
+    defaults_by_lens = {
+        "desktop.chromium.real": {
+            "deviceModel": "Windows Desktop",
+            "osName": "Windows",
+            "osVersion": "11",
+            "browserName": "chrome",
+            "browserVersion": "latest",
+        },
+        "android.chrome.real": {
+            "deviceModel": "Samsung Galaxy S23",
+            "osName": "Android",
+            "osVersion": "13.0",
+            "browserName": "chrome",
+            "browserVersion": "latest",
+        },
+        "iphone.webkit.real": {
+            "deviceModel": "iPhone 15",
+            "osName": "iOS",
+            "osVersion": "17",
+            "browserName": "safari",
+            "browserVersion": "17",
+        },
+    }
+    profile_browser_name = str(lens_profile.get("browser_engine") or "").strip().lower()
+    normalized_browser_name = {
+        "chromium": "chrome",
+        "webkit": "safari",
+    }.get(profile_browser_name, profile_browser_name)
+    defaults = defaults_by_lens.get(lens_id, {})
+    merged = {
+        **base_config,
+        "deviceModel": explicit_values["deviceModel"] or defaults.get("deviceModel"),
+        "osName": explicit_values["osName"] or defaults.get("osName"),
+        "osVersion": explicit_values["osVersion"] or defaults.get("osVersion"),
+        "browserName": explicit_values["browserName"] or defaults.get("browserName") or normalized_browser_name,
+        "browserVersion": explicit_values["browserVersion"] or defaults.get("browserVersion") or "latest",
+        "providerType": provider_type,
+    }
+    missing = [
+        key
+        for key in ("deviceModel", "osName", "osVersion", "browserName", "browserVersion")
+        if not isinstance(merged.get(key), str) or not str(merged.get(key)).strip()
+    ]
+    if missing:
+        raise RuntimeError(
+            f"Lens '{lens_id}' requires explicit provider capability mapping before provider_capture can run. "
+            f"Missing: {', '.join(missing)}."
+        )
+    return merged
+
+
 def _capture_cache(
     *,
     execute: bool,
@@ -217,15 +283,13 @@ def _capture_cache(
             if not isinstance(provider_manifest_ref, str) or not provider_manifest_ref.strip():
                 raise RuntimeError(f"Lens '{lens_id}' requires provider_capture but does not declare provider_manifest_ref.")
             provider_payload, _ = load_provider_manifest(root=ROOT, provider_manifest_ref=provider_manifest_ref)
-            provider_config = {
-                **config,
-                "deviceModel": lens.get("device_model") or profile.get("emulation_profile") or lens_id,
-                "osName": lens.get("os_name") or ("iOS" if "iphone" in lens_id else "Android" if "android" in lens_id else "Desktop"),
-                "osVersion": lens.get("os_version") or "unspecified",
-                "browserName": lens.get("browser_name") or profile.get("browser_engine"),
-                "browserVersion": lens.get("browser_version") or "unspecified",
-                "providerType": provider_payload.get("provider_type"),
-            }
+            provider_config = _provider_capture_config(
+                base_config=config,
+                lens_id=lens_id,
+                lens=lens,
+                lens_profile=profile,
+                provider_type=str(provider_payload.get("provider_type") or ""),
+            )
             cache[lens_id] = capture_with_provider(root=ROOT, provider_manifest_ref=provider_manifest_ref, config=provider_config)
         else:
             cache[lens_id] = capture_with_playwright(root=ROOT, config=config)
