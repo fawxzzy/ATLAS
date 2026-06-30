@@ -1,0 +1,18 @@
+{
+  "baseline_id": "sha256:7b699639e257d65029a16b2648db617ac85f67b237b682d1bbbf71aa1811bf4d",
+  "contract_version": "atlas.qa.visual_baseline.v1",
+  "generated_at": "2026-06-30T07:58:04.374028Z",
+  "runner_version": "atlas.qa.baselines.v1",
+  "scenario_id": "fitness.progression-pr-smoke",
+  "adapter_id": "fitness.web",
+  "lens_id": "iphone.webkit.emulated",
+  "evidence_tier": "physical_device",
+  "source_run_id": "fitness-progression-pr-smoke-20260630T074245034067Z",
+  "git_sha": "ab976cb783645eddf4303b99d48806193a817f2c",
+  "artifact_hash": "sha256:b926f60a09f9c8425af7b8154923ff47de9874752baf3910c1d608c1dead7ef2",
+  "state": "blessed",
+  "baseline_ref": "data/atlas/qa/baselines/fitness.progression-pr-smoke/iphone.webkit.emulated.png",
+  "candidate_image_ref": "runtime/atlas/qa/runs/fitness-progression-pr-smoke-20260630T074245034067Z/captures/iphone.webkit.emulated/screenshot.png",
+  "approved_by": "zjhre",
+  "approved_at": "2026-06-30T07:58:34.851605Z"
+}

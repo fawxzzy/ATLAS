@@ -20,6 +20,7 @@ from ops.atlas.qa.bootstrap_release_repos import bootstrap_release_repos
 from ops.atlas.qa.compatibility_report import compatibility_report
 from ops.atlas.qa.collect_artifacts import _capture_cache
 from ops.atlas.qa.evidence_index import build_evidence_index
+from ops.atlas.qa.evaluate_run import evaluate_run
 from ops.atlas.qa.github_secret_readiness import github_secret_readiness
 from ops.atlas.qa.manual_attestation import (
     build_manual_attestation_packet_prep,
@@ -213,6 +214,8 @@ class AtlasQaPipelineTests(unittest.TestCase):
             "atlas.qa.capture_receipt.v1.json",
             "atlas.qa.visual_baseline.v1.json",
             "atlas.qa.adapter.v1.json",
+            "atlas.qa.artifact.v1.json",
+            "atlas.qa.result.v1.json",
             "atlas.qa.scenario.v1.json",
             "atlas.qa.test_evidence.v1.json",
             "atlas.qa.evidence_index.v1.json",
@@ -1176,6 +1179,144 @@ class AtlasQaPipelineTests(unittest.TestCase):
         self.assertEqual("waived", promotion["summary"]["real_device_proof"])
         self.assertEqual(["android.chrome.real.manual"], promotion["waived_lanes"])
         self.assertEqual([], promotion["manual_required_lanes"])
+
+    def test_evaluate_run_carries_manual_required_artifact_lanes_into_promotion(self) -> None:
+        root = self._temp_root()
+        run_root = root / "runtime" / "atlas" / "qa" / "runs" / "run-1"
+        artifact_path, _ = self._base_manifest(root=root)
+        scenario_path = root / "ops" / "atlas" / "qa" / "scenarios" / "fitness.progression-pr-smoke.json"
+        scenario_path.parent.mkdir(parents=True, exist_ok=True)
+        _write_json(
+            scenario_path,
+            {
+                "contract_version": "atlas.qa.scenario.v1",
+                "scenario_id": "fitness.progression-pr-smoke",
+                "title": "fixture",
+                "repo_id": "fitness",
+                "repo_path": "repos/fawxzzy-fitness",
+                "adapter_id": "fitness.web",
+                "criticality": "high",
+                "entrypoint": {"path": "/"},
+                "proof": {
+                    "pr_lenses": ["desktop.chromium.emulated"],
+                    "certify_lenses": ["iphone.webkit.real"],
+                    "lens_manifest_ref": "ops/atlas/qa/lenses/atlas-default-web.v1.json",
+                    "real_device_strategy": "preview_only",
+                },
+                "required_artifacts": [],
+                "execution": {"pr_command_sequence": [], "certify_command_sequence": []},
+                "promotion": {
+                    "require_executable_truth": True,
+                    "require_pr_artifacts": True,
+                    "require_real_device_on": "release",
+                    "allow_manual_certification": True,
+                    "max_flaky_lenses": 0,
+                },
+            },
+        )
+        _write_json(
+            run_root / "matrix.result.json",
+            {
+                "contract_version": "atlas.qa.result.v1",
+                "result_id": "sha256:" + ("6" * 64),
+                "generated_at": "2026-05-11T00:00:00Z",
+                "runner_version": "test",
+                "stage": "executed",
+                "run_id": "run-1",
+                "scenario_ref": "ops/atlas/qa/scenarios/fitness.progression-pr-smoke.json",
+                "repo_id": "fitness",
+                "repo_path": "repos/fawxzzy-fitness",
+                "git_sha": "abcdef1234567890",
+                "adapter_id": "fitness.web",
+                "adapter_ref": "ops/atlas/qa/adapters/fitness.web.json",
+                "lens_manifest_ref": "ops/atlas/qa/lenses/atlas-default-web.v1.json",
+                "mode": "execute",
+                "summary": {
+                    "overall_status": "ready",
+                    "executable_status": "clean",
+                    "artifact_status": "complete",
+                    "certification_status": "satisfied",
+                    "highest_satisfied_tier": "emulated_browser",
+                    "satisfied_evidence_tiers": ["emulated_browser"],
+                    "missing_evidence_tiers": ["physical_device"],
+                    "manual_required_lanes": [],
+                    "visual_status": "not_configured",
+                    "visual_diff_count": 0,
+                    "test_evidence_status": "not_configured",
+                    "required_test_evidence_count": 0,
+                    "lens_count": 2,
+                    "failing_lens_count": 0,
+                    "finding_count": 0,
+                },
+                "matrix": [
+                    {
+                        "lens_id": "desktop.chromium.emulated",
+                        "lens_profile_id": "desktop.chromium",
+                        "proof_kind": "emulated",
+                        "evidence_kind": "emulated_browser",
+                        "promotion_tier": "emulated_browser",
+                        "fallback_behavior": "blocked",
+                        "execution_mode": "browser_capture",
+                        "status": "pass",
+                    },
+                    {
+                        "lens_id": "iphone.webkit.real",
+                        "lens_profile_id": "iphone.webkit",
+                        "proof_kind": "real",
+                        "evidence_kind": "physical_device",
+                        "promotion_tier": "physical_device",
+                        "fallback_behavior": "manual_attestation",
+                        "execution_mode": "provider_capture",
+                        "status": "pass",
+                    },
+                ],
+                "findings": [],
+                "artifact_manifest_refs": [],
+            },
+        )
+        artifact_payload = load_json_object(artifact_path)
+        artifact_payload["artifacts"].append(
+            {
+                "artifact_id": "run-1:main:iphone.webkit.real:screenshot",
+                "artifact_kind": "screenshot",
+                "step_id": "main",
+                "lens_id": "iphone.webkit.real",
+                "proof_kind": "real",
+                "required": True,
+                "status": "manual_required",
+                "content_type": "image/png",
+                "notes": [],
+            }
+        )
+        artifact_payload["summary"]["artifact_count"] = 2
+        artifact_payload["summary"]["required_count"] = 2
+        artifact_payload["summary"]["manual_required_count"] = 1
+        _write_json(artifact_path, artifact_payload)
+        _write_json(
+            run_root / "captures" / "desktop.chromium.emulated" / "capture.metadata.json",
+            {
+                "contract_version": "atlas.qa.capture_receipt.v1",
+                "run_id": "run-1",
+                "scenario_id": "fitness.progression-pr-smoke",
+                "adapter_id": "fitness.web",
+                "repo_id": "fitness",
+                "git_sha": "abcdef1234567890",
+                "lens_id": "desktop.chromium.emulated",
+                "captured_at": "2026-05-11T00:00:00Z",
+                "source_url": "http://127.0.0.1:3000/dev/mobile-regression",
+                "capture_backend": "playwright",
+                "capture_method": "browser_emulation",
+            },
+        )
+
+        evaluated = evaluate_run(root=root, run_id="run-1")
+        self.assertEqual("manual_required", evaluated["summary"]["certification_status"])
+        self.assertEqual(["iphone.webkit.real"], evaluated["summary"]["manual_required_lanes"])
+
+        promotion = promote_run(root=root, run_id="run-1", scenario_path=scenario_path)
+        self.assertEqual("manual_review", promotion["promotion_status"])
+        self.assertEqual("manual_required", promotion["summary"]["real_device_proof"])
+        self.assertEqual(["iphone.webkit.real"], promotion["manual_required_lanes"])
 
     def test_promote_run_rejects_wrong_run_waiver(self) -> None:
         root = self._temp_root()

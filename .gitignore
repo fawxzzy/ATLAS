@@ -36,6 +36,13 @@ data/**
 !data/**/
 !data/**/README.md
 !data/**/.gitkeep
+!data/atlas/
+!data/atlas/qa/
+!data/atlas/qa/baselines/
+!data/atlas/qa/baselines/**/
+!data/atlas/qa/baselines/**/*.png
+!data/atlas/qa/baselines/**/*.baseline.json
+data/atlas/qa/baselines/**/*.superseded.*
 !data/fixtures/
 !data/fixtures/atlas.continuity.source.manifest.example.v1.json
 !data/fixtures/atlas.playbook.adoption.report.example.v1.json

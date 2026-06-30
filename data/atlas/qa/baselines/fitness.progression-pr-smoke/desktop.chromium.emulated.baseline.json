@@ -1,0 +1,18 @@
+{
+  "baseline_id": "sha256:7b47ecf2f6df27a469391abfcaf6c9d39e0c925f28e31d82c99ec296cc96aa5d",
+  "contract_version": "atlas.qa.visual_baseline.v1",
+  "generated_at": "2026-06-30T07:58:04.342694Z",
+  "runner_version": "atlas.qa.baselines.v1",
+  "scenario_id": "fitness.progression-pr-smoke",
+  "adapter_id": "fitness.web",
+  "lens_id": "desktop.chromium.emulated",
+  "evidence_tier": "physical_device",
+  "source_run_id": "fitness-progression-pr-smoke-20260630T074245034067Z",
+  "git_sha": "ab976cb783645eddf4303b99d48806193a817f2c",
+  "artifact_hash": "sha256:bd882432a7c426ab5bc7a3cf62df8fcc6d865d38f17c64836343fb7e904d5ce8",
+  "state": "blessed",
+  "baseline_ref": "data/atlas/qa/baselines/fitness.progression-pr-smoke/desktop.chromium.emulated.png",
+  "candidate_image_ref": "runtime/atlas/qa/runs/fitness-progression-pr-smoke-20260630T074245034067Z/captures/desktop.chromium.emulated/screenshot.png",
+  "approved_by": "zjhre",
+  "approved_at": "2026-06-30T07:58:34.809955Z"
+}
