@@ -215,7 +215,7 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/mazer.git",
       "pinned_commit": "dcf315ca577b4a5e5fde605604d16a2f710b6b12",
-      "current_commit": "dcf315ca577b4a5e5fde605604d16a2f710b6b12",
+      "current_commit": "8bd174ef63373a04300ee800a7c82eb93b0e5518",
       "pinned_ref_type": "branch",
       "pinned_ref": "codex/mazer-pass2-menu-parity",
       "current_ref_type": "branch",
@@ -317,7 +317,7 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "657dd8da9958ff1edb7c5732598d66d3c5fee2a8",
+      "current_commit": "50d4cd668e778993327334a23c5bec701059a72d",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
@@ -530,5 +530,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:c842d1e6d0860d6d76783bc1abaff66bd59ebcb5d9c4e3e72184eb72d0c2b5ba"
+  "content_digest": "sha256:224ec6de49498e53f880d7302104654339909d69dc672de4b80dd1e2ac2fbb87"
 }
