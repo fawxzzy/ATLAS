@@ -126,6 +126,11 @@ def _target_file_for_kind(output_dir: Path, artifact_kind: str) -> Path:
     return output_dir / f"{artifact_kind}.json"
 
 
+def _write_capture_failure_note(output_dir: Path, detail: str) -> None:
+    output_dir.mkdir(parents=True, exist_ok=True)
+    (output_dir / "capture.failure.txt").write_text(f"{detail.rstrip()}\n", encoding="utf-8")
+
+
 def _build_capture_config(
     *,
     repo_root: Path,
@@ -295,7 +300,15 @@ def _capture_cache(
                 lens_profile=profile,
                 provider_type=str(provider_payload.get("provider_type") or ""),
             )
-            cache[lens_id] = capture_with_provider(root=ROOT, provider_manifest_ref=provider_manifest_ref, config=provider_config)
+            try:
+                cache[lens_id] = capture_with_provider(root=ROOT, provider_manifest_ref=provider_manifest_ref, config=provider_config)
+            except Exception as exc:
+                fallback_behavior = str(matrix_entry.get("fallback_behavior") or lens.get("fallback_behavior") or "")
+                proof_kind = str(matrix_entry.get("proof_kind") or lens.get("proof_kind") or "")
+                if proof_kind == "real" and fallback_behavior in {"manual_attestation", "manual_review", "optional"}:
+                    _write_capture_failure_note(output_dir, f"provider_capture_failed lens={lens_id} detail={exc}")
+                    continue
+                raise
         else:
             cache[lens_id] = capture_with_playwright(root=ROOT, config=config)
     return cache

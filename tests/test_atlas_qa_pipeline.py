@@ -2536,6 +2536,73 @@ console.log(JSON.stringify(caps));
         self.assertEqual("iOS", captured["iphone.webkit.real"]["osName"])
         self.assertEqual("17", captured["iphone.webkit.real"]["osVersion"])
 
+    def test_capture_cache_degrades_real_provider_failures_to_manual_required_when_allowed(self) -> None:
+        adapter_payload = load_json_object(ROOT / "ops" / "atlas" / "qa" / "adapters" / "fitness.web.json")
+        for item in adapter_payload["lenses"]:
+            if isinstance(item, dict) and item.get("proof_kind") == "real":
+                item["execution_mode"] = "provider_capture"
+                item["provider_manifest_ref"] = "ops/atlas/qa/providers/browserstack.playwright.v1.json"
+
+        lens_payload = load_json_object(ROOT / "ops" / "atlas" / "qa" / "lenses" / "atlas-default-web.v1.json")
+        lens_profiles = {
+            str(item["lens_id"]): item
+            for item in lens_payload["lenses"]
+            if isinstance(item, dict) and isinstance(item.get("lens_id"), str)
+        }
+        result_payload = {
+            "run_id": "run-1",
+            "scenario_id": "fitness.progression-pr-smoke",
+            "adapter_id": "fitness.web",
+            "repo_id": "fitness",
+            "git_sha": "abcdef1234567890",
+        }
+        scenario_payload = {"scenario_id": "fitness.progression-pr-smoke", "entrypoint": {"path": "/dev/mobile-regression"}}
+        result_by_lens = {
+            "desktop.chromium.real": {"execution_mode": "provider_capture", "proof_kind": "real", "fallback_behavior": "manual_attestation"},
+            "android.chrome.real": {"execution_mode": "provider_capture", "proof_kind": "real", "fallback_behavior": "manual_attestation"},
+            "iphone.webkit.real": {"execution_mode": "provider_capture", "proof_kind": "real", "fallback_behavior": "manual_attestation"},
+        }
+        captured: dict[str, dict] = {}
+
+        def _fake_capture_with_provider(*, root: Path, provider_manifest_ref: str, config: dict[str, object]) -> dict[str, object]:
+            lens_id = str(config["lensId"])
+            if lens_id == "iphone.webkit.real":
+                raise RuntimeError("provider screenshot stalled")
+            captured[lens_id] = config
+            return {
+                "metadata_path": str(root / "runtime" / "atlas" / "qa" / "runs" / "run-1" / "captures" / lens_id / "capture.metadata.json"),
+                "outputs": {
+                    "screenshot": str(root / "runtime" / "atlas" / "qa" / "runs" / "run-1" / "captures" / lens_id / "screenshot.png"),
+                    "console_log": str(root / "runtime" / "atlas" / "qa" / "runs" / "run-1" / "captures" / lens_id / "console.log"),
+                    "network_log": str(root / "runtime" / "atlas" / "qa" / "runs" / "run-1" / "captures" / lens_id / "network.json"),
+                },
+            }
+
+        run_root = ROOT / "tmp" / "unit-capture-cache-provider-failure"
+        if run_root.exists():
+            shutil.rmtree(run_root)
+        self.addCleanup(lambda: shutil.rmtree(run_root, ignore_errors=True))
+
+        with mock.patch("ops.atlas.qa.collect_artifacts.capture_with_provider", side_effect=_fake_capture_with_provider):
+            cache = _capture_cache(
+                execute=True,
+                repo_root=ROOT / "repos" / "fawxzzy-fitness",
+                run_root=run_root,
+                adapter=adapter_payload,
+                scenario=scenario_payload,
+                result_payload=result_payload,
+                lens_payload=lens_payload,
+                lens_profiles=lens_profiles,
+                result_by_lens=result_by_lens,
+            )
+
+        self.assertIn("desktop.chromium.real", cache)
+        self.assertIn("android.chrome.real", cache)
+        self.assertNotIn("iphone.webkit.real", cache)
+        failure_note = run_root / "captures" / "iphone.webkit.real" / "capture.failure.txt"
+        self.assertTrue(failure_note.exists())
+        self.assertIn("provider screenshot stalled", failure_note.read_text(encoding="utf-8"))
+
     def test_run_matrix_dry_run_honors_explicit_real_lens_command_ref(self) -> None:
         temp_dir = tempfile.TemporaryDirectory()
         self.addCleanup(temp_dir.cleanup)
