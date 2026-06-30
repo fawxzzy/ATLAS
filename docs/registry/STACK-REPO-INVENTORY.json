@@ -3,14 +3,14 @@
   "stack_manifest_ref": "stack.yaml",
   "stack_manifest_digest": "sha256:e5ac73c00983975b59e4b8e7f8541160d479087f5dc95ad1d642568116bd7d10",
   "stack_lock_ref": "stack.lock.yaml",
-  "stack_lock_digest": "sha256:b73c91c39e1e06e28e4ef05ee63ed8f387662c04a37938bb96b843e706b1ee73",
+  "stack_lock_digest": "sha256:551eb945037e42c309906456ce84ddf5fa93daeed4d71f49ac1d59ead2afd38e",
   "working_memory_digest": "sha256:fe4f4902e2b2c475974b050ba1bf3f5e740439aa41df2f844555c2c0dc3b310f",
   "published_refs": {
     "json": "docs/registry/STACK-REPO-INVENTORY.json",
     "markdown": "docs/audits/STACK-REPO-INVENTORY.md"
   },
   "repo_count": 12,
-  "dirty_repo_count": 0,
+  "dirty_repo_count": 1,
   "release_eligible_count": 5,
   "repos": [
     {
@@ -122,7 +122,7 @@
       "status": "unmanaged",
       "remote_url": "https://github.com/fawxzzy/fawxzzy-fitness.git",
       "pinned_commit": null,
-      "current_commit": "ab976cb783645eddf4303b99d48806193a817f2c",
+      "current_commit": "303c6e450bfaf97290a9436da871947e1e2fc6be",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
@@ -214,8 +214,8 @@
       "role": "application",
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/mazer.git",
-      "pinned_commit": "7d542f723897a5c05d250d54f5634138050d8ba1",
-      "current_commit": "7d542f723897a5c05d250d54f5634138050d8ba1",
+      "pinned_commit": "14d25cf69626b0591991cd1c48caf6db9b4e8fbe",
+      "current_commit": "14d25cf69626b0591991cd1c48caf6db9b4e8fbe",
       "pinned_ref_type": "branch",
       "pinned_ref": "codex/mazer-pass2-menu-parity",
       "current_ref_type": "branch",
@@ -317,13 +317,13 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "9fcce4f4b3459d3875fcf3f01922baade8bcfa00",
+      "current_commit": "5265ddd2e255d537b09d31fa4997752bb9a4a2dc",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
       "current_ref": "codex/atlas-browserstack-provider-capture",
       "branch": "codex/atlas-browserstack-provider-capture",
-      "dirty": false,
+      "dirty": true,
       "trust_class": "trusted",
       "release_eligible": false,
       "exists": true,
@@ -530,5 +530,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:ec9ad8eff990269f5fcec6173f3b5bc04a21e3fd6cc4bd9bc33481e68ac6e3a6"
+  "content_digest": "sha256:949fd47752a1afbb7731cd7f31488d7deb921941d9f876e3b83c568d6a18d8bf"
 }
