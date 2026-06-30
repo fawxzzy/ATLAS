@@ -14,7 +14,7 @@ from PIL import Image
 
 from ops.atlas.qa.baselines import bless_baseline, propose_baselines
 from ops.atlas.qa.bootstrap_adapter_repo import bootstrap_adapter_repo
-from ops.atlas.qa.ci_gate import _materialize_runtime_waivers, _provider_override_file, _provider_status
+from ops.atlas.qa.ci_gate import _materialize_runtime_waivers, _provider_override_file, _provider_status, _wait_for_url
 from ops.atlas.qa.adoption_drift import build_adoption_drift
 from ops.atlas.qa.bootstrap_release_repos import bootstrap_release_repos
 from ops.atlas.qa.compatibility_report import compatibility_report
@@ -2119,6 +2119,17 @@ class AtlasQaPipelineTests(unittest.TestCase):
             ["BROWSERSTACK_USERNAME", "BROWSERSTACK_ACCESS_KEY"],
             status["missing_env_vars"],
         )
+
+    def test_wait_for_url_reports_adapter_server_log_tail_when_process_exits_early(self) -> None:
+        root = self._temp_root()
+        log_path = root / "runtime" / "atlas" / "qa" / "adapter-server" / "fitness.latest.log"
+        log_path.parent.mkdir(parents=True, exist_ok=True)
+        log_path.write_text("fitness dev server crashed\nError: missing fixture\n", encoding="utf-8")
+        process = mock.Mock()
+        process.poll.return_value = 17
+        process.returncode = 17
+        with self.assertRaisesRegex(RuntimeError, "adapter server log tail"):
+            _wait_for_url("http://127.0.0.1:3002/api/health", timeout_s=1, process=process, log_path=log_path)
 
     def test_provider_readiness_reports_browserstack_ready_for_fitness_release_lenses(self) -> None:
         with mock.patch.dict("os.environ", {"BROWSERSTACK_USERNAME": "user", "BROWSERSTACK_ACCESS_KEY": "key"}, clear=False):
