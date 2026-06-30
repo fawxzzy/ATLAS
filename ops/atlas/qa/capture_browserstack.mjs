@@ -168,6 +168,45 @@ async function writeFailureDebug({ page, config, outputDir, error }) {
   };
 }
 
+async function captureScreenshotWithFallbacks({ page, config, screenshotPath, outputDir }) {
+  const attempts = [
+    async () => {
+      await page.screenshot({ path: screenshotPath, fullPage: Boolean(config.fullPage) });
+      return "page";
+    },
+    async () => {
+      const body = page.locator("body");
+      await body.screenshot({ path: screenshotPath });
+      return "body";
+    },
+    async () => {
+      const html = page.locator("html");
+      await html.screenshot({ path: screenshotPath });
+      return "html";
+    },
+  ];
+
+  let lastError = null;
+  for (const attempt of attempts) {
+    try {
+      return await attempt();
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  const debug = await writeFailureDebug({ page, config, outputDir, error: lastError });
+  const detail = [
+    `Provider screenshot failed for lens ${config.lensId}.`,
+    `currentUrl=${debug.currentUrl || String(config.sourceUrl || "")}`,
+    debug.title ? `title=${debug.title}` : null,
+    `debug=${debug.debugPath}`,
+    `screenshot=${debug.screenshotPath}`,
+    lastError instanceof Error ? `reason=${lastError.message}` : null,
+  ].filter(Boolean).join(" ");
+  throw new Error(detail);
+}
+
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   const configPath = args.get("config");
@@ -251,7 +290,7 @@ async function main() {
   const screenshotPath = path.join(outputDir, "screenshot.png");
   const consolePath = path.join(outputDir, "console.log");
   const networkPath = path.join(outputDir, "network.json");
-  await page.screenshot({ path: screenshotPath, fullPage: Boolean(config.fullPage) });
+  const screenshotStrategy = await captureScreenshotWithFallbacks({ page, config, screenshotPath, outputDir });
   await fs.writeFile(consolePath, consoleLines.map((item) => `[${item.type}] ${item.text}`).join("\n"), "utf8");
   await fs.writeFile(networkPath, JSON.stringify(networkEntries, null, 2) + "\n", "utf8");
 
@@ -290,6 +329,7 @@ async function main() {
       console_log: consolePath,
       network_log: networkPath,
     },
+    screenshot_strategy: screenshotStrategy,
   };
   const metadataPath = path.join(outputDir, "capture.metadata.json");
   const metadataBody = JSON.stringify(metadata, null, 2) + "\n";
