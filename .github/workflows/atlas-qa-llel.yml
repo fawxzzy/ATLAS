@@ -211,6 +211,49 @@ jobs:
           local-testing: stop
           local-identifier: atlas-qa-${{ github.run_id }}-${{ github.run_attempt }}
 
+      - name: Refresh evidence index
+        if: github.event_name == 'workflow_dispatch' && inputs.enforce_release_readiness == true
+        run: python ops/atlas/qa/evidence_index.py
+
+      - name: Build release readiness
+        if: github.event_name == 'workflow_dispatch' && inputs.enforce_release_readiness == true
+        run: |
+          if [ -n "${TARGET_SHA}" ]; then
+            python ops/atlas/qa/release_readiness.py --target-sha "${TARGET_SHA}" --max-receipt-age-hours "${MAX_RECEIPT_AGE_HOURS}"
+          else
+            python ops/atlas/qa/release_readiness.py --max-receipt-age-hours "${MAX_RECEIPT_AGE_HOURS}"
+          fi
+        env:
+          TARGET_SHA: ${{ inputs.target_sha }}
+          MAX_RECEIPT_AGE_HOURS: ${{ inputs.max_receipt_age_hours || '168' }}
+
+      - name: Scan adoption drift
+        if: github.event_name == 'workflow_dispatch' && inputs.enforce_release_readiness == true
+        run: python ops/atlas/qa/adoption_drift.py
+
+      - name: Build release rehearsal
+        if: github.event_name == 'workflow_dispatch' && inputs.enforce_release_readiness == true
+        run: python ops/atlas/qa/release_rehearsal.py
+
+      - name: Enforce repo-tier release readiness
+        if: github.event_name == 'workflow_dispatch' && inputs.enforce_release_readiness == true
+        shell: bash
+        run: |
+          repo_id="${RELEASE_REPO}"
+          if [ -z "${repo_id}" ]; then
+            repo_id="${ADAPTER_REPO_ID}"
+          fi
+          if [ -n "${TARGET_SHA}" ]; then
+            python ops/atlas/qa/release_readiness.py --repo "${repo_id}" --mode release --enforce --target-sha "${TARGET_SHA}" --max-receipt-age-hours "${MAX_RECEIPT_AGE_HOURS}"
+          else
+            python ops/atlas/qa/release_readiness.py --repo "${repo_id}" --mode release --enforce --max-receipt-age-hours "${MAX_RECEIPT_AGE_HOURS}"
+          fi
+        env:
+          RELEASE_REPO: ${{ inputs.release_repo }}
+          ADAPTER_REPO_ID: ${{ steps.adapter.outputs.repo_id }}
+          TARGET_SHA: ${{ inputs.target_sha }}
+          MAX_RECEIPT_AGE_HOURS: ${{ inputs.max_receipt_age_hours || '168' }}
+
       - name: Upload QA artifacts
         if: always()
         uses: actions/upload-artifact@v4
@@ -220,6 +263,14 @@ jobs:
             runtime/atlas/qa/runs/**
             runtime/atlas/qa/bootstrap-adapter-repo.latest.json
             runtime/atlas/qa/bootstrap-adapter-repo.latest.md
+            runtime/atlas/qa/evidence-index.latest.json
+            runtime/atlas/qa/evidence-index.latest.md
+            runtime/atlas/qa/release-readiness.latest.json
+            runtime/atlas/qa/release-readiness.latest.md
+            runtime/atlas/qa/release-rehearsal.latest.json
+            runtime/atlas/qa/release-rehearsal.latest.md
+            runtime/atlas/qa/adoption-drift.latest.json
+            runtime/atlas/qa/adoption-drift.latest.md
             runtime/receipts/validation/stack-validation.latest.json
             runtime/receipts/validation/stack-validation.latest.md
             runtime/receipts/validation/stack-warning-budget.latest.json
@@ -331,7 +382,7 @@ jobs:
             runtime/receipts/validation/stack-warning-budget.latest.md
 
   atlas-release-readiness:
-    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.enforce_release_readiness == true && inputs.dispatch_scope != 'release_refresh')
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
       - name: Check out
