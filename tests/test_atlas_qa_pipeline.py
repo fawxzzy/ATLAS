@@ -3915,6 +3915,7 @@ console.log(JSON.stringify(caps));
         with mock.patch.dict(
             "os.environ",
             {
+                "ATLAS_QA_ORIGIN_TYPE": "",
                 "GITHUB_ACTIONS": "true",
                 "GITHUB_EVENT_NAME": "workflow_dispatch",
             },
