@@ -218,11 +218,13 @@ def build_repo_inventory(
         repo_path = resolve_atlas_path(repo_info["path"], root=base_root)
         ignored_dirty_paths: set[str] = set()
         if repo_id == "stack" and repo_path == base_root:
-            # The exporter writes these two published surfaces itself, so they
-            # should not make the stack entry look dirty in the same read.
+            # The inventory/lock refresh flow writes these generated stack
+            # surfaces itself, so they should not make the stack entry look
+            # dirty in the same read.
             ignored_dirty_paths = {
                 normalize_slashes(str(DEFAULT_JSON_OUTPUT)),
                 normalize_slashes(str(DEFAULT_MARKDOWN_OUTPUT)),
+                atlas_relative(resolved_lock_path, root=base_root),
             }
         live_state = _live_repo_state(repo_path, ignored_dirty_paths=ignored_dirty_paths)
         lock_component = lock_components.get(repo_id) if isinstance(lock_components.get(repo_id), dict) else {}

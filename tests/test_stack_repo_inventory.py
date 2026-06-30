@@ -67,7 +67,7 @@ class StackRepoInventoryTests(unittest.TestCase):
         self.assertIn("mazer", repo_inventory["repo_ids"])
         self.assertGreaterEqual(repo_inventory["item_count"], 1)
 
-    def test_stack_inventory_outputs_do_not_self_dirty_root(self) -> None:
+    def test_stack_inventory_outputs_and_lockfile_do_not_self_dirty_root(self) -> None:
         original_git_status_lines = repo_inventory_module.git_status_lines
 
         def fake_git_status_lines(repo_path):
@@ -75,6 +75,7 @@ class StackRepoInventoryTests(unittest.TestCase):
                 return [
                     " M docs/registry/STACK-REPO-INVENTORY.json",
                     " M docs/audits/STACK-REPO-INVENTORY.md",
+                    " M stack.lock.yaml",
                 ]
             return original_git_status_lines(repo_path)
 
@@ -83,7 +84,12 @@ class StackRepoInventoryTests(unittest.TestCase):
 
         stack_entry = next(item for item in inventory["repos"] if item["logical_id"] == "stack")
         self.assertFalse(stack_entry["dirty"])
-        self.assertEqual(inventory["dirty_repo_count"], 0)
+        dirty_repo_ids = {
+            item["logical_id"]
+            for item in inventory["repos"]
+            if item.get("dirty") is True
+        }
+        self.assertNotIn("stack", dirty_repo_ids)
 
     def test_non_inventory_root_changes_still_dirty_stack_entry(self) -> None:
         original_git_status_lines = repo_inventory_module.git_status_lines
@@ -93,6 +99,7 @@ class StackRepoInventoryTests(unittest.TestCase):
                 return [
                     " M docs/registry/STACK-REPO-INVENTORY.json",
                     " M docs/audits/STACK-REPO-INVENTORY.md",
+                    " M stack.lock.yaml",
                     " M docs/ops/EXTRA-ROOT-CHANGE.md",
                 ]
             return original_git_status_lines(repo_path)
@@ -102,7 +109,12 @@ class StackRepoInventoryTests(unittest.TestCase):
 
         stack_entry = next(item for item in inventory["repos"] if item["logical_id"] == "stack")
         self.assertTrue(stack_entry["dirty"])
-        self.assertEqual(inventory["dirty_repo_count"], 1)
+        dirty_repo_ids = {
+            item["logical_id"]
+            for item in inventory["repos"]
+            if item.get("dirty") is True
+        }
+        self.assertIn("stack", dirty_repo_ids)
 
 
 if __name__ == "__main__":
