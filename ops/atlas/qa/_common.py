@@ -6,7 +6,8 @@ import platform
 from hashlib import sha256
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Mapping
+from urllib.parse import urlsplit
 
 from ops._atlas import atlas_relative, atlas_root, load_repo_registry, normalize_slashes
 from ops.cortex._artifacts import stable_json_digest, write_json
@@ -123,6 +124,34 @@ def load_json_object(path: Path) -> dict[str, Any]:
 def resolve_ref(ref: str | Path, *, root: Path) -> Path:
     candidate = Path(ref)
     return candidate.resolve() if candidate.is_absolute() else (root / candidate).resolve()
+
+
+def _is_loopback_url(url: str) -> bool:
+    try:
+        hostname = (urlsplit(str(url).strip()).hostname or "").strip().lower()
+    except ValueError:
+        return False
+    return hostname in {"127.0.0.1", "::1", "localhost"}
+
+
+def resolve_execution_target_url(
+    url: str,
+    *,
+    execution_mode: str,
+    env: Mapping[str, str] | None = None,
+) -> str:
+    target_url = str(url).strip()
+    if not target_url:
+        return ""
+    if execution_mode != "provider_capture" or not _is_loopback_url(target_url):
+        return target_url.rstrip("/")
+
+    env_map = env or os.environ
+    override_url = (
+        str(env_map.get("ATLAS_QA_PROVIDER_BASE_URL", "")).strip()
+        or str(env_map.get("FITNESS_QA_TUNNEL_URL", "")).strip()
+    )
+    return override_url.rstrip("/") if override_url else target_url.rstrip("/")
 
 
 def default_schema_path(contract_version: str, *, root: Path | None = None) -> Path:

@@ -2472,18 +2472,19 @@ console.log(JSON.stringify(caps));
             return {"metadata_path": str(root / "tmp" / f"{config['lensId']}.metadata.json"), "outputs": {}}
 
         with tempfile.TemporaryDirectory() as temp_dir:
-            with mock.patch("ops.atlas.qa.collect_artifacts.capture_with_provider", side_effect=_fake_capture_with_provider):
-                _capture_cache(
-                    execute=True,
-                    repo_root=ROOT / "repos" / "fawxzzy-fitness",
-                    run_root=Path(temp_dir),
-                    adapter=adapter_payload,
-                    scenario=scenario_payload,
-                    result_payload=result_payload,
-                    lens_payload=lens_payload,
-                    lens_profiles=lens_profiles,
-                    result_by_lens=result_by_lens,
-                )
+            with mock.patch.dict("os.environ", {"ATLAS_QA_PROVIDER_BASE_URL": "https://atlas-provider.example"}, clear=False):
+                with mock.patch("ops.atlas.qa.collect_artifacts.capture_with_provider", side_effect=_fake_capture_with_provider):
+                    _capture_cache(
+                        execute=True,
+                        repo_root=ROOT / "repos" / "fawxzzy-fitness",
+                        run_root=Path(temp_dir),
+                        adapter=adapter_payload,
+                        scenario=scenario_payload,
+                        result_payload=result_payload,
+                        lens_payload=lens_payload,
+                        lens_profiles=lens_profiles,
+                        result_by_lens=result_by_lens,
+                    )
 
         self.assertEqual("Windows Desktop", captured["desktop.chromium.real"]["deviceModel"])
         self.assertEqual("Windows", captured["desktop.chromium.real"]["osName"])
@@ -2491,6 +2492,7 @@ console.log(JSON.stringify(caps));
         self.assertEqual("chrome", captured["desktop.chromium.real"]["browserName"])
         self.assertEqual("latest", captured["desktop.chromium.real"]["browserVersion"])
         self.assertEqual("attached", captured["desktop.chromium.real"]["readyState"])
+        self.assertEqual("https://atlas-provider.example/dev/mobile-regression", captured["desktop.chromium.real"]["sourceUrl"])
         self.assertEqual("Samsung Galaxy S23", captured["android.chrome.real"]["deviceModel"])
         self.assertEqual("Android", captured["android.chrome.real"]["osName"])
         self.assertEqual("13.0", captured["android.chrome.real"]["osVersion"])
@@ -2509,18 +2511,20 @@ console.log(JSON.stringify(caps));
                 item["provider_manifest_ref"] = "ops/atlas/qa/providers/browserstack.playwright.v1.json"
                 item["command_ref"] = "qa_visual"
         _write_json(adapter_dir / "fitness.web.json", adapter_payload)
-        result = run_matrix(
-            root=ROOT,
-            scenario_path=ROOT / "ops" / "atlas" / "qa" / "scenarios" / "fitness.progression-pr-smoke.json",
-            adapter_id="fitness.web",
-            adapter_dir=adapter_dir,
-            output_root=adapter_dir,
-            dry_run=True,
-        )
+        with mock.patch.dict("os.environ", {"ATLAS_QA_PROVIDER_BASE_URL": "https://atlas-provider.example"}, clear=False):
+            result = run_matrix(
+                root=ROOT,
+                scenario_path=ROOT / "ops" / "atlas" / "qa" / "scenarios" / "fitness.progression-pr-smoke.json",
+                adapter_id="fitness.web",
+                adapter_dir=adapter_dir,
+                output_root=adapter_dir,
+                dry_run=True,
+            )
         self.assertFalse(any(item["code"] == "missing_command_ref" for item in result["findings"]))
         real_lenses = [item for item in result["matrix"] if item["proof_kind"] == "real"]
         self.assertTrue(real_lenses)
         self.assertTrue(all(item.get("command_ref") == "qa_visual" for item in real_lenses))
+        self.assertTrue(all(item.get("url_target") == "https://atlas-provider.example" for item in real_lenses))
 
     def test_browserstack_provider_redacts_credentials_from_subprocess_failure(self) -> None:
         username = "atlas-browserstack-user"

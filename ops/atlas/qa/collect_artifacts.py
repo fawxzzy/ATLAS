@@ -23,6 +23,7 @@ from ops.atlas.qa._common import (
     load_provider_manifest,
     payload_with_digest,
     resolve_ref,
+    resolve_execution_target_url,
     utc_now,
     validate_artifact_manifest,
     validate_result_payload,
@@ -137,7 +138,10 @@ def _build_capture_config(
 ) -> dict[str, Any]:
     capture = adapter.get("capture", {}) if isinstance(adapter.get("capture"), dict) else {}
     start = adapter.get("start", {}) if isinstance(adapter.get("start"), dict) else {}
-    target_url = str(start.get("default_url") or "")
+    target_url = resolve_execution_target_url(
+        str(start.get("default_url") or ""),
+        execution_mode=str(lens.get("execution_mode") or ""),
+    )
     entrypoint = scenario.get("entrypoint", {}) if isinstance(scenario.get("entrypoint"), dict) else {}
     entry_path = str(entrypoint.get("path") or "").strip()
     if entry_path and target_url.rstrip("/"):
