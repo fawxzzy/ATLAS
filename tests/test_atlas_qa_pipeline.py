@@ -2490,6 +2490,7 @@ console.log(JSON.stringify(caps));
         self.assertEqual("11", captured["desktop.chromium.real"]["osVersion"])
         self.assertEqual("chrome", captured["desktop.chromium.real"]["browserName"])
         self.assertEqual("latest", captured["desktop.chromium.real"]["browserVersion"])
+        self.assertEqual("attached", captured["desktop.chromium.real"]["readyState"])
         self.assertEqual("Samsung Galaxy S23", captured["android.chrome.real"]["deviceModel"])
         self.assertEqual("Android", captured["android.chrome.real"]["osName"])
         self.assertEqual("13.0", captured["android.chrome.real"]["osVersion"])

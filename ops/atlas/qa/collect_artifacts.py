@@ -156,6 +156,7 @@ def _build_capture_config(
         "waitUntil": str(capture.get("wait_until") or "networkidle"),
         "settleMs": int(capture.get("settle_ms") or 0),
         "readySelector": capture.get("ready_selector"),
+        "readyState": str(capture.get("ready_state") or "visible"),
         "readyTimeoutMs": int(capture.get("ready_timeout_ms") or 30000),
         "fullPage": bool(capture.get("full_page")),
         "disableAnimations": bool(capture.get("disable_animations", True)),

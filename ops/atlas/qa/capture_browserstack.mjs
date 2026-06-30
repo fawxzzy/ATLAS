@@ -45,6 +45,15 @@ function isIos(config) {
   return String(config.osName || "").toLowerCase().startsWith("ios");
 }
 
+function resolveReadyState(config) {
+  const allowedStates = new Set(["attached", "detached", "hidden", "visible"]);
+  const requestedState = String(config.readyState || "visible").toLowerCase();
+  if (!allowedStates.has(requestedState)) {
+    throw new Error(`Unsupported readyState: ${config.readyState}`);
+  }
+  return requestedState;
+}
+
 export function buildCapabilities(providerPayload, config) {
   const defaults = {
     project: "ATLAS QA LLEL",
@@ -146,7 +155,10 @@ async function main() {
 
   await page.goto(config.sourceUrl, { waitUntil: config.waitUntil || "networkidle" });
   if (config.readySelector) {
-    await page.waitForSelector(config.readySelector, { state: "visible", timeout: config.readyTimeoutMs || 30000 });
+    await page.waitForSelector(config.readySelector, {
+      state: resolveReadyState(config),
+      timeout: config.readyTimeoutMs || 30000,
+    });
   }
   if (config.settleMs) {
     await page.waitForTimeout(config.settleMs);

@@ -27,6 +27,15 @@ function sha256(value) {
   return `sha256:${createHash("sha256").update(value).digest("hex")}`;
 }
 
+function resolveReadyState(config) {
+  const allowedStates = new Set(["attached", "detached", "hidden", "visible"]);
+  const requestedState = String(config.readyState || "visible").toLowerCase();
+  if (!allowedStates.has(requestedState)) {
+    throw new Error(`Unsupported readyState: ${config.readyState}`);
+  }
+  return requestedState;
+}
+
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   const configPath = args.get("config");
@@ -117,7 +126,10 @@ async function main() {
 
   await page.goto(config.sourceUrl, { waitUntil: config.waitUntil || "networkidle" });
   if (config.readySelector) {
-    await page.waitForSelector(config.readySelector, { state: "visible", timeout: config.readyTimeoutMs || 30000 });
+    await page.waitForSelector(config.readySelector, {
+      state: resolveReadyState(config),
+      timeout: config.readyTimeoutMs || 30000,
+    });
   }
   if (config.settleMs) {
     await page.waitForTimeout(config.settleMs);
