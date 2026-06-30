@@ -162,53 +162,33 @@ jobs:
         run: |
           python ops/atlas/qa/provider_readiness.py --provider "ops/atlas/qa/providers/${QA_PROVIDER}.json" --adapter "${QA_ADAPTER}" --scenario "${QA_SCENARIO}"
 
+      - name: Set up BrowserStack environment
+        if: env.QA_PROVIDER == 'browserstack.playwright.v1'
+        uses: browserstack/github-actions/setup-env@master
+        with:
+          username: ${{ secrets.BROWSERSTACK_USERNAME }}
+          access-key: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
+
       - name: Install browser runtime
         if: env.QA_MODE != 'dry-run' && steps.adapter.outputs.capture_tool == 'playwright'
         working-directory: ${{ steps.adapter.outputs.repo_path }}
         run: npx playwright install --with-deps chromium webkit
 
-      - name: Start provider tunnel
-        if: env.QA_PROVIDER != 'none' && steps.adapter.outputs.repo_id == 'fitness'
-        working-directory: ${{ steps.adapter.outputs.repo_path }}
-        shell: bash
-        env:
-          NEXT_PUBLIC_SUPABASE_URL: ${{ github.event_name == 'workflow_dispatch' && secrets.NEXT_PUBLIC_SUPABASE_URL || '' }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ github.event_name == 'workflow_dispatch' && secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || '' }}
-          NEXT_PUBLIC_APP_URL: http://127.0.0.1:3002
-          APP_URL: http://127.0.0.1:3002
-          ALLOW_PROD_SUPABASE_IN_DEV: "1"
-          FITNESS_QA_TUNNEL_COMMAND: npx
-          FITNESS_QA_TUNNEL_ARGS_JSON: '["--yes","localtunnel","--port","{port}"]'
-        run: |
-          node scripts/qa/fitness-tunnel.mjs --port 3002 --local-url http://127.0.0.1:3002 > "${RUNNER_TEMP}/fitness-tunnel.log" 2>&1 &
-          echo "FITNESS_QA_TUNNEL_PID=$!" >> "$GITHUB_ENV"
-          python - <<'PY'
-          import json
-          import os
-          import time
-          from pathlib import Path
-
-          status_path = Path("..") / ".." / "runtime" / "fitness" / "mobile-loop-status.json"
-          deadline = time.time() + 90
-          while time.time() < deadline:
-              if status_path.exists():
-                  payload = json.loads(status_path.read_text(encoding="utf-8"))
-                  tunnel_url = str(payload.get("tunnelUrl") or "").strip()
-                  if tunnel_url:
-                      with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as handle:
-                          handle.write(f"FITNESS_QA_TUNNEL_URL={tunnel_url}\n")
-                          handle.write(f"ATLAS_QA_PROVIDER_BASE_URL={tunnel_url}\n")
-                      print(f"Provider tunnel ready: {tunnel_url}")
-                      raise SystemExit(0)
-              time.sleep(1)
-          raise SystemExit("Timed out waiting for tunnel URL in runtime/fitness/mobile-loop-status.json")
-          PY
+      - name: Start BrowserStack Local
+        if: env.QA_PROVIDER == 'browserstack.playwright.v1' && steps.adapter.outputs.repo_id == 'fitness'
+        uses: browserstack/github-actions/setup-local@master
+        with:
+          local-testing: start
+          local-logging-level: all-logs
+          local-identifier: atlas-qa-${{ github.run_id }}-${{ github.run_attempt }}
 
       - name: Run ATLAS QA gate
         shell: bash
         env:
           BROWSERSTACK_USERNAME: ${{ github.event_name == 'workflow_dispatch' && secrets.BROWSERSTACK_USERNAME || '' }}
           BROWSERSTACK_ACCESS_KEY: ${{ github.event_name == 'workflow_dispatch' && secrets.BROWSERSTACK_ACCESS_KEY || '' }}
+          BROWSERSTACK_LOCAL: ${{ env.QA_PROVIDER == 'browserstack.playwright.v1' && 'true' || 'false' }}
+          BROWSERSTACK_LOCAL_IDENTIFIER: atlas-qa-${{ github.run_id }}-${{ github.run_attempt }}
           NEXT_PUBLIC_SUPABASE_URL: ${{ github.event_name == 'workflow_dispatch' && secrets.NEXT_PUBLIC_SUPABASE_URL || '' }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ github.event_name == 'workflow_dispatch' && secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || '' }}
           NEXT_PUBLIC_APP_URL: http://127.0.0.1:3002
@@ -223,6 +203,13 @@ jobs:
             cmd+=(--allow-missing-locked-repos --require-present-repo-id "${{ steps.adapter.outputs.repo_id }}")
           fi
           "${cmd[@]}"
+
+      - name: Stop BrowserStack Local
+        if: always() && env.QA_PROVIDER == 'browserstack.playwright.v1' && steps.adapter.outputs.repo_id == 'fitness'
+        uses: browserstack/github-actions/setup-local@master
+        with:
+          local-testing: stop
+          local-identifier: atlas-qa-${{ github.run_id }}-${{ github.run_attempt }}
 
       - name: Upload QA artifacts
         if: always()

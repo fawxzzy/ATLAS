@@ -2439,6 +2439,42 @@ console.log(JSON.stringify(caps));
         self.assertEqual("latest", caps["browser_version"])
         self.assertNotIn("resolution", caps)
 
+    def test_browserstack_capture_enables_local_testing_for_loopback_targets(self) -> None:
+        script = """
+import { buildCapabilities } from './ops/atlas/qa/capture_browserstack.mjs';
+const caps = buildCapabilities({}, {
+  runId: 'run-1',
+  scenarioId: 'fitness.progression-pr-smoke',
+  lensId: 'desktop.chromium.real',
+  browserEngine: 'chromium',
+  sourceUrl: 'http://127.0.0.1:3002/dev/mobile-regression',
+  viewport: { width: 1440, height: 1024 },
+  deviceModel: 'Windows Desktop',
+  osName: 'Windows',
+  osVersion: '11',
+  browserName: 'chrome',
+  browserVersion: 'latest'
+}, {
+  BROWSERSTACK_USERNAME: 'user',
+  BROWSERSTACK_ACCESS_KEY: 'key',
+  BROWSERSTACK_LOCAL_IDENTIFIER: 'atlas-local-1'
+});
+console.log(JSON.stringify(caps));
+"""
+        completed = subprocess.run(
+            ["node", "--input-type=module", "-e", script],
+            cwd=str(ROOT),
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            check=False,
+        )
+        self.assertEqual(0, completed.returncode, completed.stderr)
+        caps = json.loads(completed.stdout)
+        self.assertEqual("true", caps["browserstack.local"])
+        self.assertEqual("atlas-local-1", caps["browserstack.localIdentifier"])
+
     def test_capture_cache_uses_provider_safe_defaults_for_browserstack_real_lenses(self) -> None:
         adapter_payload = load_json_object(ROOT / "ops" / "atlas" / "qa" / "adapters" / "fitness.web.json")
         for item in adapter_payload["lenses"]:

@@ -45,6 +45,32 @@ function isIos(config) {
   return String(config.osName || "").toLowerCase().startsWith("ios");
 }
 
+function isLoopbackSourceUrl(config) {
+  try {
+    const parsed = new URL(String(config.sourceUrl || ""));
+    const hostname = parsed.hostname.trim().toLowerCase();
+    return hostname === "127.0.0.1" || hostname === "localhost" || hostname === "::1";
+  } catch {
+    return false;
+  }
+}
+
+function shouldEnableBrowserStackLocal(config, env = process.env) {
+  const explicit = String(env.BROWSERSTACK_LOCAL || "").trim().toLowerCase();
+  if (explicit === "1" || explicit === "true" || explicit === "yes") {
+    return true;
+  }
+  if (explicit === "0" || explicit === "false" || explicit === "no") {
+    return false;
+  }
+  return isLoopbackSourceUrl(config);
+}
+
+function resolveBrowserStackLocalIdentifier(env = process.env) {
+  const identifier = String(env.BROWSERSTACK_LOCAL_IDENTIFIER || "").trim();
+  return identifier || null;
+}
+
 function resolveReadyState(config) {
   const allowedStates = new Set(["attached", "detached", "hidden", "visible"]);
   const requestedState = String(config.readyState || "visible").toLowerCase();
@@ -54,18 +80,25 @@ function resolveReadyState(config) {
   return requestedState;
 }
 
-export function buildCapabilities(providerPayload, config) {
+export function buildCapabilities(providerPayload, config, env = process.env) {
   const defaults = {
     project: "ATLAS QA LLEL",
     build: config.runId,
     name: `${config.scenarioId}:${config.lensId}`,
-    "browserstack.username": process.env.BROWSERSTACK_USERNAME,
-    "browserstack.accessKey": process.env.BROWSERSTACK_ACCESS_KEY,
+    "browserstack.username": env.BROWSERSTACK_USERNAME,
+    "browserstack.accessKey": env.BROWSERSTACK_ACCESS_KEY,
     "browserstack.networkLogs": "true",
     "browserstack.debug": "true",
     "browserstack.playwrightVersion": "1.latest",
     "client.playwrightVersion": localPlaywrightVersion(),
   };
+  if (shouldEnableBrowserStackLocal(config, env)) {
+    defaults["browserstack.local"] = "true";
+    const localIdentifier = resolveBrowserStackLocalIdentifier(env);
+    if (localIdentifier) {
+      defaults["browserstack.localIdentifier"] = localIdentifier;
+    }
+  }
   const browserName = String(config.browserName || config.browserEngine || "chrome").toLowerCase();
   if (isAndroid(config)) {
     return {
@@ -93,6 +126,45 @@ export function buildCapabilities(providerPayload, config) {
     os_version: config.osVersion || "11",
     browser: browserName === "chromium" ? "chrome" : browserName,
     browser_version: config.browserVersion || "latest",
+  };
+}
+
+async function safePageDebugValue(getValue, fallback = null) {
+  try {
+    return await getValue();
+  } catch {
+    return fallback;
+  }
+}
+
+async function writeFailureDebug({ page, config, outputDir, error }) {
+  const screenshotPath = path.join(outputDir, "failure.png");
+  const debugPath = path.join(outputDir, "failure.debug.json");
+  await fs.mkdir(outputDir, { recursive: true });
+
+  await safePageDebugValue(() => page.screenshot({ path: screenshotPath, fullPage: true }));
+  const payload = {
+    capturedAt: new Date().toISOString(),
+    sourceUrl: String(config.sourceUrl || ""),
+    currentUrl: await safePageDebugValue(() => page.url(), ""),
+    title: await safePageDebugValue(() => page.title(), ""),
+    readySelector: String(config.readySelector || ""),
+    readyState: resolveReadyState(config),
+    errorMessage: error instanceof Error ? error.message : String(error),
+    documentReadyState: await safePageDebugValue(() => page.evaluate(() => document.readyState), null),
+    htmlDataset: await safePageDebugValue(() => page.evaluate(() => ({ ...document.documentElement.dataset })), null),
+    bodyDataset: await safePageDebugValue(() => page.evaluate(() => document.body ? ({ ...document.body.dataset }) : null), null),
+    bodyTextPreview: await safePageDebugValue(
+      () => page.evaluate(() => (document.body?.innerText || "").slice(0, 500)),
+      "",
+    ),
+  };
+  await fs.writeFile(debugPath, JSON.stringify(payload, null, 2) + "\n", "utf8");
+  return {
+    debugPath,
+    screenshotPath,
+    currentUrl: payload.currentUrl,
+    title: payload.title,
   };
 }
 
@@ -153,15 +225,27 @@ async function main() {
     });
   });
 
-  await page.goto(config.sourceUrl, { waitUntil: config.waitUntil || "networkidle" });
-  if (config.readySelector) {
-    await page.waitForSelector(config.readySelector, {
-      state: resolveReadyState(config),
-      timeout: config.readyTimeoutMs || 30000,
-    });
-  }
-  if (config.settleMs) {
-    await page.waitForTimeout(config.settleMs);
+  try {
+    await page.goto(config.sourceUrl, { waitUntil: config.waitUntil || "networkidle" });
+    if (config.readySelector) {
+      await page.waitForSelector(config.readySelector, {
+        state: resolveReadyState(config),
+        timeout: config.readyTimeoutMs || 30000,
+      });
+    }
+    if (config.settleMs) {
+      await page.waitForTimeout(config.settleMs);
+    }
+  } catch (error) {
+    const debug = await writeFailureDebug({ page, config, outputDir, error });
+    const detail = [
+      `Provider capture failed before ready state for lens ${config.lensId}.`,
+      `currentUrl=${debug.currentUrl || String(config.sourceUrl || "")}`,
+      debug.title ? `title=${debug.title}` : null,
+      `debug=${debug.debugPath}`,
+      `screenshot=${debug.screenshotPath}`,
+    ].filter(Boolean).join(" ");
+    throw new Error(detail);
   }
 
   const screenshotPath = path.join(outputDir, "screenshot.png");
