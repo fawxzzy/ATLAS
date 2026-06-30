@@ -10,7 +10,7 @@
     "markdown": "docs/audits/STACK-REPO-INVENTORY.md"
   },
   "repo_count": 12,
-  "dirty_repo_count": 1,
+  "dirty_repo_count": 0,
   "release_eligible_count": 5,
   "repos": [
     {
@@ -317,13 +317,13 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "91ddae5bd9ccb855017fa5069fc4a6e7cb2d9b8b",
+      "current_commit": "fa62be097a57e6b92fe0f29201e7e14b228311ca",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
       "current_ref": "codex/atlas-browserstack-provider-capture",
       "branch": "codex/atlas-browserstack-provider-capture",
-      "dirty": true,
+      "dirty": false,
       "trust_class": "trusted",
       "release_eligible": false,
       "exists": true,
@@ -530,5 +530,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:4e0b6a2ff392d2da4c60521d0a00bf831b8d81550d7711961adbfdabf6a23c49"
+  "content_digest": "sha256:7f7075f03fac35eefd865ef38e45cc466c7377bb3f6a77e416a901263aa9ca95"
 }
