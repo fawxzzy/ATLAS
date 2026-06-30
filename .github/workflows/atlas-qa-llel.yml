@@ -172,6 +172,11 @@ jobs:
         env:
           BROWSERSTACK_USERNAME: ${{ github.event_name == 'workflow_dispatch' && secrets.BROWSERSTACK_USERNAME || '' }}
           BROWSERSTACK_ACCESS_KEY: ${{ github.event_name == 'workflow_dispatch' && secrets.BROWSERSTACK_ACCESS_KEY || '' }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ github.event_name == 'workflow_dispatch' && secrets.NEXT_PUBLIC_SUPABASE_URL || '' }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ github.event_name == 'workflow_dispatch' && secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || '' }}
+          NEXT_PUBLIC_APP_URL: http://127.0.0.1:3002
+          APP_URL: http://127.0.0.1:3002
+          ALLOW_PROD_SUPABASE_IN_DEV: "1"
         run: |
           cmd=(python ops/atlas/qa/ci_gate.py --mode "${QA_MODE}" --scenario "${QA_SCENARIO}" --adapter "${QA_ADAPTER}")
           if [ "${QA_PROVIDER}" != "none" ]; then
