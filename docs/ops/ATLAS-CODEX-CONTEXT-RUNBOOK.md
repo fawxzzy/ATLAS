@@ -120,14 +120,24 @@ That opener should resolve to:
 - mode `fast-iteration-loop`
 - repo `fitness` at `repos/fawxzzy-fitness`
 - localhost assumption `running`
+- browser surface policy `one-maintained-surface`
+- idle browser posture `park-to-blank`
 - validation mode `affected-screen`
 - patch style `minimal`
+
+Rapid-loop browser/runtime hygiene rule:
+
+- keep one maintained browser surface per active repo lane
+- keep one maintained local runtime per active repo lane
+- if the live page is not actively being inspected, parked preview is preferred over leaving an animated route running
+- before opening another localhost tab or starting another server for the same repo, check whether the existing surface is already healthy and reusable
 
 Checkpoint opener should resolve to:
 
 - mode `checkpoint-sweep`
 - repo `fitness` at `repos/fawxzzy-fitness`
 - localhost assumption `running`
+- browser surface policy `reuse-current-surface-or-open-once-for-sweep`
 - validation mode `related-flow`
 - patch style `none-by-default`
 

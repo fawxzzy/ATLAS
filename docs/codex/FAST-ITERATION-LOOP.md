@@ -79,16 +79,19 @@ Canonical receipt:
 When `fast-iteration-loop` is active for a repo, Codex should:
 
 - assume `localhost` or the emulator is already running unless the operator says otherwise
+- reuse one maintained browser surface and one maintained local runtime for that repo lane unless the operator explicitly opens a comparison need
 - accept one small, scoped change at a time
 - make the minimal patch needed for the request
 - preserve repo architecture and naming
 - prefer affected-screen validation by default
+- park the browser to `about:blank` or another neutral low-overhead surface when live preview is not actively needed
 - reserve broader screenshot sweeps for checkpoints
 - escalate when the request stops being rapid-loop sized
 
 Do not:
 
 - restart the dev server unless necessary
+- open duplicate localhost tabs or duplicate servers for the same repo lane unless the comparison need is explicit
 - widen scope because the local runtime makes bigger edits convenient
 - run a full sweep after every micro-change
 - pretend structural work is still a rapid-loop task
@@ -98,6 +101,9 @@ Do not:
 | Field | Value |
 | --- | --- |
 | `localhost_assumption` | `running` |
+| `browser_surface_policy` | `one-maintained-surface` |
+| `idle_browser_posture` | `park-to-blank` |
+| `local_runtime_policy` | `reuse-single-healthy-instance` |
 | `validation_mode` | `affected-screen` |
 | `patch_style` | `minimal` |
 | `sweep_posture` | `checkpoint-only` |

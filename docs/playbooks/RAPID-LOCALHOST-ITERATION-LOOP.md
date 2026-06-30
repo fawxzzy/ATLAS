@@ -144,6 +144,27 @@ If stack-root artifacts are captured during the loop, keep them disposable and p
 - screenshots or captures -> `tmp/captures/`
 - preview notes or scratch output -> `tmp/previews/`
 
+## Resource posture
+
+Rapid iteration should stay fast without leaving unnecessary browser or runtime load behind.
+
+Default workstation posture:
+
+- keep one maintained local runtime per active repo lane
+- keep one maintained browser surface per active repo lane
+- keep one active app tab for the target route when preview is needed
+- do not accumulate duplicate localhost tabs, duplicate dev servers, or idle browser automation surfaces for the same repo
+
+Idle posture:
+
+- if the operator is reasoning, writing docs, or doing non-visual work, park the browser to `about:blank` or another neutral low-overhead surface
+- reopen the app route only when visual verification, browser automation, or live interaction is actually needed
+- if a second browser or server instance is temporarily needed for comparison, call that out explicitly and close or park it as soon as the comparison ends
+
+Rule:
+
+- before opening a new browser tab or starting a new local server for the same repo, first check whether the existing one is already healthy and reusable
+
 ## Core loop
 
 1. Assume the developer keeps `localhost` or the emulator running unless the runtime is actually broken.
@@ -174,6 +195,8 @@ Checkpoint mode is for moments such as:
 ## Guardrails
 
 - do not restart the dev server unless necessary
+- do not keep animated app routes open when no live preview is being used
+- do not open duplicate browser tabs or duplicate localhost servers for the same repo lane unless the comparison need is explicit
 - do not widen scope during a rapid loop
 - do not run full sweeps after every tiny change
 - do not turn a local preview pass into a full automation project during Wave 1
@@ -290,11 +313,11 @@ Keep a persistent local runtime alive and optimize for minimal patches plus imme
 
 ## Pattern
 
-Use two-speed validation. Check the affected screen every iteration; run broader screenshot sweeps only at checkpoints.
+Use two-speed validation plus one-browser runtime hygiene. Check the affected screen every iteration, run broader screenshot sweeps only at checkpoints, and park idle browser surfaces when preview is not active.
 
 ## Failure Mode
 
-Running a full screenshot pass after every micro-change destroys iteration speed and creates low-signal work.
+Running a full screenshot pass after every micro-change destroys iteration speed and creates low-signal work. Leaving duplicate animated localhost tabs and duplicate dev servers alive creates the same kind of waste at the workstation level.
 
 ## Example operator prompts
 

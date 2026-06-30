@@ -114,6 +114,7 @@ Roadmap addition:
   - `repos/lifeline/docs/runbooks/hermetic-validation-operator-flow.md`
 - the rapid localhost iteration workflow is now tracked in `docs/playbooks/RAPID-LOCALHOST-ITERATION-LOOP.md`
 - its default posture is two-speed validation: affected-screen checks every iteration, broader screenshot sweeps only at checkpoints
+- its workstation hygiene posture is now explicit too: one maintained browser surface, one maintained local runtime, reuse healthy localhost surfaces, and park idle animated tabs to `about:blank`
 - named session bootstraps are now tracked through `docs/registry/ATLAS-SESSION-MODE-REGISTRY.json`
 - the first named mode binds natural-language openers to canonical workflow and prompt docs so Codex can recognize `fast-iteration-loop` as an Atlas contract instead of free-form instruction
 

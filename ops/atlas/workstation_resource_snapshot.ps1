@@ -201,7 +201,10 @@ function Get-ReviewGuidance {
     return @(
         "Only one Codex chat should be hot at a time.",
         "Hot means commands, browser automation, tests, dev servers, screenshots, or validation are actively running.",
-        "If another chat stays open, keep it idle and explicitly report what remains running before handoff or archive."
+        "If another chat stays open, keep it idle and explicitly report what remains running before handoff or archive.",
+        "Prefer one maintained browser surface and one maintained local runtime per active repo lane.",
+        "If live preview is not actively needed, park the browser on about:blank or another neutral low-overhead surface instead of leaving an animated app route running.",
+        "Do not keep duplicate localhost tabs or duplicate dev servers alive for the same repo unless the comparison need is explicit."
     )
 }
 
