@@ -25,7 +25,7 @@ Proof:
 - forum thread id: `1521542046329077932`
 - status: `in_progress`
 - repo branch: `main`
-- repo head: `48453c915b17f13a24898f50ebdfd79e581c2174`
+- repo head: `ea1dedd18abfd28f0387cb11bbfe830f227f19dc`
 - mobile-regression fixture tests: `108/108`
 - mobile regression scenario count: `57`
 - mobile regression manifest: `repos/fawxzzy-fitness/.codex/qa/mobile-regression/manifest.json`
@@ -36,7 +36,7 @@ Proof:
   - `repos/fawxzzy-fitness/.codex/qa/mobile-regression/session-summaries-board.png`
   - `repos/fawxzzy-fitness/.codex/qa/mobile-regression/settings-detail-board.png`
   - `repos/fawxzzy-fitness/.codex/qa/mobile-regression/mega-board.png`
-- targeted Playwright proof on `routines-list-create-duplicate` after the hydration fix:
+- targeted Playwright proof on `http://127.0.0.1:3002/qa/mobile-regression?screen=routines&fixture=list-create-duplicate` after the hydration fix:
   - page status: `200`
   - console errors: `0`
   - page errors: `0`
