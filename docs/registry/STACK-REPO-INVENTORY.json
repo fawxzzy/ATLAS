@@ -3,14 +3,14 @@
   "stack_manifest_ref": "stack.yaml",
   "stack_manifest_digest": "sha256:e5ac73c00983975b59e4b8e7f8541160d479087f5dc95ad1d642568116bd7d10",
   "stack_lock_ref": "stack.lock.yaml",
-  "stack_lock_digest": "sha256:bf467bdfa942ed5c082bc959abee090980cf997fe8b3a26cadc53ae83c41e654",
+  "stack_lock_digest": "sha256:3f14b4b3aeca9109d4bcb76c6a07fb163f3c3dae96f1cf025f2ee98ce1e4cd74",
   "working_memory_digest": "sha256:fe4f4902e2b2c475974b050ba1bf3f5e740439aa41df2f844555c2c0dc3b310f",
   "published_refs": {
     "json": "docs/registry/STACK-REPO-INVENTORY.json",
     "markdown": "docs/audits/STACK-REPO-INVENTORY.md"
   },
   "repo_count": 12,
-  "dirty_repo_count": 0,
+  "dirty_repo_count": 1,
   "release_eligible_count": 5,
   "repos": [
     {
@@ -122,7 +122,7 @@
       "status": "unmanaged",
       "remote_url": "https://github.com/fawxzzy/fawxzzy-fitness.git",
       "pinned_commit": null,
-      "current_commit": "d63650b7a668d312f23cde3429c6887644bd5f04",
+      "current_commit": "0974a444c65c29788c2f7c8bbd5b5358f6de7e8c",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
@@ -221,7 +221,7 @@
       "current_ref_type": "branch",
       "current_ref": "codex/mazer-pass2-menu-parity",
       "branch": "codex/mazer-pass2-menu-parity",
-      "dirty": false,
+      "dirty": true,
       "trust_class": "trusted",
       "release_eligible": true,
       "exists": true,
@@ -317,7 +317,7 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "4383ea8a1448f9988ef010a045acb43812bdf410",
+      "current_commit": "32d19e9b15ca1d4037f7753775f8301992939804",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
@@ -530,5 +530,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:0b4c4d19619a60f70a081c442d39a484f8ba2eb7463e8f4ad24015096a93dac3"
+  "content_digest": "sha256:618a5e3ec30bc256b25b054aac3a46826e93679c14913bfb3bf4f8a0576d6b57"
 }
