@@ -1,0 +1,42 @@
+{
+  "contract_version": "atlas.vercel_hobby_review.v1",
+  "review_id": "fitness-hobby-review-2026-07-01",
+  "generated_at": "2026-07-01T00:00:00Z",
+  "repo_id": "fitness",
+  "target_sha": "34ebd096f24b9a42bcc526f4e8c0c315d824c9ee",
+  "checkpoint_status": "ready",
+  "decision": "keep_hobby",
+  "decision_reason": "Fitness target 34ebd096 adds bounded Lifetime Pro billing endpoints and one retired Discord message-command polling endpoint; deployment remains disabled, guardrail posture categories remain unchanged, and the no-secret pressure review does not justify a default Vercel plan upgrade.",
+  "next_action": "stay on Hobby by default, keep billing and webhook routes on the guardrail watch list, and reopen upgrade review if deployment is enabled or route/fetch pressure increases again",
+  "accepted_signature_digest": "sha256:09d0418128bbe5c28bb74bb3de3910f89365c6f695579b7577060944b5aa5868",
+  "accepted_drift_fields": [
+    "api_routes",
+    "external_or_dynamic_fetch_sites",
+    "force_dynamic_routes",
+    "middleware_public_authless_paths",
+    "nodejs_route_count",
+    "nodejs_routes",
+    "total_fetch_sites",
+    "total_routes"
+  ],
+  "review_basis": {
+    "deployment_enabled": false,
+    "guardrail_posture": {
+      "deployment_posture": "ok",
+      "route_pressure_posture": "watch",
+      "middleware_pressure_posture": "watch",
+      "integration_pressure_posture": "watch",
+      "hot_route_watch_posture": "watch"
+    },
+    "bounded_additions": [
+      "/api/billing/checkout",
+      "/api/billing/webhook/stripe",
+      "/api/discord/message-commands/poll"
+    ],
+    "limitations": [
+      "This is a no-secret repo-state pressure review, not live Vercel billing-counter proof.",
+      "This review does not mutate Vercel settings, billing, or project linkage.",
+      "This review does not make Fitness release-ready without current protected QA promotion evidence."
+    ]
+  }
+}

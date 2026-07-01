@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import sys
@@ -16,6 +17,7 @@ from ops._atlas import atlas_relative
 
 CONTRACT_VERSION = "atlas.vercel_hobby_decision.v1"
 GUARDRAIL_REPORT_VERSION = "atlas.vercel_hobby_guardrail.v1"
+REVIEW_CONTRACT_VERSION = "atlas.vercel_hobby_review.v1"
 SNAPSHOT_DATE_PATTERN = re.compile(r"\.(\d{4}-\d{2}-\d{2})\.json$")
 
 
@@ -41,6 +43,10 @@ def _default_latest_ref(repo_id: str) -> str:
 def _default_output_ref(repo_id: str, fmt: str) -> str:
     suffix = "json" if fmt == "json" else "md"
     return f"runtime/receipts/vercel-hobby-cost-governance/{repo_id}-hobby-decision.latest.{suffix}"
+
+
+def _default_review_ref(repo_id: str) -> str:
+    return f"data/atlas/qa/vercel-hobby-cost-governance/{repo_id}-hobby-review.latest.json"
 
 
 def _discover_preserved_refs(*, root: Path, repo_id: str) -> list[Path]:
@@ -142,6 +148,11 @@ def _comparison_signature(payload: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _signature_digest(signature: dict[str, Any]) -> str:
+    encoded = json.dumps(signature, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return "sha256:" + hashlib.sha256(encoded).hexdigest()
+
+
 def _diff_signatures(*, left_label: str, left: dict[str, Any], right_label: str, right: dict[str, Any]) -> list[dict[str, Any]]:
     diffs: list[dict[str, Any]] = []
     for key in sorted(set(left) | set(right)):
@@ -156,6 +167,56 @@ def _diff_signatures(*, left_label: str, left: dict[str, Any], right_label: str,
                 }
             )
     return diffs
+
+
+def _load_matching_review(
+    *,
+    root: Path,
+    repo_id: str,
+    latest_signature: dict[str, Any],
+    latest_alignment_drift: list[dict[str, Any]],
+) -> tuple[dict[str, Any] | None, list[str]]:
+    review_path = (root / _default_review_ref(repo_id)).resolve()
+    if not review_path.exists():
+        return None, []
+    findings: list[str] = []
+    try:
+        review = _load_json(review_path)
+    except Exception as exc:
+        return None, [f"Hobby review '{atlas_relative(review_path, root=root)}' could not be loaded: {exc}"]
+
+    if str(review.get("contract_version") or "").strip() != REVIEW_CONTRACT_VERSION:
+        findings.append(
+            f"Hobby review '{atlas_relative(review_path, root=root)}' must use contract '{REVIEW_CONTRACT_VERSION}'."
+        )
+    if str(review.get("repo_id") or "").strip() != repo_id:
+        findings.append(f"Hobby review '{atlas_relative(review_path, root=root)}' targets the wrong repo.")
+    if str(review.get("checkpoint_status") or "").strip() != "ready":
+        findings.append(f"Hobby review '{atlas_relative(review_path, root=root)}' is not ready.")
+    if str(review.get("decision") or "").strip() != "keep_hobby":
+        findings.append(f"Hobby review '{atlas_relative(review_path, root=root)}' does not approve keep_hobby.")
+    observed_digest = _signature_digest(latest_signature)
+    expected_digest = str(review.get("accepted_signature_digest") or "").strip()
+    if expected_digest != observed_digest:
+        findings.append(
+            f"Hobby review '{atlas_relative(review_path, root=root)}' signature digest does not match current guardrail signature."
+        )
+    reviewed_fields = {
+        str(value)
+        for value in review.get("accepted_drift_fields", [])
+        if isinstance(value, str) and value.strip()
+    }
+    current_fields = {str(item.get("field") or "") for item in latest_alignment_drift if isinstance(item, dict)}
+    missing_fields = sorted(current_fields - reviewed_fields)
+    if missing_fields:
+        findings.append(
+            f"Hobby review '{atlas_relative(review_path, root=root)}' does not cover current drift fields: {', '.join(missing_fields)}."
+        )
+    if findings:
+        return None, findings
+    review["review_ref"] = atlas_relative(review_path, root=root)
+    review["observed_signature_digest"] = observed_digest
+    return review, []
 
 
 def build_checkpoint(
@@ -224,20 +285,36 @@ def build_checkpoint(
         right_label="rolling_latest",
         right=latest_signature,
     )
+    matching_review, review_findings = _load_matching_review(
+        root=root,
+        repo_id=repo_id,
+        latest_signature=latest_signature,
+        latest_alignment_drift=latest_alignment_drift,
+    )
 
     upgrade_review_reasons: list[str] = []
     if preserved_drift:
         upgrade_review_reasons.append("preserved dated guardrail snapshots drifted across the compared operating window")
-    if latest_alignment_drift:
+    if latest_alignment_drift and matching_review is None:
         upgrade_review_reasons.append("rolling latest guardrail report no longer matches the newest preserved checkpoint")
     if latest_signature.get("deployment_posture") != "ok":
         upgrade_review_reasons.append("deployment posture is no longer ok")
+    upgrade_review_reasons.extend(review_findings)
 
     if upgrade_review_reasons:
         decision = "upgrade_review_required"
         checkpoint_status = "blocked"
         decision_reason = "; ".join(upgrade_review_reasons)
         next_action = "open one explicit upgrade or pressure-review checkpoint before relying on Hobby by default"
+    elif latest_alignment_drift and matching_review is not None:
+        decision = "keep_hobby"
+        checkpoint_status = "ready"
+        decision_reason = str(matching_review.get("decision_reason") or "").strip() or (
+            "current drift is covered by a matching no-secret Hobby pressure review and deployment posture remains ok"
+        )
+        next_action = str(matching_review.get("next_action") or "").strip() or (
+            "stay on Hobby by default and refresh the checkpoint on the next governed cadence"
+        )
     else:
         decision = "keep_hobby"
         checkpoint_status = "ready"
@@ -260,6 +337,8 @@ def build_checkpoint(
         "preserved_guardrail_refs": [atlas_relative(snapshot["path"], root=root) for snapshot in preserved_snapshots],
         "preserved_local_dates": [snapshot["local_date"] for snapshot in preserved_snapshots if snapshot["local_date"]],
         "latest_guardrail_generated_at": str(latest_payload.get("generated_at") or ""),
+        "approved_review_ref": str((matching_review or {}).get("review_ref") or ""),
+        "accepted_signature_digest": str((matching_review or {}).get("accepted_signature_digest") or ""),
         "guardrail_posture": latest_payload.get("guardrail_posture", {}),
         "comparison": {
             "baseline_preserved_ref": atlas_relative(baseline_snapshot["path"], root=root),
@@ -269,11 +348,13 @@ def build_checkpoint(
             "preserved_snapshot_drift": preserved_drift,
             "latest_alignment_drift": latest_alignment_drift,
             "current_signature": latest_signature,
+            "current_signature_digest": _signature_digest(latest_signature),
         },
         "notes": [
             "This checkpoint is repo-local and no-secret by design; it does not read live Vercel billing counters.",
             "keep_hobby means current preserved repo-state pressure does not justify a default upgrade decision.",
             "upgrade_review_required means route, fetch, posture, or preserved-trend drift needs an explicit operator review before leaning on Hobby by default.",
+            "A matching no-secret Hobby review may approve a bounded baseline reset only when its signature digest matches the current guardrail signature.",
         ],
     }
 
@@ -290,6 +371,8 @@ def render_markdown(checkpoint: dict[str, Any]) -> str:
         f"- reason: {checkpoint['decision_reason']}",
         f"- next action: {checkpoint['next_action']}",
         f"- latest guardrail ref: `{checkpoint['latest_guardrail_ref']}`",
+        f"- approved review ref: `{checkpoint.get('approved_review_ref') or '-'}`",
+        f"- current signature digest: `{checkpoint['comparison'].get('current_signature_digest') or '-'}`",
         "",
         "## Preserved Trend Window",
         "",

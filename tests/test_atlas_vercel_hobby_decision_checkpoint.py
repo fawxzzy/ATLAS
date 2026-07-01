@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import tempfile
 import unittest
 from pathlib import Path
@@ -77,6 +78,10 @@ class AtlasVercelHobbyDecisionCheckpointTests(unittest.TestCase):
     def _write_json(self, path: Path, payload: dict) -> None:
         path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
 
+    def _signature_digest(self, signature: dict) -> str:
+        encoded = json.dumps(signature, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        return "sha256:" + hashlib.sha256(encoded).hexdigest()
+
     def test_build_checkpoint_keeps_hobby_when_preserved_window_is_stable(self) -> None:
         root = self._temp_root()
         receipt_dir = root / "runtime" / "receipts" / "vercel-hobby-cost-governance"
@@ -110,6 +115,43 @@ class AtlasVercelHobbyDecisionCheckpointTests(unittest.TestCase):
         self.assertEqual("blocked", checkpoint["checkpoint_status"])
         self.assertEqual("upgrade_review_required", checkpoint["decision"])
         self.assertTrue(checkpoint["comparison"]["preserved_snapshot_drift"])
+
+    def test_build_checkpoint_accepts_matching_hobby_review_for_latest_drift(self) -> None:
+        root = self._temp_root()
+        receipt_dir = root / "runtime" / "receipts" / "vercel-hobby-cost-governance"
+        review_dir = root / "data" / "atlas" / "qa" / "vercel-hobby-cost-governance"
+        review_dir.mkdir(parents=True, exist_ok=True)
+        self._write_json(receipt_dir / "fitness-hobby-guardrail.2026-06-17.json", self._guardrail_payload(generated_at="2026-06-18T03:51:55Z"))
+        self._write_json(receipt_dir / "fitness-hobby-guardrail.2026-06-18.json", self._guardrail_payload(generated_at="2026-06-18T04:45:01Z"))
+        self._write_json(
+            receipt_dir / "fitness-hobby-guardrail.latest.json",
+            self._guardrail_payload(generated_at="2026-07-01T19:00:00Z", total_routes=34),
+        )
+
+        blocked = build_checkpoint(root=root, repo_id="fitness")
+        current_signature = blocked["comparison"]["current_signature"]
+        self._write_json(
+            review_dir / "fitness-hobby-review.latest.json",
+            {
+                "contract_version": "atlas.vercel_hobby_review.v1",
+                "repo_id": "fitness",
+                "checkpoint_status": "ready",
+                "decision": "keep_hobby",
+                "decision_reason": "bounded route drift reviewed",
+                "accepted_signature_digest": self._signature_digest(current_signature),
+                "accepted_drift_fields": ["total_routes"],
+            },
+        )
+
+        checkpoint = build_checkpoint(root=root, repo_id="fitness")
+
+        self.assertEqual("ready", checkpoint["checkpoint_status"])
+        self.assertEqual("keep_hobby", checkpoint["decision"])
+        self.assertEqual("bounded route drift reviewed", checkpoint["decision_reason"])
+        self.assertEqual(
+            "data/atlas/qa/vercel-hobby-cost-governance/fitness-hobby-review.latest.json",
+            checkpoint["approved_review_ref"],
+        )
 
     def test_build_checkpoint_fails_closed_without_two_preserved_snapshots(self) -> None:
         root = self._temp_root()

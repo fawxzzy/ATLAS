@@ -24,7 +24,12 @@ def _receipt_dir(root: Path) -> Path:
     return root / "runtime" / "receipts" / "vercel-hobby-cost-governance"
 
 
-def refresh_vercel_hobby_governance(*, root: Path | None = None, repo_id: str = "fitness") -> dict[str, object]:
+def refresh_vercel_hobby_governance(
+    *,
+    root: Path | None = None,
+    repo_id: str = "fitness",
+    repo_root_override: Path | None = None,
+) -> dict[str, object]:
     base_root = (root or atlas_root()).resolve()
     seed_dir = _seed_dir(base_root)
     receipt_dir = _receipt_dir(base_root)
@@ -43,7 +48,7 @@ def refresh_vercel_hobby_governance(*, root: Path | None = None, repo_id: str = 
             f"No preserved Vercel Hobby guardrail snapshots found for repo '{repo_id}' in {atlas_relative(seed_dir, root=base_root)}"
         )
 
-    guardrail = build_report(root=base_root, repo_id=repo_id)
+    guardrail = build_report(root=base_root, repo_id=repo_id, repo_root_override=repo_root_override)
     latest_json = receipt_dir / f"{repo_id}-hobby-guardrail.latest.json"
     latest_md = receipt_dir / f"{repo_id}-hobby-guardrail.latest.md"
     write_json(latest_json, guardrail)
@@ -72,8 +77,13 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Refresh no-secret Vercel Hobby governance receipts for release readiness.")
     parser.add_argument("--root", type=Path, default=atlas_root())
     parser.add_argument("--repo-id", default="fitness")
+    parser.add_argument("--repo-path", type=Path, help="Optional repo root override for exact-SHA local verification")
     args = parser.parse_args(argv)
-    result = refresh_vercel_hobby_governance(root=args.root.resolve(), repo_id=args.repo_id)
+    result = refresh_vercel_hobby_governance(
+        root=args.root.resolve(),
+        repo_id=args.repo_id,
+        repo_root_override=args.repo_path.resolve() if isinstance(args.repo_path, Path) else None,
+    )
     print(json.dumps(result, indent=2))
     return 0
 

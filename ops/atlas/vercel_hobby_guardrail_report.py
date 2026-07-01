@@ -252,12 +252,12 @@ def _load_vercel_config(repo_root: Path) -> dict[str, Any]:
     }
 
 
-def build_report(*, root: Path, repo_id: str) -> dict[str, Any]:
+def build_report(*, root: Path, repo_id: str, repo_root_override: Path | None = None) -> dict[str, Any]:
     registry = load_repo_registry(root=root)
     if repo_id not in registry:
         raise GuardrailReportError(f"Unknown repo id: {repo_id}")
     repo_entry = registry[repo_id]
-    repo_root = repo_entry.root
+    repo_root = repo_root_override.resolve() if isinstance(repo_root_override, Path) else repo_entry.root
     project_link = _load_project_link(root, repo_id, repo_root)
     vercel_config = _load_vercel_config(repo_root)
     route_records = _collect_route_records(repo_root)
@@ -413,6 +413,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Build a no-secret Vercel Hobby guardrail report from repo state.")
     parser.add_argument("--root", default=str(ROOT), help="ATLAS root path")
     parser.add_argument("--repo-id", default="fitness", help="Repo id from stack.yaml")
+    parser.add_argument("--repo-path", help="Optional repo root override for exact-SHA local verification")
     parser.add_argument("--format", choices=("json", "markdown"), default="markdown")
     parser.add_argument("--output", help="Optional ATLAS-relative or absolute output path")
     return parser.parse_args(argv)
@@ -421,7 +422,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     root = Path(args.root).resolve()
-    report = build_report(root=root, repo_id=args.repo_id)
+    repo_root_override = Path(args.repo_path).resolve() if args.repo_path else None
+    report = build_report(root=root, repo_id=args.repo_id, repo_root_override=repo_root_override)
     rendered = json.dumps(report, indent=2) + "\n" if args.format == "json" else render_markdown(report)
     if args.output:
         output_path = Path(args.output)
