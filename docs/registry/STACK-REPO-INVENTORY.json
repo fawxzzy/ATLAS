@@ -10,7 +10,7 @@
     "markdown": "docs/audits/STACK-REPO-INVENTORY.md"
   },
   "repo_count": 12,
-  "dirty_repo_count": 1,
+  "dirty_repo_count": 0,
   "release_eligible_count": 5,
   "repos": [
     {
@@ -122,7 +122,7 @@
       "status": "unmanaged",
       "remote_url": "https://github.com/fawxzzy/fawxzzy-fitness.git",
       "pinned_commit": null,
-      "current_commit": "0e00a552f09164ecef1b61256d4d767f4df35d2e",
+      "current_commit": "8dc393cedeb7c14c0a903f6e7b34f247bcc13fc9",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
@@ -317,13 +317,13 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "eec182b81bd3e7918b4b8e33d9f04118c65ad6a7",
+      "current_commit": "7d927f2ddcd73be03e96124751baa4f937b357fb",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
       "current_ref": "codex/atlas-browserstack-provider-capture",
       "branch": "codex/atlas-browserstack-provider-capture",
-      "dirty": true,
+      "dirty": false,
       "trust_class": "trusted",
       "release_eligible": false,
       "exists": true,
@@ -530,5 +530,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:e5886fde804cbd6c6f1e7569cc65401c420071acb5709b4f88b6c391d1702eed"
+  "content_digest": "sha256:c0561b58d1ad4c6ed2773d0105c4d69fc3551268710e3141afb993d8f893855d"
 }
