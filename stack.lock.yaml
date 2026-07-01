@@ -54,7 +54,7 @@ components:
     remote: "https://github.com/fawxzzy/mazer.git"
     ref_type: "branch"
     ref: "codex/mazer-pass2-menu-parity"
-    commit: "da7435eced38808734d761c11731dccd3eaea1f5"
+    commit: "8f5c67de8b20fa46ef144109667a22571ee28fc1"
     dirty: false
     trust_class: "trusted"
     release_eligible: true
@@ -216,4 +216,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:c7bfa39af8b3ce409182e9f41ae7086ebb9bcc3e9705aa1e2216d3a108fe7c2b"
+lock_digest: "sha256:9617468cae2737dd59cd04288fcc46ac5661da0d8a92c69e53dfa561b66ed6c0"
