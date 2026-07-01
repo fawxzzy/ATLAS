@@ -2618,7 +2618,7 @@ console.log(JSON.stringify(caps));
 
     def test_browserstack_capture_rewrites_loopback_navigation_for_desktop_local(self) -> None:
         script = """
-import { resolveBrowserStackNavigationUrl } from './ops/atlas/qa/capture_browserstack.mjs';
+import { resolveBrowserStackNavigationUrl, resolveBrowserStackWaitUntil } from './ops/atlas/qa/capture_browserstack.mjs';
 const desktopUrl = resolveBrowserStackNavigationUrl({
   lensId: 'desktop.chromium.real',
   osName: 'Windows',
@@ -2637,7 +2637,14 @@ const androidUrl = resolveBrowserStackNavigationUrl({
   BROWSERSTACK_ACCESS_KEY: 'key',
   BROWSERSTACK_LOCAL_IDENTIFIER: 'atlas-local-1'
 });
-console.log(JSON.stringify({ desktopUrl, androidUrl }));
+const waitUntilWithSelector = resolveBrowserStackWaitUntil({
+  waitUntil: 'networkidle',
+  readySelector: "body[data-mobile-regression='true']"
+});
+const waitUntilWithoutSelector = resolveBrowserStackWaitUntil({
+  waitUntil: 'networkidle'
+});
+console.log(JSON.stringify({ desktopUrl, androidUrl, waitUntilWithSelector, waitUntilWithoutSelector }));
 """
         completed = subprocess.run(
             ["node", "--input-type=module", "-e", script],
@@ -2658,6 +2665,8 @@ console.log(JSON.stringify({ desktopUrl, androidUrl }));
             "http://127.0.0.1:3002/dev/mobile-regression?scenario=today-progression-status",
             urls["androidUrl"],
         )
+        self.assertEqual("domcontentloaded", urls["waitUntilWithSelector"])
+        self.assertEqual("networkidle", urls["waitUntilWithoutSelector"])
 
     def test_capture_cache_uses_provider_safe_defaults_for_browserstack_real_lenses(self) -> None:
         adapter_payload = load_json_object(ROOT / "ops" / "atlas" / "qa" / "adapters" / "fitness.web.json")

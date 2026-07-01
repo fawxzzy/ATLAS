@@ -84,6 +84,14 @@ export function resolveBrowserStackNavigationUrl(config, env = process.env) {
   return sourceUrl;
 }
 
+export function resolveBrowserStackWaitUntil(config) {
+  const waitUntil = String(config.waitUntil || "networkidle").trim() || "networkidle";
+  if (config.readySelector && waitUntil === "networkidle") {
+    return "domcontentloaded";
+  }
+  return waitUntil;
+}
+
 function resolveBrowserStackLocalIdentifier(env = process.env) {
   const identifier = String(env.BROWSERSTACK_LOCAL_IDENTIFIER || "").trim();
   return identifier || null;
@@ -284,7 +292,7 @@ async function main() {
   });
 
   try {
-    await page.goto(navigationConfig.sourceUrl, { waitUntil: navigationConfig.waitUntil || "networkidle" });
+    await page.goto(navigationConfig.sourceUrl, { waitUntil: resolveBrowserStackWaitUntil(navigationConfig) });
     if (navigationConfig.readySelector) {
       await page.waitForSelector(navigationConfig.readySelector, {
         state: resolveReadyState(navigationConfig),
