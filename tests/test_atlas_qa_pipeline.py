@@ -2616,6 +2616,49 @@ console.log(JSON.stringify(caps));
         self.assertEqual("true", caps["browserstack.local"])
         self.assertEqual("atlas-local-1", caps["browserstack.localIdentifier"])
 
+    def test_browserstack_capture_rewrites_loopback_navigation_for_desktop_local(self) -> None:
+        script = """
+import { resolveBrowserStackNavigationUrl } from './ops/atlas/qa/capture_browserstack.mjs';
+const desktopUrl = resolveBrowserStackNavigationUrl({
+  lensId: 'desktop.chromium.real',
+  osName: 'Windows',
+  sourceUrl: 'http://127.0.0.1:3002/dev/mobile-regression?scenario=today-progression-status'
+}, {
+  BROWSERSTACK_USERNAME: 'user',
+  BROWSERSTACK_ACCESS_KEY: 'key',
+  BROWSERSTACK_LOCAL_IDENTIFIER: 'atlas-local-1'
+});
+const androidUrl = resolveBrowserStackNavigationUrl({
+  lensId: 'android.chrome.real',
+  osName: 'Android',
+  sourceUrl: 'http://127.0.0.1:3002/dev/mobile-regression?scenario=today-progression-status'
+}, {
+  BROWSERSTACK_USERNAME: 'user',
+  BROWSERSTACK_ACCESS_KEY: 'key',
+  BROWSERSTACK_LOCAL_IDENTIFIER: 'atlas-local-1'
+});
+console.log(JSON.stringify({ desktopUrl, androidUrl }));
+"""
+        completed = subprocess.run(
+            ["node", "--input-type=module", "-e", script],
+            cwd=str(ROOT),
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            check=False,
+        )
+        self.assertEqual(0, completed.returncode, completed.stderr)
+        urls = json.loads(completed.stdout)
+        self.assertEqual(
+            "http://bs-local.com:3002/dev/mobile-regression?scenario=today-progression-status",
+            urls["desktopUrl"],
+        )
+        self.assertEqual(
+            "http://127.0.0.1:3002/dev/mobile-regression?scenario=today-progression-status",
+            urls["androidUrl"],
+        )
+
     def test_capture_cache_uses_provider_safe_defaults_for_browserstack_real_lenses(self) -> None:
         adapter_payload = load_json_object(ROOT / "ops" / "atlas" / "qa" / "adapters" / "fitness.web.json")
         for item in adapter_payload["lenses"]:

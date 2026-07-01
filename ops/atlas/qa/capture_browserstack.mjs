@@ -66,6 +66,24 @@ function shouldEnableBrowserStackLocal(config, env = process.env) {
   return isLoopbackSourceUrl(config);
 }
 
+export function resolveBrowserStackNavigationUrl(config, env = process.env) {
+  const sourceUrl = String(config.sourceUrl || "");
+  if (!shouldEnableBrowserStackLocal(config, env) || isAndroid(config)) {
+    return sourceUrl;
+  }
+  try {
+    const parsed = new URL(sourceUrl);
+    const hostname = parsed.hostname.trim().toLowerCase();
+    if (hostname === "127.0.0.1" || hostname === "localhost" || hostname === "::1") {
+      parsed.hostname = "bs-local.com";
+      return parsed.toString();
+    }
+  } catch {
+    return sourceUrl;
+  }
+  return sourceUrl;
+}
+
 function resolveBrowserStackLocalIdentifier(env = process.env) {
   const identifier = String(env.BROWSERSTACK_LOCAL_IDENTIFIER || "").trim();
   return identifier || null;
@@ -229,6 +247,7 @@ async function main() {
   const capabilities = buildCapabilities(providerPayload, config);
   const endpoint = `wss://cdp.browserstack.com/playwright?caps=${encodeURIComponent(JSON.stringify(capabilities))}`;
   const androidSession = isAndroid(config);
+  const navigationConfig = { ...config, sourceUrl: resolveBrowserStackNavigationUrl(config) };
   const browserType = String(config.browserEngine || "").toLowerCase() === "webkit" ? playwright.webkit : playwright.chromium;
   const browser = androidSession ? null : await browserType.connect({ wsEndpoint: endpoint });
   const device = androidSession ? await playwright._android.connect(endpoint) : null;
@@ -265,21 +284,21 @@ async function main() {
   });
 
   try {
-    await page.goto(config.sourceUrl, { waitUntil: config.waitUntil || "networkidle" });
-    if (config.readySelector) {
-      await page.waitForSelector(config.readySelector, {
-        state: resolveReadyState(config),
-        timeout: config.readyTimeoutMs || 30000,
+    await page.goto(navigationConfig.sourceUrl, { waitUntil: navigationConfig.waitUntil || "networkidle" });
+    if (navigationConfig.readySelector) {
+      await page.waitForSelector(navigationConfig.readySelector, {
+        state: resolveReadyState(navigationConfig),
+        timeout: navigationConfig.readyTimeoutMs || 30000,
       });
     }
-    if (config.settleMs) {
-      await page.waitForTimeout(config.settleMs);
+    if (navigationConfig.settleMs) {
+      await page.waitForTimeout(navigationConfig.settleMs);
     }
   } catch (error) {
-    const debug = await writeFailureDebug({ page, config, outputDir, error });
+    const debug = await writeFailureDebug({ page, config: navigationConfig, outputDir, error });
     const detail = [
       `Provider capture failed before ready state for lens ${config.lensId}.`,
-      `currentUrl=${debug.currentUrl || String(config.sourceUrl || "")}`,
+      `currentUrl=${debug.currentUrl || String(navigationConfig.sourceUrl || "")}`,
       debug.title ? `title=${debug.title}` : null,
       `debug=${debug.debugPath}`,
       `screenshot=${debug.screenshotPath}`,
@@ -290,7 +309,7 @@ async function main() {
   const screenshotPath = path.join(outputDir, "screenshot.png");
   const consolePath = path.join(outputDir, "console.log");
   const networkPath = path.join(outputDir, "network.json");
-  const screenshotStrategy = await captureScreenshotWithFallbacks({ page, config, screenshotPath, outputDir });
+  const screenshotStrategy = await captureScreenshotWithFallbacks({ page, config: navigationConfig, screenshotPath, outputDir });
   await fs.writeFile(consolePath, consoleLines.map((item) => `[${item.type}] ${item.text}`).join("\n"), "utf8");
   await fs.writeFile(networkPath, JSON.stringify(networkEntries, null, 2) + "\n", "utf8");
 
