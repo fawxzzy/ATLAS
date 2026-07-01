@@ -215,6 +215,10 @@ jobs:
         if: github.event_name == 'workflow_dispatch' && inputs.enforce_release_readiness == true
         run: python ops/atlas/qa/evidence_index.py
 
+      - name: Refresh Fitness Vercel Hobby governance receipts
+        if: github.event_name == 'workflow_dispatch' && inputs.enforce_release_readiness == true && (inputs.release_repo == 'fitness' || (inputs.release_repo == '' && steps.adapter.outputs.repo_id == 'fitness'))
+        run: python ops/atlas/qa/vercel_hobby_governance_refresh.py --repo-id fitness
+
       - name: Build release readiness
         if: github.event_name == 'workflow_dispatch' && inputs.enforce_release_readiness == true
         run: |
@@ -271,6 +275,7 @@ jobs:
             runtime/atlas/qa/release-rehearsal.latest.md
             runtime/atlas/qa/adoption-drift.latest.json
             runtime/atlas/qa/adoption-drift.latest.md
+            runtime/receipts/vercel-hobby-cost-governance/**
             runtime/receipts/validation/stack-validation.latest.json
             runtime/receipts/validation/stack-validation.latest.md
             runtime/receipts/validation/stack-warning-budget.latest.json
@@ -344,6 +349,9 @@ jobs:
           BROWSERSTACK_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME || '' }}
           BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY || '' }}
         run: |
+          if [ "${{ inputs.release_repo }}" = "fitness" ] || [ -z "${{ inputs.release_repo }}" ]; then
+            python ops/atlas/qa/vercel_hobby_governance_refresh.py --repo-id fitness
+          fi
           cmd=(python ops/atlas/qa/protected_release_refresh.py --mode "${{ inputs.mode }}" --provider "${{ inputs.provider }}" --max-receipt-age-hours "${{ inputs.max_receipt_age_hours || '168' }}")
           if [ -n "${{ inputs.release_repo }}" ]; then
             cmd+=(--repo "${{ inputs.release_repo }}")
@@ -376,6 +384,7 @@ jobs:
             runtime/atlas/qa/release-readiness.latest.md
             runtime/atlas/qa/release-rehearsal.latest.json
             runtime/atlas/qa/release-rehearsal.latest.md
+            runtime/receipts/vercel-hobby-cost-governance/**
             runtime/receipts/validation/stack-validation.latest.json
             runtime/receipts/validation/stack-validation.latest.md
             runtime/receipts/validation/stack-warning-budget.latest.json

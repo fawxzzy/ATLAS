@@ -38,6 +38,8 @@ data/**
 !data/**/.gitkeep
 !data/atlas/
 !data/atlas/qa/
+!data/atlas/qa/vercel-hobby-cost-governance/
+!data/atlas/qa/vercel-hobby-cost-governance/**
 !data/atlas/qa/baselines/
 !data/atlas/qa/baselines/**/
 !data/atlas/qa/baselines/**/*.png

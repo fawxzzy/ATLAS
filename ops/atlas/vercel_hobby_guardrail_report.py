@@ -198,21 +198,39 @@ def _collect_middleware_inventory(repo_root: Path) -> dict[str, Any]:
     }
 
 
-def _load_project_link(repo_root: Path) -> dict[str, str]:
+def _project_link_fallback_path(root: Path, repo_id: str) -> Path:
+    return root / "data" / "atlas" / "qa" / "vercel-hobby-cost-governance" / f"{repo_id}-project-link.json"
+
+
+def _load_project_link(root: Path, repo_id: str, repo_root: Path) -> dict[str, str]:
     project_path = repo_root / ".vercel" / "project.json"
-    if not project_path.exists():
-        raise GuardrailReportError(f"Missing Vercel link file: {atlas_relative(project_path)}")
-    payload = json.loads(_read_text(project_path))
+    source_path = project_path
+    if project_path.exists():
+        payload = json.loads(_read_text(project_path))
+    else:
+        source_path = _project_link_fallback_path(root, repo_id)
+        if not source_path.exists():
+            raise GuardrailReportError(
+                "Missing Vercel link file: "
+                f"{atlas_relative(project_path, root=root)} and fallback {atlas_relative(source_path, root=root)}"
+            )
+        payload = json.loads(_read_text(source_path))
     project_id = payload.get("projectId")
     team_id = payload.get("orgId")
     project_name = payload.get("projectName")
+    if project_id is None:
+        project_id = payload.get("project_id")
+    if team_id is None:
+        team_id = payload.get("team_id")
+    if project_name is None:
+        project_name = payload.get("project_name")
     if not all(isinstance(value, str) and value.strip() for value in (project_id, team_id, project_name)):
-        raise GuardrailReportError(f"Malformed Vercel link file: {atlas_relative(project_path)}")
+        raise GuardrailReportError(f"Malformed Vercel link file: {atlas_relative(source_path, root=root)}")
     return {
         "project_id": project_id.strip(),
         "team_id": team_id.strip(),
         "project_name": project_name.strip(),
-        "path": atlas_relative(project_path),
+        "path": atlas_relative(source_path, root=root),
     }
 
 
@@ -240,7 +258,7 @@ def build_report(*, root: Path, repo_id: str) -> dict[str, Any]:
         raise GuardrailReportError(f"Unknown repo id: {repo_id}")
     repo_entry = registry[repo_id]
     repo_root = repo_entry.root
-    project_link = _load_project_link(repo_root)
+    project_link = _load_project_link(root, repo_id, repo_root)
     vercel_config = _load_vercel_config(repo_root)
     route_records = _collect_route_records(repo_root)
     fetch_inventory = _collect_fetch_inventory(repo_root)

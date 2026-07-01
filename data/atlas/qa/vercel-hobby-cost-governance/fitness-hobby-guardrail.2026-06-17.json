@@ -1,0 +1,199 @@
+{
+  "report_version": "atlas.vercel_hobby_guardrail.v1",
+  "report_id": "vercel-hobby-guardrail-fitness",
+  "generated_at": "2026-06-18T03:51:55.522194+00:00",
+  "repo_id": "fitness",
+  "repo_path": "repos/fawxzzy-fitness",
+  "project_link": {
+    "project_id": "prj_rtlFVOMFAWCRoJ3SQjHloi89881K",
+    "team_id": "team_CMJn7MvzFZZBnhNnjVUZF2RD",
+    "project_name": "fawxzzy-fitness",
+    "path": "repos/fawxzzy-fitness/.vercel/project.json"
+  },
+  "vercel_config": {
+    "present": true,
+    "path": "repos/fawxzzy-fitness/vercel.json",
+    "deployment_enabled": false
+  },
+  "thresholds_revalidated_on": "2026-06-17",
+  "hobby_thresholds": {
+    "edge_requests_per_month": 1000000,
+    "fast_data_transfer_gb_per_month": 100,
+    "function_invocations_per_month": 1000000,
+    "active_cpu_hours_per_month": 4,
+    "provisioned_memory_gb_hours_per_month": 360,
+    "build_execution_minutes": 6000,
+    "speed_insights_points_per_month": 10000,
+    "web_analytics_events_per_month": 50000,
+    "runtime_log_retention_hours": 1
+  },
+  "summary": {
+    "total_routes": 31,
+    "api_routes": 22,
+    "auth_routes": 5,
+    "dev_routes": 4,
+    "force_dynamic_routes": 29,
+    "nodejs_routes": 4,
+    "method_counts": {
+      "GET": 18,
+      "POST": 15,
+      "DELETE": 1,
+      "PUT": 0,
+      "PATCH": 0,
+      "OPTIONS": 0
+    },
+    "fetch_inventory": {
+      "total_fetch_sites": 34,
+      "internal_fetch_sites": 17,
+      "external_or_dynamic_fetch_sites": 17
+    }
+  },
+  "middleware_inventory": {
+    "present": true,
+    "path": "repos/fawxzzy-fitness/src/middleware.ts",
+    "public_authless_paths": [
+      "/api/app-version",
+      "/api/discord/interactions"
+    ],
+    "has_broad_non_static_matcher": true,
+    "refresh_session_call_present": true
+  },
+  "nodejs_routes": [
+    "/api/discord/interactions",
+    "/api/spotify/oauth/callback",
+    "/api/spotify/oauth/start",
+    "/api/vercel/deployment-webhook"
+  ],
+  "watch_targets": [
+    {
+      "target": "/api/discord/interactions",
+      "references": 1,
+      "files": [
+        "src/lib/auth-session.ts"
+      ]
+    },
+    {
+      "target": "/auth/session-keepalive",
+      "references": 4,
+      "files": [
+        "src/components/ServiceWorkerBootstrap.tsx",
+        "src/lib/session-keepalive.ts"
+      ]
+    },
+    {
+      "target": "/api/app-version",
+      "references": 2,
+      "files": [
+        "src/components/ServiceWorkerBootstrap.tsx",
+        "src/lib/auth-session.ts"
+      ]
+    },
+    {
+      "target": "/auth/session-sync",
+      "references": 4,
+      "files": [
+        "src/components/SignOutButton.tsx",
+        "src/lib/supabase/client.ts"
+      ]
+    },
+    {
+      "target": "/api/history/sessions",
+      "references": 1,
+      "files": [
+        "src/app/history/HistorySessionsClient.tsx"
+      ]
+    },
+    {
+      "target": "/api/history/exercises",
+      "references": 1,
+      "files": [
+        "src/app/history/exercises/ExerciseBrowserClient.tsx"
+      ]
+    },
+    {
+      "target": "/api/sessions/start",
+      "references": 1,
+      "files": [
+        "src/app/today/TodayStartButton.tsx"
+      ]
+    },
+    {
+      "target": "/api/sessions/resume",
+      "references": 1,
+      "files": [
+        "src/app/today/TodayStartButton.tsx"
+      ]
+    },
+    {
+      "target": "/api/account/export",
+      "references": 2,
+      "files": [
+        "src/components/settings/DataSettingsSection.tsx"
+      ]
+    },
+    {
+      "target": "/api/account/export/preview",
+      "references": 1,
+      "files": [
+        "src/components/settings/DataSettingsSection.tsx"
+      ]
+    },
+    {
+      "target": "/api/migration/export",
+      "references": 1,
+      "files": [
+        "src/components/settings/LegacyMigrationSettings.tsx"
+      ]
+    },
+    {
+      "target": "/api/migration/import",
+      "references": 1,
+      "files": [
+        "src/components/settings/LegacyMigrationSettings.tsx"
+      ]
+    },
+    {
+      "target": "/api/migration/parity",
+      "references": 1,
+      "files": [
+        "src/components/settings/LegacyMigrationSettings.tsx"
+      ]
+    },
+    {
+      "target": "/api/discord/verification-token",
+      "references": 2,
+      "files": [
+        "src/app/api/discord/verification-token/route.ts",
+        "src/components/settings/DiscordAccessSettings.tsx"
+      ]
+    },
+    {
+      "target": "/api/ecosystem/fitness/pilot-shadow",
+      "references": 1,
+      "files": [
+        "src/app/today/TodayRecoveryShadowPlacement.tsx"
+      ]
+    },
+    {
+      "target": "/api/exercise-info/",
+      "references": 4,
+      "files": [
+        "src/app/api/exercise-info/[exerciseId]/route.ts",
+        "src/app/dev/exercise-info-live/page.tsx",
+        "src/lib/exercise-info-client.ts"
+      ]
+    }
+  ],
+  "guardrail_posture": {
+    "deployment_posture": "ok",
+    "route_pressure_posture": "watch",
+    "middleware_pressure_posture": "watch",
+    "integration_pressure_posture": "watch",
+    "hot_route_watch_posture": "watch"
+  },
+  "notes": [
+    "This report is repo-local and no-secret by design; it does not read live billing counters.",
+    "Threshold values are local checkpoint constants last revalidated on 2026-06-17.",
+    "Watch postures are governance hints, not spend claims or upgrade recommendations."
+  ]
+}
