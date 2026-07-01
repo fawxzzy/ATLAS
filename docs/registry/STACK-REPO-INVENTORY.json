@@ -3,7 +3,7 @@
   "stack_manifest_ref": "stack.yaml",
   "stack_manifest_digest": "sha256:e5ac73c00983975b59e4b8e7f8541160d479087f5dc95ad1d642568116bd7d10",
   "stack_lock_ref": "stack.lock.yaml",
-  "stack_lock_digest": "sha256:c9655b25887a424dd814b8fba2d9ef02c30265219593a5ab3267d708f0307378",
+  "stack_lock_digest": "sha256:dcb9137f3a43fe47eafce29b5fff4cb99c629a1e9d966fd7721033a2fbb00b5e",
   "working_memory_digest": "sha256:fe4f4902e2b2c475974b050ba1bf3f5e740439aa41df2f844555c2c0dc3b310f",
   "published_refs": {
     "json": "docs/registry/STACK-REPO-INVENTORY.json",
@@ -214,8 +214,8 @@
       "role": "application",
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/mazer.git",
-      "pinned_commit": "1da4fdf91be267800543e7953b75374f43e8440b",
-      "current_commit": "1da4fdf91be267800543e7953b75374f43e8440b",
+      "pinned_commit": "b79efeab10b37db8ba18ba55c629a730ab28c81e",
+      "current_commit": "b79efeab10b37db8ba18ba55c629a730ab28c81e",
       "pinned_ref_type": "branch",
       "pinned_ref": "codex/mazer-pass2-menu-parity",
       "current_ref_type": "branch",
@@ -317,12 +317,12 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "6ce4e4560390a0641ebbc7137d9bb6849cfce646",
+      "current_commit": "64b7143a378836b3bd8a658047bc6b56867d8bc7",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
-      "current_ref": "codex/atlas-browserstack-provider-capture",
-      "branch": "codex/atlas-browserstack-provider-capture",
+      "current_ref": "codex/atlas-mazer-stack-lock-resync-20260701",
+      "branch": "codex/atlas-mazer-stack-lock-resync-20260701",
       "dirty": false,
       "trust_class": "trusted",
       "release_eligible": false,
@@ -530,5 +530,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:7c7553e68b96d30f514d3006cb86db343b2254a0b9acce9d345d3d0ae3265a18"
+  "content_digest": "sha256:cc9ebc05e0e78c083f4e7ff56e861449b99f77154bed440bf79da60d3ee2496f"
 }
