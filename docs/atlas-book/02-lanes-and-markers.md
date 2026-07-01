@@ -177,7 +177,7 @@ Current AI Long-Run closeout read: `AI Long-Run Batch Orchestration` stays at `6
 
 ## Current Marker Read
 
-- latest PR #105 overlay as of 2026-07-01: ATLAS head `4ace22735229287707549ed5b524e0d8ebccefa2` and Fitness head `46f14c84ce4a0c6b9dd14579ead8b085afa83893` are clean/parity-clean, and current-head ATLAS QA LLEL run `28536575996` succeeded with dry-run artifact digest `sha256:251595ddfc4a670d31575cf386040b5a612a6d590b825841440f64dede2ec8de`; this does not move any marker because protected BrowserStack promotion/readiness and approved manual fallback proof are still absent for the current heads
+- latest PR #105 overlay as of 2026-07-01: ATLAS head `857787871fe6a79400454bae6bf9b91b5f2ab061` and Fitness head `34ebd096f24b9a42bcc526f4e8c0c315d824c9ee` are clean/parity-clean, and current-head ATLAS QA LLEL run `28538172955` succeeded with dry-run artifact digest `sha256:9c4f75e936aaa511c69c2b165d8467fd7c638e4619a43d9b375104973946a28e`; artifact inspection confirms `promotion_status: dry_run`, `visual_status: planned`, and `test_evidence_status: planned`, so this does not move any marker because protected BrowserStack promotion/readiness and approved manual fallback proof are still absent for the current heads
 - active front-page rebaseline is now durably complete and held flat: the reduced front-page set is current, but the latest durable evidence did not justify any further active-value moves
 - the front-page marker read is now capped to the smallest useful steering set so operator attention stays on the ten most decision-shaping live markers rather than broader open-marker drift
 - materially closed ladders now have a separate carry-forward role so their held truth stays visible without consuming active front-page slots

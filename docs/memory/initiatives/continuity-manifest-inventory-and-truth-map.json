@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-05-29T00:00:00Z",
-  "updated_at": "2026-07-01T18:02:25Z",
+  "updated_at": "2026-07-01T18:12:09Z",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -93,7 +93,8 @@
     "ops/atlas/qa/github_secret_readiness.py",
     "runtime/atlas/qa/github-secret-readiness.latest.json",
     "docs/ops/INVENTORY-AND-TRUTH-MAP-PR105-CURRENT-HEAD-PROOF-GATE-AND-MARKER-HOLD-RESYNC-2026-07-01.md",
-    "docs/ops/INVENTORY-AND-TRUTH-MAP-FITNESS-BILLING-MIGRATION-HISTORY-ALIGNMENT-AND-PR105-HOLD-RESYNC-2026-07-01.md"
+    "docs/ops/INVENTORY-AND-TRUTH-MAP-FITNESS-BILLING-MIGRATION-HISTORY-ALIGNMENT-AND-PR105-HOLD-RESYNC-2026-07-01.md",
+    "docs/ops/INVENTORY-AND-TRUTH-MAP-PR105-LATEST-DRY-RUN-PROOF-AND-SELECTOR-HOLD-RESYNC-2026-07-01.md"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -101,9 +102,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "inventory-and-truth-map",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/INVENTORY-AND-TRUTH-MAP-FITNESS-BILLING-MIGRATION-HISTORY-ALIGNMENT-AND-PR105-HOLD-RESYNC-2026-07-01.md",
-    "checkpoint_commit": "d677c1f1a58f117c8b7e24444431567cf535369c",
-    "checkpoint_summary": "The lane still sits at 99 percent after the Fitness billing migration-history alignment and PR #105 hold resync: ATLAS root is clean and parity-clean at `d677c1f1a58f117c8b7e24444431567cf535369c`, Fitness `main` is clean and parity-clean at `34ebd096f24b9a42bcc526f4e8c0c315d824c9ee`, root validation reads `critical=0 error=0 warning=3 info=0`, linked Fitness Supabase migration history now aligns through remote versions `20260701174902` and `20260701175406`, `npm run migration:validate`, `npm run test:billing`, and `npm run verify` passed, and PR #105 remains open/draft/mergeable with current-head ATLAS QA LLEL dry-run success only. The marker does not move because protected BrowserStack promotion/readiness and approved validated manual fallback proof remain absent for the current heads.",
+    "current_checkpoint_receipt": "docs/ops/INVENTORY-AND-TRUTH-MAP-PR105-LATEST-DRY-RUN-PROOF-AND-SELECTOR-HOLD-RESYNC-2026-07-01.md",
+    "checkpoint_commit": "857787871fe6a79400454bae6bf9b91b5f2ab061",
+    "checkpoint_summary": "The lane still sits at 99 percent after the PR #105 latest dry-run proof and selector hold resync: ATLAS root is clean and parity-clean at `857787871fe6a79400454bae6bf9b91b5f2ab061`, Fitness `main` is clean and parity-clean at `34ebd096f24b9a42bcc526f4e8c0c315d824c9ee`, published inventory reports `dirty_repo_count: 0`, root validation reads `critical=0 error=0 warning=3 info=0`, current-head ATLAS QA LLEL run `28538172955` succeeded with dry-run artifact digest `sha256:9c4f75e936aaa511c69c2b165d8467fd7c638e4619a43d9b375104973946a28e`, artifact inspection confirms QA run `fitness-progression-pr-smoke-20260701T181208361804Z` is still `promotion_status: dry_run`, and selector truth remains `operator_action: no_immediate_root_packet`. The marker does not move because protected BrowserStack promotion/readiness and approved validated manual fallback proof remain absent for the current heads.",
     "governing_receipts": [
       "docs/ops/STACK-LANE-0-BASELINE-INVENTORY-2026-05-22.md",
       "docs/ops/STACK-LANE-0-TRUTH-MAP-2026-05-22.md",
@@ -160,7 +161,8 @@
       "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-HISTORY-DETAIL-FEEDBACK-CLEAN-HEAD-AND-ZERO-DIRTY-RESYNC-2026-06-29.md",
       "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-EFFORT-PERSISTENCE-AND-MAZER-RIGHT-GOAL-SILHOUETTE-CLEAN-HEAD-RESYNC-2026-06-29.md",
       "docs/ops/INVENTORY-AND-TRUTH-MAP-PR105-CURRENT-HEAD-PROOF-GATE-AND-MARKER-HOLD-RESYNC-2026-07-01.md",
-      "docs/ops/INVENTORY-AND-TRUTH-MAP-FITNESS-BILLING-MIGRATION-HISTORY-ALIGNMENT-AND-PR105-HOLD-RESYNC-2026-07-01.md"
+      "docs/ops/INVENTORY-AND-TRUTH-MAP-FITNESS-BILLING-MIGRATION-HISTORY-ALIGNMENT-AND-PR105-HOLD-RESYNC-2026-07-01.md",
+      "docs/ops/INVENTORY-AND-TRUTH-MAP-PR105-LATEST-DRY-RUN-PROOF-AND-SELECTOR-HOLD-RESYNC-2026-07-01.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -376,9 +378,9 @@
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/INVENTORY-AND-TRUTH-MAP-FITNESS-BILLING-MIGRATION-HISTORY-ALIGNMENT-AND-PR105-HOLD-RESYNC-2026-07-01.md",
-    "freshness_checked_at": "2026-07-01T18:02:25Z",
-    "freshness_basis": "the current checkpoint, marker posture, lane-state projection, blocked-work posture, and next-package posture now match the Fitness billing migration-history alignment and PR #105 hold resync: ATLAS root is clean and parity-clean at `d677c1f1a58f117c8b7e24444431567cf535369c`, Fitness `main` is clean and parity-clean at `34ebd096f24b9a42bcc526f4e8c0c315d824c9ee`, root validation reads `critical=0 / error=0 / warning=3 / info=0`, linked Fitness Supabase migration history aligns through `20260701174902` and `20260701175406`, `npm run migration:validate`, `npm run test:billing`, and `npm run verify` passed, non-Fitness dirty state currently exists in `repos/mazer` and is root-accounting only, PR #105 is open, draft, and mergeable, current-head ATLAS QA LLEL run `28537201072` succeeded with dry-run artifact digest `sha256:26150664b3c07f207947f5b63a9e0543e839f8ff4b46147034d10a30e316d204`, and protected BrowserStack promotion/readiness plus approved validated manual fallback proof remain absent for the current heads.",
+    "freshness_checked_receipt": "docs/ops/INVENTORY-AND-TRUTH-MAP-PR105-LATEST-DRY-RUN-PROOF-AND-SELECTOR-HOLD-RESYNC-2026-07-01.md",
+    "freshness_checked_at": "2026-07-01T18:12:09Z",
+    "freshness_basis": "the current checkpoint, marker posture, lane-state projection, blocked-work posture, and next-package posture now match the PR #105 latest dry-run proof and selector hold resync: ATLAS root is clean and parity-clean at `857787871fe6a79400454bae6bf9b91b5f2ab061`, Fitness `main` is clean and parity-clean at `34ebd096f24b9a42bcc526f4e8c0c315d824c9ee`, published inventory reports `dirty_repo_count: 0`, root validation reads `critical=0 / error=0 / warning=3 / info=0`, PR #105 is open, draft, and mergeable, current-head ATLAS QA LLEL run `28538172955` succeeded with dry-run artifact digest `sha256:9c4f75e936aaa511c69c2b165d8467fd7c638e4619a43d9b375104973946a28e`, artifact inspection confirms QA run `fitness-progression-pr-smoke-20260701T181208361804Z` is still `promotion_status: dry_run`, selector truth remains `operator_action: no_immediate_root_packet`, and protected BrowserStack promotion/readiness plus approved validated manual fallback proof remain absent for the current heads.",
     "marker_posture": [
       {
         "marker": "Inventory & Truth Map",
