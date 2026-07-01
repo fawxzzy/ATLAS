@@ -3,14 +3,14 @@
   "stack_manifest_ref": "stack.yaml",
   "stack_manifest_digest": "sha256:e5ac73c00983975b59e4b8e7f8541160d479087f5dc95ad1d642568116bd7d10",
   "stack_lock_ref": "stack.lock.yaml",
-  "stack_lock_digest": "sha256:bb953238b75a25d6c08f9b15ebb6f172fc78ab8dff2c1abfde444890ef5cf5f9",
+  "stack_lock_digest": "sha256:5486b7548a48f38d81234634bcec56e2a237d419c3b22e24a25d2d3a98c71eea",
   "working_memory_digest": "sha256:fe4f4902e2b2c475974b050ba1bf3f5e740439aa41df2f844555c2c0dc3b310f",
   "published_refs": {
     "json": "docs/registry/STACK-REPO-INVENTORY.json",
     "markdown": "docs/audits/STACK-REPO-INVENTORY.md"
   },
   "repo_count": 12,
-  "dirty_repo_count": 1,
+  "dirty_repo_count": 0,
   "release_eligible_count": 5,
   "repos": [
     {
@@ -122,13 +122,13 @@
       "status": "unmanaged",
       "remote_url": "https://github.com/fawxzzy/fawxzzy-fitness.git",
       "pinned_commit": null,
-      "current_commit": "34ebd096f24b9a42bcc526f4e8c0c315d824c9ee",
+      "current_commit": "81ad97ab619e75c32c775d09abb633ef7edfd19b",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
       "current_ref": "main",
       "branch": "main",
-      "dirty": true,
+      "dirty": false,
       "trust_class": "adjacent",
       "release_eligible": false,
       "exists": true,
@@ -214,8 +214,8 @@
       "role": "application",
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/mazer.git",
-      "pinned_commit": "7efa25d5d19787bf55c010f043d043463e2c1ef5",
-      "current_commit": "7efa25d5d19787bf55c010f043d043463e2c1ef5",
+      "pinned_commit": "fd9ce0066920beb16c112302ac469bb10bf3607a",
+      "current_commit": "fd9ce0066920beb16c112302ac469bb10bf3607a",
       "pinned_ref_type": "branch",
       "pinned_ref": "codex/mazer-pass2-menu-parity",
       "current_ref_type": "branch",
@@ -317,7 +317,7 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "84fe333ee916c9815baee8202cee0639b8748820",
+      "current_commit": "7959d539726ffcbfebc552e838f4f36cb2643bd6",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
@@ -530,5 +530,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:5220c91ea9e69e352edec50768b81682fb8c72d0dfbc0a999c2b7f90088cee57"
+  "content_digest": "sha256:cd31893ede61990ab1d3f195f23cfbd6fea9bcd750ab24f11c60683c88d99dd8"
 }
