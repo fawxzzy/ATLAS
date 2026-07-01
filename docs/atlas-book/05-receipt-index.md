@@ -83,6 +83,7 @@
 - [Inventory And Truth Map And ATLAS Book Fitness Effort Persistence And Mazer Right Goal Silhouette Clean Head Re-Sync](../ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-EFFORT-PERSISTENCE-AND-MAZER-RIGHT-GOAL-SILHOUETTE-CLEAN-HEAD-RESYNC-2026-06-29.md)
 - [Inventory And Truth Map And ATLAS Book Mazer Menu Demo Reset Exactness And Live Fitness Dirty Re-Sync](../ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-MAZER-MENU-DEMO-RESET-EXACTNESS-AND-LIVE-FITNESS-DIRTY-RESYNC-2026-06-30.md)
 - [Inventory And Truth Map And ATLAS Book Mazer AiTilePathCheck And Live Fitness Dirty Re-Sync](../ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-MAZER-AI-TILE-PATH-CHECK-AND-LIVE-FITNESS-DIRTY-RESYNC-2026-06-30.md)
+- [Inventory And Truth Map PR105 Current-Head Proof Gate And Marker Hold Re-Sync](../ops/INVENTORY-AND-TRUTH-MAP-PR105-CURRENT-HEAD-PROOF-GATE-AND-MARKER-HOLD-RESYNC-2026-07-01.md)
 - [Truth Map And Inventory Continuity Coverage Rollup And Ratchet](../ops/TRUTH-MAP-AND-INVENTORY-CONTINUITY-COVERAGE-ROLLUP-AND-RATCHET-2026-06-29.md)
 - [Inventory And Truth Map And ATLAS Book Fitness Session Copilot Drift And Mazer Latest Clean Head Re-Sync](../ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-SESSION-COPILOT-DRIFT-AND-MAZER-LATEST-CLEAN-HEAD-RESYNC-2026-06-28.md)
 - [ATLAS Root Main And Fitness Post-Verify Zero Dirty Inventory Re-Sync](../ops/ATLAS-ROOT-MAIN-AND-FITNESS-POST-VERIFY-ZERO-DIRTY-INVENTORY-RESYNC-2026-06-28.md)

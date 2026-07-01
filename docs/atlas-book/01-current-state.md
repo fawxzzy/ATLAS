@@ -4,6 +4,8 @@
 
 The stack is currently at a clean-governance but still-dirty-working-set checkpoint: the latest published clean checkpoint remains intact as historical baseline, root validation remains at the non-blocking warning floor `critical=0 error=0 warning=3 info=0`, the live working set now truthfully carries stack-owned writeback plus dirty local Fitness source changes while `fitness` stays on its newer pushed head and `mazer` is clean again on its latest pushed head, and no immediate ATLAS-root packet is open.
 
+Latest overlay as of 2026-07-01: PR #105 is open, draft, and mergeable on `codex/atlas-browserstack-provider-capture` at ATLAS head `4ace22735229287707549ed5b524e0d8ebccefa2`, with Fitness `main` at `46f14c84ce4a0c6b9dd14579ead8b085afa83893`. ATLAS root and Fitness are parity-clean. Current-head ATLAS QA LLEL run `28536575996` succeeded, but it produced only the dry-run artifact `atlas-qa-dry-run-fitness.progression-pr-smoke` with digest `sha256:251595ddfc4a670d31575cf386040b5a612a6d590b825841440f64dede2ec8de`; `atlas-protected-release-refresh` and `atlas-release-readiness` were skipped. Older restart text that names missing BrowserStack secrets or older Fitness/ATLAS heads is historical context only. The current blocker is narrower: protected BrowserStack promotion/readiness or approved validated manual fallback is still missing for the current heads. This truth refresh is recorded in `docs/ops/INVENTORY-AND-TRUTH-MAP-PR105-CURRENT-HEAD-PROOF-GATE-AND-MARKER-HOLD-RESYNC-2026-07-01.md`.
+
 What is true right now:
 
 - Fitness remains the live app and the owner of the remaining explicit Fitness-retained Discord seams.
