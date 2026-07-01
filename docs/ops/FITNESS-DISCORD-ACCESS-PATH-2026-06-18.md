@@ -5,6 +5,15 @@ Date: 2026-06-18
 Purpose:
 - Prevent future Codex chats from re-discovering the Discord access path problem when working on the Fitness feedback board or any Fitness feature card/thread.
 
+Current verified state:
+- Re-proved on `2026-06-30` that the canonical DiscordOS readiness check still returns `status: ready`:
+  - `npm run ops:production-env:run -- npm run ops:discordos:env-readiness:json`
+- Surfaced this path into the startup guidance actually read by future sessions:
+  - `AGENTS.md`
+  - `repos/fawxzzy-fitness/AGENTS.md`
+  - `repos/DiscordOS/AGENTS.md`
+- Future sessions should now hit the DiscordOS bot path first instead of reclassifying the task as blocked for lack of a generic Discord connector.
+
 Canonical live-update path:
 1. Enter `repos/DiscordOS`.
 2. Prove operator env admission with:

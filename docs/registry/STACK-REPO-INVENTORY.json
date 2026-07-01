@@ -3,14 +3,14 @@
   "stack_manifest_ref": "stack.yaml",
   "stack_manifest_digest": "sha256:e5ac73c00983975b59e4b8e7f8541160d479087f5dc95ad1d642568116bd7d10",
   "stack_lock_ref": "stack.lock.yaml",
-  "stack_lock_digest": "sha256:077dd9f42ed15273ed48f327952dc5b057889bf23b46762f6c708e816be3a638",
+  "stack_lock_digest": "sha256:5e468efcc032f1802d233fd61f44447fdb6ca24cf96a6146c50286a3bacaf219",
   "working_memory_digest": "sha256:fe4f4902e2b2c475974b050ba1bf3f5e740439aa41df2f844555c2c0dc3b310f",
   "published_refs": {
     "json": "docs/registry/STACK-REPO-INVENTORY.json",
     "markdown": "docs/audits/STACK-REPO-INVENTORY.md"
   },
   "repo_count": 12,
-  "dirty_repo_count": 0,
+  "dirty_repo_count": 1,
   "release_eligible_count": 5,
   "repos": [
     {
@@ -77,8 +77,8 @@
       "role": "application",
       "status": "incubating",
       "remote_url": "https://github.com/fawxzzy/DiscordOS.git",
-      "pinned_commit": "76b699269b724070f548ca7841d36ec1505727f8",
-      "current_commit": "76b699269b724070f548ca7841d36ec1505727f8",
+      "pinned_commit": "9bfc67e38455754c63db98c96fcad439007c726d",
+      "current_commit": "9bfc67e38455754c63db98c96fcad439007c726d",
       "pinned_ref_type": "branch",
       "pinned_ref": "main",
       "current_ref_type": "branch",
@@ -122,7 +122,7 @@
       "status": "unmanaged",
       "remote_url": "https://github.com/fawxzzy/fawxzzy-fitness.git",
       "pinned_commit": null,
-      "current_commit": "a308b96d8434602d21081d6b28039af902a003a8",
+      "current_commit": "0e00a552f09164ecef1b61256d4d767f4df35d2e",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
@@ -214,8 +214,8 @@
       "role": "application",
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/mazer.git",
-      "pinned_commit": "6ffa5acf1bfbfc47a0d0124fe906422413885ab3",
-      "current_commit": "6ffa5acf1bfbfc47a0d0124fe906422413885ab3",
+      "pinned_commit": "8fd1a6f30afc6c635ae3bc0945c6701618c57bc6",
+      "current_commit": "8fd1a6f30afc6c635ae3bc0945c6701618c57bc6",
       "pinned_ref_type": "branch",
       "pinned_ref": "codex/mazer-pass2-menu-parity",
       "current_ref_type": "branch",
@@ -317,13 +317,13 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "0136c67a1c09994346ccfe59e695f947dae88b3d",
+      "current_commit": "eec182b81bd3e7918b4b8e33d9f04118c65ad6a7",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
       "current_ref": "codex/atlas-browserstack-provider-capture",
       "branch": "codex/atlas-browserstack-provider-capture",
-      "dirty": false,
+      "dirty": true,
       "trust_class": "trusted",
       "release_eligible": false,
       "exists": true,
@@ -530,5 +530,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:2e5299aaf505a340ce9a9bc9d7960d6f0e5da7e441ecd07874876e81cb6c01cf"
+  "content_digest": "sha256:e5886fde804cbd6c6f1e7569cc65401c420071acb5709b4f88b6c391d1702eed"
 }

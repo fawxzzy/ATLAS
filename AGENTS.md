@@ -15,6 +15,14 @@ Persistent context
   - `docs/memory/profiles/zachariah_workflow_profile.md`
 - Treat that profile as the durable source of truth for assistant behavior and long-term operator/project context.
 
+Fitness Discord live-update path
+- For Fitness forum-card edits, board updates, or `#updates` posts, do not assume the absence of a first-class Discord connector means no live path exists.
+- Read `docs/ops/FITNESS-DISCORD-ACCESS-PATH-2026-06-18.md` before declaring a Discord update blocked.
+- The canonical first check is the admitted DiscordOS bot path in `repos/DiscordOS`:
+  - `npm run ops:production-env:run -- npm run ops:discordos:env-readiness:json`
+- If readiness is `status: ready`, use the DiscordOS bot-backed command family for the live update instead of falling back to browser-control assumptions.
+- Only if that readiness proof is blocked should browser or desktop Discord automation be treated as the fallback path.
+
 Routing
 - Single-repo implementation work should be routed into the target repo root.
 - Cross-repo work may touch only the named repos plus stack-level files under the ATLAS root.
@@ -67,6 +75,7 @@ Live Data Safety
 - Prefer QA accounts, fixture lanes, or dedicated dev routes before mutating user-owned product data during investigation or visual QA.
 - If live user data must be touched, record the targeted records first, keep the mutation bounded, and restore or explicitly report any residual state before claiming completion.
 - Do not treat exploratory product mutations as disposable if they can affect user-visible ordering, naming, history, or active-state truth.
+- Live Discord/forum updates count as live mutations: claim completion only from a proved DiscordOS publication path, a verified browser/desktop fallback, or an explicitly local-only draft artifact.
 
 Parallelism
 - Use one agent per repo or one non-overlapping stack file slice.

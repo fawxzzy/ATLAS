@@ -21,7 +21,7 @@ components:
     remote: "https://github.com/fawxzzy/DiscordOS.git"
     ref_type: "branch"
     ref: "main"
-    commit: "76b699269b724070f548ca7841d36ec1505727f8"
+    commit: "9bfc67e38455754c63db98c96fcad439007c726d"
     dirty: false
     trust_class: "trusted"
     release_eligible: false
@@ -54,7 +54,7 @@ components:
     remote: "https://github.com/fawxzzy/mazer.git"
     ref_type: "branch"
     ref: "codex/mazer-pass2-menu-parity"
-    commit: "6ffa5acf1bfbfc47a0d0124fe906422413885ab3"
+    commit: "8fd1a6f30afc6c635ae3bc0945c6701618c57bc6"
     dirty: false
     trust_class: "trusted"
     release_eligible: true
@@ -216,4 +216,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:077dd9f42ed15273ed48f327952dc5b057889bf23b46762f6c708e816be3a638"
+lock_digest: "sha256:5e468efcc032f1802d233fd61f44447fdb6ca24cf96a6146c50286a3bacaf219"
