@@ -3,14 +3,14 @@
   "stack_manifest_ref": "stack.yaml",
   "stack_manifest_digest": "sha256:e5ac73c00983975b59e4b8e7f8541160d479087f5dc95ad1d642568116bd7d10",
   "stack_lock_ref": "stack.lock.yaml",
-  "stack_lock_digest": "sha256:5e468efcc032f1802d233fd61f44447fdb6ca24cf96a6146c50286a3bacaf219",
+  "stack_lock_digest": "sha256:d21e70edc013ad52b8f00b649f0782564969e4c960f1de07ed2b5748c7979ab1",
   "working_memory_digest": "sha256:fe4f4902e2b2c475974b050ba1bf3f5e740439aa41df2f844555c2c0dc3b310f",
   "published_refs": {
     "json": "docs/registry/STACK-REPO-INVENTORY.json",
     "markdown": "docs/audits/STACK-REPO-INVENTORY.md"
   },
   "repo_count": 12,
-  "dirty_repo_count": 0,
+  "dirty_repo_count": 1,
   "release_eligible_count": 5,
   "repos": [
     {
@@ -128,7 +128,7 @@
       "current_ref_type": "branch",
       "current_ref": "main",
       "branch": "main",
-      "dirty": false,
+      "dirty": true,
       "trust_class": "adjacent",
       "release_eligible": false,
       "exists": true,
@@ -214,8 +214,8 @@
       "role": "application",
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/mazer.git",
-      "pinned_commit": "8fd1a6f30afc6c635ae3bc0945c6701618c57bc6",
-      "current_commit": "8fd1a6f30afc6c635ae3bc0945c6701618c57bc6",
+      "pinned_commit": "8e792080eacaa544d05e9a909529c8434f459dda",
+      "current_commit": "8e792080eacaa544d05e9a909529c8434f459dda",
       "pinned_ref_type": "branch",
       "pinned_ref": "codex/mazer-pass2-menu-parity",
       "current_ref_type": "branch",
@@ -317,7 +317,7 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "7d927f2ddcd73be03e96124751baa4f937b357fb",
+      "current_commit": "61c07ba2f3db54360f880b6d2a931cb96a18a7e7",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
@@ -530,5 +530,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:c0561b58d1ad4c6ed2773d0105c4d69fc3551268710e3141afb993d8f893855d"
+  "content_digest": "sha256:16feace6a0af6859e4ed30dc0833b595d1c7f3139b64ea1bf27715e5f6d96ae0"
 }
