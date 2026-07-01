@@ -2934,6 +2934,56 @@ console.log(JSON.stringify({ desktopUrl, androidUrl, waitUntilWithSelector, wait
         self.assertEqual(2, run_mock.call_count)
         sleep_mock.assert_called_once()
 
+    def test_browserstack_provider_defaults_to_four_transient_attempts(self) -> None:
+        failures = [
+            subprocess.CompletedProcess(
+                args=["node", "capture_browserstack.mjs"],
+                returncode=1,
+                stdout="",
+                stderr="Provider screenshot failed for lens iphone.webkit.real. reason=Socket idle from a long time",
+            )
+            for _ in range(4)
+        ]
+        with mock.patch.dict(
+            "os.environ",
+            {
+                "BROWSERSTACK_USERNAME": "atlas-browserstack-user",
+                "BROWSERSTACK_ACCESS_KEY": "atlas-browserstack-key",
+            },
+            clear=False,
+        ):
+            with mock.patch(
+                "ops.atlas.qa.providers.browserstack_provider.subprocess.run",
+                side_effect=failures,
+            ) as run_mock:
+                with mock.patch("ops.atlas.qa.providers.browserstack_provider.time.sleep") as sleep_mock:
+                    with self.assertRaisesRegex(RuntimeError, "Socket idle from a long time"):
+                        capture_with_provider(
+                            root=ROOT,
+                            provider_manifest_ref="ops/atlas/qa/providers/browserstack.playwright.v1.json",
+                            config={
+                                "repoRoot": str(ROOT / "repos" / "fawxzzy-fitness"),
+                                "outputDir": str(ROOT / "tmp" / "qa-provider-test"),
+                                "browserEngine": "webkit",
+                                "viewport": {"width": 393, "height": 852, "device_scale_factor": 3},
+                                "sourceUrl": "https://example.com",
+                                "runId": "run-1",
+                                "scenarioId": "fixture",
+                                "adapterId": "fixture.web",
+                                "repoId": "fitness",
+                                "gitSha": "abcdef1234567890",
+                                "lensId": "iphone.webkit.real",
+                                "lensProfileId": "iphone.webkit",
+                                "deviceModel": "iPhone 15",
+                                "osName": "iOS",
+                                "osVersion": "17",
+                                "browserName": "safari",
+                                "browserVersion": "17",
+                            },
+                        )
+        self.assertEqual(4, run_mock.call_count)
+        self.assertEqual(3, sleep_mock.call_count)
+
     def test_compatibility_report_marks_fitness_contract_compatible(self) -> None:
         report = compatibility_report(root=ROOT, adapter="fitness.web", scenario="fitness.progression-pr-smoke")
         self.assertEqual("compatible", report["status"])

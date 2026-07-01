@@ -163,27 +163,36 @@ async function safePageDebugValue(getValue, fallback = null) {
   }
 }
 
+function isBrowserStackSocketFailure(error) {
+  const message = error instanceof Error ? error.message : String(error || "");
+  return /socket idle from a long time|playwright connection closed|browser has been closed|target closed/i.test(message);
+}
+
 async function writeFailureDebug({ page, config, outputDir, error }) {
   const screenshotPath = path.join(outputDir, "failure.png");
   const debugPath = path.join(outputDir, "failure.debug.json");
   await fs.mkdir(outputDir, { recursive: true });
 
-  await safePageDebugValue(() => page.screenshot({ path: screenshotPath, fullPage: true }));
+  const skipPageProbes = isBrowserStackSocketFailure(error);
+  if (!skipPageProbes) {
+    await safePageDebugValue(() => page.screenshot({ path: screenshotPath, fullPage: true, timeout: 10000 }));
+  }
   const payload = {
     capturedAt: new Date().toISOString(),
     sourceUrl: String(config.sourceUrl || ""),
-    currentUrl: await safePageDebugValue(() => page.url(), ""),
-    title: await safePageDebugValue(() => page.title(), ""),
+    currentUrl: skipPageProbes ? "" : await safePageDebugValue(() => page.url(), ""),
+    title: skipPageProbes ? "" : await safePageDebugValue(() => page.title(), ""),
     readySelector: String(config.readySelector || ""),
     readyState: resolveReadyState(config),
     errorMessage: error instanceof Error ? error.message : String(error),
-    documentReadyState: await safePageDebugValue(() => page.evaluate(() => document.readyState), null),
-    htmlDataset: await safePageDebugValue(() => page.evaluate(() => ({ ...document.documentElement.dataset })), null),
-    bodyDataset: await safePageDebugValue(() => page.evaluate(() => document.body ? ({ ...document.body.dataset }) : null), null),
-    bodyTextPreview: await safePageDebugValue(
+    documentReadyState: skipPageProbes ? null : await safePageDebugValue(() => page.evaluate(() => document.readyState), null),
+    htmlDataset: skipPageProbes ? null : await safePageDebugValue(() => page.evaluate(() => ({ ...document.documentElement.dataset })), null),
+    bodyDataset: skipPageProbes ? null : await safePageDebugValue(() => page.evaluate(() => document.body ? ({ ...document.body.dataset }) : null), null),
+    bodyTextPreview: skipPageProbes ? "" : await safePageDebugValue(
       () => page.evaluate(() => (document.body?.innerText || "").slice(0, 500)),
       "",
     ),
+    pageProbesSkipped: skipPageProbes,
   };
   await fs.writeFile(debugPath, JSON.stringify(payload, null, 2) + "\n", "utf8");
   return {
@@ -195,19 +204,20 @@ async function writeFailureDebug({ page, config, outputDir, error }) {
 }
 
 async function captureScreenshotWithFallbacks({ page, config, screenshotPath, outputDir }) {
+  const timeout = Number.isFinite(Number(config.screenshotTimeoutMs)) ? Number(config.screenshotTimeoutMs) : 20000;
   const attempts = [
     async () => {
-      await page.screenshot({ path: screenshotPath, fullPage: Boolean(config.fullPage) });
+      await page.screenshot({ path: screenshotPath, fullPage: Boolean(config.fullPage), timeout });
       return "page";
     },
     async () => {
       const body = page.locator("body");
-      await body.screenshot({ path: screenshotPath });
+      await body.screenshot({ path: screenshotPath, timeout });
       return "body";
     },
     async () => {
       const html = page.locator("html");
-      await html.screenshot({ path: screenshotPath });
+      await html.screenshot({ path: screenshotPath, timeout });
       return "html";
     },
   ];
@@ -274,6 +284,7 @@ async function main() {
         height: config.viewport.height,
       },
     });
+  context.setDefaultTimeout(20000);
   const page = await context.newPage();
   const consoleLines = [];
   const networkEntries = [];

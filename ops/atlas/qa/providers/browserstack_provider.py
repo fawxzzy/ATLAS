@@ -53,7 +53,7 @@ def _redact_provider_output(text: str, secrets: dict[str, str]) -> str:
 def _capture_attempts() -> int:
     raw_value = os.environ.get("BROWSERSTACK_CAPTURE_ATTEMPTS", "").strip()
     if not raw_value:
-        return 2
+        return 4
     try:
         return max(1, min(5, int(raw_value)))
     except ValueError:
