@@ -36,6 +36,49 @@ function resolveReadyState(config) {
   return requestedState;
 }
 
+async function waitForVisibleImages(page, timeoutMs = 10000) {
+  await page.waitForFunction(
+    () => Array.from(document.images)
+      .filter((image) => {
+        const rect = image.getBoundingClientRect();
+        const style = window.getComputedStyle(image);
+        return rect.width > 0
+          && rect.height > 0
+          && style.visibility !== "hidden"
+          && style.display !== "none";
+      })
+      .every((image) => image.complete && image.naturalWidth > 0),
+    undefined,
+    { timeout: timeoutMs },
+  );
+}
+
+function captureRetryUrl(sourceUrl) {
+  try {
+    const parsed = new URL(String(sourceUrl || ""));
+    parsed.searchParams.set("__atlas_capture_retry", String(Date.now()));
+    parsed.searchParams.delete("app-recovery");
+    parsed.searchParams.delete("app-build");
+    return parsed.toString();
+  } catch {
+    return sourceUrl;
+  }
+}
+
+async function navigateToReadyPage(page, config, sourceUrl) {
+  await page.goto(sourceUrl, { waitUntil: config.waitUntil || "networkidle" });
+  if (config.readySelector) {
+    await page.waitForSelector(config.readySelector, {
+      state: resolveReadyState(config),
+      timeout: config.readyTimeoutMs || 30000,
+    });
+  }
+  if (config.settleMs) {
+    await page.waitForTimeout(config.settleMs);
+  }
+  await waitForVisibleImages(page, config.imageReadyTimeoutMs || 10000);
+}
+
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   const configPath = args.get("config");
@@ -124,15 +167,13 @@ async function main() {
     await context.tracing.start({ screenshots: true, snapshots: true });
   }
 
-  await page.goto(config.sourceUrl, { waitUntil: config.waitUntil || "networkidle" });
-  if (config.readySelector) {
-    await page.waitForSelector(config.readySelector, {
-      state: resolveReadyState(config),
-      timeout: config.readyTimeoutMs || 30000,
-    });
-  }
-  if (config.settleMs) {
-    await page.waitForTimeout(config.settleMs);
+  try {
+    await navigateToReadyPage(page, config, config.sourceUrl);
+  } catch (error) {
+    if (!String(page.url()).includes("app-recovery=chunk-load-error")) {
+      throw error;
+    }
+    await navigateToReadyPage(page, config, captureRetryUrl(config.sourceUrl));
   }
 
   const outputs = {};
