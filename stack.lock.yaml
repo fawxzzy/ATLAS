@@ -11,7 +11,7 @@ components:
     ref_type: "branch"
     ref: "codex/queue-or-registry-broader-execution-behavior"
     commit: "3450e463b1e666c9e7f8caa2bf990338882aeca4"
-    dirty: false
+    dirty: true
     trust_class: "trusted"
     release_eligible: false
   discordos:
@@ -54,7 +54,7 @@ components:
     remote: "https://github.com/fawxzzy/mazer.git"
     ref_type: "branch"
     ref: "codex/mazer-pass2-menu-parity"
-    commit: "2dd6efb270dc55be19964b510989ce6ca6401d3b"
+    commit: "02cbdf279fabe1e2a82e33af8494d19e32d9d380"
     dirty: false
     trust_class: "trusted"
     release_eligible: true
@@ -216,4 +216,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:88ce77beb7f1a150a52a0b260a44a7c805bf9c4336a29dbc31442768a1a2bde4"
+lock_digest: "sha256:c0d1ffa8a8ace858c77bed2e72b00643ee79fd6af539ecb5fffdeda94699f8a1"
