@@ -3,7 +3,7 @@
   "stack_manifest_ref": "stack.yaml",
   "stack_manifest_digest": "sha256:e5ac73c00983975b59e4b8e7f8541160d479087f5dc95ad1d642568116bd7d10",
   "stack_lock_ref": "stack.lock.yaml",
-  "stack_lock_digest": "sha256:ed988b440a8ad8feec3fea278fc09232ce583dbf00cbffea10558611aa8bdaeb",
+  "stack_lock_digest": "sha256:fa74f7b75a0b1e11d932d6e8de6cd609a2f2641500080fba5c0ab26315a25978",
   "working_memory_digest": "sha256:fe4f4902e2b2c475974b050ba1bf3f5e740439aa41df2f844555c2c0dc3b310f",
   "published_refs": {
     "json": "docs/registry/STACK-REPO-INVENTORY.json",
@@ -214,8 +214,8 @@
       "role": "application",
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/mazer.git",
-      "pinned_commit": "d8b14e1d18f6e6c8812556ad4aa2787b78b5a5c9",
-      "current_commit": "d8b14e1d18f6e6c8812556ad4aa2787b78b5a5c9",
+      "pinned_commit": "bdd2dd3c00f8272fd6b725849fa884e4e6c91e0b",
+      "current_commit": "bdd2dd3c00f8272fd6b725849fa884e4e6c91e0b",
       "pinned_ref_type": "branch",
       "pinned_ref": "codex/mazer-pass2-menu-parity",
       "current_ref_type": "branch",
@@ -317,12 +317,12 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "e1b8a53aa2a38e26f9cb7c3ca166f27a9e0a1fd9",
+      "current_commit": "cd76d04d5c408986cf976f318765c59db9d99a69",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
-      "current_ref": "codex/atlas-mazer-stack-lock-resync-20260701",
-      "branch": "codex/atlas-mazer-stack-lock-resync-20260701",
+      "current_ref": "codex/atlas-mazer-dense-slab-resync-20260702",
+      "branch": "codex/atlas-mazer-dense-slab-resync-20260702",
       "dirty": false,
       "trust_class": "trusted",
       "release_eligible": false,
@@ -530,5 +530,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:48665892059de41c5c941711446b53d4c575fe475a8738005e76012e6f39c1bb"
+  "content_digest": "sha256:18b4121fdc395a5f65ef4cca06e88741168cf3b66d93fe7fb891bbee3c419766"
 }
