@@ -185,6 +185,17 @@ def _live_repo_state(repo_path: Path, *, ignored_dirty_paths: set[str] | None = 
     }
 
 
+def _repo_blocks_root(repo_id: str, repo_info: dict[str, Any], lock_config: dict[str, Any]) -> bool:
+    overrides = lock_config.get("repo_overrides", {})
+    if isinstance(overrides, dict):
+        repo_override = overrides.get(repo_id, {})
+        if isinstance(repo_override, dict) and "root_blocking" in repo_override:
+            return bool(repo_override["root_blocking"])
+    if "root_blocking" in repo_info:
+        return bool(repo_info["root_blocking"])
+    return str(repo_info.get("status", "unknown")) != "unmanaged"
+
+
 def build_repo_inventory(
     *,
     root: Path | None = None,
@@ -229,6 +240,8 @@ def build_repo_inventory(
         live_state = _live_repo_state(repo_path, ignored_dirty_paths=ignored_dirty_paths)
         lock_component = lock_components.get(repo_id) if isinstance(lock_components.get(repo_id), dict) else {}
         related_initiatives = initiative_index.get(repo_id, [])
+        root_blocking = _repo_blocks_root(repo_id, repo_info, lock_config)
+        dirty_blocks_root = bool(live_state["dirty"] is True and root_blocking)
         repos.append(
             {
                 "logical_id": repo_id,
@@ -244,6 +257,8 @@ def build_repo_inventory(
                 "current_ref": live_state["current_ref"],
                 "branch": live_state["branch"],
                 "dirty": live_state["dirty"],
+                "root_blocking": root_blocking,
+                "dirty_blocks_root": dirty_blocks_root,
                 "trust_class": lock_component.get("trust_class") or repo_trust_class(repo_id, repo_info, lock_config),
                 "release_eligible": (
                     bool(lock_component.get("release_eligible"))
@@ -291,7 +306,9 @@ def build_repo_inventory(
             "markdown": normalize_slashes(str(DEFAULT_MARKDOWN_OUTPUT)),
         },
         "repo_count": len(repos),
-        "dirty_repo_count": sum(1 for item in repos if item.get("dirty") is True),
+        "dirty_repo_count": sum(1 for item in repos if item.get("dirty_blocks_root") is True),
+        "visible_dirty_repo_count": sum(1 for item in repos if item.get("dirty") is True),
+        "advisory_dirty_repo_count": sum(1 for item in repos if item.get("dirty") is True and not item.get("root_blocking")),
         "release_eligible_count": sum(1 for item in repos if bool(item.get("release_eligible"))),
         "repos": repos,
         "excluded_surface_count": len(excluded_surfaces),
@@ -313,6 +330,8 @@ def summarize_repo_inventory(payload: dict[str, Any]) -> dict[str, Any]:
             "local_path": item.get("local_path"),
             "branch": item.get("branch"),
             "dirty": item.get("dirty"),
+            "root_blocking": item.get("root_blocking"),
+            "dirty_blocks_root": item.get("dirty_blocks_root"),
             "trust_class": item.get("trust_class"),
             "release_eligible": item.get("release_eligible"),
             "related_initiative_refs": item.get("related_initiative_refs", []),
@@ -325,7 +344,9 @@ def summarize_repo_inventory(payload: dict[str, Any]) -> dict[str, Any]:
         "content_digest": payload.get("content_digest"),
         "published_refs": payload.get("published_refs"),
         "item_count": len(items),
-        "dirty_item_count": sum(1 for item in items if item.get("dirty") is True),
+        "dirty_item_count": sum(1 for item in items if item.get("dirty_blocks_root") is True),
+        "visible_dirty_item_count": sum(1 for item in items if item.get("dirty") is True),
+        "advisory_dirty_item_count": sum(1 for item in items if item.get("dirty") is True and not item.get("root_blocking")),
         "release_eligible_count": sum(1 for item in items if bool(item.get("release_eligible"))),
         "repo_ids": [item.get("logical_id") for item in items],
         "excluded_surface_count": len(excluded_surfaces),
@@ -375,12 +396,15 @@ def render_repo_inventory_markdown(payload: dict[str, Any]) -> str:
         "- `stack.yaml` declares topology",
         "- `stack.lock.yaml` pins the working set",
         "- this inventory publishes the visible topology for root status, chat, search, and future cockpit surfaces",
+        "- `dirty_repo_count` counts only root-blocking repos; unmanaged owner-lane dirtiness remains visible as advisory dirtiness",
         "- `repos/**` stays untracked by the root repo except for explicit stack-owned docs and audits outside that tree",
         "",
         "## Summary",
         "",
         f"- Repo count: `{payload.get('repo_count', 0)}`",
-        f"- Dirty repo count: `{payload.get('dirty_repo_count', 0)}`",
+        f"- Root-blocking dirty repo count: `{payload.get('dirty_repo_count', 0)}`",
+        f"- Visible dirty repo count: `{payload.get('visible_dirty_repo_count', 0)}`",
+        f"- Advisory dirty repo count: `{payload.get('advisory_dirty_repo_count', 0)}`",
         f"- Release-eligible repo count: `{payload.get('release_eligible_count', 0)}`",
         f"- Excluded surface count: `{payload.get('excluded_surface_count', 0)}`",
         f"- Stack manifest: `{payload.get('stack_manifest_ref')}`",
@@ -389,8 +413,8 @@ def render_repo_inventory_markdown(payload: dict[str, Any]) -> str:
         "",
         "## Managed Repos",
         "",
-        "| Repo id | Path | Branch | Pinned commit | Current commit | Dirty | Trust | Release | Related initiatives |",
-        "| --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+        "| Repo id | Path | Branch | Pinned commit | Current commit | Dirty | Root-blocking | Dirty blocks root | Trust | Release | Related initiatives |",
+        "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
     ]
 
     for item in repos:
@@ -410,6 +434,8 @@ def render_repo_inventory_markdown(payload: dict[str, Any]) -> str:
                     str(item.get("pinned_commit") or "-"),
                     str(item.get("current_commit") or "-"),
                     str(item.get("dirty") if item.get("dirty") is not None else "-"),
+                    str(item.get("root_blocking")),
+                    str(item.get("dirty_blocks_root")),
                     str(item.get("trust_class") or "-"),
                     str(item.get("release_eligible")),
                     initiative_text,

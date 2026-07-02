@@ -116,6 +116,28 @@ class StackRepoInventoryTests(unittest.TestCase):
         }
         self.assertIn("stack", dirty_repo_ids)
 
+    def test_unmanaged_owner_lane_dirty_repos_are_advisory_not_root_blocking(self) -> None:
+        def fake_git_status_lines(repo_path):
+            if repo_path.resolve() in {
+                (self.root / "repos" / "fawxzzy-fitness").resolve(),
+                (self.root / "repos" / "mazer").resolve(),
+            }:
+                return [" M docs/owner-lane.md"]
+            return []
+
+        with patch("ops.stack.export_repo_inventory.git_status_lines", side_effect=fake_git_status_lines):
+            inventory = build_repo_inventory(root=self.root)
+
+        by_id = {item["logical_id"]: item for item in inventory["repos"]}
+        for repo_id in ("fitness", "mazer"):
+            self.assertTrue(by_id[repo_id]["dirty"])
+            self.assertFalse(by_id[repo_id]["root_blocking"])
+            self.assertFalse(by_id[repo_id]["dirty_blocks_root"])
+
+        self.assertEqual(0, inventory["dirty_repo_count"])
+        self.assertEqual(2, inventory["visible_dirty_repo_count"])
+        self.assertEqual(2, inventory["advisory_dirty_repo_count"])
+
 
 if __name__ == "__main__":
     unittest.main()

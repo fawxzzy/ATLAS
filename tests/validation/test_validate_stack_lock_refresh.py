@@ -9,6 +9,7 @@ from unittest.mock import patch
 from ops.stack.generate_lockfile import (
     STACK_LOCK_SCHEMA_VERSION,
     describe_lock_payload_drift,
+    included_repo_ids,
     normalize_lock_payload,
     render_lockfile_bytes,
 )
@@ -310,6 +311,17 @@ class ValidateStackRootLockRefreshTests(unittest.TestCase):
             ("stack-lock-pin-drift", "stack.lock.yaml#child"),
             categories_by_path,
         )
+
+    def test_unmanaged_repos_are_not_implicitly_lock_managed(self) -> None:
+        config = {
+            "repo_registry": {
+                "stack": {"path": ".", "role": "operator-layer", "status": "active"},
+                "fitness": {"path": "repos/fawxzzy-fitness", "role": "application", "status": "unmanaged"},
+                "mazer": {"path": "repos/mazer", "role": "application", "status": "unmanaged"},
+            }
+        }
+
+        self.assertEqual(["stack"], included_repo_ids(config))
 
 
 if __name__ == "__main__":
