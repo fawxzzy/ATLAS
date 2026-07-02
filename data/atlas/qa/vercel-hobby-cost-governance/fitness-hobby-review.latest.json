@@ -1,18 +1,19 @@
 {
   "contract_version": "atlas.vercel_hobby_review.v1",
-  "review_id": "fitness-hobby-review-2026-07-01-current-fitness-8049f0a5",
-  "generated_at": "2026-07-01T21:10:00Z",
+  "review_id": "fitness-hobby-review-2026-07-02-current-fitness-44724e99",
+  "generated_at": "2026-07-02T04:40:00Z",
   "repo_id": "fitness",
-  "target_sha": "8049f0a59b601b0a27a48344df0bac859d6366be",
+  "target_sha": "44724e9971ec7dc7e608112973c05d23e70b0a80",
   "checkpoint_status": "ready",
   "decision": "keep_hobby",
-  "decision_reason": "Fitness target 8049f0a5 retains the bounded Lifetime Pro billing endpoints and retired Discord message-command polling endpoint already accepted in the current drift field set; deployment remains disabled, guardrail posture categories remain unchanged, and the no-secret pressure review does not justify a default Vercel plan upgrade.",
+  "decision_reason": "Fitness target 44724e99 retains the bounded Lifetime Pro billing endpoints and retired Discord message-command polling endpoint already accepted in the current drift field set; deployment remains disabled, guardrail posture categories remain unchanged, internal fetch sites decreased from the preserved checkpoint, and the no-secret pressure review does not justify a default Vercel plan upgrade.",
   "next_action": "stay on Hobby by default, keep billing and webhook routes on the guardrail watch list, and reopen upgrade review if deployment is enabled or route/fetch pressure increases again",
-  "accepted_signature_digest": "sha256:6d1fccb7a6a18701a294a9981079ccacfc1ed44fd0955560d75c7ec591119bf4",
+  "accepted_signature_digest": "sha256:00bdcbf1157173a41523a7b09387b3b00d6a487ec5770767df9c3ae5df27e0d3",
   "accepted_drift_fields": [
     "api_routes",
     "external_or_dynamic_fetch_sites",
     "force_dynamic_routes",
+    "internal_fetch_sites",
     "middleware_public_authless_paths",
     "nodejs_route_count",
     "nodejs_routes",
@@ -30,6 +31,7 @@
     },
     "bounded_additions": [
       "/api/billing/checkout",
+      "/api/billing/portal",
       "/api/billing/webhook/stripe",
       "/api/discord/message-commands/poll"
     ],
