@@ -3530,6 +3530,7 @@ console.log(JSON.stringify(caps));
             {
                 "GITHUB_ACTIONS": "true",
                 "GITHUB_EVENT_NAME": "workflow_dispatch",
+                "ATLAS_QA_ORIGIN_TYPE": "",
             },
             clear=False,
         ):
