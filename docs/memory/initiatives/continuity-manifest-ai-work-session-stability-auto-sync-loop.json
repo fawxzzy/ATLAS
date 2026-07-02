@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-06-29T00:00:00Z",
-  "updated_at": "2026-07-02T18:48:10Z",
+  "updated_at": "2026-07-02T19:09:43Z",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -28,6 +28,7 @@
     "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-PREFLIGHT-AGGREGATOR-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-29.md",
     "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-POST-OWNER-LANE-SEPARATION-NEXT-SLICE-SELECTION-2026-07-02.md",
     "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-CLOSEOUT-AGGREGATOR-FIRST-IMPLEMENTATION-ADMISSION-2026-07-02.md",
+    "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-CLOSEOUT-AGGREGATOR-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-02.md",
     "ops/atlas/ai_work_session_preflight.py",
     "tests/test_atlas_ai_work_session_preflight.py"
   ],
@@ -37,9 +38,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "ai-work-session-stability-auto-sync-loop",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-CLOSEOUT-AGGREGATOR-FIRST-IMPLEMENTATION-ADMISSION-2026-07-02.md",
-    "checkpoint_commit": "main@e33b03dc",
-    "checkpoint_summary": "The lane still sits at 25 percent after the landed read-only preflight helper, but post-owner-lane separation selector truth now admits the read-only closeout aggregator prompt-pack as the next exact same-lane package without implementing the worker or widening into owner/platform mutation.",
+    "current_checkpoint_receipt": "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-CLOSEOUT-AGGREGATOR-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-02.md",
+    "checkpoint_commit": "main@d919eaca",
+    "checkpoint_summary": "The lane still sits at 25 percent after the landed read-only preflight helper, but the closeout-aggregator prompt-pack now freezes the future worker objective, output contract, proof matrix, no-mutation guards, and routes the next same-lane package to implementation-readiness and worker-routing.",
     "governing_receipts": [
       "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-CONTRACT-FREEZE-2026-06-29.md",
       "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-PREFLIGHT-AGGREGATOR-FIRST-IMPLEMENTATION-ADMISSION-2026-06-29.md",
@@ -47,9 +48,14 @@
       "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-PREFLIGHT-AGGREGATOR-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-06-29.md",
       "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-PREFLIGHT-AGGREGATOR-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-29.md",
       "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-POST-OWNER-LANE-SEPARATION-NEXT-SLICE-SELECTION-2026-07-02.md",
-      "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-CLOSEOUT-AGGREGATOR-FIRST-IMPLEMENTATION-ADMISSION-2026-07-02.md"
+      "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-CLOSEOUT-AGGREGATOR-FIRST-IMPLEMENTATION-ADMISSION-2026-07-02.md",
+      "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-CLOSEOUT-AGGREGATOR-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-02.md"
     ],
     "owner_truth_surfaces": [
+      {
+        "path": "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-CLOSEOUT-AGGREGATOR-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-02.md",
+        "role": "docs-only closeout aggregator prompt-pack, worker objective, output contract, proof matrix, guards, and next readiness-routing package"
+      },
       {
         "path": "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-CLOSEOUT-AGGREGATOR-FIRST-IMPLEMENTATION-ADMISSION-2026-07-02.md",
         "role": "docs-only closeout aggregator admission, future output contract, proof matrix, and next prompt-pack handoff"
@@ -120,7 +126,7 @@
     "blocked_or_gated_work": [
       {
         "item": "implementing the closeout command before prompt-pack and worker handoff are explicit",
-        "requirement": "blocked until the admitted closeout aggregator prompt-pack and worker handoff contract freezes touch surfaces, tests, stop conditions, and reconciliation routing"
+        "requirement": "cleared for prompt-pack only; implementation remains blocked until implementation-readiness and worker-routing explicitly admit the bounded worker packet"
       },
       {
         "item": "moving the marker above 25 percent from selector or admission wording alone",
@@ -133,15 +139,15 @@
     ],
     "next_package_ladder": [
       {
-        "package": "AI Work Session Stability & Auto-Sync Loop read-only closeout aggregator prompt-pack and worker handoff contract",
-        "mode": "docs-only prompt-pack and worker handoff contract",
-        "reason": "the post-owner-lane-separation selector admitted the closeout aggregator as the next smallest same-lane slice, and the first-implementation admission froze the future worker output contract without implementing it"
+        "package": "AI Work Session Stability & Auto-Sync Loop read-only closeout aggregator implementation-readiness closeout and worker-routing",
+        "mode": "docs-only implementation-readiness closeout and worker-routing",
+        "reason": "the closeout aggregator prompt-pack froze the worker objective, output contract, proof matrix, allowed and forbidden behavior, and no-mutation guards; the next honest step is to decide whether the worker can be routed for bounded implementation"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-CLOSEOUT-AGGREGATOR-FIRST-IMPLEMENTATION-ADMISSION-2026-07-02.md",
-    "freshness_checked_at": "2026-07-02T18:48:10Z",
-    "freshness_basis": "The manifest now mirrors the post-owner-lane-separation selector decision, the closeout aggregator admission, the unchanged 25 percent marker posture, and the prompt-pack handoff as the next exact same-lane package.",
+    "freshness_checked_receipt": "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-CLOSEOUT-AGGREGATOR-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-02.md",
+    "freshness_checked_at": "2026-07-02T19:09:43Z",
+    "freshness_basis": "The manifest now mirrors the closeout aggregator prompt-pack, the unchanged 25 percent marker posture, and implementation-readiness plus worker-routing as the next exact same-lane package.",
     "marker_posture": [
       {
         "marker": "AI Work Session Stability & Auto-Sync Loop",

@@ -271,14 +271,14 @@ POLICY_REGISTRY: dict[str, MarkerPolicy] = {
     "AI Work Session Stability & Auto-Sync Loop": MarkerPolicy(
         category="admissible after current lane",
         rationale=(
-            "The lane now has the landed preflight helper and a post-owner-lane-separation selector/admission "
-            "receipt for the read-only closeout aggregator. It should not outrank the held active Sandbox "
+            "The lane now has the landed preflight helper plus a frozen prompt-pack and worker handoff "
+            "contract for the read-only closeout aggregator. It should not outrank the held active Sandbox "
             "family, but it is the first honest downstream automation package once the current hold posture "
             "allows fall-through."
         ),
         expected_evidence=(
-            "one bounded prompt-pack and worker handoff contract for the read-only closeout aggregator, with "
-            "future helper/test touch surfaces explicit and no owner/platform mutation widening"
+            "one bounded implementation-readiness and worker-routing decision for the read-only closeout "
+            "aggregator, with future helper/test touch surfaces explicit and no owner/platform mutation widening"
         ),
     ),
     "Feedback Loop Readiness": MarkerPolicy(
@@ -339,16 +339,16 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "AI Work Session Stability & Auto-Sync Loop": PacketDescriptor(
-        packet="AI Work Session Stability & Auto-Sync Loop read-only closeout aggregator prompt-pack and worker handoff contract",
+        packet="AI Work Session Stability & Auto-Sync Loop read-only closeout aggregator implementation-readiness closeout and worker-routing",
         basis_receipt_ref=(
             "docs/ops/"
             "AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-CLOSEOUT-AGGREGATOR-"
-            "FIRST-IMPLEMENTATION-ADMISSION-2026-07-02.md"
+            "PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-02.md"
         ),
-        mode="docs-only prompt-pack and worker handoff contract",
+        mode="docs-only implementation-readiness closeout and worker-routing",
         scope=(
-            "freeze exact worker touch surfaces, command shape, test cases, allowed outputs, stop conditions, "
-            "and the final worker-cluster reconciliation package for the future read-only closeout aggregator"
+            "decide whether the read-only closeout aggregator worker can be routed for bounded implementation "
+            "without widening into owner-repo, platform, protected-proof, cleanup, or orchestration behavior"
         ),
     ),
 }
