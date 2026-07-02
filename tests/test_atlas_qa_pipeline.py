@@ -2940,6 +2940,24 @@ console.log(JSON.stringify({ desktopUrl, androidUrl, waitUntilWithSelector, wait
         self.assertNotIn(encoded_access_key, message)
         self.assertIn("[REDACTED]", message)
 
+    def test_browserstack_capture_classifies_socket_idle_as_session_failure(self) -> None:
+        script = """
+import { isBrowserStackSocketFailure } from './ops/atlas/qa/capture_browserstack.mjs';
+if (!isBrowserStackSocketFailure(new Error('locator.screenshot: page.screenshot: Socket idle from a long time'))) {
+  throw new Error('socket idle should be classified as a BrowserStack session failure');
+}
+if (isBrowserStackSocketFailure(new Error('strict mode violation'))) {
+  throw new Error('non-session screenshot errors should still allow same-session fallback');
+}
+"""
+        subprocess.run(
+            ["node", "--input-type=module", "-e", script],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+
     def test_browserstack_provider_retries_transient_socket_idle_failure(self) -> None:
         failure = subprocess.CompletedProcess(
             args=["node", "capture_browserstack.mjs"],
@@ -2999,6 +3017,69 @@ console.log(JSON.stringify({ desktopUrl, androidUrl, waitUntilWithSelector, wait
                     )
         self.assertEqual("run-1:iphone.webkit.real", payload["provider_run_id"])
         self.assertEqual(2, run_mock.call_count)
+        sleep_mock.assert_called_once()
+
+    def test_browserstack_provider_retries_capture_timeout(self) -> None:
+        timeout = subprocess.TimeoutExpired(
+            cmd=["node", "capture_browserstack.mjs"],
+            timeout=60,
+            output="",
+            stderr="",
+        )
+        success = subprocess.CompletedProcess(
+            args=["node", "capture_browserstack.mjs"],
+            returncode=0,
+            stdout=json.dumps(
+                {
+                    "provider_id": "browserstack.playwright",
+                    "provider_run_id": "run-1:iphone.webkit.real",
+                    "metadata_path": str(ROOT / "tmp" / "qa-provider-test" / "capture.metadata.json"),
+                    "outputs": {},
+                }
+            ),
+            stderr="",
+        )
+        with mock.patch.dict(
+            "os.environ",
+            {
+                "BROWSERSTACK_USERNAME": "atlas-browserstack-user",
+                "BROWSERSTACK_ACCESS_KEY": "atlas-browserstack-key",
+                "BROWSERSTACK_CAPTURE_ATTEMPTS": "2",
+                "BROWSERSTACK_CAPTURE_TIMEOUT_SECONDS": "60",
+            },
+            clear=False,
+        ):
+            with mock.patch(
+                "ops.atlas.qa.providers.browserstack_provider.subprocess.run",
+                side_effect=[timeout, success],
+            ) as run_mock:
+                with mock.patch("ops.atlas.qa.providers.browserstack_provider.time.sleep") as sleep_mock:
+                    payload = capture_with_provider(
+                        root=ROOT,
+                        provider_manifest_ref="ops/atlas/qa/providers/browserstack.playwright.v1.json",
+                        config={
+                            "repoRoot": str(ROOT / "repos" / "fawxzzy-fitness"),
+                            "outputDir": str(ROOT / "tmp" / "qa-provider-test"),
+                            "browserEngine": "webkit",
+                            "viewport": {"width": 393, "height": 852, "device_scale_factor": 3},
+                            "sourceUrl": "https://example.com",
+                            "runId": "run-1",
+                            "scenarioId": "fixture",
+                            "adapterId": "fixture.web",
+                            "repoId": "fitness",
+                            "gitSha": "abcdef1234567890",
+                            "lensId": "iphone.webkit.real",
+                            "lensProfileId": "iphone.webkit",
+                            "deviceModel": "iPhone 15",
+                            "osName": "iOS",
+                            "osVersion": "17",
+                            "browserName": "safari",
+                            "browserVersion": "17",
+                        },
+                    )
+        self.assertEqual("run-1:iphone.webkit.real", payload["provider_run_id"])
+        self.assertEqual(2, run_mock.call_count)
+        self.assertEqual(60, run_mock.call_args_list[0].kwargs["timeout"])
         sleep_mock.assert_called_once()
 
     def test_browserstack_provider_defaults_to_four_transient_attempts(self) -> None:

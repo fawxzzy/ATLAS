@@ -60,6 +60,16 @@ def _capture_attempts() -> int:
         return 2
 
 
+def _capture_timeout_s() -> int:
+    raw_value = os.environ.get("BROWSERSTACK_CAPTURE_TIMEOUT_SECONDS", "").strip()
+    if not raw_value:
+        return 300
+    try:
+        return max(60, min(900, int(raw_value)))
+    except ValueError:
+        return 300
+
+
 def _is_transient_provider_failure(detail: str) -> bool:
     normalized = detail.lower()
     transient_markers = (
@@ -68,6 +78,8 @@ def _is_transient_provider_failure(detail: str) -> bool:
         "browser has been closed",
         "playwright connection closed",
         "websocket",
+        "capture timed out",
+        "timed out after",
         "timed out waiting",
     )
     return any(marker in normalized for marker in transient_markers)
@@ -94,18 +106,30 @@ def capture_with_browserstack_provider(
     env.update(env_values)
     completed: subprocess.CompletedProcess[str] | None = None
     attempts = _capture_attempts()
+    timeout_s = _capture_timeout_s()
     try:
         for attempt_index in range(attempts):
-            completed = subprocess.run(
-                ["node", str(script_path), "--config", str(temp_path)],
-                cwd=str(root),
-                capture_output=True,
-                text=True,
-                encoding="utf-8",
-                errors="replace",
-                check=False,
-                env=env,
-            )
+            try:
+                completed = subprocess.run(
+                    ["node", str(script_path), "--config", str(temp_path)],
+                    cwd=str(root),
+                    capture_output=True,
+                    text=True,
+                    encoding="utf-8",
+                    errors="replace",
+                    check=False,
+                    env=env,
+                    timeout=timeout_s,
+                )
+            except subprocess.TimeoutExpired as exc:
+                stdout = exc.stdout if isinstance(exc.stdout, str) else ""
+                stderr = exc.stderr if isinstance(exc.stderr, str) else ""
+                completed = subprocess.CompletedProcess(
+                    args=exc.cmd,
+                    returncode=124,
+                    stdout=stdout,
+                    stderr=stderr or f"BrowserStack capture timed out after {timeout_s} seconds.",
+                )
             if completed.returncode == 0:
                 break
             detail = completed.stderr.strip() or completed.stdout.strip() or "capture_browserstack failed."

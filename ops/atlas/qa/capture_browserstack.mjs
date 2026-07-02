@@ -163,7 +163,7 @@ async function safePageDebugValue(getValue, fallback = null) {
   }
 }
 
-function isBrowserStackSocketFailure(error) {
+export function isBrowserStackSocketFailure(error) {
   const message = error instanceof Error ? error.message : String(error || "");
   return /socket idle from a long time|playwright connection closed|browser has been closed|target closed/i.test(message);
 }
@@ -228,6 +228,9 @@ async function captureScreenshotWithFallbacks({ page, config, screenshotPath, ou
       return await attempt();
     } catch (error) {
       lastError = error;
+      if (isBrowserStackSocketFailure(error)) {
+        break;
+      }
     }
   }
 
