@@ -271,14 +271,14 @@ POLICY_REGISTRY: dict[str, MarkerPolicy] = {
     "AI Work Session Stability & Auto-Sync Loop": MarkerPolicy(
         category="admissible after current lane",
         rationale=(
-            "The lane now has the landed preflight helper plus a frozen prompt-pack and worker handoff "
-            "contract for the read-only closeout aggregator. It should not outrank the held active Sandbox "
+            "The lane now has the landed preflight helper plus a frozen prompt-pack and implementation-readiness "
+            "routing receipt for the read-only closeout aggregator. It should not outrank the held active Sandbox "
             "family, but it is the first honest downstream automation package once the current hold posture "
             "allows fall-through."
         ),
         expected_evidence=(
-            "one bounded implementation-readiness and worker-routing decision for the read-only closeout "
-            "aggregator, with future helper/test touch surfaces explicit and no owner/platform mutation widening"
+            "one bounded first-implementation worker packet for the read-only closeout aggregator, limited to "
+            "ops/atlas/ai_work_session_closeout.py and tests/test_atlas_ai_work_session_closeout.py"
         ),
     ),
     "Feedback Loop Readiness": MarkerPolicy(
@@ -339,16 +339,17 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "AI Work Session Stability & Auto-Sync Loop": PacketDescriptor(
-        packet="AI Work Session Stability & Auto-Sync Loop read-only closeout aggregator implementation-readiness closeout and worker-routing",
+        packet="AI Work Session Stability & Auto-Sync Loop read-only closeout aggregator first-implementation worker packet 1",
         basis_receipt_ref=(
             "docs/ops/"
             "AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-CLOSEOUT-AGGREGATOR-"
-            "PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-02.md"
+            "IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-02.md"
         ),
-        mode="docs-only implementation-readiness closeout and worker-routing",
+        mode="root-owned bounded first-implementation worker",
         scope=(
-            "decide whether the read-only closeout aggregator worker can be routed for bounded implementation "
-            "without widening into owner-repo, platform, protected-proof, cleanup, or orchestration behavior"
+            "implement only ops/atlas/ai_work_session_closeout.py and "
+            "tests/test_atlas_ai_work_session_closeout.py under the frozen read-only closeout contract, "
+            "output-path guard, status vocabulary, and proof matrix"
         ),
     ),
 }
