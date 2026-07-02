@@ -36,6 +36,7 @@ from ops.stack.export_repo_inventory import (
     build_repo_inventory,
     find_excluded_surface,
     find_repo_inventory_entry,
+    summarize_repo_inventory,
 )
 
 STATUS_CONTRACT_VERSION = "atlas.awareness.status.v1"
@@ -579,6 +580,7 @@ def atlas_status(*, root: Path | None = None, refresh: bool = False) -> dict[str
     attention = _load_attention(root=base_root, refresh=refresh)
     status = render_status_payload(base_root / "runtime" / "cortex" / "artifacts")
     repo_inventory = _load_repo_inventory(root=base_root, refresh=refresh)
+    repo_inventory_summary = summarize_repo_inventory(repo_inventory)
     system_guardian = _build_system_guardian_read_model(root=base_root, refresh=refresh)
     playbook_report, playbook_slices = build_playbook_status_slices(
         root=base_root,
@@ -604,7 +606,7 @@ def atlas_status(*, root: Path | None = None, refresh: bool = False) -> dict[str
             "summary": attention.get("summary"),
         },
         "trust_posture": status.get("trust_posture"),
-        "repo_inventory": status.get("repo_inventory"),
+        "repo_inventory": repo_inventory_summary,
         "system_guardian": system_guardian,
         "working_memory": status.get("working_memory"),
         "initiatives": status.get("initiatives"),
@@ -625,9 +627,7 @@ def atlas_status(*, root: Path | None = None, refresh: bool = False) -> dict[str
             "working_memory_digest": status.get("working_memory", {}).get("content_digest")
             if isinstance(status.get("working_memory"), dict)
             else None,
-            "repo_inventory_digest": status.get("repo_inventory", {}).get("content_digest")
-            if isinstance(status.get("repo_inventory"), dict)
-            else None,
+            "repo_inventory_digest": repo_inventory_summary.get("content_digest"),
             "generated_lock_digest": status.get("lock_worktree_hygiene", {}).get("generated_lock_digest")
             if isinstance(status.get("lock_worktree_hygiene"), dict)
             else None,

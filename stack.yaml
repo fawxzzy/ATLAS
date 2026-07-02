@@ -140,6 +140,7 @@ repo_registry:
     path: repos/fawxzzy-fitness
     role: application
     status: unmanaged
+    root_blocking: false
     validation:
       generated_state_cleanup:
         command: node ../../ops/validation/repo_generated_state_cleanup_wrapper.mjs --run "node scripts/cleanup-repo.mjs --include-build-cache --include-node-modules --include-playbook-state --relocate-to-tmp --report-path ../../runtime/state/repo-cleanup/fitness.validation.latest.json" --retain .vercel=protected_local_vercel_linkage --report-path ../../runtime/state/repo-cleanup/fitness.validation.latest.json
@@ -152,7 +153,8 @@ repo_registry:
   mazer:
     path: repos/mazer
     role: application
-    status: active
+    status: unmanaged
+    root_blocking: false
   trove:
     path: repos/trove
     role: application
@@ -232,7 +234,6 @@ stack_lock:
     - lifeline
     - foundation
     - discordos
-    - mazer
     - trove
     - stream
     - nat1-games
@@ -253,9 +254,6 @@ stack_lock:
     discordos:
       trust_class: trusted
       release_eligible: false
-    mazer:
-      trust_class: trusted
-      release_eligible: true
     trove:
       trust_class: trusted
       release_eligible: true

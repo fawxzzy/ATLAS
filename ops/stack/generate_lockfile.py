@@ -17,7 +17,7 @@ from ops._atlas import atlas_relative, atlas_root, load_stack_config, normalize_
 
 STACK_LOCK_SCHEMA_VERSION = "atlas.stack.lock.v1"
 TRUST_CLASSES = {"trusted", "adjacent", "untrusted"}
-DEFAULT_INCLUDED_STATUSES = {"active", "incubating", "demo", "unmanaged"}
+DEFAULT_INCLUDED_STATUSES = {"active", "incubating", "demo"}
 LOCK_COMPONENT_FIELDS = (
     "path",
     "role",
