@@ -19,7 +19,7 @@ Operational rule:
 - Excluded surface count: `17`
 - Stack manifest: `stack.yaml`
 - Stack lock: `stack.lock.yaml`
-- Inventory digest: `sha256:34e926554472ed84cc143036a950fa0be93d43ffb10d3a89a98dae09fd454dc8`
+- Inventory digest: `sha256:8b11255f7b9a3d7ee3a4fae59ceeb27095395805b4045eb73f304cc1eb56a4de`
 
 ## Managed Repos
 
@@ -30,11 +30,11 @@ Operational rule:
 | fitness | repos/fawxzzy-fitness | main | - | 44724e9971ec7dc7e608112973c05d23e70b0a80 | True | adjacent | False | initiative:continuity-manifest-dependency-untangling<br>initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-discord-os-infrastructure-separation<br>initiative:continuity-manifest-local-data-gateway |
 | foundation | repos/foundation | main | fd1cf0650cdbb732f1231aa47a6e43138dab9062 | fd1cf0650cdbb732f1231aa47a6e43138dab9062 | False | trusted | True | - |
 | lifeline | repos/lifeline | codex/path-discipline-warning-slice-lifeline | 538f623a84b003e70dadd234e6ea3af642446a5f | 538f623a84b003e70dadd234e6ea3af642446a5f | False | trusted | True | - |
-| mazer | repos/mazer | codex/mazer-pass2-menu-parity | b52aa6079b99ded75e6397caf4d620e5a5ddea33 | b52aa6079b99ded75e6397caf4d620e5a5ddea33 | False | trusted | True | initiative:initiative-mazer-d2-learning-scorer |
+| mazer | repos/mazer | codex/mazer-pass2-menu-parity | 2d156d127d12bd2d0a4e8770776d5250e04b9041 | 2d156d127d12bd2d0a4e8770776d5250e04b9041 | False | trusted | True | initiative:initiative-mazer-d2-learning-scorer |
 | nat1-games | repos/Nat1-Games/nat1-games | codex/path-discipline-warning-slice-nat1 | 404460d3717fab389407582048a9b9f228f26d39 | 404460d3717fab389407582048a9b9f228f26d39 | False | trusted | False | - |
 | playbook | repos/playbook | codex/path-discipline-warning-slice-playbook | 10b8f0ac044a7f9c66b4aa8dd08f6abd2d1c5269 | 10b8f0ac044a7f9c66b4aa8dd08f6abd2d1c5269 | False | trusted | True | initiative:continuity-manifest-atlas-owned-repo-naming-canonicalization |
 | playbook-demo | repos/playbook-demo/playbook-demo | main | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | False | trusted | False | - |
-| stack | . | codex/atlas-mazer-pause-reset-trail-resync-20260702 | - | 6f010eba643098ba82c633ce09dcf8b6bfbb5a1d | False | trusted | False | - |
+| stack | . | codex/atlas-mazer-dynamic-overlay-resync-20260702 | - | 3d36a595118ffc73505a090a06287d0dbc423bc0 | False | trusted | False | - |
 | stream | repos/stream | main | 43769ba86d4c6ebc419ab9e7847c3843460a094f | 43769ba86d4c6ebc419ab9e7847c3843460a094f | False | trusted | False | - |
 | trove | repos/trove | codex/path-discipline-warning-slice-trove | 437c7604adee02e0403d77f75162a6c5f232221f | 437c7604adee02e0403d77f75162a6c5f232221f | False | trusted | True | - |
 
