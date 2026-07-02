@@ -429,6 +429,73 @@ class AtlasQaPipelineTests(unittest.TestCase):
         self.assertTrue((root / result["bootstrap_adapter_repo_ref"]).exists())
         self.assertEqual(commit, _git(root / "repos" / "fawxzzy-fitness", "rev-parse", "HEAD"))
 
+    def test_bootstrap_adapter_repo_refetches_all_heads_for_narrow_refspec(self) -> None:
+        root = self._temp_root()
+        remote_repo = root / "tmp-remote-fitness"
+        initial_commit = _init_committed_repo(remote_repo, content="# fitness\n")
+        _git(remote_repo, "branch", "old", initial_commit)
+        (remote_repo / "README.md").write_text("# fitness\n\nready\n", encoding="utf-8")
+        _git(remote_repo, "add", "README.md")
+        _git(remote_repo, "commit", "-m", "target")
+        target_commit = _git(remote_repo, "rev-parse", "HEAD")
+
+        repo_path = root / "repos" / "fawxzzy-fitness"
+        repo_path.mkdir(parents=True, exist_ok=True)
+        _git(repo_path, "init")
+        _git(repo_path, "remote", "add", "origin", str(remote_repo.resolve()))
+        _git(repo_path, "config", "remote.origin.fetch", "+refs/heads/old:refs/remotes/origin/old")
+        _git(repo_path, "fetch", "--tags", "--prune", "origin")
+        _git(repo_path, "checkout", "--detach", initial_commit)
+
+        (root / "ops" / "atlas" / "qa" / "adapters").mkdir(parents=True, exist_ok=True)
+        _write_json(
+            root / "ops" / "atlas" / "qa" / "adapters" / "fitness.web.json",
+            {
+                "contract_version": "atlas.qa.adapter.v1",
+                "adapter_id": "fitness.web",
+                "repo_id": "fitness",
+                "repo_path": "repos/fawxzzy-fitness",
+                "framework": "nextjs",
+                "commands": {
+                    "verify": {
+                        "command": "npm run verify",
+                    }
+                },
+                "prepare": {
+                    "kind": "command",
+                    "command": "npm install",
+                },
+                "lens_manifest_ref": "ops/atlas/qa/lenses/atlas-default-web.v1.json",
+                "lenses": [
+                    {
+                        "lens_id": "desktop.chromium.emulated",
+                        "profile_id": "desktop.chromium",
+                        "proof_kind": "emulated",
+                        "evidence_kind": "emulated_browser",
+                        "required_for": ["evidence"],
+                        "promotion_tier": "emulated_browser",
+                        "fallback_behavior": "blocked",
+                        "execution_mode": "browser_capture",
+                    }
+                ],
+            },
+        )
+        _write_repo_inventory(
+            root,
+            repos=[
+                {
+                    "logical_id": "fitness",
+                    "local_path": "repos/fawxzzy-fitness",
+                    "remote_url": str(remote_repo.resolve()),
+                    "current_commit": target_commit,
+                }
+            ],
+        )
+
+        result = bootstrap_adapter_repo(root=root, adapter="fitness.web", target_sha=target_commit)
+        self.assertEqual(target_commit, result["checkout_sha"])
+        self.assertEqual(target_commit, _git(repo_path, "rev-parse", "HEAD"))
+
     def test_declared_surface_scan_coverage_accepts_required_surfaces(self) -> None:
         root = self._temp_root()
         findings = validate_declared_surface_scan_coverage(root, {"repo_registry": {}}, root / "stack.yaml")
