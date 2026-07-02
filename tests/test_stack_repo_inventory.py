@@ -71,6 +71,7 @@ class StackRepoInventoryTests(unittest.TestCase):
         def fake_git_status_lines(repo_path):
             if repo_path.resolve() == self.root.resolve():
                 return [
+                    " M stack.lock.yaml",
                     " M docs/registry/STACK-REPO-INVENTORY.json",
                     " M docs/audits/STACK-REPO-INVENTORY.md",
                 ]

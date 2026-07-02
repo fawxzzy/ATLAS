@@ -229,9 +229,10 @@ def build_repo_inventory(
         repo_path = resolve_atlas_path(repo_info["path"], root=base_root)
         ignored_dirty_paths: set[str] = set()
         if repo_id == "stack" and repo_path == base_root:
-            # The exporter writes these two published surfaces itself, so they
+            # The stack refresh writes these published surfaces itself, so they
             # should not make the stack entry look dirty in the same read.
             ignored_dirty_paths = {
+                normalize_slashes(str(resolved_lock_path.relative_to(base_root))),
                 normalize_slashes(str(DEFAULT_JSON_OUTPUT)),
                 normalize_slashes(str(DEFAULT_MARKDOWN_OUTPUT)),
             }
