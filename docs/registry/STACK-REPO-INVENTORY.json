@@ -3,15 +3,15 @@
   "stack_manifest_ref": "stack.yaml",
   "stack_manifest_digest": "sha256:8059a89c5e852d8abd0b872526e13115857f505b5931675a3b10808f71500597",
   "stack_lock_ref": "stack.lock.yaml",
-  "stack_lock_digest": "sha256:d36ec8b0299a5a78825c02bf9ef3233896ec5cc21e7c682adfb820d48e6b5773",
+  "stack_lock_digest": "sha256:1fc5b5078ba80d0f9defce9cbbf96a4b3aaddeb86296ed2e94885eba272578e6",
   "working_memory_digest": "sha256:fe4f4902e2b2c475974b050ba1bf3f5e740439aa41df2f844555c2c0dc3b310f",
   "published_refs": {
     "json": "docs/registry/STACK-REPO-INVENTORY.json",
     "markdown": "docs/audits/STACK-REPO-INVENTORY.md"
   },
   "repo_count": 12,
-  "dirty_repo_count": 1,
-  "visible_dirty_repo_count": 2,
+  "dirty_repo_count": 0,
+  "visible_dirty_repo_count": 1,
   "advisory_dirty_repo_count": 1,
   "release_eligible_count": 4,
   "repos": [
@@ -88,9 +88,9 @@
       "current_ref_type": "branch",
       "current_ref": "main",
       "branch": "main",
-      "dirty": true,
+      "dirty": false,
       "root_blocking": true,
-      "dirty_blocks_root": true,
+      "dirty_blocks_root": false,
       "trust_class": "trusted",
       "release_eligible": false,
       "exists": true,
@@ -227,7 +227,7 @@
       "status": "unmanaged",
       "remote_url": "https://github.com/fawxzzy/mazer.git",
       "pinned_commit": null,
-      "current_commit": "44def74d40d8dad26546c11c6555bc2f090530e2",
+      "current_commit": "7d5cf628b869e18b1b7c79ecca5bf1d7af3afdf9",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
@@ -337,7 +337,7 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "8c7c4ce00beecb7a8402911a8b4e2fbe89d6f871",
+      "current_commit": "636aefa6c0a15763c8407c09e9a58f2555482199",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
@@ -556,5 +556,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:d75c23519a2696d4d8e1c5e94e464d7163739f10863b503b3b848a73cc19e467"
+  "content_digest": "sha256:17ac29ed19b9252e81ae1f174534c607388070dbc75a5899b3c4da7a97d8683d"
 }
