@@ -68,15 +68,13 @@ class StackRepoInventoryTests(unittest.TestCase):
         self.assertGreaterEqual(repo_inventory["item_count"], 1)
 
     def test_stack_inventory_outputs_do_not_self_dirty_root(self) -> None:
-        original_git_status_lines = repo_inventory_module.git_status_lines
-
         def fake_git_status_lines(repo_path):
             if repo_path.resolve() == self.root.resolve():
                 return [
                     " M docs/registry/STACK-REPO-INVENTORY.json",
                     " M docs/audits/STACK-REPO-INVENTORY.md",
                 ]
-            return original_git_status_lines(repo_path)
+            return []
 
         with patch("ops.stack.export_repo_inventory.git_status_lines", side_effect=fake_git_status_lines):
             inventory = build_repo_inventory(root=self.root)
@@ -86,8 +84,6 @@ class StackRepoInventoryTests(unittest.TestCase):
         self.assertEqual(inventory["dirty_repo_count"], 0)
 
     def test_non_inventory_root_changes_still_dirty_stack_entry(self) -> None:
-        original_git_status_lines = repo_inventory_module.git_status_lines
-
         def fake_git_status_lines(repo_path):
             if repo_path.resolve() == self.root.resolve():
                 return [
@@ -95,7 +91,7 @@ class StackRepoInventoryTests(unittest.TestCase):
                     " M docs/audits/STACK-REPO-INVENTORY.md",
                     " M docs/ops/EXTRA-ROOT-CHANGE.md",
                 ]
-            return original_git_status_lines(repo_path)
+            return []
 
         with patch("ops.stack.export_repo_inventory.git_status_lines", side_effect=fake_git_status_lines):
             inventory = build_repo_inventory(root=self.root)
@@ -103,6 +99,28 @@ class StackRepoInventoryTests(unittest.TestCase):
         stack_entry = next(item for item in inventory["repos"] if item["logical_id"] == "stack")
         self.assertTrue(stack_entry["dirty"])
         self.assertEqual(inventory["dirty_repo_count"], 1)
+
+    def test_unmanaged_owner_lane_dirty_repos_are_advisory_not_root_blocking(self) -> None:
+        def fake_git_status_lines(repo_path):
+            if repo_path.resolve() in {
+                (self.root / "repos" / "fawxzzy-fitness").resolve(),
+                (self.root / "repos" / "mazer").resolve(),
+            }:
+                return [" M docs/owner-lane.md"]
+            return []
+
+        with patch("ops.stack.export_repo_inventory.git_status_lines", side_effect=fake_git_status_lines):
+            inventory = build_repo_inventory(root=self.root)
+
+        by_id = {item["logical_id"]: item for item in inventory["repos"]}
+        for repo_id in ("fitness", "mazer"):
+            self.assertTrue(by_id[repo_id]["dirty"])
+            self.assertFalse(by_id[repo_id]["root_blocking"])
+            self.assertFalse(by_id[repo_id]["dirty_blocks_root"])
+
+        self.assertEqual(0, inventory["dirty_repo_count"])
+        self.assertEqual(2, inventory["visible_dirty_repo_count"])
+        self.assertEqual(2, inventory["advisory_dirty_repo_count"])
 
 
 if __name__ == "__main__":
