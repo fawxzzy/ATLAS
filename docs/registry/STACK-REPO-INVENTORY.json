@@ -227,7 +227,7 @@
       "status": "unmanaged",
       "remote_url": "https://github.com/fawxzzy/mazer.git",
       "pinned_commit": null,
-      "current_commit": "11f8ecd6d79ed7c9fb43dc5b505720a537271115",
+      "current_commit": "44def74d40d8dad26546c11c6555bc2f090530e2",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
@@ -337,7 +337,7 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "c764c25c95f4f021832e0fe922b90c4658b38fe3",
+      "current_commit": "8c7c4ce00beecb7a8402911a8b4e2fbe89d6f871",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
@@ -556,5 +556,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:94c3e69aa4f2bad7c74b37006d2262c4291b1218572118e142645f1aa0173e61"
+  "content_digest": "sha256:d75c23519a2696d4d8e1c5e94e464d7163739f10863b503b3b848a73cc19e467"
 }
