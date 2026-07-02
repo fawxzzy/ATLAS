@@ -3,15 +3,15 @@
   "stack_manifest_ref": "stack.yaml",
   "stack_manifest_digest": "sha256:8059a89c5e852d8abd0b872526e13115857f505b5931675a3b10808f71500597",
   "stack_lock_ref": "stack.lock.yaml",
-  "stack_lock_digest": "sha256:1fc5b5078ba80d0f9defce9cbbf96a4b3aaddeb86296ed2e94885eba272578e6",
+  "stack_lock_digest": "sha256:d36ec8b0299a5a78825c02bf9ef3233896ec5cc21e7c682adfb820d48e6b5773",
   "working_memory_digest": "sha256:fe4f4902e2b2c475974b050ba1bf3f5e740439aa41df2f844555c2c0dc3b310f",
   "published_refs": {
     "json": "docs/registry/STACK-REPO-INVENTORY.json",
     "markdown": "docs/audits/STACK-REPO-INVENTORY.md"
   },
   "repo_count": 12,
-  "dirty_repo_count": 0,
-  "visible_dirty_repo_count": 1,
+  "dirty_repo_count": 1,
+  "visible_dirty_repo_count": 2,
   "advisory_dirty_repo_count": 1,
   "release_eligible_count": 4,
   "repos": [
@@ -88,9 +88,9 @@
       "current_ref_type": "branch",
       "current_ref": "main",
       "branch": "main",
-      "dirty": false,
+      "dirty": true,
       "root_blocking": true,
-      "dirty_blocks_root": false,
+      "dirty_blocks_root": true,
       "trust_class": "trusted",
       "release_eligible": false,
       "exists": true,
@@ -227,7 +227,7 @@
       "status": "unmanaged",
       "remote_url": "https://github.com/fawxzzy/mazer.git",
       "pinned_commit": null,
-      "current_commit": "bdd2dd3c00f8272fd6b725849fa884e4e6c91e0b",
+      "current_commit": "f0bcccf6a32b565ab215b8b5d94ca133cfbaf65a",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
@@ -337,12 +337,12 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "2629d0b22c35b400d650b34a17fdf7d97ff2937a",
+      "current_commit": "749e2dce3178910ac05a9e89b57949ebe3ed5a66",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
-      "current_ref": "codex/atlas-owner-lane-separation-clean",
-      "branch": "codex/atlas-owner-lane-separation-clean",
+      "current_ref": "codex/atlas-mazer-procedural-title-resync-20260702",
+      "branch": "codex/atlas-mazer-procedural-title-resync-20260702",
       "dirty": false,
       "root_blocking": true,
       "dirty_blocks_root": false,
@@ -556,5 +556,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:b05b35317ff4551cd2f1ee8bd92845d3564bd2385a44681ee9b0b08f79b6c680"
+  "content_digest": "sha256:c4c8098c67244908cc502f8d5a1b168215a7190496447669207e326e44670457"
 }
