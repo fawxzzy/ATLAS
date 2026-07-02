@@ -271,14 +271,13 @@ POLICY_REGISTRY: dict[str, MarkerPolicy] = {
     "AI Work Session Stability & Auto-Sync Loop": MarkerPolicy(
         category="admissible after current lane",
         rationale=(
-            "The lane now has the landed preflight helper plus a frozen prompt-pack and implementation-readiness "
-            "routing receipt for the read-only closeout aggregator. It should not outrank the held active Sandbox "
-            "family, but it is the first honest downstream automation package once the current hold posture "
-            "allows fall-through."
+            "The lane now has landed read-only preflight and closeout helpers with direct proof and a "
+            "worker-cluster reconciliation. It should not outrank the held active Sandbox family, but it is "
+            "the first honest downstream automation package once the current hold posture allows fall-through."
         ),
         expected_evidence=(
-            "one bounded first-implementation worker packet for the read-only closeout aggregator, limited to "
-            "ops/atlas/ai_work_session_closeout.py and tests/test_atlas_ai_work_session_closeout.py"
+            "one bounded first-implementation admission for the projection freshness checker, preserving "
+            "the read-only contract and no owner/platform mutation boundary"
         ),
     ),
     "Feedback Loop Readiness": MarkerPolicy(
@@ -339,17 +338,16 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "AI Work Session Stability & Auto-Sync Loop": PacketDescriptor(
-        packet="AI Work Session Stability & Auto-Sync Loop read-only closeout aggregator first-implementation worker packet 1",
+        packet="AI Work Session Stability & Auto-Sync Loop projection freshness checker first-implementation admission",
         basis_receipt_ref=(
             "docs/ops/"
             "AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-CLOSEOUT-AGGREGATOR-"
-            "IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-02.md"
+            "FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-02.md"
         ),
-        mode="root-owned bounded first-implementation worker",
+        mode="docs-only first-implementation admission",
         scope=(
-            "implement only ops/atlas/ai_work_session_closeout.py and "
-            "tests/test_atlas_ai_work_session_closeout.py under the frozen read-only closeout contract, "
-            "output-path guard, status vocabulary, and proof matrix"
+            "admit a future read-only projection freshness checker that consumes closeout and preflight truth "
+            "without mutating owner repos, platform state, protected proof, or restart surfaces"
         ),
     ),
 }
