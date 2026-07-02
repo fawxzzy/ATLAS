@@ -10,8 +10,8 @@
     "markdown": "docs/audits/STACK-REPO-INVENTORY.md"
   },
   "repo_count": 12,
-  "dirty_repo_count": 1,
-  "visible_dirty_repo_count": 2,
+  "dirty_repo_count": 0,
+  "visible_dirty_repo_count": 1,
   "advisory_dirty_repo_count": 1,
   "release_eligible_count": 4,
   "repos": [
@@ -337,15 +337,15 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "6df0a692f8bbf9294db8c34f95eca847914ea300",
+      "current_commit": "2629d0b22c35b400d650b34a17fdf7d97ff2937a",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
       "current_ref": "codex/atlas-owner-lane-separation-clean",
       "branch": "codex/atlas-owner-lane-separation-clean",
-      "dirty": true,
+      "dirty": false,
       "root_blocking": true,
-      "dirty_blocks_root": true,
+      "dirty_blocks_root": false,
       "trust_class": "trusted",
       "release_eligible": false,
       "exists": true,
@@ -556,5 +556,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:c4189cc93fb1005a536daf3a7d0e3fb070534d8868810923c71ccf9898ab07ee"
+  "content_digest": "sha256:b05b35317ff4551cd2f1ee8bd92845d3564bd2385a44681ee9b0b08f79b6c680"
 }
