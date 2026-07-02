@@ -10,8 +10,8 @@
     "markdown": "docs/audits/STACK-REPO-INVENTORY.md"
   },
   "repo_count": 12,
-  "dirty_repo_count": 2,
-  "visible_dirty_repo_count": 3,
+  "dirty_repo_count": 1,
+  "visible_dirty_repo_count": 2,
   "advisory_dirty_repo_count": 1,
   "release_eligible_count": 4,
   "repos": [
@@ -337,15 +337,15 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "9535e72c70037a2c68038140ebbf15ad339784a2",
+      "current_commit": "ec70dd19f3c8e4609227b3c070335fcafd242360",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
       "current_ref": "codex/atlas-mazer-side-panel-title-resync-20260702",
       "branch": "codex/atlas-mazer-side-panel-title-resync-20260702",
-      "dirty": true,
+      "dirty": false,
       "root_blocking": true,
-      "dirty_blocks_root": true,
+      "dirty_blocks_root": false,
       "trust_class": "trusted",
       "release_eligible": false,
       "exists": true,
@@ -556,5 +556,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:daeea013dd26d8d4bd0c538ac36c3daa49655371c5c340b69cec24d4ed90f208"
+  "content_digest": "sha256:8622ff08477134b0ed98c18276065c7e46e89925355bab89cc752291f2514019"
 }
