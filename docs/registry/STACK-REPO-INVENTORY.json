@@ -337,12 +337,12 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "41859bd6bdbf16444a49d0abb1f4b368a3733396",
+      "current_commit": "c764c25c95f4f021832e0fe922b90c4658b38fe3",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
-      "current_ref": "codex/atlas-mazer-procedural-title-resync-20260702",
-      "branch": "codex/atlas-mazer-procedural-title-resync-20260702",
+      "current_ref": "main",
+      "branch": "main",
       "dirty": false,
       "root_blocking": true,
       "dirty_blocks_root": false,
@@ -556,5 +556,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:eb96bd784ab18197eb79b793df6b0d3b209ef4e59fc492c7583883b29bca79b0"
+  "content_digest": "sha256:94c3e69aa4f2bad7c74b37006d2262c4291b1218572118e142645f1aa0173e61"
 }
