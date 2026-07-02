@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-06-29T00:00:00Z",
-  "updated_at": "2026-07-02T20:02:52Z",
+  "updated_at": "2026-07-02T20:14:44Z",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -30,8 +30,11 @@
     "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-CLOSEOUT-AGGREGATOR-FIRST-IMPLEMENTATION-ADMISSION-2026-07-02.md",
     "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-CLOSEOUT-AGGREGATOR-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-02.md",
     "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-CLOSEOUT-AGGREGATOR-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-02.md",
+    "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-CLOSEOUT-AGGREGATOR-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-02.md",
     "ops/atlas/ai_work_session_preflight.py",
-    "tests/test_atlas_ai_work_session_preflight.py"
+    "ops/atlas/ai_work_session_closeout.py",
+    "tests/test_atlas_ai_work_session_preflight.py",
+    "tests/test_atlas_ai_work_session_closeout.py"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -39,9 +42,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "ai-work-session-stability-auto-sync-loop",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-CLOSEOUT-AGGREGATOR-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-02.md",
-    "checkpoint_commit": "main@7adfbca9",
-    "checkpoint_summary": "The lane still sits at 25 percent after the landed read-only preflight helper, but the closeout-aggregator readiness receipt now routes exactly one bounded first-implementation worker packet for ops/atlas/ai_work_session_closeout.py and tests/test_atlas_ai_work_session_closeout.py.",
+    "current_checkpoint_receipt": "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-CLOSEOUT-AGGREGATOR-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-02.md",
+    "checkpoint_commit": "main@31af3475",
+    "checkpoint_summary": "The lane now sits at 40 percent after the landed read-only preflight helper, landed read-only closeout helper, direct tests for both helpers, clean blocking-level validation, and reconciliation proof that no owner/platform/protected mutation occurred.",
     "governing_receipts": [
       "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-CONTRACT-FREEZE-2026-06-29.md",
       "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-PREFLIGHT-AGGREGATOR-FIRST-IMPLEMENTATION-ADMISSION-2026-06-29.md",
@@ -51,9 +54,22 @@
       "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-POST-OWNER-LANE-SEPARATION-NEXT-SLICE-SELECTION-2026-07-02.md",
       "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-CLOSEOUT-AGGREGATOR-FIRST-IMPLEMENTATION-ADMISSION-2026-07-02.md",
       "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-CLOSEOUT-AGGREGATOR-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-02.md",
-      "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-CLOSEOUT-AGGREGATOR-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-02.md"
+      "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-CLOSEOUT-AGGREGATOR-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-02.md",
+      "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-CLOSEOUT-AGGREGATOR-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-02.md"
     ],
     "owner_truth_surfaces": [
+      {
+        "path": "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-CLOSEOUT-AGGREGATOR-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-02.md",
+        "role": "worker landing reconciliation, proof summary, marker ratchet, preserved boundaries, and projection freshness next-package routing"
+      },
+      {
+        "path": "ops/atlas/ai_work_session_closeout.py",
+        "role": "landed read-only closeout helper"
+      },
+      {
+        "path": "tests/test_atlas_ai_work_session_closeout.py",
+        "role": "direct proof for the landed closeout helper"
+      },
       {
         "path": "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-CLOSEOUT-AGGREGATOR-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-02.md",
         "role": "docs-only closeout aggregator implementation-readiness decision, exact worker routing, allowed files, forbidden surfaces, marker decision, and post-worker reconciliation package"
@@ -132,11 +148,11 @@
     "blocked_or_gated_work": [
       {
         "item": "implementing the closeout command before prompt-pack and worker handoff are explicit",
-        "requirement": "cleared for exactly one bounded first-implementation worker packet limited to ops/atlas/ai_work_session_closeout.py and tests/test_atlas_ai_work_session_closeout.py"
+        "requirement": "cleared and reconciled for the first helper only; future widening requires a separate receipt-backed admission"
       },
       {
-        "item": "moving the marker above 25 percent from selector or admission wording alone",
-        "requirement": "blocked until the closeout helper and direct proof land with reconciliation or another receipt-backed ratchet threshold is met"
+        "item": "moving the marker above 40 percent from wording alone",
+        "requirement": "blocked until another distinct implementation, broader adoption, refreshed restart truth with executed state change, or blocker clearance lands with reconciliation"
       },
       {
         "item": "using this lane to mutate owner repos or platform state",
@@ -145,19 +161,19 @@
     ],
     "next_package_ladder": [
       {
-        "package": "AI Work Session Stability & Auto-Sync Loop read-only closeout aggregator first-implementation worker packet 1",
-        "mode": "root-owned bounded first-implementation worker",
-        "reason": "the implementation-readiness receipt found the contract spine durable and routed exactly one bounded worker packet limited to the closeout helper and its tests"
+        "package": "AI Work Session Stability & Auto-Sync Loop projection freshness checker first-implementation admission",
+        "mode": "docs-only first-implementation admission",
+        "reason": "the closeout helper now lands and reports safe-close truth, so the next smallest same-lane slice is admitting a read-only projection freshness checker that consumes closeout and preflight truth without mutating owner or platform state"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-CLOSEOUT-AGGREGATOR-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-02.md",
-    "freshness_checked_at": "2026-07-02T20:02:52Z",
-    "freshness_basis": "The manifest now mirrors the closeout aggregator implementation-readiness decision, the unchanged 25 percent marker posture, and the routed first worker packet as the next exact same-lane package.",
+    "freshness_checked_receipt": "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-CLOSEOUT-AGGREGATOR-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-02.md",
+    "freshness_checked_at": "2026-07-02T20:14:44Z",
+    "freshness_basis": "The manifest now mirrors the closeout aggregator worker reconciliation, the 40 percent marker posture, and projection freshness checker first-implementation admission as the next exact same-lane package.",
     "marker_posture": [
       {
         "marker": "AI Work Session Stability & Auto-Sync Loop",
-        "percent": 25,
+        "percent": 40,
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ]
