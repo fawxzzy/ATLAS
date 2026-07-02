@@ -10,7 +10,7 @@ components:
     remote: "https://github.com/fawxzzy/_stack.git"
     ref_type: "branch"
     ref: "codex/queue-or-registry-broader-execution-behavior"
-    commit: "3450e463b1e666c9e7f8caa2bf990338882aeca4"
+    commit: "70289e0248764586a62e16847adb86e34077cada"
     dirty: false
     trust_class: "trusted"
     release_eligible: false
@@ -21,8 +21,8 @@ components:
     remote: "https://github.com/fawxzzy/DiscordOS.git"
     ref_type: "branch"
     ref: "main"
-    commit: "76b699269b724070f548ca7841d36ec1505727f8"
-    dirty: false
+    commit: "9bfc67e38455754c63db98c96fcad439007c726d"
+    dirty: true
     trust_class: "trusted"
     release_eligible: false
   foundation:
@@ -54,7 +54,7 @@ components:
     remote: "https://github.com/fawxzzy/mazer.git"
     ref_type: "branch"
     ref: "codex/mazer-pass2-menu-parity"
-    commit: "8c170dd38647c94a799c133ecbfa6a1703436bf8"
+    commit: "dd905546b5bfbb2a448d1e566d586b7367abf93f"
     dirty: false
     trust_class: "trusted"
     release_eligible: true
@@ -216,4 +216,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:dfc3ab01f4ac018851c4f3559b0ba73d7cc94b75070f02f970a8b28209707802"
+lock_digest: "sha256:29492e0cbf37e70202c0567ede703ce7127def2d232c61401ab76ce9144fda37"
