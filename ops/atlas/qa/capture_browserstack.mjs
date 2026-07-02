@@ -106,6 +106,42 @@ function resolveReadyState(config) {
   return requestedState;
 }
 
+export function isReadySelectorTimeout(error) {
+  const message = error instanceof Error ? error.message : String(error || "");
+  return /waitForSelector: Timeout|Timeout \d+ms exceeded[\s\S]*waiting for locator/i.test(message);
+}
+
+export function hasMeaningfulBodyTextPreview(value) {
+  const normalized = String(value || "").replace(/\s+/g, " ").trim();
+  return normalized.length >= 20;
+}
+
+async function readySelectorFallbackSnapshot({ page, config, error }) {
+  if (!config.readySelector || !isReadySelectorTimeout(error)) {
+    return { continueCapture: false };
+  }
+  const bodyTextPreview = await safePageDebugValue(
+    () => page.evaluate(() => (document.body?.innerText || "").slice(0, 500)),
+    "",
+  );
+  const documentReadyState = await safePageDebugValue(() => page.evaluate(() => document.readyState), null);
+  if (!hasMeaningfulBodyTextPreview(bodyTextPreview)) {
+    return {
+      continueCapture: false,
+      bodyTextPreview,
+      documentReadyState,
+    };
+  }
+  return {
+    continueCapture: true,
+    reason: "ready_selector_timeout_with_rendered_body",
+    readySelector: String(config.readySelector || ""),
+    readyState: resolveReadyState(config),
+    documentReadyState,
+    bodyTextPreview,
+  };
+}
+
 export function buildCapabilities(providerPayload, config, env = process.env) {
   const defaults = {
     project: "ATLAS QA LLEL",
@@ -307,15 +343,6 @@ async function main() {
 
   try {
     await page.goto(navigationConfig.sourceUrl, { waitUntil: resolveBrowserStackWaitUntil(navigationConfig) });
-    if (navigationConfig.readySelector) {
-      await page.waitForSelector(navigationConfig.readySelector, {
-        state: resolveReadyState(navigationConfig),
-        timeout: navigationConfig.readyTimeoutMs || 30000,
-      });
-    }
-    if (navigationConfig.settleMs) {
-      await page.waitForTimeout(navigationConfig.settleMs);
-    }
   } catch (error) {
     const debug = await writeFailureDebug({ page, config: navigationConfig, outputDir, error });
     const detail = [
@@ -326,6 +353,32 @@ async function main() {
       `screenshot=${debug.screenshotPath}`,
     ].filter(Boolean).join(" ");
     throw new Error(detail);
+  }
+  let readySelectorFallback = null;
+  if (navigationConfig.readySelector) {
+    try {
+      await page.waitForSelector(navigationConfig.readySelector, {
+        state: resolveReadyState(navigationConfig),
+        timeout: navigationConfig.readyTimeoutMs || 30000,
+      });
+    } catch (error) {
+      const fallback = await readySelectorFallbackSnapshot({ page, config: navigationConfig, error });
+      if (!fallback.continueCapture) {
+        const debug = await writeFailureDebug({ page, config: navigationConfig, outputDir, error });
+        const detail = [
+          `Provider capture failed before ready state for lens ${config.lensId}.`,
+          `currentUrl=${debug.currentUrl || String(navigationConfig.sourceUrl || "")}`,
+          debug.title ? `title=${debug.title}` : null,
+          `debug=${debug.debugPath}`,
+          `screenshot=${debug.screenshotPath}`,
+        ].filter(Boolean).join(" ");
+        throw new Error(detail);
+      }
+      readySelectorFallback = fallback;
+    }
+  }
+  if (navigationConfig.settleMs) {
+    await page.waitForTimeout(navigationConfig.settleMs);
   }
 
   const screenshotPath = path.join(outputDir, "screenshot.png");
@@ -372,6 +425,9 @@ async function main() {
     },
     screenshot_strategy: screenshotStrategy,
   };
+  if (readySelectorFallback) {
+    metadata.ready_selector_fallback = readySelectorFallback;
+  }
   const metadataPath = path.join(outputDir, "capture.metadata.json");
   const metadataBody = JSON.stringify(metadata, null, 2) + "\n";
   await fs.writeFile(metadataPath, metadataBody, "utf8");

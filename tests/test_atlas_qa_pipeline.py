@@ -2735,6 +2735,37 @@ console.log(JSON.stringify({ desktopUrl, androidUrl, waitUntilWithSelector, wait
         self.assertEqual("domcontentloaded", urls["waitUntilWithSelector"])
         self.assertEqual("networkidle", urls["waitUntilWithoutSelector"])
 
+    def test_browserstack_ready_selector_timeout_fallback_requires_rendered_body(self) -> None:
+        script = """
+import { hasMeaningfulBodyTextPreview, isReadySelectorTimeout } from './ops/atlas/qa/capture_browserstack.mjs';
+const timeout = new Error(`page.waitForSelector: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator('body[data-mobile-regression=\\'true\\']')
+`);
+const socket = new Error('page.screenshot: Socket idle from a long time');
+console.log(JSON.stringify({
+  selectorTimeout: isReadySelectorTimeout(timeout),
+  socketTimeout: isReadySelectorTimeout(socket),
+  renderedBody: hasMeaningfulBodyTextPreview('Today Routines History Account Back Squat Current Target'),
+  blankBody: hasMeaningfulBodyTextPreview('   \\n\\t ')
+}));
+"""
+        completed = subprocess.run(
+            ["node", "--input-type=module", "-e", script],
+            cwd=str(ROOT),
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            check=False,
+        )
+        self.assertEqual(0, completed.returncode, completed.stderr)
+        payload = json.loads(completed.stdout)
+        self.assertTrue(payload["selectorTimeout"])
+        self.assertFalse(payload["socketTimeout"])
+        self.assertTrue(payload["renderedBody"])
+        self.assertFalse(payload["blankBody"])
+
     def test_capture_cache_uses_provider_safe_defaults_for_browserstack_real_lenses(self) -> None:
         adapter_payload = load_json_object(ROOT / "ops" / "atlas" / "qa" / "adapters" / "fitness.web.json")
         for item in adapter_payload["lenses"]:
