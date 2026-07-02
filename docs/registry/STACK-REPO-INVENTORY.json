@@ -3,14 +3,14 @@
   "stack_manifest_ref": "stack.yaml",
   "stack_manifest_digest": "sha256:e5ac73c00983975b59e4b8e7f8541160d479087f5dc95ad1d642568116bd7d10",
   "stack_lock_ref": "stack.lock.yaml",
-  "stack_lock_digest": "sha256:f9cffb4c44cc027c537bc446b2a35c608dec6913434c7c57a5801d175d8bd8a2",
+  "stack_lock_digest": "sha256:8eeec0098de37127c5d37671992bd15cbaeb587d3b7c323f3623a4afafe06c5b",
   "working_memory_digest": "sha256:fe4f4902e2b2c475974b050ba1bf3f5e740439aa41df2f844555c2c0dc3b310f",
   "published_refs": {
     "json": "docs/registry/STACK-REPO-INVENTORY.json",
     "markdown": "docs/audits/STACK-REPO-INVENTORY.md"
   },
   "repo_count": 12,
-  "dirty_repo_count": 1,
+  "dirty_repo_count": 2,
   "release_eligible_count": 5,
   "repos": [
     {
@@ -84,7 +84,7 @@
       "current_ref_type": "branch",
       "current_ref": "main",
       "branch": "main",
-      "dirty": false,
+      "dirty": true,
       "trust_class": "trusted",
       "release_eligible": false,
       "exists": true,
@@ -214,8 +214,8 @@
       "role": "application",
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/mazer.git",
-      "pinned_commit": "c732b87ff1b87ec1ca9b2b09ff582820a6feb943",
-      "current_commit": "c732b87ff1b87ec1ca9b2b09ff582820a6feb943",
+      "pinned_commit": "b52aa6079b99ded75e6397caf4d620e5a5ddea33",
+      "current_commit": "b52aa6079b99ded75e6397caf4d620e5a5ddea33",
       "pinned_ref_type": "branch",
       "pinned_ref": "codex/mazer-pass2-menu-parity",
       "current_ref_type": "branch",
@@ -317,12 +317,12 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "450f044f1ca1cb4d4f3e63b55482372f939ef5dd",
+      "current_commit": "6f010eba643098ba82c633ce09dcf8b6bfbb5a1d",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
-      "current_ref": "codex/atlas-mazer-dense-slab-resync-20260702",
-      "branch": "codex/atlas-mazer-dense-slab-resync-20260702",
+      "current_ref": "codex/atlas-mazer-pause-reset-trail-resync-20260702",
+      "branch": "codex/atlas-mazer-pause-reset-trail-resync-20260702",
       "dirty": false,
       "trust_class": "trusted",
       "release_eligible": false,
@@ -530,5 +530,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:48d70a7b5842eadd09f43d30e09ac0456c0be65126d273329cee22483e1b5a88"
+  "content_digest": "sha256:34e926554472ed84cc143036a950fa0be93d43ffb10d3a89a98dae09fd454dc8"
 }
