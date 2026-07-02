@@ -3,7 +3,7 @@
   "stack_manifest_ref": "stack.yaml",
   "stack_manifest_digest": "sha256:e5ac73c00983975b59e4b8e7f8541160d479087f5dc95ad1d642568116bd7d10",
   "stack_lock_ref": "stack.lock.yaml",
-  "stack_lock_digest": "sha256:e918ff4e795243f6961901ee76c13ae74669eb6cb052faebac52ee64ef55a0fb",
+  "stack_lock_digest": "sha256:2f50863316997c8d9879732f0d82b34fd3f999cf4cf7ce55888ac72be174d1e6",
   "working_memory_digest": "sha256:fe4f4902e2b2c475974b050ba1bf3f5e740439aa41df2f844555c2c0dc3b310f",
   "published_refs": {
     "json": "docs/registry/STACK-REPO-INVENTORY.json",
@@ -214,8 +214,8 @@
       "role": "application",
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/mazer.git",
-      "pinned_commit": "2d156d127d12bd2d0a4e8770776d5250e04b9041",
-      "current_commit": "2d156d127d12bd2d0a4e8770776d5250e04b9041",
+      "pinned_commit": "a0dafd67a888964bc118cdca7154529ce3b6e4a4",
+      "current_commit": "a0dafd67a888964bc118cdca7154529ce3b6e4a4",
       "pinned_ref_type": "branch",
       "pinned_ref": "codex/mazer-pass2-menu-parity",
       "current_ref_type": "branch",
@@ -317,12 +317,12 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "3d36a595118ffc73505a090a06287d0dbc423bc0",
+      "current_commit": "0265c84960514bc09c8300d5c6035d85a454f772",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
-      "current_ref": "codex/atlas-mazer-dynamic-overlay-resync-20260702",
-      "branch": "codex/atlas-mazer-dynamic-overlay-resync-20260702",
+      "current_ref": "codex/atlas-mazer-camera-follow-resync-20260702",
+      "branch": "codex/atlas-mazer-camera-follow-resync-20260702",
       "dirty": false,
       "trust_class": "trusted",
       "release_eligible": false,
@@ -530,5 +530,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:8b11255f7b9a3d7ee3a4fae59ceeb27095395805b4045eb73f304cc1eb56a4de"
+  "content_digest": "sha256:1a9072388172b54293b7238fd8ef08814afcf5975db8ba2ab6a9f746e8e81eca"
 }
