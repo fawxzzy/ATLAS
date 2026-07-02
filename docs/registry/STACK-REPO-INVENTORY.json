@@ -3,7 +3,7 @@
   "stack_manifest_ref": "stack.yaml",
   "stack_manifest_digest": "sha256:e5ac73c00983975b59e4b8e7f8541160d479087f5dc95ad1d642568116bd7d10",
   "stack_lock_ref": "stack.lock.yaml",
-  "stack_lock_digest": "sha256:4feb076dcfe101056e0814f24214ead6561af0dab2ce692858f2a30f745612ce",
+  "stack_lock_digest": "sha256:4530580fb2f63e0ddfe876fc61594b6516dabb346717fbb46b7a4b677d35d240",
   "working_memory_digest": "sha256:fe4f4902e2b2c475974b050ba1bf3f5e740439aa41df2f844555c2c0dc3b310f",
   "published_refs": {
     "json": "docs/registry/STACK-REPO-INVENTORY.json",
@@ -214,8 +214,8 @@
       "role": "application",
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/mazer.git",
-      "pinned_commit": "7e02a24b36c65dbc3a08cf588105dc90ada79861",
-      "current_commit": "7e02a24b36c65dbc3a08cf588105dc90ada79861",
+      "pinned_commit": "a358b6400487a3b84ce8091e930b2bff679013d1",
+      "current_commit": "a358b6400487a3b84ce8091e930b2bff679013d1",
       "pinned_ref_type": "branch",
       "pinned_ref": "codex/mazer-pass2-menu-parity",
       "current_ref_type": "branch",
@@ -317,7 +317,7 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "9cfa7382e95687908148fb8fbe3df84ef541ee17",
+      "current_commit": "6f72fc1754be7d41edae2965e281fba800c433e5",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
@@ -530,5 +530,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:98cd96b3da0f42a46295d3599563ce08b8b20253ac6f9b2c7f14712525c4124c"
+  "content_digest": "sha256:043e234b8f53db9819904b31441912e306963d1c611640e2920b3ba57a5fd029"
 }
