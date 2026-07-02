@@ -1,7 +1,7 @@
 schema_version: "atlas.stack.lock.v1"
 stack_manifest_path: "stack.yaml"
-stack_manifest_digest: "sha256:e5ac73c00983975b59e4b8e7f8541160d479087f5dc95ad1d642568116bd7d10"
-component_count: 10
+stack_manifest_digest: "sha256:8059a89c5e852d8abd0b872526e13115857f505b5931675a3b10808f71500597"
+component_count: 9
 components:
   _stack:
     path: "repos/_stack"
@@ -44,17 +44,6 @@ components:
     ref_type: "branch"
     ref: "codex/path-discipline-warning-slice-lifeline"
     commit: "538f623a84b003e70dadd234e6ea3af642446a5f"
-    dirty: false
-    trust_class: "trusted"
-    release_eligible: true
-  mazer:
-    path: "repos/mazer"
-    role: "application"
-    status: "active"
-    remote: "https://github.com/fawxzzy/mazer.git"
-    ref_type: "branch"
-    ref: "codex/mazer-pass2-menu-parity"
-    commit: "d8b14e1d18f6e6c8812556ad4aa2787b78b5a5c9"
     dirty: false
     trust_class: "trusted"
     release_eligible: true
@@ -216,4 +205,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:ed988b440a8ad8feec3fea278fc09232ce583dbf00cbffea10558611aa8bdaeb"
+lock_digest: "sha256:1fc5b5078ba80d0f9defce9cbbf96a4b3aaddeb86296ed2e94885eba272578e6"
