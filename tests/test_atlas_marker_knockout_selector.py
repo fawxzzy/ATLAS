@@ -677,19 +677,19 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual("hold_current_lane", payload["operator_action"])
         self.assertEqual("AI Work Session Stability & Auto-Sync Loop", payload["next_after_current_marker"])
         self.assertEqual(
-            "AI Work Session Stability & Auto-Sync Loop read-only preflight aggregator first-implementation worker packet 1",
+            "AI Work Session Stability & Auto-Sync Loop read-only closeout aggregator prompt-pack and worker handoff contract",
             payload["next_after_current_packet"],
         )
         self.assertEqual(
-            "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-PREFLIGHT-AGGREGATOR-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-06-29.md",
+            "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-CLOSEOUT-AGGREGATOR-FIRST-IMPLEMENTATION-ADMISSION-2026-07-02.md",
             payload["next_after_current_packet_basis_ref"],
         )
         self.assertEqual(
-            "root-owned bounded first-implementation worker",
+            "docs-only prompt-pack and worker handoff contract",
             payload["next_after_current_packet_mode"],
         )
         self.assertIn(
-            "implement only ops/atlas/ai_work_session_preflight.py",
+            "future read-only closeout aggregator",
             payload["next_after_current_packet_scope"],
         )
 
