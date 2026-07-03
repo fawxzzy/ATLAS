@@ -27,6 +27,7 @@
 - [AI Work Session Stability Auto-Sync Loop Projection Freshness Checker Implementation-Readiness Closeout And Worker-Routing](../ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PROJECTION-FRESHNESS-CHECKER-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-02.md)
 - [AI Work Session Stability Auto-Sync Loop Projection Freshness Checker First-Implementation Worker-Cluster Reconciliation](../ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PROJECTION-FRESHNESS-CHECKER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-03.md)
 - [AI Work Session Stability Auto-Sync Loop Playbook Adoption Matrix First-Implementation Admission](../ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PLAYBOOK-ADOPTION-MATRIX-FIRST-IMPLEMENTATION-ADMISSION-2026-07-03.md)
+- [AI Work Session Stability Auto-Sync Loop Playbook Adoption Matrix Prompt-Pack And Worker Handoff Contract](../ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PLAYBOOK-ADOPTION-MATRIX-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-03.md)
 - [Unified Workflow Convergence Handoff-Map Pass 1](../ops/UNIFIED-WORKFLOW-CONVERGENCE-HANDOFF-MAP-PASS-1-2026-05-29.md)
 - [Unified Workflow Convergence Release-Ledger, Publish-Boundary, And Root-Packaging Consequence Pass 2](../ops/UNIFIED-WORKFLOW-CONVERGENCE-RELEASE-LEDGER-PUBLISH-BOUNDARY-AND-ROOT-PACKAGING-CONSEQUENCE-PASS-2-2026-05-29.md)
 - [Unified Workflow Convergence Boundary-Hardened Workflow Spine Pass 3](../ops/UNIFIED-WORKFLOW-CONVERGENCE-BOUNDARY-HARDENED-WORKFLOW-SPINE-PASS-3-2026-06-03.md)

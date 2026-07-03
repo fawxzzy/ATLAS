@@ -277,7 +277,7 @@ POLICY_REGISTRY: dict[str, MarkerPolicy] = {
             "automation package once the current hold posture allows fall-through."
         ),
         expected_evidence=(
-            "one Playbook adoption matrix prompt-pack that freezes the matrix contract without "
+            "one Playbook adoption matrix implementation-readiness closeout that routes the worker without "
             "owner/platform mutation"
         ),
     ),
@@ -339,17 +339,17 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "AI Work Session Stability & Auto-Sync Loop": PacketDescriptor(
-        packet="AI Work Session Stability & Auto-Sync Loop Playbook adoption matrix prompt-pack and worker handoff contract",
+        packet="AI Work Session Stability & Auto-Sync Loop Playbook adoption matrix implementation-readiness closeout and worker-routing",
         basis_receipt_ref=(
             "docs/ops/"
             "AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PLAYBOOK-ADOPTION-MATRIX-"
-            "FIRST-IMPLEMENTATION-ADMISSION-2026-07-03.md"
+            "PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-03.md"
         ),
-        mode="docs-only prompt-pack and worker handoff contract",
+        mode="docs-only implementation-readiness closeout and worker-routing",
         scope=(
-            "freeze the Playbook adoption matrix path, fields, proof matrix, forbidden behavior, stop conditions, "
-            "and worker-routing criteria without implementing the matrix or mutating owner repos, platform state, "
-            "protected proof, PR bodies, markers, or restart surfaces"
+            "decide whether the frozen Playbook adoption matrix contract can route implementation to "
+            "ops/atlas/playbook_adoption_matrix.py and tests/test_atlas_playbook_adoption_matrix.py without "
+            "mutating owner repos, platform state, protected proof, PR bodies, markers, or restart surfaces"
         ),
     ),
 }
