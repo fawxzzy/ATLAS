@@ -34,9 +34,10 @@ PROTECTED_OUTPUT_PREFIXES = {
 }
 PROJECTION_RECEIPT = (
     "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PROJECTION-FRESHNESS-CHECKER-"
-    "IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-02.md"
+    "FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-03.md"
 )
-PROJECTION_PACKET = "AI Work Session Stability & Auto-Sync Loop projection freshness checker first-implementation worker packet 1"
+PROJECTION_PACKET = "AI Work Session Stability & Auto-Sync Loop Playbook adoption matrix first-implementation admission"
+AI_WORK_SESSION_MARKER_PERCENT = 55
 
 
 def _read_text(path: Path) -> str | None:
@@ -309,8 +310,12 @@ def collect_atlas_book(root: Path, markers: dict[str, Any]) -> tuple[OrderedDict
     restart = _read_text(root / "docs" / "atlas-book" / "12-restart-and-handoff-guide.md") or ""
     joined = "\n".join([current_state, lanes, receipt_index, restart])
     expected_bits = {
-        "marker_40": "AI Work Session Stability & Auto-Sync Loop: 40%" in joined
-        or "AI Work Session Stability & Auto-Sync Loop` now sits at a supporting `40%" in joined,
+        "marker_current": f"AI Work Session Stability & Auto-Sync Loop: {AI_WORK_SESSION_MARKER_PERCENT}%" in joined
+        or (
+            "AI Work Session Stability & Auto-Sync Loop` now sits at "
+            f"`{AI_WORK_SESSION_MARKER_PERCENT}%"
+        )
+        in joined,
         "projection_packet": PROJECTION_PACKET in joined,
         "routing_receipt": PROJECTION_RECEIPT in joined or Path(PROJECTION_RECEIPT).name in joined,
     }
@@ -351,7 +356,7 @@ def collect_manifests(root: Path) -> tuple[OrderedDict[str, Any], list[dict[str,
         if isinstance(first, dict):
             next_package = first.get("package")
     checkpoint = metadata.get("current_checkpoint_receipt")
-    if percent != 40:
+    if percent != AI_WORK_SESSION_MARKER_PERCENT:
         warnings.append(_finding("manifest_marker_percent_drift", "AI Work Session manifest marker percent is stale.", percent=percent))
     if next_package != PROJECTION_PACKET:
         warnings.append(_finding("manifest_next_packet_drift", "AI Work Session manifest next package is stale.", package=next_package))
@@ -375,7 +380,7 @@ def collect_markers(root: Path, manifests: dict[str, Any] | None = None) -> tupl
     next_basis = payload.get("next_after_current_packet_basis_ref")
     next_percent = payload.get("next_after_current_percentage")
     if next_packet != PROJECTION_PACKET:
-        warnings.append(_finding("selector_next_packet_drift", "Marker selector does not route the projection freshness worker.", packet=next_packet))
+        warnings.append(_finding("selector_next_packet_drift", "Marker selector does not route the expected AI Work Session next packet.", packet=next_packet))
     if next_basis != PROJECTION_RECEIPT:
         warnings.append(_finding("selector_basis_drift", "Marker selector basis receipt is stale.", basis=next_basis))
     if manifests and manifests.get("marker_percent") != next_percent:

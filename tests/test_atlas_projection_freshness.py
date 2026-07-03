@@ -63,7 +63,7 @@ def _stack_lock() -> OrderedDict[str, object]:
 
 
 def _atlas_book() -> OrderedDict[str, object]:
-    return OrderedDict([("expected_truth_present", {"marker_40": True, "projection_packet": True, "routing_receipt": True})])
+    return OrderedDict([("expected_truth_present", {"marker_current": True, "projection_packet": True, "routing_receipt": True})])
 
 
 def _receipts() -> OrderedDict[str, object]:
@@ -75,7 +75,7 @@ def _manifests(*, next_package: str | None = None) -> OrderedDict[str, object]:
         [
             ("source_ref", "docs/memory/initiatives/continuity-manifest-ai-work-session-stability-auto-sync-loop.json"),
             ("available", True),
-            ("marker_percent", 40),
+            ("marker_percent", freshness.AI_WORK_SESSION_MARKER_PERCENT),
             ("next_package", next_package or freshness.PROJECTION_PACKET),
             ("current_checkpoint_receipt", freshness.PROJECTION_RECEIPT),
         ]
@@ -89,7 +89,7 @@ def _markers(*, packet: str | None = None) -> OrderedDict[str, object]:
             ("active_lane", "Sandbox Simulation Readiness"),
             ("operator_action", "hold_current_lane"),
             ("next_after_current_marker", "AI Work Session Stability & Auto-Sync Loop"),
-            ("next_after_current_percentage", 40),
+            ("next_after_current_percentage", freshness.AI_WORK_SESSION_MARKER_PERCENT),
             ("next_after_current_packet", packet or freshness.PROJECTION_PACKET),
             ("next_after_current_packet_basis_ref", freshness.PROJECTION_RECEIPT),
             ("next_after_current_packet_mode", "bounded read-only worker implementation"),
