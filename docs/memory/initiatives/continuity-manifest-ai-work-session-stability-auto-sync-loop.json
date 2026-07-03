@@ -35,6 +35,7 @@
     "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PROJECTION-FRESHNESS-CHECKER-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-02.md",
     "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PROJECTION-FRESHNESS-CHECKER-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-02.md",
     "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PROJECTION-FRESHNESS-CHECKER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-03.md",
+    "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PLAYBOOK-ADOPTION-MATRIX-FIRST-IMPLEMENTATION-ADMISSION-2026-07-03.md",
     "ops/atlas/projection_freshness.py",
     "tests/test_atlas_projection_freshness.py",
     "ops/atlas/ai_work_session_preflight.py",
@@ -48,9 +49,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "ai-work-session-stability-auto-sync-loop",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PROJECTION-FRESHNESS-CHECKER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-03.md",
-    "checkpoint_commit": "main@7a98ef86",
-    "checkpoint_summary": "The lane now sits at 55 percent after the landed read-only preflight helper, landed read-only closeout helper, landed read-only projection freshness checker, direct tests for all three helpers, clean blocking-level validation, advisory-drift smoke proof, and worker-cluster reconciliation proof.",
+    "current_checkpoint_receipt": "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PLAYBOOK-ADOPTION-MATRIX-FIRST-IMPLEMENTATION-ADMISSION-2026-07-03.md",
+    "checkpoint_commit": "main@60fe67d9",
+    "checkpoint_summary": "The lane remains at 55 percent after the landed read-only preflight helper, landed read-only closeout helper, landed read-only projection freshness checker, direct tests for all three helpers, clean blocking-level validation, advisory-drift smoke proof, worker-cluster reconciliation proof, and docs-only Playbook adoption matrix admission.",
     "governing_receipts": [
       "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-CONTRACT-FREEZE-2026-06-29.md",
       "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-PREFLIGHT-AGGREGATOR-FIRST-IMPLEMENTATION-ADMISSION-2026-06-29.md",
@@ -65,9 +66,14 @@
       "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PROJECTION-FRESHNESS-CHECKER-FIRST-IMPLEMENTATION-ADMISSION-2026-07-02.md",
       "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PROJECTION-FRESHNESS-CHECKER-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-02.md",
       "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PROJECTION-FRESHNESS-CHECKER-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-02.md",
-      "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PROJECTION-FRESHNESS-CHECKER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-03.md"
+      "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PROJECTION-FRESHNESS-CHECKER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-03.md",
+      "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PLAYBOOK-ADOPTION-MATRIX-FIRST-IMPLEMENTATION-ADMISSION-2026-07-03.md"
     ],
     "owner_truth_surfaces": [
+      {
+        "path": "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PLAYBOOK-ADOPTION-MATRIX-FIRST-IMPLEMENTATION-ADMISSION-2026-07-03.md",
+        "role": "docs-only Playbook adoption matrix admission, future matrix contract boundary, non-goals, marker decision, and prompt-pack routing"
+      },
       {
         "path": "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PROJECTION-FRESHNESS-CHECKER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-03.md",
         "role": "projection freshness checker worker landing reconciliation, proof summary, 55 percent marker ratchet, preserved no-mutation boundaries, and Playbook adoption matrix next-package routing"
@@ -181,8 +187,8 @@
     ],
     "blocked_or_gated_work": [
       {
-        "item": "implementing the Playbook adoption matrix before admission/prompt-pack/readiness routing",
-        "requirement": "blocked; the next package is docs-only admission and may not implement a broader matrix yet"
+        "item": "implementing the Playbook adoption matrix before prompt-pack/readiness routing",
+        "requirement": "blocked; the next package is docs-only prompt-pack and may not implement a broader matrix yet"
       },
       {
         "item": "moving the marker above 55 percent from wording alone",
@@ -195,15 +201,15 @@
     ],
     "next_package_ladder": [
       {
-        "package": "AI Work Session Stability & Auto-Sync Loop Playbook adoption matrix first-implementation admission",
-        "mode": "docs-only first-implementation admission",
-        "reason": "the projection freshness checker is now landed and reconciled; the next smallest same-lane slice is admitting a Playbook adoption matrix that maps the landed preflight, closeout, and projection freshness helpers without implementing the matrix or mutating owner repos, platform state, protected proof, PR bodies, markers, or restart surfaces"
+        "package": "AI Work Session Stability & Auto-Sync Loop Playbook adoption matrix prompt-pack and worker handoff contract",
+        "mode": "docs-only prompt-pack and worker handoff contract",
+        "reason": "the Playbook adoption matrix is now admitted; the next smallest same-lane slice is freezing its path, fields, proof matrix, forbidden behavior, stop conditions, and worker-routing criteria without implementing the matrix or mutating owner repos, platform state, protected proof, PR bodies, markers, or restart surfaces"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PROJECTION-FRESHNESS-CHECKER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-03.md",
-    "freshness_checked_at": "2026-07-03T12:00:00Z",
-    "freshness_basis": "The manifest now mirrors the landed projection freshness checker, direct proof, 55 percent marker posture, preserved no-mutation boundary, and Playbook adoption matrix admission as the next exact same-lane package.",
+    "freshness_checked_receipt": "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PLAYBOOK-ADOPTION-MATRIX-FIRST-IMPLEMENTATION-ADMISSION-2026-07-03.md",
+    "freshness_checked_at": "2026-07-03T16:00:00Z",
+    "freshness_basis": "The manifest now mirrors the landed projection freshness checker, direct proof, 55 percent marker posture, preserved no-mutation boundary, docs-only Playbook adoption matrix admission, and its prompt-pack as the next exact same-lane package.",
     "marker_posture": [
       {
         "marker": "AI Work Session Stability & Auto-Sync Loop",

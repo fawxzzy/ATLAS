@@ -277,7 +277,7 @@ POLICY_REGISTRY: dict[str, MarkerPolicy] = {
             "automation package once the current hold posture allows fall-through."
         ),
         expected_evidence=(
-            "one docs-only Playbook adoption matrix admission that maps the landed session helpers without "
+            "one Playbook adoption matrix prompt-pack that freezes the matrix contract without "
             "owner/platform mutation"
         ),
     ),
@@ -339,17 +339,17 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "AI Work Session Stability & Auto-Sync Loop": PacketDescriptor(
-        packet="AI Work Session Stability & Auto-Sync Loop Playbook adoption matrix first-implementation admission",
+        packet="AI Work Session Stability & Auto-Sync Loop Playbook adoption matrix prompt-pack and worker handoff contract",
         basis_receipt_ref=(
             "docs/ops/"
-            "AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PROJECTION-FRESHNESS-CHECKER-"
-            "FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-03.md"
+            "AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PLAYBOOK-ADOPTION-MATRIX-"
+            "FIRST-IMPLEMENTATION-ADMISSION-2026-07-03.md"
         ),
-        mode="docs-only first-implementation admission",
+        mode="docs-only prompt-pack and worker handoff contract",
         scope=(
-            "admit a Playbook adoption matrix that maps the landed preflight, closeout, and projection freshness "
-            "helpers into a bounded session workflow adoption surface without implementing the matrix or mutating "
-            "owner repos, platform state, protected proof, PR bodies, markers, or restart surfaces"
+            "freeze the Playbook adoption matrix path, fields, proof matrix, forbidden behavior, stop conditions, "
+            "and worker-routing criteria without implementing the matrix or mutating owner repos, platform state, "
+            "protected proof, PR bodies, markers, or restart surfaces"
         ),
     ),
 }
