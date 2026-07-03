@@ -22,7 +22,7 @@ Operational rule:
 - Excluded surface count: `17`
 - Stack manifest: `stack.yaml`
 - Stack lock: `stack.lock.yaml`
-- Inventory digest: `sha256:8cfaf91521d6ee2730650e58bb78e00a79279672c7bba39e3739e7c101263c80`
+- Inventory digest: `sha256:fdfe0b73a05f82980630637233faaea4a8d6b143b5812cfbbe5e03cb46f8e716`
 
 ## Managed Repos
 
@@ -33,11 +33,11 @@ Operational rule:
 | fitness | repos/fawxzzy-fitness | main | - | 44724e9971ec7dc7e608112973c05d23e70b0a80 | True | False | False | adjacent | False | initiative:continuity-manifest-dependency-untangling<br>initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-discord-os-infrastructure-separation<br>initiative:continuity-manifest-local-data-gateway |
 | foundation | repos/foundation | main | fd1cf0650cdbb732f1231aa47a6e43138dab9062 | fd1cf0650cdbb732f1231aa47a6e43138dab9062 | False | True | False | trusted | True | - |
 | lifeline | repos/lifeline | codex/path-discipline-warning-slice-lifeline | 538f623a84b003e70dadd234e6ea3af642446a5f | 538f623a84b003e70dadd234e6ea3af642446a5f | False | True | False | trusted | True | - |
-| mazer | repos/mazer | main | - | d08098eb6945ea84efd64ac5be67548b1cb39303 | False | False | False | adjacent | False | initiative:initiative-mazer-d2-learning-scorer |
+| mazer | repos/mazer | main | - | 11ab78f721d93c34b066ec7b54acf97b7b0f4693 | False | False | False | adjacent | False | initiative:initiative-mazer-d2-learning-scorer |
 | nat1-games | repos/Nat1-Games/nat1-games | codex/path-discipline-warning-slice-nat1 | 404460d3717fab389407582048a9b9f228f26d39 | 404460d3717fab389407582048a9b9f228f26d39 | False | True | False | trusted | False | - |
 | playbook | repos/playbook | codex/path-discipline-warning-slice-playbook | 10b8f0ac044a7f9c66b4aa8dd08f6abd2d1c5269 | 10b8f0ac044a7f9c66b4aa8dd08f6abd2d1c5269 | False | True | False | trusted | True | initiative:continuity-manifest-atlas-owned-repo-naming-canonicalization |
 | playbook-demo | repos/playbook-demo/playbook-demo | main | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | False | True | False | trusted | False | - |
-| stack | . | main | - | 61ee6fd0b206db785816729d6efd92985486c6b8 | False | True | False | trusted | False | - |
+| stack | . | main | - | 993c75205b4ff9bd20cc024d8a35150aa2c50e66 | False | True | False | trusted | False | - |
 | stream | repos/stream | main | 43769ba86d4c6ebc419ab9e7847c3843460a094f | 43769ba86d4c6ebc419ab9e7847c3843460a094f | False | True | False | trusted | False | - |
 | trove | repos/trove | codex/path-discipline-warning-slice-trove | 437c7604adee02e0403d77f75162a6c5f232221f | 437c7604adee02e0403d77f75162a6c5f232221f | False | True | False | trusted | True | - |
 
