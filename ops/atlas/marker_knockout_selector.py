@@ -272,12 +272,13 @@ POLICY_REGISTRY: dict[str, MarkerPolicy] = {
         category="admissible after current lane",
         rationale=(
             "The lane now has landed read-only preflight and closeout helpers with direct proof and a "
-            "worker-cluster reconciliation. It should not outrank the held active Sandbox family, but it is "
-            "the first honest downstream automation package once the current hold posture allows fall-through."
+            "worker-cluster reconciliation, plus projection freshness admission and worker-routing receipts. "
+            "It should not outrank the held active Sandbox family, but it is the first honest downstream "
+            "automation package once the current hold posture allows fall-through."
         ),
         expected_evidence=(
-            "one bounded first-implementation admission for the projection freshness checker, preserving "
-            "the read-only contract and no owner/platform mutation boundary"
+            "one bounded read-only projection freshness checker implementation with tests, preserving "
+            "the no owner/platform mutation boundary"
         ),
     ),
     "Feedback Loop Readiness": MarkerPolicy(
@@ -338,16 +339,17 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "AI Work Session Stability & Auto-Sync Loop": PacketDescriptor(
-        packet="AI Work Session Stability & Auto-Sync Loop projection freshness checker first-implementation admission",
+        packet="AI Work Session Stability & Auto-Sync Loop projection freshness checker first-implementation worker packet 1",
         basis_receipt_ref=(
             "docs/ops/"
-            "AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-CLOSEOUT-AGGREGATOR-"
-            "FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-02.md"
+            "AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PROJECTION-FRESHNESS-CHECKER-"
+            "IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-02.md"
         ),
-        mode="docs-only first-implementation admission",
+        mode="bounded read-only worker implementation",
         scope=(
-            "admit a future read-only projection freshness checker that consumes closeout and preflight truth "
-            "without mutating owner repos, platform state, protected proof, or restart surfaces"
+            "implement the first read-only projection freshness checker in ops/atlas/projection_freshness.py "
+            "with direct tests in tests/test_atlas_projection_freshness.py, without mutating owner repos, "
+            "platform state, protected proof, PR bodies, markers, or restart surfaces"
         ),
     ),
 }
