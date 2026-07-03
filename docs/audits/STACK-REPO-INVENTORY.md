@@ -22,7 +22,7 @@ Operational rule:
 - Excluded surface count: `17`
 - Stack manifest: `stack.yaml`
 - Stack lock: `stack.lock.yaml`
-- Inventory digest: `sha256:f3da9b4db51e7af61c33a3ec24b6f28f92f460c64f181de1f93bb0765d399c56`
+- Inventory digest: `sha256:642ff0b7d2e8405607cfdfcf193124b9218e6eb1a97c53a4d1e5b0f3a955f419`
 
 ## Managed Repos
 
@@ -33,11 +33,11 @@ Operational rule:
 | fitness | repos/fawxzzy-fitness | main | - | 44724e9971ec7dc7e608112973c05d23e70b0a80 | True | False | False | adjacent | False | initiative:continuity-manifest-dependency-untangling<br>initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-discord-os-infrastructure-separation<br>initiative:continuity-manifest-local-data-gateway |
 | foundation | repos/foundation | main | fd1cf0650cdbb732f1231aa47a6e43138dab9062 | fd1cf0650cdbb732f1231aa47a6e43138dab9062 | False | True | False | trusted | True | - |
 | lifeline | repos/lifeline | codex/path-discipline-warning-slice-lifeline | 538f623a84b003e70dadd234e6ea3af642446a5f | 538f623a84b003e70dadd234e6ea3af642446a5f | False | True | False | trusted | True | - |
-| mazer | repos/mazer | main | - | 45f59b909e4225c2587cda107bc91cf981076ee8 | False | False | False | adjacent | False | initiative:initiative-mazer-d2-learning-scorer |
+| mazer | repos/mazer | main | - | 65ca59e022adece17e65cbfdb76966c710fd7b56 | False | False | False | adjacent | False | initiative:initiative-mazer-d2-learning-scorer |
 | nat1-games | repos/Nat1-Games/nat1-games | codex/path-discipline-warning-slice-nat1 | 404460d3717fab389407582048a9b9f228f26d39 | 404460d3717fab389407582048a9b9f228f26d39 | False | True | False | trusted | False | - |
 | playbook | repos/playbook | codex/path-discipline-warning-slice-playbook | 10b8f0ac044a7f9c66b4aa8dd08f6abd2d1c5269 | 10b8f0ac044a7f9c66b4aa8dd08f6abd2d1c5269 | False | True | False | trusted | True | initiative:continuity-manifest-atlas-owned-repo-naming-canonicalization |
 | playbook-demo | repos/playbook-demo/playbook-demo | main | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | False | True | False | trusted | False | - |
-| stack | . | main | - | 1a7c199171b4f3f86e11111f8cde30e4418caf98 | False | True | False | trusted | False | - |
+| stack | . | codex/post-mazer-mechanics-mobile-pivot-resync | - | 9b1f7d6e1e1640bf4f26c1bfd59666bdb0ddf6a6 | False | True | False | trusted | False | - |
 | stream | repos/stream | main | 43769ba86d4c6ebc419ab9e7847c3843460a094f | 43769ba86d4c6ebc419ab9e7847c3843460a094f | False | True | False | trusted | False | - |
 | trove | repos/trove | codex/path-discipline-warning-slice-trove | 437c7604adee02e0403d77f75162a6c5f232221f | 437c7604adee02e0403d77f75162a6c5f232221f | False | True | False | trusted | True | - |
 
