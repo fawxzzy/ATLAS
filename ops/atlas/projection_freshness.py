@@ -575,7 +575,7 @@ def build_report(
             ("blockers", blockers),
             ("warnings", warnings),
             ("required_refreshes", required_refreshes),
-            ("safe_to_continue", status == STATUS_OK),
+            ("safe_to_continue", not blockers),
         ]
     )
 
