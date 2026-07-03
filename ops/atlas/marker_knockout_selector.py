@@ -271,14 +271,14 @@ POLICY_REGISTRY: dict[str, MarkerPolicy] = {
     "AI Work Session Stability & Auto-Sync Loop": MarkerPolicy(
         category="admissible after current lane",
         rationale=(
-            "The lane now has landed read-only preflight and closeout helpers with direct proof and a "
-            "worker-cluster reconciliation, plus projection freshness admission and worker-routing receipts. "
+            "The lane now has landed read-only preflight, closeout, and projection freshness helpers with "
+            "direct proof and worker-cluster reconciliation. "
             "It should not outrank the held active Sandbox family, but it is the first honest downstream "
             "automation package once the current hold posture allows fall-through."
         ),
         expected_evidence=(
-            "one bounded read-only projection freshness checker implementation with tests, preserving "
-            "the no owner/platform mutation boundary"
+            "one docs-only Playbook adoption matrix admission that maps the landed session helpers without "
+            "owner/platform mutation"
         ),
     ),
     "Feedback Loop Readiness": MarkerPolicy(
@@ -339,17 +339,17 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "AI Work Session Stability & Auto-Sync Loop": PacketDescriptor(
-        packet="AI Work Session Stability & Auto-Sync Loop projection freshness checker first-implementation worker packet 1",
+        packet="AI Work Session Stability & Auto-Sync Loop Playbook adoption matrix first-implementation admission",
         basis_receipt_ref=(
             "docs/ops/"
             "AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PROJECTION-FRESHNESS-CHECKER-"
-            "IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-02.md"
+            "FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-03.md"
         ),
-        mode="bounded read-only worker implementation",
+        mode="docs-only first-implementation admission",
         scope=(
-            "implement the first read-only projection freshness checker in ops/atlas/projection_freshness.py "
-            "with direct tests in tests/test_atlas_projection_freshness.py, without mutating owner repos, "
-            "platform state, protected proof, PR bodies, markers, or restart surfaces"
+            "admit a Playbook adoption matrix that maps the landed preflight, closeout, and projection freshness "
+            "helpers into a bounded session workflow adoption surface without implementing the matrix or mutating "
+            "owner repos, platform state, protected proof, PR bodies, markers, or restart surfaces"
         ),
     ),
 }
