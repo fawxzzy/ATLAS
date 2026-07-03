@@ -277,7 +277,7 @@ POLICY_REGISTRY: dict[str, MarkerPolicy] = {
             "automation package once the current hold posture allows fall-through."
         ),
         expected_evidence=(
-            "one Playbook adoption matrix implementation-readiness closeout that routes the worker without "
+            "one read-only Playbook adoption matrix implementation with direct proof and no "
             "owner/platform mutation"
         ),
     ),
@@ -339,17 +339,18 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "AI Work Session Stability & Auto-Sync Loop": PacketDescriptor(
-        packet="AI Work Session Stability & Auto-Sync Loop Playbook adoption matrix implementation-readiness closeout and worker-routing",
+        packet="AI Work Session Stability & Auto-Sync Loop Playbook adoption matrix first-implementation worker packet 1",
         basis_receipt_ref=(
             "docs/ops/"
             "AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PLAYBOOK-ADOPTION-MATRIX-"
-            "PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-03.md"
+            "IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-03.md"
         ),
-        mode="docs-only implementation-readiness closeout and worker-routing",
+        mode="bounded read-only worker implementation",
         scope=(
-            "decide whether the frozen Playbook adoption matrix contract can route implementation to "
-            "ops/atlas/playbook_adoption_matrix.py and tests/test_atlas_playbook_adoption_matrix.py without "
-            "mutating owner repos, platform state, protected proof, PR bodies, markers, or restart surfaces"
+            "implement ops/atlas/playbook_adoption_matrix.py and tests/test_atlas_playbook_adoption_matrix.py "
+            "as a read-only classifier for documented, referenced, consumed, enforced, stale, missing, "
+            "owner-lane advisory, and Cortex-substrate Playbook adoption signals without mutating owner repos, "
+            "platform state, protected proof, PR bodies, markers, or restart surfaces"
         ),
     ),
 }

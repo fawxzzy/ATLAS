@@ -34,12 +34,9 @@ PROTECTED_OUTPUT_PREFIXES = {
 }
 PROJECTION_RECEIPT = (
     "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PLAYBOOK-ADOPTION-MATRIX-"
-    "PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-03.md"
+    "IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-03.md"
 )
-PROJECTION_PACKET = (
-    "AI Work Session Stability & Auto-Sync Loop Playbook adoption matrix "
-    "implementation-readiness closeout and worker-routing"
-)
+PROJECTION_PACKET = "AI Work Session Stability & Auto-Sync Loop Playbook adoption matrix first-implementation worker packet 1"
 AI_WORK_SESSION_MARKER_PERCENT = 55
 
 
