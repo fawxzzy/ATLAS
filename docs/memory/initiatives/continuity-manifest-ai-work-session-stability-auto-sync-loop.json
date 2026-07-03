@@ -34,6 +34,9 @@
     "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PROJECTION-FRESHNESS-CHECKER-FIRST-IMPLEMENTATION-ADMISSION-2026-07-02.md",
     "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PROJECTION-FRESHNESS-CHECKER-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-02.md",
     "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PROJECTION-FRESHNESS-CHECKER-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-02.md",
+    "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PROJECTION-FRESHNESS-CHECKER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-03.md",
+    "ops/atlas/projection_freshness.py",
+    "tests/test_atlas_projection_freshness.py",
     "ops/atlas/ai_work_session_preflight.py",
     "ops/atlas/ai_work_session_closeout.py",
     "tests/test_atlas_ai_work_session_preflight.py",
@@ -45,9 +48,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "ai-work-session-stability-auto-sync-loop",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PROJECTION-FRESHNESS-CHECKER-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-02.md",
-    "checkpoint_commit": "main@28f2cab7",
-    "checkpoint_summary": "The lane remains at 40 percent after the landed read-only preflight helper, landed read-only closeout helper, direct tests for both helpers, clean blocking-level validation, reconciliation proof, and docs-only projection freshness admission/prompt-pack/readiness routing for one bounded read-only worker.",
+    "current_checkpoint_receipt": "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PROJECTION-FRESHNESS-CHECKER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-03.md",
+    "checkpoint_commit": "main@7a98ef86",
+    "checkpoint_summary": "The lane now sits at 55 percent after the landed read-only preflight helper, landed read-only closeout helper, landed read-only projection freshness checker, direct tests for all three helpers, clean blocking-level validation, advisory-drift smoke proof, and worker-cluster reconciliation proof.",
     "governing_receipts": [
       "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-CONTRACT-FREEZE-2026-06-29.md",
       "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-PREFLIGHT-AGGREGATOR-FIRST-IMPLEMENTATION-ADMISSION-2026-06-29.md",
@@ -61,9 +64,22 @@
       "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-CLOSEOUT-AGGREGATOR-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-02.md",
       "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PROJECTION-FRESHNESS-CHECKER-FIRST-IMPLEMENTATION-ADMISSION-2026-07-02.md",
       "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PROJECTION-FRESHNESS-CHECKER-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-02.md",
-      "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PROJECTION-FRESHNESS-CHECKER-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-02.md"
+      "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PROJECTION-FRESHNESS-CHECKER-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-02.md",
+      "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PROJECTION-FRESHNESS-CHECKER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-03.md"
     ],
     "owner_truth_surfaces": [
+      {
+        "path": "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PROJECTION-FRESHNESS-CHECKER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-03.md",
+        "role": "projection freshness checker worker landing reconciliation, proof summary, 55 percent marker ratchet, preserved no-mutation boundaries, and Playbook adoption matrix next-package routing"
+      },
+      {
+        "path": "ops/atlas/projection_freshness.py",
+        "role": "landed read-only projection freshness checker"
+      },
+      {
+        "path": "tests/test_atlas_projection_freshness.py",
+        "role": "direct proof for the landed projection freshness checker"
+      },
       {
         "path": "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PROJECTION-FRESHNESS-CHECKER-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-02.md",
         "role": "docs-only projection freshness checker implementation-readiness decision, exact worker routing, allowed files, forbidden surfaces, marker decision, and post-worker reconciliation package"
@@ -165,12 +181,12 @@
     ],
     "blocked_or_gated_work": [
       {
-        "item": "implementing the projection freshness checker outside the routed worker files",
-        "requirement": "blocked; the next worker packet may touch only ops/atlas/projection_freshness.py and tests/test_atlas_projection_freshness.py"
+        "item": "implementing the Playbook adoption matrix before admission/prompt-pack/readiness routing",
+        "requirement": "blocked; the next package is docs-only admission and may not implement a broader matrix yet"
       },
       {
-        "item": "moving the marker above 40 percent from wording alone",
-        "requirement": "blocked until projection freshness implementation, tests, clean validation, preserved read-only boundaries, and reconciliation proof land"
+        "item": "moving the marker above 55 percent from wording alone",
+        "requirement": "blocked until Playbook adoption matrix admission, prompt-pack, implementation-readiness, implementation, tests, clean validation, preserved read-only boundaries, and reconciliation proof land"
       },
       {
         "item": "using this lane to mutate owner repos or platform state",
@@ -179,19 +195,19 @@
     ],
     "next_package_ladder": [
       {
-        "package": "AI Work Session Stability & Auto-Sync Loop projection freshness checker first-implementation worker packet 1",
-        "mode": "bounded read-only worker implementation",
-        "reason": "the projection freshness checker is now admitted, prompt-packed, and implementation-ready; the next smallest same-lane slice is implementing the read-only checker in the two routed files without mutating owner repos, platform state, protected proof, PR bodies, markers, or restart surfaces"
+        "package": "AI Work Session Stability & Auto-Sync Loop Playbook adoption matrix first-implementation admission",
+        "mode": "docs-only first-implementation admission",
+        "reason": "the projection freshness checker is now landed and reconciled; the next smallest same-lane slice is admitting a Playbook adoption matrix that maps the landed preflight, closeout, and projection freshness helpers without implementing the matrix or mutating owner repos, platform state, protected proof, PR bodies, markers, or restart surfaces"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PROJECTION-FRESHNESS-CHECKER-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-02.md",
-    "freshness_checked_at": "2026-07-03T03:57:25Z",
-    "freshness_basis": "The manifest now mirrors the projection freshness checker admission, prompt-pack, implementation-readiness routing, the 40 percent marker posture, and the first read-only worker packet as the next exact same-lane package.",
+    "freshness_checked_receipt": "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PROJECTION-FRESHNESS-CHECKER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-03.md",
+    "freshness_checked_at": "2026-07-03T12:00:00Z",
+    "freshness_basis": "The manifest now mirrors the landed projection freshness checker, direct proof, 55 percent marker posture, preserved no-mutation boundary, and Playbook adoption matrix admission as the next exact same-lane package.",
     "marker_posture": [
       {
         "marker": "AI Work Session Stability & Auto-Sync Loop",
-        "percent": 40,
+        "percent": 55,
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ]

@@ -112,9 +112,9 @@ Mandatory prompt preflight:
 
 ## Required AI Work Session Loop
 
-The supporting marker `AI Work Session Stability & Auto-Sync Loop` now sits at `40%` through `docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-CLOSEOUT-AGGREGATOR-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-02.md`, while the opening contract remains at `docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-CONTRACT-FREEZE-2026-06-29.md`.
+The supporting marker `AI Work Session Stability & Auto-Sync Loop` now sits at `55%` through `docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PROJECTION-FRESHNESS-CHECKER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-03.md`, while the opening contract remains at `docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-CONTRACT-FREEZE-2026-06-29.md`.
 
-The first preflight command now exists as `ops/atlas/ai_work_session_preflight.py`. Use the command first, and fall back to the manual contract only when the helper cannot answer the requested scope honestly:
+The first preflight command now exists as `ops/atlas/ai_work_session_preflight.py`, the first closeout command exists as `ops/atlas/ai_work_session_closeout.py`, and the first projection freshness checker exists as `ops/atlas/projection_freshness.py`. Use the commands first, and fall back to the manual contract only when a helper cannot answer the requested scope honestly:
 
 1. read root/profile/Book/receipt/index context
 2. classify root versus owner-repo versus platform scope
@@ -132,7 +132,7 @@ The first preflight command now exists as `ops/atlas/ai_work_session_preflight.p
 14. commit, push, fetch, and prove parity when mutation was admitted
 15. report residue, blockers, validation, and next exact package
 
-The next exact package is `AI Work Session Stability & Auto-Sync Loop projection freshness checker first-implementation worker packet 1`.
+The next exact package is `AI Work Session Stability & Auto-Sync Loop Playbook adoption matrix first-implementation admission`.
 
 ## Where The Marker Table Lives
 
