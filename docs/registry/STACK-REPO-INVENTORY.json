@@ -227,7 +227,7 @@
       "status": "unmanaged",
       "remote_url": "https://github.com/fawxzzy/mazer.git",
       "pinned_commit": null,
-      "current_commit": "65ca59e022adece17e65cbfdb76966c710fd7b56",
+      "current_commit": "3e460aa7e47d0effa9278f4ed1a1c0285c1c3e25",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
@@ -337,12 +337,12 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "9b1f7d6e1e1640bf4f26c1bfd59666bdb0ddf6a6",
+      "current_commit": "d972eb58005a0fc91282a6d937f9ee1b60ee3eb5",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
-      "current_ref": "codex/post-mazer-mechanics-mobile-pivot-resync",
-      "branch": "codex/post-mazer-mechanics-mobile-pivot-resync",
+      "current_ref": "main",
+      "branch": "main",
       "dirty": false,
       "root_blocking": true,
       "dirty_blocks_root": false,
@@ -556,5 +556,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:642ff0b7d2e8405607cfdfcf193124b9218e6eb1a97c53a4d1e5b0f3a955f419"
+  "content_digest": "sha256:d5f9ed84e97c71dbb430730086d1912d32c02a9b9443fa9c8ef5baa71c4d4136"
 }
