@@ -143,6 +143,7 @@ class AtlasProjectionFreshnessTests(unittest.TestCase):
         with _patch_collectors(inventory=_inventory(advisory=["fitness"])):
             report = freshness.build_report(root=Path("C:/ATLAS"), scope="owner", owners=["fitness"])
         self.assertEqual(freshness.STATUS_ADVISORY, report["status"])
+        self.assertTrue(report["safe_to_continue"])
         self.assertEqual([], report["blockers"])
         self.assertIn("advisory_owner_lane_dirty", {item["code"] for item in report["warnings"]})
 
@@ -218,10 +219,26 @@ class AtlasProjectionFreshnessTests(unittest.TestCase):
     def test_strict_returns_nonzero_for_advisory_drift(self) -> None:
         self.assertEqual(1, freshness.report_exit_code(status=freshness.STATUS_ADVISORY, strict=True))
 
+    def test_advisory_status_is_safe_to_continue_when_no_blockers(self) -> None:
+        with _patch_collectors():
+            with mock.patch.object(
+                freshness,
+                "collect_inventory",
+                return_value=(
+                    _inventory(root_head_matches=False),
+                    [freshness._finding("inventory_root_head_drift", "root head drift")],
+                ),
+            ):
+                report = freshness.build_report(root=Path("C:/ATLAS"), scope="root")
+        self.assertEqual(freshness.STATUS_ADVISORY, report["status"])
+        self.assertEqual([], report["blockers"])
+        self.assertTrue(report["safe_to_continue"])
+
     def test_blocker_state_returns_nonzero(self) -> None:
         with _patch_collectors(inventory=_inventory(root_blocking=["playbook"])):
             report = freshness.build_report(root=Path("C:/ATLAS"), scope="root")
         self.assertEqual(freshness.STATUS_BLOCKER, report["status"])
+        self.assertFalse(report["safe_to_continue"])
         self.assertEqual(2, freshness.report_exit_code(status=report["status"], strict=False))
 
     def test_deterministic_json_field_ordering(self) -> None:
