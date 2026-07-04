@@ -42,6 +42,9 @@
     "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-ADMISSION-2026-07-04.md",
     "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-04.md",
     "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-04.md",
+    "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-EVIDENCE-INTAKE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-04.md",
+    "ops/atlas/root_plus_owner_adoption_evidence.py",
+    "tests/test_atlas_root_plus_owner_adoption_evidence.py",
     "ops/atlas/playbook_adoption_matrix.py",
     "tests/test_atlas_playbook_adoption_matrix.py",
     "ops/atlas/projection_freshness.py",
@@ -57,9 +60,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "ai-work-session-stability-auto-sync-loop",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-04.md",
-    "checkpoint_commit": "main@45c58e07",
-    "checkpoint_summary": "The lane remains at 70 percent after the landed read-only preflight helper, landed read-only closeout helper, landed read-only projection freshness checker, landed read-only Playbook adoption matrix worker, direct tests for all four helpers, clean blocking-level validation, advisory-gap smoke proof, worker-cluster reconciliation proof, preserved no-mutation boundaries, root restart-surface refresh, docs-only root-plus-owner adoption admission, docs-only root-plus-owner adoption prompt-pack, and docs-only implementation-readiness routing for one root-only evidence-intake worker.",
+    "current_checkpoint_receipt": "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-EVIDENCE-INTAKE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-04.md",
+    "checkpoint_commit": "main@2fb3fa78",
+    "checkpoint_summary": "The lane remains at 70 percent after the landed read-only preflight helper, landed read-only closeout helper, landed read-only projection freshness checker, landed read-only Playbook adoption matrix worker, landed read-only root-plus-owner evidence-intake worker, direct tests for all five helpers, clean blocking-level validation, advisory-gap smoke proof, worker-cluster reconciliation proof, preserved no-mutation boundaries, root restart-surface refresh, and same-lane hold because owner-lane adoption evidence is 0 of 2.",
     "governing_receipts": [
       "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-CONTRACT-FREEZE-2026-06-29.md",
       "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-PREFLIGHT-AGGREGATOR-FIRST-IMPLEMENTATION-ADMISSION-2026-06-29.md",
@@ -81,9 +84,22 @@
       "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PLAYBOOK-ADOPTION-MATRIX-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-04.md",
       "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-ADMISSION-2026-07-04.md",
       "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-04.md",
-      "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-04.md"
+      "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-04.md",
+      "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-EVIDENCE-INTAKE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-04.md"
     ],
     "owner_truth_surfaces": [
+      {
+        "path": "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-EVIDENCE-INTAKE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-04.md",
+        "role": "root-plus-owner evidence-intake worker landing reconciliation, proof summary, 0 of 2 owner-evidence hold, no-owner-mutation guard, 70 percent marker hold, and no-immediate same-lane next-package routing"
+      },
+      {
+        "path": "ops/atlas/root_plus_owner_adoption_evidence.py",
+        "role": "landed read-only root-plus-owner owner-lane adoption evidence classifier"
+      },
+      {
+        "path": "tests/test_atlas_root_plus_owner_adoption_evidence.py",
+        "role": "direct proof for the landed root-plus-owner owner-lane adoption evidence classifier"
+      },
       {
         "path": "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-04.md",
         "role": "docs-only root-plus-owner adoption implementation-readiness closeout, exact root evidence-intake worker routing, allowed worker files, no-owner-mutation guard, 70 percent marker hold, and worker-packet next-package routing"
@@ -234,7 +250,7 @@
     "blocked_or_gated_work": [
       {
         "item": "using the AI work-session loop across owner repos from the ATLAS root",
-        "requirement": "blocked until the root-only evidence-intake worker lands and separately authorized owner-lane proofs exist"
+        "requirement": "blocked until at least two separately authorized owner-lane adoption proof receipts exist and the root-only evidence-intake worker counts them"
       },
       {
         "item": "moving the marker above 70 percent from wording alone",
@@ -247,15 +263,15 @@
     ],
     "next_package_ladder": [
       {
-        "package": "AI Work Session Stability & Auto-Sync Loop root-plus-owner adoption evidence-intake first-implementation worker packet 1",
-        "mode": "bounded read-only root evidence-intake worker",
-        "reason": "root-plus-owner adoption is now admitted, the proof contract is frozen, and implementation-readiness routed one worker that may count durable exported owner-lane proofs without mutating Fitness, Mazer, or any other owner repo from root"
+        "package": "No immediate AI Work Session Stability & Auto-Sync Loop same-lane packet; wait for at least two separately authorized owner-lane adoption proof receipts",
+        "mode": "held pending owner-lane proof supply",
+        "reason": "the root-plus-owner evidence-intake worker is landed and reports eligible_owner_count 0 of required_owner_count 2; no further root-only same-lane packet can honestly satisfy the owner-adoption threshold"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-04.md",
+    "freshness_checked_receipt": "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-EVIDENCE-INTAKE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-04.md",
     "freshness_checked_at": "2026-07-04T01:00:00Z",
-    "freshness_basis": "The manifest now mirrors the docs-only root-plus-owner adoption implementation-readiness closeout, 70 percent marker posture, preserved no-mutation boundary, exact root evidence-intake worker routing, and evidence-intake worker packet as the next exact same-lane package.",
+    "freshness_basis": "The manifest now mirrors the root-plus-owner evidence-intake worker reconciliation, 70 percent marker posture, preserved no-mutation boundary, eligible owner evidence count of 0 of 2, and no-immediate same-lane hold until separately authorized owner-lane proof receipts exist.",
     "marker_posture": [
       {
         "marker": "AI Work Session Stability & Auto-Sync Loop",

@@ -340,17 +340,16 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "AI Work Session Stability & Auto-Sync Loop": PacketDescriptor(
-        packet="AI Work Session Stability & Auto-Sync Loop root-plus-owner adoption evidence-intake first-implementation worker packet 1",
+        packet="No immediate AI Work Session Stability & Auto-Sync Loop same-lane packet; wait for at least two separately authorized owner-lane adoption proof receipts",
         basis_receipt_ref=(
             "docs/ops/"
-            "AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-IMPLEMENTATION-"
-            "READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-04.md"
+            "AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-EVIDENCE-"
+            "INTAKE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-04.md"
         ),
-        mode="bounded read-only root evidence-intake worker",
+        mode="held pending owner-lane proof supply",
         scope=(
-            "implement exactly ops/atlas/root_plus_owner_adoption_evidence.py and "
-            "tests/test_atlas_root_plus_owner_adoption_evidence.py to count durable exported owner-lane "
-            "adoption proofs without mutating Fitness, Mazer, or any other owner repo from root"
+            "hold the same-lane AI work-session root-plus-owner adoption family because the evidence-intake "
+            "worker is landed and reports 0 of 2 required owner-lane proof receipts"
         ),
     ),
 }
