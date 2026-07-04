@@ -1,9 +1,9 @@
 {
   "schema_version": "atlas.stack.repo-inventory.v1",
   "stack_manifest_ref": "stack.yaml",
-  "stack_manifest_digest": "sha256:8059a89c5e852d8abd0b872526e13115857f505b5931675a3b10808f71500597",
+  "stack_manifest_digest": "sha256:1ebf366757baf13a45064cdf8d07edd92909ac07f93c44ee9e77b30abebf03e6",
   "stack_lock_ref": "stack.lock.yaml",
-  "stack_lock_digest": "sha256:17d8e8184c4467da065f86cdaf8b9cf84145c6adb2dcfeebab5f0e25cdd03286",
+  "stack_lock_digest": "sha256:a9492975e6068fd1eb4af4df6265c40ed2d54b2c54678f22e7ec9f2353d53357",
   "working_memory_digest": "sha256:fe4f4902e2b2c475974b050ba1bf3f5e740439aa41df2f844555c2c0dc3b310f",
   "published_refs": {
     "json": "docs/registry/STACK-REPO-INVENTORY.json",
@@ -337,7 +337,7 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "e486001aada5b2dd41d23966f81aad293f4b1e30",
+      "current_commit": "9478eaadbc2109299e377f3e4761dcaf60b2cedf",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
@@ -556,5 +556,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:b716cd912dac4a865939772f90c0f4ffb7eb24e8316859444b341c3b61fccc17"
+  "content_digest": "sha256:86be7dffed559ed4c0b944cbaedbacb668f8de93bfebfd412e2e6ce2260c155e"
 }
