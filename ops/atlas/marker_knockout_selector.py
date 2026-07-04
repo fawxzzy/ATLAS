@@ -340,17 +340,17 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "AI Work Session Stability & Auto-Sync Loop": PacketDescriptor(
-        packet="AI Work Session Stability & Auto-Sync Loop root-plus-owner adoption implementation-readiness closeout and worker-routing",
+        packet="AI Work Session Stability & Auto-Sync Loop root-plus-owner adoption evidence-intake first-implementation worker packet 1",
         basis_receipt_ref=(
             "docs/ops/"
-            "AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-PROMPT-PACK-"
-            "AND-WORKER-HANDOFF-CONTRACT-2026-07-04.md"
+            "AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-IMPLEMENTATION-"
+            "READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-04.md"
         ),
-        mode="docs-only root-plus-owner adoption implementation-readiness",
+        mode="bounded read-only root evidence-intake worker",
         scope=(
-            "decide whether a bounded implementation or reconciliation worker can be routed from the frozen "
-            "root-plus-owner adoption proof contract without mutating Fitness, Mazer, or any other owner repo "
-            "from root"
+            "implement exactly ops/atlas/root_plus_owner_adoption_evidence.py and "
+            "tests/test_atlas_root_plus_owner_adoption_evidence.py to count durable exported owner-lane "
+            "adoption proofs without mutating Fitness, Mazer, or any other owner repo from root"
         ),
     ),
 }

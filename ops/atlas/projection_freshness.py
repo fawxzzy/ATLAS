@@ -34,9 +34,9 @@ PROTECTED_OUTPUT_PREFIXES = {
 }
 PROJECTION_RECEIPT = (
     "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-"
-    "PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-04.md"
+    "IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-04.md"
 )
-PROJECTION_PACKET = "AI Work Session Stability & Auto-Sync Loop root-plus-owner adoption implementation-readiness closeout and worker-routing"
+PROJECTION_PACKET = "AI Work Session Stability & Auto-Sync Loop root-plus-owner adoption evidence-intake first-implementation worker packet 1"
 AI_WORK_SESSION_MARKER_PERCENT = 70
 
 
