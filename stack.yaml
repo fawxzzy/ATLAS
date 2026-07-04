@@ -107,17 +107,24 @@ repo_registry:
     path: repos/_stack
     role: workflow-operator
     status: active
+    validation:
+      generated_state_cleanup:
+        command: node ../../ops/validation/repo_generated_state_cleanup_wrapper.mjs --retain node_modules=active_dependency_install --report-path ../../runtime/state/repo-cleanup/_stack.validation.latest.json
+        report_path: ../../runtime/state/repo-cleanup/_stack.validation.latest.json
+        paths:
+          - node_modules
   playbook:
     path: repos/playbook
     role: governance-runtime
     status: active
     validation:
       generated_state_cleanup:
-        command: node ../../ops/validation/repo_generated_state_cleanup_wrapper.mjs --delete node_modules --retain .playbook=playbook_owned_runtime_state --report-path ../../runtime/state/repo-cleanup/playbook.validation.latest.json
+        command: node ../../ops/validation/repo_generated_state_cleanup_wrapper.mjs --delete node_modules --retain .playbook=playbook_owned_runtime_state --retain dist=generated_build_output --report-path ../../runtime/state/repo-cleanup/playbook.validation.latest.json
         report_path: ../../runtime/state/repo-cleanup/playbook.validation.latest.json
         paths:
           - node_modules
           - .playbook
+          - dist
   lifeline:
     path: repos/lifeline
     role: local-operator
@@ -126,6 +133,12 @@ repo_registry:
     path: repos/foundation
     role: package
     status: active
+    validation:
+      generated_state_cleanup:
+        command: node ../../ops/validation/repo_generated_state_cleanup_wrapper.mjs --retain node_modules=active_dependency_install --report-path ../../runtime/state/repo-cleanup/foundation.validation.latest.json
+        report_path: ../../runtime/state/repo-cleanup/foundation.validation.latest.json
+        paths:
+          - node_modules
   discordos:
     path: repos/DiscordOS
     role: application

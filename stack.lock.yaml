@@ -1,6 +1,6 @@
 schema_version: "atlas.stack.lock.v1"
 stack_manifest_path: "stack.yaml"
-stack_manifest_digest: "sha256:8059a89c5e852d8abd0b872526e13115857f505b5931675a3b10808f71500597"
+stack_manifest_digest: "sha256:1ebf366757baf13a45064cdf8d07edd92909ac07f93c44ee9e77b30abebf03e6"
 component_count: 9
 components:
   _stack:
@@ -205,4 +205,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:17d8e8184c4467da065f86cdaf8b9cf84145c6adb2dcfeebab5f0e25cdd03286"
+lock_digest: "sha256:a9492975e6068fd1eb4af4df6265c40ed2d54b2c54678f22e7ec9f2353d53357"
