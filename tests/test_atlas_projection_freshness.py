@@ -257,6 +257,22 @@ class AtlasProjectionFreshnessTests(unittest.TestCase):
         self.assertEqual([], report["blockers"])
         self.assertTrue(report["safe_to_continue"])
 
+    def test_inventory_self_reference_lag_is_not_required_refresh(self) -> None:
+        with _patch_collectors():
+            with mock.patch.object(
+                freshness,
+                "collect_inventory",
+                return_value=(
+                    _inventory(root_head_matches=False),
+                    [freshness._finding("inventory_root_head_self_reference_lag", "self reference lag")],
+                ),
+            ):
+                report = freshness.build_report(root=Path("C:/ATLAS"), scope="root")
+
+        self.assertEqual(freshness.STATUS_ADVISORY, report["status"])
+        self.assertIn("inventory_root_head_self_reference_lag", {item["code"] for item in report["warnings"]})
+        self.assertNotIn("inventory_root_head_self_reference_lag", {item["code"] for item in report["required_refreshes"]})
+
     def test_blocker_state_returns_nonzero(self) -> None:
         with _patch_collectors(inventory=_inventory(root_blocking=["playbook"])):
             report = freshness.build_report(root=Path("C:/ATLAS"), scope="root")

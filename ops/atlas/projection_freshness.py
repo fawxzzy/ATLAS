@@ -89,6 +89,17 @@ def _git_lines(repo_root: Path, *args: str) -> list[str]:
     return [line.strip() for line in stdout.splitlines() if line.strip()]
 
 
+def _git_commit_relation(repo_root: Path, older_commit: str | None, newer_commit: str | None) -> str:
+    if not older_commit or not newer_commit:
+        return "unavailable"
+    if older_commit == newer_commit:
+        return "matches"
+    code, _stdout = _git_stdout(repo_root, "merge-base", "--is-ancestor", older_commit, newer_commit)
+    if code == 0:
+        return "ancestor"
+    return "diverged"
+
+
 def _finding(code: str, message: str, *, severity: str = "advisory", **details: Any) -> dict[str, Any]:
     payload: dict[str, Any] = {"code": code, "severity": severity, "message": message}
     if details:
@@ -244,14 +255,23 @@ def collect_inventory(root: Path, branch_state: dict[str, Any]) -> tuple[Ordered
     repos = payload.get("repos", [])
     stack_repo = next((item for item in repos if isinstance(item, dict) and item.get("logical_id") == "stack"), None)
     root_head = branch_state.get("head")
-    root_head_drift = bool(stack_repo and root_head and stack_repo.get("current_commit") != root_head)
+    stack_commit = stack_repo.get("current_commit") if stack_repo else None
+    root_head_relation = _git_commit_relation(root, stack_commit, root_head)
+    root_head_drift = bool(stack_repo and root_head and stack_commit != root_head)
     if root_head_drift:
+        code = "inventory_root_head_self_reference_lag" if root_head_relation == "ancestor" else "inventory_root_head_drift"
+        message = (
+            "Inventory stack entry points at an ancestor of current root HEAD; this is expected after committing root-only changes."
+            if root_head_relation == "ancestor"
+            else "Inventory stack entry does not match current root HEAD."
+        )
         warnings.append(
             _finding(
-                "inventory_root_head_drift",
-                "Inventory stack entry does not match current root HEAD.",
-                inventory=stack_repo.get("current_commit"),
+                code,
+                message,
+                inventory=stack_commit,
                 head=root_head,
+                relation=root_head_relation,
             )
         )
 
@@ -296,6 +316,7 @@ def collect_inventory(root: Path, branch_state: dict[str, Any]) -> tuple[Ordered
             ("visible_dirty_repo_count", payload.get("visible_dirty_repo_count")),
             ("advisory_dirty_repo_count", payload.get("advisory_dirty_repo_count")),
             ("root_head_matches", not root_head_drift),
+            ("root_head_relation", root_head_relation),
             ("root_blocking_dirty_repos", root_blocking_dirty),
             ("advisory_dirty_repos", advisory_dirty),
             ("payload", payload),
