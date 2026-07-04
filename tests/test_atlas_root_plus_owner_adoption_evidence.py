@@ -122,6 +122,36 @@ class AtlasRootPlusOwnerAdoptionEvidenceTests(unittest.TestCase):
         self.assertEqual(0, report["eligible_owner_count"])
         self.assertIn("invalid:owner repo", report["owner_evidence"][0]["reasons"])
 
+    def test_root_plus_owner_root_receipts_are_not_owner_evidence(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            _minimal_root(root)
+            _write(
+                root
+                / "docs"
+                / "ops"
+                / "AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-EVIDENCE-INTAKE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-04.md",
+                "\n".join(
+                    [
+                        "# Root Reconciliation",
+                        "- Owner-lane adoption proof: true",
+                        "- Owner repo: <repo-id>",
+                        "- AI work-session loop used: true",
+                        "- Separate owner-lane authorization: true",
+                        "- Root mutated owner repo: false",
+                        "- Platform mutation from root: false",
+                        "- Protected-surface mutation: false",
+                        "- Secrets touched: false",
+                        "",
+                    ]
+                ),
+            )
+            with mock.patch.object(evidence, "collect_branch_state", return_value=_branch_state()):
+                report = evidence.build_report(root=root)
+
+        self.assertEqual([], report["owner_evidence"])
+        self.assertEqual(0, report["eligible_owner_count"])
+
     def test_missing_contract_receipt_blocks(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

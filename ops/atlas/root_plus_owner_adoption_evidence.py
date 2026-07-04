@@ -34,6 +34,7 @@ CONTRACT_RECEIPTS = (
     "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-04.md",
     "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-04.md",
 )
+ROOT_PLUS_OWNER_ROOT_RECEIPT_PREFIX = "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-"
 REQUIRED_EVIDENCE_FIELDS = OrderedDict(
     [
         ("owner-lane adoption proof", "true"),
@@ -221,7 +222,8 @@ def collect_owner_evidence(root: Path) -> list[OrderedDict[str, Any]]:
     contract_paths = {normalize_slashes(ref) for ref in CONTRACT_RECEIPTS}
     rows: list[OrderedDict[str, Any]] = []
     for path in sorted(ops_dir.glob("*.md"), key=lambda item: normalize_slashes(str(item))):
-        if _root_relative(path, root) in contract_paths:
+        relative_path = _root_relative(path, root)
+        if relative_path in contract_paths or relative_path.startswith(ROOT_PLUS_OWNER_ROOT_RECEIPT_PREFIX):
             continue
         row = classify_owner_evidence(path, root=root)
         if row is not None:
