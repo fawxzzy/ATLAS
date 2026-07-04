@@ -166,7 +166,9 @@ def collect_markers(root: Path) -> dict[str, Any]:
 def collect_inventory(root: Path) -> dict[str, Any]:
     inventory_path = root / "docs" / "registry" / "STACK-REPO-INVENTORY.json"
     payload = _read_json(inventory_path) or {}
-    repositories = payload.get("repositories", [])
+    repositories = payload.get("repos")
+    if not isinstance(repositories, list):
+        repositories = payload.get("repositories", [])
     root_blocking_dirty = []
     advisory_dirty = []
     if isinstance(repositories, list):

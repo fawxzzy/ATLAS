@@ -267,6 +267,57 @@ class AtlasAiWorkSessionCloseoutTests(unittest.TestCase):
         self.assertEqual(closeout.STATUS_BLOCKER, report["status"])
         self.assertIn("root_blocking_dirty_repos", {item["code"] for item in report["blockers"]})
 
+    def test_collect_inventory_reads_current_repos_schema(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            inventory_path = root / "docs" / "registry" / "STACK-REPO-INVENTORY.json"
+            inventory_path.parent.mkdir(parents=True)
+            inventory_path.write_text(
+                json.dumps(
+                    {
+                        "repo_count": 2,
+                        "dirty_repo_count": 1,
+                        "visible_dirty_repo_count": 2,
+                        "advisory_dirty_repo_count": 1,
+                        "repos": [
+                            {"logical_id": "discordos", "dirty": True, "dirty_blocks_root": True},
+                            {"logical_id": "fitness", "dirty": True, "dirty_blocks_root": False},
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            inventory = closeout.collect_inventory(root)
+
+        self.assertEqual(["discordos"], inventory["root_blocking_dirty_repos"])
+        self.assertEqual(["fitness"], inventory["advisory_dirty_repos"])
+
+    def test_collect_inventory_keeps_legacy_repositories_fallback(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            inventory_path = root / "docs" / "registry" / "STACK-REPO-INVENTORY.json"
+            inventory_path.parent.mkdir(parents=True)
+            inventory_path.write_text(
+                json.dumps(
+                    {
+                        "repo_count": 1,
+                        "dirty_repo_count": 0,
+                        "visible_dirty_repo_count": 1,
+                        "advisory_dirty_repo_count": 1,
+                        "repositories": [
+                            {"logical_id": "fitness", "dirty": True, "dirty_blocks_root": False},
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            inventory = closeout.collect_inventory(root)
+
+        self.assertEqual([], inventory["root_blocking_dirty_repos"])
+        self.assertEqual(["fitness"], inventory["advisory_dirty_repos"])
+
 
 if __name__ == "__main__":
     unittest.main()
