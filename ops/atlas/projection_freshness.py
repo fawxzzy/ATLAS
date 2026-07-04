@@ -36,6 +36,14 @@ PROJECTION_RECEIPT = (
     "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-"
     "EVIDENCE-INTAKE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-04.md"
 )
+OWNER_REPO_RECEIPT_SCAN_RECEIPT = (
+    "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-"
+    "OWNER-REPO-RECEIPT-SCAN-SEPARATION-HARDENING-2026-07-04.md"
+)
+ACCEPTED_MANIFEST_CHECKPOINT_RECEIPTS = {
+    PROJECTION_RECEIPT,
+    OWNER_REPO_RECEIPT_SCAN_RECEIPT,
+}
 PROJECTION_PACKET = "No immediate AI Work Session Stability & Auto-Sync Loop same-lane packet; wait for at least two separately authorized owner-lane adoption proof receipts"
 AI_WORK_SESSION_MARKER_PERCENT = 70
 NO_IMMEDIATE_OPERATOR_ACTION = "no_immediate_root_packet"
@@ -339,7 +347,7 @@ def collect_atlas_book(root: Path, markers: dict[str, Any]) -> tuple[OrderedDict
         )
         in joined,
         "projection_packet": PROJECTION_PACKET in joined,
-        "routing_receipt": PROJECTION_RECEIPT in joined or Path(PROJECTION_RECEIPT).name in joined,
+        "routing_receipt": any(ref in joined or Path(ref).name in joined for ref in ACCEPTED_MANIFEST_CHECKPOINT_RECEIPTS),
     }
     for key, present in expected_bits.items():
         if not present:
@@ -382,7 +390,7 @@ def collect_manifests(root: Path) -> tuple[OrderedDict[str, Any], list[dict[str,
         warnings.append(_finding("manifest_marker_percent_drift", "AI Work Session manifest marker percent is stale.", percent=percent))
     if next_package != PROJECTION_PACKET:
         warnings.append(_finding("manifest_next_packet_drift", "AI Work Session manifest next package is stale.", package=next_package))
-    if checkpoint != PROJECTION_RECEIPT:
+    if checkpoint not in ACCEPTED_MANIFEST_CHECKPOINT_RECEIPTS:
         warnings.append(_finding("manifest_checkpoint_drift", "AI Work Session manifest checkpoint receipt is stale.", checkpoint=checkpoint))
     return OrderedDict(
         [
@@ -414,7 +422,7 @@ def collect_markers(root: Path, manifests: dict[str, Any] | None = None) -> tupl
                     package=manifest_package,
                 )
             )
-        if manifest_checkpoint != PROJECTION_RECEIPT:
+        if manifest_checkpoint not in ACCEPTED_MANIFEST_CHECKPOINT_RECEIPTS:
             warnings.append(
                 _finding(
                     "selector_no_immediate_manifest_basis_drift",
@@ -425,7 +433,7 @@ def collect_markers(root: Path, manifests: dict[str, Any] | None = None) -> tupl
     else:
         if next_packet != PROJECTION_PACKET:
             warnings.append(_finding("selector_next_packet_drift", "Marker selector does not route the expected AI Work Session next packet.", packet=next_packet))
-        if next_basis != PROJECTION_RECEIPT:
+        if next_basis not in ACCEPTED_MANIFEST_CHECKPOINT_RECEIPTS:
             warnings.append(_finding("selector_basis_drift", "Marker selector basis receipt is stale.", basis=next_basis))
     if manifests and not no_immediate and manifests.get("marker_percent") != next_percent:
         warnings.append(
@@ -456,6 +464,7 @@ def collect_receipts(root: Path) -> tuple[OrderedDict[str, Any], list[dict[str, 
         "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PROJECTION-FRESHNESS-CHECKER-FIRST-IMPLEMENTATION-ADMISSION-2026-07-02.md",
         "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PROJECTION-FRESHNESS-CHECKER-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-02.md",
         PROJECTION_RECEIPT,
+        OWNER_REPO_RECEIPT_SCAN_RECEIPT,
     ]
     missing = [ref for ref in refs if not (root / ref).exists()]
     if missing:

@@ -82,6 +82,12 @@ def _manifests(*, next_package: str | None = None) -> OrderedDict[str, object]:
     )
 
 
+def _manifests_with_owner_repo_scan_checkpoint() -> OrderedDict[str, object]:
+    payload = _manifests()
+    payload["current_checkpoint_receipt"] = freshness.OWNER_REPO_RECEIPT_SCAN_RECEIPT
+    return payload
+
+
 def _markers(*, packet: str | None = None) -> OrderedDict[str, object]:
     return OrderedDict(
         [
@@ -214,6 +220,14 @@ class AtlasProjectionFreshnessTests(unittest.TestCase):
         self.assertEqual(freshness.STATUS_OK, report["status"])
         self.assertEqual(freshness.NO_IMMEDIATE_OPERATOR_ACTION, report["markers"]["operator_action"])
         self.assertEqual(None, report["markers"]["next_after_current_packet"])
+
+    def test_no_immediate_selector_accepts_owner_repo_scan_checkpoint(self) -> None:
+        with _patch_collectors(markers=_no_immediate_markers(), manifests=_manifests_with_owner_repo_scan_checkpoint()):
+            report = freshness.build_report(root=Path("C:/ATLAS"), scope="root")
+
+        self.assertEqual(freshness.STATUS_OK, report["status"])
+        self.assertNotIn("manifest_checkpoint_drift", {item["code"] for item in report["warnings"]})
+        self.assertEqual(freshness.OWNER_REPO_RECEIPT_SCAN_RECEIPT, report["manifests"]["current_checkpoint_receipt"])
 
     def test_dry_run_proof_is_not_classified_as_protected(self) -> None:
         with _patch_collectors():
