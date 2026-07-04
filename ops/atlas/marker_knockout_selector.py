@@ -271,14 +271,15 @@ POLICY_REGISTRY: dict[str, MarkerPolicy] = {
     "AI Work Session Stability & Auto-Sync Loop": MarkerPolicy(
         category="admissible after current lane",
         rationale=(
-            "The lane now has landed read-only preflight, closeout, and projection freshness helpers with "
-            "direct proof and worker-cluster reconciliation. "
+            "The lane now has landed read-only preflight, closeout, projection freshness, and Playbook adoption "
+            "matrix helpers with direct proof and worker-cluster reconciliation. "
             "It should not outrank the held active Sandbox family, but it is the first honest downstream "
-            "automation package once the current hold posture allows fall-through."
+            "automation package once the current hold posture allows fall-through into a separately admitted "
+            "root-plus-owner adoption decision."
         ),
         expected_evidence=(
-            "one read-only Playbook adoption matrix implementation with direct proof and no "
-            "owner/platform mutation"
+            "one receipt-backed loop adoption slice used across ATLAS root plus at least two owner repos "
+            "without collapsing owner lanes into root work"
         ),
     ),
     "Feedback Loop Readiness": MarkerPolicy(
@@ -339,18 +340,17 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "AI Work Session Stability & Auto-Sync Loop": PacketDescriptor(
-        packet="AI Work Session Stability & Auto-Sync Loop Playbook adoption matrix first-implementation worker packet 1",
+        packet="AI Work Session Stability & Auto-Sync Loop root-plus-owner adoption admission",
         basis_receipt_ref=(
             "docs/ops/"
             "AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PLAYBOOK-ADOPTION-MATRIX-"
-            "IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-03.md"
+            "FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-04.md"
         ),
-        mode="bounded read-only worker implementation",
+        mode="docs-only root-plus-owner adoption admission",
         scope=(
-            "implement ops/atlas/playbook_adoption_matrix.py and tests/test_atlas_playbook_adoption_matrix.py "
-            "as a read-only classifier for documented, referenced, consumed, enforced, stale, missing, "
-            "owner-lane advisory, and Cortex-substrate Playbook adoption signals without mutating owner repos, "
-            "platform state, protected proof, PR bodies, markers, or restart surfaces"
+            "decide whether the AI work-session loop can be used across ATLAS root plus at least two owner repos "
+            "through separately authorized owner-lane packets without mutating owner repos from root or treating "
+            "advisory owner evidence as root-owned proof"
         ),
     ),
 }

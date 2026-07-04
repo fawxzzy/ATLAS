@@ -34,10 +34,10 @@ PROTECTED_OUTPUT_PREFIXES = {
 }
 PROJECTION_RECEIPT = (
     "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PLAYBOOK-ADOPTION-MATRIX-"
-    "IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-03.md"
+    "FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-04.md"
 )
-PROJECTION_PACKET = "AI Work Session Stability & Auto-Sync Loop Playbook adoption matrix first-implementation worker packet 1"
-AI_WORK_SESSION_MARKER_PERCENT = 55
+PROJECTION_PACKET = "AI Work Session Stability & Auto-Sync Loop root-plus-owner adoption admission"
+AI_WORK_SESSION_MARKER_PERCENT = 70
 
 
 def _read_text(path: Path) -> str | None:
