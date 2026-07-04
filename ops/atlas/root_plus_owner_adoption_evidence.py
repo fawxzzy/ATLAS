@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from ops._atlas import atlas_root, normalize_slashes
+from ops._atlas import atlas_relative, atlas_root, load_repo_registry, normalize_slashes
 from ops.stack.generate_lockfile import git_output
 
 SCHEMA_VERSION = "atlas.root_plus_owner_adoption_evidence.v1"
@@ -34,7 +34,10 @@ CONTRACT_RECEIPTS = (
     "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-04.md",
     "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-04.md",
 )
-ROOT_PLUS_OWNER_ROOT_RECEIPT_PREFIX = "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-"
+ROOT_CONTROL_RECEIPT_PREFIXES = (
+    "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-",
+    "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-OWNER-REPO-RECEIPT-SCAN-",
+)
 REQUIRED_EVIDENCE_FIELDS = OrderedDict(
     [
         ("owner-lane adoption proof", "true"),
@@ -215,7 +218,44 @@ def classify_owner_evidence(path: Path, *, root: Path) -> OrderedDict[str, Any] 
     )
 
 
-def collect_owner_evidence(root: Path) -> list[OrderedDict[str, Any]]:
+def _repo_relative(path: Path, repo_root: Path) -> str:
+    return normalize_slashes(str(path.resolve().relative_to(repo_root.resolve())))
+
+
+def _owner_receipt_git_reasons(repo_root: Path, receipt_path: Path) -> list[str]:
+    relative_path = _repo_relative(receipt_path, repo_root)
+    tracked_code, _tracked_stdout = _git_stdout(repo_root, "ls-files", "--error-unmatch", "--", relative_path)
+    if tracked_code != 0:
+        return ["uncommitted:owner receipt not tracked"]
+    status_code, status_stdout = _git_stdout(repo_root, "status", "--porcelain=v1", "--", relative_path)
+    if status_code != 0:
+        return ["unavailable:owner receipt git status"]
+    if status_stdout.strip():
+        return ["uncommitted:owner receipt has local changes"]
+    return []
+
+
+def _annotate_owner_repo_evidence(
+    row: OrderedDict[str, Any],
+    *,
+    root: Path,
+    repo_id: str,
+    repo_root: Path,
+    receipt_path: Path,
+) -> OrderedDict[str, Any]:
+    reasons = list(row.get("reasons") or [])
+    git_reasons = _owner_receipt_git_reasons(repo_root, receipt_path)
+    reasons.extend(git_reasons)
+    row["eligible"] = bool(row.get("eligible")) and not git_reasons
+    row["reasons"] = reasons
+    row["source"] = "owner_repo"
+    row["source_repo_id"] = repo_id
+    row["source_repo_path"] = atlas_relative(repo_root, root=root)
+    row["source_repo_relative_path"] = _repo_relative(receipt_path, repo_root)
+    return row
+
+
+def _collect_root_exported_owner_evidence(root: Path) -> list[OrderedDict[str, Any]]:
     ops_dir = root / "docs" / "ops"
     if not ops_dir.exists():
         return []
@@ -223,12 +263,36 @@ def collect_owner_evidence(root: Path) -> list[OrderedDict[str, Any]]:
     rows: list[OrderedDict[str, Any]] = []
     for path in sorted(ops_dir.glob("*.md"), key=lambda item: normalize_slashes(str(item))):
         relative_path = _root_relative(path, root)
-        if relative_path in contract_paths or relative_path.startswith(ROOT_PLUS_OWNER_ROOT_RECEIPT_PREFIX):
+        if relative_path in contract_paths or any(relative_path.startswith(prefix) for prefix in ROOT_CONTROL_RECEIPT_PREFIXES):
             continue
         row = classify_owner_evidence(path, root=root)
         if row is not None:
+            row["source"] = "root_export"
             rows.append(row)
     return rows
+
+
+def _collect_owner_repo_evidence(root: Path) -> list[OrderedDict[str, Any]]:
+    rows: list[OrderedDict[str, Any]] = []
+    try:
+        registry = load_repo_registry(root=root)
+    except FileNotFoundError:
+        return rows
+    for repo_id, entry in sorted(registry.items()):
+        if repo_id == "stack":
+            continue
+        ops_dir = entry.root / "docs" / "ops"
+        if not ops_dir.exists() or not ops_dir.is_dir():
+            continue
+        for path in sorted(ops_dir.glob("*.md"), key=lambda item: normalize_slashes(str(item))):
+            row = classify_owner_evidence(path, root=root)
+            if row is not None:
+                rows.append(_annotate_owner_repo_evidence(row, root=root, repo_id=repo_id, repo_root=entry.root, receipt_path=path))
+    return rows
+
+
+def collect_owner_evidence(root: Path) -> list[OrderedDict[str, Any]]:
+    return _collect_root_exported_owner_evidence(root) + _collect_owner_repo_evidence(root)
 
 
 def _eligible_owner_repos(rows: list[dict[str, Any]]) -> list[str]:
