@@ -21,7 +21,7 @@ components:
     remote: "https://github.com/fawxzzy/DiscordOS.git"
     ref_type: "branch"
     ref: "main"
-    commit: "9bfc67e38455754c63db98c96fcad439007c726d"
+    commit: "5fcaedfdacbd79e714416d7fe4f14080d7584f16"
     dirty: false
     trust_class: "trusted"
     release_eligible: false
@@ -32,7 +32,7 @@ components:
     remote: "https://github.com/fawxzzy/foundation.git"
     ref_type: "branch"
     ref: "main"
-    commit: "fd1cf0650cdbb732f1231aa47a6e43138dab9062"
+    commit: "e0c56bf20ef2460f962d8913a7c63b1fdfeab4da"
     dirty: false
     trust_class: "trusted"
     release_eligible: true
@@ -205,4 +205,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:1fc5b5078ba80d0f9defce9cbbf96a4b3aaddeb86296ed2e94885eba272578e6"
+lock_digest: "sha256:17d8e8184c4467da065f86cdaf8b9cf84145c6adb2dcfeebab5f0e25cdd03286"

@@ -40,12 +40,17 @@ OWNER_REPO_RECEIPT_SCAN_RECEIPT = (
     "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-"
     "OWNER-REPO-RECEIPT-SCAN-SEPARATION-HARDENING-2026-07-04.md"
 )
+OWNER_ADOPTION_THRESHOLD_RECEIPT = (
+    "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-"
+    "ROOT-PLUS-OWNER-ADOPTION-THRESHOLD-RECONCILIATION-2026-07-04.md"
+)
 ACCEPTED_MANIFEST_CHECKPOINT_RECEIPTS = {
     PROJECTION_RECEIPT,
     OWNER_REPO_RECEIPT_SCAN_RECEIPT,
+    OWNER_ADOPTION_THRESHOLD_RECEIPT,
 }
-PROJECTION_PACKET = "No immediate AI Work Session Stability & Auto-Sync Loop same-lane packet; wait for at least two separately authorized owner-lane adoption proof receipts"
-AI_WORK_SESSION_MARKER_PERCENT = 70
+PROJECTION_PACKET = "No immediate AI Work Session Stability & Auto-Sync Loop same-lane packet; root-plus-owner adoption threshold is satisfied and future widening requires a separately scoped adoption or automation packet"
+AI_WORK_SESSION_MARKER_PERCENT = 85
 NO_IMMEDIATE_OPERATOR_ACTION = "no_immediate_root_packet"
 
 

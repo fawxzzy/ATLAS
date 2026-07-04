@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-06-29T00:00:00Z",
-  "updated_at": "2026-07-04T01:00:00Z",
+  "updated_at": "2026-07-04T08:45:00Z",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -44,6 +44,7 @@
     "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-04.md",
     "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-EVIDENCE-INTAKE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-04.md",
     "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-OWNER-REPO-RECEIPT-SCAN-SEPARATION-HARDENING-2026-07-04.md",
+    "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-THRESHOLD-RECONCILIATION-2026-07-04.md",
     "ops/atlas/root_plus_owner_adoption_evidence.py",
     "tests/test_atlas_root_plus_owner_adoption_evidence.py",
     "ops/atlas/playbook_adoption_matrix.py",
@@ -61,9 +62,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "ai-work-session-stability-auto-sync-loop",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-OWNER-REPO-RECEIPT-SCAN-SEPARATION-HARDENING-2026-07-04.md",
-    "checkpoint_commit": "main@2fb3fa78",
-    "checkpoint_summary": "The lane remains at 70 percent after the landed read-only preflight helper, landed read-only closeout helper, landed read-only projection freshness checker, landed read-only Playbook adoption matrix worker, hardened read-only root-plus-owner evidence-intake worker that can scan clean tracked owner-repo proof receipts without mutating owner repos, direct tests for all five helpers, clean blocking-level validation, advisory-gap smoke proof, preserved no-mutation boundaries, root restart-surface refresh, and same-lane hold because owner-lane adoption evidence is 0 of 2.",
+    "current_checkpoint_receipt": "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-THRESHOLD-RECONCILIATION-2026-07-04.md",
+    "checkpoint_commit": "main@pending-root-threshold-reconciliation",
+    "checkpoint_summary": "The lane now sits at 85 percent after the landed read-only preflight helper, landed read-only closeout helper, landed read-only projection freshness checker, landed read-only Playbook adoption matrix worker, hardened read-only root-plus-owner evidence-intake worker that can scan clean tracked owner-repo proof receipts without mutating owner repos, direct tests for all five helpers, preserved no-mutation boundaries, separate pushed Foundation and DiscordOS owner-lane proof receipts, and evidence-intake output reporting eligible owner evidence 2 of 2.",
     "governing_receipts": [
       "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-CONTRACT-FREEZE-2026-06-29.md",
       "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-PREFLIGHT-AGGREGATOR-FIRST-IMPLEMENTATION-ADMISSION-2026-06-29.md",
@@ -87,16 +88,21 @@
       "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-04.md",
       "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-04.md",
       "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-EVIDENCE-INTAKE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-04.md",
-      "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-OWNER-REPO-RECEIPT-SCAN-SEPARATION-HARDENING-2026-07-04.md"
+      "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-OWNER-REPO-RECEIPT-SCAN-SEPARATION-HARDENING-2026-07-04.md",
+      "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-THRESHOLD-RECONCILIATION-2026-07-04.md"
     ],
     "owner_truth_surfaces": [
+      {
+        "path": "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-THRESHOLD-RECONCILIATION-2026-07-04.md",
+        "role": "root-owned threshold reconciliation receipt proving the evidence-intake worker now counts clean tracked Foundation and DiscordOS owner-lane proof receipts at 2 of 2 and ratchets the marker to 85 percent while leaving Fitness and Mazer outside this ATLAS marker lane"
+      },
       {
         "path": "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-OWNER-REPO-RECEIPT-SCAN-SEPARATION-HARDENING-2026-07-04.md",
         "role": "root-owned separation-hardening receipt proving the root-plus-owner evidence worker now scans clean tracked owner-repo docs/ops proof receipts read-only while leaving uncommitted owner work ineligible and preserving the 70 percent marker hold"
       },
       {
         "path": "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-EVIDENCE-INTAKE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-04.md",
-        "role": "root-plus-owner evidence-intake worker landing reconciliation, proof summary, 0 of 2 owner-evidence hold, no-owner-mutation guard, 70 percent marker hold, and no-immediate same-lane next-package routing"
+        "role": "root-plus-owner evidence-intake worker landing reconciliation, proof summary, original 0 of 2 owner-evidence hold, no-owner-mutation guard, 70 percent marker hold, and no-immediate same-lane next-package routing before separate owner receipts existed"
       },
       {
         "path": "ops/atlas/root_plus_owner_adoption_evidence.py",
@@ -255,12 +261,12 @@
     ],
     "blocked_or_gated_work": [
       {
-        "item": "using the AI work-session loop across owner repos from the ATLAS root",
-        "requirement": "blocked until at least two separately authorized owner-lane adoption proof receipts exist and the read-only evidence-intake worker counts clean tracked owner-repo proof receipts"
+        "item": "same-lane owner proof supply for the AI work-session loop",
+        "requirement": "satisfied by separate clean tracked Foundation and DiscordOS owner-lane adoption proof receipts counted by the read-only evidence-intake worker"
       },
       {
-        "item": "moving the marker above 70 percent from wording alone",
-        "requirement": "blocked until the loop is used across ATLAS root plus at least two owner repos with receipt-backed proof and preserved owner-lane separation"
+        "item": "moving the marker above 85 percent from proof supply alone",
+        "requirement": "blocked until a separately scoped adoption or automation widening packet exists beyond the now-satisfied 2 of 2 owner-proof threshold"
       },
       {
         "item": "using this lane to mutate owner repos or platform state",
@@ -269,19 +275,19 @@
     ],
     "next_package_ladder": [
       {
-        "package": "No immediate AI Work Session Stability & Auto-Sync Loop same-lane packet; wait for at least two separately authorized owner-lane adoption proof receipts",
-        "mode": "held pending owner-lane proof supply",
-        "reason": "the root-plus-owner evidence-intake worker is hardened to scan clean tracked owner-repo receipts read-only and still reports eligible_owner_count 0 of required_owner_count 2; no further root-only same-lane packet can honestly satisfy the owner-adoption threshold"
+        "package": "No immediate AI Work Session Stability & Auto-Sync Loop same-lane packet; root-plus-owner adoption threshold is satisfied and future widening requires a separately scoped adoption or automation packet",
+        "mode": "held after root-plus-owner adoption threshold reconciliation",
+        "reason": "the root-plus-owner evidence-intake worker is hardened to scan clean tracked owner-repo receipts read-only and now reports eligible_owner_count 2 of required_owner_count 2; no further same-lane proof-supply packet is needed"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-OWNER-REPO-RECEIPT-SCAN-SEPARATION-HARDENING-2026-07-04.md",
-    "freshness_checked_at": "2026-07-04T01:00:00Z",
-    "freshness_basis": "The manifest now mirrors the hardened root-plus-owner evidence-intake worker, 70 percent marker posture, preserved no-mutation boundary, read-only owner-repo receipt scanning, eligible owner evidence count of 0 of 2, and no-immediate same-lane hold until separately authorized owner-lane proof receipts exist.",
+    "freshness_checked_receipt": "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-THRESHOLD-RECONCILIATION-2026-07-04.md",
+    "freshness_checked_at": "2026-07-04T08:45:00Z",
+    "freshness_basis": "The manifest now mirrors the hardened root-plus-owner evidence-intake worker, 85 percent marker posture, preserved no-mutation boundary, read-only owner-repo receipt scanning, eligible owner evidence count of 2 of 2, and no-immediate same-lane hold until a separately scoped adoption or automation widening packet exists.",
     "marker_posture": [
       {
         "marker": "AI Work Session Stability & Auto-Sync Loop",
-        "percent": 70,
+        "percent": 85,
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ]

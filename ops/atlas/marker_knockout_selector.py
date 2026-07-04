@@ -340,16 +340,16 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "AI Work Session Stability & Auto-Sync Loop": PacketDescriptor(
-        packet="No immediate AI Work Session Stability & Auto-Sync Loop same-lane packet; wait for at least two separately authorized owner-lane adoption proof receipts",
+        packet="No immediate AI Work Session Stability & Auto-Sync Loop same-lane packet; root-plus-owner adoption threshold is satisfied and future widening requires a separately scoped adoption or automation packet",
         basis_receipt_ref=(
             "docs/ops/"
-            "AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-EVIDENCE-"
-            "INTAKE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-04.md"
+            "AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-"
+            "THRESHOLD-RECONCILIATION-2026-07-04.md"
         ),
-        mode="held pending owner-lane proof supply",
+        mode="held after root-plus-owner adoption threshold reconciliation",
         scope=(
             "hold the same-lane AI work-session root-plus-owner adoption family because the evidence-intake "
-            "worker is landed and reports 0 of 2 required owner-lane proof receipts"
+            "worker now reports 2 of 2 required owner-lane proof receipts while preserving owner-lane separation"
         ),
     ),
 }
