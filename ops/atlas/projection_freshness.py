@@ -33,10 +33,10 @@ PROTECTED_OUTPUT_PREFIXES = {
     "secrets",
 }
 PROJECTION_RECEIPT = (
-    "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PLAYBOOK-ADOPTION-MATRIX-"
-    "FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-04.md"
+    "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-"
+    "ADMISSION-2026-07-04.md"
 )
-PROJECTION_PACKET = "AI Work Session Stability & Auto-Sync Loop root-plus-owner adoption admission"
+PROJECTION_PACKET = "AI Work Session Stability & Auto-Sync Loop root-plus-owner adoption prompt-pack and worker handoff contract"
 AI_WORK_SESSION_MARKER_PERCENT = 70
 
 
