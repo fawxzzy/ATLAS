@@ -9,8 +9,8 @@ components:
     status: "active"
     remote: "https://github.com/fawxzzy/_stack.git"
     ref_type: "branch"
-    ref: "codex/queue-or-registry-broader-execution-behavior"
-    commit: "70289e0248764586a62e16847adb86e34077cada"
+    ref: "main"
+    commit: "71dd07ae14c4d06f4448b736094be2a65f45f842"
     dirty: false
     trust_class: "trusted"
     release_eligible: false
@@ -205,4 +205,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:a9492975e6068fd1eb4af4df6265c40ed2d54b2c54678f22e7ec9f2353d53357"
+lock_digest: "sha256:49eca189e13440023a8e39e077fc600992a7dae311fe7da55310ce8232805604"

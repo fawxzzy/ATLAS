@@ -34,25 +34,26 @@ Command:
 python ops/validation/validate_stack.py
 ```
 
-Observed result after the policy update:
+Observed result after the policy update and `_stack` mainline resync:
 
 ```text
-critical=0 error=0 warning=10 info=0
+critical=0 error=0 warning=17 info=0
 ```
 
-The previous post-owner-adoption root validation floor was:
+The pass suppresses three managed generated-state warnings that otherwise came from retained dependency/build state:
 
-```text
-critical=0 error=0 warning=13 info=0
-```
+- `_stack/node_modules`
+- `playbook/dist`
+- `foundation/node_modules`
 
-The remaining `10` warnings are Mazer-owned warning-floor items:
+The remaining `17` warnings are inherited path/mutable-state warning-floor items:
 
 - `repos/mazer/.playbook`
 - `repos/mazer/.vercel`
 - `repos/mazer/node_modules`
 - `repos/mazer/dist`
 - six committed absolute-path references in Mazer docs
+- seven committed absolute-path references in `_stack` receipts/docs
 
 ## Marker Decision
 
