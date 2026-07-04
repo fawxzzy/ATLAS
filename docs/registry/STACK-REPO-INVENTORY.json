@@ -3,7 +3,7 @@
   "stack_manifest_ref": "stack.yaml",
   "stack_manifest_digest": "sha256:1ebf366757baf13a45064cdf8d07edd92909ac07f93c44ee9e77b30abebf03e6",
   "stack_lock_ref": "stack.lock.yaml",
-  "stack_lock_digest": "sha256:a9492975e6068fd1eb4af4df6265c40ed2d54b2c54678f22e7ec9f2353d53357",
+  "stack_lock_digest": "sha256:49eca189e13440023a8e39e077fc600992a7dae311fe7da55310ce8232805604",
   "working_memory_digest": "sha256:fe4f4902e2b2c475974b050ba1bf3f5e740439aa41df2f844555c2c0dc3b310f",
   "published_refs": {
     "json": "docs/registry/STACK-REPO-INVENTORY.json",
@@ -21,13 +21,13 @@
       "role": "workflow-operator",
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/_stack.git",
-      "pinned_commit": "70289e0248764586a62e16847adb86e34077cada",
-      "current_commit": "70289e0248764586a62e16847adb86e34077cada",
+      "pinned_commit": "71dd07ae14c4d06f4448b736094be2a65f45f842",
+      "current_commit": "71dd07ae14c4d06f4448b736094be2a65f45f842",
       "pinned_ref_type": "branch",
-      "pinned_ref": "codex/queue-or-registry-broader-execution-behavior",
+      "pinned_ref": "main",
       "current_ref_type": "branch",
-      "current_ref": "codex/queue-or-registry-broader-execution-behavior",
-      "branch": "codex/queue-or-registry-broader-execution-behavior",
+      "current_ref": "main",
+      "branch": "main",
       "dirty": false,
       "root_blocking": true,
       "dirty_blocks_root": false,
@@ -337,7 +337,7 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "9478eaadbc2109299e377f3e4761dcaf60b2cedf",
+      "current_commit": "95d12151221cf871c650b445aa7fa22f2761434d",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
@@ -556,5 +556,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:86be7dffed559ed4c0b944cbaedbacb668f8de93bfebfd412e2e6ce2260c155e"
+  "content_digest": "sha256:1d8d304f0d336406541ae3a53d38ccc7b4c14da03f58491cdfd416f2e4de3a36"
 }
