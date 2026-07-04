@@ -38,6 +38,7 @@ PROJECTION_RECEIPT = (
 )
 PROJECTION_PACKET = "No immediate AI Work Session Stability & Auto-Sync Loop same-lane packet; wait for at least two separately authorized owner-lane adoption proof receipts"
 AI_WORK_SESSION_MARKER_PERCENT = 70
+NO_IMMEDIATE_OPERATOR_ACTION = "no_immediate_root_packet"
 
 
 def _read_text(path: Path) -> str | None:
@@ -379,11 +380,33 @@ def collect_markers(root: Path, manifests: dict[str, Any] | None = None) -> tupl
     next_packet = payload.get("next_after_current_packet")
     next_basis = payload.get("next_after_current_packet_basis_ref")
     next_percent = payload.get("next_after_current_percentage")
-    if next_packet != PROJECTION_PACKET:
-        warnings.append(_finding("selector_next_packet_drift", "Marker selector does not route the expected AI Work Session next packet.", packet=next_packet))
-    if next_basis != PROJECTION_RECEIPT:
-        warnings.append(_finding("selector_basis_drift", "Marker selector basis receipt is stale.", basis=next_basis))
-    if manifests and manifests.get("marker_percent") != next_percent:
+    operator_action = payload.get("operator_action")
+    no_immediate = operator_action == NO_IMMEDIATE_OPERATOR_ACTION
+    if no_immediate:
+        manifest_package = manifests.get("next_package") if manifests else None
+        manifest_checkpoint = manifests.get("current_checkpoint_receipt") if manifests else None
+        if manifest_package != PROJECTION_PACKET:
+            warnings.append(
+                _finding(
+                    "selector_no_immediate_manifest_packet_drift",
+                    "Marker selector reports no immediate root packet, but the AI Work Session manifest does not hold the expected package.",
+                    package=manifest_package,
+                )
+            )
+        if manifest_checkpoint != PROJECTION_RECEIPT:
+            warnings.append(
+                _finding(
+                    "selector_no_immediate_manifest_basis_drift",
+                    "Marker selector reports no immediate root packet, but the AI Work Session manifest checkpoint is stale.",
+                    basis=manifest_checkpoint,
+                )
+            )
+    else:
+        if next_packet != PROJECTION_PACKET:
+            warnings.append(_finding("selector_next_packet_drift", "Marker selector does not route the expected AI Work Session next packet.", packet=next_packet))
+        if next_basis != PROJECTION_RECEIPT:
+            warnings.append(_finding("selector_basis_drift", "Marker selector basis receipt is stale.", basis=next_basis))
+    if manifests and not no_immediate and manifests.get("marker_percent") != next_percent:
         warnings.append(
             _finding(
                 "marker_manifest_percent_drift",

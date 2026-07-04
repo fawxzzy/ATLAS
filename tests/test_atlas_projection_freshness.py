@@ -97,6 +97,21 @@ def _markers(*, packet: str | None = None) -> OrderedDict[str, object]:
     )
 
 
+def _no_immediate_markers() -> OrderedDict[str, object]:
+    return OrderedDict(
+        [
+            ("source_ref", "docs/atlas-book/02-lanes-and-markers.md"),
+            ("active_lane", "Sandbox Simulation Readiness"),
+            ("operator_action", freshness.NO_IMMEDIATE_OPERATOR_ACTION),
+            ("next_after_current_marker", None),
+            ("next_after_current_percentage", None),
+            ("next_after_current_packet", None),
+            ("next_after_current_packet_basis_ref", None),
+            ("next_after_current_packet_mode", None),
+        ]
+    )
+
+
 def _proof_state(*, dry_run_only: bool = False) -> OrderedDict[str, object]:
     return OrderedDict(
         [
@@ -191,6 +206,14 @@ class AtlasProjectionFreshnessTests(unittest.TestCase):
                 report = freshness.build_report(root=Path("C:/ATLAS"), scope="root")
         self.assertEqual(freshness.STATUS_ADVISORY, report["status"])
         self.assertIn("selector_next_packet_drift", {item["code"] for item in report["warnings"]})
+
+    def test_no_immediate_selector_matches_manifest_hold(self) -> None:
+        with _patch_collectors(markers=_no_immediate_markers()):
+            report = freshness.build_report(root=Path("C:/ATLAS"), scope="root")
+
+        self.assertEqual(freshness.STATUS_OK, report["status"])
+        self.assertEqual(freshness.NO_IMMEDIATE_OPERATOR_ACTION, report["markers"]["operator_action"])
+        self.assertEqual(None, report["markers"]["next_after_current_packet"])
 
     def test_dry_run_proof_is_not_classified_as_protected(self) -> None:
         with _patch_collectors():
