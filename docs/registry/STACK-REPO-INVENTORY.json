@@ -3,7 +3,7 @@
   "stack_manifest_ref": "stack.yaml",
   "stack_manifest_digest": "sha256:1ebf366757baf13a45064cdf8d07edd92909ac07f93c44ee9e77b30abebf03e6",
   "stack_lock_ref": "stack.lock.yaml",
-  "stack_lock_digest": "sha256:49eca189e13440023a8e39e077fc600992a7dae311fe7da55310ce8232805604",
+  "stack_lock_digest": "sha256:4a2f8a0a7d5546988c0ba8bfe80f22868b008db6b444f46a28a64b6673cb0097",
   "working_memory_digest": "sha256:fe4f4902e2b2c475974b050ba1bf3f5e740439aa41df2f844555c2c0dc3b310f",
   "published_refs": {
     "json": "docs/registry/STACK-REPO-INVENTORY.json",
@@ -21,8 +21,8 @@
       "role": "workflow-operator",
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/_stack.git",
-      "pinned_commit": "71dd07ae14c4d06f4448b736094be2a65f45f842",
-      "current_commit": "71dd07ae14c4d06f4448b736094be2a65f45f842",
+      "pinned_commit": "c55a2b54c60f7cb196ed6ae57511434368655604",
+      "current_commit": "c55a2b54c60f7cb196ed6ae57511434368655604",
       "pinned_ref_type": "branch",
       "pinned_ref": "main",
       "current_ref_type": "branch",
@@ -227,12 +227,12 @@
       "status": "unmanaged",
       "remote_url": "https://github.com/fawxzzy/mazer.git",
       "pinned_commit": null,
-      "current_commit": "ccfbcf9a17e815a9149f929d5216aebef15b6a75",
+      "current_commit": "c9911aafdb1d1321c2445cb839fd3698a26d5207",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
-      "current_ref": "codex/mazer-hosted-preview-proof",
-      "branch": "codex/mazer-hosted-preview-proof",
+      "current_ref": "main",
+      "branch": "main",
       "dirty": false,
       "root_blocking": false,
       "dirty_blocks_root": false,
@@ -337,7 +337,7 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "95d12151221cf871c650b445aa7fa22f2761434d",
+      "current_commit": "ce5b817ce1e215b3274bda48a15c56deb217b111",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
@@ -556,5 +556,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:1d8d304f0d336406541ae3a53d38ccc7b4c14da03f58491cdfd416f2e4de3a36"
+  "content_digest": "sha256:d6365ac2227806db0b8ae4295b0770ecfbfe9395dd509dc4838421bb5184ca5a"
 }
