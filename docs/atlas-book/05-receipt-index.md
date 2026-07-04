@@ -37,6 +37,7 @@
 - [AI Work Session Stability Auto-Sync Loop Owner-Repo Receipt Scan Separation Hardening](../ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-OWNER-REPO-RECEIPT-SCAN-SEPARATION-HARDENING-2026-07-04.md)
 - [AI Work Session Stability Auto-Sync Loop Root-Plus-Owner Adoption Threshold Reconciliation](../ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-THRESHOLD-RECONCILIATION-2026-07-04.md)
 - [AI Work Session Stability Auto-Sync Loop Closeout Inventory Schema Alignment](../ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-CLOSEOUT-INVENTORY-SCHEMA-ALIGNMENT-2026-07-04.md)
+- [AI Work Session Stability Auto-Sync Loop Closeout Advisory Owner-Lane Safety](../ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-CLOSEOUT-ADVISORY-OWNER-LANE-SAFETY-2026-07-04.md)
 - [ATLAS Root Managed Generated-State Retention Policy Warning Reduction](../ops/ATLAS-ROOT-MANAGED-GENERATED-STATE-RETENTION-POLICY-WARNING-REDUCTION-2026-07-04.md)
 - [Unified Workflow Convergence Handoff-Map Pass 1](../ops/UNIFIED-WORKFLOW-CONVERGENCE-HANDOFF-MAP-PASS-1-2026-05-29.md)
 - [Unified Workflow Convergence Release-Ledger, Publish-Boundary, And Root-Packaging Consequence Pass 2](../ops/UNIFIED-WORKFLOW-CONVERGENCE-RELEASE-LEDGER-PUBLISH-BOUNDARY-AND-ROOT-PACKAGING-CONSEQUENCE-PASS-2-2026-05-29.md)

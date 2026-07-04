@@ -332,7 +332,8 @@ def build_report(
         status = STATUS_BLOCKER
     elif warnings:
         status = STATUS_ADVISORY
-    safe_to_close = status == STATUS_OK
+    warning_codes = {str(item.get("code", "")) for item in warnings if isinstance(item, dict)}
+    safe_to_close = not blockers and "local_residue_present" not in warning_codes
     next_actions = build_next_actions(markers, blockers)
 
     return {

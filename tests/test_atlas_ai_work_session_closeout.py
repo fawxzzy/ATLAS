@@ -116,6 +116,20 @@ class AtlasAiWorkSessionCloseoutTests(unittest.TestCase):
         self.assertFalse(report["safe_to_close"])
         self.assertEqual("local_residue_present", report["warnings"][0]["code"])
 
+    def test_advisory_owner_lane_dirt_does_not_block_root_closeout(self) -> None:
+        with _patch_collectors(inventory=_inventory(advisory=["fitness"])):
+            report = closeout.build_report(
+                root=Path("C:/ATLAS"),
+                scope="root",
+                session_label="advisory-owner",
+                touched_repos=[],
+                commands_run=[],
+            )
+        self.assertEqual(closeout.STATUS_ADVISORY, report["status"])
+        self.assertTrue(report["safe_to_close"])
+        self.assertEqual([], report["blockers"])
+        self.assertIn("advisory_dirty_repos", {item["code"] for item in report["warnings"]})
+
     def test_closeout_with_blockers(self) -> None:
         with _patch_collectors(validation=_validation(error=1)):
             report = closeout.build_report(
