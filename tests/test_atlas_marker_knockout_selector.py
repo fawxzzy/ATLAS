@@ -677,19 +677,19 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual("hold_current_lane", payload["operator_action"])
         self.assertEqual("AI Work Session Stability & Auto-Sync Loop", payload["next_after_current_marker"])
         self.assertEqual(
-            "AI Work Session Stability & Auto-Sync Loop root-plus-owner adoption prompt-pack and worker handoff contract",
+            "AI Work Session Stability & Auto-Sync Loop root-plus-owner adoption implementation-readiness closeout and worker-routing",
             payload["next_after_current_packet"],
         )
         self.assertEqual(
-            "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-ADMISSION-2026-07-04.md",
+            "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-04.md",
             payload["next_after_current_packet_basis_ref"],
         )
         self.assertEqual(
-            "docs-only root-plus-owner adoption prompt-pack",
+            "docs-only root-plus-owner adoption implementation-readiness",
             payload["next_after_current_packet_mode"],
         )
         self.assertIn(
-            "eligible owner evidence surfaces",
+            "without mutating Fitness, Mazer",
             payload["next_after_current_packet_scope"],
         )
 

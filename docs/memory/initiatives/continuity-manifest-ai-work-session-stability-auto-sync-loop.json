@@ -40,6 +40,7 @@
     "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PLAYBOOK-ADOPTION-MATRIX-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-03.md",
     "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PLAYBOOK-ADOPTION-MATRIX-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-04.md",
     "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-ADMISSION-2026-07-04.md",
+    "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-04.md",
     "ops/atlas/playbook_adoption_matrix.py",
     "tests/test_atlas_playbook_adoption_matrix.py",
     "ops/atlas/projection_freshness.py",
@@ -55,9 +56,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "ai-work-session-stability-auto-sync-loop",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-ADMISSION-2026-07-04.md",
-    "checkpoint_commit": "main@dfd7110d",
-    "checkpoint_summary": "The lane remains at 70 percent after the landed read-only preflight helper, landed read-only closeout helper, landed read-only projection freshness checker, landed read-only Playbook adoption matrix worker, direct tests for all four helpers, clean blocking-level validation, advisory-gap smoke proof, worker-cluster reconciliation proof, preserved no-mutation boundaries, root restart-surface refresh, and docs-only root-plus-owner adoption admission.",
+    "current_checkpoint_receipt": "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-04.md",
+    "checkpoint_commit": "main@352dfcff",
+    "checkpoint_summary": "The lane remains at 70 percent after the landed read-only preflight helper, landed read-only closeout helper, landed read-only projection freshness checker, landed read-only Playbook adoption matrix worker, direct tests for all four helpers, clean blocking-level validation, advisory-gap smoke proof, worker-cluster reconciliation proof, preserved no-mutation boundaries, root restart-surface refresh, docs-only root-plus-owner adoption admission, and docs-only root-plus-owner adoption prompt-pack.",
     "governing_receipts": [
       "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-CONTRACT-FREEZE-2026-06-29.md",
       "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-READ-ONLY-PREFLIGHT-AGGREGATOR-FIRST-IMPLEMENTATION-ADMISSION-2026-06-29.md",
@@ -77,9 +78,14 @@
       "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PLAYBOOK-ADOPTION-MATRIX-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-03.md",
       "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PLAYBOOK-ADOPTION-MATRIX-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-03.md",
       "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PLAYBOOK-ADOPTION-MATRIX-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-04.md",
-      "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-ADMISSION-2026-07-04.md"
+      "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-ADMISSION-2026-07-04.md",
+      "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-04.md"
     ],
     "owner_truth_surfaces": [
+      {
+        "path": "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-04.md",
+        "role": "docs-only root-plus-owner adoption prompt-pack, owner-lane eligibility criteria, root-owned proof fields, owner-owned proof fields, helper participation contract, stop conditions, no-root-owner-mutation guard, 70 percent marker hold, and implementation-readiness next-package routing"
+      },
       {
         "path": "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-ADMISSION-2026-07-04.md",
         "role": "docs-only root-plus-owner adoption admission, owner-lane proof boundary, no owner mutation guard, 70 percent marker hold, and prompt-pack next-package routing"
@@ -222,7 +228,7 @@
     "blocked_or_gated_work": [
       {
         "item": "using the AI work-session loop across owner repos from the ATLAS root",
-        "requirement": "blocked until a root-plus-owner prompt-pack freezes exact owner-lane proof surfaces, stop conditions, and readiness criteria"
+        "requirement": "blocked until implementation-readiness routes a bounded reconciliation or worker packet, and separately authorized owner-lane proofs exist"
       },
       {
         "item": "moving the marker above 70 percent from wording alone",
@@ -235,15 +241,15 @@
     ],
     "next_package_ladder": [
       {
-        "package": "AI Work Session Stability & Auto-Sync Loop root-plus-owner adoption prompt-pack and worker handoff contract",
-        "mode": "docs-only root-plus-owner adoption prompt-pack",
-        "reason": "root-plus-owner adoption is now admitted but not implemented; the next packet must freeze the exact proof contract, owner-lane boundaries, eligible owner evidence surfaces, stop conditions, and readiness criteria before any owner repo can count toward the 85 percent threshold"
+        "package": "AI Work Session Stability & Auto-Sync Loop root-plus-owner adoption implementation-readiness closeout and worker-routing",
+        "mode": "docs-only root-plus-owner adoption implementation-readiness",
+        "reason": "root-plus-owner adoption is now admitted and the proof contract is frozen; the next packet must decide whether a bounded reconciliation or worker packet can be routed without mutating Fitness, Mazer, or any other owner repo from root"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-ADMISSION-2026-07-04.md",
+    "freshness_checked_receipt": "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-04.md",
     "freshness_checked_at": "2026-07-04T01:00:00Z",
-    "freshness_basis": "The manifest now mirrors the docs-only root-plus-owner adoption admission, 70 percent marker posture, preserved no-mutation boundary, and root-plus-owner adoption prompt-pack as the next exact same-lane package.",
+    "freshness_basis": "The manifest now mirrors the docs-only root-plus-owner adoption prompt-pack, 70 percent marker posture, preserved no-mutation boundary, owner-lane proof eligibility contract, and root-plus-owner adoption implementation-readiness as the next exact same-lane package.",
     "marker_posture": [
       {
         "marker": "AI Work Session Stability & Auto-Sync Loop",
