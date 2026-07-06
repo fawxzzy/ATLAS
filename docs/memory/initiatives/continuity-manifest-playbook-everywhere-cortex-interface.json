@@ -29,7 +29,8 @@
     "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-POST-AI-WORK-SESSION-STABILITY-NEXT-SLICE-SELECTION-2026-07-06.md",
     "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-READ-ONLY-PLAYBOOK-ADOPTION-MATRIX-CONTRACT-FREEZE-2026-07-06.md",
     "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-READ-ONLY-PLAYBOOK-ADOPTION-MATRIX-OWNER-SURFACE-ADMISSION-2026-07-06.md",
-    "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-READ-ONLY-PLAYBOOK-ADOPTION-MATRIX-CONSUMPTION-RECONCILIATION-2026-07-06.md"
+    "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-READ-ONLY-PLAYBOOK-ADOPTION-MATRIX-CONSUMPTION-RECONCILIATION-2026-07-06.md",
+    "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CORTEX-WORKER-PROMPT-CONSUMPTION-PROOF-RECONCILIATION-2026-07-06.md"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -37,9 +38,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "playbook-everywhere-cortex-interface",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-READ-ONLY-PLAYBOOK-ADOPTION-MATRIX-CONSUMPTION-RECONCILIATION-2026-07-06.md",
-    "checkpoint_commit": "main@01ee8c9f",
-    "checkpoint_summary": "The lane remains at 22 percent, but the frozen read-only Playbook adoption matrix has now been reconciled across doctrine, consumer, owner-advisory, and Cortex-substrate classes. The live matrix remains advisory_gap with no blockers, proving safe structured adoption breadth but not marker-ratchet readiness.",
+    "current_checkpoint_receipt": "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CORTEX-WORKER-PROMPT-CONSUMPTION-PROOF-RECONCILIATION-2026-07-06.md",
+    "checkpoint_commit": "main@5ba077c0",
+    "checkpoint_summary": "The lane now sits at 25 percent after the refreshed Cortex worker-prompt consumption proof reconciled explicit Playbook/Cortex source refs, clean publication posture, matched rule ids, owner-repo avoidance, non-execution guards, and final-receipt separation. The ratchet remains bounded because Cortex stays read-only advisory and gains no execution, owner-truth, or final-receipt authority.",
     "governing_receipts": [
       "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CONTRACT-FIRST-AGENT-SHADOWING-PASS-1-2026-06-01.md",
       "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-VALIDATION-SUMMARY-SHADOW-CONSUMPTION-PASS-2-2026-06-01.md",
@@ -49,9 +50,14 @@
       "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-POST-AI-WORK-SESSION-STABILITY-NEXT-SLICE-SELECTION-2026-07-06.md",
       "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-READ-ONLY-PLAYBOOK-ADOPTION-MATRIX-CONTRACT-FREEZE-2026-07-06.md",
       "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-READ-ONLY-PLAYBOOK-ADOPTION-MATRIX-OWNER-SURFACE-ADMISSION-2026-07-06.md",
-      "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-READ-ONLY-PLAYBOOK-ADOPTION-MATRIX-CONSUMPTION-RECONCILIATION-2026-07-06.md"
+      "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-READ-ONLY-PLAYBOOK-ADOPTION-MATRIX-CONSUMPTION-RECONCILIATION-2026-07-06.md",
+      "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CORTEX-WORKER-PROMPT-CONSUMPTION-PROOF-RECONCILIATION-2026-07-06.md"
     ],
     "owner_truth_surfaces": [
+      {
+        "path": "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CORTEX-WORKER-PROMPT-CONSUMPTION-PROOF-RECONCILIATION-2026-07-06.md",
+        "role": "docs-only reconciliation of refreshed Cortex worker-prompt consumption proof, clean publication posture, explicit source refs, owner-repo avoidance, non-execution guards, final-receipt separation, and the bounded 22-to-25 percent marker ratchet"
+      },
       {
         "path": "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-READ-ONLY-PLAYBOOK-ADOPTION-MATRIX-CONSUMPTION-RECONCILIATION-2026-07-06.md",
         "role": "docs-only reconciliation of current matrix output proving safe advisory adoption breadth, owner rows as non-proof, Cortex substrate candidates as advisory, and no marker movement"
@@ -121,16 +127,12 @@
     ],
     "blocked_or_gated_work": [
       {
-        "item": "marker movement from matrix consumption reconciliation",
-        "requirement": "blocked until a later worker-prompt consumption proof, implementation, or explicit authority-safe interface widening proves adoption beyond advisory_gap"
-      },
-      {
         "item": "continuing this lane by adjacency alone",
-        "requirement": "blocked unless a new exportable family, a cleared blocked-family admissibility boundary, or real contract/read-model drift appears"
+        "requirement": "blocked unless a new implementation packet, authority-safe interface widening, owner-side adoption proof, cleared blocked-family admissibility boundary, or real contract/read-model drift appears"
       },
       {
         "item": "higher marker movement above the current held interface threshold",
-        "requirement": "blocked until broader governed export breadth, a new live safe consumer class, or real owner-boundary change alters operator reality again"
+        "requirement": "blocked until broader governed export breadth, an implementation-backed consumer class, or real owner-boundary change alters operator reality again"
       },
       {
         "item": "claiming Cortex authority widening from safe shadow consumption alone",
@@ -139,19 +141,19 @@
     ],
     "next_package_ladder": [
       {
-        "package": "Playbook Everywhere + Cortex Interface Cortex worker-prompt consumption proof reconciliation",
-        "mode": "docs-only worker-prompt consumption proof reconciliation",
-        "reason": "the original selector deferred worker-prompt consumption proof until after the matrix contract was frozen; the contract is now frozen, owner-surface metadata is admitted, and matrix consumption is reconciled as advisory, so the next honest move is to prove exactly how Cortex worker prompts consume Playbook/Cortex substrate while preserving non-execution guards"
+        "package": "No immediate Playbook Everywhere + Cortex Interface same-lane packet after worker-prompt consumption proof reconciliation",
+        "mode": "hold or select a separately scoped implementation or authority-safe widening packet",
+        "reason": "the current bounded worker-prompt consumption proof threshold is now consumed and ratcheted; further same-lane progress needs a new implementation-backed consumer class, authority-safe interface widening, owner-side adoption proof, or real contract/read-model drift rather than another wording-only receipt"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-READ-ONLY-PLAYBOOK-ADOPTION-MATRIX-CONSUMPTION-RECONCILIATION-2026-07-06.md",
+    "freshness_checked_receipt": "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CORTEX-WORKER-PROMPT-CONSUMPTION-PROOF-RECONCILIATION-2026-07-06.md",
     "freshness_checked_at": "2026-07-06T00:00:00Z",
-    "freshness_basis": "The manifest now mirrors consumption reconciliation for the frozen read-only Playbook adoption matrix. The lane remains at 22 percent and names Cortex worker-prompt consumption proof reconciliation as the next bounded packet; no owner repo mutation or marker movement is claimed.",
+    "freshness_basis": "The manifest now mirrors the refreshed Cortex worker-prompt consumption proof reconciliation. The lane moves to 25 percent from a live safe read-only Cortex consumer class while preserving owner-repo separation, non-execution guards, and final-receipt separation; no immediate same-lane packet remains open by adjacency alone.",
     "marker_posture": [
       {
         "marker": "Playbook Everywhere + Cortex Interface",
-        "percent": 22,
+        "percent": 25,
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ]
