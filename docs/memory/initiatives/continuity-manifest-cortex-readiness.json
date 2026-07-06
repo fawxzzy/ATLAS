@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-06-19T07:00:00Z",
-  "updated_at": "2026-06-28T20:14:34.4865933-04:00",
+  "updated_at": "2026-07-06T00:00:00Z",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -30,6 +30,8 @@
     "docs/ops/CORTEX-READINESS-DOCS-ADR-OR-DEBT-SLICE-POST-PR-70-MERGE-LIVE-READ-MODEL-RECONCILIATION-PASS-23-2026-06-06.md",
     "docs/ops/CORTEX-READINESS-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md",
     "docs/ops/CORTEX-HELD-ROOT-POSTURE-SEED-AND-RUNTIME-RESYNC-2026-06-28.md",
+    "docs/ops/CORTEX-READINESS-POST-AUTHORITY-SAFE-INTERFACE-HANDOFF-NEXT-SLICE-SELECTION-2026-07-06.md",
+    "docs/ops/CORTEX-READINESS-AUTHORITY-SAFE-HANDOFF-CONSUMPTION-PROOF-CONTRACT-FREEZE-2026-07-06.md",
     "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-CORTEX-HELD-ROOT-PROJECTION-CLEANUP-2026-06-28.md",
     "docs/ops/ATLAS-ROOT-VALIDATION-WARNING-FLOOR-AND-LIVE-MAZER-LOCK-TRUTH-RESYNC-2026-06-28.md",
     "docs/ops/ATLAS-ROOT-ZERO-WARNING-FLOOR-AFTER-MAZER-GENERATED-STATE-CLEANUP-RESYNC-2026-06-28.md",
@@ -44,9 +46,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "cortex-readiness",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/CORTEX-HELD-ROOT-POSTURE-SEED-AND-RUNTIME-RESYNC-2026-06-28.md",
-    "checkpoint_commit": "main",
-    "checkpoint_summary": "The lane still holds at 41 percent, and the live seeded and generated Cortex read model still agrees with the current held-root dispatcher truth: the stale docs-adr-or-debt-slice next action and ambient warning-debt wording are cleared, `hold-current-root-posture` is now the truthful bounded next action, current validation now reads `critical=0 error=0 warning=3 info=0`, the live stack lock now pins clean pushed `mazer` on `codex/legacy-web-port-truth` at `2545cfe0fe383ad170d9d79b95c00e02fa8d4caa`, and the lane remains advisory and projection-only with no authority widening.",
+    "current_checkpoint_receipt": "docs/ops/CORTEX-READINESS-AUTHORITY-SAFE-HANDOFF-CONSUMPTION-PROOF-CONTRACT-FREEZE-2026-07-06.md",
+    "checkpoint_commit": "main@98b5db20",
+    "checkpoint_summary": "The lane still holds at 41 percent, and the latest Cortex-side packet is a docs-only authority-safe handoff consumption contract. Cortex may consume `ops/cortex/authority_safe_interface_handoff.py --json --scope root` only as advisory substrate. The contract preserves denial of execution, approval, owner-truth, final-receipt, deploy, secret-handling, transcript-scraping, automatic _stack dispatch, repo mutation, platform mutation, owner-repo mutation, and protected-surface mutation authority. The next exact Cortex packet is `Cortex Readiness authority-safe handoff consumption proof first-implementation admission`.",
     "governing_receipts": [
       "docs/ops/CORTEX-READINESS-MARKER-CHECKPOINT-SHADOW-CONSUMPTION-PASS-1-2026-06-01.md",
       "docs/ops/CORTEX-READINESS-RECEIPT-DOCTRINE-DRAFT-SHADOW-CONSUMPTION-PASS-2-2026-06-01.md",
@@ -57,6 +59,8 @@
       "docs/ops/CORTEX-READINESS-DOCS-ADR-OR-DEBT-SLICE-POST-PR-70-MERGE-LIVE-READ-MODEL-RECONCILIATION-PASS-23-2026-06-06.md",
       "docs/ops/CORTEX-READINESS-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md",
       "docs/ops/CORTEX-HELD-ROOT-POSTURE-SEED-AND-RUNTIME-RESYNC-2026-06-28.md",
+      "docs/ops/CORTEX-READINESS-POST-AUTHORITY-SAFE-INTERFACE-HANDOFF-NEXT-SLICE-SELECTION-2026-07-06.md",
+      "docs/ops/CORTEX-READINESS-AUTHORITY-SAFE-HANDOFF-CONSUMPTION-PROOF-CONTRACT-FREEZE-2026-07-06.md",
       "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-CORTEX-HELD-ROOT-PROJECTION-CLEANUP-2026-06-28.md",
       "docs/ops/ATLAS-ROOT-VALIDATION-WARNING-FLOOR-AND-LIVE-MAZER-LOCK-TRUTH-RESYNC-2026-06-28.md",
       "docs/ops/ATLAS-ROOT-ZERO-WARNING-FLOOR-AFTER-MAZER-GENERATED-STATE-CLEANUP-RESYNC-2026-06-28.md",
@@ -75,6 +79,14 @@
       {
         "path": "docs/ops/CORTEX-HELD-ROOT-POSTURE-SEED-AND-RUNTIME-RESYNC-2026-06-28.md",
         "role": "current exact held-root seed and runtime resync truth"
+      },
+      {
+        "path": "docs/ops/CORTEX-READINESS-POST-AUTHORITY-SAFE-INTERFACE-HANDOFF-NEXT-SLICE-SELECTION-2026-07-06.md",
+        "role": "Cortex-side next-slice selector after the authority-safe interface handoff helper landed"
+      },
+      {
+        "path": "docs/ops/CORTEX-READINESS-AUTHORITY-SAFE-HANDOFF-CONSUMPTION-PROOF-CONTRACT-FREEZE-2026-07-06.md",
+        "role": "current authority-safe handoff consumption contract for treating helper output as advisory Cortex substrate only"
       },
       {
         "path": "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-CORTEX-HELD-ROOT-PROJECTION-CLEANUP-2026-06-28.md",
@@ -155,19 +167,23 @@
       {
         "item": "continuing this lane after the held-root resync without a new distinct drift class",
         "requirement": "blocked unless live runtime surfaces drift again, a new bounded held-root preservation question opens, or a real branch or reconciliation blocker returns"
+      },
+      {
+        "item": "moving Cortex Readiness from the authority-safe handoff consumption contract alone",
+        "requirement": "blocked until an implementation-backed Cortex consumer proves the helper output is consumed as advisory substrate without granting execution, approval, owner-truth, deploy, secret, repo-mutation, platform-mutation, final-receipt, owner-repo, or protected-surface authority"
       }
     ],
     "next_package_ladder": [
       {
-        "package": "No immediate Cortex Readiness same-lane packet",
-        "mode": "hold-flat after held-root seed and runtime resync",
-        "reason": "the bounded advisory lane is aligned and refresh-safe again; reopen only with new read-model drift, broader adoption, or explicit authority widening"
+        "package": "Cortex Readiness authority-safe handoff consumption proof first-implementation admission",
+        "mode": "docs-only first-implementation admission",
+        "reason": "the consumption contract is frozen; the next honest move is to admit one bounded implementation proof that consumes authority-safe handoff helper output while preserving every authority denial"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-FITNESS-LATEST-CLEAN-HEAD-AND-MAZER-LATEST-CLEAN-HEAD-RESYNC-2026-06-28.md",
-    "freshness_checked_at": "2026-06-28T20:14:34.4865933-04:00",
-    "freshness_basis": "The manifest now matches the current 41 percent advisory Cortex posture after the June 28 held-root resync, the immediate Book-side cleanup, the later warning-floor truth re-sync, the later zero-warning closeout, the later live dirty-working-set resync, the later clean-mazer parity resync, the later README-path dirty-head resync, the later Fitness latest-clean-head resync, and the later dual-clean-head resync: the live seed and generated runtime chain agree that no immediate ATLAS-root packet is open, `hold-current-root-posture` is the truthful bounded next action, current validation now reads `critical=0 error=0 warning=3 info=0`, the live stack lock now pins pushed clean `mazer` on `codex/legacy-web-port-truth` at `2545cfe0fe383ad170d9d79b95c00e02fa8d4caa`, and the canonical marker plus posture mirrors no longer narrate the stale docs-ADR slice as the live Cortex next move.",
+    "freshness_checked_receipt": "docs/ops/CORTEX-READINESS-AUTHORITY-SAFE-HANDOFF-CONSUMPTION-PROOF-CONTRACT-FREEZE-2026-07-06.md",
+    "freshness_checked_at": "2026-07-06T00:00:00Z",
+    "freshness_basis": "The manifest now matches the current 41 percent Cortex posture after the authority-safe handoff consumption selector and contract freeze. Cortex may consume the authority-safe interface helper output only as advisory substrate, no marker moves from docs-only selection or contract freeze, and the next exact packet is first-implementation admission for a bounded Cortex consumer proof.",
     "marker_posture": [
       {
         "marker": "Cortex Readiness",

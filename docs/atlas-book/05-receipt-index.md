@@ -250,6 +250,8 @@
 - [Playbook Everywhere + Cortex Interface Authority-Safe Cortex Interface Widening Prompt-Pack And Worker Handoff Contract](../ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-AUTHORITY-SAFE-CORTEX-INTERFACE-WIDENING-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-06.md)
 - [Playbook Everywhere + Cortex Interface Authority-Safe Cortex Interface Widening Implementation-Readiness Closeout And Worker Routing](../ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-AUTHORITY-SAFE-CORTEX-INTERFACE-WIDENING-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-06.md)
 - [Playbook Everywhere + Cortex Interface Authority-Safe Cortex Interface Widening First-Implementation Worker Cluster Reconciliation](../ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-AUTHORITY-SAFE-CORTEX-INTERFACE-WIDENING-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-06.md)
+- [Cortex Readiness Post Authority-Safe Interface Handoff Next Slice Selection](../ops/CORTEX-READINESS-POST-AUTHORITY-SAFE-INTERFACE-HANDOFF-NEXT-SLICE-SELECTION-2026-07-06.md)
+- [Cortex Readiness Authority-Safe Handoff Consumption Proof Contract Freeze](../ops/CORTEX-READINESS-AUTHORITY-SAFE-HANDOFF-CONSUMPTION-PROOF-CONTRACT-FREEZE-2026-07-06.md)
 - [Cortex Readiness Continuity Manifest Seed And Active Continuity Widening](../ops/CORTEX-READINESS-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md)
 - [Open Marker Manifest Coverage Closeout And Active Continuity Lane Ratchet](../ops/OPEN-MARKER-MANIFEST-COVERAGE-CLOSEOUT-AND-ACTIVE-CONTINUITY-LANE-RATCHET-2026-06-19.md)
 - [Open Marker Restart Index Closeout And Active Continuity Lane Ratchet](../ops/OPEN-MARKER-RESTART-INDEX-CLOSEOUT-AND-ACTIVE-CONTINUITY-LANE-RATCHET-2026-06-19.md)
