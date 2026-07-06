@@ -50,6 +50,7 @@ ACCEPTED_MANIFEST_CHECKPOINT_RECEIPTS = {
     OWNER_ADOPTION_THRESHOLD_RECEIPT,
 }
 PROJECTION_PACKET = "No immediate AI Work Session Stability & Auto-Sync Loop same-lane packet; root-plus-owner adoption threshold is satisfied and future widening requires a separately scoped adoption or automation packet"
+AI_WORK_SESSION_MARKER = "AI Work Session Stability & Auto-Sync Loop"
 AI_WORK_SESSION_MARKER_PERCENT = 85
 NO_IMMEDIATE_OPERATOR_ACTION = "no_immediate_root_packet"
 
@@ -411,6 +412,7 @@ def collect_manifests(root: Path) -> tuple[OrderedDict[str, Any], list[dict[str,
 def collect_markers(root: Path, manifests: dict[str, Any] | None = None) -> tuple[OrderedDict[str, Any], list[dict[str, Any]]]:
     warnings: list[dict[str, Any]] = []
     payload = build_campaign(root=root)
+    next_marker = payload.get("next_after_current_marker")
     next_packet = payload.get("next_after_current_packet")
     next_basis = payload.get("next_after_current_packet_basis_ref")
     next_percent = payload.get("next_after_current_percentage")
@@ -435,12 +437,12 @@ def collect_markers(root: Path, manifests: dict[str, Any] | None = None) -> tupl
                     basis=manifest_checkpoint,
                 )
             )
-    else:
+    elif next_marker == AI_WORK_SESSION_MARKER:
         if next_packet != PROJECTION_PACKET:
             warnings.append(_finding("selector_next_packet_drift", "Marker selector does not route the expected AI Work Session next packet.", packet=next_packet))
         if next_basis not in ACCEPTED_MANIFEST_CHECKPOINT_RECEIPTS:
             warnings.append(_finding("selector_basis_drift", "Marker selector basis receipt is stale.", basis=next_basis))
-    if manifests and not no_immediate and manifests.get("marker_percent") != next_percent:
+    if manifests and not no_immediate and next_marker == AI_WORK_SESSION_MARKER and manifests.get("marker_percent") != next_percent:
         warnings.append(
             _finding(
                 "marker_manifest_percent_drift",
@@ -454,7 +456,7 @@ def collect_markers(root: Path, manifests: dict[str, Any] | None = None) -> tupl
             ("source_ref", "docs/atlas-book/02-lanes-and-markers.md"),
             ("active_lane", payload.get("active_lane")),
             ("operator_action", payload.get("operator_action")),
-            ("next_after_current_marker", payload.get("next_after_current_marker")),
+            ("next_after_current_marker", next_marker),
             ("next_after_current_percentage", next_percent),
             ("next_after_current_packet", next_packet),
             ("next_after_current_packet_basis_ref", next_basis),

@@ -124,6 +124,21 @@ def _no_immediate_markers() -> OrderedDict[str, object]:
     )
 
 
+def _playbook_fallthrough_markers() -> OrderedDict[str, object]:
+    return OrderedDict(
+        [
+            ("source_ref", "docs/atlas-book/02-lanes-and-markers.md"),
+            ("active_lane", "Sandbox Simulation Readiness"),
+            ("operator_action", "hold_current_lane"),
+            ("next_after_current_marker", "Playbook Everywhere + Cortex Interface"),
+            ("next_after_current_percentage", 22),
+            ("next_after_current_packet", None),
+            ("next_after_current_packet_basis_ref", None),
+            ("next_after_current_packet_mode", None),
+        ]
+    )
+
+
 def _proof_state(*, dry_run_only: bool = False) -> OrderedDict[str, object]:
     return OrderedDict(
         [
@@ -242,6 +257,16 @@ class AtlasProjectionFreshnessTests(unittest.TestCase):
         self.assertEqual(freshness.STATUS_OK, report["status"])
         self.assertNotIn("manifest_checkpoint_drift", {item["code"] for item in report["warnings"]})
         self.assertEqual(freshness.OWNER_ADOPTION_THRESHOLD_RECEIPT, report["manifests"]["current_checkpoint_receipt"])
+
+    def test_non_ai_work_session_fallthrough_does_not_emit_ai_work_session_drift(self) -> None:
+        with _patch_collectors(markers=_playbook_fallthrough_markers()):
+            report = freshness.build_report(root=Path("C:/ATLAS"), scope="root")
+
+        warning_codes = {item["code"] for item in report["warnings"]}
+        self.assertNotIn("selector_next_packet_drift", warning_codes)
+        self.assertNotIn("selector_basis_drift", warning_codes)
+        self.assertNotIn("marker_manifest_percent_drift", warning_codes)
+        self.assertEqual("Playbook Everywhere + Cortex Interface", report["markers"]["next_after_current_marker"])
 
     def test_dry_run_proof_is_not_classified_as_protected(self) -> None:
         with _patch_collectors():
