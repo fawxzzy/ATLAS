@@ -26,7 +26,8 @@
     "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CONTRACT-EXPORT-SURFACE-PASS-3-2026-06-02.md",
     "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-EXPORTED-FAMILY-CONSUMPTION-RECONCILIATION-PASS-4-2026-06-02.md",
     "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md",
-    "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-POST-AI-WORK-SESSION-STABILITY-NEXT-SLICE-SELECTION-2026-07-06.md"
+    "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-POST-AI-WORK-SESSION-STABILITY-NEXT-SLICE-SELECTION-2026-07-06.md",
+    "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-READ-ONLY-PLAYBOOK-ADOPTION-MATRIX-CONTRACT-FREEZE-2026-07-06.md"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -34,18 +35,23 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "playbook-everywhere-cortex-interface",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-POST-AI-WORK-SESSION-STABILITY-NEXT-SLICE-SELECTION-2026-07-06.md",
-    "checkpoint_commit": "main@caa770cb",
-    "checkpoint_summary": "The lane remains at 22 percent, but an operator-selected docs-only selector now admits the next bounded packet: a read-only Playbook adoption matrix contract freeze. This selection is based on the landed AI Work Session Playbook adoption matrix helper, Cortex worker-prompt health, and live matrix output showing advisory adoption evidence without enough proof for marker movement.",
+    "current_checkpoint_receipt": "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-READ-ONLY-PLAYBOOK-ADOPTION-MATRIX-CONTRACT-FREEZE-2026-07-06.md",
+    "checkpoint_commit": "main@5dce6401",
+    "checkpoint_summary": "The lane remains at 22 percent, but the read-only Playbook adoption matrix contract is now frozen. The receipt defines Playbook utilization, Cortex substrate readiness, adoption classifications, owner-lane read-only boundaries, and the next exact owner-surface admission packet without claiming marker movement or owner-repo mutation.",
     "governing_receipts": [
       "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CONTRACT-FIRST-AGENT-SHADOWING-PASS-1-2026-06-01.md",
       "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-VALIDATION-SUMMARY-SHADOW-CONSUMPTION-PASS-2-2026-06-01.md",
       "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CONTRACT-EXPORT-SURFACE-PASS-3-2026-06-02.md",
       "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-EXPORTED-FAMILY-CONSUMPTION-RECONCILIATION-PASS-4-2026-06-02.md",
       "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md",
-      "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-POST-AI-WORK-SESSION-STABILITY-NEXT-SLICE-SELECTION-2026-07-06.md"
+      "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-POST-AI-WORK-SESSION-STABILITY-NEXT-SLICE-SELECTION-2026-07-06.md",
+      "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-READ-ONLY-PLAYBOOK-ADOPTION-MATRIX-CONTRACT-FREEZE-2026-07-06.md"
     ],
     "owner_truth_surfaces": [
+      {
+        "path": "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-READ-ONLY-PLAYBOOK-ADOPTION-MATRIX-CONTRACT-FREEZE-2026-07-06.md",
+        "role": "read-only Playbook adoption matrix contract freeze defining Playbook utilization, Cortex substrate readiness, adoption taxonomy, owner-lane read-only boundaries, no marker movement, and the next owner-surface admission packet"
+      },
       {
         "path": "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-POST-AI-WORK-SESSION-STABILITY-NEXT-SLICE-SELECTION-2026-07-06.md",
         "role": "operator-selected docs-only selector admitting the read-only Playbook adoption matrix contract freeze as the next bounded Playbook/Cortex packet without marker movement or owner-repo mutation"
@@ -103,8 +109,8 @@
     ],
     "blocked_or_gated_work": [
       {
-        "item": "marker movement from this selector packet",
-        "requirement": "blocked until the selected Playbook adoption matrix contract freeze proves a real adoption posture change beyond advisory classification"
+        "item": "marker movement from this contract freeze",
+        "requirement": "blocked until a later owner-surface admission, implementation, or reconciliation packet proves adoption posture widened beyond advisory classification"
       },
       {
         "item": "continuing this lane by adjacency alone",
@@ -121,15 +127,15 @@
     ],
     "next_package_ladder": [
       {
-        "package": "Playbook Everywhere + Cortex Interface read-only Playbook adoption matrix contract freeze",
-        "mode": "operator-selected docs-only contract freeze",
-        "reason": "the AI Work Session lane now has a landed read-only Playbook adoption matrix helper and the live classifier reports safe advisory adoption evidence, so the next honest Playbook/Cortex move is to freeze the matrix contract before any consumption reconciliation or marker movement"
+        "package": "Playbook Everywhere + Cortex Interface read-only Playbook adoption matrix owner-surface admission",
+        "mode": "docs-only owner-surface admission",
+        "reason": "the adoption matrix helper already exists and the contract is now frozen, so the next honest Playbook/Cortex move is to admit which owner-surface metadata can be read as advisory input and which owner-adoption claims remain blocked until owner-side proof exists"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-POST-AI-WORK-SESSION-STABILITY-NEXT-SLICE-SELECTION-2026-07-06.md",
+    "freshness_checked_receipt": "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-READ-ONLY-PLAYBOOK-ADOPTION-MATRIX-CONTRACT-FREEZE-2026-07-06.md",
     "freshness_checked_at": "2026-07-06T00:00:00Z",
-    "freshness_basis": "The manifest now mirrors the operator-selected Playbook/Cortex next-slice decision after AI Work Session Stability reached 85 percent. The lane remains at 22 percent and names a read-only Playbook adoption matrix contract freeze as the next bounded packet; no owner repo mutation or marker movement is claimed.",
+    "freshness_basis": "The manifest now mirrors the frozen read-only Playbook adoption matrix contract. The lane remains at 22 percent and names owner-surface admission as the next bounded packet; no owner repo mutation or marker movement is claimed.",
     "marker_posture": [
       {
         "marker": "Playbook Everywhere + Cortex Interface",

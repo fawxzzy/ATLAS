@@ -239,6 +239,7 @@
 - [AI Repetition-to-Automation Pipeline Continuity Manifest Seed And Active Continuity Widening](../ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md)
 - [Playbook Everywhere + Cortex Interface Continuity Manifest Seed And Active Continuity Widening](../ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md)
 - [Playbook Everywhere + Cortex Interface Post AI Work Session Stability Next Slice Selection](../ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-POST-AI-WORK-SESSION-STABILITY-NEXT-SLICE-SELECTION-2026-07-06.md)
+- [Playbook Everywhere + Cortex Interface Read-Only Playbook Adoption Matrix Contract Freeze](../ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-READ-ONLY-PLAYBOOK-ADOPTION-MATRIX-CONTRACT-FREEZE-2026-07-06.md)
 - [Cortex Readiness Continuity Manifest Seed And Active Continuity Widening](../ops/CORTEX-READINESS-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md)
 - [Open Marker Manifest Coverage Closeout And Active Continuity Lane Ratchet](../ops/OPEN-MARKER-MANIFEST-COVERAGE-CLOSEOUT-AND-ACTIVE-CONTINUITY-LANE-RATCHET-2026-06-19.md)
 - [Open Marker Restart Index Closeout And Active Continuity Lane Ratchet](../ops/OPEN-MARKER-RESTART-INDEX-CLOSEOUT-AND-ACTIVE-CONTINUITY-LANE-RATCHET-2026-06-19.md)
