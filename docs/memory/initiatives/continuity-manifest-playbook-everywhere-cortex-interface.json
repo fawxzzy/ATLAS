@@ -35,7 +35,8 @@
     "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-POST-ADOPTION-MATRIX-NEXT-SLICE-SELECTION-2026-07-06.md",
     "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-AUTHORITY-SAFE-CORTEX-INTERFACE-WIDENING-CONTRACT-FREEZE-2026-07-06.md",
     "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-AUTHORITY-SAFE-CORTEX-INTERFACE-WIDENING-FIRST-IMPLEMENTATION-ADMISSION-2026-07-06.md",
-    "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-AUTHORITY-SAFE-CORTEX-INTERFACE-WIDENING-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-06.md"
+    "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-AUTHORITY-SAFE-CORTEX-INTERFACE-WIDENING-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-06.md",
+    "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-AUTHORITY-SAFE-CORTEX-INTERFACE-WIDENING-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-06.md"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -43,9 +44,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "playbook-everywhere-cortex-interface",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-AUTHORITY-SAFE-CORTEX-INTERFACE-WIDENING-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-06.md",
-    "checkpoint_commit": "main@0324d750",
-    "checkpoint_summary": "The lane remains at 30 percent after the prompt-pack and worker handoff contract froze the future implementation path for ops/cortex/authority_safe_interface_handoff.py and tests/test_cortex_authority_safe_interface_handoff.py. Neither file is implemented yet. The next packet is implementation-readiness closeout and worker routing. Cortex still has no execution, approval, owner-truth, deploy, secret, transcript-scraping, automatic _stack dispatch, or final-receipt authority.",
+    "current_checkpoint_receipt": "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-AUTHORITY-SAFE-CORTEX-INTERFACE-WIDENING-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-06.md",
+    "checkpoint_commit": "main@5272c630",
+    "checkpoint_summary": "The lane remains at 30 percent after the implementation-readiness closeout proved the selector, contract freeze, first-implementation admission, and prompt-pack are durable enough to route one bounded worker packet. The next packet is Playbook Everywhere + Cortex Interface authority-safe Cortex interface widening first-implementation worker packet 1. Cortex still has no execution, approval, owner-truth, deploy, secret, transcript-scraping, automatic _stack dispatch, or final-receipt authority.",
     "governing_receipts": [
       "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CONTRACT-FIRST-AGENT-SHADOWING-PASS-1-2026-06-01.md",
       "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-VALIDATION-SUMMARY-SHADOW-CONSUMPTION-PASS-2-2026-06-01.md",
@@ -61,9 +62,14 @@
       "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-POST-ADOPTION-MATRIX-NEXT-SLICE-SELECTION-2026-07-06.md",
       "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-AUTHORITY-SAFE-CORTEX-INTERFACE-WIDENING-CONTRACT-FREEZE-2026-07-06.md",
       "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-AUTHORITY-SAFE-CORTEX-INTERFACE-WIDENING-FIRST-IMPLEMENTATION-ADMISSION-2026-07-06.md",
-      "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-AUTHORITY-SAFE-CORTEX-INTERFACE-WIDENING-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-06.md"
+      "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-AUTHORITY-SAFE-CORTEX-INTERFACE-WIDENING-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-06.md",
+      "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-AUTHORITY-SAFE-CORTEX-INTERFACE-WIDENING-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-06.md"
     ],
     "owner_truth_surfaces": [
+      {
+        "path": "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-AUTHORITY-SAFE-CORTEX-INTERFACE-WIDENING-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-06.md",
+        "role": "docs-only implementation-readiness closeout proving prior authority-safe interface widening receipts are durable, deciding implementation-ready, routing one bounded worker packet for ops/cortex/authority_safe_interface_handoff.py plus tests/test_cortex_authority_safe_interface_handoff.py, and preserving no marker movement until implementation-backed proof lands"
+      },
       {
         "path": "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-AUTHORITY-SAFE-CORTEX-INTERFACE-WIDENING-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-06.md",
         "role": "docs-only prompt-pack and worker handoff contract for the future ops/cortex/authority_safe_interface_handoff.py helper and tests/test_cortex_authority_safe_interface_handoff.py proof file, preserving read-only advisory authority, forbidden surfaces, verification commands, and implementation-readiness closeout as the next exact packet without marker movement"
@@ -171,15 +177,15 @@
     ],
     "next_package_ladder": [
       {
-        "package": "Playbook Everywhere + Cortex Interface authority-safe Cortex interface widening implementation-readiness closeout and worker routing",
-        "mode": "docs-only implementation-readiness closeout and worker routing",
-        "reason": "the prompt-pack and worker handoff contract is now frozen; the next honest same-lane packet is to decide whether the implementation worker can run from that prompt pack without implementing the helper in the readiness packet or granting Cortex execution, approval, owner-truth, deploy, secret, transcript-scraping, automatic _stack dispatch, or final-receipt authority"
+        "package": "Playbook Everywhere + Cortex Interface authority-safe Cortex interface widening first-implementation worker packet 1",
+        "mode": "bounded root-owned helper implementation worker",
+        "reason": "the readiness closeout now proves the selector, contract freeze, first-implementation admission, and prompt-pack are durable enough to implement exactly ops/cortex/authority_safe_interface_handoff.py and tests/test_cortex_authority_safe_interface_handoff.py without owner-repo mutation, protected-surface mutation, or any Cortex execution, approval, owner-truth, deploy, secret, transcript-scraping, automatic _stack dispatch, or final-receipt authority"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-AUTHORITY-SAFE-CORTEX-INTERFACE-WIDENING-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-06.md",
+    "freshness_checked_receipt": "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-AUTHORITY-SAFE-CORTEX-INTERFACE-WIDENING-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-06.md",
     "freshness_checked_at": "2026-07-06T00:00:00Z",
-    "freshness_basis": "The manifest now mirrors the authority-safe Cortex interface widening prompt-pack and worker handoff contract. The lane remains at 30 percent because the packet prepares a future implementation worker, but does not yet implement the helper, add tests, or widen Cortex authority.",
+    "freshness_basis": "The manifest now mirrors the authority-safe Cortex interface widening implementation-readiness closeout. The lane remains at 30 percent because the packet routes a future implementation worker, but does not yet implement the helper, add tests, or widen Cortex authority.",
     "marker_posture": [
       {
         "marker": "Playbook Everywhere + Cortex Interface",
