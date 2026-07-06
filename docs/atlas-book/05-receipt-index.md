@@ -246,6 +246,8 @@
 - [Playbook Everywhere + Cortex Interface Adoption Matrix Scope Discipline And Gap Clearance](../ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-ADOPTION-MATRIX-SCOPE-DISCIPLINE-AND-GAP-CLEARANCE-2026-07-06.md)
 - [Playbook Everywhere + Cortex Interface Post-Adoption-Matrix Next Slice Selection](../ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-POST-ADOPTION-MATRIX-NEXT-SLICE-SELECTION-2026-07-06.md)
 - [Playbook Everywhere + Cortex Interface Authority-Safe Cortex Interface Widening Contract Freeze](../ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-AUTHORITY-SAFE-CORTEX-INTERFACE-WIDENING-CONTRACT-FREEZE-2026-07-06.md)
+- [Playbook Everywhere + Cortex Interface Authority-Safe Cortex Interface Widening First-Implementation Admission](../ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-AUTHORITY-SAFE-CORTEX-INTERFACE-WIDENING-FIRST-IMPLEMENTATION-ADMISSION-2026-07-06.md)
+- [Playbook Everywhere + Cortex Interface Authority-Safe Cortex Interface Widening Prompt-Pack And Worker Handoff Contract](../ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-AUTHORITY-SAFE-CORTEX-INTERFACE-WIDENING-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-06.md)
 - [Cortex Readiness Continuity Manifest Seed And Active Continuity Widening](../ops/CORTEX-READINESS-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md)
 - [Open Marker Manifest Coverage Closeout And Active Continuity Lane Ratchet](../ops/OPEN-MARKER-MANIFEST-COVERAGE-CLOSEOUT-AND-ACTIVE-CONTINUITY-LANE-RATCHET-2026-06-19.md)
 - [Open Marker Restart Index Closeout And Active Continuity Lane Ratchet](../ops/OPEN-MARKER-RESTART-INDEX-CLOSEOUT-AND-ACTIVE-CONTINUITY-LANE-RATCHET-2026-06-19.md)
