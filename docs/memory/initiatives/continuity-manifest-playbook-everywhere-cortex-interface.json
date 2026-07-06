@@ -30,7 +30,8 @@
     "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-READ-ONLY-PLAYBOOK-ADOPTION-MATRIX-CONTRACT-FREEZE-2026-07-06.md",
     "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-READ-ONLY-PLAYBOOK-ADOPTION-MATRIX-OWNER-SURFACE-ADMISSION-2026-07-06.md",
     "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-READ-ONLY-PLAYBOOK-ADOPTION-MATRIX-CONSUMPTION-RECONCILIATION-2026-07-06.md",
-    "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CORTEX-WORKER-PROMPT-CONSUMPTION-PROOF-RECONCILIATION-2026-07-06.md"
+    "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CORTEX-WORKER-PROMPT-CONSUMPTION-PROOF-RECONCILIATION-2026-07-06.md",
+    "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-ADOPTION-MATRIX-SCOPE-DISCIPLINE-AND-GAP-CLEARANCE-2026-07-06.md"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -38,9 +39,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "playbook-everywhere-cortex-interface",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CORTEX-WORKER-PROMPT-CONSUMPTION-PROOF-RECONCILIATION-2026-07-06.md",
-    "checkpoint_commit": "main@5ba077c0",
-    "checkpoint_summary": "The lane now sits at 25 percent after the refreshed Cortex worker-prompt consumption proof reconciled explicit Playbook/Cortex source refs, clean publication posture, matched rule ids, owner-repo avoidance, non-execution guards, and final-receipt separation. The ratchet remains bounded because Cortex stays read-only advisory and gains no execution, owner-truth, or final-receipt authority.",
+    "current_checkpoint_receipt": "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-ADOPTION-MATRIX-SCOPE-DISCIPLINE-AND-GAP-CLEARANCE-2026-07-06.md",
+    "checkpoint_commit": "main@c232e7c3",
+    "checkpoint_summary": "The lane now sits at 30 percent after the Playbook adoption matrix gained implementation-backed scope discipline: Playbook-bearing AI-session receipts remain consumer surfaces, unrelated AI-session receipts no longer create false Playbook adoption gaps, live matrix proof reports zero adoption gaps, and the classifier preserves read-only owner-lane separation. The ratchet remains bounded because this does not prove owner-side adoption, Cortex execution authority, or final-receipt authority.",
     "governing_receipts": [
       "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CONTRACT-FIRST-AGENT-SHADOWING-PASS-1-2026-06-01.md",
       "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-VALIDATION-SUMMARY-SHADOW-CONSUMPTION-PASS-2-2026-06-01.md",
@@ -51,9 +52,14 @@
       "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-READ-ONLY-PLAYBOOK-ADOPTION-MATRIX-CONTRACT-FREEZE-2026-07-06.md",
       "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-READ-ONLY-PLAYBOOK-ADOPTION-MATRIX-OWNER-SURFACE-ADMISSION-2026-07-06.md",
       "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-READ-ONLY-PLAYBOOK-ADOPTION-MATRIX-CONSUMPTION-RECONCILIATION-2026-07-06.md",
-      "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CORTEX-WORKER-PROMPT-CONSUMPTION-PROOF-RECONCILIATION-2026-07-06.md"
+      "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CORTEX-WORKER-PROMPT-CONSUMPTION-PROOF-RECONCILIATION-2026-07-06.md",
+      "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-ADOPTION-MATRIX-SCOPE-DISCIPLINE-AND-GAP-CLEARANCE-2026-07-06.md"
     ],
     "owner_truth_surfaces": [
+      {
+        "path": "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-ADOPTION-MATRIX-SCOPE-DISCIPLINE-AND-GAP-CLEARANCE-2026-07-06.md",
+        "role": "implementation-backed reconciliation proving Playbook adoption matrix scope discipline, zero Playbook adoption gaps, preserved read-only owner-lane separation, and the bounded 25-to-30 percent marker ratchet"
+      },
       {
         "path": "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CORTEX-WORKER-PROMPT-CONSUMPTION-PROOF-RECONCILIATION-2026-07-06.md",
         "role": "docs-only reconciliation of refreshed Cortex worker-prompt consumption proof, clean publication posture, explicit source refs, owner-repo avoidance, non-execution guards, final-receipt separation, and the bounded 22-to-25 percent marker ratchet"
@@ -141,19 +147,19 @@
     ],
     "next_package_ladder": [
       {
-        "package": "No immediate Playbook Everywhere + Cortex Interface same-lane packet after worker-prompt consumption proof reconciliation",
+        "package": "No immediate Playbook Everywhere + Cortex Interface same-lane packet after adoption matrix scope-discipline gap clearance",
         "mode": "hold or select a separately scoped implementation or authority-safe widening packet",
-        "reason": "the current bounded worker-prompt consumption proof threshold is now consumed and ratcheted; further same-lane progress needs a new implementation-backed consumer class, authority-safe interface widening, owner-side adoption proof, or real contract/read-model drift rather than another wording-only receipt"
+        "reason": "the current helper-correctness threshold is now consumed and ratcheted; further same-lane progress needs owner-side Playbook adoption proof admitted separately, a new authority-safe Cortex interface widening packet, another implementation-backed Playbook consumer class, or real contract/read-model drift rather than another wording-only receipt"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CORTEX-WORKER-PROMPT-CONSUMPTION-PROOF-RECONCILIATION-2026-07-06.md",
+    "freshness_checked_receipt": "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-ADOPTION-MATRIX-SCOPE-DISCIPLINE-AND-GAP-CLEARANCE-2026-07-06.md",
     "freshness_checked_at": "2026-07-06T00:00:00Z",
-    "freshness_basis": "The manifest now mirrors the refreshed Cortex worker-prompt consumption proof reconciliation. The lane moves to 25 percent from a live safe read-only Cortex consumer class while preserving owner-repo separation, non-execution guards, and final-receipt separation; no immediate same-lane packet remains open by adjacency alone.",
+    "freshness_basis": "The manifest now mirrors the adoption-matrix scope-discipline implementation and gap-clearance reconciliation. The lane moves to 30 percent from tested root-owned helper behavior that preserves Playbook-bearing AI-session consumers, excludes unrelated AI-session receipts from Playbook adoption scoring, and reports zero Playbook adoption gaps while preserving owner-repo separation and read-only advisory authority.",
     "marker_posture": [
       {
         "marker": "Playbook Everywhere + Cortex Interface",
-        "percent": 25,
+        "percent": 30,
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ]

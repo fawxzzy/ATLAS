@@ -99,6 +99,41 @@ class AtlasPlaybookAdoptionMatrixTests(unittest.TestCase):
         classes = {item["classification"] for item in report["adoption_surfaces"]}
         self.assertIn("consumed_doctrine", classes)
 
+    def test_unrelated_ai_work_session_receipt_is_not_a_playbook_gap(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            _covered_root(root)
+            _write(
+                root / "docs" / "ops" / "AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-CLOSEOUT-ONLY-2026-07-06.md",
+                "Closeout receipt for root parity and validation safety.\n",
+            )
+            with mock.patch.object(matrix, "collect_branch_state", return_value=_branch_state()), mock.patch.object(
+                matrix, "collect_selector_state", return_value=({}, [])
+            ):
+                report = matrix.build_report(root=root)
+
+        gap_refs = {item["details"]["ref"] for item in report["gaps"]}
+        self.assertNotIn(
+            "docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-CLOSEOUT-ONLY-2026-07-06.md",
+            gap_refs,
+        )
+
+    def test_playbook_ai_work_session_receipt_remains_a_consumer_surface(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            _covered_root(root)
+            _write(
+                root / "docs" / "ops" / "AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PLAYBOOK-2026-07-06.md",
+                "Playbook adoption matrix consumes doctrine for handoff packet routing.\n",
+            )
+            with mock.patch.object(matrix, "collect_branch_state", return_value=_branch_state()), mock.patch.object(
+                matrix, "collect_selector_state", return_value=({}, [])
+            ):
+                report = matrix.build_report(root=root)
+
+        refs = {item["ref"] for item in report["adoption_surfaces"]}
+        self.assertIn("docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-PLAYBOOK-2026-07-06.md", refs)
+
     def test_selector_reference_is_operational_adoption(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

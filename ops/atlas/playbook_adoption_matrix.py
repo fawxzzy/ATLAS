@@ -221,16 +221,20 @@ def discover_consumer_paths(root: Path) -> list[Path]:
         base_path = root / base
         if not base_path.exists():
             continue
-        patterns.extend(
-            path
-            for path in base_path.rglob("*")
-            if path.is_file()
-            and path.suffix.lower() in TEXT_SUFFIXES
-            and (
-                "playbook" in path.name.lower()
-                or "ai-work-session-stability-auto-sync-loop" in path.name.lower()
-            )
-        )
+        for path in base_path.rglob("*"):
+            if not path.is_file() or path.suffix.lower() not in TEXT_SUFFIXES:
+                continue
+            name = path.name.lower()
+            if "playbook" in name:
+                patterns.append(path)
+                continue
+            if "ai-work-session-stability-auto-sync-loop" not in name:
+                continue
+            # AI Work Session receipts are only Playbook/Cortex adoption surfaces
+            # when their content explicitly participates in the Playbook chain.
+            text = (_read_text(path) or "").lower()
+            if "playbook" in text or "adoption matrix" in text:
+                patterns.append(path)
     return _dedupe_paths([*fixed, *patterns])
 
 
