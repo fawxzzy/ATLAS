@@ -86,7 +86,7 @@
     "lane_id": "ai-repetition-to-automation-pipeline",
     "scope_class": "atlas-root-governance",
     "current_checkpoint_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-PROJECTION-READ-MODEL-MANIFEST-PACKET-LADDER-FIRST-IMPLEMENTATION-ADMISSION-2026-07-07.md",
-    "checkpoint_commit": "main@3bdbe825aa276c09797ea6141b71471c90cbffec",
+    "checkpoint_commit": "main@6e77feedbdbe0d384812a47b3554e75919c90a34",
     "checkpoint_summary": "The lane remains at 47 percent after the July 7 projection-read-model-manifest packet-ladder first-implementation admission. The existing generic packet-ladder helper is admitted only for advisory sequencing of the accepted projection-read-model-manifest review card, but no specialized projection/read-model/manifest implementation, owner truth, _stack dispatch, workflow edit or dispatch, platform/deploy proof, validation verdict, release readiness, execution authority, or marker ratchet is admitted.",
     "governing_receipts": [
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-SURFACE-PASS-52-2026-06-09.md",

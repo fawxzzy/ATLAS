@@ -22,8 +22,8 @@ No new code surface is admitted for this candidate family in this packet.
 - Helper status: `ok`
 - Candidate id: `projection-read-model-manifest`
 - Candidate review status: `review_ready`
-- Selection-time repeat count: `79`
-- Selection-time supporting receipt count: `79`
+- Selection-time repeat count: `80`
+- Selection-time supporting receipt count: `80`
 - Packet ladder stage count: `5`
 - `safe_to_use`: `true`
 
