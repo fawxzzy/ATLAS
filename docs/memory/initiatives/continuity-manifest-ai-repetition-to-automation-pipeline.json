@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-06-19T05:00:00Z",
-  "updated_at": "2026-07-07T09:00:00Z",
+  "updated_at": "2026-07-07T10:00:00Z",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -55,7 +55,8 @@
     "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-WORKER-CLUSTER-RECONCILIATION-PACKET-LADDER-FIRST-IMPLEMENTATION-ADMISSION-2026-07-07.md",
     "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-WORKER-CLUSTER-RECONCILIATION-PACKET-LADDER-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-07.md",
     "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-WORKER-CLUSTER-RECONCILIATION-PACKET-LADDER-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-07.md",
-    "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-WORKER-CLUSTER-RECONCILIATION-PACKET-LADDER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md"
+    "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-WORKER-CLUSTER-RECONCILIATION-PACKET-LADDER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
+    "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-VALIDATION-GOVERNANCE-CANDIDATE-REVIEW-CONTRACT-FREEZE-2026-07-07.md"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -63,9 +64,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "ai-repetition-to-automation-pipeline",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-WORKER-CLUSTER-RECONCILIATION-PACKET-LADDER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
+    "current_checkpoint_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-VALIDATION-GOVERNANCE-CANDIDATE-REVIEW-CONTRACT-FREEZE-2026-07-07.md",
     "checkpoint_commit": "main@4b03b9209458d0c88b19ad5ccd5720a25017f0ec",
-    "checkpoint_summary": "The lane moves to 43 percent after the July 7 generic automation candidate packet ladder helper was adopted for the accepted worker-cluster-reconciliation review card. Live helper proof reports schema_version=atlas.automation_candidate_packet_ladder.v1, status=ok, candidate_id=worker-cluster-reconciliation, packet_ladder stage count 5, safe_to_use=true, and focused generic helper tests still pass while preserving tmp-only review-report input/output, docs-only decision refs, no owner mutation, no owner truth, no hidden transcript inference, no _stack dispatch, no platform/deploy access, no execution authority, and no marker-authority output.",
+    "checkpoint_summary": "The lane remains at 43 percent after the July 7 validation-governance candidate-review contract freeze. The broad validation-governance review card is accepted for bounded packet-ladder design, but marker movement is held because this receipt is docs-only and the next package must still decide whether the existing generic helper is sufficient or whether validation-governance needs a specialized root helper. Boundaries remain no owner mutation, no owner truth, no hidden transcript inference, no _stack dispatch, no platform/deploy access, no execution authority, and no marker-authority output.",
     "governing_receipts": [
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-SURFACE-PASS-52-2026-06-09.md",
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-ACTIVE-LANE-FOLLOW-ON-DISAMBIGUATION-2026-06-17.md",
@@ -101,7 +102,8 @@
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-WORKER-CLUSTER-RECONCILIATION-PACKET-LADDER-FIRST-IMPLEMENTATION-ADMISSION-2026-07-07.md",
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-WORKER-CLUSTER-RECONCILIATION-PACKET-LADDER-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-07.md",
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-WORKER-CLUSTER-RECONCILIATION-PACKET-LADDER-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-07.md",
-      "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-WORKER-CLUSTER-RECONCILIATION-PACKET-LADDER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md"
+      "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-WORKER-CLUSTER-RECONCILIATION-PACKET-LADDER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
+      "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-VALIDATION-GOVERNANCE-CANDIDATE-REVIEW-CONTRACT-FREEZE-2026-07-07.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -243,6 +245,10 @@
       {
         "path": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-WORKER-CLUSTER-RECONCILIATION-PACKET-LADDER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
         "role": "implementation-backed adoption reconciliation for the worker-cluster-reconciliation packet ladder family"
+      },
+      {
+        "path": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-VALIDATION-GOVERNANCE-CANDIDATE-REVIEW-CONTRACT-FREEZE-2026-07-07.md",
+        "role": "decision receipt accepting the validation-governance review card for bounded packet ladder design without marker movement"
       }
     ],
     "verification_adoption_surfaces": [
@@ -291,15 +297,15 @@
     ],
     "next_package_ladder": [
       {
-        "package": "AI Repetition-to-Automation Pipeline validation-governance candidate-review contract freeze",
-        "mode": "docs-only contract freeze",
-        "reason": "the worker-cluster-reconciliation packet ladder family now has implementation-backed generic root-helper adoption and worker reconciliation, so the next honest reviewed-candidate family is the next review-ready card, validation-governance, without granting implementation, marker movement, owner-repo truth, _stack dispatch, deploy/platform proof, or final automation adoption authority"
+        "package": "AI Repetition-to-Automation Pipeline validation-governance packet ladder first-implementation admission",
+        "mode": "docs-only first-implementation admission",
+        "reason": "the validation-governance review card is accepted, but it is broader than the helper-only candidate families; the next honest packet must decide whether first adoption can use the generic packet ladder helper or whether a specialized root helper is required, without granting marker movement, owner-repo truth, _stack dispatch, deploy/platform proof, or final automation adoption authority"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-WORKER-CLUSTER-RECONCILIATION-PACKET-LADDER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
-    "freshness_checked_at": "2026-07-07T09:00:00Z",
-    "freshness_basis": "the manifest now matches the 43 percent AI repetition posture after the July 7 worker-cluster-reconciliation packet ladder adoption used the generic read-only root helper with live JSON proof, tmp-only review-report input and output gating, durable docs-only decision-ref gating, no owner mutation, no hidden transcript inference, no _stack dispatch, no platform/deploy proof, no execution authority, and no marker-authority output.",
+    "freshness_checked_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-VALIDATION-GOVERNANCE-CANDIDATE-REVIEW-CONTRACT-FREEZE-2026-07-07.md",
+    "freshness_checked_at": "2026-07-07T10:00:00Z",
+    "freshness_basis": "the manifest now matches the 43 percent AI repetition posture after the July 7 validation-governance contract freeze accepted the broad review card but held marker movement until first-implementation admission decides the correct helper strategy.",
     "marker_posture": [
       {
         "marker": "AI Repetition-to-Automation Pipeline",
