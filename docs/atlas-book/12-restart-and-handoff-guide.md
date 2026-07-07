@@ -145,6 +145,13 @@ The surrounding lane posture also lives in:
 - [Current State](01-current-state.md)
 - [Current System Map / Graph](11-system-map-graph.md)
 
+Current Playbook/Cortex owner-lane proof posture:
+
+- `Playbook Everywhere + Cortex Interface` remains `40%`
+- the latest Foundation owner-lane proof worker is reconciled at `docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-FOUNDATION-OWNER-LANE-PLAYBOOK-ADOPTION-PROOF-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md`
+- the reconciled proof reports Foundation as read-only `missing_adoption` with `root_owned_proof=false`, zero blockers, one `owner_scope_read_only` advisory warning, and no owner-repo/Fitness/Mazer/platform mutation
+- the exact same-lane package is now `No immediate Playbook Everywhere + Cortex Interface same-lane packet`; future movement requires a separately scoped owner-side Foundation adoption packet, a new root-owned consumer class, or broader governed export-breadth proof
+
 If a new checkpoint changes markers, update the book-local marker table rather than leaving the latest truth stranded in chat.
 
 Marker-system hygiene rule:
