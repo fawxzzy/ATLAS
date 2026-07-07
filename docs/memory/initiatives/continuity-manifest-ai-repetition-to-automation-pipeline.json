@@ -88,7 +88,7 @@
     "lane_id": "ai-repetition-to-automation-pipeline",
     "scope_class": "atlas-root-governance",
     "current_checkpoint_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-PROJECTION-READ-MODEL-MANIFEST-PACKET-LADDER-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-07.md",
-    "checkpoint_commit": "main@79e4338b19069b351fa52e00a05728fac9e4d7c5",
+    "checkpoint_commit": "main@0c24972bbe54f8e7afcc7a3f4e7b71910a7ad2f9",
     "checkpoint_summary": "The lane remains at 47 percent after the July 7 projection-read-model-manifest prompt-pack/handoff contract and implementation-readiness closeout. One bounded generic packet-ladder proof worker is now routed for projection-read-model-manifest adoption, but no specialized projection/read-model/manifest implementation, owner truth, _stack dispatch, workflow edit or dispatch, platform/deploy proof, validation verdict, release readiness, execution authority, or marker ratchet is admitted.",
     "governing_receipts": [
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-SURFACE-PASS-52-2026-06-09.md",
