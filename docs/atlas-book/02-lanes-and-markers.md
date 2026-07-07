@@ -26,8 +26,9 @@ Read:
 
 - Local Data Gateway is now a closed ratchet for the current no-send packet scope: the fifteen admitted workflow classes remain proven, and path discipline is now machine-checked in the shared packet contract
 - `_stack` is now a closed enabling substrate rather than an active front-page marker; current execution-facing open work starts with the ATLAS-root automation lanes
-- root validation currently reads `critical=0 error=0 warning=17 info=0`
+- root validation currently reads `critical=0 error=0 warning=19 info=0`
 - broader automation and long-run orchestration are still early
+- AI Repetition now has docs-only admission and prompt-pack receipts for a future root-only reusable workflow proof-contract candidate helper; the lane remains at `48%` until implementation-backed helper proof lands
 
 ### Discord workflow
 

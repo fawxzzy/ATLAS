@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-06-19T05:00:00Z",
-  "updated_at": "2026-07-07T19:35:00Z",
+  "updated_at": "2026-07-07T20:20:00Z",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -82,7 +82,9 @@
     "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-PROJECTION-READ-MODEL-MANIFEST-PACKET-LADDER-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-07.md",
     "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-PROJECTION-READ-MODEL-MANIFEST-PACKET-LADDER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
     "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-POST-FOUNDATION-PLAYBOOK-PROOF-NEXT-SLICE-SELECTION-2026-07-07.md",
-    "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-REUSABLE-WORKFLOW-PROOF-CONTRACT-CANDIDATE-CONTRACT-FREEZE-2026-07-07.md"
+    "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-REUSABLE-WORKFLOW-PROOF-CONTRACT-CANDIDATE-CONTRACT-FREEZE-2026-07-07.md",
+    "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-REUSABLE-WORKFLOW-PROOF-CONTRACT-CANDIDATE-FIRST-IMPLEMENTATION-ADMISSION-2026-07-07.md",
+    "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-REUSABLE-WORKFLOW-PROOF-CONTRACT-CANDIDATE-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-07.md"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -90,9 +92,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "ai-repetition-to-automation-pipeline",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-REUSABLE-WORKFLOW-PROOF-CONTRACT-CANDIDATE-CONTRACT-FREEZE-2026-07-07.md",
-    "checkpoint_commit": "main@9a2a387c",
-    "checkpoint_summary": "The lane remains at 48 percent after the post-Foundation selector and reusable-workflow-proof-contract candidate contract freeze. The fresh candidate family is root-only and docs-only: it freezes typed invocation, manual/protected gate, artifact-or-receipt proof, least-privilege, no-workflow-edit, no-dispatch, no-owner-mutation, no-secret, no-deploy, no-final-receipt, and no-marker-authority boundaries after Foundation remained missing_adoption with root_owned_proof=false. The exact next packet is reusable workflow proof-contract candidate first-implementation admission.",
+    "current_checkpoint_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-REUSABLE-WORKFLOW-PROOF-CONTRACT-CANDIDATE-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-07.md",
+    "checkpoint_commit": "main@a8578dbb",
+    "checkpoint_summary": "The lane remains at 48 percent after the reusable-workflow-proof-contract candidate first-implementation admission and prompt-pack/handoff contract. The admitted future helper is root-only and read-only at ops/atlas/reusable_workflow_proof_contract_candidate.py with tests/test_atlas_reusable_workflow_proof_contract_candidate.py; no implementation, workflow edit, workflow dispatch, owner mutation, secret access, deploy action, final receipt authority, release-readiness claim, or marker ratchet has landed yet. The exact next packet is reusable workflow proof-contract candidate implementation-readiness closeout and worker routing.",
     "governing_receipts": [
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-SURFACE-PASS-52-2026-06-09.md",
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-ACTIVE-LANE-FOLLOW-ON-DISAMBIGUATION-2026-06-17.md",
@@ -155,9 +157,19 @@
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-PROJECTION-READ-MODEL-MANIFEST-PACKET-LADDER-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-07.md",
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-PROJECTION-READ-MODEL-MANIFEST-PACKET-LADDER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-POST-FOUNDATION-PLAYBOOK-PROOF-NEXT-SLICE-SELECTION-2026-07-07.md",
-      "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-REUSABLE-WORKFLOW-PROOF-CONTRACT-CANDIDATE-CONTRACT-FREEZE-2026-07-07.md"
+      "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-REUSABLE-WORKFLOW-PROOF-CONTRACT-CANDIDATE-CONTRACT-FREEZE-2026-07-07.md",
+      "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-REUSABLE-WORKFLOW-PROOF-CONTRACT-CANDIDATE-FIRST-IMPLEMENTATION-ADMISSION-2026-07-07.md",
+      "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-REUSABLE-WORKFLOW-PROOF-CONTRACT-CANDIDATE-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-07.md"
     ],
     "owner_truth_surfaces": [
+      {
+        "path": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-REUSABLE-WORKFLOW-PROOF-CONTRACT-CANDIDATE-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-07.md",
+        "role": "docs-only prompt-pack and worker handoff contract for the future root-only reusable workflow proof-contract candidate helper, including CLI, JSON fields, proof obligations, allowed files, forbidden files, stop conditions, and no-marker-authority boundary"
+      },
+      {
+        "path": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-REUSABLE-WORKFLOW-PROOF-CONTRACT-CANDIDATE-FIRST-IMPLEMENTATION-ADMISSION-2026-07-07.md",
+        "role": "docs-only first-implementation admission for future ops/atlas/reusable_workflow_proof_contract_candidate.py plus tests/test_atlas_reusable_workflow_proof_contract_candidate.py as a root-only read-only candidate classifier"
+      },
       {
         "path": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-REUSABLE-WORKFLOW-PROOF-CONTRACT-CANDIDATE-CONTRACT-FREEZE-2026-07-07.md",
         "role": "docs-only contract freeze accepting reusable-workflow-proof-contract as a fresh root-only candidate family with typed invocation, manual/protected gate, artifact-or-receipt proof, least-privilege, no-workflow-edit, no-dispatch, no-owner-mutation, no-secret, no-deploy, no-final-receipt, and no-marker-authority boundaries"
@@ -444,7 +456,7 @@
       },
       {
         "item": "higher marker movement above the current held restart posture",
-        "requirement": "blocked until the reusable-workflow-proof-contract candidate gains first-implementation admission plus implementation-backed proof, another reviewed candidate family gains a bounded contract freeze plus implementation-backed root helper, one owner-side or _stack execution widening lands, or broader repeated governed adoption changes operator reality again"
+        "requirement": "blocked until the reusable-workflow-proof-contract candidate gains implementation-readiness closeout plus implementation-backed helper proof, another reviewed candidate family gains a bounded contract freeze plus implementation-backed root helper, one owner-side or _stack execution widening lands, or broader repeated governed adoption changes operator reality again"
       },
       {
         "item": "treating the AI Long-Run fallback as continuation of this lane",
@@ -453,15 +465,15 @@
     ],
     "next_package_ladder": [
       {
-        "package": "AI Repetition-to-Automation Pipeline reusable workflow proof-contract candidate first-implementation admission",
-        "mode": "docs-only first-implementation admission after reusable proof-contract freeze",
-        "reason": "the fresh reusable-workflow-proof-contract candidate is now frozen as a root-only docs contract; the next packet must decide whether an existing generic helper can represent typed invocation, secret names, permissions, proof artifacts, manual/protected gates, and authority denials, or whether a new read-only root helper must be admitted"
+        "package": "AI Repetition-to-Automation Pipeline reusable workflow proof-contract candidate implementation-readiness closeout and worker routing",
+        "mode": "docs-only implementation-readiness closeout after prompt-pack and worker handoff contract",
+        "reason": "the future reusable workflow proof-contract candidate helper and test surface are admitted, and the prompt-pack freezes CLI shape, JSON output fields, proof obligations, allowed files, forbidden files, and stop conditions; the next packet must decide readiness and route one bounded implementation worker without moving markers"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-REUSABLE-WORKFLOW-PROOF-CONTRACT-CANDIDATE-CONTRACT-FREEZE-2026-07-07.md",
+    "freshness_checked_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-REUSABLE-WORKFLOW-PROOF-CONTRACT-CANDIDATE-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-07.md",
     "freshness_checked_at": "2026-07-07T00:00:00Z",
-    "freshness_basis": "the manifest now matches the 48 percent AI repetition posture after the post-Foundation selector and reusable-workflow-proof-contract candidate contract freeze. The lane remains at 48 percent because this is docs-only selection and contract freeze, not first-implementation admission or implementation-backed proof.",
+    "freshness_basis": "the manifest now matches the 48 percent AI repetition posture after the reusable-workflow-proof-contract candidate first-implementation admission and prompt-pack/handoff contract. The lane remains at 48 percent because this is docs-only admission and worker scoping, not implementation-backed helper proof.",
     "marker_posture": [
       {
         "marker": "AI Repetition-to-Automation Pipeline",
