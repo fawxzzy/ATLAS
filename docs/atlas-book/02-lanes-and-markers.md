@@ -18,7 +18,7 @@ Read:
 
 - `Playbook Everywhere + Cortex Interface: 40%`
 - `AI Work Session Stability & Auto-Sync Loop: 85%`
-- `AI Repetition-to-Automation Pipeline: 48%`
+- `AI Repetition-to-Automation Pipeline: 49%`
 - `AI Long-Run Batch Orchestration: 66%`
 - `Sandbox Simulation Readiness: 99%`
 
@@ -28,7 +28,7 @@ Read:
 - `_stack` is now a closed enabling substrate rather than an active front-page marker; current execution-facing open work starts with the ATLAS-root automation lanes
 - root validation currently reads `critical=0 error=0 warning=19 info=0`
 - broader automation and long-run orchestration are still early
-- AI Repetition now has docs-only admission, prompt-pack, and implementation-readiness receipts for a future root-only reusable workflow proof-contract candidate helper; the lane remains at `48%` until implementation-backed helper proof lands
+- AI Repetition now has implementation-backed proof for the root-only reusable workflow proof-contract candidate helper: live output reports `status=ok`, `candidate_count=3`, and `safe_to_continue=true`, focused tests pass 7/7, the broader AI Repetition helper suite passes 49/49, and the lane moves to `49%`
 
 ### Discord workflow
 
@@ -48,7 +48,7 @@ Read:
 ## Active Front-Page Marker Table
 
 - Inventory & Truth Map: `99%`
-- AI Repetition-to-Automation Pipeline: `48%`
+- AI Repetition-to-Automation Pipeline: `49%`
 - AI Long-Run Batch Orchestration: `66%`
 - Sandbox Simulation Readiness: `99%`
 
@@ -58,7 +58,7 @@ Read:
 
 - Cortex Readiness: `45%`
 - AI Work Session Stability & Auto-Sync Loop: `85%`
-- AI Repetition-to-Automation Pipeline: `48%`
+- AI Repetition-to-Automation Pipeline: `49%`
 - AI Long-Run Batch Orchestration: `66%`
 - Playbook Everywhere + Cortex Interface: `40%`
 
@@ -251,6 +251,7 @@ Current AI Long-Run closeout read: `AI Long-Run Batch Orchestration` stays at `6
 - AI Repetition-to-Automation Pipeline now has `docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-PROJECTION-READ-MODEL-MANIFEST-PACKET-LADDER-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-07.md`: one bounded generic packet-ladder proof worker is now routed for projection-read-model-manifest adoption, the marker remains `47%`, and no specialized projection/read-model/manifest helper, workflow dispatch, owner truth, or marker authority is admitted
 - AI Repetition-to-Automation Pipeline moved to `48%`: the `projection-read-model-manifest` read-model/manifest-projection candidate family now has live adoption proof through the generic implementation-backed root helper, with focused tests passing and no owner-repo, `_stack`, platform, secret, deploy, workflow-edit, dispatch, execution, marker-authority, validation-verdict, release-readiness, or manifest-mutation-automation authority widened
 - AI Repetition-to-Automation Pipeline now has one fresh post-Foundation selector plus reusable workflow proof-contract freeze: the lane accepts `reusable-workflow-proof-contract` as the next root-only candidate family after Foundation remained `missing_adoption`, freezes typed invocation, manual/protected gate, artifact-or-receipt proof, least-privilege, no-workflow-edit, no-dispatch, no-owner-mutation, no-secret, no-deploy, no-final-receipt, and no-marker-authority boundaries, and keeps the marker at `48%` until first-implementation admission or later implementation-backed proof lands
+- AI Repetition-to-Automation Pipeline moved to `49%`: the `reusable-workflow-proof-contract` candidate family now has live implementation-backed proof through `ops/atlas/reusable_workflow_proof_contract_candidate.py`, with focused tests passing, broader AI Repetition helper tests passing, deterministic JSON output reporting three candidate classes, and no owner-repo, workflow-edit, workflow-dispatch, secret, deploy, final-receipt, release-readiness, validation-verdict, or marker-output authority widened
 - AI Long-Run Batch Orchestration moved to `21%`: the lane now has one exact `queue-or-registry batch entry contract`, one exact owner-facing root home, one explicit `none new yet` support decision, one exact first-slice selection in `batch-entry validator`, one exact first-slice admission and proof matrix for that validator, one exact prompt-pack and handoff contract for that same slice, one exact implementation-readiness closeout and worker-routing result, and now one reconciled first validator worker cluster with real executed state change plus immediate proof hardening inside the admitted slice
 - AI Long-Run Batch Orchestration stays intentionally low at `21%`: the worker cluster did not admit queue-home or registry-home semantics, `_stack` execution-home semantics, supervised pilot proof, broader operator adoption, or later-slice widening
 - AI Long-Run Batch Orchestration moved to `22%`: the lane now also has one exact draft-entry scaffold first-implementation admission and proof matrix, one exact scaffold prompt-pack and handoff contract, one exact implementation-readiness closeout and worker-routing result, and one reconciled first draft-entry scaffold worker cluster with real executed state change plus proof for placeholder rendering, full explicit scaffold rendering, non-`proposed` status rejection, optional-field rejection, unsupported-input rejection, and multi-entry fail-closed handling
