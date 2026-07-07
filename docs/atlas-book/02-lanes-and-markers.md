@@ -18,7 +18,7 @@ Read:
 
 - `Playbook Everywhere + Cortex Interface: 40%`
 - `AI Work Session Stability & Auto-Sync Loop: 85%`
-- `AI Repetition-to-Automation Pipeline: 43%`
+- `AI Repetition-to-Automation Pipeline: 44%`
 - `AI Long-Run Batch Orchestration: 66%`
 - `Sandbox Simulation Readiness: 99%`
 
@@ -47,7 +47,7 @@ Read:
 ## Active Front-Page Marker Table
 
 - Inventory & Truth Map: `99%`
-- AI Repetition-to-Automation Pipeline: `43%`
+- AI Repetition-to-Automation Pipeline: `44%`
 - AI Long-Run Batch Orchestration: `66%`
 - Sandbox Simulation Readiness: `99%`
 
@@ -57,7 +57,7 @@ Read:
 
 - Cortex Readiness: `45%`
 - AI Work Session Stability & Auto-Sync Loop: `85%`
-- AI Repetition-to-Automation Pipeline: `43%`
+- AI Repetition-to-Automation Pipeline: `44%`
 - AI Long-Run Batch Orchestration: `66%`
 - Playbook Everywhere + Cortex Interface: `40%`
 
@@ -236,8 +236,8 @@ Current AI Long-Run closeout read: `AI Long-Run Batch Orchestration` stays at `6
 - AI Repetition-to-Automation Pipeline previously moved to `40%`: the lane no longer stopped at selector truth, receipt scaffolds, checkpoint recap, or raw candidate extraction once the July 7 candidate-review surface landed `ops/atlas/receipt_automation_candidate_review.py` plus `tests/test_atlas_receipt_automation_candidate_review.py`; that prior proof reported `status=ok`, `candidate_count=8`, `review_count=8`, and `safe_to_use=true` while keeping candidate-report input and output writes constrained to `tmp/**` and preserving no-owner-truth, no-hidden-context, no-`_stack`, no-deploy, no-secret, and no-marker-movement boundaries
 - AI Repetition-to-Automation Pipeline now has `docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-HANDOFF-HELPER-PACKET-LADDER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md`: the accepted `handoff-helper` review card now has a generic implementation-backed root helper, `ops/atlas/automation_candidate_packet_ladder.py`, that emits a deterministic five-stage packet ladder with focused tests, `tmp/**` input/output gating, durable decision-ref enforcement, and no-owner/no-secret/no-deploy/no-`_stack` boundaries
 - AI Repetition-to-Automation Pipeline now has `docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-WORKER-CLUSTER-RECONCILIATION-PACKET-LADDER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md`: the accepted `worker-cluster-reconciliation` review card now has live adoption proof through the generic implementation-backed root helper without new owner-repo or platform work
-- AI Repetition-to-Automation Pipeline now sits at `43%`: this is the smallest honest movement above `42%` because a third reviewed candidate family crossed from decision receipt into repeatable root-local helper adoption, but no owner-repo execution, `_stack` execution, platform proof, marker-authority output, or downstream owner adoption widened
-- AI Repetition-to-Automation Pipeline now routes next to `AI Repetition-to-Automation Pipeline validation-governance packet ladder prompt-pack and worker handoff contract`: the validation-governance first-implementation admission is durable and reuses the existing generic packet-ladder helper for advisory packet sequencing, but the marker remains `43%` because no specialized validation-governance implementation, worker routing, owner execution, `_stack` execution, platform proof, or broader adoption has landed
+- AI Repetition-to-Automation Pipeline moved to `44%`: the broader `validation-governance` candidate family now has live adoption proof through the generic implementation-backed root helper, with focused tests passing and no owner-repo, `_stack`, platform, secret, deploy, execution, marker-authority, validation-verdict, or release-readiness authority widened
+- AI Repetition-to-Automation Pipeline now routes next to `AI Repetition-to-Automation Pipeline contract-freeze candidate-review contract freeze`: the validation-governance packet ladder is reconciled, and the next highest review-ready candidate family is `contract-freeze`
 - AI Long-Run Batch Orchestration moved to `21%`: the lane now has one exact `queue-or-registry batch entry contract`, one exact owner-facing root home, one explicit `none new yet` support decision, one exact first-slice selection in `batch-entry validator`, one exact first-slice admission and proof matrix for that validator, one exact prompt-pack and handoff contract for that same slice, one exact implementation-readiness closeout and worker-routing result, and now one reconciled first validator worker cluster with real executed state change plus immediate proof hardening inside the admitted slice
 - AI Long-Run Batch Orchestration stays intentionally low at `21%`: the worker cluster did not admit queue-home or registry-home semantics, `_stack` execution-home semantics, supervised pilot proof, broader operator adoption, or later-slice widening
 - AI Long-Run Batch Orchestration moved to `22%`: the lane now also has one exact draft-entry scaffold first-implementation admission and proof matrix, one exact scaffold prompt-pack and handoff contract, one exact implementation-readiness closeout and worker-routing result, and one reconciled first draft-entry scaffold worker cluster with real executed state change plus proof for placeholder rendering, full explicit scaffold rendering, non-`proposed` status rejection, optional-field rejection, unsupported-input rejection, and multi-entry fail-closed handling
