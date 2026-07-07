@@ -74,7 +74,7 @@
     "lane_id": "ai-repetition-to-automation-pipeline",
     "scope_class": "atlas-root-governance",
     "current_checkpoint_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CONTRACT-FREEZE-PACKET-LADDER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
-    "checkpoint_commit": "main@acbf1eb8b818144f23ee87cf6892d6c929aa99f6",
+    "checkpoint_commit": "main@35672f3b8d72854984fab57a5e9afc2a9abd3ec3",
     "checkpoint_summary": "The lane moves to 45 percent after the July 7 contract-freeze packet-ladder worker-cluster reconciliation. The existing generic packet-ladder helper now has live proof against the selector/routing contract-freeze candidate family, focused tests pass, and authority remains bounded: no owner mutation, no owner truth, no hidden transcript inference, no _stack dispatch, no platform/deploy access, no execution authority, no validation verdict, no release-readiness claim, and no marker-authority output from the helper.",
     "governing_receipts": [
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-SURFACE-PASS-52-2026-06-09.md",
