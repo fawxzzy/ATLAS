@@ -18,7 +18,7 @@ Read:
 
 - `Playbook Everywhere + Cortex Interface: 40%`
 - `AI Work Session Stability & Auto-Sync Loop: 85%`
-- `AI Repetition-to-Automation Pipeline: 47%`
+- `AI Repetition-to-Automation Pipeline: 48%`
 - `AI Long-Run Batch Orchestration: 66%`
 - `Sandbox Simulation Readiness: 99%`
 
@@ -47,7 +47,7 @@ Read:
 ## Active Front-Page Marker Table
 
 - Inventory & Truth Map: `99%`
-- AI Repetition-to-Automation Pipeline: `47%`
+- AI Repetition-to-Automation Pipeline: `48%`
 - AI Long-Run Batch Orchestration: `66%`
 - Sandbox Simulation Readiness: `99%`
 
@@ -57,7 +57,7 @@ Read:
 
 - Cortex Readiness: `45%`
 - AI Work Session Stability & Auto-Sync Loop: `85%`
-- AI Repetition-to-Automation Pipeline: `47%`
+- AI Repetition-to-Automation Pipeline: `48%`
 - AI Long-Run Batch Orchestration: `66%`
 - Playbook Everywhere + Cortex Interface: `40%`
 
@@ -248,7 +248,8 @@ Current AI Long-Run closeout read: `AI Long-Run Batch Orchestration` stays at `6
 - AI Repetition-to-Automation Pipeline now has `docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-PROJECTION-READ-MODEL-MANIFEST-PACKET-LADDER-FIRST-IMPLEMENTATION-ADMISSION-2026-07-07.md`: the existing generic packet-ladder helper is admitted for `projection-read-model-manifest` advisory sequencing, the marker remains `47%`, and no specialized projection/read-model/manifest implementation or workflow dispatch is admitted
 - AI Repetition-to-Automation Pipeline now has `docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-PROJECTION-READ-MODEL-MANIFEST-PACKET-LADDER-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-07.md`: the worker objective and proof matrix are frozen for projection-read-model-manifest packet-ladder proof, the marker remains `47%`, and worker routing remains unadmitted until implementation-readiness closes
 - AI Repetition-to-Automation Pipeline now has `docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-PROJECTION-READ-MODEL-MANIFEST-PACKET-LADDER-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-07.md`: one bounded generic packet-ladder proof worker is now routed for projection-read-model-manifest adoption, the marker remains `47%`, and no specialized projection/read-model/manifest helper, workflow dispatch, owner truth, or marker authority is admitted
-- AI Repetition-to-Automation Pipeline now routes next to `AI Repetition-to-Automation Pipeline projection-read-model-manifest packet ladder first-implementation worker-cluster reconciliation`: the projection-read-model-manifest family has a frozen readiness closeout, but adoption proof has not run yet
+- AI Repetition-to-Automation Pipeline moved to `48%`: the `projection-read-model-manifest` read-model/manifest-projection candidate family now has live adoption proof through the generic implementation-backed root helper, with focused tests passing and no owner-repo, `_stack`, platform, secret, deploy, workflow-edit, dispatch, execution, marker-authority, validation-verdict, release-readiness, or manifest-mutation-automation authority widened
+- AI Repetition-to-Automation Pipeline now routes next to `No immediate AI Repetition-to-Automation Pipeline same-lane packet`: the current eight-family automation-candidate review report has been consumed through generic packet-ladder adoption, and future movement needs a fresh candidate family, broader governed adoption, owner-side/_stack execution widening, or real operator-loop automation proof
 - AI Long-Run Batch Orchestration moved to `21%`: the lane now has one exact `queue-or-registry batch entry contract`, one exact owner-facing root home, one explicit `none new yet` support decision, one exact first-slice selection in `batch-entry validator`, one exact first-slice admission and proof matrix for that validator, one exact prompt-pack and handoff contract for that same slice, one exact implementation-readiness closeout and worker-routing result, and now one reconciled first validator worker cluster with real executed state change plus immediate proof hardening inside the admitted slice
 - AI Long-Run Batch Orchestration stays intentionally low at `21%`: the worker cluster did not admit queue-home or registry-home semantics, `_stack` execution-home semantics, supervised pilot proof, broader operator adoption, or later-slice widening
 - AI Long-Run Batch Orchestration moved to `22%`: the lane now also has one exact draft-entry scaffold first-implementation admission and proof matrix, one exact scaffold prompt-pack and handoff contract, one exact implementation-readiness closeout and worker-routing result, and one reconciled first draft-entry scaffold worker cluster with real executed state change plus proof for placeholder rendering, full explicit scaffold rendering, non-`proposed` status rejection, optional-field rejection, unsupported-input rejection, and multi-entry fail-closed handling
