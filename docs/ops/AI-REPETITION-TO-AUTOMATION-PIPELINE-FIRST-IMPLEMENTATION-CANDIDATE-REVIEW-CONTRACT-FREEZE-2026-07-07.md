@@ -7,7 +7,7 @@ Accepted for bounded contract freeze. No implementation authority is granted by 
 ## Control-plane checkpoint
 
 - ATLAS root branch: `main`
-- ATLAS root checkpoint consumed: `57297c9c07821c9e19921cf647faabb8d2992aaa`
+- ATLAS root checkpoint consumed: `f21f004a47e570f61537431433e500fb3f614ecf`
 - Prior decisive receipt: `docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-RECEIPT-DERIVED-AUTOMATION-CANDIDATE-REVIEW-SURFACE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md`
 - Review helper: `ops/atlas/receipt_automation_candidate_review.py`
 - Candidate extractor: `ops/atlas/receipt_automation_candidate_extractor.py`
@@ -25,8 +25,8 @@ Live candidate-review proof on the consumed checkpoint reports:
 - highest-priority candidate category: `helper`
 - highest-priority candidate review status: `review_ready`
 - highest-priority candidate review priority: `0`
-- highest-priority candidate repeat count: `207`
-- highest-priority candidate supporting receipt count: `207`
+- highest-priority candidate repeat count: `208`
+- highest-priority candidate supporting receipt count: `208`
 - required operator decision: `contract_freeze_or_reject`
 
 The accepted candidate evidence summary is:

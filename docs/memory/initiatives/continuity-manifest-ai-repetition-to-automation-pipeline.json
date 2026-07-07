@@ -50,8 +50,8 @@
     "lane_id": "ai-repetition-to-automation-pipeline",
     "scope_class": "atlas-root-governance",
     "current_checkpoint_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-FIRST-IMPLEMENTATION-CANDIDATE-REVIEW-CONTRACT-FREEZE-2026-07-07.md",
-    "checkpoint_commit": "main@57297c9c07821c9e19921cf647faabb8d2992aaa",
-    "checkpoint_summary": "The lane remains at 40 percent after the July 7 first-implementation candidate-review contract freeze accepted the highest-priority review card for bounded future contract work. Live review proof reports status=ok, candidate_count=8, review_count=8, safe_to_use=true, and the accepted first-implementation card has review_priority=0, repeat_count=207, and supporting_receipt_count=207. No downstream helper implementation, owner-repo execution, _stack execution, platform proof, final automation adoption, or marker movement widened.",
+    "checkpoint_commit": "main@f21f004a47e570f61537431433e500fb3f614ecf",
+    "checkpoint_summary": "The lane remains at 40 percent after the July 7 first-implementation candidate-review contract freeze accepted the highest-priority review card for bounded future contract work. Live review proof reports status=ok, candidate_count=8, review_count=8, safe_to_use=true, and the accepted first-implementation card has review_priority=0, repeat_count=208, and supporting_receipt_count=208. No downstream helper implementation, owner-repo execution, _stack execution, platform proof, final automation adoption, or marker movement widened.",
     "governing_receipts": [
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-SURFACE-PASS-52-2026-06-09.md",
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-ACTIVE-LANE-FOLLOW-ON-DISAMBIGUATION-2026-06-17.md",
