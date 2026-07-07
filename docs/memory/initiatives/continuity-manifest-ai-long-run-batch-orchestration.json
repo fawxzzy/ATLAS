@@ -408,6 +408,7 @@
     "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-RESTART-SURFACE-ACTIVE-PACKET-RECONCILIATION-2026-06-27.md",
     "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-AI-REPETITION-49-NEXT-SLICE-SELECTION-2026-07-07.md",
     "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-MARKER-AWARE-NEXT-PACKET-PLANNER-CONTRACT-FREEZE-2026-07-07.md",
+    "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-MARKER-AWARE-NEXT-PACKET-PLANNER-FIRST-IMPLEMENTATION-ADMISSION-2026-07-07.md",
     "ops/atlas/supervised_execution_home_stack_command_implementation_actual_owner_side_mutation_authority_class_choice.py",
     "tests/test_atlas_supervised_execution_home_stack_command_implementation_actual_owner_side_mutation_authority_class_choice.py"
   ],
@@ -417,9 +418,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "ai-long-run-batch-orchestration",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-MARKER-AWARE-NEXT-PACKET-PLANNER-CONTRACT-FREEZE-2026-07-07.md",
-    "checkpoint_commit": "main@9629040e",
-    "checkpoint_summary": "After the post-AI-Repetition-49 selector chose the marker-aware planner, this lane now has the planner contract frozen. `AI Long-Run Batch Orchestration` stays at `66%`; the future planner may consume only root-owned selector, continuity, closeout, projection, Playbook, reusable-workflow, and Cortex advisory inputs; Fitness and Mazer remain outside this ATLAS marker lane; the selected next packet is `AI Long-Run Batch Orchestration marker-aware next-packet planner first-implementation admission`.",
+    "current_checkpoint_receipt": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-MARKER-AWARE-NEXT-PACKET-PLANNER-FIRST-IMPLEMENTATION-ADMISSION-2026-07-07.md",
+    "checkpoint_commit": "main@8b7306cc",
+    "checkpoint_summary": "After the marker-aware planner contract freeze, this lane now admits the smallest future implementation slice without implementing it. `AI Long-Run Batch Orchestration` stays at `66%`; the future helper file is `ops/atlas/marker_aware_next_packet_planner.py`, the future test file is `tests/test_atlas_marker_aware_next_packet_planner.py`, Fitness and Mazer remain outside this ATLAS marker lane, and the selected next packet is `AI Long-Run Batch Orchestration marker-aware next-packet planner prompt-pack and worker handoff contract`.",
     "governing_receipts": [
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-2026-05-22.md",
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-POST-WORLD-MODEL-TOP-LEVEL-PAYLOAD-BOUNDARY-NEXT-SLICE-SELECTION-PASS-460-2026-06-17.md",
@@ -432,6 +433,7 @@
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-RESTART-SURFACE-ACTIVE-PACKET-RECONCILIATION-2026-06-27.md",
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-AI-REPETITION-49-NEXT-SLICE-SELECTION-2026-07-07.md",
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-MARKER-AWARE-NEXT-PACKET-PLANNER-CONTRACT-FREEZE-2026-07-07.md",
+      "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-MARKER-AWARE-NEXT-PACKET-PLANNER-FIRST-IMPLEMENTATION-ADMISSION-2026-07-07.md",
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTION-CRITERIA-CONTRACT-FREEZE-PASS-462-2026-06-18.md",
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTION-CRITERIA-OWNER-SURFACE-ADMISSION-PASS-463-2026-06-19.md",
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTION-CRITERIA-SUPPORTING-LANE-ADMISSION-PASS-464-2026-06-19.md",
@@ -769,6 +771,10 @@
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-OWNER-REPO-MUTATION-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-21.md"
     ],
     "owner_truth_surfaces": [
+      {
+        "path": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-MARKER-AWARE-NEXT-PACKET-PLANNER-FIRST-IMPLEMENTATION-ADMISSION-2026-07-07.md",
+        "role": "current first-implementation admission for the marker-aware next-packet planner"
+      },
       {
         "path": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-MARKER-AWARE-NEXT-PACKET-PLANNER-CONTRACT-FREEZE-2026-07-07.md",
         "role": "current contract freeze for the marker-aware next-packet planner"
@@ -1243,7 +1249,7 @@
       },
       {
         "item": "implementing the marker-aware next-packet planner by adjacency",
-        "requirement": "blocked until one later first-implementation admission packet explicitly admits `ops/atlas/marker_aware_next_packet_planner.py` plus `tests/test_atlas_marker_aware_next_packet_planner.py` from the frozen planner contract"
+        "requirement": "blocked until one later prompt-pack and worker handoff contract freezes the exact worker objective, allowed inputs, proof matrix, and stop conditions for `ops/atlas/marker_aware_next_packet_planner.py` plus `tests/test_atlas_marker_aware_next_packet_planner.py`"
       },
       {
         "item": "widening this lane into owner-repo, deploy, secret, or protected-surface work",
@@ -1252,15 +1258,15 @@
     ],
     "next_package_ladder": [
       {
-        "package": "AI Long-Run Batch Orchestration marker-aware next-packet planner first-implementation admission",
-        "mode": "docs-only root-bounded first-implementation admission",
-        "reason": "the marker-aware planner contract now freezes the admitted inputs, scoring model, held-lane blocker model, owner-lane separation model, proof-risk model, output schema, forbidden authority, and future file boundary; the next honest root-owned step is deciding whether to admit one bounded implementation packet without touching owner repos, workflows, secrets, deploys, or protected surfaces"
+        "package": "AI Long-Run Batch Orchestration marker-aware next-packet planner prompt-pack and worker handoff contract",
+        "mode": "docs-only root-bounded prompt-pack and worker handoff contract",
+        "reason": "the first-implementation admission now names the exact future helper file, exact future test file, candidate classifications, output fields, proof matrix, and forbidden authority; the next honest root-owned step is freezing the worker prompt and handoff contract before implementation"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-MARKER-AWARE-NEXT-PACKET-PLANNER-CONTRACT-FREEZE-2026-07-07.md",
+    "freshness_checked_receipt": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-MARKER-AWARE-NEXT-PACKET-PLANNER-FIRST-IMPLEMENTATION-ADMISSION-2026-07-07.md",
     "freshness_checked_at": "2026-07-07T00:00:00.0000000-04:00",
-    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture now match the marker-aware planner contract freeze: `AI Long-Run Batch Orchestration` stays at `66%`, AI Repetition stays held at `49%`, Fitness and Mazer remain outside this ATLAS marker lane, and the next exact root-only packet is `AI Long-Run Batch Orchestration marker-aware next-packet planner first-implementation admission`.",
+    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture now match the marker-aware planner first-implementation admission: `AI Long-Run Batch Orchestration` stays at `66%`, AI Repetition stays held at `49%`, Fitness and Mazer remain outside this ATLAS marker lane, and the next exact root-only packet is `AI Long-Run Batch Orchestration marker-aware next-packet planner prompt-pack and worker handoff contract`.",
     "marker_posture": [
       {
         "marker": "AI Long-Run Batch Orchestration",
