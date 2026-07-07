@@ -3,7 +3,7 @@
   "stack_manifest_ref": "stack.yaml",
   "stack_manifest_digest": "sha256:1ebf366757baf13a45064cdf8d07edd92909ac07f93c44ee9e77b30abebf03e6",
   "stack_lock_ref": "stack.lock.yaml",
-  "stack_lock_digest": "sha256:7fc257480963b08d2dac1251231f2b01d7e8bcd2d64be894014602e1eae40dd8",
+  "stack_lock_digest": "sha256:4a1a2ee7e39eb09528331828b152608ccaf65a8e310e9cd4fe9ff97e614121d7",
   "working_memory_digest": "sha256:fe4f4902e2b2c475974b050ba1bf3f5e740439aa41df2f844555c2c0dc3b310f",
   "published_refs": {
     "json": "docs/registry/STACK-REPO-INVENTORY.json",
@@ -11,8 +11,8 @@
   },
   "repo_count": 12,
   "dirty_repo_count": 0,
-  "visible_dirty_repo_count": 0,
-  "advisory_dirty_repo_count": 0,
+  "visible_dirty_repo_count": 1,
+  "advisory_dirty_repo_count": 1,
   "release_eligible_count": 4,
   "repos": [
     {
@@ -21,8 +21,8 @@
       "role": "workflow-operator",
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/_stack.git",
-      "pinned_commit": "a645215870876a21de90363be2c1f3d96b98613f",
-      "current_commit": "a645215870876a21de90363be2c1f3d96b98613f",
+      "pinned_commit": "7ca8a81acb71c935adabd345dff3e3bcbbedba7c",
+      "current_commit": "7ca8a81acb71c935adabd345dff3e3bcbbedba7c",
       "pinned_ref_type": "branch",
       "pinned_ref": "main",
       "current_ref_type": "branch",
@@ -134,7 +134,7 @@
       "current_ref_type": "branch",
       "current_ref": "main",
       "branch": "main",
-      "dirty": false,
+      "dirty": true,
       "root_blocking": false,
       "dirty_blocks_root": false,
       "trust_class": "adjacent",
@@ -227,12 +227,12 @@
       "status": "unmanaged",
       "remote_url": "https://github.com/fawxzzy/mazer.git",
       "pinned_commit": null,
-      "current_commit": "c9911aafdb1d1321c2445cb839fd3698a26d5207",
+      "current_commit": "9b4ffc28c63af24516a1ba773d418a31f6533f16",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
-      "current_ref": "main",
-      "branch": "main",
+      "current_ref": "codex/player-goal-default-colors",
+      "branch": "codex/player-goal-default-colors",
       "dirty": false,
       "root_blocking": false,
       "dirty_blocks_root": false,
@@ -337,7 +337,7 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "09e3a462c3de9dff82840c263483237c3e9a13bb",
+      "current_commit": "180f78d589608ffb0c3c5d0f711928139f893d18",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
@@ -556,5 +556,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:6f0a89f283620dab04b7acfed224cb10e8dbe970a185117cb49e94591f0ee2a2"
+  "content_digest": "sha256:bb26ecd85b60738de63993f0050fd4a0b11b7cb0e23cbdb1b278143b9e6fcc51"
 }
