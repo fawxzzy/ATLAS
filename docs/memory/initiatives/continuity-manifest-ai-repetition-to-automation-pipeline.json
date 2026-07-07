@@ -75,7 +75,7 @@
     "lane_id": "ai-repetition-to-automation-pipeline",
     "scope_class": "atlas-root-governance",
     "current_checkpoint_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-SELECTOR-ROUTING-CANDIDATE-REVIEW-CONTRACT-FREEZE-2026-07-07.md",
-    "checkpoint_commit": "main@aca98559aac085840709490d69c38b91b08e1e7c",
+    "checkpoint_commit": "main@433413b34b6ce6c9e20f5f75250e63affe7dea53",
     "checkpoint_summary": "The lane remains at 45 percent after the July 7 selector-routing candidate-review contract freeze. The selector-routing review card is accepted for bounded packet-ladder design, but marker movement is held because this receipt is docs-only and does not authorize implementation, owner truth, _stack dispatch, platform/deploy proof, validation verdicts, release readiness, execution authority, or final automation adoption.",
     "governing_receipts": [
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-SURFACE-PASS-52-2026-06-09.md",
