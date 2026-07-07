@@ -86,7 +86,8 @@
     "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-REUSABLE-WORKFLOW-PROOF-CONTRACT-CANDIDATE-FIRST-IMPLEMENTATION-ADMISSION-2026-07-07.md",
     "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-REUSABLE-WORKFLOW-PROOF-CONTRACT-CANDIDATE-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-07.md",
     "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-REUSABLE-WORKFLOW-PROOF-CONTRACT-CANDIDATE-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-07.md",
-    "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-REUSABLE-WORKFLOW-PROOF-CONTRACT-CANDIDATE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md"
+    "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-REUSABLE-WORKFLOW-PROOF-CONTRACT-CANDIDATE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
+    "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-PROOF-CONTRACT-CANDIDATE-CONTRACT-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -94,9 +95,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "ai-repetition-to-automation-pipeline",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-REUSABLE-WORKFLOW-PROOF-CONTRACT-CANDIDATE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
-    "checkpoint_commit": "main@6e51e41c",
-    "checkpoint_summary": "The lane moves to 49 percent after the reusable-workflow-proof-contract candidate gained implementation-backed root helper proof. ops/atlas/reusable_workflow_proof_contract_candidate.py plus tests/test_atlas_reusable_workflow_proof_contract_candidate.py landed, live output reports status=ok, candidate_count=3, safe_to_continue=true, focused tests pass 7/7, broader AI Repetition helper tests pass 49/49, and no workflow edit, workflow dispatch, owner mutation, secret access, deploy action, final receipt authority, release-readiness claim, validation-verdict authority, or marker-output authority was widened. The exact next packet is No immediate AI Repetition-to-Automation Pipeline same-lane packet.",
+    "current_checkpoint_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-PROOF-CONTRACT-CANDIDATE-CONTRACT-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
+    "checkpoint_commit": "pending-current-commit",
+    "checkpoint_summary": "The lane moves to 50 percent after the reusable proof-contract candidate chain gained a second implementation-backed root helper. ops/atlas/proof_contract_candidate_contract.py plus tests/test_atlas_proof_contract_candidate_contract.py landed, live output reports status=ok for artifact-backed-proof-contract and manual-protected-proof-contract, focused tests pass 7/7, adjacent reusable proof-contract candidate tests pass 7/7, and no owner mutation, workflow edit, workflow dispatch, secret-value access, deploy action, final receipt authority, release-readiness claim, validation-verdict authority, or marker-output authority was widened. The exact next packet is No immediate AI Repetition-to-Automation Pipeline same-lane packet.",
     "governing_receipts": [
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-SURFACE-PASS-52-2026-06-09.md",
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-ACTIVE-LANE-FOLLOW-ON-DISAMBIGUATION-2026-06-17.md",
@@ -163,9 +164,14 @@
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-REUSABLE-WORKFLOW-PROOF-CONTRACT-CANDIDATE-FIRST-IMPLEMENTATION-ADMISSION-2026-07-07.md",
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-REUSABLE-WORKFLOW-PROOF-CONTRACT-CANDIDATE-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-07.md",
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-REUSABLE-WORKFLOW-PROOF-CONTRACT-CANDIDATE-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-07.md",
-      "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-REUSABLE-WORKFLOW-PROOF-CONTRACT-CANDIDATE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md"
+      "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-REUSABLE-WORKFLOW-PROOF-CONTRACT-CANDIDATE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
+      "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-PROOF-CONTRACT-CANDIDATE-CONTRACT-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md"
     ],
     "owner_truth_surfaces": [
+      {
+        "path": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-PROOF-CONTRACT-CANDIDATE-CONTRACT-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
+        "role": "implementation-backed reconciliation for the root-only proof-contract candidate contract renderer with live artifact-backed and manual protected proof-contract payloads, focused tests, adjacent reusable proof-contract candidate tests, and marker movement to 50 percent"
+      },
       {
         "path": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-REUSABLE-WORKFLOW-PROOF-CONTRACT-CANDIDATE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
         "role": "implementation-backed reconciliation for the root-only reusable workflow proof-contract candidate helper with live status ok, three candidate classes, focused tests, broader AI Repetition helper tests, and marker movement to 49 percent"
@@ -478,18 +484,18 @@
     "next_package_ladder": [
       {
         "package": "No immediate AI Repetition-to-Automation Pipeline same-lane packet",
-        "mode": "hold-flat after reusable workflow proof-contract helper reconciliation",
-        "reason": "the reusable workflow proof-contract helper landed and reconciled with implementation-backed proof; future movement requires a separately selected candidate family, broader adoption, or another implementation-backed widening packet"
+        "mode": "hold-flat after proof-contract candidate contract renderer reconciliation",
+        "reason": "the proof-contract candidate contract renderer landed and reconciled with implementation-backed proof; future movement requires a separately selected candidate family, broader adoption, or another implementation-backed widening packet"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-REUSABLE-WORKFLOW-PROOF-CONTRACT-CANDIDATE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
+    "freshness_checked_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-PROOF-CONTRACT-CANDIDATE-CONTRACT-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
     "freshness_checked_at": "2026-07-07T00:00:00Z",
-    "freshness_basis": "the manifest now matches the 49 percent AI repetition posture after the reusable-workflow-proof-contract candidate implementation-backed worker reconciliation. The lane moved because the helper, tests, live JSON proof, and reconciliation receipt landed without widening owner, workflow, secret, deploy, final-receipt, release-readiness, validation-verdict, or marker-output authority.",
+    "freshness_basis": "the manifest now matches the 50 percent AI repetition posture after the proof-contract candidate contract renderer implementation-backed worker reconciliation. The lane moved because the helper, tests, live JSON proof, and reconciliation receipt landed without widening owner, workflow, secret-value, deploy, final-receipt, release-readiness, validation-verdict, or marker-output authority.",
     "marker_posture": [
       {
         "marker": "AI Repetition-to-Automation Pipeline",
-        "percent": 49,
+        "percent": 50,
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ]
