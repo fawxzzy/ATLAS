@@ -15,8 +15,8 @@ Accept the `projection-read-model-manifest` review card for one bounded root-own
 - Category: `read_model_or_manifest_projection`
 - Review status: `review_ready`
 - Review priority: `4`
-- Selection-time repeat count: `78`
-- Selection-time supporting receipt count: `78`
+- Selection-time repeat count: `79`
+- Selection-time supporting receipt count: `79`
 - Required operator decision: `contract_freeze_or_reject`
 - Evidence summary: repeated projection, read-model, or manifest receipts
 
