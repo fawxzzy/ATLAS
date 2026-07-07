@@ -406,6 +406,7 @@
     "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-STACK-COMMAND-IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-VALUE-NEXT-SLICE-SELECTION-PASS-763-2026-06-26.md",
     "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-STACK-COMMAND-IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-VALUE-DOWNSTREAM-HOLD-RECHECK-2026-06-26.md",
     "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-RESTART-SURFACE-ACTIVE-PACKET-RECONCILIATION-2026-06-27.md",
+    "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-AI-REPETITION-49-NEXT-SLICE-SELECTION-2026-07-07.md",
     "ops/atlas/supervised_execution_home_stack_command_implementation_actual_owner_side_mutation_authority_class_choice.py",
     "tests/test_atlas_supervised_execution_home_stack_command_implementation_actual_owner_side_mutation_authority_class_choice.py"
   ],
@@ -415,9 +416,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "ai-long-run-batch-orchestration",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-RESTART-SURFACE-ACTIVE-PACKET-RECONCILIATION-2026-06-27.md",
-    "checkpoint_commit": "main",
-    "checkpoint_summary": "The lane now carries the full supervised-execution-home downstream chain durably on canonical `main` through the post-stack-command-implementation-actual-owner-side-mutation-authority-class-value selector in pass 763 plus the downstream hold recheck, and the shared restart surfaces are reconciled to that same truth. `AI Long-Run Batch Orchestration` stays at `66%`; the current decisive packet remains `AI Long-Run Batch Orchestration post-stack-command-implementation-actual-owner-side-mutation-authority-class-value downstream hold recheck`, the previously selected AI Repetition selector surface remains manifest-held, the remaining restart-ready fallback lanes are also currently manifest-held, and no immediate same-lane packet is honestly open by default.",
+    "current_checkpoint_receipt": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-AI-REPETITION-49-NEXT-SLICE-SELECTION-2026-07-07.md",
+    "checkpoint_commit": "main@ec0e100a",
+    "checkpoint_summary": "After AI Repetition reached `49%` with the reusable workflow proof-contract helper cluster, this lane has one new root-only selector receipt that consumes that evidence without reopening AI Repetition by adjacency. `AI Long-Run Batch Orchestration` stays at `66%`; Fitness and Mazer stay outside this ATLAS marker lane; the selected next packet is `AI Long-Run Batch Orchestration marker-aware next-packet planner contract freeze`, and the planner is not implemented yet.",
     "governing_receipts": [
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-2026-05-22.md",
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-POST-WORLD-MODEL-TOP-LEVEL-PAYLOAD-BOUNDARY-NEXT-SLICE-SELECTION-PASS-460-2026-06-17.md",
@@ -428,6 +429,7 @@
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-CONTINUITY-MANIFEST-SEED-AND-RATCHET-DECISION-PASS-461-2026-06-18.md",
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-STACK-COMMAND-IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-VALUE-DOWNSTREAM-HOLD-RECHECK-2026-06-26.md",
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-RESTART-SURFACE-ACTIVE-PACKET-RECONCILIATION-2026-06-27.md",
+      "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-AI-REPETITION-49-NEXT-SLICE-SELECTION-2026-07-07.md",
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTION-CRITERIA-CONTRACT-FREEZE-PASS-462-2026-06-18.md",
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTION-CRITERIA-OWNER-SURFACE-ADMISSION-PASS-463-2026-06-19.md",
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTION-CRITERIA-SUPPORTING-LANE-ADMISSION-PASS-464-2026-06-19.md",
@@ -765,6 +767,10 @@
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-OWNER-REPO-MUTATION-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-21.md"
     ],
     "owner_truth_surfaces": [
+      {
+        "path": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-AI-REPETITION-49-NEXT-SLICE-SELECTION-2026-07-07.md",
+        "role": "current selector receipt choosing marker-aware next-packet planner contract freeze after AI Repetition reached 49 percent"
+      },
       {
         "path": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-CONTINUITY-MANIFEST-SEED-AND-RATCHET-DECISION-PASS-461-2026-06-18.md",
         "role": "current exact continuity-manifest seed and ratchet surface"
@@ -1230,21 +1236,25 @@
         "requirement": "blocked until broader execution, proof-backed adoption, or another real blocker-clearance class changes operator reality again"
       },
       {
+        "item": "implementing the marker-aware next-packet planner by adjacency",
+        "requirement": "blocked until the selected contract-freeze packet lands and admits a future implementation boundary for `ops/atlas/marker_aware_next_packet_planner.py` plus `tests/test_atlas_marker_aware_next_packet_planner.py`"
+      },
+      {
         "item": "widening this lane into owner-repo, deploy, secret, or protected-surface work",
         "requirement": "blocked unless a separate owner-side or approval-gated packet is explicitly selected"
       }
     ],
     "next_package_ladder": [
       {
-        "package": "No immediate AI Long-Run Batch Orchestration same-lane packet",
-        "mode": "hold-flat after downstream hold recheck",
-        "reason": "the authority-class-value worker cluster is now reconciled on canonical `main`, the previously selected AI Repetition selector surface remains manifest-held, the remaining restart-ready fallback lanes are also currently manifest-held, and no honest downstream root-bounded follow-on remains open right now"
+        "package": "AI Long-Run Batch Orchestration marker-aware next-packet planner contract freeze",
+        "mode": "docs-only root-bounded contract freeze",
+        "reason": "AI Repetition is held after the proof-backed reusable workflow proof-contract helper cluster, the live selector still reports no immediate root packet, and the strongest root-owned continuation is a planner contract that scores held lanes, admissible markers, Playbook proof posture, Cortex advisory state, reusable workflow proof candidates, owner-lane separation, and existing helper surfaces before any worker implementation"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-RESTART-SURFACE-ACTIVE-PACKET-RECONCILIATION-2026-06-27.md",
-    "freshness_checked_at": "2026-06-27T00:00:00.0000000-04:00",
-    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture now match the active AI Long-Run lane because the supervised-execution-home downstream chain is durable on canonical `main` through the post-stack-command-implementation-actual-owner-side-mutation-authority-class-value selector in pass 763 plus the downstream hold recheck, the shared restart surfaces are now reconciled to that same truth, the previously selected AI Repetition selector surface remains manifest-held, the remaining restart-ready fallback lanes are also currently manifest-held, the marker still stays at `66%`, and no immediate same-lane packet is honestly open by default.",
+    "freshness_checked_receipt": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-AI-REPETITION-49-NEXT-SLICE-SELECTION-2026-07-07.md",
+    "freshness_checked_at": "2026-07-07T00:00:00.0000000-04:00",
+    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture now match the post-AI-Repetition-49 selector decision: AI Repetition stays held at `49%`, `AI Long-Run Batch Orchestration` stays at `66%`, Fitness and Mazer remain outside this ATLAS marker lane, and the next exact root-only packet is `AI Long-Run Batch Orchestration marker-aware next-packet planner contract freeze`.",
     "marker_posture": [
       {
         "marker": "AI Long-Run Batch Orchestration",
