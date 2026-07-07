@@ -26,6 +26,7 @@ SCAN_SKIP_DIRS = {
 ACTIVE_STATUSES = {"active"}
 AGENTS_EXPECTED_STATUSES = {"active", "incubating"}
 CONFIG_EXPECTED_STATUSES = {"active"}
+INTERNAL_VALIDATION_STATUSES = {"active", "incubating"}
 WINDOWS_DRIVE_PREFIX_PATTERN = r"[A-Za-z]:"
 USER_HOME_DIRECTORY = "Users"
 UNIX_HOME_DIRECTORIES = ("Users", "home")
@@ -2805,7 +2806,7 @@ def collect_text_scan_roots(root: Path, config: dict[str, Any], stack_file: Path
         if candidate_path.exists():
             roots.append(candidate_path)
     for repo in config.get("repo_registry", {}).values():
-        if isinstance(repo, dict) and isinstance(repo.get("path"), str) and repo.get("status") in {"active", "incubating", "unmanaged"}:
+        if isinstance(repo, dict) and isinstance(repo.get("path"), str) and repo_status_allows_internal_validation(str(repo.get("status", ""))):
             repo_path = resolve_path(stack_file, repo["path"])
             if repo_path.resolve() == root.resolve():
                 continue
@@ -2818,6 +2819,10 @@ def collect_text_scan_roots(root: Path, config: dict[str, Any], stack_file: Path
             seen.add(item)
             result.append(item)
     return result
+
+
+def repo_status_allows_internal_validation(status: str) -> bool:
+    return str(status).strip() in INTERNAL_VALIDATION_STATUSES
 
 
 def validate_declared_surface_scan_coverage(root: Path, config: dict[str, Any], stack_file: Path) -> list[Finding]:
@@ -3076,29 +3081,30 @@ def build_findings(
             readme_name = "README-STACK.md" if is_stack_control_repo else "README.md"
             findings.append(Finding("warning", "missing-readme", repo_rel, f"{readme_name} is missing for an active repo.", {"status": status}))
 
-        cleanup_findings, cleanup_suppressed_paths = apply_repo_generated_state_cleanup(
-            repo_id=repo_id,
-            repo_path=repo_path,
-            repo_rel=repo_rel,
-            repo_info=repo_info,
-        )
-        findings.extend(cleanup_findings)
-        for relative_dir, requires_warning in mutable_surface_warning_map(
-            repo_path,
-            suppressed_paths=cleanup_suppressed_paths,
-        ).items():
-            if requires_warning:
-                candidate = repo_path / relative_dir
-                rel = normalize_slashes(str(candidate.relative_to(root)))
-                findings.append(Finding("warning", "mutable-state-in-repo", rel, "Mutable or generated state is present inside a repo path.", {"repo_id": repo_id, "state_path": relative_dir}))
-        for env_candidate in list(repo_path.glob(".env")) + list(repo_path.glob(".env.*")):
-            if not is_repo_local_secret_candidate(env_candidate):
-                continue
-            findings.append(Finding("warning", "repo-local-secret-material", normalize_slashes(str(env_candidate.relative_to(root))), "Repo-local environment file detected; secrets should not be part of default exports.", {"repo_id": repo_id}))
-        for file_path, pattern in iter_unique_repo_root_files(repo_path, ROOT_LOG_PATTERNS):
-            findings.append(Finding("warning", "mutable-artifact-in-repo-root", normalize_slashes(str(file_path.relative_to(root))), "Mutable log, temp, or database artifact detected in repo root.", {"repo_id": repo_id, "pattern": pattern}))
-        for file_path, pattern in iter_unique_repo_root_files(repo_path, ROOT_CAPTURE_PATTERNS):
-            findings.append(Finding("warning", "capture-artifact-in-repo-root", normalize_slashes(str(file_path.relative_to(root))), "Likely review or capture artifact detected in repo root.", {"repo_id": repo_id, "pattern": pattern}))
+        if repo_status_allows_internal_validation(status):
+            cleanup_findings, cleanup_suppressed_paths = apply_repo_generated_state_cleanup(
+                repo_id=repo_id,
+                repo_path=repo_path,
+                repo_rel=repo_rel,
+                repo_info=repo_info,
+            )
+            findings.extend(cleanup_findings)
+            for relative_dir, requires_warning in mutable_surface_warning_map(
+                repo_path,
+                suppressed_paths=cleanup_suppressed_paths,
+            ).items():
+                if requires_warning:
+                    candidate = repo_path / relative_dir
+                    rel = normalize_slashes(str(candidate.relative_to(root)))
+                    findings.append(Finding("warning", "mutable-state-in-repo", rel, "Mutable or generated state is present inside a repo path.", {"repo_id": repo_id, "state_path": relative_dir}))
+            for env_candidate in list(repo_path.glob(".env")) + list(repo_path.glob(".env.*")):
+                if not is_repo_local_secret_candidate(env_candidate):
+                    continue
+                findings.append(Finding("warning", "repo-local-secret-material", normalize_slashes(str(env_candidate.relative_to(root))), "Repo-local environment file detected; secrets should not be part of default exports.", {"repo_id": repo_id}))
+            for file_path, pattern in iter_unique_repo_root_files(repo_path, ROOT_LOG_PATTERNS):
+                findings.append(Finding("warning", "mutable-artifact-in-repo-root", normalize_slashes(str(file_path.relative_to(root))), "Mutable log, temp, or database artifact detected in repo root.", {"repo_id": repo_id, "pattern": pattern}))
+            for file_path, pattern in iter_unique_repo_root_files(repo_path, ROOT_CAPTURE_PATTERNS):
+                findings.append(Finding("warning", "capture-artifact-in-repo-root", normalize_slashes(str(file_path.relative_to(root))), "Likely review or capture artifact detected in repo root.", {"repo_id": repo_id, "pattern": pattern}))
     if not lockfile_path.exists():
         findings.append(
             Finding(

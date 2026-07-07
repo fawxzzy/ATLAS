@@ -9,14 +9,54 @@ from unittest.mock import patch
 
 from ops.validation.validate_stack import (
     apply_repo_generated_state_cleanup,
+    collect_text_scan_roots,
     is_repo_local_secret_candidate,
     iter_unique_repo_root_files,
     mutable_surface_requires_warning,
     mutable_surface_warning_map,
+    repo_status_allows_internal_validation,
 )
 
 
 class ValidateStackMutableStateRulesTests(unittest.TestCase):
+    def test_internal_validation_statuses_exclude_unmanaged_owner_lanes(self) -> None:
+        self.assertTrue(repo_status_allows_internal_validation("active"))
+        self.assertTrue(repo_status_allows_internal_validation("incubating"))
+        self.assertFalse(repo_status_allows_internal_validation("unmanaged"))
+        self.assertFalse(repo_status_allows_internal_validation("demo"))
+
+    def test_unmanaged_repo_is_not_a_text_scan_root(self) -> None:
+        temp_dir = tempfile.TemporaryDirectory()
+        self.addCleanup(temp_dir.cleanup)
+        root = Path(temp_dir.name)
+        stack_file = root / "stack.yaml"
+        stack_file.write_text("name: temp\n", encoding="utf-8")
+        (root / "docs").mkdir(parents=True, exist_ok=True)
+        unmanaged_repo = root / "repos" / "owner-app"
+        unmanaged_repo.mkdir(parents=True, exist_ok=True)
+        active_repo = root / "repos" / "operator"
+        active_repo.mkdir(parents=True, exist_ok=True)
+
+        roots = collect_text_scan_roots(
+            root,
+            {
+                "repo_registry": {
+                    "owner-app": {
+                        "path": "repos/owner-app",
+                        "status": "unmanaged",
+                    },
+                    "operator": {
+                        "path": "repos/operator",
+                        "status": "active",
+                    },
+                }
+            },
+            stack_file,
+        )
+
+        self.assertIn(active_repo, roots)
+        self.assertNotIn(unmanaged_repo, roots)
+
     def test_env_example_variants_are_not_secret_candidates(self) -> None:
         temp_dir = tempfile.TemporaryDirectory()
         self.addCleanup(temp_dir.cleanup)
