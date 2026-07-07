@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-06-19T05:00:00Z",
-  "updated_at": "2026-07-07T12:00:00Z",
+  "updated_at": "2026-07-07T12:30:00Z",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -62,7 +62,8 @@
     "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-VALIDATION-GOVERNANCE-PACKET-LADDER-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-07.md",
     "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-VALIDATION-GOVERNANCE-PACKET-LADDER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
     "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CONTRACT-FREEZE-CANDIDATE-REVIEW-CONTRACT-FREEZE-2026-07-07.md",
-    "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CONTRACT-FREEZE-PACKET-LADDER-FIRST-IMPLEMENTATION-ADMISSION-2026-07-07.md"
+    "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CONTRACT-FREEZE-PACKET-LADDER-FIRST-IMPLEMENTATION-ADMISSION-2026-07-07.md",
+    "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CONTRACT-FREEZE-PACKET-LADDER-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-07.md"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -70,9 +71,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "ai-repetition-to-automation-pipeline",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CONTRACT-FREEZE-PACKET-LADDER-FIRST-IMPLEMENTATION-ADMISSION-2026-07-07.md",
-    "checkpoint_commit": "main@29321c45e7bcecba7d09b11ed01bdea427b2906b",
-    "checkpoint_summary": "The lane remains at 44 percent after the July 7 contract-freeze packet-ladder first-implementation admission. The existing generic packet-ladder helper is admitted only for advisory sequencing of the accepted contract-freeze review card; no specialized helper, owner truth, _stack dispatch, platform/deploy proof, validation verdict, release readiness, execution authority, marker authority, or final automation adoption is admitted.",
+    "current_checkpoint_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CONTRACT-FREEZE-PACKET-LADDER-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-07.md",
+    "checkpoint_commit": "main@5848942e585fb46a0440e650660d8c99776cce30",
+    "checkpoint_summary": "The lane remains at 44 percent after the July 7 contract-freeze packet-ladder prompt-pack and worker handoff contract. The worker objective, command, required checks, and stop conditions are frozen for using the existing generic packet-ladder helper against the accepted contract-freeze review card; implementation routing, owner truth, _stack dispatch, platform/deploy proof, validation verdicts, release readiness, execution authority, marker authority, and final automation adoption remain blocked.",
     "governing_receipts": [
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-SURFACE-PASS-52-2026-06-09.md",
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-ACTIVE-LANE-FOLLOW-ON-DISAMBIGUATION-2026-06-17.md",
@@ -115,7 +116,8 @@
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-VALIDATION-GOVERNANCE-PACKET-LADDER-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-07.md",
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-VALIDATION-GOVERNANCE-PACKET-LADDER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CONTRACT-FREEZE-CANDIDATE-REVIEW-CONTRACT-FREEZE-2026-07-07.md",
-      "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CONTRACT-FREEZE-PACKET-LADDER-FIRST-IMPLEMENTATION-ADMISSION-2026-07-07.md"
+      "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CONTRACT-FREEZE-PACKET-LADDER-FIRST-IMPLEMENTATION-ADMISSION-2026-07-07.md",
+      "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CONTRACT-FREEZE-PACKET-LADDER-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-07.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -285,6 +287,10 @@
       {
         "path": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CONTRACT-FREEZE-PACKET-LADDER-FIRST-IMPLEMENTATION-ADMISSION-2026-07-07.md",
         "role": "admission receipt allowing the generic packet ladder helper for contract-freeze advisory sequencing without marker movement"
+      },
+      {
+        "path": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CONTRACT-FREEZE-PACKET-LADDER-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-07.md",
+        "role": "prompt-pack and worker handoff contract for contract-freeze packet ladder proof without marker movement"
       }
     ],
     "verification_adoption_surfaces": [
@@ -333,15 +339,15 @@
     ],
     "next_package_ladder": [
       {
-        "package": "AI Repetition-to-Automation Pipeline contract-freeze packet ladder prompt-pack and worker handoff contract",
-        "mode": "docs-only prompt-pack and worker handoff contract",
-        "reason": "the existing generic packet-ladder helper is admitted for contract-freeze advisory sequencing, but implementation routing remains blocked until a prompt-pack and worker handoff contract freezes the exact objective, allowed files, forbidden files, proof matrix, and stop conditions without granting marker movement, owner-repo truth, _stack dispatch, deploy/platform proof, validation verdicts, release-readiness claims, or final automation adoption authority"
+        "package": "AI Repetition-to-Automation Pipeline contract-freeze packet ladder implementation-readiness closeout and worker routing",
+        "mode": "docs-only implementation-readiness closeout and worker routing",
+        "reason": "the prompt-pack and worker handoff contract is frozen; the next packet must decide whether the bounded proof worker can leave docs-only mode without granting marker movement, owner-repo truth, _stack dispatch, deploy/platform proof, validation verdicts, release-readiness claims, or final automation adoption authority"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CONTRACT-FREEZE-PACKET-LADDER-FIRST-IMPLEMENTATION-ADMISSION-2026-07-07.md",
-    "freshness_checked_at": "2026-07-07T12:00:00Z",
-    "freshness_basis": "the manifest now matches the 44 percent AI repetition posture after the July 7 contract-freeze packet-ladder first-implementation admission proved the generic helper can sequence the accepted review card while marker movement stays blocked until a bounded implementation-backed worker cluster lands.",
+    "freshness_checked_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CONTRACT-FREEZE-PACKET-LADDER-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-07.md",
+    "freshness_checked_at": "2026-07-07T12:30:00Z",
+    "freshness_basis": "the manifest now matches the 44 percent AI repetition posture after the July 7 contract-freeze prompt-pack and worker handoff contract froze the exact worker objective and stop conditions while marker movement remains blocked until a bounded implementation-backed worker cluster lands.",
     "marker_posture": [
       {
         "marker": "AI Repetition-to-Automation Pipeline",
