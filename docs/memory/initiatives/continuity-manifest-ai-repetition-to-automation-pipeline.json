@@ -65,7 +65,7 @@
     "lane_id": "ai-repetition-to-automation-pipeline",
     "scope_class": "atlas-root-governance",
     "current_checkpoint_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-VALIDATION-GOVERNANCE-CANDIDATE-REVIEW-CONTRACT-FREEZE-2026-07-07.md",
-    "checkpoint_commit": "main@4b03b9209458d0c88b19ad5ccd5720a25017f0ec",
+    "checkpoint_commit": "main@853b6dd06fda39fa334ea1ff8ebb0a396c259c80",
     "checkpoint_summary": "The lane remains at 43 percent after the July 7 validation-governance candidate-review contract freeze. The broad validation-governance review card is accepted for bounded packet-ladder design, but marker movement is held because this receipt is docs-only and the next package must still decide whether the existing generic helper is sufficient or whether validation-governance needs a specialized root helper. Boundaries remain no owner mutation, no owner truth, no hidden transcript inference, no _stack dispatch, no platform/deploy access, no execution authority, and no marker-authority output.",
     "governing_receipts": [
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-SURFACE-PASS-52-2026-06-09.md",
