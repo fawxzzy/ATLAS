@@ -64,7 +64,7 @@
     "lane_id": "ai-repetition-to-automation-pipeline",
     "scope_class": "atlas-root-governance",
     "current_checkpoint_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-WORKER-CLUSTER-RECONCILIATION-PACKET-LADDER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
-    "checkpoint_commit": "main@539b695210e1cbc533400da5dde0b0f24a8fea5d",
+    "checkpoint_commit": "main@4b03b9209458d0c88b19ad5ccd5720a25017f0ec",
     "checkpoint_summary": "The lane moves to 43 percent after the July 7 generic automation candidate packet ladder helper was adopted for the accepted worker-cluster-reconciliation review card. Live helper proof reports schema_version=atlas.automation_candidate_packet_ladder.v1, status=ok, candidate_id=worker-cluster-reconciliation, packet_ladder stage count 5, safe_to_use=true, and focused generic helper tests still pass while preserving tmp-only review-report input/output, docs-only decision refs, no owner mutation, no owner truth, no hidden transcript inference, no _stack dispatch, no platform/deploy access, no execution authority, and no marker-authority output.",
     "governing_receipts": [
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-SURFACE-PASS-52-2026-06-09.md",
