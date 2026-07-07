@@ -82,7 +82,7 @@
     "lane_id": "ai-repetition-to-automation-pipeline",
     "scope_class": "atlas-root-governance",
     "current_checkpoint_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-PROMPT-PACK-PACKET-LADDER-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-07.md",
-    "checkpoint_commit": "main@e07e18f4ede9e02ae32675bd87d82d9cab7cf82e",
+    "checkpoint_commit": "main@a37b2ae15b77952088a6c6fbfdb264451aa89a31",
     "checkpoint_summary": "The lane remains at 46 percent after the July 7 prompt-pack packet-ladder prompt-pack and worker handoff contract. The worker objective, required command, proof matrix, allowed files, forbidden files, and stop conditions are frozen for one bounded generic packet-ladder proof worker, but no owner truth, _stack dispatch, workflow edit or dispatch, platform/deploy proof, validation verdict, release readiness, execution authority, or marker ratchet is admitted.",
     "governing_receipts": [
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-SURFACE-PASS-52-2026-06-09.md",
