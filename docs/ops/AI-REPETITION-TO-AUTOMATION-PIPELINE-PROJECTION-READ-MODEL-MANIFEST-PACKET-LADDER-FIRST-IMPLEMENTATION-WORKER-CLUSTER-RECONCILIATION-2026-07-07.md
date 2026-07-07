@@ -30,8 +30,8 @@ Observed proof:
 - `status=ok`
 - `candidate_id=projection-read-model-manifest`
 - `candidate_review_status=review_ready`
-- `candidate_repeat_count=82`
-- `supporting_receipt_count=82`
+- `candidate_repeat_count=83`
+- `supporting_receipt_count=83`
 - `packet_ladder` stage count `5`
 - `safe_to_use=true`
 - `warnings=[]`

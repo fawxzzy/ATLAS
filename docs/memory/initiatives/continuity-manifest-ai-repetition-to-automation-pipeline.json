@@ -89,8 +89,8 @@
     "lane_id": "ai-repetition-to-automation-pipeline",
     "scope_class": "atlas-root-governance",
     "current_checkpoint_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-PROJECTION-READ-MODEL-MANIFEST-PACKET-LADDER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
-    "checkpoint_commit": "main@c2c262443207778fab93ff89d2dd5ca1da817716",
-    "checkpoint_summary": "The lane moves to 48 percent after the July 7 projection-read-model-manifest packet-ladder worker-cluster reconciliation. The existing generic packet-ladder helper now packages the accepted projection-read-model-manifest review card with live status ok, five required stages, 82 supporting receipts, no blockers, and focused packet-ladder tests passing, while preserving no owner truth, _stack dispatch, workflow edit or dispatch, platform/deploy proof, validation verdict, release readiness, execution authority, marker-authority output, or manifest-mutation automation.",
+    "checkpoint_commit": "main@1f0a74bd6b38fe3f094089610a4a95f9a140faf3",
+    "checkpoint_summary": "The lane moves to 48 percent after the July 7 projection-read-model-manifest packet-ladder worker-cluster reconciliation. The existing generic packet-ladder helper now packages the accepted projection-read-model-manifest review card with live status ok, five required stages, 83 supporting receipts, no blockers, and focused packet-ladder tests passing, while preserving no owner truth, _stack dispatch, workflow edit or dispatch, platform/deploy proof, validation verdict, release readiness, execution authority, marker-authority output, or manifest-mutation automation.",
     "governing_receipts": [
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-SURFACE-PASS-52-2026-06-09.md",
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-ACTIVE-LANE-FOLLOW-ON-DISAMBIGUATION-2026-06-17.md",
