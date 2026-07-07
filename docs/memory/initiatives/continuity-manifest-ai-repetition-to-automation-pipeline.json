@@ -70,7 +70,7 @@
     "lane_id": "ai-repetition-to-automation-pipeline",
     "scope_class": "atlas-root-governance",
     "current_checkpoint_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CONTRACT-FREEZE-CANDIDATE-REVIEW-CONTRACT-FREEZE-2026-07-07.md",
-    "checkpoint_commit": "main@f4a3807801a8ef989b351655c42e7eb98b0549f1",
+    "checkpoint_commit": "main@7152b831633db005f1ae0d2b379c84bf7d0d4c8a",
     "checkpoint_summary": "The lane remains at 44 percent after the July 7 contract-freeze candidate-review contract freeze. The contract-freeze review card is accepted for bounded packet-ladder design, but marker movement is held because this receipt is docs-only and does not authorize implementation, owner truth, _stack dispatch, platform/deploy proof, validation verdicts, release readiness, execution authority, or final automation adoption.",
     "governing_receipts": [
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-SURFACE-PASS-52-2026-06-09.md",
