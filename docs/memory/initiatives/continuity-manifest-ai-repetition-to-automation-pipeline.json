@@ -71,7 +71,7 @@
     "lane_id": "ai-repetition-to-automation-pipeline",
     "scope_class": "atlas-root-governance",
     "current_checkpoint_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CONTRACT-FREEZE-PACKET-LADDER-FIRST-IMPLEMENTATION-ADMISSION-2026-07-07.md",
-    "checkpoint_commit": "main@b4d0379340850efc5f2e0a78e56bfdd8277f6b92",
+    "checkpoint_commit": "main@29321c45e7bcecba7d09b11ed01bdea427b2906b",
     "checkpoint_summary": "The lane remains at 44 percent after the July 7 contract-freeze packet-ladder first-implementation admission. The existing generic packet-ladder helper is admitted only for advisory sequencing of the accepted contract-freeze review card; no specialized helper, owner truth, _stack dispatch, platform/deploy proof, validation verdict, release readiness, execution authority, marker authority, or final automation adoption is admitted.",
     "governing_receipts": [
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-SURFACE-PASS-52-2026-06-09.md",
