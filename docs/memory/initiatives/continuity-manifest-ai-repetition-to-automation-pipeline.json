@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-06-19T05:00:00Z",
-  "updated_at": "2026-07-07T13:00:00Z",
+  "updated_at": "2026-07-07T13:30:00Z",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -65,7 +65,8 @@
     "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CONTRACT-FREEZE-PACKET-LADDER-FIRST-IMPLEMENTATION-ADMISSION-2026-07-07.md",
     "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CONTRACT-FREEZE-PACKET-LADDER-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-07.md",
     "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CONTRACT-FREEZE-PACKET-LADDER-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-07.md",
-    "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CONTRACT-FREEZE-PACKET-LADDER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md"
+    "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CONTRACT-FREEZE-PACKET-LADDER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
+    "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-SELECTOR-ROUTING-CANDIDATE-REVIEW-CONTRACT-FREEZE-2026-07-07.md"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -73,9 +74,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "ai-repetition-to-automation-pipeline",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CONTRACT-FREEZE-PACKET-LADDER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
-    "checkpoint_commit": "main@35672f3b8d72854984fab57a5e9afc2a9abd3ec3",
-    "checkpoint_summary": "The lane moves to 45 percent after the July 7 contract-freeze packet-ladder worker-cluster reconciliation. The existing generic packet-ladder helper now has live proof against the selector/routing contract-freeze candidate family, focused tests pass, and authority remains bounded: no owner mutation, no owner truth, no hidden transcript inference, no _stack dispatch, no platform/deploy access, no execution authority, no validation verdict, no release-readiness claim, and no marker-authority output from the helper.",
+    "current_checkpoint_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-SELECTOR-ROUTING-CANDIDATE-REVIEW-CONTRACT-FREEZE-2026-07-07.md",
+    "checkpoint_commit": "main@aca98559aac085840709490d69c38b91b08e1e7c",
+    "checkpoint_summary": "The lane remains at 45 percent after the July 7 selector-routing candidate-review contract freeze. The selector-routing review card is accepted for bounded packet-ladder design, but marker movement is held because this receipt is docs-only and does not authorize implementation, owner truth, _stack dispatch, platform/deploy proof, validation verdicts, release readiness, execution authority, or final automation adoption.",
     "governing_receipts": [
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-SURFACE-PASS-52-2026-06-09.md",
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-ACTIVE-LANE-FOLLOW-ON-DISAMBIGUATION-2026-06-17.md",
@@ -121,7 +122,8 @@
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CONTRACT-FREEZE-PACKET-LADDER-FIRST-IMPLEMENTATION-ADMISSION-2026-07-07.md",
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CONTRACT-FREEZE-PACKET-LADDER-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-07.md",
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CONTRACT-FREEZE-PACKET-LADDER-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-07.md",
-      "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CONTRACT-FREEZE-PACKET-LADDER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md"
+      "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CONTRACT-FREEZE-PACKET-LADDER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
+      "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-SELECTOR-ROUTING-CANDIDATE-REVIEW-CONTRACT-FREEZE-2026-07-07.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -303,6 +305,10 @@
       {
         "path": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CONTRACT-FREEZE-PACKET-LADDER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
         "role": "implementation-backed adoption reconciliation for the contract-freeze packet ladder family"
+      },
+      {
+        "path": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-SELECTOR-ROUTING-CANDIDATE-REVIEW-CONTRACT-FREEZE-2026-07-07.md",
+        "role": "decision receipt accepting the selector-routing review card for bounded packet ladder design without marker movement"
       }
     ],
     "verification_adoption_surfaces": [
@@ -351,15 +357,15 @@
     ],
     "next_package_ladder": [
       {
-        "package": "AI Repetition-to-Automation Pipeline selector-routing candidate-review contract freeze",
-        "mode": "docs-only candidate-review contract freeze",
-        "reason": "the contract-freeze packet ladder adoption is reconciled with live proof and focused tests; the next highest review-ready selector/routing candidate family is selector-routing, which must still be accepted or rejected before any packet-ladder admission"
+        "package": "AI Repetition-to-Automation Pipeline selector-routing packet ladder first-implementation admission",
+        "mode": "docs-only first-implementation admission",
+        "reason": "the selector-routing review card is accepted, but this receipt is docs-only; the next packet must decide whether first adoption can use the generic packet ladder helper without granting marker movement, owner-repo truth, _stack dispatch, deploy/platform proof, validation verdicts, release-readiness claims, or final automation adoption authority"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CONTRACT-FREEZE-PACKET-LADDER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
-    "freshness_checked_at": "2026-07-07T13:00:00Z",
-    "freshness_basis": "the manifest now matches the 45 percent AI repetition posture after the July 7 contract-freeze worker-cluster reconciliation proved another reviewed selector/routing candidate family through the generic packet-ladder helper while preserving all authority boundaries.",
+    "freshness_checked_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-SELECTOR-ROUTING-CANDIDATE-REVIEW-CONTRACT-FREEZE-2026-07-07.md",
+    "freshness_checked_at": "2026-07-07T13:30:00Z",
+    "freshness_basis": "the manifest now matches the 45 percent AI repetition posture after the July 7 selector-routing contract freeze accepted the review card but held marker movement until first-implementation admission proves the correct helper strategy.",
     "marker_posture": [
       {
         "marker": "AI Repetition-to-Automation Pipeline",
