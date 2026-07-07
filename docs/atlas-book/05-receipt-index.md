@@ -303,6 +303,7 @@
 - [Playbook Everywhere + Cortex Interface Authority-Safe Cortex Interface Widening First-Implementation Worker Cluster Reconciliation](../ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-AUTHORITY-SAFE-CORTEX-INTERFACE-WIDENING-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-06.md)
 - [Playbook Everywhere + Cortex Interface Owner-Lane Playbook Adoption Proof Selection](../ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-OWNER-LANE-PLAYBOOK-ADOPTION-PROOF-SELECTION-2026-07-07.md)
 - [Playbook Everywhere + Cortex Interface Foundation Owner-Lane Playbook Adoption Proof Contract Freeze](../ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-FOUNDATION-OWNER-LANE-PLAYBOOK-ADOPTION-PROOF-CONTRACT-FREEZE-2026-07-07.md)
+- [Playbook Everywhere + Cortex Interface Foundation Owner-Lane Playbook Adoption Proof First-Implementation Admission](../ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-FOUNDATION-OWNER-LANE-PLAYBOOK-ADOPTION-PROOF-FIRST-IMPLEMENTATION-ADMISSION-2026-07-07.md)
 - [Cortex Readiness Post Authority-Safe Interface Handoff Next Slice Selection](../ops/CORTEX-READINESS-POST-AUTHORITY-SAFE-INTERFACE-HANDOFF-NEXT-SLICE-SELECTION-2026-07-06.md)
 - [Cortex Readiness Authority-Safe Handoff Consumption Proof Contract Freeze](../ops/CORTEX-READINESS-AUTHORITY-SAFE-HANDOFF-CONSUMPTION-PROOF-CONTRACT-FREEZE-2026-07-06.md)
 - [Cortex Readiness Authority-Safe Handoff Consumption Proof First-Implementation Admission](../ops/CORTEX-READINESS-AUTHORITY-SAFE-HANDOFF-CONSUMPTION-PROOF-FIRST-IMPLEMENTATION-ADMISSION-2026-07-06.md)
