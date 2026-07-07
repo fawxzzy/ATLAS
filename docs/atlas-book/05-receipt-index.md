@@ -1837,6 +1837,7 @@
 - [AI Long-Run Batch Orchestration Post-Stack-Command-Implementation-Actual-Owner-Side-Mutation-Authority-Class-Value Downstream Hold Recheck](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-STACK-COMMAND-IMPLEMENTATION-ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-VALUE-DOWNSTREAM-HOLD-RECHECK-2026-06-26.md)
 - [AI Long-Run Batch Orchestration Restart-Surface Active-Packet Reconciliation](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-RESTART-SURFACE-ACTIVE-PACKET-RECONCILIATION-2026-06-27.md)
 - [AI Long-Run Batch Orchestration Post AI Repetition 49 Next-Slice Selection](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-AI-REPETITION-49-NEXT-SLICE-SELECTION-2026-07-07.md)
+- [AI Long-Run Batch Orchestration Marker-Aware Next-Packet Planner Contract Freeze](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-MARKER-AWARE-NEXT-PACKET-PLANNER-CONTRACT-FREEZE-2026-07-07.md)
 - [Truth Map And ATLAS Book Root Validation Warning Drift Closeout And Stack Re-Sync](../ops/TRUTH-MAP-AND-ATLAS-BOOK-ROOT-VALIDATION-WARNING-DRIFT-CLOSEOUT-AND-STACK-RESYNC-2026-06-26.md)
 - [Truth Map And ATLAS Book Local Warning Floor Reduction And Stack Re-Sync](../ops/TRUTH-MAP-AND-ATLAS-BOOK-LOCAL-WARNING-FLOOR-REDUCTION-AND-STACK-RESYNC-2026-06-26.md)
 - [Truth Map And ATLAS Book Playbook Dependency Residue Reduction And Stack Re-Sync](../ops/TRUTH-MAP-AND-ATLAS-BOOK-PLAYBOOK-DEPENDENCY-RESIDUE-REDUCTION-AND-STACK-RESYNC-2026-06-26.md)
