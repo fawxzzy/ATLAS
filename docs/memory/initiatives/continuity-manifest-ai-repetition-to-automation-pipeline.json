@@ -54,7 +54,7 @@
     "lane_id": "ai-repetition-to-automation-pipeline",
     "scope_class": "atlas-root-governance",
     "current_checkpoint_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-FIRST-IMPLEMENTATION-PACKET-LADDER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
-    "checkpoint_commit": "main@f15ad001418cf3ed84eb2678055402325cc7ee14",
+    "checkpoint_commit": "main@666b5171b345a3825aeb11fac84f8ea6f67fd502",
     "checkpoint_summary": "The lane moves to 41 percent after the July 7 first-implementation packet ladder helper landed as an implementation-backed root surface. Live helper proof reports schema_version=atlas.first_implementation_packet_ladder.v1, status=ok, candidate_id=first-implementation, packet_ladder stage count 5, safe_to_use=true, and focused tests pass 11 cases while preserving tmp-only input/output, no owner mutation, no owner truth, no hidden transcript inference, no _stack dispatch, no platform/deploy access, no execution authority, and no marker-authority output.",
     "governing_receipts": [
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-SURFACE-PASS-52-2026-06-09.md",
