@@ -48,7 +48,7 @@
     "lane_id": "playbook-everywhere-cortex-interface",
     "scope_class": "atlas-root-governance",
     "current_checkpoint_receipt": "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-FOUNDATION-OWNER-LANE-PLAYBOOK-ADOPTION-PROOF-CONTRACT-FREEZE-2026-07-07.md",
-    "checkpoint_commit": "main@b1584315",
+    "checkpoint_commit": "main@30cd2bff",
     "checkpoint_summary": "The lane remains at 40 percent after a docs-only owner-lane Playbook adoption proof selector and Foundation contract freeze. Foundation is selected as the first read-only owner-lane proof target because it is clean on main, active/trusted in stack inventory, and currently classified as a missing_adoption owner row by the Playbook adoption matrix. The next exact packet is Foundation owner-lane Playbook adoption proof first-implementation admission; no owner repo, Fitness, Mazer, deploy, platform, secret, branch-normalization, execution, owner-truth, final-receipt, or Cortex authority was widened.",
     "governing_receipts": [
       "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CONTRACT-FIRST-AGENT-SHADOWING-PASS-1-2026-06-01.md",
