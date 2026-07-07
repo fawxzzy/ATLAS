@@ -412,6 +412,7 @@
     "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-MARKER-AWARE-NEXT-PACKET-PLANNER-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-07.md",
     "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-MARKER-AWARE-NEXT-PACKET-PLANNER-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-07.md",
     "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-MARKER-AWARE-NEXT-PACKET-PLANNER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
+    "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-MARKER-AWARE-PLANNER-CANDIDATE-REVIEW-SELECTION-2026-07-07.md",
     "ops/atlas/supervised_execution_home_stack_command_implementation_actual_owner_side_mutation_authority_class_choice.py",
     "tests/test_atlas_supervised_execution_home_stack_command_implementation_actual_owner_side_mutation_authority_class_choice.py"
   ],
@@ -421,9 +422,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "ai-long-run-batch-orchestration",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-MARKER-AWARE-NEXT-PACKET-PLANNER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
-    "checkpoint_commit": "main after marker-aware planner worker-cluster reconciliation",
-    "checkpoint_summary": "The marker-aware next-packet planner helper now lands at `ops/atlas/marker_aware_next_packet_planner.py` with focused proof in `tests/test_atlas_marker_aware_next_packet_planner.py`. Live output is `status=ok`, `selected_marker=AI Long-Run Batch Orchestration`, `candidate_count=20`, and `safe_to_continue=true`; focused tests pass 12/12; Fitness and Mazer remain separated as owner lanes. `AI Long-Run Batch Orchestration` moves to `67%`, and no immediate same-lane AI Long-Run packet is open by default.",
+    "current_checkpoint_receipt": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-MARKER-AWARE-PLANNER-CANDIDATE-REVIEW-SELECTION-2026-07-07.md",
+    "checkpoint_commit": "main after marker-aware planner candidate-review selection",
+    "checkpoint_summary": "The marker-aware next-packet planner candidate-review selection now confirms the live planner output is `status=advisory_recommendation`, `selected_packet=null`, `candidate_count=20`, and `safe_to_continue=true`. All 20 candidates classify as held lanes; Fitness and Mazer remain separated owner lanes; no owner, workflow, deploy, secret, protected-surface, marker-write, or final-receipt authority is admitted. `AI Long-Run Batch Orchestration` remains at `67%`, and the exact next posture is `hold / no immediate root packet` unless a separately selected scope or new proof clears a held-lane threshold.",
     "governing_receipts": [
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-2026-05-22.md",
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-POST-WORLD-MODEL-TOP-LEVEL-PAYLOAD-BOUNDARY-NEXT-SLICE-SELECTION-PASS-460-2026-06-17.md",
@@ -440,6 +441,7 @@
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-MARKER-AWARE-NEXT-PACKET-PLANNER-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-07.md",
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-MARKER-AWARE-NEXT-PACKET-PLANNER-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-07.md",
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-MARKER-AWARE-NEXT-PACKET-PLANNER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
+      "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-MARKER-AWARE-PLANNER-CANDIDATE-REVIEW-SELECTION-2026-07-07.md",
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTION-CRITERIA-CONTRACT-FREEZE-PASS-462-2026-06-18.md",
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTION-CRITERIA-OWNER-SURFACE-ADMISSION-PASS-463-2026-06-19.md",
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTION-CRITERIA-SUPPORTING-LANE-ADMISSION-PASS-464-2026-06-19.md",
@@ -780,6 +782,10 @@
       {
         "path": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-MARKER-AWARE-NEXT-PACKET-PLANNER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
         "role": "current worker-cluster reconciliation for the marker-aware next-packet planner"
+      },
+      {
+        "path": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-MARKER-AWARE-PLANNER-CANDIDATE-REVIEW-SELECTION-2026-07-07.md",
+        "role": "current candidate-review selection hold receipt for the marker-aware planner output"
       },
       {
         "path": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-MARKER-AWARE-NEXT-PACKET-PLANNER-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-07.md",
@@ -1273,14 +1279,14 @@
     "next_package_ladder": [
       {
         "package": "No immediate AI Long-Run Batch Orchestration same-lane packet",
-        "mode": "hold-flat after marker-aware next-packet planner worker-cluster reconciliation",
-        "reason": "the marker-aware planner helper now lands with focused proof and may inform future selection, but no further same-lane AI Long-Run packet is open by default without a separately selected candidate family, broader implementation-backed adoption, or real blocker-clearance class"
+        "mode": "hold-flat after marker-aware planner candidate-review selection",
+        "reason": "the marker-aware planner candidate-review pass confirms the live planner state is advisory only, all 20 planner candidates are held, no selected packet is present, and no further same-lane AI Long-Run or root packet is open by default without a separately selected scope, broader implementation-backed adoption, or real blocker-clearance class"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-MARKER-AWARE-NEXT-PACKET-PLANNER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
+    "freshness_checked_receipt": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-MARKER-AWARE-PLANNER-CANDIDATE-REVIEW-SELECTION-2026-07-07.md",
     "freshness_checked_at": "2026-07-07T00:00:00.0000000-04:00",
-    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture now match the marker-aware planner worker-cluster reconciliation: `AI Long-Run Batch Orchestration` moves to `67%`, AI Repetition stays held at `49%`, Fitness and Mazer remain outside this ATLAS marker lane, and no immediate same-lane AI Long-Run packet is open by default.",
+    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture now match the marker-aware planner candidate-review selection: `AI Long-Run Batch Orchestration` remains at `67%`, planner output is advisory with 20 held candidates and no selected packet, Fitness and Mazer remain outside this ATLAS marker lane, and no immediate root packet is open by default.",
     "marker_posture": [
       {
         "marker": "AI Long-Run Batch Orchestration",
