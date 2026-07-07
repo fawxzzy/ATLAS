@@ -212,6 +212,7 @@
 - [AI Repetition-to-Automation Pipeline Selector-To-Receipt Scaffold Routing](../ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-SELECTOR-TO-RECEIPT-SCAFFOLD-ROUTING-2026-06-28.md)
 - [AI Repetition-to-Automation Pipeline Checkpoint Handoff Summary Helper](../ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CHECKPOINT-HANDOFF-SUMMARY-HELPER-2026-06-28.md)
 - [AI Repetition-to-Automation Pipeline Receipt-Derived Checkpoint Handoff Summary Helper](../ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-RECEIPT-DERIVED-CHECKPOINT-HANDOFF-SUMMARY-HELPER-2026-06-29.md)
+- [AI Repetition-to-Automation Pipeline First-Implementation Candidate Review Contract Freeze](../ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-FIRST-IMPLEMENTATION-CANDIDATE-REVIEW-CONTRACT-FREEZE-2026-07-07.md)
 - [AI Repetition-to-Automation Pipeline Post AI Work Session And Cortex Helpers Next Slice Selection](../ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-POST-AI-WORK-SESSION-AND-CORTEX-HELPERS-NEXT-SLICE-SELECTION-2026-07-07.md)
 - [AI Repetition-to-Automation Pipeline Receipt-Derived Automation Candidate Extractor Contract Freeze](../ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-RECEIPT-DERIVED-AUTOMATION-CANDIDATE-EXTRACTOR-CONTRACT-FREEZE-2026-07-07.md)
 - [AI Repetition-to-Automation Pipeline Receipt-Derived Automation Candidate Extractor First-Implementation Admission](../ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-RECEIPT-DERIVED-AUTOMATION-CANDIDATE-EXTRACTOR-FIRST-IMPLEMENTATION-ADMISSION-2026-07-07.md)

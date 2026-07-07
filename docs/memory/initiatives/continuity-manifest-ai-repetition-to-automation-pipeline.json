@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-06-19T05:00:00Z",
-  "updated_at": "2026-07-07T05:00:00Z",
+  "updated_at": "2026-07-07T06:00:00Z",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -40,7 +40,8 @@
     "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-RECEIPT-DERIVED-AUTOMATION-CANDIDATE-REVIEW-SURFACE-FIRST-IMPLEMENTATION-ADMISSION-2026-07-07.md",
     "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-RECEIPT-DERIVED-AUTOMATION-CANDIDATE-REVIEW-SURFACE-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-07.md",
     "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-RECEIPT-DERIVED-AUTOMATION-CANDIDATE-REVIEW-SURFACE-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-07.md",
-    "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-RECEIPT-DERIVED-AUTOMATION-CANDIDATE-REVIEW-SURFACE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md"
+    "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-RECEIPT-DERIVED-AUTOMATION-CANDIDATE-REVIEW-SURFACE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
+    "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-FIRST-IMPLEMENTATION-CANDIDATE-REVIEW-CONTRACT-FREEZE-2026-07-07.md"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -48,9 +49,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "ai-repetition-to-automation-pipeline",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-RECEIPT-DERIVED-AUTOMATION-CANDIDATE-REVIEW-SURFACE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
-    "checkpoint_commit": "main@f77c006727aa32df2896fa4221b97dd2b97ae69d",
-    "checkpoint_summary": "The lane now sits at 40 percent after the July 7 candidate-review surface landed one read-only root helper plus tests on top of the extractor. The live review proof reports status=ok, candidate_count=8, review_count=8, and safe_to_use=true while preserving tmp-only input/output, no owner truth, no hidden transcript inference, no _stack dispatch, no platform/deploy access, and no marker fields. No downstream candidate implementation, owner-repo execution, _stack execution, platform proof, or final automation adoption widened.",
+    "current_checkpoint_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-FIRST-IMPLEMENTATION-CANDIDATE-REVIEW-CONTRACT-FREEZE-2026-07-07.md",
+    "checkpoint_commit": "main@57297c9c07821c9e19921cf647faabb8d2992aaa",
+    "checkpoint_summary": "The lane remains at 40 percent after the July 7 first-implementation candidate-review contract freeze accepted the highest-priority review card for bounded future contract work. Live review proof reports status=ok, candidate_count=8, review_count=8, safe_to_use=true, and the accepted first-implementation card has review_priority=0, repeat_count=207, and supporting_receipt_count=207. No downstream helper implementation, owner-repo execution, _stack execution, platform proof, final automation adoption, or marker movement widened.",
     "governing_receipts": [
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-SURFACE-PASS-52-2026-06-09.md",
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-ACTIVE-LANE-FOLLOW-ON-DISAMBIGUATION-2026-06-17.md",
@@ -71,7 +72,8 @@
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-RECEIPT-DERIVED-AUTOMATION-CANDIDATE-REVIEW-SURFACE-FIRST-IMPLEMENTATION-ADMISSION-2026-07-07.md",
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-RECEIPT-DERIVED-AUTOMATION-CANDIDATE-REVIEW-SURFACE-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-07.md",
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-RECEIPT-DERIVED-AUTOMATION-CANDIDATE-REVIEW-SURFACE-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-07.md",
-      "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-RECEIPT-DERIVED-AUTOMATION-CANDIDATE-REVIEW-SURFACE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md"
+      "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-RECEIPT-DERIVED-AUTOMATION-CANDIDATE-REVIEW-SURFACE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
+      "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-FIRST-IMPLEMENTATION-CANDIDATE-REVIEW-CONTRACT-FREEZE-2026-07-07.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -153,6 +155,10 @@
       {
         "path": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-RECEIPT-DERIVED-AUTOMATION-CANDIDATE-REVIEW-SURFACE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
         "role": "implementation-backed reconciliation for read-only receipt-derived automation candidate review"
+      },
+      {
+        "path": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-FIRST-IMPLEMENTATION-CANDIDATE-REVIEW-CONTRACT-FREEZE-2026-07-07.md",
+        "role": "decision receipt accepting the first-implementation review card for bounded future first-implementation packet ladder contract work"
       }
     ],
     "verification_adoption_surfaces": [
@@ -192,7 +198,7 @@
       },
       {
         "item": "higher marker movement above the current held restart posture",
-        "requirement": "blocked until a reviewed candidate is explicitly accepted or rejected through a bounded contract freeze, one owner-side or _stack execution widening lands, or broader repeated governed adoption changes operator reality again"
+        "requirement": "blocked until the accepted first-implementation candidate family gains a new implementation-backed root helper, one owner-side or _stack execution widening lands, or broader repeated governed adoption changes operator reality again"
       },
       {
         "item": "treating the AI Long-Run fallback as continuation of this lane",
@@ -201,15 +207,15 @@
     ],
     "next_package_ladder": [
       {
-        "package": "AI Repetition-to-Automation Pipeline first-implementation candidate-review contract freeze",
-        "mode": "docs-only contract freeze",
-        "reason": "the July 7 candidate-review helper now exists and ranks the first-implementation card as the highest-priority review item, so the next honest move is to decide whether that reviewed candidate deserves a bounded contract freeze or should be rejected/deferred without granting implementation, marker movement, owner-repo truth, _stack dispatch, deploy/platform proof, or final automation adoption authority"
+        "package": "AI Repetition-to-Automation Pipeline first-implementation packet ladder first-implementation admission",
+        "mode": "docs-only first-implementation admission",
+        "reason": "the July 7 candidate-review contract freeze accepted the first-implementation card for bounded future contract work, so the next honest move is to admit the smallest exact first slice for first-implementation packet ladder review and packaging without granting implementation, marker movement, owner-repo truth, _stack dispatch, deploy/platform proof, or final automation adoption authority"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-RECEIPT-DERIVED-AUTOMATION-CANDIDATE-REVIEW-SURFACE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
-    "freshness_checked_at": "2026-07-07T05:00:00Z",
-    "freshness_basis": "the manifest now matches the 40 percent AI repetition posture after the July 7 candidate-review implementation landed as a read-only root helper with tests, live JSON proof, tmp-only candidate-report input and output gating, no owner mutation, no hidden transcript inference, no _stack dispatch, and no marker fields in output.",
+    "freshness_checked_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-FIRST-IMPLEMENTATION-CANDIDATE-REVIEW-CONTRACT-FREEZE-2026-07-07.md",
+    "freshness_checked_at": "2026-07-07T06:00:00Z",
+    "freshness_basis": "the manifest now matches the 40 percent AI repetition posture after the July 7 first-implementation candidate-review contract freeze accepted the highest-priority review card for bounded future contract work while preserving no implementation, no owner mutation, no hidden transcript inference, no _stack dispatch, no platform/deploy proof, no final adoption claim, and no marker movement.",
     "marker_posture": [
       {
         "marker": "AI Repetition-to-Automation Pipeline",
