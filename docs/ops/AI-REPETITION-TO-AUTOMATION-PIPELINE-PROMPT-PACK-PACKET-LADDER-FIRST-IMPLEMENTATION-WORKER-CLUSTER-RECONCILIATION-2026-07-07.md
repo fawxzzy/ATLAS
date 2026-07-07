@@ -30,8 +30,8 @@ Observed proof:
 - `status=ok`
 - `candidate_id=prompt-pack`
 - `candidate_review_status=review_ready`
-- `candidate_repeat_count=109`
-- `supporting_receipt_count=109`
+- `candidate_repeat_count=110`
+- `supporting_receipt_count=110`
 - `packet_ladder` stage count `5`
 - `safe_to_use=true`
 - `warnings=[]`
