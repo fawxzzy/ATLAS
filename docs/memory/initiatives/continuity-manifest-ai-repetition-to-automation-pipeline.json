@@ -96,7 +96,7 @@
     "lane_id": "ai-repetition-to-automation-pipeline",
     "scope_class": "atlas-root-governance",
     "current_checkpoint_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-PROOF-CONTRACT-CANDIDATE-CONTRACT-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
-    "checkpoint_commit": "pending-current-commit",
+    "checkpoint_commit": "f7312f4fdb67dba4202727e47681f2a4bb7c65af",
     "checkpoint_summary": "The lane moves to 50 percent after the reusable proof-contract candidate chain gained a second implementation-backed root helper. ops/atlas/proof_contract_candidate_contract.py plus tests/test_atlas_proof_contract_candidate_contract.py landed, live output reports status=ok for artifact-backed-proof-contract and manual-protected-proof-contract, focused tests pass 7/7, adjacent reusable proof-contract candidate tests pass 7/7, and no owner mutation, workflow edit, workflow dispatch, secret-value access, deploy action, final receipt authority, release-readiness claim, validation-verdict authority, or marker-output authority was widened. The exact next packet is No immediate AI Repetition-to-Automation Pipeline same-lane packet.",
     "governing_receipts": [
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-SURFACE-PASS-52-2026-06-09.md",
