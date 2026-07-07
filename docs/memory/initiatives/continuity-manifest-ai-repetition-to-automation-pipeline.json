@@ -72,7 +72,7 @@
     "lane_id": "ai-repetition-to-automation-pipeline",
     "scope_class": "atlas-root-governance",
     "current_checkpoint_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CONTRACT-FREEZE-PACKET-LADDER-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-07.md",
-    "checkpoint_commit": "main@5848942e585fb46a0440e650660d8c99776cce30",
+    "checkpoint_commit": "main@43f141c68f9f32b556f38f6be997b4a4611422a5",
     "checkpoint_summary": "The lane remains at 44 percent after the July 7 contract-freeze packet-ladder prompt-pack and worker handoff contract. The worker objective, command, required checks, and stop conditions are frozen for using the existing generic packet-ladder helper against the accepted contract-freeze review card; implementation routing, owner truth, _stack dispatch, platform/deploy proof, validation verdicts, release readiness, execution authority, marker authority, and final automation adoption remain blocked.",
     "governing_receipts": [
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-SURFACE-PASS-52-2026-06-09.md",
