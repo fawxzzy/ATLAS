@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-06-19T05:00:00Z",
-  "updated_at": "2026-06-29T08:26:18Z",
+  "updated_at": "2026-07-07T00:00:00Z",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -29,7 +29,9 @@
     "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md",
     "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-SELECTOR-TO-RECEIPT-SCAFFOLD-ROUTING-2026-06-28.md",
     "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CHECKPOINT-HANDOFF-SUMMARY-HELPER-2026-06-28.md",
-    "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-RECEIPT-DERIVED-CHECKPOINT-HANDOFF-SUMMARY-HELPER-2026-06-29.md"
+    "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-RECEIPT-DERIVED-CHECKPOINT-HANDOFF-SUMMARY-HELPER-2026-06-29.md",
+    "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-POST-AI-WORK-SESSION-AND-CORTEX-HELPERS-NEXT-SLICE-SELECTION-2026-07-07.md",
+    "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-RECEIPT-DERIVED-AUTOMATION-CANDIDATE-EXTRACTOR-CONTRACT-FREEZE-2026-07-07.md"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -37,9 +39,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "ai-repetition-to-automation-pipeline",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-RECEIPT-DERIVED-CHECKPOINT-HANDOFF-SUMMARY-HELPER-2026-06-29.md",
-    "checkpoint_commit": "codex/atlas-root-mazer-dirty-head-resync@1eb47c9e",
-    "checkpoint_summary": "The lane now holds at 38 percent with no immediate same-lane packet open by default: selector truth already flows into receipt scaffolds when an actionable packet exists, the checkpoint-handoff helper still turns committed ATLAS git history into one deterministic handoff recap, and the helper can now also derive its inclusive base directly from a cited receipt checkpoint without inferring marker movement, owner/runtime truth, or execution authority.",
+    "current_checkpoint_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-RECEIPT-DERIVED-AUTOMATION-CANDIDATE-EXTRACTOR-CONTRACT-FREEZE-2026-07-07.md",
+    "checkpoint_commit": "main@5bb39cac3bd30836491b460cc91524ecbba89335",
+    "checkpoint_summary": "The lane still holds at 38 percent, but the next slice is no longer a generic hold: the July 7 selector selects a receipt-derived automation candidate extractor, and the July 7 contract freeze defines a future read-only root helper that may classify repeated receipt-backed manual patterns into helper, prompt-pack, selector/routing, validation/governance, or read-model/manifest projection candidates. No worker implementation, proof-backed adoption widening, blocker clearance, or marker movement landed in this packet.",
     "governing_receipts": [
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-SURFACE-PASS-52-2026-06-09.md",
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-ACTIVE-LANE-FOLLOW-ON-DISAMBIGUATION-2026-06-17.md",
@@ -49,7 +51,9 @@
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md",
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-SELECTOR-TO-RECEIPT-SCAFFOLD-ROUTING-2026-06-28.md",
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CHECKPOINT-HANDOFF-SUMMARY-HELPER-2026-06-28.md",
-      "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-RECEIPT-DERIVED-CHECKPOINT-HANDOFF-SUMMARY-HELPER-2026-06-29.md"
+      "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-RECEIPT-DERIVED-CHECKPOINT-HANDOFF-SUMMARY-HELPER-2026-06-29.md",
+      "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-POST-AI-WORK-SESSION-AND-CORTEX-HELPERS-NEXT-SLICE-SELECTION-2026-07-07.md",
+      "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-RECEIPT-DERIVED-AUTOMATION-CANDIDATE-EXTRACTOR-CONTRACT-FREEZE-2026-07-07.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -87,6 +91,14 @@
       {
         "path": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-RECEIPT-DERIVED-CHECKPOINT-HANDOFF-SUMMARY-HELPER-2026-06-29.md",
         "role": "receipt-derived checkpoint basis widening for the handoff summary helper with live committed-history proof"
+      },
+      {
+        "path": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-POST-AI-WORK-SESSION-AND-CORTEX-HELPERS-NEXT-SLICE-SELECTION-2026-07-07.md",
+        "role": "post-AI-work-session and Cortex-helper next-slice selection for the receipt-derived automation candidate extractor family"
+      },
+      {
+        "path": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-RECEIPT-DERIVED-AUTOMATION-CANDIDATE-EXTRACTOR-CONTRACT-FREEZE-2026-07-07.md",
+        "role": "contract freeze for future read-only receipt-derived automation candidate extraction"
       }
     ],
     "verification_adoption_surfaces": [
@@ -135,15 +147,15 @@
     ],
     "next_package_ladder": [
       {
-        "package": "No immediate AI Repetition-to-Automation Pipeline same-lane packet",
-        "mode": "hold-flat after selector-to-scaffold routing plus receipt-derived checkpoint-handoff helper proof",
-        "reason": "the current admitted AI repetition families now cover direct selector-to-scaffold routing, deterministic checkpoint handoff recap, and receipt-derived inclusive checkpoint recovery, while the held root still proves no immediate same-lane packet is honestly open; reopen only with another distinct AI Repetition family, broader adoption, or wider execution reality than the current held posture"
+        "package": "AI Repetition-to-Automation Pipeline receipt-derived automation candidate extractor first-implementation admission",
+        "mode": "docs-only contract frozen; implementation admission is the next exact packet",
+        "reason": "the July 7 selector and contract freeze identify a distinct AI Repetition family that can reduce repeated manual receipt scanning, but no worker implementation or execution proof exists yet; the next honest move is first-implementation admission for the future read-only extractor"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-RECEIPT-DERIVED-CHECKPOINT-HANDOFF-SUMMARY-HELPER-2026-06-29.md",
-    "freshness_checked_at": "2026-06-29T08:26:18Z",
-    "freshness_basis": "the manifest now matches the held 38 percent AI repetition posture after selector output widened into receipt-scaffold routing, the original checkpoint-handoff helper landed with live committed-history proof, and the helper now also derives its inclusive base directly from a cited receipt checkpoint on the current branch.",
+    "freshness_checked_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-RECEIPT-DERIVED-AUTOMATION-CANDIDATE-EXTRACTOR-CONTRACT-FREEZE-2026-07-07.md",
+    "freshness_checked_at": "2026-07-07T00:00:00Z",
+    "freshness_basis": "the manifest now matches the held 38 percent AI repetition posture after the July 7 selector and contract freeze selected the receipt-derived automation candidate extractor family as the next exact packet while explicitly preserving docs-only scope, no owner mutation, no hidden transcript inference, no _stack dispatch, no marker movement, and no worker implementation.",
     "marker_posture": [
       {
         "marker": "AI Repetition-to-Automation Pipeline",
