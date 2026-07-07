@@ -34,6 +34,7 @@
     "docs/ops/CORTEX-READINESS-AUTHORITY-SAFE-HANDOFF-CONSUMPTION-PROOF-CONTRACT-FREEZE-2026-07-06.md",
     "docs/ops/CORTEX-READINESS-AUTHORITY-SAFE-HANDOFF-CONSUMPTION-PROOF-FIRST-IMPLEMENTATION-ADMISSION-2026-07-06.md",
     "docs/ops/CORTEX-READINESS-AUTHORITY-SAFE-HANDOFF-CONSUMPTION-PROOF-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-06.md",
+    "docs/ops/CORTEX-READINESS-AUTHORITY-SAFE-HANDOFF-CONSUMPTION-PROOF-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-06.md",
     "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-CORTEX-HELD-ROOT-PROJECTION-CLEANUP-2026-06-28.md",
     "docs/ops/ATLAS-ROOT-VALIDATION-WARNING-FLOOR-AND-LIVE-MAZER-LOCK-TRUTH-RESYNC-2026-06-28.md",
     "docs/ops/ATLAS-ROOT-ZERO-WARNING-FLOOR-AFTER-MAZER-GENERATED-STATE-CLEANUP-RESYNC-2026-06-28.md",
@@ -48,9 +49,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "cortex-readiness",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/CORTEX-READINESS-AUTHORITY-SAFE-HANDOFF-CONSUMPTION-PROOF-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-06.md",
-    "checkpoint_commit": "main@64968dab",
-    "checkpoint_summary": "The lane still holds at 41 percent, and the latest Cortex-side packets are docs-only first-implementation admission plus prompt-pack for an authority-safe handoff consumption proof helper. Future `ops/cortex/authority_safe_handoff_consumption.py` and `tests/test_cortex_authority_safe_handoff_consumption.py` are admitted but not implemented. Cortex may consume `ops/cortex/authority_safe_interface_handoff.py --json --scope root` output only as advisory substrate, preserving denial of execution, approval, owner-truth, final-receipt, deploy, secret-handling, transcript-scraping, automatic _stack dispatch, repo mutation, platform mutation, owner-repo mutation, and protected-surface mutation authority. The next exact Cortex packet is `Cortex Readiness authority-safe handoff consumption proof implementation-readiness closeout and worker routing`.",
+    "current_checkpoint_receipt": "docs/ops/CORTEX-READINESS-AUTHORITY-SAFE-HANDOFF-CONSUMPTION-PROOF-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-06.md",
+    "checkpoint_commit": "main@52279c90",
+    "checkpoint_summary": "The lane still holds at 41 percent, and the latest Cortex-side packet is docs-only implementation-readiness closeout and worker routing. Future `ops/cortex/authority_safe_handoff_consumption.py` and `tests/test_cortex_authority_safe_handoff_consumption.py` are now implementation-ready but not implemented. Cortex may consume `ops/cortex/authority_safe_interface_handoff.py --json --scope root` output only as advisory substrate, preserving denial of execution, approval, owner-truth, final-receipt, deploy, secret-handling, transcript-scraping, automatic _stack dispatch, repo mutation, platform mutation, owner-repo mutation, and protected-surface mutation authority. The next exact Cortex packet is `Cortex Readiness authority-safe handoff consumption proof first-implementation worker packet 1`.",
     "governing_receipts": [
       "docs/ops/CORTEX-READINESS-MARKER-CHECKPOINT-SHADOW-CONSUMPTION-PASS-1-2026-06-01.md",
       "docs/ops/CORTEX-READINESS-RECEIPT-DOCTRINE-DRAFT-SHADOW-CONSUMPTION-PASS-2-2026-06-01.md",
@@ -65,6 +66,7 @@
       "docs/ops/CORTEX-READINESS-AUTHORITY-SAFE-HANDOFF-CONSUMPTION-PROOF-CONTRACT-FREEZE-2026-07-06.md",
       "docs/ops/CORTEX-READINESS-AUTHORITY-SAFE-HANDOFF-CONSUMPTION-PROOF-FIRST-IMPLEMENTATION-ADMISSION-2026-07-06.md",
       "docs/ops/CORTEX-READINESS-AUTHORITY-SAFE-HANDOFF-CONSUMPTION-PROOF-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-06.md",
+      "docs/ops/CORTEX-READINESS-AUTHORITY-SAFE-HANDOFF-CONSUMPTION-PROOF-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-06.md",
       "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-CORTEX-HELD-ROOT-PROJECTION-CLEANUP-2026-06-28.md",
       "docs/ops/ATLAS-ROOT-VALIDATION-WARNING-FLOOR-AND-LIVE-MAZER-LOCK-TRUTH-RESYNC-2026-06-28.md",
       "docs/ops/ATLAS-ROOT-ZERO-WARNING-FLOOR-AFTER-MAZER-GENERATED-STATE-CLEANUP-RESYNC-2026-06-28.md",
@@ -99,6 +101,10 @@
       {
         "path": "docs/ops/CORTEX-READINESS-AUTHORITY-SAFE-HANDOFF-CONSUMPTION-PROOF-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-06.md",
         "role": "docs-only worker prompt pack freezing the future authority-safe handoff consumption proof helper objective, CLI, JSON fields, proof matrix, and no-authority boundaries"
+      },
+      {
+        "path": "docs/ops/CORTEX-READINESS-AUTHORITY-SAFE-HANDOFF-CONSUMPTION-PROOF-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-06.md",
+        "role": "docs-only implementation-readiness closeout deciding the handoff consumption proof worker is ready and routing one exact worker packet"
       },
       {
         "path": "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-CORTEX-HELD-ROOT-PROJECTION-CLEANUP-2026-06-28.md",
@@ -187,15 +193,15 @@
     ],
     "next_package_ladder": [
       {
-        "package": "Cortex Readiness authority-safe handoff consumption proof implementation-readiness closeout and worker routing",
-        "mode": "docs-only implementation-readiness closeout and worker routing",
-        "reason": "the first-implementation admission and prompt-pack are frozen; the next honest move is to decide whether the bounded implementation worker can run from the prompt pack without widening authority"
+        "package": "Cortex Readiness authority-safe handoff consumption proof first-implementation worker packet 1",
+        "mode": "implementation worker packet",
+        "reason": "implementation-readiness is closed; the next honest move is to implement the bounded authority-safe handoff consumption helper and focused tests only"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/CORTEX-READINESS-AUTHORITY-SAFE-HANDOFF-CONSUMPTION-PROOF-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-06.md",
+    "freshness_checked_receipt": "docs/ops/CORTEX-READINESS-AUTHORITY-SAFE-HANDOFF-CONSUMPTION-PROOF-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-06.md",
     "freshness_checked_at": "2026-07-06T00:00:00Z",
-    "freshness_basis": "The manifest now matches the current 41 percent Cortex posture after the authority-safe handoff consumption selector, contract freeze, first-implementation admission, and prompt-pack. Future implementation is admitted only for `ops/cortex/authority_safe_handoff_consumption.py` plus `tests/test_cortex_authority_safe_handoff_consumption.py`; no marker moves from docs-only admission or prompt-pack, and the next exact packet is implementation-readiness closeout and worker routing.",
+    "freshness_basis": "The manifest now matches the current 41 percent Cortex posture after the authority-safe handoff consumption selector, contract freeze, first-implementation admission, prompt-pack, and implementation-readiness closeout. Future implementation is admitted only for `ops/cortex/authority_safe_handoff_consumption.py` plus `tests/test_cortex_authority_safe_handoff_consumption.py`; no marker moves from docs-only readiness, and the next exact packet is first-implementation worker packet 1.",
     "marker_posture": [
       {
         "marker": "Cortex Readiness",
