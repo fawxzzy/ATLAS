@@ -1845,6 +1845,8 @@
 - [AI Long-Run Batch Orchestration Marker-Aware Planner Candidate Review Selection](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-MARKER-AWARE-PLANNER-CANDIDATE-REVIEW-SELECTION-2026-07-07.md)
 - [AI Long-Run Batch Orchestration Held-Lane Unlock Matrix Contract Freeze](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-HELD-LANE-UNLOCK-MATRIX-CONTRACT-FREEZE-2026-07-07.md)
 - [AI Long-Run Batch Orchestration Held-Lane Unlock Matrix First-Implementation Admission](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-HELD-LANE-UNLOCK-MATRIX-FIRST-IMPLEMENTATION-ADMISSION-2026-07-07.md)
+- [AI Long-Run Batch Orchestration Held-Lane Unlock Matrix Prompt-Pack And Worker Handoff Contract](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-HELD-LANE-UNLOCK-MATRIX-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-07.md)
+- [AI Long-Run Batch Orchestration Held-Lane Unlock Matrix Implementation-Readiness Closeout And Worker Routing](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-HELD-LANE-UNLOCK-MATRIX-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-07.md)
 - [Truth Map And ATLAS Book Root Validation Warning Drift Closeout And Stack Re-Sync](../ops/TRUTH-MAP-AND-ATLAS-BOOK-ROOT-VALIDATION-WARNING-DRIFT-CLOSEOUT-AND-STACK-RESYNC-2026-06-26.md)
 - [Truth Map And ATLAS Book Local Warning Floor Reduction And Stack Re-Sync](../ops/TRUTH-MAP-AND-ATLAS-BOOK-LOCAL-WARNING-FLOOR-REDUCTION-AND-STACK-RESYNC-2026-06-26.md)
 - [Truth Map And ATLAS Book Playbook Dependency Residue Reduction And Stack Re-Sync](../ops/TRUTH-MAP-AND-ATLAS-BOOK-PLAYBOOK-DEPENDENCY-RESIDUE-REDUCTION-AND-STACK-RESYNC-2026-06-26.md)
