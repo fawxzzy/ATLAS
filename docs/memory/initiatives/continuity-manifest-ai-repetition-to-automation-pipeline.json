@@ -59,7 +59,7 @@
     "lane_id": "ai-repetition-to-automation-pipeline",
     "scope_class": "atlas-root-governance",
     "current_checkpoint_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-HANDOFF-HELPER-PACKET-LADDER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
-    "checkpoint_commit": "main@5a7e19480f242df9721ee93f2b8093068599850a",
+    "checkpoint_commit": "main@539b695210e1cbc533400da5dde0b0f24a8fea5d",
     "checkpoint_summary": "The lane moves to 42 percent after the July 7 generic automation candidate packet ladder helper landed as an implementation-backed root surface for the accepted handoff-helper review card. Live helper proof reports schema_version=atlas.automation_candidate_packet_ladder.v1, status=ok, candidate_id=handoff-helper, candidate_repeat_count=120, supporting_receipt_count=120, packet_ladder stage count 5, safe_to_use=true, and focused tests pass 12 cases while preserving tmp-only review-report input/output, docs-only decision refs, no owner mutation, no owner truth, no hidden transcript inference, no _stack dispatch, no platform/deploy access, no execution authority, and no marker-authority output.",
     "governing_receipts": [
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-SURFACE-PASS-52-2026-06-09.md",
