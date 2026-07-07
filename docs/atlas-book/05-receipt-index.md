@@ -1839,6 +1839,7 @@
 - [AI Long-Run Batch Orchestration Post AI Repetition 49 Next-Slice Selection](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-AI-REPETITION-49-NEXT-SLICE-SELECTION-2026-07-07.md)
 - [AI Long-Run Batch Orchestration Marker-Aware Next-Packet Planner Contract Freeze](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-MARKER-AWARE-NEXT-PACKET-PLANNER-CONTRACT-FREEZE-2026-07-07.md)
 - [AI Long-Run Batch Orchestration Marker-Aware Next-Packet Planner First-Implementation Admission](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-MARKER-AWARE-NEXT-PACKET-PLANNER-FIRST-IMPLEMENTATION-ADMISSION-2026-07-07.md)
+- [AI Long-Run Batch Orchestration Marker-Aware Next-Packet Planner Prompt-Pack And Worker Handoff Contract](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-MARKER-AWARE-NEXT-PACKET-PLANNER-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-07.md)
 - [Truth Map And ATLAS Book Root Validation Warning Drift Closeout And Stack Re-Sync](../ops/TRUTH-MAP-AND-ATLAS-BOOK-ROOT-VALIDATION-WARNING-DRIFT-CLOSEOUT-AND-STACK-RESYNC-2026-06-26.md)
 - [Truth Map And ATLAS Book Local Warning Floor Reduction And Stack Re-Sync](../ops/TRUTH-MAP-AND-ATLAS-BOOK-LOCAL-WARNING-FLOOR-REDUCTION-AND-STACK-RESYNC-2026-06-26.md)
 - [Truth Map And ATLAS Book Playbook Dependency Residue Reduction And Stack Re-Sync](../ops/TRUTH-MAP-AND-ATLAS-BOOK-PLAYBOOK-DEPENDENCY-RESIDUE-REDUCTION-AND-STACK-RESYNC-2026-06-26.md)
