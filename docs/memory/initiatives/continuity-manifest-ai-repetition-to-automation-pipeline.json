@@ -80,7 +80,7 @@
     "lane_id": "ai-repetition-to-automation-pipeline",
     "scope_class": "atlas-root-governance",
     "current_checkpoint_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-PROMPT-PACK-CANDIDATE-REVIEW-CONTRACT-FREEZE-2026-07-07.md",
-    "checkpoint_commit": "main@6d560e4d16deb6f4a89703ab8771c79d9e3a86e8",
+    "checkpoint_commit": "main@4c2e230acdc7af8539e0b51ac814eca7885735a7",
     "checkpoint_summary": "The lane remains at 46 percent after the July 7 prompt-pack candidate-review contract freeze. The prompt-pack review card is accepted for bounded packet-ladder design, but no implementation-backed helper adoption, owner truth, _stack dispatch, workflow dispatch, platform/deploy proof, validation verdict, release readiness, execution authority, or marker ratchet is admitted.",
     "governing_receipts": [
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-SURFACE-PASS-52-2026-06-09.md",
