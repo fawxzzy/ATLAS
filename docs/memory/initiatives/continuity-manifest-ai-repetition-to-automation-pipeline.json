@@ -66,7 +66,7 @@
     "lane_id": "ai-repetition-to-automation-pipeline",
     "scope_class": "atlas-root-governance",
     "current_checkpoint_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-VALIDATION-GOVERNANCE-PACKET-LADDER-FIRST-IMPLEMENTATION-ADMISSION-2026-07-07.md",
-    "checkpoint_commit": "main@26e13bf5c72ad3a26498d18f6f6986a1714034cb",
+    "checkpoint_commit": "main@fccc2ad8934bb3a0b27124c450a28db070c02a21",
     "checkpoint_summary": "The lane remains at 43 percent after the July 7 validation-governance first-implementation admission. The existing generic packet-ladder helper is admitted only for advisory validation-governance packet sequencing; specialized validation-governance implementation, worker routing, owner truth, _stack dispatch, platform/deploy proof, execution authority, and marker-authority output remain unadmitted until a prompt-pack and worker handoff contract freezes the exact bounded objective.",
     "governing_receipts": [
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-SURFACE-PASS-52-2026-06-09.md",
