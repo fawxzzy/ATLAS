@@ -69,7 +69,7 @@
     "lane_id": "ai-repetition-to-automation-pipeline",
     "scope_class": "atlas-root-governance",
     "current_checkpoint_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-VALIDATION-GOVERNANCE-PACKET-LADDER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
-    "checkpoint_commit": "main@e02a18deb9cc59e0811016be2e1eaaf645d97ccf",
+    "checkpoint_commit": "main@8a25792d72b29b4c6e6f7d826d1b6615a587dda8",
     "checkpoint_summary": "The lane moves to 44 percent after the July 7 validation-governance packet-ladder worker-cluster reconciliation. The existing generic packet-ladder helper now has live proof against the broader validation-governance candidate family, focused tests pass, and authority remains bounded: no owner mutation, no owner truth, no hidden transcript inference, no _stack dispatch, no platform/deploy access, no execution authority, no validation verdict, no release-readiness claim, and no marker-authority output from the helper.",
     "governing_receipts": [
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-SURFACE-PASS-52-2026-06-09.md",
