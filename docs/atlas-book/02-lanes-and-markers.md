@@ -14,6 +14,7 @@ Read:
 - `Knowledge Capture & Transfer` and `Durable Context Externalization` now stay discoverable through `Closed / Locked Ratchets` plus receipts rather than the live active/open marker display
 - one explicit reusable work item now sits inside this substrate: `ATLAS systems-doc normalization`, meaning owner-repo system truth gets reconciled into restart-friendly Book chapters without duplicating repo-local implementation detail; `Lifeline` is the first concrete example
 - the July 8 final-blocker audit keeps `Inventory & Truth Map` at `99%`: validation is clean, root-blocking dirt is zero, continuity/restart coverage is healthy, and owner lanes are separated, but final closeout still requires broader continuity automation, broader owner-truth adoption proof, or a distinct blocker-clearance class; refreshed inventory now reports advisory owner-lane drift at `visible_dirty_repo_count: 2` / `advisory_dirty_repo_count: 2`
+- the owner-truth adoption proof selector and contract freeze now define the next root-only proof class for this final blocker: future work must implement a helper that proves advisory owner truth can be adopted from admitted read-only surfaces without mutating owner repos or treating Fitness/Mazer as fallback work; no marker movement is admitted until implementation-backed reconciliation lands
 
 ### Execution substrate
 

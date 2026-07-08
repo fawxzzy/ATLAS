@@ -1171,6 +1171,8 @@
 - [Truth Map And Inventory Continuity Coverage Rollup And Ratchet](../ops/TRUTH-MAP-AND-INVENTORY-CONTINUITY-COVERAGE-ROLLUP-AND-RATCHET-2026-06-29.md)
 - [Inventory And Truth Map Unmanaged Owner-Lane Validation Boundary And Zero-Warning Re-Sync](../ops/INVENTORY-AND-TRUTH-MAP-UNMANAGED-OWNER-LANE-VALIDATION-BOUNDARY-AND-ZERO-WARNING-RESYNC-2026-07-07.md)
 - [Inventory And Truth Map Final Blocker Audit And Closeout Eligibility](../ops/INVENTORY-AND-TRUTH-MAP-FINAL-BLOCKER-AUDIT-AND-CLOSEOUT-ELIGIBILITY-2026-07-08.md)
+- [Inventory And Truth Map Owner-Truth Adoption Proof Selection](../ops/INVENTORY-AND-TRUTH-MAP-OWNER-TRUTH-ADOPTION-PROOF-SELECTION-2026-07-08.md)
+- [Inventory And Truth Map Owner-Truth Adoption Proof Contract Freeze](../ops/INVENTORY-AND-TRUTH-MAP-OWNER-TRUTH-ADOPTION-PROOF-CONTRACT-FREEZE-2026-07-08.md)
 
 ## Knowledge Capture & Transfer
 

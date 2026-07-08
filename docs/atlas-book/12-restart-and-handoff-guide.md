@@ -158,6 +158,8 @@ The July 8 audit proves validation is clean, root-blocking dirty count is zero, 
 
 Do not convert that advisory owner-lane drift into ATLAS-root fallback work. Fitness and Mazer remain separate owner lanes unless the operator explicitly selects an owner-lane packet.
 
+The next exact Inventory package is now `Inventory & Truth Map owner-truth adoption proof first-implementation admission`, based on `docs/ops/INVENTORY-AND-TRUTH-MAP-OWNER-TRUTH-ADOPTION-PROOF-SELECTION-2026-07-08.md` and `docs/ops/INVENTORY-AND-TRUTH-MAP-OWNER-TRUTH-ADOPTION-PROOF-CONTRACT-FREEZE-2026-07-08.md`. That future packet may admit `ops/atlas/owner_truth_adoption_proof.py` plus `tests/test_atlas_owner_truth_adoption_proof.py`, but must still deny owner-repo mutation, protected paths, deploy/platform work, secrets, and marker movement without reconciliation proof.
+
 ## Where The Marker Table Lives
 
 The durable book-local marker table lives in:
