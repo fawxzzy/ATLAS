@@ -336,6 +336,7 @@
 - [Cortex Readiness Second Advisory Substrate Consumption First-Implementation Admission](../ops/CORTEX-READINESS-SECOND-ADVISORY-SUBSTRATE-CONSUMPTION-FIRST-IMPLEMENTATION-ADMISSION-2026-07-08.md)
 - [Cortex Readiness Second Advisory Substrate Consumption Prompt-Pack And Worker Handoff Contract](../ops/CORTEX-READINESS-SECOND-ADVISORY-SUBSTRATE-CONSUMPTION-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-08.md)
 - [Cortex Readiness Second Advisory Substrate Consumption Implementation-Readiness Closeout And Worker Routing](../ops/CORTEX-READINESS-SECOND-ADVISORY-SUBSTRATE-CONSUMPTION-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-08.md)
+- [Cortex Readiness Second Advisory Substrate Consumption First-Implementation Worker Cluster Reconciliation](../ops/CORTEX-READINESS-SECOND-ADVISORY-SUBSTRATE-CONSUMPTION-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-08.md)
 - [Cortex Readiness Continuity Manifest Seed And Active Continuity Widening](../ops/CORTEX-READINESS-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md)
 - [Open Marker Manifest Coverage Closeout And Active Continuity Lane Ratchet](../ops/OPEN-MARKER-MANIFEST-COVERAGE-CLOSEOUT-AND-ACTIVE-CONTINUITY-LANE-RATCHET-2026-06-19.md)
 - [Open Marker Restart Index Closeout And Active Continuity Lane Ratchet](../ops/OPEN-MARKER-RESTART-INDEX-CLOSEOUT-AND-ACTIVE-CONTINUITY-LANE-RATCHET-2026-06-19.md)

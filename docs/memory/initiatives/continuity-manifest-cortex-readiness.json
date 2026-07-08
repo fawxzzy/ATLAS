@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-06-19T07:00:00Z",
-  "updated_at": "2026-07-08T02:00:00Z",
+  "updated_at": "2026-07-08T23:52:10Z",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -41,6 +41,7 @@
     "docs/ops/CORTEX-READINESS-SECOND-ADVISORY-SUBSTRATE-CONSUMPTION-FIRST-IMPLEMENTATION-ADMISSION-2026-07-08.md",
     "docs/ops/CORTEX-READINESS-SECOND-ADVISORY-SUBSTRATE-CONSUMPTION-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-08.md",
     "docs/ops/CORTEX-READINESS-SECOND-ADVISORY-SUBSTRATE-CONSUMPTION-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-08.md",
+    "docs/ops/CORTEX-READINESS-SECOND-ADVISORY-SUBSTRATE-CONSUMPTION-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-08.md",
     "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-CORTEX-HELD-ROOT-PROJECTION-CLEANUP-2026-06-28.md",
     "docs/ops/ATLAS-ROOT-VALIDATION-WARNING-FLOOR-AND-LIVE-MAZER-LOCK-TRUTH-RESYNC-2026-06-28.md",
     "docs/ops/ATLAS-ROOT-ZERO-WARNING-FLOOR-AFTER-MAZER-GENERATED-STATE-CLEANUP-RESYNC-2026-06-28.md",
@@ -55,9 +56,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "cortex-readiness",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/CORTEX-READINESS-SECOND-ADVISORY-SUBSTRATE-CONSUMPTION-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-08.md",
-    "checkpoint_commit": "main@97d8f33e",
-    "checkpoint_summary": "The lane remains at 45 percent after the post-Sandbox selector, second advisory substrate contract freeze, first-implementation admission, prompt-pack, and implementation-readiness closeout. The future helper is routed as ops/cortex/second_advisory_substrate_consumption.py with tests/test_cortex_second_advisory_substrate_consumption.py; it may consume only explicit root-owned second advisory substrate, emit deterministic advisory JSON, preserve all authority denials, and write only to safe tmp outputs when explicitly requested. No worker is implemented and no marker moves; the next exact packet is Cortex Readiness second advisory substrate consumption first-implementation worker packet 1.",
+    "current_checkpoint_receipt": "docs/ops/CORTEX-READINESS-SECOND-ADVISORY-SUBSTRATE-CONSUMPTION-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-08.md",
+    "checkpoint_commit": "main@fb64568b",
+    "checkpoint_summary": "The lane moves to 46 percent after the second advisory substrate consumer lands as ops/cortex/second_advisory_substrate_consumption.py with tests/test_cortex_second_advisory_substrate_consumption.py. Focused proof, live Cortex manifest smoke, existing Cortex regression proof, queue/selector/continuity proof, and stack validation all passed; the helper remains advisory-only, preserves all authority denials, rejects owner/protected/deploy/secret/transcript/session paths, and writes only to safe tmp JSON outputs when explicitly requested. No immediate Cortex Readiness same-lane packet remains open from this reconciliation alone.",
     "governing_receipts": [
       "docs/ops/CORTEX-READINESS-MARKER-CHECKPOINT-SHADOW-CONSUMPTION-PASS-1-2026-06-01.md",
       "docs/ops/CORTEX-READINESS-RECEIPT-DOCTRINE-DRAFT-SHADOW-CONSUMPTION-PASS-2-2026-06-01.md",
@@ -79,6 +80,7 @@
       "docs/ops/CORTEX-READINESS-SECOND-ADVISORY-SUBSTRATE-CONSUMPTION-FIRST-IMPLEMENTATION-ADMISSION-2026-07-08.md",
       "docs/ops/CORTEX-READINESS-SECOND-ADVISORY-SUBSTRATE-CONSUMPTION-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-08.md",
       "docs/ops/CORTEX-READINESS-SECOND-ADVISORY-SUBSTRATE-CONSUMPTION-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-08.md",
+      "docs/ops/CORTEX-READINESS-SECOND-ADVISORY-SUBSTRATE-CONSUMPTION-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-08.md",
       "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-CORTEX-HELD-ROOT-PROJECTION-CLEANUP-2026-06-28.md",
       "docs/ops/ATLAS-ROOT-VALIDATION-WARNING-FLOOR-AND-LIVE-MAZER-LOCK-TRUTH-RESYNC-2026-06-28.md",
       "docs/ops/ATLAS-ROOT-ZERO-WARNING-FLOOR-AFTER-MAZER-GENERATED-STATE-CLEANUP-RESYNC-2026-06-28.md",
@@ -143,12 +145,24 @@
         "role": "docs-only implementation-readiness closeout deciding the second advisory substrate consumer is implementation-ready, routing exactly one worker packet, and preserving no worker implementation or marker movement in the readiness packet"
       },
       {
+        "path": "docs/ops/CORTEX-READINESS-SECOND-ADVISORY-SUBSTRATE-CONSUMPTION-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-08.md",
+        "role": "implementation-backed reconciliation proving the second advisory substrate consumer helper, focused tests, live Cortex manifest smoke, regression proof, validation, and the 45-to-46 percent marker ratchet"
+      },
+      {
         "path": "ops/cortex/authority_safe_handoff_consumption.py",
         "role": "root-owned read-only helper that consumes an explicit authority-safe handoff JSON payload as advisory Cortex substrate only"
       },
       {
         "path": "tests/test_cortex_authority_safe_handoff_consumption.py",
         "role": "focused proof suite for schema validation, authority denial preservation, path guards, no-write default behavior, explicit safe output, validation gating, and deterministic JSON ordering"
+      },
+      {
+        "path": "ops/cortex/second_advisory_substrate_consumption.py",
+        "role": "root-owned read-only helper that consumes admitted second advisory substrate refs as advisory Cortex context only"
+      },
+      {
+        "path": "tests/test_cortex_second_advisory_substrate_consumption.py",
+        "role": "focused proof suite for admitted source classification, path guards, default no-write behavior, explicit safe output, validation gating, deterministic JSON ordering, and authority-denial preservation"
       },
       {
         "path": "docs/ops/TRUTH-MAP-AND-ATLAS-BOOK-CORTEX-HELD-ROOT-PROJECTION-CLEANUP-2026-06-28.md",
@@ -224,7 +238,7 @@
       },
       {
         "item": "higher marker movement above the current 45 percent advisory consumption threshold",
-        "requirement": "blocked until the admitted second advisory substrate consumer is implementation-backed, broader live read-model adoption lands, fresher runtime reconciliation changes operator reality, or distinct authority widening lands"
+        "requirement": "blocked until a distinct third authority-false Cortex consumer class lands, broader live read-model adoption lands, fresher runtime reconciliation changes operator reality, or distinct authority widening lands"
       },
       {
         "item": "continuing this lane after the held-root resync without a new distinct drift class",
@@ -237,19 +251,19 @@
     ],
     "next_package_ladder": [
       {
-        "package": "Cortex Readiness second advisory substrate consumption first-implementation worker packet 1",
-        "mode": "implement one bounded second advisory substrate consumer helper and focused test file",
-        "reason": "the post-Sandbox selector, contract freeze, first-implementation admission, prompt-pack, and implementation-readiness closeout now define and route the second consumer family; marker movement remains blocked until the implementation-backed helper and focused tests prove safe advisory consumption"
+        "package": "No immediate Cortex Readiness same-lane packet",
+        "mode": "held after second advisory substrate consumer worker-cluster reconciliation",
+        "reason": "the second authority-false Cortex advisory substrate consumer helper, focused tests, live manifest smoke, regression proof, and validation are landed and reconciled; further same-lane movement requires a distinct third consumer class, real runtime/read-model drift, or broader governed runtime adoption proof rather than continuation by adjacency"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/CORTEX-READINESS-SECOND-ADVISORY-SUBSTRATE-CONSUMPTION-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-08.md",
-    "freshness_checked_at": "2026-07-08T02:00:00Z",
-    "freshness_basis": "The manifest now matches the current 45 percent Cortex posture after the post-Sandbox next-slice selector, second advisory substrate consumption contract freeze, first-implementation admission, prompt-pack, and implementation-readiness closeout. Sandbox remains held at 99 percent, Cortex has a routed second authority-false consumer helper and frozen worker touch surface, no implementation has landed yet, and the next exact packet is Cortex Readiness second advisory substrate consumption first-implementation worker packet 1.",
+    "freshness_checked_receipt": "docs/ops/CORTEX-READINESS-SECOND-ADVISORY-SUBSTRATE-CONSUMPTION-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-08.md",
+    "freshness_checked_at": "2026-07-08T23:52:10Z",
+    "freshness_basis": "The manifest now matches the current 46 percent Cortex posture after the second advisory substrate consumer implementation landed and reconciled. Sandbox remains held at 99 percent, Cortex has a second authority-false consumer helper with focused tests and live manifest smoke proof, no execution or owner-truth authority is granted, and no immediate Cortex Readiness same-lane packet remains open.",
     "marker_posture": [
       {
         "marker": "Cortex Readiness",
-        "percent": 45,
+        "percent": 46,
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ]
