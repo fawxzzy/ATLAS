@@ -1892,6 +1892,7 @@
 - [Sandbox Simulation Readiness Post-Local-Only First Validator Deploy Execution Admission Boundary Next-Slice Selection](../ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-DEPLOY-EXECUTION-ADMISSION-BOUNDARY-NEXT-SLICE-SELECTION-2026-06-27.md)
 - [Sandbox Simulation Readiness Local-Only First Validator Broader Runtime Assertions Admission Boundary Contract Freeze](../ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-FIRST-VALIDATOR-BROADER-RUNTIME-ASSERTIONS-ADMISSION-BOUNDARY-CONTRACT-FREEZE-2026-06-27.md)
 - [Sandbox Simulation Readiness Post-Local-Only First Validator Broader Runtime Assertions Admission Boundary Hold Or Top-Level Lane Reselection](../ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-BROADER-RUNTIME-ASSERTIONS-ADMISSION-BOUNDARY-HOLD-OR-TOP-LEVEL-LANE-RESELECTION-2026-06-27.md)
+- [Sandbox Simulation Readiness Final Blocker Audit And Closeout Eligibility](../ops/SANDBOX-SIMULATION-READINESS-FINAL-BLOCKER-AUDIT-AND-CLOSEOUT-ELIGIBILITY-2026-07-08.md)
 - [Root-Bounded Lane Selection After Sandbox Simulation Readiness Broader-Runtime-Assertions Hold Closeout](../ops/ROOT-BOUNDED-LANE-SELECTION-AFTER-SANDBOX-SIMULATION-READINESS-BROADER-RUNTIME-ASSERTIONS-HOLD-CLOSEOUT-2026-06-27.md)
 - [Stack Lock Mazer Dirty-State Refresh](../ops/STACK-LOCK-MAZER-DIRTY-STATE-REFRESH-2026-06-27.md)
 - [Stack Lock Mazer Main Clean Re-Sync](../ops/STACK-LOCK-MAZER-MAIN-CLEAN-RESYNC-2026-06-27.md)
