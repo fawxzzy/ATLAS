@@ -48,6 +48,14 @@ Read:
 - naming is now a closed ratchet, and dependency untangling is now also a closed ratchet because the remaining cross-repo seams are explicit retained boundaries rather than hidden mixed-runtime coupling
 - local path truth and remote-name truth are durable enough that the next honest packets must be bounded dependency or contract work, not naming replay
 
+### Owner-lane advisory snapshot
+
+Read:
+
+- Mazer is production-closed for the current mechanics/mobile scope at owner commit `9b4d4157` on branch `codex/player-goal-default-colors`; production alias is `https://fawxzzy-mazer.vercel.app`.
+- The owner-lane proof spine is `npm run test`, `npm run verify`, production `visual:ui-surfaces`, and Vercel deployment/log inspection. The latest root projection receipt is `docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-MAZER-PRODUCTION-CLOSEOUT-RESYNC-2026-07-08.md`.
+- This does not add Mazer to root validation or stack-lock inclusion. Future rooms, hazards, enemies, timed pressure, path/trail presets, or native shell work should open as new Mazer owner scope.
+
 ## Active Front-Page Marker Table
 
 - Inventory & Truth Map: `99%`

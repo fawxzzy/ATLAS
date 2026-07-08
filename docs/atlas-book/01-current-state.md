@@ -8,6 +8,7 @@ Current routing posture:
 
 - ATLAS root owns coordination, receipts, marker truth, root-owned read models, and stack governance only.
 - Fitness app work and Mazer game work are separate unmanaged owner lanes. They remain visible in inventory metadata, but root validation no longer scans or mutates their internals, and their dirtiness is advisory unless a separately scoped owner-proof packet explicitly admits it.
+- Mazer's current mechanics/mobile owner scope is production-closed at owner commit `9b4d4157` on branch `codex/player-goal-default-colors`, with production alias `https://fawxzzy-mazer.vercel.app` and production visual proof at `tmp/captures/mazer-ui-surfaces/2026-07-08T02-54-39-566Z/report.md`. ATLAS records this as owner-lane projection truth only; implementation truth remains in `repos/mazer`.
 - The current active ATLAS-side lane remains `Sandbox Simulation Readiness`, held at `99%` with `No immediate Sandbox Simulation Readiness same-lane packet`.
 - The latest executed ATLAS marker movement is `Playbook Everywhere + Cortex Interface: 30% -> 40%`, backed by `docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-AUTHORITY-SAFE-CORTEX-INTERFACE-WIDENING-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-06.md`.
 - The refreshed Cortex worker-prompt proof remains `read_only_advisory`: it consumes explicit root-owned Playbook/Cortex source refs, reports clean publication posture, preserves owner-repo avoidance, and keeps final receipt authority outside Cortex.
