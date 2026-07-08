@@ -11,8 +11,8 @@
   },
   "repo_count": 12,
   "dirty_repo_count": 0,
-  "visible_dirty_repo_count": 1,
-  "advisory_dirty_repo_count": 1,
+  "visible_dirty_repo_count": 2,
+  "advisory_dirty_repo_count": 2,
   "release_eligible_count": 4,
   "repos": [
     {
@@ -227,13 +227,13 @@
       "status": "unmanaged",
       "remote_url": "https://github.com/fawxzzy/mazer.git",
       "pinned_commit": null,
-      "current_commit": "9b4d4157d89301916ff50921367e2ee777b6be2f",
+      "current_commit": "f24dc53d05c58a32d4d36e93aeb6d96acb09bdbd",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
       "current_ref": "codex/player-goal-default-colors",
       "branch": "codex/player-goal-default-colors",
-      "dirty": false,
+      "dirty": true,
       "root_blocking": false,
       "dirty_blocks_root": false,
       "trust_class": "adjacent",
@@ -337,7 +337,7 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "e055970217c03601d4c1f2264f7298358e2d8197",
+      "current_commit": "b2fa1f456e50c1af86cb3448d1439da6d8dbe2a5",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
@@ -556,5 +556,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:3459813a827d6d588b7a35c8ca3e347151af81de45999135a23e5aa084163928"
+  "content_digest": "sha256:106a93e6848ee119cce3af04e113a9c2ba3856fb588bbac1731f34475e4063df"
 }

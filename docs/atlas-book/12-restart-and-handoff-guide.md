@@ -150,6 +150,14 @@ python ops/atlas/codex_hour_block_queue_prompt.py --json --output tmp/codex-hour
 
 If the helper reports no safe planner candidates and selector posture is `no_immediate_root_packet`, do not invent marker movement. Run only an admitted held-lane review/unlock helper or close out.
 
+## Current Inventory & Truth Map Final-Blocker Posture
+
+`Inventory & Truth Map` remains at `99%` after `docs/ops/INVENTORY-AND-TRUTH-MAP-FINAL-BLOCKER-AUDIT-AND-CLOSEOUT-ELIGIBILITY-2026-07-08.md`.
+
+The July 8 audit proves validation is clean, root-blocking dirty count is zero, continuity health is clean, restart index is complete for the current eligible open marker set, projection freshness is safe, and owner lanes are separated. It does not close the final 1% because the live inventory still has advisory owner-lane drift and no broader continuity automation, broader owner-truth adoption proof, or distinct blocker-clearance class landed in that packet.
+
+Do not convert that advisory owner-lane drift into ATLAS-root fallback work. Fitness and Mazer remain separate owner lanes unless the operator explicitly selects an owner-lane packet.
+
 ## Where The Marker Table Lives
 
 The durable book-local marker table lives in:

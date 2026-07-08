@@ -13,6 +13,7 @@ Read:
 - continuity is still not universal across every future lane, but the current KCT and DCE continuity family is now closed for its admitted scope because bootstrap, trusted repo-context, run/session, memory, knowledge, and promote seams all preserve doctrine identity directly
 - `Knowledge Capture & Transfer` and `Durable Context Externalization` now stay discoverable through `Closed / Locked Ratchets` plus receipts rather than the live active/open marker display
 - one explicit reusable work item now sits inside this substrate: `ATLAS systems-doc normalization`, meaning owner-repo system truth gets reconciled into restart-friendly Book chapters without duplicating repo-local implementation detail; `Lifeline` is the first concrete example
+- the July 8 final-blocker audit keeps `Inventory & Truth Map` at `99%`: validation is clean, root-blocking dirt is zero, continuity/restart coverage is healthy, and owner lanes are separated, but final closeout still requires broader continuity automation, broader owner-truth adoption proof, or a distinct blocker-clearance class; refreshed inventory now reports advisory owner-lane drift at `visible_dirty_repo_count: 2` / `advisory_dirty_repo_count: 2`
 
 ### Execution substrate
 
@@ -52,7 +53,7 @@ Read:
 
 Read:
 
-- Mazer is production-closed for the current mechanics/mobile scope at owner commit `9b4d4157` on branch `codex/player-goal-default-colors`; production alias is `https://fawxzzy-mazer.vercel.app`.
+- Mazer remains separate owner-lane work. Its prior mechanics/mobile production closeout remains historical owner proof, while the latest refreshed ATLAS inventory reports `repos/mazer` as advisory dirty at `f24dc53d05c58a32d4d36e93aeb6d96acb09bdbd` on `codex/player-goal-default-colors`; this is not root-blocking and does not authorize ATLAS-root mutation of Mazer.
 - The owner-lane proof spine is `npm run test`, `npm run verify`, production `visual:ui-surfaces`, and Vercel deployment/log inspection. The latest root projection receipt is `docs/ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-MAZER-PRODUCTION-CLOSEOUT-RESYNC-2026-07-08.md`.
 - This does not add Mazer to root validation or stack-lock inclusion. Future rooms, hazards, enemies, timed pressure, path/trail presets, or native shell work should open as new Mazer owner scope.
 

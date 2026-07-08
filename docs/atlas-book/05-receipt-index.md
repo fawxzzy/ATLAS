@@ -1169,6 +1169,8 @@
 - [Inventory And Truth Map June 18 And 19 Closeout Cluster Canonical Placement Pass 10](../ops/INVENTORY-AND-TRUTH-MAP-JUNE-18-AND-19-CLOSEOUT-CLUSTER-CANONICAL-PLACEMENT-PASS-10-2026-06-19.md)
 - [Inventory And Truth Map And ATLAS Book Live Owner Drift Re-Sync](../ops/INVENTORY-AND-TRUTH-MAP-AND-ATLAS-BOOK-LIVE-OWNER-DRIFT-RESYNC-2026-06-29.md)
 - [Truth Map And Inventory Continuity Coverage Rollup And Ratchet](../ops/TRUTH-MAP-AND-INVENTORY-CONTINUITY-COVERAGE-ROLLUP-AND-RATCHET-2026-06-29.md)
+- [Inventory And Truth Map Unmanaged Owner-Lane Validation Boundary And Zero-Warning Re-Sync](../ops/INVENTORY-AND-TRUTH-MAP-UNMANAGED-OWNER-LANE-VALIDATION-BOUNDARY-AND-ZERO-WARNING-RESYNC-2026-07-07.md)
+- [Inventory And Truth Map Final Blocker Audit And Closeout Eligibility](../ops/INVENTORY-AND-TRUTH-MAP-FINAL-BLOCKER-AUDIT-AND-CLOSEOUT-ELIGIBILITY-2026-07-08.md)
 
 ## Knowledge Capture & Transfer
 

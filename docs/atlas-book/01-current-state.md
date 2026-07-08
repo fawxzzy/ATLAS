@@ -2,13 +2,13 @@
 
 ## Snapshot
 
-The stack is currently clean and parity-clean on `main@58f0072a5cf4c7478b17bdaecccff63280da0676`: root validation is clean at `critical=0 error=0 warning=0 info=0`, published inventory reports `dirty_repo_count: 0`, the root worktree is clean, and the selector still reports no immediate ATLAS-root packet.
+The stack is currently clean and parity-clean through the July 8 Inventory final-blocker audit lineage. The audit preflight checkpoint was `main@b2fa1f456e50c1af86cb3448d1439da6d8dbe2a5`: root validation is clean at `critical=0 error=0 warning=0 info=0`, refreshed inventory reports `dirty_repo_count: 0`, the root worktree was clean at preflight, and the selector still reports no immediate ATLAS-root packet.
 
 Current routing posture:
 
 - ATLAS root owns coordination, receipts, marker truth, root-owned read models, and stack governance only.
 - Fitness app work and Mazer game work are separate unmanaged owner lanes. They remain visible in inventory metadata, but root validation no longer scans or mutates their internals, and their dirtiness is advisory unless a separately scoped owner-proof packet explicitly admits it.
-- Mazer's current mechanics/mobile owner scope is production-closed at owner commit `9b4d4157` on branch `codex/player-goal-default-colors`, with production alias `https://fawxzzy-mazer.vercel.app` and production visual proof at `tmp/captures/mazer-ui-surfaces/2026-07-08T02-54-39-566Z/report.md`. ATLAS records this as owner-lane projection truth only; implementation truth remains in `repos/mazer`.
+- Mazer's current mechanics/mobile owner scope remains production-closed by its prior owner-lane proof, but the latest refreshed ATLAS inventory now sees `repos/mazer` as advisory dirty on branch `codex/player-goal-default-colors` at `f24dc53d05c58a32d4d36e93aeb6d96acb09bdbd`. ATLAS records this as advisory owner-lane inventory truth only; implementation truth remains in `repos/mazer`.
 - The current active ATLAS-side lane remains `Sandbox Simulation Readiness`, held at `99%` with `No immediate Sandbox Simulation Readiness same-lane packet`.
 - The latest executed ATLAS marker movement is `Playbook Everywhere + Cortex Interface: 30% -> 40%`, backed by `docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-AUTHORITY-SAFE-CORTEX-INTERFACE-WIDENING-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-06.md`.
 - The refreshed Cortex worker-prompt proof remains `read_only_advisory`: it consumes explicit root-owned Playbook/Cortex source refs, reports clean publication posture, preserves owner-repo avoidance, and keeps final receipt authority outside Cortex.

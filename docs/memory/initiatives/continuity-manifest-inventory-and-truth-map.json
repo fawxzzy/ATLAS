@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-05-29T00:00:00Z",
-  "updated_at": "2026-06-29T22:06:35Z",
+  "updated_at": "2026-07-08T00:00:00Z",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -92,7 +92,8 @@
     "ops/atlas/qa/release_gate_packet.py",
     "ops/atlas/qa/github_secret_readiness.py",
     "runtime/atlas/qa/github-secret-readiness.latest.json",
-    "docs/ops/INVENTORY-AND-TRUTH-MAP-UNMANAGED-OWNER-LANE-VALIDATION-BOUNDARY-AND-ZERO-WARNING-RESYNC-2026-07-07.md"
+    "docs/ops/INVENTORY-AND-TRUTH-MAP-UNMANAGED-OWNER-LANE-VALIDATION-BOUNDARY-AND-ZERO-WARNING-RESYNC-2026-07-07.md",
+    "docs/ops/INVENTORY-AND-TRUTH-MAP-FINAL-BLOCKER-AUDIT-AND-CLOSEOUT-ELIGIBILITY-2026-07-08.md"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -100,9 +101,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "inventory-and-truth-map",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/INVENTORY-AND-TRUTH-MAP-UNMANAGED-OWNER-LANE-VALIDATION-BOUNDARY-AND-ZERO-WARNING-RESYNC-2026-07-07.md",
-    "checkpoint_commit": "58f0072a5cf4c7478b17bdaecccff63280da0676",
-    "checkpoint_summary": "The lane still sits at 99 percent after the root-owned unmanaged owner-lane validation boundary and zero-warning resync: ATLAS root now keeps Fitness and Mazer visible as unmanaged owner-lane inventory metadata while excluding their internals from root validation scans and cleanup hooks, published inventory reports `dirty_repo_count: 0`, root validation now reads `critical=0 error=0 warning=0 info=0`, Fitness remains advisory dirty and non-root-blocking, Mazer remains unmanaged and non-root-blocking, initiative continuity health still reads `20 ok / 0 warning / 0 error`, eligible open-marker coverage and restart readiness still read `7 / 7`, maintained manifest restart readiness still reads `20 / 20`, and the structured rollup still reports `pending_review_count: 0`. The marker does not move because this refresh strengthens owner-lane separation and restart truth without adding broader continuity automation or clearing a separately selected blocker family.",
+    "current_checkpoint_receipt": "docs/ops/INVENTORY-AND-TRUTH-MAP-FINAL-BLOCKER-AUDIT-AND-CLOSEOUT-ELIGIBILITY-2026-07-08.md",
+    "checkpoint_commit": "b2fa1f456e50c1af86cb3448d1439da6d8dbe2a5",
+    "checkpoint_summary": "The lane still sits at 99 percent after the final blocker audit and closeout eligibility check: ATLAS root validation reads `critical=0 error=0 warning=0 info=0`, refreshed inventory reports `dirty_repo_count: 0`, refreshed inventory reports advisory owner-lane drift at `visible_dirty_repo_count: 2` and `advisory_dirty_repo_count: 2`, owner lanes remain separated and non-root-blocking, initiative continuity health reads `20 ok / 0 warning / 0 error`, eligible open-marker coverage and restart readiness read `7 / 7`, maintained manifest restart readiness reads `20 / 20`, and the structured rollup reports `pending_review_count: 0`. The marker does not move because final closeout still requires broader continuity automation, broader owner-truth adoption proof, or a distinct blocker-clearance class beyond this root read-model audit.",
     "governing_receipts": [
       "docs/ops/STACK-LANE-0-BASELINE-INVENTORY-2026-05-22.md",
       "docs/ops/STACK-LANE-0-TRUTH-MAP-2026-05-22.md",
@@ -117,6 +118,7 @@
       "docs/ops/INVENTORY-AND-TRUTH-MAP-JUNE-12-CLOSEOUT-CLUSTER-CANONICAL-PLACEMENT-PASS-9-2026-06-12.md",
       "docs/ops/INVENTORY-AND-TRUTH-MAP-JUNE-18-AND-19-CLOSEOUT-CLUSTER-CANONICAL-PLACEMENT-PASS-10-2026-06-19.md",
       "docs/ops/INITIATIVE-CONTINUITY-MANIFEST-HEALTH-WIDENING-AND-ACTIVE-CONTINUITY-LANE-RATCHET-2026-06-19.md",
+      "docs/ops/INVENTORY-AND-TRUTH-MAP-FINAL-BLOCKER-AUDIT-AND-CLOSEOUT-ELIGIBILITY-2026-07-08.md",
       "docs/ops/INITIATIVE-CONTINUITY-MANIFEST-HEALTH-ZERO-WARNING-CLOSEOUT-AND-ACTIVE-CONTINUITY-LANE-RATCHET-2026-06-19.md",
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md",
       "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md",
@@ -354,29 +356,29 @@
     ],
     "blocked_or_gated_work": [
       {
-        "item": "promoting the current Fitness release lane beyond `manual_review`",
-        "requirement": "blocked until the remaining `desktop.chromium.real`, `android.chrome.real`, and `iphone.webkit.real` lanes are completed; the live protected-refresh latest now sits at `manual_review` on clean owner-side head `6ca649b273b4460de55959753fbb8ec3c60e663a` via run `fitness-progression-pr-smoke-20260629T074949197509Z`, all emulated lenses pass, `runtime/atlas/qa/runs/fitness-progression-pr-smoke-20260629T074949197509Z/release-gate.packet-prep.md` now compresses the blocked run into one exact handoff, the ATLAS GitHub Actions blocker is still missing `BROWSERSTACK_USERNAME` and `BROWSERSTACK_ACCESS_KEY`, and `runtime/atlas/qa/github-secret-readiness.latest.json` currently reports `available_secret_count: 0`"
+        "item": "closing `Inventory & Truth Map` at `100%`",
+        "requirement": "blocked until broader continuity automation, broader owner-truth adoption proof, or a distinct blocker-clearance class changes operator reality beyond the current structured continuity rollup and final blocker audit"
       },
       {
-        "item": "broader inventory cleanup or repo-local truth rewrite execution",
-        "requirement": "blocked until a distinct owner-facing or control-plane execution lane is explicitly selected rather than implied by the current docs-only refresh result"
+        "item": "using advisory owner-lane drift as ATLAS-root fallback work",
+        "requirement": "blocked by root scope lock; Fitness and Mazer advisory dirtiness remains non-root-blocking inventory truth unless an owner-lane packet is explicitly selected"
       },
       {
         "item": "higher marker movement above the current refresh-backed ratchet",
-        "requirement": "blocked until continuity automation widens beyond the current structured continuity_coverage rollup plus the combined blocked-run handoff packet, broader proof-backed adoption lands, or a distinct blocker-clearance class changes operator reality again"
+        "requirement": "blocked because refreshed inventory still reports advisory owner-lane drift at `visible_dirty_repo_count: 2` and `advisory_dirty_repo_count: 2`, and this packet did not land a broader automation or proof-adoption surface"
       }
     ],
     "next_package_ladder": [
       {
         "package": "No immediate Inventory & Truth Map docs-only follow-on packet",
-        "mode": "hold-flat after continuity-coverage rollup widening",
-        "reason": "the published inventory and Book-side protected-QA mirrors now match current clean-owner-head / clean-owner-head / latest-published-Atlas-root checkpoint / Trove-preserved / Fitness-manual-review truth, the exact ATLAS GitHub Actions secret blocker is still machine-readably captured through `runtime/atlas/qa/github-secret-readiness.latest.json`, the current blocked run is still compressed into one exact operator handoff at `runtime/atlas/qa/runs/fitness-progression-pr-smoke-20260629T074949197509Z/release-gate.packet-prep.md`, seeded initiative manifest health remains fully clean at 20 of 20, all 7 of 7 eligible open markers are now manifest-backed and restart-ready, and the structured rollup now also reports `pending_review_count: 0`; reopen only with distinct restart-truth drift, owner-side blocker conversion, owner-truth widening, or broader continuity automation than the current structured rollup plus blocked-run packet surface"
+        "mode": "hold-flat after final blocker audit",
+        "reason": "the final blocker audit proves validation is clean, root-blocking dirty count is zero, owner-lane drift is advisory and separated, initiative manifest health is clean at 20 of 20, all 7 of 7 eligible open markers are restart-ready, and the structured rollup reports `pending_review_count: 0`; the marker remains at 99 because final closeout still requires broader continuity automation, broader owner-truth adoption proof, or a distinct blocker-clearance class beyond this root read-model audit"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/INVENTORY-AND-TRUTH-MAP-UNMANAGED-OWNER-LANE-VALIDATION-BOUNDARY-AND-ZERO-WARNING-RESYNC-2026-07-07.md",
-    "freshness_checked_at": "2026-07-07T00:00:00Z",
-    "freshness_basis": "the current checkpoint, marker posture, lane-state projection, blocked-work posture, and next-package posture now match the root-owned unmanaged owner-lane validation boundary and zero-warning resync: published inventory reports dirty_repo_count 0 while preserving unmanaged owner-lane visibility, Fitness advisory dirtiness remains non-root-blocking, Mazer remains unmanaged and non-root-blocking, root validation reads critical=0 / error=0 / warning=0 / info=0, root validation no longer scans or mutates unmanaged owner repo internals, initiative manifest health remains 20 ok / 0 warning / 0 error, eligible open-marker coverage plus restart index remain 7 of 7 manifest-backed and restart-ready, maintained-manifest restart index remains 20 of 20, and the structured rollup still reports pending_review_count 0. The marker remains at 99 percent because this refresh clears root validation noise and strengthens owner-lane separation but does not add broader continuity automation or clear a separately selected blocker family.",
+    "freshness_checked_receipt": "docs/ops/INVENTORY-AND-TRUTH-MAP-FINAL-BLOCKER-AUDIT-AND-CLOSEOUT-ELIGIBILITY-2026-07-08.md",
+    "freshness_checked_at": "2026-07-08T00:00:00Z",
+    "freshness_basis": "the current checkpoint, marker posture, lane-state projection, blocked-work posture, and next-package posture now match the final blocker audit: published inventory reports dirty_repo_count 0 while preserving advisory owner-lane visibility, Fitness and Mazer advisory dirtiness remain non-root-blocking, root validation reads critical=0 / error=0 / warning=0 / info=0, initiative manifest health remains 20 ok / 0 warning / 0 error, eligible open-marker coverage plus restart index remain 7 of 7 manifest-backed and restart-ready, maintained-manifest restart index remains 20 of 20, and the structured rollup still reports pending_review_count 0. The marker remains at 99 percent because this audit did not add broader continuity automation, broader owner-truth adoption proof, or a distinct blocker-clearance class.",
     "marker_posture": [
       {
         "marker": "Inventory & Truth Map",
