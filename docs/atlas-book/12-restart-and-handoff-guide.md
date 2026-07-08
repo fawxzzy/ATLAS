@@ -136,7 +136,7 @@ The next exact package is `No immediate AI Work Session Stability & Auto-Sync Lo
 
 ## Required Hour-Block Queue Prompt
 
-The supporting marker `AI Repetition-to-Automation Pipeline` now sits at `53%`; the ratchet proof is `docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-HELD-LANE-PROMPT-SUPPRESSION-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-08.md`.
+The supporting marker `AI Repetition-to-Automation Pipeline` now sits at `54%`; the ratchet proof is `docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-HELD-LANE-SUPPRESSION-QUEUE-INTEGRATION-RECONCILIATION-2026-07-08.md`.
 
 The latest docs-only selector receipt is `docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-FRESH-CANDIDATE-FAMILY-SELECTION-2026-07-08.md`. It selects `held-lane prompt suppression` as the next candidate family after repeated autonomous prompts reopened a held root state. The marker stays `52%`.
 
@@ -150,7 +150,9 @@ The latest docs-only implementation-readiness closeout is `docs/ops/AI-REPETITIO
 
 The latest implementation-backed worker-cluster reconciliation is `docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-HELD-LANE-PROMPT-SUPPRESSION-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-08.md`. It reconciles worker commit `9f79f93a`, proves the frozen held-lane prompt suppression CLI/JSON/status/decision/exit/path contract, blocks owner-lane fallback plus Fitness/Mazer fallback, rejects protected/deploy/secret continuations, and moves the marker to `53%`. The next exact packet is `No immediate AI Repetition-to-Automation Pipeline same-lane packet`.
 
-Use `ops/atlas/codex_hour_block_queue_prompt.py` when an operator asks for a long autonomous ATLAS root work block without a fresh exact packet. The helper generates a bounded queue prompt from live selector and planner state, includes the mandatory baseline commands, excludes Fitness, Mazer, owner repos, workflow dispatch, deploy, secrets, and protected surfaces, and keeps marker movement receipt-backed.
+The latest implementation-backed queue integration reconciliation is `docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-HELD-LANE-SUPPRESSION-QUEUE-INTEGRATION-RECONCILIATION-2026-07-08.md`. It reconciles worker commit `0b1d2aad`, integrates the suppression helper into `ops/atlas/codex_hour_block_queue_prompt.py`, exposes suppression fields in queue JSON, renders `ATLAS ROOT HELD - DO NOT CONTINUE GENERICALLY` for clean held roots, preserves exact-packet, planner-candidate, operator-selected, validation-cleanup, and worker-reconciliation bypasses, blocks Fitness/Mazer fallback, and moves the marker to `54%`. The next exact packet remains `No immediate AI Repetition-to-Automation Pipeline same-lane packet`.
+
+Use `ops/atlas/codex_hour_block_queue_prompt.py` when an operator asks for a long autonomous ATLAS root work block without a fresh exact packet. The helper generates a bounded queue prompt from live selector and planner state, includes suppression fields and the mandatory baseline commands, excludes Fitness, Mazer, owner repos, workflow dispatch, deploy, secrets, and protected surfaces, suppresses generic continuation in clean held root states, and keeps marker movement receipt-backed.
 
 Every generated ATLAS root hour-block prompt must carry a `SCOPE LOCK` header. The lock means the packet is ATLAS-root-only: Fitness and Mazer may be mentioned only as read-only advisory owner-lane inventory status, must not be selected as fallback lanes, and must not be mutated or discussed as active product/game work unless the operator explicitly selects a Fitness or Mazer owner-lane packet. If selector/planner state is held and no root packet is available, close out the held root state instead of switching into owner-repo work.
 
