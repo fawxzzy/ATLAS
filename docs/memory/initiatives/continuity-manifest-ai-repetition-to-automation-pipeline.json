@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-06-19T05:00:00Z",
-  "updated_at": "2026-07-07T22:20:00Z",
+  "updated_at": "2026-07-07T23:10:00Z",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -88,7 +88,8 @@
     "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-REUSABLE-WORKFLOW-PROOF-CONTRACT-CANDIDATE-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-07.md",
     "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-REUSABLE-WORKFLOW-PROOF-CONTRACT-CANDIDATE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
     "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-PROOF-CONTRACT-CANDIDATE-CONTRACT-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
-    "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-PROOF-CONTRACT-PAYLOAD-VALIDATOR-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md"
+    "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-PROOF-CONTRACT-PAYLOAD-VALIDATOR-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
+    "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CODEX-HOUR-BLOCK-QUEUE-PROMPT-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -96,9 +97,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "ai-repetition-to-automation-pipeline",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-PROOF-CONTRACT-PAYLOAD-VALIDATOR-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
-    "checkpoint_commit": "3fec398a0f1387e5bba99aa08d9f66e34d948de7",
-    "checkpoint_summary": "The lane moves to 51 percent after the proof-contract candidate chain gained a payload validator behind the renderer. ops/atlas/proof_contract_payload_validator.py plus tests/test_atlas_proof_contract_payload_validator.py landed, live output reports status=valid and safe_to_use=true for artifact-backed-proof-contract and manual-protected-proof-contract, focused validator/renderer/candidate tests pass 23/23, the broader AI Repetition helper suite passes 65/65, and no owner mutation, workflow edit, workflow dispatch, secret-value access, deploy action, final receipt authority, release-readiness claim, validation-verdict authority, or marker-output authority was widened. The exact next packet is No immediate AI Repetition-to-Automation Pipeline same-lane packet.",
+    "current_checkpoint_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CODEX-HOUR-BLOCK-QUEUE-PROMPT-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
+    "checkpoint_commit": "PENDING",
+    "checkpoint_summary": "The lane moves to 52 percent after the repeated autonomous-mode hour-block prompt pattern became a reusable root-owned queue prompt helper. ops/atlas/codex_hour_block_queue_prompt.py plus tests/test_atlas_codex_hour_block_queue_prompt.py landed, live output reports status=ok, safe_to_use=True, selector operator_action=no_immediate_root_packet, planner safe_candidate_count=0, and prompt_len=4600, focused helper/planner/unlock tests pass 38/38, root validation reports critical=0 error=0 warning=0 info=0, and no owner mutation, Fitness mutation, Mazer mutation, workflow edit, workflow dispatch, secret access, deploy action, protected-surface access, final receipt authority, release-readiness claim, validation-verdict authority, or marker-output authority was widened. The exact next packet is No immediate AI Repetition-to-Automation Pipeline same-lane packet.",
     "governing_receipts": [
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-SURFACE-PASS-52-2026-06-09.md",
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-ACTIVE-LANE-FOLLOW-ON-DISAMBIGUATION-2026-06-17.md",
@@ -167,9 +168,14 @@
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-REUSABLE-WORKFLOW-PROOF-CONTRACT-CANDIDATE-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-07.md",
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-REUSABLE-WORKFLOW-PROOF-CONTRACT-CANDIDATE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-PROOF-CONTRACT-CANDIDATE-CONTRACT-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
-      "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-PROOF-CONTRACT-PAYLOAD-VALIDATOR-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md"
+      "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-PROOF-CONTRACT-PAYLOAD-VALIDATOR-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
+      "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CODEX-HOUR-BLOCK-QUEUE-PROMPT-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md"
     ],
     "owner_truth_surfaces": [
+      {
+        "path": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CODEX-HOUR-BLOCK-QUEUE-PROMPT-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
+        "role": "implementation-backed reconciliation for the root-only Codex hour-block queue prompt helper with live selector/planner-aware prompt generation, tmp output guards, focused helper/planner/unlock tests, root validation, and marker movement to 52 percent"
+      },
       {
         "path": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-PROOF-CONTRACT-PAYLOAD-VALIDATOR-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
         "role": "implementation-backed reconciliation for the root-only proof-contract payload validator with live artifact-backed and manual protected validation, focused validator/renderer/candidate tests, broader AI Repetition helper tests, and marker movement to 51 percent"
@@ -490,18 +496,18 @@
     "next_package_ladder": [
       {
         "package": "No immediate AI Repetition-to-Automation Pipeline same-lane packet",
-        "mode": "hold-flat after proof-contract payload validator reconciliation",
-        "reason": "the proof-contract payload validator landed and reconciled with implementation-backed proof; future movement requires a separately selected candidate family, broader adoption, or another implementation-backed widening packet"
+        "mode": "hold-flat after Codex hour-block queue prompt reconciliation",
+        "reason": "the hour-block queue prompt helper landed and reconciled with implementation-backed proof; future movement requires a separately selected candidate family, broader adoption of the queue prompt surface, or another implementation-backed root helper"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-PROOF-CONTRACT-PAYLOAD-VALIDATOR-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
+    "freshness_checked_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CODEX-HOUR-BLOCK-QUEUE-PROMPT-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
     "freshness_checked_at": "2026-07-07T00:00:00Z",
-    "freshness_basis": "the manifest now matches the 51 percent AI repetition posture after the proof-contract payload validator implementation-backed worker reconciliation. The lane moved because the helper, tests, live JSON proof, and reconciliation receipt landed without widening owner, workflow, secret-value, deploy, final-receipt, release-readiness, validation-verdict, or marker-output authority.",
+    "freshness_basis": "the manifest now matches the 52 percent AI repetition posture after the Codex hour-block queue prompt implementation-backed worker reconciliation. The lane moved because the helper, tests, live JSON and prompt proof, and reconciliation receipt landed without widening owner, Fitness, Mazer, workflow, secret, deploy, protected-surface, final-receipt, release-readiness, validation-verdict, or marker-output authority.",
     "marker_posture": [
       {
         "marker": "AI Repetition-to-Automation Pipeline",
-        "percent": 51,
+        "percent": 52,
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ]

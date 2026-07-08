@@ -134,6 +134,20 @@ The first preflight command now exists as `ops/atlas/ai_work_session_preflight.p
 
 The next exact package is `No immediate AI Work Session Stability & Auto-Sync Loop same-lane packet; root-plus-owner adoption threshold is satisfied and future widening requires a separately scoped adoption or automation packet`.
 
+## Required Hour-Block Queue Prompt
+
+The supporting marker `AI Repetition-to-Automation Pipeline` now sits at `52%`; the ratchet proof is `docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CODEX-HOUR-BLOCK-QUEUE-PROMPT-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md`.
+
+Use `ops/atlas/codex_hour_block_queue_prompt.py` when an operator asks for a long autonomous ATLAS root work block without a fresh exact packet. The helper generates a bounded queue prompt from live selector and planner state, includes the mandatory baseline commands, excludes Fitness, Mazer, owner repos, workflow dispatch, deploy, secrets, and protected surfaces, and keeps marker movement receipt-backed.
+
+Required command:
+
+```powershell
+python ops/atlas/codex_hour_block_queue_prompt.py --json --output tmp/codex-hour-block.latest.json --prompt-output tmp/codex-hour-block.latest.md
+```
+
+If the helper reports no safe planner candidates and selector posture is `no_immediate_root_packet`, do not invent marker movement. Run only an admitted held-lane review/unlock helper or close out.
+
 ## Where The Marker Table Lives
 
 The durable book-local marker table lives in:

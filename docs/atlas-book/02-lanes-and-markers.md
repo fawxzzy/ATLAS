@@ -18,7 +18,7 @@ Read:
 
 - `Playbook Everywhere + Cortex Interface: 40%`
 - `AI Work Session Stability & Auto-Sync Loop: 85%`
-- `AI Repetition-to-Automation Pipeline: 51%`
+- `AI Repetition-to-Automation Pipeline: 52%`
 - `AI Long-Run Batch Orchestration: 69%`
 - `Sandbox Simulation Readiness: 99%`
 
@@ -30,6 +30,7 @@ Read:
 - broader automation and long-run orchestration are still early
 - AI Repetition now has implementation-backed proof for the root-only reusable workflow proof-contract candidate helper: live output reports `status=ok`, `candidate_count=3`, and `safe_to_continue=true`, focused tests pass 7/7, the broader AI Repetition helper suite passes 49/49, and the lane moves to `49%`
 - AI Repetition now has implementation-backed proof for the proof-contract payload validator: live output reports `status=valid` and `safe_to_use=true` for both artifact-backed and manual-protected contracts, focused validator/renderer/candidate tests pass 23/23, the broader AI Repetition helper suite passes 65/65, and the lane moves to `51%`
+- AI Repetition now has implementation-backed proof for the Codex hour-block queue prompt helper: live output reports `status=ok`, `safe_to_use=True`, selector `operator_action=no_immediate_root_packet`, planner `safe_candidate_count=0`, generated prompt length `4600`, focused helper/planner/unlock tests pass 38/38, and the lane moves to `52%`
 - AI Long-Run now has implementation-backed proof for the held-lane unlock matrix validator: live output reports `status=valid`, `matrix_status=advisory_matrix`, `candidate_count=20`, `held_count=20`, `unlockable_count=0`, and `safe_to_use=true`, focused validator/planner/matrix tests pass 32/32, Fitness and Mazer remain separated owner lanes, and the lane moves to `69%`
 
 ### Discord workflow
@@ -50,7 +51,7 @@ Read:
 ## Active Front-Page Marker Table
 
 - Inventory & Truth Map: `99%`
-- AI Repetition-to-Automation Pipeline: `51%`
+- AI Repetition-to-Automation Pipeline: `52%`
 - AI Long-Run Batch Orchestration: `69%`
 - Sandbox Simulation Readiness: `99%`
 
@@ -60,7 +61,7 @@ Read:
 
 - Cortex Readiness: `45%`
 - AI Work Session Stability & Auto-Sync Loop: `85%`
-- AI Repetition-to-Automation Pipeline: `51%`
+- AI Repetition-to-Automation Pipeline: `52%`
 - AI Long-Run Batch Orchestration: `69%`
 - Playbook Everywhere + Cortex Interface: `40%`
 
@@ -256,6 +257,7 @@ Current AI Long-Run closeout read: `AI Long-Run Batch Orchestration` now sits at
 - AI Repetition-to-Automation Pipeline moved to `49%`: the `reusable-workflow-proof-contract` candidate family now has live implementation-backed proof through `ops/atlas/reusable_workflow_proof_contract_candidate.py`, with focused tests passing, broader AI Repetition helper tests passing, deterministic JSON output reporting three candidate classes, and no owner-repo, workflow-edit, workflow-dispatch, secret, deploy, final-receipt, release-readiness, validation-verdict, or marker-output authority widened
 - AI Repetition-to-Automation Pipeline moves to `50%`: the proof-contract candidate chain now has live implementation-backed proof through `ops/atlas/proof_contract_candidate_contract.py`, with focused tests passing, adjacent reusable proof-contract candidate tests passing, live JSON output for `artifact-backed-proof-contract` and `manual-protected-proof-contract`, deterministic advisory contract payloads, secret names only for manual protected proof, and no owner-repo, workflow-edit, workflow-dispatch, secret-value, deploy, final-receipt, release-readiness, validation-verdict, or marker-output authority widened
 - AI Repetition-to-Automation Pipeline moves to `51%`: the proof-contract candidate chain now has live implementation-backed validation through `ops/atlas/proof_contract_payload_validator.py`, with focused validator/renderer/candidate tests passing, broader AI Repetition helper tests passing, live JSON output for `artifact-backed-proof-contract` and `manual-protected-proof-contract` reporting `status=valid` and `safe_to_use=true`, and no owner-repo, workflow-edit, workflow-dispatch, secret-value, deploy, final-receipt, release-readiness, validation-verdict, or marker-output authority widened
+- AI Repetition-to-Automation Pipeline moves to `52%`: the repeated autonomous-mode hour-block queue prompt is now a reusable root-only helper, `ops/atlas/codex_hour_block_queue_prompt.py`, with deterministic selector/planner-aware JSON and prompt output, `tmp/**` output guards, focused helper/planner/unlock tests passing 38/38, live output reporting `status=ok`, `safe_to_use=True`, `operator_action=no_immediate_root_packet`, and `planner_safe=0`, and no owner-repo, workflow-edit, workflow-dispatch, secret, deploy, protected-surface, final-receipt, release-readiness, validation-verdict, or marker-output authority widened
 - AI Long-Run Batch Orchestration moved to `21%`: the lane now has one exact `queue-or-registry batch entry contract`, one exact owner-facing root home, one explicit `none new yet` support decision, one exact first-slice selection in `batch-entry validator`, one exact first-slice admission and proof matrix for that validator, one exact prompt-pack and handoff contract for that same slice, one exact implementation-readiness closeout and worker-routing result, and now one reconciled first validator worker cluster with real executed state change plus immediate proof hardening inside the admitted slice
 - AI Long-Run Batch Orchestration stays intentionally low at `21%`: the worker cluster did not admit queue-home or registry-home semantics, `_stack` execution-home semantics, supervised pilot proof, broader operator adoption, or later-slice widening
 - AI Long-Run Batch Orchestration moved to `22%`: the lane now also has one exact draft-entry scaffold first-implementation admission and proof matrix, one exact scaffold prompt-pack and handoff contract, one exact implementation-readiness closeout and worker-routing result, and one reconciled first draft-entry scaffold worker cluster with real executed state change plus proof for placeholder rendering, full explicit scaffold rendering, non-`proposed` status rejection, optional-field rejection, unsupported-input rejection, and multi-entry fail-closed handling
