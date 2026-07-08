@@ -19,7 +19,7 @@ Read:
 
 - `Playbook Everywhere + Cortex Interface: 40%`
 - `AI Work Session Stability & Auto-Sync Loop: 85%`
-- `AI Repetition-to-Automation Pipeline: 52%`
+- `AI Repetition-to-Automation Pipeline: 53%`
 - `AI Long-Run Batch Orchestration: 69%`
 - `Sandbox Simulation Readiness: 99%`
 
@@ -32,6 +32,7 @@ Read:
 - AI Repetition now has implementation-backed proof for the root-only reusable workflow proof-contract candidate helper: live output reports `status=ok`, `candidate_count=3`, and `safe_to_continue=true`, focused tests pass 7/7, the broader AI Repetition helper suite passes 49/49, and the lane moves to `49%`
 - AI Repetition now has implementation-backed proof for the proof-contract payload validator: live output reports `status=valid` and `safe_to_use=true` for both artifact-backed and manual-protected contracts, focused validator/renderer/candidate tests pass 23/23, the broader AI Repetition helper suite passes 65/65, and the lane moves to `51%`
 - AI Repetition now has implementation-backed proof for the Codex hour-block queue prompt helper: live output reports `status=ok`, `safe_to_use=True`, selector `operator_action=no_immediate_root_packet`, planner `safe_candidate_count=0`, generated prompt length `4600`, focused helper/planner/unlock tests pass 38/38, and the lane moves to `52%`
+- AI Repetition now has implementation-backed proof for the held-lane prompt suppression helper: worker commit `9f79f93a` lands the frozen root-only classifier and test pair, direct tests pass `15/15`, adjacent root regressions and stack validation pass, owner-lane fallback plus Fitness/Mazer fallback are rejected, protected/deploy/secret continuations fail closed, strict suppress exits nonzero, and the lane moves to `53%`
 - AI Long-Run now has implementation-backed proof for the held-lane unlock matrix validator: live output reports `status=valid`, `matrix_status=advisory_matrix`, `candidate_count=20`, `held_count=20`, `unlockable_count=0`, and `safe_to_use=true`, focused validator/planner/matrix tests pass 32/32, Fitness and Mazer remain separated owner lanes, and the lane moves to `69%`
 
 ### Discord workflow
@@ -59,7 +60,7 @@ Read:
 
 ## Active Front-Page Marker Table
 
-- AI Repetition-to-Automation Pipeline: `52%`
+- AI Repetition-to-Automation Pipeline: `53%`
 - AI Long-Run Batch Orchestration: `69%`
 - Sandbox Simulation Readiness: `99%`
 
@@ -69,7 +70,7 @@ Read:
 
 - Cortex Readiness: `45%`
 - AI Work Session Stability & Auto-Sync Loop: `85%`
-- AI Repetition-to-Automation Pipeline: `52%`
+- AI Repetition-to-Automation Pipeline: `53%`
 - AI Long-Run Batch Orchestration: `69%`
 - Playbook Everywhere + Cortex Interface: `40%`
 
