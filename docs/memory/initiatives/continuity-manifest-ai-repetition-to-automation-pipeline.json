@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-06-19T05:00:00Z",
-  "updated_at": "2026-07-07T23:10:00Z",
+  "updated_at": "2026-07-08T00:00:00Z",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -89,7 +89,8 @@
     "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-REUSABLE-WORKFLOW-PROOF-CONTRACT-CANDIDATE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
     "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-PROOF-CONTRACT-CANDIDATE-CONTRACT-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
     "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-PROOF-CONTRACT-PAYLOAD-VALIDATOR-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
-    "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CODEX-HOUR-BLOCK-QUEUE-PROMPT-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md"
+    "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CODEX-HOUR-BLOCK-QUEUE-PROMPT-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
+    "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-FRESH-CANDIDATE-FAMILY-SELECTION-2026-07-08.md"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -97,9 +98,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "ai-repetition-to-automation-pipeline",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CODEX-HOUR-BLOCK-QUEUE-PROMPT-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
-    "checkpoint_commit": "fedeed1dc02c932cbf3f9b1d84bc3d9286e13535",
-    "checkpoint_summary": "The lane moves to 52 percent after the repeated autonomous-mode hour-block prompt pattern became a reusable root-owned queue prompt helper. ops/atlas/codex_hour_block_queue_prompt.py plus tests/test_atlas_codex_hour_block_queue_prompt.py landed, live output reports status=ok, safe_to_use=True, selector operator_action=no_immediate_root_packet, planner safe_candidate_count=0, and prompt_len=4600, focused helper/planner/unlock tests pass 38/38, root validation reports critical=0 error=0 warning=0 info=0, and no owner mutation, Fitness mutation, Mazer mutation, workflow edit, workflow dispatch, secret access, deploy action, protected-surface access, final receipt authority, release-readiness claim, validation-verdict authority, or marker-output authority was widened. The exact next packet is No immediate AI Repetition-to-Automation Pipeline same-lane packet.",
+    "current_checkpoint_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-FRESH-CANDIDATE-FAMILY-SELECTION-2026-07-08.md",
+    "checkpoint_commit": "09855f23faf498385c9e1442dd621d441c662085",
+    "checkpoint_summary": "The lane remains at 52 percent after a docs-only selector packet selected held-lane prompt suppression as the next AI Repetition candidate family. The selection is based on repeated autonomous prompts reopening an ATLAS-root held state where the selector reports operator_action=no_immediate_root_packet, the planner has no selected packet and zero safe candidates, the existing hour-block queue prompt helper is safe, root validation reports critical=0 error=0 warning=0 info=0, continuity and restart coverage are clean, and only advisory owner-lane drift remains. No implementation is admitted and no owner mutation, Fitness mutation, Mazer mutation, workflow edit, workflow dispatch, secret access, deploy action, protected-surface access, final receipt authority, release-readiness claim, validation-verdict authority, or marker-output authority was widened. The exact next packet is AI Repetition-to-Automation Pipeline held-lane prompt suppression contract freeze.",
     "governing_receipts": [
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-SURFACE-PASS-52-2026-06-09.md",
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-ACTIVE-LANE-FOLLOW-ON-DISAMBIGUATION-2026-06-17.md",
@@ -169,12 +170,17 @@
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-REUSABLE-WORKFLOW-PROOF-CONTRACT-CANDIDATE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-PROOF-CONTRACT-CANDIDATE-CONTRACT-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-PROOF-CONTRACT-PAYLOAD-VALIDATOR-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
-      "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CODEX-HOUR-BLOCK-QUEUE-PROMPT-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md"
+      "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CODEX-HOUR-BLOCK-QUEUE-PROMPT-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
+      "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-FRESH-CANDIDATE-FAMILY-SELECTION-2026-07-08.md"
     ],
     "owner_truth_surfaces": [
       {
         "path": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CODEX-HOUR-BLOCK-QUEUE-PROMPT-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
         "role": "implementation-backed reconciliation for the root-only Codex hour-block queue prompt helper with live selector/planner-aware prompt generation, tmp output guards, focused helper/planner/unlock tests, root validation, and marker movement to 52 percent"
+      },
+      {
+        "path": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-FRESH-CANDIDATE-FAMILY-SELECTION-2026-07-08.md",
+        "role": "docs-only selector receipt selecting held-lane prompt suppression as the next AI Repetition candidate family without marker movement"
       },
       {
         "path": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-PROOF-CONTRACT-PAYLOAD-VALIDATOR-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
@@ -491,19 +497,23 @@
       {
         "item": "treating the AI Long-Run fallback as continuation of this lane",
         "requirement": "blocked unless a new exact AI Repetition family is explicitly selected instead of the currently held selector posture"
+      },
+      {
+        "item": "implementing held-lane prompt suppression from selection alone",
+        "requirement": "blocked until the selected candidate family receives a contract freeze, admission, proof matrix, and later implementation-backed reconciliation"
       }
     ],
     "next_package_ladder": [
       {
-        "package": "No immediate AI Repetition-to-Automation Pipeline same-lane packet",
-        "mode": "hold-flat after Codex hour-block queue prompt reconciliation",
-        "reason": "the hour-block queue prompt helper landed and reconciled with implementation-backed proof; future movement requires a separately selected candidate family, broader adoption of the queue prompt surface, or another implementation-backed root helper"
+        "package": "AI Repetition-to-Automation Pipeline held-lane prompt suppression contract freeze",
+        "mode": "docs-only contract freeze after fresh candidate-family selection",
+        "reason": "a distinct repeated prompt-suppression seam is now selected: generic autonomous prompts are reopening an ATLAS-root held state even when selector/planner have no immediate root packet or safe candidates"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CODEX-HOUR-BLOCK-QUEUE-PROMPT-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
-    "freshness_checked_at": "2026-07-07T00:00:00Z",
-    "freshness_basis": "the manifest now matches the 52 percent AI repetition posture after the Codex hour-block queue prompt implementation-backed worker reconciliation. The lane moved because the helper, tests, live JSON and prompt proof, and reconciliation receipt landed without widening owner, Fitness, Mazer, workflow, secret, deploy, protected-surface, final-receipt, release-readiness, validation-verdict, or marker-output authority.",
+    "freshness_checked_receipt": "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-FRESH-CANDIDATE-FAMILY-SELECTION-2026-07-08.md",
+    "freshness_checked_at": "2026-07-08T00:00:00Z",
+    "freshness_basis": "the manifest now matches the 52 percent AI repetition posture after the fresh held-lane prompt suppression candidate-family selection. The lane did not move because this is a docs-only selector receipt; it only routes the next exact packet to a contract freeze while preserving owner, Fitness, Mazer, workflow, secret, deploy, protected-surface, final-receipt, release-readiness, validation-verdict, and marker-output boundaries.",
     "marker_posture": [
       {
         "marker": "AI Repetition-to-Automation Pipeline",
