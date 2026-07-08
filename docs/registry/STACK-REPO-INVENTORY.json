@@ -11,8 +11,8 @@
   },
   "repo_count": 12,
   "dirty_repo_count": 0,
-  "visible_dirty_repo_count": 1,
-  "advisory_dirty_repo_count": 1,
+  "visible_dirty_repo_count": 2,
+  "advisory_dirty_repo_count": 2,
   "release_eligible_count": 4,
   "repos": [
     {
@@ -233,7 +233,7 @@
       "current_ref_type": "branch",
       "current_ref": "codex/player-goal-default-colors",
       "branch": "codex/player-goal-default-colors",
-      "dirty": false,
+      "dirty": true,
       "root_blocking": false,
       "dirty_blocks_root": false,
       "trust_class": "adjacent",
@@ -337,7 +337,7 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "95e4a0fa8269734c1dcb404901c5e078f069d242",
+      "current_commit": "9d26a9016cfccb7927899dc738236b6f52caee76",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
@@ -556,5 +556,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:fa9759baf6d2a37c3457b32908271040f374000bf633cd90914dfb6df3486ecb"
+  "content_digest": "sha256:482e15586efa127136fb26d32313993e175d72a86bd0ed2f1f75767237311bb4"
 }
