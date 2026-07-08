@@ -51,6 +51,7 @@
 - [Stack Lock And Pinned Dirty-State Drift Classification Checkpoint](../ops/STACK-LOCK-AND-PINNED-DIRTY-STATE-DRIFT-CLASSIFICATION-CHECKPOINT-2026-06-01.md)
 - [Root-Side Stack Lock Refresh And Reconciliation Pass After Owner-Side Dirty-State Disposition](../ops/ROOT-SIDE-STACK-LOCK-REFRESH-AND-RECONCILIATION-PASS-AFTER-OWNER-SIDE-DIRTY-STATE-DISPOSITION-2026-06-01.md)
 - [Root-Bounded Lane-Selection Pass After Root-Side Stack Lock Refresh And Reconciliation Closeout](../ops/ROOT-BOUNDED-LANE-SELECTION-PASS-AFTER-ROOT-SIDE-STACK-LOCK-REFRESH-AND-RECONCILIATION-CLOSEOUT-2026-06-01.md)
+- [DiscordOS Fitness Verify Bridge And Stack Lock Re-Sync](../ops/DISCORDOS-FITNESS-VERIFY-BRIDGE-AND-STACK-LOCK-RESYNC-2026-07-08.md)
 - [Stack Validation Validator-Correctness Warning-Burn Pass 1](../ops/STACK-VALIDATION-VALIDATOR-CORRECTNESS-WARNING-BURN-PASS-1-2026-06-05.md)
 - [Stack Validation Tracked-Surface Classification Warning-Burn Pass 2](../ops/STACK-VALIDATION-TRACKED-SURFACE-CLASSIFICATION-WARNING-BURN-PASS-2-2026-06-05.md)
 - [Stack Lock Refresh After Warning-Slice Branch Preservation Pass 1](../ops/STACK-LOCK-REFRESH-AFTER-WARNING-SLICE-BRANCH-PRESERVATION-PASS-1-2026-06-05.md)
