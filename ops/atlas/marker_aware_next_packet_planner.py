@@ -74,6 +74,7 @@ PROOF_REQUIREMENTS = [
     "owner-lane blocked classification",
     "external-proof blocked classification",
     "implementation-ready packet classification",
+    "numbered worker packet classification",
     "docs-only packet classification",
     "unsafe authority-risk rejection",
     "Playbook refs surfaced as evidence only",
@@ -303,7 +304,12 @@ def _classify_packet(*, packet: str, mode: str, reason: str, blocked_text: str) 
         return CLASS_UNSAFE
     if "stale" in text:
         return CLASS_STALE
-    if "first-implementation worker-cluster" in text or "implementation worker" in mode.lower() or "root-local implementation worker" in text:
+    if (
+        "first-implementation worker-cluster" in text
+        or "worker packet" in packet_lower
+        or "implementation worker" in mode.lower()
+        or "root-local implementation worker" in text
+    ):
         return CLASS_IMPLEMENTATION_READY
     if "docs-only" in mode.lower():
         return CLASS_DOCS_ONLY

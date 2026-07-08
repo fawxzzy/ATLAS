@@ -56,6 +56,30 @@ class MarkerAwareNextPacketPlannerTests(unittest.TestCase):
         self.assertEqual(planner.CLASS_IMPLEMENTATION_READY, report["candidate_scores"][0]["classification"])
         self.assertTrue(report["safe_to_continue"])
 
+    def test_numbered_worker_packet_is_selected(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            _seed_manifest(
+                root,
+                "continuity-manifest-cortex-readiness",
+                _manifest(
+                    "Cortex Readiness",
+                    45,
+                    "Cortex Readiness second advisory substrate consumption first-implementation worker packet 1",
+                    "implement one bounded second advisory substrate consumer helper and focused test file",
+                    "implementation-readiness closeout routed this exact worker packet",
+                ),
+            )
+            report = planner.build_report(root=root)
+
+        self.assertEqual(planner.STATUS_OK, report["status"])
+        self.assertEqual("Cortex Readiness", report["selected_marker"])
+        self.assertEqual(planner.CLASS_IMPLEMENTATION_READY, report["candidate_scores"][0]["classification"])
+        self.assertEqual(
+            "Cortex Readiness second advisory substrate consumption first-implementation worker packet 1",
+            report["selected_packet"],
+        )
+
     def test_held_lane_classification(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
