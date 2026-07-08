@@ -13,12 +13,14 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from ops._atlas import atlas_root, normalize_slashes
+from ops.atlas import held_lane_prompt_suppression as suppression
 from ops.atlas import marker_aware_next_packet_planner as planner
 
 SCHEMA_VERSION = "atlas.codex_hour_block_queue_prompt.v1"
 STATUS_OK = "ok"
 STATUS_BLOCKED = "blocked"
 STATUS_INTERNAL_ERROR = "internal_error"
+HOLD_HEADER = "ATLAS ROOT HELD - DO NOT CONTINUE GENERICALLY"
 
 QUEUE_STAGES = [
     ("preflight", "Verify root cleanliness, branch, parity, and recent commits."),
@@ -113,6 +115,18 @@ BOUNDARIES = [
 ]
 
 
+def _scope_lock_payload() -> OrderedDict[str, Any]:
+    return OrderedDict(
+        [
+            ("scope", "ATLAS-root-only"),
+            ("allowed", ["ATLAS root governance files", "ATLAS Book / continuity manifests / selector / planner / root helpers", "root-owned tests and validation"]),
+            ("forbidden", EXCLUDED_SURFACES),
+            ("boundaries", BOUNDARIES),
+            ("owner_lane_fallback_forbidden", True),
+        ]
+    )
+
+
 def _finding(code: str, message: str, *, severity: str = "warning", **details: Any) -> OrderedDict[str, Any]:
     payload: OrderedDict[str, Any] = OrderedDict([("code", code), ("severity", severity), ("message", message)])
     if details:
@@ -149,6 +163,53 @@ def _parity_state(root: Path) -> OrderedDict[str, Any]:
     ahead = int(parts[1])
     status = "clean" if behind == 0 and ahead == 0 else "drift"
     return OrderedDict([("status", status), ("behind", behind), ("ahead", ahead)])
+
+
+def _latest_validation_state(root: Path) -> OrderedDict[str, int]:
+    validation_path = root / "runtime" / "receipts" / "validation" / "stack-validation.latest.json"
+    loaded: dict[str, Any] = {}
+    if validation_path.exists():
+        try:
+            payload = json.loads(validation_path.read_text(encoding="utf-8"))
+            if isinstance(payload, dict):
+                loaded = payload
+        except (OSError, json.JSONDecodeError):
+            loaded = {}
+    source: dict[str, Any] = loaded
+    for key in ("validation_state", "validation", "summary"):
+        nested = source.get(key)
+        if isinstance(nested, dict):
+            source = nested
+            break
+
+    def as_count(value: Any) -> int:
+        if isinstance(value, bool):
+            return int(value)
+        if isinstance(value, int):
+            return value
+        if isinstance(value, str) and value.strip().isdigit():
+            return int(value.strip())
+        return 0
+
+    return OrderedDict(
+        [
+            ("critical", as_count(source.get("critical", source.get("critical_count", 0)))),
+            ("error", as_count(source.get("error", source.get("error_count", 0)))),
+            ("warning", as_count(source.get("warning", source.get("warning_count", 0)))),
+            ("info", as_count(source.get("info", source.get("info_count", 0)))),
+        ]
+    )
+
+
+def _closeout_report(root: Path) -> OrderedDict[str, Any]:
+    dirty = _git_stdout(root, "status", "--porcelain")
+    return OrderedDict(
+        [
+            ("root_clean", dirty == ""),
+            ("validation_state", _latest_validation_state(root)),
+            ("owner_lane_fallback_forbidden", True),
+        ]
+    )
 
 
 def _selector_summary(selector: dict[str, Any]) -> OrderedDict[str, Any]:
@@ -213,6 +274,7 @@ def _planner_summary(planner_report: dict[str, Any]) -> OrderedDict[str, Any]:
 def render_prompt(report: dict[str, Any]) -> str:
     selector = report["selector"]
     planner_state = report["planner"]
+    suppression_state = report["suppression"]
     lines = [
         "CODEX-MSG-ID: CODEX-HOUR-BLOCK-ATLAS-MARKER-PROGRESSION-QUEUE",
         "",
@@ -231,6 +293,8 @@ def render_prompt(report: dict[str, Any]) -> str:
         f"- Operator action: `{selector.get('operator_action')}`",
         f"- Planner selected packet: `{planner_state.get('selected_packet')}`",
         f"- Planner safe candidates: `{planner_state.get('safe_candidate_count')}`",
+        f"- Suppression decision: `{report.get('suppression_decision')}`",
+        f"- Should generate queue: `{report.get('should_generate_queue')}`",
         "",
         "Execution budget:",
         "- Attempt up to 7 bundles.",
@@ -287,10 +351,67 @@ def render_prompt(report: dict[str, Any]) -> str:
         ]
     )
     lines.extend(["", "Final closeout must include commits, marker movement, validation, tests, protected surfaces untouched, owner repos untouched, exact next package, blockers, and whether another queued prompt would be useful."])
+    if suppression_state.get("allowed_next_actions"):
+        lines.extend(["", "Suppression-aware allowed next actions:"])
+        lines.extend(f"- `{action}`" for action in suppression_state.get("allowed_next_actions", []))
     return "\n".join(lines) + "\n"
 
 
-def build_report(*, root: Path, source_refs: list[str] | None = None) -> OrderedDict[str, Any]:
+def render_hold_prompt(report: dict[str, Any]) -> str:
+    selector = report["selector"]
+    suppression_state = report["suppression"]
+    validation_state = suppression_state.get("validation_state") or {}
+    lines = [
+        "CODEX-MSG-ID: CODEX-HOUR-BLOCK-ATLAS-ROOT-HELD-NO-GENERIC-CONTINUATION",
+        "",
+        HOLD_HEADER,
+        "",
+        *SCOPE_LOCK_LINES,
+        "",
+        "Current state:",
+        f"- Branch: `{report.get('branch') or 'unknown'}`",
+        f"- Head: `{report.get('head') or 'unknown'}`",
+        f"- Parity: `{report.get('parity', {}).get('status')}` behind `{report.get('parity', {}).get('behind')}` ahead `{report.get('parity', {}).get('ahead')}`",
+        f"- Selected marker: `{selector.get('selected_marker')}` at `{selector.get('selected_percentage')}`",
+        f"- Operator action: `{selector.get('operator_action')}`",
+        f"- Planner selected packet: `{report.get('planner', {}).get('selected_packet')}`",
+        f"- Planner safe candidates: `{report.get('planner', {}).get('safe_candidate_count')}`",
+        "",
+        "Suppression state:",
+        f"- Decision: `{report.get('suppression_decision')}`",
+        f"- Reason: {report.get('suppression_reason')}",
+        f"- Root is clean: `{suppression_state.get('root_clean')}`",
+        f"- Validation: critical `{validation_state.get('critical')}` error `{validation_state.get('error')}` warning `{validation_state.get('warning')}` info `{validation_state.get('info')}`",
+        f"- Exact root packet exists: `{suppression_state.get('exact_packet_available')}`",
+        f"- Owner-lane fallback is forbidden: `{suppression_state.get('owner_lane_fallback_forbidden')}`",
+        "",
+        "Do not continue generically.",
+        "",
+        "Do not:",
+        "- Do not open a generic ATLAS root work loop.",
+        "- Do not switch into Fitness or Mazer.",
+        "- Do not use owner-lane fallback.",
+        "- Do not touch secrets, deploy, Vercel, Supabase, workflows, or protected surfaces.",
+        "- Do not move markers without receipt-backed proof.",
+        "",
+        "Required next move:",
+        "- Choose a new bounded ATLAS-root packet before continuing.",
+        "- If the next work is owner-lane work, start a separate owner-lane packet outside this ATLAS root queue.",
+        "- If material state changed, rerun selector, planner, suppression, validation, and continuity health before issuing another queue.",
+        "",
+        "Allowed next actions:",
+    ]
+    lines.extend(f"- `{action}`" for action in suppression_state.get("allowed_next_actions", []))
+    return "\n".join(lines) + "\n"
+
+
+def build_report(
+    *,
+    root: Path,
+    source_refs: list[str] | None = None,
+    operator_selected_packet: str | None = None,
+    external_proof_present: bool = False,
+) -> OrderedDict[str, Any]:
     branch, head = _branch_state(root)
     source_refs = list(source_refs or [])
     planner_report = planner.build_report(root=root, source_refs=source_refs)
@@ -309,11 +430,30 @@ def build_report(*, root: Path, source_refs: list[str] | None = None) -> Ordered
     except Exception:
         selector_payload = {}
 
+    suppression_report = suppression.build_report(
+        selector_report=selector_payload,
+        planner_report=planner_report,
+        closeout_report=_closeout_report(root),
+        operator_selected_packet=operator_selected_packet,
+        external_proof_present=external_proof_present,
+    )
+    should_generate_queue = suppression_report.get("status") != suppression.STATUS_SUPPRESS
+
     blockers: list[OrderedDict[str, Any]] = []
     if not selector_payload:
         blockers.append(_finding("selector_unavailable", "Marker knockout selector JSON was unavailable.", severity="blocker"))
     if planner_report.get("status") == planner.STATUS_BLOCKED:
         blockers.append(_finding("planner_blocked", "Marker-aware planner is blocked.", severity="blocker"))
+    if suppression_report.get("status") in {suppression.STATUS_BLOCKED, suppression.STATUS_INTERNAL_ERROR}:
+        blockers.append(
+            _finding(
+                "suppression_blocked",
+                "Held-lane prompt suppression blocked queue generation.",
+                severity="blocker",
+                decision=suppression_report.get("decision"),
+                reason=suppression_report.get("suppression_reason"),
+            )
+        )
 
     prompt_text = ""
     status = STATUS_BLOCKED if blockers else STATUS_OK
@@ -328,6 +468,13 @@ def build_report(*, root: Path, source_refs: list[str] | None = None) -> Ordered
             ("source_refs", [normalize_slashes(item) for item in source_refs]),
             ("selector", _selector_summary(selector_payload)),
             ("planner", _planner_summary(planner_report)),
+            ("suppression", suppression_report),
+            ("suppression_decision", suppression_report.get("decision")),
+            ("suppression_reason", suppression_report.get("suppression_reason")),
+            ("allowed_next_actions", suppression_report.get("allowed_next_actions", [])),
+            ("should_generate_queue", should_generate_queue and not blockers),
+            ("operator_selected_packet", operator_selected_packet),
+            ("scope_lock", _scope_lock_payload()),
             ("queue_stages", [OrderedDict([("stage_id", stage_id), ("purpose", purpose)]) for stage_id, purpose in QUEUE_STAGES]),
             ("allowed_root_marker_lanes", ROOT_MARKER_LANES),
             ("excluded_surfaces", EXCLUDED_SURFACES),
@@ -340,7 +487,7 @@ def build_report(*, root: Path, source_refs: list[str] | None = None) -> Ordered
         ]
     )
     if not blockers:
-        prompt_text = render_prompt(report)
+        prompt_text = render_prompt(report) if report["should_generate_queue"] else render_hold_prompt(report)
     report["prompt_text"] = prompt_text
     return report
 
@@ -380,6 +527,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--json", action="store_true", help="Emit JSON only on stdout.")
     parser.add_argument("--prompt-only", action="store_true", help="Emit only the generated prompt text.")
     parser.add_argument("--source", action="append", default=[], help="Optional root-relative admitted source ref for planner context. May be repeated.")
+    parser.add_argument("--operator-selected-packet", help="Explicit operator-selected root packet name.")
+    parser.add_argument("--external-proof-present", action="store_true", help="Allow queue generation when admitted external proof exists.")
     parser.add_argument("--output", help="Optional root-relative tmp/**.json report output path.")
     parser.add_argument("--prompt-output", help="Optional root-relative tmp/**.md prompt output path.")
     parser.add_argument("--strict", action="store_true")
@@ -409,7 +558,12 @@ def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     root = atlas_root().resolve()
     try:
-        report = build_report(root=root, source_refs=list(args.source or []))
+        report = build_report(
+            root=root,
+            source_refs=list(args.source or []),
+            operator_selected_packet=args.operator_selected_packet,
+            external_proof_present=bool(args.external_proof_present),
+        )
         if args.output:
             resolved_output, output_error = planner.validate_output_path(root=root, output_path=args.output)
             if output_error is not None:
@@ -439,6 +593,13 @@ def main(argv: list[str] | None = None) -> int:
                 ("source_refs", []),
                 ("selector", OrderedDict()),
                 ("planner", OrderedDict()),
+                ("suppression", OrderedDict()),
+                ("suppression_decision", None),
+                ("suppression_reason", None),
+                ("allowed_next_actions", []),
+                ("should_generate_queue", False),
+                ("operator_selected_packet", None),
+                ("scope_lock", _scope_lock_payload()),
                 ("queue_stages", []),
                 ("allowed_root_marker_lanes", ROOT_MARKER_LANES),
                 ("excluded_surfaces", EXCLUDED_SURFACES),

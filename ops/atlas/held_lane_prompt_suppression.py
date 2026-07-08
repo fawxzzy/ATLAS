@@ -293,12 +293,16 @@ def _string_value(value: Any) -> str | None:
 
 
 def _selected_packet(selector: dict[str, Any], planner: dict[str, Any]) -> str | None:
+    selector_action = _selector_action(selector)
+    selector_current_packet = None
+    if selector_action not in {"no_immediate_root_packet", "hold_current_lane", "held", "hold"}:
+        selector_current_packet = selector.get("selected_current_packet")
     for value in (
         planner.get("selected_packet"),
         planner.get("recommended_next_selection"),
         planner.get("packet"),
         selector.get("selected_packet"),
-        selector.get("selected_current_packet"),
+        selector_current_packet,
         selector.get("next_packet"),
         selector.get("next_after_current_packet"),
     ):

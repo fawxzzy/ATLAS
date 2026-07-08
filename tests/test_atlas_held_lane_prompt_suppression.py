@@ -105,6 +105,21 @@ class HeldLanePromptSuppressionTests(unittest.TestCase):
         self.assertEqual(suppression.DECISION_ALLOW_EXACT_PACKET, report["decision"])
         self.assertTrue(report["exact_packet_available"])
 
+    def test_no_immediate_selector_current_packet_does_not_reopen_execution(self) -> None:
+        selector = _selector_payload()
+        selector["selected_current_packet"] = "Sandbox carried hold packet"
+
+        report = suppression.build_report(
+            selector_report=selector,
+            planner_report=_planner_payload(),
+            closeout_report=_closeout_payload(),
+        )
+
+        self.assertEqual(suppression.STATUS_SUPPRESS, report["status"])
+        self.assertEqual(suppression.DECISION_SUPPRESS_CONTINUATION, report["decision"])
+        self.assertFalse(report["exact_packet_available"])
+        self.assertIsNone(report["selected_packet"])
+
     def test_allows_operator_selected_packet(self) -> None:
         report = suppression.build_report(
             selector_report=_selector_payload(),
