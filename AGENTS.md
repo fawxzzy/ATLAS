@@ -18,6 +18,9 @@ Persistent context
 Routing
 - Single-repo implementation work should be routed into the target repo root.
 - Cross-repo work may touch only the named repos plus stack-level files under the ATLAS root.
+- ATLAS-root sessions are root-governance sessions by default. Fitness, Mazer, and other owner repos are excluded fallback lanes unless the operator explicitly selects an owner-lane packet by name.
+- If the selector, planner, or marker board reports no immediate root packet, stop and report the held root state. Do not switch into Fitness, Mazer, Stripe/Vercel launch work, game work, or owner-repo cleanup as a fallback.
+- Fitness and Mazer may appear in root outputs only as read-only advisory owner-lane inventory status unless explicitly selected.
 - Stack-level files are:
   - `stack.yaml`
   - `README-STACK.md`

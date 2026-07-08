@@ -1886,6 +1886,7 @@
 - [Stack Lock And Inventory Stream Trove And Nat1 Cleanup Re-Sync](../ops/STACK-LOCK-AND-INVENTORY-STREAM-TROVE-AND-NAT1-CLEANUP-RESYNC-2026-06-27.md)
 - [Mazer Generated State Zero-Warning Cleanup](../ops/MAZER-GENERATED-STATE-ZERO-WARNING-CLEANUP-2026-06-27.md)
 - [DiscordOS Feedback Extraction Closeout](../ops/discordos-feedback-extraction-closeout-2026-06-27.md)
+- [ATLAS Root Scope Lock Owner-Lane Fallback Denial](../ops/ATLAS-ROOT-SCOPE-LOCK-OWNER-LANE-FALLBACK-DENIAL-2026-07-08.md)
 ## Notes
 
 This index is a working spine, not an exhaustive archive.

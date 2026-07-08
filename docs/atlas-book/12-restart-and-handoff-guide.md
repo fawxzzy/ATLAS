@@ -140,6 +140,8 @@ The supporting marker `AI Repetition-to-Automation Pipeline` now sits at `52%`; 
 
 Use `ops/atlas/codex_hour_block_queue_prompt.py` when an operator asks for a long autonomous ATLAS root work block without a fresh exact packet. The helper generates a bounded queue prompt from live selector and planner state, includes the mandatory baseline commands, excludes Fitness, Mazer, owner repos, workflow dispatch, deploy, secrets, and protected surfaces, and keeps marker movement receipt-backed.
 
+Every generated ATLAS root hour-block prompt must carry a `SCOPE LOCK` header. The lock means the packet is ATLAS-root-only: Fitness and Mazer may be mentioned only as read-only advisory owner-lane inventory status, must not be selected as fallback lanes, and must not be mutated or discussed as active product/game work unless the operator explicitly selects a Fitness or Mazer owner-lane packet. If selector/planner state is held and no root packet is available, close out the held root state instead of switching into owner-repo work.
+
 Required command:
 
 ```powershell

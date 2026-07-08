@@ -53,6 +53,29 @@ EXCLUDED_SURFACES = [
     "final receipt authority outside ATLAS rules",
 ]
 
+SCOPE_LOCK_LINES = [
+    "SCOPE LOCK:",
+    "This is an ATLAS-root-only packet.",
+    "",
+    "Allowed:",
+    "- ATLAS root governance files",
+    "- ATLAS Book / continuity manifests / selector / planner / root helpers",
+    "- root-owned tests and validation",
+    "",
+    "Forbidden:",
+    "- repos/fawxzzy-fitness/**",
+    "- repos/mazer/**",
+    "- any owner repo mutation",
+    "- Fitness product, business, Stripe, Vercel, or live launch work",
+    "- Mazer game work",
+    "- Vercel, Supabase, deploy, secrets, .env*, .vercel, .playwright-mcp, archive, or broad untracked backlog",
+    "",
+    "Fitness and Mazer may only be mentioned as advisory owner-lane inventory status.",
+    "They must not be selected as next work lanes.",
+    "If ATLAS selector or planner returns no root packet, stop and report held state.",
+    "Do not switch to Fitness or Mazer as a fallback.",
+]
+
 REQUIRED_BASELINE_COMMANDS = [
     "git status -sb",
     "git branch --show-current",
@@ -192,6 +215,8 @@ def render_prompt(report: dict[str, Any]) -> str:
     planner_state = report["planner"]
     lines = [
         "CODEX-MSG-ID: CODEX-HOUR-BLOCK-ATLAS-MARKER-PROGRESSION-QUEUE",
+        "",
+        *SCOPE_LOCK_LINES,
         "",
         "You are operating in bounded autonomous execution mode for an ATLAS root work block.",
         "",
