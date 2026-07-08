@@ -95,7 +95,10 @@
     "docs/ops/INVENTORY-AND-TRUTH-MAP-UNMANAGED-OWNER-LANE-VALIDATION-BOUNDARY-AND-ZERO-WARNING-RESYNC-2026-07-07.md",
     "docs/ops/INVENTORY-AND-TRUTH-MAP-FINAL-BLOCKER-AUDIT-AND-CLOSEOUT-ELIGIBILITY-2026-07-08.md",
     "docs/ops/INVENTORY-AND-TRUTH-MAP-OWNER-TRUTH-ADOPTION-PROOF-SELECTION-2026-07-08.md",
-    "docs/ops/INVENTORY-AND-TRUTH-MAP-OWNER-TRUTH-ADOPTION-PROOF-CONTRACT-FREEZE-2026-07-08.md"
+    "docs/ops/INVENTORY-AND-TRUTH-MAP-OWNER-TRUTH-ADOPTION-PROOF-CONTRACT-FREEZE-2026-07-08.md",
+    "docs/ops/INVENTORY-AND-TRUTH-MAP-OWNER-TRUTH-ADOPTION-PROOF-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-08.md",
+    "ops/atlas/owner_truth_adoption_proof.py",
+    "tests/test_atlas_owner_truth_adoption_proof.py"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -103,9 +106,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "inventory-and-truth-map",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/INVENTORY-AND-TRUTH-MAP-OWNER-TRUTH-ADOPTION-PROOF-CONTRACT-FREEZE-2026-07-08.md",
-    "checkpoint_commit": "16f75543011184c2319f296863e0315945032539",
-    "checkpoint_summary": "The lane still sits at 99 percent after the owner-truth adoption proof selector and contract freeze: ATLAS root validation reads `critical=0 error=0 warning=0 info=0`, refreshed inventory reports `dirty_repo_count: 0`, refreshed inventory reports advisory owner-lane drift at `visible_dirty_repo_count: 2` and `advisory_dirty_repo_count: 2`, owner lanes remain separated and non-root-blocking, initiative continuity health reads `20 ok / 0 warning / 0 error`, eligible open-marker coverage and restart readiness read `7 / 7`, maintained manifest restart readiness reads `20 / 20`, and the structured rollup reports `pending_review_count: 0`. The marker does not move because this docs-only packet selects and freezes the owner-truth adoption proof class but does not implement or reconcile the helper.",
+    "current_checkpoint_receipt": "docs/ops/INVENTORY-AND-TRUTH-MAP-OWNER-TRUTH-ADOPTION-PROOF-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-08.md",
+    "checkpoint_commit": "6f1f6ade1d61c6e13cf4dfc8cfd7d35b92e842a8",
+    "checkpoint_summary": "The lane is now closed at 100 percent after the owner-truth adoption proof helper landed and reconciled: `ops/atlas/owner_truth_adoption_proof.py` reports `status=ok`, `adoption_result=adopted_advisory_truth`, `safe_to_use=true`, `dirty_repo_count=0`, `visible_dirty_repo_count=2`, `advisory_dirty_repo_count=2`, `root_blocking_owner_repos=[]`, `book_mirror_status=ok`, `scope_lock_status=ok`, and zero blockers/warnings; focused tests pass 13/13; root validation reads `critical=0 error=0 warning=0 info=0`; Fitness and Mazer advisory dirtiness remain separated owner-lane inventory truth, not ATLAS-root fallback work.",
     "governing_receipts": [
       "docs/ops/STACK-LANE-0-BASELINE-INVENTORY-2026-05-22.md",
       "docs/ops/STACK-LANE-0-TRUTH-MAP-2026-05-22.md",
@@ -123,6 +126,7 @@
       "docs/ops/INVENTORY-AND-TRUTH-MAP-FINAL-BLOCKER-AUDIT-AND-CLOSEOUT-ELIGIBILITY-2026-07-08.md",
       "docs/ops/INVENTORY-AND-TRUTH-MAP-OWNER-TRUTH-ADOPTION-PROOF-SELECTION-2026-07-08.md",
       "docs/ops/INVENTORY-AND-TRUTH-MAP-OWNER-TRUTH-ADOPTION-PROOF-CONTRACT-FREEZE-2026-07-08.md",
+      "docs/ops/INVENTORY-AND-TRUTH-MAP-OWNER-TRUTH-ADOPTION-PROOF-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-08.md",
       "docs/ops/INITIATIVE-CONTINUITY-MANIFEST-HEALTH-ZERO-WARNING-CLOSEOUT-AND-ACTIVE-CONTINUITY-LANE-RATCHET-2026-06-19.md",
       "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md",
       "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md",
@@ -206,6 +210,14 @@
       {
         "path": "docs/registry/STACK-REPO-INVENTORY.json",
         "role": "machine-readable registry truth"
+      },
+      {
+        "path": "ops/atlas/owner_truth_adoption_proof.py",
+        "role": "root-owned owner-truth adoption proof helper"
+      },
+      {
+        "path": "tests/test_atlas_owner_truth_adoption_proof.py",
+        "role": "focused owner-truth adoption proof test surface"
       },
       {
         "path": "docs/ops/INVENTORY-AND-TRUTH-MAP-CLOSEOUT-CLUSTER-CANONICAL-PLACEMENT-PASS-8-2026-06-02.md",
@@ -360,33 +372,25 @@
     ],
     "blocked_or_gated_work": [
       {
-        "item": "closing `Inventory & Truth Map` at `100%`",
-        "requirement": "blocked until the owner-truth adoption proof helper is admitted, implemented, tested, and reconciled, or another broader continuity automation/blocker-clearance class changes operator reality"
-      },
-      {
         "item": "using advisory owner-lane drift as ATLAS-root fallback work",
         "requirement": "blocked by root scope lock; Fitness and Mazer advisory dirtiness remains non-root-blocking inventory truth unless an owner-lane packet is explicitly selected"
-      },
-      {
-        "item": "higher marker movement above the current refresh-backed ratchet",
-        "requirement": "blocked because refreshed inventory still reports advisory owner-lane drift at `visible_dirty_repo_count: 2` and `advisory_dirty_repo_count: 2`, and this packet did not land a broader automation or proof-adoption surface"
       }
     ],
     "next_package_ladder": [
       {
-        "package": "No immediate Inventory & Truth Map docs-only follow-on packet",
-        "mode": "held after owner-truth adoption proof contract freeze",
-        "reason": "the final blocker audit named owner-truth adoption proof as a valid closeout-unblock class, the selector selected that class, and the contract freeze now defines the future helper, admitted inputs, forbidden inputs, output fields, proof rules, and authority denials; the marker remains at 99 because implementation-backed proof and reconciliation have not landed yet"
+        "package": "No immediate Inventory & Truth Map follow-on packet",
+        "mode": "closed after owner-truth adoption proof reconciliation",
+        "reason": "the final blocker audit named owner-truth adoption proof as the remaining closeout-unblock class, and that class is now implemented, tested, live-proofed, and reconciled; future inventory work requires a new topology class, new repo admission, projection drift, broader continuity automation, or a separately selected root-owned proof class"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/INVENTORY-AND-TRUTH-MAP-OWNER-TRUTH-ADOPTION-PROOF-CONTRACT-FREEZE-2026-07-08.md",
+    "freshness_checked_receipt": "docs/ops/INVENTORY-AND-TRUTH-MAP-OWNER-TRUTH-ADOPTION-PROOF-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-08.md",
     "freshness_checked_at": "2026-07-08T00:00:00Z",
-    "freshness_basis": "the current checkpoint, marker posture, lane-state projection, blocked-work posture, and next-package posture now match the owner-truth adoption proof selector and contract freeze: published inventory reports dirty_repo_count 0 while preserving advisory owner-lane visibility, Fitness and Mazer advisory dirtiness remain non-root-blocking, root validation reads critical=0 / error=0 / warning=0 / info=0, initiative manifest health remains 20 ok / 0 warning / 0 error, eligible open-marker coverage plus restart index remain 7 of 7 manifest-backed and restart-ready, maintained-manifest restart index remains 20 of 20, and the structured rollup still reports pending_review_count 0. The marker remains at 99 percent because implementation-backed owner-truth adoption proof and reconciliation have not landed yet.",
+    "freshness_basis": "the current checkpoint, marker posture, lane-state projection, blocked-work posture, and next-package posture now match the owner-truth adoption proof implementation reconciliation: published inventory reports dirty_repo_count 0 while preserving advisory owner-lane visibility, Fitness and Mazer advisory dirtiness remain non-root-blocking, root validation reads critical=0 / error=0 / warning=0 / info=0, initiative manifest health remains 20 ok / 0 warning / 0 error, eligible open-marker coverage plus restart index remain 6 of 6 manifest-backed and restart-ready, maintained-manifest restart index remains 20 of 20, and the owner-truth helper reports adopted_advisory_truth with zero blockers/warnings. The marker closes at 100 percent because implementation-backed owner-truth adoption proof and reconciliation have landed.",
     "marker_posture": [
       {
         "marker": "Inventory & Truth Map",
-        "percent": 99,
+        "percent": 100,
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ]
