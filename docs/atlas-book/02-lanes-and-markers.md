@@ -81,6 +81,10 @@ Read:
 
 - Sandbox Simulation Readiness: `99%`
 
+### Platform governance
+
+- Vercel Platform Observability Governance: `0%`
+
 ## Materially Closed Carry-Forward Families
 
 - Discord Workflow, Publication & Docs Reliability broader-summary parity-proof ladder

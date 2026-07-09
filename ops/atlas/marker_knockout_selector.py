@@ -31,6 +31,7 @@ CAMPAIGN_PRIORITY = (
     "AI Repetition-to-Automation Pipeline",
     "AI Long-Run Batch Orchestration",
     "Sandbox Simulation Readiness",
+    "Vercel Platform Observability Governance",
     "AI Work Session Stability & Auto-Sync Loop",
     "Feedback Loop Readiness",
     "Durable Context Externalization",
@@ -218,6 +219,17 @@ POLICY_REGISTRY: dict[str, MarkerPolicy] = {
         rationale="The marker is now durably admitted, but current truth still keeps the AI and queue-or-registry execution-facing lanes ahead of a cost-governance follow-on by default.",
         expected_evidence="one root-owned usage-snapshot or threshold-governance receipt that preserves Hobby posture without requiring Vercel setting mutation",
     ),
+    "Vercel Platform Observability Governance": MarkerPolicy(
+        category="admissible after current lane",
+        rationale=(
+            "The lane is now durably admitted because helper-backed 5-of-5 governed Vercel project-inventory coverage exists, "
+            "but current durable restart truth still routes through the held Sandbox family first."
+        ),
+        expected_evidence=(
+            "one root-owned log and runtime-error inventory contract or equivalent read-only observability packet "
+            "that preserves no env values, no token values, and no Vercel mutation"
+        ),
+    ),
     "Operator Secret Path Hygiene": MarkerPolicy(
         category="secret/.env hold",
         rationale="The marker may only reopen on non-secret docs/checks or new secret-path ambiguity, and the active campaign explicitly forbids secret work.",
@@ -337,6 +349,19 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         mode="docs-only root-bounded hold or top-level lane reselection",
         scope=(
             "decide whether Sandbox stays held or returns to broader campaign routing now that the local-only first validator broader-runtime-assertions admission boundary is directly frozen on canonical main"
+        ),
+    ),
+    "Vercel Platform Observability Governance": PacketDescriptor(
+        packet="Vercel Platform Observability Governance log and runtime-error inventory contract freeze",
+        basis_receipt_ref=(
+            "docs/ops/"
+            "VERCEL-PLATFORM-OBSERVABILITY-GOVERNANCE-PROJECT-INVENTORY-COVERAGE-"
+            "RECONCILIATION-CONTRACT-FREEZE-2026-07-09.md"
+        ),
+        mode="docs-only root-bounded log and runtime-error contract freeze",
+        scope=(
+            "freeze the next safe read-only Vercel observability boundary after full governed project-inventory coverage, "
+            "covering admitted log and grouped runtime-error inventory fields without widening into env values, token values, analytics, drains, or mutation"
         ),
     ),
     "AI Work Session Stability & Auto-Sync Loop": PacketDescriptor(

@@ -35,6 +35,7 @@ QUEUE_STAGES = [
 ROOT_MARKER_LANES = [
     "AI Repetition-to-Automation Pipeline",
     "AI Long-Run Batch Orchestration",
+    "Vercel Platform Observability Governance",
     "Cortex Readiness",
     "Playbook Everywhere + Cortex Interface",
     "AI Work Session Stability & Auto-Sync Loop",

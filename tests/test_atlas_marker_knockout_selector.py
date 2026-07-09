@@ -49,6 +49,7 @@ MARKER_DOC = """# Lanes And Markers
 - AI Long-Run Batch Orchestration: `20%`
 - Feedback Loop Readiness: `42%`
 - Sandbox Simulation Readiness: `0%`
+- Vercel Platform Observability Governance: `0%`
 - Post-Convergence Lane Split Readiness: `61%`
 
 ## Closed / Locked Ratchets
@@ -294,9 +295,67 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual("protected/Fitness hold", records["Fitness QA/LLEL Workflow"]["category"])
         self.assertEqual("secret/.env hold", records["Operator Secret Path Hygiene"]["category"])
         self.assertEqual("admissible after current lane", records["Vercel Hobby Cost Governance"]["category"])
+        self.assertEqual("admissible after current lane", records["Vercel Platform Observability Governance"]["category"])
         self.assertEqual("admissible after current lane", records["AI Repetition-to-Automation Pipeline"]["category"])
         self.assertEqual("admissible now", records["AI Long-Run Batch Orchestration"]["category"])
         self.assertEqual("already closed / locked", records["_stack Readiness"]["category"])
+
+    def test_build_campaign_routes_vercel_observability_after_current_hold(self) -> None:
+        root = self._temp_root()
+        marker_doc = """# Lanes And Markers
+
+## Active Front-Page Marker Table
+
+- Sandbox Simulation Readiness: `99%`
+
+## Supporting Open Markers
+
+- Vercel Platform Observability Governance: `0%`
+
+## Closed / Locked Ratchets
+
+- _stack Readiness: `100%`
+"""
+        current_state_doc = """# Current State
+
+- the current active ATLAS-side lane is now `Sandbox Simulation Readiness`
+"""
+        (root / "docs" / "atlas-book" / "02-lanes-and-markers.md").write_text(marker_doc, encoding="utf-8")
+        (root / "docs" / "atlas-book" / "01-current-state.md").write_text(current_state_doc, encoding="utf-8")
+        self._write_packet_receipts(root)
+        self._write_manifest(
+            root,
+            manifest_name="continuity-manifest-sandbox-simulation-readiness.json",
+            marker="Sandbox Simulation Readiness",
+            percent=99,
+            checkpoint_ref=(
+                "docs/ops/"
+                "SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-BROADER-"
+                "RUNTIME-ASSERTIONS-ADMISSION-BOUNDARY-HOLD-OR-TOP-LEVEL-LANE-"
+                "RESELECTION-2026-06-27.md"
+            ),
+            next_package="No immediate Sandbox Simulation Readiness same-lane packet",
+            mode="hold-flat after broader-runtime-assertions admission boundary freeze",
+            reason="current sandbox lane is intentionally held",
+        )
+
+        payload = build_campaign(root=root)
+
+        self.assertEqual("hold_current_lane", payload["operator_action"])
+        self.assertEqual("Vercel Platform Observability Governance", payload["next_after_current_marker"])
+        self.assertEqual(
+            "Vercel Platform Observability Governance log and runtime-error inventory contract freeze",
+            payload["next_after_current_packet"],
+        )
+        self.assertEqual(
+            "docs/ops/VERCEL-PLATFORM-OBSERVABILITY-GOVERNANCE-PROJECT-INVENTORY-COVERAGE-RECONCILIATION-CONTRACT-FREEZE-2026-07-09.md",
+            payload["next_after_current_packet_basis_ref"],
+        )
+        self.assertEqual(
+            "docs-only root-bounded log and runtime-error contract freeze",
+            payload["next_after_current_packet_mode"],
+        )
+        self.assertIn("full governed project-inventory coverage", payload["next_after_current_packet_scope"])
 
     def test_build_campaign_skips_manifest_held_follow_on_marker(self) -> None:
         root = self._temp_root()
@@ -320,7 +379,7 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
 
         payload = build_campaign(root=root)
 
-        self.assertEqual("Durable Context Externalization", payload["next_after_current_marker"])
+        self.assertEqual("Vercel Platform Observability Governance", payload["next_after_current_marker"])
         self.assertNotEqual("AI Repetition-to-Automation Pipeline", payload["next_after_current_marker"])
 
     def test_build_campaign_holds_active_lane_when_its_manifest_has_no_immediate_packet(self) -> None:

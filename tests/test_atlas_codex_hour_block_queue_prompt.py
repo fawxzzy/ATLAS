@@ -106,6 +106,7 @@ class CodexHourBlockQueuePromptTests(unittest.TestCase):
         self.assertIn("Fitness app implementation", payload["prompt_text"])
         self.assertIn("Mazer game implementation", payload["prompt_text"])
         self.assertIn("Do not move markers for wording refresh", payload["prompt_text"])
+        self.assertIn("Vercel Platform Observability Governance", payload["allowed_root_marker_lanes"])
 
     def test_clean_held_root_emits_suppression_state_and_hold_prompt(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
