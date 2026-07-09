@@ -3,15 +3,15 @@
   "stack_manifest_ref": "stack.yaml",
   "stack_manifest_digest": "sha256:1ebf366757baf13a45064cdf8d07edd92909ac07f93c44ee9e77b30abebf03e6",
   "stack_lock_ref": "stack.lock.yaml",
-  "stack_lock_digest": "sha256:29432b2c465427e4f6760b345057482630f2b8ea1fe4e2d61ad275d293f4ad2f",
+  "stack_lock_digest": "sha256:76ff57db6048eee4e83a0ae32be479c4ba9a11ba3afec9acf52cfa854be6aba3",
   "working_memory_digest": "sha256:fe4f4902e2b2c475974b050ba1bf3f5e740439aa41df2f844555c2c0dc3b310f",
   "published_refs": {
     "json": "docs/registry/STACK-REPO-INVENTORY.json",
     "markdown": "docs/audits/STACK-REPO-INVENTORY.md"
   },
   "repo_count": 12,
-  "dirty_repo_count": 0,
-  "visible_dirty_repo_count": 2,
+  "dirty_repo_count": 2,
+  "visible_dirty_repo_count": 4,
   "advisory_dirty_repo_count": 2,
   "release_eligible_count": 4,
   "repos": [
@@ -88,9 +88,9 @@
       "current_ref_type": "branch",
       "current_ref": "main",
       "branch": "main",
-      "dirty": false,
+      "dirty": true,
       "root_blocking": true,
-      "dirty_blocks_root": false,
+      "dirty_blocks_root": true,
       "trust_class": "trusted",
       "release_eligible": false,
       "exists": true,
@@ -227,7 +227,7 @@
       "status": "unmanaged",
       "remote_url": "https://github.com/fawxzzy/mazer.git",
       "pinned_commit": null,
-      "current_commit": "f24dc53d05c58a32d4d36e93aeb6d96acb09bdbd",
+      "current_commit": "845446266347be19524fbe36f39e688db804e9e8",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
@@ -337,15 +337,15 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "b2fa1f456e50c1af86cb3448d1439da6d8dbe2a5",
+      "current_commit": "4b64ba9c3254cea769da92b19ab0c0ae77d96f19",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
       "current_ref": "main",
       "branch": "main",
-      "dirty": false,
+      "dirty": true,
       "root_blocking": true,
-      "dirty_blocks_root": false,
+      "dirty_blocks_root": true,
       "trust_class": "trusted",
       "release_eligible": false,
       "exists": true,
@@ -556,5 +556,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:106a93e6848ee119cce3af04e113a9c2ba3856fb588bbac1731f34475e4063df"
+  "content_digest": "sha256:8846c8d324fbb8c96c6e2642d27b64f799a6720971c3810541fa374ccc1ef6e8"
 }
