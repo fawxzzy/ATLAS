@@ -1878,6 +1878,7 @@
 - [AI Long-Run Batch Orchestration Cross-Marker Ratchet Opportunity Contract Freeze](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-CROSS-MARKER-RATCHET-OPPORTUNITY-CONTRACT-FREEZE-2026-07-08.md)
 - [AI Long-Run Batch Orchestration Cross-Marker Ratchet Opportunity First-Implementation Admission](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-CROSS-MARKER-RATCHET-OPPORTUNITY-FIRST-IMPLEMENTATION-ADMISSION-2026-07-08.md)
 - [AI Long-Run Batch Orchestration Cross-Marker Ratchet Opportunity Prompt-Pack And Worker Handoff Contract](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-CROSS-MARKER-RATCHET-OPPORTUNITY-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-08.md)
+- [AI Long-Run Batch Orchestration Cross-Marker Ratchet Opportunity Implementation-Readiness Closeout And Worker Routing](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-CROSS-MARKER-RATCHET-OPPORTUNITY-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-08.md)
 - [AI Long-Run Batch Orchestration Hour-Block Ratchet Wording False-Positive Fix](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-HOUR-BLOCK-RATCHET-WORDING-FALSE-POSITIVE-FIX-2026-07-08.md)
 - [Truth Map And ATLAS Book Root Validation Warning Drift Closeout And Stack Re-Sync](../ops/TRUTH-MAP-AND-ATLAS-BOOK-ROOT-VALIDATION-WARNING-DRIFT-CLOSEOUT-AND-STACK-RESYNC-2026-06-26.md)
 - [Truth Map And ATLAS Book Local Warning Floor Reduction And Stack Re-Sync](../ops/TRUTH-MAP-AND-ATLAS-BOOK-LOCAL-WARNING-FLOOR-REDUCTION-AND-STACK-RESYNC-2026-06-26.md)
