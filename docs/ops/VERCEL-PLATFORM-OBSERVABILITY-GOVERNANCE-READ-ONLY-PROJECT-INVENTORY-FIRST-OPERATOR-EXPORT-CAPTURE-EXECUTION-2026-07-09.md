@@ -136,7 +136,7 @@ Secrets posture:
 Executed helper:
 
 ```powershell
-python C:\ATLAS\ops\atlas\vercel_observability_project_inventory.py --json --input tmp/atlas/vercel-observability/discordos-real-2026-07-09T17-08-05Z.json --output tmp/atlas/vercel-observability/discordos-real-2026-07-09T17-08-05Z.report.json
+python ops/atlas/vercel_observability_project_inventory.py --json --input tmp/atlas/vercel-observability/discordos-real-2026-07-09T17-08-05Z.json --output tmp/atlas/vercel-observability/discordos-real-2026-07-09T17-08-05Z.report.json
 ```
 
 Helper result:
@@ -170,7 +170,7 @@ Result:
 Root validation after capture:
 
 ```powershell
-python C:\ATLAS\ops\validation\validate_stack.py
+python ops/validation/validate_stack.py
 ```
 
 Result:
