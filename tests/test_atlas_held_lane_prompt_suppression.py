@@ -24,17 +24,23 @@ def _selector_payload(*, action: str = "no_immediate_root_packet", next_packet: 
     }
 
 
-def _planner_payload(*, status: str = "advisory_recommendation", selected_packet: str | None = None, candidate_packet: str | None = None) -> dict[str, object]:
+def _planner_payload(
+    *,
+    status: str = "advisory_recommendation",
+    selected_packet: str | None = None,
+    candidate_packet: str | None = None,
+    classification: str = "held_lane",
+) -> dict[str, object]:
     return {
         "status": status,
         "selected_packet": selected_packet,
         "candidate_scores": [
             {
                 "marker": "AI Repetition-to-Automation Pipeline",
-                "classification": "held_lane",
+                "classification": classification,
                 "packet": candidate_packet or selected_packet or "No immediate root packet",
                 "reason": "fixture",
-                "safe_to_select": selected_packet is not None,
+                "safe_to_select": selected_packet is not None and classification != "held_lane",
             }
         ],
     }
@@ -97,13 +103,32 @@ class HeldLanePromptSuppressionTests(unittest.TestCase):
     def test_allows_exact_packet_from_planner(self) -> None:
         report = suppression.build_report(
             selector_report=_selector_payload(),
-            planner_report=_planner_payload(selected_packet="AI Repetition exact bounded packet"),
+            planner_report=_planner_payload(selected_packet="AI Repetition exact bounded packet", classification="immediately_executable_packet"),
             closeout_report=_closeout_payload(),
         )
 
         self.assertEqual(suppression.STATUS_ALLOW, report["status"])
         self.assertEqual(suppression.DECISION_ALLOW_EXACT_PACKET, report["decision"])
         self.assertTrue(report["exact_packet_available"])
+        self.assertEqual("planner_selected_packet", report["selected_packet_source"])
+        self.assertEqual("immediately_executable_packet", report["selected_packet_classification"])
+        self.assertEqual("none", report["packet_authority_risk"])
+
+    def test_allows_safe_docs_only_marker_ratchet_packet_from_planner(self) -> None:
+        packet = "AI Long-Run Batch Orchestration cross-marker ratchet opportunity first-implementation admission"
+        report = suppression.build_report(
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload(selected_packet=packet, classification="docs_only_packet"),
+            closeout_report=_closeout_payload(),
+        )
+
+        self.assertEqual(suppression.STATUS_ALLOW, report["status"])
+        self.assertEqual(suppression.DECISION_ALLOW_EXACT_PACKET, report["decision"])
+        self.assertEqual(packet, report["selected_packet"])
+        self.assertEqual("planner_selected_packet", report["selected_packet_source"])
+        self.assertEqual("docs_only_packet", report["selected_packet_classification"])
+        self.assertEqual("none", report["packet_authority_risk"])
+        self.assertIn("marker or ratchet wording alone is not authority", report["suppression_reason"])
 
     def test_no_immediate_selector_current_packet_does_not_reopen_execution(self) -> None:
         selector = _selector_payload()
@@ -146,12 +171,13 @@ class HeldLanePromptSuppressionTests(unittest.TestCase):
     def test_worker_and_reconciliation_packets_are_not_suppressed(self) -> None:
         report = suppression.build_report(
             selector_report=_selector_payload(),
-            planner_report=_planner_payload(selected_packet="AI Repetition held-lane prompt suppression worker packet 1"),
+            planner_report=_planner_payload(selected_packet="AI Repetition held-lane prompt suppression worker packet 1", classification="implementation_ready_packet"),
             closeout_report=_closeout_payload(),
         )
 
         self.assertEqual(suppression.STATUS_ALLOW, report["status"])
-        self.assertEqual(suppression.DECISION_ALLOW_WORKER_RECONCILIATION, report["decision"])
+        self.assertEqual(suppression.DECISION_ALLOW_EXACT_PACKET, report["decision"])
+        self.assertEqual("implementation_ready_packet", report["selected_packet_classification"])
 
     def test_owner_fallback_is_blocked_by_scope_lock(self) -> None:
         report = suppression.build_report(
@@ -183,6 +209,17 @@ class HeldLanePromptSuppressionTests(unittest.TestCase):
             )
             self.assertEqual(suppression.STATUS_BLOCKED, report["status"])
             self.assertEqual(suppression.DECISION_BLOCKED_BY_SCOPE_LOCK, report["decision"])
+
+    def test_unproven_marker_movement_claim_is_blocked(self) -> None:
+        report = suppression.build_report(
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload(selected_packet="Move marker to 70 without receipt proof", classification="immediately_executable_packet"),
+            closeout_report=_closeout_payload(),
+        )
+
+        self.assertEqual(suppression.STATUS_BLOCKED, report["status"])
+        self.assertEqual(suppression.DECISION_BLOCKED_BY_SCOPE_LOCK, report["decision"])
+        self.assertEqual("marker_movement_authority_claim", report["packet_authority_risk"])
 
     def test_stale_completed_packet_suppresses_rerun(self) -> None:
         report = suppression.build_report(

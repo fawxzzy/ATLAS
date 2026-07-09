@@ -35,12 +35,21 @@ def _selector_payload(
     }
 
 
-def _planner_payload(*, safe: bool = False) -> dict:
+def _planner_payload(
+    *,
+    safe: bool = False,
+    selected_packet: str | None = None,
+    classification: str | None = None,
+    mode: str | None = None,
+) -> dict:
+    packet = selected_packet or ("Executable packet" if safe else None)
+    candidate_packet = selected_packet or ("Executable packet" if safe else "No immediate AI Long-Run Batch Orchestration same-lane packet")
+    candidate_classification = classification or (planner.CLASS_IMMEDIATE if safe else planner.CLASS_HELD)
     return {
         "schema_version": planner.SCHEMA_VERSION,
         "status": planner.STATUS_ADVISORY_RECOMMENDATION,
         "selected_marker": "AI Long-Run Batch Orchestration" if safe else None,
-        "selected_packet": "Executable packet" if safe else None,
+        "selected_packet": packet,
         "candidate_count": 1,
         "candidate_scores": [
             {
@@ -48,10 +57,10 @@ def _planner_payload(*, safe: bool = False) -> dict:
                 "percent": 69,
                 "manifest_id": "continuity-manifest-ai-long-run-batch-orchestration",
                 "source_ref": "docs/memory/initiatives/continuity-manifest-ai-long-run-batch-orchestration.json",
-                "classification": planner.CLASS_IMMEDIATE if safe else planner.CLASS_HELD,
+                "classification": candidate_classification,
                 "score": 90 if safe else 10,
-                "packet": "Executable packet" if safe else "No immediate AI Long-Run Batch Orchestration same-lane packet",
-                "mode": "implementation-ready" if safe else "hold-flat",
+                "packet": candidate_packet,
+                "mode": mode or ("implementation-ready" if safe else "hold-flat"),
                 "reason": "test",
                 "safe_to_select": safe,
             }
@@ -88,6 +97,8 @@ class CodexHourBlockQueuePromptTests(unittest.TestCase):
         self.assertEqual("continue_current_lane", payload["selector"]["operator_action"])
         self.assertEqual("allow_exact_packet", payload["suppression_decision"])
         self.assertEqual(0, payload["planner"]["safe_candidate_count"])
+        self.assertEqual("selector_current_packet", payload["selected_packet_source"])
+        self.assertEqual("none", payload["packet_authority_risk"])
         self.assertIn("SCOPE LOCK:", payload["prompt_text"])
         self.assertIn("This is an ATLAS-root-only packet.", payload["prompt_text"])
         self.assertIn("Do not switch to Fitness or Mazer as a fallback.", payload["prompt_text"])
@@ -130,8 +141,38 @@ class CodexHourBlockQueuePromptTests(unittest.TestCase):
         self.assertEqual(1, payload["planner"]["safe_candidate_count"])
         self.assertEqual("Executable packet", payload["planner"]["safe_candidates"][0]["packet"])
         self.assertEqual("allow_exact_packet", payload["suppression_decision"])
+        self.assertEqual(planner.CLASS_IMMEDIATE, payload["selected_packet_classification"])
         self.assertTrue(payload["should_generate_queue"])
         self.assertIn("Planner safe candidates: `1`", payload["prompt_text"])
+        self.assertIn("Packet authority risk: `none`", payload["prompt_text"])
+
+    def test_safe_docs_only_marker_ratchet_packet_generates_queue(self) -> None:
+        selected_packet = "AI Long-Run Batch Orchestration cross-marker ratchet opportunity first-implementation admission"
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            with mock.patch.object(hour_block, "_branch_state", return_value=("main", "abc123")):
+                with mock.patch.object(hour_block, "_parity_state", return_value={"status": "clean", "behind": 0, "ahead": 0}):
+                    with mock.patch.object(hour_block, "_closeout_report", return_value=_closeout_payload()):
+                        with mock.patch.object(
+                            hour_block.planner,
+                            "build_report",
+                            return_value=_planner_payload(
+                                safe=True,
+                                selected_packet=selected_packet,
+                                classification=planner.CLASS_DOCS_ONLY,
+                                mode="docs-only first-implementation admission",
+                            ),
+                        ):
+                            with mock.patch.object(hour_block.subprocess, "check_output", return_value=json.dumps(_selector_payload())):
+                                payload = hour_block.build_report(root=root)
+
+        self.assertEqual(hour_block.STATUS_OK, payload["status"])
+        self.assertEqual("allow_exact_packet", payload["suppression_decision"])
+        self.assertEqual("planner_selected_packet", payload["selected_packet_source"])
+        self.assertEqual(planner.CLASS_DOCS_ONLY, payload["selected_packet_classification"])
+        self.assertEqual("none", payload["packet_authority_risk"])
+        self.assertTrue(payload["should_generate_queue"])
+        self.assertIn(selected_packet, payload["prompt_text"])
 
     def test_operator_selected_packet_bypasses_suppression(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -271,6 +312,9 @@ class CodexHourBlockQueuePromptTests(unittest.TestCase):
                 "suppression",
                 "suppression_decision",
                 "suppression_reason",
+                "selected_packet_source",
+                "selected_packet_classification",
+                "packet_authority_risk",
                 "allowed_next_actions",
                 "should_generate_queue",
                 "operator_selected_packet",

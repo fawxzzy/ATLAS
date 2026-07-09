@@ -1876,6 +1876,7 @@
 - [AI Long-Run Batch Orchestration Held-Lane Unlock Matrix Validator First-Implementation Worker-Cluster Reconciliation](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-HELD-LANE-UNLOCK-MATRIX-VALIDATOR-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md)
 - [AI Long-Run Batch Orchestration Post Cross-Marker Ratchet Evidence Next-Slice Selection](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-CROSS-MARKER-RATCHET-EVIDENCE-NEXT-SLICE-SELECTION-2026-07-08.md)
 - [AI Long-Run Batch Orchestration Cross-Marker Ratchet Opportunity Contract Freeze](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-CROSS-MARKER-RATCHET-OPPORTUNITY-CONTRACT-FREEZE-2026-07-08.md)
+- [AI Long-Run Batch Orchestration Hour-Block Ratchet Wording False-Positive Fix](../ops/AI-LONG-RUN-BATCH-ORCHESTRATION-HOUR-BLOCK-RATCHET-WORDING-FALSE-POSITIVE-FIX-2026-07-08.md)
 - [Truth Map And ATLAS Book Root Validation Warning Drift Closeout And Stack Re-Sync](../ops/TRUTH-MAP-AND-ATLAS-BOOK-ROOT-VALIDATION-WARNING-DRIFT-CLOSEOUT-AND-STACK-RESYNC-2026-06-26.md)
 - [Truth Map And ATLAS Book Local Warning Floor Reduction And Stack Re-Sync](../ops/TRUTH-MAP-AND-ATLAS-BOOK-LOCAL-WARNING-FLOOR-REDUCTION-AND-STACK-RESYNC-2026-06-26.md)
 - [Truth Map And ATLAS Book Playbook Dependency Residue Reduction And Stack Re-Sync](../ops/TRUTH-MAP-AND-ATLAS-BOOK-PLAYBOOK-DEPENDENCY-RESIDUE-REDUCTION-AND-STACK-RESYNC-2026-06-26.md)

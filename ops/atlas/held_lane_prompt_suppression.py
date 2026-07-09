@@ -41,6 +41,9 @@ OUTPUT_FIELDS = [
     "selector_action",
     "planner_status",
     "selected_packet",
+    "selected_packet_source",
+    "selected_packet_classification",
+    "packet_authority_risk",
     "owner_lane_fallback_forbidden",
     "exact_packet_available",
     "operator_selected_packet",
@@ -105,8 +108,6 @@ PROTECTED_TERMS = (
     "deploy",
     "deployment",
     "final receipt",
-    "marker movement",
-    "marker ratchet",
     "release readiness",
     "release-readiness",
     "secret",
@@ -115,6 +116,23 @@ PROTECTED_TERMS = (
     "vercel",
     "workflow dispatch",
     "workflow_dispatch",
+)
+MARKER_AUTHORITY_TERMS = (
+    "advance marker",
+    "claim marker",
+    "increase marker",
+    "marker movement",
+    "marker to ",
+    "move marker",
+    "moves marker",
+    "moving marker",
+    "ratchet marker",
+    "ratchet to ",
+)
+SAFE_PLANNER_CLASSIFICATIONS = (
+    "docs_only_packet",
+    "implementation_ready_packet",
+    "immediately_executable_packet",
 )
 NO_PACKET_TERMS = (
     "",
@@ -312,6 +330,39 @@ def _selected_packet(selector: dict[str, Any], planner: dict[str, Any]) -> str |
     return None
 
 
+def _selected_packet_source(selector: dict[str, Any], planner: dict[str, Any], selected_packet: str | None, operator_packet: str | None) -> str | None:
+    if operator_packet:
+        return "operator_selected_packet"
+    if selected_packet is None:
+        return None
+    if _string_value(planner.get("selected_packet")) == selected_packet:
+        return "planner_selected_packet"
+    for item in planner.get("candidate_scores") or []:
+        if isinstance(item, dict) and _string_value(item.get("packet")) == selected_packet:
+            return "planner_candidate_packet"
+    selector_action = _selector_action(selector)
+    if selector_action not in {"no_immediate_root_packet", "hold_current_lane", "held", "hold"} and _string_value(selector.get("selected_current_packet")) == selected_packet:
+        return "selector_current_packet"
+    if _string_value(selector.get("next_packet")) == selected_packet or _string_value(selector.get("next_after_current_packet")) == selected_packet:
+        return "selector_next_packet"
+    return "unknown"
+
+
+def _planner_candidate_for_packet(planner: dict[str, Any], packet: str | None) -> dict[str, Any] | None:
+    if packet is None:
+        return None
+    for item in planner.get("candidate_scores") or []:
+        if isinstance(item, dict) and _string_value(item.get("packet")) == packet:
+            return item
+    return None
+
+
+def _planner_packet_is_safe(candidate: dict[str, Any] | None) -> bool:
+    if not isinstance(candidate, dict):
+        return False
+    return candidate.get("safe_to_select") is True and _string_value(candidate.get("classification")) in SAFE_PLANNER_CLASSIFICATIONS
+
+
 def _candidate_text(*values: Any) -> str:
     rendered: list[str] = []
     for value in values:
@@ -337,6 +388,25 @@ def _candidate_text(*values: Any) -> str:
 
 def _has_any(text: str, terms: tuple[str, ...]) -> bool:
     return any(term in text for term in terms if term)
+
+
+def _packet_authority_risk(
+    *,
+    selected_text: str,
+    selected_or_candidate_text: str,
+    owner_fallback_forbidden: bool,
+) -> str:
+    if _has_any(selected_text, PROTECTED_TERMS):
+        return "protected_secret_deploy_workflow_or_final_receipt_authority"
+    if _has_any(selected_text, MARKER_AUTHORITY_TERMS):
+        return "marker_movement_authority_claim"
+    if owner_fallback_forbidden and _has_any(selected_text, OWNER_LANE_TERMS):
+        return "owner_lane_mutation"
+    if _has_any(selected_text, OWNER_FALLBACK_TERMS) or ("owner" in selected_text and "fallback" in selected_text):
+        return "owner_lane_fallback"
+    if _has_any(selected_or_candidate_text, STALE_TERMS):
+        return "stale_or_completed_packet"
+    return "none"
 
 
 def _exact_packet_available(packet: str | None) -> bool:
@@ -412,6 +482,9 @@ def _build_payload(
     selector_action: str | None,
     planner_status: str | None,
     selected_packet: str | None,
+    selected_packet_source: str | None,
+    selected_packet_classification: str | None,
+    packet_authority_risk: str,
     owner_lane_fallback_forbidden: bool,
     exact_packet_available: bool,
     operator_selected_packet: str | None,
@@ -428,6 +501,9 @@ def _build_payload(
             ("selector_action", selector_action),
             ("planner_status", planner_status),
             ("selected_packet", selected_packet),
+            ("selected_packet_source", selected_packet_source),
+            ("selected_packet_classification", selected_packet_classification),
+            ("packet_authority_risk", packet_authority_risk),
             ("owner_lane_fallback_forbidden", owner_lane_fallback_forbidden),
             ("exact_packet_available", exact_packet_available),
             ("operator_selected_packet", operator_selected_packet),
@@ -457,21 +533,33 @@ def build_report(
     planner_status = _planner_status(planner)
     selected_packet = _selected_packet(selector, planner)
     operator_packet = _string_value(operator_selected_packet)
+    selected_packet_source = _selected_packet_source(selector, planner, selected_packet, operator_packet)
+    planner_candidate = _planner_candidate_for_packet(planner, selected_packet)
+    selected_packet_classification = _string_value(planner_candidate.get("classification")) if isinstance(planner_candidate, dict) else None
+    selected_packet_planner_safe = _planner_packet_is_safe(planner_candidate)
     exact_packet = _exact_packet_available(selected_packet)
     owner_fallback_forbidden = _owner_lane_fallback_forbidden(closeout)
     selected_text = _candidate_text(selected_packet, operator_packet)
     selected_or_candidate_text = _candidate_text(selected_packet, operator_packet, planner.get("candidate_scores"))
+    packet_authority_risk = _packet_authority_risk(
+        selected_text=selected_text,
+        selected_or_candidate_text=selected_or_candidate_text,
+        owner_fallback_forbidden=owner_fallback_forbidden,
+    )
 
-    if _has_any(selected_text, PROTECTED_TERMS):
+    if packet_authority_risk == "protected_secret_deploy_workflow_or_final_receipt_authority":
         decision = DECISION_BLOCKED_BY_SCOPE_LOCK
-        reason = "Selected continuation touches protected, secret, deploy, workflow, marker, or final-receipt authority."
-    elif owner_fallback_forbidden and _has_any(selected_text, OWNER_LANE_TERMS):
+        reason = "Selected continuation touches protected, secret, deploy, workflow, or final-receipt authority."
+    elif packet_authority_risk == "marker_movement_authority_claim":
+        decision = DECISION_BLOCKED_BY_SCOPE_LOCK
+        reason = "Selected continuation claims marker movement authority instead of using receipt-backed proof."
+    elif packet_authority_risk == "owner_lane_mutation":
         decision = DECISION_BLOCKED_BY_OWNER_LANE_FALLBACK
         reason = "Selected continuation tries to route Fitness or Mazer from an ATLAS-root governance lane."
-    elif _has_any(selected_text, OWNER_FALLBACK_TERMS) or ("owner" in selected_text and "fallback" in selected_text):
+    elif packet_authority_risk == "owner_lane_fallback":
         decision = DECISION_BLOCKED_BY_SCOPE_LOCK
         reason = "Selected continuation tries to use owner-lane fallback despite root scope lock."
-    elif _has_any(selected_or_candidate_text, STALE_TERMS):
+    elif packet_authority_risk == "stale_or_completed_packet":
         decision = DECISION_SUPPRESS_CONTINUATION
         reason = "Candidate packet appears stale or already completed; no rerun authority is inferred."
     elif validation_state["critical"] > 0 or validation_state["error"] > 0 or not root_clean:
@@ -483,6 +571,9 @@ def build_report(
     elif external_proof_present:
         decision = DECISION_ALLOW_EXACT_PACKET
         reason = "External proof was supplied and admitted; suppression would be stale."
+    elif exact_packet and selected_packet_planner_safe:
+        decision = DECISION_ALLOW_EXACT_PACKET
+        reason = "Planner-selected packet is explicitly safe to select; marker or ratchet wording alone is not authority."
     elif exact_packet and _has_any(selected_text, WORKER_TERMS):
         decision = DECISION_ALLOW_WORKER_RECONCILIATION
         reason = "A worker, readiness, or reconciliation packet is available and should not be suppressed."
@@ -506,6 +597,9 @@ def build_report(
         selector_action=selector_action,
         planner_status=planner_status,
         selected_packet=selected_packet,
+        selected_packet_source=selected_packet_source,
+        selected_packet_classification=selected_packet_classification,
+        packet_authority_risk=packet_authority_risk,
         owner_lane_fallback_forbidden=owner_fallback_forbidden,
         exact_packet_available=exact_packet,
         operator_selected_packet=operator_packet,
@@ -608,6 +702,9 @@ def _error_report(reason: str, *, decision: str = DECISION_INTERNAL_ERROR) -> Or
         selector_action=None,
         planner_status=None,
         selected_packet=None,
+        selected_packet_source=None,
+        selected_packet_classification=None,
+        packet_authority_risk="internal_error",
         owner_lane_fallback_forbidden=True,
         exact_packet_available=False,
         operator_selected_packet=None,
@@ -685,6 +782,9 @@ def main(argv: list[str] | None = None) -> int:
                     selector_action=report.get("selector_action") if isinstance(report.get("selector_action"), str) else None,
                     planner_status=report.get("planner_status") if isinstance(report.get("planner_status"), str) else None,
                     selected_packet=report.get("selected_packet") if isinstance(report.get("selected_packet"), str) else None,
+                    selected_packet_source=report.get("selected_packet_source") if isinstance(report.get("selected_packet_source"), str) else None,
+                    selected_packet_classification=report.get("selected_packet_classification") if isinstance(report.get("selected_packet_classification"), str) else None,
+                    packet_authority_risk=report.get("packet_authority_risk") if isinstance(report.get("packet_authority_risk"), str) else "output_path_error",
                     owner_lane_fallback_forbidden=bool(report.get("owner_lane_fallback_forbidden")),
                     exact_packet_available=bool(report.get("exact_packet_available")),
                     operator_selected_packet=report.get("operator_selected_packet") if isinstance(report.get("operator_selected_packet"), str) else None,
