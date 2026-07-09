@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-06-18T16:50:07.5884334-04:00",
-  "updated_at": "2026-07-07T23:00:00.0000000-04:00",
+  "updated_at": "2026-07-08T21:23:08.6294087-04:00",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -419,6 +419,8 @@
     "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-HELD-LANE-UNLOCK-MATRIX-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-07.md",
     "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-HELD-LANE-UNLOCK-MATRIX-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
     "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-HELD-LANE-UNLOCK-MATRIX-VALIDATOR-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
+    "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-CROSS-MARKER-RATCHET-EVIDENCE-NEXT-SLICE-SELECTION-2026-07-08.md",
+    "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-CROSS-MARKER-RATCHET-OPPORTUNITY-CONTRACT-FREEZE-2026-07-08.md",
     "ops/atlas/held_lane_unlock_matrix.py",
     "tests/test_atlas_held_lane_unlock_matrix.py",
     "ops/atlas/supervised_execution_home_stack_command_implementation_actual_owner_side_mutation_authority_class_choice.py",
@@ -430,9 +432,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "ai-long-run-batch-orchestration",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-HELD-LANE-UNLOCK-MATRIX-VALIDATOR-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
-    "checkpoint_commit": "5be8086d4d060386964755afa1a87dab74c02ba3",
-    "checkpoint_summary": "The held-lane unlock matrix validator worker cluster is now implemented and reconciled. `ops/atlas/held_lane_unlock_matrix_validator.py` validates advisory `atlas.held_lane_unlock_matrix.v1` JSON before reuse, `tests/test_atlas_held_lane_unlock_matrix_validator.py` proves live validation, all-held advisory validation, count mismatch blocking, selection mismatch blocking, owner-lane boundary blocking, tmp-only input reads, tmp-only output writes, protected output rejection, and deterministic top-level ordering, live output reported `status=valid`, `matrix_status=advisory_matrix`, `candidate_count=20`, `held_count=20`, `unlockable_count=0`, `safe_to_use=true`, and `blockers=0`, Fitness and Mazer remain separated owner lanes, no owner, workflow, deploy, secret, protected-surface, marker-write, or final-receipt authority is admitted, `AI Long-Run Batch Orchestration` moves to `69%`, and no immediate same-lane packet is opened by default.",
+    "current_checkpoint_receipt": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-CROSS-MARKER-RATCHET-OPPORTUNITY-CONTRACT-FREEZE-2026-07-08.md",
+    "checkpoint_commit": "main@4104dc9f",
+    "checkpoint_summary": "The post-cross-marker ratchet evidence selector and cross-marker ratchet opportunity contract freeze are now durable. The selector recognizes that the Cortex second advisory substrate implementation proof also satisfied the Playbook/Cortex second implementation-backed consumer class criteria, and the contract freeze defines a future advisory helper for cross-marker proof reuse through `ops/atlas/cross_marker_ratchet_opportunity.py` plus `tests/test_atlas_cross_marker_ratchet_opportunity.py`. No worker is implemented yet, no owner repo is mutated, Fitness and Mazer remain separated owner lanes, workflow, deploy, secret, protected-surface, marker-write, and final-receipt authority remain denied, `AI Long-Run Batch Orchestration` stays at `69%`, and the next exact packet is the cross-marker ratchet opportunity first-implementation admission.",
     "governing_receipts": [
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-2026-05-22.md",
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-POST-WORLD-MODEL-TOP-LEVEL-PAYLOAD-BOUNDARY-NEXT-SLICE-SELECTION-PASS-460-2026-06-17.md",
@@ -456,6 +458,8 @@
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-HELD-LANE-UNLOCK-MATRIX-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-07.md",
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-HELD-LANE-UNLOCK-MATRIX-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-HELD-LANE-UNLOCK-MATRIX-VALIDATOR-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
+      "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-CROSS-MARKER-RATCHET-EVIDENCE-NEXT-SLICE-SELECTION-2026-07-08.md",
+      "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-CROSS-MARKER-RATCHET-OPPORTUNITY-CONTRACT-FREEZE-2026-07-08.md",
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTION-CRITERIA-CONTRACT-FREEZE-PASS-462-2026-06-18.md",
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTION-CRITERIA-OWNER-SURFACE-ADMISSION-PASS-463-2026-06-19.md",
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTION-CRITERIA-SUPPORTING-LANE-ADMISSION-PASS-464-2026-06-19.md",
@@ -793,6 +797,14 @@
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTED-PILOT-OWNER-REPO-MUTATION-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-06-21.md"
     ],
     "owner_truth_surfaces": [
+      {
+        "path": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-CROSS-MARKER-RATCHET-EVIDENCE-NEXT-SLICE-SELECTION-2026-07-08.md",
+        "role": "current cross-marker ratchet opportunity selector"
+      },
+      {
+        "path": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-CROSS-MARKER-RATCHET-OPPORTUNITY-CONTRACT-FREEZE-2026-07-08.md",
+        "role": "current cross-marker ratchet opportunity contract freeze"
+      },
       {
         "path": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-MARKER-AWARE-NEXT-PACKET-PLANNER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
         "role": "current worker-cluster reconciliation for the marker-aware next-packet planner"
@@ -1326,21 +1338,25 @@
         "requirement": "blocked until broader execution, proof-backed adoption, or another real blocker-clearance class changes operator reality again"
       },
       {
+        "item": "cross-marker ratchet opportunity implementation",
+        "requirement": "blocked until the docs-only first-implementation admission admits `ops/atlas/cross_marker_ratchet_opportunity.py` plus `tests/test_atlas_cross_marker_ratchet_opportunity.py`; the current contract freeze does not implement a helper or move the marker"
+      },
+      {
         "item": "widening this lane into owner-repo, deploy, secret, or protected-surface work",
         "requirement": "blocked unless a separate owner-side or approval-gated packet is explicitly selected"
       }
     ],
     "next_package_ladder": [
       {
-        "package": "No immediate AI Long-Run Batch Orchestration same-lane packet",
-        "mode": "hold-flat after held-lane unlock matrix validator worker-cluster reconciliation",
-        "reason": "the held-lane unlock matrix validator helper and focused proof are landed and reconciled; the current all-held advisory posture is machine-validated and future movement requires a separately selected candidate family, broader adoption, or a real blocker-clearance class that changes operator reality"
+        "package": "AI Long-Run Batch Orchestration cross-marker ratchet opportunity first-implementation admission",
+        "mode": "docs-only first-implementation admission",
+        "reason": "the cross-marker ratchet opportunity contract is frozen, but the advisory helper and proof surface have not yet been admitted; the next safe packet admits `ops/atlas/cross_marker_ratchet_opportunity.py` plus `tests/test_atlas_cross_marker_ratchet_opportunity.py` without implementing them or moving markers"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-HELD-LANE-UNLOCK-MATRIX-VALIDATOR-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
-    "freshness_checked_at": "2026-07-07T23:00:00.0000000-04:00",
-    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture now match the held-lane unlock matrix validator worker-cluster reconciliation: `AI Long-Run Batch Orchestration` moves to `69%`, the unlock matrix validator helper and focused tests are landed, Fitness and Mazer remain outside this ATLAS marker lane, and no immediate same-lane packet is opened by default.",
+    "freshness_checked_receipt": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-CROSS-MARKER-RATCHET-OPPORTUNITY-CONTRACT-FREEZE-2026-07-08.md",
+    "freshness_checked_at": "2026-07-08T21:23:08.6294087-04:00",
+    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture now match the cross-marker ratchet opportunity contract freeze: `AI Long-Run Batch Orchestration` remains at `69%`, the future cross-marker advisory helper and proof surface are frozen but not admitted or implemented, Fitness and Mazer remain outside this ATLAS marker lane, and the next exact packet is the docs-only first-implementation admission.",
     "marker_posture": [
       {
         "marker": "AI Long-Run Batch Orchestration",
