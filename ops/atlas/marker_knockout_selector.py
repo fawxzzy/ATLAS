@@ -402,15 +402,15 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "Cortex Dual-Mode Replacement Readiness": PacketDescriptor(
-        packet="Cortex Dual-Mode Replacement Readiness ChatGPT/Codex role inventory prompt-pack and worker handoff contract",
+        packet="Cortex Dual-Mode Replacement Readiness ChatGPT/Codex role inventory implementation-readiness closeout and worker routing",
         basis_receipt_ref=(
             "docs/ops/"
-            "CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHATGPT-CODEX-ROLE-INVENTORY-FIRST-IMPLEMENTATION-ADMISSION-2026-07-09.md"
+            "CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHATGPT-CODEX-ROLE-INVENTORY-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-09.md"
         ),
-        mode="docs-only root-bounded ChatGPT/Codex role-inventory prompt-pack and worker handoff contract",
+        mode="docs-only root-bounded ChatGPT/Codex role-inventory implementation-readiness closeout and worker routing",
         scope=(
-            "freeze the exact worker objective, proof commands, fixture posture, and stop conditions for the "
-            "admitted ChatGPT/Codex role-inventory helper without widening authority beyond the frozen operating model"
+            "decide whether the admitted ChatGPT/Codex role-inventory helper is fully specified enough to route one "
+            "bounded worker packet without widening authority beyond the frozen operating model"
         ),
     ),
     "Cortex Simulation Substrate Readiness": PacketDescriptor(

@@ -97,6 +97,7 @@
 - [Cortex Dual-Mode And Simulation Substrate Marker Admission](../ops/CORTEX-DUAL-MODE-AND-SIMULATION-SUBSTRATE-MARKER-ADMISSION-2026-07-09.md)
 - [Cortex Dual-Mode Replacement Readiness Operating-Mode Contract Freeze](../ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-OPERATING-MODE-CONTRACT-FREEZE-2026-07-09.md)
 - [Cortex Dual-Mode Replacement Readiness ChatGPT/Codex Role Inventory First-Implementation Admission](../ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHATGPT-CODEX-ROLE-INVENTORY-FIRST-IMPLEMENTATION-ADMISSION-2026-07-09.md)
+- [Cortex Dual-Mode Replacement Readiness ChatGPT/Codex Role Inventory Prompt-Pack And Worker Handoff Contract](../ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHATGPT-CODEX-ROLE-INVENTORY-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-09.md)
 - [Supabase Pro Platform Capability Adoption Audit](../ops/SUPABASE-PRO-PLATFORM-CAPABILITY-ADOPTION-AUDIT-2026-07-09.md)
 - [Supabase Pro Platform Governance Backup And Restore Posture Contract Freeze](../ops/SUPABASE-PRO-PLATFORM-GOVERNANCE-BACKUP-AND-RESTORE-POSTURE-CONTRACT-FREEZE-2026-07-09.md)
 - [Supabase Pro Platform Governance Backup Inventory And Restore-Readiness First-Implementation Admission](../ops/SUPABASE-PRO-PLATFORM-GOVERNANCE-BACKUP-INVENTORY-AND-RESTORE-READINESS-FIRST-IMPLEMENTATION-ADMISSION-2026-07-09.md)
