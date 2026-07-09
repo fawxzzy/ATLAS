@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-06-19T06:00:00Z",
-  "updated_at": "2026-07-07T00:00:00Z",
+  "updated_at": "2026-07-09T00:03:52Z",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -43,7 +43,9 @@
     "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-FOUNDATION-OWNER-LANE-PLAYBOOK-ADOPTION-PROOF-FIRST-IMPLEMENTATION-ADMISSION-2026-07-07.md",
     "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-FOUNDATION-OWNER-LANE-PLAYBOOK-ADOPTION-PROOF-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-07.md",
     "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-FOUNDATION-OWNER-LANE-PLAYBOOK-ADOPTION-PROOF-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-07.md",
-    "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-FOUNDATION-OWNER-LANE-PLAYBOOK-ADOPTION-PROOF-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md"
+    "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-FOUNDATION-OWNER-LANE-PLAYBOOK-ADOPTION-PROOF-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
+    "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-POST-CORTEX-SECOND-SUBSTRATE-CONSUMER-CLASS-SELECTION-2026-07-08.md",
+    "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-SECOND-IMPLEMENTATION-BACKED-CONSUMER-CLASS-PROOF-RECONCILIATION-2026-07-08.md"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -51,9 +53,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "playbook-everywhere-cortex-interface",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-FOUNDATION-OWNER-LANE-PLAYBOOK-ADOPTION-PROOF-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
-    "checkpoint_commit": "main@1c2dd42f",
-    "checkpoint_summary": "The lane remains at 40 percent after the Foundation owner-lane Playbook adoption proof worker-cluster reconciliation. At parity-clean root head, the owner-scope matrix reports advisory_gap, safe_to_continue true, zero blockers, one owner_scope_read_only warning, Foundation missing_adoption, read_only true, and root_owned_proof false; Foundation is clean on main, focused matrix tests pass, validation remains critical=0 error=0, and no owner repo, Fitness, Mazer, platform, deploy, secret, protected-surface, release-readiness, owner-truth, or Cortex-authority boundary is touched. The exact same-lane package is now no immediate Playbook Everywhere + Cortex Interface same-lane packet.",
+    "current_checkpoint_receipt": "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-SECOND-IMPLEMENTATION-BACKED-CONSUMER-CLASS-PROOF-RECONCILIATION-2026-07-08.md",
+    "checkpoint_commit": "main@0ec0616c",
+    "checkpoint_summary": "The lane moves to 45 percent after the post-Cortex second substrate selector and second implementation-backed consumer-class proof reconciliation. The selector accepted ops/cortex/second_advisory_substrate_consumption.py as distinct from the first authority-safe interface handoff helper and the first handoff-consumption proof; the reconciliation counts only the already-landed helper, focused tests, live Cortex manifest smoke, regression proof, and clean validation as the second implementation-backed consumer class. The move preserves no owner-repo, Fitness, Mazer, workflow, deploy, secret, protected-surface, final-receipt, owner-truth, execution, or marker-authority widening, and no immediate Playbook/Cortex same-lane packet remains open.",
     "governing_receipts": [
       "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-CONTRACT-FIRST-AGENT-SHADOWING-PASS-1-2026-06-01.md",
       "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-VALIDATION-SUMMARY-SHADOW-CONSUMPTION-PASS-2-2026-06-01.md",
@@ -77,9 +79,27 @@
       "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-FOUNDATION-OWNER-LANE-PLAYBOOK-ADOPTION-PROOF-FIRST-IMPLEMENTATION-ADMISSION-2026-07-07.md",
       "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-FOUNDATION-OWNER-LANE-PLAYBOOK-ADOPTION-PROOF-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-07.md",
       "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-FOUNDATION-OWNER-LANE-PLAYBOOK-ADOPTION-PROOF-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-07.md",
-      "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-FOUNDATION-OWNER-LANE-PLAYBOOK-ADOPTION-PROOF-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md"
+      "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-FOUNDATION-OWNER-LANE-PLAYBOOK-ADOPTION-PROOF-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
+      "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-POST-CORTEX-SECOND-SUBSTRATE-CONSUMER-CLASS-SELECTION-2026-07-08.md",
+      "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-SECOND-IMPLEMENTATION-BACKED-CONSUMER-CLASS-PROOF-RECONCILIATION-2026-07-08.md"
     ],
     "owner_truth_surfaces": [
+      {
+        "path": "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-SECOND-IMPLEMENTATION-BACKED-CONSUMER-CLASS-PROOF-RECONCILIATION-2026-07-08.md",
+        "role": "docs-only proof reconciliation accepting the landed Cortex second advisory substrate consumer as the Playbook/Cortex lane's second implementation-backed consumer class, moving the marker from 40 to 45 percent while preserving no owner-repo, Fitness, Mazer, workflow, deploy, secret, protected-surface, final-receipt, owner-truth, execution, or marker-authority widening"
+      },
+      {
+        "path": "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-POST-CORTEX-SECOND-SUBSTRATE-CONSUMER-CLASS-SELECTION-2026-07-08.md",
+        "role": "docs-only selector proving the Cortex second advisory substrate consumer is distinct from the first authority-safe interface handoff helper and first handoff-consumption proof, selecting the second-consumer proof reconciliation packet without marker movement"
+      },
+      {
+        "path": "ops/cortex/second_advisory_substrate_consumption.py",
+        "role": "root-owned read-only Cortex consumer helper that consumes admitted second advisory substrate refs directly, computes source digests, classifies substrate classes, preserves authority denials, rejects owner/protected/deploy/secret/workflow/transcript/session paths, and writes only to explicit safe tmp JSON outputs"
+      },
+      {
+        "path": "tests/test_cortex_second_advisory_substrate_consumption.py",
+        "role": "focused proof suite for the second advisory substrate consumer covering admitted source classification, path guards, default no-write behavior, explicit safe output, validation gating, deterministic JSON ordering, and authority-denial preservation"
+      },
       {
         "path": "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-FOUNDATION-OWNER-LANE-PLAYBOOK-ADOPTION-PROOF-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
         "role": "root-only worker-cluster reconciliation proving the Foundation owner-lane adoption proof slice is safely classified as read-only missing_adoption with root_owned_proof=false, zero blockers at parity-clean root, clean Foundation status, focused matrix test proof, stack validation critical=0 error=0, no Fitness or Mazer mutation, and no marker movement"
@@ -214,11 +234,11 @@
     "blocked_or_gated_work": [
       {
         "item": "continuing this lane by adjacency alone",
-        "requirement": "blocked unless a new implementation packet, authority-safe interface widening, owner-side adoption proof, cleared blocked-family admissibility boundary, or real contract/read-model drift appears"
+        "requirement": "blocked unless a third distinct implementation-backed interface or consumer class, owner-side adoption proof, broader governed export-breadth proof, cleared blocked-family admissibility boundary, or real contract/read-model drift appears"
       },
       {
         "item": "higher marker movement above the current held interface threshold",
-        "requirement": "blocked because the Foundation owner-lane Playbook adoption proof slice is reconciled as safe but still reports missing_adoption with root_owned_proof=false; future movement requires actual owner-side Foundation adoption proof, broader governed export breadth, a second implementation-backed consumer class, or real owner-boundary change"
+        "requirement": "blocked because the second implementation-backed consumer class is now reconciled; future movement requires actual owner-side Foundation adoption proof, broader governed export breadth, a third distinct implementation-backed consumer or interface class, or real owner-boundary/interface change"
       },
       {
         "item": "claiming Cortex authority widening from safe shadow consumption alone",
@@ -228,18 +248,18 @@
     "next_package_ladder": [
       {
         "package": "No immediate Playbook Everywhere + Cortex Interface same-lane packet",
-        "mode": "held after Foundation owner-lane proof worker-cluster reconciliation",
-        "reason": "The admitted Foundation owner-lane proof slice is reconciled as safe and read-only, but it still reports Foundation missing_adoption with root_owned_proof=false; further progress requires a separately scoped Foundation owner-side adoption packet, a new root-owned consumer class, or broader governed export-breadth proof"
+        "mode": "held after second implementation-backed consumer-class proof reconciliation",
+        "reason": "The second implementation-backed consumer class is reconciled and moved the lane to 45 percent; further progress requires a third distinct implementation-backed interface or consumer class, owner-side Foundation adoption proof that changes missing_adoption/root_owned_proof=false, broader governed export-breadth proof, or real Playbook/Cortex contract drift"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-FOUNDATION-OWNER-LANE-PLAYBOOK-ADOPTION-PROOF-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
-    "freshness_checked_at": "2026-07-07T00:00:00Z",
-    "freshness_basis": "The manifest now mirrors the Foundation owner-lane Playbook adoption proof worker-cluster reconciliation. The lane remains at 40 percent because the reconciled proof confirms safe root-owned owner-lane classification but still reports Foundation missing_adoption with root_owned_proof=false; the next threshold requires separately scoped owner-side Foundation adoption proof, a new root-owned consumer class, or broader governed export-breadth proof.",
+    "freshness_checked_receipt": "docs/ops/PLAYBOOK-EVERYWHERE-CORTEX-INTERFACE-SECOND-IMPLEMENTATION-BACKED-CONSUMER-CLASS-PROOF-RECONCILIATION-2026-07-08.md",
+    "freshness_checked_at": "2026-07-09T00:03:52Z",
+    "freshness_basis": "The manifest now mirrors the second implementation-backed consumer-class proof reconciliation. The lane moves to 45 percent because the already-landed Cortex second advisory substrate consumer proves a distinct direct substrate-consumption class with focused tests, live manifest smoke, regression proof, clean validation, and preserved no-authority boundaries; the next threshold requires a third distinct implementation-backed class, owner-side Foundation adoption proof, broader governed export-breadth proof, or real contract drift.",
     "marker_posture": [
       {
         "marker": "Playbook Everywhere + Cortex Interface",
-        "percent": 40,
+        "percent": 45,
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ]
