@@ -111,6 +111,7 @@
 - [Supabase Pro Platform Governance Backup Metadata Read-Only Intake Prompt-Pack And Worker Handoff Contract](../ops/SUPABASE-PRO-PLATFORM-GOVERNANCE-BACKUP-METADATA-READ-ONLY-INTAKE-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-09.md)
 - [Supabase Pro Platform Governance Backup Metadata Read-Only Intake Implementation-Readiness Closeout And Worker Routing](../ops/SUPABASE-PRO-PLATFORM-GOVERNANCE-BACKUP-METADATA-READ-ONLY-INTAKE-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-09.md)
 - [Supabase Pro Platform Governance Backup Metadata Read-Only Intake First-Implementation Worker-Cluster Reconciliation](../ops/SUPABASE-PRO-PLATFORM-GOVERNANCE-BACKUP-METADATA-READ-ONLY-INTAKE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-09.md)
+- [Supabase Pro Platform Governance Backup Metadata First Operator-Export Capture Contract Freeze](../ops/SUPABASE-PRO-PLATFORM-GOVERNANCE-BACKUP-METADATA-FIRST-OPERATOR-EXPORT-CAPTURE-CONTRACT-FREEZE-2026-07-09.md)
 - [Fitness Vercel Deconstruction Receipt](../ops/FITNESS-VERCEL-DECONSTRUCTION-2026-07-04.md)
 - [ATLAS QA Topology Repair And Read-Model Re-Sync](../ops/ATLAS-QA-TOPOLOGY-REPAIR-AND-READ-MODEL-RESYNC-2026-06-27.md)
 - [Root-Side Stack Lock Refresh After ATLAS QA Topology Repair And Read-Model Re-Sync](../ops/ROOT-SIDE-STACK-LOCK-REFRESH-AFTER-ATLAS-QA-TOPOLOGY-REPAIR-AND-READ-MODEL-RESYNC-2026-06-27.md)
