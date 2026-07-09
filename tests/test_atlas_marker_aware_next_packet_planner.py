@@ -111,6 +111,96 @@ class MarkerAwareNextPacketPlannerTests(unittest.TestCase):
         self.assertEqual(planner.STATUS_OK, report["status"])
         self.assertEqual(planner.CLASS_DOCS_ONLY, report["candidate_scores"][0]["classification"])
 
+    def test_non_actionable_cross_marker_opportunity_stays_advisory_only(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            _seed_manifest(
+                root,
+                "continuity-manifest-playbook-everywhere-cortex-interface",
+                _manifest(
+                    "Playbook Everywhere + Cortex Interface",
+                    45,
+                    "No immediate Playbook Everywhere + Cortex Interface same-lane packet",
+                    "held after foundation proof",
+                ),
+            )
+            with mock.patch.object(
+                planner.cross_marker_ratchet_opportunity,
+                "build_report",
+                return_value={
+                    "status": planner.cross_marker_ratchet_opportunity.STATUS_OK,
+                    "safe_to_use": True,
+                    "opportunities": [
+                        {
+                            "source_receipt": "docs/ops/CORTEX-READINESS-SECOND-ADVISORY-SUBSTRATE-CONSUMPTION-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-08.md",
+                            "source_marker": "Cortex Readiness",
+                            "candidate_marker": "Playbook Everywhere + Cortex Interface",
+                            "required_follow_up_packet": "No immediate Playbook Everywhere + Cortex Interface same-lane packet",
+                        }
+                    ],
+                },
+            ):
+                report = planner.build_report(root=root)
+
+        self.assertEqual(planner.STATUS_ADVISORY_RECOMMENDATION, report["status"])
+        candidate = report["candidate_scores"][0]
+        self.assertFalse(candidate["cross_marker_signal_applied"])
+        self.assertEqual(0, candidate["cross_marker_score_bonus"])
+        self.assertIn("advisory-only", candidate["cross_marker_reason"])
+        self.assertIsNone(report["selected_packet"])
+
+    def test_actionable_cross_marker_opportunity_gets_bounded_score_uplift(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            _seed_manifest(
+                root,
+                "continuity-manifest-ai-long-run-batch-orchestration",
+                _manifest(
+                    "AI Long-Run Batch Orchestration",
+                    70,
+                    "AI Long-Run Batch Orchestration cross-marker opportunity planner-integration first-implementation admission",
+                    "docs-only first-implementation admission after planner-integration contract freeze",
+                ),
+            )
+            _seed_manifest(
+                root,
+                "continuity-manifest-cortex-readiness",
+                _manifest(
+                    "Cortex Readiness",
+                    46,
+                    "Cortex docs-only contract freeze",
+                    "docs-only root-bounded contract freeze",
+                ),
+            )
+            with mock.patch.object(
+                planner.cross_marker_ratchet_opportunity,
+                "build_report",
+                return_value={
+                    "status": planner.cross_marker_ratchet_opportunity.STATUS_OK,
+                    "safe_to_use": True,
+                    "opportunities": [
+                        {
+                            "source_receipt": "docs/ops/CORTEX-READINESS-SECOND-ADVISORY-SUBSTRATE-CONSUMPTION-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-08.md",
+                            "source_marker": "Cortex Readiness",
+                            "candidate_marker": "AI Long-Run Batch Orchestration",
+                            "required_follow_up_packet": "AI Long-Run Batch Orchestration cross-marker opportunity planner-integration first-implementation admission",
+                        }
+                    ],
+                },
+            ):
+                report = planner.build_report(root=root)
+
+        self.assertEqual(planner.STATUS_OK, report["status"])
+        self.assertEqual("AI Long-Run Batch Orchestration", report["selected_marker"])
+        candidate = report["candidate_scores"][0]
+        self.assertTrue(candidate["cross_marker_signal_applied"])
+        self.assertEqual(planner.CROSS_MARKER_SCORE_BONUS, candidate["cross_marker_score_bonus"])
+        self.assertEqual(candidate["base_score"] + planner.CROSS_MARKER_SCORE_BONUS, candidate["score"])
+        self.assertEqual(
+            "AI Long-Run Batch Orchestration cross-marker opportunity planner-integration first-implementation admission",
+            report["selected_packet"],
+        )
+
     def test_unsafe_authority_risk_rejected_from_selection(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

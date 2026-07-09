@@ -191,7 +191,7 @@ If the helper reports no safe planner candidates and selector posture is `no_imm
 
 ## Required AI Long-Run Cross-Marker Opportunity Helper
 
-The supporting marker `AI Long-Run Batch Orchestration` now sits at `70%`; the latest ratchet proof is `docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-CROSS-MARKER-RATCHET-OPPORTUNITY-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-08.md`.
+The supporting marker `AI Long-Run Batch Orchestration` now sits at `71%`; the latest ratchet proof is `docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-CROSS-MARKER-OPPORTUNITY-PLANNER-INTEGRATION-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-09.md`.
 
 The helper is:
 

@@ -20,7 +20,7 @@ Read:
 - `Playbook Everywhere + Cortex Interface: 45%`
 - `AI Work Session Stability & Auto-Sync Loop: 85%`
 - `AI Repetition-to-Automation Pipeline: 54%`
-- `AI Long-Run Batch Orchestration: 70%`
+- `AI Long-Run Batch Orchestration: 71%`
 - `Sandbox Simulation Readiness: 99%`
 
 Read:
@@ -36,7 +36,7 @@ Read:
 - AI Repetition now has implementation-backed proof for held-lane suppression queue integration: worker commit `0b1d2aad` wires the suppression helper into the hour-block prompt generator, exposes top-level suppression JSON fields, renders `ATLAS ROOT HELD - DO NOT CONTINUE GENERICALLY` for clean held roots, preserves exact-packet, planner-candidate, operator-selected, validation-cleanup, and worker-reconciliation bypasses, blocks Fitness/Mazer fallback from ATLAS-root continuation, focused suppression tests pass `16/16`, focused queue tests pass `11/11`, adjacent selector/continuity tests pass `21/21`, broader AI Repetition helper tests pass `49/49`, stack validation remains `critical=0 error=0 warning=0 info=0`, and the lane moves to `54%`
 - AI Long-Run now has implementation-backed proof for the held-lane unlock matrix validator: live output reports `status=valid`, `matrix_status=advisory_matrix`, `candidate_count=20`, `held_count=20`, `unlockable_count=0`, and `safe_to_use=true`, focused validator/planner/matrix tests pass 32/32, Fitness and Mazer remain separated owner lanes, and the lane moves to `69%`
 - AI Long-Run now also has implementation-backed proof for the cross-marker ratchet opportunity helper: live output reports `status=ok`, `safe_to_use=true`, `candidate_count=12`, `opportunity_count=1`, and `blocked_candidates=4`; focused tests pass 11/11, adjacent planner/queue/continuity tests pass 35/35, stack validation remains `critical=0 error=0 warning=0 info=0`, Fitness and Mazer remain separated owner lanes, and the lane moves to `70%`
-- AI Long-Run now also has a docs-only cross-marker opportunity planner-integration selector and contract freeze: the July 9 selector chooses planner integration as the next honest slice because the helper proves an opportunity while the live planner still selects nothing, and the July 9 contract freeze preserves advisory scoring only, hold-preserving no-action behavior when the follow-up is still non-executable, existing authority denials, and the exact next packet `AI Long-Run Batch Orchestration cross-marker opportunity planner-integration first-implementation admission`; the marker remains `70%`
+- AI Long-Run now also has implementation-backed proof for cross-marker opportunity planner integration: the July 9 selector and contract freeze are now consumed by the admitted admission, prompt-pack, readiness, and worker-cluster reconciliation chain; focused planner tests now pass `15/15`, the broader planner plus cross-marker helper suite passes `26/26`, live planner output now keeps the Playbook/Cortex follow-up advisory-only because it remains `No immediate ...`, stack validation remains `critical=0 error=0 warning=0 info=0`, Fitness and Mazer remain separated owner lanes, and the lane moves to `71%`
 
 ### Discord workflow
 
@@ -64,7 +64,7 @@ Read:
 ## Active Front-Page Marker Table
 
 - AI Repetition-to-Automation Pipeline: `54%`
-- AI Long-Run Batch Orchestration: `70%`
+- AI Long-Run Batch Orchestration: `71%`
 - Sandbox Simulation Readiness: `99%`
 
 ## Supporting Open Markers
@@ -74,7 +74,7 @@ Read:
 - Cortex Readiness: `46%`
 - AI Work Session Stability & Auto-Sync Loop: `85%`
 - AI Repetition-to-Automation Pipeline: `54%`
-- AI Long-Run Batch Orchestration: `70%`
+- AI Long-Run Batch Orchestration: `71%`
 - Playbook Everywhere + Cortex Interface: `45%`
 
 ### Future / lane-structure
@@ -199,7 +199,7 @@ Within the ATLAS systems lane, the current immediate control-plane family is now
 
 ATLAS root remains the truth owner for the family. `_stack` Readiness control-plane surfaces in ATLAS root receipts, restart mirrors, selector output, and continuity surfaces now own the producing and consuming home for the active supervised-execution-home downstream chain through the landed actual owner-side mutation authority-class-value worker-cluster reconciliation, the post-stack-command-implementation-actual-owner-side-mutation-authority-class-value selector in pass `763`, and the downstream hold recheck. `_stack` Readiness is not itself one concrete `_stack` command home, one actual concrete command file, one downstream runtime-home value placement, or one actual concrete `_stack` command implementation surface, and `repos/_stack/**`, one actual concrete command-file decision, one downstream placement decision, one actual concrete `_stack` command implementation-surface choice, one actual owner-repo mutation surface, actual owner-side mutation authority, and Playbook doctrine export all remain deferred below the current boundary. The current Sandbox family is now honestly held: `No immediate Sandbox Simulation Readiness same-lane packet`.
 
-Current AI Long-Run closeout read: `AI Long-Run Batch Orchestration` now sits at `70%`. The supervised-execution-home downstream chain remains durable through the landed actual owner-side mutation authority-class-value worker-cluster reconciliation on canonical `main`, the post-stack-command-implementation-actual-owner-side-mutation-authority-class-value selector in pass `763`, and the downstream hold recheck; the marker-aware next-packet planner, held-lane unlock matrix, held-lane unlock matrix validator, and cross-marker ratchet opportunity workers are reconciled as root-owned advisory surfaces with focused proof. The cross-marker ratchet opportunity helper reports one safe advisory opportunity from the Cortex second advisory substrate proof to the Playbook/Cortex second-consumer class, but the live planner still has no selected packet, so the July 9 selector and contract freeze now route the next exact packet to `AI Long-Run Batch Orchestration cross-marker opportunity planner-integration first-implementation admission` while preserving hold behavior, owner-lane separation, and marker-write/final-receipt denial.
+Current AI Long-Run closeout read: `AI Long-Run Batch Orchestration` now sits at `71%`. The supervised-execution-home downstream chain remains durable through the landed actual owner-side mutation authority-class-value worker-cluster reconciliation on canonical `main`, the post-stack-command-implementation-actual-owner-side-mutation-authority-class-value selector in pass `763`, and the downstream hold recheck; the marker-aware next-packet planner, held-lane unlock matrix, held-lane unlock matrix validator, cross-marker ratchet opportunity helper, and planner-integration worker are all reconciled as root-owned advisory surfaces with focused proof. The cross-marker ratchet opportunity helper still reports one safe advisory opportunity from the Cortex second advisory substrate proof to the Playbook/Cortex second-consumer class, but the landed planner integration now proves that follow-up remains advisory-only because the Playbook lane is still held. No immediate same-lane AI Long-Run packet is honestly open after the worker-cluster reconciliation.
 
 ## Current Marker Read
 

@@ -13,6 +13,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from ops._atlas import atlas_root, normalize_slashes
+from ops.atlas import cross_marker_ratchet_opportunity
 
 SCHEMA_VERSION = "atlas.marker_aware_next_packet_planner.v1"
 
@@ -31,6 +32,8 @@ CLASS_IMPLEMENTATION_READY = "implementation_ready_packet"
 CLASS_DOCS_ONLY = "docs_only_packet"
 CLASS_UNSAFE = "unsafe_authority_risk_packet"
 CLASS_NO_ACTION = "no_action_hold"
+
+CROSS_MARKER_SCORE_BONUS = 15
 
 CLASS_SCORES = {
     CLASS_IMPLEMENTATION_READY: 100,
@@ -79,6 +82,8 @@ PROOF_REQUIREMENTS = [
     "unsafe authority-risk rejection",
     "Playbook refs surfaced as evidence only",
     "Cortex advisory inputs remain authority-denying",
+    "non-actionable cross-marker opportunities remain advisory only",
+    "actionable cross-marker opportunities can add bounded score uplift without inventing packets",
     "workflow-style candidates cannot edit .github/workflows/**",
     "optional output writes limited to explicit tmp/**.json",
     "no marker movement or final-receipt authority",
@@ -341,6 +346,7 @@ def _candidate_from_manifest(source_ref: str, manifest: dict[str, Any]) -> Order
             ("source_ref", source_ref),
             ("classification", classification),
             ("score", score),
+            ("base_score", score),
             ("packet", packet or None),
             ("mode", mode or None),
             ("reason", reason or None),
@@ -362,6 +368,79 @@ def _classify_sources(sources: list[tuple[str, Path, str]]) -> list[OrderedDict[
         if candidate is not None:
             candidates.append(candidate)
     return sorted(candidates, key=lambda item: (-int(item["score"]), str(item["marker"]), str(item.get("packet") or "")))
+
+
+def _is_nonheld_packet(packet: str | None) -> bool:
+    if not packet:
+        return False
+    packet_lower = packet.lower()
+    return not (
+        "no immediate" in packet_lower
+        or "no lane-internal" in packet_lower
+        or packet_lower.startswith("none ")
+        or packet_lower.startswith("no further")
+    )
+
+
+def _cross_marker_signal_reason(*, classification: str, follow_up_packet: str) -> str:
+    if not _is_nonheld_packet(follow_up_packet):
+        return "follow-up remains a hold packet, so the signal stays advisory-only"
+    if classification not in {CLASS_IMMEDIATE, CLASS_IMPLEMENTATION_READY, CLASS_DOCS_ONLY}:
+        return "candidate is not a safe selectable packet class, so the signal stays advisory-only"
+    if classification == CLASS_IMPLEMENTATION_READY:
+        return "candidate is already implementation-ready, so no cross-marker score bonus is required"
+    if classification == CLASS_IMMEDIATE:
+        return "candidate is already immediately executable, so no cross-marker score bonus is required"
+    return "candidate already has explicit non-held next-package truth, so bounded advisory uplift is allowed"
+
+
+def _cross_marker_bonus(*, classification: str, follow_up_packet: str) -> int:
+    if not _is_nonheld_packet(follow_up_packet):
+        return 0
+    if classification == CLASS_DOCS_ONLY:
+        return CROSS_MARKER_SCORE_BONUS
+    return 0
+
+
+def _apply_cross_marker_signals(*, root: Path, candidates: list[OrderedDict[str, Any]]) -> None:
+    try:
+        cross_marker_report = cross_marker_ratchet_opportunity.build_report(root=root)
+    except Exception:
+        return
+
+    if cross_marker_report.get("status") != cross_marker_ratchet_opportunity.STATUS_OK:
+        return
+    if cross_marker_report.get("safe_to_use") is not True:
+        return
+
+    candidate_by_marker = {str(candidate.get("marker")): candidate for candidate in candidates}
+    opportunities = cross_marker_report.get("opportunities")
+    if not isinstance(opportunities, list):
+        return
+
+    for opportunity in opportunities:
+        if not isinstance(opportunity, dict):
+            continue
+        marker = str(opportunity.get("candidate_marker") or "")
+        candidate = candidate_by_marker.get(marker)
+        if candidate is None:
+            continue
+        follow_up_packet = str(opportunity.get("required_follow_up_packet") or candidate.get("packet") or "")
+        classification = str(candidate.get("classification") or "")
+        bonus = _cross_marker_bonus(classification=classification, follow_up_packet=follow_up_packet)
+        candidate["cross_marker_signal_applied"] = bonus > 0
+        candidate["cross_marker_source_receipt"] = opportunity.get("source_receipt")
+        candidate["cross_marker_source_marker"] = opportunity.get("source_marker")
+        candidate["cross_marker_candidate_marker"] = opportunity.get("candidate_marker")
+        candidate["cross_marker_required_follow_up_packet"] = opportunity.get("required_follow_up_packet")
+        candidate["cross_marker_reason"] = _cross_marker_signal_reason(
+            classification=classification,
+            follow_up_packet=follow_up_packet,
+        )
+        candidate["cross_marker_score_bonus"] = bonus
+        candidate["score"] = int(candidate.get("base_score") or 0) + bonus
+
+    candidates.sort(key=lambda item: (-int(item["score"]), str(item["marker"]), str(item.get("packet") or "")))
 
 
 def _selected_candidate(candidates: list[OrderedDict[str, Any]]) -> OrderedDict[str, Any] | None:
@@ -409,6 +488,7 @@ def build_report(*, root: Path, source_refs: list[str] | None = None) -> Ordered
     head = _git_stdout(root, "rev-parse", "HEAD")
     loaded_sources, blockers = _load_sources(root=root, source_refs=source_refs or [])
     candidates = _classify_sources(loaded_sources)
+    _apply_cross_marker_signals(root=root, candidates=candidates)
     selected = _selected_candidate(candidates)
 
     if blockers:
