@@ -168,6 +168,23 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
             encoding="utf-8",
         )
 
+        dual_mode_reconciliation_receipt = root / "docs" / "ops" / (
+            "CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHATGPT-CODEX-ROLE-INVENTORY-FIRST-"
+            "IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-09.md"
+        )
+        dual_mode_reconciliation_receipt.write_text(
+            "\n".join(
+                [
+                    "# Dual-Mode Role Inventory Reconciliation",
+                    "",
+                    "- Mode: `docs-only root-bounded ChatGPT/Codex role-inventory marker-surface ratchet decision`",
+                    "- Scope: `decide whether the implementation-backed ChatGPT/Codex role inventory justifies broader marker adoption or should remain held at 0 percent without widening beyond admitted root doctrine`",
+                    "",
+                ]
+            ),
+            encoding="utf-8",
+        )
+
     def _write_manifest(
         self,
         root: Path,
@@ -801,14 +818,14 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual("hold_current_lane", payload["operator_action"])
         self.assertEqual("Cortex Dual-Mode Replacement Readiness", payload["next_after_current_marker"])
         self.assertEqual(
-            "Cortex Dual-Mode Replacement Readiness ChatGPT/Codex role inventory implementation-readiness closeout and worker routing",
+            "Cortex Dual-Mode Replacement Readiness ChatGPT/Codex role inventory marker-surface ratchet decision",
             payload["next_after_current_packet"],
         )
         self.assertEqual(
-            "docs-only root-bounded ChatGPT/Codex role-inventory implementation-readiness closeout and worker routing",
+            "docs-only root-bounded ChatGPT/Codex role-inventory marker-surface ratchet decision",
             payload["next_after_current_packet_mode"],
         )
-        self.assertIn("fully specified enough to route one bounded worker packet", payload["next_after_current_packet_scope"])
+        self.assertIn("implementation-backed ChatGPT/Codex role inventory", payload["next_after_current_packet_scope"])
 
 
 if __name__ == "__main__":

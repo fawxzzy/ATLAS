@@ -188,8 +188,8 @@ POLICY_REGISTRY: dict[str, MarkerPolicy] = {
             "already-active Vercel and mature automation or interface lanes before a new doctrine-only bridge family."
         ),
         expected_evidence=(
-            "one dual-mode operating model contract that freezes external-scaffolding roles, Cortex synthesis and "
-            "execution interface boundaries, and bridge authority denials"
+            "one implementation-backed ChatGPT/Codex role-inventory reconciliation or marker-ratchet decision that "
+            "preserves read-only doctrine intake, authority denials, and bridge boundary truth"
         ),
     ),
     "Cortex Simulation Substrate Readiness": MarkerPolicy(
@@ -402,15 +402,15 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "Cortex Dual-Mode Replacement Readiness": PacketDescriptor(
-        packet="Cortex Dual-Mode Replacement Readiness ChatGPT/Codex role inventory implementation-readiness closeout and worker routing",
+        packet="Cortex Dual-Mode Replacement Readiness ChatGPT/Codex role inventory marker-surface ratchet decision",
         basis_receipt_ref=(
             "docs/ops/"
-            "CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHATGPT-CODEX-ROLE-INVENTORY-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-09.md"
+            "CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHATGPT-CODEX-ROLE-INVENTORY-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-09.md"
         ),
-        mode="docs-only root-bounded ChatGPT/Codex role-inventory implementation-readiness closeout and worker routing",
+        mode="docs-only root-bounded ChatGPT/Codex role-inventory marker-surface ratchet decision",
         scope=(
-            "decide whether the admitted ChatGPT/Codex role-inventory helper is fully specified enough to route one "
-            "bounded worker packet without widening authority beyond the frozen operating model"
+            "decide whether the implementation-backed ChatGPT/Codex role inventory justifies broader marker adoption "
+            "or should remain held at 0 percent without widening beyond admitted root doctrine"
         ),
     ),
     "Cortex Simulation Substrate Readiness": PacketDescriptor(
