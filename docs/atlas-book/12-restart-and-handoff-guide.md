@@ -110,6 +110,22 @@ Mandatory prompt preflight:
 - is the next move owner-side unblock work, a root execution cluster, or read-model or doctrine only
 - if continuation is being automated, is there already one machine-readable result plus a guarded dry-run gate instead of a blind `continue` loop
 
+## Current Supabase Pro Platform Posture
+
+If the task is about Supabase Pro adoption, platform readiness, or cross-project Supabase governance at ATLAS root, start with:
+
+- `docs/ops/SUPABASE-PRO-PLATFORM-CAPABILITY-ADOPTION-AUDIT-2026-07-09.md`
+
+What that receipt currently establishes:
+
+- the current Supabase org has three confirmed projects visible to the read-only connector: `FawxzzyFitness` (`lpswxoyfniocuhljgzbc`), `DiscordOS` (`nwexsktuuenfdegzrbut`), and `Mazer` (`geknvnrmktchljnyddwp`)
+- `Nat1-Games` has a real `supabase-js` dependency but no confirmed visible project identity yet
+- the July 9 pass is read-only governance only; no settings, secrets, or owner repos were mutated
+- no new marker or continuity manifest exists for this family yet
+- the exact next packet is `Supabase Pro Platform Governance backup and restore posture contract freeze`
+
+Do not skip from that receipt straight into PITR, network restrictions, log drains, custom domains, or compute changes. The current governed order is audit first, then bounded contract freezes, then any later operator-authorized platform mutation.
+
 ## Required AI Work Session Loop
 
 The supporting marker `AI Work Session Stability & Auto-Sync Loop` now sits at `85%`; the ratchet proof is `docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-THRESHOLD-RECONCILIATION-2026-07-04.md`, the latest same-lane routing receipt is that same threshold reconciliation receipt, and the opening contract remains at `docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-CONTRACT-FREEZE-2026-06-29.md`.
