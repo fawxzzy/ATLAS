@@ -402,15 +402,15 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "Cortex Dual-Mode Replacement Readiness": PacketDescriptor(
-        packet="Cortex Dual-Mode Replacement Readiness operating-model contract freeze",
+        packet="Cortex Dual-Mode Replacement Readiness ChatGPT/Codex role inventory first-implementation admission",
         basis_receipt_ref=(
             "docs/ops/"
-            "CORTEX-DUAL-MODE-AND-SIMULATION-SUBSTRATE-MARKER-ADMISSION-2026-07-09.md"
+            "CORTEX-DUAL-MODE-REPLACEMENT-READINESS-OPERATING-MODE-CONTRACT-FREEZE-2026-07-09.md"
         ),
-        mode="docs-only root-bounded dual-mode operating-model contract freeze",
+        mode="docs-only root-bounded ChatGPT/Codex role-inventory first-implementation admission",
         scope=(
-            "freeze the first durable operating model for replacing external ChatGPT and Codex scaffolding with "
-            "internal Cortex synthesis and execution interfaces while preserving bridge authority denials"
+            "admit the first bounded role-inventory slice that maps current ChatGPT and Codex duties into the "
+            "frozen Cortex synthesis, execution, and bridge operating model without widening authority"
         ),
     ),
     "Cortex Simulation Substrate Readiness": PacketDescriptor(

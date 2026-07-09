@@ -801,14 +801,14 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual("hold_current_lane", payload["operator_action"])
         self.assertEqual("Cortex Dual-Mode Replacement Readiness", payload["next_after_current_marker"])
         self.assertEqual(
-            "Cortex Dual-Mode Replacement Readiness operating-model contract freeze",
+            "Cortex Dual-Mode Replacement Readiness ChatGPT/Codex role inventory first-implementation admission",
             payload["next_after_current_packet"],
         )
         self.assertEqual(
-            "docs-only root-bounded dual-mode operating-model contract freeze",
+            "docs-only root-bounded ChatGPT/Codex role-inventory first-implementation admission",
             payload["next_after_current_packet_mode"],
         )
-        self.assertIn("replacing external ChatGPT and Codex scaffolding", payload["next_after_current_packet_scope"])
+        self.assertIn("maps current ChatGPT and Codex duties", payload["next_after_current_packet_scope"])
 
 
 if __name__ == "__main__":
