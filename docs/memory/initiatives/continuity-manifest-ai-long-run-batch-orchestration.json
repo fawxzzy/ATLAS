@@ -422,6 +422,7 @@
     "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-CROSS-MARKER-RATCHET-EVIDENCE-NEXT-SLICE-SELECTION-2026-07-08.md",
     "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-CROSS-MARKER-RATCHET-OPPORTUNITY-CONTRACT-FREEZE-2026-07-08.md",
     "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-CROSS-MARKER-RATCHET-OPPORTUNITY-FIRST-IMPLEMENTATION-ADMISSION-2026-07-08.md",
+    "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-CROSS-MARKER-RATCHET-OPPORTUNITY-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-08.md",
     "ops/atlas/held_lane_unlock_matrix.py",
     "tests/test_atlas_held_lane_unlock_matrix.py",
     "ops/atlas/supervised_execution_home_stack_command_implementation_actual_owner_side_mutation_authority_class_choice.py",
@@ -433,9 +434,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "ai-long-run-batch-orchestration",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-CROSS-MARKER-RATCHET-OPPORTUNITY-FIRST-IMPLEMENTATION-ADMISSION-2026-07-08.md",
+    "current_checkpoint_receipt": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-CROSS-MARKER-RATCHET-OPPORTUNITY-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-08.md",
     "checkpoint_commit": "main",
-    "checkpoint_summary": "The post-cross-marker ratchet evidence selector, cross-marker ratchet opportunity contract freeze, and first-implementation admission are now durable. The selector recognizes that the Cortex second advisory substrate implementation proof also satisfied the Playbook/Cortex second implementation-backed consumer class criteria, the contract freeze defines a future advisory helper for cross-marker proof reuse, and the first-implementation admission admits `ops/atlas/cross_marker_ratchet_opportunity.py` plus `tests/test_atlas_cross_marker_ratchet_opportunity.py` as the only future worker/proof files. No worker is implemented yet, no owner repo is mutated, Fitness and Mazer remain separated owner lanes, workflow, deploy, secret, protected-surface, marker-write, and final-receipt authority remain denied, `AI Long-Run Batch Orchestration` stays at `69%`, and the next exact packet is the cross-marker ratchet opportunity prompt-pack and worker handoff contract.",
+    "checkpoint_summary": "The post-cross-marker ratchet evidence selector, cross-marker ratchet opportunity contract freeze, first-implementation admission, and prompt-pack are now durable. The selector recognizes that the Cortex second advisory substrate implementation proof also satisfied the Playbook/Cortex second implementation-backed consumer class criteria, the contract freeze defines a future advisory helper for cross-marker proof reuse, the first-implementation admission admits `ops/atlas/cross_marker_ratchet_opportunity.py` plus `tests/test_atlas_cross_marker_ratchet_opportunity.py` as the only future worker/proof files, and the prompt-pack freezes the worker objective, command, schema, proof obligations, stop conditions, and authority denials. No worker is implemented yet, no owner repo is mutated, Fitness and Mazer remain separated owner lanes, workflow, deploy, secret, protected-surface, marker-write, and final-receipt authority remain denied, `AI Long-Run Batch Orchestration` stays at `69%`, and the next exact packet is the cross-marker ratchet opportunity implementation-readiness closeout and worker routing.",
     "governing_receipts": [
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-2026-05-22.md",
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-QUEUE-OR-REGISTRY-POST-WORLD-MODEL-TOP-LEVEL-PAYLOAD-BOUNDARY-NEXT-SLICE-SELECTION-PASS-460-2026-06-17.md",
@@ -462,6 +463,7 @@
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-CROSS-MARKER-RATCHET-EVIDENCE-NEXT-SLICE-SELECTION-2026-07-08.md",
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-CROSS-MARKER-RATCHET-OPPORTUNITY-CONTRACT-FREEZE-2026-07-08.md",
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-CROSS-MARKER-RATCHET-OPPORTUNITY-FIRST-IMPLEMENTATION-ADMISSION-2026-07-08.md",
+      "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-CROSS-MARKER-RATCHET-OPPORTUNITY-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-08.md",
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTION-CRITERIA-CONTRACT-FREEZE-PASS-462-2026-06-18.md",
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTION-CRITERIA-OWNER-SURFACE-ADMISSION-PASS-463-2026-06-19.md",
       "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-SINGLE-SUPERVISED-PILOT-SELECTION-CRITERIA-SUPPORTING-LANE-ADMISSION-PASS-464-2026-06-19.md",
@@ -810,6 +812,10 @@
       {
         "path": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-CROSS-MARKER-RATCHET-OPPORTUNITY-FIRST-IMPLEMENTATION-ADMISSION-2026-07-08.md",
         "role": "current cross-marker ratchet opportunity first-implementation admission"
+      },
+      {
+        "path": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-CROSS-MARKER-RATCHET-OPPORTUNITY-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-08.md",
+        "role": "current cross-marker ratchet opportunity prompt-pack and worker handoff contract"
       },
       {
         "path": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-MARKER-AWARE-NEXT-PACKET-PLANNER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-07.md",
@@ -1345,7 +1351,7 @@
       },
       {
         "item": "cross-marker ratchet opportunity implementation",
-        "requirement": "blocked until the prompt-pack and worker handoff contract freezes the worker objective, exact command, allowed files, stop conditions, and proof obligations; the current first-implementation admission admits `ops/atlas/cross_marker_ratchet_opportunity.py` plus `tests/test_atlas_cross_marker_ratchet_opportunity.py` but does not implement a helper or move the marker"
+        "requirement": "blocked until the implementation-readiness closeout confirms no docs-only prerequisite remains and routes the bounded worker; the current prompt-pack freezes the worker objective, exact command, allowed files, stop conditions, and proof obligations but does not implement a helper or move the marker"
       },
       {
         "item": "widening this lane into owner-repo, deploy, secret, or protected-surface work",
@@ -1354,15 +1360,15 @@
     ],
     "next_package_ladder": [
       {
-        "package": "AI Long-Run Batch Orchestration cross-marker ratchet opportunity prompt-pack and worker handoff contract",
-        "mode": "docs-only prompt-pack and worker handoff contract",
-        "reason": "the cross-marker ratchet opportunity first-implementation admission now admits `ops/atlas/cross_marker_ratchet_opportunity.py` plus `tests/test_atlas_cross_marker_ratchet_opportunity.py`, but the worker objective, command, allowed files, stop conditions, and proof obligations are not yet frozen; the next safe packet is the prompt-pack and worker handoff contract without implementing the helper or moving markers"
+        "package": "AI Long-Run Batch Orchestration cross-marker ratchet opportunity implementation-readiness closeout and worker routing",
+        "mode": "docs-only implementation-readiness closeout and worker routing",
+        "reason": "the cross-marker ratchet opportunity prompt-pack now freezes the worker objective, command, allowed files, stop conditions, output schema, and proof obligations; the next safe packet confirms docs-only prerequisites are complete and routes the bounded worker without implementing it or moving markers"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-CROSS-MARKER-RATCHET-OPPORTUNITY-FIRST-IMPLEMENTATION-ADMISSION-2026-07-08.md",
-    "freshness_checked_at": "2026-07-08T22:01:50.8422934-04:00",
-    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture now match the cross-marker ratchet opportunity first-implementation admission: `AI Long-Run Batch Orchestration` remains at `69%`, the future cross-marker advisory helper and proof surface are admitted but not implemented, Fitness and Mazer remain outside this ATLAS marker lane, and the next exact packet is the docs-only prompt-pack and worker handoff contract.",
+    "freshness_checked_receipt": "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-CROSS-MARKER-RATCHET-OPPORTUNITY-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-08.md",
+    "freshness_checked_at": "2026-07-08T22:07:39.8915651-04:00",
+    "freshness_basis": "the current checkpoint, marker posture, blocked-work posture, and next-package posture now match the cross-marker ratchet opportunity prompt-pack: `AI Long-Run Batch Orchestration` remains at `69%`, the future cross-marker advisory helper and proof surface are admitted and prompt-packed but not implemented, Fitness and Mazer remain outside this ATLAS marker lane, and the next exact packet is the docs-only implementation-readiness closeout and worker routing.",
     "marker_posture": [
       {
         "marker": "AI Long-Run Batch Orchestration",
