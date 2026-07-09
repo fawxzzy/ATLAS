@@ -3,15 +3,15 @@
   "stack_manifest_ref": "stack.yaml",
   "stack_manifest_digest": "sha256:1ebf366757baf13a45064cdf8d07edd92909ac07f93c44ee9e77b30abebf03e6",
   "stack_lock_ref": "stack.lock.yaml",
-  "stack_lock_digest": "sha256:212460dad9ad2c5f4f8bb31a68c4fc09bc855ab1b5e8f28321e0cf975151bf42",
+  "stack_lock_digest": "sha256:4c348077a3511f8dc5267b243e94fd76bc6f46db98981159b7e2c234d7d3f540",
   "working_memory_digest": "sha256:fe4f4902e2b2c475974b050ba1bf3f5e740439aa41df2f844555c2c0dc3b310f",
   "published_refs": {
     "json": "docs/registry/STACK-REPO-INVENTORY.json",
     "markdown": "docs/audits/STACK-REPO-INVENTORY.md"
   },
   "repo_count": 12,
-  "dirty_repo_count": 2,
-  "visible_dirty_repo_count": 3,
+  "dirty_repo_count": 1,
+  "visible_dirty_repo_count": 2,
   "advisory_dirty_repo_count": 1,
   "release_eligible_count": 4,
   "repos": [
@@ -81,16 +81,16 @@
       "role": "application",
       "status": "incubating",
       "remote_url": "https://github.com/fawxzzy/DiscordOS.git",
-      "pinned_commit": "ea383ae163b02fdb27412d875719f530317315b2",
-      "current_commit": "ea383ae163b02fdb27412d875719f530317315b2",
+      "pinned_commit": "f93988dfb7553e460275e50571d4d3eda8ad1099",
+      "current_commit": "f93988dfb7553e460275e50571d4d3eda8ad1099",
       "pinned_ref_type": "branch",
       "pinned_ref": "main",
       "current_ref_type": "branch",
       "current_ref": "main",
       "branch": "main",
-      "dirty": true,
+      "dirty": false,
       "root_blocking": true,
-      "dirty_blocks_root": true,
+      "dirty_blocks_root": false,
       "trust_class": "trusted",
       "release_eligible": false,
       "exists": true,
@@ -337,7 +337,7 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "689b83e293929deccc4128f4ec17942f7f18ebf4",
+      "current_commit": "47730a4ac744b4b4736acdb70b1335e1f6c6d6a6",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
@@ -556,5 +556,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:b1c34aa0b82025db1bce58cea0bb63757509b2dd16c5a61232d5091d1a7b4c6e"
+  "content_digest": "sha256:1c4734b63b26bf8f732529960f6cefb3b044c5ecafc116c090f7d78f69835152"
 }
