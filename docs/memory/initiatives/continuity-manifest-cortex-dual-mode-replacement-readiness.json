@@ -1,0 +1,127 @@
+{
+  "contract_version": "atlas.initiative.v1",
+  "id": "continuity-manifest-cortex-dual-mode-replacement-readiness",
+  "title": "Continuity Manifest Cortex Dual Mode Replacement Readiness",
+  "summary": "Maintained ATLAS-root retrieval map for the supporting Cortex Dual-Mode Replacement Readiness lane.",
+  "status": "active",
+  "owner": "stack-root",
+  "created_at": "2026-07-09T19:47:39.8439335-04:00",
+  "updated_at": "2026-07-09T19:47:39.8439335-04:00",
+  "related_plan_refs": [],
+  "related_decision_refs": [],
+  "related_hypothesis_refs": [],
+  "related_session_refs": [],
+  "related_attention_refs": [],
+  "proposed_next_session_refs": [],
+  "evidence_refs": [
+    "docs/atlas-book/01-current-state.md",
+    "docs/atlas-book/02-lanes-and-markers.md",
+    "docs/atlas-book/13-vision-and-endgames.md",
+    "docs/memory/README.md",
+    "docs/memory/profiles/zachariah_workflow_profile.md",
+    "docs/ops/CORTEX-DUAL-MODE-AND-SIMULATION-SUBSTRATE-MARKER-ADMISSION-2026-07-09.md",
+    "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-OPERATING-MODE-CONTRACT-FREEZE-2026-07-09.md",
+    "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHATGPT-CODEX-ROLE-INVENTORY-FIRST-IMPLEMENTATION-ADMISSION-2026-07-09.md",
+    "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHATGPT-CODEX-ROLE-INVENTORY-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-09.md",
+    "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHATGPT-CODEX-ROLE-INVENTORY-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-09.md",
+    "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHATGPT-CODEX-ROLE-INVENTORY-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-09.md",
+    "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHATGPT-CODEX-ROLE-INVENTORY-MARKER-SURFACE-RATCHET-DECISION-2026-07-09.md",
+    "ops/cortex/chatgpt_codex_role_inventory.py",
+    "tests/test_cortex_chatgpt_codex_role_inventory.py"
+  ],
+  "supersedes": [],
+  "superseded_by": [],
+  "metadata": {
+    "artifact_kind": "continuity_manifest",
+    "lane_id": "cortex-dual-mode-replacement-readiness",
+    "scope_class": "atlas-root-governance",
+    "current_checkpoint_receipt": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHATGPT-CODEX-ROLE-INVENTORY-MARKER-SURFACE-RATCHET-DECISION-2026-07-09.md",
+    "checkpoint_commit": "main@84f0b791",
+    "checkpoint_summary": "The lane moves to 20 percent because the frozen dual-mode operating model now exists and the ChatGPT/Codex role inventory is implementation-backed through ops/cortex/chatgpt_codex_role_inventory.py plus focused tests and prior worker-cluster reconciliation. The next honest threshold is the synthesis-to-execution bridge schema contract freeze; no deploy, secret, owner-repo, workflow-dispatch, or platform-mutation authority is widened.",
+    "governing_receipts": [
+      "docs/ops/CORTEX-DUAL-MODE-AND-SIMULATION-SUBSTRATE-MARKER-ADMISSION-2026-07-09.md",
+      "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-OPERATING-MODE-CONTRACT-FREEZE-2026-07-09.md",
+      "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHATGPT-CODEX-ROLE-INVENTORY-FIRST-IMPLEMENTATION-ADMISSION-2026-07-09.md",
+      "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHATGPT-CODEX-ROLE-INVENTORY-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-09.md",
+      "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHATGPT-CODEX-ROLE-INVENTORY-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-09.md",
+      "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHATGPT-CODEX-ROLE-INVENTORY-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-09.md",
+      "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHATGPT-CODEX-ROLE-INVENTORY-MARKER-SURFACE-RATCHET-DECISION-2026-07-09.md"
+    ],
+    "owner_truth_surfaces": [
+      {
+        "path": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHATGPT-CODEX-ROLE-INVENTORY-MARKER-SURFACE-RATCHET-DECISION-2026-07-09.md",
+        "role": "current marker-ratchet receipt and exact next-packet truth"
+      },
+      {
+        "path": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-OPERATING-MODE-CONTRACT-FREEZE-2026-07-09.md",
+        "role": "frozen dual-mode operating-model threshold source"
+      },
+      {
+        "path": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHATGPT-CODEX-ROLE-INVENTORY-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-09.md",
+        "role": "implementation-backed role-inventory threshold source"
+      },
+      {
+        "path": "ops/cortex/chatgpt_codex_role_inventory.py",
+        "role": "root-owned read-only ChatGPT/Codex role-inventory helper"
+      },
+      {
+        "path": "tests/test_cortex_chatgpt_codex_role_inventory.py",
+        "role": "focused proof suite for the landed ChatGPT/Codex role-inventory helper"
+      },
+      {
+        "path": "docs/memory/profiles/zachariah_workflow_profile.md",
+        "role": "canonical workflow profile that governs the external-scaffolding and Cortex absorption posture"
+      }
+    ],
+    "verification_adoption_surfaces": [
+      {
+        "path": "docs/atlas-book/01-current-state.md",
+        "role": "current root-state projection surface"
+      },
+      {
+        "path": "docs/atlas-book/02-lanes-and-markers.md",
+        "role": "marker table and supporting-open marker projection surface"
+      },
+      {
+        "path": "docs/atlas-book/13-vision-and-endgames.md",
+        "role": "current continuity and future-lane projection surface"
+      },
+      {
+        "path": "docs/memory/README.md",
+        "role": "manifest-backed continuity doctrine surface"
+      }
+    ],
+    "blocked_or_gated_work": [
+      {
+        "item": "moving above the current 20 percent dual-mode threshold",
+        "requirement": "blocked until a distinct synthesis-to-execution bridge schema contract is frozen or a later threshold source lands"
+      },
+      {
+        "item": "claiming bridge implementation or execution routing from the current role inventory alone",
+        "requirement": "blocked until the bridge schema is frozen and later admitted implementation surfaces land"
+      },
+      {
+        "item": "widening into deploy, secret, workflow-dispatch, owner-repo, or platform-mutation authority",
+        "requirement": "blocked unless a separate explicit authority packet is opened and proved"
+      }
+    ],
+    "next_package_ladder": [
+      {
+        "package": "Cortex Dual-Mode Replacement Readiness synthesis-to-execution bridge schema contract freeze",
+        "mode": "docs-only root-bounded synthesis-to-execution bridge-schema contract freeze",
+        "reason": "the operating model and implementation-backed ChatGPT/Codex role inventory thresholds are now satisfied, so the next honest dual-mode threshold is freezing the bounded synthesis-to-execution bridge contract without widening authority"
+      }
+    ],
+    "freshness_state": "manifest-backed",
+    "freshness_checked_receipt": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHATGPT-CODEX-ROLE-INVENTORY-MARKER-SURFACE-RATCHET-DECISION-2026-07-09.md",
+    "freshness_checked_at": "2026-07-09T19:47:39.8439335-04:00",
+    "freshness_basis": "The current dual-mode posture is now nonzero and manifest-backed: the operating-model threshold is frozen, the role inventory is implementation-backed, the marker is 20 percent, and the next honest same-lane move is the bridge-schema contract freeze rather than another role-inventory replay.",
+    "marker_posture": [
+      {
+        "marker": "Cortex Dual-Mode Replacement Readiness",
+        "percent": 20,
+        "source": "docs/atlas-book/02-lanes-and-markers.md"
+      }
+    ]
+  }
+}

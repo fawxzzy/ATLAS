@@ -185,6 +185,23 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
             encoding="utf-8",
         )
 
+        dual_mode_ratchet_receipt = root / "docs" / "ops" / (
+            "CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHATGPT-CODEX-ROLE-INVENTORY-MARKER-"
+            "SURFACE-RATCHET-DECISION-2026-07-09.md"
+        )
+        dual_mode_ratchet_receipt.write_text(
+            "\n".join(
+                [
+                    "# Dual-Mode Marker Ratchet Decision",
+                    "",
+                    "- Mode: `docs-only root-bounded synthesis-to-execution bridge-schema contract freeze`",
+                    "- Scope: `freeze the next dual-mode bridge boundary after the operating model and implementation-backed role inventory thresholds, without widening beyond admitted root doctrine, authority denials, and shared-substrate truth`",
+                    "",
+                ]
+            ),
+            encoding="utf-8",
+        )
+
     def _write_manifest(
         self,
         root: Path,
@@ -783,7 +800,7 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
 
 ## Supporting Open Markers
 
-- Cortex Dual-Mode Replacement Readiness: `0%`
+- Cortex Dual-Mode Replacement Readiness: `20%`
 - Cortex Simulation Substrate Readiness: `0%`
 
 ## Closed / Locked Ratchets
@@ -812,20 +829,34 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
             mode="hold-flat after broader-runtime-assertions admission boundary freeze",
             reason="current sandbox lane is intentionally held",
         )
+        self._write_manifest(
+            root,
+            manifest_name="continuity-manifest-cortex-dual-mode-replacement-readiness.json",
+            marker="Cortex Dual-Mode Replacement Readiness",
+            percent=20,
+            checkpoint_ref=(
+                "docs/ops/"
+                "CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHATGPT-CODEX-ROLE-INVENTORY-"
+                "MARKER-SURFACE-RATCHET-DECISION-2026-07-09.md"
+            ),
+            next_package="Cortex Dual-Mode Replacement Readiness synthesis-to-execution bridge schema contract freeze",
+            mode="docs-only root-bounded synthesis-to-execution bridge-schema contract freeze",
+            reason="the operating model and implementation-backed role inventory thresholds are now satisfied, so the next honest dual-mode threshold is freezing the bounded synthesis-to-execution bridge contract without widening authority",
+        )
 
         payload = build_campaign(root=root)
 
         self.assertEqual("hold_current_lane", payload["operator_action"])
         self.assertEqual("Cortex Dual-Mode Replacement Readiness", payload["next_after_current_marker"])
         self.assertEqual(
-            "Cortex Dual-Mode Replacement Readiness ChatGPT/Codex role inventory marker-surface ratchet decision",
+            "Cortex Dual-Mode Replacement Readiness synthesis-to-execution bridge schema contract freeze",
             payload["next_after_current_packet"],
         )
         self.assertEqual(
-            "docs-only root-bounded ChatGPT/Codex role-inventory marker-surface ratchet decision",
+            "docs-only root-bounded synthesis-to-execution bridge-schema contract freeze",
             payload["next_after_current_packet_mode"],
         )
-        self.assertIn("implementation-backed ChatGPT/Codex role inventory", payload["next_after_current_packet_scope"])
+        self.assertIn("implementation-backed role inventory thresholds", payload["next_after_current_packet_scope"])
 
 
 if __name__ == "__main__":
