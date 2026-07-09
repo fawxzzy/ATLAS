@@ -3,7 +3,7 @@
   "stack_manifest_ref": "stack.yaml",
   "stack_manifest_digest": "sha256:1ebf366757baf13a45064cdf8d07edd92909ac07f93c44ee9e77b30abebf03e6",
   "stack_lock_ref": "stack.lock.yaml",
-  "stack_lock_digest": "sha256:76ff57db6048eee4e83a0ae32be479c4ba9a11ba3afec9acf52cfa854be6aba3",
+  "stack_lock_digest": "sha256:212460dad9ad2c5f4f8bb31a68c4fc09bc855ab1b5e8f28321e0cf975151bf42",
   "working_memory_digest": "sha256:fe4f4902e2b2c475974b050ba1bf3f5e740439aa41df2f844555c2c0dc3b310f",
   "published_refs": {
     "json": "docs/registry/STACK-REPO-INVENTORY.json",
@@ -11,8 +11,8 @@
   },
   "repo_count": 12,
   "dirty_repo_count": 2,
-  "visible_dirty_repo_count": 4,
-  "advisory_dirty_repo_count": 2,
+  "visible_dirty_repo_count": 3,
+  "advisory_dirty_repo_count": 1,
   "release_eligible_count": 4,
   "repos": [
     {
@@ -81,8 +81,8 @@
       "role": "application",
       "status": "incubating",
       "remote_url": "https://github.com/fawxzzy/DiscordOS.git",
-      "pinned_commit": "967b69fe694bccbc8a9587ccf357332192c00010",
-      "current_commit": "967b69fe694bccbc8a9587ccf357332192c00010",
+      "pinned_commit": "ea383ae163b02fdb27412d875719f530317315b2",
+      "current_commit": "ea383ae163b02fdb27412d875719f530317315b2",
       "pinned_ref_type": "branch",
       "pinned_ref": "main",
       "current_ref_type": "branch",
@@ -128,13 +128,13 @@
       "status": "unmanaged",
       "remote_url": "https://github.com/fawxzzy/fawxzzy-fitness.git",
       "pinned_commit": null,
-      "current_commit": "d3f3e88645b7ee878d57f2bf242e1c7eb9f1eeb3",
+      "current_commit": "70f21e96ebdb7116d2427120a82beedf2b03208d",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
       "current_ref": "main",
       "branch": "main",
-      "dirty": true,
+      "dirty": false,
       "root_blocking": false,
       "dirty_blocks_root": false,
       "trust_class": "adjacent",
@@ -337,7 +337,7 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "4b64ba9c3254cea769da92b19ab0c0ae77d96f19",
+      "current_commit": "689b83e293929deccc4128f4ec17942f7f18ebf4",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
@@ -556,5 +556,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:8846c8d324fbb8c96c6e2642d27b64f799a6720971c3810541fa374ccc1ef6e8"
+  "content_digest": "sha256:b1c34aa0b82025db1bce58cea0bb63757509b2dd16c5a61232d5091d1a7b4c6e"
 }
