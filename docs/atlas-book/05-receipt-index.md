@@ -95,6 +95,7 @@
 - [Vercel Platform Observability Governance Project Inventory Missing-Project Export Capture Execution Update 2](../ops/VERCEL-PLATFORM-OBSERVABILITY-GOVERNANCE-PROJECT-INVENTORY-MISSING-PROJECT-EXPORT-CAPTURE-EXECUTION-UPDATE-2026-07-09-2.md)
 - [Vercel Platform Observability Governance Project Inventory Coverage Reconciliation Contract Freeze](../ops/VERCEL-PLATFORM-OBSERVABILITY-GOVERNANCE-PROJECT-INVENTORY-COVERAGE-RECONCILIATION-CONTRACT-FREEZE-2026-07-09.md)
 - [Vercel Platform Observability Governance Deployment Freshness Inventory Contract Freeze](../ops/VERCEL-PLATFORM-OBSERVABILITY-GOVERNANCE-DEPLOYMENT-FRESHNESS-INVENTORY-CONTRACT-FREEZE-2026-07-09.md)
+- [Vercel Platform Observability Governance Deployment Freshness Inventory First-Implementation Admission](../ops/VERCEL-PLATFORM-OBSERVABILITY-GOVERNANCE-DEPLOYMENT-FRESHNESS-INVENTORY-FIRST-IMPLEMENTATION-ADMISSION-2026-07-09.md)
 - [Cortex Dual-Mode And Simulation Substrate Marker Admission](../ops/CORTEX-DUAL-MODE-AND-SIMULATION-SUBSTRATE-MARKER-ADMISSION-2026-07-09.md)
 - [Cortex Dual-Mode Replacement Readiness Operating-Mode Contract Freeze](../ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-OPERATING-MODE-CONTRACT-FREEZE-2026-07-09.md)
 - [Cortex Dual-Mode Replacement Readiness ChatGPT/Codex Role Inventory First-Implementation Admission](../ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHATGPT-CODEX-ROLE-INVENTORY-FIRST-IMPLEMENTATION-ADMISSION-2026-07-09.md)
