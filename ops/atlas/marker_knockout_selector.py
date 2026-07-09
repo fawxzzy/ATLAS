@@ -40,6 +40,8 @@ CAMPAIGN_PRIORITY = (
     "Inventory & Truth Map",
     "Playbook Everywhere + Cortex Interface",
     "Cortex Readiness",
+    "Cortex Dual-Mode Replacement Readiness",
+    "Cortex Simulation Substrate Readiness",
     "Core Pattern Convergence",
     "Discord Workflow, Publication & Docs Reliability",
     "DiscordOS Runtime & Product Hardening",
@@ -178,6 +180,28 @@ POLICY_REGISTRY: dict[str, MarkerPolicy] = {
         category="admissible after current lane",
         rationale="The lane is root-owned and the read-model surfaces are real, but the first reopen should still favor the more execution-facing AI pipeline lane.",
         expected_evidence="one new authority-false consumption or routing surface that widens bounded runtime breadth without shifting truth ownership",
+    ),
+    "Cortex Dual-Mode Replacement Readiness": MarkerPolicy(
+        category="admissible after current lane",
+        rationale=(
+            "The lane is now durably admitted as future-facing Cortex governance, but current truth still favors the "
+            "already-active Vercel and mature automation or interface lanes before a new doctrine-only bridge family."
+        ),
+        expected_evidence=(
+            "one dual-mode operating model contract that freezes external-scaffolding roles, Cortex synthesis and "
+            "execution interface boundaries, and bridge authority denials"
+        ),
+    ),
+    "Cortex Simulation Substrate Readiness": MarkerPolicy(
+        category="admissible after current lane",
+        rationale=(
+            "The lane is durably admitted as future-facing Cortex simulation governance, but it remains a doctrine "
+            "and research family downstream of already-admitted execution-facing work."
+        ),
+        expected_evidence=(
+            "one Fable or generative-agent research contract that maps simulation, memory, reflection, planning, "
+            "and sandbox interaction requirements into ATLAS and Cortex without implying implementation"
+        ),
     ),
     "Fitness QA/LLEL Workflow": MarkerPolicy(
         category="protected/Fitness hold",
@@ -375,6 +399,30 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         scope=(
             "hold the same-lane AI work-session root-plus-owner adoption family because the evidence-intake "
             "worker now reports 2 of 2 required owner-lane proof receipts while preserving owner-lane separation"
+        ),
+    ),
+    "Cortex Dual-Mode Replacement Readiness": PacketDescriptor(
+        packet="Cortex Dual-Mode Replacement Readiness operating-model contract freeze",
+        basis_receipt_ref=(
+            "docs/ops/"
+            "CORTEX-DUAL-MODE-AND-SIMULATION-SUBSTRATE-MARKER-ADMISSION-2026-07-09.md"
+        ),
+        mode="docs-only root-bounded dual-mode operating-model contract freeze",
+        scope=(
+            "freeze the first durable operating model for replacing external ChatGPT and Codex scaffolding with "
+            "internal Cortex synthesis and execution interfaces while preserving bridge authority denials"
+        ),
+    ),
+    "Cortex Simulation Substrate Readiness": PacketDescriptor(
+        packet="Cortex Simulation Substrate Readiness Fable/generative-agent research contract freeze",
+        basis_receipt_ref=(
+            "docs/ops/"
+            "CORTEX-DUAL-MODE-AND-SIMULATION-SUBSTRATE-MARKER-ADMISSION-2026-07-09.md"
+        ),
+        mode="docs-only root-bounded simulation research contract freeze",
+        scope=(
+            "freeze the first governed research contract for Cortex simulation substrate doctrine using "
+            "Showrunner strategy signals plus generative-agent architectural patterns without implying implementation"
         ),
     ),
 }
