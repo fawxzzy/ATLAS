@@ -184,9 +184,14 @@ Required command:
 python ops/atlas/cross_marker_ratchet_opportunity.py --json
 ```
 
-The current live output reports `status=ok`, `safe_to_use=true`, `candidate_count=12`, `opportunity_count=1`, and `blocked_candidates=4`. The one advisory opportunity is the Cortex second advisory substrate proof supporting the Playbook/Cortex second implementation-backed consumer class. The required follow-up is still `No immediate Playbook Everywhere + Cortex Interface same-lane packet`; the helper output is evidence for later bounded receipt decisions, not a direct marker-write action.
+The current live output reports `status=ok`, `safe_to_use=true`, `candidate_count=12`, `opportunity_count=1`, and `blocked_candidates=4`. The one advisory opportunity is the Cortex second advisory substrate proof supporting the Playbook/Cortex second implementation-backed consumer class. The required follow-up for that candidate lane is still `No immediate Playbook Everywhere + Cortex Interface same-lane packet`; the helper output is evidence for later bounded receipt decisions, not a direct marker-write action.
 
-The next exact AI Long-Run package is `No immediate AI Long-Run Batch Orchestration same-lane packet`. Future movement requires a distinct broader proof-reuse/adoption class, real new cross-marker implementation-backed proof, supervised execution widening, or another concrete blocker clearance.
+The July 9 selector and contract freeze now make the next honest AI Long-Run packet planner-facing rather than helper-facing:
+
+- selector: `docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-CROSS-MARKER-OPPORTUNITY-PLANNER-INTEGRATION-SELECTION-2026-07-09.md`
+- contract freeze: `docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-CROSS-MARKER-OPPORTUNITY-PLANNER-INTEGRATION-CONTRACT-FREEZE-2026-07-09.md`
+
+The next exact AI Long-Run package is `AI Long-Run Batch Orchestration cross-marker opportunity planner-integration first-implementation admission`. The planner integration must keep the current opportunity advisory-only when no executable follow-up exists, preserve held-root suppression for generic continuation, and deny marker-write, final-receipt, owner-lane, workflow, deploy, secret, and protected-surface authority.
 
 ## Current Inventory & Truth Map Closeout Posture
 
