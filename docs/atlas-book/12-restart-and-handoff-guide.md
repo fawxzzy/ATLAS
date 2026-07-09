@@ -114,7 +114,7 @@ Mandatory prompt preflight:
 
 If the task is about Supabase Pro adoption, platform readiness, or cross-project Supabase governance at ATLAS root, start with:
 
-- `docs/ops/SUPABASE-PRO-PLATFORM-GOVERNANCE-BACKUP-INVENTORY-AND-RESTORE-READINESS-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-09.md`
+- `docs/ops/SUPABASE-PRO-PLATFORM-GOVERNANCE-BACKUP-METADATA-READ-ONLY-INTAKE-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-09.md`
 
 What that receipt currently establishes:
 
@@ -124,10 +124,14 @@ What that receipt currently establishes:
 - no new marker or continuity manifest exists for this family yet
 - the backup/restore posture classes are now frozen for the confirmed project set, including `daily_backup_covered`, `daily_backup_unverified`, `restore_process_unverified`, `pitr_not_approved`, `storage_restore_gap`, `custom_role_password_gap`, and `operator_decision_required`
 - `ops/atlas/supabase_backup_restore_posture.py` plus `tests/test_atlas_supabase_backup_restore_posture.py` are now landed as a read-only root-owned classifier/test pair
+- `ops/atlas/supabase_backup_metadata_intake.py` plus `tests/test_atlas_supabase_backup_metadata_intake.py` are now landed as a second read-only root-owned validator/test pair
+- the new intake chain freezes a wrapper contract around the documented Management API backups endpoint `GET /v1/projects/{ref}/database/backups`, but the helper itself does not call Supabase and instead consumes operator-exported root-relative `tmp/**.json` wrappers only
+- the synthetic helper proof demonstrates deterministic intake behavior without claiming that any real production backup metadata export is already recorded at ATLAS root
 - the live helper preserves `pitr_candidate=true` only for `FawxzzyFitness` and `DiscordOS`, keeps `Mazer` non-candidate for now, and keeps `Nat1-Games` at `no_project_identity`
 - the governing contract receipt remains `docs/ops/SUPABASE-PRO-PLATFORM-GOVERNANCE-BACKUP-AND-RESTORE-POSTURE-CONTRACT-FREEZE-2026-07-09.md`
 - the audit spine remains `docs/ops/SUPABASE-PRO-PLATFORM-CAPABILITY-ADOPTION-AUDIT-2026-07-09.md`
-- the exact next packet is `Supabase Pro Platform Governance backup metadata read-only intake contract freeze`
+- the backup metadata intake contract spine now also includes `docs/ops/SUPABASE-PRO-PLATFORM-GOVERNANCE-BACKUP-METADATA-READ-ONLY-INTAKE-CONTRACT-FREEZE-2026-07-09.md`
+- the exact next packet is `Supabase Pro Platform Governance backup metadata first operator-export capture contract freeze`
 
 Do not skip from that receipt straight into PITR, network restrictions, log drains, custom domains, or compute changes. The current governed order is audit first, then bounded contract freezes, then any later operator-authorized platform mutation.
 
