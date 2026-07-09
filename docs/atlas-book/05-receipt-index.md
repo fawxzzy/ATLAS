@@ -82,6 +82,7 @@
 - [Vercel Platform Observability Governance Read-Only Project Inventory Implementation-Readiness Closeout And Worker Routing](../ops/VERCEL-PLATFORM-OBSERVABILITY-GOVERNANCE-READ-ONLY-PROJECT-INVENTORY-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-09.md)
 - [Vercel Platform Observability Governance Read-Only Project Inventory First-Implementation Worker-Cluster Reconciliation](../ops/VERCEL-PLATFORM-OBSERVABILITY-GOVERNANCE-READ-ONLY-PROJECT-INVENTORY-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-09.md)
 - [Vercel Platform Observability Governance Read-Only Project Inventory First Operator-Export Capture Contract Freeze](../ops/VERCEL-PLATFORM-OBSERVABILITY-GOVERNANCE-READ-ONLY-PROJECT-INVENTORY-FIRST-OPERATOR-EXPORT-CAPTURE-CONTRACT-FREEZE-2026-07-09.md)
+- [Vercel Platform Observability Governance Read-Only Project Inventory First Operator-Export Capture Execution](../ops/VERCEL-PLATFORM-OBSERVABILITY-GOVERNANCE-READ-ONLY-PROJECT-INVENTORY-FIRST-OPERATOR-EXPORT-CAPTURE-EXECUTION-2026-07-09.md)
 - [Supabase Pro Platform Capability Adoption Audit](../ops/SUPABASE-PRO-PLATFORM-CAPABILITY-ADOPTION-AUDIT-2026-07-09.md)
 - [Supabase Pro Platform Governance Backup And Restore Posture Contract Freeze](../ops/SUPABASE-PRO-PLATFORM-GOVERNANCE-BACKUP-AND-RESTORE-POSTURE-CONTRACT-FREEZE-2026-07-09.md)
 - [Supabase Pro Platform Governance Backup Inventory And Restore-Readiness First-Implementation Admission](../ops/SUPABASE-PRO-PLATFORM-GOVERNANCE-BACKUP-INVENTORY-AND-RESTORE-READINESS-FIRST-IMPLEMENTATION-ADMISSION-2026-07-09.md)
