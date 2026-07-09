@@ -164,6 +164,30 @@ python ops/atlas/codex_hour_block_queue_prompt.py --json --output tmp/codex-hour
 
 If the helper reports no safe planner candidates and selector posture is `no_immediate_root_packet`, do not invent marker movement. Run only an admitted held-lane review/unlock helper or close out.
 
+## Required AI Long-Run Cross-Marker Opportunity Helper
+
+The supporting marker `AI Long-Run Batch Orchestration` now sits at `70%`; the latest ratchet proof is `docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-CROSS-MARKER-RATCHET-OPPORTUNITY-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-08.md`.
+
+The helper is:
+
+- `ops/atlas/cross_marker_ratchet_opportunity.py`
+
+The proof surface is:
+
+- `tests/test_atlas_cross_marker_ratchet_opportunity.py`
+
+The helper is advisory only. It detects whether a committed implementation-backed receipt can safely support a cross-marker ratchet opportunity for another marker. It does not write markers, create final receipts, mutate owner repos, touch workflows, touch deploy surfaces, touch secrets, or authorize protected-surface work.
+
+Required command:
+
+```powershell
+python ops/atlas/cross_marker_ratchet_opportunity.py --json
+```
+
+The current live output reports `status=ok`, `safe_to_use=true`, `candidate_count=12`, `opportunity_count=1`, and `blocked_candidates=4`. The one advisory opportunity is the Cortex second advisory substrate proof supporting the Playbook/Cortex second implementation-backed consumer class. The required follow-up is still `No immediate Playbook Everywhere + Cortex Interface same-lane packet`; the helper output is evidence for later bounded receipt decisions, not a direct marker-write action.
+
+The next exact AI Long-Run package is `No immediate AI Long-Run Batch Orchestration same-lane packet`. Future movement requires a distinct broader proof-reuse/adoption class, real new cross-marker implementation-backed proof, supervised execution widening, or another concrete blocker clearance.
+
 ## Current Inventory & Truth Map Closeout Posture
 
 `Inventory & Truth Map` is closed at `100%` after `docs/ops/INVENTORY-AND-TRUTH-MAP-OWNER-TRUTH-ADOPTION-PROOF-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-08.md`.
