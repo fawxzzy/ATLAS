@@ -4,7 +4,7 @@
 
 The stack is currently clean and parity-clean through the July 8 Inventory owner-truth adoption proof closeout lineage. The implementation checkpoint starts from `main@6f1f6ade1d61c6e13cf4dfc8cfd7d35b92e842a8`: root validation is clean at `critical=0 error=0 warning=0 info=0`, refreshed inventory reports `dirty_repo_count: 0`, Fitness and Mazer advisory owner dirt is represented as non-root-blocking inventory truth, and the selector still reports no immediate ATLAS-root packet. The owner-truth mirror counts are `dirty_repo_count: 0`, `visible_dirty_repo_count: 2`, and `advisory_dirty_repo_count: 2`.
 
-The current top-level platform-readiness receipt is now `docs/ops/SUPABASE-PRO-PLATFORM-CAPABILITY-ADOPTION-AUDIT-2026-07-09.md`: Supabase Pro is treated as a new material platform state, the audit confirms three actual Supabase projects in the current org (`FawxzzyFitness`, `DiscordOS`, and `Mazer`), records `Nat1-Games` as dependency-only until project identity is disclosed, keeps the pass read-only, opens no new marker, and sets the exact next platform packet to `Supabase Pro Platform Governance backup and restore posture contract freeze`.
+The current top-level platform-readiness receipt is now `docs/ops/SUPABASE-PRO-PLATFORM-GOVERNANCE-BACKUP-INVENTORY-AND-RESTORE-READINESS-FIRST-IMPLEMENTATION-ADMISSION-2026-07-09.md`: the July 9 audit confirmed three actual Supabase projects in the current org (`FawxzzyFitness`, `DiscordOS`, and `Mazer`) plus dependency-only `Nat1-Games`, the follow-on contract freeze now locks the backup/restore posture classes and operator-decision boundaries for those surfaces without mutating Supabase, and the admission now opens one bounded future helper/test pair for read-only posture inventory while setting the exact next platform packet to `Supabase Pro Platform Governance backup inventory and restore-readiness prompt-pack and worker handoff contract`.
 
 Current routing posture:
 
@@ -15,7 +15,7 @@ Current routing posture:
 - The current active ATLAS-side lane remains `Sandbox Simulation Readiness`, held at `99%` with `No immediate Sandbox Simulation Readiness same-lane packet`.
 - The latest executed ATLAS marker movement is `AI Long-Run Batch Orchestration: 69% -> 70%`, backed by `docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-CROSS-MARKER-RATCHET-OPPORTUNITY-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-08.md`.
 - The refreshed Cortex worker-prompt proof remains `read_only_advisory`: it consumes explicit root-owned Playbook/Cortex source refs, reports clean publication posture, preserves owner-repo avoidance, and keeps final receipt authority outside Cortex.
-- Supabase Pro platform governance is now an explicit receipt-backed root concern, but not yet a marker lane: the July 9 audit confirms the project inventory and safe follow-up order while preserving no-mutation posture, and the exact next platform packet is `Supabase Pro Platform Governance backup and restore posture contract freeze`.
+- Supabase Pro platform governance is now an explicit receipt-backed root concern, but not yet a marker lane: the July 9 audit remains the inventory spine, the new contract freeze and admission keep the pass read-only while freezing backup/restore posture and one future helper/test slice, and the exact next platform packet is `Supabase Pro Platform Governance backup inventory and restore-readiness prompt-pack and worker handoff contract`.
 
 What is true right now:
 

@@ -114,15 +114,19 @@ Mandatory prompt preflight:
 
 If the task is about Supabase Pro adoption, platform readiness, or cross-project Supabase governance at ATLAS root, start with:
 
-- `docs/ops/SUPABASE-PRO-PLATFORM-CAPABILITY-ADOPTION-AUDIT-2026-07-09.md`
+- `docs/ops/SUPABASE-PRO-PLATFORM-GOVERNANCE-BACKUP-INVENTORY-AND-RESTORE-READINESS-FIRST-IMPLEMENTATION-ADMISSION-2026-07-09.md`
 
 What that receipt currently establishes:
 
 - the current Supabase org has three confirmed projects visible to the read-only connector: `FawxzzyFitness` (`lpswxoyfniocuhljgzbc`), `DiscordOS` (`nwexsktuuenfdegzrbut`), and `Mazer` (`geknvnrmktchljnyddwp`)
 - `Nat1-Games` has a real `supabase-js` dependency but no confirmed visible project identity yet
-- the July 9 pass is read-only governance only; no settings, secrets, or owner repos were mutated
+- the July 9 pass remains read-only governance only; no settings, secrets, or owner repos were mutated
 - no new marker or continuity manifest exists for this family yet
-- the exact next packet is `Supabase Pro Platform Governance backup and restore posture contract freeze`
+- the backup/restore posture classes are now frozen for the confirmed project set, including `daily_backup_covered`, `daily_backup_unverified`, `restore_process_unverified`, `pitr_not_approved`, `storage_restore_gap`, `custom_role_password_gap`, and `operator_decision_required`
+- the first admitted future implementation surface is `ops/atlas/supabase_backup_restore_posture.py` plus `tests/test_atlas_supabase_backup_restore_posture.py`
+- the governing contract receipt remains `docs/ops/SUPABASE-PRO-PLATFORM-GOVERNANCE-BACKUP-AND-RESTORE-POSTURE-CONTRACT-FREEZE-2026-07-09.md`
+- the audit spine remains `docs/ops/SUPABASE-PRO-PLATFORM-CAPABILITY-ADOPTION-AUDIT-2026-07-09.md`
+- the exact next packet is `Supabase Pro Platform Governance backup inventory and restore-readiness prompt-pack and worker handoff contract`
 
 Do not skip from that receipt straight into PITR, network restrictions, log drains, custom domains, or compute changes. The current governed order is audit first, then bounded contract freezes, then any later operator-authorized platform mutation.
 
