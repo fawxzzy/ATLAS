@@ -76,6 +76,7 @@
 - [Vercel Hobby Cost Governance Preserved Two-Snapshot Trend Checkpoint](../ops/VERCEL-HOBBY-COST-GOVERNANCE-PRESERVED-TWO-SNAPSHOT-TREND-CHECKPOINT-2026-06-18.md)
 - [Vercel Hobby Cost Governance Keep-Hobby Vs Upgrade Decision Checkpoint](../ops/VERCEL-HOBBY-COST-GOVERNANCE-KEEP-HOBBY-VS-UPGRADE-DECISION-CHECKPOINT-2026-06-18.md)
 - [Vercel Platform Observability Capability Audit](../ops/VERCEL-PLATFORM-OBSERVABILITY-CAPABILITY-AUDIT-2026-07-09.md)
+- [Vercel Platform Observability Governance Read-Only Project Inventory Contract Freeze](../ops/VERCEL-PLATFORM-OBSERVABILITY-GOVERNANCE-READ-ONLY-PROJECT-INVENTORY-CONTRACT-FREEZE-2026-07-09.md)
 - [Supabase Pro Platform Capability Adoption Audit](../ops/SUPABASE-PRO-PLATFORM-CAPABILITY-ADOPTION-AUDIT-2026-07-09.md)
 - [Supabase Pro Platform Governance Backup And Restore Posture Contract Freeze](../ops/SUPABASE-PRO-PLATFORM-GOVERNANCE-BACKUP-AND-RESTORE-POSTURE-CONTRACT-FREEZE-2026-07-09.md)
 - [Supabase Pro Platform Governance Backup Inventory And Restore-Readiness First-Implementation Admission](../ops/SUPABASE-PRO-PLATFORM-GOVERNANCE-BACKUP-INVENTORY-AND-RESTORE-READINESS-FIRST-IMPLEMENTATION-ADMISSION-2026-07-09.md)
