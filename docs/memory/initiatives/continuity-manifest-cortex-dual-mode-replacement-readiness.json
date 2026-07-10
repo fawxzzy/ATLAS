@@ -33,6 +33,7 @@
     "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CODEX-CLOSEOUT-INGESTION-READ-MODEL-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-10.md",
     "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CODEX-CLOSEOUT-INGESTION-READ-MODEL-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-10.md",
     "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CODEX-CLOSEOUT-INGESTION-READ-MODEL-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-10.md",
+    "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CODEX-CLOSEOUT-INGESTION-READ-MODEL-MARKER-SURFACE-RATCHET-DECISION-2026-07-10.md",
     "ops/cortex/chatgpt_codex_role_inventory.py",
     "tests/test_cortex_chatgpt_codex_role_inventory.py"
   ],
@@ -42,9 +43,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "cortex-dual-mode-replacement-readiness",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CODEX-CLOSEOUT-INGESTION-READ-MODEL-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-10.md",
+    "current_checkpoint_receipt": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CODEX-CLOSEOUT-INGESTION-READ-MODEL-MARKER-SURFACE-RATCHET-DECISION-2026-07-10.md",
     "checkpoint_commit": "main@cd630a88",
-    "checkpoint_summary": "The lane remains at 30 percent, but the Codex closeout ingestion read-model worker is now implementation-backed and reconciled. The helper/test pair is landed, the focused suite and schema smoke pass, and the next honest same-lane move is a marker-surface ratchet decision that decides whether the implementation satisfies the 40 percent threshold; no owner repo, deploy, secret, workflow-dispatch, hidden transcript, or platform-mutation authority is widened.",
+    "checkpoint_summary": "The lane is now at 40 percent because the Codex closeout ingestion read-model helper/test pair is landed, proof-backed, reconciled, and adopted through a marker-surface ratchet decision. The helper converts explicit closeout artifacts into deterministic Cortex-readable advisory state while preserving evidence classes, provenance, path guards, and authority denials. The next honest same-lane move is a chat-style synthesis packet generation contract freeze before any 50 percent implementation work.",
     "governing_receipts": [
       "docs/ops/CORTEX-DUAL-MODE-AND-SIMULATION-SUBSTRATE-MARKER-ADMISSION-2026-07-09.md",
       "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-OPERATING-MODE-CONTRACT-FREEZE-2026-07-09.md",
@@ -58,7 +59,8 @@
       "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CODEX-CLOSEOUT-INGESTION-READ-MODEL-FIRST-IMPLEMENTATION-ADMISSION-2026-07-10.md",
       "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CODEX-CLOSEOUT-INGESTION-READ-MODEL-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-10.md",
       "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CODEX-CLOSEOUT-INGESTION-READ-MODEL-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-10.md",
-      "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CODEX-CLOSEOUT-INGESTION-READ-MODEL-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-10.md"
+      "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CODEX-CLOSEOUT-INGESTION-READ-MODEL-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-10.md",
+      "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CODEX-CLOSEOUT-INGESTION-READ-MODEL-MARKER-SURFACE-RATCHET-DECISION-2026-07-10.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -83,7 +85,11 @@
       },
       {
         "path": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CODEX-CLOSEOUT-INGESTION-READ-MODEL-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-10.md",
-        "role": "current Codex closeout ingestion read-model implementation-backed reconciliation truth"
+        "role": "Codex closeout ingestion read-model implementation-backed reconciliation truth"
+      },
+      {
+        "path": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CODEX-CLOSEOUT-INGESTION-READ-MODEL-MARKER-SURFACE-RATCHET-DECISION-2026-07-10.md",
+        "role": "current 40 percent marker-ratchet receipt and Codex closeout ingestion threshold source"
       },
       {
         "path": "ops/cortex/codex_closeout_ingestion_read_model.py",
@@ -138,8 +144,8 @@
     ],
     "blocked_or_gated_work": [
       {
-        "item": "moving above the current 30 percent dual-mode threshold",
-        "requirement": "blocked until the implementation-backed Codex closeout ingestion helper is adopted through a separate marker-surface ratchet decision"
+        "item": "moving above the current 40 percent dual-mode threshold",
+        "requirement": "blocked until chat-style synthesis packet generation from Cortex memory is contract-frozen, implemented, proof-backed, reconciled, and adopted through a marker-surface ratchet decision"
       },
       {
         "item": "claiming bridge implementation or execution routing from the frozen bridge schema alone",
@@ -152,19 +158,19 @@
     ],
     "next_package_ladder": [
       {
-        "package": "Cortex Dual-Mode Replacement Readiness Codex closeout ingestion read-model marker-surface ratchet decision",
-        "mode": "docs-only marker-surface ratchet decision",
-        "reason": "the helper and focused proof suite are implementation-backed and reconciled, so the next honest same-lane move is to decide whether the evidence satisfies the 40 percent Codex closeout ingestion threshold without widening helper scope or authority"
+        "package": "Cortex Dual-Mode Replacement Readiness chat-style synthesis packet generation contract freeze",
+        "mode": "docs-only contract freeze",
+        "reason": "the 40 percent Codex closeout ingestion threshold is adopted, so the next honest same-lane move is to freeze the 50 percent chat-style synthesis packet generation contract before implementation"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CODEX-CLOSEOUT-INGESTION-READ-MODEL-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-10.md",
+    "freshness_checked_receipt": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CODEX-CLOSEOUT-INGESTION-READ-MODEL-MARKER-SURFACE-RATCHET-DECISION-2026-07-10.md",
     "freshness_checked_at": "2026-07-10T00:00:00-04:00",
-    "freshness_basis": "The current dual-mode posture is manifest-backed at 30 percent: the operating-model threshold is frozen, the role inventory is implementation-backed, the synthesis-to-execution bridge schema is frozen, the bridge-schema threshold has been adopted, and the Codex closeout ingestion read-model helper/test slice is now implementation-backed and reconciled. The next same-lane move is the marker-surface ratchet decision for the 40 percent threshold.",
+    "freshness_basis": "The current dual-mode posture is manifest-backed at 40 percent: the operating-model threshold is frozen, the role inventory is implementation-backed, the synthesis-to-execution bridge schema is frozen, the bridge-schema threshold has been adopted, and the Codex closeout ingestion read-model helper/test slice is implementation-backed, reconciled, and adopted. The next same-lane move is the chat-style synthesis packet generation contract freeze for the future 50 percent threshold.",
     "marker_posture": [
       {
         "marker": "Cortex Dual-Mode Replacement Readiness",
-        "percent": 30,
+        "percent": 40,
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ]

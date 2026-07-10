@@ -83,7 +83,7 @@ Read:
 
 ### Future / Cortex
 
-- Cortex Dual-Mode Replacement Readiness: `30%`
+- Cortex Dual-Mode Replacement Readiness: `40%`
 - Cortex Simulation Substrate Readiness: `0%`
 
 ### Platform governance
