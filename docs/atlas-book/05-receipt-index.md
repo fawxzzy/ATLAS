@@ -105,6 +105,7 @@
 - [Cortex Dual-Mode Replacement Readiness ChatGPT/Codex Role Inventory Prompt-Pack And Worker Handoff Contract](../ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHATGPT-CODEX-ROLE-INVENTORY-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-09.md)
 - [Cortex Dual-Mode Replacement Readiness ChatGPT/Codex Role Inventory Implementation-Readiness Closeout And Worker Routing](../ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHATGPT-CODEX-ROLE-INVENTORY-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-09.md)
 - [Cortex Dual-Mode Replacement Readiness ChatGPT/Codex Role Inventory First-Implementation Worker-Cluster Reconciliation](../ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHATGPT-CODEX-ROLE-INVENTORY-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-09.md)
+- [ATLAS Root Operator Reselection To Cortex Simulation Substrate](../ops/ATLAS-ROOT-OPERATOR-RESELECTION-TO-CORTEX-SIMULATION-SUBSTRATE-2026-07-09.md)
 - [Cortex Dual-Mode Replacement Readiness ChatGPT/Codex Role Inventory Marker-Surface Ratchet Decision](../ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHATGPT-CODEX-ROLE-INVENTORY-MARKER-SURFACE-RATCHET-DECISION-2026-07-09.md)
 - [Cortex Dual-Mode Replacement Readiness Receipt-Index And Restart-Truth Reconciliation](../ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-RECEIPT-INDEX-AND-RESTART-TRUTH-RECONCILIATION-2026-07-09.md)
 - [Supabase Pro Platform Capability Adoption Audit](../ops/SUPABASE-PRO-PLATFORM-CAPABILITY-ADOPTION-AUDIT-2026-07-09.md)
