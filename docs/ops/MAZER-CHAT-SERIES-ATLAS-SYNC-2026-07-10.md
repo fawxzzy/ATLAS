@@ -109,6 +109,13 @@ These failures emerged repeatedly enough to preserve as Atlas/Playbook inputs:
 - Deliberate remaining risk: a poor E-rank run may be long because it is completing visible memory recovery rather than being cut off. Route-overhead reduction is the next controller tuning slice; do not reintroduce an end-route fallback or forced early reset as a shortcut.
 - DiscordOS sync/readback: the live `mazer` forum in Project Feedback was updated through the bot. All `35` cards read back with required sections and reactions; the active AI card is now `98%`.
 
+## 2026-07-10 - AI Rank-Ladder Receipt
+
+- Owner implementation: D/C/B/A/S now use progressively stronger local perception instead of sharing one D-grade controller floor. Lookahead widens from local branches, confidence noise and split uncertainty reduce, and wrap mental cost falls by rank. A* remains diagnostics/post-run-only.
+- Proof: the rank sweep is monotonic at level `1` over scale `37` / seeds `1,2,3,5,8`: average score E `65.2` -> S `80.8`; route-efficiency pressure E `61.98` -> S `25.937`; target leaks remain zero.
+- Maintained proof spine: `tests/ai/demo-walker-known-frontier.test.ts` and `tests/ai/demo-walker-rank-ladder.test.ts` are now in `npm run test:verify`. The full run passed `38` files / `311` tests, then lint and build passed.
+- DiscordOS: the same card was live-synced and read back after this receipt. It remains at `98%`: the remaining controller work is low-rank frontier/travel overhead, followed by a player-facing thought/skill legend.
+
 ## Selected Next Discord Card
 
 The chat is now halted behind one implementation card: `mazer-human-configured-ai-runner`.
