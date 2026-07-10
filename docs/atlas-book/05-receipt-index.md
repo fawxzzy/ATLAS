@@ -112,6 +112,7 @@
 - [ATLAS Root Operator Reselection To Cortex Simulation Substrate](../ops/ATLAS-ROOT-OPERATOR-RESELECTION-TO-CORTEX-SIMULATION-SUBSTRATE-2026-07-09.md)
 - [Cortex Dual-Mode Replacement Readiness ChatGPT/Codex Role Inventory Marker-Surface Ratchet Decision](../ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHATGPT-CODEX-ROLE-INVENTORY-MARKER-SURFACE-RATCHET-DECISION-2026-07-09.md)
 - [Cortex Dual-Mode Replacement Readiness Receipt-Index And Restart-Truth Reconciliation](../ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-RECEIPT-INDEX-AND-RESTART-TRUTH-RECONCILIATION-2026-07-09.md)
+- [Cortex Dual-Mode Replacement Readiness Codex Closeout Ingestion Read-Model Prompt-Pack And Worker Handoff Contract](../ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CODEX-CLOSEOUT-INGESTION-READ-MODEL-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-10.md)
 - [Supabase Pro Platform Capability Adoption Audit](../ops/SUPABASE-PRO-PLATFORM-CAPABILITY-ADOPTION-AUDIT-2026-07-09.md)
 - [Supabase Pro Platform Governance Backup And Restore Posture Contract Freeze](../ops/SUPABASE-PRO-PLATFORM-GOVERNANCE-BACKUP-AND-RESTORE-POSTURE-CONTRACT-FREEZE-2026-07-09.md)
 - [Supabase Pro Platform Governance Backup Inventory And Restore-Readiness First-Implementation Admission](../ops/SUPABASE-PRO-PLATFORM-GOVERNANCE-BACKUP-INVENTORY-AND-RESTORE-READINESS-FIRST-IMPLEMENTATION-ADMISSION-2026-07-09.md)
