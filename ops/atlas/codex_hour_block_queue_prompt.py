@@ -13,6 +13,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from ops._atlas import atlas_root, normalize_slashes
+from ops.atlas import autonomous_lane_scheduler as lane_scheduler
 from ops.atlas import held_lane_prompt_suppression as suppression
 from ops.atlas import marker_aware_next_packet_planner as planner
 
@@ -529,6 +530,49 @@ def render_stdout(report: dict[str, Any], *, json_only: bool, prompt_only: bool)
     return render_summary(report) + "\n\n" + json_text
 
 
+def build_report_from_scheduler_report(scheduler_report: dict[str, Any]) -> OrderedDict[str, Any]:
+    git_state = scheduler_report.get("git_state", {}) if isinstance(scheduler_report.get("git_state"), dict) else {}
+    prompt_text = lane_scheduler.render_prompt(scheduler_report)
+    selected_marker = scheduler_report.get("selected_marker")
+    selected_packet = scheduler_report.get("selected_packet")
+    status = STATUS_OK if scheduler_report.get("status") in {lane_scheduler.STATUS_EXECUTE, lane_scheduler.STATUS_HOLD, lane_scheduler.STATUS_VALIDATION_CLEANUP} else STATUS_BLOCKED
+    should_generate_queue = scheduler_report.get("status") == lane_scheduler.STATUS_EXECUTE
+    report = OrderedDict(
+        [
+            ("schema_version", SCHEMA_VERSION),
+            ("status", status),
+            ("root", scheduler_report.get("root", "")),
+            ("branch", git_state.get("branch")),
+            ("head", git_state.get("head")),
+            ("parity", git_state.get("parity", OrderedDict([("status", "unknown"), ("behind", None), ("ahead", None)]))),
+            ("source_refs", [scheduler_report.get("prompt_output")] if scheduler_report.get("prompt_output") else []),
+            ("selector", OrderedDict([("selected_marker", git_state.get("active_lane")), ("selected_percentage", None), ("operator_action", scheduler_report.get("routing_mode")), ("current_packet", None), ("next_packet", selected_packet)])),
+            ("planner", OrderedDict([("status", scheduler_report.get("status")), ("selected_marker", selected_marker), ("selected_packet", selected_packet), ("candidate_count", scheduler_report.get("candidate_count")), ("held_count", len(scheduler_report.get("skipped_candidates", []))), ("safe_candidate_count", len(scheduler_report.get("candidates", []))), ("safe_candidates", scheduler_report.get("candidates", []))])),
+            ("suppression", OrderedDict([("status", scheduler_report.get("status")), ("decision", scheduler_report.get("decision")), ("root_clean", True), ("validation_state", scheduler_report.get("validation_state", {})), ("owner_lane_fallback_forbidden", True), ("exact_packet_available", selected_packet is not None), ("safe_to_continue", should_generate_queue)])),
+            ("suppression_decision", scheduler_report.get("decision")),
+            ("suppression_reason", scheduler_report.get("stop_reason")),
+            ("selected_packet_source", scheduler_report.get("selected_packet_source")),
+            ("selected_packet_classification", scheduler_report.get("packet_phase")),
+            ("packet_authority_risk", "none"),
+            ("allowed_next_actions", [scheduler_report.get("decision")] if scheduler_report.get("decision") else []),
+            ("should_generate_queue", should_generate_queue),
+            ("operator_selected_packet", selected_packet if scheduler_report.get("requires_reselection_receipt") else None),
+            ("scope_lock", scheduler_report.get("scope_lock", OrderedDict())),
+            ("queue_stages", []),
+            ("allowed_root_marker_lanes", scheduler_report.get("scope_lock", {}).get("allowed_markers", [])),
+            ("excluded_surfaces", scheduler_report.get("scope_lock", {}).get("forbidden_owner_lanes", [])),
+            ("boundaries", scheduler_report.get("authority_denials", [])),
+            ("baseline_commands", REQUIRED_BASELINE_COMMANDS),
+            ("optional_helper_commands", []),
+            ("blockers", scheduler_report.get("blocked_candidates", []) if status == STATUS_BLOCKED else []),
+            ("warnings", []),
+            ("safe_to_use", status != STATUS_BLOCKED),
+            ("prompt_text", prompt_text),
+        ]
+    )
+    return report
+
+
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Build a bounded Codex hour-block queue prompt from current ATLAS root state.")
     parser.add_argument("--json", action="store_true", help="Emit JSON only on stdout.")
@@ -536,6 +580,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--source", action="append", default=[], help="Optional root-relative admitted source ref for planner context. May be repeated.")
     parser.add_argument("--operator-selected-packet", help="Explicit operator-selected root packet name.")
     parser.add_argument("--external-proof-present", action="store_true", help="Allow queue generation when admitted external proof exists.")
+    parser.add_argument("--scheduler-output", help="Optional root-relative tmp/**.json autonomous lane scheduler report to consume.")
     parser.add_argument("--output", help="Optional root-relative tmp/**.json report output path.")
     parser.add_argument("--prompt-output", help="Optional root-relative tmp/**.md prompt output path.")
     parser.add_argument("--strict", action="store_true")
@@ -565,12 +610,52 @@ def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     root = atlas_root().resolve()
     try:
-        report = build_report(
-            root=root,
-            source_refs=list(args.source or []),
-            operator_selected_packet=args.operator_selected_packet,
-            external_proof_present=bool(args.external_proof_present),
-        )
+        if args.scheduler_output:
+            resolved_input, input_error = suppression._validate_artifact_path(root=root, artifact_path=args.scheduler_output)
+            if input_error is not None or resolved_input is None:
+                report = OrderedDict(
+                    [
+                        ("schema_version", SCHEMA_VERSION),
+                        ("status", STATUS_BLOCKED),
+                        ("root", normalize_slashes(str(root))),
+                        ("branch", None),
+                        ("head", None),
+                        ("parity", OrderedDict([("status", "unknown"), ("behind", None), ("ahead", None)])),
+                        ("source_refs", [args.scheduler_output]),
+                        ("selector", OrderedDict()),
+                        ("planner", OrderedDict()),
+                        ("suppression", OrderedDict()),
+                        ("suppression_decision", None),
+                        ("suppression_reason", None),
+                        ("selected_packet_source", None),
+                        ("selected_packet_classification", None),
+                        ("packet_authority_risk", "blocked"),
+                        ("allowed_next_actions", []),
+                        ("should_generate_queue", False),
+                        ("operator_selected_packet", None),
+                        ("scope_lock", _scope_lock_payload()),
+                        ("queue_stages", []),
+                        ("allowed_root_marker_lanes", ROOT_MARKER_LANES),
+                        ("excluded_surfaces", EXCLUDED_SURFACES),
+                        ("boundaries", BOUNDARIES),
+                        ("baseline_commands", REQUIRED_BASELINE_COMMANDS),
+                        ("optional_helper_commands", OPTIONAL_HELPER_COMMANDS),
+                        ("blockers", [_finding("scheduler_input_invalid", str(input_error), severity="blocker")]),
+                        ("warnings", []),
+                        ("safe_to_use", False),
+                        ("prompt_text", ""),
+                    ]
+                )
+            else:
+                loaded = json.loads(resolved_input.read_text(encoding="utf-8"))
+                report = build_report_from_scheduler_report(loaded if isinstance(loaded, dict) else {})
+        else:
+            report = build_report(
+                root=root,
+                source_refs=list(args.source or []),
+                operator_selected_packet=args.operator_selected_packet,
+                external_proof_present=bool(args.external_proof_present),
+            )
         if args.output:
             resolved_output, output_error = planner.validate_output_path(root=root, output_path=args.output)
             if output_error is not None:

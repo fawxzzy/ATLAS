@@ -11,6 +11,11 @@ from ops.atlas import codex_hour_block_queue_prompt as hour_block
 from ops.atlas import marker_aware_next_packet_planner as planner
 
 
+def _write(path: Path, text: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text, encoding="utf-8")
+
+
 def _selector_payload(
     *,
     action: str = "no_immediate_root_packet",
@@ -333,6 +338,89 @@ class CodexHourBlockQueuePromptTests(unittest.TestCase):
             ],
             list(payload.keys()),
         )
+
+    def test_scheduler_output_can_drive_hour_block_prompt(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            scheduler_payload = {
+                "schema_version": "atlas.autonomous_lane_scheduler.v1",
+                "status": "execute",
+                "decision": "operator_program_packet",
+                "routing_mode": "operator_program_packet",
+                "selected_marker": "Cortex Dual-Mode Replacement Readiness",
+                "selected_lane": "Cortex Dual-Mode Replacement Readiness",
+                "selected_packet": "Cortex Dual-Mode Replacement Readiness synthesis-to-execution bridge schema contract freeze",
+                "packet_phase": "contract_freeze",
+                "selected_packet_source": "planner",
+                "requires_reselection_receipt": True,
+                "reselection_receipt": "docs/ops/ATLAS-ROOT-OPERATOR-RESELECTION-TO-CORTEX-DUAL-MODE-REPLACEMENT-READINESS-2026-07-10.md",
+                "candidate_count": 1,
+                "candidates": [],
+                "skipped_candidates": [],
+                "blocked_candidates": [],
+                "validation_state": {"critical": 0, "error": 0, "warning": 0, "info": 0},
+                "git_state": {"branch": "main", "head": "abc123", "parity": {"status": "clean", "behind": 0, "ahead": 0}, "active_lane": "Sandbox Simulation Readiness"},
+                "scope_lock": {"allowed_markers": ["Cortex Dual-Mode Replacement Readiness"], "forbidden_owner_lanes": ["fitness", "mazer"]},
+                "authority_denials": ["owner-repo-mutation"],
+                "safe_to_execute": True,
+                "stop_reason": None,
+                "prompt_output": "tmp/atlas/codex-autocomplete-prompt.latest.md",
+                "next_recommended_command": "python ops/atlas/autonomous_lane_scheduler.py ...",
+            }
+            path = root / "tmp" / "atlas" / "scheduler.json"
+            _write(path, json.dumps(scheduler_payload, indent=2) + "\n")
+
+            with mock.patch.object(hour_block, "atlas_root", return_value=root):
+                stdout = io.StringIO()
+                with mock.patch("sys.stdout", stdout):
+                    code = hour_block.main(["--json", "--scheduler-output", "tmp/atlas/scheduler.json"])
+
+            payload = json.loads(stdout.getvalue())
+            self.assertEqual(0, code)
+            self.assertTrue(payload["should_generate_queue"])
+            self.assertIn("Selected packet:", payload["prompt_text"])
+            self.assertIn("synthesis-to-execution bridge schema contract freeze", payload["prompt_text"])
+
+    def test_scheduler_hold_output_renders_hold_prompt(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            scheduler_payload = {
+                "schema_version": "atlas.autonomous_lane_scheduler.v1",
+                "status": "hold",
+                "decision": "hold",
+                "routing_mode": "hold",
+                "selected_marker": None,
+                "selected_lane": None,
+                "selected_packet": None,
+                "packet_phase": "hold",
+                "selected_packet_source": None,
+                "requires_reselection_receipt": False,
+                "reselection_receipt": None,
+                "candidate_count": 0,
+                "candidates": [],
+                "skipped_candidates": [],
+                "blocked_candidates": [],
+                "validation_state": {"critical": 0, "error": 0, "warning": 0, "info": 0},
+                "git_state": {"branch": "main", "head": "abc123", "parity": {"status": "clean", "behind": 0, "ahead": 0}, "active_lane": "Sandbox Simulation Readiness"},
+                "scope_lock": {"allowed_markers": [], "forbidden_owner_lanes": []},
+                "authority_denials": [],
+                "safe_to_execute": False,
+                "stop_reason": "no_safe_candidate",
+                "prompt_output": "tmp/atlas/codex-autocomplete-prompt.latest.md",
+                "next_recommended_command": None,
+            }
+            path = root / "tmp" / "atlas" / "scheduler.json"
+            _write(path, json.dumps(scheduler_payload, indent=2) + "\n")
+
+            with mock.patch.object(hour_block, "atlas_root", return_value=root):
+                stdout = io.StringIO()
+                with mock.patch("sys.stdout", stdout):
+                    code = hour_block.main(["--json", "--scheduler-output", "tmp/atlas/scheduler.json"])
+
+            payload = json.loads(stdout.getvalue())
+            self.assertEqual(0, code)
+            self.assertFalse(payload["should_generate_queue"])
+            self.assertIn("ATLAS ROOT HELD - NO SAFE AUTOCOMPLETE PACKET", payload["prompt_text"])
 
 
 if __name__ == "__main__":
