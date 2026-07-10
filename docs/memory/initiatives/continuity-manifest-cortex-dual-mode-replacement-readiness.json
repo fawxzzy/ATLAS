@@ -29,6 +29,7 @@
     "docs/ops/ATLAS-ROOT-OPERATOR-RESELECTION-TO-CORTEX-DUAL-MODE-REPLACEMENT-READINESS-2026-07-10.md",
     "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-SYNTHESIS-TO-EXECUTION-BRIDGE-SCHEMA-CONTRACT-FREEZE-2026-07-10.md",
     "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-SYNTHESIS-TO-EXECUTION-BRIDGE-SCHEMA-MARKER-SURFACE-RATCHET-DECISION-2026-07-10.md",
+    "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CODEX-CLOSEOUT-INGESTION-READ-MODEL-FIRST-IMPLEMENTATION-ADMISSION-2026-07-10.md",
     "ops/cortex/chatgpt_codex_role_inventory.py",
     "tests/test_cortex_chatgpt_codex_role_inventory.py"
   ],
@@ -38,9 +39,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "cortex-dual-mode-replacement-readiness",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-SYNTHESIS-TO-EXECUTION-BRIDGE-SCHEMA-MARKER-SURFACE-RATCHET-DECISION-2026-07-10.md",
-    "checkpoint_commit": "main@03ec89e5",
-    "checkpoint_summary": "The lane moves to 30 percent because the published 30 percent milestone is the synthesis-to-execution bridge schema frozen threshold, and that schema is now durable as atlas.cortex.synthesis_execution_bridge_packet.v1. The next honest same-lane packet is Codex closeout ingestion read-model first-implementation admission; no bridge validator, generator, closeout ingestion, deploy, secret, owner-repo, workflow-dispatch, or platform-mutation authority is widened.",
+    "current_checkpoint_receipt": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CODEX-CLOSEOUT-INGESTION-READ-MODEL-FIRST-IMPLEMENTATION-ADMISSION-2026-07-10.md",
+    "checkpoint_commit": "main@1c00d0a4",
+    "checkpoint_summary": "The lane remains at 30 percent, but the Codex closeout ingestion read-model first implementation is now admitted as a bounded future helper/test slice. The next honest same-lane packet is the prompt-pack and worker handoff contract; no helper, closeout read model, marker movement, deploy, secret, owner-repo, workflow-dispatch, or platform-mutation authority is implemented or widened.",
     "governing_receipts": [
       "docs/ops/CORTEX-DUAL-MODE-AND-SIMULATION-SUBSTRATE-MARKER-ADMISSION-2026-07-09.md",
       "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-OPERATING-MODE-CONTRACT-FREEZE-2026-07-09.md",
@@ -50,7 +51,8 @@
       "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHATGPT-CODEX-ROLE-INVENTORY-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-09.md",
       "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHATGPT-CODEX-ROLE-INVENTORY-MARKER-SURFACE-RATCHET-DECISION-2026-07-09.md",
       "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-SYNTHESIS-TO-EXECUTION-BRIDGE-SCHEMA-CONTRACT-FREEZE-2026-07-10.md",
-      "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-SYNTHESIS-TO-EXECUTION-BRIDGE-SCHEMA-MARKER-SURFACE-RATCHET-DECISION-2026-07-10.md"
+      "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-SYNTHESIS-TO-EXECUTION-BRIDGE-SCHEMA-MARKER-SURFACE-RATCHET-DECISION-2026-07-10.md",
+      "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CODEX-CLOSEOUT-INGESTION-READ-MODEL-FIRST-IMPLEMENTATION-ADMISSION-2026-07-10.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -59,7 +61,11 @@
       },
       {
         "path": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-SYNTHESIS-TO-EXECUTION-BRIDGE-SCHEMA-MARKER-SURFACE-RATCHET-DECISION-2026-07-10.md",
-        "role": "current 30 percent marker-ratchet receipt and exact next-packet truth"
+        "role": "current 30 percent marker-ratchet receipt and bridge-schema threshold source"
+      },
+      {
+        "path": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CODEX-CLOSEOUT-INGESTION-READ-MODEL-FIRST-IMPLEMENTATION-ADMISSION-2026-07-10.md",
+        "role": "current Codex closeout ingestion read-model admission and exact next-packet truth"
       },
       {
         "path": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-SYNTHESIS-TO-EXECUTION-BRIDGE-SCHEMA-CONTRACT-FREEZE-2026-07-10.md",
@@ -107,7 +113,7 @@
     "blocked_or_gated_work": [
       {
         "item": "moving above the current 30 percent dual-mode threshold",
-        "requirement": "blocked until Codex closeout ingestion into a Cortex read model is admitted, implemented, proof-backed, and reconciled"
+        "requirement": "blocked until Codex closeout ingestion into a Cortex read model is implemented, proof-backed, reconciled, and then adopted through a marker-surface ratchet decision"
       },
       {
         "item": "claiming bridge implementation or execution routing from the frozen bridge schema alone",
@@ -120,15 +126,15 @@
     ],
     "next_package_ladder": [
       {
-        "package": "Cortex Dual-Mode Replacement Readiness Codex closeout ingestion read-model first-implementation admission",
-        "mode": "docs-only root-bounded first-implementation admission",
-        "reason": "the bridge schema threshold is now adopted at 30 percent, so the next honest same-lane move is to admit the smallest safe root-owned Codex closeout ingestion read-model slice before any implementation attempts the 40 percent milestone"
+        "package": "Cortex Dual-Mode Replacement Readiness Codex closeout ingestion read-model prompt-pack and worker handoff contract",
+        "mode": "docs-only root-bounded prompt-pack and worker handoff contract",
+        "reason": "the Codex closeout ingestion read-model helper/test slice is now admitted, so the next honest same-lane move is to freeze exact worker instructions, command shape, fixtures, proof obligations, and stop conditions before implementation-readiness can route a worker"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-SYNTHESIS-TO-EXECUTION-BRIDGE-SCHEMA-MARKER-SURFACE-RATCHET-DECISION-2026-07-10.md",
+    "freshness_checked_receipt": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CODEX-CLOSEOUT-INGESTION-READ-MODEL-FIRST-IMPLEMENTATION-ADMISSION-2026-07-10.md",
     "freshness_checked_at": "2026-07-10T00:00:00-04:00",
-    "freshness_basis": "The current dual-mode posture is manifest-backed at 30 percent: the operating-model threshold is frozen, the role inventory is implementation-backed, the synthesis-to-execution bridge schema is frozen, and the bridge-schema threshold has been adopted through a marker-surface ratchet decision. The next same-lane move is Codex closeout ingestion read-model first-implementation admission.",
+    "freshness_basis": "The current dual-mode posture is manifest-backed at 30 percent: the operating-model threshold is frozen, the role inventory is implementation-backed, the synthesis-to-execution bridge schema is frozen, the bridge-schema threshold has been adopted, and the Codex closeout ingestion read-model helper/test slice is admitted. The next same-lane move is the prompt-pack and worker handoff contract.",
     "marker_posture": [
       {
         "marker": "Cortex Dual-Mode Replacement Readiness",
