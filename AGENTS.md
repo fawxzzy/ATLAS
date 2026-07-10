@@ -60,6 +60,15 @@ Verification
 - For repo changes, run the repo-local verify command before claiming completion.
 - If `_stack` owns an existing operator command for the task, prefer using it instead of inventing a new cross-repo flow.
 
+Runtime Permissions
+- The default ATLAS-root Codex runtime posture is full local access, network enabled, live web search, and no approval prompts.
+- Canonical modern Codex config uses `default_permissions = ":danger-full-access"`, `approval_policy = "never"`, and `web_search = "live"`.
+- Canonical legacy fallback uses `sandbox_mode = "danger-full-access"`, `approval_policy = "never"`, and `web_search = "live"`.
+- Do not mix modern permission-profile config with legacy sandbox config in the same loaded Codex configuration.
+- Do not downgrade permissions for ATLAS-root threads, owner-lane service threads, scheduler workers, service-bus workers, or future Cortex adapters unless the operator explicitly requests it in the current thread.
+- Treat single-writer routing, queue ordering, idempotency, leases, sync/readback, and correlated receipts as coordination controls, not as permission restrictions.
+- Managed product or workspace requirements may still constrain allowed permission profiles or approval policies even when the ATLAS operator default is full access.
+
 Vercel Production Deploy Guard
 - Treat every Vercel production deployment, promotion, or production-alias cutover as approval-gated.
 - Do not run `vercel deploy --prod`, `vercel promote`, production rollback/promotion APIs, or any equivalent production-targeting Vercel mutation unless the operator explicitly requests production deploy intent in the current thread.

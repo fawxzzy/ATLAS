@@ -1,0 +1,6 @@
+default_permissions = ":danger-full-access"
+approval_policy = "never"
+web_search = "live"
+
+[notice]
+hide_full_access_warning = true

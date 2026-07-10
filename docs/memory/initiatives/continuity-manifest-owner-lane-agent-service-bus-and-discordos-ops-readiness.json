@@ -1,0 +1,127 @@
+{
+  "contract_version": "atlas.initiative.v1",
+  "id": "continuity-manifest-owner-lane-agent-service-bus-and-discordos-ops-readiness",
+  "title": "Continuity Manifest Owner Lane Agent Service Bus And DiscordOS Ops Readiness",
+  "summary": "Maintained ATLAS-root retrieval map for the owner-lane agent service bus and DiscordOS Ops readiness lane.",
+  "status": "active",
+  "owner": "stack-root",
+  "created_at": "2026-07-10T12:00:00-04:00",
+  "updated_at": "2026-07-10T12:00:00-04:00",
+  "related_plan_refs": [],
+  "related_decision_refs": [],
+  "related_hypothesis_refs": [],
+  "related_session_refs": [],
+  "related_attention_refs": [],
+  "proposed_next_session_refs": [],
+  "evidence_refs": [
+    "AGENTS.md",
+    "docs/atlas-book/01-current-state.md",
+    "docs/atlas-book/02-lanes-and-markers.md",
+    "docs/atlas-book/05-receipt-index.md",
+    "docs/memory/README.md",
+    "docs/memory/profiles/zachariah_workflow_profile.md",
+    "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-MARKER-ADMISSION-2026-07-10.md",
+    "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-FULL-PERMISSION-RUNTIME-AND-REQUEST-RECEIPT-PROTOCOL-CONTRACT-FREEZE-2026-07-10.md",
+    "ops/atlas/marker_knockout_selector.py",
+    "ops/codex/config.full-permission.toml",
+    "tests/test_atlas_marker_knockout_selector.py"
+  ],
+  "supersedes": [],
+  "superseded_by": [],
+  "metadata": {
+    "artifact_kind": "continuity_manifest",
+    "lane_id": "owner-lane-agent-service-bus-and-discordos-ops-readiness",
+    "scope_class": "atlas-root-governance",
+    "current_checkpoint_receipt": "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-FULL-PERMISSION-RUNTIME-AND-REQUEST-RECEIPT-PROTOCOL-CONTRACT-FREEZE-2026-07-10.md",
+    "checkpoint_commit": "main@c9c812f4",
+    "checkpoint_summary": "The owner-lane service-bus family is now durable at 10 percent. The standing full-permission runtime policy, no-mixing rule, no-downgrade rule, app-server launch contract, service registry defaults, request schema, receipt schema, queue states, idempotency model, resource lease model, callback modes, and single-writer coordination posture are frozen without implementing the queue or mutating owner repos.",
+    "governing_receipts": [
+      "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-MARKER-ADMISSION-2026-07-10.md",
+      "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-FULL-PERMISSION-RUNTIME-AND-REQUEST-RECEIPT-PROTOCOL-CONTRACT-FREEZE-2026-07-10.md"
+    ],
+    "owner_truth_surfaces": [
+      {
+        "path": "AGENTS.md",
+        "role": "root runtime-permission doctrine and operator-routing guardrails"
+      },
+      {
+        "path": "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-MARKER-ADMISSION-2026-07-10.md",
+        "role": "marker-admission doctrine, single-writer rationale, threshold ladder, and historical lane boundary"
+      },
+      {
+        "path": "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-FULL-PERMISSION-RUNTIME-AND-REQUEST-RECEIPT-PROTOCOL-CONTRACT-FREEZE-2026-07-10.md",
+        "role": "current 10 percent contract freeze and decisive full-permission runtime plus request/receipt protocol source"
+      },
+      {
+        "path": "ops/atlas/marker_knockout_selector.py",
+        "role": "root-owned next-packet routing truth for the owner-lane service-bus family"
+      },
+      {
+        "path": "tests/test_atlas_marker_knockout_selector.py",
+        "role": "focused selector proof for the renamed next-packet contract"
+      },
+      {
+        "path": "ops/codex/config.full-permission.toml",
+        "role": "committed reusable full-permission Codex config template"
+      },
+      {
+        "path": "docs/memory/profiles/zachariah_workflow_profile.md",
+        "role": "canonical workflow profile that governs root doctrine and future Cortex continuity posture"
+      }
+    ],
+    "verification_adoption_surfaces": [
+      {
+        "path": "docs/atlas-book/01-current-state.md",
+        "role": "current root-state projection surface"
+      },
+      {
+        "path": "docs/atlas-book/02-lanes-and-markers.md",
+        "role": "marker table and supporting-open marker projection surface"
+      },
+      {
+        "path": "docs/atlas-book/05-receipt-index.md",
+        "role": "receipt spine and restart lookup surface"
+      },
+      {
+        "path": "docs/memory/README.md",
+        "role": "continuity-manifest doctrine and seeded-manifest inventory surface"
+      }
+    ],
+    "blocked_or_gated_work": [
+      {
+        "item": "claiming a live queue implementation",
+        "requirement": "blocked until the durable SQLite queue first-implementation admission lands and its helper/test surface is admitted"
+      },
+      {
+        "item": "claiming live DiscordOS mutation execution from the bus",
+        "requirement": "blocked until a later worker packet proves queue handling, sync, readback, and receipt emission end to end"
+      },
+      {
+        "item": "framing single-writer routing as a sandbox restriction",
+        "requirement": "blocked permanently by doctrine; coordination and permission policy are separate contracts"
+      },
+      {
+        "item": "widening into owner-repo mutation, Vercel mutation, Supabase mutation, or secret handling from this lane",
+        "requirement": "blocked unless a separate explicit authority packet is opened and proved"
+      }
+    ],
+    "next_package_ladder": [
+      {
+        "package": "Owner-Lane Agent Service Bus & DiscordOS Ops durable SQLite queue first-implementation admission",
+        "mode": "docs-only first-implementation admission",
+        "reason": "the runtime and protocol contract is frozen, so the next honest same-lane move is to admit the first bounded SQLite queue implementation surfaces, proof matrix, and stop conditions before any worker execution"
+      }
+    ],
+    "freshness_state": "manifest-backed",
+    "freshness_checked_receipt": "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-FULL-PERMISSION-RUNTIME-AND-REQUEST-RECEIPT-PROTOCOL-CONTRACT-FREEZE-2026-07-10.md",
+    "freshness_checked_at": "2026-07-10T12:00:00-04:00",
+    "freshness_basis": "The owner-lane service-bus family is manifest-backed at 10 percent: the marker is admitted, the standing full-permission runtime policy is durable, the no-mixing and no-downgrade rules are explicit, the app-server launch and resume contract is frozen, the service registry defaults are frozen, the request and receipt schemas are frozen, the queue state/idempotency/lease/callback model is frozen, and the next same-lane move is the durable SQLite queue first-implementation admission.",
+    "marker_posture": [
+      {
+        "marker": "Owner-Lane Agent Service Bus & DiscordOS Ops Readiness",
+        "percent": 10,
+        "source": "docs/atlas-book/02-lanes-and-markers.md"
+      }
+    ]
+  }
+}

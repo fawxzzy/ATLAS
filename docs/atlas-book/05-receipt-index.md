@@ -102,6 +102,7 @@
 - [Cortex Dual-Mode Replacement Readiness Codex Closeout Ingestion Read-Model Marker-Surface Ratchet Decision](../ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CODEX-CLOSEOUT-INGESTION-READ-MODEL-MARKER-SURFACE-RATCHET-DECISION-2026-07-10.md)
 - [Cortex Dual-Mode Replacement Readiness Chat-Style Synthesis Packet Generation Contract Freeze](../ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHAT-STYLE-SYNTHESIS-PACKET-GENERATION-CONTRACT-FREEZE-2026-07-10.md)
 - [Owner-Lane Agent Service Bus And DiscordOS Ops Marker Admission](../ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-MARKER-ADMISSION-2026-07-10.md)
+- [Owner-Lane Agent Service Bus And DiscordOS Ops Full-Permission Runtime And Request-Receipt Protocol Contract Freeze](../ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-FULL-PERMISSION-RUNTIME-AND-REQUEST-RECEIPT-PROTOCOL-CONTRACT-FREEZE-2026-07-10.md)
 - [Cortex Dual-Mode Replacement Readiness Chat-Style Synthesis Packet Generation First-Implementation Admission](../ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHAT-STYLE-SYNTHESIS-PACKET-GENERATION-FIRST-IMPLEMENTATION-ADMISSION-2026-07-10.md)
 - [ATLAS Root Operator Reselection To Cortex Simulation Substrate](../ops/ATLAS-ROOT-OPERATOR-RESELECTION-TO-CORTEX-SIMULATION-SUBSTRATE-2026-07-09.md)
 - [Cortex Simulation Substrate Readiness Fable/Generative-Agent Research Contract Freeze](../ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-FABLE-GENERATIVE-AGENT-RESEARCH-CONTRACT-FREEZE-2026-07-09.md)

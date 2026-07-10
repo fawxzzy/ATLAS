@@ -9,7 +9,7 @@
 Read:
 
 - the continuity substrate is strong enough to restart from durable surfaces first
-- continuity manifests, truth maps, and retrieval hygiene are real, and the seeded initiative set now also has five machine-readable continuity reads: `21` covered manifests at `21 ok / 0 warning / 0 error`, `7 / 7` eligible open markers are manifest-backed, `7 / 7` eligible open markers are restart-ready from one machine-readable index, `21 / 21` maintained initiative manifests are restart-ready from one machine-readable index, and the structured `continuity_coverage` rollup still reports `pending_review_count: 0`; `Truth Map & ATLAS Book` remains the canonical restart surface through `Closed / Locked Ratchets`, and `AI Repetition-to-Automation Pipeline`, `Playbook Everywhere + Cortex Interface`, `Cortex Readiness`, `Cortex Dual-Mode Replacement Readiness`, `Sandbox Simulation Readiness`, and `AI Work Session Stability & Auto-Sync Loop` now also have maintained manifest-backed retrieval maps
+- continuity manifests, truth maps, and retrieval hygiene are real, and the seeded initiative set now also has five machine-readable continuity reads: `22` covered manifests at `22 ok / 0 warning / 0 error`, `8 / 8` eligible open markers are manifest-backed, `8 / 8` eligible open markers are restart-ready from one machine-readable index, `22 / 22` maintained initiative manifests are restart-ready from one machine-readable index, and the structured `continuity_coverage` rollup still reports `pending_review_count: 0`; `Truth Map & ATLAS Book` remains the canonical restart surface through `Closed / Locked Ratchets`, and `AI Repetition-to-Automation Pipeline`, `Playbook Everywhere + Cortex Interface`, `Cortex Readiness`, `Cortex Dual-Mode Replacement Readiness`, `Owner-Lane Agent Service Bus & DiscordOS Ops Readiness`, `Sandbox Simulation Readiness`, and `AI Work Session Stability & Auto-Sync Loop` now also have maintained manifest-backed retrieval maps
 - continuity is still not universal across every future lane, but the current KCT and DCE continuity family is now closed for its admitted scope because bootstrap, trusted repo-context, run/session, memory, knowledge, and promote seams all preserve doctrine identity directly
 - `Knowledge Capture & Transfer` and `Durable Context Externalization` now stay discoverable through `Closed / Locked Ratchets` plus receipts rather than the live active/open marker display
 - one explicit reusable work item now sits inside this substrate: `ATLAS systems-doc normalization`, meaning owner-repo system truth gets reconciled into restart-friendly Book chapters without duplicating repo-local implementation detail; `Lifeline` is the first concrete example
@@ -83,7 +83,7 @@ Read:
 
 ### Future / owner-lane orchestration
 
-- Owner-Lane Agent Service Bus & DiscordOS Ops Readiness: `0%`
+- Owner-Lane Agent Service Bus & DiscordOS Ops Readiness: `10%`
 
 ### Future / Cortex
 

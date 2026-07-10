@@ -129,7 +129,9 @@ Current seeded manifest set:
 - `docs/memory/initiatives/continuity-manifest-ai-repetition-to-automation-pipeline.json`
 - `docs/memory/initiatives/continuity-manifest-ai-long-run-batch-orchestration.json`
 - `docs/memory/initiatives/continuity-manifest-sandbox-simulation-readiness.json`
+- `docs/memory/initiatives/continuity-manifest-cortex-dual-mode-replacement-readiness.json`
 - `docs/memory/initiatives/continuity-manifest-cortex-readiness.json`
+- `docs/memory/initiatives/continuity-manifest-owner-lane-agent-service-bus-and-discordos-ops-readiness.json`
 - `docs/memory/initiatives/continuity-manifest-playbook-everywhere-cortex-interface.json`
 - `docs/memory/initiatives/continuity-manifest-ai-work-session-stability-auto-sync-loop.json`
 - `docs/memory/initiatives/continuity-manifest-post-convergence-lane-split-readiness.json`

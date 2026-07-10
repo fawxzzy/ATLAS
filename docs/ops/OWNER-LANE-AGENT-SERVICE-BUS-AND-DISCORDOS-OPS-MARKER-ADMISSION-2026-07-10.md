@@ -3,7 +3,7 @@
 - Date: `2026-07-10`
 - Lane: `ATLAS-root owner-lane orchestration governance`
 - Mode: `ATLAS-root docs-only supporting-marker admission`
-- Scope: `admit the owner-lane agent service bus and DiscordOS Ops readiness marker at 0 percent, freeze the durable request/receipt operating model, and preserve the current Cortex Dual-Mode selected packet without implementing the bus or mutating any owner repo`
+- Scope: `admit the owner-lane agent service bus and DiscordOS Ops readiness marker at 0 percent under the standing full-permission operator policy, freeze the draft durable request/receipt operating model, and preserve the current Cortex Dual-Mode selected packet without implementing the bus or mutating any owner repo`
 - Control-plane checkpoint: `main@6ab14089`
 - Marker movement:
   - admit `Owner-Lane Agent Service Bus & DiscordOS Ops Readiness: 0%`
@@ -41,7 +41,7 @@ One writer gives the stack:
 - one place to enforce schema validation
 - one place to enforce idempotency and resource leases
 - one place to require live sync and mandatory readback
-- one permission profile with bounded filesystem and network scope
+- one place to apply the full-permission runtime under serialized coordination and proof rules
 
 That keeps board truth coherent even when Mazer and Fitness both need updates.
 
@@ -69,7 +69,6 @@ Admitted request contract:
   "source_lane": "mazer",
   "source_client": "mazer-main-codex",
   "source_thread_id": null,
-  "reply_mode": "queue",
   "target_service": "discordos_ops",
   "action": "board.card.update",
   "resource_key": "discord-board:mazer:invisibility-cloak-item",
@@ -80,7 +79,9 @@ Admitted request contract:
     "live_sync": true,
     "readback": true,
     "commit_if_repo_changed": true
-  }
+  },
+  "callback_mode": "queue_return",
+  "created_at": "2026-07-10T15:00:00Z"
 }
 ```
 
@@ -88,7 +89,7 @@ Required fields are:
 
 - request identity: `request_id`, `idempotency_key`
 - caller identity: `source_lane`, `source_client`, optional `source_thread_id`
-- routing: `reply_mode`, `target_service`
+- routing: `target_service`, `callback_mode`, `created_at`
 - mutation intent: `action`, `resource_key`, `priority`, optional `expected_version`
 - exact work payload
 - proof requirements
@@ -109,12 +110,8 @@ Admitted receipt contract:
   "resource_key": "discord-board:mazer:invisibility-cloak-item",
   "files_changed": [],
   "commit_sha": null,
-  "live_sync_status": "passed",
+  "sync_status": "passed",
   "readback_status": "passed",
-  "card_ids": [
-    "mazer-invisibility-cloak-item"
-  ],
-  "board_version": 4,
   "evidence_refs": [],
   "warnings": [],
   "blockers": [],
@@ -152,18 +149,21 @@ The queue contract freezes these rules:
 
 This keeps repeated submissions from causing duplicate board moves or split-brain receipts.
 
-## Permission-Profile Model
+## Runtime Permission Model
 
-The worker should run under one bounded profile, for example `discordos_ops_writer`.
+The standing operator posture is always-on full permissions for Codex clients and services unless the operator explicitly requests a downgrade.
 
-The profile model is:
+The runtime model is:
 
-- writable: `repos/DiscordOS/**` and `runtime/orchestration/receipts/**`
-- read-only: source request payload plus required ATLAS marker and receipt references
-- network: only what the Discord sync and readback path needs
-- forbidden: ATLAS root mutation beyond queue receipts, Mazer or Fitness writes, Vercel mutation, Supabase mutation, secret output, and arbitrary filesystem access
+- modern config should use `default_permissions = ":danger-full-access"`, `approval_policy = "never"`, and `web_search = "live"`
+- legacy fallback should use `sandbox_mode = "danger-full-access"`, `approval_policy = "never"`, and `web_search = "live"`
+- source clients and destination services should launch with the same full-permission default
+- no automatic permission downgrade is allowed inside ATLAS orchestration
+- the no-mixing rule applies: do not combine permission-profile config and legacy sandbox config in the same loaded Codex config
+- DiscordOS, Mazer, Fitness, ATLAS, scheduler workers, service-bus workers, and future Cortex adapters all inherit the same capability baseline
+- operator policy still forbids using that capability to mutate owner repos, emit secrets, or perform unrelated platform actions from this lane; those are governance denials and receipt-contract denials, not sandbox denials
 
-Source chats do not grant permissions by prose. The worker thread configuration remains the authority boundary.
+Source chats do not grant permissions by prose. The worker launch contract and the request/receipt protocol remain the authority boundary.
 
 ## Queue Return And Managed-Thread Callback Modes
 
@@ -198,7 +198,7 @@ Why SQLite first:
 - transactions
 - WAL support
 - easy leases and idempotency
-- no cloud dependency for the first Codex adapter
+- no cloud dependency for the first full-permission Codex adapter
 
 Supabase is a later transport adapter for cross-host execution. The request and receipt schema should stay the same across both transports.
 
@@ -224,7 +224,7 @@ This marker is therefore durable and product-independent rather than Codex-speci
 - `0%`: marker admitted
 - `10%`: request and receipt protocol plus single-writer contract frozen
 - `20%`: SQLite queue, CLI, idempotency, and leases implemented
-- `30%`: persistent DiscordOS Ops worker thread plus restricted permission profile
+- `30%`: persistent DiscordOS Ops worker thread plus full-permission runtime launch contract
 - `40%`: Mazer client works end to end
 - `50%`: Fitness client works end to end
 - `60%`: concurrent fairness, retry, and dead-letter proof lands
@@ -238,10 +238,10 @@ This admission packet does not move the marker beyond `0%`.
 ## Non-Goals
 
 - no arbitrary UI chat-to-chat claim
-- no blanket full permissions
 - no owner-repo mutation
 - no automatic deploy
 - no hidden transcript scraping
+- no permission-based justification for the single-writer model
 - no shared direct DiscordOS writes
 - no marker ratchet
 
@@ -256,7 +256,7 @@ The frozen failure model includes:
 - lease loss causes concurrent mutation
 - live sync succeeds but readback fails
 - callback delivery interrupts an unrelated managed-thread task
-- the worker profile widens into owner repos, secrets, or platform mutation
+- full-permission workers bypass the bus or blur coordination doctrine into ad hoc owner or platform mutation
 
 Any implementation packet has to prove these classes are bounded or fail closed.
 
@@ -265,10 +265,10 @@ Any implementation packet has to prove these classes are bounded or fail closed.
 The next exact packet is:
 
 ```text
-Owner-Lane Agent Service Bus & DiscordOS Ops request-receipt protocol contract freeze
+Owner-Lane Agent Service Bus & DiscordOS Ops full-permission runtime and request-receipt protocol contract freeze
 ```
 
-That packet should freeze the final request schema, receipt schema, queue state machine, idempotency rules, lease semantics, and basis surfaces without implementing the bus yet.
+That packet should freeze the final full-permission runtime policy, request schema, receipt schema, queue state machine, idempotency rules, lease semantics, and basis surfaces without implementing the bus yet.
 
 ## Completion
 

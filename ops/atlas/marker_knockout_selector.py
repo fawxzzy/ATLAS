@@ -210,11 +210,13 @@ POLICY_REGISTRY: dict[str, MarkerPolicy] = {
         rationale=(
             "The lane is now durably admitted as a future owner-lane orchestration boundary, but it remains a "
             "docs-first service-bus governance family that should not displace the already-selected Cortex "
-            "Dual-Mode packet or claim implementation progress before its request-and-receipt contract is frozen."
+            "Dual-Mode packet or claim implementation progress before its full-permission runtime and "
+            "request-and-receipt contract is frozen."
         ),
         expected_evidence=(
-            "one root-owned request-and-receipt protocol contract freeze that preserves the single-writer DiscordOS "
-            "Ops model, logical service naming, bounded permission profiles, and no owner-repo mutation"
+            "one root-owned full-permission runtime and request-and-receipt protocol contract freeze that preserves "
+            "the single-writer DiscordOS Ops model, logical service naming, no automatic permission downgrade, and "
+            "no owner-repo mutation"
         ),
     ),
     "Fitness QA/LLEL Workflow": MarkerPolicy(
@@ -440,16 +442,17 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "Owner-Lane Agent Service Bus & DiscordOS Ops Readiness": PacketDescriptor(
-        packet="Owner-Lane Agent Service Bus & DiscordOS Ops request-receipt protocol contract freeze",
+        packet="Owner-Lane Agent Service Bus & DiscordOS Ops full-permission runtime and request-receipt protocol contract freeze",
         basis_receipt_ref=(
             "docs/ops/"
             "OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-MARKER-ADMISSION-2026-07-10.md"
         ),
-        mode="docs-only root-bounded request-receipt protocol contract freeze",
+        mode="docs-only root-bounded full-permission runtime and request-receipt protocol contract freeze",
         scope=(
-            "freeze the durable request schema, receipt schema, queue states, idempotency and lease rules, "
-            "permission-profile model, and queue-return versus managed-thread callback modes for the logical "
-            "discordos_ops single-writer service without implementing the bus or mutating owner repos"
+            "freeze the standing full-permission runtime defaults, no-mixing rule, no-downgrade rule, durable "
+            "request schema, receipt schema, queue states, idempotency and lease rules, service registry defaults, "
+            "and queue-return versus managed-thread callback modes for the logical discordos_ops single-writer "
+            "service without implementing the bus or mutating owner repos"
         ),
     ),
 }
