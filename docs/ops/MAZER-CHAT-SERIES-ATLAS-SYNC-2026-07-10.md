@@ -7,10 +7,10 @@
 - Owner repo: `repos/mazer`
 - Owner branch: `codex/player-goal-default-colors`
 - Owner commits:
-- `a5b0482c` - `Polish Mazer AI progression and mobile visuals`
-- `12874e43` - `Record Mazer production mobile proof`
-- `600e28de` - `Recover AI through known frontiers`
-- `db1ab43a` - `Differentiate AI rank cognition`
+  - `a5b0482c` - `Polish Mazer AI progression and mobile visuals`
+  - `12874e43` - `Record Mazer production mobile proof`
+  - `600e28de` - `Recover AI through known frontiers`
+  - `db1ab43a` - `Differentiate AI rank cognition`
 - Production deployment: `dpl_DBWoHVUPCED5fgDrbHfrpcTkPipU`
 - Production alias: `https://fawxzzy-mazer.vercel.app`
 
