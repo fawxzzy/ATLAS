@@ -52,6 +52,7 @@ MARKER_DOC = """# Lanes And Markers
 - Vercel Platform Observability Governance: `0%`
 - Cortex Dual-Mode Replacement Readiness: `0%`
 - Cortex Simulation Substrate Readiness: `0%`
+- Owner-Lane Agent Service Bus & DiscordOS Ops Readiness: `0%`
 - Post-Convergence Lane Split Readiness: `61%`
 
 ## Closed / Locked Ratchets
@@ -334,6 +335,7 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual("admissible after current lane", records["Vercel Platform Observability Governance"]["category"])
         self.assertEqual("admissible after current lane", records["Cortex Dual-Mode Replacement Readiness"]["category"])
         self.assertEqual("admissible after current lane", records["Cortex Simulation Substrate Readiness"]["category"])
+        self.assertEqual("admissible after current lane", records["Owner-Lane Agent Service Bus & DiscordOS Ops Readiness"]["category"])
         self.assertEqual("admissible after current lane", records["AI Repetition-to-Automation Pipeline"]["category"])
         self.assertEqual("admissible now", records["AI Long-Run Batch Orchestration"]["category"])
         self.assertEqual("already closed / locked", records["_stack Readiness"]["category"])
@@ -857,6 +859,63 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
             payload["next_after_current_packet_mode"],
         )
         self.assertIn("implementation-backed role inventory thresholds", payload["next_after_current_packet_scope"])
+
+    def test_build_campaign_routes_owner_lane_service_bus_marker_when_it_is_first_available(self) -> None:
+        root = self._temp_root()
+        marker_doc = """# Lanes And Markers
+
+## Active Front-Page Marker Table
+
+- Sandbox Simulation Readiness: `99%`
+
+## Supporting Open Markers
+
+- Owner-Lane Agent Service Bus & DiscordOS Ops Readiness: `0%`
+
+## Closed / Locked Ratchets
+
+- _stack Readiness: `100%`
+"""
+        current_state_doc = """# Current State
+
+- the current active ATLAS-side lane is now `Sandbox Simulation Readiness`
+"""
+        (root / "docs" / "atlas-book" / "02-lanes-and-markers.md").write_text(marker_doc, encoding="utf-8")
+        (root / "docs" / "atlas-book" / "01-current-state.md").write_text(current_state_doc, encoding="utf-8")
+        self._write_packet_receipts(root)
+        self._write_manifest(
+            root,
+            manifest_name="continuity-manifest-sandbox-simulation-readiness.json",
+            marker="Sandbox Simulation Readiness",
+            percent=99,
+            checkpoint_ref=(
+                "docs/ops/"
+                "SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-BROADER-"
+                "RUNTIME-ASSERTIONS-ADMISSION-BOUNDARY-HOLD-OR-TOP-LEVEL-LANE-"
+                "RESELECTION-2026-06-27.md"
+            ),
+            next_package="No immediate Sandbox Simulation Readiness same-lane packet",
+            mode="hold-flat after broader-runtime-assertions admission boundary freeze",
+            reason="current sandbox lane is intentionally held",
+        )
+
+        payload = build_campaign(root=root)
+
+        self.assertEqual("hold_current_lane", payload["operator_action"])
+        self.assertEqual("Owner-Lane Agent Service Bus & DiscordOS Ops Readiness", payload["next_after_current_marker"])
+        self.assertEqual(
+            "Owner-Lane Agent Service Bus & DiscordOS Ops request-receipt protocol contract freeze",
+            payload["next_after_current_packet"],
+        )
+        self.assertEqual(
+            "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-MARKER-ADMISSION-2026-07-10.md",
+            payload["next_after_current_packet_basis_ref"],
+        )
+        self.assertEqual(
+            "docs-only root-bounded request-receipt protocol contract freeze",
+            payload["next_after_current_packet_mode"],
+        )
+        self.assertIn("single-writer service", payload["next_after_current_packet_scope"])
 
 
 if __name__ == "__main__":

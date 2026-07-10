@@ -42,6 +42,7 @@ CAMPAIGN_PRIORITY = (
     "Cortex Readiness",
     "Cortex Dual-Mode Replacement Readiness",
     "Cortex Simulation Substrate Readiness",
+    "Owner-Lane Agent Service Bus & DiscordOS Ops Readiness",
     "Core Pattern Convergence",
     "Discord Workflow, Publication & Docs Reliability",
     "DiscordOS Runtime & Product Hardening",
@@ -202,6 +203,18 @@ POLICY_REGISTRY: dict[str, MarkerPolicy] = {
         expected_evidence=(
             "one Fable or generative-agent research contract that maps simulation, memory, reflection, planning, "
             "and sandbox interaction requirements into ATLAS and Cortex without implying implementation"
+        ),
+    ),
+    "Owner-Lane Agent Service Bus & DiscordOS Ops Readiness": MarkerPolicy(
+        category="admissible after current lane",
+        rationale=(
+            "The lane is now durably admitted as a future owner-lane orchestration boundary, but it remains a "
+            "docs-first service-bus governance family that should not displace the already-selected Cortex "
+            "Dual-Mode packet or claim implementation progress before its request-and-receipt contract is frozen."
+        ),
+        expected_evidence=(
+            "one root-owned request-and-receipt protocol contract freeze that preserves the single-writer DiscordOS "
+            "Ops model, logical service naming, bounded permission profiles, and no owner-repo mutation"
         ),
     ),
     "Fitness QA/LLEL Workflow": MarkerPolicy(
@@ -424,6 +437,19 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         scope=(
             "freeze the first governed research contract for Cortex simulation substrate doctrine using "
             "Showrunner strategy signals plus generative-agent architectural patterns without implying implementation"
+        ),
+    ),
+    "Owner-Lane Agent Service Bus & DiscordOS Ops Readiness": PacketDescriptor(
+        packet="Owner-Lane Agent Service Bus & DiscordOS Ops request-receipt protocol contract freeze",
+        basis_receipt_ref=(
+            "docs/ops/"
+            "OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-MARKER-ADMISSION-2026-07-10.md"
+        ),
+        mode="docs-only root-bounded request-receipt protocol contract freeze",
+        scope=(
+            "freeze the durable request schema, receipt schema, queue states, idempotency and lease rules, "
+            "permission-profile model, and queue-return versus managed-thread callback modes for the logical "
+            "discordos_ops single-writer service without implementing the bus or mutating owner repos"
         ),
     ),
 }

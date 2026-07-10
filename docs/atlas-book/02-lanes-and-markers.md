@@ -81,6 +81,10 @@ Read:
 
 - Sandbox Simulation Readiness: `99%`
 
+### Future / owner-lane orchestration
+
+- Owner-Lane Agent Service Bus & DiscordOS Ops Readiness: `0%`
+
 ### Future / Cortex
 
 - Cortex Dual-Mode Replacement Readiness: `40%`
