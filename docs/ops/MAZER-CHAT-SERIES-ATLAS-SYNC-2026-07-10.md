@@ -33,7 +33,7 @@ Owner marker snapshot from the July 10 pass:
 | Lane | Marker |
 | --- | ---: |
 | Overall auth / AI / visual completion marker | 96% |
-| AI/playbook progression contracts | 97% |
+| AI/playbook progression contracts | 98% |
 | Play-mode completion lifecycle | 76% |
 | Auth QA and production readiness | 94% |
 | Visual proof verification discipline | 99% |
@@ -101,11 +101,19 @@ These failures emerged repeatedly enough to preserve as Atlas/Playbook inputs:
 - Local material follow-up: removed the competing white/green moving trail sheen. The green trail now uses only the existing purple pulse, preserving its `2600ms` travel period and `33ms` redraw cadence. Focused renderer/capture/marker proof passed `65` tests and the local build passed; this follow-up is not deployed yet.
 - Deliberate non-claim: finite local AI route exhaustion is not fixed by this release. The correct next change is persistent known-frontier expansion, not a hidden end route, teleport, reset, or regeneration before a real goal is found.
 
+## 2026-07-10 - Known-Frontier AI Recovery Receipt
+
+- Owner implementation: `repos/mazer/src/domain/ai/demoWalker.ts` now allows human-memory recovery to cross remembered dead-end corridors while it selects only verified unexplored frontiers for new exploration.
+- Lifecycle policy: `ai-path-exhausted` remains only for the retired legacy-source demonstration model. The shipped human-memory menu runner cannot reset, regenerate, teleport, or target the hidden end before it reaches the goal.
+- Proof: `tests/ai/demo-walker-known-frontier.test.ts` passed across `30` generated mazes; the E-rank calibration over `60` generated mazes reached the goal in every case with `0` target leaks and `0` pre-goal regenerations. The full supported `npm run test:verify` passed `36` files / `309` tests, with `npm run lint` and `npm run build` also passing.
+- Deliberate remaining risk: a poor E-rank run may be long because it is completing visible memory recovery rather than being cut off. Route-overhead reduction is the next controller tuning slice; do not reintroduce an end-route fallback or forced early reset as a shortcut.
+- DiscordOS sync/readback: the live `mazer` forum in Project Feedback was updated through the bot. All `35` cards read back with required sections and reactions; the active AI card is now `98%`.
+
 ## Selected Next Discord Card
 
 The chat is now halted behind one implementation card: `mazer-human-configured-ai-runner`.
 
-Resume by implementing its known-frontier expansion acceptance path, then run the card's generated-route and rank/bias proof before moving to another card.
+Resume by tuning low-rank frontier selection and recovery travel without breaking the goal-only regeneration invariant, then run the card's generated-route and rank/bias proof before moving to another card.
 
 All other Mazer work stays recorded on the `mazer` DiscordOS board and is intentionally not worked in parallel.
 
