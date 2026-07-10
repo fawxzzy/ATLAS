@@ -107,6 +107,7 @@
 - [Cortex Simulation Substrate Readiness Fable/Generative-Agent Research Contract Freeze](../ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-FABLE-GENERATIVE-AGENT-RESEARCH-CONTRACT-FREEZE-2026-07-09.md)
 - [Cortex Simulation Substrate Readiness Simulation Requirements Map First-Implementation Admission](../ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-SIMULATION-REQUIREMENTS-MAP-FIRST-IMPLEMENTATION-ADMISSION-2026-07-09.md)
 - [Cortex Simulation Substrate Readiness Simulation Requirements Map Prompt-Pack And Worker Handoff Contract](../ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-SIMULATION-REQUIREMENTS-MAP-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-10.md)
+- [Cortex Simulation Substrate Readiness Simulation Requirements Map Implementation-Readiness Closeout And Worker Routing](../ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-SIMULATION-REQUIREMENTS-MAP-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-10.md)
 - [Cortex Dual-Mode Replacement Readiness ChatGPT/Codex Role Inventory First-Implementation Worker-Cluster Reconciliation](../ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHATGPT-CODEX-ROLE-INVENTORY-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-09.md)
 - [ATLAS Root Operator Reselection To Cortex Simulation Substrate](../ops/ATLAS-ROOT-OPERATOR-RESELECTION-TO-CORTEX-SIMULATION-SUBSTRATE-2026-07-09.md)
 - [Cortex Dual-Mode Replacement Readiness ChatGPT/Codex Role Inventory Marker-Surface Ratchet Decision](../ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHATGPT-CODEX-ROLE-INVENTORY-MARKER-SURFACE-RATCHET-DECISION-2026-07-09.md)
