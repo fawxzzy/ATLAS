@@ -8,6 +8,8 @@ policies:
   runtime_state_outside_repos: true
   secrets_in_exports_by_default: false
   repo_roots_are_source_only: true
+  vercel_production_deploy_requires_explicit_user_intent: true
+  vercel_production_deploy_intent_scope: per_project_per_deploy_current_thread_only
 
 paths:
   root: .

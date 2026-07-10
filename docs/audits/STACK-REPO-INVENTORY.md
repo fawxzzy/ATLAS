@@ -16,28 +16,28 @@ Operational rule:
 
 - Repo count: `12`
 - Root-blocking dirty repo count: `1`
-- Visible dirty repo count: `2`
-- Advisory dirty repo count: `1`
+- Visible dirty repo count: `3`
+- Advisory dirty repo count: `2`
 - Release-eligible repo count: `4`
 - Excluded surface count: `17`
 - Stack manifest: `stack.yaml`
 - Stack lock: `stack.lock.yaml`
-- Inventory digest: `sha256:1c4734b63b26bf8f732529960f6cefb3b044c5ecafc116c090f7d78f69835152`
+- Inventory digest: `sha256:2932b4b6e507c07e1bb4c135efc59bcf604fa6b5b3017526956ad0ffd12ddb7c`
 
 ## Managed Repos
 
 | Repo id | Path | Branch | Pinned commit | Current commit | Dirty | Root-blocking | Dirty blocks root | Trust | Release | Related initiatives |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | _stack | repos/_stack | main | 7ca8a81acb71c935adabd345dff3e3bcbbedba7c | 7ca8a81acb71c935adabd345dff3e3bcbbedba7c | False | True | False | trusted | False | initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-local-data-gateway<br>initiative:continuity-manifest-post-convergence-lane-split-readiness<br>initiative:continuity-manifest-stack-readiness<br>initiative:continuity-manifest-vision-future-alignment |
-| discordos | repos/DiscordOS | main | f93988dfb7553e460275e50571d4d3eda8ad1099 | f93988dfb7553e460275e50571d4d3eda8ad1099 | False | True | False | trusted | False | initiative:continuity-manifest-dependency-untangling<br>initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-discord-os-infrastructure-separation |
-| fitness | repos/fawxzzy-fitness | main | - | 70f21e96ebdb7116d2427120a82beedf2b03208d | False | False | False | adjacent | False | initiative:continuity-manifest-dependency-untangling<br>initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-discord-os-infrastructure-separation<br>initiative:continuity-manifest-local-data-gateway |
-| foundation | repos/foundation | main | e0c56bf20ef2460f962d8913a7c63b1fdfeab4da | e0c56bf20ef2460f962d8913a7c63b1fdfeab4da | False | True | False | trusted | True | - |
+| discordos | repos/DiscordOS | codex/discordos-mazer-board-cards | c3a72920eed8c8fc910e5395a7bd72ba847a3d35 | c3a72920eed8c8fc910e5395a7bd72ba847a3d35 | False | True | False | trusted | False | initiative:continuity-manifest-dependency-untangling<br>initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-discord-os-infrastructure-separation |
+| fitness | repos/fawxzzy-fitness | main | - | e1ab7fbea979456380230c5459fdef6ae4c927e9 | True | False | False | adjacent | False | initiative:continuity-manifest-dependency-untangling<br>initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-discord-os-infrastructure-separation<br>initiative:continuity-manifest-local-data-gateway |
+| foundation | repos/foundation | main | 5cedd6234755be3d637abc33572b905dce3b8f7c | 5cedd6234755be3d637abc33572b905dce3b8f7c | False | True | False | trusted | True | - |
 | lifeline | repos/lifeline | codex/path-discipline-warning-slice-lifeline | 538f623a84b003e70dadd234e6ea3af642446a5f | 538f623a84b003e70dadd234e6ea3af642446a5f | False | True | False | trusted | True | - |
-| mazer | repos/mazer | codex/player-goal-default-colors | - | 845446266347be19524fbe36f39e688db804e9e8 | True | False | False | adjacent | False | initiative:initiative-mazer-d2-learning-scorer |
+| mazer | repos/mazer | codex/player-goal-default-colors | - | 88b5262f8c685210f7690241f82e19f28e99252b | True | False | False | adjacent | False | initiative:initiative-mazer-d2-learning-scorer |
 | nat1-games | repos/Nat1-Games/nat1-games | codex/path-discipline-warning-slice-nat1 | 404460d3717fab389407582048a9b9f228f26d39 | 404460d3717fab389407582048a9b9f228f26d39 | False | True | False | trusted | False | - |
 | playbook | repos/playbook | codex/path-discipline-warning-slice-playbook | 10b8f0ac044a7f9c66b4aa8dd08f6abd2d1c5269 | 10b8f0ac044a7f9c66b4aa8dd08f6abd2d1c5269 | False | True | False | trusted | True | initiative:continuity-manifest-atlas-owned-repo-naming-canonicalization |
 | playbook-demo | repos/playbook-demo/playbook-demo | main | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | False | True | False | trusted | False | - |
-| stack | . | main | - | 47730a4ac744b4b4736acdb70b1335e1f6c6d6a6 | True | True | True | trusted | False | - |
+| stack | . | main | - | e94c26bb4793941763eedba226300b2f066ca43f | True | True | True | trusted | False | - |
 | stream | repos/stream | main | 43769ba86d4c6ebc419ab9e7847c3843460a094f | 43769ba86d4c6ebc419ab9e7847c3843460a094f | False | True | False | trusted | False | - |
 | trove | repos/trove | codex/path-discipline-warning-slice-trove | 437c7604adee02e0403d77f75162a6c5f232221f | 437c7604adee02e0403d77f75162a6c5f232221f | False | True | False | trusted | True | - |
 

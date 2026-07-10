@@ -1,6 +1,6 @@
 schema_version: "atlas.stack.lock.v1"
 stack_manifest_path: "stack.yaml"
-stack_manifest_digest: "sha256:1ebf366757baf13a45064cdf8d07edd92909ac07f93c44ee9e77b30abebf03e6"
+stack_manifest_digest: "sha256:18e03e37b2e8609b907a96f39678eed97f5c71f8b3f405763d6c484e7d145f04"
 component_count: 9
 components:
   _stack:
@@ -20,8 +20,8 @@ components:
     status: "incubating"
     remote: "https://github.com/fawxzzy/DiscordOS.git"
     ref_type: "branch"
-    ref: "main"
-    commit: "f93988dfb7553e460275e50571d4d3eda8ad1099"
+    ref: "codex/discordos-mazer-board-cards"
+    commit: "c3a72920eed8c8fc910e5395a7bd72ba847a3d35"
     dirty: false
     trust_class: "trusted"
     release_eligible: false
@@ -32,7 +32,7 @@ components:
     remote: "https://github.com/fawxzzy/foundation.git"
     ref_type: "branch"
     ref: "main"
-    commit: "e0c56bf20ef2460f962d8913a7c63b1fdfeab4da"
+    commit: "5cedd6234755be3d637abc33572b905dce3b8f7c"
     dirty: false
     trust_class: "trusted"
     release_eligible: true
@@ -205,4 +205,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:4c348077a3511f8dc5267b243e94fd76bc6f46db98981159b7e2c234d7d3f540"
+lock_digest: "sha256:56eb7b01c0412a37584bdc296223f5fade62771a3e6a605808cf839178bd1ad7"

@@ -214,11 +214,12 @@ Consumer repos should receive generated or synced copies only. Do not hand-manag
 1. Start at the ATLAS root (`.`) only for stack-wide work, audits, standards, packaging, or cross-repo routing.
 2. No Codex lane starts until the owner repo and target branch or worktree are explicit.
 3. Do single-repo implementation work inside the target repo or its clean worktree, not from the stack root.
-4. Do not commit machine-specific absolute paths in stack docs or config.
-5. Do not store logs, screenshots, or runtime state in repo roots when a stack bucket exists.
-6. Do not let default exports include `secrets/`, `.env*`, `runtime/`, or `tmp/`.
-7. Keep live implementation truth in the owning repo; ATLAS docs should stay lineage- and boundary-oriented.
-8. For recovered machine material, catalog first and delete originals only after verified-safe classification.
+4. Do not run Vercel production deploys, promotions, or production alias cutovers unless the operator explicitly says so for the named project in the current thread. Generic `continue` or broad approval is not enough.
+5. Do not commit machine-specific absolute paths in stack docs or config.
+6. Do not store logs, screenshots, or runtime state in repo roots when a stack bucket exists.
+7. Do not let default exports include `secrets/`, `.env*`, `runtime/`, or `tmp/`.
+8. Keep live implementation truth in the owning repo; ATLAS docs should stay lineage- and boundary-oriented.
+9. For recovered machine material, catalog first and delete originals only after verified-safe classification.
 
 ## Packaging and Exports
 

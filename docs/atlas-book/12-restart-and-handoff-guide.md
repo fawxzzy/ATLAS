@@ -214,12 +214,15 @@ python ops/atlas/cross_marker_ratchet_opportunity.py --json
 
 The current live output reports `status=ok`, `safe_to_use=true`, `candidate_count=12`, `opportunity_count=1`, and `blocked_candidates=4`. The one advisory opportunity is the Cortex second advisory substrate proof supporting the Playbook/Cortex second implementation-backed consumer class. The required follow-up for that candidate lane is still `No immediate Playbook Everywhere + Cortex Interface same-lane packet`; the helper output is evidence for later bounded receipt decisions, not a direct marker-write action.
 
-The July 9 selector and contract freeze now make the next honest AI Long-Run packet planner-facing rather than helper-facing:
+The July 9 planner-facing chain is now fully landed:
 
 - selector: `docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-CROSS-MARKER-OPPORTUNITY-PLANNER-INTEGRATION-SELECTION-2026-07-09.md`
 - contract freeze: `docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-CROSS-MARKER-OPPORTUNITY-PLANNER-INTEGRATION-CONTRACT-FREEZE-2026-07-09.md`
+- worker reconciliation: `docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-CROSS-MARKER-OPPORTUNITY-PLANNER-INTEGRATION-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-09.md`
 
-The next exact AI Long-Run package is `AI Long-Run Batch Orchestration cross-marker opportunity planner-integration first-implementation admission`. The planner integration must keep the current opportunity advisory-only when no executable follow-up exists, preserve held-root suppression for generic continuation, and deny marker-write, final-receipt, owner-lane, workflow, deploy, secret, and protected-surface authority.
+`ops/atlas/marker_aware_next_packet_planner.py` now consumes the cross-marker helper as bounded advisory input, attaches advisory fields to matching candidates, and keeps the live Cortex-to-Playbook opportunity advisory-only because the Playbook follow-up remains `No immediate ...`. Focused proof now covers both the advisory-only hold branch and the bounded uplift branch without widening queue, owner, deploy, workflow, secret, protected-surface, final-receipt, or marker authority.
+
+The next exact AI Long-Run package is `No immediate AI Long-Run Batch Orchestration same-lane packet`. Future same-lane movement requires a newly actionable cross-marker opportunity, an explicit non-held follow-up truth change, or a separately scoped downstream planner or queue adoption packet.
 
 ## Current Inventory & Truth Map Closeout Posture
 

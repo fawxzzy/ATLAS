@@ -60,6 +60,14 @@ Verification
 - For repo changes, run the repo-local verify command before claiming completion.
 - If `_stack` owns an existing operator command for the task, prefer using it instead of inventing a new cross-repo flow.
 
+Vercel Production Deploy Guard
+- Treat every Vercel production deployment, promotion, or production-alias cutover as approval-gated.
+- Do not run `vercel deploy --prod`, `vercel promote`, production rollback/promotion APIs, or any equivalent production-targeting Vercel mutation unless the operator explicitly requests production deploy intent in the current thread.
+- Valid approval must be explicit and current-thread-local, for example: `deploy to prod`, `deploy to production`, `ship this to Vercel production`, or `promote <project> on Vercel`.
+- Generic autonomy language such as `continue`, `proceed`, `do it`, `I approve`, or broad approval of a batch does not count as Vercel production deploy approval.
+- Approval is per deploy and per named project. One approval does not carry forward to later deploys or other Vercel projects.
+- Read-only Vercel inspection, logs, env reads, health checks, preview deploys, and non-production analysis remain allowed unless another rule blocks them.
+
 UI Mutation Discipline
 - For governed UI edit batches, convert every explicit requested edit into an internal checklist before mutating code.
 - Completion claims for UI work must reconcile that checklist item-by-item as `landed`, `blocked`, or `intentionally deferred`.
