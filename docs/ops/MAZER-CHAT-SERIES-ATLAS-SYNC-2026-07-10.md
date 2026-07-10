@@ -56,7 +56,7 @@ Major owner-repo work completed and now pointed to from ATLAS:
 - Procedural difficulty contract: level 1 is now explicitly tutorial/simple; later bands use executable generation pressure for scale, shortcuts, wraps, branch/dead-end pressure, and retry review.
 - Play lifecycle work: fresh procedural play seeds, perpetual play loop direction, post-goal deconstruct/build path, play HUD cleanup, pause menu cleanup, and mobile proof lanes.
 - Mobile UI hardening: high-DPI canvas backing-store fix, DPR-2 route-aware surface proof, authenticated Options capture, scroll rail diagnostics, text bounds/overlap checks, and badge fit checks.
-- Visual polish: player/AI marker pinned green, active goal red, active AI target yellow, purple pulse retained, and green-white trail shine added while the full rainbow/material pass remains deferred.
+- Visual polish: player/AI marker pinned green, active goal red, active AI target yellow, and one purple trail pulse retained while the full rainbow/material pass remains deferred.
 - Iteration speed tooling: maintained fast verify wrapper, targeted proof scripts, live menu AI QA, live play QA, UI-surface capture, AI calibration commands, and iteration-loop performance notes.
 - DiscordOS correction doctrine: Mazer board must be named `mazer`, placed under project feedback, use full card format, and carry the not-done reaction metadata for incomplete cards.
 
@@ -98,6 +98,7 @@ These failures emerged repeatedly enough to preserve as Atlas/Playbook inputs:
 - Local release proof: TypeScript lint passed; the focused reset/AI/menu packet passed `101` tests; and `npm run build` passed.
 - DiscordOS live sync/readback: the canonical `mazer` board remains in `project-feedback` forum `1524889569475170478`; all `35` cards were updated through the bot, every card has the required not-done reaction, and all rendered payloads passed the `2000`-character limit.
 - Shipped UI behavior: main-menu Options no longer has Move Speed; played-game Pause keeps it and has toggle on/off copy; the centered Player Guide reuses literal board glyph renderers; and Reset Progress is confirmation-gated and clears only player progression.
+- Local material follow-up: removed the competing white/green moving trail sheen. The green trail now uses only the existing purple pulse, preserving its `2600ms` travel period and `33ms` redraw cadence. Focused renderer/capture/marker proof passed `65` tests and the local build passed; this follow-up is not deployed yet.
 - Deliberate non-claim: finite local AI route exhaustion is not fixed by this release. The correct next change is persistent known-frontier expansion, not a hidden end route, teleport, reset, or regeneration before a real goal is found.
 
 ## Selected Next Discord Card
@@ -120,7 +121,7 @@ The remaining owner-repo sequence after that selected card is:
 ## Open Risks
 
 - Broader mobile soak is still needed for longer play-control sessions, live auth native input entry, and longer animation cycles.
-- The full rainbow/material graphics pass is not complete; the shipped state intentionally pins player/trail green while preserving purple pulse and adding green-white shine.
+- The full rainbow/material graphics pass is not complete; the local shipped state pins player/trail green and retains only the purple trail pulse.
 - Atlas/playbook cycle-learning has a repo-local validator/consumer proof but still needs an actual Atlas-side consumer/ratchet process.
 - DiscordOS agent service bus is admitted as architecture but not yet implemented as the single-writer service.
 - Mazer board/card correctness in Discord remains dependent on DiscordOS live readback receipts, not this root summary.
