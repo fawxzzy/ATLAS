@@ -7,8 +7,10 @@
 - Owner repo: `repos/mazer`
 - Owner branch: `codex/player-goal-default-colors`
 - Owner commits:
-  - `a5b0482c` - `Polish Mazer AI progression and mobile visuals`
-  - `12874e43` - `Record Mazer production mobile proof`
+- `a5b0482c` - `Polish Mazer AI progression and mobile visuals`
+- `12874e43` - `Record Mazer production mobile proof`
+- `600e28de` - `Recover AI through known frontiers`
+- `db1ab43a` - `Differentiate AI rank cognition`
 - Production deployment: `dpl_DBWoHVUPCED5fgDrbHfrpcTkPipU`
 - Production alias: `https://fawxzzy-mazer.vercel.app`
 
@@ -115,6 +117,14 @@ These failures emerged repeatedly enough to preserve as Atlas/Playbook inputs:
 - Proof: the rank sweep is monotonic at level `1` over scale `37` / seeds `1,2,3,5,8`: average score E `65.2` -> S `80.8`; route-efficiency pressure E `61.98` -> S `25.937`; target leaks remain zero.
 - Maintained proof spine: `tests/ai/demo-walker-known-frontier.test.ts` and `tests/ai/demo-walker-rank-ladder.test.ts` are now in `npm run test:verify`. The full run passed `38` files / `311` tests, then lint and build passed.
 - DiscordOS: the same card was live-synced and read back after this receipt. It remains at `98%`: the remaining controller work is low-rank frontier/travel overhead, followed by a player-facing thought/skill legend.
+
+## 2026-07-10 - AI Recovery Calibration Decision
+
+- Baseline retained: the human-memory E-rank calibration over 60 generated mazes stays at average route ratio `4.217`, with every run reaching goal, zero target leaks, and zero pre-goal regenerations.
+- Rejected experiments: E-rank local-progress scoring (`4.586`), bounded endpoint-discovery/vision-map scoring (`6.334` plus broken rank monotonicity), and recovery-path penalties `0.8` (`4.732`) and `0.3` (`4.253`) all worsened the efficiency gate. Each was reverted before release.
+- Instrumentation landed: `DemoRunnerRouteDiagnostics` and the calibration CLI now emit a per-recovery ledger. The retained 60-case E baseline shows `1,239` frontier recoveries, `120` optional retargets, `11.586` average known-route steps, and a `105`-step maximum; `tests/ai/demo-walker-recovery-diagnostics.test.ts` guards the ledger. Full Mazer verification passed `39` files / `312` tests, plus lint and build.
+- DiscordOS: active card `mazer-human-configured-ai-runner` was updated with these decision receipts and live-synced/read back through the bot. The canonical `mazer` board remains in Project Feedback with `35` formatted, reaction-ready cards.
+- Marker policy: the AI lane remains `98%`; stronger evidence changed the next action, not implementation completion. The next pass is decision-level recovery telemetry followed by one bounded factor change at a time.
 
 ## Selected Next Discord Card
 
