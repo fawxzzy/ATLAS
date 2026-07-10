@@ -30,6 +30,7 @@
     "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-SYNTHESIS-TO-EXECUTION-BRIDGE-SCHEMA-CONTRACT-FREEZE-2026-07-10.md",
     "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-SYNTHESIS-TO-EXECUTION-BRIDGE-SCHEMA-MARKER-SURFACE-RATCHET-DECISION-2026-07-10.md",
     "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CODEX-CLOSEOUT-INGESTION-READ-MODEL-FIRST-IMPLEMENTATION-ADMISSION-2026-07-10.md",
+    "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CODEX-CLOSEOUT-INGESTION-READ-MODEL-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-10.md",
     "ops/cortex/chatgpt_codex_role_inventory.py",
     "tests/test_cortex_chatgpt_codex_role_inventory.py"
   ],
@@ -39,9 +40,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "cortex-dual-mode-replacement-readiness",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CODEX-CLOSEOUT-INGESTION-READ-MODEL-FIRST-IMPLEMENTATION-ADMISSION-2026-07-10.md",
-    "checkpoint_commit": "main@1c00d0a4",
-    "checkpoint_summary": "The lane remains at 30 percent, but the Codex closeout ingestion read-model first implementation is now admitted as a bounded future helper/test slice. The next honest same-lane packet is the prompt-pack and worker handoff contract; no helper, closeout read model, marker movement, deploy, secret, owner-repo, workflow-dispatch, or platform-mutation authority is implemented or widened.",
+    "current_checkpoint_receipt": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CODEX-CLOSEOUT-INGESTION-READ-MODEL-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-10.md",
+    "checkpoint_commit": "main@5d031069",
+    "checkpoint_summary": "The lane remains at 30 percent, but the Codex closeout ingestion read-model prompt-pack and worker handoff contract is now frozen. The exact future helper/test files, source classes, trust classes, verification model, CLI contract, deterministic JSON shape, proof matrix, path guards, and stop conditions are specified; no helper, closeout read model, marker movement, deploy, secret, owner-repo, workflow-dispatch, or platform-mutation authority is implemented or widened.",
     "governing_receipts": [
       "docs/ops/CORTEX-DUAL-MODE-AND-SIMULATION-SUBSTRATE-MARKER-ADMISSION-2026-07-09.md",
       "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-OPERATING-MODE-CONTRACT-FREEZE-2026-07-09.md",
@@ -52,7 +53,8 @@
       "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHATGPT-CODEX-ROLE-INVENTORY-MARKER-SURFACE-RATCHET-DECISION-2026-07-09.md",
       "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-SYNTHESIS-TO-EXECUTION-BRIDGE-SCHEMA-CONTRACT-FREEZE-2026-07-10.md",
       "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-SYNTHESIS-TO-EXECUTION-BRIDGE-SCHEMA-MARKER-SURFACE-RATCHET-DECISION-2026-07-10.md",
-      "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CODEX-CLOSEOUT-INGESTION-READ-MODEL-FIRST-IMPLEMENTATION-ADMISSION-2026-07-10.md"
+      "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CODEX-CLOSEOUT-INGESTION-READ-MODEL-FIRST-IMPLEMENTATION-ADMISSION-2026-07-10.md",
+      "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CODEX-CLOSEOUT-INGESTION-READ-MODEL-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-10.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -65,7 +67,11 @@
       },
       {
         "path": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CODEX-CLOSEOUT-INGESTION-READ-MODEL-FIRST-IMPLEMENTATION-ADMISSION-2026-07-10.md",
-        "role": "current Codex closeout ingestion read-model admission and exact next-packet truth"
+        "role": "Codex closeout ingestion read-model admission and future helper/test surface truth"
+      },
+      {
+        "path": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CODEX-CLOSEOUT-INGESTION-READ-MODEL-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-10.md",
+        "role": "current Codex closeout ingestion read-model prompt-pack, worker contract, proof matrix, and exact next-packet truth"
       },
       {
         "path": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-SYNTHESIS-TO-EXECUTION-BRIDGE-SCHEMA-CONTRACT-FREEZE-2026-07-10.md",
@@ -126,15 +132,15 @@
     ],
     "next_package_ladder": [
       {
-        "package": "Cortex Dual-Mode Replacement Readiness Codex closeout ingestion read-model prompt-pack and worker handoff contract",
-        "mode": "docs-only root-bounded prompt-pack and worker handoff contract",
-        "reason": "the Codex closeout ingestion read-model helper/test slice is now admitted, so the next honest same-lane move is to freeze exact worker instructions, command shape, fixtures, proof obligations, and stop conditions before implementation-readiness can route a worker"
+        "package": "Cortex Dual-Mode Replacement Readiness Codex closeout ingestion read-model implementation-readiness closeout and worker routing",
+        "mode": "docs-only root-bounded implementation-readiness closeout and worker routing",
+        "reason": "the Codex closeout ingestion read-model prompt-pack and worker handoff contract is frozen, so the next honest same-lane move is to decide whether the exact worker/test pair can be routed for implementation under the frozen contract"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CODEX-CLOSEOUT-INGESTION-READ-MODEL-FIRST-IMPLEMENTATION-ADMISSION-2026-07-10.md",
+    "freshness_checked_receipt": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CODEX-CLOSEOUT-INGESTION-READ-MODEL-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-10.md",
     "freshness_checked_at": "2026-07-10T00:00:00-04:00",
-    "freshness_basis": "The current dual-mode posture is manifest-backed at 30 percent: the operating-model threshold is frozen, the role inventory is implementation-backed, the synthesis-to-execution bridge schema is frozen, the bridge-schema threshold has been adopted, and the Codex closeout ingestion read-model helper/test slice is admitted. The next same-lane move is the prompt-pack and worker handoff contract.",
+    "freshness_basis": "The current dual-mode posture is manifest-backed at 30 percent: the operating-model threshold is frozen, the role inventory is implementation-backed, the synthesis-to-execution bridge schema is frozen, the bridge-schema threshold has been adopted, the Codex closeout ingestion read-model helper/test slice is admitted, and the prompt-pack plus worker handoff contract is frozen. The next same-lane move is implementation-readiness closeout and worker routing.",
     "marker_posture": [
       {
         "marker": "Cortex Dual-Mode Replacement Readiness",
