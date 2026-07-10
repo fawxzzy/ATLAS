@@ -67,6 +67,7 @@ Current operating call:
 - grounded text conversation is ready for bounded daily operator use
 - `fitness` is the first bounded `verified` repo at `verification_scope=targeted`
 - `mazer` is now the second bounded `verified` repo at `verification_scope=targeted`
+- Mazer owner-lane truth from the July 10 chat series is now indexed at `docs/ops/MAZER-CHAT-SERIES-ATLAS-SYNC-2026-07-10.md`, with root receipt `runtime/receipts/mazer/chat-series-atlas-sync/latest.json`; implementation truth remains in `repos/mazer`
 - stack-wide source-verified synergy discovery is landed enough at root for tranche selection
 - Wave 1 contract freeze, adoption, instrumentation, reusable workflow lane, and warehouse smoke-check lane are landed in the scope actually frozen
 - Atlas and Fitness caller workflows are pinned to immutable Playbook ref `9ce397e893e4007afbe93366770867ed64f66500`
