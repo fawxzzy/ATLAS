@@ -90,7 +90,25 @@ These failures emerged repeatedly enough to preserve as Atlas/Playbook inputs:
 
 ## Current Next-Work Order
 
-The current owner-repo focus order remains:
+## 2026-07-10 - Pause Guide, Board Sync, And Production Closeout
+
+- Release commit: `55ccf078` (`Polish pause guide and progression reset`) on `codex/player-goal-default-colors`.
+- Production deployment: `https://fawxzzy-mazer-l6s84zf2u-fawxzzy.vercel.app`, aliased to `https://fawxzzy-mazer.vercel.app`.
+- Production readback: the alias returned `200` and served `assets/main-DseUwJEK.js`; Vercel reported the deployment `Ready` after its own production build passed.
+- Local release proof: TypeScript lint passed; the focused reset/AI/menu packet passed `101` tests; and `npm run build` passed.
+- DiscordOS live sync/readback: the canonical `mazer` board remains in `project-feedback` forum `1524889569475170478`; all `35` cards were updated through the bot, every card has the required not-done reaction, and all rendered payloads passed the `2000`-character limit.
+- Shipped UI behavior: main-menu Options no longer has Move Speed; played-game Pause keeps it and has toggle on/off copy; the centered Player Guide reuses literal board glyph renderers; and Reset Progress is confirmation-gated and clears only player progression.
+- Deliberate non-claim: finite local AI route exhaustion is not fixed by this release. The correct next change is persistent known-frontier expansion, not a hidden end route, teleport, reset, or regeneration before a real goal is found.
+
+## Selected Next Discord Card
+
+The chat is now halted behind one implementation card: `mazer-human-configured-ai-runner`.
+
+Resume by implementing its known-frontier expansion acceptance path, then run the card's generated-route and rank/bias proof before moving to another card.
+
+All other Mazer work stays recorded on the `mazer` DiscordOS board and is intentionally not worked in parallel.
+
+The remaining owner-repo sequence after that selected card is:
 
 1. Procedural difficulty generator shaping plus maze topology.
 2. AI/playbook progression contracts.
