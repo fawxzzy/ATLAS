@@ -53,22 +53,22 @@ Reconcile the already-published `Cortex Dual-Mode Replacement Readiness: 20%` ra
 
 ## Validation
 
-- `python C:\ATLAS\ops\validation\validate_stack.py`
+- `python ops\validation\validate_stack.py`
   - `critical=0 error=0 warning=0 info=0`
-- `python C:\ATLAS\ops\atlas\continuity_manifest_health.py`
+- `python ops\atlas\continuity_manifest_health.py`
   - `status=ok`
   - `manifest_count=21`
   - `ok_count=21`
-- `python C:\ATLAS\ops\atlas\continuity_open_marker_restart_index.py`
+- `python ops\atlas\continuity_open_marker_restart_index.py`
   - `status=ok`
   - `eligible_open_marker_count=7`
   - `restart_ready_count=7`
-- `python C:\ATLAS\ops\atlas\continuity_coverage.py`
+- `python ops\atlas\continuity_coverage.py`
   - `status=structured`
   - `initiative_manifest_count=21`
   - `open_marker_restart_ready_count=7`
   - `maintained_manifest_restart_ready_count=21`
-- `python C:\ATLAS\ops\atlas\marker_knockout_selector.py --format json`
+- `python ops\atlas\marker_knockout_selector.py --format json`
   - `operator_action=hold_current_lane`
   - `active_lane=Sandbox Simulation Readiness`
 - `python -m unittest tests.test_atlas_marker_knockout_selector -v`
