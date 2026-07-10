@@ -114,11 +114,11 @@ Covered cases:
 Commands run during the worker landing and reconciliation cluster:
 
 ```powershell
-python -m unittest C:\ATLAS\tests\test_cortex_simulation_substrate_requirements.py
-python C:\ATLAS\ops\cortex\simulation_substrate_requirements.py --json --strict
-python C:\ATLAS\ops\cortex\simulation_substrate_requirements.py --json --strict --output tmp/cortex/simulation-substrate-requirements.latest.json
-python C:\ATLAS\ops\validation\validate_stack.py
-git -C C:\ATLAS rev-list --left-right --count origin/main...HEAD
+python -m unittest tests.test_cortex_simulation_substrate_requirements
+python ops/cortex/simulation_substrate_requirements.py --json --strict
+python ops/cortex/simulation_substrate_requirements.py --json --strict --output tmp/cortex/simulation-substrate-requirements.latest.json
+python ops/validation/validate_stack.py
+git rev-list --left-right --count origin/main...HEAD
 ```
 
 Observed proof:
@@ -158,4 +158,3 @@ No additional same-lane Simulation packet is implied automatically by this recei
 The attached autonomous bootstrap packet separately authorizes the next root move after this reconciliation:
 
 - `AI Long-Run Batch Orchestration autonomous lane scheduler selection`
-
