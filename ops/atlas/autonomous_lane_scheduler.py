@@ -55,7 +55,19 @@ DOCS_ONLY_PHASES = {
     PHASE_CONTRACT_FREEZE,
     PHASE_SELECTOR,
 }
-OWNER_LANE_TERMS = ("fitness", "mazer", "discordos", "foundation", "trove", "playbook", "stream")
+OWNER_LANE_TERMS = (
+    "fitness",
+    "mazer",
+    "discordos",
+    "foundation",
+    "trove",
+    "stream",
+    "owner repo",
+    "owner-repo",
+    "playbook owner repo",
+    "repos/playbook",
+    "repos\\playbook",
+)
 PROTECTED_TERMS = (
     ".env",
     ".github/workflows",

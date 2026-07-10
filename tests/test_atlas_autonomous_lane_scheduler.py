@@ -232,6 +232,29 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         self.assertEqual(scheduler.STATUS_HOLD, report["status"])
         self.assertEqual("protected_or_platform_mutation_forbidden", report["blocked_candidates"][0]["blocked_reason"])
 
+    def test_playbook_everywhere_marker_is_not_blocked_by_name_only(self) -> None:
+        report = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=_program_payload(),
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload(
+                [
+                    {
+                        "marker": "Playbook Everywhere + Cortex Interface",
+                        "classification": planner.CLASS_DOCS_ONLY,
+                        "score": 70,
+                        "packet": "Playbook Everywhere + Cortex Interface third consumer-class contract freeze",
+                        "mode": "docs-only root-bounded contract freeze",
+                    }
+                ]
+            ),
+        )
+
+        self.assertEqual(scheduler.STATUS_EXECUTE, report["status"])
+        self.assertEqual("Playbook Everywhere + Cortex Interface", report["selected_marker"])
+
     def test_completed_packet_is_skipped(self) -> None:
         report = scheduler.build_report(
             root=Path("atlas-root-fixture"),
