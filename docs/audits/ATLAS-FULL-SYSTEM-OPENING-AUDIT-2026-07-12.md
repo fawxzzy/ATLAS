@@ -323,6 +323,12 @@ Confirmed: No owner-repository mutation occurred. Read-only owner-repository ins
 
 ## Recovery correction and current validation override
 
+### Authorized two-commit provenance correction
+
+Commit `34fa6c713d79dc4717c52b7dd7f5046cb785b389` was `worker-created after runner verification_failed`. It is preserved under explicit operator authorization; no history rewrite is allowed (including amend, reset, rebase, squash, revert, or rewrite). The complete two-commit state must pass this corrective canonical runner before publication, and publication is authorized only after the corrective canonical runner succeeds.
+
+The authorized parity sequence is pre-push `0 2`, push without force, fetch, post-push `0 0`. The retained exact 13-path recovery stashes remain immutable provenance: `5595299105c20b361f13653708de3030cc3fbd11`, `5e93dad8dccab196370737413d0e7e60bc0f8cca`, and `e9fe1190afc7468c6b52b3c642db47b3099dd070`. None was popped or dropped.
+
 Opening snapshot and final validation are separate evidence objects. The immutable pre-package opening observation at `2026-07-12T11:26:09.595602Z` was `critical=0 error=4 warning=25 info=0` with the four documented lock/head errors and the 16-plus-9 path-warning grouping. The governed post-package final validation at `2026-07-12T12:38:06.660078+00:00` was `critical=0 error=5 warning=25 info=0`: the same four lock/head errors, `working-memory-catalog-drift` at `runtime/cortex/catalog/memory/working-memory.latest.json`, and the same two path-warning groups. The runtime catalog is outside this 13-path packet; this is not a clean-health claim.
 
 The audit gate is authoritative but excluded from execution-selector routing. Its denominator remains exactly two accepted audit gates: opening is `1/2` at `50%`; discovered work adds zero; closing remains a separate exhaustive audit. `Full Stack Re-sync, Clean & Closeout: 100%` remains historical closure. Dependency graph: acyclic. Mazer resume is conditional on guarded publication and remains ineffective in this committed receipt.
@@ -331,4 +337,4 @@ The audit gate is authoritative but excluded from execution-selector routing. It
 
 The `50 -> 100` gate remains blocked until a separate exhaustive closing audit is accepted, confirms then-current evidence across every plane, reconciles independent child-lane outcomes without crediting them to this denominator, re-audits marker integrity and unknowns, and issues its own receipt and continuity update.
 
-Exact next action: **ATLAS MAIN reviews the accepted published 0->50 receipt and, if accepted, sends the explicit `RESUME MAZER` message to standing task `019f52e6-3b96-78b0-adb4-946b475f4ba6` from its preserved checkpoint.** This audit must not and did not send that message. Fitness remains security-blocked.
+Exact next action: **After the corrective canonical runner succeeds, confirm pre-push `0 2`, push without force, fetch, confirm post-push `0 0`, and obtain ATLAS MAIN review; only then may ATLAS MAIN send the explicit `RESUME MAZER` message to standing task `019f52e6-3b96-78b0-adb4-946b475f4ba6` from its preserved checkpoint.** This audit must not and did not send that message. Fitness remains security-blocked.
