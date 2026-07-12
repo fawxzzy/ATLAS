@@ -29,6 +29,10 @@ class StackComponentTopologyProjectionTests(unittest.TestCase):
                     "path": "repos/DiscordOS",
                     "role": "board-and-discord-writer",
                     "playbook_adoption_status": "not-claimed",
+                    "playbook_adoption_profile": "playbook_convergence_contract",
+                    "playbook_adoption_version": "1.0.0",
+                    "playbook_adoption_owner_head": "0123456789abcdef0123456789abcdef01234567",
+                    "playbook_adoption_owner_ref": "main",
                     "status": "incubating",
                 },
                 "foundation": {
@@ -112,6 +116,33 @@ class StackComponentTopologyProjectionTests(unittest.TestCase):
                 "not-claimed",
                 inventory_by_id[repo_id]["playbook_adoption_status"],
             )
+
+        self.assertEqual(
+            {
+                "playbook_adoption_status": "not-claimed",
+                "playbook_adoption_profile": "playbook_convergence_contract",
+                "playbook_adoption_version": "1.0.0",
+                "playbook_adoption_owner_head": "0123456789abcdef0123456789abcdef01234567",
+                "playbook_adoption_owner_ref": "main",
+            },
+            {
+                key: inventory_by_id["discordos"][key]
+                for key in (
+                    "playbook_adoption_status",
+                    "playbook_adoption_profile",
+                    "playbook_adoption_version",
+                    "playbook_adoption_owner_head",
+                    "playbook_adoption_owner_ref",
+                )
+            },
+        )
+        for key in (
+            "playbook_adoption_profile",
+            "playbook_adoption_version",
+            "playbook_adoption_owner_head",
+            "playbook_adoption_owner_ref",
+        ):
+            self.assertEqual("", inventory_by_id["foundation"][key])
 
         first_markdown = render_repo_inventory_markdown(first_inventory)
         second_markdown = render_repo_inventory_markdown(second_inventory)

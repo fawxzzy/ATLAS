@@ -251,7 +251,12 @@ def build_repo_inventory(
                         "playbook_adoption_status",
                         repo_info.get("playbook_adoption_status", ""),
                     )
+                    or ""
                 ),
+                "playbook_adoption_profile": str(repo_info.get("playbook_adoption_profile", "") or ""),
+                "playbook_adoption_version": str(repo_info.get("playbook_adoption_version", "") or ""),
+                "playbook_adoption_owner_head": str(repo_info.get("playbook_adoption_owner_head", "") or ""),
+                "playbook_adoption_owner_ref": str(repo_info.get("playbook_adoption_owner_ref", "") or ""),
                 "status": str(repo_info.get("status", "unknown")),
                 "remote_url": live_state["remote_url"],
                 "pinned_commit": lock_component.get("commit"),
