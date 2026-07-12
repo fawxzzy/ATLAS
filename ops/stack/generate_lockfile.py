@@ -21,6 +21,7 @@ DEFAULT_INCLUDED_STATUSES = {"active", "incubating", "demo"}
 LOCK_COMPONENT_FIELDS = (
     "path",
     "role",
+    "playbook_adoption_status",
     "status",
     "remote",
     "ref_type",
@@ -219,6 +220,7 @@ def normalize_lock_component(component: dict[str, Any]) -> dict[str, Any]:
     return {
         "path": normalize_slashes(str(component.get("path", ""))),
         "role": str(component.get("role", "")),
+        "playbook_adoption_status": str(component.get("playbook_adoption_status", "")),
         "status": str(component.get("status", "unknown")),
         "remote": normalize_slashes(str(remote)) if isinstance(remote, str) and remote else None,
         "ref_type": str(component.get("ref_type", "")),
@@ -402,6 +404,7 @@ def build_lock_payload(
         components[repo_id] = {
             "path": atlas_relative(repo_path, root=base),
             "role": str(repo_info.get("role", "")),
+            "playbook_adoption_status": str(repo_info.get("playbook_adoption_status", "")),
             "status": str(repo_info.get("status", "unknown")),
             "remote": current_remote(repo_path),
             "ref_type": ref_type,
@@ -427,7 +430,7 @@ def load_lockfile(path: Path) -> dict[str, Any]:
     payload = load_stack_config(path)
     if not isinstance(payload, dict):
         raise ValueError("Lockfile must deserialize to a mapping.")
-    return payload
+    return normalize_lock_payload(payload)
 
 
 def yaml_scalar(value: Any) -> str:

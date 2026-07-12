@@ -245,7 +245,13 @@ def build_repo_inventory(
             {
                 "logical_id": repo_id,
                 "local_path": atlas_relative(repo_path, root=base_root),
-                "role": str(repo_info.get("role", "")),
+                "role": str(lock_component.get("role", repo_info.get("role", ""))),
+                "playbook_adoption_status": str(
+                    lock_component.get(
+                        "playbook_adoption_status",
+                        repo_info.get("playbook_adoption_status", ""),
+                    )
+                ),
                 "status": str(repo_info.get("status", "unknown")),
                 "remote_url": live_state["remote_url"],
                 "pinned_commit": lock_component.get("commit"),
@@ -412,8 +418,8 @@ def render_repo_inventory_markdown(payload: dict[str, Any]) -> str:
         "",
         "## Managed Repos",
         "",
-        "| Repo id | Path | Branch | Pinned commit | Current commit | Dirty | Root-blocking | Dirty blocks root | Trust | Release | Related initiatives |",
-        "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+        "| Repo id | Path | Role | Playbook adoption status | Branch | Pinned commit | Current commit | Dirty | Root-blocking | Dirty blocks root | Trust | Release | Related initiatives |",
+        "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
     ]
 
     for item in repos:
@@ -429,6 +435,8 @@ def render_repo_inventory_markdown(payload: dict[str, Any]) -> str:
                 [
                     str(item.get("logical_id") or "-"),
                     str(item.get("local_path") or "-"),
+                    str(item.get("role") or "-"),
+                    str(item.get("playbook_adoption_status") or "-"),
                     str(item.get("branch") or "-"),
                     str(item.get("pinned_commit") or "-"),
                     str(item.get("current_commit") or "-"),

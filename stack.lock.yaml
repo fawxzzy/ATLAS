@@ -1,22 +1,24 @@
 schema_version: "atlas.stack.lock.v1"
 stack_manifest_path: "stack.yaml"
-stack_manifest_digest: "sha256:18e03e37b2e8609b907a96f39678eed97f5c71f8b3f405763d6c484e7d145f04"
+stack_manifest_digest: "sha256:59800ff7e2cb30cf22bccf3d00e0836f69ba2d6d2ac15afb7b517309fa3cf650"
 component_count: 9
 components:
   _stack:
     path: "repos/_stack"
     role: "workflow-operator"
+    playbook_adoption_status: ""
     status: "active"
     remote: "https://github.com/fawxzzy/_stack.git"
     ref_type: "branch"
     ref: "main"
-    commit: "c2afaafe4f73c678cc4d467af090fefd0766f193"
+    commit: "6e96d1571121a30c668b5c6f9d283ca316912126"
     dirty: false
     trust_class: "trusted"
     release_eligible: false
   discordos:
     path: "repos/DiscordOS"
-    role: "application"
+    role: "board-and-discord-writer"
+    playbook_adoption_status: "not-claimed"
     status: "incubating"
     remote: "https://github.com/fawxzzy/DiscordOS.git"
     ref_type: "branch"
@@ -27,7 +29,8 @@ components:
     release_eligible: false
   foundation:
     path: "repos/foundation"
-    role: "package"
+    role: "shared-contract-foundation"
+    playbook_adoption_status: "not-claimed"
     status: "active"
     remote: "https://github.com/fawxzzy/foundation.git"
     ref_type: "branch"
@@ -39,6 +42,7 @@ components:
   lifeline:
     path: "repos/lifeline"
     role: "local-operator"
+    playbook_adoption_status: ""
     status: "active"
     remote: "https://github.com/fawxzzy/lifeline.git"
     ref_type: "branch"
@@ -50,6 +54,7 @@ components:
   nat1-games:
     path: "repos/Nat1-Games/nat1-games"
     role: "application"
+    playbook_adoption_status: ""
     status: "incubating"
     remote: "https://github.com/ZachariahRedfield/nat1-games.git"
     ref_type: "branch"
@@ -61,6 +66,7 @@ components:
   playbook:
     path: "repos/playbook"
     role: "governance-runtime"
+    playbook_adoption_status: ""
     status: "active"
     remote: "https://github.com/fawxzzy/playbook.git"
     ref_type: "branch"
@@ -72,6 +78,7 @@ components:
   playbook-demo:
     path: "repos/playbook-demo/playbook-demo"
     role: "demo"
+    playbook_adoption_status: ""
     status: "demo"
     remote: "https://github.com/ZachariahRedfield/playbook-demo.git"
     ref_type: "branch"
@@ -83,6 +90,7 @@ components:
   stream:
     path: "repos/stream"
     role: "application"
+    playbook_adoption_status: ""
     status: "incubating"
     remote: null
     ref_type: "branch"
@@ -94,6 +102,7 @@ components:
   trove:
     path: "repos/trove"
     role: "application"
+    playbook_adoption_status: ""
     status: "active"
     remote: "https://github.com/fawxzzy/trove.git"
     ref_type: "branch"
@@ -109,12 +118,6 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ATLAS sibling checkout remains an adjacent non-canonical repo root and is not part of the governed stack member set."
-  cortex_adjacent_checkout:
-    path: "repos/fawxzzy-cortex"
-    present: false
-    trust_class: "adjacent"
-    release_eligible: false
-    reason: "Cortex checkout is present in the workspace as an adjacent repo but is not yet a governed ATLAS child-repo adoption target."
   cortex_playbook_snapshot_archive:
     path: "repos/CORTEX-AND-PLAYBOOK-20260408.zip"
     present: false
@@ -205,4 +208,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:596a5d11b655a3ce6d13801748ccaee346bfb5aef7f16183af8dfd227620b0fb"
+lock_digest: "sha256:4d1e5cbe2350558c42a23fbbe5949b02e60e858f0c24a3b8c88639b2862c5e1c"

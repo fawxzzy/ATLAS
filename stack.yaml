@@ -133,7 +133,8 @@ repo_registry:
     status: active
   foundation:
     path: repos/foundation
-    role: package
+    role: shared-contract-foundation
+    playbook_adoption_status: not-claimed
     status: active
     validation:
       generated_state_cleanup:
@@ -143,7 +144,8 @@ repo_registry:
           - node_modules
   discordos:
     path: repos/DiscordOS
-    role: application
+    role: board-and-discord-writer
+    playbook_adoption_status: not-claimed
     status: incubating
     validation:
       generated_state_cleanup:
@@ -194,6 +196,12 @@ subsystem_registry:
     role: read-only coordination runtime
     status: active
     model: root-owned-subsystem
+    implementation_authority: sole-root-owned-implementation
+    remote_provenance:
+      url: https://github.com/fawxzzy/cortex
+      relation: unresolved-remote-only
+      local_checkout: absent
+      adoption_status: not-adopted
 
 archives:
   archive_register: docs/registry/ATLAS-ARCHIVE-REGISTRY.json
@@ -282,11 +290,6 @@ stack_lock:
       trust_class: trusted
       release_eligible: false
   excluded_surfaces:
-    cortex_adjacent_checkout:
-      path: repos/fawxzzy-cortex
-      trust_class: adjacent
-      release_eligible: false
-      reason: Cortex checkout is present in the workspace as an adjacent repo but is not yet a governed ATLAS child-repo adoption target.
     fitness_reclone_recovery_checkout:
       path: repos/fawxzzy-fitness.reclone.20260502-195639
       trust_class: untrusted
