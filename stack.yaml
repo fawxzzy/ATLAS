@@ -111,7 +111,7 @@ repo_registry:
     playbook_adoption_status: verified
     playbook_adoption_profile: playbook_convergence_contract
     playbook_adoption_version: 1.0.0
-    playbook_adoption_owner_head: 0b91367158f09ca3ea007752678142cde9fb7653
+    playbook_adoption_owner_head: 2127af207370cacf8752fd4f13c6545ea49bb503
     playbook_adoption_owner_ref: main
     status: active
     validation:

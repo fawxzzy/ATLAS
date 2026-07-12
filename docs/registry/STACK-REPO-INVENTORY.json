@@ -1,9 +1,9 @@
 {
   "schema_version": "atlas.stack.repo-inventory.v1",
   "stack_manifest_ref": "stack.yaml",
-  "stack_manifest_digest": "sha256:c00a458dfab0628bdb90c36131e511bc77a2d522288dc4a34306bb2448eea9b9",
+  "stack_manifest_digest": "sha256:51f09a42e5ffb3b93a9ed2a6ab93ac93dec0220b342e24a42b036d5961184ee2",
   "stack_lock_ref": "stack.lock.yaml",
-  "stack_lock_digest": "sha256:288a593b575e4bbb9642472e18ff5a6b9f3168defc46823fb09e62346f56b0b8",
+  "stack_lock_digest": "sha256:e1e48b426faf4845687c170418f26aa139bacc3e8bca406bc9f6e1d9892d7caf",
   "working_memory_digest": "sha256:6bb3c2347becf6afc2c0c7c4ca13248078d37e86d36dacd93908dc306f69ecff",
   "published_refs": {
     "json": "docs/registry/STACK-REPO-INVENTORY.json",
@@ -22,12 +22,12 @@
       "playbook_adoption_status": "verified",
       "playbook_adoption_profile": "playbook_convergence_contract",
       "playbook_adoption_version": "1.0.0",
-      "playbook_adoption_owner_head": "0b91367158f09ca3ea007752678142cde9fb7653",
+      "playbook_adoption_owner_head": "2127af207370cacf8752fd4f13c6545ea49bb503",
       "playbook_adoption_owner_ref": "main",
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/_stack.git",
-      "pinned_commit": "0b91367158f09ca3ea007752678142cde9fb7653",
-      "current_commit": "0b91367158f09ca3ea007752678142cde9fb7653",
+      "pinned_commit": "2127af207370cacf8752fd4f13c6545ea49bb503",
+      "current_commit": "2127af207370cacf8752fd4f13c6545ea49bb503",
       "pinned_ref_type": "branch",
       "pinned_ref": "main",
       "current_ref_type": "branch",
@@ -394,7 +394,7 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "7dc4844a7b54862f28e4c782d152b6264a8ed04b",
+      "current_commit": "0ce276b311adc6f069d4d76a23a8ae3276dc9c9b",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
@@ -614,5 +614,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:7170855bbf7e07cef354564c0ad0e77f7e3baddcd512e0f81b6bc4a9cbd35e36"
+  "content_digest": "sha256:7e9e6599ecc8d3a432daad6b601fbaefb42183e65c3b435f38d893000b7189b7"
 }
