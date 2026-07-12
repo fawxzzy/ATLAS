@@ -1,8 +1,8 @@
 # Atlas Full-System Re-evaluation Opening Audit — 2026-07-12
 
-Status: **VERIFIED — opening gate accepted**  
-Scope: ATLAS root governance and authenticated read-only external evidence only  
-Baseline: `main@845d1802095cd8458806285bf2b053778b120f90`, origin parity ahead `0` / behind `0`  
+Status: **VERIFIED — opening gate accepted**
+Scope: ATLAS root governance and authenticated read-only external evidence only
+Baseline: `main@845d1802095cd8458806285bf2b053778b120f90`, origin parity ahead `0` / behind `0`
 Published baseline subject: `docs(github): establish control-plane opening audit`
 
 ## Executive gate decision and marker basis
