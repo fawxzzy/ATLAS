@@ -1,0 +1,90 @@
+{
+  "contract_version": "atlas.initiative.v1",
+  "id": "continuity-manifest-atlas-full-system-re-evaluation",
+  "title": "Continuity Manifest Atlas Full-System Re-evaluation",
+  "summary": "Active ATLAS-root retrieval map for the two-gate Atlas Full-System Re-evaluation audit gate after its opening 0-to-50 observation; it is maintained but excluded from execution-selector routing.",
+  "status": "active",
+  "owner": "stack-root",
+  "created_at": "2026-07-12T12:00:00Z",
+  "updated_at": "2026-07-12T12:00:00Z",
+  "related_plan_refs": [],
+  "related_decision_refs": [],
+  "related_hypothesis_refs": [],
+  "related_session_refs": [],
+  "related_attention_refs": [],
+  "proposed_next_session_refs": [],
+  "evidence_refs": [
+    "docs/audits/ATLAS-FULL-SYSTEM-OPENING-AUDIT-2026-07-12.md",
+    "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json",
+    "docs/ops/ATLAS-FULL-SYSTEM-REEVALUATION-OPENING-AUDIT-RECEIPT-2026-07-12.md",
+    "docs/atlas-book/01-current-state.md",
+    "docs/atlas-book/02-lanes-and-markers.md",
+    "docs/atlas-book/03-operating-model.md",
+    "docs/atlas-book/05-receipt-index.md",
+    "docs/atlas-book/06-system-ownership.md",
+    "docs/atlas-book/07-contracts-and-seams.md",
+    "docs/atlas-book/11-system-map-graph.md",
+    "docs/atlas-book/12-restart-and-handoff-guide.md",
+    "docs/atlas-book/13-vision-and-endgames.md",
+    "docs/memory/profiles/zachariah_workflow_profile.md",
+    "docs/audits/GITHUB-CONTROL-PLANE-OPENING-AUDIT-2026-07-12.md",
+    "docs/registry/GITHUB-CONTROL-PLANE-REGISTRY.json",
+    "docs/memory/initiatives/initiative-github-control-plane-integration.json"
+  ],
+  "supersedes": [],
+  "superseded_by": [],
+  "metadata": {
+    "artifact_kind": "continuity_manifest",
+    "lane_id": "atlas-full-system-re-evaluation",
+    "scope_class": "atlas-root-two-gate-platform-governance-audit",
+    "current_checkpoint_receipt": "docs/ops/ATLAS-FULL-SYSTEM-REEVALUATION-OPENING-AUDIT-RECEIPT-2026-07-12.md",
+    "checkpoint_commit": "pending_parent_publication",
+    "checkpoint_summary": "The exhaustive opening audit is governed-success pending parent publication and the distinct Atlas Full-System Re-evaluation marker is 50 percent on exactly one of two audit gates; every discovery is percentage-null independent work and the closing gate remains blocked. Mazer resume is conditional on guarded publication and remains ineffective in this committed receipt.",
+    "validation_posture": {"opening_validation_snapshot":{"critical":0,"error":4,"warning":25,"info":0,"label":"pre-package opening observation"},"final_validation":{"critical":0,"error":5,"warning":25,"info":0,"label":"post-package final validation","errors":["working-memory-catalog-drift","stack-lock-drift","stack-lock-render-drift","stack-lock-pin-drift","stack-lock-missing-ref"]},"ratchet_statement":"Ratchet remediation is a separate lane, not an opening-audit success criterion."},
+    "governing_receipts": [
+      "docs/ops/ATLAS-FULL-SYSTEM-REEVALUATION-OPENING-AUDIT-RECEIPT-2026-07-12.md",
+      "docs/audits/ATLAS-FULL-SYSTEM-OPENING-AUDIT-2026-07-12.md",
+      "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json",
+      "docs/audits/GITHUB-CONTROL-PLANE-OPENING-AUDIT-2026-07-12.md",
+      "docs/registry/GITHUB-CONTROL-PLANE-REGISTRY.json",
+      "docs/memory/initiatives/initiative-github-control-plane-integration.json"
+    ],
+    "owner_truth_surfaces": [
+      {"path": "docs/audits/ATLAS-FULL-SYSTEM-OPENING-AUDIT-2026-07-12.md", "role": "accepted exhaustive opening gate and current evidence classification"},
+      {"path": "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json", "role": "deterministic percentage-null discovery externalization"},
+      {"path": "docs/ops/ATLAS-FULL-SYSTEM-REEVALUATION-OPENING-AUDIT-RECEIPT-2026-07-12.md", "role": "decisive opening checkpoint and marker transition receipt"},
+      {"path": "docs/memory/profiles/zachariah_workflow_profile.md", "role": "durable operator and two-pass audit doctrine"},
+      {"path": "docs/registry/GITHUB-CONTROL-PLANE-REGISTRY.json", "role": "accepted timestamped GitHub plane evidence"}
+    ],
+    "verification_adoption_surfaces": [
+      {"path": "docs/atlas-book/01-current-state.md", "role": "current health and continuity projection"},
+      {"path": "docs/atlas-book/02-lanes-and-markers.md", "role": "canonical distinct 50 percent marker posture"},
+      {"path": "docs/atlas-book/03-operating-model.md", "role": "current-versus-proposed execution model"},
+      {"path": "docs/atlas-book/05-receipt-index.md", "role": "opening receipt discovery spine"},
+      {"path": "docs/atlas-book/06-system-ownership.md", "role": "capability ownership map"},
+      {"path": "docs/atlas-book/07-contracts-and-seams.md", "role": "implemented v1 and proposed vNext boundary"},
+      {"path": "docs/atlas-book/11-system-map-graph.md", "role": "current and proposed topology projection"},
+      {"path": "docs/atlas-book/12-restart-and-handoff-guide.md", "role": "exact next ATLAS MAIN action"},
+      {"path": "docs/atlas-book/13-vision-and-endgames.md", "role": "two-gate endgame and vNext posture"}
+    ],
+    "blocked_or_gated_work": [
+      {"item": "Atlas Full-System Re-evaluation closing audit", "requirement": "blocked until a separate later exhaustive closing audit is accepted; no child-lane work supplies marker points"},
+      {"item": "all primary and backlog discovery lanes", "requirement": "independent percentage-null candidates; each requires its own selection, authority, denominator, proof, and receipt"},
+      {"item": "Mazer execution", "requirement": "resume_allowed_after_publication is true and resume_effective is false; only after guarded parent publication/review may ATLAS MAIN separately send RESUME MAZER to the preserved standing task"},
+      {"item": "Fitness execution", "requirement": "resume_allowed is false until explicit operator-authorized Critical secret containment, rotation, and verification"},
+      {"item": "production, Discord, Supabase, GitHub cleanup, branch, worktree, or security mutation", "requirement": "not authorized by this audit"}
+    ],
+    "next_package_ladder": [
+      {"package": "No immediate root packet", "mode": "audit-gate hold", "reason": "parent publication/review and the possible later ATLAS MAIN Mazer message are outside root execution-selector routing; this audit gate is maintained and marker-backed but excluded from the selector"},
+      {"package": "Independently select and execute percentage-null child lanes", "mode": "separate owner/root packages", "reason": "discoveries have their own owners, denominators, dependencies, serialization, and receipts and contribute zero audit-marker points"},
+      {"package": "Atlas Full-System Re-evaluation closing audit", "mode": "later exhaustive root audit", "reason": "only a separate accepted closing audit may move the marker from 50 to 100"}
+    ],
+    "freshness_state": "manifest-backed",
+    "freshness_checked_receipt": "docs/ops/ATLAS-FULL-SYSTEM-REEVALUATION-OPENING-AUDIT-RECEIPT-2026-07-12.md",
+    "freshness_checked_at": "2026-07-12T12:00:00Z",
+    "freshness_basis": "Exact 0-to-50 basis: one accepted exhaustive opening audit of a fixed two-audit-gate denominator; current completed units 1 of 2, all discoveries externalized at percentage null, no other marker moved, and the later closing audit remains gated.",
+    "marker_posture": [
+      {"marker": "Atlas Full-System Re-evaluation", "percent": 50, "source": "docs/atlas-book/02-lanes-and-markers.md"}
+    ]
+  }
+}

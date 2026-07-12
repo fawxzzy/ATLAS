@@ -1,5 +1,11 @@
 # Current System Map / Graph
 
+## 2026-07-12 current/proposed overlay
+
+Current authority flow: owner repos -> owner verification -> `_stack` normalization/canonical writer -> ATLAS receipts/markers/restart projections. GitHub supplies remote/CI/review/release/security evidence; Vercel supplies delivery/observability; Supabase supplies auth/persistence; DiscordOS is one logical board/publication/readback writer. Cortex is root-owned advisory context/routing/synthesis. Codex tasks execute bounded work; native handoff creates a separate transcript and receipts return durable truth.
+
+Proposed overlay only: Atlas Control thin ledger, Contracts v2 mesh, cross-plane delivery events, persistent workspace/browser leases, historical task intelligence, and systematic cross-project knowledge promotion. These proposed nodes do not replace the current owner flow.
+
 ## Purpose
 
 This chapter is the compact cross-system map for the current stack.
@@ -245,10 +251,10 @@ Retrieval-first continuity should be reconstructed in this order:
    - restart guide
    - system map
    - endgame surface
-   - seeded initiative manifest health via `ops/atlas/continuity_manifest_health.py` or the awareness slice `continuity_initiative_manifest_health`; current seeded-set posture is `20 ok / 0 warning / 0 error`
-   - eligible open-marker manifest coverage via `ops/atlas/continuity_open_marker_manifest_coverage.py` or the awareness slice `continuity_open_marker_manifest_coverage`; current posture is `7 / 7` eligible open markers manifest-backed
-   - eligible open-marker restart index via `ops/atlas/continuity_open_marker_restart_index.py` or the awareness slice `continuity_open_marker_restart_index`; current posture is `7 / 7` eligible open markers restart-ready from one machine-readable index
-   - maintained-manifest restart index via `ops/atlas/continuity_maintained_manifest_restart_index.py` or the awareness slice `continuity_maintained_manifest_restart_index`; current posture is `20 / 20` maintained initiative manifests restart-ready from one machine-readable index
+   - seeded initiative manifest health via `ops/atlas/continuity_manifest_health.py` or the awareness slice `continuity_initiative_manifest_health`; current seeded-set posture is `23 ok / 0 warning / 0 error`
+   - eligible open-marker manifest coverage via `ops/atlas/continuity_open_marker_manifest_coverage.py` or the awareness slice `continuity_open_marker_manifest_coverage`; current posture is `9 / 9` eligible open markers manifest-backed
+   - eligible open-marker restart index via `ops/atlas/continuity_open_marker_restart_index.py` or the awareness slice `continuity_open_marker_restart_index`; current posture is `9 / 9` eligible open markers restart-ready from one machine-readable index
+   - maintained-manifest restart index via `ops/atlas/continuity_maintained_manifest_restart_index.py` or the awareness slice `continuity_maintained_manifest_restart_index`; current posture is `23 / 23` maintained initiative manifests restart-ready from one machine-readable index
    - structured continuity coverage rollup via `ops/atlas/continuity_coverage.py` or the awareness slice `continuity_coverage`; current posture is `status: structured` with `pending_review_count: 0`
 2. owner-repo truth-owner surfaces
    - repo READMEs

@@ -1,5 +1,11 @@
 # Operating Model
 
+## 2026-07-12 current capability override
+
+Atlas root owns governance, markers, v1 contracts, and accepted receipts; `_stack` owns the canonical writer, operator flows, and event normalization; Playbook owns doctrine and repo verification; root-owned Cortex surfaces provide advisory context/routing/synthesis; owner repos own product/code truth; DiscordOS is one logical board/publication/readback writer; GitHub is remote/CI/review/release/security truth; Vercel is delivery/observability; Supabase is auth/persistence; Codex supplies bounded execution tasks; ATLAS MAIN routes standing command surfaces.
+
+Native desktop handoff creates a separate Codex transcript and receipts are the durable reverse handoff. Current manual evidence proves local/worktree/cloud tasks, deep links, follow-up steer/queue behavior, subagent threads, and task-scoped IDE context, but not the full Atlas callback loop. Atlas Control and its backend-neutral ledger, persistent workspace/browser leases, delivery event plane, historical task intelligence, and systematic cross-project promotion remain partial or **PROPOSED**. SQLite is a frozen proposal, not deployed truth. Current standing surfaces are ATLAS MAIN, existing Mazer, future Fitness after gates, with DiscordOS embedded.
+
 ## Canonical Owner Split
 
 ### Fitness app lane

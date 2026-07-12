@@ -1,5 +1,24 @@
 # System Ownership
 
+## 2026-07-12 capability ownership override
+
+| Capability | Current owner / boundary |
+|---|---|
+| root governance, marker truth, v1 contracts, accepted receipts | ATLAS root |
+| canonical workspace writer, operator commands, event normalization | `_stack` |
+| doctrine and repo verification | Playbook |
+| advisory context/routing/synthesis | root-owned Cortex; remote Cortex is not adopted |
+| product and code truth | each owner repository |
+| board/publication/readback mutation | DiscordOS as one logical writer; Fitness direct overlap is debt |
+| remote source, CI, review, releases, security signals | GitHub |
+| delivery and observability | Vercel |
+| auth and persistence | Supabase |
+| bounded execution tasks | Codex |
+| project routing | ATLAS MAIN; existing Mazer; Fitness after security gates; DiscordOS embedded |
+| backend-neutral durable coordination ledger | **PROPOSED** Atlas Control |
+
+READY deployments, clean worktrees, historical 100% markers, chat handoffs, and continuity projections are never owner implementation or current-health proof.
+
 ## Purpose
 
 This page names the current and future owner surfaces across the stack so work can reopen inside the correct lane without reconstructing boundaries from chat history.

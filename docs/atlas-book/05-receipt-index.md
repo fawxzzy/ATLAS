@@ -1,5 +1,20 @@
 # Receipt Index
 
+## Atlas Full-System Re-evaluation opening gate
+
+- `docs/ops/ATLAS-FULL-SYSTEM-REEVALUATION-OPENING-AUDIT-RECEIPT-2026-07-12.md`
+  - accepted exhaustive opening audit receipt
+  - moves only `Atlas Full-System Re-evaluation` from `0%` to `50%` on one of two audit gates
+  - records 0/4/25/0 validation truth, all discoveries as percentage-null lanes, exact preservation inventory, Mazer `resume_allowed: true`, Fitness `resume_allowed: false`, and pending-parent publication fields
+- `docs/audits/ATLAS-FULL-SYSTEM-OPENING-AUDIT-2026-07-12.md`
+  - self-contained current evidence and marker audit; frozen SHA-256 is carried by the receipt
+- `docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json`
+  - deterministic primary/backlog discovery registry; every percentage is null
+- `docs/memory/initiatives/continuity-manifest-atlas-full-system-re-evaluation.json`
+  - manifest-backed 50% checkpoint and later closing-audit gate
+
+This is a new two-pass lane. It does not alter the historical `Full Stack Re-sync, Clean & Closeout: 100%` receipt chain.
+
 ## Core Workflow / Operating Model
 
 - [Unified Workflow Convergence Inventory](../ops/UNIFIED-WORKFLOW-CONVERGENCE-INVENTORY-2026-05-24.md)

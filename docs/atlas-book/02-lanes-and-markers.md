@@ -9,7 +9,7 @@
 Read:
 
 - the continuity substrate is strong enough to restart from durable surfaces first
-- continuity manifests, truth maps, and retrieval hygiene are real, and the seeded initiative set now also has five machine-readable continuity reads: `22` covered manifests at `22 ok / 0 warning / 0 error`, `8 / 8` eligible open markers are manifest-backed, `8 / 8` eligible open markers are restart-ready from one machine-readable index, `22 / 22` maintained initiative manifests are restart-ready from one machine-readable index, and the structured `continuity_coverage` rollup still reports `pending_review_count: 0`; `Truth Map & ATLAS Book` remains the canonical restart surface through `Closed / Locked Ratchets`, and `AI Repetition-to-Automation Pipeline`, `Playbook Everywhere + Cortex Interface`, `Cortex Readiness`, `Cortex Dual-Mode Replacement Readiness`, `Owner-Lane Agent Service Bus & DiscordOS Ops Readiness`, `Sandbox Simulation Readiness`, and `AI Work Session Stability & Auto-Sync Loop` now also have maintained manifest-backed retrieval maps
+- continuity manifests, truth maps, and retrieval hygiene are real, and the seeded initiative set has five machine-readable continuity reads: `23` covered manifests at `23 ok / 0 warning / 0 error`, `9 / 9` eligible open markers are manifest-backed, `9 / 9` eligible open markers are restart-ready from one machine-readable index, `23 / 23` maintained initiative manifests are restart-ready from one machine-readable index, and the structured `continuity_coverage` rollup reports `pending_review_count: 0`; earlier counts in dated narrative below remain historical evidence
 - continuity is still not universal across every future lane, but the current KCT and DCE continuity family is now closed for its admitted scope because bootstrap, trusted repo-context, run/session, memory, knowledge, and promote seams all preserve doctrine identity directly
 - `Knowledge Capture & Transfer` and `Durable Context Externalization` now stay discoverable through `Closed / Locked Ratchets` plus receipts rather than the live active/open marker display
 - one explicit reusable work item now sits inside this substrate: `ATLAS systems-doc normalization`, meaning owner-repo system truth gets reconciled into restart-friendly Book chapters without duplicating repo-local implementation detail; `Lifeline` is the first concrete example
@@ -94,6 +94,16 @@ Read:
 
 - Vercel Platform Observability Governance: `0%`
 
+GitHub Control-Plane Integration remains percentage-null. No execution-selector marker moved.
+
+## Audit Gate Markers
+
+- Atlas Full-System Re-evaluation: `50%`
+
+Audit-gate marker; excluded from the execution selector.
+
+The Atlas Full-System Re-evaluation denominator is exactly two accepted audit gates: opening `0 -> 50`, then a separate later closing audit `50 -> 100`. The opening gate is accepted at `1 / 2`. Discovered work adds zero to this marker and remains percentage-null in `docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json`. The marker cannot exceed 50 until the closing audit is accepted. Ratchet remediation is a separate lane, not an opening-audit success criterion. No other open or locked marker moved.
+
 ## Materially Closed Carry-Forward Families
 
 - Discord Workflow, Publication & Docs Reliability broader-summary parity-proof ladder
@@ -149,6 +159,8 @@ Read:
 - Branch & Worktree Normalization: `100%`
 - Fitness Supabase Profile/Data Hygiene: `100%`
 - Full Stack Re-sync, Clean & Closeout: `100%`
+
+The Full Stack Re-sync entry above is preserved historical completion for its dated scope, not a current-health claim. Historical one-line entries do not expose deterministic current-health denominators in this table.
 - Unified Workflow Convergence: `100%`
 - Feedback Loop Readiness: `100%`
 - Core Pattern Convergence: `100%`

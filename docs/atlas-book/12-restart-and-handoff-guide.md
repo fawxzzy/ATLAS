@@ -1,5 +1,13 @@
 # Restart And Handoff Guide
 
+## 2026-07-12 exact next action
+
+The accepted Atlas Full-System Re-evaluation opening audit moves its distinct marker from 0% to 50% on one of two audit gates. Current continuity is `23 manifests / 23 ok / 0 warning / 0 error`, `8 / 8` eligible execution-open markers manifest-backed and restart-ready, `23 / 23` maintained manifests restart-ready, and `pending_review_count: 0`; the audit-gate manifest is maintained and marker-backed but excluded from the execution selector. The post-package final validation is `0 critical / 5 error / 25 warning / 0 info`; ratchet remediation is separate and does not decide this opening gate. Older counts below are historical snapshots.
+
+Exact next action: **ATLAS MAIN reviews this accepted published 0->50 receipt and, if accepted, sends the explicit `RESUME MAZER` message to standing task `019f52e6-3b96-78b0-adb4-946b475f4ba6` from its preserved checkpoint.** `resume_allowed_after_publication: true`; `resume_effective: false`. Mazer resume is conditional on guarded publication and remains ineffective in this committed receipt. Preserve the canonical dirty Mazer file, dirty `turnlive`, eight Mazer candidates, all registered worktrees, and checkpoint. This audit does not send the message. Fitness remains security-blocked pending explicit operator-authorized containment, rotation, and verification for published Critical secret-scanning alert #1.
+
+The later 50->100 closing audit is a separate package. Child lanes remain percentage-null and add zero points to the audit marker.
+
 ## Purpose
 
 This chapter is the shortest path for resuming the stack from a new chat without rebuilding state from memory.
