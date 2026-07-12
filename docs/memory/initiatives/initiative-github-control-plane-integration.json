@@ -1,0 +1,373 @@
+{
+  "contract_version": "atlas.initiative.v1",
+  "id": "initiative-github-control-plane-integration",
+  "title": "GitHub Control-Plane Integration",
+  "summary": "Create a deterministic, read-only-first GitHub control plane that correlates the fawxzzy repository ecosystem with local Git, _stack events, Atlas contracts and receipts, DiscordOS projections, Vercel delivery, and Supabase operational evidence without weakening mutation authority.",
+  "status": "active",
+  "owner": "stack-root",
+  "created_at": "2026-07-12T10:58:57.680276Z",
+  "updated_at": "2026-07-12T10:58:57.680276Z",
+  "related_plan_refs": [],
+  "related_decision_refs": [],
+  "related_hypothesis_refs": [],
+  "related_session_refs": [],
+  "related_attention_refs": [],
+  "evidence_refs": [
+    "docs/audits/GITHUB-CONTROL-PLANE-OPENING-AUDIT-2026-07-12.md",
+    "docs/registry/GITHUB-CONTROL-PLANE-REGISTRY.json",
+    "stack.yaml",
+    "stack.lock.yaml",
+    "docs/registry/STACK-REPO-INVENTORY.json"
+  ],
+  "proposed_next_session_refs": [],
+  "supersedes": [],
+  "superseded_by": [],
+  "metadata": {
+    "schema_version": "atlas.github.control-plane.initiative.v1",
+    "version": 1,
+    "objective": "Create a deterministic, read-only-first GitHub control plane that correlates the fawxzzy repository ecosystem with local Git, _stack events, Atlas contracts and receipts, DiscordOS projections, Vercel delivery, and Supabase operational evidence without weakening mutation authority.",
+    "scope": {
+      "cloud_repositories": [
+        "ATLAS",
+        "DiscordOS",
+        "_stack",
+        "cortex",
+        "fawxzzy-fitness",
+        "foundation",
+        "lifeline",
+        "mazer",
+        "playbook",
+        "trove"
+      ],
+      "local_only_components": [
+        "stream"
+      ],
+      "remote_only_components": [
+        "cortex"
+      ],
+      "included_surfaces": [
+        "inventory",
+        "parity",
+        "branches",
+        "worktrees",
+        "pull_requests",
+        "issues",
+        "actions",
+        "releases",
+        "protection",
+        "rulesets",
+        "dependabot",
+        "secret_scanning",
+        "cleanup_candidates",
+        "discordos_projection_contracts"
+      ],
+      "excluded_mutations": [
+        "push",
+        "branch_delete",
+        "worktree_remove",
+        "pull_request_disposition",
+        "issue_disposition",
+        "workflow_rerun",
+        "release_create",
+        "protection_change",
+        "security_change",
+        "secret_rotation",
+        "git_history_remediation",
+        "deployment",
+        "discord_write",
+        "supabase_write",
+        "marker_change",
+        "percentage_change"
+      ]
+    },
+    "authority": {
+      "initiative_owner": "stack-root",
+      "inventory_authority": "Atlas root governance",
+      "event_normalization_authority": "_stack",
+      "projection_authority": "DiscordOS single writer after accepted event admission",
+      "owner_repository_authority": "each owner repository",
+      "push_authority": "parent supervisor after guarded review",
+      "production_authority": "explicit current-thread project-specific approval only",
+      "security_authority": "explicit operator authorization for containment, rotation, verification, alert handling, and any history decision",
+      "unknown_or_access_denied_evidence_policy": "Record the endpoint and state; never invent facts, zeroes, percentages, protection, security, or adoption."
+    },
+    "phases": [
+      {
+        "id": "phase-1-automated-inventory",
+        "title": "Automated inventory",
+        "objective": "Collect deterministic repository/component metadata with account, timestamp, freshness, endpoint state, and stable ordering.",
+        "acceptance_gate": "Two repeat collections produce schema-valid, semantically equivalent output except for declared volatile facts."
+      },
+      {
+        "id": "phase-2-parity-monitoring",
+        "title": "Parity monitoring",
+        "objective": "Correlate local HEAD/tracking refs, live cloud defaults, branches, and worktrees without implicit fetch or mutation.",
+        "acceptance_gate": "Every governed checkout has separate local-tracking and live-cloud parity facts or explicit not-applicable/unknown."
+      },
+      {
+        "id": "phase-3-actions-monitoring",
+        "title": "Actions monitoring",
+        "objective": "Project workflows, bounded run samples, failure families, owners, recurrence, and recovery receipts.",
+        "acceptance_gate": "Playbook and Fitness recovery queues close only on owner-side fix proof and fresh successful runs."
+      },
+      {
+        "id": "phase-4-pr-issue-hygiene",
+        "title": "PR and issue hygiene",
+        "objective": "Maintain evidence-backed disposition, stacked dependency, checks, mergeability, ownership, and terminal reconciliation.",
+        "acceptance_gate": "Every open item has one allowed disposition; terminal changes reconcile without automatic mutation."
+      },
+      {
+        "id": "phase-5-release-security-signals",
+        "title": "Release and security signals",
+        "objective": "Project release, protection/ruleset, Dependabot, and secret-scanning facts with endpoint-specific access states.",
+        "acceptance_gate": "Disabled, empty, denied, conflicting, and unknown remain distinct; every gap has an owner decision."
+      },
+      {
+        "id": "phase-6-governed-cleanup",
+        "title": "Governed cleanup",
+        "objective": "Recalculate branch/worktree candidates and execute only admitted retention classes with idempotent receipts.",
+        "acceptance_gate": "No cleanup occurs without fresh exclusions, explicit authority, pre/post evidence, and correlated receipts."
+      },
+      {
+        "id": "phase-7-discordos-projection",
+        "title": "DiscordOS projections",
+        "objective": "Emit accepted GitHub event families through _stack and project authorized board/Update state through DiscordOS.",
+        "acceptance_gate": "Idempotent events, event-specific formatting, single-writer enforcement, and readback are proven end to end."
+      }
+    ],
+    "acceptance_criteria": [
+      "The registry covers all ten fawxzzy repositories plus local-only Stream and remote-only Cortex with deterministic order and explicit unknown/access_denied states.",
+      "Local tracking parity and live cloud-default comparison remain separate and freshness-stamped.",
+      "Actions, open work, release, protection, rulesets, Dependabot, and secret scanning are projected without empty-as-healthy inference.",
+      "Remote branch and local worktree candidates remain separate, exclusion-aware, retention-aware, and non-mutating until admitted.",
+      "_stack emits correlated facts, Atlas preserves contracts/receipts/markers, and DiscordOS returns idempotent readback for authorized projections.",
+      "Vercel and Supabase evidence correlates to GitHub SHAs/runs without bypassing production, security, or live-data authority.",
+      "Opening and closing audits prove their own gates; historical closeouts do not substitute for current health."
+    ],
+    "dependencies": [
+      "Accepted and published opening audit and registry",
+      "Accepted opening marker audit",
+      "Stable repository/component identity mapping",
+      "_stack GitHub event and correlated receipt family",
+      "DiscordOS single-writer adapter and readback contract",
+      "Owner-side Playbook demo contract synchronization recovery",
+      "Owner-side Fitness CI recovery",
+      "Operator-authorized Fitness security containment, rotation, and verification",
+      "Cortex boundary decision",
+      "Stream remote decision"
+    ],
+    "risks": [
+      "Volatile branch, PR, workflow, and worktree state can invalidate cleanup evidence quickly.",
+      "Dependabot access_denied/disabled evidence may be mistaken for zero alerts.",
+      "Fitness's open Critical alert may be omitted or product work resumed prematurely.",
+      "Zero workflows or releases may be mislabeled as health.",
+      "Stale inventory or tracking refs may be treated as live parity.",
+      "Cross-plane correlation may accidentally expand mutation authority.",
+      "Owner-lane worktrees may be removed before retention is proven."
+    ],
+    "marker_mapping": {
+      "github_control_plane_integration": {
+        "lane": "GitHub Control-Plane Integration",
+        "candidate": true,
+        "percentage": null,
+        "measurement_units": [
+          {
+            "id": "repository_inventory",
+            "unit": "10/10 cloud repositories plus declared local-only and remote-only components freshness-stamped"
+          },
+          {
+            "id": "parity_projection",
+            "unit": "every governed checkout has local-tracking and live-cloud parity or explicit not-applicable evidence"
+          },
+          {
+            "id": "actions_projection",
+            "unit": "workflow inventory and bounded health samples with recovery ownership"
+          },
+          {
+            "id": "open_work_hygiene",
+            "unit": "every open PR and issue has an evidence-backed allowed disposition"
+          },
+          {
+            "id": "release_security_projection",
+            "unit": "release, protection, ruleset, Dependabot, and secret-scanning states visible or endpoint-specifically unknown"
+          },
+          {
+            "id": "cleanup_governance",
+            "unit": "remote branches and local worktrees classified with exclusions, retention, authority, and receipts"
+          },
+          {
+            "id": "stack_event_correlation",
+            "unit": "_stack emits idempotent GitHub facts correlated to Atlas receipts"
+          },
+          {
+            "id": "discordos_projection",
+            "unit": "authorized GitHub events project through DiscordOS with readback"
+          }
+        ],
+        "ratchet_rule": "Percentage remains null until an authorized marker audit accepts a deterministic denominator and completed units."
+      },
+      "atlas_full_system_re_evaluation": {
+        "lane": "Atlas Full-System Re-evaluation",
+        "opening_gate": {
+          "transition": "0_to_50",
+          "from": 0,
+          "to": 50,
+          "gate": "Move only after exhaustive opening-pass proof is accepted by the opening marker audit."
+        },
+        "closing_gate": {
+          "transition": "50_to_100",
+          "from": 50,
+          "to": 100,
+          "gate": "Move only after exhaustive closing-pass proof and closing marker audit acceptance."
+        },
+        "discovered_work_rule": "Every discovered work item becomes a separate named lane and never inflates the re-evaluation marker."
+      }
+    },
+    "resume_gates": {
+      "global": [
+        {
+          "id": "operational_preparation",
+          "status": "pending_external_proof",
+          "requirement": "Operational preparation must be accepted."
+        },
+        {
+          "id": "github_opening_evidence",
+          "status": "pending_parent_acceptance_and_publication",
+          "requirement": "Corrected GitHub opening evidence must be accepted and published."
+        },
+        {
+          "id": "opening_marker_audit",
+          "status": "pending",
+          "requirement": "The accepted opening marker audit must approve any marker movement or owner-lane resume."
+        }
+      ],
+      "owner_lanes": [
+        {
+          "lane": "Mazer",
+          "status": "paused",
+          "resume_action": "Resume its existing standing task",
+          "resume_only_after": [
+            "operational_preparation",
+            "github_opening_evidence",
+            "opening_marker_audit"
+          ]
+        },
+        {
+          "lane": "Fitness",
+          "status": "paused",
+          "resume_only_after": [
+            "operational_preparation",
+            "github_opening_evidence",
+            "opening_marker_audit",
+            "fitness_critical_containment_rotation_verification"
+          ]
+        }
+      ]
+    },
+    "security_blockers": [
+      {
+        "id": "fitness_critical_containment_rotation_verification",
+        "repository": "fawxzzy-fitness",
+        "severity": "Critical",
+        "alert": {
+          "number": 1,
+          "state": "open",
+          "severity": "Critical",
+          "secret_type": "supabase_service_key",
+          "secret_type_display_name": "Supabase Service Key",
+          "created_at": "2026-04-17T04:17:11Z",
+          "validity": "unknown",
+          "publicly_leaked": true,
+          "push_protection_bypassed": false,
+          "location": {
+            "commit": "410efe6e8fa9a30b1c56362455397dfbf51b1942",
+            "path": ".env.local",
+            "line": 5,
+            "blob": "aa72c0dfece4ae7ec991ebe6f4f5f58ade7561d1"
+          },
+          "url": "https://github.com/fawxzzy/fawxzzy-fitness/security/secret-scanning/1"
+        },
+        "requirement": "Explicit operator-authorized containment, rotation, and verification are required after global gates. Rotation is mandatory if the key is or was live. Git history remediation is a separate explicit decision and is not automatic.",
+        "product_resume_blocked": true,
+        "automatic_mutation": false
+      }
+    ],
+    "named_follow_up_lanes": [
+      {
+        "id": "lane-stack-inventory-lock-head-reconciliation",
+        "owner": "stack-root",
+        "reason": "ATLAS/_stack inventory and _stack lock head drift"
+      },
+      {
+        "id": "lane-playbook-demo-contract-synchronization",
+        "owner": "playbook",
+        "reason": "run 29185091723"
+      },
+      {
+        "id": "lane-fitness-atlas-contracts-loader",
+        "owner": "fawxzzy-fitness",
+        "reason": "run 29035579046"
+      },
+      {
+        "id": "lane-fitness-playbook-runtime-artifacts",
+        "owner": "fawxzzy-fitness",
+        "reason": "run 29035579017"
+      },
+      {
+        "id": "lane-fitness-dependency-security",
+        "owner": "fawxzzy-fitness",
+        "reason": "14 vulnerabilities and deprecated Next 14.2.5"
+      },
+      {
+        "id": "lane-fitness-critical-secret-containment",
+        "owner": "operator-security",
+        "reason": "Critical supabase_service_key alert"
+      },
+      {
+        "id": "lane-default-branch-governance",
+        "owner": "repository-owners",
+        "reason": "protection/ruleset gaps"
+      },
+      {
+        "id": "lane-dependabot-visibility",
+        "owner": "github-governance",
+        "reason": "access_denied/unknown alert counts"
+      },
+      {
+        "id": "lane-release-policy-and-evidence",
+        "owner": "repository-owners",
+        "reason": "no releases visible"
+      },
+      {
+        "id": "lane-remote-branch-cleanup-review",
+        "owner": "github-governance",
+        "reason": "merged candidate review; no deletion"
+      },
+      {
+        "id": "lane-local-worktree-retention-classification",
+        "owner": "owner-repositories",
+        "reason": "retention_class UNKNOWN"
+      },
+      {
+        "id": "lane-cortex-boundary-decision",
+        "owner": "stack-root",
+        "reason": "remote-only repository versus embedded subsystem"
+      },
+      {
+        "id": "lane-stream-remote-decision",
+        "owner": "stack-root",
+        "reason": "local-only repository"
+      },
+      {
+        "id": "lane-stack-github-event-contracts",
+        "owner": "_stack",
+        "reason": "facts/events/receipts"
+      },
+      {
+        "id": "lane-discordos-github-projections",
+        "owner": "DiscordOS",
+        "reason": "boards/Updates/readback"
+      }
+    ]
+  }
+}

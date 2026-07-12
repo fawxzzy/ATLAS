@@ -1,0 +1,3687 @@
+{
+  "schema_version": "atlas.github.control-plane.registry.v1",
+  "generated_at": "2026-07-12T10:58:57.680276Z",
+  "account": "fawxzzy",
+  "collection_window": {
+    "started_at": "2026-07-12T10:45:12.355703Z",
+    "completed_at": "2026-07-12T10:48:06.535706Z",
+    "targeted_ci_and_security_detail_completed_at": "2026-07-12T10:58:57.680276Z"
+  },
+  "access_context": {
+    "authenticated": true,
+    "account": "fawxzzy",
+    "account_type": "User",
+    "git_protocol": "https",
+    "github_cli_path": "local-only canonical installation; omitted from committed path contract",
+    "token_or_credential_material_included": false,
+    "mutation_performed": false
+  },
+  "repositories": [
+    {
+      "name": "ATLAS",
+      "logical_id": "stack",
+      "registry_reconciliation": {
+        "manifest": "governed",
+        "lock": "not_locked",
+        "inventory": "stale",
+        "inventory_observed_head": "0ce276b311adc6f069d4d76a23a8ae3276dc9c9b",
+        "lock_observed_head": null
+      },
+      "local": {
+        "path": ".",
+        "present": true,
+        "remote_url": "https://github.com/fawxzzy/ATLAS.git",
+        "branch": "main",
+        "head": "c31ff1070a3ee3f2864f23484d34aded2859fb39",
+        "upstream": "origin/main",
+        "upstream_parity": {
+          "basis": "local_tracking_ref_without_fetch",
+          "ahead": 0,
+          "behind": 0,
+          "status": "equal"
+        },
+        "dirty_count": 17,
+        "worktree_count": 4,
+        "cloud_default_parity": {
+          "basis": "live_github_compare_local_head_to_cloud_default",
+          "api_status": "identical",
+          "cloud_commits_ahead_of_local": 0,
+          "cloud_commits_behind_local": 0,
+          "status": "identical"
+        }
+      },
+      "cloud": {
+        "owner": "fawxzzy",
+        "url": "https://github.com/fawxzzy/ATLAS",
+        "remote_url": "https://github.com/fawxzzy/ATLAS.git",
+        "visibility": "public",
+        "archived": false,
+        "disabled": false,
+        "default_branch": "main",
+        "default_branch_head": "c31ff1070a3ee3f2864f23484d34aded2859fb39",
+        "branch_count": 52,
+        "protected_branch_count": 0,
+        "permissions": {
+          "admin": true,
+          "maintain": true,
+          "push": true,
+          "triage": true,
+          "pull": true
+        }
+      },
+      "open_work": {
+        "pull_requests": [
+          {
+            "number": 105,
+            "title": "Harden Fitness BrowserStack protected proof flow",
+            "url": "https://github.com/fawxzzy/ATLAS/pull/105",
+            "draft": true,
+            "head": "codex/atlas-browserstack-provider-capture",
+            "head_sha": "274fab0a3ed7cda865e33c93815e4f1102e16870",
+            "base": "main",
+            "author": "fawxzzy",
+            "created_at": "2026-06-30T17:58:00Z",
+            "updated_at": "2026-07-02T05:09:17Z",
+            "mergeable": false,
+            "mergeable_state": "dirty",
+            "checks": {
+              "status": "visible",
+              "total": 9,
+              "success": 2,
+              "failure": 1,
+              "skipped": 6,
+              "pending": 0
+            },
+            "disposition": "retain",
+            "disposition_basis": "Registered worktree and stacked PR #106 preserve active context; current checks include one failed atlas-qa-llel result, so review and recovery remain required."
+          },
+          {
+            "number": 106,
+            "title": "Stacked Mazer lock resync after BrowserStack proof branch",
+            "url": "https://github.com/fawxzzy/ATLAS/pull/106",
+            "draft": true,
+            "head": "codex/atlas-mazer-stack-lock-resync-20260701",
+            "head_sha": "cd76d04d5c408986cf976f318765c59db9d99a69",
+            "base": "codex/atlas-browserstack-provider-capture",
+            "author": "fawxzzy",
+            "created_at": "2026-07-01T22:32:08Z",
+            "updated_at": "2026-07-02T14:28:30Z",
+            "mergeable": true,
+            "mergeable_state": "clean",
+            "checks": {
+              "status": "visible",
+              "total": 3,
+              "success": 1,
+              "failure": 0,
+              "skipped": 2,
+              "pending": 0
+            },
+            "disposition": "retain",
+            "disposition_basis": "Draft stacked PR targets PR #105's head branch; its reported QA check passes, but the dependency must resolve first."
+          },
+          {
+            "number": 109,
+            "title": "Resync ATLAS after Mazer menu-generation updates",
+            "url": "https://github.com/fawxzzy/ATLAS/pull/109",
+            "draft": true,
+            "head": "codex/atlas-mazer-side-panel-title-resync-20260702",
+            "head_sha": "0985eacc2c1343b97f5dc8872836a787fe840253",
+            "base": "main",
+            "author": "fawxzzy",
+            "created_at": "2026-07-02T15:48:44Z",
+            "updated_at": "2026-07-02T16:50:43Z",
+            "mergeable": false,
+            "mergeable_state": "dirty",
+            "checks": {
+              "status": "visible",
+              "total": 3,
+              "success": 1,
+              "failure": 0,
+              "skipped": 2,
+              "pending": 0
+            },
+            "disposition": "review",
+            "disposition_basis": "Draft PR has a passing QA check but currently conflicts with main and has no registered worktree proving current ownership."
+          }
+        ],
+        "issues": [
+          {
+            "number": 49,
+            "title": "Dispatcher Wave 1: `_stack vercel-health` implementation + independent root marker lane",
+            "url": "https://github.com/fawxzzy/ATLAS/issues/49",
+            "author": "fawxzzy",
+            "created_at": "2026-05-31T03:37:21Z",
+            "updated_at": "2026-06-01T03:16:50Z",
+            "labels": [],
+            "disposition": "review",
+            "disposition_basis": "Open dispatcher implementation issue lacks current terminal proof or a proven active owner."
+          }
+        ]
+      },
+      "actions": {
+        "workflow_endpoint": {
+          "status": "visible",
+          "http_status": 200
+        },
+        "runs_endpoint": {
+          "status": "visible",
+          "http_status": 200
+        },
+        "workflow_count": 1,
+        "sample_limit": 20,
+        "sample_size": 20,
+        "sample_oldest_created_at": "2026-07-02T04:32:34Z",
+        "sample_newest_created_at": "2026-07-02T18:01:44Z",
+        "sample_conclusions": {
+          "success": 17,
+          "failure": 3,
+          "cancelled": 0,
+          "in_progress_or_no_conclusion": 0
+        },
+        "sample_health": "sample_mixed",
+        "latest_by_observed_workflow": [
+          {
+            "name": "ATLAS QA LLEL",
+            "run_id": 28611175319,
+            "run_number": 210,
+            "event": "pull_request",
+            "branch": "codex/atlas-mazer-procedural-title-resync-20260702",
+            "head": "0bd3ed4d5cc4e3535d8d89d580788db6d46fdcb1",
+            "status": "completed",
+            "conclusion": "success",
+            "created_at": "2026-07-02T18:01:44Z",
+            "url": "https://github.com/fawxzzy/ATLAS/actions/runs/28611175319"
+          }
+        ],
+        "recovery_queue": []
+      },
+      "cleanup": {
+        "merged_remote_branch_candidates": [
+          {
+            "branch": "codex/archive-normalization-closeout",
+            "head": "676751a50712e5ae7930a030a30dc284d8d4e22b",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 1660
+          },
+          {
+            "branch": "codex/atlas-owner-lane-separation-clean",
+            "head": "f88658a1f9146f98f134baba87cd303405082d97",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 288
+          },
+          {
+            "branch": "codex/atlas-platform-v1-contracts",
+            "head": "7e1f98904065c5eccf17e071496a68e48a2dd251",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 1747
+          },
+          {
+            "branch": "codex/atlas-qa-release-refresh-pr",
+            "head": "7d11cbeef72ede446dcce5b3d875ed25b96bed47",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 1707
+          },
+          {
+            "branch": "codex/cortex-admission-planning",
+            "head": "63e1fb40146464166fe697aa6ae44a82f5756b09",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 1648
+          },
+          {
+            "branch": "codex/cortex-ledger-wave5",
+            "head": "3f237045651522dee15aa2d8f97f5e48a7d3bdbc",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 1768
+          },
+          {
+            "branch": "codex/cortex-operator-surface-wave4",
+            "head": "7127bf57ee101ee8f59c44742a5adc6c38eeb7d5",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 1774
+          },
+          {
+            "branch": "codex/cortex-rail-seed-progression-r11",
+            "head": "df9341392c578a00addb6360fac9d7851c59849b",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 1765
+          },
+          {
+            "branch": "codex/cortex-rail-seed-progression-r13",
+            "head": "d5cbc0b1340f323ba13bc0a83312e002bdbe390d",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 1759
+          },
+          {
+            "branch": "codex/cortex-rail-seed-progression-r15",
+            "head": "e97996a6b24f0d8901446f348c0edb8ea3789732",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 1753
+          },
+          {
+            "branch": "codex/cortex-rail-seed-progression-r17",
+            "head": "2779dea37cb0b72de6dea908e6c05dcc3f254dec",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 1747
+          },
+          {
+            "branch": "codex/cortex-rail-seed-progression-r7",
+            "head": "fb7bc448b4706f5de416112ace75163b9404a2c7",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 1777
+          },
+          {
+            "branch": "codex/cortex-rail-seed-progression-r9",
+            "head": "c579f8a2a725ac7ad9eb830a8e560dc01552c8db",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 1771
+          },
+          {
+            "branch": "codex/cortex-receipt-interpretation-stack-consumption-wave10-clean",
+            "head": "fa404f220587bb4734b3255dd62b7a9374f06f9a",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 1728
+          },
+          {
+            "branch": "codex/cortex-stack-consumption-pilot-wave7",
+            "head": "9cc9070c5a722386dfd857b87f6b9de71360cfa0",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 1756
+          },
+          {
+            "branch": "codex/cortex-worker-prompt-contract-wave6",
+            "head": "ca7e3c71a39754e29f0effaf7b611e302d927e22",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 1762
+          },
+          {
+            "branch": "codex/discord-moderation-receipt-clean",
+            "head": "debc3f45ce21545bad80b8c8dfbfe613803206c8",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 1686
+          },
+          {
+            "branch": "codex/discord-update-workflow-memory",
+            "head": "a385024cf2d8065758af2c4ac194cad96048d700",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 1683
+          },
+          {
+            "branch": "codex/final-verta-closeout-self-lock",
+            "head": "15d4c2acd1725cd9414974113344247baf961230",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 1664
+          },
+          {
+            "branch": "codex/foundation-atlas-admission-alignment",
+            "head": "051cfe6e6da6e229269d213098d098a176b82083",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 1653
+          },
+          {
+            "branch": "codex/foundation-pnpm-protected-refresh",
+            "head": "3b9362d20e7ea07653446b1797202a8efb481124",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 1692
+          },
+          {
+            "branch": "codex/foundation-release-lock-refresh",
+            "head": "5b26857d1e076875d868980752c0dbaae5954454",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 1694
+          },
+          {
+            "branch": "codex/near-100-marker-closeout-selector-pass-1",
+            "head": "e44b4e0eec76c62f51f687154b9bf7d6f8dc2cc3",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 1086
+          },
+          {
+            "branch": "codex/playbook-release-lock-refresh",
+            "head": "7e808b4b43b3402c5f7c34bda7ee34431922655e",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 1703
+          },
+          {
+            "branch": "codex/pnpm-protected-refresh",
+            "head": "10d6b77901bb1bbbc96145ab475e4a7d8a2c5f96",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 1705
+          },
+          {
+            "branch": "codex/post-r20-cortex-artifact-normalization",
+            "head": "e0c32ded21cdb2cdc81df640bdc2fb6bad85be15",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 1720
+          },
+          {
+            "branch": "codex/preserve-automation-governance-tranche-2026-06-05",
+            "head": "d549abb0b42e47496977fc5f9db1d5ddd26477a2",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 1268
+          },
+          {
+            "branch": "codex/sparse-protected-stack-validation",
+            "head": "82fb59f2091d0948923918de0c91d0529454dd02",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 1699
+          },
+          {
+            "branch": "codex/stack-progression-checkpoint",
+            "head": "ce532ed6207cadafa5a44933e13b61b9e908bdf8",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 1650
+          },
+          {
+            "branch": "codex/validate-archive-registry-surfaces",
+            "head": "92d6f65be6c445c185b9c0bf21b02d3bb7babde7",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 1656
+          },
+          {
+            "branch": "codex/verta-absorption-closeout-checkpoint",
+            "head": "54e927ad24bfeba44c5bffe19d96685e8dbd3050",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 1669
+          },
+          {
+            "branch": "codex/verta-closeout-final-self-lock",
+            "head": "34626bb284180bd22ed747bb08fd0a66bd8b6ec6",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 1666
+          },
+          {
+            "branch": "codex/verta-derivative-absorption-phase-gates",
+            "head": "49511e51100ba0fa5c3bd136bd1e5d5eb9e20cca",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 1679
+          },
+          {
+            "branch": "codex/verta-gate-final-lock-refresh",
+            "head": "477edaa4d1a7dbf88636fb1f72c3f98c7c1670d3",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 1671
+          },
+          {
+            "branch": "codex/verta-gate-stack-lock-refresh",
+            "head": "017d9180b15d11a8b7516dd53ac5387a6edac7fb",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 1673
+          },
+          {
+            "branch": "codex/verta-lookup-stack-lock-refresh",
+            "head": "7db98d0d91554f23128c1f5ea63aa10540dd49d7",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 1675
+          },
+          {
+            "branch": "codex/verta-post-merge-stack-lock-refresh",
+            "head": "b052ec063aded2fc41f6cdae77cb5bc507400e95",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 1677
+          }
+        ],
+        "remote_branch_exclusion_counts": {
+          "default_branch": 1,
+          "active_pr_head": 3,
+          "protected_branch": 0,
+          "registered_or_preserved_worktree_branch": 0,
+          "not_fully_merged": 11,
+          "unresolved_comparison": 0
+        },
+        "local_worktree_candidates": [
+          {
+            "path": null,
+            "outside_atlas_root": true,
+            "external_locator": "external-worktree:b0r2",
+            "branch": "codex/atlas-vnext-wave1b0-r2-canonical-writer-proof-recovery",
+            "head": "b87ab5ed21312d36d8e256e62e0b95e124fed9e4",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": null,
+            "outside_atlas_root": true,
+            "external_locator": "external-worktree:pr108-ci-repro",
+            "branch": null,
+            "head": "05df178e07b0bdcc6d5b6b3505268df4985c275e",
+            "detached": true,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "tmp/atlas-browserstack-fix",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/atlas-browserstack-provider-capture",
+            "head": "274fab0a3ed7cda865e33c93815e4f1102e16870",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          }
+        ],
+        "automatic_cleanup_authorized": false
+      },
+      "protection": {
+        "default_branch": "main",
+        "aggregate_status": "not_protected",
+        "classic_branch_protection_endpoint": {
+          "status": "not_found",
+          "http_status": 404,
+          "meaning": "not_enabled_or_not_found"
+        },
+        "repository_rulesets_endpoint": {
+          "status": "visible",
+          "http_status": 200,
+          "visible_count": 0
+        },
+        "classic_details": null,
+        "conflict_semantics": "If endpoint results disagree, aggregate_status is conflicting; if either endpoint is access_denied or unresolved, aggregate_status is unknown. No false zero or missing response is treated as protection."
+      },
+      "release": {
+        "endpoint": {
+          "status": "visible",
+          "http_status": 200
+        },
+        "sample_limit": 20,
+        "sample_count": 0,
+        "latest": null,
+        "status": "none_visible"
+      },
+      "security": {
+        "dependabot": {
+          "security_updates_setting": "disabled",
+          "alerts_endpoint_status": "access_denied",
+          "http_status": 403,
+          "open_alert_count": null,
+          "note": "Endpoint-specific access_denied or unknown is not converted to zero alerts."
+        },
+        "secret_scanning": {
+          "setting": "enabled",
+          "push_protection_setting": "enabled",
+          "alerts_endpoint_status": "visible",
+          "http_status": 200,
+          "open_alert_count": 0,
+          "open_alerts": []
+        },
+        "resume_blocker": null
+      },
+      "unknowns": [
+        "Open Dependabot alert count is unknown because the endpoint returned access_denied (HTTP 403)."
+      ]
+    },
+    {
+      "name": "DiscordOS",
+      "logical_id": "discordos",
+      "registry_reconciliation": {
+        "manifest": "governed",
+        "lock": "current",
+        "inventory": "current",
+        "inventory_observed_head": "b173de1549f85cbde040aa6a7ddeba959c7dc524",
+        "lock_observed_head": "b173de1549f85cbde040aa6a7ddeba959c7dc524"
+      },
+      "local": {
+        "path": "repos/DiscordOS",
+        "present": true,
+        "remote_url": "https://github.com/fawxzzy/DiscordOS.git",
+        "branch": "codex/mazer-viewport-board-status",
+        "head": "b173de1549f85cbde040aa6a7ddeba959c7dc524",
+        "upstream": "origin/codex/mazer-viewport-board-status",
+        "upstream_parity": {
+          "basis": "local_tracking_ref_without_fetch",
+          "ahead": 0,
+          "behind": 0,
+          "status": "equal"
+        },
+        "dirty_count": 0,
+        "worktree_count": 12,
+        "cloud_default_parity": {
+          "basis": "live_github_compare_local_head_to_cloud_default",
+          "api_status": "diverged",
+          "cloud_commits_ahead_of_local": 12,
+          "cloud_commits_behind_local": 2,
+          "status": "diverged"
+        }
+      },
+      "cloud": {
+        "owner": "fawxzzy",
+        "url": "https://github.com/fawxzzy/DiscordOS",
+        "remote_url": "https://github.com/fawxzzy/DiscordOS.git",
+        "visibility": "public",
+        "archived": false,
+        "disabled": false,
+        "default_branch": "main",
+        "default_branch_head": "5a87166b001766ba40ba1d152824398f13788443",
+        "branch_count": 11,
+        "protected_branch_count": 0,
+        "permissions": {
+          "admin": true,
+          "maintain": true,
+          "push": true,
+          "triage": true,
+          "pull": true
+        }
+      },
+      "open_work": {
+        "pull_requests": [],
+        "issues": []
+      },
+      "actions": {
+        "workflow_endpoint": {
+          "status": "visible",
+          "http_status": 200
+        },
+        "runs_endpoint": {
+          "status": "visible",
+          "http_status": 200
+        },
+        "workflow_count": 2,
+        "sample_limit": 20,
+        "sample_size": 20,
+        "sample_oldest_created_at": "2026-07-11T08:07:56Z",
+        "sample_newest_created_at": "2026-07-12T10:09:55Z",
+        "sample_conclusions": {
+          "success": 20,
+          "failure": 0,
+          "cancelled": 0,
+          "in_progress_or_no_conclusion": 0
+        },
+        "sample_health": "sample_all_success",
+        "latest_by_observed_workflow": [
+          {
+            "name": "Discord Message Command Poll",
+            "run_id": 29188672931,
+            "run_number": 183,
+            "event": "schedule",
+            "branch": "main",
+            "head": "5a87166b001766ba40ba1d152824398f13788443",
+            "status": "completed",
+            "conclusion": "success",
+            "created_at": "2026-07-12T10:09:55Z",
+            "url": "https://github.com/fawxzzy/DiscordOS/actions/runs/29188672931"
+          }
+        ],
+        "recovery_queue": []
+      },
+      "cleanup": {
+        "merged_remote_branch_candidates": [
+          {
+            "branch": "codex/discordos-mazer-board-cards",
+            "head": "87f291f4eab60263b82a0c8790c64a7cd25ae5a0",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 13
+          },
+          {
+            "branch": "codex/message-command-poll-status",
+            "head": "76b699269b724070f548ca7841d36ec1505727f8",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 36
+          },
+          {
+            "branch": "codex/path-discipline-warning-slice-discordos",
+            "head": "f58432152d3a3d072c0f43d4d1b903d0bde9f133",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 179
+          }
+        ],
+        "remote_branch_exclusion_counts": {
+          "default_branch": 1,
+          "active_pr_head": 0,
+          "protected_branch": 0,
+          "registered_or_preserved_worktree_branch": 6,
+          "not_fully_merged": 1,
+          "unresolved_comparison": 0
+        },
+        "local_worktree_candidates": [
+          {
+            "path": "d",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/mazer-ai-corpus-board",
+            "head": "b1f852f33aea69a97734c9c16f06cca713279d8c",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "d2",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/mazer-ai-metric-board",
+            "head": "ce8998f60be471b593a93db97645ad80934b552c",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "d3",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/mazer-board-epic-reconciliation",
+            "head": "41455a3013315638030d59cea66bc061552815dd",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "d4",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/mazer-ui-evidence-board-update",
+            "head": "41fffe73b9ea07fa62ec67e10b14dc854028708a",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "d5",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/mazer-player-input-evidence",
+            "head": "6f9cd30e049c04f9bbb3dd43aa4cc8e8ee79aaa7",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "d6",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/mazer-play-loop-evidence",
+            "head": "69b8d95e52f9d0b17f39d744f56e7bcd89c4c2ad",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "d7",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/mazer-world-turn-evidence",
+            "head": "015b92afe5ce2f73b25d2c5cae80fe3e5ca1d234",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "runtime/w/d/d2r2",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/d2r2",
+            "head": "5a87166b001766ba40ba1d152824398f13788443",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "runtime/w/d/d2r2-2",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/d2r2-2",
+            "head": "5a87166b001766ba40ba1d152824398f13788443",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "runtime/w/d/d2r5",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/d2r5",
+            "head": "5a87166b001766ba40ba1d152824398f13788443",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "runtime/w/d/d2r6",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/d2r6",
+            "head": "5a87166b001766ba40ba1d152824398f13788443",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          }
+        ],
+        "automatic_cleanup_authorized": false
+      },
+      "protection": {
+        "default_branch": "main",
+        "aggregate_status": "not_protected",
+        "classic_branch_protection_endpoint": {
+          "status": "not_found",
+          "http_status": 404,
+          "meaning": "not_enabled_or_not_found"
+        },
+        "repository_rulesets_endpoint": {
+          "status": "visible",
+          "http_status": 200,
+          "visible_count": 0
+        },
+        "classic_details": null,
+        "conflict_semantics": "If endpoint results disagree, aggregate_status is conflicting; if either endpoint is access_denied or unresolved, aggregate_status is unknown. No false zero or missing response is treated as protection."
+      },
+      "release": {
+        "endpoint": {
+          "status": "visible",
+          "http_status": 200
+        },
+        "sample_limit": 20,
+        "sample_count": 0,
+        "latest": null,
+        "status": "none_visible"
+      },
+      "security": {
+        "dependabot": {
+          "security_updates_setting": "disabled",
+          "alerts_endpoint_status": "access_denied",
+          "http_status": 403,
+          "open_alert_count": null,
+          "note": "Endpoint-specific access_denied or unknown is not converted to zero alerts."
+        },
+        "secret_scanning": {
+          "setting": "enabled",
+          "push_protection_setting": "enabled",
+          "alerts_endpoint_status": "visible",
+          "http_status": 200,
+          "open_alert_count": 0,
+          "open_alerts": []
+        },
+        "resume_blocker": null
+      },
+      "unknowns": [
+        "Open Dependabot alert count is unknown because the endpoint returned access_denied (HTTP 403)."
+      ]
+    },
+    {
+      "name": "_stack",
+      "logical_id": "_stack",
+      "registry_reconciliation": {
+        "manifest": "governed",
+        "lock": "stale",
+        "inventory": "stale",
+        "inventory_observed_head": "2127af207370cacf8752fd4f13c6545ea49bb503",
+        "lock_observed_head": "2127af207370cacf8752fd4f13c6545ea49bb503"
+      },
+      "local": {
+        "path": "repos/_stack",
+        "present": true,
+        "remote_url": "https://github.com/fawxzzy/_stack.git",
+        "branch": "main",
+        "head": "5ea6b712b91a691689b619addb8f8ba649126661",
+        "upstream": "origin/main",
+        "upstream_parity": {
+          "basis": "local_tracking_ref_without_fetch",
+          "ahead": 0,
+          "behind": 0,
+          "status": "equal"
+        },
+        "dirty_count": 0,
+        "worktree_count": 40,
+        "cloud_default_parity": {
+          "basis": "live_github_compare_local_head_to_cloud_default",
+          "api_status": "identical",
+          "cloud_commits_ahead_of_local": 0,
+          "cloud_commits_behind_local": 0,
+          "status": "identical"
+        }
+      },
+      "cloud": {
+        "owner": "fawxzzy",
+        "url": "https://github.com/fawxzzy/_stack",
+        "remote_url": "https://github.com/fawxzzy/_stack.git",
+        "visibility": "public",
+        "archived": false,
+        "disabled": false,
+        "default_branch": "main",
+        "default_branch_head": "5ea6b712b91a691689b619addb8f8ba649126661",
+        "branch_count": 5,
+        "protected_branch_count": 0,
+        "permissions": {
+          "admin": true,
+          "maintain": true,
+          "push": true,
+          "triage": true,
+          "pull": true
+        }
+      },
+      "open_work": {
+        "pull_requests": [
+          {
+            "number": 1,
+            "title": "docs: reduce path discipline warning residue",
+            "url": "https://github.com/fawxzzy/_stack/pull/1",
+            "draft": true,
+            "head": "codex/path-discipline-warning-slice-stack-pub",
+            "head_sha": "6ebde947801ca6cbf9e15094d423d245028c2f99",
+            "base": "main",
+            "author": "fawxzzy",
+            "created_at": "2026-06-05T12:38:31Z",
+            "updated_at": "2026-06-05T12:38:31Z",
+            "mergeable": false,
+            "mergeable_state": "dirty",
+            "checks": {
+              "status": "visible",
+              "total": 0,
+              "success": 0,
+              "failure": 0,
+              "skipped": 0,
+              "pending": 0
+            },
+            "disposition": "review",
+            "disposition_basis": "Historical draft currently conflicts with main and has no checks; age alone does not prove supersession."
+          }
+        ],
+        "issues": []
+      },
+      "actions": {
+        "workflow_endpoint": {
+          "status": "visible",
+          "http_status": 200
+        },
+        "runs_endpoint": {
+          "status": "visible",
+          "http_status": 200
+        },
+        "workflow_count": 0,
+        "sample_limit": 20,
+        "sample_size": 0,
+        "sample_oldest_created_at": null,
+        "sample_newest_created_at": null,
+        "sample_conclusions": {
+          "success": 0,
+          "failure": 0,
+          "cancelled": 0,
+          "in_progress_or_no_conclusion": 0
+        },
+        "sample_health": "no_runs_visible",
+        "latest_by_observed_workflow": [],
+        "recovery_queue": []
+      },
+      "cleanup": {
+        "merged_remote_branch_candidates": [
+          {
+            "branch": "codex/preserve-stack-packaging-tranche-2026-06-05",
+            "head": "eb1f7c49e4e887e52b465b3fdf4d9ab25affbc57",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 26
+          }
+        ],
+        "remote_branch_exclusion_counts": {
+          "default_branch": 1,
+          "active_pr_head": 1,
+          "protected_branch": 0,
+          "registered_or_preserved_worktree_branch": 1,
+          "not_fully_merged": 1,
+          "unresolved_comparison": 0
+        },
+        "local_worktree_candidates": [
+          {
+            "path": "repos/_stack/.codex/worktrees/atlas-operational-prep-codex-cli-capability-convergence",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/atlas-operational-prep-codex-cli-capability-convergence",
+            "head": "c2afaafe4f73c678cc4d467af090fefd0766f193",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "repos/_stack/.codex/worktrees/atlas-operational-prep-codex-cli-capability-convergence-r2",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/atlas-operational-prep-codex-cli-capability-convergence-r2",
+            "head": "c2afaafe4f73c678cc4d467af090fefd0766f193",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "repos/_stack/.codex/worktrees/atlas-operational-prep-codex-cli-capability-convergence-r3",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/atlas-operational-prep-codex-cli-capability-convergence-r3",
+            "head": "c2afaafe4f73c678cc4d467af090fefd0766f193",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "repos/_stack/.codex/worktrees/atlas-operational-prep-codex-cli-capability-convergence-r4",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/atlas-operational-prep-codex-cli-capability-convergence-r4",
+            "head": "c2afaafe4f73c678cc4d467af090fefd0766f193",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "repos/_stack/.codex/worktrees/atlas-operational-prep-codex-cli-capability-convergence-r5",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/atlas-operational-prep-codex-cli-capability-convergence-r5",
+            "head": "6e96d1571121a30c668b5c6f9d283ca316912126",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "repos/_stack/.codex/worktrees/atlas-operational-prep-d0-r1-discordos-owner-adapter",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/atlas-operational-prep-d0-r1-discordos-owner-adapter",
+            "head": "2127af207370cacf8752fd4f13c6545ea49bb503",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "repos/_stack/.codex/worktrees/atlas-operational-prep-d0-s0-worktree-safe-brand-verifier",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/atlas-operational-prep-d0-s0-worktree-safe-brand-verifier",
+            "head": "0b91367158f09ca3ea007752678142cde9fb7653",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "repos/_stack/.codex/worktrees/atlas-operational-prep-d0-s1-r1-scoped-brand-proof-recovery",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/atlas-operational-prep-d0-s1-r1-scoped-brand-proof-recovery",
+            "head": "1c063d53f263382b2dda6b5629b993d7e534d02e",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "repos/_stack/.codex/worktrees/atlas-operational-prep-d0-s1-scoped-brand-verification-recovery",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/atlas-operational-prep-d0-s1-scoped-brand-verification-recovery",
+            "head": "0b91367158f09ca3ea007752678142cde9fb7653",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "repos/_stack/.codex/worktrees/atlas-operational-prep-d2-r0-stack-discordos-runtime-receipt-repair",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/atlas-operational-prep-d2-r0-stack-discordos-runtime-receipt-repair",
+            "head": "baef0dab99eacc98a8037be6df9b5af009a26a0b",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "repos/_stack/.codex/worktrees/atlas-operational-prep-d2-r2-stack-worktree-path-budget",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/atlas-operational-prep-d2-r2-stack-worktree-path-budget",
+            "head": "9504224ee5ae99c3b0f6f39c9b3c961a4562204b",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "repos/_stack/.codex/worktrees/atlas-operational-prep-d2-r3-stack-permission-precedence-repair",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/atlas-operational-prep-d2-r3-stack-permission-precedence-repair",
+            "head": "d1fdae5c7d0a3482f0d53ac51f90dd024f418ebc",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "repos/_stack/.codex/worktrees/atlas-operational-prep-d2-r4-stack-verified-no-change-contract",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/atlas-operational-prep-d2-r4-stack-verified-no-change-contract",
+            "head": "5ea6b712b91a691689b619addb8f8ba649126661",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "repos/_stack/.codex/worktrees/atlas-operational-prep-packet-c0-r1-owner-path-verifier-recovery",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/atlas-operational-prep-packet-c0-r1-owner-path-verifier-recovery",
+            "head": "6e96d1571121a30c668b5c6f9d283ca316912126",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "repos/_stack/.codex/worktrees/atlas-operational-prep-packet-c0-r2-diff-addressable-proof-recovery",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/atlas-operational-prep-packet-c0-r2-diff-addressable-proof-recovery",
+            "head": "a7cf3ab4632a12a61150beee0fa97f90221b2dc5",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "repos/_stack/.codex/worktrees/atlas-operational-prep-packet-c0-stack-owner-path-truth",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/atlas-operational-prep-packet-c0-stack-owner-path-truth",
+            "head": "6e96d1571121a30c668b5c6f9d283ca316912126",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "repos/_stack/.codex/worktrees/atlas-operational-prep-packet-c1-r1-stack-playbook-adoption-recovery",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/atlas-operational-prep-packet-c1-r1-stack-playbook-adoption-recovery",
+            "head": "0b91367158f09ca3ea007752678142cde9fb7653",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "repos/_stack/.codex/worktrees/atlas-operational-prep-packet-c1-s0-stack-playbook-evidence-admission",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/atlas-operational-prep-packet-c1-s0-stack-playbook-evidence-admission",
+            "head": "2446bfc2513fe509e88e6a8f84c77079696875fd",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "repos/_stack/.codex/worktrees/atlas-operational-prep-packet-c1-stack-playbook-adoption",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/atlas-operational-prep-packet-c1-stack-playbook-adoption",
+            "head": "a7cf3ab4632a12a61150beee0fa97f90221b2dc5",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "repos/_stack/.codex/worktrees/atlas-operational-prep-packet-d0-discordos-owner-adapter",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/atlas-operational-prep-packet-d0-discordos-owner-adapter",
+            "head": "0b91367158f09ca3ea007752678142cde9fb7653",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "repos/_stack/.codex/worktrees/atlas-vnext-wave1a-r1-stack-runtime-salvage",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/atlas-vnext-wave1a-r1-stack-runtime-salvage",
+            "head": "fc9ec24ab3e37e4bc651342dbd0b765cda680b38",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "repos/_stack/.codex/worktrees/atlas-vnext-wave1a-stack-runtime-bootstrap",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/atlas-vnext-wave1a-stack-runtime-bootstrap",
+            "head": "7ca8a81acb71c935adabd345dff3e3bcbbedba7c",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "repos/_stack/.codex/worktrees/atlas-vnext-wave1a-stack-runtime-bootstrap-2",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/atlas-vnext-wave1a-stack-runtime-bootstrap-2",
+            "head": "7ca8a81acb71c935adabd345dff3e3bcbbedba7c",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "repos/_stack/.codex/worktrees/atlas-vnext-wave1a-stack-runtime-bootstrap-3",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/atlas-vnext-wave1a-stack-runtime-bootstrap-3",
+            "head": "7ca8a81acb71c935adabd345dff3e3bcbbedba7c",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "repos/_stack/.codex/worktrees/atlas-vnext-wave1b0-canonical-workspace-writer",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/atlas-vnext-wave1b0-canonical-workspace-writer",
+            "head": "fc9ec24ab3e37e4bc651342dbd0b765cda680b38",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "repos/_stack/.codex/worktrees/atlas-vnext-wave1b0-canonical-workspace-writer-2",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/atlas-vnext-wave1b0-canonical-workspace-writer-2",
+            "head": "fc9ec24ab3e37e4bc651342dbd0b765cda680b38",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "repos/_stack/.codex/worktrees/atlas-vnext-wave1b0-canonical-workspace-writer-3",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/atlas-vnext-wave1b0-canonical-workspace-writer-3",
+            "head": "fc9ec24ab3e37e4bc651342dbd0b765cda680b38",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "repos/_stack/.codex/worktrees/atlas-vnext-wave1b0-r2-canonical-writer-proof-recovery",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/atlas-vnext-wave1b0-r2-canonical-writer-proof-recovery",
+            "head": "fc9ec24ab3e37e4bc651342dbd0b765cda680b38",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "repos/_stack/.codex/worktrees/atlas-vnext-wave1b0-r3-canonical-writer-recovery",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/atlas-vnext-wave1b0-r3-canonical-writer-recovery",
+            "head": "93821b1924755eb59acae118e009865ccf469fe7",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "repos/_stack/.codex/worktrees/atlas-vnext-wave1b0-r4-canonical-writer-recovery",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/atlas-vnext-wave1b0-r4-canonical-writer-recovery",
+            "head": "dc405b30251672c388e78baca43274c97feee897",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "repos/_stack/.codex/worktrees/atlas-vnext-wave1b1-r2-canonical-directory-digest-fix",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/atlas-vnext-wave1b1-r2-canonical-directory-digest-fix",
+            "head": "dc405b30251672c388e78baca43274c97feee897",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "repos/_stack/.codex/worktrees/atlas-vnext-wave1b1-r3-canonical-directory-digest-recovery",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/atlas-vnext-wave1b1-r3-canonical-directory-digest-recovery",
+            "head": "32c55a5eefe4ebe983b2f65f68aa795a55ecf1ab",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "repos/_stack/.codex/worktrees/atlas-vnext-wave1b1-r4-canonical-executable-resolution-fix",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/atlas-vnext-wave1b1-r4-canonical-executable-resolution-fix",
+            "head": "32c55a5eefe4ebe983b2f65f68aa795a55ecf1ab",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "repos/_stack/.codex/worktrees/atlas-vnext-wave1b1-r5-canonical-executable-resolution-recovery",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/atlas-vnext-wave1b1-r5-canonical-executable-resolution-recovery",
+            "head": "038871832df78642016356ecd191b78f970a2bf5",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "repos/_stack/.codex/worktrees/atlas-vnext-wave1b1-r6-registered-owner-worktree-preservation",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/atlas-vnext-wave1b1-r6-registered-owner-worktree-preservation",
+            "head": "038871832df78642016356ecd191b78f970a2bf5",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "repos/_stack/.codex/worktrees/atlas-vnext-wave1b1-r7-registered-owner-worktree-proof-recovery",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/atlas-vnext-wave1b1-r7-registered-owner-worktree-proof-recovery",
+            "head": "038871832df78642016356ecd191b78f970a2bf5",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "repos/_stack/.codex/worktrees/atlas-vnext-wave1b1-r8-registered-owner-worktree-network-recovery",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/atlas-vnext-wave1b1-r8-registered-owner-worktree-network-recovery",
+            "head": "038871832df78642016356ecd191b78f970a2bf5",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "repos/_stack/.codex/worktrees/atlas-vnext-wave1b1-r9-registered-owner-worktree-supported-model-recovery",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/atlas-vnext-wave1b1-r9-registered-owner-worktree-supported-model-recovery",
+            "head": "c2afaafe4f73c678cc4d467af090fefd0766f193",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "tmp/_stack-mazer-operator-fix",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/mazer-operator-path-fix-clean",
+            "head": "a899a13ee45ab5bf248946f33c65e9a9c12c1774",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          }
+        ],
+        "automatic_cleanup_authorized": false
+      },
+      "protection": {
+        "default_branch": "main",
+        "aggregate_status": "not_protected",
+        "classic_branch_protection_endpoint": {
+          "status": "not_found",
+          "http_status": 404,
+          "meaning": "not_enabled_or_not_found"
+        },
+        "repository_rulesets_endpoint": {
+          "status": "visible",
+          "http_status": 200,
+          "visible_count": 0
+        },
+        "classic_details": null,
+        "conflict_semantics": "If endpoint results disagree, aggregate_status is conflicting; if either endpoint is access_denied or unresolved, aggregate_status is unknown. No false zero or missing response is treated as protection."
+      },
+      "release": {
+        "endpoint": {
+          "status": "visible",
+          "http_status": 200
+        },
+        "sample_limit": 20,
+        "sample_count": 0,
+        "latest": null,
+        "status": "none_visible"
+      },
+      "security": {
+        "dependabot": {
+          "security_updates_setting": "disabled",
+          "alerts_endpoint_status": "access_denied",
+          "http_status": 403,
+          "open_alert_count": null,
+          "note": "Endpoint-specific access_denied or unknown is not converted to zero alerts."
+        },
+        "secret_scanning": {
+          "setting": "enabled",
+          "push_protection_setting": "enabled",
+          "alerts_endpoint_status": "visible",
+          "http_status": 200,
+          "open_alert_count": 0,
+          "open_alerts": []
+        },
+        "resume_blocker": null
+      },
+      "unknowns": [
+        "Open Dependabot alert count is unknown because the endpoint returned access_denied (HTTP 403)."
+      ]
+    },
+    {
+      "name": "cortex",
+      "logical_id": "cortex",
+      "registry_reconciliation": {
+        "manifest": "remote_only_subsystem_boundary",
+        "lock": "not_locked",
+        "inventory": "not_applicable_remote_only",
+        "inventory_observed_head": null,
+        "lock_observed_head": null
+      },
+      "local": {
+        "path": null,
+        "present": false,
+        "remote_url": null,
+        "branch": null,
+        "head": null,
+        "upstream": null,
+        "upstream_parity": {
+          "basis": "local_tracking_ref_without_fetch",
+          "ahead": null,
+          "behind": null,
+          "status": "unknown"
+        },
+        "dirty_count": null,
+        "worktree_count": 0,
+        "cloud_default_parity": {
+          "basis": "live_github_compare_local_head_to_cloud_default",
+          "api_status": null,
+          "cloud_commits_ahead_of_local": null,
+          "cloud_commits_behind_local": null,
+          "status": "unknown"
+        }
+      },
+      "cloud": {
+        "owner": "fawxzzy",
+        "url": "https://github.com/fawxzzy/cortex",
+        "remote_url": "https://github.com/fawxzzy/cortex.git",
+        "visibility": "public",
+        "archived": false,
+        "disabled": false,
+        "default_branch": "main",
+        "default_branch_head": "495808fde487b3bdca2de283ff53f748b0b84630",
+        "branch_count": 1,
+        "protected_branch_count": 0,
+        "permissions": {
+          "admin": true,
+          "maintain": true,
+          "push": true,
+          "triage": true,
+          "pull": true
+        }
+      },
+      "open_work": {
+        "pull_requests": [],
+        "issues": []
+      },
+      "actions": {
+        "workflow_endpoint": {
+          "status": "visible",
+          "http_status": 200
+        },
+        "runs_endpoint": {
+          "status": "visible",
+          "http_status": 200
+        },
+        "workflow_count": 0,
+        "sample_limit": 20,
+        "sample_size": 0,
+        "sample_oldest_created_at": null,
+        "sample_newest_created_at": null,
+        "sample_conclusions": {
+          "success": 0,
+          "failure": 0,
+          "cancelled": 0,
+          "in_progress_or_no_conclusion": 0
+        },
+        "sample_health": "no_runs_visible",
+        "latest_by_observed_workflow": [],
+        "recovery_queue": []
+      },
+      "cleanup": {
+        "merged_remote_branch_candidates": [],
+        "remote_branch_exclusion_counts": {
+          "default_branch": 1,
+          "active_pr_head": 0,
+          "protected_branch": 0,
+          "registered_or_preserved_worktree_branch": 0,
+          "not_fully_merged": 0,
+          "unresolved_comparison": 0
+        },
+        "local_worktree_candidates": [],
+        "automatic_cleanup_authorized": false
+      },
+      "protection": {
+        "default_branch": "main",
+        "aggregate_status": "not_protected",
+        "classic_branch_protection_endpoint": {
+          "status": "not_found",
+          "http_status": 404,
+          "meaning": "not_enabled_or_not_found"
+        },
+        "repository_rulesets_endpoint": {
+          "status": "visible",
+          "http_status": 200,
+          "visible_count": 0
+        },
+        "classic_details": null,
+        "conflict_semantics": "If endpoint results disagree, aggregate_status is conflicting; if either endpoint is access_denied or unresolved, aggregate_status is unknown. No false zero or missing response is treated as protection."
+      },
+      "release": {
+        "endpoint": {
+          "status": "visible",
+          "http_status": 200
+        },
+        "sample_limit": 20,
+        "sample_count": 0,
+        "latest": null,
+        "status": "none_visible"
+      },
+      "security": {
+        "dependabot": {
+          "security_updates_setting": "disabled",
+          "alerts_endpoint_status": "access_denied",
+          "http_status": 403,
+          "open_alert_count": null,
+          "note": "Endpoint-specific access_denied or unknown is not converted to zero alerts."
+        },
+        "secret_scanning": {
+          "setting": "enabled",
+          "push_protection_setting": "enabled",
+          "alerts_endpoint_status": "visible",
+          "http_status": 200,
+          "open_alert_count": 0,
+          "open_alerts": []
+        },
+        "resume_blocker": null
+      },
+      "unknowns": [
+        "Open Dependabot alert count is unknown because the endpoint returned access_denied (HTTP 403).",
+        "Remote Cortex adoption is unresolved; runtime/cortex is an embedded root-owned subsystem, not this repository's checkout."
+      ]
+    },
+    {
+      "name": "fawxzzy-fitness",
+      "logical_id": "fitness",
+      "registry_reconciliation": {
+        "manifest": "governed",
+        "lock": "not_locked",
+        "inventory": "current",
+        "inventory_observed_head": "e1ab7fbea979456380230c5459fdef6ae4c927e9",
+        "lock_observed_head": null
+      },
+      "local": {
+        "path": "repos/fawxzzy-fitness",
+        "present": true,
+        "remote_url": "https://github.com/fawxzzy/fawxzzy-fitness.git",
+        "branch": "main",
+        "head": "e1ab7fbea979456380230c5459fdef6ae4c927e9",
+        "upstream": "origin/main",
+        "upstream_parity": {
+          "basis": "local_tracking_ref_without_fetch",
+          "ahead": 0,
+          "behind": 0,
+          "status": "equal"
+        },
+        "dirty_count": 34,
+        "worktree_count": 2,
+        "cloud_default_parity": {
+          "basis": "live_github_compare_local_head_to_cloud_default",
+          "api_status": "identical",
+          "cloud_commits_ahead_of_local": 0,
+          "cloud_commits_behind_local": 0,
+          "status": "identical"
+        }
+      },
+      "cloud": {
+        "owner": "fawxzzy",
+        "url": "https://github.com/fawxzzy/fawxzzy-fitness",
+        "remote_url": "https://github.com/fawxzzy/fawxzzy-fitness.git",
+        "visibility": "public",
+        "archived": false,
+        "disabled": false,
+        "default_branch": "main",
+        "default_branch_head": "e1ab7fbea979456380230c5459fdef6ae4c927e9",
+        "branch_count": 6,
+        "protected_branch_count": 0,
+        "permissions": {
+          "admin": true,
+          "maintain": true,
+          "push": true,
+          "triage": true,
+          "pull": true
+        }
+      },
+      "open_work": {
+        "pull_requests": [],
+        "issues": []
+      },
+      "actions": {
+        "workflow_endpoint": {
+          "status": "visible",
+          "http_status": 200
+        },
+        "runs_endpoint": {
+          "status": "visible",
+          "http_status": 200
+        },
+        "workflow_count": 5,
+        "sample_limit": 20,
+        "sample_size": 20,
+        "sample_oldest_created_at": "2026-07-02T03:46:05Z",
+        "sample_newest_created_at": "2026-07-09T17:01:53Z",
+        "sample_conclusions": {
+          "success": 0,
+          "failure": 20,
+          "cancelled": 0,
+          "in_progress_or_no_conclusion": 0
+        },
+        "sample_health": "sample_mixed",
+        "latest_by_observed_workflow": [
+          {
+            "name": "CI",
+            "run_id": 29035579017,
+            "run_number": 380,
+            "event": "push",
+            "branch": "main",
+            "head": "e1ab7fbea979456380230c5459fdef6ae4c927e9",
+            "status": "completed",
+            "conclusion": "failure",
+            "created_at": "2026-07-09T17:01:53Z",
+            "url": "https://github.com/fawxzzy/fawxzzy-fitness/actions/runs/29035579017"
+          },
+          {
+            "name": "atlas-contracts",
+            "run_id": 29035579046,
+            "run_number": 89,
+            "event": "push",
+            "branch": "main",
+            "head": "e1ab7fbea979456380230c5459fdef6ae4c927e9",
+            "status": "completed",
+            "conclusion": "failure",
+            "created_at": "2026-07-09T17:01:53Z",
+            "url": "https://github.com/fawxzzy/fawxzzy-fitness/actions/runs/29035579046"
+          },
+          {
+            "name": "fitness-event-contracts",
+            "run_id": 29033528940,
+            "run_number": 75,
+            "event": "push",
+            "branch": "main",
+            "head": "70f21e96ebdb7116d2427120a82beedf2b03208d",
+            "status": "completed",
+            "conclusion": "failure",
+            "created_at": "2026-07-09T16:28:26Z",
+            "url": "https://github.com/fawxzzy/fawxzzy-fitness/actions/runs/29033528940"
+          }
+        ],
+        "recovery_queue": [
+          {
+            "id": "fitness-atlas-contracts-typescript-loader",
+            "run_id": 29035579046,
+            "workflow": "atlas-contracts",
+            "branch": "main",
+            "head": "e1ab7fbea979456380230c5459fdef6ae4c927e9",
+            "url": "https://github.com/fawxzzy/fawxzzy-fitness/actions/runs/29035579046",
+            "failure": "test:atlas-contracts fails with ERR_UNKNOWN_FILE_EXTENSION for src/lib/atlas-contracts.test.ts."
+          },
+          {
+            "id": "fitness-playbook-runtime-artifacts",
+            "run_id": 29035579017,
+            "workflow": "CI",
+            "branch": "main",
+            "head": "e1ab7fbea979456380230c5459fdef6ae4c927e9",
+            "url": "https://github.com/fawxzzy/fawxzzy-fitness/actions/runs/29035579017",
+            "passing_scope": [
+              "lint",
+              "build",
+              "large-file verification"
+            ],
+            "failure": "Playbook clean-environment validation fails because required runtime artifacts are not written under .playbook/."
+          },
+          {
+            "id": "fitness-dependency-security",
+            "source_run_id": 29035579017,
+            "classification": "dependency/security",
+            "finding": "Install reports 14 vulnerabilities: 3 moderate, 10 high, and 1 critical, plus a deprecated Next 14.2.5 warning.",
+            "automatic_mutation": false
+          }
+        ]
+      },
+      "cleanup": {
+        "merged_remote_branch_candidates": [
+          {
+            "branch": "codex/fitness-main-progression-summary-reapply",
+            "head": "fa30c13d18a8b72c8d8ebd6cdeb9990610dc04a2",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 40
+          },
+          {
+            "branch": "codex/per-day-exercise-templates",
+            "head": "6d75c1814d670e146e2c3cd8a2e3f20c3de33fbf",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 96
+          }
+        ],
+        "remote_branch_exclusion_counts": {
+          "default_branch": 1,
+          "active_pr_head": 0,
+          "protected_branch": 0,
+          "registered_or_preserved_worktree_branch": 0,
+          "not_fully_merged": 3,
+          "unresolved_comparison": 0
+        },
+        "local_worktree_candidates": [
+          {
+            "path": "tmp/fawxzzy-fitness-discord-hotfix",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/discord-message-command-recovery",
+            "head": "81919c7512262d12825ee3597289b6d4abc8e49d",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          }
+        ],
+        "automatic_cleanup_authorized": false
+      },
+      "protection": {
+        "default_branch": "main",
+        "aggregate_status": "not_protected",
+        "classic_branch_protection_endpoint": {
+          "status": "not_found",
+          "http_status": 404,
+          "meaning": "not_enabled_or_not_found"
+        },
+        "repository_rulesets_endpoint": {
+          "status": "visible",
+          "http_status": 200,
+          "visible_count": 0
+        },
+        "classic_details": null,
+        "conflict_semantics": "If endpoint results disagree, aggregate_status is conflicting; if either endpoint is access_denied or unresolved, aggregate_status is unknown. No false zero or missing response is treated as protection."
+      },
+      "release": {
+        "endpoint": {
+          "status": "visible",
+          "http_status": 200
+        },
+        "sample_limit": 20,
+        "sample_count": 0,
+        "latest": null,
+        "status": "none_visible"
+      },
+      "security": {
+        "dependabot": {
+          "security_updates_setting": "disabled",
+          "alerts_endpoint_status": "access_denied",
+          "http_status": 403,
+          "open_alert_count": null,
+          "note": "Endpoint-specific access_denied or unknown is not converted to zero alerts."
+        },
+        "secret_scanning": {
+          "setting": "enabled",
+          "push_protection_setting": "enabled",
+          "alerts_endpoint_status": "visible",
+          "http_status": 200,
+          "open_alert_count": 1,
+          "open_alerts": [
+            {
+              "number": 1,
+              "state": "open",
+              "severity": "Critical",
+              "secret_type": "supabase_service_key",
+              "secret_type_display_name": "Supabase Service Key",
+              "created_at": "2026-04-17T04:17:11Z",
+              "validity": "unknown",
+              "publicly_leaked": true,
+              "push_protection_bypassed": false,
+              "location": {
+                "commit": "410efe6e8fa9a30b1c56362455397dfbf51b1942",
+                "path": ".env.local",
+                "line": 5,
+                "blob": "aa72c0dfece4ae7ec991ebe6f4f5f58ade7561d1"
+              },
+              "url": "https://github.com/fawxzzy/fawxzzy-fitness/security/secret-scanning/1"
+            }
+          ]
+        },
+        "resume_blocker": "Fitness product work remains blocked after global opening gates until explicit operator-authorized containment, rotation, and verification. Rotation is mandatory if the key is or was live. Git history remediation is a separate explicit decision and is not automatic."
+      },
+      "unknowns": [
+        "Open Dependabot alert count is unknown because the endpoint returned access_denied (HTTP 403).",
+        "The open Supabase Service Key alert validity is unknown; no containment, rotation, history, or alert mutation was performed."
+      ]
+    },
+    {
+      "name": "foundation",
+      "logical_id": "foundation",
+      "registry_reconciliation": {
+        "manifest": "governed",
+        "lock": "current",
+        "inventory": "current",
+        "inventory_observed_head": "5cedd6234755be3d637abc33572b905dce3b8f7c",
+        "lock_observed_head": "5cedd6234755be3d637abc33572b905dce3b8f7c"
+      },
+      "local": {
+        "path": "repos/foundation",
+        "present": true,
+        "remote_url": "https://github.com/fawxzzy/foundation.git",
+        "branch": "main",
+        "head": "5cedd6234755be3d637abc33572b905dce3b8f7c",
+        "upstream": "origin/main",
+        "upstream_parity": {
+          "basis": "local_tracking_ref_without_fetch",
+          "ahead": 0,
+          "behind": 0,
+          "status": "equal"
+        },
+        "dirty_count": 0,
+        "worktree_count": 1,
+        "cloud_default_parity": {
+          "basis": "live_github_compare_local_head_to_cloud_default",
+          "api_status": "identical",
+          "cloud_commits_ahead_of_local": 0,
+          "cloud_commits_behind_local": 0,
+          "status": "identical"
+        }
+      },
+      "cloud": {
+        "owner": "fawxzzy",
+        "url": "https://github.com/fawxzzy/foundation",
+        "remote_url": "https://github.com/fawxzzy/foundation.git",
+        "visibility": "public",
+        "archived": false,
+        "disabled": false,
+        "default_branch": "main",
+        "default_branch_head": "5cedd6234755be3d637abc33572b905dce3b8f7c",
+        "branch_count": 4,
+        "protected_branch_count": 0,
+        "permissions": {
+          "admin": true,
+          "maintain": true,
+          "push": true,
+          "triage": true,
+          "pull": true
+        }
+      },
+      "open_work": {
+        "pull_requests": [],
+        "issues": []
+      },
+      "actions": {
+        "workflow_endpoint": {
+          "status": "visible",
+          "http_status": 200
+        },
+        "runs_endpoint": {
+          "status": "visible",
+          "http_status": 200
+        },
+        "workflow_count": 1,
+        "sample_limit": 20,
+        "sample_size": 20,
+        "sample_oldest_created_at": "2026-05-04T04:43:34Z",
+        "sample_newest_created_at": "2026-07-10T09:46:00Z",
+        "sample_conclusions": {
+          "success": 20,
+          "failure": 0,
+          "cancelled": 0,
+          "in_progress_or_no_conclusion": 0
+        },
+        "sample_health": "sample_all_success",
+        "latest_by_observed_workflow": [
+          {
+            "name": "Foundation CI",
+            "run_id": 29084137414,
+            "run_number": 41,
+            "event": "push",
+            "branch": "main",
+            "head": "5cedd6234755be3d637abc33572b905dce3b8f7c",
+            "status": "completed",
+            "conclusion": "success",
+            "created_at": "2026-07-10T09:46:00Z",
+            "url": "https://github.com/fawxzzy/foundation/actions/runs/29084137414"
+          }
+        ],
+        "recovery_queue": []
+      },
+      "cleanup": {
+        "merged_remote_branch_candidates": [
+          {
+            "branch": "codex/wave-2a-2-proof",
+            "head": "ad78ea472a902a6fca7da8b55952f88d718a60e9",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 7
+          },
+          {
+            "branch": "codex/wave-2a-3-proof",
+            "head": "2f7f22bf84968508357ea55c626d68e2580be833",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 6
+          },
+          {
+            "branch": "codex/wave-2a-4-proof",
+            "head": "36ac2970c77160c4e7efdcc881eb3b53f3b3182f",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 5
+          }
+        ],
+        "remote_branch_exclusion_counts": {
+          "default_branch": 1,
+          "active_pr_head": 0,
+          "protected_branch": 0,
+          "registered_or_preserved_worktree_branch": 0,
+          "not_fully_merged": 0,
+          "unresolved_comparison": 0
+        },
+        "local_worktree_candidates": [],
+        "automatic_cleanup_authorized": false
+      },
+      "protection": {
+        "default_branch": "main",
+        "aggregate_status": "not_protected",
+        "classic_branch_protection_endpoint": {
+          "status": "not_found",
+          "http_status": 404,
+          "meaning": "not_enabled_or_not_found"
+        },
+        "repository_rulesets_endpoint": {
+          "status": "visible",
+          "http_status": 200,
+          "visible_count": 0
+        },
+        "classic_details": null,
+        "conflict_semantics": "If endpoint results disagree, aggregate_status is conflicting; if either endpoint is access_denied or unresolved, aggregate_status is unknown. No false zero or missing response is treated as protection."
+      },
+      "release": {
+        "endpoint": {
+          "status": "visible",
+          "http_status": 200
+        },
+        "sample_limit": 20,
+        "sample_count": 0,
+        "latest": null,
+        "status": "none_visible"
+      },
+      "security": {
+        "dependabot": {
+          "security_updates_setting": "disabled",
+          "alerts_endpoint_status": "access_denied",
+          "http_status": 403,
+          "open_alert_count": null,
+          "note": "Endpoint-specific access_denied or unknown is not converted to zero alerts."
+        },
+        "secret_scanning": {
+          "setting": "enabled",
+          "push_protection_setting": "enabled",
+          "alerts_endpoint_status": "visible",
+          "http_status": 200,
+          "open_alert_count": 0,
+          "open_alerts": []
+        },
+        "resume_blocker": null
+      },
+      "unknowns": [
+        "Open Dependabot alert count is unknown because the endpoint returned access_denied (HTTP 403)."
+      ]
+    },
+    {
+      "name": "lifeline",
+      "logical_id": "lifeline",
+      "registry_reconciliation": {
+        "manifest": "governed",
+        "lock": "current",
+        "inventory": "current",
+        "inventory_observed_head": "538f623a84b003e70dadd234e6ea3af642446a5f",
+        "lock_observed_head": "538f623a84b003e70dadd234e6ea3af642446a5f"
+      },
+      "local": {
+        "path": "repos/lifeline",
+        "present": true,
+        "remote_url": "https://github.com/fawxzzy/lifeline.git",
+        "branch": "codex/path-discipline-warning-slice-lifeline",
+        "head": "538f623a84b003e70dadd234e6ea3af642446a5f",
+        "upstream": "origin/codex/path-discipline-warning-slice-lifeline",
+        "upstream_parity": {
+          "basis": "local_tracking_ref_without_fetch",
+          "ahead": 0,
+          "behind": 0,
+          "status": "equal"
+        },
+        "dirty_count": 0,
+        "worktree_count": 1,
+        "cloud_default_parity": {
+          "basis": "live_github_compare_local_head_to_cloud_default",
+          "api_status": "behind",
+          "cloud_commits_ahead_of_local": 0,
+          "cloud_commits_behind_local": 2,
+          "status": "local_ahead_of_cloud"
+        }
+      },
+      "cloud": {
+        "owner": "fawxzzy",
+        "url": "https://github.com/fawxzzy/lifeline",
+        "remote_url": "https://github.com/fawxzzy/lifeline.git",
+        "visibility": "public",
+        "archived": false,
+        "disabled": false,
+        "default_branch": "main",
+        "default_branch_head": "31ef3ad92c775810b19cc565820664f3476a6719",
+        "branch_count": 23,
+        "protected_branch_count": 1,
+        "permissions": {
+          "admin": true,
+          "maintain": true,
+          "push": true,
+          "triage": true,
+          "pull": true
+        }
+      },
+      "open_work": {
+        "pull_requests": [
+          {
+            "number": 23,
+            "title": "Lifeline: enforce appName contract parity",
+            "url": "https://github.com/fawxzzy/lifeline/pull/23",
+            "draft": true,
+            "head": "codex/lifeline-deploy-contract-appname-parity",
+            "head_sha": "367ee92293d7170e276379998f80df4f566e70a0",
+            "base": "main",
+            "author": "fawxzzy",
+            "created_at": "2026-05-11T18:00:09Z",
+            "updated_at": "2026-05-11T18:00:09Z",
+            "mergeable": false,
+            "mergeable_state": "dirty",
+            "checks": {
+              "status": "visible",
+              "total": 1,
+              "success": 1,
+              "failure": 0,
+              "skipped": 0,
+              "pending": 0
+            },
+            "disposition": "review",
+            "disposition_basis": "Historical draft has a passing check but currently conflicts with main; owner review must confirm contract relevance."
+          },
+          {
+            "number": 32,
+            "title": "docs: reduce path discipline warning residue",
+            "url": "https://github.com/fawxzzy/lifeline/pull/32",
+            "draft": true,
+            "head": "codex/path-discipline-warning-slice-lifeline",
+            "head_sha": "538f623a84b003e70dadd234e6ea3af642446a5f",
+            "base": "main",
+            "author": "fawxzzy",
+            "created_at": "2026-06-05T12:00:44Z",
+            "updated_at": "2026-06-27T07:38:14Z",
+            "mergeable": true,
+            "mergeable_state": "clean",
+            "checks": {
+              "status": "visible",
+              "total": 1,
+              "success": 1,
+              "failure": 0,
+              "skipped": 0,
+              "pending": 0
+            },
+            "disposition": "retain",
+            "disposition_basis": "Draft head is the active Lifeline checkout, mergeable clean, and its reported verify check passes."
+          },
+          {
+            "number": 33,
+            "title": "build(deps): bump actions/checkout from 6 to 7 in the github-actions group",
+            "url": "https://github.com/fawxzzy/lifeline/pull/33",
+            "draft": false,
+            "head": "dependabot/github_actions/github-actions-640176b5ab",
+            "head_sha": "1cfd4b73a1291170df67de4e75e41de447d027a5",
+            "base": "main",
+            "author": "dependabot[bot]",
+            "created_at": "2026-07-01T01:14:54Z",
+            "updated_at": "2026-07-01T01:14:55Z",
+            "mergeable": true,
+            "mergeable_state": "clean",
+            "checks": {
+              "status": "visible",
+              "total": 1,
+              "success": 1,
+              "failure": 0,
+              "skipped": 0,
+              "pending": 0
+            },
+            "disposition": "merge-candidate",
+            "disposition_basis": "Non-draft Dependabot PR is mergeable clean and its reported verify check passes; merge remains separately authorized."
+          }
+        ],
+        "issues": []
+      },
+      "actions": {
+        "workflow_endpoint": {
+          "status": "visible",
+          "http_status": 200
+        },
+        "runs_endpoint": {
+          "status": "visible",
+          "http_status": 200
+        },
+        "workflow_count": 3,
+        "sample_limit": 20,
+        "sample_size": 20,
+        "sample_oldest_created_at": "2026-05-13T06:46:20Z",
+        "sample_newest_created_at": "2026-07-01T01:14:58Z",
+        "sample_conclusions": {
+          "success": 20,
+          "failure": 0,
+          "cancelled": 0,
+          "in_progress_or_no_conclusion": 0
+        },
+        "sample_health": "sample_all_success",
+        "latest_by_observed_workflow": [
+          {
+            "name": "CI",
+            "run_id": 28486675143,
+            "run_number": 63,
+            "event": "pull_request",
+            "branch": "dependabot/github_actions/github-actions-640176b5ab",
+            "head": "1cfd4b73a1291170df67de4e75e41de447d027a5",
+            "status": "completed",
+            "conclusion": "success",
+            "created_at": "2026-07-01T01:14:58Z",
+            "url": "https://github.com/fawxzzy/lifeline/actions/runs/28486675143"
+          },
+          {
+            "name": "github_actions in /. - Update #1391963244",
+            "run_id": 26732067204,
+            "run_number": 11,
+            "event": "dynamic",
+            "branch": "main",
+            "head": "31ef3ad92c775810b19cc565820664f3476a6719",
+            "status": "completed",
+            "conclusion": "success",
+            "created_at": "2026-06-01T02:31:17Z",
+            "url": "https://github.com/fawxzzy/lifeline/actions/runs/26732067204"
+          },
+          {
+            "name": "github_actions in /. - Update #1442656372",
+            "run_id": 28486651838,
+            "run_number": 13,
+            "event": "dynamic",
+            "branch": "main",
+            "head": "31ef3ad92c775810b19cc565820664f3476a6719",
+            "status": "completed",
+            "conclusion": "success",
+            "created_at": "2026-07-01T01:14:21Z",
+            "url": "https://github.com/fawxzzy/lifeline/actions/runs/28486651838"
+          },
+          {
+            "name": "npm_and_yarn in /. - Update #1391963239",
+            "run_id": 26732067183,
+            "run_number": 10,
+            "event": "dynamic",
+            "branch": "main",
+            "head": "31ef3ad92c775810b19cc565820664f3476a6719",
+            "status": "completed",
+            "conclusion": "success",
+            "created_at": "2026-06-01T02:31:17Z",
+            "url": "https://github.com/fawxzzy/lifeline/actions/runs/26732067183"
+          },
+          {
+            "name": "npm_and_yarn in /. - Update #1442656384",
+            "run_id": 28486651831,
+            "run_number": 12,
+            "event": "dynamic",
+            "branch": "main",
+            "head": "31ef3ad92c775810b19cc565820664f3476a6719",
+            "status": "completed",
+            "conclusion": "success",
+            "created_at": "2026-07-01T01:14:21Z",
+            "url": "https://github.com/fawxzzy/lifeline/actions/runs/28486651831"
+          }
+        ],
+        "recovery_queue": []
+      },
+      "cleanup": {
+        "merged_remote_branch_candidates": [
+          {
+            "branch": "codex/canary-verify-contract",
+            "head": "a81914d6a849e056ae4d7ea703a3a16be97a5e70",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 38
+          },
+          {
+            "branch": "codex/lifeline-hermetic-validation-wave1",
+            "head": "5ce5a8ea2f6095912f6a6e69c43ba52de278459d",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 47
+          },
+          {
+            "branch": "codex/lifeline-operator-evidence",
+            "head": "bdb50fcce1bcf0742a74b8fcbd783f7b68bd65bc",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 33
+          },
+          {
+            "branch": "codex/lifeline-proof-pass-fixture-expansion",
+            "head": "6fa90955d19dbebc4216c5b02107cbd1e616c67d",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 45
+          },
+          {
+            "branch": "codex/lifeline-release-appname-path-hardening",
+            "head": "89357af70fc103137bd5f46c76d3c81549ba64fc",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 16
+          },
+          {
+            "branch": "codex/lifeline-release-cli-surface",
+            "head": "16b10ef43b2d073ccf4ef124ec3bf9c18a6950a4",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 20
+          },
+          {
+            "branch": "codex/lifeline-release-phase-hooks",
+            "head": "35297d6aea35a28427251614e0289a2412840b8d",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 19
+          },
+          {
+            "branch": "codex/lifeline-release-receipt-schema-parity",
+            "head": "d3d8496d65d00b715c721fc5c4012d524c8089ae",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 1
+          },
+          {
+            "branch": "codex/lifeline-release-replay-verification",
+            "head": "4589b4f332247b32e01931907f803e5ea5991e34",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 13
+          },
+          {
+            "branch": "codex/lifeline-release-safety-closeout-checkpoint",
+            "head": "a6079866da6f280c14f279fa8f333e9f02c7b958",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 3
+          },
+          {
+            "branch": "codex/lifeline-required-verify-governance",
+            "head": "893da3637fdd5f4c98b8839d51e7fda77c1abd36",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 40
+          },
+          {
+            "branch": "codex/lifeline-rollback-rehearsal-evidence",
+            "head": "e4de3eba46064d1d404497ae936ba1497ec7f2bb",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 25
+          },
+          {
+            "branch": "codex/lifeline-topology-contract-intake",
+            "head": "57cef1b881d0785e8a4c32c1920c3fcd62ab6677",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 22
+          },
+          {
+            "branch": "codex/lifeline-wave1-release-safety",
+            "head": "34ce04c34c43991c0bc7a6c6e2d91ef2a002b683",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 12
+          },
+          {
+            "branch": "codex/lifeline-wave2-release-safety",
+            "head": "ecce13c960a022a835270846bcc73f010ec4c1c5",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 7
+          },
+          {
+            "branch": "codex/lifeline-wave3-rollback-confidence",
+            "head": "cee62ab28a4b1e0a6b6ad6f42e744785de4ccacb",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 5
+          }
+        ],
+        "remote_branch_exclusion_counts": {
+          "default_branch": 1,
+          "active_pr_head": 3,
+          "protected_branch": 0,
+          "registered_or_preserved_worktree_branch": 0,
+          "not_fully_merged": 3,
+          "unresolved_comparison": 0
+        },
+        "local_worktree_candidates": [],
+        "automatic_cleanup_authorized": false
+      },
+      "protection": {
+        "default_branch": "main",
+        "aggregate_status": "protected",
+        "classic_branch_protection_endpoint": {
+          "status": "visible",
+          "http_status": 200,
+          "meaning": "enabled"
+        },
+        "repository_rulesets_endpoint": {
+          "status": "visible",
+          "http_status": 200,
+          "visible_count": 0
+        },
+        "classic_details": {
+          "enforce_admins": false,
+          "required_status_checks": [
+            "verify"
+          ],
+          "strict_status_checks": true,
+          "required_approving_reviews": null,
+          "restrictions_present": false
+        },
+        "conflict_semantics": "If endpoint results disagree, aggregate_status is conflicting; if either endpoint is access_denied or unresolved, aggregate_status is unknown. No false zero or missing response is treated as protection."
+      },
+      "release": {
+        "endpoint": {
+          "status": "visible",
+          "http_status": 200
+        },
+        "sample_limit": 20,
+        "sample_count": 0,
+        "latest": null,
+        "status": "none_visible"
+      },
+      "security": {
+        "dependabot": {
+          "security_updates_setting": "disabled",
+          "alerts_endpoint_status": "access_denied",
+          "http_status": 403,
+          "open_alert_count": null,
+          "note": "Endpoint-specific access_denied or unknown is not converted to zero alerts."
+        },
+        "secret_scanning": {
+          "setting": "enabled",
+          "push_protection_setting": "enabled",
+          "alerts_endpoint_status": "visible",
+          "http_status": 200,
+          "open_alert_count": 0,
+          "open_alerts": []
+        },
+        "resume_blocker": null
+      },
+      "unknowns": [
+        "Open Dependabot alert count is unknown because the endpoint returned access_denied (HTTP 403)."
+      ]
+    },
+    {
+      "name": "mazer",
+      "logical_id": "mazer",
+      "registry_reconciliation": {
+        "manifest": "governed",
+        "lock": "not_locked",
+        "inventory": "current",
+        "inventory_observed_head": "a537d2d17429bdf0482989c280373a6ea751f9c0",
+        "lock_observed_head": null
+      },
+      "local": {
+        "path": "repos/mazer",
+        "present": true,
+        "remote_url": "https://github.com/fawxzzy/mazer.git",
+        "branch": "codex/player-goal-default-colors",
+        "head": "a537d2d17429bdf0482989c280373a6ea751f9c0",
+        "upstream": "origin/codex/player-goal-default-colors",
+        "upstream_parity": {
+          "basis": "local_tracking_ref_without_fetch",
+          "ahead": 0,
+          "behind": 0,
+          "status": "equal"
+        },
+        "dirty_count": 1,
+        "worktree_count": 9,
+        "cloud_default_parity": {
+          "basis": "live_github_compare_local_head_to_cloud_default",
+          "api_status": "ahead",
+          "cloud_commits_ahead_of_local": 10,
+          "cloud_commits_behind_local": 0,
+          "status": "local_behind_cloud"
+        }
+      },
+      "cloud": {
+        "owner": "fawxzzy",
+        "url": "https://github.com/fawxzzy/mazer",
+        "remote_url": "https://github.com/fawxzzy/mazer.git",
+        "visibility": "public",
+        "archived": false,
+        "disabled": false,
+        "default_branch": "main",
+        "default_branch_head": "8ced175c65cfb36bb057cf25e93f59819c57803b",
+        "branch_count": 28,
+        "protected_branch_count": 0,
+        "permissions": {
+          "admin": true,
+          "maintain": true,
+          "push": true,
+          "triage": true,
+          "pull": true
+        }
+      },
+      "open_work": {
+        "pull_requests": [
+          {
+            "number": 1,
+            "title": "chore: reduce path discipline warning residue",
+            "url": "https://github.com/fawxzzy/mazer/pull/1",
+            "draft": true,
+            "head": "codex/path-discipline-warning-slice-mazer-pub",
+            "head_sha": "fcf7f5f22ac3656f4dcd1e260c54a78f570d1a32",
+            "base": "main",
+            "author": "fawxzzy",
+            "created_at": "2026-06-05T11:51:05Z",
+            "updated_at": "2026-06-05T11:51:05Z",
+            "mergeable": false,
+            "mergeable_state": "dirty",
+            "checks": {
+              "status": "visible",
+              "total": 0,
+              "success": 0,
+              "failure": 0,
+              "skipped": 0,
+              "pending": 0
+            },
+            "disposition": "review",
+            "disposition_basis": "Historical draft currently conflicts with main and has no checks; no terminal inference is supported."
+          },
+          {
+            "number": 34,
+            "title": "Record hosted preview share proof",
+            "url": "https://github.com/fawxzzy/mazer/pull/34",
+            "draft": false,
+            "head": "codex/mazer-hosted-preview-unblocked",
+            "head_sha": "b757c07f1995e2d0d1012e65e9bcf6e64ae776da",
+            "base": "main",
+            "author": "fawxzzy",
+            "created_at": "2026-07-06T01:04:29Z",
+            "updated_at": "2026-07-06T01:07:09Z",
+            "mergeable": true,
+            "mergeable_state": "clean",
+            "checks": {
+              "status": "visible",
+              "total": 0,
+              "success": 0,
+              "failure": 0,
+              "skipped": 0,
+              "pending": 0
+            },
+            "disposition": "merge-candidate",
+            "disposition_basis": "Non-draft PR is mergeable clean; Mazer has no Actions workflows, so owner-side manual proof remains required."
+          }
+        ],
+        "issues": []
+      },
+      "actions": {
+        "workflow_endpoint": {
+          "status": "visible",
+          "http_status": 200
+        },
+        "runs_endpoint": {
+          "status": "visible",
+          "http_status": 200
+        },
+        "workflow_count": 0,
+        "sample_limit": 20,
+        "sample_size": 0,
+        "sample_oldest_created_at": null,
+        "sample_newest_created_at": null,
+        "sample_conclusions": {
+          "success": 0,
+          "failure": 0,
+          "cancelled": 0,
+          "in_progress_or_no_conclusion": 0
+        },
+        "sample_health": "no_runs_visible",
+        "latest_by_observed_workflow": [],
+        "recovery_queue": []
+      },
+      "cleanup": {
+        "merged_remote_branch_candidates": [
+          {
+            "branch": "codex/legacy-web-port-truth",
+            "head": "a7cb12d281e450a6d8f4ea3a766378cacb7e1e3d",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 164
+          },
+          {
+            "branch": "codex/mazer-playbook-path-references",
+            "head": "4719850977a5726ee1cf3a788f6dbe2f7827f5b8",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 215
+          }
+        ],
+        "remote_branch_exclusion_counts": {
+          "default_branch": 1,
+          "active_pr_head": 2,
+          "protected_branch": 0,
+          "registered_or_preserved_worktree_branch": 6,
+          "not_fully_merged": 17,
+          "unresolved_comparison": 0
+        },
+        "local_worktree_candidates": [
+          {
+            "path": "input4",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/player-input-movement-correctness",
+            "head": "9759ce22f68746ca73a294695fb28449cfc6a76e",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "m2",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/ai-metric-contract-parity",
+            "head": "e11ab6e5c677f1f8d2859be310122f3c73b7a605",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "playloop",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/play-mode-perpetual-loop",
+            "head": "e9647e77b48e71b4df7b8dd7c14d3cc2652b3f61",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "tmp/worktrees/mazer-ai-run-corpus-quality-calibration",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/ai-run-corpus-quality-calibration",
+            "head": "05c2e51158a6556acb725ad42fbe8f992677fef9",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "tmp/worktrees/mazer-viewport-layout-contract",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/viewport-layout-contract",
+            "head": "ff6139ba8bef85f74d0c1bd72a2b18f1b3087dac",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "turnlive",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/world-turn-live-integration",
+            "head": "8ced175c65cfb36bb057cf25e93f59819c57803b",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "turnsim",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/turn-synchronous-world-simulation",
+            "head": "cf94ede0127a802108c7261556a61af4c9f5df8a",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          },
+          {
+            "path": "ui3",
+            "outside_atlas_root": false,
+            "external_locator": null,
+            "branch": "codex/cross-platform-ui-followup",
+            "head": "a27324a422809c577b29e66a53b84ed94c6cb163",
+            "detached": false,
+            "prunable": false,
+            "retention_class": "UNKNOWN",
+            "removal_safe": false,
+            "durable_removal_receipt": null
+          }
+        ],
+        "automatic_cleanup_authorized": false
+      },
+      "protection": {
+        "default_branch": "main",
+        "aggregate_status": "not_protected",
+        "classic_branch_protection_endpoint": {
+          "status": "not_found",
+          "http_status": 404,
+          "meaning": "not_enabled_or_not_found"
+        },
+        "repository_rulesets_endpoint": {
+          "status": "visible",
+          "http_status": 200,
+          "visible_count": 0
+        },
+        "classic_details": null,
+        "conflict_semantics": "If endpoint results disagree, aggregate_status is conflicting; if either endpoint is access_denied or unresolved, aggregate_status is unknown. No false zero or missing response is treated as protection."
+      },
+      "release": {
+        "endpoint": {
+          "status": "visible",
+          "http_status": 200
+        },
+        "sample_limit": 20,
+        "sample_count": 0,
+        "latest": null,
+        "status": "none_visible"
+      },
+      "security": {
+        "dependabot": {
+          "security_updates_setting": "disabled",
+          "alerts_endpoint_status": "access_denied",
+          "http_status": 403,
+          "open_alert_count": null,
+          "note": "Endpoint-specific access_denied or unknown is not converted to zero alerts."
+        },
+        "secret_scanning": {
+          "setting": "enabled",
+          "push_protection_setting": "enabled",
+          "alerts_endpoint_status": "visible",
+          "http_status": 200,
+          "open_alert_count": 0,
+          "open_alerts": []
+        },
+        "resume_blocker": null
+      },
+      "unknowns": [
+        "Open Dependabot alert count is unknown because the endpoint returned access_denied (HTTP 403)."
+      ]
+    },
+    {
+      "name": "playbook",
+      "logical_id": "playbook",
+      "registry_reconciliation": {
+        "manifest": "governed",
+        "lock": "current",
+        "inventory": "current",
+        "inventory_observed_head": "10b8f0ac044a7f9c66b4aa8dd08f6abd2d1c5269",
+        "lock_observed_head": "10b8f0ac044a7f9c66b4aa8dd08f6abd2d1c5269"
+      },
+      "local": {
+        "path": "repos/playbook",
+        "present": true,
+        "remote_url": "https://github.com/fawxzzy/playbook.git",
+        "branch": "codex/path-discipline-warning-slice-playbook",
+        "head": "10b8f0ac044a7f9c66b4aa8dd08f6abd2d1c5269",
+        "upstream": "origin/codex/path-discipline-warning-slice-playbook",
+        "upstream_parity": {
+          "basis": "local_tracking_ref_without_fetch",
+          "ahead": 0,
+          "behind": 0,
+          "status": "equal"
+        },
+        "dirty_count": 0,
+        "worktree_count": 1,
+        "cloud_default_parity": {
+          "basis": "live_github_compare_local_head_to_cloud_default",
+          "api_status": "diverged",
+          "cloud_commits_ahead_of_local": 7,
+          "cloud_commits_behind_local": 13,
+          "status": "diverged"
+        }
+      },
+      "cloud": {
+        "owner": "fawxzzy",
+        "url": "https://github.com/fawxzzy/playbook",
+        "remote_url": "https://github.com/fawxzzy/playbook.git",
+        "visibility": "public",
+        "archived": false,
+        "disabled": false,
+        "default_branch": "main",
+        "default_branch_head": "aab5ad5b4a51f37f6426b0797080dfa565954788",
+        "branch_count": 20,
+        "protected_branch_count": 0,
+        "permissions": {
+          "admin": true,
+          "maintain": true,
+          "push": true,
+          "triage": true,
+          "pull": true
+        }
+      },
+      "open_work": {
+        "pull_requests": [
+          {
+            "number": 11,
+            "title": "docs: add phase-grid Boolean math core memo",
+            "url": "https://github.com/fawxzzy/playbook/pull/11",
+            "draft": false,
+            "head": "codex/research-phase-grid-boolean-functions-math-core",
+            "head_sha": "49df506e7ae8b3e339e567e8a3fe6e93c8f92ba6",
+            "base": "main",
+            "author": "fawxzzy",
+            "created_at": "2026-05-18T05:21:06Z",
+            "updated_at": "2026-05-18T05:23:35Z",
+            "mergeable": true,
+            "mergeable_state": "clean",
+            "checks": {
+              "status": "visible",
+              "total": 13,
+              "success": 10,
+              "failure": 0,
+              "skipped": 3,
+              "pending": 0
+            },
+            "disposition": "merge-candidate",
+            "disposition_basis": "Non-draft one-commit documentation PR is mergeable clean; all reported checks pass or intentionally skip."
+          },
+          {
+            "number": 12,
+            "title": "docs: add phase-grid Boolean evidence ledger",
+            "url": "https://github.com/fawxzzy/playbook/pull/12",
+            "draft": false,
+            "head": "codex/research-phase-grid-boolean-functions-evidence",
+            "head_sha": "a196e6da3874d0a243de69207e75c3eeb889ba71",
+            "base": "main",
+            "author": "fawxzzy",
+            "created_at": "2026-05-18T05:25:26Z",
+            "updated_at": "2026-05-18T05:27:43Z",
+            "mergeable": true,
+            "mergeable_state": "clean",
+            "checks": {
+              "status": "visible",
+              "total": 13,
+              "success": 10,
+              "failure": 0,
+              "skipped": 3,
+              "pending": 0
+            },
+            "disposition": "merge-candidate",
+            "disposition_basis": "Non-draft one-commit documentation PR is mergeable clean; all reported checks pass or intentionally skip."
+          },
+          {
+            "number": 21,
+            "title": "docs: reduce path-discipline warning residue",
+            "url": "https://github.com/fawxzzy/playbook/pull/21",
+            "draft": true,
+            "head": "codex/path-discipline-warning-slice-playbook",
+            "head_sha": "10b8f0ac044a7f9c66b4aa8dd08f6abd2d1c5269",
+            "base": "main",
+            "author": "fawxzzy",
+            "created_at": "2026-06-05T11:27:56Z",
+            "updated_at": "2026-06-27T23:12:08Z",
+            "mergeable": false,
+            "mergeable_state": "dirty",
+            "checks": {
+              "status": "visible",
+              "total": 2,
+              "success": 2,
+              "failure": 0,
+              "skipped": 0,
+              "pending": 0
+            },
+            "disposition": "retain",
+            "disposition_basis": "Draft head is the active Playbook checkout and checks pass, but it currently conflicts with main."
+          }
+        ],
+        "issues": []
+      },
+      "actions": {
+        "workflow_endpoint": {
+          "status": "visible",
+          "http_status": 200
+        },
+        "runs_endpoint": {
+          "status": "visible",
+          "http_status": 200
+        },
+        "workflow_count": 14,
+        "sample_limit": 20,
+        "sample_size": 20,
+        "sample_oldest_created_at": "2026-06-27T23:12:09Z",
+        "sample_newest_created_at": "2026-07-12T07:58:52Z",
+        "sample_conclusions": {
+          "success": 3,
+          "failure": 17,
+          "cancelled": 0,
+          "in_progress_or_no_conclusion": 0
+        },
+        "sample_health": "sample_mixed",
+        "latest_by_observed_workflow": [
+          {
+            "name": "ci",
+            "run_id": 28304712957,
+            "run_number": 99,
+            "event": "push",
+            "branch": "codex/path-discipline-warning-slice-playbook",
+            "head": "10b8f0ac044a7f9c66b4aa8dd08f6abd2d1c5269",
+            "status": "completed",
+            "conclusion": "success",
+            "created_at": "2026-06-27T23:12:09Z",
+            "url": "https://github.com/fawxzzy/playbook/actions/runs/28304712957"
+          },
+          {
+            "name": "demo-integration",
+            "run_id": 29185091723,
+            "run_number": 87,
+            "event": "schedule",
+            "branch": "main",
+            "head": "aab5ad5b4a51f37f6426b0797080dfa565954788",
+            "status": "completed",
+            "conclusion": "failure",
+            "created_at": "2026-07-12T07:58:52Z",
+            "url": "https://github.com/fawxzzy/playbook/actions/runs/29185091723"
+          },
+          {
+            "name": "demo-refresh",
+            "run_id": 28788138891,
+            "run_number": 28,
+            "event": "schedule",
+            "branch": "main",
+            "head": "aab5ad5b4a51f37f6426b0797080dfa565954788",
+            "status": "completed",
+            "conclusion": "failure",
+            "created_at": "2026-07-06T11:26:39Z",
+            "url": "https://github.com/fawxzzy/playbook/actions/runs/28788138891"
+          },
+          {
+            "name": "maintenance",
+            "run_id": 28777628790,
+            "run_number": 12,
+            "event": "schedule",
+            "branch": "main",
+            "head": "aab5ad5b4a51f37f6426b0797080dfa565954788",
+            "status": "completed",
+            "conclusion": "success",
+            "created_at": "2026-07-06T08:16:26Z",
+            "url": "https://github.com/fawxzzy/playbook/actions/runs/28777628790"
+          }
+        ],
+        "recovery_queue": [
+          {
+            "id": "playbook-demo-contract-synchronization",
+            "run_id": 29185091723,
+            "workflow": "demo-integration",
+            "branch": "main",
+            "head": "aab5ad5b4a51f37f6426b0797080dfa565954788",
+            "url": "https://github.com/fawxzzy/playbook/actions/runs/29185091723",
+            "classification": "Playbook/demo contract synchronization",
+            "passing_scope": [
+              "Composite CI",
+              "docs audit"
+            ],
+            "failure": "Demo refresh dry-run integration fails because the demo doctor reports missing or invalid docs/contracts/command-truth.json and missing fact, interpretation, and narrative revision layers in docs/PLAYBOOK_PRODUCT_ROADMAP.md."
+          }
+        ]
+      },
+      "cleanup": {
+        "merged_remote_branch_candidates": [
+          {
+            "branch": "codex/changelog-generator",
+            "head": "431e83e143717fa8ad792fd6f3dc72074d20195c",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 34
+          },
+          {
+            "branch": "codex/playbook-baseline-finding-identity",
+            "head": "90217f423e91306cbf9cce93a4d5095ee8a2f572",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 51
+          },
+          {
+            "branch": "codex/playbook-lint-debt-closeout",
+            "head": "0a562d337f2c354c1977df7441abbfe598362c83",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 5
+          },
+          {
+            "branch": "codex/playbook-sarif-output",
+            "head": "6d893d0245436a2e670c0decf18bb2c8b1a9aab0",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 49
+          },
+          {
+            "branch": "codex/playbook-sustain-docs-audit",
+            "head": "4f1d95529f373eaa287096098092204c14215576",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 1
+          },
+          {
+            "branch": "codex/playbook-verify-baseline-hygiene",
+            "head": "136779b68837624733e6b2e0676df3e645ca68e9",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 53
+          },
+          {
+            "branch": "codex/verta-derivative-doctrine-closeout",
+            "head": "52537b0af23cf5ef8632f0eb9f59afa7c2e440f0",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 14
+          },
+          {
+            "branch": "codex/verta-derivative-doctrine-patterns",
+            "head": "239b9ee4457f17c4186126880f2639470d2f8cec",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 18
+          },
+          {
+            "branch": "codex/verta-doctrine-pattern-lookup",
+            "head": "c0f039862a6795d6abba0d7dc24bbd06742e8917",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 12
+          },
+          {
+            "branch": "codex/verta-gate-path-trust-hardening",
+            "head": "d88996f2222fc626565e8549a86e065536231e2b",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 8
+          },
+          {
+            "branch": "codex/verta-seam-gate-validator",
+            "head": "e0c5824100df66602ddcfc5dcd96722069ba40cf",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 10
+          },
+          {
+            "branch": "codex/workflow-pack-environment-bridge-dry-run-executor",
+            "head": "7b62d6598e2f67cae62f9210c93e65eadbc4754f",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 19
+          },
+          {
+            "branch": "codex/workflow-pack-environment-bridge-engine",
+            "head": "52ee1b57f46a64838d1df9ebf2cd30355fa45d9d",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 31
+          },
+          {
+            "branch": "codex/workflow-pack-environment-bridge-executor-contract",
+            "head": "91dafb005ddb8bba50bf85ca26a3f41fc7ec2597",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 25
+          },
+          {
+            "branch": "codex/workflow-pack-environment-bridge-planner",
+            "head": "058cc68aaa6963bc37412c4d5c5d77f9d247c448",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 28
+          }
+        ],
+        "remote_branch_exclusion_counts": {
+          "default_branch": 1,
+          "active_pr_head": 3,
+          "protected_branch": 0,
+          "registered_or_preserved_worktree_branch": 0,
+          "not_fully_merged": 1,
+          "unresolved_comparison": 0
+        },
+        "local_worktree_candidates": [],
+        "automatic_cleanup_authorized": false
+      },
+      "protection": {
+        "default_branch": "main",
+        "aggregate_status": "not_protected",
+        "classic_branch_protection_endpoint": {
+          "status": "not_found",
+          "http_status": 404,
+          "meaning": "not_enabled_or_not_found"
+        },
+        "repository_rulesets_endpoint": {
+          "status": "visible",
+          "http_status": 200,
+          "visible_count": 0
+        },
+        "classic_details": null,
+        "conflict_semantics": "If endpoint results disagree, aggregate_status is conflicting; if either endpoint is access_denied or unresolved, aggregate_status is unknown. No false zero or missing response is treated as protection."
+      },
+      "release": {
+        "endpoint": {
+          "status": "visible",
+          "http_status": 200
+        },
+        "sample_limit": 20,
+        "sample_count": 0,
+        "latest": null,
+        "status": "none_visible"
+      },
+      "security": {
+        "dependabot": {
+          "security_updates_setting": "disabled",
+          "alerts_endpoint_status": "access_denied",
+          "http_status": 403,
+          "open_alert_count": null,
+          "note": "Endpoint-specific access_denied or unknown is not converted to zero alerts."
+        },
+        "secret_scanning": {
+          "setting": "enabled",
+          "push_protection_setting": "enabled",
+          "alerts_endpoint_status": "visible",
+          "http_status": 200,
+          "open_alert_count": 0,
+          "open_alerts": []
+        },
+        "resume_blocker": null
+      },
+      "unknowns": [
+        "Open Dependabot alert count is unknown because the endpoint returned access_denied (HTTP 403)."
+      ]
+    },
+    {
+      "name": "trove",
+      "logical_id": "trove",
+      "registry_reconciliation": {
+        "manifest": "governed",
+        "lock": "current",
+        "inventory": "current",
+        "inventory_observed_head": "437c7604adee02e0403d77f75162a6c5f232221f",
+        "lock_observed_head": "437c7604adee02e0403d77f75162a6c5f232221f"
+      },
+      "local": {
+        "path": "repos/trove",
+        "present": true,
+        "remote_url": "https://github.com/fawxzzy/trove.git",
+        "branch": "codex/path-discipline-warning-slice-trove",
+        "head": "437c7604adee02e0403d77f75162a6c5f232221f",
+        "upstream": "origin/codex/path-discipline-warning-slice-trove",
+        "upstream_parity": {
+          "basis": "local_tracking_ref_without_fetch",
+          "ahead": 0,
+          "behind": 0,
+          "status": "equal"
+        },
+        "dirty_count": 0,
+        "worktree_count": 1,
+        "cloud_default_parity": {
+          "basis": "live_github_compare_local_head_to_cloud_default",
+          "api_status": "behind",
+          "cloud_commits_ahead_of_local": 0,
+          "cloud_commits_behind_local": 4,
+          "status": "local_ahead_of_cloud"
+        }
+      },
+      "cloud": {
+        "owner": "fawxzzy",
+        "url": "https://github.com/fawxzzy/trove",
+        "remote_url": "https://github.com/fawxzzy/trove.git",
+        "visibility": "public",
+        "archived": false,
+        "disabled": false,
+        "default_branch": "main",
+        "default_branch_head": "ed51c69643047e1c59bb1caa310900ac6d526d8a",
+        "branch_count": 5,
+        "protected_branch_count": 0,
+        "permissions": {
+          "admin": true,
+          "maintain": true,
+          "push": true,
+          "triage": true,
+          "pull": true
+        }
+      },
+      "open_work": {
+        "pull_requests": [
+          {
+            "number": 5,
+            "title": "docs: reduce path discipline warning residue",
+            "url": "https://github.com/fawxzzy/trove/pull/5",
+            "draft": true,
+            "head": "codex/path-discipline-warning-slice-trove",
+            "head_sha": "437c7604adee02e0403d77f75162a6c5f232221f",
+            "base": "main",
+            "author": "fawxzzy",
+            "created_at": "2026-06-05T12:09:51Z",
+            "updated_at": "2026-06-28T04:33:26Z",
+            "mergeable": true,
+            "mergeable_state": "clean",
+            "checks": {
+              "status": "visible",
+              "total": 1,
+              "success": 1,
+              "failure": 0,
+              "skipped": 0,
+              "pending": 0
+            },
+            "disposition": "retain",
+            "disposition_basis": "Draft head is the active Trove checkout, mergeable clean, and its reported verify check passes."
+          }
+        ],
+        "issues": [
+          {
+            "number": 1,
+            "title": "Track Vercel deployment platform incident for Trove",
+            "url": "https://github.com/fawxzzy/trove/issues/1",
+            "author": "fawxzzy",
+            "created_at": "2026-04-21T22:42:50Z",
+            "updated_at": "2026-04-21T23:32:35Z",
+            "labels": [],
+            "disposition": "review",
+            "disposition_basis": "Historical Vercel incident needs current platform-status reconciliation before any closure decision."
+          }
+        ]
+      },
+      "actions": {
+        "workflow_endpoint": {
+          "status": "visible",
+          "http_status": 200
+        },
+        "runs_endpoint": {
+          "status": "visible",
+          "http_status": 200
+        },
+        "workflow_count": 1,
+        "sample_limit": 20,
+        "sample_size": 20,
+        "sample_oldest_created_at": "2026-04-21T07:03:13Z",
+        "sample_newest_created_at": "2026-06-28T04:33:29Z",
+        "sample_conclusions": {
+          "success": 20,
+          "failure": 0,
+          "cancelled": 0,
+          "in_progress_or_no_conclusion": 0
+        },
+        "sample_health": "sample_all_success",
+        "latest_by_observed_workflow": [
+          {
+            "name": "CI",
+            "run_id": 28311429952,
+            "run_number": 20,
+            "event": "pull_request",
+            "branch": "codex/path-discipline-warning-slice-trove",
+            "head": "437c7604adee02e0403d77f75162a6c5f232221f",
+            "status": "completed",
+            "conclusion": "success",
+            "created_at": "2026-06-28T04:33:29Z",
+            "url": "https://github.com/fawxzzy/trove/actions/runs/28311429952"
+          }
+        ],
+        "recovery_queue": []
+      },
+      "cleanup": {
+        "merged_remote_branch_candidates": [
+          {
+            "branch": "codex/trove-pilot-release-cutover",
+            "head": "75c3119e2385990a0f4a157bf22442b941cfbdd7",
+            "comparison_status": "behind",
+            "ahead_by": 0,
+            "behind_by": 2
+          }
+        ],
+        "remote_branch_exclusion_counts": {
+          "default_branch": 1,
+          "active_pr_head": 1,
+          "protected_branch": 0,
+          "registered_or_preserved_worktree_branch": 0,
+          "not_fully_merged": 2,
+          "unresolved_comparison": 0
+        },
+        "local_worktree_candidates": [],
+        "automatic_cleanup_authorized": false
+      },
+      "protection": {
+        "default_branch": "main",
+        "aggregate_status": "not_protected",
+        "classic_branch_protection_endpoint": {
+          "status": "not_found",
+          "http_status": 404,
+          "meaning": "not_enabled_or_not_found"
+        },
+        "repository_rulesets_endpoint": {
+          "status": "visible",
+          "http_status": 200,
+          "visible_count": 0
+        },
+        "classic_details": null,
+        "conflict_semantics": "If endpoint results disagree, aggregate_status is conflicting; if either endpoint is access_denied or unresolved, aggregate_status is unknown. No false zero or missing response is treated as protection."
+      },
+      "release": {
+        "endpoint": {
+          "status": "visible",
+          "http_status": 200
+        },
+        "sample_limit": 20,
+        "sample_count": 0,
+        "latest": null,
+        "status": "none_visible"
+      },
+      "security": {
+        "dependabot": {
+          "security_updates_setting": "disabled",
+          "alerts_endpoint_status": "access_denied",
+          "http_status": 403,
+          "open_alert_count": null,
+          "note": "Endpoint-specific access_denied or unknown is not converted to zero alerts."
+        },
+        "secret_scanning": {
+          "setting": "enabled",
+          "push_protection_setting": "enabled",
+          "alerts_endpoint_status": "visible",
+          "http_status": 200,
+          "open_alert_count": 0,
+          "open_alerts": []
+        },
+        "resume_blocker": null
+      },
+      "unknowns": [
+        "Open Dependabot alert count is unknown because the endpoint returned access_denied (HTTP 403)."
+      ]
+    }
+  ],
+  "local_only_components": [
+    {
+      "name": "stream",
+      "logical_id": "stream",
+      "local": {
+        "path": "repos/stream",
+        "present": true,
+        "remote_url": null,
+        "branch": "main",
+        "head": "43769ba86d4c6ebc419ab9e7847c3843460a094f",
+        "upstream": null,
+        "upstream_parity": {
+          "basis": "local_tracking_ref_without_fetch",
+          "ahead": null,
+          "behind": null,
+          "status": "unknown"
+        },
+        "dirty_count": 0,
+        "worktree_count": 1
+      },
+      "cloud": null,
+      "decision_required": "Choose explicitly among publishing a fawxzzy remote, retaining local-only status, or archival; do not create a remote implicitly."
+    }
+  ],
+  "remote_only_components": [
+    {
+      "name": "cortex",
+      "remote": "https://github.com/fawxzzy/cortex",
+      "local_path": null,
+      "embedded_subsystem_path": "runtime/cortex",
+      "boundary": "The embedded root-owned subsystem is not a checkout of the remote repository.",
+      "decision_required": "Choose explicitly among owner-repo adoption, reference/archive treatment, or continued separation; do not clone or synchronize implicitly."
+    }
+  ],
+  "other_governed_components": [
+    {
+      "name": "playbook-demo",
+      "path": "repos/playbook-demo/playbook-demo",
+      "reason": "Governed demo component outside the exact ten-repository fawxzzy control-plane set."
+    },
+    {
+      "name": "nat1-games",
+      "path": "repos/Nat1-Games/nat1-games",
+      "reason": "Governed component under a different GitHub owner and outside this exact account scope."
+    }
+  ],
+  "unknowns": [
+    "Dependabot open-alert counts are unknown for every repository because every live endpoint returned access_denied (HTTP 403); disabled settings are not zero-alert evidence.",
+    "ATLAS and _stack heads in docs/registry/STACK-REPO-INVENTORY.json are stale relative to current local Git; _stack is also stale in stack.lock.yaml. This audit records but does not repair those projections.",
+    "Cortex remote adoption and Stream remote publication remain explicit decisions.",
+    "Bounded Actions samples do not prove complete workflow history or default-branch health.",
+    "No releases visible is a current endpoint result, not proof of release readiness or policy completion.",
+    "Fitness secret validity remains unknown; operator-authorized containment, rotation, and verification have not occurred."
+  ],
+  "evidence_sources": [
+    {
+      "source": "stack.yaml",
+      "surface": "repository registry, Cortex subsystem boundary, paths, roles, and policy"
+    },
+    {
+      "source": "stack.lock.yaml",
+      "surface": "locked components, pinned refs, and exclusions"
+    },
+    {
+      "source": "docs/registry/STACK-REPO-INVENTORY.json",
+      "surface": "published inventory reconciled against fresh local Git"
+    },
+    {
+      "source": "local_git",
+      "surface": "git rev-parse, branch, remote, status --porcelain, rev-list tracking parity, and worktree list; no fetch"
+    },
+    {
+      "source": "github_cli_auth",
+      "surface": "authenticated account and access context; no token or credential retained"
+    },
+    {
+      "source": "github_rest",
+      "surface": "repositories, branches, compares, pull requests, issues, workflows, runs, releases, classic branch protection, rulesets, Dependabot alerts, and secret-scanning alerts/locations"
+    },
+    {
+      "source": "github_cli_run_view",
+      "surface": "Playbook run 29185091723 and Fitness runs 29035579046/29035579017 job, step, and filtered failure signals"
+    },
+    {
+      "source": "tmp/github-control-plane-readiness-2026-07-11.md",
+      "surface": "historical note used only for explicit reconciliation; not current authority"
+    }
+  ],
+  "disposition_queues": {
+    "allowed_dispositions": [
+      "retain",
+      "review",
+      "close-candidate",
+      "merge-candidate",
+      "superseded-candidate"
+    ],
+    "items": [
+      {
+        "repository": "ATLAS",
+        "kind": "pull_request",
+        "number": 105,
+        "title": "Harden Fitness BrowserStack protected proof flow",
+        "url": "https://github.com/fawxzzy/ATLAS/pull/105",
+        "disposition": "retain",
+        "basis": "Registered worktree and stacked PR #106 preserve active context; current checks include one failed atlas-qa-llel result, so review and recovery remain required."
+      },
+      {
+        "repository": "ATLAS",
+        "kind": "pull_request",
+        "number": 106,
+        "title": "Stacked Mazer lock resync after BrowserStack proof branch",
+        "url": "https://github.com/fawxzzy/ATLAS/pull/106",
+        "disposition": "retain",
+        "basis": "Draft stacked PR targets PR #105's head branch; its reported QA check passes, but the dependency must resolve first."
+      },
+      {
+        "repository": "ATLAS",
+        "kind": "pull_request",
+        "number": 109,
+        "title": "Resync ATLAS after Mazer menu-generation updates",
+        "url": "https://github.com/fawxzzy/ATLAS/pull/109",
+        "disposition": "review",
+        "basis": "Draft PR has a passing QA check but currently conflicts with main and has no registered worktree proving current ownership."
+      },
+      {
+        "repository": "ATLAS",
+        "kind": "issue",
+        "number": 49,
+        "title": "Dispatcher Wave 1: `_stack vercel-health` implementation + independent root marker lane",
+        "url": "https://github.com/fawxzzy/ATLAS/issues/49",
+        "disposition": "review",
+        "basis": "Open dispatcher implementation issue lacks current terminal proof or a proven active owner."
+      },
+      {
+        "repository": "_stack",
+        "kind": "pull_request",
+        "number": 1,
+        "title": "docs: reduce path discipline warning residue",
+        "url": "https://github.com/fawxzzy/_stack/pull/1",
+        "disposition": "review",
+        "basis": "Historical draft currently conflicts with main and has no checks; age alone does not prove supersession."
+      },
+      {
+        "repository": "lifeline",
+        "kind": "pull_request",
+        "number": 23,
+        "title": "Lifeline: enforce appName contract parity",
+        "url": "https://github.com/fawxzzy/lifeline/pull/23",
+        "disposition": "review",
+        "basis": "Historical draft has a passing check but currently conflicts with main; owner review must confirm contract relevance."
+      },
+      {
+        "repository": "lifeline",
+        "kind": "pull_request",
+        "number": 32,
+        "title": "docs: reduce path discipline warning residue",
+        "url": "https://github.com/fawxzzy/lifeline/pull/32",
+        "disposition": "retain",
+        "basis": "Draft head is the active Lifeline checkout, mergeable clean, and its reported verify check passes."
+      },
+      {
+        "repository": "lifeline",
+        "kind": "pull_request",
+        "number": 33,
+        "title": "build(deps): bump actions/checkout from 6 to 7 in the github-actions group",
+        "url": "https://github.com/fawxzzy/lifeline/pull/33",
+        "disposition": "merge-candidate",
+        "basis": "Non-draft Dependabot PR is mergeable clean and its reported verify check passes; merge remains separately authorized."
+      },
+      {
+        "repository": "mazer",
+        "kind": "pull_request",
+        "number": 1,
+        "title": "chore: reduce path discipline warning residue",
+        "url": "https://github.com/fawxzzy/mazer/pull/1",
+        "disposition": "review",
+        "basis": "Historical draft currently conflicts with main and has no checks; no terminal inference is supported."
+      },
+      {
+        "repository": "mazer",
+        "kind": "pull_request",
+        "number": 34,
+        "title": "Record hosted preview share proof",
+        "url": "https://github.com/fawxzzy/mazer/pull/34",
+        "disposition": "merge-candidate",
+        "basis": "Non-draft PR is mergeable clean; Mazer has no Actions workflows, so owner-side manual proof remains required."
+      },
+      {
+        "repository": "playbook",
+        "kind": "pull_request",
+        "number": 11,
+        "title": "docs: add phase-grid Boolean math core memo",
+        "url": "https://github.com/fawxzzy/playbook/pull/11",
+        "disposition": "merge-candidate",
+        "basis": "Non-draft one-commit documentation PR is mergeable clean; all reported checks pass or intentionally skip."
+      },
+      {
+        "repository": "playbook",
+        "kind": "pull_request",
+        "number": 12,
+        "title": "docs: add phase-grid Boolean evidence ledger",
+        "url": "https://github.com/fawxzzy/playbook/pull/12",
+        "disposition": "merge-candidate",
+        "basis": "Non-draft one-commit documentation PR is mergeable clean; all reported checks pass or intentionally skip."
+      },
+      {
+        "repository": "playbook",
+        "kind": "pull_request",
+        "number": 21,
+        "title": "docs: reduce path-discipline warning residue",
+        "url": "https://github.com/fawxzzy/playbook/pull/21",
+        "disposition": "retain",
+        "basis": "Draft head is the active Playbook checkout and checks pass, but it currently conflicts with main."
+      },
+      {
+        "repository": "trove",
+        "kind": "pull_request",
+        "number": 5,
+        "title": "docs: reduce path discipline warning residue",
+        "url": "https://github.com/fawxzzy/trove/pull/5",
+        "disposition": "retain",
+        "basis": "Draft head is the active Trove checkout, mergeable clean, and its reported verify check passes."
+      },
+      {
+        "repository": "trove",
+        "kind": "issue",
+        "number": 1,
+        "title": "Track Vercel deployment platform incident for Trove",
+        "url": "https://github.com/fawxzzy/trove/issues/1",
+        "disposition": "review",
+        "basis": "Historical Vercel incident needs current platform-status reconciliation before any closure decision."
+      }
+    ],
+    "mutation_authorized": false
+  },
+  "recovery_queues": {
+    "ci": [
+      {
+        "id": "fitness-atlas-contracts-typescript-loader",
+        "run_id": 29035579046,
+        "workflow": "atlas-contracts",
+        "branch": "main",
+        "head": "e1ab7fbea979456380230c5459fdef6ae4c927e9",
+        "url": "https://github.com/fawxzzy/fawxzzy-fitness/actions/runs/29035579046",
+        "failure": "test:atlas-contracts fails with ERR_UNKNOWN_FILE_EXTENSION for src/lib/atlas-contracts.test.ts."
+      },
+      {
+        "id": "fitness-playbook-runtime-artifacts",
+        "run_id": 29035579017,
+        "workflow": "CI",
+        "branch": "main",
+        "head": "e1ab7fbea979456380230c5459fdef6ae4c927e9",
+        "url": "https://github.com/fawxzzy/fawxzzy-fitness/actions/runs/29035579017",
+        "passing_scope": [
+          "lint",
+          "build",
+          "large-file verification"
+        ],
+        "failure": "Playbook clean-environment validation fails because required runtime artifacts are not written under .playbook/."
+      },
+      {
+        "id": "fitness-dependency-security",
+        "source_run_id": 29035579017,
+        "classification": "dependency/security",
+        "finding": "Install reports 14 vulnerabilities: 3 moderate, 10 high, and 1 critical, plus a deprecated Next 14.2.5 warning.",
+        "automatic_mutation": false
+      },
+      {
+        "id": "playbook-demo-contract-synchronization",
+        "run_id": 29185091723,
+        "workflow": "demo-integration",
+        "branch": "main",
+        "head": "aab5ad5b4a51f37f6426b0797080dfa565954788",
+        "url": "https://github.com/fawxzzy/playbook/actions/runs/29185091723",
+        "classification": "Playbook/demo contract synchronization",
+        "passing_scope": [
+          "Composite CI",
+          "docs audit"
+        ],
+        "failure": "Demo refresh dry-run integration fails because the demo doctor reports missing or invalid docs/contracts/command-truth.json and missing fact, interpretation, and narrative revision layers in docs/PLAYBOOK_PRODUCT_ROADMAP.md."
+      }
+    ],
+    "security": [
+      {
+        "id": "fitness-critical-secret-containment",
+        "repository": "fawxzzy-fitness",
+        "alert": {
+          "number": 1,
+          "state": "open",
+          "severity": "Critical",
+          "secret_type": "supabase_service_key",
+          "secret_type_display_name": "Supabase Service Key",
+          "created_at": "2026-04-17T04:17:11Z",
+          "validity": "unknown",
+          "publicly_leaked": true,
+          "push_protection_bypassed": false,
+          "location": {
+            "commit": "410efe6e8fa9a30b1c56362455397dfbf51b1942",
+            "path": ".env.local",
+            "line": 5,
+            "blob": "aa72c0dfece4ae7ec991ebe6f4f5f58ade7561d1"
+          },
+          "url": "https://github.com/fawxzzy/fawxzzy-fitness/security/secret-scanning/1"
+        },
+        "resume_blocker": "Global gates plus explicit operator-authorized containment, rotation, and verification are required. Rotation is mandatory if the key is or was live. Git history remediation is a separate explicit decision and is not automatic.",
+        "automatic_mutation": false
+      }
+    ]
+  },
+  "cleanup_summaries": {
+    "merged_remote_branch_candidate_count": 80,
+    "local_worktree_candidate_count": 62,
+    "local_worktree_retention_class": "UNKNOWN",
+    "excluded_classes": [
+      "default branches",
+      "active PR heads",
+      "protected branches",
+      "branches tied to active or preserved worktrees",
+      "unresolved or not-fully-merged branches"
+    ],
+    "deletion_authorized": false
+  }
+}
