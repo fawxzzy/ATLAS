@@ -10,7 +10,7 @@ components:
     remote: "https://github.com/fawxzzy/_stack.git"
     ref_type: "branch"
     ref: "main"
-    commit: "7ca8a81acb71c935adabd345dff3e3bcbbedba7c"
+    commit: "c2afaafe4f73c678cc4d467af090fefd0766f193"
     dirty: false
     trust_class: "trusted"
     release_eligible: false
@@ -20,8 +20,8 @@ components:
     status: "incubating"
     remote: "https://github.com/fawxzzy/DiscordOS.git"
     ref_type: "branch"
-    ref: "codex/discordos-mazer-board-cards"
-    commit: "c3a72920eed8c8fc910e5395a7bd72ba847a3d35"
+    ref: "codex/mazer-viewport-board-status"
+    commit: "b173de1549f85cbde040aa6a7ddeba959c7dc524"
     dirty: false
     trust_class: "trusted"
     release_eligible: false
@@ -205,4 +205,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:56eb7b01c0412a37584bdc296223f5fade62771a3e6a605808cf839178bd1ad7"
+lock_digest: "sha256:596a5d11b655a3ce6d13801748ccaee346bfb5aef7f16183af8dfd227620b0fb"
