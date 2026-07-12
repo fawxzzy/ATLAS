@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+from collections import Counter
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
@@ -16,86 +18,66 @@ class AtlasPlaybookContractConsumptionTests(unittest.TestCase):
     def setUp(self) -> None:
         self.root = atlas_root()
 
-    def test_live_contract_source_loads_from_owner_repo(self) -> None:
+    def _live_report_and_rows(self) -> tuple[dict[str, object], dict[str, dict[str, object]]]:
         report = build_playbook_adoption_report(root=self.root)
+        rows = {row["repo_id"]: row for row in report["repos"] if isinstance(row, dict) and isinstance(row.get("repo_id"), str)}
+        return report, rows
+
+    def test_live_contract_source_loads_from_owner_repo(self) -> None:
+        report, _ = self._live_report_and_rows()
         contract_source = report["contract_source"]
 
         self.assertEqual(contract_source["repo_id"], "playbook")
-        self.assertEqual(contract_source["repo_identity"], "remote")
         self.assertEqual(contract_source["source_status"], "present")
+        self.assertIn(contract_source["repo_identity"], {"remote", "local_only", "unknown"})
         self.assertTrue(contract_source["contract_version"])
         self.assertEqual(validate_playbook_adoption_report(report), [])
 
-    def test_local_only_repos_stay_visible_without_verification(self) -> None:
-        report = build_playbook_adoption_report(root=self.root)
-        rows = {
-            row["repo_id"]: row
-            for row in report["repos"]
-            if isinstance(row, dict) and isinstance(row.get("repo_id"), str)
+    def test_live_rows_follow_current_inventory_identity(self) -> None:
+        report, rows = self._live_report_and_rows()
+        inventory = json.loads((self.root / "docs/registry/STACK-REPO-INVENTORY.json").read_text(encoding="utf-8"))
+        expected = {
+            entry["logical_id"]: "remote" if str(entry.get("remote_url") or "").strip() else "local_only" if entry.get("exists") else "unknown"
+            for entry in inventory["repos"]
+            if isinstance(entry, dict) and isinstance(entry.get("logical_id"), str)
         }
 
-        for repo_id in ("_stack", "atlas", "stream"):
+        self.assertIn("stack", rows)
+        self.assertNotIn("atlas", rows)
+        for repo_id, identity in expected.items():
             with self.subTest(repo_id=repo_id):
-                self.assertEqual(rows[repo_id]["repo_identity"], "local_only")
-                self.assertEqual(rows[repo_id]["verification_status"], "missing")
-                self.assertNotEqual(rows[repo_id]["adoption_status"], "verified")
+                self.assertEqual(identity, rows[repo_id]["repo_identity"])
+        self.assertEqual(validate_playbook_adoption_report(report), [])
 
-    def test_repo_local_adoption_slices_project_live_verified_and_missing_split(self) -> None:
-        report = build_playbook_adoption_report(root=self.root)
-        rows = {
-            row["repo_id"]: row
-            for row in report["repos"]
-            if isinstance(row, dict) and isinstance(row.get("repo_id"), str)
-        }
-
+    def test_fitness_remains_non_green_when_trusted_state_blocks_it(self) -> None:
+        _, rows = self._live_report_and_rows()
         fitness = rows["fitness"]
-        self.assertEqual(fitness["adoption_status"], "adopted")
-        self.assertEqual(fitness["verification_state"], "targeted")
-        self.assertEqual(fitness["verification_scope"], "targeted")
-        self.assertEqual(fitness["verification_status"], "verified")
-        self.assertEqual(fitness["continuity_status"], "structured")
-        self.assertEqual(fitness["blocking_gaps"], [])
-        self.assertTrue(
-            any(
-                ref.endswith("fitness.playbook.verification.report.v1.json")
-                for ref in fitness["evidence_refs"]
-            )
-        )
 
-        mazer = rows["mazer"]
-        self.assertEqual(mazer["adoption_status"], "adopted")
-        self.assertEqual(mazer["verification_state"], "targeted")
-        self.assertEqual(mazer["verification_scope"], "targeted")
-        self.assertEqual(mazer["verification_status"], "missing")
-        self.assertEqual(mazer["continuity_status"], "structured")
-        self.assertTrue(mazer["blocking_gaps"])
-        self.assertTrue(
-            any(
-                ref.endswith("mazer.playbook.adoption.evidence.v1.json")
-                for ref in mazer["evidence_refs"]
-            )
-        )
+        self.assertNotEqual(fitness["verification_status"], "verified")
+        self.assertTrue(fitness["blocking_gaps"])
+        self.assertNotEqual(fitness["adoption_status"], "verified")
+        self.assertTrue(any(ref.endswith("fitness.playbook.adoption.evidence.v1.json") for ref in fitness["evidence_refs"]))
 
-    def test_summary_distinguishes_adopted_from_verified(self) -> None:
-        report = build_playbook_adoption_report(root=self.root)
+    def test_live_summary_reconciles_exactly_to_emitted_rows(self) -> None:
+        report, rows = self._live_report_and_rows()
         summary = report["summary"]
+        emitted = list(rows.values())
+        identity_counts = Counter(row["repo_identity"] for row in emitted)
+        verification_counts = Counter(row["verification_status"] for row in emitted)
 
-        self.assertIn("verification_missing_count", summary)
-        self.assertIn("verification_blocked_count", summary)
-        self.assertGreaterEqual(summary["verified_count"], 1)
-        self.assertGreaterEqual(summary["adopted_count"], 1)
+        self.assertEqual(len(emitted), summary["repo_count"])
+        self.assertEqual(identity_counts["remote"], summary["remote_count"])
+        self.assertEqual(identity_counts["local_only"], summary["local_only_count"])
+        self.assertEqual(verification_counts["verified"], summary["verified_count"])
+        self.assertEqual(verification_counts["missing"], summary["verification_missing_count"])
+        self.assertEqual(verification_counts["partial"], summary["verification_partial_count"])
+        self.assertEqual(verification_counts["blocked"], summary["verification_blocked_count"])
+        self.assertEqual(sum(row["adoption_status"] == "adopted" and row["verification_status"] != "verified" for row in emitted), summary["adopted_count"])
 
     def test_missing_export_is_reported_non_green(self) -> None:
         with TemporaryDirectory() as tempdir:
             base = Path(tempdir)
-            result = inspect_playbook_contract_source(
-                export_path=base / "missing.json",
-                schema_path=base / "schema.json",
-                doc_path=base / "contract.md",
-                repo_id="playbook",
-                repo_path="repos/fawxzzy-playbook",
-                repo_identity="remote",
-            )
+            result = inspect_playbook_contract_source(export_path=base / "missing.json", schema_path=base / "schema.json", doc_path=base / "contract.md", repo_id="playbook", repo_path="repos/fawxzzy-playbook", repo_identity="remote")
 
         self.assertEqual(result["source_status"], "missing")
         self.assertEqual(result["validation_state"], "schema_invalid")
@@ -109,15 +91,7 @@ class AtlasPlaybookContractConsumptionTests(unittest.TestCase):
             export_path.write_text("{not json", encoding="utf-8")
             schema_path.write_text("{}", encoding="utf-8")
             doc_path.write_text("# Contract\n", encoding="utf-8")
-
-            result = inspect_playbook_contract_source(
-                export_path=export_path,
-                schema_path=schema_path,
-                doc_path=doc_path,
-                repo_id="playbook",
-                repo_path="repos/fawxzzy-playbook",
-                repo_identity="remote",
-            )
+            result = inspect_playbook_contract_source(export_path=export_path, schema_path=schema_path, doc_path=doc_path, repo_id="playbook", repo_path="repos/fawxzzy-playbook", repo_identity="remote")
 
         self.assertEqual(result["source_status"], "malformed")
         self.assertEqual(result["validation_state"], "schema_invalid")

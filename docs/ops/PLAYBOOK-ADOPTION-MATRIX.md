@@ -1,60 +1,56 @@
 # Playbook Adoption Matrix
 
-This matrix is the root-owned visibility surface for cross-repo Playbook convergence.
+This root-owned read model projects operational Playbook adoption for governed inventory components. It consumes declaration posture from `docs/registry/STACK-REPO-INVENTORY.json` and owner evidence through the validators and report projection in `ops/atlas/playbook_contract.py`. Owner repositories and their exports remain read-only.
 
-Current statuses are evidence-based working assessments from the stack-root read models, the live repo inventory at `docs/registry/STACK-REPO-INVENTORY.json`, and the Playbook owner export. They do not become repo-owned truth until the named verification artifact exists in the owning repo or stack surface.
+## Operational Status Legend
 
-## Status Legend
+- `missing`: no accepted manifest declaration and no valid owner proof that can be correlated safely
+- `not_claimed`: the canonical manifest posture is explicitly `not-claimed`
+- `declared`: an accepted profile/version declaration exists, but verification is absent or not current
+- `verified`: the declaration agrees with a root-valid owner adoption export and verification receipt, the receipt is fresh, and declared or receipted owner HEAD/ref values agree with current inventory truth
+- `stale`: otherwise valid, agreeing evidence is older than the freshness limit or names a prior owner HEAD/ref
+- `conflicting`: declaration profile/version and owner evidence disagree, or owner proof lacks the required matching root declaration
+- `blocked`: evidence cannot be parsed, fails the reused root contract validators, has an invalid timestamp, or current owner identity/trust/state makes verification unsafe
 
-- `adopted`: repo-local owner-truth adoption evidence exists and targeted proof is green, but repo-owned verification truth is not yet landed or not yet strong enough to project `verified`
-- `verified`: repo-local adoption evidence and repo-owned verification truth are both reproducible, root-visible, and scoped explicitly so the status does not overclaim broader certification
-- `partial`: current artifacts show meaningful alignment, but explicit contract adoption is not yet proven
-- `missing`: no explicit contract adoption artifact is visible from the stack root yet
-- `n/a`: the surface is intentionally out of the current adoption gate
+Field presence never earns adoption. An empty or absent `playbook_adoption_status`, a Playbook-named field, a filename, a note, or any other keyword produces no operational maturity. The explicit `not-claimed` posture is negative-safe unless genuine owner proof creates a conflict that must be reconciled.
 
-## Matrix
+## Declaration And Evidence Contract
 
-| Surface | Scope | Current Status | Evidence Now | Verification Needed | First Slice |
-| --- | --- | --- | --- | --- | --- |
-| `stack` | stack coordination root | `partial` | `README-STACK.md`, `docs/architecture/ATLAS-CORTEX-PLAYBOOK-CODEX.md`, `docs/ops/ATLAS-PLAYBOOK-CONVERGENCE.md` | root-visible adoption and continuity report | publish and maintain the stack-level report surface |
-| `playbook` | repo-local governance owner | `partial` | `repos/fawxzzy-playbook/exports/playbook.contract.example.v1.json`, `repos/fawxzzy-playbook/exports/playbook.contract.schema.v1.json`, `repos/fawxzzy-playbook/docs/contracts/PLAYBOOK-CONTRACT.md` | owner-repo verification beyond the export slice | keep the export canonical and versioned |
-| `atlas` | doctrine and context-routing owner | `partial` | awareness-first and conversation docs already enforce grounded, explicit files | context or verify output tied to the shared Playbook contract | route contract refs and continuity refs by intent |
-| `lifeline` | approvals and execution owner | `partial` | current stack doctrine already routes execution and approvals here | repo-local artifact that names the implemented contract version | align approvals, receipts, and execution surfaces |
-| `_stack` | orchestration and resume owner | `partial` | current stack doctrine already routes worker flow here | repo-local artifact that names the implemented contract version | align merge and resume patterns |
-| `knowledge lane` | stack-owned import, catalog, and promotion lane | `partial` | `docs/knowledge/IMPORT-RUNBOOK.md`, `docs/knowledge/QUERY-CONTRACT.md`, `docs/knowledge/PROMOTION-RUNBOOK.md` | explicit continuity promotion flow from handoff or archive into queryable outputs | wire conversation continuity into the import and promotion lane |
-| `fitness` | application repo | `verified` | `repos/fawxzzy-fitness/exports/fitness.playbook.adoption.evidence.v1.json`, `repos/fawxzzy-fitness/exports/fitness.playbook.verification.report.v1.json`, `repos/fawxzzy-fitness/docs/ops/FITNESS-PLAYBOOK-ADOPTION.md`, `repos/fawxzzy-fitness/docs/ops/FITNESS-PLAYBOOK-VERIFICATION.md`, `repos/fawxzzy-fitness/tests/playbook-adoption-evidence.test.mjs`, `repos/fawxzzy-fitness/tests/playbook-verification-report.test.mjs` | keep the targeted verification report and reproducible green path honest; broader product verification remains explicitly out of scope | maintain the repo-owned targeted verification lane and let root consume it read-only |
-| `mazer` | application repo | `verified` | `repos/mazer/exports/mazer.playbook.adoption.evidence.v1.json`, `repos/mazer/exports/mazer.playbook.verification.report.v1.json`, `repos/mazer/docs/ops/MAZER-PLAYBOOK-ADOPTION.md`, `repos/mazer/docs/ops/MAZER-PLAYBOOK-VERIFICATION.md`, `repos/mazer/tests/playbook-adoption-evidence.test.mjs`, `repos/mazer/tests/playbook-verification-report.test.mjs` | keep the targeted verification report and reproducible green path honest; broader product verification remains explicitly out of scope | maintain the repo-owned targeted verification lane and let root consume it read-only |
-| `stream` | incubating application repo | `missing` | visible in `stack.yaml` and inventory only | repo-local adoption note or explicit incubating defer decision | decide whether it joins the first rollout |
-| `nat1-games` | incubating application repo | `missing` | visible in `stack.yaml` and inventory only | repo-local adoption note or explicit incubating defer decision | decide whether it joins the first rollout |
-| `playbook-demo` | demo surface | `n/a` | demo repo exists in `stack.yaml` and inventory | explicit demo-role decision if reused for contract demos | keep out of the critical path unless intentionally used as a mirror |
+An accepted declaration uses `playbook_adoption_status` with `declared`, `adopted`, or `verified` plus non-empty bounded `playbook_adoption_profile` and `playbook_adoption_version` values. The projection does not maintain or guess a static profile catalog. `not-claimed` is normalized to `not_claimed`; empty and absent values mean no declaration.
 
-## Verification Rule
+`verified` requires every gate below:
 
-A status should move only when the owning surface has a concrete artifact such as:
+1. the explicit manifest profile and version declaration is accepted
+2. the repo-owned adoption export validates with `validate_repo_adoption_payload`
+3. the repo-owned verification report validates with `validate_playbook_verification_report` and reports `verified`
+4. the profile/version claim agrees with the manifest declaration
+5. current inventory identity and trust are safe for promotion
+6. any declared or receipted `owner_head`/`owner_ref` agrees with inventory `current_commit`/`current_ref`, with at least one current correlation value present
+7. `summary.last_verified_at` is timezone-aware, not in the future, and no more than 30 days old
 
-- a repo-local spec
-- a machine-readable contract file
-- a repo-local verify output that names the contract version
-- a stack-visible report or receipt that proves the rollout
+Timestamp parsing fails closed. Evidence older than 30 days or correlated to an earlier owner HEAD/ref is `stale`; malformed timestamps or unavailable correlation truth are non-green. Owner exports remain advisory inputs until the root completes all gates.
 
-`verified` specifically requires a repo-owned verification artifact with declared scope in addition to the adoption evidence.
+## Operational Rows And Compatibility
 
-`adopted` to `verified` requires all of the following:
+Schema `atlas.playbook_adoption_matrix.v2` emits one stable, sorted row per governed inventory component. Rows contain only bounded decision data: component id, operational classification, normalized declaration, profile/version, validation and verification state, freshness and HEAD correlation, short evidence refs, bounded reasons, and a legacy mapping.
 
-- the owner-repo verification run passes
-- the repo-owned verification artifact or report is published in the expected shape
-- root consumes that artifact without reinterpretation
-- the root projection updates cleanly
-- continuity captures the recovery narrative separately from live posture
+`legacy_classification` is deterministic compatibility data only:
 
-Until then, the matrix is an honest working assessment, not proof.
+- `declared` and `verified` map to legacy `owner_lane_advisory_adoption`
+- every other operational status maps to legacy `missing_adoption`
 
-## Root Projection Note
+The legacy value is never the operational `classification`. Consumers should migrate to the seven v2 status names.
 
-ATLAS now projects these statuses into the awareness and cockpit read models, but those projections stay negative-safe:
+Run the live read-only projection instead of copying status claims into this document:
 
-- local-only repos remain visible without being marked verified
-- missing or malformed owner exports render non-green
-- continuity coverage is reported separately from adoption
-- `fitness` should project as `verified` for its targeted convergence slice without implying broader product-wide certification
-- `mazer` should project as `verified` for its targeted convergence slice without implying broader product-wide certification
+```powershell
+python ops/atlas/playbook_adoption_matrix.py --json --scope owner
+```
+
+In particular, old static claims that Fitness or Mazer are verified are not authoritative. A live row is `verified` only while all declaration, validation, trust, freshness, and HEAD/ref gates above are satisfied.
+
+## Doctrine And Cortex Separation
+
+`playbook_sources`, doctrine consumer/signals, and `cortex_substrate_candidates` remain separate read-only catalog sections. They identify documentation, historical doctrine, consumers, patterns, rules, and failure modes for discovery or future curation. Historical docs and keyword-only catalog matches never participate in owner operational classification.
+
+The root-owned Cortex subsystem is not invented as a second implementation owner. It receives an owner row only if it is a governed inventory component; without a compatible declaration and owner-evidence contract it remains `missing` or `not_claimed`. Cortex substrate candidates do not upgrade that result.

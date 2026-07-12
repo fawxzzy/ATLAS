@@ -5,6 +5,7 @@ import json
 import re
 import sys
 from collections import OrderedDict
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Iterable
 
@@ -14,13 +15,49 @@ if str(ROOT) not in sys.path:
 
 from ops._atlas import atlas_root, normalize_slashes
 from ops.atlas.marker_knockout_selector import build_campaign
+from ops.atlas.playbook_contract import (
+    REPO_ADOPTION_EXPORT_TEMPLATE,
+    REPO_VERIFICATION_REPORT_TEMPLATE,
+    build_playbook_adoption_report,
+    validate_playbook_verification_report,
+    validate_repo_adoption_payload,
+)
 from ops.stack.generate_lockfile import git_output
 
-SCHEMA_VERSION = "atlas.playbook_adoption_matrix.v1"
+SCHEMA_VERSION = "atlas.playbook_adoption_matrix.v2"
 STATUS_OK = "ok"
 STATUS_ADVISORY = "advisory_gap"
 STATUS_BLOCKER = "blocker"
 STATUS_INTERNAL_ERROR = "internal_error"
+OWNER_STATUS_MISSING = "missing"
+OWNER_STATUS_NOT_CLAIMED = "not_claimed"
+OWNER_STATUS_DECLARED = "declared"
+OWNER_STATUS_VERIFIED = "verified"
+OWNER_STATUS_STALE = "stale"
+OWNER_STATUS_CONFLICTING = "conflicting"
+OWNER_STATUS_BLOCKED = "blocked"
+OWNER_OPERATIONAL_STATUSES = (
+    OWNER_STATUS_MISSING,
+    OWNER_STATUS_NOT_CLAIMED,
+    OWNER_STATUS_DECLARED,
+    OWNER_STATUS_VERIFIED,
+    OWNER_STATUS_STALE,
+    OWNER_STATUS_CONFLICTING,
+    OWNER_STATUS_BLOCKED,
+)
+LEGACY_OWNER_CLASSIFICATION = {
+    OWNER_STATUS_MISSING: "missing_adoption",
+    OWNER_STATUS_NOT_CLAIMED: "missing_adoption",
+    OWNER_STATUS_DECLARED: "owner_lane_advisory_adoption",
+    OWNER_STATUS_VERIFIED: "owner_lane_advisory_adoption",
+    OWNER_STATUS_STALE: "missing_adoption",
+    OWNER_STATUS_CONFLICTING: "missing_adoption",
+    OWNER_STATUS_BLOCKED: "missing_adoption",
+}
+ACCEPTED_DECLARATION_STATUSES = {"declared", "adopted", "verified"}
+EVIDENCE_FRESHNESS_DAYS = 30
+MAX_OWNER_EVIDENCE_REFS = 4
+MAX_OWNER_REASONS = 6
 SCOPES = {"owner", "platform", "research", "root"}
 PROTECTED_OUTPUT_PREFIXES = {
     ".playwright-mcp",
@@ -403,38 +440,214 @@ def collect_cortex_candidates(root: Path, paths: list[Path]) -> tuple[list[Order
     return doctrine, patterns, failures, candidates
 
 
-def collect_owner_lane_adoption(root: Path, owners: list[str]) -> OrderedDict[str, Any]:
-    report_path = root / "docs" / "registry" / "STACK-REPO-INVENTORY.json"
-    payload = _read_json(report_path) or {}
-    repos = payload.get("repos", [])
-    requested = {owner.lower() for owner in owners}
-    rows: list[OrderedDict[str, Any]] = []
-    if isinstance(repos, list):
-        for repo in repos:
-            if not isinstance(repo, dict):
-                continue
-            repo_id = str(repo.get("logical_id") or repo.get("repo_id") or repo.get("id") or "").strip()
-            if not repo_id:
-                continue
-            if requested and repo_id.lower() not in requested:
-                continue
-            text = json.dumps(repo, sort_keys=True).lower()
-            rows.append(
-                OrderedDict(
-                    [
-                        ("owner", repo_id),
-                        ("classification", "owner_lane_advisory_adoption" if "playbook" in text else "missing_adoption"),
-                        ("source_ref", "docs/registry/STACK-REPO-INVENTORY.json"),
-                        ("read_only", True),
-                        ("root_owned_proof", False),
-                    ]
-                )
-            )
+def _normalized_token(value: Any) -> str | None:
+    token = str(value or "").strip()
+    if not token or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{0,63}", token):
+        return None
+    return token
+
+
+def _manifest_declaration(repo: dict[str, Any]) -> dict[str, Any]:
+    raw_status = str(repo.get("playbook_adoption_status") or "").strip().lower()
+    status = raw_status.replace("-", "_").replace(" ", "_")
+    profile = _normalized_token(repo.get("playbook_adoption_profile"))
+    version = _normalized_token(repo.get("playbook_adoption_version"))
+    owner_head = _normalized_token(repo.get("playbook_adoption_owner_head"))
+    owner_ref = _normalized_token(repo.get("playbook_adoption_owner_ref"))
+    if not status:
+        state = "missing"
+    elif status == "not_claimed":
+        state = "not_claimed"
+    elif status in ACCEPTED_DECLARATION_STATUSES and profile and version:
+        state = "declared"
+    else:
+        state = "invalid"
+    return {
+        "state": state,
+        "profile": profile,
+        "version": version,
+        "owner_head": owner_head,
+        "owner_ref": owner_ref,
+    }
+
+
+def _owner_evidence(*, root: Path, repo: dict[str, Any], contract_row: dict[str, Any]) -> dict[str, Any]:
+    repo_id = str(repo.get("logical_id") or "").strip()
+    repo_path = str(repo.get("local_path") or "").strip()
+    evidence_refs: list[str] = []
+    payloads: dict[str, dict[str, Any] | None] = {"adoption": None, "verification": None}
+    errors: list[str] = []
+    states: list[str] = []
+    specs = (
+        ("adoption", REPO_ADOPTION_EXPORT_TEMPLATE.format(repo_id=repo_id), validate_repo_adoption_payload),
+        ("verification", REPO_VERIFICATION_REPORT_TEMPLATE.format(repo_id=repo_id), validate_playbook_verification_report),
+    )
+    for kind, relative_ref, validator in specs:
+        if not repo_path:
+            states.append("missing")
+            continue
+        path = root / repo_path / relative_ref
+        if not path.exists():
+            states.append("missing")
+            continue
+        evidence_refs.append(f"{repo_path.rstrip('/')}/{relative_ref}".replace("\\", "/"))
+        text = _read_text(path)
+        try:
+            payload = json.loads(text or "")
+        except (TypeError, json.JSONDecodeError):
+            states.append("invalid")
+            errors.append(f"{kind}_evidence_unparseable")
+            continue
+        if not isinstance(payload, dict):
+            states.append("invalid")
+            errors.append(f"{kind}_evidence_not_object")
+            continue
+        validation_errors = validator(payload, expected_repo_id=repo_id)
+        if validation_errors:
+            states.append("invalid")
+            errors.append(f"{kind}_evidence_schema_invalid")
+            continue
+        states.append("valid")
+        payloads[kind] = payload
+
+    if "invalid" in states:
+        validation = "invalid"
+    elif states and all(state == "valid" for state in states):
+        validation = "valid"
+    elif "valid" in states:
+        validation = "partial"
+    else:
+        validation = "missing"
+    if contract_row.get("verification_status") == "blocked" and validation != "invalid":
+        validation = "unsafe"
+        errors.append("contract_projection_blocked")
+    return {
+        "validation": validation,
+        "adoption": payloads["adoption"],
+        "verification": payloads["verification"],
+        "evidence_refs": sorted(set(evidence_refs))[:MAX_OWNER_EVIDENCE_REFS],
+        "errors": errors,
+    }
+
+
+def _payload_repo_correlation(payload: dict[str, Any] | None) -> tuple[str | None, str | None]:
+    repo = payload.get("repo") if isinstance(payload, dict) and isinstance(payload.get("repo"), dict) else {}
+    return _normalized_token(repo.get("owner_head")), _normalized_token(repo.get("owner_ref"))
+
+
+def _parse_receipt_time(value: Any) -> datetime | None:
+    text = str(value or "").strip()
+    if not text:
+        return None
+    try:
+        parsed = datetime.fromisoformat(text.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        return None
+    return parsed.astimezone(timezone.utc)
+
+
+def _classify_owner_row(*, repo: dict[str, Any], contract_row: dict[str, Any], evidence: dict[str, Any], now: datetime) -> OrderedDict[str, Any]:
+    repo_id = str(repo.get("logical_id") or "").strip()
+    declaration = _manifest_declaration(repo)
+    adoption = evidence.get("adoption") if isinstance(evidence.get("adoption"), dict) else None
+    verification = evidence.get("verification") if isinstance(evidence.get("verification"), dict) else None
+    claim = adoption.get("contract_claim") if adoption and isinstance(adoption.get("contract_claim"), dict) else {}
+    adoption_summary = adoption.get("summary") if adoption and isinstance(adoption.get("summary"), dict) else {}
+    verification_summary = verification.get("summary") if verification and isinstance(verification.get("summary"), dict) else {}
+    evidence_profile = _normalized_token(claim.get("contract_id"))
+    evidence_version = _normalized_token(claim.get("contract_version"))
+    owner_proof_claim = adoption_summary.get("adoption_status") in {"adopted", "verified"} or verification_summary.get("verification_status") == "verified"
+    reasons = list(evidence.get("errors", []))
+    freshness = "not_applicable"
+    head_correlation = "not_applicable"
+
+    if evidence.get("validation") == "invalid":
+        classification = OWNER_STATUS_BLOCKED
+    elif declaration["state"] == "not_claimed" and owner_proof_claim:
+        classification = OWNER_STATUS_CONFLICTING
+        reasons.append("not_claimed_conflicts_with_owner_proof")
+    elif declaration["state"] in {"missing", "invalid"} and owner_proof_claim:
+        classification = OWNER_STATUS_CONFLICTING
+        reasons.append("matching_manifest_declaration_missing")
+    elif declaration["state"] == "not_claimed":
+        classification = OWNER_STATUS_NOT_CLAIMED
+    elif declaration["state"] != "declared":
+        classification = OWNER_STATUS_MISSING
+        if declaration["state"] == "invalid":
+            reasons.append("manifest_declaration_invalid")
+    elif adoption and (evidence_profile != declaration["profile"] or evidence_version != declaration["version"]):
+        classification = OWNER_STATUS_CONFLICTING
+        reasons.append("manifest_owner_profile_version_mismatch")
+    elif evidence.get("validation") == "unsafe":
+        classification = OWNER_STATUS_BLOCKED
+    elif not adoption or adoption_summary.get("adoption_status") not in {"adopted", "verified"}:
+        classification = OWNER_STATUS_DECLARED
+        reasons.append("valid_owner_adoption_export_absent")
+    elif not verification or verification_summary.get("verification_status") != "verified":
+        classification = OWNER_STATUS_DECLARED
+        reasons.append("current_verification_receipt_absent")
+    else:
+        receipt_time = _parse_receipt_time(verification_summary.get("last_verified_at"))
+        if receipt_time is None or receipt_time > now:
+            freshness = "invalid"
+            classification = OWNER_STATUS_BLOCKED
+            reasons.append("verification_timestamp_invalid")
+        elif now - receipt_time > timedelta(days=EVIDENCE_FRESHNESS_DAYS):
+            freshness = "stale"
+            classification = OWNER_STATUS_STALE
+            reasons.append("verification_older_than_30_days")
+        else:
+            freshness = "fresh"
+            current_head = _normalized_token(repo.get("current_commit"))
+            current_ref = _normalized_token(repo.get("current_ref"))
+            adoption_head, adoption_ref = _payload_repo_correlation(adoption)
+            verification_head, verification_ref = _payload_repo_correlation(verification)
+            correlations = [(declaration.get("owner_head"), current_head), (declaration.get("owner_ref"), current_ref), (adoption_head, current_head), (adoption_ref, current_ref), (verification_head, current_head), (verification_ref, current_ref)]
+            claims = [(claim_value, current_value) for claim_value, current_value in correlations if claim_value]
+            if not claims:
+                head_correlation = "missing"
+                classification = OWNER_STATUS_DECLARED
+                reasons.append("owner_head_correlation_missing")
+            elif any(current_value is None for _, current_value in claims):
+                head_correlation = "unsafe"
+                classification = OWNER_STATUS_BLOCKED
+                reasons.append("inventory_owner_head_unavailable")
+            elif any(claim_value != current_value for claim_value, current_value in claims):
+                head_correlation = "stale"
+                classification = OWNER_STATUS_STALE
+                reasons.append("owner_head_or_ref_is_not_current")
+            else:
+                head_correlation = "current"
+                classification = OWNER_STATUS_VERIFIED
+
+    if classification not in OWNER_OPERATIONAL_STATUSES:
+        raise ValueError(f"Unsupported owner classification for {repo_id}: {classification}")
+    return OrderedDict([("component_id", repo_id), ("classification", classification), ("declaration", declaration["state"]), ("profile", declaration["profile"] or evidence_profile), ("version", declaration["version"] or evidence_version), ("evidence_validation", evidence.get("validation")), ("verification_status", str(contract_row.get("verification_status") or "missing")), ("freshness", freshness), ("head_correlation", head_correlation), ("evidence_refs", evidence.get("evidence_refs", [])), ("blocking_reasons", sorted(set(reasons))[:MAX_OWNER_REASONS]), ("legacy_classification", LEGACY_OWNER_CLASSIFICATION[classification])])
+
+
+def collect_owner_lane_adoption(root: Path, owners: list[str], *, scope: str = "root", now: datetime | None = None, inventory_payload: dict[str, Any] | None = None) -> OrderedDict[str, Any]:
+    payload = inventory_payload or _read_json(root / "docs" / "registry" / "STACK-REPO-INVENTORY.json") or {}
+    repos = payload.get("repos", []) if isinstance(payload.get("repos"), list) else []
+    requested_owners = sorted({owner.strip() for owner in owners if owner.strip()}, key=str.lower)
+    requested = {owner.lower() for owner in requested_owners}
+    contract_report = build_playbook_adoption_report(root=root, inventory_payload=payload) if repos else {"repos": []}
+    contract_rows = {str(row.get("repo_id") or ""): row for row in contract_report.get("repos", []) if isinstance(row, dict) and str(row.get("repo_id") or "").strip()}
+    current_time = (now or datetime.now(timezone.utc)).astimezone(timezone.utc)
+    governed = sorted((repo for repo in repos if isinstance(repo, dict) and str(repo.get("logical_id") or "").strip() and (not requested or str(repo.get("logical_id") or "").lower() in requested)), key=lambda repo: str(repo.get("logical_id") or "").lower())
+    rows = []
+    for repo in governed:
+        repo_id = str(repo.get("logical_id") or "").strip()
+        evidence = _owner_evidence(root=root, repo=repo, contract_row=contract_rows.get(repo_id, {}))
+        rows.append(_classify_owner_row(repo=repo, contract_row=contract_rows.get(repo_id, {}), evidence=evidence, now=current_time))
     return OrderedDict(
         [
-            ("scope", "owner" if owners else "root"),
-            ("requested_owners", owners),
+            ("scope", "owner" if scope == "owner" else "root"),
+            ("requested_owners", requested_owners),
             ("read_only", True),
+            ("freshness_rule_days", EVIDENCE_FRESHNESS_DAYS),
+            ("legacy_mapping", OrderedDict((status, LEGACY_OWNER_CLASSIFICATION[status]) for status in OWNER_OPERATIONAL_STATUSES)),
             ("rows", rows),
         ]
     )
@@ -492,7 +705,7 @@ def build_report(*, root: Path, scope: str = "root", owners: list[str] | None = 
 
     non_consumers = collect_non_consumers(root, gaps)
     doctrine_signals, pattern_signals, failure_mode_signals, cortex_candidates = collect_cortex_candidates(root, [*source_paths, *consumer_paths])
-    owner_lane_adoption = collect_owner_lane_adoption(root, owners)
+    owner_lane_adoption = collect_owner_lane_adoption(root, owners, scope=scope)
     if scope == "owner":
         all_findings.append(_finding("owner_scope_read_only", "Owner scope is read-only and advisory to ATLAS root.", owners=owners))
     if scope in {"platform", "research"}:
