@@ -22,13 +22,13 @@ Operational rule:
 - Excluded surface count: `16`
 - Stack manifest: `stack.yaml`
 - Stack lock: `stack.lock.yaml`
-- Inventory digest: `sha256:d3bf433fa9001d18f6c7e9efc1d58a60c18282a34d611dbe371eab7a8a49d241`
+- Inventory digest: `sha256:7170855bbf7e07cef354564c0ad0e77f7e3baddcd512e0f81b6bc4a9cbd35e36`
 
 ## Managed Repos
 
 | Repo id | Path | Role | Playbook adoption status | Branch | Pinned commit | Current commit | Dirty | Root-blocking | Dirty blocks root | Trust | Release | Related initiatives |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| _stack | repos/_stack | workflow-operator | - | main | 6e96d1571121a30c668b5c6f9d283ca316912126 | 6e96d1571121a30c668b5c6f9d283ca316912126 | False | True | False | trusted | False | initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-local-data-gateway<br>initiative:continuity-manifest-post-convergence-lane-split-readiness<br>initiative:continuity-manifest-stack-readiness<br>initiative:continuity-manifest-vision-future-alignment |
+| _stack | repos/_stack | workflow-operator | verified | main | 0b91367158f09ca3ea007752678142cde9fb7653 | 0b91367158f09ca3ea007752678142cde9fb7653 | False | True | False | trusted | False | initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-local-data-gateway<br>initiative:continuity-manifest-post-convergence-lane-split-readiness<br>initiative:continuity-manifest-stack-readiness<br>initiative:continuity-manifest-vision-future-alignment |
 | discordos | repos/DiscordOS | board-and-discord-writer | not-claimed | codex/mazer-viewport-board-status | b173de1549f85cbde040aa6a7ddeba959c7dc524 | b173de1549f85cbde040aa6a7ddeba959c7dc524 | False | True | False | trusted | False | initiative:continuity-manifest-dependency-untangling<br>initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-discord-os-infrastructure-separation |
 | fitness | repos/fawxzzy-fitness | application | - | main | - | e1ab7fbea979456380230c5459fdef6ae4c927e9 | True | False | False | adjacent | False | initiative:continuity-manifest-dependency-untangling<br>initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-discord-os-infrastructure-separation<br>initiative:continuity-manifest-local-data-gateway |
 | foundation | repos/foundation | shared-contract-foundation | not-claimed | main | 5cedd6234755be3d637abc33572b905dce3b8f7c | 5cedd6234755be3d637abc33572b905dce3b8f7c | False | True | False | trusted | True | - |
@@ -37,7 +37,7 @@ Operational rule:
 | nat1-games | repos/Nat1-Games/nat1-games | application | - | codex/path-discipline-warning-slice-nat1 | 404460d3717fab389407582048a9b9f228f26d39 | 404460d3717fab389407582048a9b9f228f26d39 | False | True | False | trusted | False | - |
 | playbook | repos/playbook | governance-runtime | - | codex/path-discipline-warning-slice-playbook | 10b8f0ac044a7f9c66b4aa8dd08f6abd2d1c5269 | 10b8f0ac044a7f9c66b4aa8dd08f6abd2d1c5269 | False | True | False | trusted | True | initiative:continuity-manifest-atlas-owned-repo-naming-canonicalization |
 | playbook-demo | repos/playbook-demo/playbook-demo | demo | - | main | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | False | True | False | trusted | False | - |
-| stack | . | operator-layer | - | main | - | 5a8c8385d779c825de3a3ce60f9d3eca13f51baf | True | True | True | trusted | False | - |
+| stack | . | operator-layer | - | main | - | 7dc4844a7b54862f28e4c782d152b6264a8ed04b | True | True | True | trusted | False | - |
 | stream | repos/stream | application | - | main | 43769ba86d4c6ebc419ab9e7847c3843460a094f | 43769ba86d4c6ebc419ab9e7847c3843460a094f | False | True | False | trusted | False | - |
 | trove | repos/trove | application | - | codex/path-discipline-warning-slice-trove | 437c7604adee02e0403d77f75162a6c5f232221f | 437c7604adee02e0403d77f75162a6c5f232221f | False | True | False | trusted | True | - |
 
