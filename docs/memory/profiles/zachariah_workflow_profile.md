@@ -61,7 +61,10 @@ Responses should end with a short `Recommended execution path` referencing the b
 
 ## Implementation style
 
-When changes are needed, prefer copy-paste-ready Codex prompts instead of raw code unless Zac explicitly asks for code.
+When changes are needed, prefer native desktop task handoff and direct Codex
+execution over copy-pasting large prompts. Use a portable prompt artifact only
+when the native handoff is unavailable or the prompt itself is a governed
+deliverable.
 
 Codex prompts should include:
 - Objective
@@ -76,6 +79,39 @@ When working on Playbook or repository development and speed matters, default to
 - avoid file overlap and merge conflicts
 - separate Wave 1 / Wave 2 when dependencies exist
 - produce copy-paste-ready prompts for each worker
+
+## Atlas command-surface preferences
+
+- `ATLAS MAIN` is the pinned anchor conversation for operational preparation,
+  Atlas governance, architecture, markers, routing, and cross-project review.
+- Create `Fitness` only after its operational-preparation resume gates pass.
+- Reuse the existing `Mazer` conversation. Refresh its context and resume its
+  preserved checkpoint instead of creating a replacement conversation.
+- DiscordOS is an embedded governed service and single logical writer, not a
+  required standing conversation.
+- Archive bounded Codex tasks after their accepted terminal receipt is durable.
+  Do not archive active standing conversations.
+- Atlas may pause Mazer or another owner lane at a safe checkpoint when a
+  serialized canonical root window requires stable workspace registration,
+  then explicitly resume it from the recorded checkpoint.
+
+## Atlas platform preferences
+
+- Atlas is local-first, with GitHub treated as a first-class remote backup,
+  collaboration, CI, review, release, and delivery control plane alongside
+  Vercel and Supabase.
+- Keep GitHub repository inventory, branch and remote parity, pull requests,
+  Actions, releases, dependency/security signals, and stale-resource cleanup
+  visible in Atlas and correlated with `_stack` and DiscordOS receipts.
+- Full local permissions are the default execution capability. Pushes,
+  production deployments, Discord writes, and live data mutations still require
+  the applicable task authority.
+- Select model, reasoning, and speed by task. Capability-check the actual Codex
+  executable because desktop and CLI model catalogs can differ, and always
+  receipt requested versus effective runtime settings.
+- The Atlas Clean and Re-sync marker cluster includes an exhaustive two-pass
+  full-system re-evaluation: `0%` before the opening audit, `50%` after it, and
+  `100%` only after the closing audit. Discovered work receives separate lanes.
 
 If a reusable Rule, Pattern, or Failure Mode emerges:
 - explicitly label it
