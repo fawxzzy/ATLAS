@@ -37,6 +37,21 @@ const schemaPlan = [
     valid: "valid/receipt.json",
     invalid: "invalid/receipt.bad-status.json",
   },
+  {
+    file: "atlas.component-manifest.v2.schema.json",
+    valid: "valid/component-manifest.v2.json",
+    invalid: "invalid/component-manifest.v2.bad-authority.json",
+  },
+  {
+    file: "atlas.job-envelope.v2.schema.json",
+    valid: "valid/job-envelope.v2.json",
+    invalid: "invalid/job-envelope.v2.bad-authority.json",
+  },
+  {
+    file: "atlas.execution-receipt.v2.schema.json",
+    valid: "valid/execution-receipt.v2.json",
+    invalid: "invalid/execution-receipt.v2.bad-status.json",
+  },
 ];
 
 const isoDateTimePattern =

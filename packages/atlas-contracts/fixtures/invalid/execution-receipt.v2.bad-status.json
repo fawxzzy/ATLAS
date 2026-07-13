@@ -1,0 +1,18 @@
+{
+  "contract_version": "atlas.execution-receipt.v2",
+  "receipt_id": "atlas-receipt-20260713-002",
+  "job_id": "atlas-job-20260713-001",
+  "recorded_at": "2026-07-13T00:25:00Z",
+  "status": "complete",
+  "component_id": "stack",
+  "project_id": "atlas",
+  "runtime_effective": {"model": "gpt-5.6-terra", "reasoning": "medium", "speed": "standard", "permissions": "full-access", "approval_policy": "never"},
+  "changed_paths": [],
+  "commits": [],
+  "verification": [],
+  "evidence_refs": [],
+  "blockers": [],
+  "follow_up": [],
+  "correlations": {"card_id": null, "thread_id": null, "turn_id": null, "branch": null, "worktree": null},
+  "authority_actions": []
+}

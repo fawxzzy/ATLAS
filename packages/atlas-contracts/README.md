@@ -16,6 +16,14 @@ ATLAS root owns versioned platform contracts. Owner repos own implementation.
 
 This package gives app repos a stable, machine-validated surface to conform to without moving app logic, auth flows, or deployment behavior into the ATLAS root.
 
+The first Contracts v2 implementation cluster also provides schema, export, and fixture foundations for:
+
+- `atlas.component-manifest.v2`
+- `atlas.job-envelope.v2`
+- `atlas.execution-receipt.v2`
+
+These v2 families remain implementation foundations rather than completed mesh units until governed producer and consumer adoption proof exists.
+
 ## Package Surface
 
 Schemas:
@@ -25,6 +33,9 @@ Schemas:
 - `atlas.health.v1`
 - `atlas.event.v1`
 - `atlas.receipt.v1`
+- `atlas.component-manifest.v2`
+- `atlas.job-envelope.v2`
+- `atlas.execution-receipt.v2`
 
 Exports:
 

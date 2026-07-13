@@ -4,6 +4,12 @@ export const ATLAS_APP_REGISTRATION_CONTRACT_VERSION =
 export const ATLAS_HEALTH_CONTRACT_VERSION = "atlas.health.v1" as const;
 export const ATLAS_EVENT_CONTRACT_VERSION = "atlas.event.v1" as const;
 export const ATLAS_RECEIPT_CONTRACT_VERSION = "atlas.receipt.v1" as const;
+export const ATLAS_COMPONENT_MANIFEST_CONTRACT_VERSION =
+  "atlas.component-manifest.v2" as const;
+export const ATLAS_JOB_ENVELOPE_CONTRACT_VERSION =
+  "atlas.job-envelope.v2" as const;
+export const ATLAS_EXECUTION_RECEIPT_CONTRACT_VERSION =
+  "atlas.execution-receipt.v2" as const;
 
 export const ATLAS_CONTRACT_VERSIONS = [
   ATLAS_ENV_CONTRACT_VERSION,
@@ -11,6 +17,9 @@ export const ATLAS_CONTRACT_VERSIONS = [
   ATLAS_HEALTH_CONTRACT_VERSION,
   ATLAS_EVENT_CONTRACT_VERSION,
   ATLAS_RECEIPT_CONTRACT_VERSION,
+  ATLAS_COMPONENT_MANIFEST_CONTRACT_VERSION,
+  ATLAS_JOB_ENVELOPE_CONTRACT_VERSION,
+  ATLAS_EXECUTION_RECEIPT_CONTRACT_VERSION,
 ] as const;
 
 export const ATLAS_ENVIRONMENTS = [
@@ -95,6 +104,12 @@ export const ATLAS_SCHEMA_PATHS = {
     "schemas/atlas.event.v1.schema.json",
   [ATLAS_RECEIPT_CONTRACT_VERSION]:
     "schemas/atlas.receipt.v1.schema.json",
+  [ATLAS_COMPONENT_MANIFEST_CONTRACT_VERSION]:
+    "schemas/atlas.component-manifest.v2.schema.json",
+  [ATLAS_JOB_ENVELOPE_CONTRACT_VERSION]:
+    "schemas/atlas.job-envelope.v2.schema.json",
+  [ATLAS_EXECUTION_RECEIPT_CONTRACT_VERSION]:
+    "schemas/atlas.execution-receipt.v2.schema.json",
 } as const;
 
 export type AtlasContractVersion = (typeof ATLAS_CONTRACT_VERSIONS)[number];

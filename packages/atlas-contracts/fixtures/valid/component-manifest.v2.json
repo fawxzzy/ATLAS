@@ -1,0 +1,11 @@
+{
+  "contract_version": "atlas.component-manifest.v2",
+  "component_id": "stack",
+  "display_name": "Atlas Stack Operator",
+  "kind": "operator",
+  "owner": {"id": "stack", "authority": "owner-repository"},
+  "repository": {"repo_id": "stack", "root_path": "repos/_stack", "default_branch": "main", "remote": "fawxzzy/_stack"},
+  "capabilities": ["codex-execution", "verification", "worktree-management"],
+  "dependencies": [{"component_id": "atlas", "kind": "contracts", "required": true}],
+  "protocols": {"atlas_contracts": "v2", "playbook_profile": "operator", "agent_instructions": "AGENTS.md"}
+}

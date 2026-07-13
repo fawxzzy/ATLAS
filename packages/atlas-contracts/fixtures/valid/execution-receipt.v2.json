@@ -1,0 +1,19 @@
+{
+  "contract_version": "atlas.execution-receipt.v2",
+  "receipt_id": "atlas-receipt-20260713-001",
+  "job_id": "atlas-job-20260713-001",
+  "recorded_at": "2026-07-13T00:25:00Z",
+  "status": "succeeded",
+  "component_id": "stack",
+  "project_id": "atlas",
+  "runtime_effective": {"model": "gpt-5.6-terra", "reasoning": "medium", "speed": "standard", "permissions": "full-access", "approval_policy": "never"},
+  "changed_paths": ["packages/atlas-contracts/schemas/atlas.job-envelope.v2.schema.json"],
+  "commits": ["0123456789abcdef0123456789abcdef01234567"],
+  "verification": [{"command": "node packages/atlas-contracts/scripts/validate-contracts.mjs", "status": "passed", "evidence_refs": ["runtime/receipts/contracts/validation.json"]}],
+  "evidence_refs": ["runtime/receipts/contracts/validation.json"],
+  "blockers": [],
+  "follow_up": ["Add governed producer and consumer adoption proof."],
+  "correlations": {"card_id": null, "thread_id": "thread-001", "turn_id": "turn-001", "branch": "codex/contracts-v2-cluster-1", "worktree": null},
+  "authority_actions": [],
+  "summary": "Cluster validation passed."
+}

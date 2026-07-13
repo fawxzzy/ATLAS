@@ -1,0 +1,11 @@
+{
+  "contract_version": "atlas.component-manifest.v2",
+  "component_id": "stack",
+  "display_name": "Atlas Stack Operator",
+  "kind": "operator",
+  "owner": {"id": "stack", "authority": "unbounded"},
+  "repository": {"repo_id": "stack", "root_path": "repos/_stack", "default_branch": "main"},
+  "capabilities": [],
+  "dependencies": [],
+  "protocols": {"atlas_contracts": "v2", "playbook_profile": null, "agent_instructions": "AGENTS.md"}
+}
