@@ -1,0 +1,69 @@
+{
+  "schema": "atlas.source-manifest.v1",
+  "import_id": "fawxzzy-tech-plan-recovery-2026-07-13",
+  "imported_at": "2026-07-13T07:43:50Z",
+  "import_posture": "immutable raw provenance import",
+  "current_truth_override_rule": "Imported historical, chat-derived, skill, and draft playbook claims are context only. They cannot override current Git, runtime, test, owner receipt, board readback, deployment readback, or accepted receipt evidence.",
+  "sources": [
+    {
+      "relative_import_path": "data/imports/fawxzzy-tech-plan-recovery/2026-07-13/FAWXZZY_TECH_PLAN_RECOVERY_2026-07-13.md",
+      "display_filename": "FAWXZZY_TECH_PLAN_RECOVERY_2026-07-13.md",
+      "sha256": "c579f1a1fdf999d34b4acad05362decafee599d568e90d5fedf0198f1430c8e5",
+      "byte_size": 32404,
+      "media_type": "text/markdown",
+      "evidence_class": "historical recovered plan",
+      "authority_class": "historical-plan-harvest",
+      "immutable_raw": true
+    },
+    {
+      "relative_import_path": "data/imports/fawxzzy-tech-plan-recovery/2026-07-13/FAWXZZY_TECH_PLAN_RECOVERY_COMPLETE_2026-07-13.md",
+      "display_filename": "FAWXZZY_TECH_PLAN_RECOVERY_COMPLETE_2026-07-13.md",
+      "sha256": "746e12bb88e9c9cd83a7af400b1d6f0a32f395ce90b61abe54c8842d8f4780b9",
+      "byte_size": 39464,
+      "media_type": "text/markdown",
+      "evidence_class": "historical recovered plan",
+      "authority_class": "historical-plan-harvest",
+      "immutable_raw": true
+    },
+    {
+      "relative_import_path": "data/imports/fawxzzy-tech-plan-recovery/2026-07-13/FAWXZZY_TECH_PLAN_RECOVERY_VERIFIED_2026-07-13.md",
+      "display_filename": "FAWXZZY_TECH_PLAN_RECOVERY_VERIFIED_2026-07-13.md",
+      "sha256": "5a040bd5325ff514c860e630309230f8c85d548cb4ffc042a334db44829af94f",
+      "byte_size": 77718,
+      "media_type": "text/markdown",
+      "evidence_class": "historical recovered plan with dated verification claims",
+      "authority_class": "historical-plan-harvest",
+      "immutable_raw": true
+    },
+    {
+      "relative_import_path": "data/imports/fawxzzy-tech-plan-recovery/2026-07-13/FAWXZZY_TECH_PLAN_REGISTER_VERIFIED_2026-07-13.json",
+      "display_filename": "FAWXZZY_TECH_PLAN_REGISTER_VERIFIED_2026-07-13.json",
+      "sha256": "16da7dca845bc7dc0b4b3e941b2ddbd379486c2ba46b9c2d34330c14c7456305",
+      "byte_size": 49185,
+      "media_type": "application/json",
+      "evidence_class": "historical recovered plan register",
+      "authority_class": "historical-plan-harvest",
+      "immutable_raw": true
+    },
+    {
+      "relative_import_path": "data/imports/fawxzzy-tech-plan-recovery/2026-07-13/review-project-next-step.SKILL.md",
+      "display_filename": "SKILL.md",
+      "sha256": "cc7732a7ff5a8b79d6027575b693de383129857ffdd87b26448bdb1bb3af7552",
+      "byte_size": 7115,
+      "media_type": "text/markdown",
+      "evidence_class": "Project Review and Next Step skill source",
+      "authority_class": "skill-source",
+      "immutable_raw": true
+    },
+    {
+      "relative_import_path": "data/imports/fawxzzy-tech-plan-recovery/2026-07-13/atlas-engineering-playbook.docx",
+      "display_filename": "atlas-engineering-playbook.docx",
+      "sha256": "29c1d3e5f4050fa1fd18336129085dd4d4a308548d6b776cda63eae84f67c479",
+      "byte_size": 42757,
+      "media_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "evidence_class": "ATLAS Engineering Playbook Edition 0.1 draft",
+      "authority_class": "playbook-draft",
+      "immutable_raw": true
+    }
+  ]
+}

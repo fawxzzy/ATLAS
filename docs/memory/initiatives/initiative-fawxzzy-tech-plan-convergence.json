@@ -1,0 +1,79 @@
+{
+  "contract_version": "atlas.initiative.v1",
+  "id": "initiative-fawxzzy-tech-plan-convergence",
+  "title": "Fawxzzy Technology Plan Convergence",
+  "summary": "Admit recovered technology-plan, Project Review and Next Step skill, and ATLAS Engineering Playbook sources as immutable provenance without allowing historical status to override current evidence.",
+  "status": "active",
+  "owner": "stack-root",
+  "created_at": "2026-07-13T07:43:50Z",
+  "updated_at": "2026-07-13T07:43:50Z",
+  "related_plan_refs": [],
+  "related_decision_refs": [],
+  "related_hypothesis_refs": [],
+  "related_session_refs": [],
+  "related_attention_refs": [],
+  "proposed_next_session_refs": [],
+  "evidence_refs": [
+    "data/imports/fawxzzy-tech-plan-recovery/2026-07-13/source-manifest.json",
+    "docs/registry/FAWXZZY-TECH-PLAN-RECOVERY-ADMISSION.json",
+    "docs/ops/FAWXZZY-TECH-PLAN-CONVERGENCE-ADMISSION-2026-07-13.md"
+  ],
+  "supersedes": [],
+  "superseded_by": [],
+  "metadata": {
+    "schema_version": "atlas.fawxzzy-tech-plan-convergence.initiative.v1",
+    "phase": "admission",
+    "mission": "Admit recovered technology-plan, Project Review and Next Step skill, and ATLAS Engineering Playbook sources as immutable provenance-backed Atlas inputs without allowing historical status to override current evidence.",
+    "source_set": {
+      "manifest": "data/imports/fawxzzy-tech-plan-recovery/2026-07-13/source-manifest.json",
+      "raw_import_root": "data/imports/fawxzzy-tech-plan-recovery/2026-07-13",
+      "admission_registry": "docs/registry/FAWXZZY-TECH-PLAN-RECOVERY-ADMISSION.json"
+    },
+    "evidence_hierarchy": [
+      "Current Git and repository state",
+      "Current runtime and deployment readback",
+      "Current tests and validation",
+      "Current owner receipts and board readback",
+      "Accepted current stack receipts",
+      "Recovered sources as provenance only"
+    ],
+    "accepted_outputs": [
+      "Six byte-preserved raw imports with matching SHA-256 and size",
+      "Source manifest",
+      "Governed admission registry",
+      "Admission report"
+    ],
+    "candidate_outputs": [
+      "Machine-readable engineering doctrine registry under lane-source-hierarchy-doc-normalization",
+      "Governed Project Review and Next Step skill adoption under lane-codex-execution-contracts"
+    ],
+    "dependencies": [
+      "lane-atlas-contracts-mesh producer and consumer adoption",
+      "Current source hierarchy and owner evidence",
+      "No duplicate lane admission"
+    ],
+    "serialization": [
+      "Continue Contracts v2 producer and consumer adoption first",
+      "Then implement the doctrine registry",
+      "Then govern Project Review and Next Step skill adoption",
+      "Do not interleave recovered backlog implementation with this admission"
+    ],
+    "ownership": {
+      "admission_writer": "stack-root",
+      "provenance_convergence_lane": "lane-historical-task-intelligence",
+      "doctrine_registry_lane": "lane-source-hierarchy-doc-normalization",
+      "review_skill_lane": "lane-codex-execution-contracts"
+    },
+    "resume_conditions": [
+      "Raw-import hashes and byte sizes remain verified",
+      "No current evidence contradicts the proposed next packet",
+      "Contracts v2 producer and consumer adoption is addressed before follow-on doctrine or skill work",
+      "A future lane changes only with accepted current evidence and its own scope admission"
+    ],
+    "constraints": [
+      "Historical status cannot override current truth",
+      "No marker moves from this import alone",
+      "No owner repository, board, Discord, deployment, production system, or GitHub remote mutation"
+    ]
+  }
+}

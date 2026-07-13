@@ -1,0 +1,1165 @@
+{
+  "schema": "fawxzzy.tech-plan-recovery.v2",
+  "generated_at": "2026-07-13",
+  "title": "Fawxzzy Technology Plan Recovery — Live-Verified Revision",
+  "coverage": {
+    "library_baseline": "FAWXZZY_TECH_PLAN_RECOVERY_2026-07-13.md",
+    "github_owner": "fawxzzy",
+    "cloud_repositories_inspected": [
+      "ATLAS",
+      "playbook",
+      "lifeline",
+      "fawxzzy-fitness",
+      "mazer",
+      "trove",
+      "foundation",
+      "cortex",
+      "DiscordOS",
+      "_stack"
+    ],
+    "local_or_projected_repositories": [
+      "stream",
+      "nat1-games",
+      "playbook-demo"
+    ],
+    "claim": "All recoverable plans found in indexed conversation/library records plus current accessible repository plan surfaces; not a claim about deleted or inaccessible material."
+  },
+  "source_precedence": [
+    "Current executable/local owner evidence and timestamped authenticated read-only external responses for their respective planes.",
+    "stack.yaml for declared topology/policy, with generated lock/inventory drift explicitly flagged.",
+    "Current validation receipt for health.",
+    "ATLAS Book marker surface only when backed by accepted receipt and continuity manifest.",
+    "Continuity/restart indexes as projections, never implementation proof.",
+    "Current owner-repository evidence for product/code truth.",
+    "Chat, delegation, and handoffs as intent/routing evidence only.",
+    "Historical/archive documents as provenance only."
+  ],
+  "post_clean_resync_lineage": {
+    "original_markers": [
+      "Overall Integration Program",
+      "Inventory & Truth Map",
+      "Progress Marker System",
+      "Workflow Convergence",
+      "Discord Workflow Unification",
+      "QA LLEL Workflow Convergence",
+      "Fitness Workflow Integration",
+      "_stack Integration",
+      "Playbook Everywhere",
+      "Full Clean / Re-sync / Enhancement",
+      "Documentation & Connection Web",
+      "ATLAS Book",
+      "Discord Documentation Channel",
+      "Post-Convergence Lane Split",
+      "Future Fitness App Lane",
+      "Future Discord Lane",
+      "Future ATLAS Systems Lane"
+    ],
+    "original_waves": [
+      "Inventory and truth map",
+      "Workflow convergence",
+      "Playbook plus docs sync",
+      "Full clean / re-sync / enhancement",
+      "ATLAS Book",
+      "Discord documentation channel",
+      "Resume product lanes split into Fitness / Discord / ATLAS"
+    ],
+    "may_25_packages": [
+      "Stack Lock And Registry Reconciliation Pass",
+      "Branch And Worktree Normalization Closeout Pass 2",
+      "Fitness Vercel Duplicate Pressure Final Review",
+      "Tmp And Mutable State Governance Pass",
+      "Fitness Supabase Mutation Pass 1 Execution Packet"
+    ],
+    "may_25_completion_ladder": [
+      "Stack lock and registry reconciliation",
+      "Branch/worktree normalization closeout",
+      "Vercel duplicate-pressure final review",
+      "Tmp/mutable-state governance",
+      "Fitness Supabase exact-scope execution",
+      "Remote preview/unfurl verification",
+      "DiscordOS tiny runtime-shadow or adapter lane",
+      "Final ATLAS Book and publishing cleanup"
+    ],
+    "june_27_followup": "Stream, Trove, and Nat1 owner cleanup was projected into refreshed stack lock/inventory; generated verifier residue was cleared and root validation returned to zero warnings at that checkpoint.",
+    "july_12_override": "The old Full Stack Re-sync marker is 100% historical closure. Atlas Full-System Re-evaluation is a separate 0→50→100 two-audit gate and is currently 50%.",
+    "july_13_current": "Root truth convergence and lock/head reconciliation are complete; Contracts Mesh is active; all other child lanes keep their own denominators/status."
+  },
+  "current_open_markers": [
+    {
+      "name": "AI Repetition-to-Automation Pipeline",
+      "percentage": 54,
+      "status": "open"
+    },
+    {
+      "name": "AI Long-Run Batch Orchestration",
+      "percentage": 71,
+      "status": "open"
+    },
+    {
+      "name": "Sandbox Simulation Readiness",
+      "percentage": 99,
+      "status": "open-held"
+    },
+    {
+      "name": "Cortex Readiness",
+      "percentage": 46,
+      "status": "open"
+    },
+    {
+      "name": "AI Work Session Stability & Auto-Sync Loop",
+      "percentage": 85,
+      "status": "open"
+    },
+    {
+      "name": "Playbook Everywhere + Cortex Interface",
+      "percentage": 45,
+      "status": "open-held"
+    },
+    {
+      "name": "Owner-Lane Agent Service Bus & DiscordOS Ops Readiness",
+      "percentage": 10,
+      "status": "open"
+    },
+    {
+      "name": "Cortex Dual-Mode Replacement Readiness",
+      "percentage": 40,
+      "status": "open"
+    },
+    {
+      "name": "Cortex Simulation Substrate Readiness",
+      "percentage": 0,
+      "status": "open"
+    },
+    {
+      "name": "Vercel Platform Observability Governance",
+      "percentage": 0,
+      "status": "open"
+    },
+    {
+      "name": "Atlas Full-System Re-evaluation",
+      "percentage": 50,
+      "status": "audit-gate"
+    }
+  ],
+  "historical_closed_ratchets": [
+    {
+      "name": "_stack Readiness",
+      "percentage": 100,
+      "status": "closed-locked-historical"
+    },
+    {
+      "name": "Atlas-owned Repo Naming Canonicalization",
+      "percentage": 100,
+      "status": "closed-locked-historical"
+    },
+    {
+      "name": "Discord OS Infrastructure Separation",
+      "percentage": 100,
+      "status": "closed-locked-historical"
+    },
+    {
+      "name": "Discord OS Feedback Workflow Canonicalization",
+      "percentage": 100,
+      "status": "closed-locked-historical"
+    },
+    {
+      "name": "Discord Workflow, Publication & Docs Reliability",
+      "percentage": 100,
+      "status": "closed-locked-historical"
+    },
+    {
+      "name": "DiscordOS Runtime & Product Hardening",
+      "percentage": 100,
+      "status": "closed-locked-historical"
+    },
+    {
+      "name": "Brand Asset Canonicalization",
+      "percentage": 100,
+      "status": "closed-locked-historical"
+    },
+    {
+      "name": "Preview Cache & Surface Consistency",
+      "percentage": 100,
+      "status": "closed-locked-historical"
+    },
+    {
+      "name": "Manual Deploy Exception Burn-Down",
+      "percentage": 100,
+      "status": "closed-locked-historical"
+    },
+    {
+      "name": "Playbook Maturity",
+      "percentage": 100,
+      "status": "closed-locked-historical"
+    },
+    {
+      "name": "Lifeline Readiness",
+      "percentage": 100,
+      "status": "closed-locked-historical"
+    },
+    {
+      "name": "ATLAS Core Phase",
+      "percentage": 100,
+      "status": "closed-locked-historical"
+    },
+    {
+      "name": "Verta Absorption",
+      "percentage": 100,
+      "status": "closed-locked-historical"
+    },
+    {
+      "name": "Archive Normalization",
+      "percentage": 100,
+      "status": "closed-locked-historical"
+    },
+    {
+      "name": "Foundation Alignment",
+      "percentage": 100,
+      "status": "closed-locked-historical"
+    },
+    {
+      "name": "Fitness Source-of-Truth Reset",
+      "percentage": 100,
+      "status": "closed-locked-historical"
+    },
+    {
+      "name": "Fitness QA/LLEL Workflow",
+      "percentage": 100,
+      "status": "closed-locked-historical"
+    },
+    {
+      "name": "Fitness Branch Cleanup / Main-Only Governance",
+      "percentage": 100,
+      "status": "closed-locked-historical"
+    },
+    {
+      "name": "Fitness Recovery Preservation",
+      "percentage": 100,
+      "status": "closed-locked-historical"
+    },
+    {
+      "name": "Duplicate Surface Decommission",
+      "percentage": 100,
+      "status": "closed-locked-historical"
+    },
+    {
+      "name": "Operator Secret Path Hygiene",
+      "percentage": 100,
+      "status": "closed-locked-historical"
+    },
+    {
+      "name": "Workstation Resource Hygiene",
+      "percentage": 100,
+      "status": "closed-locked-historical"
+    },
+    {
+      "name": "Vercel Hobby Cost Governance",
+      "percentage": 100,
+      "status": "closed-locked-historical"
+    },
+    {
+      "name": "Local Data Gateway",
+      "percentage": 100,
+      "status": "closed-locked-historical"
+    },
+    {
+      "name": "Dependency Untangling",
+      "percentage": 100,
+      "status": "closed-locked-historical"
+    },
+    {
+      "name": "Knowledge Capture & Transfer",
+      "percentage": 100,
+      "status": "closed-locked-historical"
+    },
+    {
+      "name": "Durable Context Externalization",
+      "percentage": 100,
+      "status": "closed-locked-historical"
+    },
+    {
+      "name": "Inventory & Truth Map",
+      "percentage": 100,
+      "status": "closed-locked-historical"
+    },
+    {
+      "name": "Truth Map & ATLAS Book",
+      "percentage": 100,
+      "status": "closed-locked-historical"
+    },
+    {
+      "name": "Tmp Dependency Elimination",
+      "percentage": 100,
+      "status": "closed-locked-historical"
+    },
+    {
+      "name": "Canonical Repo Restoration",
+      "percentage": 100,
+      "status": "closed-locked-historical"
+    },
+    {
+      "name": "Branch & Worktree Normalization",
+      "percentage": 100,
+      "status": "closed-locked-historical"
+    },
+    {
+      "name": "Fitness Supabase Profile/Data Hygiene",
+      "percentage": 100,
+      "status": "closed-locked-historical"
+    },
+    {
+      "name": "Full Stack Re-sync, Clean & Closeout",
+      "percentage": 100,
+      "status": "closed-locked-historical"
+    },
+    {
+      "name": "Unified Workflow Convergence",
+      "percentage": 100,
+      "status": "closed-locked-historical"
+    },
+    {
+      "name": "Feedback Loop Readiness",
+      "percentage": 100,
+      "status": "closed-locked-historical"
+    },
+    {
+      "name": "Core Pattern Convergence",
+      "percentage": 100,
+      "status": "closed-locked-historical"
+    },
+    {
+      "name": "Post-Convergence Lane Split Readiness",
+      "percentage": 100,
+      "status": "closed-locked-historical"
+    },
+    {
+      "name": "Vision & Future Alignment",
+      "percentage": 100,
+      "status": "closed-locked-historical"
+    }
+  ],
+  "formal_plan_records": [
+    {
+      "id": "plan-atlas-wave6-readonly",
+      "title": "ATLAS Wave 6 read-only",
+      "status": "completed",
+      "summary": "Read-only awareness/client work; completed formal plan record."
+    },
+    {
+      "id": "wave-8b-awareness-closure",
+      "title": "Wave 8B awareness closure",
+      "status": "active",
+      "summary": "Close awareness and read-model gaps without widening authority."
+    },
+    {
+      "id": "wave-9-operator-productization-and-debt-burndown",
+      "title": "Wave 9 operator productization and debt burn-down",
+      "status": "active",
+      "summary": "Make read surfaces trustworthy before opening one narrow write path; productize operator surfaces and burn debt."
+    },
+    {
+      "id": "wave-9b-playbook-convergence-and-continuity",
+      "title": "Wave 9B Playbook convergence and continuity",
+      "status": "active",
+      "summary": "Converge Playbook owner truth and continuity/restart surfaces."
+    },
+    {
+      "id": "wave-1-lifeline-platform-cutover",
+      "title": "Lifeline platform cutover record",
+      "status": "active-record-needs-owner-reconciliation",
+      "summary": "Formal ATLAS plan record remains active, while Lifeline owner truth already contains substantial Wave 1/Wave 2 runtime and startup implementation."
+    },
+    {
+      "id": "initiative-mazer-d2-learning-scorer",
+      "title": "Mazer D2 learning scorer",
+      "status": "active-non-executing",
+      "summary": "Hold non-executing pending fixed blessed-ID soak and manual blessing."
+    }
+  ],
+  "current_deterministic_lanes": {
+    "primary": [
+      {
+        "id": "lane-root-truth-convergence",
+        "title": "Root truth convergence",
+        "owner": "stack-root",
+        "status": "complete",
+        "percentage": 100,
+        "denominator": "4 accepted truth assertions",
+        "summary": "Reconcile declared, generated, locked, validation, and checkout truth without erasing dated provenance.",
+        "dependencies": [
+          "lane-stack-inventory-lock-head-reconciliation"
+        ]
+      },
+      {
+        "id": "lane-github-control-plane-integration",
+        "title": "GitHub control-plane integration",
+        "owner": "stack-root",
+        "status": "candidate",
+        "percentage": null,
+        "denominator": "8 proof units",
+        "summary": "Read-only-first inventory, parity, Actions, open work, release/security, cleanup, event, and projection evidence.",
+        "dependencies": [
+          "lane-stack-github-event-contracts",
+          "lane-discordos-github-projections"
+        ]
+      },
+      {
+        "id": "lane-playbook-universal-adoption",
+        "title": "Playbook universal adoption",
+        "owner": "playbook",
+        "status": "candidate",
+        "percentage": null,
+        "denominator": "12 component adoption proofs",
+        "summary": "Prove explicit owner-side Playbook adoption or explicit non-adoption across every declared component.",
+        "dependencies": [
+          "lane-project-command-surfaces",
+          "lane-playbook-demo-contract-synchronization"
+        ]
+      },
+      {
+        "id": "lane-cortex-context-synthesis",
+        "title": "Cortex context and synthesis",
+        "owner": "stack-root",
+        "status": "candidate",
+        "percentage": null,
+        "denominator": "4 accepted behaviors",
+        "summary": "Refresh context/routing read models, implement frozen chat synthesis, and resolve local-versus-remote authority.",
+        "dependencies": [
+          "lane-cortex-boundary-decision"
+        ]
+      },
+      {
+        "id": "lane-codex-execution-contracts",
+        "title": "Codex execution contracts",
+        "owner": "_stack",
+        "status": "candidate",
+        "percentage": null,
+        "denominator": "7 execution behaviors",
+        "summary": "Harden task identity, requested/effective runtime, handoff, reverse receipt, steering, queueing, and acceptance.",
+        "dependencies": [
+          "lane-atlas-control-ledger"
+        ]
+      },
+      {
+        "id": "lane-project-command-surfaces",
+        "title": "Project command surfaces",
+        "owner": "stack-root",
+        "status": "candidate",
+        "percentage": null,
+        "denominator": "4 command surfaces",
+        "summary": "Make ATLAS MAIN, Mazer, future gated Fitness, and embedded DiscordOS routing explicit and testable.",
+        "dependencies": [
+          "lane-discordos-single-writer"
+        ]
+      },
+      {
+        "id": "lane-atlas-control-ledger",
+        "title": "Atlas Control ledger",
+        "owner": "stack-root",
+        "status": "candidate-proposed",
+        "percentage": null,
+        "denominator": "8 ledger invariants",
+        "summary": "Backend-neutral thin coordination ledger for card/job/thread/turn identity, leases, idempotency, evidence, and acceptance.",
+        "dependencies": [
+          "lane-persistent-workspaces"
+        ]
+      },
+      {
+        "id": "lane-delivery-event-plane",
+        "title": "Delivery event plane",
+        "owner": "_stack",
+        "status": "candidate-proposed",
+        "percentage": null,
+        "denominator": "4 event families",
+        "summary": "Extend generic Atlas lifecycle events with governed GitHub, Vercel, Supabase, and Discord delivery families.",
+        "dependencies": [
+          "lane-stack-github-event-contracts",
+          "lane-vercel-supabase-monitoring-correlation",
+          "lane-discordos-single-writer"
+        ]
+      },
+      {
+        "id": "lane-discordos-single-writer",
+        "title": "DiscordOS single writer",
+        "owner": "DiscordOS",
+        "status": "candidate",
+        "percentage": null,
+        "denominator": "6 writer-contract behaviors",
+        "summary": "Eliminate direct writer overlap and prove identity, normalization, readback, idempotency, and partial-failure semantics.",
+        "dependencies": [
+          "lane-discordos-command-surface-convergence",
+          "lane-mazer-board-truth-reconciliation"
+        ]
+      },
+      {
+        "id": "lane-persistent-workspaces",
+        "title": "Persistent workspaces and browser leases",
+        "owner": "_stack",
+        "status": "candidate-proposed",
+        "percentage": null,
+        "denominator": "5 lease behaviors",
+        "summary": "Define identity, renewal, expiry, recovery, and collision behavior for persistent workspaces and browser leases.",
+        "dependencies": [
+          "lane-workspace-branch-worktree-hygiene"
+        ]
+      },
+      {
+        "id": "lane-ci-delivery-health",
+        "title": "CI and delivery health",
+        "owner": "repository-owners",
+        "status": "candidate",
+        "percentage": null,
+        "denominator": "3 failed command families",
+        "summary": "Recover Fitness and Playbook CI and correlate Actions with delivery without treating READY or absence as health.",
+        "dependencies": [
+          "lane-playbook-demo-contract-synchronization",
+          "lane-fitness-atlas-contracts-loader",
+          "lane-fitness-playbook-runtime-artifacts"
+        ]
+      },
+      {
+        "id": "lane-marker-integrity",
+        "title": "Marker integrity",
+        "owner": "stack-root",
+        "status": "candidate",
+        "percentage": null,
+        "denominator": "51 marker families",
+        "summary": "Keep marker names, denominators, scope, dates, receipts, and manifests coherent without rewriting history.",
+        "dependencies": [
+          "lane-owner-metric-scope-alignment",
+          "lane-mazer-board-truth-reconciliation"
+        ]
+      },
+      {
+        "id": "lane-workspace-branch-worktree-hygiene",
+        "title": "Workspace, branch, and worktree hygiene",
+        "owner": "repository-owners",
+        "status": "candidate",
+        "percentage": null,
+        "denominator": "64 registrations",
+        "summary": "Classify retained worktrees/registrations before any cleanup; clean is not removal-safe.",
+        "dependencies": [
+          "lane-local-worktree-retention-classification",
+          "lane-remote-branch-cleanup-review"
+        ]
+      },
+      {
+        "id": "lane-security-containment",
+        "title": "Security containment",
+        "owner": "operator-security",
+        "status": "candidate-gated",
+        "percentage": null,
+        "denominator": "4 child-lane closeouts",
+        "summary": "Umbrella for Fitness critical secret containment, Supabase advisors, sensitive residue, and dependency security.",
+        "dependencies": [
+          "lane-fitness-critical-secret-containment",
+          "lane-supabase-security-advisor-remediation",
+          "lane-sensitive-runtime-residue-containment",
+          "lane-fitness-dependency-security"
+        ]
+      },
+      {
+        "id": "lane-historical-task-intelligence",
+        "title": "Historical task intelligence",
+        "owner": "stack-root",
+        "status": "candidate-proposed",
+        "percentage": null,
+        "denominator": "4 source classes",
+        "summary": "Index tasks, handoffs, receipts, and accepted outcomes without treating transcripts as canonical memory.",
+        "dependencies": [
+          "lane-atlas-control-ledger"
+        ]
+      },
+      {
+        "id": "lane-vercel-supabase-monitoring-correlation",
+        "title": "Vercel and Supabase monitoring correlation",
+        "owner": "stack-root",
+        "status": "candidate",
+        "percentage": null,
+        "denominator": "8 external projects",
+        "summary": "Freshness-stamped read-only correlation of five Vercel and three Supabase projects with source/run evidence.",
+        "dependencies": [
+          "lane-supabase-security-advisor-remediation"
+        ]
+      }
+    ],
+    "backlog": [
+      {
+        "id": "lane-atlas-contracts-mesh",
+        "title": "Atlas contracts mesh",
+        "owner": "stack-root",
+        "status": "active",
+        "percentage": 0,
+        "denominator": "11 schema-family acceptances",
+        "summary": "Implement Contracts v2 mesh family-by-family with fixtures, validator/export coverage, compatibility, and producer/consumer proof."
+      },
+      {
+        "id": "lane-cross-project-knowledge-promotion",
+        "title": "Cross-project knowledge promotion",
+        "owner": "playbook",
+        "status": "candidate-scope-admission",
+        "percentage": null,
+        "denominator": "unknown until governed inventory",
+        "summary": "Promote reviewed reusable knowledge across projects while preserving owner authority and provenance."
+      },
+      {
+        "id": "lane-stack-adapter-coverage",
+        "title": "Stack adapter coverage",
+        "owner": "_stack",
+        "status": "candidate",
+        "percentage": null,
+        "denominator": "7 components",
+        "summary": "Add or explicitly waive adapters for Mazer, Fitness, Foundation, Trove, Stream, Nat1, and Playbook Demo."
+      },
+      {
+        "id": "lane-local-branch-retention-classification",
+        "title": "Local branch retention classification",
+        "owner": "repository-owners",
+        "status": "candidate-read-only",
+        "percentage": null,
+        "denominator": "218 observed local branches",
+        "summary": "Classify owner, retention/collision class, and evidence before disposition."
+      },
+      {
+        "id": "lane-stack-inventory-lock-head-reconciliation",
+        "title": "Stack inventory, lock, and head reconciliation",
+        "owner": "stack-root",
+        "status": "complete",
+        "percentage": 100,
+        "denominator": "4 validation errors",
+        "summary": "Resolve the four exact lock/head validation errors through canonical generation."
+      },
+      {
+        "id": "lane-playbook-demo-contract-synchronization",
+        "title": "Playbook Demo contract synchronization",
+        "owner": "playbook",
+        "status": "candidate",
+        "percentage": null,
+        "denominator": "3 reconciliation layers",
+        "summary": "Repair command truth and roadmap revision layers; classify local/live head divergence."
+      },
+      {
+        "id": "lane-fitness-atlas-contracts-loader",
+        "title": "Fitness Atlas contracts loader",
+        "owner": "fawxzzy-fitness",
+        "status": "candidate-blocked-by-security",
+        "percentage": null,
+        "denominator": "1 failed run family",
+        "summary": "Repair the TypeScript loader/unknown-extension CI failure after security authority permits work."
+      },
+      {
+        "id": "lane-fitness-playbook-runtime-artifacts",
+        "title": "Fitness Playbook runtime artifacts",
+        "owner": "fawxzzy-fitness",
+        "status": "candidate-blocked-by-security",
+        "percentage": null,
+        "denominator": "1 failed run family",
+        "summary": "Restore required Playbook runtime artifacts and prove fresh CI."
+      },
+      {
+        "id": "lane-fitness-dependency-security",
+        "title": "Fitness dependency security",
+        "owner": "fawxzzy-fitness",
+        "status": "candidate-security",
+        "percentage": null,
+        "denominator": "15 findings",
+        "summary": "Remediate 14 reported vulnerabilities plus the deprecated framework version."
+      },
+      {
+        "id": "lane-fitness-critical-secret-containment",
+        "title": "Fitness Critical secret containment",
+        "owner": "operator-security",
+        "status": "candidate-blocking",
+        "percentage": null,
+        "denominator": "3 proofs",
+        "summary": "Contain, rotate, and verify the published critical alert without exposing its value; blocks Fitness resume."
+      },
+      {
+        "id": "lane-default-branch-governance",
+        "title": "Default branch governance",
+        "owner": "repository-owners",
+        "status": "candidate",
+        "percentage": null,
+        "denominator": "10 cloud repositories",
+        "summary": "Decide protection/ruleset posture and prove it per repository."
+      },
+      {
+        "id": "lane-dependabot-visibility",
+        "title": "Dependabot visibility",
+        "owner": "github-governance",
+        "status": "candidate",
+        "percentage": null,
+        "denominator": "10 endpoints",
+        "summary": "Resolve 403/disabled appearance while keeping counts unknown until authorized proof exists."
+      },
+      {
+        "id": "lane-release-policy-and-evidence",
+        "title": "Release policy and evidence",
+        "owner": "repository-owners",
+        "status": "candidate",
+        "percentage": null,
+        "denominator": "10 cloud repositories",
+        "summary": "Define release readiness and evidence; zero visible releases is not readiness."
+      },
+      {
+        "id": "lane-remote-branch-cleanup-review",
+        "title": "Remote branch cleanup review",
+        "owner": "github-governance",
+        "status": "candidate-retention",
+        "percentage": null,
+        "denominator": "80 branch candidates",
+        "summary": "Review merged branch candidates without deleting by inference."
+      },
+      {
+        "id": "lane-local-worktree-retention-classification",
+        "title": "Local worktree retention classification",
+        "owner": "owner-repositories",
+        "status": "candidate-retention",
+        "percentage": null,
+        "denominator": "62 worktree candidates",
+        "summary": "Assign an accepted retention class to every candidate; no cleanup without separate receipt."
+      },
+      {
+        "id": "lane-cortex-boundary-decision",
+        "title": "Cortex boundary decision",
+        "owner": "stack-root",
+        "status": "candidate-architecture",
+        "percentage": null,
+        "denominator": "1 authority decision",
+        "summary": "Choose root-owned embedded Cortex versus remote-repository authority, including migration/archive posture."
+      },
+      {
+        "id": "lane-stream-remote-decision",
+        "title": "Stream remote decision",
+        "owner": "stack-root",
+        "status": "candidate-decision",
+        "percentage": null,
+        "denominator": "1 repository decision",
+        "summary": "Choose publish, retain local-only, or archive for Stream."
+      },
+      {
+        "id": "lane-stack-github-event-contracts",
+        "title": "Stack GitHub event contracts",
+        "owner": "_stack",
+        "status": "candidate-contract",
+        "percentage": null,
+        "denominator": "3 event behaviors",
+        "summary": "Implement idempotent GitHub facts, events, and correlated receipts."
+      },
+      {
+        "id": "lane-discordos-github-projections",
+        "title": "DiscordOS GitHub projections",
+        "owner": "DiscordOS",
+        "status": "candidate-projection",
+        "percentage": null,
+        "denominator": "3 projection behaviors",
+        "summary": "Project accepted GitHub events to boards/Updates with idempotent readback."
+      },
+      {
+        "id": "lane-source-hierarchy-doc-normalization",
+        "title": "Source hierarchy documentation normalization",
+        "owner": "stack-root",
+        "status": "candidate-scope-admission",
+        "percentage": null,
+        "denominator": "unknown until document inventory",
+        "summary": "Normalize current-sounding docs to the accepted source hierarchy while retaining dated provenance."
+      },
+      {
+        "id": "lane-component-generated-state-hygiene",
+        "title": "Component generated-state hygiene",
+        "owner": "repository-owners",
+        "status": "candidate-retention",
+        "percentage": null,
+        "denominator": "5 generated-state classes",
+        "summary": "Classify Fitness logs/bytecode, Nat1 outputs, root bytecode, _stack runtime/log/archive, and working-memory catalog drift."
+      },
+      {
+        "id": "lane-archive-package-retention",
+        "title": "Archive and package retention",
+        "owner": "stack-root",
+        "status": "candidate-retention",
+        "percentage": null,
+        "denominator": "4 surfaces",
+        "summary": "Classify the Fitness snapshot, package-root DOCX, and two zip/media path-mismatch surfaces."
+      },
+      {
+        "id": "lane-owner-metric-scope-alignment",
+        "title": "Owner metric scope alignment",
+        "owner": "repository-owners",
+        "status": "candidate-marker-integrity",
+        "percentage": null,
+        "denominator": "2 metric families",
+        "summary": "Resolve the Mazer board-count conflict and 100/96 scope mismatch without rewriting history."
+      },
+      {
+        "id": "lane-root-path-hygiene",
+        "title": "Root path hygiene",
+        "owner": "stack-root-and-_stack",
+        "status": "candidate-validation",
+        "percentage": null,
+        "denominator": "25 warnings",
+        "summary": "Disposition 16 preserved-root and 9 owner-_stack path warnings with fresh validation."
+      },
+      {
+        "id": "lane-discordos-command-surface-convergence",
+        "title": "DiscordOS command-surface convergence",
+        "owner": "DiscordOS",
+        "status": "candidate-maintainability",
+        "percentage": null,
+        "denominator": "255 long script names",
+        "summary": "Retain, alias, or retire recursive/long command families without losing behavior."
+      },
+      {
+        "id": "lane-supabase-security-advisor-remediation",
+        "title": "Supabase security advisor remediation",
+        "owner": "project-owners",
+        "status": "candidate-security",
+        "percentage": null,
+        "denominator": "14 findings",
+        "summary": "Disposition Fitness/Mazer leaked-password warnings and twelve DiscordOS advisor findings."
+      },
+      {
+        "id": "lane-mazer-legacy-nested-repo-admission",
+        "title": "Mazer legacy nested repo admission",
+        "owner": "mazer",
+        "status": "candidate-repository",
+        "percentage": null,
+        "denominator": "2 nested repositories",
+        "summary": "Decide source authority and retention for two dirty nested legacy repos outside stack truth."
+      },
+      {
+        "id": "lane-foundation-control-plane-truth-reconciliation",
+        "title": "Foundation control-plane truth reconciliation",
+        "owner": "foundation",
+        "status": "candidate-owner-truth",
+        "percentage": null,
+        "denominator": "4 truth conflicts",
+        "summary": "Reconcile stale registry, remote names, deployment proof, and competing root-control-plane wording."
+      },
+      {
+        "id": "lane-sensitive-runtime-residue-containment",
+        "title": "Sensitive runtime residue containment",
+        "owner": "operator-security",
+        "status": "candidate-security-retention",
+        "percentage": null,
+        "denominator": "4 surfaces",
+        "summary": "Classify name-only token, cookie, snapshot metadata, and DOCX evidence without reading values."
+      },
+      {
+        "id": "lane-nat1-remote-recovery",
+        "title": "Nat1 remote recovery",
+        "owner": "nat1",
+        "status": "candidate-repository",
+        "percentage": null,
+        "denominator": "2 recovery assertions",
+        "summary": "Resolve inaccessible/not-found remote and detached registration."
+      },
+      {
+        "id": "lane-trove-command-path-repair",
+        "title": "Trove command path repair",
+        "owner": "_stack-and-trove",
+        "status": "candidate-command",
+        "percentage": null,
+        "denominator": "1 command family",
+        "summary": "Replace nonexistent ../fawxzzy-trove assumptions with canonical Trove routing."
+      },
+      {
+        "id": "lane-mazer-board-truth-reconciliation",
+        "title": "Mazer board truth reconciliation",
+        "owner": "DiscordOS",
+        "status": "candidate-projection-integrity",
+        "percentage": null,
+        "denominator": "4 assertion sets",
+        "summary": "Reconcile checked-in 40-card truth with stale 8/15/35 documents and older forum references."
+      },
+      {
+        "id": "lane-validation-ratchet-remediation",
+        "title": "Validation ratchet remediation",
+        "owner": "stack-root-and-_stack",
+        "status": "candidate-validation",
+        "percentage": null,
+        "denominator": "5 blocker categories",
+        "summary": "Remediate current validation blocker categories through canonical owner flows and later prove ratchet success."
+      }
+    ]
+  },
+  "owner_roadmaps": {
+    "ATLAS": {
+      "status": "active governance/control plane",
+      "current": "Full-system re-evaluation is 50% (opening audit accepted; closing audit pending). Root truth convergence is complete; Contracts Mesh is the explicitly active backlog lane.",
+      "plans": [
+        "Maintain read-first governance, source hierarchy, markers, receipts, continuity, and current-state projections.",
+        "Complete current deterministic child lanes without crediting them to the two-gate audit denominator.",
+        "Open the final closing audit only after then-current evidence is rechecked across all planes.",
+        "Keep owner-repo and external mutations in separately authorized lanes."
+      ],
+      "source_paths": [
+        "docs/audits/ATLAS-FULL-SYSTEM-OPENING-AUDIT-2026-07-12.md",
+        "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json",
+        "docs/atlas-book/02-lanes-and-markers.md"
+      ]
+    },
+    "_stack": {
+      "status": "active execution/operator substrate",
+      "current": "Canonical writer/operator/event-normalization role is current; readiness is historically closed, while execution-contract, adapter, lease, event, path, and validation follow-ons remain.",
+      "plans": [
+        "Harden Codex task identity, runtime, handoff, reverse receipt, steering, queueing, and acceptance contracts.",
+        "Add or waive adapters for seven currently uncovered components.",
+        "Define persistent workspace/browser lease behavior.",
+        "Implement GitHub delivery event contracts after the Contracts Mesh foundation.",
+        "Repair Trove routing and resolve owner _stack path warnings."
+      ],
+      "source_paths": [
+        "repos/_stack/README.md",
+        "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json"
+      ]
+    },
+    "Playbook": {
+      "status": "active owner roadmap; adoption/CI follow-ons",
+      "current": "Deterministic trust/doctrine engine with a large machine roadmap. Universal adoption and Playbook Demo synchronization remain current candidates.",
+      "plans": [
+        "Harden repository intelligence, query, plan/apply, analyze-PR, package boundaries, CI delivery, and product-truth packaging.",
+        "Continue failure intelligence and architecture graph work.",
+        "Build knowledge compaction, memory/replay/promotion, graph memory, control-plane and evidence/session behaviors.",
+        "Advance execution orchestration, outcome learning, self-repair, cross-repo transfer, governed API, pilots, packaging/SKUs, and metrics only through dependencies.",
+        "Converge owner truth across twelve declared components and keep cross-project knowledge promotion reviewable."
+      ],
+      "source_paths": [
+        "docs/PLAYBOOK_PRODUCT_ROADMAP.md",
+        "docs/roadmap/ROADMAP.json"
+      ]
+    },
+    "Fitness": {
+      "status": "product live; engineering resume security-blocked",
+      "current": "Owner roadmap makes Fitness the reference lane and paid-capacity MVP. The July 12 audit blocks further resume until critical secret containment, rotation, and verification; CI/dependency work remains additional.",
+      "plans": [
+        "Stabilize deterministic Supabase/custom-exercise behavior and the shared reference shell.",
+        "Sequence custom-exercise modal, tagging, analytics accuracy, and reference stability before new modes.",
+        "Expand one shell into Diet and Cycle, then later Sleep, Mind, Recovery, Mobility, Hydration, Supplements, and Habits.",
+        "Run the paid beta/retention roadmap: 10–20 beta users, pricing/copy, retention loops, curated workout engine, achievements, analytics, and social features.",
+        "Close security, CI, dependency, backup/restore, and monitoring gates before broad owner-lane work."
+      ],
+      "source_paths": [
+        "docs/ROADMAP.md",
+        "docs/ops/FITNESS-MONETIZATION-ROADMAP.md",
+        "docs/audits/ATLAS-FULL-SYSTEM-OPENING-AUDIT-2026-07-12.md"
+      ]
+    },
+    "Mazer": {
+      "status": "resume allowed by audit; explicit route required",
+      "current": "2D Phaser remains the shipping baseline. Mazer can resume only through explicit ATLAS MAIN routing from the preserved checkpoint. D2 scorer is active/non-executing; rotating-planet/3D is parked.",
+      "plans": [
+        "Continue 2D gameplay, feel, mobile/cross-platform proof, telemetry, and owner-side milestones.",
+        "Run D2 scorer soak and require manual blessing before execution.",
+        "Reconcile board truth and owner metrics without rewriting history.",
+        "Decide admission/retention for two nested legacy repos.",
+        "Keep the rotating-planet/3D path behind design brief, topology sandbox, isolated 3D prototype, and readability/orientation gates."
+      ],
+      "source_paths": [
+        "docs/roadmap.md",
+        "docs/research/MAZER_ROTATING_PLANET_MAZE_MASTER_PLAN.md",
+        "docs/memory/initiatives/initiative-mazer-d2-learning-scorer.json"
+      ]
+    },
+    "DiscordOS": {
+      "status": "standalone runtime live; new feature work must open new owner scope",
+      "current": "Infrastructure separation, feedback canonicalization, publication/docs reliability, and runtime/product hardening are closed for their admitted scopes. Current follow-ons are single-writer convergence, command maintainability, projections, and board-truth reconciliation.",
+      "plans": [
+        "Keep one logical Discord writer and retire/mediate Fitness direct mutation.",
+        "Converge recursive command surfaces and long script-name debt with compatibility proof.",
+        "Project accepted GitHub events to boards/Updates only after event contracts land.",
+        "Open Music Sesh, moderation, board, publication, or other features as new explicit owner scopes.",
+        "Keep runtime alerts distinct from curated #updates."
+      ],
+      "source_paths": [
+        "README.md",
+        "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json"
+      ]
+    },
+    "Foundation": {
+      "status": "active read-first control-plane roadmap",
+      "current": "Read-first project-family control plane; current audit found four truth conflicts requiring owner proof and root projection.",
+      "plans": [
+        "Maintain registry/proof health and draft-only provider/Supabase observations.",
+        "Add Playbook and Lifeline receipt bridges.",
+        "Add voice-safe inspection commands and cross-app privacy/data contracts.",
+        "Reach an operator dashboard only after read contracts and evidence are trustworthy.",
+        "Do not take owner-repo or mutation authority."
+      ],
+      "source_paths": [
+        "docs/roadmap/FOUNDATION_ROADMAP.md"
+      ]
+    },
+    "Lifeline": {
+      "status": "narrow local operator; Wave 1/2 substantial implementation exists",
+      "current": "Manifest-defined single-machine operator with runtime, release, receipt, restore, and multi-OS startup backends. Next stated slice is narrow repo hygiene then focused architecture/contract work.",
+      "plans": [
+        "Keep manifest validation/resolution and runtime/release behavior deterministic.",
+        "Extend through focused architecture slices, not hosted-platform growth.",
+        "Consume Playbook exports from disk and emit explicit receipts.",
+        "Preserve single-host/local-first scope; no dashboard, auth, database control plane, or multi-node orchestration."
+      ],
+      "source_paths": [
+        "README.md",
+        "docs/scope.md"
+      ]
+    },
+    "Cortex": {
+      "status": "partial root-owned advisory runtime; boundary unresolved",
+      "current": "ATLAS-root Cortex surfaces are current authority; remote cortex repo is not adopted. Read models are stale/partial and chat synthesis is frozen but unimplemented.",
+      "plans": [
+        "Extraction sequence: repo shell, ATLAS projection, schemas/docs, code only after owner-truth consumption proof, stack registration last.",
+        "Refresh context/routing read models and implement four proven synthesis behaviors.",
+        "Decide embedded-root versus remote-repo authority before remote adoption.",
+        "Keep richer learning/retrieval claims behind real data, privacy, provenance, and evaluation."
+      ],
+      "source_paths": [
+        "docs/roadmap/CORTEX-EXTRACTION-ROADMAP.md",
+        "README.md",
+        "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json"
+      ]
+    },
+    "Trove": {
+      "status": "bounded storefront/pilot; no broad product roadmap recovered",
+      "current": "One-page launcher/storefront with app-owned installation. Also serves as bounded Lifeline Wave 1 pilot. Current follow-up is canonical command-path repair.",
+      "plans": [
+        "Remain a one-page storefront with grounded URLs and no platform logic.",
+        "Let each target application own install/access truth.",
+        "Maintain bounded Lifeline pilot parity, health, rollback, and static-export expectations.",
+        "Repair _stack command paths that assume a nonexistent ../fawxzzy-trove location."
+      ],
+      "source_paths": [
+        "README.md",
+        "docs/lifeline-wave1-pilot.md"
+      ]
+    },
+    "Stream": {
+      "status": "local-only decision pending",
+      "current": "Current audit sees a clean local-only repo with no remote/upstream.",
+      "plans": [
+        "Choose publish, retain local-only, or archive through an explicit decision and receipt.",
+        "A historical STREAM-WAVE-2-RUNTIME-SPLIT playbook path exists, but its full body was not recovered in this pass."
+      ],
+      "source_paths": [
+        "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json",
+        "docs/playbooks/STREAM-WAVE-2-RUNTIME-SPLIT.md"
+      ]
+    },
+    "Nat1 Games": {
+      "status": "repository recovery pending",
+      "current": "Current audit reports inaccessible/not-found live remote plus a detached registration.",
+      "plans": [
+        "Resolve remote accessibility and registration state through owner proof.",
+        "Do not prune or rewrite the remote by inference."
+      ],
+      "source_paths": [
+        "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json"
+      ]
+    },
+    "Playbook Demo": {
+      "status": "contract synchronization candidate",
+      "current": "Local/live head divergence and missing/invalid command/roadmap contract layers remain.",
+      "plans": [
+        "Repair two CI contract layers.",
+        "Classify local versus live head divergence and prove fresh CI."
+      ],
+      "source_paths": [
+        "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json"
+      ]
+    }
+  },
+  "historical_parked_superseded": [
+    {
+      "id": "historical-original-convergence-program",
+      "title": "Original ATLAS workflow convergence / clean-re-sync program",
+      "status": "historical-closed-for-dated-scope",
+      "summary": "Inventory → convergence → Playbook/docs sync → full clean/re-sync → ATLAS Book → Discord docs → Fitness/Discord/ATLAS lane split.",
+      "supersession": "Its 100% closeout is provenance, not current-health proof; current reevaluation and child lanes govern present work."
+    },
+    {
+      "id": "historical-verta-work-kit-core-split",
+      "title": "Verta Work Kit / Verta Core split",
+      "status": "historical-superseded-boundary-retained",
+      "summary": "Freeze five-path Work Kit for soak/pilot/ship; evolve Core separately; one-way promotion through five criteria; ATLAS primary destination.",
+      "supersession": "Reviewed doctrine was absorbed into Playbook; raw Verta remains quarantined and non-executable."
+    },
+    {
+      "id": "historical-verta-retrieval-corpus",
+      "title": "Verta retrieval over 338K conversation corpus",
+      "status": "rejected-no-go",
+      "summary": "Corpus was synthetic/template-heavy and unsuitable for retrieval; deterministic-first two-layer path retained."
+    },
+    {
+      "id": "parked-spotify-club-phase8",
+      "title": "Spotify Club Phase 8",
+      "status": "parked-explicit-restart-required",
+      "summary": "Later direction was Cross-Service Room Sync + Simple Controls: Discord-first provider-neutral room/queue UX, Spotify first, Apple Music as future adapter; no audio relay or perfect-sync promise.",
+      "supersession": "Earlier 'Simple Room + Jam Companion' framing is superseded by the later provider-neutral plan."
+    },
+    {
+      "id": "parked-mazer-rotating-planet-3d",
+      "title": "Mazer rotating-planet / 3D concept",
+      "status": "parked-research",
+      "summary": "Design brief → topology sandbox → isolated 3D prototype → integrate/stop decision; readability and orientation gates first."
+    },
+    {
+      "id": "historical-atlas-design-governance",
+      "title": "ATLAS/Fitness design-system and UI observation loop",
+      "status": "historical-partial-unreconciled",
+      "summary": "Live screenshots → observations/drift → tokens/contracts → docs/tasks → validation; primitives, harvesting, then enforcement."
+    },
+    {
+      "id": "historical-discord-feedback-jira-upgrades",
+      "title": "Discord feedback workflow enhancement tiers",
+      "status": "historical-owner-scope-needed",
+      "summary": "Definition of Done, assignee, blocked/dependencies, numbered AC; then epics, in-review, related links, Definition of Ready; then formatter/state-machine/release targets."
+    },
+    {
+      "id": "historical-pwa-distribution",
+      "title": "Trove/Fitness PWA distribution contract",
+      "status": "durable-boundary-mostly-adopted",
+      "summary": "Trove routes; Fitness owns installability, iOS guidance, auth-safe browser routes, and protected-surface install gates; no fake cross-origin install claim."
+    },
+    {
+      "id": "historical-fitness-source-recovery",
+      "title": "Fitness source recovery, canonical reset, migration bridge, and brand sync",
+      "status": "closed-locked",
+      "summary": "Recovery preservation, source-of-truth reset, main-only governance, Supabase profile/data hygiene, and brand asset canonicalization are closed ratchets."
+    },
+    {
+      "id": "historical-spec-to-diff",
+      "title": "_stack spec-to-diff verification gate",
+      "status": "materially-closed-carry-forward",
+      "summary": "Mutating prompts declare acceptance criteria and expected paths; completion maps criteria to proof against actual diff. Reopen only on regression."
+    },
+    {
+      "id": "vision-ecosystem-gated-expansion",
+      "title": "Older gated ecosystem expansion order",
+      "status": "partially-superseded",
+      "summary": "Fitness revenue anchor → Playbook adoption → ATLAS read-only → Foundation/_stack → Cortex evidence gates → Lifeline only where measured need justifies it."
+    },
+    {
+      "id": "vision-mazer-ai-ladder",
+      "title": "Mazer AI/learning research ladder",
+      "status": "vision-research-not-release-gate",
+      "summary": "Deterministic generation and solver → telemetry/replay → data-informed generation → assistance → player modeling → consented imitation/learning research."
+    }
+  ],
+  "known_gaps": [
+    "This is exhaustive for the retrievable Library records and current repository documents inspected in this pass; it cannot prove recovery of deleted, unindexed, or inaccessible chats/files.",
+    "Stream's historical Wave 2 runtime-split document path was found, but its body was not recovered through the current connector pass.",
+    "No governed Nat1 product roadmap body was recovered; only repository recovery state is current.",
+    "No broad Trove product roadmap exists in current owner truth beyond the storefront and Lifeline pilot contracts.",
+    "Hard Pill To Swallow and Realm Blade appear as retained archive/media surfaces, but no canonical technology implementation roadmap was recovered.",
+    "Live Discord state remained unknown in the July 12 audit because no authenticated safe connector was available; checked-in readback is not live Discord proof.",
+    "The prior Library recovery grouped Mazer under the product lane with Fitness. Current ATLAS truth treats the canonical post-convergence split as Fitness / Discord / ATLAS and keeps Mazer as a separate owner lane."
+  ],
+  "recommended_execution_order": [
+    "Preserve this register as a continuity artifact and link every row to owner-repo truth rather than copying implementation truth into ATLAS.",
+    "Keep Fitness blocked until critical secret containment, rotation, and verification are accepted; then handle CI/dependency lanes.",
+    "Resume Mazer only through the explicit ATLAS MAIN route from the preserved checkpoint.",
+    "Continue the active Atlas Contracts Mesh in non-overlapping schema-family clusters with producer/consumer proof.",
+    "Run other candidate child lanes under their own authorities and denominators.",
+    "Perform the separate exhaustive closing audit only after then-current evidence is rechecked across every plane."
+  ]
+}

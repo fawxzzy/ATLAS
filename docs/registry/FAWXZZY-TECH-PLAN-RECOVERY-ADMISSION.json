@@ -1,0 +1,123 @@
+{
+  "schema": "atlas.fawxzzy-tech-plan-recovery-admission.v1",
+  "admission_id": "fawxzzy-tech-plan-recovery-2026-07-13",
+  "admitted_at": "2026-07-13T07:43:50Z",
+  "admission_scope": "provenance import and classification only",
+  "current_status_authority": false,
+  "current_truth_rule": "Recovered prose and status claims cannot change current truth, marker percentage, owner state, board state, deployment state, or receipt state.",
+  "evidence_hierarchy": [
+    "Current Git refs and repository state",
+    "Current runtime and deployment readback",
+    "Current test and validation evidence",
+    "Current owner receipts",
+    "Current board readback",
+    "Accepted current stack receipts and manifests",
+    "Recovered plan prose, chat-derived status, skill source, and playbook draft"
+  ],
+  "source_register": {
+    "raw_import_path": "data/imports/fawxzzy-tech-plan-recovery/2026-07-13/FAWXZZY_TECH_PLAN_REGISTER_VERIFIED_2026-07-13.json",
+    "source_schema": "fawxzzy.tech-plan-recovery.v2",
+    "source_title_ascii": "Fawxzzy Technology Plan Recovery - Live-Verified Revision",
+    "source_generated_at": "2026-07-13",
+    "counts": {
+      "open_markers": 11,
+      "historical_closed_ratchets": 39,
+      "primary_lanes": 16,
+      "backlog_candidates": 33,
+      "formal_plan_records": 6
+    }
+  },
+  "stable_id_reference": {
+    "raw_register_path": "data/imports/fawxzzy-tech-plan-recovery/2026-07-13/FAWXZZY_TECH_PLAN_REGISTER_VERIFIED_2026-07-13.json",
+    "formal_plan_records_json_pointer": "/formal_plan_records",
+    "primary_lanes_json_pointer": "/current_deterministic_lanes/primary",
+    "backlog_candidates_json_pointer": "/current_deterministic_lanes/backlog",
+    "rule": "Source IDs remain in the immutable raw register; this admission registry does not duplicate or mint replacement source IDs."
+  },
+  "recovered_plan_lane_mapping": [
+    {
+      "source_plan_id": "plan-atlas-wave6-readonly",
+      "current_lane_id": null,
+      "disposition": "historical scoped closure retained; no current lane is reopened"
+    },
+    {
+      "source_plan_id": "wave-8b-awareness-closure",
+      "current_lane_id": "lane-cortex-context-synthesis",
+      "disposition": "reconcile as a narrower historical predecessor; current implementation remains separately governed"
+    },
+    {
+      "source_plan_id": "wave-9-operator-productization-and-debt-burndown",
+      "current_lane_id": "lane-project-command-surfaces",
+      "disposition": "reconcile as an operator-surface antecedent without widening the current lane"
+    },
+    {
+      "source_plan_id": "wave-9b-playbook-convergence-and-continuity",
+      "current_lane_id": "lane-playbook-universal-adoption",
+      "disposition": "reconcile with existing Playbook adoption and continuity work"
+    },
+    {
+      "source_plan_id": "wave-1-lifeline-platform-cutover",
+      "current_lane_id": null,
+      "disposition": "preserve owner-roadmap record; owner reconciliation is required before any lane mapping"
+    },
+    {
+      "source_plan_id": "initiative-mazer-d2-learning-scorer",
+      "current_lane_id": null,
+      "disposition": "preserve the owner standing-task checkpoint; no root lane is created from this import"
+    }
+  ],
+  "duplicate_and_overlap_controls": {
+    "historical_clean_resync": "Retain as dated historical closure. Do not reopen it or use its 100 percent claim as current health.",
+    "recovered_primary_lanes": "Reference the raw register and reconcile only to existing lane IDs when deterministic.",
+    "candidate_lane_rule": "No candidate lane is created by this import. A future candidate requires an outcome with no current owner and its own scope admission.",
+    "lane_reuse": [
+      "lane-historical-task-intelligence for recovered-plan convergence and provenance",
+      "lane-source-hierarchy-doc-normalization for a machine-readable engineering doctrine registry",
+      "lane-codex-execution-contracts for governed Project Review and Next Step skill adoption"
+    ]
+  },
+  "current_overrides": [
+    {
+      "subject": "Mazer",
+      "current_override": "Mazer is resumed in its existing standing task; old resume-required wording is historical.",
+      "evidence_refs": ["docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json", "docs/memory/initiatives/initiative-mazer-wave2-metric-contract-parity.json"]
+    },
+    {
+      "subject": "Fitness",
+      "current_override": "Fitness has a standing reconciliation task; secret and security status remains evidence-qualified.",
+      "evidence_refs": ["docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json", "docs/registry/GITHUB-CONTROL-PLANE-REGISTRY.json"]
+    },
+    {
+      "subject": "DiscordOS",
+      "current_override": "DiscordOS has a published 93-card zero-drift baseline and Ready-admission lifecycle; old rename records are provenance.",
+      "evidence_refs": ["operator current-state instruction", "repos/DiscordOS/config/discordos-mazer-feedback-board.json"]
+    },
+    {
+      "subject": "Atlas Contracts",
+      "current_override": "Eleven schema foundations and the reusable artifact validator exist; adoption remains 0/11 until producer and consumer proof.",
+      "evidence_refs": ["packages/atlas-contracts/README.md", "docs/ops/ATLAS-CONTRACTS-V2-ARTIFACT-VALIDATOR-FOUNDATION-2026-07-13.md"]
+    },
+    {
+      "subject": "Atlas Full-System Re-evaluation",
+      "current_override": "The marker remains 50 percent until the exhaustive closing audit.",
+      "evidence_refs": ["docs/memory/initiatives/continuity-manifest-atlas-full-system-re-evaluation.json", "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json"]
+    },
+    {
+      "subject": "GitHub control plane",
+      "current_override": "Integration is active but incomplete.",
+      "evidence_refs": ["docs/memory/initiatives/initiative-github-control-plane-integration.json", "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json"]
+    },
+    {
+      "subject": "ATLAS Book",
+      "current_override": "The historical scoped marker is closed; operating-model refresh is follow-on work.",
+      "evidence_refs": ["docs/atlas-book/02-lanes-and-markers.md", "docs/atlas-book/03-operating-model.md"]
+    }
+  ],
+  "limits_and_gaps": {
+    "deleted_or_inaccessible_history": "The recovery cannot prove deleted, unindexed, or inaccessible chats and files.",
+    "known_gaps_reference": "/known_gaps in the raw imported register",
+    "known_gaps_count": 7,
+    "secret_handling": "No secret value was read, copied, or recorded by this admission."
+  },
+  "marker_effect": "No marker movement. This import does not satisfy any ratchet threshold."
+}
