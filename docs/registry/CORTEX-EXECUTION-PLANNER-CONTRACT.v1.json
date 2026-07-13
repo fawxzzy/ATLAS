@@ -1,0 +1,223 @@
+{
+  "contract_version": "atlas.cortex.execution_planner_contract_registry.v1",
+  "schema_identifier": "atlas.cortex.execution_plan.v1",
+  "document_kind": "machine_readable_doctrine",
+  "runtime_adoption": "not_adopted",
+  "planner_mode": "deterministic_advisory_only",
+  "authority_boundary": {
+    "cortex": "recommends_non_overlapping_job_candidates_only",
+    "stack": "execution_operator_plane",
+    "codex": "native_execution_runtime",
+    "atlas": "identity_contract_receipt_marker_and_routing_authority",
+    "discordos": "sole_logical_board_and_discord_writer",
+    "external_action_authority": "explicit_task_local_and_separate_from_planning"
+  },
+  "admitted_inputs": {
+    "required": [
+      {
+        "name": "synthesis_packet",
+        "schema": "atlas.cortex.chat_style_synthesis_packet.v1",
+        "cardinality": "exactly_one",
+        "trust_class": "validated_advisory"
+      },
+      {
+        "name": "bridge_candidate",
+        "schema": "atlas.cortex.synthesis_execution_bridge_packet.v1",
+        "cardinality": "exactly_one_compatible",
+        "trust_class": "validated_advisory"
+      },
+      {
+        "name": "continuity_and_marker_sources",
+        "trust_class": "durable_root_truth"
+      },
+      {
+        "name": "component_and_topology_references",
+        "trust_class": "durable_root_truth"
+      },
+      {
+        "name": "applicable_playbook_doctrine_references",
+        "trust_class": "durable_doctrine"
+      },
+      {
+        "name": "operator_intent_and_authority_envelope",
+        "trust_class": "explicit_task_local"
+      },
+      {
+        "name": "resource_state_receipts",
+        "trust_class": "durable_receipt"
+      }
+    ],
+    "conditional": [
+      {
+        "name": "prior_closeout_read_model_evidence",
+        "required_when": ["resume", "reconcile"],
+        "trust_class": "durable_receipt"
+      }
+    ],
+    "optional": ["card_correlation_id", "job_correlation_id"],
+    "denied": [
+      "secret_bearing_inputs",
+      "hidden_transcript_dependence",
+      "hidden_session_inference",
+      "live_platform_reads_without_durable_receipt",
+      "absolute_paths_as_durable_truth"
+    ]
+  },
+  "deterministic_output": {
+    "top_level_field_order": [
+      "schema_version",
+      "plan_id",
+      "source_packet",
+      "source_digests",
+      "source_trust_classes",
+      "selected_lane",
+      "selected_marker",
+      "selected_packet",
+      "objective",
+      "plan_status",
+      "dependency_graph",
+      "execution_waves",
+      "job_candidates",
+      "project_component_ownership",
+      "runtime_recommendation",
+      "permission_posture",
+      "external_action_authority",
+      "scope_lock",
+      "resource_leases",
+      "verification_requirements",
+      "proof_requirements",
+      "commit_requirements",
+      "receipt_requirements",
+      "rollback_requirements",
+      "recovery_requirements",
+      "collision_risks",
+      "dependency_risks",
+      "required_approvals",
+      "blocked_reasons",
+      "skipped_reasons",
+      "next_recommended_packet",
+      "safe_to_admit",
+      "warnings"
+    ],
+    "identity_rule": "stable_digest_of_normalized_admitted_inputs_and_contract_version",
+    "ordering_rules": [
+      "normalize_repository_relative_paths_before_comparison",
+      "sort_references_by_normalized_path_then_stable_identifier",
+      "validate_dependency_edges_before_assigning_execution_waves",
+      "sort_job_candidates_by_stable_job_id",
+      "sort_execution_waves_by_wave_number_then_stable_job_id",
+      "preserve_declared_top_level_field_order"
+    ],
+    "stable_for_identical_admitted_inputs": true
+  },
+  "allowed_enums": {
+    "plan_status": ["draft", "blocked", "ready_for_admission"],
+    "execution_class": ["read_only", "repo_worktree", "canonical_workspace"],
+    "external_action_authority": ["no_execution_authority", "explicit_task_local_authority"],
+    "resource_kinds": ["files", "worktrees", "ports", "browsers", "schemas", "canonical_root", "external_writers"],
+    "runtime_speed": ["standard", "fast"],
+    "runtime_fallback": ["standard_with_warning", "blocked"],
+    "job_state": ["candidate", "blocked", "skipped"],
+    "approval_state": ["not_required", "required", "current_thread_project_specific"]
+  },
+  "field_contracts": {
+    "source_packet": "selected synthesis packet identity and compatible bridge candidate identity",
+    "source_digests": "normalized source digests and conflict detection inputs",
+    "source_trust_classes": "durable or validated advisory provenance per source",
+    "selected_scope": "selected_lane selected_marker selected_packet and objective must name one admitted scope",
+    "dependency_graph": "directed prerequisite edges; cycles block admission",
+    "execution_waves": "assigned only after dependency graph validation",
+    "job_candidates": "stable IDs, one independently verifiable outcome, ownership, scope lock, and execution class",
+    "project_component_ownership": "project component repository and known owner per job",
+    "runtime_recommendation": "provider model reasoning speed capability checks and fallback recommendation only",
+    "permission_posture": "host capability only; never external mutation authority",
+    "external_action_authority": "separate task-local authority; planner output cannot grant it",
+    "scope_lock": "exact allowed and forbidden paths or subsystems",
+    "resource_leases": "receipt-backed files worktrees ports browsers schemas canonical root and external writers",
+    "execution_requirements": "verification proof commit receipt rollback and recovery requirements are prospective only",
+    "risk_register": "collision and dependency risks remain explicit",
+    "admission_result": "required approvals blocked/skipped reasons next recommended packet and safe_to_admit"
+  },
+  "planning_rules": [
+    "one_independently_verifiable_outcome_per_job_candidate",
+    "dependency_edges_before_execution_wave_assignment",
+    "serialize_overlapping_files_generated_artifacts_schema_canonical_workspace_browser_or_discord_writer_ownership",
+    "parallelize_read_only_only_when_not_contending_with_root_or_owner_writer",
+    "stack_resolves_and_receipts_effective_runtime",
+    "capability_detect_fast_mode_and_degrade_to_standard_with_warning",
+    "full_local_access_is_host_capability_not_external_authority",
+    "require_current_thread_project_specific_vercel_production_approval",
+    "preserve_dirty_paths_and_user_work_without_broad_staging_or_cleanup",
+    "never_claim_executed_verified_reconciled_or_completed_state",
+    "no_custom_sqlite_execution_queue_worker_loop_or_scheduler"
+  ],
+  "failure_closed_conditions": [
+    "missing_or_invalid_source_schema",
+    "digest_conflict",
+    "stale_source_truth",
+    "marker_conflict",
+    "unknown_owner",
+    "unsafe_git_state_without_admitted_repair_packet",
+    "overlapping_resources",
+    "unknown_external_authority",
+    "unavailable_execution_class",
+    "unsupported_runtime_without_fallback",
+    "secret_bearing_input",
+    "hidden_transcript_dependence",
+    "multi_lane_scope_without_approved_cross_repo_packet",
+    "self_granted_execution_final_receipt_marker_routing_or_external_authority"
+  ],
+  "first_implementation_boundary": {
+    "allowed_paths": [
+      "ops/cortex/execution_planner.py",
+      "tests/test_cortex_execution_planner.py"
+    ],
+    "readable_existing_contracts": [
+      "ops/cortex/chat_style_synthesis_packet_generator.py",
+      "atlas.cortex.synthesis_execution_bridge_packet.v1"
+    ],
+    "allowed_output_glob": "tmp/atlas/**.json",
+    "forbidden_targets": [
+      "existing_cortex_helpers",
+      "_stack",
+      "owner_repositories",
+      "atlas_contracts",
+      "discordos",
+      "cards",
+      "live_platforms",
+      "secrets",
+      "markers",
+      "runtime_state"
+    ],
+    "required_proof": [
+      "deterministic_ids_and_order",
+      "valid_single_job_planning",
+      "dependency_waves",
+      "collision_serialization",
+      "fail_closed_authority_conflicts",
+      "git_and_resource_conflict_handling",
+      "runtime_recommendation_and_fallback_warnings",
+      "absolute_traversal_and_output_path_rejection",
+      "no_execution_side_effects",
+      "strict_mode_exit_behavior",
+      "writes_only_to_explicit_tmp_atlas_json_outputs"
+    ]
+  },
+  "marker_decision": {
+    "marker": "Cortex Dual-Mode Replacement Readiness",
+    "percent": 50,
+    "movement": "none",
+    "movement_above_threshold_requires": "admitted_implemented_proof_backed_reconciled_and_separately_ratcheted_execution_planner",
+    "next_packet": "Cortex Dual-Mode Replacement Readiness execution planner first-implementation admission"
+  },
+  "prohibitions": [
+    "no_execution_authority",
+    "no_final_receipt_authority",
+    "no_marker_authority",
+    "no_external_mutation_authority",
+    "no_codex_launch",
+    "no_queue_or_scheduler_creation",
+    "no_owner_repository_mutation",
+    "no_live_platform_query"
+  ]
+}

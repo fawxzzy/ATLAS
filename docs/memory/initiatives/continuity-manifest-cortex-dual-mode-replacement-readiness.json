@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-07-09T19:47:39.8439335-04:00",
-  "updated_at": "2026-07-13T20:20:00-04:00",
+  "updated_at": "2026-07-13T22:26:38-04:00",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -40,6 +40,8 @@
     "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHAT-STYLE-SYNTHESIS-PACKET-GENERATION-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-13.md",
     "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHAT-STYLE-SYNTHESIS-PACKET-GENERATION-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-13.md",
     "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHAT-STYLE-SYNTHESIS-PACKET-GENERATION-MARKER-SURFACE-RATCHET-DECISION-2026-07-13.md",
+    "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-EXECUTION-PLANNER-CONTRACT-FREEZE-2026-07-13.md",
+    "docs/registry/CORTEX-EXECUTION-PLANNER-CONTRACT.v1.json",
     "ops/cortex/chat_style_synthesis_packet_generator.py",
     "tests/test_cortex_chat_style_synthesis_packet_generator.py",
     "ops/cortex/chatgpt_codex_role_inventory.py",
@@ -74,7 +76,8 @@
                                                 "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHAT-STYLE-SYNTHESIS-PACKET-GENERATION-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-13.md",
                                                 "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHAT-STYLE-SYNTHESIS-PACKET-GENERATION-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-13.md",
                                                 "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHAT-STYLE-SYNTHESIS-PACKET-GENERATION-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-13.md",
-                                                "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHAT-STYLE-SYNTHESIS-PACKET-GENERATION-MARKER-SURFACE-RATCHET-DECISION-2026-07-13.md"
+                                                "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHAT-STYLE-SYNTHESIS-PACKET-GENERATION-MARKER-SURFACE-RATCHET-DECISION-2026-07-13.md",
+                                                "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-EXECUTION-PLANNER-CONTRACT-FREEZE-2026-07-13.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -112,6 +115,14 @@
       {
         "path": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHAT-STYLE-SYNTHESIS-PACKET-GENERATION-FIRST-IMPLEMENTATION-ADMISSION-2026-07-10.md",
         "role": "current chat-style synthesis packet-generation first-implementation admission and future helper/test surface truth"
+      },
+      {
+        "path": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-EXECUTION-PLANNER-CONTRACT-FREEZE-2026-07-13.md",
+        "role": "current deterministic advisory execution-planner contract freeze and exact first-implementation boundary"
+      },
+      {
+        "path": "docs/registry/CORTEX-EXECUTION-PLANNER-CONTRACT.v1.json",
+        "role": "machine-readable deterministic execution-planner doctrine registry; not runtime adoption"
       },
       {
         "path": "ops/cortex/codex_closeout_ingestion_read_model.py",
@@ -166,8 +177,8 @@
     ],
     "blocked_or_gated_work": [
       {
-        "item": "moving above the current 40 percent dual-mode threshold",
-        "requirement": "blocked until chat-style synthesis packet generation from Cortex memory is implemented, proof-backed, reconciled, and adopted through a marker-surface ratchet decision"
+        "item": "moving above the current 50 percent dual-mode threshold",
+        "requirement": "blocked until execution-planner implementation is admitted, implemented, proof-backed, reconciled, and separately ratcheted; the contract freeze alone does not move the marker"
       },
       {
         "item": "claiming bridge implementation or execution routing from the frozen bridge schema alone",
@@ -180,19 +191,20 @@
     ],
     "next_package_ladder": [
       {
-        "package": "Cortex Dual-Mode Replacement Readiness execution planner contract freeze",
-        "mode": "docs-only execution planner contract freeze",
-        "reason": "the 50 percent chat-style synthesis packet-generation threshold is implementation-backed, proof-backed, reconciled, and adopted; movement above 50 percent requires a separately ratcheted execution planner contract"
+        "package": "Cortex Dual-Mode Replacement Readiness execution planner first-implementation admission",
+        "mode": "bounded future implementation admission",
+        "reason": "the 50 percent chat-style synthesis packet-generation threshold remains implementation-backed, proof-backed, reconciled, and adopted; the execution-planner contract is now frozen but movement above 50 percent requires execution-planner implementation proof, reconciliation, and a separate ratchet"
       }
     ],
-    "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHAT-STYLE-SYNTHESIS-PACKET-GENERATION-MARKER-SURFACE-RATCHET-DECISION-2026-07-13.md",
-    "freshness_checked_at": "2026-07-13T20:20:00-04:00",
-    "freshness_basis": "The current dual-mode posture is implementation-backed and adopted at 50 percent: chat-style synthesis packet generation from Cortex memory is landed in ops/cortex/chat_style_synthesis_packet_generator.py with its focused test suite, reconciled at main@aa231d4c, and ratcheted by the current decision after focused tests 30/30 passed and strict conflict exit 2. Movement above 50 percent requires the exact execution planner contract freeze packet.",
+    "freshness_state": "execution-planner-contract-freeze-current",
+    "freshness_checked_receipt": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-EXECUTION-PLANNER-CONTRACT-FREEZE-2026-07-13.md",
+    "freshness_checked_at": "2026-07-13T22:26:38-04:00",
+    "freshness_basis": "The current dual-mode posture remains implementation-backed and adopted at 50 percent: chat-style synthesis packet generation from Cortex memory is landed in ops/cortex/chat_style_synthesis_packet_generator.py with its focused test suite, reconciled at main@aa231d4c, and ratcheted after focused tests 30/30 passed and strict conflict exit 2. This execution-planner contract freeze adds deterministic advisory doctrine and no marker moved. Movement above the current 50 percent threshold requires execution-planner implementation proof, reconciliation, and a separate ratchet.",
     "marker_posture": [
       {
         "marker": "Cortex Dual-Mode Replacement Readiness",
         "percent": 50,
+        "movement": "none",
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ]
