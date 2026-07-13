@@ -1,6 +1,7 @@
 # Receipt Index
 
 - [External Model Sidecar Provider Integration - DeepSeek/LiteLLM Bridge Program Admission 2026-07-13](../ops/ATLAS-EXTERNAL-MODEL-SIDECAR-DEEPSEEK-LITELLM-BRIDGE-PROGRAM-ADMISSION-2026-07-13.md)
+- [External Model Sidecar Provider Integration - DeepSeek/LiteLLM Bridge Phase 1 Capability Audit 2026-07-13](../ops/ATLAS-EXTERNAL-MODEL-SIDECAR-DEEPSEEK-LITELLM-BRIDGE-PHASE-1-CAPABILITY-AUDIT-2026-07-13.md) - accepted feasible-with-constraints audit; exact next packet: `External Model Sidecar Provider Integration Phase 2 security identity and runtime contract freeze`.
 
 ## Atlas Full-System Re-evaluation opening gate
 

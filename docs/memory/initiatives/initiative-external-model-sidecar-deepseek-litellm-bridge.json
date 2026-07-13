@@ -2,8 +2,8 @@
   "contract_version": "atlas.initiative.v1",
   "id": "initiative-external-model-sidecar-deepseek-litellm-bridge",
   "title": "External Model Sidecar Provider Integration - DeepSeek/LiteLLM Bridge",
-  "summary": "Planning-only admission for a six-unit DeepSeek/LiteLLM sidecar program; progress is 0 / 6 and native OpenAI remains fallback.",
-  "status": "admitted_planning_only",
+  "summary": "Phase 1 accepted as a feasible-with-constraints read-only capability audit for the six-unit DeepSeek/LiteLLM sidecar program; progress is 1 / 6 and native OpenAI remains fallback.",
+  "status": "active_contract_freeze_next",
   "owner": "ATLAS root governance",
   "created_at": "2026-07-13T00:00:00Z",
   "updated_at": "2026-07-13T00:00:00Z",
@@ -13,21 +13,22 @@
   "related_session_refs": [],
   "related_attention_refs": [],
   "evidence_refs": [
-    "docs/ops/ATLAS-EXTERNAL-MODEL-SIDECAR-DEEPSEEK-LITELLM-BRIDGE-PROGRAM-ADMISSION-2026-07-13.md"
+    "docs/ops/ATLAS-EXTERNAL-MODEL-SIDECAR-DEEPSEEK-LITELLM-BRIDGE-PROGRAM-ADMISSION-2026-07-13.md",
+    "docs/ops/ATLAS-EXTERNAL-MODEL-SIDECAR-DEEPSEEK-LITELLM-BRIDGE-PHASE-1-CAPABILITY-AUDIT-2026-07-13.md"
   ],
   "proposed_next_session_refs": [
-    "External Model Sidecar Provider Integration Phase 1 read-only capability audit"
+    "External Model Sidecar Provider Integration Phase 2 security identity and runtime contract freeze"
   ],
   "supersedes": [],
   "superseded_by": [],
   "metadata": {
     "lane": "External Model Sidecar Provider Integration - DeepSeek/LiteLLM Bridge",
     "progress": {
-      "percent": 0,
-      "numerator": 0,
+      "percent": 16.7,
+      "numerator": 1,
       "denominator": 6,
-      "marker": "0%",
-      "admission_completes_no_unit": true
+      "marker": "16.7%",
+      "admission_completes_no_unit": false
     },
     "authority": {
       "mode": "planning_only",
@@ -37,8 +38,8 @@
       "custom_provider_support_must_be_proven_before_integration": true
     },
     "phases": [
-      {"id": "phase-01", "title": "Read-only capability audit", "state": "admitted_not_executed", "outcome": "No capability audit was executed."},
-      {"id": "phase-02", "title": "Security/identity/runtime contract freeze", "state": "admitted_not_executed", "outcome": "No contract or configuration was frozen by execution."},
+      {"id": "phase-01", "title": "Read-only capability audit", "state": "completed", "outcome": "Accepted feasible-with-constraints read-only capability audit; configuration capability is proven by documentation and parser admission, while end-to-end provider execution remains unproven."},
+      {"id": "phase-02", "title": "Security/identity/runtime contract freeze", "state": "ready", "outcome": "Exact next packet: External Model Sidecar Provider Integration Phase 2 security identity and runtime contract freeze."},
       {"id": "phase-03", "title": "Dedicated runtime and one-time credential setup", "state": "admitted_not_executed", "outcome": "No runtime or credential setup occurred."},
       {"id": "phase-04", "title": "Loopback LiteLLM proxy and Scheduled Task", "state": "admitted_not_executed", "outcome": "No proxy or Scheduled Task was created."},
       {"id": "phase-05", "title": "Explicit-route Codex/_stack/Atlas Control integration only if proven supported", "state": "admitted_not_executed", "outcome": "No integration occurred; support remains unproven."},
@@ -55,7 +56,9 @@
     "source_provenance": "operator-provided DeepSeek bridge execution order, admitted on 2026-07-13; local attachment path intentionally not persisted",
     "future_secret_rule": "The future key is requested exactly once at Phase 3 and never printed, committed, passed in process arguments, or written to plaintext logs.",
     "candidate_doctrine": ["External Model Sidecar", "Secret/Identity Alignment", "Discover -> Back Up -> Modify -> Validate -> Document", "Listening Is Not Healthy", "Dedicated Runtime"],
-    "exact_next_packet": "External Model Sidecar Provider Integration Phase 1 read-only capability audit",
-    "marker_movement": "No other marker moves."
+    "exact_next_packet": "External Model Sidecar Provider Integration Phase 2 security identity and runtime contract freeze",
+    "current_constraints": ["Program Files path requires elevated installation or approved user-scoped path decision", "credential retrieval and Scheduled Task identity alignment are not frozen", "end-to-end provider execution remains unproven", "LiteLLM is absent and no proxy or task exists"],
+    "privacy_data_routing_risk": "Source code, prompts, repository context, and tool outputs routed through the sidecar leave the OpenAI path and may be processed by DeepSeek; Phase 2 must define explicit data classification, deny secrets and production credentials by default, require deliberate routing, and redact prompt/body/key content from proxy logs and receipts.",
+    "marker_movement": "Only this lane moved from 0% to 16.7%; no other marker moved."
   }
 }
