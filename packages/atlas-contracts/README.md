@@ -72,7 +72,38 @@ Instead, it defines the first importable v1 platform surface and keeps compatibi
 Run:
 
 ```powershell
-node packages/atlas-contracts/scripts/validate-contracts.mjs
+npm --prefix packages/atlas-contracts run validate
 ```
 
-The validator checks all bundled valid fixtures and bundled invalid fixtures against the v1 and v2 schemas.
+This runs the bundled valid/invalid fixture suite and the artifact-validator CLI suite. The fixture validator and the artifact CLI both use the exported `@atlas/contracts/validator` engine.
+
+### Artifact CLI
+
+Validate an arbitrary JSON artifact against a registered contract identifier or an exact schema file owned by this package:
+
+```powershell
+node packages/atlas-contracts/scripts/validate-artifact.mjs --schema atlas.env.v1 --artifact C:\work\env.json
+node packages/atlas-contracts/scripts/validate-artifact.mjs --schema schemas/atlas.component-manifest.v2.schema.json --artifact C:\work\component.json --json
+```
+
+`--json` emits one deterministic JSON result with `ok`, `code`, `schema`, `artifact`, and `errors`. The supported exit codes are `0` (`VALID`), `1` (`INVALID_ARTIFACT`), `2` (unsupported, unknown, or invalid schema reference), `3` (`MALFORMED_JSON`), and `4` (`MISSING_INPUT`). Unsupported major versions use the stable `UNSUPPORTED_CONTRACT_VERSION` code. Schema resolution accepts only an identifier in the registered plan or an exact package-owned `schemas/<file>.schema.json` path; traversal segments and arbitrary filesystem schemas are rejected.
+
+### Programmatic use
+
+```js
+import {
+  loadJson,
+  loadKnownSchema,
+  validateJsonSchema,
+} from "@atlas/contracts/validator";
+
+const loaded = await loadKnownSchema("atlas.env.v1");
+const artifact = await loadJson("C:/work/env.json");
+const errors = loaded.ok ? validateJsonSchema(artifact, loaded.schema) : [loaded.error];
+```
+
+`loadJson` is for caller-owned JSON artifacts. `loadKnownSchema` is deliberately restricted to the Atlas registered schema plan, so owner repositories must invoke this validator instead of copying its engine or loading their own schema paths. The current supported majors are v1 and v2; additions must be registered here before they become callable.
+
+## Producer/consumer boundary
+
+Atlas root owns schema semantics and validation behavior. Owner repositories produce or consume governed artifacts through this package and do not maintain validator copies. This foundation does not prove producer/consumer adoption: all eleven v2 foundations remain at `0/11` until governed proof lands. The next serialized task is `_stack` producer adoption using the Atlas-owned artifact validator.

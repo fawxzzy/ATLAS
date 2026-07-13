@@ -15,6 +15,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./constants": "./src/constants.ts",
+    "./validator": "./scripts/lib/validate-json-schema.mjs",
     "./schemas/atlas.env.v1": "./schemas/atlas.env.v1.schema.json",
     "./schemas/atlas.env.v1.schema.json": "./schemas/atlas.env.v1.schema.json",
     "./schemas/atlas.app-registration.v1": "./schemas/atlas.app-registration.v1.schema.json",
@@ -49,7 +50,9 @@
     "./schemas/atlas.knowledge-candidate.v2.schema.json": "./schemas/atlas.knowledge-candidate.v2.schema.json"
   },
   "scripts": {
-    "validate": "node scripts/validate-contracts.mjs"
+    "validate:fixtures": "node scripts/validate-contracts.mjs",
+    "test:artifact-validator": "node scripts/test-validate-artifact.mjs",
+    "validate": "npm run validate:fixtures && npm run test:artifact-validator"
   },
   "engines": {
     "node": ">=22"
