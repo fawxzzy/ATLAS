@@ -1,0 +1,40 @@
+{
+  "contract_version": "atlas.worker-lease.v2",
+  "lease_id": "lease-001",
+  "job_id": "job-001",
+  "component_id": "_stack",
+  "status": "active",
+  "acquired_at": "2026-07-13T02:00:00Z",
+  "expires_at": "2026-07-13T04:00:00Z",
+  "renewed_at": null,
+  "released_at": null,
+  "owner": {
+    "worker_id": "worker-001",
+    "thread_id": "thread-001",
+    "turn_id": "turn-001"
+  },
+  "workspace": {
+    "root": "repos/_stack",
+    "worktree": "repos/_stack/.codex/worktrees/job-001",
+    "branch": "codex/job-001"
+  },
+  "resources": [
+    {
+      "kind": "port",
+      "resource_id": "localhost:4173",
+      "exclusive": true,
+      "metadata": {
+        "purpose": "preview"
+      }
+    },
+    {
+      "kind": "browser",
+      "resource_id": "mazer-live-preview",
+      "exclusive": true
+    }
+  ],
+  "recovery": {
+    "strategy": "resume",
+    "checkpoint": "runtime/receipts/job-001.json"
+  }
+}

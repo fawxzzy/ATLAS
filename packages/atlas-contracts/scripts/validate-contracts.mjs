@@ -55,6 +55,7 @@ const schemaPlan = [
   { file: "atlas.context-packet.v2.schema.json", valid: "valid/context-packet.v2.json", invalid: "invalid/context-packet.v2.no-sources.json" },
   { file: "atlas.evidence-bundle.v2.schema.json", valid: "valid/evidence-bundle.v2.json", invalid: "invalid/evidence-bundle.v2.bad-classification.json" },
   { file: "atlas.approval-record.v2.schema.json", valid: "valid/approval-record.v2.json", invalid: "invalid/approval-record.v2.bad-decision.json" },
+  { file: "atlas.worker-lease.v2.schema.json", valid: "valid/worker-lease.v2.json", invalid: "invalid/worker-lease.v2.bad-status.json" },
 ];
 
 const isoDateTimePattern =

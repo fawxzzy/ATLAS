@@ -19,6 +19,7 @@ export {
   ATLAS_REPO_CLASSES,
   ATLAS_REPO_STATUSES,
   ATLAS_SCHEMA_PATHS,
+  ATLAS_WORKER_LEASE_CONTRACT_VERSION,
 } from "./constants";
 
 export type {

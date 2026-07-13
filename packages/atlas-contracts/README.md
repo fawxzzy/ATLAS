@@ -24,6 +24,7 @@ The first Contracts v2 implementation cluster also provides schema, export, and 
 - `atlas.context-packet.v2`
 - `atlas.evidence-bundle.v2`
 - `atlas.approval-record.v2`
+- `atlas.worker-lease.v2`
 
 These v2 families remain implementation foundations rather than completed mesh units until governed producer and consumer adoption proof exists.
 
@@ -39,6 +40,10 @@ Schemas:
 - `atlas.component-manifest.v2`
 - `atlas.job-envelope.v2`
 - `atlas.execution-receipt.v2`
+- `atlas.context-packet.v2`
+- `atlas.evidence-bundle.v2`
+- `atlas.approval-record.v2`
+- `atlas.worker-lease.v2`
 
 Exports:
 
@@ -62,4 +67,4 @@ Run:
 node packages/atlas-contracts/scripts/validate-contracts.mjs
 ```
 
-The validator checks all bundled valid fixtures and bundled invalid fixtures against the v1 schemas.
+The validator checks all bundled valid fixtures and bundled invalid fixtures against the v1 and v2 schemas.
