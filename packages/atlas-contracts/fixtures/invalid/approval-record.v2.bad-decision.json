@@ -1,0 +1,1 @@
+{"contract_version":"atlas.approval-record.v2","approval_id":"approval-002","job_id":"job-001","recorded_at":"2026-07-13T00:30:00Z","actor":"operator","action":{"kind":"external-mutation","target":"github:atlas","scope":"push main"},"decision":"allowed","expires_at":null,"constraints":[]}

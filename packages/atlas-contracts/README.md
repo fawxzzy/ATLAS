@@ -21,6 +21,9 @@ The first Contracts v2 implementation cluster also provides schema, export, and 
 - `atlas.component-manifest.v2`
 - `atlas.job-envelope.v2`
 - `atlas.execution-receipt.v2`
+- `atlas.context-packet.v2`
+- `atlas.evidence-bundle.v2`
+- `atlas.approval-record.v2`
 
 These v2 families remain implementation foundations rather than completed mesh units until governed producer and consumer adoption proof exists.
 

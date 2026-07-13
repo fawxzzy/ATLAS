@@ -1,0 +1,1 @@
+{"contract_version":"atlas.evidence-bundle.v2","bundle_id":"evidence-002","job_id":"job-001","recorded_at":"2026-07-13T00:30:00Z","environment":{"component_id":"stack","commit":null,"branch":null},"evidence":[{"kind":"test","ref":"contract-validation","status":"passed"}],"classifications":["assumed"]}

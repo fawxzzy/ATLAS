@@ -10,6 +10,9 @@ export const ATLAS_JOB_ENVELOPE_CONTRACT_VERSION =
   "atlas.job-envelope.v2" as const;
 export const ATLAS_EXECUTION_RECEIPT_CONTRACT_VERSION =
   "atlas.execution-receipt.v2" as const;
+export const ATLAS_CONTEXT_PACKET_CONTRACT_VERSION = "atlas.context-packet.v2" as const;
+export const ATLAS_EVIDENCE_BUNDLE_CONTRACT_VERSION = "atlas.evidence-bundle.v2" as const;
+export const ATLAS_APPROVAL_RECORD_CONTRACT_VERSION = "atlas.approval-record.v2" as const;
 
 export const ATLAS_CONTRACT_VERSIONS = [
   ATLAS_ENV_CONTRACT_VERSION,
@@ -20,6 +23,9 @@ export const ATLAS_CONTRACT_VERSIONS = [
   ATLAS_COMPONENT_MANIFEST_CONTRACT_VERSION,
   ATLAS_JOB_ENVELOPE_CONTRACT_VERSION,
   ATLAS_EXECUTION_RECEIPT_CONTRACT_VERSION,
+  ATLAS_CONTEXT_PACKET_CONTRACT_VERSION,
+  ATLAS_EVIDENCE_BUNDLE_CONTRACT_VERSION,
+  ATLAS_APPROVAL_RECORD_CONTRACT_VERSION,
 ] as const;
 
 export const ATLAS_ENVIRONMENTS = [
@@ -110,6 +116,9 @@ export const ATLAS_SCHEMA_PATHS = {
     "schemas/atlas.job-envelope.v2.schema.json",
   [ATLAS_EXECUTION_RECEIPT_CONTRACT_VERSION]:
     "schemas/atlas.execution-receipt.v2.schema.json",
+  [ATLAS_CONTEXT_PACKET_CONTRACT_VERSION]: "schemas/atlas.context-packet.v2.schema.json",
+  [ATLAS_EVIDENCE_BUNDLE_CONTRACT_VERSION]: "schemas/atlas.evidence-bundle.v2.schema.json",
+  [ATLAS_APPROVAL_RECORD_CONTRACT_VERSION]: "schemas/atlas.approval-record.v2.schema.json",
 } as const;
 
 export type AtlasContractVersion = (typeof ATLAS_CONTRACT_VERSIONS)[number];

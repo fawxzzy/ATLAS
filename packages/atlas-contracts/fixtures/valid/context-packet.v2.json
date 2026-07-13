@@ -1,0 +1,1 @@
+{"contract_version":"atlas.context-packet.v2","context_id":"context-001","job_id":"job-001","component_id":"stack","assembled_at":"2026-07-13T00:30:00Z","sources":[{"kind":"repository","ref":"AGENTS.md","authority":"authoritative","digest":null}],"rules":["Preserve owner authority."],"decisions":[],"risks":[]}

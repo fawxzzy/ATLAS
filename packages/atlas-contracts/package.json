@@ -30,7 +30,13 @@
     "./schemas/atlas.job-envelope.v2": "./schemas/atlas.job-envelope.v2.schema.json",
     "./schemas/atlas.job-envelope.v2.schema.json": "./schemas/atlas.job-envelope.v2.schema.json",
     "./schemas/atlas.execution-receipt.v2": "./schemas/atlas.execution-receipt.v2.schema.json",
-    "./schemas/atlas.execution-receipt.v2.schema.json": "./schemas/atlas.execution-receipt.v2.schema.json"
+    "./schemas/atlas.execution-receipt.v2.schema.json": "./schemas/atlas.execution-receipt.v2.schema.json",
+    "./schemas/atlas.context-packet.v2": "./schemas/atlas.context-packet.v2.schema.json",
+    "./schemas/atlas.context-packet.v2.schema.json": "./schemas/atlas.context-packet.v2.schema.json",
+    "./schemas/atlas.evidence-bundle.v2": "./schemas/atlas.evidence-bundle.v2.schema.json",
+    "./schemas/atlas.evidence-bundle.v2.schema.json": "./schemas/atlas.evidence-bundle.v2.schema.json",
+    "./schemas/atlas.approval-record.v2": "./schemas/atlas.approval-record.v2.schema.json",
+    "./schemas/atlas.approval-record.v2.schema.json": "./schemas/atlas.approval-record.v2.schema.json"
   },
   "scripts": {
     "validate": "node scripts/validate-contracts.mjs"
