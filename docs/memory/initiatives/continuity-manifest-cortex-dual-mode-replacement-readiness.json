@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-07-09T19:47:39.8439335-04:00",
-  "updated_at": "2026-07-13T19:50:09-04:00",
+  "updated_at": "2026-07-13T20:00:00-04:00",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -45,6 +45,7 @@
     "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-EXECUTION-PLANNER-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-13.md",
     "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-EXECUTION-PLANNER-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-13.md",
     "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-EXECUTION-PLANNER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-13.md",
+    "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-EXECUTION-PLANNER-MARKER-SURFACE-RATCHET-DECISION-2026-07-13.md",
     "docs/registry/CORTEX-EXECUTION-PLANNER-CONTRACT.v1.json",
     "ops/cortex/execution_planner.py",
     "tests/test_cortex_execution_planner.py",
@@ -59,9 +60,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "cortex-dual-mode-replacement-readiness",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-EXECUTION-PLANNER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-13.md",
-    "checkpoint_commit": "main@9285757383adb7711b0139eb38e1e3d827aabd99",
-    "checkpoint_summary": "The deterministic advisory execution planner is landed in exactly two implementation files at main@92857573, focused proof passes 39/39, the canonical runner reports successful mutation-scope and spec-to-diff validation, and ordinary stack validation matches the admitted 0/0/28/0 baseline. The lane remains at 50 percent pending a separate marker-surface ratchet decision.",
+    "current_checkpoint_receipt": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-EXECUTION-PLANNER-MARKER-SURFACE-RATCHET-DECISION-2026-07-13.md",
+    "checkpoint_commit": "main@0a82fb2f",
+    "checkpoint_summary": "The deterministic advisory execution planner is landed, proof-backed, and reconciled, satisfying the published 60 percent bounded-routing threshold without granting Cortex execution or external-mutation authority. The exact next packet is the replay/evaluation harness contract freeze for the 70 percent threshold.",
     "governing_receipts": [
       "docs/ops/CORTEX-DUAL-MODE-AND-SIMULATION-SUBSTRATE-MARKER-ADMISSION-2026-07-09.md",
       "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-OPERATING-MODE-CONTRACT-FREEZE-2026-07-09.md",
@@ -87,7 +88,8 @@
       "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-EXECUTION-PLANNER-FIRST-IMPLEMENTATION-ADMISSION-2026-07-13.md",
       "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-EXECUTION-PLANNER-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-13.md",
       "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-EXECUTION-PLANNER-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-13.md",
-      "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-EXECUTION-PLANNER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-13.md"
+      "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-EXECUTION-PLANNER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-13.md",
+      "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-EXECUTION-PLANNER-MARKER-SURFACE-RATCHET-DECISION-2026-07-13.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -145,6 +147,10 @@
       {
         "path": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-EXECUTION-PLANNER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-13.md",
         "role": "current implementation-backed execution-planner reconciliation and separate marker-ratchet prerequisite truth"
+      },
+      {
+        "path": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-EXECUTION-PLANNER-MARKER-SURFACE-RATCHET-DECISION-2026-07-13.md",
+        "role": "current 60 percent marker-ratchet receipt and bounded execution-planning threshold source"
       },
       {
         "path": "docs/registry/CORTEX-EXECUTION-PLANNER-CONTRACT.v1.json",
@@ -217,20 +223,20 @@
     ],
     "next_package_ladder": [
       {
-        "package": "Cortex Dual-Mode Replacement Readiness execution planner first-implementation worker implementation",
-        "mode": "first-implementation worker implementation",
-        "reason": "implementation readiness is closed and one exact serialized worker is routed; code is not yet landed and the 50 percent marker must remain unchanged"
+        "package": "Cortex Dual-Mode Replacement Readiness replay/evaluation harness contract freeze",
+        "mode": "docs-only contract freeze",
+        "reason": "the bounded execution-planner threshold is ratcheted to 60 percent; the next published milestone requires a replay/evaluation harness contract before implementation"
       }
     ],
-    "freshness_state": "execution-planner-first-implementation-reconciled",
-    "freshness_checked_receipt": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-EXECUTION-PLANNER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-13.md",
-    "freshness_checked_at": "2026-07-13T19:50:09-04:00",
-    "freshness_basis": "The deterministic advisory execution planner is published at main@92857573 in exactly two implementation files, focused tests pass 39/39, schema-only output remains non-admissible, the canonical runner reports successful exact-scope and spec-to-diff proof, and ordinary validation matches the admitted 0/0/28/0 baseline. The implementation is reconciled without widening Cortex authority; marker movement still requires the separate marker-surface ratchet decision.",
+    "freshness_state": "execution-planner-60-percent-ratcheted",
+    "freshness_checked_receipt": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-EXECUTION-PLANNER-MARKER-SURFACE-RATCHET-DECISION-2026-07-13.md",
+    "freshness_checked_at": "2026-07-13T20:00:00-04:00",
+    "freshness_basis": "The deterministic advisory execution planner is published and reconciled with 39/39 focused tests, exact two-file runner proof, and ordinary validation matching the admitted baseline. This satisfies the published 60 percent bounded-routing threshold without widening Cortex authority. The next exact packet is the replay/evaluation harness contract freeze.",
     "marker_posture": [
       {
         "marker": "Cortex Dual-Mode Replacement Readiness",
-        "percent": 50,
-        "movement": "none",
+        "percent": 60,
+        "movement": "50_to_60",
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ]

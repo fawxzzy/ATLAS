@@ -4,7 +4,7 @@
 
 The new Atlas Full-System Re-evaluation lane is at `50%` on exactly one accepted opening audit out of two gates. Its endgame is a later independent exhaustive closing audit; child-lane execution contributes zero points. `Full Stack Re-sync, Clean & Closeout: 100%` remains historical completion and not current health.
 
-Current implemented substrate is v1 contracts, root governance/receipts, `_stack` canonical writing/event normalization, partial Playbook adoption, root-owned advisory Cortex, Codex task execution, owner-repo truth, DiscordOS single-writer intent, and read-only GitHub/Vercel/Supabase evidence. Atlas Control/SQLite, Contracts mesh/v2, delivery events, persistent workspaces, historical task intelligence, and systematic cross-project promotion remain proposed or partial. Current continuity is `23/23` healthy manifests, `9/9` eligible open markers backed and restart-ready, `23/23` maintained manifests restart-ready, pending review `0`; older counts below are dated historical evidence.
+Current implemented substrate is v1 contracts, root governance/receipts, `_stack` canonical writing/event normalization, partial Playbook adoption, root-owned advisory Cortex with deterministic bounded execution planning, Codex task execution, owner-repo truth, DiscordOS single-writer intent, and read-only GitHub/Vercel/Supabase evidence. Atlas Control/SQLite, Contracts mesh/v2, delivery events, persistent workspaces, historical task intelligence, and systematic cross-project promotion remain proposed or partial. Current continuity is `23/23` healthy manifests, `9/9` eligible open markers backed and restart-ready, `23/23` maintained manifests restart-ready, pending review `0`; older counts below are dated historical evidence.
 
 ## Purpose
 

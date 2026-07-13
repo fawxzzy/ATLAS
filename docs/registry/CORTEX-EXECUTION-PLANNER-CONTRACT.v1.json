@@ -2,7 +2,7 @@
   "contract_version": "atlas.cortex.execution_planner_contract_registry.v1",
   "schema_identifier": "atlas.cortex.execution_plan.v1",
   "document_kind": "machine_readable_doctrine",
-  "runtime_adoption": "not_adopted",
+  "runtime_adoption": "first_implementation_landed_advisory_only",
   "planner_mode": "deterministic_advisory_only",
   "authority_boundary": {
     "cortex": "recommends_non_overlapping_job_candidates_only",
@@ -205,10 +205,10 @@
   },
   "marker_decision": {
     "marker": "Cortex Dual-Mode Replacement Readiness",
-    "percent": 50,
-    "movement": "none",
+    "percent": 60,
+    "movement": "ratcheted_from_50_to_60",
     "movement_above_threshold_requires": "admitted_implemented_proof_backed_reconciled_and_separately_ratcheted_execution_planner",
-    "next_packet": "Cortex Dual-Mode Replacement Readiness execution planner first-implementation admission"
+    "next_packet": "Cortex Dual-Mode Replacement Readiness replay/evaluation harness contract freeze"
   },
   "prohibitions": [
     "no_execution_authority",
