@@ -1,0 +1,581 @@
+{
+  "contract_version": "atlas.github.event-admission-policy.v1",
+  "deduplication": {
+    "digest_conflict": {
+      "decision": "quarantined",
+      "ledger_meaning": "quarantine_hold",
+      "reason_codes": [
+        "admission.quarantine.digest_conflict"
+      ]
+    },
+    "same_digest": {
+      "decision": "duplicate",
+      "ledger_meaning": "noop_duplicate",
+      "reason_codes": [
+        "admission.duplicate.same_digest"
+      ]
+    }
+  },
+  "event_families": {
+    "branch": {
+      "states": {
+        "access_denied": {
+          "decision": "accepted",
+          "intent_template_ids": [
+            "ledger_record"
+          ],
+          "ledger_meaning": "record_only",
+          "reason_codes": [
+            "policy.branch.access_denied"
+          ]
+        },
+        "conflicting": {
+          "decision": "quarantined",
+          "intent_template_ids": [],
+          "ledger_meaning": "quarantine_hold",
+          "reason_codes": [
+            "policy.branch.conflicting"
+          ]
+        },
+        "disabled": {
+          "decision": "accepted",
+          "intent_template_ids": [
+            "ledger_record"
+          ],
+          "ledger_meaning": "record_only",
+          "reason_codes": [
+            "policy.branch.disabled"
+          ]
+        },
+        "empty": {
+          "decision": "accepted",
+          "intent_template_ids": [
+            "ledger_record"
+          ],
+          "ledger_meaning": "record_only",
+          "reason_codes": [
+            "policy.branch.empty"
+          ]
+        },
+        "not_applicable": {
+          "decision": "accepted",
+          "intent_template_ids": [
+            "ledger_record"
+          ],
+          "ledger_meaning": "record_only",
+          "reason_codes": [
+            "policy.branch.not_applicable"
+          ]
+        },
+        "observed": {
+          "decision": "accepted",
+          "intent_template_ids": [
+            "ledger_record"
+          ],
+          "ledger_meaning": "record_only",
+          "reason_codes": [
+            "policy.branch.observed"
+          ]
+        },
+        "unknown": {
+          "decision": "accepted",
+          "intent_template_ids": [
+            "ledger_record"
+          ],
+          "ledger_meaning": "record_only",
+          "reason_codes": [
+            "policy.branch.unknown"
+          ]
+        }
+      }
+    },
+    "issue": {
+      "states": {
+        "access_denied": {
+          "decision": "accepted",
+          "intent_template_ids": [
+            "ledger_record"
+          ],
+          "ledger_meaning": "record_only",
+          "reason_codes": [
+            "policy.issue.access_denied"
+          ]
+        },
+        "conflicting": {
+          "decision": "quarantined",
+          "intent_template_ids": [],
+          "ledger_meaning": "quarantine_hold",
+          "reason_codes": [
+            "policy.issue.conflicting"
+          ]
+        },
+        "disabled": {
+          "decision": "accepted",
+          "intent_template_ids": [
+            "ledger_record"
+          ],
+          "ledger_meaning": "record_only",
+          "reason_codes": [
+            "policy.issue.disabled"
+          ]
+        },
+        "empty": {
+          "decision": "accepted",
+          "intent_template_ids": [
+            "ledger_record"
+          ],
+          "ledger_meaning": "record_only",
+          "reason_codes": [
+            "policy.issue.empty"
+          ]
+        },
+        "not_applicable": {
+          "decision": "accepted",
+          "intent_template_ids": [
+            "ledger_record"
+          ],
+          "ledger_meaning": "record_only",
+          "reason_codes": [
+            "policy.issue.not_applicable"
+          ]
+        },
+        "observed": {
+          "decision": "accepted",
+          "intent_template_ids": [
+            "ledger_record"
+          ],
+          "ledger_meaning": "record_only",
+          "reason_codes": [
+            "policy.issue.observed"
+          ]
+        },
+        "unknown": {
+          "decision": "accepted",
+          "intent_template_ids": [
+            "ledger_record"
+          ],
+          "ledger_meaning": "record_only",
+          "reason_codes": [
+            "policy.issue.unknown"
+          ]
+        }
+      }
+    },
+    "pull_request": {
+      "states": {
+        "access_denied": {
+          "decision": "accepted",
+          "intent_template_ids": [
+            "ledger_record"
+          ],
+          "ledger_meaning": "record_only",
+          "reason_codes": [
+            "policy.pull_request.access_denied"
+          ]
+        },
+        "conflicting": {
+          "decision": "quarantined",
+          "intent_template_ids": [],
+          "ledger_meaning": "quarantine_hold",
+          "reason_codes": [
+            "policy.pull_request.conflicting"
+          ]
+        },
+        "disabled": {
+          "decision": "accepted",
+          "intent_template_ids": [
+            "ledger_record"
+          ],
+          "ledger_meaning": "record_only",
+          "reason_codes": [
+            "policy.pull_request.disabled"
+          ]
+        },
+        "empty": {
+          "decision": "accepted",
+          "intent_template_ids": [
+            "ledger_record"
+          ],
+          "ledger_meaning": "record_only",
+          "reason_codes": [
+            "policy.pull_request.empty"
+          ]
+        },
+        "not_applicable": {
+          "decision": "accepted",
+          "intent_template_ids": [
+            "ledger_record"
+          ],
+          "ledger_meaning": "record_only",
+          "reason_codes": [
+            "policy.pull_request.not_applicable"
+          ]
+        },
+        "observed": {
+          "decision": "accepted",
+          "intent_template_ids": [
+            "ledger_record"
+          ],
+          "ledger_meaning": "record_only",
+          "reason_codes": [
+            "policy.pull_request.observed"
+          ]
+        },
+        "unknown": {
+          "decision": "accepted",
+          "intent_template_ids": [
+            "ledger_record"
+          ],
+          "ledger_meaning": "record_only",
+          "reason_codes": [
+            "policy.pull_request.unknown"
+          ]
+        }
+      }
+    },
+    "release": {
+      "states": {
+        "access_denied": {
+          "decision": "accepted",
+          "intent_template_ids": [
+            "ledger_record"
+          ],
+          "ledger_meaning": "record_only",
+          "reason_codes": [
+            "policy.release.access_denied"
+          ]
+        },
+        "conflicting": {
+          "decision": "quarantined",
+          "intent_template_ids": [],
+          "ledger_meaning": "quarantine_hold",
+          "reason_codes": [
+            "policy.release.conflicting"
+          ]
+        },
+        "disabled": {
+          "decision": "accepted",
+          "intent_template_ids": [
+            "ledger_record"
+          ],
+          "ledger_meaning": "record_only",
+          "reason_codes": [
+            "policy.release.disabled"
+          ]
+        },
+        "empty": {
+          "decision": "accepted",
+          "intent_template_ids": [
+            "ledger_record"
+          ],
+          "ledger_meaning": "record_only",
+          "reason_codes": [
+            "policy.release.empty"
+          ]
+        },
+        "not_applicable": {
+          "decision": "accepted",
+          "intent_template_ids": [
+            "ledger_record"
+          ],
+          "ledger_meaning": "record_only",
+          "reason_codes": [
+            "policy.release.not_applicable"
+          ]
+        },
+        "observed": {
+          "decision": "accepted",
+          "intent_template_ids": [
+            "ledger_record",
+            "release_publish_requires_review"
+          ],
+          "ledger_meaning": "record_and_project",
+          "reason_codes": [
+            "policy.release.observed"
+          ]
+        },
+        "unknown": {
+          "decision": "accepted",
+          "intent_template_ids": [
+            "ledger_record"
+          ],
+          "ledger_meaning": "record_only",
+          "reason_codes": [
+            "policy.release.unknown"
+          ]
+        }
+      }
+    },
+    "repository": {
+      "states": {
+        "access_denied": {
+          "decision": "accepted",
+          "intent_template_ids": [
+            "ledger_record"
+          ],
+          "ledger_meaning": "record_only",
+          "reason_codes": [
+            "policy.repository.access_denied"
+          ]
+        },
+        "conflicting": {
+          "decision": "quarantined",
+          "intent_template_ids": [],
+          "ledger_meaning": "quarantine_hold",
+          "reason_codes": [
+            "policy.repository.conflicting"
+          ]
+        },
+        "disabled": {
+          "decision": "accepted",
+          "intent_template_ids": [
+            "ledger_record"
+          ],
+          "ledger_meaning": "record_only",
+          "reason_codes": [
+            "policy.repository.disabled"
+          ]
+        },
+        "empty": {
+          "decision": "accepted",
+          "intent_template_ids": [
+            "ledger_record"
+          ],
+          "ledger_meaning": "record_only",
+          "reason_codes": [
+            "policy.repository.empty"
+          ]
+        },
+        "not_applicable": {
+          "decision": "accepted",
+          "intent_template_ids": [
+            "ledger_record"
+          ],
+          "ledger_meaning": "record_only",
+          "reason_codes": [
+            "policy.repository.not_applicable"
+          ]
+        },
+        "observed": {
+          "decision": "accepted",
+          "intent_template_ids": [
+            "ledger_record"
+          ],
+          "ledger_meaning": "record_only",
+          "reason_codes": [
+            "policy.repository.observed"
+          ]
+        },
+        "unknown": {
+          "decision": "accepted",
+          "intent_template_ids": [
+            "ledger_record"
+          ],
+          "ledger_meaning": "record_only",
+          "reason_codes": [
+            "policy.repository.unknown"
+          ]
+        }
+      }
+    },
+    "security_alert": {
+      "states": {
+        "access_denied": {
+          "decision": "accepted",
+          "intent_template_ids": [
+            "ledger_record"
+          ],
+          "ledger_meaning": "record_only",
+          "reason_codes": [
+            "policy.security_alert.access_denied"
+          ]
+        },
+        "conflicting": {
+          "decision": "quarantined",
+          "intent_template_ids": [],
+          "ledger_meaning": "quarantine_hold",
+          "reason_codes": [
+            "policy.security_alert.conflicting"
+          ]
+        },
+        "disabled": {
+          "decision": "accepted",
+          "intent_template_ids": [
+            "ledger_record"
+          ],
+          "ledger_meaning": "record_only",
+          "reason_codes": [
+            "policy.security_alert.disabled"
+          ]
+        },
+        "empty": {
+          "decision": "accepted",
+          "intent_template_ids": [
+            "ledger_record"
+          ],
+          "ledger_meaning": "record_only",
+          "reason_codes": [
+            "policy.security_alert.empty"
+          ]
+        },
+        "not_applicable": {
+          "decision": "accepted",
+          "intent_template_ids": [
+            "ledger_record"
+          ],
+          "ledger_meaning": "record_only",
+          "reason_codes": [
+            "policy.security_alert.not_applicable"
+          ]
+        },
+        "observed": {
+          "decision": "accepted",
+          "intent_template_ids": [
+            "ledger_record",
+            "security_alert_requires_review"
+          ],
+          "ledger_meaning": "record_and_project",
+          "reason_codes": [
+            "policy.security_alert.observed"
+          ]
+        },
+        "unknown": {
+          "decision": "accepted",
+          "intent_template_ids": [
+            "ledger_record"
+          ],
+          "ledger_meaning": "record_only",
+          "reason_codes": [
+            "policy.security_alert.unknown"
+          ]
+        }
+      }
+    },
+    "workflow_run": {
+      "states": {
+        "access_denied": {
+          "decision": "accepted",
+          "intent_template_ids": [
+            "ledger_record"
+          ],
+          "ledger_meaning": "record_only",
+          "reason_codes": [
+            "policy.workflow_run.access_denied"
+          ]
+        },
+        "conflicting": {
+          "decision": "quarantined",
+          "intent_template_ids": [],
+          "ledger_meaning": "quarantine_hold",
+          "reason_codes": [
+            "policy.workflow_run.conflicting"
+          ]
+        },
+        "disabled": {
+          "decision": "accepted",
+          "intent_template_ids": [
+            "ledger_record"
+          ],
+          "ledger_meaning": "record_only",
+          "reason_codes": [
+            "policy.workflow_run.disabled"
+          ]
+        },
+        "empty": {
+          "decision": "accepted",
+          "intent_template_ids": [
+            "ledger_record"
+          ],
+          "ledger_meaning": "record_only",
+          "reason_codes": [
+            "policy.workflow_run.empty"
+          ]
+        },
+        "not_applicable": {
+          "decision": "accepted",
+          "intent_template_ids": [
+            "ledger_record"
+          ],
+          "ledger_meaning": "record_only",
+          "reason_codes": [
+            "policy.workflow_run.not_applicable"
+          ]
+        },
+        "observed": {
+          "decision": "accepted",
+          "intent_template_ids": [
+            "ledger_record"
+          ],
+          "ledger_meaning": "record_only",
+          "reason_codes": [
+            "policy.workflow_run.observed"
+          ]
+        },
+        "unknown": {
+          "decision": "accepted",
+          "intent_template_ids": [
+            "ledger_record"
+          ],
+          "ledger_meaning": "record_only",
+          "reason_codes": [
+            "policy.workflow_run.unknown"
+          ]
+        }
+      }
+    }
+  },
+  "intent_templates": {
+    "ledger_record": {
+      "decision": "admitted",
+      "destination": "atlas_ledger",
+      "operation": "record",
+      "reason_codes": [
+        "projection.atlas_ledger.record"
+      ],
+      "route_key": "atlas_ledger"
+    },
+    "release_publish_requires_review": {
+      "decision": "requires_review",
+      "destination": "discordos_update",
+      "operation": "publish",
+      "reason_codes": [
+        "projection.discordos_update.publish.requires_review"
+      ],
+      "route_key": "discordos_update"
+    },
+    "security_alert_requires_review": {
+      "decision": "requires_review",
+      "destination": "discordos_alerts",
+      "operation": "alert",
+      "reason_codes": [
+        "projection.discordos_alerts.alert.requires_review"
+      ],
+      "route_key": "discordos_alerts"
+    }
+  },
+  "policy_id": "github-event-admission-policy",
+  "routes": {
+    "atlas_ledger": {
+      "board_id": null,
+      "card_id": null,
+      "channel_id": null,
+      "project_id": null,
+      "thread_id": null
+    },
+    "discordos_alerts": {
+      "board_id": null,
+      "card_id": null,
+      "channel_id": null,
+      "project_id": null,
+      "thread_id": null
+    },
+    "discordos_update": {
+      "board_id": null,
+      "card_id": null,
+      "channel_id": null,
+      "project_id": null,
+      "thread_id": null
+    }
+  },
+  "version": 1
+}
