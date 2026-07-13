@@ -58,6 +58,8 @@ const schemaPlan = [
   { file: "atlas.worker-lease.v2.schema.json", valid: "valid/worker-lease.v2.json", invalid: "invalid/worker-lease.v2.bad-status.json" },
   { file: "atlas.card-record.v2.schema.json", valid: "valid/card-record.v2.json", invalid: "invalid/card-record.v2.bad-lifecycle.json" },
   { file: "atlas.board-event.v2.schema.json", valid: "valid/board-event.v2.json", invalid: "invalid/board-event.v2.bad-result.json" },
+  { file: "atlas.marker-evidence.v2.schema.json", valid: "valid/marker-evidence.v2.json", invalid: "invalid/marker-evidence.v2.bad-rollup.json" },
+  { file: "atlas.knowledge-candidate.v2.schema.json", valid: "valid/knowledge-candidate.v2.json", invalid: "invalid/knowledge-candidate.v2.bad-kind.json" },
 ];
 
 const isoDateTimePattern =
@@ -177,6 +179,9 @@ function validateSchema(value, schema, rootSchema, atPath = "$") {
   if (typeof value === "number") {
     if (schema.minimum !== undefined && value < schema.minimum) {
       errors.push(`${atPath} must be >= ${schema.minimum}`);
+    }
+    if (schema.maximum !== undefined && value > schema.maximum) {
+      errors.push(`${atPath} must be <= ${schema.maximum}`);
     }
   }
 

@@ -16,6 +16,8 @@ export const ATLAS_APPROVAL_RECORD_CONTRACT_VERSION = "atlas.approval-record.v2"
 export const ATLAS_WORKER_LEASE_CONTRACT_VERSION = "atlas.worker-lease.v2" as const;
 export const ATLAS_CARD_RECORD_CONTRACT_VERSION = "atlas.card-record.v2" as const;
 export const ATLAS_BOARD_EVENT_CONTRACT_VERSION = "atlas.board-event.v2" as const;
+export const ATLAS_MARKER_EVIDENCE_CONTRACT_VERSION = "atlas.marker-evidence.v2" as const;
+export const ATLAS_KNOWLEDGE_CANDIDATE_CONTRACT_VERSION = "atlas.knowledge-candidate.v2" as const;
 
 export const ATLAS_CONTRACT_VERSIONS = [
   ATLAS_ENV_CONTRACT_VERSION,
@@ -32,6 +34,8 @@ export const ATLAS_CONTRACT_VERSIONS = [
   ATLAS_WORKER_LEASE_CONTRACT_VERSION,
   ATLAS_CARD_RECORD_CONTRACT_VERSION,
   ATLAS_BOARD_EVENT_CONTRACT_VERSION,
+  ATLAS_MARKER_EVIDENCE_CONTRACT_VERSION,
+  ATLAS_KNOWLEDGE_CANDIDATE_CONTRACT_VERSION,
 ] as const;
 
 export const ATLAS_ENVIRONMENTS = [
@@ -128,6 +132,8 @@ export const ATLAS_SCHEMA_PATHS = {
   [ATLAS_WORKER_LEASE_CONTRACT_VERSION]: "schemas/atlas.worker-lease.v2.schema.json",
   [ATLAS_CARD_RECORD_CONTRACT_VERSION]: "schemas/atlas.card-record.v2.schema.json",
   [ATLAS_BOARD_EVENT_CONTRACT_VERSION]: "schemas/atlas.board-event.v2.schema.json",
+  [ATLAS_MARKER_EVIDENCE_CONTRACT_VERSION]: "schemas/atlas.marker-evidence.v2.schema.json",
+  [ATLAS_KNOWLEDGE_CANDIDATE_CONTRACT_VERSION]: "schemas/atlas.knowledge-candidate.v2.schema.json",
 } as const;
 
 export type AtlasContractVersion = (typeof ATLAS_CONTRACT_VERSIONS)[number];

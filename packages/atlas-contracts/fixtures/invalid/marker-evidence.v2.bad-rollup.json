@@ -1,0 +1,13 @@
+{
+  "contract_version": "atlas.marker-evidence.v2",
+  "marker_id": "lane-atlas-contracts-mesh",
+  "scope": "Accepted Contracts v2 families.",
+  "measured_at": "2026-07-13T03:00:00Z",
+  "numerator": 0,
+  "denominator": 11,
+  "percentage": 0,
+  "evidence_refs": [],
+  "freshness": {"status": "current", "valid_until": null},
+  "transition": {"previous_percentage": 0, "current_percentage": 0, "reason": "No adoption."},
+  "rollup_policy": "automatic"
+}

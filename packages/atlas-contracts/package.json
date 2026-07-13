@@ -42,7 +42,11 @@
     "./schemas/atlas.card-record.v2": "./schemas/atlas.card-record.v2.schema.json",
     "./schemas/atlas.card-record.v2.schema.json": "./schemas/atlas.card-record.v2.schema.json",
     "./schemas/atlas.board-event.v2": "./schemas/atlas.board-event.v2.schema.json",
-    "./schemas/atlas.board-event.v2.schema.json": "./schemas/atlas.board-event.v2.schema.json"
+    "./schemas/atlas.board-event.v2.schema.json": "./schemas/atlas.board-event.v2.schema.json",
+    "./schemas/atlas.marker-evidence.v2": "./schemas/atlas.marker-evidence.v2.schema.json",
+    "./schemas/atlas.marker-evidence.v2.schema.json": "./schemas/atlas.marker-evidence.v2.schema.json",
+    "./schemas/atlas.knowledge-candidate.v2": "./schemas/atlas.knowledge-candidate.v2.schema.json",
+    "./schemas/atlas.knowledge-candidate.v2.schema.json": "./schemas/atlas.knowledge-candidate.v2.schema.json"
   },
   "scripts": {
     "validate": "node scripts/validate-contracts.mjs"

@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://packages/contracts/atlas.marker-evidence.v2.schema.json",
+  "title": "ATLAS marker evidence contract v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "marker_id", "scope", "measured_at", "numerator", "denominator", "percentage", "evidence_refs", "freshness", "transition", "rollup_policy"],
+  "properties": {
+    "contract_version": {"type": "string", "const": "atlas.marker-evidence.v2"},
+    "marker_id": {"type": "string", "minLength": 1},
+    "scope": {"type": "string", "minLength": 1},
+    "measured_at": {"type": "string", "format": "date-time"},
+    "numerator": {"type": "number", "minimum": 0},
+    "denominator": {"type": "number", "minimum": 1},
+    "percentage": {"type": "number", "minimum": 0, "maximum": 100},
+    "evidence_refs": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "freshness": {"$ref": "#/$defs/freshness"},
+    "transition": {"$ref": "#/$defs/transition"},
+    "rollup_policy": {"type": "string", "enum": ["independent", "parent-only", "child-evidence-no-rollup", "weighted-explicit"]},
+    "extensions": {"type": "object"}
+  },
+  "$defs": {
+    "freshness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "valid_until"],
+      "properties": {
+        "status": {"type": "string", "enum": ["current", "stale", "historical", "unknown"]},
+        "valid_until": {"type": ["string", "null"], "format": "date-time"}
+      }
+    },
+    "transition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["previous_percentage", "current_percentage", "reason"],
+      "properties": {
+        "previous_percentage": {"type": ["number", "null"], "minimum": 0, "maximum": 100},
+        "current_percentage": {"type": "number", "minimum": 0, "maximum": 100},
+        "reason": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}
