@@ -130,6 +130,7 @@ This is a new two-pass lane. It does not alter the historical `Full Stack Re-syn
 - [Cortex Dual-Mode Replacement Readiness Chat-Style Synthesis Packet Generation Marker-Surface Ratchet Decision](../ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHAT-STYLE-SYNTHESIS-PACKET-GENERATION-MARKER-SURFACE-RATCHET-DECISION-2026-07-13.md)
 - [Cortex Dual-Mode Replacement Readiness Execution Planner Contract Freeze](../ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-EXECUTION-PLANNER-CONTRACT-FREEZE-2026-07-13.md)
 - [Cortex Dual-Mode Replacement Readiness Execution Planner First-Implementation Admission](../ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-EXECUTION-PLANNER-FIRST-IMPLEMENTATION-ADMISSION-2026-07-13.md)
+- [Cortex Dual-Mode Replacement Readiness Execution Planner Prompt-Pack And Worker Handoff Contract](../ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-EXECUTION-PLANNER-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-13.md)
 - [ATLAS Root Operator Reselection To Cortex Simulation Substrate](../ops/ATLAS-ROOT-OPERATOR-RESELECTION-TO-CORTEX-SIMULATION-SUBSTRATE-2026-07-09.md)
 - [Cortex Simulation Substrate Readiness Fable/Generative-Agent Research Contract Freeze](../ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-FABLE-GENERATIVE-AGENT-RESEARCH-CONTRACT-FREEZE-2026-07-09.md)
 - [Cortex Simulation Substrate Readiness Simulation Requirements Map First-Implementation Admission](../ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-SIMULATION-REQUIREMENTS-MAP-FIRST-IMPLEMENTATION-ADMISSION-2026-07-09.md)
