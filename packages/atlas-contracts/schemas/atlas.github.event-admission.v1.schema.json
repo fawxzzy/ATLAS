@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://packages/contracts/atlas.github.event-admission.v1.schema.json",
+  "title": "Atlas GitHub event admission contract v1",
+  "description": "Deterministic Atlas admission and deduplication result for a canonical GitHub event receipt.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "admission_id", "idempotency_key", "admitted_at", "source_event", "decision", "reason_codes", "ledger_disposition", "projection_intent_refs", "authority", "evidence_refs"],
+  "properties": {
+    "contract_version": {"type": "string", "const": "atlas.github.event-admission.v1"},
+    "admission_id": {"type": "string", "pattern": "^gha_[a-z0-9][a-z0-9_-]*$"},
+    "idempotency_key": {"type": "string", "pattern": "^ghak_[a-z0-9][a-z0-9_-]*$"},
+    "admitted_at": {"type": "string", "format": "date-time"},
+    "source_event": {"$ref": "#/$defs/sourceEvent"},
+    "decision": {"type": "string", "enum": ["accepted", "duplicate", "rejected", "quarantined"]},
+    "reason_codes": {"type": "array", "items": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$"}},
+    "ledger_disposition": {"$ref": "#/$defs/ledgerDisposition"},
+    "projection_intent_refs": {"type": "array", "items": {"type": "string", "pattern": "^ghp_[a-z0-9][a-z0-9_-]*$"}},
+    "authority": {"$ref": "#/$defs/authority"},
+    "evidence_refs": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "summary": {"type": ["string", "null"], "minLength": 1},
+    "extensions": {"type": "object"}
+  },
+  "$defs": {
+    "sourceEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["event_id", "idempotency_key", "event_family", "fact_state", "digest_algorithm", "digest_value"],
+      "properties": {
+        "event_id": {"type": "string", "pattern": "^ghr_[a-z0-9][a-z0-9_-]*$"},
+        "idempotency_key": {"type": "string", "pattern": "^ghk_[a-z0-9][a-z0-9_-]*$"},
+        "event_family": {"type": "string", "enum": ["repository", "branch", "pull_request", "issue", "workflow_run", "release", "security_alert"]},
+        "fact_state": {"type": "string", "enum": ["observed", "empty", "unknown", "access_denied", "disabled", "conflicting", "not_applicable"]},
+        "digest_algorithm": {"type": "string", "const": "sha256"},
+        "digest_value": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+      }
+    },
+    "ledgerDisposition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["meaning", "backend", "terminal"],
+      "properties": {
+        "meaning": {"type": "string", "enum": ["record_only", "record_and_project", "noop_duplicate", "reject_record", "quarantine_hold"]},
+        "backend": {"type": "string", "const": "backend_neutral"},
+        "terminal": {"type": "boolean"}
+      }
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_producer", "admission_owner", "projection_writer", "external_mutation"],
+      "properties": {
+        "source_producer": {"type": "string", "const": "_stack"},
+        "admission_owner": {"type": "string", "const": "Atlas"},
+        "projection_writer": {"type": "string", "const": "DiscordOS"},
+        "external_mutation": {"type": "string", "const": "denied"}
+      }
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "contract_version": "atlas.github.event-admission.v1",
+  "admission_id": "gha_atlas_pr_105_admission_20260713",
+  "idempotency_key": "ghak_atlas_pr_105_274fab0a3ed7",
+  "admitted_at": "2026-07-13T13:17:00Z",
+  "source_event": {
+    "event_id": "ghr_atlas_pr_105_274fab0a3ed7cda8",
+    "idempotency_key": "ghk_atlas_pr_105_head_274fab0a3ed7",
+    "event_family": "pull_request",
+    "fact_state": "observed",
+    "digest_algorithm": "sha256",
+    "digest_value": "5c3dfa861d93c74791af17ed1460b3f371f4866bd6f10b8882a26fcfacbf6c5f"
+  },
+  "decision": "accepted",
+  "reason_codes": [
+    "pull_request.visible",
+    "projection.allowed"
+  ],
+  "ledger_disposition": {
+    "meaning": "record_and_project",
+    "backend": "backend_neutral",
+    "terminal": true
+  },
+  "projection_intent_refs": [
+    "ghp_atlas_pr_105_board",
+    "ghp_atlas_pr_105_update"
+  ],
+  "authority": {
+    "source_producer": "_stack",
+    "admission_owner": "Atlas",
+    "projection_writer": "DiscordOS",
+    "external_mutation": "denied"
+  },
+  "evidence_refs": [
+    "packages/atlas-contracts/fixtures/valid/github.event-receipt.v1.json",
+    "docs/ops/GITHUB-CONTROL-PLANE-EVENT-PROJECTION-CONTRACT-IMPLEMENTATION-2026-07-13.md"
+  ],
+  "summary": "Atlas accepted the GitHub event and produced deterministic projection references."
+}

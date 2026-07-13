@@ -56,8 +56,27 @@ Not every job produces every object, but produced objects must retain the availa
 - `atlas.app-registration.v1` is a predecessor input to `ComponentManifest`, not an automatic v2 completion.
 - `atlas.event.v1` remains the generic envelope that v2 event-bearing families may embed or reference.
 - `atlas.receipt.v1` remains a generic receipt predecessor to `ExecutionReceipt`.
+- `atlas.github.event-receipt.v1`, `atlas.github.event-admission.v1`, and `atlas.github.projection-intent.v1` define the canonical `_stack -> Atlas -> DiscordOS` GitHub projection seam and remain outside the eleven-family v2 denominator.
 - `atlas.env.v1` and `atlas.health.v1` remain platform contracts outside the eleven-family denominator.
 - Existing exports and fixtures remain supported until a separately approved migration proves consumers have moved.
+
+## GitHub Projection Seam
+
+The GitHub projection seam is intentionally contract-only:
+
+```text
+_stack normalized GitHub facts
+-> atlas.github.event-receipt.v1
+-> Atlas admission and deduplication
+-> atlas.github.event-admission.v1
+-> formatting-free atlas.github.projection-intent.v1
+-> DiscordOS single writer
+```
+
+- `_stack` keeps immutable fact production and does not own Discord mutation.
+- Atlas owns admission, durable correlation, backend-neutral ledger meaning, and intent production.
+- DiscordOS owns final presentation, card/update mutation, publication, and readback.
+- The seam preserves deterministic source identities (`ghr_`, `ghk_`) and adds Atlas-local admission and projection identities without weakening owner-repository truth or external-mutation authority.
 
 ## Implementation Order
 

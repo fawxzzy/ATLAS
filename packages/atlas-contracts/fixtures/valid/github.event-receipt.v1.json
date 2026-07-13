@@ -1,0 +1,71 @@
+{
+  "contract_version": "atlas.github.event-receipt.v1",
+  "event_id": "ghr_atlas_pr_105_274fab0a3ed7cda8",
+  "idempotency_key": "ghk_atlas_pr_105_head_274fab0a3ed7",
+  "observed_at": "2026-07-13T13:16:10Z",
+  "event_family": "pull_request",
+  "fact_state": "observed",
+  "source": {
+    "provider": "github",
+    "producer": "_stack",
+    "repository_owner": "fawxzzy",
+    "repository_name": "ATLAS",
+    "endpoint": "repos/fawxzzy/ATLAS/pulls/105"
+  },
+  "subject": {
+    "repository": "fawxzzy/ATLAS",
+    "repository_id": "stack",
+    "entity_type": "pull_request",
+    "entity_id": "105",
+    "entity_ref": "refs/pull/105/head",
+    "title": "Harden Fitness BrowserStack protected proof flow",
+    "url": "https://github.com/fawxzzy/ATLAS/pull/105"
+  },
+  "correlation": {
+    "provider_delivery_id": null,
+    "source_run_id": null,
+    "atlas_job_id": null,
+    "parent_event_id": null
+  },
+  "evidence_refs": [
+    "docs/registry/GITHUB-CONTROL-PLANE-REGISTRY.json",
+    "docs/ops/GITHUB-CONTROL-PLANE-EVENT-PROJECTION-CONTRACT-IMPLEMENTATION-2026-07-13.md"
+  ],
+  "digest": {
+    "algorithm": "sha256",
+    "value": "5c3dfa861d93c74791af17ed1460b3f371f4866bd6f10b8882a26fcfacbf6c5f",
+    "source_event_identity": "pull_request:fawxzzy/ATLAS#105:274fab0a3ed7cda865e33c93815e4f1102e16870",
+    "fact_payload_identity": "github-control-plane:pull_request:105"
+  },
+  "normalized_facts": [
+    {
+      "fact_key": "pull_request.number",
+      "state": "observed",
+      "value": "105",
+      "source_path": "open_work.pull_requests[0].number",
+      "note": null
+    },
+    {
+      "fact_key": "pull_request.head_sha",
+      "state": "observed",
+      "value": "274fab0a3ed7cda865e33c93815e4f1102e16870",
+      "source_path": "open_work.pull_requests[0].head_sha",
+      "note": null
+    },
+    {
+      "fact_key": "pull_request.disposition",
+      "state": "observed",
+      "value": "retain",
+      "source_path": "open_work.pull_requests[0].disposition",
+      "note": "Owner repository truth is preserved and Atlas does not rewrite the upstream disposition basis."
+    }
+  ],
+  "authority": {
+    "producer": "_stack",
+    "atlas_contract_owner": "Atlas Contracts",
+    "owner_repository_truth": "preserved",
+    "read_only_first": true,
+    "external_mutation": "denied"
+  },
+  "summary": "Normalized pull request facts are ready for Atlas admission."
+}

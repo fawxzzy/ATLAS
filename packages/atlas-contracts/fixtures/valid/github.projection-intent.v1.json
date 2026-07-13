@@ -1,0 +1,45 @@
+{
+  "contract_version": "atlas.github.projection-intent.v1",
+  "projection_id": "ghp_atlas_pr_105_board",
+  "idempotency_key": "ghpk_atlas_pr_105_board_274fab0a3ed7",
+  "created_at": "2026-07-13T13:17:30Z",
+  "admission_ref": {
+    "admission_id": "gha_atlas_pr_105_admission_20260713",
+    "decision": "accepted"
+  },
+  "source_event": {
+    "event_id": "ghr_atlas_pr_105_274fab0a3ed7cda8",
+    "event_family": "pull_request",
+    "digest_algorithm": "sha256",
+    "digest_value": "5c3dfa861d93c74791af17ed1460b3f371f4866bd6f10b8882a26fcfacbf6c5f"
+  },
+  "decision": "admitted",
+  "destination": "discordos_board",
+  "operation": "transition",
+  "route": {
+    "project_id": "atlas",
+    "card_id": "ATLAS-PR-105",
+    "board_id": "discordos:project-feedback:atlas",
+    "channel_id": "github-control-plane",
+    "thread_id": null
+  },
+  "normalized_fact_refs": [
+    "pull_request.number",
+    "pull_request.head_sha",
+    "pull_request.disposition"
+  ],
+  "reason_codes": [
+    "projection.board.transition",
+    "single_writer.discordos"
+  ],
+  "authority": {
+    "intent_producer": "Atlas",
+    "external_writer": "DiscordOS"
+  },
+  "external_mutation": "denied",
+  "evidence_refs": [
+    "packages/atlas-contracts/fixtures/valid/github.event-admission.v1.json",
+    "docs/ops/GITHUB-CONTROL-PLANE-EVENT-PROJECTION-CONTRACT-IMPLEMENTATION-2026-07-13.md"
+  ],
+  "summary": "Atlas emitted a formatting-free board transition intent for DiscordOS."
+}

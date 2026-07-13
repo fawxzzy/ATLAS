@@ -45,6 +45,24 @@ export const knownSchemaPlan = Object.freeze([
     invalid: "invalid/receipt.bad-status.json",
   },
   {
+    id: "atlas.github.event-receipt.v1",
+    file: "atlas.github.event-receipt.v1.schema.json",
+    valid: "valid/github.event-receipt.v1.json",
+    invalid: "invalid/github.event-receipt.v1.bad-authority.json",
+  },
+  {
+    id: "atlas.github.event-admission.v1",
+    file: "atlas.github.event-admission.v1.schema.json",
+    valid: "valid/github.event-admission.v1.json",
+    invalid: "invalid/github.event-admission.v1.bad-decision.json",
+  },
+  {
+    id: "atlas.github.projection-intent.v1",
+    file: "atlas.github.projection-intent.v1.schema.json",
+    valid: "valid/github.projection-intent.v1.json",
+    invalid: "invalid/github.projection-intent.v1.bad-external-mutation.json",
+  },
+  {
     id: "atlas.component-manifest.v2",
     file: "atlas.component-manifest.v2.schema.json",
     valid: "valid/component-manifest.v2.json",

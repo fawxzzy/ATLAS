@@ -32,6 +32,14 @@ The first Contracts v2 implementation cluster also provides schema, export, and 
 
 These v2 families remain implementation foundations rather than completed mesh units until governed producer and consumer adoption proof exists.
 
+The package also carries the canonical GitHub projection seam contracts:
+
+- `atlas.github.event-receipt.v1`
+- `atlas.github.event-admission.v1`
+- `atlas.github.projection-intent.v1`
+
+These GitHub contracts are backend-neutral interoperability seams for `_stack -> Atlas -> DiscordOS`. They are not counted inside the eleven-family Atlas Contracts v2 mesh denominator.
+
 ## Package Surface
 
 Schemas:
@@ -41,6 +49,9 @@ Schemas:
 - `atlas.health.v1`
 - `atlas.event.v1`
 - `atlas.receipt.v1`
+- `atlas.github.event-receipt.v1`
+- `atlas.github.event-admission.v1`
+- `atlas.github.projection-intent.v1`
 - `atlas.component-manifest.v2`
 - `atlas.job-envelope.v2`
 - `atlas.execution-receipt.v2`
@@ -57,6 +68,35 @@ Exports:
 
 - `src/constants.ts` for version ids, enums, and schema path maps
 - package export paths for each schema JSON file
+
+## GitHub Projection Seam
+
+These three contracts freeze the backend-neutral boundary between normalized GitHub observations and any later Discord-facing application:
+
+```text
+_stack normalized GitHub facts
+-> atlas.github.event-receipt.v1
+-> Atlas admission and deduplication
+-> atlas.github.event-admission.v1
+-> zero or more atlas.github.projection-intent.v1 records
+-> DiscordOS single writer
+```
+
+Boundary rules:
+
+- `_stack` is the immutable GitHub fact producer and does not call Discord.
+- Atlas owns admission, deduplication, durable correlation, backend-neutral ledger meaning, and intent production.
+- DiscordOS owns final wording, route-specific presentation, idempotent application, and readback.
+- `external_mutation` remains denied in all three contracts until a separately authorized consumer action exists.
+- Event receipts preserve deterministic `ghr_` event identities and `ghk_` idempotency keys from `_stack`.
+- Atlas admission adds deterministic `gha_` and `ghak_` identities without rewriting owner-repository truth.
+- Projection intents add deterministic `ghp_` and `ghpk_` identities for formatting-free downstream application.
+
+Planned migrations:
+
+1. `_stack` later replaces its repo-local receipt schema authority with `atlas.github.event-receipt.v1`.
+2. Atlas later persists `atlas.github.event-admission.v1` and `atlas.github.projection-intent.v1` into its chosen ledger implementation without changing contract meaning.
+3. DiscordOS later proves consumer-side application, publication/readback receipts, and single-writer behavior against these contracts.
 
 ## Compatibility
 
@@ -84,6 +124,7 @@ Validate an arbitrary JSON artifact against a registered contract identifier or 
 ```powershell
 node packages/atlas-contracts/scripts/validate-artifact.mjs --schema atlas.env.v1 --artifact C:\work\env.json
 node packages/atlas-contracts/scripts/validate-artifact.mjs --schema schemas/atlas.component-manifest.v2.schema.json --artifact C:\work\component.json --json
+node packages/atlas-contracts/scripts/validate-artifact.mjs --schema atlas.github.event-receipt.v1 --artifact packages/atlas-contracts/fixtures/valid/github.event-receipt.v1.json --json
 ```
 
 `--json` emits one deterministic JSON result with `ok`, `code`, `schema`, `artifact`, and `errors`. The supported exit codes are `0` (`VALID`), `1` (`INVALID_ARTIFACT`), `2` (unsupported, unknown, or invalid schema reference), `3` (`MALFORMED_JSON`), and `4` (`MISSING_INPUT`). Unsupported major versions use the stable `UNSUPPORTED_CONTRACT_VERSION` code. Schema resolution accepts only an identifier in the registered plan or an exact package-owned `schemas/<file>.schema.json` path; traversal segments and arbitrary filesystem schemas are rejected.

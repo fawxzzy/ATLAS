@@ -63,6 +63,36 @@ try {
     "INVALID_ARTIFACT",
   );
   expectJson(
+    ["--schema", "atlas.github.event-receipt.v1", "--artifact", fixture("valid", "github.event-receipt.v1.json")],
+    0,
+    "VALID",
+  );
+  expectJson(
+    ["--schema", "schemas/atlas.github.event-admission.v1.schema.json", "--artifact", fixture("valid", "github.event-admission.v1.json")],
+    0,
+    "VALID",
+  );
+  expectJson(
+    ["--schema", "atlas.github.projection-intent.v1", "--artifact", fixture("valid", "github.projection-intent.v1.json")],
+    0,
+    "VALID",
+  );
+  expectJson(
+    ["--schema", "atlas.github.event-receipt.v1", "--artifact", fixture("invalid", "github.event-receipt.v1.bad-authority.json")],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  expectJson(
+    ["--schema", "atlas.github.event-admission.v1", "--artifact", fixture("invalid", "github.event-admission.v1.bad-decision.json")],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  expectJson(
+    ["--schema", "atlas.github.projection-intent.v1", "--artifact", fixture("invalid", "github.projection-intent.v1.bad-external-mutation.json")],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  expectJson(
     ["--schema", "atlas.env.v3", "--artifact", fixture("valid", "env.json")],
     2,
     "UNSUPPORTED_CONTRACT_VERSION",
