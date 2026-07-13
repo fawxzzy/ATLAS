@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-07-09T19:47:39.8439335-04:00",
-  "updated_at": "2026-07-10T00:00:00-04:00",
+  "updated_at": "2026-07-13T20:20:00-04:00",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -36,6 +36,12 @@
     "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CODEX-CLOSEOUT-INGESTION-READ-MODEL-MARKER-SURFACE-RATCHET-DECISION-2026-07-10.md",
     "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHAT-STYLE-SYNTHESIS-PACKET-GENERATION-CONTRACT-FREEZE-2026-07-10.md",
     "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHAT-STYLE-SYNTHESIS-PACKET-GENERATION-FIRST-IMPLEMENTATION-ADMISSION-2026-07-10.md",
+    "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHAT-STYLE-SYNTHESIS-PACKET-GENERATION-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-13.md",
+    "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHAT-STYLE-SYNTHESIS-PACKET-GENERATION-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-13.md",
+    "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHAT-STYLE-SYNTHESIS-PACKET-GENERATION-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-13.md",
+    "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHAT-STYLE-SYNTHESIS-PACKET-GENERATION-MARKER-SURFACE-RATCHET-DECISION-2026-07-13.md",
+    "ops/cortex/chat_style_synthesis_packet_generator.py",
+    "tests/test_cortex_chat_style_synthesis_packet_generator.py",
     "ops/cortex/chatgpt_codex_role_inventory.py",
     "tests/test_cortex_chatgpt_codex_role_inventory.py"
   ],
@@ -45,9 +51,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "cortex-dual-mode-replacement-readiness",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHAT-STYLE-SYNTHESIS-PACKET-GENERATION-FIRST-IMPLEMENTATION-ADMISSION-2026-07-10.md",
-    "checkpoint_commit": "main@177cb85a",
-    "checkpoint_summary": "The lane remains at 40 percent, and the chat-style synthesis packet-generation first-implementation admission is now frozen. The admission names the exact future generator and test files, admitted and excluded source surfaces, trust/provenance model, path policy, authority denials, required proof matrix, and the next prompt-pack and worker handoff contract without implementing the helper or moving the marker.",
+    "current_checkpoint_receipt": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHAT-STYLE-SYNTHESIS-PACKET-GENERATION-MARKER-SURFACE-RATCHET-DECISION-2026-07-13.md",
+    "checkpoint_commit": "main@aa231d4c",
+    "checkpoint_summary": "The lane is adopted at 50 percent: chat-style synthesis packet generation from Cortex memory is implementation-backed, reconciled, and ratcheted. The helper and focused tests are landed at implementation commit b1c9c6e8 and reconciled at aa231d4c. Focused tests passed 30/30 and strict conflict exit is 2.",
     "governing_receipts": [
       "docs/ops/CORTEX-DUAL-MODE-AND-SIMULATION-SUBSTRATE-MARKER-ADMISSION-2026-07-09.md",
       "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-OPERATING-MODE-CONTRACT-FREEZE-2026-07-09.md",
@@ -64,7 +70,11 @@
       "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CODEX-CLOSEOUT-INGESTION-READ-MODEL-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-10.md",
       "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CODEX-CLOSEOUT-INGESTION-READ-MODEL-MARKER-SURFACE-RATCHET-DECISION-2026-07-10.md",
       "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHAT-STYLE-SYNTHESIS-PACKET-GENERATION-CONTRACT-FREEZE-2026-07-10.md",
-      "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHAT-STYLE-SYNTHESIS-PACKET-GENERATION-FIRST-IMPLEMENTATION-ADMISSION-2026-07-10.md"
+                                                "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHAT-STYLE-SYNTHESIS-PACKET-GENERATION-FIRST-IMPLEMENTATION-ADMISSION-2026-07-10.md",
+                                                "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHAT-STYLE-SYNTHESIS-PACKET-GENERATION-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-13.md",
+                                                "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHAT-STYLE-SYNTHESIS-PACKET-GENERATION-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-13.md",
+                                                "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHAT-STYLE-SYNTHESIS-PACKET-GENERATION-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-13.md",
+                                                "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHAT-STYLE-SYNTHESIS-PACKET-GENERATION-MARKER-SURFACE-RATCHET-DECISION-2026-07-13.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -170,19 +180,19 @@
     ],
     "next_package_ladder": [
       {
-        "package": "Cortex Dual-Mode Replacement Readiness chat-style synthesis packet generation prompt-pack and worker handoff contract",
-        "mode": "docs-only prompt-pack and worker handoff contract",
-        "reason": "the first-implementation admission is frozen, so the next honest same-lane move is to freeze the worker prompt pack, handoff contract, stop conditions, and exact implementation-readiness closeout boundary before any generator implementation"
+        "package": "Cortex Dual-Mode Replacement Readiness execution planner contract freeze",
+        "mode": "docs-only execution planner contract freeze",
+        "reason": "the 50 percent chat-style synthesis packet-generation threshold is implementation-backed, proof-backed, reconciled, and adopted; movement above 50 percent requires a separately ratcheted execution planner contract"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHAT-STYLE-SYNTHESIS-PACKET-GENERATION-FIRST-IMPLEMENTATION-ADMISSION-2026-07-10.md",
-    "freshness_checked_at": "2026-07-10T00:00:00-04:00",
-    "freshness_basis": "The current dual-mode posture is manifest-backed at 40 percent: the operating-model threshold is frozen, the role inventory is implementation-backed, the synthesis-to-execution bridge schema is frozen, the bridge-schema threshold has been adopted, the Codex closeout ingestion read-model helper/test slice is implementation-backed, reconciled, and adopted, the chat-style synthesis packet-generation contract is frozen, and the first-implementation admission now names the exact future generator helper, test file, source classes, authority denials, and proof matrix. The next same-lane move is the prompt-pack and worker handoff contract.",
+    "freshness_checked_receipt": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHAT-STYLE-SYNTHESIS-PACKET-GENERATION-MARKER-SURFACE-RATCHET-DECISION-2026-07-13.md",
+    "freshness_checked_at": "2026-07-13T20:20:00-04:00",
+    "freshness_basis": "The current dual-mode posture is implementation-backed and adopted at 50 percent: chat-style synthesis packet generation from Cortex memory is landed in ops/cortex/chat_style_synthesis_packet_generator.py with its focused test suite, reconciled at main@aa231d4c, and ratcheted by the current decision after focused tests 30/30 passed and strict conflict exit 2. Movement above 50 percent requires the exact execution planner contract freeze packet.",
     "marker_posture": [
       {
         "marker": "Cortex Dual-Mode Replacement Readiness",
-        "percent": 40,
+        "percent": 50,
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ]
