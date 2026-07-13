@@ -106,4 +106,4 @@ const errors = loaded.ok ? validateJsonSchema(artifact, loaded.schema) : [loaded
 
 ## Producer/consumer boundary
 
-Atlas root owns schema semantics and validation behavior. Owner repositories produce or consume governed artifacts through this package and do not maintain validator copies. This foundation does not prove producer/consumer adoption: all eleven v2 foundations remain at `0/11` until governed proof lands. The next serialized task is `_stack` producer adoption using the Atlas-owned artifact validator.
+Atlas root owns schema semantics and validation behavior. Owner repositories produce or consume governed artifacts through this package and do not maintain validator copies. Cluster 1 proves `3/11` adoption for ComponentManifest, JobEnvelope, and ExecutionReceipt through governed producer and independent consumer evidence. The eight remaining families are CardRecord, ContextPacket, WorkerLease, EvidenceBundle, BoardEvent, MarkerEvidence, KnowledgeCandidate, and ApprovalRecord. See [the Cluster 1 adoption receipt](../../docs/ops/ATLAS-CONTRACTS-V2-CLUSTER-1-ADOPTION-2026-07-13.md).
