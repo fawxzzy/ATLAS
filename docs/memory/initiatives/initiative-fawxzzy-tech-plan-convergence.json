@@ -2,11 +2,11 @@
   "contract_version": "atlas.initiative.v1",
   "id": "initiative-fawxzzy-tech-plan-convergence",
   "title": "Fawxzzy Technology Plan Convergence",
-  "summary": "Admit recovered technology-plan, Project Review and Next Step skill, and ATLAS Engineering Playbook sources as immutable provenance without allowing historical status to override current evidence.",
+  "summary": "Preserve the recovered technology-plan, Project Review and Next Step skill, and ATLAS Engineering Playbook sources as provenance while advancing source-linked Atlas doctrine adoption from the accepted Playbook registry without copying doctrine bodies into a second Atlas registry.",
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-07-13T07:43:50Z",
-  "updated_at": "2026-07-13T07:43:50Z",
+  "updated_at": "2026-07-13T12:55:00Z",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -16,18 +16,34 @@
   "evidence_refs": [
     "data/imports/fawxzzy-tech-plan-recovery/2026-07-13/source-manifest.json",
     "docs/registry/FAWXZZY-TECH-PLAN-RECOVERY-ADMISSION.json",
-    "docs/ops/FAWXZZY-TECH-PLAN-CONVERGENCE-ADMISSION-2026-07-13.md"
+    "docs/ops/FAWXZZY-TECH-PLAN-CONVERGENCE-ADMISSION-2026-07-13.md",
+    "git:repos/playbook@952b63aa6457d871024a224a089c4088490d69c5:docs/doctrine/atlas-engineering-doctrine-registry.v1.json",
+    "git:repos/playbook@952b63aa6457d871024a224a089c4088490d69c5:.agents/skills/review-project-next-step/SKILL.md",
+    "github:fawxzzy/playbook#22",
+    "docs/registry/ATLAS-PLAYBOOK-DOCTRINE-ADOPTION.json",
+    "ops/atlas/playbook_doctrine_adoption.py",
+    "tests/test_atlas_playbook_doctrine_adoption.py",
+    "docs/ops/ATLAS-PLAYBOOK-DOCTRINE-ADOPTION-2026-07-13.md"
   ],
   "supersedes": [],
   "superseded_by": [],
   "metadata": {
     "schema_version": "atlas.fawxzzy-tech-plan-convergence.initiative.v1",
-    "phase": "admission",
-    "mission": "Admit recovered technology-plan, Project Review and Next Step skill, and ATLAS Engineering Playbook sources as immutable provenance-backed Atlas inputs without allowing historical status to override current evidence.",
+    "phase": "doctrine-adoption",
+    "mission": "Keep recovered technology-plan and skill inputs as provenance-only imports while consuming the Playbook-owned doctrine registry by stable source reference and proving Atlas-root conformance with explicit no-copy boundaries.",
+    "imported_source_classification": "provenance-only",
     "source_set": {
       "manifest": "data/imports/fawxzzy-tech-plan-recovery/2026-07-13/source-manifest.json",
       "raw_import_root": "data/imports/fawxzzy-tech-plan-recovery/2026-07-13",
       "admission_registry": "docs/registry/FAWXZZY-TECH-PLAN-RECOVERY-ADMISSION.json"
+    },
+    "current_playbook_source": {
+      "repository_path": "repos/playbook",
+      "accepted_ref": "main",
+      "accepted_commit": "952b63aa6457d871024a224a089c4088490d69c5",
+      "registry_path": "docs/doctrine/atlas-engineering-doctrine-registry.v1.json",
+      "skill_path": ".agents/skills/review-project-next-step/SKILL.md",
+      "pull_request": "fawxzzy/playbook#22"
     },
     "evidence_hierarchy": [
       "Current Git and repository state",
@@ -41,39 +57,44 @@
       "Six byte-preserved raw imports with matching SHA-256 and size",
       "Source manifest",
       "Governed admission registry",
-      "Admission report"
+      "Admission report",
+      "Doctrine registry publication at Playbook owner commit 952b63aa6457d871024a224a089c4088490d69c5",
+      "Atlas root doctrine adoption record, validator, tests, and receipt backed by source-linked conformance evidence"
     ],
     "candidate_outputs": [
-      "Machine-readable engineering doctrine registry under lane-source-hierarchy-doc-normalization",
-      "Governed Project Review and Next Step skill adoption under lane-codex-execution-contracts"
+      "Universal component adoption proof across Atlas, _stack, DiscordOS, Lifeline, Playbook, Mazer, Fitness, Foundation, Trove, Stream, Nat1, and Playbook Demo",
+      "Broader governed skill rollout and owner-side adoption proof beyond the Atlas root unit"
     ],
     "dependencies": [
-      "lane-atlas-contracts-mesh producer and consumer adoption",
+      "Accepted Playbook registry commit remains present in the local Git object database",
       "Current source hierarchy and owner evidence",
-      "No duplicate lane admission"
+      "No duplicate lane admission",
+      "Universal component adoption stays separately evidenced"
     ],
     "serialization": [
-      "Continue Contracts v2 producer and consumer adoption first",
-      "Then implement the doctrine registry",
-      "Then govern Project Review and Next Step skill adoption",
-      "Do not interleave recovered backlog implementation with this admission"
+      "Keep recovered imports provenance-only",
+      "Consume the Playbook registry by source reference from the accepted owner commit",
+      "Prove Atlas root adoption with read-only validation and receipt evidence",
+      "Leave universal component adoption and broader skill rollout active until owner-side proof lands"
     ],
     "ownership": {
       "admission_writer": "stack-root",
       "provenance_convergence_lane": "lane-historical-task-intelligence",
-      "doctrine_registry_lane": "lane-source-hierarchy-doc-normalization",
+      "doctrine_registry_lane": "lane-playbook-universal-adoption",
       "review_skill_lane": "lane-codex-execution-contracts"
     },
     "resume_conditions": [
       "Raw-import hashes and byte sizes remain verified",
-      "No current evidence contradicts the proposed next packet",
-      "Contracts v2 producer and consumer adoption is addressed before follow-on doctrine or skill work",
+      "The accepted Playbook source commit remains locally available for Git object reads",
+      "Atlas doctrine adoption validator remains verified against the recorded digests and stable ids",
+      "No owner-side component adoption is inferred without its own current evidence",
       "A future lane changes only with accepted current evidence and its own scope admission"
     ],
     "constraints": [
       "Historical status cannot override current truth",
-      "No marker moves from this import alone",
-      "No owner repository, board, Discord, deployment, production system, or GitHub remote mutation"
+      "No marker moves from recovered imports or Atlas root adoption alone",
+      "No owner repository, board, Discord, deployment, production system, or GitHub remote mutation",
+      "Playbook doctrine bodies stay canonical in Playbook and must not be recopied into a second Atlas doctrine registry"
     ]
   }
 }

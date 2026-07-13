@@ -1,0 +1,71 @@
+{
+  "contract_version": "atlas.playbook_doctrine_adoption.v1",
+  "adopted_at": "2026-07-13",
+  "source": {
+    "repository_path": "repos/playbook",
+    "remote_owner": "fawxzzy/playbook",
+    "accepted_ref": "main",
+    "accepted_commit": "952b63aa6457d871024a224a089c4088490d69c5",
+    "pull_request": "fawxzzy/playbook#22",
+    "artifacts": {
+      "registry": {
+        "path": "docs/doctrine/atlas-engineering-doctrine-registry.v1.json",
+        "sha256": "4a013540d2f613c4cec583b071d9dc5986730faee772573fcc79750a5730dcf3"
+      },
+      "schema": {
+        "path": "docs/doctrine/atlas-engineering-doctrine-registry.schema.v1.json",
+        "sha256": "84f081b2b04b72db455609b086aa2295fcb487de9c51f8e24a230d1161483162"
+      },
+      "governed_skill": {
+        "path": ".agents/skills/review-project-next-step/SKILL.md",
+        "sha256": "ba8fee476d665ef4a0d4190ac278bfaf6b8ba21b4a7e7f799d6733bd72a2ca63"
+      }
+    }
+  },
+  "registry": {
+    "registry_id": "atlas-engineering-doctrine-registry",
+    "schema_version": "atlas-engineering-doctrine-registry.v1",
+    "schema_id": "atlas-engineering-doctrine-registry.schema.v1.json",
+    "adopted_record_ids": {
+      "promoted": [
+        "rule-owner-repo-truth",
+        "rule-candidate-knowledge-not-enforced",
+        "rule-evidence-before-marker-movement",
+        "pattern-evidence-lineage-promotion",
+        "failure-mode-premature-canonicalization",
+        "decision-playbook-registry-atlas-adoption"
+      ],
+      "superseded": [
+        "failure-mode-summary-truth-drift"
+      ],
+      "retired": [
+        "decision-imported-plan-progress-as-current-truth"
+      ],
+      "candidate": [
+        "pattern-one-honest-next-step"
+      ]
+    }
+  },
+  "governed_skill": {
+    "identity": "review-project-next-step",
+    "path": ".agents/skills/review-project-next-step/SKILL.md"
+  },
+  "validation": {
+    "command": "python ops/atlas/playbook_doctrine_adoption.py --json"
+  },
+  "evidence_refs": [
+    "git:repos/playbook@952b63aa6457d871024a224a089c4088490d69c5:docs/doctrine/atlas-engineering-doctrine-registry.v1.json",
+    "git:repos/playbook@952b63aa6457d871024a224a089c4088490d69c5:docs/doctrine/atlas-engineering-doctrine-registry.schema.v1.json",
+    "git:repos/playbook@952b63aa6457d871024a224a089c4088490d69c5:.agents/skills/review-project-next-step/SKILL.md",
+    "github:fawxzzy/playbook#22",
+    "ops/atlas/playbook_doctrine_adoption.py",
+    "tests/test_atlas_playbook_doctrine_adoption.py",
+    "docs/ops/ATLAS-PLAYBOOK-DOCTRINE-ADOPTION-2026-07-13.md"
+  ],
+  "current_limitations": [
+    "This Atlas record proves only root-level source-linked adoption and conformance evidence.",
+    "Playbook remains the canonical doctrine owner; Atlas does not republish doctrine bodies as a second registry.",
+    "The active local Playbook checkout branch may differ from accepted owner-main source as long as the accepted commit exists locally and validation uses Git object reads.",
+    "Universal component adoption and broader governed skill rollout remain separate evidence-producing work."
+  ]
+}
