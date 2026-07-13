@@ -1,0 +1,16 @@
+{
+  "contract_version": "atlas.card-record.v2",
+  "card_id": "MAZER-142",
+  "project_id": "mazer",
+  "board_id": "discordos:project-feedback:mazer",
+  "title": "Prove Pause overlay scroll reachability",
+  "description": "Keep lower controls reachable across desktop and compact viewports.",
+  "card_type": "reliability",
+  "lifecycle": "ready",
+  "priority": "high",
+  "owner": "mazer",
+  "dependencies": [],
+  "board_version": 18,
+  "updated_at": "2026-07-13T02:30:00Z",
+  "source_ref": "repos/DiscordOS/config/discordos-mazer-feedback-board.json"
+}

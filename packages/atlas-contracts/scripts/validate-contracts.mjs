@@ -56,6 +56,8 @@ const schemaPlan = [
   { file: "atlas.evidence-bundle.v2.schema.json", valid: "valid/evidence-bundle.v2.json", invalid: "invalid/evidence-bundle.v2.bad-classification.json" },
   { file: "atlas.approval-record.v2.schema.json", valid: "valid/approval-record.v2.json", invalid: "invalid/approval-record.v2.bad-decision.json" },
   { file: "atlas.worker-lease.v2.schema.json", valid: "valid/worker-lease.v2.json", invalid: "invalid/worker-lease.v2.bad-status.json" },
+  { file: "atlas.card-record.v2.schema.json", valid: "valid/card-record.v2.json", invalid: "invalid/card-record.v2.bad-lifecycle.json" },
+  { file: "atlas.board-event.v2.schema.json", valid: "valid/board-event.v2.json", invalid: "invalid/board-event.v2.bad-result.json" },
 ];
 
 const isoDateTimePattern =
@@ -140,6 +142,9 @@ function validateSchema(value, schema, rootSchema, atPath = "$") {
       }
       if (type === "object") {
         return isPlainObject(value);
+      }
+      if (type === "integer") {
+        return Number.isInteger(value);
       }
       return typeof value === type;
     });

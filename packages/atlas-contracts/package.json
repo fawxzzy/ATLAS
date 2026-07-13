@@ -38,7 +38,11 @@
     "./schemas/atlas.approval-record.v2": "./schemas/atlas.approval-record.v2.schema.json",
     "./schemas/atlas.approval-record.v2.schema.json": "./schemas/atlas.approval-record.v2.schema.json",
     "./schemas/atlas.worker-lease.v2": "./schemas/atlas.worker-lease.v2.schema.json",
-    "./schemas/atlas.worker-lease.v2.schema.json": "./schemas/atlas.worker-lease.v2.schema.json"
+    "./schemas/atlas.worker-lease.v2.schema.json": "./schemas/atlas.worker-lease.v2.schema.json",
+    "./schemas/atlas.card-record.v2": "./schemas/atlas.card-record.v2.schema.json",
+    "./schemas/atlas.card-record.v2.schema.json": "./schemas/atlas.card-record.v2.schema.json",
+    "./schemas/atlas.board-event.v2": "./schemas/atlas.board-event.v2.schema.json",
+    "./schemas/atlas.board-event.v2.schema.json": "./schemas/atlas.board-event.v2.schema.json"
   },
   "scripts": {
     "validate": "node scripts/validate-contracts.mjs"

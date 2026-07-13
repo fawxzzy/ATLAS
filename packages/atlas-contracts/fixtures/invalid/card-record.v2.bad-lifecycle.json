@@ -1,0 +1,14 @@
+{
+  "contract_version": "atlas.card-record.v2",
+  "card_id": "MAZER-142",
+  "project_id": "mazer",
+  "board_id": "discordos:project-feedback:mazer",
+  "title": "Prove Pause overlay scroll reachability",
+  "card_type": "reliability",
+  "lifecycle": "fixed",
+  "priority": "high",
+  "owner": "mazer",
+  "dependencies": [],
+  "board_version": 18,
+  "updated_at": "2026-07-13T02:30:00Z"
+}

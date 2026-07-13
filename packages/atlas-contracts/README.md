@@ -25,6 +25,8 @@ The first Contracts v2 implementation cluster also provides schema, export, and 
 - `atlas.evidence-bundle.v2`
 - `atlas.approval-record.v2`
 - `atlas.worker-lease.v2`
+- `atlas.card-record.v2`
+- `atlas.board-event.v2`
 
 These v2 families remain implementation foundations rather than completed mesh units until governed producer and consumer adoption proof exists.
 
@@ -44,6 +46,8 @@ Schemas:
 - `atlas.evidence-bundle.v2`
 - `atlas.approval-record.v2`
 - `atlas.worker-lease.v2`
+- `atlas.card-record.v2`
+- `atlas.board-event.v2`
 
 Exports:
 

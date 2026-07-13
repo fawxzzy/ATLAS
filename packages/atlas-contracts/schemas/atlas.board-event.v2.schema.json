@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://packages/contracts/atlas.board-event.v2.schema.json",
+  "title": "ATLAS board event contract v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "event_id", "idempotency_key", "job_id", "card_id", "board_id", "event_type", "occurred_at", "expected_version", "intent", "result"],
+  "properties": {
+    "contract_version": {"type": "string", "const": "atlas.board-event.v2"},
+    "event_id": {"type": "string", "minLength": 1},
+    "idempotency_key": {"type": "string", "minLength": 1},
+    "job_id": {"type": ["string", "null"]},
+    "card_id": {"type": "string", "minLength": 1},
+    "board_id": {"type": "string", "minLength": 1},
+    "event_type": {"type": "string", "enum": ["create", "update", "transition", "block", "complete", "archive", "readback"]},
+    "occurred_at": {"type": "string", "format": "date-time"},
+    "expected_version": {"type": ["integer", "null"], "minimum": 0},
+    "intent": {"$ref": "#/$defs/intent"},
+    "result": {"$ref": "#/$defs/result"},
+    "extensions": {"type": "object"}
+  },
+  "$defs": {
+    "intent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["from", "to", "reason"],
+      "properties": {
+        "from": {"type": ["string", "null"], "enum": ["intake", "planning", "ready", "in-progress", "review", "completed", "archived", "blocked", null]},
+        "to": {"type": ["string", "null"], "enum": ["intake", "planning", "ready", "in-progress", "review", "completed", "archived", "blocked", null]},
+        "reason": {"type": "string"}
+      }
+    },
+    "result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "observed_version", "readback_at", "receipt_ref"],
+      "properties": {
+        "status": {"type": "string", "enum": ["pending", "applied", "duplicate", "conflict", "failed", "verified"]},
+        "observed_version": {"type": ["integer", "null"], "minimum": 0},
+        "readback_at": {"type": ["string", "null"], "format": "date-time"},
+        "receipt_ref": {"type": ["string", "null"]},
+        "error_code": {"type": ["string", "null"]}
+      }
+    }
+  }
+}

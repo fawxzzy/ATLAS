@@ -1,0 +1,13 @@
+{
+  "contract_version": "atlas.board-event.v2",
+  "event_id": "board-event-002",
+  "idempotency_key": "mazer:MAZER-142:ready:18",
+  "job_id": "job-001",
+  "card_id": "MAZER-142",
+  "board_id": "discordos:project-feedback:mazer",
+  "event_type": "transition",
+  "occurred_at": "2026-07-13T02:31:00Z",
+  "expected_version": 17,
+  "intent": {"from": "planning", "to": "ready", "reason": "Admitted."},
+  "result": {"status": "live", "observed_version": 18, "readback_at": null, "receipt_ref": null}
+}
