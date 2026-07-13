@@ -92,10 +92,10 @@ Read:
 
 ### Platform governance
 
-- GitHub Control-Plane Integration: `75%`
+- GitHub Control-Plane Integration: `87.5%`
 - Vercel Platform Observability Governance: `0%`
 
-GitHub Control-Plane Integration is now `75%` on an accepted `6 / 8` denominator: inventory, parity, Actions, open-work hygiene, release/security projection, and `_stack` event correlation are complete; cleanup governance and live-readback DiscordOS projection remain open. No execution-selector marker moved.
+GitHub Control-Plane Integration is now `87.5%` on an accepted `7 / 8` denominator: inventory, parity, Actions, open-work hygiene, release/security projection, cleanup governance, and `_stack` event correlation are complete. The live-readback DiscordOS projection remains open. Cleanup classification grants no deletion authority: all 62 local worktrees and 80 merged remote-branch candidates remain held behind explicit mutation authority and correlated removal receipts. No execution-selector marker moved.
 
 ## Audit Gate Markers
 

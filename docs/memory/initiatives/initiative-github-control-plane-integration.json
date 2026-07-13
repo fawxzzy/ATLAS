@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-07-12T10:58:57.680276Z",
-  "updated_at": "2026-07-13T16:06:23Z",
+  "updated_at": "2026-07-13T16:25:56Z",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -23,6 +23,9 @@
     "docs/ops/GITHUB-CONTROL-PLANE-EVENT-ADMISSION-RUNTIME-2026-07-13.md",
     "docs/ops/GITHUB-CONTROL-PLANE-END-TO-END-NO-SEND-CANARY-2026-07-13.md",
     "docs/ops/GITHUB-CONTROL-PLANE-MARKER-DENOMINATOR-AUDIT-2026-07-13.md",
+    "docs/registry/GITHUB-CLEANUP-RETENTION-CLASSIFICATION.latest.json",
+    "docs/ops/GITHUB-CLEANUP-RETENTION-CLASSIFICATION-2026-07-13.md",
+    "docs/ops/GITHUB-CONTROL-PLANE-CLEANUP-GOVERNANCE-RATCHET-2026-07-13.md",
     "runtime/codex/discordos/logs/20260713T151453726Z-discordos-github-projection-intent-dry-run-consumer/run.json",
     "https://github.com/fawxzzy/DiscordOS/pull/48",
     "git:3e9ca5fd67fbcc728ac42f85b4222600523c2dfe"
@@ -144,6 +147,24 @@
       }
     ],
     "phase_state": {
+      "phase-6-governed-cleanup": {
+        "status": "classification-complete-mutation-not-authorized",
+        "updated_at": "2026-07-13T16:25:56Z",
+        "evidence_refs": [
+          "docs/registry/GITHUB-CONTROL-PLANE-REGISTRY.json",
+          "docs/registry/GITHUB-CLEANUP-RETENTION-CLASSIFICATION.latest.json",
+          "docs/ops/GITHUB-CLEANUP-RETENTION-CLASSIFICATION-2026-07-13.md",
+          "docs/ops/GITHUB-CONTROL-PLANE-CLEANUP-GOVERNANCE-RATCHET-2026-07-13.md",
+          "ops/atlas/github_cleanup_retention_audit.mjs",
+          "ops/atlas/test_github_cleanup_retention_audit.mjs"
+        ],
+        "next_gate": "Any deletion, pruning, archive, or worktree removal requires a separate explicitly authorized mutation packet with pre/post evidence and a correlated removal receipt.",
+        "notes": [
+          "All 62 accepted local worktree candidates now have explicit fail-closed retention classes: 17 dirty work holds, 33 merged-clean candidate holds, 10 unmerged branch holds, one open-pull-request hold, and one detached reproduction hold.",
+          "All 80 accepted merged remote-branch candidates are classified as merged_remote_branch_candidate_hold.",
+          "No candidate is removal-safe; deletion, pruning, archive, worktree removal, and remote mutation remain unauthorized."
+        ]
+      },
       "phase-7-discordos-projection": {
         "status": "no-send-canary-complete-awaiting-live-readback",
         "updated_at": "2026-07-13T16:06:23Z",
@@ -199,14 +220,17 @@
       "github_control_plane_integration": {
         "lane": "GitHub Control-Plane Integration",
         "candidate": true,
-        "percentage": 75,
-        "numerator": 6,
-        "completed_units": 6,
+        "percentage": 87.5,
+        "numerator": 7,
+        "completed_units": 7,
         "denominator": 8,
-        "freshness_timestamp": "2026-07-13T15:58:36Z",
-        "transition_reason": "The 2026-07-13 marker denominator audit accepted eight deterministic binary units and counted six complete units; cleanup_governance and discordos_projection remain incomplete.",
+        "freshness_timestamp": "2026-07-13T16:25:56Z",
+        "transition_reason": "The cleanup-retention classifier and accepted 2026-07-13 ratchet explicitly classified all 62 local worktree candidates and all 80 merged remote-branch candidates without granting cleanup authority; discordos_projection remains the only incomplete unit.",
         "percentage_evidence_refs": [
           "docs/ops/GITHUB-CONTROL-PLANE-MARKER-DENOMINATOR-AUDIT-2026-07-13.md",
+          "docs/ops/GITHUB-CONTROL-PLANE-CLEANUP-GOVERNANCE-RATCHET-2026-07-13.md",
+          "docs/registry/GITHUB-CLEANUP-RETENTION-CLASSIFICATION.latest.json",
+          "docs/ops/GITHUB-CLEANUP-RETENTION-CLASSIFICATION-2026-07-13.md",
           "docs/ops/GITHUB-CONTROL-PLANE-END-TO-END-NO-SEND-CANARY-2026-07-13.md",
           "docs/registry/GITHUB-CONTROL-PLANE-REGISTRY.json",
           "docs/ops/GITHUB-CONTROL-PLANE-WATCH-2026-07-13.md",
@@ -387,11 +411,6 @@
         "id": "lane-remote-branch-cleanup-review",
         "owner": "github-governance",
         "reason": "merged candidate review; no deletion"
-      },
-      {
-        "id": "lane-local-worktree-retention-classification",
-        "owner": "owner-repositories",
-        "reason": "retention_class UNKNOWN"
       },
       {
         "id": "lane-cortex-boundary-decision",
