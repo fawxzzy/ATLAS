@@ -114,7 +114,7 @@
     "plan_status": ["draft", "blocked", "ready_for_admission"],
     "execution_class": ["read_only", "repo_worktree", "canonical_workspace"],
     "external_action_authority": ["no_execution_authority", "explicit_task_local_authority"],
-    "resource_kinds": ["files", "worktrees", "ports", "browsers", "schemas", "canonical_root", "external_writers"],
+    "resource_kinds": ["files", "generated_artifacts", "worktrees", "ports", "browsers", "schemas", "canonical_root", "external_writers"],
     "runtime_speed": ["standard", "fast"],
     "runtime_fallback": ["standard_with_warning", "blocked"],
     "job_state": ["candidate", "blocked", "skipped"],
