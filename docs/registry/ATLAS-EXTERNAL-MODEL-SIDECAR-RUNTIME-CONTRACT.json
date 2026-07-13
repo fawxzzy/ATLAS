@@ -1,0 +1,107 @@
+{
+  "schema_version": "atlas.external-model-sidecar.runtime-contract.v1",
+  "status": "frozen",
+  "owner": "ATLAS root governance",
+  "runtime": {
+    "scope": "current_user",
+    "root": "${LOCALAPPDATA}/ATLAS/DeepSeekBridge",
+    "venv": "${LOCALAPPDATA}/ATLAS/DeepSeekBridge/venv",
+    "deferred_machine_path": "C:/Program Files/DeepSeekBridge",
+    "global_python_or_package_mutation": "denied",
+    "phase_3_version_requirement": "pin and receipt exact Python and LiteLLM versions before installation"
+  },
+  "identity": {
+    "principal": "same interactive current Windows user",
+    "aligned_owners": ["interactive_operator", "credential_manager", "litellm_process", "scheduled_task", "codex_profile"],
+    "availability_limitation": "host awake and user signed in"
+  },
+  "credential_targets": [
+    {"name": "ATLAS/DeepSeekBridge/ProviderApiKey", "kind": "windows_credential_manager_generic", "owner": "current_user"},
+    {"name": "ATLAS/DeepSeekBridge/ProxyToken", "kind": "windows_credential_manager_generic", "owner": "current_user"}
+  ],
+  "credential_helper": {
+    "implementation": "dedicated local helper using native Windows Credential Manager APIs",
+    "provider_key_delivery": "directly into proxy child environment",
+    "provider_key_printing": "denied",
+    "proxy_token_stdout": "direct Codex command-backed authentication pipe only",
+    "exposure_denials": ["inherited_console", "transcript", "log", "receipt", "process_argument"],
+    "failure_behavior": "fail_closed"
+  },
+  "codex_profile": {
+    "path": "${CODEX_HOME}/deepseek-sidecar.config.toml",
+    "invocation": "--profile deepseek-sidecar",
+    "scope": "user_level_opt_in",
+    "base_user_config_global_redirect": "denied"
+  },
+  "provider": {
+    "id": "atlas_deepseek_sidecar",
+    "base_url": "http://127.0.0.1:4000/v1",
+    "wire_api": "responses",
+    "auth": "command_backed_proxy_token_only",
+    "incompatible_auth_settings": ["env_key", "experimental_bearer_token", "requires_openai_auth"],
+    "native_openai": "base_default_and_explicit_fallback"
+  },
+  "routes": [
+    {"alias": "atlas-deepseek-pro", "upstream_model": "deepseek-v4-pro", "role": "default_external_sidecar", "bridge": "use_chat_completions_api: true"},
+    {"alias": "atlas-deepseek-flash", "upstream_model": "deepseek-v4-flash", "role": "lower_cost_explicit_alternative", "bridge": "use_chat_completions_api: true"}
+  ],
+  "routing_policy": {
+    "required_task_job_declaration": "deepseek-sidecar",
+    "ambient_global_routing": "denied",
+    "required_recording": ["requested_provider", "effective_provider", "profile", "model", "reasoning", "speed", "fallback"],
+    "silent_provider_substitution": "denied",
+    "native_openai_fallback": "explicit_fallback_policy_or_operator_choice_only"
+  },
+  "data_classes": [
+    {"id": "D0", "content": "public synthetic benchmark data", "policy": "allowed_by_explicit_sidecar_route"},
+    {"id": "D1", "content": "internal source code architecture prompts non-secret repository context", "policy": "explicit_sidecar_and_secret_free_preflight_required"},
+    {"id": "D2", "content": "secrets credentials tokens production database content private user/account data payment data auth/session material unredacted operational logs", "policy": "denied"}
+  ],
+  "logging": {
+    "allowed": ["timestamps", "route_alias", "status", "latency", "token_counts", "retry_counts", "redacted_error_classes", "correlation_ids"],
+    "denied": ["prompts", "request_response_bodies", "Authorization_headers", "keys", "proxy_tokens", "source_excerpts", "tool_output_content"],
+    "litellm_request_response_body_logging": "disabled"
+  },
+  "health": {
+    "listening_is_healthy": false,
+    "readiness_requirements": ["authenticated_loopback_health", "expected_model_aliases", "bridge_configuration_checksum", "credential_retrieval_success_without_disclosure", "non_paid_local_route_config_probe"],
+    "paid_provider_proof": "requires_explicit_phase_4_or_later_authorization"
+  },
+  "retry": {
+    "startup_readiness_deadline_seconds": 60,
+    "health_request_timeout_seconds": 2,
+    "provider_request_max_retries": 2,
+    "stream_max_retries": 2,
+    "stream_idle_timeout_seconds": 120,
+    "unbounded_loop": "denied"
+  },
+  "scheduled_task": {
+    "creation_phase": "phase_4",
+    "trigger": "current_user_logon",
+    "execution": "least_privilege_current_user",
+    "stores_account_password": false,
+    "runs_while_logged_out": false,
+    "restart_interval_seconds": 60,
+    "max_restart_attempts_per_failure_window": 3,
+    "persistence_proof": ["start", "stop", "restart", "duplicate_instance_prevention", "lock_port_ownership"],
+    "port_ownership": "one_process"
+  },
+  "backup": {
+    "before_future_mutation": ["config", "helper", "task"],
+    "path": "${LOCALAPPDATA}/ATLAS/DeepSeekBridge/backups/<UTC timestamp>/",
+    "manifest": "SHA-256",
+    "secret_values_in_plaintext": "denied"
+  },
+  "rollback": {
+    "steps": ["stop_task_process", "verify_port_release", "restore_last_checksummed_non_secret_backup", "remove_or_disable_named_profile_and_task_only", "preserve_native_openai_config", "verify_native_openai_health"],
+    "credential_deletion": "separately_explicit_not_implied_by_software_rollback"
+  },
+  "receipt": {
+    "required": ["environment_template_paths", "checksums", "versions", "task_identity", "bind_address", "port", "provider_profile_model_ids", "health_results", "retry_fallback_events", "rollback_proof"],
+    "never_record": ["secret_values", "prompt_body_content", "private_source_excerpts"]
+  },
+  "denied_actions": ["software_install_or_update", "secret_request_or_write", "credential_manager_read_write_delete", "scheduled_task_service_startup_listener_firewall_process_mutation", "port_binding", "codex_configuration_edit", "paid_api_call", "owner_repository_mutation", "Discord_mutation", "Vercel_mutation", "Supabase_mutation", "production_mutation"],
+  "phase_3_admission": ["Confirm root and _stack state are clean and published.", "Confirm Python version and select/pin a LiteLLM version compatible with /responses bridging.", "Create only the user-scoped runtime directories and venv.", "Implement and locally test the native Credential Manager helper without a real provider key first.", "Generate the local proxy token without displaying it and store it in the named current-user credential target.", "Request the DeepSeek key exactly once through a secure local prompt; never through chat, command arguments, committed files, clipboard logs, or plaintext output.", "Store it only in the named current-user Credential Manager target, then prove redacted retrieval.", "Do not yet create the Scheduled Task or start a listening proxy; those are Phase 4.", "If secure key entry is unavailable, stop Phase 3 at a durable blocker receipt and switch lanes."],
+  "unknowns": ["Exact Python and LiteLLM versions are selected and pinned in Phase 3.", "Exact upstream compatibility is subject to Phase 4 proof.", "Paid/provider execution proof requires explicit Phase 4 or later authorization."],
+  "evidence_refs": ["docs/ops/ATLAS-EXTERNAL-MODEL-SIDECAR-DEEPSEEK-LITELLM-BRIDGE-PROGRAM-ADMISSION-2026-07-13.md", "docs/ops/ATLAS-EXTERNAL-MODEL-SIDECAR-DEEPSEEK-LITELLM-BRIDGE-PHASE-1-CAPABILITY-AUDIT-2026-07-13.md", "docs/ops/ATLAS-EXTERNAL-MODEL-SIDECAR-DEEPSEEK-LITELLM-BRIDGE-PHASE-2-SECURITY-IDENTITY-RUNTIME-CONTRACT-2026-07-13.md"]
+}

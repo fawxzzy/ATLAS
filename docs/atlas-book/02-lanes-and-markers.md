@@ -94,11 +94,11 @@ Read:
 
 - GitHub Control-Plane Integration: `87.5%`
 - Vercel Platform Observability Governance: `0%`
-- External Model Sidecar Provider Integration - DeepSeek/LiteLLM Bridge: `16.7%` (`1 / 6`)
+- External Model Sidecar Provider Integration - DeepSeek/LiteLLM Bridge: `33.3%` (`2 / 6`)
 
 GitHub Control-Plane Integration is now `87.5%` on an accepted `7 / 8` denominator: inventory, parity, Actions, open-work hygiene, release/security projection, cleanup governance, and `_stack` event correlation are complete. The live-readback DiscordOS projection remains open. Cleanup classification grants no deletion authority: all 62 local worktrees and 80 merged remote-branch candidates remain held behind explicit mutation authority and correlated removal receipts. No execution-selector marker moved.
 
-The External Model Sidecar Provider Integration - DeepSeek/LiteLLM Bridge has an accepted `1 / 6` denominator: Phase 1 is a feasible-with-constraints read-only capability audit, native OpenAI remains the default and fallback with no global redirect, and the exact next packet is `External Model Sidecar Provider Integration Phase 2 security identity and runtime contract freeze`.
+The External Model Sidecar Provider Integration - DeepSeek/LiteLLM Bridge has completed its Phase 1 audit and Phase 2 contract at `2 / 6`: the user-scoped same-identity runtime is frozen, native OpenAI remains the default and fallback with no global redirect, and the exact next packet is `External Model Sidecar Provider Integration Phase 3 dedicated runtime and one-time credential setup`.
 
 ## Audit Gate Markers
 
