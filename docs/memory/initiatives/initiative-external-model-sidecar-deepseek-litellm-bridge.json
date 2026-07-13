@@ -1,0 +1,61 @@
+{
+  "contract_version": "atlas.initiative.v1",
+  "id": "initiative-external-model-sidecar-deepseek-litellm-bridge",
+  "title": "External Model Sidecar Provider Integration - DeepSeek/LiteLLM Bridge",
+  "summary": "Planning-only admission for a six-unit DeepSeek/LiteLLM sidecar program; progress is 0 / 6 and native OpenAI remains fallback.",
+  "status": "admitted_planning_only",
+  "owner": "ATLAS root governance",
+  "created_at": "2026-07-13T00:00:00Z",
+  "updated_at": "2026-07-13T00:00:00Z",
+  "related_plan_refs": [],
+  "related_decision_refs": [],
+  "related_hypothesis_refs": [],
+  "related_session_refs": [],
+  "related_attention_refs": [],
+  "evidence_refs": [
+    "docs/ops/ATLAS-EXTERNAL-MODEL-SIDECAR-DEEPSEEK-LITELLM-BRIDGE-PROGRAM-ADMISSION-2026-07-13.md"
+  ],
+  "proposed_next_session_refs": [
+    "External Model Sidecar Provider Integration Phase 1 read-only capability audit"
+  ],
+  "supersedes": [],
+  "superseded_by": [],
+  "metadata": {
+    "lane": "External Model Sidecar Provider Integration - DeepSeek/LiteLLM Bridge",
+    "progress": {
+      "percent": 0,
+      "numerator": 0,
+      "denominator": 6,
+      "marker": "0%",
+      "admission_completes_no_unit": true
+    },
+    "authority": {
+      "mode": "planning_only",
+      "no_workstation_or_external_system_mutation": true,
+      "native_openai_remains_fallback": true,
+      "no_global_redirect": true,
+      "custom_provider_support_must_be_proven_before_integration": true
+    },
+    "phases": [
+      {"id": "phase-01", "title": "Read-only capability audit", "state": "admitted_not_executed", "outcome": "No capability audit was executed."},
+      {"id": "phase-02", "title": "Security/identity/runtime contract freeze", "state": "admitted_not_executed", "outcome": "No contract or configuration was frozen by execution."},
+      {"id": "phase-03", "title": "Dedicated runtime and one-time credential setup", "state": "admitted_not_executed", "outcome": "No runtime or credential setup occurred."},
+      {"id": "phase-04", "title": "Loopback LiteLLM proxy and Scheduled Task", "state": "admitted_not_executed", "outcome": "No proxy or Scheduled Task was created."},
+      {"id": "phase-05", "title": "Explicit-route Codex/_stack/Atlas Control integration only if proven supported", "state": "admitted_not_executed", "outcome": "No integration occurred; support remains unproven."},
+      {"id": "phase-06", "title": "End-to-end/restart/persistence/failure/rollback proof", "state": "admitted_not_executed", "outcome": "No operational proof was run."}
+    ],
+    "boundaries": {
+      "scope": "Admission and durable planning surfaces only",
+      "denied_mutations": ["software install", "secret request", "Program Files write", "Credential Manager write", "Scheduled Task write", "port binding", "Codex config write", "paid API call"]
+    },
+    "cross_system_links": ["Codex", "_stack", "Atlas Control", "LiteLLM", "Windows runtime", "secret store", "Scheduled Task"],
+    "dependencies": ["Phase 1 capability evidence", "Phase 2 contract freeze", "supported explicit provider route", "approved secret-access identity", "health and rollback evidence"],
+    "risks": ["unsupported custom provider route", "secret/task identity mismatch", "listening but unhealthy proxy", "credential exposure", "global redirect", "incomplete rollback"],
+    "resume_gates": ["read-only capability evidence accepted", "security/identity/runtime contract accepted", "one-time credential request authorized", "runtime and task changes authorized", "explicit route proven supported", "end-to-end and rollback proof accepted"],
+    "source_provenance": "operator-provided DeepSeek bridge execution order, admitted on 2026-07-13; local attachment path intentionally not persisted",
+    "future_secret_rule": "The future key is requested exactly once at Phase 3 and never printed, committed, passed in process arguments, or written to plaintext logs.",
+    "candidate_doctrine": ["External Model Sidecar", "Secret/Identity Alignment", "Discover -> Back Up -> Modify -> Validate -> Document", "Listening Is Not Healthy", "Dedicated Runtime"],
+    "exact_next_packet": "External Model Sidecar Provider Integration Phase 1 read-only capability audit",
+    "marker_movement": "No other marker moves."
+  }
+}

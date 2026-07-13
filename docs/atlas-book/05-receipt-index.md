@@ -1,5 +1,7 @@
 # Receipt Index
 
+- [External Model Sidecar Provider Integration - DeepSeek/LiteLLM Bridge Program Admission 2026-07-13](../ops/ATLAS-EXTERNAL-MODEL-SIDECAR-DEEPSEEK-LITELLM-BRIDGE-PROGRAM-ADMISSION-2026-07-13.md)
+
 ## Atlas Full-System Re-evaluation opening gate
 
 - `docs/ops/ATLAS-FULL-SYSTEM-REEVALUATION-OPENING-AUDIT-RECEIPT-2026-07-12.md`

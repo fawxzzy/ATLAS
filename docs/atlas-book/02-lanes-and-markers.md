@@ -94,6 +94,7 @@ Read:
 
 - GitHub Control-Plane Integration: `87.5%`
 - Vercel Platform Observability Governance: `0%`
+- External Model Sidecar Provider Integration - DeepSeek/LiteLLM Bridge: `0%`
 
 GitHub Control-Plane Integration is now `87.5%` on an accepted `7 / 8` denominator: inventory, parity, Actions, open-work hygiene, release/security projection, cleanup governance, and `_stack` event correlation are complete. The live-readback DiscordOS projection remains open. Cleanup classification grants no deletion authority: all 62 local worktrees and 80 merged remote-branch candidates remain held behind explicit mutation authority and correlated removal receipts. No execution-selector marker moved.
 
