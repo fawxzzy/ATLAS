@@ -92,9 +92,10 @@ Read:
 
 ### Platform governance
 
+- GitHub Control-Plane Integration: `75%`
 - Vercel Platform Observability Governance: `0%`
 
-GitHub Control-Plane Integration remains percentage-null. No execution-selector marker moved.
+GitHub Control-Plane Integration is now `75%` on an accepted `6 / 8` denominator: inventory, parity, Actions, open-work hygiene, release/security projection, and `_stack` event correlation are complete; cleanup governance and live-readback DiscordOS projection remain open. No execution-selector marker moved.
 
 ## Audit Gate Markers
 

@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-07-12T10:58:57.680276Z",
-  "updated_at": "2026-07-13T14:16:18Z",
+  "updated_at": "2026-07-13T16:06:23Z",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -20,7 +20,12 @@
     "docs/registry/STACK-REPO-INVENTORY.json",
     "docs/ops/GITHUB-CONTROL-PLANE-WATCH-2026-07-13.md",
     "docs/ops/GITHUB-CONTROL-PLANE-EVENT-PROJECTION-CONTRACT-IMPLEMENTATION-2026-07-13.md",
-    "docs/ops/GITHUB-CONTROL-PLANE-EVENT-ADMISSION-RUNTIME-2026-07-13.md"
+    "docs/ops/GITHUB-CONTROL-PLANE-EVENT-ADMISSION-RUNTIME-2026-07-13.md",
+    "docs/ops/GITHUB-CONTROL-PLANE-END-TO-END-NO-SEND-CANARY-2026-07-13.md",
+    "docs/ops/GITHUB-CONTROL-PLANE-MARKER-DENOMINATOR-AUDIT-2026-07-13.md",
+    "runtime/codex/discordos/logs/20260713T151453726Z-discordos-github-projection-intent-dry-run-consumer/run.json",
+    "https://github.com/fawxzzy/DiscordOS/pull/48",
+    "git:3e9ca5fd67fbcc728ac42f85b4222600523c2dfe"
   ],
   "proposed_next_session_refs": [],
   "supersedes": [],
@@ -140,16 +145,23 @@
     ],
     "phase_state": {
       "phase-7-discordos-projection": {
-        "status": "admission-runtime-implemented",
-        "updated_at": "2026-07-13T14:16:18Z",
+        "status": "no-send-canary-complete-awaiting-live-readback",
+        "updated_at": "2026-07-13T16:06:23Z",
         "evidence_refs": [
           "docs/ops/GITHUB-CONTROL-PLANE-EVENT-PROJECTION-CONTRACT-IMPLEMENTATION-2026-07-13.md",
-          "docs/ops/GITHUB-CONTROL-PLANE-EVENT-ADMISSION-RUNTIME-2026-07-13.md"
+          "docs/ops/GITHUB-CONTROL-PLANE-EVENT-ADMISSION-RUNTIME-2026-07-13.md",
+          "docs/ops/GITHUB-CONTROL-PLANE-END-TO-END-NO-SEND-CANARY-2026-07-13.md",
+          "docs/ops/GITHUB-CONTROL-PLANE-MARKER-DENOMINATOR-AUDIT-2026-07-13.md",
+          "runtime/codex/discordos/logs/20260713T151453726Z-discordos-github-projection-intent-dry-run-consumer/run.json",
+          "https://github.com/fawxzzy/DiscordOS/pull/48",
+          "git:3e9ca5fd67fbcc728ac42f85b4222600523c2dfe"
         ],
+        "next_gate": "One explicitly authorized DiscordOS single-writer apply must return exact live readback tied to the same event, admission, and projection identities.",
         "notes": [
-          "Atlas Contracts now defines atlas.github.event-receipt.v1, atlas.github.event-admission.v1, and atlas.github.projection-intent.v1.",
-          "Atlas now compiles deterministic admission results and formatting-free projection intents under a backend-neutral policy registry.",
-          "DiscordOS dry-run consumption and later single-writer application proof remain the next follow-up."
+          "Atlas Contracts now defines atlas.github.event-receipt.v1, atlas.github.event-admission.v1, and atlas.github.projection-intent.v1, and Atlas compiles deterministic admission results plus formatting-free projection intents under a backend-neutral policy registry.",
+          "DiscordOS PR 48 merged the governed dry-run consumer into main at 3e9ca5fd67fbcc728ac42f85b4222600523c2dfe, and the governed run commit 874c9b5173bb068b2e29248ba23ab648c5eb09a8 is tree-identical to merged main on the nine implementation paths.",
+          "The end-to-end no-send canary preserved correlated ghr_, gha_, and ghp_ identities, emitted one atlas_ledger record intent plus one discordos_update publish intent, suppressed exact replay, and kept sends_messages=false, writes_board=false, writes_storage=false, external_mutation=denied, and readback.state=not_requested.",
+          "The live-readback limitation remains in force: DiscordOS projection is not complete until one explicitly authorized single-writer apply returns exact live readback on the sanctioned target."
         ]
       }
     },
@@ -187,7 +199,22 @@
       "github_control_plane_integration": {
         "lane": "GitHub Control-Plane Integration",
         "candidate": true,
-        "percentage": null,
+        "percentage": 75,
+        "numerator": 6,
+        "completed_units": 6,
+        "denominator": 8,
+        "freshness_timestamp": "2026-07-13T15:58:36Z",
+        "transition_reason": "The 2026-07-13 marker denominator audit accepted eight deterministic binary units and counted six complete units; cleanup_governance and discordos_projection remain incomplete.",
+        "percentage_evidence_refs": [
+          "docs/ops/GITHUB-CONTROL-PLANE-MARKER-DENOMINATOR-AUDIT-2026-07-13.md",
+          "docs/ops/GITHUB-CONTROL-PLANE-END-TO-END-NO-SEND-CANARY-2026-07-13.md",
+          "docs/registry/GITHUB-CONTROL-PLANE-REGISTRY.json",
+          "docs/ops/GITHUB-CONTROL-PLANE-WATCH-2026-07-13.md",
+          "docs/ops/GITHUB-CONTROL-PLANE-EVENT-PROJECTION-CONTRACT-IMPLEMENTATION-2026-07-13.md",
+          "docs/ops/GITHUB-CONTROL-PLANE-EVENT-ADMISSION-RUNTIME-2026-07-13.md",
+          "runtime/codex/discordos/logs/20260713T151453726Z-discordos-github-projection-intent-dry-run-consumer/run.json",
+          "https://github.com/fawxzzy/DiscordOS/pull/48"
+        ],
         "measurement_units": [
           {
             "id": "repository_inventory",
@@ -222,7 +249,7 @@
             "unit": "authorized GitHub events project through DiscordOS with readback"
           }
         ],
-        "ratchet_rule": "Percentage remains null until an authorized marker audit accepts a deterministic denominator and completed units."
+        "ratchet_rule": "Percentage remained null until the authorized 2026-07-13 marker audit accepted a deterministic denominator and completed-unit count."
       },
       "atlas_full_system_re_evaluation": {
         "lane": "Atlas Full-System Re-evaluation",
