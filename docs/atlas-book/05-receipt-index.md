@@ -2059,3 +2059,4 @@ Its job is to make the current cross-reference spine visible:
 - closeout-state receipts that change lane posture without reopening runtime mutation
 
 
+- [Cortex Simulation Substrate Readiness Atlas Workflow-Resilience Safe Scenario Simulator Prototype Contract Freeze 2026-07-14](../ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-ATLAS-WORKFLOW-RESILIENCE-SAFE-SCENARIO-SIMULATOR-PROTOTYPE-CONTRACT-FREEZE-2026-07-14.md) - freezes and admits the first root-only bounded workflow-resilience simulator without moving the 60% marker.
