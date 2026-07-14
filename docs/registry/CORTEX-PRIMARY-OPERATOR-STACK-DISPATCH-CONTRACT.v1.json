@@ -68,7 +68,22 @@
       "failure_receipt_correlation",
       "external_authority_denials",
       "no_commit_push_deploy_discord_or_data_mutation"
-    ]
+    ],
+    "implementation_status": "helper_and_focused_tests_complete_live_canary_pending",
+    "implementation_surfaces": [
+      "ops/cortex/primary_operator_stack_dispatch.py",
+      "tests/test_cortex_primary_operator_stack_dispatch.py"
+    ],
+    "focused_test_count": 12,
+    "stack_runtime_read_boundary": {
+      "root": "repos/_stack/.codex/logs/**",
+      "artifacts": [
+        "run.json",
+        "atlas.job-envelope.v2.json",
+        "atlas.execution-receipt.v2.json"
+      ],
+      "general_absolute_paths": "denied"
+    }
   },
   "marker": {
     "name": "Cortex Dual-Mode Replacement Readiness",
