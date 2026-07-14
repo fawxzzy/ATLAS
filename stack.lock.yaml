@@ -11,7 +11,7 @@ components:
     remote: "https://github.com/fawxzzy/_stack.git"
     ref_type: "branch"
     ref: "main"
-    commit: "fe8bd730c3b2c63dce9f578515758b94577695d5"
+    commit: "32f9205013bbb84e19153261b1aab2c0ada975d4"
     dirty: false
     trust_class: "trusted"
     release_eligible: false
@@ -208,4 +208,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:e624710b9deb0d161ef6c75e4b849cd105b432d3df719aa4df0847a094b1c16b"
+lock_digest: "sha256:df95f00799a1a4e49d32a8dce7abd6a4a8e097c53f47b71abbb0c95228be517e"
