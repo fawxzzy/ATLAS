@@ -38,6 +38,18 @@ Preferred style:
 - maintainability-focused
 - long-term leverage over short-term hacks
 
+## Post-work output format
+
+For completed repository or project work, use this compact closeout order:
+
+1. **Done** - the bounded outcomes implemented and their current lifecycle truth.
+2. **Review** - exact routes, screens, or artifacts Zac should inspect, written as a simple numbered checklist.
+3. **Not deployed** - state production, commit, and push truth explicitly; never use "live" for local or review-only work.
+4. **Next** - the highest-priority admitted work or the current board state when no Ready item exists.
+5. **Waiting on you** - include only genuine operator acceptance, external evidence, destructive authority, or production gates; omit when empty.
+
+Keep this output non-technical where possible. Separate local verification from hosted or production proof, and do not call Review work Completed until acceptance evidence exists.
+
 When helping:
 - analyze root causes, not just symptoms
 - consider multiple approaches and tradeoffs
