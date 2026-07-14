@@ -1,6 +1,6 @@
 {
   "contract_version": "atlas.cortex.simulation.recommendation-evaluation-registry.v1",
-  "status": "implementation_admitted",
+  "status": "evaluation_loop_proved",
   "owner": "stack-root",
   "input_contract": "atlas.cortex.simulation.recommendation-evaluation-manifest.v1",
   "output_contract": "atlas.cortex.simulation.recommendation-evaluation.v1",
@@ -23,8 +23,8 @@
   },
   "marker": {
     "name": "Cortex Simulation Substrate Readiness",
-    "current_percent": 80,
-    "next_threshold": 90,
-    "next_packet": "Cortex Simulation Substrate Readiness recommendation-envelope replay and evaluation loop first implementation and 90 percent reconciliation"
+    "current_percent": 90,
+    "next_threshold": 100,
+    "next_packet": "Cortex Simulation Substrate Readiness operational governance-safe closeout contract freeze"
   }
 }

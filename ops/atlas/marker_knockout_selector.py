@@ -207,12 +207,12 @@ POLICY_REGISTRY: dict[str, MarkerPolicy] = {
     "Cortex Simulation Substrate Readiness": MarkerPolicy(
         category="admissible after current lane",
         rationale=(
-            "The lane is at 80% with one deterministic recommendation envelope feeding candidate-only Playbook doctrine and "
-            "authority-false Cortex next-proof recommendations. Envelope replay/evaluation is next; owner adapters remain held."
+            "The lane is at 90% with deterministic match, changed, and invalid recommendation-envelope evaluation proved. "
+            "The final operational governance-safe closeout is next; owner adapters and live action remain held."
         ),
         expected_evidence=(
-            "one deterministic digest-bound replay/evaluation loop that detects identical, changed, and invalid recommendation "
-            "envelopes without executing, promoting, dispatching, or moving operational state"
+            "one independent governance audit that proves the fixed denominator, end-to-end deterministic canaries, permanent "
+            "authority denial, fail-closed boundaries, termination, continuity, validation, and completed-lane lock"
         ),
     ),
     "Owner-Lane Agent Service Bus & DiscordOS Ops Readiness": MarkerPolicy(
@@ -439,15 +439,15 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "Cortex Simulation Substrate Readiness": PacketDescriptor(
-        packet="Cortex Simulation Substrate Readiness recommendation-envelope replay and evaluation loop contract freeze",
+        packet="Cortex Simulation Substrate Readiness operational governance-safe closeout contract freeze",
         basis_receipt_ref=(
             "docs/ops/"
-            "CORTEX-SIMULATION-SUBSTRATE-READINESS-SIMULATION-OUTPUT-RECOMMENDATION-BRIDGE-FIRST-IMPLEMENTATION-AND-80-PERCENT-RECONCILIATION-2026-07-14.md"
+            "CORTEX-SIMULATION-SUBSTRATE-READINESS-RECOMMENDATION-ENVELOPE-REPLAY-AND-EVALUATION-LOOP-FIRST-IMPLEMENTATION-AND-90-PERCENT-RECONCILIATION-2026-07-14.md"
         ),
-        mode="docs-only root-bounded recommendation-envelope replay/evaluation contract freeze",
+        mode="docs-only root-bounded operational governance-safe closeout contract freeze",
         scope=(
-            "freeze one deterministic digest-bound recommendation-envelope replay/evaluation loop without owner access, model "
-            "calls, command execution, doctrine promotion, dispatch, or external mutation authority"
+            "freeze one independent final audit over the implemented root-only substrate without widening into owner access, "
+            "model calls, command execution, doctrine promotion, dispatch, or external mutation authority"
         ),
     ),
     "Owner-Lane Agent Service Bus & DiscordOS Ops Readiness": PacketDescriptor(

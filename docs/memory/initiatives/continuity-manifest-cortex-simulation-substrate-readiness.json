@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-07-14T04:02:31-04:00",
-  "updated_at": "2026-07-14T13:00:00-04:00",
+  "updated_at": "2026-07-14T14:30:00-04:00",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -64,6 +64,14 @@
     ,"schemas/atlas.cortex.simulation.recommendation-envelope.v1.json"
     ,"ops/cortex/simulation_recommendation_bridge.py"
     ,"tests/test_cortex_simulation_recommendation_bridge.py"
+    ,"docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-RECOMMENDATION-ENVELOPE-REPLAY-AND-EVALUATION-LOOP-CONTRACT-FREEZE-2026-07-14.md"
+    ,"docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-RECOMMENDATION-ENVELOPE-REPLAY-AND-EVALUATION-LOOP-FIRST-IMPLEMENTATION-AND-90-PERCENT-RECONCILIATION-2026-07-14.md"
+    ,"docs/registry/CORTEX-SIMULATION-RECOMMENDATION-EVALUATION.v1.json"
+    ,"schemas/atlas.cortex.simulation.recommendation-evaluation-manifest.v1.json"
+    ,"schemas/atlas.cortex.simulation.recommendation-evaluation.v1.json"
+    ,"ops/cortex/simulation_recommendation_evaluator.py"
+    ,"tests/test_cortex_simulation_recommendation_evaluator.py"
+    ,"data/cortex/simulation-evaluations/first-recommendation-loop/manifest.json"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -71,9 +79,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "cortex-simulation-substrate-readiness",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-SIMULATION-OUTPUT-RECOMMENDATION-BRIDGE-FIRST-IMPLEMENTATION-AND-80-PERCENT-RECONCILIATION-2026-07-14.md",
-    "checkpoint_commit": "main@07d1fd05",
-    "checkpoint_summary": "The lane is at 80 percent. One deterministic envelope now feeds candidate-only Playbook doctrine and authority-false Cortex next-proof recommendations; owner adapters remain selected and held.",
+    "current_checkpoint_receipt": "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-RECOMMENDATION-ENVELOPE-REPLAY-AND-EVALUATION-LOOP-FIRST-IMPLEMENTATION-AND-90-PERCENT-RECONCILIATION-2026-07-14.md",
+    "checkpoint_commit": "main@9715ad9a",
+    "checkpoint_summary": "The lane is at 90 percent. A deterministic digest-bound recommendation-envelope evaluation loop proves match, changed, and invalid behavior and terminates without authority.",
     "governing_receipts": [
       "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-FABLE-GENERATIVE-AGENT-RESEARCH-CONTRACT-FREEZE-2026-07-09.md",
       "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-SIMULATION-REQUIREMENTS-MAP-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-10.md",
@@ -91,6 +99,8 @@
       ,"docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-ATLAS-WORKFLOW-RESILIENCE-SAFE-SCENARIO-SIMULATOR-PROTOTYPE-FIRST-IMPLEMENTATION-AND-70-PERCENT-RECONCILIATION-2026-07-14.md"
       ,"docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-SIMULATION-OUTPUT-PLAYBOOK-AND-CORTEX-RECOMMENDATION-CONSUMPTION-CONTRACT-FREEZE-2026-07-14.md"
       ,"docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-SIMULATION-OUTPUT-RECOMMENDATION-BRIDGE-FIRST-IMPLEMENTATION-AND-80-PERCENT-RECONCILIATION-2026-07-14.md"
+      ,"docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-RECOMMENDATION-ENVELOPE-REPLAY-AND-EVALUATION-LOOP-CONTRACT-FREEZE-2026-07-14.md"
+      ,"docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-RECOMMENDATION-ENVELOPE-REPLAY-AND-EVALUATION-LOOP-FIRST-IMPLEMENTATION-AND-90-PERCENT-RECONCILIATION-2026-07-14.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -98,12 +108,12 @@
         "role": "current 70 percent marker and deterministic threshold truth"
       },
       {
-        "path": "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-SIMULATION-OUTPUT-RECOMMENDATION-BRIDGE-FIRST-IMPLEMENTATION-AND-80-PERCENT-RECONCILIATION-2026-07-14.md",
-        "role": "current recommendation-consumption implementation and 80 percent ratchet authority"
+        "path": "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-RECOMMENDATION-ENVELOPE-REPLAY-AND-EVALUATION-LOOP-FIRST-IMPLEMENTATION-AND-90-PERCENT-RECONCILIATION-2026-07-14.md",
+        "role": "current recommendation evaluation loop and 90 percent ratchet authority"
       },
       {
-        "path": "docs/registry/CORTEX-SIMULATION-RECOMMENDATION-CONSUMPTION.v1.json",
-        "role": "machine-readable dual-consumer recommendation posture, authority denials, and next threshold"
+        "path": "docs/registry/CORTEX-SIMULATION-RECOMMENDATION-EVALUATION.v1.json",
+        "role": "machine-readable evaluation classifications, authority denials, and final threshold"
       }
     ],
     "verification_adoption_surfaces": [
@@ -146,13 +156,21 @@
       {
         "path": "tests/test_cortex_simulation_recommendation_bridge.py",
         "role": "dual-consumer projection, doctrine drift, simulator blocker, output, determinism, and authority proof"
+      },
+      {
+        "path": "ops/cortex/simulation_recommendation_evaluator.py",
+        "role": "deterministic digest-bound match, changed, and invalid envelope evaluator"
+      },
+      {
+        "path": "tests/test_cortex_simulation_recommendation_evaluator.py",
+        "role": "three-class evaluation, termination, manifest, output, and authority proof"
       }
     ],
     "blocked_or_gated_work": [
       {
-        "work": "Claiming the 90 percent replay/evaluation threshold",
+        "work": "Claiming the 100 percent operational governance-safe threshold",
         "state": "gated",
-        "reason": "recommendation consumption is proved but no digest-bound recommendation-envelope replay/evaluation loop exists"
+        "reason": "the implementation denominator is complete through 90 percent but the independent final governance audit is not yet accepted"
       },
       {
         "work": "Executing simulations or project adapters",
@@ -162,23 +180,23 @@
     ],
     "next_package_ladder": [
       {
-        "package": "Cortex Simulation Substrate Readiness recommendation-envelope replay and evaluation loop contract freeze",
-        "mode": "docs-only root-bounded recommendation-envelope replay/evaluation contract freeze",
-        "reason": "dual-consumer recommendation output is proved and the next threshold requires deterministic replay and evaluation"
+        "package": "Cortex Simulation Substrate Readiness operational governance-safe closeout contract freeze",
+        "mode": "docs-only root-bounded operational governance-safe closeout contract freeze",
+        "reason": "the implementation denominator is complete through replay/evaluation and the final threshold requires an independent governance audit"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-SIMULATION-OUTPUT-RECOMMENDATION-BRIDGE-FIRST-IMPLEMENTATION-AND-80-PERCENT-RECONCILIATION-2026-07-14.md",
-    "freshness_checked_at": "2026-07-14T13:00:00-04:00",
-    "freshness_basis": "One live canary proves three candidate-only source-linked Playbook records and two authority-false Cortex next-proof recommendations under one deterministic simulation-correlated envelope.",
+    "freshness_checked_receipt": "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-RECOMMENDATION-ENVELOPE-REPLAY-AND-EVALUATION-LOOP-FIRST-IMPLEMENTATION-AND-90-PERCENT-RECONCILIATION-2026-07-14.md",
+    "freshness_checked_at": "2026-07-14T14:30:00-04:00",
+    "freshness_basis": "The committed evaluation canary proves deterministic match, changed, and invalid recommendation-envelope classification with expectation matching and bounded termination.",
     "marker_posture": [
       {
         "marker": "Cortex Simulation Substrate Readiness",
-        "percent": 80,
+        "percent": 90,
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ],
-    "current_percent": 80,
-    "next_exact_packet": "Cortex Simulation Substrate Readiness recommendation-envelope replay and evaluation loop contract freeze"
+    "current_percent": 90,
+    "next_exact_packet": "Cortex Simulation Substrate Readiness operational governance-safe closeout contract freeze"
   }
 }

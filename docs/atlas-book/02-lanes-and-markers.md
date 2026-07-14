@@ -91,8 +91,8 @@ The owner-lane orchestration marker uses a native-first fixed denominator of ten
 
 - Cortex Dual-Mode Replacement Readiness: `100%`
 - Cortex Dual-Mode Replacement Readiness is closed at `100%`. The two safely executed ATLAS bridge lanes remain the 90% foundation; the final threshold is now proved by deterministic internal primary-operator acceptance, durable exact-byte decision and dispatch records, replay source-digest parity, `_stack` canary `20260714T074235763Z-cortex-primary-operator-stack-verified-no-change-canary-7`, a validated `success_no_changes` receipt, zero changed paths or authority actions, bounded command-trace read scope, durable result correlation with `safe_to_close=true`, and a fresh independent `RATIFY_100` audit. ChatGPT/Codex remain optional external adapters; `_stack` remains the execution plane, and Cortex gains no push, deploy, Discord, board, data, secret, owner-repository, or marker authority.
-- Cortex Simulation Substrate Readiness: `80%`
-- Cortex Simulation Substrate Readiness is at `80%`. The root-only recommendation bridge consumes the proved Atlas simulation and emits three candidate-only Playbook records plus two authority-false Cortex next-proof recommendations under one deterministic envelope. Mazer, Fitness, and DiscordOS remain selected and held. The exact next packet is `Cortex Simulation Substrate Readiness recommendation-envelope replay and evaluation loop contract freeze`.
+- Cortex Simulation Substrate Readiness: `90%`
+- Cortex Simulation Substrate Readiness is at `90%`. The committed recommendation-envelope loop deterministically proves one match, one changed result, and one invalid source, then terminates without mutation authority. Mazer, Fitness, and DiscordOS remain selected and held. The exact next packet is `Cortex Simulation Substrate Readiness operational governance-safe closeout contract freeze`.
 
 ### Platform governance
 
