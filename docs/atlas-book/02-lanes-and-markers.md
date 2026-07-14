@@ -91,8 +91,8 @@ The owner-lane orchestration marker uses a native-first fixed denominator of ten
 
 - Cortex Dual-Mode Replacement Readiness: `100%`
 - Cortex Dual-Mode Replacement Readiness is closed at `100%`. The two safely executed ATLAS bridge lanes remain the 90% foundation; the final threshold is now proved by deterministic internal primary-operator acceptance, durable exact-byte decision and dispatch records, replay source-digest parity, `_stack` canary `20260714T074235763Z-cortex-primary-operator-stack-verified-no-change-canary-7`, a validated `success_no_changes` receipt, zero changed paths or authority actions, bounded command-trace read scope, durable result correlation with `safe_to_close=true`, and a fresh independent `RATIFY_100` audit. ChatGPT/Codex remain optional external adapters; `_stack` remains the execution plane, and Cortex gains no push, deploy, Discord, board, data, secret, owner-repository, or marker authority.
-- Cortex Simulation Substrate Readiness: `60%`
-- Cortex Simulation Substrate Readiness is at `60%`. Four receipt-driven advisory adapters are selected for Atlas, Mazer, Fitness, and DiscordOS without owner access or implementation authority. Atlas workflow resilience is the first safe prototype; Mazer, Fitness, and DiscordOS remain selected and held. The exact next packet is `Cortex Simulation Substrate Readiness Atlas workflow-resilience safe scenario simulator prototype contract freeze`.
+- Cortex Simulation Substrate Readiness: `70%`
+- Cortex Simulation Substrate Readiness is at `70%`. The first root-owned Atlas workflow-resilience prototype consumes committed digest-bound replay evidence, emits a deterministic four-step blocked-state recovery rehearsal, terminates, and grants no execution or mutation authority. Mazer, Fitness, and DiscordOS remain selected and held. The exact next packet is `Cortex Simulation Substrate Readiness simulation-output Playbook and Cortex recommendation consumption contract freeze`.
 
 ### Platform governance
 

@@ -207,12 +207,12 @@ POLICY_REGISTRY: dict[str, MarkerPolicy] = {
     "Cortex Simulation Substrate Readiness": MarkerPolicy(
         category="admissible after current lane",
         rationale=(
-            "The lane is at 60% with Atlas, Mazer, Fitness, and DiscordOS adapters explicitly selected. Atlas workflow "
-            "resilience is prioritized for the first safe root-only prototype; owner adapters and live action remain held."
+            "The lane is at 70% with one deterministic, receipt-bound, terminating Atlas workflow-resilience simulator "
+            "prototype proved. Playbook/Cortex recommendation consumption is next; owner adapters and live action remain held."
         ),
         expected_evidence=(
-            "one root-owned Atlas workflow-resilience prototype contract freezing admitted receipts, scenario states, "
-            "recovery outputs, proof, termination, and permanent no-execution authority"
+            "one authority-false recommendation envelope consumed by both a Playbook-facing projection and a Cortex read-model "
+            "surface with source correlation, deterministic proof, and no execution or final-receipt authority"
         ),
     ),
     "Owner-Lane Agent Service Bus & DiscordOS Ops Readiness": MarkerPolicy(
@@ -439,15 +439,15 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "Cortex Simulation Substrate Readiness": PacketDescriptor(
-        packet="Cortex Simulation Substrate Readiness Atlas workflow-resilience safe scenario simulator prototype contract freeze",
+        packet="Cortex Simulation Substrate Readiness simulation-output Playbook and Cortex recommendation consumption contract freeze",
         basis_receipt_ref=(
             "docs/ops/"
-            "CORTEX-SIMULATION-SUBSTRATE-READINESS-PROJECT-SPECIFIC-SIMULATION-ADAPTER-SELECTION-CONTRACT-FREEZE-AND-60-PERCENT-RATCHET-2026-07-14.md"
+            "CORTEX-SIMULATION-SUBSTRATE-READINESS-ATLAS-WORKFLOW-RESILIENCE-SAFE-SCENARIO-SIMULATOR-PROTOTYPE-FIRST-IMPLEMENTATION-AND-70-PERCENT-RECONCILIATION-2026-07-14.md"
         ),
-        mode="docs-only root-bounded Atlas simulator prototype contract freeze",
+        mode="docs-only root-bounded recommendation-consumption contract freeze",
         scope=(
-            "freeze one Atlas-only safe simulator prototype over admitted root receipts without implementation, owner "
-            "access, model calls, command execution, or external mutation authority"
+            "freeze one deterministic authority-false recommendation envelope and its Playbook/Cortex read-model consumption "
+            "without owner access, model calls, command execution, or external mutation authority"
         ),
     ),
     "Owner-Lane Agent Service Bus & DiscordOS Ops Readiness": PacketDescriptor(
