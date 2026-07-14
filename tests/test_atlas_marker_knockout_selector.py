@@ -53,6 +53,7 @@ MARKER_DOC = """# Lanes And Markers
 - Cortex Dual-Mode Replacement Readiness: `0%`
 - Cortex Simulation Substrate Readiness: `0%`
 - Owner-Lane Agent Service Bus & DiscordOS Ops Readiness: `0%`
+- GitHub Control-Plane Integration: `100%`
 - Post-Convergence Lane Split Readiness: `61%`
 
 ## Closed / Locked Ratchets
@@ -339,6 +340,7 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual("admissible after current lane", records["AI Repetition-to-Automation Pipeline"]["category"])
         self.assertEqual("admissible now", records["AI Long-Run Batch Orchestration"]["category"])
         self.assertEqual("already closed / locked", records["_stack Readiness"]["category"])
+        self.assertEqual("already closed / locked", records["GitHub Control-Plane Integration"]["category"])
 
     def test_build_campaign_routes_vercel_observability_after_current_hold(self) -> None:
         root = self._temp_root()

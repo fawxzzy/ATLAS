@@ -107,6 +107,17 @@ class PacketReceiptContext:
 
 
 POLICY_REGISTRY: dict[str, MarkerPolicy] = {
+    "GitHub Control-Plane Integration": MarkerPolicy(
+        category="already closed / locked",
+        rationale=(
+            "The accepted 8-of-8 denominator is complete with live DiscordOS projection readback; "
+            "the daily read-only watch continues as health monitoring rather than marker work."
+        ),
+        expected_evidence=(
+            "none; preserve 100% and reopen only for a new capability denominator, material control-plane drift, "
+            "or an explicitly authorized cleanup mutation packet"
+        ),
+    ),
     "_stack Readiness": MarkerPolicy(
         category="already closed / locked",
         rationale="The lane is already proof-closed at 100% and the operator packet explicitly says not to reopen it.",
