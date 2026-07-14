@@ -83,9 +83,9 @@ Read:
 
 ### Future / owner-lane orchestration
 
-- Owner-Lane Agent Service Bus & DiscordOS Ops Readiness: `90%`
+- Owner-Lane Agent Service Bus & DiscordOS Ops Readiness: `100%`
 
-The owner-lane orchestration marker uses a native-first fixed denominator of ten binary units. Units 1 through 9 are complete: authority/request/receipt/single-writer doctrine, native task/thread proof, executable job/task/receipt correlation, requested-versus-effective runtime accounting, ContextPacket/EvidenceBundle provenance, WorkerLease ownership/recovery binding, durable task lifecycle events, current-journal card/board correlation, and receipt-bound MarkerEvidence/KnowledgeCandidate closeout. DiscordOS PR `#58`, merged as `d3048663`, plus live read-only receipt `dbr_b89f4a31767871c89ba80877886d47a2` prove `58 / 58` active Mazer cards with exact event and idempotency correlation and no external mutation. The lane is `9 / 10 = 90%`; only unit 10, the Atlas/Mazer/Fitness end-to-end canary, remains. SQLite remains only a possible future storage backend, not an approved execution queue or selected ledger.
+The owner-lane orchestration marker is closed at `100%` for its native-first fixed denominator of ten binary units. Units 1 through 9 retain their prior authority, native-task, correlation, runtime, context/evidence, lease, lifecycle, board, marker, and knowledge receipts. Unit 10 resolves Atlas/Mazer/Fitness native rollout records and a fresh DiscordOS live-readback artifact directly, binds their SHA-256 digests into receipt `aec_d13e9d250326f9e8e577c61afa6a7d0f`, proves same-task recovery and zero authority drift, and retains DiscordOS as the sole writer. Live board proof remains `58 / 58` with receipt `dbr_b89f4a31767871c89ba80877886d47a2`. A final independent contradiction audit returned `RATIFY_100` with no blockers. SQLite remains only a possible future storage backend, not an approved execution queue or selected ledger.
 
 ### Future / Cortex
 
