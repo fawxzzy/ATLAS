@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-07-10T12:00:00-04:00",
-  "updated_at": "2026-07-14T00:42:13-04:00",
+  "updated_at": "2026-07-14T00:47:00-04:00",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -23,6 +23,7 @@
     "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-MARKER-ADMISSION-2026-07-10.md",
     "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-FULL-PERMISSION-RUNTIME-AND-REQUEST-RECEIPT-PROTOCOL-CONTRACT-FREEZE-2026-07-10.md",
     "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-FIRST-TRANSPORT-RECONCILIATION-2026-07-14.md",
+    "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-CODEX-TASK-THREAD-CAPABILITY-SPIKE-2026-07-14.md",
     "docs/architecture/ATLAS-CHATGPT-CODEX-WORKFLOW.md",
     "ops/atlas/marker_knockout_selector.py",
     "ops/codex/config.full-permission.toml",
@@ -34,13 +35,14 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "owner-lane-agent-service-bus-and-discordos-ops-readiness",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-FIRST-TRANSPORT-RECONCILIATION-2026-07-14.md",
-    "checkpoint_commit": "main@7ca57586",
-    "checkpoint_summary": "The owner-lane orchestration family remains at 10 percent with its request/receipt, idempotency, lease, full-permission, and DiscordOS single-writer contracts retained. The SQLite-first execution queue is superseded by native Codex execution plus a backend-neutral thin-ledger boundary; the next proof is a native task/thread capability spike before any backend selection.",
+    "current_checkpoint_receipt": "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-CODEX-TASK-THREAD-CAPABILITY-SPIKE-2026-07-14.md",
+    "checkpoint_commit": "main@825ca881",
+    "checkpoint_summary": "The native desktop task/thread spike proves local project discovery, task and turn identity, workspace binding, result retrieval, same-task continuation with prior context, title mutation, and archival. It also identifies eventual-consistency, runtime-policy receipt, callback/event, lease, and durable correlation gaps. The lane remains at 10 percent until its native-first denominator is rebaselined.",
     "governing_receipts": [
       "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-MARKER-ADMISSION-2026-07-10.md",
       "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-FULL-PERMISSION-RUNTIME-AND-REQUEST-RECEIPT-PROTOCOL-CONTRACT-FREEZE-2026-07-10.md",
-      "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-FIRST-TRANSPORT-RECONCILIATION-2026-07-14.md"
+      "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-FIRST-TRANSPORT-RECONCILIATION-2026-07-14.md",
+      "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-CODEX-TASK-THREAD-CAPABILITY-SPIKE-2026-07-14.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -58,6 +60,10 @@
       {
         "path": "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-FIRST-TRANSPORT-RECONCILIATION-2026-07-14.md",
         "role": "current 10 percent checkpoint and authoritative native-first transport decision"
+      },
+      {
+        "path": "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-CODEX-TASK-THREAD-CAPABILITY-SPIKE-2026-07-14.md",
+        "role": "tool-backed native task/thread lifecycle proof and missing-semantics inventory"
       },
       {
         "path": "docs/architecture/ATLAS-CHATGPT-CODEX-WORKFLOW.md",
@@ -118,15 +124,15 @@
     ],
     "next_package_ladder": [
       {
-        "package": "Owner-Lane Agent Service Bus & DiscordOS Ops native Codex task/thread capability spike first-implementation admission",
-        "mode": "docs-only native-capability spike admission",
-        "reason": "the native-first architecture is accepted, so the next honest move is to prove current task/thread identities, lifecycle, resume, event, workspace, and result behavior before defining the smallest backend-neutral ledger boundary"
+        "package": "Owner-Lane Agent Service Bus & DiscordOS Ops native-to-Atlas gap matrix and thin-ledger denominator rebaseline contract freeze",
+        "mode": "docs-only backend-neutral gap and denominator contract freeze",
+        "reason": "the native task/thread lifecycle is now directly proven, so the next honest move is to map only the missing durable semantics into Atlas Contracts v2 and define a deterministic native-first denominator before any ledger backend selection"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-FIRST-TRANSPORT-RECONCILIATION-2026-07-14.md",
-    "freshness_checked_at": "2026-07-14T00:42:13-04:00",
-    "freshness_basis": "The owner-lane orchestration family is manifest-backed at 10 percent: its request/receipt and coordination contracts remain valid, the SQLite-first runtime is superseded, native Codex remains the execution plane, and the next same-lane move is a bounded native task/thread capability spike before any thin-ledger backend decision.",
+    "freshness_checked_receipt": "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-CODEX-TASK-THREAD-CAPABILITY-SPIKE-2026-07-14.md",
+    "freshness_checked_at": "2026-07-14T00:47:00-04:00",
+    "freshness_basis": "The owner-lane orchestration family is manifest-backed at 10 percent with direct native task/thread lifecycle proof. Native execution is confirmed; the remaining work is a backend-neutral mapping of missing durable semantics and a deterministic native-first denominator, not a custom execution queue.",
     "marker_posture": [
       {
         "marker": "Owner-Lane Agent Service Bus & DiscordOS Ops Readiness",

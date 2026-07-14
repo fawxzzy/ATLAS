@@ -219,13 +219,13 @@ POLICY_REGISTRY: dict[str, MarkerPolicy] = {
     "Owner-Lane Agent Service Bus & DiscordOS Ops Readiness": MarkerPolicy(
         category="admissible after current lane",
         rationale=(
-            "The lane retains its request/receipt and single-writer contracts under the accepted native-first "
-            "architecture, but it must prove current Codex task/thread capabilities before defining a thin ledger "
-            "or selecting any storage backend."
+            "The lane now has direct native project, task, turn, continuation, result-read, title, and archive proof. "
+            "Its next bounded work is to map only missing durable semantics into Atlas contracts and rebaseline the "
+            "lane denominator before selecting any ledger backend."
         ),
         expected_evidence=(
-            "one bounded native Codex task/thread capability spike covering durable identities, lifecycle, resume, "
-            "events, workspace binding, and result surfaces plus a backend-neutral missing-semantics inventory"
+            "one backend-neutral native-to-Atlas gap matrix with a deterministic denominator and explicit mapping "
+            "to existing or newly required Atlas Contracts v2 compatibility surfaces"
         ),
     ),
     "Fitness QA/LLEL Workflow": MarkerPolicy(
@@ -451,15 +451,15 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "Owner-Lane Agent Service Bus & DiscordOS Ops Readiness": PacketDescriptor(
-        packet="Owner-Lane Agent Service Bus & DiscordOS Ops native Codex task/thread capability spike first-implementation admission",
+        packet="Owner-Lane Agent Service Bus & DiscordOS Ops native-to-Atlas gap matrix and thin-ledger denominator rebaseline contract freeze",
         basis_receipt_ref=(
             "docs/ops/"
-            "OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-FIRST-TRANSPORT-RECONCILIATION-2026-07-14.md"
+            "OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-CODEX-TASK-THREAD-CAPABILITY-SPIKE-2026-07-14.md"
         ),
-        mode="docs-only native-capability spike admission",
+        mode="docs-only backend-neutral gap and denominator contract freeze",
         scope=(
-            "admit one bounded read-only native Codex task/thread lifecycle proof and derive the smallest "
-            "backend-neutral ledger requirement set without selecting a backend or mutating owner repositories"
+            "map the proven native lifecycle against missing Atlas job, policy, lease, receipt, board, marker, "
+            "knowledge, retry, and callback semantics and freeze a deterministic denominator without selecting a backend"
         ),
     ),
 }

@@ -906,18 +906,18 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual("hold_current_lane", payload["operator_action"])
         self.assertEqual("Owner-Lane Agent Service Bus & DiscordOS Ops Readiness", payload["next_after_current_marker"])
         self.assertEqual(
-            "Owner-Lane Agent Service Bus & DiscordOS Ops native Codex task/thread capability spike first-implementation admission",
+            "Owner-Lane Agent Service Bus & DiscordOS Ops native-to-Atlas gap matrix and thin-ledger denominator rebaseline contract freeze",
             payload["next_after_current_packet"],
         )
         self.assertEqual(
-            "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-FIRST-TRANSPORT-RECONCILIATION-2026-07-14.md",
+            "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-CODEX-TASK-THREAD-CAPABILITY-SPIKE-2026-07-14.md",
             payload["next_after_current_packet_basis_ref"],
         )
         self.assertEqual(
-            "docs-only native-capability spike admission",
+            "docs-only backend-neutral gap and denominator contract freeze",
             payload["next_after_current_packet_mode"],
         )
-        self.assertIn("native Codex task/thread lifecycle proof", payload["next_after_current_packet_scope"])
+        self.assertIn("proven native lifecycle", payload["next_after_current_packet_scope"])
 
 
 if __name__ == "__main__":
