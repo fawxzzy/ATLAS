@@ -204,6 +204,23 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
             encoding="utf-8",
         )
 
+        primary_operator_contract = root / "docs" / "ops" / (
+            "CORTEX-DUAL-MODE-REPLACEMENT-READINESS-PRIMARY-OPERATOR-ACCEPTANCE-AND-"
+            "RECEIPT-CONTRACT-FREEZE-2026-07-14.md"
+        )
+        primary_operator_contract.write_text(
+            "\n".join(
+                [
+                    "# Primary Operator Contract",
+                    "",
+                    "- Mode: `root-owned deterministic dry-run primary-operator implementation`",
+                    "- Scope: `implement one Cortex helper/test pair that accepts or rejects atlas.cortex.execution_plan.v1, emits deterministic acceptance and receipt identities, preserves _stack execution ownership, requires no external adapter, and performs no runtime or platform mutation`",
+                    "",
+                ]
+            ),
+            encoding="utf-8",
+        )
+
     def _write_manifest(
         self,
         root: Path,
@@ -841,14 +858,14 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual("hold_current_lane", payload["operator_action"])
         self.assertEqual("Cortex Dual-Mode Replacement Readiness", payload["next_after_current_marker"])
         self.assertEqual(
-            "Cortex Dual-Mode Replacement Readiness synthesis-to-execution bridge schema contract freeze",
+            "Cortex Dual-Mode Replacement Readiness primary-operator acceptance and receipt first implementation",
             payload["next_after_current_packet"],
         )
         self.assertEqual(
-            "docs-only root-bounded synthesis-to-execution bridge-schema contract freeze",
+            "root-owned deterministic dry-run primary-operator implementation",
             payload["next_after_current_packet_mode"],
         )
-        self.assertIn("implementation-backed role inventory thresholds", payload["next_after_current_packet_scope"])
+        self.assertIn("requires no external adapter", payload["next_after_current_packet_scope"])
 
     def test_build_campaign_routes_owner_lane_service_bus_marker_when_it_is_first_available(self) -> None:
         root = self._temp_root()

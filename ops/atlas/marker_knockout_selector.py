@@ -196,13 +196,12 @@ POLICY_REGISTRY: dict[str, MarkerPolicy] = {
     "Cortex Dual-Mode Replacement Readiness": MarkerPolicy(
         category="admissible after current lane",
         rationale=(
-            "The lane now has a frozen operating model plus implementation-backed ChatGPT/Codex role inventory, but "
-            "current truth still favors the already-active Vercel and mature automation or interface lanes before the "
-            "next doctrine-first bridge schema family."
+            "The lane is at 90% with the bridge schema, synthesis generator, execution planner, replay harness, and two real Atlas planning lanes proven. "
+            "The next honest work is the internal primary-operator acceptance and receipt implementation; 100% remains blocked on dispatch and replay parity."
         ),
         expected_evidence=(
-            "one synthesis-to-execution bridge-schema contract freeze or equivalent read-only bridge-boundary packet "
-            "that preserves doctrine intake, authority denials, and shared-substrate truth"
+            "one deterministic dry-run primary-operator acceptance and receipt helper that consumes a safe execution plan, rejects authority or lease conflicts, "
+            "requires no ChatGPT/Codex adapter, and performs no runtime dispatch"
         ),
     ),
     "Cortex Simulation Substrate Readiness": MarkerPolicy(
@@ -427,15 +426,16 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "Cortex Dual-Mode Replacement Readiness": PacketDescriptor(
-        packet="Cortex Dual-Mode Replacement Readiness synthesis-to-execution bridge schema contract freeze",
+        packet="Cortex Dual-Mode Replacement Readiness primary-operator acceptance and receipt first implementation",
         basis_receipt_ref=(
             "docs/ops/"
-            "CORTEX-DUAL-MODE-REPLACEMENT-READINESS-CHATGPT-CODEX-ROLE-INVENTORY-MARKER-SURFACE-RATCHET-DECISION-2026-07-09.md"
+            "CORTEX-DUAL-MODE-REPLACEMENT-READINESS-PRIMARY-OPERATOR-ACCEPTANCE-AND-"
+            "RECEIPT-CONTRACT-FREEZE-2026-07-14.md"
         ),
-        mode="docs-only root-bounded synthesis-to-execution bridge-schema contract freeze",
+        mode="root-owned deterministic dry-run primary-operator implementation",
         scope=(
-            "freeze the next dual-mode bridge boundary after the operating model and implementation-backed role "
-            "inventory thresholds, without widening beyond admitted root doctrine, authority denials, and shared-substrate truth"
+            "implement one Cortex helper/test pair that accepts or rejects atlas.cortex.execution_plan.v1, emits deterministic acceptance and receipt identities, "
+            "preserves _stack execution ownership, requires no external adapter, and performs no runtime or platform mutation"
         ),
     ),
     "Cortex Simulation Substrate Readiness": PacketDescriptor(

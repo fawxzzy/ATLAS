@@ -1,0 +1,62 @@
+{
+  "contract_version": "atlas.cortex.primary_operator_acceptance_receipt_contract.v1",
+  "acceptance_schema": "atlas.cortex.primary_operator_acceptance.v1",
+  "receipt_schema": "atlas.cortex.primary_operator_receipt.v1",
+  "mode": "deterministic_internal_primary_operator",
+  "required_inputs": [
+    "atlas.cortex.execution_plan.v1",
+    "operator_authority_envelope",
+    "current_resource_lease_receipts",
+    "current_root_truth_digests"
+  ],
+  "acceptance_states": ["accepted", "blocked", "rejected", "completed", "failed"],
+  "rules": [
+    "accept_only_safe_to_admit_execution_plans",
+    "preserve_plan_job_and_source_identities",
+    "never_convert_host_capability_into_external_action_authority",
+    "dispatch_only_through_registered_stack_operator_interfaces",
+    "require_durable_acceptance_before_dispatch",
+    "require_correlated_receipt_after_dispatch",
+    "fail_closed_on_stale_truth_unknown_authority_or_resource_collision",
+    "chatgpt_and_codex_adapters_are_optional_transport_not_truth_authority"
+  ],
+  "authority": {
+    "cortex": "accepts_or_rejects_governed_plans_and_correlates_operator_receipts",
+    "stack": "executes_admitted_local_jobs",
+    "atlas": "owns_contracts_markers_final_reconciliation_and_global_identity",
+    "discordos": "sole_logical_board_and_discord_writer",
+    "external_adapters": "optional_transport_only"
+  },
+  "denials": [
+    "no_self_granted_external_mutation",
+    "no_self_granted_production_deploy",
+    "no_self_granted_push_or_merge",
+    "no_self_granted_discord_write",
+    "no_marker_movement",
+    "no_secret_read",
+    "no_hidden_transcript_dependency",
+    "no_unregistered_execution_backend"
+  ],
+  "first_implementation": {
+    "allowed_paths": ["ops/cortex/primary_operator.py", "tests/test_cortex_primary_operator.py"],
+    "output_glob": "tmp/atlas/**.json",
+    "runtime_dispatch": false,
+    "required_proof": [
+      "deterministic_acceptance_and_receipt_ids",
+      "ready_plan_acceptance",
+      "unsafe_plan_rejection",
+      "authority_widening_rejection",
+      "stale_truth_rejection",
+      "resource_lease_conflict_rejection",
+      "optional_external_adapter_posture",
+      "safe_output_path_enforcement",
+      "no_execution_side_effects"
+    ]
+  },
+  "marker": {
+    "name": "Cortex Dual-Mode Replacement Readiness",
+    "current_percent": 90,
+    "movement": "none",
+    "one_hundred_percent_requires": "internal_primary_operator_dispatch_plus_durable_receipt_and_replay_backed_optional_adapter_parity"
+  }
+}
