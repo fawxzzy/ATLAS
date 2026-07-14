@@ -167,9 +167,9 @@
   },
   "marker_decision": {
     "marker": "Cortex Dual-Mode Replacement Readiness",
-    "percent": 60,
-    "movement": "none",
-    "next_packet": "Cortex Dual-Mode Replacement Readiness replay/evaluation harness marker-surface ratchet decision",
-    "movement_to_70_requires": "admitted_implemented_proof_backed_reconciled_and_separately_ratcheted_replay_evaluation_harness"
+    "percent": 70,
+    "movement": "60_to_70",
+    "next_packet": "Cortex Dual-Mode Replacement Readiness first ATLAS lane Cortex-assisted bridge contract freeze",
+    "movement_to_80_requires": "one_atlas_lane_planned_or_executed_with_cortex_assisted_bridge_and_separately_ratcheted"
   }
 }

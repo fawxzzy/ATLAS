@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-07-09T19:47:39.8439335-04:00",
-  "updated_at": "2026-07-13T20:21:00-04:00",
+  "updated_at": "2026-07-13T20:24:00-04:00",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -51,6 +51,7 @@
     "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-REPLAY-EVALUATION-HARNESS-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-13.md",
     "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-REPLAY-EVALUATION-HARNESS-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-13.md",
     "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-REPLAY-EVALUATION-HARNESS-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-13.md",
+    "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-REPLAY-EVALUATION-HARNESS-MARKER-SURFACE-RATCHET-DECISION-2026-07-13.md",
     "docs/registry/CORTEX-EXECUTION-PLANNER-CONTRACT.v1.json",
     "docs/registry/CORTEX-REPLAY-EVALUATION-HARNESS-CONTRACT.v1.json",
     "ops/cortex/execution_planner.py",
@@ -68,9 +69,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "cortex-dual-mode-replacement-readiness",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-REPLAY-EVALUATION-HARNESS-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-13.md",
-    "checkpoint_commit": "main@75a714e7",
-    "checkpoint_summary": "The deterministic offline replay/evaluation harness is implemented, published, and reconciled with 32 focused tests, exact two-file scope, passed spec-to-diff, and remote parity. The marker remains 60 percent pending its separate 70 percent ratchet decision.",
+    "current_checkpoint_receipt": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-REPLAY-EVALUATION-HARNESS-MARKER-SURFACE-RATCHET-DECISION-2026-07-13.md",
+    "checkpoint_commit": "main@5b4394c8",
+    "checkpoint_summary": "The deterministic offline replay/evaluation harness is implemented, published, reconciled, and separately ratcheted. Cortex Dual-Mode Replacement Readiness is now 70 percent; the next threshold is one ATLAS lane planned or executed through the Cortex-assisted bridge.",
     "governing_receipts": [
       "docs/ops/CORTEX-DUAL-MODE-AND-SIMULATION-SUBSTRATE-MARKER-ADMISSION-2026-07-09.md",
       "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-OPERATING-MODE-CONTRACT-FREEZE-2026-07-09.md",
@@ -103,6 +104,7 @@
       "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-REPLAY-EVALUATION-HARNESS-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-13.md",
       "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-REPLAY-EVALUATION-HARNESS-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-13.md"
       ,"docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-REPLAY-EVALUATION-HARNESS-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-13.md"
+      ,"docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-REPLAY-EVALUATION-HARNESS-MARKER-SURFACE-RATCHET-DECISION-2026-07-13.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -190,6 +192,10 @@
         "role": "current implementation-backed replay/evaluation harness reconciliation and separate marker-ratchet prerequisite truth"
       },
       {
+        "path": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-REPLAY-EVALUATION-HARNESS-MARKER-SURFACE-RATCHET-DECISION-2026-07-13.md",
+        "role": "current 70 percent marker-ratchet receipt and replay/evaluation comparison threshold source"
+      },
+      {
         "path": "ops/cortex/replay_evaluation_harness.py",
         "role": "root-owned deterministic offline replay/evaluation harness"
       },
@@ -254,8 +260,8 @@
     ],
     "blocked_or_gated_work": [
       {
-        "item": "moving above the current 60 percent dual-mode threshold",
-        "requirement": "blocked until the replay/evaluation harness marker-surface ratchet is separately reviewed and published; implementation and reconciliation alone do not move the marker"
+        "item": "moving above the current 70 percent dual-mode threshold",
+        "requirement": "blocked until one ATLAS lane is planned or executed with the Cortex-assisted bridge, proof-backed, reconciled, and separately ratcheted"
       },
       {
         "item": "claiming bridge implementation or execution routing from the frozen bridge schema alone",
@@ -268,20 +274,20 @@
     ],
     "next_package_ladder": [
       {
-        "package": "Cortex Dual-Mode Replacement Readiness replay/evaluation harness marker-surface ratchet decision",
-        "mode": "ATLAS-root docs-only marker decision",
-        "reason": "the exact harness is implemented, proof-backed, published, and reconciled; the 70 percent threshold now requires a separate ratchet"
+        "package": "Cortex Dual-Mode Replacement Readiness first ATLAS lane Cortex-assisted bridge contract freeze",
+        "mode": "ATLAS-root docs-only bridge selection and contract freeze",
+        "reason": "the 70 percent replay/evaluation threshold is satisfied; the next honest milestone requires one real ATLAS lane to consume the Cortex-assisted bridge"
       }
     ],
-    "freshness_state": "replay-evaluation-harness-implemented-and-reconciled",
-    "freshness_checked_receipt": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-REPLAY-EVALUATION-HARNESS-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-13.md",
-    "freshness_checked_at": "2026-07-13T20:21:00-04:00",
-    "freshness_basis": "The deterministic offline replay/evaluation harness is implemented at main@75a714e7, passes 32 focused tests, compilation, schema smoke, ordinary validation, continuity health, exact mutation scope, and spec-to-diff. Remote parity is 0 0. The marker remains 60 percent until its separate ratchet decision.",
+    "freshness_state": "replay-evaluation-harness-70-percent-ratcheted",
+    "freshness_checked_receipt": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-REPLAY-EVALUATION-HARNESS-MARKER-SURFACE-RATCHET-DECISION-2026-07-13.md",
+    "freshness_checked_at": "2026-07-13T20:24:00-04:00",
+    "freshness_basis": "The deterministic offline replay/evaluation harness is implemented, proof-backed, published, reconciled, and separately ratcheted. Cortex Dual-Mode Replacement Readiness is 70 percent. The next threshold requires one ATLAS lane planned or executed with the Cortex-assisted bridge.",
     "marker_posture": [
       {
         "marker": "Cortex Dual-Mode Replacement Readiness",
-        "percent": 60,
-        "movement": "none",
+        "percent": 70,
+        "movement": "60_to_70",
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ]

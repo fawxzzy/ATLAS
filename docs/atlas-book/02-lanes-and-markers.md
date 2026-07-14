@@ -87,8 +87,8 @@ Read:
 
 ### Future / Cortex
 
-- Cortex Dual-Mode Replacement Readiness: `60%`
-- Cortex Dual-Mode Replacement Readiness now has an implementation-backed deterministic advisory execution planner: commit `92857573` lands `ops/cortex/execution_planner.py` plus `tests/test_cortex_execution_planner.py`, focused proof passes `39/39`, the canonical runner proves exact two-file scope and spec-to-diff, the separately published reconciliation preserves the authority boundary, and the lane moves from `50%` to `60%` without granting Cortex execution, final-receipt, marker, owner-repo, queue, scheduler, or external-mutation authority.
+- Cortex Dual-Mode Replacement Readiness: `70%`
+- Cortex Dual-Mode Replacement Readiness now has an implementation-backed deterministic advisory replay/evaluation harness: commit `75a714e7` lands `ops/cortex/replay_evaluation_harness.py` plus `tests/test_cortex_replay_evaluation_harness.py`, focused proof passes `32/32`, the canonical runner proves exact two-file scope and spec-to-diff, the separately published reconciliation preserves the authority boundary, and the lane moves from `60%` to `70%` without granting Cortex model-call, execution, final-receipt, marker, owner-repo, queue, scheduler, hidden-transcript, or external-mutation authority.
 - Cortex Simulation Substrate Readiness: `0%`
 
 ### Platform governance
