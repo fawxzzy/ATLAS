@@ -50,17 +50,20 @@ try {
   if (!existsSync(validator) || !existsSync(registryPath) || !existsSync(receiptPath)) throw new Error("real validator, registry, or receipt is missing");
   const registry = readJson(registryPath);
   const receipt = readJson(receiptPath);
-  run("real-initial", registry, receipt, "initial", true, directory);
-  const final = finalFixture(registry, receipt);
+  const livePhase = registry.counts?.complete === true ? "final" : "initial";
+  run(`real-${livePhase}`, registry, receipt, livePhase, true, directory);
+  const final = livePhase === "final"
+    ? { registry: clone(registry), receipt: clone(receipt) }
+    : finalFixture(registry, receipt);
   run("valid-final", final.registry, final.receipt, "final", true, directory);
 
   const duplicate = clone(registry);
   duplicate.target_rows.push(clone(duplicate.target_rows[0]));
-  run("duplicate", duplicate, receipt, "initial", false, directory);
+  run("duplicate", duplicate, receipt, livePhase, false, directory);
 
   const missing = clone(registry);
   missing.target_rows.pop();
-  run("missing", missing, receipt, "initial", false, directory);
+  run("missing", missing, receipt, livePhase, false, directory);
 
   const extra = clone(registry);
   const extraRow = { category: "atlas-root-path", path: "docs/ops/EXTRA.md", line_number: 1, message: "Absolute path leak detected in committed text.", line_preview_sha256: hash("synthetic extra") };
@@ -69,20 +72,29 @@ try {
   extraRow.disposition = "accepted_preserve_historical";
   extraRow.accepted = true;
   extra.target_rows.push(extraRow);
-  run("extra", extra, receipt, "initial", false, directory);
+  run("extra", extra, receipt, livePhase, false, directory);
 
   const denominator = clone(registry);
   denominator.lane.historical_denominator = 24;
-  run("denominator", denominator, receipt, "initial", false, directory);
+  run("denominator", denominator, receipt, livePhase, false, directory);
 
   const disposition = clone(registry);
-  disposition.target_rows.find((row) => row.row_class === "owner_remediation").disposition = "accepted_owner_remediation";
-  run("disposition", disposition, receipt, "initial", false, directory);
+  const dispositionOwner = disposition.target_rows.find((row) => row.row_class === "owner_remediation");
+  if (livePhase === "initial") {
+    dispositionOwner.disposition = "accepted_owner_remediation";
+    dispositionOwner.accepted = true;
+    dispositionOwner.remediation = { owner_repository: "_stack", owner_commit: "bb1eabe3980f248cccc4b50fb242d9f3fba1954f" };
+  } else {
+    dispositionOwner.disposition = "pending_owner_remediation";
+    dispositionOwner.accepted = false;
+    delete dispositionOwner.remediation;
+  }
+  run("disposition", disposition, receipt, livePhase, false, directory);
 
   const unexpected = clone(receipt);
   unexpected.findings.push({ severity: "warning", category: "atlas-root-path", path: "docs/ops/UNEXPECTED.md", message: "Absolute path leak detected in committed text.", details: { line_number: 1, line_preview: "synthetic unexpected warning" } });
-  run("unexpected-warning", registry, unexpected, "initial", false, directory);
-  console.log("root path hygiene validator fixtures passed: real initial, valid final, duplicate, missing, extra, denominator, disposition, unexpected-warning");
+  run("unexpected-warning", registry, unexpected, livePhase, false, directory);
+  console.log(`root path hygiene validator fixtures passed: real ${livePhase}, valid final, duplicate, missing, extra, denominator, disposition, unexpected-warning`);
 } finally {
   rmSync(directory, { recursive: true, force: true });
 }
