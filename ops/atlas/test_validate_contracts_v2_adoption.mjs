@@ -1,38 +1,87 @@
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
-import os from "node:os";
 import path from "node:path";
-import { validateAdoption } from "./validate_contracts_v2_adoption.mjs";
+import { fileURLToPath } from "node:url";
+import { EXPECTED_FAMILIES, validateAdoption } from "./validate_contracts_v2_adoption.mjs";
 
-const canary = "repos/_stack/.codex/logs/20260713T082953822Z-atlas-contracts-v2-stack-producer-no-change-canary-r1/run.json";
-const temp = await fs.mkdtemp(path.join(os.tmpdir(), "atlas-contracts-v2-"));
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+const canary = path.join(ROOT, "repos/_stack/.codex/logs/20260714T005224106Z-atlas-contracts-v2-cluster-2-stack-producer-no-change-canary/run.json");
 const source = JSON.parse(await fs.readFile(canary, "utf8"));
+const temp = await fs.mkdtemp(path.join(ROOT, "tmp", "atlas-contracts-v2-adoption-"));
+
+function replacePath(value, from, to) { return typeof value === "string" ? value.replaceAll(from, to) : value; }
+
+async function fixture(name, mutate = () => {}) {
+  const directory = path.join(temp, name);
+  await fs.mkdir(directory, { recursive: true });
+  const run = structuredClone(source);
+  const artifacts = {};
+  const originalPaths = source.atlasContractsV2.artifactPaths;
+  const artifactPaths = {};
+  for (const family of EXPECTED_FAMILIES) {
+    artifacts[family] = JSON.parse(await fs.readFile(originalPaths[family], "utf8"));
+    artifactPaths[family] = path.join(directory, `${family}.json`);
+  }
+  const writePaths = { ...artifactPaths };
+  run.atlasContractsV2.artifactPaths = artifactPaths;
+  for (const family of EXPECTED_FAMILIES) {
+    const producer = run.atlasContractsV2.validation[family];
+    producer.artifactPath = artifactPaths[family];
+    producer.result.artifact = artifactPaths[family];
+    producer.stdout = `${JSON.stringify(producer.result)}\n`;
+  }
+  for (const key of ["contextPacket", "approvalRecord", "evidenceBundle"]) {
+    const oldPath = originalPaths[key];
+    const newPath = artifactPaths[key];
+    artifacts.executionReceipt.evidence_refs = artifacts.executionReceipt.evidence_refs.map((entry) => replacePath(entry, oldPath, newPath));
+    artifacts.executionReceipt.extensions.artifact_refs[{ contextPacket: "context_packet", approvalRecord: "approval_record", evidenceBundle: "evidence_bundle" }[key]] = newPath;
+  }
+  mutate({ run, artifacts, artifactPaths });
+  for (const family of EXPECTED_FAMILIES) await fs.writeFile(writePaths[family], JSON.stringify(artifacts[family]));
+  const runPath = path.join(directory, "run.json");
+  await fs.writeFile(runPath, JSON.stringify(run));
+  return runPath;
+}
 
 async function scenario(name, mutate, expected) {
-  const run = structuredClone(source);
-  mutate(run);
-  const file = path.join(temp, `${name}.json`);
-  await fs.writeFile(file, JSON.stringify(run));
-  const result = await validateAdoption(file);
+  const result = await validateAdoption(await fixture(name, mutate));
   assert.equal(result.ok, false, `${name} must be rejected`);
   assert.equal(result.reasonCode, expected, `${name} reason code`);
 }
 
-const accepted = await validateAdoption(canary);
-assert.equal(accepted.code, "ACCEPTED");
-assert.deepEqual(accepted.families, ["componentManifest", "jobEnvelope", "executionReceipt"]);
+try {
+  const accepted = await validateAdoption(canary);
+  assert.equal(accepted.code, "ACCEPTED");
+  assert.deepEqual(accepted.families, EXPECTED_FAMILIES);
+  assert.deepEqual(Object.keys(accepted.evidence), EXPECTED_FAMILIES);
+  for (const family of EXPECTED_FAMILIES) {
+    assert.match(accepted.evidence[family].path, /^repos\/_stack\//);
+    assert.equal(accepted.evidence[family].sha256.startsWith("sha256:"), true);
+    assert.equal(accepted.evidence[family].bytes > 0, true);
+  }
 
-await scenario("job-mismatch", (run) => { run.atlasContractsV2.identities.jobId = "wrong-job"; }, "JOB_MISMATCH");
-await scenario("escaped-path", (run) => { run.atlasContractsV2.artifactPaths.jobEnvelope = "C:/Windows/job.json"; }, "UNSAFE_PATH");
-await scenario("failed-run", (run) => { run.status = "failed"; }, "REJECTED");
-await scenario("nonterminal-run", (run) => { run.atlasContractsV2.status.terminal = "running"; }, "REJECTED");
-await scenario("worker-git", (run) => { run.workerGitState.violations = ["dirty"]; }, "WORKER_GIT_VIOLATION");
-await scenario("external-authority", (run) => { run.authorityActions = ["push"]; }, "EXTERNAL_AUTHORITY_ACTION");
+  await scenario("job-mismatch", ({ run }) => { run.atlasContractsV2.identities.jobId = "wrong-job"; }, "JOB_MISMATCH");
+  await scenario("context-job-mismatch", ({ artifacts }) => { artifacts.contextPacket.job_id = "wrong-job"; }, "CONTEXT_CORRELATION_MISMATCH");
+  await scenario("approval-not-rejected", ({ artifacts }) => { artifacts.approvalRecord.decision = "approved"; }, "APPROVAL_DENIAL_MISMATCH");
+  await scenario("evidence-job-mismatch", ({ artifacts }) => { artifacts.evidenceBundle.job_id = "wrong-job"; }, "EVIDENCE_CORRELATION_MISMATCH");
+  await scenario("receipt-reference-mismatch", ({ artifacts }) => { artifacts.executionReceipt.extensions.artifact_refs.context_packet = artifacts.executionReceipt.extensions.artifact_refs.approval_record; }, "RECEIPT_ARTIFACT_REFERENCE_MISMATCH");
+  await scenario("producer-validation-mismatch", ({ run }) => { run.atlasContractsV2.validation.evidenceBundle.schemaId = "atlas.job-envelope.v2"; }, "PRODUCER_VALIDATION_MISMATCH");
+  await scenario("missing-artifact", ({ run }) => { delete run.atlasContractsV2.artifactPaths.evidenceBundle; }, "ARTIFACT_COUNT_MISMATCH");
+  await scenario("extra-artifact", ({ run }) => { run.atlasContractsV2.artifactPaths.extraArtifact = run.atlasContractsV2.artifactPaths.evidenceBundle; }, "ARTIFACT_COUNT_MISMATCH");
+  await scenario("duplicate-artifact", ({ run }) => { run.atlasContractsV2.artifactPaths.evidenceBundle = run.atlasContractsV2.artifactPaths.contextPacket; }, "UNSAFE_PATH");
+  await scenario("escaped-path", ({ run }) => { run.atlasContractsV2.artifactPaths.jobEnvelope = "C:/Windows/job.json"; }, "UNSAFE_PATH");
+  await scenario("failed-run", ({ run }) => { run.status = "failed"; }, "TERMINAL_STATUS_MISMATCH");
+  await scenario("nonterminal-run", ({ run }) => { run.atlasContractsV2.status.terminal = "running"; }, "TERMINAL_STATUS_MISMATCH");
+  await scenario("worker-git", ({ run }) => { run.workerGitState.violations = ["dirty"]; }, "WORKER_GIT_VIOLATION");
+  await scenario("external-authority", ({ run }) => { run.authorityActions = ["push"]; }, "EXTERNAL_AUTHORITY_ACTION");
+  await scenario("terminal-evidence", ({ artifacts }) => { artifacts.evidenceBundle.evidence[0].status = "failed"; }, "TERMINAL_EVIDENCE_MISMATCH");
 
-const malformed = path.join(temp, "malformed.json");
-await fs.writeFile(malformed, "{ malformed JSON rejected");
-const malformedResult = await validateAdoption(malformed);
-assert.equal(malformedResult.reasonCode, "MALFORMED_JSON");
-
-console.log("real-canary acceptance passed");
-console.log("job-mismatch, escaped-path, failed-run, nonterminal-run, worker-git, external-authority, malformed JSON rejected: passed");
+  const malformed = path.join(temp, "malformed.json");
+  await fs.writeFile(malformed, "{ malformed JSON rejected");
+  const malformedResult = await validateAdoption(malformed);
+  assert.equal(malformedResult.reasonCode, "MALFORMED_JSON");
+  console.log("real six-artifact canary acceptance passed");
+  console.log("Cluster 1 and Cluster 2 rejection scenarios: passed");
+} finally {
+  await fs.rm(temp, { recursive: true, force: true });
+}
