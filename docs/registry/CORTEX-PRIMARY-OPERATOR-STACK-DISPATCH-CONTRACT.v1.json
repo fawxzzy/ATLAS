@@ -74,7 +74,7 @@
       "external_authority_denials",
       "no_commit_push_deploy_discord_or_data_mutation"
     ],
-    "implementation_status": "durability_parity_and_read_scope_repair_complete_live_canary_pending",
+    "implementation_status": "live_canary_complete_independent_ratification_passed",
     "implementation_surfaces": [
       "ops/cortex/primary_operator_stack_dispatch.py",
       "tests/test_cortex_primary_operator_stack_dispatch.py"
@@ -93,8 +93,8 @@
   },
   "marker": {
     "name": "Cortex Dual-Mode Replacement Readiness",
-    "current_percent": 90,
-    "movement": "none",
+    "current_percent": 100,
+    "movement": "90_to_100",
     "one_hundred_percent_requires": "successful_bounded_canary_durable_correlation_and_independent_endgame_audit"
   }
 }
