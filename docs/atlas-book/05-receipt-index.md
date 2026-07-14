@@ -1,5 +1,6 @@
 # Receipt Index
 
+- [Vercel Platform Observability Governance Implemented Inventory Marker Ratchet 2026-07-14](../ops/VERCEL-PLATFORM-OBSERVABILITY-GOVERNANCE-IMPLEMENTED-INVENTORY-MARKER-RATCHET-2026-07-14.md) - reconciles two already-landed read-only inventory units, moves the marker from `0%` to `20%`, and routes next to an environment-name-only contract with values forbidden.
 - [GitHub Control-Plane Live DiscordOS Projection Ratchet 2026-07-14](../ops/GITHUB-CONTROL-PLANE-LIVE-DISCORDOS-PROJECTION-RATCHET-2026-07-14.md) - one approved single-writer projection, `sent_verified`, exact live readback; completes the deterministic `8 / 8` marker without granting cleanup authority.
 - [External Model Sidecar Provider Integration - DeepSeek/LiteLLM Bridge Program Admission 2026-07-13](../ops/ATLAS-EXTERNAL-MODEL-SIDECAR-DEEPSEEK-LITELLM-BRIDGE-PROGRAM-ADMISSION-2026-07-13.md)
 - [External Model Sidecar Provider Integration - DeepSeek/LiteLLM Bridge Phase 1 Capability Audit 2026-07-13](../ops/ATLAS-EXTERNAL-MODEL-SIDECAR-DEEPSEEK-LITELLM-BRIDGE-PHASE-1-CAPABILITY-AUDIT-2026-07-13.md) - accepted feasible-with-constraints audit.

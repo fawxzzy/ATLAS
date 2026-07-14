@@ -271,12 +271,12 @@ POLICY_REGISTRY: dict[str, MarkerPolicy] = {
     "Vercel Platform Observability Governance": MarkerPolicy(
         category="admissible after current lane",
         rationale=(
-            "The lane is now durably admitted because helper-backed 5-of-5 governed Vercel project-inventory coverage exists, "
+            "The lane now has proof-backed governed project inventory, log/runtime-error inventory, and deployment-freshness inventory at 20%, "
             "but current durable restart truth still routes through the held Sandbox family first."
         ),
         expected_evidence=(
-            "one root-owned log and runtime-error inventory contract or equivalent read-only observability packet "
-            "that preserves no env values, no token values, and no Vercel mutation"
+            "one root-owned environment-name-only inventory contract that records names, targets, and presence only "
+            "while forbidding env values, token values, and Vercel mutation"
         ),
     ),
     "Operator Secret Path Hygiene": MarkerPolicy(
@@ -401,16 +401,16 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "Vercel Platform Observability Governance": PacketDescriptor(
-        packet="Vercel Platform Observability Governance log and runtime-error inventory contract freeze",
+        packet="Vercel Platform Observability Governance environment-name-only inventory contract freeze",
         basis_receipt_ref=(
             "docs/ops/"
-            "VERCEL-PLATFORM-OBSERVABILITY-GOVERNANCE-PROJECT-INVENTORY-COVERAGE-"
-            "RECONCILIATION-CONTRACT-FREEZE-2026-07-09.md"
+            "VERCEL-PLATFORM-OBSERVABILITY-GOVERNANCE-IMPLEMENTED-INVENTORY-"
+            "MARKER-RATCHET-2026-07-14.md"
         ),
-        mode="docs-only root-bounded log and runtime-error contract freeze",
+        mode="docs-only root-bounded environment-name-only contract freeze",
         scope=(
-            "freeze the next safe read-only Vercel observability boundary after full governed project-inventory coverage, "
-            "covering admitted log and grouped runtime-error inventory fields without widening into env values, token values, analytics, drains, or mutation"
+            "freeze the next safe read-only Vercel observability boundary after log/runtime-error and deployment-freshness inventory implementation, "
+            "covering environment variable names, target scopes, and presence only without reading values, tokens, analytics, drains, or performing mutation"
         ),
     ),
     "AI Work Session Stability & Auto-Sync Loop": PacketDescriptor(

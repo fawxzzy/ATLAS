@@ -96,10 +96,12 @@ The owner-lane orchestration marker uses a native-first fixed denominator of ten
 ### Platform governance
 
 - GitHub Control-Plane Integration: `100%`
-- Vercel Platform Observability Governance: `0%`
+- Vercel Platform Observability Governance: `20%`
 - External Model Sidecar Provider Integration - DeepSeek/LiteLLM Bridge: `33.3%` (`2 / 6`)
 
 GitHub Control-Plane Integration is now `100%` on an accepted `8 / 8` denominator. Inventory, parity, Actions, open-work hygiene, release/security projection, cleanup governance, `_stack` event correlation, and DiscordOS projection are complete. The final unit is backed by one explicitly authorized single-writer application with `status=sent_verified`, exact Discord readback, no mentions, and no board or storage write. The daily read-only GitHub watch remains active because implementation completeness is not permanent cloud health. Cleanup classification grants no deletion authority: all 62 local worktrees and 80 merged remote-branch candidates remain held behind explicit mutation authority and correlated removal receipts. No execution-selector marker moved.
+
+Vercel Platform Observability Governance is now `20%` on an explicit `2 / 10` implementation denominator. Unit 1 is the landed, sensitive-field-rejecting log and runtime-error inventory helper with 20 focused and regression tests. Unit 2 is the landed deployment-freshness inventory helper with 9 focused tests and prior 5-of-5 root-safe smoke evidence. Both are read-only, preserve project identity, write only disposable reports under `tmp/**`, and grant no deployment, environment-value, token, project-setting, or owner-repository mutation authority. The project-inventory foundation admitted the lane at `0%` and is not counted again. The exact next packet is `Vercel Platform Observability Governance environment-name-only inventory contract freeze`; it may cover names, target scopes, and presence only, never values.
 
 The External Model Sidecar Provider Integration - DeepSeek/LiteLLM Bridge has completed its Phase 1 audit and Phase 2 contract at `2 / 6`: the user-scoped same-identity runtime is frozen, native OpenAI remains the default and fallback with no global redirect, and the exact next packet is `External Model Sidecar Provider Integration Phase 3 dedicated runtime and one-time credential setup`.
 
