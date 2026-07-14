@@ -333,7 +333,7 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual("protected/Fitness hold", records["Fitness QA/LLEL Workflow"]["category"])
         self.assertEqual("secret/.env hold", records["Operator Secret Path Hygiene"]["category"])
         self.assertEqual("admissible after current lane", records["Vercel Hobby Cost Governance"]["category"])
-        self.assertEqual("admissible after current lane", records["Vercel Platform Observability Governance"]["category"])
+        self.assertEqual("insufficient evidence / needs selector only", records["Vercel Platform Observability Governance"]["category"])
         self.assertEqual("admissible after current lane", records["Cortex Dual-Mode Replacement Readiness"]["category"])
         self.assertEqual("admissible after current lane", records["Cortex Simulation Substrate Readiness"]["category"])
         self.assertEqual("admissible after current lane", records["Owner-Lane Agent Service Bus & DiscordOS Ops Readiness"]["category"])
@@ -342,7 +342,7 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual("already closed / locked", records["_stack Readiness"]["category"])
         self.assertEqual("already closed / locked", records["GitHub Control-Plane Integration"]["category"])
 
-    def test_build_campaign_routes_vercel_observability_after_current_hold(self) -> None:
+    def test_build_campaign_holds_vercel_observability_without_safe_read_transport(self) -> None:
         root = self._temp_root()
         marker_doc = """# Lanes And Markers
 
@@ -383,21 +383,9 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
 
         payload = build_campaign(root=root)
 
-        self.assertEqual("hold_current_lane", payload["operator_action"])
-        self.assertEqual("Vercel Platform Observability Governance", payload["next_after_current_marker"])
-        self.assertEqual(
-            "Vercel Platform Observability Governance analytics and drain live read-only capability audit",
-            payload["next_after_current_packet"],
-        )
-        self.assertEqual(
-            "docs/ops/VERCEL-PLATFORM-OBSERVABILITY-GOVERNANCE-ANALYTICS-AND-DRAIN-VISIBILITY-CONTRACT-AND-IMPLEMENTATION-2026-07-14.md",
-            payload["next_after_current_packet_basis_ref"],
-        )
-        self.assertEqual(
-            "read-only connected-Vercel capability audit",
-            payload["next_after_current_packet_mode"],
-        )
-        self.assertIn("analytics", payload["next_after_current_packet_scope"])
+        self.assertEqual("no_immediate_root_packet", payload["operator_action"])
+        self.assertIsNone(payload["next_after_current_marker"])
+        self.assertIsNone(payload["next_after_current_packet"])
 
     def test_build_campaign_skips_manifest_held_follow_on_marker(self) -> None:
         root = self._temp_root()
@@ -421,7 +409,7 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
 
         payload = build_campaign(root=root)
 
-        self.assertEqual("Vercel Platform Observability Governance", payload["next_after_current_marker"])
+        self.assertEqual("Durable Context Externalization", payload["next_after_current_marker"])
         self.assertNotEqual("AI Repetition-to-Automation Pipeline", payload["next_after_current_marker"])
 
     def test_build_campaign_holds_active_lane_when_its_manifest_has_no_immediate_packet(self) -> None:
