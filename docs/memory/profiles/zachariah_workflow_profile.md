@@ -95,6 +95,40 @@ When working on Playbook or repository development and speed matters, default to
   serialized canonical root window requires stable workspace registration,
   then explicitly resume it from the recorded checkpoint.
 
+## Autonomous execution continuity
+
+- Do not end foreground coordination merely because background tasks are
+  running. Continue monitoring receipts, dispatching non-conflicting admitted
+  work, reconciling boards, and advancing the next executable lane until the
+  active batch is terminal or only genuine external gates remain.
+- A heartbeat or scheduled continuation is a safety net for interruption and
+  wake-up. It does not replace active foreground orchestration.
+- When one lane blocks, record the blocker durably, send a concise non-blocking
+  operator update through `FAWXZZY MESSAGES` when useful, and advance another
+  admitted non-conflicting lane. Do not repeatedly narrate the same blocker.
+- Do not ask Zac to repeat established preferences that are already present in
+  this profile, Atlas contracts, accepted receipts, or current project state.
+  Re-read those sources before asking for clarification.
+- Every new local Codex task uses full local access, network access, live web
+  search, and no approval prompts by default. A read-only objective limits job
+  authority; it must not downgrade host permissions. Pushes, production
+  deployments, Discord writes, and live-data mutations remain separately
+  governed actions.
+- Use one uniform task lifecycle: admit bounded work, correlate it to its card,
+  update the card body and work journal as evidence changes, verify, return a
+  structured post-work receipt, reconcile the board, and archive the bounded
+  task only after its durable result is accepted.
+- Never archive the standing `ATLAS MAIN`, `Mazer`, `Fitness`, or
+  `FAWXZZY MESSAGES` conversations. Keep the task roster clean by archiving
+  completed bounded implementation, research, and recovery tasks.
+- `FAWXZZY MESSAGES` is the non-blocking operator update surface, not the source
+  of truth. Git, validated receipts, Atlas registries, and external readback
+  remain authoritative.
+- Preserve usage without reducing throughput by routing deterministic scans and
+  extraction to Luna, normal scoped implementation to Terra, and hard
+  architecture or investigation to Sol. Use Fast only when the selected model
+  supports it and the expected latency benefit justifies the usage cost.
+
 ## Atlas platform preferences
 
 - Atlas is local-first, with GitHub treated as a first-class remote backup,

@@ -105,6 +105,13 @@ Execution Cadence
   - root execution cluster -> blocker recheck if needed, execution, proof or reconciliation, ratchet
   - root read-model or doctrine batch -> only when there is no executable owner-side work ready
 
+Operator Continuity
+- Do not stop foreground coordination solely because background tasks are active. Continue monitoring terminal receipts, archiving completed bounded tasks, and dispatching the next non-conflicting admitted lane.
+- Treat heartbeat automations as interruption recovery only, not as a substitute for active execution.
+- When a lane blocks, persist the blocker and advance another ready lane. Use `FAWXZZY MESSAGES` for concise non-blocking operator updates when useful.
+- All root-launched local tasks inherit full local access, network access, live web search, and no approval prompts. Read-only scope is job authority, not a permission downgrade.
+- Require every bounded task to close with verification, a structured receipt, board reconciliation when applicable, and post-work review before archival.
+
 Escalation
 - Ask before moving or renaming active repos.
 - Ask before changing secrets handling, Vercel linkage, or retention policy for backups and installers.
