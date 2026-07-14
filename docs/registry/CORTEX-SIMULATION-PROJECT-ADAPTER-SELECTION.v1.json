@@ -1,0 +1,13 @@
+{
+  "contract_version": "atlas.cortex.simulation_project_adapter_selection.v1",
+  "selected_at": "2026-07-14T07:00:00-04:00",
+  "shared_mode": "read_only_receipt_driven_advisory",
+  "adapters": [
+    {"adapter_id": "atlas-workflow-resilience", "project": "atlas", "owner": "stack-root", "priority": 1, "status": "selected_for_first_prototype", "inputs": ["execution_receipts", "validation_receipts", "marker_receipts", "continuity_receipts"], "output": "advisory_recovery_rehearsal"},
+    {"adapter_id": "mazer-play-loop-visual-qa", "project": "mazer", "owner": "mazer", "priority": 2, "status": "selected_held", "inputs": ["committed_game_test_receipts", "visual_proof_receipts", "release_receipts"], "output": "advisory_regression_rehearsal"},
+    {"adapter_id": "fitness-progression-release", "project": "fitness", "owner": "fitness", "priority": 3, "status": "selected_held", "inputs": ["contract_valid_qa_receipts", "progression_receipts", "build_receipts", "deployment_receipts"], "output": "advisory_release_risk_rehearsal"},
+    {"adapter_id": "discordos-board-publication", "project": "discordos", "owner": "discordos", "priority": 4, "status": "selected_held", "inputs": ["board_event_receipts", "publication_receipts", "idempotency_receipts", "readback_receipts"], "output": "advisory_lifecycle_failure_rehearsal"}
+  ],
+  "denied": ["hidden_transcripts", "secrets", "raw_live_user_data", "arbitrary_owner_files", "browser_sessions", "execution", "dispatch", "commit", "publication", "deployment", "discord_write", "board_write", "marker_write", "approval", "final_receipt"],
+  "marker": {"name": "Cortex Simulation Substrate Readiness", "current_percent": 60, "movement": "50_to_60", "next_threshold": 70, "next_packet": "Cortex Simulation Substrate Readiness Atlas workflow-resilience safe scenario simulator prototype contract freeze"}
+}

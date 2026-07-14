@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-07-14T04:02:31-04:00",
-  "updated_at": "2026-07-14T06:45:00-04:00",
+  "updated_at": "2026-07-14T07:00:00-04:00",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -33,10 +33,12 @@
     "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-ATLAS-RECEIPT-REPLAY-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-14.md",
     "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-ATLAS-RECEIPT-REPLAY-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-14.md",
     "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-ATLAS-RECEIPT-REPLAY-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-AND-50-PERCENT-RATCHET-2026-07-14.md",
+    "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-PROJECT-SPECIFIC-SIMULATION-ADAPTER-SELECTION-CONTRACT-FREEZE-AND-60-PERCENT-RATCHET-2026-07-14.md",
     "docs/registry/CORTEX-SIMULATION-SUBSTRATE-RESEARCH-CONTRACT.v1.json",
     "docs/registry/CORTEX-SIMULATION-AGENT-STATE-SCHEMA.v1.json",
     "docs/registry/CORTEX-SIMULATION-READ-ONLY-SCENARIO-HELPER.v1.json",
     "docs/registry/CORTEX-SIMULATION-RECEIPT-REPLAY-CONTRACT.v1.json",
+    "docs/registry/CORTEX-SIMULATION-PROJECT-ADAPTER-SELECTION.v1.json",
     "schemas/atlas.cortex.simulation.agent-state.v1.json",
     "ops/cortex/simulation_substrate_requirements.py",
     "tests/test_cortex_simulation_substrate_requirements.py",
@@ -55,9 +57,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "cortex-simulation-substrate-readiness",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-ATLAS-RECEIPT-REPLAY-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-AND-50-PERCENT-RATCHET-2026-07-14.md",
-    "checkpoint_commit": "main@bcabb0ee",
-    "checkpoint_summary": "The lane is at 50 percent. Deterministic mixed-source replay validates both admitted Atlas receipt contracts, verifies raw-byte digests, preserves chronology and source status, classifies one success and one blocker, and emits authority-false advisory agent state. The next package selects project adapters.",
+    "current_checkpoint_receipt": "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-PROJECT-SPECIFIC-SIMULATION-ADAPTER-SELECTION-CONTRACT-FREEZE-AND-60-PERCENT-RATCHET-2026-07-14.md",
+    "checkpoint_commit": "main@7ff2c620",
+    "checkpoint_summary": "The lane is at 60 percent. Receipt-driven advisory adapters are selected for Atlas, Mazer, Fitness, and DiscordOS; Atlas workflow resilience is prioritized for the first safe root-only prototype while owner adapters remain held.",
     "governing_receipts": [
       "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-FABLE-GENERATIVE-AGENT-RESEARCH-CONTRACT-FREEZE-2026-07-09.md",
       "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-SIMULATION-REQUIREMENTS-MAP-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-10.md",
@@ -70,6 +72,7 @@
       "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-ATLAS-RECEIPT-REPLAY-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-14.md",
       "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-ATLAS-RECEIPT-REPLAY-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-14.md"
       ,"docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-ATLAS-RECEIPT-REPLAY-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-AND-50-PERCENT-RATCHET-2026-07-14.md"
+      ,"docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-PROJECT-SPECIFIC-SIMULATION-ADAPTER-SELECTION-CONTRACT-FREEZE-AND-60-PERCENT-RATCHET-2026-07-14.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -113,9 +116,9 @@
     ],
     "blocked_or_gated_work": [
       {
-        "work": "Claiming the 60 percent project-adapter-selection threshold",
+        "work": "Claiming the 70 percent safe-simulator-prototype threshold",
         "state": "gated",
-        "reason": "project-specific simulation adapters have not been selected or contracted"
+        "reason": "the Atlas workflow-resilience adapter is selected but no safe simulator prototype is implemented"
       },
       {
         "work": "Executing simulations or project adapters",
@@ -125,23 +128,23 @@
     ],
     "next_package_ladder": [
       {
-        "package": "Cortex Simulation Substrate Readiness project-specific simulation adapter selection contract freeze",
-        "mode": "docs-only root-bounded project-adapter selection",
-        "reason": "the 50 percent replay threshold is proved and the 60 percent denominator requires explicit project adapter selection"
+        "package": "Cortex Simulation Substrate Readiness Atlas workflow-resilience safe scenario simulator prototype contract freeze",
+        "mode": "docs-only root-bounded Atlas simulator prototype contract freeze",
+        "reason": "the adapter-selection threshold is complete and Atlas is prioritized for the first root-only prototype"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-ATLAS-RECEIPT-REPLAY-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-AND-50-PERCENT-RATCHET-2026-07-14.md",
-    "freshness_checked_at": "2026-07-14T06:45:00-04:00",
-    "freshness_basis": "Focused tests and the committed mixed-source canary prove digest-bound chronology, both receipt contracts, success and blocker classification, threshold eligibility, schema-valid agent state, and permanent authority denial.",
+    "freshness_checked_receipt": "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-PROJECT-SPECIFIC-SIMULATION-ADAPTER-SELECTION-CONTRACT-FREEZE-AND-60-PERCENT-RATCHET-2026-07-14.md",
+    "freshness_checked_at": "2026-07-14T07:00:00-04:00",
+    "freshness_basis": "Four project adapter contracts, inputs, outputs, owners, hold states, privacy boundaries, and first-prototype priority are explicit without granting owner access or action authority.",
     "marker_posture": [
       {
         "marker": "Cortex Simulation Substrate Readiness",
-        "percent": 50,
+        "percent": 60,
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ],
-    "current_percent": 50,
-    "next_exact_packet": "Cortex Simulation Substrate Readiness project-specific simulation adapter selection contract freeze"
+    "current_percent": 60,
+    "next_exact_packet": "Cortex Simulation Substrate Readiness Atlas workflow-resilience safe scenario simulator prototype contract freeze"
   }
 }
