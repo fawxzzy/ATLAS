@@ -219,13 +219,13 @@ POLICY_REGISTRY: dict[str, MarkerPolicy] = {
     "Owner-Lane Agent Service Bus & DiscordOS Ops Readiness": MarkerPolicy(
         category="admissible after current lane",
         rationale=(
-            "The lane now has direct native project, task, turn, continuation, result-read, title, and archive proof. "
-            "Its next bounded work is to map only missing durable semantics into Atlas contracts and rebaseline the "
-            "lane denominator before selecting any ledger backend."
+            "The lane now has a fixed ten-unit native-first denominator with units 1 and 2 complete. Its next "
+            "bounded work is unit 3: correlate validated Atlas job intent to native task/turn identity and a "
+            "validated execution receipt without introducing a custom runtime or storage backend."
         ),
         expected_evidence=(
-            "one backend-neutral native-to-Atlas gap matrix with a deterministic denominator and explicit mapping "
-            "to existing or newly required Atlas Contracts v2 compatibility surfaces"
+            "one root-owned native task correlation adapter with valid/invalid fixtures and producer/consumer proof "
+            "for JobEnvelope, native task/turn identity, and ExecutionReceipt"
         ),
     ),
     "Fitness QA/LLEL Workflow": MarkerPolicy(
@@ -451,15 +451,15 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "Owner-Lane Agent Service Bus & DiscordOS Ops Readiness": PacketDescriptor(
-        packet="Owner-Lane Agent Service Bus & DiscordOS Ops native-to-Atlas gap matrix and thin-ledger denominator rebaseline contract freeze",
+        packet="Owner-Lane Agent Service Bus & DiscordOS Ops native task correlation first-implementation admission",
         basis_receipt_ref=(
             "docs/ops/"
-            "OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-CODEX-TASK-THREAD-CAPABILITY-SPIKE-2026-07-14.md"
+            "OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-TO-ATLAS-GAP-MATRIX-AND-THIN-LEDGER-DENOMINATOR-REBASELINE-2026-07-14.md"
         ),
-        mode="docs-only backend-neutral gap and denominator contract freeze",
+        mode="bounded root-owned first-implementation admission",
         scope=(
-            "map the proven native lifecycle against missing Atlas job, policy, lease, receipt, board, marker, "
-            "knowledge, retry, and callback semantics and freeze a deterministic denominator without selecting a backend"
+            "admit the smallest backend-neutral adapter and proof slice that correlates a validated JobEnvelope with "
+            "native task and turn IDs and emits a validated ExecutionReceipt"
         ),
     ),
 }

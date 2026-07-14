@@ -83,7 +83,9 @@ Read:
 
 ### Future / owner-lane orchestration
 
-- Owner-Lane Agent Service Bus & DiscordOS Ops Readiness: `10%`
+- Owner-Lane Agent Service Bus & DiscordOS Ops Readiness: `20%`
+
+The owner-lane orchestration marker now uses a native-first fixed denominator of ten binary units. Units 1 and 2 are complete: the authority/request/receipt/single-writer doctrine is frozen, and a live desktop proof exercised local project discovery, task and turn identity, result retrieval, same-task continuation, title mutation, and archival. The lane is therefore `2 / 10 = 20%`. The next unit is executable `JobEnvelope -> native task/turn -> ExecutionReceipt` correlation. SQLite remains only a possible future storage backend, not an approved execution queue or selected ledger.
 
 ### Future / Cortex
 

@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-07-10T12:00:00-04:00",
-  "updated_at": "2026-07-14T00:47:00-04:00",
+  "updated_at": "2026-07-14T00:52:00-04:00",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -24,6 +24,7 @@
     "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-FULL-PERMISSION-RUNTIME-AND-REQUEST-RECEIPT-PROTOCOL-CONTRACT-FREEZE-2026-07-10.md",
     "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-FIRST-TRANSPORT-RECONCILIATION-2026-07-14.md",
     "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-CODEX-TASK-THREAD-CAPABILITY-SPIKE-2026-07-14.md",
+    "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-TO-ATLAS-GAP-MATRIX-AND-THIN-LEDGER-DENOMINATOR-REBASELINE-2026-07-14.md",
     "docs/architecture/ATLAS-CHATGPT-CODEX-WORKFLOW.md",
     "ops/atlas/marker_knockout_selector.py",
     "ops/codex/config.full-permission.toml",
@@ -35,14 +36,15 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "owner-lane-agent-service-bus-and-discordos-ops-readiness",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-CODEX-TASK-THREAD-CAPABILITY-SPIKE-2026-07-14.md",
-    "checkpoint_commit": "main@825ca881",
-    "checkpoint_summary": "The native desktop task/thread spike proves local project discovery, task and turn identity, workspace binding, result retrieval, same-task continuation with prior context, title mutation, and archival. It also identifies eventual-consistency, runtime-policy receipt, callback/event, lease, and durable correlation gaps. The lane remains at 10 percent until its native-first denominator is rebaselined.",
+    "current_checkpoint_receipt": "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-TO-ATLAS-GAP-MATRIX-AND-THIN-LEDGER-DENOMINATOR-REBASELINE-2026-07-14.md",
+    "checkpoint_commit": "main@e2ffda9d",
+    "checkpoint_summary": "The native-to-Atlas gap matrix freezes a ten-unit backend-neutral denominator. The authority/protocol baseline and native task/thread lifecycle proof complete units 1 and 2, moving the lane to 20 percent. Unit 3 is the next bounded implementation: JobEnvelope to native task/turn to ExecutionReceipt correlation.",
     "governing_receipts": [
       "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-MARKER-ADMISSION-2026-07-10.md",
       "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-FULL-PERMISSION-RUNTIME-AND-REQUEST-RECEIPT-PROTOCOL-CONTRACT-FREEZE-2026-07-10.md",
       "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-FIRST-TRANSPORT-RECONCILIATION-2026-07-14.md",
-      "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-CODEX-TASK-THREAD-CAPABILITY-SPIKE-2026-07-14.md"
+      "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-CODEX-TASK-THREAD-CAPABILITY-SPIKE-2026-07-14.md",
+      "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-TO-ATLAS-GAP-MATRIX-AND-THIN-LEDGER-DENOMINATOR-REBASELINE-2026-07-14.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -64,6 +66,10 @@
       {
         "path": "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-CODEX-TASK-THREAD-CAPABILITY-SPIKE-2026-07-14.md",
         "role": "tool-backed native task/thread lifecycle proof and missing-semantics inventory"
+      },
+      {
+        "path": "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-TO-ATLAS-GAP-MATRIX-AND-THIN-LEDGER-DENOMINATOR-REBASELINE-2026-07-14.md",
+        "role": "current 20 percent checkpoint, native-to-Atlas gap matrix, and deterministic ten-unit denominator"
       },
       {
         "path": "docs/architecture/ATLAS-CHATGPT-CODEX-WORKFLOW.md",
@@ -124,19 +130,19 @@
     ],
     "next_package_ladder": [
       {
-        "package": "Owner-Lane Agent Service Bus & DiscordOS Ops native-to-Atlas gap matrix and thin-ledger denominator rebaseline contract freeze",
-        "mode": "docs-only backend-neutral gap and denominator contract freeze",
-        "reason": "the native task/thread lifecycle is now directly proven, so the next honest move is to map only the missing durable semantics into Atlas Contracts v2 and define a deterministic native-first denominator before any ledger backend selection"
+        "package": "Owner-Lane Agent Service Bus & DiscordOS Ops native task correlation first-implementation admission",
+        "mode": "bounded root-owned first-implementation admission",
+        "reason": "the native-first denominator is frozen at two of ten complete units, so the next honest slice is unit 3: validated JobEnvelope to native task/turn to ExecutionReceipt correlation without a custom runtime or backend selection"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-CODEX-TASK-THREAD-CAPABILITY-SPIKE-2026-07-14.md",
-    "freshness_checked_at": "2026-07-14T00:47:00-04:00",
-    "freshness_basis": "The owner-lane orchestration family is manifest-backed at 10 percent with direct native task/thread lifecycle proof. Native execution is confirmed; the remaining work is a backend-neutral mapping of missing durable semantics and a deterministic native-first denominator, not a custom execution queue.",
+    "freshness_checked_receipt": "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-TO-ATLAS-GAP-MATRIX-AND-THIN-LEDGER-DENOMINATOR-REBASELINE-2026-07-14.md",
+    "freshness_checked_at": "2026-07-14T00:52:00-04:00",
+    "freshness_basis": "The owner-lane orchestration family is manifest-backed at 20 percent on a fixed ten-unit denominator. Units 1 and 2 are complete; unit 3 is a backend-neutral native task correlation adapter using existing Atlas Contracts v2 JobEnvelope and ExecutionReceipt surfaces.",
     "marker_posture": [
       {
         "marker": "Owner-Lane Agent Service Bus & DiscordOS Ops Readiness",
-        "percent": 10,
+        "percent": 20,
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ]
