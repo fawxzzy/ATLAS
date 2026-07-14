@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-07-09T19:47:39.8439335-04:00",
-  "updated_at": "2026-07-13T20:10:00-04:00",
+  "updated_at": "2026-07-13T20:20:00-04:00",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -47,6 +47,9 @@
     "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-EXECUTION-PLANNER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-13.md",
     "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-EXECUTION-PLANNER-MARKER-SURFACE-RATCHET-DECISION-2026-07-13.md",
     "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-REPLAY-EVALUATION-HARNESS-CONTRACT-FREEZE-2026-07-13.md",
+    "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-REPLAY-EVALUATION-HARNESS-FIRST-IMPLEMENTATION-ADMISSION-2026-07-13.md",
+    "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-REPLAY-EVALUATION-HARNESS-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-13.md",
+    "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-REPLAY-EVALUATION-HARNESS-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-13.md",
     "docs/registry/CORTEX-EXECUTION-PLANNER-CONTRACT.v1.json",
     "docs/registry/CORTEX-REPLAY-EVALUATION-HARNESS-CONTRACT.v1.json",
     "ops/cortex/execution_planner.py",
@@ -62,9 +65,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "cortex-dual-mode-replacement-readiness",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-REPLAY-EVALUATION-HARNESS-CONTRACT-FREEZE-2026-07-13.md",
-    "checkpoint_commit": "main@4dc69040",
-    "checkpoint_summary": "The first deterministic offline replay/evaluation contract is frozen for explicit Chat/Codex adapter artifacts and Cortex synthesis/planner artifacts. The harness is not implemented, the marker remains 60 percent, and the exact next packet is first-implementation admission.",
+    "current_checkpoint_receipt": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-REPLAY-EVALUATION-HARNESS-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-13.md",
+    "checkpoint_commit": "main@ff63d215",
+    "checkpoint_summary": "Replay/evaluation contract, exact two-file admission, worker handoff, and implementation-readiness are complete. One serialized Terra/high canonical-workspace worker is ready; code is not yet landed and the marker remains 60 percent.",
     "governing_receipts": [
       "docs/ops/CORTEX-DUAL-MODE-AND-SIMULATION-SUBSTRATE-MARKER-ADMISSION-2026-07-09.md",
       "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-OPERATING-MODE-CONTRACT-FREEZE-2026-07-09.md",
@@ -92,7 +95,10 @@
       "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-EXECUTION-PLANNER-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-13.md",
       "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-EXECUTION-PLANNER-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-13.md",
       "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-EXECUTION-PLANNER-MARKER-SURFACE-RATCHET-DECISION-2026-07-13.md",
-      "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-REPLAY-EVALUATION-HARNESS-CONTRACT-FREEZE-2026-07-13.md"
+      "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-REPLAY-EVALUATION-HARNESS-CONTRACT-FREEZE-2026-07-13.md",
+      "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-REPLAY-EVALUATION-HARNESS-FIRST-IMPLEMENTATION-ADMISSION-2026-07-13.md",
+      "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-REPLAY-EVALUATION-HARNESS-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-13.md",
+      "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-REPLAY-EVALUATION-HARNESS-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-13.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -162,6 +168,18 @@
       {
         "path": "docs/registry/CORTEX-REPLAY-EVALUATION-HARNESS-CONTRACT.v1.json",
         "role": "machine-readable replay/evaluation harness doctrine registry; not runtime adoption"
+      },
+      {
+        "path": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-REPLAY-EVALUATION-HARNESS-FIRST-IMPLEMENTATION-ADMISSION-2026-07-13.md",
+        "role": "replay/evaluation harness exact two-file first-implementation admission truth"
+      },
+      {
+        "path": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-REPLAY-EVALUATION-HARNESS-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-13.md",
+        "role": "replay/evaluation harness worker runtime, verification, and diff-addressable proof truth"
+      },
+      {
+        "path": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-REPLAY-EVALUATION-HARNESS-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-13.md",
+        "role": "current replay/evaluation harness readiness closeout and exact serialized worker route"
       },
       {
         "path": "docs/registry/CORTEX-EXECUTION-PLANNER-CONTRACT.v1.json",
@@ -234,15 +252,15 @@
     ],
     "next_package_ladder": [
       {
-        "package": "Cortex Dual-Mode Replacement Readiness replay/evaluation harness first-implementation admission",
-        "mode": "docs-only first-implementation admission",
-        "reason": "the replay/evaluation harness contract is frozen; implementation still requires exact file admission and proof obligations"
+        "package": "Cortex Dual-Mode Replacement Readiness replay/evaluation harness first-implementation worker implementation",
+        "mode": "canonical-workspace implementation worker",
+        "reason": "contract, admission, prompt pack, and readiness are complete; one exact serialized worker is ready"
       }
     ],
-    "freshness_state": "replay-evaluation-harness-contract-frozen",
-    "freshness_checked_receipt": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-REPLAY-EVALUATION-HARNESS-CONTRACT-FREEZE-2026-07-13.md",
-    "freshness_checked_at": "2026-07-13T20:10:00-04:00",
-    "freshness_basis": "The 60 percent execution-planner threshold remains satisfied. A deterministic offline replay/evaluation contract now freezes explicit artifact schemas, comparison dimensions, result classes, failure-closed behavior, authority denials, and an exact future two-file implementation boundary. No harness code exists yet and the marker remains 60 percent.",
+    "freshness_state": "replay-evaluation-harness-implementation-ready",
+    "freshness_checked_receipt": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-REPLAY-EVALUATION-HARNESS-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-13.md",
+    "freshness_checked_at": "2026-07-13T20:20:00-04:00",
+    "freshness_basis": "The deterministic offline replay/evaluation contract, exact two-file admission, prompt-pack proof contract, and implementation-readiness closeout are complete. Root and _stack are at parity, both future files are absent, one serialized Terra/high canonical-workspace worker is ready, and the marker remains 60 percent until implementation, reconciliation, and a separate ratchet.",
     "marker_posture": [
       {
         "marker": "Cortex Dual-Mode Replacement Readiness",
