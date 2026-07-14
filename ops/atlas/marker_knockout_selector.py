@@ -219,7 +219,7 @@ POLICY_REGISTRY: dict[str, MarkerPolicy] = {
     "Owner-Lane Agent Service Bus & DiscordOS Ops Readiness": MarkerPolicy(
         category="admissible after current lane",
         rationale=(
-            "Units 1 through 7 are complete and root-side CardRecord/BoardEvent correlation is implemented, but unit 8 "
+            "Units 1 through 7 and unit 9 are complete, bringing the fixed denominator to eight of ten. Unit 8 "
             "is blocked because current DiscordOS live readback does not understand the multi-message card journal and "
             "the Supabase readback path lacks its service-role environment key."
         ),
