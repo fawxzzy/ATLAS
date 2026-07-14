@@ -995,18 +995,18 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual("hold_current_lane", payload["operator_action"])
         self.assertEqual("Owner-Lane Agent Service Bus & DiscordOS Ops Readiness", payload["next_after_current_marker"])
         self.assertEqual(
-            "DiscordOS current multi-message board readback compatibility and service-role env blocker conversion",
+            "Owner-Lane Agent Service Bus & DiscordOS Ops Atlas/Mazer/Fitness end-to-end canary admission",
             payload["next_after_current_packet"],
         )
         self.assertEqual(
-            "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-CARD-BOARD-CORRELATION-PARTIAL-IMPLEMENTATION-AND-LIVE-READBACK-BLOCKER-2026-07-14.md",
+            "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-CURRENT-JOURNAL-LIVE-READBACK-COMPATIBILITY-AND-90-PERCENT-RECONCILIATION-2026-07-14.md",
             payload["next_after_current_packet_basis_ref"],
         )
         self.assertEqual(
-            "owner-side DiscordOS readback blocker conversion",
+            "bounded cross-surface no-production canary admission",
             payload["next_after_current_packet_mode"],
         )
-        self.assertIn("multi-message card journals", payload["next_after_current_packet_scope"])
+        self.assertIn("job, native task, execution receipt, card", payload["next_after_current_packet_scope"])
 
 
 if __name__ == "__main__":

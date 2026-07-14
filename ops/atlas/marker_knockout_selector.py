@@ -218,13 +218,12 @@ POLICY_REGISTRY: dict[str, MarkerPolicy] = {
     "Owner-Lane Agent Service Bus & DiscordOS Ops Readiness": MarkerPolicy(
         category="admissible after current lane",
         rationale=(
-            "Units 1 through 7 and unit 9 are complete, bringing the fixed denominator to eight of ten. Unit 8 "
-            "is blocked because current DiscordOS live readback does not understand the multi-message card journal and "
-            "the Supabase readback path lacks its service-role environment key."
+            "Units 1 through 9 are complete, bringing the fixed denominator to nine of ten. DiscordOS current-journal "
+            "readback is merged and live-proved; only the Atlas/Mazer/Fitness end-to-end canary remains."
         ),
         expected_evidence=(
-            "one DiscordOS-owned current-format readback command with exact card/thread/message and idempotency "
-            "correlation, observed board state/version, live receipt, and no second writer"
+            "one no-production Atlas/Mazer/Fitness canary with governed admission, native task execution, complete "
+            "job/task/receipt/card correlation, DiscordOS-owned board readback, and no second writer"
         ),
     ),
     "Fitness QA/LLEL Workflow": MarkerPolicy(
@@ -451,15 +450,15 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "Owner-Lane Agent Service Bus & DiscordOS Ops Readiness": PacketDescriptor(
-        packet="DiscordOS current multi-message board readback compatibility and service-role env blocker conversion",
+        packet="Owner-Lane Agent Service Bus & DiscordOS Ops Atlas/Mazer/Fitness end-to-end canary admission",
         basis_receipt_ref=(
             "docs/ops/"
-            "OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-CARD-BOARD-CORRELATION-PARTIAL-IMPLEMENTATION-AND-LIVE-READBACK-BLOCKER-2026-07-14.md"
+            "OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-CURRENT-JOURNAL-LIVE-READBACK-COMPATIBILITY-AND-90-PERCENT-RECONCILIATION-2026-07-14.md"
         ),
-        mode="owner-side DiscordOS readback blocker conversion",
+        mode="bounded cross-surface no-production canary admission",
         scope=(
-            "update one canonical DiscordOS readback path for current multi-message card journals, correlate exact "
-            "card/thread/message and idempotency truth, and restore retained service-role readback env without adding a writer"
+            "admit one deterministic Atlas/Mazer/Fitness canary that binds job, native task, execution receipt, card, "
+            "and DiscordOS readback identities without production deployment, owner-feature mutation, or a second writer"
         ),
     ),
 }

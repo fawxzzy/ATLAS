@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-07-10T12:00:00-04:00",
-  "updated_at": "2026-07-14T01:45:00-04:00",
+  "updated_at": "2026-07-14T09:38:52-04:00",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -31,6 +31,7 @@
     "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-DURABLE-NATIVE-TASK-LIFECYCLE-IMPLEMENTATION-2026-07-14.md",
     "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-CARD-BOARD-CORRELATION-PARTIAL-IMPLEMENTATION-AND-LIVE-READBACK-BLOCKER-2026-07-14.md",
     "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-MARKER-KNOWLEDGE-CLOSEOUT-IMPLEMENTATION-2026-07-14.md",
+    "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-CURRENT-JOURNAL-LIVE-READBACK-COMPATIBILITY-AND-90-PERCENT-RECONCILIATION-2026-07-14.md",
     "docs/architecture/ATLAS-CHATGPT-CODEX-WORKFLOW.md",
     "ops/atlas/marker_knockout_selector.py",
     "ops/codex/config.full-permission.toml",
@@ -42,9 +43,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "owner-lane-agent-service-bus-and-discordos-ops-readiness",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-MARKER-KNOWLEDGE-CLOSEOUT-IMPLEMENTATION-2026-07-14.md",
-    "checkpoint_commit": "main@a64cd7a1",
-    "checkpoint_summary": "Receipt-bound MarkerEvidence and KnowledgeCandidate closeout now validates percentage reconstruction, freshness, transition truth, deterministic knowledge identity, and classified provenance. Eight focused tests and a live dual-artifact canary complete unit 9. Units 1 through 7 and 9 are complete, moving the fixed denominator to eight of ten or 80 percent while unit 8 remains blocked.",
+    "current_checkpoint_receipt": "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-CURRENT-JOURNAL-LIVE-READBACK-COMPATIBILITY-AND-90-PERCENT-RECONCILIATION-2026-07-14.md",
+    "checkpoint_commit": "DiscordOS main@d3048663",
+    "checkpoint_summary": "DiscordOS current-journal compatibility is merged and independently reviewed. Full owner verification plus live read-only receipt dbr_b89f4a31767871c89ba80877886d47a2 prove 58 of 58 active Mazer cards with exact event and idempotency correlation and no external mutation. Units 1 through 9 are complete, moving the fixed denominator to nine of ten or 90 percent.",
     "governing_receipts": [
       "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-MARKER-ADMISSION-2026-07-10.md",
       "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-FULL-PERMISSION-RUNTIME-AND-REQUEST-RECEIPT-PROTOCOL-CONTRACT-FREEZE-2026-07-10.md",
@@ -56,7 +57,8 @@
       "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-WORKER-LEASE-BINDING-IMPLEMENTATION-2026-07-14.md",
       "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-DURABLE-NATIVE-TASK-LIFECYCLE-IMPLEMENTATION-2026-07-14.md",
       "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-CARD-BOARD-CORRELATION-PARTIAL-IMPLEMENTATION-AND-LIVE-READBACK-BLOCKER-2026-07-14.md",
-      "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-MARKER-KNOWLEDGE-CLOSEOUT-IMPLEMENTATION-2026-07-14.md"
+      "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-MARKER-KNOWLEDGE-CLOSEOUT-IMPLEMENTATION-2026-07-14.md",
+      "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-CURRENT-JOURNAL-LIVE-READBACK-COMPATIBILITY-AND-90-PERCENT-RECONCILIATION-2026-07-14.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -158,6 +160,10 @@
       {
         "path": "docs/memory/profiles/zachariah_workflow_profile.md",
         "role": "canonical workflow profile that governs root doctrine and future Cortex continuity posture"
+      },
+      {
+        "path": "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-CURRENT-JOURNAL-LIVE-READBACK-COMPATIBILITY-AND-90-PERCENT-RECONCILIATION-2026-07-14.md",
+        "role": "current 90 percent checkpoint, DiscordOS merged owner proof, and live 58-card current-journal readback authority"
       }
     ],
     "verification_adoption_surfaces": [
@@ -198,24 +204,19 @@
     ],
     "next_package_ladder": [
       {
-        "package": "DiscordOS current multi-message board readback compatibility and service-role env blocker conversion",
-        "mode": "owner-side DiscordOS readback blocker conversion",
-        "reason": "root correlation is implemented, but unit 8 cannot complete until one DiscordOS-owned readback understands the current journal format and emits correlated live verification"
-      },
-      {
-        "package": "Owner-Lane Agent Service Bus & DiscordOS Ops MarkerEvidence and KnowledgeCandidate closeout first-implementation admission",
-        "mode": "bounded root-owned closeout evidence admission",
-        "reason": "unit 9 is independent root-owned work and remains executable while the unit-8 owner-side blocker is open"
+        "package": "Owner-Lane Agent Service Bus & DiscordOS Ops Atlas/Mazer/Fitness end-to-end canary admission",
+        "mode": "bounded cross-surface no-production canary",
+        "reason": "units 1 through 9 are complete; unit 10 is the only remaining denominator unit"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-MARKER-KNOWLEDGE-CLOSEOUT-IMPLEMENTATION-2026-07-14.md",
-    "freshness_checked_at": "2026-07-14T01:45:00-04:00",
-    "freshness_basis": "The family is manifest-backed at 80 percent. Units 1 through 7 and unit 9 are complete. Unit 8 remains blocked by DiscordOS live-readback compatibility and service-role environment readiness; unit 10 remains the Atlas/Mazer/Fitness end-to-end canary.",
+    "freshness_checked_receipt": "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-CURRENT-JOURNAL-LIVE-READBACK-COMPATIBILITY-AND-90-PERCENT-RECONCILIATION-2026-07-14.md",
+    "freshness_checked_at": "2026-07-14T09:38:52-04:00",
+    "freshness_basis": "The family is manifest-backed at 90 percent. Units 1 through 9 are complete. DiscordOS current-journal readback is merged and live-proved; unit 10 remains the Atlas/Mazer/Fitness end-to-end canary.",
     "marker_posture": [
       {
         "marker": "Owner-Lane Agent Service Bus & DiscordOS Ops Readiness",
-        "percent": 80,
+        "percent": 90,
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ]
