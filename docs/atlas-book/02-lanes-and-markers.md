@@ -83,9 +83,9 @@ Read:
 
 ### Future / owner-lane orchestration
 
-- Owner-Lane Agent Service Bus & DiscordOS Ops Readiness: `40%`
+- Owner-Lane Agent Service Bus & DiscordOS Ops Readiness: `50%`
 
-The owner-lane orchestration marker uses a native-first fixed denominator of ten binary units. Units 1 through 4 are complete: authority/request/receipt/single-writer doctrine, native desktop lifecycle proof, executable `JobEnvelope -> native task/turn -> ExecutionReceipt` correlation, and explicit requested-versus-effective runtime-policy accounting. The live canary emitted validated receipt `atr_61e72af7d678f8466b365adf` for the real native spike while correctly reporting unobserved effective settings as unavailable. The lane is `4 / 10 = 40%`. Unit 5 is ContextPacket and EvidenceBundle binding. SQLite remains only a possible future storage backend, not an approved execution queue or selected ledger.
+The owner-lane orchestration marker uses a native-first fixed denominator of ten binary units. Units 1 through 5 are complete: authority/request/receipt/single-writer doctrine, native desktop lifecycle proof, executable `JobEnvelope -> native task/turn -> ExecutionReceipt` correlation, requested-versus-effective runtime-policy accounting, and validated ContextPacket/EvidenceBundle provenance binding. Live receipt `atr_61e72af7d678f8466b365adf` now carries matching context and evidence IDs plus deterministic digests. The lane is `5 / 10 = 50%`. Unit 6 is WorkerLease resource ownership. SQLite remains only a possible future storage backend, not an approved execution queue or selected ledger.
 
 ### Future / Cortex
 

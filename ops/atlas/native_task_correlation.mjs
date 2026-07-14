@@ -34,12 +34,12 @@ function parseArguments(argv) {
       options.json = true;
       continue;
     }
-    const match = argument.match(/^--(job|task-result|output)=(.+)$/);
+    const match = argument.match(/^--(job|task-result|context|evidence|output)=(.+)$/);
     if (match) {
       options[match[1] === "task-result" ? "taskResult" : match[1]] = match[2];
       continue;
     }
-    if (["--job", "--task-result", "--output"].includes(argument)) {
+    if (["--job", "--task-result", "--context", "--evidence", "--output"].includes(argument)) {
       const value = argv[index + 1];
       if (!value || value.startsWith("--")) {
         throw new NativeTaskCorrelationError(`${argument} requires a value.`);
@@ -50,7 +50,7 @@ function parseArguments(argv) {
     }
     throw new NativeTaskCorrelationError(`Unsupported argument: ${argument}`);
   }
-  for (const key of ["job", "taskResult", "output"]) {
+  for (const key of ["job", "taskResult", "context", "evidence", "output"]) {
     if (!options[key]) {
       throw new NativeTaskCorrelationError(`Missing required argument: ${key}.`);
     }
@@ -146,6 +146,22 @@ function runtimeEffective(taskResult) {
   );
 }
 
+function contentDigest(payload) {
+  return `sha256:${crypto.createHash("sha256").update(JSON.stringify(payload)).digest("hex")}`;
+}
+
+function assertMatchingIdentity(payload, job, label) {
+  if (payload.job_id !== job.job_id) {
+    throw new NativeTaskCorrelationError(`${label} job correlation mismatch: ${job.job_id} != ${payload.job_id}.`);
+  }
+  const componentId = payload.component_id ?? payload.environment?.component_id;
+  if (componentId !== job.component_id) {
+    throw new NativeTaskCorrelationError(
+      `${label} component correlation mismatch: ${job.component_id} != ${componentId}.`,
+    );
+  }
+}
+
 function normalizeVerification(taskResult) {
   const records = taskResult.verification ?? [];
   if (!Array.isArray(records)) {
@@ -167,8 +183,12 @@ function normalizeVerification(taskResult) {
   });
 }
 
-export async function correlateNativeTask({ job, taskResult }) {
+export async function correlateNativeTask({ job, taskResult, contextPacket, evidenceBundle }) {
   await validateContract(job, "atlas.job-envelope.v2", "Job envelope");
+  await validateContract(contextPacket, "atlas.context-packet.v2", "Context packet");
+  await validateContract(evidenceBundle, "atlas.evidence-bundle.v2", "Evidence bundle");
+  assertMatchingIdentity(contextPacket, job, "Context packet");
+  assertMatchingIdentity(evidenceBundle, job, "Evidence bundle");
   if (!taskResult || typeof taskResult !== "object" || Array.isArray(taskResult)) {
     throw new NativeTaskCorrelationError("Native task result must be an object.");
   }
@@ -190,6 +210,10 @@ export async function correlateNativeTask({ job, taskResult }) {
   const receiptId = `atr_${crypto.createHash("sha256").update(receiptSeed).digest("hex").slice(0, 24)}`;
   const finalResponse = requireString(taskResult, "final_response");
 
+  const evidenceRefs = [
+    ...stringArray(taskResult, "evidence_refs"),
+    ...evidenceBundle.evidence.map((item) => item.ref),
+  ].filter((value, index, values) => values.indexOf(value) === index);
   const receipt = {
     contract_version: "atlas.execution-receipt.v2",
     receipt_id: receiptId,
@@ -202,7 +226,7 @@ export async function correlateNativeTask({ job, taskResult }) {
     changed_paths: stringArray(taskResult, "changed_paths"),
     commits: stringArray(taskResult, "commits"),
     verification: normalizeVerification(taskResult),
-    evidence_refs: stringArray(taskResult, "evidence_refs"),
+    evidence_refs: evidenceRefs,
     blockers: stringArray(taskResult, "blockers"),
     follow_up: stringArray(taskResult, "follow_up"),
     correlations: {
@@ -219,6 +243,17 @@ export async function correlateNativeTask({ job, taskResult }) {
       runtime_requested: job.runtime,
       runtime_policy_observed: taskResult.runtime_effective !== undefined,
       task_result_status: terminalStatus,
+      context_binding: {
+        context_id: contextPacket.context_id,
+        digest: contentDigest(contextPacket),
+        source_count: contextPacket.sources.length,
+      },
+      evidence_binding: {
+        bundle_id: evidenceBundle.bundle_id,
+        digest: contentDigest(evidenceBundle),
+        item_count: evidenceBundle.evidence.length,
+        classifications: evidenceBundle.classifications,
+      },
     },
   };
   await validateContract(receipt, "atlas.execution-receipt.v2", "Execution receipt");
@@ -229,10 +264,14 @@ export async function run(argv) {
   const options = parseArguments(argv);
   const jobPath = assertSafeInput(options.job);
   const taskResultPath = assertSafeInput(options.taskResult);
+  const contextPath = assertSafeInput(options.context);
+  const evidencePath = assertSafeInput(options.evidence);
   const outputPath = assertSafeOutput(options.output);
   const job = await readJson(jobPath.resolved, "Job envelope");
   const taskResult = await readJson(taskResultPath.resolved, "Native task result");
-  const receipt = await correlateNativeTask({ job, taskResult });
+  const contextPacket = await readJson(contextPath.resolved, "Context packet");
+  const evidenceBundle = await readJson(evidencePath.resolved, "Evidence bundle");
+  const receipt = await correlateNativeTask({ job, taskResult, contextPacket, evidenceBundle });
   if (!options.dryRun) {
     await fs.mkdir(path.dirname(outputPath.resolved), { recursive: true });
     await fs.writeFile(outputPath.resolved, `${JSON.stringify(receipt, null, 2)}\n`, "utf8");
@@ -245,6 +284,8 @@ export async function run(argv) {
     thread_id: receipt.correlations.thread_id,
     turn_id: receipt.correlations.turn_id,
     runtime_policy_observed: receipt.extensions.runtime_policy_observed,
+    context_id: receipt.extensions.context_binding.context_id,
+    evidence_bundle_id: receipt.extensions.evidence_binding.bundle_id,
   };
 }
 

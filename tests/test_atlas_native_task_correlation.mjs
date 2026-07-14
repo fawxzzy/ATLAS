@@ -70,14 +70,55 @@ function validTaskResult() {
   };
 }
 
+function validContextPacket() {
+  return {
+    contract_version: "atlas.context-packet.v2",
+    context_id: "context-native-correlation-001",
+    job_id: "job-native-correlation-001",
+    component_id: "atlas-root",
+    assembled_at: "2026-07-14T04:51:00Z",
+    sources: [{ kind: "repository", ref: "AGENTS.md", authority: "authoritative", digest: null }],
+    rules: ["Preserve owner-repository authority."],
+    decisions: ["Use native execution and backend-neutral Atlas correlation."],
+    risks: ["Effective runtime policy may be unavailable from native task reads."],
+  };
+}
+
+function validEvidenceBundle() {
+  return {
+    contract_version: "atlas.evidence-bundle.v2",
+    bundle_id: "evidence-native-correlation-001",
+    job_id: "job-native-correlation-001",
+    recorded_at: "2026-07-14T04:52:00Z",
+    environment: { component_id: "atlas-root", commit: "0123456789abcdef", branch: "main" },
+    evidence: [
+      { kind: "test", ref: "native-correlation-tests", status: "passed", digest: null, summary: "Focused tests passed." },
+    ],
+    classifications: ["verified"],
+  };
+}
+
+function correlationInput(overrides = {}) {
+  return {
+    job: validJob(),
+    taskResult: validTaskResult(),
+    contextPacket: validContextPacket(),
+    evidenceBundle: validEvidenceBundle(),
+    ...overrides,
+  };
+}
+
 test("correlates native identities into a schema-valid execution receipt", async () => {
-  const receipt = await correlateNativeTask({ job: validJob(), taskResult: validTaskResult() });
+  const receipt = await correlateNativeTask(correlationInput());
   assert.equal(receipt.job_id, "job-native-correlation-001");
   assert.equal(receipt.correlations.thread_id, validTaskResult().thread_id);
   assert.equal(receipt.correlations.turn_id, validTaskResult().turn_id);
   assert.equal(receipt.runtime_effective.model, "unavailable");
   assert.deepEqual(receipt.extensions.runtime_requested, validJob().runtime);
   assert.equal(receipt.extensions.runtime_policy_observed, false);
+  assert.equal(receipt.extensions.context_binding.context_id, "context-native-correlation-001");
+  assert.equal(receipt.extensions.evidence_binding.bundle_id, "evidence-native-correlation-001");
+  assert.ok(receipt.evidence_refs.includes("native-correlation-tests"));
   const loaded = await loadKnownSchema("atlas.execution-receipt.v2");
   assert.equal(loaded.ok, true);
   assert.deepEqual(validateJsonSchema(receipt, loaded.schema), []);
@@ -92,14 +133,14 @@ test("uses supplied effective runtime without confusing requested policy", async
     permissions: "full-access",
     approval_policy: "never",
   };
-  const receipt = await correlateNativeTask({ job: validJob(), taskResult });
+  const receipt = await correlateNativeTask(correlationInput({ taskResult }));
   assert.equal(receipt.runtime_effective.model, "gpt-5.6-terra");
   assert.equal(receipt.extensions.runtime_policy_observed, true);
 });
 
 test("receipt identity is deterministic", async () => {
-  const first = await correlateNativeTask({ job: validJob(), taskResult: validTaskResult() });
-  const second = await correlateNativeTask({ job: validJob(), taskResult: validTaskResult() });
+  const first = await correlateNativeTask(correlationInput());
+  const second = await correlateNativeTask(correlationInput());
   assert.equal(first.receipt_id, second.receipt_id);
 });
 
@@ -107,7 +148,7 @@ test("rejects mismatched job correlation", async () => {
   const taskResult = validTaskResult();
   taskResult.job_id = "job-other";
   await assert.rejects(
-    correlateNativeTask({ job: validJob(), taskResult }),
+    correlateNativeTask(correlationInput({ taskResult })),
     (error) => error instanceof NativeTaskCorrelationError && error.message.includes("Job correlation mismatch"),
   );
 });
@@ -116,7 +157,7 @@ test("rejects missing native turn identity", async () => {
   const taskResult = validTaskResult();
   delete taskResult.turn_id;
   await assert.rejects(
-    correlateNativeTask({ job: validJob(), taskResult }),
+    correlateNativeTask(correlationInput({ taskResult })),
     (error) => error instanceof NativeTaskCorrelationError && error.message.includes("turn_id"),
   );
 });
@@ -125,7 +166,7 @@ test("rejects invalid job envelopes before correlation", async () => {
   const job = validJob();
   job.authority.production_deploy = "yes";
   await assert.rejects(
-    correlateNativeTask({ job, taskResult: validTaskResult() }),
+    correlateNativeTask(correlationInput({ job })),
     (error) => error instanceof NativeTaskCorrelationError && error.message.includes("Job envelope failed"),
   );
 });
@@ -138,15 +179,25 @@ test("CLI writes only to admitted runtime or tmp paths", async () => {
   const jobPath = path.join(inputDir, "job.json");
   const taskPath = path.join(inputDir, "task.json");
   const outputPath = path.join(inputDir, "receipt.json");
+  const contextPath = path.join(inputDir, "context.json");
+  const evidencePath = path.join(inputDir, "evidence.json");
   await fs.writeFile(jobPath, JSON.stringify(validJob()), "utf8");
   await fs.writeFile(taskPath, JSON.stringify(validTaskResult()), "utf8");
+  await fs.writeFile(contextPath, JSON.stringify(validContextPacket()), "utf8");
+  await fs.writeFile(evidencePath, JSON.stringify(validEvidenceBundle()), "utf8");
   try {
-    const result = await run(["--job", jobPath, "--task-result", taskPath, "--output", outputPath]);
+    const baseArguments = [
+      "--job", jobPath,
+      "--task-result", taskPath,
+      "--context", contextPath,
+      "--evidence", evidencePath,
+    ];
+    const result = await run([...baseArguments, "--output", outputPath]);
     assert.equal(result.status, "written");
     const receipt = JSON.parse(await fs.readFile(outputPath, "utf8"));
     assert.equal(receipt.contract_version, "atlas.execution-receipt.v2");
     await assert.rejects(
-      run(["--job", jobPath, "--task-result", taskPath, "--output", path.join(root, "docs", `${token}.json`)]),
+      run([...baseArguments, "--output", path.join(root, "docs", `${token}.json`)]),
       (error) => error instanceof NativeTaskCorrelationError && error.message.includes("Output must be under"),
     );
   } finally {
@@ -156,7 +207,31 @@ test("CLI writes only to admitted runtime or tmp paths", async () => {
 
 test("rejects sensitive input paths", async () => {
   await assert.rejects(
-    run(["--job", "secrets/job.json", "--task-result", "tmp/task.json", "--output", "tmp/out.json"]),
+    run([
+      "--job", "secrets/job.json",
+      "--task-result", "tmp/task.json",
+      "--context", "tmp/context.json",
+      "--evidence", "tmp/evidence.json",
+      "--output", "tmp/out.json",
+    ]),
     (error) => error instanceof NativeTaskCorrelationError && error.message.includes("Sensitive input path"),
+  );
+});
+
+test("rejects context job mismatches", async () => {
+  const contextPacket = validContextPacket();
+  contextPacket.job_id = "job-other";
+  await assert.rejects(
+    correlateNativeTask(correlationInput({ contextPacket })),
+    (error) => error instanceof NativeTaskCorrelationError && error.message.includes("Context packet job correlation mismatch"),
+  );
+});
+
+test("rejects evidence component mismatches", async () => {
+  const evidenceBundle = validEvidenceBundle();
+  evidenceBundle.environment.component_id = "stack";
+  await assert.rejects(
+    correlateNativeTask(correlationInput({ evidenceBundle })),
+    (error) => error instanceof NativeTaskCorrelationError && error.message.includes("Evidence bundle component correlation mismatch"),
   );
 });
