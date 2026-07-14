@@ -87,8 +87,8 @@ Read:
 
 ### Future / Cortex
 
-- Cortex Dual-Mode Replacement Readiness: `70%`
-- Cortex Dual-Mode Replacement Readiness now has an implementation-backed deterministic advisory replay/evaluation harness: commit `75a714e7` lands `ops/cortex/replay_evaluation_harness.py` plus `tests/test_cortex_replay_evaluation_harness.py`, focused proof passes `32/32`, the canonical runner proves exact two-file scope and spec-to-diff, the separately published reconciliation preserves the authority boundary, and the lane moves from `60%` to `70%` without granting Cortex model-call, execution, final-receipt, marker, owner-repo, queue, scheduler, hidden-transcript, or external-mutation authority.
+- Cortex Dual-Mode Replacement Readiness: `80%`
+- Cortex Dual-Mode Replacement Readiness now has one real ATLAS lane planned through the deterministic advisory bridge: Atlas Contracts v2 Cluster 2 adoption consumes current durable evidence, emits synthesis packet `cortex-chat-style-f34b38998b00b59d` and execution plan `plan-967699c7442b4efd716c`, routes two jobs in two serialized waves with zero blockers or warnings, and moves the lane from `70%` to `80%` without granting Cortex execution, final-receipt, marker, owner-repo, queue, scheduler, or external-mutation authority.
 - Cortex Simulation Substrate Readiness: `0%`
 
 ### Platform governance

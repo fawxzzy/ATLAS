@@ -134,5 +134,23 @@
     "no_queue_or_scheduler_creation",
     "no_owner_repository_mutation_from_atlas_root",
     "no_live_platform_query"
-  ]
+  ],
+  "planning_result": {
+    "synthesis_packet_id": "cortex-chat-style-f34b38998b00b59d",
+    "execution_plan_id": "plan-967699c7442b4efd716c",
+    "plan_status": "ready_for_admission",
+    "safe_to_admit": true,
+    "job_count": 2,
+    "wave_count": 2,
+    "blocker_count": 0,
+    "warning_count": 0,
+    "planning_receipt": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-FIRST-ATLAS-LANE-CORTEX-ASSISTED-BRIDGE-PLANNING-PROOF-2026-07-13.md"
+  },
+  "marker_decision": {
+    "marker": "Cortex Dual-Mode Replacement Readiness",
+    "percent": 80,
+    "movement": "70_to_80",
+    "next_execution": "Atlas Contracts v2 Cluster 2 _stack producer adoption execution",
+    "movement_to_90_requires": "multiple_distinct_atlas_lanes_use_the_cortex_bridge_safely_and_are_separately_ratcheted"
+  }
 }
