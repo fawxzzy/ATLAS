@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://atlas.local/schemas/atlas.cortex.simulation.recommendation-envelope.v1.json",
+  "title": "Atlas Cortex simulation recommendation envelope v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "envelope_id", "simulation_id", "generated_at", "source_refs", "source_digests", "playbook_projection", "cortex_projection", "authority"],
+  "properties": {
+    "contract_version": {"const": "atlas.cortex.simulation.recommendation-envelope.v1"},
+    "envelope_id": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "simulation_id": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "generated_at": {"type": "string", "minLength": 1},
+    "source_refs": {"type": "array", "minItems": 2, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "source_digests": {"type": "array", "minItems": 2, "items": {"type": "object", "required": ["ref", "digest"], "properties": {"ref": {"type": "string"}, "digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}}}},
+    "playbook_projection": {
+      "type": "object",
+      "required": ["doctrine_source", "doctrine_is_not_implementation_proof", "candidates"],
+      "properties": {
+        "doctrine_source": {"type": "string"},
+        "doctrine_is_not_implementation_proof": {"const": true},
+        "candidates": {"type": "array", "minItems": 3}
+      }
+    },
+    "cortex_projection": {
+      "type": "object",
+      "required": ["observed_state", "recommendations"],
+      "properties": {
+        "observed_state": {"enum": ["healthy", "watch", "failed", "blocked"]},
+        "recommendations": {"type": "array", "minItems": 1}
+      }
+    },
+    "authority": {"type": "object", "required": ["advisory_only", "execution_authorized", "dispatch_authorized", "doctrine_promotion_authorized", "owner_repo_mutation_authorized", "platform_mutation_authorized", "discord_write_authorized", "board_write_authorized", "deployment_authorized", "approval_authorized", "final_receipt_authorized", "marker_movement_authorized"]}
+  }
+}
