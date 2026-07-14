@@ -1,0 +1,28 @@
+{
+  "contract_version": "atlas.cortex.simulation.recommendation-evaluation-manifest.v1",
+  "evaluation_id": "first-recommendation-envelope-loop",
+  "generated_at": "2026-07-14T14:00:00Z",
+  "cases": [
+    {
+      "case_id": "match-current",
+      "simulator_manifest_ref": "data/cortex/simulation-replays/first-mixed-replay/workflow-resilience-manifest.json",
+      "simulator_manifest_digest": "sha256:78ca4ace7c5ccd68e7500cc3bc3df8a4a811e9e8d344a9217f3916f8f5351149",
+      "expected_envelope_id": "sha256:bd0e08f9fef8b5a62451dbb1ad76d56714b8cbc77b6d69ed476ae6de2f259c6f",
+      "expected_classification": "match"
+    },
+    {
+      "case_id": "changed-baseline",
+      "simulator_manifest_ref": "data/cortex/simulation-replays/first-mixed-replay/workflow-resilience-manifest.json",
+      "simulator_manifest_digest": "sha256:78ca4ace7c5ccd68e7500cc3bc3df8a4a811e9e8d344a9217f3916f8f5351149",
+      "expected_envelope_id": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "expected_classification": "changed"
+    },
+    {
+      "case_id": "invalid-missing-source",
+      "simulator_manifest_ref": "data/cortex/simulation-replays/first-mixed-replay/missing.json",
+      "simulator_manifest_digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "expected_envelope_id": null,
+      "expected_classification": "invalid"
+    }
+  ]
+}

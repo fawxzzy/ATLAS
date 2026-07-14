@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://atlas.local/schemas/atlas.cortex.simulation.recommendation-evaluation.v1.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "evaluation_run_id", "evaluation_id", "generated_at", "source_ref", "case_results", "classification_counts", "threshold_eligible", "termination", "authority"],
+  "properties": {
+    "contract_version": {"const": "atlas.cortex.simulation.recommendation-evaluation.v1"},
+    "evaluation_run_id": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "evaluation_id": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "source_ref": {"type": "string"},
+    "case_results": {"type": "array", "minItems": 1},
+    "classification_counts": {"type": "object", "required": ["match", "changed", "invalid"]},
+    "threshold_eligible": {"type": "boolean"},
+    "termination": {"type": "object", "required": ["terminated", "reason", "cases_evaluated"]},
+    "authority": {"type": "object"}
+  }
+}
