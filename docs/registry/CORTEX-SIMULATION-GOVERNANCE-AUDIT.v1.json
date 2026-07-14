@@ -1,0 +1,32 @@
+{
+  "contract_version": "atlas.cortex.simulation.governance-audit-registry.v1",
+  "status": "implementation_admitted",
+  "owner": "stack-root",
+  "fixed_gate_count": 10,
+  "required_decision": "RATIFY_100",
+  "independent_review_required": true,
+  "canaries": [
+    "data/cortex/simulation-replays/first-mixed-replay/workflow-resilience-manifest.json",
+    "data/cortex/simulation-evaluations/first-recommendation-loop/manifest.json"
+  ],
+  "authority": {
+    "advisory_only": true,
+    "execution_authorized": false,
+    "dispatch_authorized": false,
+    "doctrine_promotion_authorized": false,
+    "owner_repo_mutation_authorized": false,
+    "platform_mutation_authorized": false,
+    "discord_write_authorized": false,
+    "board_write_authorized": false,
+    "deployment_authorized": false,
+    "approval_authorized": false,
+    "final_receipt_authorized": false,
+    "marker_movement_authorized": false
+  },
+  "marker": {
+    "name": "Cortex Simulation Substrate Readiness",
+    "current_percent": 90,
+    "next_threshold": 100,
+    "next_packet": "Cortex Simulation Substrate Readiness operational governance audit implementation and independent 100 percent ratification"
+  }
+}
