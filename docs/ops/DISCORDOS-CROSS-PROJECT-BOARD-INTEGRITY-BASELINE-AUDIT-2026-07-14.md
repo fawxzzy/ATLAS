@@ -94,6 +94,13 @@ owner card source followed by serialized type-15 forum creation and stable-ID
 readback. The admission matrix is
 `docs/ops/DISCORDOS-PROJECT-BOARD-ADMISSION-RECONNAISSANCE-2026-07-14.md`.
 
+Fitness owner reconciliation proved its one drifted thread is uniquely owned
+by `FF-QA-002`; the missing step is owner-record projection into DiscordOS, not
+identity invention. The first post-merge Mazer four-card rerun made zero
+mutations because three exact threads have legacy journal messages that omit
+card metadata. Both findings are recorded in
+`docs/ops/DISCORDOS-FITNESS-OWNER-IDENTITY-AND-MAZER-RERUN-RECONCILIATION-2026-07-14.md`.
+
 ## Additional integrity risks
 
 - DiscordOS had `57` attached worktrees and `62` local branches at audit time.
