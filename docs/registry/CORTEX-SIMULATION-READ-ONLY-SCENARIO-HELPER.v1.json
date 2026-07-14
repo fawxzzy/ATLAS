@@ -1,0 +1,30 @@
+{
+  "contract_version": "atlas.cortex.simulation_read_only_scenario_helper_registry.v1",
+  "helper": "ops/cortex/read_only_scenario_helper.py",
+  "tests": "tests/test_cortex_read_only_scenario_helper.py",
+  "input_class": "synthetic_fixture_only",
+  "input_glob": "data/cortex/simulation-fixtures/**.json",
+  "output_schema": "atlas.cortex.simulation.agent-state.v1",
+  "output_glob": "tmp/atlas/**.json",
+  "deterministic": true,
+  "model_calls": false,
+  "network_access": false,
+  "command_execution": false,
+  "authority": {
+    "advisory_only": true,
+    "execution_authorized": false,
+    "owner_repo_mutation_authorized": false,
+    "platform_mutation_authorized": false,
+    "discord_write_authorized": false,
+    "board_write_authorized": false,
+    "marker_movement_authorized": false,
+    "final_receipt_authorized": false
+  },
+  "marker": {
+    "name": "Cortex Simulation Substrate Readiness",
+    "current_percent": 40,
+    "movement": "30_to_40",
+    "next_threshold": 50,
+    "next_packet": "Cortex Simulation Substrate Readiness ATLAS receipt workflow and failure-mode replay contract freeze"
+  }
+}
