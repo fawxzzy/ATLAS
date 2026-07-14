@@ -3,6 +3,7 @@
   "report_schema": "atlas.cortex.primary_operator_replay_parity_report.v1",
   "adapter_projection_schema": "atlas.cortex.primary_operator_adapter_projection.v1",
   "mode": "deterministic_offline_replay_parity",
+  "runtime_adoption": "first_implementation_landed_offline_only",
   "required_inputs": [
     "atlas.cortex.execution_plan.v1",
     "operator_authority_envelope",
@@ -54,6 +55,11 @@
     "runtime_dispatch": false,
     "network_access": false,
     "marker_movement": false,
+    "implementation_status": "landed_and_focused_proof_passed",
+    "implementation_paths": [
+      "ops/cortex/primary_operator_replay_parity.py",
+      "tests/test_cortex_primary_operator_replay_parity.py"
+    ],
     "required_proof": [
       "stable_report_identity",
       "internal_no_adapter_baseline",
