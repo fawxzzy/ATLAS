@@ -45,7 +45,7 @@
     "lane_id": "cortex-simulation-substrate-readiness",
     "scope_class": "atlas-root-governance",
     "current_checkpoint_receipt": "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-FIRST-READ-ONLY-SCENARIO-HELPER-IMPLEMENTATION-AND-40-PERCENT-RECONCILIATION-2026-07-14.md",
-    "checkpoint_commit": "main@74de6d7c",
+    "checkpoint_commit": "main@fd9cbf20",
     "checkpoint_summary": "The lane is at 40 percent. The first deterministic read-only scenario helper converts synthetic fixtures into schema-valid advisory memories, retrieval, reflection, and candidate-plan state with no model, network, command, owner, platform, Discord, board, or live-action authority. The next packet freezes ATLAS receipt workflow and failure-mode replay.",
     "governing_receipts": [
       "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-FABLE-GENERATIVE-AGENT-RESEARCH-CONTRACT-FREEZE-2026-07-09.md",

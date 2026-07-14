@@ -5,6 +5,7 @@
 - Mode: `ATLAS-root implementation, proof, reconciliation, and marker ratchet`
 - Scope: `land and prove one deterministic synthetic-fixture read-only scenario helper`
 - Opening checkpoint: `main@74de6d7c52af901aff96b4556c353e133ef7d4d3`
+- Implementation commit: `main@fd9cbf20`
 - Marker movement: `30% -> 40%`
 
 ## Implemented
