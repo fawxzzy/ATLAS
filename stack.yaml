@@ -177,6 +177,11 @@ repo_registry:
     role: application
     status: unmanaged
     root_blocking: false
+  socials-os:
+    path: repos/socials-os
+    role: analytics-data-system
+    status: unmanaged
+    root_blocking: false
   trove:
     path: repos/trove
     role: application

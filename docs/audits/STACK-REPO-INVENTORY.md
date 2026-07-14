@@ -14,30 +14,31 @@ Operational rule:
 
 ## Summary
 
-- Repo count: `12`
+- Repo count: `13`
 - Root-blocking dirty repo count: `1`
-- Visible dirty repo count: `3`
-- Advisory dirty repo count: `2`
+- Visible dirty repo count: `2`
+- Advisory dirty repo count: `1`
 - Release-eligible repo count: `4`
 - Excluded surface count: `16`
 - Stack manifest: `stack.yaml`
 - Stack lock: `stack.lock.yaml`
-- Inventory digest: `sha256:7e9e6599ecc8d3a432daad6b601fbaefb42183e65c3b435f38d893000b7189b7`
+- Inventory digest: `sha256:c8bd1a15b2ebbd61230732f8c1cfbc2d0a96ae1a6aa7e20ca79298ac2ddff02e`
 
 ## Managed Repos
 
 | Repo id | Path | Role | Playbook adoption status | Branch | Pinned commit | Current commit | Dirty | Root-blocking | Dirty blocks root | Trust | Release | Related initiatives |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| _stack | repos/_stack | workflow-operator | verified | main | 2127af207370cacf8752fd4f13c6545ea49bb503 | 2127af207370cacf8752fd4f13c6545ea49bb503 | False | True | False | trusted | False | initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-local-data-gateway<br>initiative:continuity-manifest-post-convergence-lane-split-readiness<br>initiative:continuity-manifest-stack-readiness<br>initiative:continuity-manifest-vision-future-alignment |
+| _stack | repos/_stack | workflow-operator | verified | codex/stack-contracts-v2-cluster-2-producer | 1c07c74dc79cdc331b3723944d30e0a18b53d2d6 | 1c07c74dc79cdc331b3723944d30e0a18b53d2d6 | False | True | False | trusted | False | initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-local-data-gateway<br>initiative:continuity-manifest-post-convergence-lane-split-readiness<br>initiative:continuity-manifest-stack-readiness<br>initiative:continuity-manifest-vision-future-alignment |
 | discordos | repos/DiscordOS | board-and-discord-writer | not-claimed | codex/mazer-viewport-board-status | b173de1549f85cbde040aa6a7ddeba959c7dc524 | b173de1549f85cbde040aa6a7ddeba959c7dc524 | False | True | False | trusted | False | initiative:continuity-manifest-dependency-untangling<br>initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-discord-os-infrastructure-separation |
-| fitness | repos/fawxzzy-fitness | application | - | main | - | e1ab7fbea979456380230c5459fdef6ae4c927e9 | True | False | False | adjacent | False | initiative:continuity-manifest-dependency-untangling<br>initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-discord-os-infrastructure-separation<br>initiative:continuity-manifest-local-data-gateway |
+| fitness | repos/fawxzzy-fitness | application | - | codex/fitness-qa-002-board-binding | - | b98fa17b90e62fbe191bf3c20c88bf674bc76c13 | False | False | False | adjacent | False | initiative:continuity-manifest-dependency-untangling<br>initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-discord-os-infrastructure-separation<br>initiative:continuity-manifest-local-data-gateway |
 | foundation | repos/foundation | shared-contract-foundation | not-claimed | main | 5cedd6234755be3d637abc33572b905dce3b8f7c | 5cedd6234755be3d637abc33572b905dce3b8f7c | False | True | False | trusted | True | - |
 | lifeline | repos/lifeline | local-operator | - | codex/path-discipline-warning-slice-lifeline | 538f623a84b003e70dadd234e6ea3af642446a5f | 538f623a84b003e70dadd234e6ea3af642446a5f | False | True | False | trusted | True | - |
-| mazer | repos/mazer | application | - | codex/player-goal-default-colors | - | a537d2d17429bdf0482989c280373a6ea751f9c0 | True | False | False | adjacent | False | initiative:initiative-mazer-d2-learning-scorer<br>initiative:initiative-mazer-wave2-metric-contract-parity |
+| mazer | repos/mazer | application | - | codex/player-goal-default-colors | - | a537d2d17429bdf0482989c280373a6ea751f9c0 | True | False | False | adjacent | False | initiative:initiative-mazer-d2-learning-scorer |
 | nat1-games | repos/Nat1-Games/nat1-games | application | - | codex/path-discipline-warning-slice-nat1 | 404460d3717fab389407582048a9b9f228f26d39 | 404460d3717fab389407582048a9b9f228f26d39 | False | True | False | trusted | False | - |
-| playbook | repos/playbook | governance-runtime | - | codex/path-discipline-warning-slice-playbook | 10b8f0ac044a7f9c66b4aa8dd08f6abd2d1c5269 | 10b8f0ac044a7f9c66b4aa8dd08f6abd2d1c5269 | False | True | False | trusted | True | initiative:continuity-manifest-atlas-owned-repo-naming-canonicalization |
+| playbook | repos/playbook | governance-runtime | - | codex/repair-scheduled-demo-integration-ci | ee6907bd2d1d45ef87625cbd3382644dbb4fb199 | ee6907bd2d1d45ef87625cbd3382644dbb4fb199 | False | True | False | trusted | True | initiative:continuity-manifest-atlas-owned-repo-naming-canonicalization<br>initiative:initiative-fawxzzy-tech-plan-convergence |
 | playbook-demo | repos/playbook-demo/playbook-demo | demo | - | main | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | False | True | False | trusted | False | - |
-| stack | . | operator-layer | - | main | - | 0ce276b311adc6f069d4d76a23a8ae3276dc9c9b | True | True | True | trusted | False | - |
+| socials-os | repos/socials-os | analytics-data-system | - | main | - | 0c5309f5a448e286ced93e6e65184384f0a96ef4 | False | False | False | adjacent | False | - |
+| stack | . | operator-layer | - | main | - | 91784ad9d9bfb3a9b2724f802c9571cadbc95028 | True | True | True | trusted | False | - |
 | stream | repos/stream | application | - | main | 43769ba86d4c6ebc419ab9e7847c3843460a094f | 43769ba86d4c6ebc419ab9e7847c3843460a094f | False | True | False | trusted | False | - |
 | trove | repos/trove | application | - | codex/path-discipline-warning-slice-trove | 437c7604adee02e0403d77f75162a6c5f232221f | 437c7604adee02e0403d77f75162a6c5f232221f | False | True | False | trusted | True | - |
 
