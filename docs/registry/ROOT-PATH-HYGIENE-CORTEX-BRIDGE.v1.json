@@ -104,5 +104,30 @@
     "no_queue_or_scheduler_creation",
     "no_owner_repository_mutation_from_atlas_root",
     "no_live_platform_query"
-  ]
+  ],
+  "execution_result": {
+    "status": "executed_and_reconciled",
+    "execution_authority": "Atlas/Codex and _stack under existing authority boundaries; not Cortex",
+    "executed_jobs": [
+      "atlas-root-path-hygiene-disposition",
+      "stack-root-path-hygiene-remediation",
+      "atlas-root-path-hygiene-reconciliation"
+    ],
+    "owner_remediation_commit": "32f9205013bbb84e19153261b1aab2c0ada975d4",
+    "final_atlas_reconciliation_commit": "d1555d57",
+    "completion": {
+      "historical_denominator": 25,
+      "accepted": 25,
+      "pending": 0,
+      "complete": true,
+      "final_receipt": "docs/ops/ROOT-PATH-HYGIENE-EXECUTION-RECONCILIATION-2026-07-13.md"
+    }
+  },
+  "marker_decision": {
+    "marker": "Cortex Dual-Mode Replacement Readiness",
+    "percent": 90,
+    "movement": "80_to_90",
+    "basis": "Second distinct bridge lane executed and independently reconciled without widening Cortex authority.",
+    "unchanged_100_percent_requirement": "ChatGPT/Codex are optional external adapters, not required primary operators."
+  }
 }

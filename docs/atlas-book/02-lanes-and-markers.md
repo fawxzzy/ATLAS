@@ -87,8 +87,8 @@ Read:
 
 ### Future / Cortex
 
-- Cortex Dual-Mode Replacement Readiness: `80%`
-- Cortex Dual-Mode Replacement Readiness now has one real ATLAS lane planned through the deterministic advisory bridge: Atlas Contracts v2 Cluster 2 adoption consumes current durable evidence, emits synthesis packet `cortex-chat-style-f34b38998b00b59d` and execution plan `plan-967699c7442b4efd716c`, routes two jobs in two serialized waves with zero blockers or warnings, and moves the lane from `70%` to `80%` without granting Cortex execution, final-receipt, marker, owner-repo, queue, scheduler, or external-mutation authority.
+- Cortex Dual-Mode Replacement Readiness: `90%`
+- Cortex Dual-Mode Replacement Readiness now has two distinct safely planned and executed ATLAS bridge lanes. Atlas Contracts v2 Cluster 2 used `docs/registry/ATLAS-CONTRACTS-V2-CLUSTER-2-CORTEX-BRIDGE.v1.json` and plan `plan-967699c7442b4efd716c`; `_stack` producer commit `59c984c66fedf2ccb00ffb47fb92ea9f8cb990f8` and Atlas consumer commit `c4c2b2acfc97b86e24541cd9e390d4475ba3924c` prove six of eleven v2 contract families with producer/consumer proof. Root Path Hygiene used `docs/registry/ROOT-PATH-HYGIENE-CORTEX-BRIDGE.v1.json` and plan `plan-07dfe809d062b89cafde`; owner commit `32f9205013bbb84e19153261b1aab2c0ada975d4` and final root reconciliation `d1555d57` prove `25/25` accepted, zero pending, and `complete: true`. This moves only this marker from `80%` to `90%`; Cortex remains advisory and has no execution, final-receipt, marker, owner-repo, queue, scheduler, or external-mutation authority. `100%` still requires ChatGPT/Codex to be optional external adapters rather than required primary operators.
 - Cortex Simulation Substrate Readiness: `0%`
 
 ### Platform governance

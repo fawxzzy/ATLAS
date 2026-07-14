@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-07-09T19:47:39.8439335-04:00",
-  "updated_at": "2026-07-13T20:36:00-04:00",
+  "updated_at": "2026-07-13T23:59:00-04:00",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -64,7 +64,11 @@
     "ops/cortex/chat_style_synthesis_packet_generator.py",
     "tests/test_cortex_chat_style_synthesis_packet_generator.py",
     "ops/cortex/chatgpt_codex_role_inventory.py",
-    "tests/test_cortex_chatgpt_codex_role_inventory.py"
+    "tests/test_cortex_chatgpt_codex_role_inventory.py",
+    "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-SECOND-ATLAS-LANE-ROOT-PATH-HYGIENE-PLANNING-PROOF-2026-07-13.md",
+    "docs/ops/ROOT-PATH-HYGIENE-EXECUTION-RECONCILIATION-2026-07-13.md",
+    "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-SECOND-ATLAS-LANE-90-PERCENT-MARKER-DECISION-2026-07-13.md",
+    "docs/registry/ROOT-PATH-HYGIENE-CORTEX-BRIDGE.v1.json"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -72,9 +76,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "cortex-dual-mode-replacement-readiness",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-FIRST-ATLAS-LANE-CORTEX-ASSISTED-BRIDGE-MARKER-SURFACE-RATCHET-DECISION-2026-07-13.md",
-    "checkpoint_commit": "main@22ad4bd0",
-    "checkpoint_summary": "Atlas Contracts v2 Cluster 2 adoption is the first real ATLAS lane planned through the Cortex-assisted bridge. The blocker-free deterministic two-wave plan satisfies the published 80 percent threshold. Next execution is the serialized _stack producer job followed by Atlas consumer proof.",
+    "current_checkpoint_receipt": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-SECOND-ATLAS-LANE-90-PERCENT-MARKER-DECISION-2026-07-13.md",
+    "checkpoint_commit": "main@d1555d57",
+    "checkpoint_summary": "Two distinct ATLAS lanes now safely used the deterministic advisory Cortex bridge. Atlas Contracts v2 Cluster 2 has producer/consumer proof for six of eleven v2 contract families; Root Path Hygiene executed its three planned jobs through Atlas/Codex and _stack, reconciled 25/25 accepted dispositions, and retained the authority boundary. The published 90 percent threshold is satisfied; 100 percent remains blocked on an internal Cortex primary-operator path with optional external adapters, durable acceptance/receipt behavior, and replay-backed parity.",
     "governing_receipts": [
       "docs/ops/CORTEX-DUAL-MODE-AND-SIMULATION-SUBSTRATE-MARKER-ADMISSION-2026-07-09.md",
       "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-OPERATING-MODE-CONTRACT-FREEZE-2026-07-09.md",
@@ -110,6 +114,9 @@
       ,"docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-REPLAY-EVALUATION-HARNESS-MARKER-SURFACE-RATCHET-DECISION-2026-07-13.md"
       ,"docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-FIRST-ATLAS-LANE-CORTEX-ASSISTED-BRIDGE-PLANNING-PROOF-2026-07-13.md"
       ,"docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-FIRST-ATLAS-LANE-CORTEX-ASSISTED-BRIDGE-MARKER-SURFACE-RATCHET-DECISION-2026-07-13.md"
+      ,"docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-SECOND-ATLAS-LANE-ROOT-PATH-HYGIENE-PLANNING-PROOF-2026-07-13.md"
+      ,"docs/ops/ROOT-PATH-HYGIENE-EXECUTION-RECONCILIATION-2026-07-13.md"
+      ,"docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-SECOND-ATLAS-LANE-90-PERCENT-MARKER-DECISION-2026-07-13.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -209,6 +216,22 @@
         "role": "current 80 percent marker-ratchet receipt and first real ATLAS lane bridge threshold source"
       },
       {
+        "path": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-SECOND-ATLAS-LANE-ROOT-PATH-HYGIENE-PLANNING-PROOF-2026-07-13.md",
+        "role": "second distinct ATLAS lane deterministic advisory bridge planning proof"
+      },
+      {
+        "path": "docs/registry/ROOT-PATH-HYGIENE-CORTEX-BRIDGE.v1.json",
+        "role": "durable Root Path Hygiene bridge with reconciled execution result and 90 percent marker decision"
+      },
+      {
+        "path": "docs/ops/ROOT-PATH-HYGIENE-EXECUTION-RECONCILIATION-2026-07-13.md",
+        "role": "final Root Path Hygiene execution reconciliation: 25/25 accepted, zero pending, complete true"
+      },
+      {
+        "path": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-SECOND-ATLAS-LANE-90-PERCENT-MARKER-DECISION-2026-07-13.md",
+        "role": "current 90 percent marker decision and unchanged 100 percent optional-adapter threshold source"
+      },
+      {
         "path": "docs/registry/ATLAS-CONTRACTS-V2-CLUSTER-2-CORTEX-BRIDGE.v1.json",
         "role": "durable advisory bridge candidate for serialized Atlas Contracts v2 Cluster 2 producer and consumer adoption"
       },
@@ -275,10 +298,24 @@
         "role": "manifest-backed continuity doctrine surface"
       }
     ],
+    "source_index": [
+      {
+        "lane": "Atlas Contracts v2 Cluster 2",
+        "bridge": "docs/registry/ATLAS-CONTRACTS-V2-CLUSTER-2-CORTEX-BRIDGE.v1.json",
+        "plan": "plan-967699c7442b4efd716c",
+        "result": "_stack producer and Atlas consumer adoption commits prove six of eleven v2 contract families"
+      },
+      {
+        "lane": "Root Path Hygiene",
+        "bridge": "docs/registry/ROOT-PATH-HYGIENE-CORTEX-BRIDGE.v1.json",
+        "plan": "plan-07dfe809d062b89cafde",
+        "result": "three planned jobs executed through Atlas/Codex and _stack; 25/25 accepted, zero pending, complete true"
+      }
+    ],
     "blocked_or_gated_work": [
       {
-        "item": "moving above the current 80 percent dual-mode threshold",
-        "requirement": "blocked until multiple distinct ATLAS lanes use the Cortex bridge safely, are proof-backed and reconciled, and receive a separate marker ratchet"
+        "item": "moving above the current 90 percent dual-mode threshold",
+        "requirement": "blocked until Cortex is proven as the internal primary operator with ChatGPT/Codex optional external adapters, durable acceptance and receipt behavior, and replay-backed parity"
       },
       {
         "item": "claiming bridge implementation or execution routing from the frozen bridge schema alone",
@@ -291,25 +328,30 @@
     ],
     "next_package_ladder": [
       {
-        "package": "Atlas Contracts v2 Cluster 2 _stack producer adoption execution",
-        "mode": "serialized _stack repo-worktree execution",
-        "reason": "the admitted Cortex plan routes _stack producer adoption before Atlas consumer proof"
+        "package": "Cortex internal primary-operator acceptance and receipt path",
+        "mode": "bounded root-owned implementation and reconciliation",
+        "reason": "prove durable internal acceptance and receipt behavior without granting Cortex unbounded authority"
       },
       {
-        "package": "Atlas Contracts v2 Cluster 2 Atlas consumer adoption proof",
-        "mode": "serialized canonical-workspace execution",
-        "reason": "consumer validation depends on the governed _stack producer artifacts and advances adoption only after correlation proof"
+        "package": "Cortex replay-backed primary-operator parity",
+        "mode": "deterministic replay/evaluation proof",
+        "reason": "prove equivalent governed outcomes while ChatGPT/Codex remain optional external adapters"
+      },
+      {
+        "package": "Cortex optional-adapter endgame ratchet",
+        "mode": "independent marker audit",
+        "reason": "100 percent is available only after the internal primary-operator path and replay-backed parity are durable"
       }
     ],
-    "freshness_state": "first-real-atlas-lane-cortex-assisted-80-percent-ratcheted",
-    "freshness_checked_receipt": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-FIRST-ATLAS-LANE-CORTEX-ASSISTED-BRIDGE-MARKER-SURFACE-RATCHET-DECISION-2026-07-13.md",
-    "freshness_checked_at": "2026-07-13T20:36:00-04:00",
-    "freshness_basis": "Atlas Contracts v2 Cluster 2 adoption is planned through the deterministic Cortex bridge with two serialized jobs, two waves, no blockers, no warnings, and preserved authority boundaries. Cortex Dual-Mode Replacement Readiness is now 80 percent. The admitted _stack producer execution is next.",
+    "freshness_state": "two-distinct-atlas-lanes-cortex-assisted-90-percent-ratcheted",
+    "freshness_checked_receipt": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-SECOND-ATLAS-LANE-90-PERCENT-MARKER-DECISION-2026-07-13.md",
+    "freshness_checked_at": "2026-07-13T23:59:00-04:00",
+    "freshness_basis": "Atlas Contracts v2 Cluster 2 and Root Path Hygiene are distinct safely planned and executed bridge lanes. The Root Path Hygiene final reconciliation reports a fixed 25-row denominator with 25 accepted, zero pending, and complete true; current validation remains separately tracked at one stack-lock error and 19 classified root-path warnings. Cortex Dual-Mode Replacement Readiness is now 90 percent, while the internal primary-operator and optional-adapter 100 percent gap remains open.",
     "marker_posture": [
       {
         "marker": "Cortex Dual-Mode Replacement Readiness",
-        "percent": 80,
-        "movement": "70_to_80",
+        "percent": 90,
+        "movement": "80_to_90",
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ]
