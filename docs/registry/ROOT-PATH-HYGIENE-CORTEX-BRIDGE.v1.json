@@ -1,0 +1,108 @@
+{
+  "schema_version": "atlas.cortex.synthesis_execution_bridge_packet.v1",
+  "packet_id": "root-path-hygiene-cortex-bridge-v1",
+  "status": "ok",
+  "trust_class": "validated_advisory",
+  "execution_contract": {
+    "selected_lane": "Root Path Hygiene",
+    "selected_marker": "Root Path Hygiene = 0/25 accepted dispositions",
+    "selected_packet": "Root Path Hygiene governed disposition, owner remediation, and reconciliation",
+    "objective": "Disposition the historical 25-warning lane without rewriting preserved evidence, remediate the nine _stack-owned absolute-path warnings, and prove the denominator complete while keeping three newer findings out of scope.",
+    "local_capability": "full-access",
+    "external_action_authority": "no_execution_authority",
+    "required_approvals": [],
+    "jobs": [
+      {
+        "job_id": "atlas-root-path-hygiene-disposition",
+        "objective": "Create a deterministic 25-row disposition registry and validator: preserve the 16 historical untracked intelligence-packet warnings and mark the nine _stack warnings pending owner remediation without editing the packet or owner repository.",
+        "project": "atlas",
+        "component": "atlas-root",
+        "repository": "atlas",
+        "owner": "stack-root",
+        "execution_class": "canonical_workspace",
+        "allowed_files": [
+          "docs/registry/ROOT-PATH-HYGIENE-DISPOSITION.v1.json",
+          "ops/atlas/validate_root_path_hygiene_disposition.mjs",
+          "ops/atlas/test_validate_root_path_hygiene_disposition.mjs",
+          "docs/ops/ROOT-PATH-HYGIENE-ROOT-DISPOSITION-2026-07-13.md"
+        ],
+        "forbidden_files": ["repos/**", "runtime/**", "secrets/**", "docs/ops/ATLAS-CURRENT-STATE-INTELLIGENCE-PACKET-2026-07-10.md"],
+        "dependencies": [],
+        "resource_claims": {"files": ["docs/registry/ROOT-PATH-HYGIENE-DISPOSITION.v1.json"], "canonical_root": ["atlas"]},
+        "runtime": {"provider": "openai", "model": "gpt-5.6-terra", "reasoning": "high", "speed": "standard", "fallback": "standard_with_warning"},
+        "external_actions": [],
+        "required_approvals": [],
+        "verification_requirements": ["node ops/atlas/test_validate_root_path_hygiene_disposition.mjs", "python ops/validation/validate_stack.py --allow-missing-locked-repos"],
+        "proof_requirements": ["exact historical denominator remains 25", "sixteen preserved-root rows have accepted preserve disposition", "nine _stack rows remain pending owner remediation", "three newer findings are explicitly excluded"],
+        "commit_requirements": ["exact four Atlas-root paths only", "preserve all pre-existing operator dirt"],
+        "receipt_requirements": ["root disposition receipt records current 28-warning readback without changing the 25-warning denominator"],
+        "rollback_requirements": ["do not modify or delete the preserved intelligence packet"],
+        "recovery_requirements": ["fail closed on duplicate, missing, extra, or mismatched disposition rows"]
+      },
+      {
+        "job_id": "stack-root-path-hygiene-remediation",
+        "objective": "Normalize the nine _stack-owned committed absolute-path examples to portable ATLAS-root placeholders without changing command semantics or unrelated documentation.",
+        "project": "atlas",
+        "component": "_stack",
+        "repository": "_stack",
+        "owner": "stack",
+        "execution_class": "repo_worktree",
+        "allowed_files": [
+          "AGENTS.md",
+          "README.md",
+          "docs/dispatcher-protocol.md",
+          "docs/codex-orchestration.md",
+          "docs/canonical-atlas-workspace-writer.md"
+        ],
+        "forbidden_files": ["ops/**", "tests/**", "secrets/**", "runtime/**", "../**"],
+        "dependencies": ["atlas-root-path-hygiene-disposition"],
+        "resource_claims": {"files": ["README.md", "docs/codex-orchestration.md"], "worktrees": ["_stack-root-path-hygiene"]},
+        "runtime": {"provider": "openai", "model": "gpt-5.6-luna", "reasoning": "medium", "speed": "standard", "fallback": "standard_with_warning"},
+        "external_actions": [],
+        "required_approvals": [],
+        "verification_requirements": ["pnpm run codex:stack:verify", "git diff --check"],
+        "proof_requirements": ["all nine _stack warning fingerprints disappear", "portable examples remain operationally clear", "no non-admitted _stack file changes"],
+        "commit_requirements": ["exact five _stack documentation paths only", "push remains manual-only"],
+        "receipt_requirements": ["owner receipt records before/after warning fingerprints"],
+        "rollback_requirements": ["preserve command behavior and full-permission policy"],
+        "recovery_requirements": ["fail closed if validation introduces a new path warning"]
+      },
+      {
+        "job_id": "atlas-root-path-hygiene-reconciliation",
+        "objective": "Re-run validation, accept the nine remediated owner rows, prove all 25 historical rows disposed, and ratchet only the Root Path Hygiene lane to complete.",
+        "project": "atlas",
+        "component": "atlas-root",
+        "repository": "atlas",
+        "owner": "stack-root",
+        "execution_class": "canonical_workspace",
+        "allowed_files": [
+          "docs/registry/ROOT-PATH-HYGIENE-DISPOSITION.v1.json",
+          "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json",
+          "docs/ops/ROOT-PATH-HYGIENE-EXECUTION-RECONCILIATION-2026-07-13.md"
+        ],
+        "forbidden_files": ["repos/**", "runtime/**", "secrets/**", "docs/ops/ATLAS-CURRENT-STATE-INTELLIGENCE-PACKET-2026-07-10.md"],
+        "dependencies": ["stack-root-path-hygiene-remediation"],
+        "resource_claims": {"files": ["docs/registry/ROOT-PATH-HYGIENE-DISPOSITION.v1.json", "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json"], "canonical_root": ["atlas"]},
+        "runtime": {"provider": "openai", "model": "gpt-5.6-terra", "reasoning": "high", "speed": "standard", "fallback": "standard_with_warning"},
+        "external_actions": [],
+        "required_approvals": [],
+        "verification_requirements": ["python ops/validation/validate_stack.py --allow-missing-locked-repos", "node ops/atlas/test_validate_root_path_hygiene_disposition.mjs", "python ops/atlas/continuity_manifest_health.py"],
+        "proof_requirements": ["historical denominator remains 25", "all 25 rows are accepted", "nine _stack warnings are absent", "sixteen preserved rows remain explicitly accepted", "three newer warnings remain separately scoped"],
+        "commit_requirements": ["exact three Atlas-root paths only", "no broad staging"],
+        "receipt_requirements": ["fresh validation and owner commit correlation", "Root Path Hygiene moves to 25/25 and 100 percent only after proof"],
+        "rollback_requirements": ["do not change Atlas Full-System Re-evaluation percentage"],
+        "recovery_requirements": ["hold the lane below complete on any missing or reintroduced warning fingerprint"]
+      }
+    ]
+  },
+  "authority_denials": [
+    "no_execution_authority",
+    "no_final_receipt_authority",
+    "no_marker_authority",
+    "no_external_mutation_authority",
+    "no_codex_launch",
+    "no_queue_or_scheduler_creation",
+    "no_owner_repository_mutation_from_atlas_root",
+    "no_live_platform_query"
+  ]
+}
