@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-07-12T10:58:57.680276Z",
-  "updated_at": "2026-07-13T16:25:56Z",
+  "updated_at": "2026-07-14T03:48:21Z",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -26,6 +26,7 @@
     "docs/registry/GITHUB-CLEANUP-RETENTION-CLASSIFICATION.latest.json",
     "docs/ops/GITHUB-CLEANUP-RETENTION-CLASSIFICATION-2026-07-13.md",
     "docs/ops/GITHUB-CONTROL-PLANE-CLEANUP-GOVERNANCE-RATCHET-2026-07-13.md",
+    "docs/ops/GITHUB-CONTROL-PLANE-LIVE-DISCORDOS-PROJECTION-RATCHET-2026-07-14.md",
     "runtime/codex/discordos/logs/20260713T151453726Z-discordos-github-projection-intent-dry-run-consumer/run.json",
     "https://github.com/fawxzzy/DiscordOS/pull/48",
     "git:3e9ca5fd67fbcc728ac42f85b4222600523c2dfe"
@@ -166,23 +167,24 @@
         ]
       },
       "phase-7-discordos-projection": {
-        "status": "no-send-canary-complete-awaiting-live-readback",
-        "updated_at": "2026-07-13T16:06:23Z",
+        "status": "complete-live-readback-verified",
+        "updated_at": "2026-07-14T03:48:21Z",
         "evidence_refs": [
           "docs/ops/GITHUB-CONTROL-PLANE-EVENT-PROJECTION-CONTRACT-IMPLEMENTATION-2026-07-13.md",
           "docs/ops/GITHUB-CONTROL-PLANE-EVENT-ADMISSION-RUNTIME-2026-07-13.md",
           "docs/ops/GITHUB-CONTROL-PLANE-END-TO-END-NO-SEND-CANARY-2026-07-13.md",
           "docs/ops/GITHUB-CONTROL-PLANE-MARKER-DENOMINATOR-AUDIT-2026-07-13.md",
+          "docs/ops/GITHUB-CONTROL-PLANE-LIVE-DISCORDOS-PROJECTION-RATCHET-2026-07-14.md",
           "runtime/codex/discordos/logs/20260713T151453726Z-discordos-github-projection-intent-dry-run-consumer/run.json",
           "https://github.com/fawxzzy/DiscordOS/pull/48",
           "git:3e9ca5fd67fbcc728ac42f85b4222600523c2dfe"
         ],
-        "next_gate": "One explicitly authorized DiscordOS single-writer apply must return exact live readback tied to the same event, admission, and projection identities.",
+        "next_gate": "Continue read-only freshness monitoring; reopen implementation only on a proven contract or writer-boundary regression.",
         "notes": [
           "Atlas Contracts now defines atlas.github.event-receipt.v1, atlas.github.event-admission.v1, and atlas.github.projection-intent.v1, and Atlas compiles deterministic admission results plus formatting-free projection intents under a backend-neutral policy registry.",
           "DiscordOS PR 48 merged the governed dry-run consumer into main at 3e9ca5fd67fbcc728ac42f85b4222600523c2dfe, and the governed run commit 874c9b5173bb068b2e29248ba23ab648c5eb09a8 is tree-identical to merged main on the nine implementation paths.",
           "The end-to-end no-send canary preserved correlated ghr_, gha_, and ghp_ identities, emitted one atlas_ledger record intent plus one discordos_update publish intent, suppressed exact replay, and kept sends_messages=false, writes_board=false, writes_storage=false, external_mutation=denied, and readback.state=not_requested.",
-          "The live-readback limitation remains in force: DiscordOS projection is not complete until one explicitly authorized single-writer apply returns exact live readback on the sanctioned target."
+          "A short-lived atlas.approval-record.v2 authorized one exact publish_projection action. DiscordOS returned status=sent_verified and exact readback for message 1526435158406856787 while writes_board=false, writes_storage=false, and mention parsing remained disabled."
         ]
       }
     },
@@ -220,18 +222,19 @@
       "github_control_plane_integration": {
         "lane": "GitHub Control-Plane Integration",
         "candidate": true,
-        "percentage": 87.5,
-        "numerator": 7,
-        "completed_units": 7,
+        "percentage": 100,
+        "numerator": 8,
+        "completed_units": 8,
         "denominator": 8,
-        "freshness_timestamp": "2026-07-13T16:25:56Z",
-        "transition_reason": "The cleanup-retention classifier and accepted 2026-07-13 ratchet explicitly classified all 62 local worktree candidates and all 80 merged remote-branch candidates without granting cleanup authority; discordos_projection remains the only incomplete unit.",
+        "freshness_timestamp": "2026-07-14T03:48:21Z",
+        "transition_reason": "One explicitly authorized DiscordOS single-writer application preserved the ghr_/gha_/ghp_ identity chain, sent exactly one sanctioned GitHub release projection, and returned exact live readback with no board or storage write. All eight denominator units are complete.",
         "percentage_evidence_refs": [
           "docs/ops/GITHUB-CONTROL-PLANE-MARKER-DENOMINATOR-AUDIT-2026-07-13.md",
           "docs/ops/GITHUB-CONTROL-PLANE-CLEANUP-GOVERNANCE-RATCHET-2026-07-13.md",
           "docs/registry/GITHUB-CLEANUP-RETENTION-CLASSIFICATION.latest.json",
           "docs/ops/GITHUB-CLEANUP-RETENTION-CLASSIFICATION-2026-07-13.md",
           "docs/ops/GITHUB-CONTROL-PLANE-END-TO-END-NO-SEND-CANARY-2026-07-13.md",
+          "docs/ops/GITHUB-CONTROL-PLANE-LIVE-DISCORDOS-PROJECTION-RATCHET-2026-07-14.md",
           "docs/registry/GITHUB-CONTROL-PLANE-REGISTRY.json",
           "docs/ops/GITHUB-CONTROL-PLANE-WATCH-2026-07-13.md",
           "docs/ops/GITHUB-CONTROL-PLANE-EVENT-PROJECTION-CONTRACT-IMPLEMENTATION-2026-07-13.md",
@@ -273,7 +276,7 @@
             "unit": "authorized GitHub events project through DiscordOS with readback"
           }
         ],
-        "ratchet_rule": "Percentage remained null until the authorized 2026-07-13 marker audit accepted a deterministic denominator and completed-unit count."
+        "ratchet_rule": "The deterministic eight-unit denominator moves only on accepted binary evidence. The 2026-07-14 live DiscordOS application and exact-readback receipt complete the eighth unit; ongoing volatile GitHub health remains governed by the read-only watch rather than the implementation percentage."
       },
       "atlas_full_system_re_evaluation": {
         "lane": "Atlas Full-System Re-evaluation",

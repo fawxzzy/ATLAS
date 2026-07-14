@@ -1,5 +1,6 @@
 # Receipt Index
 
+- [GitHub Control-Plane Live DiscordOS Projection Ratchet 2026-07-14](../ops/GITHUB-CONTROL-PLANE-LIVE-DISCORDOS-PROJECTION-RATCHET-2026-07-14.md) - one approved single-writer projection, `sent_verified`, exact live readback; completes the deterministic `8 / 8` marker without granting cleanup authority.
 - [External Model Sidecar Provider Integration - DeepSeek/LiteLLM Bridge Program Admission 2026-07-13](../ops/ATLAS-EXTERNAL-MODEL-SIDECAR-DEEPSEEK-LITELLM-BRIDGE-PROGRAM-ADMISSION-2026-07-13.md)
 - [External Model Sidecar Provider Integration - DeepSeek/LiteLLM Bridge Phase 1 Capability Audit 2026-07-13](../ops/ATLAS-EXTERNAL-MODEL-SIDECAR-DEEPSEEK-LITELLM-BRIDGE-PHASE-1-CAPABILITY-AUDIT-2026-07-13.md) - accepted feasible-with-constraints audit.
 - [External Model Sidecar Provider Integration - DeepSeek/LiteLLM Bridge Phase 2 Security Identity Runtime Contract 2026-07-13](../ops/ATLAS-EXTERNAL-MODEL-SIDECAR-DEEPSEEK-LITELLM-BRIDGE-PHASE-2-SECURITY-IDENTITY-RUNTIME-CONTRACT-2026-07-13.md) - frozen contract; exact next packet: `External Model Sidecar Provider Integration Phase 3 dedicated runtime and one-time credential setup`.
