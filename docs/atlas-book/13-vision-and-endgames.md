@@ -124,6 +124,36 @@ Shared rules that survive the split:
 - next valid package:
   - `none immediate docs-only after the current continuity-restore reconciliation; reopen only with distinct projection drift, marker pressure, or a new normalization cluster`
 
+#### Future whole-stack text convergence expansion
+
+The existing `Truth Map & ATLAS Book: 100%` marker closes its prior admitted
+restart-surface scope. It does not cover the future whole-stack textual
+convergence program below, which remains a separate unmeasured expansion until
+its denominator and admission contract are ratified.
+
+The expansion must:
+
+- inventory every applicable text-bearing artifact across Atlas and all governed
+  repositories, including documentation, plans, research, prompts, receipts,
+  ADRs, rules, notes, archived material, and machine-readable registries
+- perform a dedicated Playbook archaeology pass because Playbook predates much
+  of the rest of the stack and contains early planning, research, doctrine, and
+  product-shaping material that may not exist elsewhere
+- classify every discovered artifact by authority, freshness, ownership,
+  provenance, duplication, supersession, privacy, and Book relevance
+- preserve source links and digests so the Book summarizes or indexes owner
+  truth instead of silently becoming a second stale source of truth
+- produce an explicit coverage manifest proving what was reviewed, adopted,
+  linked, deferred, superseded, or excluded
+- reconcile the conceptual overlap between Atlas Book and Playbook and produce
+  an ADR that chooses among continued separation, generated projection,
+  consolidation, or one system absorbing the other
+- prohibit silent copying, deletion, or authority transfer before that ADR and
+  a reversible migration plan are accepted
+- rerun a closing whole-stack text coverage audit after implementation so new
+  omissions discovered during convergence become tracked lanes rather than lost
+  chat context
+
 ### Preview / Cache Verification
 
 - done means source drift, generated drift, and preview/cache drift can be separated cleanly

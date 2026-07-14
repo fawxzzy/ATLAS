@@ -2,11 +2,11 @@
   "contract_version": "atlas.initiative.v1",
   "id": "initiative-fawxzzy-tech-plan-convergence",
   "title": "Fawxzzy Technology Plan Convergence",
-  "summary": "Preserve the recovered technology-plan, Project Review and Next Step skill, and ATLAS Engineering Playbook sources as provenance while advancing source-linked Atlas doctrine adoption from the accepted Playbook registry without copying doctrine bodies into a second Atlas registry.",
+  "summary": "Preserve the recovered technology-plan, Project Review and Next Step skill, and ATLAS Engineering Playbook sources as provenance while advancing source-linked Atlas doctrine adoption and planning a future whole-stack text convergence pass with dedicated Playbook archaeology and an explicit Atlas Book versus Playbook boundary decision.",
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-07-13T07:43:50Z",
-  "updated_at": "2026-07-13T12:55:00Z",
+  "updated_at": "2026-07-14T15:19:55-04:00",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -23,7 +23,8 @@
     "docs/registry/ATLAS-PLAYBOOK-DOCTRINE-ADOPTION.json",
     "ops/atlas/playbook_doctrine_adoption.py",
     "tests/test_atlas_playbook_doctrine_adoption.py",
-    "docs/ops/ATLAS-PLAYBOOK-DOCTRINE-ADOPTION-2026-07-13.md"
+    "docs/ops/ATLAS-PLAYBOOK-DOCTRINE-ADOPTION-2026-07-13.md",
+    "docs/atlas-book/13-vision-and-endgames.md"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -63,19 +64,29 @@
     ],
     "candidate_outputs": [
       "Universal component adoption proof across Atlas, _stack, DiscordOS, Lifeline, Playbook, Mazer, Fitness, Foundation, Trove, Stream, Nat1, and Playbook Demo",
-      "Broader governed skill rollout and owner-side adoption proof beyond the Atlas root unit"
+      "Broader governed skill rollout and owner-side adoption proof beyond the Atlas root unit",
+      "Whole-stack text-bearing artifact inventory and coverage manifest across all governed repositories",
+      "Dedicated Playbook historical planning, research, doctrine, prompt, and note archaeology pass",
+      "Authority, freshness, provenance, duplication, supersession, privacy, and Book-relevance classification",
+      "Atlas Book versus Playbook boundary ADR covering separation, generated projection, consolidation, or absorption",
+      "Reversible migration plan plus closing whole-stack text coverage audit"
     ],
     "dependencies": [
       "Accepted Playbook registry commit remains present in the local Git object database",
       "Current source hierarchy and owner evidence",
       "No duplicate lane admission",
-      "Universal component adoption stays separately evidenced"
+      "Universal component adoption stays separately evidenced",
+      "Every governed repository and archive surface exposes an inspectable text inventory or an explicit inaccessible classification",
+      "Atlas Book and Playbook ownership cannot change without an accepted ADR and migration proof"
     ],
     "serialization": [
       "Keep recovered imports provenance-only",
       "Consume the Playbook registry by source reference from the accepted owner commit",
       "Prove Atlas root adoption with read-only validation and receipt evidence",
-      "Leave universal component adoption and broader skill rollout active until owner-side proof lands"
+      "Leave universal component adoption and broader skill rollout active until owner-side proof lands",
+      "Treat Playbook as the highest-priority historical text corpus because it predates the wider stack and contains early planning and research",
+      "Index or summarize owner truth by source reference and digest before considering consolidation",
+      "Require an opening inventory and closing coverage audit for the whole-stack text convergence expansion"
     ],
     "ownership": {
       "admission_writer": "stack-root",
@@ -88,13 +99,17 @@
       "The accepted Playbook source commit remains locally available for Git object reads",
       "Atlas doctrine adoption validator remains verified against the recorded digests and stable ids",
       "No owner-side component adoption is inferred without its own current evidence",
-      "A future lane changes only with accepted current evidence and its own scope admission"
+      "A future lane changes only with accepted current evidence and its own scope admission",
+      "Whole-stack text convergence has a ratified denominator, repository coverage set, and explicit privacy/exclusion policy before percentage tracking begins",
+      "The Atlas Book versus Playbook ADR is accepted before any authority transfer, bulk copy, or retirement action"
     ],
     "constraints": [
       "Historical status cannot override current truth",
       "No marker moves from recovered imports or Atlas root adoption alone",
       "No owner repository, board, Discord, deployment, production system, or GitHub remote mutation",
-      "Playbook doctrine bodies stay canonical in Playbook and must not be recopied into a second Atlas doctrine registry"
+      "Playbook doctrine bodies stay canonical in Playbook and must not be recopied into a second Atlas doctrine registry under the current architecture",
+      "The future convergence pass may recommend consolidation or absorption but cannot perform it without an explicit ADR, reversible migration plan, source-preservation proof, and operator acceptance",
+      "No text artifact is silently dropped because it is informal, old, duplicated, archived, or currently non-authoritative; it must receive an explicit classification"
     ]
   }
 }
