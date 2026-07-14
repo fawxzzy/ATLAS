@@ -219,13 +219,13 @@ POLICY_REGISTRY: dict[str, MarkerPolicy] = {
     "Owner-Lane Agent Service Bus & DiscordOS Ops Readiness": MarkerPolicy(
         category="admissible after current lane",
         rationale=(
-            "The lane now has a fixed ten-unit native-first denominator with units 1 through 6 complete. Its next "
-            "bounded work is unit 7: implement deterministic admitted-through-archived lifecycle, retry, replay, "
-            "cancellation, failure, and transition validation around native tasks."
+            "The lane now has a fixed ten-unit native-first denominator with units 1 through 7 complete. Its next "
+            "bounded work is unit 8: bind validated CardRecord and BoardEvent artifacts to the native job/task/receipt "
+            "chain while keeping DiscordOS as the sole logical board writer."
         ),
         expected_evidence=(
-            "one backend-neutral root-owned lifecycle event helper with deterministic identity, allowed-transition "
-            "validation, retry/replay semantics, valid/invalid tests, and terminal receipt/archive proof"
+            "one backend-neutral root-owned card/board correlation helper with schema and identity validation, "
+            "deterministic idempotency, dry-run proof, and DiscordOS single-writer/readback boundaries"
         ),
     ),
     "Fitness QA/LLEL Workflow": MarkerPolicy(
@@ -451,15 +451,15 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "Owner-Lane Agent Service Bus & DiscordOS Ops Readiness": PacketDescriptor(
-        packet="Owner-Lane Agent Service Bus & DiscordOS Ops durable native task lifecycle state first-implementation admission",
+        packet="Owner-Lane Agent Service Bus & DiscordOS Ops CardRecord and BoardEvent integration first-implementation admission",
         basis_receipt_ref=(
             "docs/ops/"
-            "OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-WORKER-LEASE-BINDING-IMPLEMENTATION-2026-07-14.md"
+            "OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-DURABLE-NATIVE-TASK-LIFECYCLE-IMPLEMENTATION-2026-07-14.md"
         ),
-        mode="bounded root-owned lifecycle-state admission",
+        mode="bounded root-owned card/board correlation admission",
         scope=(
-            "implement deterministic native task state events and fail-closed transition, retry, replay, cancellation, "
-            "failure, and archive-after-receipt semantics without implementing a worker runtime"
+            "bind valid CardRecord and BoardEvent artifacts to the native job/task/receipt chain with deterministic "
+            "idempotency while preserving DiscordOS as the only logical board writer and requiring live readback"
         ),
     ),
 }

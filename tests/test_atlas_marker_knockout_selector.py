@@ -906,18 +906,18 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual("hold_current_lane", payload["operator_action"])
         self.assertEqual("Owner-Lane Agent Service Bus & DiscordOS Ops Readiness", payload["next_after_current_marker"])
         self.assertEqual(
-            "Owner-Lane Agent Service Bus & DiscordOS Ops durable native task lifecycle state first-implementation admission",
+            "Owner-Lane Agent Service Bus & DiscordOS Ops CardRecord and BoardEvent integration first-implementation admission",
             payload["next_after_current_packet"],
         )
         self.assertEqual(
-            "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-WORKER-LEASE-BINDING-IMPLEMENTATION-2026-07-14.md",
+            "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-DURABLE-NATIVE-TASK-LIFECYCLE-IMPLEMENTATION-2026-07-14.md",
             payload["next_after_current_packet_basis_ref"],
         )
         self.assertEqual(
-            "bounded root-owned lifecycle-state admission",
+            "bounded root-owned card/board correlation admission",
             payload["next_after_current_packet_mode"],
         )
-        self.assertIn("deterministic native task state events", payload["next_after_current_packet_scope"])
+        self.assertIn("CardRecord and BoardEvent", payload["next_after_current_packet_scope"])
 
 
 if __name__ == "__main__":

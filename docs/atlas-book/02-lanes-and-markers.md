@@ -83,9 +83,9 @@ Read:
 
 ### Future / owner-lane orchestration
 
-- Owner-Lane Agent Service Bus & DiscordOS Ops Readiness: `60%`
+- Owner-Lane Agent Service Bus & DiscordOS Ops Readiness: `70%`
 
-The owner-lane orchestration marker uses a native-first fixed denominator of ten binary units. Units 1 through 6 are complete: authority/request/receipt/single-writer doctrine, native lifecycle proof, executable job/task/receipt correlation, requested-versus-effective runtime accounting, ContextPacket/EvidenceBundle provenance, and WorkerLease ownership/recovery binding. Live receipt `atr_61e72af7d678f8466b365adf` now carries lease `lease-native-thread-spike-20260714` with exact task/turn/workspace agreement and deterministic digest. The lane is `6 / 10 = 60%`. Unit 7 is durable native task lifecycle state. SQLite remains only a possible future storage backend, not an approved execution queue or selected ledger.
+The owner-lane orchestration marker uses a native-first fixed denominator of ten binary units. Units 1 through 7 are complete: authority/request/receipt/single-writer doctrine, native task/thread proof, executable job/task/receipt correlation, requested-versus-effective runtime accounting, ContextPacket/EvidenceBundle provenance, WorkerLease ownership/recovery binding, and durable task lifecycle events. Live task `019f5ef2-29cb-73b3-a80d-ebe2160d918f` now has a five-event admitted-through-archived chain ending only after receipt `atr_61e72af7d678f8466b365adf`; all events validate as `atlas.event.v1`. The lane is `7 / 10 = 70%`. Unit 8 is CardRecord and BoardEvent integration through the DiscordOS single-writer boundary. SQLite remains only a possible future storage backend, not an approved execution queue or selected ledger.
 
 ### Future / Cortex
 
