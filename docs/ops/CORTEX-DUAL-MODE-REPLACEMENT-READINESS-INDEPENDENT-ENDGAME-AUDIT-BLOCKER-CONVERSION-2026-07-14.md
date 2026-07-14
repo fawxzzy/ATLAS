@@ -67,6 +67,12 @@ This package performed no `_stack` execution, owner-repository mutation, deploym
 
 The marker remains `90%`. A fresh live no-change canary and a new independent endgame audit are still required before `100%` can be considered.
 
+## Second independent audit correction
+
+The repaired live canary satisfied every semantic, authority, replay, and trace requirement, but the second independent audit found that Windows text-mode newline translation made the persisted decision's actual bytes differ from the request's pre-write digest.
+
+The durable writer now writes explicit UTF-8 bytes, and the reader hashes the exact bytes before UTF-8 decoding. Focused preparation proof compares the request digest directly with `sha256(decision_path.read_bytes())`, preventing newline-only byte changes from passing correlation.
+
 ## Next packet
 
 ```text

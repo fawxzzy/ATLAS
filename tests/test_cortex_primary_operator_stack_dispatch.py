@@ -242,6 +242,9 @@ class CortexPrimaryOperatorStackDispatchTests(unittest.TestCase):
         decision = json.loads((root / "runtime/atlas/sessions/a/cortex-primary-operator-decision.json").read_text(encoding="utf-8"))
         self.assertEqual(DURABLE_DECISION_SCHEMA, decision["schema_version"])
         self.assertEqual(acceptance["acceptance_id"], decision["acceptance_id"])
+        request = json.loads((root / "runtime/atlas/sessions/a/cortex-stack-dispatch-request.json").read_text(encoding="utf-8"))
+        decision_bytes = (root / "runtime/atlas/sessions/a/cortex-primary-operator-decision.json").read_bytes()
+        self.assertEqual(request["durable_decision"]["sha256"], hashlib.sha256(decision_bytes).hexdigest())
         self.assertTrue((root / "tmp/atlas/canary.md").is_file())
 
     def test_correlate_cli_writes_durable_result(self) -> None:
@@ -252,7 +255,7 @@ class CortexPrimaryOperatorStackDispatchTests(unittest.TestCase):
         _write(root / "runtime/atlas/request.json", request)
         decision_path = root / "runtime/atlas/sessions/a/cortex-primary-operator-decision.json"
         decision_path.parent.mkdir(parents=True, exist_ok=True)
-        decision_path.write_text(json.dumps(decision, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        decision_path.write_bytes((json.dumps(decision, indent=2, ensure_ascii=False) + "\n").encode("utf-8"))
         run_dir = root / "repos/_stack/.codex/logs/run-123"
         _write(run_dir / "run.json", manifest)
         _write(run_dir / "atlas.job-envelope.v2.json", job)

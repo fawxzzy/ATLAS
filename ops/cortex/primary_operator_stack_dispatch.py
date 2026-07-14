@@ -124,13 +124,14 @@ def validate_output_path(root: Path, argument: str, *, kind: str) -> tuple[Path 
 
 def _read_json(path: Path) -> tuple[dict[str, Any] | None, OrderedDict[str, Any] | None, str | None]:
     try:
-        raw = path.read_text(encoding="utf-8")
+        raw_bytes = path.read_bytes()
+        raw = raw_bytes.decode("utf-8")
         value = json.loads(raw)
     except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
         return None, _finding("invalid_json", "Input must be valid UTF-8 JSON.", path=str(path), exception=str(exc)), None
     if not isinstance(value, dict):
         return None, _finding("invalid_json_shape", "Input JSON must be an object.", path=str(path)), None
-    return value, None, hashlib.sha256(raw.encode("utf-8")).hexdigest()
+    return value, None, hashlib.sha256(raw_bytes).hexdigest()
 
 
 def build_durable_decision(
@@ -422,7 +423,8 @@ def main(argv: list[str] | None = None) -> int:
         if blockers:
             print(json.dumps(request, indent=2))
             return 2
-        _write(decision_output, durable_text)
+        decision_output.parent.mkdir(parents=True, exist_ok=True)
+        decision_output.write_bytes(durable_text.encode("utf-8"))
         _write(request_output, _render_json(request))
         _write(prompt_output, render_prompt(request, request_path=request_output.resolve()))
         print(json.dumps(OrderedDict((("status", "ready"), ("request", request), ("request_path", args.request_output), ("prompt_path", args.prompt_output))), indent=2))
