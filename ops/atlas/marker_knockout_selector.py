@@ -219,13 +219,13 @@ POLICY_REGISTRY: dict[str, MarkerPolicy] = {
     "Owner-Lane Agent Service Bus & DiscordOS Ops Readiness": MarkerPolicy(
         category="admissible after current lane",
         rationale=(
-            "The lane now has a fixed ten-unit native-first denominator with units 1 through 7 complete. Its next "
-            "bounded work is unit 8: bind validated CardRecord and BoardEvent artifacts to the native job/task/receipt "
-            "chain while keeping DiscordOS as the sole logical board writer."
+            "Units 1 through 7 are complete and root-side CardRecord/BoardEvent correlation is implemented, but unit 8 "
+            "is blocked because current DiscordOS live readback does not understand the multi-message card journal and "
+            "the Supabase readback path lacks its service-role environment key."
         ),
         expected_evidence=(
-            "one backend-neutral root-owned card/board correlation helper with schema and identity validation, "
-            "deterministic idempotency, dry-run proof, and DiscordOS single-writer/readback boundaries"
+            "one DiscordOS-owned current-format readback command with exact card/thread/message and idempotency "
+            "correlation, observed board state/version, live receipt, and no second writer"
         ),
     ),
     "Fitness QA/LLEL Workflow": MarkerPolicy(
@@ -451,15 +451,15 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "Owner-Lane Agent Service Bus & DiscordOS Ops Readiness": PacketDescriptor(
-        packet="Owner-Lane Agent Service Bus & DiscordOS Ops CardRecord and BoardEvent integration first-implementation admission",
+        packet="DiscordOS current multi-message board readback compatibility and service-role env blocker conversion",
         basis_receipt_ref=(
             "docs/ops/"
-            "OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-DURABLE-NATIVE-TASK-LIFECYCLE-IMPLEMENTATION-2026-07-14.md"
+            "OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-CARD-BOARD-CORRELATION-PARTIAL-IMPLEMENTATION-AND-LIVE-READBACK-BLOCKER-2026-07-14.md"
         ),
-        mode="bounded root-owned card/board correlation admission",
+        mode="owner-side DiscordOS readback blocker conversion",
         scope=(
-            "bind valid CardRecord and BoardEvent artifacts to the native job/task/receipt chain with deterministic "
-            "idempotency while preserving DiscordOS as the only logical board writer and requiring live readback"
+            "update one canonical DiscordOS readback path for current multi-message card journals, correlate exact "
+            "card/thread/message and idempotency truth, and restore retained service-role readback env without adding a writer"
         ),
     ),
 }
