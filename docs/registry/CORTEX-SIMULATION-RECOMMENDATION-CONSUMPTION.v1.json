@@ -1,0 +1,38 @@
+{
+  "contract_version": "atlas.cortex.simulation.recommendation-consumption.v1",
+  "status": "implementation_admitted",
+  "owner": "stack-root",
+  "simulation_contract": "atlas.cortex.simulation.workflow-resilience.v1",
+  "output_contract": "atlas.cortex.simulation.recommendation-envelope.v1",
+  "playbook_source_ref": "docs/registry/ATLAS-PLAYBOOK-DOCTRINE-ADOPTION.json",
+  "playbook_projection": {
+    "record_types": ["rule_candidate", "pattern_candidate", "failure_mode_candidate"],
+    "promotion_state": "candidate_only",
+    "owner_repo_write": false
+  },
+  "cortex_projection": {
+    "record_type": "next_proof_recommendation",
+    "execution_authorized": false,
+    "dispatch_authorized": false
+  },
+  "authority": {
+    "advisory_only": true,
+    "execution_authorized": false,
+    "dispatch_authorized": false,
+    "doctrine_promotion_authorized": false,
+    "owner_repo_mutation_authorized": false,
+    "platform_mutation_authorized": false,
+    "discord_write_authorized": false,
+    "board_write_authorized": false,
+    "deployment_authorized": false,
+    "approval_authorized": false,
+    "final_receipt_authorized": false,
+    "marker_movement_authorized": false
+  },
+  "marker": {
+    "name": "Cortex Simulation Substrate Readiness",
+    "current_percent": 70,
+    "next_threshold": 80,
+    "next_packet": "Cortex Simulation Substrate Readiness simulation-output recommendation bridge first implementation and 80 percent reconciliation"
+  }
+}
