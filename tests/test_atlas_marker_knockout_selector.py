@@ -386,15 +386,15 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual("hold_current_lane", payload["operator_action"])
         self.assertEqual("Vercel Platform Observability Governance", payload["next_after_current_marker"])
         self.assertEqual(
-            "Vercel Platform Observability Governance analytics and drain visibility contract freeze",
+            "Vercel Platform Observability Governance analytics and drain live read-only capability audit",
             payload["next_after_current_packet"],
         )
         self.assertEqual(
-            "docs/ops/VERCEL-PLATFORM-OBSERVABILITY-GOVERNANCE-ENVIRONMENT-NAME-ONLY-INVENTORY-FIRST-IMPLEMENTATION-RECONCILIATION-2026-07-14.md",
+            "docs/ops/VERCEL-PLATFORM-OBSERVABILITY-GOVERNANCE-ANALYTICS-AND-DRAIN-VISIBILITY-CONTRACT-AND-IMPLEMENTATION-2026-07-14.md",
             payload["next_after_current_packet_basis_ref"],
         )
         self.assertEqual(
-            "docs-only root-bounded analytics and drain visibility contract freeze",
+            "read-only connected-Vercel capability audit",
             payload["next_after_current_packet_mode"],
         )
         self.assertIn("analytics", payload["next_after_current_packet_scope"])

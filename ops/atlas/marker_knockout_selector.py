@@ -271,12 +271,12 @@ POLICY_REGISTRY: dict[str, MarkerPolicy] = {
     "Vercel Platform Observability Governance": MarkerPolicy(
         category="admissible after current lane",
         rationale=(
-            "The lane now has proof-backed project, log/runtime-error, deployment-freshness, and environment-name-only inventory at 30%, "
+            "The lane now has proof-backed project, log/runtime-error, deployment-freshness, environment-name-only, and observability-visibility classification at 40%, "
             "but current durable restart truth still routes through the held Sandbox family first."
         ),
         expected_evidence=(
-            "one root-owned analytics and drain visibility contract that distinguishes visible, unproven, unavailable, forbidden, and mutation-capable surfaces "
-            "without enabling products, creating drains, changing retention, or claiming entitlement"
+            "one live read-only capability audit that classifies analytics, speed insights, traces, alerts, drains, and Observability Plus posture "
+            "without enabling products, creating drains, changing retention, or inferring entitlement"
         ),
     ),
     "Operator Secret Path Hygiene": MarkerPolicy(
@@ -401,16 +401,16 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "Vercel Platform Observability Governance": PacketDescriptor(
-        packet="Vercel Platform Observability Governance analytics and drain visibility contract freeze",
+        packet="Vercel Platform Observability Governance analytics and drain live read-only capability audit",
         basis_receipt_ref=(
             "docs/ops/"
-            "VERCEL-PLATFORM-OBSERVABILITY-GOVERNANCE-ENVIRONMENT-NAME-ONLY-INVENTORY-"
-            "FIRST-IMPLEMENTATION-RECONCILIATION-2026-07-14.md"
+            "VERCEL-PLATFORM-OBSERVABILITY-GOVERNANCE-ANALYTICS-AND-DRAIN-VISIBILITY-"
+            "CONTRACT-AND-IMPLEMENTATION-2026-07-14.md"
         ),
-        mode="docs-only root-bounded analytics and drain visibility contract freeze",
+        mode="read-only connected-Vercel capability audit",
         scope=(
-            "freeze the next safe read-only Vercel observability boundary after environment-name-only intake implementation, "
-            "classifying analytics, speed insights, traces, alerts, and drains without enabling products, creating drains, changing retention, or claiming entitlement"
+            "query only available read surfaces for analytics, speed insights, traces, alerts, drains, and Observability Plus posture, "
+            "leaving unsupported surfaces unproven and forbidding product enablement, drain creation, retention changes, and entitlement inference"
         ),
     ),
     "AI Work Session Stability & Auto-Sync Loop": PacketDescriptor(
