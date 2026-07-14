@@ -1,0 +1,10 @@
+{
+  "contract_version": "atlas.cortex.simulation.workflow-resilience-manifest.v1",
+  "scenario_id": "atlas-workflow-resilience-first-mixed-replay",
+  "generated_at": "2026-07-14T12:00:00Z",
+  "adapter_id": "atlas-workflow-resilience",
+  "receipt_replay_manifest_ref": "data/cortex/simulation-replays/first-mixed-replay/manifest.json",
+  "receipt_replay_manifest_digest": "sha256:f0d785ce0e38c84aa1ffcdfdfbc5d75d5d5fa0bf1f57d040dd2a7358bfec002a",
+  "max_steps": 4,
+  "scenario_classes": ["observed", "proof_recovery", "blocked_hold"]
+}
