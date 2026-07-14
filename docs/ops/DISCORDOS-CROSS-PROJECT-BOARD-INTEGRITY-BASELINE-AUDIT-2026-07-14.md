@@ -7,10 +7,12 @@ Keep `DiscordOS Cross-Project Board Integrity & Lifecycle Repair` at `0%`
 but no proof unit has current live coverage across the complete governed board
 denominator.
 
-This receipt uses `DiscordOS origin/main@9f1650d685557611a78f5519ca24a2806d91d001`
-as repository truth after Mazer full-board reconciliation PR 61 was cleaned,
-verified, and merged. Live truth is limited to the latest bot-backed receipts;
-direct Discord GET was not available to the read-only auditor.
+This receipt opened against
+`DiscordOS origin/main@9f1650d685557611a78f5519ca24a2806d91d001`
+after Mazer full-board reconciliation PR 61 was cleaned, verified, and merged.
+The later registry reconciliation below supersedes that opening inventory with
+paginated live readback from
+`DiscordOS origin/main@9513259aab77ae3bc24c45b9c5835246ed522e2e`.
 
 ## Board coverage baseline
 
@@ -40,6 +42,43 @@ direct Discord GET was not available to the read-only auditor.
 | 10 | partial | `0` | No single recurring all-board scan; writer/scheduler/worktree surfaces are fragmented |
 
 Status distribution: `0 pass`, `9 partial`, `1 fail`, `0 unknown`.
+
+## Registry reconciliation update
+
+DiscordOS PR 63 added the authoritative registry, paginated journal reads, and
+registry-aware consistency scanner. Full owner verification passed before the
+PR was squash-merged as
+`9513259aab77ae3bc24c45b9c5835246ed522e2e`.
+
+The current registry has `12` required entries: `5` enabled boards, `7`
+blocked admissions, `0` uncovered production forums, and `1` explicitly
+excluded QA forum. The seven blocked admissions are Atlas, DiscordOS,
+Foundation, Lifeline, Cortex, `_stack`, and Playbook; each is blocked by
+`project_forum_not_discovered` rather than silently omitted.
+
+The paginated live scan returned `282` current cards, `71` healthy cards, and
+`211` drifted cards. It also classified `49` superseded records separately.
+
+| Registered board | Current | Healthy | Drifted | Disposition |
+|---|---:|---:|---:|---|
+| Legacy general feedback | `1` | `0` | `1` | Archived and retention-gated |
+| Fitness active | `35` | `34` | `1` | Owner identity required for thread `1526664644897280062` |
+| Mazer active | `65` | `7` | `58` | Owner-backed and repairable in bounded batches |
+| Music Sesh active | `151` | `0` | `151` | Archived, unknown-state, and retention-gated |
+| Shared Completed | `30` | `30` | `0` | Healthy; no repair authorized |
+
+The `58` Mazer rows already have owner-backed lifecycle and journal truth; the
+missing fields are stable identity, canonical body, and updated timestamp.
+The single Fitness row has no accepted Fitness owner identity and cannot use a
+thread fallback. Music Sesh and legacy rows cannot be reopened, replaced, or
+deleted without an explicit retention decision. These classifications prevent
+one unsafe global repair from overwriting healthy or historically archived
+state.
+
+The marker remains `0 / 10`. The registry and pagination implementation close
+important code gaps, but the ratchet requires each proof unit to cover the
+complete admitted denominator with current live readback or an accepted
+not-applicable disposition.
 
 ## Additional integrity risks
 
@@ -83,6 +122,8 @@ readback prove that whole unit across every admitted board class.
 ## Mutations performed by this audit cluster
 
 - DiscordOS PR 61 was cleaned of two machine-specific receipt paths and merged.
+- DiscordOS PR 63 added the registry and paginated consistency surface and was
+  merged after full owner verification.
 - No production deployment occurred.
 - No Discord card was created, moved, deleted, archived, reacted to, or edited
   by the read-only audit.
