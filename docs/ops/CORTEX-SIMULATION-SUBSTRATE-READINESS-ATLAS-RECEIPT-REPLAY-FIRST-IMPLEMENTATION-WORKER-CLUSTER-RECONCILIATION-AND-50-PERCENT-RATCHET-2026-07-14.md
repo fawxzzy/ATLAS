@@ -2,6 +2,7 @@
 
 - Date: `2026-07-14`
 - Opening checkpoint: `main@04c16d52`
+- Implementation commit: `main@bcabb0ee`
 - Marker movement: `40% -> 50%`
 
 ## Implemented

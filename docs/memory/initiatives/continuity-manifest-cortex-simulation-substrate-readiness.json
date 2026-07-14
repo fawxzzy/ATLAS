@@ -56,7 +56,7 @@
     "lane_id": "cortex-simulation-substrate-readiness",
     "scope_class": "atlas-root-governance",
     "current_checkpoint_receipt": "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-ATLAS-RECEIPT-REPLAY-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-AND-50-PERCENT-RATCHET-2026-07-14.md",
-    "checkpoint_commit": "main@04c16d52",
+    "checkpoint_commit": "main@bcabb0ee",
     "checkpoint_summary": "The lane is at 50 percent. Deterministic mixed-source replay validates both admitted Atlas receipt contracts, verifies raw-byte digests, preserves chronology and source status, classifies one success and one blocker, and emits authority-false advisory agent state. The next package selects project adapters.",
     "governing_receipts": [
       "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-FABLE-GENERATIVE-AGENT-RESEARCH-CONTRACT-FREEZE-2026-07-09.md",
