@@ -207,13 +207,13 @@ POLICY_REGISTRY: dict[str, MarkerPolicy] = {
     "Cortex Simulation Substrate Readiness": MarkerPolicy(
         category="admissible after current lane",
         rationale=(
-            "The lane is at 40% with the deterministic synthetic-fixture helper proved and the ATLAS receipt-replay "
-            "contract frozen. The next honest boundary is exact implementation admission; no replay implementation, "
-            "project adapter, model call, or live-action authority is admitted yet."
+            "The lane is at 40% with the receipt-replay contract and exact first-implementation surfaces admitted. The "
+            "next honest boundary is the worker prompt and handoff contract; no replay implementation, project adapter, "
+            "model call, or live-action authority is admitted yet."
         ),
         expected_evidence=(
-            "one root-owned implementation admission naming exact helper and proof surfaces plus the frozen receipt, "
-            "digest, chronology, failure-classification, output, threshold, and authority boundaries"
+            "one root-owned worker handoff contract carrying the exact objective, command, allowed files, mixed-source "
+            "canary, proof matrix, stop conditions, and frozen authority boundaries"
         ),
     ),
     "Owner-Lane Agent Service Bus & DiscordOS Ops Readiness": MarkerPolicy(
@@ -440,15 +440,15 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "Cortex Simulation Substrate Readiness": PacketDescriptor(
-        packet="Cortex Simulation Substrate Readiness ATLAS receipt workflow and failure-mode replay first-implementation admission",
+        packet="Cortex Simulation Substrate Readiness ATLAS receipt workflow and failure-mode replay prompt-pack and worker handoff contract",
         basis_receipt_ref=(
             "docs/ops/"
-            "CORTEX-SIMULATION-SUBSTRATE-READINESS-ATLAS-RECEIPT-WORKFLOW-AND-FAILURE-MODE-REPLAY-CONTRACT-FREEZE-2026-07-14.md"
+            "CORTEX-SIMULATION-SUBSTRATE-READINESS-ATLAS-RECEIPT-WORKFLOW-AND-FAILURE-MODE-REPLAY-FIRST-IMPLEMENTATION-ADMISSION-2026-07-14.md"
         ),
-        mode="docs-only root-bounded receipt-replay implementation admission",
+        mode="docs-only root-bounded receipt-replay prompt-pack freeze",
         scope=(
-            "admit exact replay helper and focused proof paths while carrying forward frozen receipt schemas, trust, "
-            "digests, chronology, failure classes, output guards, threshold eligibility, and authority denials"
+            "freeze the exact worker objective, CLI, admitted files, mixed-source canary, proof obligations, verification "
+            "commands, stop conditions, and authority denials without implementing replay"
         ),
     ),
     "Owner-Lane Agent Service Bus & DiscordOS Ops Readiness": PacketDescriptor(
