@@ -1,0 +1,138 @@
+{
+  "schema_version": "atlas.cortex.synthesis_execution_bridge_packet.v1",
+  "packet_id": "atlas-contracts-v2-cluster-2-cortex-bridge-v1",
+  "status": "ok",
+  "trust_class": "validated_advisory",
+  "execution_contract": {
+    "selected_lane": "Atlas Contracts v2 Mesh Adoption",
+    "selected_marker": "Atlas Contracts v2 adoption = 3/11 families",
+    "selected_packet": "Atlas Contracts v2 Cluster 2 governed producer and consumer adoption",
+    "objective": "Prove governed producer and independent Atlas consumer adoption for ContextPacket, EvidenceBundle, and ApprovalRecord without changing external systems or weakening authority boundaries.",
+    "local_capability": "full-access",
+    "external_action_authority": "no_execution_authority",
+    "required_approvals": [],
+    "jobs": [
+      {
+        "job_id": "stack-contracts-v2-cluster-2-producer",
+        "objective": "Extend the governed _stack Contracts v2 producer and terminal receipt path to emit validated ContextPacket, EvidenceBundle, and ApprovalRecord artifacts with existing job correlations.",
+        "project": "atlas",
+        "component": "_stack",
+        "repository": "_stack",
+        "owner": "stack",
+        "execution_class": "repo_worktree",
+        "allowed_files": [
+          "ops/codex/AtlasContractsV2Producer.ps1",
+          "ops/codex/Test-AtlasContractsV2Producer.ps1",
+          "ops/codex/Test-StackOperatorSurface.ps1",
+          "ops/codex/Test-AtlasWorkspaceWriter.ps1",
+          "docs/codex-orchestration.md",
+          "docs/runbooks/STACK-WORKER-FLOW.md"
+        ],
+        "forbidden_files": [
+          "secrets/**",
+          "runtime/**",
+          "../**"
+        ],
+        "dependencies": [],
+        "resource_claims": {
+          "files": ["ops/codex/AtlasContractsV2Producer.ps1"],
+          "worktrees": ["_stack-contracts-v2-cluster-2"],
+          "schemas": [
+            "atlas.context-packet.v2",
+            "atlas.evidence-bundle.v2",
+            "atlas.approval-record.v2"
+          ]
+        },
+        "runtime": {
+          "provider": "openai",
+          "model": "gpt-5.6-terra",
+          "reasoning": "high",
+          "speed": "standard",
+          "fallback": "standard_with_warning"
+        },
+        "external_actions": [],
+        "required_approvals": [],
+        "verification_requirements": [
+          "powershell -NoProfile -ExecutionPolicy Bypass -File ops/codex/Test-AtlasContractsV2Producer.ps1",
+          "pnpm run codex:stack:verify"
+        ],
+        "proof_requirements": [
+          "all three new artifacts validate before worker execution or terminal closeout",
+          "correlation identities match the ComponentManifest, JobEnvelope, and ExecutionReceipt chain",
+          "full local capability remains separate from external action authority"
+        ],
+        "commit_requirements": ["exact admitted _stack paths only", "push remains manual-only"],
+        "receipt_requirements": ["terminal ExecutionReceipt includes cluster-2 artifact paths and validation evidence"],
+        "rollback_requirements": ["preserve existing cluster-1 producer behavior and v1 compatibility"],
+        "recovery_requirements": ["fail closed before Codex execution when any cluster-2 artifact is invalid"]
+      },
+      {
+        "job_id": "atlas-contracts-v2-cluster-2-consumer",
+        "objective": "Extend the independent Atlas adoption consumer to validate and correlate ContextPacket, EvidenceBundle, and ApprovalRecord from one governed _stack canary, then publish the family-complete adoption receipt.",
+        "project": "atlas",
+        "component": "atlas-root",
+        "repository": "atlas",
+        "owner": "stack-root",
+        "execution_class": "canonical_workspace",
+        "allowed_files": [
+          "ops/atlas/validate_contracts_v2_adoption.mjs",
+          "ops/atlas/test_validate_contracts_v2_adoption.mjs",
+          "docs/ops/ATLAS-CONTRACTS-V2-CLUSTER-2-ADOPTION-2026-07-13.md",
+          "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json",
+          "packages/atlas-contracts/README.md"
+        ],
+        "forbidden_files": [
+          "secrets/**",
+          "repos/**",
+          "runtime/**"
+        ],
+        "dependencies": ["stack-contracts-v2-cluster-2-producer"],
+        "resource_claims": {
+          "files": [
+            "ops/atlas/validate_contracts_v2_adoption.mjs",
+            "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json"
+          ],
+          "canonical_root": ["atlas"],
+          "schemas": [
+            "atlas.context-packet.v2",
+            "atlas.evidence-bundle.v2",
+            "atlas.approval-record.v2"
+          ]
+        },
+        "runtime": {
+          "provider": "openai",
+          "model": "gpt-5.6-terra",
+          "reasoning": "high",
+          "speed": "standard",
+          "fallback": "standard_with_warning"
+        },
+        "external_actions": [],
+        "required_approvals": [],
+        "verification_requirements": [
+          "node ops/atlas/test_validate_contracts_v2_adoption.mjs",
+          "python ops/validation/validate_stack.py --allow-missing-locked-repos",
+          "python ops/atlas/continuity_manifest_health.py"
+        ],
+        "proof_requirements": [
+          "independent consumer validates all six adopted v2 families",
+          "hashes, byte counts, contract versions, and job correlations match producer artifacts",
+          "mesh adoption advances from 3/11 to 6/11 only after producer and consumer proof"
+        ],
+        "commit_requirements": ["exact admitted Atlas-root paths only", "no broad staging", "push only after parity guard"],
+        "receipt_requirements": ["durable Cluster 2 adoption receipt and marker evidence"],
+        "rollback_requirements": ["do not remove Cluster 1 adoption or existing v1 compatibility"],
+        "recovery_requirements": ["keep adoption at 3/11 when producer evidence is missing, invalid, stale, or uncorrelated"]
+      }
+    ]
+  },
+  "authority_denials": [
+    "no_execution_authority",
+    "no_final_receipt_authority",
+    "no_marker_authority",
+    "no_external_mutation_authority",
+    "no_codex_launch",
+    "no_queue_or_scheduler_creation",
+    "no_owner_repository_mutation_from_atlas_root",
+    "no_live_platform_query"
+  ]
+}
