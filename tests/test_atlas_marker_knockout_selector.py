@@ -386,18 +386,18 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual("hold_current_lane", payload["operator_action"])
         self.assertEqual("Vercel Platform Observability Governance", payload["next_after_current_marker"])
         self.assertEqual(
-            "Vercel Platform Observability Governance environment-name-only inventory contract freeze",
+            "Vercel Platform Observability Governance analytics and drain visibility contract freeze",
             payload["next_after_current_packet"],
         )
         self.assertEqual(
-            "docs/ops/VERCEL-PLATFORM-OBSERVABILITY-GOVERNANCE-IMPLEMENTED-INVENTORY-MARKER-RATCHET-2026-07-14.md",
+            "docs/ops/VERCEL-PLATFORM-OBSERVABILITY-GOVERNANCE-ENVIRONMENT-NAME-ONLY-INVENTORY-FIRST-IMPLEMENTATION-RECONCILIATION-2026-07-14.md",
             payload["next_after_current_packet_basis_ref"],
         )
         self.assertEqual(
-            "docs-only root-bounded environment-name-only contract freeze",
+            "docs-only root-bounded analytics and drain visibility contract freeze",
             payload["next_after_current_packet_mode"],
         )
-        self.assertIn("environment variable names", payload["next_after_current_packet_scope"])
+        self.assertIn("analytics", payload["next_after_current_packet_scope"])
 
     def test_build_campaign_skips_manifest_held_follow_on_marker(self) -> None:
         root = self._temp_root()

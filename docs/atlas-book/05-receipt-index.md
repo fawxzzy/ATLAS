@@ -1,5 +1,7 @@
 # Receipt Index
 
+- [Vercel Platform Observability Governance Environment-Name-Only Inventory First Implementation Reconciliation 2026-07-14](../ops/VERCEL-PLATFORM-OBSERVABILITY-GOVERNANCE-ENVIRONMENT-NAME-ONLY-INVENTORY-FIRST-IMPLEMENTATION-RECONCILIATION-2026-07-14.md) - implements the third read-only unit, proves recursive value-field rejection, and moves the marker from `20%` to `30%`.
+- [Vercel Platform Observability Governance Environment-Name-Only Inventory Contract Freeze 2026-07-14](../ops/VERCEL-PLATFORM-OBSERVABILITY-GOVERNANCE-ENVIRONMENT-NAME-ONLY-INVENTORY-CONTRACT-FREEZE-2026-07-14.md) - freezes names, targets, presence, and posture while forbidding values, secrets, and mutation.
 - [Vercel Platform Observability Governance Implemented Inventory Marker Ratchet 2026-07-14](../ops/VERCEL-PLATFORM-OBSERVABILITY-GOVERNANCE-IMPLEMENTED-INVENTORY-MARKER-RATCHET-2026-07-14.md) - reconciles two already-landed read-only inventory units, moves the marker from `0%` to `20%`, and routes next to an environment-name-only contract with values forbidden.
 - [GitHub Control-Plane Live DiscordOS Projection Ratchet 2026-07-14](../ops/GITHUB-CONTROL-PLANE-LIVE-DISCORDOS-PROJECTION-RATCHET-2026-07-14.md) - one approved single-writer projection, `sent_verified`, exact live readback; completes the deterministic `8 / 8` marker without granting cleanup authority.
 - [External Model Sidecar Provider Integration - DeepSeek/LiteLLM Bridge Program Admission 2026-07-13](../ops/ATLAS-EXTERNAL-MODEL-SIDECAR-DEEPSEEK-LITELLM-BRIDGE-PROGRAM-ADMISSION-2026-07-13.md)

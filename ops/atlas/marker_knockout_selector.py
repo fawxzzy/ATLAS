@@ -271,12 +271,12 @@ POLICY_REGISTRY: dict[str, MarkerPolicy] = {
     "Vercel Platform Observability Governance": MarkerPolicy(
         category="admissible after current lane",
         rationale=(
-            "The lane now has proof-backed governed project inventory, log/runtime-error inventory, and deployment-freshness inventory at 20%, "
+            "The lane now has proof-backed project, log/runtime-error, deployment-freshness, and environment-name-only inventory at 30%, "
             "but current durable restart truth still routes through the held Sandbox family first."
         ),
         expected_evidence=(
-            "one root-owned environment-name-only inventory contract that records names, targets, and presence only "
-            "while forbidding env values, token values, and Vercel mutation"
+            "one root-owned analytics and drain visibility contract that distinguishes visible, unproven, unavailable, forbidden, and mutation-capable surfaces "
+            "without enabling products, creating drains, changing retention, or claiming entitlement"
         ),
     ),
     "Operator Secret Path Hygiene": MarkerPolicy(
@@ -401,16 +401,16 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "Vercel Platform Observability Governance": PacketDescriptor(
-        packet="Vercel Platform Observability Governance environment-name-only inventory contract freeze",
+        packet="Vercel Platform Observability Governance analytics and drain visibility contract freeze",
         basis_receipt_ref=(
             "docs/ops/"
-            "VERCEL-PLATFORM-OBSERVABILITY-GOVERNANCE-IMPLEMENTED-INVENTORY-"
-            "MARKER-RATCHET-2026-07-14.md"
+            "VERCEL-PLATFORM-OBSERVABILITY-GOVERNANCE-ENVIRONMENT-NAME-ONLY-INVENTORY-"
+            "FIRST-IMPLEMENTATION-RECONCILIATION-2026-07-14.md"
         ),
-        mode="docs-only root-bounded environment-name-only contract freeze",
+        mode="docs-only root-bounded analytics and drain visibility contract freeze",
         scope=(
-            "freeze the next safe read-only Vercel observability boundary after log/runtime-error and deployment-freshness inventory implementation, "
-            "covering environment variable names, target scopes, and presence only without reading values, tokens, analytics, drains, or performing mutation"
+            "freeze the next safe read-only Vercel observability boundary after environment-name-only intake implementation, "
+            "classifying analytics, speed insights, traces, alerts, and drains without enabling products, creating drains, changing retention, or claiming entitlement"
         ),
     ),
     "AI Work Session Stability & Auto-Sync Loop": PacketDescriptor(
