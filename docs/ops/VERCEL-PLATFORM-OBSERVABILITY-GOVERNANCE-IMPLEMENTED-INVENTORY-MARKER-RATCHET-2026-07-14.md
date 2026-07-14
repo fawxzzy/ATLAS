@@ -67,9 +67,11 @@ Historical implementation receipt:
 python ops/validation/validate_stack.py
 ```
 
-Result before this reconciliation:
+Most recent validation result during this reconciliation:
 
-- `critical=0 error=0 warning=0 info=0`
+- `critical=0 error=0 warning=19 info=0`
+
+The warnings are inherited absolute-path findings in pre-existing imported and audit documents. None points to a file introduced or changed by this Vercel ratchet.
 
 No new live Vercel query was needed. This packet reconciles durable implementation and current local tests; it does not claim that historical production observations are permanent current health.
 
@@ -118,12 +120,14 @@ It must forbid:
 
 ## Reusable knowledge
 
-**RULE - Implementation-backed marker ratchets**  
+**RULE - Implementation-backed marker ratchets**
+
 A platform marker moves only when a distinct helper or operator surface is landed and current focused proof passes.
 
-**PATTERN - Read-only platform inventory progression**  
+**PATTERN - Read-only platform inventory progression**
+
 Advance from governed project identity to bounded operational inventories, then to narrower metadata-only capability slices before considering broad observability or mutation.
 
-**FAILURE MODE - Foundation double counting**  
-Counting project-inventory admission again as an implementation unit inflates the marker without adding a new capability.
+**FAILURE MODE - Foundation double counting**
 
+Counting project-inventory admission again as an implementation unit inflates the marker without adding a new capability.
