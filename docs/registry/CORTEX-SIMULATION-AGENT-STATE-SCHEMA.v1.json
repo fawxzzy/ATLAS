@@ -1,0 +1,69 @@
+{
+  "contract_version": "atlas.cortex.simulation_agent_state_schema_registry.v1",
+  "schema_identifier": "atlas.cortex.simulation.agent-state.v1",
+  "schema_ref": "schemas/atlas.cortex.simulation.agent-state.v1.json",
+  "mode": "read_only_advisory_state_contract",
+  "memory_policy": {
+    "content": "summary_only_with_source_provenance",
+    "identity": "sha256_of_normalized_provenance_and_summary",
+    "retention_classes": ["ephemeral", "session", "project", "durable"],
+    "rights_classes": ["synthetic", "operator_owned", "authorized_external", "unknown_blocked"],
+    "privacy_classes": ["public", "internal", "sensitive_prohibited"],
+    "injection_states": ["trusted", "neutralized", "rejected"],
+    "unknown_rights_behavior": "exclude_and_block",
+    "sensitive_behavior": "exclude_and_block"
+  },
+  "retrieval_policy": {
+    "score_components": ["recency", "importance", "relevance"],
+    "weights_must_be_explicit": true,
+    "minimum_confidence_must_be_explicit": true,
+    "tiebreaker": "score_desc_then_memory_id_asc",
+    "selected_ids_must_be_subset_of_candidates": true,
+    "excluded_items_require_reason": true
+  },
+  "reflection_policy": {
+    "triggers": ["event_count", "importance_threshold", "operator_request", "replay_checkpoint"],
+    "must_reference_memories": true,
+    "must_be_labeled_derived_not_observed": true,
+    "approval_state": "advisory_only",
+    "may_not_overwrite_observations": true
+  },
+  "planning_policy": {
+    "states": ["candidate", "active", "completed", "blocked", "abandoned"],
+    "allowed_transitions": {
+      "candidate": ["active", "blocked", "abandoned"],
+      "active": ["completed", "blocked", "abandoned"],
+      "blocked": ["active", "abandoned"],
+      "completed": [],
+      "abandoned": []
+    },
+    "steps_require_evidence_and_authority_check": true,
+    "termination_reasons": ["success", "blocked", "timeout", "operator_stop", "safety_stop"],
+    "execution_authorized": false
+  },
+  "provenance_policy": {
+    "source_refs_required": true,
+    "source_digests_required_for_memories": true,
+    "hidden_transcripts_denied": true,
+    "secret_bearing_sources_denied": true,
+    "raw_live_user_data_denied_by_default": true,
+    "owner_repo_private_drift_not_canonical": true
+  },
+  "authority": {
+    "advisory_only": true,
+    "execution_authorized": false,
+    "owner_repo_mutation_authorized": false,
+    "platform_mutation_authorized": false,
+    "discord_write_authorized": false,
+    "board_write_authorized": false,
+    "marker_movement_authorized": false,
+    "final_receipt_authorized": false
+  },
+  "marker": {
+    "name": "Cortex Simulation Substrate Readiness",
+    "current_percent": 30,
+    "movement": "20_to_30",
+    "next_threshold": 40,
+    "next_packet": "Cortex Simulation Substrate Readiness first read-only scenario helper contract freeze"
+  }
+}

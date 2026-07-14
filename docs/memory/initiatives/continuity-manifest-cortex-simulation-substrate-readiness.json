@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-07-14T04:02:31-04:00",
-  "updated_at": "2026-07-14T04:02:31-04:00",
+  "updated_at": "2026-07-14T04:20:00-04:00",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -25,9 +25,13 @@
     "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-SIMULATION-REQUIREMENTS-MAP-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-10.md",
     "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-SIMULATION-REQUIREMENTS-MAP-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-10.md",
     "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-RESEARCH-AND-REQUIREMENTS-20-PERCENT-RATCHET-2026-07-14.md",
+    "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-AGENT-MEMORY-REFLECTION-PLANNING-SCHEMA-CONTRACT-FREEZE-2026-07-14.md",
     "docs/registry/CORTEX-SIMULATION-SUBSTRATE-RESEARCH-CONTRACT.v1.json",
+    "docs/registry/CORTEX-SIMULATION-AGENT-STATE-SCHEMA.v1.json",
+    "schemas/atlas.cortex.simulation.agent-state.v1.json",
     "ops/cortex/simulation_substrate_requirements.py",
-    "tests/test_cortex_simulation_substrate_requirements.py"
+    "tests/test_cortex_simulation_substrate_requirements.py",
+    "tests/test_cortex_simulation_agent_state_schema.py"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -35,13 +39,14 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "cortex-simulation-substrate-readiness",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-RESEARCH-AND-REQUIREMENTS-20-PERCENT-RATCHET-2026-07-14.md",
-    "checkpoint_commit": "main@2025ae3a",
-    "checkpoint_summary": "The existing research contract and deterministic requirements mapper are reconciled into current truth at 20 percent. All 11 admitted groups map with fresh focused proof, no blockers, and no authority widening. The next packet freezes the agent memory, reflection, and planning schema required for 30 percent.",
+    "current_checkpoint_receipt": "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-AGENT-MEMORY-REFLECTION-PLANNING-SCHEMA-CONTRACT-FREEZE-2026-07-14.md",
+    "checkpoint_commit": "main@8c4902aa",
+    "checkpoint_summary": "The lane is at 30 percent. Research and all 11 requirements groups remain proved, and the versioned agent-state schema plus lifecycle registry now freeze memory, retrieval, reflection, planning, provenance, retention, rights, privacy, injection, confidence, and execution-denial semantics. The next packet freezes the first read-only scenario-helper contract.",
     "governing_receipts": [
       "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-FABLE-GENERATIVE-AGENT-RESEARCH-CONTRACT-FREEZE-2026-07-09.md",
       "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-SIMULATION-REQUIREMENTS-MAP-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-10.md",
-      "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-RESEARCH-AND-REQUIREMENTS-20-PERCENT-RATCHET-2026-07-14.md"
+      "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-RESEARCH-AND-REQUIREMENTS-20-PERCENT-RATCHET-2026-07-14.md",
+      "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-AGENT-MEMORY-REFLECTION-PLANNING-SCHEMA-CONTRACT-FREEZE-2026-07-14.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -49,8 +54,8 @@
         "role": "current 20 percent marker and deterministic threshold truth"
       },
       {
-        "path": "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-RESEARCH-AND-REQUIREMENTS-20-PERCENT-RATCHET-2026-07-14.md",
-        "role": "current research and requirements reconciliation authority"
+        "path": "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-AGENT-MEMORY-REFLECTION-PLANNING-SCHEMA-CONTRACT-FREEZE-2026-07-14.md",
+        "role": "current agent-state schema and 30 percent ratchet authority"
       },
       {
         "path": "docs/registry/CORTEX-SIMULATION-SUBSTRATE-RESEARCH-CONTRACT.v1.json",
@@ -65,13 +70,17 @@
       {
         "path": "tests/test_cortex_simulation_substrate_requirements.py",
         "role": "focused mapping, path-safety, strict-mode, and fail-closed proof"
+      },
+      {
+        "path": "tests/test_cortex_simulation_agent_state_schema.py",
+        "role": "focused schema validity and advisory-authority enforcement proof"
       }
     ],
     "blocked_or_gated_work": [
       {
-        "work": "Claiming the 30 percent schema threshold",
+        "work": "Claiming the 40 percent helper threshold",
         "state": "gated",
-        "reason": "agent memory, retrieval, reflection, and planning schemas are not separately versioned and frozen yet"
+        "reason": "the first read-only scenario helper is not contracted or implemented yet"
       },
       {
         "work": "Executing simulations or project adapters",
@@ -81,23 +90,23 @@
     ],
     "next_package_ladder": [
       {
-        "package": "Cortex Simulation Substrate Readiness agent memory reflection planning schema contract freeze",
-        "mode": "docs-only root-bounded simulation schema contract freeze",
-        "reason": "the 20 percent requirements map is proved and the 30 percent threshold requires a versioned schema contract"
+        "package": "Cortex Simulation Substrate Readiness first read-only scenario helper contract freeze",
+        "mode": "docs-only root-bounded read-only scenario-helper contract freeze",
+        "reason": "the 30 percent agent-state schema is frozen and the 40 percent threshold requires a bounded helper implementation"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-RESEARCH-AND-REQUIREMENTS-20-PERCENT-RATCHET-2026-07-14.md",
-    "freshness_checked_at": "2026-07-14T04:02:31-04:00",
-    "freshness_basis": "Fresh focused tests and strict live helper execution map all 11 admitted groups with no warnings or blockers; schema freezing and runtime work remain gated.",
+    "freshness_checked_receipt": "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-AGENT-MEMORY-REFLECTION-PLANNING-SCHEMA-CONTRACT-FREEZE-2026-07-14.md",
+    "freshness_checked_at": "2026-07-14T04:20:00-04:00",
+    "freshness_basis": "The Draft 2020-12 schema validates a complete advisory fixture and rejects execution authority, unknown raw memory fields, and reflections presented as observations. Runtime simulation remains gated.",
     "marker_posture": [
       {
         "marker": "Cortex Simulation Substrate Readiness",
-        "percent": 20,
+        "percent": 30,
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ],
-    "current_percent": 20,
-    "next_exact_packet": "Cortex Simulation Substrate Readiness agent memory reflection planning schema contract freeze"
+    "current_percent": 30,
+    "next_exact_packet": "Cortex Simulation Substrate Readiness first read-only scenario helper contract freeze"
   }
 }

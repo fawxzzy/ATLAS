@@ -207,13 +207,13 @@ POLICY_REGISTRY: dict[str, MarkerPolicy] = {
     "Cortex Simulation Substrate Readiness": MarkerPolicy(
         category="admissible after current lane",
         rationale=(
-            "The lane is at 20% with primary research interpretation frozen and all 11 admitted requirements groups "
-            "mapped by a deterministic read-only helper. The next honest boundary is the agent memory, reflection, "
-            "and planning schema contract; no simulator or project adapter is admitted yet."
+            "The lane is at 30% with research, deterministic requirements mapping, and a versioned advisory agent-state "
+            "schema proved. The next honest boundary is a contract for the first read-only scenario helper; no simulator, "
+            "model call, project adapter, or live-action authority is admitted yet."
         ),
         expected_evidence=(
-            "one versioned root-owned schema contract for agent memory, retrieval, reflection, and planning with "
-            "provenance, retention, lifecycle, safety, and authority denials explicit"
+            "one root-owned helper contract that consumes only synthetic or explicitly admitted root fixtures, emits "
+            "schema-valid advisory scenario state, and cannot call models, execute actions, or mutate owner/platform surfaces"
         ),
     ),
     "Owner-Lane Agent Service Bus & DiscordOS Ops Readiness": MarkerPolicy(
@@ -440,15 +440,15 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "Cortex Simulation Substrate Readiness": PacketDescriptor(
-        packet="Cortex Simulation Substrate Readiness agent memory reflection planning schema contract freeze",
+        packet="Cortex Simulation Substrate Readiness first read-only scenario helper contract freeze",
         basis_receipt_ref=(
             "docs/ops/"
-            "CORTEX-SIMULATION-SUBSTRATE-READINESS-RESEARCH-AND-REQUIREMENTS-20-PERCENT-RATCHET-2026-07-14.md"
+            "CORTEX-SIMULATION-SUBSTRATE-READINESS-AGENT-MEMORY-REFLECTION-PLANNING-SCHEMA-CONTRACT-FREEZE-2026-07-14.md"
         ),
-        mode="docs-only root-bounded simulation schema contract freeze",
+        mode="docs-only root-bounded read-only scenario-helper contract freeze",
         scope=(
-            "freeze versioned memory, retrieval, reflection, and planning schemas plus lifecycle, provenance, retention, "
-            "safety, and authority boundaries without implementing a simulator or touching owner repositories"
+            "freeze the exact inputs, outputs, path guards, deterministic behavior, authority denials, and proof matrix "
+            "for one read-only scenario helper without implementing it or touching owner repositories"
         ),
     ),
     "Owner-Lane Agent Service Bus & DiscordOS Ops Readiness": PacketDescriptor(

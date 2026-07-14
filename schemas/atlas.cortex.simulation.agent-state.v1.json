@@ -1,0 +1,303 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://schemas/atlas.cortex.simulation.agent-state.v1.json",
+  "title": "ATLAS Cortex simulation agent state v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "state_id",
+    "scenario_id",
+    "agent_id",
+    "generated_at",
+    "source_refs",
+    "memories",
+    "retrieval_context",
+    "reflections",
+    "active_plan",
+    "authority"
+  ],
+  "properties": {
+    "contract_version": {
+      "type": "string",
+      "const": "atlas.cortex.simulation.agent-state.v1"
+    },
+    "state_id": { "$ref": "#/$defs/digest_id" },
+    "scenario_id": { "type": "string", "minLength": 1 },
+    "agent_id": { "type": "string", "minLength": 1 },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "source_refs": { "$ref": "#/$defs/source_refs" },
+    "memories": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/memory" }
+    },
+    "retrieval_context": { "$ref": "#/$defs/retrieval_context" },
+    "reflections": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/reflection" }
+    },
+    "active_plan": {
+      "oneOf": [
+        { "$ref": "#/$defs/plan" },
+        { "type": "null" }
+      ]
+    },
+    "authority": { "$ref": "#/$defs/authority" }
+  },
+  "$defs": {
+    "digest_id": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "source_refs": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "memory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "memory_id",
+        "observed_at",
+        "content_summary",
+        "source_refs",
+        "source_digest",
+        "importance",
+        "confidence",
+        "retention_class",
+        "rights_class",
+        "privacy_class",
+        "injection_state",
+        "supersedes"
+      ],
+      "properties": {
+        "memory_id": { "$ref": "#/$defs/digest_id" },
+        "observed_at": { "type": "string", "format": "date-time" },
+        "content_summary": { "type": "string", "minLength": 1 },
+        "source_refs": { "$ref": "#/$defs/source_refs" },
+        "source_digest": { "$ref": "#/$defs/digest_id" },
+        "importance": { "$ref": "#/$defs/score" },
+        "confidence": { "$ref": "#/$defs/score" },
+        "retention_class": {
+          "type": "string",
+          "enum": ["ephemeral", "session", "project", "durable"]
+        },
+        "rights_class": {
+          "type": "string",
+          "enum": ["synthetic", "operator_owned", "authorized_external", "unknown_blocked"]
+        },
+        "privacy_class": {
+          "type": "string",
+          "enum": ["public", "internal", "sensitive_prohibited"]
+        },
+        "injection_state": {
+          "type": "string",
+          "enum": ["trusted", "neutralized", "rejected"]
+        },
+        "supersedes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/digest_id" }
+        }
+      }
+    },
+    "retrieval_context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "query_summary",
+        "candidate_memory_ids",
+        "selected_memory_ids",
+        "scoring",
+        "minimum_confidence",
+        "deterministic_tiebreaker",
+        "excluded"
+      ],
+      "properties": {
+        "query_summary": { "type": "string", "minLength": 1 },
+        "candidate_memory_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/digest_id" }
+        },
+        "selected_memory_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/digest_id" }
+        },
+        "scoring": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["recency_weight", "importance_weight", "relevance_weight"],
+          "properties": {
+            "recency_weight": { "$ref": "#/$defs/score" },
+            "importance_weight": { "$ref": "#/$defs/score" },
+            "relevance_weight": { "$ref": "#/$defs/score" }
+          }
+        },
+        "minimum_confidence": { "$ref": "#/$defs/score" },
+        "deterministic_tiebreaker": {
+          "type": "string",
+          "const": "score_desc_then_memory_id_asc"
+        },
+        "excluded": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["memory_id", "reason"],
+            "properties": {
+              "memory_id": { "$ref": "#/$defs/digest_id" },
+              "reason": {
+                "type": "string",
+                "enum": [
+                  "below_confidence",
+                  "rights_blocked",
+                  "privacy_blocked",
+                  "injection_rejected",
+                  "superseded",
+                  "not_relevant"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "reflection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reflection_id",
+        "generated_at",
+        "trigger",
+        "source_memory_ids",
+        "summary",
+        "confidence",
+        "source_refs",
+        "derived_not_observed",
+        "approval_state",
+        "retention_class"
+      ],
+      "properties": {
+        "reflection_id": { "$ref": "#/$defs/digest_id" },
+        "generated_at": { "type": "string", "format": "date-time" },
+        "trigger": {
+          "type": "string",
+          "enum": ["event_count", "importance_threshold", "operator_request", "replay_checkpoint"]
+        },
+        "source_memory_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/digest_id" }
+        },
+        "summary": { "type": "string", "minLength": 1 },
+        "confidence": { "$ref": "#/$defs/score" },
+        "source_refs": { "$ref": "#/$defs/source_refs" },
+        "derived_not_observed": { "type": "boolean", "const": true },
+        "approval_state": { "type": "string", "const": "advisory_only" },
+        "retention_class": {
+          "type": "string",
+          "enum": ["session", "project", "durable"]
+        }
+      }
+    },
+    "plan_step": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["step_id", "objective", "state", "proposed_action", "evidence_required", "authority_check"],
+      "properties": {
+        "step_id": { "type": "string", "minLength": 1 },
+        "objective": { "type": "string", "minLength": 1 },
+        "state": {
+          "type": "string",
+          "enum": ["candidate", "ready", "blocked", "completed", "skipped"]
+        },
+        "proposed_action": { "type": "string", "minLength": 1 },
+        "evidence_required": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "authority_check": { "type": "string", "const": "advisory_only" }
+      }
+    },
+    "plan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "plan_id",
+        "objective",
+        "status",
+        "source_memory_ids",
+        "source_reflection_ids",
+        "steps",
+        "success_criteria",
+        "termination_reason",
+        "confidence",
+        "execution_authorized"
+      ],
+      "properties": {
+        "plan_id": { "$ref": "#/$defs/digest_id" },
+        "objective": { "type": "string", "minLength": 1 },
+        "status": {
+          "type": "string",
+          "enum": ["candidate", "active", "completed", "blocked", "abandoned"]
+        },
+        "source_memory_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/digest_id" }
+        },
+        "source_reflection_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/digest_id" }
+        },
+        "steps": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/plan_step" }
+        },
+        "success_criteria": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "termination_reason": {
+          "type": ["string", "null"],
+          "enum": [null, "success", "blocked", "timeout", "operator_stop", "safety_stop"]
+        },
+        "confidence": { "$ref": "#/$defs/score" },
+        "execution_authorized": { "type": "boolean", "const": false }
+      }
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "advisory_only",
+        "execution_authorized",
+        "owner_repo_mutation_authorized",
+        "platform_mutation_authorized",
+        "discord_write_authorized",
+        "marker_movement_authorized"
+      ],
+      "properties": {
+        "advisory_only": { "type": "boolean", "const": true },
+        "execution_authorized": { "type": "boolean", "const": false },
+        "owner_repo_mutation_authorized": { "type": "boolean", "const": false },
+        "platform_mutation_authorized": { "type": "boolean", "const": false },
+        "discord_write_authorized": { "type": "boolean", "const": false },
+        "marker_movement_authorized": { "type": "boolean", "const": false }
+      }
+    }
+  }
+}
