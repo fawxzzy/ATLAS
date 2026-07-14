@@ -906,18 +906,18 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual("hold_current_lane", payload["operator_action"])
         self.assertEqual("Owner-Lane Agent Service Bus & DiscordOS Ops Readiness", payload["next_after_current_marker"])
         self.assertEqual(
-            "Owner-Lane Agent Service Bus & DiscordOS Ops native task correlation first-implementation admission",
+            "Owner-Lane Agent Service Bus & DiscordOS Ops native ContextPacket and EvidenceBundle binding first-implementation admission",
             payload["next_after_current_packet"],
         )
         self.assertEqual(
-            "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-TO-ATLAS-GAP-MATRIX-AND-THIN-LEDGER-DENOMINATOR-REBASELINE-2026-07-14.md",
+            "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-TASK-CORRELATION-FIRST-IMPLEMENTATION-2026-07-14.md",
             payload["next_after_current_packet_basis_ref"],
         )
         self.assertEqual(
-            "bounded root-owned first-implementation admission",
+            "bounded root-owned context-and-evidence binding admission",
             payload["next_after_current_packet_mode"],
         )
-        self.assertIn("validated JobEnvelope", payload["next_after_current_packet_scope"])
+        self.assertIn("validated ContextPacket", payload["next_after_current_packet_scope"])
 
 
 if __name__ == "__main__":

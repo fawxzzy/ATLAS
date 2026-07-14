@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-07-10T12:00:00-04:00",
-  "updated_at": "2026-07-14T00:52:00-04:00",
+  "updated_at": "2026-07-14T01:02:00-04:00",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -25,6 +25,7 @@
     "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-FIRST-TRANSPORT-RECONCILIATION-2026-07-14.md",
     "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-CODEX-TASK-THREAD-CAPABILITY-SPIKE-2026-07-14.md",
     "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-TO-ATLAS-GAP-MATRIX-AND-THIN-LEDGER-DENOMINATOR-REBASELINE-2026-07-14.md",
+    "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-TASK-CORRELATION-FIRST-IMPLEMENTATION-2026-07-14.md",
     "docs/architecture/ATLAS-CHATGPT-CODEX-WORKFLOW.md",
     "ops/atlas/marker_knockout_selector.py",
     "ops/codex/config.full-permission.toml",
@@ -36,15 +37,16 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "owner-lane-agent-service-bus-and-discordos-ops-readiness",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-TO-ATLAS-GAP-MATRIX-AND-THIN-LEDGER-DENOMINATOR-REBASELINE-2026-07-14.md",
-    "checkpoint_commit": "main@e2ffda9d",
-    "checkpoint_summary": "The native-to-Atlas gap matrix freezes a ten-unit backend-neutral denominator. The authority/protocol baseline and native task/thread lifecycle proof complete units 1 and 2, moving the lane to 20 percent. Unit 3 is the next bounded implementation: JobEnvelope to native task/turn to ExecutionReceipt correlation.",
+    "current_checkpoint_receipt": "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-TASK-CORRELATION-FIRST-IMPLEMENTATION-2026-07-14.md",
+    "checkpoint_commit": "main@921b48ce",
+    "checkpoint_summary": "The root-owned native task correlation adapter validates JobEnvelope input, correlates real task and turn IDs, preserves requested runtime policy, distinguishes observed from unavailable effective policy, and emits a validated ExecutionReceipt. A live read-only canary succeeded. Units 3 and 4 are complete, moving the fixed denominator to four of ten and the marker to 40 percent.",
     "governing_receipts": [
       "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-MARKER-ADMISSION-2026-07-10.md",
       "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-FULL-PERMISSION-RUNTIME-AND-REQUEST-RECEIPT-PROTOCOL-CONTRACT-FREEZE-2026-07-10.md",
       "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-FIRST-TRANSPORT-RECONCILIATION-2026-07-14.md",
       "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-CODEX-TASK-THREAD-CAPABILITY-SPIKE-2026-07-14.md",
-      "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-TO-ATLAS-GAP-MATRIX-AND-THIN-LEDGER-DENOMINATOR-REBASELINE-2026-07-14.md"
+      "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-TO-ATLAS-GAP-MATRIX-AND-THIN-LEDGER-DENOMINATOR-REBASELINE-2026-07-14.md",
+      "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-TASK-CORRELATION-FIRST-IMPLEMENTATION-2026-07-14.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -70,6 +72,18 @@
       {
         "path": "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-TO-ATLAS-GAP-MATRIX-AND-THIN-LEDGER-DENOMINATOR-REBASELINE-2026-07-14.md",
         "role": "current 20 percent checkpoint, native-to-Atlas gap matrix, and deterministic ten-unit denominator"
+      },
+      {
+        "path": "ops/atlas/native_task_correlation.mjs",
+        "role": "root-owned JobEnvelope to native task/turn to ExecutionReceipt correlation adapter"
+      },
+      {
+        "path": "tests/test_atlas_native_task_correlation.mjs",
+        "role": "focused correlation, runtime-truth, schema, identity, and path-safety proof"
+      },
+      {
+        "path": "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-TASK-CORRELATION-FIRST-IMPLEMENTATION-2026-07-14.md",
+        "role": "current 40 percent implementation and live-canary receipt"
       },
       {
         "path": "docs/architecture/ATLAS-CHATGPT-CODEX-WORKFLOW.md",
@@ -130,19 +144,19 @@
     ],
     "next_package_ladder": [
       {
-        "package": "Owner-Lane Agent Service Bus & DiscordOS Ops native task correlation first-implementation admission",
-        "mode": "bounded root-owned first-implementation admission",
-        "reason": "the native-first denominator is frozen at two of ten complete units, so the next honest slice is unit 3: validated JobEnvelope to native task/turn to ExecutionReceipt correlation without a custom runtime or backend selection"
+        "package": "Owner-Lane Agent Service Bus & DiscordOS Ops native ContextPacket and EvidenceBundle binding first-implementation admission",
+        "mode": "bounded root-owned context-and-evidence binding admission",
+        "reason": "units 3 and 4 are implementation-backed and live-canary proven, so the next honest slice is unit 5: bind validated ContextPacket input and EvidenceBundle terminal proof to the existing native identity and ExecutionReceipt chain"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-TO-ATLAS-GAP-MATRIX-AND-THIN-LEDGER-DENOMINATOR-REBASELINE-2026-07-14.md",
-    "freshness_checked_at": "2026-07-14T00:52:00-04:00",
-    "freshness_basis": "The owner-lane orchestration family is manifest-backed at 20 percent on a fixed ten-unit denominator. Units 1 and 2 are complete; unit 3 is a backend-neutral native task correlation adapter using existing Atlas Contracts v2 JobEnvelope and ExecutionReceipt surfaces.",
+    "freshness_checked_receipt": "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-TASK-CORRELATION-FIRST-IMPLEMENTATION-2026-07-14.md",
+    "freshness_checked_at": "2026-07-14T01:02:00-04:00",
+    "freshness_basis": "The owner-lane orchestration family is manifest-backed at 40 percent on a fixed ten-unit denominator. Units 1 through 4 are complete with contract, native lifecycle, executable correlation, runtime-policy truth, focused tests, and a schema-valid live canary receipt. Unit 5 is ContextPacket and EvidenceBundle binding.",
     "marker_posture": [
       {
         "marker": "Owner-Lane Agent Service Bus & DiscordOS Ops Readiness",
-        "percent": 20,
+        "percent": 40,
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ]

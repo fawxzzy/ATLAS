@@ -219,13 +219,13 @@ POLICY_REGISTRY: dict[str, MarkerPolicy] = {
     "Owner-Lane Agent Service Bus & DiscordOS Ops Readiness": MarkerPolicy(
         category="admissible after current lane",
         rationale=(
-            "The lane now has a fixed ten-unit native-first denominator with units 1 and 2 complete. Its next "
-            "bounded work is unit 3: correlate validated Atlas job intent to native task/turn identity and a "
-            "validated execution receipt without introducing a custom runtime or storage backend."
+            "The lane now has a fixed ten-unit native-first denominator with units 1 through 4 complete. Its next "
+            "bounded work is unit 5: bind validated ContextPacket input and EvidenceBundle terminal proof to the "
+            "existing native identity and execution-receipt chain."
         ),
         expected_evidence=(
-            "one root-owned native task correlation adapter with valid/invalid fixtures and producer/consumer proof "
-            "for JobEnvelope, native task/turn identity, and ExecutionReceipt"
+            "one root-owned adapter extension with ContextPacket and EvidenceBundle validation, provenance binding, "
+            "valid/invalid tests, and a schema-valid producer/consumer canary"
         ),
     ),
     "Fitness QA/LLEL Workflow": MarkerPolicy(
@@ -451,15 +451,15 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "Owner-Lane Agent Service Bus & DiscordOS Ops Readiness": PacketDescriptor(
-        packet="Owner-Lane Agent Service Bus & DiscordOS Ops native task correlation first-implementation admission",
+        packet="Owner-Lane Agent Service Bus & DiscordOS Ops native ContextPacket and EvidenceBundle binding first-implementation admission",
         basis_receipt_ref=(
             "docs/ops/"
-            "OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-TO-ATLAS-GAP-MATRIX-AND-THIN-LEDGER-DENOMINATOR-REBASELINE-2026-07-14.md"
+            "OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-TASK-CORRELATION-FIRST-IMPLEMENTATION-2026-07-14.md"
         ),
-        mode="bounded root-owned first-implementation admission",
+        mode="bounded root-owned context-and-evidence binding admission",
         scope=(
-            "admit the smallest backend-neutral adapter and proof slice that correlates a validated JobEnvelope with "
-            "native task and turn IDs and emits a validated ExecutionReceipt"
+            "extend native task correlation so validated ContextPacket input and EvidenceBundle terminal proof retain "
+            "provenance through the existing JobEnvelope, task/turn, and ExecutionReceipt identity chain"
         ),
     ),
 }
