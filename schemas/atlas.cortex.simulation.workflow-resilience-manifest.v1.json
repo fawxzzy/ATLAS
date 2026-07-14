@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://atlas.local/schemas/atlas.cortex.simulation.workflow-resilience-manifest.v1.json",
+  "title": "Atlas Cortex workflow-resilience simulation manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "scenario_id", "generated_at", "adapter_id", "receipt_replay_manifest_ref", "receipt_replay_manifest_digest", "max_steps", "scenario_classes"],
+  "properties": {
+    "contract_version": {"const": "atlas.cortex.simulation.workflow-resilience-manifest.v1"},
+    "scenario_id": {"type": "string", "minLength": 1},
+    "generated_at": {"type": "string", "minLength": 1},
+    "adapter_id": {"const": "atlas-workflow-resilience"},
+    "receipt_replay_manifest_ref": {"type": "string", "pattern": "^data/cortex/simulation-replays/.+\\.json$"},
+    "receipt_replay_manifest_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "max_steps": {"type": "integer", "minimum": 1, "maximum": 8},
+    "scenario_classes": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"enum": ["observed", "proof_recovery", "blocked_hold"]}
+    }
+  }
+}

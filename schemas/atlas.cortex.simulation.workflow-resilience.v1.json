@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://atlas.local/schemas/atlas.cortex.simulation.workflow-resilience.v1.json",
+  "title": "Atlas Cortex workflow-resilience simulation v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "simulation_id", "generated_at", "scenario_id", "adapter_id", "source_refs", "replay_id", "observed_state", "steps", "termination", "recommendations", "authority"],
+  "properties": {
+    "contract_version": {"const": "atlas.cortex.simulation.workflow-resilience.v1"},
+    "simulation_id": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "generated_at": {"type": "string", "minLength": 1},
+    "scenario_id": {"type": "string", "minLength": 1},
+    "adapter_id": {"const": "atlas-workflow-resilience"},
+    "source_refs": {"type": "array", "minItems": 2, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "replay_id": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "observed_state": {"enum": ["healthy", "watch", "failed", "blocked"]},
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["sequence", "scenario_class", "state", "action", "proof_required", "executed"],
+        "properties": {
+          "sequence": {"type": "integer", "minimum": 1},
+          "scenario_class": {"enum": ["observed", "proof_recovery", "blocked_hold"]},
+          "state": {"enum": ["healthy", "watch", "failed", "blocked", "rehearsed"]},
+          "action": {"type": "string", "minLength": 1},
+          "proof_required": {"type": "array", "items": {"type": "string", "minLength": 1}},
+          "executed": {"const": false}
+        }
+      }
+    },
+    "termination": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["terminated", "reason", "max_steps", "steps_emitted"],
+      "properties": {
+        "terminated": {"const": true},
+        "reason": {"enum": ["fixed_template_exhausted", "max_steps_reached"]},
+        "max_steps": {"type": "integer", "minimum": 1, "maximum": 8},
+        "steps_emitted": {"type": "integer", "minimum": 1, "maximum": 8}
+      }
+    },
+    "recommendations": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["advisory_only", "execution_authorized", "dispatch_authorized", "owner_repo_read_authorized", "owner_repo_mutation_authorized", "platform_mutation_authorized", "discord_write_authorized", "board_write_authorized", "deployment_authorized", "approval_authorized", "final_receipt_authorized", "marker_movement_authorized"],
+      "properties": {
+        "advisory_only": {"const": true},
+        "execution_authorized": {"const": false},
+        "dispatch_authorized": {"const": false},
+        "owner_repo_read_authorized": {"const": false},
+        "owner_repo_mutation_authorized": {"const": false},
+        "platform_mutation_authorized": {"const": false},
+        "discord_write_authorized": {"const": false},
+        "board_write_authorized": {"const": false},
+        "deployment_authorized": {"const": false},
+        "approval_authorized": {"const": false},
+        "final_receipt_authorized": {"const": false},
+        "marker_movement_authorized": {"const": false}
+      }
+    }
+  }
+}
