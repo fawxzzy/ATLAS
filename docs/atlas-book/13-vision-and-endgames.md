@@ -154,6 +154,42 @@ The expansion must:
   omissions discovered during convergence become tracked lanes rather than lost
   chat context
 
+### Post-preparation development endgame
+
+Operational preparation, Clean and Re-sync work, and the current marker cluster
+are the factory-preparation phase. They do not represent the end of Atlas. Once
+that work is terminal, the second `Atlas Full-System Re-evaluation` gate must run
+as an exhaustive pre-development audit. It must review all completed work and
+search every governed surface for omissions, regressions, stale assumptions,
+new ideas, additions, updates, risks, and cross-system synergies.
+
+The development gate remains closed until the closing audit is accepted and all
+new preparatory-gap markers discovered by it are complete. Development-scope
+discoveries are admitted as explicit measured lanes and remain queued until the
+gate opens. The audit reaches `100%` only as gate `2 / 2`; child work and cleaner
+prose contribute zero points.
+
+The development program that follows includes:
+
+- finishing Lifeline, Foundation, Cortex, `_stack`, DiscordOS, Playbook, Atlas
+  root, Atlas Contracts, Atlas Control, and the Atlas Book
+- fully wiring those systems through versioned contracts, deterministic
+  execution, evidence, receipts, GitHub, boards, publications, knowledge
+  promotion, and recovery paths
+- replacing ChatGPT and Codex capabilities with Cortex capabilities to the
+  highest safely justified degree
+- replacing or absorbing Vercel and Supabase capabilities through Lifeline and
+  Foundation to the highest safely justified degree
+- retaining ChatGPT, Codex, Vercel, and Supabase as governed adapters until each
+  replacement lane proves parity, quality, security, reliability, observability,
+  cost, migration safety, rollback, and post-cutover health
+- coordinating reusable overlap with Mazer and Fitness without moving their
+  product implementation into Atlas root
+
+This is a measured engineering program, not a single migration. Every system and
+replacement family needs its own denominator, evidence sources, dependencies,
+cutover contract, and rollback boundary before receiving a percentage.
+
 ### Preview / Cache Verification
 
 - done means source drift, generated drift, and preview/cache drift can be separated cleanly

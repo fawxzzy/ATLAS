@@ -1,7 +1,7 @@
 {
   "schema": "atlas.full_system_reevaluation.lanes.v1",
   "version": 1,
-  "generated_at": "2026-07-13T00:20:00Z",
+  "generated_at": "2026-07-14T15:39:20-04:00",
   "source_refs": [
     "docs/audits/ATLAS-FULL-SYSTEM-OPENING-AUDIT-2026-07-12.md",
     "docs/audits/GITHUB-CONTROL-PLANE-OPENING-AUDIT-2026-07-12.md",
@@ -19,6 +19,7 @@
   "global_rules": {
     "percentage_rule": "Every lane and backlog candidate remains percentage-null until its own authorized marker audit accepts a denominator and completed units.",
     "audit_marker_rule": "Child-lane discovery and execution contribute zero points to Atlas Full-System Re-evaluation; only one accepted opening audit and one later accepted closing audit count.",
+    "pre_development_gate_rule": "The accepted closing audit is mandatory before the post-preparation Atlas development program opens. It runs only after operational preparation and the Clean and Re-sync marker cluster are terminal, searches all governed surfaces for gaps, missing work, stale assumptions, new ideas, additions, updates, risks, and synergies, and requires every newly discovered preparatory gap to receive and complete its own percentage marker. Development-scope discoveries receive measured backlog lanes and remain queued until the gate opens.",
     "unknown_rule": "Unknown and access-denied evidence stays unknown and is never converted to zero, healthy, complete, or adopted.",
     "authority_rule": "Root governance does not mutate owner repositories or external planes; owner and external mutations require their own authority.",
     "serialization_rule": "One root writer, one owner-repo writer, and one optional read-only scout; DiscordOS remains one logical board writer.",

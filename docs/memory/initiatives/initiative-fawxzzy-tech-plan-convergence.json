@@ -2,11 +2,11 @@
   "contract_version": "atlas.initiative.v1",
   "id": "initiative-fawxzzy-tech-plan-convergence",
   "title": "Fawxzzy Technology Plan Convergence",
-  "summary": "Preserve the recovered technology-plan, Project Review and Next Step skill, and ATLAS Engineering Playbook sources as provenance while advancing source-linked Atlas doctrine adoption and planning a future whole-stack text convergence pass with dedicated Playbook archaeology and an explicit Atlas Book versus Playbook boundary decision.",
+  "summary": "Preserve the recovered technology-plan, Project Review and Next Step skill, and ATLAS Engineering Playbook sources as provenance while advancing source-linked doctrine adoption, whole-stack text convergence with dedicated Playbook archaeology, the mandatory pre-development closing audit, and the later Atlas software and platform development program.",
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-07-13T07:43:50Z",
-  "updated_at": "2026-07-14T15:19:55-04:00",
+  "updated_at": "2026-07-14T15:39:20-04:00",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -69,7 +69,11 @@
       "Dedicated Playbook historical planning, research, doctrine, prompt, and note archaeology pass",
       "Authority, freshness, provenance, duplication, supersession, privacy, and Book-relevance classification",
       "Atlas Book versus Playbook boundary ADR covering separation, generated projection, consolidation, or absorption",
-      "Reversible migration plan plus closing whole-stack text coverage audit"
+      "Reversible migration plan plus closing whole-stack text coverage audit",
+      "Mandatory pre-development full-system closing audit and preparatory-gap marker completion",
+      "Measured post-preparation development program for Lifeline, Foundation, Cortex, _stack, DiscordOS, Playbook, Atlas root, Atlas Contracts, Atlas Control, and the Atlas Book",
+      "Evidence-backed migration of ChatGPT and Codex capabilities into Cortex to the highest justified degree",
+      "Evidence-backed migration of Vercel and Supabase capabilities into Lifeline and Foundation to the highest justified degree"
     ],
     "dependencies": [
       "Accepted Playbook registry commit remains present in the local Git object database",
@@ -77,7 +81,10 @@
       "No duplicate lane admission",
       "Universal component adoption stays separately evidenced",
       "Every governed repository and archive surface exposes an inspectable text inventory or an explicit inaccessible classification",
-      "Atlas Book and Playbook ownership cannot change without an accepted ADR and migration proof"
+      "Atlas Book and Playbook ownership cannot change without an accepted ADR and migration proof",
+      "Operational preparation and the Clean and Re-sync cluster are terminal before the closing audit begins",
+      "Every preparatory gap found by the closing audit has a ratified marker and accepted completion evidence before development opens",
+      "Every external-model or platform replacement has a baseline, parity contract, migration plan, rollback plan, and post-cutover proof"
     ],
     "serialization": [
       "Keep recovered imports provenance-only",
@@ -86,7 +93,11 @@
       "Leave universal component adoption and broader skill rollout active until owner-side proof lands",
       "Treat Playbook as the highest-priority historical text corpus because it predates the wider stack and contains early planning and research",
       "Index or summarize owner truth by source reference and digest before considering consolidation",
-      "Require an opening inventory and closing coverage audit for the whole-stack text convergence expansion"
+      "Require an opening inventory and closing coverage audit for the whole-stack text convergence expansion",
+      "Run the full-system closing audit as gate 2 of 2 after operational preparation, not as a parallel development task",
+      "Complete newly discovered preparatory markers before opening the post-preparation development program",
+      "Develop Atlas-owned systems through owner-specific markers and reversible cross-system integration waves",
+      "Keep Fitness and Mazer product implementation in their standing owner tasks while promoting reusable evidence-backed improvements into Atlas"
     ],
     "ownership": {
       "admission_writer": "stack-root",
@@ -101,7 +112,9 @@
       "No owner-side component adoption is inferred without its own current evidence",
       "A future lane changes only with accepted current evidence and its own scope admission",
       "Whole-stack text convergence has a ratified denominator, repository coverage set, and explicit privacy/exclusion policy before percentage tracking begins",
-      "The Atlas Book versus Playbook ADR is accepted before any authority transfer, bulk copy, or retirement action"
+      "The Atlas Book versus Playbook ADR is accepted before any authority transfer, bulk copy, or retirement action",
+      "Atlas Full-System Re-evaluation has an accepted closing audit at 2 / 2 and every preparatory discovery marker is complete before development begins",
+      "The post-preparation development program has explicit owner, denominator, dependency, evidence, cutover, and rollback contracts for every admitted lane"
     ],
     "constraints": [
       "Historical status cannot override current truth",
@@ -109,7 +122,10 @@
       "No owner repository, board, Discord, deployment, production system, or GitHub remote mutation",
       "Playbook doctrine bodies stay canonical in Playbook and must not be recopied into a second Atlas doctrine registry under the current architecture",
       "The future convergence pass may recommend consolidation or absorption but cannot perform it without an explicit ADR, reversible migration plan, source-preservation proof, and operator acceptance",
-      "No text artifact is silently dropped because it is informal, old, duplicated, archived, or currently non-authoritative; it must receive an explicit classification"
+      "No text artifact is silently dropped because it is informal, old, duplicated, archived, or currently non-authoritative; it must receive an explicit classification",
+      "ChatGPT, Codex, Vercel, and Supabase remain governed adapters until replacement parity, reliability, security, observability, cost, rollback, and post-cutover health are proved",
+      "No external dependency is removed merely to satisfy an architectural vision statement",
+      "No Fitness or Mazer product work is absorbed into Atlas root; only reusable contracts, patterns, infrastructure, evidence, and failure modes converge"
     ]
   }
 }

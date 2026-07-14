@@ -139,6 +139,21 @@ rechecks the full system against the completed work. Work discovered by either
 audit becomes a separately measured lane; it is not hidden inside the
 re-evaluation percentage.
 
+The closing audit is also the mandatory pre-development gate. It runs only
+after operational preparation and the resumed Clean and Re-sync marker cluster
+are terminal. It must review all completed work and every governed component,
+repository, integration, control plane, contract, receipt path, board workflow,
+document surface, and source-of-truth boundary. It must actively search for
+gaps, missing work, stale assumptions, new ideas, additions, updates, risks,
+quality problems, dependency conflicts, and cross-system synergies.
+
+Every discovery receives an explicit disposition. Preparatory gaps become new
+percentage markers with accepted denominators and must close before the
+development gate opens. Development-scope discoveries become measured backlog
+lanes, but may not start early merely because they were found by the audit. The
+closing audit itself moves from `50%` to `100%` only after its evidence is
+accepted; wording changes or child-lane progress contribute zero points.
+
 General Atlas systems work includes Atlas root, `_stack`, Playbook, Cortex,
 Foundation, Lifeline, DiscordOS platform work, Atlas Contracts, governance,
 automation, knowledge promotion, delivery events, and other governed Atlas
@@ -151,6 +166,39 @@ failure modes, automation, evidence formats, deployment patterns, DiscordOS
 capabilities, and infrastructure improvements discovered in any lane should be
 promoted into the correct Atlas-owned surface when they are genuinely reusable.
 Atlas coordinates the overlap; it does not absorb owner-project implementation.
+
+## Post-Preparation Development Program
+
+After the pre-development gate passes, Atlas enters a distinct software and
+platform development program. Its target scope is the completion and deep
+integration of Lifeline, Foundation, Cortex, `_stack`, DiscordOS, Playbook,
+Atlas root, Atlas Contracts, Atlas Control, the Atlas Book, and every governed
+cross-system seam. This phase is not a continuation of operational cleanup; it
+is product and platform engineering against separately ratified development
+markers.
+
+The development program must:
+
+- finish each Atlas-owned system against explicit owner contracts and executable
+  definitions of done
+- wire the systems into one coherent Atlas control plane without collapsing
+  owner boundaries or creating duplicate sources of truth
+- replace ChatGPT- and Codex-dependent capabilities with Cortex-owned
+  capabilities to the highest degree that current evidence, safety, quality,
+  cost, and maintainability justify
+- move Vercel- and Supabase-dependent platform capabilities into Lifeline and
+  Foundation to the highest justified degree, while retaining external services
+  as governed adapters until parity, reliability, security, observability,
+  migration, rollback, and cost evidence support replacement
+- preserve local-first operation, GitHub-backed collaboration and recovery, and
+  deterministic receipts across every migration
+- keep Fitness and Mazer feature development in their standing owner tasks while
+  promoting reusable contracts, patterns, infrastructure, and failure modes into
+  Atlas through evidence-backed convergence paths
+
+No external platform or model dependency is removed merely to satisfy a vision
+statement. Each replacement is a bounded, reversible migration lane with a
+baseline, parity contract, cutover proof, rollback plan, and post-cutover audit.
 
 ## Cloud And Delivery Control Planes
 
