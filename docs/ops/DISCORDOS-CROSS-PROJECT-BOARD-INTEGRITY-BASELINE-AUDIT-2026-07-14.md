@@ -80,6 +80,13 @@ important code gaps, but the ratchet requires each proof unit to cover the
 complete admitted denominator with current live readback or an accepted
 not-applicable disposition.
 
+The first live repair cluster subsequently normalized `54` of the `58`
+owner-backed Mazer rows with `54 / 54` starter and journal readbacks. Mazer is
+now `61 / 65` healthy. Four cards remain withheld behind a planner lifecycle
+precedence defect; their newer journal states must not be overwritten by stale
+normalization input. The exact repair receipt is
+`docs/ops/DISCORDOS-MAZER-BOARD-NORMALIZATION-LIVE-REPAIR-2026-07-14.md`.
+
 ## Additional integrity risks
 
 - DiscordOS had `57` attached worktrees and `62` local branches at audit time.
@@ -124,6 +131,8 @@ readback prove that whole unit across every admitted board class.
 - DiscordOS PR 61 was cleaned of two machine-specific receipt paths and merged.
 - DiscordOS PR 63 added the registry and paginated consistency surface and was
   merged after full owner verification.
+- The first guarded live repair normalized `54` Mazer cards and withheld four
+  lifecycle-conflicting cards without cross-board mutation.
 - No production deployment occurred.
 - No Discord card was created, moved, deleted, archived, reacted to, or edited
   by the read-only audit.
