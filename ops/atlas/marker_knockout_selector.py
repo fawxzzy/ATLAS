@@ -200,8 +200,8 @@ POLICY_REGISTRY: dict[str, MarkerPolicy] = {
             "The next honest work is the internal primary-operator acceptance and receipt implementation; 100% remains blocked on dispatch and replay parity."
         ),
         expected_evidence=(
-            "one contract freezing bounded primary-operator dispatch through a registered _stack interface, durable acceptance-to-result correlation, "
-            "failure behavior, rollback, and explicit external-action denials"
+            "one root helper/test pair that emits a safe dispatch request and verified-no-change prompt, validates the full acceptance-to-_stack result chain, "
+            "and performs no external action"
         ),
     ),
     "Cortex Simulation Substrate Readiness": MarkerPolicy(
@@ -426,16 +426,16 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "Cortex Dual-Mode Replacement Readiness": PacketDescriptor(
-        packet="Cortex Dual-Mode Replacement Readiness _stack dispatch and durable result contract freeze",
+        packet="Cortex Dual-Mode Replacement Readiness _stack dispatch and durable result first implementation",
         basis_receipt_ref=(
             "docs/ops/"
-            "CORTEX-DUAL-MODE-REPLACEMENT-READINESS-PRIMARY-OPERATOR-REPLAY-PARITY-FIRST-"
-            "IMPLEMENTATION-RECONCILIATION-2026-07-14.md"
+            "CORTEX-DUAL-MODE-REPLACEMENT-READINESS-STACK-DISPATCH-AND-DURABLE-RESULT-"
+            "CONTRACT-FREEZE-2026-07-14.md"
         ),
-        mode="docs-only cross-plane dispatch and durable-result contract freeze",
+        mode="serialized root implementation then bounded live _stack no-change canary",
         scope=(
-            "freeze one bounded Cortex-to-_stack dispatch contract with acceptance, job, run, and result correlation; preserve _stack execution ownership and prohibit "
-            "self-granted push, deploy, Discord, database, or production authority"
+            "implement deterministic request, prompt, and result-correlation behavior around the existing codex:stack:task runner, then prove one success_no_changes canary "
+            "without commit, push, deploy, Discord, board, database, secret, or marker mutation"
         ),
     ),
     "Cortex Simulation Substrate Readiness": PacketDescriptor(

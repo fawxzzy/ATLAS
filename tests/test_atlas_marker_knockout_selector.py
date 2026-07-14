@@ -272,6 +272,23 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
             encoding="utf-8",
         )
 
+        primary_operator_stack_dispatch_contract = root / "docs" / "ops" / (
+            "CORTEX-DUAL-MODE-REPLACEMENT-READINESS-STACK-DISPATCH-AND-DURABLE-RESULT-"
+            "CONTRACT-FREEZE-2026-07-14.md"
+        )
+        primary_operator_stack_dispatch_contract.write_text(
+            "\n".join(
+                [
+                    "# Primary Operator Stack Dispatch Contract",
+                    "",
+                    "- Mode: `serialized root implementation then bounded live _stack no-change canary`",
+                    "- Scope: `implement deterministic request, prompt, and result-correlation behavior around the existing codex:stack:task runner, then prove one success_no_changes canary without commit, push, deploy, Discord, board, database, secret, or marker mutation`",
+                    "",
+                ]
+            ),
+            encoding="utf-8",
+        )
+
     def _write_manifest(
         self,
         root: Path,
@@ -909,14 +926,14 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual("hold_current_lane", payload["operator_action"])
         self.assertEqual("Cortex Dual-Mode Replacement Readiness", payload["next_after_current_marker"])
         self.assertEqual(
-            "Cortex Dual-Mode Replacement Readiness _stack dispatch and durable result contract freeze",
+            "Cortex Dual-Mode Replacement Readiness _stack dispatch and durable result first implementation",
             payload["next_after_current_packet"],
         )
         self.assertEqual(
-            "docs-only cross-plane dispatch and durable-result contract freeze",
+            "serialized root implementation then bounded live _stack no-change canary",
             payload["next_after_current_packet_mode"],
         )
-        self.assertIn("acceptance, job, run, and result correlation", payload["next_after_current_packet_scope"])
+        self.assertIn("success_no_changes canary", payload["next_after_current_packet_scope"])
 
     def test_build_campaign_routes_owner_lane_service_bus_marker_when_it_is_first_available(self) -> None:
         root = self._temp_root()

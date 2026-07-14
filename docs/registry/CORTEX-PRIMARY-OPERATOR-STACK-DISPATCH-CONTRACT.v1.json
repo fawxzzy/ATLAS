@@ -1,0 +1,79 @@
+{
+  "contract_version": "atlas.cortex.primary_operator_stack_dispatch_contract.v1",
+  "request_schema": "atlas.cortex.stack_dispatch_request.v1",
+  "result_schema": "atlas.cortex.stack_result_correlation.v1",
+  "mode": "bounded_existing_stack_operator_dispatch",
+  "existing_operator_surfaces": {
+    "command": "codex:stack:task",
+    "runner": "repos/_stack/ops/codex/Invoke-CodexRepoTask.ps1",
+    "contracts_producer": "repos/_stack/ops/codex/AtlasContractsV2Producer.ps1",
+    "run_manifest": "repos/_stack/.codex/logs/<run-id>/run.json",
+    "job_envelope": "atlas.job-envelope.v2.json",
+    "execution_receipt": "atlas.execution-receipt.v2.json"
+  },
+  "correlation_chain": [
+    "primary_operator_acceptance.acceptance_id",
+    "stack_dispatch_request.session_id",
+    "job_envelope.correlations.parent_job_id",
+    "job_envelope.job_id",
+    "run_manifest.runId",
+    "execution_receipt.job_id",
+    "stack_result_correlation.result_id"
+  ],
+  "admission_rules": [
+    "acceptance_state_must_be_accepted",
+    "primary_operator_receipt_must_correlate_to_acceptance",
+    "dispatch_request_session_id_must_equal_acceptance_id",
+    "operator_command_must_be_registered_codex_stack_task",
+    "first_canary_must_use_verified_no_change_admission",
+    "first_canary_must_use_no_commit_and_manual_push_policy",
+    "job_envelope_must_validate_before_codex_launch",
+    "terminal_execution_receipt_must_validate_through_atlas_contracts_v2",
+    "result_correlation_must_read_job_envelope_run_manifest_and_execution_receipt"
+  ],
+  "authority_denials": [
+    "no_push",
+    "no_merge",
+    "no_pull_request",
+    "no_deploy",
+    "no_production",
+    "no_discord_write",
+    "no_board_write",
+    "no_database_mutation",
+    "no_secret_read",
+    "no_marker_movement"
+  ],
+  "first_implementation": {
+    "allowed_root_paths": [
+      "ops/cortex/primary_operator_stack_dispatch.py",
+      "tests/test_cortex_primary_operator_stack_dispatch.py"
+    ],
+    "owner_repo_changes": "none_expected_unless_fixture_proves_an_exact_stack_gap",
+    "request_output_glob": "runtime/atlas/sessions/**/cortex-stack-dispatch-request.json",
+    "prompt_output_glob": "tmp/atlas/**.md",
+    "result_output_glob": "runtime/atlas/sessions/**/cortex-stack-result-correlation.json",
+    "canary": {
+      "target_repository": "stack",
+      "allow_no_changes": true,
+      "no_commit": true,
+      "keep_worktree": true,
+      "external_actions": []
+    },
+    "required_proof": [
+      "stable_dispatch_request_identity",
+      "unsafe_acceptance_rejection",
+      "safe_request_and_prompt_generation",
+      "exact_parent_job_correlation",
+      "validated_success_no_changes_terminal_receipt",
+      "failure_receipt_correlation",
+      "external_authority_denials",
+      "no_commit_push_deploy_discord_or_data_mutation"
+    ]
+  },
+  "marker": {
+    "name": "Cortex Dual-Mode Replacement Readiness",
+    "current_percent": 90,
+    "movement": "none",
+    "one_hundred_percent_requires": "successful_bounded_canary_durable_correlation_and_independent_endgame_audit"
+  }
+}
