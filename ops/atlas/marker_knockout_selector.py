@@ -207,12 +207,13 @@ POLICY_REGISTRY: dict[str, MarkerPolicy] = {
     "Cortex Simulation Substrate Readiness": MarkerPolicy(
         category="admissible after current lane",
         rationale=(
-            "The lane is durably admitted as future-facing Cortex simulation governance, but it remains a doctrine "
-            "and research family downstream of already-admitted execution-facing work."
+            "The lane is at 20% with primary research interpretation frozen and all 11 admitted requirements groups "
+            "mapped by a deterministic read-only helper. The next honest boundary is the agent memory, reflection, "
+            "and planning schema contract; no simulator or project adapter is admitted yet."
         ),
         expected_evidence=(
-            "one Fable or generative-agent research contract that maps simulation, memory, reflection, planning, "
-            "and sandbox interaction requirements into ATLAS and Cortex without implying implementation"
+            "one versioned root-owned schema contract for agent memory, retrieval, reflection, and planning with "
+            "provenance, retention, lifecycle, safety, and authority denials explicit"
         ),
     ),
     "Owner-Lane Agent Service Bus & DiscordOS Ops Readiness": MarkerPolicy(
@@ -439,15 +440,15 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "Cortex Simulation Substrate Readiness": PacketDescriptor(
-        packet="Cortex Simulation Substrate Readiness Fable/generative-agent research contract freeze",
+        packet="Cortex Simulation Substrate Readiness agent memory reflection planning schema contract freeze",
         basis_receipt_ref=(
             "docs/ops/"
-            "CORTEX-DUAL-MODE-AND-SIMULATION-SUBSTRATE-MARKER-ADMISSION-2026-07-09.md"
+            "CORTEX-SIMULATION-SUBSTRATE-READINESS-RESEARCH-AND-REQUIREMENTS-20-PERCENT-RATCHET-2026-07-14.md"
         ),
-        mode="docs-only root-bounded simulation research contract freeze",
+        mode="docs-only root-bounded simulation schema contract freeze",
         scope=(
-            "freeze the first governed research contract for Cortex simulation substrate doctrine using "
-            "Showrunner strategy signals plus generative-agent architectural patterns without implying implementation"
+            "freeze versioned memory, retrieval, reflection, and planning schemas plus lifecycle, provenance, retention, "
+            "safety, and authority boundaries without implementing a simulator or touching owner repositories"
         ),
     ),
     "Owner-Lane Agent Service Bus & DiscordOS Ops Readiness": PacketDescriptor(

@@ -1,0 +1,63 @@
+{
+  "contract_version": "atlas.cortex.simulation_substrate_research_contract.v1",
+  "lane": "Cortex Simulation Substrate Readiness",
+  "mode": "read_only_advisory_research_and_requirements_mapping",
+  "source_policy": {
+    "first_party_product_signal": {
+      "title": "Showrunner",
+      "url": "https://www.showrunner.xyz/",
+      "admitted_claims": [
+        "persistent simulated worlds",
+        "AI character populations",
+        "user steering",
+        "creator-directed story generation"
+      ],
+      "not_an_implementation_spec": true
+    },
+    "primary_architecture_research": {
+      "title": "Generative Agents: Interactive Simulacra of Human Behavior",
+      "url": "https://arxiv.org/abs/2304.03442",
+      "admitted_primitives": [
+        "observation",
+        "memory",
+        "retrieval",
+        "reflection",
+        "planning",
+        "sandbox interaction"
+      ],
+      "not_a_clone_mandate": true
+    }
+  },
+  "requirements_implementation": {
+    "schema_version": "atlas.cortex.simulation_substrate_requirements.v1",
+    "helper": "ops/cortex/simulation_substrate_requirements.py",
+    "tests": "tests/test_cortex_simulation_substrate_requirements.py",
+    "worker_commit": "99ab4dcb",
+    "reconciliation_commit": "9bc5d34f",
+    "mapped_group_count": 11,
+    "unmapped_group_count": 0,
+    "status": "implemented_and_freshly_reproved"
+  },
+  "authority_denials": [
+    "simulation-execution",
+    "agent-execution",
+    "owner-repo-mutation",
+    "platform-mutation",
+    "deploy",
+    "discord-write",
+    "board-write",
+    "secret-handling",
+    "hidden-transcript-ingestion",
+    "model-training",
+    "media-generation",
+    "automatic-final-receipt",
+    "automatic-marker-movement"
+  ],
+  "marker": {
+    "name": "Cortex Simulation Substrate Readiness",
+    "current_percent": 20,
+    "movement": "0_to_20",
+    "next_threshold": 30,
+    "next_packet": "Cortex Simulation Substrate Readiness agent memory reflection planning schema contract freeze"
+  }
+}

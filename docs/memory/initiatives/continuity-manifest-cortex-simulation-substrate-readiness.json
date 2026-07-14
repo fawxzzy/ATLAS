@@ -1,0 +1,103 @@
+{
+  "contract_version": "atlas.initiative.v1",
+  "id": "continuity-manifest-cortex-simulation-substrate-readiness",
+  "title": "Continuity Manifest Cortex Simulation Substrate Readiness",
+  "summary": "Maintained ATLAS-root retrieval map for the Cortex Simulation Substrate Readiness lane.",
+  "status": "active",
+  "owner": "stack-root",
+  "created_at": "2026-07-14T04:02:31-04:00",
+  "updated_at": "2026-07-14T04:02:31-04:00",
+  "related_plan_refs": [],
+  "related_decision_refs": [],
+  "related_hypothesis_refs": [],
+  "related_session_refs": [],
+  "related_attention_refs": [],
+  "proposed_next_session_refs": [],
+  "evidence_refs": [
+    "docs/atlas-book/01-current-state.md",
+    "docs/atlas-book/02-lanes-and-markers.md",
+    "docs/atlas-book/05-receipt-index.md",
+    "docs/atlas-book/13-vision-and-endgames.md",
+    "docs/ops/CORTEX-DUAL-MODE-AND-SIMULATION-SUBSTRATE-MARKER-ADMISSION-2026-07-09.md",
+    "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-FABLE-GENERATIVE-AGENT-RESEARCH-CONTRACT-FREEZE-2026-07-09.md",
+    "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-SIMULATION-REQUIREMENTS-MAP-FIRST-IMPLEMENTATION-ADMISSION-2026-07-09.md",
+    "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-SIMULATION-REQUIREMENTS-MAP-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-10.md",
+    "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-SIMULATION-REQUIREMENTS-MAP-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-10.md",
+    "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-SIMULATION-REQUIREMENTS-MAP-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-10.md",
+    "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-RESEARCH-AND-REQUIREMENTS-20-PERCENT-RATCHET-2026-07-14.md",
+    "docs/registry/CORTEX-SIMULATION-SUBSTRATE-RESEARCH-CONTRACT.v1.json",
+    "ops/cortex/simulation_substrate_requirements.py",
+    "tests/test_cortex_simulation_substrate_requirements.py"
+  ],
+  "supersedes": [],
+  "superseded_by": [],
+  "metadata": {
+    "artifact_kind": "continuity_manifest",
+    "lane_id": "cortex-simulation-substrate-readiness",
+    "scope_class": "atlas-root-governance",
+    "current_checkpoint_receipt": "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-RESEARCH-AND-REQUIREMENTS-20-PERCENT-RATCHET-2026-07-14.md",
+    "checkpoint_commit": "main@2025ae3a",
+    "checkpoint_summary": "The existing research contract and deterministic requirements mapper are reconciled into current truth at 20 percent. All 11 admitted groups map with fresh focused proof, no blockers, and no authority widening. The next packet freezes the agent memory, reflection, and planning schema required for 30 percent.",
+    "governing_receipts": [
+      "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-FABLE-GENERATIVE-AGENT-RESEARCH-CONTRACT-FREEZE-2026-07-09.md",
+      "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-SIMULATION-REQUIREMENTS-MAP-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-10.md",
+      "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-RESEARCH-AND-REQUIREMENTS-20-PERCENT-RATCHET-2026-07-14.md"
+    ],
+    "owner_truth_surfaces": [
+      {
+        "path": "docs/atlas-book/02-lanes-and-markers.md",
+        "role": "current 20 percent marker and deterministic threshold truth"
+      },
+      {
+        "path": "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-RESEARCH-AND-REQUIREMENTS-20-PERCENT-RATCHET-2026-07-14.md",
+        "role": "current research and requirements reconciliation authority"
+      },
+      {
+        "path": "docs/registry/CORTEX-SIMULATION-SUBSTRATE-RESEARCH-CONTRACT.v1.json",
+        "role": "machine-readable source posture, authority denials, implementation state, and next threshold"
+      }
+    ],
+    "verification_adoption_surfaces": [
+      {
+        "path": "ops/cortex/simulation_substrate_requirements.py",
+        "role": "deterministic read-only requirements mapper"
+      },
+      {
+        "path": "tests/test_cortex_simulation_substrate_requirements.py",
+        "role": "focused mapping, path-safety, strict-mode, and fail-closed proof"
+      }
+    ],
+    "blocked_or_gated_work": [
+      {
+        "work": "Claiming the 30 percent schema threshold",
+        "state": "gated",
+        "reason": "agent memory, retrieval, reflection, and planning schemas are not separately versioned and frozen yet"
+      },
+      {
+        "work": "Executing simulations or project adapters",
+        "state": "blocked",
+        "reason": "the current lane is read-only and advisory; runtime and owner-lane authority are not admitted"
+      }
+    ],
+    "next_package_ladder": [
+      {
+        "package": "Cortex Simulation Substrate Readiness agent memory reflection planning schema contract freeze",
+        "mode": "docs-only root-bounded simulation schema contract freeze",
+        "reason": "the 20 percent requirements map is proved and the 30 percent threshold requires a versioned schema contract"
+      }
+    ],
+    "freshness_state": "manifest-backed",
+    "freshness_checked_receipt": "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-RESEARCH-AND-REQUIREMENTS-20-PERCENT-RATCHET-2026-07-14.md",
+    "freshness_checked_at": "2026-07-14T04:02:31-04:00",
+    "freshness_basis": "Fresh focused tests and strict live helper execution map all 11 admitted groups with no warnings or blockers; schema freezing and runtime work remain gated.",
+    "marker_posture": [
+      {
+        "marker": "Cortex Simulation Substrate Readiness",
+        "percent": 20,
+        "source": "docs/atlas-book/02-lanes-and-markers.md"
+      }
+    ],
+    "current_percent": 20,
+    "next_exact_packet": "Cortex Simulation Substrate Readiness agent memory reflection planning schema contract freeze"
+  }
+}
