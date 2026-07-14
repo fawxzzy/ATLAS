@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-07-14T04:02:31-04:00",
-  "updated_at": "2026-07-14T05:00:00-04:00",
+  "updated_at": "2026-07-14T05:45:00-04:00",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -28,9 +28,11 @@
     "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-AGENT-MEMORY-REFLECTION-PLANNING-SCHEMA-CONTRACT-FREEZE-2026-07-14.md",
     "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-FIRST-READ-ONLY-SCENARIO-HELPER-CONTRACT-FREEZE-2026-07-14.md",
     "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-FIRST-READ-ONLY-SCENARIO-HELPER-IMPLEMENTATION-AND-40-PERCENT-RECONCILIATION-2026-07-14.md",
+    "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-ATLAS-RECEIPT-WORKFLOW-AND-FAILURE-MODE-REPLAY-CONTRACT-FREEZE-2026-07-14.md",
     "docs/registry/CORTEX-SIMULATION-SUBSTRATE-RESEARCH-CONTRACT.v1.json",
     "docs/registry/CORTEX-SIMULATION-AGENT-STATE-SCHEMA.v1.json",
     "docs/registry/CORTEX-SIMULATION-READ-ONLY-SCENARIO-HELPER.v1.json",
+    "docs/registry/CORTEX-SIMULATION-RECEIPT-REPLAY-CONTRACT.v1.json",
     "schemas/atlas.cortex.simulation.agent-state.v1.json",
     "ops/cortex/simulation_substrate_requirements.py",
     "tests/test_cortex_simulation_substrate_requirements.py",
@@ -44,16 +46,17 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "cortex-simulation-substrate-readiness",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-FIRST-READ-ONLY-SCENARIO-HELPER-IMPLEMENTATION-AND-40-PERCENT-RECONCILIATION-2026-07-14.md",
-    "checkpoint_commit": "main@fd9cbf20",
-    "checkpoint_summary": "The lane is at 40 percent. The first deterministic read-only scenario helper converts synthetic fixtures into schema-valid advisory memories, retrieval, reflection, and candidate-plan state with no model, network, command, owner, platform, Discord, board, or live-action authority. The next packet freezes ATLAS receipt workflow and failure-mode replay.",
+    "current_checkpoint_receipt": "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-ATLAS-RECEIPT-WORKFLOW-AND-FAILURE-MODE-REPLAY-CONTRACT-FREEZE-2026-07-14.md",
+    "checkpoint_commit": "main@64db605e",
+    "checkpoint_summary": "The lane remains at 40 percent. The first receipt-replay contract now freezes existing Atlas receipt schemas, raw-byte digests, trust classes, deterministic chronology, failure-mode classification, advisory output, and permanent authority denial. The next packet admits the bounded implementation.",
     "governing_receipts": [
       "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-FABLE-GENERATIVE-AGENT-RESEARCH-CONTRACT-FREEZE-2026-07-09.md",
       "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-SIMULATION-REQUIREMENTS-MAP-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-10.md",
       "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-RESEARCH-AND-REQUIREMENTS-20-PERCENT-RATCHET-2026-07-14.md",
       "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-AGENT-MEMORY-REFLECTION-PLANNING-SCHEMA-CONTRACT-FREEZE-2026-07-14.md",
       "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-FIRST-READ-ONLY-SCENARIO-HELPER-CONTRACT-FREEZE-2026-07-14.md",
-      "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-FIRST-READ-ONLY-SCENARIO-HELPER-IMPLEMENTATION-AND-40-PERCENT-RECONCILIATION-2026-07-14.md"
+      "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-FIRST-READ-ONLY-SCENARIO-HELPER-IMPLEMENTATION-AND-40-PERCENT-RECONCILIATION-2026-07-14.md",
+      "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-ATLAS-RECEIPT-WORKFLOW-AND-FAILURE-MODE-REPLAY-CONTRACT-FREEZE-2026-07-14.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -89,13 +92,17 @@
       {
         "path": "tests/test_cortex_read_only_scenario_helper.py",
         "role": "focused determinism, schema, path, fixture, strict-mode, and authority proof"
+      },
+      {
+        "path": "docs/registry/CORTEX-SIMULATION-RECEIPT-REPLAY-CONTRACT.v1.json",
+        "role": "receipt schemas, trust, chronology, failure classification, path, threshold, and authority contract"
       }
     ],
     "blocked_or_gated_work": [
       {
         "work": "Claiming the 50 percent receipt-replay threshold",
         "state": "gated",
-        "reason": "the current helper accepts synthetic fixtures only and does not replay ATLAS receipts"
+        "reason": "the receipt-replay contract is frozen but no replay implementation or mixed-source proof has landed"
       },
       {
         "work": "Executing simulations or project adapters",
@@ -105,15 +112,15 @@
     ],
     "next_package_ladder": [
       {
-        "package": "Cortex Simulation Substrate Readiness ATLAS receipt workflow and failure-mode replay contract freeze",
-        "mode": "docs-only root-bounded receipt-replay contract freeze",
-        "reason": "the 40 percent read-only helper is proved and the 50 percent threshold requires bounded replay from admitted ATLAS receipts"
+        "package": "Cortex Simulation Substrate Readiness ATLAS receipt workflow and failure-mode replay first-implementation admission",
+        "mode": "docs-only root-bounded receipt-replay implementation admission",
+        "reason": "the replay contract is frozen and the next boundary must admit exact helper and proof surfaces without implementing them"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-FIRST-READ-ONLY-SCENARIO-HELPER-IMPLEMENTATION-AND-40-PERCENT-RECONCILIATION-2026-07-14.md",
-    "freshness_checked_at": "2026-07-14T05:00:00-04:00",
-    "freshness_basis": "Focused proof validates deterministic synthetic-fixture state, schema compatibility, strict path and input guards, and permanent execution denial. Receipt replay and project adapters remain gated.",
+    "freshness_checked_receipt": "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-ATLAS-RECEIPT-WORKFLOW-AND-FAILURE-MODE-REPLAY-CONTRACT-FREEZE-2026-07-14.md",
+    "freshness_checked_at": "2026-07-14T05:45:00-04:00",
+    "freshness_basis": "The existing Atlas receipt contracts, digest and trust requirements, deterministic chronology, failure classes, output boundary, proof matrix, and threshold eligibility are frozen. Implementation remains gated.",
     "marker_posture": [
       {
         "marker": "Cortex Simulation Substrate Readiness",
@@ -122,6 +129,6 @@
       }
     ],
     "current_percent": 40,
-    "next_exact_packet": "Cortex Simulation Substrate Readiness ATLAS receipt workflow and failure-mode replay contract freeze"
+    "next_exact_packet": "Cortex Simulation Substrate Readiness ATLAS receipt workflow and failure-mode replay first-implementation admission"
   }
 }

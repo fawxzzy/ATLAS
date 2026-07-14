@@ -1,0 +1,57 @@
+{
+  "contract_version": "atlas.cortex.simulation_receipt_replay_registry.v1",
+  "manifest_contract": "atlas.cortex.simulation.receipt-replay-manifest.v1",
+  "output_contract": "atlas.cortex.simulation.receipt-replay.v1",
+  "admitted_receipt_contracts": [
+    "atlas.receipt.v1",
+    "atlas.execution-receipt.v2"
+  ],
+  "receipt_schema_refs": {
+    "atlas.receipt.v1": "packages/atlas-contracts/schemas/atlas.receipt.v1.schema.json",
+    "atlas.execution-receipt.v2": "packages/atlas-contracts/schemas/atlas.execution-receipt.v2.schema.json"
+  },
+  "manifest_glob": "data/cortex/simulation-replays/**.json",
+  "receipt_globs": [
+    "runtime/receipts/**.json",
+    "data/cortex/simulation-replays/**.json",
+    "packages/atlas-contracts/fixtures/valid/**.json"
+  ],
+  "output_glob": "tmp/atlas/**.json",
+  "trust_classes": [
+    "atlas_runtime_receipt",
+    "committed_replay_fixture",
+    "contract_fixture"
+  ],
+  "contract_fixture_threshold_eligible": false,
+  "chronology": [
+    "recorded_at_asc",
+    "receipt_id_asc",
+    "source_ref_asc"
+  ],
+  "failure_classes": {
+    "success": ["accepted", "passed", "succeeded"],
+    "advisory": ["warning", "skipped", "awaiting-review", "partial"],
+    "failure": ["rejected", "failed", "verification_failed"],
+    "blocked": ["blocked", "cancelled", "verification_blocked"]
+  },
+  "authority": {
+    "advisory_only": true,
+    "execution_authorized": false,
+    "dispatch_authorized": false,
+    "owner_repo_mutation_authorized": false,
+    "platform_mutation_authorized": false,
+    "discord_write_authorized": false,
+    "board_write_authorized": false,
+    "deployment_authorized": false,
+    "approval_authorized": false,
+    "final_receipt_authorized": false,
+    "marker_movement_authorized": false
+  },
+  "marker": {
+    "name": "Cortex Simulation Substrate Readiness",
+    "current_percent": 40,
+    "movement": "none",
+    "next_threshold": 50,
+    "next_packet": "Cortex Simulation Substrate Readiness ATLAS receipt workflow and failure-mode replay first-implementation admission"
+  }
+}
