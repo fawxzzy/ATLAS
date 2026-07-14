@@ -136,10 +136,15 @@ When working on Playbook or repository development and speed matters, default to
 - `FAWXZZY MESSAGES` is the non-blocking operator update surface, not the source
   of truth. Git, validated receipts, Atlas registries, and external readback
   remain authoritative.
-- Preserve usage without reducing throughput by routing deterministic scans and
-  extraction to Luna, normal scoped implementation to Terra, and hard
-  architecture or investigation to Sol. Use Fast only when the selected model
-  supports it and the expected latency benefit justifies the usage cost.
+- Use GPT-5.6 Sol for every newly created, resumed, or continued ChatGPT/Codex
+  task. Do not route tasks to Terra or Luna unless Zac explicitly overrides this
+  policy in the current conversation.
+- The stack-wide reasoning floor is medium. `Mazer` and `Fitness` tasks use high
+  at minimum and prefer xhigh. Use higher Sol reasoning when task complexity
+  justifies it; never reduce Mazer or Fitness below high to conserve usage.
+- Fast mode is optional. Select it only when supported and when its throughput
+  benefit is worth the usage cost; model quality and the reasoning floor take
+  precedence over speed.
 
 ## Atlas platform preferences
 
@@ -152,9 +157,10 @@ When working on Playbook or repository development and speed matters, default to
 - Full local permissions are the default execution capability. Pushes,
   production deployments, Discord writes, and live data mutations still require
   the applicable task authority.
-- Select model, reasoning, and speed by task. Capability-check the actual Codex
-  executable because desktop and CLI model catalogs can differ, and always
-  receipt requested versus effective runtime settings.
+- Select Sol reasoning and speed by task while preserving the model and effort
+  floors above. Capability-check the actual Codex executable because desktop
+  and CLI model catalogs can differ, and always receipt requested versus
+  effective runtime settings.
 - The Atlas Clean and Re-sync marker cluster includes an exhaustive two-pass
   full-system re-evaluation: `0%` before the opening audit, `50%` after it, and
   `100%` only after the closing audit. Discovered work receives separate lanes.
