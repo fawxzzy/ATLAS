@@ -207,13 +207,12 @@ POLICY_REGISTRY: dict[str, MarkerPolicy] = {
     "Cortex Simulation Substrate Readiness": MarkerPolicy(
         category="admissible after current lane",
         rationale=(
-            "The lane is at 40% with the receipt-replay contract and exact first-implementation surfaces admitted. The "
-            "next honest boundary is the worker prompt and handoff contract; no replay implementation, project adapter, "
-            "model call, or live-action authority is admitted yet."
+            "The lane is at 40% and the receipt-replay implementation is contract-frozen, admitted, handed off, and "
+            "readiness-closed. The next honest boundary is the bounded implementation and reconciliation cluster."
         ),
         expected_evidence=(
-            "one root-owned worker handoff contract carrying the exact objective, command, allowed files, mixed-source "
-            "canary, proof matrix, stop conditions, and frozen authority boundaries"
+            "one deterministic mixed-source receipt replay with schemas, digest verification, chronological transitions, "
+            "failure classification, authority denial, focused proof, and evidence-backed reconciliation"
         ),
     ),
     "Owner-Lane Agent Service Bus & DiscordOS Ops Readiness": MarkerPolicy(
@@ -440,15 +439,15 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "Cortex Simulation Substrate Readiness": PacketDescriptor(
-        packet="Cortex Simulation Substrate Readiness ATLAS receipt workflow and failure-mode replay prompt-pack and worker handoff contract",
+        packet="Cortex Simulation Substrate Readiness ATLAS receipt workflow and failure-mode replay first-implementation worker-cluster reconciliation",
         basis_receipt_ref=(
             "docs/ops/"
-            "CORTEX-SIMULATION-SUBSTRATE-READINESS-ATLAS-RECEIPT-WORKFLOW-AND-FAILURE-MODE-REPLAY-FIRST-IMPLEMENTATION-ADMISSION-2026-07-14.md"
+            "CORTEX-SIMULATION-SUBSTRATE-READINESS-ATLAS-RECEIPT-REPLAY-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-14.md"
         ),
-        mode="docs-only root-bounded receipt-replay prompt-pack freeze",
+        mode="root-bounded receipt-replay implementation and reconciliation",
         scope=(
-            "freeze the exact worker objective, CLI, admitted files, mixed-source canary, proof obligations, verification "
-            "commands, stop conditions, and authority denials without implementing replay"
+            "implement only the admitted schemas, helper, tests, and mixed-source canary; run the full proof cluster and "
+            "move to 50 percent only when threshold-eligible evidence and every authority denial are proved"
         ),
     ),
     "Owner-Lane Agent Service Bus & DiscordOS Ops Readiness": PacketDescriptor(
