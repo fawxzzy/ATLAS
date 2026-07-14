@@ -544,6 +544,15 @@ def load_active_lane(*, root: Path) -> str | None:
 def effective_policy(
     *, marker: str, percentage: int, active_lane: str | None, explicitly_held: bool = False
 ) -> MarkerPolicy:
+    if percentage >= 100:
+        return MarkerPolicy(
+            category="already closed / locked",
+            rationale=(
+                "The marker is at 100%, so the completed denominator stays locked before lane-specific "
+                "routing or stale explanatory text is considered."
+            ),
+            expected_evidence="none; reopen only for a new capability denominator or material regression",
+        )
     policy = POLICY_REGISTRY[marker]
     if marker == "Sandbox Simulation Readiness" and percentage > 0:
         policy = MarkerPolicy(

@@ -427,6 +427,22 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual("already closed / locked", records["_stack Readiness"]["category"])
         self.assertEqual("already closed / locked", records["GitHub Control-Plane Integration"]["category"])
 
+    def test_build_campaign_never_routes_a_100_percent_open_section_marker(self) -> None:
+        root = self._temp_root()
+        marker_doc = MARKER_DOC.replace(
+            "- Cortex Dual-Mode Replacement Readiness: `0%`",
+            "- Cortex Dual-Mode Replacement Readiness: `100%`",
+        )
+        (root / "docs" / "atlas-book" / "02-lanes-and-markers.md").write_text(marker_doc, encoding="utf-8")
+        (root / "docs" / "atlas-book" / "01-current-state.md").write_text(CURRENT_STATE_DOC, encoding="utf-8")
+        self._write_packet_receipts(root)
+
+        payload = build_campaign(root=root)
+        records = {record["marker"]: record for record in payload["open_markers"]}
+
+        self.assertEqual("already closed / locked", records["Cortex Dual-Mode Replacement Readiness"]["category"])
+        self.assertNotEqual("Cortex Dual-Mode Replacement Readiness", payload["next_after_current_marker"])
+
     def test_build_campaign_holds_vercel_observability_without_safe_read_transport(self) -> None:
         root = self._temp_root()
         marker_doc = """# Lanes And Markers

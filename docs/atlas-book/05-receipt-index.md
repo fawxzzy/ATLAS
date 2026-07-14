@@ -1,5 +1,6 @@
 # Receipt Index
 
+- [Atlas Marker Selector Completed-Lane Lock Reconciliation 2026-07-14](../ops/ATLAS-MARKER-SELECTOR-COMPLETED-LANE-LOCK-RECONCILIATION-2026-07-14.md) - prevents any `100%` marker from being reopened by stale lane policy or fallback prose; no marker movement.
 - [Cortex Dual-Mode Replacement Readiness Final Independent Ratification And 100 Percent Closeout 2026-07-14](../ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-FINAL-INDEPENDENT-RATIFICATION-AND-100-PERCENT-CLOSEOUT-2026-07-14.md) - records the exact-byte live canary, independent `RATIFY_100`, and final `90% -> 100%` closeout without widening Cortex authority.
 - [Cortex Dual-Mode Replacement Readiness Independent Endgame Audit Blocker Conversion 2026-07-14](../ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-INDEPENDENT-ENDGAME-AUDIT-BLOCKER-CONVERSION-2026-07-14.md) - records the independent `HOLD_90`, converts durable-admission, source-digest parity, and read-scope blockers, and keeps the marker at `90%` pending a repaired canary and re-audit.
 - [Cortex Dual-Mode Replacement Readiness Stack Dispatch And Durable Result Contract Freeze 2026-07-14](../ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-STACK-DISPATCH-AND-DURABLE-RESULT-CONTRACT-FREEZE-2026-07-14.md) - adopts the existing `_stack` and Atlas Contracts v2 spine for one correlated verified no-change canary.
