@@ -1,0 +1,19 @@
+{
+  "contract_version": "atlas.execution-receipt.v2",
+  "receipt_id": "cortex-simulation-validation-blocker-20260714",
+  "job_id": "cortex-simulation-40-percent-validation",
+  "recorded_at": "2026-07-14T09:31:00Z",
+  "status": "blocked",
+  "component_id": "cortex",
+  "project_id": "atlas",
+  "runtime_effective": {"model": "gpt-5.6-sol", "reasoning": "high", "speed": "standard", "permissions": "full-access", "approval_policy": "never"},
+  "changed_paths": [],
+  "commits": [],
+  "verification": [{"command": "python ops/validation/validate_stack.py", "status": "blocked", "evidence_refs": ["runtime/receipts/validation/stack-validation.latest.json"]}],
+  "evidence_refs": ["runtime/cortex/catalog/memory/working-memory.latest.json"],
+  "blockers": ["Working-memory catalog drift required a generated runtime catalog refresh."],
+  "follow_up": ["Refresh the runtime working-memory catalog and rerun validation."],
+  "correlations": {"card_id": null, "thread_id": null, "turn_id": null, "branch": "main", "worktree": null},
+  "authority_actions": [],
+  "summary": "Validation blocked on generated working-memory catalog drift before refresh."
+}

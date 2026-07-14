@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-07-14T04:02:31-04:00",
-  "updated_at": "2026-07-14T06:15:00-04:00",
+  "updated_at": "2026-07-14T06:45:00-04:00",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -32,6 +32,7 @@
     "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-ATLAS-RECEIPT-WORKFLOW-AND-FAILURE-MODE-REPLAY-FIRST-IMPLEMENTATION-ADMISSION-2026-07-14.md",
     "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-ATLAS-RECEIPT-REPLAY-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-14.md",
     "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-ATLAS-RECEIPT-REPLAY-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-14.md",
+    "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-ATLAS-RECEIPT-REPLAY-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-AND-50-PERCENT-RATCHET-2026-07-14.md",
     "docs/registry/CORTEX-SIMULATION-SUBSTRATE-RESEARCH-CONTRACT.v1.json",
     "docs/registry/CORTEX-SIMULATION-AGENT-STATE-SCHEMA.v1.json",
     "docs/registry/CORTEX-SIMULATION-READ-ONLY-SCENARIO-HELPER.v1.json",
@@ -42,6 +43,11 @@
     "tests/test_cortex_simulation_agent_state_schema.py",
     "ops/cortex/read_only_scenario_helper.py",
     "tests/test_cortex_read_only_scenario_helper.py"
+    ,"schemas/atlas.cortex.simulation.receipt-replay-manifest.v1.json"
+    ,"schemas/atlas.cortex.simulation.receipt-replay.v1.json"
+    ,"ops/cortex/receipt_replay.py"
+    ,"tests/test_cortex_receipt_replay.py"
+    ,"data/cortex/simulation-replays/first-mixed-replay/manifest.json"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -49,9 +55,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "cortex-simulation-substrate-readiness",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-ATLAS-RECEIPT-REPLAY-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-14.md",
-    "checkpoint_commit": "main@368d6820",
-    "checkpoint_summary": "The lane remains at 40 percent. Contract, admission, worker handoff, and implementation readiness are durable. The next honest package is the bounded receipt-replay implementation and reconciliation cluster.",
+    "current_checkpoint_receipt": "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-ATLAS-RECEIPT-REPLAY-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-AND-50-PERCENT-RATCHET-2026-07-14.md",
+    "checkpoint_commit": "main@04c16d52",
+    "checkpoint_summary": "The lane is at 50 percent. Deterministic mixed-source replay validates both admitted Atlas receipt contracts, verifies raw-byte digests, preserves chronology and source status, classifies one success and one blocker, and emits authority-false advisory agent state. The next package selects project adapters.",
     "governing_receipts": [
       "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-FABLE-GENERATIVE-AGENT-RESEARCH-CONTRACT-FREEZE-2026-07-09.md",
       "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-SIMULATION-REQUIREMENTS-MAP-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-10.md",
@@ -63,6 +69,7 @@
       "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-ATLAS-RECEIPT-WORKFLOW-AND-FAILURE-MODE-REPLAY-FIRST-IMPLEMENTATION-ADMISSION-2026-07-14.md",
       "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-ATLAS-RECEIPT-REPLAY-PROMPT-PACK-AND-WORKER-HANDOFF-CONTRACT-2026-07-14.md",
       "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-ATLAS-RECEIPT-REPLAY-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-14.md"
+      ,"docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-ATLAS-RECEIPT-REPLAY-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-AND-50-PERCENT-RATCHET-2026-07-14.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -106,9 +113,9 @@
     ],
     "blocked_or_gated_work": [
       {
-        "work": "Claiming the 50 percent receipt-replay threshold",
+        "work": "Claiming the 60 percent project-adapter-selection threshold",
         "state": "gated",
-        "reason": "the receipt-replay contract is frozen but no replay implementation or mixed-source proof has landed"
+        "reason": "project-specific simulation adapters have not been selected or contracted"
       },
       {
         "work": "Executing simulations or project adapters",
@@ -118,23 +125,23 @@
     ],
     "next_package_ladder": [
       {
-        "package": "Cortex Simulation Substrate Readiness ATLAS receipt workflow and failure-mode replay first-implementation worker-cluster reconciliation",
-        "mode": "root-bounded receipt-replay implementation and reconciliation",
-        "reason": "all docs-only prerequisites are closed and the exact bounded worker is implementation-ready"
+        "package": "Cortex Simulation Substrate Readiness project-specific simulation adapter selection contract freeze",
+        "mode": "docs-only root-bounded project-adapter selection",
+        "reason": "the 50 percent replay threshold is proved and the 60 percent denominator requires explicit project adapter selection"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-ATLAS-RECEIPT-REPLAY-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-14.md",
-    "freshness_checked_at": "2026-07-14T06:15:00-04:00",
-    "freshness_basis": "Contract, admission, worker command, proof matrix, stop conditions, and readiness decision agree. The implementation is now the only honest next package.",
+    "freshness_checked_receipt": "docs/ops/CORTEX-SIMULATION-SUBSTRATE-READINESS-ATLAS-RECEIPT-REPLAY-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-AND-50-PERCENT-RATCHET-2026-07-14.md",
+    "freshness_checked_at": "2026-07-14T06:45:00-04:00",
+    "freshness_basis": "Focused tests and the committed mixed-source canary prove digest-bound chronology, both receipt contracts, success and blocker classification, threshold eligibility, schema-valid agent state, and permanent authority denial.",
     "marker_posture": [
       {
         "marker": "Cortex Simulation Substrate Readiness",
-        "percent": 40,
+        "percent": 50,
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ],
-    "current_percent": 40,
-    "next_exact_packet": "Cortex Simulation Substrate Readiness ATLAS receipt workflow and failure-mode replay first-implementation worker-cluster reconciliation"
+    "current_percent": 50,
+    "next_exact_packet": "Cortex Simulation Substrate Readiness project-specific simulation adapter selection contract freeze"
   }
 }

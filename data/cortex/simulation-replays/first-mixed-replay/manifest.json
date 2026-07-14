@@ -1,0 +1,19 @@
+{
+  "contract_version": "atlas.cortex.simulation.receipt-replay-manifest.v1",
+  "scenario_id": "cortex-simulation-first-mixed-replay",
+  "agent_id": "cortex-simulation-advisory-agent",
+  "generated_at": "2026-07-14T09:35:00Z",
+  "objective": "Replay one proved success and one transient validation blocker without executing either outcome.",
+  "receipts": [
+    {
+      "ref": "data/cortex/simulation-replays/first-mixed-replay/receipt-passed.json",
+      "digest": "sha256:e549ebf4676c8e175927bab951fee1eef44e56a5444b49342fad51a834e8779d",
+      "trust_class": "committed_replay_fixture"
+    },
+    {
+      "ref": "data/cortex/simulation-replays/first-mixed-replay/execution-blocked.json",
+      "digest": "sha256:454a7db8d7c76e97827eb0e1592e6a962dffa8788691627c96c99c446b4d81f4",
+      "trust_class": "committed_replay_fixture"
+    }
+  ]
+}

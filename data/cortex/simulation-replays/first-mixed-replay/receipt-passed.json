@@ -1,0 +1,14 @@
+{
+  "contract_version": "atlas.receipt.v1",
+  "receipt_id": "cortex-simulation-helper-proof-20260714",
+  "recorded_at": "2026-07-14T09:30:00Z",
+  "repo_id": "atlas",
+  "app_id": "cortex",
+  "kind": "simulation-helper-proof",
+  "status": "passed",
+  "subject": {"kind": "commit", "id": "fd9cbf20", "path": "ops/cortex/read_only_scenario_helper.py"},
+  "evidence": [{"kind": "tests", "ref": "tests/test_cortex_read_only_scenario_helper.py", "digest": null, "summary": "Read-only helper proof passed."}],
+  "links": [],
+  "summary": "The first read-only scenario helper proof passed.",
+  "event_id": null
+}

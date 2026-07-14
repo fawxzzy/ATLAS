@@ -61,9 +61,9 @@
   },
   "marker": {
     "name": "Cortex Simulation Substrate Readiness",
-    "current_percent": 40,
-    "movement": "30_to_40",
-    "next_threshold": 50,
-    "next_packet": "Cortex Simulation Substrate Readiness ATLAS receipt workflow and failure-mode replay contract freeze"
+    "current_percent": 50,
+    "movement": "40_to_50",
+    "next_threshold": 60,
+    "next_packet": "Cortex Simulation Substrate Readiness project-specific simulation adapter selection contract freeze"
   }
 }

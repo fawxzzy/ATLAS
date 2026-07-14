@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://schemas/atlas.cortex.simulation.receipt-replay.v1.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "replay_id", "generated_at", "scenario_id", "agent_id", "objective", "source_refs", "receipt_observations", "transitions", "failure_mode_counts", "threshold_eligible", "agent_state", "authority"],
+  "properties": {
+    "contract_version": {"const": "atlas.cortex.simulation.receipt-replay.v1"},
+    "replay_id": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "generated_at": {"type": "string"},
+    "scenario_id": {"type": "string"},
+    "agent_id": {"type": "string"},
+    "objective": {"type": "string"},
+    "source_refs": {"type": "array", "items": {"type": "string"}},
+    "receipt_observations": {"type": "array", "items": {"type": "object"}},
+    "transitions": {"type": "array", "items": {"type": "object"}},
+    "failure_mode_counts": {"type": "object"},
+    "threshold_eligible": {"type": "boolean"},
+    "agent_state": {"type": "object"},
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["advisory_only", "execution_authorized", "dispatch_authorized", "owner_repo_mutation_authorized", "platform_mutation_authorized", "discord_write_authorized", "board_write_authorized", "deployment_authorized", "approval_authorized", "final_receipt_authorized", "marker_movement_authorized"],
+      "properties": {
+        "advisory_only": {"const": true},
+        "execution_authorized": {"const": false},
+        "dispatch_authorized": {"const": false},
+        "owner_repo_mutation_authorized": {"const": false},
+        "platform_mutation_authorized": {"const": false},
+        "discord_write_authorized": {"const": false},
+        "board_write_authorized": {"const": false},
+        "deployment_authorized": {"const": false},
+        "approval_authorized": {"const": false},
+        "final_receipt_authorized": {"const": false},
+        "marker_movement_authorized": {"const": false}
+      }
+    }
+  }
+}

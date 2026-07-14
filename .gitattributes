@@ -1,1 +1,2 @@
 stack.lock.yaml text eol=lf
+data/cortex/simulation-replays/** text eol=lf

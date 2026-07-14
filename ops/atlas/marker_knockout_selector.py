@@ -207,12 +207,13 @@ POLICY_REGISTRY: dict[str, MarkerPolicy] = {
     "Cortex Simulation Substrate Readiness": MarkerPolicy(
         category="admissible after current lane",
         rationale=(
-            "The lane is at 40% and the receipt-replay implementation is contract-frozen, admitted, handed off, and "
-            "readiness-closed. The next honest boundary is the bounded implementation and reconciliation cluster."
+            "The lane is at 50% with deterministic mixed-source Atlas receipt replay proved. The next honest boundary "
+            "is a docs-only selection contract for project-specific simulation adapters; no adapter implementation or "
+            "live-action authority is admitted yet."
         ),
         expected_evidence=(
-            "one deterministic mixed-source receipt replay with schemas, digest verification, chronological transitions, "
-            "failure classification, authority denial, focused proof, and evidence-backed reconciliation"
+            "one root-owned adapter-selection matrix covering Atlas, Mazer, Fitness, and DiscordOS use cases, inputs, "
+            "outputs, ownership, privacy, proof, collision risks, and explicit no-live-action boundaries"
         ),
     ),
     "Owner-Lane Agent Service Bus & DiscordOS Ops Readiness": MarkerPolicy(
@@ -439,15 +440,15 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "Cortex Simulation Substrate Readiness": PacketDescriptor(
-        packet="Cortex Simulation Substrate Readiness ATLAS receipt workflow and failure-mode replay first-implementation worker-cluster reconciliation",
+        packet="Cortex Simulation Substrate Readiness project-specific simulation adapter selection contract freeze",
         basis_receipt_ref=(
             "docs/ops/"
-            "CORTEX-SIMULATION-SUBSTRATE-READINESS-ATLAS-RECEIPT-REPLAY-IMPLEMENTATION-READINESS-CLOSEOUT-AND-WORKER-ROUTING-2026-07-14.md"
+            "CORTEX-SIMULATION-SUBSTRATE-READINESS-ATLAS-RECEIPT-REPLAY-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-AND-50-PERCENT-RATCHET-2026-07-14.md"
         ),
-        mode="root-bounded receipt-replay implementation and reconciliation",
+        mode="docs-only root-bounded project-adapter selection",
         scope=(
-            "implement only the admitted schemas, helper, tests, and mixed-source canary; run the full proof cluster and "
-            "move to 50 percent only when threshold-eligible evidence and every authority denial are proved"
+            "select and rank project-specific simulation adapters without implementing them, touching owner repositories, "
+            "reading live data, calling models, or granting execution or platform authority"
         ),
     ),
     "Owner-Lane Agent Service Bus & DiscordOS Ops Readiness": PacketDescriptor(
