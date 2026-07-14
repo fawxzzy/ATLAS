@@ -1,0 +1,74 @@
+{
+  "contract_version": "atlas.cortex.primary_operator_replay_parity_contract.v1",
+  "report_schema": "atlas.cortex.primary_operator_replay_parity_report.v1",
+  "adapter_projection_schema": "atlas.cortex.primary_operator_adapter_projection.v1",
+  "mode": "deterministic_offline_replay_parity",
+  "required_inputs": [
+    "atlas.cortex.execution_plan.v1",
+    "operator_authority_envelope",
+    "current_resource_lease_receipts",
+    "current_root_truth_digests"
+  ],
+  "optional_inputs": [
+    "atlas.cortex.primary_operator_adapter_projection.v1"
+  ],
+  "replay_modes": [
+    "internal_no_adapter",
+    "optional_adapter_projection"
+  ],
+  "comparison_dimensions": [
+    "plan_identity",
+    "acceptance_state",
+    "reason_codes",
+    "source_digests",
+    "runtime_dispatch",
+    "mutation_performed",
+    "operator_plane",
+    "external_adapters_required",
+    "receipt_correlation",
+    "external_action_authority"
+  ],
+  "result_classes": [
+    "equivalent",
+    "cortex_stricter",
+    "adapter_stricter",
+    "authority_regression",
+    "mismatch",
+    "blocked"
+  ],
+  "parity_rules": [
+    "internal_no_adapter_mode_must_produce_a_complete_deterministic_baseline",
+    "adapter_projection_is_optional_transport_only",
+    "adapter_projection_must_not_widen_external_authority",
+    "adapter_projection_must_not_claim_runtime_dispatch_or_mutation",
+    "adapter_projection_must_preserve_plan_and_acceptance_correlation",
+    "cortex_may_be_stricter_but_never_less_restrictive_than_the_adapter",
+    "identical_inputs_must_produce_identical_report_identity_and_order"
+  ],
+  "first_implementation": {
+    "allowed_paths": [
+      "ops/cortex/primary_operator_replay_parity.py",
+      "tests/test_cortex_primary_operator_replay_parity.py"
+    ],
+    "output_glob": "tmp/atlas/**.json",
+    "runtime_dispatch": false,
+    "network_access": false,
+    "marker_movement": false,
+    "required_proof": [
+      "stable_report_identity",
+      "internal_no_adapter_baseline",
+      "equivalent_optional_adapter_projection",
+      "cortex_stricter_classification",
+      "authority_regression_rejection",
+      "plan_or_receipt_correlation_mismatch",
+      "safe_output_path_enforcement",
+      "no_execution_side_effects"
+    ]
+  },
+  "marker": {
+    "name": "Cortex Dual-Mode Replacement Readiness",
+    "current_percent": 90,
+    "movement": "none",
+    "one_hundred_percent_requires": "real_stack_dispatch_durable_result_correlation_and_independent_optional_adapter_endgame_audit"
+  }
+}

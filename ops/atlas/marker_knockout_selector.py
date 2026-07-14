@@ -200,8 +200,8 @@ POLICY_REGISTRY: dict[str, MarkerPolicy] = {
             "The next honest work is the internal primary-operator acceptance and receipt implementation; 100% remains blocked on dispatch and replay parity."
         ),
         expected_evidence=(
-            "one replay-backed primary-operator parity contract that freezes comparison inputs, authority boundaries, correlated receipt dimensions, "
-            "and the optional ChatGPT/Codex adapter posture without claiming runtime dispatch"
+            "one deterministic offline replay-parity helper that proves an internal no-adapter baseline, compares one optional adapter projection, "
+            "rejects authority regressions, and performs no runtime dispatch"
         ),
     ),
     "Cortex Simulation Substrate Readiness": MarkerPolicy(
@@ -426,16 +426,16 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "Cortex Dual-Mode Replacement Readiness": PacketDescriptor(
-        packet="Cortex Dual-Mode Replacement Readiness replay-backed primary-operator parity contract freeze",
+        packet="Cortex Dual-Mode Replacement Readiness replay-backed primary-operator parity first implementation",
         basis_receipt_ref=(
             "docs/ops/"
-            "CORTEX-DUAL-MODE-REPLACEMENT-READINESS-PRIMARY-OPERATOR-FIRST-"
-            "IMPLEMENTATION-RECONCILIATION-2026-07-14.md"
+            "CORTEX-DUAL-MODE-REPLACEMENT-READINESS-PRIMARY-OPERATOR-REPLAY-PARITY-"
+            "CONTRACT-FREEZE-2026-07-14.md"
         ),
-        mode="docs-only root-bounded replay-parity contract freeze",
+        mode="root-owned deterministic offline replay-parity implementation",
         scope=(
-            "freeze deterministic replay comparison between primary-operator acceptance/receipts and optional adapter projections, preserving _stack execution ownership "
-            "and prohibiting runtime dispatch, marker movement, or external mutation"
+            "implement one Cortex helper/test pair for internal no-adapter replay and optional adapter projection comparison, preserving _stack execution ownership "
+            "and prohibiting model calls, runtime dispatch, marker movement, or external mutation"
         ),
     ),
     "Cortex Simulation Substrate Readiness": PacketDescriptor(

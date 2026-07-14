@@ -73,7 +73,9 @@
     "docs/registry/CORTEX-PRIMARY-OPERATOR-ACCEPTANCE-RECEIPT-CONTRACT.v1.json",
     "ops/cortex/primary_operator.py",
     "tests/test_cortex_primary_operator.py",
-    "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-PRIMARY-OPERATOR-FIRST-IMPLEMENTATION-RECONCILIATION-2026-07-14.md"
+    "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-PRIMARY-OPERATOR-FIRST-IMPLEMENTATION-RECONCILIATION-2026-07-14.md",
+    "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-PRIMARY-OPERATOR-REPLAY-PARITY-CONTRACT-FREEZE-2026-07-14.md",
+    "docs/registry/CORTEX-PRIMARY-OPERATOR-REPLAY-PARITY-CONTRACT.v1.json"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -81,9 +83,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "cortex-dual-mode-replacement-readiness",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-PRIMARY-OPERATOR-FIRST-IMPLEMENTATION-RECONCILIATION-2026-07-14.md",
+    "current_checkpoint_receipt": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-PRIMARY-OPERATOR-REPLAY-PARITY-CONTRACT-FREEZE-2026-07-14.md",
     "checkpoint_commit": "pending-current-root-commit",
-    "checkpoint_summary": "The published 90 percent threshold remains satisfied. Deterministic dry-run primary-operator acceptance and correlated receipts are implemented with 13 focused and 122 combined Cortex tests passing. The marker remains held because real _stack dispatch, durable runtime results, and replay-backed optional-adapter parity are not yet proven.",
+    "checkpoint_summary": "The published 90 percent threshold remains satisfied. Deterministic dry-run primary-operator acceptance and correlated receipts are implemented, and the replay-parity contract now freezes an internal no-adapter baseline plus optional adapter projection comparison. The marker remains held because parity implementation, real _stack dispatch, and durable runtime results are not yet proven.",
     "governing_receipts": [
       "docs/ops/CORTEX-DUAL-MODE-AND-SIMULATION-SUBSTRATE-MARKER-ADMISSION-2026-07-09.md",
       "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-OPERATING-MODE-CONTRACT-FREEZE-2026-07-09.md",
@@ -124,6 +126,7 @@
       ,"docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-SECOND-ATLAS-LANE-90-PERCENT-MARKER-DECISION-2026-07-13.md"
       ,"docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-PRIMARY-OPERATOR-ACCEPTANCE-AND-RECEIPT-CONTRACT-FREEZE-2026-07-14.md"
       ,"docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-PRIMARY-OPERATOR-FIRST-IMPLEMENTATION-RECONCILIATION-2026-07-14.md"
+      ,"docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-PRIMARY-OPERATOR-REPLAY-PARITY-CONTRACT-FREEZE-2026-07-14.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -259,6 +262,14 @@
         "role": "current implementation reconciliation and unchanged 90 percent marker hold"
       },
       {
+        "path": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-PRIMARY-OPERATOR-REPLAY-PARITY-CONTRACT-FREEZE-2026-07-14.md",
+        "role": "current no-adapter baseline and optional-adapter replay parity boundary"
+      },
+      {
+        "path": "docs/registry/CORTEX-PRIMARY-OPERATOR-REPLAY-PARITY-CONTRACT.v1.json",
+        "role": "machine-readable replay dimensions, classifications, and authority-regression rules"
+      },
+      {
         "path": "docs/registry/ATLAS-CONTRACTS-V2-CLUSTER-2-CORTEX-BRIDGE.v1.json",
         "role": "durable advisory bridge candidate for serialized Atlas Contracts v2 Cluster 2 producer and consumer adoption"
       },
@@ -359,14 +370,9 @@
     ],
     "next_package_ladder": [
       {
-        "package": "Cortex Dual-Mode Replacement Readiness replay-backed primary-operator parity contract freeze",
-        "mode": "docs-only root-bounded replay-parity contract freeze",
-        "reason": "freeze exact replay inputs, comparison dimensions, authority boundaries, and optional-adapter posture before implementation"
-      },
-      {
-        "package": "Cortex replay-backed primary-operator parity first implementation",
-        "mode": "deterministic replay/evaluation implementation and proof",
-        "reason": "prove equivalent governed outcomes while ChatGPT/Codex remain optional external adapters"
+        "package": "Cortex Dual-Mode Replacement Readiness replay-backed primary-operator parity first implementation",
+        "mode": "root-owned deterministic offline replay-parity implementation",
+        "reason": "prove the internal no-adapter baseline and optional-adapter comparison without runtime dispatch"
       },
       {
         "package": "Cortex optional-adapter endgame ratchet",
@@ -374,10 +380,10 @@
         "reason": "100 percent is available only after the internal primary-operator path and replay-backed parity are durable"
       }
     ],
-    "freshness_state": "primary-operator-dry-run-acceptance-and-receipts-implemented-at-90-percent",
-    "freshness_checked_receipt": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-PRIMARY-OPERATOR-FIRST-IMPLEMENTATION-RECONCILIATION-2026-07-14.md",
-    "freshness_checked_at": "2026-07-14T19:15:00-04:00",
-    "freshness_basis": "Deterministic internal plan acceptance and correlated dry-run receipts now pass 13 focused and 122 combined Cortex tests. The next honest gap is replay-backed primary-operator parity; real _stack dispatch and durable runtime results remain unproven.",
+    "freshness_state": "primary-operator-replay-parity-contract-frozen-at-90-percent",
+    "freshness_checked_receipt": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-PRIMARY-OPERATOR-REPLAY-PARITY-CONTRACT-FREEZE-2026-07-14.md",
+    "freshness_checked_at": "2026-07-14T19:35:00-04:00",
+    "freshness_basis": "Dry-run primary-operator acceptance and correlated receipts are implemented. The replay-parity contract now freezes the internal no-adapter baseline and optional adapter projection boundary; parity implementation and real _stack dispatch remain unproven.",
     "marker_posture": [
       {
         "marker": "Cortex Dual-Mode Replacement Readiness",
