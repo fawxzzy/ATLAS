@@ -1,0 +1,30 @@
+{
+  "contract_version": "atlas.cortex.simulation.recommendation-evaluation-registry.v1",
+  "status": "implementation_admitted",
+  "owner": "stack-root",
+  "input_contract": "atlas.cortex.simulation.recommendation-evaluation-manifest.v1",
+  "output_contract": "atlas.cortex.simulation.recommendation-evaluation.v1",
+  "evaluated_contract": "atlas.cortex.simulation.recommendation-envelope.v1",
+  "classifications": ["match", "changed", "invalid"],
+  "threshold_canary": {"match": 1, "changed": 1, "invalid": 1},
+  "authority": {
+    "advisory_only": true,
+    "execution_authorized": false,
+    "dispatch_authorized": false,
+    "doctrine_promotion_authorized": false,
+    "owner_repo_mutation_authorized": false,
+    "platform_mutation_authorized": false,
+    "discord_write_authorized": false,
+    "board_write_authorized": false,
+    "deployment_authorized": false,
+    "approval_authorized": false,
+    "final_receipt_authorized": false,
+    "marker_movement_authorized": false
+  },
+  "marker": {
+    "name": "Cortex Simulation Substrate Readiness",
+    "current_percent": 80,
+    "next_threshold": 90,
+    "next_packet": "Cortex Simulation Substrate Readiness recommendation-envelope replay and evaluation loop first implementation and 90 percent reconciliation"
+  }
+}
