@@ -60,4 +60,3 @@ This closeout grants no new push, merge, pull-request, deployment, production, D
 ## Future posture
 
 This lane is closed at `100%`. Reopen it only for a new capability denominator or material regression. New simulation, broader Cortex readiness, Playbook adoption, Atlas Control, or owner-lane orchestration work belongs to its own existing marker lane.
-
