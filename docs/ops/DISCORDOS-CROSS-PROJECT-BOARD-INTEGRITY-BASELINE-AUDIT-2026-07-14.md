@@ -87,6 +87,13 @@ precedence defect; their newer journal states must not be overwritten by stale
 normalization input. The exact repair receipt is
 `docs/ops/DISCORDOS-MAZER-BOARD-NORMALIZATION-LIVE-REPAIR-2026-07-14.md`.
 
+Read-only admission reconnaissance then proved that all seven blocked project
+entries are genuinely absent forums rather than aliases. Atlas, DiscordOS,
+Foundation, Lifeline, Cortex, `_stack`, and Playbook each need an accepted
+owner card source followed by serialized type-15 forum creation and stable-ID
+readback. The admission matrix is
+`docs/ops/DISCORDOS-PROJECT-BOARD-ADMISSION-RECONNAISSANCE-2026-07-14.md`.
+
 ## Additional integrity risks
 
 - DiscordOS had `57` attached worktrees and `62` local branches at audit time.
@@ -116,7 +123,11 @@ deletion by inference.
    Completed-board consumer.
 5. Migrate and reconcile every registered project board through dry-run,
    bounded apply, exact readback, duplicate scan, and encoding scan.
-6. Install one recurring fail-closed drift scan, deconflict writer loops, and
+6. Define owner card sources and create/admit the seven currently absent
+   project forums without seeding invented cards.
+7. Normalize the shared Completed topic and document duplicate-name channel
+   type distinctions.
+8. Install one recurring fail-closed drift scan, deconflict writer loops, and
    classify obsolete scheduler surfaces before any retirement.
 
 ## Ratchet rule
