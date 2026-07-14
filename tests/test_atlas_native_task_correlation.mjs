@@ -98,12 +98,37 @@ function validEvidenceBundle() {
   };
 }
 
+function validWorkerLease() {
+  return {
+    contract_version: "atlas.worker-lease.v2",
+    lease_id: "lease-native-correlation-001",
+    job_id: "job-native-correlation-001",
+    component_id: "atlas-root",
+    status: "released",
+    acquired_at: "2026-07-14T04:50:00Z",
+    expires_at: "2026-07-14T05:50:00Z",
+    renewed_at: null,
+    released_at: "2026-07-14T04:53:00Z",
+    owner: {
+      worker_id: "native-task-019f5ef2",
+      thread_id: "019f5ef2-29cb-73b3-a80d-ebe2160d918f",
+      turn_id: "019f5ef2-fabe-7d51-8a61-a7d06f23ac27",
+    },
+    workspace: { root: "<ATLAS_ROOT>", worktree: null, branch: "main" },
+    resources: [
+      { kind: "custom", resource_id: "atlas-root-read-only-inspection", exclusive: false, metadata: { mode: "read-only" } },
+    ],
+    recovery: { strategy: "release", checkpoint: "runtime/atlas/native-task-correlations/job-native-correlation-001.json" },
+  };
+}
+
 function correlationInput(overrides = {}) {
   return {
     job: validJob(),
     taskResult: validTaskResult(),
     contextPacket: validContextPacket(),
     evidenceBundle: validEvidenceBundle(),
+    workerLease: validWorkerLease(),
     ...overrides,
   };
 }
@@ -118,6 +143,7 @@ test("correlates native identities into a schema-valid execution receipt", async
   assert.equal(receipt.extensions.runtime_policy_observed, false);
   assert.equal(receipt.extensions.context_binding.context_id, "context-native-correlation-001");
   assert.equal(receipt.extensions.evidence_binding.bundle_id, "evidence-native-correlation-001");
+  assert.equal(receipt.extensions.worker_lease_binding.lease_id, "lease-native-correlation-001");
   assert.ok(receipt.evidence_refs.includes("native-correlation-tests"));
   const loaded = await loadKnownSchema("atlas.execution-receipt.v2");
   assert.equal(loaded.ok, true);
@@ -181,16 +207,19 @@ test("CLI writes only to admitted runtime or tmp paths", async () => {
   const outputPath = path.join(inputDir, "receipt.json");
   const contextPath = path.join(inputDir, "context.json");
   const evidencePath = path.join(inputDir, "evidence.json");
+  const leasePath = path.join(inputDir, "lease.json");
   await fs.writeFile(jobPath, JSON.stringify(validJob()), "utf8");
   await fs.writeFile(taskPath, JSON.stringify(validTaskResult()), "utf8");
   await fs.writeFile(contextPath, JSON.stringify(validContextPacket()), "utf8");
   await fs.writeFile(evidencePath, JSON.stringify(validEvidenceBundle()), "utf8");
+  await fs.writeFile(leasePath, JSON.stringify(validWorkerLease()), "utf8");
   try {
     const baseArguments = [
       "--job", jobPath,
       "--task-result", taskPath,
       "--context", contextPath,
       "--evidence", evidencePath,
+      "--lease", leasePath,
     ];
     const result = await run([...baseArguments, "--output", outputPath]);
     assert.equal(result.status, "written");
@@ -212,6 +241,7 @@ test("rejects sensitive input paths", async () => {
       "--task-result", "tmp/task.json",
       "--context", "tmp/context.json",
       "--evidence", "tmp/evidence.json",
+      "--lease", "tmp/lease.json",
       "--output", "tmp/out.json",
     ]),
     (error) => error instanceof NativeTaskCorrelationError && error.message.includes("Sensitive input path"),
@@ -233,5 +263,23 @@ test("rejects evidence component mismatches", async () => {
   await assert.rejects(
     correlateNativeTask(correlationInput({ evidenceBundle })),
     (error) => error instanceof NativeTaskCorrelationError && error.message.includes("Evidence bundle component correlation mismatch"),
+  );
+});
+
+test("rejects worker lease owner mismatches", async () => {
+  const workerLease = validWorkerLease();
+  workerLease.owner.thread_id = "thread-other";
+  await assert.rejects(
+    correlateNativeTask(correlationInput({ workerLease })),
+    (error) => error instanceof NativeTaskCorrelationError && error.message.includes("Worker lease owner"),
+  );
+});
+
+test("rejects released leases without a release timestamp", async () => {
+  const workerLease = validWorkerLease();
+  workerLease.released_at = null;
+  await assert.rejects(
+    correlateNativeTask(correlationInput({ workerLease })),
+    (error) => error instanceof NativeTaskCorrelationError && error.message.includes("requires released_at"),
   );
 });

@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-07-10T12:00:00-04:00",
-  "updated_at": "2026-07-14T01:10:00-04:00",
+  "updated_at": "2026-07-14T01:18:00-04:00",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -27,6 +27,7 @@
     "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-TO-ATLAS-GAP-MATRIX-AND-THIN-LEDGER-DENOMINATOR-REBASELINE-2026-07-14.md",
     "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-TASK-CORRELATION-FIRST-IMPLEMENTATION-2026-07-14.md",
     "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-CONTEXT-EVIDENCE-BINDING-IMPLEMENTATION-2026-07-14.md",
+    "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-WORKER-LEASE-BINDING-IMPLEMENTATION-2026-07-14.md",
     "docs/architecture/ATLAS-CHATGPT-CODEX-WORKFLOW.md",
     "ops/atlas/marker_knockout_selector.py",
     "ops/codex/config.full-permission.toml",
@@ -38,9 +39,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "owner-lane-agent-service-bus-and-discordos-ops-readiness",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-CONTEXT-EVIDENCE-BINDING-IMPLEMENTATION-2026-07-14.md",
-    "checkpoint_commit": "main@1541edef",
-    "checkpoint_summary": "The native correlation adapter now requires validated ContextPacket and EvidenceBundle inputs, rejects job/component drift, and preserves IDs plus deterministic provenance digests in the ExecutionReceipt. Ten focused tests and a live schema-valid canary complete unit 5, moving the marker to five of ten or 50 percent.",
+    "current_checkpoint_receipt": "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-WORKER-LEASE-BINDING-IMPLEMENTATION-2026-07-14.md",
+    "checkpoint_commit": "main@2f575711",
+    "checkpoint_summary": "The native correlation adapter now validates WorkerLease identity, workspace, timing, release, resource, and recovery truth and carries a deterministic lease binding into the ExecutionReceipt. Twelve focused tests and the live schema-valid canary complete unit 6, moving the marker to six of ten or 60 percent.",
     "governing_receipts": [
       "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-MARKER-ADMISSION-2026-07-10.md",
       "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-FULL-PERMISSION-RUNTIME-AND-REQUEST-RECEIPT-PROTOCOL-CONTRACT-FREEZE-2026-07-10.md",
@@ -48,7 +49,8 @@
       "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-CODEX-TASK-THREAD-CAPABILITY-SPIKE-2026-07-14.md",
       "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-TO-ATLAS-GAP-MATRIX-AND-THIN-LEDGER-DENOMINATOR-REBASELINE-2026-07-14.md",
       "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-TASK-CORRELATION-FIRST-IMPLEMENTATION-2026-07-14.md",
-      "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-CONTEXT-EVIDENCE-BINDING-IMPLEMENTATION-2026-07-14.md"
+      "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-CONTEXT-EVIDENCE-BINDING-IMPLEMENTATION-2026-07-14.md",
+      "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-WORKER-LEASE-BINDING-IMPLEMENTATION-2026-07-14.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -90,6 +92,10 @@
       {
         "path": "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-CONTEXT-EVIDENCE-BINDING-IMPLEMENTATION-2026-07-14.md",
         "role": "current 50 percent ContextPacket and EvidenceBundle implementation receipt"
+      },
+      {
+        "path": "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-WORKER-LEASE-BINDING-IMPLEMENTATION-2026-07-14.md",
+        "role": "current 60 percent WorkerLease implementation receipt"
       },
       {
         "path": "docs/architecture/ATLAS-CHATGPT-CODEX-WORKFLOW.md",
@@ -150,19 +156,19 @@
     ],
     "next_package_ladder": [
       {
-        "package": "Owner-Lane Agent Service Bus & DiscordOS Ops native WorkerLease binding first-implementation admission",
-        "mode": "bounded root-owned worker-lease binding admission",
-        "reason": "unit 5 is implementation-backed and live-canary proven, so the next honest slice is unit 6: validate and bind explicit native resource ownership, expiry, renewal, and recovery semantics to the existing correlation chain"
+        "package": "Owner-Lane Agent Service Bus & DiscordOS Ops durable native task lifecycle state first-implementation admission",
+        "mode": "bounded root-owned lifecycle-state admission",
+        "reason": "unit 6 is implementation-backed and live-canary proven, so the next honest slice is unit 7: deterministic admitted-through-archived state, retry, replay, cancellation, failure, and transition validation around native tasks"
       }
     ],
     "freshness_state": "manifest-backed",
-    "freshness_checked_receipt": "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-CONTEXT-EVIDENCE-BINDING-IMPLEMENTATION-2026-07-14.md",
-    "freshness_checked_at": "2026-07-14T01:10:00-04:00",
-    "freshness_basis": "The owner-lane orchestration family is manifest-backed at 50 percent on a fixed ten-unit denominator. Units 1 through 5 are complete with validated native identity, runtime, context, evidence, and receipt correlation. Unit 6 is WorkerLease binding.",
+    "freshness_checked_receipt": "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-WORKER-LEASE-BINDING-IMPLEMENTATION-2026-07-14.md",
+    "freshness_checked_at": "2026-07-14T01:18:00-04:00",
+    "freshness_basis": "The owner-lane orchestration family is manifest-backed at 60 percent on a fixed ten-unit denominator. Units 1 through 6 are complete with validated native identity, runtime, context, evidence, lease, recovery, and receipt correlation. Unit 7 is durable lifecycle state.",
     "marker_posture": [
       {
         "marker": "Owner-Lane Agent Service Bus & DiscordOS Ops Readiness",
-        "percent": 50,
+        "percent": 60,
         "source": "docs/atlas-book/02-lanes-and-markers.md"
       }
     ]

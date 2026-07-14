@@ -34,12 +34,12 @@ function parseArguments(argv) {
       options.json = true;
       continue;
     }
-    const match = argument.match(/^--(job|task-result|context|evidence|output)=(.+)$/);
+    const match = argument.match(/^--(job|task-result|context|evidence|lease|output)=(.+)$/);
     if (match) {
       options[match[1] === "task-result" ? "taskResult" : match[1]] = match[2];
       continue;
     }
-    if (["--job", "--task-result", "--context", "--evidence", "--output"].includes(argument)) {
+    if (["--job", "--task-result", "--context", "--evidence", "--lease", "--output"].includes(argument)) {
       const value = argv[index + 1];
       if (!value || value.startsWith("--")) {
         throw new NativeTaskCorrelationError(`${argument} requires a value.`);
@@ -50,7 +50,7 @@ function parseArguments(argv) {
     }
     throw new NativeTaskCorrelationError(`Unsupported argument: ${argument}`);
   }
-  for (const key of ["job", "taskResult", "context", "evidence", "output"]) {
+  for (const key of ["job", "taskResult", "context", "evidence", "lease", "output"]) {
     if (!options[key]) {
       throw new NativeTaskCorrelationError(`Missing required argument: ${key}.`);
     }
@@ -162,6 +162,32 @@ function assertMatchingIdentity(payload, job, label) {
   }
 }
 
+function assertLeaseConsistency(workerLease, job, taskResult) {
+  assertMatchingIdentity(workerLease, job, "Worker lease");
+  const threadId = requireString(taskResult, "thread_id");
+  const turnId = requireString(taskResult, "turn_id");
+  if (workerLease.owner.thread_id !== threadId || workerLease.owner.turn_id !== turnId) {
+    throw new NativeTaskCorrelationError("Worker lease owner must match native thread_id and turn_id.");
+  }
+  const branch = nullableString(taskResult, "branch");
+  const worktree = nullableString(taskResult, "worktree");
+  if (workerLease.workspace.branch !== branch || workerLease.workspace.worktree !== worktree) {
+    throw new NativeTaskCorrelationError("Worker lease workspace must match native branch and worktree.");
+  }
+  const acquiredAt = Date.parse(workerLease.acquired_at);
+  for (const key of ["expires_at", "renewed_at", "released_at"]) {
+    if (workerLease[key] !== null && Date.parse(workerLease[key]) < acquiredAt) {
+      throw new NativeTaskCorrelationError(`Worker lease ${key} cannot precede acquired_at.`);
+    }
+  }
+  if (workerLease.status === "released" && workerLease.released_at === null) {
+    throw new NativeTaskCorrelationError("Released worker lease requires released_at.");
+  }
+  if (workerLease.status === "active" && workerLease.released_at !== null) {
+    throw new NativeTaskCorrelationError("Active worker lease cannot include released_at.");
+  }
+}
+
 function normalizeVerification(taskResult) {
   const records = taskResult.verification ?? [];
   if (!Array.isArray(records)) {
@@ -183,15 +209,17 @@ function normalizeVerification(taskResult) {
   });
 }
 
-export async function correlateNativeTask({ job, taskResult, contextPacket, evidenceBundle }) {
+export async function correlateNativeTask({ job, taskResult, contextPacket, evidenceBundle, workerLease }) {
   await validateContract(job, "atlas.job-envelope.v2", "Job envelope");
   await validateContract(contextPacket, "atlas.context-packet.v2", "Context packet");
   await validateContract(evidenceBundle, "atlas.evidence-bundle.v2", "Evidence bundle");
+  await validateContract(workerLease, "atlas.worker-lease.v2", "Worker lease");
   assertMatchingIdentity(contextPacket, job, "Context packet");
   assertMatchingIdentity(evidenceBundle, job, "Evidence bundle");
   if (!taskResult || typeof taskResult !== "object" || Array.isArray(taskResult)) {
     throw new NativeTaskCorrelationError("Native task result must be an object.");
   }
+  assertLeaseConsistency(workerLease, job, taskResult);
   const taskJobId = requireString(taskResult, "job_id");
   if (taskJobId !== job.job_id) {
     throw new NativeTaskCorrelationError(`Job correlation mismatch: ${job.job_id} != ${taskJobId}.`);
@@ -254,6 +282,13 @@ export async function correlateNativeTask({ job, taskResult, contextPacket, evid
         item_count: evidenceBundle.evidence.length,
         classifications: evidenceBundle.classifications,
       },
+      worker_lease_binding: {
+        lease_id: workerLease.lease_id,
+        digest: contentDigest(workerLease),
+        status: workerLease.status,
+        resource_count: workerLease.resources.length,
+        recovery: workerLease.recovery,
+      },
     },
   };
   await validateContract(receipt, "atlas.execution-receipt.v2", "Execution receipt");
@@ -266,12 +301,14 @@ export async function run(argv) {
   const taskResultPath = assertSafeInput(options.taskResult);
   const contextPath = assertSafeInput(options.context);
   const evidencePath = assertSafeInput(options.evidence);
+  const leasePath = assertSafeInput(options.lease);
   const outputPath = assertSafeOutput(options.output);
   const job = await readJson(jobPath.resolved, "Job envelope");
   const taskResult = await readJson(taskResultPath.resolved, "Native task result");
   const contextPacket = await readJson(contextPath.resolved, "Context packet");
   const evidenceBundle = await readJson(evidencePath.resolved, "Evidence bundle");
-  const receipt = await correlateNativeTask({ job, taskResult, contextPacket, evidenceBundle });
+  const workerLease = await readJson(leasePath.resolved, "Worker lease");
+  const receipt = await correlateNativeTask({ job, taskResult, contextPacket, evidenceBundle, workerLease });
   if (!options.dryRun) {
     await fs.mkdir(path.dirname(outputPath.resolved), { recursive: true });
     await fs.writeFile(outputPath.resolved, `${JSON.stringify(receipt, null, 2)}\n`, "utf8");
@@ -286,6 +323,7 @@ export async function run(argv) {
     runtime_policy_observed: receipt.extensions.runtime_policy_observed,
     context_id: receipt.extensions.context_binding.context_id,
     evidence_bundle_id: receipt.extensions.evidence_binding.bundle_id,
+    worker_lease_id: receipt.extensions.worker_lease_binding.lease_id,
   };
 }
 
