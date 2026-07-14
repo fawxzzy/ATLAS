@@ -46,6 +46,7 @@ Read:
 - DiscordOS infrastructure separation and feedback workflow canonicalization are closed ratchets; do not reopen them from taxonomy cleanup alone
 - runtime/product hardening is now closed at `100%` from DiscordOS owner commit `7bb72a3`, final update message `1515710749329199268`, zero-recommendation operator dashboard proof, marker snapshot proof, and full repo verification
 - publication/docs reliability is now also closed at `100%` from repeated live `#updates` sends, forum/card lifecycle proof, ready publication status/docs/audit surfaces, and zero-recommendation operator dashboard proof; future Discord feature work must open as new owner scope rather than replaying this lane
+- `DiscordOS Cross-Project Board Integrity & Lifecycle Repair: 0%` is a new explicit owner scope on a fixed ten-unit live-proof denominator. It responds to current cross-project mismatches in incomplete/completed reactions, shipped-card movement, card bodies, work journals, encoding, formatting, duplicate prevention, lifecycle admission, and readback rather than reopening the older closed DiscordOS ratchets. No unit receives credit until current code, tests, and live readback cover every governed board class or record an accepted not-applicable disposition.
 
 ### Naming / ownership hygiene
 
