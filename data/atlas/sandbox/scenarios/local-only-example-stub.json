@@ -2,8 +2,8 @@
   "contract_version": "atlas.sandbox.scenario.v1",
   "scenario_id": "local-only-example-stub",
   "title": "Local-Only Example Stub",
-  "status": "draft",
-  "purpose": "Admit one concrete Sandbox scenario descriptor under the frozen local-only contract without implying validator, runner, or mutation behavior.",
+  "status": "active",
+  "purpose": "Provide one deterministic local-only Sandbox scenario for source-bound validator execution without external or owner-repository mutation.",
   "source_refs": [
     "docs/ops/SANDBOX-SIMULATION-READINESS-STARTER-PACKET-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-27.md",
     "docs/ops/SANDBOX-SIMULATION-READINESS-LOCAL-ONLY-ARTIFACT-HOME-AND-SCENARIO-MANIFEST-CONTRACT-FREEZE-2026-06-27.md",
@@ -23,7 +23,7 @@
     "_stack_execution": false
   },
   "non_goals": [
-    "No validator or runner behavior is admitted yet.",
+    "No generalized runner or external runtime behavior is admitted.",
     "No owner-repo, deploy, secret, or live-data mutation is admitted."
   ]
 }

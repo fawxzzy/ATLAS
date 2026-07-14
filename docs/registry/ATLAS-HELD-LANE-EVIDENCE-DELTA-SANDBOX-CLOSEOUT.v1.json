@@ -1,0 +1,129 @@
+{
+  "contract_version": "atlas.held-lane-evidence-delta.v1",
+  "case_id": "sandbox-simulation-readiness-july-2026-closeout",
+  "marker": "Sandbox Simulation Readiness",
+  "blocker_class": "implementation_or_restart_truth_change",
+  "held_checkpoint": {
+    "class": "held_checkpoint",
+    "ref": "docs/ops/SANDBOX-SIMULATION-READINESS-FINAL-BLOCKER-AUDIT-AND-CLOSEOUT-ELIGIBILITY-2026-07-08.md",
+    "assertions": [
+      {
+        "id": "held-at-99",
+        "type": "literal",
+        "value": "Current percent: `99%`."
+      },
+      {
+        "id": "required-implementation-or-restart-change",
+        "type": "literal",
+        "value": "Closeout dependency class: implementation or restart-truth change."
+      },
+      {
+        "id": "held-checkpoint-exact-digest",
+        "type": "sha256",
+        "equals": "sha256:750bdd10afd8d61a3c7c4a2b8c87bb09e6456a2aaf5909b3d5f438a2c6391ce2"
+      }
+    ]
+  },
+  "required_evidence_classes": [
+    "sandbox_runtime_execution",
+    "sandbox_runner_implementation",
+    "focused_test_proof",
+    "independent_ratification"
+  ],
+  "evidence": [
+    {
+      "class": "sandbox_runtime_execution",
+      "ref": "runtime/atlas/sandbox/runs/local-only-example-stub/local-only-example-run-005/validation/report.json",
+      "assertions": [
+        {
+          "id": "terminal-run-id",
+          "type": "json_value",
+          "path": ["run_id"],
+          "equals": "local-only-example-run-005"
+        },
+        {
+          "id": "terminal-receipt-id",
+          "type": "json_value",
+          "path": ["receipt_id"],
+          "equals": "asv_0714ea69c34630efce98a0d0"
+        },
+        {
+          "id": "terminal-result-passed",
+          "type": "json_value",
+          "path": ["result", "status"],
+          "equals": "passed"
+        },
+        {
+          "id": "terminal-runner-digest",
+          "type": "json_value",
+          "path": ["source_digests", "runner"],
+          "equals": "sha256:9d178eb469972b2e5bb7f6d49d10d7df5673dc967691dc5ebe52ddba5aba2e6a"
+        }
+      ]
+    },
+    {
+      "class": "sandbox_runner_implementation",
+      "ref": "ops/atlas/sandbox_validator_runner.py",
+      "assertions": [
+        {
+          "id": "runner-exact-byte-digest",
+          "type": "sha256",
+          "equals": "sha256:9d178eb469972b2e5bb7f6d49d10d7df5673dc967691dc5ebe52ddba5aba2e6a"
+        }
+      ]
+    },
+    {
+      "class": "focused_test_proof",
+      "ref": "tests/test_atlas_sandbox_validator_runner.py",
+      "assertions": [
+        {
+          "id": "terminal-pair-test",
+          "type": "literal",
+          "value": "def test_writes_source_bound_terminal_pair"
+        },
+        {
+          "id": "guard-drift-test",
+          "type": "literal",
+          "value": "def test_rejects_guard_drift"
+        },
+        {
+          "id": "fixture-member-shape-test",
+          "type": "literal",
+          "value": "def test_rejects_non_object_fixture_pack_member"
+        },
+        {
+          "id": "fixture-identity-test",
+          "type": "literal",
+          "value": "def test_rejects_input_fixture_identity_drift"
+        }
+      ]
+    },
+    {
+      "class": "independent_ratification",
+      "ref": "docs/ops/SANDBOX-SIMULATION-READINESS-POST-RUNTIME-BINDING-INDEPENDENT-RATIFICATION-2026-07-14.md",
+      "assertions": [
+        {
+          "id": "ratify-100",
+          "type": "literal",
+          "value": "`RATIFY_100_AFTER_RUNTIME_BINDING`"
+        },
+        {
+          "id": "focused-test-count",
+          "type": "literal",
+          "value": "`27 / 27` passed"
+        }
+      ]
+    }
+  ],
+  "authority": {
+    "marker_movement": false,
+    "selector_mutation": false,
+    "dispatch": false,
+    "owner_repo_mutation": false,
+    "deploy": false,
+    "discord": false,
+    "secret_access": false,
+    "final_receipt": false
+  },
+  "expected_decision": "reopen_eligible"
+}

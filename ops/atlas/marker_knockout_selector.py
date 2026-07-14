@@ -14,6 +14,10 @@ if str(ROOT) not in sys.path:
 
 from ops._atlas import atlas_relative, atlas_root
 from ops.atlas.continuity import build_open_marker_restart_index
+from ops.atlas.held_lane_evidence_delta import (
+    HeldLaneEvidenceDeltaError,
+    evaluate_contract,
+)
 
 MARKER_LINE_PATTERN = re.compile(r"^- ([^:]+): `(\d+)%`$")
 ACTIVE_LANE_PATTERNS = (
@@ -365,11 +369,16 @@ POLICY_REGISTRY: dict[str, MarkerPolicy] = {
 
 PACKET_REGISTRY: dict[str, PacketDescriptor] = {
     "AI Repetition-to-Automation Pipeline": PacketDescriptor(
-        packet="AI Repetition-to-Automation Pipeline non-Fitness marker knockout selector surface",
+        packet="No immediate AI Repetition-to-Automation Pipeline same-lane packet",
         basis_receipt_ref=(
             "docs/ops/"
-            "AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-"
-            "ACTIVE-LANE-FOLLOW-ON-DISAMBIGUATION-2026-06-17.md"
+            "AI-REPETITION-TO-AUTOMATION-PIPELINE-HELD-LANE-EVIDENCE-DELTA-SELECTOR-"
+            "INTEGRATION-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-14.md"
+        ),
+        mode="held after exact-checkpoint-bound selector integration reconciliation",
+        scope=(
+            "preserve the independently ratified fail-closed evidence-delta routing seam; future widening requires a "
+            "distinct registered held-lane case or materially new automation family rather than continuation by adjacency"
         ),
     ),
     "AI Long-Run Batch Orchestration": PacketDescriptor(
@@ -386,16 +395,15 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "Sandbox Simulation Readiness": PacketDescriptor(
-        packet="Sandbox Simulation Readiness post-local-only first validator broader-runtime-assertions admission boundary hold or top-level lane reselection",
+        packet="No immediate Sandbox Simulation Readiness same-lane packet",
         basis_receipt_ref=(
             "docs/ops/"
-            "SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-BROADER-"
-            "RUNTIME-ASSERTIONS-ADMISSION-BOUNDARY-HOLD-OR-TOP-LEVEL-LANE-"
-            "RESELECTION-2026-06-27.md"
+            "SANDBOX-SIMULATION-READINESS-POST-RUNTIME-BINDING-INDEPENDENT-"
+            "RATIFICATION-2026-07-14.md"
         ),
-        mode="docs-only root-bounded hold or top-level lane reselection",
+        mode="completed-lane lock",
         scope=(
-            "decide whether Sandbox stays held or returns to broader campaign routing now that the local-only first validator broader-runtime-assertions admission boundary is directly frozen on canonical main"
+            "preserve the completed local-only Sandbox denominator; broader simulation requires a new explicit lane and denominator"
         ),
     ),
     "Vercel Platform Observability Governance": PacketDescriptor(
@@ -462,6 +470,10 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
 }
+
+EVIDENCE_DELTA_CONTRACT_REFS = (
+    "docs/registry/ATLAS-HELD-LANE-EVIDENCE-DELTA-SANDBOX-CLOSEOUT.v1.json",
+)
 
 
 class MarkerSelectorError(RuntimeError):
@@ -658,10 +670,10 @@ def effective_policy(
     return policy
 
 
-def _explicit_no_immediate_hold_markers(*, root: Path) -> set[str]:
+def _explicit_no_immediate_hold_checkpoints(*, root: Path) -> dict[str, str | None]:
     payload = build_open_marker_restart_index(root=root)
     items = payload.get("items") if isinstance(payload.get("items"), list) else []
-    held_markers: set[str] = set()
+    held_markers: dict[str, str | None] = {}
 
     for item in items:
         if not isinstance(item, dict):
@@ -674,9 +686,114 @@ def _explicit_no_immediate_hold_markers(*, root: Path) -> set[str]:
         next_package = item.get("next_package") if isinstance(item.get("next_package"), dict) else {}
         package_name = str(next_package.get("package") or "").strip()
         if package_name.startswith("No immediate "):
-            held_markers.add(marker)
+            checkpoint_ref = str(item.get("current_checkpoint_receipt") or "").strip() or None
+            if marker in held_markers:
+                held_markers[marker] = None
+            else:
+                held_markers[marker] = checkpoint_ref
 
     return held_markers
+
+
+def _explicit_no_immediate_hold_markers(*, root: Path) -> set[str]:
+    return set(_explicit_no_immediate_hold_checkpoints(root=root))
+
+
+def _held_lane_evidence_delta_advisories(*, root: Path) -> list[dict[str, object]]:
+    advisories: list[dict[str, object]] = []
+    for contract_ref in EVIDENCE_DELTA_CONTRACT_REFS:
+        try:
+            receipt = evaluate_contract(root=root, contract_ref=contract_ref)
+        except HeldLaneEvidenceDeltaError as exc:
+            advisories.append(
+                {
+                    "contract_ref": contract_ref,
+                    "receipt_id": None,
+                    "subject": None,
+                    "decision": "blocked",
+                    "expectation_met": False,
+                    "advisory_only": True,
+                    "authority_actions": [],
+                    "blockers": [str(exc)],
+                }
+            )
+            continue
+
+        advisories.append(
+            {
+                "contract_ref": contract_ref,
+                "receipt_id": receipt.get("receipt_id"),
+                "subject": receipt.get("subject"),
+                "held_checkpoint_ref": receipt.get("held_checkpoint_ref"),
+                "held_checkpoint_digest": receipt.get("held_checkpoint_digest"),
+                "decision": receipt.get("decision"),
+                "expectation_met": receipt.get("expectation_met") is True,
+                "advisory_only": receipt.get("advisory_only") is True,
+                "authority_actions": (
+                    receipt.get("authority_actions")
+                    if isinstance(receipt.get("authority_actions"), list)
+                    else ["invalid_authority_actions"]
+                ),
+                "blockers": (
+                    receipt.get("blockers")
+                    if isinstance(receipt.get("blockers"), list)
+                    else []
+                ),
+            }
+        )
+    return advisories
+
+
+def _apply_evidence_delta_advisories(
+    *,
+    open_markers: dict[str, int],
+    held_checkpoints: dict[str, str | None],
+    advisories: list[dict[str, object]],
+) -> tuple[set[str], list[str], list[str]]:
+    effective_holds = set(held_checkpoints)
+    reopened_markers: list[str] = []
+    conflicts: list[str] = []
+    unresolved_contracts = [
+        str(advisory.get("contract_ref"))
+        for advisory in advisories
+        if not isinstance(advisory.get("subject"), str)
+        or not str(advisory.get("subject")).strip()
+        or str(advisory.get("subject")) != str(advisory.get("subject")).strip()
+    ]
+    if unresolved_contracts:
+        return (
+            effective_holds,
+            reopened_markers,
+            sorted(f"unresolved_contract:{ref}" for ref in unresolved_contracts),
+        )
+    advisories_by_subject: dict[str, list[dict[str, object]]] = {}
+    for advisory in advisories:
+        subject_value = advisory.get("subject")
+        if (
+            isinstance(subject_value, str)
+            and subject_value.strip()
+            and subject_value == subject_value.strip()
+        ):
+            advisories_by_subject.setdefault(subject_value, []).append(advisory)
+
+    for subject, subject_advisories in advisories_by_subject.items():
+        if subject not in open_markers or subject not in effective_holds:
+            continue
+        if len(subject_advisories) != 1:
+            conflicts.append(subject)
+            continue
+        advisory = subject_advisories[0]
+        if (
+            advisory.get("decision") != "reopen_eligible"
+            or advisory.get("expectation_met") is not True
+            or advisory.get("advisory_only") is not True
+            or advisory.get("authority_actions") != []
+            or advisory.get("held_checkpoint_ref") != held_checkpoints[subject]
+        ):
+            continue
+        effective_holds.remove(subject)
+        reopened_markers.append(subject)
+    return effective_holds, sorted(reopened_markers), sorted(conflicts)
 
 
 def packet_for_marker(marker: str) -> str | None:
@@ -751,8 +868,19 @@ def load_packet_receipt_context(*, root: Path, basis_receipt_ref: str) -> Packet
 def build_campaign(*, root: Path) -> dict[str, object]:
     sections = load_marker_sections(root=root)
     active_lane = load_active_lane(root=root)
-    explicit_hold_markers = _explicit_no_immediate_hold_markers(root=root)
+    manifest_hold_checkpoints = _explicit_no_immediate_hold_checkpoints(root=root)
+    manifest_hold_markers = set(manifest_hold_checkpoints)
     open_markers = {**sections["active_front_page"], **sections["supporting_open"]}
+    evidence_delta_advisories = _held_lane_evidence_delta_advisories(root=root)
+    (
+        explicit_hold_markers,
+        evidence_delta_reopened_markers,
+        evidence_delta_conflicts,
+    ) = _apply_evidence_delta_advisories(
+        open_markers=open_markers,
+        held_checkpoints=manifest_hold_checkpoints,
+        advisories=evidence_delta_advisories,
+    )
 
     unknown_markers = sorted(set(open_markers) - set(POLICY_REGISTRY))
     if unknown_markers:
@@ -861,6 +989,10 @@ def build_campaign(*, root: Path) -> dict[str, object]:
         "source_digest_count": len(open_markers),
         "active_lane": active_lane,
         "active_lane_is_held": active_lane_is_held,
+        "manifest_hold_markers": sorted(manifest_hold_markers),
+        "evidence_delta_advisories": evidence_delta_advisories,
+        "evidence_delta_reopened_markers": evidence_delta_reopened_markers,
+        "evidence_delta_conflicts": evidence_delta_conflicts,
         "open_markers": [asdict(record) for record in records],
         "closed_markers": [asdict(record) for record in closed_markers],
         "category_counts": category_counts,
@@ -907,6 +1039,25 @@ def render_markdown(payload: dict[str, object]) -> str:
     ]
     for category, count in sorted(dict(payload["category_counts"]).items()):
         lines.append(f"- `{category}`: `{count}`")
+
+    advisories = payload.get("evidence_delta_advisories")
+    if isinstance(advisories, list) and advisories:
+        lines += ["", "## Held-Lane Evidence Delta Advisories", ""]
+        for advisory in advisories:
+            if not isinstance(advisory, dict):
+                continue
+            lines.append(
+                f"- `{advisory.get('contract_ref')}`: decision `{advisory.get('decision')}`, "
+                f"subject `{advisory.get('subject')}`, receipt `{advisory.get('receipt_id')}`"
+            )
+        reopened = payload.get("evidence_delta_reopened_markers")
+        if isinstance(reopened, list) and reopened:
+            lines.append("- routing holds released: " + ", ".join(f"`{marker}`" for marker in reopened))
+        else:
+            lines.append("- routing holds released: none")
+        conflicts = payload.get("evidence_delta_conflicts")
+        if isinstance(conflicts, list) and conflicts:
+            lines.append("- fail-closed conflicts: " + ", ".join(f"`{item}`" for item in conflicts))
 
     lines += ["", "## Open Marker Table", "", "| Priority | Marker | Current | Category | Why | Expected evidence |", "| --- | --- | --- | --- | --- | --- |"]
     for record in payload["open_markers"]:

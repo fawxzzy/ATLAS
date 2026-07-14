@@ -3,8 +3,8 @@
   "scenario_id": "local-only-example-stub",
   "fixture_pack_id": "local-only-example-stub-pack",
   "title": "Local-Only Example Stub Fixture Pack",
-  "status": "draft",
-  "purpose": "Admit one concrete Sandbox fixture pack under the frozen local-only boundaries with bounded note, input, and expected-output stubs before any validator or runner claim becomes honest.",
+  "status": "active",
+  "purpose": "Provide the bounded note, input, and expected-output oracle for one deterministic local-only validator run.",
   "items": [
     {
       "fixture_id": "local-only-example-stub-note-001",
@@ -33,7 +33,7 @@
     "_stack_execution": false
   },
   "non_goals": [
-    "No validator or runner behavior is admitted yet.",
+    "No generalized runner or external runtime behavior is admitted.",
     "No owner-repo, deploy, secret, or live-data mutation is admitted."
   ]
 }

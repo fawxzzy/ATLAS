@@ -3,7 +3,7 @@
   "fixture_id": "local-only-example-stub-input-001",
   "scenario_id": "local-only-example-stub",
   "kind": "input",
-  "summary": "First bounded Sandbox input fixture stub for the local-only example root. This is structural sample data only and does not imply validator, runner, or expected-output truth.",
+  "summary": "Bounded Sandbox input fixture for the deterministic local-only validator.",
   "payload": {
     "mode": "stub",
     "prompt": "example local-only sandbox input",

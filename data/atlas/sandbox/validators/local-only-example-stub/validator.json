@@ -2,8 +2,8 @@
   "contract_version": "atlas.sandbox.validator.v1",
   "validator_id": "local-only-example-stub-validator-001",
   "scenario_id": "local-only-example-stub",
-  "status": "draft",
-  "purpose": "Admit one concrete Sandbox validator descriptor under the frozen local-only boundary without implying validator execution, runner behavior, or mutation behavior.",
+  "status": "active",
+  "purpose": "Run one deterministic local-only Sandbox validation without owner-repository, deploy, secret, live-data, _stack, or external-network authority.",
   "reads": {
     "scenario_ref": "data/atlas/sandbox/scenarios/local-only-example-stub.json",
     "fixture_pack_ref": "data/atlas/sandbox/fixtures/local-only-example-stub/fixture-pack.json",
@@ -24,8 +24,8 @@
     "_stack_execution": false
   },
   "non_goals": [
-    "No validator execution or verdict logic is admitted yet.",
-    "No runner behavior is admitted yet.",
+    "No owner-repository or external runtime execution is admitted.",
+    "No generalized runner or orchestration behavior is admitted.",
     "No owner-repo, deploy, secret, or live-data mutation is admitted."
   ]
 }

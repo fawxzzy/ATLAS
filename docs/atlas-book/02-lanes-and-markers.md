@@ -19,9 +19,9 @@ Read:
 
 - `Playbook Everywhere + Cortex Interface: 45%`
 - `AI Work Session Stability & Auto-Sync Loop: 85%`
-- `AI Repetition-to-Automation Pipeline: 54%`
+- `AI Repetition-to-Automation Pipeline: 56%`
 - `AI Long-Run Batch Orchestration: 71%`
-- `Sandbox Simulation Readiness: 99%`
+- `Sandbox Simulation Readiness: 100%`
 
 Read:
 
@@ -34,6 +34,7 @@ Read:
 - AI Repetition now has implementation-backed proof for the Codex hour-block queue prompt helper: live output reports `status=ok`, `safe_to_use=True`, selector `operator_action=no_immediate_root_packet`, planner `safe_candidate_count=0`, generated prompt length `4600`, focused helper/planner/unlock tests pass 38/38, and the lane moves to `52%`
 - AI Repetition now has implementation-backed proof for the held-lane prompt suppression helper: worker commit `9f79f93a` lands the frozen root-only classifier and test pair, direct tests pass `15/15`, adjacent root regressions and stack validation pass, owner-lane fallback plus Fitness/Mazer fallback are rejected, protected/deploy/secret continuations fail closed, strict suppress exits nonzero, and the lane moves to `53%`
 - AI Repetition now has implementation-backed proof for held-lane suppression queue integration: worker commit `0b1d2aad` wires the suppression helper into the hour-block prompt generator, exposes top-level suppression JSON fields, renders `ATLAS ROOT HELD - DO NOT CONTINUE GENERICALLY` for clean held roots, preserves exact-packet, planner-candidate, operator-selected, validation-cleanup, and worker-reconciliation bypasses, blocks Fitness/Mazer fallback from ATLAS-root continuation, focused suppression tests pass `16/16`, focused queue tests pass `11/11`, adjacent selector/continuity tests pass `21/21`, broader AI Repetition helper tests pass `49/49`, stack validation remains `critical=0 error=0 warning=0 info=0`, and the lane moves to `54%`
+- AI Repetition now has implementation-backed selector consumption of the held-lane evidence-delta resolver: exact hold-generation binding, evidence-alias rejection, conflict and ambiguity fail-closed routing, `104 / 104` combined workflow tests, and independent `RATIFY_SELECTOR_INTEGRATION` proof move the lane to `56%`; no immediate same-lane packet remains
 - AI Long-Run now has implementation-backed proof for the held-lane unlock matrix validator: live output reports `status=valid`, `matrix_status=advisory_matrix`, `candidate_count=20`, `held_count=20`, `unlockable_count=0`, and `safe_to_use=true`, focused validator/planner/matrix tests pass 32/32, Fitness and Mazer remain separated owner lanes, and the lane moves to `69%`
 - AI Long-Run now also has implementation-backed proof for the cross-marker ratchet opportunity helper: live output reports `status=ok`, `safe_to_use=true`, `candidate_count=12`, `opportunity_count=1`, and `blocked_candidates=4`; focused tests pass 11/11, adjacent planner/queue/continuity tests pass 35/35, stack validation remains `critical=0 error=0 warning=0 info=0`, Fitness and Mazer remain separated owner lanes, and the lane moves to `70%`
 - AI Long-Run now also has implementation-backed proof for cross-marker opportunity planner integration: the July 9 selector and contract freeze are now consumed by the admitted admission, prompt-pack, readiness, and worker-cluster reconciliation chain; focused planner tests now pass `15/15`, the broader planner plus cross-marker helper suite passes `26/26`, live planner output now keeps the Playbook/Cortex follow-up advisory-only because it remains `No immediate ...`, stack validation remains `critical=0 error=0 warning=0 info=0`, Fitness and Mazer remain separated owner lanes, and the lane moves to `71%`
@@ -63,9 +64,8 @@ Read:
 
 ## Active Front-Page Marker Table
 
-- AI Repetition-to-Automation Pipeline: `54%`
+- AI Repetition-to-Automation Pipeline: `56%`
 - AI Long-Run Batch Orchestration: `71%`
-- Sandbox Simulation Readiness: `99%`
 
 ## Supporting Open Markers
 
@@ -73,13 +73,9 @@ Read:
 
 - Cortex Readiness: `46%`
 - AI Work Session Stability & Auto-Sync Loop: `85%`
-- AI Repetition-to-Automation Pipeline: `54%`
+- AI Repetition-to-Automation Pipeline: `56%`
 - AI Long-Run Batch Orchestration: `71%`
 - Playbook Everywhere + Cortex Interface: `45%`
-
-### Future / lane-structure
-
-- Sandbox Simulation Readiness: `99%`
 
 ### Future / owner-lane orchestration
 
@@ -137,6 +133,7 @@ The Atlas Full-System Re-evaluation denominator is exactly two accepted audit ga
 
 ## Closed / Locked Ratchets
 
+- Sandbox Simulation Readiness: `100%`
 - _stack Readiness: `100%`
 - Atlas-owned Repo Naming Canonicalization: `100%`
 - Discord OS Infrastructure Separation: `100%`
@@ -223,9 +220,9 @@ That split is now operationalized enough that the lane-structure family is close
 
 `Vision & Future Alignment` and `Post-Convergence Lane Split Readiness` are now both closed at `100%`. Future Discord runtime migration or product expansion opens as new owner scope rather than as continuation of those two structural lanes.
 
-Within the ATLAS systems lane, the current immediate control-plane family is now `Sandbox Simulation Readiness`. The earlier `queue-or-registry` chain remains exhausted, the non-`queue-or-registry` supervised-execution-home branch remains durably held through the post-stack-command-implementation-actual-owner-side-mutation-authority-class-value selector in pass `763` plus the downstream hold recheck on canonical `main`, and the current bounded Sandbox packet now routes through one landed validator-behavior helper cluster plus one frozen comparison-boundary link contract plus one frozen verdict-assignment rule plus one frozen verdict-activation reopening rule plus one frozen report-status activation mapping contract plus one frozen report-status activation gate plus one frozen report-result mutation boundary plus one frozen candidate-output verdict-artifact mutation boundary plus one frozen paired-artifact writeback boundary plus one frozen report-and-candidate-output synchronization boundary plus one frozen verdict-bearing artifact activation gate plus one frozen synchronized artifact writeback boundary plus one frozen validator-execution admission boundary plus one frozen runner-behavior admission boundary plus one frozen `_stack`-routing admission boundary plus one frozen owner-surface execution admission boundary plus one frozen deploy-surface runtime admission boundary plus one frozen unattended-runtime proof admission boundary plus one frozen publication-surface claim admission boundary plus one frozen live-unattended execution admission boundary plus one frozen secret-bearing automation admission boundary plus one frozen deploy-surface mutation admission boundary plus one frozen public-release-truth admission boundary plus one frozen owner-repo-mutation admission boundary plus one frozen actual-owner-side-mutation admission boundary plus one frozen live-owner-repo-edits admission boundary plus one frozen deploy-execution admission boundary plus one frozen broader-runtime-assertions admission boundary into one exact hold-or-top-level-lane-reselection packet.
+Within the ATLAS systems lane, `Sandbox Simulation Readiness` is closed at `100%`. Fresh terminal run `local-only-example-run-005` and receipt `asv_0714ea69c34630efce98a0d0` bind the executable plus exact descriptor graph, `27 / 27` focused Sandbox tests pass, the independent audit returns `RATIFY_100_AFTER_RUNTIME_BINDING`, and the source-bound evidence-delta resolver returns `reopen_eligible` with exact-checkpoint-bound receipt `ahd_3eec1ddb67df42b407472d2c`.
 
-ATLAS root remains the truth owner for the family. `_stack` Readiness control-plane surfaces in ATLAS root receipts, restart mirrors, selector output, and continuity surfaces now own the producing and consuming home for the active supervised-execution-home downstream chain through the landed actual owner-side mutation authority-class-value worker-cluster reconciliation, the post-stack-command-implementation-actual-owner-side-mutation-authority-class-value selector in pass `763`, and the downstream hold recheck. `_stack` Readiness is not itself one concrete `_stack` command home, one actual concrete command file, one downstream runtime-home value placement, or one actual concrete `_stack` command implementation surface, and `repos/_stack/**`, one actual concrete command-file decision, one downstream placement decision, one actual concrete `_stack` command implementation-surface choice, one actual owner-repo mutation surface, actual owner-side mutation authority, and Playbook doctrine export all remain deferred below the current boundary. The current Sandbox family is now honestly held: `No immediate Sandbox Simulation Readiness same-lane packet`.
+ATLAS root remains the truth owner for the completed Sandbox family. No owner-repository, `_stack`, deploy, publication, secret, live-data, or external-network authority is added by closeout. Future broader simulation work must open under a new explicit denominator rather than widening the completed local-only lane by adjacency.
 
 Current AI Long-Run closeout read: `AI Long-Run Batch Orchestration` now sits at `71%`. The supervised-execution-home downstream chain remains durable through the landed actual owner-side mutation authority-class-value worker-cluster reconciliation on canonical `main`, the post-stack-command-implementation-actual-owner-side-mutation-authority-class-value selector in pass `763`, and the downstream hold recheck; the marker-aware next-packet planner, held-lane unlock matrix, held-lane unlock matrix validator, cross-marker ratchet opportunity helper, and planner-integration worker are all reconciled as root-owned advisory surfaces with focused proof. The cross-marker ratchet opportunity helper still reports one safe advisory opportunity from the Cortex second advisory substrate proof to the Playbook/Cortex second-consumer class, but the landed planner integration now proves that follow-up remains advisory-only because the Playbook lane is still held. No immediate same-lane AI Long-Run packet is honestly open after the worker-cluster reconciliation.
 
@@ -257,7 +254,7 @@ Current AI Long-Run closeout read: `AI Long-Run Batch Orchestration` now sits at
 - `ATLAS systems-doc normalization` is now explicit as a repeatable work item rather than a one-off exception: major ATLAS system surfaces should gain Book chapters only when owner-repo truth is reconciled into role, boundary, shipped-vs-planned, seam, and retrieval documentation without copying repo-local command or implementation detail; `Lifeline` is the first concrete example, and this clarifies future Book growth without earning a new marker by itself
 - AI Work Session Stability & Auto-Sync Loop moves to `85%` after `docs/ops/AI-WORK-SESSION-STABILITY-AUTO-SYNC-LOOP-ROOT-PLUS-OWNER-ADOPTION-THRESHOLD-RECONCILIATION-2026-07-04.md`: the lane now has the landed read-only preflight helper, landed read-only closeout helper, landed read-only projection freshness checker, landed read-only Playbook adoption matrix worker, landed read-only root-plus-owner evidence-intake worker, direct proof for all five helpers, preserved output-path and no-mutation guards, clean tracked owner-lane adoption receipts from Foundation and DiscordOS, and evidence-intake output reporting `eligible_owner_count=2` of `required_owner_count=2`. The next exact package is `No immediate AI Work Session Stability & Auto-Sync Loop same-lane packet; root-plus-owner adoption threshold is satisfied and future widening requires a separately scoped adoption or automation packet`.
 - the latest Book-side restart truth now also absorbs `docs/ops/INVENTORY-AND-TRUTH-MAP-UNMANAGED-OWNER-LANE-VALIDATION-BOUNDARY-AND-ZERO-WARNING-RESYNC-2026-07-07.md`, which keeps unmanaged owner-lane repos visible as advisory inventory metadata, keeps published inventory at `dirty_repo_count: 0`, moves the current root validation floor to `critical=0 error=0 warning=0 info=0`, and preserves the already-landed structured continuity rollup; `Truth Map & ATLAS Book` remains closed because that broader continuity automation widening is still real and already executed.
-- Sandbox Simulation Readiness remains at `99%`: the lane now also has one later packet that freezes the exact family by which that bounded runtime behavior may gain one broader-runtime-assertions story at all plus one post-boundary hold selector that freezes `No immediate Sandbox Simulation Readiness same-lane packet`, which exhausts the current bounded family without widening into closeout, top-level lane reselection, or owner-side runtime truth
+- Sandbox Simulation Readiness closes at `100%`: runtime-bound run `005`, receipt `asv_0714ea69c34630efce98a0d0`, exact graph enforcement, `27 / 27` focused tests, independent `RATIFY_100_AFTER_RUNTIME_BINDING`, and exact-checkpoint-bound evidence-delta receipt `ahd_3eec1ddb67df42b407472d2c` clear the final admitted unit
 - DiscordOS separation stayed high-confidence but intentionally below runtime migration
 - DiscordOS separation also now has one explicit reopen consequence: bridge-independent DiscordOS work may resume now because the blocked Fitness Discord proof seam has been narrowed to an external/session bridge hold rather than a repo/runtime repair class, but the marker still stays flat because no DiscordOS runtime, schema, or ownership move occurred
 - that reopen consequence now also explicitly excludes replaying the older generic named-port planning class: the May 26 consumer-planning, implementation-planning, tooling/readiness, and lookup execution-readiness chain already consumed it, so any further DiscordOS follow-on must arrive as explicit new scope or higher-level authorization rather than duplicate root planning

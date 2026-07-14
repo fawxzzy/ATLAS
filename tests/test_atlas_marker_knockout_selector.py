@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
+from ops.atlas import marker_knockout_selector as selector
 from ops.atlas.marker_knockout_selector import build_campaign, main
 
 
@@ -393,18 +396,86 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
             payload["next_after_current_marker"],
         )
         self.assertEqual(
-            "AI Repetition-to-Automation Pipeline non-Fitness marker knockout selector surface",
+            "No immediate AI Repetition-to-Automation Pipeline same-lane packet",
             payload["next_after_current_packet"],
         )
         self.assertEqual(
-            "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-NON-FITNESS-MARKER-KNOCKOUT-SELECTOR-ACTIVE-LANE-FOLLOW-ON-DISAMBIGUATION-2026-06-17.md",
+            "docs/ops/AI-REPETITION-TO-AUTOMATION-PIPELINE-HELD-LANE-EVIDENCE-DELTA-SELECTOR-INTEGRATION-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-14.md",
             payload["next_after_current_packet_basis_ref"],
         )
-        self.assertEqual("root-owned selector-surface refinement", payload["next_after_current_packet_mode"])
         self.assertEqual(
-            "remove the current-lane self-reference from the non-Fitness marker knockout helper by separating the active packet from the first admissible downstream follow-on",
+            "held after exact-checkpoint-bound selector integration reconciliation",
+            payload["next_after_current_packet_mode"],
+        )
+        self.assertEqual(
+            "preserve the independently ratified fail-closed evidence-delta routing seam; future widening requires a distinct registered held-lane case or materially new automation family rather than continuation by adjacency",
             payload["next_after_current_packet_scope"],
         )
+
+    def _write_evidence_delta_contract(
+        self,
+        root: Path,
+        *,
+        marker: str,
+        held_ref: str,
+        evidence_present: bool = True,
+        contract_name: str = "test-held-lane-evidence-delta.v1.json",
+    ) -> str:
+        evidence_ref = "docs/ops/new-evidence.md"
+        held_path = root / held_ref
+        if not held_path.exists():
+            held_path.parent.mkdir(parents=True, exist_ok=True)
+            held_path.write_text("held checkpoint\n", encoding="utf-8")
+        held_digest = "sha256:" + hashlib.sha256(held_path.read_bytes()).hexdigest()
+        if evidence_present:
+            (root / evidence_ref).write_text("new implementation proof\n", encoding="utf-8")
+        contract_ref = f"docs/registry/{contract_name}"
+        _write_json(
+            root / contract_ref,
+            {
+                "contract_version": "atlas.held-lane-evidence-delta.v1",
+                "case_id": "selector-integration-test",
+                "marker": marker,
+                "blocker_class": "implementation_or_restart_truth_change",
+                "held_checkpoint": {
+                    "class": "held_checkpoint",
+                    "ref": held_ref,
+                    "assertions": [
+                        {
+                            "id": "held-hash",
+                            "type": "sha256",
+                            "equals": held_digest,
+                        }
+                    ],
+                },
+                "required_evidence_classes": ["implementation"],
+                "evidence": [
+                    {
+                        "class": "implementation",
+                        "ref": evidence_ref,
+                        "assertions": [
+                            {
+                                "id": "implemented",
+                                "type": "literal",
+                                "value": "new implementation proof",
+                            }
+                        ],
+                    }
+                ],
+                "authority": {
+                    "marker_movement": False,
+                    "selector_mutation": False,
+                    "dispatch": False,
+                    "owner_repo_mutation": False,
+                    "deploy": False,
+                    "discord": False,
+                    "secret_access": False,
+                    "final_receipt": False,
+                },
+                "expected_decision": "reopen_eligible",
+            },
+        )
+        return contract_ref
 
     def test_build_campaign_classifies_fitness_and_secret_holds(self) -> None:
         root = self._temp_root()
@@ -540,6 +611,362 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertTrue(payload["active_lane_is_held"])
         self.assertEqual("held active lane", records["AI Long-Run Batch Orchestration"]["category"])
 
+    def test_evidence_delta_advisory_releases_only_the_matching_open_manifest_hold(self) -> None:
+        root = self._temp_root()
+        (root / "docs" / "atlas-book" / "02-lanes-and-markers.md").write_text(MARKER_DOC, encoding="utf-8")
+        (root / "docs" / "atlas-book" / "01-current-state.md").write_text(CURRENT_STATE_DOC, encoding="utf-8")
+        self._write_packet_receipts(root)
+        checkpoint_ref = (
+            "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-STACK-COMMAND-IMPLEMENTATION-"
+            "ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-VALUE-DOWNSTREAM-HOLD-RECHECK-2026-06-26.md"
+        )
+        self._write_manifest(
+            root,
+            manifest_name="continuity-manifest-ai-long-run-batch-orchestration.json",
+            marker="AI Long-Run Batch Orchestration",
+            percent=20,
+            checkpoint_ref=checkpoint_ref,
+            next_package="No immediate AI Long-Run Batch Orchestration same-lane packet",
+            mode="hold-flat after downstream follow-on recheck",
+            reason="current lane is intentionally held",
+        )
+        contract_ref = self._write_evidence_delta_contract(
+            root,
+            marker="AI Long-Run Batch Orchestration",
+            held_ref=checkpoint_ref,
+        )
+
+        with mock.patch.object(selector, "EVIDENCE_DELTA_CONTRACT_REFS", (contract_ref,)):
+            payload = build_campaign(root=root)
+
+        self.assertEqual("continue_current_lane", payload["operator_action"])
+        self.assertFalse(payload["active_lane_is_held"])
+        self.assertEqual(
+            ["AI Long-Run Batch Orchestration"],
+            payload["evidence_delta_reopened_markers"],
+        )
+        advisory = payload["evidence_delta_advisories"][0]
+        self.assertEqual("reopen_eligible", advisory["decision"])
+        self.assertTrue(advisory["advisory_only"])
+        self.assertEqual([], advisory["authority_actions"])
+        self.assertEqual(20, payload["selected_percentage"])
+
+    def test_missing_evidence_delta_source_fails_closed_and_preserves_manifest_hold(self) -> None:
+        root = self._temp_root()
+        (root / "docs" / "atlas-book" / "02-lanes-and-markers.md").write_text(MARKER_DOC, encoding="utf-8")
+        (root / "docs" / "atlas-book" / "01-current-state.md").write_text(CURRENT_STATE_DOC, encoding="utf-8")
+        self._write_packet_receipts(root)
+        checkpoint_ref = (
+            "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-STACK-COMMAND-IMPLEMENTATION-"
+            "ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-VALUE-DOWNSTREAM-HOLD-RECHECK-2026-06-26.md"
+        )
+        self._write_manifest(
+            root,
+            manifest_name="continuity-manifest-ai-long-run-batch-orchestration.json",
+            marker="AI Long-Run Batch Orchestration",
+            percent=20,
+            checkpoint_ref=checkpoint_ref,
+            next_package="No immediate AI Long-Run Batch Orchestration same-lane packet",
+            mode="hold-flat after downstream follow-on recheck",
+            reason="current lane is intentionally held",
+        )
+        contract_ref = self._write_evidence_delta_contract(
+            root,
+            marker="AI Long-Run Batch Orchestration",
+            held_ref=checkpoint_ref,
+            evidence_present=False,
+        )
+
+        with mock.patch.object(selector, "EVIDENCE_DELTA_CONTRACT_REFS", (contract_ref,)):
+            payload = build_campaign(root=root)
+
+        self.assertEqual("hold_current_lane", payload["operator_action"])
+        self.assertTrue(payload["active_lane_is_held"])
+        self.assertEqual([], payload["evidence_delta_reopened_markers"])
+        self.assertEqual("blocked", payload["evidence_delta_advisories"][0]["decision"])
+
+    def test_reopen_advisory_cannot_reopen_a_closed_marker(self) -> None:
+        root = self._temp_root()
+        (root / "docs" / "atlas-book" / "02-lanes-and-markers.md").write_text(MARKER_DOC, encoding="utf-8")
+        (root / "docs" / "atlas-book" / "01-current-state.md").write_text(CURRENT_STATE_DOC, encoding="utf-8")
+        self._write_packet_receipts(root)
+        contract_ref = self._write_evidence_delta_contract(
+            root,
+            marker="Archive Normalization",
+            held_ref="docs/ops/archive-normalization-held.md",
+        )
+
+        with mock.patch.object(selector, "EVIDENCE_DELTA_CONTRACT_REFS", (contract_ref,)):
+            payload = build_campaign(root=root)
+
+        self.assertEqual([], payload["evidence_delta_reopened_markers"])
+        self.assertEqual(100, payload["closed_markers"][0]["percentage"])
+
+    def test_stale_advisory_cannot_release_a_newer_manifest_hold(self) -> None:
+        root = self._temp_root()
+        (root / "docs" / "atlas-book" / "02-lanes-and-markers.md").write_text(MARKER_DOC, encoding="utf-8")
+        (root / "docs" / "atlas-book" / "01-current-state.md").write_text(CURRENT_STATE_DOC, encoding="utf-8")
+        self._write_packet_receipts(root)
+        current_checkpoint_ref = (
+            "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-STACK-COMMAND-IMPLEMENTATION-"
+            "ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-VALUE-DOWNSTREAM-HOLD-RECHECK-2026-06-26.md"
+        )
+        self._write_manifest(
+            root,
+            manifest_name="continuity-manifest-ai-long-run-batch-orchestration.json",
+            marker="AI Long-Run Batch Orchestration",
+            percent=20,
+            checkpoint_ref=current_checkpoint_ref,
+            next_package="No immediate AI Long-Run Batch Orchestration same-lane packet",
+            mode="hold-flat after downstream follow-on recheck",
+            reason="current lane is intentionally held",
+        )
+        contract_ref = self._write_evidence_delta_contract(
+            root,
+            marker="AI Long-Run Batch Orchestration",
+            held_ref="docs/ops/older-held-checkpoint.md",
+        )
+
+        with mock.patch.object(selector, "EVIDENCE_DELTA_CONTRACT_REFS", (contract_ref,)):
+            payload = build_campaign(root=root)
+
+        self.assertEqual("hold_current_lane", payload["operator_action"])
+        self.assertEqual([], payload["evidence_delta_reopened_markers"])
+
+    def test_multiple_advisories_for_one_subject_fail_closed(self) -> None:
+        root = self._temp_root()
+        (root / "docs" / "atlas-book" / "02-lanes-and-markers.md").write_text(MARKER_DOC, encoding="utf-8")
+        (root / "docs" / "atlas-book" / "01-current-state.md").write_text(CURRENT_STATE_DOC, encoding="utf-8")
+        self._write_packet_receipts(root)
+        checkpoint_ref = (
+            "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-STACK-COMMAND-IMPLEMENTATION-"
+            "ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-VALUE-DOWNSTREAM-HOLD-RECHECK-2026-06-26.md"
+        )
+        self._write_manifest(
+            root,
+            manifest_name="continuity-manifest-ai-long-run-batch-orchestration.json",
+            marker="AI Long-Run Batch Orchestration",
+            percent=20,
+            checkpoint_ref=checkpoint_ref,
+            next_package="No immediate AI Long-Run Batch Orchestration same-lane packet",
+            mode="hold-flat after downstream follow-on recheck",
+            reason="current lane is intentionally held",
+        )
+        first = self._write_evidence_delta_contract(
+            root,
+            marker="AI Long-Run Batch Orchestration",
+            held_ref=checkpoint_ref,
+            contract_name="first-held-lane-evidence-delta.v1.json",
+        )
+        second = self._write_evidence_delta_contract(
+            root,
+            marker="AI Long-Run Batch Orchestration",
+            held_ref=checkpoint_ref,
+            contract_name="second-held-lane-evidence-delta.v1.json",
+        )
+
+        with mock.patch.object(selector, "EVIDENCE_DELTA_CONTRACT_REFS", (first, second)):
+            payload = build_campaign(root=root)
+
+        self.assertEqual("hold_current_lane", payload["operator_action"])
+        self.assertEqual([], payload["evidence_delta_reopened_markers"])
+        self.assertEqual(
+            ["AI Long-Run Batch Orchestration"],
+            payload["evidence_delta_conflicts"],
+        )
+
+    def test_missing_configured_contract_blocks_otherwise_valid_reopen(self) -> None:
+        root = self._temp_root()
+        (root / "docs" / "atlas-book" / "02-lanes-and-markers.md").write_text(MARKER_DOC, encoding="utf-8")
+        (root / "docs" / "atlas-book" / "01-current-state.md").write_text(CURRENT_STATE_DOC, encoding="utf-8")
+        self._write_packet_receipts(root)
+        checkpoint_ref = (
+            "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-STACK-COMMAND-IMPLEMENTATION-"
+            "ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-VALUE-DOWNSTREAM-HOLD-RECHECK-2026-06-26.md"
+        )
+        self._write_manifest(
+            root,
+            manifest_name="continuity-manifest-ai-long-run-batch-orchestration.json",
+            marker="AI Long-Run Batch Orchestration",
+            percent=20,
+            checkpoint_ref=checkpoint_ref,
+            next_package="No immediate AI Long-Run Batch Orchestration same-lane packet",
+            mode="hold-flat after downstream follow-on recheck",
+            reason="current lane is intentionally held",
+        )
+        valid_ref = self._write_evidence_delta_contract(
+            root,
+            marker="AI Long-Run Batch Orchestration",
+            held_ref=checkpoint_ref,
+        )
+        missing_ref = "docs/registry/missing-held-lane-evidence-delta.v1.json"
+
+        with mock.patch.object(
+            selector,
+            "EVIDENCE_DELTA_CONTRACT_REFS",
+            (valid_ref, missing_ref),
+        ):
+            payload = build_campaign(root=root)
+
+        self.assertEqual("hold_current_lane", payload["operator_action"])
+        self.assertEqual([], payload["evidence_delta_reopened_markers"])
+        self.assertEqual(
+            [f"unresolved_contract:{missing_ref}"],
+            payload["evidence_delta_conflicts"],
+        )
+
+    def test_whitespace_subject_contract_blocks_otherwise_valid_reopen(self) -> None:
+        root = self._temp_root()
+        (root / "docs" / "atlas-book" / "02-lanes-and-markers.md").write_text(MARKER_DOC, encoding="utf-8")
+        (root / "docs" / "atlas-book" / "01-current-state.md").write_text(CURRENT_STATE_DOC, encoding="utf-8")
+        self._write_packet_receipts(root)
+        checkpoint_ref = (
+            "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-STACK-COMMAND-IMPLEMENTATION-"
+            "ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-VALUE-DOWNSTREAM-HOLD-RECHECK-2026-06-26.md"
+        )
+        self._write_manifest(
+            root,
+            manifest_name="continuity-manifest-ai-long-run-batch-orchestration.json",
+            marker="AI Long-Run Batch Orchestration",
+            percent=20,
+            checkpoint_ref=checkpoint_ref,
+            next_package="No immediate AI Long-Run Batch Orchestration same-lane packet",
+            mode="hold-flat after downstream follow-on recheck",
+            reason="current lane is intentionally held",
+        )
+        valid_ref = self._write_evidence_delta_contract(
+            root,
+            marker="AI Long-Run Batch Orchestration",
+            held_ref=checkpoint_ref,
+        )
+        invalid_ref = self._write_evidence_delta_contract(
+            root,
+            marker="   ",
+            held_ref=checkpoint_ref,
+            contract_name="whitespace-subject-held-lane-evidence-delta.v1.json",
+        )
+
+        with mock.patch.object(
+            selector,
+            "EVIDENCE_DELTA_CONTRACT_REFS",
+            (valid_ref, invalid_ref),
+        ):
+            payload = build_campaign(root=root)
+
+        self.assertEqual("hold_current_lane", payload["operator_action"])
+        self.assertEqual([], payload["evidence_delta_reopened_markers"])
+        self.assertEqual(
+            [f"unresolved_contract:{invalid_ref}"],
+            payload["evidence_delta_conflicts"],
+        )
+
+    def test_padded_subject_contract_blocks_otherwise_valid_reopen(self) -> None:
+        root = self._temp_root()
+        (root / "docs" / "atlas-book" / "02-lanes-and-markers.md").write_text(MARKER_DOC, encoding="utf-8")
+        (root / "docs" / "atlas-book" / "01-current-state.md").write_text(CURRENT_STATE_DOC, encoding="utf-8")
+        self._write_packet_receipts(root)
+        checkpoint_ref = (
+            "docs/ops/AI-LONG-RUN-BATCH-ORCHESTRATION-POST-STACK-COMMAND-IMPLEMENTATION-"
+            "ACTUAL-OWNER-SIDE-MUTATION-AUTHORITY-CLASS-VALUE-DOWNSTREAM-HOLD-RECHECK-2026-06-26.md"
+        )
+        self._write_manifest(
+            root,
+            manifest_name="continuity-manifest-ai-long-run-batch-orchestration.json",
+            marker="AI Long-Run Batch Orchestration",
+            percent=20,
+            checkpoint_ref=checkpoint_ref,
+            next_package="No immediate AI Long-Run Batch Orchestration same-lane packet",
+            mode="hold-flat after downstream follow-on recheck",
+            reason="current lane is intentionally held",
+        )
+        valid_ref = self._write_evidence_delta_contract(
+            root,
+            marker="AI Long-Run Batch Orchestration",
+            held_ref=checkpoint_ref,
+        )
+        invalid_ref = self._write_evidence_delta_contract(
+            root,
+            marker=" AI Long-Run Batch Orchestration ",
+            held_ref=checkpoint_ref,
+            contract_name="padded-subject-held-lane-evidence-delta.v1.json",
+        )
+
+        with mock.patch.object(
+            selector,
+            "EVIDENCE_DELTA_CONTRACT_REFS",
+            (valid_ref, invalid_ref),
+        ):
+            payload = build_campaign(root=root)
+
+        self.assertEqual("hold_current_lane", payload["operator_action"])
+        self.assertEqual([], payload["evidence_delta_reopened_markers"])
+        self.assertEqual(
+            [f"unresolved_contract:{invalid_ref}"],
+            payload["evidence_delta_conflicts"],
+        )
+
+    def test_missing_manifest_checkpoint_preserves_the_hold(self) -> None:
+        root = self._temp_root()
+        (root / "docs" / "atlas-book" / "02-lanes-and-markers.md").write_text(MARKER_DOC, encoding="utf-8")
+        (root / "docs" / "atlas-book" / "01-current-state.md").write_text(CURRENT_STATE_DOC, encoding="utf-8")
+        self._write_packet_receipts(root)
+        restart_index = {
+            "items": [
+                {
+                    "marker": "AI Long-Run Batch Orchestration",
+                    "restart_status": "restart_ready",
+                    "current_checkpoint_receipt": None,
+                    "next_package": {
+                        "package": "No immediate AI Long-Run Batch Orchestration same-lane packet"
+                    },
+                }
+            ]
+        }
+
+        with (
+            mock.patch.object(selector, "build_open_marker_restart_index", return_value=restart_index),
+            mock.patch.object(selector, "EVIDENCE_DELTA_CONTRACT_REFS", ()),
+        ):
+            payload = build_campaign(root=root)
+
+        self.assertEqual("hold_current_lane", payload["operator_action"])
+        self.assertTrue(payload["active_lane_is_held"])
+
+    def test_duplicate_manifest_checkpoints_preserve_the_hold(self) -> None:
+        root = self._temp_root()
+        (root / "docs" / "atlas-book" / "02-lanes-and-markers.md").write_text(MARKER_DOC, encoding="utf-8")
+        (root / "docs" / "atlas-book" / "01-current-state.md").write_text(CURRENT_STATE_DOC, encoding="utf-8")
+        self._write_packet_receipts(root)
+        restart_index = {
+            "items": [
+                {
+                    "marker": "AI Long-Run Batch Orchestration",
+                    "restart_status": "restart_ready",
+                    "current_checkpoint_receipt": "docs/ops/first.md",
+                    "next_package": {
+                        "package": "No immediate AI Long-Run Batch Orchestration same-lane packet"
+                    },
+                },
+                {
+                    "marker": "AI Long-Run Batch Orchestration",
+                    "restart_status": "restart_ready",
+                    "current_checkpoint_receipt": "docs/ops/second.md",
+                    "next_package": {
+                        "package": "No immediate AI Long-Run Batch Orchestration same-lane packet"
+                    },
+                },
+            ]
+        }
+
+        with (
+            mock.patch.object(selector, "build_open_marker_restart_index", return_value=restart_index),
+            mock.patch.object(selector, "EVIDENCE_DELTA_CONTRACT_REFS", ()),
+        ):
+            payload = build_campaign(root=root)
+
+        self.assertEqual("hold_current_lane", payload["operator_action"])
+        self.assertTrue(payload["active_lane_is_held"])
+
     def test_build_campaign_reports_no_immediate_root_packet_when_all_open_markers_are_held(self) -> None:
         root = self._temp_root()
         marker_doc = """# Lanes And Markers
@@ -638,19 +1065,19 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
             records["Sandbox Simulation Readiness"]["rationale"],
         )
         self.assertEqual(
-            "Sandbox Simulation Readiness post-local-only first validator broader-runtime-assertions admission boundary hold or top-level lane reselection",
+            "No immediate Sandbox Simulation Readiness same-lane packet",
             payload["next_after_current_packet"],
         )
         self.assertEqual(
-            "docs/ops/SANDBOX-SIMULATION-READINESS-POST-LOCAL-ONLY-FIRST-VALIDATOR-BROADER-RUNTIME-ASSERTIONS-ADMISSION-BOUNDARY-HOLD-OR-TOP-LEVEL-LANE-RESELECTION-2026-06-27.md",
+            "docs/ops/SANDBOX-SIMULATION-READINESS-POST-RUNTIME-BINDING-INDEPENDENT-RATIFICATION-2026-07-14.md",
             payload["next_after_current_packet_basis_ref"],
         )
         self.assertEqual(
-            "docs-only root-bounded hold or top-level lane reselection",
+            "completed-lane lock",
             payload["next_after_current_packet_mode"],
         )
         self.assertIn(
-            "Sandbox stays held or returns to broader campaign routing",
+            "completed local-only Sandbox denominator",
             payload["next_after_current_packet_scope"],
         )
 

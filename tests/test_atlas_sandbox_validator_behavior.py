@@ -57,7 +57,7 @@ def _materialize_temp_validation_pair(
 
 
 class SandboxValidatorBehaviorTests(unittest.TestCase):
-    def test_current_admitted_stub_pair_is_equal_on_boundary(self) -> None:
+    def test_historical_not_run_pair_is_unequal_after_oracle_activation(self) -> None:
         payload = evaluate_sandbox_validator_behavior(
             VALIDATOR_REF,
             REPORT_REF,
@@ -65,7 +65,7 @@ class SandboxValidatorBehaviorTests(unittest.TestCase):
             ORACLE_REF,
         )
 
-        self.assertEqual("equal_on_boundary", payload["comparison_outcome"])
+        self.assertEqual("unequal_on_boundary", payload["comparison_outcome"])
         self.assertEqual([], payload["comparison_reasons"])
         self.assertEqual("not_run", payload["report_status"])
         self.assertEqual(
