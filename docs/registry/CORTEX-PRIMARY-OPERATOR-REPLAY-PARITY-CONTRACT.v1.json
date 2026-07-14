@@ -55,7 +55,7 @@
     "runtime_dispatch": false,
     "network_access": false,
     "marker_movement": false,
-    "implementation_status": "landed_and_focused_proof_passed",
+    "implementation_status": "landed_focused_proof_passed_and_source_digest_parity_enforced",
     "implementation_paths": [
       "ops/cortex/primary_operator_replay_parity.py",
       "tests/test_cortex_primary_operator_replay_parity.py"
@@ -67,9 +67,11 @@
       "cortex_stricter_classification",
       "authority_regression_rejection",
       "plan_or_receipt_correlation_mismatch",
+      "adapter_source_digest_equivalence_and_mismatch",
       "safe_output_path_enforcement",
       "no_execution_side_effects"
-    ]
+    ],
+    "focused_test_count": 13
   },
   "marker": {
     "name": "Cortex Dual-Mode Replacement Readiness",

@@ -79,6 +79,21 @@ def _adapter_actions(adapter: dict[str, Any]) -> set[str]:
     return set()
 
 
+def _normalized_source_digests(value: Any) -> list[OrderedDict[str, str]] | None:
+    if not isinstance(value, list):
+        return None
+    normalized: list[OrderedDict[str, str]] = []
+    for item in value:
+        if not isinstance(item, dict):
+            return None
+        path = item.get("path")
+        sha256 = item.get("sha256")
+        if not isinstance(path, str) or not path or not isinstance(sha256, str) or not sha256:
+            return None
+        normalized.append(OrderedDict((("path", path.replace("\\", "/")), ("sha256", sha256))))
+    return sorted(normalized, key=lambda item: (item["path"], item["sha256"]))
+
+
 def build_report(
     *,
     plan: dict[str, Any],
@@ -123,6 +138,19 @@ def build_report(
 
         if adapter.get("plan_id") != acceptance["plan_id"]:
             mismatches.append(_finding("plan_identity_mismatch", "Adapter projection does not preserve the plan identity."))
+
+        internal_source_digests = _normalized_source_digests(source_digests or []) or []
+        adapter_source_digests = _normalized_source_digests(adapter.get("source_digests"))
+        comparisons.append(
+            OrderedDict(
+                (("dimension", "source_digests"), ("internal", internal_source_digests),
+                 ("adapter", adapter_source_digests))
+            )
+        )
+        if adapter_source_digests is None:
+            mismatches.append(_finding("invalid_adapter_source_digests", "Adapter source digests must be a complete normalized array."))
+        elif adapter_source_digests != internal_source_digests:
+            mismatches.append(_finding("source_digest_mismatch", "Adapter projection does not preserve the replay source digests."))
         correlation = adapter.get("receipt_correlation")
         if not isinstance(correlation, dict) or correlation.get("plan_id") != acceptance["plan_id"] or correlation.get("acceptance_id") != acceptance["acceptance_id"]:
             mismatches.append(_finding("receipt_correlation_mismatch", "Adapter projection does not preserve acceptance and plan correlation."))
@@ -192,7 +220,8 @@ def main(argv: list[str] | None = None) -> int:
             errors.append(error)
         elif value is not None and digest is not None:
             values[name] = value
-            digests.append(OrderedDict((("path", path.replace("\\", "/")), ("sha256", digest))))
+            if name != "adapter":
+                digests.append(OrderedDict((("path", path.replace("\\", "/")), ("sha256", digest))))
     if errors:
         report = OrderedDict(
             (("schema_version", REPORT_SCHEMA), ("report_id", "parity-" + _digest(errors)[:20]),

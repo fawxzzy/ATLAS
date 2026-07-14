@@ -29,7 +29,9 @@
     "first_canary_must_use_no_commit_and_manual_push_policy",
     "job_envelope_must_validate_before_codex_launch",
     "terminal_execution_receipt_must_validate_through_atlas_contracts_v2",
-    "result_correlation_must_read_job_envelope_run_manifest_and_execution_receipt"
+    "result_correlation_must_read_job_envelope_run_manifest_and_execution_receipt",
+    "dispatch_must_persist_the_correlated_primary_operator_decision_under_runtime_atlas_sessions",
+    "safe_closeout_must_validate_the_codex_command_trace_for_secret_or_recursive_root_reads"
   ],
   "authority_denials": [
     "no_push",
@@ -50,6 +52,7 @@
     ],
     "owner_repo_changes": "none_expected_unless_fixture_proves_an_exact_stack_gap",
     "request_output_glob": "runtime/atlas/sessions/**/cortex-stack-dispatch-request.json",
+    "durable_decision_output_glob": "runtime/atlas/sessions/**/cortex-primary-operator-decision.json",
     "prompt_output_glob": "tmp/atlas/**.md",
     "result_output_glob": "runtime/atlas/sessions/**/cortex-stack-result-correlation.json",
     "canary": {
@@ -66,21 +69,24 @@
       "exact_parent_job_correlation",
       "validated_success_no_changes_terminal_receipt",
       "failure_receipt_correlation",
+      "durable_acceptance_and_primary_receipt_correlation",
+      "codex_trace_read_scope_enforcement",
       "external_authority_denials",
       "no_commit_push_deploy_discord_or_data_mutation"
     ],
-    "implementation_status": "helper_and_focused_tests_complete_live_canary_pending",
+    "implementation_status": "durability_parity_and_read_scope_repair_complete_live_canary_pending",
     "implementation_surfaces": [
       "ops/cortex/primary_operator_stack_dispatch.py",
       "tests/test_cortex_primary_operator_stack_dispatch.py"
     ],
-    "focused_test_count": 12,
+    "focused_test_count": 14,
     "stack_runtime_read_boundary": {
       "root": "repos/_stack/.codex/logs/**",
       "artifacts": [
         "run.json",
         "atlas.job-envelope.v2.json",
-        "atlas.execution-receipt.v2.json"
+        "atlas.execution-receipt.v2.json",
+        "codex.stdout.log"
       ],
       "general_absolute_paths": "denied"
     }

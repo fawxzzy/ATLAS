@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import io
+import hashlib
 import json
 import tempfile
 import unittest
+from collections import OrderedDict
 from contextlib import redirect_stdout
 from pathlib import Path
 from unittest.mock import patch
@@ -24,6 +26,12 @@ def _write(path: Path, value: object) -> None:
 
 
 class CortexPrimaryOperatorReplayParityTests(unittest.TestCase):
+    SOURCE_DIGESTS = [
+        OrderedDict((("path", "tmp/atlas/authority.json"), ("sha256", "a" * 64))),
+        OrderedDict((("path", "tmp/atlas/leases.json"), ("sha256", "b" * 64))),
+        OrderedDict((("path", "tmp/atlas/plan.json"), ("sha256", "c" * 64))),
+        OrderedDict((("path", "tmp/atlas/truth.json"), ("sha256", "d" * 64))),
+    ]
     def _root(self) -> Path:
         directory = tempfile.TemporaryDirectory()
         self.addCleanup(directory.cleanup)
@@ -63,6 +71,7 @@ class CortexPrimaryOperatorReplayParityTests(unittest.TestCase):
         value: dict[str, object] = {
             "schema_version": ADAPTER_SCHEMA, "adapter": "codex", "plan_id": acceptance["plan_id"],
             "acceptance_state": acceptance["state"], "reason_codes": [],
+            "source_digests": self.SOURCE_DIGESTS,
             "receipt_correlation": {"plan_id": acceptance["plan_id"], "acceptance_id": acceptance["acceptance_id"]},
             "runtime_dispatch": False, "mutation_performed": False, "operator_plane": "_stack",
             "external_adapters_required": False, "external_action_authority": [],
@@ -75,6 +84,7 @@ class CortexPrimaryOperatorReplayParityTests(unittest.TestCase):
             plan=overrides.get("plan", self._plan()), authority=overrides.get("authority", self._authority()),
             leases=overrides.get("leases", self._leases()), truth=overrides.get("truth", self._truth()),
             adapter=adapter,
+            source_digests=self.SOURCE_DIGESTS,
         )
 
     def test_internal_no_adapter_baseline_is_complete_and_safe(self) -> None:
@@ -134,6 +144,18 @@ class CortexPrimaryOperatorReplayParityTests(unittest.TestCase):
         self.assertIn("plan_identity_mismatch", codes)
         self.assertIn("receipt_correlation_mismatch", codes)
 
+    def test_adapter_source_digest_mismatch_is_blocked(self) -> None:
+        report = self._report(self._adapter(source_digests=[]))
+        self.assertEqual("mismatch", report["result_class"])
+        self.assertFalse(report["safe_to_use"])
+        self.assertIn("source_digest_mismatch", {item["code"] for item in report["mismatches"]})
+
+    def test_adapter_source_digests_are_compared(self) -> None:
+        report = self._report(self._adapter())
+        comparison = next(item for item in report["comparisons"] if item["dimension"] == "source_digests")
+        self.assertEqual(self.SOURCE_DIGESTS, comparison["internal"])
+        self.assertEqual(self.SOURCE_DIGESTS, comparison["adapter"])
+
     def test_report_never_claims_execution_side_effects(self) -> None:
         report = self._report(self._adapter())
         self.assertFalse(report["runtime_dispatch"])
@@ -150,7 +172,20 @@ class CortexPrimaryOperatorReplayParityTests(unittest.TestCase):
         )
         values = {"plan": plan, "authority": authority, "leases": leases, "truth": truth, "adapter": adapter}
         for name, value in values.items():
+            if name == "adapter":
+                continue
             _write(root / f"tmp/atlas/{name}.json", value)
+        adapter["source_digests"] = sorted(
+            [
+                OrderedDict(
+                    (("path", f"tmp/atlas/{name}.json"),
+                     ("sha256", hashlib.sha256((root / f"tmp/atlas/{name}.json").read_bytes()).hexdigest()))
+                )
+                for name in ("plan", "authority", "leases", "truth")
+            ],
+            key=lambda item: item["path"],
+        )
+        _write(root / "tmp/atlas/adapter.json", adapter)
         argv = [
             "--execution-plan", "tmp/atlas/plan.json", "--authority-envelope", "tmp/atlas/authority.json",
             "--lease-receipts", "tmp/atlas/leases.json", "--truth-digests", "tmp/atlas/truth.json",

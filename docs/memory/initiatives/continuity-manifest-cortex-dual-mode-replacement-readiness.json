@@ -83,7 +83,8 @@
     "docs/registry/CORTEX-PRIMARY-OPERATOR-STACK-DISPATCH-CONTRACT.v1.json",
     "ops/cortex/primary_operator_stack_dispatch.py",
     "tests/test_cortex_primary_operator_stack_dispatch.py",
-    "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-STACK-DISPATCH-AND-DURABLE-RESULT-FIRST-IMPLEMENTATION-RECONCILIATION-2026-07-14.md"
+    "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-STACK-DISPATCH-AND-DURABLE-RESULT-FIRST-IMPLEMENTATION-RECONCILIATION-2026-07-14.md",
+    "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-INDEPENDENT-ENDGAME-AUDIT-BLOCKER-CONVERSION-2026-07-14.md"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -91,9 +92,9 @@
     "artifact_kind": "continuity_manifest",
     "lane_id": "cortex-dual-mode-replacement-readiness",
     "scope_class": "atlas-root-governance",
-    "current_checkpoint_receipt": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-STACK-DISPATCH-AND-DURABLE-RESULT-FIRST-IMPLEMENTATION-RECONCILIATION-2026-07-14.md",
+    "current_checkpoint_receipt": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-INDEPENDENT-ENDGAME-AUDIT-BLOCKER-CONVERSION-2026-07-14.md",
     "checkpoint_commit": "pending-current-root-commit",
-    "checkpoint_summary": "The published 90 percent threshold remains satisfied. Dispatch preparation and terminal result correlation are implemented with 12 focused tests. The next serial action is one verified no-change live canary through the existing _stack runner; no parallel runtime is authorized.",
+    "checkpoint_summary": "The independent endgame audit held the marker at 90 percent and its three blockers are converted in code: durable admission, literal source-digest parity, and command-trace read-scope enforcement. Forty focused tests pass; a repaired live canary and independent re-audit remain required.",
     "governing_receipts": [
       "docs/ops/CORTEX-DUAL-MODE-AND-SIMULATION-SUBSTRATE-MARKER-ADMISSION-2026-07-09.md",
       "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-OPERATING-MODE-CONTRACT-FREEZE-2026-07-09.md",
@@ -138,6 +139,7 @@
       ,"docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-PRIMARY-OPERATOR-REPLAY-PARITY-FIRST-IMPLEMENTATION-RECONCILIATION-2026-07-14.md"
       ,"docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-STACK-DISPATCH-AND-DURABLE-RESULT-CONTRACT-FREEZE-2026-07-14.md"
       ,"docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-STACK-DISPATCH-AND-DURABLE-RESULT-FIRST-IMPLEMENTATION-RECONCILIATION-2026-07-14.md"
+      ,"docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-INDEPENDENT-ENDGAME-AUDIT-BLOCKER-CONVERSION-2026-07-14.md"
     ],
     "owner_truth_surfaces": [
       {
@@ -405,9 +407,9 @@
     ],
     "next_package_ladder": [
       {
-        "package": "Cortex Dual-Mode Replacement Readiness _stack dispatch and durable result first implementation",
-        "mode": "serialized root implementation then bounded live _stack no-change canary",
-        "reason": "generate and validate the correlation artifacts, then prove one real operator dispatch without mutation"
+        "package": "Cortex Dual-Mode Replacement Readiness repaired live no-change canary",
+        "mode": "serialized existing _stack operator canary",
+        "reason": "prove durable decision correlation, complete read-scope evidence, and a validated no-change receipt through the repaired boundary"
       },
       {
         "package": "Cortex optional-adapter endgame ratchet",
@@ -415,10 +417,10 @@
         "reason": "100 percent is available only after the internal primary-operator path and replay-backed parity are durable"
       }
     ],
-    "freshness_state": "stack-dispatch-helper-implemented-live-canary-pending-at-90-percent",
-    "freshness_checked_receipt": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-STACK-DISPATCH-AND-DURABLE-RESULT-FIRST-IMPLEMENTATION-RECONCILIATION-2026-07-14.md",
-    "freshness_checked_at": "2026-07-14T21:25:00-04:00",
-    "freshness_basis": "The dispatch request generator and durable result correlator are implemented and focused proof passes 12 tests. The next serialized action is one verified no-change live _stack canary followed by an independent endgame audit.",
+    "freshness_state": "independent-audit-blockers-converted-repaired-live-canary-pending-at-90-percent",
+    "freshness_checked_receipt": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-INDEPENDENT-ENDGAME-AUDIT-BLOCKER-CONVERSION-2026-07-14.md",
+    "freshness_checked_at": "2026-07-14T23:30:00-04:00",
+    "freshness_basis": "The independent endgame audit held at 90 percent. Durable decision persistence, adapter source-digest comparison, command-trace read-scope enforcement, and fail-closed terminal exit behavior are now implemented with 40 focused tests passing. A repaired live canary and independent re-audit remain serialized next actions.",
     "marker_posture": [
       {
         "marker": "Cortex Dual-Mode Replacement Readiness",
