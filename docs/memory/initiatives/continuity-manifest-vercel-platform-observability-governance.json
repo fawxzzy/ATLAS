@@ -1,0 +1,97 @@
+{
+  "contract_version": "atlas.initiative.v1",
+  "id": "continuity-manifest-vercel-platform-observability-governance",
+  "title": "Vercel Platform Observability Governance",
+  "summary": "Maintained restart map for the read-only Vercel observability governance lane, held at 40 percent until a safe authenticated read transport becomes available for the remaining surfaces.",
+  "status": "active",
+  "owner": "stack-root",
+  "created_at": "2026-07-14T00:00:00Z",
+  "updated_at": "2026-07-14T00:00:00Z",
+  "related_plan_refs": [],
+  "related_decision_refs": [],
+  "related_hypothesis_refs": [],
+  "related_session_refs": [],
+  "related_attention_refs": [],
+  "proposed_next_session_refs": [],
+  "evidence_refs": [
+    "docs/ops/VERCEL-PLATFORM-OBSERVABILITY-GOVERNANCE-IMPLEMENTED-INVENTORY-MARKER-RATCHET-2026-07-14.md",
+    "docs/ops/VERCEL-PLATFORM-OBSERVABILITY-GOVERNANCE-ENVIRONMENT-NAME-ONLY-INVENTORY-CONTRACT-FREEZE-2026-07-14.md",
+    "docs/ops/VERCEL-PLATFORM-OBSERVABILITY-GOVERNANCE-ENVIRONMENT-NAME-ONLY-INVENTORY-FIRST-IMPLEMENTATION-RECONCILIATION-2026-07-14.md",
+    "docs/ops/VERCEL-PLATFORM-OBSERVABILITY-GOVERNANCE-ANALYTICS-AND-DRAIN-VISIBILITY-CONTRACT-AND-IMPLEMENTATION-2026-07-14.md",
+    "docs/ops/VERCEL-PLATFORM-OBSERVABILITY-GOVERNANCE-ANALYTICS-AND-DRAIN-LIVE-READ-ONLY-CAPABILITY-AUDIT-2026-07-14.md",
+    "ops/atlas/vercel_log_runtime_error_inventory.py",
+    "ops/atlas/vercel_deployment_freshness_inventory.py",
+    "ops/atlas/vercel_environment_name_inventory.py",
+    "ops/atlas/vercel_observability_surface_visibility.py"
+  ],
+  "supersedes": [],
+  "superseded_by": [],
+  "metadata": {
+    "artifact_kind": "continuity_manifest",
+    "lane_id": "vercel-platform-observability-governance",
+    "scope_class": "atlas-root-governance",
+    "current_checkpoint_receipt": "docs/ops/VERCEL-PLATFORM-OBSERVABILITY-GOVERNANCE-ANALYTICS-AND-DRAIN-LIVE-READ-ONLY-CAPABILITY-AUDIT-2026-07-14.md",
+    "checkpoint_commit": "main@b495bd7b",
+    "checkpoint_summary": "Four of ten implementation units are complete. The remaining analytics, Speed Insights, traces, alerts, drains, and Observability Plus surfaces stay unproven because no safe authenticated read transport is exposed to the current Atlas session.",
+    "governing_receipts": [
+      "docs/ops/VERCEL-PLATFORM-OBSERVABILITY-GOVERNANCE-IMPLEMENTED-INVENTORY-MARKER-RATCHET-2026-07-14.md",
+      "docs/ops/VERCEL-PLATFORM-OBSERVABILITY-GOVERNANCE-ENVIRONMENT-NAME-ONLY-INVENTORY-CONTRACT-FREEZE-2026-07-14.md",
+      "docs/ops/VERCEL-PLATFORM-OBSERVABILITY-GOVERNANCE-ENVIRONMENT-NAME-ONLY-INVENTORY-FIRST-IMPLEMENTATION-RECONCILIATION-2026-07-14.md",
+      "docs/ops/VERCEL-PLATFORM-OBSERVABILITY-GOVERNANCE-ANALYTICS-AND-DRAIN-VISIBILITY-CONTRACT-AND-IMPLEMENTATION-2026-07-14.md",
+      "docs/ops/VERCEL-PLATFORM-OBSERVABILITY-GOVERNANCE-ANALYTICS-AND-DRAIN-LIVE-READ-ONLY-CAPABILITY-AUDIT-2026-07-14.md"
+    ],
+    "owner_truth_surfaces": [
+      {
+        "path": "docs/atlas-book/02-lanes-and-markers.md",
+        "role": "current 40 percent marker and ten-unit denominator truth"
+      },
+      {
+        "path": "docs/ops/VERCEL-PLATFORM-OBSERVABILITY-GOVERNANCE-ANALYTICS-AND-DRAIN-LIVE-READ-ONLY-CAPABILITY-AUDIT-2026-07-14.md",
+        "role": "latest read-transport capability audit and hold decision"
+      }
+    ],
+    "verification_adoption_surfaces": [
+      {
+        "path": "ops/atlas/vercel_log_runtime_error_inventory.py",
+        "role": "implemented sensitive-field-rejecting log and runtime-error inventory"
+      },
+      {
+        "path": "ops/atlas/vercel_deployment_freshness_inventory.py",
+        "role": "implemented deployment-freshness inventory"
+      },
+      {
+        "path": "ops/atlas/vercel_environment_name_inventory.py",
+        "role": "implemented environment-name-only inventory"
+      },
+      {
+        "path": "ops/atlas/vercel_observability_surface_visibility.py",
+        "role": "implemented analytics and drain visibility classifier"
+      }
+    ],
+    "blocked_or_gated_work": [
+      {
+        "work": "Live readback for Web Analytics, Speed Insights, traces, alerts, drains, and Observability Plus",
+        "state": "blocked",
+        "reason": "read_transport_unavailable"
+      }
+    ],
+    "next_package_ladder": [
+      {
+        "package": "No immediate Vercel Platform Observability Governance same-lane packet",
+        "mode": "hold",
+        "reason": "Reopen only when a safely exposed authenticated read transport materially changes."
+      }
+    ],
+    "freshness_state": "manifest-backed",
+    "freshness_checked_receipt": "docs/ops/VERCEL-PLATFORM-OBSERVABILITY-GOVERNANCE-ANALYTICS-AND-DRAIN-LIVE-READ-ONLY-CAPABILITY-AUDIT-2026-07-14.md",
+    "freshness_checked_at": "2026-07-14T00:00:00Z",
+    "freshness_basis": "Latest connected-app and local CLI capability audit found no safe project-level read transport for the remaining observability surfaces; the lane is restartable but held.",
+    "marker_posture": [
+      {
+        "marker": "Vercel Platform Observability Governance",
+        "percent": 40,
+        "source": "docs/atlas-book/02-lanes-and-markers.md"
+      }
+    ]
+  }
+}
