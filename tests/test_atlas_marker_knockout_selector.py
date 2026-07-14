@@ -906,18 +906,18 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual("hold_current_lane", payload["operator_action"])
         self.assertEqual("Owner-Lane Agent Service Bus & DiscordOS Ops Readiness", payload["next_after_current_marker"])
         self.assertEqual(
-            "Owner-Lane Agent Service Bus & DiscordOS Ops full-permission runtime and request-receipt protocol contract freeze",
+            "Owner-Lane Agent Service Bus & DiscordOS Ops native Codex task/thread capability spike first-implementation admission",
             payload["next_after_current_packet"],
         )
         self.assertEqual(
-            "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-MARKER-ADMISSION-2026-07-10.md",
+            "docs/ops/OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-FIRST-TRANSPORT-RECONCILIATION-2026-07-14.md",
             payload["next_after_current_packet_basis_ref"],
         )
         self.assertEqual(
-            "docs-only root-bounded full-permission runtime and request-receipt protocol contract freeze",
+            "docs-only native-capability spike admission",
             payload["next_after_current_packet_mode"],
         )
-        self.assertIn("full-permission runtime defaults", payload["next_after_current_packet_scope"])
+        self.assertIn("native Codex task/thread lifecycle proof", payload["next_after_current_packet_scope"])
 
 
 if __name__ == "__main__":

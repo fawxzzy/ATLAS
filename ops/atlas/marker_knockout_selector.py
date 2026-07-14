@@ -219,15 +219,13 @@ POLICY_REGISTRY: dict[str, MarkerPolicy] = {
     "Owner-Lane Agent Service Bus & DiscordOS Ops Readiness": MarkerPolicy(
         category="admissible after current lane",
         rationale=(
-            "The lane is now durably admitted as a future owner-lane orchestration boundary, but it remains a "
-            "docs-first service-bus governance family that should not displace the already-selected Cortex "
-            "Dual-Mode packet or claim implementation progress before its full-permission runtime and "
-            "request-and-receipt contract is frozen."
+            "The lane retains its request/receipt and single-writer contracts under the accepted native-first "
+            "architecture, but it must prove current Codex task/thread capabilities before defining a thin ledger "
+            "or selecting any storage backend."
         ),
         expected_evidence=(
-            "one root-owned full-permission runtime and request-and-receipt protocol contract freeze that preserves "
-            "the single-writer DiscordOS Ops model, logical service naming, no automatic permission downgrade, and "
-            "no owner-repo mutation"
+            "one bounded native Codex task/thread capability spike covering durable identities, lifecycle, resume, "
+            "events, workspace binding, and result surfaces plus a backend-neutral missing-semantics inventory"
         ),
     ),
     "Fitness QA/LLEL Workflow": MarkerPolicy(
@@ -453,17 +451,15 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "Owner-Lane Agent Service Bus & DiscordOS Ops Readiness": PacketDescriptor(
-        packet="Owner-Lane Agent Service Bus & DiscordOS Ops full-permission runtime and request-receipt protocol contract freeze",
+        packet="Owner-Lane Agent Service Bus & DiscordOS Ops native Codex task/thread capability spike first-implementation admission",
         basis_receipt_ref=(
             "docs/ops/"
-            "OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-MARKER-ADMISSION-2026-07-10.md"
+            "OWNER-LANE-AGENT-SERVICE-BUS-AND-DISCORDOS-OPS-NATIVE-FIRST-TRANSPORT-RECONCILIATION-2026-07-14.md"
         ),
-        mode="docs-only root-bounded full-permission runtime and request-receipt protocol contract freeze",
+        mode="docs-only native-capability spike admission",
         scope=(
-            "freeze the standing full-permission runtime defaults, no-mixing rule, no-downgrade rule, durable "
-            "request schema, receipt schema, queue states, idempotency and lease rules, service registry defaults, "
-            "and queue-return versus managed-thread callback modes for the logical discordos_ops single-writer "
-            "service without implementing the bus or mutating owner repos"
+            "admit one bounded read-only native Codex task/thread lifecycle proof and derive the smallest "
+            "backend-neutral ledger requirement set without selecting a backend or mutating owner repositories"
         ),
     ),
 }
