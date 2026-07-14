@@ -221,6 +221,23 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
             encoding="utf-8",
         )
 
+        primary_operator_implementation = root / "docs" / "ops" / (
+            "CORTEX-DUAL-MODE-REPLACEMENT-READINESS-PRIMARY-OPERATOR-FIRST-"
+            "IMPLEMENTATION-RECONCILIATION-2026-07-14.md"
+        )
+        primary_operator_implementation.write_text(
+            "\n".join(
+                [
+                    "# Primary Operator First Implementation Reconciliation",
+                    "",
+                    "- Mode: `docs-only root-bounded replay-parity contract freeze`",
+                    "- Scope: `freeze deterministic replay comparison between primary-operator acceptance/receipts and optional adapter projections, preserving _stack execution ownership and prohibiting runtime dispatch, marker movement, or external mutation`",
+                    "",
+                ]
+            ),
+            encoding="utf-8",
+        )
+
     def _write_manifest(
         self,
         root: Path,
@@ -858,14 +875,14 @@ class AtlasMarkerKnockoutSelectorTests(unittest.TestCase):
         self.assertEqual("hold_current_lane", payload["operator_action"])
         self.assertEqual("Cortex Dual-Mode Replacement Readiness", payload["next_after_current_marker"])
         self.assertEqual(
-            "Cortex Dual-Mode Replacement Readiness primary-operator acceptance and receipt first implementation",
+            "Cortex Dual-Mode Replacement Readiness replay-backed primary-operator parity contract freeze",
             payload["next_after_current_packet"],
         )
         self.assertEqual(
-            "root-owned deterministic dry-run primary-operator implementation",
+            "docs-only root-bounded replay-parity contract freeze",
             payload["next_after_current_packet_mode"],
         )
-        self.assertIn("requires no external adapter", payload["next_after_current_packet_scope"])
+        self.assertIn("optional adapter projections", payload["next_after_current_packet_scope"])
 
     def test_build_campaign_routes_owner_lane_service_bus_marker_when_it_is_first_available(self) -> None:
         root = self._temp_root()

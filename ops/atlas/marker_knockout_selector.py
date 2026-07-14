@@ -200,8 +200,8 @@ POLICY_REGISTRY: dict[str, MarkerPolicy] = {
             "The next honest work is the internal primary-operator acceptance and receipt implementation; 100% remains blocked on dispatch and replay parity."
         ),
         expected_evidence=(
-            "one deterministic dry-run primary-operator acceptance and receipt helper that consumes a safe execution plan, rejects authority or lease conflicts, "
-            "requires no ChatGPT/Codex adapter, and performs no runtime dispatch"
+            "one replay-backed primary-operator parity contract that freezes comparison inputs, authority boundaries, correlated receipt dimensions, "
+            "and the optional ChatGPT/Codex adapter posture without claiming runtime dispatch"
         ),
     ),
     "Cortex Simulation Substrate Readiness": MarkerPolicy(
@@ -426,16 +426,16 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "Cortex Dual-Mode Replacement Readiness": PacketDescriptor(
-        packet="Cortex Dual-Mode Replacement Readiness primary-operator acceptance and receipt first implementation",
+        packet="Cortex Dual-Mode Replacement Readiness replay-backed primary-operator parity contract freeze",
         basis_receipt_ref=(
             "docs/ops/"
-            "CORTEX-DUAL-MODE-REPLACEMENT-READINESS-PRIMARY-OPERATOR-ACCEPTANCE-AND-"
-            "RECEIPT-CONTRACT-FREEZE-2026-07-14.md"
+            "CORTEX-DUAL-MODE-REPLACEMENT-READINESS-PRIMARY-OPERATOR-FIRST-"
+            "IMPLEMENTATION-RECONCILIATION-2026-07-14.md"
         ),
-        mode="root-owned deterministic dry-run primary-operator implementation",
+        mode="docs-only root-bounded replay-parity contract freeze",
         scope=(
-            "implement one Cortex helper/test pair that accepts or rejects atlas.cortex.execution_plan.v1, emits deterministic acceptance and receipt identities, "
-            "preserves _stack execution ownership, requires no external adapter, and performs no runtime or platform mutation"
+            "freeze deterministic replay comparison between primary-operator acceptance/receipts and optional adapter projections, preserving _stack execution ownership "
+            "and prohibiting runtime dispatch, marker movement, or external mutation"
         ),
     ),
     "Cortex Simulation Substrate Readiness": PacketDescriptor(

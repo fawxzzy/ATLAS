@@ -3,6 +3,7 @@
   "acceptance_schema": "atlas.cortex.primary_operator_acceptance.v1",
   "receipt_schema": "atlas.cortex.primary_operator_receipt.v1",
   "mode": "deterministic_internal_primary_operator",
+  "runtime_adoption": "first_implementation_landed_dry_run_only",
   "required_inputs": [
     "atlas.cortex.execution_plan.v1",
     "operator_authority_envelope",
@@ -41,6 +42,11 @@
     "allowed_paths": ["ops/cortex/primary_operator.py", "tests/test_cortex_primary_operator.py"],
     "output_glob": "tmp/atlas/**.json",
     "runtime_dispatch": false,
+    "implementation_status": "landed_and_focused_proof_passed",
+    "implementation_paths": [
+      "ops/cortex/primary_operator.py",
+      "tests/test_cortex_primary_operator.py"
+    ],
     "required_proof": [
       "deterministic_acceptance_and_receipt_ids",
       "ready_plan_acceptance",
