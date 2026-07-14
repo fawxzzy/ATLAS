@@ -207,12 +207,12 @@ POLICY_REGISTRY: dict[str, MarkerPolicy] = {
     "Cortex Simulation Substrate Readiness": MarkerPolicy(
         category="admissible after current lane",
         rationale=(
-            "The lane is at 70% with one deterministic, receipt-bound, terminating Atlas workflow-resilience simulator "
-            "prototype proved. Playbook/Cortex recommendation consumption is next; owner adapters and live action remain held."
+            "The lane is at 80% with one deterministic recommendation envelope feeding candidate-only Playbook doctrine and "
+            "authority-false Cortex next-proof recommendations. Envelope replay/evaluation is next; owner adapters remain held."
         ),
         expected_evidence=(
-            "one authority-false recommendation envelope consumed by both a Playbook-facing projection and a Cortex read-model "
-            "surface with source correlation, deterministic proof, and no execution or final-receipt authority"
+            "one deterministic digest-bound replay/evaluation loop that detects identical, changed, and invalid recommendation "
+            "envelopes without executing, promoting, dispatching, or moving operational state"
         ),
     ),
     "Owner-Lane Agent Service Bus & DiscordOS Ops Readiness": MarkerPolicy(
@@ -439,15 +439,15 @@ PACKET_REGISTRY: dict[str, PacketDescriptor] = {
         ),
     ),
     "Cortex Simulation Substrate Readiness": PacketDescriptor(
-        packet="Cortex Simulation Substrate Readiness simulation-output Playbook and Cortex recommendation consumption contract freeze",
+        packet="Cortex Simulation Substrate Readiness recommendation-envelope replay and evaluation loop contract freeze",
         basis_receipt_ref=(
             "docs/ops/"
-            "CORTEX-SIMULATION-SUBSTRATE-READINESS-ATLAS-WORKFLOW-RESILIENCE-SAFE-SCENARIO-SIMULATOR-PROTOTYPE-FIRST-IMPLEMENTATION-AND-70-PERCENT-RECONCILIATION-2026-07-14.md"
+            "CORTEX-SIMULATION-SUBSTRATE-READINESS-SIMULATION-OUTPUT-RECOMMENDATION-BRIDGE-FIRST-IMPLEMENTATION-AND-80-PERCENT-RECONCILIATION-2026-07-14.md"
         ),
-        mode="docs-only root-bounded recommendation-consumption contract freeze",
+        mode="docs-only root-bounded recommendation-envelope replay/evaluation contract freeze",
         scope=(
-            "freeze one deterministic authority-false recommendation envelope and its Playbook/Cortex read-model consumption "
-            "without owner access, model calls, command execution, or external mutation authority"
+            "freeze one deterministic digest-bound recommendation-envelope replay/evaluation loop without owner access, model "
+            "calls, command execution, doctrine promotion, dispatch, or external mutation authority"
         ),
     ),
     "Owner-Lane Agent Service Bus & DiscordOS Ops Readiness": PacketDescriptor(

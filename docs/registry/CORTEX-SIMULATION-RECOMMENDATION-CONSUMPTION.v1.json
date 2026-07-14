@@ -1,6 +1,6 @@
 {
   "contract_version": "atlas.cortex.simulation.recommendation-consumption.v1",
-  "status": "implementation_admitted",
+  "status": "consumption_proved",
   "owner": "stack-root",
   "simulation_contract": "atlas.cortex.simulation.workflow-resilience.v1",
   "output_contract": "atlas.cortex.simulation.recommendation-envelope.v1",
@@ -31,8 +31,8 @@
   },
   "marker": {
     "name": "Cortex Simulation Substrate Readiness",
-    "current_percent": 70,
-    "next_threshold": 80,
-    "next_packet": "Cortex Simulation Substrate Readiness simulation-output recommendation bridge first implementation and 80 percent reconciliation"
+    "current_percent": 80,
+    "next_threshold": 90,
+    "next_packet": "Cortex Simulation Substrate Readiness recommendation-envelope replay and evaluation loop contract freeze"
   }
 }
