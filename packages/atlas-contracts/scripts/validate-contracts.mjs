@@ -7,6 +7,7 @@ import {
   loadKnownSchema,
   validateJsonSchema,
 } from "./lib/validate-json-schema.mjs";
+import { validateContractSemantics } from "./lib/validate-semantics.mjs";
 
 async function main() {
   const failures = [];
@@ -16,7 +17,10 @@ async function main() {
     const validFixture = await loadJson(path.join(fixturesDir, plan.valid));
     const invalidFixture = await loadJson(path.join(fixturesDir, plan.invalid));
 
-    const validErrors = validateJsonSchema(validFixture, loadedSchema.schema);
+    const validErrors = [
+      ...validateJsonSchema(validFixture, loadedSchema.schema),
+      ...validateContractSemantics(plan.id, validFixture),
+    ];
     if (validErrors.length > 0) {
       failures.push(
         `${plan.valid} should be valid for ${plan.file}\n${validErrors
@@ -25,10 +29,30 @@ async function main() {
       );
     }
 
-    const invalidErrors = validateJsonSchema(invalidFixture, loadedSchema.schema);
+    const invalidErrors = [
+      ...validateJsonSchema(invalidFixture, loadedSchema.schema),
+      ...validateContractSemantics(plan.id, invalidFixture),
+    ];
     if (invalidErrors.length === 0) {
       failures.push(`${plan.invalid} should fail validation for ${plan.file}`);
     }
+  }
+
+  const ownerExportSchema = await loadKnownSchema("atlas.project-board.owner-export.v1");
+  const cardRecordSchema = await loadKnownSchema("atlas.card-record.v2");
+  const {
+    $schema: _cardSchemaDialect,
+    $id: _cardSchemaId,
+    title: _cardSchemaTitle,
+    ...cardRecordShape
+  } = cardRecordSchema.schema;
+  if (
+    JSON.stringify(ownerExportSchema.schema.$defs.card_record)
+    !== JSON.stringify(cardRecordShape)
+  ) {
+    failures.push(
+      "atlas.project-board.owner-export.v1 must embed the exact atlas.card-record.v2 shape",
+    );
   }
 
   if (failures.length > 0) {

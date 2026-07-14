@@ -10,6 +10,8 @@ export const ATLAS_GITHUB_EVENT_ADMISSION_CONTRACT_VERSION =
   "atlas.github.event-admission.v1" as const;
 export const ATLAS_GITHUB_PROJECTION_INTENT_CONTRACT_VERSION =
   "atlas.github.projection-intent.v1" as const;
+export const ATLAS_PROJECT_BOARD_OWNER_EXPORT_CONTRACT_VERSION =
+  "atlas.project-board.owner-export.v1" as const;
 export const ATLAS_COMPONENT_MANIFEST_CONTRACT_VERSION =
   "atlas.component-manifest.v2" as const;
 export const ATLAS_JOB_ENVELOPE_CONTRACT_VERSION =
@@ -34,6 +36,7 @@ export const ATLAS_CONTRACT_VERSIONS = [
   ATLAS_GITHUB_EVENT_RECEIPT_CONTRACT_VERSION,
   ATLAS_GITHUB_EVENT_ADMISSION_CONTRACT_VERSION,
   ATLAS_GITHUB_PROJECTION_INTENT_CONTRACT_VERSION,
+  ATLAS_PROJECT_BOARD_OWNER_EXPORT_CONTRACT_VERSION,
   ATLAS_COMPONENT_MANIFEST_CONTRACT_VERSION,
   ATLAS_JOB_ENVELOPE_CONTRACT_VERSION,
   ATLAS_EXECUTION_RECEIPT_CONTRACT_VERSION,
@@ -135,6 +138,8 @@ export const ATLAS_SCHEMA_PATHS = {
     "schemas/atlas.github.event-admission.v1.schema.json",
   [ATLAS_GITHUB_PROJECTION_INTENT_CONTRACT_VERSION]:
     "schemas/atlas.github.projection-intent.v1.schema.json",
+  [ATLAS_PROJECT_BOARD_OWNER_EXPORT_CONTRACT_VERSION]:
+    "schemas/atlas.project-board.owner-export.v1.schema.json",
   [ATLAS_COMPONENT_MANIFEST_CONTRACT_VERSION]:
     "schemas/atlas.component-manifest.v2.schema.json",
   [ATLAS_JOB_ENVELOPE_CONTRACT_VERSION]:

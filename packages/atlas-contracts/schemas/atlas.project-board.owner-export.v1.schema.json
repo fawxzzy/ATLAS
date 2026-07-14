@@ -1,0 +1,190 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://packages/contracts/atlas.project-board.owner-export.v1.schema.json",
+  "title": "ATLAS project-board owner export contract v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "export_id",
+    "project_id",
+    "board_id",
+    "owner",
+    "adapter_id",
+    "source_revision",
+    "generated_at",
+    "sources",
+    "cards"
+  ],
+  "properties": {
+    "contract_version": {
+      "type": "string",
+      "const": "atlas.project-board.owner-export.v1"
+    },
+    "export_id": {"type": "string", "pattern": "^pbe_[a-z0-9][a-z0-9._-]+$"},
+    "project_id": {"type": "string", "minLength": 1},
+    "board_id": {"type": "string", "minLength": 1},
+    "owner": {"type": "string", "minLength": 1},
+    "adapter_id": {"type": "string", "minLength": 1},
+    "source_revision": {"type": "string", "minLength": 1},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/source"}
+    },
+    "cards": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/export_card"}
+    },
+    "extensions": {"type": "object"}
+  },
+  "$defs": {
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_id", "kind", "repository", "path", "revision", "observed_at"],
+      "properties": {
+        "source_id": {"type": "string", "minLength": 1},
+        "kind": {
+          "type": "string",
+          "enum": ["json", "yaml", "markdown", "database", "generated", "manual-registry"]
+        },
+        "repository": {"type": "string", "minLength": 1},
+        "path": {"type": "string", "minLength": 1},
+        "revision": {"type": "string", "minLength": 1},
+        "observed_at": {"type": "string", "format": "date-time"}
+      }
+    },
+    "card_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contract_version",
+        "card_id",
+        "project_id",
+        "board_id",
+        "title",
+        "card_type",
+        "lifecycle",
+        "priority",
+        "owner",
+        "dependencies",
+        "board_version",
+        "updated_at"
+      ],
+      "properties": {
+        "contract_version": {"type": "string", "const": "atlas.card-record.v2"},
+        "card_id": {"type": "string", "minLength": 1},
+        "project_id": {"type": "string", "minLength": 1},
+        "board_id": {"type": "string", "minLength": 1},
+        "title": {"type": "string", "minLength": 1},
+        "description": {"type": "string"},
+        "card_type": {
+          "type": "string",
+          "enum": [
+            "feature",
+            "bug",
+            "governance",
+            "architecture",
+            "documentation",
+            "automation",
+            "research",
+            "migration",
+            "reliability",
+            "technical-debt"
+          ]
+        },
+        "lifecycle": {
+          "type": "string",
+          "enum": ["intake", "planning", "ready", "in-progress", "review", "completed", "archived", "blocked"]
+        },
+        "priority": {
+          "type": ["string", "null"],
+          "enum": ["critical", "high", "medium", "low", null]
+        },
+        "owner": {"type": ["string", "null"]},
+        "dependencies": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "board_version": {"type": "integer", "minimum": 0},
+        "updated_at": {"type": "string", "format": "date-time"},
+        "source_ref": {"type": ["string", "null"]},
+        "extensions": {"type": "object"}
+      }
+    },
+    "source_reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_id", "source_ref", "source_status"],
+      "properties": {
+        "source_id": {"type": "string", "minLength": 1},
+        "source_ref": {"type": "string", "minLength": 1},
+        "source_status": {
+          "type": "string",
+          "enum": ["current", "stale", "conflicting", "unverified"]
+        },
+        "source_updated_at": {"type": ["string", "null"], "format": "date-time"}
+      }
+    },
+    "content": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "summary",
+        "objective",
+        "acceptance_criteria",
+        "discoveries",
+        "next_actions",
+        "blockers",
+        "evidence"
+      ],
+      "properties": {
+        "summary": {"type": "string", "minLength": 1},
+        "objective": {"type": ["string", "null"]},
+        "acceptance_criteria": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "discoveries": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "next_actions": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "blockers": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "evidence": {"type": "array", "items": {"type": "string", "minLength": 1}}
+      }
+    },
+    "relationships": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["parent_card_id", "duplicate_of", "superseded_by"],
+      "properties": {
+        "parent_card_id": {"type": ["string", "null"]},
+        "duplicate_of": {"type": ["string", "null"]},
+        "superseded_by": {"type": ["string", "null"]}
+      }
+    },
+    "export_card": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "idempotency_key",
+        "record_kind",
+        "record_status",
+        "record",
+        "source",
+        "content",
+        "relationships"
+      ],
+      "properties": {
+        "idempotency_key": {"type": "string", "pattern": "^pbk_[a-z0-9][a-z0-9._-]+$"},
+        "record_kind": {
+          "type": "string",
+          "enum": ["project-work", "milestone", "marker", "operational", "research"]
+        },
+        "record_status": {
+          "type": "string",
+          "enum": ["active", "candidate", "superseded", "duplicate", "excluded"]
+        },
+        "record": {"$ref": "#/$defs/card_record"},
+        "source": {"$ref": "#/$defs/source_reference"},
+        "content": {"$ref": "#/$defs/content"},
+        "relationships": {"$ref": "#/$defs/relationships"},
+        "extensions": {"type": "object"}
+      }
+    }
+  }
+}

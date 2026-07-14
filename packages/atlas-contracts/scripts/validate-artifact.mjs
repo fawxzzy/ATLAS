@@ -7,6 +7,7 @@ import {
   loadKnownSchema,
   validateJsonSchema,
 } from "./lib/validate-json-schema.mjs";
+import { validateContractSemantics } from "./lib/validate-semantics.mjs";
 
 export const exitCodes = Object.freeze({
   VALID: 0,
@@ -128,7 +129,10 @@ export async function runArtifactValidator(argv) {
     throw error;
   }
 
-  const errors = validateJsonSchema(artifact, loadedSchema.schema);
+  const errors = [
+    ...validateJsonSchema(artifact, loadedSchema.schema),
+    ...validateContractSemantics(loadedSchema.entry.id, artifact),
+  ];
   if (errors.length > 0) {
     return {
       exitCode: exitCodes.INVALID_ARTIFACT,

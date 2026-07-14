@@ -78,6 +78,18 @@ try {
     "VALID",
   );
   expectJson(
+    ["--schema", "atlas.project-board.owner-export.v1", "--artifact", fixture("valid", "project-board.owner-export.v1.json")],
+    0,
+    "VALID",
+  );
+  const semanticFailure = expectJson(
+    ["--schema", "atlas.project-board.owner-export.v1", "--artifact", fixture("invalid", "project-board.owner-export.v1.semantic-conflict.json")],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  assert(semanticFailure.errors.some((error) => error.includes("ATLAS-relative portable path")));
+  assert(semanticFailure.errors.some((error) => error.includes("acceptance_criteria")));
+  expectJson(
     ["--schema", "atlas.github.event-receipt.v1", "--artifact", fixture("invalid", "github.event-receipt.v1.bad-authority.json")],
     1,
     "INVALID_ARTIFACT",

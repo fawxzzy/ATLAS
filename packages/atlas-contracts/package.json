@@ -32,6 +32,8 @@
     "./schemas/atlas.github.event-admission.v1.schema.json": "./schemas/atlas.github.event-admission.v1.schema.json",
     "./schemas/atlas.github.projection-intent.v1": "./schemas/atlas.github.projection-intent.v1.schema.json",
     "./schemas/atlas.github.projection-intent.v1.schema.json": "./schemas/atlas.github.projection-intent.v1.schema.json",
+    "./schemas/atlas.project-board.owner-export.v1": "./schemas/atlas.project-board.owner-export.v1.schema.json",
+    "./schemas/atlas.project-board.owner-export.v1.schema.json": "./schemas/atlas.project-board.owner-export.v1.schema.json",
     "./schemas/atlas.component-manifest.v2": "./schemas/atlas.component-manifest.v2.schema.json",
     "./schemas/atlas.component-manifest.v2.schema.json": "./schemas/atlas.component-manifest.v2.schema.json",
     "./schemas/atlas.job-envelope.v2": "./schemas/atlas.job-envelope.v2.schema.json",

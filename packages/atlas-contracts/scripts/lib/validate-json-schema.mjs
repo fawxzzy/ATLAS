@@ -63,6 +63,12 @@ export const knownSchemaPlan = Object.freeze([
     invalid: "invalid/github.projection-intent.v1.bad-external-mutation.json",
   },
   {
+    id: "atlas.project-board.owner-export.v1",
+    file: "atlas.project-board.owner-export.v1.schema.json",
+    valid: "valid/project-board.owner-export.v1.json",
+    invalid: "invalid/project-board.owner-export.v1.semantic-conflict.json",
+  },
+  {
     id: "atlas.component-manifest.v2",
     file: "atlas.component-manifest.v2.schema.json",
     valid: "valid/component-manifest.v2.json",

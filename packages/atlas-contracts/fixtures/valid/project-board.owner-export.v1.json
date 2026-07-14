@@ -1,0 +1,66 @@
+{
+  "contract_version": "atlas.project-board.owner-export.v1",
+  "export_id": "pbe_playbook_20260714",
+  "project_id": "playbook",
+  "board_id": "discordos:project-feedback:playbook",
+  "owner": "playbook",
+  "adapter_id": "playbook-roadmap-v1",
+  "source_revision": "main@abc1234",
+  "generated_at": "2026-07-14T23:20:00Z",
+  "sources": [
+    {
+      "source_id": "playbook-roadmap",
+      "kind": "json",
+      "repository": "playbook",
+      "path": "repos/playbook/docs/roadmap/roadmap.json",
+      "revision": "abc1234",
+      "observed_at": "2026-07-14T23:19:00Z"
+    }
+  ],
+  "cards": [
+    {
+      "idempotency_key": "pbk_playbook_pb-142_v3",
+      "record_kind": "project-work",
+      "record_status": "active",
+      "record": {
+        "contract_version": "atlas.card-record.v2",
+        "card_id": "PB-142",
+        "project_id": "playbook",
+        "board_id": "discordos:project-feedback:playbook",
+        "title": "Publish owner board exports",
+        "description": "Produce deterministic board input from the canonical roadmap.",
+        "card_type": "automation",
+        "lifecycle": "ready",
+        "priority": "high",
+        "owner": "playbook",
+        "dependencies": [],
+        "board_version": 3,
+        "updated_at": "2026-07-14T23:19:00Z",
+        "source_ref": "repos/playbook/docs/roadmap/roadmap.json#PB-142"
+      },
+      "source": {
+        "source_id": "playbook-roadmap",
+        "source_ref": "repos/playbook/docs/roadmap/roadmap.json#PB-142",
+        "source_status": "current",
+        "source_updated_at": "2026-07-14T23:19:00Z"
+      },
+      "content": {
+        "summary": "Expose roadmap work through one governed owner-export contract.",
+        "objective": "Give Atlas deterministic board admission without scraping prose.",
+        "acceptance_criteria": [
+          "The export validates against atlas.project-board.owner-export.v1.",
+          "Stable card and idempotency identities survive repeated exports."
+        ],
+        "discoveries": [],
+        "next_actions": ["Run the Playbook adapter."],
+        "blockers": [],
+        "evidence": ["repos/playbook/docs/roadmap/roadmap.json"]
+      },
+      "relationships": {
+        "parent_card_id": null,
+        "duplicate_of": null,
+        "superseded_by": null
+      }
+    }
+  ]
+}

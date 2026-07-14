@@ -1,0 +1,62 @@
+{
+  "contract_version": "atlas.project-board.owner-export.v1",
+  "export_id": "pbe_playbook_invalid",
+  "project_id": "playbook",
+  "board_id": "discordos:project-feedback:playbook",
+  "owner": "playbook",
+  "adapter_id": "playbook-roadmap-v1",
+  "source_revision": "main@abc1234",
+  "generated_at": "2026-07-14T23:20:00Z",
+  "sources": [
+    {
+      "source_id": "playbook-roadmap",
+      "kind": "json",
+      "repository": "playbook",
+      "path": "../repos/playbook/docs/roadmap/roadmap.json",
+      "revision": "abc1234",
+      "observed_at": "2026-07-14T23:19:00Z"
+    }
+  ],
+  "cards": [
+    {
+      "idempotency_key": "pbk_playbook_pb-142_v3",
+      "record_kind": "project-work",
+      "record_status": "active",
+      "record": {
+        "contract_version": "atlas.card-record.v2",
+        "card_id": "PB-142",
+        "project_id": "another-project",
+        "board_id": "discordos:project-feedback:playbook",
+        "title": "Publish owner board exports",
+        "card_type": "automation",
+        "lifecycle": "ready",
+        "priority": "high",
+        "owner": "playbook",
+        "dependencies": ["PB-142"],
+        "board_version": 3,
+        "updated_at": "2026-07-14T23:19:00Z",
+        "source_ref": "repos/playbook/docs/roadmap/roadmap.json#different"
+      },
+      "source": {
+        "source_id": "missing-source",
+        "source_ref": "repos/playbook/docs/roadmap/roadmap.json#PB-142",
+        "source_status": "current",
+        "source_updated_at": "2026-07-14T23:19:00Z"
+      },
+      "content": {
+        "summary": "This record is syntactically valid but semantically unsafe.",
+        "objective": null,
+        "acceptance_criteria": [],
+        "discoveries": [],
+        "next_actions": [],
+        "blockers": ["Planning is incomplete."],
+        "evidence": []
+      },
+      "relationships": {
+        "parent_card_id": null,
+        "duplicate_of": null,
+        "superseded_by": null
+      }
+    }
+  ]
+}

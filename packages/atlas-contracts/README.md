@@ -40,6 +40,15 @@ The package also carries the canonical GitHub projection seam contracts:
 
 These GitHub contracts are backend-neutral interoperability seams for `_stack -> Atlas -> DiscordOS`. They are not counted inside the eleven-family Atlas Contracts v2 mesh denominator.
 
+The package also owns `atlas.project-board.owner-export.v1`, the deterministic
+owner-repository-to-Atlas board admission envelope. Each export embeds exact
+`atlas.card-record.v2` records, source provenance, planning content, stable
+idempotency keys, and duplicate/supersession relationships. Semantic validation
+adds cross-record checks that JSON Schema alone cannot express: unique identity,
+project/board/source correlation, portable relative paths, relationship rules,
+and the requirement that a `ready` card has an objective, acceptance criteria,
+and no blockers. This seam is outside the eleven-family v2 mesh denominator.
+
 ## Package Surface
 
 Schemas:
@@ -52,6 +61,7 @@ Schemas:
 - `atlas.github.event-receipt.v1`
 - `atlas.github.event-admission.v1`
 - `atlas.github.projection-intent.v1`
+- `atlas.project-board.owner-export.v1`
 - `atlas.component-manifest.v2`
 - `atlas.job-envelope.v2`
 - `atlas.execution-receipt.v2`
@@ -125,6 +135,7 @@ Validate an arbitrary JSON artifact against a registered contract identifier or 
 node packages/atlas-contracts/scripts/validate-artifact.mjs --schema atlas.env.v1 --artifact C:\work\env.json
 node packages/atlas-contracts/scripts/validate-artifact.mjs --schema schemas/atlas.component-manifest.v2.schema.json --artifact C:\work\component.json --json
 node packages/atlas-contracts/scripts/validate-artifact.mjs --schema atlas.github.event-receipt.v1 --artifact packages/atlas-contracts/fixtures/valid/github.event-receipt.v1.json --json
+node packages/atlas-contracts/scripts/validate-artifact.mjs --schema atlas.project-board.owner-export.v1 --artifact packages/atlas-contracts/fixtures/valid/project-board.owner-export.v1.json --json
 ```
 
 `--json` emits one deterministic JSON result with `ok`, `code`, `schema`, `artifact`, and `errors`. The supported exit codes are `0` (`VALID`), `1` (`INVALID_ARTIFACT`), `2` (unsupported, unknown, or invalid schema reference), `3` (`MALFORMED_JSON`), and `4` (`MISSING_INPUT`). Unsupported major versions use the stable `UNSUPPORTED_CONTRACT_VERSION` code. Schema resolution accepts only an identifier in the registered plan or an exact package-owned `schemas/<file>.schema.json` path; traversal segments and arbitrary filesystem schemas are rejected.
