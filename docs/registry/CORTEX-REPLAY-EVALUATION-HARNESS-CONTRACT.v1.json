@@ -5,7 +5,16 @@
   "adapter_schema": "atlas.cortex.external_adapter_candidate.v1",
   "rubric_schema": "atlas.cortex.replay_evaluation_rubric.v1",
   "mode": "deterministic_offline_advisory_comparison",
-  "runtime_adoption": "not_implemented",
+  "runtime_adoption": "implemented_and_reconciled",
+  "implementation": {
+    "source": "ops/cortex/replay_evaluation_harness.py",
+    "tests": "tests/test_cortex_replay_evaluation_harness.py",
+    "commit": "75a714e746a784306ae10c19b14006b401a3e343",
+    "focused_tests": 32,
+    "runner_status": "success",
+    "spec_to_diff": "passed",
+    "remote_parity": "0 0"
+  },
   "required_inputs": [
     "replay_case",
     "external_adapter_candidate",
@@ -160,7 +169,7 @@
     "marker": "Cortex Dual-Mode Replacement Readiness",
     "percent": 60,
     "movement": "none",
-    "next_packet": "Cortex Dual-Mode Replacement Readiness replay/evaluation harness first-implementation admission",
+    "next_packet": "Cortex Dual-Mode Replacement Readiness replay/evaluation harness marker-surface ratchet decision",
     "movement_to_70_requires": "admitted_implemented_proof_backed_reconciled_and_separately_ratcheted_replay_evaluation_harness"
   }
 }
