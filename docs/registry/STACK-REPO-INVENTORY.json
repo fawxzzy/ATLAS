@@ -3,7 +3,7 @@
   "stack_manifest_ref": "stack.yaml",
   "stack_manifest_digest": "sha256:e0dab412668c800a212435094bcb96c95b2d1403a1e42dd6768c08b7463fba85",
   "stack_lock_ref": "stack.lock.yaml",
-  "stack_lock_digest": "sha256:05bdf112e269e2c1de67430b0ab99d18202cec29ee443231cd0c93c482c95831",
+  "stack_lock_digest": "sha256:9e821720e721a9982c91881b3cba72ecd6b7a386a1c65a5cb8337c30cb875b5f",
   "working_memory_digest": "sha256:6536c59dcfde11b0a4c180d6595adc8e6c59be34149ad512c1e3331462cf57f7",
   "published_refs": {
     "json": "docs/registry/STACK-REPO-INVENTORY.json",
@@ -11,8 +11,8 @@
   },
   "repo_count": 13,
   "dirty_repo_count": 1,
-  "visible_dirty_repo_count": 2,
-  "advisory_dirty_repo_count": 1,
+  "visible_dirty_repo_count": 3,
+  "advisory_dirty_repo_count": 2,
   "release_eligible_count": 4,
   "repos": [
     {
@@ -91,8 +91,8 @@
       "playbook_adoption_owner_ref": "",
       "status": "incubating",
       "remote_url": "https://github.com/fawxzzy/DiscordOS.git",
-      "pinned_commit": "efdfa92a4f745913a9396258e9bdf506d9aae9bd",
-      "current_commit": "efdfa92a4f745913a9396258e9bdf506d9aae9bd",
+      "pinned_commit": "876b30e17733b6cb3c3c89a667b5d546be09b4c6",
+      "current_commit": "876b30e17733b6cb3c3c89a667b5d546be09b4c6",
       "pinned_ref_type": "branch",
       "pinned_ref": "main",
       "current_ref_type": "branch",
@@ -400,7 +400,7 @@
       "current_ref_type": "branch",
       "current_ref": "main",
       "branch": "main",
-      "dirty": false,
+      "dirty": true,
       "root_blocking": false,
       "dirty_blocks_root": false,
       "trust_class": "adjacent",
@@ -422,12 +422,12 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "443a2d0bb55bab8b726f140c267f357dc853af32",
+      "current_commit": "693f63ae8e99c02b0ece00a6db8be8e1276f4a98",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
-      "current_ref": "codex/atlas-contracts-v2-workerlease-adoption",
-      "branch": "codex/atlas-contracts-v2-workerlease-adoption",
+      "current_ref": "codex/atlas-contracts-v2-card-board-adoption",
+      "branch": "codex/atlas-contracts-v2-card-board-adoption",
       "dirty": true,
       "root_blocking": true,
       "dirty_blocks_root": true,
@@ -642,5 +642,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:b26a58da9b3b92ec531024d4a02918258254c00944d26e56efaf99cad33f16e6"
+  "content_digest": "sha256:a45b20f61d3617f3338eb3191746b5808824667f3f0aba8303e55e97cc14fa67"
 }

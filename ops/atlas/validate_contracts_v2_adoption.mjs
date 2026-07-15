@@ -1,9 +1,11 @@
 import crypto from "node:crypto";
+import { spawnSync } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { runArtifactValidator } from "../../packages/atlas-contracts/scripts/validate-artifact.mjs";
+import { buildBoardEvent } from "./native_board_correlation.mjs";
 
 export const EXPECTED_FAMILIES = Object.freeze([
   "componentManifest",
@@ -14,6 +16,8 @@ export const EXPECTED_FAMILIES = Object.freeze([
   "evidenceBundle",
   "executionReceipt",
 ]);
+export const CARD_BOARD_FAMILIES = Object.freeze(["cardRecord", "boardEvent"]);
+export const ADOPTED_FAMILIES = Object.freeze([...EXPECTED_FAMILIES, ...CARD_BOARD_FAMILIES]);
 
 const SCHEMAS = Object.freeze({
   componentManifest: "atlas.component-manifest.v2",
@@ -23,16 +27,299 @@ const SCHEMAS = Object.freeze({
   workerLease: "atlas.worker-lease.v2",
   evidenceBundle: "atlas.evidence-bundle.v2",
   executionReceipt: "atlas.execution-receipt.v2",
+  cardRecord: "atlas.card-record.v2",
+  boardEvent: "atlas.board-event.v2",
 });
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const VALIDATOR = path.join(ROOT, "packages", "atlas-contracts", "scripts", "validate-artifact.mjs");
 const EXTERNAL_ACTIONS = Object.freeze(["push", "deploy", "production", "discord", "board", "data_mutation"]);
+const DISCORDOS_ROOT = path.join(ROOT, "repos", "DiscordOS");
+const DISCORDOS_CONSUMER_MERGE = "b2dbcc1a9ca66876e9c07ea8c6032701c9aaea2a";
+const DISCORDOS_CONSUMER_PATHS = Object.freeze([
+  "scripts/discordos-atlas-card-board-consumer.mjs",
+  "tests/discordos-atlas-card-board-consumer.test.mjs",
+  "docs/ops/discordos-atlas-contracts-v2-card-board-consumer-2026-07-15.md",
+  "package.json",
+]);
+const CARD_FIXTURE = path.join(ROOT, "packages", "atlas-contracts", "fixtures", "valid", "card-record.v2.json");
+const CARD_EXPORT = path.join(ROOT, "docs", "registry", "project-board-owner-exports", "atlas.project-board.owner-export.v1.json");
+const LANE_REGISTRY = path.join(ROOT, "docs", "registry", "ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json");
+const MESH_LANE_ID = "lane-atlas-contracts-mesh";
+const PRODUCER_CARD_ID = "MAZER-142";
+const PRODUCER_PROJECT_ID = "mazer";
+const PRODUCER_BOARD_ID = "discordos:project-feedback:mazer";
+const MESH_COMPLETED_UNITS = 9;
+const MESH_FOUNDATIONS = 11;
+const MESH_PERCENTAGE = Math.round((MESH_COMPLETED_UNITS / MESH_FOUNDATIONS) * 100);
+const CARD_BOARD_JOB_ID = "job-atlas-contracts-v2-card-board-adoption";
+const CARD_BOARD_OCCURRED_AT = "2026-07-15T15:05:00Z";
+const MUTATION_FLAGS = Object.freeze(["--apply", "--live", "--write", "--send", "--storage", "--discord", "--deploy", "--production", "--prod"]);
+let discordOsConsumerModule;
 
 function relative(file) { return path.relative(ROOT, file).split(path.sep).join("/"); }
 function fail(reasonCode, errors) { return { ok: false, code: reasonCode, reasonCode, errors }; }
 async function readJson(file) { return JSON.parse(await fs.readFile(file, "utf8")); }
 function isRecord(value) { return Boolean(value) && typeof value === "object" && !Array.isArray(value); }
 function resolvedPath(value) { return typeof value === "string" ? path.resolve(value) : null; }
+function sha256(bytes) { return `sha256:${crypto.createHash("sha256").update(bytes).digest("hex")}`; }
+function stableBytes(value) { return Buffer.from(`${JSON.stringify(value, null, 2)}\n`, "utf8"); }
+
+async function loadDiscordOsConsumer() {
+  if (!discordOsConsumerModule) {
+    discordOsConsumerModule = await import(pathToFileURL(path.join(DISCORDOS_ROOT, "scripts", "discordos-atlas-card-board-consumer.mjs")).href);
+  }
+  return discordOsConsumerModule;
+}
+
+function runGit(args) {
+  return spawnSync("git", ["-C", DISCORDOS_ROOT, ...args], { encoding: "utf8", windowsHide: true });
+}
+
+function consumerGitEvidence() {
+  const head = runGit(["rev-parse", "HEAD"]);
+  const ancestor = runGit(["merge-base", "--is-ancestor", DISCORDOS_CONSUMER_MERGE, "HEAD"]);
+  const unchanged = runGit(["diff", "--quiet", `${DISCORDOS_CONSUMER_MERGE}..HEAD`, "--", ...DISCORDOS_CONSUMER_PATHS]);
+  const status = runGit(["status", "--short", "--untracked-files=no"]);
+  if (head.status !== 0 || ancestor.status !== 0 || unchanged.status !== 0 || status.status !== 0 || status.stdout.trim()) return null;
+  return { mergeCommit: DISCORDOS_CONSUMER_MERGE, head: head.stdout.trim(), trackedClean: true, consumerFilesUnchanged: true };
+}
+
+function mapConsumerRejection(error) {
+  if (error?.reasonCode === "card_schema_invalid") return "CARD_RECORD_SCHEMA_INVALID";
+  if (error?.reasonCode === "event_schema_invalid") return "BOARD_EVENT_SCHEMA_INVALID";
+  const errors = new Set(error?.errors ?? []);
+  const mapping = [
+    ["card_id_mismatch", "BOARD_EVENT_CARD_MISMATCH"],
+    ["board_id_mismatch", "BOARD_EVENT_BOARD_MISMATCH"],
+    ["expected_version_mismatch", "BOARD_EVENT_VERSION_MISMATCH"],
+    ["from_state_mismatch", "BOARD_EVENT_FROM_STATE_MISMATCH"],
+    ["writer_authority_mismatch", "WRITER_AUTHORITY_MISMATCH"],
+    ["event_idempotency_key_unstable", "BOARD_EVENT_IDEMPOTENCY_MISMATCH"],
+    ["event_id_unstable", "BOARD_EVENT_IDENTITY_MISMATCH"],
+    ["authority_drift_detected", "SECOND_WRITER_AUTHORITY"],
+    ["pending_result_claims_readback_or_error", "BOARD_EVENT_RESULT_MISMATCH"],
+    ["observed_result_missing_readback_fields", "BOARD_EVENT_RESULT_MISMATCH"],
+    ["failed_result_missing_error_code", "BOARD_EVENT_RESULT_MISMATCH"],
+  ];
+  return mapping.find(([source]) => errors.has(source))?.[1] ?? "DISCORDOS_CONSUMER_REJECTED";
+}
+
+async function loadCanonicalMeshCard() {
+  const [card, ownerExport, registry] = await Promise.all([readJson(CARD_FIXTURE), readJson(CARD_EXPORT), readJson(LANE_REGISTRY)]);
+  const cardEnvelope = ownerExport.cards?.find((candidate) => candidate?.record?.card_id === MESH_LANE_ID);
+  const lane = [...(registry.lanes ?? []), ...(registry.backlog_candidates ?? [])].find((candidate) => candidate?.id === MESH_LANE_ID);
+  if (!cardEnvelope || !lane) throw new Error("canonical mesh projection missing");
+  const projectionCard = cardEnvelope.record;
+  const projectionMatches = lane.percentage === MESH_PERCENTAGE
+    && lane.completed_units === MESH_COMPLETED_UNITS
+    && lane.implementation_foundations === MESH_FOUNDATIONS
+    && lane.denominator?.value === MESH_FOUNDATIONS
+    && projectionCard.extensions?.percentage === lane.percentage
+    && projectionCard.extensions?.completed_units === lane.completed_units
+    && projectionCard.extensions?.denominator?.value === lane.denominator?.value
+    && projectionCard.updated_at === lane.last_audited_at
+    && cardEnvelope.source?.source_updated_at === lane.last_audited_at;
+  if (!projectionMatches) throw new Error("mesh marker and CardRecord projection mismatch");
+  return { card, lane, ownerExport };
+}
+
+function buildCardBoardJob(card) {
+  return {
+    contract_version: "atlas.job-envelope.v2",
+    job_id: CARD_BOARD_JOB_ID,
+    project_id: card.project_id,
+    created_at: "2026-07-15T15:04:00Z",
+    component_id: "atlas-root",
+    objective: "Independently prove CardRecord and BoardEvent adoption without external mutation.",
+    scope: { owner_repository: "atlas", allowed_paths: ["docs/**", "ops/atlas/**", "packages/atlas-contracts/**"], forbidden_paths: ["secrets/**", "repos/**"] },
+    runtime: { model: "gpt-5.6-sol", reasoning: "xhigh", speed: "standard", permissions: "full-access", approval_policy: "never" },
+    authority: { external_mutations: [], production_deploy: false, destructive_actions: false },
+    verification: { commands: ["node ops/atlas/test_validate_contracts_v2_adoption.mjs"], evidence_required: ["deterministic no-storage DiscordOS consumer receipt"] },
+    correlations: { card_id: card.card_id, parent_job_id: null },
+    expected_receipt_version: "atlas.execution-receipt.v2",
+    extensions: { adoption_cluster: 4 },
+  };
+}
+
+function buildCardBoardReceipt(card) {
+  return {
+    contract_version: "atlas.execution-receipt.v2",
+    receipt_id: "atr_card_board_adoption_20260715",
+    job_id: CARD_BOARD_JOB_ID,
+    recorded_at: CARD_BOARD_OCCURRED_AT,
+    status: "succeeded",
+    component_id: "atlas-root",
+    project_id: card.project_id,
+    runtime_effective: { model: "gpt-5.6-sol", reasoning: "xhigh", speed: "standard", permissions: "full-access", approval_policy: "never" },
+    changed_paths: [],
+    commits: [],
+    verification: [],
+    evidence_refs: [],
+    blockers: [],
+    follow_up: ["MarkerEvidence", "KnowledgeCandidate"],
+    correlations: { card_id: card.card_id, thread_id: "019f52d9-7667-72a3-a5f7-9c0613aedd8f", turn_id: "contracts-v2-cluster-4", branch: "codex/atlas-contracts-v2-card-board-adoption", worktree: null },
+    authority_actions: [],
+    summary: "CardRecord and BoardEvent independent consumer adoption proof.",
+    extensions: { external_mutation: false },
+  };
+}
+
+export async function buildCanonicalCardBoardEvidence() {
+  const { card, lane, ownerExport } = await loadCanonicalMeshCard();
+  const job = buildCardBoardJob(card);
+  const receipt = buildCardBoardReceipt(card);
+  const event = await buildBoardEvent({
+    job,
+    receipt,
+    card,
+    eventType: "transition",
+    occurredAt: CARD_BOARD_OCCURRED_AT,
+    fromState: card.lifecycle,
+    toState: "review",
+    reason: "Independent CardRecord and BoardEvent adoption proof accepted.",
+  });
+  return { card, event, job, receipt, lane, ownerExport };
+}
+
+function mutationArgumentsFailClosed(consumer) {
+  return MUTATION_FLAGS.every((flag) => {
+    try {
+      consumer.parseArgs(["--card", "card.json", "--event", "event.json", flag]);
+      return false;
+    } catch (error) {
+      return error?.reasonCode === "mutation_not_admitted";
+    }
+  });
+}
+
+export async function validateCardBoardArtifacts(card, event) {
+  const temp = await fs.mkdtemp(path.join(ROOT, "tmp", "atlas-contracts-v2-card-board-adoption-"));
+  const cardPath = path.join(temp, "card-record.json");
+  const eventPath = path.join(temp, "board-event.json");
+  const cardBytes = stableBytes(card);
+  const eventBytes = stableBytes(event);
+  try {
+    await Promise.all([fs.writeFile(cardPath, cardBytes), fs.writeFile(eventPath, eventBytes)]);
+    const [cardValidation, eventValidation] = await Promise.all([
+      validateArtifact("cardRecord", cardPath),
+      validateArtifact("boardEvent", eventPath),
+    ]);
+    if (!cardValidation.result.ok) return fail("CARD_RECORD_SCHEMA_INVALID", ["CardRecord canonical schema validation failed"]);
+    if (!eventValidation.result.ok) return fail("BOARD_EVENT_SCHEMA_INVALID", ["BoardEvent canonical schema validation failed"]);
+    if (card.card_id !== PRODUCER_CARD_ID || card.project_id !== PRODUCER_PROJECT_ID || card.board_id !== PRODUCER_BOARD_ID) {
+      return fail("CARD_RECORD_PROJECT_MISMATCH", ["CardRecord card, project, or board source identity mismatch"]);
+    }
+
+    let first;
+    let second;
+    let consumer;
+    const originalCwd = process.cwd();
+    try {
+      process.chdir(DISCORDOS_ROOT);
+      consumer = await loadDiscordOsConsumer();
+      first = await consumer.buildConsumerReceipt({ cardPath, eventPath, cwd: DISCORDOS_ROOT });
+      second = await consumer.buildConsumerReceipt({ cardPath, eventPath, cwd: DISCORDOS_ROOT });
+    } catch (error) {
+      return fail(mapConsumerRejection(error), error?.errors?.length ? error.errors : [error?.reasonCode ?? "consumer failure"]);
+    } finally {
+      process.chdir(originalCwd);
+    }
+
+    const [cardSchemaBytes, eventSchemaBytes, packageMetadata] = await Promise.all([
+      fs.readFile(path.join(ROOT, "packages", "atlas-contracts", "schemas", "atlas.card-record.v2.schema.json")),
+      fs.readFile(path.join(ROOT, "packages", "atlas-contracts", "schemas", "atlas.board-event.v2.schema.json")),
+      readJson(path.join(ROOT, "packages", "atlas-contracts", "package.json")),
+    ]);
+    const schemaSourceMatches = first.schema_source?.package_name === "@atlas/contracts"
+      && first.schema_source?.package_version === packageMetadata.version
+      && first.schema_source?.resolution === "atlas_layout_default"
+      && first.schema_source?.validator_reference === "packages/atlas-contracts/scripts/lib/validate-json-schema.mjs"
+      && first.schema_source?.semantic_validator_reference === "packages/atlas-contracts/scripts/lib/validate-semantics.mjs"
+      && first.canonical_schema_validation?.card_record?.schema_id === SCHEMAS.cardRecord
+      && first.canonical_schema_validation?.card_record?.schema_digest === sha256(cardSchemaBytes)
+      && first.canonical_schema_validation?.board_event?.schema_id === SCHEMAS.boardEvent
+      && first.canonical_schema_validation?.board_event?.schema_digest === sha256(eventSchemaBytes);
+    if (!schemaSourceMatches) return fail("CANONICAL_SCHEMA_SOURCE_MISMATCH", ["DiscordOS did not bind the Atlas-owned validator and schemas"]);
+    if (consumer.stableStringify(first) !== consumer.stableStringify(second)) return fail("CONSUMER_RECEIPT_NONDETERMINISTIC", ["identical replay changed the consumer receipt"]);
+
+    const receiptMatches = first.ok === true
+      && first.status === "admitted_dry_run"
+      && first.card_record?.contract_version === SCHEMAS.cardRecord
+      && first.card_record?.card_id === card.card_id
+      && first.card_record?.project_id === card.project_id
+      && first.card_record?.board_id === card.board_id
+      && first.card_record?.board_version === card.board_version
+      && first.card_record?.lifecycle === card.lifecycle
+      && first.board_event?.contract_version === SCHEMAS.boardEvent
+      && first.board_event?.event_id === event.event_id
+      && first.board_event?.idempotency_key === event.idempotency_key
+      && first.input_digests?.card_record === sha256(cardBytes)
+      && first.input_digests?.board_event === sha256(eventBytes)
+      && first.semantic_consumption?.card_id_matches === true
+      && first.semantic_consumption?.board_id_matches === true
+      && first.semantic_consumption?.expected_version_matches === true
+      && first.semantic_consumption?.from_state_matches === true
+      && first.semantic_consumption?.event_identity_stable === true
+      && first.semantic_consumption?.result_semantics_valid === true
+      && first.semantic_consumption?.lifecycle_sync?.status === "sync_ready"
+      && first.writer_boundary?.writer_authority === "discordos"
+      && first.writer_boundary?.sole_logical_writer === true
+      && first.writer_boundary?.external_mutation === false
+      && first.writer_boundary?.storage_applied === false
+      && first.writer_boundary?.storage_writes_allowed === false
+      && first.writer_boundary?.live_behavior_allowed === false
+      && first.writer_boundary?.messages_sent === false
+      && first.writer_boundary?.authority_drift === false;
+    if (!receiptMatches) return fail("CONSUMER_RECEIPT_MISMATCH", ["DiscordOS deterministic dry-run receipt lost identity, source, or authority bindings"]);
+    if (!mutationArgumentsFailClosed(consumer)) return fail("MUTATION_FLAG_ADMITTED", ["DiscordOS consumer admitted a write, send, deploy, or production flag"]);
+
+    return {
+      ok: true,
+      code: "ACCEPTED",
+      reasonCode: "ACCEPTED",
+      families: CARD_BOARD_FAMILIES,
+      receipt: first,
+      evidence: {
+        cardRecord: { path: relative(CARD_FIXTURE), bytes: cardBytes.length, sha256: sha256(cardBytes) },
+        boardEvent: { producer: "ops/atlas/native_board_correlation.mjs", bytes: eventBytes.length, sha256: sha256(eventBytes) },
+      },
+    };
+  } finally {
+    await fs.rm(temp, { recursive: true, force: true });
+  }
+}
+
+export async function validateCardBoardAdoption() {
+  const gitEvidence = consumerGitEvidence();
+  if (!gitEvidence) return fail("DISCORDOS_CONSUMER_GIT_MISMATCH", ["DiscordOS consumer merge, source stability, or tracked-clean proof failed"]);
+  let producer;
+  try { producer = await buildCanonicalCardBoardEvidence(); } catch (error) {
+    return fail("CARD_RECORD_PROJECTION_MISMATCH", [error.message]);
+  }
+  const result = await validateCardBoardArtifacts(producer.card, producer.event);
+  return result.ok ? { ...result, consumerGit: gitEvidence } : result;
+}
+
+export async function validateAdoptedMesh(runPath) {
+  const seven = await validateAdoption(runPath);
+  if (!seven.ok) return seven;
+  const cardBoard = await validateCardBoardAdoption();
+  if (!cardBoard.ok) return cardBoard;
+  return {
+    ok: true,
+    code: "ACCEPTED",
+    reasonCode: "ACCEPTED",
+    families: ADOPTED_FAMILIES,
+    acceptedUnits: MESH_COMPLETED_UNITS,
+    implementationFoundations: MESH_FOUNDATIONS,
+    percentage: MESH_PERCENTAGE,
+    runId: seven.runId,
+    jobId: seven.jobId,
+    consumerReceiptId: cardBoard.receipt.receipt_id,
+    consumerGit: cardBoard.consumerGit,
+    evidence: { ...seven.evidence, ...cardBoard.evidence },
+  };
+}
 
 async function validateArtifact(family, file) {
   return runArtifactValidator(["--schema", SCHEMAS[family], "--artifact", file, "--json"]);
@@ -184,11 +471,17 @@ export async function validateAdoption(runPath) {
 
 function parseArgs(argv) {
   const runIndex = argv.indexOf("--run");
-  return { json: argv.includes("--json"), run: runIndex >= 0 ? argv[runIndex + 1] : null };
+  return { json: argv.includes("--json"), all: argv.includes("--all"), cardBoard: argv.includes("--card-board"), run: runIndex >= 0 ? argv[runIndex + 1] : null };
 }
 const args = parseArgs(process.argv.slice(2));
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const result = args.run ? await validateAdoption(args.run) : fail("MISSING_INPUT", ["--run is required"]);
+  const result = args.all
+    ? (args.run ? await validateAdoptedMesh(args.run) : fail("MISSING_INPUT", ["--run is required with --all"]))
+    : args.cardBoard
+      ? await validateCardBoardAdoption()
+      : args.run
+        ? await validateAdoption(args.run)
+        : fail("MISSING_INPUT", ["--run, --card-board, or --all with --run is required"]);
   if (args.json) console.log(JSON.stringify(result));
   else console.log(`${result.code}: ${result.ok ? "Contracts v2 adoption accepted" : result.errors.join(" ")}`);
   process.exitCode = result.ok ? 0 : 1;

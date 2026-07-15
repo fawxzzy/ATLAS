@@ -86,9 +86,12 @@ Read:
 
 ### Platform governance
 
+- Atlas Contracts Mesh: `82%` (`9 / 11`)
 - GitHub Control-Plane Integration: `100%`
 - Vercel Platform Observability Governance: `40%`
 - External Model Sidecar Provider Integration - DeepSeek/LiteLLM Bridge: `33.3%` (`2 / 6`)
+
+Atlas Contracts Mesh is now `82%` on its fixed eleven-family denominator. CardRecord and BoardEvent join the seven previously accepted families after Atlas producer proof, the merged independent DiscordOS consumer, fail-closed negative conformance, deterministic no-storage receipt proof, and root reconciliation all agree. MarkerEvidence and KnowledgeCandidate remain the final two independent-consumer gaps. This child-lane ratchet does not move Atlas Full-System Re-evaluation from `50%` and `1 / 2`.
 
 GitHub Control-Plane Integration is now `100%` on an accepted `8 / 8` denominator. Inventory, parity, Actions, open-work hygiene, release/security projection, cleanup governance, `_stack` event correlation, and DiscordOS projection are complete. The final unit is backed by one explicitly authorized single-writer application with `status=sent_verified`, exact Discord readback, no mentions, and no board or storage write. The daily read-only GitHub watch remains active because implementation completeness is not permanent cloud health. Cleanup classification grants no deletion authority: all 62 local worktrees and 80 merged remote-branch candidates remain held behind explicit mutation authority and correlated removal receipts. No execution-selector marker moved.
 

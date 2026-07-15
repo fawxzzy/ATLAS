@@ -16,20 +16,20 @@ Operational rule:
 
 - Repo count: `13`
 - Root-blocking dirty repo count: `1`
-- Visible dirty repo count: `2`
-- Advisory dirty repo count: `1`
+- Visible dirty repo count: `3`
+- Advisory dirty repo count: `2`
 - Release-eligible repo count: `4`
 - Excluded surface count: `16`
 - Stack manifest: `stack.yaml`
 - Stack lock: `stack.lock.yaml`
-- Inventory digest: `sha256:b26a58da9b3b92ec531024d4a02918258254c00944d26e56efaf99cad33f16e6`
+- Inventory digest: `sha256:a45b20f61d3617f3338eb3191746b5808824667f3f0aba8303e55e97cc14fa67`
 
 ## Managed Repos
 
 | Repo id | Path | Role | Playbook adoption status | Branch | Pinned commit | Current commit | Dirty | Root-blocking | Dirty blocks root | Trust | Release | Related initiatives |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | _stack | repos/_stack | workflow-operator | verified | main | 40ab40f80ac914dd9bd59dbb64272be3ed1cf70f | 40ab40f80ac914dd9bd59dbb64272be3ed1cf70f | False | True | False | trusted | False | initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-local-data-gateway<br>initiative:continuity-manifest-post-convergence-lane-split-readiness<br>initiative:continuity-manifest-stack-readiness<br>initiative:continuity-manifest-vision-future-alignment |
-| discordos | repos/DiscordOS | board-and-discord-writer | not-claimed | main | efdfa92a4f745913a9396258e9bdf506d9aae9bd | efdfa92a4f745913a9396258e9bdf506d9aae9bd | False | True | False | trusted | False | initiative:continuity-manifest-dependency-untangling<br>initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-discord-os-infrastructure-separation |
+| discordos | repos/DiscordOS | board-and-discord-writer | not-claimed | main | 876b30e17733b6cb3c3c89a667b5d546be09b4c6 | 876b30e17733b6cb3c3c89a667b5d546be09b4c6 | False | True | False | trusted | False | initiative:continuity-manifest-dependency-untangling<br>initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-discord-os-infrastructure-separation |
 | fitness | repos/fawxzzy-fitness | application | - | codex/fitness-qa-002-board-binding | - | b98fa17b90e62fbe191bf3c20c88bf674bc76c13 | False | False | False | adjacent | False | initiative:continuity-manifest-dependency-untangling<br>initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-discord-os-infrastructure-separation<br>initiative:continuity-manifest-local-data-gateway |
 | foundation | repos/foundation | shared-contract-foundation | not-claimed | main | e0c2978e4f0d0b73aaee6fc5d14b982b78d89b97 | e0c2978e4f0d0b73aaee6fc5d14b982b78d89b97 | False | True | False | trusted | True | - |
 | lifeline | repos/lifeline | local-operator | - | codex/path-discipline-warning-slice-lifeline | 54eeb56006099235723b60ce44de8a65e4c85889 | 54eeb56006099235723b60ce44de8a65e4c85889 | False | True | False | trusted | True | - |
@@ -37,8 +37,8 @@ Operational rule:
 | nat1-games | repos/Nat1-Games/nat1-games | application | - | codex/path-discipline-warning-slice-nat1 | 404460d3717fab389407582048a9b9f228f26d39 | 404460d3717fab389407582048a9b9f228f26d39 | False | True | False | trusted | False | - |
 | playbook | repos/playbook | governance-runtime | - | codex/repair-scheduled-demo-integration-ci | ee6907bd2d1d45ef87625cbd3382644dbb4fb199 | ee6907bd2d1d45ef87625cbd3382644dbb4fb199 | False | True | False | trusted | True | initiative:continuity-manifest-atlas-owned-repo-naming-canonicalization<br>initiative:initiative-fawxzzy-tech-plan-convergence |
 | playbook-demo | repos/playbook-demo/playbook-demo | demo | - | main | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | False | True | False | trusted | False | - |
-| socials-os | repos/socials-os | analytics-data-system | - | main | - | 16bf6529e36af814fd370bb4e3afde2e314e30f8 | False | False | False | adjacent | False | - |
-| stack | . | operator-layer | - | codex/atlas-contracts-v2-workerlease-adoption | - | 443a2d0bb55bab8b726f140c267f357dc853af32 | True | True | True | trusted | False | - |
+| socials-os | repos/socials-os | analytics-data-system | - | main | - | 16bf6529e36af814fd370bb4e3afde2e314e30f8 | True | False | False | adjacent | False | - |
+| stack | . | operator-layer | - | codex/atlas-contracts-v2-card-board-adoption | - | 693f63ae8e99c02b0ece00a6db8be8e1276f4a98 | True | True | True | trusted | False | - |
 | stream | repos/stream | application | - | main | 43769ba86d4c6ebc419ab9e7847c3843460a094f | 43769ba86d4c6ebc419ab9e7847c3843460a094f | False | True | False | trusted | False | - |
 | trove | repos/trove | application | - | codex/path-discipline-warning-slice-trove | 437c7604adee02e0403d77f75162a6c5f232221f | 437c7604adee02e0403d77f75162a6c5f232221f | False | True | False | trusted | True | - |
 
