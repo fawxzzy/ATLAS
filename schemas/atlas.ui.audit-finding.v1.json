@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://schemas/atlas.ui.audit-finding.v1.json",
+  "title": "ATLAS UI audit finding v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "finding_id",
+    "standard_id",
+    "standard_version",
+    "owner_repo_id",
+    "audit_id",
+    "scope",
+    "severity",
+    "state",
+    "detected_at",
+    "detection",
+    "evidence",
+    "disposition",
+    "remediation_card_ids"
+  ],
+  "properties": {
+    "contract_version": {"const": "atlas.ui.audit-finding.v1"},
+    "finding_id": {"type": "string", "pattern": "^uif_[a-z0-9][a-z0-9._-]+$"},
+    "standard_id": {"type": "string", "pattern": "^ATLAS-UI-[A-Z0-9]{3,5}-[0-9]{3}$"},
+    "standard_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+    "owner_repo_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$"},
+    "audit_id": {"type": "string", "pattern": "^uia_[a-z0-9][a-z0-9._-]+$"},
+    "scope": {"$ref": "#/$defs/scope"},
+    "severity": {"type": "string", "enum": ["blocker", "high", "medium", "low", "info"]},
+    "state": {"type": "string", "enum": ["open", "accepted", "waived", "remediated", "verified", "superseded"]},
+    "detected_at": {"type": "string", "format": "date-time"},
+    "detection": {"$ref": "#/$defs/detection"},
+    "evidence": {"$ref": "#/$defs/evidence"},
+    "disposition": {"$ref": "#/$defs/disposition"},
+    "remediation_card_ids": {
+      "type": "array",
+      "items": {"type": "string", "pattern": "^uir_[a-z0-9][a-z0-9._-]+$"}
+    },
+    "extensions": {"type": "object"}
+  },
+  "$defs": {
+    "string_array": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["routes", "surface_ids", "component_refs", "affected_lenses"],
+      "properties": {
+        "routes": {"$ref": "#/$defs/string_array"},
+        "surface_ids": {"$ref": "#/$defs/string_array"},
+        "component_refs": {"$ref": "#/$defs/string_array"},
+        "affected_lenses": {"$ref": "#/$defs/string_array"}
+      }
+    },
+    "detection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "rule_ref", "summary"],
+      "properties": {
+        "kind": {"type": "string", "enum": ["automated", "manual", "hybrid"]},
+        "rule_ref": {"type": "string", "minLength": 1},
+        "summary": {"type": "string", "minLength": 1}
+      }
+    },
+    "accessibility_check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["check_kind", "status", "refs"],
+      "properties": {
+        "check_kind": {"type": "string", "enum": ["automated", "keyboard", "focus", "contrast", "zoom_reflow", "screen_reader", "manual"]},
+        "status": {"type": "string", "enum": ["passed", "failed", "missing", "manual_required", "not_applicable"]},
+        "refs": {"$ref": "#/$defs/string_array"}
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bundle_refs", "qa_result_refs", "runtime_refs", "accessibility_checks"],
+      "properties": {
+        "bundle_refs": {"$ref": "#/$defs/string_array"},
+        "qa_result_refs": {"$ref": "#/$defs/string_array"},
+        "runtime_refs": {"$ref": "#/$defs/string_array"},
+        "accessibility_checks": {"type": "array", "items": {"$ref": "#/$defs/accessibility_check"}}
+      }
+    },
+    "disposition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "owner", "rationale", "expires_at"],
+      "properties": {
+        "status": {"type": "string", "enum": ["unreviewed", "remediate", "accept-risk", "false-positive", "superseded"]},
+        "owner": {"type": ["string", "null"]},
+        "rationale": {"type": ["string", "null"]},
+        "expires_at": {"type": ["string", "null"], "format": "date-time"}
+      }
+    }
+  }
+}

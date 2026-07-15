@@ -1,0 +1,616 @@
+{
+  "contract_version": "atlas.ui.standard-registry.v1",
+  "program_id": "atlas-ui-standards",
+  "program_version": "1.0.0",
+  "registry_status": "foundation",
+  "published_at": "2026-07-15T12:00:00Z",
+  "authority": {
+    "root_owner": "ATLAS root",
+    "implementation_owner": "each owner repository",
+    "doctrine_owner": "Playbook",
+    "board_writer": "DiscordOS single writer",
+    "mutation_authorized": false
+  },
+  "provenance": [
+    {
+      "source_id": "deep-research-2026-07-15",
+      "ref": "data/imports/ui-standards/deep-research-2026-07-15/deep-research-report.md",
+      "sha256": "77f882e6af10eb4094e79033769ab8d8010ba2e6d473c620ef55750340941723",
+      "classification": "external-input",
+      "disposition": "reference-only"
+    },
+    {
+      "source_id": "atlas-qa-llel-v1",
+      "ref": "docs/standards/ATLAS-QA-LLEL.md",
+      "sha256": null,
+      "classification": "verified",
+      "disposition": "retain"
+    },
+    {
+      "source_id": "atlas-ui-mutation-doctrine",
+      "ref": "docs/ops/ATLAS-ROOT-UI-MUTATION-DISCIPLINE-AND-LIVE-DATA-SAFETY-DOCTRINE-REFRESH-2026-06-27.md",
+      "sha256": null,
+      "classification": "verified",
+      "disposition": "retain"
+    },
+    {
+      "source_id": "atlas-contracts-v2",
+      "ref": "docs/architecture/ATLAS-CONTRACTS-V2-SCOPE.md",
+      "sha256": null,
+      "classification": "verified",
+      "disposition": "merge"
+    },
+    {
+      "source_id": "playbook-doctrine-adoption",
+      "ref": "docs/registry/ATLAS-PLAYBOOK-DOCTRINE-ADOPTION.json",
+      "sha256": null,
+      "classification": "verified",
+      "disposition": "retain"
+    }
+  ],
+  "source_hierarchy": [
+    {
+      "rank": 1,
+      "source_id": "ui-standard-registry",
+      "ref": "docs/registry/ATLAS-UI-STANDARDS-REGISTRY.v1.json",
+      "authority": "ATLAS root",
+      "canonical_for": ["standard identity", "standard version", "program lifecycle mapping", "adoption profiles", "metric definitions"],
+      "may_not_override": ["owner implementation truth", "repo-native verification truth", "Playbook doctrine bodies"]
+    },
+    {
+      "rank": 2,
+      "source_id": "qa-llel-contracts",
+      "ref": "docs/standards/ATLAS-QA-LLEL.md",
+      "authority": "ATLAS root QA",
+      "canonical_for": ["evidence tiers", "lens contracts", "promotion semantics", "release profiles", "waiver semantics"],
+      "may_not_override": ["repo-native test results", "owner route intent"]
+    },
+    {
+      "rank": 3,
+      "source_id": "atlas-contracts",
+      "ref": "packages/atlas-contracts",
+      "authority": "ATLAS root contracts",
+      "canonical_for": ["card lifecycle wire values", "evidence bundle semantics", "marker evidence", "knowledge candidates", "board events"],
+      "may_not_override": ["owner implementation truth", "DiscordOS applied readback"]
+    },
+    {
+      "rank": 4,
+      "source_id": "owner-repository-truth",
+      "ref": "stack.yaml",
+      "authority": "each owner repository",
+      "canonical_for": ["routes", "components", "tokens", "runtime behavior", "repo-local commands", "product decisions"],
+      "may_not_override": ["shared contract meanings", "root marker policy", "another repository's truth"]
+    },
+    {
+      "rank": 5,
+      "source_id": "playbook-doctrine",
+      "ref": "docs/registry/ATLAS-PLAYBOOK-DOCTRINE-ADOPTION.json",
+      "authority": "Playbook",
+      "canonical_for": ["promoted rules", "promoted patterns", "promoted failure modes", "governed skill identity"],
+      "may_not_override": ["owner runtime truth", "unreviewed research recommendations", "Atlas adoption evidence"]
+    },
+    {
+      "rank": 6,
+      "source_id": "atlas-book-projection",
+      "ref": "docs/atlas-book/README.md",
+      "authority": "ATLAS Book",
+      "canonical_for": ["durable truth-map projection", "receipt index", "restart summary"],
+      "may_not_override": ["registry semantics", "owner truth", "Playbook doctrine", "runtime receipts"]
+    },
+    {
+      "rank": 7,
+      "source_id": "discordos-projection",
+      "ref": "docs/atlas-book/03-operating-model.md",
+      "authority": "DiscordOS single writer",
+      "canonical_for": ["applied board state", "publication state", "readback receipts"],
+      "may_not_override": ["engineering proof", "registry semantics", "marker evidence"]
+    }
+  ],
+  "lifecycle": {
+    "program_states": ["unplanned", "planned", "ready", "in_progress", "review", "completed", "blocked"],
+    "wire_contract": "atlas.card-record.v2",
+    "wire_mapping": {
+      "unplanned": "intake",
+      "planned": "planning",
+      "ready": "ready",
+      "in_progress": "in-progress",
+      "review": "review",
+      "completed": "completed",
+      "blocked": "blocked"
+    },
+    "allowed_transitions": [
+      {"from": "unplanned", "to": ["planned", "blocked"]},
+      {"from": "planned", "to": ["unplanned", "ready", "blocked"]},
+      {"from": "ready", "to": ["planned", "in_progress", "blocked"]},
+      {"from": "in_progress", "to": ["planned", "review", "blocked"]},
+      {"from": "review", "to": ["in_progress", "completed", "blocked"]},
+      {"from": "completed", "to": []},
+      {"from": "blocked", "to": ["planned", "ready", "in_progress", "review"]}
+    ],
+    "completion_gate": [
+      "Every linked audit finding is verified, superseded, or accepted through an unexpired governed exception.",
+      "Every required evidence dimension has current evidence or an explicit not-applicable disposition allowed by the adopted profile.",
+      "The requested-change checklist contains no failed, blocked, deferred, planned, or unplanned item.",
+      "Repo-native verification and the adopted QA LLEL gate pass for the target revision.",
+      "The Atlas CardRecord is in review before it enters completed.",
+      "Board completion, if projected, is applied only by DiscordOS with readback."
+    ]
+  },
+  "evidence_dimensions": [
+    {
+      "dimension_id": "routes",
+      "title": "Route and state coverage",
+      "minimum_evidence": ["A frozen applicable route and state inventory", "A result per touched route family", "Stable route or surface identifiers"],
+      "existing_contract_refs": ["atlas.qa.scenario.v1", "atlas.qa.result.v1", "atlas.ui.capture-map.v1"],
+      "absence_policy": "block"
+    },
+    {
+      "dimension_id": "devices",
+      "title": "Device and browser lens coverage",
+      "minimum_evidence": ["The profile-required lens set", "Viewport and browser engine lineage", "Physical or manual proof when the release profile requires it"],
+      "existing_contract_refs": ["atlas.qa.lens.v1", "atlas.qa.capture_receipt.v1", "atlas.qa.manual_attestation.v1"],
+      "absence_policy": "manual_required"
+    },
+    {
+      "dimension_id": "accessibility",
+      "title": "Accessibility conformance evidence",
+      "minimum_evidence": ["WCAG 2.2 AA is the default target for web UI", "Automated checks are supplemented by keyboard, focus, zoom or reflow, and manual review appropriate to risk", "APG may guide widget behavior but is not a normative standard or a design system"],
+      "existing_contract_refs": ["atlas.ui.audit-finding.v1", "atlas.qa.artifact.v1", "https://www.w3.org/TR/WCAG22/", "https://www.w3.org/WAI/ARIA/apg/about/introduction/"],
+      "absence_policy": "block"
+    },
+    {
+      "dimension_id": "visual",
+      "title": "Deterministic visual evidence",
+      "minimum_evidence": ["Browser or device-backed screenshots", "A governed baseline or explicit expected-change assertion when stability is claimed", "Digest and route or lens correlation"],
+      "existing_contract_refs": ["atlas.ui.visual-proof.v1", "atlas.ui.proof-summary.v1", "atlas.qa.visual_baseline.v1"],
+      "absence_policy": "block"
+    },
+    {
+      "dimension_id": "runtime",
+      "title": "Runtime and interaction truth",
+      "minimum_evidence": ["Repo-native executable checks", "Interaction result for the critical path", "Console, network, trace, or API evidence when required by the scenario"],
+      "existing_contract_refs": ["atlas.qa.test_evidence.v1", "atlas.qa.artifact.v1", "atlas.evidence-bundle.v2"],
+      "absence_policy": "block"
+    },
+    {
+      "dimension_id": "change_checklist",
+      "title": "Requested-change reconciliation",
+      "minimum_evidence": ["An itemized checklist created before mutation", "One terminal status and evidence link per requested change", "Canonical-surface propagation proof when sibling normalization is in scope"],
+      "existing_contract_refs": ["AGENTS.md", "docs/architecture/VISUAL-CHANGE-WORKFLOW.md", "atlas.ui.remediation-card.v1"],
+      "absence_policy": "block"
+    }
+  ],
+  "enforcement_tiers": [
+    {
+      "tier_id": "local",
+      "qa_modes": ["dry-run", "evidence"],
+      "receipt_origins": ["local_dev"],
+      "required_dimensions": ["routes", "devices", "accessibility", "visual", "runtime", "change_checklist"],
+      "gate": "Changed-scope verification must be explicit; unavailable higher-tier evidence remains visible and cannot be called passed."
+    },
+    {
+      "tier_id": "ci",
+      "qa_modes": ["evidence", "promotion"],
+      "receipt_origins": ["ci_pr", "ci_release"],
+      "required_dimensions": ["routes", "devices", "accessibility", "visual", "runtime", "change_checklist"],
+      "gate": "The adopted profile decides required checks; affected UI jobs must fail closed instead of silently skipping."
+    },
+    {
+      "tier_id": "release",
+      "qa_modes": ["promotion", "release_readiness"],
+      "receipt_origins": ["ci_release", "protected_manual", "provider"],
+      "required_dimensions": ["routes", "devices", "accessibility", "visual", "runtime", "change_checklist"],
+      "gate": "Target-revision evidence, freshness, origin trust, profile-specific physical or manual proof, and governed exceptions must all satisfy QA LLEL."
+    }
+  ],
+  "standards": [
+    {
+      "standard_id": "ATLAS-UI-GOV-001",
+      "version": "1.0.0",
+      "title": "Authority and source hierarchy",
+      "status": "accepted",
+      "enforcement_state": "root-defined",
+      "statement": "ATLAS defines shared UI governance; owner repositories retain product, implementation, route, token, component, and repo-native verification truth.",
+      "owner": "ATLAS root",
+      "evidence_dimensions": ["runtime"],
+      "enforcement_tiers": ["local", "ci", "release"],
+      "source_refs": ["docs/atlas-book/03-operating-model.md", "docs/atlas-book/06-system-ownership.md"],
+      "successor_ids": [],
+      "notes": ["Root observation and proof are validators or projections, never replacement owner truth."]
+    },
+    {
+      "standard_id": "ATLAS-UI-LIF-001",
+      "version": "1.0.0",
+      "title": "Audit and remediation lifecycle",
+      "status": "accepted",
+      "enforcement_state": "root-defined",
+      "statement": "Audit findings are durable records; remediation cards follow the mapped Atlas lifecycle from unplanned through completed and require evidence-backed review before completion.",
+      "owner": "ATLAS root",
+      "evidence_dimensions": ["routes", "runtime", "change_checklist"],
+      "enforcement_tiers": ["local", "ci", "release"],
+      "source_refs": ["schemas/atlas.ui.audit-finding.v1.json", "schemas/atlas.ui.remediation-card.v1.json", "packages/atlas-contracts/schemas/atlas.card-record.v2.schema.json"],
+      "successor_ids": [],
+      "notes": ["A completed remediation card is terminal; sustainment creates a new audit or remediation card instead of keeping one feature card permanently open."]
+    },
+    {
+      "standard_id": "ATLAS-UI-RSP-001",
+      "version": "1.0.0",
+      "title": "Responsive route and lens coverage",
+      "status": "accepted",
+      "enforcement_state": "owner-adoption-required",
+      "statement": "Applicable UI routes and states must be verified through the profile-required desktop, Android-class, iPhone WebKit, and any additional risk-driven lenses.",
+      "owner": "ATLAS root and owner repositories",
+      "evidence_dimensions": ["routes", "devices", "visual", "runtime"],
+      "enforcement_tiers": ["local", "ci", "release"],
+      "source_refs": ["docs/standards/ATLAS-QA-LLEL.md", "ops/atlas/qa/lenses/atlas-default-web.v1.json"],
+      "successor_ids": [],
+      "notes": ["Tablet and narrow-desktop lenses are added by profile or route risk; they do not replace the existing default triad."]
+    },
+    {
+      "standard_id": "ATLAS-UI-A11Y-001",
+      "version": "1.0.0",
+      "title": "Accessibility target and proof",
+      "status": "accepted",
+      "enforcement_state": "owner-adoption-required",
+      "statement": "Web UI targets WCAG 2.2 AA and records automated plus risk-appropriate manual accessibility evidence; APG is advisory implementation guidance for applicable widgets.",
+      "owner": "ATLAS root and owner repositories",
+      "evidence_dimensions": ["accessibility", "runtime"],
+      "enforcement_tiers": ["local", "ci", "release"],
+      "source_refs": ["https://www.w3.org/TR/WCAG22/", "https://www.w3.org/WAI/ARIA/apg/about/introduction/", "data/imports/ui-standards/deep-research-2026-07-15/deep-research-report.md"],
+      "successor_ids": [],
+      "notes": ["Tool choice is capability-based and owner-specific; no single vendor tool is mandated stack-wide."]
+    },
+    {
+      "standard_id": "ATLAS-UI-TOK-001",
+      "version": "1.0.0",
+      "title": "Semantic tokens and canonical components",
+      "status": "accepted",
+      "enforcement_state": "owner-adoption-required",
+      "statement": "Repeated UI decisions use owner-defined semantic tokens and canonical components, with compatibility aliases or wrappers for safe legacy migration.",
+      "owner": "owner repositories",
+      "evidence_dimensions": ["routes", "visual", "runtime"],
+      "enforcement_tiers": ["local", "ci", "release"],
+      "source_refs": ["docs/architecture/DESIGN-SURFACE-TOKEN-MAP.md", "docs/standards/FAWXZZY-THEME-STANDARD.md", "docs/ops/ATLAS-UI-OBSERVATION.md"],
+      "successor_ids": [],
+      "notes": ["The Fawxzzy theme is a shared brand input, not permission for root to overwrite owner token truth."]
+    },
+    {
+      "standard_id": "ATLAS-UI-EVD-001",
+      "version": "1.0.0",
+      "title": "Correlated evidence bundle",
+      "status": "accepted",
+      "enforcement_state": "root-defined",
+      "statement": "Every UI verification claim is correlated to repo, revision, scenario, route or surface, lens, run, and artifact digests through existing QA and EvidenceBundle contracts.",
+      "owner": "ATLAS root and owner repositories",
+      "evidence_dimensions": ["routes", "devices", "accessibility", "visual", "runtime", "change_checklist"],
+      "enforcement_tiers": ["local", "ci", "release"],
+      "source_refs": ["docs/standards/ATLAS-QA-LLEL.md", "packages/atlas-contracts/schemas/atlas.evidence-bundle.v2.schema.json"],
+      "successor_ids": [],
+      "notes": ["Screenshots without lineage are not promotion proof."]
+    },
+    {
+      "standard_id": "ATLAS-UI-VIS-001",
+      "version": "1.0.0",
+      "title": "Deterministic visual proof",
+      "status": "accepted",
+      "enforcement_state": "owner-adoption-required",
+      "statement": "Visual claims use browser or device-backed captures and deterministic assertions against governed baselines or declared expected changes.",
+      "owner": "ATLAS root and owner repositories",
+      "evidence_dimensions": ["routes", "devices", "visual"],
+      "enforcement_tiers": ["local", "ci", "release"],
+      "source_refs": ["docs/ops/ATLAS-UI-VISUAL-PROOF.md", "schemas/atlas.ui.visual-proof.v1.json", "schemas/atlas.qa.visual_baseline.v1.json"],
+      "successor_ids": [],
+      "notes": ["Semantic observation and visual proof complement each other; neither replaces runtime truth."]
+    },
+    {
+      "standard_id": "ATLAS-UI-RUN-001",
+      "version": "1.0.0",
+      "title": "Runtime and interaction truth",
+      "status": "accepted",
+      "enforcement_state": "owner-adoption-required",
+      "statement": "A route load or clean screenshot is insufficient when the requested behavior includes interaction, state, data, network, or error handling.",
+      "owner": "owner repositories",
+      "evidence_dimensions": ["routes", "runtime"],
+      "enforcement_tiers": ["local", "ci", "release"],
+      "source_refs": ["docs/standards/ATLAS-QA-LLEL.md", "docs/architecture/VISUAL-CHANGE-WORKFLOW.md"],
+      "successor_ids": [],
+      "notes": ["Repo-native executable failures remain authoritative blockers."]
+    },
+    {
+      "standard_id": "ATLAS-UI-CHK-001",
+      "version": "1.0.0",
+      "title": "Requested-change checklist",
+      "status": "accepted",
+      "enforcement_state": "root-defined",
+      "statement": "Every governed UI mutation batch records requested edits before mutation and reconciles each item with route-aware evidence before completion.",
+      "owner": "ATLAS root and owner repositories",
+      "evidence_dimensions": ["routes", "change_checklist"],
+      "enforcement_tiers": ["local", "ci", "release"],
+      "source_refs": ["AGENTS.md", "docs/architecture/VISUAL-CHANGE-WORKFLOW.md", "docs/standards/ATLAS-QA-LLEL.md"],
+      "successor_ids": [],
+      "notes": ["Canonical-surface-first propagation is required for sibling normalization."]
+    },
+    {
+      "standard_id": "ATLAS-UI-ENF-001",
+      "version": "1.0.0",
+      "title": "Tiered enforcement",
+      "status": "accepted",
+      "enforcement_state": "root-defined",
+      "statement": "UI controls progress through local, CI, and release enforcement using the existing QA LLEL modes, receipt origins, release profiles, and waiver semantics.",
+      "owner": "ATLAS root and owner repositories",
+      "evidence_dimensions": ["runtime"],
+      "enforcement_tiers": ["local", "ci", "release"],
+      "source_refs": ["docs/standards/ATLAS-QA-LLEL.md", "ops/atlas/qa/release_policy.v1.json", "docs/ops/ATLAS-QA-PROMOTION-RUNBOOK.md"],
+      "successor_ids": [],
+      "notes": ["Defined standards do not imply owner adoption or enforced repository checks."]
+    },
+    {
+      "standard_id": "ATLAS-UI-KNO-001",
+      "version": "1.0.0",
+      "title": "Evidence-backed knowledge promotion",
+      "status": "accepted",
+      "enforcement_state": "root-defined",
+      "statement": "Repeated verified findings may become KnowledgeCandidate records and later Playbook doctrine only after review; raw research and candidate findings are not enforced doctrine.",
+      "owner": "ATLAS root and Playbook",
+      "evidence_dimensions": ["runtime"],
+      "enforcement_tiers": ["local", "ci", "release"],
+      "source_refs": ["docs/registry/ATLAS-PLAYBOOK-DOCTRINE-ADOPTION.json", "packages/atlas-contracts/schemas/atlas.knowledge-candidate.v2.schema.json"],
+      "successor_ids": [],
+      "notes": ["Atlas stores source-linked adoption evidence and does not republish Playbook doctrine bodies."]
+    },
+    {
+      "standard_id": "ATLAS-UI-MET-001",
+      "version": "1.0.0",
+      "title": "Objective measurement and marker truth",
+      "status": "accepted",
+      "enforcement_state": "root-defined",
+      "statement": "UI program metrics use frozen applicable denominators and verified integer units; percentages are derived displays, never authored estimates, weights, or exception penalties.",
+      "owner": "ATLAS root",
+      "evidence_dimensions": ["routes", "devices", "accessibility", "visual", "runtime", "change_checklist"],
+      "enforcement_tiers": ["local", "ci", "release"],
+      "source_refs": ["packages/atlas-contracts/schemas/atlas.marker-evidence.v2.schema.json", "AGENTS.md"],
+      "successor_ids": [],
+      "notes": ["No program marker exists until its denominator and evidence source are accepted."]
+    }
+  ],
+  "adoption_profiles": [
+    {
+      "profile_id": "atlas-ui-profile-web-standard-v1",
+      "title": "Standard web UI",
+      "applicability": "Browser-facing product surfaces that do not require physical-device proof for every release.",
+      "qa_release_profile": "web_visual",
+      "extends": null,
+      "required_standard_ids": ["ATLAS-UI-GOV-001", "ATLAS-UI-LIF-001", "ATLAS-UI-RSP-001", "ATLAS-UI-A11Y-001", "ATLAS-UI-TOK-001", "ATLAS-UI-EVD-001", "ATLAS-UI-VIS-001", "ATLAS-UI-RUN-001", "ATLAS-UI-CHK-001", "ATLAS-UI-ENF-001", "ATLAS-UI-KNO-001", "ATLAS-UI-MET-001"],
+      "required_evidence_dimensions": ["routes", "devices", "accessibility", "visual", "runtime", "change_checklist"],
+      "required_lenses": ["desktop.chromium", "android.chrome", "iphone.webkit"],
+      "local_gate": ["Repo-native verify", "Changed-route emulated evidence", "Accessibility smoke and manual gap record", "Requested-change checklist"],
+      "ci_gate": ["Repo-native deterministic checks", "Default lens triad", "Accessibility executable report", "Targeted visual assertions", "Artifact bundle"],
+      "release_gate": ["QA LLEL web_visual readiness for target revision", "Fresh trusted evidence when enforced", "No expired exception"],
+      "exception_policy": "Only a run-scoped, scenario-scoped, time-bound governed exception may waive a required lane; the lane remains unsatisfied proof."
+    },
+    {
+      "profile_id": "atlas-ui-profile-web-release-critical-v1",
+      "title": "Release-critical web UI",
+      "applicability": "High-value user flows where physical-device or valid manual certification is required by release policy.",
+      "qa_release_profile": "release_critical_web",
+      "extends": "atlas-ui-profile-web-standard-v1",
+      "required_standard_ids": ["ATLAS-UI-GOV-001", "ATLAS-UI-LIF-001", "ATLAS-UI-RSP-001", "ATLAS-UI-A11Y-001", "ATLAS-UI-TOK-001", "ATLAS-UI-EVD-001", "ATLAS-UI-VIS-001", "ATLAS-UI-RUN-001", "ATLAS-UI-CHK-001", "ATLAS-UI-ENF-001", "ATLAS-UI-KNO-001", "ATLAS-UI-MET-001"],
+      "required_evidence_dimensions": ["routes", "devices", "accessibility", "visual", "runtime", "change_checklist"],
+      "required_lenses": ["desktop.chromium", "android.chrome", "iphone.webkit", "desktop.chromium.real", "android.chrome.real", "iphone.safari.real"],
+      "local_gate": ["All standard web local gates"],
+      "ci_gate": ["All standard web CI gates", "Physical proof remains visible as a release requirement"],
+      "release_gate": ["QA LLEL release_critical_web readiness", "Provider-backed physical evidence or valid manual attestation", "Target revision and trusted origin"],
+      "exception_policy": "A governed waiver may unblock release while preserving explicit physical-proof debt; it may not relabel the lane as passed."
+    },
+    {
+      "profile_id": "atlas-ui-profile-shared-ui-v1",
+      "title": "Shared UI package or component library",
+      "applicability": "A reusable UI package consumed by more than one owner surface.",
+      "qa_release_profile": "package_contract",
+      "extends": null,
+      "required_standard_ids": ["ATLAS-UI-GOV-001", "ATLAS-UI-LIF-001", "ATLAS-UI-A11Y-001", "ATLAS-UI-TOK-001", "ATLAS-UI-EVD-001", "ATLAS-UI-VIS-001", "ATLAS-UI-CHK-001", "ATLAS-UI-ENF-001", "ATLAS-UI-KNO-001", "ATLAS-UI-MET-001"],
+      "required_evidence_dimensions": ["accessibility", "visual", "runtime", "change_checklist"],
+      "required_lenses": ["desktop.chromium", "android.chrome", "iphone.webkit"],
+      "local_gate": ["Package tests", "Component examples", "Accessibility checks", "Visual assertions for changed components"],
+      "ci_gate": ["Contract and component tests", "Consumer compatibility proof", "Artifact bundle"],
+      "release_gate": ["Package contract readiness", "At least one governed producer and consumer proof for shared contract changes"],
+      "exception_policy": "Compatibility exceptions must name affected consumers, expire, and preserve deprecation debt as an open finding."
+    },
+    {
+      "profile_id": "atlas-ui-profile-nonvisual-v1",
+      "title": "Nonvisual or not-applicable surface",
+      "applicability": "A repo or component with no governed user interface in the selected scope.",
+      "qa_release_profile": "not_applicable",
+      "extends": null,
+      "required_standard_ids": ["ATLAS-UI-GOV-001", "ATLAS-UI-MET-001"],
+      "required_evidence_dimensions": ["runtime"],
+      "required_lenses": [],
+      "local_gate": ["Document the applicability decision and owner"],
+      "ci_gate": ["No visual job required after validated not-applicable disposition"],
+      "release_gate": ["Repo release policy remains authoritative"],
+      "exception_policy": "Not-applicable is an evidence-backed classification, not a silent skip."
+    }
+  ],
+  "metrics": [
+    {
+      "metric_id": "atlas-ui-metric-control-adoption-v1",
+      "title": "Required control adoption",
+      "unit": "control",
+      "numerator_definition": "Profile-required controls with current owner-produced and root-readable verification.",
+      "denominator_definition": "All controls required by the accepted owner adoption profile at baseline.",
+      "denominator_freeze_rule": "Freeze the applicable control list in the owner adoption receipt before measuring.",
+      "source_contract": "atlas.marker-evidence.v2",
+      "marker_policy": "No marker until owner profile and denominator are accepted; root-only config counts as zero adopted controls.",
+      "display": "derived_percentage"
+    },
+    {
+      "metric_id": "atlas-ui-metric-route-evidence-v1",
+      "title": "Current route evidence coverage",
+      "unit": "route-state",
+      "numerator_definition": "Applicable route-state units with current evidence satisfying the adopted profile.",
+      "denominator_definition": "The frozen route-state inventory for the audit revision.",
+      "denominator_freeze_rule": "Newly discovered routes create a new baseline revision instead of silently changing the old denominator.",
+      "source_contract": "atlas.ui.audit-finding.v1",
+      "marker_policy": "Report numerator and denominator; percentage is derived only.",
+      "display": "ratio"
+    },
+    {
+      "metric_id": "atlas-ui-metric-finding-verification-v1",
+      "title": "Verified finding closure",
+      "unit": "finding",
+      "numerator_definition": "In-scope findings in verified or superseded state with evidence.",
+      "denominator_definition": "All accepted findings in the frozen audit snapshot.",
+      "denominator_freeze_rule": "Findings discovered after baseline belong to a new snapshot or are added with an explicit denominator revision receipt.",
+      "source_contract": "atlas.ui.audit-finding.v1",
+      "marker_policy": "Accepted risk and unexpired waivers remain separately counted and do not become verified findings.",
+      "display": "derived_percentage"
+    },
+    {
+      "metric_id": "atlas-ui-metric-gate-enforcement-v1",
+      "title": "Required gate enforcement",
+      "unit": "gate",
+      "numerator_definition": "Profile-required local, CI, or release gates with current passing enforcement proof.",
+      "denominator_definition": "Required gates declared by the accepted profile for the measured tier.",
+      "denominator_freeze_rule": "Freeze per profile version and enforcement tier.",
+      "source_contract": "atlas.qa.promotion.v1",
+      "marker_policy": "A configured but skipped or warning-only gate is not enforced.",
+      "display": "ratio"
+    },
+    {
+      "metric_id": "atlas-ui-metric-evidence-freshness-v1",
+      "title": "Evidence freshness",
+      "unit": "evidence-bundle",
+      "numerator_definition": "Current target-revision evidence bundles inside the profile freshness window.",
+      "denominator_definition": "Evidence bundles required by the accepted scenario and profile.",
+      "denominator_freeze_rule": "Freeze with the release or audit target revision.",
+      "source_contract": "atlas.evidence-bundle.v2",
+      "marker_policy": "Stale, conflicting, or wrong-revision evidence remains visible and does not count.",
+      "display": "ratio"
+    },
+    {
+      "metric_id": "atlas-ui-metric-legacy-debt-v1",
+      "title": "Open legacy UI debt",
+      "unit": "finding",
+      "numerator_definition": "Open accepted findings classified as legacy debt.",
+      "denominator_definition": "Not applicable; this is an absolute count, not a completion percentage.",
+      "denominator_freeze_rule": "No denominator is authored for this count metric.",
+      "source_contract": "atlas.ui.audit-finding.v1",
+      "marker_policy": "Use a count and trend; do not convert it into a subjective score.",
+      "display": "count"
+    }
+  ],
+  "migration_waves": [
+    {
+      "wave_id": "atlas-ui-wave-0-root-foundation",
+      "sequence": 0,
+      "title": "Root foundation",
+      "objective": "Freeze standard identity, source boundaries, contracts, profiles, metrics, and candidate owner packets without owner-repo mutation.",
+      "entry_criteria": ["Research provenance verified", "Existing governance inventoried"],
+      "exit_criteria": ["Registry and schemas validate", "Focused tests pass", "Root receipt exists"],
+      "depends_on": []
+    },
+    {
+      "wave_id": "atlas-ui-wave-1-owner-baseline",
+      "sequence": 1,
+      "title": "Owner applicability and baseline",
+      "objective": "Each selected owner repo ratifies a profile and freezes route, state, component, and current-gate inventory.",
+      "entry_criteria": ["Root foundation accepted", "One owner lane selected"],
+      "exit_criteria": ["Owner profile accepted", "Baseline audit findings emitted", "Denominators frozen"],
+      "depends_on": ["atlas-ui-wave-0-root-foundation"]
+    },
+    {
+      "wave_id": "atlas-ui-wave-2-shared-foundations",
+      "sequence": 2,
+      "title": "Shared foundations",
+      "objective": "Land owner-side token bridges, canonical components, accessibility foundations, and repo-native QA adapters before repeated screen fixes.",
+      "entry_criteria": ["Owner baseline accepted", "Shared surfaces identified"],
+      "exit_criteria": ["Shared controls verified", "Consumer compatibility evidence exists"],
+      "depends_on": ["atlas-ui-wave-1-owner-baseline"]
+    },
+    {
+      "wave_id": "atlas-ui-wave-3-critical-flows",
+      "sequence": 3,
+      "title": "Critical flows",
+      "objective": "Remediate high-value route families using the verified shared foundations and profile-required evidence.",
+      "entry_criteria": ["Required shared foundations available", "Critical-flow findings prioritized"],
+      "exit_criteria": ["Critical-flow findings verified", "Required CI and release gates proven"],
+      "depends_on": ["atlas-ui-wave-2-shared-foundations"]
+    },
+    {
+      "wave_id": "atlas-ui-wave-4-long-tail",
+      "sequence": 4,
+      "title": "Long-tail remediation",
+      "objective": "Close residual route and component findings without bypassing canonical fixes or evidence requirements.",
+      "entry_criteria": ["Critical-flow wave verified"],
+      "exit_criteria": ["Frozen audit findings verified, superseded, or governed by unexpired accepted risk"],
+      "depends_on": ["atlas-ui-wave-3-critical-flows"]
+    },
+    {
+      "wave_id": "atlas-ui-wave-5-sustain",
+      "sequence": 5,
+      "title": "Sustain and knowledge promotion",
+      "objective": "Run periodic audits, refresh evidence, prevent regression, and promote repeated verified findings through KnowledgeCandidate review into Playbook when warranted.",
+      "entry_criteria": ["Owner adoption has verified completion evidence"],
+      "exit_criteria": ["A refresh cadence and regression path are operating", "Knowledge candidates have explicit review state"],
+      "depends_on": ["atlas-ui-wave-4-long-tail"]
+    }
+  ],
+  "collision_rules": [
+    {"rule_id": "atlas-ui-collision-001", "statement": "Only one root writer may change the registry, schemas, or program doctrine in a batch."},
+    {"rule_id": "atlas-ui-collision-002", "statement": "Only one writer may mutate a selected owner repo at a time; separate workers may own non-overlapping repos."},
+    {"rule_id": "atlas-ui-collision-003", "statement": "A canonical shared component or token owner lands and verifies before dependent consumer migrations begin."},
+    {"rule_id": "atlas-ui-collision-004", "statement": "Owner implementation precedes root proof reconciliation; root does not fabricate owner artifacts."},
+    {"rule_id": "atlas-ui-collision-005", "statement": "Execution, proof or reconciliation, and marker ratchet remain one serial cluster per lane."},
+    {"rule_id": "atlas-ui-collision-006", "statement": "No marker moves from wording, root-only prototypes, missing evidence, or an unaccepted denominator."},
+    {"rule_id": "atlas-ui-collision-007", "statement": "Board mutation is deferred to DiscordOS single-writer application and readback; candidate files authorize no mutation."},
+    {"rule_id": "atlas-ui-collision-008", "statement": "Atlas Book projection follows executed and accepted state; it does not lead implementation truth."},
+    {"rule_id": "atlas-ui-collision-009", "statement": "Playbook ingestion follows repeated verified evidence and KnowledgeCandidate review; raw research is never copied into doctrine truth."},
+    {"rule_id": "atlas-ui-collision-010", "statement": "Owner-repo adoption wraps healthy repo-native QA commands before any new generic tool is introduced."}
+  ],
+  "ingestion_boundaries": {
+    "atlas_book": {
+      "owner": "ATLAS root",
+      "ingests": ["Accepted program version and source refs", "Executed root receipts", "Proof-backed owner adoption state", "Current marker evidence"],
+      "rejects": ["Full registry duplication", "Unexecuted candidate recommendations", "Owner runtime truth copied into the Book"],
+      "promotion_gate": "Project only after the underlying source and receipt are durable."
+    },
+    "playbook": {
+      "owner": "Playbook",
+      "ingests": ["Reviewed KnowledgeCandidate records", "Repeated verified failure patterns", "Detection, canonical fix, and verification semantics with provenance"],
+      "rejects": ["Raw research report bodies", "Unreviewed findings", "Atlas-authored copies of Playbook doctrine", "One-off owner implementation details"],
+      "promotion_gate": "Require evidence-backed repetition, explicit review, and owner-side Playbook adoption proof."
+    },
+    "discordos": {
+      "owner": "DiscordOS single writer",
+      "ingests": ["Candidate cards after explicit admission", "Board events", "Accepted completion and readback intents"],
+      "rejects": ["Direct mutation from this registry", "Marker inference", "Engineering proof inferred from prose"],
+      "promotion_gate": "Require separately authorized application plus idempotent readback."
+    }
+  },
+  "encoding_policy": {
+    "normative_encoding": "utf-8",
+    "normative_character_set": "ascii",
+    "enforced_refs": [
+      "data/imports/ui-standards/deep-research-2026-07-15/.gitattributes",
+      "data/imports/ui-standards/deep-research-2026-07-15/IMPORT-MANIFEST.json",
+      "docs/audits/ATLAS-UI-STANDARDS-RECONCILIATION-2026-07-15.md",
+      "docs/ops/ATLAS-UI-STANDARDS-ROOT-FOUNDATION-2026-07-15.md",
+      "docs/standards/ATLAS-UI-STANDARDS-PROGRAM.md",
+      "docs/registry/ATLAS-UI-STANDARDS-REGISTRY.v1.json",
+      "docs/registry/ATLAS-UI-STANDARDS-CANDIDATE-CARDS.v1.json",
+      "schemas/atlas.ui.standard-registry.v1.json",
+      "schemas/atlas.ui.audit-finding.v1.json",
+      "schemas/atlas.ui.remediation-card.v1.json",
+      "ops/atlas/ui_standards/__init__.py",
+      "ops/atlas/ui_standards/validate.py",
+      "tests/test_atlas_ui_standards.py"
+    ],
+    "evidence_exceptions": [
+      {
+        "ref": "data/imports/ui-standards/deep-research-2026-07-15/deep-research-report.md",
+        "sha256": "77f882e6af10eb4094e79033769ab8d8010ba2e6d473c620ef55750340941723",
+        "reason": "Exact immutable UTF-8 research import with typographic punctuation and private-use citation delimiters; never parsed as normative registry text."
+      }
+    ]
+  }
+}
