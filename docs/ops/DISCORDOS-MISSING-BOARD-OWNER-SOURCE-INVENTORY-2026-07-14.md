@@ -17,7 +17,7 @@ guessing.
 | --- | --- | ---: | --- | --- |
 | Atlas | `docs/registry/project-board-owner-exports/atlas.project-board.owner-export.v1.json`, projected deterministically from the Atlas Book and full-system registry | 33 contract-valid records: 7 non-executable marker parents, 10 direct lanes, 16 root-governance backlog records | Owner export implemented; DiscordOS admission and seeding remain pending | `BOARD_UNADMITTED`, `DISCORD_FORUM_MISSING`, `SEED_NOT_EXECUTED` |
 | DiscordOS | No accepted owner-repo work export; five Atlas-attributed candidates exist outside the owner repo | 0 owner records; 5 Atlas candidates | Blocked | `NO_OWNER_WORK_EXPORT`, `OWNER_CHECKOUT_STALE`, `ATLAS_ONLY_CANDIDATES` |
-| Foundation | `repos/foundation/docs/roadmap/FOUNDATION_ROADMAP.md` | 5 explicit active Next items and 1 Atlas candidate | Partial; owner export required | `UNKEYED_MARKDOWN`, `MIXED_LIFECYCLE_PROSE`, `ROOT_CANDIDATE_UNADMITTED` |
+| Foundation | `repos/foundation/exports/foundation.project-board.owner-export.v1.json`, projected deterministically from `repos/foundation/docs/roadmap/FOUNDATION_ROADMAP.json` | 6 contract-valid non-complete records: 3 planned and 3 planned-later | Owner export implemented; DiscordOS admission and seeding remain pending | `BOARD_UNADMITTED`, `DISCORD_FORUM_MISSING`, `SEED_NOT_EXECUTED` |
 | Lifeline | `repos/lifeline/.playbook/plan.json` and owner README | 1 underspecified next milestone; machine plan has 0 tasks | Blocked | `EMPTY_MACHINE_PLAN`, `UNKEYED_NEXT_MILESTONE`, `STALE_ROOT_INITIATIVE_CONFLICT` |
 | Cortex | `docs/registry/project-board-owner-exports/cortex.project-board.owner-export.v1.json`, projected deterministically from the root subsystem registry and Atlas planning source | 2 contract-valid root-owned subsystem records | Owner export implemented; DiscordOS admission and seeding remain pending | `BOARD_UNADMITTED`, `DISCORD_FORUM_MISSING`, `SEED_NOT_EXECUTED` |
 | `_stack` | `repos/_stack/queue/README.md` plus Atlas candidates | 0 owner queue records; 5 Atlas candidates | Blocked | `READY_EMPTY_OWNER_QUEUE`, `ATLAS_CANDIDATES_UNADMITTED` |
@@ -65,9 +65,15 @@ versioned in the export receipt.
 
 ### Foundation and Lifeline
 
-Markdown Next sections are planning evidence, not deterministic card records.
-Foundation must key its five active items. Lifeline must populate or supersede
-its empty machine plan before the one prose milestone can become a card.
+Foundation now owns a keyed machine roadmap and deterministic export at commit
+`e0c2978e4f0d0b73aaee6fc5d14b982b78d89b97`. Its adapter excludes 11 completed
+records and emits exactly 6 non-complete records with stable `FDN-*` identities,
+explicit `null` priority, acceptance criteria, dependencies, source revision,
+and Discord mutation disabled. The export passed six focused tests, Foundation
+build and local verification, Atlas Contracts validation, and remote parity.
+This closes only Foundation's owner-export prerequisite. Lifeline must still
+populate or supersede its empty machine plan before the prose milestone can
+become a card.
 
 ### `_stack`
 
@@ -103,8 +109,9 @@ live readback.
    Contracts.
 2. Retain the implemented Atlas/Cortex root-owned aggregation adapter and the
    merged Playbook canonical-owner-JSON adapter as two accepted proof classes.
-3. Implement Foundation, Lifeline, `_stack`, and DiscordOS adapters only after
-   their owner-source blockers are resolved.
+3. Retain Foundation's implemented machine-roadmap adapter and implement
+   Lifeline, `_stack`, and DiscordOS adapters only after their owner-source
+   blockers are resolved.
 4. Validate every export without Discord mutation.
 5. Create the seven empty forums through the DiscordOS single writer and read
    back exact channel identity.
@@ -117,3 +124,7 @@ live readback.
 This inventory does not create forums, create cards, move cards, assign missing
 priority, reinterpret roadmap status, mutate owner repositories, or advance the
 DiscordOS Cross-Project Board Integrity & Lifecycle Repair marker.
+
+Supporting owner-export readiness is now `4 / 7` (`57.1%`): Atlas, Cortex,
+Playbook, and Foundation are contract-valid. This is not the official board
+integrity marker and does not move its fixed `0 / 10` denominator.

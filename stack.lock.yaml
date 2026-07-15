@@ -35,7 +35,7 @@ components:
     remote: "https://github.com/fawxzzy/foundation.git"
     ref_type: "branch"
     ref: "main"
-    commit: "5cedd6234755be3d637abc33572b905dce3b8f7c"
+    commit: "e0c2978e4f0d0b73aaee6fc5d14b982b78d89b97"
     dirty: false
     trust_class: "trusted"
     release_eligible: true
@@ -208,4 +208,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:ae3769272f249513a7bd837bbbee49f2e8ad563a544ea73bb2932c641e0e3aa1"
+lock_digest: "sha256:404cac4250be4f7b9afa705982c9c7afad438c4d9367d2a3094a98f71b781e1b"
