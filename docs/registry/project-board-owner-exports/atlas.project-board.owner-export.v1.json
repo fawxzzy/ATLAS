@@ -1,11 +1,11 @@
 {
   "contract_version": "atlas.project-board.owner-export.v1",
-  "export_id": "pbe_atlas_95123d5258de",
+  "export_id": "pbe_atlas_fd2014e5d337",
   "project_id": "atlas",
   "board_id": "discordos:project-feedback:atlas",
   "owner": "stack-root",
   "adapter_id": "atlas-full-system-registry-v1",
-  "source_revision": "sha256:95123d5258def837d27189c58bd53275772f202e3358b430a1cc2df3d46ca39b",
+  "source_revision": "sha256:fd2014e5d337b94d4f3187ad542f510742a8178fc63bbc5059ecfa0f4df7810e",
   "generated_at": "2026-07-15T12:51:09Z",
   "sources": [
     {
@@ -13,7 +13,7 @@
       "kind": "json",
       "repository": "atlas-root",
       "path": "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json",
-      "revision": "sha256:4bb980987c0cf5a63814c73cb93d729dc0005798cdab0748a8125e6ae54375b5",
+      "revision": "sha256:f9fd8c0c50d54a01b6689f51f955fe3c81574f284e3f5dc4fe5d121a64ece190",
       "observed_at": "2026-07-15T12:51:09Z"
     },
     {
@@ -21,7 +21,7 @@
       "kind": "markdown",
       "repository": "atlas-root",
       "path": "docs/atlas-book/02-lanes-and-markers.md",
-      "revision": "sha256:65af7b6513c177b8ca85ea1f6e4c91973564ee3ca3c17812f8c525f2f9f360bf",
+      "revision": "sha256:cb9aab57025ba83aedcf53bb39f867cb18ddaef31b0f00c57ce7a26b86629ebc",
       "observed_at": "2026-07-15T12:51:09Z"
     }
   ],
@@ -108,15 +108,15 @@
         "owner": "stack-root",
         "dependencies": [],
         "board_version": 1,
-        "updated_at": "2026-07-15T15:06:00Z",
+        "updated_at": "2026-07-15T15:30:00Z",
         "source_ref": "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json#lane-atlas-contracts-mesh",
         "extensions": {
           "source_section": "backlog_candidates",
           "source_classification": "contract-implementation",
           "source_status": "active",
           "measurement_unit": "schema-family acceptance",
-          "percentage": 82,
-          "completed_units": 9,
+          "percentage": 91,
+          "completed_units": 10,
           "denominator": {
             "kind": "schema_families",
             "value": 11,
@@ -130,7 +130,7 @@
         "source_id": "atlas-full-system-registry",
         "source_ref": "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json#lane-atlas-contracts-mesh",
         "source_status": "current",
-        "source_updated_at": "2026-07-15T15:06:00Z"
+        "source_updated_at": "2026-07-15T15:30:00Z"
       },
       "content": {
         "summary": "Define and implement Contracts v2 mesh without overstating @atlas/contracts v0.1.0 or five implemented v1 families.",
@@ -155,6 +155,9 @@
           "docs/ops/ATLAS-CONTRACTS-V2-CLUSTER-2-ADOPTION-2026-07-13.md",
           "docs/ops/ATLAS-CONTRACTS-V2-CLUSTER-3-WORKERLEASE-ADOPTION-2026-07-15.md",
           "docs/ops/ATLAS-CONTRACTS-V2-CLUSTER-4-CARDRECORD-BOARDEVENT-ADOPTION-2026-07-15.md",
+          "ops/atlas/marker_evidence_admission.mjs",
+          "tests/test_atlas_marker_evidence_admission.mjs",
+          "docs/ops/ATLAS-CONTRACTS-V2-CLUSTER-5-MARKEREVIDENCE-ADOPTION-2026-07-15.md",
           "docs/architecture/ATLAS-EVENT-CONTRACT.md",
           "docs/architecture/CODEX-HANDOFF-CONTRACT.md",
           "docs/architecture/ATLAS-CONTRACTS-V2-SCOPE.md",

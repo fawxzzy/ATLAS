@@ -5,7 +5,7 @@
 - **Implemented v1:** `atlas.event.v1` has seven generic lifecycle contracts; it does not implement GitHub/Vercel/Supabase/Discord delivery families.
 - **Implemented v1:** `atlas.codex.handoff.v1` captures structured final output and rejects transcript scraping.
 - **Implemented v1:** `@atlas/contracts` v0.1.0 implements five schema families.
-- **Partial Contracts v2 mesh:** all eleven families have implementation foundations and nine have independent adoption proof. MarkerEvidence and KnowledgeCandidate remain unaccepted.
+- **Partial Contracts v2 mesh:** all eleven families have implementation foundations and ten have independent adoption proof. KnowledgeCandidate remains unaccepted.
 - **Partial:** Playbook adoption and project command adapters do not cover the full stack.
 - **Partial/stale:** Cortex advisory context/routing/synthesis exists, but live freshness, chat-style synthesis, and remote authority are incomplete.
 - **Proposed:** Atlas Control ledger (including proposed SQLite), delivery event plane, persistent workspace/browser leases, historical task intelligence, and cross-project knowledge promotion.
