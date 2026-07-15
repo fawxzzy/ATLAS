@@ -99,6 +99,10 @@ When working on Playbook or repository development and speed matters, default to
 - Create `Fitness` only after its operational-preparation resume gates pass.
 - Reuse the existing `Mazer` conversation. Refresh its context and resume its
   preserved checkpoint instead of creating a replacement conversation.
+- Keep `Socials OS` as a standing non-root-blocking owner conversation for the
+  private `repos/socials-os` analytics-data system. ATLAS MAIN tracks its
+  lifecycle, receipts, GitHub parity, and cross-stack dependencies while
+  account collection, planning, and implementation remain in that owner lane.
 - DiscordOS is an embedded governed service and single logical writer, not a
   required standing conversation.
 - Archive bounded Codex tasks after their accepted terminal receipt is durable.
@@ -154,6 +158,10 @@ When working on Playbook or repository development and speed matters, default to
 - Keep GitHub repository inventory, branch and remote parity, pull requests,
   Actions, releases, dependency/security signals, and stale-resource cleanup
   visible in Atlas and correlated with `_stack` and DiscordOS receipts.
+- Cross-account social references must use the public account name `Fawxzzy`
+  as the visible label, never an internal or legacy username. Never claim that
+  typed `@` text is a native profile link until the rendered target and link
+  destination have been verified.
 - Full local permissions are the default execution capability. Pushes,
   production deployments, Discord writes, and live data mutations still require
   the applicable task authority.
