@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://schemas/atlas.ui.remediation-card.v1.json",
+  "title": "ATLAS UI remediation card v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "remediation_id",
+    "finding_ids",
+    "program_lifecycle",
+    "atlas_card",
+    "evidence_requirements",
+    "requested_change_checklist",
+    "verification"
+  ],
+  "properties": {
+    "contract_version": {"const": "atlas.ui.remediation-card.v1"},
+    "remediation_id": {"type": "string", "pattern": "^uir_[a-z0-9][a-z0-9._-]+$"},
+    "finding_ids": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "pattern": "^uif_[a-z0-9][a-z0-9._-]+$"}
+    },
+    "program_lifecycle": {"type": "string", "enum": ["unplanned", "planned", "ready", "in_progress", "review", "completed", "blocked"]},
+    "atlas_card": {"type": "object"},
+    "evidence_requirements": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "enum": ["routes", "devices", "accessibility", "visual", "runtime", "change_checklist"]}
+    },
+    "requested_change_checklist": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/checklist_item"}
+    },
+    "verification": {"$ref": "#/$defs/verification"},
+    "extensions": {"type": "object"}
+  },
+  "$defs": {
+    "string_array": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "checklist_item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["item_id", "statement", "status", "evidence_refs"],
+      "properties": {
+        "item_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]+$"},
+        "statement": {"type": "string", "minLength": 1},
+        "status": {"type": "string", "enum": ["unplanned", "planned", "passed", "failed", "blocked", "deferred"]},
+        "evidence_refs": {"$ref": "#/$defs/string_array"}
+      }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "evidence_bundle_refs", "qa_promotion_refs", "verified_at"],
+      "properties": {
+        "status": {"type": "string", "enum": ["unverified", "in_progress", "blocked", "verified"]},
+        "evidence_bundle_refs": {"$ref": "#/$defs/string_array"},
+        "qa_promotion_refs": {"$ref": "#/$defs/string_array"},
+        "verified_at": {"type": ["string", "null"], "format": "date-time"}
+      }
+    }
+  }
+}

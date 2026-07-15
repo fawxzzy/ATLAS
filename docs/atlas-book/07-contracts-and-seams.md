@@ -199,3 +199,37 @@ The first safe moves after the current docs-only checkpoint are still bounded:
 6. later bounded runtime cutover
 
 None of those are implied by this contract map alone.
+
+## UI Standards Program Seam
+
+Root-owned program truth:
+
+- `docs/registry/ATLAS-UI-STANDARDS-REGISTRY.v1.json`
+- `docs/standards/ATLAS-UI-STANDARDS-PROGRAM.md`
+- `schemas/atlas.ui.standard-registry.v1.json`
+- `schemas/atlas.ui.audit-finding.v1.json`
+- `schemas/atlas.ui.remediation-card.v1.json`
+
+Owner-repo truth:
+
+- applicable routes, states, components, and controls
+- implementation tooling and local commands
+- accepted adoption profile and denominator
+- produced evidence and remediation state
+
+Atlas Book boundary:
+
+- the Book explains and indexes accepted root contracts
+- the Book is not the machine-readable standards registry
+- owner adoption is not inferred from a Book entry
+
+Playbook boundary:
+
+- repeated, independently verified findings may become source-linked `atlas.knowledge-candidate.v2` records
+- Playbook remains the doctrine owner and must review promotion
+- research prose and one-off findings do not flow directly into Playbook doctrine
+
+Projection rule:
+
+- root candidate packets are non-live and remain `unplanned`
+- no project-board, Discord, marker, release, or production state changes until an authorized owner lane executes and returns proof

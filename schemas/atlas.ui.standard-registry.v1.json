@@ -1,0 +1,310 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://schemas/atlas.ui.standard-registry.v1.json",
+  "title": "ATLAS UI standard registry v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "program_id",
+    "program_version",
+    "registry_status",
+    "published_at",
+    "authority",
+    "provenance",
+    "source_hierarchy",
+    "lifecycle",
+    "evidence_dimensions",
+    "enforcement_tiers",
+    "standards",
+    "adoption_profiles",
+    "metrics",
+    "migration_waves",
+    "collision_rules",
+    "ingestion_boundaries",
+    "encoding_policy"
+  ],
+  "properties": {
+    "contract_version": {"const": "atlas.ui.standard-registry.v1"},
+    "program_id": {"const": "atlas-ui-standards"},
+    "program_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+    "registry_status": {"type": "string", "enum": ["foundation", "active", "superseded"]},
+    "published_at": {"type": "string", "format": "date-time"},
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["root_owner", "implementation_owner", "doctrine_owner", "board_writer", "mutation_authorized"],
+      "properties": {
+        "root_owner": {"type": "string", "minLength": 1},
+        "implementation_owner": {"type": "string", "minLength": 1},
+        "doctrine_owner": {"type": "string", "minLength": 1},
+        "board_writer": {"type": "string", "minLength": 1},
+        "mutation_authorized": {"type": "boolean"}
+      }
+    },
+    "provenance": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/provenance"}
+    },
+    "source_hierarchy": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/source"}
+    },
+    "lifecycle": {"$ref": "#/$defs/lifecycle"},
+    "evidence_dimensions": {
+      "type": "array",
+      "minItems": 5,
+      "items": {"$ref": "#/$defs/evidence_dimension"}
+    },
+    "enforcement_tiers": {
+      "type": "array",
+      "minItems": 3,
+      "items": {"$ref": "#/$defs/enforcement_tier"}
+    },
+    "standards": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/standard"}
+    },
+    "adoption_profiles": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/adoption_profile"}
+    },
+    "metrics": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/metric"}
+    },
+    "migration_waves": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/migration_wave"}
+    },
+    "collision_rules": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/rule"}
+    },
+    "ingestion_boundaries": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["atlas_book", "playbook", "discordos"],
+      "properties": {
+        "atlas_book": {"$ref": "#/$defs/boundary"},
+        "playbook": {"$ref": "#/$defs/boundary"},
+        "discordos": {"$ref": "#/$defs/boundary"}
+      }
+    },
+    "encoding_policy": {"$ref": "#/$defs/encoding_policy"}
+  },
+  "$defs": {
+    "string_array": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1}
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_id", "ref", "classification", "disposition"],
+      "properties": {
+        "source_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]+$"},
+        "ref": {"type": "string", "minLength": 1},
+        "sha256": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"},
+        "classification": {"type": "string", "enum": ["verified", "reported", "inferred", "external-input"]},
+        "disposition": {"type": "string", "enum": ["retain", "merge", "supersede", "gap", "reference-only"]}
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rank", "source_id", "ref", "authority", "canonical_for", "may_not_override"],
+      "properties": {
+        "rank": {"type": "integer", "minimum": 1},
+        "source_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]+$"},
+        "ref": {"type": "string", "minLength": 1},
+        "authority": {"type": "string", "minLength": 1},
+        "canonical_for": {"$ref": "#/$defs/string_array"},
+        "may_not_override": {"$ref": "#/$defs/string_array"}
+      }
+    },
+    "lifecycle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["program_states", "wire_contract", "wire_mapping", "allowed_transitions", "completion_gate"],
+      "properties": {
+        "program_states": {
+          "type": "array",
+          "minItems": 7,
+          "items": {"type": "string", "enum": ["unplanned", "planned", "ready", "in_progress", "review", "completed", "blocked"]}
+        },
+        "wire_contract": {"const": "atlas.card-record.v2"},
+        "wire_mapping": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["unplanned", "planned", "ready", "in_progress", "review", "completed", "blocked"],
+          "properties": {
+            "unplanned": {"const": "intake"},
+            "planned": {"const": "planning"},
+            "ready": {"const": "ready"},
+            "in_progress": {"const": "in-progress"},
+            "review": {"const": "review"},
+            "completed": {"const": "completed"},
+            "blocked": {"const": "blocked"}
+          }
+        },
+        "allowed_transitions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["from", "to"],
+            "properties": {
+              "from": {"type": "string"},
+              "to": {"$ref": "#/$defs/string_array"}
+            }
+          }
+        },
+        "completion_gate": {"$ref": "#/$defs/string_array"}
+      }
+    },
+    "evidence_dimension": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dimension_id", "title", "minimum_evidence", "existing_contract_refs", "absence_policy"],
+      "properties": {
+        "dimension_id": {"type": "string", "enum": ["routes", "devices", "accessibility", "visual", "runtime", "change_checklist"]},
+        "title": {"type": "string", "minLength": 1},
+        "minimum_evidence": {"$ref": "#/$defs/string_array"},
+        "existing_contract_refs": {"$ref": "#/$defs/string_array"},
+        "absence_policy": {"type": "string", "enum": ["block", "manual_required", "explicit_not_applicable"]}
+      }
+    },
+    "enforcement_tier": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tier_id", "qa_modes", "receipt_origins", "required_dimensions", "gate"],
+      "properties": {
+        "tier_id": {"type": "string", "enum": ["local", "ci", "release"]},
+        "qa_modes": {"$ref": "#/$defs/string_array"},
+        "receipt_origins": {"$ref": "#/$defs/string_array"},
+        "required_dimensions": {"$ref": "#/$defs/string_array"},
+        "gate": {"type": "string", "minLength": 1}
+      }
+    },
+    "standard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["standard_id", "version", "title", "status", "enforcement_state", "statement", "owner", "evidence_dimensions", "enforcement_tiers", "source_refs", "successor_ids", "notes"],
+      "properties": {
+        "standard_id": {"type": "string", "pattern": "^ATLAS-UI-[A-Z0-9]{3,5}-[0-9]{3}$"},
+        "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+        "title": {"type": "string", "minLength": 1},
+        "status": {"type": "string", "enum": ["accepted", "candidate", "deferred", "superseded"]},
+        "enforcement_state": {"type": "string", "enum": ["root-defined", "owner-adoption-required", "enforced", "retired"]},
+        "statement": {"type": "string", "minLength": 1},
+        "owner": {"type": "string", "minLength": 1},
+        "evidence_dimensions": {"$ref": "#/$defs/string_array"},
+        "enforcement_tiers": {"$ref": "#/$defs/string_array"},
+        "source_refs": {"$ref": "#/$defs/string_array"},
+        "successor_ids": {"$ref": "#/$defs/string_array"},
+        "notes": {"$ref": "#/$defs/string_array"}
+      }
+    },
+    "adoption_profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["profile_id", "title", "applicability", "qa_release_profile", "extends", "required_standard_ids", "required_evidence_dimensions", "required_lenses", "local_gate", "ci_gate", "release_gate", "exception_policy"],
+      "properties": {
+        "profile_id": {"type": "string", "pattern": "^atlas-ui-profile-[a-z0-9-]+-v[0-9]+$"},
+        "title": {"type": "string", "minLength": 1},
+        "applicability": {"type": "string", "minLength": 1},
+        "qa_release_profile": {"type": "string", "enum": ["web_visual", "release_critical_web", "package_contract", "docs_governance", "not_applicable"]},
+        "extends": {"type": ["string", "null"]},
+        "required_standard_ids": {"$ref": "#/$defs/string_array"},
+        "required_evidence_dimensions": {"$ref": "#/$defs/string_array"},
+        "required_lenses": {"$ref": "#/$defs/string_array"},
+        "local_gate": {"$ref": "#/$defs/string_array"},
+        "ci_gate": {"$ref": "#/$defs/string_array"},
+        "release_gate": {"$ref": "#/$defs/string_array"},
+        "exception_policy": {"type": "string", "minLength": 1}
+      }
+    },
+    "metric": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["metric_id", "title", "unit", "numerator_definition", "denominator_definition", "denominator_freeze_rule", "source_contract", "marker_policy", "display"],
+      "properties": {
+        "metric_id": {"type": "string", "pattern": "^atlas-ui-metric-[a-z0-9-]+-v[0-9]+$"},
+        "title": {"type": "string", "minLength": 1},
+        "unit": {"type": "string", "minLength": 1},
+        "numerator_definition": {"type": "string", "minLength": 1},
+        "denominator_definition": {"type": "string", "minLength": 1},
+        "denominator_freeze_rule": {"type": "string", "minLength": 1},
+        "source_contract": {"type": "string", "minLength": 1},
+        "marker_policy": {"type": "string", "minLength": 1},
+        "display": {"type": "string", "enum": ["count", "ratio", "derived_percentage"]}
+      }
+    },
+    "migration_wave": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["wave_id", "sequence", "title", "objective", "entry_criteria", "exit_criteria", "depends_on"],
+      "properties": {
+        "wave_id": {"type": "string", "pattern": "^atlas-ui-wave-[0-9]+-[a-z0-9-]+$"},
+        "sequence": {"type": "integer", "minimum": 0},
+        "title": {"type": "string", "minLength": 1},
+        "objective": {"type": "string", "minLength": 1},
+        "entry_criteria": {"$ref": "#/$defs/string_array"},
+        "exit_criteria": {"$ref": "#/$defs/string_array"},
+        "depends_on": {"$ref": "#/$defs/string_array"}
+      }
+    },
+    "rule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rule_id", "statement"],
+      "properties": {
+        "rule_id": {"type": "string", "pattern": "^atlas-ui-collision-[0-9]{3}$"},
+        "statement": {"type": "string", "minLength": 1}
+      }
+    },
+    "boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["owner", "ingests", "rejects", "promotion_gate"],
+      "properties": {
+        "owner": {"type": "string", "minLength": 1},
+        "ingests": {"$ref": "#/$defs/string_array"},
+        "rejects": {"$ref": "#/$defs/string_array"},
+        "promotion_gate": {"type": "string", "minLength": 1}
+      }
+    },
+    "encoding_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["normative_encoding", "normative_character_set", "enforced_refs", "evidence_exceptions"],
+      "properties": {
+        "normative_encoding": {"const": "utf-8"},
+        "normative_character_set": {"const": "ascii"},
+        "enforced_refs": {"$ref": "#/$defs/string_array"},
+        "evidence_exceptions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["ref", "sha256", "reason"],
+            "properties": {
+              "ref": {"type": "string", "minLength": 1},
+              "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+              "reason": {"type": "string", "minLength": 1}
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,370 @@
+{
+  "registry_version": "atlas.ui-standards.candidate-cards.v1",
+  "generated_at": "2026-07-15T12:00:00Z",
+  "source_registry_ref": "docs/registry/ATLAS-UI-STANDARDS-REGISTRY.v1.json",
+  "mutation_authorized": false,
+  "packets": [
+    {
+      "packet_id": "atlas-ui-owner-adoption-fitness-v1",
+      "packet_kind": "owner-adoption",
+      "target_repo_id": "fitness",
+      "target_repo_path": "repos/fawxzzy-fitness",
+      "profile_candidate": "atlas-ui-profile-web-release-critical-v1",
+      "program_lifecycle": "unplanned",
+      "card": {
+        "contract_version": "atlas.card-record.v2",
+        "card_id": "ui-standards-adoption-fitness",
+        "project_id": "fitness",
+        "board_id": "candidate:atlas-ui-standards",
+        "title": "Adopt the ATLAS UI standards profile in Fitness",
+        "description": "Ratify applicability, baseline current owner UI truth, and extend the existing QA LLEL lane without replacing Fitness tooling.",
+        "card_type": "migration",
+        "lifecycle": "intake",
+        "priority": null,
+        "owner": "fitness",
+        "dependencies": [],
+        "board_version": 0,
+        "updated_at": "2026-07-15T12:00:00Z",
+        "source_ref": "docs/registry/ATLAS-UI-STANDARDS-CANDIDATE-CARDS.v1.json#atlas-ui-owner-adoption-fitness-v1",
+        "extensions": {
+          "ui_standards_program_lifecycle": "unplanned",
+          "profile_candidate": "atlas-ui-profile-web-release-critical-v1",
+          "projection_authorized": false,
+          "percentage": null,
+          "denominator_status": "unaccepted"
+        }
+      },
+      "objective": "Use the existing Fitness release-critical QA profile, owner route truth, and deterministic proof lanes to produce the first owner adoption baseline.",
+      "acceptance_criteria": [
+        "Fitness accepts or revises the proposed profile in owner truth.",
+        "Applicable routes, states, components, and required controls have a frozen baseline.",
+        "Accessibility evidence is added without weakening existing semantic or visual proof.",
+        "Owner-produced evidence is root-readable for the target revision.",
+        "Any marker is created only after the denominator is accepted."
+      ],
+      "scope": {
+        "included": ["Owner-side discovery", "Owner-side profile adoption", "Existing QA adapter and scenario extension", "Baseline findings"],
+        "excluded": ["Production deploy", "Discord mutation", "Supabase mutation", "Secrets", "Unrelated product work"]
+      },
+      "verification": ["Fitness repo-local verify", "ATLAS QA compatibility report", "Focused accessibility and visual evidence", "Root adoption drift readback"],
+      "dependencies": ["docs/ops/ATLAS-UI-STANDARDS-ROOT-FOUNDATION-2026-07-15.md"],
+      "marker": {"status": "unmeasured", "percentage": null, "denominator": null}
+    },
+    {
+      "packet_id": "atlas-ui-owner-adoption-trove-v1",
+      "packet_kind": "owner-adoption",
+      "target_repo_id": "trove",
+      "target_repo_path": "repos/trove",
+      "profile_candidate": "atlas-ui-profile-web-standard-v1",
+      "program_lifecycle": "unplanned",
+      "card": {
+        "contract_version": "atlas.card-record.v2",
+        "card_id": "ui-standards-adoption-trove",
+        "project_id": "trove",
+        "board_id": "candidate:atlas-ui-standards",
+        "title": "Adopt the ATLAS UI standards profile in Trove",
+        "description": "Reconcile Trove's existing web_visual QA and Fawxzzy theme adoption with the stable UI standard IDs.",
+        "card_type": "migration",
+        "lifecycle": "intake",
+        "priority": null,
+        "owner": "trove",
+        "dependencies": [],
+        "board_version": 0,
+        "updated_at": "2026-07-15T12:00:00Z",
+        "source_ref": "docs/registry/ATLAS-UI-STANDARDS-CANDIDATE-CARDS.v1.json#atlas-ui-owner-adoption-trove-v1",
+        "extensions": {
+          "ui_standards_program_lifecycle": "unplanned",
+          "profile_candidate": "atlas-ui-profile-web-standard-v1",
+          "projection_authorized": false,
+          "percentage": null,
+          "denominator_status": "unaccepted"
+        }
+      },
+      "objective": "Map Trove's existing web QA and selected shared theme inputs to the standard web profile without making the root theme pack owner implementation truth.",
+      "acceptance_criteria": [
+        "Trove accepts or revises the standard web profile.",
+        "Owner routes and components are inventoried at a target revision.",
+        "Existing web_visual evidence is correlated to the new standard IDs.",
+        "Theme adoption remains an owner decision with explicit compatibility proof.",
+        "No marker is inferred from root adapter presence."
+      ],
+      "scope": {
+        "included": ["Owner-side discovery", "Profile mapping", "Existing QA and theme evidence reconciliation"],
+        "excluded": ["Production deploy", "Discord mutation", "Secrets", "Unrelated product work"]
+      },
+      "verification": ["Trove repo-local verify", "ATLAS QA compatibility report", "Root adoption drift readback"],
+      "dependencies": ["docs/ops/ATLAS-UI-STANDARDS-ROOT-FOUNDATION-2026-07-15.md"],
+      "marker": {"status": "unmeasured", "percentage": null, "denominator": null}
+    },
+    {
+      "packet_id": "atlas-ui-owner-profile-mazer-v1",
+      "packet_kind": "owner-adoption",
+      "target_repo_id": "mazer",
+      "target_repo_path": "repos/mazer",
+      "profile_candidate": null,
+      "program_lifecycle": "unplanned",
+      "card": {
+        "contract_version": "atlas.card-record.v2",
+        "card_id": "ui-standards-profile-mazer",
+        "project_id": "mazer",
+        "board_id": "candidate:atlas-ui-standards",
+        "title": "Select and baseline the ATLAS UI standards profile for Mazer",
+        "description": "Inventory Mazer UI scope and select a profile before any migration or enforcement claim.",
+        "card_type": "research",
+        "lifecycle": "intake",
+        "priority": null,
+        "owner": "mazer",
+        "dependencies": [],
+        "board_version": 0,
+        "updated_at": "2026-07-15T12:00:00Z",
+        "source_ref": "docs/registry/ATLAS-UI-STANDARDS-CANDIDATE-CARDS.v1.json#atlas-ui-owner-profile-mazer-v1",
+        "extensions": {
+          "ui_standards_program_lifecycle": "unplanned",
+          "profile_candidate": "owner-selection-required",
+          "projection_authorized": false,
+          "percentage": null,
+          "denominator_status": "unaccepted"
+        }
+      },
+      "objective": "Classify Mazer's browser, mobile, game, and release-critical UI surfaces and select the smallest applicable profile with owner evidence.",
+      "acceptance_criteria": [
+        "Mazer UI applicability and release criticality are owner-approved.",
+        "Current route or scene surfaces and repo-native proof commands are inventoried.",
+        "A profile and denominator proposal are recorded without implementation claims.",
+        "Existing production or visual proof is not relabeled as standards adoption without target-revision correlation."
+      ],
+      "scope": {
+        "included": ["Owner-side inventory", "Profile selection", "Evidence mapping"],
+        "excluded": ["Feature work", "Production deploy", "Board mutation", "Secrets"]
+      },
+      "verification": ["Mazer repo-local inventory and verify", "ATLAS QA compatibility report when an adapter is proposed"],
+      "dependencies": ["docs/ops/ATLAS-UI-STANDARDS-ROOT-FOUNDATION-2026-07-15.md"],
+      "marker": {"status": "unmeasured", "percentage": null, "denominator": null}
+    },
+    {
+      "packet_id": "atlas-ui-owner-profile-socials-os-v1",
+      "packet_kind": "owner-adoption",
+      "target_repo_id": "socials-os",
+      "target_repo_path": "repos/socials-os",
+      "profile_candidate": null,
+      "program_lifecycle": "unplanned",
+      "card": {
+        "contract_version": "atlas.card-record.v2",
+        "card_id": "ui-standards-profile-socials-os",
+        "project_id": "socials-os",
+        "board_id": "candidate:atlas-ui-standards",
+        "title": "Classify ATLAS UI standards applicability for Socials OS",
+        "description": "Determine whether Socials OS has governed UI surfaces and select a profile or explicit not-applicable disposition.",
+        "card_type": "research",
+        "lifecycle": "intake",
+        "priority": null,
+        "owner": "socials-os",
+        "dependencies": [],
+        "board_version": 0,
+        "updated_at": "2026-07-15T12:00:00Z",
+        "source_ref": "docs/registry/ATLAS-UI-STANDARDS-CANDIDATE-CARDS.v1.json#atlas-ui-owner-profile-socials-os-v1",
+        "extensions": {
+          "ui_standards_program_lifecycle": "unplanned",
+          "profile_candidate": "owner-selection-required",
+          "projection_authorized": false,
+          "percentage": null,
+          "denominator_status": "unaccepted"
+        }
+      },
+      "objective": "Produce an owner-approved UI applicability decision for Socials OS before any adapter, finding, or marker work.",
+      "acceptance_criteria": [
+        "UI-bearing surfaces are inventoried or an explicit not-applicable decision is evidenced.",
+        "The owner selects a profile if UI is in scope.",
+        "No analytics or data-system runtime is changed during discovery.",
+        "No marker is created before a denominator is accepted."
+      ],
+      "scope": {
+        "included": ["Owner-side applicability inventory", "Profile selection"],
+        "excluded": ["Data mutation", "Production deploy", "Board mutation", "Secrets"]
+      },
+      "verification": ["Socials OS repo-local discovery and verify", "Root registry validation"],
+      "dependencies": ["docs/ops/ATLAS-UI-STANDARDS-ROOT-FOUNDATION-2026-07-15.md"],
+      "marker": {"status": "unmeasured", "percentage": null, "denominator": null}
+    },
+    {
+      "packet_id": "atlas-ui-owner-profile-stream-v1",
+      "packet_kind": "owner-adoption",
+      "target_repo_id": "stream",
+      "target_repo_path": "repos/stream",
+      "profile_candidate": null,
+      "program_lifecycle": "unplanned",
+      "card": {
+        "contract_version": "atlas.card-record.v2",
+        "card_id": "ui-standards-profile-stream",
+        "project_id": "stream",
+        "board_id": "candidate:atlas-ui-standards",
+        "title": "Classify ATLAS UI standards applicability for Stream",
+        "description": "Replace prototype-only root assumptions with an owner-approved applicability and profile decision.",
+        "card_type": "research",
+        "lifecycle": "intake",
+        "priority": null,
+        "owner": "stream",
+        "dependencies": [],
+        "board_version": 0,
+        "updated_at": "2026-07-15T12:00:00Z",
+        "source_ref": "docs/registry/ATLAS-UI-STANDARDS-CANDIDATE-CARDS.v1.json#atlas-ui-owner-profile-stream-v1",
+        "extensions": {
+          "ui_standards_program_lifecycle": "unplanned",
+          "profile_candidate": "owner-selection-required",
+          "projection_authorized": false,
+          "percentage": null,
+          "denominator_status": "unaccepted"
+        }
+      },
+      "objective": "Inventory Stream owner truth and decide whether a visual, shared UI, or not-applicable profile is correct.",
+      "acceptance_criteria": [
+        "Stream owner truth replaces prototype-only root assumptions.",
+        "A profile or explicit not-applicable disposition is accepted.",
+        "Any adapter proposal wraps repo-native commands.",
+        "No adoption claim comes from root prototype files alone."
+      ],
+      "scope": {
+        "included": ["Owner-side applicability inventory", "Profile selection", "Prototype reconciliation"],
+        "excluded": ["Runtime implementation", "Production deploy", "Board mutation", "Secrets"]
+      },
+      "verification": ["Stream repo-local discovery and verify", "ATLAS adoption drift readback if an adapter is added"],
+      "dependencies": ["docs/ops/ATLAS-UI-STANDARDS-ROOT-FOUNDATION-2026-07-15.md"],
+      "marker": {"status": "unmeasured", "percentage": null, "denominator": null}
+    },
+    {
+      "packet_id": "atlas-ui-owner-profile-nat1-games-v1",
+      "packet_kind": "owner-adoption",
+      "target_repo_id": "nat1-games",
+      "target_repo_path": "repos/Nat1-Games/nat1-games",
+      "profile_candidate": null,
+      "program_lifecycle": "unplanned",
+      "card": {
+        "contract_version": "atlas.card-record.v2",
+        "card_id": "ui-standards-profile-nat1-games",
+        "project_id": "nat1-games",
+        "board_id": "candidate:atlas-ui-standards",
+        "title": "Classify ATLAS UI standards applicability for Nat1 Games",
+        "description": "Determine the governed UI surface and evidence profile only after the owner repo is ready for inspection.",
+        "card_type": "research",
+        "lifecycle": "intake",
+        "priority": null,
+        "owner": "nat1-games",
+        "dependencies": [],
+        "board_version": 0,
+        "updated_at": "2026-07-15T12:00:00Z",
+        "source_ref": "docs/registry/ATLAS-UI-STANDARDS-CANDIDATE-CARDS.v1.json#atlas-ui-owner-profile-nat1-games-v1",
+        "extensions": {
+          "ui_standards_program_lifecycle": "unplanned",
+          "profile_candidate": "owner-selection-required",
+          "projection_authorized": false,
+          "percentage": null,
+          "denominator_status": "unaccepted"
+        }
+      },
+      "objective": "Establish owner availability, UI applicability, and profile selection without treating the current incubating registration as adoption proof.",
+      "acceptance_criteria": [
+        "Owner repo access and target revision are current.",
+        "UI applicability and profile selection are owner-approved.",
+        "No remote recovery or product work is folded into standards discovery.",
+        "No denominator or marker is inferred from registration status."
+      ],
+      "scope": {
+        "included": ["Owner availability check", "UI applicability inventory", "Profile selection"],
+        "excluded": ["Remote repair", "Feature work", "Production deploy", "Board mutation", "Secrets"]
+      },
+      "verification": ["Nat1 Games repo-local discovery and verify after owner admission", "Root registry validation"],
+      "dependencies": ["docs/ops/ATLAS-UI-STANDARDS-ROOT-FOUNDATION-2026-07-15.md"],
+      "marker": {"status": "unmeasured", "percentage": null, "denominator": null}
+    },
+    {
+      "packet_id": "atlas-ui-owner-profile-discordos-v1",
+      "packet_kind": "owner-adoption",
+      "target_repo_id": "discordos",
+      "target_repo_path": "repos/DiscordOS",
+      "profile_candidate": null,
+      "program_lifecycle": "unplanned",
+      "card": {
+        "contract_version": "atlas.card-record.v2",
+        "card_id": "ui-standards-profile-discordos",
+        "project_id": "discordos",
+        "board_id": "candidate:atlas-ui-standards",
+        "title": "Classify ATLAS UI standards applicability for DiscordOS",
+        "description": "Separate any browser-facing DiscordOS UI from the canonical board/publication writer before selecting a profile.",
+        "card_type": "research",
+        "lifecycle": "intake",
+        "priority": null,
+        "owner": "discordos",
+        "dependencies": [],
+        "board_version": 0,
+        "updated_at": "2026-07-15T12:00:00Z",
+        "source_ref": "docs/registry/ATLAS-UI-STANDARDS-CANDIDATE-CARDS.v1.json#atlas-ui-owner-profile-discordos-v1",
+        "extensions": {
+          "ui_standards_program_lifecycle": "unplanned",
+          "profile_candidate": "owner-selection-required",
+          "projection_authorized": false,
+          "percentage": null,
+          "denominator_status": "unaccepted"
+        }
+      },
+      "objective": "Identify any DiscordOS user interface in scope while preserving its separate single-writer board and publication authority.",
+      "acceptance_criteria": [
+        "UI applicability is separated from board and publication runtime responsibilities.",
+        "A profile or explicit not-applicable disposition is owner-approved.",
+        "No live board or Discord state changes during discovery.",
+        "Any later candidate card is applied only through the DiscordOS writer and readback path."
+      ],
+      "scope": {
+        "included": ["Owner-side UI applicability inventory", "Profile selection"],
+        "excluded": ["Discord mutation", "Board mutation", "Runtime cutover", "Production deploy", "Secrets"]
+      },
+      "verification": ["DiscordOS repo-local discovery and verify", "Single-writer boundary review"],
+      "dependencies": ["docs/ops/ATLAS-UI-STANDARDS-ROOT-FOUNDATION-2026-07-15.md"],
+      "marker": {"status": "unmeasured", "percentage": null, "denominator": null}
+    },
+    {
+      "packet_id": "atlas-ui-knowledge-promotion-playbook-v1",
+      "packet_kind": "knowledge-promotion",
+      "target_repo_id": "playbook",
+      "target_repo_path": "repos/playbook",
+      "profile_candidate": null,
+      "program_lifecycle": "unplanned",
+      "card": {
+        "contract_version": "atlas.card-record.v2",
+        "card_id": "ui-standards-knowledge-promotion-playbook",
+        "project_id": "playbook",
+        "board_id": "candidate:atlas-ui-standards",
+        "title": "Review verified UI failure patterns for Playbook promotion",
+        "description": "Promote only repeated, verified UI failure patterns through KnowledgeCandidate review after owner adoption produces evidence.",
+        "card_type": "governance",
+        "lifecycle": "intake",
+        "priority": null,
+        "owner": "playbook",
+        "dependencies": [],
+        "board_version": 0,
+        "updated_at": "2026-07-15T12:00:00Z",
+        "source_ref": "docs/registry/ATLAS-UI-STANDARDS-CANDIDATE-CARDS.v1.json#atlas-ui-knowledge-promotion-playbook-v1",
+        "extensions": {
+          "ui_standards_program_lifecycle": "unplanned",
+          "profile_candidate": "not-applicable",
+          "projection_authorized": false,
+          "percentage": null,
+          "denominator_status": "unaccepted"
+        }
+      },
+      "objective": "Review evidence-backed repeated UI findings and decide whether they become Playbook rules, patterns, failure modes, or rejected candidates.",
+      "acceptance_criteria": [
+        "Each candidate references repeated verified owner findings and exact provenance.",
+        "Candidates use atlas.knowledge-candidate.v2 review states.",
+        "Raw research and Atlas registry bodies are not copied into Playbook doctrine.",
+        "Playbook remains the doctrine owner and Atlas records source-linked adoption only."
+      ],
+      "scope": {
+        "included": ["KnowledgeCandidate review", "Owner-side doctrine promotion when accepted"],
+        "excluded": ["Raw report ingestion as doctrine", "Automatic enforcement", "Owner repo mutation outside Playbook"]
+      },
+      "verification": ["Playbook repo-local verify", "Playbook doctrine registry validation", "Atlas source-linked adoption validator"],
+      "dependencies": ["At least two verified occurrences or one explicitly accepted systemic failure pattern"],
+      "marker": {"status": "unmeasured", "percentage": null, "denominator": null}
+    }
+  ]
+}
