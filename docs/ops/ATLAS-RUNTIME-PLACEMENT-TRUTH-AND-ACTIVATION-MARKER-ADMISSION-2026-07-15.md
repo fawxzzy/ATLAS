@@ -180,12 +180,15 @@ Historical receipts remain preserved. Their marker values are not rewritten.
 - Runtime placement schema and semantic validation reports `issue_count=0`.
   Schema definition, required fields, and date-time formats use the shared
   Draft 2020-12 validator with its dependency-free supported-subset fallback.
-- Runtime placement plus read-only-cleanup unit coverage passes `20` tests.
+- Evidence refs remain strict for committed root-owned paths and for paths
+  inside present owner/runtime contexts, while absent `repos/<owner>` and
+  `runtime/<surface>` contexts remain portable in source-only checkouts.
+- Runtime placement plus read-only-cleanup unit coverage passes `24` tests.
 - Project-board owner export and projection coverage passes `25` tests; the
   deterministic export check reports `34` Atlas cards, `2` Cortex cards,
   `discord_mutation_authorized=false`, and source revision
   `sha256:2e299105e883c9640bcb83dd4e040873377286ede98923be4dd5540a6dc6546d`.
-- Combined focused Python coverage passes `45` tests. Marker evidence admission
+- Combined focused Python coverage passes `49` tests. Marker evidence admission
   coverage separately passes `10` tests.
 - Canonical root validation with `--skip-generated-state-cleanup` reports
   `0 critical / 0 error / 5 warning / 0 info`. All warnings are pre-existing:
@@ -205,11 +208,10 @@ Historical receipts remain preserved. Their marker values are not rewritten.
   `7ad120b3b17b5a8b3eb210eecc33666763cdd8e62406e23cc1c804d5cc3a4388`.
 - Twelve of thirteen nested owner repositories retain their exact pre-packet
   heads and status. `repos/socials-os` changed concurrently under its owner
-  lane: its head advanced from `78c1330f` through `12c0e41b` to clean
-  `7ee8a25c1a9258d0228ae84ba6db0b7d95a4b994` in owner commits at
-  `2026-07-15T18:33:56Z` and `2026-07-15T18:56:03Z`; its standing owner
-  receipt reports `origin/main` parity `0 / 0`. This root packet did not touch,
-  fetch, stage, revert, or commit that repository.
+  lane from `78c1330f` through later owner commits to clean
+  `3f9db3e3153dce0abae8fd20c284f008c4063a88`; its standing owner receipt
+  reports `origin/main` parity `0 / 0`. This root packet did not touch, fetch,
+  stage, revert, or commit that repository.
 
 Canonical validation reports no stack-lock or stack-inventory drift, so neither
 generated truth surface is refreshed. Established generators own the refreshed

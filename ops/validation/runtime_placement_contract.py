@@ -5,7 +5,7 @@ import json
 import re
 import sys
 from dataclasses import asdict, dataclass
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -205,6 +205,17 @@ def _machine_specific_path(value: str) -> bool:
     )
 
 
+def _relative_evidence_context_available(root: Path, evidence_ref: str) -> bool:
+    relative_ref = evidence_ref.split("#", 1)[0].split("@", 1)[0].replace("\\", "/")
+    parts = PurePosixPath(relative_ref).parts
+    if len(parts) >= 2 and parts[0] == "repos":
+        return (root / parts[0] / parts[1]).exists()
+    if parts and parts[0] == "runtime":
+        context_parts = parts[:2] if len(parts) >= 2 else parts[:1]
+        return root.joinpath(*context_parts).exists()
+    return True
+
+
 def _all_lane_records(lane_payload: dict[str, Any]) -> dict[str, dict[str, Any]]:
     records: dict[str, dict[str, Any]] = {}
     for section in ("lanes", "backlog_candidates"):
@@ -314,7 +325,7 @@ def validate_runtime_placement_payloads(
                 issues.append(_issue("runtime-placement-machine-path", f"{path}.evidence_refs", "Evidence refs must not contain machine-specific absolute paths.", evidence_ref=evidence_ref))
             if "://" not in evidence_ref and not evidence_ref.startswith("git:"):
                 evidence_path = root / evidence_ref.split("#", 1)[0].split("@", 1)[0]
-                if not evidence_path.exists():
+                if _relative_evidence_context_available(root, evidence_ref) and not evidence_path.exists():
                     issues.append(_issue("runtime-placement-evidence-missing", f"{path}.evidence_refs", "Relative evidence ref does not exist.", evidence_ref=evidence_ref))
 
     if used_placements != set(PLACEMENT_TYPES):
