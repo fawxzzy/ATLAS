@@ -16,7 +16,7 @@ guessing.
 | Project | Current source evidence | Candidate records | Admission state | Blocking reason codes |
 | --- | --- | ---: | --- | --- |
 | Atlas | `docs/registry/project-board-owner-exports/atlas.project-board.owner-export.v1.json`, projected deterministically from the Atlas Book and full-system registry | 33 contract-valid records: 7 non-executable marker parents, 10 direct lanes, 16 root-governance backlog records | Owner export implemented; DiscordOS admission and seeding remain pending | `BOARD_UNADMITTED`, `DISCORD_FORUM_MISSING`, `SEED_NOT_EXECUTED` |
-| DiscordOS | No accepted owner-repo work export; five Atlas-attributed candidates exist outside the owner repo | 0 owner records; 5 Atlas candidates | Blocked | `NO_OWNER_WORK_EXPORT`, `OWNER_CHECKOUT_STALE`, `ATLAS_ONLY_CANDIDATES` |
+| DiscordOS | `repos/DiscordOS/exports/discordos.project-board.owner-export.v1.json`, projected deterministically from `repos/DiscordOS/config/discordos-owner-work-registry.json` | 5 contract-valid non-complete records: 1 in progress, 1 planned, 2 intake candidates, and 1 planned-later item; 3 completed records excluded | Owner export implemented and merged; DiscordOS admission and seeding remain pending | `BOARD_UNADMITTED`, `DISCORD_FORUM_MISSING`, `SEED_NOT_EXECUTED` |
 | Foundation | `repos/foundation/exports/foundation.project-board.owner-export.v1.json`, projected deterministically from `repos/foundation/docs/roadmap/FOUNDATION_ROADMAP.json` | 6 contract-valid non-complete records: 3 planned and 3 planned-later | Owner export implemented; DiscordOS admission and seeding remain pending | `BOARD_UNADMITTED`, `DISCORD_FORUM_MISSING`, `SEED_NOT_EXECUTED` |
 | Lifeline | `repos/lifeline/exports/lifeline.project-board.owner-export.v1.json`, projected deterministically from `repos/lifeline/docs/roadmap/LIFELINE_ROADMAP.json` | 2 contract-valid intake candidates; 8 completed capabilities excluded | Owner export implemented on the currently pinned owner branch; DiscordOS admission and seeding remain pending | `BOARD_UNADMITTED`, `DISCORD_FORUM_MISSING`, `SEED_NOT_EXECUTED` |
 | Cortex | `docs/registry/project-board-owner-exports/cortex.project-board.owner-export.v1.json`, projected deterministically from the root subsystem registry and Atlas planning source | 2 contract-valid root-owned subsystem records | Owner export implemented; DiscordOS admission and seeding remain pending | `BOARD_UNADMITTED`, `DISCORD_FORUM_MISSING`, `SEED_NOT_EXECUTED` |
@@ -58,10 +58,15 @@ unresolved remote repository is not owner authority.
 
 ### DiscordOS
 
-The board writer role does not imply a project work queue. DiscordOS needs its
-own owner export before Atlas-attributed infrastructure candidates can be
-admitted. Current local owner-branch staleness must be resolved or explicitly
-versioned in the export receipt.
+The board writer role does not imply a project work queue. DiscordOS pull
+request `#82` merged the owner-governed machine registry and deterministic
+export at `3189a56b79daaae84c68f89fa4eb9552d91fc88a`. The export reconciles the
+earlier Atlas-attributed candidates into exactly 5 non-complete owner records,
+excludes completed writer foundations, Mazer board reconciliation, and the
+export-governance record, preserves unknown priority as `null`, and records
+`discord_mutation_authorized: false`. Seven focused tests, the full DiscordOS
+verification suite, owner evidence-path checks, and Atlas Contracts validation
+all pass. This closes only the owner-export prerequisite.
 
 ### Foundation and Lifeline
 
@@ -120,9 +125,8 @@ live readback.
    Contracts.
 2. Retain the implemented Atlas/Cortex root-owned aggregation adapter and the
    merged Playbook canonical-owner-JSON adapter as two accepted proof classes.
-3. Retain the implemented Foundation, Lifeline, and `_stack` adapters and
-   implement the DiscordOS adapter only after its owner-source blocker is
-   resolved.
+3. Retain the implemented Foundation, Lifeline, `_stack`, and DiscordOS
+   adapters as owner-governed sources.
 4. Validate every export without Discord mutation.
 5. Create the seven empty forums through the DiscordOS single writer and read
    back exact channel identity.
@@ -136,6 +140,7 @@ This inventory does not create forums, create cards, move cards, assign missing
 priority, reinterpret roadmap status, mutate owner repositories, or advance the
 DiscordOS Cross-Project Board Integrity & Lifecycle Repair marker.
 
-Supporting owner-export readiness is now `6 / 7` (`85.7%`): Atlas, Cortex,
-Playbook, Foundation, Lifeline, and `_stack` are contract-valid. This is not the official board
-integrity marker and does not move its fixed `0 / 10` denominator.
+Supporting owner-export readiness is now `7 / 7` (`100%`): Atlas, DiscordOS,
+Cortex, Playbook, Foundation, Lifeline, and `_stack` are contract-valid. This
+is not the official board integrity marker and does not move its fixed `0 / 10`
+denominator.

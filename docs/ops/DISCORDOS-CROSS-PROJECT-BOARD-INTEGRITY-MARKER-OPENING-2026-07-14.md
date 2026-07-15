@@ -109,6 +109,13 @@ includes:
 - `_stack` commit `dd8e61a` now publishes a contract-valid zero-card owner
   export from an explicit `ready-empty` registry, rejects implicit Atlas
   candidate admission, and passes the full operator plus Atlas Contracts suites;
+- DiscordOS pull request `#82` at `3189a56` now publishes the seventh
+  contract-valid owner export from an owner-governed registry with exactly `5`
+  non-complete records, excludes `3` completed evidence records, preserves
+  unknown priority as `null`, reconciles the earlier Atlas-attributed
+  candidates, disables Discord mutation, and passes seven focused tests, the
+  full DiscordOS suite, evidence-path validation, and Atlas Contracts
+  validation;
 - Unicode prevention and exact readback merged through DiscordOS pull requests
   `#76` and `#77`;
 - a complete post-merge scan showing `0` current/actionable text findings while
@@ -125,9 +132,9 @@ See:
 - `docs/ops/DISCORDOS-IMMUTABLE-SYSTEM-HISTORY-RECONCILIATION-2026-07-14.md`.
 
 No unit moves because seven required board classes remain unadmitted. Supporting
-owner-export readiness is `6 / 7` (`85.7%`) for Atlas, Cortex, Playbook,
-Foundation, Lifeline, and `_stack`, but their forums, registry admission, seeds, readback, and all-board
-proof are not complete. The reaction, movement, full
+owner-export readiness is now `7 / 7` (`100%`) for Atlas, DiscordOS, Cortex,
+Playbook, Foundation, Lifeline, and `_stack`, but their forums, registry
+admission, seeds, readback, and all-board proof are not complete. The reaction, movement, full
 lifecycle, formatting, and recurring drift-proof
 requirements are not yet closed across the full denominator. The superseded
 all-surface text gap is closed for the five enabled boards but cannot ratchet
