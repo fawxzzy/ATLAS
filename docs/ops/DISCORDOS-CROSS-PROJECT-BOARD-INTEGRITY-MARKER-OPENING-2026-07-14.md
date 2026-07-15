@@ -91,6 +91,9 @@ includes:
   cluster;
 - `atlas.project-board.owner-export.v1` registered and validated in Atlas
   Contracts;
+- the Playbook canonical owner export merged through Playbook pull request
+  `#24` at `8796b335`, publishing 35 contract-valid non-complete roadmap
+  records with a cross-platform-stable source revision;
 - Unicode prevention and exact readback merged through DiscordOS pull requests
   `#76` and `#77`;
 - a complete post-merge scan showing `0` current/actionable text findings while
@@ -106,8 +109,10 @@ See:
 - `docs/ops/DISCORDOS-TEXT-INTEGRITY-RECONNAISSANCE-2026-07-14.md`;
 - `docs/ops/DISCORDOS-IMMUTABLE-SYSTEM-HISTORY-RECONCILIATION-2026-07-14.md`.
 
-No unit moves because seven required board classes remain unadmitted and the
-reaction, movement, full lifecycle, formatting, and recurring drift-proof
+No unit moves because seven required board classes remain unadmitted. Playbook
+now has an accepted owner export, but its forum, registry admission, seed,
+readback, and all-board proof are not complete. The reaction, movement, full
+lifecycle, formatting, and recurring drift-proof
 requirements are not yet closed across the full denominator. The superseded
 all-surface text gap is closed for the five enabled boards but cannot ratchet
 unit 8 until all required board classes are admitted.

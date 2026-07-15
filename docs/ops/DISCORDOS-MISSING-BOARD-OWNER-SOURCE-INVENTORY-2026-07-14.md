@@ -21,7 +21,7 @@ guessing.
 | Lifeline | `repos/lifeline/.playbook/plan.json` and owner README | 1 underspecified next milestone; machine plan has 0 tasks | Blocked | `EMPTY_MACHINE_PLAN`, `UNKEYED_NEXT_MILESTONE`, `STALE_ROOT_INITIATIVE_CONFLICT` |
 | Cortex | Root subsystem registry and Atlas planning sources | 2 candidates | Partial; root-owned subsystem export required | `ROOT_OWNED_SUBSYSTEM`, `MANIFEST_STATUS_CONFLICT`, `HELD_NO_IMMEDIATE_PACKET` |
 | `_stack` | `repos/_stack/queue/README.md` plus Atlas candidates | 0 owner queue records; 5 Atlas candidates | Blocked | `READY_EMPTY_OWNER_QUEUE`, `ATLAS_CANDIDATES_UNADMITTED` |
-| Playbook | `repos/playbook/docs/roadmap/ROADMAP.json` and roadmap documentation | 35 non-complete features: 11 in progress, 8 planned, 6 planned later, 6 dependency blocked, 3 directional, 1 architecture-defined | Ready for a canonical JSON export adapter | `NULLABLE_PRIORITY_TIMESTAMPS` |
+| Playbook | `repos/playbook/exports/playbook.project-board.owner-export.v1.json`, projected deterministically from `repos/playbook/docs/roadmap/ROADMAP.json` | 35 non-complete features: 11 in progress, 8 planned, 6 planned later, 6 dependency blocked, 3 directional, 1 architecture-defined | Owner export merged and contract-valid; DiscordOS admission and seeding remain pending | `BOARD_UNADMITTED`, `DISCORD_FORUM_MISSING`, `SEED_NOT_EXECUTED` |
 
 ## Export contract required before forum seeding
 
@@ -75,15 +75,32 @@ card creation is allowed.
 
 ### Playbook
 
-`docs/roadmap/ROADMAP.json` is the strongest immediate source. Its 35
-non-complete records can feed an export adapter once nullable priority and
-timestamp semantics are normalized without changing roadmap meaning.
+`docs/roadmap/ROADMAP.json` remains the canonical owner source. Playbook pull
+request `#24` merged the deterministic owner adapter and canonical export at
+merge commit `8796b33562a2d3e20f8c494fe72e601f3b5d84b9`. The export:
+
+- uses `atlas.project-board.owner-export.v1`;
+- contains exactly 35 non-complete roadmap records;
+- preserves roadmap feature IDs as card IDs;
+- records unknown priority as explicit `null` without inventing ordering;
+- normalizes roadmap source bytes to UTF-8/LF before hashing so Windows and CI
+  produce the same source revision;
+- identifies source revision
+  `sha256:2945d53cbf0b80d22ddfeeaa18e0512e70802c627a4e2f79d96dd45cd08834b6`;
+  and
+- passed focused tests, Atlas Contracts validation, Playbook CI, and the hosted
+  security program before merge.
+
+This closes the Playbook owner-export implementation prerequisite only. It does
+not create the Discord forum, enable the registry entry, seed cards, or provide
+live readback.
 
 ## Admission sequence
 
-1. Define one shared owner-export schema and validator in Atlas Contracts.
-2. Implement Atlas/Cortex and Playbook export adapters as the first two proof
-   classes: root-owned aggregation and canonical owner JSON.
+1. Retain the implemented shared owner-export schema and validator in Atlas
+   Contracts.
+2. Implement the Atlas/Cortex root-owned aggregation adapter; retain the merged
+   Playbook canonical-owner-JSON adapter as the second proof class.
 3. Implement Foundation, Lifeline, `_stack`, and DiscordOS adapters only after
    their owner-source blockers are resolved.
 4. Validate every export without Discord mutation.
