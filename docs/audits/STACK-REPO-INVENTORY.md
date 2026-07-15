@@ -22,7 +22,7 @@ Operational rule:
 - Excluded surface count: `16`
 - Stack manifest: `stack.yaml`
 - Stack lock: `stack.lock.yaml`
-- Inventory digest: `sha256:c8bd1a15b2ebbd61230732f8c1cfbc2d0a96ae1a6aa7e20ca79298ac2ddff02e`
+- Inventory digest: `sha256:0d8fb0bb4ddf51b86f8c57f5571c2bc77835cb8bb92492eb2ca4c104c7907041`
 
 ## Managed Repos
 
@@ -37,8 +37,8 @@ Operational rule:
 | nat1-games | repos/Nat1-Games/nat1-games | application | - | codex/path-discipline-warning-slice-nat1 | 404460d3717fab389407582048a9b9f228f26d39 | 404460d3717fab389407582048a9b9f228f26d39 | False | True | False | trusted | False | - |
 | playbook | repos/playbook | governance-runtime | - | codex/repair-scheduled-demo-integration-ci | ee6907bd2d1d45ef87625cbd3382644dbb4fb199 | ee6907bd2d1d45ef87625cbd3382644dbb4fb199 | False | True | False | trusted | True | initiative:continuity-manifest-atlas-owned-repo-naming-canonicalization<br>initiative:initiative-fawxzzy-tech-plan-convergence |
 | playbook-demo | repos/playbook-demo/playbook-demo | demo | - | main | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | False | True | False | trusted | False | - |
-| socials-os | repos/socials-os | analytics-data-system | - | main | - | 0c5309f5a448e286ced93e6e65184384f0a96ef4 | False | False | False | adjacent | False | - |
-| stack | . | operator-layer | - | main | - | 91784ad9d9bfb3a9b2724f802c9571cadbc95028 | True | True | True | trusted | False | - |
+| socials-os | repos/socials-os | analytics-data-system | - | main | - | 6966ffc312880df7ba41b4ac9fd445d1dbaf71b7 | False | False | False | adjacent | False | - |
+| stack | . | operator-layer | - | main | - | 621c7e892fde77e2e38fa6319daa689d1eeefe67 | True | True | True | trusted | False | - |
 | stream | repos/stream | application | - | main | 43769ba86d4c6ebc419ab9e7847c3843460a094f | 43769ba86d4c6ebc419ab9e7847c3843460a094f | False | True | False | trusted | False | - |
 | trove | repos/trove | application | - | codex/path-discipline-warning-slice-trove | 437c7604adee02e0403d77f75162a6c5f232221f | 437c7604adee02e0403d77f75162a6c5f232221f | False | True | False | trusted | True | - |
 

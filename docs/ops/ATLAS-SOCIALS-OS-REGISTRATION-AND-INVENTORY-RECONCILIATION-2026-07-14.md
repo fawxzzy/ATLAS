@@ -15,20 +15,24 @@ root sessions.
 
 - Local repository: `repos/socials-os`
 - Local branch: `main`
-- Local commit: `0c5309f5a448e286ced93e6e65184384f0a96ef4`
+- Local commit: `6966ffc312880df7ba41b4ac9fd445d1dbaf71b7`
 - Working tree: clean
-- Remote: absent
-- Current lifecycle: deterministic scaffold complete; Instagram baseline
-  incomplete
-- Current blocker: the desktop in-app browser webview did not attach after two
-  supported retries
+- Remote: `https://github.com/fawxzzy/socials-os.git`
+- GitHub visibility: private
+- Local/remote `main` parity: `0 / 0`
+- Current lifecycle: deterministic scaffold and read-only Instagram baseline
+  complete
+- Baseline evidence: 1 account, 6 account snapshots, 10 content records,
+  24 post snapshots, and 7 explicit audience-gap records
+- Raw-data publication: prohibited paths absent from the remote tree
+- Current blocker: none for the completed baseline; future Instagram collection
+  remains read-only and owner-lane scoped
 - External account mutation: none
 - Production deployment: none
 
-The repository currently provides the append-only schemas, ingestion,
-validation, reporting, and security boundary needed for a future read-only
-social analytics baseline. A private GitHub remote remains deferred until the
-first trustworthy Instagram baseline is complete.
+The repository now provides the append-only schemas, ingestion, validation,
+reporting, security boundary, and first trustworthy read-only Instagram
+baseline. The private GitHub remote is established without publishing raw data.
 
 ## Atlas truth updates
 
@@ -39,15 +43,14 @@ first trustworthy Instagram baseline is complete.
   published repo inventory rather than becoming managed lock components.
 - `docs/registry/STACK-REPO-INVENTORY.json` and
   `docs/audits/STACK-REPO-INVENTORY.md` now include the Socials OS owner lane.
-- The working-memory catalog was deterministically rebuilt to `42` items with
-  content digest
-  `sha256:19cd8ba0dccfe7e4c302335ec1c5aeb243f65895a050dcdc6e6533cbcf917570`.
+- The generated repository inventory now records the current Socials OS commit,
+  private remote URL, clean branch, and non-root-blocking owner posture.
 
 ## Verification
 
 - Repo inventory: `13` repositories, `1` dirty repository at generation time
 - Repo inventory digest:
-  `sha256:c8bd1a15b2ebbd61230732f8c1cfbc2d0a96ae1a6aa7e20ca79298ac2ddff02e`
+  `sha256:0d8fb0bb4ddf51b86f8c57f5571c2bc77835cb8bb92492eb2ca4c104c7907041`
 - Stack validation: `critical=0 error=0 warning=3 info=0`
 - Remaining warnings: three inherited absolute-path findings, unchanged by
   this admission
@@ -57,13 +60,12 @@ first trustworthy Instagram baseline is complete.
 
 This reconciliation does not:
 
-- create or push a Socials OS remote;
-- collect Instagram data;
+- publish raw Socials OS data;
 - access credentials or account state;
 - mutate Mazer, Fitness, DiscordOS, or another owner repository;
 - authorize Socials OS as an Atlas-root fallback lane;
 - normalize active `_stack`, Playbook, or DiscordOS owner branches; or
-- claim that the browser collection blocker is resolved.
+- authorize account mutation or write automation.
 
-Active owner-branch normalization, remote creation, and GitHub monitoring stay
-in their separately governed lanes.
+Future collection, GitHub monitoring, and implementation remain in the standing
+Socials OS owner lane.

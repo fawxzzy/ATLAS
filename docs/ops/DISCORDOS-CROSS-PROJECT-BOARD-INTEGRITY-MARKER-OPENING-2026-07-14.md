@@ -90,16 +90,24 @@ includes:
   identity collision was detected and corrected in the same serialized repair
   cluster;
 - `atlas.project-board.owner-export.v1` registered and validated in Atlas
-  Contracts; and
-- a read-only Unicode audit showing all `285` current cards clean while `49`
-  superseded records remain an all-surface scanning proof gap.
+  Contracts;
+- Unicode prevention and exact readback merged through DiscordOS pull requests
+  `#76` and `#77`;
+- a complete post-merge scan showing `0` current/actionable text findings while
+  retaining `124` immutable Discord system-history spans across `74` messages
+  and all `49` superseded threads; and
+- the current registry at `288` current cards, `136` healthy current cards,
+  `152` structurally drifted legacy cards, and `0` duplicate identities.
 
 See:
 
 - `docs/ops/DISCORDOS-MAZER-AND-FITNESS-BOARD-INTEGRITY-RECOVERY-2026-07-14.md`;
 - `docs/ops/ATLAS-PROJECT-BOARD-OWNER-EXPORT-CONTRACT-V1-2026-07-14.md`; and
-- `docs/ops/DISCORDOS-TEXT-INTEGRITY-RECONNAISSANCE-2026-07-14.md`.
+- `docs/ops/DISCORDOS-TEXT-INTEGRITY-RECONNAISSANCE-2026-07-14.md`;
+- `docs/ops/DISCORDOS-IMMUTABLE-SYSTEM-HISTORY-RECONCILIATION-2026-07-14.md`.
 
 No unit moves because seven required board classes remain unadmitted and the
-reaction, movement, full lifecycle, superseded-text, and recurring drift-proof
-requirements are not yet closed across the full denominator.
+reaction, movement, full lifecycle, formatting, and recurring drift-proof
+requirements are not yet closed across the full denominator. The superseded
+all-surface text gap is closed for the five enabled boards but cannot ratchet
+unit 8 until all required board classes are admitted.

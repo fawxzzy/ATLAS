@@ -392,9 +392,9 @@
       "playbook_adoption_owner_head": "",
       "playbook_adoption_owner_ref": "",
       "status": "unmanaged",
-      "remote_url": null,
+      "remote_url": "https://github.com/fawxzzy/socials-os.git",
       "pinned_commit": null,
-      "current_commit": "0c5309f5a448e286ced93e6e65184384f0a96ef4",
+      "current_commit": "6966ffc312880df7ba41b4ac9fd445d1dbaf71b7",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
@@ -422,7 +422,7 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "91784ad9d9bfb3a9b2724f802c9571cadbc95028",
+      "current_commit": "621c7e892fde77e2e38fa6319daa689d1eeefe67",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
@@ -642,5 +642,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:c8bd1a15b2ebbd61230732f8c1cfbc2d0a96ae1a6aa7e20ca79298ac2ddff02e"
+  "content_digest": "sha256:0d8fb0bb4ddf51b86f8c57f5571c2bc77835cb8bb92492eb2ca4c104c7907041"
 }

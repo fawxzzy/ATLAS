@@ -3,7 +3,8 @@
 ## Decision
 
 Admit a DiscordOS code repair for deterministic Unicode integrity scanning and
-write prevention. Do not admit a live text-repair batch yet.
+write prevention. This opening decision is now executed through DiscordOS pull
+requests `#76` and `#77`; see the terminal disposition below.
 
 The current evidence distinguishes live Discord text from locally corrupted
 display or serialization. Node-parsed UTF-8 evidence retains valid `U+2014`
@@ -103,10 +104,25 @@ admitted only for exact message or thread IDs with:
 Do not delete, recreate, clone, archive, or replace threads. User-authored or
 immutable system messages require explicit operator disposition.
 
+## Terminal disposition
+
+The merged scanner inspected the full enabled-board denominator and all 49
+superseded records. It found zero current or actionable text-integrity findings
+and 124 immutable historical spans across 74 Discord channel-name-change events
+in 49 archived superseded threads.
+
+The exact dry run proved all 74 messages were Discord system events and matched
+the scanner set with no extras. A guarded cleanup attempt changed zero messages.
+Discord documents `CHANNEL_NAME_CHANGE` (`type 4`) as non-deletable. Pull request
+`#77` therefore made immutable system history a retained evidence class and
+prevented future delete retries. Current occurrences remain actionable.
+
+See `docs/ops/DISCORDOS-IMMUTABLE-SYSTEM-HISTORY-RECONCILIATION-2026-07-14.md`.
+
 ## Marker treatment
 
 Unit 8 of `DiscordOS Cross-Project Board Integrity & Lifecycle Repair` remains
-incomplete. Closing proof requires the merged prevention code, all-surface
-coverage for the `49` superseded records, complete pagination, exact counts,
-valid typography preservation, and exact before/after evidence for any
-non-empty live repair set.
+partial. Prevention, complete pagination, valid typography preservation,
+superseded coverage, and exact immutable disposition are proven for the five
+enabled boards. Seven required board classes remain unadmitted, so the unit
+does not yet have denominator-wide proof.
