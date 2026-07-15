@@ -13,22 +13,25 @@ const MARKER_SCHEMA_ID = "atlas.marker-evidence.v2";
 const JOB_SCHEMA_ID = "atlas.job-envelope.v2";
 const RECEIPT_SCHEMA_ID = "atlas.execution-receipt.v2";
 const MARKER_ID = "lane-atlas-contracts-mesh";
-const ADOPTED_FAMILY = "MarkerEvidence";
+const ADOPTED_FAMILY = "KnowledgeCandidate";
 const ROLLUP_POLICY = "child-evidence-no-rollup";
-const EXPECTED_NUMERATOR = 10;
+const EXPECTED_NUMERATOR = 11;
 const EXPECTED_DENOMINATOR = 11;
 const EXPECTED_PERCENTAGE = Math.round((EXPECTED_NUMERATOR / EXPECTED_DENOMINATOR) * 100);
-const EXPECTED_PRIOR_NUMERATOR = 9;
+const EXPECTED_PRIOR_NUMERATOR = 10;
 const EXPECTED_PRIOR_PERCENTAGE = Math.round((EXPECTED_PRIOR_NUMERATOR / EXPECTED_DENOMINATOR) * 100);
 
 export const REQUIRED_MARKER_EVIDENCE_REFS = Object.freeze([
   REGISTRY_REF,
   MARKER_SCHEMA_REF,
+  "packages/atlas-contracts/schemas/atlas.knowledge-candidate.v2.schema.json",
   "ops/atlas/marker_evidence_admission.mjs",
   "tests/test_atlas_marker_evidence_admission.mjs",
+  "ops/atlas/knowledge_candidate_adoption.mjs",
+  "tests/test_atlas_knowledge_candidate_adoption.mjs",
   "ops/atlas/validate_contracts_v2_adoption.mjs",
   "ops/atlas/test_validate_contracts_v2_adoption.mjs",
-  "docs/ops/ATLAS-CONTRACTS-V2-CLUSTER-5-MARKEREVIDENCE-ADOPTION-2026-07-15.md",
+  "docs/ops/ATLAS-CONTRACTS-V2-CLUSTER-6-KNOWLEDGECANDIDATE-ADOPTION-2026-07-15.md",
 ]);
 
 const MUTATION_FLAGS = Object.freeze([
@@ -176,7 +179,7 @@ function validateTransition(marker) {
     || marker.transition?.previous_percentage !== EXPECTED_PRIOR_PERCENTAGE
     || marker.transition?.current_percentage !== marker.percentage
   ) {
-    reject("MARKER_TRANSITION_MISMATCH", "marker transition did not represent the single-family MarkerEvidence adoption ratchet");
+    reject("MARKER_TRANSITION_MISMATCH", "marker transition did not represent the single-family KnowledgeCandidate adoption ratchet");
   }
 }
 
@@ -243,7 +246,7 @@ function validateReceiptLineage(marker, job, executionReceipt, markerDigest) {
     || executionReceipt.changed_paths?.length !== 0
     || executionReceipt.commits?.length !== 0
     || executionReceipt.authority_actions?.length !== 0
-    || stableStringify(executionReceipt.follow_up) !== stableStringify(["KnowledgeCandidate"])
+    || stableStringify(executionReceipt.follow_up) !== stableStringify([])
     || executionReceipt.extensions?.external_mutation !== false
     || executionReceipt.extensions?.marker_mutation !== false
     || marker.extensions?.authority?.external_mutation !== false

@@ -7,6 +7,7 @@ import {
   ADOPTED_FAMILIES,
   CARD_BOARD_FAMILIES,
   EXPECTED_FAMILIES,
+  KNOWLEDGE_CANDIDATE_FAMILIES,
   MARKER_EVIDENCE_FAMILIES,
   buildCanonicalCardBoardEvidence,
   buildCanonicalMarkerEvidence,
@@ -14,6 +15,7 @@ import {
   validateAdoption,
   validateCardBoardAdoption,
   validateCardBoardArtifacts,
+  validateKnowledgeCandidateAdoption,
   validateMarkerEvidenceAdoption,
   validateMarkerEvidenceArtifacts,
 } from "./validate_contracts_v2_adoption.mjs";
@@ -145,18 +147,31 @@ try {
   assert.deepEqual(markerEvidenceAccepted.families, MARKER_EVIDENCE_FAMILIES);
   assert.deepEqual(Object.keys(markerEvidenceAccepted.evidence), MARKER_EVIDENCE_FAMILIES);
   assert.equal(markerEvidenceAccepted.receipt.status, "accepted_read_only");
-  assert.equal(markerEvidenceAccepted.receipt.result_identity.numerator, 10);
+  assert.equal(markerEvidenceAccepted.receipt.result_identity.numerator, 11);
   assert.equal(markerEvidenceAccepted.receipt.result_identity.denominator, 11);
-  assert.equal(markerEvidenceAccepted.receipt.result_identity.percentage, 91);
+  assert.equal(markerEvidenceAccepted.receipt.result_identity.percentage, 100);
   assert.equal(markerEvidenceAccepted.receipt.authority.marker_mutation, false);
+
+  const knowledgeCandidateAccepted = await validateKnowledgeCandidateAdoption();
+  assert.equal(knowledgeCandidateAccepted.code, "ACCEPTED");
+  assert.deepEqual(knowledgeCandidateAccepted.families, KNOWLEDGE_CANDIDATE_FAMILIES);
+  assert.deepEqual(Object.keys(knowledgeCandidateAccepted.evidence), KNOWLEDGE_CANDIDATE_FAMILIES);
+  assert.equal(knowledgeCandidateAccepted.receipt.status, "accepted_candidate_only");
+  assert.equal(knowledgeCandidateAccepted.receipt.admissions.length, 2);
+  assert.equal(knowledgeCandidateAccepted.receipt.queue.candidate_count, 2);
+  assert.equal(knowledgeCandidateAccepted.receipt.queue.first_replay_byte_identical, true);
+  assert.equal(knowledgeCandidateAccepted.receipt.queue.second_replay_byte_identical, true);
+  assert.equal(knowledgeCandidateAccepted.receipt.conformance.doctrine_unchanged, true);
+  assert.equal(knowledgeCandidateAccepted.receipt.authority.promotion_authority, "none");
+  assert.equal(knowledgeCandidateAccepted.consumerGit.merge_commit, "f39dbac27d9a1c706ad11dbefe7f37feeebd5c3d");
 
   const meshAccepted = await validateAdoptedMesh(canary);
   assert.equal(meshAccepted.code, "ACCEPTED");
   assert.deepEqual(meshAccepted.families, ADOPTED_FAMILIES);
   assert.deepEqual(Object.keys(meshAccepted.evidence), ADOPTED_FAMILIES);
-  assert.equal(meshAccepted.acceptedUnits, 10);
+  assert.equal(meshAccepted.acceptedUnits, 11);
   assert.equal(meshAccepted.implementationFoundations, 11);
-  assert.equal(meshAccepted.percentage, 91);
+  assert.equal(meshAccepted.percentage, 100);
 
   await cardBoardScenario("card-schema-invalid", ({ card }) => { card.lifecycle = "doing"; }, "CARD_RECORD_SCHEMA_INVALID");
   await cardBoardScenario("card-project-mismatch", ({ card }) => { card.project_id = "other"; }, "CARD_RECORD_PROJECT_MISMATCH");
@@ -171,8 +186,8 @@ try {
   await cardBoardScenario("event-second-writer", ({ event }) => { event.extensions.second_writer = "atlas"; event.extensions.deploy_authority = "production"; }, "SECOND_WRITER_AUTHORITY");
   await cardBoardScenario("event-result-mismatch", ({ event }) => { event.result.observed_version = event.expected_version; event.result.readback_at = "2026-07-15T15:05:00Z"; event.result.receipt_ref = "runtime/receipts/board-event.json"; }, "BOARD_EVENT_RESULT_MISMATCH");
 
-  await markerEvidenceScenario("marker-percentage-mismatch", ({ marker }) => { marker.percentage = 90; }, "MARKER_PERCENTAGE_MISMATCH");
-  await markerEvidenceScenario("marker-transition-mismatch", ({ marker }) => { marker.transition.current_percentage = 90; }, "MARKER_TRANSITION_MISMATCH");
+  await markerEvidenceScenario("marker-percentage-mismatch", ({ marker }) => { marker.percentage = 99; }, "MARKER_PERCENTAGE_MISMATCH");
+  await markerEvidenceScenario("marker-transition-mismatch", ({ marker }) => { marker.transition.current_percentage = 99; }, "MARKER_TRANSITION_MISMATCH");
   await markerEvidenceScenario("marker-stale", ({ marker }) => { marker.freshness.status = "stale"; }, "MARKER_STALE");
   await markerEvidenceScenario("marker-scope-mismatch", ({ marker }) => { marker.scope = "Unbound percentage claim."; }, "MARKER_SCOPE_MISMATCH");
   await markerEvidenceScenario("marker-receipt-mismatch", ({ executionReceipt }) => { executionReceipt.job_id = "job-other"; }, "MARKER_RECEIPT_MISMATCH");
@@ -189,7 +204,9 @@ try {
   console.log("Cluster 4 rejection scenarios: passed");
   console.log("independent MarkerEvidence consumer acceptance passed");
   console.log("Cluster 5 MarkerEvidence rejection scenarios: passed");
-  console.log("Contracts Mesh calculation: 10/11 = 91%");
+  console.log("independent KnowledgeCandidate consumer acceptance passed");
+  console.log("Cluster 6 KnowledgeCandidate rejection scenarios: passed");
+  console.log("Contracts Mesh calculation: 11/11 = 100%");
 } finally {
   await fs.rm(temp, { recursive: true, force: true });
 }

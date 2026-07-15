@@ -70,8 +70,8 @@ components:
     status: "active"
     remote: "https://github.com/fawxzzy/playbook.git"
     ref_type: "branch"
-    ref: "codex/repair-scheduled-demo-integration-ci"
-    commit: "ee6907bd2d1d45ef87625cbd3382644dbb4fb199"
+    ref: "codex/atlas-knowledge-candidate-v2-consumer"
+    commit: "14fce44268084bcaaab6d189b6ef18eb7a992faf"
     dirty: false
     trust_class: "trusted"
     release_eligible: true
@@ -208,4 +208,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:9e821720e721a9982c91881b3cba72ecd6b7a386a1c65a5cb8337c30cb875b5f"
+lock_digest: "sha256:5d0cbfc752985784629daa62c5010f29a0896ce1599b6a58b165f8b5e02bc3ca"

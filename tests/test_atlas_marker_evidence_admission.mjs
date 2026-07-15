@@ -59,9 +59,9 @@ test("emits a deterministic read-only receipt with stable input and result ident
   assert.match(first.receipt_id, /^amer_[a-f0-9]{32}$/);
   assert.match(first.result_identity.result_id, /^ameres_[a-f0-9]{32}$/);
   assert.equal(first.status, "accepted_read_only");
-  assert.equal(first.result_identity.numerator, 10);
+  assert.equal(first.result_identity.numerator, 11);
   assert.equal(first.result_identity.denominator, 11);
-  assert.equal(first.result_identity.percentage, 91);
+  assert.equal(first.result_identity.percentage, 100);
   assert.equal(first.schema_source.schema_id, "atlas.marker-evidence.v2");
   assert.equal(first.authority.external_mutation, false);
   assert.equal(first.authority.marker_mutation, false);
@@ -69,11 +69,11 @@ test("emits a deterministic read-only receipt with stable input and result ident
 });
 
 test("rejects percentage and rounded-math drift", async () => {
-  await expectRejection("percentage-mismatch", ({ marker }) => { marker.percentage = 90; }, "MARKER_PERCENTAGE_MISMATCH");
+  await expectRejection("percentage-mismatch", ({ marker }) => { marker.percentage = 99; }, "MARKER_PERCENTAGE_MISMATCH");
 });
 
 test("rejects transition drift", async () => {
-  await expectRejection("transition-mismatch", ({ marker }) => { marker.transition.current_percentage = 90; }, "MARKER_TRANSITION_MISMATCH");
+  await expectRejection("transition-mismatch", ({ marker }) => { marker.transition.current_percentage = 99; }, "MARKER_TRANSITION_MISMATCH");
 });
 
 test("rejects stale evidence", async () => {

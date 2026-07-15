@@ -1,11 +1,11 @@
 {
   "contract_version": "atlas.project-board.owner-export.v1",
-  "export_id": "pbe_atlas_fd2014e5d337",
+  "export_id": "pbe_atlas_8e42b3408f37",
   "project_id": "atlas",
   "board_id": "discordos:project-feedback:atlas",
   "owner": "stack-root",
   "adapter_id": "atlas-full-system-registry-v1",
-  "source_revision": "sha256:fd2014e5d337b94d4f3187ad542f510742a8178fc63bbc5059ecfa0f4df7810e",
+  "source_revision": "sha256:8e42b3408f377dda60c6da152f81fbd7fea536bd803301b0a3044702ce40f0ac",
   "generated_at": "2026-07-15T12:51:09Z",
   "sources": [
     {
@@ -13,7 +13,7 @@
       "kind": "json",
       "repository": "atlas-root",
       "path": "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json",
-      "revision": "sha256:f9fd8c0c50d54a01b6689f51f955fe3c81574f284e3f5dc4fe5d121a64ece190",
+      "revision": "sha256:a552fc910f4575726ccc513b2773554ea6716f94595c92b74c254bd5d60c955b",
       "observed_at": "2026-07-15T12:51:09Z"
     },
     {
@@ -21,7 +21,7 @@
       "kind": "markdown",
       "repository": "atlas-root",
       "path": "docs/atlas-book/02-lanes-and-markers.md",
-      "revision": "sha256:cb9aab57025ba83aedcf53bb39f867cb18ddaef31b0f00c57ce7a26b86629ebc",
+      "revision": "sha256:86823cee4ae7cd522cabfc45c27137cbe008a12653ea1739ec4e416e481c939f",
       "observed_at": "2026-07-15T12:51:09Z"
     }
   ],
@@ -103,34 +103,34 @@
         "title": "Atlas contracts mesh",
         "description": "Define and implement Contracts v2 mesh without overstating @atlas/contracts v0.1.0 or five implemented v1 families.",
         "card_type": "governance",
-        "lifecycle": "in-progress",
+        "lifecycle": "completed",
         "priority": null,
         "owner": "stack-root",
         "dependencies": [],
         "board_version": 1,
-        "updated_at": "2026-07-15T15:30:00Z",
+        "updated_at": "2026-07-15T17:25:00Z",
         "source_ref": "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json#lane-atlas-contracts-mesh",
         "extensions": {
           "source_section": "backlog_candidates",
           "source_classification": "contract-implementation",
-          "source_status": "active",
+          "source_status": "complete",
           "measurement_unit": "schema-family acceptance",
-          "percentage": 91,
-          "completed_units": 10,
+          "percentage": 100,
+          "completed_units": 11,
           "denominator": {
             "kind": "schema_families",
             "value": 11,
             "basis": "ComponentManifest, CardRecord, JobEnvelope, ContextPacket, WorkerLease, EvidenceBundle, ExecutionReceipt, BoardEvent, MarkerEvidence, KnowledgeCandidate, and ApprovalRecord"
           },
           "projection_role": "stack-coordination",
-          "seed_disposition": "current"
+          "seed_disposition": "completed"
         }
       },
       "source": {
         "source_id": "atlas-full-system-registry",
         "source_ref": "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json#lane-atlas-contracts-mesh",
         "source_status": "current",
-        "source_updated_at": "2026-07-15T15:30:00Z"
+        "source_updated_at": "2026-07-15T17:25:00Z"
       },
       "content": {
         "summary": "Define and implement Contracts v2 mesh without overstating @atlas/contracts v0.1.0 or five implemented v1 families.",
@@ -158,6 +158,12 @@
           "ops/atlas/marker_evidence_admission.mjs",
           "tests/test_atlas_marker_evidence_admission.mjs",
           "docs/ops/ATLAS-CONTRACTS-V2-CLUSTER-5-MARKEREVIDENCE-ADOPTION-2026-07-15.md",
+          "ops/atlas/knowledge_candidate_adoption.mjs",
+          "tests/test_atlas_knowledge_candidate_adoption.mjs",
+          "docs/ops/ATLAS-CONTRACTS-V2-CLUSTER-6-KNOWLEDGECANDIDATE-ADOPTION-2026-07-15.md",
+          "repos/playbook@14fce44268084bcaaab6d189b6ef18eb7a992faf",
+          "github:fawxzzy/playbook#25",
+          "github:fawxzzy/playbook@f39dbac27d9a1c706ad11dbefe7f37feeebd5c3d",
           "docs/architecture/ATLAS-EVENT-CONTRACT.md",
           "docs/architecture/CODEX-HANDOFF-CONTRACT.md",
           "docs/architecture/ATLAS-CONTRACTS-V2-SCOPE.md",
