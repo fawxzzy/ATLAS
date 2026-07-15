@@ -1,0 +1,355 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://schemas/atlas.runtime-placement.registry.v1.json",
+  "title": "ATLAS runtime placement registry v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "kind",
+    "generated_at",
+    "authority",
+    "placement_types",
+    "governance",
+    "components",
+    "activation_sequence",
+    "do_not_deploy",
+    "marker_lanes",
+    "next_owner_side_activation_packet",
+    "evidence_refs"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "atlas.runtime-placement.registry.v1"
+    },
+    "kind": {
+      "const": "atlas-runtime-placement-registry"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "authority": {
+      "const": "ATLAS root governance"
+    },
+    "placement_types": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "no_server/on_demand",
+          "local_persistent",
+          "local_scheduled",
+          "Vercel",
+          "Supabase",
+          "GitHub Actions",
+          "hybrid",
+          "owner_lane"
+        ]
+      }
+    },
+    "governance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rules",
+        "patterns",
+        "failure_modes",
+        "authority_invariants",
+        "production_deploy_guard"
+      ],
+      "properties": {
+        "rules": {
+          "$ref": "#/$defs/nonEmptyStringArray"
+        },
+        "patterns": {
+          "$ref": "#/$defs/nonEmptyStringArray"
+        },
+        "failure_modes": {
+          "$ref": "#/$defs/nonEmptyStringArray"
+        },
+        "authority_invariants": {
+          "$ref": "#/$defs/nonEmptyStringArray"
+        },
+        "production_deploy_guard": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "components": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/component"
+      }
+    },
+    "activation_sequence": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "items": {
+        "$ref": "#/$defs/activationStep"
+      }
+    },
+    "do_not_deploy": {
+      "type": "array",
+      "minItems": 10,
+      "maxItems": 10,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "marker_lanes": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "$ref": "#/$defs/markerLane"
+      }
+    },
+    "next_owner_side_activation_packet": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evidence_refs": {
+      "$ref": "#/$defs/nonEmptyStringArray"
+    }
+  },
+  "$defs": {
+    "nonEmptyStringArray": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "component": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "runtime_responsibility",
+        "authority_owner",
+        "implemented_surface",
+        "intended_placement",
+        "current_availability",
+        "consumer",
+        "lifecycle",
+        "persistence",
+        "secrets_boundary",
+        "port",
+        "availability_target",
+        "failure_modes",
+        "activation_deployment_gate",
+        "evidence_refs"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "runtime_responsibility": {
+          "type": "string",
+          "minLength": 1
+        },
+        "authority_owner": {
+          "type": "string",
+          "minLength": 1
+        },
+        "implemented_surface": {
+          "$ref": "#/$defs/nonEmptyStringArray"
+        },
+        "intended_placement": {
+          "enum": [
+            "no_server/on_demand",
+            "local_persistent",
+            "local_scheduled",
+            "Vercel",
+            "Supabase",
+            "GitHub Actions",
+            "hybrid",
+            "owner_lane"
+          ]
+        },
+        "current_availability": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "state",
+            "observed_at",
+            "proof"
+          ],
+          "properties": {
+            "state": {
+              "type": "string",
+              "minLength": 1
+            },
+            "observed_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "proof": {
+              "$ref": "#/$defs/nonEmptyStringArray"
+            }
+          }
+        },
+        "consumer": {
+          "$ref": "#/$defs/nonEmptyStringArray"
+        },
+        "lifecycle": {
+          "type": "string",
+          "minLength": 1
+        },
+        "persistence": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "mode",
+            "path"
+          ],
+          "properties": {
+            "mode": {
+              "type": "string",
+              "minLength": 1
+            },
+            "path": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        },
+        "secrets_boundary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "port": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 65535
+          },
+          "uniqueItems": true
+        },
+        "availability_target": {
+          "type": "string",
+          "minLength": 1
+        },
+        "failure_modes": {
+          "$ref": "#/$defs/nonEmptyStringArray"
+        },
+        "activation_deployment_gate": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence_refs": {
+          "$ref": "#/$defs/nonEmptyStringArray"
+        }
+      }
+    },
+    "activationStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "order",
+        "id",
+        "owner",
+        "admission_proof"
+      ],
+      "properties": {
+        "order": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "owner": {
+          "type": "string",
+          "minLength": 1
+        },
+        "admission_proof": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "markerLane": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "title",
+        "percentage",
+        "completed_units",
+        "denominator",
+        "measurement_unit",
+        "units",
+        "admission_rule"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "percentage": {
+          "type": "null"
+        },
+        "completed_units": {
+          "type": "null"
+        },
+        "denominator": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "measurement_unit": {
+          "type": "string",
+          "minLength": 1
+        },
+        "units": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "title"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        "admission_rule": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

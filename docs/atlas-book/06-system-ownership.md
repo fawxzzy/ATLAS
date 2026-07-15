@@ -1,13 +1,15 @@
 # System Ownership
 
-## 2026-07-12 capability ownership override
+## 2026-07-15 capability ownership override
 
 | Capability | Current owner / boundary |
 |---|---|
 | root governance, marker truth, v1 contracts, accepted receipts | ATLAS root |
-| canonical workspace writer, operator commands, event normalization | `_stack` |
+| governed workspace/action routing, operator commands, event normalization | `_stack`; not the Discord writer |
 | doctrine and repo verification | Playbook |
-| advisory context/routing/synthesis | root-owned Cortex; remote Cortex is not adopted |
+| private local operator cockpit | Playbook Observer on loopback, when owner-activated |
+| local supervision and logon restore | Lifeline, when owner-activated |
+| advisory context/routing/synthesis | event-triggered root-owned Cortex artifacts; remote Cortex is not adopted |
 | product and code truth | each owner repository |
 | board/publication/readback mutation | DiscordOS as one logical writer; Fitness direct overlap is debt |
 | remote source, CI, review, releases, security signals | GitHub |
@@ -62,19 +64,25 @@ ATLAS root does not own:
 
 Foundation owns:
 
-- its own product/runtime truth
-- its own repo-local implementation and verification surfaces
+- the hosted read-only portfolio surface
+- its own repo-local implementation and verification truth
+- public presentation without operator action authority
 
-At this checkpoint, Foundation remains primarily a named systems lane in ATLAS planning rather than an active cross-lane mutation surface here.
+Foundation production returned HTTP 200 on 2026-07-15. It is not the private
+operator cockpit and must not duplicate Playbook Observer.
 
 ## Lifeline Ownership
 
 Lifeline owns:
 
-- its own repo-local product and runtime truth
-- its own implementation and verification surfaces
+- local supervision, bounded restart, logs, and current-user logon restoration
+- its own repo-local implementation and verification truth
 
-ATLAS root may record Lifeline-facing checkpoints, but does not replace Lifeline as owner.
+The implementation exists, but the local runtime is currently unavailable:
+dependencies, `dist/cli.js`, retained runtime state, and startup registration are
+absent. ATLAS root may record Lifeline-facing checkpoints, but does not replace
+Lifeline as owner. Activation must place mutable state and logs under
+`runtime/lifeline/playbook-observer`, not inside an owner repository.
 
 ## Playbook Ownership
 
@@ -91,18 +99,17 @@ Playbook does not own:
 - repo-local product proof
 - Discord runtime behavior
 
+Playbook Observer is the intended private local operator cockpit on
+`127.0.0.1:4300`. It is implemented but currently unavailable: no listener is
+present and the current generated CLI entrypoint cannot start because the local
+dependency install is incomplete.
+
 ## Cortex Ownership
 
-Cortex may own:
-
-- planning context consumption
-- prioritization and admission-facing read models later
-
-Cortex does not currently own:
-
-- runtime behavior
-- doctrine promotion
-- repo mutation authority
+Cortex owns event-triggered advisory read-model artifacts under
+`runtime/cortex/**`. Its principal `latest` current-state, context, and operator
+surfaces are currently stale at 2026-07-06. Cortex does not own doctrine
+promotion, scheduling, daemon behavior, or repo mutation authority.
 
 ## Fitness Ownership
 
@@ -115,16 +122,15 @@ Fitness owns:
 - canonical `user_number` truth
 - release preparation and release ledger truth
 - verification-token issuance
-- current live Discord runtime hosting
-- current live Discord operational tables until separation lands
+- explicit Fitness-retained product and interaction seams
 
-Fitness should not permanently own:
+Fitness does not own:
 
-- future DiscordOS platform/runtime code by default
+- the current DiscordOS public writer, durable Discord state, or scheduled poller
 
-## DiscordOS Future Ownership
+## DiscordOS Ownership
 
-DiscordOS is the future owner for:
+DiscordOS is the current owner for:
 
 - Discord interaction/runtime
 - feedback workflow/runtime state
@@ -137,11 +143,10 @@ DiscordOS is the future owner for:
 
 Current status:
 
-- bootstrapped
-- local repo now exists at `repos/DiscordOS`
-- governance scaffold only
-- no code moved
-- no runtime cutover
+- hosted Vercel API and logical writer are operational
+- DiscordOS Supabase state, service-role writer, persisted writer, and transfer state report ready
+- GitHub Actions scheduled polling is active and the latest 2026-07-15 run succeeded
+- interaction-first reliability remains a separate five-scenario proof lane
 
 ## Supabase Project Ownership
 
@@ -156,55 +161,43 @@ Owns:
 - Fitness auth and profile truth
 - Fitness product tables
 - verification-token issuance truth
-- current live Discord/Music Sesh operational tables until separation
+- Fitness-retained product data
 
 ### DiscordOS Supabase
-
-Current state:
-
-- Supabase project `DiscordOS` exists at ref `nwexsktuuenfdegzrbut`
-- private schema `discordos` exists
-- feedback runtime contract tables are landed with RLS enabled and no public policies
-- Fitness remains live runtime truth until an explicit cutover packet proves parity
 
 Project:
 
 - `nwexsktuuenfdegzrbut`
 
-Future owner for:
+Owns:
 
-- Discord-owned runtime/workflow state after migration
+- Discord-owned durable runtime and workflow state
+- persisted writer and live transfer state
 
 Current status:
 
-- healthy
-- empty
-- no schema landing implemented yet
+- operational through current DiscordOS runtime-health readback
+- service-role, writer, and transfer components ready with no blocked reasons
 
 ## Vercel Project Ownership
 
-### Current
+### Current split
 
-Fitness Vercel currently owns:
-
-- live Discord interaction runtime
-- current Discord update/runtime surfaces
-- Music Sesh runtime
-- Fitness app routes and product runtime
-
-### Future split
-
-Fitness Vercel should keep:
+Fitness Vercel owns:
 
 - Fitness app/runtime
 - verification issuance surfaces
 - release-proof upstream surfaces
 
-DiscordOS Vercel should later own:
+DiscordOS Vercel owns:
 
 - Discord interaction/runtime
 - Discord publication/runtime
 - Music Sesh runtime
+- runtime-health, writer, and transfer APIs
+
+Foundation Vercel owns the hosted read-only portfolio and does not share
+operator-cockpit authority.
 
 ## Ownership Summary
 
@@ -213,12 +206,12 @@ DiscordOS Vercel should later own:
 - ATLAS root: coordination and truth-map
 - `_stack`: deploy/operator execution
 - Playbook: doctrine
-- Fitness: product truth plus current Discord hosting
-
-### Future owner map
-
 - Fitness: product truth
 - DiscordOS: Discord runtime truth
+- Foundation: hosted read-only portfolio
+- Playbook Observer: private local operations cockpit when activated
+- Lifeline: local supervision and logon restore when activated
+- Cortex: event-triggered advisory read models
 - ATLAS root: stack coordination truth
 - `_stack`: shared execution truth
 - Playbook: promoted governance truth

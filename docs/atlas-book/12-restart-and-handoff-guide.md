@@ -1,6 +1,24 @@
 # Restart And Handoff Guide
 
-## 2026-07-12 exact next action
+## 2026-07-15 runtime placement override
+
+The exact next admitted packet is **Playbook bootstrap and foreground Observer
+health proof**. Use
+`docs/registry/ATLAS-RUNTIME-PLACEMENT-REGISTRY.v1.json` and [Runtime
+Placement](16-runtime-placement.md) as current authority.
+
+Do not infer that a local recurring `_stack` worker exists from older poll
+receipts below. Current readback finds no registered local scheduled task or
+active inbox runner. DiscordOS scheduled polling is active in GitHub Actions;
+the future local `_stack` path is exactly one serialized bounded sweep after
+Playbook and Lifeline activation proof.
+
+Atlas Full-System Re-evaluation remains `1 / 2` and `50%`, Contracts Mesh
+remains `11 / 11`, and Marker Integrity remains `51 / 51`. Fitness, Mazer, and
+other products remain owner lanes and are not fallback work for this root
+activation sequence.
+
+## Historical 2026-07-12 exact next action
 
 The accepted Atlas Full-System Re-evaluation opening audit moves its distinct marker from 0% to 50% on one of two audit gates. Current continuity is `23 manifests / 23 ok / 0 warning / 0 error`, `8 / 8` eligible execution-open markers manifest-backed and restart-ready, `23 / 23` maintained manifests restart-ready, and `pending_review_count: 0`; the audit-gate manifest is maintained and marker-backed but excluded from the execution selector. The post-package final validation is `0 critical / 5 error / 25 warning / 0 info`; ratchet remediation is separate and does not decide this opening gate. Older counts below are historical snapshots.
 

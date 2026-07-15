@@ -1,0 +1,393 @@
+from __future__ import annotations
+
+import argparse
+import json
+import re
+from dataclasses import asdict, dataclass
+from pathlib import Path
+from typing import Any
+
+ROOT = Path(__file__).resolve().parents[2]
+REGISTRY_REF = Path("docs/registry/ATLAS-RUNTIME-PLACEMENT-REGISTRY.v1.json")
+SCHEMA_REF = Path("schemas/atlas.runtime-placement.registry.v1.json")
+LANE_REGISTRY_REF = Path("docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json")
+MARKER_BOOK_REF = Path("docs/atlas-book/02-lanes-and-markers.md")
+
+PLACEMENT_TYPES = (
+    "no_server/on_demand",
+    "local_persistent",
+    "local_scheduled",
+    "Vercel",
+    "Supabase",
+    "GitHub Actions",
+    "hybrid",
+    "owner_lane",
+)
+PUBLIC_PLACEMENTS = frozenset({"Vercel", "Supabase", "GitHub Actions", "hybrid"})
+DO_NOT_DEPLOY = (
+    "atlas-root",
+    "_stack",
+    "playbook-observer",
+    "lifeline",
+    "cortex-artifacts",
+    "atlas-book",
+    "socials-os",
+    "playbook-demo",
+    "external-model-sidecar",
+    "lifeline-pilot-caddy",
+)
+ACTIVATION_SEQUENCE = (
+    "playbook-bootstrap-foreground-observer-proof",
+    "lifeline-bootstrap-state-contract",
+    "lifeline-supervised-restart",
+    "lifeline-logon-restore",
+    "stack-single-scheduled-worker",
+    "cortex-event-refresh",
+    "discordos-interaction-first-reliability-review",
+    "owner-export-integration",
+)
+MARKER_SPECS: dict[str, dict[str, Any]] = {
+    "lane-runtime-activation-readiness": {
+        "title": "Runtime Activation Readiness",
+        "denominator": 8,
+        "measurement_unit": "binary activation gate",
+        "units": (
+            "placement-contract",
+            "playbook-build",
+            "observer-foreground-health",
+            "lifeline-build-doctor",
+            "lifeline-state-placement",
+            "lifeline-supervision-restart",
+            "logon-restore",
+            "stack-single-worker-proof",
+        ),
+    },
+    "lane-runtime-correlation-reliability": {
+        "title": "Runtime Correlation Reliability",
+        "denominator": 5,
+        "measurement_unit": "correlated runtime scenario",
+        "units": (
+            "successful-task",
+            "failed-task",
+            "duplicate-task",
+            "interrupted-restarted-task",
+            "stale-receipt-rejection",
+        ),
+    },
+    "lane-operator-surface-adoption": {
+        "title": "Operator Surface Adoption",
+        "denominator": 4,
+        "measurement_unit": "non-duplicative operator role",
+        "units": (
+            "foundation-portfolio",
+            "playbook-operations",
+            "atlas-book-doctrine",
+            "stack-action-routing",
+        ),
+    },
+}
+COMPONENT_REQUIRED_FIELDS = (
+    "id",
+    "runtime_responsibility",
+    "authority_owner",
+    "implemented_surface",
+    "intended_placement",
+    "current_availability",
+    "consumer",
+    "lifecycle",
+    "persistence",
+    "secrets_boundary",
+    "port",
+    "availability_target",
+    "failure_modes",
+    "activation_deployment_gate",
+    "evidence_refs",
+)
+
+
+@dataclass(frozen=True)
+class RuntimePlacementIssue:
+    severity: str
+    category: str
+    path: str
+    message: str
+    details: dict[str, Any] | None = None
+
+
+def _issue(category: str, path: str, message: str, **details: Any) -> RuntimePlacementIssue:
+    return RuntimePlacementIssue("error", category, path, message, details or None)
+
+
+def _read_json(path: Path) -> dict[str, Any]:
+    payload = json.loads(path.read_text(encoding="utf-8-sig"))
+    if not isinstance(payload, dict):
+        raise ValueError(f"{path} must contain a JSON object")
+    return payload
+
+
+def _non_empty_strings(value: Any) -> bool:
+    return isinstance(value, list) and bool(value) and all(isinstance(item, str) and item.strip() for item in value)
+
+
+def _machine_specific_path(value: str) -> bool:
+    return bool(
+        re.search(r"^[A-Za-z]:[\\/]", value)
+        or re.search(r"(?:^|/)(?:Users|home)/[^/]+/", value.replace("\\", "/"))
+    )
+
+
+def _all_lane_records(lane_payload: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    records: dict[str, dict[str, Any]] = {}
+    for section in ("lanes", "backlog_candidates"):
+        values = lane_payload.get(section)
+        if not isinstance(values, list):
+            continue
+        for value in values:
+            if isinstance(value, dict) and isinstance(value.get("id"), str):
+                records[value["id"]] = value
+    return records
+
+
+def validate_runtime_placement_payloads(
+    registry: dict[str, Any],
+    lane_registry: dict[str, Any],
+    marker_book: str,
+    *,
+    root: Path = ROOT,
+) -> list[RuntimePlacementIssue]:
+    issues: list[RuntimePlacementIssue] = []
+    registry_path = str(REGISTRY_REF).replace("\\", "/")
+
+    if registry.get("schema_version") != "atlas.runtime-placement.registry.v1":
+        issues.append(_issue("runtime-placement-schema", registry_path, "Unexpected runtime placement schema_version."))
+    if registry.get("kind") != "atlas-runtime-placement-registry":
+        issues.append(_issue("runtime-placement-kind", registry_path, "Unexpected runtime placement kind."))
+    if registry.get("authority") != "ATLAS root governance":
+        issues.append(_issue("runtime-placement-authority", registry_path, "Runtime placement authority must remain ATLAS root governance."))
+
+    placement_types = registry.get("placement_types")
+    if placement_types != list(PLACEMENT_TYPES):
+        issues.append(
+            _issue(
+                "runtime-placement-types",
+                f"{registry_path}#placement_types",
+                "Placement types must remain the exact ordered eight-type contract.",
+                expected=list(PLACEMENT_TYPES),
+                actual=placement_types,
+            )
+        )
+
+    components = registry.get("components")
+    if not isinstance(components, list) or not components:
+        issues.append(_issue("runtime-placement-components", f"{registry_path}#components", "Components must be a non-empty array."))
+        components = []
+
+    component_ids: set[str] = set()
+    responsibilities: set[str] = set()
+    component_index: dict[str, dict[str, Any]] = {}
+    used_placements: set[str] = set()
+    for index, component in enumerate(components):
+        path = f"{registry_path}#components[{index}]"
+        if not isinstance(component, dict):
+            issues.append(_issue("runtime-placement-component-shape", path, "Component must be an object."))
+            continue
+        missing = [field for field in COMPONENT_REQUIRED_FIELDS if field not in component]
+        if missing:
+            issues.append(_issue("runtime-placement-component-fields", path, "Component is missing required fields.", missing=missing))
+            continue
+
+        component_id = component.get("id")
+        responsibility = component.get("runtime_responsibility")
+        if not isinstance(component_id, str) or not component_id.strip():
+            issues.append(_issue("runtime-placement-component-id", path, "Component id must be a non-empty string."))
+        elif component_id in component_ids:
+            issues.append(_issue("runtime-placement-component-id", path, "Component id must be unique.", component_id=component_id))
+        else:
+            component_ids.add(component_id)
+            component_index[component_id] = component
+        if not isinstance(responsibility, str) or not responsibility.strip():
+            issues.append(_issue("runtime-placement-responsibility", path, "Runtime responsibility must be a non-empty string."))
+        elif responsibility in responsibilities:
+            issues.append(_issue("runtime-placement-responsibility", path, "Runtime responsibility must be unique.", responsibility=responsibility))
+        else:
+            responsibilities.add(responsibility)
+
+        placement = component.get("intended_placement")
+        if placement not in PLACEMENT_TYPES:
+            issues.append(_issue("runtime-placement-value", path, "Component uses an unsupported placement.", placement=placement))
+        else:
+            used_placements.add(placement)
+
+        for field in ("implemented_surface", "consumer", "failure_modes", "evidence_refs"):
+            if not _non_empty_strings(component.get(field)):
+                issues.append(_issue("runtime-placement-component-list", f"{path}.{field}", f"{field} must be a non-empty string array."))
+
+        availability = component.get("current_availability")
+        if not isinstance(availability, dict) or not isinstance(availability.get("state"), str) or not _non_empty_strings(availability.get("proof")):
+            issues.append(_issue("runtime-placement-availability", f"{path}.current_availability", "Current availability must record state, observed_at, and non-empty proof."))
+        elif not isinstance(availability.get("observed_at"), str) or not availability["observed_at"].endswith("Z"):
+            issues.append(_issue("runtime-placement-availability", f"{path}.current_availability.observed_at", "Availability observed_at must be UTC and end in Z."))
+
+        persistence = component.get("persistence")
+        if not isinstance(persistence, dict) or set(persistence) != {"mode", "path"} or not isinstance(persistence.get("mode"), str):
+            issues.append(_issue("runtime-placement-persistence", f"{path}.persistence", "Persistence must contain exactly mode and path."))
+
+        ports = component.get("port")
+        if ports is not None and (
+            not isinstance(ports, list)
+            or len(ports) != len(set(ports))
+            or any(not isinstance(port, int) or port < 1 or port > 65535 for port in ports)
+        ):
+            issues.append(_issue("runtime-placement-port", f"{path}.port", "Port must be null or a unique array of valid TCP port integers."))
+
+        for evidence_ref in component.get("evidence_refs", []):
+            if _machine_specific_path(evidence_ref):
+                issues.append(_issue("runtime-placement-machine-path", f"{path}.evidence_refs", "Evidence refs must not contain machine-specific absolute paths.", evidence_ref=evidence_ref))
+            if "://" not in evidence_ref and not evidence_ref.startswith("git:"):
+                evidence_path = root / evidence_ref.split("#", 1)[0].split("@", 1)[0]
+                if not evidence_path.exists():
+                    issues.append(_issue("runtime-placement-evidence-missing", f"{path}.evidence_refs", "Relative evidence ref does not exist.", evidence_ref=evidence_ref))
+
+    if used_placements != set(PLACEMENT_TYPES):
+        issues.append(
+            _issue(
+                "runtime-placement-type-coverage",
+                f"{registry_path}#components",
+                "Every placement type must be represented by at least one component.",
+                missing=sorted(set(PLACEMENT_TYPES) - used_placements),
+            )
+        )
+
+    do_not_deploy = registry.get("do_not_deploy")
+    if do_not_deploy != list(DO_NOT_DEPLOY):
+        issues.append(_issue("runtime-placement-do-not-deploy", f"{registry_path}#do_not_deploy", "Do-not-deploy list must remain exact and ordered.", expected=list(DO_NOT_DEPLOY), actual=do_not_deploy))
+    for component_id in DO_NOT_DEPLOY:
+        component = component_index.get(component_id)
+        if component is None:
+            issues.append(_issue("runtime-placement-do-not-deploy", f"{registry_path}#do_not_deploy", "Do-not-deploy component is missing from components.", component_id=component_id))
+        elif component.get("intended_placement") in PUBLIC_PLACEMENTS:
+            issues.append(_issue("runtime-placement-public-hosting-forbidden", f"{registry_path}#components/{component_id}", "Do-not-deploy component must not be assigned public hosting.", placement=component.get("intended_placement")))
+
+    activation_steps = registry.get("activation_sequence")
+    if not isinstance(activation_steps, list):
+        issues.append(_issue("runtime-placement-activation-sequence", f"{registry_path}#activation_sequence", "Activation sequence must be an array."))
+    else:
+        ids = [step.get("id") if isinstance(step, dict) else None for step in activation_steps]
+        orders = [step.get("order") if isinstance(step, dict) else None for step in activation_steps]
+        if ids != list(ACTIVATION_SEQUENCE) or orders != list(range(1, 9)):
+            issues.append(_issue("runtime-placement-activation-sequence", f"{registry_path}#activation_sequence", "Activation sequence must remain exact and ordered.", expected=list(ACTIVATION_SEQUENCE), actual=ids))
+
+    marker_lanes = registry.get("marker_lanes")
+    marker_index = {
+        marker.get("id"): marker
+        for marker in marker_lanes
+        if isinstance(marker_lanes, list) and isinstance(marker, dict) and isinstance(marker.get("id"), str)
+    } if isinstance(marker_lanes, list) else {}
+    lane_records = _all_lane_records(lane_registry)
+    for marker_id, spec in MARKER_SPECS.items():
+        marker = marker_index.get(marker_id)
+        marker_path = f"{registry_path}#marker_lanes/{marker_id}"
+        if marker is None:
+            issues.append(_issue("runtime-placement-marker-missing", marker_path, "Required runtime marker contract is missing."))
+            continue
+        unit_ids = [unit.get("id") for unit in marker.get("units", []) if isinstance(unit, dict)]
+        if marker.get("title") != spec["title"] or marker.get("denominator") != spec["denominator"] or marker.get("measurement_unit") != spec["measurement_unit"]:
+            issues.append(_issue("runtime-placement-marker-contract", marker_path, "Marker title, denominator, or measurement unit drifted.", expected=spec))
+        if marker.get("percentage") is not None or marker.get("completed_units") is not None:
+            issues.append(_issue("runtime-placement-marker-unset", marker_path, "Runtime marker percentage and completed units must remain null until fully admissible proof exists."))
+        if unit_ids != list(spec["units"]) or len(unit_ids) != spec["denominator"]:
+            issues.append(_issue("runtime-placement-marker-units", marker_path, "Marker units must remain the exact fixed denominator.", expected=list(spec["units"]), actual=unit_ids))
+
+        lane = lane_records.get(marker_id)
+        lane_path = f"{LANE_REGISTRY_REF.as_posix()}#{marker_id}"
+        if lane is None:
+            issues.append(_issue("runtime-placement-marker-projection", lane_path, "Runtime marker lane is missing from the canonical lane registry."))
+            continue
+        denominator = lane.get("denominator")
+        denominator_value = denominator.get("value") if isinstance(denominator, dict) else None
+        if lane.get("title") != spec["title"] or lane.get("measurement_unit") != spec["measurement_unit"] or denominator_value != spec["denominator"]:
+            issues.append(_issue("runtime-placement-marker-projection", lane_path, "Canonical lane projection conflicts with the runtime marker contract."))
+        if lane.get("percentage") is not None or lane.get("completed_units") is not None:
+            issues.append(_issue("runtime-placement-marker-projection-unset", lane_path, "Canonical runtime lane percentage and completed units must remain null."))
+
+    if set(marker_index) != set(MARKER_SPECS):
+        issues.append(_issue("runtime-placement-marker-set", f"{registry_path}#marker_lanes", "Runtime placement registry must contain exactly the three admitted marker lanes.", actual=sorted(marker_index)))
+
+    contracts_mesh = lane_records.get("lane-atlas-contracts-mesh", {})
+    contracts_denominator = contracts_mesh.get("denominator")
+    if not (
+        contracts_mesh.get("percentage") == 100
+        and contracts_mesh.get("completed_units") == 11
+        and isinstance(contracts_denominator, dict)
+        and contracts_denominator.get("value") == 11
+    ):
+        issues.append(_issue("runtime-placement-unchanged-marker", str(LANE_REGISTRY_REF), "Atlas Contracts Mesh must remain exactly 11/11 and 100%."))
+
+    marker_integrity = lane_records.get("lane-marker-integrity", {})
+    marker_denominator = marker_integrity.get("denominator")
+    if not (
+        marker_integrity.get("percentage") == 100
+        and marker_integrity.get("completed_units") == 51
+        and isinstance(marker_denominator, dict)
+        and marker_denominator.get("value") == 51
+    ):
+        issues.append(_issue("runtime-placement-unchanged-marker", str(LANE_REGISTRY_REF), "Marker Integrity must remain exactly 51/51 and 100%."))
+
+    if "- Atlas Full-System Re-evaluation: `50%`" not in marker_book or "opening gate is accepted at `1 / 2`" not in marker_book:
+        issues.append(_issue("runtime-placement-unchanged-marker", str(MARKER_BOOK_REF), "Atlas Full-System Re-evaluation must remain exactly 1/2 and 50%."))
+    for spec in MARKER_SPECS.values():
+        expected_line = f"- {spec['title']}: `percentage unset` (fixed `{spec['denominator']}`-unit denominator)"
+        if expected_line not in marker_book:
+            issues.append(_issue("runtime-placement-marker-book", str(MARKER_BOOK_REF), "Atlas Book runtime marker projection is missing or stale.", expected_line=expected_line))
+
+    return issues
+
+
+def validate_contract_files(*, root: Path = ROOT) -> list[RuntimePlacementIssue]:
+    paths = {
+        "registry": root / REGISTRY_REF,
+        "schema": root / SCHEMA_REF,
+        "lane_registry": root / LANE_REGISTRY_REF,
+        "marker_book": root / MARKER_BOOK_REF,
+    }
+    issues: list[RuntimePlacementIssue] = []
+    for label, path in paths.items():
+        if not path.exists():
+            issues.append(_issue("runtime-placement-file-missing", path.relative_to(root).as_posix(), f"Required {label} file is missing."))
+    if issues:
+        return issues
+    try:
+        registry = _read_json(paths["registry"])
+        schema = _read_json(paths["schema"])
+        lane_registry = _read_json(paths["lane_registry"])
+        marker_book = paths["marker_book"].read_text(encoding="utf-8-sig")
+    except (OSError, ValueError, json.JSONDecodeError) as exc:
+        return [_issue("runtime-placement-file-invalid", str(REGISTRY_REF), f"Runtime placement inputs could not be loaded: {exc}")]
+    if schema.get("$id") != "atlas://schemas/atlas.runtime-placement.registry.v1.json":
+        issues.append(_issue("runtime-placement-schema-id", str(SCHEMA_REF), "Runtime placement schema $id is invalid."))
+    issues.extend(validate_runtime_placement_payloads(registry, lane_registry, marker_book, root=root))
+    return issues
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Validate the canonical ATLAS runtime placement registry and marker projections.")
+    parser.add_argument("--root", type=Path, default=ROOT)
+    args = parser.parse_args()
+    issues = validate_contract_files(root=args.root.resolve())
+    print(
+        json.dumps(
+            {
+                "schema_version": "atlas.runtime-placement.validation.v1",
+                "status": "ok" if not issues else "blocked",
+                "issue_count": len(issues),
+                "issues": [asdict(issue) for issue in issues],
+            },
+            indent=2,
+            sort_keys=True,
+        )
+    )
+    return 0 if not issues else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

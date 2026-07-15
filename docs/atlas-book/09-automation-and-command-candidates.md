@@ -214,8 +214,8 @@ These are the best first candidates because they prepare or summarize state with
 | validation and receipt packaging | `_stack` | shared governed execution surface |
 | release proof to update draft | `_stack` plus Discord contract | respects no-post-before-proof rule |
 | doctrine routing and pattern extraction | Playbook | governance and reusable operator knowledge |
-| Discord feedback/panel helpers | DiscordOS later, Fitness-hosted now | runtime workflow surface |
-| Music Sesh setup helpers | DiscordOS later, Fitness-hosted now | runtime workflow surface |
+| Discord feedback/panel helpers | DiscordOS | current hosted runtime workflow surface |
+| Music Sesh setup helpers | DiscordOS | current hosted runtime workflow surface |
 | data-hygiene export and approval prep | owner repo plus ATLAS docs | high-risk prep needs owner context |
 | local data gateway preprocessing | `_stack` first, owner repo as needed | cross-lane export discipline should become a governed shared surface before remote sync |
 | Vercel health classification | Lifeline later, `_stack` first | operational health should become a first-class governed signal |

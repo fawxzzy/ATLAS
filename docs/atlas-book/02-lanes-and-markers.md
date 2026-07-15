@@ -91,6 +91,21 @@ Read:
 - Vercel Platform Observability Governance: `40%`
 - External Model Sidecar Provider Integration - DeepSeek/LiteLLM Bridge: `33.3%` (`2 / 6`)
 
+### Runtime placement and activation
+
+- Runtime Activation Readiness: `percentage unset` (fixed `8`-unit denominator)
+- Runtime Correlation Reliability: `percentage unset` (fixed `5`-unit denominator)
+- Operator Surface Adoption: `percentage unset` (fixed `4`-unit denominator)
+
+These three lanes are admitted with fixed binary units in
+`docs/registry/ATLAS-RUNTIME-PLACEMENT-REGISTRY.v1.json` and projected into
+`docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json`. Their percentages
+and completed-unit counts remain `null`. Implementation prose, source presence,
+hosted component health, or this placement contract alone awards no unit. The
+first owner-side packet is `Playbook bootstrap and foreground Observer health
+proof`; the remaining activation order is fixed in the runtime placement
+registry.
+
 Atlas Contracts Mesh is now complete at `100%` on its fixed eleven-family denominator. KnowledgeCandidate joins the ten previously accepted families after Atlas producer/schema authority, Playbook PR #25's independent candidate-only consumer, exact identity and classified-provenance preservation, deterministic append/replay receipts, fail-closed negative conformance, and zero doctrine mutation all agree. Atlas owns knowledge contract semantics; Playbook consumes them without copying. Candidate admission grants no Rule, Pattern, Failure Mode, story, notes, memory, or doctrine-promotion authority. This terminal child-lane ratchet does not move Atlas Full-System Re-evaluation from `50%` and `1 / 2`, and Marker Integrity remains complete at `51 / 51`.
 
 GitHub Control-Plane Integration is now `100%` on an accepted `8 / 8` denominator. Inventory, parity, Actions, open-work hygiene, release/security projection, cleanup governance, `_stack` event correlation, and DiscordOS projection are complete. The final unit is backed by one explicitly authorized single-writer application with `status=sent_verified`, exact Discord readback, no mentions, and no board or storage write. The daily read-only GitHub watch remains active because implementation completeness is not permanent cloud health. Cleanup classification grants no deletion authority: all 62 local worktrees and 80 merged remote-branch candidates remain held behind explicit mutation authority and correlated removal receipts. No execution-selector marker moved.
@@ -226,7 +241,12 @@ The marker model now supports a three-lane operating split:
 - Discord work lane
 - ATLAS systems lane
 
-That split is now operationalized enough that the lane-structure family is closed for the current scope: the dedicated Fitness Discord poll seam is now explicit in owner code, live on production, consumed by the governed recurring worker path, and no longer acts as one mixed-runtime ambiguity inside the Book.
+That split remains historically closed for its admitted owner-boundary scope. It
+does not prove a local recurring `_stack` worker is active today: current
+readback finds no registered local scheduled worker, while the active bounded
+DiscordOS poll runs in GitHub Actions. The new local activation question is
+measured separately by `Runtime Activation Readiness`, whose percentage remains
+unset.
 
 `Vision & Future Alignment` and `Post-Convergence Lane Split Readiness` are now both closed at `100%`. Future Discord runtime migration or product expansion opens as new owner scope rather than as continuation of those two structural lanes.
 

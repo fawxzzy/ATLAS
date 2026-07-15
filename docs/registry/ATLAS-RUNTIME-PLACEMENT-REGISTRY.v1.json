@@ -1,0 +1,1143 @@
+{
+  "schema_version": "atlas.runtime-placement.registry.v1",
+  "kind": "atlas-runtime-placement-registry",
+  "generated_at": "2026-07-15T18:51:09Z",
+  "authority": "ATLAS root governance",
+  "placement_types": [
+    "no_server/on_demand",
+    "local_persistent",
+    "local_scheduled",
+    "Vercel",
+    "Supabase",
+    "GitHub Actions",
+    "hybrid",
+    "owner_lane"
+  ],
+  "governance": {
+    "rules": [
+      "RULE — Deploy only capabilities that require shared/continuous availability; keep doctrine, contracts, CLIs, and private operator state local/on-demand.",
+      "RULE — One component owns each runtime responsibility; Foundation, Playbook, Atlas Book, and _stack must not duplicate authority."
+    ],
+    "patterns": [
+      "PATTERN — Hosted edge for public callbacks/state, supervised loopback services for private operator tooling, event-triggered recomputation for read models."
+    ],
+    "failure_modes": [
+      "FAILURE MODE — Serverizing the Control Plane: deploying local/private doctrine or operator machinery merely because a server command exists.",
+      "FAILURE MODE — Duplicate Cockpit: Foundation and Playbook both becoming competing operational dashboards.",
+      "FAILURE MODE — Poller Proliferation: multiple permanent watchers replacing one serialized lease/idempotency-controlled sweep."
+    ],
+    "authority_invariants": [
+      "No new general-purpose ATLAS server is admitted.",
+      "Foundation is the hosted read-only portfolio surface; Playbook Observer is the private local operator cockpit.",
+      "DiscordOS is the hosted Discord API and logical writer; its Vercel, Supabase, and GitHub Actions surfaces retain distinct responsibilities.",
+      "Cortex recomputes read models after accepted state changes or digests and does not become a competing daemon or scheduler.",
+      "Fitness, Mazer, Socials OS, Trove, Stream, Nat1, and other products remain owner lanes."
+    ],
+    "production_deploy_guard": "Every production deployment, promotion, or production-alias cutover requires explicit current-thread, per-project, per-deploy approval. This packet authorizes none."
+  },
+  "components": [
+    {
+      "id": "atlas-root",
+      "runtime_responsibility": "Stack governance, topology, placement policy, marker truth, and accepted receipts.",
+      "authority_owner": "ATLAS root governance",
+      "implemented_surface": [
+        "stack.yaml",
+        "docs/**",
+        "ops/**",
+        "packages/**"
+      ],
+      "intended_placement": "no_server/on_demand",
+      "current_availability": {
+        "state": "available_on_demand",
+        "observed_at": "2026-07-15T18:28:05Z",
+        "proof": [
+          "Root governance files are readable on the accepted root revision.",
+          "No ATLAS-related Windows scheduled task or service is registered."
+        ]
+      },
+      "consumer": [
+        "ATLAS operator",
+        "_stack",
+        "Playbook",
+        "Cortex"
+      ],
+      "lifecycle": "invoked for bounded governance packets and validation",
+      "persistence": {
+        "mode": "versioned source plus retained runtime receipts",
+        "path": "runtime/receipts"
+      },
+      "secrets_boundary": "Secrets remain under secrets/** and are never embedded in governance registries or receipts.",
+      "port": null,
+      "availability_target": "Available when the local ATLAS workspace is present; no continuous listener.",
+      "failure_modes": [
+        "Serverizing the Control Plane",
+        "Root absorbing owner-repository implementation"
+      ],
+      "activation_deployment_gate": "Do not deploy; execute only as a bounded local root packet.",
+      "evidence_refs": [
+        "AGENTS.md",
+        "stack.yaml",
+        "docs/architecture/ATLAS-CORTEX-PLAYBOOK-CODEX.md"
+      ]
+    },
+    {
+      "id": "_stack",
+      "runtime_responsibility": "Governed operator commands, normalized execution, and deploy authority without owning product truth.",
+      "authority_owner": "_stack",
+      "implemented_surface": [
+        "repos/_stack/package.json",
+        "repos/_stack/ops/codex/**"
+      ],
+      "intended_placement": "no_server/on_demand",
+      "current_availability": {
+        "state": "available_on_demand",
+        "observed_at": "2026-07-15T18:28:05Z",
+        "proof": [
+          "Operator commands exist in repos/_stack/package.json.",
+          "No general-purpose _stack service is registered."
+        ]
+      },
+      "consumer": [
+        "ATLAS operator",
+        "owner-lane activation packets"
+      ],
+      "lifecycle": "bounded command invocation; scheduled inbox work is a separate component",
+      "persistence": {
+        "mode": "retained command receipts only",
+        "path": "runtime/receipts"
+      },
+      "secrets_boundary": "Commands consume governed secret lanes only when separately authorized and must not persist secret values.",
+      "port": null,
+      "availability_target": "Available on demand; never a public or permanent server.",
+      "failure_modes": [
+        "Poller Proliferation",
+        "_stack absorbing product truth"
+      ],
+      "activation_deployment_gate": "Do not deploy _stack; only the single bounded scheduled sweep may be activated after its owner-side proof.",
+      "evidence_refs": [
+        "repos/_stack/package.json",
+        "repos/_stack/ops/codex/Start-CodexInboxRunner.ps1",
+        "docs/atlas-book/03-operating-model.md"
+      ]
+    },
+    {
+      "id": "playbook-cli",
+      "runtime_responsibility": "Deterministic repo governance commands and doctrine-facing workflows.",
+      "authority_owner": "Playbook",
+      "implemented_surface": [
+        "repos/playbook/packages/cli",
+        "repos/playbook/docs/commands"
+      ],
+      "intended_placement": "no_server/on_demand",
+      "current_availability": {
+        "state": "unavailable_dependency_incomplete",
+        "observed_at": "2026-07-15T18:28:05Z",
+        "proof": [
+          "packages/cli/dist/main.js is present from a later local generated-state refresh.",
+          "Direct CLI help exits 1 because minimatch is missing; the dependency installation is incomplete."
+        ]
+      },
+      "consumer": [
+        "repo operators",
+        "Playbook Observer",
+        "Lifeline manifest"
+      ],
+      "lifecycle": "invoked per repo operation",
+      "persistence": {
+        "mode": "repo-governed artifacts with mutable state outside source roots",
+        "path": "runtime/playbook"
+      },
+      "secrets_boundary": "No ambient secret ownership; command-specific consumers must use governed secret inputs.",
+      "port": null,
+      "availability_target": "CLI commands start successfully after an owner-side frozen dependency bootstrap.",
+      "failure_modes": [
+        "Treating generated build presence as executable readiness",
+        "Turning CLI doctrine into a hosted service"
+      ],
+      "activation_deployment_gate": "Playbook owner bootstrap and direct CLI proof must precede Observer activation; no deployment.",
+      "evidence_refs": [
+        "repos/playbook/package.json",
+        "repos/playbook/packages/cli/package.json",
+        "docs/ops/ATLAS-RUNTIME-PLACEMENT-TRUTH-AND-ACTIVATION-MARKER-ADMISSION-2026-07-15.md"
+      ]
+    },
+    {
+      "id": "playbook-observer",
+      "runtime_responsibility": "Private local operator cockpit over governed Playbook artifacts.",
+      "authority_owner": "Playbook",
+      "implemented_surface": [
+        "playbook observer serve",
+        "GET /health",
+        "GET /ui",
+        "read-only artifact endpoints"
+      ],
+      "intended_placement": "local_persistent",
+      "current_availability": {
+        "state": "unavailable",
+        "observed_at": "2026-07-15T18:28:05Z",
+        "proof": [
+          "No listener is bound to 127.0.0.1:4300.",
+          "The Playbook CLI dependency boundary is incomplete.",
+          "No canonical runtime/playbook/observer registry state is present."
+        ]
+      },
+      "consumer": [
+        "local ATLAS operator"
+      ],
+      "lifecycle": "foreground proof first, then Lifeline-supervised local persistence",
+      "persistence": {
+        "mode": "root runtime state; never source-repo mutable state",
+        "path": "runtime/playbook/observer"
+      },
+      "secrets_boundary": "Loopback-only and private; it reads governed non-secret artifacts and must not become a credential store.",
+      "port": [
+        4300
+      ],
+      "availability_target": "Healthy on http://127.0.0.1:4300 only while the operator machine is available.",
+      "failure_modes": [
+        "Duplicate Cockpit",
+        "Observer becoming canonical state instead of a thin view",
+        "Binding beyond loopback"
+      ],
+      "activation_deployment_gate": "Requires Playbook build/CLI proof and foreground health; public hosting is prohibited.",
+      "evidence_refs": [
+        "repos/playbook/docs/commands/observer.md",
+        "repos/playbook/.lifeline/playbook.lifeline.yml",
+        "repos/playbook/package.json"
+      ]
+    },
+    {
+      "id": "lifeline",
+      "runtime_responsibility": "Local supervision, bounded restart, logs, and logon restoration for Playbook Observer.",
+      "authority_owner": "Lifeline",
+      "implemented_surface": [
+        "lifeline doctor",
+        "lifeline up/status/restart/restore",
+        "Windows Task Scheduler startup backend"
+      ],
+      "intended_placement": "local_persistent",
+      "current_availability": {
+        "state": "unavailable",
+        "observed_at": "2026-07-15T18:28:05Z",
+        "proof": [
+          "repos/lifeline/node_modules and repos/lifeline/dist/cli.js are absent.",
+          "No Lifeline state/startup state is present under the repo or root runtime target.",
+          "No Lifeline or ATLAS startup task is registered."
+        ]
+      },
+      "consumer": [
+        "Playbook Observer",
+        "local ATLAS operator"
+      ],
+      "lifecycle": "owner bootstrap, doctor, supervised restart proof, then logon restore",
+      "persistence": {
+        "mode": "machine-local retained supervisor state and logs outside repositories",
+        "path": "runtime/lifeline/playbook-observer"
+      },
+      "secrets_boundary": "Machine-local process environment only; state and logs must never persist secret values.",
+      "port": null,
+      "availability_target": "Restore the loopback Observer after supervised failure and current-user logon.",
+      "failure_modes": [
+        "Repo-local .lifeline state violating root placement policy",
+        "Registering logon restore before restart proof",
+        "Expanding into a hosted control plane"
+      ],
+      "activation_deployment_gate": "Requires Lifeline owner bootstrap, doctor, root-state contract, restart proof, and only then explicit startup registration; no public deployment.",
+      "evidence_refs": [
+        "repos/lifeline/README.md",
+        "repos/playbook/.lifeline/playbook.lifeline.yml",
+        "stack.yaml"
+      ]
+    },
+    {
+      "id": "stack-inbox-sweep",
+      "runtime_responsibility": "Serialize one bounded inbox sweep with lease/idempotency-controlled task dispatch.",
+      "authority_owner": "_stack",
+      "implemented_surface": [
+        "Start-CodexInboxRunner.ps1 -RunOnce",
+        "codex:*:inbox:once package commands"
+      ],
+      "intended_placement": "local_scheduled",
+      "current_availability": {
+        "state": "inactive",
+        "observed_at": "2026-07-15T18:28:05Z",
+        "proof": [
+          "No matching Windows scheduled task is registered.",
+          "No node-based inbox runner process is active.",
+          "repos/_stack/.codex/inbox contains one file last written 2026-04-08T06:34:58Z."
+        ]
+      },
+      "consumer": [
+        "ATLAS and admitted owner-lane inboxes"
+      ],
+      "lifecycle": "one serialized RunOnce sweep per scheduled invocation; no permanent poll loop",
+      "persistence": {
+        "mode": "root runtime inbox, archive, logs, and correlated receipts",
+        "path": "runtime/codex"
+      },
+      "secrets_boundary": "Task payloads and receipts must remain secret-free; execution secrets stay in governed local inputs.",
+      "port": null,
+      "availability_target": "One bounded scheduled worker proves serialization, lease, idempotency, and correlation without concurrent pollers.",
+      "failure_modes": [
+        "Poller Proliferation",
+        "Overlapping scheduled invocations",
+        "Stale inbox replay"
+      ],
+      "activation_deployment_gate": "Requires one owner-side scheduled-task definition and direct single-worker proof after Lifeline logon restore; no permanent poller.",
+      "evidence_refs": [
+        "repos/_stack/ops/codex/Start-CodexInboxRunner.ps1",
+        "repos/_stack/package.json",
+        "docs/ops/ATLAS-RUNTIME-PLACEMENT-TRUTH-AND-ACTIVATION-MARKER-ADMISSION-2026-07-15.md"
+      ]
+    },
+    {
+      "id": "foundation",
+      "runtime_responsibility": "Hosted read-only portfolio and public stack presentation.",
+      "authority_owner": "Foundation",
+      "implemented_surface": [
+        "Foundation production UI",
+        "apps/console/public"
+      ],
+      "intended_placement": "Vercel",
+      "current_availability": {
+        "state": "available",
+        "observed_at": "2026-07-15T18:51:06Z",
+        "proof": [
+          "https://fawxzzy-foundation.vercel.app returned HTTP 200."
+        ]
+      },
+      "consumer": [
+        "public portfolio viewers",
+        "read-only stack presentation consumers"
+      ],
+      "lifecycle": "continuously hosted read-only presentation",
+      "persistence": {
+        "mode": "Vercel deployment artifacts; no operator state authority",
+        "path": null
+      },
+      "secrets_boundary": "Public UI receives only approved read-only data; it is not an operator secret or private state surface.",
+      "port": null,
+      "availability_target": "Public HTTPS availability without becoming the operator cockpit.",
+      "failure_modes": [
+        "Duplicate Cockpit",
+        "Foundation becoming an execution authority"
+      ],
+      "activation_deployment_gate": "Existing production is observed read-only; every future production deploy remains project-specific and approval-gated.",
+      "evidence_refs": [
+        "repos/foundation/vercel.json",
+        "https://fawxzzy-foundation.vercel.app",
+        "docs/ops/ATLAS-RUNTIME-PLACEMENT-TRUTH-AND-ACTIVATION-MARKER-ADMISSION-2026-07-15.md"
+      ]
+    },
+    {
+      "id": "discordos-vercel-api",
+      "runtime_responsibility": "Public Discord callback, runtime-health, writer, and transfer API edge.",
+      "authority_owner": "DiscordOS",
+      "implemented_surface": [
+        "DiscordOS Vercel serverless functions",
+        "/api/runtime-health",
+        "/api/discord-message-commands-poll"
+      ],
+      "intended_placement": "Vercel",
+      "current_availability": {
+        "state": "operational",
+        "observed_at": "2026-07-15T18:51:08Z",
+        "proof": [
+          "Runtime health returned HTTP 200, ok=true, posture=operational, readinessPercent=100."
+        ]
+      },
+      "consumer": [
+        "Discord callbacks",
+        "GitHub Actions polling",
+        "ATLAS read-only health checks"
+      ],
+      "lifecycle": "continuously hosted serverless edge",
+      "persistence": {
+        "mode": "stateless edge with Supabase-backed state",
+        "path": null
+      },
+      "secrets_boundary": "Vercel-managed environment and OIDC-authenticated poll requests; no secret values in ATLAS receipts.",
+      "port": null,
+      "availability_target": "Public HTTPS callback and writer availability.",
+      "failure_modes": [
+        "Treating HTTP reachability as end-to-end interaction reliability",
+        "Creating a second public writer"
+      ],
+      "activation_deployment_gate": "Already hosted; changes require DiscordOS owner proof and explicit per-deploy production approval.",
+      "evidence_refs": [
+        "repos/DiscordOS/vercel.json",
+        "https://fawxzzy-discordos.vercel.app/api/runtime-health"
+      ]
+    },
+    {
+      "id": "discordos-supabase-state",
+      "runtime_responsibility": "DiscordOS durable writer, transfer, and runtime state.",
+      "authority_owner": "DiscordOS",
+      "implemented_surface": [
+        "DiscordOS Supabase project",
+        "Supabase Edge service-role writer",
+        "persisted writer and transfer state"
+      ],
+      "intended_placement": "Supabase",
+      "current_availability": {
+        "state": "operational",
+        "observed_at": "2026-07-15T18:51:08Z",
+        "proof": [
+          "Runtime health reports supabaseProject, serviceRole, persistedWriter, and liveTransferStatus ready with no blocked reasons."
+        ]
+      },
+      "consumer": [
+        "DiscordOS Vercel API",
+        "DiscordOS writer and transfer flows"
+      ],
+      "lifecycle": "hosted durable state and edge writer",
+      "persistence": {
+        "mode": "Supabase-managed durable state",
+        "path": null
+      },
+      "secrets_boundary": "Supabase credentials stay in managed runtime secrets and never enter root registries or logs.",
+      "port": null,
+      "availability_target": "Durable hosted writer state with exact readback.",
+      "failure_modes": [
+        "Live-state mutation during read-only health inspection",
+        "Persisting secrets in receipts"
+      ],
+      "activation_deployment_gate": "Read-only health is admitted; schema, edge-function, data, and production mutations require separate owner authority.",
+      "evidence_refs": [
+        "https://fawxzzy-discordos.vercel.app/api/runtime-health",
+        "docs/audits/GITHUB-CONTROL-PLANE-OPENING-AUDIT-2026-07-12.md"
+      ]
+    },
+    {
+      "id": "discordos-github-actions-poll",
+      "runtime_responsibility": "Bounded hosted message-command polling for DiscordOS.",
+      "authority_owner": "DiscordOS",
+      "implemented_surface": [
+        "Discord Message Command Poll workflow",
+        "OIDC-authenticated bounded burst polling"
+      ],
+      "intended_placement": "GitHub Actions",
+      "current_availability": {
+        "state": "active_successful",
+        "observed_at": "2026-07-15T18:51:06Z",
+        "proof": [
+          "Scheduled run 29442036556 completed successfully on 2026-07-15 at DiscordOS head 876b30e."
+        ]
+      },
+      "consumer": [
+        "DiscordOS message-command ingress"
+      ],
+      "lifecycle": "bounded scheduled cloud run with concurrency serialization",
+      "persistence": {
+        "mode": "GitHub Actions run history and DiscordOS durable state",
+        "path": null
+      },
+      "secrets_boundary": "GitHub OIDC token is ephemeral and masked; no token is retained in ATLAS evidence.",
+      "port": null,
+      "availability_target": "Successful bounded scheduled polls without a permanent local watcher.",
+      "failure_modes": [
+        "Assuming cron expression equals precise execution cadence",
+        "Adding parallel polling authorities"
+      ],
+      "activation_deployment_gate": "Existing workflow is observed read-only; workflow or production changes require DiscordOS owner authority.",
+      "evidence_refs": [
+        "repos/DiscordOS/.github/workflows/discord-message-command-poll.yml",
+        "https://github.com/fawxzzy/DiscordOS/actions/runs/29442036556"
+      ]
+    },
+    {
+      "id": "discordos-runtime",
+      "runtime_responsibility": "Compose the DiscordOS hosted edge, durable state, and bounded polling surfaces without duplicating their authorities.",
+      "authority_owner": "DiscordOS",
+      "implemented_surface": [
+        "Vercel API",
+        "Supabase state and writer",
+        "GitHub Actions scheduled polling"
+      ],
+      "intended_placement": "hybrid",
+      "current_availability": {
+        "state": "operational",
+        "observed_at": "2026-07-15T18:51:08Z",
+        "proof": [
+          "Runtime health reports all hosted component states ready and live cutover active.",
+          "Latest bounded scheduled polling run succeeded."
+        ]
+      },
+      "consumer": [
+        "Discord users",
+        "ATLAS status and correlation consumers"
+      ],
+      "lifecycle": "continuous hosted edge/state plus bounded scheduled polling",
+      "persistence": {
+        "mode": "Supabase durable state with Vercel and GitHub run evidence",
+        "path": null
+      },
+      "secrets_boundary": "Each hosted plane owns its managed credentials; ATLAS records identifiers and redacted health only.",
+      "port": null,
+      "availability_target": "Interaction-first end-to-end reliability across hosted planes.",
+      "failure_modes": [
+        "Healthy component checks masking interaction-path failure",
+        "Duplicate public or scheduled writer authority"
+      ],
+      "activation_deployment_gate": "Operational now; the next admitted work is an owner-side interaction-first reliability review, not a deployment.",
+      "evidence_refs": [
+        "https://fawxzzy-discordos.vercel.app/api/runtime-health",
+        "repos/DiscordOS/vercel.json",
+        "repos/DiscordOS/.github/workflows/discord-message-command-poll.yml"
+      ]
+    },
+    {
+      "id": "atlas-qa-actions",
+      "runtime_responsibility": "Hosted ATLAS QA and LLEL validation runs.",
+      "authority_owner": "ATLAS root governance",
+      "implemented_surface": [
+        "ATLAS QA LLEL GitHub Actions workflow"
+      ],
+      "intended_placement": "GitHub Actions",
+      "current_availability": {
+        "state": "active_successful",
+        "observed_at": "2026-07-15T18:51:06Z",
+        "proof": [
+          "ATLAS QA LLEL run 29439213282 completed successfully on 2026-07-15."
+        ]
+      },
+      "consumer": [
+        "ATLAS pull requests",
+        "root governance reviewers"
+      ],
+      "lifecycle": "event-triggered CI; not a root server",
+      "persistence": {
+        "mode": "GitHub Actions run history",
+        "path": null
+      },
+      "secrets_boundary": "Workflow secrets remain GitHub-managed and are never read into governance receipts.",
+      "port": null,
+      "availability_target": "Successful event-triggered validation for admitted root changes.",
+      "failure_modes": [
+        "Treating a bounded successful run as permanent cloud health"
+      ],
+      "activation_deployment_gate": "Existing CI is observed read-only; workflow mutation requires a separate bounded root packet.",
+      "evidence_refs": [
+        "https://github.com/fawxzzy/ATLAS/actions/runs/29439213282",
+        "docs/audits/GITHUB-CONTROL-PLANE-OPENING-AUDIT-2026-07-12.md"
+      ]
+    },
+    {
+      "id": "cortex-artifacts",
+      "runtime_responsibility": "Event-triggered read-model recomputation and advisory artifacts.",
+      "authority_owner": "ATLAS root governance",
+      "implemented_surface": [
+        "runtime/cortex/current-state",
+        "runtime/cortex/context",
+        "runtime/cortex/operator-surface",
+        "ops/cortex"
+      ],
+      "intended_placement": "no_server/on_demand",
+      "current_availability": {
+        "state": "stale",
+        "observed_at": "2026-07-15T18:28:05Z",
+        "proof": [
+          "runtime/cortex/current-state/latest.json was generated 2026-07-06T06:22:19Z.",
+          "runtime/cortex/context/latest.json and operator-surface/latest.json were generated 2026-07-06."
+        ]
+      },
+      "consumer": [
+        "ATLAS operator",
+        "_stack explicit artifact-ref consumers"
+      ],
+      "lifecycle": "refresh only after accepted state changes or digest changes",
+      "persistence": {
+        "mode": "generated root runtime read models",
+        "path": "runtime/cortex"
+      },
+      "secrets_boundary": "Read models consume explicit non-secret artifacts and never scrape transcripts or credentials.",
+      "port": null,
+      "availability_target": "Fresh advisory artifacts after accepted changes; no daemon or competing scheduler.",
+      "failure_modes": [
+        "Cortex becoming a competing daemon",
+        "Stale latest artifacts treated as current principal truth"
+      ],
+      "activation_deployment_gate": "Do not deploy; refresh once after the local activation chain changes accepted state.",
+      "evidence_refs": [
+        "docs/architecture/ATLAS-CORTEX-PLAYBOOK-CODEX.md",
+        "runtime/cortex/current-state/latest.json",
+        "runtime/cortex/context/latest.json"
+      ]
+    },
+    {
+      "id": "atlas-book",
+      "runtime_responsibility": "Durable doctrine, operating model, retrieval, and runtime-placement projection.",
+      "authority_owner": "ATLAS root governance",
+      "implemented_surface": [
+        "docs/atlas-book/**"
+      ],
+      "intended_placement": "no_server/on_demand",
+      "current_availability": {
+        "state": "available_on_demand",
+        "observed_at": "2026-07-15T18:28:05Z",
+        "proof": [
+          "Atlas Book sources are present in the accepted root workspace."
+        ]
+      },
+      "consumer": [
+        "ATLAS operator",
+        "restart and handoff workflows"
+      ],
+      "lifecycle": "read and updated with accepted governance changes",
+      "persistence": {
+        "mode": "versioned documentation",
+        "path": "docs/atlas-book"
+      },
+      "secrets_boundary": "Documentation is secret-free and portable.",
+      "port": null,
+      "availability_target": "Readable from the versioned workspace without any server.",
+      "failure_modes": [
+        "Serverizing doctrine",
+        "Stale projection overriding owner truth"
+      ],
+      "activation_deployment_gate": "Do not deploy; refresh only through root governance review.",
+      "evidence_refs": [
+        "docs/atlas-book/README.md",
+        "docs/atlas-book/16-runtime-placement.md"
+      ]
+    },
+    {
+      "id": "atlas-contracts-registries",
+      "runtime_responsibility": "Versioned contracts, schemas, registries, and deterministic validation.",
+      "authority_owner": "ATLAS root governance",
+      "implemented_surface": [
+        "packages/atlas-contracts",
+        "schemas/**",
+        "docs/registry/**"
+      ],
+      "intended_placement": "no_server/on_demand",
+      "current_availability": {
+        "state": "available_on_demand",
+        "observed_at": "2026-07-15T18:28:05Z",
+        "proof": [
+          "Atlas Contracts Mesh remains accepted at 11/11.",
+          "Root validation and contract validators are local command surfaces."
+        ]
+      },
+      "consumer": [
+        "ATLAS",
+        "Playbook",
+        "_stack",
+        "DiscordOS",
+        "owner exports"
+      ],
+      "lifecycle": "validated on accepted changes and consumer adoption",
+      "persistence": {
+        "mode": "versioned source",
+        "path": "packages/atlas-contracts"
+      },
+      "secrets_boundary": "Schemas and fixtures are secret-free; sensitive values are prohibited.",
+      "port": null,
+      "availability_target": "Deterministic local validation with no hosted contract server.",
+      "failure_modes": [
+        "Creating a network dependency for doctrine or schemas",
+        "Generated exports drifting from canonical registries"
+      ],
+      "activation_deployment_gate": "Do not deploy; validate locally and refresh generated projections only through established generators.",
+      "evidence_refs": [
+        "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json",
+        "packages/atlas-contracts",
+        "ops/validation/validate_stack.py"
+      ]
+    },
+    {
+      "id": "fitness",
+      "runtime_responsibility": "Fitness product and product-runtime truth.",
+      "authority_owner": "Fitness owner lane",
+      "implemented_surface": [
+        "repos/fawxzzy-fitness"
+      ],
+      "intended_placement": "owner_lane",
+      "current_availability": {
+        "state": "owner_managed",
+        "observed_at": "2026-07-15T18:28:05Z",
+        "proof": [
+          "ATLAS root records Fitness as an unmanaged, non-root-blocking owner lane."
+        ]
+      },
+      "consumer": [
+        "Fitness users",
+        "Fitness owner task"
+      ],
+      "lifecycle": "owner-managed product lifecycle",
+      "persistence": {
+        "mode": "owner-defined",
+        "path": "repos/fawxzzy-fitness"
+      },
+      "secrets_boundary": "Owner-governed Fitness secret and production boundaries; root receives redacted evidence only.",
+      "port": null,
+      "availability_target": "Defined and proven by the Fitness owner lane, not ATLAS root.",
+      "failure_modes": [
+        "Root operating or deploying Fitness by fallback"
+      ],
+      "activation_deployment_gate": "Owner-lane packet and applicable production/security gates only.",
+      "evidence_refs": [
+        "stack.yaml"
+      ]
+    },
+    {
+      "id": "mazer",
+      "runtime_responsibility": "Mazer game and product-runtime truth.",
+      "authority_owner": "Mazer owner lane",
+      "implemented_surface": [
+        "repos/mazer"
+      ],
+      "intended_placement": "owner_lane",
+      "current_availability": {
+        "state": "owner_managed",
+        "observed_at": "2026-07-15T18:28:05Z",
+        "proof": [
+          "ATLAS root records Mazer as an unmanaged, non-root-blocking owner lane."
+        ]
+      },
+      "consumer": [
+        "Mazer users",
+        "standing Mazer owner task"
+      ],
+      "lifecycle": "owner-managed product lifecycle",
+      "persistence": {
+        "mode": "owner-defined",
+        "path": "repos/mazer"
+      },
+      "secrets_boundary": "Owner-governed product boundary; root receives advisory evidence only.",
+      "port": null,
+      "availability_target": "Defined and proven by the Mazer owner lane, not ATLAS root.",
+      "failure_modes": [
+        "Root operating Mazer as fallback work"
+      ],
+      "activation_deployment_gate": "Explicit Mazer owner-lane packet only.",
+      "evidence_refs": [
+        "stack.yaml"
+      ]
+    },
+    {
+      "id": "socials-os",
+      "runtime_responsibility": "Private Socials OS analytics-data and account workflow truth.",
+      "authority_owner": "Socials OS owner lane",
+      "implemented_surface": [
+        "repos/socials-os"
+      ],
+      "intended_placement": "owner_lane",
+      "current_availability": {
+        "state": "owner_managed",
+        "observed_at": "2026-07-15T18:28:05Z",
+        "proof": [
+          "ATLAS root records Socials OS as an unmanaged, non-root-blocking owner lane."
+        ]
+      },
+      "consumer": [
+        "Socials OS owner task"
+      ],
+      "lifecycle": "owner-managed private data workflow",
+      "persistence": {
+        "mode": "owner-defined private data system",
+        "path": "repos/socials-os"
+      },
+      "secrets_boundary": "Social account data and credentials remain owner-private and are never root runtime state.",
+      "port": null,
+      "availability_target": "Owner-defined; no root-operated or public service assignment.",
+      "failure_modes": [
+        "Root hosting or operating private Socials OS data"
+      ],
+      "activation_deployment_gate": "Do not deploy from root; explicit Socials OS owner-lane authority only.",
+      "evidence_refs": [
+        "stack.yaml",
+        "docs/memory/profiles/zachariah_workflow_profile.md"
+      ]
+    },
+    {
+      "id": "trove",
+      "runtime_responsibility": "Trove product and runtime truth.",
+      "authority_owner": "Trove owner lane",
+      "implemented_surface": [
+        "repos/trove"
+      ],
+      "intended_placement": "owner_lane",
+      "current_availability": {
+        "state": "owner_managed",
+        "observed_at": "2026-07-15T18:28:05Z",
+        "proof": [
+          "Trove remains a registered owner repository; root does not operate its runtime."
+        ]
+      },
+      "consumer": [
+        "Trove owner lane"
+      ],
+      "lifecycle": "owner-managed product lifecycle",
+      "persistence": {
+        "mode": "owner-defined",
+        "path": "repos/trove"
+      },
+      "secrets_boundary": "Owner-governed.",
+      "port": null,
+      "availability_target": "Owner-defined and owner-proven.",
+      "failure_modes": [
+        "Root operating Trove"
+      ],
+      "activation_deployment_gate": "Explicit Trove owner-lane authority only.",
+      "evidence_refs": [
+        "stack.yaml"
+      ]
+    },
+    {
+      "id": "stream",
+      "runtime_responsibility": "Stream product and runtime truth.",
+      "authority_owner": "Stream owner lane",
+      "implemented_surface": [
+        "repos/stream"
+      ],
+      "intended_placement": "owner_lane",
+      "current_availability": {
+        "state": "owner_managed",
+        "observed_at": "2026-07-15T18:28:05Z",
+        "proof": [
+          "Stream remains a registered incubating owner repository with no root-operated service."
+        ]
+      },
+      "consumer": [
+        "Stream owner lane"
+      ],
+      "lifecycle": "owner-managed incubating lifecycle",
+      "persistence": {
+        "mode": "owner-defined",
+        "path": "repos/stream"
+      },
+      "secrets_boundary": "Owner-governed.",
+      "port": null,
+      "availability_target": "Owner-defined and owner-proven.",
+      "failure_modes": [
+        "Root inventing a hosted Stream service"
+      ],
+      "activation_deployment_gate": "Explicit Stream owner-lane authority only.",
+      "evidence_refs": [
+        "stack.yaml"
+      ]
+    },
+    {
+      "id": "nat1",
+      "runtime_responsibility": "Nat1 product and runtime truth.",
+      "authority_owner": "Nat1 owner lane",
+      "implemented_surface": [
+        "repos/Nat1-Games/nat1-games"
+      ],
+      "intended_placement": "owner_lane",
+      "current_availability": {
+        "state": "owner_managed",
+        "observed_at": "2026-07-15T18:28:05Z",
+        "proof": [
+          "Nat1 remains a registered incubating owner repository with no root-operated service."
+        ]
+      },
+      "consumer": [
+        "Nat1 owner lane"
+      ],
+      "lifecycle": "owner-managed incubating lifecycle",
+      "persistence": {
+        "mode": "owner-defined",
+        "path": "repos/Nat1-Games/nat1-games"
+      },
+      "secrets_boundary": "Owner-governed.",
+      "port": null,
+      "availability_target": "Owner-defined and owner-proven.",
+      "failure_modes": [
+        "Root inventing or operating a Nat1 service"
+      ],
+      "activation_deployment_gate": "Explicit Nat1 owner-lane authority only.",
+      "evidence_refs": [
+        "stack.yaml"
+      ]
+    },
+    {
+      "id": "playbook-demo",
+      "runtime_responsibility": "On-demand Playbook demonstration and contract-consumer evidence.",
+      "authority_owner": "Playbook Demo owner lane",
+      "implemented_surface": [
+        "repos/playbook-demo/playbook-demo"
+      ],
+      "intended_placement": "no_server/on_demand",
+      "current_availability": {
+        "state": "source_present",
+        "observed_at": "2026-07-15T18:28:05Z",
+        "proof": [
+          "The governed Playbook Demo checkout is present; no runtime activation was probed or authorized."
+        ]
+      },
+      "consumer": [
+        "Playbook demonstration workflows"
+      ],
+      "lifecycle": "started only for explicit demonstrations or contract proof",
+      "persistence": {
+        "mode": "versioned demo source",
+        "path": "repos/playbook-demo/playbook-demo"
+      },
+      "secrets_boundary": "Demo inputs must remain synthetic and secret-free.",
+      "port": null,
+      "availability_target": "On-demand demo only; no continuous public availability target.",
+      "failure_modes": [
+        "Treating demo implementation as a production service"
+      ],
+      "activation_deployment_gate": "Do not deploy from this packet; explicit demo owner scope only.",
+      "evidence_refs": [
+        "stack.yaml",
+        "stack.lock.yaml"
+      ]
+    },
+    {
+      "id": "external-model-sidecar",
+      "runtime_responsibility": "Optional user-scoped loopback bridge for explicitly routed external-model tasks.",
+      "authority_owner": "ATLAS operator security",
+      "implemented_surface": [
+        "Frozen runtime/security contract only"
+      ],
+      "intended_placement": "local_persistent",
+      "current_availability": {
+        "state": "frozen_not_activated",
+        "observed_at": "2026-07-15T18:28:05Z",
+        "proof": [
+          "The sidecar contract remains frozen and denies installation, task creation, process mutation, and port binding in the current phase."
+        ]
+      },
+      "consumer": [
+        "Explicitly opted-in Codex external-model tasks"
+      ],
+      "lifecycle": "future separately authorized user-scoped activation",
+      "persistence": {
+        "mode": "future current-user runtime outside repositories",
+        "path": "${LOCALAPPDATA}/ATLAS/DeepSeekBridge"
+      },
+      "secrets_boundary": "Windows Credential Manager targets; secret values never enter arguments, logs, receipts, or source.",
+      "port": [
+        4000
+      ],
+      "availability_target": "None in this packet; future loopback-only readiness after separate security phases.",
+      "failure_modes": [
+        "Global provider redirect",
+        "Secret disclosure",
+        "Mistaking a listener for readiness"
+      ],
+      "activation_deployment_gate": "Do not deploy or activate; follow the separately gated Phase 3 and Phase 4 contract.",
+      "evidence_refs": [
+        "docs/registry/ATLAS-EXTERNAL-MODEL-SIDECAR-RUNTIME-CONTRACT.json"
+      ]
+    },
+    {
+      "id": "lifeline-pilot-caddy",
+      "runtime_responsibility": "Retained local pilot and reverse-proxy prototype evidence only.",
+      "authority_owner": "Lifeline",
+      "implemented_surface": [
+        "repos/lifeline/infra/compose.yaml",
+        "pilot container",
+        "Caddy proxy"
+      ],
+      "intended_placement": "local_persistent",
+      "current_availability": {
+        "state": "not_activated",
+        "observed_at": "2026-07-15T18:28:05Z",
+        "proof": [
+          "Compose source exists; no compose deployment or persistent process was started in this packet."
+        ]
+      },
+      "consumer": [
+        "Lifeline owner-side prototype review only"
+      ],
+      "lifecycle": "retained prototype; not in the admitted activation sequence",
+      "persistence": {
+        "mode": "prototype-defined local container state",
+        "path": "repos/lifeline/runtime/wave-1"
+      },
+      "secrets_boundary": "Prototype env files remain owner-private and excluded from root packaging.",
+      "port": [
+        8080,
+        8443
+      ],
+      "availability_target": "None; this prototype is not the Playbook Observer activation path.",
+      "failure_modes": [
+        "Deploying the pilot because compose exists",
+        "Confusing prototype proxying with Lifeline operator readiness"
+      ],
+      "activation_deployment_gate": "Do not deploy or start; any future prototype execution requires a separately named Lifeline owner packet.",
+      "evidence_refs": [
+        "repos/lifeline/infra/compose.yaml"
+      ]
+    }
+  ],
+  "activation_sequence": [
+    {
+      "order": 1,
+      "id": "playbook-bootstrap-foreground-observer-proof",
+      "owner": "Playbook",
+      "admission_proof": "Frozen dependency bootstrap, successful CLI invocation, and foreground GET /health on 127.0.0.1:4300 with root-runtime Observer state."
+    },
+    {
+      "order": 2,
+      "id": "lifeline-bootstrap-state-contract",
+      "owner": "Lifeline",
+      "admission_proof": "Lifeline build and doctor pass, and state/log placement is bound to runtime/lifeline/playbook-observer outside both owner repositories."
+    },
+    {
+      "order": 3,
+      "id": "lifeline-supervised-restart",
+      "owner": "Lifeline",
+      "admission_proof": "Observer process failure is detected, restarted once under bounded backoff, and health/readback returns with correlated state and logs."
+    },
+    {
+      "order": 4,
+      "id": "lifeline-logon-restore",
+      "owner": "Lifeline",
+      "admission_proof": "Current-user logon registration targets lifeline restore and a bounded restore proof re-establishes Observer health."
+    },
+    {
+      "order": 5,
+      "id": "stack-single-scheduled-worker",
+      "owner": "_stack",
+      "admission_proof": "Exactly one serialized RunOnce scheduled sweep proves lease, idempotency, stale-input rejection, and correlated receipt behavior."
+    },
+    {
+      "order": 6,
+      "id": "cortex-event-refresh",
+      "owner": "ATLAS root governance",
+      "admission_proof": "One accepted activation state change triggers deterministic Cortex read-model refresh without a daemon or scheduler."
+    },
+    {
+      "order": 7,
+      "id": "discordos-interaction-first-reliability-review",
+      "owner": "DiscordOS",
+      "admission_proof": "Owner-side review proves successful, failed, duplicate, interrupted/restarted, and stale-receipt interaction correlation across the existing hosted runtime."
+    },
+    {
+      "order": 8,
+      "id": "owner-export-integration",
+      "owner": "ATLAS root governance and owner repositories",
+      "admission_proof": "Established owner exporters consume accepted placement/marker truth and pass schema, semantic, and exact readback checks without Discord mutation."
+    }
+  ],
+  "do_not_deploy": [
+    "atlas-root",
+    "_stack",
+    "playbook-observer",
+    "lifeline",
+    "cortex-artifacts",
+    "atlas-book",
+    "socials-os",
+    "playbook-demo",
+    "external-model-sidecar",
+    "lifeline-pilot-caddy"
+  ],
+  "marker_lanes": [
+    {
+      "id": "lane-runtime-activation-readiness",
+      "title": "Runtime Activation Readiness",
+      "percentage": null,
+      "completed_units": null,
+      "denominator": 8,
+      "measurement_unit": "binary activation gate",
+      "units": [
+        {
+          "id": "placement-contract",
+          "title": "placement contract"
+        },
+        {
+          "id": "playbook-build",
+          "title": "Playbook build"
+        },
+        {
+          "id": "observer-foreground-health",
+          "title": "Observer foreground health"
+        },
+        {
+          "id": "lifeline-build-doctor",
+          "title": "Lifeline build/doctor"
+        },
+        {
+          "id": "lifeline-state-placement",
+          "title": "Lifeline state placement"
+        },
+        {
+          "id": "lifeline-supervision-restart",
+          "title": "Lifeline supervision/restart"
+        },
+        {
+          "id": "logon-restore",
+          "title": "logon restore"
+        },
+        {
+          "id": "stack-single-worker-proof",
+          "title": "_stack single-worker proof"
+        }
+      ],
+      "admission_rule": "Percentage and completed units remain null until every binary gate has directly admissible current proof under the accepted marker rules."
+    },
+    {
+      "id": "lane-runtime-correlation-reliability",
+      "title": "Runtime Correlation Reliability",
+      "percentage": null,
+      "completed_units": null,
+      "denominator": 5,
+      "measurement_unit": "correlated runtime scenario",
+      "units": [
+        {
+          "id": "successful-task",
+          "title": "successful task"
+        },
+        {
+          "id": "failed-task",
+          "title": "failed task"
+        },
+        {
+          "id": "duplicate-task",
+          "title": "duplicate task"
+        },
+        {
+          "id": "interrupted-restarted-task",
+          "title": "interrupted/restarted task"
+        },
+        {
+          "id": "stale-receipt-rejection",
+          "title": "stale receipt rejection"
+        }
+      ],
+      "admission_rule": "Percentage and completed units remain null until all five scenarios have current end-to-end identity, state, and receipt proof."
+    },
+    {
+      "id": "lane-operator-surface-adoption",
+      "title": "Operator Surface Adoption",
+      "percentage": null,
+      "completed_units": null,
+      "denominator": 4,
+      "measurement_unit": "non-duplicative operator role",
+      "units": [
+        {
+          "id": "foundation-portfolio",
+          "title": "Foundation portfolio"
+        },
+        {
+          "id": "playbook-operations",
+          "title": "Playbook operations"
+        },
+        {
+          "id": "atlas-book-doctrine",
+          "title": "Atlas Book doctrine"
+        },
+        {
+          "id": "stack-action-routing",
+          "title": "_stack action routing"
+        }
+      ],
+      "admission_rule": "Percentage and completed units remain null until all four roles have current adoption proof and no authority duplication."
+    }
+  ],
+  "next_owner_side_activation_packet": "Playbook bootstrap and foreground Observer health proof",
+  "evidence_refs": [
+    "docs/ops/ATLAS-RUNTIME-PLACEMENT-TRUTH-AND-ACTIVATION-MARKER-ADMISSION-2026-07-15.md",
+    "docs/architecture/ATLAS-CORTEX-PLAYBOOK-CODEX.md",
+    "docs/atlas-book/16-runtime-placement.md",
+    "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json",
+    "stack.yaml",
+    "stack.lock.yaml"
+  ]
+}

@@ -136,7 +136,7 @@ This chapter turns the current operating model into reusable “run this workflo
 
 ### Owner
 
-- current Fitness-hosted Discord runtime
+- current DiscordOS-hosted Discord runtime and logical writer
 - future Discord work lane after separation
 
 ### Starting point
