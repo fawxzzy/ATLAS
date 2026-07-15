@@ -74,3 +74,32 @@ disposition.
 - No card is deleted, recreated, or moved merely because its title looks wrong.
 - No production deployment, database migration, secret change, or unrelated
   owner-repository mutation is authorized by this marker opening.
+
+## 2026-07-14 current evidence checkpoint
+
+The opening marker remains `0 / 10` (`0%`). Current accepted evidence now
+includes:
+
+- generic lifecycle-downgrade and atomic-preflight protection merged through
+  DiscordOS pull request `#69`;
+- section-preserving canonical-body compaction merged through DiscordOS pull
+  request `#70`;
+- Mazer at `65 / 65` current cards healthy;
+- Fitness at `36 / 36` current cards healthy;
+- global duplicate identity count restored to `0` after a source-export/live
+  identity collision was detected and corrected in the same serialized repair
+  cluster;
+- `atlas.project-board.owner-export.v1` registered and validated in Atlas
+  Contracts; and
+- a read-only Unicode audit showing all `285` current cards clean while `49`
+  superseded records remain an all-surface scanning proof gap.
+
+See:
+
+- `docs/ops/DISCORDOS-MAZER-AND-FITNESS-BOARD-INTEGRITY-RECOVERY-2026-07-14.md`;
+- `docs/ops/ATLAS-PROJECT-BOARD-OWNER-EXPORT-CONTRACT-V1-2026-07-14.md`; and
+- `docs/ops/DISCORDOS-TEXT-INTEGRITY-RECONNAISSANCE-2026-07-14.md`.
+
+No unit moves because seven required board classes remain unadmitted and the
+reaction, movement, full lifecycle, superseded-text, and recurring drift-proof
+requirements are not yet closed across the full denominator.
