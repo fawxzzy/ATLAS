@@ -7,11 +7,15 @@ import {
   ADOPTED_FAMILIES,
   CARD_BOARD_FAMILIES,
   EXPECTED_FAMILIES,
+  MARKER_EVIDENCE_FAMILIES,
   buildCanonicalCardBoardEvidence,
+  buildCanonicalMarkerEvidence,
   validateAdoptedMesh,
   validateAdoption,
   validateCardBoardAdoption,
   validateCardBoardArtifacts,
+  validateMarkerEvidenceAdoption,
+  validateMarkerEvidenceArtifacts,
 } from "./validate_contracts_v2_adoption.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
@@ -78,6 +82,17 @@ async function cardBoardScenario(name, mutate, expected) {
   assert.equal(result.reasonCode, expected, `${name} reason code`);
 }
 
+let markerEvidenceSource;
+async function markerEvidenceScenario(name, mutate, expected, options) {
+  const marker = structuredClone(markerEvidenceSource.marker);
+  const job = structuredClone(markerEvidenceSource.job);
+  const executionReceipt = structuredClone(markerEvidenceSource.executionReceipt);
+  mutate({ marker, job, executionReceipt });
+  const result = await validateMarkerEvidenceArtifacts(marker, job, executionReceipt, options);
+  assert.equal(result.ok, false, `${name} must be rejected`);
+  assert.equal(result.reasonCode, expected, `${name} reason code`);
+}
+
 try {
   const accepted = await validateAdoption(canary);
   assert.equal(accepted.code, "ACCEPTED");
@@ -124,13 +139,24 @@ try {
   assert.equal(cardBoardAccepted.consumerGit.mergeCommit, "b2dbcc1a9ca66876e9c07ea8c6032701c9aaea2a");
   assert.equal(cardBoardAccepted.consumerGit.consumerFilesUnchanged, true);
 
+  markerEvidenceSource = await buildCanonicalMarkerEvidence();
+  const markerEvidenceAccepted = await validateMarkerEvidenceAdoption();
+  assert.equal(markerEvidenceAccepted.code, "ACCEPTED");
+  assert.deepEqual(markerEvidenceAccepted.families, MARKER_EVIDENCE_FAMILIES);
+  assert.deepEqual(Object.keys(markerEvidenceAccepted.evidence), MARKER_EVIDENCE_FAMILIES);
+  assert.equal(markerEvidenceAccepted.receipt.status, "accepted_read_only");
+  assert.equal(markerEvidenceAccepted.receipt.result_identity.numerator, 10);
+  assert.equal(markerEvidenceAccepted.receipt.result_identity.denominator, 11);
+  assert.equal(markerEvidenceAccepted.receipt.result_identity.percentage, 91);
+  assert.equal(markerEvidenceAccepted.receipt.authority.marker_mutation, false);
+
   const meshAccepted = await validateAdoptedMesh(canary);
   assert.equal(meshAccepted.code, "ACCEPTED");
   assert.deepEqual(meshAccepted.families, ADOPTED_FAMILIES);
   assert.deepEqual(Object.keys(meshAccepted.evidence), ADOPTED_FAMILIES);
-  assert.equal(meshAccepted.acceptedUnits, 9);
+  assert.equal(meshAccepted.acceptedUnits, 10);
   assert.equal(meshAccepted.implementationFoundations, 11);
-  assert.equal(meshAccepted.percentage, 82);
+  assert.equal(meshAccepted.percentage, 91);
 
   await cardBoardScenario("card-schema-invalid", ({ card }) => { card.lifecycle = "doing"; }, "CARD_RECORD_SCHEMA_INVALID");
   await cardBoardScenario("card-project-mismatch", ({ card }) => { card.project_id = "other"; }, "CARD_RECORD_PROJECT_MISMATCH");
@@ -145,6 +171,14 @@ try {
   await cardBoardScenario("event-second-writer", ({ event }) => { event.extensions.second_writer = "atlas"; event.extensions.deploy_authority = "production"; }, "SECOND_WRITER_AUTHORITY");
   await cardBoardScenario("event-result-mismatch", ({ event }) => { event.result.observed_version = event.expected_version; event.result.readback_at = "2026-07-15T15:05:00Z"; event.result.receipt_ref = "runtime/receipts/board-event.json"; }, "BOARD_EVENT_RESULT_MISMATCH");
 
+  await markerEvidenceScenario("marker-percentage-mismatch", ({ marker }) => { marker.percentage = 90; }, "MARKER_PERCENTAGE_MISMATCH");
+  await markerEvidenceScenario("marker-transition-mismatch", ({ marker }) => { marker.transition.current_percentage = 90; }, "MARKER_TRANSITION_MISMATCH");
+  await markerEvidenceScenario("marker-stale", ({ marker }) => { marker.freshness.status = "stale"; }, "MARKER_STALE");
+  await markerEvidenceScenario("marker-scope-mismatch", ({ marker }) => { marker.scope = "Unbound percentage claim."; }, "MARKER_SCOPE_MISMATCH");
+  await markerEvidenceScenario("marker-receipt-mismatch", ({ executionReceipt }) => { executionReceipt.job_id = "job-other"; }, "MARKER_RECEIPT_MISMATCH");
+  await markerEvidenceScenario("marker-consumer-receipt-missing", () => {}, "MARKER_CONSUMER_RECEIPT_MISSING", { consumerReceipt: null });
+  await markerEvidenceScenario("marker-rollup-mismatch", ({ marker }) => { marker.rollup_policy = "independent"; }, "MARKER_ROLLUP_MISMATCH");
+
   const malformed = path.join(temp, "malformed.json");
   await fs.writeFile(malformed, "{ malformed JSON rejected");
   const malformedResult = await validateAdoption(malformed);
@@ -153,7 +187,9 @@ try {
   console.log("Cluster 1 through Cluster 3 rejection scenarios: passed");
   console.log("independent CardRecord + BoardEvent consumer acceptance passed");
   console.log("Cluster 4 rejection scenarios: passed");
-  console.log("Contracts Mesh calculation: 9/11 = 82%");
+  console.log("independent MarkerEvidence consumer acceptance passed");
+  console.log("Cluster 5 MarkerEvidence rejection scenarios: passed");
+  console.log("Contracts Mesh calculation: 10/11 = 91%");
 } finally {
   await fs.rm(temp, { recursive: true, force: true });
 }

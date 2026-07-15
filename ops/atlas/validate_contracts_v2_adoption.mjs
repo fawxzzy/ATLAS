@@ -5,6 +5,11 @@ import path from "node:path";
 import process from "node:process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { runArtifactValidator } from "../../packages/atlas-contracts/scripts/validate-artifact.mjs";
+import {
+  buildMarkerAdmissionReceipt,
+  stableStringify as stableAdmissionStringify,
+  verifyMarkerConsumerReceipt,
+} from "./marker_evidence_admission.mjs";
 import { buildBoardEvent } from "./native_board_correlation.mjs";
 
 export const EXPECTED_FAMILIES = Object.freeze([
@@ -17,7 +22,8 @@ export const EXPECTED_FAMILIES = Object.freeze([
   "executionReceipt",
 ]);
 export const CARD_BOARD_FAMILIES = Object.freeze(["cardRecord", "boardEvent"]);
-export const ADOPTED_FAMILIES = Object.freeze([...EXPECTED_FAMILIES, ...CARD_BOARD_FAMILIES]);
+export const MARKER_EVIDENCE_FAMILIES = Object.freeze(["markerEvidence"]);
+export const ADOPTED_FAMILIES = Object.freeze([...EXPECTED_FAMILIES, ...CARD_BOARD_FAMILIES, ...MARKER_EVIDENCE_FAMILIES]);
 
 const SCHEMAS = Object.freeze({
   componentManifest: "atlas.component-manifest.v2",
@@ -29,6 +35,7 @@ const SCHEMAS = Object.freeze({
   executionReceipt: "atlas.execution-receipt.v2",
   cardRecord: "atlas.card-record.v2",
   boardEvent: "atlas.board-event.v2",
+  markerEvidence: "atlas.marker-evidence.v2",
 });
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const VALIDATOR = path.join(ROOT, "packages", "atlas-contracts", "scripts", "validate-artifact.mjs");
@@ -48,11 +55,26 @@ const MESH_LANE_ID = "lane-atlas-contracts-mesh";
 const PRODUCER_CARD_ID = "MAZER-142";
 const PRODUCER_PROJECT_ID = "mazer";
 const PRODUCER_BOARD_ID = "discordos:project-feedback:mazer";
-const MESH_COMPLETED_UNITS = 9;
+const MESH_COMPLETED_UNITS = 10;
 const MESH_FOUNDATIONS = 11;
 const MESH_PERCENTAGE = Math.round((MESH_COMPLETED_UNITS / MESH_FOUNDATIONS) * 100);
+const MESH_PRIOR_COMPLETED_UNITS = 9;
+const MESH_PRIOR_PERCENTAGE = Math.round((MESH_PRIOR_COMPLETED_UNITS / MESH_FOUNDATIONS) * 100);
 const CARD_BOARD_JOB_ID = "job-atlas-contracts-v2-card-board-adoption";
 const CARD_BOARD_OCCURRED_AT = "2026-07-15T15:05:00Z";
+const MARKER_JOB_ID = "job-atlas-contracts-v2-marker-evidence-adoption";
+const MARKER_EXECUTION_RECEIPT_ID = "atr_marker_evidence_adoption_20260715";
+const MARKER_CONSUMER_REF = "ops/atlas/marker_evidence_admission.mjs";
+const MARKER_RECEIPT_REF = "docs/ops/ATLAS-CONTRACTS-V2-CLUSTER-5-MARKEREVIDENCE-ADOPTION-2026-07-15.md";
+const MARKER_EVIDENCE_REFS = Object.freeze([
+  "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json",
+  "packages/atlas-contracts/schemas/atlas.marker-evidence.v2.schema.json",
+  MARKER_CONSUMER_REF,
+  "tests/test_atlas_marker_evidence_admission.mjs",
+  "ops/atlas/validate_contracts_v2_adoption.mjs",
+  "ops/atlas/test_validate_contracts_v2_adoption.mjs",
+  MARKER_RECEIPT_REF,
+]);
 const MUTATION_FLAGS = Object.freeze(["--apply", "--live", "--write", "--send", "--storage", "--discord", "--deploy", "--production", "--prod"]);
 let discordOsConsumerModule;
 
@@ -300,11 +322,182 @@ export async function validateCardBoardAdoption() {
   return result.ok ? { ...result, consumerGit: gitEvidence } : result;
 }
 
+export async function buildCanonicalMarkerEvidence() {
+  const { lane } = await loadCanonicalMeshCard();
+  const runtime = { model: "gpt-5.6-sol", reasoning: "xhigh", speed: "standard", permissions: "full-access", approval_policy: "never" };
+  const marker = {
+    contract_version: SCHEMAS.markerEvidence,
+    marker_id: lane.id,
+    scope: lane.scope,
+    measured_at: lane.last_audited_at,
+    numerator: lane.completed_units,
+    denominator: lane.denominator.value,
+    percentage: lane.percentage,
+    evidence_refs: [...MARKER_EVIDENCE_REFS],
+    freshness: { status: "current", valid_until: null },
+    transition: {
+      previous_percentage: MESH_PRIOR_PERCENTAGE,
+      current_percentage: lane.percentage,
+      reason: "MarkerEvidence gained independent read-only admission, deterministic receipt, and negative conformance proof.",
+    },
+    rollup_policy: "child-evidence-no-rollup",
+    extensions: {
+      source: {
+        registry_ref: relative(LANE_REGISTRY),
+        parent_lane_id: lane.parent_lane_id,
+        measurement_unit: lane.measurement_unit,
+        denominator_kind: lane.denominator.kind,
+        denominator_basis: lane.denominator.basis,
+      },
+      adoption: {
+        family: "MarkerEvidence",
+        prior_completed_units: MESH_PRIOR_COMPLETED_UNITS,
+        current_completed_units: lane.completed_units,
+        job_id: MARKER_JOB_ID,
+        execution_receipt_id: MARKER_EXECUTION_RECEIPT_ID,
+      },
+      authority: {
+        external_mutation: false,
+        marker_mutation: false,
+        parent_marker_movement: false,
+        ratchet_requires_accepted_receipt: true,
+      },
+    },
+  };
+  const markerBytes = stableBytes(marker);
+  const commands = [
+    "node --test tests/test_atlas_marker_evidence_admission.mjs",
+    "node ops/atlas/test_validate_contracts_v2_adoption.mjs",
+  ];
+  const job = {
+    contract_version: SCHEMAS.jobEnvelope,
+    job_id: MARKER_JOB_ID,
+    component_id: "atlas-root",
+    project_id: "atlas",
+    created_at: new Date(Date.parse(lane.last_audited_at) - 60_000).toISOString(),
+    objective: "Independently admit canonical MarkerEvidence without marker or external mutation.",
+    scope: {
+      owner_repository: "atlas",
+      allowed_paths: ["docs/**", "ops/atlas/**", "packages/atlas-contracts/**", "tests/**"],
+      forbidden_paths: ["secrets/**", "repos/**", "runtime/**"],
+    },
+    runtime,
+    authority: { external_mutations: [], production_deploy: false, destructive_actions: false },
+    verification: { commands, evidence_required: ["deterministic MarkerEvidence consumer receipt", "stable negative reason-code matrix"] },
+    correlations: { card_id: lane.id, parent_job_id: null },
+    expected_receipt_version: SCHEMAS.executionReceipt,
+    extensions: {
+      marker_id: lane.id,
+      producer_registry_ref: relative(LANE_REGISTRY),
+      prior_completed_units: MESH_PRIOR_COMPLETED_UNITS,
+      target_completed_units: MESH_COMPLETED_UNITS,
+      parent_marker_movement: false,
+    },
+  };
+  const executionReceipt = {
+    contract_version: SCHEMAS.executionReceipt,
+    receipt_id: MARKER_EXECUTION_RECEIPT_ID,
+    job_id: MARKER_JOB_ID,
+    recorded_at: lane.last_audited_at,
+    status: "succeeded",
+    component_id: "atlas-root",
+    project_id: "atlas",
+    runtime_effective: runtime,
+    changed_paths: [],
+    commits: [],
+    verification: commands.map((command) => ({ command, status: "passed", evidence_refs: [MARKER_RECEIPT_REF] })),
+    evidence_refs: [...MARKER_EVIDENCE_REFS],
+    blockers: [],
+    follow_up: ["KnowledgeCandidate"],
+    correlations: {
+      card_id: lane.id,
+      thread_id: "019f52d9-7667-72a3-a5f7-9c0613aedd8f",
+      turn_id: "contracts-v2-cluster-5-marker-evidence",
+      branch: "codex/atlas-contracts-v2-marker-evidence-adoption",
+      worktree: null,
+    },
+    authority_actions: [],
+    summary: "Read-only MarkerEvidence admission and adoption proof.",
+    extensions: {
+      marker_evidence_binding: {
+        marker_id: lane.id,
+        artifact_ref: "generated:ops/atlas/validate_contracts_v2_adoption.mjs#buildCanonicalMarkerEvidence",
+        digest: sha256(markerBytes),
+      },
+      external_mutation: false,
+      marker_mutation: false,
+      parent_marker_movement: false,
+    },
+  };
+  return { marker, job, executionReceipt, lane };
+}
+
+export async function validateMarkerEvidenceArtifacts(marker, job, executionReceipt, { consumerReceipt } = {}) {
+  const temp = await fs.mkdtemp(path.join(ROOT, "tmp", "atlas-contracts-v2-marker-evidence-adoption-"));
+  const markerPath = path.join(temp, "marker-evidence.json");
+  const jobPath = path.join(temp, "job-envelope.json");
+  const executionReceiptPath = path.join(temp, "execution-receipt.json");
+  const markerBytes = stableBytes(marker);
+  try {
+    await Promise.all([
+      fs.writeFile(markerPath, markerBytes),
+      fs.writeFile(jobPath, stableBytes(job)),
+      fs.writeFile(executionReceiptPath, stableBytes(executionReceipt)),
+    ]);
+    let first;
+    let second;
+    try {
+      first = await buildMarkerAdmissionReceipt({ markerPath, jobPath, executionReceiptPath });
+      second = await buildMarkerAdmissionReceipt({ markerPath, jobPath, executionReceiptPath });
+    } catch (error) {
+      return fail(error?.reasonCode ?? "MARKER_ADMISSION_FAILED", error?.errors ?? [error?.message ?? "MarkerEvidence admission failed"]);
+    }
+    if (stableAdmissionStringify(first) !== stableAdmissionStringify(second)) {
+      return fail("MARKER_CONSUMER_RECEIPT_NONDETERMINISTIC", ["identical MarkerEvidence replay changed the consumer receipt"]);
+    }
+    const admittedReceipt = consumerReceipt === undefined ? first : consumerReceipt;
+    try {
+      verifyMarkerConsumerReceipt(admittedReceipt, first);
+    } catch (error) {
+      return fail(error?.reasonCode ?? "MARKER_CONSUMER_RECEIPT_MISMATCH", error?.errors ?? [error?.message ?? "MarkerEvidence consumer receipt verification failed"]);
+    }
+    return {
+      ok: true,
+      code: "ACCEPTED",
+      reasonCode: "ACCEPTED",
+      families: MARKER_EVIDENCE_FAMILIES,
+      receipt: admittedReceipt,
+      evidence: {
+        markerEvidence: {
+          producer: "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json",
+          consumer: MARKER_CONSUMER_REF,
+          bytes: markerBytes.length,
+          sha256: sha256(markerBytes),
+        },
+      },
+    };
+  } finally {
+    await fs.rm(temp, { recursive: true, force: true });
+  }
+}
+
+export async function validateMarkerEvidenceAdoption() {
+  let producer;
+  try {
+    producer = await buildCanonicalMarkerEvidence();
+  } catch (error) {
+    return fail("MARKER_PROJECTION_MISMATCH", [error.message]);
+  }
+  return validateMarkerEvidenceArtifacts(producer.marker, producer.job, producer.executionReceipt);
+}
+
 export async function validateAdoptedMesh(runPath) {
   const seven = await validateAdoption(runPath);
   if (!seven.ok) return seven;
   const cardBoard = await validateCardBoardAdoption();
   if (!cardBoard.ok) return cardBoard;
+  const markerEvidence = await validateMarkerEvidenceAdoption();
+  if (!markerEvidence.ok) return markerEvidence;
   return {
     ok: true,
     code: "ACCEPTED",
@@ -316,8 +509,9 @@ export async function validateAdoptedMesh(runPath) {
     runId: seven.runId,
     jobId: seven.jobId,
     consumerReceiptId: cardBoard.receipt.receipt_id,
+    markerConsumerReceiptId: markerEvidence.receipt.receipt_id,
     consumerGit: cardBoard.consumerGit,
-    evidence: { ...seven.evidence, ...cardBoard.evidence },
+    evidence: { ...seven.evidence, ...cardBoard.evidence, ...markerEvidence.evidence },
   };
 }
 
@@ -471,7 +665,13 @@ export async function validateAdoption(runPath) {
 
 function parseArgs(argv) {
   const runIndex = argv.indexOf("--run");
-  return { json: argv.includes("--json"), all: argv.includes("--all"), cardBoard: argv.includes("--card-board"), run: runIndex >= 0 ? argv[runIndex + 1] : null };
+  return {
+    json: argv.includes("--json"),
+    all: argv.includes("--all"),
+    cardBoard: argv.includes("--card-board"),
+    markerEvidence: argv.includes("--marker-evidence"),
+    run: runIndex >= 0 ? argv[runIndex + 1] : null,
+  };
 }
 const args = parseArgs(process.argv.slice(2));
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
@@ -479,9 +679,11 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     ? (args.run ? await validateAdoptedMesh(args.run) : fail("MISSING_INPUT", ["--run is required with --all"]))
     : args.cardBoard
       ? await validateCardBoardAdoption()
+      : args.markerEvidence
+        ? await validateMarkerEvidenceAdoption()
       : args.run
         ? await validateAdoption(args.run)
-        : fail("MISSING_INPUT", ["--run, --card-board, or --all with --run is required"]);
+        : fail("MISSING_INPUT", ["--run, --card-board, --marker-evidence, or --all with --run is required"]);
   if (args.json) console.log(JSON.stringify(result));
   else console.log(`${result.code}: ${result.ok ? "Contracts v2 adoption accepted" : result.errors.join(" ")}`);
   process.exitCode = result.ok ? 0 : 1;
