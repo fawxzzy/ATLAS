@@ -29,15 +29,18 @@ class ProjectBoardOwnerExportTests(unittest.TestCase):
         atlas = exports["atlas"]
         cortex = exports["cortex"]
 
-        self.assertEqual(len(atlas["cards"]), 33)
-        self.assertEqual(atlas["extensions"]["selection"]["marker_parent_count"], 7)
+        self.assertEqual(len(atlas["cards"]), 31)
+        self.assertEqual(atlas["extensions"]["selection"]["marker_parent_count"], 6)
         self.assertEqual(atlas["extensions"]["selection"]["direct_lane_count"], 10)
-        self.assertEqual(atlas["extensions"]["selection"]["governance_backlog_count"], 16)
+        self.assertEqual(atlas["extensions"]["selection"]["governance_backlog_count"], 15)
         self.assertEqual(
             atlas["extensions"]["selection"]["backlog_owner_allowlist"],
             sorted(ATLAS_GOVERNANCE_BACKLOG_OWNERS),
         )
         self.assertEqual(len(cortex["cards"]), 2)
+        atlas_card_ids = {card["record"]["card_id"] for card in atlas["cards"]}
+        cortex_card_ids = {card["record"]["card_id"] for card in cortex["cards"]}
+        self.assertFalse(atlas_card_ids & cortex_card_ids)
         self.assertEqual(
             {card["record"]["card_id"] for card in cortex["cards"]},
             {"lane-cortex-context-synthesis", "lane-cortex-boundary-decision"},
@@ -49,7 +52,7 @@ class ProjectBoardOwnerExportTests(unittest.TestCase):
         atlas = build_project_board_owner_exports()["atlas"]
         cards_by_id = {card["record"]["card_id"]: card for card in atlas["cards"]}
         marker_ids = {card["record"]["card_id"] for card in atlas["cards"] if card["record_kind"] == "marker"}
-        self.assertEqual(len(marker_ids), 7)
+        self.assertEqual(len(marker_ids), 6)
         for card in atlas["cards"]:
             if card["record"]["card_id"] in marker_ids:
                 self.assertIn(card["record"]["lifecycle"], {"planning", "completed"})
@@ -64,8 +67,10 @@ class ProjectBoardOwnerExportTests(unittest.TestCase):
         selected_ids = {card["record"]["card_id"] for card in atlas["cards"]}
         backlog_by_id = {record["id"]: record for record in registry["backlog_candidates"]}
         selected_backlog = [backlog_by_id[record_id] for record_id in selected_ids if record_id in backlog_by_id]
-        self.assertEqual(len(selected_backlog), 16)
+        self.assertEqual(len(selected_backlog), 15)
         self.assertTrue(all(record["owner"] in ATLAS_GOVERNANCE_BACKLOG_OWNERS for record in selected_backlog))
+        self.assertNotIn("lane-cortex-context-synthesis", selected_ids)
+        self.assertNotIn("lane-cortex-boundary-decision", selected_ids)
         self.assertNotIn("lane-fitness-dependency-security", selected_ids)
         self.assertNotIn("lane-discordos-command-surface-convergence", selected_ids)
         self.assertNotIn("lane-stack-github-event-contracts", selected_ids)
