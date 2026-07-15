@@ -30,7 +30,7 @@ Excluded and unchanged:
 
 ## Research Provenance
 
-- Operator source: `C:/Users/zjhre/Downloads/deep-research-report.md` (local input only; not a committed canonical path)
+- Operator source: `operator-provided local download (non-canonical input)`
 - Stored evidence: `data/imports/ui-standards/deep-research-2026-07-15/deep-research-report.md`
 - Expected SHA-256: `77f882e6af10eb4094e79033769ab8d8010ba2e6d473c620ef55750340941723`
 - Observed source SHA-256: exact match
