@@ -10,6 +10,7 @@ import {
   stableStringify as stableAdmissionStringify,
   verifyMarkerConsumerReceipt,
 } from "./marker_evidence_admission.mjs";
+import { buildKnowledgeCandidateAdoptionReceipt } from "./knowledge_candidate_adoption.mjs";
 import { buildBoardEvent } from "./native_board_correlation.mjs";
 
 export const EXPECTED_FAMILIES = Object.freeze([
@@ -23,7 +24,8 @@ export const EXPECTED_FAMILIES = Object.freeze([
 ]);
 export const CARD_BOARD_FAMILIES = Object.freeze(["cardRecord", "boardEvent"]);
 export const MARKER_EVIDENCE_FAMILIES = Object.freeze(["markerEvidence"]);
-export const ADOPTED_FAMILIES = Object.freeze([...EXPECTED_FAMILIES, ...CARD_BOARD_FAMILIES, ...MARKER_EVIDENCE_FAMILIES]);
+export const KNOWLEDGE_CANDIDATE_FAMILIES = Object.freeze(["knowledgeCandidate"]);
+export const ADOPTED_FAMILIES = Object.freeze([...EXPECTED_FAMILIES, ...CARD_BOARD_FAMILIES, ...MARKER_EVIDENCE_FAMILIES, ...KNOWLEDGE_CANDIDATE_FAMILIES]);
 
 const SCHEMAS = Object.freeze({
   componentManifest: "atlas.component-manifest.v2",
@@ -36,6 +38,7 @@ const SCHEMAS = Object.freeze({
   cardRecord: "atlas.card-record.v2",
   boardEvent: "atlas.board-event.v2",
   markerEvidence: "atlas.marker-evidence.v2",
+  knowledgeCandidate: "atlas.knowledge-candidate.v2",
 });
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const VALIDATOR = path.join(ROOT, "packages", "atlas-contracts", "scripts", "validate-artifact.mjs");
@@ -55,22 +58,25 @@ const MESH_LANE_ID = "lane-atlas-contracts-mesh";
 const PRODUCER_CARD_ID = "MAZER-142";
 const PRODUCER_PROJECT_ID = "mazer";
 const PRODUCER_BOARD_ID = "discordos:project-feedback:mazer";
-const MESH_COMPLETED_UNITS = 10;
+const MESH_COMPLETED_UNITS = 11;
 const MESH_FOUNDATIONS = 11;
 const MESH_PERCENTAGE = Math.round((MESH_COMPLETED_UNITS / MESH_FOUNDATIONS) * 100);
-const MESH_PRIOR_COMPLETED_UNITS = 9;
+const MESH_PRIOR_COMPLETED_UNITS = 10;
 const MESH_PRIOR_PERCENTAGE = Math.round((MESH_PRIOR_COMPLETED_UNITS / MESH_FOUNDATIONS) * 100);
 const CARD_BOARD_JOB_ID = "job-atlas-contracts-v2-card-board-adoption";
 const CARD_BOARD_OCCURRED_AT = "2026-07-15T15:05:00Z";
-const MARKER_JOB_ID = "job-atlas-contracts-v2-marker-evidence-adoption";
-const MARKER_EXECUTION_RECEIPT_ID = "atr_marker_evidence_adoption_20260715";
+const MARKER_JOB_ID = "job-atlas-contracts-v2-knowledge-candidate-adoption";
+const MARKER_EXECUTION_RECEIPT_ID = "atr_knowledge_candidate_adoption_20260715";
 const MARKER_CONSUMER_REF = "ops/atlas/marker_evidence_admission.mjs";
-const MARKER_RECEIPT_REF = "docs/ops/ATLAS-CONTRACTS-V2-CLUSTER-5-MARKEREVIDENCE-ADOPTION-2026-07-15.md";
+const MARKER_RECEIPT_REF = "docs/ops/ATLAS-CONTRACTS-V2-CLUSTER-6-KNOWLEDGECANDIDATE-ADOPTION-2026-07-15.md";
 const MARKER_EVIDENCE_REFS = Object.freeze([
   "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json",
   "packages/atlas-contracts/schemas/atlas.marker-evidence.v2.schema.json",
+  "packages/atlas-contracts/schemas/atlas.knowledge-candidate.v2.schema.json",
   MARKER_CONSUMER_REF,
   "tests/test_atlas_marker_evidence_admission.mjs",
+  "ops/atlas/knowledge_candidate_adoption.mjs",
+  "tests/test_atlas_knowledge_candidate_adoption.mjs",
   "ops/atlas/validate_contracts_v2_adoption.mjs",
   "ops/atlas/test_validate_contracts_v2_adoption.mjs",
   MARKER_RECEIPT_REF,
@@ -338,7 +344,7 @@ export async function buildCanonicalMarkerEvidence() {
     transition: {
       previous_percentage: MESH_PRIOR_PERCENTAGE,
       current_percentage: lane.percentage,
-      reason: "MarkerEvidence gained independent read-only admission, deterministic receipt, and negative conformance proof.",
+      reason: "KnowledgeCandidate gained independent Playbook candidate-only admission, deterministic receipt, and negative conformance proof.",
     },
     rollup_policy: "child-evidence-no-rollup",
     extensions: {
@@ -350,7 +356,7 @@ export async function buildCanonicalMarkerEvidence() {
         denominator_basis: lane.denominator.basis,
       },
       adoption: {
-        family: "MarkerEvidence",
+        family: "KnowledgeCandidate",
         prior_completed_units: MESH_PRIOR_COMPLETED_UNITS,
         current_completed_units: lane.completed_units,
         job_id: MARKER_JOB_ID,
@@ -367,6 +373,7 @@ export async function buildCanonicalMarkerEvidence() {
   const markerBytes = stableBytes(marker);
   const commands = [
     "node --test tests/test_atlas_marker_evidence_admission.mjs",
+    "node --test tests/test_atlas_knowledge_candidate_adoption.mjs",
     "node ops/atlas/test_validate_contracts_v2_adoption.mjs",
   ];
   const job = {
@@ -375,7 +382,7 @@ export async function buildCanonicalMarkerEvidence() {
     component_id: "atlas-root",
     project_id: "atlas",
     created_at: new Date(Date.parse(lane.last_audited_at) - 60_000).toISOString(),
-    objective: "Independently admit canonical MarkerEvidence without marker or external mutation.",
+    objective: "Project the accepted KnowledgeCandidate consumer proof into current MarkerEvidence without parent or external mutation.",
     scope: {
       owner_repository: "atlas",
       allowed_paths: ["docs/**", "ops/atlas/**", "packages/atlas-contracts/**", "tests/**"],
@@ -383,7 +390,7 @@ export async function buildCanonicalMarkerEvidence() {
     },
     runtime,
     authority: { external_mutations: [], production_deploy: false, destructive_actions: false },
-    verification: { commands, evidence_required: ["deterministic MarkerEvidence consumer receipt", "stable negative reason-code matrix"] },
+    verification: { commands, evidence_required: ["deterministic Playbook candidate-only receipt", "current deterministic MarkerEvidence receipt", "stable negative reason-code matrix"] },
     correlations: { card_id: lane.id, parent_job_id: null },
     expected_receipt_version: SCHEMAS.executionReceipt,
     extensions: {
@@ -408,16 +415,16 @@ export async function buildCanonicalMarkerEvidence() {
     verification: commands.map((command) => ({ command, status: "passed", evidence_refs: [MARKER_RECEIPT_REF] })),
     evidence_refs: [...MARKER_EVIDENCE_REFS],
     blockers: [],
-    follow_up: ["KnowledgeCandidate"],
+    follow_up: [],
     correlations: {
       card_id: lane.id,
       thread_id: "019f52d9-7667-72a3-a5f7-9c0613aedd8f",
-      turn_id: "contracts-v2-cluster-5-marker-evidence",
-      branch: "codex/atlas-contracts-v2-marker-evidence-adoption",
+      turn_id: "contracts-v2-cluster-6-knowledge-candidate",
+      branch: "codex/contracts-mesh-knowledge-candidate-reconciliation",
       worktree: null,
     },
     authority_actions: [],
-    summary: "Read-only MarkerEvidence admission and adoption proof.",
+    summary: "KnowledgeCandidate terminal adoption with current read-only MarkerEvidence projection.",
     extensions: {
       marker_evidence_binding: {
         marker_id: lane.id,
@@ -491,11 +498,38 @@ export async function validateMarkerEvidenceAdoption() {
   return validateMarkerEvidenceArtifacts(producer.marker, producer.job, producer.executionReceipt);
 }
 
+export async function validateKnowledgeCandidateAdoption() {
+  try {
+    const receipt = await buildKnowledgeCandidateAdoptionReceipt();
+    return {
+      ok: true,
+      code: "ACCEPTED",
+      reasonCode: "ACCEPTED",
+      families: KNOWLEDGE_CANDIDATE_FAMILIES,
+      receipt,
+      consumerGit: receipt.consumer_revision,
+      evidence: {
+        knowledgeCandidate: {
+          producer: "packages/atlas-contracts/fixtures/valid/knowledge-candidate.v2.json",
+          contract: "packages/atlas-contracts/schemas/atlas.knowledge-candidate.v2.schema.json",
+          consumer: "repos/playbook:knowledge atlas-admit",
+          candidateSha256: receipt.inputs[0].candidate_sha256,
+          queueSha256: receipt.queue.queue_bytes_sha256,
+        },
+      },
+    };
+  } catch (error) {
+    return fail(error?.reasonCode ?? "KNOWLEDGE_ADOPTION_FAILED", error?.errors ?? [error?.message ?? "KnowledgeCandidate adoption failed"]);
+  }
+}
+
 export async function validateAdoptedMesh(runPath) {
   const seven = await validateAdoption(runPath);
   if (!seven.ok) return seven;
   const cardBoard = await validateCardBoardAdoption();
   if (!cardBoard.ok) return cardBoard;
+  const knowledgeCandidate = await validateKnowledgeCandidateAdoption();
+  if (!knowledgeCandidate.ok) return knowledgeCandidate;
   const markerEvidence = await validateMarkerEvidenceAdoption();
   if (!markerEvidence.ok) return markerEvidence;
   return {
@@ -510,8 +544,10 @@ export async function validateAdoptedMesh(runPath) {
     jobId: seven.jobId,
     consumerReceiptId: cardBoard.receipt.receipt_id,
     markerConsumerReceiptId: markerEvidence.receipt.receipt_id,
+    knowledgeConsumerReceiptId: knowledgeCandidate.receipt.receipt_id,
     consumerGit: cardBoard.consumerGit,
-    evidence: { ...seven.evidence, ...cardBoard.evidence, ...markerEvidence.evidence },
+    playbookConsumerGit: knowledgeCandidate.consumerGit,
+    evidence: { ...seven.evidence, ...cardBoard.evidence, ...markerEvidence.evidence, ...knowledgeCandidate.evidence },
   };
 }
 
@@ -670,6 +706,7 @@ function parseArgs(argv) {
     all: argv.includes("--all"),
     cardBoard: argv.includes("--card-board"),
     markerEvidence: argv.includes("--marker-evidence"),
+    knowledgeCandidate: argv.includes("--knowledge-candidate"),
     run: runIndex >= 0 ? argv[runIndex + 1] : null,
   };
 }
@@ -681,9 +718,11 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
       ? await validateCardBoardAdoption()
       : args.markerEvidence
         ? await validateMarkerEvidenceAdoption()
+      : args.knowledgeCandidate
+        ? await validateKnowledgeCandidateAdoption()
       : args.run
         ? await validateAdoption(args.run)
-        : fail("MISSING_INPUT", ["--run, --card-board, --marker-evidence, or --all with --run is required"]);
+        : fail("MISSING_INPUT", ["--run, --card-board, --marker-evidence, --knowledge-candidate, or --all with --run is required"]);
   if (args.json) console.log(JSON.stringify(result));
   else console.log(`${result.code}: ${result.ok ? "Contracts v2 adoption accepted" : result.errors.join(" ")}`);
   process.exitCode = result.ok ? 0 : 1;

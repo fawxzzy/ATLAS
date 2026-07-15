@@ -86,12 +86,12 @@ Read:
 
 ### Platform governance
 
-- Atlas Contracts Mesh: `91%` (`10 / 11`)
+- Atlas Contracts Mesh: `100%` (`11 / 11`)
 - GitHub Control-Plane Integration: `100%`
 - Vercel Platform Observability Governance: `40%`
 - External Model Sidecar Provider Integration - DeepSeek/LiteLLM Bridge: `33.3%` (`2 / 6`)
 
-Atlas Contracts Mesh is now `91%` on its fixed eleven-family denominator. MarkerEvidence joins the nine previously accepted families after registry producer truth, the independent read-only root admission consumer, fail-closed negative conformance, deterministic correlated receipt proof, and root reconciliation all agree. KnowledgeCandidate remains the final independent-consumer gap. This child-lane ratchet does not move Atlas Full-System Re-evaluation from `50%` and `1 / 2`, and Marker Integrity remains `51 / 51`.
+Atlas Contracts Mesh is now complete at `100%` on its fixed eleven-family denominator. KnowledgeCandidate joins the ten previously accepted families after Atlas producer/schema authority, Playbook PR #25's independent candidate-only consumer, exact identity and classified-provenance preservation, deterministic append/replay receipts, fail-closed negative conformance, and zero doctrine mutation all agree. Atlas owns knowledge contract semantics; Playbook consumes them without copying. Candidate admission grants no Rule, Pattern, Failure Mode, story, notes, memory, or doctrine-promotion authority. This terminal child-lane ratchet does not move Atlas Full-System Re-evaluation from `50%` and `1 / 2`, and Marker Integrity remains complete at `51 / 51`.
 
 GitHub Control-Plane Integration is now `100%` on an accepted `8 / 8` denominator. Inventory, parity, Actions, open-work hygiene, release/security projection, cleanup governance, `_stack` event correlation, and DiscordOS projection are complete. The final unit is backed by one explicitly authorized single-writer application with `status=sent_verified`, exact Discord readback, no mentions, and no board or storage write. The daily read-only GitHub watch remains active because implementation completeness is not permanent cloud health. Cleanup classification grants no deletion authority: all 62 local worktrees and 80 merged remote-branch candidates remain held behind explicit mutation authority and correlated removal receipts. No execution-selector marker moved.
 

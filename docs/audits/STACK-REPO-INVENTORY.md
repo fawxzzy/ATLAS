@@ -22,7 +22,7 @@ Operational rule:
 - Excluded surface count: `16`
 - Stack manifest: `stack.yaml`
 - Stack lock: `stack.lock.yaml`
-- Inventory digest: `sha256:a45b20f61d3617f3338eb3191746b5808824667f3f0aba8303e55e97cc14fa67`
+- Inventory digest: `sha256:aeb211bdc1f200e4499b61735655fb10be9b2ddd9af2749eaa53efd15e825c81`
 
 ## Managed Repos
 
@@ -35,10 +35,10 @@ Operational rule:
 | lifeline | repos/lifeline | local-operator | - | codex/path-discipline-warning-slice-lifeline | 54eeb56006099235723b60ce44de8a65e4c85889 | 54eeb56006099235723b60ce44de8a65e4c85889 | False | True | False | trusted | True | - |
 | mazer | repos/mazer | application | - | codex/player-goal-default-colors | - | a537d2d17429bdf0482989c280373a6ea751f9c0 | True | False | False | adjacent | False | initiative:initiative-mazer-d2-learning-scorer |
 | nat1-games | repos/Nat1-Games/nat1-games | application | - | codex/path-discipline-warning-slice-nat1 | 404460d3717fab389407582048a9b9f228f26d39 | 404460d3717fab389407582048a9b9f228f26d39 | False | True | False | trusted | False | - |
-| playbook | repos/playbook | governance-runtime | - | codex/repair-scheduled-demo-integration-ci | ee6907bd2d1d45ef87625cbd3382644dbb4fb199 | ee6907bd2d1d45ef87625cbd3382644dbb4fb199 | False | True | False | trusted | True | initiative:continuity-manifest-atlas-owned-repo-naming-canonicalization<br>initiative:initiative-fawxzzy-tech-plan-convergence |
+| playbook | repos/playbook | governance-runtime | - | codex/atlas-knowledge-candidate-v2-consumer | 14fce44268084bcaaab6d189b6ef18eb7a992faf | 14fce44268084bcaaab6d189b6ef18eb7a992faf | False | True | False | trusted | True | initiative:continuity-manifest-atlas-owned-repo-naming-canonicalization<br>initiative:initiative-fawxzzy-tech-plan-convergence |
 | playbook-demo | repos/playbook-demo/playbook-demo | demo | - | main | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | False | True | False | trusted | False | - |
-| socials-os | repos/socials-os | analytics-data-system | - | main | - | 16bf6529e36af814fd370bb4e3afde2e314e30f8 | True | False | False | adjacent | False | - |
-| stack | . | operator-layer | - | codex/atlas-contracts-v2-card-board-adoption | - | 693f63ae8e99c02b0ece00a6db8be8e1276f4a98 | True | True | True | trusted | False | - |
+| socials-os | repos/socials-os | analytics-data-system | - | main | - | 78c1330fcd1645f4b9453cffb8e921bea8e13a72 | True | False | False | adjacent | False | - |
+| stack | . | operator-layer | - | codex/contracts-mesh-knowledge-candidate-reconciliation | - | 5b1371ec0afd5067ec90f8bcfd2e46df772942a5 | True | True | True | trusted | False | - |
 | stream | repos/stream | application | - | main | 43769ba86d4c6ebc419ab9e7847c3843460a094f | 43769ba86d4c6ebc419ab9e7847c3843460a094f | False | True | False | trusted | False | - |
 | trove | repos/trove | application | - | codex/path-discipline-warning-slice-trove | 437c7604adee02e0403d77f75162a6c5f232221f | 437c7604adee02e0403d77f75162a6c5f232221f | False | True | False | trusted | True | - |
 
