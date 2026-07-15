@@ -3,15 +3,32 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import sys
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+_SCHEMA_VALIDATION_IMPORT_ERROR: str | None = None
+try:
+    from ops.atlas.ui_standards.validate import (
+        validate_json_schema as _validate_json_schema,
+        validate_schema_definition as _validate_schema_definition,
+    )
+except Exception as exc:
+    _validate_json_schema = None
+    _validate_schema_definition = None
+    _SCHEMA_VALIDATION_IMPORT_ERROR = str(exc)
+
 REGISTRY_REF = Path("docs/registry/ATLAS-RUNTIME-PLACEMENT-REGISTRY.v1.json")
 SCHEMA_REF = Path("schemas/atlas.runtime-placement.registry.v1.json")
 LANE_REGISTRY_REF = Path("docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json")
 MARKER_BOOK_REF = Path("docs/atlas-book/02-lanes-and-markers.md")
+SCHEMA_ID = "atlas://schemas/atlas.runtime-placement.registry.v1.json"
+SCHEMA_TITLE = "ATLAS runtime placement registry v1"
 
 PLACEMENT_TYPES = (
     "no_server/on_demand",
@@ -123,6 +140,58 @@ def _read_json(path: Path) -> dict[str, Any]:
     if not isinstance(payload, dict):
         raise ValueError(f"{path} must contain a JSON object")
     return payload
+
+
+def validate_registry_schema_contract(
+    registry: dict[str, Any],
+    schema: dict[str, Any],
+) -> list[RuntimePlacementIssue]:
+    schema_path = SCHEMA_REF.as_posix()
+    registry_path = REGISTRY_REF.as_posix()
+    if _validate_json_schema is None or _validate_schema_definition is None:
+        return [
+            _issue(
+                "runtime-placement-jsonschema-unavailable",
+                schema_path,
+                "The shared Draft 2020-12 schema-validation capability is unavailable.",
+                import_error=_SCHEMA_VALIDATION_IMPORT_ERROR,
+            )
+        ]
+
+    try:
+        schema_errors = _validate_schema_definition(
+            schema,
+            expected_id=SCHEMA_ID,
+            expected_title=SCHEMA_TITLE,
+        )
+    except Exception as exc:
+        schema_errors = [f"Schema definition validation raised {type(exc).__name__}: {exc}"]
+    if schema_errors:
+        return [
+            _issue(
+                "runtime-placement-schema-invalid",
+                schema_path,
+                "Runtime placement schema definition is invalid.",
+                error_count=len(schema_errors),
+                errors=schema_errors,
+            )
+        ]
+
+    try:
+        registry_errors = _validate_json_schema(registry, schema)
+    except Exception as exc:
+        registry_errors = [f"Registry schema validation raised {type(exc).__name__}: {exc}"]
+    if registry_errors:
+        return [
+            _issue(
+                "runtime-placement-registry-schema-invalid",
+                registry_path,
+                "Runtime placement registry does not conform to its Draft 2020-12 schema.",
+                error_count=len(registry_errors),
+                errors=registry_errors,
+            )
+        ]
+    return []
 
 
 def _non_empty_strings(value: Any) -> bool:
@@ -363,8 +432,7 @@ def validate_contract_files(*, root: Path = ROOT) -> list[RuntimePlacementIssue]
         marker_book = paths["marker_book"].read_text(encoding="utf-8-sig")
     except (OSError, ValueError, json.JSONDecodeError) as exc:
         return [_issue("runtime-placement-file-invalid", str(REGISTRY_REF), f"Runtime placement inputs could not be loaded: {exc}")]
-    if schema.get("$id") != "atlas://schemas/atlas.runtime-placement.registry.v1.json":
-        issues.append(_issue("runtime-placement-schema-id", str(SCHEMA_REF), "Runtime placement schema $id is invalid."))
+    issues.extend(validate_registry_schema_contract(registry, schema))
     issues.extend(validate_runtime_placement_payloads(registry, lane_registry, marker_book, root=root))
     return issues
 

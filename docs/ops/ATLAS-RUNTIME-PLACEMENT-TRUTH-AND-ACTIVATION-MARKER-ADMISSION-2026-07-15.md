@@ -177,13 +177,16 @@ Historical receipts remain preserved. Their marker values are not rewritten.
 
 ## Verification outcome
 
-- Runtime placement semantic validation reports `issue_count=0`.
-- Runtime placement plus read-only-cleanup unit coverage passes `16` tests.
+- Runtime placement schema and semantic validation reports `issue_count=0`.
+  Schema definition, required fields, and date-time formats use the shared
+  Draft 2020-12 validator with its dependency-free supported-subset fallback.
+- Runtime placement plus read-only-cleanup unit coverage passes `20` tests.
 - Project-board owner export and projection coverage passes `25` tests; the
   deterministic export check reports `34` Atlas cards, `2` Cortex cards,
   `discord_mutation_authorized=false`, and source revision
   `sha256:2e299105e883c9640bcb83dd4e040873377286ede98923be4dd5540a6dc6546d`.
-- Marker evidence admission coverage passes `10` tests.
+- Combined focused Python coverage passes `45` tests. Marker evidence admission
+  coverage separately passes `10` tests.
 - Canonical root validation with `--skip-generated-state-cleanup` reports
   `0 critical / 0 error / 5 warning / 0 info`. All warnings are pre-existing:
   one untracked root capture; three committed absolute-path findings across two
