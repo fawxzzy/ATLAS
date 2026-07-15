@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-06-19T07:00:00Z",
-  "updated_at": "2026-07-08T23:52:10Z",
+  "updated_at": "2026-07-15T12:15:00Z",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -186,15 +186,15 @@
       },
       {
         "path": "runtime/cortex/current-state/latest.json",
-        "role": "current Cortex read-model state surface"
+        "role": "dated historical runtime projection from the July 6/8 checkpoint; not current live readback"
       },
       {
         "path": "runtime/cortex/operator-surface/latest.json",
-        "role": "current operator-visible Cortex projection surface"
+        "role": "dated historical operator projection from the July 6/8 checkpoint; not current live readback"
       },
       {
         "path": "runtime/cortex/context/latest.json",
-        "role": "current runtime context projection surface"
+        "role": "dated historical context projection from the July 6/8 checkpoint; not current live readback"
       },
       {
         "path": "docs/ops/CORTEX-READINESS-CONTINUITY-MANIFEST-SEED-AND-ACTIVE-CONTINUITY-WIDENING-2026-06-19.md",
@@ -256,10 +256,10 @@
         "reason": "the second authority-false Cortex advisory substrate consumer helper, focused tests, live manifest smoke, regression proof, and validation are landed and reconciled; further same-lane movement requires a distinct third consumer class, real runtime/read-model drift, or broader governed runtime adoption proof rather than continuation by adjacency"
       }
     ],
-    "freshness_state": "manifest-backed",
+    "freshness_state": "implementation-checkpoint-backed-with-dated-historical-runtime-projections",
     "freshness_checked_receipt": "docs/ops/CORTEX-READINESS-SECOND-ADVISORY-SUBSTRATE-CONSUMPTION-FIRST-IMPLEMENTATION-WORKER-CLUSTER-RECONCILIATION-2026-07-08.md",
-    "freshness_checked_at": "2026-07-08T23:52:10Z",
-    "freshness_basis": "The manifest now matches the current 46 percent Cortex posture after the second advisory substrate consumer implementation landed and reconciled. Sandbox remains held at 99 percent, Cortex has a second authority-false consumer helper with focused tests and live manifest smoke proof, no execution or owner-truth authority is granted, and no immediate Cortex Readiness same-lane packet remains open.",
+    "freshness_checked_at": "2026-07-15T12:15:00Z",
+    "freshness_basis": "Current 46 percent authority remains bound to the accepted second advisory substrate consumer implementation/checkpoint receipt and main@fb64568b already recorded above. The three runtime/cortex latest.json paths are dated historical projections from the July 6/8 checkpoint, not current live readback and not proof of fresh runtime adoption; no execution or owner-truth authority is granted, and no immediate Cortex Readiness same-lane packet remains open.",
     "marker_posture": [
       {
         "marker": "Cortex Readiness",

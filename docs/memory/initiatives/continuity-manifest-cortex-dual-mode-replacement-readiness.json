@@ -2,11 +2,11 @@
   "contract_version": "atlas.initiative.v1",
   "id": "continuity-manifest-cortex-dual-mode-replacement-readiness",
   "title": "Continuity Manifest Cortex Dual Mode Replacement Readiness",
-  "summary": "Maintained ATLAS-root retrieval map for the supporting Cortex Dual-Mode Replacement Readiness lane.",
+  "summary": "Maintained ATLAS-root retrieval map for the accepted and published 100 percent Cortex Dual-Mode Replacement Readiness closeout.",
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-07-09T19:47:39.8439335-04:00",
-  "updated_at": "2026-07-14T23:45:00-04:00",
+  "updated_at": "2026-07-15T12:15:00Z",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -94,8 +94,8 @@
     "lane_id": "cortex-dual-mode-replacement-readiness",
     "scope_class": "atlas-root-governance",
     "current_checkpoint_receipt": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-FINAL-INDEPENDENT-RATIFICATION-AND-100-PERCENT-CLOSEOUT-2026-07-14.md",
-    "checkpoint_commit": "pending-current-root-commit",
-    "checkpoint_summary": "The exact-byte repaired live canary completed as success_no_changes with durable correlation, bounded read scope, no authority actions, and safe_to_close true. A fresh independent audit returned RATIFY_100 with no blocker, closing the marker at 100 percent.",
+    "checkpoint_commit": "47d960d7376aca04cc33555016eaec67f0a9a82d",
+    "checkpoint_summary": "Publication of the 100 percent closeout is accepted at commit 47d960d7376aca04cc33555016eaec67f0a9a82d. The exact-byte repaired live canary completed as success_no_changes with durable correlation, bounded read scope, no authority actions, and safe_to_close true. A fresh independent audit returned RATIFY_100 with no blocker, closing the marker at 100 percent without reopening the lane.",
     "governing_receipts": [
       "docs/ops/CORTEX-DUAL-MODE-AND-SIMULATION-SUBSTRATE-MARKER-ADMISSION-2026-07-09.md",
       "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-OPERATING-MODE-CONTRACT-FREEZE-2026-07-09.md",
@@ -360,7 +360,7 @@
       },
       {
         "path": "docs/atlas-book/02-lanes-and-markers.md",
-        "role": "marker table and supporting-open marker projection surface"
+        "role": "marker table and closed/locked ratchet projection surface"
       },
       {
         "path": "docs/atlas-book/13-vision-and-endgames.md",
@@ -415,10 +415,10 @@
         "reason": "new capabilities must not inflate or reopen the completed denominator"
       }
     ],
-    "freshness_state": "exact-byte-live-canary-and-independent-ratification-complete-at-100-percent",
+    "freshness_state": "accepted-publication-and-independent-ratification-complete-at-100-percent",
     "freshness_checked_receipt": "docs/ops/CORTEX-DUAL-MODE-REPLACEMENT-READINESS-FINAL-INDEPENDENT-RATIFICATION-AND-100-PERCENT-CLOSEOUT-2026-07-14.md",
-    "freshness_checked_at": "2026-07-14T23:45:00-04:00",
-    "freshness_basis": "Canary 7 completed success_no_changes with exact-byte decision integrity, complete handoff and receipt correlation, bounded command-trace read scope, no authority actions, and safe_to_close true. A fresh independent audit returned RATIFY_100 with no blocker.",
+    "freshness_checked_at": "2026-07-15T12:15:00Z",
+    "freshness_basis": "The accepted closeout publication is commit 47d960d7376aca04cc33555016eaec67f0a9a82d. Canary 7 completed success_no_changes with exact-byte decision integrity, complete handoff and receipt correlation, bounded command-trace read scope, no authority actions, and safe_to_close true; a fresh independent audit returned RATIFY_100 with no blocker.",
     "marker_posture": [
       {
         "marker": "Cortex Dual-Mode Replacement Readiness",

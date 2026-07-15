@@ -6,7 +6,7 @@
   "status": "active",
   "owner": "stack-root",
   "created_at": "2026-07-12T12:00:00Z",
-  "updated_at": "2026-07-12T12:00:00Z",
+  "updated_at": "2026-07-15T12:15:00Z",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -38,9 +38,9 @@
     "lane_id": "atlas-full-system-re-evaluation",
     "scope_class": "atlas-root-two-gate-platform-governance-audit",
     "current_checkpoint_receipt": "docs/ops/ATLAS-FULL-SYSTEM-REEVALUATION-OPENING-AUDIT-RECEIPT-2026-07-12.md",
-    "checkpoint_commit": "pending_parent_publication",
-    "checkpoint_summary": "The exhaustive opening audit is governed-success pending parent publication and the distinct Atlas Full-System Re-evaluation marker is 50 percent on exactly one of two audit gates; every discovery is percentage-null independent work and the closing gate remains blocked. Mazer resume is conditional on guarded publication and remains ineffective in this committed receipt.",
-    "validation_posture": {"opening_validation_snapshot":{"critical":0,"error":4,"warning":25,"info":0,"label":"pre-package opening observation"},"final_validation":{"critical":0,"error":5,"warning":25,"info":0,"label":"post-package final validation","errors":["working-memory-catalog-drift","stack-lock-drift","stack-lock-render-drift","stack-lock-pin-drift","stack-lock-missing-ref"]},"ratchet_statement":"Ratchet remediation is a separate lane, not an opening-audit success criterion."},
+    "checkpoint_commit": "34fa6c713d79dc4717c52b7dd7f5046cb785b389",
+    "checkpoint_summary": "The exhaustive opening audit publication is accepted at commit 34fa6c713d79dc4717c52b7dd7f5046cb785b389. The distinct Atlas Full-System Re-evaluation marker remains 50 percent on exactly one of two audit gates; every discovery is percentage-null independent work, and the separate later exhaustive closing audit remains blocked and unperformed.",
+    "validation_posture": {"opening_validation_snapshot":{"critical":0,"error":4,"warning":25,"info":0,"label":"dated July 12 pre-package opening observation; not current health"},"final_validation":{"critical":0,"error":5,"warning":25,"info":0,"label":"dated July 12 post-package observation; not current health","errors":["working-memory-catalog-drift","stack-lock-drift","stack-lock-render-drift","stack-lock-pin-drift","stack-lock-missing-ref"]},"ratchet_statement":"Ratchet remediation is a separate lane, not an opening-audit success criterion."},
     "governing_receipts": [
       "docs/ops/ATLAS-FULL-SYSTEM-REEVALUATION-OPENING-AUDIT-RECEIPT-2026-07-12.md",
       "docs/audits/ATLAS-FULL-SYSTEM-OPENING-AUDIT-2026-07-12.md",
@@ -50,7 +50,7 @@
       "docs/memory/initiatives/initiative-github-control-plane-integration.json"
     ],
     "owner_truth_surfaces": [
-      {"path": "docs/audits/ATLAS-FULL-SYSTEM-OPENING-AUDIT-2026-07-12.md", "role": "accepted exhaustive opening gate and current evidence classification"},
+      {"path": "docs/audits/ATLAS-FULL-SYSTEM-OPENING-AUDIT-2026-07-12.md", "role": "accepted exhaustive opening gate and dated July 12 evidence classification; not current health"},
       {"path": "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json", "role": "deterministic percentage-null discovery externalization"},
       {"path": "docs/ops/ATLAS-FULL-SYSTEM-REEVALUATION-OPENING-AUDIT-RECEIPT-2026-07-12.md", "role": "decisive opening checkpoint and marker transition receipt"},
       {"path": "docs/memory/profiles/zachariah_workflow_profile.md", "role": "durable operator and two-pass audit doctrine"},
@@ -70,19 +70,19 @@
     "blocked_or_gated_work": [
       {"item": "Atlas Full-System Re-evaluation closing audit", "requirement": "blocked until a separate later exhaustive closing audit is accepted; no child-lane work supplies marker points"},
       {"item": "all primary and backlog discovery lanes", "requirement": "independent percentage-null candidates; each requires its own selection, authority, denominator, proof, and receipt"},
-      {"item": "Mazer execution", "requirement": "resume_allowed_after_publication is true and resume_effective is false; only after guarded parent publication/review may ATLAS MAIN separately send RESUME MAZER to the preserved standing task"},
+      {"item": "Mazer execution", "requirement": "opening publication is accepted; any Mazer resume remains separately governed by ATLAS MAIN and is not authorized or changed by this manifest remediation"},
       {"item": "Fitness execution", "requirement": "resume_allowed is false until explicit operator-authorized Critical secret containment, rotation, and verification"},
       {"item": "production, Discord, Supabase, GitHub cleanup, branch, worktree, or security mutation", "requirement": "not authorized by this audit"}
     ],
     "next_package_ladder": [
-      {"package": "No immediate root packet", "mode": "audit-gate hold", "reason": "parent publication/review and the possible later ATLAS MAIN Mazer message are outside root execution-selector routing; this audit gate is maintained and marker-backed but excluded from the selector"},
+      {"package": "No immediate root packet", "mode": "audit-gate hold", "reason": "opening publication is accepted; this maintained marker-backed audit gate remains excluded from selector routing until the separately authorized later exhaustive closing audit"},
       {"package": "Independently select and execute percentage-null child lanes", "mode": "separate owner/root packages", "reason": "discoveries have their own owners, denominators, dependencies, serialization, and receipts and contribute zero audit-marker points"},
       {"package": "Atlas Full-System Re-evaluation closing audit", "mode": "later exhaustive root audit", "reason": "only a separate accepted closing audit may move the marker from 50 to 100"}
     ],
-    "freshness_state": "manifest-backed",
+    "freshness_state": "accepted-opening-publication-checkpoint-with-closing-audit-pending",
     "freshness_checked_receipt": "docs/ops/ATLAS-FULL-SYSTEM-REEVALUATION-OPENING-AUDIT-RECEIPT-2026-07-12.md",
-    "freshness_checked_at": "2026-07-12T12:00:00Z",
-    "freshness_basis": "Exact 0-to-50 basis: one accepted exhaustive opening audit of a fixed two-audit-gate denominator; current completed units 1 of 2, all discoveries externalized at percentage null, no other marker moved, and the later closing audit remains gated.",
+    "freshness_checked_at": "2026-07-15T12:15:00Z",
+    "freshness_basis": "Commit 34fa6c713d79dc4717c52b7dd7f5046cb785b389 first published the accepted opening audit receipt and manifest state. The marker remains exactly 50 percent and 1 of 2 on the fixed two-audit-gate denominator; July 12 validation snapshots remain dated observations rather than current health, all discoveries remain externalized at percentage null, and the later exhaustive closing audit remains gated and unperformed.",
     "marker_posture": [
       {"marker": "Atlas Full-System Re-evaluation", "percent": 50, "source": "docs/atlas-book/02-lanes-and-markers.md"}
     ]

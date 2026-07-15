@@ -84,19 +84,6 @@ Read:
 - AI Long-Run Batch Orchestration: `71%`
 - Playbook Everywhere + Cortex Interface: `45%`
 
-### Future / owner-lane orchestration
-
-- Owner-Lane Agent Service Bus & DiscordOS Ops Readiness: `100%`
-
-The owner-lane orchestration marker is closed at `100%` for its native-first fixed denominator of ten binary units. Units 1 through 9 retain their prior authority, native-task, correlation, runtime, context/evidence, lease, lifecycle, board, marker, and knowledge receipts. Unit 10 resolves Atlas/Mazer/Fitness native rollout records and a fresh DiscordOS live-readback artifact directly, binds their SHA-256 digests into receipt `aec_d13e9d250326f9e8e577c61afa6a7d0f`, proves same-task recovery and zero authority drift, and retains DiscordOS as the sole writer. Live board proof remains `58 / 58` with receipt `dbr_b89f4a31767871c89ba80877886d47a2`. A final independent contradiction audit returned `RATIFY_100` with no blockers. SQLite remains only a possible future storage backend, not an approved execution queue or selected ledger.
-
-### Future / Cortex
-
-- Cortex Dual-Mode Replacement Readiness: `100%`
-- Cortex Dual-Mode Replacement Readiness is closed at `100%`. The two safely executed ATLAS bridge lanes remain the 90% foundation; the final threshold is now proved by deterministic internal primary-operator acceptance, durable exact-byte decision and dispatch records, replay source-digest parity, `_stack` canary `20260714T074235763Z-cortex-primary-operator-stack-verified-no-change-canary-7`, a validated `success_no_changes` receipt, zero changed paths or authority actions, bounded command-trace read scope, durable result correlation with `safe_to_close=true`, and a fresh independent `RATIFY_100` audit. ChatGPT/Codex remain optional external adapters; `_stack` remains the execution plane, and Cortex gains no push, deploy, Discord, board, data, secret, owner-repository, or marker authority.
-- Cortex Simulation Substrate Readiness: `100%`
-- Cortex Simulation Substrate Readiness is closed at `100%` for its fixed root-only denominator. The final machine audit passes `10 / 10`, an independent reviewer returns `RATIFY_100` with no unresolved blockers, and all simulator, recommendation, and evaluation surfaces remain deterministic, bounded, source-linked, and authority-false. Mazer, Fitness, and DiscordOS adapters remain separate held owner scopes. The exact next packet is `No immediate Cortex Simulation Substrate Readiness same-lane packet`.
-
 ### Platform governance
 
 - GitHub Control-Plane Integration: `100%`
@@ -119,7 +106,16 @@ Audit-gate marker; excluded from the execution selector.
 
 The Atlas Full-System Re-evaluation denominator is exactly two accepted audit gates: opening `0 -> 50`, then a separate later closing audit `50 -> 100`. The opening gate is accepted at `1 / 2`. Discovered work adds zero to this marker and remains percentage-null in `docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json`. The marker cannot exceed 50 until the closing audit is accepted. Ratchet remediation is a separate lane, not an opening-audit success criterion. No other open or locked marker moved.
 
+The five stale 51-family projections were remediated on 2026-07-15, but `lane-marker-integrity` remains percentage-null and candidate pending separate independent `51 / 51` proof. This projection repair does not move Atlas Full-System Re-evaluation from `50%`.
+
 ## Materially Closed Carry-Forward Families
+
+- Owner-Lane Agent Service Bus & DiscordOS Ops Readiness
+  - The owner-lane orchestration marker is closed at `100%` for its native-first fixed denominator of ten binary units. Units 1 through 9 retain their prior authority, native-task, correlation, runtime, context/evidence, lease, lifecycle, board, marker, and knowledge receipts. Unit 10 resolves Atlas/Mazer/Fitness native rollout records and a fresh DiscordOS live-readback artifact directly, binds their SHA-256 digests into receipt `aec_d13e9d250326f9e8e577c61afa6a7d0f`, proves same-task recovery and zero authority drift, and retains DiscordOS as the sole writer. Live board proof remains `58 / 58` with receipt `dbr_b89f4a31767871c89ba80877886d47a2`. A final independent contradiction audit returned `RATIFY_100` with no blockers. SQLite remains only a possible future storage backend, not an approved execution queue or selected ledger.
+- Cortex Dual-Mode Replacement Readiness
+  - Cortex Dual-Mode Replacement Readiness is closed at `100%`. The two safely executed ATLAS bridge lanes remain the 90% foundation; the final threshold is now proved by deterministic internal primary-operator acceptance, durable exact-byte decision and dispatch records, replay source-digest parity, `_stack` canary `20260714T074235763Z-cortex-primary-operator-stack-verified-no-change-canary-7`, a validated `success_no_changes` receipt, zero changed paths or authority actions, bounded command-trace read scope, durable result correlation with `safe_to_close=true`, and a fresh independent `RATIFY_100` audit. ChatGPT/Codex remain optional external adapters; `_stack` remains the execution plane, and Cortex gains no push, deploy, Discord, board, data, secret, owner-repository, or marker authority.
+- Cortex Simulation Substrate Readiness
+  - Cortex Simulation Substrate Readiness is closed at `100%` for its fixed root-only denominator. The final machine audit passes `10 / 10`, an independent reviewer returns `RATIFY_100` with no unresolved blockers, and all simulator, recommendation, and evaluation surfaces remain deterministic, bounded, source-linked, and authority-false. Mazer, Fitness, and DiscordOS adapters remain separate held owner scopes. The exact next packet is `No immediate Cortex Simulation Substrate Readiness same-lane packet`.
 
 - Discord Workflow, Publication & Docs Reliability broader-summary parity-proof ladder
   - materially closed
@@ -177,6 +173,9 @@ The Atlas Full-System Re-evaluation denominator is exactly two accepted audit ga
 - Full Stack Re-sync, Clean & Closeout: `100%`
 
 The Full Stack Re-sync entry above is preserved historical completion for its dated scope, not a current-health claim. Historical one-line entries do not expose deterministic current-health denominators in this table.
+- Owner-Lane Agent Service Bus & DiscordOS Ops Readiness: `100%`
+- Cortex Dual-Mode Replacement Readiness: `100%`
+- Cortex Simulation Substrate Readiness: `100%`
 - Unified Workflow Convergence: `100%`
 - Feedback Loop Readiness: `100%`
 - Core Pattern Convergence: `100%`
