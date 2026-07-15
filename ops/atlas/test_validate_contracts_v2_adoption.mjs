@@ -1,11 +1,12 @@
 import assert from "node:assert/strict";
+import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { EXPECTED_FAMILIES, validateAdoption } from "./validate_contracts_v2_adoption.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
-const canary = path.join(ROOT, "repos/_stack/.codex/logs/20260714T005224106Z-atlas-contracts-v2-cluster-2-stack-producer-no-change-canary/run.json");
+const canary = path.join(ROOT, "repos/_stack/.codex/logs/20260715T134932158Z-atlas-contracts-v2-cluster-3-workerlease-no-change-canary-2/run.json");
 const source = JSON.parse(await fs.readFile(canary, "utf8"));
 const temp = await fs.mkdtemp(path.join(ROOT, "tmp", "atlas-contracts-v2-adoption-"));
 
@@ -30,12 +31,21 @@ async function fixture(name, mutate = () => {}) {
     producer.result.artifact = artifactPaths[family];
     producer.stdout = `${JSON.stringify(producer.result)}\n`;
   }
-  for (const key of ["contextPacket", "approvalRecord", "evidenceBundle"]) {
+  const terminalLeaseValidation = run.atlasContractsV2.validation.workerLeaseTerminal;
+  terminalLeaseValidation.artifactPath = artifactPaths.workerLease;
+  terminalLeaseValidation.result.artifact = artifactPaths.workerLease;
+  terminalLeaseValidation.stdout = `${JSON.stringify(terminalLeaseValidation.result)}\n`;
+  for (const key of ["contextPacket", "approvalRecord", "workerLease", "evidenceBundle"]) {
     const oldPath = originalPaths[key];
     const newPath = artifactPaths[key];
     artifacts.executionReceipt.evidence_refs = artifacts.executionReceipt.evidence_refs.map((entry) => replacePath(entry, oldPath, newPath));
-    artifacts.executionReceipt.extensions.artifact_refs[{ contextPacket: "context_packet", approvalRecord: "approval_record", evidenceBundle: "evidence_bundle" }[key]] = newPath;
+    artifacts.executionReceipt.extensions.artifact_refs[{ contextPacket: "context_packet", approvalRecord: "approval_record", workerLease: "worker_lease", evidenceBundle: "evidence_bundle" }[key]] = newPath;
   }
+  artifacts.executionReceipt.extensions.worker_lease_binding.artifact_ref = artifactPaths.workerLease;
+  const workerLeaseBytes = Buffer.from(JSON.stringify(artifacts.workerLease));
+  const workerLeaseDigest = `sha256:${crypto.createHash("sha256").update(workerLeaseBytes).digest("hex")}`;
+  artifacts.executionReceipt.extensions.worker_lease_binding.digest = workerLeaseDigest;
+  run.atlasContractsV2.status.leaseDigest = workerLeaseDigest;
   mutate({ run, artifacts, artifactPaths });
   for (const family of EXPECTED_FAMILIES) await fs.writeFile(writePaths[family], JSON.stringify(artifacts[family]));
   const runPath = path.join(directory, "run.json");
@@ -64,6 +74,11 @@ try {
   await scenario("context-job-mismatch", ({ artifacts }) => { artifacts.contextPacket.job_id = "wrong-job"; }, "CONTEXT_CORRELATION_MISMATCH");
   await scenario("approval-not-rejected", ({ artifacts }) => { artifacts.approvalRecord.decision = "approved"; }, "APPROVAL_DENIAL_MISMATCH");
   await scenario("evidence-job-mismatch", ({ artifacts }) => { artifacts.evidenceBundle.job_id = "wrong-job"; }, "EVIDENCE_CORRELATION_MISMATCH");
+  await scenario("lease-job-mismatch", ({ artifacts }) => { artifacts.workerLease.job_id = "wrong-job"; }, "WORKER_LEASE_MISMATCH");
+  await scenario("lease-active-terminal", ({ artifacts }) => { artifacts.workerLease.status = "active"; artifacts.workerLease.released_at = null; }, "WORKER_LEASE_MISMATCH");
+  await scenario("lease-resource-mismatch", ({ artifacts }) => { artifacts.workerLease.resources[0].resource_id = "wrong-worktree"; }, "WORKER_LEASE_MISMATCH");
+  await scenario("lease-terminal-validation", ({ run }) => { run.atlasContractsV2.validation.workerLeaseTerminal.schemaId = "atlas.job-envelope.v2"; }, "WORKER_LEASE_TERMINAL_VALIDATION_MISMATCH");
+  await scenario("lease-digest-mismatch", ({ artifacts }) => { artifacts.executionReceipt.extensions.worker_lease_binding.digest = "sha256:0000000000000000000000000000000000000000000000000000000000000000"; }, "WORKER_LEASE_DIGEST_MISMATCH");
   await scenario("receipt-reference-mismatch", ({ artifacts }) => { artifacts.executionReceipt.extensions.artifact_refs.context_packet = artifacts.executionReceipt.extensions.artifact_refs.approval_record; }, "RECEIPT_ARTIFACT_REFERENCE_MISMATCH");
   await scenario("producer-validation-mismatch", ({ run }) => { run.atlasContractsV2.validation.evidenceBundle.schemaId = "atlas.job-envelope.v2"; }, "PRODUCER_VALIDATION_MISMATCH");
   await scenario("missing-artifact", ({ run }) => { delete run.atlasContractsV2.artifactPaths.evidenceBundle; }, "ARTIFACT_COUNT_MISMATCH");
@@ -80,8 +95,8 @@ try {
   await fs.writeFile(malformed, "{ malformed JSON rejected");
   const malformedResult = await validateAdoption(malformed);
   assert.equal(malformedResult.reasonCode, "MALFORMED_JSON");
-  console.log("real six-artifact canary acceptance passed");
-  console.log("Cluster 1 and Cluster 2 rejection scenarios: passed");
+  console.log("real seven-artifact WorkerLease canary acceptance passed");
+  console.log("Cluster 1 through Cluster 3 rejection scenarios: passed");
 } finally {
   await fs.rm(temp, { recursive: true, force: true });
 }
