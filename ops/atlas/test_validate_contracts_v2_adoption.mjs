@@ -3,7 +3,16 @@ import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { EXPECTED_FAMILIES, validateAdoption } from "./validate_contracts_v2_adoption.mjs";
+import {
+  ADOPTED_FAMILIES,
+  CARD_BOARD_FAMILIES,
+  EXPECTED_FAMILIES,
+  buildCanonicalCardBoardEvidence,
+  validateAdoptedMesh,
+  validateAdoption,
+  validateCardBoardAdoption,
+  validateCardBoardArtifacts,
+} from "./validate_contracts_v2_adoption.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const canary = path.join(ROOT, "repos/_stack/.codex/logs/20260715T134932158Z-atlas-contracts-v2-cluster-3-workerlease-no-change-canary-2/run.json");
@@ -59,6 +68,16 @@ async function scenario(name, mutate, expected) {
   assert.equal(result.reasonCode, expected, `${name} reason code`);
 }
 
+let cardBoardSource;
+async function cardBoardScenario(name, mutate, expected) {
+  const card = structuredClone(cardBoardSource.card);
+  const event = structuredClone(cardBoardSource.event);
+  mutate({ card, event });
+  const result = await validateCardBoardArtifacts(card, event);
+  assert.equal(result.ok, false, `${name} must be rejected`);
+  assert.equal(result.reasonCode, expected, `${name} reason code`);
+}
+
 try {
   const accepted = await validateAdoption(canary);
   assert.equal(accepted.code, "ACCEPTED");
@@ -91,12 +110,50 @@ try {
   await scenario("external-authority", ({ run }) => { run.authorityActions = ["push"]; }, "EXTERNAL_AUTHORITY_ACTION");
   await scenario("terminal-evidence", ({ artifacts }) => { artifacts.evidenceBundle.evidence[0].status = "failed"; }, "TERMINAL_EVIDENCE_MISMATCH");
 
+  cardBoardSource = await buildCanonicalCardBoardEvidence();
+  const cardBoardAccepted = await validateCardBoardAdoption();
+  assert.equal(cardBoardAccepted.code, "ACCEPTED");
+  assert.deepEqual(cardBoardAccepted.families, CARD_BOARD_FAMILIES);
+  assert.deepEqual(Object.keys(cardBoardAccepted.evidence), CARD_BOARD_FAMILIES);
+  assert.equal(cardBoardAccepted.receipt.status, "admitted_dry_run");
+  assert.equal(cardBoardAccepted.receipt.card_record.project_id, "mazer");
+  assert.equal(cardBoardAccepted.receipt.writer_boundary.writer_authority, "discordos");
+  assert.equal(cardBoardAccepted.receipt.writer_boundary.sole_logical_writer, true);
+  assert.equal(cardBoardAccepted.receipt.writer_boundary.external_mutation, false);
+  assert.equal(cardBoardAccepted.receipt.writer_boundary.storage_applied, false);
+  assert.equal(cardBoardAccepted.consumerGit.mergeCommit, "b2dbcc1a9ca66876e9c07ea8c6032701c9aaea2a");
+  assert.equal(cardBoardAccepted.consumerGit.consumerFilesUnchanged, true);
+
+  const meshAccepted = await validateAdoptedMesh(canary);
+  assert.equal(meshAccepted.code, "ACCEPTED");
+  assert.deepEqual(meshAccepted.families, ADOPTED_FAMILIES);
+  assert.deepEqual(Object.keys(meshAccepted.evidence), ADOPTED_FAMILIES);
+  assert.equal(meshAccepted.acceptedUnits, 9);
+  assert.equal(meshAccepted.implementationFoundations, 11);
+  assert.equal(meshAccepted.percentage, 82);
+
+  await cardBoardScenario("card-schema-invalid", ({ card }) => { card.lifecycle = "doing"; }, "CARD_RECORD_SCHEMA_INVALID");
+  await cardBoardScenario("card-project-mismatch", ({ card }) => { card.project_id = "other"; }, "CARD_RECORD_PROJECT_MISMATCH");
+  await cardBoardScenario("event-schema-invalid", ({ event }) => { event.result.status = "live"; }, "BOARD_EVENT_SCHEMA_INVALID");
+  await cardBoardScenario("event-card-mismatch", ({ event }) => { event.card_id = "other-card"; }, "BOARD_EVENT_CARD_MISMATCH");
+  await cardBoardScenario("event-board-mismatch", ({ event }) => { event.board_id = "discordos:project-feedback:other"; }, "BOARD_EVENT_BOARD_MISMATCH");
+  await cardBoardScenario("event-version-mismatch", ({ event }) => { event.expected_version -= 1; }, "BOARD_EVENT_VERSION_MISMATCH");
+  await cardBoardScenario("event-from-state-mismatch", ({ event }) => { event.intent.from = "planning"; }, "BOARD_EVENT_FROM_STATE_MISMATCH");
+  await cardBoardScenario("event-idempotency-mismatch", ({ event }) => { event.idempotency_key = "abk_00000000000000000000000000000000"; }, "BOARD_EVENT_IDEMPOTENCY_MISMATCH");
+  await cardBoardScenario("event-identity-mismatch", ({ event }) => { event.event_id = "abe_00000000000000000000000000000000"; }, "BOARD_EVENT_IDENTITY_MISMATCH");
+  await cardBoardScenario("event-writer-mismatch", ({ event }) => { event.extensions.writer_authority = "atlas"; }, "WRITER_AUTHORITY_MISMATCH");
+  await cardBoardScenario("event-second-writer", ({ event }) => { event.extensions.second_writer = "atlas"; event.extensions.deploy_authority = "production"; }, "SECOND_WRITER_AUTHORITY");
+  await cardBoardScenario("event-result-mismatch", ({ event }) => { event.result.observed_version = event.expected_version; event.result.readback_at = "2026-07-15T15:05:00Z"; event.result.receipt_ref = "runtime/receipts/board-event.json"; }, "BOARD_EVENT_RESULT_MISMATCH");
+
   const malformed = path.join(temp, "malformed.json");
   await fs.writeFile(malformed, "{ malformed JSON rejected");
   const malformedResult = await validateAdoption(malformed);
   assert.equal(malformedResult.reasonCode, "MALFORMED_JSON");
   console.log("real seven-artifact WorkerLease canary acceptance passed");
   console.log("Cluster 1 through Cluster 3 rejection scenarios: passed");
+  console.log("independent CardRecord + BoardEvent consumer acceptance passed");
+  console.log("Cluster 4 rejection scenarios: passed");
+  console.log("Contracts Mesh calculation: 9/11 = 82%");
 } finally {
   await fs.rm(temp, { recursive: true, force: true });
 }
