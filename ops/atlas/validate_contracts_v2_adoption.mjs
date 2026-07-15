@@ -10,6 +10,7 @@ export const EXPECTED_FAMILIES = Object.freeze([
   "jobEnvelope",
   "contextPacket",
   "approvalRecord",
+  "workerLease",
   "evidenceBundle",
   "executionReceipt",
 ]);
@@ -19,6 +20,7 @@ const SCHEMAS = Object.freeze({
   jobEnvelope: "atlas.job-envelope.v2",
   contextPacket: "atlas.context-packet.v2",
   approvalRecord: "atlas.approval-record.v2",
+  workerLease: "atlas.worker-lease.v2",
   evidenceBundle: "atlas.evidence-bundle.v2",
   executionReceipt: "atlas.execution-receipt.v2",
 });
@@ -50,6 +52,7 @@ function artifactReferencesMatch(receipt, resolved) {
   const expected = {
     context_packet: resolved.contextPacket,
     approval_record: resolved.approvalRecord,
+    worker_lease: resolved.workerLease,
     evidence_bundle: resolved.evidenceBundle,
   };
   return Object.entries(expected).every(([key, file]) => resolvedPath(refs[key]) === file && receipt.evidence_refs.some((reference) => resolvedPath(reference) === file));
@@ -77,6 +80,31 @@ function authorityDenied(run, job, approval, receipt) {
     && !receipt.authority_actions?.length;
 }
 
+function workerLeaseMatches(run, contracts, lease, receipt, resolved) {
+  const identity = contracts.identities ?? {};
+  const binding = receipt.extensions?.worker_lease_binding;
+  const receiptIdentity = receipt.extensions?.identity_correlations;
+  const acquiredAt = Date.parse(lease.acquired_at);
+  const releasedAt = Date.parse(lease.released_at);
+  if (lease.contract_version !== "atlas.worker-lease.v2" || lease.status !== "released") return false;
+  if (lease.lease_id !== identity.leaseId || lease.job_id !== identity.jobId || lease.component_id !== identity.componentId) return false;
+  if (lease.owner?.worker_id !== identity.workerId || lease.extensions?.run_id !== run.runId || lease.extensions?.execution_class !== identity.executionClass) return false;
+  if (!Number.isFinite(acquiredAt) || !Number.isFinite(releasedAt) || releasedAt < acquiredAt) return false;
+  if (lease.recovery?.strategy !== "release" || lease.extensions?.release_proven !== true) return false;
+  if (lease.workspace?.root !== identity.workspace?.root || lease.workspace?.worktree !== identity.workspace?.worktree || lease.workspace?.branch !== identity.workspace?.branch) return false;
+  if (receipt.correlations?.thread_id !== lease.owner?.thread_id || receipt.correlations?.turn_id !== lease.owner?.turn_id) return false;
+  if (receipt.correlations?.branch !== lease.workspace?.branch || receipt.correlations?.worktree !== lease.workspace?.worktree) return false;
+  if (receiptIdentity?.worker_id !== lease.owner?.worker_id || receiptIdentity?.workspace_root !== lease.workspace?.root || receiptIdentity?.execution_class !== lease.extensions?.execution_class) return false;
+  if (!isRecord(binding) || binding.lease_id !== lease.lease_id || binding.status !== "released" || resolvedPath(binding.artifact_ref) !== resolved.workerLease) return false;
+  if (!receipt.evidence_refs?.some((reference) => resolvedPath(reference) === resolved.workerLease)) return false;
+  const resources = Array.isArray(lease.resources) ? lease.resources : [];
+  if (lease.workspace?.worktree) {
+    if (!resources.some((resource) => resource?.kind === "worktree" && resource.resource_id === lease.workspace.worktree && resource.exclusive === true)) return false;
+  } else if (!resources.some((resource) => resource?.kind === "custom" && resource.resource_id === lease.workspace?.root && resource.exclusive === true)) return false;
+  if (lease.workspace?.branch && !resources.some((resource) => resource?.kind === "branch" && resource.resource_id === lease.workspace.branch && resource.exclusive === true)) return false;
+  return true;
+}
+
 export async function validateAdoption(runPath) {
   let run;
   try { run = await readJson(path.resolve(runPath)); } catch (error) {
@@ -88,7 +116,7 @@ export async function validateAdoption(runPath) {
   const paths = contracts?.artifactPaths;
   const declaredFamilies = isRecord(paths) ? Object.keys(paths).sort() : [];
   if (declaredFamilies.length !== EXPECTED_FAMILIES.length || declaredFamilies.join(",") !== [...EXPECTED_FAMILIES].sort().join(",") || EXPECTED_FAMILIES.some((family) => typeof paths[family] !== "string")) {
-    return fail("ARTIFACT_COUNT_MISMATCH", ["exactly six declared artifacts are required"]);
+    return fail("ARTIFACT_COUNT_MISMATCH", [`exactly ${EXPECTED_FAMILIES.length} declared artifacts are required`]);
   }
 
   const resolved = {};
@@ -119,6 +147,7 @@ export async function validateAdoption(runPath) {
   const job = artifacts.jobEnvelope;
   const context = artifacts.contextPacket;
   const approval = artifacts.approvalRecord;
+  const workerLease = artifacts.workerLease;
   const evidenceBundle = artifacts.evidenceBundle;
   const receipt = artifacts.executionReceipt;
   const identity = contracts.identities ?? {};
@@ -130,6 +159,11 @@ export async function validateAdoption(runPath) {
   if (context.job_id !== job.job_id || context.component_id !== manifest.component_id || context.extensions?.run_id !== run.runId) return fail("CONTEXT_CORRELATION_MISMATCH", ["ContextPacket job, component, or run correlation mismatch"]);
   if (approval.job_id !== job.job_id || approval.extensions?.component_id !== manifest.component_id || approval.extensions?.run_id !== run.runId) return fail("APPROVAL_CORRELATION_MISMATCH", ["ApprovalRecord job, component, or run correlation mismatch"]);
   if (evidenceBundle.job_id !== job.job_id || evidenceBundle.environment?.component_id !== manifest.component_id || evidenceBundle.extensions?.run_id !== run.runId) return fail("EVIDENCE_CORRELATION_MISMATCH", ["EvidenceBundle job, component, or run correlation mismatch"]);
+  if (!workerLeaseMatches(run, contracts, workerLease, receipt, resolved)) return fail("WORKER_LEASE_MISMATCH", ["WorkerLease identity, resource, lifecycle, or receipt binding mismatch"]);
+  if (!producerValidationMatches(contracts.validation?.workerLeaseTerminal, { family: "workerLease", ...validations.workerLease }, resolved.workerLease)) return fail("WORKER_LEASE_TERMINAL_VALIDATION_MISMATCH", ["WorkerLease terminal validation representation does not match canonical validation"]);
+  const leaseBytes = await fs.readFile(resolved.workerLease);
+  const leaseDigest = `sha256:${crypto.createHash("sha256").update(leaseBytes).digest("hex")}`;
+  if (receipt.extensions?.worker_lease_binding?.digest !== leaseDigest || contracts.status?.leaseDigest !== leaseDigest || contracts.status?.lease !== "released") return fail("WORKER_LEASE_DIGEST_MISMATCH", ["WorkerLease digest or terminal status binding mismatch"]);
   if (!artifactReferencesMatch(receipt, resolved)) return fail("RECEIPT_ARTIFACT_REFERENCE_MISMATCH", ["ExecutionReceipt artifact references must exactly match declared artifacts"]);
 
   if (approval.decision !== "rejected") return fail("APPROVAL_DENIAL_MISMATCH", ["external mutation approval must be rejected"]);
