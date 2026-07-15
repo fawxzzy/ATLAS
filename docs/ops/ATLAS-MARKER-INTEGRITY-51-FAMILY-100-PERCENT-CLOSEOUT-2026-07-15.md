@@ -1,8 +1,8 @@
-# Atlas Marker Integrity 51-Family Provisional Terminal-Candidate Closeout — 2026-07-15
+# Atlas Marker Integrity 51-Family 100 Percent Closeout — 2026-07-15
 
-State: `remediation_complete_pending_independent_51_of_51_ratification`
+State: `accepted_complete_51_of_51_100_percent`
 
-This is a provisional terminal-candidate receipt for root-only metadata and projection remediation. It is not an accepted `100%` closeout, does not move `lane-marker-integrity`, and cannot ratchet that lane before a separate independent proof checks all `51 / 51` frozen families after the remediation commit.
+This is the durable accepted terminal receipt for the root-only Marker Integrity ratchet. Independent proof against published remediation commit `d9f105a08ddc0c1a0952e7ee36fed74eb9ad0ed3` accepts all `51 / 51` frozen families, so `lane-marker-integrity` moves from percentage null and candidate to `51 / 51`, `100%`, complete.
 
 ## Fixed denominator and inherited scout classification
 
@@ -46,9 +46,9 @@ Later commits `4faa14c8b43379fc1a69f880feccbf3c810c9be1` and `83e3ebf352f3f8c981
 4. **Cortex Readiness** — retained at `46%`; its three `runtime/cortex/**/latest.json` paths are now explicitly dated historical July 6/8 checkpoint projections rather than current live readback. Current `46%` authority remains bound to the accepted implementation/checkpoint receipt and `main@fb64568b`; no fresh runtime adoption is claimed. Changed path: `docs/memory/initiatives/continuity-manifest-cortex-readiness.json`.
 5. **Atlas Full-System Re-evaluation** — retained exactly at `50%` and `1 / 2`; the opening-publication checkpoint is now the evidence-derived commit `34fa6c713d79dc4717c52b7dd7f5046cb785b389`; checkpoint, freshness, blocked, and resume wording now reflects accepted publication while preserving July 12 validation snapshots as dated observations rather than current health. The later exhaustive closing audit remains gated and was not run. Changed path: `docs/memory/initiatives/continuity-manifest-atlas-full-system-re-evaluation.json`.
 
-Registry and projection-spine changes are limited to `docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json`, `docs/atlas-book/05-receipt-index.md`, and this receipt. The registry keeps `lane-marker-integrity.percentage` null, `status` candidate, and denominator `51`; only its frozen denominator basis and appended evidence change, plus required top-level `generated_at`.
+The remediation phase was published as commit `d9f105a08ddc0c1a0952e7ee36fed74eb9ad0ed3`. Its registry and projection-spine changes were limited to `docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json`, `docs/atlas-book/05-receipt-index.md`, and this receipt. At that historical gate, the registry kept `lane-marker-integrity.percentage` null, `status` candidate, and denominator `51`; only its frozen denominator basis and appended evidence changed, plus required top-level `generated_at`.
 
-Exact admitted changed paths:
+Historical remediation admitted changed paths:
 
 1. `docs/atlas-book/02-lanes-and-markers.md`
 2. `docs/atlas-book/05-receipt-index.md`
@@ -61,15 +61,23 @@ Exact admitted changed paths:
 ## Preservation and non-movement truth
 
 - Every historical marker percentage and narrative remains discoverable. Historical `0%`, intermediate, completed `100%`, owner `93%`, and other dated values are immutable provenance and were not rewritten.
-- `lane-marker-integrity` does not move in this run: percentage remains null and status remains candidate.
-- Atlas Full-System Re-evaluation does not move in this run: it remains exactly `50%` and `1 / 2`; this packet is not its closing audit.
+- `lane-marker-integrity` alone moves in this ratchet: from percentage null and candidate to `51 / 51`, `100%`, complete.
+- Atlas Full-System Re-evaluation does not move in this run: it remains exactly `50%` and `1 / 2`, with the closing audit pending; this packet is not its closing audit.
 - Cortex Readiness remains `46%`; Cortex Dual-Mode Replacement Readiness, Cortex Simulation Substrate Readiness, and Owner-Lane Agent Service Bus & DiscordOS Ops Readiness each remain `100%`.
 - No owner repository, owner marker, unrelated root lane, opening audit, workflow profile, stack declaration, stack lock, or repository inventory is changed.
-- Owner/external mutation count is zero: no owner repository, Discord, board, external system, deployment, secret, live-data, push, or publication mutation was authorized or performed. The three dated Cortex runtime projection paths remain unchanged; required local verification refreshed only the ignored generated working-memory catalog and validation receipts, which are outside the admitted diff and carry no operational authority.
+- Owner/external mutation count is zero: no owner repository, Discord, board, external system, deployment, production deployment, secret, live-data, push, or publication mutation was authorized or performed. The three dated Cortex runtime projection paths remain unchanged; required local verification may refresh only ignored validation receipts outside the admitted diff, which carry no operational authority.
 
-## Independent ratification gate
+## Accepted independent ratification
 
-After the remediation commit exists, a separate packet named `Atlas Marker Integrity Independent 51-of-51 Ratification` must reconstruct the same frozen opening-audit denominator and independently prove all `51 / 51` families scope-correct against the committed state. This receipt and its index entry must remain provisional until that proof is accepted. Only a later separately authorized marker-ratchet packet may move `lane-marker-integrity` from percentage null; this remediation cannot self-ratify.
+- Remediation commit under proof: `d9f105a08ddc0c1a0952e7ee36fed74eb9ad0ed3`.
+- Independent thread: `019f65c2-3d12-7c03-afd3-fbcc305c7129`.
+- Decision: `RATIFY_51_OF_51`.
+- Family proof: denominator `51`; proven `51`; failing `0`; duplicate memberships `0`; missing `0`; ambiguous `0`; stale projections `0`; unknown classifications `0`.
+- Exact terminal summary: `51 proven / 0 failing`.
+- Evidence checks: tracked JSON `405 / 405`; checkpoint receipts `11 / 11`; governing receipt references `700 / 700`; GitHub percentage-evidence references `11 / 11`.
+- Non-mutating stack validation: `critical=0 error=0 warning=4 info=0`; audit mutation count `0`.
+
+The independent packet reconstructed the frozen opening-audit denominator and proved all `51 / 51` families scope-correct against the published remediation state. External Model Sidecar and later-discovered lanes remain outside this denominator. The historical gate sequence remains remediation, independent ratification, then this separately authorized marker ratchet.
 
 Rule: historical percentages are immutable provenance.
 
@@ -77,9 +85,10 @@ Pattern: projection remediation, independent ratification, then marker ratchet.
 
 Failure Mode: a completed family remaining on an open-marker projection.
 
-## Terminal-candidate handoff
+## Terminal handoff
 
-- Status: `remediation_complete_pending_independent_51_of_51_ratification`.
-- Admitted changed paths: exactly seven root paths listed in this receipt and the final Git diff.
+- Status: `accepted_complete_51_of_51_100_percent`.
+- Marker: `lane-marker-integrity` is `51 / 51`, `100%`, complete on the unchanged frozen denominator basis.
+- Admitted changed paths for this ratchet: exactly the registry, this receipt, the Book marker page, and the receipt index.
 - Commit and push: intentionally not performed by this worker; the parent runner exclusively owns Git state transitions, and guarded publication remains with ATLAS MAIN after receipt review.
-- Next packet: `Atlas Marker Integrity Independent 51-of-51 Ratification`.
+- Next registry-selected packet: `No immediate AI Repetition-to-Automation Pipeline same-lane packet`; selector action `no_immediate_root_packet`. The Atlas Full-System closing audit remains pending and is not implied by this closeout.

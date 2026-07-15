@@ -106,7 +106,7 @@ Audit-gate marker; excluded from the execution selector.
 
 The Atlas Full-System Re-evaluation denominator is exactly two accepted audit gates: opening `0 -> 50`, then a separate later closing audit `50 -> 100`. The opening gate is accepted at `1 / 2`. Discovered work adds zero to this marker and remains percentage-null in `docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json`. The marker cannot exceed 50 until the closing audit is accepted. Ratchet remediation is a separate lane, not an opening-audit success criterion. No other open or locked marker moved.
 
-The five stale 51-family projections were remediated on 2026-07-15, but `lane-marker-integrity` remains percentage-null and candidate pending separate independent `51 / 51` proof. This projection repair does not move Atlas Full-System Re-evaluation from `50%`.
+The five stale 51-family projections were remediated on 2026-07-15, and the subsequent independent `RATIFY_51_OF_51` proof accepts Marker Integrity at `51 / 51`, `100%`, complete. This Marker Integrity ratchet does not move Atlas Full-System Re-evaluation from `50%` and `1 / 2`; its closing audit remains pending.
 
 ## Materially Closed Carry-Forward Families
 
@@ -136,6 +136,7 @@ The five stale 51-family projections were remediated on 2026-07-15, but `lane-ma
 
 ## Closed / Locked Ratchets
 
+- Marker Integrity: `100%` (`51 / 51`)
 - Sandbox Simulation Readiness: `100%`
 - _stack Readiness: `100%`
 - Atlas-owned Repo Naming Canonicalization: `100%`
