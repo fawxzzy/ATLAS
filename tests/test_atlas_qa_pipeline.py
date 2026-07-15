@@ -260,6 +260,7 @@ class AtlasQaPipelineTests(unittest.TestCase):
         for repo_id, commit in components.items():
             lines.append(f"  {repo_id}:")
             lines.append(f'    commit: "{commit}"')
+            lines.append("    release_eligible: true")
         (root / "stack.lock.yaml").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
     def _base_manifest(self, *, root: Path) -> tuple[Path, Path]:
