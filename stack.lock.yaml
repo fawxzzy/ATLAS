@@ -47,7 +47,7 @@ components:
     remote: "https://github.com/fawxzzy/lifeline.git"
     ref_type: "branch"
     ref: "codex/path-discipline-warning-slice-lifeline"
-    commit: "538f623a84b003e70dadd234e6ea3af642446a5f"
+    commit: "54eeb56006099235723b60ce44de8a65e4c85889"
     dirty: false
     trust_class: "trusted"
     release_eligible: true
@@ -208,4 +208,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:404cac4250be4f7b9afa705982c9c7afad438c4d9367d2a3094a98f71b781e1b"
+lock_digest: "sha256:500f5cb28598049bfe9114dbd6899af21dd5c7a2435529e8726fbbfa0393ba66"

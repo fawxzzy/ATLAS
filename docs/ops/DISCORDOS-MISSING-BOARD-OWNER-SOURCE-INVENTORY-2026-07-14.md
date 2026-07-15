@@ -18,7 +18,7 @@ guessing.
 | Atlas | `docs/registry/project-board-owner-exports/atlas.project-board.owner-export.v1.json`, projected deterministically from the Atlas Book and full-system registry | 33 contract-valid records: 7 non-executable marker parents, 10 direct lanes, 16 root-governance backlog records | Owner export implemented; DiscordOS admission and seeding remain pending | `BOARD_UNADMITTED`, `DISCORD_FORUM_MISSING`, `SEED_NOT_EXECUTED` |
 | DiscordOS | No accepted owner-repo work export; five Atlas-attributed candidates exist outside the owner repo | 0 owner records; 5 Atlas candidates | Blocked | `NO_OWNER_WORK_EXPORT`, `OWNER_CHECKOUT_STALE`, `ATLAS_ONLY_CANDIDATES` |
 | Foundation | `repos/foundation/exports/foundation.project-board.owner-export.v1.json`, projected deterministically from `repos/foundation/docs/roadmap/FOUNDATION_ROADMAP.json` | 6 contract-valid non-complete records: 3 planned and 3 planned-later | Owner export implemented; DiscordOS admission and seeding remain pending | `BOARD_UNADMITTED`, `DISCORD_FORUM_MISSING`, `SEED_NOT_EXECUTED` |
-| Lifeline | `repos/lifeline/.playbook/plan.json` and owner README | 1 underspecified next milestone; machine plan has 0 tasks | Blocked | `EMPTY_MACHINE_PLAN`, `UNKEYED_NEXT_MILESTONE`, `STALE_ROOT_INITIATIVE_CONFLICT` |
+| Lifeline | `repos/lifeline/exports/lifeline.project-board.owner-export.v1.json`, projected deterministically from `repos/lifeline/docs/roadmap/LIFELINE_ROADMAP.json` | 2 contract-valid intake candidates; 8 completed capabilities excluded | Owner export implemented on the currently pinned owner branch; DiscordOS admission and seeding remain pending | `BOARD_UNADMITTED`, `DISCORD_FORUM_MISSING`, `SEED_NOT_EXECUTED` |
 | Cortex | `docs/registry/project-board-owner-exports/cortex.project-board.owner-export.v1.json`, projected deterministically from the root subsystem registry and Atlas planning source | 2 contract-valid root-owned subsystem records | Owner export implemented; DiscordOS admission and seeding remain pending | `BOARD_UNADMITTED`, `DISCORD_FORUM_MISSING`, `SEED_NOT_EXECUTED` |
 | `_stack` | `repos/_stack/queue/README.md` plus Atlas candidates | 0 owner queue records; 5 Atlas candidates | Blocked | `READY_EMPTY_OWNER_QUEUE`, `ATLAS_CANDIDATES_UNADMITTED` |
 | Playbook | `repos/playbook/exports/playbook.project-board.owner-export.v1.json`, projected deterministically from `repos/playbook/docs/roadmap/ROADMAP.json` | 35 non-complete features: 11 in progress, 8 planned, 6 planned later, 6 dependency blocked, 3 directional, 1 architecture-defined | Owner export merged and contract-valid; DiscordOS admission and seeding remain pending | `BOARD_UNADMITTED`, `DISCORD_FORUM_MISSING`, `SEED_NOT_EXECUTED` |
@@ -71,9 +71,16 @@ records and emits exactly 6 non-complete records with stable `FDN-*` identities,
 explicit `null` priority, acceptance criteria, dependencies, source revision,
 and Discord mutation disabled. The export passed six focused tests, Foundation
 build and local verification, Atlas Contracts validation, and remote parity.
-This closes only Foundation's owner-export prerequisite. Lifeline must still
-populate or supersede its empty machine plan before the prose milestone can
-become a card.
+This closes only Foundation's owner-export prerequisite.
+
+Lifeline now owns a keyed machine roadmap and deterministic export at commit
+`54eeb56006099235723b60ce44de8a65e4c85889`. The owner reconciliation classifies
+`.playbook/plan.json` as verification-plan output rather than product-roadmap
+authority, excludes 8 completed capabilities, and exports exactly 2 intake
+candidates. Those candidates require measured evidence before implementation
+and do not authorize hosted-platform growth. The export passed six focused
+tests, full Lifeline verification, Atlas Contracts validation, and branch
+remote parity.
 
 ### `_stack`
 
@@ -109,8 +116,8 @@ live readback.
    Contracts.
 2. Retain the implemented Atlas/Cortex root-owned aggregation adapter and the
    merged Playbook canonical-owner-JSON adapter as two accepted proof classes.
-3. Retain Foundation's implemented machine-roadmap adapter and implement
-   Lifeline, `_stack`, and DiscordOS adapters only after their owner-source
+3. Retain the implemented Foundation and Lifeline machine-roadmap adapters and
+   implement `_stack` and DiscordOS adapters only after their owner-source
    blockers are resolved.
 4. Validate every export without Discord mutation.
 5. Create the seven empty forums through the DiscordOS single writer and read
@@ -125,6 +132,6 @@ This inventory does not create forums, create cards, move cards, assign missing
 priority, reinterpret roadmap status, mutate owner repositories, or advance the
 DiscordOS Cross-Project Board Integrity & Lifecycle Repair marker.
 
-Supporting owner-export readiness is now `4 / 7` (`57.1%`): Atlas, Cortex,
-Playbook, and Foundation are contract-valid. This is not the official board
+Supporting owner-export readiness is now `5 / 7` (`71.4%`): Atlas, Cortex,
+Playbook, Foundation, and Lifeline are contract-valid. This is not the official board
 integrity marker and does not move its fixed `0 / 10` denominator.
