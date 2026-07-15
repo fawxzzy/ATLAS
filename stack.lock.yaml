@@ -10,8 +10,8 @@ components:
     status: "active"
     remote: "https://github.com/fawxzzy/_stack.git"
     ref_type: "branch"
-    ref: "codex/stack-contracts-v2-cluster-2-producer"
-    commit: "dd8e61a3a569ecab4f492c1af95e8b072efd78b6"
+    ref: "main"
+    commit: "8a4da860587d0cd68ecf2136269df41c081c90a4"
     dirty: false
     trust_class: "trusted"
     release_eligible: false
@@ -23,7 +23,7 @@ components:
     remote: "https://github.com/fawxzzy/DiscordOS.git"
     ref_type: "branch"
     ref: "main"
-    commit: "3189a56b79daaae84c68f89fa4eb9552d91fc88a"
+    commit: "efdfa92a4f745913a9396258e9bdf506d9aae9bd"
     dirty: false
     trust_class: "trusted"
     release_eligible: false
@@ -208,4 +208,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:9d83955d111a675cdc0e400bf59a37deca863ee1e40ef392b024a131e06031be"
+lock_digest: "sha256:4821d9bbe86f1f7d2808c4409510013bc861715441c02f3986db9585a7d8dc45"

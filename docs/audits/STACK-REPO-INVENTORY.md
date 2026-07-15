@@ -22,14 +22,14 @@ Operational rule:
 - Excluded surface count: `16`
 - Stack manifest: `stack.yaml`
 - Stack lock: `stack.lock.yaml`
-- Inventory digest: `sha256:97e74fbff5942edc385d69a8484e27909401b7279eddafdf8bf051270f0916d7`
+- Inventory digest: `sha256:375e5763847bdec1e440cad438130379978f1b64a9b76e67d05194697d8e1367`
 
 ## Managed Repos
 
 | Repo id | Path | Role | Playbook adoption status | Branch | Pinned commit | Current commit | Dirty | Root-blocking | Dirty blocks root | Trust | Release | Related initiatives |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| _stack | repos/_stack | workflow-operator | verified | codex/stack-contracts-v2-cluster-2-producer | dd8e61a3a569ecab4f492c1af95e8b072efd78b6 | dd8e61a3a569ecab4f492c1af95e8b072efd78b6 | False | True | False | trusted | False | initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-local-data-gateway<br>initiative:continuity-manifest-post-convergence-lane-split-readiness<br>initiative:continuity-manifest-stack-readiness<br>initiative:continuity-manifest-vision-future-alignment |
-| discordos | repos/DiscordOS | board-and-discord-writer | not-claimed | main | 3189a56b79daaae84c68f89fa4eb9552d91fc88a | 3189a56b79daaae84c68f89fa4eb9552d91fc88a | False | True | False | trusted | False | initiative:continuity-manifest-dependency-untangling<br>initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-discord-os-infrastructure-separation |
+| _stack | repos/_stack | workflow-operator | verified | main | 8a4da860587d0cd68ecf2136269df41c081c90a4 | 8a4da860587d0cd68ecf2136269df41c081c90a4 | False | True | False | trusted | False | initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-local-data-gateway<br>initiative:continuity-manifest-post-convergence-lane-split-readiness<br>initiative:continuity-manifest-stack-readiness<br>initiative:continuity-manifest-vision-future-alignment |
+| discordos | repos/DiscordOS | board-and-discord-writer | not-claimed | main | efdfa92a4f745913a9396258e9bdf506d9aae9bd | efdfa92a4f745913a9396258e9bdf506d9aae9bd | False | True | False | trusted | False | initiative:continuity-manifest-dependency-untangling<br>initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-discord-os-infrastructure-separation |
 | fitness | repos/fawxzzy-fitness | application | - | codex/fitness-qa-002-board-binding | - | b98fa17b90e62fbe191bf3c20c88bf674bc76c13 | False | False | False | adjacent | False | initiative:continuity-manifest-dependency-untangling<br>initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-discord-os-infrastructure-separation<br>initiative:continuity-manifest-local-data-gateway |
 | foundation | repos/foundation | shared-contract-foundation | not-claimed | main | e0c2978e4f0d0b73aaee6fc5d14b982b78d89b97 | e0c2978e4f0d0b73aaee6fc5d14b982b78d89b97 | False | True | False | trusted | True | - |
 | lifeline | repos/lifeline | local-operator | - | codex/path-discipline-warning-slice-lifeline | 54eeb56006099235723b60ce44de8a65e4c85889 | 54eeb56006099235723b60ce44de8a65e4c85889 | False | True | False | trusted | True | - |
@@ -37,8 +37,8 @@ Operational rule:
 | nat1-games | repos/Nat1-Games/nat1-games | application | - | codex/path-discipline-warning-slice-nat1 | 404460d3717fab389407582048a9b9f228f26d39 | 404460d3717fab389407582048a9b9f228f26d39 | False | True | False | trusted | False | - |
 | playbook | repos/playbook | governance-runtime | - | codex/repair-scheduled-demo-integration-ci | ee6907bd2d1d45ef87625cbd3382644dbb4fb199 | ee6907bd2d1d45ef87625cbd3382644dbb4fb199 | False | True | False | trusted | True | initiative:continuity-manifest-atlas-owned-repo-naming-canonicalization<br>initiative:initiative-fawxzzy-tech-plan-convergence |
 | playbook-demo | repos/playbook-demo/playbook-demo | demo | - | main | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | False | True | False | trusted | False | - |
-| socials-os | repos/socials-os | analytics-data-system | - | main | - | bfab3f8e66698219677ed083ffe4043338c5a4d5 | False | False | False | adjacent | False | - |
-| stack | . | operator-layer | - | main | - | 37a5e0caa304ce710ac2a9bf17bfd55ce09da2bf | True | True | True | trusted | False | - |
+| socials-os | repos/socials-os | analytics-data-system | - | main | - | 16bf6529e36af814fd370bb4e3afde2e314e30f8 | False | False | False | adjacent | False | - |
+| stack | . | operator-layer | - | main | - | f3da334615a6c569130a41a4adfbfe03962eb0cf | True | True | True | trusted | False | - |
 | stream | repos/stream | application | - | main | 43769ba86d4c6ebc419ab9e7847c3843460a094f | 43769ba86d4c6ebc419ab9e7847c3843460a094f | False | True | False | trusted | False | - |
 | trove | repos/trove | application | - | codex/path-discipline-warning-slice-trove | 437c7604adee02e0403d77f75162a6c5f232221f | 437c7604adee02e0403d77f75162a6c5f232221f | False | True | False | trusted | True | - |
 
