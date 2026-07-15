@@ -20,7 +20,7 @@ guessing.
 | Foundation | `repos/foundation/exports/foundation.project-board.owner-export.v1.json`, projected deterministically from `repos/foundation/docs/roadmap/FOUNDATION_ROADMAP.json` | 6 contract-valid non-complete records: 3 planned and 3 planned-later | Owner export implemented; DiscordOS admission and seeding remain pending | `BOARD_UNADMITTED`, `DISCORD_FORUM_MISSING`, `SEED_NOT_EXECUTED` |
 | Lifeline | `repos/lifeline/exports/lifeline.project-board.owner-export.v1.json`, projected deterministically from `repos/lifeline/docs/roadmap/LIFELINE_ROADMAP.json` | 2 contract-valid intake candidates; 8 completed capabilities excluded | Owner export implemented on the currently pinned owner branch; DiscordOS admission and seeding remain pending | `BOARD_UNADMITTED`, `DISCORD_FORUM_MISSING`, `SEED_NOT_EXECUTED` |
 | Cortex | `docs/registry/project-board-owner-exports/cortex.project-board.owner-export.v1.json`, projected deterministically from the root subsystem registry and Atlas planning source | 2 contract-valid root-owned subsystem records | Owner export implemented; DiscordOS admission and seeding remain pending | `BOARD_UNADMITTED`, `DISCORD_FORUM_MISSING`, `SEED_NOT_EXECUTED` |
-| `_stack` | `repos/_stack/queue/README.md` plus Atlas candidates | 0 owner queue records; 5 Atlas candidates | Blocked | `READY_EMPTY_OWNER_QUEUE`, `ATLAS_CANDIDATES_UNADMITTED` |
+| `_stack` | `repos/_stack/exports/stack.project-board.owner-export.v1.json`, projected deterministically from `repos/_stack/queue/owner-work-registry.json` | 0 owner records; explicit `ready-empty` state; Atlas candidates not admitted | Owner export implemented; DiscordOS admission remains pending and seeding is intentionally empty | `BOARD_UNADMITTED`, `DISCORD_FORUM_MISSING` |
 | Playbook | `repos/playbook/exports/playbook.project-board.owner-export.v1.json`, projected deterministically from `repos/playbook/docs/roadmap/ROADMAP.json` | 35 non-complete features: 11 in progress, 8 planned, 6 planned later, 6 dependency blocked, 3 directional, 1 architecture-defined | Owner export merged and contract-valid; DiscordOS admission and seeding remain pending | `BOARD_UNADMITTED`, `DISCORD_FORUM_MISSING`, `SEED_NOT_EXECUTED` |
 
 ## Export contract required before forum seeding
@@ -84,9 +84,13 @@ remote parity.
 
 ### `_stack`
 
-An empty Ready queue is meaningful. Atlas candidates remain proposals until
-`_stack` accepts them into an owner queue or export. No Atlas root fallback
-card creation is allowed.
+An empty Ready queue is meaningful. `_stack` commit
+`dd8e61a3a569ecab4f492c1af95e8b072efd78b6` publishes a contract-valid
+zero-card export from an explicit `ready-empty` owner registry. The receipt
+records `atlas_candidates_admitted: false` and `discord_mutation_authorized:
+false`; tests prove future owner-admitted records can map without changing
+today's empty truth. Atlas candidates remain proposals until `_stack` accepts
+them into the owner registry. No Atlas root fallback card creation is allowed.
 
 ### Playbook
 
@@ -116,9 +120,9 @@ live readback.
    Contracts.
 2. Retain the implemented Atlas/Cortex root-owned aggregation adapter and the
    merged Playbook canonical-owner-JSON adapter as two accepted proof classes.
-3. Retain the implemented Foundation and Lifeline machine-roadmap adapters and
-   implement `_stack` and DiscordOS adapters only after their owner-source
-   blockers are resolved.
+3. Retain the implemented Foundation, Lifeline, and `_stack` adapters and
+   implement the DiscordOS adapter only after its owner-source blocker is
+   resolved.
 4. Validate every export without Discord mutation.
 5. Create the seven empty forums through the DiscordOS single writer and read
    back exact channel identity.
@@ -132,6 +136,6 @@ This inventory does not create forums, create cards, move cards, assign missing
 priority, reinterpret roadmap status, mutate owner repositories, or advance the
 DiscordOS Cross-Project Board Integrity & Lifecycle Repair marker.
 
-Supporting owner-export readiness is now `5 / 7` (`71.4%`): Atlas, Cortex,
-Playbook, Foundation, and Lifeline are contract-valid. This is not the official board
+Supporting owner-export readiness is now `6 / 7` (`85.7%`): Atlas, Cortex,
+Playbook, Foundation, Lifeline, and `_stack` are contract-valid. This is not the official board
 integrity marker and does not move its fixed `0 / 10` denominator.

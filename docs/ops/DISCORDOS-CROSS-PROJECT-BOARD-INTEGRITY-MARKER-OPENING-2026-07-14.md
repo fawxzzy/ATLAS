@@ -106,6 +106,9 @@ includes:
   keyed machine roadmap with exactly `2` evidence-gated intake candidates,
   excludes `8` completed capabilities, classifies the empty Playbook plan as
   verification output, and passes full Lifeline plus Atlas Contracts verification;
+- `_stack` commit `dd8e61a` now publishes a contract-valid zero-card owner
+  export from an explicit `ready-empty` registry, rejects implicit Atlas
+  candidate admission, and passes the full operator plus Atlas Contracts suites;
 - Unicode prevention and exact readback merged through DiscordOS pull requests
   `#76` and `#77`;
 - a complete post-merge scan showing `0` current/actionable text findings while
@@ -122,8 +125,8 @@ See:
 - `docs/ops/DISCORDOS-IMMUTABLE-SYSTEM-HISTORY-RECONCILIATION-2026-07-14.md`.
 
 No unit moves because seven required board classes remain unadmitted. Supporting
-owner-export readiness is `5 / 7` (`71.4%`) for Atlas, Cortex, Playbook,
-Foundation, and Lifeline, but their forums, registry admission, seeds, readback, and all-board
+owner-export readiness is `6 / 7` (`85.7%`) for Atlas, Cortex, Playbook,
+Foundation, Lifeline, and `_stack`, but their forums, registry admission, seeds, readback, and all-board
 proof are not complete. The reaction, movement, full
 lifecycle, formatting, and recurring drift-proof
 requirements are not yet closed across the full denominator. The superseded

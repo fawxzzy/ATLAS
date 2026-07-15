@@ -11,7 +11,7 @@ components:
     remote: "https://github.com/fawxzzy/_stack.git"
     ref_type: "branch"
     ref: "codex/stack-contracts-v2-cluster-2-producer"
-    commit: "1c07c74dc79cdc331b3723944d30e0a18b53d2d6"
+    commit: "dd8e61a3a569ecab4f492c1af95e8b072efd78b6"
     dirty: false
     trust_class: "trusted"
     release_eligible: false
@@ -208,4 +208,4 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:500f5cb28598049bfe9114dbd6899af21dd5c7a2435529e8726fbbfa0393ba66"
+lock_digest: "sha256:e72d82e9bfc5e3e51afe5fa1ebbe2d3b84c98fa0a041c4bc929fd9a1f8a62a9d"
