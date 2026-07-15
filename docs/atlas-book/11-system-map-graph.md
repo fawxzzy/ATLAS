@@ -1,8 +1,8 @@
 # Current System Map / Graph
 
-## 2026-07-12 current/proposed overlay
+## 2026-07-15 current/proposed overlay
 
-Current authority flow: owner repos -> owner verification -> `_stack` normalization/canonical writer -> ATLAS receipts/markers/restart projections. GitHub supplies remote/CI/review/release/security evidence; Vercel supplies delivery/observability; Supabase supplies auth/persistence; DiscordOS is one logical board/publication/readback writer. Cortex is root-owned advisory context/routing/synthesis. Codex tasks execute bounded work; native handoff creates a separate transcript and receipts return durable truth.
+Current authority flow: owner repos -> owner verification -> `_stack` action routing/event normalization -> ATLAS receipts/markers/restart projections. GitHub supplies remote/CI/review/release/security evidence; Vercel supplies delivery/observability; Supabase supplies auth/persistence; DiscordOS is the one hosted logical board/publication/readback writer. Cortex is event-triggered root-owned advisory context/routing/synthesis. Codex tasks execute bounded work; native handoff creates a separate transcript and receipts return durable truth.
 
 Proposed overlay only: Atlas Control thin ledger, Contracts v2 mesh, cross-plane delivery events, persistent workspace/browser leases, historical task intelligence, and systematic cross-project knowledge promotion. These proposed nodes do not replace the current owner flow.
 
@@ -27,16 +27,17 @@ It shows:
   - governed deploy authority and shared operator execution
 - `repos/fawxzzy-fitness`
   - Fitness app/runtime truth
-  - current Discord-hosted runtime truth
+  - retained Fitness product and interaction seams
 - `repos/trove`
   - Trove repo-local runtime truth
 - `repos/mazer`
   - Mazer repo-local runtime truth
 - `repos/foundation`
-  - Foundation repo-local runtime truth
+  - Foundation repo-local implementation truth
+  - hosted read-only portfolio owner
 - `repos/lifeline`
   - Lifeline repo-local operator and execution truth
-  - manifest/runtime/release/startup/proof surface owner
+  - intended manifest/runtime/release/startup/proof surface owner; currently unavailable locally
 - `repos/DiscordOS`
   - canonical DiscordOS repo surface now exists locally
   - live DiscordOS runtime, publication, and feedback owner surface
@@ -54,11 +55,12 @@ It shows:
   - live DiscordOS feedback/runtime/publication surfaces
   - live runtime-health and alerting surfaces
   - broader Discord-owned workflow runtime
-- Lifeline provides:
-  - local execution/operator runtime for manifest-defined apps
-  - manifest validation and resolution
-  - local runtime lifecycle, release, startup, and proof surfaces
-- `_stack` remains the governed deploy authority
+- Foundation Vercel hosts the read-only portfolio surface
+- Lifeline implements the intended local supervisor, but is not currently built,
+  registered, or running on this machine
+- `_stack` remains the governed deploy authority for approved app lanes, but no
+  local `_stack` scheduled worker or inbox runner is active
+- Cortex remains event-triggered; its principal current read models are stale
 - ATLAS root does not host product runtime
 - ATLAS root now also owns one bounded local-only Sandbox simulation substrate under `data/atlas/sandbox/**` and `runtime/atlas/sandbox/**`; that substrate now includes one admitted example scenario manifest, one paired fixture-pack, one note-only fixture, one input fixture stub, one expected-output fixture stub, one frozen validator-boundary contract, one committed validator descriptor stub, one frozen validator-report contract, one committed validator-report stub, one frozen validator-status-semantics contract, one frozen validator-comparison boundary, one frozen validator-candidate-output shape, one committed validator-candidate-output stub, one frozen validator-candidate-output report link, one frozen validator-pair coherence semantic layer, one frozen validator-verdict activation gate, one frozen validator-behavior boundary, one admitted root-local validator-behavior owner surface, one admitted supporting-lane decision held at `none yet`, one admitted first pre-verdict implementation slice, one admitted worker handoff contract, one admitted implementation-readiness routing checkpoint, and one reconciled first implementation landing, but it still admits no executed validator verdict activation, runner, `_stack`, owner-repo, deploy, secret, or live-data widening
 - ATLAS root now owns three read-only AI work-session guard helpers: `ops/atlas/ai_work_session_preflight.py`, `ops/atlas/ai_work_session_closeout.py`, and `ops/atlas/projection_freshness.py`; together they classify session start, closeout, and projection freshness without mutating owner repos, platform state, protected proof, PR bodies, markers, or restart surfaces
@@ -323,24 +325,28 @@ Historical note:
 ```mermaid
 flowchart LR
   ATLAS["ATLAS Root\nReceipts, markers, book, coordination"]
-  STACK["_stack\nGoverned deploy authority\nOperator execution"]
-  PLAYBOOK["Playbook\nDoctrine and governance"]
-  CORTEX["Cortex\nPlanning-context consumer"]
-  LIFELINE["Lifeline\nLocal execution/operator plane\nDeterministic receipts"]
+  STACK["_stack\nOn-demand actions\nOne future bounded scheduled sweep"]
+  FOUNDATION["Foundation Vercel\nHosted read-only portfolio"]
+  PLAYBOOK["Playbook\nCLI doctrine + local Observer"]
+  OBSERVER["Observer\n127.0.0.1:4300\nCurrently unavailable"]
+  CORTEX["Cortex artifacts\nEvent-triggered read models\nCurrently stale"]
+  LIFELINE["Lifeline\nLocal supervision + logon restore\nCurrently unavailable"]
   FITNESS_REPO["Fitness Repo\nrepos/fawxzzy-fitness"]
-  FITNESS_VERCEL["Fitness Vercel\nLive app + current Discord runtime"]
+  FITNESS_VERCEL["Fitness Vercel\nFitness app/runtime"]
   FITNESS_DB["Fitness Supabase\nlpswxoyfniocuhljgzbc"]
   DISCORDOS_REPO["DiscordOS Repo\nrepos/DiscordOS\nlive owner surface"]
-  DISCORDOS_VERCEL["DiscordOS Vercel\nfawxzzy-discordos\nlive runtime + publication"]
-  DISCORDOS_DB["DiscordOS Supabase\nnwexsktuuenfdegzrbut\nlive Discord-owned tables"]
+  DISCORDOS_VERCEL["DiscordOS Vercel\npublic API + logical writer"]
+  DISCORDOS_DB["DiscordOS Supabase\ndurable writer + transfer state"]
+  DISCORDOS_ACTIONS["GitHub Actions\nbounded DiscordOS polling"]
   DISCORD["Discord Surfaces\nFeedback, updates, moderation,\nMusic Sesh"]
   STALE["Historical stale/helper Vercel cleanup\nclosed on 2026-05-25"]
 
   FITNESS_REPO --> FITNESS_VERCEL
-  FITNESS_VERCEL --> DISCORD
   FITNESS_REPO --> FITNESS_DB
   STACK --> FITNESS_VERCEL
-  PLAYBOOK --> LIFELINE
+  ATLAS --> FOUNDATION
+  PLAYBOOK --> OBSERVER
+  LIFELINE --> OBSERVER
   LIFELINE --> ATLAS
   FITNESS_REPO --> ATLAS
   FITNESS_VERCEL --> ATLAS
@@ -351,6 +357,7 @@ flowchart LR
   DISCORDOS_REPO --> DISCORDOS_VERCEL
   DISCORDOS_VERCEL --> DISCORD
   DISCORDOS_REPO --> DISCORDOS_DB
+  DISCORDOS_ACTIONS --> DISCORDOS_VERCEL
 
   FITNESS_VERCEL -. "helper-surface pressure" .- STALE
 ```
@@ -361,7 +368,7 @@ flowchart LR
 | --- | --- | --- | --- | --- | --- |
 | Fitness app lane | Fitness | `repos/fawxzzy-fitness` plus protected QA read-model receipts | adopted protected-QA topology is repaired and current: `playbook`, `trove`, `foundation`, and `lifeline` are release-ready, inventory now records adjacent Fitness head `6ca649b273b4460de55959753fbb8ec3c60e663a` on `codex/fitness-main-progression-summary-reapply` with clean parity restored, latest pushed clean `mazer` head is `b0e1c20eb4ce1232bbc3c63fc774bcdec7c07e8b` and the local worktree is clean, the current committed ATLAS root checkpoint still consumed by this refresh remains `2cfb56e0084a69e323c0b1a19199cac170480861`, published inventory now shows `dirty_repo_count: 0`, current root validation now reads `critical=0 error=0 warning=3 info=0`, `stream` is visible as `not_applicable` because it is not release-eligible, the BrowserStack provider control plane remains valid for `desktop.chromium.real`, `android.chrome.real`, and `iphone.webkit.real`, `runtime/atlas/qa/github-secret-readiness.latest.json` now keeps the ATLAS repo secret-name posture machine-readable with `available_secret_count: 0`, and `runtime/atlas/qa/runs/fitness-progression-pr-smoke-20260629T074949197509Z/release-gate.packet-prep.md` still keeps the current blocked run compressed into one restart-safe operator packet | the current protected-refresh republish is no longer blocked by stale command routing, emulated visual diffs, stale target-SHA truth, or hosted-dispatch bootstrap/validation drift; the remaining live blocker is `desktop.chromium.real`, `android.chrome.real`, and `iphone.webkit.real` plus missing ATLAS GitHub Actions secrets `BROWSERSTACK_USERNAME` and `BROWSERSTACK_ACCESS_KEY`, as proved by the current release-gate packet and the secret-readiness audit | Complete desktop, Android, and iPhone real-device proof or manual attestation for `fitness`, use the combined release-gate packet as the first handoff for the current blocked run, restore ATLAS GitHub Actions BrowserStack secrets, or run one protected BrowserStack pass once those upstream credentials exist again; reopen `stream` only if stack governance later promotes it into release scope |
 | Discord work lane | retained Fitness seams plus live DiscordOS owner surfaces | retained Fitness repo/runtime seams now; `repos/DiscordOS` plus DiscordOS production/runtime receipts for the broader Discord-owned surface | feedback transfer cutover, publication, and runtime-hardening are already live and proof-closed; remaining Fitness-owned Discord seams are explicit retained boundaries rather than migration debt | none inside the closed feedback/publication/runtime-hardening lanes; reopen only with a new named DiscordOS scope or higher-level authorization | `none by default at ATLAS root; reopen only on explicit new DiscordOS named scope or higher-level authorization` |
-| Post-convergence lane split readiness | ATLAS root | lane-split receipts plus ATLAS Book restart surfaces | closed at `100%`; the dedicated Fitness poll surface is live on production, consumed by the governed recurring worker path, and no longer acts as one mixed-runtime lane-structure ambiguity | none inside the current closed lane | none immediate; reopen only with a new owner-boundary ambiguity, retained-seam regression, or materially different runtime change |
+| Post-convergence lane split readiness | ATLAS root | lane-split receipts plus ATLAS Book restart surfaces | the historical lane remains closed at `100%`; current placement now distinguishes the active DiscordOS GitHub Actions poll from the inactive local `_stack` scheduled worker, so no continuous local-worker claim is carried forward | none inside the historical closed lane; local activation is measured separately with percentage unset | follow the runtime activation sequence beginning with Playbook bootstrap and foreground Observer health proof |
 | Fitness Supabase hygiene | Fitness | Fitness Supabase plus ATLAS closeout and governance receipts | closed at `100%`; remaining Discord/Music Sesh concerns transferred out of lane scope | none inside Fitness profile-core cleanup scope | defer any Discord/Music Sesh follow-on to Discord OS Infrastructure Separation |
 | DiscordOS bootstrap | DiscordOS | `repos/DiscordOS`, `fawxzzy-discordos`, DiscordOS Supabase `nwexsktuuenfdegzrbut` | closed at the admitted infrastructure/feedback/runtime-hardening scope: repo, schema, deploy, service-role proof path, feedback cutover, publication, and runtime-health surfaces are all live and proven | none inside the closed admitted scope; future DiscordOS work must open as a new explicit feature or runtime lane | `none inside the closed bootstrap/cutover family; reopen only with explicit new DiscordOS scope` |
 | Helper Vercel decommission | ATLAS systems lane with owner confirmation | Vercel inventory and deletion receipts | stale Spotify-era and helper Fitness projects deleted | provenance clarity and future health classification only | preview/unfurl verification or Vercel health-design lane |

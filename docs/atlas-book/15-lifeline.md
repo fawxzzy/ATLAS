@@ -46,6 +46,10 @@ Lifeline is not:
 
 ## Current Shipped Surfaces
 
+"Shipped" in this section describes implemented Lifeline capability. It does
+not claim that the local runtime is built, registered, or running on this
+machine.
+
 The current shipped Lifeline surface includes:
 
 - manifest validation
@@ -69,6 +73,22 @@ Current shipped posture stays local and bounded:
 - no multi-node runtime coordination
 - no ambient privileged mutation
 - no HTTP dependency on Playbook
+
+## Current Local Availability
+
+Read-only probes on 2026-07-15 found Lifeline unavailable locally:
+
+- `repos/lifeline/node_modules` is absent
+- `repos/lifeline/dist/cli.js` is absent
+- no Lifeline supervisor or startup state is present
+- no ATLAS/Lifeline Windows scheduled task or service is registered
+- Playbook Observer has no listener on port 4300
+
+The next owner-side activation work is not logon registration. It begins with
+Playbook bootstrap and foreground Observer health proof, then Lifeline build and
+doctor plus a state-placement contract under
+`runtime/lifeline/playbook-observer`. Supervised restart must pass before logon
+restore is registered.
 
 ## Planned Later Surfaces
 
@@ -129,8 +149,8 @@ Playbook is not an HTTP dependency for Lifeline.
 
 Foundation is:
 
-- local-first substrate
-- a later adoption target
+- the existing hosted read-only portfolio surface
+- independent of Lifeline's private loopback supervision path
 
 Foundation is not a hard current runtime dependency for Lifeline's shipped operator boundary.
 
@@ -162,7 +182,7 @@ Cortex does not currently own or mutate Lifeline runtime behavior.
 
 ### Lifeline <-> Foundation
 
-- Foundation is a substrate/adoption target, not a current required runtime dependency
+- Foundation is the hosted read-only portfolio, not a current required Lifeline runtime dependency
 - any later adoption should preserve Lifeline's local-first, deterministic boundary
 
 ### Lifeline <-> Cortex

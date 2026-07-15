@@ -149,6 +149,7 @@ from ops.cortex.index_working_memory import (
 )
 from ops.cortex.world_model import world_model_state_root, write_world_model_state
 from ops.validation.atlas_topology_contract import validate_contract_files as validate_atlas_topology_contract_files
+from ops.validation.runtime_placement_contract import validate_contract_files as validate_runtime_placement_contract_files
 
 
 @dataclass
@@ -468,8 +469,9 @@ def apply_repo_generated_state_cleanup(
     repo_path: Path,
     repo_rel: str,
     repo_info: dict[str, Any],
+    execute: bool = True,
     run_command: Any = subprocess.run,
-) -> list[Finding]:
+) -> tuple[list[Finding], set[str]]:
     validation_config = repo_info.get("validation")
     if validation_config is None:
         return [], set()
@@ -543,6 +545,11 @@ def apply_repo_generated_state_cleanup(
 
     if not any((repo_path / relative_path).exists() for relative_path in target_paths):
         return [], set()
+
+    cleanup_report = load_generated_state_cleanup_report(repo_path, cleanup_config)
+    suppressed_paths = generated_state_cleanup_suppressed_paths(cleanup_report)
+    if not execute:
+        return [], suppressed_paths
 
     completed = run_command(
         command.strip(),
@@ -2973,6 +2980,7 @@ def build_findings(
     lock_file_override: Path | None = None,
     allow_missing_locked_repos: bool = False,
     required_present_repo_ids: set[str] | None = None,
+    run_generated_state_cleanup: bool = True,
 ) -> list[Finding]:
     root = stack_file.parent.resolve()
     findings: list[Finding] = []
@@ -3015,6 +3023,22 @@ def build_findings(
         )
     else:
         findings.extend(Finding(item.severity, item.category, item.path, item.message, item.details) for item in topology_issues)
+    try:
+        runtime_placement_issues = validate_runtime_placement_contract_files(root=root)
+    except Exception as exc:
+        findings.append(
+            Finding(
+                "error",
+                "runtime-placement-validator-crash",
+                "ops/validation/runtime_placement_contract.py",
+                f"Runtime placement validator failed before completion: {exc}",
+            )
+        )
+    else:
+        findings.extend(
+            Finding(item.severity, item.category, item.path, item.message, item.details)
+            for item in runtime_placement_issues
+        )
     findings.extend(validate_tool_registry(root))
     findings.extend(validate_subsystem_registry(stack_file, config))
     findings.extend(validate_playbook_enforcement_tracking(stack_file, config))
@@ -3087,6 +3111,7 @@ def build_findings(
                 repo_path=repo_path,
                 repo_rel=repo_rel,
                 repo_info=repo_info,
+                execute=run_generated_state_cleanup,
             )
             findings.extend(cleanup_findings)
             for relative_dir, requires_warning in mutable_surface_warning_map(
@@ -3743,6 +3768,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--allow-missing-locked-repos", action="store_true")
     parser.add_argument("--require-present-repo-id", action="append", default=[])
     parser.add_argument(
+        "--skip-generated-state-cleanup",
+        action="store_true",
+        help="Validate owner repositories without executing their generated-state cleanup commands.",
+    )
+    parser.add_argument(
         "--refresh-runtime-artifacts",
         action="store_true",
         help="Regenerate legacy backfill and world-model runtime artifacts before validation.",
@@ -3791,6 +3821,7 @@ def main(argv: list[str] | None = None) -> int:
                     config,
                     lock_file_override=lock_file,
                     allow_missing_locked_repos=bool(args.allow_missing_locked_repos),
+                    run_generated_state_cleanup=not bool(args.skip_generated_state_cleanup),
                     required_present_repo_ids={
                         str(repo_id).strip()
                         for repo_id in args.require_present_repo_id

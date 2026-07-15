@@ -38,6 +38,7 @@ Start here:
 - [Vision And Endgames](13-vision-and-endgames.md)
 - [Lane Split Execution](14-lane-split-execution.md)
 - [Lifeline](15-lifeline.md)
+- [Runtime Placement](16-runtime-placement.md)
 
 This chapter set now covers:
 
@@ -50,4 +51,5 @@ This chapter set now covers:
 - how to restart the stack from a new chat without reconstruction
 - what each major lane is actually trying to finish
 - how each future lane should safely reopen
+- where each runtime belongs, what is actually available, and the exact local activation order
 - how the current closeout ladder is reducing branch, tmp, Vercel, and residue drift without reopening runtime mutation

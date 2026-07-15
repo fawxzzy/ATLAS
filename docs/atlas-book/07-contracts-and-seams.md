@@ -146,16 +146,16 @@ Rule:
 
 ### Current seam
 
-- Fitness hosts both app/runtime and current Discord runtime
-
-### Future seam
-
-- Fitness keeps app/runtime and upstream proof surfaces
-- DiscordOS later owns Discord runtime surfaces
+- Fitness hosts its app/runtime and retained product seams.
+- DiscordOS hosts the current Discord runtime and logical writer on Vercel,
+  backed by Supabase durable state and bounded GitHub Actions polling.
+- Foundation hosts the read-only portfolio; Playbook Observer remains the
+  separate private loopback cockpit.
 
 ### Rule
 
-- runtime/Vercel ownership must split with env and data ownership, not before
+- hosted edge, durable state, and polling authority remain explicit and do not
+  imply a second writer or cockpit
 
 ## Remaining Approval-Gated Seams
 
@@ -188,18 +188,21 @@ The stack should reject these seam failures:
 - Discord board state being treated as deploy or product truth
 - repo-root env residue becoming the default secret lane
 
-## First Safe Seam Moves
+## Runtime Activation Sequence
 
-The first safe moves after the current docs-only checkpoint are still bounded:
+The next safe moves are owner-side and serialized:
 
-1. approved DiscordOS repo bootstrap only
-2. approved Fitness Supabase mutation only
-3. later DiscordOS code inventory/extraction package
-4. later schema landing implementation
-5. later dual-read proof
-6. later bounded runtime cutover
+1. Playbook bootstrap and foreground Observer health proof.
+2. Lifeline bootstrap and root-runtime state contract.
+3. supervised restart proof.
+4. current-user logon restore proof.
+5. exactly one bounded `_stack` scheduled worker proof.
+6. one event-triggered Cortex refresh.
+7. DiscordOS interaction-first reliability review.
+8. owner export integration.
 
-None of those are implied by this contract map alone.
+None of these steps authorizes a production deployment or public hosting for a
+local/private surface.
 
 ## UI Standards Program Seam
 

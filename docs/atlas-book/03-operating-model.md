@@ -1,8 +1,14 @@
 # Operating Model
 
-## 2026-07-12 current capability override
+## 2026-07-15 current capability override
 
-Atlas root owns governance, markers, v1 contracts, and accepted receipts; `_stack` owns the canonical writer, operator flows, and event normalization; Playbook owns doctrine and repo verification; root-owned Cortex surfaces provide advisory context/routing/synthesis; owner repos own product/code truth; DiscordOS is one logical board/publication/readback writer; GitHub is remote/CI/review/release/security truth; Vercel is delivery/observability; Supabase is auth/persistence; Codex supplies bounded execution tasks; ATLAS MAIN routes standing command surfaces.
+Atlas root owns governance, markers, v1 contracts, and accepted receipts; `_stack` owns governed action routing, operator flows, and event normalization; Playbook owns doctrine and repo verification; root-owned Cortex surfaces provide advisory context/routing/synthesis; owner repos own product/code truth; DiscordOS is the one logical board/publication/readback writer; GitHub is remote/CI/review/release/security truth; Vercel is delivery/observability; Supabase is auth/persistence; Codex supplies bounded execution tasks; ATLAS MAIN routes standing command surfaces.
+
+Runtime placement is explicit: Foundation is the hosted read-only portfolio,
+DiscordOS is the hosted API/writer, Playbook Observer is the private loopback
+cockpit, Lifeline is its intended local supervisor, `_stack` may later run one
+bounded serialized scheduled sweep, and Cortex refreshes read models only on
+accepted state or digest changes. See [Runtime Placement](16-runtime-placement.md).
 
 Native desktop handoff creates a separate Codex transcript and receipts are the durable reverse handoff. Current manual evidence proves local/worktree/cloud tasks, deep links, follow-up steer/queue behavior, subagent threads, and task-scoped IDE context, but not the full Atlas callback loop. Atlas Control and its backend-neutral ledger, persistent workspace/browser leases, delivery event plane, historical task intelligence, and systematic cross-project promotion remain partial or **PROPOSED**. SQLite is a frozen proposal, not deployed truth. Current standing surfaces are ATLAS MAIN, existing Mazer, future Fitness after gates, with DiscordOS embedded.
 
@@ -186,10 +192,11 @@ The development program must:
 - replace ChatGPT- and Codex-dependent capabilities with Cortex-owned
   capabilities to the highest degree that current evidence, safety, quality,
   cost, and maintainability justify
-- move Vercel- and Supabase-dependent platform capabilities into Lifeline and
-  Foundation to the highest justified degree, while retaining external services
-  as governed adapters until parity, reliability, security, observability,
-  migration, rollback, and cost evidence support replacement
+- keep public callback and durable state capabilities on their proven hosted
+  owners while keeping Lifeline local and Foundation read-only; any future
+  replacement of Vercel or Supabase requires explicit parity, reliability,
+  security, observability, migration, rollback, and cost evidence rather than
+  shifting authority into Lifeline or Foundation by default
 - preserve local-first operation, GitHub-backed collaboration and recovery, and
   deterministic receipts across every migration
 - keep Fitness and Mazer feature development in their standing owner tasks while

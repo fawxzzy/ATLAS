@@ -29,9 +29,9 @@ class ProjectBoardOwnerExportTests(unittest.TestCase):
         atlas = exports["atlas"]
         cortex = exports["cortex"]
 
-        self.assertEqual(len(atlas["cards"]), 31)
+        self.assertEqual(len(atlas["cards"]), 34)
         self.assertEqual(atlas["extensions"]["selection"]["marker_parent_count"], 6)
-        self.assertEqual(atlas["extensions"]["selection"]["direct_lane_count"], 10)
+        self.assertEqual(atlas["extensions"]["selection"]["direct_lane_count"], 13)
         self.assertEqual(atlas["extensions"]["selection"]["governance_backlog_count"], 15)
         self.assertEqual(
             atlas["extensions"]["selection"]["backlog_owner_allowlist"],

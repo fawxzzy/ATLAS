@@ -191,6 +191,48 @@ class ValidateStackMutableStateRulesTests(unittest.TestCase):
         self.assertEqual(set(), suppressed_paths)
         self.assertEqual([], calls)
 
+    def test_generated_state_cleanup_hook_can_reuse_report_without_mutating_repo(self) -> None:
+        temp_dir = tempfile.TemporaryDirectory()
+        self.addCleanup(temp_dir.cleanup)
+        root = Path(temp_dir.name)
+        (root / "node_modules").mkdir(parents=True, exist_ok=True)
+        report_path = root / "cleanup-report.json"
+        report_path.write_text(
+            """{
+  "retained_paths": [
+    {
+      "path": "node_modules",
+      "suppress_validation_warning": true
+    }
+  ]
+}
+""",
+            encoding="utf-8",
+        )
+        calls: list[str] = []
+
+        cleanup_findings, suppressed_paths = apply_repo_generated_state_cleanup(
+            repo_id="playbook",
+            repo_path=root,
+            repo_rel="repos/playbook",
+            repo_info={
+                "validation": {
+                    "generated_state_cleanup": {
+                        "command": "npm run cleanup:repo:validation",
+                        "report_path": "cleanup-report.json",
+                        "paths": ["node_modules"],
+                    }
+                }
+            },
+            execute=False,
+            run_command=lambda command, **_kwargs: calls.append(command),
+        )
+
+        self.assertEqual([], cleanup_findings)
+        self.assertEqual({"node_modules"}, suppressed_paths)
+        self.assertEqual([], calls)
+        self.assertTrue((root / "node_modules").exists())
+
     def test_generated_state_cleanup_hook_reports_failure(self) -> None:
         temp_dir = tempfile.TemporaryDirectory()
         self.addCleanup(temp_dir.cleanup)

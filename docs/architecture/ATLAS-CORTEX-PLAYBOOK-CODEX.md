@@ -18,8 +18,11 @@ Use this file to answer four questions:
 | Component | Current role | Owns | Must not own |
 | --- | --- | --- | --- |
 | `ATLAS` | stack root and stack contract | stack map, path policy, stack docs, stack validators, export and bootstrap tooling | repo business logic, background orchestration, hidden memory |
-| `CORTEX` | root-owned read-only coordination subsystem under `runtime/cortex/**` | event schemas, query/runtime catalogs, read-only supervisor logic, future coordination logic once proven | stack truth, repo policy truth, direct authority to rewrite repos by default |
+| `Foundation` | hosted read-only portfolio surface | public stack presentation | private operator cockpit, action routing, owner truth |
+| `DiscordOS` | hosted Discord API and logical writer | Vercel edge, Supabase-backed writer state, bounded GitHub Actions polling | ATLAS governance, Playbook doctrine, a second writer |
+| `CORTEX` | event-triggered root-owned read-only artifacts under `runtime/cortex/**` | event schemas, query/runtime catalogs, advisory read models, on-demand supervisor logic | stack truth, a competing daemon or scheduler, direct authority to rewrite repos |
 | `Playbook` | deterministic repo runtime and governance layer | repo-local context, repo validation, repo doctrine, repo-facing automation contracts | stack-wide filesystem truth, global orchestration state |
+| `Lifeline` | intended local supervisor for Playbook Observer | loopback process supervision, logs, bounded restart, current-user logon restore | hosted platform, public control plane, stack doctrine |
 | `Codex` | session executor | setup, migration, validation, refactors, docs, targeted edits, receipts produced during a session | hidden daemon behavior, durable system memory without an explicit file contract |
 
 ## What Belongs To Each Component
@@ -44,7 +47,7 @@ The Atlas platform-layer doctrine itself is canonical in `repos/fawxzzy-atlas/RE
 
 - read-only runtime/query/catalog state under `runtime/cortex/**`
 - portable event and observation schemas
-- a read-only worker supervisor that consumes explicit worker artifacts
+- on-demand read-model and supervisor logic that consumes explicit worker artifacts
 - future coordination logic only when it remains file-contract based
 
 ### CORTEX may eventually own
@@ -105,6 +108,11 @@ ATLAS may expose:
 CORTEX may read those files and make recommendations. It should not silently become a second source of truth for stack boundaries.
 
 The active Cortex surface lives under `runtime/cortex/**`. It is not a repo-local execution surface and it must remain read-only unless a future contract explicitly expands it.
+
+Active means the root-owned implementation/artifact surface is canonical. It
+does not mean a continuously running Cortex process. Cortex refreshes after
+accepted state changes or digests and must not become a competing daemon or
+scheduler.
 
 CORTEX may promote a default advisory consumer contract for `_stack`, but only as an explicit artifact-ref handoff. That does not grant automatic dispatch, execution authority, owner-truth mutation, transcript scraping, or Lifeline final receipt authority.
 
@@ -173,6 +181,27 @@ It can become one only after all of the following are true:
 4. it does not require hidden local state to reproduce decisions
 
 Until then, CORTEX stays a read-only supervisor and query/runtime surface, not the current controller.
+
+## Runtime Placement Boundary
+
+The canonical component-level placement and availability contract is
+`docs/registry/ATLAS-RUNTIME-PLACEMENT-REGISTRY.v1.json`; the Atlas Book human
+projection is `docs/atlas-book/16-runtime-placement.md`.
+
+Current boundary:
+
+- no new general-purpose ATLAS server
+- Foundation remains the hosted read-only portfolio
+- DiscordOS remains the hosted Vercel/Supabase/GitHub Actions writer runtime
+- Playbook Observer is the private loopback cockpit on `127.0.0.1:4300`
+- Lifeline is the intended local supervisor and logon restoration mechanism
+- `_stack` gets one future serialized bounded scheduled sweep, not permanent pollers
+- ATLAS root, Cortex, Atlas Book, contracts, registries, Socials OS, and Playbook CLI stay on demand or in owner lanes
+
+Observed on 2026-07-15, Foundation and DiscordOS are hosted and operational.
+Playbook Observer and Lifeline are unavailable locally, `_stack` has no
+scheduled worker, and the principal Cortex `latest` read models are stale.
+Implementation presence is not activation proof.
 
 ## Safe Integration Pattern
 
