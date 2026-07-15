@@ -1,0 +1,173 @@
+{
+  "contract_version": "atlas.project-board.owner-export.v1",
+  "export_id": "pbe_cortex_752128d6b82e",
+  "project_id": "cortex",
+  "board_id": "discordos:project-feedback:cortex",
+  "owner": "stack-root",
+  "adapter_id": "atlas-full-system-registry-v1",
+  "source_revision": "sha256:752128d6b82e81be8bb8514302e5cf79f578a7db612c301f28d9bbf0aed767b5",
+  "generated_at": "2026-07-15T02:29:06Z",
+  "sources": [
+    {
+      "source_id": "atlas-full-system-registry",
+      "kind": "json",
+      "repository": "atlas-root",
+      "path": "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json",
+      "revision": "sha256:d3fd6ee52a12b8e4e3aa25cd1438b076781609091a45890207769ad20c4bb991",
+      "observed_at": "2026-07-15T02:29:06Z"
+    },
+    {
+      "source_id": "atlas-marker-book",
+      "kind": "markdown",
+      "repository": "atlas-root",
+      "path": "docs/atlas-book/02-lanes-and-markers.md",
+      "revision": "sha256:35c2f27b5e20b6100ad02ddc841ef385b2464a6a671ab93a037f0209649b30bb",
+      "observed_at": "2026-07-15T02:29:06Z"
+    }
+  ],
+  "cards": [
+    {
+      "idempotency_key": "pbk_cortex_lane-cortex-boundary-decision_v1",
+      "record_kind": "project-work",
+      "record_status": "candidate",
+      "record": {
+        "contract_version": "atlas.card-record.v2",
+        "card_id": "lane-cortex-boundary-decision",
+        "project_id": "cortex",
+        "board_id": "discordos:project-feedback:cortex",
+        "title": "Cortex boundary decision",
+        "description": "Decide root-owned embedded Cortex versus remote repository authority.",
+        "card_type": "architecture",
+        "lifecycle": "planning",
+        "priority": null,
+        "owner": "stack-root",
+        "dependencies": [],
+        "board_version": 1,
+        "updated_at": "2026-07-15T02:29:06Z",
+        "source_ref": "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json#lane-cortex-boundary-decision",
+        "extensions": {
+          "source_section": "backlog_candidates",
+          "source_classification": "github-follow-up-architecture",
+          "source_status": "candidate",
+          "measurement_unit": "authority decision",
+          "percentage": null,
+          "completed_units": null,
+          "denominator": {
+            "kind": "decisions",
+            "value": 1,
+            "basis": "one unresolved Cortex boundary"
+          },
+          "projection_role": "root-owned-subsystem",
+          "seed_disposition": "current"
+        }
+      },
+      "source": {
+        "source_id": "atlas-full-system-registry",
+        "source_ref": "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json#lane-cortex-boundary-decision",
+        "source_status": "current",
+        "source_updated_at": "2026-07-15T02:29:06Z"
+      },
+      "content": {
+        "summary": "Decide root-owned embedded Cortex versus remote repository authority.",
+        "objective": "Decide root-owned embedded Cortex versus remote repository authority.",
+        "acceptance_criteria": [
+          "Accepted decision names source, migration, and archive posture"
+        ],
+        "discoveries": [
+          "Priority is unresolved in the owner source and remains explicitly null."
+        ],
+        "next_actions": [],
+        "blockers": [],
+        "evidence": [
+          "docs/audits/ATLAS-FULL-SYSTEM-OPENING-AUDIT-2026-07-12.md"
+        ]
+      },
+      "relationships": {
+        "parent_card_id": "lane-cortex-context-synthesis",
+        "duplicate_of": null,
+        "superseded_by": null
+      }
+    },
+    {
+      "idempotency_key": "pbk_cortex_lane-cortex-context-synthesis_v1",
+      "record_kind": "marker",
+      "record_status": "candidate",
+      "record": {
+        "contract_version": "atlas.card-record.v2",
+        "card_id": "lane-cortex-context-synthesis",
+        "project_id": "cortex",
+        "board_id": "discordos:project-feedback:cortex",
+        "title": "Cortex context and synthesis",
+        "description": "Refresh Cortex read models, implement contract-frozen chat synthesis, and resolve the local-versus-remote boundary.",
+        "card_type": "architecture",
+        "lifecycle": "planning",
+        "priority": null,
+        "owner": "stack-root",
+        "dependencies": [
+          "lane-cortex-boundary-decision"
+        ],
+        "board_version": 1,
+        "updated_at": "2026-07-15T02:29:06Z",
+        "source_ref": "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json#lane-cortex-context-synthesis",
+        "extensions": {
+          "source_section": "lanes",
+          "source_classification": "advisory-runtime",
+          "source_status": "candidate",
+          "measurement_unit": "accepted behavior",
+          "percentage": null,
+          "completed_units": null,
+          "denominator": {
+            "kind": "behaviors",
+            "value": 4,
+            "basis": "fresh context, routing, chat synthesis, authority boundary"
+          },
+          "projection_role": "root-owned-subsystem",
+          "seed_disposition": "current"
+        }
+      },
+      "source": {
+        "source_id": "atlas-full-system-registry",
+        "source_ref": "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json#lane-cortex-context-synthesis",
+        "source_status": "current",
+        "source_updated_at": "2026-07-15T02:29:06Z"
+      },
+      "content": {
+        "summary": "Refresh Cortex read models, implement contract-frozen chat synthesis, and resolve the local-versus-remote boundary.",
+        "objective": "Refresh Cortex read models, implement contract-frozen chat synthesis, and resolve the local-versus-remote boundary.",
+        "acceptance_criteria": [
+          "Four behaviors have current executable proof",
+          "Remote authority is explicitly decided",
+          "Stale runtime surfaces are reconciled"
+        ],
+        "discoveries": [
+          "Priority is unresolved in the owner source and remains explicitly null.",
+          "This record is a non-executable marker parent; child outcomes remain separate."
+        ],
+        "next_actions": [],
+        "blockers": [],
+        "evidence": [
+          "ops/cortex",
+          "runtime/cortex",
+          "docs/architecture/ATLAS-CORTEX-PLAYBOOK-CODEX.md",
+          "docs/atlas-book/13-vision-and-endgames.md"
+        ]
+      },
+      "relationships": {
+        "parent_card_id": null,
+        "duplicate_of": null,
+        "superseded_by": null
+      }
+    }
+  ],
+  "extensions": {
+    "selection": {
+      "record_ids": [
+        "lane-cortex-context-synthesis",
+        "lane-cortex-boundary-decision"
+      ],
+      "total_record_count": 2
+    },
+    "priority_policy": "preserve-unknown-as-null",
+    "discord_mutation_authorized": false
+  }
+}

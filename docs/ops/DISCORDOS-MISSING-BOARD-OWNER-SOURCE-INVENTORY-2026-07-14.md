@@ -15,11 +15,11 @@ guessing.
 
 | Project | Current source evidence | Candidate records | Admission state | Blocking reason codes |
 | --- | --- | ---: | --- | --- |
-| Atlas | `docs/atlas-book/02-lanes-and-markers.md` and `docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json` | 33 provisional: 7 marker parents, 10 direct lanes, 16 unsplit governance records | Partial; root export required | `DUPLICATE_PARENT_CHILD`, `STALE_STATUS_CONFLICT`, `MISSING_PRIORITY` |
+| Atlas | `docs/registry/project-board-owner-exports/atlas.project-board.owner-export.v1.json`, projected deterministically from the Atlas Book and full-system registry | 33 contract-valid records: 7 non-executable marker parents, 10 direct lanes, 16 root-governance backlog records | Owner export implemented; DiscordOS admission and seeding remain pending | `BOARD_UNADMITTED`, `DISCORD_FORUM_MISSING`, `SEED_NOT_EXECUTED` |
 | DiscordOS | No accepted owner-repo work export; five Atlas-attributed candidates exist outside the owner repo | 0 owner records; 5 Atlas candidates | Blocked | `NO_OWNER_WORK_EXPORT`, `OWNER_CHECKOUT_STALE`, `ATLAS_ONLY_CANDIDATES` |
 | Foundation | `repos/foundation/docs/roadmap/FOUNDATION_ROADMAP.md` | 5 explicit active Next items and 1 Atlas candidate | Partial; owner export required | `UNKEYED_MARKDOWN`, `MIXED_LIFECYCLE_PROSE`, `ROOT_CANDIDATE_UNADMITTED` |
 | Lifeline | `repos/lifeline/.playbook/plan.json` and owner README | 1 underspecified next milestone; machine plan has 0 tasks | Blocked | `EMPTY_MACHINE_PLAN`, `UNKEYED_NEXT_MILESTONE`, `STALE_ROOT_INITIATIVE_CONFLICT` |
-| Cortex | Root subsystem registry and Atlas planning sources | 2 candidates | Partial; root-owned subsystem export required | `ROOT_OWNED_SUBSYSTEM`, `MANIFEST_STATUS_CONFLICT`, `HELD_NO_IMMEDIATE_PACKET` |
+| Cortex | `docs/registry/project-board-owner-exports/cortex.project-board.owner-export.v1.json`, projected deterministically from the root subsystem registry and Atlas planning source | 2 contract-valid root-owned subsystem records | Owner export implemented; DiscordOS admission and seeding remain pending | `BOARD_UNADMITTED`, `DISCORD_FORUM_MISSING`, `SEED_NOT_EXECUTED` |
 | `_stack` | `repos/_stack/queue/README.md` plus Atlas candidates | 0 owner queue records; 5 Atlas candidates | Blocked | `READY_EMPTY_OWNER_QUEUE`, `ATLAS_CANDIDATES_UNADMITTED` |
 | Playbook | `repos/playbook/exports/playbook.project-board.owner-export.v1.json`, projected deterministically from `repos/playbook/docs/roadmap/ROADMAP.json` | 35 non-complete features: 11 in progress, 8 planned, 6 planned later, 6 dependency blocked, 3 directional, 1 architecture-defined | Owner export merged and contract-valid; DiscordOS admission and seeding remain pending | `BOARD_UNADMITTED`, `DISCORD_FORUM_MISSING`, `SEED_NOT_EXECUTED` |
 
@@ -49,10 +49,12 @@ cards unless the parent is explicitly modeled as an epic.
 
 ### Atlas and Cortex
 
-Atlas root owns both exports. The Atlas export must reconcile the marker table
-with the machine-readable full-system registry before assigning priorities or
-card identities. Cortex remains a root-owned subsystem; an unresolved remote
-repository is not owner authority.
+Atlas root owns both exports. The deterministic adapter now reconciles the
+marker table with the machine-readable full-system registry before assigning
+card identities. The accepted GitHub `8 / 8 = 100%` closeout is synchronized
+into the registry, unknown priorities remain explicit `null`, and parent
+markers remain non-executable. Cortex remains a root-owned subsystem; an
+unresolved remote repository is not owner authority.
 
 ### DiscordOS
 
@@ -99,8 +101,8 @@ live readback.
 
 1. Retain the implemented shared owner-export schema and validator in Atlas
    Contracts.
-2. Implement the Atlas/Cortex root-owned aggregation adapter; retain the merged
-   Playbook canonical-owner-JSON adapter as the second proof class.
+2. Retain the implemented Atlas/Cortex root-owned aggregation adapter and the
+   merged Playbook canonical-owner-JSON adapter as two accepted proof classes.
 3. Implement Foundation, Lifeline, `_stack`, and DiscordOS adapters only after
    their owner-source blockers are resolved.
 4. Validate every export without Discord mutation.

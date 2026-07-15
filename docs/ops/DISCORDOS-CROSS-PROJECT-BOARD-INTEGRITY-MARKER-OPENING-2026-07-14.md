@@ -94,6 +94,10 @@ includes:
 - the Playbook canonical owner export merged through Playbook pull request
   `#24` at `8796b335`, publishing 35 contract-valid non-complete roadmap
   records with a cross-platform-stable source revision;
+- the Atlas/Cortex root adapter now publishes `33` Atlas records and `2`
+  Cortex records through contract-valid deterministic exports under
+  `docs/registry/project-board-owner-exports/`, preserves unknown priority as `null`,
+  and prevents marker parents from becoming executable cards;
 - Unicode prevention and exact readback merged through DiscordOS pull requests
   `#76` and `#77`;
 - a complete post-merge scan showing `0` current/actionable text findings while
