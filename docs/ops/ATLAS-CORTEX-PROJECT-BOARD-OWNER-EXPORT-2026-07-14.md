@@ -9,16 +9,17 @@ forum by itself.
 
 The Atlas source inventory's provisional count is now deterministic:
 
-- `17` top-level registry lanes;
-- `7` of those lanes are non-executable marker parents for selected child
+- `16` Atlas-board top-level registry lanes after dedicated Cortex routing;
+- `6` of those lanes are non-executable marker parents for selected child
   outcomes;
 - `10` are direct top-level lanes; and
-- `16` backlog records are root-governance records selected by an explicit
+- `15` backlog records are root-governance records selected by an explicit
   owner allowlist.
 
-The resulting Atlas export contains `33` records. The Cortex export contains
+The resulting Atlas export contains `31` records. The Cortex export contains
 the two root-owned subsystem records `lane-cortex-context-synthesis` and
-`lane-cortex-boundary-decision`.
+`lane-cortex-boundary-decision`. Those two stable card identities are excluded
+from the Atlas coordination export so every card has one authoritative board.
 
 ## Source Reconciliation
 
@@ -32,11 +33,11 @@ with the machine registry. The registry now carries that verified closeout and
 retains the daily GitHub watch as volatile health rather than reopening the
 completed implementation marker.
 
-Owner-repository implementation records remain excluded from the Atlas
+Owner-repository implementation records and dedicated Cortex projections remain excluded from the Atlas
 governance backlog selection. Playbook, `_stack`, DiscordOS, Fitness, Mazer,
 Foundation, and other owners must publish or accept work through their own
-adapters. Cortex is the explicit exception because it remains a root-owned
-subsystem.
+adapters. Cortex remains root-owned, but its records route only to the Cortex
+board rather than being duplicated onto the Atlas board.
 
 ## Determinism And Safety
 

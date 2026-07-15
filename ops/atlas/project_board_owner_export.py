@@ -306,15 +306,18 @@ def build_project_board_owner_exports(
     generated_at = _utc_timestamp(registry.get("generated_at"), field_name="registry.generated_at")
 
     top_lanes = list(registry["lanes"])
+    atlas_top_lanes = [record for record in top_lanes if record.get("id") not in CORTEX_RECORD_IDS]
     atlas_backlog = [
-        record for record in registry["backlog_candidates"] if record.get("owner") in ATLAS_GOVERNANCE_BACKLOG_OWNERS
+        record
+        for record in registry["backlog_candidates"]
+        if record.get("owner") in ATLAS_GOVERNANCE_BACKLOG_OWNERS and record.get("id") not in CORTEX_RECORD_IDS
     ]
     atlas_parent_ids = {str(record["parent_lane_id"]) for record in atlas_backlog if record.get("parent_lane_id")}
-    top_ids = {str(record["id"]) for record in top_lanes}
+    top_ids = {str(record["id"]) for record in atlas_top_lanes}
     missing_parents = sorted(atlas_parent_ids - top_ids)
     if missing_parents:
         raise ProjectBoardOwnerExportError(f"Atlas governance backlog references missing parents: {missing_parents}")
-    atlas_records = [("lanes", record) for record in top_lanes] + [
+    atlas_records = [("lanes", record) for record in atlas_top_lanes] + [
         ("backlog_candidates", record) for record in atlas_backlog
     ]
 
@@ -330,7 +333,7 @@ def build_project_board_owner_exports(
     revision = _source_revision(registry_bytes, marker_bytes)
     registry_revision = _sha256(registry_bytes)
     marker_revision = _sha256(marker_bytes)
-    atlas_direct_count = sum(1 for record in top_lanes if record["id"] not in atlas_parent_ids)
+    atlas_direct_count = sum(1 for record in atlas_top_lanes if record["id"] not in atlas_parent_ids)
 
     return {
         "atlas": _build_envelope(
@@ -344,12 +347,13 @@ def build_project_board_owner_exports(
             projection_role="stack-coordination",
             extensions={
                 "selection": {
-                    "top_level_lane_count": len(top_lanes),
+                    "top_level_lane_count": len(atlas_top_lanes),
                     "marker_parent_count": len(atlas_parent_ids),
                     "direct_lane_count": atlas_direct_count,
                     "governance_backlog_count": len(atlas_backlog),
                     "total_record_count": len(atlas_records),
                     "backlog_owner_allowlist": sorted(ATLAS_GOVERNANCE_BACKLOG_OWNERS),
+                    "dedicated_subsystem_record_ids": list(CORTEX_RECORD_IDS),
                 },
                 "priority_policy": "preserve-unknown-as-null",
                 "discord_mutation_authorized": False,
