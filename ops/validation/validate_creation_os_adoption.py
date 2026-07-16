@@ -7,6 +7,7 @@ import argparse
 import hashlib
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Any
@@ -37,6 +38,14 @@ REQUIRED_CANDIDATE_IDS = (
 )
 
 CANONICAL_REFS = (
+    "data/knowledge-candidates/README.md",
+    "data/knowledge-candidates/creation-os/creation-os-bootstrap-pointer-not-memory.knowledge-candidate.v2.json",
+    "data/knowledge-candidates/creation-os/creation-os-builder-creative-loop-separation.knowledge-candidate.v2.json",
+    "data/knowledge-candidates/creation-os/creation-os-human-directed-authority.knowledge-candidate.v2.json",
+    "data/knowledge-candidates/creation-os/creation-os-infrastructure-shopping-before-wedge.knowledge-candidate.v2.json",
+    "data/knowledge-candidates/creation-os/creation-os-platform-surface-vertical-contracts.knowledge-candidate.v2.json",
+    "data/knowledge-candidates/creation-os/creation-os-xr-device-novelty-trap.knowledge-candidate.v2.json",
+    "data/knowledge-candidates/creation-os/manifest.v1.json",
     "data/imports/creation-os/deep-research-2026-07-16/.gitattributes",
     "data/imports/creation-os/deep-research-2026-07-16/IMPORT-MANIFEST.json",
     "docs/audits/ATLAS-CREATION-OS-RESEARCH-RECONCILIATION-2026-07-16.md",
@@ -45,6 +54,8 @@ CANONICAL_REFS = (
     "docs/atlas-book/README.md",
     "docs/atlas-book/17-creation-os-target-architecture.md",
     "docs/atlas/decisions/adr-signed-versioned-atlas-bootstrap-manifest.md",
+    "docs/ops/ATLAS-CREATION-OS-CORTEX-ADVISORY-REFRESH-HANDOFF-2026-07-16.md",
+    "docs/ops/ATLAS-CREATION-OS-PLAYBOOK-CANDIDATE-INTAKE-HANDOFF-2026-07-16.md",
     "docs/ops/ATLAS-CREATION-OS-PLAYBOOK-PROMOTION-CANDIDATES-2026-07-16.md",
     "docs/registry/project-board-owner-exports/atlas.project-board.owner-export.v1.json",
     "docs/registry/project-board-owner-exports/cortex.project-board.owner-export.v1.json",
@@ -292,6 +303,45 @@ def _validate_book_integration(errors: list[str]) -> None:
             errors.append(f"Atlas Book README does not include chapter {number}: {filename}")
 
 
+def _validate_knowledge_candidate_projection(errors: list[str]) -> None:
+    command = [
+        "node",
+        "ops/atlas/creation_os_knowledge_candidates.mjs",
+        "--check",
+        "--json",
+    ]
+    try:
+        result = subprocess.run(
+            command,
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            check=False,
+            timeout=30,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        errors.append(f"Creation OS KnowledgeCandidate check could not run: {exc}")
+        return
+    if result.returncode == 0:
+        try:
+            payload = json.loads(result.stdout)
+        except json.JSONDecodeError as exc:
+            errors.append(f"Creation OS KnowledgeCandidate check returned unreadable JSON: {exc}")
+            return
+        if (
+            payload.get("status") != "ok"
+            or payload.get("candidate_count") != 6
+            or payload.get("deferred_decision_count") != 1
+            or payload.get("byte_stable") is not True
+            or payload.get("owner_repository_outputs") != 0
+        ):
+            errors.append("Creation OS KnowledgeCandidate check returned an invalid success summary")
+        return
+    detail = result.stderr.strip() or result.stdout.strip() or "command failed without output"
+    errors.append(f"Creation OS KnowledgeCandidate check failed: {detail}")
+
+
 def validate(source: Path | None) -> list[str]:
     errors: list[str] = []
     manifest = _load_json(MANIFEST_PATH, errors)
@@ -305,6 +355,7 @@ def validate(source: Path | None) -> list[str]:
     _validate_ascii_and_residue(errors)
     _validate_markdown_links(errors)
     _validate_book_integration(errors)
+    _validate_knowledge_candidate_projection(errors)
     return errors
 
 
