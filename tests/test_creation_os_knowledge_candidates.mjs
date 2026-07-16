@@ -13,6 +13,7 @@ import {
   checkProjection,
   normalizeSourceBytes,
   projectionDigest,
+  writeProjection,
 } from "../ops/atlas/creation_os_knowledge_candidates.mjs";
 
 test("normalizes source bytes to the canonical LF Git contract", () => {
@@ -111,5 +112,17 @@ test("rejects any owner-repository output target", async () => {
   await assert.rejects(
     () => assertProjectionInvariants({ ...projection, outputs }),
     /projection output escapes the root-owned boundary/,
+  );
+
+  const traversal = `${ARTIFACT_ROOT_REF}/../../../repos/playbook/forbidden.json`;
+  const traversalOutputs = new Map(projection.outputs);
+  traversalOutputs.set(traversal, Buffer.from("{}\n", "utf8"));
+  await assert.rejects(
+    () => assertProjectionInvariants({ ...projection, outputs: traversalOutputs }),
+    /projection output is not a portable relative path/,
+  );
+  await assert.rejects(
+    () => writeProjection({ outputs: new Map([[traversal, Buffer.from("{}\n", "utf8")]]) }),
+    /projection output is not a portable relative path/,
   );
 });

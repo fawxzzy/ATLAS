@@ -356,6 +356,38 @@ function candidateArtifactRef(id) {
   return `${ARTIFACT_ROOT_REF}/${id}.knowledge-candidate.v2.json`;
 }
 
+export function resolveProjectionOutput(root, ref) {
+  if (typeof ref !== "string" || ref === "" || ref.includes("\\")) {
+    fail(`projection output is not a portable relative path: ${ref}`);
+  }
+  const segments = ref.split("/");
+  if (path.posix.isAbsolute(ref)
+    || path.win32.isAbsolute(ref)
+    || path.posix.normalize(ref) !== ref
+    || segments.some((segment) => segment === "" || segment === "." || segment === "..")) {
+    fail(`projection output is not a portable relative path: ${ref}`);
+  }
+  const artifactRelative = path.posix.relative(ARTIFACT_ROOT_REF, ref);
+  const insideArtifactRoot = artifactRelative !== ""
+    && !artifactRelative.startsWith("../")
+    && artifactRelative !== ".."
+    && !path.posix.isAbsolute(artifactRelative);
+  const allowed = insideArtifactRoot
+    || ref === PLAYBOOK_HANDOFF_REF
+    || ref === CORTEX_HANDOFF_REF;
+  if (!allowed) fail(`projection output escapes the root-owned boundary: ${ref}`);
+
+  const resolvedRoot = path.resolve(root);
+  const target = path.resolve(resolvedRoot, ...segments);
+  const rootRelative = path.relative(resolvedRoot, target);
+  if (rootRelative === ""
+    || rootRelative.startsWith("..")
+    || path.isAbsolute(rootRelative)) {
+    fail(`projection output escapes the Atlas root: ${ref}`);
+  }
+  return target;
+}
+
 function buildCandidateManifestRecord(spec, artifactBytes) {
   const basis = {
     record_id: spec.id,
@@ -669,12 +701,10 @@ export async function assertProjectionInvariants(projection) {
     errors.push("deferred Decision cannot have a KnowledgeCandidate artifact");
   }
   for (const ref of projection.outputs.keys()) {
-    const portable = ref.replaceAll("\\", "/");
-    const allowed = portable.startsWith(`${ARTIFACT_ROOT_REF}/`)
-      || portable === PLAYBOOK_HANDOFF_REF
-      || portable === CORTEX_HANDOFF_REF;
-    if (!allowed || portable.startsWith("repos/")) {
-      errors.push(`projection output escapes the root-owned boundary: ${ref}`);
+    try {
+      resolveProjectionOutput(ROOT, ref);
+    } catch (error) {
+      errors.push(...(error.errors ?? [error.message]));
     }
   }
   if (errors.length > 0) fail(errors);
@@ -715,7 +745,7 @@ export function projectionDigest(projection) {
 
 export async function writeProjection(projection, { root = ROOT } = {}) {
   for (const [ref, bytes] of projection.outputs) {
-    const target = path.join(root, ref);
+    const target = resolveProjectionOutput(root, ref);
     await fs.mkdir(path.dirname(target), { recursive: true });
     await fs.writeFile(target, bytes);
   }
@@ -724,7 +754,13 @@ export async function writeProjection(projection, { root = ROOT } = {}) {
 export async function checkProjection(projection, { root = ROOT } = {}) {
   const errors = [];
   for (const [ref, expectedBytes] of projection.outputs) {
-    const target = path.join(root, ref);
+    let target;
+    try {
+      target = resolveProjectionOutput(root, ref);
+    } catch (error) {
+      errors.push(...(error.errors ?? [error.message]));
+      continue;
+    }
     let actualBytes;
     try {
       actualBytes = await fs.readFile(target);
