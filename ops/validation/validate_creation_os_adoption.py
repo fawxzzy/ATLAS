@@ -46,6 +46,8 @@ CANONICAL_REFS = (
     "docs/atlas-book/17-creation-os-target-architecture.md",
     "docs/atlas/decisions/adr-signed-versioned-atlas-bootstrap-manifest.md",
     "docs/ops/ATLAS-CREATION-OS-PLAYBOOK-PROMOTION-CANDIDATES-2026-07-16.md",
+    "docs/registry/project-board-owner-exports/atlas.project-board.owner-export.v1.json",
+    "docs/registry/project-board-owner-exports/cortex.project-board.owner-export.v1.json",
     "ops/atlas/test_project_board_owner_export.py",
     "ops/validation/validate_creation_os_adoption.py",
 )
@@ -205,25 +207,47 @@ def _validate_candidate_lanes(registry: dict[str, Any], errors: list[str]) -> No
                     errors.append(f"{lane_id} program_links.{key} is not a valid local ref: {value}")
 
 
-def _validate_ascii_and_residue(errors: list[str]) -> None:
+def _validate_canonical_text(ref: str, text: str, errors: list[str]) -> None:
     absolute_pattern = re.compile(r"(?:(?<![A-Za-z])[A-Za-z]:[\\/]|/" + "Users/|/" + "home/)")
+    try:
+        text.encode("ascii")
+    except UnicodeEncodeError as exc:
+        errors.append(f"canonical artifact is not ASCII: {ref}: {exc}")
+    if absolute_pattern.search(text):
+        errors.append(f"canonical artifact contains a machine-specific absolute path: {ref}")
+    for fragment in MOJIBAKE_FRAGMENTS:
+        if fragment in text:
+            errors.append(f"canonical artifact contains mojibake residue {fragment!r}: {ref}")
+    if any(0xE000 <= ord(char) <= 0xF8FF for char in text):
+        errors.append(f"canonical artifact contains private-use citation residue: {ref}")
+
+
+def _validate_ascii_and_residue(errors: list[str]) -> None:
     for ref in CANONICAL_REFS:
         path = ROOT / ref
         if not path.is_file():
             errors.append(f"canonical artifact missing: {ref}")
             continue
         try:
-            text = path.read_text(encoding="ascii")
+            text = path.read_text(encoding="utf-8")
         except (OSError, UnicodeDecodeError) as exc:
-            errors.append(f"canonical artifact is not ASCII: {ref}: {exc}")
+            errors.append(f"cannot read canonical artifact as UTF-8: {ref}: {exc}")
             continue
-        if absolute_pattern.search(text):
-            errors.append(f"canonical artifact contains a machine-specific absolute path: {ref}")
-        for fragment in MOJIBAKE_FRAGMENTS:
-            if fragment in text:
-                errors.append(f"canonical artifact contains mojibake residue {fragment!r}: {ref}")
-        if any(0xE000 <= ord(char) <= 0xF8FF for char in text):
-            errors.append(f"canonical artifact contains private-use citation residue: {ref}")
+        _validate_canonical_text(ref, text, errors)
+
+
+def _validate_candidate_registry_residue(registry: dict[str, Any], errors: list[str]) -> None:
+    records = registry.get("backlog_candidates")
+    if not isinstance(records, list):
+        return
+    by_id = {record.get("id"): record for record in records if isinstance(record, dict)}
+    registry_ref = REGISTRY_PATH.relative_to(ROOT).as_posix()
+    for lane_id in REQUIRED_CANDIDATE_IDS:
+        record = by_id.get(lane_id)
+        if not isinstance(record, dict):
+            continue
+        text = json.dumps(record, ensure_ascii=False, sort_keys=True)
+        _validate_canonical_text(f"{registry_ref}#{lane_id}", text, errors)
 
 
 def _validate_markdown_links(errors: list[str]) -> None:
@@ -277,6 +301,7 @@ def validate(source: Path | None) -> list[str]:
         _validate_derived_refs(manifest, errors)
     if isinstance(registry, dict):
         _validate_candidate_lanes(registry, errors)
+        _validate_candidate_registry_residue(registry, errors)
     _validate_ascii_and_residue(errors)
     _validate_markdown_links(errors)
     _validate_book_integration(errors)
