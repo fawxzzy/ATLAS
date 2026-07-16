@@ -81,6 +81,31 @@ class AtlasTopologyContractTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Unauthorized topology operational identity"):
             resolve_topology_app_identity(broken, "fawxzzy-trove")
 
+    def test_coordinated_app_and_service_key_rename_fails_closed(self) -> None:
+        manifest = json.loads(default_manifest_path().read_text(encoding="utf-8"))
+        broken = deepcopy(manifest)
+        trove = next(app for app in broken["apps"] if app["app_id"] == "trove")
+        trove["app_id"] = "fawxzzy-trove"
+        rule = next(rule for rule in broken["hostname_rules"] if rule["rule_id"] == "trove-prod")
+        rule["rule_id"] = "fawxzzy-trove-prod"
+        rule["app_id"] = "fawxzzy-trove"
+        rule["service_key_template"] = "fawxzzy-trove/prod"
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manifest_path = Path(temp_dir) / "renamed-topology-manifest.json"
+            manifest_path.write_text(json.dumps(broken, indent=2) + "\n", encoding="utf-8")
+            _, _, issues = validate_contract_files(
+                manifest_path=manifest_path,
+                schema_path=default_schema_path(),
+                stack_file=ROOT / "stack.yaml",
+            )
+
+        categories = {issue.category for issue in issues}
+        self.assertIn("atlas-topology-app-identity-binding", categories)
+        self.assertIn("atlas-topology-hostname-rules", categories)
+        with self.assertRaisesRegex(ValueError, "Unauthorized topology app identity binding"):
+            resolve_topology_app_identity(broken, "fawxzzy-trove")
+
     def test_operator_identity_without_stack_authority_is_rejected(self) -> None:
         manifest = json.loads(default_manifest_path().read_text(encoding="utf-8"))
         broken = deepcopy(manifest)

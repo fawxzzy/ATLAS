@@ -326,6 +326,28 @@ class ValidateStackQuarantinePolicyTests(unittest.TestCase):
         self.assertIn("archive-registry-invalid", {finding.category for finding in findings})
         self.assertTrue(any("duplicated" in finding.message for finding in findings))
 
+    def test_parent_traversal_archive_registry_path_fails_closed(self) -> None:
+        root = self._temp_root()
+        entries = self._current_archive_entries()
+        entries[0] = dict(entries[0])
+        entries[0]["path"] = "../outside.zip"
+        self._write_archive_registry(root, entries)
+
+        findings = validate_archive_registry(root / "stack.yaml", self._config())
+
+        self.assertIn("archive-registry-path-outside-root", {finding.category for finding in findings})
+
+    def test_absolute_out_of_root_archive_registry_path_fails_closed(self) -> None:
+        root = self._temp_root()
+        entries = self._current_archive_entries()
+        entries[0] = dict(entries[0])
+        entries[0]["path"] = str(root.parent / "outside.zip")
+        self._write_archive_registry(root, entries)
+
+        findings = validate_archive_registry(root / "stack.yaml", self._config())
+
+        self.assertIn("archive-registry-path-outside-root", {finding.category for finding in findings})
+
     def test_release_eligible_raw_archive_fails(self) -> None:
         root = self._temp_root()
         (root / "repos" / "repo-backups").mkdir(parents=True, exist_ok=True)

@@ -180,10 +180,17 @@ def resolve_topology_app_identity(manifest: dict[str, Any], candidate: str) -> s
         app_id = app.get("app_id")
         if not isinstance(app_id, str) or not app_id:
             continue
+        stable_app_id = app_id
         accepted: set[str] = {app_id}
         projection = app.get("operational_identity")
         if projection is not None:
             repo_id = app.get("repo_id")
+            if not isinstance(repo_id, str) or app_id != repo_id:
+                raise ValueError(
+                    f"Unauthorized topology app identity binding for app '{app_id}'; "
+                    f"the stable app id is '{repo_id}'."
+                )
+            stable_app_id = repo_id
             try:
                 stack_identity = operational_identity_from_config(stack_config, str(repo_id))
             except OperationalIdentityError as exc:
@@ -207,7 +214,7 @@ def resolve_topology_app_identity(manifest: dict[str, Any], candidate: str) -> s
                 if isinstance(values, list):
                     accepted.update(value for value in values if isinstance(value, str) and value)
         if candidate in accepted:
-            matches.add(app_id)
+            matches.add(stable_app_id)
     if len(matches) != 1:
         raise ValueError(f"Unknown or ambiguous topology app identity: {candidate}")
     return next(iter(matches))
@@ -395,6 +402,15 @@ def validate_topology_manifest(
                 except OperationalIdentityError as exc:
                     issues.append(ContractIssue("error", "atlas-topology-operational-identity", path, str(exc)))
                 else:
+                    if app_id != repo_id:
+                        issues.append(
+                            ContractIssue(
+                                "error",
+                                "atlas-topology-app-identity-binding",
+                                path,
+                                f"An authorized operational identity for repo '{repo_id}' must keep stable app_id '{repo_id}'.",
+                            )
+                        )
                     expected_projection = _topology_identity_projection(stack_identity, repo_id)
                     if projection != expected_projection:
                         issues.append(
@@ -425,12 +441,12 @@ def validate_topology_manifest(
                             )
                         )
                     if expected_prod_mode == "intentional":
-                        intentional_product_rules[app_id] = {
+                        intentional_product_rules[repo_id] = {
                             "kind": "named",
                             "environment": "prod",
-                            "app_id": app_id,
+                            "app_id": repo_id,
                             "hostname_template": "{zone}",
-                            "service_key_template": f"{app_id}/prod",
+                            "service_key_template": f"{repo_id}/prod",
                             "default_hostname_mode": "intentional",
                         }
                 else:

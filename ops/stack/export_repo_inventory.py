@@ -17,6 +17,7 @@ from ops.cortex.index_working_memory import build_working_memory_catalog
 from ops.stack.generate_lockfile import (
     current_ref,
     current_remote,
+    declared_root_coordinate,
     default_lockfile_path,
     git_output,
     git_status_lines,
@@ -25,6 +26,7 @@ from ops.stack.generate_lockfile import (
     repo_is_git_root,
     repo_release_eligible,
     repo_trust_class,
+    resolve_declared_root_path,
 )
 
 REPO_INVENTORY_SCHEMA_VERSION = "atlas.stack.repo-inventory.v1"
@@ -213,11 +215,16 @@ def build_repo_inventory(
         loaded_lock = {}
 
     registry = stack_config.get("repo_registry", {}) if isinstance(stack_config.get("repo_registry"), dict) else {}
-    repo_paths = {
-        normalize_slashes(str(repo_info.get("path", ""))).strip(): str(repo_id)
-        for repo_id, repo_info in registry.items()
-        if isinstance(repo_info, dict) and isinstance(repo_info.get("path"), str)
-    }
+    repo_paths: dict[str, str] = {}
+    for repo_id, repo_info in registry.items():
+        if not isinstance(repo_info, dict) or not isinstance(repo_info.get("path"), str):
+            continue
+        coordinate = declared_root_coordinate(
+            repo_info["path"],
+            root=base_root,
+            label=f"repo_registry.{repo_id}.path",
+        )
+        repo_paths[coordinate] = str(repo_id)
     initiative_index, initiative_digest = _initiative_index(base_root, repo_paths)
     lock_components = loaded_lock.get("components", {}) if isinstance(loaded_lock.get("components"), dict) else {}
     lock_config = stack_config.get("stack_lock", {}) if isinstance(stack_config.get("stack_lock"), dict) else {}
@@ -227,7 +234,11 @@ def build_repo_inventory(
         repo_info = registry.get(repo_id)
         if not isinstance(repo_info, dict) or not isinstance(repo_info.get("path"), str):
             continue
-        repo_path = resolve_atlas_path(repo_info["path"], root=base_root)
+        coordinate, repo_path = resolve_declared_root_path(
+            repo_info["path"],
+            root=base_root,
+            label=f"repo_registry.{repo_id}.path",
+        )
         ignored_dirty_paths: set[str] = set()
         if repo_id == "stack" and repo_path == base_root:
             # The stack refresh writes these published surfaces itself, so they
@@ -252,7 +263,7 @@ def build_repo_inventory(
                 "logical_id": repo_id,
                 # Preserve the declared stack coordinate even when isolated
                 # generation reads repos through a local junction.
-                "local_path": normalize_slashes(repo_info["path"]),
+                "local_path": coordinate,
                 "operational_identity": identity_projection,
                 "role": str(lock_component.get("role", repo_info.get("role", ""))),
                 "playbook_adoption_status": str(
@@ -301,10 +312,15 @@ def build_repo_inventory(
         surface = excluded_surfaces_raw.get(surface_id)
         if not isinstance(surface, dict):
             continue
+        surface_coordinate = declared_root_coordinate(
+            str(surface.get("path", "")),
+            root=base_root,
+            label=f"stack.lock excluded surface {surface_id}",
+        )
         excluded_surfaces.append(
             {
                 "surface_id": surface_id,
-                "local_path": normalize_slashes(str(surface.get("path", ""))),
+                "local_path": surface_coordinate,
                 "present": bool(surface.get("present", False)),
                 "trust_class": str(surface.get("trust_class", "")),
                 "release_eligible": bool(surface.get("release_eligible", False)),

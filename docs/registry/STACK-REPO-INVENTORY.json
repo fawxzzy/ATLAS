@@ -3,7 +3,7 @@
   "stack_manifest_ref": "stack.yaml",
   "stack_manifest_digest": "sha256:e9f0e16fb6516e6a8694045d425ed61a6bcce5fb54dbc92afa3049088d5d788b",
   "stack_lock_ref": "stack.lock.yaml",
-  "stack_lock_digest": "sha256:089904a82efb067bfb6bde4cd68b3d7c95a51fbf3b9cd261ec382b2c0a7073db",
+  "stack_lock_digest": "sha256:f5425763d84c1f1bc0d48348aa6a47418c3a8c4215c75c2e2904abdb462f1c9a",
   "working_memory_digest": "sha256:6536c59dcfde11b0a4c180d6595adc8e6c59be34149ad512c1e3331462cf57f7",
   "published_refs": {
     "json": "docs/registry/STACK-REPO-INVENTORY.json",
@@ -27,7 +27,7 @@
       "playbook_adoption_owner_ref": "main",
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/_stack.git",
-      "pinned_commit": "7aed5495d2702a653e461549877d8fa77b3a33d2",
+      "pinned_commit": "40ab40f80ac914dd9bd59dbb64272be3ed1cf70f",
       "current_commit": "7aed5495d2702a653e461549877d8fa77b3a33d2",
       "pinned_ref_type": "branch",
       "pinned_ref": "main",
@@ -93,7 +93,7 @@
       "playbook_adoption_owner_ref": "",
       "status": "incubating",
       "remote_url": "https://github.com/fawxzzy/DiscordOS.git",
-      "pinned_commit": "38e881d4265206c2148caaeb6a6a457e3e5bcda8",
+      "pinned_commit": "876b30e17733b6cb3c3c89a667b5d546be09b4c6",
       "current_commit": "38e881d4265206c2148caaeb6a6a457e3e5bcda8",
       "pinned_ref_type": "branch",
       "pinned_ref": "main",
@@ -404,7 +404,7 @@
       "status": "unmanaged",
       "remote_url": "https://github.com/fawxzzy/socials-os.git",
       "pinned_commit": null,
-      "current_commit": "27fdd28c77971fe7caf3f5d0a86b33276514fc03",
+      "current_commit": "d9cc13717cf5e63a069bb46577a2267f9161396f",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
@@ -433,7 +433,7 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "0cdfb177106040edb44b0a10e8d8e0994a9dfad0",
+      "current_commit": "ba632f29cef71cafa9d448c9cda57d0d7ef14a41",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
@@ -673,5 +673,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:57a676fab1a65a62b3d22dc274c22aafd5a114ff2d2641818f2c65de09597b34"
+  "content_digest": "sha256:54c7a8e1d701a5b2f5a5c65cd994a33e2d3355770114bf3be1aa8f82929c9d16"
 }

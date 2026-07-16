@@ -8,7 +8,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from ops._atlas import atlas_relative, atlas_root, load_repo_registry, normalize_slashes
+from ops._atlas import atlas_relative, atlas_root, load_repo_registry, load_stack_config, normalize_slashes
+from ops.atlas.operational_identity import OperationalIdentityError, operational_identity_from_config
 from ops.cortex._artifacts import stable_json_digest, write_json
 
 QA_LLEL_VERSION = "1.0.0"
@@ -378,6 +379,41 @@ def validate_schema_metadata(schema: dict[str, Any], contract_version: str) -> l
     return errors
 
 
+def _repo_operational_identity(*, root: Path, repo_id: Any) -> tuple[dict[str, Any] | None, list[str]]:
+    if not isinstance(repo_id, str) or not repo_id.strip():
+        return None, []
+    config = load_stack_config(root / "stack.yaml")
+    registry = config.get("repo_registry", {})
+    repo_info = registry.get(repo_id) if isinstance(registry, dict) else None
+    if not isinstance(repo_info, dict) or "identity" not in repo_info:
+        return None, []
+    try:
+        return operational_identity_from_config(config, repo_id), []
+    except OperationalIdentityError as exc:
+        return None, [f"Operational identity authority for repo_id '{repo_id}' is invalid: {exc}"]
+
+
+def _validate_identity_projection_fields(
+    payload: dict[str, Any],
+    *,
+    root: Path,
+    repo_id: Any,
+) -> tuple[dict[str, Any] | None, list[str]]:
+    identity, errors = _repo_operational_identity(root=root, repo_id=repo_id)
+    if identity is None:
+        return None, errors
+    expected = {
+        "display_name": identity["display_name"],
+        "public_origin": identity["public_origin"],
+    }
+    for field, expected_value in expected.items():
+        if payload.get(field) != expected_value:
+            errors.append(
+                f"{field} for repo_id '{repo_id}' must exactly project stack.yaml identity value '{expected_value}'."
+            )
+    return identity, errors
+
+
 def validate_scenario_manifest(
     payload: dict[str, Any],
     *,
@@ -391,6 +427,8 @@ def validate_scenario_manifest(
         if not isinstance(value, str) or not value.strip():
             errors.append(f"{key} must be a non-empty string.")
     repo_path = payload.get("repo_path")
+    repo_id = payload.get("repo_id")
+    registry = load_repo_registry(root=root)
     if (
         require_repo_path_exists
         and isinstance(repo_path, str)
@@ -398,6 +436,22 @@ def validate_scenario_manifest(
         and not resolve_ref(repo_path, root=root).exists()
     ):
         errors.append(f"repo_path does not exist: {repo_path}")
+    if isinstance(repo_id, str) and repo_id in registry and isinstance(repo_path, str):
+        if normalize_slashes(repo_path) != registry[repo_id].atlas_path:
+            errors.append(f"repo_path for repo_id '{repo_id}' must match stack.yaml.")
+    identity, identity_errors = _validate_identity_projection_fields(
+        payload,
+        root=root,
+        repo_id=repo_id,
+    )
+    errors.extend(identity_errors)
+    if identity is not None:
+        title = payload.get("title")
+        expected_prefix = f"{identity['display_name']} "
+        if not isinstance(title, str) or not title.startswith(expected_prefix):
+            errors.append(
+                f"title for repo_id '{repo_id}' must begin with canonical display name '{identity['display_name']}'."
+            )
     criticality = payload.get("criticality")
     if criticality not in {"low", "medium", "high", "critical"}:
         errors.append("criticality must be one of: low, medium, high, critical.")
@@ -408,6 +462,10 @@ def validate_scenario_manifest(
         path_value = entrypoint.get("path")
         if not isinstance(path_value, str) or not path_value.strip():
             errors.append("entrypoint.path must be a non-empty string.")
+        if identity is not None and entrypoint.get("preview_url_ref") != identity["public_origin"]:
+            errors.append(
+                f"entrypoint.preview_url_ref for repo_id '{repo_id}' must exactly project stack.yaml public origin '{identity['public_origin']}'."
+            )
     proof = payload.get("proof")
     if not isinstance(proof, dict):
         errors.append("proof must be an object.")
@@ -843,6 +901,12 @@ def validate_adapter_manifest(
     if isinstance(repo_id, str) and repo_id in registry and isinstance(repo_path, str):
         if normalize_slashes(repo_path) != registry[repo_id].atlas_path:
             errors.append(f"repo_path for repo_id '{repo_id}' must match stack.yaml.")
+    _, identity_errors = _validate_identity_projection_fields(
+        payload,
+        root=root,
+        repo_id=repo_id,
+    )
+    errors.extend(identity_errors)
     commands = payload.get("commands")
     if not isinstance(commands, dict):
         errors.append("commands must be an object.")

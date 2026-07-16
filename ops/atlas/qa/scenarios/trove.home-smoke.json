@@ -3,6 +3,8 @@
   "scenario_id": "trove.home-smoke",
   "title": "FawxzzyWeb homepage smoke",
   "summary": "Root-owned QA contract for the FawxzzyWeb homepage visual smoke lane; stable QA and repo ids remain trove-based.",
+  "display_name": "FawxzzyWeb",
+  "public_origin": "https://fawxzzy.com",
   "repo_id": "trove",
   "repo_path": "repos/trove",
   "adapter_id": "trove.web",
