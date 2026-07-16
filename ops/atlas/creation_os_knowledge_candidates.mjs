@@ -164,6 +164,12 @@ function deterministicJson(value) {
   return `${JSON.stringify(value, null, 2)}\n`;
 }
 
+export function normalizeSourceBytes(sourceBytes) {
+  const text = sourceBytes.toString("utf8");
+  if (/\r(?!\n)/.test(text)) fail("source packet contains an unsupported lone CR line ending");
+  return Buffer.from(text.replaceAll("\r\n", "\n"), "utf8");
+}
+
 function canonicalJson(value) {
   return JSON.stringify(canonicalize(value));
 }
@@ -413,7 +419,7 @@ function buildManifest(sourceBytes, candidateRecords, decisionRecord) {
     source: {
       packet_ref: SOURCE_PACKET_REF,
       packet_sha256: digestBytes(sourceBytes),
-      packet_sha256_semantics: "Exact reconciled packet bytes used to build this projection.",
+      packet_sha256_semantics: "Canonical LF-normalized Git blob bytes used to build this projection.",
       packet_first_commit: SOURCE_PACKET_FIRST_COMMIT,
       packet_first_commit_at: CREATED_AT,
       adoption_merge_commit: SOURCE_ADOPTION_MERGE_COMMIT,
@@ -677,7 +683,7 @@ export async function assertProjectionInvariants(projection) {
 
 export async function buildProjection({ root = ROOT } = {}) {
   const sourcePath = path.join(root, SOURCE_PACKET_REF);
-  const sourceBytes = await fs.readFile(sourcePath);
+  const sourceBytes = normalizeSourceBytes(await fs.readFile(sourcePath));
   const sourceText = sourceBytes.toString("utf8");
   assertSourcePacket(sourceText);
 

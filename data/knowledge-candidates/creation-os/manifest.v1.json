@@ -9,8 +9,8 @@
   },
   "source": {
     "packet_ref": "docs/ops/ATLAS-CREATION-OS-PLAYBOOK-PROMOTION-CANDIDATES-2026-07-16.md",
-    "packet_sha256": "sha256:556644b597b3dee5f1ab9453ebff48d6a96a1e3e95f49c24724756bdc70a2742",
-    "packet_sha256_semantics": "Exact reconciled packet bytes used to build this projection.",
+    "packet_sha256": "sha256:e2946fcc95f2b1aa5d871767446e97a0e69da6c66d72c90e53855313c4cf2ca2",
+    "packet_sha256_semantics": "Canonical LF-normalized Git blob bytes used to build this projection.",
     "packet_first_commit": "2407b0e656775d040099e5618eb194c5c06ee0e7",
     "packet_first_commit_at": "2026-07-16T06:31:44Z",
     "adoption_merge_commit": "1d79d4ac3191dade11a2aa7c40352a5f210d35e2",

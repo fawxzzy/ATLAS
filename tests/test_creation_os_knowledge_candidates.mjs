@@ -11,8 +11,19 @@ import {
   assertSourcePacket,
   buildProjection,
   checkProjection,
+  normalizeSourceBytes,
   projectionDigest,
 } from "../ops/atlas/creation_os_knowledge_candidates.mjs";
+
+test("normalizes source bytes to the canonical LF Git contract", () => {
+  const lf = normalizeSourceBytes(Buffer.from("first\nsecond\n", "utf8"));
+  const crlf = normalizeSourceBytes(Buffer.from("first\r\nsecond\r\n", "utf8"));
+  assert.deepEqual(crlf, lf);
+  assert.throws(
+    () => normalizeSourceBytes(Buffer.from("first\rsecond\n", "utf8")),
+    /unsupported lone CR line ending/,
+  );
+});
 
 test("generates six schema-valid candidates and one manifest-only Decision byte-stably", async () => {
   const first = await buildProjection();
