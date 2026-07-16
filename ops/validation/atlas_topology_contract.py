@@ -8,12 +8,14 @@ import sys
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from ops._atlas import atlas_root, load_stack_config, normalize_slashes
+from ops.atlas.operational_identity import OperationalIdentityError, operational_identity_from_config
 
 SCHEMA_VERSION = "atlas.topology.manifest.v1"
 SCHEMA_ID = "atlas://architecture/lifeline-topology-manifest.schema.json"
@@ -142,10 +144,63 @@ def validate_schema_definition(schema: dict[str, Any]) -> list[str]:
     if not isinstance(defs, dict):
         errors.append("Schema $defs must be an object.")
     else:
-        for key in ["identity", "app", "zone", "environments", "hostname_rule", "routing", "placement"]:
+        for key in ["identity", "app", "operational_identity", "zone", "environments", "hostname_rule", "routing", "placement"]:
             if key not in defs:
                 errors.append(f"Schema $defs is missing '{key}'.")
     return errors
+
+
+def _topology_identity_projection(stack_identity: dict[str, Any], repo_id: str) -> dict[str, Any]:
+    return {
+        "identity_ref": f"stack.yaml#repo_registry.{repo_id}.identity",
+        "display_name": stack_identity["display_name"],
+        "github_repository": stack_identity["github_repository"],
+        "provider_project": stack_identity["vercel_project"],
+        "provider_project_id": stack_identity["vercel_project_id"],
+        "canonical_public_origin": stack_identity["public_origin"],
+        "redirect_origins": [stack_identity["www_redirect_origin"]],
+        "accepted_aliases": [
+            *stack_identity["legacy_display_names"],
+            *stack_identity["legacy_vercel_projects"],
+            *stack_identity["compatibility_origins"],
+        ],
+    }
+
+
+def resolve_topology_app_identity(manifest: dict[str, Any], candidate: str) -> str:
+    """Resolve declared current or compatibility identity to a stable app id."""
+    matches: set[str] = set()
+    apps = manifest.get("apps")
+    if not isinstance(apps, list):
+        raise ValueError("Topology manifest apps must be an array.")
+    for app in apps:
+        if not isinstance(app, dict):
+            continue
+        app_id = app.get("app_id")
+        if not isinstance(app_id, str) or not app_id:
+            continue
+        accepted: set[str] = {app_id}
+        projection = app.get("operational_identity")
+        if isinstance(projection, dict):
+            for field in [
+                "display_name",
+                "github_repository",
+                "provider_project",
+                "provider_project_id",
+                "canonical_public_origin",
+            ]:
+                value = projection.get(field)
+                if isinstance(value, str) and value:
+                    accepted.add(value)
+            for field in ["redirect_origins", "accepted_aliases"]:
+                values = projection.get(field)
+                if isinstance(values, list):
+                    accepted.update(value for value in values if isinstance(value, str) and value)
+        if candidate in accepted:
+            matches.add(app_id)
+    if len(matches) != 1:
+        raise ValueError(f"Unknown or ambiguous topology app identity: {candidate}")
+    return next(iter(matches))
 
 
 def validate_topology_manifest(
@@ -281,6 +336,7 @@ def validate_topology_manifest(
     known_repo_ids = {str(repo_id) for repo_id in repo_registry} if isinstance(repo_registry, dict) else set()
     apps = manifest.get("apps")
     app_ids: set[str] = set()
+    intentional_product_rules: dict[str, dict[str, str]] = {}
     if not isinstance(apps, list) or not apps:
         issues.append(
             ContractIssue(
@@ -320,9 +376,54 @@ def validate_topology_manifest(
                 if value not in HOSTNAME_MODES:
                     issues.append(ContractIssue("error", "atlas-topology-hostname-mode", path, f"{field} must be one of: {', '.join(sorted(HOSTNAME_MODES))}."))
             if surface == "product":
-                for field in ["prod_hostname_mode", "preview_hostname_mode", "pr_preview_hostname_mode"]:
+                for field in ["preview_hostname_mode", "pr_preview_hostname_mode"]:
                     if app.get(field) != "default":
                         issues.append(ContractIssue("error", "atlas-topology-product-hostname-mode", path, f"Product apps must keep {field} set to 'default'."))
+                repo_entry = repo_registry.get(repo_id) if isinstance(repo_registry, dict) else None
+                has_stack_identity = isinstance(repo_entry, dict) and "identity" in repo_entry
+                projection = app.get("operational_identity")
+                if has_stack_identity:
+                    try:
+                        stack_identity = operational_identity_from_config(stack_config, repo_id)
+                    except OperationalIdentityError as exc:
+                        issues.append(ContractIssue("error", "atlas-topology-operational-identity", path, str(exc)))
+                    else:
+                        expected_projection = _topology_identity_projection(stack_identity, repo_id)
+                        if projection != expected_projection:
+                            issues.append(
+                                ContractIssue(
+                                    "error",
+                                    "atlas-topology-operational-identity",
+                                    path,
+                                    "operational_identity must be an exact projection of stack.yaml authority.",
+                                    {"expected": expected_projection},
+                                )
+                            )
+                        public_host = urlparse(stack_identity["public_origin"]).hostname
+                        expected_prod_mode = "intentional" if public_host == default_zone else "default"
+                        if app.get("prod_hostname_mode") != expected_prod_mode:
+                            issues.append(
+                                ContractIssue(
+                                    "error",
+                                    "atlas-topology-product-hostname-mode",
+                                    path,
+                                    f"Product app prod_hostname_mode must be '{expected_prod_mode}' for its canonical public origin.",
+                                )
+                            )
+                        if expected_prod_mode == "intentional":
+                            intentional_product_rules[app_id] = {
+                                "kind": "named",
+                                "environment": "prod",
+                                "app_id": app_id,
+                                "hostname_template": "{zone}",
+                                "service_key_template": f"{app_id}/prod",
+                                "default_hostname_mode": "intentional",
+                            }
+                else:
+                    if projection is not None:
+                        issues.append(ContractIssue("error", "atlas-topology-operational-identity", path, "operational_identity has no stack.yaml authority."))
+                    if app.get("prod_hostname_mode") != "default":
+                        issues.append(ContractIssue("error", "atlas-topology-product-hostname-mode", path, "Product apps without a canonical identity must keep prod_hostname_mode set to 'default'."))
             if app_id == "lifeline":
                 if app.get("prod_hostname_mode") != "intentional":
                     issues.append(ContractIssue("error", "atlas-topology-lifeline-mode", path, "lifeline prod_hostname_mode must be 'intentional'."))
@@ -399,6 +500,15 @@ def validate_topology_manifest(
             if "{app}" in str(rule.get("service_key_template", "")) and "{environment}" in str(rule.get("service_key_template", "")):
                 issues.append(ContractIssue("error", "atlas-topology-service-key-template", path, "Hostname rules must target a concrete environment or environment template, not '{environment}'."))
         for rule_id, expected in EXPECTED_RULES.items():
+            actual = rules_by_id.get(rule_id)
+            if not isinstance(actual, dict):
+                issues.append(ContractIssue("error", "atlas-topology-hostname-rules", manifest_ref, f"Missing required hostname rule '{rule_id}'."))
+                continue
+            for key, expected_value in expected.items():
+                if str(actual.get(key, "")) != expected_value:
+                    issues.append(ContractIssue("error", "atlas-topology-hostname-rules", manifest_ref, f"Hostname rule '{rule_id}' field '{key}' must be '{expected_value}'."))
+        for app_id, expected in intentional_product_rules.items():
+            rule_id = f"{app_id}-prod"
             actual = rules_by_id.get(rule_id)
             if not isinstance(actual, dict):
                 issues.append(ContractIssue("error", "atlas-topology-hostname-rules", manifest_ref, f"Missing required hostname rule '{rule_id}'."))

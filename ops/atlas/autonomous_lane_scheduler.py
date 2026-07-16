@@ -421,7 +421,7 @@ def render_prompt(report: dict[str, Any]) -> str:
             "",
             "Scope lock:",
             "- ATLAS root only.",
-            "- Do not mutate Fitness, Mazer, DiscordOS, Foundation, Trove, Playbook, or Stream owner lanes.",
+            "- Do not mutate Fitness, Mazer, DiscordOS, Foundation, FawxzzyWeb, Playbook, or Stream owner lanes.",
             "- Do not touch Vercel, Supabase, deploy, secrets, workflows, `.env*`, `.vercel`, `.playwright-mcp`, or `archive`.",
             "",
         ]

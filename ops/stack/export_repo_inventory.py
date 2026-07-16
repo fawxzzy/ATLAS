@@ -11,6 +11,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from ops._atlas import atlas_relative, atlas_root, load_stack_config, normalize_slashes, resolve_atlas_path
+from ops.atlas.operational_identity import inventory_identity_projection, operational_identity_from_config
 from ops.cortex._artifacts import stable_json_digest
 from ops.cortex.index_working_memory import build_working_memory_catalog
 from ops.stack.generate_lockfile import (
@@ -241,10 +242,18 @@ def build_repo_inventory(
         related_initiatives = initiative_index.get(repo_id, [])
         root_blocking = _repo_blocks_root(repo_id, repo_info, lock_config)
         dirty_blocks_root = bool(live_state["dirty"] is True and root_blocking)
+        identity_projection = (
+            inventory_identity_projection(operational_identity_from_config(stack_config, repo_id))
+            if "identity" in repo_info
+            else None
+        )
         repos.append(
             {
                 "logical_id": repo_id,
-                "local_path": atlas_relative(repo_path, root=base_root),
+                # Preserve the declared stack coordinate even when isolated
+                # generation reads repos through a local junction.
+                "local_path": normalize_slashes(repo_info["path"]),
+                "operational_identity": identity_projection,
                 "role": str(lock_component.get("role", repo_info.get("role", ""))),
                 "playbook_adoption_status": str(
                     lock_component.get(
@@ -423,8 +432,8 @@ def render_repo_inventory_markdown(payload: dict[str, Any]) -> str:
         "",
         "## Managed Repos",
         "",
-        "| Repo id | Path | Role | Playbook adoption status | Branch | Pinned commit | Current commit | Dirty | Root-blocking | Dirty blocks root | Trust | Release | Related initiatives |",
-        "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+        "| Repo id | Path | Display | Provider project | Public origin | Role | Playbook adoption status | Branch | Pinned commit | Current commit | Dirty | Root-blocking | Dirty blocks root | Trust | Release | Related initiatives |",
+        "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
     ]
 
     for item in repos:
@@ -434,12 +443,17 @@ def render_repo_inventory_markdown(payload: dict[str, Any]) -> str:
         initiative_text = "<br>".join(
             str(value) for value in initiatives if isinstance(value, str)
         ) or "-"
+        operational_identity = item.get("operational_identity")
+        identity = operational_identity if isinstance(operational_identity, dict) else {}
         lines.append(
             "| "
             + " | ".join(
                 [
                     str(item.get("logical_id") or "-"),
                     str(item.get("local_path") or "-"),
+                    str(identity.get("display_name") or "-"),
+                    str(identity.get("vercel_project") or "-"),
+                    str(identity.get("public_origin") or "-"),
                     str(item.get("role") or "-"),
                     str(item.get("playbook_adoption_status") or "-"),
                     str(item.get("branch") or "-"),

@@ -263,6 +263,8 @@
       "release_profile": "package_contract"
     },
     "trove": {
+      "display_name": "FawxzzyWeb",
+      "public_origin": "https://fawxzzy.com",
       "release_profile": "web_visual"
     }
   }

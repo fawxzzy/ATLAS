@@ -198,7 +198,7 @@ class AtlasQaPipelineTests(unittest.TestCase):
                     "    role: docs",
                     "    status: active",
                     "  trove:",
-                    "    path: repos/fawxzzy-trove",
+                    "    path: repos/trove",
                     "    role: app",
                     "    status: active",
                     "",

@@ -1,8 +1,8 @@
 {
   "contract_version": "atlas.qa.scenario.v1",
   "scenario_id": "trove.home-smoke",
-  "title": "Trove homepage smoke",
-  "summary": "Root-owned QA contract for the Trove homepage visual smoke lane.",
+  "title": "FawxzzyWeb homepage smoke",
+  "summary": "Root-owned QA contract for the FawxzzyWeb homepage visual smoke lane; stable QA and repo ids remain trove-based.",
   "repo_id": "trove",
   "repo_path": "repos/trove",
   "adapter_id": "trove.web",
@@ -13,7 +13,8 @@
     "smoke"
   ],
   "entrypoint": {
-    "path": "/"
+    "path": "/",
+    "preview_url_ref": "https://fawxzzy.com"
   },
   "proof": {
     "lens_manifest_ref": "ops/atlas/qa/lenses/atlas-default-web.v1.json",

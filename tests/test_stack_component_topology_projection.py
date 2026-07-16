@@ -88,6 +88,7 @@ class StackComponentTopologyProjectionTests(unittest.TestCase):
             component = first_lock["components"][repo_id]
             self.assertEqual(role, component["role"])
             self.assertEqual("not-claimed", component["playbook_adoption_status"])
+            self.assertEqual(self.config["repo_registry"][repo_id]["path"], component["path"])
 
         changed_lock = deepcopy(first_lock)
         changed_lock["components"]["discordos"]["playbook_adoption_status"] = "adopted"
@@ -112,6 +113,7 @@ class StackComponentTopologyProjectionTests(unittest.TestCase):
         inventory_by_id = {item["logical_id"]: item for item in first_inventory["repos"]}
         for repo_id, role in expected.items():
             self.assertEqual(role, inventory_by_id[repo_id]["role"])
+            self.assertEqual(self.config["repo_registry"][repo_id]["path"], inventory_by_id[repo_id]["local_path"])
             self.assertEqual(
                 "not-claimed",
                 inventory_by_id[repo_id]["playbook_adoption_status"],

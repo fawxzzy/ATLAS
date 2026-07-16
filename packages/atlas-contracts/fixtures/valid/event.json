@@ -4,7 +4,7 @@
   "event_id": "evt-20260507-001",
   "occurred_at": "2026-05-07T12:30:00Z",
   "repo_id": "trove",
-  "app_id": "fawxzzy-trove",
+  "app_id": "fawxzzyweb",
   "environment": "preview",
   "producer": {
     "kind": "service",
@@ -22,7 +22,7 @@
     "task_id": "task-20260507-001",
     "task_name": "generate-catalog",
     "scope_paths": [
-      "repos/fawxzzy-trove",
+      "repos/trove",
       "docs/registry"
     ],
     "repo_ids": [

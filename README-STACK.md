@@ -132,11 +132,13 @@ Use these ids in stack docs, tickets, and automation:
 - `foundation` -> `repos/foundation`
 - `fitness` -> `repos/fawxzzy-fitness`
 - `mazer` -> `repos/mazer`
-- `trove` -> `repos/trove`
+- `trove` -> `repos/trove` (current product: `FawxzzyWeb`; GitHub: `fawxzzy/FawxzzyWeb`; Vercel: `fawxzzyweb`; public origin: `https://fawxzzy.com`)
 - `stream` -> `repos/stream`
 - `nat1-games` -> `repos/Nat1-Games/nat1-games`
 
 The ids are canonical. The admitted Atlas-owned local repo paths are normalized except for the preserved Fitness exception at `repos/fawxzzy-fitness` and explicitly nested or external surfaces.
+
+`trove` and `repos/trove` remain stable internal contracts. `Trove` and `fawxzzy-trove` are compatibility or historical aliases; new human-facing and provider projections use `FawxzzyWeb` and `fawxzzyweb` from `stack.yaml`.
 
 `repos/**` remains untracked by the root repo as a code surface. The stack root tracks inventory and policy about those repos, not mirrored copies of their source trees.
 

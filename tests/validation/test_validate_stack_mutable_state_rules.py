@@ -9,6 +9,8 @@ from unittest.mock import patch
 
 from ops.validation.validate_stack import (
     apply_repo_generated_state_cleanup,
+    build_archive_declared_paths,
+    build_archive_scope_exempt_paths,
     collect_text_scan_roots,
     is_repo_local_secret_candidate,
     iter_unique_repo_root_files,
@@ -19,6 +21,30 @@ from ops.validation.validate_stack import (
 
 
 class ValidateStackMutableStateRulesTests(unittest.TestCase):
+    def test_archive_policy_preserves_declared_relative_coordinates(self) -> None:
+        temp_dir = tempfile.TemporaryDirectory()
+        self.addCleanup(temp_dir.cleanup)
+        root = Path(temp_dir.name)
+        stack_file = root / "stack.yaml"
+        config = {
+            "archives": {
+                "backups": "repos/repo-backups",
+                "zip_snapshots": ["repos/dev.zip"],
+                "media": ["data/media"],
+            },
+            "stack_lock": {
+                "excluded_surfaces": {
+                    "archive": {"path": "repos/archive.zip"},
+                }
+            },
+        }
+
+        self.assertEqual(
+            {"repos/repo-backups", "repos/dev.zip", "data/media", "data/media.zip", "repos/archive.zip"},
+            build_archive_declared_paths(stack_file, config),
+        )
+        self.assertTrue({"data/media", "data/media.zip"}.issubset(build_archive_scope_exempt_paths(stack_file, config)))
+
     def test_internal_validation_statuses_exclude_unmanaged_owner_lanes(self) -> None:
         self.assertTrue(repo_status_allows_internal_validation("active"))
         self.assertTrue(repo_status_allows_internal_validation("incubating"))

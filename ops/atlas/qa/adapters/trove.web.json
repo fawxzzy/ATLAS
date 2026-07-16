@@ -1,6 +1,8 @@
 {
   "contract_version": "atlas.qa.adapter.v1",
   "adapter_id": "trove.web",
+  "display_name": "FawxzzyWeb",
+  "public_origin": "https://fawxzzy.com",
   "repo_id": "trove",
   "repo_path": "repos/trove",
   "framework": "nextjs",

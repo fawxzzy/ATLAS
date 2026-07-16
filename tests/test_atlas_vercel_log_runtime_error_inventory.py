@@ -170,7 +170,7 @@ class VercelLogRuntimeErrorInventoryTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             _required_receipts(root)
-            payload = _record("fawxzzy-trove")
+            payload = _record("fawxzzyweb")
             payload["note"] = "Bearer sk_live_1234567890"
             path = root / "tmp" / "atlas" / "vercel-observability" / "trove.json"
             _write(path, json.dumps(payload, indent=2))
@@ -209,6 +209,20 @@ class VercelLogRuntimeErrorInventoryTests(unittest.TestCase):
 
         self.assertEqual(inventory.STATUS_BLOCKER, report["status"])
         self.assertEqual("unknown_project_slug", report["blockers"][-1]["code"])
+
+    def test_legacy_fawxzzyweb_project_slug_is_accepted_and_normalized(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            _required_receipts(root)
+            payload = _record("fawxzzyweb")
+            payload["project_slug"] = "fawxzzy-trove"
+            path = root / "tmp" / "atlas" / "vercel-observability" / "trove-legacy.json"
+            _write(path, json.dumps(payload, indent=2))
+
+            report = inventory.build_report(root=root, inputs=["tmp/atlas/vercel-observability/trove-legacy.json"])
+
+        self.assertTrue(report["safe_to_use"])
+        self.assertEqual("fawxzzyweb", report["projects"][0]["project_slug"])
 
     def test_unsupported_source_class_blocks(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

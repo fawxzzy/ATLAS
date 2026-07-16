@@ -34,9 +34,25 @@
       "repo_id": "trove",
       "surface": "product",
       "default_zone": "fawxzzy.com",
-      "prod_hostname_mode": "default",
+      "prod_hostname_mode": "intentional",
       "preview_hostname_mode": "default",
-      "pr_preview_hostname_mode": "default"
+      "pr_preview_hostname_mode": "default",
+      "operational_identity": {
+        "identity_ref": "stack.yaml#repo_registry.trove.identity",
+        "display_name": "FawxzzyWeb",
+        "github_repository": "fawxzzy/FawxzzyWeb",
+        "provider_project": "fawxzzyweb",
+        "provider_project_id": "prj_vhUyajI4AL6BgCF40VnKtdxrBLuV",
+        "canonical_public_origin": "https://fawxzzy.com",
+        "redirect_origins": [
+          "https://www.fawxzzy.com"
+        ],
+        "accepted_aliases": [
+          "Trove",
+          "fawxzzy-trove",
+          "https://fawxzzy-trove.vercel.app"
+        ]
+      }
     },
     {
       "app_id": "lifeline",
@@ -106,6 +122,15 @@
       "hostname_template": "pr-{number}.{app}.{zone}",
       "service_key_template": "{app}/pr-{number}",
       "default_hostname_mode": "default"
+    },
+    {
+      "rule_id": "trove-prod",
+      "kind": "named",
+      "environment": "prod",
+      "app_id": "trove",
+      "hostname_template": "{zone}",
+      "service_key_template": "trove/prod",
+      "default_hostname_mode": "intentional"
     },
     {
       "rule_id": "lifeline-prod",

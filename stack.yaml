@@ -186,6 +186,25 @@ repo_registry:
     path: repos/trove
     role: application
     status: active
+    identity:
+      display_name: FawxzzyWeb
+      legacy_display_names:
+        - Trove
+      github:
+        repository: fawxzzy/FawxzzyWeb
+      vercel:
+        project: fawxzzyweb
+        project_id: prj_vhUyajI4AL6BgCF40VnKtdxrBLuV
+        legacy_project_aliases:
+          - fawxzzy-trove
+      public:
+        origin: https://fawxzzy.com
+        www_redirect_origin: https://www.fawxzzy.com
+        compatibility_origins:
+          - https://fawxzzy-trove.vercel.app
+      board:
+        owner_id: trove
+        display_name: FawxzzyWeb
   stream:
     path: repos/stream
     role: application
@@ -319,7 +338,7 @@ stack_lock:
       path: repos/trove-release-cutover
       trust_class: trusted
       release_eligible: false
-      reason: Trove release cutover is a branch worktree of the registered trove repo and remains a temporary non-canonical cutover lane outside the governed repo surface.
+      reason: FawxzzyWeb release cutover is a branch worktree of the registered trove repo and remains a temporary non-canonical cutover lane outside the governed repo surface.
     atlas_adjacent_checkout:
       path: repos/ATLAS
       trust_class: adjacent

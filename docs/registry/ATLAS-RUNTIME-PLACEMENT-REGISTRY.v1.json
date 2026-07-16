@@ -31,7 +31,7 @@
       "Foundation is the hosted read-only portfolio surface; Playbook Observer is the private local operator cockpit.",
       "DiscordOS is the hosted Discord API and logical writer; its Vercel, Supabase, and GitHub Actions surfaces retain distinct responsibilities.",
       "Cortex recomputes read models after accepted state changes or digests and does not become a competing daemon or scheduler.",
-      "Fitness, Mazer, Socials OS, Trove, Stream, Nat1, and other products remain owner lanes."
+      "Fitness, Mazer, Socials OS, FawxzzyWeb, Stream, Nat1, and other products remain owner lanes."
     ],
     "production_deploy_guard": "Every production deployment, promotion, or production-alias cutover requires explicit current-thread, per-project, per-deploy approval. This packet authorizes none."
   },
@@ -752,8 +752,8 @@
     },
     {
       "id": "trove",
-      "runtime_responsibility": "Trove product and runtime truth.",
-      "authority_owner": "Trove owner lane",
+      "runtime_responsibility": "FawxzzyWeb product and runtime truth under stable repo id trove.",
+      "authority_owner": "FawxzzyWeb owner lane",
       "implemented_surface": [
         "repos/trove"
       ],
@@ -762,11 +762,11 @@
         "state": "owner_managed",
         "observed_at": "2026-07-15T18:28:05Z",
         "proof": [
-          "Trove remains a registered owner repository; root does not operate its runtime."
+          "FawxzzyWeb remains registered under stable repo id trove; root does not operate its runtime."
         ]
       },
       "consumer": [
-        "Trove owner lane"
+        "FawxzzyWeb owner lane"
       ],
       "lifecycle": "owner-managed product lifecycle",
       "persistence": {
@@ -777,9 +777,9 @@
       "port": null,
       "availability_target": "Owner-defined and owner-proven.",
       "failure_modes": [
-        "Root operating Trove"
+        "Root operating FawxzzyWeb"
       ],
-      "activation_deployment_gate": "Explicit Trove owner-lane authority only.",
+      "activation_deployment_gate": "Explicit FawxzzyWeb owner-lane authority only.",
       "evidence_refs": [
         "stack.yaml"
       ]

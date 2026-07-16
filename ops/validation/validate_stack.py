@@ -128,6 +128,7 @@ from ops.stack.generate_lockfile import (
     status_paths,
 )
 from ops.stack.audit_gitdir_hygiene import build_report as build_gitdir_hygiene_report, default_target_paths as default_gitdir_hygiene_targets
+from ops.atlas.operational_identity import OperationalIdentityError, operational_identity_from_config
 from ops.atlas.backfill_legacy_runtime_artifacts import backfill_legacy_runtime_artifacts
 from ops.atlas.observations import (
     GOVERNED_ARTIFACT_EPOCH_LEGACY_PRE_REGISTRY,
@@ -921,6 +922,11 @@ def normalize_slashes(path: str) -> str:
 
 
 def relative_to_root(root: Path, path: Path) -> str:
+    lexical = path.absolute()
+    lexical_root = root.absolute()
+    if lexical.is_relative_to(lexical_root):
+        relative = lexical.relative_to(lexical_root)
+        return "." if not relative.parts else normalize_slashes(str(relative))
     resolved = path.resolve()
     if resolved.is_relative_to(root.resolve()):
         relative = resolved.relative_to(root.resolve())
@@ -1724,7 +1730,7 @@ def build_archive_declared_paths(
     if isinstance(archives, dict):
         backups = archives.get("backups")
         if isinstance(backups, str) and backups.strip():
-            declared.add(relative_to_root(root, resolve_path(stack_file, backups)))
+            declared.add(normalize_slashes(backups.strip()).rstrip("/"))
         for key in ("zip_snapshots", "media"):
             values = archives.get(key)
             if not isinstance(values, list):
@@ -1732,7 +1738,7 @@ def build_archive_declared_paths(
             for item in values:
                 if not isinstance(item, str) or not item.strip():
                     continue
-                relative = relative_to_root(root, resolve_path(stack_file, item))
+                relative = normalize_slashes(item.strip()).rstrip("/")
                 declared.add(relative)
                 if key == "media" and Path(relative).suffix == "":
                     declared.add(f"{relative}.zip")
@@ -1746,7 +1752,7 @@ def build_archive_declared_paths(
                     continue
                 raw_path = surface.get("path")
                 if isinstance(raw_path, str) and raw_path.strip():
-                    declared.add(relative_to_root(root, resolve_path(stack_file, raw_path)))
+                    declared.add(normalize_slashes(raw_path.strip()).rstrip("/"))
     return declared
 
 
@@ -1763,7 +1769,7 @@ def build_archive_scope_exempt_paths(
             for item in media:
                 if not isinstance(item, str) or not item.strip():
                     continue
-                relative = relative_to_root(root, resolve_path(stack_file, item))
+                relative = normalize_slashes(item.strip()).rstrip("/")
                 scope_exempt.add(relative)
                 if Path(relative).suffix == "":
                     scope_exempt.add(f"{relative}.zip")
@@ -3010,6 +3016,20 @@ def build_findings(
                 } - required_present_repo_ids
 
     findings.extend(validate_declared_surface_scan_coverage(root, config, stack_file))
+    for repo_id, repo_info in config.get("repo_registry", {}).items():
+        if not isinstance(repo_info, dict) or "identity" not in repo_info:
+            continue
+        try:
+            operational_identity_from_config(config, str(repo_id))
+        except OperationalIdentityError as exc:
+            findings.append(
+                Finding(
+                    "error",
+                    "operational-identity-invalid",
+                    f"stack.yaml#repo_registry.{repo_id}.identity",
+                    str(exc),
+                )
+            )
     try:
         _, _, topology_issues = validate_atlas_topology_contract_files(stack_file=stack_file)
     except Exception as exc:
@@ -3065,9 +3085,9 @@ def build_findings(
             continue
         repo_path = resolve_path(stack_file, repo_info["path"])
         status = str(repo_info.get("status", "unknown"))
-        repo_rel = normalize_slashes(str(repo_path.relative_to(root))) if repo_path.is_relative_to(root) else normalize_slashes(str(repo_path))
-        if not repo_rel:
-            repo_rel = "."
+        # The declared coordinate is the reporting contract. A resolved local
+        # junction target must never leak a machine-specific path into output.
+        repo_rel = normalize_slashes(repo_info["path"]).rstrip("/") or "."
         is_stack_control_repo = repo_path == root
         if not repo_path.exists():
             if sparse_mode and repo_id not in required_present_repo_ids:
@@ -3119,17 +3139,19 @@ def build_findings(
                 suppressed_paths=cleanup_suppressed_paths,
             ).items():
                 if requires_warning:
-                    candidate = repo_path / relative_dir
-                    rel = normalize_slashes(str(candidate.relative_to(root)))
+                    rel = normalize_slashes(f"{repo_rel}/{relative_dir}")
                     findings.append(Finding("warning", "mutable-state-in-repo", rel, "Mutable or generated state is present inside a repo path.", {"repo_id": repo_id, "state_path": relative_dir}))
             for env_candidate in list(repo_path.glob(".env")) + list(repo_path.glob(".env.*")):
                 if not is_repo_local_secret_candidate(env_candidate):
                     continue
-                findings.append(Finding("warning", "repo-local-secret-material", normalize_slashes(str(env_candidate.relative_to(root))), "Repo-local environment file detected; secrets should not be part of default exports.", {"repo_id": repo_id}))
+                env_rel = normalize_slashes(f"{repo_rel}/{env_candidate.relative_to(repo_path)}")
+                findings.append(Finding("warning", "repo-local-secret-material", env_rel, "Repo-local environment file detected; secrets should not be part of default exports.", {"repo_id": repo_id}))
             for file_path, pattern in iter_unique_repo_root_files(repo_path, ROOT_LOG_PATTERNS):
-                findings.append(Finding("warning", "mutable-artifact-in-repo-root", normalize_slashes(str(file_path.relative_to(root))), "Mutable log, temp, or database artifact detected in repo root.", {"repo_id": repo_id, "pattern": pattern}))
+                file_rel = normalize_slashes(f"{repo_rel}/{file_path.relative_to(repo_path)}")
+                findings.append(Finding("warning", "mutable-artifact-in-repo-root", file_rel, "Mutable log, temp, or database artifact detected in repo root.", {"repo_id": repo_id, "pattern": pattern}))
             for file_path, pattern in iter_unique_repo_root_files(repo_path, ROOT_CAPTURE_PATTERNS):
-                findings.append(Finding("warning", "capture-artifact-in-repo-root", normalize_slashes(str(file_path.relative_to(root))), "Likely review or capture artifact detected in repo root.", {"repo_id": repo_id, "pattern": pattern}))
+                file_rel = normalize_slashes(f"{repo_rel}/{file_path.relative_to(repo_path)}")
+                findings.append(Finding("warning", "capture-artifact-in-repo-root", file_rel, "Likely review or capture artifact detected in repo root.", {"repo_id": repo_id, "pattern": pattern}))
     if not lockfile_path.exists():
         findings.append(
             Finding(

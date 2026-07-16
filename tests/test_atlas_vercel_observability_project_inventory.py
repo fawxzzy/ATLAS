@@ -127,6 +127,21 @@ def _capture_wrapper(project_id: str) -> dict[str, object]:
 
 
 class VercelObservabilityProjectInventoryTests(unittest.TestCase):
+    def test_legacy_fawxzzyweb_project_name_is_accepted_and_normalized(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            _required_receipts(root)
+            payload = _capture_wrapper("prj_vhUyajI4AL6BgCF40VnKtdxrBLuV")
+            assert isinstance(payload["project"], dict)
+            payload["project"]["name"] = "fawxzzy-trove"
+            input_path = root / "tmp" / "atlas" / "vercel-observability" / "trove-legacy.json"
+            _write(input_path, json.dumps(payload, indent=2))
+
+            report = inventory.build_report(root=root, inputs=["tmp/atlas/vercel-observability/trove-legacy.json"])
+
+        self.assertTrue(report["safe_to_use"])
+        self.assertEqual("fawxzzyweb", report["projects"][0]["project_name"])
+
     def test_valid_single_capture_returns_ok(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

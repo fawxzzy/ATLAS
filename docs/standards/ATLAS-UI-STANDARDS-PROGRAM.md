@@ -258,7 +258,7 @@ Every candidate:
 - authorizes no board, Discord, production, data, or secret mutation
 - requires owner selection before execution
 
-Candidate coverage includes Fitness, Trove, Mazer, Socials OS, Stream, Nat1 Games, DiscordOS applicability, and later Playbook knowledge review.
+Candidate coverage includes Fitness, FawxzzyWeb (stable repo id `trove`), Mazer, Socials OS, Stream, Nat1 Games, DiscordOS applicability, and later Playbook knowledge review.
 
 ## Research And Encoding Provenance
 

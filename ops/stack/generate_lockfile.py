@@ -206,7 +206,9 @@ def excluded_surfaces(config: dict[str, Any], root: Path) -> dict[str, dict[str,
             raise ValueError(f"Unsupported trust_class '{trust_class}' for excluded surface '{surface_id}'.")
         surface_path = resolve_atlas_path(value["path"], root=root)
         surfaces[str(surface_id)] = {
-            "path": atlas_relative(surface_path, root=root),
+            # Preserve the declared stack coordinate even when a local junction
+            # supplies the repo during isolated generation.
+            "path": normalize_slashes(value["path"]),
             "present": surface_path.exists(),
             "trust_class": trust_class,
             "release_eligible": bool(value.get("release_eligible", False)),
@@ -402,7 +404,9 @@ def build_lock_payload(
         if dirty_overrides and repo_id in dirty_overrides:
             dirty = bool(dirty_overrides[repo_id])
         components[repo_id] = {
-            "path": atlas_relative(repo_path, root=base),
+            # The manifest path is the contract. Resolved filesystem targets
+            # are local implementation details and must not leak into output.
+            "path": normalize_slashes(repo_info["path"]),
             "role": str(repo_info.get("role", "")),
             "playbook_adoption_status": str(repo_info.get("playbook_adoption_status", "")),
             "status": str(repo_info.get("status", "unknown")),

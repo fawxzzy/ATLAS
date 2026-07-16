@@ -13,6 +13,12 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from ops._atlas import atlas_root, normalize_slashes
+from ops.atlas.operational_identity import OperationalIdentityError
+from ops.atlas.vercel_project_registry import (
+    GOVERNED_PROJECTS_BY_ID,
+    accepted_project_names,
+    normalize_project_name,
+)
 
 SCHEMA_VERSION = "atlas.vercel_deployment_freshness_inventory.v1"
 EXPORT_SCHEMA_VERSION = "atlas.vercel.observability.project_inventory_export.v1"
@@ -64,30 +70,7 @@ REQUIRED_TEXT_REFS = (
     RESTART_GUIDE,
 )
 
-GOVERNED_PROJECTS = OrderedDict(
-    [
-        (
-            "prj_C2RSEa34OblHfhuEpVChRQQZSjuG",
-            OrderedDict([("project_name", "fawxzzy-discordos"), ("repo_logical_id", "discordos")]),
-        ),
-        (
-            "prj_rtlFVOMFAWCRoJ3SQjHloi89881K",
-            OrderedDict([("project_name", "fawxzzy-fitness"), ("repo_logical_id", "fitness")]),
-        ),
-        (
-            "prj_t3zothbtj9DExrh3FjMsH98hwwSZ",
-            OrderedDict([("project_name", "fawxzzy-mazer"), ("repo_logical_id", "mazer")]),
-        ),
-        (
-            "prj_vhUyajI4AL6BgCF40VnKtdxrBLuV",
-            OrderedDict([("project_name", "fawxzzy-trove"), ("repo_logical_id", "trove")]),
-        ),
-        (
-            "prj_o37CPLlESB6Zybe8GB74BX3wrkpy",
-            OrderedDict([("project_name", "fawxzzy-foundation"), ("repo_logical_id", "foundation")]),
-        ),
-    ]
-)
+GOVERNED_PROJECTS = GOVERNED_PROJECTS_BY_ID
 
 PROJECT_NAME_TO_ID = {meta["project_name"]: project_id for project_id, meta in GOVERNED_PROJECTS.items()}
 REQUIRED_INVENTORY_IDS = tuple(meta["repo_logical_id"] for meta in GOVERNED_PROJECTS.values())
@@ -209,7 +192,7 @@ def _ensure_required_files(root: Path) -> tuple[dict[str, str], list[OrderedDict
 def _validate_contract_texts(texts: dict[str, str], blockers: list[OrderedDict[str, Any]]) -> None:
     audit_text = texts.get(AUDIT_RECEIPT, "")
     for project_id, meta in GOVERNED_PROJECTS.items():
-        if project_id not in audit_text and meta["project_name"] not in audit_text:
+        if project_id not in audit_text and not any(name in audit_text for name in accepted_project_names(project_id)):
             blockers.append(
                 _finding(
                     "audit_project_missing",
@@ -219,9 +202,18 @@ def _validate_contract_texts(texts: dict[str, str], blockers: list[OrderedDict[s
                 )
             )
     coverage_text = texts.get(PROJECT_COVERAGE_RECEIPT, "")
-    for needle in ("5/5", "deployment freshness", "fawxzzy-foundation", "fawxzzy-trove"):
+    for needle in ("5/5", "deployment freshness", "fawxzzy-foundation"):
         if needle not in coverage_text:
             blockers.append(_finding("coverage_reference_missing", "Project coverage receipt is missing a required deployment-freshness reference.", required_reference=needle))
+    trove_project_id = "prj_vhUyajI4AL6BgCF40VnKtdxrBLuV"
+    if not any(name in coverage_text for name in accepted_project_names(trove_project_id)):
+        blockers.append(
+            _finding(
+                "coverage_reference_missing",
+                "Project coverage receipt is missing the FawxzzyWeb current or legacy project reference.",
+                required_reference=GOVERNED_PROJECTS[trove_project_id]["project_name"],
+            )
+        )
     contract_text = texts.get(CONTRACT_RECEIPT, "")
     for needle in ("latest_production_deployment_created_at", "deployment_age_days", "age_over_30_days"):
         if needle not in contract_text:
@@ -314,7 +306,11 @@ def _summary_from_export(payload: dict[str, Any], *, path: str) -> tuple[list[Or
     if expected is None:
         blockers.append(_finding("unknown_project_id", "Input export project_id is outside the governed Vercel set.", path=path, project_id=project_id))
         return [], blockers
-    if project_name != expected["project_name"] or repo_logical_id != expected["repo_logical_id"]:
+    try:
+        canonical_project_name = normalize_project_name(project_id=project_id, project_name=project_name)
+    except OperationalIdentityError:
+        canonical_project_name = None
+    if canonical_project_name is None or repo_logical_id != expected["repo_logical_id"]:
         blockers.append(
             _finding(
                 "project_mapping_mismatch",
@@ -353,7 +349,7 @@ def _summary_from_export(payload: dict[str, Any], *, path: str) -> tuple[list[Or
         [
             OrderedDict(
                 [
-                    ("project_name", project_name),
+                    ("project_name", canonical_project_name),
                     ("project_id", project_id),
                     ("repo_logical_id", repo_logical_id),
                     ("latest_production_deployment_id", str(latest["id"])),
@@ -400,7 +396,11 @@ def _summary_from_report(payload: dict[str, Any], *, path: str) -> tuple[list[Or
         if expected is None:
             blockers.append(_finding("unknown_project_id", "Input report project_id is outside the governed Vercel set.", path=item_path, project_id=project_id))
             continue
-        if project_name != expected["project_name"] or repo_logical_id != expected["repo_logical_id"]:
+        try:
+            canonical_project_name = normalize_project_name(project_id=project_id, project_name=project_name)
+        except OperationalIdentityError:
+            canonical_project_name = None
+        if canonical_project_name is None or repo_logical_id != expected["repo_logical_id"]:
             blockers.append(
                 _finding(
                     "project_mapping_mismatch",
@@ -416,7 +416,7 @@ def _summary_from_report(payload: dict[str, Any], *, path: str) -> tuple[list[Or
         summaries.append(
             OrderedDict(
                 [
-                    ("project_name", project_name),
+                    ("project_name", canonical_project_name),
                     ("project_id", project_id),
                     ("repo_logical_id", repo_logical_id),
                     ("latest_production_deployment_id", deployment_id),

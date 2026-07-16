@@ -29,6 +29,15 @@ class StackRepoInventoryTests(unittest.TestCase):
         }
         self.assertTrue({"stack", "_stack", "playbook", "lifeline", "mazer"}.issubset(repo_ids))
 
+    def test_trove_entry_projects_current_identity_without_moving_stable_coordinates(self) -> None:
+        inventory = build_repo_inventory(root=self.root)
+        trove = next(item for item in inventory["repos"] if item["logical_id"] == "trove")
+
+        self.assertEqual("repos/trove", trove["local_path"])
+        self.assertEqual("FawxzzyWeb", trove["operational_identity"]["display_name"])
+        self.assertEqual("fawxzzyweb", trove["operational_identity"]["vercel_project"])
+        self.assertEqual("https://fawxzzy.com", trove["operational_identity"]["public_origin"])
+
     def test_awareness_search_and_fetch_resolve_repo_by_id_and_path(self) -> None:
         by_id = search("mazer", root=self.root, limit=20)
         repo_hits = [
