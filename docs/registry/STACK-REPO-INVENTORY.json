@@ -433,7 +433,7 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "ba632f29cef71cafa9d448c9cda57d0d7ef14a41",
+      "current_commit": "82a0fda9127899b26ec5b3071b7f710d58279031",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
@@ -673,5 +673,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:54c7a8e1d701a5b2f5a5c65cd994a33e2d3355770114bf3be1aa8f82929c9d16"
+  "content_digest": "sha256:0815714911cbe7647cba76cea64077aa0849c06bc9f384dc51114efc2bca7291"
 }

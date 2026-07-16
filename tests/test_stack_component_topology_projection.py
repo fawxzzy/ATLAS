@@ -158,7 +158,14 @@ class StackComponentTopologyProjectionTests(unittest.TestCase):
         self.assertIn("shared-contract-foundation | not-claimed", first_markdown)
 
     def test_declared_coordinates_reject_parent_and_absolute_escape(self) -> None:
-        for raw_path in ("../outside-repo", str(self.root.parent / "outside-repo")):
+        for raw_path in (
+            "../outside-repo",
+            str(self.root.parent / "outside-repo"),
+            "C:/Users/name/repo",
+            r"C:\Users\name\repo",
+            "//server/share/repo",
+            r"\\server\share\repo",
+        ):
             with self.subTest(raw_path=raw_path):
                 broken = deepcopy(self.config)
                 broken["repo_registry"]["foundation"]["path"] = raw_path
@@ -176,6 +183,12 @@ class StackComponentTopologyProjectionTests(unittest.TestCase):
         }
         with self.assertRaisesRegex(ValueError, "parent traversal"):
             build_lock_payload(config=broken, root=self.root)
+
+    def test_declared_coordinates_accept_normal_root_relative_paths(self) -> None:
+        self.assertEqual(
+            "repos/name/repo",
+            declared_root_coordinate("repos/name/repo", root=self.root),
+        )
 
     def test_lexical_lookalike_remains_a_distinct_in_root_coordinate(self) -> None:
         self.assertEqual(

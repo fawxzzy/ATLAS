@@ -6,7 +6,7 @@ import hashlib
 import json
 import subprocess
 import sys
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -60,7 +60,15 @@ def declared_root_coordinate(raw_path: str, *, root: Path, label: str = "Path") 
     if not normalized:
         raise ValueError(f"{label} must be a non-empty root-relative path.")
     candidate = Path(normalized)
-    if candidate.is_absolute() or candidate.drive or candidate.root:
+    windows_candidate = PureWindowsPath(normalized)
+    if (
+        candidate.is_absolute()
+        or candidate.drive
+        or candidate.root
+        or windows_candidate.is_absolute()
+        or windows_candidate.drive
+        or windows_candidate.root
+    ):
         raise ValueError(f"{label} must be root-relative: {normalized}")
     if any(part == ".." for part in candidate.parts):
         raise ValueError(f"{label} must not contain parent traversal: {normalized}")

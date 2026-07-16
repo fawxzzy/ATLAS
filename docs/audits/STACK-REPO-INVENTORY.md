@@ -22,7 +22,7 @@ Operational rule:
 - Excluded surface count: `16`
 - Stack manifest: `stack.yaml`
 - Stack lock: `stack.lock.yaml`
-- Inventory digest: `sha256:54c7a8e1d701a5b2f5a5c65cd994a33e2d3355770114bf3be1aa8f82929c9d16`
+- Inventory digest: `sha256:0815714911cbe7647cba76cea64077aa0849c06bc9f384dc51114efc2bca7291`
 
 ## Managed Repos
 
@@ -38,7 +38,7 @@ Operational rule:
 | playbook | repos/playbook | - | - | - | governance-runtime | - | codex/atlas-knowledge-candidate-v2-consumer | 14fce44268084bcaaab6d189b6ef18eb7a992faf | 14fce44268084bcaaab6d189b6ef18eb7a992faf | False | True | False | trusted | True | initiative:continuity-manifest-atlas-owned-repo-naming-canonicalization<br>initiative:initiative-fawxzzy-tech-plan-convergence |
 | playbook-demo | repos/playbook-demo/playbook-demo | - | - | - | demo | - | main | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | False | True | False | trusted | False | - |
 | socials-os | repos/socials-os | - | - | - | analytics-data-system | - | codex/fitness-walkthrough-v2 | - | d9cc13717cf5e63a069bb46577a2267f9161396f | False | False | False | adjacent | False | - |
-| stack | . | - | - | - | operator-layer | - | codex/fawxzzyweb-identity-compat | - | ba632f29cef71cafa9d448c9cda57d0d7ef14a41 | True | True | True | trusted | False | - |
+| stack | . | - | - | - | operator-layer | - | codex/fawxzzyweb-identity-compat | - | 82a0fda9127899b26ec5b3071b7f710d58279031 | True | True | True | trusted | False | - |
 | stream | repos/stream | - | - | - | application | - | main | 43769ba86d4c6ebc419ab9e7847c3843460a094f | 43769ba86d4c6ebc419ab9e7847c3843460a094f | False | True | False | trusted | False | - |
 | trove | repos/trove | FawxzzyWeb | fawxzzyweb | https://fawxzzy.com | application | - | codex/path-discipline-warning-slice-trove | 908fed4618aaf0bc869989e515ecacc410f47883 | 908fed4618aaf0bc869989e515ecacc410f47883 | False | True | False | trusted | True | - |
 
