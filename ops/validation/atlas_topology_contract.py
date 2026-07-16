@@ -170,6 +170,7 @@ def _topology_identity_projection(stack_identity: dict[str, Any], repo_id: str) 
 def resolve_topology_app_identity(manifest: dict[str, Any], candidate: str) -> str:
     """Resolve declared current or compatibility identity to a stable app id."""
     matches: set[str] = set()
+    stack_config = load_stack_config(atlas_contract_root() / "stack.yaml")
     apps = manifest.get("apps")
     if not isinstance(apps, list):
         raise ValueError("Topology manifest apps must be an array.")
@@ -181,6 +182,15 @@ def resolve_topology_app_identity(manifest: dict[str, Any], candidate: str) -> s
             continue
         accepted: set[str] = {app_id}
         projection = app.get("operational_identity")
+        if projection is not None:
+            repo_id = app.get("repo_id")
+            try:
+                stack_identity = operational_identity_from_config(stack_config, str(repo_id))
+            except OperationalIdentityError as exc:
+                raise ValueError(f"Unauthorized topology operational identity projection for app '{app_id}'.") from exc
+            expected_projection = _topology_identity_projection(stack_identity, str(repo_id))
+            if projection != expected_projection:
+                raise ValueError(f"Unauthorized topology operational identity projection for app '{app_id}'.")
         if isinstance(projection, dict):
             for field in [
                 "display_name",
@@ -375,53 +385,55 @@ def validate_topology_manifest(
                 value = str(app.get(field, ""))
                 if value not in HOSTNAME_MODES:
                     issues.append(ContractIssue("error", "atlas-topology-hostname-mode", path, f"{field} must be one of: {', '.join(sorted(HOSTNAME_MODES))}."))
+            repo_entry = repo_registry.get(repo_id) if isinstance(repo_registry, dict) else None
+            has_stack_identity = isinstance(repo_entry, dict) and "identity" in repo_entry
+            projection = app.get("operational_identity")
+            stack_identity: dict[str, Any] | None = None
+            if has_stack_identity:
+                try:
+                    stack_identity = operational_identity_from_config(stack_config, repo_id)
+                except OperationalIdentityError as exc:
+                    issues.append(ContractIssue("error", "atlas-topology-operational-identity", path, str(exc)))
+                else:
+                    expected_projection = _topology_identity_projection(stack_identity, repo_id)
+                    if projection != expected_projection:
+                        issues.append(
+                            ContractIssue(
+                                "error",
+                                "atlas-topology-operational-identity",
+                                path,
+                                "operational_identity must be an exact projection of stack.yaml authority.",
+                                {"expected": expected_projection},
+                            )
+                        )
+            elif projection is not None:
+                issues.append(ContractIssue("error", "atlas-topology-operational-identity", path, "operational_identity has no stack.yaml authority."))
             if surface == "product":
                 for field in ["preview_hostname_mode", "pr_preview_hostname_mode"]:
                     if app.get(field) != "default":
                         issues.append(ContractIssue("error", "atlas-topology-product-hostname-mode", path, f"Product apps must keep {field} set to 'default'."))
-                repo_entry = repo_registry.get(repo_id) if isinstance(repo_registry, dict) else None
-                has_stack_identity = isinstance(repo_entry, dict) and "identity" in repo_entry
-                projection = app.get("operational_identity")
-                if has_stack_identity:
-                    try:
-                        stack_identity = operational_identity_from_config(stack_config, repo_id)
-                    except OperationalIdentityError as exc:
-                        issues.append(ContractIssue("error", "atlas-topology-operational-identity", path, str(exc)))
-                    else:
-                        expected_projection = _topology_identity_projection(stack_identity, repo_id)
-                        if projection != expected_projection:
-                            issues.append(
-                                ContractIssue(
-                                    "error",
-                                    "atlas-topology-operational-identity",
-                                    path,
-                                    "operational_identity must be an exact projection of stack.yaml authority.",
-                                    {"expected": expected_projection},
-                                )
+                if stack_identity is not None:
+                    public_host = urlparse(stack_identity["public_origin"]).hostname
+                    expected_prod_mode = "intentional" if public_host == default_zone else "default"
+                    if app.get("prod_hostname_mode") != expected_prod_mode:
+                        issues.append(
+                            ContractIssue(
+                                "error",
+                                "atlas-topology-product-hostname-mode",
+                                path,
+                                f"Product app prod_hostname_mode must be '{expected_prod_mode}' for its canonical public origin.",
                             )
-                        public_host = urlparse(stack_identity["public_origin"]).hostname
-                        expected_prod_mode = "intentional" if public_host == default_zone else "default"
-                        if app.get("prod_hostname_mode") != expected_prod_mode:
-                            issues.append(
-                                ContractIssue(
-                                    "error",
-                                    "atlas-topology-product-hostname-mode",
-                                    path,
-                                    f"Product app prod_hostname_mode must be '{expected_prod_mode}' for its canonical public origin.",
-                                )
-                            )
-                        if expected_prod_mode == "intentional":
-                            intentional_product_rules[app_id] = {
-                                "kind": "named",
-                                "environment": "prod",
-                                "app_id": app_id,
-                                "hostname_template": "{zone}",
-                                "service_key_template": f"{app_id}/prod",
-                                "default_hostname_mode": "intentional",
-                            }
+                        )
+                    if expected_prod_mode == "intentional":
+                        intentional_product_rules[app_id] = {
+                            "kind": "named",
+                            "environment": "prod",
+                            "app_id": app_id,
+                            "hostname_template": "{zone}",
+                            "service_key_template": f"{app_id}/prod",
+                            "default_hostname_mode": "intentional",
+                        }
                 else:
-                    if projection is not None:
-                        issues.append(ContractIssue("error", "atlas-topology-operational-identity", path, "operational_identity has no stack.yaml authority."))
                     if app.get("prod_hostname_mode") != "default":
                         issues.append(ContractIssue("error", "atlas-topology-product-hostname-mode", path, "Product apps without a canonical identity must keep prod_hostname_mode set to 'default'."))
             if app_id == "lifeline":
