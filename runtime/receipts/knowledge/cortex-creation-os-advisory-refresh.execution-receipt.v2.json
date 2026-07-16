@@ -1,0 +1,233 @@
+{
+  "authority_actions": [],
+  "blockers": [],
+  "changed_paths": [
+    "ops/cortex/creation_os_advisory_read_model.py",
+    "ops/cortex/README.md",
+    "schemas/atlas.cortex.creation-os-advisory-read-model.v1.json",
+    "schemas/atlas.cortex.creation-os-advisory-query.v1.json",
+    "tests/test_cortex_creation_os_advisory_read_model.py",
+    "docs/ops/ATLAS-CREATION-OS-CORTEX-ADVISORY-READ-MODEL-REFRESH-2026-07-16.md",
+    "docs/atlas-book/05-receipt-index.md",
+    "runtime/cortex/catalog/knowledge/creation-os/advisory-read-model.latest.json",
+    "runtime/cortex/query/knowledge/creation-os/advisory-query.latest.json",
+    "runtime/receipts/knowledge/cortex-creation-os-advisory-refresh.execution-receipt.v2.json"
+  ],
+  "commits": [],
+  "component_id": "cortex",
+  "contract_version": "atlas.execution-receipt.v2",
+  "correlations": {
+    "branch": "codex/cortex-creation-os-advisory-refresh",
+    "card_id": null,
+    "thread_id": "019f52d9-7667-72a3-a5f7-9c0613aedd8f",
+    "turn_id": null,
+    "worktree": "runtime/codex/worktrees/atlas/cortex-creation-os-advisory-refresh"
+  },
+  "evidence_refs": [
+    "data/knowledge-candidates/creation-os/manifest.v1.json",
+    ".playbook/memory/atlas-knowledge-candidate-intake-receipts/creation-os.v1.json",
+    ".playbook/memory/atlas-knowledge-candidates.json",
+    "runtime/cortex/catalog/knowledge/creation-os/advisory-read-model.latest.json",
+    "runtime/cortex/query/knowledge/creation-os/advisory-query.latest.json"
+  ],
+  "extensions": {
+    "authority": {
+      "approval": false,
+      "automatic_selection": false,
+      "board": false,
+      "deployment": false,
+      "doctrine": false,
+      "execution": false,
+      "policy": false,
+      "promotion": false,
+      "read": true,
+      "repository_mutation": false,
+      "retrieval_advisory": true,
+      "routing_advisory": true,
+      "scheduling": false,
+      "synthesis_advisory": true
+    },
+    "base_proof_correction": {
+      "authoritative_base": "66f756768792de35ef00d1741cf8c6f6c965b733",
+      "canonical_head": "1d79d4ac3191dade11a2aa7c40352a5f210d35e2",
+      "correction": "The initial left/right rev-list count was interpreted backward; worktree base 66f756768792 remained correct.",
+      "relationship": "authoritative origin/main is seven commits ahead and contains canonical head in ancestry",
+      "status": "corrected-and-verified"
+    },
+    "global_cortex_surfaces": {
+      "actual_identity_verification": "not-performed-by-generator-terminal-proof-required",
+      "baseline": [
+        {
+          "path": "runtime/cortex/current-state/latest.json",
+          "sha256": "sha256:0daf01a2cbbeace49f73b3eb076e0e4daf3707fcff37c0c75fd3b1ef33d0a4d2"
+        },
+        {
+          "path": "runtime/cortex/current-state/latest.md",
+          "sha256": "sha256:dfc9cf5648f3948d49085128f1d4eb8efc1c7004ffa58e3d680cc9ce8da87c97"
+        },
+        {
+          "path": "runtime/cortex/context/latest.json",
+          "sha256": "sha256:5048d222f5def6bffc6cd990945ad9e2e0454b59cf9ffecbeb29aa9e39270446"
+        },
+        {
+          "path": "runtime/cortex/context/latest.md",
+          "sha256": "sha256:a7b4f706ca4d5007f7dbd821a9af3c16777826b4c0f0c877f2808848d35d3403"
+        },
+        {
+          "path": "runtime/cortex/operator-surface/latest.json",
+          "sha256": "sha256:afeb7a2b1c70e74835e77be76e000b426750bba75572d0c6cb0511e932da5662"
+        },
+        {
+          "path": "runtime/cortex/operator-surface/latest.md",
+          "sha256": "sha256:a1d74ec515d0897d96dfd3a8191ca77a97946aa34c5819fd9482f1bd6b51b36f"
+        },
+        {
+          "path": "runtime/cortex/ledger/latest.json",
+          "sha256": "sha256:360736a7cce673fb775039d9b3ecec1957168f5f684e2bc945622a24d2f25f58"
+        },
+        {
+          "path": "runtime/cortex/ledger/latest.md",
+          "sha256": "sha256:76358010295bcc7b1fddf9b901b3cd5ac8848eec3aac9781f1d2328a18af63fd"
+        },
+        {
+          "path": "runtime/cortex/query/knowledge/bundle.json",
+          "sha256": "sha256:7c5a0fc8aa4484601b7b8e4601c0889eb8a1f2390ebdce2429b0b057ec88da0e"
+        }
+      ],
+      "expected_byte_identical": true,
+      "freshness_claimed": false
+    },
+    "marker_deltas": [],
+    "marker_movement_authorized": false,
+    "output_hashes": {
+      "runtime/cortex/catalog/knowledge/creation-os/advisory-read-model.latest.json": "sha256:76d2ebf9016c8cad52ef534ff114d6cc170fc62aa6c000c87f4c38feac9b27e1",
+      "runtime/cortex/query/knowledge/creation-os/advisory-query.latest.json": "sha256:c58a2693564202c2e805b032994ecc1e3b4985ab39b88640a9f8ee6d6dbf0c2f"
+    },
+    "projected_identities": {
+      "candidate_ids": [
+        "creation-os-bootstrap-pointer-not-memory",
+        "creation-os-builder-creative-loop-separation",
+        "creation-os-human-directed-authority",
+        "creation-os-infrastructure-shopping-before-wedge",
+        "creation-os-platform-surface-vertical-contracts",
+        "creation-os-xr-device-novelty-trap"
+      ],
+      "deferred_decision_ids": [
+        "creation-os-software-repo-voice-first-wedge"
+      ]
+    },
+    "source_set": {
+      "components": [
+        {
+          "byte_length": 40,
+          "label": "atlas_revision",
+          "sha256": "sha256:98ba8acdb2de401c19dac3a3cf9f12385e79a3fb87d391b8d16a1d1d208b3511",
+          "value": "66f756768792de35ef00d1741cf8c6f6c965b733"
+        },
+        {
+          "byte_length": 10563,
+          "label": "atlas_manifest",
+          "path": "data/knowledge-candidates/creation-os/manifest.v1.json",
+          "sha256": "sha256:eaab80257186a1f1d32e45106ed87858e0e254065df315ccb26b1e89b854efe2"
+        },
+        {
+          "byte_length": 2829,
+          "label": "atlas_candidate:creation-os-bootstrap-pointer-not-memory",
+          "path": "data/knowledge-candidates/creation-os/creation-os-bootstrap-pointer-not-memory.knowledge-candidate.v2.json",
+          "sha256": "sha256:71170a9442e24862e0f79876e3f8e7028c9146efe5a91bc20daacf1b3a679c05"
+        },
+        {
+          "byte_length": 2942,
+          "label": "atlas_candidate:creation-os-builder-creative-loop-separation",
+          "path": "data/knowledge-candidates/creation-os/creation-os-builder-creative-loop-separation.knowledge-candidate.v2.json",
+          "sha256": "sha256:8c50f2611698756850c88c15ff4ba3d3f09a8807378e4aeb339572842bf4d986"
+        },
+        {
+          "byte_length": 2889,
+          "label": "atlas_candidate:creation-os-human-directed-authority",
+          "path": "data/knowledge-candidates/creation-os/creation-os-human-directed-authority.knowledge-candidate.v2.json",
+          "sha256": "sha256:0aee7841a054b2460d0260699151d0e878602af4fd63961ca9697e5cf71e2b4a"
+        },
+        {
+          "byte_length": 3087,
+          "label": "atlas_candidate:creation-os-infrastructure-shopping-before-wedge",
+          "path": "data/knowledge-candidates/creation-os/creation-os-infrastructure-shopping-before-wedge.knowledge-candidate.v2.json",
+          "sha256": "sha256:44f882ae82ee35b4691457a6ac5039ff481c37d9aecb37fed75bbf659673405a"
+        },
+        {
+          "byte_length": 3139,
+          "label": "atlas_candidate:creation-os-platform-surface-vertical-contracts",
+          "path": "data/knowledge-candidates/creation-os/creation-os-platform-surface-vertical-contracts.knowledge-candidate.v2.json",
+          "sha256": "sha256:b8ce18b2720dbcc5900721e43de96dc660e91f4625223b683550c52de8bb8da2"
+        },
+        {
+          "byte_length": 2994,
+          "label": "atlas_candidate:creation-os-xr-device-novelty-trap",
+          "path": "data/knowledge-candidates/creation-os/creation-os-xr-device-novelty-trap.knowledge-candidate.v2.json",
+          "sha256": "sha256:d44055c02c0acb69a58e15a9f28fd8a69421b083d927cecbe6828e0aebad390d"
+        },
+        {
+          "byte_length": 71,
+          "label": "atlas_decision_record_sha256",
+          "sha256": "sha256:fbf27256f7e24a88e43195dae5b0056d1095cad580a42af41f42a3a5cc727d95",
+          "value": "sha256:5f26456f7e2a5d18ca6ca513cdcd53d33af0df5a19a3b05c01a753d393a121d6"
+        },
+        {
+          "byte_length": 40,
+          "label": "playbook_merged_revision",
+          "sha256": "sha256:686ceddc9e2a2ce15d17a56717dc776b789490978e248b9c3e69d35c1f583c14",
+          "value": "885ae2bb0104f5ffc1c99bc1febe1f4cf2fde1aa"
+        },
+        {
+          "byte_length": 13550,
+          "label": "playbook_owner_receipt",
+          "path": ".playbook/memory/atlas-knowledge-candidate-intake-receipts/creation-os.v1.json",
+          "sha256": "sha256:ebeb5c88c9fb05630a029e7975d11c3f182f61951f20241438eb24fd3c1c77f8"
+        },
+        {
+          "byte_length": 34241,
+          "label": "playbook_candidate_queue",
+          "path": ".playbook/memory/atlas-knowledge-candidates.json",
+          "sha256": "sha256:206e30ff026969dec954f04b2aa722fb047f6c8540e9258ddda8b9887dba0d75"
+        }
+      ],
+      "digest": "sha256:52dda582fd44d75f6d1a62c8ddd0a78adb5b31a5d3e604a59f6072ae19e7e2fb",
+      "digest_algorithm": "sha256 over ordered length-prefixed UTF-8 labels and exact raw component bytes",
+      "topology": {
+        "accepted_head_is_ancestor": true,
+        "merge_parents": [
+          "8aa912b492e689fca4c296d59a438c2813cba4fc",
+          "e692f574ed51cdb0f59ce423d0cbf6baa08fe51d"
+        ],
+        "playbook_accepted_head": "e692f574ed51cdb0f59ce423d0cbf6baa08fe51d",
+        "playbook_merged_revision": "885ae2bb0104f5ffc1c99bc1febe1f4cf2fde1aa"
+      }
+    }
+  },
+  "follow_up": [
+    "DiscordOS reliability continuation after this owner receipt is reconciled."
+  ],
+  "job_id": "cortex-creation-os-advisory-refresh",
+  "project_id": "atlas",
+  "receipt_id": "cortex-creation-os-advisory-refresh-66f756768792-885ae2bb0104",
+  "recorded_at": "2026-07-16T13:56:04Z",
+  "runtime_effective": {
+    "approval_policy": "never",
+    "model": "gpt-5.6-sol",
+    "permissions": "full-local-access-network-live-web",
+    "reasoning": "xhigh",
+    "speed": "unknown-not-exposed"
+  },
+  "status": "succeeded",
+  "summary": "Built the deterministic Creation OS candidate-only advisory catalog and retrieval model with one separately deferred Atlas product Decision.",
+  "verification": [
+    {
+      "command": "python ops/cortex/creation_os_advisory_read_model.py --check --atlas-repo <ATLAS_WORKTREE> --playbook-repo <PLAYBOOK_REPO>",
+      "evidence_refs": [
+        "runtime/cortex/catalog/knowledge/creation-os/advisory-read-model.latest.json",
+        "runtime/cortex/query/knowledge/creation-os/advisory-query.latest.json"
+      ],
+      "status": "passed"
+    }
+  ]
+}
