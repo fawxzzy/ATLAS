@@ -14,7 +14,8 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from ops._atlas import atlas_root, normalize_slashes
-from ops.atlas.vercel_observability_project_inventory import GOVERNED_PROJECTS
+from ops.atlas.operational_identity import OperationalIdentityError
+from ops.atlas.vercel_project_registry import GOVERNED_PROJECTS_BY_ID as GOVERNED_PROJECTS, normalize_project_name
 
 SCHEMA_VERSION = "atlas.vercel_environment_name_inventory.v1"
 WRAPPER_SCHEMA_VERSION = "atlas.vercel.observability.environment_name_wrapper.v1"
@@ -125,9 +126,15 @@ def _normalize_wrapper(payload: dict[str, Any]) -> tuple[OrderedDict[str, Any] |
     project_id = payload.get("project_id")
     project_name = payload.get("project_name")
     meta = _project_meta(str(project_id)) if isinstance(project_id, str) else None
+    canonical_project_name: str | None = None
     if meta is None:
         blockers.append(_finding("unknown_project_id", "Wrapper project is not in the governed Vercel project registry.", project_id=project_id))
-    elif project_name != meta["project_name"]:
+    elif isinstance(project_id, str) and isinstance(project_name, str):
+        try:
+            canonical_project_name = normalize_project_name(project_id=project_id, project_name=project_name)
+        except OperationalIdentityError:
+            blockers.append(_finding("project_identity_mismatch", "Wrapper project name does not match the governed project id."))
+    else:
         blockers.append(_finding("project_identity_mismatch", "Wrapper project name does not match the governed project id."))
 
     variables = payload.get("variables")
@@ -184,7 +191,7 @@ def _normalize_wrapper(payload: dict[str, Any]) -> tuple[OrderedDict[str, Any] |
         OrderedDict(
             [
                 ("project_id", project_id),
-                ("project_name", project_name),
+                ("project_name", canonical_project_name),
                 ("repo_logical_id", meta["repo_logical_id"]),
                 ("captured_at_utc", captured_at),
                 ("variable_count", len(normalized_variables)),
