@@ -39,6 +39,7 @@ data/**
 !data/fixtures/
 !data/fixtures/atlas.continuity.source.manifest.example.v1.json
 !data/fixtures/atlas.playbook.adoption.report.example.v1.json
+!data/knowledge-candidates/**
 data/imports/**/raw/**
 data/imports/**/extracted/**
 

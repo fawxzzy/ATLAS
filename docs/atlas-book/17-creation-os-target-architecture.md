@@ -186,6 +186,9 @@ ratification.
 
 The Atlas-owned
 [Playbook promotion packet](../ops/ATLAS-CREATION-OS-PLAYBOOK-PROMOTION-CANDIDATES-2026-07-16.md)
-records two Rules, two Patterns, two Failure Modes, and one Decision for later
-Playbook owner review. No candidate is canonical doctrine merely because it is
-listed here.
+records two Rules, two Patterns, two Failure Modes, and one Decision. The six
+contract candidates and deferred Decision are indexed in the root-owned
+[Creation OS knowledge manifest](../../data/knowledge-candidates/creation-os/manifest.v1.json).
+Only the six supported kinds can enter Playbook's candidate-only review path;
+the Decision remains outside `atlas.knowledge-candidate.v2`. No candidate is
+canonical doctrine merely because it is listed here.

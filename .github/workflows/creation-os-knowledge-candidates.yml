@@ -1,0 +1,46 @@
+name: Creation OS Knowledge Candidates
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/creation-os-knowledge-candidates.yml"
+      - "data/knowledge-candidates/**"
+      - "docs/architecture/ATLAS-CREATION-OS-TARGET-ARCHITECTURE.md"
+      - "docs/atlas-book/17-creation-os-target-architecture.md"
+      - "docs/ops/ATLAS-CREATION-OS-*.md"
+      - "ops/atlas/creation_os_knowledge_candidates.mjs"
+      - "ops/validation/validate_creation_os_adoption.py"
+      - "packages/atlas-contracts/**"
+      - "tests/test_creation_os_knowledge_candidates.mjs"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate Atlas Contracts fixtures
+        run: npm --prefix packages/atlas-contracts run validate
+
+      - name: Check Creation OS projection
+        run: node ops/atlas/creation_os_knowledge_candidates.mjs --check --json
+
+      - name: Run deterministic projection tests
+        run: node --test tests/test_creation_os_knowledge_candidates.mjs
+
+      - name: Run Creation OS adoption validation
+        run: python ops/validation/validate_creation_os_adoption.py

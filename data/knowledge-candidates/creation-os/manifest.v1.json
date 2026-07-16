@@ -1,0 +1,186 @@
+{
+  "manifest_version": "atlas.creation-os.knowledge-candidate-index.v1",
+  "generated_at": "2026-07-16T06:31:44Z",
+  "layout": {
+    "root": "data/knowledge-candidates/creation-os",
+    "candidate_filename_contract": "<candidate_id>.knowledge-candidate.v2.json",
+    "manifest": "data/knowledge-candidates/creation-os/manifest.v1.json",
+    "owner_repository_output_allowed": false
+  },
+  "source": {
+    "packet_ref": "docs/ops/ATLAS-CREATION-OS-PLAYBOOK-PROMOTION-CANDIDATES-2026-07-16.md",
+    "packet_sha256": "sha256:556644b597b3dee5f1ab9453ebff48d6a96a1e3e95f49c24724756bdc70a2742",
+    "packet_sha256_semantics": "Exact reconciled packet bytes used to build this projection.",
+    "packet_first_commit": "2407b0e656775d040099e5618eb194c5c06ee0e7",
+    "packet_first_commit_at": "2026-07-16T06:31:44Z",
+    "adoption_merge_commit": "1d79d4ac3191dade11a2aa7c40352a5f210d35e2",
+    "created_at_semantics": "Each candidate created_at is the UTC time of the first durable Git commit containing the source candidate packet, not generation or owner-review time."
+  },
+  "contract": {
+    "contract_id": "atlas.knowledge-candidate.v2",
+    "schema_ref": "packages/atlas-contracts/schemas/atlas.knowledge-candidate.v2.schema.json",
+    "allowed_kinds": [
+      "rule",
+      "pattern",
+      "failure-mode",
+      "automation-opportunity",
+      "governance-gap"
+    ],
+    "playbook_consumer": {
+      "repository": "fawxzzy/playbook",
+      "observed_revision": "8aa912b492e689fca4c296d59a438c2813cba4fc",
+      "contract_path": "packages/engine/src/memory/atlasCandidateAdmission.ts",
+      "accepted_destinations": {
+        "rule": "Playbook/rules",
+        "pattern": "Playbook/patterns",
+        "failure-mode": "Playbook/failure-modes"
+      }
+    }
+  },
+  "hash_policy": {
+    "algorithm": "sha256",
+    "artifact_sha256": "Exact committed UTF-8 bytes including the terminal LF.",
+    "source_field_sha256": "Exact normalized Markdown paragraph text encoded as UTF-8.",
+    "record_sha256": "Recursive key-sorted UTF-8 JSON without whitespace, excluding record_sha256 itself."
+  },
+  "counts": {
+    "total_source_records": 7,
+    "knowledge_candidates": 6,
+    "deferred_decisions": 1
+  },
+  "records": [
+    {
+      "record_id": "creation-os-human-directed-authority",
+      "classification": "knowledge-candidate-v2",
+      "kind": "rule",
+      "source_statement_sha256": "sha256:4b17a2fbe026529c61041a9af494fbeb63aa4827a009c78ef31b026ec28149e0",
+      "source_scope_sha256": "sha256:e277c24dff69cb94304f19d45239c96c09f68e0773ca278cda4b95bb0acb6a60",
+      "contract_eligible": true,
+      "artifact_path": "data/knowledge-candidates/creation-os/creation-os-human-directed-authority.knowledge-candidate.v2.json",
+      "artifact_sha256": "sha256:45daed22bd773604e1be0e068dd0582d69ae0304d7dfdc5f2dee4787b8b7ac76",
+      "suggested_destination": "Playbook/rules",
+      "disposition": "playbook-candidate-only-intake",
+      "record_sha256": "sha256:4dd859b60e971e7d81e9c65e8021719f501ad86fd13f412a54f4859ced3d289c"
+    },
+    {
+      "record_id": "creation-os-bootstrap-pointer-not-memory",
+      "classification": "knowledge-candidate-v2",
+      "kind": "rule",
+      "source_statement_sha256": "sha256:ec2ba71e59c57f2e625a88184970f573f84e59493dc9e136a6dcd77ee3e55702",
+      "source_scope_sha256": "sha256:3d816f53c3df64a5555737c1b04284fabb41200040f2e5ffb80d9c8e93e18814",
+      "contract_eligible": true,
+      "artifact_path": "data/knowledge-candidates/creation-os/creation-os-bootstrap-pointer-not-memory.knowledge-candidate.v2.json",
+      "artifact_sha256": "sha256:da911a286e13cec9cf2458c347fc0029107154d062ab8d2ac1b58b6a2585b87a",
+      "suggested_destination": "Playbook/rules",
+      "disposition": "playbook-candidate-only-intake",
+      "record_sha256": "sha256:5df0f7d16eb8953d1a7cd9f6c9c323013817034946604d3566a5f96a1c2a110e"
+    },
+    {
+      "record_id": "creation-os-builder-creative-loop-separation",
+      "classification": "knowledge-candidate-v2",
+      "kind": "pattern",
+      "source_statement_sha256": "sha256:45b131a2ca8dbaa28863fc1c7bd80524deb7db17d8427e96bab89fb9b64134e3",
+      "source_scope_sha256": "sha256:5f3ec0991ea23bc61a139f87e8ca0ad39d3519f28a9216efb72c613beea106e7",
+      "contract_eligible": true,
+      "artifact_path": "data/knowledge-candidates/creation-os/creation-os-builder-creative-loop-separation.knowledge-candidate.v2.json",
+      "artifact_sha256": "sha256:c1757bab378fff7ab1cc17ed265ddb1bee2914437c27ebf95d8806f2d747ad67",
+      "suggested_destination": "Playbook/patterns",
+      "disposition": "playbook-candidate-only-intake",
+      "record_sha256": "sha256:03e9216940a2f9adab567b370944c536bd92696a3d7969f9ee24439340b92547"
+    },
+    {
+      "record_id": "creation-os-platform-surface-vertical-contracts",
+      "classification": "knowledge-candidate-v2",
+      "kind": "pattern",
+      "source_statement_sha256": "sha256:6acbfe34686350cf933dbc43cdad5f66885549223c7abc35af402fdb985dae5b",
+      "source_scope_sha256": "sha256:a16c24e2d2b598738aeb106ab139d4fd23b14d7371ff02dc16e47580f69544c0",
+      "contract_eligible": true,
+      "artifact_path": "data/knowledge-candidates/creation-os/creation-os-platform-surface-vertical-contracts.knowledge-candidate.v2.json",
+      "artifact_sha256": "sha256:adc55f5262cf8a99c1ea0a47f2de05c9393698c8ac081c2c682176fb4dea19a1",
+      "suggested_destination": "Playbook/patterns",
+      "disposition": "playbook-candidate-only-intake",
+      "record_sha256": "sha256:c13f12449f7803dd7017dea087c6f8954b036eb24ea903fcc976d4938f18a1d4"
+    },
+    {
+      "record_id": "creation-os-infrastructure-shopping-before-wedge",
+      "classification": "knowledge-candidate-v2",
+      "kind": "failure-mode",
+      "source_statement_sha256": "sha256:1d6a53a2298696bc28e52c3149fae4fb2ab3bd5f3d87aba3bbaefde8d0cbaca1",
+      "source_scope_sha256": "sha256:8d66a9fc8d7a9b7bfa179047c4f58ec8c94b88e0357aafe2c699ae480f4c5c2b",
+      "contract_eligible": true,
+      "artifact_path": "data/knowledge-candidates/creation-os/creation-os-infrastructure-shopping-before-wedge.knowledge-candidate.v2.json",
+      "artifact_sha256": "sha256:0497c6357d9049b30e913a8d72e4ebd9e30c61388a9d12479affd658bb5aa805",
+      "suggested_destination": "Playbook/failure-modes",
+      "disposition": "playbook-candidate-only-intake",
+      "record_sha256": "sha256:76e118ddf34734fe968ec023e28fe3b331a6b831ed4ec6be1a05fe86531176a8"
+    },
+    {
+      "record_id": "creation-os-xr-device-novelty-trap",
+      "classification": "knowledge-candidate-v2",
+      "kind": "failure-mode",
+      "source_statement_sha256": "sha256:792d0a78d60d3997e2a9a0256908a3ff0c2c57f19f506c9a0be160cf2f9892b8",
+      "source_scope_sha256": "sha256:3ef15743b0c02b1ad98eed32b0abafcf424bf57b0122792c4bd06aadcd43a964",
+      "contract_eligible": true,
+      "artifact_path": "data/knowledge-candidates/creation-os/creation-os-xr-device-novelty-trap.knowledge-candidate.v2.json",
+      "artifact_sha256": "sha256:20ce4b0a3277a9d025f382f23693475ba0e2ff4ad58f200261087cd77db573ef",
+      "suggested_destination": "Playbook/failure-modes",
+      "disposition": "playbook-candidate-only-intake",
+      "record_sha256": "sha256:07053c6f8ea57dbb0787a496da73ef7c17b9a5967d621a611cf5c028398e0d18"
+    },
+    {
+      "record_id": "creation-os-software-repo-voice-first-wedge",
+      "classification": "atlas-product-decision",
+      "kind": "decision",
+      "name": "Software Repository and Voice First Wedge",
+      "statement": "Software creation with repository ingestion and voice is the first Creation OS product wedge, subject to operator ratification of success and kill metrics.",
+      "scope": "product definition, repository classes, artifact types, previews, voice interaction, human approval, product-market fit, and monetization.",
+      "source_statement_sha256": "sha256:608e6720c731b39533542d40936a2af1d75dd6441fb52812056dd444ca2365b0",
+      "source_scope_sha256": "sha256:cd3fd29be18d4cc2d5b02f58cfa15cfbac2282db737fc0b6a1bbac17bde8326f",
+      "provenance": [
+        {
+          "source_type": "repository",
+          "ref": "git:fawxzzy/ATLAS@2407b0e656775d040099e5618eb194c5c06ee0e7:docs/ops/ATLAS-CREATION-OS-PLAYBOOK-PROMOTION-CANDIDATES-2026-07-16.md#creation-os-software-repo-voice-first-wedge",
+          "classification": "verified"
+        },
+        {
+          "source_type": "repository",
+          "ref": "git:fawxzzy/ATLAS@1d79d4ac3191dade11a2aa7c40352a5f210d35e2:docs/architecture/ATLAS-CREATION-OS-TARGET-ARCHITECTURE.md#phase-one-wedge",
+          "classification": "verified"
+        },
+        {
+          "source_type": "repository",
+          "ref": "git:fawxzzy/ATLAS@1d79d4ac3191dade11a2aa7c40352a5f210d35e2:docs/architecture/ATLAS-CREATION-OS-TARGET-ARCHITECTURE.md#success-metrics-and-kill-criteria",
+          "classification": "verified"
+        },
+        {
+          "source_type": "external-source",
+          "ref": "git:fawxzzy/ATLAS@1d79d4ac3191dade11a2aa7c40352a5f210d35e2:data/imports/creation-os/deep-research-2026-07-16/deep-research-report.md#lines=13,27,415",
+          "classification": "reported"
+        }
+      ],
+      "contract_eligible": false,
+      "artifact_path": null,
+      "artifact_sha256": null,
+      "suggested_destination": null,
+      "disposition": "deferred-atlas-product-decision",
+      "contract_exclusion_reason": "Decision is not one of the five atlas.knowledge-candidate.v2 kinds, and the current Playbook consumer has no Decision destination.",
+      "later_authority": {
+        "decision_ratification": "Operator ratification of the target architecture success thresholds and kill criteria is required before this product Decision can authorize execution.",
+        "contract_migration": "A separately approved Atlas Contracts and Playbook consumer migration is required before any Decision can flow through the KnowledgeCandidate contract; relabeling is forbidden."
+      },
+      "target_architecture_refs": [
+        "docs/architecture/ATLAS-CREATION-OS-TARGET-ARCHITECTURE.md#phase-one-wedge",
+        "docs/architecture/ATLAS-CREATION-OS-TARGET-ARCHITECTURE.md#success-metrics-and-kill-criteria"
+      ],
+      "record_sha256": "sha256:33926c99c5426189d4a5b0a900dad49268a68dc80d26eb3a639a7b12f51b0e8f"
+    }
+  ],
+  "authority": {
+    "atlas_projection_only": true,
+    "playbook_doctrine_mutation": false,
+    "cortex_policy_authority": false,
+    "owner_repository_mutation": false,
+    "bulk_copy": false,
+    "automatic_promotion": false
+  }
+}

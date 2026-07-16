@@ -1,0 +1,62 @@
+{
+  "contract_version": "atlas.knowledge-candidate.v2",
+  "candidate_id": "creation-os-human-directed-authority",
+  "kind": "rule",
+  "name": "Human-Directed Authority",
+  "statement": "Atlas remains human-directed; autonomy does not imply external or production authority.",
+  "scope": "Atlas jobs, tools, agents, voice surfaces, planner roles, deployments, publications, purchases, and device actions.",
+  "provenance": [
+    {
+      "source_type": "repository",
+      "ref": "git:fawxzzy/ATLAS@2407b0e656775d040099e5618eb194c5c06ee0e7:docs/ops/ATLAS-CREATION-OS-PLAYBOOK-PROMOTION-CANDIDATES-2026-07-16.md#creation-os-human-directed-authority",
+      "classification": "verified"
+    },
+    {
+      "source_type": "repository",
+      "ref": "git:fawxzzy/ATLAS@1d79d4ac3191dade11a2aa7c40352a5f210d35e2:docs/architecture/ATLAS-CONTRACTS-V2-SCOPE.md#authority-boundaries",
+      "classification": "verified"
+    },
+    {
+      "source_type": "repository",
+      "ref": "git:fawxzzy/ATLAS@1d79d4ac3191dade11a2aa7c40352a5f210d35e2:docs/architecture/ATLAS-CREATION-OS-TARGET-ARCHITECTURE.md#policy-permission-and-approval",
+      "classification": "verified"
+    },
+    {
+      "source_type": "external-source",
+      "ref": "git:fawxzzy/ATLAS@1d79d4ac3191dade11a2aa7c40352a5f210d35e2:data/imports/creation-os/deep-research-2026-07-16/deep-research-report.md#lines=5,19,68,365-370",
+      "classification": "reported"
+    },
+    {
+      "source_type": "repository",
+      "ref": "git:fawxzzy/playbook@8aa912b492e689fca4c296d59a438c2813cba4fc:packages/engine/src/memory/atlasCandidateAdmission.ts",
+      "classification": "verified"
+    }
+  ],
+  "review": {
+    "status": "candidate",
+    "reviewer": null,
+    "reviewed_at": null,
+    "decision_note": null
+  },
+  "suggested_destination": "Playbook/rules",
+  "created_at": "2026-07-16T06:31:44Z",
+  "extensions": {
+    "atlas_projection": {
+      "source_packet_ref": "docs/ops/ATLAS-CREATION-OS-PLAYBOOK-PROMOTION-CANDIDATES-2026-07-16.md",
+      "source_packet_first_commit": "2407b0e656775d040099e5618eb194c5c06ee0e7",
+      "source_adoption_merge_commit": "1d79d4ac3191dade11a2aa7c40352a5f210d35e2",
+      "source_statement_sha256": "sha256:4b17a2fbe026529c61041a9af494fbeb63aa4827a009c78ef31b026ec28149e0",
+      "source_scope_sha256": "sha256:e277c24dff69cb94304f19d45239c96c09f68e0773ca278cda4b95bb0acb6a60",
+      "created_at_basis": "First durable Git commit containing the source candidate packet."
+    },
+    "playbook_consumer_contract": {
+      "repository": "fawxzzy/playbook",
+      "observed_revision": "8aa912b492e689fca4c296d59a438c2813cba4fc",
+      "contract_path": "packages/engine/src/memory/atlasCandidateAdmission.ts",
+      "accepted_mapping": {
+        "kind": "rule",
+        "destination": "Playbook/rules"
+      }
+    }
+  }
+}
