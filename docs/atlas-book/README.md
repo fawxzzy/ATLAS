@@ -39,6 +39,7 @@ Start here:
 - [Lane Split Execution](14-lane-split-execution.md)
 - [Lifeline](15-lifeline.md)
 - [Runtime Placement](16-runtime-placement.md)
+- [Creation OS Target Architecture](17-creation-os-target-architecture.md)
 
 This chapter set now covers:
 
@@ -52,4 +53,5 @@ This chapter set now covers:
 - what each major lane is actually trying to finish
 - how each future lane should safely reopen
 - where each runtime belongs, what is actually available, and the exact local activation order
+- how the Creation OS target composes current Atlas owners, gates, memory boundaries, and staged product lanes
 - how the current closeout ladder is reducing branch, tmp, Vercel, and residue drift without reopening runtime mutation

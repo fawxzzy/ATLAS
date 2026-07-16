@@ -29,6 +29,8 @@ It is meant to answer:
 13. [Vision And Endgames](13-vision-and-endgames.md)
 14. [Lane Split Execution](14-lane-split-execution.md)
 15. [Lifeline](15-lifeline.md)
+16. [Runtime Placement](16-runtime-placement.md)
+17. [Creation OS Target Architecture](17-creation-os-target-architecture.md)
 
 ## Current Emphasis
 
@@ -98,3 +100,10 @@ The current closeout layer now also adds:
 - green normal-validation confirmation after stack and registry repair
 - bounded classification for branch/worktree, tmp, helper Vercel, and Fitness residue pressure
 - a narrow next-package ladder toward 100 instead of another broad convergence pass
+
+The current target-architecture layer now also adds:
+
+- a human-directed Creation OS product definition and software-builder wedge
+- deterministic builder and conversational creative loop separation
+- a backend-neutral bootstrap pointer and memory-tier contract
+- unmeasured staged roadmap candidates without changing marker percentages
