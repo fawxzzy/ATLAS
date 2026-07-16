@@ -19,6 +19,8 @@ export const CORTEX_HANDOFF_REF = "docs/ops/ATLAS-CREATION-OS-CORTEX-ADVISORY-RE
 const CONTRACT_ID = "atlas.knowledge-candidate.v2";
 const SCHEMA_REF = "packages/atlas-contracts/schemas/atlas.knowledge-candidate.v2.schema.json";
 const SOURCE_PACKET_FIRST_COMMIT = "2407b0e656775d040099e5618eb194c5c06ee0e7";
+const SOURCE_PACKET_CORRECTED_REVISION = "c376810ec75066fb6b21d950f56fcdf986421889";
+const SOURCE_PACKET_CORRECTED_SHA256 = "sha256:e2946fcc95f2b1aa5d871767446e97a0e69da6c66d72c90e53855313c4cf2ca2";
 const SOURCE_ADOPTION_MERGE_COMMIT = "1d79d4ac3191dade11a2aa7c40352a5f210d35e2";
 const CREATED_AT = "2026-07-16T06:31:44Z";
 const PLAYBOOK_REPOSITORY = "fawxzzy/playbook";
@@ -298,7 +300,7 @@ function atlasRepositoryRef(ref, revision = SOURCE_ADOPTION_MERGE_COMMIT) {
 
 function candidateProvenance(spec) {
   return [
-    atlasRepositoryRef(`${SOURCE_PACKET_REF}#${spec.id}`, SOURCE_PACKET_FIRST_COMMIT),
+    atlasRepositoryRef(`${SOURCE_PACKET_REF}#${spec.id}`, SOURCE_PACKET_CORRECTED_REVISION),
     ...spec.evidenceRefs.map((ref) => atlasRepositoryRef(ref)),
     {
       source_type: "external-source",
@@ -334,6 +336,7 @@ function buildCandidate(spec) {
       atlas_projection: {
         source_packet_ref: SOURCE_PACKET_REF,
         source_packet_first_commit: SOURCE_PACKET_FIRST_COMMIT,
+        source_packet_corrected_revision: SOURCE_PACKET_CORRECTED_REVISION,
         source_adoption_merge_commit: SOURCE_ADOPTION_MERGE_COMMIT,
         source_statement_sha256: digestText(spec.statement),
         source_scope_sha256: digestText(spec.scope),
@@ -415,7 +418,7 @@ function buildDecisionManifestRecord(spec) {
     source_statement_sha256: digestText(spec.statement),
     source_scope_sha256: digestText(spec.scope),
     provenance: [
-      atlasRepositoryRef(`${SOURCE_PACKET_REF}#${spec.id}`, SOURCE_PACKET_FIRST_COMMIT),
+      atlasRepositoryRef(`${SOURCE_PACKET_REF}#${spec.id}`, SOURCE_PACKET_CORRECTED_REVISION),
       ...spec.evidenceRefs.map((ref) => atlasRepositoryRef(ref)),
       {
         source_type: "external-source",
@@ -454,6 +457,7 @@ function buildManifest(sourceBytes, candidateRecords, decisionRecord) {
       packet_sha256_semantics: "Canonical LF-normalized Git blob bytes used to build this projection.",
       packet_first_commit: SOURCE_PACKET_FIRST_COMMIT,
       packet_first_commit_at: CREATED_AT,
+      corrected_packet_revision: SOURCE_PACKET_CORRECTED_REVISION,
       adoption_merge_commit: SOURCE_ADOPTION_MERGE_COMMIT,
       created_at_semantics: "Each candidate created_at is the UTC time of the first durable Git commit containing the source candidate packet, not generation or owner-review time.",
     },
@@ -644,6 +648,17 @@ export async function assertProjectionInvariants(projection) {
     if (candidate.scope !== expected.scope) errors.push(`${candidate.candidate_id} scope drifted`);
     if (candidate.created_at !== CREATED_AT) errors.push(`${candidate.candidate_id} created_at semantics drifted`);
     if (candidate.review?.status !== "candidate") errors.push(`${candidate.candidate_id} review status must be candidate`);
+    const expectedPacketRef = `git:fawxzzy/ATLAS@${SOURCE_PACKET_CORRECTED_REVISION}:${SOURCE_PACKET_REF}#${candidate.candidate_id}`;
+    if (candidate.provenance?.[0]?.ref !== expectedPacketRef
+      || candidate.provenance?.[0]?.classification !== "verified") {
+      errors.push(`${candidate.candidate_id} corrected packet provenance drifted`);
+    }
+    const projectionMetadata = candidate.extensions?.atlas_projection;
+    if (projectionMetadata?.source_packet_first_commit !== SOURCE_PACKET_FIRST_COMMIT
+      || projectionMetadata?.source_packet_corrected_revision !== SOURCE_PACKET_CORRECTED_REVISION
+      || projectionMetadata?.created_at_basis !== "First durable Git commit containing the source candidate packet.") {
+      errors.push(`${candidate.candidate_id} packet history semantics drifted`);
+    }
     const supported = SUPPORTED_PLAYBOOK_DESTINATIONS[candidate.kind];
     if (!supported || candidate.suggested_destination !== supported) {
       errors.push(`${candidate.candidate_id} has unsupported kind/destination mapping`);
@@ -653,6 +668,12 @@ export async function assertProjectionInvariants(projection) {
   }
 
   const manifest = projection.manifest;
+  if (manifest.source?.packet_first_commit !== SOURCE_PACKET_FIRST_COMMIT
+    || manifest.source?.packet_first_commit_at !== CREATED_AT
+    || manifest.source?.corrected_packet_revision !== SOURCE_PACKET_CORRECTED_REVISION
+    || manifest.source?.packet_sha256 !== SOURCE_PACKET_CORRECTED_SHA256) {
+    errors.push("manifest packet history and corrected provenance drifted");
+  }
   if (manifest.counts?.total_source_records !== 7
     || manifest.counts?.knowledge_candidates !== 6
     || manifest.counts?.deferred_decisions !== 1
@@ -697,6 +718,11 @@ export async function assertProjectionInvariants(projection) {
     || decision.suggested_destination !== null) {
     errors.push("deferred Decision must remain manifest-only and contract-ineligible");
   }
+  const expectedDecisionPacketRef = `git:fawxzzy/ATLAS@${SOURCE_PACKET_CORRECTED_REVISION}:${SOURCE_PACKET_REF}#${DECISION_ID}`;
+  if (decision?.provenance?.[0]?.ref !== expectedDecisionPacketRef
+    || decision?.provenance?.[0]?.classification !== "verified") {
+    errors.push("deferred Decision corrected packet provenance drifted");
+  }
   if (projection.outputs.has(candidateArtifactRef(DECISION_ID))) {
     errors.push("deferred Decision cannot have a KnowledgeCandidate artifact");
   }
@@ -714,6 +740,10 @@ export async function assertProjectionInvariants(projection) {
 export async function buildProjection({ root = ROOT } = {}) {
   const sourcePath = path.join(root, SOURCE_PACKET_REF);
   const sourceBytes = normalizeSourceBytes(await fs.readFile(sourcePath));
+  const sourceDigest = digestBytes(sourceBytes);
+  if (sourceDigest !== SOURCE_PACKET_CORRECTED_SHA256) {
+    fail(`source packet bytes drifted from corrected revision ${SOURCE_PACKET_CORRECTED_REVISION}`);
+  }
   const sourceText = sourceBytes.toString("utf8");
   assertSourcePacket(sourceText);
 

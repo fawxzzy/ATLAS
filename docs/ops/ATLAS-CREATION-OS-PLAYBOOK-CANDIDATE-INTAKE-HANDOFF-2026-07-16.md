@@ -18,12 +18,12 @@ Playbook consumer truth was inspected read-only at
 
 | Candidate ID | Atlas artifact | Exact artifact SHA-256 | Supported destination |
 | --- | --- | --- | --- |
-| `creation-os-human-directed-authority` | `data/knowledge-candidates/creation-os/creation-os-human-directed-authority.knowledge-candidate.v2.json` | `sha256:45daed22bd773604e1be0e068dd0582d69ae0304d7dfdc5f2dee4787b8b7ac76` | `Playbook/rules` |
-| `creation-os-bootstrap-pointer-not-memory` | `data/knowledge-candidates/creation-os/creation-os-bootstrap-pointer-not-memory.knowledge-candidate.v2.json` | `sha256:da911a286e13cec9cf2458c347fc0029107154d062ab8d2ac1b58b6a2585b87a` | `Playbook/rules` |
-| `creation-os-builder-creative-loop-separation` | `data/knowledge-candidates/creation-os/creation-os-builder-creative-loop-separation.knowledge-candidate.v2.json` | `sha256:c1757bab378fff7ab1cc17ed265ddb1bee2914437c27ebf95d8806f2d747ad67` | `Playbook/patterns` |
-| `creation-os-platform-surface-vertical-contracts` | `data/knowledge-candidates/creation-os/creation-os-platform-surface-vertical-contracts.knowledge-candidate.v2.json` | `sha256:adc55f5262cf8a99c1ea0a47f2de05c9393698c8ac081c2c682176fb4dea19a1` | `Playbook/patterns` |
-| `creation-os-infrastructure-shopping-before-wedge` | `data/knowledge-candidates/creation-os/creation-os-infrastructure-shopping-before-wedge.knowledge-candidate.v2.json` | `sha256:0497c6357d9049b30e913a8d72e4ebd9e30c61388a9d12479affd658bb5aa805` | `Playbook/failure-modes` |
-| `creation-os-xr-device-novelty-trap` | `data/knowledge-candidates/creation-os/creation-os-xr-device-novelty-trap.knowledge-candidate.v2.json` | `sha256:20ce4b0a3277a9d025f382f23693475ba0e2ff4ad58f200261087cd77db573ef` | `Playbook/failure-modes` |
+| `creation-os-human-directed-authority` | `data/knowledge-candidates/creation-os/creation-os-human-directed-authority.knowledge-candidate.v2.json` | `sha256:0aee7841a054b2460d0260699151d0e878602af4fd63961ca9697e5cf71e2b4a` | `Playbook/rules` |
+| `creation-os-bootstrap-pointer-not-memory` | `data/knowledge-candidates/creation-os/creation-os-bootstrap-pointer-not-memory.knowledge-candidate.v2.json` | `sha256:71170a9442e24862e0f79876e3f8e7028c9146efe5a91bc20daacf1b3a679c05` | `Playbook/rules` |
+| `creation-os-builder-creative-loop-separation` | `data/knowledge-candidates/creation-os/creation-os-builder-creative-loop-separation.knowledge-candidate.v2.json` | `sha256:8c50f2611698756850c88c15ff4ba3d3f09a8807378e4aeb339572842bf4d986` | `Playbook/patterns` |
+| `creation-os-platform-surface-vertical-contracts` | `data/knowledge-candidates/creation-os/creation-os-platform-surface-vertical-contracts.knowledge-candidate.v2.json` | `sha256:b8ce18b2720dbcc5900721e43de96dc660e91f4625223b683550c52de8bb8da2` | `Playbook/patterns` |
+| `creation-os-infrastructure-shopping-before-wedge` | `data/knowledge-candidates/creation-os/creation-os-infrastructure-shopping-before-wedge.knowledge-candidate.v2.json` | `sha256:44f882ae82ee35b4691457a6ac5039ff481c37d9aecb37fed75bbf659673405a` | `Playbook/failure-modes` |
+| `creation-os-xr-device-novelty-trap` | `data/knowledge-candidates/creation-os/creation-os-xr-device-novelty-trap.knowledge-candidate.v2.json` | `sha256:d44055c02c0acb69a58e15a9f28fd8a69421b083d927cecbe6828e0aebad390d` | `Playbook/failure-modes` |
 
 The source of truth for this set is
 `data/knowledge-candidates/creation-os/manifest.v1.json`. Intake must reject any identity, byte hash, provenance,

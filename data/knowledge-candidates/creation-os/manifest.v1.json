@@ -13,6 +13,7 @@
     "packet_sha256_semantics": "Canonical LF-normalized Git blob bytes used to build this projection.",
     "packet_first_commit": "2407b0e656775d040099e5618eb194c5c06ee0e7",
     "packet_first_commit_at": "2026-07-16T06:31:44Z",
+    "corrected_packet_revision": "c376810ec75066fb6b21d950f56fcdf986421889",
     "adoption_merge_commit": "1d79d4ac3191dade11a2aa7c40352a5f210d35e2",
     "created_at_semantics": "Each candidate created_at is the UTC time of the first durable Git commit containing the source candidate packet, not generation or owner-review time."
   },
@@ -57,10 +58,10 @@
       "source_scope_sha256": "sha256:e277c24dff69cb94304f19d45239c96c09f68e0773ca278cda4b95bb0acb6a60",
       "contract_eligible": true,
       "artifact_path": "data/knowledge-candidates/creation-os/creation-os-human-directed-authority.knowledge-candidate.v2.json",
-      "artifact_sha256": "sha256:45daed22bd773604e1be0e068dd0582d69ae0304d7dfdc5f2dee4787b8b7ac76",
+      "artifact_sha256": "sha256:0aee7841a054b2460d0260699151d0e878602af4fd63961ca9697e5cf71e2b4a",
       "suggested_destination": "Playbook/rules",
       "disposition": "playbook-candidate-only-intake",
-      "record_sha256": "sha256:4dd859b60e971e7d81e9c65e8021719f501ad86fd13f412a54f4859ced3d289c"
+      "record_sha256": "sha256:8a53222e45e99d36e10e07d5c9b8f6ec3d1543aa4ce8d9e95f7ac8ce0c2658c8"
     },
     {
       "record_id": "creation-os-bootstrap-pointer-not-memory",
@@ -70,10 +71,10 @@
       "source_scope_sha256": "sha256:3d816f53c3df64a5555737c1b04284fabb41200040f2e5ffb80d9c8e93e18814",
       "contract_eligible": true,
       "artifact_path": "data/knowledge-candidates/creation-os/creation-os-bootstrap-pointer-not-memory.knowledge-candidate.v2.json",
-      "artifact_sha256": "sha256:da911a286e13cec9cf2458c347fc0029107154d062ab8d2ac1b58b6a2585b87a",
+      "artifact_sha256": "sha256:71170a9442e24862e0f79876e3f8e7028c9146efe5a91bc20daacf1b3a679c05",
       "suggested_destination": "Playbook/rules",
       "disposition": "playbook-candidate-only-intake",
-      "record_sha256": "sha256:5df0f7d16eb8953d1a7cd9f6c9c323013817034946604d3566a5f96a1c2a110e"
+      "record_sha256": "sha256:51c608f096ffbcc7480bc06e027953ad7fe00d67e30ba20eccce089eddaa803f"
     },
     {
       "record_id": "creation-os-builder-creative-loop-separation",
@@ -83,10 +84,10 @@
       "source_scope_sha256": "sha256:5f3ec0991ea23bc61a139f87e8ca0ad39d3519f28a9216efb72c613beea106e7",
       "contract_eligible": true,
       "artifact_path": "data/knowledge-candidates/creation-os/creation-os-builder-creative-loop-separation.knowledge-candidate.v2.json",
-      "artifact_sha256": "sha256:c1757bab378fff7ab1cc17ed265ddb1bee2914437c27ebf95d8806f2d747ad67",
+      "artifact_sha256": "sha256:8c50f2611698756850c88c15ff4ba3d3f09a8807378e4aeb339572842bf4d986",
       "suggested_destination": "Playbook/patterns",
       "disposition": "playbook-candidate-only-intake",
-      "record_sha256": "sha256:03e9216940a2f9adab567b370944c536bd92696a3d7969f9ee24439340b92547"
+      "record_sha256": "sha256:f9d9b094e1d05a0888d6ec316bf1278be3251dedaa43dd51e15f04c6d4e12036"
     },
     {
       "record_id": "creation-os-platform-surface-vertical-contracts",
@@ -96,10 +97,10 @@
       "source_scope_sha256": "sha256:a16c24e2d2b598738aeb106ab139d4fd23b14d7371ff02dc16e47580f69544c0",
       "contract_eligible": true,
       "artifact_path": "data/knowledge-candidates/creation-os/creation-os-platform-surface-vertical-contracts.knowledge-candidate.v2.json",
-      "artifact_sha256": "sha256:adc55f5262cf8a99c1ea0a47f2de05c9393698c8ac081c2c682176fb4dea19a1",
+      "artifact_sha256": "sha256:b8ce18b2720dbcc5900721e43de96dc660e91f4625223b683550c52de8bb8da2",
       "suggested_destination": "Playbook/patterns",
       "disposition": "playbook-candidate-only-intake",
-      "record_sha256": "sha256:c13f12449f7803dd7017dea087c6f8954b036eb24ea903fcc976d4938f18a1d4"
+      "record_sha256": "sha256:d41a7f04aeb116e84937d33f1156d72ac4302c260f0c27a19b8a13a45a61e55e"
     },
     {
       "record_id": "creation-os-infrastructure-shopping-before-wedge",
@@ -109,10 +110,10 @@
       "source_scope_sha256": "sha256:8d66a9fc8d7a9b7bfa179047c4f58ec8c94b88e0357aafe2c699ae480f4c5c2b",
       "contract_eligible": true,
       "artifact_path": "data/knowledge-candidates/creation-os/creation-os-infrastructure-shopping-before-wedge.knowledge-candidate.v2.json",
-      "artifact_sha256": "sha256:0497c6357d9049b30e913a8d72e4ebd9e30c61388a9d12479affd658bb5aa805",
+      "artifact_sha256": "sha256:44f882ae82ee35b4691457a6ac5039ff481c37d9aecb37fed75bbf659673405a",
       "suggested_destination": "Playbook/failure-modes",
       "disposition": "playbook-candidate-only-intake",
-      "record_sha256": "sha256:76e118ddf34734fe968ec023e28fe3b331a6b831ed4ec6be1a05fe86531176a8"
+      "record_sha256": "sha256:10aadcddbcf6e2c9f448da34f17aa3d404e7e8fab41d3c32c382085f264d4efb"
     },
     {
       "record_id": "creation-os-xr-device-novelty-trap",
@@ -122,10 +123,10 @@
       "source_scope_sha256": "sha256:3ef15743b0c02b1ad98eed32b0abafcf424bf57b0122792c4bd06aadcd43a964",
       "contract_eligible": true,
       "artifact_path": "data/knowledge-candidates/creation-os/creation-os-xr-device-novelty-trap.knowledge-candidate.v2.json",
-      "artifact_sha256": "sha256:20ce4b0a3277a9d025f382f23693475ba0e2ff4ad58f200261087cd77db573ef",
+      "artifact_sha256": "sha256:d44055c02c0acb69a58e15a9f28fd8a69421b083d927cecbe6828e0aebad390d",
       "suggested_destination": "Playbook/failure-modes",
       "disposition": "playbook-candidate-only-intake",
-      "record_sha256": "sha256:07053c6f8ea57dbb0787a496da73ef7c17b9a5967d621a611cf5c028398e0d18"
+      "record_sha256": "sha256:303bd8a13845679399fc9a889f15ccc909e7e8b82c14aac80a7f684699b024bf"
     },
     {
       "record_id": "creation-os-software-repo-voice-first-wedge",
@@ -139,7 +140,7 @@
       "provenance": [
         {
           "source_type": "repository",
-          "ref": "git:fawxzzy/ATLAS@2407b0e656775d040099e5618eb194c5c06ee0e7:docs/ops/ATLAS-CREATION-OS-PLAYBOOK-PROMOTION-CANDIDATES-2026-07-16.md#creation-os-software-repo-voice-first-wedge",
+          "ref": "git:fawxzzy/ATLAS@c376810ec75066fb6b21d950f56fcdf986421889:docs/ops/ATLAS-CREATION-OS-PLAYBOOK-PROMOTION-CANDIDATES-2026-07-16.md#creation-os-software-repo-voice-first-wedge",
           "classification": "verified"
         },
         {
@@ -172,7 +173,7 @@
         "docs/architecture/ATLAS-CREATION-OS-TARGET-ARCHITECTURE.md#phase-one-wedge",
         "docs/architecture/ATLAS-CREATION-OS-TARGET-ARCHITECTURE.md#success-metrics-and-kill-criteria"
       ],
-      "record_sha256": "sha256:33926c99c5426189d4a5b0a900dad49268a68dc80d26eb3a639a7b12f51b0e8f"
+      "record_sha256": "sha256:5f26456f7e2a5d18ca6ca513cdcd53d33af0df5a19a3b05c01a753d393a121d6"
     }
   ],
   "authority": {

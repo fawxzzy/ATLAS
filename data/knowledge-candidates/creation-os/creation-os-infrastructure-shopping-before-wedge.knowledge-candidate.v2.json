@@ -8,7 +8,7 @@
   "provenance": [
     {
       "source_type": "repository",
-      "ref": "git:fawxzzy/ATLAS@2407b0e656775d040099e5618eb194c5c06ee0e7:docs/ops/ATLAS-CREATION-OS-PLAYBOOK-PROMOTION-CANDIDATES-2026-07-16.md#creation-os-infrastructure-shopping-before-wedge",
+      "ref": "git:fawxzzy/ATLAS@c376810ec75066fb6b21d950f56fcdf986421889:docs/ops/ATLAS-CREATION-OS-PLAYBOOK-PROMOTION-CANDIDATES-2026-07-16.md#creation-os-infrastructure-shopping-before-wedge",
       "classification": "verified"
     },
     {
@@ -44,6 +44,7 @@
     "atlas_projection": {
       "source_packet_ref": "docs/ops/ATLAS-CREATION-OS-PLAYBOOK-PROMOTION-CANDIDATES-2026-07-16.md",
       "source_packet_first_commit": "2407b0e656775d040099e5618eb194c5c06ee0e7",
+      "source_packet_corrected_revision": "c376810ec75066fb6b21d950f56fcdf986421889",
       "source_adoption_merge_commit": "1d79d4ac3191dade11a2aa7c40352a5f210d35e2",
       "source_statement_sha256": "sha256:1d6a53a2298696bc28e52c3149fae4fb2ab3bd5f3d87aba3bbaefde8d0cbaca1",
       "source_scope_sha256": "sha256:8d66a9fc8d7a9b7bfa179047c4f58ec8c94b88e0357aafe2c699ae480f4c5c2b",

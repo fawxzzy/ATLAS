@@ -46,6 +46,36 @@ test("generates six schema-valid candidates and one manifest-only Decision byte-
   assert.equal(decision.artifact_sha256, null);
 });
 
+test("binds reproducible provenance to the corrected packet while preserving creation time", async () => {
+  const projection = await buildProjection();
+  const firstCommit = "2407b0e656775d040099e5618eb194c5c06ee0e7";
+  const correctedRevision = "c376810ec75066fb6b21d950f56fcdf986421889";
+  const packetPrefix = `git:fawxzzy/ATLAS@${correctedRevision}:${SOURCE_PACKET_REF}#`;
+
+  assert.equal(projection.manifest.source.packet_first_commit, firstCommit);
+  assert.equal(projection.manifest.source.packet_first_commit_at, "2026-07-16T06:31:44Z");
+  assert.equal(projection.manifest.source.corrected_packet_revision, correctedRevision);
+  assert.equal(
+    projection.manifest.source.packet_sha256,
+    "sha256:e2946fcc95f2b1aa5d871767446e97a0e69da6c66d72c90e53855313c4cf2ca2",
+  );
+  for (const candidate of projection.candidates) {
+    assert.equal(candidate.created_at, "2026-07-16T06:31:44Z");
+    assert.equal(candidate.provenance[0].ref, `${packetPrefix}${candidate.candidate_id}`);
+    assert.equal(candidate.extensions.atlas_projection.source_packet_first_commit, firstCommit);
+    assert.equal(
+      candidate.extensions.atlas_projection.source_packet_corrected_revision,
+      correctedRevision,
+    );
+    assert.doesNotMatch(candidate.provenance[0].ref, new RegExp(`@${firstCommit}:`));
+  }
+
+  const decision = projection.manifest.records.find(
+    (record) => record.record_id === "creation-os-software-repo-voice-first-wedge",
+  );
+  assert.equal(decision.provenance[0].ref, `${packetPrefix}${decision.record_id}`);
+});
+
 test("fails closed when a source statement changes", async () => {
   const source = await fs.readFile(path.join(ROOT, SOURCE_PACKET_REF), "utf8");
   const changed = source.replace(
