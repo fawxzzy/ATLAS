@@ -12,7 +12,7 @@ This document defines the ATLAS-owned public topology contract for Lifeline-mana
 - Public product apps currently covered by the topology manifest:
   - `fitness`
   - `mazer`
-  - `trove`
+  - FawxzzyWeb, using stable app and service key prefix `trove`
 - Operator service covered by the topology manifest:
   - `lifeline`
 
@@ -32,6 +32,14 @@ This document defines the ATLAS-owned public topology contract for Lifeline-mana
   - production hostname: `lifeline.{zone}`
   - no named preview hostname
   - no PR preview hostname
+- FawxzzyWeb is also intentional in production:
+  - canonical public origin: `https://fawxzzy.com`
+  - `https://www.fawxzzy.com` permanently redirects to the apex
+  - stable Lifeline service key: `trove/prod`
+  - canonical provider project: `fawxzzyweb`
+  - accepted compatibility inputs: `Trove`, `fawxzzy-trove`, and `https://fawxzzy-trove.vercel.app`
+
+Unknown FawxzzyWeb identity inputs fail closed. Compatibility inputs normalize to the stable `trove` service identity; they do not create parallel services.
 
 ## Placement doctrine
 

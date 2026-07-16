@@ -1,6 +1,6 @@
 schema_version: "atlas.stack.lock.v1"
 stack_manifest_path: "stack.yaml"
-stack_manifest_digest: "sha256:e0dab412668c800a212435094bcb96c95b2d1403a1e42dd6768c08b7463fba85"
+stack_manifest_digest: "sha256:e9f0e16fb6516e6a8694045d425ed61a6bcce5fb54dbc92afa3049088d5d788b"
 component_count: 9
 components:
   _stack:
@@ -104,10 +104,10 @@ components:
     role: "application"
     playbook_adoption_status: ""
     status: "active"
-    remote: "https://github.com/fawxzzy/trove.git"
+    remote: "https://github.com/fawxzzy/FawxzzyWeb.git"
     ref_type: "branch"
     ref: "codex/path-discipline-warning-slice-trove"
-    commit: "437c7604adee02e0403d77f75162a6c5f232221f"
+    commit: "908fed4618aaf0bc869989e515ecacc410f47883"
     dirty: false
     trust_class: "trusted"
     release_eligible: true
@@ -183,7 +183,7 @@ excluded_surfaces:
     present: false
     trust_class: "trusted"
     release_eligible: false
-    reason: "Trove release cutover is a branch worktree of the registered trove repo and remains a temporary non-canonical cutover lane outside the governed repo surface."
+    reason: "FawxzzyWeb release cutover is a branch worktree of the registered trove repo and remains a temporary non-canonical cutover lane outside the governed repo surface."
   verta_core_archive:
     path: "repos/Verta-Core.zip"
     present: false
@@ -208,4 +208,9 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-lock_digest: "sha256:5d0cbfc752985784629daa62c5010f29a0896ce1599b6a58b165f8b5e02bc3ca"
+refresh_scope:
+  mode: "scoped"
+  baseline_ref: "0cdfb177106040edb44b0a10e8d8e0994a9dfad0"
+  repo_ids:
+    trove: true
+lock_digest: "sha256:f5425763d84c1f1bc0d48348aa6a47418c3a8c4215c75c2e2904abdb462f1c9a"

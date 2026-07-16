@@ -62,8 +62,8 @@
         "card_id": "ui-standards-adoption-trove",
         "project_id": "trove",
         "board_id": "candidate:atlas-ui-standards",
-        "title": "Adopt the ATLAS UI standards profile in Trove",
-        "description": "Reconcile Trove's existing web_visual QA and Fawxzzy theme adoption with the stable UI standard IDs.",
+        "title": "Adopt the ATLAS UI standards profile in FawxzzyWeb",
+        "description": "Reconcile FawxzzyWeb's existing web_visual QA and Fawxzzy theme adoption with the stable UI standard IDs while preserving repo id trove.",
         "card_type": "migration",
         "lifecycle": "intake",
         "priority": null,
@@ -80,9 +80,9 @@
           "denominator_status": "unaccepted"
         }
       },
-      "objective": "Map Trove's existing web QA and selected shared theme inputs to the standard web profile without making the root theme pack owner implementation truth.",
+      "objective": "Map FawxzzyWeb's existing web QA and selected shared theme inputs to the standard web profile without making the root theme pack owner implementation truth.",
       "acceptance_criteria": [
-        "Trove accepts or revises the standard web profile.",
+        "FawxzzyWeb accepts or revises the standard web profile.",
         "Owner routes and components are inventoried at a target revision.",
         "Existing web_visual evidence is correlated to the new standard IDs.",
         "Theme adoption remains an owner decision with explicit compatibility proof.",
@@ -92,7 +92,7 @@
         "included": ["Owner-side discovery", "Profile mapping", "Existing QA and theme evidence reconciliation"],
         "excluded": ["Production deploy", "Discord mutation", "Secrets", "Unrelated product work"]
       },
-      "verification": ["Trove repo-local verify", "ATLAS QA compatibility report", "Root adoption drift readback"],
+      "verification": ["FawxzzyWeb repo-local verify", "ATLAS QA compatibility report", "Root adoption drift readback"],
       "dependencies": ["docs/ops/ATLAS-UI-STANDARDS-ROOT-FOUNDATION-2026-07-15.md"],
       "marker": {"status": "unmeasured", "percentage": null, "denominator": null}
     },

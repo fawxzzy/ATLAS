@@ -1,9 +1,9 @@
 {
   "schema_version": "atlas.stack.repo-inventory.v1",
   "stack_manifest_ref": "stack.yaml",
-  "stack_manifest_digest": "sha256:e0dab412668c800a212435094bcb96c95b2d1403a1e42dd6768c08b7463fba85",
+  "stack_manifest_digest": "sha256:e9f0e16fb6516e6a8694045d425ed61a6bcce5fb54dbc92afa3049088d5d788b",
   "stack_lock_ref": "stack.lock.yaml",
-  "stack_lock_digest": "sha256:5d0cbfc752985784629daa62c5010f29a0896ce1599b6a58b165f8b5e02bc3ca",
+  "stack_lock_digest": "sha256:f5425763d84c1f1bc0d48348aa6a47418c3a8c4215c75c2e2904abdb462f1c9a",
   "working_memory_digest": "sha256:6536c59dcfde11b0a4c180d6595adc8e6c59be34149ad512c1e3331462cf57f7",
   "published_refs": {
     "json": "docs/registry/STACK-REPO-INVENTORY.json",
@@ -11,13 +11,14 @@
   },
   "repo_count": 13,
   "dirty_repo_count": 1,
-  "visible_dirty_repo_count": 3,
-  "advisory_dirty_repo_count": 2,
+  "visible_dirty_repo_count": 2,
+  "advisory_dirty_repo_count": 1,
   "release_eligible_count": 4,
   "repos": [
     {
       "logical_id": "_stack",
       "local_path": "repos/_stack",
+      "operational_identity": null,
       "role": "workflow-operator",
       "playbook_adoption_status": "verified",
       "playbook_adoption_profile": "playbook_convergence_contract",
@@ -27,7 +28,7 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/_stack.git",
       "pinned_commit": "40ab40f80ac914dd9bd59dbb64272be3ed1cf70f",
-      "current_commit": "40ab40f80ac914dd9bd59dbb64272be3ed1cf70f",
+      "current_commit": "7aed5495d2702a653e461549877d8fa77b3a33d2",
       "pinned_ref_type": "branch",
       "pinned_ref": "main",
       "current_ref_type": "branch",
@@ -83,6 +84,7 @@
     {
       "logical_id": "discordos",
       "local_path": "repos/DiscordOS",
+      "operational_identity": null,
       "role": "board-and-discord-writer",
       "playbook_adoption_status": "not-claimed",
       "playbook_adoption_profile": "",
@@ -92,7 +94,7 @@
       "status": "incubating",
       "remote_url": "https://github.com/fawxzzy/DiscordOS.git",
       "pinned_commit": "876b30e17733b6cb3c3c89a667b5d546be09b4c6",
-      "current_commit": "876b30e17733b6cb3c3c89a667b5d546be09b4c6",
+      "current_commit": "38e881d4265206c2148caaeb6a6a457e3e5bcda8",
       "pinned_ref_type": "branch",
       "pinned_ref": "main",
       "current_ref_type": "branch",
@@ -134,6 +136,7 @@
     {
       "logical_id": "fitness",
       "local_path": "repos/fawxzzy-fitness",
+      "operational_identity": null,
       "role": "application",
       "playbook_adoption_status": "",
       "playbook_adoption_profile": "",
@@ -192,6 +195,7 @@
     {
       "logical_id": "foundation",
       "local_path": "repos/foundation",
+      "operational_identity": null,
       "role": "shared-contract-foundation",
       "playbook_adoption_status": "not-claimed",
       "playbook_adoption_profile": "",
@@ -220,6 +224,7 @@
     {
       "logical_id": "lifeline",
       "local_path": "repos/lifeline",
+      "operational_identity": null,
       "role": "local-operator",
       "playbook_adoption_status": "",
       "playbook_adoption_profile": "",
@@ -248,6 +253,7 @@
     {
       "logical_id": "mazer",
       "local_path": "repos/mazer",
+      "operational_identity": null,
       "role": "application",
       "playbook_adoption_status": "",
       "playbook_adoption_profile": "",
@@ -285,6 +291,7 @@
     {
       "logical_id": "nat1-games",
       "local_path": "repos/Nat1-Games/nat1-games",
+      "operational_identity": null,
       "role": "application",
       "playbook_adoption_status": "",
       "playbook_adoption_profile": "",
@@ -313,6 +320,7 @@
     {
       "logical_id": "playbook",
       "local_path": "repos/playbook",
+      "operational_identity": null,
       "role": "governance-runtime",
       "playbook_adoption_status": "",
       "playbook_adoption_profile": "",
@@ -357,6 +365,7 @@
     {
       "logical_id": "playbook-demo",
       "local_path": "repos/playbook-demo/playbook-demo",
+      "operational_identity": null,
       "role": "demo",
       "playbook_adoption_status": "",
       "playbook_adoption_profile": "",
@@ -385,6 +394,7 @@
     {
       "logical_id": "socials-os",
       "local_path": "repos/socials-os",
+      "operational_identity": null,
       "role": "analytics-data-system",
       "playbook_adoption_status": "",
       "playbook_adoption_profile": "",
@@ -394,13 +404,13 @@
       "status": "unmanaged",
       "remote_url": "https://github.com/fawxzzy/socials-os.git",
       "pinned_commit": null,
-      "current_commit": "78c1330fcd1645f4b9453cffb8e921bea8e13a72",
+      "current_commit": "d9cc13717cf5e63a069bb46577a2267f9161396f",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
-      "current_ref": "main",
-      "branch": "main",
-      "dirty": true,
+      "current_ref": "codex/fitness-walkthrough-v2",
+      "branch": "codex/fitness-walkthrough-v2",
+      "dirty": false,
       "root_blocking": false,
       "dirty_blocks_root": false,
       "trust_class": "adjacent",
@@ -413,6 +423,7 @@
     {
       "logical_id": "stack",
       "local_path": ".",
+      "operational_identity": null,
       "role": "operator-layer",
       "playbook_adoption_status": "",
       "playbook_adoption_profile": "",
@@ -422,12 +433,12 @@
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/ATLAS.git",
       "pinned_commit": null,
-      "current_commit": "5b1371ec0afd5067ec90f8bcfd2e46df772942a5",
+      "current_commit": "82a0fda9127899b26ec5b3071b7f710d58279031",
       "pinned_ref_type": null,
       "pinned_ref": null,
       "current_ref_type": "branch",
-      "current_ref": "codex/contracts-mesh-knowledge-candidate-reconciliation",
-      "branch": "codex/contracts-mesh-knowledge-candidate-reconciliation",
+      "current_ref": "codex/fawxzzyweb-identity-compat",
+      "branch": "codex/fawxzzyweb-identity-compat",
       "dirty": true,
       "root_blocking": true,
       "dirty_blocks_root": true,
@@ -441,6 +452,7 @@
     {
       "logical_id": "stream",
       "local_path": "repos/stream",
+      "operational_identity": null,
       "role": "application",
       "playbook_adoption_status": "",
       "playbook_adoption_profile": "",
@@ -469,6 +481,25 @@
     {
       "logical_id": "trove",
       "local_path": "repos/trove",
+      "operational_identity": {
+        "display_name": "FawxzzyWeb",
+        "legacy_display_names": [
+          "Trove"
+        ],
+        "github_repository": "fawxzzy/FawxzzyWeb",
+        "vercel_project": "fawxzzyweb",
+        "vercel_project_id": "prj_vhUyajI4AL6BgCF40VnKtdxrBLuV",
+        "legacy_vercel_projects": [
+          "fawxzzy-trove"
+        ],
+        "public_origin": "https://fawxzzy.com",
+        "www_redirect_origin": "https://www.fawxzzy.com",
+        "compatibility_origins": [
+          "https://fawxzzy-trove.vercel.app"
+        ],
+        "board_owner_id": "trove",
+        "board_display_name": "FawxzzyWeb"
+      },
       "role": "application",
       "playbook_adoption_status": "",
       "playbook_adoption_profile": "",
@@ -476,9 +507,9 @@
       "playbook_adoption_owner_head": "",
       "playbook_adoption_owner_ref": "",
       "status": "active",
-      "remote_url": "https://github.com/fawxzzy/trove.git",
-      "pinned_commit": "437c7604adee02e0403d77f75162a6c5f232221f",
-      "current_commit": "437c7604adee02e0403d77f75162a6c5f232221f",
+      "remote_url": "https://github.com/fawxzzy/FawxzzyWeb.git",
+      "pinned_commit": "908fed4618aaf0bc869989e515ecacc410f47883",
+      "current_commit": "908fed4618aaf0bc869989e515ecacc410f47883",
       "pinned_ref_type": "branch",
       "pinned_ref": "codex/path-discipline-warning-slice-trove",
       "current_ref_type": "branch",
@@ -602,7 +633,7 @@
       "present": false,
       "trust_class": "trusted",
       "release_eligible": false,
-      "reason": "Trove release cutover is a branch worktree of the registered trove repo and remains a temporary non-canonical cutover lane outside the governed repo surface.",
+      "reason": "FawxzzyWeb release cutover is a branch worktree of the registered trove repo and remains a temporary non-canonical cutover lane outside the governed repo surface.",
       "visibility_mode": "full"
     },
     {
@@ -642,5 +673,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:aeb211bdc1f200e4499b61735655fb10be9b2ddd9af2749eaa53efd15e825c81"
+  "content_digest": "sha256:0815714911cbe7647cba76cea64077aa0849c06bc9f384dc51114efc2bca7291"
 }

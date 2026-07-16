@@ -40,6 +40,42 @@ class VercelObservabilitySurfaceVisibilityTests(unittest.TestCase):
         self.assertFalse(report["mutation_performed"])
         self.assertFalse(report["entitlement_claimed"])
 
+    def test_legacy_fawxzzyweb_project_name_is_accepted_and_normalized(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            payload = _payload()
+            payload["project_id"] = "prj_vhUyajI4AL6BgCF40VnKtdxrBLuV"
+            payload["project_name"] = "fawxzzy-trove"
+            _write(root / "tmp" / "visibility.json", payload)
+            report = visibility.build_report(root=root, inputs=["tmp/visibility.json"])
+
+        self.assertEqual(visibility.STATUS_ADVISORY_GAP, report["status"])
+        self.assertEqual("fawxzzyweb", report["projects"][0]["project_name"])
+
+    def test_canonical_fawxzzyweb_project_name_is_accepted(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            payload = _payload()
+            payload["project_id"] = "prj_vhUyajI4AL6BgCF40VnKtdxrBLuV"
+            payload["project_name"] = "fawxzzyweb"
+            _write(root / "tmp" / "visibility.json", payload)
+            report = visibility.build_report(root=root, inputs=["tmp/visibility.json"])
+
+        self.assertEqual(visibility.STATUS_ADVISORY_GAP, report["status"])
+        self.assertEqual("fawxzzyweb", report["projects"][0]["project_name"])
+
+    def test_unknown_fawxzzyweb_project_name_fails_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            payload = _payload()
+            payload["project_id"] = "prj_vhUyajI4AL6BgCF40VnKtdxrBLuV"
+            payload["project_name"] = "unknown-fawxzzyweb"
+            _write(root / "tmp" / "visibility.json", payload)
+            report = visibility.build_report(root=root, inputs=["tmp/visibility.json"])
+
+        self.assertEqual(visibility.STATUS_BLOCKER, report["status"])
+        self.assertEqual("project_identity_mismatch", report["blockers"][0]["code"])
+
     def test_visible_requires_direct_readback(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)

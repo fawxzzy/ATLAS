@@ -48,6 +48,43 @@ class VercelEnvironmentNameInventoryTests(unittest.TestCase):
         self.assertEqual("SUPABASE_SERVICE_ROLE_KEY", report["projects"][0]["variables"][0]["name"])
         self.assertNotIn("value", report["projects"][0]["variables"][0])
 
+    def test_legacy_fawxzzyweb_project_name_is_accepted_and_normalized(self) -> None:
+        project_id = "prj_vhUyajI4AL6BgCF40VnKtdxrBLuV"
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            payload = _payload(project_id)
+            payload["project_name"] = "fawxzzy-trove"
+            path = root / "tmp" / "vercel" / "trove.json"
+            _write(path, payload)
+            report = inventory.build_report(root=root, inputs=["tmp/vercel/trove.json"])
+
+        self.assertTrue(report["safe_to_use"])
+        self.assertEqual("fawxzzyweb", report["projects"][0]["project_name"])
+
+    def test_canonical_fawxzzyweb_project_name_is_accepted(self) -> None:
+        project_id = "prj_vhUyajI4AL6BgCF40VnKtdxrBLuV"
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            path = root / "tmp" / "vercel" / "trove.json"
+            _write(path, _payload(project_id))
+            report = inventory.build_report(root=root, inputs=["tmp/vercel/trove.json"])
+
+        self.assertTrue(report["safe_to_use"])
+        self.assertEqual("fawxzzyweb", report["projects"][0]["project_name"])
+
+    def test_unknown_fawxzzyweb_project_name_fails_closed(self) -> None:
+        project_id = "prj_vhUyajI4AL6BgCF40VnKtdxrBLuV"
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            payload = _payload(project_id)
+            payload["project_name"] = "unknown-fawxzzyweb"
+            path = root / "tmp" / "vercel" / "trove.json"
+            _write(path, payload)
+            report = inventory.build_report(root=root, inputs=["tmp/vercel/trove.json"])
+
+        self.assertEqual(inventory.STATUS_BLOCKER, report["status"])
+        self.assertEqual("project_identity_mismatch", report["blockers"][0]["code"])
+
     def test_value_field_is_rejected(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

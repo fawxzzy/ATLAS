@@ -7,9 +7,9 @@ Use this when the operator wants copy-paste prompts that can be run lane-by-lane
 Atlas repo ids used here follow `stack.yaml` and `docs/registry/STACK-REPO-INVENTORY.json`:
 
 - `fitness` -> `repos/fawxzzy-fitness`
-- `trove` -> `repos/fawxzzy-trove`
+- `trove` -> `repos/trove`
 
-`trove` is the FoxyTrove launcher app for this prompt pack.
+`trove` is the stable logical ID for the FawxzzyWeb launcher app in this prompt pack.
 
 ## Purpose
 
@@ -18,7 +18,7 @@ Provide a single orchestrator prompt plus bounded worker prompts for:
 - repo discovery and lane planning
 - shared platform and install detection
 - Fitness app gating
-- Trove launcher handoff
+- FawxzzyWeb launcher handoff
 - screenshot and QA coverage
 - Playbook extraction after implementation exists
 
@@ -87,12 +87,12 @@ Map the Atlas-level repos and docs involved in the PWA installer flow, then prod
 Context
 We are implementing a platform-specific PWA installer and access flow across multiple apps, starting with:
 - `fitness` -> `repos/fawxzzy-fitness`
-- `trove` -> `repos/fawxzzy-trove`
+- `trove` -> `repos/trove`
 
-Trove is the launcher and bio-link app. Fitness is the target app.
+FawxzzyWeb is the launcher and bio-link app. Fitness is the target app.
 
 Desired product flow
-1. Trove is commonly opened from TikTok or other social bio links.
+1. FawxzzyWeb is commonly opened from TikTok or other social bio links.
 2. If an iOS user opens a target app in an in-app browser, show a forced "Open in Safari" gate.
 3. That gate must include:
    - direct explanation
@@ -102,7 +102,7 @@ Desired product flow
 4. If an iOS user is in Safari but has not launched from the Home Screen, show a forced "Add to Home Screen" gate.
 5. Once the app is launched from the iOS Home Screen or standalone mode, allow normal app access and login.
 6. For Android and other non-iOS platforms, do not hard-lock access. Show a native install button only when the current app and browser expose `beforeinstallprompt`.
-7. Trove must route users into each target app's own install or open flow. Do not attempt to trigger a PWA install prompt for a different origin from Trove.
+7. FawxzzyWeb must route users into each target app's own install or open flow. Do not attempt to trigger a PWA install prompt for a different origin from FawxzzyWeb.
 
 Platform rules
 - Do not attempt to force-open Safari.
@@ -119,7 +119,7 @@ Tasks
    - App Router or Pages Router if Next.js
    - manifest and service worker setup
    - auth and login boundaries
-4. Determine whether Fitness and Trove are same-origin or different-origin.
+4. Determine whether Fitness and FawxzzyWeb are same-origin or different-origin.
 5. Decide where shared platform detection should live:
    - preferred: existing shared package
    - fallback: local utility in Fitness first with an extractable API
@@ -160,7 +160,7 @@ Run this only if the orchestrator finds a real shared package or clearly shared 
 
 ```md
 Objective
-Create a reusable PWA install and platform detection module that can power Fitness and Trove without coupling to app-specific UI.
+Create a reusable PWA install and platform detection module that can power Fitness and FawxzzyWeb without coupling to app-specific UI.
 
 Paste the shared hard-constraints block here before proceeding.
 
@@ -353,7 +353,7 @@ Update a repo-local doc such as `docs/install-flow.md` with:
 - manual QA checklist
 
 Deliverable
-A PR-sized Fitness implementation with no Trove changes.
+A PR-sized Fitness implementation with no FawxzzyWeb changes.
 ```
 
 ## Wave 2B prompt
@@ -362,15 +362,15 @@ Run this in `trove` only.
 
 ```md
 Objective
-Update Trove so its launcher buttons route users into the correct platform-specific install or open flow, especially from TikTok and other social in-app browsers.
+Update FawxzzyWeb so its launcher buttons route users into the correct platform-specific install or open flow, especially from TikTok and other social in-app browsers.
 
 Core rule
-Trove must not attempt to install a different-origin PWA directly. If a target app is on a different origin, Trove opens the target app's install route and lets that app own `beforeinstallprompt` and iOS gating.
+FawxzzyWeb must not attempt to install a different-origin PWA directly. If a target app is on a different origin, FawxzzyWeb opens the target app's install route and lets that app own `beforeinstallprompt` and iOS gating.
 
 Paste the shared hard-constraints block here before proceeding.
 
 Implementation plan
-1. Locate the Trove launcher page and the app card or button rendering path.
+1. Locate the FawxzzyWeb launcher page and the app card or button rendering path.
 2. Add or update an app registry or config with:
    - app id
    - display name
@@ -384,8 +384,8 @@ Implementation plan
    - Android or non-iOS same-origin installable app: `Install`
    - Android or non-iOS different-origin target app: `Open installer`
    - fallback: `Open`
-4. If Trove itself is opened inside an iOS in-app browser, prefer a clear "copy link and open in Safari" experience before sending the user deeper into the flow.
-5. Preserve current Trove design and navigation architecture.
+4. If FawxzzyWeb itself is opened inside an iOS in-app browser, prefer a clear "copy link and open in Safari" experience before sending the user deeper into the flow.
+5. Preserve current FawxzzyWeb design and navigation architecture.
 
 Button behavior details
 - Do not label a button `Install` if it only navigates to another origin.
@@ -395,7 +395,7 @@ Button behavior details
 
 Target handoff behavior
 - iOS in-app browser:
-  - either show Trove's own copy-link and open-in-Safari gate for the target install URL
+  - either show FawxzzyWeb's own copy-link and open-in-Safari gate for the target install URL
   - or navigate to the target app's public install route where that app handles the gate
 - iOS Safari:
   - open the target app's public install route
@@ -422,22 +422,22 @@ Verification
 3. run tests
 4. run build
 5. generate screenshots for:
-   - Trove in an iOS in-app browser
-   - Trove in iOS Safari
-   - Trove on Android or non-iOS
+   - FawxzzyWeb in an iOS in-app browser
+   - FawxzzyWeb in iOS Safari
+   - FawxzzyWeb on Android or non-iOS
    - Fitness card and button labels in each context
-6. verify there are no route loops between Trove and Fitness
+6. verify there are no route loops between FawxzzyWeb and Fitness
 7. verify copy-to-clipboard behavior where present
 
 Documentation
 Update a repo-local doc such as `docs/install-flow.md` with:
-- Trove-to-Fitness handoff
+- FawxzzyWeb-to-Fitness handoff
 - same-origin versus different-origin rule
 - TikTok and social bio-link behavior
 - manual QA steps
 
 Deliverable
-A PR-sized Trove implementation with no Fitness changes.
+A PR-sized FawxzzyWeb implementation with no Fitness changes.
 ```
 
 ## Wave 3 prompt
@@ -446,7 +446,7 @@ Run this after Waves 2A and 2B land.
 
 ```md
 Objective
-Add verification coverage and screenshot artifacts for the full installer and access flow across Fitness and Trove.
+Add verification coverage and screenshot artifacts for the full installer and access flow across Fitness and FawxzzyWeb.
 
 Paste the shared hard-constraints block here before proceeding.
 
@@ -466,7 +466,7 @@ Fitness:
 4. Android or non-iOS install button visible
 5. Android or non-iOS normal access when native prompt is unavailable
 
-Trove:
+FawxzzyWeb:
 1. iOS in-app browser launcher behavior
 2. iOS Safari launcher behavior
 3. Android or non-iOS launcher behavior
@@ -487,7 +487,7 @@ Manual QA checklist
 Create or update a repo-local `docs/manual-install-qa.md` with:
 
 iOS:
-- open Trove from a TikTok bio or another in-app browser
+- open FawxzzyWeb from a TikTok bio or another in-app browser
 - confirm the Safari and copy gate
 - copy the link
 - open Safari

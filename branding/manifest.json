@@ -156,49 +156,49 @@
     {
       "id": "trove-brand-master",
       "repoId": "trove",
-      "description": "Trove local master copy for repo-local brand use",
+      "description": "FawxzzyWeb local master copy for repo-local brand use",
       "source": "branding/source/atlas-sigil-master.png",
       "target": "repos/trove/public/brand/atlas-sigil-master.png"
     },
     {
       "id": "trove-app-icon-192",
       "repoId": "trove",
-      "description": "Trove PWA app icon 192",
+      "description": "FawxzzyWeb PWA app icon 192",
       "source": "branding/generated/app/icon-192.png",
       "target": "repos/trove/public/app/icon-192.png"
     },
     {
       "id": "trove-app-icon-512",
       "repoId": "trove",
-      "description": "Trove PWA app icon 512",
+      "description": "FawxzzyWeb PWA app icon 512",
       "source": "branding/generated/app/icon-512.png",
       "target": "repos/trove/public/app/icon-512.png"
     },
     {
       "id": "trove-apple-touch",
       "repoId": "trove",
-      "description": "Trove apple-touch icon",
+      "description": "FawxzzyWeb apple-touch icon",
       "source": "branding/generated/favicon/apple-touch-icon.png",
       "target": "repos/trove/public/icons/apple-touch-icon.png"
     },
     {
       "id": "trove-favicon-32",
       "repoId": "trove",
-      "description": "Trove favicon 32",
+      "description": "FawxzzyWeb favicon 32",
       "source": "branding/generated/favicon/favicon-32x32.png",
       "target": "repos/trove/public/favicon-32x32.png"
     },
     {
       "id": "trove-favicon-16",
       "repoId": "trove",
-      "description": "Trove favicon 16",
+      "description": "FawxzzyWeb favicon 16",
       "source": "branding/generated/favicon/favicon-16x16.png",
       "target": "repos/trove/public/favicon-16x16.png"
     },
     {
       "id": "trove-favicon-ico",
       "repoId": "trove",
-      "description": "Trove root favicon",
+      "description": "FawxzzyWeb root favicon",
       "source": "branding/generated/favicon/favicon.ico",
       "target": "repos/trove/public/favicon.ico"
     }

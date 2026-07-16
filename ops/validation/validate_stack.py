@@ -118,16 +118,22 @@ from ops.stack.generate_lockfile import (
     STACK_LOCK_SCHEMA_VERSION,
     TRUST_CLASSES,
     build_canonical_lockfile_artifacts,
+    declared_root_coordinate,
     default_lockfile_path,
     describe_lock_payload_drift,
     git_output,
     load_lockfile,
+    load_lockfile_from_git_ref,
     normalize_lock_payload,
     repo_is_git_root,
     render_lockfile_bytes,
+    resolve_declared_root_path,
+    scoped_refresh_baseline_ref,
+    scoped_refresh_repo_ids,
     status_paths,
 )
 from ops.stack.audit_gitdir_hygiene import build_report as build_gitdir_hygiene_report, default_target_paths as default_gitdir_hygiene_targets
+from ops.atlas.operational_identity import OperationalIdentityError, operational_identity_from_config
 from ops.atlas.backfill_legacy_runtime_artifacts import backfill_legacy_runtime_artifacts
 from ops.atlas.observations import (
     GOVERNED_ARTIFACT_EPOCH_LEGACY_PRE_REGISTRY,
@@ -916,11 +922,64 @@ def resolve_path(stack_file: Path, raw_path: str) -> Path:
     return path.resolve() if path.is_absolute() else (stack_file.parent / path).resolve()
 
 
+def declared_stack_coordinate(stack_file: Path, raw_path: str, *, label: str) -> str:
+    return declared_root_coordinate(raw_path, root=stack_file.parent.resolve(), label=label)
+
+
+def resolve_declared_stack_path(stack_file: Path, raw_path: str, *, label: str) -> tuple[str, Path]:
+    return resolve_declared_root_path(raw_path, root=stack_file.parent.resolve(), label=label)
+
+
+def validate_declared_stack_coordinates(stack_file: Path, config: dict[str, Any]) -> list[Finding]:
+    findings: list[Finding] = []
+    targets: list[tuple[str, str]] = []
+    registry = config.get("repo_registry", {})
+    if isinstance(registry, dict):
+        for repo_id, repo_info in registry.items():
+            if isinstance(repo_info, dict) and isinstance(repo_info.get("path"), str):
+                targets.append((f"repo_registry.{repo_id}.path", repo_info["path"]))
+
+    lock_config = config.get("stack_lock", {})
+    if isinstance(lock_config, dict):
+        if isinstance(lock_config.get("path"), str):
+            targets.append(("stack_lock.path", lock_config["path"]))
+        surfaces = lock_config.get("excluded_surfaces", {})
+        if isinstance(surfaces, dict):
+            for surface_id, surface in surfaces.items():
+                if isinstance(surface, dict) and isinstance(surface.get("path"), str):
+                    targets.append((f"stack_lock.excluded_surfaces.{surface_id}.path", surface["path"]))
+
+    archives = config.get("archives", {})
+    if isinstance(archives, dict):
+        for key in ("archive_register", "backups"):
+            value = archives.get(key)
+            if isinstance(value, str):
+                targets.append((f"archives.{key}", value))
+        for key in ("zip_snapshots", "media"):
+            values = archives.get(key)
+            if isinstance(values, list):
+                for index, value in enumerate(values):
+                    if isinstance(value, str):
+                        targets.append((f"archives.{key}[{index}]", value))
+
+    for label, raw_path in targets:
+        try:
+            declared_stack_coordinate(stack_file, raw_path, label=label)
+        except ValueError as exc:
+            findings.append(Finding("error", "stack-path-outside-root", "stack.yaml", str(exc), {"field": label, "value": raw_path}))
+    return findings
+
+
 def normalize_slashes(path: str) -> str:
     return path.replace("\\", "/")
 
 
 def relative_to_root(root: Path, path: Path) -> str:
+    lexical = path.absolute()
+    lexical_root = root.absolute()
+    if lexical.is_relative_to(lexical_root):
+        relative = lexical.relative_to(lexical_root)
+        return "." if not relative.parts else normalize_slashes(str(relative))
     resolved = path.resolve()
     if resolved.is_relative_to(root.resolve()):
         relative = resolved.relative_to(root.resolve())
@@ -942,14 +1001,22 @@ def collect_excluded_surface_roots(
     for surface_id, surface in excluded_surfaces.items():
         if not isinstance(surface, dict) or not isinstance(surface.get("path"), str):
             continue
-        resolved_path = resolve_path(stack_file, str(surface["path"])).resolve()
+        try:
+            coordinate, resolved_path = resolve_declared_stack_path(
+                stack_file,
+                str(surface["path"]),
+                label=f"stack_lock.excluded_surfaces.{surface_id}.path",
+            )
+        except ValueError:
+            continue
+        resolved_path = resolved_path.resolve()
         trust_class = str(surface.get("trust_class", ""))
         collected.append(
             (
                 resolved_path,
                 {
                     "surface_id": str(surface_id),
-                    "path": relative_to_root(root, resolved_path),
+                    "path": coordinate,
                     "trust_class": trust_class,
                     "release_eligible": bool(surface.get("release_eligible")),
                     "reason": str(surface.get("reason", "")).strip() or None,
@@ -1029,6 +1096,7 @@ def verify_locked_ref(
     component: dict[str, Any],
     *,
     allow_exact_head_without_ref: bool = False,
+    allow_pinned_head_drift: bool = False,
 ) -> str | None:
     ref_type = str(component.get("ref_type", ""))
     ref = str(component.get("ref", ""))
@@ -1036,6 +1104,10 @@ def verify_locked_ref(
     code, head_commit = git_output(repo_path, "rev-parse", "HEAD")
     if code != 0 or not head_commit:
         return "Unable to resolve current HEAD for pinned component."
+    if commit:
+        code, _ = git_output(repo_path, "cat-file", "-e", f"{commit}^{{commit}}")
+        if code != 0:
+            return f"Pinned commit '{commit}' is missing."
     if ref_type == "branch":
         code, _ = git_output(repo_path, "show-ref", "--verify", "--quiet", f"refs/heads/{ref}")
         if code != 0:
@@ -1056,7 +1128,7 @@ def verify_locked_ref(
             return f"Pinned commit ref '{ref}' is missing."
     else:
         return f"Unsupported ref_type '{ref_type}'."
-    if commit and head_commit != commit:
+    if commit and head_commit != commit and not allow_pinned_head_drift:
         return f"Pinned commit '{commit}' does not match current HEAD '{head_commit}'."
     return None
 
@@ -1268,19 +1340,34 @@ def discover_unregistered_git_roots(root: Path, config: dict[str, Any], stack_fi
     repos_root = root / "repos"
     if not repos_root.exists():
         return []
-    registry_paths = {
-        resolve_path(stack_file, repo_info["path"]).resolve()
-        for repo_info in config.get("repo_registry", {}).values()
-        if isinstance(repo_info, dict) and isinstance(repo_info.get("path"), str)
-    }
+    registry_paths: set[Path] = set()
+    for repo_id, repo_info in config.get("repo_registry", {}).items():
+        if not isinstance(repo_info, dict) or not isinstance(repo_info.get("path"), str):
+            continue
+        try:
+            _, repo_path = resolve_declared_stack_path(
+                stack_file,
+                repo_info["path"],
+                label=f"repo_registry.{repo_id}.path",
+            )
+        except ValueError:
+            continue
+        registry_paths.add(repo_path.resolve())
     lock_config = config.get("stack_lock", {})
-    excluded_roots = {
-        resolve_path(stack_file, value["path"]).resolve()
-        for value in lock_config.get("excluded_surfaces", {}).values()
-        if isinstance(lock_config, dict)
-        and isinstance(value, dict)
-        and isinstance(value.get("path"), str)
-    } if isinstance(lock_config, dict) else set()
+    excluded_roots: set[Path] = set()
+    if isinstance(lock_config, dict):
+        for surface_id, value in lock_config.get("excluded_surfaces", {}).items():
+            if not isinstance(value, dict) or not isinstance(value.get("path"), str):
+                continue
+            try:
+                _, surface_path = resolve_declared_stack_path(
+                    stack_file,
+                    value["path"],
+                    label=f"stack_lock.excluded_surfaces.{surface_id}.path",
+                )
+            except ValueError:
+                continue
+            excluded_roots.add(surface_path.resolve())
 
     candidates: set[Path] = set()
     for top_level in repos_root.iterdir():
@@ -1724,7 +1811,10 @@ def build_archive_declared_paths(
     if isinstance(archives, dict):
         backups = archives.get("backups")
         if isinstance(backups, str) and backups.strip():
-            declared.add(relative_to_root(root, resolve_path(stack_file, backups)))
+            try:
+                declared.add(declared_stack_coordinate(stack_file, backups, label="archives.backups"))
+            except ValueError:
+                pass
         for key in ("zip_snapshots", "media"):
             values = archives.get(key)
             if not isinstance(values, list):
@@ -1732,7 +1822,10 @@ def build_archive_declared_paths(
             for item in values:
                 if not isinstance(item, str) or not item.strip():
                     continue
-                relative = relative_to_root(root, resolve_path(stack_file, item))
+                try:
+                    relative = declared_stack_coordinate(stack_file, item, label=f"archives.{key}")
+                except ValueError:
+                    continue
                 declared.add(relative)
                 if key == "media" and Path(relative).suffix == "":
                     declared.add(f"{relative}.zip")
@@ -1746,7 +1839,16 @@ def build_archive_declared_paths(
                     continue
                 raw_path = surface.get("path")
                 if isinstance(raw_path, str) and raw_path.strip():
-                    declared.add(relative_to_root(root, resolve_path(stack_file, raw_path)))
+                    try:
+                        declared.add(
+                            declared_stack_coordinate(
+                                stack_file,
+                                raw_path,
+                                label="stack_lock.excluded_surfaces.path",
+                            )
+                        )
+                    except ValueError:
+                        pass
     return declared
 
 
@@ -1763,7 +1865,10 @@ def build_archive_scope_exempt_paths(
             for item in media:
                 if not isinstance(item, str) or not item.strip():
                     continue
-                relative = relative_to_root(root, resolve_path(stack_file, item))
+                try:
+                    relative = declared_stack_coordinate(stack_file, item, label="archives.media")
+                except ValueError:
+                    continue
                 scope_exempt.add(relative)
                 if Path(relative).suffix == "":
                     scope_exempt.add(f"{relative}.zip")
@@ -1827,8 +1932,15 @@ def validate_archive_registry(stack_file: Path, config: dict[str, Any]) -> list[
         )
         return findings
 
-    registry_path = resolve_path(stack_file, archive_register_value)
-    registry_rel = relative_to_root(root, registry_path)
+    try:
+        registry_rel, registry_path = resolve_declared_stack_path(
+            stack_file,
+            archive_register_value,
+            label="archives.archive_register",
+        )
+    except ValueError as exc:
+        findings.append(Finding("error", "archive-registry-path-outside-root", "stack.yaml", str(exc)))
+        return findings
     if not registry_path.exists():
         findings.append(
             Finding(
@@ -1905,7 +2017,15 @@ def validate_archive_registry(stack_file: Path, config: dict[str, Any]) -> list[
                 )
             )
             continue
-        relative_path = normalize_slashes(raw_path)
+        try:
+            relative_path = declared_stack_coordinate(
+                stack_file,
+                raw_path,
+                label=f"archive registry entries[{index}].path",
+            )
+        except ValueError as exc:
+            findings.append(Finding("error", "archive-registry-path-outside-root", entry_path, str(exc)))
+            continue
         if relative_path in registered_paths:
             findings.append(
                 Finding(
@@ -1962,7 +2082,12 @@ def validate_archive_registry(stack_file: Path, config: dict[str, Any]) -> list[
                 )
             )
 
-        actual_exists = resolve_path(stack_file, relative_path).exists()
+        _, actual_path = resolve_declared_stack_path(
+            stack_file,
+            relative_path,
+            label=f"archive registry entries[{index}].path",
+        )
+        actual_exists = actual_path.exists()
         if bool(entry.get("present")) != actual_exists:
             findings.append(
                 Finding(
@@ -2812,9 +2937,16 @@ def collect_text_scan_roots(root: Path, config: dict[str, Any], stack_file: Path
         candidate_path = root / candidate
         if candidate_path.exists():
             roots.append(candidate_path)
-    for repo in config.get("repo_registry", {}).values():
+    for repo_id, repo in config.get("repo_registry", {}).items():
         if isinstance(repo, dict) and isinstance(repo.get("path"), str) and repo_status_allows_internal_validation(str(repo.get("status", ""))):
-            repo_path = resolve_path(stack_file, repo["path"])
+            try:
+                _, repo_path = resolve_declared_stack_path(
+                    stack_file,
+                    repo["path"],
+                    label=f"repo_registry.{repo_id}.path",
+                )
+            except ValueError:
+                continue
             if repo_path.resolve() == root.resolve():
                 continue
             if repo_path.exists():
@@ -2994,6 +3126,9 @@ def build_findings(
     lockfile_rel = relative_to_root(root, lockfile_path)
     preloaded_lockfile: dict[str, Any] | None = None
     allowed_missing_locked_repo_ids: set[str] = set()
+    lock_refresh_repo_ids: set[str] | None = None
+    lock_refresh_baseline_ref: str | None = None
+    lock_refresh_baseline_payload: dict[str, Any] | None = None
     if allow_missing_locked_repos and lockfile_path.exists():
         try:
             candidate_lockfile = load_lockfile(lockfile_path)
@@ -3009,7 +3144,22 @@ def build_findings(
                     if str(repo_id).strip() and isinstance(component, dict)
                 } - required_present_repo_ids
 
+    findings.extend(validate_declared_stack_coordinates(stack_file, config))
     findings.extend(validate_declared_surface_scan_coverage(root, config, stack_file))
+    for repo_id, repo_info in config.get("repo_registry", {}).items():
+        if not isinstance(repo_info, dict) or "identity" not in repo_info:
+            continue
+        try:
+            operational_identity_from_config(config, str(repo_id))
+        except OperationalIdentityError as exc:
+            findings.append(
+                Finding(
+                    "error",
+                    "operational-identity-invalid",
+                    f"stack.yaml#repo_registry.{repo_id}.identity",
+                    str(exc),
+                )
+            )
     try:
         _, _, topology_issues = validate_atlas_topology_contract_files(stack_file=stack_file)
     except Exception as exc:
@@ -3052,8 +3202,11 @@ def build_findings(
         findings.extend(validate_proposed_sessions(stack_file))
 
         for label, raw_path in iter_relative_directory_targets(config):
-            resolved = resolve_path(stack_file, raw_path)
-            rel = normalize_slashes(str(resolved.relative_to(root))) if resolved.is_relative_to(root) else normalize_slashes(str(resolved))
+            try:
+                rel, resolved = resolve_declared_stack_path(stack_file, raw_path, label=label)
+            except ValueError as exc:
+                findings.append(Finding("error", "stack-path-outside-root", "stack.yaml", str(exc), {"field": label, "value": raw_path}))
+                continue
             if not resolved.exists():
                 findings.append(Finding("critical", "missing-directory", rel, f"Required directory from {label} is missing.", {"config_value": raw_path}))
             elif not resolved.is_dir():
@@ -3063,11 +3216,17 @@ def build_findings(
         if not isinstance(repo_info, dict) or not isinstance(repo_info.get("path"), str):
             findings.append(Finding("critical", "invalid-repo-config", f"repo_registry.{repo_id}", "Repo entry is missing a valid path."))
             continue
-        repo_path = resolve_path(stack_file, repo_info["path"])
+        try:
+            repo_rel, repo_path = resolve_declared_stack_path(
+                stack_file,
+                repo_info["path"],
+                label=f"repo_registry.{repo_id}.path",
+            )
+        except ValueError:
+            continue
         status = str(repo_info.get("status", "unknown"))
-        repo_rel = normalize_slashes(str(repo_path.relative_to(root))) if repo_path.is_relative_to(root) else normalize_slashes(str(repo_path))
-        if not repo_rel:
-            repo_rel = "."
+        # The declared coordinate is the reporting contract. A resolved local
+        # junction target must never leak a machine-specific path into output.
         is_stack_control_repo = repo_path == root
         if not repo_path.exists():
             if sparse_mode and repo_id not in required_present_repo_ids:
@@ -3119,17 +3278,19 @@ def build_findings(
                 suppressed_paths=cleanup_suppressed_paths,
             ).items():
                 if requires_warning:
-                    candidate = repo_path / relative_dir
-                    rel = normalize_slashes(str(candidate.relative_to(root)))
+                    rel = normalize_slashes(f"{repo_rel}/{relative_dir}")
                     findings.append(Finding("warning", "mutable-state-in-repo", rel, "Mutable or generated state is present inside a repo path.", {"repo_id": repo_id, "state_path": relative_dir}))
             for env_candidate in list(repo_path.glob(".env")) + list(repo_path.glob(".env.*")):
                 if not is_repo_local_secret_candidate(env_candidate):
                     continue
-                findings.append(Finding("warning", "repo-local-secret-material", normalize_slashes(str(env_candidate.relative_to(root))), "Repo-local environment file detected; secrets should not be part of default exports.", {"repo_id": repo_id}))
+                env_rel = normalize_slashes(f"{repo_rel}/{env_candidate.relative_to(repo_path)}")
+                findings.append(Finding("warning", "repo-local-secret-material", env_rel, "Repo-local environment file detected; secrets should not be part of default exports.", {"repo_id": repo_id}))
             for file_path, pattern in iter_unique_repo_root_files(repo_path, ROOT_LOG_PATTERNS):
-                findings.append(Finding("warning", "mutable-artifact-in-repo-root", normalize_slashes(str(file_path.relative_to(root))), "Mutable log, temp, or database artifact detected in repo root.", {"repo_id": repo_id, "pattern": pattern}))
+                file_rel = normalize_slashes(f"{repo_rel}/{file_path.relative_to(repo_path)}")
+                findings.append(Finding("warning", "mutable-artifact-in-repo-root", file_rel, "Mutable log, temp, or database artifact detected in repo root.", {"repo_id": repo_id, "pattern": pattern}))
             for file_path, pattern in iter_unique_repo_root_files(repo_path, ROOT_CAPTURE_PATTERNS):
-                findings.append(Finding("warning", "capture-artifact-in-repo-root", normalize_slashes(str(file_path.relative_to(root))), "Likely review or capture artifact detected in repo root.", {"repo_id": repo_id, "pattern": pattern}))
+                file_rel = normalize_slashes(f"{repo_rel}/{file_path.relative_to(repo_path)}")
+                findings.append(Finding("warning", "capture-artifact-in-repo-root", file_rel, "Likely review or capture artifact detected in repo root.", {"repo_id": repo_id, "pattern": pattern}))
     if not lockfile_path.exists():
         findings.append(
             Finding(
@@ -3164,11 +3325,31 @@ def build_findings(
                         f"Stack lockfile schema_version must be '{STACK_LOCK_SCHEMA_VERSION}'.",
                     )
                 )
+            try:
+                lock_refresh_repo_ids = scoped_refresh_repo_ids(lockfile)
+                lock_refresh_baseline_ref = scoped_refresh_baseline_ref(lockfile)
+                if lock_refresh_repo_ids is not None and lock_refresh_baseline_ref is not None:
+                    lock_refresh_baseline_payload = load_lockfile_from_git_ref(
+                        root=root,
+                        git_ref=lock_refresh_baseline_ref,
+                        lockfile_path=lockfile_path,
+                    )
+            except ValueError as exc:
+                findings.append(Finding("error", "stack-lock-refresh-scope", lockfile_rel, str(exc)))
+                lock_refresh_repo_ids = None
+                lock_refresh_baseline_ref = None
+                lock_refresh_baseline_payload = None
             if allow_missing_locked_repos:
                 canonical_lock = None
             else:
                 try:
-                    canonical_lock = build_canonical_lockfile_artifacts(config=config, root=root)
+                    canonical_lock = build_canonical_lockfile_artifacts(
+                        config=config,
+                        root=root,
+                        baseline_payload=lock_refresh_baseline_payload,
+                        refresh_repo_ids=lock_refresh_repo_ids,
+                        refresh_baseline_ref=lock_refresh_baseline_ref,
+                    )
                 except Exception as exc:
                     findings.append(
                         Finding(
@@ -3274,7 +3455,15 @@ def build_findings(
                                 f"Stack lockfile component is missing required fields: {', '.join(missing_fields)}",
                             )
                         )
-                    repo_path = resolve_path(stack_file, str(component.get("path", "")))
+                    try:
+                        _, repo_path = resolve_declared_stack_path(
+                            stack_file,
+                            str(component.get("path", "")),
+                            label=f"stack lock component {component_id}.path",
+                        )
+                    except ValueError as exc:
+                        findings.append(Finding("error", "stack-lock-path-outside-root", component_path, str(exc)))
+                        continue
                     if not repo_path.exists():
                         if sparse_mode and component_id not in required_present_repo_ids:
                             continue
@@ -3294,6 +3483,9 @@ def build_findings(
                         repo_path,
                         component,
                         allow_exact_head_without_ref=sparse_mode,
+                        allow_pinned_head_drift=(
+                            lock_refresh_repo_ids is not None and component_id not in lock_refresh_repo_ids
+                        ),
                     )
                     if ref_problem:
                         findings.append(Finding("error", "stack-lock-missing-ref", component_path, ref_problem))
@@ -3333,6 +3525,15 @@ def build_findings(
                                 f"Excluded surface entry is missing required fields: {', '.join(missing_fields)}",
                             )
                         )
+                    try:
+                        declared_stack_coordinate(
+                            stack_file,
+                            str(surface.get("path", "")),
+                            label=f"stack lock excluded surface {surface_id}.path",
+                        )
+                    except ValueError as exc:
+                        findings.append(Finding("error", "stack-lock-path-outside-root", surface_path, str(exc)))
+                        continue
                     trust_class = str(surface.get("trust_class", ""))
                     if trust_class not in TRUST_CLASSES:
                         findings.append(Finding("error", "stack-lock-excluded-surface-trust", surface_path, f"Unsupported trust_class '{trust_class}' in excluded surface entry."))

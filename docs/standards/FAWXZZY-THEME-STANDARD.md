@@ -89,7 +89,7 @@ Required qualities:
 5. Do not mix in old saturated blues, purples, oranges, or reds without remapping them first.
 
 ## Current reference adopter
-- `repos/fawxzzy-trove`
+- FawxzzyWeb (`trove` at `repos/trove`)
 
 ## Rollout guidance
 Adopt per repo with small, targeted visual changes. Reuse the shared palette and ambient motion layer before inventing repo-specific theme forks.

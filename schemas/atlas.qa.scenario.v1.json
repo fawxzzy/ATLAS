@@ -33,6 +33,14 @@
     "summary": {
       "type": "string"
     },
+    "display_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "public_origin": {
+      "type": "string",
+      "format": "uri"
+    },
     "repo_id": {
       "type": "string",
       "minLength": 1

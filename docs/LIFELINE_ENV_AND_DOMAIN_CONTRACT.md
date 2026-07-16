@@ -30,6 +30,7 @@ This document captures the operator-facing environment and hostname contract tha
 - Stable service key template: `{app}/{environment}`
 - Stable public unit: `app/environment`
 - Routing default: `subdomain-first`
+- Product-specific intentional hostnames are allowed only when the topology manifest binds them to the canonical `stack.yaml` operational identity and preserves the stable service key. FawxzzyWeb uses apex `https://fawxzzy.com` with service key `trove/prod`.
 - Public hostnames must hide:
   - machine identity
   - provider instance identity

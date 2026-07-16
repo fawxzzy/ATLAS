@@ -11,11 +11,13 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from ops._atlas import atlas_relative, atlas_root, load_stack_config, normalize_slashes, resolve_atlas_path
+from ops.atlas.operational_identity import inventory_identity_projection, operational_identity_from_config
 from ops.cortex._artifacts import stable_json_digest
 from ops.cortex.index_working_memory import build_working_memory_catalog
 from ops.stack.generate_lockfile import (
     current_ref,
     current_remote,
+    declared_root_coordinate,
     default_lockfile_path,
     git_output,
     git_status_lines,
@@ -24,6 +26,7 @@ from ops.stack.generate_lockfile import (
     repo_is_git_root,
     repo_release_eligible,
     repo_trust_class,
+    resolve_declared_root_path,
 )
 
 REPO_INVENTORY_SCHEMA_VERSION = "atlas.stack.repo-inventory.v1"
@@ -212,11 +215,16 @@ def build_repo_inventory(
         loaded_lock = {}
 
     registry = stack_config.get("repo_registry", {}) if isinstance(stack_config.get("repo_registry"), dict) else {}
-    repo_paths = {
-        normalize_slashes(str(repo_info.get("path", ""))).strip(): str(repo_id)
-        for repo_id, repo_info in registry.items()
-        if isinstance(repo_info, dict) and isinstance(repo_info.get("path"), str)
-    }
+    repo_paths: dict[str, str] = {}
+    for repo_id, repo_info in registry.items():
+        if not isinstance(repo_info, dict) or not isinstance(repo_info.get("path"), str):
+            continue
+        coordinate = declared_root_coordinate(
+            repo_info["path"],
+            root=base_root,
+            label=f"repo_registry.{repo_id}.path",
+        )
+        repo_paths[coordinate] = str(repo_id)
     initiative_index, initiative_digest = _initiative_index(base_root, repo_paths)
     lock_components = loaded_lock.get("components", {}) if isinstance(loaded_lock.get("components"), dict) else {}
     lock_config = stack_config.get("stack_lock", {}) if isinstance(stack_config.get("stack_lock"), dict) else {}
@@ -226,7 +234,11 @@ def build_repo_inventory(
         repo_info = registry.get(repo_id)
         if not isinstance(repo_info, dict) or not isinstance(repo_info.get("path"), str):
             continue
-        repo_path = resolve_atlas_path(repo_info["path"], root=base_root)
+        coordinate, repo_path = resolve_declared_root_path(
+            repo_info["path"],
+            root=base_root,
+            label=f"repo_registry.{repo_id}.path",
+        )
         ignored_dirty_paths: set[str] = set()
         if repo_id == "stack" and repo_path == base_root:
             # The stack refresh writes these published surfaces itself, so they
@@ -241,10 +253,18 @@ def build_repo_inventory(
         related_initiatives = initiative_index.get(repo_id, [])
         root_blocking = _repo_blocks_root(repo_id, repo_info, lock_config)
         dirty_blocks_root = bool(live_state["dirty"] is True and root_blocking)
+        identity_projection = (
+            inventory_identity_projection(operational_identity_from_config(stack_config, repo_id))
+            if "identity" in repo_info
+            else None
+        )
         repos.append(
             {
                 "logical_id": repo_id,
-                "local_path": atlas_relative(repo_path, root=base_root),
+                # Preserve the declared stack coordinate even when isolated
+                # generation reads repos through a local junction.
+                "local_path": coordinate,
+                "operational_identity": identity_projection,
                 "role": str(lock_component.get("role", repo_info.get("role", ""))),
                 "playbook_adoption_status": str(
                     lock_component.get(
@@ -292,10 +312,15 @@ def build_repo_inventory(
         surface = excluded_surfaces_raw.get(surface_id)
         if not isinstance(surface, dict):
             continue
+        surface_coordinate = declared_root_coordinate(
+            str(surface.get("path", "")),
+            root=base_root,
+            label=f"stack.lock excluded surface {surface_id}",
+        )
         excluded_surfaces.append(
             {
                 "surface_id": surface_id,
-                "local_path": normalize_slashes(str(surface.get("path", ""))),
+                "local_path": surface_coordinate,
                 "present": bool(surface.get("present", False)),
                 "trust_class": str(surface.get("trust_class", "")),
                 "release_eligible": bool(surface.get("release_eligible", False)),
@@ -423,8 +448,8 @@ def render_repo_inventory_markdown(payload: dict[str, Any]) -> str:
         "",
         "## Managed Repos",
         "",
-        "| Repo id | Path | Role | Playbook adoption status | Branch | Pinned commit | Current commit | Dirty | Root-blocking | Dirty blocks root | Trust | Release | Related initiatives |",
-        "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+        "| Repo id | Path | Display | Provider project | Public origin | Role | Playbook adoption status | Branch | Pinned commit | Current commit | Dirty | Root-blocking | Dirty blocks root | Trust | Release | Related initiatives |",
+        "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
     ]
 
     for item in repos:
@@ -434,12 +459,17 @@ def render_repo_inventory_markdown(payload: dict[str, Any]) -> str:
         initiative_text = "<br>".join(
             str(value) for value in initiatives if isinstance(value, str)
         ) or "-"
+        operational_identity = item.get("operational_identity")
+        identity = operational_identity if isinstance(operational_identity, dict) else {}
         lines.append(
             "| "
             + " | ".join(
                 [
                     str(item.get("logical_id") or "-"),
                     str(item.get("local_path") or "-"),
+                    str(identity.get("display_name") or "-"),
+                    str(identity.get("vercel_project") or "-"),
+                    str(identity.get("public_origin") or "-"),
                     str(item.get("role") or "-"),
                     str(item.get("playbook_adoption_status") or "-"),
                     str(item.get("branch") or "-"),

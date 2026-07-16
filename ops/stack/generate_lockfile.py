@@ -6,14 +6,14 @@ import hashlib
 import json
 import subprocess
 import sys
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from ops._atlas import atlas_relative, atlas_root, load_stack_config, normalize_slashes, resolve_atlas_path
+from ops._atlas import atlas_relative, atlas_root, load_stack_config, normalize_slashes, parse_simple_yaml, resolve_atlas_path
 
 STACK_LOCK_SCHEMA_VERSION = "atlas.stack.lock.v1"
 TRUST_CLASSES = {"trusted", "adjacent", "untrusted"}
@@ -36,6 +36,7 @@ LOCK_METADATA_FIELDS = (
     "stack_manifest_path",
     "stack_manifest_digest",
     "component_count",
+    "refresh_scope",
 )
 LOCK_EXCLUDED_SURFACE_FIELDS = (
     "path",
@@ -44,6 +45,80 @@ LOCK_EXCLUDED_SURFACE_FIELDS = (
     "release_eligible",
     "reason",
 )
+SCOPED_PIN_FIELDS = ("remote", "ref_type", "ref", "commit", "dirty")
+
+
+def declared_root_coordinate(raw_path: str, *, root: Path, label: str = "Path") -> str:
+    """Return a canonical root-relative presentation coordinate.
+
+    Containment is intentionally lexical. A declared coordinate may be backed by
+    a junction whose resolved target is outside an isolated worktree, but the
+    declaration itself must remain relative to the ATLAS root and may not use
+    parent traversal.
+    """
+    normalized = normalize_slashes(str(raw_path).strip())
+    if not normalized:
+        raise ValueError(f"{label} must be a non-empty root-relative path.")
+    candidate = Path(normalized)
+    windows_candidate = PureWindowsPath(normalized)
+    if (
+        candidate.is_absolute()
+        or candidate.drive
+        or candidate.root
+        or windows_candidate.is_absolute()
+        or windows_candidate.drive
+        or windows_candidate.root
+    ):
+        raise ValueError(f"{label} must be root-relative: {normalized}")
+    if any(part == ".." for part in candidate.parts):
+        raise ValueError(f"{label} must not contain parent traversal: {normalized}")
+
+    parts = tuple(part for part in candidate.parts if part not in {"", "."})
+    coordinate = "/".join(parts) if parts else "."
+    lexical_root = root.absolute()
+    lexical_target = lexical_root.joinpath(*parts)
+    if not lexical_target.is_relative_to(lexical_root):
+        raise ValueError(f"{label} escapes the ATLAS root: {normalized}")
+    return coordinate
+
+
+def resolve_declared_root_path(raw_path: str, *, root: Path, label: str = "Path") -> tuple[str, Path]:
+    coordinate = declared_root_coordinate(raw_path, root=root, label=label)
+    return coordinate, resolve_atlas_path(coordinate, root=root)
+
+
+def scoped_refresh_repo_ids(payload: dict[str, Any]) -> set[str] | None:
+    scope = payload.get("refresh_scope")
+    if scope is None:
+        return None
+    if not isinstance(scope, dict) or scope.get("mode") != "scoped":
+        raise ValueError("refresh_scope must declare mode 'scoped'.")
+    raw_repo_ids = scope.get("repo_ids")
+    if not isinstance(raw_repo_ids, dict) or not raw_repo_ids:
+        raise ValueError("refresh_scope.repo_ids must be a non-empty mapping.")
+    repo_ids = {
+        str(repo_id)
+        for repo_id, selected in raw_repo_ids.items()
+        if bool(selected) and str(repo_id).strip()
+    }
+    if len(repo_ids) != len(raw_repo_ids):
+        raise ValueError("refresh_scope.repo_ids entries must map non-empty repo ids to true.")
+    return repo_ids
+
+
+def scoped_refresh_baseline_ref(payload: dict[str, Any]) -> str | None:
+    scope = payload.get("refresh_scope")
+    if scope is None:
+        return None
+    if not isinstance(scope, dict):
+        raise ValueError("refresh_scope must be a mapping.")
+    baseline_ref = scope.get("baseline_ref")
+    if not isinstance(baseline_ref, str) or not baseline_ref.strip():
+        raise ValueError("refresh_scope.baseline_ref must be a non-empty string.")
+    normalized = baseline_ref.strip().lower()
+    if len(normalized) != 40 or any(character not in "0123456789abcdef" for character in normalized):
+        raise ValueError("refresh_scope.baseline_ref must be a full 40-character commit object id.")
+    return normalized
 
 
 def stable_json_digest(value: Any) -> str:
@@ -175,7 +250,12 @@ def stack_component_repo_id(config: dict[str, Any], root: Path) -> str | None:
         repo_info = registry.get(repo_id)
         if not isinstance(repo_info, dict) or not isinstance(repo_info.get("path"), str):
             continue
-        if resolve_atlas_path(repo_info["path"], root=root).resolve() == root.resolve():
+        _, repo_path = resolve_declared_root_path(
+            repo_info["path"],
+            root=root,
+            label=f"repo_registry.{repo_id}.path",
+        )
+        if repo_path.resolve() == root.resolve():
             return str(repo_id)
     return None
 
@@ -185,7 +265,12 @@ def default_lockfile_path(config: dict[str, Any] | None = None, root: Path | Non
     stack_config = config or load_stack_config(base / "stack.yaml")
     lock_config = stack_config.get("stack_lock", {})
     if isinstance(lock_config, dict) and isinstance(lock_config.get("path"), str):
-        return resolve_atlas_path(lock_config["path"], root=base)
+        _, lockfile_path = resolve_declared_root_path(
+            lock_config["path"],
+            root=base,
+            label="stack_lock.path",
+        )
+        return lockfile_path
     return base / "stack.lock.yaml"
 
 
@@ -204,9 +289,15 @@ def excluded_surfaces(config: dict[str, Any], root: Path) -> dict[str, dict[str,
         trust_class = str(value.get("trust_class", "untrusted"))
         if trust_class not in TRUST_CLASSES:
             raise ValueError(f"Unsupported trust_class '{trust_class}' for excluded surface '{surface_id}'.")
-        surface_path = resolve_atlas_path(value["path"], root=root)
+        coordinate, surface_path = resolve_declared_root_path(
+            value["path"],
+            root=root,
+            label=f"stack_lock.excluded_surfaces.{surface_id}.path",
+        )
         surfaces[str(surface_id)] = {
-            "path": atlas_relative(surface_path, root=root),
+            # Preserve the declared stack coordinate even when a local junction
+            # supplies the repo during isolated generation.
+            "path": coordinate,
             "present": surface_path.exists(),
             "trust_class": trust_class,
             "release_eligible": bool(value.get("release_eligible", False)),
@@ -271,7 +362,59 @@ def normalize_lock_payload(payload: dict[str, Any]) -> dict[str, Any]:
         "components": components,
         "excluded_surfaces": excluded,
     }
+    if payload.get("refresh_scope") is not None:
+        repo_ids = scoped_refresh_repo_ids(payload)
+        baseline_ref = scoped_refresh_baseline_ref(payload)
+        body["refresh_scope"] = {
+            "mode": "scoped",
+            "baseline_ref": baseline_ref,
+            "repo_ids": {repo_id: True for repo_id in sorted(repo_ids or set())},
+        }
     return body | {"lock_digest": stable_json_digest(body)}
+
+
+def apply_scoped_component_refresh(
+    live_payload: dict[str, Any],
+    *,
+    baseline_payload: dict[str, Any],
+    refresh_repo_ids: set[str],
+    baseline_ref: str,
+) -> dict[str, Any]:
+    normalized_live = normalize_lock_payload(live_payload)
+    normalized_baseline = normalize_lock_payload(baseline_payload)
+    live_components = normalized_live.get("components", {})
+    baseline_components = normalized_baseline.get("components", {})
+    if not isinstance(live_components, dict) or not isinstance(baseline_components, dict):
+        raise ValueError("Scoped lock refresh requires component mappings.")
+    unknown = sorted(refresh_repo_ids - set(live_components))
+    if unknown:
+        raise ValueError(f"Scoped lock refresh contains unknown repo ids: {', '.join(unknown)}")
+    if not refresh_repo_ids:
+        raise ValueError("Scoped lock refresh requires at least one repo id.")
+    normalized_baseline_ref = baseline_ref.strip().lower()
+    if len(normalized_baseline_ref) != 40 or any(
+        character not in "0123456789abcdef" for character in normalized_baseline_ref
+    ):
+        raise ValueError("Scoped lock refresh requires a full 40-character baseline commit object id.")
+
+    for repo_id, live_component in live_components.items():
+        if repo_id in refresh_repo_ids:
+            continue
+        baseline_component = baseline_components.get(repo_id)
+        if not isinstance(live_component, dict) or not isinstance(baseline_component, dict):
+            raise ValueError(f"Scoped lock refresh requires a baseline component for '{repo_id}'.")
+        missing = [field for field in SCOPED_PIN_FIELDS if field not in baseline_component]
+        if missing:
+            raise ValueError(f"Baseline component '{repo_id}' is missing scoped pin fields: {', '.join(missing)}")
+        for field in SCOPED_PIN_FIELDS:
+            live_component[field] = baseline_component[field]
+
+    normalized_live["refresh_scope"] = {
+        "mode": "scoped",
+        "baseline_ref": normalized_baseline_ref,
+        "repo_ids": {repo_id: True for repo_id in sorted(refresh_repo_ids)},
+    }
+    return normalize_lock_payload(normalized_live)
 
 
 def stack_root_dirty_state(
@@ -385,7 +528,11 @@ def build_lock_payload(
         repo_info = registry.get(repo_id)
         if not isinstance(repo_info, dict) or not isinstance(repo_info.get("path"), str):
             raise ValueError(f"Included repo '{repo_id}' is missing a valid repo_registry entry.")
-        repo_path = resolve_atlas_path(repo_info["path"], root=base)
+        coordinate, repo_path = resolve_declared_root_path(
+            repo_info["path"],
+            root=base,
+            label=f"repo_registry.{repo_id}.path",
+        )
         if not repo_path.exists():
             raise FileNotFoundError(f"Included repo path does not exist: {atlas_relative(repo_path, root=base)}")
         if not repo_path.is_dir():
@@ -402,7 +549,9 @@ def build_lock_payload(
         if dirty_overrides and repo_id in dirty_overrides:
             dirty = bool(dirty_overrides[repo_id])
         components[repo_id] = {
-            "path": atlas_relative(repo_path, root=base),
+            # The manifest path is the contract. Resolved filesystem targets
+            # are local implementation details and must not leak into output.
+            "path": coordinate,
             "role": str(repo_info.get("role", "")),
             "playbook_adoption_status": str(repo_info.get("playbook_adoption_status", "")),
             "status": str(repo_info.get("status", "unknown")),
@@ -430,6 +579,22 @@ def load_lockfile(path: Path) -> dict[str, Any]:
     payload = load_stack_config(path)
     if not isinstance(payload, dict):
         raise ValueError("Lockfile must deserialize to a mapping.")
+    return normalize_lock_payload(payload)
+
+
+def load_lockfile_from_git_ref(*, root: Path, git_ref: str, lockfile_path: Path) -> dict[str, Any]:
+    lockfile_ref = atlas_relative(lockfile_path, root=root)
+    code, text = git_output(root, "show", f"{git_ref}:{lockfile_ref}")
+    if code != 0 or not text:
+        raise ValueError(f"Unable to load scoped lock baseline '{git_ref}:{lockfile_ref}'.")
+    try:
+        import yaml  # type: ignore
+
+        payload = yaml.safe_load(text)
+    except ModuleNotFoundError:
+        payload = parse_simple_yaml(text)
+    if not isinstance(payload, dict):
+        raise ValueError("Scoped lock baseline must deserialize to a mapping.")
     return normalize_lock_payload(payload)
 
 
@@ -468,6 +633,10 @@ def render_lockfile_bytes(payload: dict[str, Any]) -> bytes:
 def build_canonical_lockfile_artifacts(
     config: dict[str, Any] | None = None,
     root: Path | None = None,
+    *,
+    baseline_payload: dict[str, Any] | None = None,
+    refresh_repo_ids: set[str] | None = None,
+    refresh_baseline_ref: str | None = None,
 ) -> dict[str, Any]:
     base = (root or atlas_root()).resolve()
     stack_config = config or load_stack_config(base / "stack.yaml")
@@ -477,6 +646,15 @@ def build_canonical_lockfile_artifacts(
     if dirty_state.get("self_refresh_only") and isinstance(repo_id, str):
         dirty_overrides = {repo_id: bool(dirty_state["dirty_effective"])}
     payload = build_lock_payload(config=stack_config, root=base, dirty_overrides=dirty_overrides)
+    if refresh_repo_ids is not None:
+        if not isinstance(baseline_payload, dict):
+            raise ValueError("Scoped lock refresh requires the existing lockfile as its baseline.")
+        payload = apply_scoped_component_refresh(
+            payload,
+            baseline_payload=baseline_payload,
+            refresh_repo_ids=refresh_repo_ids,
+            baseline_ref=refresh_baseline_ref or "",
+        )
     text = render_lockfile_text(payload)
     return {
         "payload": payload,
@@ -498,15 +676,43 @@ def main() -> int:
     )
     parser.add_argument("--stack-file", type=Path, default=atlas_root() / "stack.yaml")
     parser.add_argument("--output-path", type=Path)
+    parser.add_argument(
+        "--refresh-repo-id",
+        action="append",
+        default=[],
+        help="Refresh only the named component pin while preserving unselected pins from the existing lockfile.",
+    )
+    parser.add_argument(
+        "--baseline-git-ref",
+        help="Object-addressed git ref supplying unselected component pins for a scoped refresh.",
+    )
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
 
     stack_file = resolve_atlas_path(args.stack_file)
     root = stack_file.parent.resolve()
     config = load_stack_config(stack_file)
-    artifacts = build_canonical_lockfile_artifacts(config=config, root=root)
-    payload = artifacts["payload"]
     output_path = resolve_atlas_path(args.output_path, root=root) if args.output_path else default_lockfile_path(config, root)
+    refresh_repo_ids = {str(repo_id).strip() for repo_id in args.refresh_repo_id if str(repo_id).strip()}
+    baseline_payload = None
+    if refresh_repo_ids:
+        if not args.baseline_git_ref:
+            raise ValueError("Scoped lock refresh requires --baseline-git-ref.")
+        baseline_payload = load_lockfile_from_git_ref(
+            root=root,
+            git_ref=args.baseline_git_ref,
+            lockfile_path=output_path,
+        )
+    elif args.baseline_git_ref:
+        raise ValueError("--baseline-git-ref is valid only with --refresh-repo-id.")
+    artifacts = build_canonical_lockfile_artifacts(
+        config=config,
+        root=root,
+        baseline_payload=baseline_payload,
+        refresh_repo_ids=refresh_repo_ids or None,
+        refresh_baseline_ref=args.baseline_git_ref,
+    )
+    payload = artifacts["payload"]
     if not args.dry_run:
         write_lockfile(output_path, payload)
 
@@ -518,6 +724,8 @@ def main() -> int:
                 "output_path": atlas_relative(output_path, root=root),
                 "component_count": payload["component_count"],
                 "excluded_surface_count": len(payload["excluded_surfaces"]),
+                "refresh_repo_ids": sorted(refresh_repo_ids),
+                "baseline_git_ref": args.baseline_git_ref,
                 "lock_digest": payload["lock_digest"],
             },
             indent=2,

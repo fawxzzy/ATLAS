@@ -87,7 +87,7 @@ def _report_payload() -> dict[str, object]:
                 "latest_production_commit_sha": "a" * 40,
             },
             {
-                "project_name": "fawxzzy-trove",
+                "project_name": "fawxzzyweb",
                 "project_id": "prj_vhUyajI4AL6BgCF40VnKtdxrBLuV",
                 "repo_logical_id": "trove",
                 "latest_production_deployment_id": "dpl_trove",
@@ -125,6 +125,20 @@ def _export_payload(project_id: str, created_at: str) -> dict[str, object]:
 
 
 class VercelDeploymentFreshnessInventoryTests(unittest.TestCase):
+    def test_legacy_fawxzzyweb_project_name_is_accepted_and_normalized(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            _required_receipts(root)
+            payload = _export_payload("prj_vhUyajI4AL6BgCF40VnKtdxrBLuV", "2026-07-09T16:33:54.692000Z")
+            payload["project"]["name"] = "fawxzzy-trove"
+            input_path = root / "tmp" / "atlas" / "vercel-observability" / "trove-legacy.json"
+            _write(input_path, json.dumps(payload, indent=2))
+
+            report = inventory.build_report(root=root, inputs=["tmp/atlas/vercel-observability/trove-legacy.json"])
+
+        self.assertTrue(report["safe_to_use"])
+        self.assertEqual("fawxzzyweb", report["projects"][0]["project_name"])
+
     def test_valid_report_input_classifies_same_day_and_stale(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

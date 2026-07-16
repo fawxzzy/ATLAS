@@ -9,16 +9,81 @@ from unittest.mock import patch
 
 from ops.validation.validate_stack import (
     apply_repo_generated_state_cleanup,
+    build_archive_declared_paths,
+    build_archive_scope_exempt_paths,
     collect_text_scan_roots,
+    declared_stack_coordinate,
     is_repo_local_secret_candidate,
     iter_unique_repo_root_files,
     mutable_surface_requires_warning,
     mutable_surface_warning_map,
     repo_status_allows_internal_validation,
+    validate_declared_stack_coordinates,
 )
 
 
 class ValidateStackMutableStateRulesTests(unittest.TestCase):
+    def test_archive_policy_preserves_declared_relative_coordinates(self) -> None:
+        temp_dir = tempfile.TemporaryDirectory()
+        self.addCleanup(temp_dir.cleanup)
+        root = Path(temp_dir.name)
+        stack_file = root / "stack.yaml"
+        config = {
+            "archives": {
+                "backups": "repos/repo-backups",
+                "zip_snapshots": ["repos/dev.zip"],
+                "media": ["data/media"],
+            },
+            "stack_lock": {
+                "excluded_surfaces": {
+                    "archive": {"path": "repos/archive.zip"},
+                }
+            },
+        }
+
+        self.assertEqual(
+            {"repos/repo-backups", "repos/dev.zip", "data/media", "data/media.zip", "repos/archive.zip"},
+            build_archive_declared_paths(stack_file, config),
+        )
+        self.assertTrue({"data/media", "data/media.zip"}.issubset(build_archive_scope_exempt_paths(stack_file, config)))
+
+    def test_declared_stack_coordinates_reject_escape_before_matching_or_reporting(self) -> None:
+        temp_dir = tempfile.TemporaryDirectory()
+        self.addCleanup(temp_dir.cleanup)
+        root = Path(temp_dir.name)
+        stack_file = root / "stack.yaml"
+        config = {
+            "repo_registry": {"outside": {"path": "../outside-repo"}},
+            "archives": {
+                "archive_register": "docs/registry/ATLAS-ARCHIVE-REGISTRY.json",
+                "zip_snapshots": ["../outside.zip"],
+                "media": [str(root.parent / "outside-media")],
+            },
+            "stack_lock": {
+                "path": "stack.lock.yaml",
+                "excluded_surfaces": {"outside": {"path": "../outside-surface"}},
+            },
+        }
+
+        findings = validate_declared_stack_coordinates(stack_file, config)
+
+        self.assertEqual(4, len(findings))
+        self.assertEqual({"stack-path-outside-root"}, {finding.category for finding in findings})
+        self.assertEqual(set(), build_archive_declared_paths(stack_file, config))
+
+    def test_lexical_lookalike_is_valid_but_not_equal_to_canonical_repo(self) -> None:
+        temp_dir = tempfile.TemporaryDirectory()
+        self.addCleanup(temp_dir.cleanup)
+        root = Path(temp_dir.name)
+        stack_file = root / "stack.yaml"
+
+        canonical = declared_stack_coordinate(stack_file, "repos/trove", label="repo")
+        lookalike = declared_stack_coordinate(stack_file, "repos/trove-archive", label="repo")
+
+        self.assertEqual("repos/trove", canonical)
+        self.assertEqual("repos/trove-archive", lookalike)
+        self.assertNotEqual(canonical, lookalike)
+
     def test_internal_validation_statuses_exclude_unmanaged_owner_lanes(self) -> None:
         self.assertTrue(repo_status_allows_internal_validation("active"))
         self.assertTrue(repo_status_allows_internal_validation("incubating"))

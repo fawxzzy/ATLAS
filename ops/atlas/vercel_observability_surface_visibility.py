@@ -13,7 +13,8 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from ops._atlas import atlas_root, normalize_slashes
-from ops.atlas.vercel_observability_project_inventory import GOVERNED_PROJECTS
+from ops.atlas.operational_identity import OperationalIdentityError
+from ops.atlas.vercel_project_registry import GOVERNED_PROJECTS_BY_ID as GOVERNED_PROJECTS, normalize_project_name
 
 SCHEMA_VERSION = "atlas.vercel_observability_surface_visibility.v1"
 WRAPPER_SCHEMA_VERSION = "atlas.vercel.observability.surface_visibility_wrapper.v1"
@@ -92,10 +93,17 @@ def _normalize(payload: dict[str, Any]) -> tuple[OrderedDict[str, Any] | None, l
         blockers.append(_finding("invalid_capture_timestamp", "Capture timestamp must be RFC 3339 UTC with a trailing Z."))
 
     project_id = payload.get("project_id")
+    project_name = payload.get("project_name")
     meta = GOVERNED_PROJECTS.get(str(project_id)) if isinstance(project_id, str) else None
+    canonical_project_name: str | None = None
     if meta is None:
         blockers.append(_finding("unknown_project_id", "Project is not in the governed Vercel registry.", project_id=project_id))
-    elif payload.get("project_name") != meta["project_name"]:
+    elif isinstance(project_id, str) and isinstance(project_name, str):
+        try:
+            canonical_project_name = normalize_project_name(project_id=project_id, project_name=project_name)
+        except OperationalIdentityError:
+            blockers.append(_finding("project_identity_mismatch", "Project name does not match the governed project id."))
+    else:
         blockers.append(_finding("project_identity_mismatch", "Project name does not match the governed project id."))
 
     surfaces = payload.get("surfaces")
@@ -139,7 +147,7 @@ def _normalize(payload: dict[str, Any]) -> tuple[OrderedDict[str, Any] | None, l
         OrderedDict(
             [
                 ("project_id", project_id),
-                ("project_name", payload.get("project_name")),
+                ("project_name", canonical_project_name),
                 ("repo_logical_id", meta["repo_logical_id"]),
                 ("captured_at_utc", captured_at),
                 ("surfaces", normalized_surfaces),

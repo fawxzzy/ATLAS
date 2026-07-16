@@ -13,6 +13,12 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from ops._atlas import atlas_root, normalize_slashes
+from ops.atlas.operational_identity import OperationalIdentityError
+from ops.atlas.vercel_project_registry import (
+    GOVERNED_PROJECTS_BY_SLUG,
+    PROJECT_SLUG_ALIASES,
+    normalize_project_slug,
+)
 
 SCHEMA_VERSION = "atlas.vercel_log_runtime_error_inventory.v1"
 WRAPPER_SCHEMA_VERSION = "atlas.vercel.observability.log_runtime_wrapper.v1"
@@ -54,55 +60,7 @@ REQUIRED_TEXT_REFS = (
 
 NEXT_RECOMMENDED_PACKET = "Vercel Platform Observability Governance log and runtime-error inventory first-implementation worker-cluster reconciliation"
 
-GOVERNED_PROJECTS = OrderedDict(
-    [
-        (
-            "fawxzzy-discordos",
-            OrderedDict(
-                [
-                    ("project_id", "prj_C2RSEa34OblHfhuEpVChRQQZSjuG"),
-                    ("repo_logical_id", "discordos"),
-                ]
-            ),
-        ),
-        (
-            "fawxzzy-fitness",
-            OrderedDict(
-                [
-                    ("project_id", "prj_rtlFVOMFAWCRoJ3SQjHloi89881K"),
-                    ("repo_logical_id", "fitness"),
-                ]
-            ),
-        ),
-        (
-            "fawxzzy-mazer",
-            OrderedDict(
-                [
-                    ("project_id", "prj_t3zothbtj9DExrh3FjMsH98hwwSZ"),
-                    ("repo_logical_id", "mazer"),
-                ]
-            ),
-        ),
-        (
-            "fawxzzy-trove",
-            OrderedDict(
-                [
-                    ("project_id", "prj_vhUyajI4AL6BgCF40VnKtdxrBLuV"),
-                    ("repo_logical_id", "trove"),
-                ]
-            ),
-        ),
-        (
-            "fawxzzy-foundation",
-            OrderedDict(
-                [
-                    ("project_id", "prj_o37CPLlESB6Zybe8GB74BX3wrkpy"),
-                    ("repo_logical_id", "foundation"),
-                ]
-            ),
-        ),
-    ]
-)
+GOVERNED_PROJECTS = GOVERNED_PROJECTS_BY_SLUG
 
 PROJECT_BY_ID = {meta["project_id"]: slug for slug, meta in GOVERNED_PROJECTS.items()}
 REQUIRED_INVENTORY_IDS = tuple(meta["repo_logical_id"] for meta in GOVERNED_PROJECTS.values())
@@ -285,7 +243,8 @@ def _ensure_required_files(root: Path) -> tuple[dict[str, str], list[OrderedDict
 def _validate_contract_texts(texts: dict[str, str], blockers: list[OrderedDict[str, Any]]) -> None:
     audit_text = texts.get(AUDIT_RECEIPT, "")
     for slug, meta in GOVERNED_PROJECTS.items():
-        if slug not in audit_text or meta["project_id"] not in audit_text:
+        accepted_slugs = (slug, *(alias for alias, canonical in PROJECT_SLUG_ALIASES.items() if canonical == slug))
+        if not any(candidate in audit_text for candidate in accepted_slugs) or meta["project_id"] not in audit_text:
             blockers.append(
                 _finding(
                     "audit_project_missing",
@@ -305,7 +264,7 @@ def _validate_contract_texts(texts: dict[str, str], blockers: list[OrderedDict[s
             )
 
     project_coverage_text = texts.get(PROJECT_COVERAGE_RECEIPT, "")
-    for needle in ("5/5", "fawxzzy-foundation", "fawxzzy-trove"):
+    for needle in ("5/5", "fawxzzy-foundation"):
         if needle not in project_coverage_text:
             blockers.append(
                 _finding(
@@ -314,6 +273,14 @@ def _validate_contract_texts(texts: dict[str, str], blockers: list[OrderedDict[s
                     required_reference=needle,
                 )
             )
+    if not any(candidate in project_coverage_text for candidate in ("fawxzzyweb", *PROJECT_SLUG_ALIASES)):
+        blockers.append(
+            _finding(
+                "project_coverage_reference_missing",
+                "Project inventory coverage receipt is missing the FawxzzyWeb current or legacy project reference.",
+                required_reference="fawxzzyweb",
+            )
+        )
 
     contract_text = texts.get(CONTRACT_RECEIPT, "")
     for needle in ("request logs", "runtime logs", "grouped runtime errors", "tmp/atlas/vercel-observability/"):
@@ -451,7 +418,11 @@ def _metadata_from_object(payload: dict[str, Any], *, object_path: str) -> tuple
     if blockers or source_class is None or project_slug is None or project_id is None or environment is None or deployment_id is None:
         return None, blockers
 
-    expected = GOVERNED_PROJECTS.get(project_slug)
+    try:
+        canonical_project_slug = normalize_project_slug(project_slug=project_slug, project_id=project_id)
+    except OperationalIdentityError:
+        canonical_project_slug = None
+    expected = GOVERNED_PROJECTS.get(canonical_project_slug or "")
     if expected is None:
         blockers.append(_finding("unknown_project_slug", "Wrapper project_slug is not part of the governed Vercel set.", project_slug=project_slug))
         return None, blockers
@@ -466,7 +437,7 @@ def _metadata_from_object(payload: dict[str, Any], *, object_path: str) -> tuple
             )
         )
         return None, blockers
-    if PROJECT_BY_ID.get(project_id) != project_slug:
+    if PROJECT_BY_ID.get(project_id) != canonical_project_slug:
         blockers.append(
             _finding(
                 "unknown_project_id",
@@ -480,7 +451,7 @@ def _metadata_from_object(payload: dict[str, Any], *, object_path: str) -> tuple
         OrderedDict(
             [
                 ("source_class", source_class),
-                ("project_slug", project_slug),
+                ("project_slug", canonical_project_slug),
                 ("project_id", project_id),
                 ("environment", environment),
                 ("deployment_id", deployment_id),

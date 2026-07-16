@@ -12,6 +12,12 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from ops._atlas import atlas_root, normalize_slashes
+from ops.atlas.operational_identity import OperationalIdentityError
+from ops.atlas.vercel_project_registry import (
+    GOVERNED_PROJECTS_BY_ID,
+    accepted_project_names,
+    normalize_project_name,
+)
 
 SCHEMA_VERSION = "atlas.vercel_observability_project_inventory.v1"
 EXPORT_SCHEMA_VERSION = "atlas.vercel.observability.project_inventory_export.v1"
@@ -74,55 +80,7 @@ FORBIDDEN_KEYS = {
     "request_body",
 }
 
-GOVERNED_PROJECTS = OrderedDict(
-    [
-        (
-            "prj_C2RSEa34OblHfhuEpVChRQQZSjuG",
-            OrderedDict(
-                [
-                    ("project_name", "fawxzzy-discordos"),
-                    ("repo_logical_id", "discordos"),
-                ]
-            ),
-        ),
-        (
-            "prj_rtlFVOMFAWCRoJ3SQjHloi89881K",
-            OrderedDict(
-                [
-                    ("project_name", "fawxzzy-fitness"),
-                    ("repo_logical_id", "fitness"),
-                ]
-            ),
-        ),
-        (
-            "prj_t3zothbtj9DExrh3FjMsH98hwwSZ",
-            OrderedDict(
-                [
-                    ("project_name", "fawxzzy-mazer"),
-                    ("repo_logical_id", "mazer"),
-                ]
-            ),
-        ),
-        (
-            "prj_vhUyajI4AL6BgCF40VnKtdxrBLuV",
-            OrderedDict(
-                [
-                    ("project_name", "fawxzzy-trove"),
-                    ("repo_logical_id", "trove"),
-                ]
-            ),
-        ),
-        (
-            "prj_o37CPLlESB6Zybe8GB74BX3wrkpy",
-            OrderedDict(
-                [
-                    ("project_name", "fawxzzy-foundation"),
-                    ("repo_logical_id", "foundation"),
-                ]
-            ),
-        ),
-    ]
-)
+GOVERNED_PROJECTS = GOVERNED_PROJECTS_BY_ID
 
 
 def _finding(code: str, message: str, *, severity: str = "blocker", **details: Any) -> OrderedDict[str, Any]:
@@ -223,7 +181,7 @@ def _ensure_required_files(root: Path) -> tuple[dict[str, str], list[OrderedDict
 def _validate_contract_texts(texts: dict[str, str], blockers: list[OrderedDict[str, Any]]) -> None:
     audit_text = texts.get(AUDIT_RECEIPT, "")
     for project_id, meta in GOVERNED_PROJECTS.items():
-        if project_id not in audit_text or meta["project_name"] not in audit_text:
+        if project_id not in audit_text or not any(name in audit_text for name in accepted_project_names(project_id)):
             blockers.append(
                 _finding(
                     "audit_project_missing",
@@ -381,7 +339,9 @@ def _validate_project_wrapper(*, wrapper: dict[str, Any]) -> tuple[OrderedDict[s
     if expected_project is None and project_id is not None:
         blockers.append(_finding("unknown_project_id", "Project id is not part of the governed Vercel project set.", project_id=project_id))
     if expected_project is not None:
-        if project_name != expected_project["project_name"]:
+        try:
+            canonical_project_name = normalize_project_name(project_id=project_id or "", project_name=project_name or "")
+        except OperationalIdentityError:
             blockers.append(
                 _finding(
                     "project_name_mismatch",
@@ -390,6 +350,7 @@ def _validate_project_wrapper(*, wrapper: dict[str, Any]) -> tuple[OrderedDict[s
                     actual=project_name,
                 )
             )
+            canonical_project_name = None
         if repo_logical_id != expected_project["repo_logical_id"]:
             blockers.append(
                 _finding(
@@ -524,7 +485,7 @@ def _validate_project_wrapper(*, wrapper: dict[str, Any]) -> tuple[OrderedDict[s
 
     summary = OrderedDict(
         [
-            ("project_name", project_name),
+            ("project_name", canonical_project_name),
             ("project_id", project_id),
             ("repo_logical_id", repo_logical_id),
             ("inventory_scope", inventory_scope),

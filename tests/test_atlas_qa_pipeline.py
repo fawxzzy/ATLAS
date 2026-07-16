@@ -198,7 +198,7 @@ class AtlasQaPipelineTests(unittest.TestCase):
                     "    role: docs",
                     "    status: active",
                     "  trove:",
-                    "    path: repos/fawxzzy-trove",
+                    "    path: repos/trove",
                     "    role: app",
                     "    status: active",
                     "",
@@ -2077,6 +2077,30 @@ class AtlasQaPipelineTests(unittest.TestCase):
         scenario = load_json_object(ROOT / "ops" / "atlas" / "qa" / "scenarios" / "fitness.progression-pr-smoke.json")
         errors = validate_scenario_manifest(scenario, root=self._temp_root(), require_repo_path_exists=False)
         self.assertFalse(any(item.startswith("repo_path does not exist:") for item in errors), errors)
+
+    def test_trove_adapter_identity_drift_fails_closed(self) -> None:
+        adapter = load_json_object(ROOT / "ops" / "atlas" / "qa" / "adapters" / "trove.web.json")
+        adapter["display_name"] = "Forged Web"
+        adapter["public_origin"] = "https://forged.example"
+
+        errors = validate_adapter_manifest(adapter, root=ROOT, require_repo_path_exists=False)
+
+        self.assertTrue(any(item.startswith("display_name for repo_id 'trove'") for item in errors), errors)
+        self.assertTrue(any(item.startswith("public_origin for repo_id 'trove'") for item in errors), errors)
+
+    def test_trove_scenario_identity_drift_fails_closed(self) -> None:
+        scenario = load_json_object(ROOT / "ops" / "atlas" / "qa" / "scenarios" / "trove.home-smoke.json")
+        scenario["display_name"] = "Forged Web"
+        scenario["public_origin"] = "https://forged.example"
+        scenario["title"] = "Forged Web homepage smoke"
+        scenario["entrypoint"]["preview_url_ref"] = "https://forged.example"
+
+        errors = validate_scenario_manifest(scenario, root=ROOT, require_repo_path_exists=False)
+
+        self.assertTrue(any(item.startswith("display_name for repo_id 'trove'") for item in errors), errors)
+        self.assertTrue(any(item.startswith("public_origin for repo_id 'trove'") for item in errors), errors)
+        self.assertTrue(any(item.startswith("title for repo_id 'trove'") for item in errors), errors)
+        self.assertTrue(any(item.startswith("entrypoint.preview_url_ref for repo_id 'trove'") for item in errors), errors)
 
     def test_provider_manifest_validates(self) -> None:
         payload = load_json_object(ROOT / "ops" / "atlas" / "qa" / "providers" / "mock.physical-device.v1.json")

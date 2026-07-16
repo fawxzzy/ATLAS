@@ -5,16 +5,20 @@ import tempfile
 import unittest
 from copy import deepcopy
 from pathlib import Path
+from unittest.mock import patch
 
 from ops.stack.export_repo_inventory import (
     build_repo_inventory,
     render_repo_inventory_markdown,
 )
 from ops.stack.generate_lockfile import (
+    apply_scoped_component_refresh,
     build_lock_payload,
+    declared_root_coordinate,
     describe_lock_payload_drift,
     load_lockfile,
     render_lockfile_text,
+    resolve_declared_root_path,
 )
 
 
@@ -88,6 +92,7 @@ class StackComponentTopologyProjectionTests(unittest.TestCase):
             component = first_lock["components"][repo_id]
             self.assertEqual(role, component["role"])
             self.assertEqual("not-claimed", component["playbook_adoption_status"])
+            self.assertEqual(self.config["repo_registry"][repo_id]["path"], component["path"])
 
         changed_lock = deepcopy(first_lock)
         changed_lock["components"]["discordos"]["playbook_adoption_status"] = "adopted"
@@ -112,6 +117,7 @@ class StackComponentTopologyProjectionTests(unittest.TestCase):
         inventory_by_id = {item["logical_id"]: item for item in first_inventory["repos"]}
         for repo_id, role in expected.items():
             self.assertEqual(role, inventory_by_id[repo_id]["role"])
+            self.assertEqual(self.config["repo_registry"][repo_id]["path"], inventory_by_id[repo_id]["local_path"])
             self.assertEqual(
                 "not-claimed",
                 inventory_by_id[repo_id]["playbook_adoption_status"],
@@ -150,6 +156,101 @@ class StackComponentTopologyProjectionTests(unittest.TestCase):
         self.assertIn("| Role | Playbook adoption status |", first_markdown)
         self.assertIn("board-and-discord-writer | not-claimed", first_markdown)
         self.assertIn("shared-contract-foundation | not-claimed", first_markdown)
+
+    def test_declared_coordinates_reject_parent_and_absolute_escape(self) -> None:
+        for raw_path in (
+            "../outside-repo",
+            str(self.root.parent / "outside-repo"),
+            "C:/Users/name/repo",
+            r"C:\Users\name\repo",
+            "//server/share/repo",
+            r"\\server\share\repo",
+        ):
+            with self.subTest(raw_path=raw_path):
+                broken = deepcopy(self.config)
+                broken["repo_registry"]["foundation"]["path"] = raw_path
+                with self.assertRaisesRegex(ValueError, "root-relative|parent traversal"):
+                    build_lock_payload(config=broken, root=self.root)
+
+        broken = deepcopy(self.config)
+        broken["stack_lock"]["excluded_surfaces"] = {
+            "outside_archive": {
+                "path": "../outside.zip",
+                "trust_class": "untrusted",
+                "release_eligible": False,
+                "reason": "invalid fixture",
+            }
+        }
+        with self.assertRaisesRegex(ValueError, "parent traversal"):
+            build_lock_payload(config=broken, root=self.root)
+
+    def test_declared_coordinates_accept_normal_root_relative_paths(self) -> None:
+        self.assertEqual(
+            "repos/name/repo",
+            declared_root_coordinate("repos/name/repo", root=self.root),
+        )
+
+    def test_lexical_lookalike_remains_a_distinct_in_root_coordinate(self) -> None:
+        self.assertEqual(
+            "repos/foundation-archive",
+            declared_root_coordinate("repos/foundation-archive", root=self.root),
+        )
+        self.assertNotEqual(
+            declared_root_coordinate("repos/foundation", root=self.root),
+            declared_root_coordinate("repos/foundation-archive", root=self.root),
+        )
+
+    def test_in_root_presentation_allows_junction_backed_resolution(self) -> None:
+        external_dir = tempfile.TemporaryDirectory()
+        self.addCleanup(external_dir.cleanup)
+        external = Path(external_dir.name).resolve()
+
+        with patch("ops.stack.generate_lockfile.resolve_atlas_path", return_value=external):
+            coordinate, resolved = resolve_declared_root_path(
+                "repos/junction-backed",
+                root=self.root,
+                label="fixture.path",
+            )
+
+        self.assertEqual("repos/junction-backed", coordinate)
+        self.assertEqual(external, resolved)
+
+    def test_scoped_refresh_preserves_unselected_component_pins_deterministically(self) -> None:
+        baseline = build_lock_payload(config=self.config, root=self.root)
+        for repo_path in ("repos/DiscordOS", "repos/foundation"):
+            subprocess.run(
+                ["git", "-C", str(self.root / repo_path), "commit", "--quiet", "--allow-empty", "-m", "advance"],
+                check=True,
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+            )
+        live = build_lock_payload(config=self.config, root=self.root)
+
+        scoped = apply_scoped_component_refresh(
+            live,
+            baseline_payload=baseline,
+            refresh_repo_ids={"foundation"},
+            baseline_ref="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        )
+        repeated = apply_scoped_component_refresh(
+            live,
+            baseline_payload=scoped,
+            refresh_repo_ids={"foundation"},
+            baseline_ref="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        )
+
+        self.assertEqual(baseline["components"]["discordos"]["commit"], scoped["components"]["discordos"]["commit"])
+        self.assertEqual(live["components"]["foundation"]["commit"], scoped["components"]["foundation"]["commit"])
+        self.assertEqual(
+            {
+                "mode": "scoped",
+                "baseline_ref": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "repo_ids": {"foundation": True},
+            },
+            scoped["refresh_scope"],
+        )
+        self.assertEqual(scoped, repeated)
 
 
 if __name__ == "__main__":
