@@ -1,0 +1,44 @@
+{
+  "manifest_version": "atlas.creation-os-research-import.v1",
+  "source_filename": "deep-research-report (1).md",
+  "stored_ref": "data/imports/creation-os/deep-research-2026-07-16/deep-research-report.md",
+  "source_sha256": "6d3ecbfba3cb22e9a29a30d00befaf7c4ac04720b8a619fc19a8e61e6f52fe8f",
+  "stored_sha256": "6d3ecbfba3cb22e9a29a30d00befaf7c4ac04720b8a619fc19a8e61e6f52fe8f",
+  "byte_length": 39592,
+  "line_count": 415,
+  "received_via": "operator-provided local file",
+  "provenance": {
+    "provider": "operator",
+    "received_on": "2026-07-16",
+    "source_location_policy": "The machine-specific source path is intentionally not committed.",
+    "copy_policy": "The stored evidence is a byte-for-byte copy of the operator source."
+  },
+  "trust_classification": "external-research-input",
+  "review_status": "reconciled-not-canonical",
+  "encoding": {
+    "detected": "utf-8 without BOM; LF; no terminal newline",
+    "normative_eligible": false,
+    "notes": [
+      "The source is preserved byte-for-byte as evidence.",
+      "The source intentionally contains typographic Unicode, private-use citation delimiters, and citation or encoding artifacts.",
+      "The source is excluded from the normative ASCII guard and is accepted only at the recorded digest.",
+      "Derived canonical artifacts use ASCII and do not copy citation residue."
+    ]
+  },
+  "validation": {
+    "command": "python ops/validation/validate_creation_os_adoption.py --source <operator-source-path>",
+    "fail_closed": true
+  },
+  "derived_artifacts": [
+    "docs/audits/ATLAS-CREATION-OS-RESEARCH-RECONCILIATION-2026-07-16.md",
+    "docs/architecture/ATLAS-CREATION-OS-TARGET-ARCHITECTURE.md",
+    "docs/atlas-book/17-creation-os-target-architecture.md",
+    "docs/atlas/decisions/adr-signed-versioned-atlas-bootstrap-manifest.md",
+    "docs/ops/ATLAS-CREATION-OS-PLAYBOOK-PROMOTION-CANDIDATES-2026-07-16.md",
+    "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json",
+    "docs/registry/project-board-owner-exports/atlas.project-board.owner-export.v1.json",
+    "docs/registry/project-board-owner-exports/cortex.project-board.owner-export.v1.json",
+    "ops/atlas/test_project_board_owner_export.py",
+    "ops/validation/validate_creation_os_adoption.py"
+  ]
+}

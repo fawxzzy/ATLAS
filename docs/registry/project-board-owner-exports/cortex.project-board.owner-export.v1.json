@@ -1,20 +1,20 @@
 {
   "contract_version": "atlas.project-board.owner-export.v1",
-  "export_id": "pbe_cortex_2e299105e883",
+  "export_id": "pbe_cortex_5a2e64622b8a",
   "project_id": "cortex",
   "board_id": "discordos:project-feedback:cortex",
   "owner": "stack-root",
   "adapter_id": "atlas-full-system-registry-v1",
-  "source_revision": "sha256:2e299105e883c9640bcb83dd4e040873377286ede98923be4dd5540a6dc6546d",
-  "generated_at": "2026-07-15T18:28:05Z",
+  "source_revision": "sha256:5a2e64622b8ab469f3a18733f940dd11f9f54cc1b39db05a9f8e55c3f7f88e76",
+  "generated_at": "2026-07-16T06:13:40Z",
   "sources": [
     {
       "source_id": "atlas-full-system-registry",
       "kind": "json",
       "repository": "atlas-root",
       "path": "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json",
-      "revision": "sha256:c0af2c9a3fa6471439181204ae870e6c98441bb9101a261a632ef6757d1f788e",
-      "observed_at": "2026-07-15T18:28:05Z"
+      "revision": "sha256:add9365db2d0e0e877057ad4826fc06d36a9e6d5596868a03461e1c8ddffaabf",
+      "observed_at": "2026-07-16T06:13:40Z"
     },
     {
       "source_id": "atlas-marker-book",
@@ -22,7 +22,7 @@
       "repository": "atlas-root",
       "path": "docs/atlas-book/02-lanes-and-markers.md",
       "revision": "sha256:eb0624f00e289306f65643fdf0893332cf233fc273911efc7da82a2dd057e8ad",
-      "observed_at": "2026-07-15T18:28:05Z"
+      "observed_at": "2026-07-16T06:13:40Z"
     }
   ],
   "cards": [
@@ -43,7 +43,7 @@
         "owner": "stack-root",
         "dependencies": [],
         "board_version": 1,
-        "updated_at": "2026-07-15T18:28:05Z",
+        "updated_at": "2026-07-16T06:13:40Z",
         "source_ref": "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json#lane-cortex-boundary-decision",
         "extensions": {
           "source_section": "backlog_candidates",
@@ -65,7 +65,7 @@
         "source_id": "atlas-full-system-registry",
         "source_ref": "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json#lane-cortex-boundary-decision",
         "source_status": "current",
-        "source_updated_at": "2026-07-15T18:28:05Z"
+        "source_updated_at": "2026-07-16T06:13:40Z"
       },
       "content": {
         "summary": "Decide root-owned embedded Cortex versus remote repository authority.",
@@ -107,7 +107,7 @@
           "lane-cortex-boundary-decision"
         ],
         "board_version": 1,
-        "updated_at": "2026-07-15T18:28:05Z",
+        "updated_at": "2026-07-16T06:13:40Z",
         "source_ref": "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json#lane-cortex-context-synthesis",
         "extensions": {
           "source_section": "lanes",
@@ -129,7 +129,7 @@
         "source_id": "atlas-full-system-registry",
         "source_ref": "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json#lane-cortex-context-synthesis",
         "source_status": "current",
-        "source_updated_at": "2026-07-15T18:28:05Z"
+        "source_updated_at": "2026-07-16T06:13:40Z"
       },
       "content": {
         "summary": "Refresh Cortex read models, implement contract-frozen chat synthesis, and resolve the local-versus-remote boundary.",

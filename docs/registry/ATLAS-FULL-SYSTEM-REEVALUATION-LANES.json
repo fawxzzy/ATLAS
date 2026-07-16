@@ -1,7 +1,7 @@
 {
   "schema": "atlas.full_system_reevaluation.lanes.v1",
   "version": 1,
-  "generated_at": "2026-07-15T18:28:05Z",
+  "generated_at": "2026-07-16T06:13:40Z",
   "source_refs": [
     "docs/audits/ATLAS-FULL-SYSTEM-OPENING-AUDIT-2026-07-12.md",
     "docs/audits/GITHUB-CONTROL-PLANE-OPENING-AUDIT-2026-07-12.md",
@@ -18,7 +18,11 @@
     "docs/standards/ATLAS-UI-STANDARDS-PROGRAM.md",
     "docs/registry/ATLAS-UI-STANDARDS-REGISTRY.v1.json",
     "docs/registry/ATLAS-UI-STANDARDS-CANDIDATE-CARDS.v1.json",
-    "docs/ops/ATLAS-UI-STANDARDS-ROOT-FOUNDATION-2026-07-15.md"
+    "docs/ops/ATLAS-UI-STANDARDS-ROOT-FOUNDATION-2026-07-15.md",
+    "data/imports/creation-os/deep-research-2026-07-16/IMPORT-MANIFEST.json",
+    "docs/audits/ATLAS-CREATION-OS-RESEARCH-RECONCILIATION-2026-07-16.md",
+    "docs/architecture/ATLAS-CREATION-OS-TARGET-ARCHITECTURE.md",
+    "docs/atlas-book/17-creation-os-target-architecture.md"
   ],
   "global_rules": {
     "percentage_rule": "Every lane and backlog candidate remains percentage-null until its own authorized marker audit accepts a denominator and completed units.",
@@ -131,6 +135,542 @@
     {"id":"lane-nat1-remote-recovery","title":"Nat1 remote recovery","classification":"new-discovery-repository","parent_lane_id":"lane-workspace-branch-worktree-hygiene","owner":"nat1","scope":"Resolve inaccessible/not-found live remote and detached registration.","percentage":null,"measurement_unit":"recovery assertion","denominator":{"kind":"assertions","value":2,"basis":"remote accessibility and registration state"},"evidence_sources":["docs/audits/ATLAS-FULL-SYSTEM-OPENING-AUDIT-2026-07-12.md"],"definition_of_done":["Both assertions have current owner proof and accepted action"],"dependencies":[],"serialization_rules":["No prune or remote rewrite without owner authority"],"resume_implications":{"mazer":"None.","fitness":"None."},"status":"candidate"},
     {"id":"lane-trove-command-path-repair","title":"Trove command path repair","classification":"new-discovery-command","parent_lane_id":"lane-project-command-surfaces","owner":"_stack-and-trove","scope":"Replace nonexistent ../fawxzzy-trove assumptions with canonical Trove routing.","percentage":null,"measurement_unit":"broken command family","denominator":{"kind":"command_families","value":1,"basis":"one known Trove path family"},"evidence_sources":["docs/audits/ATLAS-FULL-SYSTEM-OPENING-AUDIT-2026-07-12.md"],"definition_of_done":["Canonical command resolves and owner verification passes"],"dependencies":[],"serialization_rules":["_stack adapter and Trove owner proof are separate serial steps"],"resume_implications":{"mazer":"None.","fitness":"None."},"status":"candidate"},
     {"id":"lane-mazer-board-truth-reconciliation","title":"Mazer board truth reconciliation","classification":"new-discovery-projection-integrity","parent_lane_id":"lane-marker-integrity","owner":"DiscordOS","scope":"Reconcile checked-in 40-card truth with stale 8/15/35 documents and older forum references.","percentage":100,"completed_units":4,"measurement_unit":"conflicting document assertion","denominator":{"kind":"assertion_sets","value":4,"basis":"8, 15, 35, and 40 card counts"},"evidence_sources":["docs/audits/ATLAS-FULL-SYSTEM-OPENING-AUDIT-2026-07-12.md","repos/DiscordOS/docs/ops/discordos-mazer-feedback-board-live-update-2026-07-09.md","repos/DiscordOS/docs/ops/discordos-mazer-board-correction-2026-07-09.md","docs/ops/MAZER-CHAT-SERIES-ATLAS-SYNC-2026-07-10.md","runtime/board-integrity/canonical-13-board-residual-final-terminal-v3.yaml","sha256:b528078596f4bb2f11c76003a99716d4e80a97114fdde53f512118efa3590845","runtime/board-integrity/canonical-13-board-residual-final-live-v3.json","docs/ops/DISCORDOS-CROSS-PROJECT-BOARD-INTEGRITY-100-PERCENT-CLOSEOUT-2026-07-15.md","repos/DiscordOS@efdfa92a4f745913a9396258e9bdf506d9aae9bd","atlas-root@c88b813788dc4cf0ce5e59fd4f71960d48e1b6b3","docs/ops/MAZER-BOARD-TRUTH-RECONCILIATION-100-PERCENT-CLOSEOUT-2026-07-15.md"],"definition_of_done":["Four assertion sets are dated/classified and one current readback is accepted"],"dependencies":[],"related_lanes":["lane-discordos-single-writer"],"serialization_rules":["Checked-in readback stays distinct from live Discord; one logical writer"],"resume_implications":{"mazer":"Does not rewrite owner percentages or block explicit code resume.","fitness":"None."},"status":"complete","last_audited_at":"2026-07-15T11:37:26Z"},
-    {"id":"lane-validation-ratchet-remediation","title":"Validation ratchet remediation","classification":"new-discovery-validation-remediation","parent_lane_id":"lane-root-truth-convergence","owner":"stack-root-and-_stack","scope":"Remediate the five current validation blocker categories without treating their discovery as an opening-audit failure.","percentage":null,"measurement_unit":"validation blocker category","denominator":{"kind":"blocker_categories","value":5,"basis":"working-memory-catalog-drift, stack-lock-drift, stack-lock-render-drift, stack-lock-pin-drift, and stack-lock-missing-ref"},"evidence_sources":["runtime/receipts/validation/stack-validation.latest.json","docs/audits/ATLAS-FULL-SYSTEM-OPENING-AUDIT-2026-07-12.md","docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json"],"definition_of_done":["All five blocker categories are remediated through their canonical owner flows","A later `python ops/validation/validate_stack.py --ratchet` succeeds after remediation","The later ratchet receipt distinguishes remediation from this opening-audit gate"],"dependencies":["lane-stack-inventory-lock-head-reconciliation","lane-component-generated-state-hygiene"],"serialization_rules":["Use the canonical _stack writer for lock and generated-state remediation","Do not run or claim ratchet success as an opening-audit gate","Preserve owner-repo isolation and existing worktrees"],"resume_implications":{"mazer":"Independent of the guarded publication route; no automatic resume.","fitness":"Does not weaken the Critical security block."},"status":"candidate"}
+    {"id":"lane-validation-ratchet-remediation","title":"Validation ratchet remediation","classification":"new-discovery-validation-remediation","parent_lane_id":"lane-root-truth-convergence","owner":"stack-root-and-_stack","scope":"Remediate the five current validation blocker categories without treating their discovery as an opening-audit failure.","percentage":null,"measurement_unit":"validation blocker category","denominator":{"kind":"blocker_categories","value":5,"basis":"working-memory-catalog-drift, stack-lock-drift, stack-lock-render-drift, stack-lock-pin-drift, and stack-lock-missing-ref"},"evidence_sources":["runtime/receipts/validation/stack-validation.latest.json","docs/audits/ATLAS-FULL-SYSTEM-OPENING-AUDIT-2026-07-12.md","docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json"],"definition_of_done":["All five blocker categories are remediated through their canonical owner flows","A later `python ops/validation/validate_stack.py --ratchet` succeeds after remediation","The later ratchet receipt distinguishes remediation from this opening-audit gate"],"dependencies":["lane-stack-inventory-lock-head-reconciliation","lane-component-generated-state-hygiene"],"serialization_rules":["Use the canonical _stack writer for lock and generated-state remediation","Do not run or claim ratchet success as an opening-audit gate","Preserve owner-repo isolation and existing worktrees"],"resume_implications":{"mazer":"Independent of the guarded publication route; no automatic resume.","fitness":"Does not weaken the Critical security block."},"status":"candidate"},
+    {
+      "id": "lane-creation-os-product-definition-first-wedge",
+      "title": "Creation OS Product Definition and First Wedge",
+      "classification": "creation-os-product-strategy",
+      "owner": "stack-root",
+      "scope": "Ratify one product definition, the voice-capable software/app/tool builder wedge, supported artifact and repository classes, and explicit phase-one non-goals.",
+      "percentage": null,
+      "completed_units": null,
+      "measurement_unit": "operator-ratified product decision",
+      "denominator": {
+        "kind": "product_decisions",
+        "value": null,
+        "basis": "UNKNOWN until the operator ratifies the product definition, first wedge, supported classes, and non-goals."
+      },
+      "evidence_sources": [
+        "docs/architecture/ATLAS-CREATION-OS-TARGET-ARCHITECTURE.md",
+        "docs/audits/ATLAS-CREATION-OS-RESEARCH-RECONCILIATION-2026-07-16.md",
+        "docs/atlas-book/13-vision-and-endgames.md",
+        "docs/atlas-book/17-creation-os-target-architecture.md"
+      ],
+      "definition_of_done": [
+        "The operator accepts one product definition and one first-wedge statement.",
+        "Supported repository classes, artifact types, preview types, and deployment scope are explicit.",
+        "Phase-one non-goals and owner boundaries are accepted.",
+        "The decision has a versioned source, review receipt, and change policy."
+      ],
+      "dependencies": [],
+      "related_lanes": [
+        "lane-root-truth-convergence",
+        "lane-marker-integrity",
+        "lane-playbook-universal-adoption"
+      ],
+      "program_links": {
+        "clean_and_resync": "docs/atlas-book/02-lanes-and-markers.md#materially-closed-carry-forward-families",
+        "pre_development_gate": "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json#/global_rules/pre_development_gate_rule",
+        "post_preparation_development": "docs/atlas-book/03-operating-model.md#post-preparation-development-program"
+      },
+      "automation_opportunity": "Validate that product, wedge, non-goal, repository-class, and artifact-class decisions are present, versioned, and free of unresolved placeholder leakage before implementation admission.",
+      "serialization_rules": [
+        "Product definition precedes implementation admission.",
+        "External research cannot self-ratify the product decision.",
+        "Fitness, Mazer, and Socials OS remain separate owner lanes."
+      ],
+      "resume_implications": {
+        "mazer": "No owner-product work is absorbed or rerouted.",
+        "fitness": "No owner-product work or production gate changes.",
+        "socials_os": "Remains a separate non-root-blocking owner lane."
+      },
+      "status": "candidate",
+      "last_audited_at": "2026-07-16T06:13:40Z"
+    },
+    {
+      "id": "lane-atlas-bootstrap-manifest-recovery-pointer",
+      "title": "Bootstrap Manifest and Recovery Pointer",
+      "classification": "creation-os-recovery-contract",
+      "owner": "stack-root",
+      "scope": "Define, implement, and prove a signed/versioned minimal Atlas recovery pointer into the distributed source hierarchy without storing all memory or granting execution authority.",
+      "percentage": null,
+      "completed_units": null,
+      "measurement_unit": "accepted bootstrap recovery contract proof",
+      "denominator": {
+        "kind": "recovery_contract_proofs",
+        "value": null,
+        "basis": "UNKNOWN until schema, threat model, signing, recovery, rollback, and negative-conformance units are admitted."
+      },
+      "evidence_sources": [
+        "docs/atlas/decisions/adr-signed-versioned-atlas-bootstrap-manifest.md",
+        "docs/architecture/STATE-AND-MEMORY-BOUNDARIES.md",
+        "docs/architecture/ATLAS-CREATION-OS-TARGET-ARCHITECTURE.md",
+        "docs/audits/ATLAS-FULL-SYSTEM-OPENING-AUDIT-2026-07-12.md"
+      ],
+      "definition_of_done": [
+        "The ADR, threat model, schema, canonical serialization, signing, trust, rotation, and revocation decisions are accepted.",
+        "Valid, stale, tampered, revoked, missing, cyclic, and unsupported-version fixtures fail or recover deterministically.",
+        "Recovery resolves the Atlas source hierarchy and rebuilds derived indexes without copying owner truth.",
+        "Restore and rollback produce correlated receipts and grant no execution authority."
+      ],
+      "dependencies": [
+        "lane-creation-os-product-definition-first-wedge",
+        "lane-policy-tracing-evaluation-artifact-trust"
+      ],
+      "related_lanes": [
+        "lane-atlas-contracts-mesh",
+        "lane-atlas-control-ledger",
+        "lane-historical-task-intelligence"
+      ],
+      "program_links": {
+        "clean_and_resync": "docs/atlas-book/02-lanes-and-markers.md#materially-closed-carry-forward-families",
+        "pre_development_gate": "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json#/global_rules/pre_development_gate_rule",
+        "post_preparation_development": "docs/atlas-book/03-operating-model.md#post-preparation-development-program"
+      },
+      "automation_opportunity": "Provide schema, signature, pointer-resolution, cycle, freshness, tamper, rollback, and no-authority validators plus deterministic recovery receipts.",
+      "serialization_rules": [
+        "ADR acceptance precedes implementation.",
+        "File-native proof precedes backend adoption.",
+        "Signing and recovery proof precede any bootstrap authority claim."
+      ],
+      "resume_implications": {
+        "mazer": "Owner recovery truth remains in the Mazer lane.",
+        "fitness": "Owner recovery truth and production authority remain unchanged.",
+        "socials_os": "No owner data or account mutation."
+      },
+      "status": "candidate",
+      "last_audited_at": "2026-07-16T06:13:40Z"
+    },
+    {
+      "id": "lane-durable-memory-fabric-context-compaction",
+      "title": "Durable Memory Fabric and Context Compaction",
+      "classification": "creation-os-memory-architecture",
+      "owner": "stack-root-and-cortex",
+      "scope": "Define backend-neutral memory tiers, retrieval, compaction, provenance, privacy, supersession, replay, and restore contracts across Git, docs, runtime, data, receipts, owner truth, and Cortex read models.",
+      "percentage": null,
+      "completed_units": null,
+      "measurement_unit": "accepted memory and compaction contract proof",
+      "denominator": {
+        "kind": "memory_contract_proofs",
+        "value": null,
+        "basis": "UNKNOWN until memory classes, retrieval scenarios, compaction cases, privacy classes, and restore cases are inventoried."
+      },
+      "evidence_sources": [
+        "docs/architecture/STATE-AND-MEMORY-BOUNDARIES.md",
+        "docs/architecture/ATLAS-CREATION-OS-TARGET-ARCHITECTURE.md",
+        "docs/memory/profiles/zachariah_workflow_profile.md",
+        "docs/atlas/decisions/adr-signed-versioned-atlas-bootstrap-manifest.md"
+      ],
+      "definition_of_done": [
+        "Every admitted memory class has an authority, placement, retention, privacy, retrieval, compaction, and restore contract.",
+        "Compacted context preserves source refs, digests, decisions, unresolved risks, authority qualifiers, and supersession.",
+        "Derived indexes are rebuildable and cannot overwrite source or owner truth.",
+        "Retrieval quality, privacy, backup, restore, and failure behavior have measured proof before any backend selection."
+      ],
+      "dependencies": [
+        "lane-atlas-bootstrap-manifest-recovery-pointer",
+        "lane-policy-tracing-evaluation-artifact-trust"
+      ],
+      "related_lanes": [
+        "lane-cortex-context-synthesis",
+        "lane-historical-task-intelligence",
+        "lane-cross-project-knowledge-promotion"
+      ],
+      "program_links": {
+        "clean_and_resync": "docs/atlas-book/02-lanes-and-markers.md#materially-closed-carry-forward-families",
+        "pre_development_gate": "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json#/global_rules/pre_development_gate_rule",
+        "post_preparation_development": "docs/atlas-book/03-operating-model.md#post-preparation-development-program"
+      },
+      "automation_opportunity": "Continuously validate placement, provenance chains, compaction fidelity, supersession, index rebuildability, privacy classification, and restore parity.",
+      "serialization_rules": [
+        "Memory inventory and contract freeze precede backend evaluation.",
+        "Cortex remains advisory until explicit contracts expand authority.",
+        "Owner truth stays federated rather than copied into root memory."
+      ],
+      "resume_implications": {
+        "mazer": "Only source-linked reusable context may converge; owner truth remains local.",
+        "fitness": "Secrets and user data remain governed by owner and security contracts.",
+        "socials_os": "Account data remains owner-controlled and non-root-blocking."
+      },
+      "status": "candidate",
+      "last_audited_at": "2026-07-16T06:13:40Z"
+    },
+    {
+      "id": "lane-repository-ingestion-compatibility-graph",
+      "title": "Repository Ingestion and Compatibility Graph",
+      "classification": "creation-os-repository-intelligence",
+      "owner": "stack-root-and-playbook",
+      "scope": "Prove deterministic repository ingestion from manifests, lockfiles, changelogs, and OpenAPI through syntax/indexing, LSP/static analysis, compatibility graphs, CI matrices, migration plans, and tested adapters.",
+      "percentage": null,
+      "completed_units": null,
+      "measurement_unit": "accepted repository-class compatibility proof",
+      "denominator": {
+        "kind": "repository_class_proofs",
+        "value": null,
+        "basis": "UNKNOWN until supported language, framework, package, API, schema, generated-state, and migration classes are ratified."
+      },
+      "evidence_sources": [
+        "docs/architecture/ATLAS-CREATION-OS-TARGET-ARCHITECTURE.md",
+        "docs/architecture/ATLAS-CONTRACTS-V2-SCOPE.md",
+        "docs/registry/STACK-REPO-INVENTORY.json",
+        "stack.yaml"
+      ],
+      "definition_of_done": [
+        "Supported repository classes and explicit unsupported classes have an accepted inventory.",
+        "Ingestion records owner, revision, exclusions, source/generated boundaries, tool versions, and observed-versus-inferred facts.",
+        "Compatibility graph facts reproduce from source inputs and versioned analyzers.",
+        "Migration plans, adapters, CI matrices, and negative cases prove compatibility without bypassing owner review."
+      ],
+      "dependencies": [
+        "lane-creation-os-product-definition-first-wedge",
+        "lane-policy-tracing-evaluation-artifact-trust"
+      ],
+      "related_lanes": [
+        "lane-playbook-universal-adoption",
+        "lane-atlas-contracts-mesh",
+        "lane-stack-adapter-coverage"
+      ],
+      "program_links": {
+        "clean_and_resync": "docs/atlas-book/02-lanes-and-markers.md#materially-closed-carry-forward-families",
+        "pre_development_gate": "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json#/global_rules/pre_development_gate_rule",
+        "post_preparation_development": "docs/atlas-book/03-operating-model.md#post-preparation-development-program"
+      },
+      "automation_opportunity": "Generate reproducible inventory, parser/LSP/static-analysis receipts, compatibility diffs, CI matrices, adapter candidates, and contradiction reports.",
+      "serialization_rules": [
+        "Repository class admission precedes implementation claims.",
+        "Observed compatibility facts remain distinct from model inference.",
+        "Owner validation and review precede adapter adoption."
+      ],
+      "resume_implications": {
+        "mazer": "Mazer support requires a separate owner proof and cannot be inferred.",
+        "fitness": "Fitness support requires a separate owner proof and cannot bypass security gates.",
+        "socials_os": "Socials OS support remains separately admitted and cannot mutate accounts."
+      },
+      "status": "candidate",
+      "last_audited_at": "2026-07-16T06:13:40Z"
+    },
+    {
+      "id": "lane-deterministic-builder-loop",
+      "title": "Deterministic Builder Loop",
+      "classification": "creation-os-product-execution",
+      "owner": "stack-root-and-_stack-and-owner-repositories",
+      "scope": "Prove the goal-to-spec-to-repo-change-to-test-to-preview-to-receipt-to-human-acceptance loop with bounded authority, recovery, and separately authorized side effects.",
+      "percentage": null,
+      "completed_units": null,
+      "measurement_unit": "accepted end-to-end builder scenario",
+      "denominator": {
+        "kind": "builder_scenarios",
+        "value": null,
+        "basis": "UNKNOWN until repository, artifact, mutation, preview, failure, recovery, and approval scenarios are ratified."
+      },
+      "evidence_sources": [
+        "docs/architecture/ATLAS-CREATION-OS-TARGET-ARCHITECTURE.md",
+        "docs/architecture/ATLAS-CHATGPT-CODEX-WORKFLOW.md",
+        "docs/architecture/ATLAS-CONTRACTS-V2-SCOPE.md",
+        "docs/atlas-book/03-operating-model.md"
+      ],
+      "definition_of_done": [
+        "Every admitted scenario preserves identity from human goal through JobEnvelope, workspace, diff, evidence, receipt, and acceptance.",
+        "Tests, static checks, preview, changed paths, and authority scope are deterministic and fail closed.",
+        "Failures, cancellation, retry, rollback, and recovery produce correlated proof.",
+        "Merge, deploy, publication, purchase, and device side effects remain separately authorized."
+      ],
+      "dependencies": [
+        "lane-creation-os-product-definition-first-wedge",
+        "lane-pmf-monetization-success-kill-criteria",
+        "lane-atlas-bootstrap-manifest-recovery-pointer",
+        "lane-durable-memory-fabric-context-compaction",
+        "lane-repository-ingestion-compatibility-graph",
+        "lane-policy-tracing-evaluation-artifact-trust"
+      ],
+      "related_lanes": [
+        "lane-codex-execution-contracts",
+        "lane-project-command-surfaces",
+        "lane-atlas-contracts-mesh",
+        "lane-persistent-workspaces"
+      ],
+      "program_links": {
+        "clean_and_resync": "docs/atlas-book/02-lanes-and-markers.md#materially-closed-carry-forward-families",
+        "pre_development_gate": "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json#/global_rules/pre_development_gate_rule",
+        "post_preparation_development": "docs/atlas-book/03-operating-model.md#post-preparation-development-program"
+      },
+      "automation_opportunity": "Build a scenario harness that validates identity lineage, authority, diff scope, tests, preview, receipts, retry, rollback, and spec-to-diff reconciliation.",
+      "serialization_rules": [
+        "Builder contracts and dependencies precede end-to-end scenarios.",
+        "Owner-repo execution and root projection remain separate serial writers.",
+        "No production or external side effect is part of an implicit happy path."
+      ],
+      "resume_implications": {
+        "mazer": "Mazer scenarios remain owner-selected and owner-proved.",
+        "fitness": "Fitness scenarios remain owner-selected and production-gated.",
+        "socials_os": "Socials OS scenarios cannot mutate external social accounts without separate authority."
+      },
+      "status": "candidate",
+      "last_audited_at": "2026-07-16T06:13:40Z"
+    },
+    {
+      "id": "lane-conversational-realtime-creative-loop",
+      "title": "Conversational/Realtime Creative Loop",
+      "classification": "creation-os-conversational-surface",
+      "owner": "stack-root-and-cortex",
+      "scope": "Prove voice/text exploration, interruption, rapid preview, comparison, transcript/provenance, and explicit handoff from creative output into the deterministic builder loop.",
+      "percentage": null,
+      "completed_units": null,
+      "measurement_unit": "accepted realtime creative scenario",
+      "denominator": {
+        "kind": "realtime_creative_scenarios",
+        "value": null,
+        "basis": "UNKNOWN until latency, interruption, transcript, preview, privacy, handoff, failure, and provider scenarios are ratified."
+      },
+      "evidence_sources": [
+        "docs/architecture/ATLAS-CREATION-OS-TARGET-ARCHITECTURE.md",
+        "docs/architecture/ATLAS-CHATGPT-CODEX-WORKFLOW.md",
+        "docs/atlas-book/17-creation-os-target-architecture.md"
+      ],
+      "definition_of_done": [
+        "The operator ratifies realtime latency, interruption, transcript, privacy, and preview requirements.",
+        "Creative branches preserve provenance and remain disposable until explicitly selected.",
+        "Selected output enters the builder loop through a versioned, reviewable handoff.",
+        "Voice or conversational state cannot bypass policy, tests, owner truth, or approval."
+      ],
+      "dependencies": [
+        "lane-deterministic-builder-loop",
+        "lane-policy-tracing-evaluation-artifact-trust",
+        "lane-pmf-monetization-success-kill-criteria"
+      ],
+      "related_lanes": [
+        "lane-cortex-context-synthesis",
+        "lane-codex-execution-contracts",
+        "lane-project-command-surfaces"
+      ],
+      "program_links": {
+        "clean_and_resync": "docs/atlas-book/02-lanes-and-markers.md#materially-closed-carry-forward-families",
+        "pre_development_gate": "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json#/global_rules/pre_development_gate_rule",
+        "post_preparation_development": "docs/atlas-book/03-operating-model.md#post-preparation-development-program"
+      },
+      "automation_opportunity": "Measure latency, interruption recovery, transcript and provenance fidelity, preview timing, creative-to-builder conversion, and authority-safe failure behavior.",
+      "serialization_rules": [
+        "Trusted deterministic builder proof precedes realtime expansion.",
+        "Primary transport selection requires measured native-gap evidence.",
+        "Conversation remains a command surface, not durable truth."
+      ],
+      "resume_implications": {
+        "mazer": "No game feature or voice surface is implied.",
+        "fitness": "No product or production voice surface is implied.",
+        "socials_os": "No social-account interaction is authorized."
+      },
+      "status": "candidate",
+      "last_audited_at": "2026-07-16T06:13:40Z"
+    },
+    {
+      "id": "lane-spatial-blueprint-surface",
+      "title": "Spatial Blueprint Surface",
+      "classification": "creation-os-spatial-surface",
+      "owner": "stack-root-and-owner-repositories",
+      "scope": "Evaluate dependency, architecture, scene, and system blueprint views in 2D before any headset-specific or engine-specific expansion.",
+      "percentage": null,
+      "completed_units": null,
+      "measurement_unit": "accepted spatial blueprint scenario",
+      "denominator": {
+        "kind": "spatial_blueprint_scenarios",
+        "value": null,
+        "basis": "UNKNOWN until user tasks, visualization classes, performance, accessibility, export, and XR deferral criteria are ratified."
+      },
+      "evidence_sources": [
+        "docs/architecture/ATLAS-CREATION-OS-TARGET-ARCHITECTURE.md",
+        "docs/audits/ATLAS-CREATION-OS-RESEARCH-RECONCILIATION-2026-07-16.md",
+        "docs/atlas-book/17-creation-os-target-architecture.md"
+      ],
+      "definition_of_done": [
+        "One or more explicit builder tasks show measured comprehension or task-time improvement from a blueprint surface.",
+        "2D browser or existing native visualization is evaluated before new XR infrastructure.",
+        "Source, generated view, overlay, annotation, and telemetry layers preserve provenance.",
+        "Accessibility, performance, export, and failure behavior meet accepted thresholds without delaying the builder roadmap."
+      ],
+      "dependencies": [
+        "lane-deterministic-builder-loop",
+        "lane-pmf-monetization-success-kill-criteria"
+      ],
+      "related_lanes": [
+        "lane-atlas-ui-standards-adoption",
+        "lane-cortex-context-synthesis"
+      ],
+      "program_links": {
+        "clean_and_resync": "docs/atlas-book/02-lanes-and-markers.md#materially-closed-carry-forward-families",
+        "pre_development_gate": "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json#/global_rules/pre_development_gate_rule",
+        "post_preparation_development": "docs/atlas-book/03-operating-model.md#post-preparation-development-program"
+      },
+      "automation_opportunity": "Generate provenance-bound dependency and architecture views, visual regression evidence, performance metrics, and task-value comparisons from existing graph facts.",
+      "serialization_rules": [
+        "Measured builder use case precedes spatial implementation.",
+        "2D evidence precedes headset or engine adoption.",
+        "OpenUSD, OpenXR, WebXR, and engine choices remain deferred ADR candidates."
+      ],
+      "resume_implications": {
+        "mazer": "Mazer visual work remains owner-selected and cannot be used as automatic spatial proof.",
+        "fitness": "Fitness UI work remains owner-selected and separate.",
+        "socials_os": "No effect on analytics or social account ownership."
+      },
+      "status": "candidate",
+      "last_audited_at": "2026-07-16T06:13:40Z"
+    },
+    {
+      "id": "lane-device-gateway-safe-actuation",
+      "title": "Device Gateway and Safe Actuation",
+      "classification": "creation-os-device-safety",
+      "owner": "stack-root-and-device-owners",
+      "scope": "Define a read-mostly, simulation-first, protocol-neutral device gateway and prove explicit identity, policy, approval, cancellation, rollback, telemetry, and safe actuation before physical control.",
+      "percentage": null,
+      "completed_units": null,
+      "measurement_unit": "accepted device safety scenario",
+      "denominator": {
+        "kind": "device_safety_scenarios",
+        "value": null,
+        "basis": "UNKNOWN until device classes, read, simulate, approve, actuate, cancel, fail, rollback, and emergency-stop cases are ratified."
+      },
+      "evidence_sources": [
+        "docs/architecture/ATLAS-CREATION-OS-TARGET-ARCHITECTURE.md",
+        "docs/audits/ATLAS-CREATION-OS-RESEARCH-RECONCILIATION-2026-07-16.md",
+        "docs/architecture/ATLAS-CONTRACTS-V2-SCOPE.md"
+      ],
+      "definition_of_done": [
+        "Device identity, capability, owner, location, policy, health, and telemetry contracts are accepted.",
+        "Read and simulation scenarios pass before physical actuation is admitted.",
+        "Every actuation has explicit approval, bounded scope, cancellation, timeout, rollback or safe-state, and correlated receipt.",
+        "Negative, partial-failure, stale-state, wrong-device, and emergency-stop scenarios fail closed."
+      ],
+      "dependencies": [
+        "lane-spatial-blueprint-surface",
+        "lane-policy-tracing-evaluation-artifact-trust",
+        "lane-pmf-monetization-success-kill-criteria"
+      ],
+      "related_lanes": [
+        "lane-atlas-contracts-mesh",
+        "lane-delivery-event-plane"
+      ],
+      "program_links": {
+        "clean_and_resync": "docs/atlas-book/02-lanes-and-markers.md#materially-closed-carry-forward-families",
+        "pre_development_gate": "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json#/global_rules/pre_development_gate_rule",
+        "post_preparation_development": "docs/atlas-book/03-operating-model.md#post-preparation-development-program"
+      },
+      "automation_opportunity": "Run protocol-neutral simulations, policy checks, stale/wrong-device negatives, cancellation, timeout, rollback, emergency-stop, and receipt-replay suites.",
+      "serialization_rules": [
+        "No hardware deployment in planning or research packets.",
+        "Read and simulation proof precede actuation.",
+        "Device and protocol choices require owner and safety ADRs."
+      ],
+      "resume_implications": {
+        "mazer": "No game or controller device scope is inferred.",
+        "fitness": "No health, wearable, or user device scope is inferred.",
+        "socials_os": "No external account or device mutation."
+      },
+      "status": "candidate",
+      "last_audited_at": "2026-07-16T06:13:40Z"
+    },
+    {
+      "id": "lane-policy-tracing-evaluation-artifact-trust",
+      "title": "Policy, Tracing, Evaluation, and Artifact Trust",
+      "classification": "creation-os-governance-and-trust",
+      "owner": "stack-root-and-playbook-and-_stack",
+      "scope": "Define and prove authority, policy, trace, evaluation, artifact provenance, signing, privacy, cost, and acceptance controls for every Creation OS loop and side effect.",
+      "percentage": null,
+      "completed_units": null,
+      "measurement_unit": "accepted governance and trust control",
+      "denominator": {
+        "kind": "governance_trust_controls",
+        "value": null,
+        "basis": "UNKNOWN until authority classes, side effects, trace events, evaluations, artifact classes, privacy modes, and threat cases are inventoried."
+      },
+      "evidence_sources": [
+        "docs/architecture/ATLAS-CONTRACTS-V2-SCOPE.md",
+        "docs/architecture/ATLAS-CREATION-OS-TARGET-ARCHITECTURE.md",
+        "docs/atlas-book/04-approval-gates.md",
+        "AGENTS.md"
+      ],
+      "definition_of_done": [
+        "Every admitted side effect maps host capability, job scope, owner authority, ApprovalRecord, and receipt semantics explicitly.",
+        "Trace and evaluation contracts prove intent, tool calls, model/provider identity, cost, artifacts, decisions, and outcomes without leaking secrets.",
+        "Artifact provenance, integrity, signing candidates, retention, and tamper behavior have accepted positive and negative proof.",
+        "Policy and evaluation remain backend-neutral until measured requirements justify a product choice."
+      ],
+      "dependencies": [
+        "lane-atlas-contracts-mesh"
+      ],
+      "related_lanes": [
+        "lane-security-containment",
+        "lane-codex-execution-contracts",
+        "lane-delivery-event-plane",
+        "lane-release-policy-and-evidence"
+      ],
+      "program_links": {
+        "clean_and_resync": "docs/atlas-book/02-lanes-and-markers.md#materially-closed-carry-forward-families",
+        "pre_development_gate": "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json#/global_rules/pre_development_gate_rule",
+        "post_preparation_development": "docs/atlas-book/03-operating-model.md#post-preparation-development-program"
+      },
+      "automation_opportunity": "Validate JobEnvelope/ApprovalRecord authority, trace completeness, evaluation reproducibility, artifact digests, privacy redaction, tamper failure, and side-effect readback.",
+      "serialization_rules": [
+        "Authority and threat inventory precede implementation admission.",
+        "Native controls are measured before new policy or signing infrastructure.",
+        "No trace, evaluation, or artifact claim may expose secrets or self-approve work."
+      ],
+      "resume_implications": {
+        "mazer": "Owner security and production rules remain unchanged.",
+        "fitness": "Critical secret and production gates remain independent and higher priority.",
+        "socials_os": "External account authority remains explicitly denied by default."
+      },
+      "status": "candidate",
+      "last_audited_at": "2026-07-16T06:13:40Z"
+    },
+    {
+      "id": "lane-pmf-monetization-success-kill-criteria",
+      "title": "PMF, Monetization, Success Metrics, and Kill Criteria",
+      "classification": "creation-os-product-evidence",
+      "owner": "operator-and-stack-root",
+      "scope": "Ratify measurable product value, trust, reliability, retention, monetization, cost, success, narrowing, and kill criteria before phase-one implementation expands.",
+      "percentage": null,
+      "completed_units": null,
+      "measurement_unit": "operator-ratified metric or kill criterion",
+      "denominator": {
+        "kind": "product_metric_decisions",
+        "value": null,
+        "basis": "UNKNOWN until the operator selects the metric families, baselines, thresholds, observation windows, and decision rules."
+      },
+      "evidence_sources": [
+        "docs/architecture/ATLAS-CREATION-OS-TARGET-ARCHITECTURE.md",
+        "docs/audits/ATLAS-CREATION-OS-RESEARCH-RECONCILIATION-2026-07-16.md",
+        "docs/atlas-book/17-creation-os-target-architecture.md"
+      ],
+      "definition_of_done": [
+        "The operator accepts non-vanity success metrics, baselines, thresholds, observation windows, and evidence sources for the first wedge.",
+        "Trust, authority, quality, latency, retention, paid-outcome, cost, and margin decisions are explicit or explicitly not applicable.",
+        "Each major feature family has a stop, narrow, defer, or kill criterion.",
+        "Metric collection preserves privacy, provenance, owner authority, and reproducible calculation."
+      ],
+      "dependencies": [
+        "lane-creation-os-product-definition-first-wedge"
+      ],
+      "related_lanes": [
+        "lane-marker-integrity",
+        "lane-historical-task-intelligence"
+      ],
+      "program_links": {
+        "clean_and_resync": "docs/atlas-book/02-lanes-and-markers.md#materially-closed-carry-forward-families",
+        "pre_development_gate": "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json#/global_rules/pre_development_gate_rule",
+        "post_preparation_development": "docs/atlas-book/03-operating-model.md#post-preparation-development-program"
+      },
+      "automation_opportunity": "Generate privacy-safe metric receipts, threshold evaluations, trend and cost reports, and automatic hold recommendations without granting product or marker authority.",
+      "serialization_rules": [
+        "Operator decisions precede metric collection and implementation expansion.",
+        "No percentage exists until the denominator and accepted evidence are ratified.",
+        "Kill criteria stop or narrow work; they do not trigger destructive action automatically."
+      ],
+      "resume_implications": {
+        "mazer": "Mazer business and product metrics remain owner-specific.",
+        "fitness": "Fitness business and product metrics remain owner-specific.",
+        "socials_os": "Socials OS product and account metrics remain owner-specific."
+      },
+      "status": "candidate",
+      "last_audited_at": "2026-07-16T06:13:40Z"
+    }
   ]
 }

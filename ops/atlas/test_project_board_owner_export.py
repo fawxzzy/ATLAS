@@ -29,10 +29,10 @@ class ProjectBoardOwnerExportTests(unittest.TestCase):
         atlas = exports["atlas"]
         cortex = exports["cortex"]
 
-        self.assertEqual(len(atlas["cards"]), 34)
+        self.assertEqual(len(atlas["cards"]), 36)
         self.assertEqual(atlas["extensions"]["selection"]["marker_parent_count"], 6)
         self.assertEqual(atlas["extensions"]["selection"]["direct_lane_count"], 13)
-        self.assertEqual(atlas["extensions"]["selection"]["governance_backlog_count"], 15)
+        self.assertEqual(atlas["extensions"]["selection"]["governance_backlog_count"], 17)
         self.assertEqual(
             atlas["extensions"]["selection"]["backlog_owner_allowlist"],
             sorted(ATLAS_GOVERNANCE_BACKLOG_OWNERS),
@@ -67,13 +67,16 @@ class ProjectBoardOwnerExportTests(unittest.TestCase):
         selected_ids = {card["record"]["card_id"] for card in atlas["cards"]}
         backlog_by_id = {record["id"]: record for record in registry["backlog_candidates"]}
         selected_backlog = [backlog_by_id[record_id] for record_id in selected_ids if record_id in backlog_by_id]
-        self.assertEqual(len(selected_backlog), 15)
+        self.assertEqual(len(selected_backlog), 17)
         self.assertTrue(all(record["owner"] in ATLAS_GOVERNANCE_BACKLOG_OWNERS for record in selected_backlog))
+        self.assertIn("lane-creation-os-product-definition-first-wedge", selected_ids)
+        self.assertIn("lane-atlas-bootstrap-manifest-recovery-pointer", selected_ids)
         self.assertNotIn("lane-cortex-context-synthesis", selected_ids)
         self.assertNotIn("lane-cortex-boundary-decision", selected_ids)
         self.assertNotIn("lane-fitness-dependency-security", selected_ids)
         self.assertNotIn("lane-discordos-command-surface-convergence", selected_ids)
         self.assertNotIn("lane-stack-github-event-contracts", selected_ids)
+        self.assertNotIn("lane-deterministic-builder-loop", selected_ids)
 
     def test_line_endings_do_not_change_source_revision(self) -> None:
         baseline = build_project_board_owner_exports()["atlas"]["source_revision"]
