@@ -112,6 +112,11 @@ class CreationOsAdvisoryReadModelTests(unittest.TestCase):
         self.assertFalse(catalog["authority"]["execution"])
         self.assertFalse(query["selection"]["automatic_selection"])
         self.assertEqual("corrected-and-verified", receipt["extensions"]["base_proof_correction"]["status"])
+        self.assertEqual("unknown-not-exposed", receipt["runtime_effective"]["speed"])
+        self.assertEqual(
+            "not-performed-by-generator-terminal-proof-required",
+            receipt["extensions"]["global_cortex_surfaces"]["actual_identity_verification"],
+        )
 
     def test_render_is_canonical_lf_and_repeatable(self) -> None:
         first = model.render_outputs(*_build())

@@ -453,7 +453,7 @@ def build_models(
         "status": "succeeded",
         "component_id": "cortex",
         "project_id": "atlas",
-        "runtime_effective": {"model": "gpt-5.6-sol", "reasoning": "xhigh", "speed": "standard", "permissions": "full-local-access-network-live-web", "approval_policy": "never"},
+        "runtime_effective": {"model": "gpt-5.6-sol", "reasoning": "xhigh", "speed": "unknown-not-exposed", "permissions": "full-local-access-network-live-web", "approval_policy": "never"},
         "changed_paths": CHANGED_PATHS,
         "commits": [],
         "verification": [{"command": "python ops/cortex/creation_os_advisory_read_model.py --check --atlas-repo <ATLAS_WORKTREE> --playbook-repo <PLAYBOOK_REPO>", "status": "passed", "evidence_refs": [CATALOG_PATH.as_posix(), QUERY_PATH.as_posix()]}],
@@ -470,7 +470,12 @@ def build_models(
             "authority": AUTHORITY,
             "marker_deltas": [],
             "marker_movement_authorized": False,
-            "global_cortex_surfaces": {"freshness_claimed": False, "expected_byte_identical": True, "baseline": GLOBAL_SURFACE_BASELINE},
+            "global_cortex_surfaces": {
+                "freshness_claimed": False,
+                "expected_byte_identical": True,
+                "actual_identity_verification": "not-performed-by-generator-terminal-proof-required",
+                "baseline": GLOBAL_SURFACE_BASELINE,
+            },
             "base_proof_correction": {
                 "status": "corrected-and-verified",
                 "canonical_head": "1d79d4ac3191dade11a2aa7c40352a5f210d35e2",

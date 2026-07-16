@@ -55,6 +55,7 @@
       "status": "corrected-and-verified"
     },
     "global_cortex_surfaces": {
+      "actual_identity_verification": "not-performed-by-generator-terminal-proof-required",
       "baseline": [
         {
           "path": "runtime/cortex/current-state/latest.json",
@@ -215,7 +216,7 @@
     "model": "gpt-5.6-sol",
     "permissions": "full-local-access-network-live-web",
     "reasoning": "xhigh",
-    "speed": "standard"
+    "speed": "unknown-not-exposed"
   },
   "status": "succeeded",
   "summary": "Built the deterministic Creation OS candidate-only advisory catalog and retrieval model with one separately deferred Atlas product Decision.",
