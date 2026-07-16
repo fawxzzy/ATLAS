@@ -1,0 +1,35 @@
+{
+  "schema": "atlas.source-import-manifest.v1",
+  "import_id": "deepseek-bridge-proposal-2026-07-13",
+  "source": {
+    "logical_locator": "codex-attachment:1e33f6ae-0f08-4601-811a-edf5d3feb03e/pasted-text.txt",
+    "original_filename": "pasted-text.txt",
+    "received_on": "2026-07-13",
+    "bytes": 13273,
+    "sha256": "957463349b17ab2a1362a54e3c04329cd67892a9e0c75644090e474621c76022",
+    "machine_specific_path_committed": false
+  },
+  "stored": {
+    "path": "data/imports/deepseek-bridge/2026-07-13/DEEPSEEK_BRIDGE_PROPOSAL_2026-07-13.txt",
+    "bytes": 13273,
+    "sha256": "957463349b17ab2a1362a54e3c04329cd67892a9e0c75644090e474621c76022",
+    "encoding": "utf-8",
+    "bom": false,
+    "line_endings": "crlf",
+    "line_count": 375,
+    "terminal_newline": true
+  },
+  "copy_policy": {
+    "byte_for_byte": true,
+    "normalization": false,
+    "fail_closed": true
+  },
+  "trust_classification": "untrusted-external-model-bridge-proposal-input",
+  "review_status": "admitted-to-governed-backlog-not-approved-or-implemented",
+  "derived_artifacts": [
+    "docs/registry/DEEPSEEK-BRIDGE-WAVE-0-ADMISSION.json",
+    "docs/memory/initiatives/initiative-external-model-sidecar-deepseek-litellm-bridge.json",
+    "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json",
+    "docs/registry/ATLAS-MASTER-PROGRAM-REGISTER.v1.json"
+  ]
+}

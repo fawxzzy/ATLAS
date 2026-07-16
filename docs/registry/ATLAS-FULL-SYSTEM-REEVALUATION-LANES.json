@@ -1,7 +1,7 @@
 {
   "schema": "atlas.full_system_reevaluation.lanes.v1",
   "version": 1,
-  "generated_at": "2026-07-16T06:13:40Z",
+  "generated_at": "2026-07-16T23:30:07Z",
   "source_refs": [
     "docs/audits/ATLAS-FULL-SYSTEM-OPENING-AUDIT-2026-07-12.md",
     "docs/audits/GITHUB-CONTROL-PLANE-OPENING-AUDIT-2026-07-12.md",
@@ -22,7 +22,15 @@
     "data/imports/creation-os/deep-research-2026-07-16/IMPORT-MANIFEST.json",
     "docs/audits/ATLAS-CREATION-OS-RESEARCH-RECONCILIATION-2026-07-16.md",
     "docs/architecture/ATLAS-CREATION-OS-TARGET-ARCHITECTURE.md",
-    "docs/atlas-book/17-creation-os-target-architecture.md"
+    "docs/atlas-book/17-creation-os-target-architecture.md",
+    "data/imports/fawxzzy-platform/2026-07-16/IMPORT-MANIFEST.json",
+    "docs/registry/FAWXZZY-PLATFORM-MIGRATION-ADMISSION.json",
+    "docs/memory/initiatives/initiative-fawxzzy-platform-migration.json",
+    "data/imports/deepseek-bridge/2026-07-13/IMPORT-MANIFEST.json",
+    "docs/registry/DEEPSEEK-BRIDGE-WAVE-0-ADMISSION.json",
+    "docs/memory/initiatives/initiative-external-model-sidecar-deepseek-litellm-bridge.json",
+    "docs/memory/initiatives/initiative-fawxzzy-tech-plan-convergence.json",
+    "docs/memory/initiatives/initiative-atlas-post-preparation-development.json"
   ],
   "global_rules": {
     "percentage_rule": "Every lane and backlog candidate remains percentage-null until its own authorized marker audit accepts a denominator and completed units.",
@@ -671,6 +679,293 @@
       },
       "status": "candidate",
       "last_audited_at": "2026-07-16T06:13:40Z"
+    },
+    {
+      "id": "lane-fawxzzy-platform-migration",
+      "title": "FawxzzyPlatform Supabase Consolidation",
+      "classification": "cross-owner-platform-migration-governance",
+      "owner": "fawxzzy-platform-program-with-fitness-mazer-discordos-owner-lanes",
+      "authority": "docs/registry/FAWXZZY-PLATFORM-MIGRATION-ADMISSION.json governs admission while serialized owner repositories retain implementation authority.",
+      "scope": "Govern source recovery, parity, backup and restore, identity, data, RLS, billing, cross-service Auth, preview rehearsals, separately approved cutovers, observation, rollback, quarantine, contraction, and separately approved retirement or deletion for the Fitness-seeded FawxzzyPlatform architecture while DiscordOS remains separate by default.",
+      "percentage": null,
+      "completed_units": null,
+      "measurement_status": "UNMEASURED",
+      "measurement_unit": "accepted platform migration proof",
+      "denominator": {
+        "kind": "platform_migration_proofs",
+        "value": null,
+        "basis": "UNKNOWN until source recovery, parity, backup and restore, rehearsal, cutover, observation, rollback, quarantine, contraction, and retirement proof classes are ratified; the source proposal's 20 epics are decomposition only."
+      },
+      "evidence_sources": [
+        "data/imports/fawxzzy-platform/2026-07-16/IMPORT-MANIFEST.json",
+        "docs/registry/FAWXZZY-PLATFORM-MIGRATION-ADMISSION.json",
+        "docs/memory/initiatives/initiative-fawxzzy-platform-migration.json"
+      ],
+      "definition_of_done": [
+        "FP-DOS-REC-001, FP-MZR-REC-001, and FP-FIT-REC-001 close in their owner repositories without production deployment.",
+        "FP-PARITY-RATCHET-001 proves ordered ledger equality or accepted baselines, source bundle checksums, clean-worktree parity, disposable replay, and backup/restore evidence.",
+        "The platform repository, canonical migration ledger, adapters, previews, and rehearsals are admitted only after the parity ratchet.",
+        "Identity, data, RLS, billing, cross-service Auth, cutover, observation, rollback, quarantine, contraction, and retirement each have accepted evidence and independent current-action approvals where required.",
+        "Unknown endpoints, configuration, secrets, backups, and historical equalities remain UNKNOWN rather than healthy or zero."
+      ],
+      "dependencies": [
+        "lane-security-containment",
+        "lane-fitness-critical-secret-containment",
+        "lane-supabase-security-advisor-remediation",
+        "lane-vercel-supabase-monitoring-correlation",
+        "lane-discordos-single-writer"
+      ],
+      "related_lanes": [
+        "lane-delivery-event-plane",
+        "lane-atlas-contracts-mesh",
+        "lane-policy-tracing-evaluation-artifact-trust"
+      ],
+      "blocked_by_packets": [
+        "FP-DOS-REC-001",
+        "FP-MZR-REC-001",
+        "FP-FIT-REC-001",
+        "FP-PARITY-RATCHET-001"
+      ],
+      "approval_gates": [
+        "Paid project creation or upgrade",
+        "Production Auth or OAuth change",
+        "Production data cutover",
+        "Maintenance window",
+        "Breaking secret rotation",
+        "Destructive contraction",
+        "Source disable or deletion",
+        "Physical Discord database merge",
+        "Any irreversible action"
+      ],
+      "serialization_rules": [
+        "Owner source recovery precedes the parity ratchet; the parity ratchet precedes platform repository or rehearsal admission.",
+        "Use one canonical migration ledger: expand -> migrate -> verify -> cutover -> contract.",
+        "Hold schema, Auth, billing, Edge Function, and cron writers in Fitness, Mazer, and DiscordOS until their recovery packet closes.",
+        "Root records dependencies and receipts only; owner repositories retain implementation authority.",
+        "Mazer source retirement or deletion is a separate explicit approval gate."
+      ],
+      "next_packet": {
+        "id": "FP-DOS-REC-001",
+        "title": "DiscordOS canonical Supabase migration and Edge source recovery",
+        "mode": "owner-source-only-recovery-and-disposable-replay",
+        "status": "serialized-after-current-discordos-board-repair-cluster"
+      },
+      "resume_implications": {
+        "mazer": "UI, content, gameplay, and read-only work may continue if it does not touch schema, Auth, billing, Edge Functions, or cron; FP-MZR-REC-001 owns ledger recovery.",
+        "fitness": "UI, content, and read-only work may continue if it does not touch schema, Auth, billing, Edge Functions, or cron; FP-FIT-REC-001 and existing security gates remain independent.",
+        "socials_os": "No product or external-account work is absorbed into the platform lane."
+      },
+      "current_state": "HOLD",
+      "status": "candidate",
+      "last_audited_at": "2026-07-16T23:30:07Z"
+    },
+    {
+      "id": "lane-external-model-sidecar-deepseek-evaluation",
+      "title": "DeepSeek Sidecar Capability-Gated Evaluation",
+      "classification": "external-model-sidecar-governed-backlog",
+      "owner": "foundation-and-_stack-and-lifeline",
+      "authority": "docs/registry/DEEPSEEK-BRIDGE-WAVE-0-ADMISSION.json governs the untrusted-input evaluation backlog; Foundation, _stack, and Lifeline retain later implementation authority.",
+      "scope": "Evaluate a future localhost-only DeepSeek/LiteLLM sidecar under Foundation, _stack, and Lifeline boundaries with current Codex compatibility proof, least exposure, health, privacy, cost, persistence, rollback, explicit routing, and native Codex/OpenAI fallback; never treat it as an unproven global replacement.",
+      "percentage": null,
+      "completed_units": null,
+      "measurement_status": "UNMEASURED",
+      "measurement_unit": "accepted sidecar capability and safety proof",
+      "denominator": {
+        "kind": "sidecar_capability_safety_proofs",
+        "value": null,
+        "basis": "UNKNOWN until current provider compatibility, identity, runtime, privacy, health, cost, persistence, fallback, and rollback proof classes are ratified; historical 2 / 6 bookkeeping is not reused."
+      },
+      "evidence_sources": [
+        "data/imports/deepseek-bridge/2026-07-13/IMPORT-MANIFEST.json",
+        "docs/registry/DEEPSEEK-BRIDGE-WAVE-0-ADMISSION.json",
+        "docs/memory/initiatives/initiative-external-model-sidecar-deepseek-litellm-bridge.json",
+        "docs/registry/ATLAS-EXTERNAL-MODEL-SIDECAR-RUNTIME-CONTRACT.json",
+        "docs/registry/ATLAS-RUNTIME-PLACEMENT-REGISTRY.v1.json"
+      ],
+      "definition_of_done": [
+        "Current Codex custom-provider and explicit-route compatibility is verified immediately before any configuration mutation.",
+        "Provider/model, privacy, identity, localhost runtime, health, cost, persistence, observability, rollback, and native-fallback contracts are accepted.",
+        "A reversible explicit-route trial proves success, failure, restart, fallback, and rollback without global routing or secret exposure.",
+        "Any global replacement proposal receives a separate parity and authority program."
+      ],
+      "dependencies": [
+        "lane-runtime-activation-readiness",
+        "lane-runtime-correlation-reliability",
+        "lane-policy-tracing-evaluation-artifact-trust",
+        "lane-codex-execution-contracts"
+      ],
+      "related_lanes": [
+        "lane-cortex-context-synthesis",
+        "lane-vercel-supabase-monitoring-correlation"
+      ],
+      "approval_gates": [
+        "Software installation",
+        "Credential request or storage",
+        "Scheduled Task or persistence mutation",
+        "Port binding",
+        "Codex configuration mutation",
+        "Paid provider call",
+        "Global routing or replacement"
+      ],
+      "serialization_rules": [
+        "Keep this lane independent from FawxzzyPlatform unless a real dependency is proven.",
+        "Capability and threat/privacy audit precedes runtime selection; runtime and identity proof precede credentials.",
+        "Native Codex/OpenAI remains default and fail-closed fallback.",
+        "No install, start, config, schedule, credential, or provider call is authorized by this lane admission."
+      ],
+      "next_packet": {
+        "id": "DS-BRIDGE-CAP-001",
+        "title": "Current Codex custom-provider and explicit-route capability audit",
+        "mode": "read-only-official-capability-and-policy-audit",
+        "status": "backlog-not-selected"
+      },
+      "resume_implications": {
+        "mazer": "No model routing or owner work is changed.",
+        "fitness": "No model routing, secret handling, or owner work is changed.",
+        "socials_os": "No external account data may be routed through an unproven sidecar."
+      },
+      "current_state": "PROPOSAL_ONLY",
+      "status": "candidate",
+      "last_audited_at": "2026-07-16T23:30:07Z"
+    },
+    {
+      "id": "lane-atlas-book-playbook-corpus-convergence",
+      "title": "Atlas Book and Playbook Corpus Convergence",
+      "classification": "whole-stack-text-corpus-governance",
+      "owner": "playbook-and-stack-root",
+      "authority": "Current Playbook, Atlas Book, owner-repository, and accepted ADR sources retain their existing authority; this lane governs only inventory, mapping, and convergence evidence.",
+      "scope": "Inventory and classify text-bearing planning, research, doctrine, prompt, note, receipt, and Book artifacts across the entire governed stack, treating Playbook as the priority historical corpus and requiring an ADR before any Book/Playbook authority transfer, consolidation, absorption, or retirement.",
+      "percentage": null,
+      "completed_units": null,
+      "measurement_status": "UNMEASURED",
+      "measurement_unit": "accepted corpus coverage and authority proof",
+      "denominator": {
+        "kind": "corpus_coverage_authority_proofs",
+        "value": null,
+        "basis": "UNKNOWN until repository coverage, archive coverage, privacy exclusions, artifact classes, duplicate and supersession rules, and Book-relevance classes are ratified."
+      },
+      "evidence_sources": [
+        "docs/memory/initiatives/initiative-fawxzzy-tech-plan-convergence.json",
+        "docs/registry/FAWXZZY-TECH-PLAN-RECOVERY-ADMISSION.json",
+        "docs/registry/ATLAS-PLAYBOOK-DOCTRINE-ADOPTION.json",
+        "docs/atlas-book",
+        "stack.yaml"
+      ],
+      "definition_of_done": [
+        "Every governed repository and admitted archive surface has an inspectable text inventory or explicit inaccessible classification.",
+        "Every artifact has authority, freshness, provenance, duplication, supersession, privacy, and Book-relevance classification.",
+        "A Book/Playbook relationship ADR is accepted before authority transfer, bulk copy, consolidation, absorption, or retirement.",
+        "A closing corpus-coverage audit proves the ratified coverage set without erasing provenance or owner truth."
+      ],
+      "dependencies": [
+        "lane-historical-task-intelligence",
+        "lane-playbook-universal-adoption",
+        "lane-cross-project-knowledge-promotion"
+      ],
+      "related_lanes": [
+        "lane-durable-memory-fabric-context-compaction",
+        "lane-source-hierarchy-doc-normalization"
+      ],
+      "approval_gates": [
+        "Book/Playbook relationship ADR acceptance",
+        "Privacy and exclusion policy acceptance",
+        "Authority transfer or consolidation approval",
+        "Source retirement or deletion approval"
+      ],
+      "serialization_rules": [
+        "Inventory and classify before synthesis or copying.",
+        "Consume Playbook doctrine by source reference under the current architecture.",
+        "Preserve source digests and provenance; no informal, old, duplicate, archived, or non-authoritative text is silently dropped.",
+        "Owner truth remains in owner repositories until an accepted ADR and reversible migration prove otherwise."
+      ],
+      "next_packet": {
+        "id": "ABP-CORPUS-001",
+        "title": "Whole-stack text corpus inventory and measurement-contract proposal",
+        "mode": "read-only-inventory-classification-and-adr-input",
+        "status": "backlog-not-selected"
+      },
+      "resume_implications": {
+        "mazer": "Only source-linked reusable knowledge may be indexed; product truth remains owner-local.",
+        "fitness": "Secrets and user data remain excluded or explicitly privacy-classified.",
+        "socials_os": "Account data and owner truth remain owner-controlled."
+      },
+      "current_state": "UNMEASURED_BACKLOG",
+      "status": "candidate",
+      "last_audited_at": "2026-07-16T23:30:07Z"
+    },
+    {
+      "id": "lane-atlas-post-preparation-development",
+      "title": "Atlas Post-Preparation Development",
+      "classification": "gated-whole-stack-development-program",
+      "owner": "stack-root-and-system-owner-repositories",
+      "authority": "docs/memory/initiatives/initiative-atlas-post-preparation-development.json plus the accepted exhaustive closing-audit contract governs admission; each system owner retains implementation authority.",
+      "scope": "Finish Lifeline, Foundation, Cortex, _stack, DiscordOS, Playbook, Atlas wiring and contracts, the Atlas Book, and shared integrations after operational preparation and the mandatory exhaustive closing audit, while converting external capabilities only to the maximum evidence-backed and capability-gated degree.",
+      "percentage": null,
+      "completed_units": null,
+      "measurement_status": "UNMEASURED",
+      "measurement_unit": "accepted post-preparation development proof",
+      "denominator": {
+        "kind": "post_preparation_development_proofs",
+        "value": null,
+        "basis": "UNKNOWN until the closing audit accepts the development coverage set and each system has explicit owner, dependency, evidence, cutover, rollback, and measurement contracts."
+      },
+      "evidence_sources": [
+        "docs/memory/initiatives/initiative-atlas-post-preparation-development.json",
+        "docs/memory/initiatives/continuity-manifest-atlas-full-system-re-evaluation.json",
+        "docs/memory/initiatives/initiative-fawxzzy-tech-plan-convergence.json",
+        "docs/atlas-book/03-operating-model.md"
+      ],
+      "definition_of_done": [
+        "Operational preparation and the Clean and Re-sync cluster are terminal.",
+        "The exhaustive closing audit is accepted at gate 2 / 2 and every preparatory discovery marker is complete.",
+        "Each admitted system and shared integration has owner-specific implementation, verification, migration, cutover, rollback, observation, and acceptance proof.",
+        "ChatGPT/Codex-to-Cortex and Vercel/Supabase-to-Lifeline/Foundation conversions remain evidence-first, capability-gated, reversible, and bounded by current product support.",
+        "Fitness, Mazer, Socials OS, and FawxzzyWeb remain independent standing owner lanes."
+      ],
+      "dependencies": [
+        "lane-marker-integrity",
+        "lane-runtime-activation-readiness",
+        "lane-runtime-correlation-reliability",
+        "lane-atlas-contracts-mesh",
+        "lane-playbook-universal-adoption",
+        "lane-durable-memory-fabric-context-compaction",
+        "lane-atlas-book-playbook-corpus-convergence"
+      ],
+      "related_lanes": [
+        "lane-cortex-context-synthesis",
+        "lane-delivery-event-plane",
+        "lane-persistent-workspaces",
+        "lane-fawxzzy-platform-migration"
+      ],
+      "approval_gates": [
+        "Operational preparation terminal receipt",
+        "Clean and Re-sync cluster terminal receipt",
+        "Accepted exhaustive closing audit at 2 / 2",
+        "All preparatory discovery markers complete",
+        "Per-system owner and external-plane mutation authority",
+        "Per-cutover and irreversible-action approval"
+      ],
+      "serialization_rules": [
+        "Do not start development before the exhaustive closing audit and preparatory-gap completion gates.",
+        "Use owner-specific reversible waves with exact receipts and post-work review.",
+        "Root coordinates identities, dependencies, contracts, projections, and receipts; owner repositories implement product work.",
+        "External services remain governed adapters until replacement parity and rollback evidence is accepted."
+      ],
+      "next_packet": {
+        "id": "ATLAS-CLOSING-AUDIT-001",
+        "title": "Exhaustive closing Atlas review",
+        "mode": "later-root-audit-after-operational-preparation",
+        "status": "gated-not-ready"
+      },
+      "resume_implications": {
+        "mazer": "Mazer remains an independent standing owner lane.",
+        "fitness": "Fitness remains an independent standing owner lane with its own security and production gates.",
+        "socials_os": "Socials OS remains an independent standing owner lane.",
+        "fawxzzyweb": "FawxzzyWeb remains an independent standing owner lane under stable repo id trove."
+      },
+      "current_state": "GATED",
+      "status": "candidate",
+      "last_audited_at": "2026-07-16T23:30:07Z"
     }
   ]
 }

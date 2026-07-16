@@ -1,0 +1,47 @@
+{
+  "contract_version": "atlas.initiative.v1",
+  "id": "initiative-atlas-post-preparation-development",
+  "title": "Atlas Post-Preparation Development",
+  "summary": "Open measured owner-specific development for Lifeline, Foundation, Cortex, _stack, DiscordOS, Playbook, Atlas wiring, Atlas Book, and integrations only after the mandatory closing audit and all preparatory discoveries are terminal.",
+  "status": "hold-closing-audit-required",
+  "owner": "stack-root and component owners",
+  "created_at": "2026-07-16T23:26:40Z",
+  "updated_at": "2026-07-16T23:26:40Z",
+  "related_plan_refs": [],
+  "related_decision_refs": [],
+  "related_hypothesis_refs": [],
+  "related_session_refs": [],
+  "related_attention_refs": [],
+  "evidence_refs": [
+    "docs/registry/ATLAS-MASTER-PROGRAM-REGISTER.v1.json",
+    "docs/memory/initiatives/continuity-manifest-atlas-full-system-re-evaluation.json",
+    "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json",
+    "docs/atlas-book/03-operating-model.md",
+    "docs/atlas-book/13-vision-and-endgames.md"
+  ],
+  "proposed_next_session_refs": ["Atlas Full-System Re-evaluation closing audit after all preparation gates are terminal"],
+  "supersedes": [],
+  "superseded_by": [],
+  "metadata": {
+    "schema_version": "atlas.post-preparation-development.initiative.v1",
+    "measurement_status": "UNMEASURED",
+    "percentage": null,
+    "owner": "stack-root and component owners",
+    "authority": "future measured owner-specific packets only; this initiative grants no implementation, production, secret, board, or external mutation authority",
+    "scope": ["Lifeline", "Foundation", "Cortex", "_stack", "DiscordOS", "Playbook", "Atlas wiring", "Atlas Book", "integrations"],
+    "dependencies": ["accepted exhaustive closing audit at gate 2 of 2", "every preparatory discovery marker terminal", "owner-specific denominator and evidence contracts"],
+    "serialization": ["closing audit", "preparatory-gap completion", "owner-specific admissions", "reversible integration waves", "capability-gated cutover and retirement"],
+    "approval_gates": ["production deploy", "production Auth/OAuth", "production data cutover", "breaking secret rotation", "destructive contraction", "source disable/delete", "irreversible action"],
+    "evidence": ["owner Git and verification", "runtime and deployment readback", "versioned contracts", "producer/consumer proof", "rollback and observation receipts"],
+    "definition_of_done": ["Every named system has an accepted owner-specific completion contract and current proof.", "Cross-system wiring is observable, reversible, and receipt-backed.", "External capability replacement occurs only to the maximum level justified by parity and rollback evidence."],
+    "status": "HOLD",
+    "next_packet": "Mandatory closing exhaustive audit after preparation becomes terminal.",
+    "capability_conversion": {
+      "cortex": "Convert ChatGPT and Codex capability only where baseline, parity, safety, observability, cost, fallback, rollback, and operator acceptance are proven.",
+      "lifeline_foundation": "Convert Vercel and Supabase capability only where hosting, data, security, identity, observability, backup, migration, fallback, and rollback evidence are proven.",
+      "external_dependency_rule": "Unproven or unconverted capabilities remain governed adapters; no external dependency is removed to satisfy a vision statement."
+    },
+    "owner_lanes": ["Fitness", "Mazer", "Socials OS", "FawxzzyWeb"],
+    "cross_cutting": ["shared contracts", "cross-project knowledge promotion", "model-effort-speed routing", "persistent workspace leases", "historical conversation and task knowledge extraction"]
+  }
+}

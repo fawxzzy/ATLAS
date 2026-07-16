@@ -2,11 +2,11 @@
   "contract_version": "atlas.initiative.v1",
   "id": "initiative-external-model-sidecar-deepseek-litellm-bridge",
   "title": "External Model Sidecar Provider Integration - DeepSeek/LiteLLM Bridge",
-  "summary": "Phase 2 accepted with a frozen security, identity, runtime, routing, privacy, health, persistence, backup, and rollback contract for the six-unit DeepSeek/LiteLLM sidecar program; progress is 2 / 6 and native OpenAI remains default and fallback.",
-  "status": "active_runtime_setup_next",
+  "summary": "Governed UNMEASURED DeepSeek sidecar proposal held for read-only current capability and placement revalidation. The historical 2 / 6 and 33.3% record remains dated provenance only; native OpenAI remains default and fallback.",
+  "status": "held_untrusted_proposal_revalidation_required",
   "owner": "ATLAS root governance",
   "created_at": "2026-07-13T00:00:00Z",
-  "updated_at": "2026-07-13T00:00:00Z",
+  "updated_at": "2026-07-16T23:28:24Z",
   "related_plan_refs": [],
   "related_decision_refs": [],
   "related_hypothesis_refs": [],
@@ -16,10 +16,14 @@
     "docs/ops/ATLAS-EXTERNAL-MODEL-SIDECAR-DEEPSEEK-LITELLM-BRIDGE-PROGRAM-ADMISSION-2026-07-13.md",
     "docs/ops/ATLAS-EXTERNAL-MODEL-SIDECAR-DEEPSEEK-LITELLM-BRIDGE-PHASE-1-CAPABILITY-AUDIT-2026-07-13.md",
     "docs/ops/ATLAS-EXTERNAL-MODEL-SIDECAR-DEEPSEEK-LITELLM-BRIDGE-PHASE-2-SECURITY-IDENTITY-RUNTIME-CONTRACT-2026-07-13.md",
-    "docs/registry/ATLAS-EXTERNAL-MODEL-SIDECAR-RUNTIME-CONTRACT.json"
+    "docs/registry/ATLAS-EXTERNAL-MODEL-SIDECAR-RUNTIME-CONTRACT.json",
+    "data/imports/deepseek-bridge/2026-07-13/IMPORT-MANIFEST.json",
+    "docs/registry/DEEPSEEK-BRIDGE-WAVE-0-ADMISSION.json",
+    "docs/registry/ATLAS-MASTER-PROGRAM-REGISTER.v1.json",
+    "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json"
   ],
   "proposed_next_session_refs": [
-    "External Model Sidecar Provider Integration Phase 3 dedicated runtime and one-time credential setup"
+    "DEEPSEEK-CAP-REVALIDATE-001 read-only current Codex custom-provider and sidecar placement revalidation"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -31,6 +35,12 @@
       "denominator": 6,
       "marker": "33.3%",
       "admission_completes_no_unit": false
+    },
+    "progress_authority": "historical dated provenance only; not current measurement and not a denominator for the Wave 0 lane",
+    "current_measurement": {
+      "status": "UNMEASURED",
+      "percentage": null,
+      "denominator": null
     },
     "authority": {
       "mode": "planning_only",
@@ -47,6 +57,7 @@
       {"id": "phase-05", "title": "Explicit-route Codex/_stack/Atlas Control integration only if proven supported", "state": "admitted_not_executed", "outcome": "No integration occurred; support remains unproven."},
       {"id": "phase-06", "title": "End-to-end/restart/persistence/failure/rollback proof", "state": "admitted_not_executed", "outcome": "No operational proof was run."}
     ],
+    "phase_record_authority": "historical planning record only; Phase 3 is not currently ready or authorized",
     "boundaries": {
       "scope": "Admission and durable planning surfaces only",
       "denied_mutations": ["software install", "secret request", "Program Files write", "Credential Manager write", "Scheduled Task write", "port binding", "Codex config write", "paid API call"]
@@ -55,12 +66,18 @@
     "dependencies": ["Phase 1 capability evidence", "Phase 2 frozen contract", "supported explicit provider route", "approved secret-access identity", "health and rollback evidence"],
     "risks": ["unsupported custom provider route", "secret/task identity mismatch", "listening but unhealthy proxy", "credential exposure", "global redirect", "incomplete rollback"],
     "resume_gates": ["read-only capability evidence accepted", "security/identity/runtime contract accepted", "one-time credential request authorized", "runtime and task changes authorized", "explicit route proven supported", "end-to-end and rollback proof accepted"],
-    "source_provenance": "operator-provided DeepSeek bridge execution order, admitted on 2026-07-13; local attachment path intentionally not persisted",
+    "source_provenance": "Byte-exact imported proposal at data/imports/deepseek-bridge/2026-07-13, classified as untrusted input only by docs/registry/DEEPSEEK-BRIDGE-WAVE-0-ADMISSION.json.",
     "future_secret_rule": "The future key is requested exactly once at Phase 3 and never printed, committed, passed in process arguments, or written to plaintext logs.",
     "candidate_doctrine": ["External Model Sidecar", "Secret/Identity Alignment", "Discover -> Back Up -> Modify -> Validate -> Document", "Listening Is Not Healthy", "Dedicated Runtime"],
     "exact_next_packet": "External Model Sidecar Provider Integration Phase 3 dedicated runtime and one-time credential setup",
+    "exact_next_packet_authority": "historical planning record only",
+    "current_exact_next_packet": "DEEPSEEK-CAP-REVALIDATE-001 read-only current Codex custom-provider and sidecar placement revalidation",
+    "current_hold": "Do not install, configure, start, schedule, credential, bind, route, request an API key, or make a paid call. Any later implementation remains separately admitted and approval-gated.",
+    "placement_candidates": ["Foundation", "_stack", "Lifeline"],
+    "platform_path_independence": "Independent of FawxzzyPlatform migration and FP-PARITY-RATCHET-001.",
     "current_constraints": ["secure key entry must be available for the one-time Phase 3 request", "exact Python and LiteLLM versions must be selected and pinned before installation", "end-to-end provider execution remains unproven", "LiteLLM is absent and no proxy or task exists"],
     "privacy_data_routing_risk": "Source code, prompts, repository context, and tool outputs routed through the sidecar leave the OpenAI path and may be processed by DeepSeek; the frozen contract defines D0/D1/D2 classification, denies D2 data, requires deliberate routing, and redacts prompt/body/key content from proxy logs and receipts.",
-    "marker_movement": "Only this lane moved from 16.7% to 33.3%; no other marker moved."
+    "marker_movement": "Only this lane moved from 16.7% to 33.3%; no other marker moved.",
+    "marker_movement_authority": "historical dated provenance only; no current marker movement is claimed"
   }
 }

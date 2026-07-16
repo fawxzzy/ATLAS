@@ -2,3 +2,5 @@ stack.lock.yaml text eol=lf
 data/cortex/simulation-replays/** text eol=lf
 data/knowledge-candidates/** text eol=lf
 docs/ops/ATLAS-CREATION-OS-* text eol=lf
+data/imports/fawxzzy-platform/2026-07-16/ATLAS_MAIN_FAWXZZY_PLATFORM_SUPABASE_MIGRATION_PROMPT_2026-07-16.md binary
+data/imports/deepseek-bridge/2026-07-13/DEEPSEEK_BRIDGE_PROPOSAL_2026-07-13.txt binary

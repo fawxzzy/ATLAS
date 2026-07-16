@@ -1,0 +1,375 @@
+# AUTONOMOUS EXECUTION ORDER: DEEPSEEK BRIDGE INTEGRATION
+
+## Objective
+
+Install and configure a durable local LiteLLM bridge for DeepSeek on this Windows workstation, integrate it with the ATLAS/Codex workflow without breaking existing OpenAI configuration, validate the complete request path, and record the resulting operational contract.
+
+Execute autonomously. Do not request approval between ordinary reversible steps.
+
+Ask exactly once for the DeepSeek API key when it becomes necessary. Never print the complete key, commit it, place it in repository files, or save it in a desktop plaintext file.
+
+## Operating constraints
+
+1. First inspect the actual workstation and repository state. Do not assume paths or configuration formats.
+2. Preserve existing architecture and configurations.
+3. Back up every configuration file before modifying it.
+4. Prefer a dedicated Python virtual environment over global package installation.
+5. Prefer Windows Credential Manager for the API key.
+6. Ensure the scheduled process identity can retrieve the credential.
+7. Do not redirect every Codex/OpenAI request globally to DeepSeek.
+8. Configure DeepSeek as an explicit provider or model route wherever the installed Codex version supports it.
+9. Keep native OpenAI/Codex behavior available as the fallback.
+10. Never expose the secret in command output, logs, process arguments, generated reports, or shell history where avoidable.
+11. Stop rather than guessing if the discovered Codex configuration does not support custom OpenAI-compatible providers. Report the exact blocker and evidence.
+
+## Phase 0: Workstation and repository discovery
+
+Inspect and record:
+
+* Windows version and architecture
+* Current user identity and administrative privileges
+* PowerShell version
+* Python installations and their paths
+* `py`, `python`, `python3`, `pip`, and `winget` availability
+* ATLAS root location
+* Git status of any repository that may be modified
+* Existing Codex configuration locations
+* Existing LiteLLM installation
+* Existing service or Scheduled Task named for DeepSeekBridge
+* Whether TCP port 4000 is already occupied
+
+Likely locations may include, but are not limited to:
+
+* `C:\ATLAS`
+* `%APPDATA%\Codex`
+* `%LOCALAPPDATA%\Codex`
+* `%USERPROFILE%\.codex`
+* repository-local configuration files
+
+Search deliberately. Do not recursively scan unrelated user data.
+
+Create a timestamped implementation log under an appropriate ATLAS operational/log directory if one exists. Redact secrets.
+
+## Phase 1: Python runtime and isolated LiteLLM installation
+
+Requirement: Python 3.9 or newer.
+
+1. Detect all installed Python versions.
+
+2. Prefer an existing supported installation.
+
+3. If none exists, install a current supported Python release from the official Python distribution using `winget`, with PATH integration.
+
+4. Create:
+
+   `C:\Program Files\DeepSeekBridge`
+
+5. Create a dedicated virtual environment:
+
+   `C:\Program Files\DeepSeekBridge\.venv`
+
+6. Upgrade `pip` inside that virtual environment.
+
+7. Install LiteLLM inside the virtual environment, not globally.
+
+8. Record the resolved Python and LiteLLM versions.
+
+9. Verify the LiteLLM CLI can start and display help.
+
+Do not alter unrelated Python installations.
+
+## Phase 2: Secret acquisition and storage
+
+Ask once:
+
+> Paste your DeepSeek API key. It will be stored through Windows Credential Manager and will not be written into the ATLAS repository or a desktop plaintext file.
+
+After receiving it:
+
+1. Validate only that the value is non-empty and structurally plausible.
+
+2. Store it in Windows Credential Manager under a clearly scoped target such as:
+
+   `ATLAS/DeepSeekBridge/APIKey`
+
+3. Do not echo the key.
+
+4. Do not place the key directly in the Scheduled Task command line.
+
+5. Do not persist it in:
+
+   * Git-tracked files
+   * `.env` files inside repositories
+   * desktop files
+   * PowerShell transcripts
+   * the confirmation log
+
+6. Ensure the account running the Scheduled Task can retrieve the credential.
+
+If Credential Manager access from the selected task account is not reliable, choose one of these paths in ranked order:
+
+1. Run the task under the current user with “Run whether user is logged on or not.”
+2. Use an appropriately permissioned machine-scoped secret mechanism.
+3. As a documented fallback only, use a machine environment variable with explicit acknowledgement that it is less protected than Credential Manager.
+
+Do not claim that environment variables are encrypted secret storage.
+
+## Phase 3: Proxy configuration
+
+Prefer a LiteLLM configuration file over a long command line.
+
+Create:
+
+`C:\Program Files\DeepSeekBridge\litellm-config.yaml`
+
+The configuration must:
+
+* expose an OpenAI-compatible endpoint on localhost
+* bind only to loopback unless a broader binding is explicitly required
+* define a stable local model alias such as `deepseek-chat`
+* route that alias to DeepSeek’s chat model
+* obtain the API key from process environment at runtime
+* avoid embedding the API key
+* use the current DeepSeek OpenAI-compatible API base supported by the installed LiteLLM version
+* include reasonable timeout and retry settings
+* avoid logging request bodies or authorization headers
+
+Create:
+
+`C:\Program Files\DeepSeekBridge\run_proxy.ps1`
+
+The script must:
+
+1. use strict error handling
+2. retrieve the DeepSeek key from the selected secret store
+3. inject it into the process environment only for the proxy process
+4. invoke LiteLLM from the dedicated virtual environment
+5. bind to `127.0.0.1`
+6. use port `4000`
+7. write sanitized operational logs to a controlled log directory
+8. prevent duplicate proxy instances
+9. return a nonzero exit code on failure
+10. never print the API key
+
+Prefer calling LiteLLM with its configuration file.
+
+## Phase 4: Persistent startup
+
+Register a Windows Scheduled Task named:
+
+`ATLAS DeepSeek Bridge`
+
+Requirements:
+
+* trigger at system startup or user logon, depending on the credential-access design
+* run under the account capable of retrieving the stored credential
+* run whether or not the user is interactively logged on where feasible
+* use the 64-bit PowerShell executable
+* execute `run_proxy.ps1`
+* restart on failure
+* apply a reasonable restart delay
+* avoid launching duplicate instances
+* use the correct working directory
+* record task registration details without exposing credentials
+
+Do not replace an existing task blindly. Inspect and update it idempotently.
+
+## Phase 5: Codex and ATLAS integration
+
+Discover the actual installed Codex configuration format before changing anything.
+
+For every candidate configuration:
+
+1. identify whether it is authoritative
+2. inspect documentation, schema, or existing examples
+3. create a timestamped backup
+4. preserve existing OpenAI settings
+5. add DeepSeek as a separate OpenAI-compatible provider or custom model only if supported
+
+Desired logical configuration:
+
+* provider name: `deepseek-local`
+* base URL: `http://127.0.0.1:4000/v1`
+* model alias: `deepseek-chat`
+* local proxy authentication: only configure if LiteLLM requires it
+* native Codex/OpenAI provider remains unchanged and available
+
+Do not globally replace the default OpenAI base URL unless the product supports no provider-level configuration and there is explicit evidence that the change is safe and reversible.
+
+If Codex does not support custom providers:
+
+* do not fabricate unsupported configuration
+* document the discovered limitation
+* configure the bridge for tools that do support OpenAI-compatible endpoints
+* provide the exact supported invocation path for ATLAS automation
+
+## Phase 6: Validation
+
+Start or restart the Scheduled Task.
+
+Validate in order:
+
+1. Scheduled Task reports a successful start.
+
+2. A single process is listening on `127.0.0.1:4000`.
+
+3. A health or models endpoint responds.
+
+4. Send a minimal request to:
+
+   `http://127.0.0.1:4000/v1/chat/completions`
+
+5. Use the configured `deepseek-chat` alias.
+
+6. Confirm:
+
+   * HTTP success
+   * valid OpenAI-compatible JSON
+   * non-empty assistant response
+   * expected model/provider routing
+   * no API key appears in logs
+
+7. Restart the proxy and repeat the request.
+
+8. Where practical, test persistence by manually stopping the process and confirming Scheduled Task recovery.
+
+9. Validate the Codex/custom-provider path only if the installed Codex version supports it.
+
+Do not mark the bridge active based only on a listening port.
+
+## Phase 7: ATLAS operational documentation
+
+Write:
+
+`<ATLAS_ROOT>\DEEPSEEK_BRIDGE_ACTIVE.txt`
+
+Include:
+
+* completion timestamp
+* machine name
+* Python version and path
+* LiteLLM version
+* bridge installation path
+* proxy URL
+* local model alias
+* Scheduled Task name and execution identity
+* secret-storage method, without the secret
+* Codex integration status
+* validation results
+* fallback behavior
+* rollback procedure
+* configuration backup paths
+* any unresolved risks
+
+Also capture reusable operational knowledge in the appropriate ATLAS/Playbook location when one exists.
+
+### Rule: External Model Sidecar
+
+External models must be integrated as explicit sidecar providers. Never replace the canonical provider globally when provider-level routing is available.
+
+### Rule: Secret/Identity Alignment
+
+A background service can retrieve a secret only when the secret scope and service execution identity are compatible.
+
+### Pattern: Discover → Back Up → Modify → Validate → Document
+
+Configuration automation must discover the authoritative file and schema, create a reversible backup, apply the smallest valid change, validate end to end, and document rollback.
+
+### Failure Mode: Listening Is Not Healthy
+
+A process listening on a port does not prove authentication, upstream routing, response compatibility, or restart persistence.
+
+### Decision: Dedicated Runtime
+
+Use a dedicated Python virtual environment for long-lived infrastructure utilities to prevent global dependency drift.
+
+## Routing policy
+
+Do not claim that ChatGPT itself can automatically forward future messages to localhost unless the current ChatGPT environment has explicit network and tool access to that endpoint.
+
+For ATLAS-local automation that runs on this workstation:
+
+1. Quick local operations and ordinary orchestration may use the native configured agent.
+2. DeepSeek may be selected explicitly for suitable coding, analysis, or architecture workloads.
+3. Native Codex/OpenAI remains the canonical fallback.
+4. On DeepSeek timeout, authentication failure, rate limit, malformed response, or proxy outage:
+
+   * record a sanitized failure
+   * retry only within bounded policy
+   * route to the native provider
+   * do not silently lose the task
+5. Avoid routing security-sensitive operations, secret handling, or irreversible workstation changes through an external model without deterministic local controls.
+
+## Verification commands and evidence
+
+Run appropriate commands and retain sanitized output proving:
+
+* Python version
+* virtual environment path
+* LiteLLM version
+* credential target existence without secret disclosure
+* Scheduled Task state
+* listener ownership
+* health endpoint response
+* successful completion response
+* restart recovery
+* Codex provider configuration or documented unsupported state
+* clean Git status for any repository touched
+
+## Rollback
+
+Provide and test a rollback procedure that can:
+
+1. stop and unregister the Scheduled Task
+2. stop the proxy process
+3. restore backed-up Codex configurations
+4. remove the stored credential
+5. remove the DeepSeekBridge installation directory
+6. leave existing Python and native Codex/OpenAI configuration intact
+
+## Final response format
+
+Return:
+
+### Done
+
+What was successfully installed and validated.
+
+### Changed
+
+Every file, task, credential target, and configuration changed.
+
+### Validation
+
+Concrete evidence for the full request path and persistence.
+
+### Codex integration
+
+Whether custom-provider integration was actually supported and proven.
+
+### Risks
+
+Any security, compatibility, billing, or operational risks.
+
+### Rollback
+
+Exact rollback commands or procedure.
+
+### Blockers
+
+Only real unresolved blockers with supporting evidence.
+
+Do not report “bridge live” unless the DeepSeek request succeeds through the local LiteLLM endpoint and the persistence mechanism is verified.
+
+## Acceptance criteria
+
+* Python 3.9+ is available.
+* LiteLLM is installed in a dedicated runtime.
+* The DeepSeek API key is not present in repository or desktop plaintext files.
+* The proxy binds to localhost on port 4000.
+* Startup persistence is configured and verified.
+* A real DeepSeek completion succeeds through the local proxy.
+* Existing native Codex/OpenAI behavior remains available.
+* Codex configuration changes are schema-supported, backed up, and validated—or clearly reported as unsupported.
+* The ATLAS confirmation file exists and contains no secrets.
+* A tested rollback path is documented.

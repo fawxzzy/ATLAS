@@ -1,0 +1,72 @@
+{
+  "schema": "atlas.program-admission.v1",
+  "admission_id": "deepseek-bridge-wave-0-evaluation-2026-07-16",
+  "generated_at": "2026-07-16T23:26:40Z",
+  "title": "DeepSeek Bridge Wave 0 Evaluation Admission",
+  "owner": "Foundation, _stack, Lifeline, and ATLAS root governance",
+  "authority": {
+    "mode": "read-only-capability-evaluation-only",
+    "proposal_trust": "untrusted-proposal-input",
+    "install_configure_start_schedule_credential_authority": false,
+    "secret_rule": "Never request, read, persist, transmit, or receipt a DeepSeek API key in this lane.",
+    "provider_rule": "Native OpenAI remains default and fallback; no global replacement or redirect is admitted.",
+    "historical_mapping": "The existing initiative and frozen runtime contract remain unchanged historical provenance. Their prior 33.3 percent / 2-of-6 posture is not the measurement state of this new Wave 0 lane."
+  },
+  "scope": "Import the proposal byte-for-byte, map it to a distinct UNMEASURED backlog lane, and admit only a later read-only check of current Codex custom-provider support and a future Foundation/_stack/Lifeline localhost-sidecar design evaluation.",
+  "dependencies": [
+    "current installed Codex custom-provider capability evidence",
+    "Foundation/_stack/Lifeline ownership decision",
+    "loopback exposure and data-classification policy",
+    "health, rollback, and native-fallback contract"
+  ],
+  "serialization": [
+    "Read-only current capability verification precedes any runtime design.",
+    "Design and security review precede any separately authorized implementation.",
+    "This evaluation remains independent of the FawxzzyPlatform critical path unless evidence proves a dependency."
+  ],
+  "approval_gates": ["irreversible-action"],
+  "evidence": [
+    "data/imports/deepseek-bridge/2026-07-13/DEEPSEEK_BRIDGE_PROPOSAL_2026-07-13.txt",
+    "data/imports/deepseek-bridge/2026-07-13/IMPORT-MANIFEST.json",
+    "docs/memory/initiatives/initiative-external-model-sidecar-deepseek-litellm-bridge.json",
+    "docs/registry/ATLAS-EXTERNAL-MODEL-SIDECAR-RUNTIME-CONTRACT.json",
+    "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json"
+  ],
+  "definition_of_done": [
+    "The current installed Codex runtime's custom-provider support is verified from current primary evidence.",
+    "A future localhost LiteLLM design has explicit owner placement, loopback exposure, data policy, authenticated health, rollback, native fallback, and provider-routing evidence.",
+    "No install, configuration, process, Scheduled Task, credential, API call, or global redirect occurs under this admission.",
+    "No percentage is assigned until a deterministic measurement contract is accepted."
+  ],
+  "status": "HOLD-UNTRUSTED-PROPOSAL",
+  "next_packet": "Read-only current Codex custom-provider capability verification under Foundation/_stack/Lifeline ownership.",
+  "measurement_status": "UNMEASURED",
+  "source_import": {
+    "stored_ref": "data/imports/deepseek-bridge/2026-07-13/DEEPSEEK_BRIDGE_PROPOSAL_2026-07-13.txt",
+    "manifest_ref": "data/imports/deepseek-bridge/2026-07-13/IMPORT-MANIFEST.json",
+    "byte_length": 13273,
+    "sha256": "957463349b17ab2a1362a54e3c04329cd67892a9e0c75644090e474621c76022"
+  },
+  "initiative_mapping": {
+    "historical_initiative_ref": "docs/memory/initiatives/initiative-external-model-sidecar-deepseek-litellm-bridge.json",
+    "historical_runtime_contract_ref": "docs/registry/ATLAS-EXTERNAL-MODEL-SIDECAR-RUNTIME-CONTRACT.json",
+    "current_backlog_id": "lane-external-model-sidecar-deepseek-evaluation",
+    "mapping_rule": "Preserve the older initiative's dated 2-of-6 / 33.3 percent snapshot and runtime contract as historical provenance; the current Wave 0 backlog is a distinct UNMEASURED evaluation with stricter authority."
+  },
+  "historical_metric_disposition": {
+    "source": "docs/memory/initiatives/initiative-external-model-sidecar-deepseek-litellm-bridge.json",
+    "preserved_claim": "The existing initiative records historical phase bookkeeping at 2 / 6 and 33.3 percent.",
+    "current_effect": "The historical value is not rewritten, widened, or reused as the new evaluation-lane denominator.",
+    "frozen_51_family_membership": false
+  },
+  "denied_actions": [
+    "software install or update",
+    "Codex or provider configuration mutation",
+    "process start or port bind",
+    "Scheduled Task creation or mutation",
+    "credential or secret request, read, write, or deletion",
+    "paid provider call",
+    "owner repository mutation",
+    "Supabase, Vercel, Discord, production, social-account, or canonical ATLAS checkout mutation"
+  ]
+}
