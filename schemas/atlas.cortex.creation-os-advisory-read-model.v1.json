@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://schemas/atlas.cortex.creation-os-advisory-read-model.v1.json",
+  "title": "Cortex Creation OS advisory read model v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "status", "scope", "source_set", "candidate_projections", "promoted_knowledge", "deferred_product_decisions", "authority", "failure_semantics", "marker_deltas", "marker_movement_authorized", "global_cortex_freshness_claimed"],
+  "properties": {
+    "schema_version": {"const": "atlas.cortex.creation-os-advisory-read-model.v1"},
+    "status": {"const": "ready"},
+    "scope": {"const": "creation-os"},
+    "source_set": {"$ref": "#/$defs/sourceSet"},
+    "candidate_projections": {"type": "array", "minItems": 6, "maxItems": 6, "items": {"$ref": "#/$defs/candidate"}},
+    "promoted_knowledge": {"type": "array", "maxItems": 0},
+    "deferred_product_decisions": {"type": "array", "minItems": 1, "maxItems": 1, "items": {"$ref": "#/$defs/decision"}},
+    "authority": {"$ref": "#/$defs/authority"},
+    "failure_semantics": {"$ref": "#/$defs/failureSemantics"},
+    "marker_deltas": {"type": "array", "maxItems": 0},
+    "marker_movement_authorized": {"const": false},
+    "global_cortex_freshness_claimed": {"const": false}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^sha256:[a-f0-9]{64}$"},
+    "sourceSet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["digest", "digest_algorithm", "components", "topology"],
+      "properties": {
+        "digest": {"$ref": "#/$defs/sha256"},
+        "digest_algorithm": {"type": "string", "minLength": 1},
+        "components": {"type": "array", "minItems": 12, "items": {"type": "object", "required": ["label", "sha256", "byte_length"], "properties": {"label": {"type": "string"}, "sha256": {"$ref": "#/$defs/sha256"}, "byte_length": {"type": "integer", "minimum": 1}, "path": {"type": "string"}, "value": {"type": "string"}}, "additionalProperties": false}},
+        "topology": {"type": "object", "required": ["playbook_merged_revision", "playbook_accepted_head", "merge_parents", "accepted_head_is_ancestor"], "properties": {"playbook_merged_revision": {"type": "string"}, "playbook_accepted_head": {"type": "string"}, "merge_parents": {"type": "array", "minItems": 2, "items": {"type": "string"}}, "accepted_head_is_ancestor": {"const": true}}, "additionalProperties": false}
+      }
+    },
+    "provenance": {"type": "object", "required": ["source_type", "ref", "classification"], "properties": {"source_type": {"type": "string"}, "ref": {"type": "string"}, "classification": {"type": "string"}}, "additionalProperties": false},
+    "candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["candidate_id", "classification", "kind", "name", "statement", "scope", "provenance", "review", "suggested_destination", "destination_authority", "promotion_status", "source", "owner_intake"],
+      "properties": {
+        "candidate_id": {"type": "string", "pattern": "^creation-os-"},
+        "classification": {"const": "playbook-review-candidate"},
+        "kind": {"enum": ["rule", "pattern", "failure-mode"]},
+        "name": {"type": "string", "minLength": 1},
+        "statement": {"type": "string", "minLength": 1},
+        "scope": {"type": "string", "minLength": 1},
+        "provenance": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/provenance"}},
+        "review": {"type": "object"},
+        "suggested_destination": {"enum": ["Playbook/rules", "Playbook/patterns", "Playbook/failure-modes"]},
+        "destination_authority": {"const": "proposal-only"},
+        "promotion_status": {"const": "not-promoted"},
+        "source": {"type": "object"},
+        "owner_intake": {"type": "object"}
+      }
+    },
+    "decision": {
+      "type": "object",
+      "required": ["record_id", "classification", "kind", "record_sha256", "contract_eligible", "disposition", "thresholds_and_kill_criteria_status", "advisory_projection_only"],
+      "properties": {
+        "record_id": {"const": "creation-os-software-repo-voice-first-wedge"},
+        "classification": {"const": "atlas-product-decision"},
+        "kind": {"const": "decision"},
+        "record_sha256": {"const": "sha256:5f26456f7e2a5d18ca6ca513cdcd53d33af0df5a19a3b05c01a753d393a121d6"},
+        "contract_eligible": {"const": false},
+        "disposition": {"const": "deferred-atlas-product-decision"},
+        "thresholds_and_kill_criteria_status": {"const": "unresolved-pending-operator-ratification"},
+        "advisory_projection_only": {"const": true}
+      },
+      "additionalProperties": true
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["read", "synthesis_advisory", "routing_advisory", "retrieval_advisory", "doctrine", "policy", "scheduling", "execution", "deployment", "approval", "board", "repository_mutation", "promotion", "automatic_selection"],
+      "properties": {
+        "read": {"const": true}, "synthesis_advisory": {"const": true}, "routing_advisory": {"const": true}, "retrieval_advisory": {"const": true},
+        "doctrine": {"const": false}, "policy": {"const": false}, "scheduling": {"const": false}, "execution": {"const": false}, "deployment": {"const": false}, "approval": {"const": false}, "board": {"const": false}, "repository_mutation": {"const": false}, "promotion": {"const": false}, "automatic_selection": {"const": false}
+      }
+    },
+    "failureSemantics": {"type": "object", "required": ["missing_evidence", "changed_revision", "duplicate_hash_kind_destination_or_disposition_drift", "decision_admission", "doctrine_mutation", "conflict_resolution"], "properties": {"missing_evidence": {"const": "unknown"}, "changed_revision": {"const": "stale"}, "duplicate_hash_kind_destination_or_disposition_drift": {"const": "conflict"}, "decision_admission": {"const": "conflict"}, "doctrine_mutation": {"const": "conflict"}, "conflict_resolution": {"const": "operator-required-never-auto-select"}}, "additionalProperties": false}
+  }
+}

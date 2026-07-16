@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://schemas/atlas.cortex.creation-os-advisory-query.v1.json",
+  "title": "Cortex Creation OS advisory query v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "status", "scope", "source_set_digest", "catalog_ref", "candidate_retrieval", "promoted_knowledge", "deferred_decision_retrieval", "indexes", "selection", "authority", "failure_semantics", "marker_deltas", "marker_movement_authorized", "global_cortex_freshness_claimed"],
+  "properties": {
+    "schema_version": {"const": "atlas.cortex.creation-os-advisory-query.v1"},
+    "status": {"const": "ready"},
+    "scope": {"const": "creation-os"},
+    "source_set_digest": {"type": "string", "pattern": "^sha256:[a-f0-9]{64}$"},
+    "catalog_ref": {"const": "runtime/cortex/catalog/knowledge/creation-os/advisory-read-model.latest.json"},
+    "candidate_retrieval": {"type": "array", "minItems": 6, "maxItems": 6, "items": {"$ref": "#/$defs/candidate"}},
+    "promoted_knowledge": {"type": "array", "maxItems": 0},
+    "deferred_decision_retrieval": {"type": "array", "minItems": 1, "maxItems": 1, "items": {"$ref": "#/$defs/decision"}},
+    "indexes": {"type": "object", "required": ["candidate_ids_by_kind", "candidate_ids_by_destination", "deferred_decision_ids"], "properties": {"candidate_ids_by_kind": {"type": "object"}, "candidate_ids_by_destination": {"type": "object"}, "deferred_decision_ids": {"type": "array", "items": {"const": "creation-os-software-repo-voice-first-wedge"}}}, "additionalProperties": false},
+    "selection": {"type": "object", "required": ["automatic_selection", "conflict_resolution", "destination_authority"], "properties": {"automatic_selection": {"const": false}, "conflict_resolution": {"const": "operator-required"}, "destination_authority": {"const": "proposal-only"}}, "additionalProperties": false},
+    "authority": {"$ref": "#/$defs/authority"},
+    "failure_semantics": {"$ref": "#/$defs/failureSemantics"},
+    "marker_deltas": {"type": "array", "maxItems": 0},
+    "marker_movement_authorized": {"const": false},
+    "global_cortex_freshness_claimed": {"const": false}
+  },
+  "$defs": {
+    "candidate": {"type": "object", "required": ["candidate_id", "classification", "kind", "statement", "scope", "provenance", "suggested_destination", "destination_authority", "promotion_status", "source", "owner_intake"], "properties": {"candidate_id": {"type": "string"}, "classification": {"const": "playbook-review-candidate"}, "kind": {"enum": ["rule", "pattern", "failure-mode"]}, "statement": {"type": "string"}, "scope": {"type": "string"}, "provenance": {"type": "array", "minItems": 1}, "suggested_destination": {"type": "string"}, "destination_authority": {"const": "proposal-only"}, "promotion_status": {"const": "not-promoted"}, "source": {"type": "object"}, "owner_intake": {"type": "object"}}, "additionalProperties": true},
+    "decision": {"type": "object", "required": ["record_id", "classification", "kind", "record_sha256", "contract_eligible", "disposition", "thresholds_and_kill_criteria_status"], "properties": {"record_id": {"const": "creation-os-software-repo-voice-first-wedge"}, "classification": {"const": "atlas-product-decision"}, "kind": {"const": "decision"}, "record_sha256": {"const": "sha256:5f26456f7e2a5d18ca6ca513cdcd53d33af0df5a19a3b05c01a753d393a121d6"}, "contract_eligible": {"const": false}, "disposition": {"const": "deferred-atlas-product-decision"}, "thresholds_and_kill_criteria_status": {"const": "unresolved-pending-operator-ratification"}}, "additionalProperties": true},
+    "authority": {"type": "object", "required": ["read", "synthesis_advisory", "routing_advisory", "retrieval_advisory", "doctrine", "policy", "scheduling", "execution", "deployment", "approval", "board", "repository_mutation", "promotion", "automatic_selection"], "properties": {"read": {"const": true}, "synthesis_advisory": {"const": true}, "routing_advisory": {"const": true}, "retrieval_advisory": {"const": true}, "doctrine": {"const": false}, "policy": {"const": false}, "scheduling": {"const": false}, "execution": {"const": false}, "deployment": {"const": false}, "approval": {"const": false}, "board": {"const": false}, "repository_mutation": {"const": false}, "promotion": {"const": false}, "automatic_selection": {"const": false}}, "additionalProperties": false},
+    "failureSemantics": {"type": "object", "required": ["missing_evidence", "changed_revision", "duplicate_hash_kind_destination_or_disposition_drift", "decision_admission", "doctrine_mutation", "conflict_resolution"], "properties": {"missing_evidence": {"const": "unknown"}, "changed_revision": {"const": "stale"}, "duplicate_hash_kind_destination_or_disposition_drift": {"const": "conflict"}, "decision_admission": {"const": "conflict"}, "doctrine_mutation": {"const": "conflict"}, "conflict_resolution": {"const": "operator-required-never-auto-select"}}, "additionalProperties": false}
+  }
+}

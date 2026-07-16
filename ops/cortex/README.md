@@ -41,3 +41,16 @@ No agent without boundary:
 - new agents should shadow before authority
 - prompt-shaped agent behavior is drift, not a contract
 - blocked or non-shadow admissibility states must fail at the registry gate rather than being inferred downstream
+
+Creation OS advisory read model:
+
+- `creation_os_advisory_read_model.py` reads the pinned Atlas and Playbook inputs as exact Git blobs and builds only the dedicated Creation OS catalog, query projection, and execution receipt.
+- The projection contains exactly six Playbook review candidates and one separately deferred Atlas product Decision. It never projects promoted knowledge or Decision-as-candidate data.
+- Missing evidence is `unknown`, a changed pinned revision is `stale`, and duplicate, hash, kind, destination, disposition, Decision-admission, or doctrine drift is `conflict`. Any such state blocks before writes.
+- Cortex authority is limited to read and advisory synthesis, routing, and retrieval. Policy, doctrine, scheduling, execution, deployment, approval, board, repository mutation, promotion, and automatic selection remain false.
+- Write and byte-stability check:
+
+  ```text
+  python ops/cortex/creation_os_advisory_read_model.py --write --atlas-repo <atlas-worktree> --playbook-repo <playbook-repo>
+  python ops/cortex/creation_os_advisory_read_model.py --check --atlas-repo <atlas-worktree> --playbook-repo <playbook-repo>
+  ```
