@@ -26,6 +26,40 @@ test("normalizes source bytes to the canonical LF Git contract", () => {
   );
 });
 
+test("workflow watches every input consumed by integrated Creation OS validation", async () => {
+  const workflow = await fs.readFile(
+    path.join(ROOT, ".github/workflows/creation-os-knowledge-candidates.yml"),
+    "utf8",
+  );
+  const pathsBlock = workflow.match(/^    paths:\r?\n((?:      - "[^"]+"\r?\n)+)/m);
+  assert.ok(pathsBlock, "workflow must define a quoted pull_request.paths allowlist");
+  const configuredPaths = new Set(
+    [...pathsBlock[1].matchAll(/^      - "([^"]+)"$/gm)].map((match) => match[1]),
+  );
+  const requiredPaths = [
+    ".github/workflows/creation-os-knowledge-candidates.yml",
+    "data/imports/creation-os/deep-research-2026-07-16/**",
+    "data/knowledge-candidates/**",
+    "docs/audits/ATLAS-CREATION-OS-RESEARCH-RECONCILIATION-2026-07-16.md",
+    "docs/architecture/ATLAS-CREATION-OS-TARGET-ARCHITECTURE.md",
+    "docs/atlas-book/**",
+    "docs/atlas/decisions/adr-signed-versioned-atlas-bootstrap-manifest.md",
+    "docs/ops/ATLAS-CREATION-OS-*.md",
+    "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json",
+    "docs/registry/project-board-owner-exports/**",
+    "ops/atlas/creation_os_knowledge_candidates.mjs",
+    "ops/atlas/test_project_board_owner_export.py",
+    "ops/validation/validate_creation_os_adoption.py",
+    "packages/atlas-contracts/**",
+    "tests/test_creation_os_knowledge_candidates.mjs",
+  ];
+  assert.deepEqual(
+    requiredPaths.filter((input) => !configuredPaths.has(input)),
+    [],
+    "workflow path filters must cover every validated Creation OS input",
+  );
+});
+
 test("generates six schema-valid candidates and one manifest-only Decision byte-stably", async () => {
   const first = await buildProjection();
   const second = await buildProjection();
