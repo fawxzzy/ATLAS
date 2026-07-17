@@ -38,8 +38,10 @@ def _write_source_only_contract_root(root: Path) -> None:
         destination.parent.mkdir(parents=True, exist_ok=True)
         destination.write_text(content, encoding="utf-8")
 
-    for component in registry["components"]:
-        for evidence_ref in component["evidence_refs"]:
+    evidence_owners = [*registry["components"], *registry["activation_steps"]]
+    evidence_owners.extend(unit for marker in registry["marker_lanes"] for unit in marker["units"])
+    for owner in evidence_owners:
+        for evidence_ref in owner["evidence_refs"]:
             if (
                 "://" in evidence_ref
                 or evidence_ref.startswith("git:")
@@ -74,6 +76,15 @@ class RuntimePlacementContractTests(unittest.TestCase):
         mutated["marker_lanes"][0]["units"][0]["status"] = "unknown"
         issues = contract.validate_runtime_placement_payloads(mutated, lane_registry, marker_book, root=ROOT)
         self.assertIn("runtime-placement-marker-calculation", {issue.category for issue in issues})
+
+    def test_marker_unit_relative_evidence_must_be_retrievable(self) -> None:
+        registry, lane_registry, marker_book = _payloads()
+        mutated = copy.deepcopy(registry)
+        mutated["marker_lanes"][0]["units"][0]["evidence_refs"] = ["definitely/missing-marker-evidence.json"]
+
+        issues = contract.validate_runtime_placement_payloads(mutated, lane_registry, marker_book, root=ROOT)
+
+        self.assertIn("runtime-placement-evidence-missing", {issue.category for issue in issues})
 
     def test_blocked_marker_unit_remains_distinct_and_unaccepted(self) -> None:
         registry, lane_registry, marker_book = _payloads()
@@ -151,6 +162,15 @@ class RuntimePlacementContractTests(unittest.TestCase):
         issues = contract.validate_runtime_placement_payloads(mutated, lane_registry, marker_book, root=ROOT)
 
         self.assertIn("runtime-placement-activation-step-packet-duplicate", {issue.category for issue in issues})
+
+    def test_activation_step_relative_evidence_must_be_retrievable(self) -> None:
+        registry, lane_registry, marker_book = _payloads()
+        mutated = copy.deepcopy(registry)
+        mutated["activation_steps"][0]["evidence_refs"] = ["definitely/missing-activation-evidence.json"]
+
+        issues = contract.validate_runtime_placement_payloads(mutated, lane_registry, marker_book, root=ROOT)
+
+        self.assertIn("runtime-placement-evidence-missing", {issue.category for issue in issues})
 
     def test_selector_advances_when_current_step_becomes_accepted(self) -> None:
         registry, lane_registry, marker_book = _payloads()

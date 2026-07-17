@@ -217,6 +217,20 @@ def _relative_evidence_context_available(root: Path, evidence_ref: str) -> bool:
     return True
 
 
+def _validate_evidence_refs(evidence_refs: Any, path: str, root: Path) -> list[RuntimePlacementIssue]:
+    if not _non_empty_strings(evidence_refs):
+        return []
+    issues: list[RuntimePlacementIssue] = []
+    for evidence_ref in evidence_refs:
+        if _machine_specific_path(evidence_ref):
+            issues.append(_issue("runtime-placement-machine-path", path, "Evidence refs must not contain machine-specific absolute paths.", evidence_ref=evidence_ref))
+        if "://" not in evidence_ref and not evidence_ref.startswith("git:"):
+            evidence_path = root / evidence_ref.split("#", 1)[0].split("@", 1)[0]
+            if _relative_evidence_context_available(root, evidence_ref) and not evidence_path.exists():
+                issues.append(_issue("runtime-placement-evidence-missing", path, "Relative evidence ref does not exist.", evidence_ref=evidence_ref))
+    return issues
+
+
 def _all_lane_records(lane_payload: dict[str, Any]) -> dict[str, dict[str, Any]]:
     records: dict[str, dict[str, Any]] = {}
     for section in ("lanes", "backlog_candidates"):
@@ -321,13 +335,7 @@ def validate_runtime_placement_payloads(
         ):
             issues.append(_issue("runtime-placement-port", f"{path}.port", "Port must be null or a unique array of valid TCP port integers."))
 
-        for evidence_ref in component.get("evidence_refs", []):
-            if _machine_specific_path(evidence_ref):
-                issues.append(_issue("runtime-placement-machine-path", f"{path}.evidence_refs", "Evidence refs must not contain machine-specific absolute paths.", evidence_ref=evidence_ref))
-            if "://" not in evidence_ref and not evidence_ref.startswith("git:"):
-                evidence_path = root / evidence_ref.split("#", 1)[0].split("@", 1)[0]
-                if _relative_evidence_context_available(root, evidence_ref) and not evidence_path.exists():
-                    issues.append(_issue("runtime-placement-evidence-missing", f"{path}.evidence_refs", "Relative evidence ref does not exist.", evidence_ref=evidence_ref))
+        issues.extend(_validate_evidence_refs(component.get("evidence_refs"), f"{path}.evidence_refs", root))
 
     if used_placements != set(PLACEMENT_TYPES):
         issues.append(
@@ -399,6 +407,8 @@ def validate_runtime_placement_payloads(
                 issues.append(_issue("runtime-placement-activation-step-status", step_path, "Activation step status must preserve accepted, pending, blocked, or unknown distinctly.", actual=status))
             if not _non_empty_strings(step.get("evidence_refs")):
                 issues.append(_issue("runtime-placement-activation-step-evidence", step_path, "Activation step must cite non-empty structured evidence refs."))
+            else:
+                issues.extend(_validate_evidence_refs(step.get("evidence_refs"), f"{step_path}.evidence_refs", root))
 
             if status == "accepted":
                 if unresolved_seen:
@@ -440,6 +450,8 @@ def validate_runtime_placement_payloads(
                 accepted_units += 1
             if not _non_empty_strings(unit.get("evidence_refs")):
                 issues.append(_issue("runtime-placement-marker-unit-evidence", unit_path, "Marker unit must cite non-empty evidence refs."))
+            else:
+                issues.extend(_validate_evidence_refs(unit.get("evidence_refs"), f"{unit_path}.evidence_refs", root))
 
         expected_completed_units = accepted_units if accepted_units else None
         expected_percentage = (accepted_units * 100 / spec["denominator"]) if accepted_units else None

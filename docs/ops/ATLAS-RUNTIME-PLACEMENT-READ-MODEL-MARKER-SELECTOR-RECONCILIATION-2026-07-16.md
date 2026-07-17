@@ -135,11 +135,11 @@ step.
 
 - Runtime placement schema and semantic validation reports `issue_count=0`.
 - Focused runtime-placement and deterministic owner-export coverage passes
-  `27` tests. Coverage includes the original v1 string-ID sequence shape,
+  `29` tests. Coverage includes the original v1 string-ID sequence shape,
   missing/duplicate/reordered structured-step rejection, unique public packet
-  selectors, selector advancement, accepted-prefix enforcement,
-  blocked/unknown distinction, fixed-unit marker derivation, and source-only
-  portability.
+  selectors, retrievable relative evidence for activation steps and marker
+  units, selector advancement, accepted-prefix enforcement, blocked/unknown
+  distinction, fixed-unit marker derivation, and source-only portability.
 - Deterministic owner-export write and replay both report source revision
   `sha256:33ce842268106ba720722bb257053bf8d28208b9cbcae87f55716a15ddebf214`,
   `36` Atlas cards, `2` Cortex cards, and
@@ -150,9 +150,9 @@ step.
   - Cortex owner export:
     `sha256:727e983f0ec189880720fcc058f0612d2fb16296686390cef8ce4b4daa015ed6`
   - runtime-placement registry:
-    `sha256:5ac85264e9eb9f0ec2fe4974489161ca1c053d3b36cf8387ac4cfa6855c549c1`
+    `sha256:8873d926818944c7667fc911d9a88c45d2b411da30ae14f6393f4703309387ce`
   - full-system lane registry:
-    `sha256:8913477c7a0141278ac561373a8dae6d3fcccd3720151305356d449a7c690b51`
+    `sha256:4f27f5e8174ca4401e2ef564d25ed353868d043aed8e2b8d793f1ef3718e361e`
 - Authoritative source-only root validation with missing locked repositories
   explicitly allowed and owner cleanup disabled reports
   `0 critical / 0 error / 10 warning / 0 info`. The warnings are read-only Git
