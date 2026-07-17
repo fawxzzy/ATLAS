@@ -104,8 +104,16 @@ ATLAS may expose:
 - audits
 - path policy
 - repo registry and maturity status
+- deterministic Atlas/Cortex owner exports with a schema-constrained runtime
+  placement, activation, marker, selector, and status-boundary readback
 
 CORTEX may read those files and make recommendations. It should not silently become a second source of truth for stack boundaries.
+
+The owner-export runtime readback is a projection, not authority. Its source
+revision must bind the canonical runtime registry, its selector must be derived
+from the frozen activation steps, and `discord_mutation_authorized` remains
+false. A null selector means the eight-step activation sequence is exhausted;
+it does not authorize production deployment or invent follow-on work.
 
 The active Cortex surface lives under `runtime/cortex/**`. It is not a repo-local execution surface and it must remain read-only unless a future contract explicitly expands it.
 

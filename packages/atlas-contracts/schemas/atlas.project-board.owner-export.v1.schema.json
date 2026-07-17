@@ -37,9 +37,117 @@
       "type": "array",
       "items": {"$ref": "#/$defs/export_card"}
     },
+    "runtime_readback": {"$ref": "#/$defs/runtime_readback"},
     "extensions": {"type": "object"}
   },
   "$defs": {
+    "runtime_readback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contract_version",
+        "source_id",
+        "source_ref",
+        "source_revision",
+        "activation_sequence",
+        "activation_steps",
+        "selector",
+        "marker_lanes",
+        "status_boundaries",
+        "discord_mutation_authorized"
+      ],
+      "properties": {
+        "contract_version": {"const": "atlas.runtime-owner-export.readback.v1"},
+        "source_id": {"const": "atlas-runtime-placement-registry"},
+        "source_ref": {"type": "string", "minLength": 1},
+        "source_revision": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "activation_sequence": {
+          "type": "array",
+          "minItems": 8,
+          "maxItems": 8,
+          "uniqueItems": true,
+          "prefixItems": [
+            {"const": "playbook-bootstrap-foreground-observer-proof"},
+            {"const": "lifeline-bootstrap-state-contract"},
+            {"const": "lifeline-supervised-restart"},
+            {"const": "lifeline-logon-restore"},
+            {"const": "stack-single-scheduled-worker"},
+            {"const": "cortex-event-refresh"},
+            {"const": "discordos-interaction-first-reliability-review"},
+            {"const": "owner-export-integration"}
+          ],
+          "items": false
+        },
+        "activation_steps": {
+          "type": "array",
+          "minItems": 8,
+          "maxItems": 8,
+          "items": {"$ref": "#/$defs/runtime_activation_step"}
+        },
+        "selector": {"type": ["string", "null"], "minLength": 1},
+        "marker_lanes": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {"$ref": "#/$defs/runtime_marker_lane"}
+        },
+        "status_boundaries": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["unknown", "pending", "blocked", "stale"],
+          "properties": {
+            "unknown": {"type": "array", "items": {"type": "string", "minLength": 1}},
+            "pending": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+            "blocked": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+            "stale": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true}
+          }
+        },
+        "discord_mutation_authorized": {"const": false}
+      }
+    },
+    "runtime_activation_step": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["order", "id", "owner", "packet", "status", "admission_proof", "evidence_refs"],
+      "properties": {
+        "order": {"type": "integer", "minimum": 1, "maximum": 8},
+        "id": {"type": "string", "minLength": 1},
+        "owner": {"type": "string", "minLength": 1},
+        "packet": {"type": "string", "minLength": 1},
+        "status": {"enum": ["accepted", "pending", "blocked", "unknown"]},
+        "admission_proof": {"type": "string", "minLength": 1},
+        "evidence_refs": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}
+      }
+    },
+    "runtime_marker_lane": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "percentage", "completed_units", "denominator", "measurement_unit", "units"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "title": {"type": "string", "minLength": 1},
+        "percentage": {"type": ["number", "null"], "minimum": 0, "maximum": 100},
+        "completed_units": {"type": ["integer", "null"], "minimum": 0},
+        "denominator": {"type": "integer", "minimum": 1},
+        "measurement_unit": {"type": "string", "minLength": 1},
+        "units": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/runtime_marker_unit"}
+        }
+      }
+    },
+    "runtime_marker_unit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "status", "evidence_refs"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "title": {"type": "string", "minLength": 1},
+        "status": {"enum": ["accepted", "pending", "blocked", "unknown"]},
+        "evidence_refs": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}
+      }
+    },
     "source": {
       "type": "object",
       "additionalProperties": false,

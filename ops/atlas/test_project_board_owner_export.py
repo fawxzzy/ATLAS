@@ -17,6 +17,7 @@ from ops.atlas.project_board_owner_export import (
     CORTEX_OUTPUT_NAME,
     MARKER_BOOK_REF,
     REGISTRY_REF,
+    RUNTIME_REGISTRY_REF,
     ProjectBoardOwnerExportError,
     build_project_board_owner_exports,
     write_project_board_owner_exports,
@@ -47,6 +48,15 @@ class ProjectBoardOwnerExportTests(unittest.TestCase):
         )
         self.assertTrue(all(card["record"]["priority"] is None for card in [*atlas["cards"], *cortex["cards"]]))
         self.assertTrue(all(card["record"]["updated_at"].endswith("Z") for card in atlas["cards"]))
+        self.assertEqual(3, len(atlas["sources"]))
+        self.assertEqual(atlas["runtime_readback"], cortex["runtime_readback"])
+        self.assertEqual(
+            [step["id"] for step in atlas["runtime_readback"]["activation_steps"]],
+            atlas["runtime_readback"]["activation_sequence"],
+        )
+        self.assertTrue(all(step["status"] == "accepted" for step in atlas["runtime_readback"]["activation_steps"]))
+        self.assertIsNone(atlas["runtime_readback"]["selector"])
+        self.assertFalse(atlas["runtime_readback"]["discord_mutation_authorized"])
 
     def test_marker_parents_are_not_executable_and_children_keep_parent_identity(self) -> None:
         atlas = build_project_board_owner_exports()["atlas"]
@@ -84,6 +94,7 @@ class ProjectBoardOwnerExportTests(unittest.TestCase):
             root = Path(temp_dir)
             registry_path = root / "registry.json"
             marker_path = root / "markers.md"
+            runtime_path = root / "runtime.json"
             registry_path.write_text(
                 (ROOT / REGISTRY_REF).read_text(encoding="utf-8").replace("\n", "\r\n"),
                 encoding="utf-8",
@@ -94,11 +105,54 @@ class ProjectBoardOwnerExportTests(unittest.TestCase):
                 encoding="utf-8",
                 newline="",
             )
+            runtime_path.write_text(
+                (ROOT / RUNTIME_REGISTRY_REF).read_text(encoding="utf-8").replace("\n", "\r\n"),
+                encoding="utf-8",
+                newline="",
+            )
             candidate = build_project_board_owner_exports(
                 registry_path=registry_path,
                 marker_book_path=marker_path,
+                runtime_registry_path=runtime_path,
             )["atlas"]["source_revision"]
         self.assertEqual(candidate, baseline)
+
+    def test_runtime_registry_is_hashed_and_semantically_validated(self) -> None:
+        runtime = json.loads((ROOT / RUNTIME_REGISTRY_REF).read_text(encoding="utf-8"))
+        changed = copy.deepcopy(runtime)
+        changed["current_unknowns"].append("Synthetic unresolved observation remains UNKNOWN.")
+        invalid = copy.deepcopy(runtime)
+        invalid["activation_steps"][6]["status"] = "pending"
+        invalid["next_owner_side_activation_packet"] = invalid["activation_steps"][6]["packet"]
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            changed_path = Path(temp_dir) / "changed-runtime.json"
+            invalid_path = Path(temp_dir) / "invalid-runtime.json"
+            changed_path.write_text(json.dumps(changed), encoding="utf-8")
+            invalid_path.write_text(json.dumps(invalid), encoding="utf-8")
+
+            baseline = build_project_board_owner_exports()["atlas"]["source_revision"]
+            changed_revision = build_project_board_owner_exports(
+                runtime_registry_path=changed_path,
+            )["atlas"]["source_revision"]
+            self.assertNotEqual(baseline, changed_revision)
+
+            invalid["activation_steps"][7]["status"] = "accepted"
+            invalid_path.write_text(json.dumps(invalid), encoding="utf-8")
+            with self.assertRaises(ProjectBoardOwnerExportError):
+                build_project_board_owner_exports(runtime_registry_path=invalid_path)
+
+    def test_runtime_readback_preserves_identity_and_status_boundaries(self) -> None:
+        readback = build_project_board_owner_exports()["atlas"]["runtime_readback"]
+        step_ids = [step["id"] for step in readback["activation_steps"]]
+        marker_ids = [marker["id"] for marker in readback["marker_lanes"]]
+
+        self.assertEqual(len(step_ids), len(set(step_ids)))
+        self.assertEqual(len(marker_ids), len(set(marker_ids)))
+        self.assertEqual([], readback["status_boundaries"]["pending"])
+        self.assertEqual([], readback["status_boundaries"]["blocked"])
+        self.assertEqual([], readback["status_boundaries"]["stale"])
+        self.assertTrue(readback["status_boundaries"]["unknown"])
 
     def test_registry_book_status_conflict_fails_closed(self) -> None:
         registry = json.loads((ROOT / REGISTRY_REF).read_text(encoding="utf-8"))

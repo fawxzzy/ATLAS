@@ -1,6 +1,21 @@
 # Restart And Handoff Guide
 
-## 2026-07-17 Cortex event-refresh override
+## 2026-07-17 runtime owner-export integration override
+
+The frozen runtime activation sequence is exhausted at `8 / 8`. DiscordOS step
+7 is accepted from exact reviewed draft PR #104 Preview evidence without merge
+or production-adoption claims. Step 8 is accepted from deterministic Atlas and
+Cortex owner exports that consume the runtime registry, pass schema and
+semantic checks, and expose exact readback with Discord mutation unauthorized.
+
+The existing selector rule derives `null` because no activation step remains
+non-accepted. Do not invent a ninth runtime selector. The canonical root
+planner currently reports `no_immediate_root_packet`; the Atlas Full-System
+Re-evaluation closing audit remains a separately authorized hold excluded from
+selector routing. Preserve production-path adoption and real-user DiscordOS
+coverage as UNKNOWN.
+
+## Historical 2026-07-17 Cortex event-refresh override
 
 The exact next admitted packet is **DiscordOS interaction-first reliability
 review**. Cortex step 6 is accepted from one immutable activation event plus a

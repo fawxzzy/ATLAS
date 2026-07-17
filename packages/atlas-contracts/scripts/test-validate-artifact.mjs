@@ -4,6 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { validateProjectBoardOwnerExport } from "./lib/validate-project-board-owner-export.mjs";
 
 const scriptsDir = path.dirname(fileURLToPath(import.meta.url));
 const packageRoot = path.resolve(scriptsDir, "..");
@@ -89,6 +90,21 @@ try {
   );
   assert(semanticFailure.errors.some((error) => error.includes("ATLAS-relative portable path")));
   assert(semanticFailure.errors.some((error) => error.includes("acceptance_criteria")));
+  const rootExportPath = path.resolve(
+    packageRoot,
+    "..",
+    "..",
+    "docs",
+    "registry",
+    "project-board-owner-exports",
+    "atlas.project-board.owner-export.v1.json",
+  );
+  const truncatedMarkerExport = JSON.parse(await fs.readFile(rootExportPath, "utf8"));
+  truncatedMarkerExport.runtime_readback.marker_lanes[0].units.pop();
+  const truncatedMarkerErrors = validateProjectBoardOwnerExport(truncatedMarkerExport);
+  assert(
+    truncatedMarkerErrors.some((error) => error.includes("units length must equal the fixed denominator")),
+  );
   expectJson(
     ["--schema", "atlas.github.event-receipt.v1", "--artifact", fixture("invalid", "github.event-receipt.v1.bad-authority.json")],
     1,

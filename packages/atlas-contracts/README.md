@@ -49,6 +49,13 @@ project/board/source correlation, portable relative paths, relationship rules,
 and the requirement that a `ready` card has an objective, acceptance criteria,
 and no blockers. This seam is outside the eleven-family v2 mesh denominator.
 
+Root-owned Atlas and Cortex exports may additionally carry the optional
+`atlas.runtime-owner-export.readback.v1` projection. When present, semantic
+validation binds it to the runtime-registry source revision and checks frozen
+activation identity/order, selector derivation, marker counts, status
+boundaries, and `discord_mutation_authorized=false`. Owner exports that do not
+cite the runtime registry remain valid without this optional projection.
+
 ## Package Surface
 
 Schemas:

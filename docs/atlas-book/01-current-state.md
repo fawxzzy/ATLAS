@@ -1,6 +1,14 @@
 # Current State
 
-## 2026-07-17 Cortex event-refresh override
+## 2026-07-17 runtime owner-export integration override
+
+- DiscordOS selector step 7 is accepted from draft, unmerged PR #104 at exact reviewed head `c62b31e76ac0c401b0213dcd3537df86e1ab371c` and READY Preview `dpl_7zBA8ggFEATvj7tRFeS2oYf5NWXP`; this does not claim merge, production adoption, or real-user coverage.
+- Atlas and Cortex owner exports now consume the runtime registry as a third governed source and publish the same schema-constrained activation/marker readback with `discord_mutation_authorized=false`.
+- Step 8 is accepted. All eight frozen activation IDs remain in their original order, the accepted prefix is `8 / 8`, and the existing first-non-accepted selector derives `null`; no replacement selector or percentage is created.
+- Runtime Activation Readiness, Runtime Correlation Reliability, and Operator Surface Adoption remain unchanged at `8 / 8`, `5 / 5`, and `4 / 4`. Historical snapshots remain immutable; UNKNOWN, pending, blocked, and stale remain distinct.
+- The canonical root planner currently reports `no_immediate_root_packet`; the separately authorized Atlas Full-System Re-evaluation closing audit remains held and excluded from selector routing. Production-path adoption and real-user interaction coverage for the DiscordOS reliability contract remain UNKNOWN.
+
+## Historical 2026-07-17 Cortex event-refresh override
 
 - Foundation is available as the hosted read-only portfolio; DiscordOS is operational as the hosted Vercel/Supabase/GitHub Actions API and logical writer. Read-only probes returned HTTP 200 on 2026-07-16 America/New_York.
 - Playbook PR #27, Lifeline PR #35, and `_stack` PR #9 are merged. The foreground Observer proof succeeded on `127.0.0.1:4300`, the current Observer is intentionally stopped/restorable, `LifelineRestoreAtLogon` is enabled/Ready with last result `0`, and `AtlasStackInboxSweep` is enabled/Ready on `PT5M` with a latest successful zero-work sweep and released lease.

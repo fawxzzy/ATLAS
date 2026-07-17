@@ -30,6 +30,91 @@ function requireRelationship(errors, card, field, expectedStatus) {
   }
 }
 
+function validateRuntimeReadback(errors, value, sourceIdSet) {
+  const readback = value.runtime_readback;
+  const hasRuntimeSource = sourceIdSet.has("atlas-runtime-placement-registry");
+  if (!readback) {
+    if (hasRuntimeSource) {
+      errors.push("$.runtime_readback is required when the runtime placement source is present");
+    }
+    return;
+  }
+  if (!hasRuntimeSource) {
+    errors.push("$.runtime_readback requires source_id atlas-runtime-placement-registry in $.sources");
+    return;
+  }
+
+  const runtimeSource = value.sources.find((source) => source.source_id === readback.source_id);
+  if (runtimeSource?.path !== readback.source_ref) {
+    errors.push("$.runtime_readback.source_ref must equal the runtime source path");
+  }
+  if (runtimeSource?.revision !== readback.source_revision) {
+    errors.push("$.runtime_readback.source_revision must equal the runtime source revision");
+  }
+  if (!isRelativePortablePath(readback.source_ref)) {
+    errors.push("$.runtime_readback.source_ref must be an ATLAS-relative portable path");
+  }
+
+  const sequence = Array.isArray(readback.activation_sequence) ? readback.activation_sequence : [];
+  const steps = Array.isArray(readback.activation_steps) ? readback.activation_steps : [];
+  const stepIds = steps.map((step) => step.id);
+  if (JSON.stringify(stepIds) !== JSON.stringify(sequence)) {
+    errors.push("$.runtime_readback.activation_steps must map one-to-one and in order to activation_sequence");
+  }
+  for (const duplicate of uniqueDuplicates(stepIds)) {
+    errors.push(`$.runtime_readback.activation_steps contains duplicate id ${JSON.stringify(duplicate)}`);
+  }
+
+  let expectedSelector = null;
+  let unresolvedSeen = false;
+  steps.forEach((step, index) => {
+    if (step.order !== index + 1) {
+      errors.push(`$.runtime_readback.activation_steps[${index}].order must equal ${index + 1}`);
+    }
+    if (step.status === "accepted") {
+      if (unresolvedSeen) {
+        errors.push("$.runtime_readback accepted activation steps must form a contiguous prefix");
+      }
+      return;
+    }
+    unresolvedSeen = true;
+    if (expectedSelector === null) expectedSelector = step.packet;
+  });
+  if (readback.selector !== expectedSelector) {
+    errors.push("$.runtime_readback.selector must equal the first non-accepted activation packet or null");
+  }
+
+  const boundaries = readback.status_boundaries ?? {};
+  for (const status of ["pending", "blocked"]) {
+    const expected = steps.filter((step) => step.status === status).map((step) => step.id);
+    if (JSON.stringify(boundaries[status] ?? []) !== JSON.stringify(expected)) {
+      errors.push(`$.runtime_readback.status_boundaries.${status} must exactly match activation step status`);
+    }
+  }
+
+  const markers = Array.isArray(readback.marker_lanes) ? readback.marker_lanes : [];
+  for (const duplicate of uniqueDuplicates(markers.map((marker) => marker.id))) {
+    errors.push(`$.runtime_readback.marker_lanes contains duplicate id ${JSON.stringify(duplicate)}`);
+  }
+  markers.forEach((marker, markerIndex) => {
+    const units = Array.isArray(marker.units) ? marker.units : [];
+    if (units.length !== marker.denominator) {
+      errors.push(
+        `$.runtime_readback.marker_lanes[${markerIndex}].units length must equal the fixed denominator`,
+      );
+    }
+    for (const duplicate of uniqueDuplicates(units.map((unit) => unit.id))) {
+      errors.push(`$.runtime_readback.marker_lanes[${markerIndex}].units contains duplicate id ${JSON.stringify(duplicate)}`);
+    }
+    const accepted = units.filter((unit) => unit.status === "accepted").length;
+    const expectedCompleted = accepted || null;
+    const expectedPercentage = accepted ? (accepted * 100) / marker.denominator : null;
+    if (marker.completed_units !== expectedCompleted || marker.percentage !== expectedPercentage) {
+      errors.push(`$.runtime_readback.marker_lanes[${markerIndex}] counts must derive from accepted units`);
+    }
+  });
+}
+
 export function validateProjectBoardOwnerExport(value) {
   if (!value || typeof value !== "object" || Array.isArray(value)) return [];
 
@@ -47,6 +132,7 @@ export function validateProjectBoardOwnerExport(value) {
       errors.push(`$.sources[${index}].path must be an ATLAS-relative portable path`);
     }
   });
+  validateRuntimeReadback(errors, value, sourceIdSet);
 
   const indexedCards = cards.map((card, index) => ({ ...card, index }));
   for (const duplicate of uniqueDuplicates(indexedCards.map((card) => card.record?.card_id))) {
