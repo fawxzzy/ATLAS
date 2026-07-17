@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://schemas/atlas.cortex.event-refresh-receipt.v1.json",
+  "title": "ATLAS Cortex event refresh receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "receipt_id",
+    "event_id",
+    "event_digest",
+    "recorded_at",
+    "status",
+    "outcome",
+    "refresh_count",
+    "source_authority",
+    "source_set_digest",
+    "source_components",
+    "state_change",
+    "prior_artifacts",
+    "generated_outputs",
+    "deterministic_replay",
+    "verification",
+    "unchanged_markers",
+    "historical_snapshots_mutated",
+    "authority",
+    "next_packet"
+  ],
+  "properties": {
+    "schema_version": {"const": "atlas.cortex.event-refresh-receipt.v1"},
+    "receipt_id": {"type": "string", "minLength": 1},
+    "event_id": {"type": "string", "minLength": 1},
+    "event_digest": {"$ref": "#/$defs/sha256"},
+    "recorded_at": {"type": "string", "format": "date-time"},
+    "status": {"const": "accepted"},
+    "outcome": {"const": "refreshed"},
+    "refresh_count": {"const": 1},
+    "source_authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "ref", "commit", "tree"],
+      "properties": {
+        "repository": {"const": "fawxzzy/ATLAS"},
+        "ref": {"const": "main"},
+        "commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "tree": {"type": "string", "pattern": "^[0-9a-f]{40}$"}
+      }
+    },
+    "source_set_digest": {"$ref": "#/$defs/sha256"},
+    "source_components": {"type": "array", "minItems": 10},
+    "state_change": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["activation_step_id", "order", "from_status", "to_status", "selector_before", "selector_after", "changed_step_count", "step_7_status", "step_8_status"],
+      "properties": {
+        "activation_step_id": {"const": "cortex-event-refresh"},
+        "order": {"const": 6},
+        "from_status": {"const": "pending"},
+        "to_status": {"const": "accepted"},
+        "selector_before": {"const": "Cortex event-triggered runtime read-model refresh proof"},
+        "selector_after": {"const": "DiscordOS interaction-first reliability review"},
+        "changed_step_count": {"const": 1},
+        "step_7_status": {"const": "pending"},
+        "step_8_status": {"const": "pending"}
+      }
+    },
+    "prior_artifacts": {"type": "array", "minItems": 6, "maxItems": 6},
+    "generated_outputs": {"type": "array", "minItems": 6, "maxItems": 6},
+    "deterministic_replay": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["same_inputs_byte_stable", "output_set_digest", "idempotent_duplicate_outcome", "conflicting_duplicate_outcome"],
+      "properties": {
+        "same_inputs_byte_stable": {"const": true},
+        "output_set_digest": {"$ref": "#/$defs/sha256"},
+        "idempotent_duplicate_outcome": {"const": "noop"},
+        "conflicting_duplicate_outcome": {"const": "rejected"}
+      }
+    },
+    "verification": {"type": "object"},
+    "unchanged_markers": {"type": "object"},
+    "historical_snapshots_mutated": {"const": false},
+    "authority": {
+      "type": "object",
+      "properties": {
+        "read_only": {"const": true},
+        "advisory": {"const": true},
+        "owner_health_inference": {"const": false},
+        "repository_mutation": {"const": false},
+        "discord_mutation": {"const": false},
+        "board_mutation": {"const": false},
+        "vercel_mutation": {"const": false},
+        "supabase_mutation": {"const": false},
+        "database_mutation": {"const": false},
+        "secret_access": {"const": false},
+        "scheduler_or_service_creation": {"const": false},
+        "production_mutation": {"const": false}
+      },
+      "required": ["read_only", "advisory", "owner_health_inference", "repository_mutation", "discord_mutation", "board_mutation", "vercel_mutation", "supabase_mutation", "database_mutation", "secret_access", "scheduler_or_service_creation", "production_mutation"],
+      "additionalProperties": false
+    },
+    "next_packet": {"const": "DiscordOS interaction-first reliability review"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+  }
+}

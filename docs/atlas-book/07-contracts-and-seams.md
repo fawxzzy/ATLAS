@@ -203,8 +203,10 @@ Current frozen sequence:
 4. current-user logon restore proof — accepted from deterministic owner proof;
    an actual later new-logon restoration remains unknown.
 5. exactly one bounded `_stack` scheduled worker proof — accepted.
-6. one event-triggered Cortex refresh — pending and currently selected.
-7. DiscordOS interaction-first reliability review — pending.
+6. one event-triggered Cortex refresh — accepted from the immutable step-6
+   event, deterministic source-only refresh, and replay receipt.
+7. DiscordOS interaction-first reliability review — pending and currently
+   selected.
 8. owner export integration — pending.
 
 None of these steps authorizes a production deployment or public hosting for a

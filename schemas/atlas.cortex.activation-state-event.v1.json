@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://schemas/atlas.cortex.activation-state-event.v1.json",
+  "title": "ATLAS Cortex activation state event v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "event_id",
+    "event_status",
+    "occurred_at",
+    "authority",
+    "source",
+    "change",
+    "resolved_unknowns",
+    "prior_artifacts",
+    "acceptance_evidence_refs",
+    "unchanged_markers",
+    "authorization"
+  ],
+  "properties": {
+    "schema_version": {"const": "atlas.cortex.activation-state-event.v1"},
+    "event_id": {"type": "string", "minLength": 1},
+    "event_status": {"enum": ["accepted", "pending", "blocked", "unknown"]},
+    "occurred_at": {"type": "string", "format": "date-time"},
+    "authority": {"const": "ATLAS root governance"},
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "ref", "commit", "tree", "registry_path", "registry_git_blob", "registry_sha256"],
+      "properties": {
+        "repository": {"const": "fawxzzy/ATLAS"},
+        "ref": {"const": "main"},
+        "commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "tree": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "registry_path": {"const": "docs/registry/ATLAS-RUNTIME-PLACEMENT-REGISTRY.v1.json"},
+        "registry_git_blob": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "registry_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "change": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["activation_step_id", "order", "from_status", "to_status", "selector_before", "selector_after"],
+      "properties": {
+        "activation_step_id": {"const": "cortex-event-refresh"},
+        "order": {"const": 6},
+        "from_status": {"const": "pending"},
+        "to_status": {"const": "accepted"},
+        "selector_before": {"const": "Cortex event-triggered runtime read-model refresh proof"},
+        "selector_after": {"const": "DiscordOS interaction-first reliability review"}
+      }
+    },
+    "resolved_unknowns": {"$ref": "#/$defs/nonEmptyStrings"},
+    "prior_artifacts": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "generated_at", "sha256"],
+        "properties": {
+          "path": {"type": "string", "minLength": 1},
+          "generated_at": {"type": ["string", "null"], "format": "date-time"},
+          "sha256": {"$ref": "#/$defs/sha256"}
+        }
+      }
+    },
+    "acceptance_evidence_refs": {"$ref": "#/$defs/nonEmptyStrings"},
+    "unchanged_markers": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["runtime_activation_readiness", "runtime_correlation_reliability", "operator_surface_adoption"],
+      "properties": {
+        "runtime_activation_readiness": {"const": "8/8"},
+        "runtime_correlation_reliability": {"const": "5/5"},
+        "operator_surface_adoption": {"const": "4/4"}
+      }
+    },
+    "authorization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["read_model_refresh", "external_mutation", "discord_mutation", "scheduler_or_service_creation", "second_queue"],
+      "properties": {
+        "read_model_refresh": {"const": true},
+        "external_mutation": {"const": false},
+        "discord_mutation": {"const": false},
+        "scheduler_or_service_creation": {"const": false},
+        "second_queue": {"const": false}
+      }
+    }
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "nonEmptyStrings": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}
+  }
+}

@@ -1,11 +1,12 @@
 # Restart And Handoff Guide
 
-## 2026-07-16 runtime placement reconciliation override
+## 2026-07-17 Cortex event-refresh override
 
-The exact next admitted packet is **Cortex event-triggered runtime read-model
-refresh proof**. It is derived as the first non-accepted step in the frozen,
-structured activation sequence; it is not a manually maintained duplicate
-constant. Use
+The exact next admitted packet is **DiscordOS interaction-first reliability
+review**. Cortex step 6 is accepted from one immutable activation event plus a
+deterministic source-only refresh and byte-stable replay receipt. The selector
+is still derived as the first non-accepted step in the frozen structured
+sequence; it is not a manually maintained duplicate constant. Use
 `docs/registry/ATLAS-RUNTIME-PLACEMENT-REGISTRY.v1.json` and [Runtime
 Placement](16-runtime-placement.md) as current authority.
 
@@ -16,9 +17,9 @@ ready, and the latest observed sweep succeeded. Do not translate those facts
 into running Observer uptime, actual later new-logon restoration, or sustained
 unattended uptime; those remain unknown until freshly and safely observed.
 
-Do not skip to DiscordOS reliability review, owner-export integration, closing
-audit, or post-preparation development before the selected Cortex refresh proof
-is accepted.
+Do not launch the selected DiscordOS review from the Cortex receipt task. Step 7
+and owner-export step 8 remain pending and require their separately admitted
+packets before closing audit or post-preparation development.
 
 Atlas Full-System Re-evaluation remains `1 / 2` and `50%`, Contracts Mesh
 remains `11 / 11`, and Marker Integrity remains `51 / 51`. Fitness, Mazer, and

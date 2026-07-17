@@ -19,7 +19,7 @@ No new general-purpose ATLAS server is admitted.
 | Playbook Observer | Local persistent on `127.0.0.1:4300` | Foreground proof accepted; currently intentionally stopped/restorable with no listener | Playbook |
 | Lifeline | Local persistent supervisor and current-user logon restore | Registered/restorable; task enabled, ready, and last result `0` | Lifeline |
 | `_stack` inbox sweep | Local scheduled | Exactly one bounded task enabled/ready; latest observed sweep succeeded with zero pending work and no active lease residue | `_stack` |
-| Cortex read models | No server / event-triggered on demand | Stale; principal `latest` state/context/operator surfaces remain dated 2026-07-06 | ATLAS root |
+| Cortex read models | No server / event-triggered on demand | Refreshed at `2026-07-17T03:32:30Z` from pinned source-only authority; owner/runtime health remains UNKNOWN | ATLAS root |
 | Atlas root, Atlas Book, contracts, registries, and Playbook CLI doctrine | No server / on demand | Source surfaces are available locally; runtime claims still require their own proof | ATLAS root or named owner |
 | Fitness, Mazer, Socials OS, Trove, Stream, Nat1, and other products | Owner lane | Owner-managed; not root-operated services | Named owner lane |
 
@@ -44,14 +44,14 @@ Owner-side activation is serialized in this exact order:
 4. Lifeline current-user logon restore proof — `accepted` from deterministic
    owner proof; actual later new-logon restoration remains `unknown`.
 5. One `_stack` bounded scheduled worker proof — `accepted`.
-6. One event-triggered Cortex refresh — `pending`.
-7. DiscordOS interaction-first reliability review — `pending`.
+6. One event-triggered Cortex refresh — `accepted` from an immutable activation
+   event, exact source blobs, and byte-stable replay receipt.
+7. DiscordOS interaction-first reliability review — `pending` and selected.
 8. Owner export integration — `pending`.
 
 Each step has structured status and evidence. The selector is the first step
 whose status is not `accepted`; accepted steps must form a contiguous prefix.
-The exact next packet is `Cortex event-triggered runtime read-model refresh
-proof`.
+The exact next packet is `DiscordOS interaction-first reliability review`.
 
 ## Fixed marker lanes
 

@@ -7,3 +7,15 @@ data/imports/deepseek-bridge/2026-07-13/DEEPSEEK_BRIDGE_PROPOSAL_2026-07-13.txt 
 data/imports/fawxzzy-platform/2026-07-16/IMPORT-MANIFEST.json text eol=lf
 data/imports/deepseek-bridge/2026-07-13/IMPORT-MANIFEST.json text eol=lf
 docs/registry/ATLAS-MASTER-PROGRAM-REGISTER.v1.json text eol=lf
+ops/cortex/activation_read_model_refresh.py text eol=lf
+schemas/atlas.cortex.activation-state-event.v1.json text eol=lf
+schemas/atlas.cortex.event-refreshed-read-model.v1.json text eol=lf
+schemas/atlas.cortex.event-refresh-receipt.v1.json text eol=lf
+runtime/cortex/events/cortex-event-refresh.step-6.accepted.v1.json text eol=lf
+runtime/cortex/current-state/latest.json text eol=lf
+runtime/cortex/current-state/latest.md text eol=lf
+runtime/cortex/context/latest.json text eol=lf
+runtime/cortex/context/latest.md text eol=lf
+runtime/cortex/operator-surface/latest.json text eol=lf
+runtime/cortex/operator-surface/latest.md text eol=lf
+runtime/receipts/cortex/cortex-event-refresh.step-6.execution-receipt.v1.json text eol=lf

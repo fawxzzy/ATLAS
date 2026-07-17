@@ -1,11 +1,11 @@
 {
   "contract_version": "atlas.project-board.owner-export.v1",
-  "export_id": "pbe_cortex_33ce84226810",
+  "export_id": "pbe_cortex_18e89c59b6c7",
   "project_id": "cortex",
   "board_id": "discordos:project-feedback:cortex",
   "owner": "stack-root",
   "adapter_id": "atlas-full-system-registry-v1",
-  "source_revision": "sha256:33ce842268106ba720722bb257053bf8d28208b9cbcae87f55716a15ddebf214",
+  "source_revision": "sha256:18e89c59b6c745ec0a6e8074778b6f2ae49b2a23400396cf475e18e2648c2fa0",
   "generated_at": "2026-07-17T01:54:51Z",
   "sources": [
     {
@@ -21,7 +21,7 @@
       "kind": "markdown",
       "repository": "atlas-root",
       "path": "docs/atlas-book/02-lanes-and-markers.md",
-      "revision": "sha256:434f63a3d1bd423423d493d86cc0a413ae8a94395b49de4d1f7e683da7aa5272",
+      "revision": "sha256:55bc35c4c6ea4f760f52e054809532148f2b8717e91b2ef361422caaa6850470",
       "observed_at": "2026-07-17T01:54:51Z"
     }
   ],
