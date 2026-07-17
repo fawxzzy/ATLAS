@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import copy
 import json
+import os
 import shutil
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -171,6 +173,107 @@ class RuntimePlacementContractTests(unittest.TestCase):
         issues = contract.validate_runtime_placement_payloads(mutated, lane_registry, marker_book, root=ROOT)
 
         self.assertIn("runtime-placement-evidence-missing", {issue.category for issue in issues})
+
+    def test_filesystem_evidence_rejects_posix_absolute_path(self) -> None:
+        issues = contract._validate_evidence_refs(["/etc/hosts"], "test.evidence_refs", ROOT)
+
+        self.assertIn("runtime-placement-evidence-path", {issue.category for issue in issues})
+        self.assertEqual("posix-absolute", issues[0].details["reason"])
+
+    def test_filesystem_evidence_rejects_windows_drive_and_unc_paths(self) -> None:
+        invalid_refs = (
+            "C:/Windows/System32/drivers/etc/hosts",
+            "C://Windows/System32/drivers/etc/hosts",
+            r"C:\Windows\System32\drivers\etc\hosts",
+            r"\\server\share\proof.md",
+        )
+
+        for evidence_ref in invalid_refs:
+            with self.subTest(evidence_ref=evidence_ref):
+                issues = contract._validate_evidence_refs([evidence_ref], "test.evidence_refs", ROOT)
+                self.assertIn("runtime-placement-machine-path", {issue.category for issue in issues})
+                self.assertEqual("windows-absolute", issues[0].details["reason"])
+
+    def test_filesystem_evidence_rejects_parent_traversal(self) -> None:
+        issues = contract._validate_evidence_refs(["../ATLAS/AGENTS.md"], "test.evidence_refs", ROOT)
+
+        self.assertIn("runtime-placement-evidence-path", {issue.category for issue in issues})
+        self.assertEqual("parent-traversal", issues[0].details["reason"])
+
+    def test_filesystem_evidence_rejects_local_file_uris(self) -> None:
+        invalid_refs = (
+            "file:///etc/hosts",
+            "file:/etc/hosts",
+            "FILE:/etc/hosts",
+            "file://server/share/proof.md",
+            "file:relative/proof.md",
+        )
+
+        for evidence_ref in invalid_refs:
+            with self.subTest(evidence_ref=evidence_ref):
+                issues = contract._validate_evidence_refs([evidence_ref], "test.evidence_refs", ROOT)
+                self.assertIn("runtime-placement-evidence-path", {issue.category for issue in issues})
+                self.assertEqual("local-file-uri", issues[0].details["reason"])
+
+    def test_filesystem_evidence_rejects_empty_and_non_normalized_paths(self) -> None:
+        invalid_refs = (
+            "#fragment",
+            "docs//atlas-book/README.md",
+            "./AGENTS.md",
+            "docs\\atlas-book\\README.md",
+            "docs/proof://outside",
+        )
+
+        for evidence_ref in invalid_refs:
+            with self.subTest(evidence_ref=evidence_ref):
+                issues = contract._validate_evidence_refs([evidence_ref], "test.evidence_refs", ROOT)
+                self.assertIn("runtime-placement-evidence-path", {issue.category for issue in issues})
+                self.assertIn(issues[0].details["reason"], {"empty", "non-normalized"})
+
+    def test_filesystem_evidence_uses_real_path_containment(self) -> None:
+        with tempfile.TemporaryDirectory() as root_dir, tempfile.TemporaryDirectory() as outside_dir:
+            root = Path(root_dir)
+            outside = Path(outside_dir)
+            (outside / "proof.md").write_text("outside\n", encoding="utf-8")
+            escape = root / "escape"
+            try:
+                escape.symlink_to(outside, target_is_directory=True)
+            except (NotImplementedError, OSError) as exc:
+                if os.name != "nt":
+                    self.skipTest(f"Filesystem links are unavailable on this platform: {type(exc).__name__}")
+                junction = subprocess.run(
+                    ["cmd", "/c", "mklink", "/J", str(escape), str(outside)],
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                )
+                if junction.returncode != 0:
+                    self.skipTest("Filesystem symlinks and junctions are unavailable on this platform")
+
+            try:
+                issues = contract._validate_evidence_refs(["escape/proof.md"], "test.evidence_refs", root)
+            finally:
+                if escape.is_symlink():
+                    escape.unlink()
+                else:
+                    escape.rmdir()
+
+        self.assertIn("runtime-placement-evidence-outside-root", {issue.category for issue in issues})
+
+    def test_valid_in_root_and_remote_evidence_remain_supported(self) -> None:
+        with tempfile.TemporaryDirectory() as root_dir:
+            root = Path(root_dir)
+            proof = root / "docs" / "proof.md"
+            proof.parent.mkdir(parents=True)
+            proof.write_text("accepted\n", encoding="utf-8")
+
+            issues = contract._validate_evidence_refs(
+                ["docs/proof.md", "https://example.com/proof", "git:accepted-proof"],
+                "test.evidence_refs",
+                root,
+            )
+
+        self.assertEqual([], issues)
 
     def test_selector_advances_when_current_step_becomes_accepted(self) -> None:
         registry, lane_registry, marker_book = _payloads()
