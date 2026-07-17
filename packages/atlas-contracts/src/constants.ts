@@ -26,6 +26,14 @@ export const ATLAS_CARD_RECORD_CONTRACT_VERSION = "atlas.card-record.v2" as cons
 export const ATLAS_BOARD_EVENT_CONTRACT_VERSION = "atlas.board-event.v2" as const;
 export const ATLAS_MARKER_EVIDENCE_CONTRACT_VERSION = "atlas.marker-evidence.v2" as const;
 export const ATLAS_KNOWLEDGE_CANDIDATE_CONTRACT_VERSION = "atlas.knowledge-candidate.v2" as const;
+export const ATLAS_CARD_RECORD_V3_CONTRACT_VERSION = "atlas.card-record.v3" as const;
+export const ATLAS_CARD_EVENT_V3_CONTRACT_VERSION = "atlas.card-event.v3" as const;
+export const ATLAS_BOARD_COMMIT_RECEIPT_CONTRACT_VERSION = "atlas.board-commit-receipt.v1" as const;
+export const ATLAS_PROJECTION_DELIVERY_CONTRACT_VERSION = "atlas.projection-delivery.v1" as const;
+export const ATLAS_PROJECTION_ACK_CONTRACT_VERSION = "atlas.projection-ack.v1" as const;
+export const ATLAS_BOARD_AUTHORITY_MIGRATION_CONTRACT_VERSION = "atlas.board-authority-migration.v1" as const;
+export const ATLAS_CONTROL_BOARD_READ_MODEL_CONTRACT_VERSION = "atlas.control-board-read-model.v1" as const;
+export const ATLAS_ROLLOVER_MANIFEST_CONTRACT_VERSION = "atlas.rollover-manifest.v1" as const;
 
 export const ATLAS_CONTRACT_VERSIONS = [
   ATLAS_ENV_CONTRACT_VERSION,
@@ -48,6 +56,14 @@ export const ATLAS_CONTRACT_VERSIONS = [
   ATLAS_BOARD_EVENT_CONTRACT_VERSION,
   ATLAS_MARKER_EVIDENCE_CONTRACT_VERSION,
   ATLAS_KNOWLEDGE_CANDIDATE_CONTRACT_VERSION,
+  ATLAS_CARD_RECORD_V3_CONTRACT_VERSION,
+  ATLAS_CARD_EVENT_V3_CONTRACT_VERSION,
+  ATLAS_BOARD_COMMIT_RECEIPT_CONTRACT_VERSION,
+  ATLAS_PROJECTION_DELIVERY_CONTRACT_VERSION,
+  ATLAS_PROJECTION_ACK_CONTRACT_VERSION,
+  ATLAS_BOARD_AUTHORITY_MIGRATION_CONTRACT_VERSION,
+  ATLAS_CONTROL_BOARD_READ_MODEL_CONTRACT_VERSION,
+  ATLAS_ROLLOVER_MANIFEST_CONTRACT_VERSION,
 ] as const;
 
 export const ATLAS_ENVIRONMENTS = [
@@ -154,6 +170,14 @@ export const ATLAS_SCHEMA_PATHS = {
   [ATLAS_BOARD_EVENT_CONTRACT_VERSION]: "schemas/atlas.board-event.v2.schema.json",
   [ATLAS_MARKER_EVIDENCE_CONTRACT_VERSION]: "schemas/atlas.marker-evidence.v2.schema.json",
   [ATLAS_KNOWLEDGE_CANDIDATE_CONTRACT_VERSION]: "schemas/atlas.knowledge-candidate.v2.schema.json",
+  [ATLAS_CARD_RECORD_V3_CONTRACT_VERSION]: "schemas/atlas.card-record.v3.schema.json",
+  [ATLAS_CARD_EVENT_V3_CONTRACT_VERSION]: "schemas/atlas.card-event.v3.schema.json",
+  [ATLAS_BOARD_COMMIT_RECEIPT_CONTRACT_VERSION]: "schemas/atlas.board-commit-receipt.v1.schema.json",
+  [ATLAS_PROJECTION_DELIVERY_CONTRACT_VERSION]: "schemas/atlas.projection-delivery.v1.schema.json",
+  [ATLAS_PROJECTION_ACK_CONTRACT_VERSION]: "schemas/atlas.projection-ack.v1.schema.json",
+  [ATLAS_BOARD_AUTHORITY_MIGRATION_CONTRACT_VERSION]: "schemas/atlas.board-authority-migration.v1.schema.json",
+  [ATLAS_CONTROL_BOARD_READ_MODEL_CONTRACT_VERSION]: "schemas/atlas.control-board-read-model.v1.schema.json",
+  [ATLAS_ROLLOVER_MANIFEST_CONTRACT_VERSION]: "schemas/atlas.rollover-manifest.v1.schema.json",
 } as const;
 
 export type AtlasContractVersion = (typeof ATLAS_CONTRACT_VERSIONS)[number];

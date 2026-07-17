@@ -1,7 +1,7 @@
 {
   "schema": "atlas.full_system_reevaluation.lanes.v1",
   "version": 1,
-  "generated_at": "2026-07-17T01:54:51Z",
+  "generated_at": "2026-07-17T10:30:00Z",
   "source_refs": [
     "docs/audits/ATLAS-FULL-SYSTEM-OPENING-AUDIT-2026-07-12.md",
     "docs/audits/GITHUB-CONTROL-PLANE-OPENING-AUDIT-2026-07-12.md",
@@ -31,7 +31,9 @@
     "docs/memory/initiatives/initiative-external-model-sidecar-deepseek-litellm-bridge.json",
     "docs/memory/initiatives/initiative-fawxzzy-tech-plan-convergence.json",
     "docs/memory/initiatives/initiative-atlas-post-preparation-development.json",
-    "docs/ops/ATLAS-RUNTIME-PLACEMENT-READ-MODEL-MARKER-SELECTOR-RECONCILIATION-2026-07-16.md"
+    "docs/ops/ATLAS-RUNTIME-PLACEMENT-READ-MODEL-MARKER-SELECTOR-RECONCILIATION-2026-07-16.md",
+    "docs/architecture/ADR-ATLAS-BOARD-AUTHORITY-V3.md",
+    "docs/registry/ATLAS-BOARD-AUTHORITY-MIGRATION.v1.json"
   ],
   "global_rules": {
     "percentage_rule": "Every lane and backlog candidate remains percentage-null until its own authorized marker audit accepts a denominator and completed units.",
@@ -968,6 +970,80 @@
       "current_state": "GATED",
       "status": "candidate",
       "last_audited_at": "2026-07-16T23:30:07Z"
+    },
+    {
+      "id": "lane-atlas-board-authority-v3",
+      "marker_id": "lane-atlas-board-authority-v3",
+      "packet_id": "ATLAS-BOARD-000",
+      "program_id": "program-atlas-board-authority-v3",
+      "title": "Atlas Board Authority v3",
+      "classification": "existing-preparatory-atlas-control-board-authority-governance",
+      "parent_lane_id": "lane-atlas-control-ledger",
+      "owner": "stack-root-and-named-owner-repositories",
+      "authority": "docs/architecture/ADR-ATLAS-BOARD-AUTHORITY-V3.md and docs/registry/ATLAS-BOARD-AUTHORITY-MIGRATION.v1.json",
+      "scope": "Freeze and later activate an Atlas-local authoritative CardRecord/CardEvent ledger, asynchronous DiscordOS projection, generated Atlas Control read model, and rollover continuity without changing v2 or opening the held closing audit.",
+      "percentage": null,
+      "completed_units": null,
+      "measurement_status": "UNMEASURED",
+      "measurement_unit": "fixed named packet status",
+      "denominator": {
+        "kind": "unmeasured_fixed_packet_set",
+        "value": null,
+        "basis": "Packet identities and statuses are fixed for routing only; packet count is not a denominator and no percentage is inferred."
+      },
+      "full_system_audit_points": 0,
+      "runtime_activation_steps_added": 0,
+      "fixed_units": [
+        {"id": "ATLAS-BOARD-000", "wave": 0, "owner": "ATLAS", "status": "review", "dependencies": [], "optional": false},
+        {"id": "ATLAS-BOARD-001", "wave": 1, "owner": "ATLAS", "status": "blocked-by-ATLAS-BOARD-000-merge", "dependencies": ["ATLAS-BOARD-000"], "optional": false},
+        {"id": "STACK-BOARD-001", "wave": 1, "owner": "_stack", "status": "blocked-by-ATLAS-BOARD-000-merge", "dependencies": ["ATLAS-BOARD-000"], "optional": false},
+        {"id": "DOS-PROJ-001", "wave": 1, "owner": "DiscordOS", "status": "blocked-by-ATLAS-BOARD-000-merge", "dependencies": ["ATLAS-BOARD-000"], "optional": false},
+        {"id": "LIFE-SUP-001", "wave": 1, "owner": "Lifeline", "status": "blocked-by-ATLAS-BOARD-000-merge", "dependencies": ["ATLAS-BOARD-000"], "optional": false},
+        {"id": "ATLAS-CONTROL-001", "wave": 2, "owner": "ATLAS", "status": "blocked-by-wave-1-proof", "dependencies": ["ATLAS-BOARD-001", "DOS-PROJ-001"], "optional": false},
+        {"id": "CORTEX-BOARD-001", "wave": 2, "owner": "Cortex", "status": "blocked-by-ATLAS-CONTROL-001", "dependencies": ["ATLAS-CONTROL-001"], "optional": false},
+        {"id": "STACK-SUP-001", "wave": 2, "owner": "_stack", "status": "blocked-by-wave-1-proof", "dependencies": ["STACK-BOARD-001", "LIFE-SUP-001"], "optional": false},
+        {"id": "STACK-ROLL-001", "wave": 2, "owner": "_stack", "status": "blocked-by-STACK-SUP-001", "dependencies": ["STACK-SUP-001"], "optional": false},
+        {"id": "DOS-PROJ-002", "wave": 2, "owner": "DiscordOS", "status": "blocked-by-DOS-PROJ-001", "dependencies": ["DOS-PROJ-001"], "optional": false},
+        {"id": "ATLAS-HIST-001", "wave": 2, "owner": "ATLAS", "status": "optional-blocked-by-privacy-dedup-rollover-contracts", "dependencies": ["STACK-ROLL-001"], "optional": true},
+        {"id": "ATLAS-CUTOVER-001", "wave": 3, "owner": "ATLAS", "status": "blocked-by-wave-2-proof", "dependencies": ["ATLAS-CONTROL-001", "CORTEX-BOARD-001", "STACK-ROLL-001", "DOS-PROJ-002"], "optional": false},
+        {"id": "DOS-DEBT-001", "wave": 3, "owner": "DiscordOS", "status": "blocked-by-ATLAS-CUTOVER-001", "dependencies": ["ATLAS-CUTOVER-001"], "optional": false},
+        {"id": "ATLAS-BOARD-002", "wave": 3, "owner": "ATLAS", "status": "blocked-by-DOS-DEBT-001", "dependencies": ["DOS-DEBT-001"], "optional": false}
+      ],
+      "evidence_sources": [
+        "docs/architecture/ADR-ATLAS-BOARD-AUTHORITY-V3.md",
+        "docs/registry/ATLAS-BOARD-AUTHORITY-MIGRATION.v1.json",
+        "packages/atlas-contracts/schemas/atlas.card-record.v3.schema.json",
+        "packages/atlas-contracts/schemas/atlas.card-event.v3.schema.json"
+      ],
+      "definition_of_done": [
+        "All fixed proof gates in the ADR are accepted without changing v2 or historical marker truth.",
+        "Atlas-local acceptance is authoritative and DiscordOS projection never gates engineering closure.",
+        "One-time v2 import, target-path SQLite WAL, backup/restore, deterministic replay, one-writer, projection, readback, Control, rollover, cutover, and rollback proof are accepted in their named packets.",
+        "No ninth runtime activation step or Full-System audit point is created."
+      ],
+      "dependencies": ["lane-atlas-control-ledger", "lane-discordos-single-writer", "lane-persistent-workspaces"],
+      "related_lanes": ["lane-delivery-event-plane", "lane-runtime-correlation-reliability", "lane-operator-surface-adoption"],
+      "approval_gates": ["ATLAS-CUTOVER-001 explicit cutover receipt", "Any destructive retention or privacy erasure requires separate authority"],
+      "serialization_rules": [
+        "Wave 1 starts only after ATLAS-BOARD-000 merges and may run in parallel only with one writer per repository.",
+        "Wave 2 preserves owner isolation; STACK-SUP-001 precedes STACK-ROLL-001 and ATLAS-HIST-001 remains optional behind privacy, deduplication, and rollover contracts.",
+        "Wave 3 is serialized ATLAS-CUTOVER-001 then DOS-DEBT-001 then ATLAS-BOARD-002.",
+        "The current eight-step runtime selector remains exhausted; no ninth activation step is added."
+      ],
+      "next_packet": {
+        "id": "ATLAS-BOARD-001",
+        "title": "Atlas local board ledger activation and target-path storage proof",
+        "mode": "root-implementation-after-contract-merge",
+        "status": "blocked-by-ATLAS-BOARD-000-merge"
+      },
+      "resume_implications": {
+        "mazer": "Independent owner lane; no fallback work or mutation is authorized.",
+        "fitness": "Independent owner lane; no security or production gate is changed.",
+        "socials_os": "Independent owner lane; no account or data mutation is authorized."
+      },
+      "current_state": "UNMEASURED_CONTRACT_FREEZE_REVIEW",
+      "status": "candidate",
+      "last_audited_at": "2026-07-17T10:30:00Z"
     }
   ]
 }

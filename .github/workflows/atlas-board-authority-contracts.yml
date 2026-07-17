@@ -1,0 +1,52 @@
+name: ATLAS Board Authority Contracts
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/atlas-board-authority-contracts.yml"
+      - "docs/architecture/ADR-ATLAS-BOARD-AUTHORITY-V3.md"
+      - "docs/programs/ATLAS-MASTER-PROGRAM-REGISTER.v1.source.json"
+      - "docs/registry/ATLAS-BOARD-AUTHORITY-MIGRATION.v1.json"
+      - "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json"
+      - "docs/registry/ATLAS-MASTER-PROGRAM-REGISTER.v1.json"
+      - "ops/atlas/master_program.py"
+      - "packages/atlas-contracts/**"
+      - "tests/test_atlas_board_authority_contracts.mjs"
+      - "tests/test_atlas_master_program.py"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate board authority schemas and semantics
+        run: npm --prefix packages/atlas-contracts run validate
+
+      - name: Check deterministic master program generation
+        run: python ops/atlas/master_program.py --check
+
+      - name: Test master program registration
+        run: python -m unittest tests.test_atlas_master_program
+
+      - name: Test board authority repository consistency
+        run: node --test tests/test_atlas_board_authority_contracts.mjs
+
+      - name: Check diff whitespace
+        run: git diff --check ${{ github.event.pull_request.base.sha }}...HEAD

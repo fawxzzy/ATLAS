@@ -1,0 +1,46 @@
+{
+  "contract_version": "atlas.card-record.v3",
+  "authority": "atlas-local-ledger",
+  "card_id": "ATLAS-BOARD-000",
+  "project_id": "atlas",
+  "board_id": "atlas-control",
+  "epoch_id": "atlas-board-000-epoch-1",
+  "version": 1,
+  "last_event_sequence": 1,
+  "title": "Freeze the v3 board authority contract",
+  "description": "Additive contract and registration packet only.",
+  "card_type": "governance",
+  "lifecycle": "review",
+  "priority": "high",
+  "owner": "stack-root",
+  "standing_anchor": false,
+  "archive_state": "active",
+  "work": {
+    "job_id": "job-atlas-board-000",
+    "lease_id": "lease-atlas-root-writer",
+    "branch_name": "codex/atlas-board-000-authority-contract",
+    "head_sha": "4617c67b367b04dbc287ab2b20b23469e3ec37b7",
+    "worktree_ref": "worktrees/atlas-board-000",
+    "status": "review"
+  },
+  "blockers": [],
+  "owned_resources": [
+    {
+      "resource_id": "atlas-root-writer",
+      "kind": "writer-lease",
+      "owner": "stack-root",
+      "status": "claimed"
+    }
+  ],
+  "receipt_refs": [
+    {
+      "receipt_id": "execution-atlas-board-000",
+      "digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+      "status": "succeeded"
+    }
+  ],
+  "next_action": "Merge the reviewed contract before starting ATLAS-BOARD-001.",
+  "projection_state": "queued",
+  "created_at": "2026-07-17T12:00:00Z",
+  "updated_at": "2026-07-17T12:00:00Z"
+}

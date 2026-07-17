@@ -1,0 +1,66 @@
+{
+  "contract_version": "atlas.card-event.v3",
+  "authority": "atlas-local-ledger",
+  "event_id": "event-atlas-board-000-1",
+  "event_sequence": 1,
+  "card_id": "ATLAS-BOARD-000",
+  "project_id": "atlas",
+  "board_id": "atlas-control",
+  "epoch_id": "atlas-board-000-epoch-1",
+  "card_version": 1,
+  "idempotency_key": "board-commit:ATLAS-BOARD-000:1",
+  "expected_version": 0,
+  "event_type": "create",
+  "occurred_at": "2026-07-17T12:00:00Z",
+  "actor": {
+    "kind": "worker",
+    "id": "stack-root"
+  },
+  "job_id": "job-atlas-board-000",
+  "lease_id": "lease-atlas-root-writer",
+  "execution_receipt": {
+    "receipt_id": "execution-atlas-board-000",
+    "digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+    "status": "succeeded"
+  },
+  "previous_record_digest": null,
+  "resulting_record_digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+  "changes": {
+    "set": {
+      "title": "Freeze the v3 board authority contract",
+      "description": "Additive contract and registration packet only.",
+      "card_type": "governance",
+      "lifecycle": "review",
+      "priority": "high",
+      "owner": "stack-root",
+      "standing_anchor": false,
+      "archive_state": "active",
+      "work": {
+        "job_id": "job-atlas-board-000",
+        "lease_id": "lease-atlas-root-writer",
+        "branch_name": "codex/atlas-board-000-authority-contract",
+        "head_sha": "4617c67b367b04dbc287ab2b20b23469e3ec37b7",
+        "worktree_ref": "worktrees/atlas-board-000",
+        "status": "review"
+      },
+      "next_action": "Merge the reviewed contract before starting ATLAS-BOARD-001.",
+      "projection_state": "queued"
+    },
+    "transition": {
+      "from": null,
+      "to": "review"
+    },
+    "add_blockers": [],
+    "remove_blocker_ids": [],
+    "add_resources": [],
+    "remove_resource_ids": [],
+    "add_receipts": [
+      {
+        "receipt_id": "execution-atlas-board-000",
+        "digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111"
+      }
+    ]
+  },
+  "projection_delivery_id": "projection-atlas-board-000-1",
+  "commit_receipt_id": "board-commit-atlas-board-000-1"
+}

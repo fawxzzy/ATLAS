@@ -267,7 +267,7 @@ try {
     "INVALID_ARTIFACT",
   );
   expectJson(
-    ["--schema", "atlas.env.v3", "--artifact", fixture("valid", "env.json")],
+    ["--schema", "atlas.env.v4", "--artifact", fixture("valid", "env.json")],
     2,
     "UNSUPPORTED_CONTRACT_VERSION",
   );

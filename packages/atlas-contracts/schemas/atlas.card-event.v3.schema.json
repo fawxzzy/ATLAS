@@ -1,0 +1,164 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://packages/contracts/atlas.card-event.v3.schema.json",
+  "title": "ATLAS immutable card event contract v3",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "authority",
+    "event_id",
+    "event_sequence",
+    "card_id",
+    "project_id",
+    "board_id",
+    "epoch_id",
+    "card_version",
+    "idempotency_key",
+    "expected_version",
+    "event_type",
+    "occurred_at",
+    "actor",
+    "job_id",
+    "lease_id",
+    "execution_receipt",
+    "previous_record_digest",
+    "resulting_record_digest",
+    "changes",
+    "projection_delivery_id",
+    "commit_receipt_id"
+  ],
+  "properties": {
+    "contract_version": {"const": "atlas.card-event.v3"},
+    "authority": {"const": "atlas-local-ledger"},
+    "event_id": {"type": "string", "minLength": 1},
+    "event_sequence": {"type": "integer", "minimum": 1},
+    "card_id": {"type": "string", "minLength": 1},
+    "project_id": {"type": "string", "minLength": 1},
+    "board_id": {"type": "string", "minLength": 1},
+    "epoch_id": {"type": "string", "minLength": 1},
+    "card_version": {"type": "integer", "minimum": 1},
+    "idempotency_key": {"type": "string", "minLength": 1},
+    "expected_version": {"type": "integer", "minimum": 0},
+    "event_type": {
+      "type": "string",
+      "enum": ["baseline-import", "create", "update", "transition", "block", "unblock", "complete", "reopen", "archive", "rollover", "resource-claim", "resource-release"]
+    },
+    "occurred_at": {"type": "string", "format": "date-time"},
+    "actor": {"$ref": "#/$defs/actor"},
+    "job_id": {"type": ["string", "null"]},
+    "lease_id": {"type": ["string", "null"]},
+    "execution_receipt": {"$ref": "#/$defs/executionReceipt"},
+    "previous_record_digest": {"type": ["string", "null"], "pattern": "^sha256:[0-9a-f]{64}$"},
+    "resulting_record_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "changes": {"$ref": "#/$defs/changes"},
+    "projection_delivery_id": {"type": "string", "minLength": 1},
+    "commit_receipt_id": {"type": "string", "minLength": 1},
+    "extensions": {"type": "object"}
+  },
+  "$defs": {
+    "actor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "id"],
+      "properties": {
+        "kind": {"type": "string", "enum": ["operator", "worker", "migration", "system"]},
+        "id": {"type": "string", "minLength": 1}
+      }
+    },
+    "executionReceipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["receipt_id", "digest", "status"],
+      "properties": {
+        "receipt_id": {"type": "string", "minLength": 1},
+        "digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "status": {"const": "succeeded"}
+      }
+    },
+    "changes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["set", "transition", "add_blockers", "remove_blocker_ids", "add_resources", "remove_resource_ids", "add_receipts"],
+      "properties": {
+        "set": {"$ref": "#/$defs/setValues"},
+        "transition": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "required": ["from", "to"],
+          "properties": {
+            "from": {"type": ["string", "null"]},
+            "to": {"type": ["string", "null"]}
+          }
+        },
+        "add_blockers": {"type": "array", "items": {"$ref": "#/$defs/blocker"}},
+        "remove_blocker_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "add_resources": {"type": "array", "items": {"$ref": "#/$defs/resource"}},
+        "remove_resource_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "add_receipts": {"type": "array", "items": {"$ref": "#/$defs/receipt"}}
+      }
+    },
+    "setValues": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "epoch_id": {"type": "string", "minLength": 1},
+        "title": {"type": "string", "minLength": 1},
+        "description": {"type": "string"},
+        "card_type": {"type": "string", "enum": ["feature", "bug", "governance", "architecture", "documentation", "automation", "research", "migration", "reliability", "technical-debt"]},
+        "lifecycle": {"type": "string", "enum": ["intake", "planning", "ready", "in-progress", "review", "completed", "blocked", "archived"]},
+        "priority": {"type": ["string", "null"], "enum": ["critical", "high", "medium", "low", null]},
+        "owner": {"type": ["string", "null"]},
+        "standing_anchor": {"type": "boolean"},
+        "archive_state": {"type": "string", "enum": ["active", "successor-pending", "archive-eligible", "archived"]},
+        "work": {"$ref": "#/$defs/work"},
+        "next_action": {"type": ["string", "null"]},
+        "projection_state": {"type": "string", "enum": ["queued", "applied", "stale", "failed", "UNKNOWN"]}
+      }
+    },
+    "work": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["job_id", "lease_id", "branch_name", "head_sha", "worktree_ref", "status"],
+      "properties": {
+        "job_id": {"type": ["string", "null"]},
+        "lease_id": {"type": ["string", "null"]},
+        "branch_name": {"type": ["string", "null"]},
+        "head_sha": {"type": ["string", "null"], "pattern": "^[0-9a-f]{40}$"},
+        "worktree_ref": {"type": ["string", "null"]},
+        "status": {"type": "string", "enum": ["unassigned", "active", "blocked", "review", "accepted", "terminal", "UNKNOWN"]}
+      }
+    },
+    "blocker": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["blocker_id", "status", "reason", "evidence_ref"],
+      "properties": {
+        "blocker_id": {"type": "string", "minLength": 1},
+        "status": {"type": "string", "enum": ["open", "cleared", "UNKNOWN"]},
+        "reason": {"type": "string", "minLength": 1},
+        "evidence_ref": {"type": ["string", "null"]}
+      }
+    },
+    "resource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["resource_id", "kind", "owner", "status"],
+      "properties": {
+        "resource_id": {"type": "string", "minLength": 1},
+        "kind": {"type": "string", "minLength": 1},
+        "owner": {"type": "string", "minLength": 1},
+        "status": {"type": "string", "enum": ["claimed", "released", "UNKNOWN"]}
+      }
+    },
+    "receipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["receipt_id", "digest"],
+      "properties": {
+        "receipt_id": {"type": "string", "minLength": 1},
+        "digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+      }
+    }
+  }
+}

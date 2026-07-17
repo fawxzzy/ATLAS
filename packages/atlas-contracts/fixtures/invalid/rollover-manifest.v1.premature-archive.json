@@ -1,0 +1,48 @@
+{
+  "contract_version": "atlas.rollover-manifest.v1",
+  "rollover_id": "rollover-atlas-board-000-1",
+  "standing_anchor_id": "ATLAS-MAIN",
+  "card_id": "ATLAS-BOARD-000",
+  "event_sequence": 12,
+  "predecessor_epoch": {
+    "epoch_id": "atlas-board-000-epoch-1",
+    "task_id": "task-atlas-board-000-1",
+    "card_id": "ATLAS-BOARD-000",
+    "job_id": "job-atlas-board-000-1",
+    "lease_id": "lease-atlas-root-writer-1",
+    "branch_name": "codex/atlas-board-000-authority-contract",
+    "head_sha": "4617c67b367b04dbc287ab2b20b23469e3ec37b7",
+    "worktree_ref": "worktrees/atlas-board-000-1",
+    "status": "terminal"
+  },
+  "successor_epoch": {
+    "epoch_id": "atlas-board-000-epoch-2",
+    "task_id": "task-atlas-board-000-2",
+    "card_id": "ATLAS-BOARD-000",
+    "job_id": "job-atlas-board-000-2",
+    "lease_id": "lease-atlas-root-writer-2",
+    "branch_name": "codex/atlas-board-000-authority-contract",
+    "head_sha": "4617c67b367b04dbc287ab2b20b23469e3ec37b7",
+    "worktree_ref": "worktrees/atlas-board-000-2",
+    "status": "active"
+  },
+  "blockers": [],
+  "owned_resources": [],
+  "receipt_digests": [],
+  "next_action": "Wait for successor reconstruction.",
+  "context_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "successor_reconstruction": {
+    "status": "pending",
+    "context_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "reconstructed_at": null,
+    "evidence_digests": [],
+    "exact_readback": "pending"
+  },
+  "archive_gate": {
+    "stable_standing_anchor_remains_unarchived": true,
+    "predecessor_epoch_archive": "eligible",
+    "successor_continuity_verified": false,
+    "exact_readback_verified": false
+  },
+  "created_at": "2026-07-17T12:05:00Z"
+}
