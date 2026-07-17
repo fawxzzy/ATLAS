@@ -198,19 +198,20 @@ Current boundary:
 - `_stack` has one serialized bounded scheduled sweep, not permanent pollers
 - ATLAS root, Cortex, Atlas Book, contracts, registries, Socials OS, and Playbook CLI stay on demand or in owner lanes
 
-Reconciled on 2026-07-16, Foundation and DiscordOS are hosted and operational;
+Reconciled through 2026-07-17, Foundation and DiscordOS are hosted and operational;
 the Observer foreground proof, Lifeline bounded supervision/restore proof, and
 one `_stack` scheduled-sweep proof are accepted from merged owner evidence.
-Current Observer state is intentionally stopped/restorable, the Lifeline and
-`_stack` tasks are ready, and the principal Cortex `latest` read models remain
-stale. Actual later new-logon restoration and sustained unattended uptime are
-unknown. Accepted proof is not converted into a claim of current running
-uptime.
+Current Observer state is intentionally stopped/restorable and the Lifeline and
+`_stack` tasks are ready. One accepted activation event refreshed the principal
+Cortex `latest` read models from pinned source-only authority; unavailable owner
+and runtime health remains unknown. Actual later new-logon restoration and
+sustained unattended uptime are unknown. Accepted proof is not converted into a
+claim of current running uptime.
 
 Activation steps carry structured `accepted`, `pending`, `blocked`, or
 `unknown` status plus evidence. The selector is derived as the first
-non-accepted step in the frozen sequence. It currently selects the Cortex
-event-triggered runtime read-model refresh proof.
+non-accepted step in the frozen sequence. Cortex step 6 is accepted and the
+selector now names `DiscordOS interaction-first reliability review` as step 7.
 
 ## Safe Integration Pattern
 

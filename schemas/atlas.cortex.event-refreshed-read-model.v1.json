@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://schemas/atlas.cortex.event-refreshed-read-model.v1.json",
+  "title": "ATLAS Cortex event-refreshed read model v1",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "contract_version",
+    "refresh_contract_version",
+    "model_kind",
+    "generated_at",
+    "stack_root",
+    "source_authority",
+    "refresh",
+    "status_boundaries",
+    "source_refs"
+  ],
+  "properties": {
+    "contract_version": {"enum": ["atlas.cortex.current-state.v1", "atlas.cortex.context-packet.v1", "atlas.cortex.operator-surface.v1"]},
+    "refresh_contract_version": {"const": "atlas.cortex.activation-read-model-refresh.v1"},
+    "model_kind": {"enum": ["current_state", "context", "operator_surface"]},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "stack_root": {"const": "."},
+    "source_authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "ref", "commit", "tree", "registry_path", "registry_git_blob", "registry_sha256"],
+      "properties": {
+        "repository": {"const": "fawxzzy/ATLAS"},
+        "ref": {"const": "main"},
+        "commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "tree": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "registry_path": {"const": "docs/registry/ATLAS-RUNTIME-PLACEMENT-REGISTRY.v1.json"},
+        "registry_git_blob": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "registry_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "refresh": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["event_id", "event_digest", "event_ref", "source_set_digest", "transition"],
+      "properties": {
+        "event_id": {"type": "string", "minLength": 1},
+        "event_digest": {"$ref": "#/$defs/sha256"},
+        "event_ref": {"const": "runtime/cortex/events/cortex-event-refresh.step-6.accepted.v1.json"},
+        "source_set_digest": {"$ref": "#/$defs/sha256"},
+        "transition": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["activation_step_id", "from_status", "to_status", "selector_before", "selector_after", "changed_step_count"],
+          "properties": {
+            "activation_step_id": {"const": "cortex-event-refresh"},
+            "from_status": {"const": "pending"},
+            "to_status": {"const": "accepted"},
+            "selector_before": {"const": "Cortex event-triggered runtime read-model refresh proof"},
+            "selector_after": {"const": "DiscordOS interaction-first reliability review"},
+            "changed_step_count": {"const": 1}
+          }
+        }
+      }
+    },
+    "status_boundaries": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["unknown", "blocked", "stale", "pending", "resolved_stale"],
+      "properties": {
+        "unknown": {"type": "array"},
+        "blocked": {"type": "array"},
+        "stale": {"type": "array"},
+        "pending": {"type": "array"},
+        "resolved_stale": {"type": "array", "minItems": 6, "maxItems": 6}
+      }
+    },
+    "source_refs": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+  }
+}

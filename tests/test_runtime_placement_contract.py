@@ -151,6 +151,18 @@ class RuntimePlacementContractTests(unittest.TestCase):
         issues = contract.validate_runtime_placement_payloads(mutated, lane_registry, marker_book, root=ROOT)
         self.assertIn("runtime-placement-selector", {issue.category for issue in issues})
 
+    def test_canonical_step_6_is_accepted_and_selector_is_exactly_step_7(self) -> None:
+        registry, _lane_registry, _marker_book = _payloads()
+        statuses = {step["id"]: step["status"] for step in registry["activation_steps"]}
+
+        self.assertEqual("accepted", statuses["cortex-event-refresh"])
+        self.assertEqual("pending", statuses["discordos-interaction-first-reliability-review"])
+        self.assertEqual("pending", statuses["owner-export-integration"])
+        self.assertEqual(
+            "DiscordOS interaction-first reliability review",
+            registry["next_owner_side_activation_packet"],
+        )
+
     def test_activation_packet_names_must_be_unique(self) -> None:
         registry, lane_registry, marker_book = _payloads()
         mutated = copy.deepcopy(registry)
@@ -364,11 +376,14 @@ class RuntimePlacementContractTests(unittest.TestCase):
         }
         self.assertIn("repos/foundation/vercel.json", missing_refs)
 
-    def test_present_runtime_surface_does_not_require_ignored_generated_evidence(self) -> None:
+    def test_present_runtime_surface_accepts_committed_event_and_ignores_absent_generated_evidence(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             source_only_root = Path(temp_dir)
             _write_source_only_contract_root(source_only_root)
             (source_only_root / "runtime" / "cortex").mkdir(parents=True)
+            event_ref = Path("runtime/cortex/events/cortex-event-refresh.step-6.accepted.v1.json")
+            (source_only_root / event_ref).parent.mkdir(parents=True)
+            shutil.copyfile(ROOT / event_ref, source_only_root / event_ref)
 
             issues = contract.validate_contract_files(root=source_only_root)
 

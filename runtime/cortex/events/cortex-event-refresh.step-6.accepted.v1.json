@@ -1,0 +1,57 @@
+{
+  "schema_version": "atlas.cortex.activation-state-event.v1",
+  "event_id": "cortex-event-refresh-step-6-accepted-90f9de1d",
+  "event_status": "accepted",
+  "occurred_at": "2026-07-17T03:32:30Z",
+  "authority": "ATLAS root governance",
+  "source": {
+    "repository": "fawxzzy/ATLAS",
+    "ref": "main",
+    "commit": "90f9de1dd55fe17b8fd2623b71193a6cc332e8f1",
+    "tree": "3ef6ec258d17d034ca8b42e6cc7214df84b2fe48",
+    "registry_path": "docs/registry/ATLAS-RUNTIME-PLACEMENT-REGISTRY.v1.json",
+    "registry_git_blob": "bc513e150b1acdb02928566c8e3f6b008d025f73",
+    "registry_sha256": "sha256:8873d926818944c7667fc911d9a88c45d2b411da30ae14f6393f4703309387ce"
+  },
+  "change": {
+    "activation_step_id": "cortex-event-refresh",
+    "order": 6,
+    "from_status": "pending",
+    "to_status": "accepted",
+    "selector_before": "Cortex event-triggered runtime read-model refresh proof",
+    "selector_after": "DiscordOS interaction-first reliability review"
+  },
+  "resolved_unknowns": [
+    "Principal Cortex current-state, context, and operator latest artifacts remain dated 2026-07-06; complete event-triggered refresh proof is UNKNOWN."
+  ],
+  "prior_artifacts": [
+    {"path": "runtime/cortex/current-state/latest.json", "generated_at": "2026-07-06T06:22:19.476929Z", "sha256": "sha256:0daf01a2cbbeace49f73b3eb076e0e4daf3707fcff37c0c75fd3b1ef33d0a4d2"},
+    {"path": "runtime/cortex/current-state/latest.md", "generated_at": null, "sha256": "sha256:dfc9cf5648f3948d49085128f1d4eb8efc1c7004ffa58e3d680cc9ce8da87c97"},
+    {"path": "runtime/cortex/context/latest.json", "generated_at": "2026-07-06T06:22:20.080988Z", "sha256": "sha256:5048d222f5def6bffc6cd990945ad9e2e0454b59cf9ffecbeb29aa9e39270446"},
+    {"path": "runtime/cortex/context/latest.md", "generated_at": null, "sha256": "sha256:a7b4f706ca4d5007f7dbd821a9af3c16777826b4c0f0c877f2808848d35d3403"},
+    {"path": "runtime/cortex/operator-surface/latest.json", "generated_at": "2026-07-06T06:22:20.443544Z", "sha256": "sha256:afeb7a2b1c70e74835e77be76e000b426750bba75572d0c6cb0511e932da5662"},
+    {"path": "runtime/cortex/operator-surface/latest.md", "generated_at": null, "sha256": "sha256:a1d74ec515d0897d96dfd3a8191ca77a97946aa34c5819fd9482f1bd6b51b36f"}
+  ],
+  "acceptance_evidence_refs": [
+    "ops/cortex/activation_read_model_refresh.py",
+    "schemas/atlas.cortex.activation-state-event.v1.json",
+    "schemas/atlas.cortex.event-refreshed-read-model.v1.json",
+    "schemas/atlas.cortex.event-refresh-receipt.v1.json",
+    "tests/test_cortex_activation_read_model_refresh.py",
+    "runtime/cortex/events/cortex-event-refresh.step-6.accepted.v1.json",
+    "runtime/receipts/cortex/cortex-event-refresh.step-6.execution-receipt.v1.json",
+    "docs/ops/CORTEX-EVENT-TRIGGERED-RUNTIME-READ-MODEL-REFRESH-PROOF-2026-07-17.md"
+  ],
+  "unchanged_markers": {
+    "runtime_activation_readiness": "8/8",
+    "runtime_correlation_reliability": "5/5",
+    "operator_surface_adoption": "4/4"
+  },
+  "authorization": {
+    "read_model_refresh": true,
+    "external_mutation": false,
+    "discord_mutation": false,
+    "scheduler_or_service_creation": false,
+    "second_queue": false
+  }
+}

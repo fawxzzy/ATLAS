@@ -54,3 +54,16 @@ Creation OS advisory read model:
   python ops/cortex/creation_os_advisory_read_model.py --write --atlas-repo <atlas-worktree> --playbook-repo <playbook-repo>
   python ops/cortex/creation_os_advisory_read_model.py --check --atlas-repo <atlas-worktree> --playbook-repo <playbook-repo>
   ```
+
+Activation event refresh:
+
+- `activation_read_model_refresh.py` consumes one schema-valid, explicitly accepted activation-state event bound to an immutable ATLAS commit and registry blob.
+- It projects the principal current-state, context, and operator-surface `latest` artifacts from source-only authority. Mutable owner/runtime availability remains `UNKNOWN`; the projection never infers owner health.
+- A first valid event produces exactly one refresh receipt. A receipt-less prior set is admitted only when all six event-named paths and hashes match; partial or mismatched sets fail before writes. Publication stages the full output set and restores prior bytes on a replacement failure. Identical replay is a byte-stable no-op, while malformed, stale, non-accepted, and duplicate-conflicting inputs fail before writes.
+- The adapter creates no daemon, scheduler, standing server, second queue, Discord/board write, owner-repository write, deployment, database access, or secret access.
+- Write and replay check:
+
+  ```text
+  python ops/cortex/activation_read_model_refresh.py --write --source-revision <PINNED_ATLAS_COMMIT> --json
+  python ops/cortex/activation_read_model_refresh.py --check --source-revision <PINNED_ATLAS_COMMIT> --json
+  ```

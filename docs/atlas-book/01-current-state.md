@@ -1,10 +1,11 @@
 # Current State
 
-## 2026-07-16 runtime placement reconciliation override
+## 2026-07-17 Cortex event-refresh override
 
 - Foundation is available as the hosted read-only portfolio; DiscordOS is operational as the hosted Vercel/Supabase/GitHub Actions API and logical writer. Read-only probes returned HTTP 200 on 2026-07-16 America/New_York.
 - Playbook PR #27, Lifeline PR #35, and `_stack` PR #9 are merged. The foreground Observer proof succeeded on `127.0.0.1:4300`, the current Observer is intentionally stopped/restorable, `LifelineRestoreAtLogon` is enabled/Ready with last result `0`, and `AtlasStackInboxSweep` is enabled/Ready on `PT5M` with a latest successful zero-work sweep and released lease.
-- The exact next activation packet is `Cortex event-triggered runtime read-model refresh proof`. Principal Cortex `latest` current-state, context, and operator artifacts remain dated 2026-07-06; Creation OS PR #134 is separate merged advisory history and is not reopened.
+- One explicit accepted activation event refreshed the principal Cortex `latest` current-state, context, and operator artifacts at `2026-07-17T03:32:30Z` from pinned ATLAS commit `90f9de1d` and registry blob `bc513e15`. Identical replay is a byte-stable no-op; unavailable owner/runtime health remains UNKNOWN. Creation OS PR #134 stays separate merged advisory history and was not reopened.
+- Step 6 is accepted. The exact next activation packet is `DiscordOS interaction-first reliability review`; step 7 and step 8 remain pending and this refresh does not launch either one.
 - Runtime Activation Readiness, Runtime Correlation Reliability, and Operator Surface Adoption are `100%` at exact fixed denominators `8 / 8`, `5 / 5`, and `4 / 4`. Actual new-logon restoration and sustained unattended Observer uptime remain UNKNOWN and are not marker units.
 - Atlas Contracts Mesh remains `11 / 11`, Atlas Full-System Re-evaluation remains `1 / 2` and `50%`, and Marker Integrity remains `51 / 51`.
 

@@ -1,0 +1,338 @@
+{
+  "contract_version": "atlas.cortex.current-state.v1",
+  "model_kind": "current_state",
+  "refresh_contract_version": "atlas.cortex.activation-read-model-refresh.v1",
+  "generated_at": "2026-07-17T03:32:30Z",
+  "stack_root": ".",
+  "source_authority": {
+    "repository": "fawxzzy/ATLAS",
+    "ref": "main",
+    "commit": "90f9de1dd55fe17b8fd2623b71193a6cc332e8f1",
+    "tree": "3ef6ec258d17d034ca8b42e6cc7214df84b2fe48",
+    "registry_path": "docs/registry/ATLAS-RUNTIME-PLACEMENT-REGISTRY.v1.json",
+    "registry_git_blob": "bc513e150b1acdb02928566c8e3f6b008d025f73",
+    "registry_sha256": "sha256:8873d926818944c7667fc911d9a88c45d2b411da30ae14f6393f4703309387ce"
+  },
+  "refresh": {
+    "event_id": "cortex-event-refresh-step-6-accepted-90f9de1d",
+    "event_digest": "sha256:9819f1aba325afbe5605df156b33de5ed16f626be6236b907f981f36a1f7e4da",
+    "event_ref": "runtime/cortex/events/cortex-event-refresh.step-6.accepted.v1.json",
+    "source_set_digest": "sha256:d2e0c5ecf70af88356c41abf1a0c33ca4fbd21fdcdd747554fc5406e0f692922",
+    "transition": {
+      "activation_step_id": "cortex-event-refresh",
+      "from_status": "pending",
+      "to_status": "accepted",
+      "selector_before": "Cortex event-triggered runtime read-model refresh proof",
+      "selector_after": "DiscordOS interaction-first reliability review",
+      "changed_step_count": 1
+    }
+  },
+  "status_boundaries": {
+    "unknown": [
+      "Actual restoration after a new Windows logon is UNKNOWN.",
+      "Sustained unattended Playbook Observer uptime is UNKNOWN; current state is intentionally stopped and restorable.",
+      "DiscordOS five-scenario interaction-first reliability review is not yet accepted.",
+      "Activation-sequence owner-export integration after the Cortex and DiscordOS steps is not yet accepted.",
+      "PostgreSQL 5432 and 5433 ownership is UNKNOWN.",
+      "The loopback browser-debugger process ownership is UNKNOWN."
+    ],
+    "blocked": [],
+    "stale": [],
+    "pending": [
+      {
+        "step_id": "discordos-interaction-first-reliability-review",
+        "packet": "DiscordOS interaction-first reliability review",
+        "status": "pending"
+      },
+      {
+        "step_id": "owner-export-integration",
+        "packet": "Runtime placement owner-export integration",
+        "status": "pending"
+      }
+    ],
+    "resolved_stale": [
+      {
+        "path": "runtime/cortex/current-state/latest.json",
+        "generated_at": "2026-07-06T06:22:19.476929Z",
+        "sha256": "sha256:0daf01a2cbbeace49f73b3eb076e0e4daf3707fcff37c0c75fd3b1ef33d0a4d2"
+      },
+      {
+        "path": "runtime/cortex/current-state/latest.md",
+        "generated_at": null,
+        "sha256": "sha256:dfc9cf5648f3948d49085128f1d4eb8efc1c7004ffa58e3d680cc9ce8da87c97"
+      },
+      {
+        "path": "runtime/cortex/context/latest.json",
+        "generated_at": "2026-07-06T06:22:20.080988Z",
+        "sha256": "sha256:5048d222f5def6bffc6cd990945ad9e2e0454b59cf9ffecbeb29aa9e39270446"
+      },
+      {
+        "path": "runtime/cortex/context/latest.md",
+        "generated_at": null,
+        "sha256": "sha256:a7b4f706ca4d5007f7dbd821a9af3c16777826b4c0f0c877f2808848d35d3403"
+      },
+      {
+        "path": "runtime/cortex/operator-surface/latest.json",
+        "generated_at": "2026-07-06T06:22:20.443544Z",
+        "sha256": "sha256:afeb7a2b1c70e74835e77be76e000b426750bba75572d0c6cb0511e932da5662"
+      },
+      {
+        "path": "runtime/cortex/operator-surface/latest.md",
+        "generated_at": null,
+        "sha256": "sha256:a1d74ec515d0897d96dfd3a8191ca77a97946aa34c5819fd9482f1bd6b51b36f"
+      }
+    ]
+  },
+  "source_refs": [
+    "git:90f9de1dd55fe17b8fd2623b71193a6cc332e8f1:docs/registry/ATLAS-RUNTIME-PLACEMENT-REGISTRY.v1.json@bc513e150b1acdb02928566c8e3f6b008d025f73",
+    "runtime/cortex/events/cortex-event-refresh.step-6.accepted.v1.json",
+    "ops/cortex/activation_read_model_refresh.py",
+    "schemas/atlas.cortex.activation-state-event.v1.json",
+    "schemas/atlas.cortex.event-refreshed-read-model.v1.json",
+    "schemas/atlas.cortex.event-refresh-receipt.v1.json",
+    "tests/test_cortex_activation_read_model_refresh.py",
+    "runtime/cortex/events/cortex-event-refresh.step-6.accepted.v1.json",
+    "runtime/receipts/cortex/cortex-event-refresh.step-6.execution-receipt.v1.json",
+    "docs/ops/CORTEX-EVENT-TRIGGERED-RUNTIME-READ-MODEL-REFRESH-PROOF-2026-07-17.md"
+  ],
+  "authority": {
+    "mode": "source-only-advisory",
+    "read_only": true,
+    "owner_health_inference": false,
+    "external_mutation": false
+  },
+  "branch": "main",
+  "head": "90f9de1dd55fe17b8fd2623b71193a6cc332e8f1",
+  "worktree_status": "source-only",
+  "changed_files": [],
+  "untracked_files": [],
+  "retained_untracked_files": [],
+  "remote_status": {
+    "status": "pinned",
+    "upstream": "origin/main",
+    "ahead": null,
+    "behind": null
+  },
+  "remote_publication_state": {
+    "status": "pinned-source-only",
+    "branch": "main",
+    "head": "90f9de1dd55fe17b8fd2623b71193a6cc332e8f1",
+    "published": true,
+    "upstream": "origin/main",
+    "pr_state": null,
+    "pr_url": null,
+    "notes": [
+      "No owner health or mutable checkout state was sampled."
+    ]
+  },
+  "validation_receipt": {
+    "status": "UNKNOWN",
+    "generated_at": null,
+    "path": null,
+    "counts": {
+      "critical": null,
+      "error": null,
+      "warning": null,
+      "info": null,
+      "total": null
+    },
+    "reason": "Source-only refresh does not infer current owner or runtime health."
+  },
+  "validation_counts": {
+    "critical": null,
+    "error": null,
+    "warning": null,
+    "info": null,
+    "total": null
+  },
+  "active_blockers": [],
+  "latest_clean_step": {
+    "step_id": "cortex-event-refresh",
+    "owner_layer": "ATLAS root governance",
+    "summary": "One accepted activation state change triggers deterministic Cortex read-model refresh without a daemon or scheduler.",
+    "status": "accepted",
+    "evidence": [
+      "ops/cortex/activation_read_model_refresh.py",
+      "schemas/atlas.cortex.activation-state-event.v1.json",
+      "schemas/atlas.cortex.event-refreshed-read-model.v1.json",
+      "schemas/atlas.cortex.event-refresh-receipt.v1.json",
+      "tests/test_cortex_activation_read_model_refresh.py",
+      "runtime/cortex/events/cortex-event-refresh.step-6.accepted.v1.json",
+      "runtime/receipts/cortex/cortex-event-refresh.step-6.execution-receipt.v1.json",
+      "docs/ops/CORTEX-EVENT-TRIGGERED-RUNTIME-READ-MODEL-REFRESH-PROOF-2026-07-17.md"
+    ],
+    "source_inputs": [
+      "runtime/cortex/events/cortex-event-refresh.step-6.accepted.v1.json",
+      "git:90f9de1dd55fe17b8fd2623b71193a6cc332e8f1:docs/registry/ATLAS-RUNTIME-PLACEMENT-REGISTRY.v1.json@bc513e150b1acdb02928566c8e3f6b008d025f73"
+    ],
+    "completed_at": "2026-07-17T03:32:30Z",
+    "source_ref": "runtime/cortex/events/cortex-event-refresh.step-6.accepted.v1.json"
+  },
+  "rail_state": null,
+  "operator_surface_projection": {
+    "artifact_ref": "runtime/cortex/operator-surface/latest.json",
+    "artifact_generated_at": "2026-07-17T03:32:30Z",
+    "authority": "read-only-advisory"
+  },
+  "activation": {
+    "source_registry_generated_at": "2026-07-17T01:54:51Z",
+    "accepted_prefix_count": 6,
+    "sequence": [
+      "playbook-bootstrap-foreground-observer-proof",
+      "lifeline-bootstrap-state-contract",
+      "lifeline-supervised-restart",
+      "lifeline-logon-restore",
+      "stack-single-scheduled-worker",
+      "cortex-event-refresh",
+      "discordos-interaction-first-reliability-review",
+      "owner-export-integration"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "id": "playbook-bootstrap-foreground-observer-proof",
+        "owner": "Playbook",
+        "packet": "Playbook bootstrap and foreground Observer health proof",
+        "status": "accepted",
+        "admission_proof": "Frozen dependency bootstrap, successful CLI invocation, and foreground GET /health on 127.0.0.1:4300 with root-runtime Observer state.",
+        "evidence_refs": [
+          "https://github.com/fawxzzy/playbook/pull/27",
+          "docs/ops/ATLAS-RUNTIME-PLACEMENT-READ-MODEL-MARKER-SELECTOR-RECONCILIATION-2026-07-16.md"
+        ]
+      },
+      {
+        "order": 2,
+        "id": "lifeline-bootstrap-state-contract",
+        "owner": "Lifeline",
+        "packet": "Lifeline bootstrap and root-runtime state contract",
+        "status": "accepted",
+        "admission_proof": "Lifeline build and doctor pass, and state/log placement is bound to runtime/lifeline/playbook-observer outside both owner repositories.",
+        "evidence_refs": [
+          "https://github.com/fawxzzy/lifeline/pull/35",
+          "https://github.com/fawxzzy/playbook/pull/27"
+        ]
+      },
+      {
+        "order": 3,
+        "id": "lifeline-supervised-restart",
+        "owner": "Lifeline",
+        "packet": "Lifeline supervised restart proof",
+        "status": "accepted",
+        "admission_proof": "Observer process failure is detected, restarted once under bounded backoff, and health/readback returns with correlated state and logs.",
+        "evidence_refs": [
+          "https://github.com/fawxzzy/lifeline/pull/35",
+          "docs/ops/ATLAS-RUNTIME-PLACEMENT-READ-MODEL-MARKER-SELECTOR-RECONCILIATION-2026-07-16.md"
+        ]
+      },
+      {
+        "order": 4,
+        "id": "lifeline-logon-restore",
+        "owner": "Lifeline",
+        "packet": "Lifeline current-user logon restore proof",
+        "status": "accepted",
+        "admission_proof": "Current-user logon registration targets lifeline restore and a bounded restore proof re-establishes Observer health.",
+        "evidence_refs": [
+          "https://github.com/fawxzzy/lifeline/pull/35",
+          "docs/ops/ATLAS-RUNTIME-PLACEMENT-READ-MODEL-MARKER-SELECTOR-RECONCILIATION-2026-07-16.md"
+        ]
+      },
+      {
+        "order": 5,
+        "id": "stack-single-scheduled-worker",
+        "owner": "_stack",
+        "packet": "_stack single bounded scheduled sweep proof",
+        "status": "accepted",
+        "admission_proof": "Exactly one serialized RunOnce scheduled sweep proves lease, idempotency, stale-input rejection, and correlated receipt behavior.",
+        "evidence_refs": [
+          "https://github.com/fawxzzy/_stack/pull/9",
+          "docs/ops/ATLAS-RUNTIME-PLACEMENT-READ-MODEL-MARKER-SELECTOR-RECONCILIATION-2026-07-16.md"
+        ]
+      },
+      {
+        "order": 6,
+        "id": "cortex-event-refresh",
+        "owner": "ATLAS root governance",
+        "packet": "Cortex event-triggered runtime read-model refresh proof",
+        "status": "accepted",
+        "admission_proof": "One accepted activation state change triggers deterministic Cortex read-model refresh without a daemon or scheduler.",
+        "evidence_refs": [
+          "ops/cortex/activation_read_model_refresh.py",
+          "schemas/atlas.cortex.activation-state-event.v1.json",
+          "schemas/atlas.cortex.event-refreshed-read-model.v1.json",
+          "schemas/atlas.cortex.event-refresh-receipt.v1.json",
+          "tests/test_cortex_activation_read_model_refresh.py",
+          "runtime/cortex/events/cortex-event-refresh.step-6.accepted.v1.json",
+          "runtime/receipts/cortex/cortex-event-refresh.step-6.execution-receipt.v1.json",
+          "docs/ops/CORTEX-EVENT-TRIGGERED-RUNTIME-READ-MODEL-REFRESH-PROOF-2026-07-17.md"
+        ]
+      },
+      {
+        "order": 7,
+        "id": "discordos-interaction-first-reliability-review",
+        "owner": "DiscordOS",
+        "packet": "DiscordOS interaction-first reliability review",
+        "status": "pending",
+        "admission_proof": "Owner-side review proves successful, failed, duplicate, interrupted/restarted, and stale-receipt interaction correlation across the existing hosted runtime.",
+        "evidence_refs": [
+          "https://fawxzzy-discordos.vercel.app/api/runtime-health",
+          "docs/ops/ATLAS-RUNTIME-PLACEMENT-READ-MODEL-MARKER-SELECTOR-RECONCILIATION-2026-07-16.md"
+        ]
+      },
+      {
+        "order": 8,
+        "id": "owner-export-integration",
+        "owner": "ATLAS root governance and owner repositories",
+        "packet": "Runtime placement owner-export integration",
+        "status": "pending",
+        "admission_proof": "Established owner exporters consume accepted placement/marker truth and pass schema, semantic, and exact readback checks without Discord mutation.",
+        "evidence_refs": [
+          "ops/atlas/project_board_owner_export.py",
+          "docs/registry/project-board-owner-exports/atlas.project-board.owner-export.v1.json"
+        ]
+      }
+    ],
+    "selector_before": "Cortex event-triggered runtime read-model refresh proof",
+    "selector_after": "DiscordOS interaction-first reliability review"
+  },
+  "marker_snapshot": [
+    {
+      "id": "lane-runtime-activation-readiness",
+      "title": "Runtime Activation Readiness",
+      "completed_units": 8,
+      "denominator": 8,
+      "percentage": 100
+    },
+    {
+      "id": "lane-runtime-correlation-reliability",
+      "title": "Runtime Correlation Reliability",
+      "completed_units": 5,
+      "denominator": 5,
+      "percentage": 100
+    },
+    {
+      "id": "lane-operator-surface-adoption",
+      "title": "Operator Surface Adoption",
+      "completed_units": 4,
+      "denominator": 4,
+      "percentage": 100
+    }
+  ],
+  "next_recommended_lane": {
+    "lane_id": "discordos-interaction-first-reliability-review",
+    "owner_layer": "DiscordOS",
+    "packet": "DiscordOS interaction-first reliability review",
+    "status": "pending",
+    "rationale": "The selector advances to the first non-accepted step in the frozen activation sequence.",
+    "blocked_by": [],
+    "source_refs": [
+      "ops/cortex/activation_read_model_refresh.py",
+      "schemas/atlas.cortex.activation-state-event.v1.json",
+      "schemas/atlas.cortex.event-refreshed-read-model.v1.json",
+      "schemas/atlas.cortex.event-refresh-receipt.v1.json",
+      "tests/test_cortex_activation_read_model_refresh.py",
+      "runtime/cortex/events/cortex-event-refresh.step-6.accepted.v1.json",
+      "runtime/receipts/cortex/cortex-event-refresh.step-6.execution-receipt.v1.json",
+      "docs/ops/CORTEX-EVENT-TRIGGERED-RUNTIME-READ-MODEL-REFRESH-PROOF-2026-07-17.md"
+    ]
+  }
+}

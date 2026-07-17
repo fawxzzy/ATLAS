@@ -1,0 +1,241 @@
+{
+  "schema_version": "atlas.cortex.event-refresh-receipt.v1",
+  "receipt_id": "cortex-event-refresh-step-6-90f9de1d",
+  "event_id": "cortex-event-refresh-step-6-accepted-90f9de1d",
+  "event_digest": "sha256:9819f1aba325afbe5605df156b33de5ed16f626be6236b907f981f36a1f7e4da",
+  "recorded_at": "2026-07-17T03:32:30Z",
+  "status": "accepted",
+  "outcome": "refreshed",
+  "refresh_count": 1,
+  "source_authority": {
+    "repository": "fawxzzy/ATLAS",
+    "ref": "main",
+    "commit": "90f9de1dd55fe17b8fd2623b71193a6cc332e8f1",
+    "tree": "3ef6ec258d17d034ca8b42e6cc7214df84b2fe48"
+  },
+  "source_set_digest": "sha256:d2e0c5ecf70af88356c41abf1a0c33ca4fbd21fdcdd747554fc5406e0f692922",
+  "source_components": [
+    {
+      "path": "docs/registry/ATLAS-RUNTIME-PLACEMENT-REGISTRY.v1.json",
+      "revision": "90f9de1dd55fe17b8fd2623b71193a6cc332e8f1",
+      "git_blob": "bc513e150b1acdb02928566c8e3f6b008d025f73",
+      "sha256": "sha256:8873d926818944c7667fc911d9a88c45d2b411da30ae14f6393f4703309387ce",
+      "byte_length": 54518
+    },
+    {
+      "path": "schemas/atlas.runtime-placement.registry.v1.json",
+      "revision": "90f9de1dd55fe17b8fd2623b71193a6cc332e8f1",
+      "git_blob": "d28cf2100e6fccfb10cde5ba197634cb183b2fe4",
+      "sha256": "sha256:f434e99a31dca308ee5922cc1b6100314447993d6e492af7e088c73ddf3ddf51",
+      "byte_length": 10170
+    },
+    {
+      "path": "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json",
+      "revision": "90f9de1dd55fe17b8fd2623b71193a6cc332e8f1",
+      "git_blob": "64b299af65eb6e60556f856274a0b75129a91ba8",
+      "sha256": "sha256:4f27f5e8174ca4401e2ef564d25ed353868d043aed8e2b8d793f1ef3718e361e",
+      "byte_length": 120396
+    },
+    {
+      "path": "docs/atlas-book/02-lanes-and-markers.md",
+      "revision": "90f9de1dd55fe17b8fd2623b71193a6cc332e8f1",
+      "git_blob": "6008e24bf844491ba7b01163a2c0580fdf059eb1",
+      "sha256": "sha256:434f63a3d1bd423423d493d86cc0a413ae8a94395b49de4d1f7e683da7aa5272",
+      "byte_length": 134424
+    },
+    {
+      "path": "ops/validation/runtime_placement_contract.py",
+      "revision": "90f9de1dd55fe17b8fd2623b71193a6cc332e8f1",
+      "git_blob": "5cf08e5fc6984eb4507c6692a5f4b2e4c4a591e5",
+      "sha256": "sha256:ef46d3b88213dbff78ad17f86014d54a89259b39a2895c34a731c1d8c00ae5b3",
+      "byte_length": 34240
+    },
+    {
+      "path": "ops/cortex/_artifacts.py",
+      "revision": "90f9de1dd55fe17b8fd2623b71193a6cc332e8f1",
+      "git_blob": "10567762e05b55d6f258d5ad37054016efd8aad5",
+      "sha256": "sha256:3cda3750884420cd3bbc0084baceefce774cdf640de0e9a882b1a0814e68be88",
+      "byte_length": 44740
+    },
+    {
+      "path": "ops/cortex/current_state.py",
+      "revision": "90f9de1dd55fe17b8fd2623b71193a6cc332e8f1",
+      "git_blob": "9f7c9cc78cc4da34085be229ccd61ccc595b99e8",
+      "sha256": "sha256:f298c7208b18af7d930273019fb78aa455189e58c5ce7d3b282a6a0b63bb701c",
+      "byte_length": 32475
+    },
+    {
+      "path": "ops/cortex/context_assembler.py",
+      "revision": "90f9de1dd55fe17b8fd2623b71193a6cc332e8f1",
+      "git_blob": "052358ed490b41635ede1e1c68ac6e77881a63ce",
+      "sha256": "sha256:0e939f8114393e6a793d78d15c019fc86c23c262aabdc861e69a029edb25bdb5",
+      "byte_length": 27105
+    },
+    {
+      "path": "ops/cortex/operator_surface.py",
+      "revision": "90f9de1dd55fe17b8fd2623b71193a6cc332e8f1",
+      "git_blob": "4b6c25bedcb2bbead1596cbe5f7a1739b6fa9024",
+      "sha256": "sha256:16ecd8d0eef2b6ad7df7d1c1242b2a8d8921bd3f4e73be0d16ee814c19f8be17",
+      "byte_length": 29515
+    },
+    {
+      "path": "runtime/cortex/shadow-agent-registry.seed.v1.json",
+      "revision": "90f9de1dd55fe17b8fd2623b71193a6cc332e8f1",
+      "git_blob": "1fab1f2cf355a4f4565b73b686d590d108bea462",
+      "sha256": "sha256:6a227d1a8c9d438e09a80c996b33b7035897648d3b508b7567a2d8a8e1e75c2a",
+      "byte_length": 14406
+    },
+    {
+      "path": "docs/architecture/ATLAS-CORTEX-PLAYBOOK-CODEX.md",
+      "revision": "90f9de1dd55fe17b8fd2623b71193a6cc332e8f1",
+      "git_blob": "9e147b0e65a7736c3d4663e95f7c2694580d06e8",
+      "sha256": "sha256:4ebec160c296049448ae973d4696bdf0dc3a562067836f13296b5261cf16a77a",
+      "byte_length": 10268
+    },
+    {
+      "path": "ops/cortex/activation_read_model_refresh.py",
+      "revision": "refresh-transform",
+      "git_blob": null,
+      "sha256": "sha256:ac4d4edd0977bd219e340724abb6c88fa229f12ed8fb8daf101cca06f4b5c569",
+      "byte_length": 42282
+    },
+    {
+      "path": "schemas/atlas.cortex.activation-state-event.v1.json",
+      "revision": "refresh-transform",
+      "git_blob": null,
+      "sha256": "sha256:32f2ea4e4d6a0be53a4a7d35b8c954d4728804dbe6be0a6f2171069b4e6cfcfc",
+      "byte_length": 3805
+    },
+    {
+      "path": "schemas/atlas.cortex.event-refreshed-read-model.v1.json",
+      "revision": "refresh-transform",
+      "git_blob": null,
+      "sha256": "sha256:21ace9fb927e477028e6c2e725de272e94536d61767945e91b978092e1365e5f",
+      "byte_length": 3345
+    },
+    {
+      "path": "schemas/atlas.cortex.event-refresh-receipt.v1.json",
+      "revision": "refresh-transform",
+      "git_blob": null,
+      "sha256": "sha256:e9ef77aba35829802b4177ef44e4d0dea21c545bd7a52a9fbb014222884d30d8",
+      "byte_length": 4306
+    }
+  ],
+  "state_change": {
+    "activation_step_id": "cortex-event-refresh",
+    "order": 6,
+    "from_status": "pending",
+    "to_status": "accepted",
+    "selector_before": "Cortex event-triggered runtime read-model refresh proof",
+    "selector_after": "DiscordOS interaction-first reliability review",
+    "changed_step_count": 1,
+    "step_7_status": "pending",
+    "step_8_status": "pending"
+  },
+  "prior_artifacts": [
+    {
+      "path": "runtime/cortex/current-state/latest.json",
+      "generated_at": "2026-07-06T06:22:19.476929Z",
+      "sha256": "sha256:0daf01a2cbbeace49f73b3eb076e0e4daf3707fcff37c0c75fd3b1ef33d0a4d2"
+    },
+    {
+      "path": "runtime/cortex/current-state/latest.md",
+      "generated_at": null,
+      "sha256": "sha256:dfc9cf5648f3948d49085128f1d4eb8efc1c7004ffa58e3d680cc9ce8da87c97"
+    },
+    {
+      "path": "runtime/cortex/context/latest.json",
+      "generated_at": "2026-07-06T06:22:20.080988Z",
+      "sha256": "sha256:5048d222f5def6bffc6cd990945ad9e2e0454b59cf9ffecbeb29aa9e39270446"
+    },
+    {
+      "path": "runtime/cortex/context/latest.md",
+      "generated_at": null,
+      "sha256": "sha256:a7b4f706ca4d5007f7dbd821a9af3c16777826b4c0f0c877f2808848d35d3403"
+    },
+    {
+      "path": "runtime/cortex/operator-surface/latest.json",
+      "generated_at": "2026-07-06T06:22:20.443544Z",
+      "sha256": "sha256:afeb7a2b1c70e74835e77be76e000b426750bba75572d0c6cb0511e932da5662"
+    },
+    {
+      "path": "runtime/cortex/operator-surface/latest.md",
+      "generated_at": null,
+      "sha256": "sha256:a1d74ec515d0897d96dfd3a8191ca77a97946aa34c5819fd9482f1bd6b51b36f"
+    }
+  ],
+  "generated_outputs": [
+    {
+      "path": "runtime/cortex/current-state/latest.json",
+      "sha256": "sha256:700582748fa4573cb8218fc38256bab57d68d8cf41d480f5f113c82d0a02bcbc",
+      "byte_length": 14257,
+      "generated_at": "2026-07-17T03:32:30Z"
+    },
+    {
+      "path": "runtime/cortex/current-state/latest.md",
+      "sha256": "sha256:8ca0556c1f48bb18b05f29e02382aa7182b6b5ee5d23aca56eb2798f563aab4d",
+      "byte_length": 580,
+      "generated_at": "2026-07-17T03:32:30Z"
+    },
+    {
+      "path": "runtime/cortex/context/latest.json",
+      "sha256": "sha256:317bf51ab0d5e1e4770d5a1dfaf332f3f08e33ec571812351af5a725bb02a19d",
+      "byte_length": 7020,
+      "generated_at": "2026-07-17T03:32:30Z"
+    },
+    {
+      "path": "runtime/cortex/context/latest.md",
+      "sha256": "sha256:b61cdef643fd44587fc003e9784c30f6e3554b3847f4b9ba8a1f2ac8f0591fbd",
+      "byte_length": 503,
+      "generated_at": "2026-07-17T03:32:30Z"
+    },
+    {
+      "path": "runtime/cortex/operator-surface/latest.json",
+      "sha256": "sha256:3416416986a045bb9d9e81416aef796aeefd0835fc57ff2f14024a1900709bef",
+      "byte_length": 19492,
+      "generated_at": "2026-07-17T03:32:30Z"
+    },
+    {
+      "path": "runtime/cortex/operator-surface/latest.md",
+      "sha256": "sha256:e8bf4b10bce02a7b6244e665c135e03c22e8edbfbcaf779bfaf5fc6361401059",
+      "byte_length": 352,
+      "generated_at": "2026-07-17T03:32:30Z"
+    }
+  ],
+  "deterministic_replay": {
+    "same_inputs_byte_stable": true,
+    "output_set_digest": "sha256:eca91713e36e335129f3e30443ed2f61abc7b3752ede8646f816919dd96d4553",
+    "idempotent_duplicate_outcome": "noop",
+    "conflicting_duplicate_outcome": "rejected"
+  },
+  "verification": {
+    "event_schema": "passed",
+    "pinned_registry_schema": "passed",
+    "pinned_registry_semantics": "passed",
+    "read_model_schema": "passed",
+    "receipt_schema": "passed",
+    "single_state_change": "passed",
+    "source_only_authority": "passed"
+  },
+  "unchanged_markers": {
+    "runtime_activation_readiness": "8/8",
+    "runtime_correlation_reliability": "5/5",
+    "operator_surface_adoption": "4/4"
+  },
+  "historical_snapshots_mutated": false,
+  "authority": {
+    "read_only": true,
+    "advisory": true,
+    "owner_health_inference": false,
+    "repository_mutation": false,
+    "discord_mutation": false,
+    "board_mutation": false,
+    "vercel_mutation": false,
+    "supabase_mutation": false,
+    "database_mutation": false,
+    "secret_access": false,
+    "scheduler_or_service_creation": false,
+    "production_mutation": false
+  },
+  "next_packet": "DiscordOS interaction-first reliability review"
+}

@@ -104,9 +104,10 @@ reconciliation admits only fixed units backed by merged owner changes,
 exact-head CI, accepted bounded proofs, current scheduler readback, and the
 deterministic `_stack` scenario suite. The current stopped/restorable Observer
 state is not running uptime proof. Actual new-logon restoration and sustained
-unattended uptime remain UNKNOWN outside these denominators. The first
-unexecuted activation step is `Cortex event-triggered runtime read-model refresh
-proof`; closing audit and post-preparation development remain gated.
+unattended uptime remain UNKNOWN outside these denominators. The accepted
+event-triggered Cortex refresh moved no marker unit. The first unexecuted
+activation step is now `DiscordOS interaction-first reliability review`;
+closing audit and post-preparation development remain gated.
 
 Atlas Contracts Mesh is now complete at `100%` on its fixed eleven-family denominator. KnowledgeCandidate joins the ten previously accepted families after Atlas producer/schema authority, Playbook PR #25's independent candidate-only consumer, exact identity and classified-provenance preservation, deterministic append/replay receipts, fail-closed negative conformance, and zero doctrine mutation all agree. Atlas owns knowledge contract semantics; Playbook consumes them without copying. Candidate admission grants no Rule, Pattern, Failure Mode, story, notes, memory, or doctrine-promotion authority. This terminal child-lane ratchet does not move Atlas Full-System Re-evaluation from `50%` and `1 / 2`, and Marker Integrity remains complete at `51 / 51`.
 
