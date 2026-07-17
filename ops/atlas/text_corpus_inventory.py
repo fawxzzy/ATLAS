@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
 import subprocess
 import sys
@@ -125,6 +126,8 @@ SECRET_NAMES = {
     "token",
     "tokens.json",
 }
+SECRET_STEMS = {"credential", "credentials", "secret", "secrets", "token", "tokens"}
+SECRET_MANIFEST_SUFFIXES = {".cfg", ".conf", ".ini", ".json", ".toml", ".txt", ".yaml", ".yml"}
 SECRET_SUFFIXES = {".asc", ".der", ".key", ".p12", ".pem", ".pfx"}
 RUNTIME_SEGMENTS = {".codex", ".playbook", "runtime", "tmp"}
 DEPENDENCY_SEGMENTS = {
@@ -279,14 +282,22 @@ def validate_output_root(workspace_root: Path, output_root: Path) -> tuple[Path,
     return workspace_real, output_real
 
 
+def git_read_env() -> dict[str, str]:
+    env = dict(os.environ)
+    env["GIT_NO_LAZY_FETCH"] = "1"
+    env["GIT_OPTIONAL_LOCKS"] = "0"
+    return env
+
+
 def _git(repo: Path, *args: str, binary: bool = False) -> bytes | str:
     completed = subprocess.run(
-        ["git", "-C", str(repo), *args],
+        ["git", "-C", str(repo), "--no-replace-objects", *args],
         check=False,
         capture_output=True,
         text=not binary,
         encoding=None if binary else "utf-8",
         errors=None if binary else "replace",
+        env=git_read_env(),
     )
     if completed.returncode != 0:
         stderr = completed.stderr.decode("utf-8", errors="replace") if binary else completed.stderr
@@ -339,12 +350,21 @@ def list_tree_entries(repo: Path, commit: str) -> tuple[str, list[TreeEntry]]:
         if relative_path in seen_paths:
             raise InventoryError("DUPLICATE_RECORD_IDENTITY", f"Duplicate tree path: {relative_path}")
         seen_paths.add(relative_path)
+        if size_text == "-":
+            byte_size = None
+        elif size_text == "BAD":
+            raise InventoryError("GIT_BLOB_UNAVAILABLE", f"Git object size is unavailable for {relative_path} ({oid}).")
+        else:
+            try:
+                byte_size = int(size_text)
+            except ValueError as exc:
+                raise InventoryError("MALFORMED_TREE_ENTRY", f"Git object size is malformed for {relative_path}.") from exc
         entries.append(
             TreeEntry(
                 mode=mode,
                 object_type=object_type,
                 oid=oid,
-                byte_size=None if size_text == "-" else int(size_text),
+                byte_size=byte_size,
                 relative_path=relative_path,
             )
         )
@@ -357,10 +377,11 @@ def batch_read_blobs(repo: Path, oids: Iterable[str]) -> dict[str, bytes]:
     if not ordered:
         return {}
     process = subprocess.Popen(
-        ["git", "-C", str(repo), "cat-file", "--batch"],
+        ["git", "-C", str(repo), "--no-replace-objects", "cat-file", "--batch"],
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
+        env=git_read_env(),
     )
     assert process.stdin is not None and process.stdout is not None and process.stderr is not None
     try:
@@ -428,10 +449,12 @@ def path_exclusion(entry: TreeEntry) -> tuple[str, str] | None:
     path = PurePosixPath(entry.relative_path)
     parts = tuple(part.lower() for part in path.parts)
     name = parts[-1]
+    secret_stem = name.split(".", 1)[0]
     if (
         any(part in SECRET_SEGMENTS for part in parts)
         or name.startswith(".env")
         or name in SECRET_NAMES
+        or (secret_stem in SECRET_STEMS and path.suffix.lower() in SECRET_MANIFEST_SUFFIXES)
         or path.suffix.lower() in SECRET_SUFFIXES
     ):
         return "SECRET_SURFACE", "restricted"
@@ -960,10 +983,11 @@ def materialize_outputs(
     check: bool,
 ) -> list[str]:
     drift: list[str] = []
+    ensure_resolved_contained(workspace_root, output_root)
     for relative_path, raw in sorted(outputs.items(), key=lambda item: item[0].as_posix()):
         validate_relative_path(relative_path.as_posix())
         target = ensure_resolved_contained(
-            workspace_root,
+            output_root,
             resolve_real_path(output_root / relative_path, allow_missing_leaf=True),
         )
         if check:

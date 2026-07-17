@@ -20,11 +20,11 @@ The implementation began from the exact merged Atlas base on a clean, detached, 
 
 ## Frozen contract
 
-- Git commit/tree/blob objects are the only corpus source. Ignored, untracked, and mutable working-tree bytes are never enumerated.
+- Git commit/tree/blob objects are the only corpus source. Every Git object read disables replacement refs and lazy fetching, so missing or promised objects fail closed without mutating the source repository. Ignored, untracked, and mutable working-tree bytes are never enumerated.
 - Playbook is read only through a temporary bare Git object store at the accepted commit. Its mutable owner checkout is not a source.
 - Included UTF-8 text rows record stable identity, owner/component, repository-relative path, commit, blob, SHA-256, byte size, media/content type, source class, authority tier, privacy/indexing profile, lifecycle/supersession, disposition/reason, provenance, and generator version.
-- Secret, private/transcript, runtime, temporary, dependency/vendor, build/generated, symlink, gitlink, binary, and unsupported-media surfaces fail closed. Excluded bodies are not stored and their content SHA-256 remains `UNKNOWN`.
-- Repository and output paths are resolved before containment or hashing. Absolute paths, traversal, ambiguous real roots, duplicate identities, object/digest mismatches, malformed records, and resolved-path escapes are rejected.
+- Secret, credential, and token stems across supported configuration extensions, plus private/transcript, runtime, temporary, dependency/vendor, build/generated, symlink, gitlink, binary, and unsupported-media surfaces, fail closed before blob reads. Excluded bodies are not stored and their content SHA-256 remains `UNKNOWN`.
+- Repository and output paths are resolved before containment or hashing. Every materialized path must remain beneath the resolved selected output root, even when an in-workspace symlink or junction redirects a descendant. Absolute paths, traversal, ambiguous real roots, duplicate identities, object/digest mismatches, malformed records, and resolved-path escapes are rejected.
 - An unavailable admitted source remains `UNKNOWN`; its denominator and aggregate digest are not rewritten as zero, absent, or healthy.
 - Playbook remains doctrine owner. Atlas remains inventory/adoption owner. Authority widening and marker movement are both false.
 
@@ -54,7 +54,7 @@ Serialized output byte digests:
 
 ## Verification evidence
 
-- Focused suite: 19 tests passed. The deterministic cross-platform resolved-path escape regression is non-skipped. The optional Python symlink test skipped because this Windows runtime lacks symlink privilege; an independent real Windows junction proof passed and cleaned up both endpoints.
+- Focused suite: 22 tests passed. Deterministic non-skipped regressions cover replacement-ref suppression, missing promised-object failure without source mutation, in-workspace output-root escape, protected secret/credential/token filenames before blob reads, and cross-platform resolved-path escape. The optional Python symlink test skipped because this Windows runtime lacks symlink privilege; an independent real Windows junction proof passed and cleaned up both endpoints.
 - Large-corpus transport regression: 256 blobs larger than the OS pipe buffers completed within the test timeout. The reader interleaves each Git object request and response.
 - Source-only check mode regenerated both pinned inventories and matched every committed output byte.
 - Two independent staging runs produced byte-identical output files and the same aggregate digest; both staging trees were removed.

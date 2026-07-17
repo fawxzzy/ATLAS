@@ -91,6 +91,10 @@ class AtlasTextCorpusInventoryTests(unittest.TestCase):
             "transcripts/chat.md": b"transcript body\n",
             "secrets/key.txt": b"secret body\n",
             ".env.local": b"TOKEN=secret\n",
+            "config/credentials.yml": b"password: secret\n",
+            "config/secret.toml": b"token = 'secret'\n",
+            "config/secrets.yaml": b"password: secret\n",
+            "config/token.json": b"{\"token\":\"secret\"}\n",
             "assets/fake.md": b"binary\x00body",
             "assets/logo.png": b"\x89PNG\r\n\x1a\n",
         }
@@ -153,6 +157,10 @@ class AtlasTextCorpusInventoryTests(unittest.TestCase):
             "transcripts/chat.md": "PRIVATE_OR_TRANSCRIPT_SURFACE",
             "secrets/key.txt": "SECRET_SURFACE",
             ".env.local": "SECRET_SURFACE",
+            "config/credentials.yml": "SECRET_SURFACE",
+            "config/secret.toml": "SECRET_SURFACE",
+            "config/secrets.yaml": "SECRET_SURFACE",
+            "config/token.json": "SECRET_SURFACE",
             "assets/fake.md": "BINARY_CONTENT",
             "assets/logo.png": "UNSUPPORTED_MEDIA_TYPE",
             "linked.md": "SYMLINK_ENTRY",
@@ -168,12 +176,22 @@ class AtlasTextCorpusInventoryTests(unittest.TestCase):
         self.assertNotIn("ignored.md", self._atlas_records())
 
     def test_secret_paths_are_rejected_before_blob_reads(self) -> None:
-        secret_oid = _git(self.atlas_repo, "rev-parse", f"{self.atlas_commit}:.env.local").decode().strip()
+        secret_paths = [
+            ".env.local",
+            "config/credentials.yml",
+            "config/secret.toml",
+            "config/secrets.yaml",
+            "config/token.json",
+        ]
+        secret_oids = {
+            _git(self.atlas_repo, "rev-parse", f"{self.atlas_commit}:{path}").decode().strip()
+            for path in secret_paths
+        }
         original = inventory.batch_read_blobs
         with mock.patch.object(inventory, "batch_read_blobs", wraps=original) as reader:
             inventory.build_component(self.specs[0], self.atlas_repo.resolve())
         requested = set(reader.call_args.args[1])
-        self.assertNotIn(secret_oid, requested)
+        self.assertTrue(secret_oids.isdisjoint(requested))
 
     def test_traversal_absolute_and_backslash_paths_are_rejected(self) -> None:
         for value in ("../escape.md", "docs/../escape.md", "/absolute.md", "C:/absolute.md", "docs\\file.md"):
@@ -199,6 +217,61 @@ class AtlasTextCorpusInventoryTests(unittest.TestCase):
                 same_commit_specs,
                 {"atlas-root": self.atlas_repo, "playbook": self.atlas_repo},
             )
+
+    def test_replacement_refs_cannot_change_pinned_object_reads(self) -> None:
+        repo = self.base / "replacement-refs"
+        original_commit = _init_repo(repo, {"guide.md": b"original body\n"})
+        (repo / "guide.md").write_bytes(b"replacement body\n")
+        _git(repo, "add", "guide.md")
+        _git(repo, "commit", "--quiet", "-m", "replacement")
+        replacement_commit = _git(repo, "rev-parse", "HEAD").decode().strip()
+        _git(repo, "replace", original_commit, replacement_commit)
+        spec = inventory.SourceSpec(
+            source_id="github:test/atlas-replacement",
+            component_id="atlas-root",
+            repository_owner="test",
+            repository_name="atlas-replacement",
+            pinned_commit=original_commit,
+            authority_tier="atlas_inventory_adoption_owner",
+        )
+        component = inventory.build_component(spec, repo.resolve())
+        record = component["records"][0]
+        self.assertEqual("guide.md", record["relative_path"])
+        self.assertEqual(inventory.sha256_bytes(b"original body\n"), record["sha256"])
+
+    def test_missing_promisor_blob_fails_without_mutating_source_store(self) -> None:
+        source = self.base / "promisor-source"
+        commit = _init_repo(source, {"guide.md": b"promised body\n"})
+        tree = _git(source, "rev-parse", f"{commit}^{{tree}}").decode().strip()
+        commit_raw = _git(source, "cat-file", "commit", commit)
+        tree_raw = _git(source, "cat-file", "tree", tree)
+        partial = self.base / "partial.git"
+        partial.mkdir()
+        _git(partial, "init", "--bare", "--quiet")
+        written_commit = _git(partial, "hash-object", "-t", "commit", "-w", "--stdin", input_bytes=commit_raw).decode().strip()
+        written_tree = _git(partial, "hash-object", "-t", "tree", "-w", "--stdin", input_bytes=tree_raw).decode().strip()
+        self.assertEqual(commit, written_commit)
+        self.assertEqual(tree, written_tree)
+        _git(partial, "config", "core.repositoryformatversion", "1")
+        _git(partial, "config", "extensions.partialClone", "origin")
+        _git(partial, "config", "remote.origin.url", source.resolve().as_uri())
+        _git(partial, "config", "remote.origin.promisor", "true")
+        _git(partial, "config", "remote.origin.partialclonefilter", "blob:none")
+        before = sorted((path.relative_to(partial).as_posix(), path.stat().st_size) for path in (partial / "objects").rglob("*") if path.is_file())
+        spec = inventory.SourceSpec(
+            source_id="github:test/atlas-partial",
+            component_id="atlas-root",
+            repository_owner="test",
+            repository_name="atlas-partial",
+            pinned_commit=commit,
+            authority_tier="atlas_inventory_adoption_owner",
+        )
+        with self.assertRaises(inventory.InventoryError) as raised:
+            inventory.build_component(spec, partial.resolve())
+        self.assertEqual("GIT_BLOB_UNAVAILABLE", raised.exception.code)
+        after = sorted((path.relative_to(partial).as_posix(), path.stat().st_size) for path in (partial / "objects").rglob("*") if path.is_file())
+        self.assertEqual(before, after)
+        self.assertEqual("1", inventory.git_read_env()["GIT_NO_LAZY_FETCH"])
 
     def test_blob_digest_mismatch_fails_closed(self) -> None:
         def tampered(repo: Path, oids: object) -> dict[str, bytes]:
@@ -296,6 +369,25 @@ class AtlasTextCorpusInventoryTests(unittest.TestCase):
             )
         self.assertEqual(2, code)
         builder.assert_not_called()
+
+    def test_in_workspace_symlink_resolution_cannot_escape_output_root(self) -> None:
+        workspace = (self.base / "workspace-output-containment").resolve()
+        output = workspace / "stage"
+        escaped_target = workspace / "docs" / "inventory.json"
+        output.mkdir(parents=True)
+        escaped_target.parent.mkdir(parents=True)
+        # Deterministically model stage/docs as a symlink or junction to
+        # workspace/docs without requiring platform-specific link privileges.
+        with mock.patch.object(inventory, "resolve_real_path", return_value=escaped_target):
+            with self.assertRaises(inventory.InventoryError) as raised:
+                inventory.materialize_outputs(
+                    workspace_root=workspace,
+                    output_root=output,
+                    outputs={Path("docs/inventory.json"): b"{}\n"},
+                    check=False,
+                )
+        self.assertEqual("RESOLVED_PATH_ESCAPE", raised.exception.code)
+        self.assertFalse(escaped_target.exists())
 
     def test_component_and_index_schema_semantics_validate(self) -> None:
         components = self._components()
