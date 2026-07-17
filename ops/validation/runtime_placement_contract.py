@@ -217,8 +217,11 @@ def _is_remote_evidence_ref(evidence_ref: str) -> bool:
         and evidence_ref[1] == ":"
         and evidence_ref[2] in {"/", "\\"}
     )
+    local_file_uri = evidence_ref.lower().startswith("file:")
     return evidence_ref.startswith("git:") or (
-        not windows_drive_path and REMOTE_EVIDENCE_REF_PATTERN.match(evidence_ref) is not None
+        not windows_drive_path
+        and not local_file_uri
+        and REMOTE_EVIDENCE_REF_PATTERN.match(evidence_ref) is not None
     )
 
 

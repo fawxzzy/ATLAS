@@ -200,6 +200,14 @@ class RuntimePlacementContractTests(unittest.TestCase):
         self.assertIn("runtime-placement-evidence-path", {issue.category for issue in issues})
         self.assertEqual("parent-traversal", issues[0].details["reason"])
 
+    def test_filesystem_evidence_rejects_local_file_uris(self) -> None:
+        invalid_refs = ("file:///etc/hosts", "file://server/share/proof.md")
+
+        for evidence_ref in invalid_refs:
+            with self.subTest(evidence_ref=evidence_ref):
+                issues = contract._validate_evidence_refs([evidence_ref], "test.evidence_refs", ROOT)
+                self.assertIn("runtime-placement-evidence-path", {issue.category for issue in issues})
+
     def test_filesystem_evidence_rejects_empty_and_non_normalized_paths(self) -> None:
         invalid_refs = (
             "#fragment",

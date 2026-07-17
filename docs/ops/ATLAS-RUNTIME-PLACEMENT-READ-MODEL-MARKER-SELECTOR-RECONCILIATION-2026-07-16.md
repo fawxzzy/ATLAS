@@ -178,10 +178,11 @@ The additive follow-up preserves remote URL and `git:` evidence while requiring
 filesystem evidence to be a non-empty, normalized, root-relative POSIX path.
 POSIX absolute paths, Windows drive/UNC paths, parent traversal, and paths whose
 real filesystem target escapes the resolved ATLAS root are rejected before any
-existence check. Focused coverage includes valid in-root evidence and a real
-filesystem-link escape when the host supports links.
+existence check. Local `file:` URIs are treated as filesystem evidence and
+cannot bypass containment. Focused coverage includes valid in-root evidence and
+a real filesystem-link escape when the host supports links.
 
-Follow-up verification passes `35` focused runtime-placement and deterministic
+Follow-up verification passes `36` focused runtime-placement and deterministic
 owner-export tests, the canonical semantic validator reports `issue_count=0`,
 deterministic owner-export replay is byte-identical, and authoritative
 source-only root validation reports
