@@ -10,6 +10,11 @@ import {
 } from "./lib/validate-json-schema.mjs";
 import { validateContractSemantics } from "./lib/validate-semantics.mjs";
 
+const ATLAS_ROOT_SENTINELS = Object.freeze([
+  "stack.yaml",
+  "schemas/atlas.runtime-placement.registry.v1.json",
+]);
+
 export const exitCodes = Object.freeze({
   VALID: 0,
   INVALID_ARTIFACT: 1,
@@ -84,6 +89,33 @@ function ancestorDirectories(start) {
   }
 }
 
+function isContainedPath(realRoot, realCandidate) {
+  const relative = path.relative(realRoot, realCandidate);
+  return relative !== ""
+    && !relative.startsWith(`..${path.sep}`)
+    && relative !== ".."
+    && !path.isAbsolute(relative);
+}
+
+async function resolveAtlasRoot(candidateRoot) {
+  let realRoot;
+  try {
+    realRoot = await fs.realpath(candidateRoot);
+  } catch {
+    return null;
+  }
+  for (const sentinel of ATLAS_ROOT_SENTINELS) {
+    try {
+      const realSentinel = await fs.realpath(path.join(candidateRoot, ...sentinel.split("/")));
+      const sentinelStat = await fs.stat(realSentinel);
+      if (!sentinelStat.isFile() || !isContainedPath(realRoot, realSentinel)) return null;
+    } catch {
+      return null;
+    }
+  }
+  return realRoot;
+}
+
 async function loadRuntimeSourceContext(artifactPath, artifact) {
   const sourceRef = artifact?.runtime_readback?.source_ref;
   if (!sourceRef) return {};
@@ -101,18 +133,17 @@ async function loadRuntimeSourceContext(artifactPath, artifact) {
       if (visited.has(candidate)) continue;
       visited.add(candidate);
 
-      let realRoot;
+      const realRoot = await resolveAtlasRoot(ancestor);
+      if (!realRoot) continue;
       let realCandidate;
       try {
-        realRoot = await fs.realpath(ancestor);
         realCandidate = await fs.realpath(candidate);
       } catch (error) {
         if (error?.code === "ENOENT" || error?.code === "ENOTDIR") continue;
         return { runtimeSourceError: `runtime source realpath resolution failed: ${error.message}` };
       }
 
-      const relative = path.relative(realRoot, realCandidate);
-      if (relative === "" || relative.startsWith(`..${path.sep}`) || relative === ".." || path.isAbsolute(relative)) {
+      if (!isContainedPath(realRoot, realCandidate)) {
         containmentEscapeSeen = true;
         continue;
       }

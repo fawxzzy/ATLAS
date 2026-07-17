@@ -169,6 +169,23 @@ try {
     "ATLAS-RUNTIME-PLACEMENT-REGISTRY.v1.json",
   );
   const runtimeSourceText = await fs.readFile(runtimeSourcePath, "utf8");
+  const runtimeSchemaPath = path.resolve(
+    packageRoot,
+    "..",
+    "..",
+    "schemas",
+    "atlas.runtime-placement.registry.v1.json",
+  );
+  const runtimeSchemaText = await fs.readFile(runtimeSchemaPath, "utf8");
+  const writeAtlasRootSentinels = async (root) => {
+    await fs.mkdir(path.join(root, "schemas"), { recursive: true });
+    await fs.writeFile(path.join(root, "stack.yaml"), "version: 1\n", "utf8");
+    await fs.writeFile(
+      path.join(root, "schemas", "atlas.runtime-placement.registry.v1.json"),
+      runtimeSchemaText,
+      "utf8",
+    );
+  };
   const escapeRoot = path.join(temporaryDir, "escape-root");
   const outsideDocs = path.join(temporaryDir, "outside-docs");
   await fs.mkdir(path.join(outsideDocs, "registry"), { recursive: true });
@@ -177,7 +194,7 @@ try {
     runtimeSourceText,
     "utf8",
   );
-  await fs.mkdir(escapeRoot, { recursive: true });
+  await writeAtlasRootSentinels(escapeRoot);
   await fs.symlink(outsideDocs, path.join(escapeRoot, "docs"), process.platform === "win32" ? "junction" : "dir");
   const escapedArtifactPath = path.join(escapeRoot, "owner-export.json");
   await fs.writeFile(escapedArtifactPath, `${JSON.stringify(rootExport, null, 2)}\n`, "utf8");
@@ -193,6 +210,7 @@ try {
   const ambiguousRoot = path.join(temporaryDir, "ambiguous-root");
   const ambiguousInner = path.join(ambiguousRoot, "inner");
   for (const candidateRoot of [ambiguousRoot, ambiguousInner]) {
+    await writeAtlasRootSentinels(candidateRoot);
     const registryDir = path.join(candidateRoot, "docs", "registry");
     await fs.mkdir(registryDir, { recursive: true });
     await fs.writeFile(
@@ -210,6 +228,28 @@ try {
   );
   assert(
     ambiguousSourceFailure.errors.some((error) => error.includes("ambiguous across multiple contained roots")),
+  );
+
+  const unidentifiedRoot = path.join(temporaryDir, "unidentified-root");
+  const unidentifiedArtifactDir = path.join(unidentifiedRoot, "workspace");
+  await fs.mkdir(path.join(unidentifiedRoot, "tmp"), { recursive: true });
+  await fs.mkdir(unidentifiedArtifactDir, { recursive: true });
+  await fs.writeFile(path.join(unidentifiedRoot, "tmp", "runtime.json"), runtimeSourceText, "utf8");
+  const unidentifiedArtifact = structuredClone(rootExport);
+  const runtimeSource = unidentifiedArtifact.sources.find(
+    (source) => source.source_id === "atlas-runtime-placement-registry",
+  );
+  runtimeSource.path = "tmp/runtime.json";
+  unidentifiedArtifact.runtime_readback.source_ref = "tmp/runtime.json";
+  const unidentifiedArtifactPath = path.join(unidentifiedArtifactDir, "owner-export.json");
+  await fs.writeFile(unidentifiedArtifactPath, `${JSON.stringify(unidentifiedArtifact, null, 2)}\n`, "utf8");
+  const unidentifiedRootFailure = expectJson(
+    ["--schema", "atlas.project-board.owner-export.v1", "--artifact", unidentifiedArtifactPath],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  assert(
+    unidentifiedRootFailure.errors.some((error) => error.includes("could not be resolved from the artifact or working tree")),
   );
   expectJson(
     ["--schema", "atlas.github.event-receipt.v1", "--artifact", fixture("invalid", "github.event-receipt.v1.bad-authority.json")],
