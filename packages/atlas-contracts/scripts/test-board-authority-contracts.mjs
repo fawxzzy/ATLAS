@@ -11,6 +11,7 @@ import { validateContractSemantics } from "./lib/validate-semantics.mjs";
 import {
   COMMIT_CLOSURE_ORDER,
   TARGET_CONTRACTS,
+  V2_CONTRACT_BASELINE,
   projectInitialCardRecordV3,
   validateCardRecordV3,
   validateProjectionAckAgainstDelivery,
@@ -75,6 +76,7 @@ const delivery = validArtifacts.get("atlas.projection-delivery.v1");
 const ack = validArtifacts.get("atlas.projection-ack.v1");
 const control = validArtifacts.get("atlas.control-board-read-model.v1");
 const cardSchema = await loadKnownSchema("atlas.card-record.v3");
+const commitSchema = await loadKnownSchema("atlas.board-commit-receipt.v1");
 const migrationSchema = await loadKnownSchema("atlas.board-authority-migration.v1");
 const eventSchema = await loadKnownSchema("atlas.card-event.v3");
 const deliverySchema = await loadKnownSchema("atlas.projection-delivery.v1");
@@ -285,6 +287,40 @@ for (const testCase of controlIdentityCases) {
 }
 
 const migration = validArtifacts.get("atlas.board-authority-migration.v1");
+assert.deepEqual(migration.v2_contract_baseline, V2_CONTRACT_BASELINE);
+const baselineDriftCases = [
+  { label: "frozen baseline canonical", mutate: () => {}, valid: true },
+  { label: "baseline base commit drift", mutate: (candidate) => { candidate.v2_contract_baseline.base_commit = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"; } },
+  { label: "baseline selection rule drift", mutate: (candidate) => { candidate.v2_contract_baseline.selection_rule = "Different selection."; } },
+  { label: "baseline file count drift", mutate: (candidate) => { candidate.v2_contract_baseline.file_count += 1; } },
+  { label: "baseline path digest drift", mutate: (candidate) => { candidate.v2_contract_baseline.path_set_digest = "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"; } },
+  { label: "baseline tree digest drift", mutate: (candidate) => { candidate.v2_contract_baseline.tree_digest = "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"; } },
+  { label: "baseline protected group drift", mutate: (candidate) => { candidate.v2_contract_baseline.protected_path_groups.reverse(); } },
+];
+for (const testCase of baselineDriftCases) {
+  const candidate = structuredClone(migration);
+  testCase.mutate(candidate);
+  assert.deepEqual(validateJsonSchema(candidate, migrationSchema.schema), [], `${testCase.label} schema`);
+  const errors = validateContractSemantics("atlas.board-authority-migration.v1", candidate);
+  if (testCase.valid) {
+    assert.deepEqual(errors, [], testCase.label);
+  } else {
+    assert(errors.some((error) => error.includes("frozen ATLAS-BOARD-000 baseline")), `${testCase.label}: ${errors.join(" | ")}`);
+  }
+}
+const migrationIdentityCases = [
+  { label: "migration ID drift", mutate: (candidate) => { candidate.migration_id = "other-migration"; } },
+  { label: "import ID drift", mutate: (candidate) => { candidate.one_time_import.import_id = "other-import"; } },
+  { label: "import idempotency drift", mutate: (candidate) => { candidate.one_time_import.idempotency_key = "other-key"; } },
+  { label: "cutover gate drift", mutate: (candidate) => { candidate.cutover.gate_ids.reverse(); } },
+];
+for (const testCase of migrationIdentityCases) {
+  const candidate = structuredClone(migration);
+  testCase.mutate(candidate);
+  assert.deepEqual(validateJsonSchema(candidate, migrationSchema.schema), [], `${testCase.label} schema`);
+  const errors = validateContractSemantics("atlas.board-authority-migration.v1", candidate);
+  assert(errors.some((error) => error.includes("identities must remain frozen")), `${testCase.label}: ${errors.join(" | ")}`);
+}
 const prematureActiveMigration = structuredClone(migration);
 prematureActiveMigration.phase = "v3-active";
 prematureActiveMigration.cutover.status = "active";
@@ -316,6 +352,27 @@ activeMigration.first_v3_acceptance = {
 activeMigration.rollback.current_mode = "v3-restore-replay-only";
 activeMigration.cutover.status = "active";
 assert.deepEqual(validateContractSemantics("atlas.board-authority-migration.v1", activeMigration), []);
+
+const migrationChronologyCases = [
+  { label: "ordered migration chronology", capturedAt: "2026-07-17T12:01:00Z", importedAt: "2026-07-17T12:05:00Z", acceptedAt: "2026-07-17T12:06:00Z", valid: true },
+  { label: "equal migration milestones", capturedAt: migration.created_at, importedAt: migration.created_at, acceptedAt: migration.created_at, valid: true },
+  { label: "snapshot before migration creation", capturedAt: "2026-07-17T11:59:59Z", importedAt: "2026-07-17T12:05:00Z", acceptedAt: "2026-07-17T12:06:00Z", error: "capture cannot precede migration creation" },
+  { label: "import before snapshot capture", capturedAt: "2026-07-17T12:05:00Z", importedAt: "2026-07-17T12:04:00Z", acceptedAt: "2026-07-17T12:06:00Z", error: "import cannot precede V2 authority snapshot capture" },
+  { label: "acceptance before verified import", capturedAt: "2026-07-17T12:01:00Z", importedAt: "2026-07-17T12:05:00Z", acceptedAt: "2026-07-17T12:04:00Z", error: "acceptance cannot precede verified one-time baseline import" },
+];
+for (const testCase of migrationChronologyCases) {
+  const candidate = structuredClone(activeMigration);
+  candidate.v2_authority_snapshot.captured_at = testCase.capturedAt;
+  candidate.one_time_import.imported_at = testCase.importedAt;
+  candidate.first_v3_acceptance.accepted_at = testCase.acceptedAt;
+  assert.deepEqual(validateJsonSchema(candidate, migrationSchema.schema), [], `${testCase.label} schema`);
+  const errors = validateContractSemantics("atlas.board-authority-migration.v1", candidate);
+  if (testCase.valid) {
+    assert.deepEqual(errors, [], testCase.label);
+  } else {
+    assert(errors.some((error) => error.includes(testCase.error)), `${testCase.label}: ${errors.join(" | ")}`);
+  }
+}
 
 for (const fixtureRef of [
   "valid/board-authority-migration.v1.import-failed.json",
@@ -605,6 +662,26 @@ const duplicateControlErrors = await assertSemanticNegative(
   "invalid/control-board-read-model.v1.duplicate-card.json",
 );
 assert(duplicateControlErrors.some((error) => error.includes("duplicate identity")));
+
+const receiptSequenceErrors = await assertSemanticNegative(
+  "atlas.board-commit-receipt.v1",
+  commitSchema.schema,
+  "invalid/board-commit-receipt.v1.sequence-before-version.json",
+);
+assert(receiptSequenceErrors.some((error) => error.includes("cannot precede $.card_version")));
+const baselineDriftErrors = await assertSemanticNegative(
+  "atlas.board-authority-migration.v1",
+  migrationSchema.schema,
+  "invalid/board-authority-migration.v1.baseline-drift.json",
+);
+assert(baselineDriftErrors.some((error) => error.includes("frozen ATLAS-BOARD-000 baseline")));
+const migrationChronologyErrors = await assertSemanticNegative(
+  "atlas.board-authority-migration.v1",
+  migrationSchema.schema,
+  "invalid/board-authority-migration.v1.chronology-conflict.json",
+);
+assert(migrationChronologyErrors.some((error) => error.includes("import cannot precede")));
+assert(migrationChronologyErrors.some((error) => error.includes("acceptance cannot precede")));
 const migrationPhaseErrors = await assertSemanticNegative(
   "atlas.board-authority-migration.v1",
   migrationSchema.schema,
@@ -632,5 +709,5 @@ assert(validateContractSemantics("atlas.rollover-manifest.v1", livePredecessorRo
 ));
 
 console.log(
-  `ATLAS board authority contract tests passed (${archiveTransitionCases.length} lifecycle, ${receiptCases.length} receipt, ${eventVersionCases.length} version, ${projectionDeliveryCases.length} projection, ${ackChronologyCases.length} acknowledgement chronology, ${controlIdentityCases.length} control identity matrix cases).`,
+  `ATLAS board authority contract tests passed (${archiveTransitionCases.length} lifecycle, ${receiptCases.length} receipt provenance, ${eventVersionCases.length} event version, ${projectionDeliveryCases.length} projection, ${ackChronologyCases.length} acknowledgement chronology, ${controlIdentityCases.length} control identity, ${baselineDriftCases.length} v2 baseline, ${migrationIdentityCases.length} migration identity, ${migrationChronologyCases.length} migration chronology matrix cases).`,
 );

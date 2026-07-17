@@ -20,6 +20,32 @@ const TARGET_CONTRACTS = Object.freeze([
   "atlas.rollover-manifest.v1",
 ]);
 
+const V2_CONTRACT_BASELINE = Object.freeze({
+  base_commit: "4617c67b367b04dbc287ab2b20b23469e3ec37b7",
+  selection_rule: "All tracked paths containing v2 plus the frozen native board correlation pair and named historical marker snapshots.",
+  file_count: 63,
+  path_set_digest: "sha256:b7e427c102012241b71a296dba55c95ef64aa10f42cd9fdb75d75091bc9c77fe",
+  tree_digest: "sha256:736271a2e95b5151b57bc6a34db732c49deee8e24ee3dedb4494575044528609",
+  protected_path_groups: Object.freeze([
+    "**/*v2*",
+    "ops/atlas/native_board_correlation.mjs",
+    "tests/test_atlas_native_board_correlation.mjs",
+    "docs/audits/ATLAS-FULL-SYSTEM-OPENING-AUDIT-2026-07-12.md",
+    "docs/memory/initiatives/continuity-manifest-atlas-full-system-re-evaluation.json",
+    "docs/ops/ATLAS-MARKER-INTEGRITY-51-FAMILY-100-PERCENT-CLOSEOUT-2026-07-15.md",
+  ]),
+});
+
+const MIGRATION_ID = "atlas-board-authority-v3";
+const BASELINE_IMPORT_ID = "atlas-board-v2-baseline-import";
+const BASELINE_IMPORT_IDEMPOTENCY_KEY = "atlas-board-v2-baseline-import:v1";
+const CUTOVER_GATE_IDS = Object.freeze([
+  "ATLAS-BOARD-001",
+  "DOS-PROJ-001",
+  "ATLAS-CONTROL-001",
+  "ATLAS-CUTOVER-001",
+]);
+
 function duplicateValues(values) {
   const seen = new Set();
   const duplicates = new Set();
@@ -249,6 +275,9 @@ export function validateBoardCommitReceiptV1(receipt) {
   if (receipt.card_version !== receipt.expected_version + 1) {
     errors.push("$.card_version must equal $.expected_version + 1");
   }
+  if (receipt.event_sequence < receipt.card_version) {
+    errors.push("BoardCommitReceipt $.event_sequence cannot precede $.card_version");
+  }
   if (receipt.projection_gates_engineering !== false || receipt.engineering_closed !== true) {
     errors.push("Accepted local commit must close engineering without projection gating");
   }
@@ -410,6 +439,24 @@ export function validateProjectionAckAgainstDelivery(ack, delivery) {
 
 export function validateBoardAuthorityMigrationV1(migration) {
   const errors = [];
+  const baseline = migration.v2_contract_baseline;
+  const baselineScalarKeys = [
+    "base_commit",
+    "selection_rule",
+    "file_count",
+    "path_set_digest",
+    "tree_digest",
+  ];
+  if (baselineScalarKeys.some((key) => baseline[key] !== V2_CONTRACT_BASELINE[key])
+    || !sameArray(baseline.protected_path_groups, V2_CONTRACT_BASELINE.protected_path_groups)) {
+    errors.push("$.v2_contract_baseline must exactly equal the frozen ATLAS-BOARD-000 baseline");
+  }
+  if (migration.migration_id !== MIGRATION_ID
+    || migration.one_time_import.import_id !== BASELINE_IMPORT_ID
+    || migration.one_time_import.idempotency_key !== BASELINE_IMPORT_IDEMPOTENCY_KEY
+    || !sameArray(migration.cutover.gate_ids, CUTOVER_GATE_IDS)) {
+    errors.push("Migration, one-time import, idempotency, and cutover gate identities must remain frozen");
+  }
   if (!sameArray(migration.target_contracts, TARGET_CONTRACTS)) {
     errors.push(`$.target_contracts must exactly freeze ${TARGET_CONTRACTS.join(", ")}`);
   }
@@ -547,6 +594,23 @@ export function validateBoardAuthorityMigrationV1(migration) {
   if (migration.phase !== "planned" && migration.v2_authority_snapshot.status !== "available") {
     errors.push(`Migration phase ${migration.phase} requires an available v2 authority snapshot`);
   }
+  const createdAt = Date.parse(migration.created_at);
+  const capturedAt = migration.v2_authority_snapshot.captured_at === null
+    ? null
+    : Date.parse(migration.v2_authority_snapshot.captured_at);
+  const importedAt = baselineImport.imported_at === null ? null : Date.parse(baselineImport.imported_at);
+  const acceptedAt = migration.first_v3_acceptance.accepted_at === null
+    ? null
+    : Date.parse(migration.first_v3_acceptance.accepted_at);
+  if (capturedAt !== null && capturedAt < createdAt) {
+    errors.push("V2 authority snapshot capture cannot precede migration creation");
+  }
+  if (capturedAt !== null && importedAt !== null && importedAt < capturedAt) {
+    errors.push("One-time baseline import cannot precede V2 authority snapshot capture");
+  }
+  if (importedAt !== null && acceptedAt !== null && acceptedAt < importedAt) {
+    errors.push("First v3 acceptance cannot precede verified one-time baseline import");
+  }
   return errors;
 }
 
@@ -632,4 +696,4 @@ export const boardAuthoritySemanticValidators = Object.freeze({
   "atlas.rollover-manifest.v1": validateRolloverManifestV1,
 });
 
-export { COMMIT_CLOSURE_ORDER, TARGET_CONTRACTS };
+export { COMMIT_CLOSURE_ORDER, TARGET_CONTRACTS, V2_CONTRACT_BASELINE };

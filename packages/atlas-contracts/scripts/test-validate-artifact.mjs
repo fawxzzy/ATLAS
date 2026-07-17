@@ -190,6 +190,34 @@ try {
       "VALID",
     );
   }
+  const receiptSequenceFailure = expectJson(
+    [
+      "--schema", "atlas.board-commit-receipt.v1",
+      "--artifact", fixture("invalid", "board-commit-receipt.v1.sequence-before-version.json"),
+    ],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  assert(receiptSequenceFailure.errors.some((error) => error.includes("cannot precede $.card_version")));
+  const migrationBaselineFailure = expectJson(
+    [
+      "--schema", "atlas.board-authority-migration.v1",
+      "--artifact", fixture("invalid", "board-authority-migration.v1.baseline-drift.json"),
+    ],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  assert(migrationBaselineFailure.errors.some((error) => error.includes("frozen ATLAS-BOARD-000 baseline")));
+  const migrationChronologyFailure = expectJson(
+    [
+      "--schema", "atlas.board-authority-migration.v1",
+      "--artifact", fixture("invalid", "board-authority-migration.v1.chronology-conflict.json"),
+    ],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  assert(migrationChronologyFailure.errors.some((error) => error.includes("import cannot precede")));
+  assert(migrationChronologyFailure.errors.some((error) => error.includes("acceptance cannot precede")));
   const unknownProjectionConflict = expectJson(
     [
       "--schema", "atlas.projection-delivery.v1",
