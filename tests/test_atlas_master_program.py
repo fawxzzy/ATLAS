@@ -28,23 +28,34 @@ class AtlasMasterProgramTests(unittest.TestCase):
         self.assertEqual([], MASTER_PROGRAM.validate_repository())
 
     def test_immutable_historical_guards_match_exact_merged_base_provenance(self) -> None:
+        git_available = subprocess.run(
+            ["git", "rev-parse", "--git-dir"],
+            cwd=ROOT,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            check=False,
+        ).returncode == 0
         for ref, expected in MASTER_PROGRAM.IMMUTABLE_FILE_GUARDS.items():
-            committed = subprocess.check_output(
-                ["git", "show", f"{MASTER_PROGRAM.BASE_COMMIT}:{ref}"],
-                cwd=ROOT,
-            )
-            self.assertEqual(expected, hashlib.sha256(committed).hexdigest(), ref)
-            self.assertEqual(expected, MASTER_PROGRAM._file_digest(ROOT / ref), ref)
-        for ref, field_guards in MASTER_PROGRAM.IMMUTABLE_JSON_FIELD_GUARDS.items():
-            committed = json.loads(
-                subprocess.check_output(
+            if git_available:
+                committed = subprocess.check_output(
                     ["git", "show", f"{MASTER_PROGRAM.BASE_COMMIT}:{ref}"],
                     cwd=ROOT,
-                ).decode("utf-8")
-            )
+                )
+                self.assertEqual(expected, hashlib.sha256(committed).hexdigest(), ref)
+            self.assertEqual(expected, MASTER_PROGRAM._file_digest(ROOT / ref), ref)
+        for ref, field_guards in MASTER_PROGRAM.IMMUTABLE_JSON_FIELD_GUARDS.items():
+            committed = None
+            if git_available:
+                committed = json.loads(
+                    subprocess.check_output(
+                        ["git", "show", f"{MASTER_PROGRAM.BASE_COMMIT}:{ref}"],
+                        cwd=ROOT,
+                    ).decode("utf-8")
+                )
             current = load_json(ref)
             for path, expected in field_guards.items():
-                self.assertEqual(expected, MASTER_PROGRAM._value_at_path(committed, path), ref)
+                if committed is not None:
+                    self.assertEqual(expected, MASTER_PROGRAM._value_at_path(committed, path), ref)
                 self.assertEqual(expected, MASTER_PROGRAM._value_at_path(current, path), ref)
         self.assertEqual([], MASTER_PROGRAM._validate_immutable_historical_provenance())
 
