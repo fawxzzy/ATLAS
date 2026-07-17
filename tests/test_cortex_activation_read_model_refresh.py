@@ -5,16 +5,21 @@ import hashlib
 import json
 import tempfile
 import unittest
+from dataclasses import replace
 from pathlib import Path
+from unittest import mock
 
 from ops._atlas import atlas_root
+from ops.cortex import activation_read_model_refresh as refresh_module
 from ops.cortex.activation_read_model_refresh import (
     CONTEXT_JSON_PATH,
     CURRENT_STATE_JSON_PATH,
     EVENT_PATH,
     OPERATOR_JSON_PATH,
     OUTPUT_PATHS,
+    READ_MODEL_OUTPUT_PATHS,
     RECEIPT_PATH,
+    RefreshBuild,
     RefreshError,
     build_refresh,
     write_or_check,
@@ -38,6 +43,16 @@ class CortexActivationReadModelRefreshTests(unittest.TestCase):
         temp = tempfile.TemporaryDirectory()
         self.addCleanup(temp.cleanup)
         return Path(temp.name)
+
+    def _build_with_matching_prior_outputs(self) -> tuple[RefreshBuild, dict[Path, bytes]]:
+        build = build_refresh(repo_root=self.root)
+        event = copy.deepcopy(build.event)
+        prior_outputs: dict[Path, bytes] = {}
+        for item, path in zip(event["prior_artifacts"], READ_MODEL_OUTPUT_PATHS, strict=True):
+            raw = f"prior artifact for {path.as_posix()}\n".encode("utf-8")
+            item["sha256"] = "sha256:" + hashlib.sha256(raw).hexdigest()
+            prior_outputs[path] = raw
+        return replace(build, event=event), prior_outputs
 
     def test_canonical_event_changes_exactly_step_6_and_selects_step_7(self) -> None:
         build = build_refresh(
@@ -143,6 +158,67 @@ class CortexActivationReadModelRefreshTests(unittest.TestCase):
                     [partial_path],
                     [path for path in OUTPUT_PATHS if (output_root / path).exists()],
                 )
+
+    def test_complete_matching_prior_set_is_admitted_for_exactly_one_refresh(self) -> None:
+        output_root = self._output_root()
+        build, prior_outputs = self._build_with_matching_prior_outputs()
+        for path, raw in prior_outputs.items():
+            target = output_root / path
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(raw)
+
+        with self.assertRaises(RefreshError) as raised:
+            write_or_check(build, output_root=output_root, check=True)
+        self.assertEqual("stale", raised.exception.classification)
+        self.assertEqual("output_drift", raised.exception.code)
+        self.assertEqual(
+            prior_outputs,
+            {path: (output_root / path).read_bytes() for path in READ_MODEL_OUTPUT_PATHS},
+        )
+
+        self.assertEqual("refreshed", write_or_check(build, output_root=output_root, check=False))
+        self.assertEqual(
+            build.outputs,
+            {path: (output_root / path).read_bytes() for path in OUTPUT_PATHS},
+        )
+        self.assertEqual("noop", write_or_check(build, output_root=output_root, check=False))
+
+    def test_mid_publish_failure_restores_prior_set_and_retry_succeeds(self) -> None:
+        output_root = self._output_root()
+        build, prior_outputs = self._build_with_matching_prior_outputs()
+        for path, raw in prior_outputs.items():
+            target = output_root / path
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(raw)
+
+        real_replace = refresh_module._replace_path
+        call_count = 0
+
+        def fail_second_publish(source: Path, target: Path) -> None:
+            nonlocal call_count
+            call_count += 1
+            if call_count == 2:
+                raise OSError("injected publication failure")
+            real_replace(source, target)
+
+        with mock.patch.object(refresh_module, "_replace_path", side_effect=fail_second_publish):
+            with self.assertRaises(RefreshError) as raised:
+                write_or_check(build, output_root=output_root, check=False)
+
+        self.assertEqual("write_failure", raised.exception.classification)
+        self.assertEqual("publication_failed_rolled_back", raised.exception.code)
+        self.assertEqual(
+            prior_outputs,
+            {path: (output_root / path).read_bytes() for path in READ_MODEL_OUTPUT_PATHS},
+        )
+        self.assertFalse((output_root / RECEIPT_PATH).exists())
+        self.assertFalse(any(path.name.startswith(".cortex-refresh-") for path in output_root.iterdir()))
+
+        self.assertEqual("refreshed", write_or_check(build, output_root=output_root, check=False))
+        self.assertEqual(
+            build.outputs,
+            {path: (output_root / path).read_bytes() for path in OUTPUT_PATHS},
+        )
 
 
 if __name__ == "__main__":

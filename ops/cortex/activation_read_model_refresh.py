@@ -9,6 +9,7 @@ import json
 import re
 import subprocess
 import sys
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 from typing import Any
@@ -798,6 +799,95 @@ def build_refresh(
     return RefreshBuild(event, event_digest, source_set_digest, outputs, receipt)
 
 
+def _matching_prior_output_set(build: RefreshBuild, *, output_root: Path) -> bool:
+    expected = {
+        Path(item["path"]): item["sha256"]
+        for item in build.event["prior_artifacts"]
+    }
+    return all(
+        (output_root / path).is_file()
+        and sha256_bytes((output_root / path).read_bytes()) == expected[path]
+        for path in READ_MODEL_OUTPUT_PATHS
+    )
+
+
+def _replace_path(source: Path, target: Path) -> None:
+    source.replace(target)
+
+
+def _rollback_outputs(
+    *,
+    output_root: Path,
+    stage_root: Path,
+    originals: dict[Path, bytes],
+) -> list[str]:
+    errors: list[str] = []
+    for index, path in enumerate(OUTPUT_PATHS):
+        target = output_root / path
+        try:
+            if path in originals:
+                rollback_source = stage_root / f"rollback-{index:02d}"
+                rollback_source.write_bytes(originals[path])
+                _replace_path(rollback_source, target)
+            elif target.exists():
+                target.unlink()
+        except OSError as exc:
+            errors.append(f"{path.as_posix()}: {exc}")
+    return errors
+
+
+def _publish_outputs(build: RefreshBuild, *, output_root: Path) -> None:
+    originals = {
+        path: (output_root / path).read_bytes()
+        for path in OUTPUT_PATHS
+        if (output_root / path).is_file()
+    }
+    try:
+        output_root.mkdir(parents=True, exist_ok=True)
+        for path in OUTPUT_PATHS:
+            (output_root / path).parent.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(
+            prefix=".cortex-refresh-",
+            dir=output_root,
+            ignore_cleanup_errors=True,
+        ) as temporary:
+            stage_root = Path(temporary)
+            staged: dict[Path, Path] = {}
+            for index, path in enumerate(OUTPUT_PATHS):
+                stage_path = stage_root / f"publish-{index:02d}"
+                stage_path.write_bytes(build.outputs[path])
+                staged[path] = stage_path
+            try:
+                for path in OUTPUT_PATHS:
+                    _replace_path(staged[path], output_root / path)
+            except OSError as exc:
+                rollback_errors = _rollback_outputs(
+                    output_root=output_root,
+                    stage_root=stage_root,
+                    originals=originals,
+                )
+                if rollback_errors:
+                    raise RefreshError(
+                        "write_failure",
+                        "publication_rollback_failed",
+                        "Cortex output publication failed and rollback was incomplete: "
+                        + "; ".join(rollback_errors),
+                    ) from exc
+                raise RefreshError(
+                    "write_failure",
+                    "publication_failed_rolled_back",
+                    f"Cortex output publication failed and the prior set was restored: {exc}",
+                ) from exc
+    except RefreshError:
+        raise
+    except OSError as exc:
+        raise RefreshError(
+            "write_failure",
+            "output_staging_failed",
+            f"Cortex outputs could not be staged; no output was published: {exc}",
+        ) from exc
+
+
 def write_or_check(build: RefreshBuild, *, output_root: Path, check: bool) -> str:
     root = output_root.resolve()
     matches = {
@@ -817,13 +907,17 @@ def write_or_check(build: RefreshBuild, *, output_root: Path, check: bool) -> st
             raise RefreshError("conflict", "duplicate_event_conflict", "Existing refresh receipt conflicts with this event.")
         raise RefreshError("conflict", "duplicate_output_conflict", "Existing outputs drifted for an already-recorded event.")
     if existing_targets:
-        raise RefreshError("conflict", "partial_output_conflict", "Partial outputs exist without the correlated refresh receipt.")
+        if set(existing_targets) != set(READ_MODEL_OUTPUT_PATHS):
+            raise RefreshError("conflict", "partial_output_conflict", "Partial outputs exist without the correlated refresh receipt.")
+        if not _matching_prior_output_set(build, output_root=root):
+            raise RefreshError(
+                "conflict",
+                "prior_output_conflict",
+                "Complete receipt-less outputs do not match the prior artifact digests admitted by the event.",
+            )
     if check:
         raise RefreshError("stale", "output_drift", "Expected event-refreshed Cortex outputs are missing or stale.")
-    for path, raw in build.outputs.items():
-        target = root / path
-        target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_bytes(raw)
+    _publish_outputs(build, output_root=root)
     return "refreshed"
 
 

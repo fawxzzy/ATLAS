@@ -28,7 +28,7 @@ reopened, rerun, or relabeled.
 - correlated receipt ref:
   `runtime/receipts/cortex/cortex-event-refresh.step-6.execution-receipt.v1.json`
 - event SHA-256: `sha256:9819f1aba325afbe5605df156b33de5ed16f626be6236b907f981f36a1f7e4da`
-- source-set SHA-256: `sha256:d567e1fe75dacddd0f415c9296518eb6912f6099824eff5a11818d56b8dff41e`
+- source-set SHA-256: `sha256:d2e0c5ecf70af88356c41abf1a0c33ca4fbd21fdcdd747554fc5406e0f692922`
 
 The source set binds the runtime-placement registry/schema, lane registry,
 marker book, existing Cortex current-state/context/operator primitives,
@@ -58,6 +58,10 @@ against the first unresolved step at the pinned registry blob.
 - duplicate-conflicting output or receipt: rejected without rewrite
 - partial output set without its correlated receipt: rejected without adding
   or rewriting any output
+- complete receipt-less prior set: admitted only when all six paths and hashes
+  exactly match the accepted event
+- publication failure: staged before replacement; any replaced output is rolled
+  back to its prior bytes before the failure is reported
 - accepted change cardinality: exactly one step
 
 The adapter is invoked directly for the accepted event. It has no polling loop,
@@ -67,15 +71,15 @@ daemon, scheduler, standing server, or second queue.
 
 | Artifact | Before generated | Before SHA-256 | After generated | After SHA-256 |
 | --- | --- | --- | --- | --- |
-| `runtime/cortex/current-state/latest.json` | `2026-07-06T06:22:19.476929Z` | `sha256:0daf01a2cbbeace49f73b3eb076e0e4daf3707fcff37c0c75fd3b1ef33d0a4d2` | `2026-07-17T03:32:30Z` | `sha256:3ea1990067f7c83df4923ac86dd29398bda1f2127b94e8b9353876239310eb19` |
-| `runtime/cortex/current-state/latest.md` | n/a | `sha256:dfc9cf5648f3948d49085128f1d4eb8efc1c7004ffa58e3d680cc9ce8da87c97` | `2026-07-17T03:32:30Z` | `sha256:4cfe7e38018e073803aadb78d9dde76dbbcfcd3b9e3710d6532974ca22b453a5` |
-| `runtime/cortex/context/latest.json` | `2026-07-06T06:22:20.080988Z` | `sha256:5048d222f5def6bffc6cd990945ad9e2e0454b59cf9ffecbeb29aa9e39270446` | `2026-07-17T03:32:30Z` | `sha256:c76fd06437e2a0afc96308b149bf36b4d866a08530944854a465127ef19e21c3` |
-| `runtime/cortex/context/latest.md` | n/a | `sha256:a7b4f706ca4d5007f7dbd821a9af3c16777826b4c0f0c877f2808848d35d3403` | `2026-07-17T03:32:30Z` | `sha256:90dcc5993d42b82d841967649b399808c6cd250d42dd99c467b4d25780f4a8b3` |
-| `runtime/cortex/operator-surface/latest.json` | `2026-07-06T06:22:20.443544Z` | `sha256:afeb7a2b1c70e74835e77be76e000b426750bba75572d0c6cb0511e932da5662` | `2026-07-17T03:32:30Z` | `sha256:5e20f35a5736481c8e4fc9988060654537aaf51fe04dc5d8096fbad853cd0663` |
-| `runtime/cortex/operator-surface/latest.md` | n/a | `sha256:a1d74ec515d0897d96dfd3a8191ca77a97946aa34c5819fd9482f1bd6b51b36f` | `2026-07-17T03:32:30Z` | `sha256:a5d529843fd10198a3ecbc18f72de3bb4242dc5ff35700b91b7aed914601dba5` |
+| `runtime/cortex/current-state/latest.json` | `2026-07-06T06:22:19.476929Z` | `sha256:0daf01a2cbbeace49f73b3eb076e0e4daf3707fcff37c0c75fd3b1ef33d0a4d2` | `2026-07-17T03:32:30Z` | `sha256:700582748fa4573cb8218fc38256bab57d68d8cf41d480f5f113c82d0a02bcbc` |
+| `runtime/cortex/current-state/latest.md` | n/a | `sha256:dfc9cf5648f3948d49085128f1d4eb8efc1c7004ffa58e3d680cc9ce8da87c97` | `2026-07-17T03:32:30Z` | `sha256:8ca0556c1f48bb18b05f29e02382aa7182b6b5ee5d23aca56eb2798f563aab4d` |
+| `runtime/cortex/context/latest.json` | `2026-07-06T06:22:20.080988Z` | `sha256:5048d222f5def6bffc6cd990945ad9e2e0454b59cf9ffecbeb29aa9e39270446` | `2026-07-17T03:32:30Z` | `sha256:317bf51ab0d5e1e4770d5a1dfaf332f3f08e33ec571812351af5a725bb02a19d` |
+| `runtime/cortex/context/latest.md` | n/a | `sha256:a7b4f706ca4d5007f7dbd821a9af3c16777826b4c0f0c877f2808848d35d3403` | `2026-07-17T03:32:30Z` | `sha256:b61cdef643fd44587fc003e9784c30f6e3554b3847f4b9ba8a1f2ac8f0591fbd` |
+| `runtime/cortex/operator-surface/latest.json` | `2026-07-06T06:22:20.443544Z` | `sha256:afeb7a2b1c70e74835e77be76e000b426750bba75572d0c6cb0511e932da5662` | `2026-07-17T03:32:30Z` | `sha256:3416416986a045bb9d9e81416aef796aeefd0835fc57ff2f14024a1900709bef` |
+| `runtime/cortex/operator-surface/latest.md` | n/a | `sha256:a1d74ec515d0897d96dfd3a8191ca77a97946aa34c5819fd9482f1bd6b51b36f` | `2026-07-17T03:32:30Z` | `sha256:e8bf4b10bce02a7b6244e665c135e03c22e8edbfbcaf779bfaf5fc6361401059` |
 
 Output-set digest:
-`sha256:3c1f4ae7493cc30264127a6a7bcee112a1e5c806a40e21f78fa5b72a2e4610a3`.
+`sha256:eca91713e36e335129f3e30443ed2f61abc7b3752ede8646f816919dd96d4553`.
 
 The read models preserve `UNKNOWN`, `blocked`, `stale`, and `pending` as distinct
 arrays. The stale Cortex-artifact UNKNOWN is resolved by this event. Other
@@ -102,7 +106,8 @@ inferred.
   validation: passed
 - pinned source-only runtime-placement semantic validation: passed
 - root QA unit tests: `78` passed
-- focused Cortex/runtime-placement/current-state tests: `41` passed
+- focused Cortex/runtime-placement/current-state tests: `43` passed, including
+  matching-prior admission plus injected mid-publication rollback and retry
 - owner-export tests: `6` passed; canonical replay reported `atlas_cards=36`,
   `cortex_cards=2`, and `discord_mutation_authorized=false`
 - authoritative source-only stack validation: `0` critical, `0` error, and

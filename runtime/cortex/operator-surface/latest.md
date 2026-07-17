@@ -1,7 +1,7 @@
 # Cortex Operator Surface
 
 - Generated: `2026-07-17T03:32:30Z`
-- JSON digest: `sha256:5e20f35a5736481c8e4fc9988060654537aaf51fe04dc5d8096fbad853cd0663`
+- JSON digest: `sha256:3416416986a045bb9d9e81416aef796aeefd0835fc57ff2f14024a1900709bef`
 - Next packet: `DiscordOS interaction-first reliability review`
 - Status: `pending`
 - Validation/owner health: `UNKNOWN`

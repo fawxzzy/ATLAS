@@ -13,7 +13,7 @@
     "commit": "90f9de1dd55fe17b8fd2623b71193a6cc332e8f1",
     "tree": "3ef6ec258d17d034ca8b42e6cc7214df84b2fe48"
   },
-  "source_set_digest": "sha256:d567e1fe75dacddd0f415c9296518eb6912f6099824eff5a11818d56b8dff41e",
+  "source_set_digest": "sha256:d2e0c5ecf70af88356c41abf1a0c33ca4fbd21fdcdd747554fc5406e0f692922",
   "source_components": [
     {
       "path": "docs/registry/ATLAS-RUNTIME-PLACEMENT-REGISTRY.v1.json",
@@ -96,8 +96,8 @@
       "path": "ops/cortex/activation_read_model_refresh.py",
       "revision": "refresh-transform",
       "git_blob": null,
-      "sha256": "sha256:612cadb0e84ea643c7f3a8a2efe42987a0a1e190fde4591575f74a04def5d345",
-      "byte_length": 38812
+      "sha256": "sha256:ac4d4edd0977bd219e340724abb6c88fa229f12ed8fb8daf101cca06f4b5c569",
+      "byte_length": 42282
     },
     {
       "path": "schemas/atlas.cortex.activation-state-event.v1.json",
@@ -167,44 +167,44 @@
   "generated_outputs": [
     {
       "path": "runtime/cortex/current-state/latest.json",
-      "sha256": "sha256:3ea1990067f7c83df4923ac86dd29398bda1f2127b94e8b9353876239310eb19",
+      "sha256": "sha256:700582748fa4573cb8218fc38256bab57d68d8cf41d480f5f113c82d0a02bcbc",
       "byte_length": 14257,
       "generated_at": "2026-07-17T03:32:30Z"
     },
     {
       "path": "runtime/cortex/current-state/latest.md",
-      "sha256": "sha256:4cfe7e38018e073803aadb78d9dde76dbbcfcd3b9e3710d6532974ca22b453a5",
+      "sha256": "sha256:8ca0556c1f48bb18b05f29e02382aa7182b6b5ee5d23aca56eb2798f563aab4d",
       "byte_length": 580,
       "generated_at": "2026-07-17T03:32:30Z"
     },
     {
       "path": "runtime/cortex/context/latest.json",
-      "sha256": "sha256:c76fd06437e2a0afc96308b149bf36b4d866a08530944854a465127ef19e21c3",
+      "sha256": "sha256:317bf51ab0d5e1e4770d5a1dfaf332f3f08e33ec571812351af5a725bb02a19d",
       "byte_length": 7020,
       "generated_at": "2026-07-17T03:32:30Z"
     },
     {
       "path": "runtime/cortex/context/latest.md",
-      "sha256": "sha256:90dcc5993d42b82d841967649b399808c6cd250d42dd99c467b4d25780f4a8b3",
+      "sha256": "sha256:b61cdef643fd44587fc003e9784c30f6e3554b3847f4b9ba8a1f2ac8f0591fbd",
       "byte_length": 503,
       "generated_at": "2026-07-17T03:32:30Z"
     },
     {
       "path": "runtime/cortex/operator-surface/latest.json",
-      "sha256": "sha256:5e20f35a5736481c8e4fc9988060654537aaf51fe04dc5d8096fbad853cd0663",
+      "sha256": "sha256:3416416986a045bb9d9e81416aef796aeefd0835fc57ff2f14024a1900709bef",
       "byte_length": 19492,
       "generated_at": "2026-07-17T03:32:30Z"
     },
     {
       "path": "runtime/cortex/operator-surface/latest.md",
-      "sha256": "sha256:a5d529843fd10198a3ecbc18f72de3bb4242dc5ff35700b91b7aed914601dba5",
+      "sha256": "sha256:e8bf4b10bce02a7b6244e665c135e03c22e8edbfbcaf779bfaf5fc6361401059",
       "byte_length": 352,
       "generated_at": "2026-07-17T03:32:30Z"
     }
   ],
   "deterministic_replay": {
     "same_inputs_byte_stable": true,
-    "output_set_digest": "sha256:3c1f4ae7493cc30264127a6a7bcee112a1e5c806a40e21f78fa5b72a2e4610a3",
+    "output_set_digest": "sha256:eca91713e36e335129f3e30443ed2f61abc7b3752ede8646f816919dd96d4553",
     "idempotent_duplicate_outcome": "noop",
     "conflicting_duplicate_outcome": "rejected"
   },

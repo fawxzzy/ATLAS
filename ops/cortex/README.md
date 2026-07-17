@@ -59,7 +59,7 @@ Activation event refresh:
 
 - `activation_read_model_refresh.py` consumes one schema-valid, explicitly accepted activation-state event bound to an immutable ATLAS commit and registry blob.
 - It projects the principal current-state, context, and operator-surface `latest` artifacts from source-only authority. Mutable owner/runtime availability remains `UNKNOWN`; the projection never infers owner health.
-- A first valid event produces exactly one refresh receipt. Identical replay is a byte-stable no-op. Malformed, stale, non-accepted, partial, and duplicate-conflicting inputs fail before writes.
+- A first valid event produces exactly one refresh receipt. A receipt-less prior set is admitted only when all six event-named paths and hashes match; partial or mismatched sets fail before writes. Publication stages the full output set and restores prior bytes on a replacement failure. Identical replay is a byte-stable no-op, while malformed, stale, non-accepted, and duplicate-conflicting inputs fail before writes.
 - The adapter creates no daemon, scheduler, standing server, second queue, Discord/board write, owner-repository write, deployment, database access, or secret access.
 - Write and replay check:
 

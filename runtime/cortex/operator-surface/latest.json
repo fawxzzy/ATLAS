@@ -17,7 +17,7 @@
     "event_id": "cortex-event-refresh-step-6-accepted-90f9de1d",
     "event_digest": "sha256:9819f1aba325afbe5605df156b33de5ed16f626be6236b907f981f36a1f7e4da",
     "event_ref": "runtime/cortex/events/cortex-event-refresh.step-6.accepted.v1.json",
-    "source_set_digest": "sha256:d567e1fe75dacddd0f415c9296518eb6912f6099824eff5a11818d56b8dff41e",
+    "source_set_digest": "sha256:d2e0c5ecf70af88356c41abf1a0c33ca4fbd21fdcdd747554fc5406e0f692922",
     "transition": {
       "activation_step_id": "cortex-event-refresh",
       "from_status": "pending",
