@@ -96,6 +96,17 @@ try {
     "INVALID_ARTIFACT",
   );
   assert(emptyAck.errors.some((error) => error.includes("is required")));
+  const shortCircuitedEmptyAck = expectJson(
+    [
+      "--schema", "atlas.projection-ack.v1",
+      "--artifact", emptyArtifact,
+      "--projection-delivery", path.join(temporaryDir, "must-not-be-read.json"),
+    ],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  assert(shortCircuitedEmptyAck.errors.some((error) => error.includes("is required")));
+  assert(shortCircuitedEmptyAck.errors.every((error) => !error.includes("ProjectionDelivery")));
   const missingDeliveryContext = expectJson(
     ["--schema", "atlas.projection-ack.v1", "--artifact", fixture("valid", "projection-ack.v1.json")],
     1,
@@ -138,6 +149,15 @@ try {
     "INVALID_ARTIFACT",
   );
   assert(nullTransitionFrom.errors.some((error) => error.includes("Non-initial transitions require")));
+  const ambiguousOperations = expectJson(
+    [
+      "--schema", "atlas.card-event.v3",
+      "--artifact", fixture("invalid", "card-event.v3.ambiguous-operations.json"),
+    ],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  assert(ambiguousOperations.errors.some((error) => error.includes("duplicate blocker_id")));
   const unknownProjectionConflict = expectJson(
     [
       "--schema", "atlas.projection-delivery.v1",
@@ -147,6 +167,25 @@ try {
     "INVALID_ARTIFACT",
   );
   assert(unknownProjectionConflict.errors.some((error) => error.includes("Available UNKNOWN projection")));
+  const appliedDeliveryRetry = expectJson(
+    [
+      "--schema", "atlas.projection-delivery.v1",
+      "--artifact", fixture("invalid", "projection-delivery.v1.applied-retry.json"),
+    ],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  assert(appliedDeliveryRetry.errors.some((error) => error.includes("must be non-retryable")));
+  const appliedAckRetry = expectJson(
+    [
+      "--schema", "atlas.projection-ack.v1",
+      "--artifact", fixture("invalid", "projection-ack.v1.applied-retry.json"),
+      "--projection-delivery", projectionDeliveryFixture,
+    ],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  assert(appliedAckRetry.errors.some((error) => error.includes("must be non-retryable")));
   const malformedTerminalReceipt = expectJson(
     [
       "--schema", "atlas.rollover-manifest.v1",

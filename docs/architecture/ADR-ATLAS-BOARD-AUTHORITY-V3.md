@@ -43,7 +43,7 @@ There is no new general-purpose Atlas server. Foundation does not gain a dashboa
 | `atlas.control-board-read-model.v1` | Deterministic generated read model with explicit availability and queued/applied/stale/failed/`UNKNOWN` counts. |
 | `atlas.rollover-manifest.v1` | Predecessor/successor continuity and bounded-epoch archive gate while preserving stable standing anchors. |
 
-All schemas declare JSON Schema Draft 2020-12 and have schema-valid plus semantic-invalid focused fixtures. Semantic validation is part of the registered artifact validator. Schema-invalid artifacts return deterministic validation errors without semantic dereference; the validator enforces both `anyOf` and `oneOf` branches used by the registered family. Projection acknowledgements are context-dependent admission artifacts: the registered CLI requires the referenced `ProjectionDelivery`, validates that delivery, and rejects the acknowledgement unless every correlation field and payload digest match.
+All schemas declare JSON Schema Draft 2020-12 and have schema-valid plus semantic-invalid focused fixtures. Semantic validation is part of the registered artifact validator. Primary schema-invalid artifacts return deterministic validation errors before semantic dereference or any runtime/projection context read; the validator enforces both `anyOf` and `oneOf` branches used by the registered family. Projection acknowledgements are context-dependent admission artifacts: the registered CLI requires the referenced `ProjectionDelivery`, validates that delivery, and rejects the acknowledgement unless every correlation field and payload digest match.
 
 ## Local closure transaction
 
@@ -60,7 +60,7 @@ One writer holding the active board-writer lease performs this exact order insid
 
 An existing idempotency key returns the original accepted result and creates no second event, version, outbox row, or receipt. An expected-version mismatch rejects before append and creates no materialization, delivery, or accepted receipt. Any failure before commit rolls back all transaction-owned effects.
 
-Event sequence is monotonic and immutable. Card version equals `expected_version + 1`. Transition endpoints are restricted to the CardRecord lifecycle domain; only an initial transition may start from null, and no transition may target null or an unknown lifecycle. When both lifecycle `set` and `transition` operations are present, the materialized lifecycle must equal the transition target; conflicting operations reject before append. Replay orders events by event sequence, applies the frozen deterministic operations, verifies each resulting record digest, and fails closed on gaps, duplicates, version drift, or digest drift. JSONL export uses canonical UTF-8/LF serialization and is the canonical portable audit/export form; it is not transaction authority.
+Event sequence is monotonic and immutable. Card version equals `expected_version + 1`. Transition endpoints are restricted to the CardRecord lifecycle domain; only an initial transition may start from null, and no transition may target null or an unknown lifecycle. When both lifecycle `set` and `transition` operations are present, the materialized lifecycle must equal the transition target; conflicting operations reject before append. Added blocker, resource, and receipt identities are unique within an event, and one event cannot both add and remove the same blocker or resource. Replay orders events by event sequence, applies the frozen deterministic operations, verifies each resulting record digest, and fails closed on gaps, duplicates, version drift, or digest drift. JSONL export uses canonical UTF-8/LF serialization and is the canonical portable audit/export form; it is not transaction authority.
 
 ## Storage ADR
 
@@ -90,7 +90,7 @@ Alternatives rejected:
 
 Visible projection states are exactly `queued`, `applied`, `stale`, `failed`, and `UNKNOWN`. Unavailable evidence is always `UNKNOWN`; it is never converted to zero requests, healthy state, applied state, or empty-board truth. When the adapter is available but the result is `UNKNOWN`, touched-card readback must also be `UNKNOWN` and retain positive request count, observation time, and response digest evidence.
 
-Every delivery and acknowledgement binds card, event, sequence, version, idempotency key, attempt count, and payload digest. Critical-path readback fetches the exact touched card only and records request count plus response digest. Full-board scans are scheduled integrity work outside engineering closure. A partial projection failure retries only the failed delivery; it never replays the accepted local transaction or unrelated cards.
+Every delivery and acknowledgement binds card, event, sequence, version, idempotency key, attempt count, and payload digest. Critical-path readback fetches the exact touched card only and records request count plus response digest. Full-board scans are scheduled integrity work outside engineering closure. A partial projection failure retries only the failed delivery; an applied delivery or acknowledgement is non-retryable and has no next attempt. Retry never replays the accepted local transaction or unrelated cards.
 
 ## Failure matrix
 

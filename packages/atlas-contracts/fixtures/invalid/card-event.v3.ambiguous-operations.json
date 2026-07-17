@@ -1,0 +1,45 @@
+{
+  "contract_version": "atlas.card-event.v3",
+  "authority": "atlas-local-ledger",
+  "event_id": "event-atlas-board-000-ambiguous-operations",
+  "event_sequence": 2,
+  "card_id": "ATLAS-BOARD-000",
+  "project_id": "atlas",
+  "board_id": "atlas-control",
+  "epoch_id": "atlas-board-000-epoch-1",
+  "card_version": 2,
+  "idempotency_key": "board-commit:ATLAS-BOARD-000:ambiguous",
+  "expected_version": 1,
+  "event_type": "update",
+  "occurred_at": "2026-07-17T12:03:00Z",
+  "actor": {"kind": "worker", "id": "stack-root"},
+  "job_id": "job-atlas-board-000",
+  "lease_id": "lease-atlas-root-writer",
+  "execution_receipt": {
+    "receipt_id": "execution-atlas-board-000-ambiguous",
+    "digest": "sha256:1515151515151515151515151515151515151515151515151515151515151515",
+    "status": "succeeded"
+  },
+  "previous_record_digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+  "resulting_record_digest": "sha256:2626262626262626262626262626262626262626262626262626262626262626",
+  "changes": {
+    "set": {},
+    "transition": null,
+    "add_blockers": [
+      {"blocker_id": "blocker-1", "status": "open", "reason": "first", "evidence_ref": null},
+      {"blocker_id": "blocker-1", "status": "cleared", "reason": "conflicting", "evidence_ref": null}
+    ],
+    "remove_blocker_ids": ["blocker-1"],
+    "add_resources": [
+      {"resource_id": "resource-1", "kind": "writer-lease", "owner": "stack-root", "status": "claimed"},
+      {"resource_id": "resource-1", "kind": "writer-lease", "owner": "other", "status": "released"}
+    ],
+    "remove_resource_ids": ["resource-1"],
+    "add_receipts": [
+      {"receipt_id": "receipt-1", "digest": "sha256:1717171717171717171717171717171717171717171717171717171717171717"},
+      {"receipt_id": "receipt-1", "digest": "sha256:1818181818181818181818181818181818181818181818181818181818181818"}
+    ]
+  },
+  "projection_delivery_id": "projection-atlas-board-000-ambiguous",
+  "commit_receipt_id": "board-commit-atlas-board-000-ambiguous"
+}

@@ -246,6 +246,21 @@ export async function runArtifactValidator(argv) {
     throw error;
   }
 
+  const schemaErrors = validateJsonSchema(artifact, loadedSchema.schema);
+  if (schemaErrors.length > 0) {
+    return {
+      exitCode: exitCodes.INVALID_ARTIFACT,
+      result: makeResult({
+        ok: false,
+        code: "INVALID_ARTIFACT",
+        schema: schemaResult(loadedSchema.entry),
+        artifact: options.artifact,
+        errors: schemaErrors,
+      }),
+      json: options.json,
+    };
+  }
+
   const semanticContext = await loadRuntimeSourceContext(options.artifact, artifact);
   if (loadedSchema.entry.id === "atlas.projection-ack.v1") {
     if (!options.projectionDelivery) {
@@ -268,10 +283,7 @@ export async function runArtifactValidator(argv) {
       }
     }
   }
-  const schemaErrors = validateJsonSchema(artifact, loadedSchema.schema);
-  const errors = schemaErrors.length > 0
-    ? schemaErrors
-    : validateContractSemantics(loadedSchema.entry.id, artifact, semanticContext);
+  const errors = validateContractSemantics(loadedSchema.entry.id, artifact, semanticContext);
   if (errors.length > 0) {
     return {
       exitCode: exitCodes.INVALID_ARTIFACT,

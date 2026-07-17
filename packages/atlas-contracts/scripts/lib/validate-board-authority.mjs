@@ -131,6 +131,28 @@ export function validateCardEventV3(event) {
       errors.push(`$.changes.${key} contains duplicate id ${duplicate}`);
     }
   }
+  const addCollections = [
+    ["add_blockers", "blocker_id"],
+    ["add_resources", "resource_id"],
+    ["add_receipts", "receipt_id"],
+  ];
+  for (const [collection, idField] of addCollections) {
+    for (const duplicate of duplicateValues(changes[collection].map((item) => item[idField]))) {
+      errors.push(`$.changes.${collection} contains duplicate ${idField} ${duplicate}`);
+    }
+  }
+  const blockerRemovals = new Set(changes.remove_blocker_ids);
+  for (const blocker of changes.add_blockers) {
+    if (blockerRemovals.has(blocker.blocker_id)) {
+      errors.push(`$.changes cannot add and remove blocker_id ${blocker.blocker_id} in one event`);
+    }
+  }
+  const resourceRemovals = new Set(changes.remove_resource_ids);
+  for (const resource of changes.add_resources) {
+    if (resourceRemovals.has(resource.resource_id)) {
+      errors.push(`$.changes cannot add and remove resource_id ${resource.resource_id} in one event`);
+    }
+  }
   return errors;
 }
 
@@ -208,6 +230,9 @@ export function validateProjectionDeliveryV1(delivery) {
   if (delivery.state === "queued" && delivery.retry.attempt_count !== 0) {
     errors.push("Newly queued delivery must start at attempt_count 0");
   }
+  if (delivery.state === "applied" && (delivery.retry.retryable || delivery.retry.next_attempt_at !== null)) {
+    errors.push("Applied projection delivery must be non-retryable with no next attempt");
+  }
   return errors;
 }
 
@@ -218,6 +243,9 @@ export function validateProjectionAckV1(ack, context = {}) {
   }
   if (!ack.retryable && ack.next_attempt_at !== null) {
     errors.push("Non-retryable acknowledgement must not schedule a next attempt");
+  }
+  if (ack.state === "applied" && (ack.retryable || ack.next_attempt_at !== null)) {
+    errors.push("Applied projection acknowledgement must be non-retryable with no next attempt");
   }
   if (context.projectionDeliveryError) {
     errors.push(context.projectionDeliveryError);

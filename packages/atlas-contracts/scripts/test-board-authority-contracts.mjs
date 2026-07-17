@@ -181,6 +181,20 @@ const nullTransitionFromErrors = await assertSemanticNegative(
   "invalid/card-event.v3.null-transition-from.json",
 );
 assert(nullTransitionFromErrors.some((error) => error.includes("Non-initial transitions require")));
+const ambiguousOperationErrors = await assertSemanticNegative(
+  "atlas.card-event.v3",
+  eventSchema.schema,
+  "invalid/card-event.v3.ambiguous-operations.json",
+);
+for (const expected of [
+  "duplicate blocker_id blocker-1",
+  "duplicate resource_id resource-1",
+  "duplicate receipt_id receipt-1",
+  "add and remove blocker_id blocker-1",
+  "add and remove resource_id resource-1",
+]) {
+  assert(ambiguousOperationErrors.some((error) => error.includes(expected)));
+}
 const staleErrors = await assertSemanticNegative(
   "atlas.projection-delivery.v1",
   deliverySchema.schema,
@@ -193,6 +207,12 @@ const availableUnknownErrors = await assertSemanticNegative(
   "invalid/projection-delivery.v1.available-unknown-conflict.json",
 );
 assert(availableUnknownErrors.some((error) => error.includes("Available UNKNOWN projection")));
+const appliedDeliveryRetryErrors = await assertSemanticNegative(
+  "atlas.projection-delivery.v1",
+  deliverySchema.schema,
+  "invalid/projection-delivery.v1.applied-retry.json",
+);
+assert(appliedDeliveryRetryErrors.some((error) => error.includes("must be non-retryable")));
 const ackCorrelationErrors = await assertSemanticNegative(
   "atlas.projection-ack.v1",
   ackSchema.schema,
@@ -200,6 +220,13 @@ const ackCorrelationErrors = await assertSemanticNegative(
   { projectionDelivery: delivery },
 );
 assert(ackCorrelationErrors.some((error) => error.includes("payload_digest")));
+const appliedAckRetryErrors = await assertSemanticNegative(
+  "atlas.projection-ack.v1",
+  ackSchema.schema,
+  "invalid/projection-ack.v1.applied-retry.json",
+  { projectionDelivery: delivery },
+);
+assert(appliedAckRetryErrors.some((error) => error.includes("must be non-retryable")));
 const migrationPhaseErrors = await assertSemanticNegative(
   "atlas.board-authority-migration.v1",
   migrationSchema.schema,
