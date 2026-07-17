@@ -1,0 +1,262 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://schemas/atlas.text-corpus.inventory.v1.json",
+  "title": "ATLAS committed text corpus inventory v1",
+  "oneOf": [
+    {"$ref": "#/$defs/index_document"},
+    {"$ref": "#/$defs/component_document"}
+  ],
+  "$defs": {
+    "sha256_or_unknown": {
+      "oneOf": [
+        {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        {"const": "UNKNOWN"}
+      ]
+    },
+    "git_oid_or_unknown": {
+      "oneOf": [
+        {"type": "string", "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$"},
+        {"const": "UNKNOWN"}
+      ]
+    },
+    "unknown_reason": {
+      "oneOf": [
+        {"enum": ["SOURCE_PATH_UNAVAILABLE"]},
+        {"type": "null"}
+      ]
+    },
+    "count_or_unknown": {
+      "oneOf": [
+        {"type": "integer", "minimum": 0},
+        {"const": "UNKNOWN"}
+      ]
+    },
+    "counts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["total", "included", "excluded", "unknown", "exclusion_reasons"],
+      "properties": {
+        "total": {"$ref": "#/$defs/count_or_unknown"},
+        "included": {"$ref": "#/$defs/count_or_unknown"},
+        "excluded": {"$ref": "#/$defs/count_or_unknown"},
+        "unknown": {"$ref": "#/$defs/count_or_unknown"},
+        "exclusion_reasons": {
+          "oneOf": [
+            {
+              "type": "object",
+              "propertyNames": {"pattern": "^[A-Z][A-Z0-9_]*$"},
+              "additionalProperties": {"type": "integer", "minimum": 1}
+            },
+            {"const": "UNKNOWN"}
+          ]
+        }
+      }
+    },
+    "lifecycle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "supersedes", "superseded_by"],
+      "properties": {
+        "status": {"enum": ["active_at_pinned_commit", "excluded_at_pinned_commit", "UNKNOWN"]},
+        "supersedes": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+        "superseded_by": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true}
+      }
+    },
+    "record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "record_id",
+        "source_id",
+        "component_id",
+        "repository_owner",
+        "repository_name",
+        "relative_path",
+        "pinned_commit",
+        "git_object_id",
+        "git_blob_id",
+        "sha256",
+        "byte_size",
+        "media_type",
+        "content_type",
+        "source_class",
+        "authority_tier",
+        "privacy_class",
+        "indexing_profile",
+        "lifecycle",
+        "disposition",
+        "reason",
+        "provenance_ref",
+        "generator_version"
+      ],
+      "properties": {
+        "record_id": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "source_id": {"type": "string", "pattern": "^github:[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"},
+        "component_id": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+        "repository_owner": {"type": "string", "minLength": 1},
+        "repository_name": {"type": "string", "minLength": 1},
+        "relative_path": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^(?!/)(?![A-Za-z]:)(?!.*\\\\)(?!.*(?:^|/)\\.\\.(?:/|$)).+$"
+        },
+        "pinned_commit": {"type": "string", "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$"},
+        "git_object_id": {"$ref": "#/$defs/git_oid_or_unknown"},
+        "git_blob_id": {"$ref": "#/$defs/git_oid_or_unknown"},
+        "sha256": {"$ref": "#/$defs/sha256_or_unknown"},
+        "byte_size": {"$ref": "#/$defs/count_or_unknown"},
+        "media_type": {"type": "string", "minLength": 1},
+        "content_type": {"enum": ["text", "binary", "unknown", "not_applicable"]},
+        "source_class": {"type": "string", "pattern": "^[a-z0-9]+(?:_[a-z0-9]+)*$"},
+        "authority_tier": {"type": "string", "pattern": "^[a-z0-9]+(?:_[a-z0-9]+)*$"},
+        "privacy_class": {"enum": ["internal", "restricted", "UNKNOWN"]},
+        "indexing_profile": {"enum": ["metadata_and_digest", "metadata_only_excluded", "metadata_only_unknown"]},
+        "lifecycle": {"$ref": "#/$defs/lifecycle"},
+        "disposition": {"enum": ["included", "excluded", "UNKNOWN"]},
+        "reason": {"type": "string", "pattern": "^[A-Z0-9_]+$"},
+        "provenance_ref": {"type": "string", "pattern": "^github:[^\\s]+$"},
+        "generator_version": {"const": "atlas.text-corpus.inventory.generator.v1"}
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_id",
+        "component_id",
+        "repository_owner",
+        "repository_name",
+        "repository_ref",
+        "pinned_commit",
+        "tree_oid",
+        "authority_tier",
+        "availability",
+        "unknown_reason"
+      ],
+      "properties": {
+        "source_id": {"type": "string", "minLength": 1},
+        "component_id": {"type": "string", "minLength": 1},
+        "repository_owner": {"type": "string", "minLength": 1},
+        "repository_name": {"type": "string", "minLength": 1},
+        "repository_ref": {"type": "string", "pattern": "^github:[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"},
+        "pinned_commit": {"type": "string", "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$"},
+        "tree_oid": {"$ref": "#/$defs/git_oid_or_unknown"},
+        "authority_tier": {"type": "string", "minLength": 1},
+        "availability": {"enum": ["available", "UNKNOWN"]},
+        "unknown_reason": {"$ref": "#/$defs/unknown_reason"}
+      }
+    },
+    "component_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_id",
+        "component_id",
+        "shard_ref",
+        "pinned_commit",
+        "tree_oid",
+        "authority_tier",
+        "availability",
+        "unknown_reason",
+        "counts",
+        "component_digest"
+      ],
+      "properties": {
+        "source_id": {"type": "string", "minLength": 1},
+        "component_id": {"type": "string", "minLength": 1},
+        "shard_ref": {"type": "string", "pattern": "^docs/registry/text-corpus/components/[a-z0-9-]+\\.v1\\.json$"},
+        "pinned_commit": {"type": "string", "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$"},
+        "tree_oid": {"$ref": "#/$defs/git_oid_or_unknown"},
+        "authority_tier": {"type": "string", "minLength": 1},
+        "availability": {"enum": ["available", "UNKNOWN"]},
+        "unknown_reason": {"$ref": "#/$defs/unknown_reason"},
+        "counts": {"$ref": "#/$defs/counts"},
+        "component_digest": {"$ref": "#/$defs/sha256_or_unknown"}
+      }
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_basis",
+        "body_storage",
+        "unavailable_semantics",
+        "doctrine_owner",
+        "inventory_owner",
+        "authority_widening",
+        "marker_movement"
+      ],
+      "properties": {
+        "source_basis": {"const": "committed_git_objects_only"},
+        "body_storage": {"const": "prohibited"},
+        "unavailable_semantics": {"const": "UNKNOWN"},
+        "doctrine_owner": {"const": "playbook"},
+        "inventory_owner": {"const": "atlas"},
+        "authority_widening": {"const": false},
+        "marker_movement": {"const": false}
+      }
+    },
+    "aggregate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_count", "available_source_count", "counts", "aggregate_digest"],
+      "properties": {
+        "source_count": {"const": 2},
+        "available_source_count": {"type": "integer", "minimum": 0, "maximum": 2},
+        "counts": {"$ref": "#/$defs/counts"},
+        "aggregate_digest": {"$ref": "#/$defs/sha256_or_unknown"}
+      }
+    },
+    "index_document": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "document_kind",
+        "inventory_id",
+        "generator_version",
+        "policy",
+        "components",
+        "aggregate"
+      ],
+      "properties": {
+        "schema": {"const": "atlas.text-corpus.inventory.v1"},
+        "document_kind": {"const": "index"},
+        "inventory_id": {"const": "atlas-playbook-committed-text-pilot-v1"},
+        "generator_version": {"const": "atlas.text-corpus.inventory.generator.v1"},
+        "policy": {"$ref": "#/$defs/policy"},
+        "components": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {"$ref": "#/$defs/component_summary"}
+        },
+        "aggregate": {"$ref": "#/$defs/aggregate"}
+      }
+    },
+    "component_document": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "document_kind",
+        "inventory_id",
+        "generator_version",
+        "source",
+        "counts",
+        "component_digest",
+        "records"
+      ],
+      "properties": {
+        "schema": {"const": "atlas.text-corpus.inventory.v1"},
+        "document_kind": {"const": "component"},
+        "inventory_id": {"const": "atlas-playbook-committed-text-pilot-v1"},
+        "generator_version": {"const": "atlas.text-corpus.inventory.generator.v1"},
+        "source": {"$ref": "#/$defs/source"},
+        "counts": {"$ref": "#/$defs/counts"},
+        "component_digest": {"$ref": "#/$defs/sha256_or_unknown"},
+        "records": {"type": "array", "items": {"$ref": "#/$defs/record"}}
+      }
+    }
+  }
+}
