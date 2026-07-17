@@ -36,22 +36,39 @@ COMPONENT_PATHS = {
     "playbook": Path("docs/registry/text-corpus/components/playbook.v1.json"),
 }
 
+CONFIGURATION_MEDIA_TYPES = {
+    ".cfg": "text/plain",
+    ".conf": "text/plain",
+    ".editorconfig": "text/plain",
+    ".gitattributes": "text/plain",
+    ".gitignore": "text/plain",
+    ".ini": "text/plain",
+    ".json": "application/json",
+    ".jsonc": "application/json",
+    ".lock": "text/plain",
+    ".npmrc": "text/plain",
+    ".nvmrc": "text/plain",
+    ".prisma": "text/plain",
+    ".properties": "text/plain",
+    ".toml": "application/toml",
+    ".txt": "text/plain",
+    ".xml": "application/xml",
+    ".yaml": "application/yaml",
+    ".yml": "application/yaml",
+}
+
 TEXT_MEDIA_TYPES = {
+    **CONFIGURATION_MEDIA_TYPES,
     ".adoc": "text/asciidoc",
     ".bash": "text/x-shellscript",
     ".bat": "text/x-msdos-batch",
     ".c": "text/x-c",
-    ".cfg": "text/plain",
     ".cjs": "text/javascript",
     ".cmd": "text/x-msdos-batch",
-    ".conf": "text/plain",
     ".cpp": "text/x-c++",
     ".cs": "text/x-csharp",
     ".css": "text/css",
     ".csv": "text/csv",
-    ".editorconfig": "text/plain",
-    ".gitattributes": "text/plain",
-    ".gitignore": "text/plain",
     ".gql": "application/graphql",
     ".go": "text/x-go",
     ".graphql": "application/graphql",
@@ -59,23 +76,15 @@ TEXT_MEDIA_TYPES = {
     ".hpp": "text/x-c++",
     ".htm": "text/html",
     ".html": "text/html",
-    ".ini": "text/plain",
     ".java": "text/x-java-source",
     ".js": "text/javascript",
-    ".json": "application/json",
-    ".jsonc": "application/json",
     ".jsx": "text/jsx",
     ".kt": "text/x-kotlin",
     ".kts": "text/x-kotlin",
     ".less": "text/css",
-    ".lock": "text/plain",
     ".md": "text/markdown",
     ".mdx": "text/markdown",
     ".mjs": "text/javascript",
-    ".npmrc": "text/plain",
-    ".nvmrc": "text/plain",
-    ".prisma": "text/plain",
-    ".properties": "text/plain",
     ".proto": "text/x-protobuf",
     ".ps1": "text/x-powershell",
     ".py": "text/x-python",
@@ -87,14 +96,9 @@ TEXT_MEDIA_TYPES = {
     ".svelte": "text/plain",
     ".svg": "image/svg+xml",
     ".swift": "text/x-swift",
-    ".toml": "application/toml",
     ".ts": "text/typescript",
     ".tsx": "text/tsx",
-    ".txt": "text/plain",
     ".vue": "text/plain",
-    ".xml": "application/xml",
-    ".yaml": "application/yaml",
-    ".yml": "application/yaml",
 }
 
 SPECIAL_TEXT_NAMES = {
@@ -127,7 +131,7 @@ SECRET_NAMES = {
     "tokens.json",
 }
 SECRET_STEMS = {"credential", "credentials", "secret", "secrets", "token", "tokens"}
-SECRET_MANIFEST_SUFFIXES = {".cfg", ".conf", ".ini", ".json", ".toml", ".txt", ".yaml", ".yml"}
+SECRET_MANIFEST_SUFFIXES = frozenset(CONFIGURATION_MEDIA_TYPES)
 SECRET_SUFFIXES = {".asc", ".der", ".key", ".p12", ".pem", ".pfx"}
 RUNTIME_SEGMENTS = {".codex", ".playbook", "runtime", "tmp"}
 DEPENDENCY_SEGMENTS = {
@@ -825,7 +829,12 @@ def validate_index_semantics(index: Mapping[str, Any]) -> list[str]:
     if aggregate.get("available_source_count") != len(available):
         errors.append("available source count mismatch")
     if len(available) != len(components):
-        if aggregate.get("aggregate_digest") != UNKNOWN or aggregate.get("counts", {}).get("total") != UNKNOWN:
+        counts = aggregate.get("counts", {})
+        if (
+            aggregate.get("aggregate_digest") != UNKNOWN
+            or not isinstance(counts, dict)
+            or any(counts.get(field) != UNKNOWN for field in ("total", "included", "excluded", "unknown", "exclusion_reasons"))
+        ):
             errors.append("unavailable source denominator must remain UNKNOWN")
     else:
         expected_counts = {

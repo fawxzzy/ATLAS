@@ -92,12 +92,17 @@ class AtlasTextCorpusInventoryTests(unittest.TestCase):
             "secrets/key.txt": b"secret body\n",
             ".env.local": b"TOKEN=secret\n",
             "config/credentials.yml": b"password: secret\n",
-            "config/secret.toml": b"token = 'secret'\n",
+            "config/credentials.properties": b"password=secret\n",
             "config/secrets.yaml": b"password: secret\n",
             "config/token.json": b"{\"token\":\"secret\"}\n",
+            "config/token.npmrc": b"token=secret\n",
+            "config/token.xml": b"<token>secret</token>\n",
             "assets/fake.md": b"binary\x00body",
             "assets/logo.png": b"\x89PNG\r\n\x1a\n",
         }
+        fixture_files.update(
+            {f"config/secret{suffix}": b"protected configuration fixture\n" for suffix in sorted(inventory.SECRET_MANIFEST_SUFFIXES)}
+        )
         self.atlas_commit = _init_repo(self.atlas_repo, fixture_files, special_entries=True)
         self.playbook_commit = _init_repo(
             self.playbook_repo,
@@ -158,14 +163,17 @@ class AtlasTextCorpusInventoryTests(unittest.TestCase):
             "secrets/key.txt": "SECRET_SURFACE",
             ".env.local": "SECRET_SURFACE",
             "config/credentials.yml": "SECRET_SURFACE",
-            "config/secret.toml": "SECRET_SURFACE",
+            "config/credentials.properties": "SECRET_SURFACE",
             "config/secrets.yaml": "SECRET_SURFACE",
             "config/token.json": "SECRET_SURFACE",
+            "config/token.npmrc": "SECRET_SURFACE",
+            "config/token.xml": "SECRET_SURFACE",
             "assets/fake.md": "BINARY_CONTENT",
             "assets/logo.png": "UNSUPPORTED_MEDIA_TYPE",
             "linked.md": "SYMLINK_ENTRY",
             "nested-repo": "GITLINK_ENTRY",
         }
+        expected.update({f"config/secret{suffix}": "SECRET_SURFACE" for suffix in inventory.SECRET_MANIFEST_SUFFIXES})
         for path, reason in expected.items():
             with self.subTest(path=path):
                 self.assertEqual("excluded", records[path]["disposition"])
@@ -176,13 +184,19 @@ class AtlasTextCorpusInventoryTests(unittest.TestCase):
         self.assertNotIn("ignored.md", self._atlas_records())
 
     def test_secret_paths_are_rejected_before_blob_reads(self) -> None:
-        secret_paths = [
-            ".env.local",
-            "config/credentials.yml",
-            "config/secret.toml",
-            "config/secrets.yaml",
-            "config/token.json",
-        ]
+        protected_suffix_paths = {suffix: f"config/secret{suffix}" for suffix in inventory.SECRET_MANIFEST_SUFFIXES}
+        secret_paths = sorted(
+            {
+                ".env.local",
+                "config/credentials.yml",
+                "config/credentials.properties",
+                "config/secrets.yaml",
+                "config/token.json",
+                "config/token.npmrc",
+                "config/token.xml",
+                *protected_suffix_paths.values(),
+            }
+        )
         secret_oids = {
             _git(self.atlas_repo, "rev-parse", f"{self.atlas_commit}:{path}").decode().strip()
             for path in secret_paths
@@ -192,6 +206,10 @@ class AtlasTextCorpusInventoryTests(unittest.TestCase):
             inventory.build_component(self.specs[0], self.atlas_repo.resolve())
         requested = set(reader.call_args.args[1])
         self.assertTrue(secret_oids.isdisjoint(requested))
+        for suffix, path in protected_suffix_paths.items():
+            with self.subTest(suffix=suffix):
+                oid = _git(self.atlas_repo, "rev-parse", f"{self.atlas_commit}:{path}").decode().strip()
+                self.assertNotIn(oid, requested)
 
     def test_traversal_absolute_and_backslash_paths_are_rejected(self) -> None:
         for value in ("../escape.md", "docs/../escape.md", "/absolute.md", "C:/absolute.md", "docs\\file.md"):
@@ -328,6 +346,12 @@ class AtlasTextCorpusInventoryTests(unittest.TestCase):
         self.assertEqual(inventory.UNKNOWN, playbook["counts"]["total"])
         self.assertEqual(inventory.UNKNOWN, index["aggregate"]["counts"]["total"])
         self.assertEqual(inventory.UNKNOWN, index["aggregate"]["aggregate_digest"])
+        for field in ("total", "included", "excluded", "unknown", "exclusion_reasons"):
+            with self.subTest(field=field):
+                malformed = copy.deepcopy(index)
+                malformed["aggregate"]["counts"][field] = {} if field == "exclusion_reasons" else 0
+                errors = inventory.validate_index_semantics(malformed)
+                self.assertIn("unavailable source denominator must remain UNKNOWN", errors)
 
     def test_resolved_path_escape_regression_is_cross_platform_and_non_skipped(self) -> None:
         workspace = (self.base / "workspace").resolve()
