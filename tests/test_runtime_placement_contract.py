@@ -238,7 +238,10 @@ class RuntimePlacementContractTests(unittest.TestCase):
             try:
                 issues = contract._validate_evidence_refs(["escape/proof.md"], "test.evidence_refs", root)
             finally:
-                escape.rmdir()
+                if escape.is_symlink():
+                    escape.unlink()
+                else:
+                    escape.rmdir()
 
         self.assertIn("runtime-placement-evidence-outside-root", {issue.category for issue in issues})
 
