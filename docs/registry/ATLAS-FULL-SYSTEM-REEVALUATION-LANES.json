@@ -735,7 +735,8 @@
         "Destructive contraction",
         "Source disable or deletion",
         "Physical Discord database merge",
-        "Any irreversible action"
+        "Any irreversible action",
+        "Project-specific Vercel production deploy, promotion, rollback, or alias cutover"
       ],
       "serialization_rules": [
         "Owner source recovery precedes the parity ratchet; the parity ratchet precedes platform repository or rehearsal admission.",

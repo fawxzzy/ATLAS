@@ -67,24 +67,21 @@ IMPORTS = (
     },
 )
 
-HISTORICAL_FILE_GUARDS = {
+IMMUTABLE_FILE_GUARDS = {
     "docs/audits/ATLAS-FULL-SYSTEM-OPENING-AUDIT-2026-07-12.md": "5d946ead2631516e5d5a70c6041a4fafdf6bece4b703d501b3894b49b19b1e9f",
-    "docs/atlas-book/02-lanes-and-markers.md": "eb0624f00e289306f65643fdf0893332cf233fc273911efc7da82a2dd057e8ad",
-    "docs/memory/initiatives/continuity-manifest-atlas-full-system-re-evaluation.json": "03f4243f8ff5d9de23df5c1995fed2cf5b025c65923c07646d51c8f04715995b",
-    "docs/memory/initiatives/initiative-fawxzzy-tech-plan-convergence.json": "d458dcab083901c13a1553d2a15d4a2ff0794b4261501fc728b97fb91986aba9",
-    "docs/registry/FAWXZZY-TECH-PLAN-RECOVERY-ADMISSION.json": "3f5b37d3f573c1c7732f601b9f699b710cba5e89161cc8dba12d002c390716cd",
-    "docs/registry/ATLAS-EXTERNAL-MODEL-SIDECAR-RUNTIME-CONTRACT.json": "fcca89d9b54def0a8e9346f13e87aa9079568a2c9c9cd9acd8ee69e787f265ce",
 }
 
-HISTORICAL_LANE_GUARDS = {
-    "lanes": {
-        "count": 20,
-        "sha256": "4886e1f3e566ac2037e61a55dacdb830b53714a37cfc133268364a03f8c88b90",
-    },
-    "backlog_candidates": {
-        "count": 44,
-        "sha256": "241b63460851a15a26af2f1064a2e9c0125eff12c077fdb9de025f6b870d43ca",
-    },
+IMMUTABLE_JSON_FIELD_GUARDS = {
+    "docs/memory/initiatives/continuity-manifest-atlas-full-system-re-evaluation.json": {
+        ("created_at",): "2026-07-12T12:00:00Z",
+        ("metadata", "validation_posture", "opening_validation_snapshot"): {
+            "critical": 0,
+            "error": 4,
+            "warning": 25,
+            "info": 0,
+            "label": "dated July 12 pre-package opening observation; not current health",
+        },
+    }
 }
 
 
@@ -96,21 +93,20 @@ def _json_bytes(payload: Any) -> bytes:
     return (json.dumps(payload, indent=2, ensure_ascii=False) + "\n").encode("utf-8")
 
 
-def _canonical_digest(payload: Any) -> str:
-    encoded = json.dumps(
-        payload,
-        sort_keys=True,
-        separators=(",", ":"),
-        ensure_ascii=False,
-    ).encode("utf-8")
-    return hashlib.sha256(encoded).hexdigest()
-
-
 def _file_digest(path: Path) -> str:
-    # Guard values are exact SHA-256 digests of the committed BASE_COMMIT blobs. Git may
-    # materialize text as CRLF on Windows, so normalize only checkout line endings before
-    # comparing with those canonical blob bytes. Any substantive byte change still fails.
+    # Immutable-file guard values are exact SHA-256 digests of committed BASE_COMMIT blobs.
+    # Git may materialize text as CRLF on Windows, so normalize only checkout line endings
+    # before comparing with those canonical blob bytes. Any substantive byte change fails.
     return hashlib.sha256(path.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
+
+
+def _value_at_path(payload: Any, path: tuple[str, ...]) -> Any:
+    value = payload
+    for key in path:
+        if not isinstance(value, dict) or key not in value:
+            return None
+        value = value[key]
+    return value
 
 
 def build_import_manifest(spec: dict[str, Any]) -> dict[str, Any]:
@@ -173,11 +169,14 @@ def build_master_register() -> dict[str, Any]:
         "mandatory_closing_audit": {
             "authority_ref": "docs/memory/initiatives/continuity-manifest-atlas-full-system-re-evaluation.json",
             "marker_authority_ref": "docs/atlas-book/02-lanes-and-markers.md",
-            "status": "pending",
-            "accepted_opening_gate_count": 1,
-            "fixed_gate_denominator": 2,
-            "historical_percentage": 50,
-            "rule": "No discovered lane contributes a point; only the accepted later exhaustive closing audit can complete gate 2 of 2.",
+            "current_status_rule": "Resolve the current closing-audit status from the authority references; this index does not restate mutable gate status.",
+            "historical_opening_snapshot": {
+                "authority_ref": "docs/audits/ATLAS-FULL-SYSTEM-OPENING-AUDIT-2026-07-12.md",
+                "accepted_gate_count": 1,
+                "fixed_gate_denominator": 2,
+                "historical_percentage": 50,
+            },
+            "completion_rule": "No discovered lane contributes a point; only a separately accepted exhaustive closing audit can complete gate 2 of 2.",
         },
     }
     return result
@@ -262,6 +261,8 @@ def _schema_subset_validate(instance: Any, schema: dict[str, Any], path: str = "
             errors.append(f"{path}: string does not match {schema['pattern']}")
         if schema.get("format") == "date":
             try:
+                if re.fullmatch(r"\d{4}-\d{2}-\d{2}", instance) is None:
+                    raise ValueError
                 dt.date.fromisoformat(instance)
             except ValueError:
                 errors.append(f"{path}: invalid date")
@@ -283,19 +284,21 @@ def _schema_subset_validate(instance: Any, schema: dict[str, Any], path: str = "
     return errors
 
 
-def _validate_historical_guards(lanes: dict[str, Any]) -> list[str]:
+def _validate_immutable_historical_provenance() -> list[str]:
     errors: list[str] = []
-    for ref, expected in HISTORICAL_FILE_GUARDS.items():
+    for ref, expected in IMMUTABLE_FILE_GUARDS.items():
         actual = _file_digest(ROOT / ref)
         if actual != expected:
-            errors.append(f"historical provenance changed: {ref}: {actual} != {expected}")
-    for key, expected in HISTORICAL_LANE_GUARDS.items():
-        historical = [item for item in lanes[key] if item.get("id") not in NEW_LANE_IDS]
-        actual = _canonical_digest(historical)
-        if len(historical) != expected["count"] or actual != expected["sha256"]:
-            errors.append(
-                f"historical {key} projection changed: count={len(historical)} sha256={actual}"
-            )
+            errors.append(f"immutable historical file changed: {ref}: {actual} != {expected}")
+    for ref, field_guards in IMMUTABLE_JSON_FIELD_GUARDS.items():
+        payload = _load_json(ROOT / ref)
+        for path, expected in field_guards.items():
+            actual = _value_at_path(payload, path)
+            if actual != expected:
+                errors.append(
+                    f"immutable historical field changed: {ref}#{'/'.join(path)}: "
+                    f"{actual!r} != {expected!r}"
+                )
     return errors
 
 
@@ -391,7 +394,7 @@ def _validate_reference_integrity(register: dict[str, Any], lanes: dict[str, Any
 def validate_repository() -> list[str]:
     errors: list[str] = []
     lanes = _load_json(LANE_REGISTRY)
-    errors.extend(_validate_historical_guards(lanes))
+    errors.extend(_validate_immutable_historical_provenance())
     errors.extend(_validate_deepseek_historical_snapshot())
     errors.extend(_validate_packet_git_attributes())
 

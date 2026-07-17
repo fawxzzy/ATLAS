@@ -30,7 +30,7 @@
     "scope": "identity, data, RLS, billing, cross-service Auth, canonical ledger, backup/restore, rehearsal, previews, cutover, observation, rollback, quarantine, retirement, and deletion gates",
     "dependencies": ["FP-DOS-REC-001", "FP-MZR-REC-001", "FP-FIT-REC-001", "FP-PARITY-RATCHET-001"],
     "serialization": ["FP-DOS-REC-001", "FP-MZR-REC-001", "FP-FIT-REC-001", "FP-PARITY-RATCHET-001", "platform repository admission", "isolated rehearsal", "separately approved production gates"],
-    "approval_gates": ["paid project", "production Auth/OAuth", "production data cutover", "maintenance", "breaking secret rotation", "destructive contraction", "source disable/delete", "physical Discord merge", "irreversible action"],
+    "approval_gates": ["paid project", "production Auth/OAuth", "production data cutover", "maintenance", "breaking secret rotation", "destructive contraction", "source disable/delete", "physical Discord merge", "irreversible action", "project-specific Vercel production deploy/promotion/rollback/alias cutover"],
     "definition_of_done": ["All recovery and parity packets close.", "Backup/restore and isolated rehearsal pass.", "Cutover, observation, rollback, quarantine, and retirement decisions have current accepted evidence and approval."],
     "status": "HOLD",
     "next_packet": "FP-DOS-REC-001",
