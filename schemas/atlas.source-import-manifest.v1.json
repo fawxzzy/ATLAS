@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://schemas/atlas.source-import-manifest.v1.json",
+  "title": "ATLAS byte-preserved source import manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "import_id",
+    "source",
+    "stored",
+    "copy_policy",
+    "trust_classification",
+    "review_status",
+    "derived_artifacts"
+  ],
+  "properties": {
+    "schema": {
+      "const": "atlas.source-import-manifest.v1"
+    },
+    "import_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "logical_locator",
+        "original_filename",
+        "received_on",
+        "bytes",
+        "sha256",
+        "machine_specific_path_committed"
+      ],
+      "properties": {
+        "logical_locator": {"type": "string", "minLength": 1},
+        "original_filename": {"type": "string", "minLength": 1},
+        "received_on": {"type": "string", "format": "date"},
+        "bytes": {"type": "integer", "minimum": 0},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "machine_specific_path_committed": {"const": false}
+      }
+    },
+    "stored": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "bytes",
+        "sha256",
+        "encoding",
+        "bom",
+        "line_endings",
+        "line_count",
+        "terminal_newline"
+      ],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "bytes": {"type": "integer", "minimum": 0},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "encoding": {"const": "utf-8"},
+        "bom": {"type": "boolean"},
+        "line_endings": {"enum": ["lf", "crlf", "mixed", "none"]},
+        "line_count": {"type": "integer", "minimum": 0},
+        "terminal_newline": {"type": "boolean"}
+      }
+    },
+    "copy_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["byte_for_byte", "normalization", "fail_closed"],
+      "properties": {
+        "byte_for_byte": {"const": true},
+        "normalization": {"const": false},
+        "fail_closed": {"const": true}
+      }
+    },
+    "trust_classification": {
+      "type": "string",
+      "minLength": 1
+    },
+    "review_status": {
+      "type": "string",
+      "minLength": 1
+    },
+    "derived_artifacts": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1}
+    }
+  }
+}

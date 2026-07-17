@@ -1,0 +1,35 @@
+{
+  "schema": "atlas.source-import-manifest.v1",
+  "import_id": "fawxzzy-platform-supabase-migration-prompt-2026-07-16",
+  "source": {
+    "logical_locator": "operator-download:ATLAS_MAIN_FAWXZZY_PLATFORM_SUPABASE_MIGRATION_PROMPT_2026-07-16.md",
+    "original_filename": "ATLAS_MAIN_FAWXZZY_PLATFORM_SUPABASE_MIGRATION_PROMPT_2026-07-16.md",
+    "received_on": "2026-07-16",
+    "bytes": 37988,
+    "sha256": "e79f9b1506e79fff5910520fec1652cedb123eac1bbaf3d77a18943f46d0da99",
+    "machine_specific_path_committed": false
+  },
+  "stored": {
+    "path": "data/imports/fawxzzy-platform/2026-07-16/ATLAS_MAIN_FAWXZZY_PLATFORM_SUPABASE_MIGRATION_PROMPT_2026-07-16.md",
+    "bytes": 37988,
+    "sha256": "e79f9b1506e79fff5910520fec1652cedb123eac1bbaf3d77a18943f46d0da99",
+    "encoding": "utf-8",
+    "bom": false,
+    "line_endings": "lf",
+    "line_count": 1520,
+    "terminal_newline": true
+  },
+  "copy_policy": {
+    "byte_for_byte": true,
+    "normalization": false,
+    "fail_closed": true
+  },
+  "trust_classification": "operator-provided-program-proposal-input",
+  "review_status": "admitted-as-provenance-not-implementation-authority",
+  "derived_artifacts": [
+    "docs/registry/FAWXZZY-PLATFORM-MIGRATION-ADMISSION.json",
+    "docs/memory/initiatives/initiative-fawxzzy-platform-migration.json",
+    "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json",
+    "docs/registry/ATLAS-MASTER-PROGRAM-REGISTER.v1.json"
+  ]
+}

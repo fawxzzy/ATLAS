@@ -1,0 +1,45 @@
+{
+  "contract_version": "atlas.initiative.v1",
+  "id": "initiative-fawxzzy-platform-migration",
+  "title": "FawxzzyPlatform Migration",
+  "summary": "Govern a Fitness-seeded FawxzzyPlatform migration through serialized source recovery, parity, backup/restore, rehearsal, separately approved cutover, observation, rollback, quarantine, and separately approved retirement without creating a fourth blank project or physically merging DiscordOS by default.",
+  "status": "hold-parity-recovery-required",
+  "owner": "stack-root coordinator and serialized owner lanes",
+  "created_at": "2026-07-16T23:26:40Z",
+  "updated_at": "2026-07-16T23:26:40Z",
+  "related_plan_refs": [],
+  "related_decision_refs": [],
+  "related_hypothesis_refs": [],
+  "related_session_refs": [],
+  "related_attention_refs": [],
+  "evidence_refs": [
+    "data/imports/fawxzzy-platform/2026-07-16/IMPORT-MANIFEST.json",
+    "docs/registry/FAWXZZY-PLATFORM-MIGRATION-ADMISSION.json",
+    "docs/registry/ATLAS-MASTER-PROGRAM-REGISTER.v1.json",
+    "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json"
+  ],
+  "proposed_next_session_refs": ["FP-DOS-REC-001"],
+  "supersedes": [],
+  "superseded_by": [],
+  "metadata": {
+    "schema_version": "atlas.fawxzzy-platform-migration.initiative.v1",
+    "measurement_status": "UNMEASURED",
+    "percentage": null,
+    "owner": "ATLAS coordinator plus Fitness, Mazer, DiscordOS, Foundation, Lifeline, _stack, FawxzzyWeb, and application owners",
+    "authority": "governance and admission only until serialized owner packets receive their own authority",
+    "scope": "identity, data, RLS, billing, cross-service Auth, canonical ledger, backup/restore, rehearsal, previews, cutover, observation, rollback, quarantine, retirement, and deletion gates",
+    "dependencies": ["FP-DOS-REC-001", "FP-MZR-REC-001", "FP-FIT-REC-001", "FP-PARITY-RATCHET-001"],
+    "serialization": ["FP-DOS-REC-001", "FP-MZR-REC-001", "FP-FIT-REC-001", "FP-PARITY-RATCHET-001", "platform repository admission", "isolated rehearsal", "separately approved production gates"],
+    "approval_gates": ["paid project", "production Auth/OAuth", "production data cutover", "maintenance", "breaking secret rotation", "destructive contraction", "source disable/delete", "physical Discord merge", "irreversible action", "project-specific Vercel production deploy/promotion/rollback/alias cutover"],
+    "definition_of_done": ["All recovery and parity packets close.", "Backup/restore and isolated rehearsal pass.", "Cutover, observation, rollback, quarantine, and retirement decisions have current accepted evidence and approval."],
+    "status": "HOLD",
+    "next_packet": "FP-DOS-REC-001",
+    "architecture": {
+      "platform_seed": "existing Fitness Supabase project",
+      "discordos": "separate by default",
+      "fourth_blank_project": false,
+      "migration_sequence": ["expand", "migrate", "verify", "cutover", "contract"],
+      "source_epics": "20 decomposition units; not a denominator"
+    }
+  }
+}

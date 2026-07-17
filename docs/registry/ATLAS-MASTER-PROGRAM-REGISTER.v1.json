@@ -1,0 +1,887 @@
+{
+  "schema": "atlas.master-program-register.v1",
+  "version": 1,
+  "generated_at": "2026-07-16T23:26:40Z",
+  "title": "ATLAS Master Program and FawxzzyPlatform Wave 0",
+  "register_scope": "Deterministic authority index and admission map. It does not replace lane, marker, owner, board, deployment, runtime, or receipt truth.",
+  "producer": {
+    "source": "docs/programs/ATLAS-MASTER-PROGRAM-REGISTER.v1.source.json",
+    "command": "python ops/atlas/master_program.py --write",
+    "check": "python ops/atlas/master_program.py --check"
+  },
+  "source_refs": [
+    "stack.yaml",
+    "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json",
+    "docs/memory/initiatives/continuity-manifest-atlas-full-system-re-evaluation.json",
+    "docs/memory/initiatives/initiative-fawxzzy-tech-plan-convergence.json",
+    "docs/registry/FAWXZZY-TECH-PLAN-RECOVERY-ADMISSION.json",
+    "docs/registry/GITHUB-CONTROL-PLANE-REGISTRY.json",
+    "docs/registry/ATLAS-RUNTIME-PLACEMENT-REGISTRY.v1.json",
+    "docs/registry/ATLAS-PLAYBOOK-DOCTRINE-ADOPTION.json",
+    "docs/registry/project-board-owner-exports/atlas.project-board.owner-export.v1.json",
+    "docs/registry/project-board-owner-exports/cortex.project-board.owner-export.v1.json",
+    "docs/atlas-book/01-current-state.md",
+    "docs/atlas-book/02-lanes-and-markers.md",
+    "docs/atlas-book/03-operating-model.md",
+    "docs/atlas-book/05-receipt-index.md",
+    "docs/atlas-book/06-system-ownership.md",
+    "docs/atlas-book/07-contracts-and-seams.md",
+    "docs/atlas-book/12-restart-and-handoff-guide.md",
+    "docs/atlas-book/13-vision-and-endgames.md",
+    "data/imports/fawxzzy-platform/2026-07-16/IMPORT-MANIFEST.json",
+    "data/imports/deepseek-bridge/2026-07-13/IMPORT-MANIFEST.json",
+    "docs/registry/FAWXZZY-PLATFORM-MIGRATION-ADMISSION.json",
+    "docs/registry/DEEPSEEK-BRIDGE-WAVE-0-ADMISSION.json"
+  ],
+  "authority_model": {
+    "rule": "Index existing authority by reference; never copy a mutable status into a competing source of truth.",
+    "evidence_order": [
+      "current Git and exact owner-repository evidence",
+      "current runtime, deployment, database, and board readback",
+      "current tests, CI, and validation evidence",
+      "current owner receipts and accepted manifests",
+      "recovered or imported proposal prose"
+    ],
+    "unknown_rule": "Unavailable or denied evidence remains UNKNOWN, never zero or healthy.",
+    "owner_lane_rule": "Fitness, Mazer, Socials OS, and FawxzzyWeb remain independent standing owner lanes.",
+    "single_writer_rule": "At most one ATLAS root writer, one owner-repository writer, and one logical DiscordOS board writer."
+  },
+  "measurement_policy": {
+    "new_work": "UNMEASURED",
+    "percentage_rule": "New work remains percentage null until a deterministic measurement contract is accepted.",
+    "decomposition_rule": "Rows, epics, phases, packets, and the master-program row count are decomposition only and never become a denominator by inference."
+  },
+  "approval_gate_catalog": [
+    {
+      "id": "paid-project",
+      "requirement": "Current exact approval before creating or upgrading any paid project."
+    },
+    {
+      "id": "production-auth-oauth",
+      "requirement": "Current exact approval before production Auth or OAuth change."
+    },
+    {
+      "id": "production-data-cutover",
+      "requirement": "Current exact approval before production data cutover."
+    },
+    {
+      "id": "maintenance-window",
+      "requirement": "Current exact approval before entering maintenance or user-visible write restriction."
+    },
+    {
+      "id": "breaking-secret-rotation",
+      "requirement": "Current exact approval before a breaking secret rotation."
+    },
+    {
+      "id": "destructive-contraction",
+      "requirement": "Current exact approval before destructive schema or data contraction."
+    },
+    {
+      "id": "source-disable-delete",
+      "requirement": "Current exact approval before disabling or deleting a source project or service."
+    },
+    {
+      "id": "physical-discord-merge",
+      "requirement": "Current exact approval before physically merging DiscordOS into the public platform project."
+    },
+    {
+      "id": "irreversible-action",
+      "requirement": "Current exact approval before any other irreversible action."
+    },
+    {
+      "id": "vercel-production",
+      "requirement": "Current project-specific approval for each Vercel production deploy, promotion, rollback, or alias cutover."
+    }
+  ],
+  "global_holds": [
+    {
+      "id": "fawxzzy-platform-parity-hold",
+      "status": "HOLD",
+      "rule": "Platform repository creation, schema/Auth/billing migration, and rehearsal remain held until FP-DOS-REC-001, FP-MZR-REC-001, FP-FIT-REC-001, and a fresh FP-PARITY-RATCHET-001 close serially."
+    },
+    {
+      "id": "post-preparation-development-gate",
+      "status": "HOLD",
+      "rule": "The mandatory exhaustive closing audit and completion of every newly discovered preparatory marker precede post-preparation development."
+    },
+    {
+      "id": "wave-0-zero-mutation",
+      "status": "ENFORCED",
+      "rule": "Wave 0 is root-governance and admission only: no owner repository, Supabase, Vercel, Discord, social account, production, secret, or canonical ATLAS checkout mutation."
+    }
+  ],
+  "programs": [
+    {
+      "id": "program-clean-resync-authority-index",
+      "title": "Clean and Re-sync authority index",
+      "owner": "stack-root",
+      "authority": "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json plus accepted marker and receipt sources",
+      "scope": "Index every current lane and backlog entry without repeating its status, percentage, denominator, timestamp, or evidence body.",
+      "dependencies": [],
+      "serialization": [
+        "Canonical lane and marker producers write first; this generated register indexes their IDs."
+      ],
+      "approval_gates": [],
+      "evidence": [
+        "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json",
+        "docs/atlas-book/02-lanes-and-markers.md"
+      ],
+      "definition_of_done": [
+        "Every lane and backlog ID is present in the generated authority index.",
+        "No historical value is normalized or rewritten."
+      ],
+      "status": "authority-referenced",
+      "next_packet": "Resolve the next packet from the canonical lane selector and accepted receipts.",
+      "measurement_status": "AUTHORITY_REFERENCED"
+    },
+    {
+      "id": "program-mandatory-closing-exhaustive-audit",
+      "title": "Mandatory closing exhaustive audit",
+      "owner": "stack-root",
+      "authority": "docs/memory/initiatives/continuity-manifest-atlas-full-system-re-evaluation.json",
+      "scope": "Run the accepted second exhaustive gate only after operational preparation and all discovered preparatory markers are terminal.",
+      "dependencies": [
+        "Clean and Re-sync cluster terminal",
+        "all preparatory discovery markers terminal"
+      ],
+      "serialization": [
+        "Do not rerun the accepted opening audit.",
+        "Development discoveries are queued; preparatory gaps receive their own markers."
+      ],
+      "approval_gates": [],
+      "evidence": [
+        "docs/audits/ATLAS-FULL-SYSTEM-OPENING-AUDIT-2026-07-12.md",
+        "docs/memory/initiatives/continuity-manifest-atlas-full-system-re-evaluation.json"
+      ],
+      "definition_of_done": [
+        "One separately accepted exhaustive closing audit closes gate 2 of 2.",
+        "Every preparatory gap found by it is complete before development opens."
+      ],
+      "status": "authority-referenced-mandatory-gate",
+      "next_packet": "Resolve current closing-audit status and routing from the canonical continuity manifest and marker authority.",
+      "measurement_status": "HISTORICAL_OPENING_SNAPSHOT_1_OF_2"
+    },
+    {
+      "id": "program-discordos-board-governance",
+      "title": "DiscordOS board consistency and maintenance",
+      "owner": "DiscordOS",
+      "authority": "DiscordOS contracts, exact journals/readback, owner export, and accepted board receipts",
+      "scope": "Maintain canonical profiles, tags, permissions, board #14 FawxzzyWeb, exact journal/readback semantics, current-state consistency, and one logical writer.",
+      "dependencies": [
+        "DiscordOS single-writer admission",
+        "exact live readback for mutations"
+      ],
+      "serialization": [
+        "Identity reconciliation precedes event replay.",
+        "Board writes are idempotent and exact-thread scoped."
+      ],
+      "approval_gates": [
+        "irreversible-action"
+      ],
+      "evidence": [
+        "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json",
+        "docs/registry/project-board-owner-exports/atlas.project-board.owner-export.v1.json"
+      ],
+      "definition_of_done": [
+        "Current cards and journals reconcile exactly with zero duplicate stable IDs.",
+        "Historical records remain distinct from active state."
+      ],
+      "status": "authority-referenced",
+      "next_packet": "Use the currently admitted DiscordOS board cluster before FP-DOS-REC-001.",
+      "measurement_status": "AUTHORITY_REFERENCED"
+    },
+    {
+      "id": "program-github-control-plane",
+      "title": "GitHub control-plane watch and hygiene",
+      "owner": "stack-root-and-repository-owners",
+      "authority": "docs/registry/GITHUB-CONTROL-PLANE-REGISTRY.json and fresh exact-head GitHub evidence",
+      "scope": "Track CI, PRs, branches, security, remote/local parity, releases, and local-first cloud-backup hygiene while preserving unavailable endpoints as UNKNOWN.",
+      "dependencies": [
+        "repository-specific authority for mutation"
+      ],
+      "serialization": [
+        "Read-only collection precedes cleanup or policy mutation.",
+        "Exact-head CI and review precede merge authority."
+      ],
+      "approval_gates": [
+        "irreversible-action"
+      ],
+      "evidence": [
+        "docs/registry/GITHUB-CONTROL-PLANE-REGISTRY.json",
+        "docs/memory/initiatives/initiative-github-control-plane-integration.json"
+      ],
+      "definition_of_done": [
+        "Every governed repository has fresh parity and control-plane evidence.",
+        "Denied security surfaces remain UNKNOWN."
+      ],
+      "status": "authority-referenced",
+      "next_packet": "Continue the existing GitHub control-plane watch cadence.",
+      "measurement_status": "AUTHORITY_REFERENCED"
+    },
+    {
+      "id": "program-fawxzzyweb-distribution",
+      "title": "FawxzzyWeb distribution and canonical-origin migration",
+      "owner": "FawxzzyWeb",
+      "authority": "FawxzzyWeb owner repository, owner export, Discord admission, and current deployment/link readback",
+      "scope": "Govern canonical origin, link migration, public distribution, owner export, and Discord admission without absorbing product implementation into root.",
+      "dependencies": [
+        "owner-side inventory",
+        "canonical-origin decision",
+        "route and rendered-link proof"
+      ],
+      "serialization": [
+        "Owner export precedes root projection.",
+        "Preview and rendered-link proof precede production cutover."
+      ],
+      "approval_gates": [
+        "vercel-production",
+        "irreversible-action"
+      ],
+      "evidence": [
+        "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json",
+        "docs/memory/profiles/zachariah_workflow_profile.md"
+      ],
+      "definition_of_done": [
+        "Canonical origin and every migrated link are route-proven.",
+        "Owner export and Discord admission reconcile without duplicate authority."
+      ],
+      "status": "independent-owner-lane",
+      "next_packet": "Resolve from the FawxzzyWeb owner lane after its current board cluster.",
+      "measurement_status": "UNMEASURED"
+    },
+    {
+      "id": "program-fawxzzy-platform-migration",
+      "title": "FawxzzyPlatform migration",
+      "owner": "ATLAS coordinator plus serialized Fitness, Mazer, DiscordOS, Foundation, Lifeline, _stack, and application owners",
+      "authority": "docs/registry/FAWXZZY-PLATFORM-MIGRATION-ADMISSION.json",
+      "scope": "Recover source truth, prove backup/restore and ledger parity, seed the platform from Fitness, rehearse identity/data/RLS/billing/cross-service auth, use previews, perform separately approved cutovers, observe and roll back or quarantine, and separately approve retirement or deletion.",
+      "dependencies": [
+        "FP-DOS-REC-001",
+        "FP-MZR-REC-001",
+        "FP-FIT-REC-001",
+        "FP-PARITY-RATCHET-001"
+      ],
+      "serialization": [
+        "One canonical ledger.",
+        "Expand -> migrate -> verify -> cutover -> contract.",
+        "DiscordOS remains physically separate by default."
+      ],
+      "approval_gates": [
+        "paid-project",
+        "production-auth-oauth",
+        "production-data-cutover",
+        "maintenance-window",
+        "breaking-secret-rotation",
+        "destructive-contraction",
+        "source-disable-delete",
+        "physical-discord-merge",
+        "irreversible-action",
+        "vercel-production"
+      ],
+      "evidence": [
+        "data/imports/fawxzzy-platform/2026-07-16/IMPORT-MANIFEST.json",
+        "docs/registry/FAWXZZY-PLATFORM-MIGRATION-ADMISSION.json",
+        "docs/memory/initiatives/initiative-fawxzzy-platform-migration.json"
+      ],
+      "definition_of_done": [
+        "Parity, backup/restore, rehearsal, migration, cutover, observation, rollback, quarantine, and retirement gates have current accepted evidence.",
+        "No source is disabled or deleted without separate exact approval."
+      ],
+      "status": "HOLD",
+      "next_packet": "FP-DOS-REC-001",
+      "measurement_status": "UNMEASURED"
+    },
+    {
+      "id": "program-atlas-book-playbook-convergence",
+      "title": "Atlas Book and Playbook exhaustive text convergence",
+      "owner": "stack-root-and-playbook",
+      "authority": "initiative-fawxzzy-tech-plan-convergence plus Playbook-owned doctrine and corpus sources",
+      "scope": "Inventory and classify all text-bearing artifacts, prioritize Playbook historical planning and research, audit corpus coverage, and later decide the Book/Playbook boundary through an ADR.",
+      "dependencies": [
+        "whole-stack text inventory",
+        "privacy and exclusion policy",
+        "accepted Book/Playbook ADR before authority transfer"
+      ],
+      "serialization": [
+        "Playbook archaeology precedes consolidation recommendations.",
+        "Source reference and digest precede derived summaries."
+      ],
+      "approval_gates": [
+        "irreversible-action"
+      ],
+      "evidence": [
+        "docs/memory/initiatives/initiative-fawxzzy-tech-plan-convergence.json",
+        "docs/registry/ATLAS-PLAYBOOK-DOCTRINE-ADOPTION.json",
+        "docs/atlas-book/13-vision-and-endgames.md"
+      ],
+      "definition_of_done": [
+        "Every admitted corpus surface has provenance and coverage classification.",
+        "The later ADR and reversible migration plan resolve Book/Playbook ownership."
+      ],
+      "status": "active-authority-referenced",
+      "next_packet": "Whole-stack text inventory and Playbook-first corpus coverage contract.",
+      "measurement_status": "UNMEASURED"
+    },
+    {
+      "id": "program-long-task-continuity-resource-hygiene",
+      "title": "Long-task continuity and workstation hygiene",
+      "owner": "stack-root-and-runtime-owners",
+      "authority": "continuity, runtime-placement, worktree, and workstation-resource contracts",
+      "scope": "Prove context compaction, export, successor, archive, and recovery; classify idle processes, worktrees, browsers, servers, and CPU/GPU/RAM use without destructive cleanup by inference.",
+      "dependencies": [
+        "retention classification",
+        "successor receipt before archive"
+      ],
+      "serialization": [
+        "Export and successor proof precede archive.",
+        "Observe and classify resources before stop or delete authority."
+      ],
+      "approval_gates": [
+        "irreversible-action"
+      ],
+      "evidence": [
+        "docs/registry/ATLAS-RUNTIME-PLACEMENT-REGISTRY.v1.json",
+        "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json"
+      ],
+      "definition_of_done": [
+        "Long tasks can compact and resume without authority or evidence loss.",
+        "Idle-resource residue has explicit retention and stop policy."
+      ],
+      "status": "authority-referenced",
+      "next_packet": "Resolve from durable memory fabric and workspace-hygiene lanes.",
+      "measurement_status": "AUTHORITY_REFERENCED"
+    },
+    {
+      "id": "program-post-preparation-atlas-development",
+      "title": "Post-preparation Atlas development",
+      "owner": "stack-root-and-component-owners",
+      "authority": "docs/memory/initiatives/initiative-atlas-post-preparation-development.json",
+      "scope": "After the closing gate, complete Lifeline, Foundation, Cortex, _stack, DiscordOS, Playbook, Atlas wiring, Atlas Book, and governed integrations.",
+      "dependencies": [
+        "mandatory closing exhaustive audit accepted",
+        "all preparatory markers terminal"
+      ],
+      "serialization": [
+        "Owner-specific contracts and proofs precede root ratchets.",
+        "Reversible integration waves precede replacement or retirement."
+      ],
+      "approval_gates": [
+        "vercel-production",
+        "irreversible-action"
+      ],
+      "evidence": [
+        "docs/memory/initiatives/initiative-atlas-post-preparation-development.json",
+        "docs/atlas-book/03-operating-model.md"
+      ],
+      "definition_of_done": [
+        "Every named component has an accepted owner-specific completion contract and proof.",
+        "Cross-system wiring is observable, reversible, and receipt-backed."
+      ],
+      "status": "HOLD",
+      "next_packet": "Mandatory closing exhaustive audit, then measured component admissions.",
+      "measurement_status": "UNMEASURED"
+    },
+    {
+      "id": "program-cortex-capability-conversion",
+      "title": "ChatGPT and Codex to Cortex conversion",
+      "owner": "Cortex-and-stack-root",
+      "authority": "Cortex readiness, contracts, simulations, and operator acceptance evidence",
+      "scope": "Convert the maximum feasible ChatGPT and Codex capability into Cortex only where capability, parity, safety, observability, cost, fallback, and rollback evidence justify it.",
+      "dependencies": [
+        "capability baselines",
+        "contract and replay parity",
+        "operator acceptance",
+        "native fallback"
+      ],
+      "serialization": [
+        "Codex-style structured coding workflows precede broader reasoning replacement.",
+        "No external dependency is removed before accepted parity and rollback proof."
+      ],
+      "approval_gates": [
+        "irreversible-action"
+      ],
+      "evidence": [
+        "docs/memory/initiatives/continuity-manifest-cortex-readiness.json",
+        "docs/registry/ATLAS-CONTRACTS-V2-CLUSTER-2-CORTEX-BRIDGE.v1.json"
+      ],
+      "definition_of_done": [
+        "Each converted capability has accepted baseline, parity, fallback, and rollback evidence.",
+        "Unproven capabilities remain governed adapters."
+      ],
+      "status": "capability-gated",
+      "next_packet": "Resolve from current Cortex readiness and accepted simulation evidence.",
+      "measurement_status": "AUTHORITY_REFERENCED"
+    },
+    {
+      "id": "program-lifeline-foundation-platform-conversion",
+      "title": "Vercel and Supabase to Lifeline and Foundation conversion",
+      "owner": "Lifeline-Foundation-and-stack-root",
+      "authority": "runtime-placement, observability, backup/restore, deployment, and owner evidence",
+      "scope": "Convert the maximum feasible Vercel and Supabase capability only where hosting, data, security, identity, observability, cost, fallback, migration, and rollback proof justify it.",
+      "dependencies": [
+        "capability inventory",
+        "backup/restore proof",
+        "rehearsal",
+        "rollback and quarantine contract"
+      ],
+      "serialization": [
+        "Read-only inventory and rehearsal precede cutover.",
+        "Native services remain until replacement proof and separately approved retirement."
+      ],
+      "approval_gates": [
+        "paid-project",
+        "production-auth-oauth",
+        "production-data-cutover",
+        "vercel-production",
+        "source-disable-delete",
+        "irreversible-action"
+      ],
+      "evidence": [
+        "docs/registry/ATLAS-RUNTIME-PLACEMENT-REGISTRY.v1.json",
+        "docs/memory/initiatives/initiative-lifeline-platform-cutover.json"
+      ],
+      "definition_of_done": [
+        "Every converted capability has parity, health, backup, rollback, and acceptance evidence.",
+        "Unconverted capability remains explicitly owned by its external adapter."
+      ],
+      "status": "capability-gated",
+      "next_packet": "Read-only capability and evidence inventory after preparation gates.",
+      "measurement_status": "UNMEASURED"
+    },
+    {
+      "id": "program-owner-lane-fitness",
+      "title": "Fitness standing owner lane",
+      "owner": "Fitness",
+      "authority": "Fitness owner repository, task, CI, runtime, Supabase, and accepted receipts",
+      "scope": "Preserve Fitness as an independent product lane and platform-seed owner; root indexes only shared contracts and parity dependencies.",
+      "dependencies": [
+        "owner routing for owner mutation"
+      ],
+      "serialization": [
+        "Fitness writer owns Fitness changes.",
+        "Platform parity recovery precedes platform rehearsal."
+      ],
+      "approval_gates": [
+        "production-auth-oauth",
+        "production-data-cutover",
+        "breaking-secret-rotation",
+        "irreversible-action"
+      ],
+      "evidence": [
+        "stack.yaml",
+        "docs/registry/FAWXZZY-PLATFORM-MIGRATION-ADMISSION.json"
+      ],
+      "definition_of_done": [
+        "Fitness owner truth remains current and isolated.",
+        "Shared improvements promote through explicit contracts."
+      ],
+      "status": "independent-standing-owner-lane",
+      "next_packet": "FP-FIT-REC-001 after earlier serialized recovery packets.",
+      "measurement_status": "OWNER_AUTHORITY"
+    },
+    {
+      "id": "program-owner-lane-mazer",
+      "title": "Mazer standing owner lane",
+      "owner": "Mazer",
+      "authority": "Mazer owner repository, standing task, CI, runtime, Supabase, and accepted receipts",
+      "scope": "Preserve Mazer product independence while governing platform identity/data migration and separately approval-gated retirement or deletion.",
+      "dependencies": [
+        "owner routing for owner mutation"
+      ],
+      "serialization": [
+        "Mazer writer owns Mazer changes.",
+        "Exact replay/parity precedes source-only alias normalization."
+      ],
+      "approval_gates": [
+        "production-auth-oauth",
+        "production-data-cutover",
+        "source-disable-delete",
+        "irreversible-action"
+      ],
+      "evidence": [
+        "stack.yaml",
+        "docs/registry/FAWXZZY-PLATFORM-MIGRATION-ADMISSION.json"
+      ],
+      "definition_of_done": [
+        "Mazer owner truth remains current and isolated.",
+        "Retirement and deletion remain separately approved after migration proof."
+      ],
+      "status": "independent-standing-owner-lane",
+      "next_packet": "FP-MZR-REC-001 after FP-DOS-REC-001.",
+      "measurement_status": "OWNER_AUTHORITY"
+    },
+    {
+      "id": "program-owner-lane-socials-os",
+      "title": "Socials OS standing owner lane",
+      "owner": "Socials OS",
+      "authority": "Socials OS owner repository, standing task, account readback, and accepted receipts",
+      "scope": "Preserve Socials OS as independent and non-root-blocking; platform work may define scoped identity or integration contracts but cannot mutate social accounts.",
+      "dependencies": [
+        "owner routing for owner mutation"
+      ],
+      "serialization": [
+        "Owner data collection and implementation remain in Socials OS.",
+        "Root consumes only accepted receipts and shared contracts."
+      ],
+      "approval_gates": [
+        "irreversible-action"
+      ],
+      "evidence": [
+        "docs/memory/profiles/zachariah_workflow_profile.md",
+        "stack.yaml"
+      ],
+      "definition_of_done": [
+        "Owner truth remains isolated and receipt-backed.",
+        "No social-account mutation is inferred from root governance."
+      ],
+      "status": "independent-standing-owner-lane",
+      "next_packet": "Resolve from the Socials OS standing owner task.",
+      "measurement_status": "OWNER_AUTHORITY"
+    },
+    {
+      "id": "program-owner-lane-fawxzzyweb",
+      "title": "FawxzzyWeb standing owner lane",
+      "owner": "FawxzzyWeb",
+      "authority": "FawxzzyWeb owner repository, deployment, owner export, and rendered-route evidence",
+      "scope": "Keep the canonical public website and former Trove /apps catalog owner-specific while exposing shared identity, entitlement, and distribution contracts.",
+      "dependencies": [
+        "owner routing for owner mutation"
+      ],
+      "serialization": [
+        "Owner implementation precedes root projection.",
+        "Preview proof precedes production approval."
+      ],
+      "approval_gates": [
+        "vercel-production",
+        "irreversible-action"
+      ],
+      "evidence": [
+        "docs/registry/FAWXZZY-PLATFORM-MIGRATION-ADMISSION.json",
+        "docs/memory/profiles/zachariah_workflow_profile.md"
+      ],
+      "definition_of_done": [
+        "Canonical-origin and integration behavior are owner-proven.",
+        "Root does not become the web implementation owner."
+      ],
+      "status": "independent-standing-owner-lane",
+      "next_packet": "Resolve from the FawxzzyWeb owner lane and board #14.",
+      "measurement_status": "OWNER_AUTHORITY"
+    },
+    {
+      "id": "program-shared-contracts-wiring",
+      "title": "Shared contracts and Atlas wiring",
+      "owner": "stack-root-and-contract-owners",
+      "authority": "versioned Atlas contracts, runtime placement, producer/consumer proof, and owner manifests",
+      "scope": "Maintain reusable shared contracts and observable wiring without collapsing component ownership or treating schema existence as adoption.",
+      "dependencies": [
+        "producer proof",
+        "consumer proof",
+        "compatibility and migration proof"
+      ],
+      "serialization": [
+        "Contract proposal precedes implementation.",
+        "Owner adoption precedes root ratchet."
+      ],
+      "approval_gates": [
+        "irreversible-action"
+      ],
+      "evidence": [
+        "packages/atlas-contracts",
+        "docs/registry/ATLAS-RUNTIME-PLACEMENT-REGISTRY.v1.json",
+        "stack.yaml"
+      ],
+      "definition_of_done": [
+        "Every contract family has versioned schema, fixtures, producer, consumer, and compatibility evidence.",
+        "Ownership remains explicit."
+      ],
+      "status": "authority-referenced",
+      "next_packet": "Resolve from current contracts and runtime-placement lanes.",
+      "measurement_status": "AUTHORITY_REFERENCED"
+    },
+    {
+      "id": "program-cross-project-synergy-knowledge-promotion",
+      "title": "Cross-project synergy and knowledge promotion",
+      "owner": "Playbook-and-owner-repositories",
+      "authority": "owner truth plus reviewed Playbook promotion contracts",
+      "scope": "Promote reusable patterns, rules, failure modes, decisions, and synergies without overwriting owner truth or exposing protected data.",
+      "dependencies": [
+        "provenance",
+        "owner review",
+        "privacy classification"
+      ],
+      "serialization": [
+        "Review precedes promotion.",
+        "Canonical owner truth wins conflicts."
+      ],
+      "approval_gates": [
+        "irreversible-action"
+      ],
+      "evidence": [
+        "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json",
+        "docs/memory/initiatives/initiative-fawxzzy-tech-plan-convergence.json"
+      ],
+      "definition_of_done": [
+        "Every promoted item retains source, digest, owner, review, and supersession data.",
+        "No owner status is inferred from cross-project similarity."
+      ],
+      "status": "authority-referenced",
+      "next_packet": "Playbook-first corpus and promotion coverage contract.",
+      "measurement_status": "UNMEASURED"
+    },
+    {
+      "id": "program-model-effort-speed-routing",
+      "title": "Model, effort, and speed routing",
+      "owner": "stack-root-and-runtime-owners",
+      "authority": "workflow profile, capability checks, task receipts, and provider policy",
+      "scope": "Route model, reasoning effort, and speed by task while preserving configured floors, requested/effective receipts, provider boundaries, and explicit fallback.",
+      "dependencies": [
+        "current capability discovery",
+        "provider policy",
+        "receipt coverage"
+      ],
+      "serialization": [
+        "Capability-check the actual runtime before selection.",
+        "Record requested versus effective settings."
+      ],
+      "approval_gates": [
+        "irreversible-action"
+      ],
+      "evidence": [
+        "docs/memory/profiles/zachariah_workflow_profile.md",
+        "docs/registry/ATLAS-EXTERNAL-MODEL-SIDECAR-RUNTIME-CONTRACT.json"
+      ],
+      "definition_of_done": [
+        "Every routed task records effective model, effort, speed, provider, and fallback.",
+        "No unsupported or silent provider substitution occurs."
+      ],
+      "status": "policy-active",
+      "next_packet": "Capability and receipt coverage audit.",
+      "measurement_status": "UNMEASURED"
+    },
+    {
+      "id": "program-persistent-workspace-leases",
+      "title": "Persistent workspace leases",
+      "owner": "_stack-and-owner-repositories",
+      "authority": "workspace, worker-lease, worktree, queue, and runtime placement contracts",
+      "scope": "Provide durable, collision-safe workspace leases and restartable worktree ownership without broad cleanup or duplicate writers.",
+      "dependencies": [
+        "lease identity",
+        "resource claims",
+        "retention classification",
+        "restart receipt"
+      ],
+      "serialization": [
+        "One writer per claimed workspace.",
+        "Lease release or transfer requires a receipt."
+      ],
+      "approval_gates": [
+        "irreversible-action"
+      ],
+      "evidence": [
+        "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json",
+        "packages/atlas-contracts/schemas/atlas.worker-lease.v2.schema.json"
+      ],
+      "definition_of_done": [
+        "Every active workspace has owner, lease, branch, scope, and restart evidence.",
+        "Stale workspaces are classified before cleanup."
+      ],
+      "status": "authority-referenced",
+      "next_packet": "Resolve from persistent-workspaces and worktree-hygiene lanes.",
+      "measurement_status": "AUTHORITY_REFERENCED"
+    },
+    {
+      "id": "program-historical-conversation-task-knowledge",
+      "title": "Historical conversation and task knowledge extraction",
+      "owner": "stack-root-Playbook-and-Cortex",
+      "authority": "versioned Atlas memory, provenance manifests, reviewed promotions, and privacy policy",
+      "scope": "Extract historical ChatGPT conversations and Codex tasks into durable, queryable, provenance-preserving knowledge for Atlas, Playbook, and Cortex.",
+      "dependencies": [
+        "authorized exports",
+        "privacy and retention policy",
+        "deduplication and supersession contract"
+      ],
+      "serialization": [
+        "Immutable import precedes normalization.",
+        "Review precedes promotion or training use."
+      ],
+      "approval_gates": [
+        "irreversible-action"
+      ],
+      "evidence": [
+        "docs/memory/profiles/zachariah_workflow_profile.md",
+        "docs/memory/initiatives/initiative-fawxzzy-tech-plan-convergence.json"
+      ],
+      "definition_of_done": [
+        "Every extracted item has source, digest, trust class, privacy class, and promotion state.",
+        "Canonical owner truth remains higher authority than conversation prose."
+      ],
+      "status": "admitted-future-work",
+      "next_packet": "Authorized export and corpus coverage contract.",
+      "measurement_status": "UNMEASURED"
+    },
+    {
+      "id": "program-deepseek-sidecar-evaluation",
+      "title": "DeepSeek sidecar evaluation",
+      "owner": "Foundation-_stack-Lifeline-and-stack-root",
+      "authority": "docs/registry/DEEPSEEK-BRIDGE-WAVE-0-ADMISSION.json",
+      "scope": "Treat the imported proposal as untrusted input; later verify current Codex custom-provider support and evaluate a localhost LiteLLM sidecar with health, exposure, rollback, native fallback, and provider policy. Never treat it as an unproven global replacement.",
+      "dependencies": [
+        "current Codex capability verification",
+        "provider policy",
+        "security/exposure review",
+        "rollback and native fallback proof"
+      ],
+      "serialization": [
+        "Read-only capability verification precedes any runtime design.",
+        "This lane remains independent of the FawxzzyPlatform critical path unless evidence proves a dependency."
+      ],
+      "approval_gates": [
+        "irreversible-action"
+      ],
+      "evidence": [
+        "data/imports/deepseek-bridge/2026-07-13/IMPORT-MANIFEST.json",
+        "docs/registry/DEEPSEEK-BRIDGE-WAVE-0-ADMISSION.json",
+        "docs/memory/initiatives/initiative-external-model-sidecar-deepseek-litellm-bridge.json"
+      ],
+      "definition_of_done": [
+        "Custom-provider support is verified against the current installed Codex runtime.",
+        "Any later sidecar has accepted health, loopback exposure, data policy, fallback, rollback, and owner placement evidence."
+      ],
+      "status": "HOLD-UNTRUSTED-PROPOSAL",
+      "next_packet": "DS-BRIDGE-CAP-001",
+      "measurement_status": "UNMEASURED"
+    }
+  ],
+  "provenance_guards": {
+    "historical_values_rule": "Historical percentages, denominators, accepted opening/closing contracts, and timestamped evidence remain immutable provenance.",
+    "immutable_file_sha256": {
+      "docs/audits/ATLAS-FULL-SYSTEM-OPENING-AUDIT-2026-07-12.md": "5d946ead2631516e5d5a70c6041a4fafdf6bece4b703d501b3894b49b19b1e9f"
+    },
+    "immutable_json_fields": {
+      "docs/memory/initiatives/continuity-manifest-atlas-full-system-re-evaluation.json": {
+        "created_at": "2026-07-12T12:00:00Z",
+        "metadata.validation_posture.opening_validation_snapshot": {
+          "critical": 0,
+          "error": 4,
+          "warning": 25,
+          "info": 0,
+          "label": "dated July 12 pre-package opening observation; not current health"
+        }
+      }
+    },
+    "guard_basis": "Only immutable dated artifacts and immutable historical fields are validated. Mutable lane, marker, initiative, admission, and runtime authority may ratchet without rebasing a full-object digest.",
+    "wave_0_admission_baseline": {
+      "base_commit": "ef8a1e7abe514f2f3a01e7fdbd0fe537157efff9",
+      "role": "Dated no-mutation evidence only; never a current-status guard or competing authority.",
+      "existing_lane_projection": {
+        "lanes": {
+          "count": 20,
+          "sha256": "4886e1f3e566ac2037e61a55dacdb830b53714a37cfc133268364a03f8c88b90"
+        },
+        "backlog_candidates": {
+          "count": 44,
+          "sha256": "241b63460851a15a26af2f1064a2e9c0125eff12c077fdb9de025f6b870d43ca"
+        }
+      }
+    },
+    "deepseek_historical_marker_rule": "The prior 33.3 percent / 2-of-6 initiative snapshot is preserved unchanged as dated provenance; the new Wave 0 evaluation lane is distinct and UNMEASURED.",
+    "deepseek_historical_snapshot": {
+      "created_at": "2026-07-13T00:00:00Z",
+      "numerator": 2,
+      "denominator": 6,
+      "percent": 33.3,
+      "marker": "33.3%",
+      "marker_movement": "Only this lane moved from 16.7% to 33.3%; no other marker moved."
+    }
+  },
+  "authority_indexes": {
+    "clean_and_resync_lane_registry": {
+      "authority_ref": "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json",
+      "lane_ids": [
+        "lane-root-truth-convergence",
+        "lane-github-control-plane-integration",
+        "lane-playbook-universal-adoption",
+        "lane-cortex-context-synthesis",
+        "lane-codex-execution-contracts",
+        "lane-project-command-surfaces",
+        "lane-atlas-control-ledger",
+        "lane-delivery-event-plane",
+        "lane-discordos-single-writer",
+        "lane-discordos-cross-project-board-integrity",
+        "lane-persistent-workspaces",
+        "lane-ci-delivery-health",
+        "lane-marker-integrity",
+        "lane-workspace-branch-worktree-hygiene",
+        "lane-security-containment",
+        "lane-historical-task-intelligence",
+        "lane-vercel-supabase-monitoring-correlation",
+        "lane-runtime-activation-readiness",
+        "lane-runtime-correlation-reliability",
+        "lane-operator-surface-adoption"
+      ],
+      "backlog_ids": [
+        "lane-atlas-ui-standards-adoption",
+        "lane-atlas-contracts-mesh",
+        "lane-cross-project-knowledge-promotion",
+        "lane-stack-adapter-coverage",
+        "lane-local-branch-retention-classification",
+        "lane-stack-inventory-lock-head-reconciliation",
+        "lane-playbook-demo-contract-synchronization",
+        "lane-fitness-atlas-contracts-loader",
+        "lane-fitness-playbook-runtime-artifacts",
+        "lane-fitness-dependency-security",
+        "lane-fitness-critical-secret-containment",
+        "lane-default-branch-governance",
+        "lane-dependabot-visibility",
+        "lane-release-policy-and-evidence",
+        "lane-remote-branch-cleanup-review",
+        "lane-local-worktree-retention-classification",
+        "lane-cortex-boundary-decision",
+        "lane-stream-remote-decision",
+        "lane-stack-github-event-contracts",
+        "lane-discordos-github-projections",
+        "lane-source-hierarchy-doc-normalization",
+        "lane-component-generated-state-hygiene",
+        "lane-archive-package-retention",
+        "lane-owner-metric-scope-alignment",
+        "lane-root-path-hygiene",
+        "lane-discordos-command-surface-convergence",
+        "lane-supabase-security-advisor-remediation",
+        "lane-mazer-legacy-nested-repo-admission",
+        "lane-foundation-control-plane-truth-reconciliation",
+        "lane-sensitive-runtime-residue-containment",
+        "lane-nat1-remote-recovery",
+        "lane-trove-command-path-repair",
+        "lane-mazer-board-truth-reconciliation",
+        "lane-validation-ratchet-remediation",
+        "lane-creation-os-product-definition-first-wedge",
+        "lane-atlas-bootstrap-manifest-recovery-pointer",
+        "lane-durable-memory-fabric-context-compaction",
+        "lane-repository-ingestion-compatibility-graph",
+        "lane-deterministic-builder-loop",
+        "lane-conversational-realtime-creative-loop",
+        "lane-spatial-blueprint-surface",
+        "lane-device-gateway-safe-actuation",
+        "lane-policy-tracing-evaluation-artifact-trust",
+        "lane-pmf-monetization-success-kill-criteria",
+        "lane-fawxzzy-platform-migration",
+        "lane-external-model-sidecar-deepseek-evaluation",
+        "lane-atlas-book-playbook-corpus-convergence",
+        "lane-atlas-post-preparation-development"
+      ],
+      "status_rule": "Resolve status, percentages, denominators, timestamps, and evidence from the authority_ref; this master register does not restate or replace them."
+    },
+    "mandatory_closing_audit": {
+      "authority_ref": "docs/memory/initiatives/continuity-manifest-atlas-full-system-re-evaluation.json",
+      "marker_authority_ref": "docs/atlas-book/02-lanes-and-markers.md",
+      "current_status_rule": "Resolve the current closing-audit status from the authority references; this index does not restate mutable gate status.",
+      "historical_opening_snapshot": {
+        "authority_ref": "docs/audits/ATLAS-FULL-SYSTEM-OPENING-AUDIT-2026-07-12.md",
+        "accepted_gate_count": 1,
+        "fixed_gate_denominator": 2,
+        "historical_percentage": 50
+      },
+      "completion_rule": "No discovered lane contributes a point; only a separately accepted exhaustive closing audit can complete gate 2 of 2."
+    }
+  }
+}

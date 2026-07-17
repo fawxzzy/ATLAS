@@ -1,0 +1,198 @@
+{
+  "schema": "atlas.program-admission.v1",
+  "admission_id": "fawxzzy-platform-migration-wave-0-2026-07-16",
+  "generated_at": "2026-07-16T23:26:40Z",
+  "title": "FawxzzyPlatform Migration Wave 0 Admission",
+  "owner": "ATLAS coordinator with serialized Fitness, Mazer, DiscordOS, Foundation, Lifeline, _stack, FawxzzyWeb, and application-owner packets",
+  "authority": {
+    "mode": "governance-admission-only",
+    "root_writer": "single writer in isolated ATLAS worktree",
+    "owner_repository_mutation": false,
+    "external_system_mutation": false,
+    "current_truth_rule": "Current owner Git, database, Auth, billing, runtime, deployment, and live readback evidence outranks imported prose.",
+    "imported_source_role": "Program intent, architecture decision, decomposition, and recovery-packet input; never current execution proof."
+  },
+  "scope": "Admit the platform migration and serialized recovery/parity prerequisites without creating the platform repository, implementing infrastructure, changing owner repositories, or touching Supabase, Vercel, Discord, production, secrets, or the canonical ATLAS checkout.",
+  "dependencies": [
+    "FP-DOS-REC-001",
+    "FP-MZR-REC-001",
+    "FP-FIT-REC-001",
+    "FP-PARITY-RATCHET-001",
+    "accepted backup/restore evidence",
+    "current owner-specific authority for every later mutation"
+  ],
+  "serialization": [
+    "Overall HOLD applies to platform repository creation, schema/Auth/billing migration, and rehearsal.",
+    "Run FP-DOS-REC-001, then FP-MZR-REC-001, then FP-FIT-REC-001, then FP-PARITY-RATCHET-001.",
+    "Use one canonical migration ledger.",
+    "Expand -> migrate -> verify -> cutover -> contract.",
+    "Root coordinates and receipts; each owner repository owns its implementation.",
+    "DiscordOS remains physically separate by default and one logical board writer remains in force."
+  ],
+  "approval_gates": [
+    "paid-project",
+    "production-auth-oauth",
+    "production-data-cutover",
+    "maintenance-window",
+    "breaking-secret-rotation",
+    "destructive-contraction",
+    "source-disable-delete",
+    "physical-discord-merge",
+    "irreversible-action",
+    "vercel-production"
+  ],
+  "evidence": [
+    "data/imports/fawxzzy-platform/2026-07-16/ATLAS_MAIN_FAWXZZY_PLATFORM_SUPABASE_MIGRATION_PROMPT_2026-07-16.md",
+    "data/imports/fawxzzy-platform/2026-07-16/IMPORT-MANIFEST.json",
+    "docs/registry/ATLAS-MASTER-PROGRAM-REGISTER.v1.json",
+    "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json",
+    "docs/memory/initiatives/initiative-fawxzzy-platform-migration.json"
+  ],
+  "definition_of_done": [
+    "All serialized recovery packets and the fresh parity ratchet close with exact source and replay evidence.",
+    "Backup and restore proof exists before rehearsal or migration.",
+    "Identity, data, RLS, billing, and cross-service Auth rehearsals pass in an isolated environment.",
+    "Every cutover has current exact approval, observation, rollback, and quarantine proof.",
+    "Every Vercel production deploy, promotion, rollback, or alias cutover has current project-specific approval.",
+    "Retirement, disablement, contraction, and deletion remain separately approval-gated.",
+    "No percentage is assigned until an accepted deterministic measurement contract exists."
+  ],
+  "status": "HOLD",
+  "next_packet": "FP-DOS-REC-001",
+  "measurement_status": "UNMEASURED",
+  "source_import": {
+    "stored_ref": "data/imports/fawxzzy-platform/2026-07-16/ATLAS_MAIN_FAWXZZY_PLATFORM_SUPABASE_MIGRATION_PROMPT_2026-07-16.md",
+    "manifest_ref": "data/imports/fawxzzy-platform/2026-07-16/IMPORT-MANIFEST.json",
+    "byte_length": 37988,
+    "sha256": "e79f9b1506e79fff5910520fec1652cedb123eac1bbaf3d77a18943f46d0da99"
+  },
+  "architecture_decision": {
+    "platform_seed": "The existing Fitness Supabase project seeds FawxzzyPlatform.",
+    "discordos": "DiscordOS remains physically separate by default.",
+    "new_blank_project": "Do not create a fourth blank project.",
+    "migration_sequence": ["expand", "migrate", "verify", "cutover", "contract"],
+    "ledger": "One canonical migration ledger after convergence.",
+    "mazer_retirement": "Retirement, disablement, contraction, and deletion are separately approval-gated.",
+    "epic_rule": "The source document's 20 epics are decomposition only, not a denominator."
+  },
+  "decomposition": {
+    "source_epic_count": 20,
+    "measurement_effect": null,
+    "rule": "Epic completion cannot be converted into a percentage without a later accepted measurement contract."
+  },
+  "allowed_later": [
+    "read-only inventory",
+    "secure backup planning and export",
+    "temporary isolated rehearsal",
+    "code, tests, adapters, documentation, and cards in authorized owner packets",
+    "preview deployments and review artifacts",
+    "reversible compatibility and observation work"
+  ],
+  "current_exact_approval_required": [
+    "creating or upgrading a paid project",
+    "production Auth or OAuth change",
+    "production data cutover",
+    "maintenance window",
+    "breaking secret rotation",
+    "destructive contraction",
+    "source disablement or deletion",
+    "physical DiscordOS merge",
+    "any irreversible action"
+  ],
+  "terminal_zero_mutation_parity_truth": {
+    "classification": "operator-supplied 2026-07-16 snapshot admitted for serialized owner recovery; every packet must reverify current live truth without production mutation",
+    "overall_hold": "Platform repository creation, schema/Auth/billing migration, and rehearsal are held until all four packets close.",
+    "outside_hold": "UI, content, gameplay, and read-only work outside these contracts may continue under its own owner authority.",
+    "recovery_packets": [
+      {
+        "id": "FP-DOS-REC-001",
+        "owner": "DiscordOS",
+        "status": "NEXT-AFTER-CURRENT-DISCORD-BOARD-CLUSTER",
+        "authority": "source-only recovery and disposable replay; no production deploy",
+        "scope": "Recover six live-only migrations and the JWT-verified discordos-update-drafts Edge v5 source, then prove disposable replay and RPC security contracts.",
+        "dependencies": [],
+        "serialization": ["Run first.", "Recover exact source before replay.", "Never read, expose, or store the cron bearer."],
+        "approval_gates": ["breaking-secret-rotation", "production-data-cutover", "irreversible-action"],
+        "evidence": [
+          "live project ref nwexsktuuenfdegzrbut: 17 migrations (operator-supplied snapshot)",
+          "repo main 38e881d...: 11 migrations (operator-supplied abbreviated ref)",
+          "discordos-update-drafts Edge v5: 6703 bytes; sha256 fc366e5b614f9a776ff15f291a41d8dc3173375a6fa5dcd86e5e5b65eec229fa"
+        ],
+        "definition_of_done": [
+          "All six live-only migration sources match the recorded SHA-256 values.",
+          "Disposable replay passes.",
+          "RPCs are public(payload jsonb), security invoker, search_path=discordos,public,pg_temp, and service_role only.",
+          "Only a secret-reference contract is stored; later secret-authorized proof may compare command MD5 a643548eb2f16b7959ff8b4c45d98c02."
+        ],
+        "next_packet": "FP-MZR-REC-001",
+        "measurement_status": "UNMEASURED",
+        "migrations": [
+          {"version": "20260612082854", "sha256": "dfc460760a4d2c78e5afb0c13e668c13fff7daddb07d1721e1f50e2fa6eb28c2"},
+          {"version": "20260627201353", "sha256": "3ca082fa41d1c088e6ab8a9e61135569b0f6ddbc05cef004dccf769b754da2cf"},
+          {"version": "20260627202737", "sha256": "67ff8afe4d05185852d46d6a74d87096dad26a4f6c4d78be5cc5c7ed5bee1f38"},
+          {"version": "20260627202816", "sha256": "4872d6f37343e67707b4159982de98994452605816becbc91d4d15fbd4165f73"},
+          {"version": "20260627210302", "sha256": "f792337de60fa2f778682dd48fa1069a2809b4a0b5a03f4547b5c89ada77f67e"},
+          {"version": "20260627211548", "sha256": "938f6ee78ea74dc6ea17f731f35e4c0c370f9a2b52cb0175969b09b05369b2d8"}
+        ]
+      },
+      {
+        "id": "FP-MZR-REC-001",
+        "owner": "Mazer",
+        "status": "QUEUED",
+        "authority": "source-only exact replay and parity; no live repair",
+        "scope": "Recover the exact four-entry live ledger, prove replay/parity, then normalize source-only aliases.",
+        "dependencies": ["FP-DOS-REC-001"],
+        "serialization": ["Run after FP-DOS-REC-001.", "Exact replay/parity precedes alias normalization."],
+        "approval_gates": ["production-data-cutover", "destructive-contraction", "irreversible-action"],
+        "evidence": ["operator-supplied exact live ledger snapshot"],
+        "definition_of_done": ["All four source files match recorded digests.", "Disposable replay and parity pass.", "No live repair occurs."],
+        "next_packet": "FP-FIT-REC-001",
+        "measurement_status": "UNMEASURED",
+        "migrations": [
+          {"filename": "20260709045557_mazer_progression_state.sql", "sha256": "4476161ea667383d3eca49b846036dfb2eee73109ea86c8809666a9934f1ce0e"},
+          {"filename": "20260709045648_mazer_account_storage_contracts.sql", "sha256": "a9b35bdb2637490290de5cd74ef920f996da0bc8460b84e39e5d7c1563e5e37a"},
+          {"filename": "20260709045725_mazer_tighten_public_table_grants.sql", "sha256": "04a4e445de3a65db32b10422e081fe5914ae541240a83d98b6014b7b18c947a5"},
+          {"filename": "20260716211513_account_state_revisions.sql", "sha256": "8d999773d9c46a135f304bb3357e72ae99c773f859c1da1eb712680028d9ea01"}
+        ]
+      },
+      {
+        "id": "FP-FIT-REC-001",
+        "owner": "Fitness",
+        "status": "QUEUED",
+        "authority": "owner-side source recovery, explicit history disposition, disposable replay, and verification; no production mutation",
+        "scope": "Reconcile the 101-entry live Fitness ledger with 98-entry origin/main, land the exact timer/set/routine source, preserve 65 historical byte-equality unknowns, and prove mapped replay and schema/RLS/function parity.",
+        "dependencies": ["FP-MZR-REC-001"],
+        "serialization": ["Run after FP-MZR-REC-001.", "No silent rewrite of history or executable source."],
+        "approval_gates": ["production-data-cutover", "breaking-secret-rotation", "irreversible-action"],
+        "evidence": [
+          "live project ref lpswxoyfniocuhljgzbc: 101 migrations (operator-supplied snapshot)",
+          "origin/main e1ab7f...: 98 migrations (operator-supplied abbreviated ref)",
+          "source branch codex/fitness-engine-001-curated-ui-normalization at 0cf6c885f3f5726485c6f2a78eeb1659801024e7",
+          "routine 20260716033653 sha256 c7f8d5d07f4f91bfe31ae34c20b3604744f8e8b5084b4464b04d38cbfd049813"
+        ],
+        "definition_of_done": [
+          "Timer, set, and routine sources are explicitly landed or dispositioned.",
+          "043_hide_standalone_stretch_catalog_rows extra slug DDL has an explicit reproducible disposition.",
+          "20260709073000_billing_subscription_receipt_dedupe executable-source versus live-history record has an explicit reproducible disposition.",
+          "All 101 live versions map, 65 historical byte-equality unknowns remain explicit, disposable replay passes, schema/RLS/function comparison passes, and owner verification passes."
+        ],
+        "next_packet": "FP-PARITY-RATCHET-001",
+        "measurement_status": "UNMEASURED"
+      },
+      {
+        "id": "FP-PARITY-RATCHET-001",
+        "owner": "ATLAS coordinator with read-only owner evidence",
+        "status": "QUEUED",
+        "authority": "fresh read-only parity from clean owner worktrees after all recovery merges",
+        "scope": "Recheck ordered ledger equality or ratified baselines, source checksums, disposable replay, schema/RLS/function comparison where applicable, and backup/restore evidence.",
+        "dependencies": ["FP-DOS-REC-001", "FP-MZR-REC-001", "FP-FIT-REC-001"],
+        "serialization": ["Run only after all three recovery merges.", "Admit platform repository and first rehearsal only after fresh ratchet acceptance."],
+        "approval_gates": ["paid-project", "production-auth-oauth", "production-data-cutover", "maintenance-window", "irreversible-action"],
+        "evidence": ["clean owner worktrees", "ordered ledgers", "source digests", "disposable replay receipts", "backup/restore receipts"],
+        "definition_of_done": ["Each owner has ordered ledger equality or an accepted explicit baseline.", "Source checksums, replay, and backup/restore evidence pass.", "A fresh accepted receipt explicitly lifts or preserves the platform hold."],
+        "next_packet": "Platform repository admission and first isolated rehearsal only if the hold is lifted.",
+        "measurement_status": "UNMEASURED"
+      }
+    ]
+  }
+}
