@@ -17,7 +17,7 @@
   },
   "card_record_digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
   "projection_delivery_id": "projection-atlas-board-000-1",
-  "projection_delivery_digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+  "projection_delivery_digest": "sha256:fa84b8155e4647d5833096dd90a34396bc32f8adca006e2c1f7b18e90ef3fb3c",
   "transaction": {
     "transaction_id": "sqlite-tx-atlas-board-000-1",
     "engine": "python-stdlib-sqlite3",
@@ -38,5 +38,5 @@
   ],
   "engineering_closed": true,
   "projection_gates_engineering": false,
-  "committed_at": "2026-07-17T12:00:00Z"
+  "committed_at": "2026-07-17T12:06:00Z"
 }

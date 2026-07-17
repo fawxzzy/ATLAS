@@ -63,7 +63,7 @@
     "import": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["mode", "status", "import_id", "idempotency_key", "source_snapshot_digest", "event_sequence_start", "event_sequence_end", "imported_at", "failure_reason", "unknown_reason"],
+      "required": ["mode", "status", "import_id", "idempotency_key", "source_snapshot_digest", "event_sequence_start", "event_sequence_end", "imported_at", "verified_at", "failure_reason", "unknown_reason"],
       "properties": {
         "mode": {"const": "one-time"},
         "status": {"type": "string", "enum": ["not-started", "imported", "verified", "failed", "UNKNOWN"]},
@@ -73,6 +73,7 @@
         "event_sequence_start": {"type": ["integer", "null"], "minimum": 1},
         "event_sequence_end": {"type": ["integer", "null"], "minimum": 1},
         "imported_at": {"type": ["string", "null"], "format": "date-time"},
+        "verified_at": {"type": ["string", "null"], "format": "date-time"},
         "failure_reason": {"type": ["string", "null"], "minLength": 1},
         "unknown_reason": {"type": ["string", "null"], "minLength": 1}
       }
@@ -80,10 +81,11 @@
     "firstAcceptance": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["status", "receipt_id", "accepted_at"],
+      "required": ["status", "receipt_id", "receipt_digest", "accepted_at"],
       "properties": {
         "status": {"type": "string", "enum": ["not-accepted", "accepted"]},
         "receipt_id": {"type": ["string", "null"]},
+        "receipt_digest": {"type": ["string", "null"], "pattern": "^sha256:[0-9a-f]{64}$"},
         "accepted_at": {"type": ["string", "null"], "format": "date-time"}
       }
     },

@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+
 const COMMIT_CLOSURE_ORDER = Object.freeze([
   "validate-execution-receipt",
   "idempotency-lookup",
@@ -67,6 +69,19 @@ function isNonEmptyObject(value) {
 
 function isPositiveInteger(value) {
   return Number.isInteger(value) && value > 0;
+}
+
+function stableValue(value) {
+  if (Array.isArray(value)) return value.map((entry) => stableValue(entry));
+  if (!value || typeof value !== "object") return value;
+  return Object.fromEntries(
+    Object.keys(value).sort().map((key) => [key, stableValue(value[key])]),
+  );
+}
+
+export function canonicalArtifactDigest(value) {
+  const canonicalJson = JSON.stringify(stableValue(value));
+  return `sha256:${createHash("sha256").update(canonicalJson, "utf8").digest("hex")}`;
 }
 
 function validateArchiveMaterialization({ lifecycle, archiveState, standingAnchor }) {
@@ -267,7 +282,7 @@ export function validateCardEventV3(event) {
   return errors;
 }
 
-export function validateBoardCommitReceiptV1(receipt) {
+export function validateBoardCommitReceiptV1(receipt, context = {}) {
   const errors = [];
   if (!sameArray(receipt.closure_order, COMMIT_CLOSURE_ORDER)) {
     errors.push(`$.closure_order must exactly equal ${COMMIT_CLOSURE_ORDER.join(" -> ")}`);
@@ -280,6 +295,84 @@ export function validateBoardCommitReceiptV1(receipt) {
   }
   if (receipt.projection_gates_engineering !== false || receipt.engineering_closed !== true) {
     errors.push("Accepted local commit must close engineering without projection gating");
+  }
+  if (context.cardEventError) {
+    errors.push(context.cardEventError);
+  } else if (!context.cardEvent) {
+    errors.push("BoardCommitReceipt admission requires the referenced CardEvent context");
+  }
+  if (context.projectionDeliveryError) {
+    errors.push(context.projectionDeliveryError);
+  } else if (!context.projectionDelivery) {
+    errors.push("BoardCommitReceipt admission requires the referenced ProjectionDelivery context");
+  }
+  if (context.cardEvent && context.projectionDelivery) {
+    errors.push(...validateBoardCommitReceiptAgainstContext(
+      receipt,
+      context.cardEvent,
+      context.projectionDelivery,
+    ));
+  }
+  return errors;
+}
+
+export function validateBoardCommitReceiptAgainstContext(receipt, event, delivery) {
+  const errors = [];
+  const eventFields = [
+    "card_id",
+    "project_id",
+    "board_id",
+    "event_id",
+    "event_sequence",
+    "card_version",
+    "idempotency_key",
+    "expected_version",
+  ];
+  for (const field of eventFields) {
+    if (receipt[field] !== event[field]) {
+      errors.push(`BoardCommitReceipt $.${field} must equal CardEvent $.${field}`);
+    }
+  }
+  if (receipt.execution_receipt.receipt_id !== event.execution_receipt.receipt_id
+    || receipt.execution_receipt.digest !== event.execution_receipt.digest
+    || receipt.execution_receipt.status !== event.execution_receipt.status) {
+    errors.push("BoardCommitReceipt $.execution_receipt must exactly equal CardEvent $.execution_receipt");
+  }
+  if (receipt.card_record_digest !== event.resulting_record_digest) {
+    errors.push("BoardCommitReceipt $.card_record_digest must equal CardEvent $.resulting_record_digest");
+  }
+  if (receipt.receipt_id !== event.commit_receipt_id) {
+    errors.push("BoardCommitReceipt $.receipt_id must equal CardEvent $.commit_receipt_id");
+  }
+  if (receipt.transaction.writer_lease_id !== event.lease_id) {
+    errors.push("BoardCommitReceipt $.transaction.writer_lease_id must equal CardEvent $.lease_id");
+  }
+
+  const deliveryEventFields = [
+    "card_id",
+    "project_id",
+    "board_id",
+    "event_id",
+    "event_sequence",
+    "card_version",
+  ];
+  for (const field of deliveryEventFields) {
+    if (delivery[field] !== event[field]) {
+      errors.push(`ProjectionDelivery $.${field} must equal CardEvent $.${field}`);
+    }
+  }
+  if (receipt.projection_delivery_id !== event.projection_delivery_id
+    || receipt.projection_delivery_id !== delivery.delivery_id) {
+    errors.push("BoardCommitReceipt projection_delivery_id must equal CardEvent and ProjectionDelivery identities");
+  }
+  if (receipt.projection_delivery_digest !== canonicalArtifactDigest(delivery)) {
+    errors.push("BoardCommitReceipt $.projection_delivery_digest must equal the canonical ProjectionDelivery digest");
+  }
+  if (Date.parse(delivery.enqueued_at) < Date.parse(event.occurred_at)) {
+    errors.push("ProjectionDelivery $.enqueued_at cannot precede CardEvent $.occurred_at");
+  }
+  if (Date.parse(receipt.committed_at) < Date.parse(delivery.enqueued_at)) {
+    errors.push("BoardCommitReceipt $.committed_at cannot precede ProjectionDelivery $.enqueued_at");
   }
   return errors;
 }
@@ -437,7 +530,7 @@ export function validateProjectionAckAgainstDelivery(ack, delivery) {
   return errors;
 }
 
-export function validateBoardAuthorityMigrationV1(migration) {
+export function validateBoardAuthorityMigrationV1(migration, context = {}) {
   const errors = [];
   const baseline = migration.v2_contract_baseline;
   const baselineScalarKeys = [
@@ -478,9 +571,10 @@ export function validateBoardAuthorityMigrationV1(migration) {
       || baselineImport.event_sequence_start !== null
       || baselineImport.event_sequence_end !== null
       || baselineImport.imported_at !== null
+      || baselineImport.verified_at !== null
       || baselineImport.failure_reason !== null
       || baselineImport.unknown_reason !== null) {
-      errors.push("Not-started one-time import must not claim source, sequence, or timestamp evidence");
+      errors.push("Not-started one-time import must not claim source, sequence, import, or verification evidence");
     }
   }
   if (["imported", "verified"].includes(baselineImport.status)) {
@@ -494,14 +588,21 @@ export function validateBoardAuthorityMigrationV1(migration) {
       errors.push("Imported baseline requires source digest, ordered event sequence, and imported_at");
     }
   }
+  if (baselineImport.status === "imported" && baselineImport.verified_at !== null) {
+    errors.push("Imported but unverified baseline must not claim $.one_time_import.verified_at");
+  }
+  if (baselineImport.status === "verified" && !baselineImport.verified_at) {
+    errors.push("Verified baseline import requires a distinct $.one_time_import.verified_at milestone");
+  }
   if (baselineImport.status === "failed") {
     if (!baselineImport.source_snapshot_digest
       || baselineImport.event_sequence_start !== null
       || baselineImport.event_sequence_end !== null
       || baselineImport.imported_at !== null
+      || baselineImport.verified_at !== null
       || !baselineImport.failure_reason
       || baselineImport.unknown_reason !== null) {
-      errors.push("Failed baseline import requires source digest and failure reason without committed sequence evidence");
+      errors.push("Failed baseline import requires source digest and failure reason without committed sequence or verification evidence");
     }
   }
   if (baselineImport.status === "UNKNOWN") {
@@ -509,28 +610,49 @@ export function validateBoardAuthorityMigrationV1(migration) {
       || baselineImport.event_sequence_start !== null
       || baselineImport.event_sequence_end !== null
       || baselineImport.imported_at !== null
+      || baselineImport.verified_at !== null
       || baselineImport.failure_reason !== null
       || !baselineImport.unknown_reason) {
-      errors.push("UNKNOWN baseline import requires source digest and unknown reason without invented sequence evidence");
+      errors.push("UNKNOWN baseline import requires source digest and unknown reason without invented sequence or verification evidence");
     }
   }
   const accepted = migration.first_v3_acceptance.status === "accepted";
   if (!accepted) {
-    if (migration.first_v3_acceptance.receipt_id !== null || migration.first_v3_acceptance.accepted_at !== null) {
-      errors.push("Not-accepted v3 state must not claim a first acceptance receipt or timestamp");
+    if (migration.first_v3_acceptance.receipt_id !== null
+      || migration.first_v3_acceptance.receipt_digest !== null
+      || migration.first_v3_acceptance.accepted_at !== null) {
+      errors.push("Not-accepted v3 state must not claim a first acceptance receipt, digest, or timestamp");
     }
     if (migration.rollback.current_mode !== "v2-authority-allowed") {
       errors.push("Before first v3 acceptance, current rollback mode must allow explicit v2 authority return");
     }
   } else {
-    if (!migration.first_v3_acceptance.receipt_id || !migration.first_v3_acceptance.accepted_at) {
-      errors.push("Accepted v3 state requires the first BoardCommitReceipt identity and timestamp");
+    const firstAcceptance = migration.first_v3_acceptance;
+    if (!firstAcceptance.receipt_id || !firstAcceptance.receipt_digest || !firstAcceptance.accepted_at) {
+      errors.push("Accepted v3 state requires the first BoardCommitReceipt identity, digest, and timestamp");
     }
     if (baselineImport.status !== "verified") {
       errors.push("First v3 acceptance requires verified one-time baseline import");
     }
     if (migration.rollback.current_mode !== "v3-restore-replay-only") {
       errors.push("After first v3 acceptance, rollback is v3 restore/replay only; silent v2 authority reversion is forbidden");
+    }
+    if (context.boardCommitReceiptError) {
+      errors.push(context.boardCommitReceiptError);
+    } else if (!context.boardCommitReceipt) {
+      errors.push("Accepted v3 migration admission requires the referenced BoardCommitReceipt context");
+    } else {
+      const receiptErrors = validateBoardCommitReceiptV1(context.boardCommitReceipt, context);
+      errors.push(...receiptErrors.map((error) => `First v3 BoardCommitReceipt: ${error}`));
+      if (firstAcceptance.receipt_id !== context.boardCommitReceipt.receipt_id) {
+        errors.push("$.first_v3_acceptance.receipt_id must equal the referenced BoardCommitReceipt $.receipt_id");
+      }
+      if (firstAcceptance.receipt_digest !== canonicalArtifactDigest(context.boardCommitReceipt)) {
+        errors.push("$.first_v3_acceptance.receipt_digest must equal the canonical BoardCommitReceipt digest");
+      }
+      if (firstAcceptance.accepted_at !== context.boardCommitReceipt.committed_at) {
+        errors.push("$.first_v3_acceptance.accepted_at must equal the referenced BoardCommitReceipt $.committed_at");
+      }
     }
   }
   if (migration.phase === "planned" && migration.cutover.status !== "held") {
@@ -599,6 +721,7 @@ export function validateBoardAuthorityMigrationV1(migration) {
     ? null
     : Date.parse(migration.v2_authority_snapshot.captured_at);
   const importedAt = baselineImport.imported_at === null ? null : Date.parse(baselineImport.imported_at);
+  const verifiedAt = baselineImport.verified_at === null ? null : Date.parse(baselineImport.verified_at);
   const acceptedAt = migration.first_v3_acceptance.accepted_at === null
     ? null
     : Date.parse(migration.first_v3_acceptance.accepted_at);
@@ -608,8 +731,11 @@ export function validateBoardAuthorityMigrationV1(migration) {
   if (capturedAt !== null && importedAt !== null && importedAt < capturedAt) {
     errors.push("One-time baseline import cannot precede V2 authority snapshot capture");
   }
-  if (importedAt !== null && acceptedAt !== null && acceptedAt < importedAt) {
-    errors.push("First v3 acceptance cannot precede verified one-time baseline import");
+  if (importedAt !== null && verifiedAt !== null && verifiedAt < importedAt) {
+    errors.push("One-time baseline verification cannot precede baseline import");
+  }
+  if (verifiedAt !== null && acceptedAt !== null && acceptedAt < verifiedAt) {
+    errors.push("First v3 acceptance cannot precede verified one-time baseline verification");
   }
   return errors;
 }

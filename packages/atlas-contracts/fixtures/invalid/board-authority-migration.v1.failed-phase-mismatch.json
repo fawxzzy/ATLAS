@@ -36,10 +36,11 @@
     "event_sequence_start": null,
     "event_sequence_end": null,
     "imported_at": null,
+    "verified_at": null,
     "failure_reason": "Import failed but phase was not advanced.",
     "unknown_reason": null
   },
-  "first_v3_acceptance": {"status": "not-accepted", "receipt_id": null, "accepted_at": null},
+  "first_v3_acceptance": {"status": "not-accepted", "receipt_id": null, "receipt_digest": null, "accepted_at": null},
   "rollback": {
     "before_first_v3_acceptance": "v2-authority-allowed",
     "after_first_v3_acceptance": "v3-restore-replay-only",

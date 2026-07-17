@@ -12,7 +12,9 @@ import {
   COMMIT_CLOSURE_ORDER,
   TARGET_CONTRACTS,
   V2_CONTRACT_BASELINE,
+  canonicalArtifactDigest,
   projectInitialCardRecordV3,
+  validateBoardCommitReceiptAgainstContext,
   validateCardRecordV3,
   validateProjectionAckAgainstDelivery,
 } from "./lib/validate-board-authority.mjs";
@@ -28,6 +30,8 @@ const contractIds = Object.freeze([
   "atlas.rollover-manifest.v1",
 ]);
 const validArtifacts = new Map();
+const sharedCardEvent = await loadJson(path.join(fixturesDir, "valid/card-event.v3.json"));
+const sharedProjectionDelivery = await loadJson(path.join(fixturesDir, "valid/projection-delivery.v1.json"));
 
 for (const contractId of contractIds) {
   const plan = knownSchemaPlan.find((candidate) => candidate.id === contractId);
@@ -38,9 +42,11 @@ for (const contractId of contractIds) {
 
   const valid = await loadJson(path.join(fixturesDir, plan.valid));
   validArtifacts.set(contractId, valid);
-  const semanticContext = contractId === "atlas.projection-ack.v1"
-    ? { projectionDelivery: validArtifacts.get("atlas.projection-delivery.v1") }
-    : {};
+  const semanticContext = contractId === "atlas.board-commit-receipt.v1"
+    ? { cardEvent: sharedCardEvent, projectionDelivery: sharedProjectionDelivery }
+    : contractId === "atlas.projection-ack.v1"
+      ? { projectionDelivery: sharedProjectionDelivery }
+      : {};
   assert.deepEqual(validateJsonSchema(valid, loaded.schema), [], `${contractId} valid schema fixture`);
   assert.deepEqual(validateContractSemantics(contractId, valid, semanticContext), [], `${contractId} valid semantic fixture`);
 
@@ -109,6 +115,48 @@ assert.equal(ack.delivery_id, delivery.delivery_id);
 assert.equal(ack.event_id, event.event_id);
 assert.equal(ack.payload_digest, delivery.payload_digest);
 assert.deepEqual(validateProjectionAckAgainstDelivery(ack, delivery), []);
+assert.equal(commit.projection_delivery_digest, canonicalArtifactDigest(delivery));
+const commitContext = { cardEvent: event, projectionDelivery: delivery };
+assert.deepEqual(validateBoardCommitReceiptAgainstContext(commit, event, delivery), []);
+assert.deepEqual(validateContractSemantics("atlas.board-commit-receipt.v1", commit, commitContext), []);
+const receiptContextCases = [
+  { label: "exact receipt context", mutate: () => {}, valid: true },
+  { label: "event identity mismatch", mutate: ({ receipt }) => { receipt.event_id = "other-event"; }, error: "$.event_id must equal CardEvent" },
+  { label: "event sequence mismatch", mutate: ({ receipt }) => { receipt.event_sequence += 1; }, error: "$.event_sequence must equal CardEvent" },
+  { label: "card version mismatch", mutate: ({ receipt }) => { receipt.expected_version += 1; receipt.card_version += 1; }, error: "$.card_version must equal CardEvent" },
+  { label: "record digest mismatch", mutate: ({ receipt }) => { receipt.card_record_digest = "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"; }, error: "$.card_record_digest must equal CardEvent" },
+  { label: "execution receipt identity mismatch", mutate: ({ receipt }) => { receipt.execution_receipt.receipt_id = "other-execution"; }, error: "$.execution_receipt must exactly equal CardEvent" },
+  { label: "execution receipt digest mismatch", mutate: ({ receipt }) => { receipt.execution_receipt.digest = "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"; }, error: "$.execution_receipt must exactly equal CardEvent" },
+  { label: "commit receipt identity mismatch", mutate: ({ receipt }) => { receipt.receipt_id = "other-board-commit"; }, error: "$.receipt_id must equal CardEvent" },
+  { label: "writer lease mismatch", mutate: ({ receipt }) => { receipt.transaction.writer_lease_id = "other-lease"; }, error: "writer_lease_id must equal CardEvent" },
+  { label: "delivery identity mismatch", mutate: ({ receipt }) => { receipt.projection_delivery_id = "other-delivery"; }, error: "projection_delivery_id must equal" },
+  { label: "delivery digest mismatch", mutate: ({ receipt }) => { receipt.projection_delivery_digest = "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"; }, error: "canonical ProjectionDelivery digest" },
+  { label: "delivery event identity mismatch", mutate: ({ delivery: candidateDelivery }) => { candidateDelivery.event_id = "other-event"; }, error: "ProjectionDelivery $.event_id must equal CardEvent" },
+  { label: "delivery event sequence mismatch", mutate: ({ delivery: candidateDelivery }) => { candidateDelivery.event_sequence += 1; }, error: "ProjectionDelivery $.event_sequence must equal CardEvent" },
+  { label: "delivery card version mismatch", mutate: ({ delivery: candidateDelivery }) => { candidateDelivery.card_version += 1; }, error: "ProjectionDelivery $.card_version must equal CardEvent" },
+  { label: "delivery predates event", mutate: ({ delivery: candidateDelivery }) => { candidateDelivery.enqueued_at = "2026-07-17T11:59:59Z"; }, error: "cannot precede CardEvent $.occurred_at" },
+  { label: "commit predates delivery", mutate: ({ receipt }) => { receipt.committed_at = "2026-07-17T11:59:59Z"; }, error: "cannot precede ProjectionDelivery $.enqueued_at" },
+];
+for (const testCase of receiptContextCases) {
+  const candidate = {
+    receipt: structuredClone(commit),
+    event: structuredClone(event),
+    delivery: structuredClone(delivery),
+  };
+  testCase.mutate(candidate);
+  assert.deepEqual(validateJsonSchema(candidate.receipt, commitSchema.schema), [], `${testCase.label} receipt schema`);
+  assert.deepEqual(validateJsonSchema(candidate.event, eventSchema.schema), [], `${testCase.label} event schema`);
+  assert.deepEqual(validateJsonSchema(candidate.delivery, deliverySchema.schema), [], `${testCase.label} delivery schema`);
+  const errors = validateContractSemantics("atlas.board-commit-receipt.v1", candidate.receipt, {
+    cardEvent: candidate.event,
+    projectionDelivery: candidate.delivery,
+  });
+  if (testCase.valid) {
+    assert.deepEqual(errors, [], testCase.label);
+  } else {
+    assert(errors.some((error) => error.includes(testCase.error)), `${testCase.label}: ${errors.join(" | ")}`);
+  }
+}
 const mismatchedAck = structuredClone(ack);
 mismatchedAck.payload_digest = "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
 assert.deepEqual(validateProjectionAckAgainstDelivery(mismatchedAck, delivery), [
@@ -343,30 +391,96 @@ activeMigration.one_time_import = {
   event_sequence_start: 1,
   event_sequence_end: 20,
   imported_at: "2026-07-17T12:05:00Z",
+  verified_at: "2026-07-17T12:06:00Z",
 };
 activeMigration.first_v3_acceptance = {
   status: "accepted",
-  receipt_id: "board-commit-first-v3",
-  accepted_at: "2026-07-17T12:06:00Z",
+  receipt_id: commit.receipt_id,
+  receipt_digest: canonicalArtifactDigest(commit),
+  accepted_at: commit.committed_at,
 };
 activeMigration.rollback.current_mode = "v3-restore-replay-only";
 activeMigration.cutover.status = "active";
-assert.deepEqual(validateContractSemantics("atlas.board-authority-migration.v1", activeMigration), []);
+const activeMigrationContext = {
+  boardCommitReceipt: commit,
+  cardEvent: event,
+  projectionDelivery: delivery,
+};
+assert.deepEqual(validateContractSemantics(
+  "atlas.board-authority-migration.v1",
+  activeMigration,
+  activeMigrationContext,
+), []);
+
+const importVerificationCases = [
+  { label: "verified import milestone present", mutate: () => {}, valid: true },
+  { label: "verified import milestone absent", mutate: (candidate) => { candidate.one_time_import.verified_at = null; }, error: "requires a distinct $.one_time_import.verified_at" },
+  { label: "imported state claims verification", mutate: (candidate) => { candidate.one_time_import.status = "imported"; }, error: "Imported but unverified baseline" },
+  { label: "not-started state claims verification", mutate: (candidate) => { candidate.one_time_import.status = "not-started"; }, error: "must not claim source, sequence, import, or verification evidence" },
+];
+for (const testCase of importVerificationCases) {
+  const candidate = structuredClone(activeMigration);
+  testCase.mutate(candidate);
+  assert.deepEqual(validateJsonSchema(candidate, migrationSchema.schema), [], `${testCase.label} schema`);
+  const errors = validateContractSemantics(
+    "atlas.board-authority-migration.v1",
+    candidate,
+    activeMigrationContext,
+  );
+  if (testCase.valid) {
+    assert.deepEqual(errors, [], testCase.label);
+  } else {
+    assert(errors.some((error) => error.includes(testCase.error)), `${testCase.label}: ${errors.join(" | ")}`);
+  }
+}
+
+const migrationReceiptCases = [
+  { label: "exact first acceptance receipt", mutate: () => {}, valid: true },
+  { label: "missing first acceptance receipt context", context: null, error: "requires the referenced BoardCommitReceipt context" },
+  { label: "first acceptance receipt identity mismatch", mutate: ({ migration: candidate }) => { candidate.first_v3_acceptance.receipt_id = "other-board-commit"; }, error: "receipt_id must equal the referenced BoardCommitReceipt" },
+  { label: "first acceptance receipt digest mismatch", mutate: ({ migration: candidate }) => { candidate.first_v3_acceptance.receipt_digest = "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"; }, error: "receipt_digest must equal the canonical BoardCommitReceipt digest" },
+  { label: "first acceptance timestamp mismatch", mutate: ({ migration: candidate }) => { candidate.first_v3_acceptance.accepted_at = "2026-07-17T12:07:00Z"; }, error: "accepted_at must equal the referenced BoardCommitReceipt" },
+  { label: "referenced receipt context invalid", mutate: ({ migration: candidate, receipt }) => { receipt.execution_receipt.receipt_id = "other-execution"; candidate.first_v3_acceptance.receipt_digest = canonicalArtifactDigest(receipt); }, error: "First v3 BoardCommitReceipt: BoardCommitReceipt $.execution_receipt" },
+];
+for (const testCase of migrationReceiptCases) {
+  const candidate = structuredClone(activeMigration);
+  const receipt = structuredClone(commit);
+  testCase.mutate?.({ migration: candidate, receipt });
+  const context = testCase.context === null
+    ? { cardEvent: event, projectionDelivery: delivery }
+    : { boardCommitReceipt: receipt, cardEvent: event, projectionDelivery: delivery };
+  assert.deepEqual(validateJsonSchema(candidate, migrationSchema.schema), [], `${testCase.label} schema`);
+  const errors = validateContractSemantics("atlas.board-authority-migration.v1", candidate, context);
+  if (testCase.valid) {
+    assert.deepEqual(errors, [], testCase.label);
+  } else {
+    assert(errors.some((error) => error.includes(testCase.error)), `${testCase.label}: ${errors.join(" | ")}`);
+  }
+}
 
 const migrationChronologyCases = [
-  { label: "ordered migration chronology", capturedAt: "2026-07-17T12:01:00Z", importedAt: "2026-07-17T12:05:00Z", acceptedAt: "2026-07-17T12:06:00Z", valid: true },
-  { label: "equal migration milestones", capturedAt: migration.created_at, importedAt: migration.created_at, acceptedAt: migration.created_at, valid: true },
-  { label: "snapshot before migration creation", capturedAt: "2026-07-17T11:59:59Z", importedAt: "2026-07-17T12:05:00Z", acceptedAt: "2026-07-17T12:06:00Z", error: "capture cannot precede migration creation" },
-  { label: "import before snapshot capture", capturedAt: "2026-07-17T12:05:00Z", importedAt: "2026-07-17T12:04:00Z", acceptedAt: "2026-07-17T12:06:00Z", error: "import cannot precede V2 authority snapshot capture" },
-  { label: "acceptance before verified import", capturedAt: "2026-07-17T12:01:00Z", importedAt: "2026-07-17T12:05:00Z", acceptedAt: "2026-07-17T12:04:00Z", error: "acceptance cannot precede verified one-time baseline import" },
+  { label: "ordered migration chronology", capturedAt: "2026-07-17T12:01:00Z", importedAt: "2026-07-17T12:04:00Z", verifiedAt: "2026-07-17T12:05:00Z", acceptedAt: "2026-07-17T12:06:00Z", valid: true },
+  { label: "equal migration milestones", capturedAt: migration.created_at, importedAt: migration.created_at, verifiedAt: migration.created_at, acceptedAt: migration.created_at, valid: true },
+  { label: "snapshot before migration creation", capturedAt: "2026-07-17T11:59:59Z", importedAt: "2026-07-17T12:04:00Z", verifiedAt: "2026-07-17T12:05:00Z", acceptedAt: "2026-07-17T12:06:00Z", error: "capture cannot precede migration creation" },
+  { label: "import before snapshot capture", capturedAt: "2026-07-17T12:05:00Z", importedAt: "2026-07-17T12:04:00Z", verifiedAt: "2026-07-17T12:05:00Z", acceptedAt: "2026-07-17T12:06:00Z", error: "import cannot precede V2 authority snapshot capture" },
+  { label: "verification before import", capturedAt: "2026-07-17T12:01:00Z", importedAt: "2026-07-17T12:05:00Z", verifiedAt: "2026-07-17T12:04:00Z", acceptedAt: "2026-07-17T12:06:00Z", error: "verification cannot precede baseline import" },
+  { label: "acceptance before verification", capturedAt: "2026-07-17T12:01:00Z", importedAt: "2026-07-17T12:04:00Z", verifiedAt: "2026-07-17T12:06:00Z", acceptedAt: "2026-07-17T12:05:00Z", error: "acceptance cannot precede verified one-time baseline verification" },
 ];
 for (const testCase of migrationChronologyCases) {
   const candidate = structuredClone(activeMigration);
+  const receipt = structuredClone(commit);
+  receipt.committed_at = testCase.acceptedAt;
   candidate.v2_authority_snapshot.captured_at = testCase.capturedAt;
   candidate.one_time_import.imported_at = testCase.importedAt;
+  candidate.one_time_import.verified_at = testCase.verifiedAt;
   candidate.first_v3_acceptance.accepted_at = testCase.acceptedAt;
+  candidate.first_v3_acceptance.receipt_digest = canonicalArtifactDigest(receipt);
   assert.deepEqual(validateJsonSchema(candidate, migrationSchema.schema), [], `${testCase.label} schema`);
-  const errors = validateContractSemantics("atlas.board-authority-migration.v1", candidate);
+  const errors = validateContractSemantics("atlas.board-authority-migration.v1", candidate, {
+    boardCommitReceipt: receipt,
+    cardEvent: event,
+    projectionDelivery: delivery,
+  });
   if (testCase.valid) {
     assert.deepEqual(errors, [], testCase.label);
   } else {
@@ -667,6 +781,7 @@ const receiptSequenceErrors = await assertSemanticNegative(
   "atlas.board-commit-receipt.v1",
   commitSchema.schema,
   "invalid/board-commit-receipt.v1.sequence-before-version.json",
+  commitContext,
 );
 assert(receiptSequenceErrors.some((error) => error.includes("cannot precede $.card_version")));
 const baselineDriftErrors = await assertSemanticNegative(
@@ -679,9 +794,10 @@ const migrationChronologyErrors = await assertSemanticNegative(
   "atlas.board-authority-migration.v1",
   migrationSchema.schema,
   "invalid/board-authority-migration.v1.chronology-conflict.json",
+  activeMigrationContext,
 );
 assert(migrationChronologyErrors.some((error) => error.includes("import cannot precede")));
-assert(migrationChronologyErrors.some((error) => error.includes("acceptance cannot precede")));
+assert(migrationChronologyErrors.some((error) => error.includes("acceptance cannot precede verified one-time baseline verification")));
 const migrationPhaseErrors = await assertSemanticNegative(
   "atlas.board-authority-migration.v1",
   migrationSchema.schema,
@@ -709,5 +825,5 @@ assert(validateContractSemantics("atlas.rollover-manifest.v1", livePredecessorRo
 ));
 
 console.log(
-  `ATLAS board authority contract tests passed (${archiveTransitionCases.length} lifecycle, ${receiptCases.length} receipt provenance, ${eventVersionCases.length} event version, ${projectionDeliveryCases.length} projection, ${ackChronologyCases.length} acknowledgement chronology, ${controlIdentityCases.length} control identity, ${baselineDriftCases.length} v2 baseline, ${migrationIdentityCases.length} migration identity, ${migrationChronologyCases.length} migration chronology matrix cases).`,
+  `ATLAS board authority contract tests passed (${archiveTransitionCases.length} lifecycle, ${receiptCases.length} receipt provenance, ${eventVersionCases.length} event version, ${receiptContextCases.length} commit context, ${projectionDeliveryCases.length} projection, ${ackChronologyCases.length} acknowledgement chronology, ${controlIdentityCases.length} control identity, ${baselineDriftCases.length} v2 baseline, ${migrationIdentityCases.length} migration identity, ${importVerificationCases.length} import verification, ${migrationReceiptCases.length} acceptance receipt, ${migrationChronologyCases.length} migration chronology matrix cases).`,
 );

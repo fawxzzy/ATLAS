@@ -36,12 +36,14 @@
     "event_sequence_start": 1,
     "event_sequence_end": 20,
     "imported_at": "2026-07-17T12:05:00Z",
+    "verified_at": "2026-07-17T12:06:00Z",
     "failure_reason": null,
     "unknown_reason": null
   },
   "first_v3_acceptance": {
     "status": "accepted",
-    "receipt_id": "board-commit-first-v3",
+    "receipt_id": "board-commit-atlas-board-000-1",
+    "receipt_digest": "sha256:a32df1f13b43dc30dd096c583465f5dd06798704800a1e6180da397a46bcc606",
     "accepted_at": "2026-07-17T12:06:00Z"
   },
   "rollback": {

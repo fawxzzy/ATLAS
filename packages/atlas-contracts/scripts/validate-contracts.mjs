@@ -11,14 +11,18 @@ import { validateContractSemantics } from "./lib/validate-semantics.mjs";
 
 async function main() {
   const failures = [];
+  const cardEvent = await loadJson(path.join(fixturesDir, "valid/card-event.v3.json"));
+  const projectionDelivery = await loadJson(path.join(fixturesDir, "valid/projection-delivery.v1.json"));
 
   for (const plan of knownSchemaPlan) {
     const loadedSchema = await loadKnownSchema(plan.id);
     const validFixture = await loadJson(path.join(fixturesDir, plan.valid));
     const invalidFixture = await loadJson(path.join(fixturesDir, plan.invalid));
-    const semanticContext = plan.id === "atlas.projection-ack.v1"
-      ? { projectionDelivery: await loadJson(path.join(fixturesDir, "valid/projection-delivery.v1.json")) }
-      : {};
+    const semanticContext = plan.id === "atlas.board-commit-receipt.v1"
+      ? { cardEvent, projectionDelivery }
+      : plan.id === "atlas.projection-ack.v1"
+        ? { projectionDelivery }
+        : {};
 
     const validSchemaErrors = validateJsonSchema(validFixture, loadedSchema.schema);
     const validErrors = validSchemaErrors.length > 0
