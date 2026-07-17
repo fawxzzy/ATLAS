@@ -3,8 +3,8 @@
 
 This module has no transport client and never emits an operator-facing message.
 Callers prepare an event, atomically claim it in a runtime-owned receive ledger,
-perform their separately authorized delivery only when ``should_emit`` is true,
-and then acknowledge the correlated claim token.
+fence the claim with ``begin_delivery`` immediately before transport, and then
+acknowledge the correlated claim token and generation.
 """
 
 from __future__ import annotations
@@ -37,6 +37,42 @@ ID_RE = re.compile(r"^[a-z0-9][a-z0-9._:-]*$")
 EVENT_ID_RE = re.compile(r"^onv1_[0-9a-f]{64}$")
 DIGEST_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
 CLAIM_TOKEN_RE = re.compile(r"^oncl1_[0-9a-f]{64}$")
+RFC3339_UTC_RE = re.compile(
+    r"^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])"
+    r"T(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]"
+    r"(?:\.[0-9]{1,6})?Z$"
+)
+LEDGER_EVENT_COLUMNS = frozenset(
+    {
+        "sequence",
+        "event_id",
+        "source_thread_id",
+        "event_class",
+        "notification_kind",
+        "event_contract_version",
+        "canonicalization_version",
+        "canonical_payload_digest",
+        "first_envelope_digest",
+        "last_envelope_digest",
+        "created_at",
+        "first_seen",
+        "last_seen",
+        "duplicate_count",
+        "disposition",
+        "supersedes_event_id",
+        "superseded_by_event_id",
+        "delta_json",
+        "claim_generation",
+        "claim_token",
+        "claim_expires_at",
+        "claimant_digest",
+        "delivery_state",
+        "delivery_started_at",
+        "ack_state",
+        "ack_id",
+        "acknowledged_at",
+    }
+)
 
 
 class NotificationContractError(ValueError):
@@ -52,17 +88,23 @@ class UnknownLedgerSchemaError(RuntimeError):
 
 
 class ClaimTokenError(NotificationContractError):
-    """An acknowledgement did not correlate to the active delivery claim."""
+    """A delivery transition did not correlate to the active claim fence."""
+
+
+class DeliveryStateError(NotificationContractError):
+    """A delivery transition is stale, unsafe, or out of order."""
 
 
 def _utc(value: str, field: str) -> datetime:
-    if not isinstance(value, str) or not value.endswith("Z"):
-        raise NotificationContractError(f"{field} must be an ISO 8601 UTC timestamp")
+    if not isinstance(value, str) or not RFC3339_UTC_RE.fullmatch(value):
+        raise NotificationContractError(
+            f"{field} must be a canonical RFC 3339 UTC timestamp"
+        )
     try:
         parsed = datetime.fromisoformat(value[:-1] + "+00:00")
     except ValueError as exc:
         raise NotificationContractError(
-            f"{field} must be an ISO 8601 UTC timestamp"
+            f"{field} must be a canonical RFC 3339 UTC timestamp"
         ) from exc
     if parsed.tzinfo is None or parsed.utcoffset() != timedelta(0):
         raise NotificationContractError(f"{field} must be UTC")
@@ -70,7 +112,7 @@ def _utc(value: str, field: str) -> datetime:
 
 
 def _timestamp(value: datetime) -> str:
-    return value.astimezone(timezone.utc).isoformat(timespec="seconds").replace(
+    return value.astimezone(timezone.utc).isoformat(timespec="microseconds").replace(
         "+00:00", "Z"
     )
 
@@ -145,7 +187,7 @@ def _validate_delta(delta: Any) -> dict[str, Any] | None:
     if (
         not isinstance(paths, list)
         or not paths
-        or any(not isinstance(path, str) or not path.startswith("/") for path in paths)
+        or any(not _is_non_root_json_pointer(path) for path in paths)
     ):
         raise NotificationContractError(
             "delta.changed_fact_paths must be a non-empty JSON Pointer array"
@@ -155,6 +197,22 @@ def _validate_delta(delta: Any) -> dict[str, Any] | None:
             "delta.changed_fact_paths must be sorted and unique"
         )
     return {"changed_fact_paths": paths}
+
+
+def _is_non_root_json_pointer(value: Any) -> bool:
+    """Admit RFC 6901 pointers while keeping the existing no-root policy."""
+
+    if not isinstance(value, str) or not value.startswith("/"):
+        return False
+    index = 0
+    while index < len(value):
+        if value[index] != "~":
+            index += 1
+            continue
+        if index + 1 >= len(value) or value[index + 1] not in "01":
+            return False
+        index += 2
+    return True
 
 
 def build_event(
@@ -412,6 +470,7 @@ class NotificationLedger:
                 claim_expires_at TEXT,
                 claimant_digest TEXT,
                 delivery_state TEXT NOT NULL,
+                delivery_started_at TEXT,
                 ack_state TEXT NOT NULL,
                 ack_id TEXT,
                 acknowledged_at TEXT,
@@ -444,6 +503,13 @@ class NotificationLedger:
             raise UnknownLedgerSchemaError(
                 "existing notification ledger is missing required tables"
             )
+        columns = {
+            row[1] for row in connection.execute("PRAGMA table_info(notification_events)")
+        }
+        if columns != LEDGER_EVENT_COLUMNS:
+            raise UnknownLedgerSchemaError(
+                "existing notification ledger has incompatible event columns"
+            )
         row = connection.execute(
             "SELECT value FROM ledger_meta WHERE key='schema_version'"
         ).fetchone()
@@ -460,9 +526,12 @@ class NotificationLedger:
         )
 
     @staticmethod
-    def _ack_id(event_id: str, claim_token: str) -> str:
+    def _ack_id(event_id: str, claim_token: str, claim_generation: int) -> str:
         return _prefixed_id(
-            "ona1_", f"{event_id}\x1f{claim_token}\x1faccepted".encode("utf-8")
+            "ona1_",
+            f"{event_id}\x1f{claim_token}\x1f{claim_generation}\x1faccepted".encode(
+                "utf-8"
+            ),
         )
 
     @staticmethod
@@ -476,6 +545,7 @@ class NotificationLedger:
             "source_thread_id": row["source_thread_id"],
             "event_class": row["event_class"],
             "canonical_payload_digest": row["canonical_payload_digest"],
+            "claim_generation": row["claim_generation"],
             "acknowledged_at": row["acknowledged_at"],
             "delivery_state": "accepted",
             "ack_disposition": disposition,
@@ -606,7 +676,7 @@ class NotificationLedger:
             ).fetchone()
             return self._claim_result(
                 updated,
-                should_emit=False,
+                should_begin_delivery=False,
                 disposition=disposition,
                 ack_disposition="replayed",
             )
@@ -634,7 +704,7 @@ class NotificationLedger:
                 (event["event_id"],),
             ).fetchone()
             return self._claim_result(
-                updated, should_emit=False, disposition=disposition
+                updated, should_begin_delivery=False, disposition=disposition
             )
         if row["superseded_by_event_id"] is not None:
             disposition = "duplicate_superseded"
@@ -655,7 +725,34 @@ class NotificationLedger:
                 (event["event_id"],),
             ).fetchone()
             return self._claim_result(
-                updated, should_emit=False, disposition=disposition
+                updated, should_begin_delivery=False, disposition=disposition
+            )
+        if row["delivery_state"] == "delivery_in_progress":
+            disposition = "duplicate_delivery_unknown"
+            connection.execute(
+                """UPDATE notification_events
+                   SET last_seen=?, last_envelope_digest=?, duplicate_count=?, disposition=?
+                   WHERE event_id=?""",
+                (
+                    seen_at,
+                    event["transport_envelope_digest"],
+                    duplicate_count,
+                    disposition,
+                    event["event_id"],
+                ),
+            )
+            updated = connection.execute(
+                "SELECT * FROM notification_events WHERE event_id=?",
+                (event["event_id"],),
+            ).fetchone()
+            return self._claim_result(
+                updated,
+                should_begin_delivery=False,
+                disposition=disposition,
+            )
+        if row["delivery_state"] not in {"claimed", "retry_claimed"}:
+            raise DeliveryStateError(
+                "existing notification has an unsafe delivery state"
             )
         expires = (
             None
@@ -690,7 +787,7 @@ class NotificationLedger:
                 (event["event_id"],),
             ).fetchone()
             return self._claim_result(
-                updated, should_emit=True, disposition=disposition
+                updated, should_begin_delivery=True, disposition=disposition
             )
         disposition = (
             "duplicate_exact"
@@ -713,7 +810,9 @@ class NotificationLedger:
             "SELECT * FROM notification_events WHERE event_id=?",
             (event["event_id"],),
         ).fetchone()
-        return self._claim_result(updated, should_emit=False, disposition=disposition)
+        return self._claim_result(
+            updated, should_begin_delivery=False, disposition=disposition
+        )
 
     def _claim_new(
         self,
@@ -737,7 +836,7 @@ class NotificationLedger:
         ack_state = "not_required"
         delivery_state = "suppressed"
         disposition = "suppressed_control"
-        should_emit = False
+        should_begin_delivery = False
         if kind not in CONTROL_KINDS:
             prior = connection.execute(
                 """SELECT * FROM notification_events
@@ -780,7 +879,7 @@ class NotificationLedger:
             ack_state = "pending"
             delivery_state = "claimed"
             disposition = "emit_claimed"
-            should_emit = True
+            should_begin_delivery = True
         connection.execute(
             """INSERT INTO notification_events(
                    event_id, source_thread_id, event_class, notification_kind,
@@ -826,40 +925,155 @@ class NotificationLedger:
             "SELECT * FROM notification_events WHERE event_id=?",
             (event["event_id"],),
         ).fetchone()
-        return self._claim_result(row, should_emit=should_emit, disposition=disposition)
+        return self._claim_result(
+            row,
+            should_begin_delivery=should_begin_delivery,
+            disposition=disposition,
+        )
 
     @staticmethod
     def _claim_result(
         row: sqlite3.Row,
         *,
-        should_emit: bool,
+        should_begin_delivery: bool,
         disposition: str,
         ack_disposition: str = "accepted",
     ) -> dict[str, Any]:
+        delivery_unknown = row["delivery_state"] == "delivery_in_progress"
+        if row["ack_state"] == "accepted":
+            delivery_outcome = "accepted"
+        elif delivery_unknown:
+            delivery_outcome = "UNKNOWN"
+        else:
+            delivery_outcome = "not_started"
         return {
             "event_id": row["event_id"],
-            "should_emit": should_emit,
+            "should_emit": False,
+            "should_begin_delivery": should_begin_delivery,
             "disposition": disposition,
             "duplicate_count": row["duplicate_count"],
-            "claim_token": row["claim_token"] if should_emit else None,
-            "claim_expires_at": row["claim_expires_at"] if should_emit else None,
+            "claim_token": row["claim_token"] if should_begin_delivery else None,
+            "claim_generation": (
+                row["claim_generation"] if should_begin_delivery else None
+            ),
+            "claim_expires_at": (
+                row["claim_expires_at"] if should_begin_delivery else None
+            ),
             "ack": NotificationLedger._row_ack(row, ack_disposition),
+            "delivery_outcome": delivery_outcome,
+            "reconciliation_required": delivery_unknown,
             "retry_authorized": False,
-            "operator_message_authorized": should_emit,
+            "operator_message_authorized": False,
         }
+
+    def begin_delivery(
+        self,
+        event_id: str,
+        *,
+        claim_token: str,
+        claim_generation: int,
+        started_at: str,
+    ) -> dict[str, Any]:
+        """Atomically fence one claim immediately before transport begins."""
+
+        if not EVENT_ID_RE.fullmatch(event_id):
+            raise NotificationContractError("event_id is invalid")
+        if not CLAIM_TOKEN_RE.fullmatch(claim_token):
+            raise ClaimTokenError("claim_token is invalid")
+        if (
+            not isinstance(claim_generation, int)
+            or isinstance(claim_generation, bool)
+            or claim_generation < 1
+        ):
+            raise ClaimTokenError("claim_generation is invalid")
+        started = _utc(started_at, "started_at")
+        connection = self._connect()
+        try:
+            connection.execute("BEGIN IMMEDIATE")
+            row = connection.execute(
+                "SELECT * FROM notification_events WHERE event_id=?", (event_id,)
+            ).fetchone()
+            if row is None:
+                raise NotificationContractError(
+                    "event is not present in the receive ledger"
+                )
+            if row["notification_kind"] in CONTROL_KINDS:
+                raise DeliveryStateError(
+                    "heartbeat and continuation events do not authorize delivery"
+                )
+            if (
+                row["claim_token"] != claim_token
+                or row["claim_generation"] != claim_generation
+            ):
+                raise ClaimTokenError(
+                    "delivery start does not match the active claim fence"
+                )
+            if row["ack_state"] == "accepted":
+                raise DeliveryStateError("accepted delivery cannot be started again")
+            if row["superseded_by_event_id"] is not None:
+                raise DeliveryStateError("superseded delivery cannot be started")
+            if row["delivery_state"] == "delivery_in_progress":
+                raise DeliveryStateError(
+                    "delivery outcome is unknown and requires reconciliation"
+                )
+            if row["delivery_state"] not in {"claimed", "retry_claimed"}:
+                raise DeliveryStateError("claim is not eligible to begin delivery")
+            expires = _utc(row["claim_expires_at"], "claim_expires_at")
+            first_seen = _utc(row["first_seen"], "first_seen")
+            if started < first_seen or started >= expires:
+                raise DeliveryStateError("claim expired before delivery start")
+            changed = connection.execute(
+                """UPDATE notification_events
+                   SET delivery_state='delivery_in_progress',
+                       delivery_started_at=?, disposition='delivery_started'
+                   WHERE event_id=? AND claim_token=? AND claim_generation=?
+                     AND delivery_state IN ('claimed', 'retry_claimed')
+                     AND ack_state='pending'""",
+                (started_at, event_id, claim_token, claim_generation),
+            )
+            if changed.rowcount != 1:
+                raise DeliveryStateError("delivery fence transition was not admitted")
+            connection.execute("COMMIT")
+            return {
+                "event_id": event_id,
+                "claim_token": claim_token,
+                "claim_generation": claim_generation,
+                "delivery_state": "delivery_in_progress",
+                "delivery_outcome": "UNKNOWN",
+                "reconciliation_required": True,
+                "delivery_started_at": started_at,
+                "transport_idempotency_key": event_id,
+                "transport_event_id_dedupe_required": True,
+                "should_emit": True,
+                "retry_authorized": False,
+                "operator_message_authorized": True,
+            }
+        except Exception:
+            if connection.in_transaction:
+                connection.execute("ROLLBACK")
+            raise
+        finally:
+            connection.close()
 
     def acknowledge(
         self,
         event_id: str,
         *,
         claim_token: str,
+        claim_generation: int,
         acknowledged_at: str,
     ) -> dict[str, Any]:
         if not EVENT_ID_RE.fullmatch(event_id):
             raise NotificationContractError("event_id is invalid")
         if not CLAIM_TOKEN_RE.fullmatch(claim_token):
             raise ClaimTokenError("claim_token is invalid")
-        _utc(acknowledged_at, "acknowledged_at")
+        if (
+            not isinstance(claim_generation, int)
+            or isinstance(claim_generation, bool)
+            or claim_generation < 1
+        ):
+            raise ClaimTokenError("claim_generation is invalid")
+        acknowledged = _utc(acknowledged_at, "acknowledged_at")
         connection = self._connect()
         try:
             connection.execute("BEGIN IMMEDIATE")
@@ -872,12 +1086,28 @@ class NotificationLedger:
                 raise NotificationContractError(
                     "heartbeat and continuation events do not authorize delivery acknowledgement"
                 )
-            if row["claim_token"] != claim_token:
-                raise ClaimTokenError("acknowledgement does not match the active claim token")
+            if (
+                row["claim_token"] != claim_token
+                or row["claim_generation"] != claim_generation
+            ):
+                raise ClaimTokenError(
+                    "acknowledgement does not match the active claim fence"
+                )
             if row["ack_state"] == "accepted":
                 connection.execute("COMMIT")
                 return self._row_ack(row, "replayed")
-            ack_id = self._ack_id(event_id, claim_token)
+            if row["delivery_state"] != "delivery_in_progress":
+                raise DeliveryStateError(
+                    "acknowledgement requires a fenced delivery in progress"
+                )
+            delivery_started = _utc(
+                row["delivery_started_at"], "delivery_started_at"
+            )
+            if acknowledged < delivery_started:
+                raise DeliveryStateError(
+                    "acknowledgement predates the fenced delivery start"
+                )
+            ack_id = self._ack_id(event_id, claim_token, claim_generation)
             connection.execute(
                 """UPDATE notification_events
                    SET delivery_state='accepted', ack_state='accepted',
@@ -910,6 +1140,10 @@ class NotificationLedger:
             return True
         if row["ack_state"] == "accepted" or row["notification_kind"] in CONTROL_KINDS:
             return False
+        if row["delivery_state"] == "delivery_in_progress":
+            return False
+        if row["delivery_state"] not in {"claimed", "retry_claimed"}:
+            return False
         if row["claim_expires_at"] is None:
             return False
         return _utc(row["claim_expires_at"], "claim_expires_at") <= moment
@@ -924,6 +1158,12 @@ class NotificationLedger:
             connection.close()
         if row is None:
             return None
+        if row["ack_state"] == "accepted":
+            delivery_outcome = "accepted"
+        elif row["delivery_state"] == "delivery_in_progress":
+            delivery_outcome = "UNKNOWN"
+        else:
+            delivery_outcome = "not_started"
         return {
             "ledger_schema_version": LEDGER_SCHEMA_VERSION,
             "event_contract_version": row["event_contract_version"],
@@ -943,6 +1183,14 @@ class NotificationLedger:
                 "delta": None if row["delta_json"] is None else json.loads(row["delta_json"]),
             },
             "delivery_state": row["delivery_state"],
+            "claim_generation": row["claim_generation"],
+            "claim_expires_at": row["claim_expires_at"],
+            "delivery_started_at": row["delivery_started_at"],
+            "delivery_outcome": delivery_outcome,
+            "reconciliation_required": (
+                row["delivery_state"] == "delivery_in_progress"
+                and row["ack_state"] != "accepted"
+            ),
             "ack_state": row["ack_state"],
             "ack_id": row["ack_id"],
             "acknowledged_at": row["acknowledged_at"],
@@ -984,11 +1232,20 @@ def _parser() -> argparse.ArgumentParser:
     claim.add_argument("--seen-at", required=True)
     claim.add_argument("--lease-seconds", type=int, default=300)
 
+    begin = subparsers.add_parser("begin-delivery")
+    begin.add_argument("--runtime-root", required=True)
+    begin.add_argument("--ledger", required=True)
+    begin.add_argument("--event-id", required=True)
+    begin.add_argument("--claim-token", required=True)
+    begin.add_argument("--claim-generation", type=int, required=True)
+    begin.add_argument("--started-at", required=True)
+
     ack = subparsers.add_parser("ack")
     ack.add_argument("--runtime-root", required=True)
     ack.add_argument("--ledger", required=True)
     ack.add_argument("--event-id", required=True)
     ack.add_argument("--claim-token", required=True)
+    ack.add_argument("--claim-generation", type=int, required=True)
     ack.add_argument("--acknowledged-at", required=True)
 
     status = subparsers.add_parser("status")
@@ -1011,10 +1268,18 @@ def main(argv: Sequence[str] | None = None) -> int:
                 seen_at=args.seen_at,
                 lease_seconds=args.lease_seconds,
             )
+        elif args.command == "begin-delivery":
+            result = _ledger(args).begin_delivery(
+                args.event_id,
+                claim_token=args.claim_token,
+                claim_generation=args.claim_generation,
+                started_at=args.started_at,
+            )
         elif args.command == "ack":
             result = _ledger(args).acknowledge(
                 args.event_id,
                 claim_token=args.claim_token,
+                claim_generation=args.claim_generation,
                 acknowledged_at=args.acknowledged_at,
             )
         else:

@@ -14,11 +14,14 @@ from jsonschema import Draft202012Validator, FormatChecker
 from ops.atlas.operator_notification_idempotency import (
     ACK_CONTRACT_VERSION,
     EVENT_CONTRACT_VERSION,
+    ClaimTokenError,
+    DeliveryStateError,
     LedgerCorruptionError,
     NotificationContractError,
     NotificationLedger,
     UnknownLedgerSchemaError,
     build_event,
+    validate_event,
 )
 
 
@@ -29,6 +32,7 @@ THREAD_ID = "019f52d9-7667-72a3-a5f7-9c0613aedd8f"
 CREATED = "2026-07-17T14:00:00Z"
 SEEN = "2026-07-17T14:00:01Z"
 ACKED = "2026-07-17T14:00:02Z"
+STARTED = "2026-07-17T14:00:01.500000Z"
 
 
 class OperatorNotificationIdempotencyTests(unittest.TestCase):
@@ -73,6 +77,24 @@ class OperatorNotificationIdempotencyTests(unittest.TestCase):
             **kwargs,
         )
 
+    def begin(self, event: dict, claim: dict, *, started_at: str = STARTED) -> dict:
+        return self.ledger.begin_delivery(
+            event["event_id"],
+            claim_token=claim["claim_token"],
+            claim_generation=claim["claim_generation"],
+            started_at=started_at,
+        )
+
+    def acknowledge(
+        self, event: dict, claim: dict, *, acknowledged_at: str = ACKED
+    ) -> dict:
+        return self.ledger.acknowledge(
+            event["event_id"],
+            claim_token=claim["claim_token"],
+            claim_generation=claim["claim_generation"],
+            acknowledged_at=acknowledged_at,
+        )
+
     def test_schemas_compile_and_validate_generated_contracts(self) -> None:
         event_schema = json.loads(EVENT_SCHEMA.read_text(encoding="utf-8"))
         ack_schema = json.loads(ACK_SCHEMA.read_text(encoding="utf-8"))
@@ -83,11 +105,8 @@ class OperatorNotificationIdempotencyTests(unittest.TestCase):
             event_schema, format_checker=FormatChecker()
         ).validate(event)
         claim = self.claim(event)
-        ack = self.ledger.acknowledge(
-            event["event_id"],
-            claim_token=claim["claim_token"],
-            acknowledged_at=ACKED,
-        )
+        self.begin(event, claim)
+        ack = self.acknowledge(event, claim)
         Draft202012Validator(
             ack_schema, format_checker=FormatChecker()
         ).validate(ack)
@@ -102,10 +121,215 @@ class OperatorNotificationIdempotencyTests(unittest.TestCase):
             claimant_id="host-a",
             seen_at="2026-07-17T14:00:02Z",
         )
-        self.assertTrue(first["should_emit"])
+        self.assertTrue(first["should_begin_delivery"])
+        self.assertFalse(first["should_emit"])
+        self.assertFalse(first["operator_message_authorized"])
         self.assertFalse(duplicate["should_emit"])
         self.assertEqual(duplicate["disposition"], "duplicate_exact")
         self.assertEqual(self.ledger.record(event["event_id"])["duplicate_count"], 1)
+
+    def test_pre_send_fence_is_the_only_operator_delivery_authorization(self) -> None:
+        event = self.event()
+        claim = self.claim(event)
+        self.assertTrue(claim["should_begin_delivery"])
+        self.assertFalse(claim["should_emit"])
+        self.assertFalse(claim["operator_message_authorized"])
+
+        delivery = self.begin(event, claim)
+        self.assertTrue(delivery["should_emit"])
+        self.assertTrue(delivery["operator_message_authorized"])
+        self.assertTrue(delivery["transport_event_id_dedupe_required"])
+        self.assertEqual(delivery["transport_idempotency_key"], event["event_id"])
+        self.assertEqual(delivery["delivery_outcome"], "UNKNOWN")
+        self.assertTrue(delivery["reconciliation_required"])
+        with self.assertRaisesRegex(DeliveryStateError, "requires reconciliation"):
+            self.begin(event, claim)
+
+    def test_expired_claimant_is_fenced_after_replacement_claim(self) -> None:
+        event = self.event()
+        original = self.claim(event, lease_seconds=1)
+        replacement = self.ledger.claim(
+            event,
+            claimant_id="replacement-host",
+            seen_at="2026-07-17T14:00:02.000001Z",
+            lease_seconds=30,
+        )
+        self.assertTrue(replacement["should_begin_delivery"])
+        self.assertGreater(
+            replacement["claim_generation"], original["claim_generation"]
+        )
+        with self.assertRaisesRegex(ClaimTokenError, "active claim fence"):
+            self.ledger.begin_delivery(
+                event["event_id"],
+                claim_token=original["claim_token"],
+                claim_generation=original["claim_generation"],
+                started_at="2026-07-17T14:00:02.100000Z",
+            )
+        delivery = self.ledger.begin_delivery(
+            event["event_id"],
+            claim_token=replacement["claim_token"],
+            claim_generation=replacement["claim_generation"],
+            started_at="2026-07-17T14:00:02.100000Z",
+        )
+        self.assertTrue(delivery["operator_message_authorized"])
+
+    def test_transport_crash_state_is_durable_unknown_and_non_retryable(self) -> None:
+        event = self.event()
+        claim = self.claim(event)
+        self.begin(event, claim)
+        restarted = NotificationLedger(self.runtime_root, self.ledger_path)
+        duplicate = restarted.claim(
+            event,
+            claimant_id="restart-host",
+            seen_at="2026-07-18T14:00:00Z",
+        )
+        self.assertFalse(duplicate["should_begin_delivery"])
+        self.assertFalse(duplicate["should_emit"])
+        self.assertEqual(duplicate["disposition"], "duplicate_delivery_unknown")
+        self.assertEqual(duplicate["delivery_outcome"], "UNKNOWN")
+        self.assertTrue(duplicate["reconciliation_required"])
+        self.assertFalse(
+            restarted.should_retry(event["event_id"], at="2026-07-18T14:00:00Z")
+        )
+        record = restarted.record(event["event_id"])
+        self.assertEqual(record["delivery_state"], "delivery_in_progress")
+        self.assertEqual(record["delivery_outcome"], "UNKNOWN")
+        self.assertTrue(record["reconciliation_required"])
+
+    def test_active_ack_requires_matching_generation_and_pre_send_fence(self) -> None:
+        event = self.event()
+        original = self.claim(event, lease_seconds=1)
+        with self.assertRaisesRegex(DeliveryStateError, "fenced delivery"):
+            self.acknowledge(event, original)
+        replacement = self.ledger.claim(
+            event,
+            claimant_id="replacement-host",
+            seen_at="2026-07-17T14:00:02.000001Z",
+            lease_seconds=30,
+        )
+        self.ledger.begin_delivery(
+            event["event_id"],
+            claim_token=replacement["claim_token"],
+            claim_generation=replacement["claim_generation"],
+            started_at="2026-07-17T14:00:02.100000Z",
+        )
+        with self.assertRaisesRegex(ClaimTokenError, "active claim fence"):
+            self.acknowledge(
+                event, original, acknowledged_at="2026-07-17T14:00:03Z"
+            )
+        ack = self.acknowledge(
+            event, replacement, acknowledged_at="2026-07-17T14:00:03Z"
+        )
+        self.assertEqual(ack["claim_generation"], replacement["claim_generation"])
+
+    def test_lease_expiry_preserves_microsecond_floor(self) -> None:
+        event = self.event()
+        first = self.claim(
+            event,
+            seen_at="2026-07-17T14:00:00.999999Z",
+            lease_seconds=1,
+        )
+        self.assertEqual(
+            first["claim_expires_at"], "2026-07-17T14:00:01.999999Z"
+        )
+        early = self.ledger.claim(
+            event,
+            claimant_id="early-host",
+            seen_at="2026-07-17T14:00:01Z",
+            lease_seconds=1,
+        )
+        self.assertFalse(early["should_begin_delivery"])
+        retry = self.ledger.claim(
+            event,
+            claimant_id="on-boundary-host",
+            seen_at="2026-07-17T14:00:01.999999Z",
+            lease_seconds=1,
+        )
+        self.assertTrue(retry["should_begin_delivery"])
+        self.assertEqual(retry["disposition"], "retry_claimed")
+
+    def test_timestamps_require_canonical_rfc3339_utc_grammar(self) -> None:
+        invalid = (
+            "2026-07-17 14:00:00Z",
+            "2026-07-17T14:00:00+00:00",
+            "2026-07-17T14:00:00",
+            "2026-07-17t14:00:00z",
+            "2026-07-17T14:00:00.Z",
+            "2026-07-17T14:00:00.1234567Z",
+        )
+        for value in invalid:
+            with self.subTest(value=value):
+                with self.assertRaisesRegex(
+                    NotificationContractError, "canonical RFC 3339"
+                ):
+                    self.event(created_at=value)
+        valid = self.event(created_at="2026-07-17T14:00:00.123456Z")
+        self.assertEqual(validate_event(valid), valid)
+        schema = json.loads(EVENT_SCHEMA.read_text(encoding="utf-8"))
+        Draft202012Validator(schema, format_checker=FormatChecker()).validate(valid)
+        invalid_schema_event = dict(valid)
+        invalid_schema_event["created_at"] = "2026-07-17 14:00:00Z"
+        self.assertTrue(
+            list(
+                Draft202012Validator(
+                    schema, format_checker=FormatChecker()
+                ).iter_errors(invalid_schema_event)
+            )
+        )
+
+        with self.assertRaisesRegex(
+            NotificationContractError, "canonical RFC 3339"
+        ):
+            self.ledger.claim(
+                valid,
+                claimant_id="host-a",
+                seen_at="2026-07-17T14:00:01+00:00",
+            )
+        claim = self.claim(valid)
+        with self.assertRaisesRegex(
+            NotificationContractError, "canonical RFC 3339"
+        ):
+            self.begin(valid, claim, started_at="2026-07-17 14:00:01Z")
+        self.begin(valid, claim)
+        with self.assertRaisesRegex(
+            NotificationContractError, "canonical RFC 3339"
+        ):
+            self.acknowledge(
+                valid, claim, acknowledged_at="2026-07-17T14:00:02+00:00"
+            )
+        with self.assertRaisesRegex(DeliveryStateError, "predates"):
+            self.acknowledge(
+                valid, claim, acknowledged_at="2026-07-17T14:00:01.499999Z"
+            )
+        self.acknowledge(valid, claim)
+
+    def test_json_pointer_delta_escape_grammar_and_root_policy(self) -> None:
+        predecessor = "onv1_" + "a" * 64
+        for path in ("", "/status~", "/status~2value", "/~a"):
+            with self.subTest(path=path):
+                with self.assertRaisesRegex(NotificationContractError, "JSON Pointer"):
+                    self.event(
+                        supersedes_event_id=predecessor,
+                        delta={"changed_fact_paths": [path]},
+                    )
+        valid_paths = ["/", "//", "/path~1segment", "/status~0value"]
+        event = self.event(
+            supersedes_event_id=predecessor,
+            delta={"changed_fact_paths": valid_paths},
+        )
+        self.assertEqual(event["delta"]["changed_fact_paths"], valid_paths)
+        schema = json.loads(EVENT_SCHEMA.read_text(encoding="utf-8"))
+        Draft202012Validator.check_schema(schema)
+        Draft202012Validator(schema, format_checker=FormatChecker()).validate(event)
+        invalid_schema_event = json.loads(json.dumps(event))
+        invalid_schema_event["delta"]["changed_fact_paths"] = ["/status~2value"]
+        self.assertTrue(
+            list(
+                Draft202012Validator(
+                    schema, format_checker=FormatChecker()
+                ).iter_errors(invalid_schema_event)
+            )
+        )
 
     def test_semantic_duplicate_ignores_declared_transport_volatility(self) -> None:
         first = self.event(transport={"host_id": "host-a", "attempt": 1})
@@ -148,7 +372,7 @@ class OperatorNotificationIdempotencyTests(unittest.TestCase):
             seen_at="2026-07-17T14:00:03Z",
         )
         self.assertNotEqual(first["event_id"], changed["event_id"])
-        self.assertTrue(result["should_emit"])
+        self.assertTrue(result["should_begin_delivery"])
 
     def test_supersession_is_machine_readable_in_both_records(self) -> None:
         first = self.event()
@@ -202,11 +426,8 @@ class OperatorNotificationIdempotencyTests(unittest.TestCase):
     def test_acknowledgement_stops_retry_and_replays_stable_control_ack(self) -> None:
         event = self.event()
         claim = self.claim(event)
-        ack = self.ledger.acknowledge(
-            event["event_id"],
-            claim_token=claim["claim_token"],
-            acknowledged_at=ACKED,
-        )
+        self.begin(event, claim)
+        ack = self.acknowledge(event, claim)
         self.assertFalse(
             self.ledger.should_retry(event["event_id"], at="2026-07-18T00:00:00Z")
         )
@@ -224,15 +445,10 @@ class OperatorNotificationIdempotencyTests(unittest.TestCase):
     def test_duplicate_ack_does_not_create_a_second_ack_or_message(self) -> None:
         event = self.event()
         claim = self.claim(event)
-        first = self.ledger.acknowledge(
-            event["event_id"],
-            claim_token=claim["claim_token"],
-            acknowledged_at=ACKED,
-        )
-        second = self.ledger.acknowledge(
-            event["event_id"],
-            claim_token=claim["claim_token"],
-            acknowledged_at="2026-07-17T14:10:00Z",
+        self.begin(event, claim)
+        first = self.acknowledge(event, claim)
+        second = self.acknowledge(
+            event, claim, acknowledged_at="2026-07-17T14:10:00Z"
         )
         self.assertEqual(first["ack_id"], second["ack_id"])
         self.assertEqual(first["acknowledged_at"], second["acknowledged_at"])
@@ -242,11 +458,8 @@ class OperatorNotificationIdempotencyTests(unittest.TestCase):
     def test_heartbeat_and_continuation_never_replay_operator_message(self) -> None:
         event = self.event()
         claim = self.claim(event)
-        self.ledger.acknowledge(
-            event["event_id"],
-            claim_token=claim["claim_token"],
-            acknowledged_at=ACKED,
-        )
+        self.begin(event, claim)
+        self.acknowledge(event, claim)
         for kind in ("heartbeat", "continuation"):
             control = self.event(
                 event_class=f"task.{kind}",
@@ -269,11 +482,8 @@ class OperatorNotificationIdempotencyTests(unittest.TestCase):
     def test_restart_recovery_preserves_deduplication_and_ack(self) -> None:
         event = self.event()
         claim = self.claim(event)
-        expected_ack = self.ledger.acknowledge(
-            event["event_id"],
-            claim_token=claim["claim_token"],
-            acknowledged_at=ACKED,
-        )
+        self.begin(event, claim)
+        expected_ack = self.acknowledge(event, claim)
         restarted = NotificationLedger(self.runtime_root, self.ledger_path)
         result = restarted.claim(
             event,
@@ -300,7 +510,19 @@ class OperatorNotificationIdempotencyTests(unittest.TestCase):
         with self.assertRaises(UnknownLedgerSchemaError):
             NotificationLedger(self.runtime_root, unknown_path)
 
-    def test_concurrent_duplicate_claim_allows_exactly_one_emission(self) -> None:
+        incompatible_path = (
+            self.runtime_root / "atlas" / "notifications" / "incompatible.sqlite3"
+        )
+        NotificationLedger(self.runtime_root, incompatible_path)
+        with closing(sqlite3.connect(incompatible_path)) as connection:
+            connection.execute(
+                "ALTER TABLE notification_events ADD COLUMN unexpected TEXT"
+            )
+            connection.commit()
+        with self.assertRaises(UnknownLedgerSchemaError):
+            NotificationLedger(self.runtime_root, incompatible_path)
+
+    def test_concurrent_duplicate_claim_allows_exactly_one_delivery_candidate(self) -> None:
         event = self.event()
         barrier = threading.Barrier(12)
 
@@ -314,10 +536,12 @@ class OperatorNotificationIdempotencyTests(unittest.TestCase):
 
         with ThreadPoolExecutor(max_workers=12) as executor:
             results = list(executor.map(attempt, range(12)))
-        self.assertEqual(sum(result["should_emit"] for result in results), 1)
+        self.assertEqual(
+            sum(result["should_begin_delivery"] for result in results), 1
+        )
         self.assertEqual(self.ledger.record(event["event_id"])["duplicate_count"], 11)
 
-    def test_concurrent_first_open_and_claim_allows_exactly_one_emission(self) -> None:
+    def test_concurrent_first_open_and_claim_allows_one_delivery_candidate(self) -> None:
         event = self.event(event_class="task.concurrent-startup")
         ledger_path = (
             self.runtime_root / "atlas" / "notifications" / "startup.sqlite3"
@@ -336,8 +560,30 @@ class OperatorNotificationIdempotencyTests(unittest.TestCase):
         with ThreadPoolExecutor(max_workers=12) as executor:
             results = list(executor.map(attempt, range(12)))
         ledger = NotificationLedger(self.runtime_root, ledger_path)
-        self.assertEqual(sum(result["should_emit"] for result in results), 1)
+        self.assertEqual(
+            sum(result["should_begin_delivery"] for result in results), 1
+        )
         self.assertEqual(ledger.record(event["event_id"])["duplicate_count"], 11)
+
+    def test_concurrent_pre_send_fence_allows_exactly_one_authorization(self) -> None:
+        event = self.event(event_class="task.concurrent-delivery")
+        claim = self.claim(event)
+        barrier = threading.Barrier(12)
+
+        def attempt(_: int) -> bool:
+            barrier.wait()
+            try:
+                result = self.begin(event, claim)
+            except DeliveryStateError:
+                return False
+            return bool(result["operator_message_authorized"])
+
+        with ThreadPoolExecutor(max_workers=12) as executor:
+            results = list(executor.map(attempt, range(12)))
+        self.assertEqual(sum(results), 1)
+        record = self.ledger.record(event["event_id"])
+        self.assertEqual(record["delivery_state"], "delivery_in_progress")
+        self.assertEqual(record["delivery_outcome"], "UNKNOWN")
 
     def test_expired_claim_can_be_retried_exactly_once(self) -> None:
         event = self.event()
@@ -354,8 +600,8 @@ class OperatorNotificationIdempotencyTests(unittest.TestCase):
             seen_at="2026-07-17T14:00:04Z",
             lease_seconds=30,
         )
-        self.assertTrue(first["should_emit"])
-        self.assertTrue(retry["should_emit"])
+        self.assertTrue(first["should_begin_delivery"])
+        self.assertTrue(retry["should_begin_delivery"])
         self.assertEqual(retry["disposition"], "retry_claimed")
         self.assertNotEqual(first["claim_token"], retry["claim_token"])
         self.assertFalse(duplicate["should_emit"])
@@ -378,7 +624,7 @@ class OperatorNotificationIdempotencyTests(unittest.TestCase):
             claimant_id="digest-host",
             seen_at="2026-07-18T14:00:01Z",
         )
-        self.assertTrue(result["should_emit"])
+        self.assertTrue(result["should_begin_delivery"])
         self.assertIsNone(second["supersedes_event_id"])
 
     def test_payload_body_is_not_retained_in_receive_ledger(self) -> None:

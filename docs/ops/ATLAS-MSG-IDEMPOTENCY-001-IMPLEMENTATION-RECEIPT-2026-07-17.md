@@ -14,14 +14,20 @@ second notification stream.
 
 - Frozen deterministic event and acknowledgement contracts.
 - Added a transport-free event builder and SQLite receive ledger using WAL, FULL
-  synchronous durability, one-writer claim transactions, stable claim/ack identities, and
-  fail-closed schema/integrity checks.
+  synchronous durability, one-writer claim transactions, token-plus-generation pre-send
+  fencing, stable acknowledgement identities, and fail-closed schema/integrity checks.
+- Claim receipts never authorize transport. Only an atomic, unexpired `begin_delivery`
+  transition enters non-stealable `delivery_in_progress` and authorizes one transport call.
+- A transport crash after fencing remains explicit `UNKNOWN` and reconciliation-required;
+  automatic lease takeover is forbidden without downstream `event_id` dedupe evidence.
 - Exact and semantic duplicates are recorded without operator-message authorization.
 - Changed facts require supersession and machine-readable delta paths; only typed periodic
   digests may replay an unlinked full snapshot.
 - Heartbeats and continuations are durably suppressed.
 - Payload bodies and transport metadata are not retained in the ledger.
 - Duplicate acknowledgements are stable control receipts with no message or retry authority.
+- Lease expiries retain microsecond precision; timestamps are canonical RFC 3339 UTC; and
+  changed-fact paths enforce RFC 6901 escape grammar with the existing no-root policy.
 
 ## Fixed Verification Units
 
@@ -30,12 +36,15 @@ second notification stream.
 - Semantic duplicate suppression after volatile-field normalization.
 - Changed-delta and supersession enforcement.
 - Cross-host stable identity.
-- Correlated acknowledgement stopping retry.
+- Pre-send token/generation fencing and stale claimant rejection.
+- Correlated token/generation acknowledgement stopping retry.
 - Heartbeat and continuation non-replay.
 - Restart recovery.
 - Corrupt and unknown schema fail-closed behavior.
-- Concurrent duplicate claim with exactly one emission authorization.
-- Expired unacknowledged claim recovery.
+- Concurrent duplicate claim with exactly one pre-send delivery candidate.
+- Expired pre-send claim recovery without lease shortening.
+- Durable crash-to-`UNKNOWN` recovery and non-stealable delivery state.
+- Canonical timestamp and JSON Pointer grammar rejection.
 - Periodic-digest full-snapshot exception.
 - Payload non-retention.
 
@@ -44,8 +53,8 @@ Completion values are not inferred from these units. Runtime effectiveness remai
 
 ## Local Verification Snapshot
 
-- Notification contract/ledger suite: 16 passed in each of two final runs on Python 3.13;
-  16 passed on Python 3.12.
+- Notification contract/ledger suite: 24 passed in each of two final runs on Python 3.12
+  and in each of two final runs on Python 3.13.
 - Native task and board correlation suite: 22 passed in each of two runs.
 - Root QA pipeline suite: 78 passed in each of two runs.
 - Root stack validation: exit 0 in each of two runs with identical semantic results. The
@@ -70,10 +79,11 @@ CI lane validates repository code only.
 ## Adoption and Rollback
 
 Adoption is held until the native sender/receiver owner, runtime path, filesystem WAL and
-backup/restore proof, transport gate, privacy-safe observability, and rollback owner are
-named and verified. Before adoption, rollback is a repository revert. After adoption,
-stop the adapter, preserve and hash the ledger plus WAL sidecars, then restore or forward-fix
-v1 before resuming; never fall back to an unguarded direct-send path.
+backup/restore proof, pre-send fence, mandatory downstream `event_id` dedupe, privacy-safe
+observability, reconciliation procedure, and rollback owner are named and verified. Before
+adoption, rollback is a repository revert. After adoption, stop the adapter, preserve and
+hash the ledger plus WAL sidecars, then restore or forward-fix v1 before resuming; never
+fall back to an unguarded direct-send path.
 
 ## Failure Mode
 

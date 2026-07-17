@@ -12,10 +12,13 @@ receipts only. It does not connect to FAWXZZY MESSAGES or any other transport.
 
 1. Prepare one event from allowlisted facts.
 2. Pass the event to the receiver claim transaction.
-3. Deliver only when `should_emit` is exactly `true` and the caller already has delivery
-   authority.
-4. Record the correlated acknowledgement using the returned `claim_token`.
-5. Stop sender retries when the acknowledgement sets `retry_authorized=false`.
+3. When `should_begin_delivery=true`, call the atomic `begin-delivery` transition with the
+   returned claim token and generation immediately before transport.
+4. Deliver only when that pre-send receipt sets both `should_emit=true` and
+   `operator_message_authorized=true`, the caller already has delivery authority, and the
+   transport uses `event_id` as its idempotency key.
+5. Record the correlated acknowledgement using the same token and generation.
+6. Stop sender retries when the acknowledgement sets `retry_authorized=false`.
 
 Never infer permission from a missing, unreadable, corrupt, or unknown ledger. Those states
 are failures, not empty or healthy state.
@@ -53,7 +56,9 @@ python ops/atlas/operator_notification_idempotency.py prepare --input <input-jso
 Transport attempt numbers, host labels, routing metadata, and `created_at` may change on a
 retry without changing `event_id`. Changed facts must produce a new event and, after the
 first event in a stream, must name the latest predecessor and changed fact paths. Only an
-explicit `periodic_digest` may establish another unlinked full snapshot.
+explicit `periodic_digest` may establish another unlinked full snapshot. All timestamps
+must use canonical RFC 3339 UTC (`T`, `Z`, and at most six fractional digits). Delta paths
+exclude the empty root pointer and use only RFC 6901 `~0` and `~1` escapes.
 
 ## Claim
 
@@ -70,17 +75,41 @@ python ops/atlas/operator_notification_idempotency.py claim `
 
 Interpretation:
 
-- `should_emit=true`: this claim alone may proceed to the separately authorized transport.
-- `should_emit=false`: record the receipt and emit nothing to the operator.
+- `should_begin_delivery=true`: this claimant may attempt the atomic pre-send fence.
+- Every claim receipt has `should_emit=false` and authorizes no operator message.
 - `duplicate_exact`: unchanged facts and unchanged transport envelope.
 - `duplicate_semantic`: unchanged canonical facts after declared volatile fields changed.
 - `duplicate_acked`: the receiver already accepted delivery; use the returned stable ack.
 - `duplicate_superseded`: a newer changed event replaced this event; never retry it.
 - `suppressed_control`: heartbeat or continuation; never emit.
-- `retry_claimed`: the prior unacknowledged lease expired and this claim owns the retry.
+- `retry_claimed`: the prior lease expired before delivery began and this fenced claim owns
+  the retry.
+- `duplicate_delivery_unknown`: delivery began but no acknowledgement is durable; emit
+  nothing, do not take over, and reconcile against transport acceptance by `event_id`.
 
 Do not treat delivery-state changes as new operator notifications. In particular, never
 send a duplicate acknowledgement through the same notification lane.
+
+## Begin Delivery
+
+Immediately before the transport call:
+
+```powershell
+python ops/atlas/operator_notification_idempotency.py begin-delivery `
+  --runtime-root <atlas-runtime-root> `
+  --ledger <atlas-runtime-root>\atlas\notifications\receive.sqlite3 `
+  --event-id <event-id> `
+  --claim-token <claim-token> `
+  --claim-generation <claim-generation> `
+  --started-at <utc-timestamp>
+```
+
+This transition is the only source of operator-message authorization. It atomically fences
+expired claimants and makes the delivery non-stealable. The transport must deduplicate on
+the returned `transport_idempotency_key`, which is the stable `event_id`. SQLite protects
+local claim ownership; it does not provide network exactly-once delivery. If the process
+crashes or times out after this transition, status is `UNKNOWN` and reconciliation is
+required. Never replay automatically from `delivery_in_progress`.
 
 ## Acknowledge
 
@@ -92,11 +121,14 @@ python ops/atlas/operator_notification_idempotency.py ack `
   --ledger <atlas-runtime-root>\atlas\notifications\receive.sqlite3 `
   --event-id <event-id> `
   --claim-token <claim-token> `
+  --claim-generation <claim-generation> `
   --acknowledged-at <utc-timestamp>
 ```
 
-The token must match the active claim. A repeated acknowledgement returns the same `ack_id`
-with `ack_disposition=replayed`; it never authorizes a message or another retry.
+The token and generation must match the active claim, and delivery must already be fenced
+in progress. A repeated acknowledgement returns the same `ack_id` with
+`ack_disposition=replayed`; stale acknowledgements fail closed and never authorize a
+message or another retry.
 
 ## Inspect
 
@@ -120,6 +152,8 @@ prove SQLite online backup and restore on the target filesystem.
   the last verified backup, then replay the original deterministic events.
 - Busy/lock timeout: report unavailable and retry the claim transaction later; do not bypass
   the ledger.
+- `delivery_in_progress` without acknowledgement: report `UNKNOWN`, reconcile using the
+  transport's `event_id` acceptance evidence, and do not issue a replacement lease.
 - Duplicate acknowledgement loop: break the loop at both adapters and retain the ledger
   evidence. An acknowledgement is a control receipt, never notification content.
 
