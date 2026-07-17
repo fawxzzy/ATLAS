@@ -231,6 +231,21 @@ def _resolve_filesystem_evidence_ref(
     path: str,
 ) -> tuple[Path | None, Path | None, str | None, list[RuntimePlacementIssue]]:
     issues: list[RuntimePlacementIssue] = []
+    if evidence_ref.lower().startswith("file:"):
+        return (
+            None,
+            None,
+            None,
+            [
+                _issue(
+                    "runtime-placement-evidence-path",
+                    path,
+                    "Local file URIs are not valid evidence refs; use a normalized ATLAS-root-relative path.",
+                    evidence_ref=evidence_ref,
+                    reason="local-file-uri",
+                )
+            ],
+        )
     relative_ref = evidence_ref.split("#", 1)[0].split("@", 1)[0]
     if not relative_ref:
         return (
