@@ -454,10 +454,11 @@ def path_exclusion(entry: TreeEntry) -> tuple[str, str] | None:
         return "UNSUPPORTED_GIT_OBJECT", "internal"
     path = PurePosixPath(entry.relative_path)
     parts = tuple(part.lower() for part in path.parts)
+    secret_parts = tuple(part[1:] if part.startswith(".") else part for part in parts)
     name = parts[-1]
-    secret_stem = name.split(".", 1)[0]
+    secret_stem = name.lstrip(".").split(".", 1)[0]
     if (
-        any(part in SECRET_SEGMENTS for part in parts)
+        any(part in SECRET_SEGMENTS for part in secret_parts)
         or name.startswith(".env")
         or name in SECRET_NAMES
         or (secret_stem in SECRET_STEMS and path.suffix.lower() in SECRET_MANIFEST_SUFFIXES)
