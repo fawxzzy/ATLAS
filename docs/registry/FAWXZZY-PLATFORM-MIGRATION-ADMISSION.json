@@ -38,7 +38,8 @@
     "destructive-contraction",
     "source-disable-delete",
     "physical-discord-merge",
-    "irreversible-action"
+    "irreversible-action",
+    "vercel-production"
   ],
   "evidence": [
     "data/imports/fawxzzy-platform/2026-07-16/ATLAS_MAIN_FAWXZZY_PLATFORM_SUPABASE_MIGRATION_PROMPT_2026-07-16.md",
@@ -52,6 +53,7 @@
     "Backup and restore proof exists before rehearsal or migration.",
     "Identity, data, RLS, billing, and cross-service Auth rehearsals pass in an isolated environment.",
     "Every cutover has current exact approval, observation, rollback, and quarantine proof.",
+    "Every Vercel production deploy, promotion, rollback, or alias cutover has current project-specific approval.",
     "Retirement, disablement, contraction, and deletion remain separately approval-gated.",
     "No percentage is assigned until an accepted deterministic measurement contract exists."
   ],

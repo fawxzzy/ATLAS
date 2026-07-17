@@ -27,14 +27,39 @@ class AtlasMasterProgramTests(unittest.TestCase):
     def test_repository_contract_is_valid(self) -> None:
         self.assertEqual([], MASTER_PROGRAM.validate_repository())
 
-    def test_historical_guards_match_exact_merged_base_blobs(self) -> None:
-        for ref, expected in MASTER_PROGRAM.HISTORICAL_FILE_GUARDS.items():
+    def test_immutable_historical_guards_match_exact_merged_base_provenance(self) -> None:
+        for ref, expected in MASTER_PROGRAM.IMMUTABLE_FILE_GUARDS.items():
             committed = subprocess.check_output(
                 ["git", "show", f"{MASTER_PROGRAM.BASE_COMMIT}:{ref}"],
                 cwd=ROOT,
             )
             self.assertEqual(expected, hashlib.sha256(committed).hexdigest(), ref)
             self.assertEqual(expected, MASTER_PROGRAM._file_digest(ROOT / ref), ref)
+        for ref, field_guards in MASTER_PROGRAM.IMMUTABLE_JSON_FIELD_GUARDS.items():
+            committed = json.loads(
+                subprocess.check_output(
+                    ["git", "show", f"{MASTER_PROGRAM.BASE_COMMIT}:{ref}"],
+                    cwd=ROOT,
+                ).decode("utf-8")
+            )
+            current = load_json(ref)
+            for path, expected in field_guards.items():
+                self.assertEqual(expected, MASTER_PROGRAM._value_at_path(committed, path), ref)
+                self.assertEqual(expected, MASTER_PROGRAM._value_at_path(current, path), ref)
+        self.assertEqual([], MASTER_PROGRAM._validate_immutable_historical_provenance())
+
+        mutable_authority_refs = {
+            "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json",
+            "docs/atlas-book/02-lanes-and-markers.md",
+            "docs/memory/initiatives/continuity-manifest-atlas-full-system-re-evaluation.json",
+            "docs/registry/ATLAS-EXTERNAL-MODEL-SIDECAR-RUNTIME-CONTRACT.json",
+        }
+        self.assertTrue(mutable_authority_refs.isdisjoint(MASTER_PROGRAM.IMMUTABLE_FILE_GUARDS))
+        provenance = load_json(
+            "docs/programs/ATLAS-MASTER-PROGRAM-REGISTER.v1.source.json"
+        )["provenance_guards"]
+        self.assertEqual(MASTER_PROGRAM.BASE_COMMIT, provenance["wave_0_admission_baseline"]["base_commit"])
+        self.assertIn("never a current-status guard", provenance["wave_0_admission_baseline"]["role"])
 
     def test_generated_artifacts_are_byte_deterministic(self) -> None:
         first_register = MASTER_PROGRAM._json_bytes(MASTER_PROGRAM.build_master_register())
@@ -107,6 +132,29 @@ class AtlasMasterProgramTests(unittest.TestCase):
             [packet["id"] for packet in packets],
         )
         self.assertEqual("FP-DOS-REC-001", admission["next_packet"])
+        self.assertIn("vercel-production", admission["approval_gates"])
+
+        registry = load_json("docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json")
+        lane = next(
+            entry for entry in registry["backlog_candidates"]
+            if entry["id"] == "lane-fawxzzy-platform-migration"
+        )
+        self.assertIn(
+            "Project-specific Vercel production deploy, promotion, rollback, or alias cutover",
+            lane["approval_gates"],
+        )
+        source = load_json("docs/programs/ATLAS-MASTER-PROGRAM-REGISTER.v1.source.json")
+        source_program = next(
+            entry for entry in source["programs"]
+            if entry["id"] == "program-fawxzzy-platform-migration"
+        )
+        register = load_json("docs/registry/ATLAS-MASTER-PROGRAM-REGISTER.v1.json")
+        generated_program = next(
+            entry for entry in register["programs"]
+            if entry["id"] == "program-fawxzzy-platform-migration"
+        )
+        self.assertIn("vercel-production", source_program["approval_gates"])
+        self.assertIn("vercel-production", generated_program["approval_gates"])
 
     def test_deepseek_historical_metric_is_preserved_but_not_reused(self) -> None:
         initiative = load_json(
@@ -191,6 +239,31 @@ class AtlasMasterProgramTests(unittest.TestCase):
                 ),
             )
         self.assertIsInstance(FakeDraft202012Validator.received_checker, FakeFormatChecker)
+
+        import_schema = load_json("schemas/atlas.source-import-manifest.v1.json")
+        for invalid_date in ("20260716", "2026-W29-4"):
+            invalid_manifest = load_json(
+                "data/imports/fawxzzy-platform/2026-07-16/IMPORT-MANIFEST.json"
+            )
+            invalid_manifest["source"]["received_on"] = invalid_date
+            errors = MASTER_PROGRAM._schema_subset_validate(invalid_manifest, import_schema)
+            self.assertTrue(errors, invalid_date)
+
+    def test_closing_audit_index_preserves_gate_semantics_without_current_status(self) -> None:
+        register = load_json("docs/registry/ATLAS-MASTER-PROGRAM-REGISTER.v1.json")
+        closing = register["authority_indexes"]["mandatory_closing_audit"]
+        self.assertNotIn("status", closing)
+        self.assertIn("authority references", closing["current_status_rule"])
+        self.assertEqual(
+            {
+                "authority_ref": "docs/audits/ATLAS-FULL-SYSTEM-OPENING-AUDIT-2026-07-12.md",
+                "accepted_gate_count": 1,
+                "fixed_gate_denominator": 2,
+                "historical_percentage": 50,
+            },
+            closing["historical_opening_snapshot"],
+        )
+        self.assertIn("separately accepted exhaustive closing audit", closing["completion_rule"])
 
     def test_master_register_covers_required_program_families(self) -> None:
         register = load_json("docs/registry/ATLAS-MASTER-PROGRAM-REGISTER.v1.json")

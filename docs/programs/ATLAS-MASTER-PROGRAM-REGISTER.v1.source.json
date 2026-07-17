@@ -107,9 +107,9 @@
       "approval_gates": [],
       "evidence": ["docs/audits/ATLAS-FULL-SYSTEM-OPENING-AUDIT-2026-07-12.md", "docs/memory/initiatives/continuity-manifest-atlas-full-system-re-evaluation.json"],
       "definition_of_done": ["One separately accepted exhaustive closing audit closes gate 2 of 2.", "Every preparatory gap found by it is complete before development opens."],
-      "status": "pending-gated",
-      "next_packet": "Atlas Full-System Re-evaluation closing audit after preparation gates become terminal.",
-      "measurement_status": "HISTORICAL_FIXED_1_OF_2"
+      "status": "authority-referenced-mandatory-gate",
+      "next_packet": "Resolve current closing-audit status and routing from the canonical continuity manifest and marker authority.",
+      "measurement_status": "HISTORICAL_OPENING_SNAPSHOT_1_OF_2"
     },
     {
       "id": "program-discordos-board-governance",
@@ -164,7 +164,7 @@
       "scope": "Recover source truth, prove backup/restore and ledger parity, seed the platform from Fitness, rehearse identity/data/RLS/billing/cross-service auth, use previews, perform separately approved cutovers, observe and roll back or quarantine, and separately approve retirement or deletion.",
       "dependencies": ["FP-DOS-REC-001", "FP-MZR-REC-001", "FP-FIT-REC-001", "FP-PARITY-RATCHET-001"],
       "serialization": ["One canonical ledger.", "Expand -> migrate -> verify -> cutover -> contract.", "DiscordOS remains physically separate by default."],
-      "approval_gates": ["paid-project", "production-auth-oauth", "production-data-cutover", "maintenance-window", "breaking-secret-rotation", "destructive-contraction", "source-disable-delete", "physical-discord-merge", "irreversible-action"],
+      "approval_gates": ["paid-project", "production-auth-oauth", "production-data-cutover", "maintenance-window", "breaking-secret-rotation", "destructive-contraction", "source-disable-delete", "physical-discord-merge", "irreversible-action", "vercel-production"],
       "evidence": ["data/imports/fawxzzy-platform/2026-07-16/IMPORT-MANIFEST.json", "docs/registry/FAWXZZY-PLATFORM-MIGRATION-ADMISSION.json", "docs/memory/initiatives/initiative-fawxzzy-platform-migration.json"],
       "definition_of_done": ["Parity, backup/restore, rehearsal, migration, cutover, observation, rollback, quarantine, and retirement gates have current accepted evidence.", "No source is disabled or deleted without separate exact approval."],
       "status": "HOLD",
@@ -399,16 +399,23 @@
   ],
   "provenance_guards": {
     "historical_values_rule": "Historical percentages, denominators, accepted opening/closing contracts, and timestamped evidence remain immutable provenance.",
-    "guarded_file_sha256": {
-      "docs/audits/ATLAS-FULL-SYSTEM-OPENING-AUDIT-2026-07-12.md": "5d946ead2631516e5d5a70c6041a4fafdf6bece4b703d501b3894b49b19b1e9f",
-      "docs/atlas-book/02-lanes-and-markers.md": "eb0624f00e289306f65643fdf0893332cf233fc273911efc7da82a2dd057e8ad",
-      "docs/memory/initiatives/continuity-manifest-atlas-full-system-re-evaluation.json": "03f4243f8ff5d9de23df5c1995fed2cf5b025c65923c07646d51c8f04715995b",
-      "docs/registry/ATLAS-EXTERNAL-MODEL-SIDECAR-RUNTIME-CONTRACT.json": "fcca89d9b54def0a8e9346f13e87aa9079568a2c9c9cd9acd8ee69e787f265ce"
+    "immutable_file_sha256": {
+      "docs/audits/ATLAS-FULL-SYSTEM-OPENING-AUDIT-2026-07-12.md": "5d946ead2631516e5d5a70c6041a4fafdf6bece4b703d501b3894b49b19b1e9f"
     },
-    "guard_digest_basis": "Exact SHA-256 of the committed text blobs at merged base ef8a1e7abe514f2f3a01e7fdbd0fe537157efff9; checkout CRLF is normalized to canonical Git LF before comparison.",
-    "existing_lane_projection": {
-      "lanes": {"count": 20, "sha256": "4886e1f3e566ac2037e61a55dacdb830b53714a37cfc133268364a03f8c88b90"},
-      "backlog_candidates": {"count": 44, "sha256": "241b63460851a15a26af2f1064a2e9c0125eff12c077fdb9de025f6b870d43ca"}
+    "immutable_json_fields": {
+      "docs/memory/initiatives/continuity-manifest-atlas-full-system-re-evaluation.json": {
+        "created_at": "2026-07-12T12:00:00Z",
+        "metadata.validation_posture.opening_validation_snapshot": {"critical": 0, "error": 4, "warning": 25, "info": 0, "label": "dated July 12 pre-package opening observation; not current health"}
+      }
+    },
+    "guard_basis": "Only immutable dated artifacts and immutable historical fields are validated. Mutable lane, marker, initiative, admission, and runtime authority may ratchet without rebasing a full-object digest.",
+    "wave_0_admission_baseline": {
+      "base_commit": "ef8a1e7abe514f2f3a01e7fdbd0fe537157efff9",
+      "role": "Dated no-mutation evidence only; never a current-status guard or competing authority.",
+      "existing_lane_projection": {
+        "lanes": {"count": 20, "sha256": "4886e1f3e566ac2037e61a55dacdb830b53714a37cfc133268364a03f8c88b90"},
+        "backlog_candidates": {"count": 44, "sha256": "241b63460851a15a26af2f1064a2e9c0125eff12c077fdb9de025f6b870d43ca"}
+      }
     },
     "deepseek_historical_marker_rule": "The prior 33.3 percent / 2-of-6 initiative snapshot is preserved unchanged as dated provenance; the new Wave 0 evaluation lane is distinct and UNMEASURED.",
     "deepseek_historical_snapshot": {

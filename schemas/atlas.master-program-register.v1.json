@@ -119,15 +119,23 @@
         "mandatory_closing_audit": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["authority_ref", "marker_authority_ref", "status", "accepted_opening_gate_count", "fixed_gate_denominator", "historical_percentage", "rule"],
+          "required": ["authority_ref", "marker_authority_ref", "current_status_rule", "historical_opening_snapshot", "completion_rule"],
           "properties": {
             "authority_ref": {"type": "string", "minLength": 1},
             "marker_authority_ref": {"type": "string", "minLength": 1},
-            "status": {"const": "pending"},
-            "accepted_opening_gate_count": {"const": 1},
-            "fixed_gate_denominator": {"const": 2},
-            "historical_percentage": {"const": 50},
-            "rule": {"type": "string", "minLength": 1}
+            "current_status_rule": {"type": "string", "minLength": 1},
+            "historical_opening_snapshot": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["authority_ref", "accepted_gate_count", "fixed_gate_denominator", "historical_percentage"],
+              "properties": {
+                "authority_ref": {"const": "docs/audits/ATLAS-FULL-SYSTEM-OPENING-AUDIT-2026-07-12.md"},
+                "accepted_gate_count": {"const": 1},
+                "fixed_gate_denominator": {"const": 2},
+                "historical_percentage": {"const": 50}
+              }
+            },
+            "completion_rule": {"type": "string", "minLength": 1}
           }
         }
       }
