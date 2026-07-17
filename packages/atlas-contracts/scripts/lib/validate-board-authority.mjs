@@ -43,17 +43,62 @@ function isPositiveInteger(value) {
   return Number.isInteger(value) && value > 0;
 }
 
+function validateArchiveMaterialization({ lifecycle, archiveState, standingAnchor }) {
+  const errors = [];
+  if (standingAnchor === true && (lifecycle === "archived" || archiveState === "archived")) {
+    errors.push("Stable standing anchors must remain unarchived");
+  }
+  if (lifecycle !== undefined
+    && archiveState !== undefined
+    && ((lifecycle === "archived") !== (archiveState === "archived"))) {
+    errors.push("Lifecycle archived and archive_state archived must move together");
+  }
+  return errors;
+}
+
+export function projectInitialCardRecordV3(event) {
+  const set = event.changes.set;
+  return {
+    contract_version: "atlas.card-record.v3",
+    authority: event.authority,
+    card_id: event.card_id,
+    project_id: event.project_id,
+    board_id: event.board_id,
+    epoch_id: set.epoch_id,
+    version: event.card_version,
+    last_event_sequence: event.event_sequence,
+    title: set.title,
+    description: set.description,
+    card_type: set.card_type,
+    lifecycle: set.lifecycle,
+    priority: set.priority,
+    owner: set.owner,
+    standing_anchor: set.standing_anchor,
+    archive_state: set.archive_state,
+    work: set.work,
+    blockers: event.changes.add_blockers,
+    owned_resources: event.changes.add_resources,
+    receipt_refs: event.changes.add_receipts.map((receipt) => ({
+      ...receipt,
+      status: receipt.receipt_id === event.execution_receipt.receipt_id ? "succeeded" : "UNKNOWN",
+    })),
+    next_action: set.next_action,
+    projection_state: set.projection_state,
+    created_at: event.occurred_at,
+    updated_at: event.occurred_at,
+  };
+}
+
 export function validateCardRecordV3(record) {
   const errors = [];
   if (record.last_event_sequence < record.version) {
     errors.push("$.last_event_sequence cannot precede $.version");
   }
-  if (record.standing_anchor && (record.lifecycle === "archived" || record.archive_state === "archived")) {
-    errors.push("Stable standing anchors must remain unarchived");
-  }
-  if ((record.lifecycle === "archived") !== (record.archive_state === "archived")) {
-    errors.push("$.lifecycle archived and $.archive_state archived must move together");
-  }
+  errors.push(...validateArchiveMaterialization({
+    lifecycle: record.lifecycle,
+    archiveState: record.archive_state,
+    standingAnchor: record.standing_anchor,
+  }));
   if (Date.parse(record.updated_at) < Date.parse(record.created_at)) {
     errors.push("$.updated_at cannot precede $.created_at");
   }
@@ -96,11 +141,20 @@ export function validateCardEventV3(event) {
       "next_action",
       "projection_state",
     ];
+    let initialFieldsComplete = true;
     for (const field of requiredInitialFields) {
-      if (!(field in event.changes.set)) errors.push(`Initial create/import event requires $.changes.set.${field}`);
+      if (!(field in event.changes.set)) {
+        errors.push(`Initial create/import event requires $.changes.set.${field}`);
+        initialFieldsComplete = false;
+      }
     }
     if (event.changes.transition?.from !== null || event.changes.transition?.to !== event.changes.set.lifecycle) {
       errors.push("Initial create/import transition must move from null to the materialized lifecycle");
+    }
+    if (initialFieldsComplete) {
+      errors.push(...validateCardRecordV3(projectInitialCardRecordV3(event)).map(
+        (error) => `Initial materialized CardRecord: ${error}`,
+      ));
     }
   }
   if (event.changes.set.epoch_id !== undefined && event.changes.set.epoch_id !== event.epoch_id) {
@@ -125,6 +179,13 @@ export function validateCardEventV3(event) {
     && changes.set.lifecycle !== undefined
     && changes.set.lifecycle !== changes.transition.to) {
     errors.push("$.changes.set.lifecycle must equal $.changes.transition.to when both materialization operations are present");
+  }
+  if (!isInitial) {
+    errors.push(...validateArchiveMaterialization({
+      lifecycle: changes.transition?.to ?? changes.set.lifecycle,
+      archiveState: changes.set.archive_state,
+      standingAnchor: changes.set.standing_anchor,
+    }));
   }
   for (const key of ["remove_blocker_ids", "remove_resource_ids"]) {
     for (const duplicate of duplicateValues(changes[key])) {
@@ -230,6 +291,11 @@ export function validateProjectionDeliveryV1(delivery) {
   if (delivery.state === "queued" && delivery.retry.attempt_count !== 0) {
     errors.push("Newly queued delivery must start at attempt_count 0");
   }
+  const requiresPositiveAttempt = ["applied", "stale", "failed"].includes(delivery.state)
+    || (delivery.state === "UNKNOWN" && delivery.availability === "available");
+  if (requiresPositiveAttempt && !isPositiveInteger(delivery.retry.attempt_count)) {
+    errors.push("Post-queued projection delivery requires a positive attempt_count");
+  }
   if (delivery.state === "applied" && (delivery.retry.retryable || delivery.retry.next_attempt_at !== null)) {
     errors.push("Applied projection delivery must be non-retryable with no next attempt");
   }
@@ -246,6 +312,9 @@ export function validateProjectionAckV1(ack, context = {}) {
   }
   if (ack.state === "applied" && (ack.retryable || ack.next_attempt_at !== null)) {
     errors.push("Applied projection acknowledgement must be non-retryable with no next attempt");
+  }
+  if (!isPositiveInteger(ack.attempt_count)) {
+    errors.push("Projection acknowledgement requires a positive attempt_count");
   }
   if (context.projectionDeliveryError) {
     errors.push(context.projectionDeliveryError);

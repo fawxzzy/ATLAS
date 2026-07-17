@@ -158,6 +158,33 @@ try {
     "INVALID_ARTIFACT",
   );
   assert(ambiguousOperations.errors.some((error) => error.includes("duplicate blocker_id")));
+  for (const fixtureName of [
+    "card-event.v3.invalid-initial-materialization.json",
+    "card-event.v3.invalid-update-materialization.json",
+  ]) {
+    const invalidMaterialization = expectJson(
+      [
+        "--schema", "atlas.card-event.v3",
+        "--artifact", fixture("invalid", fixtureName),
+      ],
+      1,
+      "INVALID_ARTIFACT",
+    );
+    assert(invalidMaterialization.errors.some((error) => (
+      error.includes("Stable standing anchors") || error.includes("archive_state archived must move together")
+    )));
+  }
+  for (const fixtureName of [
+    "card-event.v3.initial-standing-anchor.json",
+    "card-event.v3.archive-materialization.json",
+    "card-event.v3.partial-archive-state.json",
+  ]) {
+    expectJson(
+      ["--schema", "atlas.card-event.v3", "--artifact", fixture("valid", fixtureName)],
+      0,
+      "VALID",
+    );
+  }
   const unknownProjectionConflict = expectJson(
     [
       "--schema", "atlas.projection-delivery.v1",
@@ -176,6 +203,27 @@ try {
     "INVALID_ARTIFACT",
   );
   assert(appliedDeliveryRetry.errors.some((error) => error.includes("must be non-retryable")));
+  for (const fixtureName of [
+    "projection-delivery.v1.applied-zero-attempt.json",
+    "projection-delivery.v1.stale-zero-attempt.json",
+    "projection-delivery.v1.failed-zero-attempt.json",
+    "projection-delivery.v1.available-unknown-zero-attempt.json",
+  ]) {
+    const zeroAttempt = expectJson(
+      ["--schema", "atlas.projection-delivery.v1", "--artifact", fixture("invalid", fixtureName)],
+      1,
+      "INVALID_ARTIFACT",
+    );
+    assert(zeroAttempt.errors.some((error) => error.includes("positive attempt_count")));
+  }
+  expectJson(
+    [
+      "--schema", "atlas.projection-delivery.v1",
+      "--artifact", fixture("valid", "projection-delivery.v1.unavailable-unknown-zero-attempt.json"),
+    ],
+    0,
+    "VALID",
+  );
   const appliedAckRetry = expectJson(
     [
       "--schema", "atlas.projection-ack.v1",
@@ -186,6 +234,16 @@ try {
     "INVALID_ARTIFACT",
   );
   assert(appliedAckRetry.errors.some((error) => error.includes("must be non-retryable")));
+  const appliedAckZeroAttempt = expectJson(
+    [
+      "--schema", "atlas.projection-ack.v1",
+      "--artifact", fixture("invalid", "projection-ack.v1.applied-zero-attempt.json"),
+      "--projection-delivery", projectionDeliveryFixture,
+    ],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  assert(appliedAckZeroAttempt.errors.some((error) => error.includes("attempt_count")));
   const malformedTerminalReceipt = expectJson(
     [
       "--schema", "atlas.rollover-manifest.v1",

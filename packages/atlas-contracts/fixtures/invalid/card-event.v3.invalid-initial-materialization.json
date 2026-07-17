@@ -1,0 +1,56 @@
+{
+  "contract_version": "atlas.card-event.v3",
+  "authority": "atlas-local-ledger",
+  "event_id": "event-atlas-board-000-invalid-initial-materialization",
+  "event_sequence": 1,
+  "card_id": "ATLAS-BOARD-000",
+  "project_id": "atlas",
+  "board_id": "atlas-control",
+  "epoch_id": "atlas-board-000-epoch-1",
+  "card_version": 1,
+  "idempotency_key": "board-commit:ATLAS-BOARD-000:invalid-initial-materialization",
+  "expected_version": 0,
+  "event_type": "create",
+  "occurred_at": "2026-07-17T12:10:00Z",
+  "actor": {"kind": "worker", "id": "stack-root"},
+  "job_id": "job-atlas-board-000",
+  "lease_id": "lease-atlas-root-writer",
+  "execution_receipt": {
+    "receipt_id": "execution-atlas-board-000-invalid-initial-materialization",
+    "digest": "sha256:3131313131313131313131313131313131313131313131313131313131313131",
+    "status": "succeeded"
+  },
+  "previous_record_digest": null,
+  "resulting_record_digest": "sha256:3232323232323232323232323232323232323232323232323232323232323232",
+  "changes": {
+    "set": {
+      "epoch_id": "atlas-board-000-epoch-1",
+      "title": "Invalid initial archive materialization",
+      "description": "Schema-valid event that would materialize an invalid CardRecord.",
+      "card_type": "governance",
+      "lifecycle": "archived",
+      "priority": "high",
+      "owner": "stack-root",
+      "standing_anchor": true,
+      "archive_state": "archived",
+      "work": {
+        "job_id": "job-atlas-board-000",
+        "lease_id": "lease-atlas-root-writer",
+        "branch_name": "codex/atlas-board-000-authority-contract",
+        "head_sha": "32927f475fe8a746887121e42212775895938568",
+        "worktree_ref": "worktrees/atlas-board-000",
+        "status": "terminal"
+      },
+      "next_action": null,
+      "projection_state": "queued"
+    },
+    "transition": {"from": null, "to": "archived"},
+    "add_blockers": [],
+    "remove_blocker_ids": [],
+    "add_resources": [],
+    "remove_resource_ids": [],
+    "add_receipts": []
+  },
+  "projection_delivery_id": "projection-atlas-board-000-invalid-initial-materialization",
+  "commit_receipt_id": "board-commit-atlas-board-000-invalid-initial-materialization"
+}

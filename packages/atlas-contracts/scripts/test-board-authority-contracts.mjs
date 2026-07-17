@@ -11,6 +11,8 @@ import { validateContractSemantics } from "./lib/validate-semantics.mjs";
 import {
   COMMIT_CLOSURE_ORDER,
   TARGET_CONTRACTS,
+  projectInitialCardRecordV3,
+  validateCardRecordV3,
   validateProjectionAckAgainstDelivery,
 } from "./lib/validate-board-authority.mjs";
 
@@ -72,6 +74,7 @@ const commit = validArtifacts.get("atlas.board-commit-receipt.v1");
 const delivery = validArtifacts.get("atlas.projection-delivery.v1");
 const ack = validArtifacts.get("atlas.projection-ack.v1");
 const control = validArtifacts.get("atlas.control-board-read-model.v1");
+const cardSchema = await loadKnownSchema("atlas.card-record.v3");
 const migrationSchema = await loadKnownSchema("atlas.board-authority-migration.v1");
 const eventSchema = await loadKnownSchema("atlas.card-event.v3");
 const deliverySchema = await loadKnownSchema("atlas.projection-delivery.v1");
@@ -120,6 +123,28 @@ mismatchedEpochEvent.changes.set.epoch_id = "different-epoch";
 assert(validateContractSemantics("atlas.card-event.v3", mismatchedEpochEvent).includes(
   "$.changes.set.epoch_id must equal $.epoch_id",
 ));
+const projectedInitialCard = projectInitialCardRecordV3(event);
+assert.deepEqual(validateJsonSchema(projectedInitialCard, cardSchema.schema), []);
+assert.deepEqual(validateCardRecordV3(projectedInitialCard), []);
+
+for (const fixtureRef of [
+  "valid/card-event.v3.initial-standing-anchor.json",
+  "valid/card-event.v3.archive-materialization.json",
+  "valid/card-event.v3.partial-archive-state.json",
+]) {
+  const artifact = await loadJson(path.join(fixturesDir, fixtureRef));
+  assert.deepEqual(validateJsonSchema(artifact, eventSchema.schema), [], `${fixtureRef} schema`);
+  assert.deepEqual(validateContractSemantics("atlas.card-event.v3", artifact), [], `${fixtureRef} semantics`);
+  if (artifact.event_type === "create" || artifact.event_type === "baseline-import") {
+    const projected = projectInitialCardRecordV3(artifact);
+    assert.deepEqual(validateJsonSchema(projected, cardSchema.schema), [], `${fixtureRef} CardRecord projection schema`);
+    assert.deepEqual(validateCardRecordV3(projected), [], `${fixtureRef} CardRecord projection semantics`);
+    if (fixtureRef.endsWith("initial-standing-anchor.json")) {
+      assert.equal(projected.receipt_refs[0].status, "succeeded");
+      assert.equal(projected.receipt_refs[1].status, "UNKNOWN");
+    }
+  }
+}
 
 const migration = validArtifacts.get("atlas.board-authority-migration.v1");
 const prematureActiveMigration = structuredClone(migration);
@@ -195,6 +220,25 @@ for (const expected of [
 ]) {
   assert(ambiguousOperationErrors.some((error) => error.includes(expected)));
 }
+const initialMaterializationErrors = await assertSemanticNegative(
+  "atlas.card-event.v3",
+  eventSchema.schema,
+  "invalid/card-event.v3.invalid-initial-materialization.json",
+);
+assert(initialMaterializationErrors.some((error) => error.includes("Stable standing anchors")));
+const invalidInitialEvent = await loadJson(path.join(
+  fixturesDir,
+  "invalid/card-event.v3.invalid-initial-materialization.json",
+));
+const invalidInitialProjection = projectInitialCardRecordV3(invalidInitialEvent);
+assert.deepEqual(validateJsonSchema(invalidInitialProjection, cardSchema.schema), []);
+assert(validateCardRecordV3(invalidInitialProjection).some((error) => error.includes("Stable standing anchors")));
+const updateMaterializationErrors = await assertSemanticNegative(
+  "atlas.card-event.v3",
+  eventSchema.schema,
+  "invalid/card-event.v3.invalid-update-materialization.json",
+);
+assert(updateMaterializationErrors.some((error) => error.includes("archive_state archived must move together")));
 const staleErrors = await assertSemanticNegative(
   "atlas.projection-delivery.v1",
   deliverySchema.schema,
@@ -213,6 +257,25 @@ const appliedDeliveryRetryErrors = await assertSemanticNegative(
   "invalid/projection-delivery.v1.applied-retry.json",
 );
 assert(appliedDeliveryRetryErrors.some((error) => error.includes("must be non-retryable")));
+for (const fixtureRef of [
+  "invalid/projection-delivery.v1.applied-zero-attempt.json",
+  "invalid/projection-delivery.v1.stale-zero-attempt.json",
+  "invalid/projection-delivery.v1.failed-zero-attempt.json",
+  "invalid/projection-delivery.v1.available-unknown-zero-attempt.json",
+]) {
+  const attemptErrors = await assertSemanticNegative(
+    "atlas.projection-delivery.v1",
+    deliverySchema.schema,
+    fixtureRef,
+  );
+  assert(attemptErrors.some((error) => error.includes("positive attempt_count")));
+}
+const unavailableUnknownZeroAttempt = await loadJson(path.join(
+  fixturesDir,
+  "valid/projection-delivery.v1.unavailable-unknown-zero-attempt.json",
+));
+assert.deepEqual(validateJsonSchema(unavailableUnknownZeroAttempt, deliverySchema.schema), []);
+assert.deepEqual(validateContractSemantics("atlas.projection-delivery.v1", unavailableUnknownZeroAttempt), []);
 const ackCorrelationErrors = await assertSemanticNegative(
   "atlas.projection-ack.v1",
   ackSchema.schema,
@@ -227,6 +290,12 @@ const appliedAckRetryErrors = await assertSemanticNegative(
   { projectionDelivery: delivery },
 );
 assert(appliedAckRetryErrors.some((error) => error.includes("must be non-retryable")));
+const zeroAttemptAck = await loadJson(path.join(
+  fixturesDir,
+  "invalid/projection-ack.v1.applied-zero-attempt.json",
+));
+const zeroAttemptAckSchemaErrors = validateJsonSchema(zeroAttemptAck, ackSchema.schema);
+assert(zeroAttemptAckSchemaErrors.some((error) => error.includes("attempt_count")));
 const migrationPhaseErrors = await assertSemanticNegative(
   "atlas.board-authority-migration.v1",
   migrationSchema.schema,
