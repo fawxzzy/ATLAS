@@ -335,6 +335,41 @@ class AtlasTextCorpusInventoryTests(unittest.TestCase):
         errors = inventory.validate_document(malformed, self.schema)
         self.assertTrue(any("provenance_ref" in error for error in errors), errors)
 
+    def test_component_availability_evidence_is_coupled_in_both_directions(self) -> None:
+        available = self._components()[0]
+        unavailable_with_concrete_identity = inventory.unknown_component(self.specs[0], "SOURCE_PATH_UNAVAILABLE")
+        unavailable_with_concrete_identity["source"]["tree_oid"] = available["source"]["tree_oid"]
+        unavailable_with_concrete_identity["source"]["unknown_reason"] = None
+        errors = inventory.validate_document(unavailable_with_concrete_identity, self.schema)
+        self.assertIn("UNKNOWN component source must retain UNKNOWN tree_oid and a canonical unknown_reason", errors)
+
+        available_with_unknown_evidence = copy.deepcopy(available)
+        available_with_unknown_evidence["source"]["tree_oid"] = inventory.UNKNOWN
+        available_with_unknown_evidence["source"]["unknown_reason"] = "SOURCE_PATH_UNAVAILABLE"
+        available_with_unknown_evidence["counts"] = {field: inventory.UNKNOWN for field in inventory.COUNT_FIELDS}
+        available_with_unknown_evidence["component_digest"] = inventory.UNKNOWN
+        errors = inventory.validate_document(available_with_unknown_evidence, self.schema)
+        self.assertIn("available component source unknown_reason must be null", errors)
+        self.assertIn("available component counts must remain concrete", errors)
+        self.assertIn("available component digest must remain concrete", errors)
+
+    def test_index_summary_availability_evidence_is_coupled_in_both_directions(self) -> None:
+        available_index = inventory.build_index(self._components())
+        unavailable_with_concrete_evidence = copy.deepcopy(available_index)
+        unavailable_with_concrete_evidence["components"][0]["availability"] = inventory.UNKNOWN
+        errors = inventory.validate_document(unavailable_with_concrete_evidence, self.schema)
+        self.assertIn("UNKNOWN component summary evidence must remain UNKNOWN with a canonical reason", errors)
+
+        components = inventory.build_components(
+            self.specs,
+            {"atlas-root": self.atlas_repo, "playbook": self.base / "missing-playbook.git"},
+        )
+        unavailable_index = inventory.build_index(components)
+        available_with_unknown_evidence = copy.deepcopy(unavailable_index)
+        available_with_unknown_evidence["components"][1]["availability"] = "available"
+        errors = inventory.validate_document(available_with_unknown_evidence, self.schema)
+        self.assertIn("available component summary evidence must remain concrete with null unknown_reason", errors)
+
     def test_unavailable_source_denominator_remains_unknown(self) -> None:
         components = inventory.build_components(
             self.specs,

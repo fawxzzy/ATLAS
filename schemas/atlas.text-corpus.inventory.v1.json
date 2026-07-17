@@ -19,6 +19,12 @@
         {"const": "UNKNOWN"}
       ]
     },
+    "unknown_reason": {
+      "oneOf": [
+        {"enum": ["SOURCE_PATH_UNAVAILABLE"]},
+        {"type": "null"}
+      ]
+    },
     "count_or_unknown": {
       "oneOf": [
         {"type": "integer", "minimum": 0},
@@ -137,12 +143,7 @@
         "tree_oid": {"$ref": "#/$defs/git_oid_or_unknown"},
         "authority_tier": {"type": "string", "minLength": 1},
         "availability": {"enum": ["available", "UNKNOWN"]},
-        "unknown_reason": {
-          "oneOf": [
-            {"type": "string", "pattern": "^[A-Z0-9_]+$"},
-            {"type": "null"}
-          ]
-        }
+        "unknown_reason": {"$ref": "#/$defs/unknown_reason"}
       }
     },
     "component_summary": {
@@ -156,6 +157,7 @@
         "tree_oid",
         "authority_tier",
         "availability",
+        "unknown_reason",
         "counts",
         "component_digest"
       ],
@@ -167,6 +169,7 @@
         "tree_oid": {"$ref": "#/$defs/git_oid_or_unknown"},
         "authority_tier": {"type": "string", "minLength": 1},
         "availability": {"enum": ["available", "UNKNOWN"]},
+        "unknown_reason": {"$ref": "#/$defs/unknown_reason"},
         "counts": {"$ref": "#/$defs/counts"},
         "component_digest": {"$ref": "#/$defs/sha256_or_unknown"}
       }

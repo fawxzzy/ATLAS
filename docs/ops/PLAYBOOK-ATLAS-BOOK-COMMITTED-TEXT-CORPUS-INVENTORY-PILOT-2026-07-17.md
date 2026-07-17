@@ -26,6 +26,7 @@ The implementation began from the exact merged Atlas base on a clean, detached, 
 - Secret, credential, and token stems across every supported configuration extension, plus private/transcript, runtime, temporary, dependency/vendor, build/generated, symlink, gitlink, binary, and unsupported-media surfaces, fail closed before blob reads. Excluded bodies are not stored and their content SHA-256 remains `UNKNOWN`.
 - Repository and output paths are resolved before containment or hashing. Every materialized path must remain beneath the resolved selected output root, even when an in-workspace symlink or junction redirects a descendant. Absolute paths, traversal, ambiguous real roots, duplicate identities, object/digest mismatches, malformed records, and resolved-path escapes are rejected.
 - An unavailable admitted source remains `UNKNOWN`; its denominator and aggregate digest are not rewritten as zero, absent, or healthy.
+- Availability evidence is bidirectionally coupled in component shards and index summaries: unavailable sources retain an `UNKNOWN` tree, counts, and digest plus a canonical reason, while available sources retain concrete evidence and a null unknown reason.
 - Playbook remains doctrine owner. Atlas remains inventory/adoption owner. Authority widening and marker movement are both false.
 
 ## Inventory result
@@ -34,7 +35,7 @@ The implementation began from the exact merged Atlas base on a clean, detached, 
 | --- | ---: | ---: | ---: | ---: | --- |
 | `atlas-root` | 3,491 | 3,431 | 60 | 0 | `sha256:a43f6b75fd7338cca54fb0b2f1121b187a05f2031148631d0bee1e21e7056fed` |
 | `playbook` | 1,800 | 1,444 | 356 | 0 | `sha256:2cb25cb419aa7da6957f3eb58e9673fd69a5cc5f090878e9b7b3062750c6852b` |
-| **Aggregate** | **5,291** | **4,875** | **416** | **0** | `sha256:1d0449be1f3328fa8c2573e35247703218ff864fddcb845d5ca6ced1653950dc` |
+| **Aggregate** | **5,291** | **4,875** | **416** | **0** | `sha256:bb0643928f4967a5477920cc42359f51b82596adf73dc9afa2f2824d760a4b3b` |
 
 Exclusion denominator:
 
@@ -48,13 +49,15 @@ Exclusion denominator:
 
 Serialized output byte digests:
 
-- Aggregate index: `sha256:9671ba83cc28f36962305c05e5e3aa01677fe216a101246ab4ada91ca8ae4aa5`
+- Aggregate index: `sha256:fa3561796ad36f517745c242fa77e78685527107072ea570c8aac9246c1407f1`
 - Atlas shard: `sha256:dac94200e1222676979f5e9fe31130c5a98340cafc6e1ae96bfb712b7d98bf40`
 - Playbook shard: `sha256:c619d410b0cb245493c5d4f782dc8b4b10d0ad9b6e2a40c8bdcd5dcedf7f1ff4`
 
+The availability-coupling hardening adds `unknown_reason: null` to each available index summary. This intentionally changes only the aggregate index bytes and its summary-derived aggregate digest; both component shard bytes, every row denominator, and every exclusion denominator remain unchanged.
+
 ## Verification evidence
 
-- Focused suite: 22 tests passed. Deterministic non-skipped regressions cover replacement-ref suppression, missing promised-object failure without source mutation, in-workspace output-root escape, protected secret/credential/token filenames across all supported configuration extensions before blob reads, unavailable aggregate counts remaining wholly `UNKNOWN`, and cross-platform resolved-path escape. The optional Python symlink test skipped because this Windows runtime lacks symlink privilege; an independent real Windows junction proof passed and cleaned up both endpoints.
+- Focused suite: 24 tests passed. Deterministic non-skipped regressions cover replacement-ref suppression, missing promised-object failure without source mutation, in-workspace output-root escape, protected secret/credential/token filenames across all supported configuration extensions before blob reads, unavailable aggregate counts remaining wholly `UNKNOWN`, bidirectional component/index availability coupling, and cross-platform resolved-path escape. The optional Python symlink test skipped because this Windows runtime lacks symlink privilege; an independent real Windows junction proof passed and cleaned up both endpoints.
 - Large-corpus transport regression: 256 blobs larger than the OS pipe buffers completed within the test timeout. The reader interleaves each Git object request and response.
 - Source-only check mode regenerated both pinned inventories and matched every committed output byte.
 - Two independent staging runs produced byte-identical output files and the same aggregate digest; both staging trees were removed.

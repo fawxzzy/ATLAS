@@ -25,6 +25,8 @@ SCHEMA_VERSION = "atlas.text-corpus.inventory.v1"
 GENERATOR_VERSION = "atlas.text-corpus.inventory.generator.v1"
 INVENTORY_ID = "atlas-playbook-committed-text-pilot-v1"
 UNKNOWN = "UNKNOWN"
+COUNT_FIELDS = ("total", "included", "excluded", "unknown", "exclusion_reasons")
+UNKNOWN_REASON_CODES = frozenset({"SOURCE_PATH_UNAVAILABLE"})
 
 SHA256_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$")
 GIT_OID_PATTERN = re.compile(r"^(?:[0-9a-f]{40}|[0-9a-f]{64})$")
@@ -562,6 +564,28 @@ def counts_for(records: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
     }
 
 
+def counts_are_all_unknown(counts: Any) -> bool:
+    return isinstance(counts, dict) and all(counts.get(field) == UNKNOWN for field in COUNT_FIELDS)
+
+
+def counts_are_concrete(counts: Any) -> bool:
+    if not isinstance(counts, dict):
+        return False
+    for field in COUNT_FIELDS[:-1]:
+        value = counts.get(field)
+        if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+            return False
+    reasons = counts.get("exclusion_reasons")
+    return isinstance(reasons, dict) and all(
+        isinstance(key, str)
+        and re.fullmatch(r"[A-Z0-9_]+", key) is not None
+        and not isinstance(value, bool)
+        and isinstance(value, int)
+        and value >= 1
+        for key, value in reasons.items()
+    )
+
+
 def source_payload(spec: SourceSpec, *, tree_oid: str, availability: str, unknown_reason: str | None) -> dict[str, Any]:
     return {
         "source_id": spec.source_id,
@@ -692,6 +716,7 @@ def component_summary(component: Mapping[str, Any]) -> dict[str, Any]:
         "tree_oid": source["tree_oid"],
         "authority_tier": source["authority_tier"],
         "availability": source["availability"],
+        "unknown_reason": source["unknown_reason"],
         "counts": component["counts"],
         "component_digest": component["component_digest"],
     }
@@ -755,19 +780,29 @@ def validate_component_semantics(component: Mapping[str, Any]) -> list[str]:
     records = component.get("records", [])
     if not isinstance(source, dict) or not isinstance(records, list):
         return ["component source and records must be structured"]
+    if not GIT_OID_PATTERN.fullmatch(str(source.get("pinned_commit", ""))):
+        errors.append("component source pinned commit is malformed")
     if source.get("availability") == UNKNOWN:
+        if source.get("tree_oid") != UNKNOWN or source.get("unknown_reason") not in UNKNOWN_REASON_CODES:
+            errors.append("UNKNOWN component source must retain UNKNOWN tree_oid and a canonical unknown_reason")
         if records:
             errors.append("UNKNOWN component must not invent records")
         if component.get("component_digest") != UNKNOWN:
             errors.append("UNKNOWN component digest must remain UNKNOWN")
         counts = component.get("counts", {})
-        if not isinstance(counts, dict) or any(counts.get(field) != UNKNOWN for field in ("total", "included", "excluded", "unknown", "exclusion_reasons")):
+        if not counts_are_all_unknown(counts):
             errors.append("UNKNOWN component counts must remain UNKNOWN")
         return errors
-    if not GIT_OID_PATTERN.fullmatch(str(source.get("pinned_commit", ""))):
-        errors.append("component source pinned commit is malformed")
+    if source.get("availability") != "available":
+        return [*errors, "component source availability is malformed"]
     if not GIT_OID_PATTERN.fullmatch(str(source.get("tree_oid", ""))):
         errors.append("component source tree OID is malformed")
+    if source.get("unknown_reason") is not None:
+        errors.append("available component source unknown_reason must be null")
+    if not counts_are_concrete(component.get("counts")):
+        errors.append("available component counts must remain concrete")
+    if not SHA256_PATTERN.fullmatch(str(component.get("component_digest", ""))):
+        errors.append("available component digest must remain concrete")
     paths = [record.get("relative_path") for record in records if isinstance(record, dict)]
     if paths != sorted(paths):
         errors.append("component records must be ordered by relative_path")
@@ -817,12 +852,35 @@ def validate_index_semantics(index: Mapping[str, Any]) -> list[str]:
     source_ids = [item.get("source_id") for item in components if isinstance(item, dict)]
     if len(source_ids) != len(set(source_ids)):
         errors.append("index contains duplicate source identity")
-    available = [item for item in components if item.get("availability") == "available"]
-    for item in available:
-        if not GIT_OID_PATTERN.fullmatch(str(item.get("tree_oid", ""))):
-            errors.append("available component tree OID is malformed")
-        if not SHA256_PATTERN.fullmatch(str(item.get("component_digest", ""))):
-            errors.append("available component digest is malformed")
+    available: list[Mapping[str, Any]] = []
+    available_evidence_is_concrete = True
+    for item in components:
+        if not isinstance(item, dict):
+            errors.append("index component summary must be an object")
+            available_evidence_is_concrete = False
+            continue
+        if item.get("availability") == UNKNOWN:
+            if (
+                item.get("tree_oid") != UNKNOWN
+                or item.get("unknown_reason") not in UNKNOWN_REASON_CODES
+                or not counts_are_all_unknown(item.get("counts"))
+                or item.get("component_digest") != UNKNOWN
+            ):
+                errors.append("UNKNOWN component summary evidence must remain UNKNOWN with a canonical reason")
+        elif item.get("availability") == "available":
+            available.append(item)
+            item_is_concrete = (
+                GIT_OID_PATTERN.fullmatch(str(item.get("tree_oid", ""))) is not None
+                and item.get("unknown_reason") is None
+                and counts_are_concrete(item.get("counts"))
+                and SHA256_PATTERN.fullmatch(str(item.get("component_digest", ""))) is not None
+            )
+            if not item_is_concrete:
+                errors.append("available component summary evidence must remain concrete with null unknown_reason")
+                available_evidence_is_concrete = False
+        else:
+            errors.append("index component summary availability is malformed")
+            available_evidence_is_concrete = False
     aggregate = index.get("aggregate", {})
     if not isinstance(aggregate, dict):
         return [*errors, "index aggregate must be an object"]
@@ -833,10 +891,10 @@ def validate_index_semantics(index: Mapping[str, Any]) -> list[str]:
         if (
             aggregate.get("aggregate_digest") != UNKNOWN
             or not isinstance(counts, dict)
-            or any(counts.get(field) != UNKNOWN for field in ("total", "included", "excluded", "unknown", "exclusion_reasons"))
+            or not counts_are_all_unknown(counts)
         ):
             errors.append("unavailable source denominator must remain UNKNOWN")
-    else:
+    elif available_evidence_is_concrete:
         expected_counts = {
             "total": sum(int(item["counts"]["total"]) for item in components),
             "included": sum(int(item["counts"]["included"]) for item in components),
@@ -946,6 +1004,7 @@ def schema_contract_errors(schema: Mapping[str, Any]) -> list[str]:
         "git_oid_or_unknown",
         "index_document",
         "lifecycle",
+        "unknown_reason",
         "policy",
         "record",
         "sha256_or_unknown",

@@ -1,6 +1,6 @@
 {
   "aggregate": {
-    "aggregate_digest": "sha256:1d0449be1f3328fa8c2573e35247703218ff864fddcb845d5ca6ced1653950dc",
+    "aggregate_digest": "sha256:bb0643928f4967a5477920cc42359f51b82596adf73dc9afa2f2824d760a4b3b",
     "available_source_count": 2,
     "counts": {
       "excluded": 416,
@@ -37,7 +37,8 @@
       "pinned_commit": "59fb0bbad0054a725004746c29492c3abf4f08e3",
       "shard_ref": "docs/registry/text-corpus/components/atlas-root.v1.json",
       "source_id": "github:fawxzzy/ATLAS",
-      "tree_oid": "7ac23ac04e60115eeaa5adc659e1e54c12dcedb4"
+      "tree_oid": "7ac23ac04e60115eeaa5adc659e1e54c12dcedb4",
+      "unknown_reason": null
     },
     {
       "authority_tier": "playbook_doctrine_owner",
@@ -59,7 +60,8 @@
       "pinned_commit": "952b63aa6457d871024a224a089c4088490d69c5",
       "shard_ref": "docs/registry/text-corpus/components/playbook.v1.json",
       "source_id": "github:fawxzzy/playbook",
-      "tree_oid": "9256609de8ae3463f568cc53614b630e53c6989c"
+      "tree_oid": "9256609de8ae3463f568cc53614b630e53c6989c",
+      "unknown_reason": null
     }
   ],
   "document_kind": "index",
