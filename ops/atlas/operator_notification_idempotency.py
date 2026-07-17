@@ -1,0 +1,1037 @@
+#!/usr/bin/env python3
+"""Deterministic sender/receiver idempotency for Atlas operator notifications.
+
+This module has no transport client and never emits an operator-facing message.
+Callers prepare an event, atomically claim it in a runtime-owned receive ledger,
+perform their separately authorized delivery only when ``should_emit`` is true,
+and then acknowledge the correlated claim token.
+"""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import math
+import os
+import re
+import sqlite3
+import sys
+import time
+import unicodedata
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+from typing import Any, Mapping, Sequence
+
+
+EVENT_CONTRACT_VERSION = "atlas.operator-notification.event.v1"
+ACK_CONTRACT_VERSION = "atlas.operator-notification.ack.v1"
+LEDGER_SCHEMA_VERSION = "atlas.operator-notification.ledger.v1"
+CANONICALIZATION_VERSION = "atlas.operator-notification.canonical-json.v1"
+TRANSPORT_VOLATILE_PATHS = ("$.payload.transport", "$.created_at")
+NOTIFICATION_KINDS = frozenset(
+    {"operator_update", "periodic_digest", "heartbeat", "continuation"}
+)
+CONTROL_KINDS = frozenset({"heartbeat", "continuation"})
+ID_RE = re.compile(r"^[a-z0-9][a-z0-9._:-]*$")
+EVENT_ID_RE = re.compile(r"^onv1_[0-9a-f]{64}$")
+DIGEST_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
+CLAIM_TOKEN_RE = re.compile(r"^oncl1_[0-9a-f]{64}$")
+
+
+class NotificationContractError(ValueError):
+    """The event or state transition violates the notification contract."""
+
+
+class LedgerCorruptionError(RuntimeError):
+    """The durable ledger failed integrity validation."""
+
+
+class UnknownLedgerSchemaError(RuntimeError):
+    """The durable ledger uses an unknown or incomplete schema."""
+
+
+class ClaimTokenError(NotificationContractError):
+    """An acknowledgement did not correlate to the active delivery claim."""
+
+
+def _utc(value: str, field: str) -> datetime:
+    if not isinstance(value, str) or not value.endswith("Z"):
+        raise NotificationContractError(f"{field} must be an ISO 8601 UTC timestamp")
+    try:
+        parsed = datetime.fromisoformat(value[:-1] + "+00:00")
+    except ValueError as exc:
+        raise NotificationContractError(
+            f"{field} must be an ISO 8601 UTC timestamp"
+        ) from exc
+    if parsed.tzinfo is None or parsed.utcoffset() != timedelta(0):
+        raise NotificationContractError(f"{field} must be UTC")
+    return parsed
+
+
+def _timestamp(value: datetime) -> str:
+    return value.astimezone(timezone.utc).isoformat(timespec="seconds").replace(
+        "+00:00", "Z"
+    )
+
+
+def _normalize_json(value: Any, path: str = "$") -> Any:
+    if value is None or isinstance(value, bool) or isinstance(value, int):
+        return value
+    if isinstance(value, float):
+        if not math.isfinite(value):
+            raise NotificationContractError(f"{path} contains a non-finite number")
+        raise NotificationContractError(
+            f"{path} contains a floating-point value; use integer or string fixed-point facts"
+        )
+    if isinstance(value, str):
+        return unicodedata.normalize("NFC", value)
+    if isinstance(value, list):
+        return [_normalize_json(item, f"{path}[{index}]") for index, item in enumerate(value)]
+    if isinstance(value, dict):
+        normalized: dict[str, Any] = {}
+        for key, item in value.items():
+            if not isinstance(key, str):
+                raise NotificationContractError(f"{path} contains a non-string object key")
+            normalized_key = unicodedata.normalize("NFC", key)
+            if normalized_key in normalized:
+                raise NotificationContractError(
+                    f"{path} contains duplicate keys after Unicode normalization"
+                )
+            normalized[normalized_key] = _normalize_json(
+                item, f"{path}.{normalized_key}"
+            )
+        return normalized
+    raise NotificationContractError(
+        f"{path} contains unsupported JSON value {type(value).__name__}"
+    )
+
+
+def canonical_json_bytes(value: Any) -> bytes:
+    normalized = _normalize_json(value)
+    return json.dumps(
+        normalized,
+        ensure_ascii=False,
+        allow_nan=False,
+        separators=(",", ":"),
+        sort_keys=True,
+    ).encode("utf-8")
+
+
+def _sha256(value: bytes) -> str:
+    return "sha256:" + hashlib.sha256(value).hexdigest()
+
+
+def _prefixed_id(prefix: str, value: bytes) -> str:
+    return prefix + hashlib.sha256(value).hexdigest()
+
+
+def _validate_identifier(value: Any, field: str) -> str:
+    if not isinstance(value, str) or not ID_RE.fullmatch(value):
+        raise NotificationContractError(
+            f"{field} must match {ID_RE.pattern}"
+        )
+    return value
+
+
+def _validate_delta(delta: Any) -> dict[str, Any] | None:
+    if delta is None:
+        return None
+    if not isinstance(delta, dict) or set(delta) != {"changed_fact_paths"}:
+        raise NotificationContractError(
+            "delta must contain only changed_fact_paths"
+        )
+    paths = delta["changed_fact_paths"]
+    if (
+        not isinstance(paths, list)
+        or not paths
+        or any(not isinstance(path, str) or not path.startswith("/") for path in paths)
+    ):
+        raise NotificationContractError(
+            "delta.changed_fact_paths must be a non-empty JSON Pointer array"
+        )
+    if paths != sorted(set(paths)):
+        raise NotificationContractError(
+            "delta.changed_fact_paths must be sorted and unique"
+        )
+    return {"changed_fact_paths": paths}
+
+
+def build_event(
+    *,
+    source_thread_id: str,
+    event_class: str,
+    payload: Mapping[str, Any],
+    created_at: str,
+    notification_kind: str = "operator_update",
+    supersedes_event_id: str | None = None,
+    delta: Mapping[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Create a deterministic, cross-host notification event envelope."""
+
+    source_thread_id = _validate_identifier(source_thread_id, "source_thread_id")
+    event_class = _validate_identifier(event_class, "event_class")
+    if notification_kind not in NOTIFICATION_KINDS:
+        raise NotificationContractError(
+            f"notification_kind must be one of {sorted(NOTIFICATION_KINDS)}"
+        )
+    _utc(created_at, "created_at")
+    if not isinstance(payload, Mapping) or "facts" not in payload:
+        raise NotificationContractError("payload.facts is required")
+    if set(payload) - {"facts", "transport"}:
+        raise NotificationContractError("payload permits only facts and transport")
+    facts = payload["facts"]
+    transport = payload.get("transport", {})
+    if not isinstance(facts, dict) or not facts:
+        raise NotificationContractError("payload.facts must be a non-empty object")
+    if not isinstance(transport, dict):
+        raise NotificationContractError("payload.transport must be an object")
+    normalized_payload = _normalize_json({"facts": facts, "transport": transport})
+    canonical_payload_digest = _sha256(canonical_json_bytes(normalized_payload["facts"]))
+    transport_envelope_digest = _sha256(
+        canonical_json_bytes(
+            {"created_at": created_at, "payload": normalized_payload}
+        )
+    )
+    event_id = _prefixed_id(
+        "onv1_",
+        (
+            source_thread_id
+            + "\x1f"
+            + event_class
+            + "\x1f"
+            + canonical_payload_digest
+        ).encode("utf-8"),
+    )
+    if supersedes_event_id is not None and not EVENT_ID_RE.fullmatch(
+        supersedes_event_id
+    ):
+        raise NotificationContractError("supersedes_event_id is invalid")
+    normalized_delta = _validate_delta(delta)
+    if normalized_delta is not None and supersedes_event_id is None:
+        raise NotificationContractError("delta requires supersedes_event_id")
+    authority = {
+        "notification_only": True,
+        "repository_execution_authorized": False,
+        "board_mutation_authorized": False,
+    }
+    return {
+        "contract_version": EVENT_CONTRACT_VERSION,
+        "event_id": event_id,
+        "source_thread_id": source_thread_id,
+        "event_class": event_class,
+        "notification_kind": notification_kind,
+        "canonicalization": {
+            "contract_version": CANONICALIZATION_VERSION,
+            "digest_algorithm": "sha256",
+            "included_paths": ["$.payload.facts"],
+            "excluded_paths": list(TRANSPORT_VOLATILE_PATHS),
+        },
+        "canonical_payload_digest": canonical_payload_digest,
+        "transport_envelope_digest": transport_envelope_digest,
+        "created_at": created_at,
+        "supersedes_event_id": supersedes_event_id,
+        "delta": normalized_delta,
+        "payload": normalized_payload,
+        "authority": authority,
+    }
+
+
+def validate_event(event: Mapping[str, Any]) -> dict[str, Any]:
+    if not isinstance(event, Mapping):
+        raise NotificationContractError("event must be an object")
+    required = {
+        "contract_version",
+        "event_id",
+        "source_thread_id",
+        "event_class",
+        "notification_kind",
+        "canonicalization",
+        "canonical_payload_digest",
+        "transport_envelope_digest",
+        "created_at",
+        "supersedes_event_id",
+        "delta",
+        "payload",
+        "authority",
+    }
+    if set(event) != required:
+        missing = sorted(required - set(event))
+        extra = sorted(set(event) - required)
+        raise NotificationContractError(
+            f"event fields mismatch; missing={missing}, extra={extra}"
+        )
+    rebuilt = build_event(
+        source_thread_id=event["source_thread_id"],
+        event_class=event["event_class"],
+        notification_kind=event["notification_kind"],
+        payload=event["payload"],
+        created_at=event["created_at"],
+        supersedes_event_id=event["supersedes_event_id"],
+        delta=event["delta"],
+    )
+    if dict(event) != rebuilt:
+        raise NotificationContractError(
+            "event does not match deterministic canonical reconstruction"
+        )
+    return rebuilt
+
+
+def resolve_ledger_path(runtime_root: Path | str, ledger_path: Path | str) -> Path:
+    root = Path(runtime_root).resolve()
+    path = Path(ledger_path).resolve()
+    try:
+        path.relative_to(root)
+    except ValueError as exc:
+        raise NotificationContractError(
+            "ledger path must remain under the configured runtime root"
+        ) from exc
+    if path.suffix.lower() != ".sqlite3":
+        raise NotificationContractError("ledger path must use the .sqlite3 suffix")
+    if any(part.lower() in {"secrets", ".git"} for part in path.parts):
+        raise NotificationContractError("ledger path enters a protected directory")
+    return path
+
+
+class NotificationLedger:
+    """SQLite-backed receive ledger with atomic duplicate claim semantics."""
+
+    def __init__(self, runtime_root: Path | str, ledger_path: Path | str):
+        self.runtime_root = Path(runtime_root).resolve()
+        self.path = resolve_ledger_path(self.runtime_root, ledger_path)
+        self._initialize()
+
+    def _connect(self) -> sqlite3.Connection:
+        connection = sqlite3.connect(
+            self.path,
+            timeout=5.0,
+            isolation_level=None,
+        )
+        try:
+            connection.row_factory = sqlite3.Row
+            connection.execute("PRAGMA foreign_keys=ON")
+            connection.execute("PRAGMA busy_timeout=5000")
+            connection.execute("PRAGMA synchronous=FULL")
+            synchronous = connection.execute("PRAGMA synchronous").fetchone()[0]
+            if synchronous != 2:
+                raise LedgerCorruptionError(
+                    "SQLite FULL synchronous mode was not admitted"
+                )
+            return connection
+        except Exception:
+            connection.close()
+            raise
+
+    @staticmethod
+    def _admit_wal(connection: sqlite3.Connection) -> str:
+        for attempt in range(50):
+            try:
+                current = connection.execute("PRAGMA journal_mode").fetchone()[0]
+                if str(current).lower() == "wal":
+                    return "wal"
+                admitted = connection.execute("PRAGMA journal_mode=WAL").fetchone()[0]
+                return str(admitted).lower()
+            except sqlite3.OperationalError as exc:
+                retryable = "locked" in str(exc).lower() or "busy" in str(exc).lower()
+                if not retryable or attempt == 49:
+                    raise
+                time.sleep(0.02)
+        raise LedgerCorruptionError("SQLite WAL admission did not terminate")
+
+    def _initialize(self) -> None:
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            connection = self._connect()
+            try:
+                mode = self._admit_wal(connection)
+                if mode != "wal":
+                    raise LedgerCorruptionError("SQLite WAL mode was not admitted")
+                connection.execute("BEGIN IMMEDIATE")
+                try:
+                    tables = {
+                        row[0]
+                        for row in connection.execute(
+                            "SELECT name FROM sqlite_master "
+                            "WHERE type='table' AND name NOT LIKE 'sqlite_%'"
+                        )
+                    }
+                    if tables:
+                        self._verify_existing(connection)
+                    else:
+                        self._create_schema(connection)
+                    connection.execute("COMMIT")
+                except Exception:
+                    if connection.in_transaction:
+                        connection.execute("ROLLBACK")
+                    raise
+                quick_check = connection.execute("PRAGMA quick_check").fetchone()[0]
+                if quick_check != "ok":
+                    raise LedgerCorruptionError(
+                        f"SQLite quick_check failed: {quick_check}"
+                    )
+            finally:
+                connection.close()
+        except (sqlite3.DatabaseError, sqlite3.OperationalError) as exc:
+            raise LedgerCorruptionError(
+                "notification ledger could not be opened safely"
+            ) from exc
+
+    @staticmethod
+    def _create_schema(connection: sqlite3.Connection) -> None:
+        connection.execute(
+            """
+            CREATE TABLE ledger_meta (
+                key TEXT PRIMARY KEY,
+                value TEXT NOT NULL
+            ) STRICT
+            """
+        )
+        connection.execute(
+            """
+            CREATE TABLE notification_events (
+                sequence INTEGER PRIMARY KEY AUTOINCREMENT,
+                event_id TEXT NOT NULL UNIQUE,
+                source_thread_id TEXT NOT NULL,
+                event_class TEXT NOT NULL,
+                notification_kind TEXT NOT NULL,
+                event_contract_version TEXT NOT NULL,
+                canonicalization_version TEXT NOT NULL,
+                canonical_payload_digest TEXT NOT NULL,
+                first_envelope_digest TEXT NOT NULL,
+                last_envelope_digest TEXT NOT NULL,
+                created_at TEXT NOT NULL,
+                first_seen TEXT NOT NULL,
+                last_seen TEXT NOT NULL,
+                duplicate_count INTEGER NOT NULL DEFAULT 0,
+                disposition TEXT NOT NULL,
+                supersedes_event_id TEXT,
+                superseded_by_event_id TEXT,
+                delta_json TEXT,
+                claim_generation INTEGER NOT NULL DEFAULT 0,
+                claim_token TEXT,
+                claim_expires_at TEXT,
+                claimant_digest TEXT,
+                delivery_state TEXT NOT NULL,
+                ack_state TEXT NOT NULL,
+                ack_id TEXT,
+                acknowledged_at TEXT,
+                FOREIGN KEY (supersedes_event_id) REFERENCES notification_events(event_id),
+                CHECK (duplicate_count >= 0),
+                CHECK (claim_generation >= 0)
+            ) STRICT
+            """
+        )
+        connection.execute(
+            """
+            CREATE INDEX notification_stream_latest
+                ON notification_events(source_thread_id, event_class, sequence DESC)
+            """
+        )
+        connection.execute(
+            "INSERT INTO ledger_meta(key, value) VALUES (?, ?)",
+            ("schema_version", LEDGER_SCHEMA_VERSION),
+        )
+
+    @staticmethod
+    def _verify_existing(connection: sqlite3.Connection) -> None:
+        tables = {
+            row[0]
+            for row in connection.execute(
+                "SELECT name FROM sqlite_master WHERE type='table'"
+            )
+        }
+        if not {"ledger_meta", "notification_events"}.issubset(tables):
+            raise UnknownLedgerSchemaError(
+                "existing notification ledger is missing required tables"
+            )
+        row = connection.execute(
+            "SELECT value FROM ledger_meta WHERE key='schema_version'"
+        ).fetchone()
+        if row is None or row[0] != LEDGER_SCHEMA_VERSION:
+            observed = None if row is None else row[0]
+            raise UnknownLedgerSchemaError(
+                f"unsupported notification ledger schema: {observed!r}"
+            )
+
+    @staticmethod
+    def _claim_token(event_id: str, generation: int) -> str:
+        return _prefixed_id(
+            "oncl1_", f"{event_id}\x1f{generation}".encode("utf-8")
+        )
+
+    @staticmethod
+    def _ack_id(event_id: str, claim_token: str) -> str:
+        return _prefixed_id(
+            "ona1_", f"{event_id}\x1f{claim_token}\x1faccepted".encode("utf-8")
+        )
+
+    @staticmethod
+    def _row_ack(row: sqlite3.Row, disposition: str) -> dict[str, Any] | None:
+        if row["ack_state"] != "accepted":
+            return None
+        return {
+            "contract_version": ACK_CONTRACT_VERSION,
+            "ack_id": row["ack_id"],
+            "event_id": row["event_id"],
+            "source_thread_id": row["source_thread_id"],
+            "event_class": row["event_class"],
+            "canonical_payload_digest": row["canonical_payload_digest"],
+            "acknowledged_at": row["acknowledged_at"],
+            "delivery_state": "accepted",
+            "ack_disposition": disposition,
+            "retry_authorized": False,
+            "operator_message_authorized": False,
+            "authority": {
+                "notification_only": True,
+                "repository_execution_authorized": False,
+                "board_mutation_authorized": False,
+            },
+        }
+
+    @staticmethod
+    def _invariant_fields(event: Mapping[str, Any]) -> tuple[Any, ...]:
+        delta_json = (
+            None
+            if event["delta"] is None
+            else canonical_json_bytes(event["delta"]).decode("utf-8")
+        )
+        return (
+            event["source_thread_id"],
+            event["event_class"],
+            event["notification_kind"],
+            event["contract_version"],
+            event["canonicalization"]["contract_version"],
+            event["canonical_payload_digest"],
+            event["supersedes_event_id"],
+            delta_json,
+        )
+
+    @staticmethod
+    def _row_invariant_fields(row: sqlite3.Row) -> tuple[Any, ...]:
+        return (
+            row["source_thread_id"],
+            row["event_class"],
+            row["notification_kind"],
+            row["event_contract_version"],
+            row["canonicalization_version"],
+            row["canonical_payload_digest"],
+            row["supersedes_event_id"],
+            row["delta_json"],
+        )
+
+    def claim(
+        self,
+        event: Mapping[str, Any],
+        *,
+        claimant_id: str,
+        seen_at: str,
+        lease_seconds: int = 300,
+    ) -> dict[str, Any]:
+        event = validate_event(event)
+        seen = _utc(seen_at, "seen_at")
+        if not isinstance(claimant_id, str) or not claimant_id:
+            raise NotificationContractError("claimant_id is required")
+        if lease_seconds < 1 or lease_seconds > 3600:
+            raise NotificationContractError("lease_seconds must be between 1 and 3600")
+        claimant_digest = _sha256(claimant_id.encode("utf-8"))
+        connection = self._connect()
+        try:
+            connection.execute("BEGIN IMMEDIATE")
+            row = connection.execute(
+                "SELECT * FROM notification_events WHERE event_id=?",
+                (event["event_id"],),
+            ).fetchone()
+            if row is not None:
+                result = self._claim_existing(
+                    connection,
+                    row,
+                    event,
+                    claimant_digest=claimant_digest,
+                    seen=seen,
+                    seen_at=seen_at,
+                    lease_seconds=lease_seconds,
+                )
+                connection.execute("COMMIT")
+                return result
+            result = self._claim_new(
+                connection,
+                event,
+                claimant_digest=claimant_digest,
+                seen=seen,
+                seen_at=seen_at,
+                lease_seconds=lease_seconds,
+            )
+            connection.execute("COMMIT")
+            return result
+        except Exception:
+            if connection.in_transaction:
+                connection.execute("ROLLBACK")
+            raise
+        finally:
+            connection.close()
+
+    def _claim_existing(
+        self,
+        connection: sqlite3.Connection,
+        row: sqlite3.Row,
+        event: Mapping[str, Any],
+        *,
+        claimant_digest: str,
+        seen: datetime,
+        seen_at: str,
+        lease_seconds: int,
+    ) -> dict[str, Any]:
+        if self._row_invariant_fields(row) != self._invariant_fields(event):
+            raise NotificationContractError(
+                "event_id collision changed immutable notification metadata"
+            )
+        duplicate_count = row["duplicate_count"] + 1
+        if row["ack_state"] == "accepted":
+            disposition = "duplicate_acked"
+            connection.execute(
+                """UPDATE notification_events
+                   SET last_seen=?, last_envelope_digest=?, duplicate_count=?, disposition=?
+                   WHERE event_id=?""",
+                (
+                    seen_at,
+                    event["transport_envelope_digest"],
+                    duplicate_count,
+                    disposition,
+                    event["event_id"],
+                ),
+            )
+            updated = connection.execute(
+                "SELECT * FROM notification_events WHERE event_id=?",
+                (event["event_id"],),
+            ).fetchone()
+            return self._claim_result(
+                updated,
+                should_emit=False,
+                disposition=disposition,
+                ack_disposition="replayed",
+            )
+        if row["notification_kind"] in CONTROL_KINDS:
+            disposition = (
+                "duplicate_exact"
+                if row["last_envelope_digest"]
+                == event["transport_envelope_digest"]
+                else "duplicate_semantic"
+            )
+            connection.execute(
+                """UPDATE notification_events
+                   SET last_seen=?, last_envelope_digest=?, duplicate_count=?, disposition=?
+                   WHERE event_id=?""",
+                (
+                    seen_at,
+                    event["transport_envelope_digest"],
+                    duplicate_count,
+                    disposition,
+                    event["event_id"],
+                ),
+            )
+            updated = connection.execute(
+                "SELECT * FROM notification_events WHERE event_id=?",
+                (event["event_id"],),
+            ).fetchone()
+            return self._claim_result(
+                updated, should_emit=False, disposition=disposition
+            )
+        if row["superseded_by_event_id"] is not None:
+            disposition = "duplicate_superseded"
+            connection.execute(
+                """UPDATE notification_events
+                   SET last_seen=?, last_envelope_digest=?, duplicate_count=?, disposition=?
+                   WHERE event_id=?""",
+                (
+                    seen_at,
+                    event["transport_envelope_digest"],
+                    duplicate_count,
+                    disposition,
+                    event["event_id"],
+                ),
+            )
+            updated = connection.execute(
+                "SELECT * FROM notification_events WHERE event_id=?",
+                (event["event_id"],),
+            ).fetchone()
+            return self._claim_result(
+                updated, should_emit=False, disposition=disposition
+            )
+        expires = (
+            None
+            if row["claim_expires_at"] is None
+            else _utc(row["claim_expires_at"], "claim_expires_at")
+        )
+        if expires is not None and expires <= seen:
+            generation = row["claim_generation"] + 1
+            claim_token = self._claim_token(event["event_id"], generation)
+            claim_expires_at = _timestamp(seen + timedelta(seconds=lease_seconds))
+            disposition = "retry_claimed"
+            connection.execute(
+                """UPDATE notification_events
+                   SET last_seen=?, last_envelope_digest=?, duplicate_count=?,
+                       disposition=?, claim_generation=?, claim_token=?,
+                       claim_expires_at=?, claimant_digest=?, delivery_state='retry_claimed'
+                   WHERE event_id=?""",
+                (
+                    seen_at,
+                    event["transport_envelope_digest"],
+                    duplicate_count,
+                    disposition,
+                    generation,
+                    claim_token,
+                    claim_expires_at,
+                    claimant_digest,
+                    event["event_id"],
+                ),
+            )
+            updated = connection.execute(
+                "SELECT * FROM notification_events WHERE event_id=?",
+                (event["event_id"],),
+            ).fetchone()
+            return self._claim_result(
+                updated, should_emit=True, disposition=disposition
+            )
+        disposition = (
+            "duplicate_exact"
+            if row["last_envelope_digest"] == event["transport_envelope_digest"]
+            else "duplicate_semantic"
+        )
+        connection.execute(
+            """UPDATE notification_events
+               SET last_seen=?, last_envelope_digest=?, duplicate_count=?, disposition=?
+               WHERE event_id=?""",
+            (
+                seen_at,
+                event["transport_envelope_digest"],
+                duplicate_count,
+                disposition,
+                event["event_id"],
+            ),
+        )
+        updated = connection.execute(
+            "SELECT * FROM notification_events WHERE event_id=?",
+            (event["event_id"],),
+        ).fetchone()
+        return self._claim_result(updated, should_emit=False, disposition=disposition)
+
+    def _claim_new(
+        self,
+        connection: sqlite3.Connection,
+        event: Mapping[str, Any],
+        *,
+        claimant_digest: str,
+        seen: datetime,
+        seen_at: str,
+        lease_seconds: int,
+    ) -> dict[str, Any]:
+        kind = event["notification_kind"]
+        delta_json = (
+            None
+            if event["delta"] is None
+            else canonical_json_bytes(event["delta"]).decode("utf-8")
+        )
+        claim_generation = 0
+        claim_token = None
+        claim_expires_at = None
+        ack_state = "not_required"
+        delivery_state = "suppressed"
+        disposition = "suppressed_control"
+        should_emit = False
+        if kind not in CONTROL_KINDS:
+            prior = connection.execute(
+                """SELECT * FROM notification_events
+                   WHERE source_thread_id=? AND event_class=?
+                     AND notification_kind NOT IN ('heartbeat', 'continuation')
+                   ORDER BY sequence DESC LIMIT 1""",
+                (event["source_thread_id"], event["event_class"]),
+            ).fetchone()
+            if prior is None:
+                if event["supersedes_event_id"] is not None:
+                    raise NotificationContractError(
+                        "first stream event cannot supersede an unknown predecessor"
+                    )
+            elif kind != "periodic_digest":
+                if event["supersedes_event_id"] != prior["event_id"]:
+                    raise NotificationContractError(
+                        "changed payload must supersede the latest stream event"
+                    )
+                if event["delta"] is None:
+                    raise NotificationContractError(
+                        "changed payload must include machine-readable delta paths"
+                    )
+            if event["supersedes_event_id"] is not None:
+                predecessor = connection.execute(
+                    "SELECT * FROM notification_events WHERE event_id=?",
+                    (event["supersedes_event_id"],),
+                ).fetchone()
+                if predecessor is None:
+                    raise NotificationContractError("superseded event is not in the ledger")
+                if (
+                    predecessor["source_thread_id"] != event["source_thread_id"]
+                    or predecessor["event_class"] != event["event_class"]
+                ):
+                    raise NotificationContractError(
+                        "supersession must remain within one source/event-class stream"
+                    )
+            claim_generation = 1
+            claim_token = self._claim_token(event["event_id"], claim_generation)
+            claim_expires_at = _timestamp(seen + timedelta(seconds=lease_seconds))
+            ack_state = "pending"
+            delivery_state = "claimed"
+            disposition = "emit_claimed"
+            should_emit = True
+        connection.execute(
+            """INSERT INTO notification_events(
+                   event_id, source_thread_id, event_class, notification_kind,
+                   event_contract_version, canonicalization_version,
+                   canonical_payload_digest, first_envelope_digest,
+                   last_envelope_digest, created_at, first_seen, last_seen,
+                   duplicate_count, disposition, supersedes_event_id,
+                   delta_json, claim_generation, claim_token, claim_expires_at,
+                   claimant_digest, delivery_state, ack_state
+               ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (
+                event["event_id"],
+                event["source_thread_id"],
+                event["event_class"],
+                kind,
+                event["contract_version"],
+                event["canonicalization"]["contract_version"],
+                event["canonical_payload_digest"],
+                event["transport_envelope_digest"],
+                event["transport_envelope_digest"],
+                event["created_at"],
+                seen_at,
+                seen_at,
+                disposition,
+                event["supersedes_event_id"],
+                delta_json,
+                claim_generation,
+                claim_token,
+                claim_expires_at,
+                claimant_digest,
+                delivery_state,
+                ack_state,
+            ),
+        )
+        if event["supersedes_event_id"] is not None:
+            connection.execute(
+                """UPDATE notification_events
+                   SET superseded_by_event_id=?, disposition='superseded'
+                   WHERE event_id=?""",
+                (event["event_id"], event["supersedes_event_id"]),
+            )
+        row = connection.execute(
+            "SELECT * FROM notification_events WHERE event_id=?",
+            (event["event_id"],),
+        ).fetchone()
+        return self._claim_result(row, should_emit=should_emit, disposition=disposition)
+
+    @staticmethod
+    def _claim_result(
+        row: sqlite3.Row,
+        *,
+        should_emit: bool,
+        disposition: str,
+        ack_disposition: str = "accepted",
+    ) -> dict[str, Any]:
+        return {
+            "event_id": row["event_id"],
+            "should_emit": should_emit,
+            "disposition": disposition,
+            "duplicate_count": row["duplicate_count"],
+            "claim_token": row["claim_token"] if should_emit else None,
+            "claim_expires_at": row["claim_expires_at"] if should_emit else None,
+            "ack": NotificationLedger._row_ack(row, ack_disposition),
+            "retry_authorized": False,
+            "operator_message_authorized": should_emit,
+        }
+
+    def acknowledge(
+        self,
+        event_id: str,
+        *,
+        claim_token: str,
+        acknowledged_at: str,
+    ) -> dict[str, Any]:
+        if not EVENT_ID_RE.fullmatch(event_id):
+            raise NotificationContractError("event_id is invalid")
+        if not CLAIM_TOKEN_RE.fullmatch(claim_token):
+            raise ClaimTokenError("claim_token is invalid")
+        _utc(acknowledged_at, "acknowledged_at")
+        connection = self._connect()
+        try:
+            connection.execute("BEGIN IMMEDIATE")
+            row = connection.execute(
+                "SELECT * FROM notification_events WHERE event_id=?", (event_id,)
+            ).fetchone()
+            if row is None:
+                raise NotificationContractError("event is not present in the receive ledger")
+            if row["notification_kind"] in CONTROL_KINDS:
+                raise NotificationContractError(
+                    "heartbeat and continuation events do not authorize delivery acknowledgement"
+                )
+            if row["claim_token"] != claim_token:
+                raise ClaimTokenError("acknowledgement does not match the active claim token")
+            if row["ack_state"] == "accepted":
+                connection.execute("COMMIT")
+                return self._row_ack(row, "replayed")
+            ack_id = self._ack_id(event_id, claim_token)
+            connection.execute(
+                """UPDATE notification_events
+                   SET delivery_state='accepted', ack_state='accepted',
+                       ack_id=?, acknowledged_at=?, disposition='delivered'
+                   WHERE event_id=?""",
+                (ack_id, acknowledged_at, event_id),
+            )
+            updated = connection.execute(
+                "SELECT * FROM notification_events WHERE event_id=?", (event_id,)
+            ).fetchone()
+            connection.execute("COMMIT")
+            return self._row_ack(updated, "accepted")
+        except Exception:
+            if connection.in_transaction:
+                connection.execute("ROLLBACK")
+            raise
+        finally:
+            connection.close()
+
+    def should_retry(self, event_id: str, *, at: str) -> bool:
+        moment = _utc(at, "at")
+        connection = self._connect()
+        try:
+            row = connection.execute(
+                "SELECT * FROM notification_events WHERE event_id=?", (event_id,)
+            ).fetchone()
+        finally:
+            connection.close()
+        if row is None:
+            return True
+        if row["ack_state"] == "accepted" or row["notification_kind"] in CONTROL_KINDS:
+            return False
+        if row["claim_expires_at"] is None:
+            return False
+        return _utc(row["claim_expires_at"], "claim_expires_at") <= moment
+
+    def record(self, event_id: str) -> dict[str, Any] | None:
+        connection = self._connect()
+        try:
+            row = connection.execute(
+                "SELECT * FROM notification_events WHERE event_id=?", (event_id,)
+            ).fetchone()
+        finally:
+            connection.close()
+        if row is None:
+            return None
+        return {
+            "ledger_schema_version": LEDGER_SCHEMA_VERSION,
+            "event_contract_version": row["event_contract_version"],
+            "canonicalization_version": row["canonicalization_version"],
+            "event_id": row["event_id"],
+            "source_thread_id": row["source_thread_id"],
+            "event_class": row["event_class"],
+            "notification_kind": row["notification_kind"],
+            "canonical_payload_digest": row["canonical_payload_digest"],
+            "first_seen": row["first_seen"],
+            "last_seen": row["last_seen"],
+            "duplicate_count": row["duplicate_count"],
+            "disposition": row["disposition"],
+            "supersession": {
+                "supersedes_event_id": row["supersedes_event_id"],
+                "superseded_by_event_id": row["superseded_by_event_id"],
+                "delta": None if row["delta_json"] is None else json.loads(row["delta_json"]),
+            },
+            "delivery_state": row["delivery_state"],
+            "ack_state": row["ack_state"],
+            "ack_id": row["ack_id"],
+            "acknowledged_at": row["acknowledged_at"],
+        }
+
+
+def _reject_sensitive_input_path(path: Path) -> None:
+    lowered = [part.lower() for part in path.parts]
+    if "secrets" in lowered or any(part.startswith(".env") for part in lowered):
+        raise NotificationContractError("sensitive input paths are not admitted")
+
+
+def _load_json(path_value: str) -> dict[str, Any]:
+    path = Path(path_value).resolve()
+    _reject_sensitive_input_path(path)
+    value = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(value, dict):
+        raise NotificationContractError("input JSON must be an object")
+    return value
+
+
+def _ledger(args: argparse.Namespace) -> NotificationLedger:
+    return NotificationLedger(args.runtime_root, args.ledger)
+
+
+def _parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        description="Prepare and deduplicate Atlas operator notifications without sending them."
+    )
+    subparsers = parser.add_subparsers(dest="command", required=True)
+    prepare = subparsers.add_parser("prepare")
+    prepare.add_argument("--input", required=True)
+
+    claim = subparsers.add_parser("claim")
+    claim.add_argument("--runtime-root", required=True)
+    claim.add_argument("--ledger", required=True)
+    claim.add_argument("--event", required=True)
+    claim.add_argument("--claimant-id", required=True)
+    claim.add_argument("--seen-at", required=True)
+    claim.add_argument("--lease-seconds", type=int, default=300)
+
+    ack = subparsers.add_parser("ack")
+    ack.add_argument("--runtime-root", required=True)
+    ack.add_argument("--ledger", required=True)
+    ack.add_argument("--event-id", required=True)
+    ack.add_argument("--claim-token", required=True)
+    ack.add_argument("--acknowledged-at", required=True)
+
+    status = subparsers.add_parser("status")
+    status.add_argument("--runtime-root", required=True)
+    status.add_argument("--ledger", required=True)
+    status.add_argument("--event-id", required=True)
+    return parser
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    args = _parser().parse_args(argv)
+    try:
+        if args.command == "prepare":
+            source = _load_json(args.input)
+            result = build_event(**source)
+        elif args.command == "claim":
+            result = _ledger(args).claim(
+                _load_json(args.event),
+                claimant_id=args.claimant_id,
+                seen_at=args.seen_at,
+                lease_seconds=args.lease_seconds,
+            )
+        elif args.command == "ack":
+            result = _ledger(args).acknowledge(
+                args.event_id,
+                claim_token=args.claim_token,
+                acknowledged_at=args.acknowledged_at,
+            )
+        else:
+            result = _ledger(args).record(args.event_id)
+        print(json.dumps(result, sort_keys=True, separators=(",", ":")))
+        return 0
+    except (NotificationContractError, LedgerCorruptionError, UnknownLedgerSchemaError) as exc:
+        print(
+            json.dumps(
+                {"status": "rejected", "error": type(exc).__name__, "message": str(exc)},
+                sort_keys=True,
+                separators=(",", ":"),
+            ),
+            file=sys.stderr,
+        )
+        return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
