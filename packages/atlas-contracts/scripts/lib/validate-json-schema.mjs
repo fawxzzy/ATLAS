@@ -249,6 +249,20 @@ export function validateJsonSchema(value, schema, rootSchema = schema, atPath = 
     ];
   }
 
+  if (schema.oneOf) {
+    const branchErrors = schema.oneOf.map((branch) =>
+      validateJsonSchema(value, branch, rootSchema, atPath),
+    );
+    const matchingBranchCount = branchErrors.filter((errors) => errors.length === 0).length;
+    if (matchingBranchCount === 1) {
+      return [];
+    }
+    return [
+      `${atPath} must satisfy exactly one allowed shape; matched ${matchingBranchCount}`,
+      ...(matchingBranchCount === 0 ? branchErrors.flat() : []),
+    ];
+  }
+
   const errors = [];
 
   if (schema.const !== undefined && value !== schema.const) {

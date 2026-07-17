@@ -36,6 +36,8 @@ const temporaryDir = await fs.mkdtemp(path.join(os.tmpdir(), "atlas-contracts-va
 try {
   const malformedArtifact = path.join(temporaryDir, "malformed.json");
   await fs.writeFile(malformedArtifact, '{"contract_version":', "utf8");
+  const emptyArtifact = path.join(temporaryDir, "empty.json");
+  await fs.writeFile(emptyArtifact, "{}\n", "utf8");
 
   const validV1 = expectJson(
     ["--schema", "atlas.env.v1", "--artifact", fixture("valid", "env.json")],
@@ -78,6 +80,22 @@ try {
     "VALID",
   );
   const projectionDeliveryFixture = fixture("valid", "projection-delivery.v1.json");
+  const emptyProjection = expectJson(
+    ["--schema", "atlas.projection-delivery.v1", "--artifact", emptyArtifact],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  assert(emptyProjection.errors.some((error) => error.includes("is required")));
+  const emptyAck = expectJson(
+    [
+      "--schema", "atlas.projection-ack.v1",
+      "--artifact", emptyArtifact,
+      "--projection-delivery", projectionDeliveryFixture,
+    ],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  assert(emptyAck.errors.some((error) => error.includes("is required")));
   const missingDeliveryContext = expectJson(
     ["--schema", "atlas.projection-ack.v1", "--artifact", fixture("valid", "projection-ack.v1.json")],
     1,
@@ -103,6 +121,41 @@ try {
     "INVALID_ARTIFACT",
   );
   assert(mismatchedDeliveryContext.errors.some((error) => error.includes("payload_digest")));
+  expectJson(
+    [
+      "--schema", "atlas.card-event.v3",
+      "--artifact", fixture("invalid", "card-event.v3.invalid-transition-target.json"),
+    ],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  const nullTransitionFrom = expectJson(
+    [
+      "--schema", "atlas.card-event.v3",
+      "--artifact", fixture("invalid", "card-event.v3.null-transition-from.json"),
+    ],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  assert(nullTransitionFrom.errors.some((error) => error.includes("Non-initial transitions require")));
+  const unknownProjectionConflict = expectJson(
+    [
+      "--schema", "atlas.projection-delivery.v1",
+      "--artifact", fixture("invalid", "projection-delivery.v1.available-unknown-conflict.json"),
+    ],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  assert(unknownProjectionConflict.errors.some((error) => error.includes("Available UNKNOWN projection")));
+  const malformedTerminalReceipt = expectJson(
+    [
+      "--schema", "atlas.rollover-manifest.v1",
+      "--artifact", fixture("invalid", "rollover-manifest.v1.malformed-terminal-receipt.json"),
+    ],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  assert(malformedTerminalReceipt.errors.some((error) => error.includes("must satisfy exactly one allowed shape")));
   expectJson(
     ["--schema", "atlas.project-board.owner-export.v1", "--artifact", fixture("valid", "project-board.owner-export.v1.json")],
     0,

@@ -118,6 +118,9 @@ export function validateCardEventV3(event) {
   if (event.event_type === "transition" && changes.transition === null) {
     errors.push("Transition events require $.changes.transition");
   }
+  if (!isInitial && changes.transition?.from === null) {
+    errors.push("Non-initial transitions require a lifecycle-valued $.changes.transition.from");
+  }
   if (changes.transition !== null
     && changes.set.lifecycle !== undefined
     && changes.set.lifecycle !== changes.transition.to) {
@@ -157,6 +160,14 @@ function validateProjectionState(value, { allowQueued }) {
     }
     if (readback.request_count !== null || readback.observed_at !== null || readback.response_digest !== null) {
       errors.push("Unavailable projection readback must not invent request counts, timestamps, or response digests");
+    }
+  }
+  if (value.availability === "available" && value.state === "UNKNOWN") {
+    if (readback.state !== "UNKNOWN" || !isPositiveInteger(readback.request_count)) {
+      errors.push("Available UNKNOWN projection requires positive exact touched-card request-count proof with UNKNOWN readback state");
+    }
+    if (readback.observed_at === null || readback.response_digest === null) {
+      errors.push("Available UNKNOWN projection requires observed_at and response_digest");
     }
   }
   if (value.state === "applied") {

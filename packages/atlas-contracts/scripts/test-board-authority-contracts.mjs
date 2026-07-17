@@ -169,12 +169,30 @@ const lifecycleErrors = await assertSemanticNegative(
   "invalid/card-event.v3.lifecycle-conflict.json",
 );
 assert(lifecycleErrors.some((error) => error.includes("set.lifecycle")));
+const invalidTransitionTarget = await loadJson(path.join(
+  fixturesDir,
+  "invalid/card-event.v3.invalid-transition-target.json",
+));
+const invalidTransitionTargetErrors = validateJsonSchema(invalidTransitionTarget, eventSchema.schema);
+assert(invalidTransitionTargetErrors.some((error) => error.includes("changes.transition.to")));
+const nullTransitionFromErrors = await assertSemanticNegative(
+  "atlas.card-event.v3",
+  eventSchema.schema,
+  "invalid/card-event.v3.null-transition-from.json",
+);
+assert(nullTransitionFromErrors.some((error) => error.includes("Non-initial transitions require")));
 const staleErrors = await assertSemanticNegative(
   "atlas.projection-delivery.v1",
   deliverySchema.schema,
   "invalid/projection-delivery.v1.stale-without-evidence.json",
 );
 assert(staleErrors.some((error) => error.includes("observed_at and response_digest")));
+const availableUnknownErrors = await assertSemanticNegative(
+  "atlas.projection-delivery.v1",
+  deliverySchema.schema,
+  "invalid/projection-delivery.v1.available-unknown-conflict.json",
+);
+assert(availableUnknownErrors.some((error) => error.includes("Available UNKNOWN projection")));
 const ackCorrelationErrors = await assertSemanticNegative(
   "atlas.projection-ack.v1",
   ackSchema.schema,
@@ -194,6 +212,12 @@ const terminalReceiptErrors = await assertSemanticNegative(
   "invalid/rollover-manifest.v1.unrelated-terminal-receipt.json",
 );
 assert(terminalReceiptErrors.some((error) => error.includes("identified terminal receipt")));
+const malformedTerminalReceipt = await loadJson(path.join(
+  fixturesDir,
+  "invalid/rollover-manifest.v1.malformed-terminal-receipt.json",
+));
+const malformedTerminalReceiptErrors = validateJsonSchema(malformedTerminalReceipt, rolloverSchema.schema);
+assert(malformedTerminalReceiptErrors.some((error) => error.includes("must satisfy exactly one allowed shape")));
 
 const rollover = validArtifacts.get("atlas.rollover-manifest.v1");
 const livePredecessorRollover = structuredClone(rollover);

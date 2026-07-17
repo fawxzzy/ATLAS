@@ -20,10 +20,10 @@ async function main() {
       ? { projectionDelivery: await loadJson(path.join(fixturesDir, "valid/projection-delivery.v1.json")) }
       : {};
 
-    const validErrors = [
-      ...validateJsonSchema(validFixture, loadedSchema.schema),
-      ...validateContractSemantics(plan.id, validFixture, semanticContext),
-    ];
+    const validSchemaErrors = validateJsonSchema(validFixture, loadedSchema.schema);
+    const validErrors = validSchemaErrors.length > 0
+      ? validSchemaErrors
+      : validateContractSemantics(plan.id, validFixture, semanticContext);
     if (validErrors.length > 0) {
       failures.push(
         `${plan.valid} should be valid for ${plan.file}\n${validErrors
@@ -32,10 +32,10 @@ async function main() {
       );
     }
 
-    const invalidErrors = [
-      ...validateJsonSchema(invalidFixture, loadedSchema.schema),
-      ...validateContractSemantics(plan.id, invalidFixture, semanticContext),
-    ];
+    const invalidSchemaErrors = validateJsonSchema(invalidFixture, loadedSchema.schema);
+    const invalidErrors = invalidSchemaErrors.length > 0
+      ? invalidSchemaErrors
+      : validateContractSemantics(plan.id, invalidFixture, semanticContext);
     if (invalidErrors.length === 0) {
       failures.push(`${plan.invalid} should fail validation for ${plan.file}`);
     }

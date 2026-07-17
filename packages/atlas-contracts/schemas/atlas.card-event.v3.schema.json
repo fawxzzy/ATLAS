@@ -87,8 +87,8 @@
           "additionalProperties": false,
           "required": ["from", "to"],
           "properties": {
-            "from": {"type": ["string", "null"]},
-            "to": {"type": ["string", "null"]}
+            "from": {"enum": [null, "intake", "planning", "ready", "in-progress", "review", "completed", "blocked", "archived"]},
+            "to": {"type": "string", "enum": ["intake", "planning", "ready", "in-progress", "review", "completed", "blocked", "archived"]}
           }
         },
         "add_blockers": {"type": "array", "items": {"$ref": "#/$defs/blocker"}},

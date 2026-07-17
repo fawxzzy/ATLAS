@@ -254,10 +254,10 @@ export async function runArtifactValidator(argv) {
       try {
         const projectionDelivery = await loadJson(options.projectionDelivery);
         const deliverySchema = await loadKnownSchema("atlas.projection-delivery.v1");
-        const deliveryErrors = [
-          ...validateJsonSchema(projectionDelivery, deliverySchema.schema),
-          ...validateContractSemantics("atlas.projection-delivery.v1", projectionDelivery),
-        ];
+        const deliverySchemaErrors = validateJsonSchema(projectionDelivery, deliverySchema.schema);
+        const deliveryErrors = deliverySchemaErrors.length > 0
+          ? deliverySchemaErrors
+          : validateContractSemantics("atlas.projection-delivery.v1", projectionDelivery);
         if (deliveryErrors.length > 0) {
           semanticContext.projectionDeliveryError = `Referenced ProjectionDelivery is invalid: ${deliveryErrors.join(" ")}`;
         } else {
@@ -268,10 +268,10 @@ export async function runArtifactValidator(argv) {
       }
     }
   }
-  const errors = [
-    ...validateJsonSchema(artifact, loadedSchema.schema),
-    ...validateContractSemantics(loadedSchema.entry.id, artifact, semanticContext),
-  ];
+  const schemaErrors = validateJsonSchema(artifact, loadedSchema.schema);
+  const errors = schemaErrors.length > 0
+    ? schemaErrors
+    : validateContractSemantics(loadedSchema.entry.id, artifact, semanticContext);
   if (errors.length > 0) {
     return {
       exitCode: exitCodes.INVALID_ARTIFACT,
