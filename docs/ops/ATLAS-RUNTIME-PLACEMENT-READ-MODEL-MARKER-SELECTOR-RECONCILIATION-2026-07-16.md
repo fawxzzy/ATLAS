@@ -165,6 +165,35 @@ readback, final diff/scans, and root/owner invariance are recorded in the
 terminal task receipt. This committed receipt does not attempt the impossible
 self-reference of embedding its own final commit hash.
 
+## Post-merge review race
+
+ATLAS PR `#137` merged at
+`eb0402d61608da797ef5b6a0d26755d746addf9e` before its fresh exact-head Codex
+review thread `PRRT_kwDOSEq72s6RoodU` became visible to the merge readback. The
+late P2 was valid: an absolute or parent-traversing filesystem evidence ref
+could resolve outside the ATLAS root and still count as retrievable when that
+host path existed.
+
+The additive follow-up preserves remote URL and `git:` evidence while requiring
+filesystem evidence to be a non-empty, normalized, root-relative POSIX path.
+POSIX absolute paths, Windows drive/UNC paths, parent traversal, and paths whose
+real filesystem target escapes the resolved ATLAS root are rejected before any
+existence check. Focused coverage includes valid in-root evidence and a real
+filesystem-link escape when the host supports links.
+
+Follow-up verification passes `35` focused runtime-placement and deterministic
+owner-export tests, the canonical semantic validator reports `issue_count=0`,
+deterministic owner-export replay is byte-identical, and authoritative
+source-only root validation reports
+`0 critical / 0 error / 10 warning / 0 info`. The warnings remain the expected
+read-only `_stack` and Lifeline hygiene probes for intentionally absent locked
+repositories.
+
+This correction changes no runtime placement, activation status, selector,
+marker unit, marker percentage, generated projection, owner evidence, or
+historical snapshot. The exact next packet remains
+`Cortex event-triggered runtime read-model refresh proof`.
+
 ## Prohibited actions preserved
 
 This packet does not mutate Playbook, Lifeline, `_stack`, DiscordOS, Fitness,

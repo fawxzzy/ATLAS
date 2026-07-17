@@ -5,7 +5,7 @@ import json
 import re
 import sys
 from dataclasses import asdict, dataclass
-from pathlib import Path, PurePosixPath
+from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -64,6 +64,7 @@ ACTIVATION_SEQUENCE = (
     "owner-export-integration",
 )
 STEP_STATUSES = frozenset({"accepted", "pending", "blocked", "unknown"})
+REMOTE_EVIDENCE_REF_PATTERN = re.compile(r"^[A-Za-z][A-Za-z0-9+.-]*://")
 MARKER_SPECS: dict[str, dict[str, Any]] = {
     "lane-runtime-activation-readiness": {
         "title": "Runtime Activation Readiness",
@@ -199,15 +200,7 @@ def _non_empty_strings(value: Any) -> bool:
     return isinstance(value, list) and bool(value) and all(isinstance(item, str) and item.strip() for item in value)
 
 
-def _machine_specific_path(value: str) -> bool:
-    return bool(
-        re.search(r"^[A-Za-z]:[\\/]", value)
-        or re.search(r"(?:^|/)(?:Users|home)/[^/]+/", value.replace("\\", "/"))
-    )
-
-
-def _relative_evidence_context_available(root: Path, evidence_ref: str) -> bool:
-    relative_ref = evidence_ref.split("#", 1)[0].split("@", 1)[0].replace("\\", "/")
+def _relative_evidence_context_available(root: Path, relative_ref: str) -> bool:
     parts = PurePosixPath(relative_ref).parts
     if len(parts) >= 2 and parts[0] == "repos":
         return (root / parts[0] / parts[1]).exists()
@@ -217,17 +210,148 @@ def _relative_evidence_context_available(root: Path, evidence_ref: str) -> bool:
     return True
 
 
+def _is_remote_evidence_ref(evidence_ref: str) -> bool:
+    windows_drive_path = (
+        len(evidence_ref) >= 3
+        and evidence_ref[0].isalpha()
+        and evidence_ref[1] == ":"
+        and evidence_ref[2] in {"/", "\\"}
+    )
+    return evidence_ref.startswith("git:") or (
+        not windows_drive_path and REMOTE_EVIDENCE_REF_PATTERN.match(evidence_ref) is not None
+    )
+
+
+def _resolve_filesystem_evidence_ref(
+    root: Path,
+    evidence_ref: str,
+    path: str,
+) -> tuple[Path | None, Path | None, str | None, list[RuntimePlacementIssue]]:
+    issues: list[RuntimePlacementIssue] = []
+    relative_ref = evidence_ref.split("#", 1)[0].split("@", 1)[0]
+    if not relative_ref:
+        return (
+            None,
+            None,
+            None,
+            [
+                _issue(
+                    "runtime-placement-evidence-path",
+                    path,
+                    "Filesystem evidence refs must include a non-empty relative path.",
+                    evidence_ref=evidence_ref,
+                    reason="empty",
+                )
+            ],
+        )
+
+    posix_ref = PurePosixPath(relative_ref)
+    windows_ref = PureWindowsPath(relative_ref)
+    if posix_ref.is_absolute():
+        issues.append(
+            _issue(
+                "runtime-placement-evidence-path",
+                path,
+                "Filesystem evidence refs must not use absolute POSIX paths.",
+                evidence_ref=evidence_ref,
+                reason="posix-absolute",
+            )
+        )
+    elif windows_ref.is_absolute() or windows_ref.drive:
+        issues.append(
+            _issue(
+                "runtime-placement-machine-path",
+                path,
+                "Filesystem evidence refs must not use Windows drive or UNC paths.",
+                evidence_ref=evidence_ref,
+                reason="windows-absolute",
+            )
+        )
+    elif ".." in posix_ref.parts or ".." in windows_ref.parts:
+        issues.append(
+            _issue(
+                "runtime-placement-evidence-path",
+                path,
+                "Filesystem evidence refs must not contain parent traversal.",
+                evidence_ref=evidence_ref,
+                reason="parent-traversal",
+            )
+        )
+    elif (
+        evidence_ref != evidence_ref.strip()
+        or "\\" in relative_ref
+        or relative_ref != posix_ref.as_posix()
+        or posix_ref.as_posix() == "."
+    ):
+        issues.append(
+            _issue(
+                "runtime-placement-evidence-path",
+                path,
+                "Filesystem evidence refs must use normalized root-relative POSIX paths.",
+                evidence_ref=evidence_ref,
+                reason="non-normalized",
+            )
+        )
+    if issues:
+        return None, None, None, issues
+
+    try:
+        resolved_root = root.resolve(strict=True)
+        resolved_evidence = resolved_root.joinpath(*posix_ref.parts).resolve(strict=False)
+    except (OSError, RuntimeError) as exc:
+        return (
+            None,
+            None,
+            None,
+            [
+                _issue(
+                    "runtime-placement-evidence-path",
+                    path,
+                    "Filesystem evidence ref could not be resolved safely.",
+                    evidence_ref=evidence_ref,
+                    reason="resolution-failed",
+                    error_type=type(exc).__name__,
+                )
+            ],
+        )
+
+    try:
+        resolved_evidence.relative_to(resolved_root)
+    except ValueError:
+        return (
+            None,
+            None,
+            None,
+            [
+                _issue(
+                    "runtime-placement-evidence-outside-root",
+                    path,
+                    "Filesystem evidence ref resolves outside the ATLAS root.",
+                    evidence_ref=evidence_ref,
+                    reason="resolved-outside-root",
+                )
+            ],
+        )
+    return resolved_evidence, resolved_root, posix_ref.as_posix(), []
+
+
 def _validate_evidence_refs(evidence_refs: Any, path: str, root: Path) -> list[RuntimePlacementIssue]:
-    if not _non_empty_strings(evidence_refs):
+    if not isinstance(evidence_refs, list):
         return []
     issues: list[RuntimePlacementIssue] = []
     for evidence_ref in evidence_refs:
-        if _machine_specific_path(evidence_ref):
-            issues.append(_issue("runtime-placement-machine-path", path, "Evidence refs must not contain machine-specific absolute paths.", evidence_ref=evidence_ref))
-        if "://" not in evidence_ref and not evidence_ref.startswith("git:"):
-            evidence_path = root / evidence_ref.split("#", 1)[0].split("@", 1)[0]
-            if _relative_evidence_context_available(root, evidence_ref) and not evidence_path.exists():
-                issues.append(_issue("runtime-placement-evidence-missing", path, "Relative evidence ref does not exist.", evidence_ref=evidence_ref))
+        if not isinstance(evidence_ref, str):
+            continue
+        if _is_remote_evidence_ref(evidence_ref):
+            continue
+        evidence_path, resolved_root, relative_ref, path_issues = _resolve_filesystem_evidence_ref(
+            root, evidence_ref, path
+        )
+        issues.extend(path_issues)
+        if path_issues or evidence_path is None or resolved_root is None or relative_ref is None:
+            continue
+        if _relative_evidence_context_available(resolved_root, relative_ref) and not evidence_path.exists():
+            issues.append(_issue("runtime-placement-evidence-missing", path, "Relative evidence ref does not exist.", evidence_ref=evidence_ref))
     return issues
 
 
