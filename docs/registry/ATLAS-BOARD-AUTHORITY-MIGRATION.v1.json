@@ -42,7 +42,9 @@
     "source_snapshot_digest": null,
     "event_sequence_start": null,
     "event_sequence_end": null,
-    "imported_at": null
+    "imported_at": null,
+    "failure_reason": null,
+    "unknown_reason": null
   },
   "first_v3_acceptance": {
     "status": "not-accepted",

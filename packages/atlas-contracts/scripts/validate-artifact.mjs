@@ -32,19 +32,21 @@ function parseArguments(argv) {
       continue;
     }
 
-    const equalsMatch = argument.match(/^--(schema|artifact)=(.*)$/);
+    const equalsMatch = argument.match(/^--(schema|artifact|projection-delivery)=(.*)$/);
     if (equalsMatch) {
-      options[equalsMatch[1]] = equalsMatch[2];
+      const optionName = equalsMatch[1] === "projection-delivery" ? "projectionDelivery" : equalsMatch[1];
+      options[optionName] = equalsMatch[2];
       continue;
     }
 
-    if (argument === "--schema" || argument === "--artifact") {
+    if (argument === "--schema" || argument === "--artifact" || argument === "--projection-delivery") {
       const value = argv[index + 1];
       if (!value || value.startsWith("--")) {
         options.argumentError = `${argument} requires a value.`;
         continue;
       }
-      options[argument.slice(2)] = value;
+      const optionName = argument === "--projection-delivery" ? "projectionDelivery" : argument.slice(2);
+      options[optionName] = value;
       index += 1;
       continue;
     }
@@ -245,6 +247,27 @@ export async function runArtifactValidator(argv) {
   }
 
   const semanticContext = await loadRuntimeSourceContext(options.artifact, artifact);
+  if (loadedSchema.entry.id === "atlas.projection-ack.v1") {
+    if (!options.projectionDelivery) {
+      semanticContext.projectionDeliveryError = "ProjectionAck artifact validation requires --projection-delivery";
+    } else {
+      try {
+        const projectionDelivery = await loadJson(options.projectionDelivery);
+        const deliverySchema = await loadKnownSchema("atlas.projection-delivery.v1");
+        const deliveryErrors = [
+          ...validateJsonSchema(projectionDelivery, deliverySchema.schema),
+          ...validateContractSemantics("atlas.projection-delivery.v1", projectionDelivery),
+        ];
+        if (deliveryErrors.length > 0) {
+          semanticContext.projectionDeliveryError = `Referenced ProjectionDelivery is invalid: ${deliveryErrors.join(" ")}`;
+        } else {
+          semanticContext.projectionDelivery = projectionDelivery;
+        }
+      } catch (error) {
+        semanticContext.projectionDeliveryError = `Referenced ProjectionDelivery could not be loaded: ${error.message}`;
+      }
+    }
+  }
   const errors = [
     ...validateJsonSchema(artifact, loadedSchema.schema),
     ...validateContractSemantics(loadedSchema.entry.id, artifact, semanticContext),

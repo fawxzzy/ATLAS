@@ -35,7 +35,9 @@
     "source_snapshot_digest": "sha256:6666666666666666666666666666666666666666666666666666666666666666",
     "event_sequence_start": 1,
     "event_sequence_end": 20,
-    "imported_at": "2026-07-17T12:05:00Z"
+    "imported_at": "2026-07-17T12:05:00Z",
+    "failure_reason": null,
+    "unknown_reason": null
   },
   "first_v3_acceptance": {
     "status": "accepted",

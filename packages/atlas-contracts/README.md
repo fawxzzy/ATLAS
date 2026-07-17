@@ -143,9 +143,10 @@ node packages/atlas-contracts/scripts/validate-artifact.mjs --schema atlas.env.v
 node packages/atlas-contracts/scripts/validate-artifact.mjs --schema schemas/atlas.component-manifest.v2.schema.json --artifact C:\work\component.json --json
 node packages/atlas-contracts/scripts/validate-artifact.mjs --schema atlas.github.event-receipt.v1 --artifact packages/atlas-contracts/fixtures/valid/github.event-receipt.v1.json --json
 node packages/atlas-contracts/scripts/validate-artifact.mjs --schema atlas.project-board.owner-export.v1 --artifact packages/atlas-contracts/fixtures/valid/project-board.owner-export.v1.json --json
+node packages/atlas-contracts/scripts/validate-artifact.mjs --schema atlas.projection-ack.v1 --artifact packages/atlas-contracts/fixtures/valid/projection-ack.v1.json --projection-delivery packages/atlas-contracts/fixtures/valid/projection-delivery.v1.json --json
 ```
 
-`--json` emits one deterministic JSON result with `ok`, `code`, `schema`, `artifact`, and `errors`. The supported exit codes are `0` (`VALID`), `1` (`INVALID_ARTIFACT`), `2` (unsupported, unknown, or invalid schema reference), `3` (`MALFORMED_JSON`), and `4` (`MISSING_INPUT`). Unsupported major versions use the stable `UNSUPPORTED_CONTRACT_VERSION` code. Schema resolution accepts only an identifier in the registered plan or an exact package-owned `schemas/<file>.schema.json` path; traversal segments and arbitrary filesystem schemas are rejected.
+`--json` emits one deterministic JSON result with `ok`, `code`, `schema`, `artifact`, and `errors`. ProjectionAck admission additionally requires `--projection-delivery`; the CLI validates the referenced delivery and rejects any identity or payload-digest mismatch. The supported exit codes are `0` (`VALID`), `1` (`INVALID_ARTIFACT`), `2` (unsupported, unknown, or invalid schema reference), `3` (`MALFORMED_JSON`), and `4` (`MISSING_INPUT`). Unsupported major versions use the stable `UNSUPPORTED_CONTRACT_VERSION` code. Schema resolution accepts only an identifier in the registered plan or an exact package-owned `schemas/<file>.schema.json` path; traversal segments and arbitrary filesystem schemas are rejected.
 
 ### Programmatic use
 

@@ -15,6 +15,7 @@
     "blockers",
     "owned_resources",
     "receipt_digests",
+    "terminal_receipt",
     "next_action",
     "context_digest",
     "successor_reconstruction",
@@ -32,6 +33,7 @@
     "blockers": {"type": "array", "items": {"$ref": "#/$defs/blocker"}},
     "owned_resources": {"type": "array", "items": {"$ref": "#/$defs/resource"}},
     "receipt_digests": {"type": "array", "items": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}},
+    "terminal_receipt": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/terminalReceipt"}]},
     "next_action": {"type": "string", "minLength": 1},
     "context_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
     "successor_reconstruction": {"$ref": "#/$defs/reconstruction"},
@@ -74,6 +76,17 @@
         "kind": {"type": "string", "minLength": 1},
         "owner": {"type": "string", "minLength": 1},
         "status": {"type": "string", "enum": ["claimed", "released", "UNKNOWN"]}
+      }
+    },
+    "terminalReceipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["receipt_id", "epoch_id", "digest", "status"],
+      "properties": {
+        "receipt_id": {"type": "string", "minLength": 1},
+        "epoch_id": {"type": "string", "minLength": 1},
+        "digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "status": {"const": "terminal"}
       }
     },
     "reconstruction": {

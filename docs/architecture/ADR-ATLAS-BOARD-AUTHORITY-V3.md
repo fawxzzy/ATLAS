@@ -43,7 +43,7 @@ There is no new general-purpose Atlas server. Foundation does not gain a dashboa
 | `atlas.control-board-read-model.v1` | Deterministic generated read model with explicit availability and queued/applied/stale/failed/`UNKNOWN` counts. |
 | `atlas.rollover-manifest.v1` | Predecessor/successor continuity and bounded-epoch archive gate while preserving stable standing anchors. |
 
-All schemas declare JSON Schema Draft 2020-12 and have schema-valid plus semantic-invalid focused fixtures. Semantic validation is part of the registered artifact validator.
+All schemas declare JSON Schema Draft 2020-12 and have schema-valid plus semantic-invalid focused fixtures. Semantic validation is part of the registered artifact validator. Projection acknowledgements are context-dependent admission artifacts: the registered CLI requires the referenced `ProjectionDelivery`, validates that delivery, and rejects the acknowledgement unless every correlation field and payload digest match.
 
 ## Local closure transaction
 
@@ -60,7 +60,7 @@ One writer holding the active board-writer lease performs this exact order insid
 
 An existing idempotency key returns the original accepted result and creates no second event, version, outbox row, or receipt. An expected-version mismatch rejects before append and creates no materialization, delivery, or accepted receipt. Any failure before commit rolls back all transaction-owned effects.
 
-Event sequence is monotonic and immutable. Card version equals `expected_version + 1`. Replay orders events by event sequence, applies the frozen deterministic operations, verifies each resulting record digest, and fails closed on gaps, duplicates, version drift, or digest drift. JSONL export uses canonical UTF-8/LF serialization and is the canonical portable audit/export form; it is not transaction authority.
+Event sequence is monotonic and immutable. Card version equals `expected_version + 1`. When both lifecycle `set` and `transition` operations are present, the materialized lifecycle must equal the transition target; conflicting operations reject before append. Replay orders events by event sequence, applies the frozen deterministic operations, verifies each resulting record digest, and fails closed on gaps, duplicates, version drift, or digest drift. JSONL export uses canonical UTF-8/LF serialization and is the canonical portable audit/export form; it is not transaction authority.
 
 ## Storage ADR
 
@@ -120,7 +120,7 @@ The selection rule and exact digests are frozen in `docs/registry/ATLAS-BOARD-AU
 
 Before the first accepted v3 `BoardCommitReceipt`, an explicit rollback may return authority to v2. The first accepted v3 receipt is the irreversible authority boundary. After it, rollback means validated backup restore and event replay within v3 only. Silent authority reversion to v2 is forbidden.
 
-Migration phases are correlated states, not labels. `planned` requires a not-started import, no v3 acceptance, v2 rollback mode, and held cutover. `baseline-imported` requires an available source snapshot plus imported or verified baseline, no v3 acceptance, v2 rollback mode, and held cutover. `v3-acceptance-open` requires a verified import, no v3 acceptance, v2 rollback mode, and ready cutover. `v3-active` requires verified import, the first accepted receipt, v3-only restore/replay, and active cutover. `rolled-back-v3` preserves that accepted boundary and v3-only rollback mode while marking cutover rolled back within v3.
+Migration phases are correlated states, not labels. `planned` requires a not-started import, no v3 acceptance, v2 rollback mode, and held cutover. `baseline-imported` requires an available source snapshot plus imported or verified baseline, no v3 acceptance, v2 rollback mode, and held cutover. `baseline-import-failed` and `baseline-import-unknown` preserve the available source snapshot, explicit failure or unknown reason, no committed import sequence, no v3 acceptance, v2 rollback mode, and held cutover. `v3-acceptance-open` requires a verified import, no v3 acceptance, v2 rollback mode, and ready cutover. `v3-active` requires verified import, the first accepted receipt, v3-only restore/replay, and active cutover. `rolled-back-v3` preserves that accepted boundary and v3-only rollback mode while marking cutover rolled back within v3.
 
 ATLAS-CUTOVER-001 requires verified import, SQLite target-path proof, backup/restore proof, one-writer proof, projection and readback proof, Atlas Control proof, observer privacy/loopback proof, and an explicit cutover receipt. No condition in this ADR performs or pre-approves cutover.
 
@@ -128,7 +128,7 @@ ATLAS-CUTOVER-001 requires verified import, SQLite target-path proof, backup/res
 
 Every `RolloverManifest` includes predecessor and successor epoch identity, event sequence, card/job/lease correlation, branch/head/worktree/status, blockers, owned resources, receipt digests, next action, context digest, successor reconstruction proof, and an archive gate.
 
-Stable standing anchors such as ATLAS MAIN remain unarchived. A bounded predecessor epoch becomes archive-eligible only after it is terminal with at least one terminal receipt digest and the successor has reconstructed the same context digest with exact continuity/readback verified. Archiving a task never archives its standing anchor or deletes ledger history.
+Stable standing anchors such as ATLAS MAIN remain unarchived. A bounded predecessor epoch becomes archive-eligible only after it is terminal, its identified terminal receipt reference names that exact epoch and digest, and the successor has reconstructed the same context digest with exact continuity/readback verified. An unrelated or merely intermediate digest is not archive evidence. Archiving a task never archives its standing anchor or deletes ledger history.
 
 ## Privacy and retention
 

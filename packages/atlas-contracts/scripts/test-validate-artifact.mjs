@@ -77,6 +77,32 @@ try {
     0,
     "VALID",
   );
+  const projectionDeliveryFixture = fixture("valid", "projection-delivery.v1.json");
+  const missingDeliveryContext = expectJson(
+    ["--schema", "atlas.projection-ack.v1", "--artifact", fixture("valid", "projection-ack.v1.json")],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  assert(missingDeliveryContext.errors.some((error) => error.includes("requires --projection-delivery")));
+  expectJson(
+    [
+      "--schema=atlas.projection-ack.v1",
+      `--artifact=${fixture("valid", "projection-ack.v1.json")}`,
+      `--projection-delivery=${projectionDeliveryFixture}`,
+    ],
+    0,
+    "VALID",
+  );
+  const mismatchedDeliveryContext = expectJson(
+    [
+      "--schema", "atlas.projection-ack.v1",
+      "--artifact", fixture("invalid", "projection-ack.v1.mismatched-delivery.json"),
+      "--projection-delivery", projectionDeliveryFixture,
+    ],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  assert(mismatchedDeliveryContext.errors.some((error) => error.includes("payload_digest")));
   expectJson(
     ["--schema", "atlas.project-board.owner-export.v1", "--artifact", fixture("valid", "project-board.owner-export.v1.json")],
     0,

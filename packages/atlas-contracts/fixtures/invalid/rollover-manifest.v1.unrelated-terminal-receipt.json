@@ -1,6 +1,6 @@
 {
   "contract_version": "atlas.rollover-manifest.v1",
-  "rollover_id": "rollover-atlas-board-000-1",
+  "rollover_id": "rollover-atlas-board-000-unrelated-receipt",
   "standing_anchor_id": "ATLAS-MAIN",
   "card_id": "ATLAS-BOARD-000",
   "event_sequence": 12,
@@ -27,24 +27,17 @@
     "status": "reconstructed"
   },
   "blockers": [],
-  "owned_resources": [
-    {
-      "resource_id": "atlas-root-writer",
-      "kind": "writer-lease",
-      "owner": "stack-root",
-      "status": "claimed"
-    }
-  ],
+  "owned_resources": [],
   "receipt_digests": [
     "sha256:9999999999999999999999999999999999999999999999999999999999999999"
   ],
   "terminal_receipt": {
-    "receipt_id": "terminal-atlas-board-000-epoch-1",
+    "receipt_id": "terminal-unrelated",
     "epoch_id": "atlas-board-000-epoch-1",
-    "digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+    "digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
     "status": "terminal"
   },
-  "next_action": "Continue from event sequence 12 without archiving ATLAS MAIN.",
+  "next_action": "Reject archive eligibility because terminal receipt evidence is unrelated.",
   "context_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
   "successor_reconstruction": {
     "status": "verified",

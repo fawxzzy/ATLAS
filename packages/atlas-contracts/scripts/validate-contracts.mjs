@@ -16,10 +16,13 @@ async function main() {
     const loadedSchema = await loadKnownSchema(plan.id);
     const validFixture = await loadJson(path.join(fixturesDir, plan.valid));
     const invalidFixture = await loadJson(path.join(fixturesDir, plan.invalid));
+    const semanticContext = plan.id === "atlas.projection-ack.v1"
+      ? { projectionDelivery: await loadJson(path.join(fixturesDir, "valid/projection-delivery.v1.json")) }
+      : {};
 
     const validErrors = [
       ...validateJsonSchema(validFixture, loadedSchema.schema),
-      ...validateContractSemantics(plan.id, validFixture),
+      ...validateContractSemantics(plan.id, validFixture, semanticContext),
     ];
     if (validErrors.length > 0) {
       failures.push(
@@ -31,7 +34,7 @@ async function main() {
 
     const invalidErrors = [
       ...validateJsonSchema(invalidFixture, loadedSchema.schema),
-      ...validateContractSemantics(plan.id, invalidFixture),
+      ...validateContractSemantics(plan.id, invalidFixture, semanticContext),
     ];
     if (invalidErrors.length === 0) {
       failures.push(`${plan.invalid} should fail validation for ${plan.file}`);

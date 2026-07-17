@@ -22,7 +22,7 @@
   "properties": {
     "contract_version": {"const": "atlas.board-authority-migration.v1"},
     "migration_id": {"type": "string", "minLength": 1},
-    "phase": {"type": "string", "enum": ["planned", "baseline-imported", "v3-acceptance-open", "v3-active", "rolled-back-v3"]},
+    "phase": {"type": "string", "enum": ["planned", "baseline-imported", "baseline-import-failed", "baseline-import-unknown", "v3-acceptance-open", "v3-active", "rolled-back-v3"]},
     "v2_contract_baseline": {"$ref": "#/$defs/contractBaseline"},
     "v2_authority_snapshot": {"$ref": "#/$defs/authoritySnapshot"},
     "target_contracts": {"type": "array", "items": {"type": "string", "minLength": 1}},
@@ -63,7 +63,7 @@
     "import": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["mode", "status", "import_id", "idempotency_key", "source_snapshot_digest", "event_sequence_start", "event_sequence_end", "imported_at"],
+      "required": ["mode", "status", "import_id", "idempotency_key", "source_snapshot_digest", "event_sequence_start", "event_sequence_end", "imported_at", "failure_reason", "unknown_reason"],
       "properties": {
         "mode": {"const": "one-time"},
         "status": {"type": "string", "enum": ["not-started", "imported", "verified", "failed", "UNKNOWN"]},
@@ -72,7 +72,9 @@
         "source_snapshot_digest": {"type": ["string", "null"], "pattern": "^sha256:[0-9a-f]{64}$"},
         "event_sequence_start": {"type": ["integer", "null"], "minimum": 1},
         "event_sequence_end": {"type": ["integer", "null"], "minimum": 1},
-        "imported_at": {"type": ["string", "null"], "format": "date-time"}
+        "imported_at": {"type": ["string", "null"], "format": "date-time"},
+        "failure_reason": {"type": ["string", "null"], "minLength": 1},
+        "unknown_reason": {"type": ["string", "null"], "minLength": 1}
       }
     },
     "firstAcceptance": {

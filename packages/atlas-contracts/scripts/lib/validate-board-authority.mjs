@@ -118,6 +118,11 @@ export function validateCardEventV3(event) {
   if (event.event_type === "transition" && changes.transition === null) {
     errors.push("Transition events require $.changes.transition");
   }
+  if (changes.transition !== null
+    && changes.set.lifecycle !== undefined
+    && changes.set.lifecycle !== changes.transition.to) {
+    errors.push("$.changes.set.lifecycle must equal $.changes.transition.to when both materialization operations are present");
+  }
   for (const key of ["remove_blocker_ids", "remove_resource_ids"]) {
     for (const duplicate of duplicateValues(changes[key])) {
       errors.push(`$.changes.${key} contains duplicate id ${duplicate}`);
@@ -162,8 +167,13 @@ function validateProjectionState(value, { allowQueued }) {
       errors.push("Applied projection requires observed_at and response_digest");
     }
   }
-  if (value.state === "stale" && (readback.state !== "stale" || !isPositiveInteger(readback.request_count))) {
-    errors.push("Stale projection requires positive exact touched-card readback proof");
+  if (value.state === "stale") {
+    if (readback.state !== "stale" || !isPositiveInteger(readback.request_count)) {
+      errors.push("Stale projection requires positive exact touched-card request-count proof");
+    }
+    if (readback.observed_at === null || readback.response_digest === null) {
+      errors.push("Stale projection requires observed_at and response_digest");
+    }
   }
   if (value.state === "failed" && (readback.state !== "failed" || !isPositiveInteger(readback.request_count))) {
     errors.push("Failed projection requires positive exact touched-card request-count proof");
@@ -190,13 +200,20 @@ export function validateProjectionDeliveryV1(delivery) {
   return errors;
 }
 
-export function validateProjectionAckV1(ack) {
+export function validateProjectionAckV1(ack, context = {}) {
   const errors = validateProjectionState(ack, { allowQueued: false });
   if (ack.retryable && ack.next_attempt_at === null) {
     errors.push("Retryable acknowledgement requires $.next_attempt_at");
   }
   if (!ack.retryable && ack.next_attempt_at !== null) {
     errors.push("Non-retryable acknowledgement must not schedule a next attempt");
+  }
+  if (context.projectionDeliveryError) {
+    errors.push(context.projectionDeliveryError);
+  } else if (!context.projectionDelivery) {
+    errors.push("ProjectionAck admission requires the referenced ProjectionDelivery context");
+  } else {
+    errors.push(...validateProjectionAckAgainstDelivery(ack, context.projectionDelivery));
   }
   return errors;
 }
@@ -244,7 +261,9 @@ export function validateBoardAuthorityMigrationV1(migration) {
     if (baselineImport.source_snapshot_digest !== null
       || baselineImport.event_sequence_start !== null
       || baselineImport.event_sequence_end !== null
-      || baselineImport.imported_at !== null) {
+      || baselineImport.imported_at !== null
+      || baselineImport.failure_reason !== null
+      || baselineImport.unknown_reason !== null) {
       errors.push("Not-started one-time import must not claim source, sequence, or timestamp evidence");
     }
   }
@@ -253,8 +272,30 @@ export function validateBoardAuthorityMigrationV1(migration) {
       || !isPositiveInteger(baselineImport.event_sequence_start)
       || !isPositiveInteger(baselineImport.event_sequence_end)
       || baselineImport.event_sequence_end < baselineImport.event_sequence_start
-      || !baselineImport.imported_at) {
+      || !baselineImport.imported_at
+      || baselineImport.failure_reason !== null
+      || baselineImport.unknown_reason !== null) {
       errors.push("Imported baseline requires source digest, ordered event sequence, and imported_at");
+    }
+  }
+  if (baselineImport.status === "failed") {
+    if (!baselineImport.source_snapshot_digest
+      || baselineImport.event_sequence_start !== null
+      || baselineImport.event_sequence_end !== null
+      || baselineImport.imported_at !== null
+      || !baselineImport.failure_reason
+      || baselineImport.unknown_reason !== null) {
+      errors.push("Failed baseline import requires source digest and failure reason without committed sequence evidence");
+    }
+  }
+  if (baselineImport.status === "UNKNOWN") {
+    if (!baselineImport.source_snapshot_digest
+      || baselineImport.event_sequence_start !== null
+      || baselineImport.event_sequence_end !== null
+      || baselineImport.imported_at !== null
+      || baselineImport.failure_reason !== null
+      || !baselineImport.unknown_reason) {
+      errors.push("UNKNOWN baseline import requires source digest and unknown reason without invented sequence evidence");
     }
   }
   const accepted = migration.first_v3_acceptance.status === "accepted";
@@ -279,7 +320,7 @@ export function validateBoardAuthorityMigrationV1(migration) {
   if (migration.phase === "planned" && migration.cutover.status !== "held") {
     errors.push("Planned migration must keep cutover held");
   }
-  if (["imported", "verified"].includes(baselineImport.status)
+  if (["imported", "verified", "failed", "UNKNOWN"].includes(baselineImport.status)
     && baselineImport.source_snapshot_digest !== migration.v2_authority_snapshot.digest) {
     errors.push("One-time import source digest must equal the available v2 authority snapshot digest");
   }
@@ -292,6 +333,18 @@ export function validateBoardAuthorityMigrationV1(migration) {
     },
     "baseline-imported": {
       importStatuses: ["imported", "verified"],
+      accepted: false,
+      rollback: "v2-authority-allowed",
+      cutover: ["held"],
+    },
+    "baseline-import-failed": {
+      importStatuses: ["failed"],
+      accepted: false,
+      rollback: "v2-authority-allowed",
+      cutover: ["held"],
+    },
+    "baseline-import-unknown": {
+      importStatuses: ["UNKNOWN"],
       accepted: false,
       rollback: "v2-authority-allowed",
       cutover: ["held"],
@@ -374,14 +427,17 @@ export function validateRolloverManifestV1(manifest) {
   const archiveState = manifest.archive_gate.predecessor_epoch_archive;
   if (archiveState === "eligible" || archiveState === "archived") {
     if (manifest.predecessor_epoch.status !== "terminal"
-      || manifest.receipt_digests.length === 0
+      || manifest.terminal_receipt === null
+      || manifest.terminal_receipt?.epoch_id !== manifest.predecessor_epoch.epoch_id
+      || manifest.terminal_receipt?.status !== "terminal"
+      || !manifest.receipt_digests.includes(manifest.terminal_receipt?.digest)
       || manifest.successor_reconstruction.status !== "verified"
       || manifest.successor_reconstruction.exact_readback !== "verified"
       || manifest.successor_reconstruction.reconstructed_at === null
       || manifest.successor_epoch.status !== "reconstructed"
       || !manifest.archive_gate.successor_continuity_verified
       || !manifest.archive_gate.exact_readback_verified) {
-      errors.push("Bounded predecessor epoch cannot archive before terminal receipt evidence, verified successor reconstruction, continuity, and exact readback");
+      errors.push("Bounded predecessor epoch cannot archive before an identified terminal receipt for that epoch, verified successor reconstruction, continuity, and exact readback");
     }
   }
   return errors;

@@ -29,6 +29,7 @@
   "blockers": [],
   "owned_resources": [],
   "receipt_digests": [],
+  "terminal_receipt": null,
   "next_action": "Wait for successor reconstruction.",
   "context_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
   "successor_reconstruction": {
