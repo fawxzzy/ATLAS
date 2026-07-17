@@ -15,6 +15,7 @@ import json
 import math
 import os
 import re
+import secrets
 import sqlite3
 import sys
 import time
@@ -89,7 +90,7 @@ class UnknownLedgerSchemaError(RuntimeError):
 
 
 class LedgerUnavailableError(RuntimeError):
-    """Normal startup cannot open the configured, provisioned ledger."""
+    """The ledger or a required runtime capability is temporarily unavailable."""
 
 
 class LedgerProvisioningError(RuntimeError):
@@ -381,10 +382,14 @@ class NotificationLedger:
         ledger_path: Path | str,
         *,
         _clock: Callable[[], datetime] | None = None,
+        _token_bytes: Callable[[int], bytes] | None = None,
+        _busy_timeout_ms: int = 5000,
     ):
         self.runtime_root = Path(runtime_root).resolve()
         self.path = resolve_ledger_path(self.runtime_root, ledger_path)
         self._clock = _clock or _system_utc_now
+        self._token_bytes = _token_bytes or secrets.token_bytes
+        self._busy_timeout_ms = _busy_timeout_ms
         if not self.path.is_file():
             raise LedgerUnavailableError(
                 "configured notification ledger is missing; restore it or provision explicitly"
@@ -398,6 +403,8 @@ class NotificationLedger:
         ledger_path: Path | str,
         *,
         _clock: Callable[[], datetime] | None = None,
+        _token_bytes: Callable[[int], bytes] | None = None,
+        _busy_timeout_ms: int = 5000,
     ) -> "NotificationLedger":
         """Create one new authority ledger only through an explicit first-use call."""
 
@@ -405,6 +412,8 @@ class NotificationLedger:
         instance.runtime_root = Path(runtime_root).resolve()
         instance.path = resolve_ledger_path(instance.runtime_root, ledger_path)
         instance._clock = _clock or _system_utc_now
+        instance._token_bytes = _token_bytes or secrets.token_bytes
+        instance._busy_timeout_ms = _busy_timeout_ms
         instance.path.parent.mkdir(parents=True, exist_ok=True)
         try:
             descriptor = os.open(
@@ -426,16 +435,17 @@ class NotificationLedger:
         return instance
 
     def _connect(self) -> sqlite3.Connection:
-        connection = sqlite3.connect(
-            self.path.as_uri() + "?mode=rw",
-            timeout=5.0,
-            isolation_level=None,
-            uri=True,
-        )
+        connection = None
         try:
+            connection = sqlite3.connect(
+                self.path.as_uri() + "?mode=rw",
+                timeout=self._busy_timeout_ms / 1000,
+                isolation_level=None,
+                uri=True,
+            )
             connection.row_factory = sqlite3.Row
             connection.execute("PRAGMA foreign_keys=ON")
-            connection.execute("PRAGMA busy_timeout=5000")
+            connection.execute(f"PRAGMA busy_timeout={self._busy_timeout_ms}")
             connection.execute("PRAGMA synchronous=FULL")
             synchronous = connection.execute("PRAGMA synchronous").fetchone()[0]
             if synchronous != 2:
@@ -443,9 +453,25 @@ class NotificationLedger:
                     "SQLite FULL synchronous mode was not admitted"
                 )
             return connection
-        except Exception:
-            connection.close()
+        except Exception as exc:
+            if connection is not None:
+                connection.close()
+            self._raise_if_contention(exc)
             raise
+
+    @staticmethod
+    def _raise_if_contention(exc: BaseException) -> None:
+        if not isinstance(exc, sqlite3.OperationalError):
+            return
+        error_code = getattr(exc, "sqlite_errorcode", None)
+        primary_code = error_code & 0xFF if isinstance(error_code, int) else None
+        message = str(exc).casefold()
+        if primary_code in {sqlite3.SQLITE_BUSY, sqlite3.SQLITE_LOCKED} or any(
+            marker in message for marker in ("busy", "locked")
+        ):
+            raise LedgerUnavailableError(
+                "notification ledger is temporarily unavailable due to SQLite lock contention"
+            ) from exc
 
     def _ledger_utc_now(self, operation: str) -> datetime:
         observed = self._clock()
@@ -497,7 +523,8 @@ class NotificationLedger:
                     )
             finally:
                 connection.close()
-        except (sqlite3.DatabaseError, sqlite3.OperationalError) as exc:
+        except sqlite3.DatabaseError as exc:
+            self._raise_if_contention(exc)
             raise LedgerCorruptionError(
                 "notification ledger could not be opened safely"
             ) from exc
@@ -535,7 +562,8 @@ class NotificationLedger:
                     )
             finally:
                 connection.close()
-        except (sqlite3.DatabaseError, sqlite3.OperationalError) as exc:
+        except sqlite3.DatabaseError as exc:
+            self._raise_if_contention(exc)
             raise LedgerCorruptionError(
                 "notification ledger could not be provisioned safely"
             ) from exc
@@ -626,10 +654,23 @@ class NotificationLedger:
                 f"unsupported notification ledger schema: {observed!r}"
             )
 
-    @staticmethod
-    def _claim_token(event_id: str, generation: int) -> str:
-        return _prefixed_id(
-            "oncl1_", f"{event_id}\x1f{generation}".encode("utf-8")
+    def _claim_token(self, prior_token: str | None = None) -> str:
+        for _ in range(8):
+            try:
+                token_bytes = self._token_bytes(32)
+            except Exception as exc:
+                raise LedgerUnavailableError(
+                    "secure claim token source failed"
+                ) from exc
+            if not isinstance(token_bytes, bytes) or len(token_bytes) != 32:
+                raise LedgerUnavailableError(
+                    "secure claim token source must return exactly 32 bytes"
+                )
+            candidate = "oncl1_" + token_bytes.hex()
+            if candidate != prior_token:
+                return candidate
+        raise LedgerUnavailableError(
+            "secure claim token source repeated the active capability"
         )
 
     @staticmethod
@@ -744,9 +785,10 @@ class NotificationLedger:
             )
             connection.execute("COMMIT")
             return result
-        except Exception:
+        except Exception as exc:
             if connection.in_transaction:
                 connection.execute("ROLLBACK")
+            self._raise_if_contention(exc)
             raise
         finally:
             connection.close()
@@ -873,7 +915,7 @@ class NotificationLedger:
         )
         if expires is not None and expires <= claimed:
             generation = row["claim_generation"] + 1
-            claim_token = self._claim_token(event["event_id"], generation)
+            claim_token = self._claim_token(row["claim_token"])
             claim_expires_at = _timestamp(
                 claimed + timedelta(seconds=lease_seconds)
             )
@@ -993,7 +1035,7 @@ class NotificationLedger:
                     )
             claim_generation = 1
             claim_acquired_at = claimed_at
-            claim_token = self._claim_token(event["event_id"], claim_generation)
+            claim_token = self._claim_token()
             claim_expires_at = _timestamp(
                 claimed + timedelta(seconds=lease_seconds)
             )
@@ -1175,9 +1217,10 @@ class NotificationLedger:
                 "retry_authorized": False,
                 "operator_message_authorized": True,
             }
-        except Exception:
+        except Exception as exc:
             if connection.in_transaction:
                 connection.execute("ROLLBACK")
+            self._raise_if_contention(exc)
             raise
         finally:
             connection.close()
@@ -1247,9 +1290,10 @@ class NotificationLedger:
             ).fetchone()
             connection.execute("COMMIT")
             return self._row_ack(updated, "accepted")
-        except Exception:
+        except Exception as exc:
             if connection.in_transaction:
                 connection.execute("ROLLBACK")
+            self._raise_if_contention(exc)
             raise
         finally:
             connection.close()
@@ -1261,6 +1305,9 @@ class NotificationLedger:
             row = connection.execute(
                 "SELECT * FROM notification_events WHERE event_id=?", (event_id,)
             ).fetchone()
+        except Exception as exc:
+            self._raise_if_contention(exc)
+            raise
         finally:
             connection.close()
         if row is None:
@@ -1281,6 +1328,9 @@ class NotificationLedger:
             row = connection.execute(
                 "SELECT * FROM notification_events WHERE event_id=?", (event_id,)
             ).fetchone()
+        except Exception as exc:
+            self._raise_if_contention(exc)
+            raise
         finally:
             connection.close()
         if row is None:

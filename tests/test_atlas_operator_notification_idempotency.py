@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import sqlite3
 import tempfile
@@ -46,12 +47,28 @@ class OperatorNotificationIdempotencyTests(unittest.TestCase):
         self.clock_now = datetime.fromisoformat(
             STARTED[:-1] + "+00:00"
         )
+        self.token_counter = 0
+        self.token_lock = threading.Lock()
         self.ledger = NotificationLedger.provision(
-            self.runtime_root, self.ledger_path, _clock=lambda: self.clock_now
+            self.runtime_root,
+            self.ledger_path,
+            _clock=lambda: self.clock_now,
+            _token_bytes=self.fixture_token_bytes,
         )
 
     def tearDown(self) -> None:
         self.temporary.cleanup()
+
+    def fixture_token_bytes(self, size: int) -> bytes:
+        if size != 32:
+            raise AssertionError(f"unexpected token size: {size}")
+        with self.token_lock:
+            self.token_counter += 1
+            return self.token_counter.to_bytes(size, "big")
+
+    @staticmethod
+    def expected_fixture_token(index: int) -> str:
+        return "oncl1_" + index.to_bytes(32, "big").hex()
 
     def event(
         self,
@@ -586,6 +603,51 @@ class OperatorNotificationIdempotencyTests(unittest.TestCase):
         with self.assertRaisesRegex(LedgerProvisioningError, "already exists"):
             NotificationLedger.provision(self.runtime_root, missing_path)
 
+    def test_lock_contention_is_temporarily_unavailable_not_corruption(self) -> None:
+        short_wait_ledger = NotificationLedger(
+            self.runtime_root,
+            self.ledger_path,
+            _clock=lambda: self.clock_now,
+            _token_bytes=self.fixture_token_bytes,
+            _busy_timeout_ms=20,
+        )
+        with closing(
+            sqlite3.connect(self.ledger_path, timeout=0, isolation_level=None)
+        ) as blocker:
+            blocker.execute("PRAGMA busy_timeout=0")
+            blocker.execute("BEGIN IMMEDIATE")
+            with self.assertRaisesRegex(
+                LedgerUnavailableError, "temporarily unavailable.*lock contention"
+            ):
+                NotificationLedger(
+                    self.runtime_root,
+                    self.ledger_path,
+                    _token_bytes=self.fixture_token_bytes,
+                    _busy_timeout_ms=20,
+                )
+            with self.assertRaisesRegex(
+                LedgerUnavailableError, "temporarily unavailable.*lock contention"
+            ):
+                short_wait_ledger.claim(
+                    self.event(event_class="task.lock-contention"),
+                    claimant_id="blocked-host",
+                    seen_at=SEEN,
+                )
+            blocker.execute("ROLLBACK")
+
+        restarted = NotificationLedger(
+            self.runtime_root,
+            self.ledger_path,
+            _token_bytes=self.fixture_token_bytes,
+            _busy_timeout_ms=20,
+        )
+        admitted = restarted.claim(
+            self.event(event_class="task.lock-contention"),
+            claimant_id="recovered-host",
+            seen_at=SEEN,
+        )
+        self.assertTrue(admitted["should_begin_delivery"])
+
     def test_corrupt_and_unknown_ledger_schema_fail_closed(self) -> None:
         corrupt_path = self.runtime_root / "atlas" / "notifications" / "corrupt.sqlite3"
         corrupt_path.write_bytes(b"not-a-sqlite-database")
@@ -719,6 +781,129 @@ class OperatorNotificationIdempotencyTests(unittest.TestCase):
         self.assertEqual(retry["disposition"], "retry_claimed")
         self.assertNotEqual(first["claim_token"], retry["claim_token"])
         self.assertFalse(duplicate["should_emit"])
+
+    def test_claim_tokens_are_independent_persisted_capabilities(self) -> None:
+        event = self.event(event_class="task.random-capability")
+        initial = self.claim(event, lease_seconds=1)
+        self.assertEqual(initial["claim_token"], self.expected_fixture_token(1))
+
+        self.clock_now = datetime.fromisoformat(
+            "2026-07-17T14:00:02.000001+00:00"
+        )
+        replacement = self.ledger.claim(
+            event,
+            claimant_id="replacement-host",
+            seen_at="2026-07-17T14:00:02.000001Z",
+            lease_seconds=30,
+        )
+        self.assertEqual(replacement["claim_token"], self.expected_fixture_token(2))
+        self.assertNotEqual(initial["claim_token"], replacement["claim_token"])
+
+        with self.assertRaisesRegex(ClaimTokenError, "active claim fence"):
+            self.ledger.begin_delivery(
+                event["event_id"],
+                claim_token=initial["claim_token"],
+                claim_generation=replacement["claim_generation"],
+            )
+        with self.assertRaisesRegex(ClaimTokenError, "active claim fence"):
+            self.ledger.begin_delivery(
+                event["event_id"],
+                claim_token=initial["claim_token"],
+                claim_generation=initial["claim_generation"],
+            )
+
+        restarted = NotificationLedger(
+            self.runtime_root,
+            self.ledger_path,
+            _clock=lambda: self.clock_now,
+            _token_bytes=self.fixture_token_bytes,
+        )
+        delivery = restarted.begin_delivery(
+            event["event_id"],
+            claim_token=replacement["claim_token"],
+            claim_generation=replacement["claim_generation"],
+        )
+        self.assertTrue(delivery["operator_message_authorized"])
+
+        independent = restarted.claim(
+            self.event(event_class="task.independent-capability"),
+            claimant_id="independent-host",
+            seen_at="2026-07-17T14:00:03Z",
+        )
+        self.assertEqual(independent["claim_token"], self.expected_fixture_token(3))
+        self.assertNotIn(
+            independent["claim_token"],
+            {initial["claim_token"], replacement["claim_token"]},
+        )
+
+    def test_existing_ledger_v2_claim_token_remains_valid_across_restart(self) -> None:
+        event = self.event(event_class="task.ledger-v2-token-compatibility")
+        claim = self.claim(event)
+        legacy_token = "oncl1_" + hashlib.sha256(
+            f"{event['event_id']}\x1f{claim['claim_generation']}".encode("utf-8")
+        ).hexdigest()
+        with closing(sqlite3.connect(self.ledger_path)) as connection:
+            connection.execute(
+                "UPDATE notification_events SET claim_token=? WHERE event_id=?",
+                (legacy_token, event["event_id"]),
+            )
+            connection.commit()
+
+        restarted = NotificationLedger(
+            self.runtime_root,
+            self.ledger_path,
+            _clock=lambda: self.clock_now,
+            _token_bytes=self.fixture_token_bytes,
+        )
+        delivery = restarted.begin_delivery(
+            event["event_id"],
+            claim_token=legacy_token,
+            claim_generation=claim["claim_generation"],
+        )
+        self.assertTrue(delivery["operator_message_authorized"])
+
+    def test_claim_token_source_failures_roll_back_without_replacing_capability(self) -> None:
+        invalid_path = (
+            self.runtime_root / "atlas" / "notifications" / "invalid-token.sqlite3"
+        )
+        invalid = NotificationLedger.provision(
+            self.runtime_root,
+            invalid_path,
+            _token_bytes=lambda size: b"too-short",
+        )
+        invalid_event = self.event(event_class="task.invalid-token-source")
+        with self.assertRaisesRegex(LedgerUnavailableError, "exactly 32 bytes"):
+            invalid.claim(invalid_event, claimant_id="host-a", seen_at=SEEN)
+        self.assertIsNone(invalid.record(invalid_event["event_id"]))
+
+        repeated_path = (
+            self.runtime_root / "atlas" / "notifications" / "repeated-token.sqlite3"
+        )
+        repeated = NotificationLedger.provision(
+            self.runtime_root,
+            repeated_path,
+            _clock=lambda: self.clock_now,
+            _token_bytes=lambda size: b"r" * size,
+        )
+        repeated_event = self.event(event_class="task.repeated-token-source")
+        self.clock_now = datetime.fromisoformat("2026-07-17T14:00:01+00:00")
+        original = repeated.claim(
+            repeated_event,
+            claimant_id="host-a",
+            seen_at=SEEN,
+            lease_seconds=1,
+        )
+        self.clock_now = datetime.fromisoformat("2026-07-17T14:00:02+00:00")
+        with self.assertRaisesRegex(LedgerUnavailableError, "repeated"):
+            repeated.claim(
+                repeated_event,
+                claimant_id="replacement-host",
+                seen_at="2026-07-17T14:00:02Z",
+                lease_seconds=30,
+            )
+        record = repeated.record(repeated_event["event_id"])
+        self.assertEqual(record["claim_generation"], original["claim_generation"])
+        self.assertEqual(record["delivery_state"], "claimed")
 
     def test_delivery_start_is_fenced_by_current_claim_acquisition(self) -> None:
         event = self.event(event_class="task.claim-acquisition")

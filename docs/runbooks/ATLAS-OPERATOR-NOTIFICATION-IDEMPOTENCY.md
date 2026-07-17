@@ -138,6 +138,14 @@ or after the active claim generation's persisted acquisition timestamp and befor
 the ledger captures it from the UTC runtime clock inside the transaction, so callers cannot
 backdate it to the event's original `first_seen`.
 
+Treat the claim token as a secret capability. Each generation receives a new 256-bit token
+from the operating system cryptographic random source; it is never derivable from
+`event_id`, generation, claimant ID, or timestamps. Persist and return it only through the
+claim receipt, never log it, and never substitute a deterministic runtime token source.
+Restart reuses the active persisted token; a replacement generation always receives a new
+capability. If the secure token source fails or repeats the active capability, handle the
+result as unavailable and retry later without changing or restoring the ledger.
+
 ## Acknowledge
 
 After the separately authorized transport accepts the one claimed notification:
@@ -179,8 +187,9 @@ prove SQLite online backup and restore on the target filesystem.
   over the file or auto-migrate it.
 - Failed integrity/open check: stop delivery, preserve the database and sidecars, restore
   the last verified backup, then replay the original deterministic events.
-- Busy/lock timeout: report unavailable and retry the claim transaction later; do not bypass
-  the ledger.
+- Busy/lock timeout: handle `LedgerUnavailableError`, report temporarily unavailable, and
+  retry the complete claim transaction later; do not restore, replace, or bypass the
+  healthy locked ledger.
 - `delivery_in_progress` without acknowledgement: report `UNKNOWN`, reconcile using the
   transport's `event_id` acceptance evidence, and do not issue a replacement lease.
 - Duplicate acknowledgement loop: break the loop at both adapters and retain the ledger

@@ -98,6 +98,15 @@ persisted acquisition timestamp and before its expiry; the original event `first
 timestamp cannot authorize a later generation. The ledger records `started_at` from its
 UTC runtime clock inside the fence transaction; callers cannot supply or backdate it.
 
+Every newly issued claim generation receives an independently generated 256-bit capability
+from the operating system cryptographic random source. The token is persisted before the
+claim commits and is never derived from public event identity or generation metadata.
+Deterministic tests may inject a private byte-source fixture; runtime callers must not
+replace the secure default. Existing active `ledger.v2` tokens remain valid across restart,
+while every later replacement generation receives a new unpredictable capability. Secure
+token-source failure is temporary unavailability and rolls the claim transaction back; it
+does not imply ledger corruption or authorize restore.
+
 For an existing `event_id`, one transaction increments `duplicate_count`, advances
 `last_seen`, records exact or semantic duplicate disposition, and returns
 `should_emit=false`. A claim may be reissued only when its lease expires before
@@ -114,6 +123,12 @@ generation and can follow only `delivery_in_progress`. Once accepted, every late
 returns the stable acknowledgement and the sender must stop. Superseded events remain
 suppressed. Replayed acknowledgements always set both `retry_authorized=false` and
 `operator_message_authorized=false`.
+
+SQLite `BUSY` or `LOCKED` after the bounded busy timeout is temporary authority
+unavailability, not corruption. Startup and state transitions raise
+`LedgerUnavailableError`, authorize no delivery, and leave the ledger untouched for a
+later retry. Integrity, schema, and quick-check failures remain separate fail-closed
+corruption or compatibility errors.
 
 ## Stored Data and Privacy
 

@@ -24,6 +24,11 @@ second notification stream.
   delivery start from its runtime clock, and rejects starts outside the current lease.
 - Claim acquisition and expiry use that ledger clock inside the claim transaction;
   caller-supplied `seen_at` is retained only as first/last-seen receipt metadata.
+- Every new claim generation receives an independently generated, persisted 256-bit
+  capability from the operating system cryptographic random source. Runtime tokens are not
+  derivable from event identity or generation; deterministic sources are test fixtures only.
+- SQLite busy/locked timeout is reported as temporary ledger unavailability, never as
+  corruption or restore authority.
 - Claim receipts never authorize transport. Only an atomic, unexpired `begin_delivery`
   transition enters non-stealable `delivery_in_progress` and authorizes one transport call.
 - A transport crash after fencing remains explicit `UNKNOWN` and reconciliation-required;
@@ -53,6 +58,11 @@ second notification stream.
 - Heartbeat and continuation non-replay.
 - Control-kind supersession rejection across same and unrelated streams.
 - Ledger-clock claim acquisition under past/future caller-clock skew and restart.
+- Temporary-unavailable lock-contention classification for startup and claim transactions.
+- Independent unpredictable claim capabilities, stale-token rejection, restart persistence,
+  and `ledger.v2` active-token compatibility.
+- Invalid or repeated secure-token-source unavailability with transactional rollback and
+  no corruption classification.
 - Restart recovery.
 - Corrupt and unknown schema fail-closed behavior.
 - Concurrent duplicate claim with exactly one pre-send delivery candidate.
@@ -67,7 +77,7 @@ Completion values are not inferred from these units. Runtime effectiveness remai
 
 ## Local Verification Snapshot
 
-- Notification contract/ledger suite: 30 passed in each of two final runs on Python 3.12
+- Notification contract/ledger suite: 34 passed in each of two final runs on Python 3.12
   and in each of two final runs on Python 3.13.
 - Native task and board correlation suite: 22 passed in each of two runs.
 - Root QA pipeline suite: 78 passed in each of two runs.
