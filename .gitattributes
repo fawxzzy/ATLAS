@@ -4,3 +4,6 @@ data/knowledge-candidates/** text eol=lf
 docs/ops/ATLAS-CREATION-OS-* text eol=lf
 data/imports/fawxzzy-platform/2026-07-16/ATLAS_MAIN_FAWXZZY_PLATFORM_SUPABASE_MIGRATION_PROMPT_2026-07-16.md binary
 data/imports/deepseek-bridge/2026-07-13/DEEPSEEK_BRIDGE_PROPOSAL_2026-07-13.txt binary
+data/imports/fawxzzy-platform/2026-07-16/IMPORT-MANIFEST.json text eol=lf
+data/imports/deepseek-bridge/2026-07-13/IMPORT-MANIFEST.json text eol=lf
+docs/registry/ATLAS-MASTER-PROGRAM-REGISTER.v1.json text eol=lf

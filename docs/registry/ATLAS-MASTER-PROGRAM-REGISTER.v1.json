@@ -747,18 +747,19 @@
         "Any later sidecar has accepted health, loopback exposure, data policy, fallback, rollback, and owner placement evidence."
       ],
       "status": "HOLD-UNTRUSTED-PROPOSAL",
-      "next_packet": "Read-only current Codex custom-provider capability verification under Foundation/_stack/Lifeline ownership.",
+      "next_packet": "DS-BRIDGE-CAP-001",
       "measurement_status": "UNMEASURED"
     }
   ],
   "provenance_guards": {
     "historical_values_rule": "Historical percentages, denominators, accepted opening/closing contracts, and timestamped evidence remain immutable provenance.",
     "guarded_file_sha256": {
-      "docs/audits/ATLAS-FULL-SYSTEM-OPENING-AUDIT-2026-07-12.md": "42766699bfe91a0e034af69d93ddd0aaed497819578ee652555010bb19d4ce65",
-      "docs/atlas-book/02-lanes-and-markers.md": "fce6f6444f7acbd094376922649e937760a5aaa2e3dd751499b126926f19116e",
-      "docs/memory/initiatives/continuity-manifest-atlas-full-system-re-evaluation.json": "4e4315506fd251b4da2c2c6313d95ecb09fca561022d90b880094536a7d4f923",
-      "docs/registry/ATLAS-EXTERNAL-MODEL-SIDECAR-RUNTIME-CONTRACT.json": "2fd76706b79431fcddb8b009eaed7c55ea0c6e45f45332afdf127170b2bfef0d"
+      "docs/audits/ATLAS-FULL-SYSTEM-OPENING-AUDIT-2026-07-12.md": "5d946ead2631516e5d5a70c6041a4fafdf6bece4b703d501b3894b49b19b1e9f",
+      "docs/atlas-book/02-lanes-and-markers.md": "eb0624f00e289306f65643fdf0893332cf233fc273911efc7da82a2dd057e8ad",
+      "docs/memory/initiatives/continuity-manifest-atlas-full-system-re-evaluation.json": "03f4243f8ff5d9de23df5c1995fed2cf5b025c65923c07646d51c8f04715995b",
+      "docs/registry/ATLAS-EXTERNAL-MODEL-SIDECAR-RUNTIME-CONTRACT.json": "fcca89d9b54def0a8e9346f13e87aa9079568a2c9c9cd9acd8ee69e787f265ce"
     },
+    "guard_digest_basis": "Exact SHA-256 of the committed text blobs at merged base ef8a1e7abe514f2f3a01e7fdbd0fe537157efff9; checkout CRLF is normalized to canonical Git LF before comparison.",
     "existing_lane_projection": {
       "lanes": {
         "count": 20,

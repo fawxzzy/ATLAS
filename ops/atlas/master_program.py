@@ -10,6 +10,7 @@ from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[2]
+BASE_COMMIT = "ef8a1e7abe514f2f3a01e7fdbd0fe537157efff9"
 SOURCE_SPEC = ROOT / "docs/programs/ATLAS-MASTER-PROGRAM-REGISTER.v1.source.json"
 REGISTER = ROOT / "docs/registry/ATLAS-MASTER-PROGRAM-REGISTER.v1.json"
 LANE_REGISTRY = ROOT / "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json"
@@ -67,12 +68,12 @@ IMPORTS = (
 )
 
 HISTORICAL_FILE_GUARDS = {
-    "docs/audits/ATLAS-FULL-SYSTEM-OPENING-AUDIT-2026-07-12.md": "42766699bfe91a0e034af69d93ddd0aaed497819578ee652555010bb19d4ce65",
-    "docs/atlas-book/02-lanes-and-markers.md": "fce6f6444f7acbd094376922649e937760a5aaa2e3dd751499b126926f19116e",
-    "docs/memory/initiatives/continuity-manifest-atlas-full-system-re-evaluation.json": "4e4315506fd251b4da2c2c6313d95ecb09fca561022d90b880094536a7d4f923",
-    "docs/memory/initiatives/initiative-fawxzzy-tech-plan-convergence.json": "09aa9406595d23d3f1e78e0e568bb31587fee4a103be8e4c6ef1ef3b94d827a4",
-    "docs/registry/FAWXZZY-TECH-PLAN-RECOVERY-ADMISSION.json": "e3fa1e0b33292717607b7b218613a648ab7f92d52118b92dd23fd5940d7dbb07",
-    "docs/registry/ATLAS-EXTERNAL-MODEL-SIDECAR-RUNTIME-CONTRACT.json": "2fd76706b79431fcddb8b009eaed7c55ea0c6e45f45332afdf127170b2bfef0d",
+    "docs/audits/ATLAS-FULL-SYSTEM-OPENING-AUDIT-2026-07-12.md": "5d946ead2631516e5d5a70c6041a4fafdf6bece4b703d501b3894b49b19b1e9f",
+    "docs/atlas-book/02-lanes-and-markers.md": "eb0624f00e289306f65643fdf0893332cf233fc273911efc7da82a2dd057e8ad",
+    "docs/memory/initiatives/continuity-manifest-atlas-full-system-re-evaluation.json": "03f4243f8ff5d9de23df5c1995fed2cf5b025c65923c07646d51c8f04715995b",
+    "docs/memory/initiatives/initiative-fawxzzy-tech-plan-convergence.json": "d458dcab083901c13a1553d2a15d4a2ff0794b4261501fc728b97fb91986aba9",
+    "docs/registry/FAWXZZY-TECH-PLAN-RECOVERY-ADMISSION.json": "3f5b37d3f573c1c7732f601b9f699b710cba5e89161cc8dba12d002c390716cd",
+    "docs/registry/ATLAS-EXTERNAL-MODEL-SIDECAR-RUNTIME-CONTRACT.json": "fcca89d9b54def0a8e9346f13e87aa9079568a2c9c9cd9acd8ee69e787f265ce",
 }
 
 HISTORICAL_LANE_GUARDS = {
@@ -106,7 +107,10 @@ def _canonical_digest(payload: Any) -> str:
 
 
 def _file_digest(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    # Guard values are exact SHA-256 digests of the committed BASE_COMMIT blobs. Git may
+    # materialize text as CRLF on Windows, so normalize only checkout line endings before
+    # comparing with those canonical blob bytes. Any substantive byte change still fails.
+    return hashlib.sha256(path.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
 
 
 def build_import_manifest(spec: dict[str, Any]) -> dict[str, Any]:
@@ -185,7 +189,10 @@ def _schema_validate(instance: dict[str, Any], schema_ref: str) -> list[str]:
     except ImportError:
         return _schema_subset_validate(instance, _load_json(ROOT / schema_ref))
     schema = _load_json(ROOT / schema_ref)
-    validator = jsonschema.Draft202012Validator(schema)
+    validator = jsonschema.Draft202012Validator(
+        schema,
+        format_checker=jsonschema.FormatChecker(),
+    )
     return [error.message for error in sorted(validator.iter_errors(instance), key=lambda item: list(item.path))]
 
 
@@ -259,8 +266,14 @@ def _schema_subset_validate(instance: Any, schema: dict[str, Any], path: str = "
             except ValueError:
                 errors.append(f"{path}: invalid date")
         if schema.get("format") == "date-time":
+            rfc3339 = re.fullmatch(
+                r"\d{4}-\d{2}-\d{2}[Tt]\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:[Zz]|[+-]\d{2}:\d{2})",
+                instance,
+            )
             try:
-                dt.datetime.fromisoformat(instance.replace("Z", "+00:00"))
+                if rfc3339 is None:
+                    raise ValueError
+                dt.datetime.fromisoformat(instance.replace("Z", "+00:00").replace("z", "+00:00"))
             except ValueError:
                 errors.append(f"{path}: invalid date-time")
 
@@ -311,17 +324,24 @@ def _validate_deepseek_historical_snapshot() -> list[str]:
     return errors
 
 
-def _validate_raw_import_git_attributes() -> list[str]:
+def _validate_packet_git_attributes() -> list[str]:
     rules = {
         line.strip()
         for line in (ROOT / ".gitattributes").read_text(encoding="utf-8").splitlines()
         if line.strip() and not line.lstrip().startswith("#")
     }
-    return [
+    errors = [
         f"raw byte-preserved import must be marked binary in .gitattributes: {spec['stored_ref']}"
         for spec in IMPORTS
         if f"{spec['stored_ref']} binary" not in rules
     ]
+    generated_refs = [spec["manifest_ref"] for spec in IMPORTS] + [REGISTER.relative_to(ROOT).as_posix()]
+    errors.extend(
+        f"producer-owned JSON must be marked text eol=lf in .gitattributes: {ref}"
+        for ref in generated_refs
+        if f"{ref} text eol=lf" not in rules
+    )
+    return errors
 
 
 def _validate_reference_integrity(register: dict[str, Any], lanes: dict[str, Any]) -> list[str]:
@@ -373,7 +393,7 @@ def validate_repository() -> list[str]:
     lanes = _load_json(LANE_REGISTRY)
     errors.extend(_validate_historical_guards(lanes))
     errors.extend(_validate_deepseek_historical_snapshot())
-    errors.extend(_validate_raw_import_git_attributes())
+    errors.extend(_validate_packet_git_attributes())
 
     for spec in IMPORTS:
         try:

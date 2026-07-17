@@ -3,8 +3,12 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import json
+import subprocess
+import sys
+import types
 import unittest
 from pathlib import Path
+from unittest import mock
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -22,6 +26,15 @@ def load_json(ref: str) -> dict:
 class AtlasMasterProgramTests(unittest.TestCase):
     def test_repository_contract_is_valid(self) -> None:
         self.assertEqual([], MASTER_PROGRAM.validate_repository())
+
+    def test_historical_guards_match_exact_merged_base_blobs(self) -> None:
+        for ref, expected in MASTER_PROGRAM.HISTORICAL_FILE_GUARDS.items():
+            committed = subprocess.check_output(
+                ["git", "show", f"{MASTER_PROGRAM.BASE_COMMIT}:{ref}"],
+                cwd=ROOT,
+            )
+            self.assertEqual(expected, hashlib.sha256(committed).hexdigest(), ref)
+            self.assertEqual(expected, MASTER_PROGRAM._file_digest(ROOT / ref), ref)
 
     def test_generated_artifacts_are_byte_deterministic(self) -> None:
         first_register = MASTER_PROGRAM._json_bytes(MASTER_PROGRAM.build_master_register())
@@ -53,7 +66,7 @@ class AtlasMasterProgramTests(unittest.TestCase):
         self.assertFalse(
             (ROOT / "data/imports/fawxzzy-platform/2026-07-16/source-manifest.json").exists()
         )
-        self.assertEqual([], MASTER_PROGRAM._validate_raw_import_git_attributes())
+        self.assertEqual([], MASTER_PROGRAM._validate_packet_git_attributes())
 
     def test_new_lanes_are_complete_and_unmeasured(self) -> None:
         registry = load_json("docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json")
@@ -119,6 +132,65 @@ class AtlasMasterProgramTests(unittest.TestCase):
             "lane-external-model-sidecar-deepseek-evaluation",
             admission["initiative_mapping"]["current_backlog_id"],
         )
+        registry = load_json("docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json")
+        lane = next(
+            entry
+            for entry in registry["backlog_candidates"]
+            if entry["id"] == "lane-external-model-sidecar-deepseek-evaluation"
+        )
+        register = load_json("docs/registry/ATLAS-MASTER-PROGRAM-REGISTER.v1.json")
+        program = next(
+            entry for entry in register["programs"] if entry["id"] == "program-deepseek-sidecar-evaluation"
+        )
+        self.assertEqual("DS-BRIDGE-CAP-001", lane["next_packet"]["id"])
+        self.assertEqual("DS-BRIDGE-CAP-001", admission["next_packet"])
+        self.assertEqual("DS-BRIDGE-CAP-001", initiative["metadata"]["current_exact_next_packet"])
+        self.assertTrue(initiative["proposed_next_session_refs"][0].startswith("DS-BRIDGE-CAP-001 "))
+        self.assertEqual("DS-BRIDGE-CAP-001", program["next_packet"])
+
+    def test_schema_formats_fail_closed_in_full_and_fallback_paths(self) -> None:
+        invalid = load_json("docs/registry/DEEPSEEK-BRIDGE-WAVE-0-ADMISSION.json")
+        invalid["generated_at"] = "2026-07-16T23:00:00"
+        self.assertTrue(
+            MASTER_PROGRAM._schema_subset_validate(
+                invalid,
+                load_json("schemas/atlas.program-admission.v1.json"),
+            )
+        )
+        self.assertTrue(
+            MASTER_PROGRAM._schema_validate(
+                invalid,
+                "schemas/atlas.program-admission.v1.json",
+            )
+        )
+
+        class FakeFormatChecker:
+            pass
+
+        class FakeDraft202012Validator:
+            received_checker = None
+
+            def __init__(self, schema, *, format_checker=None):
+                del schema
+                type(self).received_checker = format_checker
+
+            def iter_errors(self, instance):
+                del instance
+                return []
+
+        fake_jsonschema = types.SimpleNamespace(
+            Draft202012Validator=FakeDraft202012Validator,
+            FormatChecker=FakeFormatChecker,
+        )
+        with mock.patch.dict(sys.modules, {"jsonschema": fake_jsonschema}):
+            self.assertEqual(
+                [],
+                MASTER_PROGRAM._schema_validate(
+                    load_json("docs/registry/DEEPSEEK-BRIDGE-WAVE-0-ADMISSION.json"),
+                    "schemas/atlas.program-admission.v1.json",
+                ),
+            )
+        self.assertIsInstance(FakeDraft202012Validator.received_checker, FakeFormatChecker)
 
     def test_master_register_covers_required_program_families(self) -> None:
         register = load_json("docs/registry/ATLAS-MASTER-PROGRAM-REGISTER.v1.json")

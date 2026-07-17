@@ -39,7 +39,7 @@
     "No percentage is assigned until a deterministic measurement contract is accepted."
   ],
   "status": "HOLD-UNTRUSTED-PROPOSAL",
-  "next_packet": "Read-only current Codex custom-provider capability verification under Foundation/_stack/Lifeline ownership.",
+  "next_packet": "DS-BRIDGE-CAP-001",
   "measurement_status": "UNMEASURED",
   "source_import": {
     "stored_ref": "data/imports/deepseek-bridge/2026-07-13/DEEPSEEK_BRIDGE_PROPOSAL_2026-07-13.txt",

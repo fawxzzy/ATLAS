@@ -23,7 +23,7 @@
     "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json"
   ],
   "proposed_next_session_refs": [
-    "DEEPSEEK-CAP-REVALIDATE-001 read-only current Codex custom-provider and sidecar placement revalidation"
+    "DS-BRIDGE-CAP-001 read-only current Codex custom-provider and sidecar placement revalidation"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -71,7 +71,7 @@
     "candidate_doctrine": ["External Model Sidecar", "Secret/Identity Alignment", "Discover -> Back Up -> Modify -> Validate -> Document", "Listening Is Not Healthy", "Dedicated Runtime"],
     "exact_next_packet": "External Model Sidecar Provider Integration Phase 3 dedicated runtime and one-time credential setup",
     "exact_next_packet_authority": "historical planning record only",
-    "current_exact_next_packet": "DEEPSEEK-CAP-REVALIDATE-001 read-only current Codex custom-provider and sidecar placement revalidation",
+    "current_exact_next_packet": "DS-BRIDGE-CAP-001",
     "current_hold": "Do not install, configure, start, schedule, credential, bind, route, request an API key, or make a paid call. Any later implementation remains separately admitted and approval-gated.",
     "placement_candidates": ["Foundation", "_stack", "Lifeline"],
     "platform_path_independence": "Independent of FawxzzyPlatform migration and FP-PARITY-RATCHET-001.",
