@@ -4,13 +4,24 @@ import argparse
 import hashlib
 import json
 import re
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from ops.validation.runtime_placement_contract import (
+    validate_registry_schema_contract,
+    validate_runtime_placement_payloads,
+)
+
 REGISTRY_REF = "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json"
 MARKER_BOOK_REF = "docs/atlas-book/02-lanes-and-markers.md"
+RUNTIME_REGISTRY_REF = "docs/registry/ATLAS-RUNTIME-PLACEMENT-REGISTRY.v1.json"
+RUNTIME_SCHEMA_REF = "schemas/atlas.runtime-placement.registry.v1.json"
 OUTPUT_ROOT_REF = "docs/registry/project-board-owner-exports"
 ATLAS_OUTPUT_NAME = "atlas.project-board.owner-export.v1.json"
 CORTEX_OUTPUT_NAME = "cortex.project-board.owner-export.v1.json"
@@ -73,6 +84,29 @@ def _load_registry(path: Path) -> dict[str, Any]:
     return payload
 
 
+def _load_runtime_registry(path: Path) -> dict[str, Any]:
+    try:
+        payload = json.loads(_read_normalized_bytes(path))
+    except json.JSONDecodeError as exc:
+        raise ProjectBoardOwnerExportError(f"Malformed runtime registry JSON: {path}") from exc
+    if not isinstance(payload, dict):
+        raise ProjectBoardOwnerExportError("The runtime placement registry must be a JSON object.")
+    if payload.get("schema_version") != "atlas.runtime-placement.registry.v1":
+        raise ProjectBoardOwnerExportError("Unexpected runtime placement registry schema.")
+    return payload
+
+
+def _load_runtime_schema() -> dict[str, Any]:
+    path = ROOT / RUNTIME_SCHEMA_REF
+    try:
+        payload = json.loads(_read_normalized_bytes(path))
+    except json.JSONDecodeError as exc:
+        raise ProjectBoardOwnerExportError(f"Malformed runtime schema JSON: {path}") from exc
+    if not isinstance(payload, dict):
+        raise ProjectBoardOwnerExportError("The runtime placement schema must be a JSON object.")
+    return payload
+
+
 def _index_records(registry: dict[str, Any]) -> dict[str, dict[str, Any]]:
     records = [*registry["lanes"], *registry["backlog_candidates"]]
     indexed: dict[str, dict[str, Any]] = {}
@@ -102,9 +136,57 @@ def _verify_marker_reconciliation(registry: dict[str, Any], marker_text: str) ->
         raise ProjectBoardOwnerExportError("The GitHub lane denominator must remain 8.")
 
 
-def _source_revision(registry_bytes: bytes, marker_bytes: bytes) -> str:
-    digest_input = b"registry\0" + registry_bytes + b"\0marker-book\0" + marker_bytes
+def _source_revision(registry_bytes: bytes, marker_bytes: bytes, runtime_registry_bytes: bytes) -> str:
+    digest_input = (
+        b"registry\0"
+        + registry_bytes
+        + b"\0marker-book\0"
+        + marker_bytes
+        + b"\0runtime-registry\0"
+        + runtime_registry_bytes
+    )
     return f"sha256:{_sha256(digest_input)}"
+
+
+def _runtime_readback(runtime_registry: dict[str, Any], *, runtime_revision: str) -> dict[str, Any]:
+    steps = [dict(step) for step in runtime_registry["activation_steps"]]
+    marker_lanes = [
+        {
+            "id": marker["id"],
+            "title": marker["title"],
+            "percentage": marker.get("percentage"),
+            "completed_units": marker.get("completed_units"),
+            "denominator": marker["denominator"],
+            "measurement_unit": marker["measurement_unit"],
+            "units": [
+                {
+                    "id": unit["id"],
+                    "title": unit["title"],
+                    "status": unit["status"],
+                    "evidence_refs": list(unit["evidence_refs"]),
+                }
+                for unit in marker["units"]
+            ],
+        }
+        for marker in runtime_registry["marker_lanes"]
+    ]
+    return {
+        "contract_version": "atlas.runtime-owner-export.readback.v1",
+        "source_id": "atlas-runtime-placement-registry",
+        "source_ref": RUNTIME_REGISTRY_REF,
+        "source_revision": f"sha256:{runtime_revision}",
+        "activation_sequence": list(runtime_registry["activation_sequence"]),
+        "activation_steps": steps,
+        "selector": runtime_registry.get("next_owner_side_activation_packet"),
+        "marker_lanes": marker_lanes,
+        "status_boundaries": {
+            "unknown": list(runtime_registry["current_unknowns"]),
+            "pending": [step["id"] for step in steps if step["status"] == "pending"],
+            "blocked": [step["id"] for step in steps if step["status"] == "blocked"],
+            "stale": [],
+        },
+        "discord_mutation_authorized": False,
+    }
 
 
 def _record_card_type(record: dict[str, Any]) -> str:
@@ -240,6 +322,8 @@ def _build_envelope(
     source_revision: str,
     registry_revision: str,
     marker_revision: str,
+    runtime_revision: str,
+    runtime_readback: dict[str, Any],
     projection_role: str,
     extensions: dict[str, Any],
 ) -> dict[str, Any]:
@@ -284,8 +368,17 @@ def _build_envelope(
                 "revision": f"sha256:{marker_revision}",
                 "observed_at": generated_at,
             },
+            {
+                "source_id": "atlas-runtime-placement-registry",
+                "kind": "json",
+                "repository": "atlas-root",
+                "path": RUNTIME_REGISTRY_REF,
+                "revision": f"sha256:{runtime_revision}",
+                "observed_at": generated_at,
+            },
         ],
         "cards": cards,
+        "runtime_readback": runtime_readback,
         "extensions": extensions,
     }
 
@@ -294,16 +387,30 @@ def build_project_board_owner_exports(
     *,
     registry_path: Path | None = None,
     marker_book_path: Path | None = None,
+    runtime_registry_path: Path | None = None,
 ) -> dict[str, dict[str, Any]]:
     registry_path = registry_path or ROOT / REGISTRY_REF
     marker_book_path = marker_book_path or ROOT / MARKER_BOOK_REF
+    runtime_registry_path = runtime_registry_path or ROOT / RUNTIME_REGISTRY_REF
     registry_bytes = _read_normalized_bytes(registry_path)
     marker_bytes = _read_normalized_bytes(marker_book_path)
+    runtime_registry_bytes = _read_normalized_bytes(runtime_registry_path)
     registry = _load_registry(registry_path)
+    runtime_registry = _load_runtime_registry(runtime_registry_path)
     marker_text = marker_bytes.decode("utf-8")
     _verify_marker_reconciliation(registry, marker_text)
+    runtime_issues = [
+        *validate_registry_schema_contract(runtime_registry, _load_runtime_schema()),
+        *validate_runtime_placement_payloads(runtime_registry, registry, marker_text, root=ROOT),
+    ]
+    if runtime_issues:
+        categories = ", ".join(sorted({issue.category for issue in runtime_issues}))
+        raise ProjectBoardOwnerExportError(f"Runtime placement truth failed semantic validation: {categories}")
     indexed = _index_records(registry)
-    generated_at = _utc_timestamp(registry.get("generated_at"), field_name="registry.generated_at")
+    generated_at = max(
+        _utc_timestamp(registry.get("generated_at"), field_name="registry.generated_at"),
+        _utc_timestamp(runtime_registry.get("generated_at"), field_name="runtime_registry.generated_at"),
+    )
 
     top_lanes = list(registry["lanes"])
     atlas_top_lanes = [record for record in top_lanes if record.get("id") not in CORTEX_RECORD_IDS]
@@ -330,9 +437,11 @@ def build_project_board_owner_exports(
         cortex_records.append((section, record))
     cortex_parent_ids = {"lane-cortex-context-synthesis"}
 
-    revision = _source_revision(registry_bytes, marker_bytes)
+    revision = _source_revision(registry_bytes, marker_bytes, runtime_registry_bytes)
     registry_revision = _sha256(registry_bytes)
     marker_revision = _sha256(marker_bytes)
+    runtime_revision = _sha256(runtime_registry_bytes)
+    runtime_readback = _runtime_readback(runtime_registry, runtime_revision=runtime_revision)
     atlas_direct_count = sum(1 for record in atlas_top_lanes if record["id"] not in atlas_parent_ids)
 
     return {
@@ -344,6 +453,8 @@ def build_project_board_owner_exports(
             source_revision=revision,
             registry_revision=registry_revision,
             marker_revision=marker_revision,
+            runtime_revision=runtime_revision,
+            runtime_readback=runtime_readback,
             projection_role="stack-coordination",
             extensions={
                 "selection": {
@@ -367,6 +478,8 @@ def build_project_board_owner_exports(
             source_revision=revision,
             registry_revision=registry_revision,
             marker_revision=marker_revision,
+            runtime_revision=runtime_revision,
+            runtime_readback=runtime_readback,
             projection_role="root-owned-subsystem",
             extensions={
                 "selection": {
@@ -411,11 +524,16 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Build deterministic Atlas and Cortex project-board owner exports.")
     parser.add_argument("--registry", type=Path, default=ROOT / REGISTRY_REF)
     parser.add_argument("--marker-book", type=Path, default=ROOT / MARKER_BOOK_REF)
+    parser.add_argument("--runtime-registry", type=Path, default=ROOT / RUNTIME_REGISTRY_REF)
     parser.add_argument("--output-root", type=Path, default=ROOT / OUTPUT_ROOT_REF)
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
     try:
-        exports = build_project_board_owner_exports(registry_path=args.registry, marker_book_path=args.marker_book)
+        exports = build_project_board_owner_exports(
+            registry_path=args.registry,
+            marker_book_path=args.marker_book,
+            runtime_registry_path=args.runtime_registry,
+        )
         write_project_board_owner_exports(exports, output_root=args.output_root, check=args.check)
     except (OSError, ProjectBoardOwnerExportError) as exc:
         print(json.dumps({"status": "blocked", "reason": str(exc)}, sort_keys=True))

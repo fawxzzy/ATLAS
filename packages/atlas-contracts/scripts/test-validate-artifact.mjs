@@ -89,6 +89,168 @@ try {
   );
   assert(semanticFailure.errors.some((error) => error.includes("ATLAS-relative portable path")));
   assert(semanticFailure.errors.some((error) => error.includes("acceptance_criteria")));
+  const rootExportPath = path.resolve(
+    packageRoot,
+    "..",
+    "..",
+    "docs",
+    "registry",
+    "project-board-owner-exports",
+    "atlas.project-board.owner-export.v1.json",
+  );
+  const rootExport = JSON.parse(await fs.readFile(rootExportPath, "utf8"));
+  const writeTamperedExport = async (name, mutate) => {
+    const artifact = structuredClone(rootExport);
+    mutate(artifact);
+    const artifactPath = path.join(temporaryDir, name);
+    await fs.writeFile(artifactPath, `${JSON.stringify(artifact, null, 2)}\n`, "utf8");
+    return artifactPath;
+  };
+
+  const truncatedMarkerPath = await writeTamperedExport("owner-export.truncated-marker.json", (artifact) => {
+    artifact.runtime_readback.marker_lanes[0].units.pop();
+  });
+  const truncatedMarkerFailure = expectJson(
+    ["--schema", "atlas.project-board.owner-export.v1", "--artifact", truncatedMarkerPath],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  assert(
+    truncatedMarkerFailure.errors.some((error) => error.includes("units length must equal the fixed denominator")),
+  );
+
+  const renamedMarkerPath = await writeTamperedExport("owner-export.renamed-markers.json", (artifact) => {
+    artifact.runtime_readback.marker_lanes.forEach((marker, markerIndex) => {
+      marker.id = `renamed-marker-${markerIndex}`;
+      marker.units.forEach((unit, unitIndex) => {
+        unit.id = `renamed-unit-${markerIndex}-${unitIndex}`;
+      });
+    });
+  });
+  const renamedMarkerFailure = expectJson(
+    ["--schema", "atlas.project-board.owner-export.v1", "--artifact", renamedMarkerPath],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  assert(
+    renamedMarkerFailure.errors.some((error) => error.includes("exact frozen marker and ordered unit identities")),
+  );
+
+  const clearedUnknownPath = await writeTamperedExport("owner-export.cleared-unknown.json", (artifact) => {
+    artifact.runtime_readback.status_boundaries.unknown = [];
+  });
+  const clearedUnknownFailure = expectJson(
+    ["--schema", "atlas.project-board.owner-export.v1", "--artifact", clearedUnknownPath],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  assert(
+    clearedUnknownFailure.errors.some((error) => error.includes("unknown must exactly match the runtime source projection")),
+  );
+
+  const inventedStalePath = await writeTamperedExport("owner-export.invented-stale.json", (artifact) => {
+    artifact.runtime_readback.status_boundaries.stale = ["invented-stale-boundary"];
+  });
+  const inventedStaleFailure = expectJson(
+    ["--schema", "atlas.project-board.owner-export.v1", "--artifact", inventedStalePath],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  assert(
+    inventedStaleFailure.errors.some((error) => error.includes("canonical empty stale boundary")),
+  );
+
+  const runtimeSourcePath = path.resolve(
+    packageRoot,
+    "..",
+    "..",
+    "docs",
+    "registry",
+    "ATLAS-RUNTIME-PLACEMENT-REGISTRY.v1.json",
+  );
+  const runtimeSourceText = await fs.readFile(runtimeSourcePath, "utf8");
+  const runtimeSchemaPath = path.resolve(
+    packageRoot,
+    "..",
+    "..",
+    "schemas",
+    "atlas.runtime-placement.registry.v1.json",
+  );
+  const runtimeSchemaText = await fs.readFile(runtimeSchemaPath, "utf8");
+  const writeAtlasRootSentinels = async (root) => {
+    await fs.mkdir(path.join(root, "schemas"), { recursive: true });
+    await fs.writeFile(path.join(root, "stack.yaml"), "version: 1\n", "utf8");
+    await fs.writeFile(
+      path.join(root, "schemas", "atlas.runtime-placement.registry.v1.json"),
+      runtimeSchemaText,
+      "utf8",
+    );
+  };
+  const escapeRoot = path.join(temporaryDir, "escape-root");
+  const outsideDocs = path.join(temporaryDir, "outside-docs");
+  await fs.mkdir(path.join(outsideDocs, "registry"), { recursive: true });
+  await fs.writeFile(
+    path.join(outsideDocs, "registry", "ATLAS-RUNTIME-PLACEMENT-REGISTRY.v1.json"),
+    runtimeSourceText,
+    "utf8",
+  );
+  await writeAtlasRootSentinels(escapeRoot);
+  await fs.symlink(outsideDocs, path.join(escapeRoot, "docs"), process.platform === "win32" ? "junction" : "dir");
+  const escapedArtifactPath = path.join(escapeRoot, "owner-export.json");
+  await fs.writeFile(escapedArtifactPath, `${JSON.stringify(rootExport, null, 2)}\n`, "utf8");
+  const escapedSourceFailure = expectJson(
+    ["--schema", "atlas.project-board.owner-export.v1", "--artifact", escapedArtifactPath],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  assert(
+    escapedSourceFailure.errors.some((error) => error.includes("escapes a candidate root after realpath resolution")),
+  );
+
+  const ambiguousRoot = path.join(temporaryDir, "ambiguous-root");
+  const ambiguousInner = path.join(ambiguousRoot, "inner");
+  for (const candidateRoot of [ambiguousRoot, ambiguousInner]) {
+    await writeAtlasRootSentinels(candidateRoot);
+    const registryDir = path.join(candidateRoot, "docs", "registry");
+    await fs.mkdir(registryDir, { recursive: true });
+    await fs.writeFile(
+      path.join(registryDir, "ATLAS-RUNTIME-PLACEMENT-REGISTRY.v1.json"),
+      runtimeSourceText,
+      "utf8",
+    );
+  }
+  const ambiguousArtifactPath = path.join(ambiguousInner, "owner-export.json");
+  await fs.writeFile(ambiguousArtifactPath, `${JSON.stringify(rootExport, null, 2)}\n`, "utf8");
+  const ambiguousSourceFailure = expectJson(
+    ["--schema", "atlas.project-board.owner-export.v1", "--artifact", ambiguousArtifactPath],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  assert(
+    ambiguousSourceFailure.errors.some((error) => error.includes("ambiguous across multiple contained roots")),
+  );
+
+  const unidentifiedRoot = path.join(temporaryDir, "unidentified-root");
+  const unidentifiedArtifactDir = path.join(unidentifiedRoot, "workspace");
+  await fs.mkdir(path.join(unidentifiedRoot, "tmp"), { recursive: true });
+  await fs.mkdir(unidentifiedArtifactDir, { recursive: true });
+  await fs.writeFile(path.join(unidentifiedRoot, "tmp", "runtime.json"), runtimeSourceText, "utf8");
+  const unidentifiedArtifact = structuredClone(rootExport);
+  const runtimeSource = unidentifiedArtifact.sources.find(
+    (source) => source.source_id === "atlas-runtime-placement-registry",
+  );
+  runtimeSource.path = "tmp/runtime.json";
+  unidentifiedArtifact.runtime_readback.source_ref = "tmp/runtime.json";
+  const unidentifiedArtifactPath = path.join(unidentifiedArtifactDir, "owner-export.json");
+  await fs.writeFile(unidentifiedArtifactPath, `${JSON.stringify(unidentifiedArtifact, null, 2)}\n`, "utf8");
+  const unidentifiedRootFailure = expectJson(
+    ["--schema", "atlas.project-board.owner-export.v1", "--artifact", unidentifiedArtifactPath],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  assert(
+    unidentifiedRootFailure.errors.some((error) => error.includes("could not be resolved from the artifact or working tree")),
+  );
   expectJson(
     ["--schema", "atlas.github.event-receipt.v1", "--artifact", fixture("invalid", "github.event-receipt.v1.bad-authority.json")],
     1,

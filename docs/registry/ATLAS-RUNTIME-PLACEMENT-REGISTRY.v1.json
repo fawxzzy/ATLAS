@@ -1,7 +1,7 @@
 {
   "schema_version": "atlas.runtime-placement.registry.v1",
   "kind": "atlas-runtime-placement-registry",
-  "generated_at": "2026-07-17T03:32:30Z",
+  "generated_at": "2026-07-17T06:07:21Z",
   "authority": "ATLAS root governance",
   "placement_types": [
     "no_server/on_demand",
@@ -1058,11 +1058,12 @@
       "id": "discordos-interaction-first-reliability-review",
       "owner": "DiscordOS",
       "packet": "DiscordOS interaction-first reliability review",
-      "status": "pending",
-      "admission_proof": "Owner-side review proves successful, failed, duplicate, interrupted/restarted, and stale-receipt interaction correlation across the existing hosted runtime.",
+      "status": "accepted",
+      "admission_proof": "Draft, unmerged DiscordOS PR #104 at exact reviewed head c62b31e76ac0c401b0213dcd3537df86e1ab371c proves the five fixed stateful scenarios on READY Preview dpl_7zBA8ggFEATvj7tRFeS2oYf5NWXP with 31 fixture requests, 12 reads, 19 in-memory writes, zero external requests or writes, five exact readbacks, restart-lease-bound recovered publication, and deployment-bound digest; production-path adoption and real-user coverage remain UNKNOWN.",
       "evidence_refs": [
-        "https://fawxzzy-discordos.vercel.app/api/runtime-health",
-        "docs/ops/ATLAS-RUNTIME-PLACEMENT-READ-MODEL-MARKER-SELECTOR-RECONCILIATION-2026-07-16.md"
+        "https://github.com/fawxzzy/DiscordOS/pull/104",
+        "https://github.com/fawxzzy/DiscordOS/pull/104#issuecomment-4999418558",
+        "https://github.com/fawxzzy/DiscordOS/pull/104#issuecomment-4999435354"
       ]
     },
     {
@@ -1070,11 +1071,15 @@
       "id": "owner-export-integration",
       "owner": "ATLAS root governance and owner repositories",
       "packet": "Runtime placement owner-export integration",
-      "status": "pending",
-      "admission_proof": "Established owner exporters consume accepted placement/marker truth and pass schema, semantic, and exact readback checks without Discord mutation.",
+      "status": "accepted",
+      "admission_proof": "Established Atlas and Cortex owner exporters consume the validated runtime placement registry as a third governed source, preserve the frozen activation and marker identities, derive the null post-sequence selector, and pass schema, semantic, deterministic replay, source-revision, and exact generated readback checks with Discord mutation unauthorized.",
       "evidence_refs": [
         "ops/atlas/project_board_owner_export.py",
-        "docs/registry/project-board-owner-exports/atlas.project-board.owner-export.v1.json"
+        "ops/atlas/test_project_board_owner_export.py",
+        "packages/atlas-contracts/schemas/atlas.project-board.owner-export.v1.schema.json",
+        "docs/registry/project-board-owner-exports/atlas.project-board.owner-export.v1.json",
+        "docs/registry/project-board-owner-exports/cortex.project-board.owner-export.v1.json",
+        "docs/ops/ATLAS-RUNTIME-OWNER-EXPORT-INTEGRATION-2026-07-17.md"
       ]
     }
   ],
@@ -1314,18 +1319,20 @@
   "current_unknowns": [
     "Actual restoration after a new Windows logon is UNKNOWN.",
     "Sustained unattended Playbook Observer uptime is UNKNOWN; current state is intentionally stopped and restorable.",
-    "DiscordOS five-scenario interaction-first reliability review is not yet accepted.",
-    "Activation-sequence owner-export integration after the Cortex and DiscordOS steps is not yet accepted.",
+    "DiscordOS production message-command adoption of the interaction reliability contract is UNKNOWN because PR #104 remains draft and unmerged.",
+    "DiscordOS real-user interaction coverage outside the fixed Preview canary is UNKNOWN.",
     "PostgreSQL 5432 and 5433 ownership is UNKNOWN.",
     "The loopback browser-debugger process ownership is UNKNOWN."
   ],
-  "next_owner_side_activation_packet": "DiscordOS interaction-first reliability review",
+  "next_owner_side_activation_packet": null,
   "evidence_refs": [
     "docs/ops/ATLAS-RUNTIME-PLACEMENT-TRUTH-AND-ACTIVATION-MARKER-ADMISSION-2026-07-15.md",
     "docs/ops/ATLAS-RUNTIME-PLACEMENT-READ-MODEL-MARKER-SELECTOR-RECONCILIATION-2026-07-16.md",
     "docs/ops/CORTEX-EVENT-TRIGGERED-RUNTIME-READ-MODEL-REFRESH-PROOF-2026-07-17.md",
+    "docs/ops/ATLAS-RUNTIME-OWNER-EXPORT-INTEGRATION-2026-07-17.md",
     "runtime/cortex/events/cortex-event-refresh.step-6.accepted.v1.json",
     "runtime/receipts/cortex/cortex-event-refresh.step-6.execution-receipt.v1.json",
+    "https://github.com/fawxzzy/DiscordOS/pull/104",
     "https://github.com/fawxzzy/playbook/pull/27",
     "https://github.com/fawxzzy/lifeline/pull/35",
     "https://github.com/fawxzzy/_stack/pull/9",

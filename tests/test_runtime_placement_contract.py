@@ -151,24 +151,21 @@ class RuntimePlacementContractTests(unittest.TestCase):
         issues = contract.validate_runtime_placement_payloads(mutated, lane_registry, marker_book, root=ROOT)
         self.assertIn("runtime-placement-selector", {issue.category for issue in issues})
 
-    def test_canonical_step_6_is_accepted_and_selector_is_exactly_step_7(self) -> None:
+    def test_canonical_activation_sequence_is_fully_accepted_and_selector_is_null(self) -> None:
         registry, _lane_registry, _marker_book = _payloads()
         statuses = {step["id"]: step["status"] for step in registry["activation_steps"]}
 
         self.assertEqual("accepted", statuses["cortex-event-refresh"])
-        self.assertEqual("pending", statuses["discordos-interaction-first-reliability-review"])
-        self.assertEqual("pending", statuses["owner-export-integration"])
-        self.assertEqual(
-            "DiscordOS interaction-first reliability review",
-            registry["next_owner_side_activation_packet"],
-        )
+        self.assertEqual("accepted", statuses["discordos-interaction-first-reliability-review"])
+        self.assertEqual("accepted", statuses["owner-export-integration"])
+        self.assertIsNone(registry["next_owner_side_activation_packet"])
 
     def test_activation_packet_names_must_be_unique(self) -> None:
         registry, lane_registry, marker_book = _payloads()
         mutated = copy.deepcopy(registry)
-        current_index = next(
-            index for index, step in enumerate(mutated["activation_steps"]) if step["status"] != "accepted"
-        )
+        current_index = 6
+        mutated["activation_steps"][current_index]["status"] = "pending"
+        mutated["activation_steps"][current_index + 1]["status"] = "pending"
         duplicate_packet = mutated["activation_steps"][0]["packet"]
         mutated["activation_steps"][current_index]["packet"] = duplicate_packet
         mutated["next_owner_side_activation_packet"] = duplicate_packet
@@ -290,6 +287,9 @@ class RuntimePlacementContractTests(unittest.TestCase):
     def test_selector_advances_when_current_step_becomes_accepted(self) -> None:
         registry, lane_registry, marker_book = _payloads()
         mutated = copy.deepcopy(registry)
+        mutated["activation_steps"][6]["status"] = "pending"
+        mutated["activation_steps"][7]["status"] = "pending"
+        mutated["next_owner_side_activation_packet"] = mutated["activation_steps"][6]["packet"]
         selected_index = next(
             index
             for index, step in enumerate(mutated["activation_steps"])

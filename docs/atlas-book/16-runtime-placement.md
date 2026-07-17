@@ -19,7 +19,7 @@ No new general-purpose ATLAS server is admitted.
 | Playbook Observer | Local persistent on `127.0.0.1:4300` | Foreground proof accepted; currently intentionally stopped/restorable with no listener | Playbook |
 | Lifeline | Local persistent supervisor and current-user logon restore | Registered/restorable; task enabled, ready, and last result `0` | Lifeline |
 | `_stack` inbox sweep | Local scheduled | Exactly one bounded task enabled/ready; latest observed sweep succeeded with zero pending work and no active lease residue | `_stack` |
-| Cortex read models | No server / event-triggered on demand | Refreshed at `2026-07-17T03:32:30Z` from pinned source-only authority; owner/runtime health remains UNKNOWN | ATLAS root |
+| Cortex read models | No server / event-triggered on demand | Principal Cortex event artifacts remain the accepted step-6 snapshot; generated Atlas/Cortex owner exports now carry the current step-8 runtime readback | ATLAS root |
 | Atlas root, Atlas Book, contracts, registries, and Playbook CLI doctrine | No server / on demand | Source surfaces are available locally; runtime claims still require their own proof | ATLAS root or named owner |
 | Fitness, Mazer, Socials OS, Trove, Stream, Nat1, and other products | Owner lane | Owner-managed; not root-operated services | Named owner lane |
 
@@ -28,8 +28,9 @@ local operator cockpit. They must not become competing dashboards.
 
 DiscordOS is the hosted Discord API and logical writer. Vercel owns its public
 edge, Supabase owns durable writer state, and GitHub Actions owns bounded
-scheduled polling. Component health is not yet the five-scenario
-interaction-first reliability proof.
+scheduled polling. The exact reviewed DiscordOS PR #104 Preview supplies the
+five-scenario interaction-first reliability proof. Production-path adoption
+and real-user coverage remain UNKNOWN because the PR is draft and unmerged.
 
 Cortex refreshes after accepted state changes or digests. It is not a daemon,
 scheduler, or competing execution authority.
@@ -46,12 +47,18 @@ Owner-side activation is serialized in this exact order:
 5. One `_stack` bounded scheduled worker proof — `accepted`.
 6. One event-triggered Cortex refresh — `accepted` from an immutable activation
    event, exact source blobs, and byte-stable replay receipt.
-7. DiscordOS interaction-first reliability review — `pending` and selected.
-8. Owner export integration — `pending`.
+7. DiscordOS interaction-first reliability review - `accepted` from exact
+   reviewed draft PR #104 Preview evidence without a merge or production claim.
+8. Owner export integration - `accepted` from deterministic Atlas/Cortex
+   runtime readback, schema, semantic, and exact replay proof.
 
 Each step has structured status and evidence. The selector is the first step
 whose status is not `accepted`; accepted steps must form a contiguous prefix.
-The exact next packet is `DiscordOS interaction-first reliability review`.
+All eight steps are accepted, so the derived selector is `null`. The next
+runtime activation packet does not exist, and the canonical root planner
+currently reports `no_immediate_root_packet`. The Atlas Full-System
+Re-evaluation closing audit remains a separately authorized hold excluded from
+selector routing.
 
 ## Fixed marker lanes
 

@@ -205,9 +205,14 @@ Current frozen sequence:
 5. exactly one bounded `_stack` scheduled worker proof — accepted.
 6. one event-triggered Cortex refresh — accepted from the immutable step-6
    event, deterministic source-only refresh, and replay receipt.
-7. DiscordOS interaction-first reliability review — pending and currently
-   selected.
-8. owner export integration — pending.
+7. DiscordOS interaction-first reliability review - accepted from the exact
+   reviewed draft PR #104 Preview proof; production-path adoption and real-user
+   coverage remain unknown.
+8. owner export integration - accepted from schema-constrained Atlas/Cortex
+   runtime readback, semantic validation, and deterministic replay.
+
+All eight steps are accepted, so the derived selector is `null`. This exhausts
+the frozen runtime activation sequence without creating a ninth selector.
 
 None of these steps authorizes a production deployment or public hosting for a
 local/private surface.
