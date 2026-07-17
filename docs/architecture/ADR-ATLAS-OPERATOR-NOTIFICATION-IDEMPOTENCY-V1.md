@@ -67,7 +67,12 @@ identity. This makes `ready -> blocked -> ready` three distinct occurrences whil
 of any occurrence with the same facts and predecessor remains stable. Unless the event is
 explicitly typed `periodic_digest`, the receiver requires the changed event to name the
 latest stream event in `supersedes_event_id` and provide sorted, unique JSON Pointer paths
-in `delta.changed_fact_paths`. Existing event-v1 changed-deliverable envelopes created
+in `delta.changed_fact_paths`. The successor's canonical fact digest must differ from its
+predecessor, so causal identity cannot turn unchanged facts plus a false delta into a new
+delivery. The privacy-preserving ledger retains fact digests rather than payload bodies;
+it therefore enforces real digest change plus non-empty, valid delta syntax without
+claiming to recompute path-level differences from discarded facts. Existing event-v1
+changed-deliverable envelopes created
 without the causal identity component remain valid for replay and duplicate recognition;
 new preparation always uses causal identity. `ledger.v2` is unchanged. Initial stream
 events may establish a first snapshot. Heartbeats and continuations are control records
@@ -78,6 +83,11 @@ source-thread/event-class stream. Timestamps use canonical RFC 3339 UTC with an 
 `T` and `Z`, optional one-to-six digit fractional seconds, and no offset form. JSON Pointer
 paths exclude the empty root pointer and admit `~` only as the RFC 6901 escapes `~0` or
 `~1`.
+
+`periodic_digest` is an explicitly unlinked deliverable. It rejects both
+`supersedes_event_id` and `delta`, never writes predecessor or successor materialization,
+and is excluded when resolving the latest causal predecessor for ordinary deliverables.
+This preserves an existing `A -> B` lineage before and after a digest snapshot.
 
 CLI input failures are contract rejections. Missing or unreadable files, malformed JSON,
 non-object input, and invalid top-level builder fields return a compact

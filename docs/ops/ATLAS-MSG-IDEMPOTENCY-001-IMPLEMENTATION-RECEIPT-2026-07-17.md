@@ -23,6 +23,8 @@ second notification stream.
 - Changed deliverables include their causal predecessor in identity, representing repeated
   fact states after an intervening change without destabilizing same-occurrence retries.
   Existing non-causal event-v1 envelopes remain replay-compatible; `ledger.v2` is unchanged.
+- A causal successor is rejected unless its canonical fact digest differs from its latest
+  predecessor; false identical-fact changes and empty deltas cannot create a delivery.
 - Durable `ledger.v2` stores each active generation's acquisition timestamp, captures
   delivery start from its runtime clock, and rejects starts outside the current lease.
 - Claim acquisition and expiry use that ledger clock inside the claim transaction;
@@ -37,8 +39,9 @@ second notification stream.
 - A transport crash after fencing remains explicit `UNKNOWN` and reconciliation-required;
   automatic lease takeover is forbidden without downstream `event_id` dedupe evidence.
 - Exact and semantic duplicates are recorded without operator-message authorization.
-- Changed facts require supersession and machine-readable delta paths; only typed periodic
-  digests may replay an unlinked full snapshot.
+- Changed facts require supersession and machine-readable delta paths. Typed periodic
+  digests are strictly unlinked, cannot carry lineage metadata, cannot materialize causal
+  edges, and are excluded from ordinary predecessor resolution.
 - Heartbeats and continuations are durably suppressed and cannot carry supersession
   metadata or mark any deliverable event superseded.
 - Payload bodies and transport metadata are not retained in the ledger.
@@ -54,6 +57,7 @@ second notification stream.
 - Exact duplicate suppression.
 - Semantic duplicate suppression after volatile-field normalization.
 - Changed-delta and supersession enforcement.
+- Identical-fact causal supersession rejection with transactional no-mutation proof.
 - Cross-host stable identity.
 - Ready-blocked-ready causal occurrence identity, stable retry, and legacy replay.
 - Notification-kind identity separation.
@@ -76,6 +80,8 @@ second notification stream.
 - Durable crash-to-`UNKNOWN` recovery and non-stealable delivery state.
 - Canonical timestamp and JSON Pointer grammar rejection.
 - Periodic-digest full-snapshot exception.
+- Periodic-digest latest, historical, unrelated, and delta lineage rejection with preserved
+  ordinary `A -> B -> C` materialization.
 - Payload non-retention.
 - Sanitized deterministic CLI input rejection.
 
@@ -84,7 +90,7 @@ Completion values are not inferred from these units. Runtime effectiveness remai
 
 ## Local Verification Snapshot
 
-- Notification contract/ledger suite: 38 passed in each of two final runs on Python 3.12
+- Notification contract/ledger suite: 40 passed in each of two final runs on Python 3.12
   and in each of two final runs on Python 3.13.
 - Native task and board correlation suite: 22 passed in each of two runs.
 - Root QA pipeline suite: 78 passed in each of two runs.

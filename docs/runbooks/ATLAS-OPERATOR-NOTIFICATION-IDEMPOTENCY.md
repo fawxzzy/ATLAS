@@ -64,8 +64,13 @@ occurrence. A retry reuses the same predecessor and therefore the same ID. Chang
 must produce a new event and, after the first event in a stream, must name the latest
 predecessor and changed fact paths. Existing event-v1 changed-deliverable envelopes that
 predate causal identity remain admissible for replay; do not regenerate them under a new
-ID during recovery. Only an explicit
-`periodic_digest` may establish another unlinked full snapshot. Heartbeats and
+ID during recovery. The receiver rejects a supersession when its canonical fact digest is
+identical to the predecessor, even if a producer supplies a causal ID and delta. It also
+rejects empty or malformed delta paths. Because payload bodies are intentionally not
+retained, path-level semantic accuracy remains producer evidence rather than a receiver
+claim. Only an explicit `periodic_digest` may establish another unlinked full snapshot.
+It must carry neither `supersedes_event_id` nor `delta`, does not alter causal links, and
+does not become the predecessor for the next ordinary deliverable. Heartbeats and
 continuations must not carry `supersedes_event_id` or `delta`; control receipts can never
 supersede a deliverable event. All timestamps must use canonical RFC 3339 UTC (`T`, `Z`,
 and at most six fractional digits). Delta paths exclude the empty root pointer and use only

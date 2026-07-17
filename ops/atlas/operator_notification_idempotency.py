@@ -294,6 +294,12 @@ def build_event(
     ):
         raise NotificationContractError("supersedes_event_id is invalid")
     normalized_delta = _validate_delta(delta)
+    if notification_kind == "periodic_digest" and (
+        supersedes_event_id is not None or normalized_delta is not None
+    ):
+        raise NotificationContractError(
+            "periodic_digest events must remain unlinked"
+        )
     if normalized_delta is not None and supersedes_event_id is None:
         raise NotificationContractError("delta requires supersedes_event_id")
     if notification_kind in CONTROL_KINDS and (
@@ -1033,14 +1039,26 @@ class NotificationLedger:
         disposition = "suppressed_control"
         should_begin_delivery = False
         if kind not in CONTROL_KINDS:
-            prior = connection.execute(
-                """SELECT * FROM notification_events
-                   WHERE source_thread_id=? AND event_class=?
-                     AND notification_kind NOT IN ('heartbeat', 'continuation')
-                   ORDER BY sequence DESC LIMIT 1""",
-                (event["source_thread_id"], event["event_class"]),
-            ).fetchone()
-            if prior is None:
+            if kind == "periodic_digest":
+                if (
+                    event["supersedes_event_id"] is not None
+                    or event["delta"] is not None
+                ):
+                    raise NotificationContractError(
+                        "periodic_digest events must remain unlinked"
+                    )
+                prior = None
+            else:
+                prior = connection.execute(
+                    """SELECT * FROM notification_events
+                       WHERE source_thread_id=? AND event_class=?
+                         AND notification_kind NOT IN (
+                           'heartbeat', 'continuation', 'periodic_digest'
+                         )
+                       ORDER BY sequence DESC LIMIT 1""",
+                    (event["source_thread_id"], event["event_class"]),
+                ).fetchone()
+            if kind != "periodic_digest" and prior is None:
                 if event["supersedes_event_id"] is not None:
                     raise NotificationContractError(
                         "first stream event cannot supersede an unknown predecessor"
@@ -1053,6 +1071,13 @@ class NotificationLedger:
                 if event["delta"] is None:
                     raise NotificationContractError(
                         "changed payload must include machine-readable delta paths"
+                    )
+                if (
+                    event["canonical_payload_digest"]
+                    == prior["canonical_payload_digest"]
+                ):
+                    raise NotificationContractError(
+                        "supersession requires changed canonical facts"
                     )
             if event["supersedes_event_id"] is not None:
                 predecessor = connection.execute(
@@ -1113,7 +1138,11 @@ class NotificationLedger:
                 ack_state,
             ),
         )
-        if kind not in CONTROL_KINDS and event["supersedes_event_id"] is not None:
+        if (
+            kind not in CONTROL_KINDS
+            and kind != "periodic_digest"
+            and event["supersedes_event_id"] is not None
+        ):
             connection.execute(
                 """UPDATE notification_events
                    SET superseded_by_event_id=?, disposition='superseded'

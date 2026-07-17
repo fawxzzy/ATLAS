@@ -477,6 +477,37 @@ class OperatorNotificationIdempotencyTests(unittest.TestCase):
         self.assertNotEqual(first["event_id"], changed["event_id"])
         self.assertTrue(result["should_begin_delivery"])
 
+    def test_identical_facts_cannot_claim_a_causal_supersession(self) -> None:
+        first = self.event(event_class="task.false-change")
+        self.claim(first)
+        predecessor_before = self.ledger.record(first["event_id"])
+        false_change = self.event(
+            event_class="task.false-change",
+            supersedes_event_id=first["event_id"],
+            delta={"changed_fact_paths": ["/unrelated"]},
+        )
+        self.assertNotEqual(first["event_id"], false_change["event_id"])
+        self.assertEqual(
+            first["canonical_payload_digest"],
+            false_change["canonical_payload_digest"],
+        )
+        with self.assertRaisesRegex(
+            NotificationContractError, "changed canonical facts"
+        ):
+            self.ledger.claim(
+                false_change,
+                claimant_id="false-change-host",
+                seen_at="2026-07-17T14:00:02Z",
+            )
+        with self.assertRaisesRegex(NotificationContractError, "non-empty"):
+            self.event(
+                event_class="task.false-change",
+                supersedes_event_id=first["event_id"],
+                delta={"changed_fact_paths": []},
+            )
+        self.assertIsNone(self.ledger.record(false_change["event_id"]))
+        self.assertEqual(self.ledger.record(first["event_id"]), predecessor_before)
+
     def test_supersession_is_machine_readable_in_both_records(self) -> None:
         first = self.event()
         self.claim(first)
@@ -1167,26 +1198,124 @@ class OperatorNotificationIdempotencyTests(unittest.TestCase):
             self.ledger.record(event["event_id"])["delivery_state"], "claimed"
         )
 
-    def test_periodic_digest_is_the_only_unlinked_full_snapshot_replay(self) -> None:
-        first = self.event(
-            facts={"digest_day": "2026-07-17", "open_items": 3},
+    def test_periodic_digest_rejects_all_lineage_metadata(self) -> None:
+        historical = self.event(event_class="daily.summary")
+        self.claim(historical)
+        latest = self.event(
+            facts={"status": "blocked", "card_id": "ATLAS-1"},
             event_class="daily.summary",
-            notification_kind="periodic_digest",
+            supersedes_event_id=historical["event_id"],
+            delta={"changed_fact_paths": ["/status"]},
         )
+        self.ledger.claim(
+            latest,
+            claimant_id="latest-host",
+            seen_at="2026-07-17T14:00:02Z",
+        )
+        unrelated = self.event(event_class="task.unrelated-digest")
+        self.ledger.claim(
+            unrelated,
+            claimant_id="unrelated-host",
+            seen_at="2026-07-17T14:00:03Z",
+        )
+        for name, predecessor in (
+            ("latest", latest),
+            ("historical", historical),
+            ("unrelated", unrelated),
+        ):
+            with self.subTest(name=name):
+                with self.assertRaisesRegex(NotificationContractError, "unlinked"):
+                    self.event(
+                        facts={"digest_day": "2026-07-18", "open_items": 2},
+                        event_class="daily.summary",
+                        notification_kind="periodic_digest",
+                        supersedes_event_id=predecessor["event_id"],
+                    )
+        with self.assertRaisesRegex(NotificationContractError, "unlinked"):
+            self.event(
+                facts={"digest_day": "2026-07-18", "open_items": 2},
+                event_class="daily.summary",
+                notification_kind="periodic_digest",
+                supersedes_event_id=latest["event_id"],
+                delta={"changed_fact_paths": ["/open_items"]},
+            )
+        self.assertEqual(
+            self.ledger.record(historical["event_id"])["supersession"][
+                "superseded_by_event_id"
+            ],
+            latest["event_id"],
+        )
+
+    def test_periodic_digest_remains_outside_deliverable_lineage(self) -> None:
+        first = self.event(event_class="daily.summary")
+        self.claim(first)
         second = self.event(
+            facts={"status": "blocked", "card_id": "ATLAS-1"},
+            event_class="daily.summary",
+            supersedes_event_id=first["event_id"],
+            delta={"changed_fact_paths": ["/status"]},
+        )
+        self.ledger.claim(
+            second,
+            claimant_id="lineage-host",
+            seen_at="2026-07-17T14:00:02Z",
+        )
+        digest = self.event(
             facts={"digest_day": "2026-07-18", "open_items": 2},
             event_class="daily.summary",
             notification_kind="periodic_digest",
             created_at="2026-07-18T14:00:00Z",
         )
-        self.claim(first)
         result = self.ledger.claim(
-            second,
+            digest,
             claimant_id="digest-host",
             seen_at="2026-07-18T14:00:01Z",
         )
         self.assertTrue(result["should_begin_delivery"])
-        self.assertIsNone(second["supersedes_event_id"])
+        self.assertEqual(
+            self.ledger.record(first["event_id"])["supersession"][
+                "superseded_by_event_id"
+            ],
+            second["event_id"],
+        )
+        self.assertEqual(
+            self.ledger.record(second["event_id"])["supersession"][
+                "supersedes_event_id"
+            ],
+            first["event_id"],
+        )
+        self.assertEqual(
+            self.ledger.record(digest["event_id"])["supersession"],
+            {
+                "supersedes_event_id": None,
+                "superseded_by_event_id": None,
+                "delta": None,
+            },
+        )
+
+        third = self.event(
+            facts={"status": "ready", "card_id": "ATLAS-1"},
+            event_class="daily.summary",
+            supersedes_event_id=second["event_id"],
+            delta={"changed_fact_paths": ["/status"]},
+        )
+        admitted = self.ledger.claim(
+            third,
+            claimant_id="lineage-host",
+            seen_at="2026-07-18T14:00:02Z",
+        )
+        self.assertTrue(admitted["should_begin_delivery"])
+        self.assertEqual(
+            self.ledger.record(second["event_id"])["supersession"][
+                "superseded_by_event_id"
+            ],
+            third["event_id"],
+        )
+        self.assertIsNone(
+            self.ledger.record(digest["event_id"])["supersession"][
+                "superseded_by_event_id"
+            ]
+        )
 
     def test_payload_body_is_not_retained_in_receive_ledger(self) -> None:
         secret_text = "operator-visible-body-not-for-ledger"
