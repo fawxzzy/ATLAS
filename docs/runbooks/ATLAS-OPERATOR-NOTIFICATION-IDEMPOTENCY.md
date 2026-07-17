@@ -60,9 +60,11 @@ retry without changing `event_id`. `notification_kind` is identity-bearing, so c
 heartbeat into an operator update creates a different ID while same-kind cross-host retries
 remain stable. Changed facts must produce a new event and, after the first event in a
 stream, must name the latest predecessor and changed fact paths. Only an explicit
-`periodic_digest` may establish another unlinked full snapshot. All timestamps must use
-canonical RFC 3339 UTC (`T`, `Z`, and at most six fractional digits). Delta paths exclude
-the empty root pointer and use only RFC 6901 `~0` and `~1` escapes.
+`periodic_digest` may establish another unlinked full snapshot. Heartbeats and
+continuations must not carry `supersedes_event_id` or `delta`; control receipts can never
+supersede a deliverable event. All timestamps must use canonical RFC 3339 UTC (`T`, `Z`,
+and at most six fractional digits). Delta paths exclude the empty root pointer and use only
+RFC 6901 `~0` and `~1` escapes.
 
 ## Provision Once
 
@@ -105,6 +107,10 @@ Interpretation:
   the retry.
 - `duplicate_delivery_unknown`: delivery began but no acknowledgement is durable; emit
   nothing, do not take over, and reconcile against transport acceptance by `event_id`.
+
+`seen_at` is receipt metadata only. Claim acquisition, lease expiry, and lease takeover are
+computed from the ledger's UTC runtime clock while the claim transaction holds its writer
+lock. A caller clock in the past or future must not shorten, extend, or replace a claim.
 
 Do not treat delivery-state changes as new operator notifications. In particular, never
 send a duplicate acknowledgement through the same notification lane.

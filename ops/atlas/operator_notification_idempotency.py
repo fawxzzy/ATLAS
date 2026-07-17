@@ -283,6 +283,12 @@ def build_event(
     normalized_delta = _validate_delta(delta)
     if normalized_delta is not None and supersedes_event_id is None:
         raise NotificationContractError("delta requires supersedes_event_id")
+    if notification_kind in CONTROL_KINDS and (
+        supersedes_event_id is not None or normalized_delta is not None
+    ):
+        raise NotificationContractError(
+            "heartbeat and continuation events cannot supersede notifications"
+        )
     authority = {
         "notification_only": True,
         "repository_execution_authorized": False,
@@ -440,6 +446,18 @@ class NotificationLedger:
         except Exception:
             connection.close()
             raise
+
+    def _ledger_utc_now(self, operation: str) -> datetime:
+        observed = self._clock()
+        if (
+            not isinstance(observed, datetime)
+            or observed.tzinfo is None
+            or observed.utcoffset() != timedelta(0)
+        ):
+            raise LedgerCorruptionError(
+                f"{operation} clock must return a timezone-aware UTC datetime"
+            )
+        return observed
 
     @staticmethod
     def _admit_wal(connection: sqlite3.Connection) -> str:
@@ -687,7 +705,7 @@ class NotificationLedger:
         lease_seconds: int = 300,
     ) -> dict[str, Any]:
         event = validate_event(event)
-        seen = _utc(seen_at, "seen_at")
+        _utc(seen_at, "seen_at")
         if not isinstance(claimant_id, str) or not claimant_id:
             raise NotificationContractError("claimant_id is required")
         if lease_seconds < 1 or lease_seconds > 3600:
@@ -696,6 +714,8 @@ class NotificationLedger:
         connection = self._connect()
         try:
             connection.execute("BEGIN IMMEDIATE")
+            claimed = self._ledger_utc_now("claim")
+            claimed_at = _timestamp(claimed)
             row = connection.execute(
                 "SELECT * FROM notification_events WHERE event_id=?",
                 (event["event_id"],),
@@ -706,7 +726,8 @@ class NotificationLedger:
                     row,
                     event,
                     claimant_digest=claimant_digest,
-                    seen=seen,
+                    claimed=claimed,
+                    claimed_at=claimed_at,
                     seen_at=seen_at,
                     lease_seconds=lease_seconds,
                 )
@@ -716,7 +737,8 @@ class NotificationLedger:
                 connection,
                 event,
                 claimant_digest=claimant_digest,
-                seen=seen,
+                claimed=claimed,
+                claimed_at=claimed_at,
                 seen_at=seen_at,
                 lease_seconds=lease_seconds,
             )
@@ -736,7 +758,8 @@ class NotificationLedger:
         event: Mapping[str, Any],
         *,
         claimant_digest: str,
-        seen: datetime,
+        claimed: datetime,
+        claimed_at: str,
         seen_at: str,
         lease_seconds: int,
     ) -> dict[str, Any]:
@@ -848,10 +871,12 @@ class NotificationLedger:
             if row["claim_expires_at"] is None
             else _utc(row["claim_expires_at"], "claim_expires_at")
         )
-        if expires is not None and expires <= seen:
+        if expires is not None and expires <= claimed:
             generation = row["claim_generation"] + 1
             claim_token = self._claim_token(event["event_id"], generation)
-            claim_expires_at = _timestamp(seen + timedelta(seconds=lease_seconds))
+            claim_expires_at = _timestamp(
+                claimed + timedelta(seconds=lease_seconds)
+            )
             disposition = "retry_claimed"
             connection.execute(
                 """UPDATE notification_events
@@ -867,7 +892,7 @@ class NotificationLedger:
                     disposition,
                     generation,
                     claim_token,
-                    seen_at,
+                    claimed_at,
                     claim_expires_at,
                     claimant_digest,
                     event["event_id"],
@@ -911,7 +936,8 @@ class NotificationLedger:
         event: Mapping[str, Any],
         *,
         claimant_digest: str,
-        seen: datetime,
+        claimed: datetime,
+        claimed_at: str,
         seen_at: str,
         lease_seconds: int,
     ) -> dict[str, Any]:
@@ -966,9 +992,11 @@ class NotificationLedger:
                         "supersession must remain within one source/event-class stream"
                     )
             claim_generation = 1
-            claim_acquired_at = seen_at
+            claim_acquired_at = claimed_at
             claim_token = self._claim_token(event["event_id"], claim_generation)
-            claim_expires_at = _timestamp(seen + timedelta(seconds=lease_seconds))
+            claim_expires_at = _timestamp(
+                claimed + timedelta(seconds=lease_seconds)
+            )
             ack_state = "pending"
             delivery_state = "claimed"
             disposition = "emit_claimed"
@@ -1008,7 +1036,7 @@ class NotificationLedger:
                 ack_state,
             ),
         )
-        if event["supersedes_event_id"] is not None:
+        if kind not in CONTROL_KINDS and event["supersedes_event_id"] is not None:
             connection.execute(
                 """UPDATE notification_events
                    SET superseded_by_event_id=?, disposition='superseded'
@@ -1085,15 +1113,7 @@ class NotificationLedger:
         connection = self._connect()
         try:
             connection.execute("BEGIN IMMEDIATE")
-            started = self._clock()
-            if (
-                not isinstance(started, datetime)
-                or started.tzinfo is None
-                or started.utcoffset() != timedelta(0)
-            ):
-                raise LedgerCorruptionError(
-                    "delivery clock must return a timezone-aware UTC datetime"
-                )
+            started = self._ledger_utc_now("delivery")
             started_at = _timestamp(started)
             row = connection.execute(
                 "SELECT * FROM notification_events WHERE event_id=?", (event_id,)

@@ -63,9 +63,12 @@ event is explicitly typed `periodic_digest`, the receiver requires the changed e
 name the latest stream event in `supersedes_event_id` and provide sorted, unique JSON
 Pointer paths in `delta.changed_fact_paths`. Initial stream events may establish a first
 snapshot. Heartbeats and continuations are control records and never authorize an
-operator-facing message. Timestamps use canonical RFC 3339 UTC with an uppercase `T` and
-`Z`, optional one-to-six digit fractional seconds, and no offset form. JSON Pointer paths
-exclude the empty root pointer and admit `~` only as the RFC 6901 escapes `~0` or `~1`.
+operator-facing message. Control records cannot carry `supersedes_event_id` or `delta`;
+only a validated deliverable event may mark a predecessor superseded, and only within its
+source-thread/event-class stream. Timestamps use canonical RFC 3339 UTC with an uppercase
+`T` and `Z`, optional one-to-six digit fractional seconds, and no offset form. JSON Pointer
+paths exclude the empty root pointer and admit `~` only as the RFC 6901 escapes `~0` or
+`~1`.
 
 ## Atomic Receive Contract
 
@@ -79,8 +82,8 @@ For a new notification event, one transaction:
 2. checks the current stream and supersession relationship;
 3. inserts the immutable identity and version metadata;
 4. creates an opaque claim token plus generation, persists that generation's acquisition
-   timestamp, and computes a microsecond-precise expiry for an operator update or periodic
-   digest;
+   timestamp, and computes a microsecond-precise expiry from the ledger's UTC runtime clock
+   inside the claim transaction for an operator update or periodic digest;
 5. returns `should_begin_delivery=true` to exactly one claimant while keeping
    `should_emit=false` and `operator_message_authorized=false`.
 
@@ -99,7 +102,10 @@ For an existing `event_id`, one transaction increments `duplicate_count`, advanc
 `last_seen`, records exact or semantic duplicate disposition, and returns
 `should_emit=false`. A claim may be reissued only when its lease expires before
 `begin_delivery`; that retry uses a new claim generation and token, fencing the expired
-claimant. The replacement transaction also records the new generation's acquisition time.
+claimant. The replacement transaction also records the new generation's acquisition time
+from the same ledger clock. Caller-supplied `seen_at` is receipt metadata for
+`first_seen`/`last_seen` only; it never establishes acquisition, expiry, or takeover
+eligibility and therefore cannot skew a claim fence.
 Once delivery begins, no lease takeover is automatic. A crash or timeout leaves the
 durable outcome explicitly `UNKNOWN`, sets reconciliation required, and authorizes no retry
 unless the downstream transport proves idempotent acceptance by `event_id` through a

@@ -22,6 +22,8 @@ second notification stream.
   cross-host retries while separating control and operator delivery semantics.
 - Durable `ledger.v2` stores each active generation's acquisition timestamp, captures
   delivery start from its runtime clock, and rejects starts outside the current lease.
+- Claim acquisition and expiry use that ledger clock inside the claim transaction;
+  caller-supplied `seen_at` is retained only as first/last-seen receipt metadata.
 - Claim receipts never authorize transport. Only an atomic, unexpired `begin_delivery`
   transition enters non-stealable `delivery_in_progress` and authorizes one transport call.
 - A transport crash after fencing remains explicit `UNKNOWN` and reconciliation-required;
@@ -29,7 +31,8 @@ second notification stream.
 - Exact and semantic duplicates are recorded without operator-message authorization.
 - Changed facts require supersession and machine-readable delta paths; only typed periodic
   digests may replay an unlinked full snapshot.
-- Heartbeats and continuations are durably suppressed.
+- Heartbeats and continuations are durably suppressed and cannot carry supersession
+  metadata or mark any deliverable event superseded.
 - Payload bodies and transport metadata are not retained in the ledger.
 - Duplicate acknowledgements are stable control receipts with no message or retry authority.
 - Lease expiries retain microsecond precision; timestamps are canonical RFC 3339 UTC; and
@@ -48,6 +51,8 @@ second notification stream.
 - Current-generation acquisition-time fencing across restart.
 - Correlated token/generation acknowledgement stopping retry.
 - Heartbeat and continuation non-replay.
+- Control-kind supersession rejection across same and unrelated streams.
+- Ledger-clock claim acquisition under past/future caller-clock skew and restart.
 - Restart recovery.
 - Corrupt and unknown schema fail-closed behavior.
 - Concurrent duplicate claim with exactly one pre-send delivery candidate.
@@ -62,7 +67,7 @@ Completion values are not inferred from these units. Runtime effectiveness remai
 
 ## Local Verification Snapshot
 
-- Notification contract/ledger suite: 28 passed in each of two final runs on Python 3.12
+- Notification contract/ledger suite: 30 passed in each of two final runs on Python 3.12
   and in each of two final runs on Python 3.13.
 - Native task and board correlation suite: 22 passed in each of two runs.
 - Root QA pipeline suite: 78 passed in each of two runs.

@@ -78,10 +78,13 @@ class OperatorNotificationIdempotencyTests(unittest.TestCase):
         )
 
     def claim(self, event: dict, **kwargs) -> dict:
+        seen_at = kwargs.pop("seen_at", SEEN)
+        clock_at = kwargs.pop("clock_at", seen_at)
+        self.clock_now = datetime.fromisoformat(clock_at[:-1] + "+00:00")
         return self.ledger.claim(
             event,
             claimant_id=kwargs.pop("claimant_id", "host-a"),
-            seen_at=kwargs.pop("seen_at", SEEN),
+            seen_at=seen_at,
             **kwargs,
         )
 
@@ -156,6 +159,9 @@ class OperatorNotificationIdempotencyTests(unittest.TestCase):
     def test_expired_claimant_is_fenced_after_replacement_claim(self) -> None:
         event = self.event()
         original = self.claim(event, lease_seconds=1)
+        self.clock_now = datetime.fromisoformat(
+            "2026-07-17T14:00:02.000001+00:00"
+        )
         replacement = self.ledger.claim(
             event,
             claimant_id="replacement-host",
@@ -210,6 +216,9 @@ class OperatorNotificationIdempotencyTests(unittest.TestCase):
         original = self.claim(event, lease_seconds=1)
         with self.assertRaisesRegex(DeliveryStateError, "fenced delivery"):
             self.acknowledge(event, original)
+        self.clock_now = datetime.fromisoformat(
+            "2026-07-17T14:00:02.000001+00:00"
+        )
         replacement = self.ledger.claim(
             event,
             claimant_id="replacement-host",
@@ -243,6 +252,9 @@ class OperatorNotificationIdempotencyTests(unittest.TestCase):
         self.assertEqual(
             first["claim_expires_at"], "2026-07-17T14:00:01.999999Z"
         )
+        self.clock_now = datetime.fromisoformat(
+            "2026-07-17T14:00:01+00:00"
+        )
         early = self.ledger.claim(
             event,
             claimant_id="early-host",
@@ -250,6 +262,9 @@ class OperatorNotificationIdempotencyTests(unittest.TestCase):
             lease_seconds=1,
         )
         self.assertFalse(early["should_begin_delivery"])
+        self.clock_now = datetime.fromisoformat(
+            "2026-07-17T14:00:01.999999+00:00"
+        )
         retry = self.ledger.claim(
             event,
             claimant_id="on-boundary-host",
@@ -382,6 +397,37 @@ class OperatorNotificationIdempotencyTests(unittest.TestCase):
         )
         self.assertEqual(suppressed["disposition"], "suppressed_control")
         self.assertTrue(admitted["should_begin_delivery"])
+
+    def test_control_events_cannot_supersede_deliverable_events(self) -> None:
+        deliverable = self.event(event_class="task.control-target")
+        claim = self.claim(deliverable)
+        for kind, event_class in (
+            ("heartbeat", "task.control-target"),
+            ("continuation", "task.unrelated-stream"),
+        ):
+            with self.subTest(kind=kind, event_class=event_class):
+                with self.assertRaisesRegex(
+                    NotificationContractError, "cannot supersede"
+                ):
+                    self.event(
+                        facts={"status": "control", "card_id": "ATLAS-1"},
+                        event_class=event_class,
+                        notification_kind=kind,
+                        supersedes_event_id=deliverable["event_id"],
+                        delta={"changed_fact_paths": ["/status"]},
+                    )
+        with self.assertRaisesRegex(NotificationContractError, "cannot supersede"):
+            self.event(
+                event_class="task.control-target",
+                notification_kind="heartbeat",
+                supersedes_event_id=deliverable["event_id"],
+            )
+        self.assertIsNone(
+            self.ledger.record(deliverable["event_id"])["supersession"][
+                "superseded_by_event_id"
+            ]
+        )
+        self.assertTrue(self.begin(deliverable, claim)["operator_message_authorized"])
 
     def test_changed_payload_requires_delta_and_creates_new_event(self) -> None:
         first = self.event()
@@ -650,11 +696,17 @@ class OperatorNotificationIdempotencyTests(unittest.TestCase):
     def test_expired_claim_can_be_retried_exactly_once(self) -> None:
         event = self.event()
         first = self.claim(event, lease_seconds=1)
+        self.clock_now = datetime.fromisoformat(
+            "2026-07-17T14:00:03+00:00"
+        )
         retry = self.ledger.claim(
             event,
             claimant_id="recovery-host",
             seen_at="2026-07-17T14:00:03Z",
             lease_seconds=30,
+        )
+        self.clock_now = datetime.fromisoformat(
+            "2026-07-17T14:00:04+00:00"
         )
         duplicate = self.ledger.claim(
             event,
@@ -671,6 +723,9 @@ class OperatorNotificationIdempotencyTests(unittest.TestCase):
     def test_delivery_start_is_fenced_by_current_claim_acquisition(self) -> None:
         event = self.event(event_class="task.claim-acquisition")
         self.claim(event, lease_seconds=1)
+        self.clock_now = datetime.fromisoformat(
+            "2026-07-17T14:00:03.123456+00:00"
+        )
         replacement = self.ledger.claim(
             event,
             claimant_id="replacement-host",
@@ -709,6 +764,68 @@ class OperatorNotificationIdempotencyTests(unittest.TestCase):
         self.assertTrue(delivery["operator_message_authorized"])
         self.assertEqual(
             delivery["delivery_started_at"], "2026-07-17T14:00:03.123456Z"
+        )
+
+    def test_claim_lease_uses_ledger_clock_not_skewed_seen_at(self) -> None:
+        event = self.event(event_class="task.claim-clock")
+        self.clock_now = datetime.fromisoformat(
+            "2026-07-17T14:00:10.123456+00:00"
+        )
+        initial = self.ledger.claim(
+            event,
+            claimant_id="future-skewed-host",
+            seen_at="2099-07-17T14:00:00Z",
+            lease_seconds=30,
+        )
+        self.assertEqual(initial["claim_acquired_at"], "2026-07-17T14:00:10.123456Z")
+        self.assertEqual(initial["claim_expires_at"], "2026-07-17T14:00:40.123456Z")
+        record = self.ledger.record(event["event_id"])
+        self.assertEqual(record["first_seen"], "2099-07-17T14:00:00Z")
+
+        self.clock_now = datetime.fromisoformat(
+            "2026-07-17T14:00:11.123456+00:00"
+        )
+        restarted = NotificationLedger(
+            self.runtime_root,
+            self.ledger_path,
+            _clock=lambda: self.clock_now,
+        )
+        active = restarted.claim(
+            event,
+            claimant_id="second-future-skewed-host",
+            seen_at="2199-07-17T14:00:00Z",
+            lease_seconds=30,
+        )
+        self.assertFalse(active["should_begin_delivery"])
+        self.assertEqual(
+            restarted.record(event["event_id"])["claim_generation"],
+            initial["claim_generation"],
+        )
+
+        self.clock_now = datetime.fromisoformat(
+            "2026-07-17T14:00:40.123456+00:00"
+        )
+        replacement = restarted.claim(
+            event,
+            claimant_id="past-skewed-host",
+            seen_at="2020-07-17T14:00:00Z",
+            lease_seconds=10,
+        )
+        self.assertTrue(replacement["should_begin_delivery"])
+        self.assertEqual(
+            replacement["claim_generation"], initial["claim_generation"] + 1
+        )
+        self.assertEqual(
+            replacement["claim_acquired_at"], "2026-07-17T14:00:40.123456Z"
+        )
+        self.assertEqual(
+            replacement["claim_expires_at"], "2026-07-17T14:00:50.123456Z"
+        )
+        restarted_record = restarted.record(event["event_id"])
+        self.assertEqual(restarted_record["last_seen"], "2020-07-17T14:00:00Z")
+        self.assertEqual(
+            restarted_record["ledger_schema_version"],
+            "atlas.operator-notification.ledger.v2",
         )
 
     def test_expired_claimant_cannot_backdate_delivery_start(self) -> None:
