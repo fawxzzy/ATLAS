@@ -93,18 +93,20 @@ Read:
 
 ### Runtime placement and activation
 
-- Runtime Activation Readiness: `percentage unset` (fixed `8`-unit denominator)
-- Runtime Correlation Reliability: `percentage unset` (fixed `5`-unit denominator)
-- Operator Surface Adoption: `percentage unset` (fixed `4`-unit denominator)
+- Runtime Activation Readiness: `100%` (`8 / 8`)
+- Runtime Correlation Reliability: `100%` (`5 / 5`)
+- Operator Surface Adoption: `100%` (`4 / 4`)
 
 These three lanes are admitted with fixed binary units in
 `docs/registry/ATLAS-RUNTIME-PLACEMENT-REGISTRY.v1.json` and projected into
-`docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json`. Their percentages
-and completed-unit counts remain `null`. Implementation prose, source presence,
-hosted component health, or this placement contract alone awards no unit. The
-first owner-side packet is `Playbook bootstrap and foreground Observer health
-proof`; the remaining activation order is fixed in the runtime placement
-registry.
+`docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json`. The 2026-07-16
+reconciliation admits only fixed units backed by merged owner changes,
+exact-head CI, accepted bounded proofs, current scheduler readback, and the
+deterministic `_stack` scenario suite. The current stopped/restorable Observer
+state is not running uptime proof. Actual new-logon restoration and sustained
+unattended uptime remain UNKNOWN outside these denominators. The first
+unexecuted activation step is `Cortex event-triggered runtime read-model refresh
+proof`; closing audit and post-preparation development remain gated.
 
 Atlas Contracts Mesh is now complete at `100%` on its fixed eleven-family denominator. KnowledgeCandidate joins the ten previously accepted families after Atlas producer/schema authority, Playbook PR #25's independent candidate-only consumer, exact identity and classified-provenance preservation, deterministic append/replay receipts, fail-closed negative conformance, and zero doctrine mutation all agree. Atlas owns knowledge contract semantics; Playbook consumes them without copying. Candidate admission grants no Rule, Pattern, Failure Mode, story, notes, memory, or doctrine-promotion authority. This terminal child-lane ratchet does not move Atlas Full-System Re-evaluation from `50%` and `1 / 2`, and Marker Integrity remains complete at `51 / 51`.
 

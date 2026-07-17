@@ -63,6 +63,7 @@ ACTIVATION_SEQUENCE = (
     "discordos-interaction-first-reliability-review",
     "owner-export-integration",
 )
+STEP_STATUSES = frozenset({"accepted", "pending", "blocked", "unknown"})
 MARKER_SPECS: dict[str, dict[str, Any]] = {
     "lane-runtime-activation-readiness": {
         "title": "Runtime Activation Readiness",
@@ -348,14 +349,50 @@ def validate_runtime_placement_payloads(
         elif component.get("intended_placement") in PUBLIC_PLACEMENTS:
             issues.append(_issue("runtime-placement-public-hosting-forbidden", f"{registry_path}#components/{component_id}", "Do-not-deploy component must not be assigned public hosting.", placement=component.get("intended_placement")))
 
-    activation_steps = registry.get("activation_sequence")
+    activation_sequence = registry.get("activation_sequence")
+    if activation_sequence != list(ACTIVATION_SEQUENCE):
+        issues.append(
+            _issue(
+                "runtime-placement-activation-sequence",
+                f"{registry_path}#activation_sequence",
+                "The v1 activation_sequence must remain the exact ordered string-ID array.",
+                expected=list(ACTIVATION_SEQUENCE),
+                actual=activation_sequence,
+            )
+        )
+
+    activation_steps = registry.get("activation_steps")
+    expected_selector: str | None = None
     if not isinstance(activation_steps, list):
-        issues.append(_issue("runtime-placement-activation-sequence", f"{registry_path}#activation_sequence", "Activation sequence must be an array."))
+        issues.append(_issue("runtime-placement-activation-steps", f"{registry_path}#activation_steps", "Structured activation_steps must be an array."))
     else:
         ids = [step.get("id") if isinstance(step, dict) else None for step in activation_steps]
         orders = [step.get("order") if isinstance(step, dict) else None for step in activation_steps]
         if ids != list(ACTIVATION_SEQUENCE) or orders != list(range(1, 9)):
-            issues.append(_issue("runtime-placement-activation-sequence", f"{registry_path}#activation_sequence", "Activation sequence must remain exact and ordered.", expected=list(ACTIVATION_SEQUENCE), actual=ids))
+            issues.append(_issue("runtime-placement-activation-steps", f"{registry_path}#activation_steps", "Structured activation steps must map one-to-one and in order to the frozen v1 activation_sequence.", expected=list(ACTIVATION_SEQUENCE), actual=ids))
+        unresolved_seen = False
+        for step_index, step in enumerate(activation_steps):
+            step_path = f"{registry_path}#activation_steps[{step_index}]"
+            if not isinstance(step, dict):
+                issues.append(_issue("runtime-placement-activation-step-shape", step_path, "Activation step must be an object."))
+                unresolved_seen = True
+                continue
+            packet = step.get("packet")
+            status = step.get("status")
+            if not isinstance(packet, str) or not packet.strip():
+                issues.append(_issue("runtime-placement-activation-step-packet", step_path, "Activation step packet must be a non-empty string."))
+            if status not in STEP_STATUSES:
+                issues.append(_issue("runtime-placement-activation-step-status", step_path, "Activation step status must preserve accepted, pending, blocked, or unknown distinctly.", actual=status))
+            if not _non_empty_strings(step.get("evidence_refs")):
+                issues.append(_issue("runtime-placement-activation-step-evidence", step_path, "Activation step must cite non-empty structured evidence refs."))
+
+            if status == "accepted":
+                if unresolved_seen:
+                    issues.append(_issue("runtime-placement-activation-accepted-prefix", step_path, "Accepted activation steps must form a contiguous prefix of the frozen sequence."))
+            else:
+                unresolved_seen = True
+                if expected_selector is None and isinstance(packet, str) and packet.strip():
+                    expected_selector = packet
 
     marker_lanes = registry.get("marker_lanes")
     marker_index = {
@@ -373,10 +410,37 @@ def validate_runtime_placement_payloads(
         unit_ids = [unit.get("id") for unit in marker.get("units", []) if isinstance(unit, dict)]
         if marker.get("title") != spec["title"] or marker.get("denominator") != spec["denominator"] or marker.get("measurement_unit") != spec["measurement_unit"]:
             issues.append(_issue("runtime-placement-marker-contract", marker_path, "Marker title, denominator, or measurement unit drifted.", expected=spec))
-        if marker.get("percentage") is not None or marker.get("completed_units") is not None:
-            issues.append(_issue("runtime-placement-marker-unset", marker_path, "Runtime marker percentage and completed units must remain null until fully admissible proof exists."))
         if unit_ids != list(spec["units"]) or len(unit_ids) != spec["denominator"]:
             issues.append(_issue("runtime-placement-marker-units", marker_path, "Marker units must remain the exact fixed denominator.", expected=list(spec["units"]), actual=unit_ids))
+
+        accepted_units = 0
+        for unit_index, unit in enumerate(marker.get("units", [])):
+            unit_path = f"{marker_path}.units[{unit_index}]"
+            if not isinstance(unit, dict):
+                issues.append(_issue("runtime-placement-marker-unit-shape", unit_path, "Marker unit must be an object."))
+                continue
+            status = unit.get("status")
+            if status not in STEP_STATUSES:
+                issues.append(_issue("runtime-placement-marker-unit-status", unit_path, "Marker unit status must preserve accepted, pending, blocked, or unknown distinctly.", actual=status))
+            if status == "accepted":
+                accepted_units += 1
+            if not _non_empty_strings(unit.get("evidence_refs")):
+                issues.append(_issue("runtime-placement-marker-unit-evidence", unit_path, "Marker unit must cite non-empty evidence refs."))
+
+        expected_completed_units = accepted_units if accepted_units else None
+        expected_percentage = (accepted_units * 100 / spec["denominator"]) if accepted_units else None
+        if marker.get("completed_units") != expected_completed_units or marker.get("percentage") != expected_percentage:
+            issues.append(
+                _issue(
+                    "runtime-placement-marker-calculation",
+                    marker_path,
+                    "Marker completed units and percentage must derive from accepted fixed-denominator units.",
+                    expected_completed_units=expected_completed_units,
+                    expected_percentage=expected_percentage,
+                    actual_completed_units=marker.get("completed_units"),
+                    actual_percentage=marker.get("percentage"),
+                )
+            )
 
         lane = lane_records.get(marker_id)
         lane_path = f"{LANE_REGISTRY_REF.as_posix()}#{marker_id}"
@@ -387,8 +451,11 @@ def validate_runtime_placement_payloads(
         denominator_value = denominator.get("value") if isinstance(denominator, dict) else None
         if lane.get("title") != spec["title"] or lane.get("measurement_unit") != spec["measurement_unit"] or denominator_value != spec["denominator"]:
             issues.append(_issue("runtime-placement-marker-projection", lane_path, "Canonical lane projection conflicts with the runtime marker contract."))
-        if lane.get("percentage") is not None or lane.get("completed_units") is not None:
-            issues.append(_issue("runtime-placement-marker-projection-unset", lane_path, "Canonical runtime lane percentage and completed units must remain null."))
+        if lane.get("percentage") != marker.get("percentage") or lane.get("completed_units") != marker.get("completed_units"):
+            issues.append(_issue("runtime-placement-marker-projection-value", lane_path, "Canonical runtime lane values conflict with the runtime marker contract."))
+        expected_status = "complete" if accepted_units == spec["denominator"] else "candidate"
+        if lane.get("status") != expected_status:
+            issues.append(_issue("runtime-placement-marker-projection-status", lane_path, "Canonical runtime lane status conflicts with accepted marker units.", expected=expected_status, actual=lane.get("status")))
 
     if set(marker_index) != set(MARKER_SPECS):
         issues.append(_issue("runtime-placement-marker-set", f"{registry_path}#marker_lanes", "Runtime placement registry must contain exactly the three admitted marker lanes.", actual=sorted(marker_index)))
@@ -415,10 +482,46 @@ def validate_runtime_placement_payloads(
 
     if "- Atlas Full-System Re-evaluation: `50%`" not in marker_book or "opening gate is accepted at `1 / 2`" not in marker_book:
         issues.append(_issue("runtime-placement-unchanged-marker", str(MARKER_BOOK_REF), "Atlas Full-System Re-evaluation must remain exactly 1/2 and 50%."))
-    for spec in MARKER_SPECS.values():
-        expected_line = f"- {spec['title']}: `percentage unset` (fixed `{spec['denominator']}`-unit denominator)"
+    for marker_id, spec in MARKER_SPECS.items():
+        marker = marker_index.get(marker_id, {})
+        expected_line = f"- {spec['title']}: `{marker.get('percentage')}%` (`{marker.get('completed_units')} / {spec['denominator']}`)"
         if expected_line not in marker_book:
             issues.append(_issue("runtime-placement-marker-book", str(MARKER_BOOK_REF), "Atlas Book runtime marker projection is missing or stale.", expected_line=expected_line))
+
+    resource_observations = registry.get("advisory_resource_observations")
+    if not isinstance(resource_observations, list) or not resource_observations:
+        issues.append(_issue("runtime-placement-resource-observations", registry_path, "Advisory resource observations must be a non-empty array."))
+    else:
+        observation_ids: set[str] = set()
+        for index, observation in enumerate(resource_observations):
+            path = f"{registry_path}#advisory_resource_observations[{index}]"
+            if not isinstance(observation, dict):
+                issues.append(_issue("runtime-placement-resource-observation-shape", path, "Advisory resource observation must be an object."))
+                continue
+            observation_id = observation.get("id")
+            if not isinstance(observation_id, str) or not observation_id.strip() or observation_id in observation_ids:
+                issues.append(_issue("runtime-placement-resource-observation-id", path, "Advisory resource observation id must be non-empty and unique.", actual=observation_id))
+            else:
+                observation_ids.add(observation_id)
+            if observation.get("action") != "observe_only_no_mutation":
+                issues.append(_issue("runtime-placement-resource-observation-authority", path, "Resource observations must remain advisory and non-mutating."))
+            observed_at = observation.get("observed_at")
+            if not isinstance(observed_at, str) or not observed_at.endswith("Z"):
+                issues.append(_issue("runtime-placement-resource-observation-time", path, "Resource observation timestamps must be UTC and end in Z."))
+
+    if not _non_empty_strings(registry.get("current_unknowns")):
+        issues.append(_issue("runtime-placement-current-unknowns", registry_path, "Current UNKNOWNs must be a non-empty string array."))
+
+    if registry.get("next_owner_side_activation_packet") != expected_selector:
+        issues.append(
+            _issue(
+                "runtime-placement-selector",
+                f"{registry_path}#next_owner_side_activation_packet",
+                "Runtime placement selector must name the first unexecuted activation-sequence packet.",
+                expected=expected_selector,
+                actual=registry.get("next_owner_side_activation_packet"),
+            )
+        )
 
     return issues
 

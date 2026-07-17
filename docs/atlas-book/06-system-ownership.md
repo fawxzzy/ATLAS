@@ -1,14 +1,14 @@
 # System Ownership
 
-## 2026-07-15 capability ownership override
+## 2026-07-16 capability ownership override
 
 | Capability | Current owner / boundary |
 |---|---|
 | root governance, marker truth, v1 contracts, accepted receipts | ATLAS root |
 | governed workspace/action routing, operator commands, event normalization | `_stack`; not the Discord writer |
 | doctrine and repo verification | Playbook |
-| private local operator cockpit | Playbook Observer on loopback, when owner-activated |
-| local supervision and logon restore | Lifeline, when owner-activated |
+| private local operator cockpit | Playbook Observer on loopback; foreground proof accepted, currently stopped/restorable |
+| local supervision and logon restore | Lifeline; registered Ready under the root runtime home, with actual new-logon restoration still UNKNOWN |
 | advisory context/routing/synthesis | event-triggered root-owned Cortex artifacts; remote Cortex is not adopted |
 | product and code truth | each owner repository |
 | board/publication/readback mutation | DiscordOS as one logical writer; Fitness direct overlap is debt |
@@ -68,7 +68,7 @@ Foundation owns:
 - its own repo-local implementation and verification truth
 - public presentation without operator action authority
 
-Foundation production returned HTTP 200 on 2026-07-15. It is not the private
+Foundation production returned HTTP 200 on 2026-07-16 America/New_York. It is not the private
 operator cockpit and must not duplicate Playbook Observer.
 
 ## Lifeline Ownership
@@ -78,11 +78,11 @@ Lifeline owns:
 - local supervision, bounded restart, logs, and current-user logon restoration
 - its own repo-local implementation and verification truth
 
-The implementation exists, but the local runtime is currently unavailable:
-dependencies, `dist/cli.js`, retained runtime state, and startup registration are
-absent. ATLAS root may record Lifeline-facing checkpoints, but does not replace
-Lifeline as owner. Activation must place mutable state and logs under
-`runtime/lifeline/playbook-observer`, not inside an owner repository.
+PR #35 is merged at `ca542081`; `LifelineRestoreAtLogon` is enabled and Ready,
+last result `0`, and targets `runtime/lifeline/playbook-observer`. ATLAS root may
+record Lifeline-facing checkpoints, but does not replace Lifeline as owner.
+Actual restoration after a new Windows logon and sustained unattended Observer
+uptime remain UNKNOWN.
 
 ## Playbook Ownership
 
@@ -99,10 +99,10 @@ Playbook does not own:
 - repo-local product proof
 - Discord runtime behavior
 
-Playbook Observer is the intended private local operator cockpit on
-`127.0.0.1:4300`. It is implemented but currently unavailable: no listener is
-present and the current generated CLI entrypoint cannot start because the local
-dependency install is incomplete.
+Playbook Observer is the private local operator cockpit on `127.0.0.1:4300`.
+PR #27 is merged at `8aa912b`; accepted foreground health succeeded with one
+registered repository. The current listener is intentionally stopped/restorable,
+so no running or sustained-uptime claim is carried forward.
 
 ## Cortex Ownership
 

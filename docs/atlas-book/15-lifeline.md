@@ -46,9 +46,9 @@ Lifeline is not:
 
 ## Current Shipped Surfaces
 
-"Shipped" in this section describes implemented Lifeline capability. It does
-not claim that the local runtime is built, registered, or running on this
-machine.
+"Shipped" in this section describes implemented Lifeline capability. Current
+registration and restorable state are stated separately and do not imply that
+the supervised Observer is running.
 
 The current shipped Lifeline surface includes:
 
@@ -76,19 +76,20 @@ Current shipped posture stays local and bounded:
 
 ## Current Local Availability
 
-Read-only probes on 2026-07-15 found Lifeline unavailable locally:
+Merged Lifeline PR `#35` accepts build/doctor, state placement, bounded
+supervised restart, and deterministic restore proof. Read-only probes on
+2026-07-16 found:
 
-- `repos/lifeline/node_modules` is absent
-- `repos/lifeline/dist/cli.js` is absent
-- no Lifeline supervisor or startup state is present
-- no ATLAS/Lifeline Windows scheduled task or service is registered
-- Playbook Observer has no listener on port 4300
+- `LifelineRestoreAtLogon` enabled, `Ready`, and `LastTaskResult=0`
+- the logon action bound to the root runtime home
+  `runtime/lifeline/playbook-observer`
+- Playbook Observer intentionally stopped/restorable, with no listener on port
+  `4300`
 
-The next owner-side activation work is not logon registration. It begins with
-Playbook bootstrap and foreground Observer health proof, then Lifeline build and
-doctor plus a state-placement contract under
-`runtime/lifeline/playbook-observer`. Supervised restart must pass before logon
-restore is registered.
+This is registered/restorable posture, not running/healthy uptime proof. No
+fresh actual later new-logon restoration or sustained unattended uptime was
+observed in this reconciliation; both remain unknown. The next activation
+packet is Cortex read-model refresh, not a Lifeline rerun.
 
 ## Planned Later Surfaces
 

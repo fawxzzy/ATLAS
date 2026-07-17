@@ -1,17 +1,24 @@
 # Restart And Handoff Guide
 
-## 2026-07-15 runtime placement override
+## 2026-07-16 runtime placement reconciliation override
 
-The exact next admitted packet is **Playbook bootstrap and foreground Observer
-health proof**. Use
+The exact next admitted packet is **Cortex event-triggered runtime read-model
+refresh proof**. It is derived as the first non-accepted step in the frozen,
+structured activation sequence; it is not a manually maintained duplicate
+constant. Use
 `docs/registry/ATLAS-RUNTIME-PLACEMENT-REGISTRY.v1.json` and [Runtime
 Placement](16-runtime-placement.md) as current authority.
 
-Do not infer that a local recurring `_stack` worker exists from older poll
-receipts below. Current readback finds no registered local scheduled task or
-active inbox runner. DiscordOS scheduled polling is active in GitHub Actions;
-the future local `_stack` path is exactly one serialized bounded sweep after
-Playbook and Lifeline activation proof.
+Playbook, Lifeline, and `_stack` owner packets are already accepted and must not
+be rerun. The current Observer is intentionally stopped/restorable. The
+registered Lifeline restore task and the single `_stack` bounded sweep are
+ready, and the latest observed sweep succeeded. Do not translate those facts
+into running Observer uptime, actual later new-logon restoration, or sustained
+unattended uptime; those remain unknown until freshly and safely observed.
+
+Do not skip to DiscordOS reliability review, owner-export integration, closing
+audit, or post-preparation development before the selected Cortex refresh proof
+is accepted.
 
 Atlas Full-System Re-evaluation remains `1 / 2` and `50%`, Contracts Mesh
 remains `11 / 11`, and Marker Integrity remains `51 / 51`. Fitness, Mazer, and

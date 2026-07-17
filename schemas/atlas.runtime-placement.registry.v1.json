@@ -13,8 +13,11 @@
     "governance",
     "components",
     "activation_sequence",
+    "activation_steps",
     "do_not_deploy",
     "marker_lanes",
+    "advisory_resource_observations",
+    "current_unknowns",
     "next_owner_side_activation_packet",
     "evidence_refs"
   ],
@@ -90,6 +93,16 @@
       "type": "array",
       "minItems": 8,
       "maxItems": 8,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "activation_steps": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
       "items": {
         "$ref": "#/$defs/activationStep"
       }
@@ -112,8 +125,21 @@
         "$ref": "#/$defs/markerLane"
       }
     },
+    "advisory_resource_observations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/advisoryResourceObservation"
+      }
+    },
+    "current_unknowns": {
+      "$ref": "#/$defs/nonEmptyStringArray"
+    },
     "next_owner_side_activation_packet": {
-      "type": "string",
+      "type": [
+        "string",
+        "null"
+      ],
       "minLength": 1
     },
     "evidence_refs": {
@@ -265,7 +291,10 @@
         "order",
         "id",
         "owner",
-        "admission_proof"
+        "admission_proof",
+        "packet",
+        "status",
+        "evidence_refs"
       ],
       "properties": {
         "order": {
@@ -284,6 +313,21 @@
         "admission_proof": {
           "type": "string",
           "minLength": 1
+        },
+        "packet": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "enum": [
+            "accepted",
+            "pending",
+            "blocked",
+            "unknown"
+          ]
+        },
+        "evidence_refs": {
+          "$ref": "#/$defs/nonEmptyStringArray"
         }
       }
     },
@@ -310,10 +354,19 @@
           "minLength": 1
         },
         "percentage": {
-          "type": "null"
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 100
         },
         "completed_units": {
-          "type": "null"
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
         },
         "denominator": {
           "type": "integer",
@@ -331,7 +384,9 @@
             "additionalProperties": false,
             "required": [
               "id",
-              "title"
+              "title",
+              "status",
+              "evidence_refs"
             ],
             "properties": {
               "id": {
@@ -341,6 +396,17 @@
               "title": {
                 "type": "string",
                 "minLength": 1
+              },
+              "status": {
+                "enum": [
+                  "accepted",
+                  "pending",
+                  "blocked",
+                  "unknown"
+                ]
+              },
+              "evidence_refs": {
+                "$ref": "#/$defs/nonEmptyStringArray"
               }
             }
           }
@@ -348,6 +414,38 @@
         "admission_rule": {
           "type": "string",
           "minLength": 1
+        }
+      }
+    },
+    "advisoryResourceObservation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "observed_at",
+        "observation",
+        "owner",
+        "action"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "observed_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "observation": {
+          "type": "string",
+          "minLength": 1
+        },
+        "owner": {
+          "type": "string",
+          "minLength": 1
+        },
+        "action": {
+          "const": "observe_only_no_mutation"
         }
       }
     }

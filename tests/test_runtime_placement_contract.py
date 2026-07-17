@@ -61,12 +61,28 @@ class RuntimePlacementContractTests(unittest.TestCase):
     def test_canonical_contract_is_valid(self) -> None:
         self.assertEqual([], contract.validate_contract_files(root=ROOT))
 
-    def test_percentage_must_remain_unset(self) -> None:
+    def test_percentage_must_match_accepted_fixed_denominator_units(self) -> None:
         registry, lane_registry, marker_book = _payloads()
         mutated = copy.deepcopy(registry)
         mutated["marker_lanes"][0]["percentage"] = 0
         issues = contract.validate_runtime_placement_payloads(mutated, lane_registry, marker_book, root=ROOT)
-        self.assertIn("runtime-placement-marker-unset", {issue.category for issue in issues})
+        self.assertIn("runtime-placement-marker-calculation", {issue.category for issue in issues})
+
+    def test_unknown_unit_cannot_remain_counted_as_accepted(self) -> None:
+        registry, lane_registry, marker_book = _payloads()
+        mutated = copy.deepcopy(registry)
+        mutated["marker_lanes"][0]["units"][0]["status"] = "unknown"
+        issues = contract.validate_runtime_placement_payloads(mutated, lane_registry, marker_book, root=ROOT)
+        self.assertIn("runtime-placement-marker-calculation", {issue.category for issue in issues})
+
+    def test_blocked_marker_unit_remains_distinct_and_unaccepted(self) -> None:
+        registry, lane_registry, marker_book = _payloads()
+        mutated = copy.deepcopy(registry)
+        mutated["marker_lanes"][0]["units"][0]["status"] = "blocked"
+        semantic_issues = contract.validate_runtime_placement_payloads(mutated, lane_registry, marker_book, root=ROOT)
+        self.assertNotIn("runtime-placement-marker-unit-status", {issue.category for issue in semantic_issues})
+        self.assertIn("runtime-placement-marker-calculation", {issue.category for issue in semantic_issues})
+        self.assertEqual([], contract.validate_registry_schema_contract(mutated, _schema()))
 
     def test_fixed_denominator_must_match_units(self) -> None:
         registry, lane_registry, marker_book = _payloads()
@@ -92,6 +108,57 @@ class RuntimePlacementContractTests(unittest.TestCase):
         )
         issues = contract.validate_runtime_placement_payloads(mutated, lane_registry, marker_book, root=ROOT)
         self.assertIn("runtime-placement-activation-sequence", {issue.category for issue in issues})
+
+    def test_v1_activation_sequence_remains_an_ordered_string_id_array(self) -> None:
+        registry, _lane_registry, _marker_book = _payloads()
+
+        self.assertEqual(list(contract.ACTIVATION_SEQUENCE), registry["activation_sequence"])
+        self.assertTrue(all(isinstance(step_id, str) for step_id in registry["activation_sequence"]))
+        self.assertEqual([], contract.validate_registry_schema_contract(registry, _schema()))
+
+    def test_structured_activation_steps_map_one_to_one_to_v1_sequence(self) -> None:
+        registry, lane_registry, marker_book = _payloads()
+        mutations = {
+            "missing": lambda steps: steps.pop(),
+            "duplicate": lambda steps: steps.__setitem__(1, copy.deepcopy(steps[0])),
+            "reordered": lambda steps: steps.__setitem__(slice(0, 2), [steps[1], steps[0]]),
+        }
+
+        for name, mutate in mutations.items():
+            with self.subTest(name=name):
+                mutated = copy.deepcopy(registry)
+                mutate(mutated["activation_steps"])
+                issues = contract.validate_runtime_placement_payloads(mutated, lane_registry, marker_book, root=ROOT)
+                self.assertIn("runtime-placement-activation-steps", {issue.category for issue in issues})
+
+    def test_selector_must_name_the_first_unexecuted_packet(self) -> None:
+        registry, lane_registry, marker_book = _payloads()
+        mutated = copy.deepcopy(registry)
+        mutated["next_owner_side_activation_packet"] = "Playbook bootstrap and foreground Observer health proof"
+        issues = contract.validate_runtime_placement_payloads(mutated, lane_registry, marker_book, root=ROOT)
+        self.assertIn("runtime-placement-selector", {issue.category for issue in issues})
+
+    def test_selector_advances_when_current_step_becomes_accepted(self) -> None:
+        registry, lane_registry, marker_book = _payloads()
+        mutated = copy.deepcopy(registry)
+        selected_index = next(
+            index
+            for index, step in enumerate(mutated["activation_steps"])
+            if step["packet"] == mutated["next_owner_side_activation_packet"]
+        )
+        mutated["activation_steps"][selected_index]["status"] = "accepted"
+        mutated["next_owner_side_activation_packet"] = mutated["activation_steps"][selected_index + 1]["packet"]
+
+        issues = contract.validate_runtime_placement_payloads(mutated, lane_registry, marker_book, root=ROOT)
+
+        self.assertEqual([], issues)
+
+    def test_resource_observations_cannot_grant_mutation_authority(self) -> None:
+        registry, lane_registry, marker_book = _payloads()
+        mutated = copy.deepcopy(registry)
+        mutated["advisory_resource_observations"][0]["action"] = "cleanup"
+        issues = contract.validate_runtime_placement_payloads(mutated, lane_registry, marker_book, root=ROOT)
+        self.assertIn("runtime-placement-resource-observation-authority", {issue.category for issue in issues})
 
     def test_schema_only_required_governance_violation_is_rejected(self) -> None:
         registry, lane_registry, marker_book = _payloads()
@@ -160,7 +227,7 @@ class RuntimePlacementContractTests(unittest.TestCase):
         }
         self.assertIn("repos/foundation/vercel.json", missing_refs)
 
-    def test_present_runtime_surface_with_missing_evidence_path_fails(self) -> None:
+    def test_present_runtime_surface_does_not_require_ignored_generated_evidence(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             source_only_root = Path(temp_dir)
             _write_source_only_contract_root(source_only_root)
@@ -168,12 +235,7 @@ class RuntimePlacementContractTests(unittest.TestCase):
 
             issues = contract.validate_contract_files(root=source_only_root)
 
-        missing_refs = {
-            issue.details.get("evidence_ref")
-            for issue in issues
-            if issue.category == "runtime-placement-evidence-missing" and issue.details
-        }
-        self.assertIn("runtime/cortex/current-state/latest.json", missing_refs)
+        self.assertEqual([], issues)
 
     def test_missing_committed_root_owned_evidence_ref_fails(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

@@ -190,16 +190,22 @@ The stack should reject these seam failures:
 
 ## Runtime Activation Sequence
 
-The next safe moves are owner-side and serialized:
+Activation status is structured in the runtime-placement registry. Accepted
+steps form a contiguous prefix; the selector is derived as the first step whose
+status is not `accepted`. Prose does not close a step, and `pending`, `blocked`,
+and `unknown` remain distinct.
 
-1. Playbook bootstrap and foreground Observer health proof.
-2. Lifeline bootstrap and root-runtime state contract.
-3. supervised restart proof.
-4. current-user logon restore proof.
-5. exactly one bounded `_stack` scheduled worker proof.
-6. one event-triggered Cortex refresh.
-7. DiscordOS interaction-first reliability review.
-8. owner export integration.
+Current frozen sequence:
+
+1. Playbook bootstrap and foreground Observer health proof — accepted.
+2. Lifeline bootstrap and root-runtime state contract — accepted.
+3. supervised restart proof — accepted.
+4. current-user logon restore proof — accepted from deterministic owner proof;
+   an actual later new-logon restoration remains unknown.
+5. exactly one bounded `_stack` scheduled worker proof — accepted.
+6. one event-triggered Cortex refresh — pending and currently selected.
+7. DiscordOS interaction-first reliability review — pending.
+8. owner export integration — pending.
 
 None of these steps authorizes a production deployment or public hosting for a
 local/private surface.

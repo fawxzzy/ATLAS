@@ -1,11 +1,11 @@
 # Current State
 
-## 2026-07-15 runtime placement override
+## 2026-07-16 runtime placement reconciliation override
 
-- Foundation is available as the hosted read-only portfolio; DiscordOS is operational as the hosted Vercel/Supabase/GitHub Actions API and logical writer.
-- Playbook Observer is unavailable on `127.0.0.1:4300`; Lifeline is unbuilt/unregistered; no local `_stack` scheduled worker is registered; principal Cortex `latest` read models remain dated 2026-07-06.
-- The exact next owner-side activation packet is `Playbook bootstrap and foreground Observer health proof`, followed by the fixed sequence in `docs/registry/ATLAS-RUNTIME-PLACEMENT-REGISTRY.v1.json`.
-- Runtime Activation Readiness, Runtime Correlation Reliability, and Operator Surface Adoption have fixed `8`, `5`, and `4` unit denominators respectively, with percentage and completed units unset.
+- Foundation is available as the hosted read-only portfolio; DiscordOS is operational as the hosted Vercel/Supabase/GitHub Actions API and logical writer. Read-only probes returned HTTP 200 on 2026-07-16 America/New_York.
+- Playbook PR #27, Lifeline PR #35, and `_stack` PR #9 are merged. The foreground Observer proof succeeded on `127.0.0.1:4300`, the current Observer is intentionally stopped/restorable, `LifelineRestoreAtLogon` is enabled/Ready with last result `0`, and `AtlasStackInboxSweep` is enabled/Ready on `PT5M` with a latest successful zero-work sweep and released lease.
+- The exact next activation packet is `Cortex event-triggered runtime read-model refresh proof`. Principal Cortex `latest` current-state, context, and operator artifacts remain dated 2026-07-06; Creation OS PR #134 is separate merged advisory history and is not reopened.
+- Runtime Activation Readiness, Runtime Correlation Reliability, and Operator Surface Adoption are `100%` at exact fixed denominators `8 / 8`, `5 / 5`, and `4 / 4`. Actual new-logon restoration and sustained unattended Observer uptime remain UNKNOWN and are not marker units.
 - Atlas Contracts Mesh remains `11 / 11`, Atlas Full-System Re-evaluation remains `1 / 2` and `50%`, and Marker Integrity remains `51 / 51`.
 
 ## Snapshot
