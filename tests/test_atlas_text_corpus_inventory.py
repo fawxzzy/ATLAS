@@ -4,6 +4,7 @@ import copy
 import hashlib
 import json
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -481,6 +482,28 @@ class AtlasTextCorpusInventoryTests(unittest.TestCase):
         for document in [*components, index]:
             self.assertEqual([], inventory.validate_document(document, self.schema))
         self.assertEqual([], inventory.validate_cross_document(index, components))
+        reason_pattern = self.schema["$defs"]["counts"]["properties"]["exclusion_reasons"]["oneOf"][0]["propertyNames"]["pattern"]
+        self.assertEqual(r"^[A-Z][A-Z0-9_]*$", reason_pattern)
+        reason_maps = [component["counts"]["exclusion_reasons"] for component in components]
+        reason_maps.append(index["aggregate"]["counts"]["exclusion_reasons"])
+        for reasons in reason_maps:
+            for reason in reasons:
+                with self.subTest(reason=reason):
+                    self.assertIsNotNone(re.fullmatch(reason_pattern, reason))
+        for invalid_reason in ("invalid-key", "lowercase", "_LEADING_UNDERSCORE", "1LEADING_DIGIT"):
+            with self.subTest(invalid_reason=invalid_reason):
+                self.assertIsNone(re.fullmatch(reason_pattern, invalid_reason))
+        try:
+            from jsonschema import Draft202012Validator
+        except ImportError:
+            Draft202012Validator = None
+        if Draft202012Validator is not None:
+            validator = Draft202012Validator(self.schema)
+            for document in [*components, index]:
+                self.assertEqual([], list(validator.iter_errors(document)))
+            invalid_component = copy.deepcopy(components[0])
+            invalid_component["counts"]["exclusion_reasons"]["invalid-key"] = 1
+            self.assertTrue(list(validator.iter_errors(invalid_component)))
         malformed_index = copy.deepcopy(index)
         malformed_index["aggregate"]["counts"]["total"] = 0
         errors = inventory.validate_document(malformed_index, self.schema)

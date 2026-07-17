@@ -30,6 +30,7 @@ UNKNOWN_REASON_CODES = frozenset({"SOURCE_PATH_UNAVAILABLE"})
 
 SHA256_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$")
 GIT_OID_PATTERN = re.compile(r"^(?:[0-9a-f]{40}|[0-9a-f]{64})$")
+REASON_CODE_PATTERN = re.compile(r"^[A-Z][A-Z0-9_]*$")
 
 SCHEMA_PATH = Path("schemas/atlas.text-corpus.inventory.v1.json")
 INDEX_PATH = Path("docs/registry/text-corpus/ATLAS-TEXT-CORPUS-INDEX.v1.json")
@@ -579,7 +580,7 @@ def counts_are_concrete(counts: Any) -> bool:
     reasons = counts.get("exclusion_reasons")
     return isinstance(reasons, dict) and all(
         isinstance(key, str)
-        and re.fullmatch(r"[A-Z0-9_]+", key) is not None
+        and REASON_CODE_PATTERN.fullmatch(key) is not None
         and not isinstance(value, bool)
         and isinstance(value, int)
         and value >= 1

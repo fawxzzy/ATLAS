@@ -27,6 +27,7 @@ The implementation began from the exact merged Atlas base on a clean, detached, 
 - Repository and output paths are resolved before containment or hashing. Every materialized path must remain beneath the resolved selected output root, even when an in-workspace symlink or junction redirects a descendant. Absolute paths, traversal, ambiguous real roots, duplicate identities, object/digest mismatches, malformed records, and resolved-path escapes are rejected.
 - An unavailable admitted source remains `UNKNOWN`; its denominator and aggregate digest are not rewritten as zero, absent, or healthy.
 - Availability evidence is bidirectionally coupled in component shards and index summaries: unavailable sources retain an `UNKNOWN` tree, counts, and digest plus a canonical reason, while available sources retain concrete evidence and a null unknown reason.
+- Exclusion-reason maps use canonical uppercase reason codes, and the schema validates those keys identically under both fallback and full Draft 2020-12 validation environments.
 - Playbook remains doctrine owner. Atlas remains inventory/adoption owner. Authority widening and marker movement are both false.
 
 ## Inventory result
@@ -58,6 +59,7 @@ The availability-coupling hardening adds `unknown_reason: null` to each availabl
 ## Verification evidence
 
 - Focused suite: 24 tests passed. Deterministic non-skipped regressions cover replacement-ref suppression, missing promised-object failure without source mutation, in-workspace output-root escape, plain and dot-prefixed protected secret/credential/token filenames across all supported configuration extensions before blob reads, unavailable aggregate counts remaining wholly `UNKNOWN`, bidirectional component/index availability coupling, and cross-platform resolved-path escape. The optional Python symlink test skipped because this Windows runtime lacks symlink privilege; an independent real Windows junction proof passed and cleaned up both endpoints.
+- Full Draft 2020-12 proof: the same 24-test suite passed with a temporary `jsonschema` 4.26.0 dependency lane, including generated-document acceptance and invalid exclusion-reason key rejection; the dependency lane was removed after the run.
 - Large-corpus transport regression: 256 blobs larger than the OS pipe buffers completed within the test timeout. The reader interleaves each Git object request and response.
 - Source-only check mode regenerated both pinned inventories and matched every committed output byte.
 - Two independent staging runs produced byte-identical output files and the same aggregate digest; both staging trees were removed.
