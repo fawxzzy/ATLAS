@@ -35,5 +35,7 @@ ops/atlas/test_project_board_owner_export.py text eol=lf
 packages/atlas-contracts/README.md text eol=lf
 packages/atlas-contracts/schemas/atlas.project-board.owner-export.v1.schema.json text eol=lf
 packages/atlas-contracts/scripts/lib/validate-project-board-owner-export.mjs text eol=lf
+packages/atlas-contracts/scripts/lib/validate-semantics.mjs text eol=lf
 packages/atlas-contracts/scripts/test-validate-artifact.mjs text eol=lf
+packages/atlas-contracts/scripts/validate-artifact.mjs text eol=lf
 tests/test_runtime_placement_contract.py text eol=lf

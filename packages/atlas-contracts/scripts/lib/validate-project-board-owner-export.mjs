@@ -1,5 +1,40 @@
 import path from "node:path";
 
+const FROZEN_RUNTIME_MARKER_IDENTITIES = Object.freeze([
+  Object.freeze({
+    id: "lane-runtime-activation-readiness",
+    unitIds: Object.freeze([
+      "placement-contract",
+      "playbook-build",
+      "observer-foreground-health",
+      "lifeline-build-doctor",
+      "lifeline-state-placement",
+      "lifeline-supervision-restart",
+      "logon-restore",
+      "stack-single-worker-proof",
+    ]),
+  }),
+  Object.freeze({
+    id: "lane-runtime-correlation-reliability",
+    unitIds: Object.freeze([
+      "successful-task",
+      "failed-task",
+      "duplicate-task",
+      "interrupted-restarted-task",
+      "stale-receipt-rejection",
+    ]),
+  }),
+  Object.freeze({
+    id: "lane-operator-surface-adoption",
+    unitIds: Object.freeze([
+      "foundation-portfolio",
+      "playbook-operations",
+      "atlas-book-doctrine",
+      "stack-action-routing",
+    ]),
+  }),
+]);
+
 function uniqueDuplicates(values) {
   const seen = new Set();
   const duplicates = new Set();
@@ -30,7 +65,28 @@ function requireRelationship(errors, card, field, expectedStatus) {
   }
 }
 
-function validateRuntimeReadback(errors, value, sourceIdSet) {
+function sameJson(left, right) {
+  return JSON.stringify(left) === JSON.stringify(right);
+}
+
+function projectRuntimeMarkers(markers) {
+  return (Array.isArray(markers) ? markers : []).map((marker) => ({
+    id: marker.id,
+    title: marker.title,
+    percentage: marker.percentage ?? null,
+    completed_units: marker.completed_units ?? null,
+    denominator: marker.denominator,
+    measurement_unit: marker.measurement_unit,
+    units: (Array.isArray(marker.units) ? marker.units : []).map((unit) => ({
+      id: unit.id,
+      title: unit.title,
+      status: unit.status,
+      evidence_refs: unit.evidence_refs,
+    })),
+  }));
+}
+
+function validateRuntimeReadback(errors, value, sourceIdSet, context) {
   const readback = value.runtime_readback;
   const hasRuntimeSource = sourceIdSet.has("atlas-runtime-placement-registry");
   if (!readback) {
@@ -91,8 +147,18 @@ function validateRuntimeReadback(errors, value, sourceIdSet) {
       errors.push(`$.runtime_readback.status_boundaries.${status} must exactly match activation step status`);
     }
   }
+  if (!sameJson(boundaries.stale ?? [], [])) {
+    errors.push("$.runtime_readback.status_boundaries.stale must exactly match the canonical empty stale boundary");
+  }
 
   const markers = Array.isArray(readback.marker_lanes) ? readback.marker_lanes : [];
+  const markerIdentities = markers.map((marker) => ({
+    id: marker.id,
+    unitIds: (Array.isArray(marker.units) ? marker.units : []).map((unit) => unit.id),
+  }));
+  if (!sameJson(markerIdentities, FROZEN_RUNTIME_MARKER_IDENTITIES)) {
+    errors.push("$.runtime_readback.marker_lanes must preserve the exact frozen marker and ordered unit identities");
+  }
   for (const duplicate of uniqueDuplicates(markers.map((marker) => marker.id))) {
     errors.push(`$.runtime_readback.marker_lanes contains duplicate id ${JSON.stringify(duplicate)}`);
   }
@@ -113,9 +179,35 @@ function validateRuntimeReadback(errors, value, sourceIdSet) {
       errors.push(`$.runtime_readback.marker_lanes[${markerIndex}] counts must derive from accepted units`);
     }
   });
+
+  const runtimeRegistry = context.runtimeSource;
+  if (!runtimeRegistry) {
+    errors.push(
+      `$.runtime_readback runtime source projection is unavailable: ${context.runtimeSourceError ?? "no source context"}`,
+    );
+    return;
+  }
+  if (context.runtimeSourceRevision !== readback.source_revision) {
+    errors.push("$.runtime_readback.source_revision must match the normalized runtime source bytes");
+  }
+  if (!sameJson(readback.activation_sequence, runtimeRegistry.activation_sequence)) {
+    errors.push("$.runtime_readback.activation_sequence must exactly match the runtime source projection");
+  }
+  if (!sameJson(readback.activation_steps, runtimeRegistry.activation_steps)) {
+    errors.push("$.runtime_readback.activation_steps must exactly match the runtime source projection");
+  }
+  if (readback.selector !== runtimeRegistry.next_owner_side_activation_packet) {
+    errors.push("$.runtime_readback.selector must exactly match the runtime source projection");
+  }
+  if (!sameJson(markers, projectRuntimeMarkers(runtimeRegistry.marker_lanes))) {
+    errors.push("$.runtime_readback.marker_lanes must exactly match the runtime source projection");
+  }
+  if (!sameJson(boundaries.unknown ?? [], runtimeRegistry.current_unknowns ?? [])) {
+    errors.push("$.runtime_readback.status_boundaries.unknown must exactly match the runtime source projection");
+  }
 }
 
-export function validateProjectBoardOwnerExport(value) {
+export function validateProjectBoardOwnerExport(value, context = {}) {
   if (!value || typeof value !== "object" || Array.isArray(value)) return [];
 
   const errors = [];
@@ -132,7 +224,7 @@ export function validateProjectBoardOwnerExport(value) {
       errors.push(`$.sources[${index}].path must be an ATLAS-relative portable path`);
     }
   });
-  validateRuntimeReadback(errors, value, sourceIdSet);
+  validateRuntimeReadback(errors, value, sourceIdSet, context);
 
   const indexedCards = cards.map((card, index) => ({ ...card, index }));
   for (const duplicate of uniqueDuplicates(indexedCards.map((card) => card.record?.card_id))) {

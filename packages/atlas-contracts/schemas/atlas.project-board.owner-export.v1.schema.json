@@ -99,7 +99,7 @@
             "unknown": {"type": "array", "items": {"type": "string", "minLength": 1}},
             "pending": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
             "blocked": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
-            "stale": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true}
+            "stale": {"type": "array", "maxItems": 0, "items": {"type": "string", "minLength": 1}, "uniqueItems": true}
           }
         },
         "discord_mutation_authorized": {"const": false}

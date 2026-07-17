@@ -4,6 +4,6 @@ const semanticValidators = Object.freeze({
   "atlas.project-board.owner-export.v1": validateProjectBoardOwnerExport,
 });
 
-export function validateContractSemantics(contractId, value) {
-  return semanticValidators[contractId]?.(value) ?? [];
+export function validateContractSemantics(contractId, value, context = {}) {
+  return semanticValidators[contractId]?.(value, context) ?? [];
 }
