@@ -10,6 +10,7 @@
   "event_sequence": 1,
   "card_version": 1,
   "idempotency_key": "projection:ATLAS-BOARD-000:1:discordos",
+  "payload_digest": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
   "availability": "unavailable",
   "state": "applied",
   "attempt_count": 1,

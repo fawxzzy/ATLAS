@@ -27,6 +27,7 @@
   "resulting_record_digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
   "changes": {
     "set": {
+      "epoch_id": "atlas-board-000-epoch-1",
       "title": "Freeze the v3 board authority contract",
       "description": "Additive contract and registration packet only.",
       "card_type": "governance",

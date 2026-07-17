@@ -83,6 +83,7 @@ export function validateCardEventV3(event) {
   }
   if (isInitial) {
     const requiredInitialFields = [
+      "epoch_id",
       "title",
       "description",
       "card_type",
@@ -101,6 +102,9 @@ export function validateCardEventV3(event) {
     if (event.changes.transition?.from !== null || event.changes.transition?.to !== event.changes.set.lifecycle) {
       errors.push("Initial create/import transition must move from null to the materialized lifecycle");
     }
+  }
+  if (event.changes.set.epoch_id !== undefined && event.changes.set.epoch_id !== event.epoch_id) {
+    errors.push("$.changes.set.epoch_id must equal $.epoch_id");
   }
   const changes = event.changes;
   const hasChange = isNonEmptyObject(changes.set)
@@ -197,6 +201,27 @@ export function validateProjectionAckV1(ack) {
   return errors;
 }
 
+export function validateProjectionAckAgainstDelivery(ack, delivery) {
+  const errors = [];
+  const correlatedFields = [
+    ["delivery_id", "delivery_id"],
+    ["card_id", "card_id"],
+    ["project_id", "project_id"],
+    ["board_id", "board_id"],
+    ["event_id", "event_id"],
+    ["event_sequence", "event_sequence"],
+    ["card_version", "card_version"],
+    ["idempotency_key", "idempotency_key"],
+    ["payload_digest", "payload_digest"],
+  ];
+  for (const [ackField, deliveryField] of correlatedFields) {
+    if (ack[ackField] !== delivery[deliveryField]) {
+      errors.push(`ProjectionAck $.${ackField} must equal ProjectionDelivery $.${deliveryField}`);
+    }
+  }
+  return errors;
+}
+
 export function validateBoardAuthorityMigrationV1(migration) {
   const errors = [];
   if (!sameArray(migration.target_contracts, TARGET_CONTRACTS)) {
@@ -254,6 +279,52 @@ export function validateBoardAuthorityMigrationV1(migration) {
   if (migration.phase === "planned" && migration.cutover.status !== "held") {
     errors.push("Planned migration must keep cutover held");
   }
+  if (["imported", "verified"].includes(baselineImport.status)
+    && baselineImport.source_snapshot_digest !== migration.v2_authority_snapshot.digest) {
+    errors.push("One-time import source digest must equal the available v2 authority snapshot digest");
+  }
+  const phaseRequirements = {
+    planned: {
+      importStatuses: ["not-started"],
+      accepted: false,
+      rollback: "v2-authority-allowed",
+      cutover: ["held"],
+    },
+    "baseline-imported": {
+      importStatuses: ["imported", "verified"],
+      accepted: false,
+      rollback: "v2-authority-allowed",
+      cutover: ["held"],
+    },
+    "v3-acceptance-open": {
+      importStatuses: ["verified"],
+      accepted: false,
+      rollback: "v2-authority-allowed",
+      cutover: ["ready"],
+    },
+    "v3-active": {
+      importStatuses: ["verified"],
+      accepted: true,
+      rollback: "v3-restore-replay-only",
+      cutover: ["active"],
+    },
+    "rolled-back-v3": {
+      importStatuses: ["verified"],
+      accepted: true,
+      rollback: "v3-restore-replay-only",
+      cutover: ["rolled-back-v3"],
+    },
+  };
+  const required = phaseRequirements[migration.phase];
+  if (!required.importStatuses.includes(baselineImport.status)
+    || required.accepted !== accepted
+    || required.rollback !== migration.rollback.current_mode
+    || !required.cutover.includes(migration.cutover.status)) {
+    errors.push(`Migration phase ${migration.phase} is inconsistent with import, acceptance, rollback, or cutover state`);
+  }
+  if (migration.phase !== "planned" && migration.v2_authority_snapshot.status !== "available") {
+    errors.push(`Migration phase ${migration.phase} requires an available v2 authority snapshot`);
+  }
   return errors;
 }
 
@@ -302,13 +373,15 @@ export function validateRolloverManifestV1(manifest) {
   }
   const archiveState = manifest.archive_gate.predecessor_epoch_archive;
   if (archiveState === "eligible" || archiveState === "archived") {
-    if (manifest.successor_reconstruction.status !== "verified"
+    if (manifest.predecessor_epoch.status !== "terminal"
+      || manifest.receipt_digests.length === 0
+      || manifest.successor_reconstruction.status !== "verified"
       || manifest.successor_reconstruction.exact_readback !== "verified"
       || manifest.successor_reconstruction.reconstructed_at === null
       || manifest.successor_epoch.status !== "reconstructed"
       || !manifest.archive_gate.successor_continuity_verified
       || !manifest.archive_gate.exact_readback_verified) {
-      errors.push("Bounded predecessor epoch cannot archive before verified successor reconstruction, continuity, and exact readback");
+      errors.push("Bounded predecessor epoch cannot archive before terminal receipt evidence, verified successor reconstruction, continuity, and exact readback");
     }
   }
   return errors;

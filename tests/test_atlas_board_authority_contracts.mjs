@@ -55,16 +55,22 @@ function isProtectedPath(ref) {
 const baseHead = git("rev-parse", BASE);
 assert.equal(baseHead, BASE, "exact ATLAS-BOARD-000 base must be available");
 
-const entries = git("ls-tree", "-r", BASE)
-  .split("\n")
-  .map((line) => {
-    const match = line.match(/^\d+\s+blob\s+([0-9a-f]{40})\t(.+)$/);
-    return match ? { blob: match[1], ref: match[2] } : null;
-  })
-  .filter((entry) => entry && isProtectedPath(entry.ref))
-  .sort((left, right) => Buffer.compare(Buffer.from(left.ref), Buffer.from(right.ref)));
+function protectedEntries(treeish) {
+  return git("ls-tree", "-r", treeish)
+    .split("\n")
+    .map((line) => {
+      const match = line.match(/^\d+\s+blob\s+([0-9a-f]{40})\t(.+)$/);
+      return match ? { blob: match[1], ref: match[2] } : null;
+    })
+    .filter((entry) => entry && isProtectedPath(entry.ref))
+    .sort((left, right) => Buffer.compare(Buffer.from(left.ref), Buffer.from(right.ref)));
+}
+
+const entries = protectedEntries(BASE);
+const headEntries = protectedEntries("HEAD");
 
 assert.equal(entries.length, 63, "protected v2/historical/native path count must remain frozen");
+assert.deepEqual(headEntries, entries, "HEAD protected v2/historical/native path set and blobs must equal the exact baseline");
 const pathInput = `${entries.map((entry) => entry.ref).join("\n")}\n`;
 const treeInput = `${entries.map((entry) => `${entry.blob} ${entry.ref}`).join("\n")}\n`;
 assert.equal(sha256(pathInput), EXPECTED_PATH_SET_DIGEST);

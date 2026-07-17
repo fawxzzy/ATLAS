@@ -24,6 +24,7 @@
   "resulting_record_digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
   "changes": {
     "set": {
+      "epoch_id": "atlas-board-000-epoch-1",
       "title": "Invalid CAS version",
       "description": "All initial materialization fields are present; the CAS version is invalid.",
       "card_type": "governance",

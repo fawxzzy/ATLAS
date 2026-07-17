@@ -11,6 +11,7 @@ import { validateContractSemantics } from "./lib/validate-semantics.mjs";
 import {
   COMMIT_CLOSURE_ORDER,
   TARGET_CONTRACTS,
+  validateProjectionAckAgainstDelivery,
 } from "./lib/validate-board-authority.mjs";
 
 const contractIds = Object.freeze([
@@ -82,8 +83,61 @@ assert.equal(delivery.event_id, event.event_id);
 assert.equal(delivery.event_sequence, event.event_sequence);
 assert.equal(ack.delivery_id, delivery.delivery_id);
 assert.equal(ack.event_id, event.event_id);
+assert.equal(ack.payload_digest, delivery.payload_digest);
+assert.deepEqual(validateProjectionAckAgainstDelivery(ack, delivery), []);
+const mismatchedAck = structuredClone(ack);
+mismatchedAck.payload_digest = "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+assert.deepEqual(validateProjectionAckAgainstDelivery(mismatchedAck, delivery), [
+  "ProjectionAck $.payload_digest must equal ProjectionDelivery $.payload_digest",
+]);
 assert.equal(control.cards[0].card_id, card.card_id);
 assert.equal(control.cards[0].project_id, card.project_id);
 assert.equal(control.cards[0].board_id, card.board_id);
+
+const mismatchedEpochEvent = structuredClone(event);
+mismatchedEpochEvent.changes.set.epoch_id = "different-epoch";
+assert(validateContractSemantics("atlas.card-event.v3", mismatchedEpochEvent).includes(
+  "$.changes.set.epoch_id must equal $.epoch_id",
+));
+
+const migration = validArtifacts.get("atlas.board-authority-migration.v1");
+const prematureActiveMigration = structuredClone(migration);
+prematureActiveMigration.phase = "v3-active";
+prematureActiveMigration.cutover.status = "active";
+assert(validateContractSemantics("atlas.board-authority-migration.v1", prematureActiveMigration).some(
+  (error) => error.includes("Migration phase v3-active is inconsistent"),
+));
+const activeMigration = structuredClone(migration);
+activeMigration.phase = "v3-active";
+activeMigration.v2_authority_snapshot = {
+  status: "available",
+  snapshot_id: "snapshot-v2",
+  digest: "sha256:6666666666666666666666666666666666666666666666666666666666666666",
+  captured_at: "2026-07-17T12:00:00Z",
+  unknown_reason: null,
+};
+activeMigration.one_time_import = {
+  ...activeMigration.one_time_import,
+  status: "verified",
+  source_snapshot_digest: activeMigration.v2_authority_snapshot.digest,
+  event_sequence_start: 1,
+  event_sequence_end: 20,
+  imported_at: "2026-07-17T12:05:00Z",
+};
+activeMigration.first_v3_acceptance = {
+  status: "accepted",
+  receipt_id: "board-commit-first-v3",
+  accepted_at: "2026-07-17T12:06:00Z",
+};
+activeMigration.rollback.current_mode = "v3-restore-replay-only";
+activeMigration.cutover.status = "active";
+assert.deepEqual(validateContractSemantics("atlas.board-authority-migration.v1", activeMigration), []);
+
+const rollover = validArtifacts.get("atlas.rollover-manifest.v1");
+const livePredecessorRollover = structuredClone(rollover);
+livePredecessorRollover.predecessor_epoch.status = "active";
+assert(validateContractSemantics("atlas.rollover-manifest.v1", livePredecessorRollover).some(
+  (error) => error.includes("terminal receipt evidence"),
+));
 
 console.log("ATLAS board authority contract tests passed.");

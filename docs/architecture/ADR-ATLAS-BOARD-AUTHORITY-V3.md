@@ -35,10 +35,10 @@ There is no new general-purpose Atlas server. Foundation does not gain a dashboa
 | Contract | Purpose |
 | --- | --- |
 | `atlas.card-record.v3` | Authoritative materialized card state, current epoch/work identity, blockers, owned resources, receipts, next action, archive posture, and visible projection state. |
-| `atlas.card-event.v3` | Immutable, sequenced, idempotent event carrying the expected version, succeeded execution receipt, deterministic materialization operations, and preallocated local receipt/outbox identities. |
+| `atlas.card-event.v3` | Immutable, sequenced, idempotent event carrying the expected version, succeeded execution receipt, deterministic materialization operations, and preallocated local receipt/outbox identities. Any materialized epoch value must equal the event-envelope epoch. |
 | `atlas.board-commit-receipt.v1` | Accepted local transaction proof that closes engineering independently of projection delivery. |
 | `atlas.projection-delivery.v1` | Durable DiscordOS outbox item with retry state and exact touched-card readback accounting. |
-| `atlas.projection-ack.v1` | Applied, stale, failed, or `UNKNOWN` projection acknowledgement; it has no local-acceptance effect. |
+| `atlas.projection-ack.v1` | Applied, stale, failed, or `UNKNOWN` projection acknowledgement bound to both delivery identity and payload digest; it has no local-acceptance effect. |
 | `atlas.board-authority-migration.v1` | Immutable v2 baseline, one-time import, first-v3-acceptance boundary, cutover gates, and irreversible rollback-mode transition. |
 | `atlas.control-board-read-model.v1` | Deterministic generated read model with explicit availability and queued/applied/stale/failed/`UNKNOWN` counts. |
 | `atlas.rollover-manifest.v1` | Predecessor/successor continuity and bounded-epoch archive gate while preserving stable standing anchors. |
@@ -120,13 +120,15 @@ The selection rule and exact digests are frozen in `docs/registry/ATLAS-BOARD-AU
 
 Before the first accepted v3 `BoardCommitReceipt`, an explicit rollback may return authority to v2. The first accepted v3 receipt is the irreversible authority boundary. After it, rollback means validated backup restore and event replay within v3 only. Silent authority reversion to v2 is forbidden.
 
+Migration phases are correlated states, not labels. `planned` requires a not-started import, no v3 acceptance, v2 rollback mode, and held cutover. `baseline-imported` requires an available source snapshot plus imported or verified baseline, no v3 acceptance, v2 rollback mode, and held cutover. `v3-acceptance-open` requires a verified import, no v3 acceptance, v2 rollback mode, and ready cutover. `v3-active` requires verified import, the first accepted receipt, v3-only restore/replay, and active cutover. `rolled-back-v3` preserves that accepted boundary and v3-only rollback mode while marking cutover rolled back within v3.
+
 ATLAS-CUTOVER-001 requires verified import, SQLite target-path proof, backup/restore proof, one-writer proof, projection and readback proof, Atlas Control proof, observer privacy/loopback proof, and an explicit cutover receipt. No condition in this ADR performs or pre-approves cutover.
 
 ## Rollover and archive policy
 
 Every `RolloverManifest` includes predecessor and successor epoch identity, event sequence, card/job/lease correlation, branch/head/worktree/status, blockers, owned resources, receipt digests, next action, context digest, successor reconstruction proof, and an archive gate.
 
-Stable standing anchors such as ATLAS MAIN remain unarchived. A bounded predecessor epoch becomes archive-eligible only after the successor has reconstructed the same context digest and exact continuity/readback is verified. Archiving a task never archives its standing anchor or deletes ledger history.
+Stable standing anchors such as ATLAS MAIN remain unarchived. A bounded predecessor epoch becomes archive-eligible only after it is terminal with at least one terminal receipt digest and the successor has reconstructed the same context digest with exact continuity/readback verified. Archiving a task never archives its standing anchor or deletes ledger history.
 
 ## Privacy and retention
 
