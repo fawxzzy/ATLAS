@@ -1,0 +1,78 @@
+{
+  "aggregate": {
+    "aggregate_digest": "sha256:1d0449be1f3328fa8c2573e35247703218ff864fddcb845d5ca6ced1653950dc",
+    "available_source_count": 2,
+    "counts": {
+      "excluded": 416,
+      "exclusion_reasons": {
+        "GENERATED_OR_BUILD_TREE": 11,
+        "MUTABLE_RUNTIME_SURFACE": 359,
+        "PRIVATE_OR_TRANSCRIPT_SURFACE": 11,
+        "SECRET_SURFACE": 1,
+        "UNSUPPORTED_MEDIA_TYPE": 34
+      },
+      "included": 4875,
+      "total": 5291,
+      "unknown": 0
+    },
+    "source_count": 2
+  },
+  "components": [
+    {
+      "authority_tier": "atlas_inventory_adoption_owner",
+      "availability": "available",
+      "component_digest": "sha256:a43f6b75fd7338cca54fb0b2f1121b187a05f2031148631d0bee1e21e7056fed",
+      "component_id": "atlas-root",
+      "counts": {
+        "excluded": 60,
+        "exclusion_reasons": {
+          "GENERATED_OR_BUILD_TREE": 11,
+          "MUTABLE_RUNTIME_SURFACE": 24,
+          "UNSUPPORTED_MEDIA_TYPE": 25
+        },
+        "included": 3431,
+        "total": 3491,
+        "unknown": 0
+      },
+      "pinned_commit": "59fb0bbad0054a725004746c29492c3abf4f08e3",
+      "shard_ref": "docs/registry/text-corpus/components/atlas-root.v1.json",
+      "source_id": "github:fawxzzy/ATLAS",
+      "tree_oid": "7ac23ac04e60115eeaa5adc659e1e54c12dcedb4"
+    },
+    {
+      "authority_tier": "playbook_doctrine_owner",
+      "availability": "available",
+      "component_digest": "sha256:2cb25cb419aa7da6957f3eb58e9673fd69a5cc5f090878e9b7b3062750c6852b",
+      "component_id": "playbook",
+      "counts": {
+        "excluded": 356,
+        "exclusion_reasons": {
+          "MUTABLE_RUNTIME_SURFACE": 335,
+          "PRIVATE_OR_TRANSCRIPT_SURFACE": 11,
+          "SECRET_SURFACE": 1,
+          "UNSUPPORTED_MEDIA_TYPE": 9
+        },
+        "included": 1444,
+        "total": 1800,
+        "unknown": 0
+      },
+      "pinned_commit": "952b63aa6457d871024a224a089c4088490d69c5",
+      "shard_ref": "docs/registry/text-corpus/components/playbook.v1.json",
+      "source_id": "github:fawxzzy/playbook",
+      "tree_oid": "9256609de8ae3463f568cc53614b630e53c6989c"
+    }
+  ],
+  "document_kind": "index",
+  "generator_version": "atlas.text-corpus.inventory.generator.v1",
+  "inventory_id": "atlas-playbook-committed-text-pilot-v1",
+  "policy": {
+    "authority_widening": false,
+    "body_storage": "prohibited",
+    "doctrine_owner": "playbook",
+    "inventory_owner": "atlas",
+    "marker_movement": false,
+    "source_basis": "committed_git_objects_only",
+    "unavailable_semantics": "UNKNOWN"
+  },
+  "schema": "atlas.text-corpus.inventory.v1"
+}
