@@ -1,7 +1,7 @@
 {
   "schema_version": "atlas.runtime-placement.registry.v1",
   "kind": "atlas-runtime-placement-registry",
-  "generated_at": "2026-07-15T18:51:09Z",
+  "generated_at": "2026-07-17T01:54:51Z",
   "authority": "ATLAS root governance",
   "placement_types": [
     "no_server/on_demand",
@@ -130,11 +130,11 @@
       ],
       "intended_placement": "no_server/on_demand",
       "current_availability": {
-        "state": "unavailable_dependency_incomplete",
-        "observed_at": "2026-07-15T18:28:05Z",
+        "state": "available_on_demand",
+        "observed_at": "2026-07-17T01:39:34Z",
         "proof": [
-          "packages/cli/dist/main.js is present from a later local generated-state refresh.",
-          "Direct CLI help exits 1 because minimatch is missing; the dependency installation is incomplete."
+          "Playbook PR 27 merged at 8aa912b492e689fca4c296d59a438c2813cba4fc with green exact-head checks.",
+          "The accepted owner receipt records a clean detached execution home and successful direct CLI/bootstrap proof."
         ]
       },
       "consumer": [
@@ -158,7 +158,8 @@
       "evidence_refs": [
         "repos/playbook/package.json",
         "repos/playbook/packages/cli/package.json",
-        "docs/ops/ATLAS-RUNTIME-PLACEMENT-TRUTH-AND-ACTIVATION-MARKER-ADMISSION-2026-07-15.md"
+        "https://github.com/fawxzzy/playbook/pull/27",
+        "docs/ops/ATLAS-RUNTIME-PLACEMENT-READ-MODEL-MARKER-SELECTOR-RECONCILIATION-2026-07-16.md"
       ]
     },
     {
@@ -173,12 +174,11 @@
       ],
       "intended_placement": "local_persistent",
       "current_availability": {
-        "state": "unavailable",
-        "observed_at": "2026-07-15T18:28:05Z",
+        "state": "stopped_restorable",
+        "observed_at": "2026-07-17T01:39:34Z",
         "proof": [
-          "No listener is bound to 127.0.0.1:4300.",
-          "The Playbook CLI dependency boundary is incomplete.",
-          "No canonical runtime/playbook/observer registry state is present."
+          "Accepted foreground proof returned healthy on 127.0.0.1:4300 with one registered repository.",
+          "Current readback finds no listener on port 4300 because the Observer is intentionally stopped and restorable; this is not an uptime claim."
         ]
       },
       "consumer": [
@@ -203,7 +203,8 @@
       "evidence_refs": [
         "repos/playbook/docs/commands/observer.md",
         "repos/playbook/.lifeline/playbook.lifeline.yml",
-        "repos/playbook/package.json"
+        "https://github.com/fawxzzy/playbook/pull/27",
+        "docs/ops/ATLAS-RUNTIME-PLACEMENT-READ-MODEL-MARKER-SELECTOR-RECONCILIATION-2026-07-16.md"
       ]
     },
     {
@@ -217,12 +218,12 @@
       ],
       "intended_placement": "local_persistent",
       "current_availability": {
-        "state": "unavailable",
-        "observed_at": "2026-07-15T18:28:05Z",
+        "state": "registered_ready_restorable",
+        "observed_at": "2026-07-17T01:51:00Z",
         "proof": [
-          "repos/lifeline/node_modules and repos/lifeline/dist/cli.js are absent.",
-          "No Lifeline state/startup state is present under the repo or root runtime target.",
-          "No Lifeline or ATLAS startup task is registered."
+          "Lifeline PR 35 merged at ca542081193b69144fdd125b8cc9b1448b67bb42; its accepted receipt head bca9d7b1 is tree-equivalent and CI is green.",
+          "LifelineRestoreAtLogon is enabled and Ready with LastTaskResult 0, targeting the root runtime home.",
+          "Actual restoration after a new Windows logon and sustained unattended Observer uptime remain UNKNOWN."
         ]
       },
       "consumer": [
@@ -246,7 +247,8 @@
       "evidence_refs": [
         "repos/lifeline/README.md",
         "repos/playbook/.lifeline/playbook.lifeline.yml",
-        "stack.yaml"
+        "https://github.com/fawxzzy/lifeline/pull/35",
+        "docs/ops/ATLAS-RUNTIME-PLACEMENT-READ-MODEL-MARKER-SELECTOR-RECONCILIATION-2026-07-16.md"
       ]
     },
     {
@@ -259,12 +261,12 @@
       ],
       "intended_placement": "local_scheduled",
       "current_availability": {
-        "state": "inactive",
-        "observed_at": "2026-07-15T18:28:05Z",
+        "state": "active_successful_bounded",
+        "observed_at": "2026-07-17T01:50:03Z",
         "proof": [
-          "No matching Windows scheduled task is registered.",
-          "No node-based inbox runner process is active.",
-          "repos/_stack/.codex/inbox contains one file last written 2026-04-08T06:34:58Z."
+          "_stack PR 9 merged on clean main at 7aed5495d2702a653e461549877d8fa77b3a33d2 with green Windows authoritative verification.",
+          "AtlasStackInboxSweep is enabled and Ready on a PT5M repetition interval with LastTaskResult 0.",
+          "Sweep sweep-e8c3918763fd4a0f834c68551adf30aa succeeded with zero pending work, a released lease, and no active lease residue."
         ]
       },
       "consumer": [
@@ -287,7 +289,8 @@
       "evidence_refs": [
         "repos/_stack/ops/codex/Start-CodexInboxRunner.ps1",
         "repos/_stack/package.json",
-        "docs/ops/ATLAS-RUNTIME-PLACEMENT-TRUTH-AND-ACTIVATION-MARKER-ADMISSION-2026-07-15.md"
+        "https://github.com/fawxzzy/_stack/pull/9",
+        "docs/ops/ATLAS-RUNTIME-PLACEMENT-READ-MODEL-MARKER-SELECTOR-RECONCILIATION-2026-07-16.md"
       ]
     },
     {
@@ -301,9 +304,9 @@
       "intended_placement": "Vercel",
       "current_availability": {
         "state": "available",
-        "observed_at": "2026-07-15T18:51:06Z",
+        "observed_at": "2026-07-17T01:54:48Z",
         "proof": [
-          "https://fawxzzy-foundation.vercel.app returned HTTP 200."
+          "https://fawxzzy-foundation.vercel.app returned HTTP 200 during the read-only reconciliation probe."
         ]
       },
       "consumer": [
@@ -341,9 +344,9 @@
       "intended_placement": "Vercel",
       "current_availability": {
         "state": "operational",
-        "observed_at": "2026-07-15T18:51:08Z",
+        "observed_at": "2026-07-17T01:54:50Z",
         "proof": [
-          "Runtime health returned HTTP 200, ok=true, posture=operational, readinessPercent=100."
+          "Runtime health returned HTTP 200, ok=true, posture=operational, readinessPercent=100 during the read-only reconciliation probe."
         ]
       },
       "consumer": [
@@ -381,7 +384,7 @@
       "intended_placement": "Supabase",
       "current_availability": {
         "state": "operational",
-        "observed_at": "2026-07-15T18:51:08Z",
+        "observed_at": "2026-07-17T01:54:50Z",
         "proof": [
           "Runtime health reports supabaseProject, serviceRole, persistedWriter, and liveTransferStatus ready with no blocked reasons."
         ]
@@ -457,7 +460,7 @@
       "intended_placement": "hybrid",
       "current_availability": {
         "state": "operational",
-        "observed_at": "2026-07-15T18:51:08Z",
+        "observed_at": "2026-07-17T01:54:50Z",
         "proof": [
           "Runtime health reports all hosted component states ready and live cutover active.",
           "Latest bounded scheduled polling run succeeded."
@@ -560,8 +563,7 @@
       "activation_deployment_gate": "Do not deploy; refresh once after the local activation chain changes accepted state.",
       "evidence_refs": [
         "docs/architecture/ATLAS-CORTEX-PLAYBOOK-CODEX.md",
-        "runtime/cortex/current-state/latest.json",
-        "runtime/cortex/context/latest.json"
+        "docs/ops/ATLAS-RUNTIME-PLACEMENT-READ-MODEL-MARKER-SELECTOR-RECONCILIATION-2026-07-16.md"
       ]
     },
     {
@@ -967,53 +969,112 @@
     }
   ],
   "activation_sequence": [
+    "playbook-bootstrap-foreground-observer-proof",
+    "lifeline-bootstrap-state-contract",
+    "lifeline-supervised-restart",
+    "lifeline-logon-restore",
+    "stack-single-scheduled-worker",
+    "cortex-event-refresh",
+    "discordos-interaction-first-reliability-review",
+    "owner-export-integration"
+  ],
+  "activation_steps": [
     {
       "order": 1,
       "id": "playbook-bootstrap-foreground-observer-proof",
       "owner": "Playbook",
-      "admission_proof": "Frozen dependency bootstrap, successful CLI invocation, and foreground GET /health on 127.0.0.1:4300 with root-runtime Observer state."
+      "packet": "Playbook bootstrap and foreground Observer health proof",
+      "status": "accepted",
+      "admission_proof": "Frozen dependency bootstrap, successful CLI invocation, and foreground GET /health on 127.0.0.1:4300 with root-runtime Observer state.",
+      "evidence_refs": [
+        "https://github.com/fawxzzy/playbook/pull/27",
+        "docs/ops/ATLAS-RUNTIME-PLACEMENT-READ-MODEL-MARKER-SELECTOR-RECONCILIATION-2026-07-16.md"
+      ]
     },
     {
       "order": 2,
       "id": "lifeline-bootstrap-state-contract",
       "owner": "Lifeline",
-      "admission_proof": "Lifeline build and doctor pass, and state/log placement is bound to runtime/lifeline/playbook-observer outside both owner repositories."
+      "packet": "Lifeline bootstrap and root-runtime state contract",
+      "status": "accepted",
+      "admission_proof": "Lifeline build and doctor pass, and state/log placement is bound to runtime/lifeline/playbook-observer outside both owner repositories.",
+      "evidence_refs": [
+        "https://github.com/fawxzzy/lifeline/pull/35",
+        "https://github.com/fawxzzy/playbook/pull/27"
+      ]
     },
     {
       "order": 3,
       "id": "lifeline-supervised-restart",
       "owner": "Lifeline",
-      "admission_proof": "Observer process failure is detected, restarted once under bounded backoff, and health/readback returns with correlated state and logs."
+      "packet": "Lifeline supervised restart proof",
+      "status": "accepted",
+      "admission_proof": "Observer process failure is detected, restarted once under bounded backoff, and health/readback returns with correlated state and logs.",
+      "evidence_refs": [
+        "https://github.com/fawxzzy/lifeline/pull/35",
+        "docs/ops/ATLAS-RUNTIME-PLACEMENT-READ-MODEL-MARKER-SELECTOR-RECONCILIATION-2026-07-16.md"
+      ]
     },
     {
       "order": 4,
       "id": "lifeline-logon-restore",
       "owner": "Lifeline",
-      "admission_proof": "Current-user logon registration targets lifeline restore and a bounded restore proof re-establishes Observer health."
+      "packet": "Lifeline current-user logon restore proof",
+      "status": "accepted",
+      "admission_proof": "Current-user logon registration targets lifeline restore and a bounded restore proof re-establishes Observer health.",
+      "evidence_refs": [
+        "https://github.com/fawxzzy/lifeline/pull/35",
+        "docs/ops/ATLAS-RUNTIME-PLACEMENT-READ-MODEL-MARKER-SELECTOR-RECONCILIATION-2026-07-16.md"
+      ]
     },
     {
       "order": 5,
       "id": "stack-single-scheduled-worker",
       "owner": "_stack",
-      "admission_proof": "Exactly one serialized RunOnce scheduled sweep proves lease, idempotency, stale-input rejection, and correlated receipt behavior."
+      "packet": "_stack single bounded scheduled sweep proof",
+      "status": "accepted",
+      "admission_proof": "Exactly one serialized RunOnce scheduled sweep proves lease, idempotency, stale-input rejection, and correlated receipt behavior.",
+      "evidence_refs": [
+        "https://github.com/fawxzzy/_stack/pull/9",
+        "docs/ops/ATLAS-RUNTIME-PLACEMENT-READ-MODEL-MARKER-SELECTOR-RECONCILIATION-2026-07-16.md"
+      ]
     },
     {
       "order": 6,
       "id": "cortex-event-refresh",
       "owner": "ATLAS root governance",
-      "admission_proof": "One accepted activation state change triggers deterministic Cortex read-model refresh without a daemon or scheduler."
+      "packet": "Cortex event-triggered runtime read-model refresh proof",
+      "status": "pending",
+      "admission_proof": "One accepted activation state change triggers deterministic Cortex read-model refresh without a daemon or scheduler.",
+      "evidence_refs": [
+        "ops/cortex/current_state.py",
+        "ops/cortex/context_assembler.py",
+        "docs/ops/ATLAS-RUNTIME-PLACEMENT-READ-MODEL-MARKER-SELECTOR-RECONCILIATION-2026-07-16.md"
+      ]
     },
     {
       "order": 7,
       "id": "discordos-interaction-first-reliability-review",
       "owner": "DiscordOS",
-      "admission_proof": "Owner-side review proves successful, failed, duplicate, interrupted/restarted, and stale-receipt interaction correlation across the existing hosted runtime."
+      "packet": "DiscordOS interaction-first reliability review",
+      "status": "pending",
+      "admission_proof": "Owner-side review proves successful, failed, duplicate, interrupted/restarted, and stale-receipt interaction correlation across the existing hosted runtime.",
+      "evidence_refs": [
+        "https://fawxzzy-discordos.vercel.app/api/runtime-health",
+        "docs/ops/ATLAS-RUNTIME-PLACEMENT-READ-MODEL-MARKER-SELECTOR-RECONCILIATION-2026-07-16.md"
+      ]
     },
     {
       "order": 8,
       "id": "owner-export-integration",
       "owner": "ATLAS root governance and owner repositories",
-      "admission_proof": "Established owner exporters consume accepted placement/marker truth and pass schema, semantic, and exact readback checks without Discord mutation."
+      "packet": "Runtime placement owner-export integration",
+      "status": "pending",
+      "admission_proof": "Established owner exporters consume accepted placement/marker truth and pass schema, semantic, and exact readback checks without Discord mutation.",
+      "evidence_refs": [
+        "ops/atlas/project_board_owner_export.py",
+        "docs/registry/project-board-owner-exports/atlas.project-board.owner-export.v1.json"
+      ]
     }
   ],
   "do_not_deploy": [
@@ -1032,108 +1093,239 @@
     {
       "id": "lane-runtime-activation-readiness",
       "title": "Runtime Activation Readiness",
-      "percentage": null,
-      "completed_units": null,
+      "percentage": 100,
+      "completed_units": 8,
       "denominator": 8,
       "measurement_unit": "binary activation gate",
       "units": [
         {
           "id": "placement-contract",
-          "title": "placement contract"
+          "title": "placement contract",
+          "status": "accepted",
+          "evidence_refs": [
+            "https://github.com/fawxzzy/ATLAS/pull/131",
+            "docs/registry/ATLAS-RUNTIME-PLACEMENT-REGISTRY.v1.json"
+          ]
         },
         {
           "id": "playbook-build",
-          "title": "Playbook build"
+          "title": "Playbook build",
+          "status": "accepted",
+          "evidence_refs": [
+            "https://github.com/fawxzzy/playbook/pull/27",
+            "docs/ops/ATLAS-RUNTIME-PLACEMENT-READ-MODEL-MARKER-SELECTOR-RECONCILIATION-2026-07-16.md"
+          ]
         },
         {
           "id": "observer-foreground-health",
-          "title": "Observer foreground health"
+          "title": "Observer foreground health",
+          "status": "accepted",
+          "evidence_refs": [
+            "https://github.com/fawxzzy/playbook/pull/27",
+            "docs/ops/ATLAS-RUNTIME-PLACEMENT-READ-MODEL-MARKER-SELECTOR-RECONCILIATION-2026-07-16.md"
+          ]
         },
         {
           "id": "lifeline-build-doctor",
-          "title": "Lifeline build/doctor"
+          "title": "Lifeline build/doctor",
+          "status": "accepted",
+          "evidence_refs": [
+            "https://github.com/fawxzzy/lifeline/pull/35",
+            "docs/ops/ATLAS-RUNTIME-PLACEMENT-READ-MODEL-MARKER-SELECTOR-RECONCILIATION-2026-07-16.md"
+          ]
         },
         {
           "id": "lifeline-state-placement",
-          "title": "Lifeline state placement"
+          "title": "Lifeline state placement",
+          "status": "accepted",
+          "evidence_refs": [
+            "https://github.com/fawxzzy/lifeline/pull/35",
+            "https://github.com/fawxzzy/playbook/pull/27"
+          ]
         },
         {
           "id": "lifeline-supervision-restart",
-          "title": "Lifeline supervision/restart"
+          "title": "Lifeline supervision/restart",
+          "status": "accepted",
+          "evidence_refs": [
+            "https://github.com/fawxzzy/lifeline/pull/35",
+            "docs/ops/ATLAS-RUNTIME-PLACEMENT-READ-MODEL-MARKER-SELECTOR-RECONCILIATION-2026-07-16.md"
+          ]
         },
         {
           "id": "logon-restore",
-          "title": "logon restore"
+          "title": "logon restore",
+          "status": "accepted",
+          "evidence_refs": [
+            "https://github.com/fawxzzy/lifeline/pull/35",
+            "docs/ops/ATLAS-RUNTIME-PLACEMENT-READ-MODEL-MARKER-SELECTOR-RECONCILIATION-2026-07-16.md"
+          ]
         },
         {
           "id": "stack-single-worker-proof",
-          "title": "_stack single-worker proof"
+          "title": "_stack single-worker proof",
+          "status": "accepted",
+          "evidence_refs": [
+            "https://github.com/fawxzzy/_stack/pull/9",
+            "docs/ops/ATLAS-RUNTIME-PLACEMENT-READ-MODEL-MARKER-SELECTOR-RECONCILIATION-2026-07-16.md"
+          ]
         }
       ],
-      "admission_rule": "Percentage and completed units remain null until every binary gate has directly admissible current proof under the accepted marker rules."
+      "admission_rule": "Count only units with accepted evidence. Unknown units remain explicitly unknown; percentage is derived from accepted units over the fixed denominator."
     },
     {
       "id": "lane-runtime-correlation-reliability",
       "title": "Runtime Correlation Reliability",
-      "percentage": null,
-      "completed_units": null,
+      "percentage": 100,
+      "completed_units": 5,
       "denominator": 5,
       "measurement_unit": "correlated runtime scenario",
       "units": [
         {
           "id": "successful-task",
-          "title": "successful task"
+          "title": "successful task",
+          "status": "accepted",
+          "evidence_refs": [
+            "https://github.com/fawxzzy/_stack/pull/9",
+            "docs/ops/ATLAS-RUNTIME-PLACEMENT-READ-MODEL-MARKER-SELECTOR-RECONCILIATION-2026-07-16.md"
+          ]
         },
         {
           "id": "failed-task",
-          "title": "failed task"
+          "title": "failed task",
+          "status": "accepted",
+          "evidence_refs": [
+            "https://github.com/fawxzzy/_stack/blob/7aed5495d2702a653e461549877d8fa77b3a33d2/ops/codex/Test-StackInboxSweep.ps1"
+          ]
         },
         {
           "id": "duplicate-task",
-          "title": "duplicate task"
+          "title": "duplicate task",
+          "status": "accepted",
+          "evidence_refs": [
+            "https://github.com/fawxzzy/_stack/blob/7aed5495d2702a653e461549877d8fa77b3a33d2/ops/codex/Test-StackInboxSweep.ps1"
+          ]
         },
         {
           "id": "interrupted-restarted-task",
-          "title": "interrupted/restarted task"
+          "title": "interrupted/restarted task",
+          "status": "accepted",
+          "evidence_refs": [
+            "https://github.com/fawxzzy/_stack/blob/7aed5495d2702a653e461549877d8fa77b3a33d2/ops/codex/Test-StackInboxSweep.ps1"
+          ]
         },
         {
           "id": "stale-receipt-rejection",
-          "title": "stale receipt rejection"
+          "title": "stale receipt rejection",
+          "status": "accepted",
+          "evidence_refs": [
+            "https://github.com/fawxzzy/_stack/blob/7aed5495d2702a653e461549877d8fa77b3a33d2/ops/codex/Test-StackInboxSweep.ps1"
+          ]
         }
       ],
-      "admission_rule": "Percentage and completed units remain null until all five scenarios have current end-to-end identity, state, and receipt proof."
+      "admission_rule": "Count only scenarios with accepted deterministic identity, state, and receipt proof; hosted DiscordOS interaction reliability remains a separate activation-sequence review."
     },
     {
       "id": "lane-operator-surface-adoption",
       "title": "Operator Surface Adoption",
-      "percentage": null,
-      "completed_units": null,
+      "percentage": 100,
+      "completed_units": 4,
       "denominator": 4,
       "measurement_unit": "non-duplicative operator role",
       "units": [
         {
           "id": "foundation-portfolio",
-          "title": "Foundation portfolio"
+          "title": "Foundation portfolio",
+          "status": "accepted",
+          "evidence_refs": [
+            "https://fawxzzy-foundation.vercel.app",
+            "docs/ops/ATLAS-RUNTIME-PLACEMENT-READ-MODEL-MARKER-SELECTOR-RECONCILIATION-2026-07-16.md"
+          ]
         },
         {
           "id": "playbook-operations",
-          "title": "Playbook operations"
+          "title": "Playbook operations",
+          "status": "accepted",
+          "evidence_refs": [
+            "https://github.com/fawxzzy/playbook/pull/27",
+            "docs/ops/ATLAS-RUNTIME-PLACEMENT-READ-MODEL-MARKER-SELECTOR-RECONCILIATION-2026-07-16.md"
+          ]
         },
         {
           "id": "atlas-book-doctrine",
-          "title": "Atlas Book doctrine"
+          "title": "Atlas Book doctrine",
+          "status": "accepted",
+          "evidence_refs": [
+            "docs/atlas-book/README.md",
+            "docs/atlas-book/16-runtime-placement.md"
+          ]
         },
         {
           "id": "stack-action-routing",
-          "title": "_stack action routing"
+          "title": "_stack action routing",
+          "status": "accepted",
+          "evidence_refs": [
+            "https://github.com/fawxzzy/_stack/pull/9",
+            "docs/ops/ATLAS-RUNTIME-PLACEMENT-READ-MODEL-MARKER-SELECTOR-RECONCILIATION-2026-07-16.md"
+          ]
         }
       ],
-      "admission_rule": "Percentage and completed units remain null until all four roles have current adoption proof and no authority duplication."
+      "admission_rule": "Count only roles with accepted current adoption proof and no authority duplication."
     }
   ],
-  "next_owner_side_activation_packet": "Playbook bootstrap and foreground Observer health proof",
+  "advisory_resource_observations": [
+    {
+      "id": "mazer-port-4173",
+      "observed_at": "2026-07-17T01:50:00Z",
+      "observation": "Two node listeners share port 4173: one on 0.0.0.0 and one on 127.0.0.1; additional loopback listeners are present on 4174 and 4191.",
+      "owner": "Mazer owner lane",
+      "action": "observe_only_no_mutation"
+    },
+    {
+      "id": "socials-os-port-8765",
+      "observed_at": "2026-07-17T01:50:00Z",
+      "observation": "A Python listener is bound to 0.0.0.0:8765.",
+      "owner": "Socials OS owner lane",
+      "action": "observe_only_no_mutation"
+    },
+    {
+      "id": "postgresql-ports-5432-5433",
+      "observed_at": "2026-07-17T01:50:00Z",
+      "observation": "PostgreSQL listeners are present on all interfaces at ports 5432 and 5433; Atlas ownership is UNKNOWN.",
+      "owner": "UNKNOWN",
+      "action": "observe_only_no_mutation"
+    },
+    {
+      "id": "browser-debugger-65067",
+      "observed_at": "2026-07-17T01:50:00Z",
+      "observation": "Chrome debugging is listening on loopback port 65067 beside an agent-browser parent on 65064; current task ownership is UNKNOWN.",
+      "owner": "UNKNOWN",
+      "action": "observe_only_no_mutation"
+    },
+    {
+      "id": "registered-worktree-inventory",
+      "observed_at": "2026-07-17T01:50:00Z",
+      "observation": "Registered worktree counts are Atlas 9, _stack 64, Playbook 14, Lifeline 3, Foundation 1, DiscordOS 94, Fitness 8, Mazer 45, Socials OS 1, FawxzzyWeb 3, Nat1 2, and Playbook Demo 2.",
+      "owner": "respective repository owners",
+      "action": "observe_only_no_mutation"
+    }
+  ],
+  "current_unknowns": [
+    "Actual restoration after a new Windows logon is UNKNOWN.",
+    "Sustained unattended Playbook Observer uptime is UNKNOWN; current state is intentionally stopped and restorable.",
+    "Principal Cortex current-state, context, and operator latest artifacts remain dated 2026-07-06; complete event-triggered refresh proof is UNKNOWN.",
+    "DiscordOS five-scenario interaction-first reliability review is not yet accepted.",
+    "Activation-sequence owner-export integration after the Cortex and DiscordOS steps is not yet accepted.",
+    "PostgreSQL 5432 and 5433 ownership is UNKNOWN.",
+    "The loopback browser-debugger process ownership is UNKNOWN."
+  ],
+  "next_owner_side_activation_packet": "Cortex event-triggered runtime read-model refresh proof",
   "evidence_refs": [
     "docs/ops/ATLAS-RUNTIME-PLACEMENT-TRUTH-AND-ACTIVATION-MARKER-ADMISSION-2026-07-15.md",
+    "docs/ops/ATLAS-RUNTIME-PLACEMENT-READ-MODEL-MARKER-SELECTOR-RECONCILIATION-2026-07-16.md",
+    "https://github.com/fawxzzy/playbook/pull/27",
+    "https://github.com/fawxzzy/lifeline/pull/35",
+    "https://github.com/fawxzzy/_stack/pull/9",
     "docs/architecture/ATLAS-CORTEX-PLAYBOOK-CODEX.md",
     "docs/atlas-book/16-runtime-placement.md",
     "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json",

@@ -195,13 +195,22 @@ Current boundary:
 - DiscordOS remains the hosted Vercel/Supabase/GitHub Actions writer runtime
 - Playbook Observer is the private loopback cockpit on `127.0.0.1:4300`
 - Lifeline is the intended local supervisor and logon restoration mechanism
-- `_stack` gets one future serialized bounded scheduled sweep, not permanent pollers
+- `_stack` has one serialized bounded scheduled sweep, not permanent pollers
 - ATLAS root, Cortex, Atlas Book, contracts, registries, Socials OS, and Playbook CLI stay on demand or in owner lanes
 
-Observed on 2026-07-15, Foundation and DiscordOS are hosted and operational.
-Playbook Observer and Lifeline are unavailable locally, `_stack` has no
-scheduled worker, and the principal Cortex `latest` read models are stale.
-Implementation presence is not activation proof.
+Reconciled on 2026-07-16, Foundation and DiscordOS are hosted and operational;
+the Observer foreground proof, Lifeline bounded supervision/restore proof, and
+one `_stack` scheduled-sweep proof are accepted from merged owner evidence.
+Current Observer state is intentionally stopped/restorable, the Lifeline and
+`_stack` tasks are ready, and the principal Cortex `latest` read models remain
+stale. Actual later new-logon restoration and sustained unattended uptime are
+unknown. Accepted proof is not converted into a claim of current running
+uptime.
+
+Activation steps carry structured `accepted`, `pending`, `blocked`, or
+`unknown` status plus evidence. The selector is derived as the first
+non-accepted step in the frozen sequence. It currently selects the Cortex
+event-triggered runtime read-model refresh proof.
 
 ## Safe Integration Pattern
 

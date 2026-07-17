@@ -13,12 +13,12 @@ No new general-purpose ATLAS server is admitted.
 
 | Surface | Intended placement | Current availability | Authority |
 | --- | --- | --- | --- |
-| Foundation portfolio | Vercel | Available; production UI returned HTTP 200 on 2026-07-15 | Foundation |
-| DiscordOS runtime | Hybrid Vercel, Supabase, and GitHub Actions | Operational; runtime health reported every component ready and the latest scheduled poll succeeded on 2026-07-15 | DiscordOS |
-| Playbook CLI | No server / on demand | Unavailable; compiled output is present after a later generated-state refresh, but direct invocation fails on an incomplete dependency install | Playbook |
-| Playbook Observer | Local persistent on `127.0.0.1:4300` | Unavailable; no listener or canonical root-runtime Observer state | Playbook |
-| Lifeline | Local persistent supervisor and current-user logon restore | Unavailable; dependencies, build, runtime state, and startup registration are absent | Lifeline |
-| `_stack` inbox sweep | Local scheduled | Inactive; no scheduled task or active runner, with only stale inbox evidence | `_stack` |
+| Foundation portfolio | Vercel | Available; production UI returned HTTP 200 on 2026-07-16 | Foundation |
+| DiscordOS runtime | Hybrid Vercel, Supabase, and GitHub Actions | Operational; runtime health returned HTTP 200, `ok=true`, and `posture=operational` on 2026-07-16 | DiscordOS |
+| Playbook CLI | No server / on demand | Available on demand from merged Playbook PR `#27` proof | Playbook |
+| Playbook Observer | Local persistent on `127.0.0.1:4300` | Foreground proof accepted; currently intentionally stopped/restorable with no listener | Playbook |
+| Lifeline | Local persistent supervisor and current-user logon restore | Registered/restorable; task enabled, ready, and last result `0` | Lifeline |
+| `_stack` inbox sweep | Local scheduled | Exactly one bounded task enabled/ready; latest observed sweep succeeded with zero pending work and no active lease residue | `_stack` |
 | Cortex read models | No server / event-triggered on demand | Stale; principal `latest` state/context/operator surfaces remain dated 2026-07-06 | ATLAS root |
 | Atlas root, Atlas Book, contracts, registries, and Playbook CLI doctrine | No server / on demand | Source surfaces are available locally; runtime claims still require their own proof | ATLAS root or named owner |
 | Fitness, Mazer, Socials OS, Trove, Stream, Nat1, and other products | Owner lane | Owner-managed; not root-operated services | Named owner lane |
@@ -38,29 +38,34 @@ scheduler, or competing execution authority.
 
 Owner-side activation is serialized in this exact order:
 
-1. Playbook bootstrap and foreground Observer proof.
-2. Lifeline bootstrap and state-placement contract.
-3. Lifeline supervised restart proof.
-4. Lifeline current-user logon restore proof.
-5. One `_stack` bounded scheduled worker proof.
-6. One event-triggered Cortex refresh.
-7. DiscordOS interaction-first reliability review.
-8. Owner export integration.
+1. Playbook bootstrap and foreground Observer proof — `accepted`.
+2. Lifeline bootstrap and state-placement contract — `accepted`.
+3. Lifeline supervised restart proof — `accepted`.
+4. Lifeline current-user logon restore proof — `accepted` from deterministic
+   owner proof; actual later new-logon restoration remains `unknown`.
+5. One `_stack` bounded scheduled worker proof — `accepted`.
+6. One event-triggered Cortex refresh — `pending`.
+7. DiscordOS interaction-first reliability review — `pending`.
+8. Owner export integration — `pending`.
 
-The exact next packet is `Playbook bootstrap and foreground Observer health
+Each step has structured status and evidence. The selector is the first step
+whose status is not `accepted`; accepted steps must form a contiguous prefix.
+The exact next packet is `Cortex event-triggered runtime read-model refresh
 proof`.
 
 ## Fixed marker lanes
 
-The current marker values are intentionally unset:
+Only directly evidenced fixed units are counted:
 
-- Runtime Activation Readiness: fixed eight binary gates.
-- Runtime Correlation Reliability: fixed five scenarios.
-- Operator Surface Adoption: fixed four roles.
+- Runtime Activation Readiness: `8 / 8`, `100%`.
+- Runtime Correlation Reliability: `5 / 5`, `100%`.
+- Operator Surface Adoption: `4 / 4`, `100%`.
 
-No percentage or completed-unit count is assigned until every unit in the
-corresponding lane has directly admissible current proof. Source presence,
-implementation prose, or partial hosted health does not count.
+Unit status is structured as `accepted`, `pending`, `blocked`, or `unknown`.
+Only `accepted` counts; prose never implies completion, and a genuinely blocked
+unit is not collapsed into unknown. These deterministic markers do not claim
+that Observer is currently running or that actual later new-logon restoration
+or sustained unattended uptime has been observed.
 
 ## Do not deploy
 
