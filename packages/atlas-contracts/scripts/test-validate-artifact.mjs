@@ -158,9 +158,13 @@ try {
     "INVALID_ARTIFACT",
   );
   assert(ambiguousOperations.errors.some((error) => error.includes("duplicate blocker_id")));
-  for (const fixtureName of [
-    "card-event.v3.invalid-initial-materialization.json",
-    "card-event.v3.invalid-update-materialization.json",
+  for (const [fixtureName, expectedError] of [
+    ["card-event.v3.invalid-initial-materialization.json", "Stable standing anchors"],
+    ["card-event.v3.invalid-update-materialization.json", "archive_state archived must move together"],
+    ["card-event.v3.archive-entry-missing-state.json", "crossing the archived boundary"],
+    ["card-event.v3.archive-entry-missing-standing-anchor.json", "explicit $.changes.set.standing_anchor false"],
+    ["card-event.v3.archive-exit-missing-state.json", "crossing the archived boundary"],
+    ["card-event.v3.execution-receipt-digest-mismatch.json", "identity and digest"],
   ]) {
     const invalidMaterialization = expectJson(
       [
@@ -170,13 +174,12 @@ try {
       1,
       "INVALID_ARTIFACT",
     );
-    assert(invalidMaterialization.errors.some((error) => (
-      error.includes("Stable standing anchors") || error.includes("archive_state archived must move together")
-    )));
+    assert(invalidMaterialization.errors.some((error) => error.includes(expectedError)));
   }
   for (const fixtureName of [
     "card-event.v3.initial-standing-anchor.json",
     "card-event.v3.archive-materialization.json",
+    "card-event.v3.archive-exit-materialization.json",
     "card-event.v3.partial-archive-state.json",
   ]) {
     expectJson(
@@ -224,6 +227,15 @@ try {
     0,
     "VALID",
   );
+  const unavailableMissingError = expectJson(
+    [
+      "--schema", "atlas.projection-delivery.v1",
+      "--artifact", fixture("invalid", "projection-delivery.v1.unavailable-unknown-missing-error.json"),
+    ],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  assert(unavailableMissingError.errors.some((error) => error.includes("availability error evidence")));
   const appliedAckRetry = expectJson(
     [
       "--schema", "atlas.projection-ack.v1",
@@ -244,6 +256,25 @@ try {
     "INVALID_ARTIFACT",
   );
   assert(appliedAckZeroAttempt.errors.some((error) => error.includes("attempt_count")));
+  const unavailableAckMissingError = expectJson(
+    [
+      "--schema", "atlas.projection-ack.v1",
+      "--artifact", fixture("invalid", "projection-ack.v1.unavailable-unknown-missing-error.json"),
+      "--projection-delivery", projectionDeliveryFixture,
+    ],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  assert(unavailableAckMissingError.errors.some((error) => error.includes("availability error evidence")));
+  expectJson(
+    [
+      "--schema", "atlas.projection-ack.v1",
+      "--artifact", fixture("valid", "projection-ack.v1.unavailable-unknown.json"),
+      "--projection-delivery", projectionDeliveryFixture,
+    ],
+    0,
+    "VALID",
+  );
   const malformedTerminalReceipt = expectJson(
     [
       "--schema", "atlas.rollover-manifest.v1",

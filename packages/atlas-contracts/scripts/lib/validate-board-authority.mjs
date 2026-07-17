@@ -80,7 +80,10 @@ export function projectInitialCardRecordV3(event) {
     owned_resources: event.changes.add_resources,
     receipt_refs: event.changes.add_receipts.map((receipt) => ({
       ...receipt,
-      status: receipt.receipt_id === event.execution_receipt.receipt_id ? "succeeded" : "UNKNOWN",
+      status: receipt.receipt_id === event.execution_receipt.receipt_id
+        && receipt.digest === event.execution_receipt.digest
+        ? "succeeded"
+        : "UNKNOWN",
     })),
     next_action: set.next_action,
     projection_state: set.projection_state,
@@ -181,6 +184,15 @@ export function validateCardEventV3(event) {
     errors.push("$.changes.set.lifecycle must equal $.changes.transition.to when both materialization operations are present");
   }
   if (!isInitial) {
+    const crossesArchivedBoundary = changes.transition !== null
+      && ((changes.transition.from === "archived") !== (changes.transition.to === "archived"));
+    if (crossesArchivedBoundary && changes.set.archive_state === undefined) {
+      errors.push("Transitions crossing the archived boundary require $.changes.set.archive_state");
+    }
+    if (changes.transition?.to === "archived" && changes.transition.from !== "archived"
+      && changes.set.standing_anchor !== false) {
+      errors.push("A transition into archived requires explicit $.changes.set.standing_anchor false");
+    }
     errors.push(...validateArchiveMaterialization({
       lifecycle: changes.transition?.to ?? changes.set.lifecycle,
       archiveState: changes.set.archive_state,
@@ -200,6 +212,12 @@ export function validateCardEventV3(event) {
   for (const [collection, idField] of addCollections) {
     for (const duplicate of duplicateValues(changes[collection].map((item) => item[idField]))) {
       errors.push(`$.changes.${collection} contains duplicate ${idField} ${duplicate}`);
+    }
+  }
+  for (const receipt of changes.add_receipts) {
+    if (receipt.receipt_id === event.execution_receipt.receipt_id
+      && receipt.digest !== event.execution_receipt.digest) {
+      errors.push("An added execution receipt reference must match $.execution_receipt identity and digest");
     }
   }
   const blockerRemovals = new Set(changes.remove_blocker_ids);
@@ -231,7 +249,7 @@ export function validateBoardCommitReceiptV1(receipt) {
   return errors;
 }
 
-function validateProjectionState(value, { allowQueued }) {
+function validateProjectionState(value, { allowQueued, availabilityError }) {
   const errors = [];
   const readback = value.touched_card_readback;
   if (readback.card_id !== value.card_id) {
@@ -243,6 +261,9 @@ function validateProjectionState(value, { allowQueued }) {
     }
     if (readback.request_count !== null || readback.observed_at !== null || readback.response_digest !== null) {
       errors.push("Unavailable projection readback must not invent request counts, timestamps, or response digests");
+    }
+    if (!isNonEmptyObject(availabilityError)) {
+      errors.push("Unavailable projection requires non-empty availability error evidence");
     }
   }
   if (value.availability === "available" && value.state === "UNKNOWN") {
@@ -272,6 +293,13 @@ function validateProjectionState(value, { allowQueued }) {
   if (value.state === "failed" && (readback.state !== "failed" || !isPositiveInteger(readback.request_count))) {
     errors.push("Failed projection requires positive exact touched-card request-count proof");
   }
+  if (value.state === "failed" && !isNonEmptyObject(availabilityError)) {
+    errors.push("Failed projection requires non-empty error evidence");
+  }
+  if ((value.state === "queued" || value.state === "applied")
+    && availabilityError !== null && availabilityError !== undefined) {
+    errors.push(`${value.state === "queued" ? "Queued" : "Applied"} projection must not retain error evidence`);
+  }
   if (allowQueued && value.state === "queued") {
     if (readback.state !== "queued" || readback.request_count !== 0 || readback.observed_at !== null || readback.response_digest !== null) {
       errors.push("Queued projection must expose zero performed requests without claiming readback");
@@ -281,7 +309,10 @@ function validateProjectionState(value, { allowQueued }) {
 }
 
 export function validateProjectionDeliveryV1(delivery) {
-  const errors = validateProjectionState(delivery, { allowQueued: true });
+  const errors = validateProjectionState(delivery, {
+    allowQueued: true,
+    availabilityError: delivery.last_error,
+  });
   if (delivery.retry.retryable && delivery.retry.next_attempt_at === null) {
     errors.push("Retryable delivery requires $.retry.next_attempt_at");
   }
@@ -290,6 +321,12 @@ export function validateProjectionDeliveryV1(delivery) {
   }
   if (delivery.state === "queued" && delivery.retry.attempt_count !== 0) {
     errors.push("Newly queued delivery must start at attempt_count 0");
+  }
+  if (delivery.state === "queued" && !delivery.retry.retryable) {
+    errors.push("Queued projection delivery must remain retryable");
+  }
+  if (delivery.availability === "unavailable" && delivery.retry.attempt_count !== 0) {
+    errors.push("Unavailable UNKNOWN delivery must not invent an attempt");
   }
   const requiresPositiveAttempt = ["applied", "stale", "failed"].includes(delivery.state)
     || (delivery.state === "UNKNOWN" && delivery.availability === "available");
@@ -303,7 +340,10 @@ export function validateProjectionDeliveryV1(delivery) {
 }
 
 export function validateProjectionAckV1(ack, context = {}) {
-  const errors = validateProjectionState(ack, { allowQueued: false });
+  const errors = validateProjectionState(ack, {
+    allowQueued: false,
+    availabilityError: ack.error,
+  });
   if (ack.retryable && ack.next_attempt_at === null) {
     errors.push("Retryable acknowledgement requires $.next_attempt_at");
   }

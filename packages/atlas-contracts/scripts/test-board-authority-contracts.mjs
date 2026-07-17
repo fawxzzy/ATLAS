@@ -130,6 +130,7 @@ assert.deepEqual(validateCardRecordV3(projectedInitialCard), []);
 for (const fixtureRef of [
   "valid/card-event.v3.initial-standing-anchor.json",
   "valid/card-event.v3.archive-materialization.json",
+  "valid/card-event.v3.archive-exit-materialization.json",
   "valid/card-event.v3.partial-archive-state.json",
 ]) {
   const artifact = await loadJson(path.join(fixturesDir, fixtureRef));
@@ -144,6 +145,90 @@ for (const fixtureRef of [
       assert.equal(projected.receipt_refs[1].status, "UNKNOWN");
     }
   }
+}
+
+const omitted = Symbol("omitted");
+const archiveTransitionTemplate = await loadJson(path.join(
+  fixturesDir,
+  "valid/card-event.v3.archive-materialization.json",
+));
+const archiveTransitionCases = [
+  { label: "enter archived with full post-state", from: "review", to: "archived", archiveState: "archived", standingAnchor: false, valid: true },
+  { label: "enter archived without archive_state", from: "review", to: "archived", archiveState: omitted, standingAnchor: false, error: "crossing the archived boundary" },
+  { label: "enter archived with non-archived state", from: "review", to: "archived", archiveState: "active", standingAnchor: false, error: "archive_state archived must move together" },
+  { label: "enter archived without standing-anchor post-state", from: "review", to: "archived", archiveState: "archived", standingAnchor: omitted, error: "explicit $.changes.set.standing_anchor false" },
+  { label: "enter archived as standing anchor", from: "review", to: "archived", archiveState: "archived", standingAnchor: true, error: "Stable standing anchors" },
+  { label: "leave archived to active", from: "archived", to: "review", archiveState: "active", standingAnchor: omitted, valid: true },
+  { label: "leave archived to successor-pending", from: "archived", to: "review", archiveState: "successor-pending", standingAnchor: omitted, valid: true },
+  { label: "leave archived to archive-eligible", from: "archived", to: "review", archiveState: "archive-eligible", standingAnchor: omitted, valid: true },
+  { label: "leave archived without archive_state", from: "archived", to: "review", archiveState: omitted, standingAnchor: omitted, error: "crossing the archived boundary" },
+  { label: "leave archived with archived state", from: "archived", to: "review", archiveState: "archived", standingAnchor: omitted, error: "archive_state archived must move together" },
+  { label: "stay outside archived without archive_state", from: "review", to: "completed", archiveState: omitted, standingAnchor: omitted, valid: true },
+  { label: "stay outside archived with active state", from: "review", to: "completed", archiveState: "active", standingAnchor: omitted, valid: true },
+  { label: "stay outside archived with successor-pending", from: "review", to: "completed", archiveState: "successor-pending", standingAnchor: omitted, valid: true },
+  { label: "stay outside archived with archive-eligible", from: "review", to: "completed", archiveState: "archive-eligible", standingAnchor: omitted, valid: true },
+  { label: "stay outside archived with archived state", from: "review", to: "completed", archiveState: "archived", standingAnchor: omitted, error: "archive_state archived must move together" },
+  { label: "stay outside archived as standing anchor", from: "review", to: "completed", archiveState: omitted, standingAnchor: true, valid: true },
+  { label: "stay archived without restating archive_state", from: "archived", to: "archived", archiveState: omitted, standingAnchor: omitted, valid: true },
+  { label: "stay archived with archived state", from: "archived", to: "archived", archiveState: "archived", standingAnchor: false, valid: true },
+  { label: "stay archived with non-archived state", from: "archived", to: "archived", archiveState: "active", standingAnchor: false, error: "archive_state archived must move together" },
+];
+for (const testCase of archiveTransitionCases) {
+  const candidate = structuredClone(archiveTransitionTemplate);
+  candidate.event_type = "transition";
+  candidate.changes.set = {};
+  candidate.changes.transition = { from: testCase.from, to: testCase.to };
+  if (testCase.archiveState !== omitted) candidate.changes.set.archive_state = testCase.archiveState;
+  if (testCase.standingAnchor !== omitted) candidate.changes.set.standing_anchor = testCase.standingAnchor;
+  assert.deepEqual(validateJsonSchema(candidate, eventSchema.schema), [], `${testCase.label} schema`);
+  const errors = validateContractSemantics("atlas.card-event.v3", candidate);
+  if (testCase.valid) {
+    assert.deepEqual(errors, [], testCase.label);
+  } else {
+    assert(errors.some((error) => error.includes(testCase.error)), `${testCase.label}: ${errors.join(" | ")}`);
+  }
+}
+
+const receiptCases = [
+  { label: "execution receipt absent from materialized refs", receipts: [], valid: true, statuses: [] },
+  {
+    label: "execution receipt identity and digest match",
+    receipts: [{ receipt_id: event.execution_receipt.receipt_id, digest: event.execution_receipt.digest }],
+    valid: true,
+    statuses: ["succeeded"],
+  },
+  {
+    label: "execution receipt identity matches but digest conflicts",
+    receipts: [{ receipt_id: event.execution_receipt.receipt_id, digest: "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" }],
+    error: "identity and digest",
+    statuses: ["UNKNOWN"],
+  },
+  {
+    label: "different receipt identity with execution digest",
+    receipts: [{ receipt_id: "other-receipt", digest: event.execution_receipt.digest }],
+    valid: true,
+    statuses: ["UNKNOWN"],
+  },
+  {
+    label: "different receipt identity and digest",
+    receipts: [{ receipt_id: "other-receipt", digest: "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" }],
+    valid: true,
+    statuses: ["UNKNOWN"],
+  },
+];
+for (const testCase of receiptCases) {
+  const candidate = structuredClone(event);
+  candidate.changes.add_receipts = structuredClone(testCase.receipts);
+  assert.deepEqual(validateJsonSchema(candidate, eventSchema.schema), [], `${testCase.label} schema`);
+  const errors = validateContractSemantics("atlas.card-event.v3", candidate);
+  if (testCase.valid) {
+    assert.deepEqual(errors, [], testCase.label);
+  } else {
+    assert(errors.some((error) => error.includes(testCase.error)), `${testCase.label}: ${errors.join(" | ")}`);
+  }
+  const projected = projectInitialCardRecordV3(candidate);
+  assert.deepEqual(validateJsonSchema(projected, cardSchema.schema), [], `${testCase.label} projection schema`);
+  assert.deepEqual(projected.receipt_refs.map((receipt) => receipt.status), testCase.statuses, `${testCase.label} statuses`);
 }
 
 const migration = validArtifacts.get("atlas.board-authority-migration.v1");
@@ -239,6 +324,15 @@ const updateMaterializationErrors = await assertSemanticNegative(
   "invalid/card-event.v3.invalid-update-materialization.json",
 );
 assert(updateMaterializationErrors.some((error) => error.includes("archive_state archived must move together")));
+for (const [fixtureRef, expectedError] of [
+  ["invalid/card-event.v3.archive-entry-missing-state.json", "crossing the archived boundary"],
+  ["invalid/card-event.v3.archive-entry-missing-standing-anchor.json", "explicit $.changes.set.standing_anchor false"],
+  ["invalid/card-event.v3.archive-exit-missing-state.json", "crossing the archived boundary"],
+  ["invalid/card-event.v3.execution-receipt-digest-mismatch.json", "identity and digest"],
+]) {
+  const fixtureErrors = await assertSemanticNegative("atlas.card-event.v3", eventSchema.schema, fixtureRef);
+  assert(fixtureErrors.some((error) => error.includes(expectedError)));
+}
 const staleErrors = await assertSemanticNegative(
   "atlas.projection-delivery.v1",
   deliverySchema.schema,
@@ -276,6 +370,111 @@ const unavailableUnknownZeroAttempt = await loadJson(path.join(
 ));
 assert.deepEqual(validateJsonSchema(unavailableUnknownZeroAttempt, deliverySchema.schema), []);
 assert.deepEqual(validateContractSemantics("atlas.projection-delivery.v1", unavailableUnknownZeroAttempt), []);
+const missingAvailabilityError = await assertSemanticNegative(
+  "atlas.projection-delivery.v1",
+  deliverySchema.schema,
+  "invalid/projection-delivery.v1.unavailable-unknown-missing-error.json",
+);
+assert(missingAvailabilityError.some((error) => error.includes("availability error evidence")));
+
+const projectionEvidenceTimestamp = "2026-07-17T12:01:00Z";
+const projectionResponseDigest = "sha256:5555555555555555555555555555555555555555555555555555555555555555";
+function makeProjectionDeliveryCase({ availability, state, ...overrides }) {
+  const candidate = structuredClone(delivery);
+  const unavailable = availability === "unavailable";
+  const queued = state === "queued";
+  const retryable = state !== "applied";
+  candidate.availability = availability;
+  candidate.state = state;
+  candidate.retry = {
+    attempt_count: unavailable || queued ? 0 : 1,
+    retryable,
+    next_attempt_at: retryable ? "2026-07-17T12:05:00Z" : null,
+  };
+  candidate.touched_card_readback = {
+    mode: "exact-touched-card",
+    card_id: candidate.card_id,
+    state: unavailable ? "UNKNOWN" : state,
+    request_count: unavailable ? null : (queued ? 0 : 1),
+    full_scan: false,
+    observed_at: unavailable || queued ? null : projectionEvidenceTimestamp,
+    response_digest: unavailable || queued ? null : projectionResponseDigest,
+  };
+  candidate.last_error = unavailable || state === "failed" ? { code: "PROJECTION_ERROR" } : null;
+  if (Object.hasOwn(overrides, "attemptCount")) candidate.retry.attempt_count = overrides.attemptCount;
+  if (Object.hasOwn(overrides, "retryable")) candidate.retry.retryable = overrides.retryable;
+  if (Object.hasOwn(overrides, "nextAttemptAt")) candidate.retry.next_attempt_at = overrides.nextAttemptAt;
+  if (Object.hasOwn(overrides, "readbackState")) candidate.touched_card_readback.state = overrides.readbackState;
+  if (Object.hasOwn(overrides, "requestCount")) candidate.touched_card_readback.request_count = overrides.requestCount;
+  if (Object.hasOwn(overrides, "observedAt")) candidate.touched_card_readback.observed_at = overrides.observedAt;
+  if (Object.hasOwn(overrides, "responseDigest")) candidate.touched_card_readback.response_digest = overrides.responseDigest;
+  if (Object.hasOwn(overrides, "lastError")) candidate.last_error = overrides.lastError;
+  if (overrides.omitLastError) delete candidate.last_error;
+  return candidate;
+}
+
+const projectionDeliveryCases = [
+  { label: "available queued", availability: "available", state: "queued", valid: true },
+  { label: "available applied", availability: "available", state: "applied", valid: true },
+  { label: "available stale retryable", availability: "available", state: "stale", valid: true },
+  { label: "available stale terminal", availability: "available", state: "stale", retryable: false, nextAttemptAt: null, valid: true },
+  { label: "available failed retryable", availability: "available", state: "failed", valid: true },
+  { label: "available failed terminal", availability: "available", state: "failed", retryable: false, nextAttemptAt: null, valid: true },
+  { label: "available UNKNOWN retryable", availability: "available", state: "UNKNOWN", valid: true },
+  { label: "available UNKNOWN terminal", availability: "available", state: "UNKNOWN", retryable: false, nextAttemptAt: null, valid: true },
+  { label: "unavailable UNKNOWN retryable", availability: "unavailable", state: "UNKNOWN", valid: true },
+  { label: "unavailable UNKNOWN terminal", availability: "unavailable", state: "UNKNOWN", retryable: false, nextAttemptAt: null, valid: true },
+  { label: "unavailable queued", availability: "unavailable", state: "queued", error: "must remain UNKNOWN" },
+  { label: "unavailable applied", availability: "unavailable", state: "applied", error: "must remain UNKNOWN" },
+  { label: "unavailable stale", availability: "unavailable", state: "stale", error: "must remain UNKNOWN" },
+  { label: "unavailable failed", availability: "unavailable", state: "failed", error: "must remain UNKNOWN" },
+  { label: "queued with positive attempt", availability: "available", state: "queued", attemptCount: 1, error: "attempt_count 0" },
+  { label: "queued made non-retryable", availability: "available", state: "queued", retryable: false, nextAttemptAt: null, error: "must remain retryable" },
+  { label: "queued with performed request", availability: "available", state: "queued", requestCount: 1, error: "zero performed requests" },
+  { label: "queued with wrong readback state", availability: "available", state: "queued", readbackState: "UNKNOWN", error: "zero performed requests" },
+  { label: "queued with readback evidence", availability: "available", state: "queued", observedAt: projectionEvidenceTimestamp, responseDigest: projectionResponseDigest, error: "without claiming readback" },
+  { label: "queued retaining error", availability: "available", state: "queued", lastError: { code: "OLD" }, error: "must not retain error" },
+  { label: "applied with zero attempt", availability: "available", state: "applied", attemptCount: 0, error: "positive attempt_count" },
+  { label: "applied made retryable", availability: "available", state: "applied", retryable: true, nextAttemptAt: "2026-07-17T12:05:00Z", error: "must be non-retryable" },
+  { label: "applied with zero requests", availability: "available", state: "applied", requestCount: 0, error: "positive exact touched-card" },
+  { label: "applied with wrong readback state", availability: "available", state: "applied", readbackState: "stale", error: "positive exact touched-card" },
+  { label: "applied without observation evidence", availability: "available", state: "applied", observedAt: null, responseDigest: null, error: "observed_at and response_digest" },
+  { label: "applied retaining error", availability: "available", state: "applied", lastError: { code: "OLD" }, error: "must not retain error" },
+  { label: "stale with zero attempt", availability: "available", state: "stale", attemptCount: 0, error: "positive attempt_count" },
+  { label: "stale with zero requests", availability: "available", state: "stale", requestCount: 0, error: "positive exact touched-card" },
+  { label: "stale with wrong readback state", availability: "available", state: "stale", readbackState: "applied", error: "positive exact touched-card" },
+  { label: "stale without observation evidence", availability: "available", state: "stale", observedAt: null, responseDigest: null, error: "observed_at and response_digest" },
+  { label: "failed with zero attempt", availability: "available", state: "failed", attemptCount: 0, error: "positive attempt_count" },
+  { label: "failed with zero requests", availability: "available", state: "failed", requestCount: 0, error: "positive exact touched-card" },
+  { label: "failed with wrong readback state", availability: "available", state: "failed", readbackState: "UNKNOWN", error: "positive exact touched-card" },
+  { label: "failed without error evidence", availability: "available", state: "failed", lastError: null, error: "non-empty error evidence" },
+  { label: "failed with empty error evidence", availability: "available", state: "failed", lastError: {}, error: "non-empty error evidence" },
+  { label: "available UNKNOWN with zero attempt", availability: "available", state: "UNKNOWN", attemptCount: 0, error: "positive attempt_count" },
+  { label: "available UNKNOWN with zero requests", availability: "available", state: "UNKNOWN", requestCount: 0, error: "positive exact touched-card" },
+  { label: "available UNKNOWN with wrong readback state", availability: "available", state: "UNKNOWN", readbackState: "failed", error: "positive exact touched-card" },
+  { label: "available UNKNOWN without observation evidence", availability: "available", state: "UNKNOWN", observedAt: null, responseDigest: null, error: "observed_at and response_digest" },
+  { label: "unavailable UNKNOWN with positive attempt", availability: "unavailable", state: "UNKNOWN", attemptCount: 1, error: "must not invent an attempt" },
+  { label: "unavailable UNKNOWN with zero request claim", availability: "unavailable", state: "UNKNOWN", requestCount: 0, error: "must not invent request counts" },
+  { label: "unavailable UNKNOWN with wrong readback state", availability: "unavailable", state: "UNKNOWN", readbackState: "failed", error: "must remain UNKNOWN" },
+  { label: "unavailable UNKNOWN with observation evidence", availability: "unavailable", state: "UNKNOWN", observedAt: projectionEvidenceTimestamp, responseDigest: projectionResponseDigest, error: "must not invent request counts" },
+  { label: "unavailable UNKNOWN missing last_error", availability: "unavailable", state: "UNKNOWN", omitLastError: true, error: "availability error evidence" },
+  { label: "unavailable UNKNOWN null last_error", availability: "unavailable", state: "UNKNOWN", lastError: null, error: "availability error evidence" },
+  { label: "unavailable UNKNOWN empty last_error", availability: "unavailable", state: "UNKNOWN", lastError: {}, error: "availability error evidence" },
+  { label: "retryable state without next attempt", availability: "available", state: "stale", nextAttemptAt: null, error: "requires $.retry.next_attempt_at" },
+  { label: "non-retryable state with next attempt", availability: "available", state: "failed", retryable: false, nextAttemptAt: "2026-07-17T12:05:00Z", error: "must not schedule a next attempt" },
+];
+for (const testCase of projectionDeliveryCases) {
+  const candidate = makeProjectionDeliveryCase(testCase);
+  assert.deepEqual(validateJsonSchema(candidate, deliverySchema.schema), [], `${testCase.label} schema`);
+  const firstErrors = validateContractSemantics("atlas.projection-delivery.v1", candidate);
+  const secondErrors = validateContractSemantics("atlas.projection-delivery.v1", candidate);
+  assert.deepEqual(firstErrors, secondErrors, `${testCase.label} deterministic`);
+  if (testCase.valid) {
+    assert.deepEqual(firstErrors, [], testCase.label);
+  } else {
+    assert(firstErrors.some((error) => error.includes(testCase.error)), `${testCase.label}: ${firstErrors.join(" | ")}`);
+  }
+}
 const ackCorrelationErrors = await assertSemanticNegative(
   "atlas.projection-ack.v1",
   ackSchema.schema,
@@ -296,6 +495,22 @@ const zeroAttemptAck = await loadJson(path.join(
 ));
 const zeroAttemptAckSchemaErrors = validateJsonSchema(zeroAttemptAck, ackSchema.schema);
 assert(zeroAttemptAckSchemaErrors.some((error) => error.includes("attempt_count")));
+const missingAckAvailabilityError = await assertSemanticNegative(
+  "atlas.projection-ack.v1",
+  ackSchema.schema,
+  "invalid/projection-ack.v1.unavailable-unknown-missing-error.json",
+  { projectionDelivery: delivery },
+);
+assert(missingAckAvailabilityError.some((error) => error.includes("availability error evidence")));
+const validUnavailableAck = await loadJson(path.join(
+  fixturesDir,
+  "valid/projection-ack.v1.unavailable-unknown.json",
+));
+assert.deepEqual(validateJsonSchema(validUnavailableAck, ackSchema.schema), []);
+assert.deepEqual(
+  validateContractSemantics("atlas.projection-ack.v1", validUnavailableAck, { projectionDelivery: delivery }),
+  [],
+);
 const migrationPhaseErrors = await assertSemanticNegative(
   "atlas.board-authority-migration.v1",
   migrationSchema.schema,
@@ -322,4 +537,6 @@ assert(validateContractSemantics("atlas.rollover-manifest.v1", livePredecessorRo
   (error) => error.includes("identified terminal receipt"),
 ));
 
-console.log("ATLAS board authority contract tests passed.");
+console.log(
+  `ATLAS board authority contract tests passed (${archiveTransitionCases.length} lifecycle, ${receiptCases.length} receipt, ${projectionDeliveryCases.length} projection matrix cases).`,
+);
