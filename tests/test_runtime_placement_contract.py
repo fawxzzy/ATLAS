@@ -138,6 +138,20 @@ class RuntimePlacementContractTests(unittest.TestCase):
         issues = contract.validate_runtime_placement_payloads(mutated, lane_registry, marker_book, root=ROOT)
         self.assertIn("runtime-placement-selector", {issue.category for issue in issues})
 
+    def test_activation_packet_names_must_be_unique(self) -> None:
+        registry, lane_registry, marker_book = _payloads()
+        mutated = copy.deepcopy(registry)
+        current_index = next(
+            index for index, step in enumerate(mutated["activation_steps"]) if step["status"] != "accepted"
+        )
+        duplicate_packet = mutated["activation_steps"][0]["packet"]
+        mutated["activation_steps"][current_index]["packet"] = duplicate_packet
+        mutated["next_owner_side_activation_packet"] = duplicate_packet
+
+        issues = contract.validate_runtime_placement_payloads(mutated, lane_registry, marker_book, root=ROOT)
+
+        self.assertIn("runtime-placement-activation-step-packet-duplicate", {issue.category for issue in issues})
+
     def test_selector_advances_when_current_step_becomes_accepted(self) -> None:
         registry, lane_registry, marker_book = _payloads()
         mutated = copy.deepcopy(registry)

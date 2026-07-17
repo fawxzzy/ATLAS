@@ -371,6 +371,7 @@ def validate_runtime_placement_payloads(
         if ids != list(ACTIVATION_SEQUENCE) or orders != list(range(1, 9)):
             issues.append(_issue("runtime-placement-activation-steps", f"{registry_path}#activation_steps", "Structured activation steps must map one-to-one and in order to the frozen v1 activation_sequence.", expected=list(ACTIVATION_SEQUENCE), actual=ids))
         unresolved_seen = False
+        packet_owners: dict[str, str | None] = {}
         for step_index, step in enumerate(activation_steps):
             step_path = f"{registry_path}#activation_steps[{step_index}]"
             if not isinstance(step, dict):
@@ -381,6 +382,19 @@ def validate_runtime_placement_payloads(
             status = step.get("status")
             if not isinstance(packet, str) or not packet.strip():
                 issues.append(_issue("runtime-placement-activation-step-packet", step_path, "Activation step packet must be a non-empty string."))
+            elif packet in packet_owners:
+                issues.append(
+                    _issue(
+                        "runtime-placement-activation-step-packet-duplicate",
+                        step_path,
+                        "Activation step packet names must be unique so the public selector resolves unambiguously.",
+                        packet=packet,
+                        first_step_id=packet_owners[packet],
+                        duplicate_step_id=step.get("id"),
+                    )
+                )
+            else:
+                packet_owners[packet] = step.get("id")
             if status not in STEP_STATUSES:
                 issues.append(_issue("runtime-placement-activation-step-status", step_path, "Activation step status must preserve accepted, pending, blocked, or unknown distinctly.", actual=status))
             if not _non_empty_strings(step.get("evidence_refs")):

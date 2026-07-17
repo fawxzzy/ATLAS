@@ -135,10 +135,11 @@ step.
 
 - Runtime placement schema and semantic validation reports `issue_count=0`.
 - Focused runtime-placement and deterministic owner-export coverage passes
-  `26` tests. Coverage includes the original v1 string-ID sequence shape,
-  missing/duplicate/reordered structured-step rejection, selector advancement,
-  accepted-prefix enforcement, blocked/unknown distinction, fixed-unit marker
-  derivation, and source-only portability.
+  `27` tests. Coverage includes the original v1 string-ID sequence shape,
+  missing/duplicate/reordered structured-step rejection, unique public packet
+  selectors, selector advancement, accepted-prefix enforcement,
+  blocked/unknown distinction, fixed-unit marker derivation, and source-only
+  portability.
 - Deterministic owner-export write and replay both report source revision
   `sha256:33ce842268106ba720722bb257053bf8d28208b9cbcae87f55716a15ddebf214`,
   `36` Atlas cards, `2` Cortex cards, and
