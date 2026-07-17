@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import hashlib
+import io
 import json
 import sqlite3
 import tempfile
 import threading
 import unittest
 from concurrent.futures import ThreadPoolExecutor
-from contextlib import closing
+from contextlib import closing, redirect_stderr, redirect_stdout
 from datetime import datetime
 from pathlib import Path
 
@@ -25,6 +26,7 @@ from ops.atlas.operator_notification_idempotency import (
     NotificationLedger,
     UnknownLedgerSchemaError,
     build_event,
+    main as notification_main,
     validate_event,
 )
 
@@ -104,6 +106,14 @@ class OperatorNotificationIdempotencyTests(unittest.TestCase):
             seen_at=seen_at,
             **kwargs,
         )
+
+    @staticmethod
+    def run_cli(*argv: str) -> tuple[int, str, str]:
+        stdout = io.StringIO()
+        stderr = io.StringIO()
+        with redirect_stdout(stdout), redirect_stderr(stderr):
+            exit_code = notification_main(list(argv))
+        return exit_code, stdout.getvalue(), stderr.getvalue()
 
     def begin(self, event: dict, claim: dict, *, clock_at: str = STARTED) -> dict:
         self.clock_now = datetime.fromisoformat(clock_at[:-1] + "+00:00")
@@ -515,6 +525,134 @@ class OperatorNotificationIdempotencyTests(unittest.TestCase):
             seen_at="2026-07-17T14:00:02Z",
         )
         self.assertFalse(result["operator_message_authorized"])
+
+    def test_causal_occurrence_identity_supports_ready_blocked_ready(self) -> None:
+        ready = self.event(event_class="task.causal-cycle")
+        self.claim(ready)
+        blocked = self.event(
+            facts={"status": "blocked", "card_id": "ATLAS-1"},
+            event_class="task.causal-cycle",
+            supersedes_event_id=ready["event_id"],
+            delta={"changed_fact_paths": ["/status"]},
+        )
+        self.ledger.claim(
+            blocked,
+            claimant_id="host-b",
+            seen_at="2026-07-17T14:00:02Z",
+        )
+        ready_again = self.event(
+            event_class="task.causal-cycle",
+            supersedes_event_id=blocked["event_id"],
+            delta={"changed_fact_paths": ["/status"]},
+        )
+        admitted = self.ledger.claim(
+            ready_again,
+            claimant_id="host-c",
+            seen_at="2026-07-17T14:00:03Z",
+        )
+
+        self.assertEqual(
+            ready_again["canonical_payload_digest"], ready["canonical_payload_digest"]
+        )
+        self.assertEqual(blocked["supersedes_event_id"], ready["event_id"])
+        self.assertEqual(ready_again["supersedes_event_id"], blocked["event_id"])
+        self.assertEqual(
+            len({ready["event_id"], blocked["event_id"], ready_again["event_id"]}),
+            3,
+        )
+        self.assertTrue(admitted["should_begin_delivery"])
+        self.assertFalse(admitted["operator_message_authorized"])
+
+    def test_causal_identity_retry_is_stable_across_hosts_and_restart(self) -> None:
+        ready = self.event(event_class="task.causal-retry")
+        self.claim(ready)
+        changed = self.event(
+            facts={"status": "blocked", "card_id": "ATLAS-1"},
+            event_class="task.causal-retry",
+            transport={"host_id": "windows-a", "attempt": 1},
+            supersedes_event_id=ready["event_id"],
+            delta={"changed_fact_paths": ["/status"]},
+        )
+        retry = self.event(
+            facts={"status": "blocked", "card_id": "ATLAS-1"},
+            event_class="task.causal-retry",
+            transport={"host_id": "linux-b", "attempt": 8},
+            created_at="2026-07-18T01:02:03Z",
+            supersedes_event_id=ready["event_id"],
+            delta={"changed_fact_paths": ["/status"]},
+        )
+        self.assertEqual(changed["event_id"], retry["event_id"])
+        self.ledger.claim(
+            changed,
+            claimant_id="windows-a",
+            seen_at="2026-07-17T14:00:02Z",
+        )
+        restarted = NotificationLedger(
+            self.runtime_root,
+            self.ledger_path,
+            _clock=lambda: self.clock_now,
+            _token_bytes=self.fixture_token_bytes,
+        )
+        duplicate = restarted.claim(
+            retry,
+            claimant_id="linux-b",
+            seen_at="2026-07-17T14:00:03Z",
+        )
+        self.assertFalse(duplicate["operator_message_authorized"])
+        self.assertEqual(duplicate["event_id"], changed["event_id"])
+
+    def test_causal_lineage_rejects_unrelated_stream_and_accepts_legacy_event(self) -> None:
+        first = self.event(event_class="task.legacy-causal")
+        self.claim(first)
+        current = self.event(
+            facts={"status": "complete", "card_id": "ATLAS-1"},
+            event_class="task.legacy-causal",
+            supersedes_event_id=first["event_id"],
+            delta={"changed_fact_paths": ["/status"]},
+        )
+        legacy = dict(current)
+        legacy["event_id"] = "onv1_" + hashlib.sha256(
+            "\x1f".join(
+                [
+                    current["source_thread_id"],
+                    current["event_class"],
+                    current["notification_kind"],
+                    current["canonical_payload_digest"],
+                ]
+            ).encode("utf-8")
+        ).hexdigest()
+        self.assertEqual(validate_event(legacy), legacy)
+        self.ledger.claim(
+            legacy,
+            claimant_id="legacy-host",
+            seen_at="2026-07-17T14:00:02Z",
+        )
+        restarted = NotificationLedger(self.runtime_root, self.ledger_path)
+        duplicate = restarted.claim(
+            legacy,
+            claimant_id="restart-host",
+            seen_at="2026-07-17T14:00:03Z",
+        )
+        self.assertFalse(duplicate["operator_message_authorized"])
+
+        unrelated = self.event(event_class="task.unrelated-causal")
+        self.ledger.claim(
+            unrelated,
+            claimant_id="unrelated-host",
+            seen_at="2026-07-17T14:00:04Z",
+        )
+        with self.assertRaisesRegex(NotificationContractError, "supersede"):
+            self.ledger.claim(
+                self.event(
+                    facts={"status": "complete", "card_id": "ATLAS-1"},
+                    event_class="task.unrelated-causal",
+                    supersedes_event_id=legacy["event_id"],
+                    delta={"changed_fact_paths": ["/status"]},
+                ),
+                claimant_id="unrelated-host",
+                seen_at="2026-07-17T14:00:05Z",
+            )
+        self.assertNotEqual(unrelated["event_id"], legacy["event_id"])
 
     def test_acknowledgement_stops_retry_and_replays_stable_control_ack(self) -> None:
         event = self.event()
@@ -1058,6 +1196,79 @@ class OperatorNotificationIdempotencyTests(unittest.TestCase):
         self.assertNotIn(secret_text.encode("utf-8"), raw_database)
         record = self.ledger.record(event["event_id"])
         self.assertNotIn("payload", record)
+
+    def test_cli_input_failures_are_sanitized_contract_rejections(self) -> None:
+        input_root = self.runtime_root.parent / "operator-inputs"
+        input_root.mkdir()
+        unreadable = input_root / "unreadable-marker"
+        unreadable.mkdir()
+        missing = input_root / "missing-private-marker.json"
+        malformed = input_root / "malformed.json"
+        malformed.write_text('{"private_payload_marker":', encoding="utf-8")
+        non_object = input_root / "non-object.json"
+        non_object.write_text('["private-list-marker"]', encoding="utf-8")
+        missing_fields = input_root / "missing-fields.json"
+        missing_fields.write_text("{}", encoding="utf-8")
+        extra_field = input_root / "extra-field.json"
+        extra_field.write_text(
+            json.dumps(
+                {
+                    "source_thread_id": THREAD_ID,
+                    "event_class": "task.cli",
+                    "payload": {"facts": {"status": "ready"}},
+                    "created_at": CREATED,
+                    "raw_private_argument": "must-not-leak",
+                }
+            ),
+            encoding="utf-8",
+        )
+        invalid_type = input_root / "invalid-type.json"
+        invalid_type.write_text(
+            json.dumps(
+                {
+                    "source_thread_id": ["private-thread-marker"],
+                    "event_class": "task.cli",
+                    "payload": {"facts": {"status": "ready"}},
+                    "created_at": CREATED,
+                }
+            ),
+            encoding="utf-8",
+        )
+
+        cases = {
+            "missing": missing,
+            "unreadable": unreadable,
+            "malformed": malformed,
+            "non_object": non_object,
+            "missing_fields": missing_fields,
+            "extra_field": extra_field,
+            "invalid_type": invalid_type,
+        }
+        forbidden = {
+            str(input_root),
+            "missing-private-marker",
+            "unreadable-marker",
+            "private_payload_marker",
+            "private-list-marker",
+            "must-not-leak",
+            "private-thread-marker",
+            "Traceback",
+        }
+        for name, path in cases.items():
+            with self.subTest(name=name):
+                exit_code, stdout, stderr = self.run_cli(
+                    "prepare", "--input", str(path)
+                )
+                self.assertEqual(exit_code, 2)
+                self.assertEqual(stdout, "")
+                rejection = json.loads(stderr)
+                self.assertEqual(
+                    set(rejection), {"error", "message", "status"}
+                )
+                self.assertEqual(rejection["status"], "rejected")
+                self.assertEqual(rejection["error"], "NotificationContractError")
+                for marker in forbidden:
+                    self.assertNotIn(marker, stderr)
 
 
 if __name__ == "__main__":

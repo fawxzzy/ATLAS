@@ -48,7 +48,11 @@ must use integer or string fixed-point facts.
 `event_id` is:
 
 ```text
-onv1_ + sha256(source_thread_id + U+001F + event_class + U+001F + notification_kind + U+001F + canonical_payload_digest)
+onv1_ + sha256(
+  source_thread_id + U+001F + event_class + U+001F + notification_kind
+  + U+001F + canonical_payload_digest
+  [+ U+001F + supersedes_event_id for a changed deliverable]
+)
 ```
 
 `notification_kind` is identity-bearing because it changes delivery semantics. A heartbeat
@@ -58,17 +62,27 @@ excluded from logical identity, so an unchanged same-kind retry preserves `event
 across hosts and restarts. Their combined envelope digest is retained only to distinguish
 exact from semantic duplicate receipts.
 
-Every event carries `created_at`. A changed fact set creates a new `event_id`. Unless the
-event is explicitly typed `periodic_digest`, the receiver requires the changed event to
-name the latest stream event in `supersedes_event_id` and provide sorted, unique JSON
-Pointer paths in `delta.changed_fact_paths`. Initial stream events may establish a first
-snapshot. Heartbeats and continuations are control records and never authorize an
-operator-facing message. Control records cannot carry `supersedes_event_id` or `delta`;
+Every event carries `created_at`. A changed deliverable binds its causal predecessor into
+identity. This makes `ready -> blocked -> ready` three distinct occurrences while a retry
+of any occurrence with the same facts and predecessor remains stable. Unless the event is
+explicitly typed `periodic_digest`, the receiver requires the changed event to name the
+latest stream event in `supersedes_event_id` and provide sorted, unique JSON Pointer paths
+in `delta.changed_fact_paths`. Existing event-v1 changed-deliverable envelopes created
+without the causal identity component remain valid for replay and duplicate recognition;
+new preparation always uses causal identity. `ledger.v2` is unchanged. Initial stream
+events may establish a first snapshot. Heartbeats and continuations are control records
+and never authorize an operator-facing message. Control records cannot carry
+`supersedes_event_id` or `delta`;
 only a validated deliverable event may mark a predecessor superseded, and only within its
 source-thread/event-class stream. Timestamps use canonical RFC 3339 UTC with an uppercase
 `T` and `Z`, optional one-to-six digit fractional seconds, and no offset form. JSON Pointer
 paths exclude the empty root pointer and admit `~` only as the RFC 6901 escapes `~0` or
 `~1`.
+
+CLI input failures are contract rejections. Missing or unreadable files, malformed JSON,
+non-object input, and invalid top-level builder fields return a compact
+`NotificationContractError` record with exit code 2. Rejections never include the input
+path, raw payload, or a traceback.
 
 ## Atomic Receive Contract
 

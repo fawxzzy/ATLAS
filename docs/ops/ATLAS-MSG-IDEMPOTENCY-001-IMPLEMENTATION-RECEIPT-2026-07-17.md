@@ -20,6 +20,9 @@ second notification stream.
   authority file; first-time provisioning is a separate exclusive operation.
 - `notification_kind` is part of deterministic event identity, preserving same-kind
   cross-host retries while separating control and operator delivery semantics.
+- Changed deliverables include their causal predecessor in identity, representing repeated
+  fact states after an intervening change without destabilizing same-occurrence retries.
+  Existing non-causal event-v1 envelopes remain replay-compatible; `ledger.v2` is unchanged.
 - Durable `ledger.v2` stores each active generation's acquisition timestamp, captures
   delivery start from its runtime clock, and rejects starts outside the current lease.
 - Claim acquisition and expiry use that ledger clock inside the claim transaction;
@@ -42,6 +45,8 @@ second notification stream.
 - Duplicate acknowledgements are stable control receipts with no message or retry authority.
 - Lease expiries retain microsecond precision; timestamps are canonical RFC 3339 UTC; and
   changed-fact paths enforce RFC 6901 escape grammar with the existing no-root policy.
+- CLI file, JSON, shape, and builder-argument failures are sanitized contract rejections
+  with exit code 2 and no path, payload, or traceback disclosure.
 
 ## Fixed Verification Units
 
@@ -50,6 +55,7 @@ second notification stream.
 - Semantic duplicate suppression after volatile-field normalization.
 - Changed-delta and supersession enforcement.
 - Cross-host stable identity.
+- Ready-blocked-ready causal occurrence identity, stable retry, and legacy replay.
 - Notification-kind identity separation.
 - Missing-ledger startup rejection and exclusive first-time provisioning.
 - Pre-send token/generation fencing and stale claimant rejection.
@@ -71,13 +77,14 @@ second notification stream.
 - Canonical timestamp and JSON Pointer grammar rejection.
 - Periodic-digest full-snapshot exception.
 - Payload non-retention.
+- Sanitized deterministic CLI input rejection.
 
 Completion values are not inferred from these units. Runtime effectiveness remains
 `UNKNOWN` until an owner-named adapter passes the adoption gates in the ADR.
 
 ## Local Verification Snapshot
 
-- Notification contract/ledger suite: 34 passed in each of two final runs on Python 3.12
+- Notification contract/ledger suite: 38 passed in each of two final runs on Python 3.12
   and in each of two final runs on Python 3.13.
 - Native task and board correlation suite: 22 passed in each of two runs.
 - Root QA pipeline suite: 78 passed in each of two runs.

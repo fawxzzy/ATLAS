@@ -58,13 +58,23 @@ python ops/atlas/operator_notification_idempotency.py prepare --input <input-jso
 Transport attempt numbers, host labels, routing metadata, and `created_at` may change on a
 retry without changing `event_id`. `notification_kind` is identity-bearing, so changing a
 heartbeat into an operator update creates a different ID while same-kind cross-host retries
-remain stable. Changed facts must produce a new event and, after the first event in a
-stream, must name the latest predecessor and changed fact paths. Only an explicit
+remain stable. Changed deliverables bind the latest predecessor into deterministic
+identity, so returning to an earlier fact state after an intervening change remains a new
+occurrence. A retry reuses the same predecessor and therefore the same ID. Changed facts
+must produce a new event and, after the first event in a stream, must name the latest
+predecessor and changed fact paths. Existing event-v1 changed-deliverable envelopes that
+predate causal identity remain admissible for replay; do not regenerate them under a new
+ID during recovery. Only an explicit
 `periodic_digest` may establish another unlinked full snapshot. Heartbeats and
 continuations must not carry `supersedes_event_id` or `delta`; control receipts can never
 supersede a deliverable event. All timestamps must use canonical RFC 3339 UTC (`T`, `Z`,
 and at most six fractional digits). Delta paths exclude the empty root pointer and use only
 RFC 6901 `~0` and `~1` escapes.
+
+`prepare` rejects unreadable or missing input, malformed JSON, non-object JSON, and invalid
+top-level builder fields as sanitized `NotificationContractError` JSON on stderr with exit
+code 2. Treat any other result as a wrapper defect; never forward a traceback, file path,
+or raw input into an operator notification.
 
 ## Provision Once
 

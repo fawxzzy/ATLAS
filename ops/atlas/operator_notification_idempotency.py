@@ -229,6 +229,30 @@ def _is_non_root_json_pointer(value: Any) -> bool:
     return True
 
 
+def _notification_event_id(
+    *,
+    source_thread_id: str,
+    event_class: str,
+    notification_kind: str,
+    canonical_payload_digest: str,
+    supersedes_event_id: str | None,
+    include_causal_predecessor: bool = True,
+) -> str:
+    identity_parts = [
+        source_thread_id,
+        event_class,
+        notification_kind,
+        canonical_payload_digest,
+    ]
+    if (
+        include_causal_predecessor
+        and notification_kind not in CONTROL_KINDS
+        and supersedes_event_id is not None
+    ):
+        identity_parts.append(supersedes_event_id)
+    return _prefixed_id("onv1_", "\x1f".join(identity_parts).encode("utf-8"))
+
+
 def build_event(
     *,
     source_thread_id: str,
@@ -265,18 +289,6 @@ def build_event(
             {"created_at": created_at, "payload": normalized_payload}
         )
     )
-    event_id = _prefixed_id(
-        "onv1_",
-        (
-            source_thread_id
-            + "\x1f"
-            + event_class
-            + "\x1f"
-            + notification_kind
-            + "\x1f"
-            + canonical_payload_digest
-        ).encode("utf-8"),
-    )
     if supersedes_event_id is not None and not EVENT_ID_RE.fullmatch(
         supersedes_event_id
     ):
@@ -290,6 +302,13 @@ def build_event(
         raise NotificationContractError(
             "heartbeat and continuation events cannot supersede notifications"
         )
+    event_id = _notification_event_id(
+        source_thread_id=source_thread_id,
+        event_class=event_class,
+        notification_kind=notification_kind,
+        canonical_payload_digest=canonical_payload_digest,
+        supersedes_event_id=supersedes_event_id,
+    )
     authority = {
         "notification_only": True,
         "repository_execution_authorized": False,
@@ -350,11 +369,27 @@ def validate_event(event: Mapping[str, Any]) -> dict[str, Any]:
         supersedes_event_id=event["supersedes_event_id"],
         delta=event["delta"],
     )
-    if dict(event) != rebuilt:
-        raise NotificationContractError(
-            "event does not match deterministic canonical reconstruction"
+    event_dict = dict(event)
+    if event_dict == rebuilt:
+        return rebuilt
+    if (
+        rebuilt["notification_kind"] not in CONTROL_KINDS
+        and rebuilt["supersedes_event_id"] is not None
+    ):
+        legacy = dict(rebuilt)
+        legacy["event_id"] = _notification_event_id(
+            source_thread_id=rebuilt["source_thread_id"],
+            event_class=rebuilt["event_class"],
+            notification_kind=rebuilt["notification_kind"],
+            canonical_payload_digest=rebuilt["canonical_payload_digest"],
+            supersedes_event_id=rebuilt["supersedes_event_id"],
+            include_causal_predecessor=False,
         )
-    return rebuilt
+        if event_dict == legacy:
+            return legacy
+    raise NotificationContractError(
+        "event does not match deterministic canonical reconstruction"
+    )
 
 
 def resolve_ledger_path(runtime_root: Path | str, ledger_path: Path | str) -> Path:
@@ -1382,12 +1417,38 @@ def _reject_sensitive_input_path(path: Path) -> None:
 
 
 def _load_json(path_value: str) -> dict[str, Any]:
-    path = Path(path_value).resolve()
-    _reject_sensitive_input_path(path)
-    value = json.loads(path.read_text(encoding="utf-8"))
+    try:
+        path = Path(path_value).resolve()
+        _reject_sensitive_input_path(path)
+        serialized = path.read_text(encoding="utf-8")
+    except NotificationContractError:
+        raise
+    except (OSError, UnicodeError):
+        raise NotificationContractError("input JSON could not be read") from None
+    try:
+        value = json.loads(serialized)
+    except (json.JSONDecodeError, RecursionError):
+        raise NotificationContractError("input JSON is malformed") from None
     if not isinstance(value, dict):
         raise NotificationContractError("input JSON must be an object")
     return value
+
+
+def _build_event_from_input(source: Mapping[str, Any]) -> dict[str, Any]:
+    required = {"source_thread_id", "event_class", "payload", "created_at"}
+    optional = {"notification_kind", "supersedes_event_id", "delta"}
+    missing = sorted(required - set(source))
+    extra = sorted(set(source) - required - optional)
+    if missing or extra:
+        raise NotificationContractError(
+            f"input JSON fields mismatch; missing={missing}, extra={extra}"
+        )
+    try:
+        return build_event(**source)
+    except TypeError:
+        raise NotificationContractError(
+            "input JSON contains invalid build-event arguments"
+        ) from None
 
 
 def _ledger(args: argparse.Namespace) -> NotificationLedger:
@@ -1441,7 +1502,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     try:
         if args.command == "prepare":
             source = _load_json(args.input)
-            result = build_event(**source)
+            result = _build_event_from_input(source)
         elif args.command == "provision":
             NotificationLedger.provision(args.runtime_root, args.ledger)
             result = {
