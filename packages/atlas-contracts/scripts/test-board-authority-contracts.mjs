@@ -80,6 +80,7 @@ const eventSchema = await loadKnownSchema("atlas.card-event.v3");
 const deliverySchema = await loadKnownSchema("atlas.projection-delivery.v1");
 const ackSchema = await loadKnownSchema("atlas.projection-ack.v1");
 const rolloverSchema = await loadKnownSchema("atlas.rollover-manifest.v1");
+const controlSchema = await loadKnownSchema("atlas.control-board-read-model.v1");
 
 async function assertSemanticNegative(contractId, schema, fixtureRef, context = {}) {
   const artifact = await loadJson(path.join(fixturesDir, fixtureRef));
@@ -231,6 +232,58 @@ for (const testCase of receiptCases) {
   assert.deepEqual(projected.receipt_refs.map((receipt) => receipt.status), testCase.statuses, `${testCase.label} statuses`);
 }
 
+const eventVersionTemplate = await loadJson(path.join(
+  fixturesDir,
+  "valid/card-event.v3.partial-archive-state.json",
+));
+const eventVersionCases = [
+  { label: "non-initial version one preimage", expectedVersion: 1, cardVersion: 2, eventSequence: 2, valid: true },
+  { label: "non-initial version zero preimage", expectedVersion: 0, cardVersion: 1, eventSequence: 1, error: "expected_version >= 1" },
+  { label: "event sequence equal to card version", expectedVersion: 1, cardVersion: 2, eventSequence: 2, valid: true },
+  { label: "event sequence ahead of card version", expectedVersion: 1, cardVersion: 2, eventSequence: 3, valid: true },
+  { label: "event sequence behind card version", expectedVersion: 1, cardVersion: 2, eventSequence: 1, error: "cannot precede $.card_version" },
+];
+for (const testCase of eventVersionCases) {
+  const candidate = structuredClone(eventVersionTemplate);
+  candidate.expected_version = testCase.expectedVersion;
+  candidate.card_version = testCase.cardVersion;
+  candidate.event_sequence = testCase.eventSequence;
+  assert.deepEqual(validateJsonSchema(candidate, eventSchema.schema), [], `${testCase.label} schema`);
+  const errors = validateContractSemantics("atlas.card-event.v3", candidate);
+  if (testCase.valid) {
+    assert.deepEqual(errors, [], testCase.label);
+  } else {
+    assert(errors.some((error) => error.includes(testCase.error)), `${testCase.label}: ${errors.join(" | ")}`);
+  }
+}
+
+function makeControlIdentityCase(secondCard) {
+  const candidate = structuredClone(control);
+  if (secondCard !== null) {
+    candidate.cards.push({ ...structuredClone(candidate.cards[0]), ...secondCard });
+    candidate.card_count = 2;
+    candidate.projection_summary.queued = 2;
+  }
+  return candidate;
+}
+const controlIdentityCases = [
+  { label: "single generated card identity", secondCard: null, valid: true },
+  { label: "exact duplicate generated card identity", secondCard: {}, error: "duplicate identity" },
+  { label: "same card ID in another board", secondCard: { board_id: "another-board" }, valid: true },
+  { label: "same card ID in another project", secondCard: { project_id: "another-project" }, valid: true },
+  { label: "different card ID in same project and board", secondCard: { card_id: "ATLAS-BOARD-001" }, valid: true },
+];
+for (const testCase of controlIdentityCases) {
+  const candidate = makeControlIdentityCase(testCase.secondCard);
+  assert.deepEqual(validateJsonSchema(candidate, controlSchema.schema), [], `${testCase.label} schema`);
+  const errors = validateContractSemantics("atlas.control-board-read-model.v1", candidate);
+  if (testCase.valid) {
+    assert.deepEqual(errors, [], testCase.label);
+  } else {
+    assert(errors.some((error) => error.includes(testCase.error)), `${testCase.label}: ${errors.join(" | ")}`);
+  }
+}
+
 const migration = validArtifacts.get("atlas.board-authority-migration.v1");
 const prematureActiveMigration = structuredClone(migration);
 prematureActiveMigration.phase = "v3-active";
@@ -329,6 +382,8 @@ for (const [fixtureRef, expectedError] of [
   ["invalid/card-event.v3.archive-entry-missing-standing-anchor.json", "explicit $.changes.set.standing_anchor false"],
   ["invalid/card-event.v3.archive-exit-missing-state.json", "crossing the archived boundary"],
   ["invalid/card-event.v3.execution-receipt-digest-mismatch.json", "identity and digest"],
+  ["invalid/card-event.v3.non-initial-zero-version.json", "expected_version >= 1"],
+  ["invalid/card-event.v3.sequence-before-version.json", "cannot precede $.card_version"],
 ]) {
   const fixtureErrors = await assertSemanticNegative("atlas.card-event.v3", eventSchema.schema, fixtureRef);
   assert(fixtureErrors.some((error) => error.includes(expectedError)));
@@ -439,6 +494,7 @@ const projectionDeliveryCases = [
   { label: "applied with zero requests", availability: "available", state: "applied", requestCount: 0, error: "positive exact touched-card" },
   { label: "applied with wrong readback state", availability: "available", state: "applied", readbackState: "stale", error: "positive exact touched-card" },
   { label: "applied without observation evidence", availability: "available", state: "applied", observedAt: null, responseDigest: null, error: "observed_at and response_digest" },
+  { label: "applied readback before enqueue", availability: "available", state: "applied", observedAt: "2026-07-17T11:59:59Z", error: "readback cannot precede $.enqueued_at" },
   { label: "applied retaining error", availability: "available", state: "applied", lastError: { code: "OLD" }, error: "must not retain error" },
   { label: "stale with zero attempt", availability: "available", state: "stale", attemptCount: 0, error: "positive attempt_count" },
   { label: "stale with zero requests", availability: "available", state: "stale", requestCount: 0, error: "positive exact touched-card" },
@@ -511,6 +567,44 @@ assert.deepEqual(
   validateContractSemantics("atlas.projection-ack.v1", validUnavailableAck, { projectionDelivery: delivery }),
   [],
 );
+const predatingAckErrors = await assertSemanticNegative(
+  "atlas.projection-ack.v1",
+  ackSchema.schema,
+  "invalid/projection-ack.v1.predates-delivery.json",
+  { projectionDelivery: delivery },
+);
+assert(predatingAckErrors.some((error) => error.includes("cannot precede ProjectionDelivery $.enqueued_at")));
+
+const ackChronologyCases = [
+  { label: "acknowledgement at enqueue", acknowledgedAt: delivery.enqueued_at, observedAt: delivery.enqueued_at, valid: true },
+  { label: "acknowledgement after readback", acknowledgedAt: "2026-07-17T12:02:00Z", observedAt: "2026-07-17T12:01:00Z", valid: true },
+  { label: "acknowledgement before enqueue", acknowledgedAt: "2026-07-17T11:59:59Z", observedAt: delivery.enqueued_at, error: "cannot precede ProjectionDelivery $.enqueued_at" },
+  { label: "ack readback before enqueue", acknowledgedAt: "2026-07-17T12:01:00Z", observedAt: "2026-07-17T11:59:59Z", error: "readback cannot precede ProjectionDelivery $.enqueued_at" },
+  { label: "acknowledgement before its readback", acknowledgedAt: delivery.enqueued_at, observedAt: "2026-07-17T12:01:00Z", error: "cannot precede its touched-card readback" },
+];
+for (const testCase of ackChronologyCases) {
+  const candidate = structuredClone(ack);
+  candidate.acknowledged_at = testCase.acknowledgedAt;
+  candidate.touched_card_readback.observed_at = testCase.observedAt;
+  assert.deepEqual(validateJsonSchema(candidate, ackSchema.schema), [], `${testCase.label} schema`);
+  const errors = validateContractSemantics(
+    "atlas.projection-ack.v1",
+    candidate,
+    { projectionDelivery: delivery },
+  );
+  if (testCase.valid) {
+    assert.deepEqual(errors, [], testCase.label);
+  } else {
+    assert(errors.some((error) => error.includes(testCase.error)), `${testCase.label}: ${errors.join(" | ")}`);
+  }
+}
+
+const duplicateControlErrors = await assertSemanticNegative(
+  "atlas.control-board-read-model.v1",
+  controlSchema.schema,
+  "invalid/control-board-read-model.v1.duplicate-card.json",
+);
+assert(duplicateControlErrors.some((error) => error.includes("duplicate identity")));
 const migrationPhaseErrors = await assertSemanticNegative(
   "atlas.board-authority-migration.v1",
   migrationSchema.schema,
@@ -538,5 +632,5 @@ assert(validateContractSemantics("atlas.rollover-manifest.v1", livePredecessorRo
 ));
 
 console.log(
-  `ATLAS board authority contract tests passed (${archiveTransitionCases.length} lifecycle, ${receiptCases.length} receipt, ${projectionDeliveryCases.length} projection matrix cases).`,
+  `ATLAS board authority contract tests passed (${archiveTransitionCases.length} lifecycle, ${receiptCases.length} receipt, ${eventVersionCases.length} version, ${projectionDeliveryCases.length} projection, ${ackChronologyCases.length} acknowledgement chronology, ${controlIdentityCases.length} control identity matrix cases).`,
 );

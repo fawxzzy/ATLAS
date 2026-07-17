@@ -1,0 +1,36 @@
+{
+  "contract_version": "atlas.card-event.v3",
+  "authority": "atlas-local-ledger",
+  "event_id": "event-atlas-board-000-non-initial-zero-version",
+  "event_sequence": 1,
+  "card_id": "ATLAS-BOARD-000",
+  "project_id": "atlas",
+  "board_id": "atlas-control",
+  "epoch_id": "atlas-board-000-epoch-1",
+  "card_version": 1,
+  "idempotency_key": "board-commit:ATLAS-BOARD-000:non-initial-zero-version",
+  "expected_version": 0,
+  "event_type": "update",
+  "occurred_at": "2026-07-17T12:40:00Z",
+  "actor": {"kind": "worker", "id": "stack-root"},
+  "job_id": "job-atlas-board-000",
+  "lease_id": "lease-atlas-root-writer",
+  "execution_receipt": {
+    "receipt_id": "execution-atlas-board-000-non-initial-zero-version",
+    "digest": "sha256:7171717171717171717171717171717171717171717171717171717171717171",
+    "status": "succeeded"
+  },
+  "previous_record_digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+  "resulting_record_digest": "sha256:7272727272727272727272727272727272727272727272727272727272727272",
+  "changes": {
+    "set": {"next_action": "Impossible version-zero mutation."},
+    "transition": null,
+    "add_blockers": [],
+    "remove_blocker_ids": [],
+    "add_resources": [],
+    "remove_resource_ids": [],
+    "add_receipts": []
+  },
+  "projection_delivery_id": "projection-atlas-board-000-non-initial-zero-version",
+  "commit_receipt_id": "board-commit-atlas-board-000-non-initial-zero-version"
+}

@@ -165,6 +165,8 @@ try {
     ["card-event.v3.archive-entry-missing-standing-anchor.json", "explicit $.changes.set.standing_anchor false"],
     ["card-event.v3.archive-exit-missing-state.json", "crossing the archived boundary"],
     ["card-event.v3.execution-receipt-digest-mismatch.json", "identity and digest"],
+    ["card-event.v3.non-initial-zero-version.json", "expected_version >= 1"],
+    ["card-event.v3.sequence-before-version.json", "cannot precede $.card_version"],
   ]) {
     const invalidMaterialization = expectJson(
       [
@@ -227,6 +229,25 @@ try {
     0,
     "VALID",
   );
+  const predatingAck = expectJson(
+    [
+      "--schema", "atlas.projection-ack.v1",
+      "--artifact", fixture("invalid", "projection-ack.v1.predates-delivery.json"),
+      "--projection-delivery", projectionDeliveryFixture,
+    ],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  assert(predatingAck.errors.some((error) => error.includes("cannot precede ProjectionDelivery $.enqueued_at")));
+  const duplicateControlCard = expectJson(
+    [
+      "--schema", "atlas.control-board-read-model.v1",
+      "--artifact", fixture("invalid", "control-board-read-model.v1.duplicate-card.json"),
+    ],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  assert(duplicateControlCard.errors.some((error) => error.includes("duplicate identity")));
   const unavailableMissingError = expectJson(
     [
       "--schema", "atlas.projection-delivery.v1",

@@ -122,12 +122,18 @@ export function validateCardEventV3(event) {
   if (event.card_version !== event.expected_version + 1) {
     errors.push("$.card_version must equal $.expected_version + 1");
   }
+  if (event.event_sequence < event.card_version) {
+    errors.push("$.event_sequence cannot precede $.card_version");
+  }
   const isInitial = event.event_type === "create" || event.event_type === "baseline-import";
   if (isInitial && (event.expected_version !== 0 || event.previous_record_digest !== null)) {
     errors.push("Initial create/import events require expected_version 0 and null previous_record_digest");
   }
   if (!isInitial && event.previous_record_digest === null) {
     errors.push("Non-initial events require a previous_record_digest");
+  }
+  if (!isInitial && event.expected_version < 1) {
+    errors.push("Non-initial events require $.expected_version >= 1");
   }
   if (isInitial) {
     const requiredInitialFields = [
@@ -336,6 +342,10 @@ export function validateProjectionDeliveryV1(delivery) {
   if (delivery.state === "applied" && (delivery.retry.retryable || delivery.retry.next_attempt_at !== null)) {
     errors.push("Applied projection delivery must be non-retryable with no next attempt");
   }
+  if (delivery.touched_card_readback.observed_at !== null
+    && Date.parse(delivery.touched_card_readback.observed_at) < Date.parse(delivery.enqueued_at)) {
+    errors.push("ProjectionDelivery readback cannot precede $.enqueued_at");
+  }
   return errors;
 }
 
@@ -382,6 +392,17 @@ export function validateProjectionAckAgainstDelivery(ack, delivery) {
   for (const [ackField, deliveryField] of correlatedFields) {
     if (ack[ackField] !== delivery[deliveryField]) {
       errors.push(`ProjectionAck $.${ackField} must equal ProjectionDelivery $.${deliveryField}`);
+    }
+  }
+  if (Date.parse(ack.acknowledged_at) < Date.parse(delivery.enqueued_at)) {
+    errors.push("ProjectionAck $.acknowledged_at cannot precede ProjectionDelivery $.enqueued_at");
+  }
+  if (ack.touched_card_readback.observed_at !== null) {
+    if (Date.parse(ack.touched_card_readback.observed_at) < Date.parse(delivery.enqueued_at)) {
+      errors.push("ProjectionAck readback cannot precede ProjectionDelivery $.enqueued_at");
+    }
+    if (Date.parse(ack.acknowledged_at) < Date.parse(ack.touched_card_readback.observed_at)) {
+      errors.push("ProjectionAck $.acknowledged_at cannot precede its touched-card readback");
     }
   }
   return errors;
@@ -532,6 +553,15 @@ export function validateBoardAuthorityMigrationV1(migration) {
 export function validateControlBoardReadModelV1(model) {
   const errors = [];
   const summaryKeys = ["queued", "applied", "stale", "failed", "UNKNOWN"];
+  const cardIdentities = model.cards.map((card) => JSON.stringify([
+    card.project_id,
+    card.board_id,
+    card.card_id,
+  ]));
+  for (const duplicate of duplicateValues(cardIdentities)) {
+    const [projectId, boardId, cardId] = JSON.parse(duplicate);
+    errors.push(`$.cards contains duplicate identity ${projectId}/${boardId}/${cardId}`);
+  }
   if (model.availability === "unavailable") {
     if (model.card_count !== null || summaryKeys.some((key) => model.projection_summary[key] !== null)) {
       errors.push("Unavailable read model must use null counts, never inferred zero or health");
