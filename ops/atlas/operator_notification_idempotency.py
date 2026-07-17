@@ -21,12 +21,12 @@ import time
 import unicodedata
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any, Mapping, Sequence
+from typing import Any, Callable, Mapping, Sequence
 
 
 EVENT_CONTRACT_VERSION = "atlas.operator-notification.event.v1"
 ACK_CONTRACT_VERSION = "atlas.operator-notification.ack.v1"
-LEDGER_SCHEMA_VERSION = "atlas.operator-notification.ledger.v1"
+LEDGER_SCHEMA_VERSION = "atlas.operator-notification.ledger.v2"
 CANONICALIZATION_VERSION = "atlas.operator-notification.canonical-json.v1"
 TRANSPORT_VOLATILE_PATHS = ("$.payload.transport", "$.created_at")
 NOTIFICATION_KINDS = frozenset(
@@ -63,6 +63,7 @@ LEDGER_EVENT_COLUMNS = frozenset(
         "superseded_by_event_id",
         "delta_json",
         "claim_generation",
+        "claim_acquired_at",
         "claim_token",
         "claim_expires_at",
         "claimant_digest",
@@ -87,12 +88,24 @@ class UnknownLedgerSchemaError(RuntimeError):
     """The durable ledger uses an unknown or incomplete schema."""
 
 
+class LedgerUnavailableError(RuntimeError):
+    """Normal startup cannot open the configured, provisioned ledger."""
+
+
+class LedgerProvisioningError(RuntimeError):
+    """Explicit first-time provisioning was not safely admitted."""
+
+
 class ClaimTokenError(NotificationContractError):
     """A delivery transition did not correlate to the active claim fence."""
 
 
 class DeliveryStateError(NotificationContractError):
     """A delivery transition is stale, unsafe, or out of order."""
+
+
+def _system_utc_now() -> datetime:
+    return datetime.now(timezone.utc)
 
 
 def _utc(value: str, field: str) -> datetime:
@@ -258,6 +271,8 @@ def build_event(
             + "\x1f"
             + event_class
             + "\x1f"
+            + notification_kind
+            + "\x1f"
             + canonical_payload_digest
         ).encode("utf-8"),
     )
@@ -354,16 +369,62 @@ def resolve_ledger_path(runtime_root: Path | str, ledger_path: Path | str) -> Pa
 class NotificationLedger:
     """SQLite-backed receive ledger with atomic duplicate claim semantics."""
 
-    def __init__(self, runtime_root: Path | str, ledger_path: Path | str):
+    def __init__(
+        self,
+        runtime_root: Path | str,
+        ledger_path: Path | str,
+        *,
+        _clock: Callable[[], datetime] | None = None,
+    ):
         self.runtime_root = Path(runtime_root).resolve()
         self.path = resolve_ledger_path(self.runtime_root, ledger_path)
-        self._initialize()
+        self._clock = _clock or _system_utc_now
+        if not self.path.is_file():
+            raise LedgerUnavailableError(
+                "configured notification ledger is missing; restore it or provision explicitly"
+            )
+        self._open_existing()
+
+    @classmethod
+    def provision(
+        cls,
+        runtime_root: Path | str,
+        ledger_path: Path | str,
+        *,
+        _clock: Callable[[], datetime] | None = None,
+    ) -> "NotificationLedger":
+        """Create one new authority ledger only through an explicit first-use call."""
+
+        instance = cls.__new__(cls)
+        instance.runtime_root = Path(runtime_root).resolve()
+        instance.path = resolve_ledger_path(instance.runtime_root, ledger_path)
+        instance._clock = _clock or _system_utc_now
+        instance.path.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            descriptor = os.open(
+                instance.path,
+                os.O_CREAT | os.O_EXCL | os.O_WRONLY,
+                0o600,
+            )
+        except FileExistsError as exc:
+            raise LedgerProvisioningError(
+                "configured notification ledger already exists; provisioning will not replace it"
+            ) from exc
+        except OSError as exc:
+            raise LedgerProvisioningError(
+                "notification ledger path could not be reserved for provisioning"
+            ) from exc
+        else:
+            os.close(descriptor)
+        instance._provision_new()
+        return instance
 
     def _connect(self) -> sqlite3.Connection:
         connection = sqlite3.connect(
-            self.path,
+            self.path.as_uri() + "?mode=rw",
             timeout=5.0,
             isolation_level=None,
+            uri=True,
         )
         try:
             connection.row_factory = sqlite3.Row
@@ -396,8 +457,34 @@ class NotificationLedger:
                 time.sleep(0.02)
         raise LedgerCorruptionError("SQLite WAL admission did not terminate")
 
-    def _initialize(self) -> None:
-        self.path.parent.mkdir(parents=True, exist_ok=True)
+    def _open_existing(self) -> None:
+        try:
+            connection = self._connect()
+            try:
+                connection.execute("BEGIN IMMEDIATE")
+                try:
+                    self._verify_existing(connection)
+                    connection.execute("COMMIT")
+                except Exception:
+                    if connection.in_transaction:
+                        connection.execute("ROLLBACK")
+                    raise
+                mode = self._admit_wal(connection)
+                if mode != "wal":
+                    raise LedgerCorruptionError("SQLite WAL mode was not admitted")
+                quick_check = connection.execute("PRAGMA quick_check").fetchone()[0]
+                if quick_check != "ok":
+                    raise LedgerCorruptionError(
+                        f"SQLite quick_check failed: {quick_check}"
+                    )
+            finally:
+                connection.close()
+        except (sqlite3.DatabaseError, sqlite3.OperationalError) as exc:
+            raise LedgerCorruptionError(
+                "notification ledger could not be opened safely"
+            ) from exc
+
+    def _provision_new(self) -> None:
         try:
             connection = self._connect()
             try:
@@ -414,9 +501,10 @@ class NotificationLedger:
                         )
                     }
                     if tables:
-                        self._verify_existing(connection)
-                    else:
-                        self._create_schema(connection)
+                        raise LedgerProvisioningError(
+                            "new notification ledger is not empty"
+                        )
+                    self._create_schema(connection)
                     connection.execute("COMMIT")
                 except Exception:
                     if connection.in_transaction:
@@ -431,7 +519,7 @@ class NotificationLedger:
                 connection.close()
         except (sqlite3.DatabaseError, sqlite3.OperationalError) as exc:
             raise LedgerCorruptionError(
-                "notification ledger could not be opened safely"
+                "notification ledger could not be provisioned safely"
             ) from exc
 
     @staticmethod
@@ -466,6 +554,7 @@ class NotificationLedger:
                 superseded_by_event_id TEXT,
                 delta_json TEXT,
                 claim_generation INTEGER NOT NULL DEFAULT 0,
+                claim_acquired_at TEXT,
                 claim_token TEXT,
                 claim_expires_at TEXT,
                 claimant_digest TEXT,
@@ -768,7 +857,8 @@ class NotificationLedger:
                 """UPDATE notification_events
                    SET last_seen=?, last_envelope_digest=?, duplicate_count=?,
                        disposition=?, claim_generation=?, claim_token=?,
-                       claim_expires_at=?, claimant_digest=?, delivery_state='retry_claimed'
+                       claim_acquired_at=?, claim_expires_at=?, claimant_digest=?,
+                       delivery_state='retry_claimed'
                    WHERE event_id=?""",
                 (
                     seen_at,
@@ -777,6 +867,7 @@ class NotificationLedger:
                     disposition,
                     generation,
                     claim_token,
+                    seen_at,
                     claim_expires_at,
                     claimant_digest,
                     event["event_id"],
@@ -831,6 +922,7 @@ class NotificationLedger:
             else canonical_json_bytes(event["delta"]).decode("utf-8")
         )
         claim_generation = 0
+        claim_acquired_at = None
         claim_token = None
         claim_expires_at = None
         ack_state = "not_required"
@@ -874,6 +966,7 @@ class NotificationLedger:
                         "supersession must remain within one source/event-class stream"
                     )
             claim_generation = 1
+            claim_acquired_at = seen_at
             claim_token = self._claim_token(event["event_id"], claim_generation)
             claim_expires_at = _timestamp(seen + timedelta(seconds=lease_seconds))
             ack_state = "pending"
@@ -887,9 +980,9 @@ class NotificationLedger:
                    canonical_payload_digest, first_envelope_digest,
                    last_envelope_digest, created_at, first_seen, last_seen,
                    duplicate_count, disposition, supersedes_event_id,
-                   delta_json, claim_generation, claim_token, claim_expires_at,
-                   claimant_digest, delivery_state, ack_state
-               ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                   delta_json, claim_generation, claim_acquired_at, claim_token,
+                   claim_expires_at, claimant_digest, delivery_state, ack_state
+               ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (
                 event["event_id"],
                 event["source_thread_id"],
@@ -907,6 +1000,7 @@ class NotificationLedger:
                 event["supersedes_event_id"],
                 delta_json,
                 claim_generation,
+                claim_acquired_at,
                 claim_token,
                 claim_expires_at,
                 claimant_digest,
@@ -956,6 +1050,9 @@ class NotificationLedger:
             "claim_generation": (
                 row["claim_generation"] if should_begin_delivery else None
             ),
+            "claim_acquired_at": (
+                row["claim_acquired_at"] if should_begin_delivery else None
+            ),
             "claim_expires_at": (
                 row["claim_expires_at"] if should_begin_delivery else None
             ),
@@ -972,7 +1069,6 @@ class NotificationLedger:
         *,
         claim_token: str,
         claim_generation: int,
-        started_at: str,
     ) -> dict[str, Any]:
         """Atomically fence one claim immediately before transport begins."""
 
@@ -986,10 +1082,19 @@ class NotificationLedger:
             or claim_generation < 1
         ):
             raise ClaimTokenError("claim_generation is invalid")
-        started = _utc(started_at, "started_at")
         connection = self._connect()
         try:
             connection.execute("BEGIN IMMEDIATE")
+            started = self._clock()
+            if (
+                not isinstance(started, datetime)
+                or started.tzinfo is None
+                or started.utcoffset() != timedelta(0)
+            ):
+                raise LedgerCorruptionError(
+                    "delivery clock must return a timezone-aware UTC datetime"
+                )
+            started_at = _timestamp(started)
             row = connection.execute(
                 "SELECT * FROM notification_events WHERE event_id=?", (event_id,)
             ).fetchone()
@@ -1019,9 +1124,11 @@ class NotificationLedger:
             if row["delivery_state"] not in {"claimed", "retry_claimed"}:
                 raise DeliveryStateError("claim is not eligible to begin delivery")
             expires = _utc(row["claim_expires_at"], "claim_expires_at")
-            first_seen = _utc(row["first_seen"], "first_seen")
-            if started < first_seen or started >= expires:
-                raise DeliveryStateError("claim expired before delivery start")
+            acquired = _utc(row["claim_acquired_at"], "claim_acquired_at")
+            if started < acquired or started >= expires:
+                raise DeliveryStateError(
+                    "delivery start falls outside the active claim lease"
+                )
             changed = connection.execute(
                 """UPDATE notification_events
                    SET delivery_state='delivery_in_progress',
@@ -1184,6 +1291,7 @@ class NotificationLedger:
             },
             "delivery_state": row["delivery_state"],
             "claim_generation": row["claim_generation"],
+            "claim_acquired_at": row["claim_acquired_at"],
             "claim_expires_at": row["claim_expires_at"],
             "delivery_started_at": row["delivery_started_at"],
             "delivery_outcome": delivery_outcome,
@@ -1224,6 +1332,10 @@ def _parser() -> argparse.ArgumentParser:
     prepare = subparsers.add_parser("prepare")
     prepare.add_argument("--input", required=True)
 
+    provision = subparsers.add_parser("provision")
+    provision.add_argument("--runtime-root", required=True)
+    provision.add_argument("--ledger", required=True)
+
     claim = subparsers.add_parser("claim")
     claim.add_argument("--runtime-root", required=True)
     claim.add_argument("--ledger", required=True)
@@ -1238,7 +1350,6 @@ def _parser() -> argparse.ArgumentParser:
     begin.add_argument("--event-id", required=True)
     begin.add_argument("--claim-token", required=True)
     begin.add_argument("--claim-generation", type=int, required=True)
-    begin.add_argument("--started-at", required=True)
 
     ack = subparsers.add_parser("ack")
     ack.add_argument("--runtime-root", required=True)
@@ -1261,6 +1372,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.command == "prepare":
             source = _load_json(args.input)
             result = build_event(**source)
+        elif args.command == "provision":
+            NotificationLedger.provision(args.runtime_root, args.ledger)
+            result = {
+                "status": "provisioned",
+                "ledger_schema_version": LEDGER_SCHEMA_VERSION,
+            }
         elif args.command == "claim":
             result = _ledger(args).claim(
                 _load_json(args.event),
@@ -1273,7 +1390,6 @@ def main(argv: Sequence[str] | None = None) -> int:
                 args.event_id,
                 claim_token=args.claim_token,
                 claim_generation=args.claim_generation,
-                started_at=args.started_at,
             )
         elif args.command == "ack":
             result = _ledger(args).acknowledge(
@@ -1286,7 +1402,13 @@ def main(argv: Sequence[str] | None = None) -> int:
             result = _ledger(args).record(args.event_id)
         print(json.dumps(result, sort_keys=True, separators=(",", ":")))
         return 0
-    except (NotificationContractError, LedgerCorruptionError, UnknownLedgerSchemaError) as exc:
+    except (
+        NotificationContractError,
+        LedgerCorruptionError,
+        UnknownLedgerSchemaError,
+        LedgerUnavailableError,
+        LedgerProvisioningError,
+    ) as exc:
         print(
             json.dumps(
                 {"status": "rejected", "error": type(exc).__name__, "message": str(exc)},

@@ -10,15 +10,17 @@ receipts only. It does not connect to FAWXZZY MESSAGES or any other transport.
 
 ## Required Call Order
 
-1. Prepare one event from allowlisted facts.
-2. Pass the event to the receiver claim transaction.
-3. When `should_begin_delivery=true`, call the atomic `begin-delivery` transition with the
+1. Before first use only, explicitly provision one new ledger. Normal startup must open
+   that existing ledger and fail closed if it is missing.
+2. Prepare one event from allowlisted facts.
+3. Pass the event to the receiver claim transaction.
+4. When `should_begin_delivery=true`, call the atomic `begin-delivery` transition with the
    returned claim token and generation immediately before transport.
-4. Deliver only when that pre-send receipt sets both `should_emit=true` and
+5. Deliver only when that pre-send receipt sets both `should_emit=true` and
    `operator_message_authorized=true`, the caller already has delivery authority, and the
    transport uses `event_id` as its idempotency key.
-5. Record the correlated acknowledgement using the same token and generation.
-6. Stop sender retries when the acknowledgement sets `retry_authorized=false`.
+6. Record the correlated acknowledgement using the same token and generation.
+7. Stop sender retries when the acknowledgement sets `retry_authorized=false`.
 
 Never infer permission from a missing, unreadable, corrupt, or unknown ledger. Those states
 are failures, not empty or healthy state.
@@ -54,11 +56,28 @@ python ops/atlas/operator_notification_idempotency.py prepare --input <input-jso
 ```
 
 Transport attempt numbers, host labels, routing metadata, and `created_at` may change on a
-retry without changing `event_id`. Changed facts must produce a new event and, after the
-first event in a stream, must name the latest predecessor and changed fact paths. Only an
-explicit `periodic_digest` may establish another unlinked full snapshot. All timestamps
-must use canonical RFC 3339 UTC (`T`, `Z`, and at most six fractional digits). Delta paths
-exclude the empty root pointer and use only RFC 6901 `~0` and `~1` escapes.
+retry without changing `event_id`. `notification_kind` is identity-bearing, so changing a
+heartbeat into an operator update creates a different ID while same-kind cross-host retries
+remain stable. Changed facts must produce a new event and, after the first event in a
+stream, must name the latest predecessor and changed fact paths. Only an explicit
+`periodic_digest` may establish another unlinked full snapshot. All timestamps must use
+canonical RFC 3339 UTC (`T`, `Z`, and at most six fractional digits). Delta paths exclude
+the empty root pointer and use only RFC 6901 `~0` and `~1` escapes.
+
+## Provision Once
+
+Before first receiver use and only when no authority ledger exists:
+
+```powershell
+python ops/atlas/operator_notification_idempotency.py provision `
+  --runtime-root <atlas-runtime-root> `
+  --ledger <atlas-runtime-root>\atlas\notifications\receive.sqlite3
+```
+
+Provisioning reserves a new file exclusively and fails if any file already exists. Claim,
+delivery, acknowledgement, and status commands open only an existing database and never
+create a replacement. If an adopted ledger is missing, stop and restore it; never run
+`provision` to bypass missing duplicate or acknowledgement history.
 
 ## Claim
 
@@ -100,8 +119,7 @@ python ops/atlas/operator_notification_idempotency.py begin-delivery `
   --ledger <atlas-runtime-root>\atlas\notifications\receive.sqlite3 `
   --event-id <event-id> `
   --claim-token <claim-token> `
-  --claim-generation <claim-generation> `
-  --started-at <utc-timestamp>
+  --claim-generation <claim-generation>
 ```
 
 This transition is the only source of operator-message authorization. It atomically fences
@@ -109,7 +127,10 @@ expired claimants and makes the delivery non-stealable. The transport must dedup
 the returned `transport_idempotency_key`, which is the stable `event_id`. SQLite protects
 local claim ownership; it does not provide network exactly-once delivery. If the process
 crashes or times out after this transition, status is `UNKNOWN` and reconciliation is
-required. Never replay automatically from `delivery_in_progress`.
+required. Never replay automatically from `delivery_in_progress`. `started_at` must be at
+or after the active claim generation's persisted acquisition timestamp and before expiry;
+the ledger captures it from the UTC runtime clock inside the transaction, so callers cannot
+backdate it to the event's original `first_seen`.
 
 ## Acknowledge
 
@@ -146,8 +167,10 @@ prove SQLite online backup and restore on the target filesystem.
 ## Failure Response
 
 - Contract rejection: quarantine the event metadata and fix the producer; do not send.
+- Missing configured ledger: stop the adapter and restore the authority ledger; normal
+  startup never creates it, and provisioning is not a recovery operation.
 - Unknown schema or missing tables: stop the adapter; do not create a replacement ledger
-  over the file.
+  over the file or auto-migrate it.
 - Failed integrity/open check: stop delivery, preserve the database and sidecars, restore
   the last verified backup, then replay the original deterministic events.
 - Busy/lock timeout: report unavailable and retry the claim transaction later; do not bypass

@@ -16,6 +16,12 @@ second notification stream.
 - Added a transport-free event builder and SQLite receive ledger using WAL, FULL
   synchronous durability, one-writer claim transactions, token-plus-generation pre-send
   fencing, stable acknowledgement identities, and fail-closed schema/integrity checks.
+- Normal startup opens only a previously provisioned ledger and cannot recreate a missing
+  authority file; first-time provisioning is a separate exclusive operation.
+- `notification_kind` is part of deterministic event identity, preserving same-kind
+  cross-host retries while separating control and operator delivery semantics.
+- Durable `ledger.v2` stores each active generation's acquisition timestamp, captures
+  delivery start from its runtime clock, and rejects starts outside the current lease.
 - Claim receipts never authorize transport. Only an atomic, unexpired `begin_delivery`
   transition enters non-stealable `delivery_in_progress` and authorizes one transport call.
 - A transport crash after fencing remains explicit `UNKNOWN` and reconciliation-required;
@@ -36,7 +42,10 @@ second notification stream.
 - Semantic duplicate suppression after volatile-field normalization.
 - Changed-delta and supersession enforcement.
 - Cross-host stable identity.
+- Notification-kind identity separation.
+- Missing-ledger startup rejection and exclusive first-time provisioning.
 - Pre-send token/generation fencing and stale claimant rejection.
+- Current-generation acquisition-time fencing across restart.
 - Correlated token/generation acknowledgement stopping retry.
 - Heartbeat and continuation non-replay.
 - Restart recovery.
@@ -53,7 +62,7 @@ Completion values are not inferred from these units. Runtime effectiveness remai
 
 ## Local Verification Snapshot
 
-- Notification contract/ledger suite: 24 passed in each of two final runs on Python 3.12
+- Notification contract/ledger suite: 28 passed in each of two final runs on Python 3.12
   and in each of two final runs on Python 3.13.
 - Native task and board correlation suite: 22 passed in each of two runs.
 - Root QA pipeline suite: 78 passed in each of two runs.

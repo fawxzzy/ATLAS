@@ -7,6 +7,7 @@ import threading
 import unittest
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import closing
+from datetime import datetime
 from pathlib import Path
 
 from jsonschema import Draft202012Validator, FormatChecker
@@ -17,6 +18,8 @@ from ops.atlas.operator_notification_idempotency import (
     ClaimTokenError,
     DeliveryStateError,
     LedgerCorruptionError,
+    LedgerProvisioningError,
+    LedgerUnavailableError,
     NotificationContractError,
     NotificationLedger,
     UnknownLedgerSchemaError,
@@ -40,7 +43,12 @@ class OperatorNotificationIdempotencyTests(unittest.TestCase):
         self.temporary = tempfile.TemporaryDirectory()
         self.runtime_root = Path(self.temporary.name) / "runtime"
         self.ledger_path = self.runtime_root / "atlas" / "notifications" / "receive.sqlite3"
-        self.ledger = NotificationLedger(self.runtime_root, self.ledger_path)
+        self.clock_now = datetime.fromisoformat(
+            STARTED[:-1] + "+00:00"
+        )
+        self.ledger = NotificationLedger.provision(
+            self.runtime_root, self.ledger_path, _clock=lambda: self.clock_now
+        )
 
     def tearDown(self) -> None:
         self.temporary.cleanup()
@@ -77,12 +85,12 @@ class OperatorNotificationIdempotencyTests(unittest.TestCase):
             **kwargs,
         )
 
-    def begin(self, event: dict, claim: dict, *, started_at: str = STARTED) -> dict:
+    def begin(self, event: dict, claim: dict, *, clock_at: str = STARTED) -> dict:
+        self.clock_now = datetime.fromisoformat(clock_at[:-1] + "+00:00")
         return self.ledger.begin_delivery(
             event["event_id"],
             claim_token=claim["claim_token"],
             claim_generation=claim["claim_generation"],
-            started_at=started_at,
         )
 
     def acknowledge(
@@ -159,17 +167,18 @@ class OperatorNotificationIdempotencyTests(unittest.TestCase):
             replacement["claim_generation"], original["claim_generation"]
         )
         with self.assertRaisesRegex(ClaimTokenError, "active claim fence"):
+            self.clock_now = datetime.fromisoformat(
+                "2026-07-17T14:00:02.100000+00:00"
+            )
             self.ledger.begin_delivery(
                 event["event_id"],
                 claim_token=original["claim_token"],
                 claim_generation=original["claim_generation"],
-                started_at="2026-07-17T14:00:02.100000Z",
             )
         delivery = self.ledger.begin_delivery(
             event["event_id"],
             claim_token=replacement["claim_token"],
             claim_generation=replacement["claim_generation"],
-            started_at="2026-07-17T14:00:02.100000Z",
         )
         self.assertTrue(delivery["operator_message_authorized"])
 
@@ -207,11 +216,13 @@ class OperatorNotificationIdempotencyTests(unittest.TestCase):
             seen_at="2026-07-17T14:00:02.000001Z",
             lease_seconds=30,
         )
+        self.clock_now = datetime.fromisoformat(
+            "2026-07-17T14:00:02.100000+00:00"
+        )
         self.ledger.begin_delivery(
             event["event_id"],
             claim_token=replacement["claim_token"],
             claim_generation=replacement["claim_generation"],
-            started_at="2026-07-17T14:00:02.100000Z",
         )
         with self.assertRaisesRegex(ClaimTokenError, "active claim fence"):
             self.acknowledge(
@@ -286,10 +297,6 @@ class OperatorNotificationIdempotencyTests(unittest.TestCase):
                 seen_at="2026-07-17T14:00:01+00:00",
             )
         claim = self.claim(valid)
-        with self.assertRaisesRegex(
-            NotificationContractError, "canonical RFC 3339"
-        ):
-            self.begin(valid, claim, started_at="2026-07-17 14:00:01Z")
         self.begin(valid, claim)
         with self.assertRaisesRegex(
             NotificationContractError, "canonical RFC 3339"
@@ -352,6 +359,29 @@ class OperatorNotificationIdempotencyTests(unittest.TestCase):
         )
         self.assertFalse(result["should_emit"])
         self.assertEqual(result["disposition"], "duplicate_semantic")
+
+    def test_notification_kind_has_distinct_deterministic_identity(self) -> None:
+        heartbeat = self.event(notification_kind="heartbeat")
+        operator_update = self.event(notification_kind="operator_update")
+        retry = self.event(
+            notification_kind="operator_update",
+            transport={"host_id": "host-b", "attempt": 9},
+            created_at="2026-07-17T14:05:00Z",
+        )
+        self.assertEqual(
+            heartbeat["canonical_payload_digest"],
+            operator_update["canonical_payload_digest"],
+        )
+        self.assertNotEqual(heartbeat["event_id"], operator_update["event_id"])
+        self.assertEqual(operator_update["event_id"], retry["event_id"])
+        suppressed = self.claim(heartbeat)
+        admitted = self.ledger.claim(
+            operator_update,
+            claimant_id="host-b",
+            seen_at="2026-07-17T14:00:02Z",
+        )
+        self.assertEqual(suppressed["disposition"], "suppressed_control")
+        self.assertTrue(admitted["should_begin_delivery"])
 
     def test_changed_payload_requires_delta_and_creates_new_event(self) -> None:
         first = self.event()
@@ -493,6 +523,23 @@ class OperatorNotificationIdempotencyTests(unittest.TestCase):
         self.assertFalse(result["should_emit"])
         self.assertEqual(result["ack"]["ack_id"], expected_ack["ack_id"])
 
+    def test_missing_startup_ledger_requires_explicit_provisioning(self) -> None:
+        missing_path = (
+            self.runtime_root / "unprovisioned" / "notifications.sqlite3"
+        )
+        with self.assertRaisesRegex(LedgerUnavailableError, "provision explicitly"):
+            NotificationLedger(self.runtime_root, missing_path)
+        self.assertFalse(missing_path.exists())
+        self.assertFalse(missing_path.parent.exists())
+
+        provisioned = NotificationLedger.provision(self.runtime_root, missing_path)
+        self.assertTrue(missing_path.is_file())
+        self.assertIsNone(provisioned.record(self.event()["event_id"]))
+        restarted = NotificationLedger(self.runtime_root, missing_path)
+        self.assertIsNone(restarted.record(self.event()["event_id"]))
+        with self.assertRaisesRegex(LedgerProvisioningError, "already exists"):
+            NotificationLedger.provision(self.runtime_root, missing_path)
+
     def test_corrupt_and_unknown_ledger_schema_fail_closed(self) -> None:
         corrupt_path = self.runtime_root / "atlas" / "notifications" / "corrupt.sqlite3"
         corrupt_path.write_bytes(b"not-a-sqlite-database")
@@ -500,7 +547,7 @@ class OperatorNotificationIdempotencyTests(unittest.TestCase):
             NotificationLedger(self.runtime_root, corrupt_path)
 
         unknown_path = self.runtime_root / "atlas" / "notifications" / "unknown.sqlite3"
-        NotificationLedger(self.runtime_root, unknown_path)
+        NotificationLedger.provision(self.runtime_root, unknown_path)
         with closing(sqlite3.connect(unknown_path)) as connection:
             connection.execute(
                 "UPDATE ledger_meta SET value='atlas.operator-notification.ledger.v999' "
@@ -513,7 +560,7 @@ class OperatorNotificationIdempotencyTests(unittest.TestCase):
         incompatible_path = (
             self.runtime_root / "atlas" / "notifications" / "incompatible.sqlite3"
         )
-        NotificationLedger(self.runtime_root, incompatible_path)
+        NotificationLedger.provision(self.runtime_root, incompatible_path)
         with closing(sqlite3.connect(incompatible_path)) as connection:
             connection.execute(
                 "ALTER TABLE notification_events ADD COLUMN unexpected TEXT"
@@ -521,6 +568,20 @@ class OperatorNotificationIdempotencyTests(unittest.TestCase):
             connection.commit()
         with self.assertRaises(UnknownLedgerSchemaError):
             NotificationLedger(self.runtime_root, incompatible_path)
+
+        legacy_path = self.runtime_root / "atlas" / "notifications" / "legacy.sqlite3"
+        NotificationLedger.provision(self.runtime_root, legacy_path)
+        with closing(sqlite3.connect(legacy_path)) as connection:
+            connection.execute(
+                "UPDATE ledger_meta SET value='atlas.operator-notification.ledger.v1' "
+                "WHERE key='schema_version'"
+            )
+            connection.execute(
+                "ALTER TABLE notification_events DROP COLUMN claim_acquired_at"
+            )
+            connection.commit()
+        with self.assertRaises(UnknownLedgerSchemaError):
+            NotificationLedger(self.runtime_root, legacy_path)
 
     def test_concurrent_duplicate_claim_allows_exactly_one_delivery_candidate(self) -> None:
         event = self.event()
@@ -541,11 +602,12 @@ class OperatorNotificationIdempotencyTests(unittest.TestCase):
         )
         self.assertEqual(self.ledger.record(event["event_id"])["duplicate_count"], 11)
 
-    def test_concurrent_first_open_and_claim_allows_one_delivery_candidate(self) -> None:
+    def test_concurrent_startup_and_claim_allows_one_delivery_candidate(self) -> None:
         event = self.event(event_class="task.concurrent-startup")
         ledger_path = (
             self.runtime_root / "atlas" / "notifications" / "startup.sqlite3"
         )
+        NotificationLedger.provision(self.runtime_root, ledger_path)
         barrier = threading.Barrier(12)
 
         def attempt(index: int) -> dict:
@@ -605,6 +667,65 @@ class OperatorNotificationIdempotencyTests(unittest.TestCase):
         self.assertEqual(retry["disposition"], "retry_claimed")
         self.assertNotEqual(first["claim_token"], retry["claim_token"])
         self.assertFalse(duplicate["should_emit"])
+
+    def test_delivery_start_is_fenced_by_current_claim_acquisition(self) -> None:
+        event = self.event(event_class="task.claim-acquisition")
+        self.claim(event, lease_seconds=1)
+        replacement = self.ledger.claim(
+            event,
+            claimant_id="replacement-host",
+            seen_at="2026-07-17T14:00:03.123456Z",
+            lease_seconds=30,
+        )
+        self.assertEqual(
+            replacement["claim_acquired_at"], "2026-07-17T14:00:03.123456Z"
+        )
+        self.clock_now = datetime.fromisoformat(
+            "2026-07-17T14:00:03.123455+00:00"
+        )
+        with self.assertRaisesRegex(DeliveryStateError, "active claim lease"):
+            self.ledger.begin_delivery(
+                event["event_id"],
+                claim_token=replacement["claim_token"],
+                claim_generation=replacement["claim_generation"],
+            )
+        self.clock_now = datetime.fromisoformat(
+            "2026-07-17T14:00:03.123456+00:00"
+        )
+        restarted = NotificationLedger(
+            self.runtime_root,
+            self.ledger_path,
+            _clock=lambda: self.clock_now,
+        )
+        record = restarted.record(event["event_id"])
+        self.assertEqual(
+            record["claim_acquired_at"], "2026-07-17T14:00:03.123456Z"
+        )
+        delivery = restarted.begin_delivery(
+            event["event_id"],
+            claim_token=replacement["claim_token"],
+            claim_generation=replacement["claim_generation"],
+        )
+        self.assertTrue(delivery["operator_message_authorized"])
+        self.assertEqual(
+            delivery["delivery_started_at"], "2026-07-17T14:00:03.123456Z"
+        )
+
+    def test_expired_claimant_cannot_backdate_delivery_start(self) -> None:
+        event = self.event(event_class="task.expired-delivery")
+        claim = self.claim(event, lease_seconds=1)
+        self.clock_now = datetime.fromisoformat(
+            "2026-07-17T14:00:02.000001+00:00"
+        )
+        with self.assertRaisesRegex(DeliveryStateError, "active claim lease"):
+            self.ledger.begin_delivery(
+                event["event_id"],
+                claim_token=claim["claim_token"],
+                claim_generation=claim["claim_generation"],
+            )
+        self.assertEqual(
+            self.ledger.record(event["event_id"])["delivery_state"], "claimed"
+        )
 
     def test_periodic_digest_is_the_only_unlinked_full_snapshot_replay(self) -> None:
         first = self.event(

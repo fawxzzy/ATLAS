@@ -25,14 +25,17 @@ Add a transport-neutral Python standard-library module and two Draft 2020-12 con
 
 - `atlas.operator-notification.event.v1`
 - `atlas.operator-notification.ack.v1`
-- internal durable schema `atlas.operator-notification.ledger.v1`
+- internal durable schema `atlas.operator-notification.ledger.v2`
 - canonicalization contract `atlas.operator-notification.canonical-json.v1`
 
 The module prepares deterministic events, atomically claims receive-side delivery, records
 duplicates, returns correlated acknowledgements, and reports whether a sender may retry.
 It has no transport client and cannot emit an operator-facing message by itself.
 
-Runtime adoption must configure the SQLite file below an explicit `runtime/` root. No
+Runtime adoption must configure the SQLite file below an explicit `runtime/` root and run
+one explicit, exclusive provisioning operation before first use. Normal receiver startup
+opens only an existing file with SQLite `mode=rw`; it never creates a missing ledger. A
+missing adopted ledger requires restore or operator action, not fresh provisioning. No
 runtime database is committed. Tests own temporary runtime directories.
 
 ## Stable Identity
@@ -45,13 +48,15 @@ must use integer or string fixed-point facts.
 `event_id` is:
 
 ```text
-onv1_ + sha256(source_thread_id + U+001F + event_class + U+001F + canonical_payload_digest)
+onv1_ + sha256(source_thread_id + U+001F + event_class + U+001F + notification_kind + U+001F + canonical_payload_digest)
 ```
 
+`notification_kind` is identity-bearing because it changes delivery semantics. A heartbeat
+and operator update with otherwise identical facts therefore cannot collide. In contrast,
 `payload.transport` and `created_at` are declared transport-volatile fields. They are
-excluded from logical identity, so an unchanged retry preserves `event_id` across hosts
-and restarts. Their combined envelope digest is retained only to distinguish exact from
-semantic duplicate receipts.
+excluded from logical identity, so an unchanged same-kind retry preserves `event_id`
+across hosts and restarts. Their combined envelope digest is retained only to distinguish
+exact from semantic duplicate receipts.
 
 Every event carries `created_at`. A changed fact set creates a new `event_id`. Unless the
 event is explicitly typed `periodic_digest`, the receiver requires the changed event to
@@ -73,8 +78,9 @@ For a new notification event, one transaction:
 1. validates and deterministically reconstructs the event;
 2. checks the current stream and supersession relationship;
 3. inserts the immutable identity and version metadata;
-4. creates an opaque claim token plus generation and a microsecond-precise expiry for an
-   operator update or periodic digest;
+4. creates an opaque claim token plus generation, persists that generation's acquisition
+   timestamp, and computes a microsecond-precise expiry for an operator update or periodic
+   digest;
 5. returns `should_begin_delivery=true` to exactly one claimant while keeping
    `should_emit=false` and `operator_message_authorized=false`.
 
@@ -84,15 +90,19 @@ claim is active and unexpired, changes the durable state to non-stealable
 `delivery_in_progress`, and returns the only receipt with `should_emit=true` and
 `operator_message_authorized=true`. The transport must use the stable `event_id` as its
 idempotency key and must prove duplicate acceptance is suppressed. SQLite fencing alone is
-not network exactly-once delivery.
+not network exactly-once delivery. `started_at` must be at or after the active generation's
+persisted acquisition timestamp and before its expiry; the original event `first_seen`
+timestamp cannot authorize a later generation. The ledger records `started_at` from its
+UTC runtime clock inside the fence transaction; callers cannot supply or backdate it.
 
 For an existing `event_id`, one transaction increments `duplicate_count`, advances
 `last_seen`, records exact or semantic duplicate disposition, and returns
 `should_emit=false`. A claim may be reissued only when its lease expires before
 `begin_delivery`; that retry uses a new claim generation and token, fencing the expired
-claimant. Once delivery begins, no lease takeover is automatic. A crash or timeout leaves
-the durable outcome explicitly `UNKNOWN`, sets reconciliation required, and authorizes no
-retry unless the downstream transport proves idempotent acceptance by `event_id` through a
+claimant. The replacement transaction also records the new generation's acquisition time.
+Once delivery begins, no lease takeover is automatic. A crash or timeout leaves the
+durable outcome explicitly `UNKNOWN`, sets reconciliation required, and authorizes no retry
+unless the downstream transport proves idempotent acceptance by `event_id` through a
 separate governed reconciliation. Acknowledgement requires the active event ID, token, and
 generation and can follow only `delivery_in_progress`. Once accepted, every later retry
 returns the stable acknowledgement and the sender must stop. Superseded events remain
@@ -103,9 +113,9 @@ suppressed. Replayed acknowledgements always set both `retry_authorized=false` a
 
 The SQLite ledger stores event identity, source thread, event class, contract versions,
 canonical and envelope digests, first/last seen timestamps, duplicate count, disposition,
-supersession/delta metadata, claim state, delivery state, and acknowledgement state. It
-does not store notification bodies, transport metadata, claimant host names, secrets, or
-PII. Claimant identifiers are retained only as SHA-256 digests.
+supersession/delta metadata, claim generation/acquisition state, delivery state, and
+acknowledgement state. It does not store notification bodies, transport metadata, claimant
+host names, secrets, or PII. Claimant identifiers are retained only as SHA-256 digests.
 
 Ledger paths are fail-closed unless they remain below the configured runtime root, use the
 `.sqlite3` suffix, and avoid `.git` and `secrets`. CLI JSON inputs under `secrets` or `.env*`
@@ -121,8 +131,12 @@ compaction receipt; silent row deletion is forbidden.
 Before operational adoption, the owner must define the backup destination and retention
 window, prove SQLite online backup and restore on the actual runtime filesystem, and prove
 that restored duplicate and acknowledgement state suppresses replay. An unknown ledger
-schema, missing required tables, SQLite open failure, or failed `quick_check` is a terminal
-fail-closed condition; the receiver must not emit while state is unknown.
+schema, missing configured file, missing required tables, SQLite open failure, or failed
+`quick_check` is a terminal fail-closed condition; the receiver must not emit while state
+is unknown. Automatic storage migration is forbidden. The dormant pre-adoption
+`ledger.v1` test layout is rejected by `ledger.v2`; only known non-authoritative test data
+may be explicitly discarded and reprovisioned. Any adopted ledger requires a separately
+verified backup/migration/restore packet.
 
 ## Authority Boundary
 
@@ -151,7 +165,8 @@ Repository acceptance does not activate the feature. Runtime adoption requires a
 
 1. an owner-named native sender and receiver integration point;
 2. one configured `runtime/` location with single-writer ownership;
-3. actual-filesystem WAL, lock, online-backup, integrity, restore, and replay proof;
+3. explicit first-time provisioning plus actual-filesystem WAL, lock, online-backup,
+   integrity, restore, and replay proof;
 4. a transport adapter that requires the pre-send fence, uses `event_id` as its mandatory
    downstream idempotency key, and validates token-plus-generation acknowledgement before
    stopping retries;
