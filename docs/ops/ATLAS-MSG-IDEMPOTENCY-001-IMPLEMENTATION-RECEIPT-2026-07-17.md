@@ -24,6 +24,9 @@ second notification stream.
   cannot alter the winner; handled failures clean only exact identity-checked private
   artifacts. Abrupt-exit residue remains uniquely named, non-authoritative, and separately
   classifiable without blocking a clean retry.
+- POSIX provisioning synchronizes the parent directory after canonical hard-link
+  publication and again after private-name removal, closing the directory-entry durability
+  gap without changing Windows behavior.
 - `notification_kind` is part of deterministic event identity, preserving same-kind
   cross-host retries while separating control and operator delivery semantics.
 - Changed deliverables include their causal predecessor in identity, representing repeated
@@ -42,6 +45,10 @@ second notification stream.
   corruption or restore authority.
 - Claim receipts never authorize transport. Only an atomic, unexpired `begin_delivery`
   transition enters non-stealable `delivery_in_progress` and authorizes one transport call.
+- The same pre-send transition emits one canonical transport identity JSON string and flat
+  validated string fields. Object/list coercion, `[object Object]`, empty values, bare
+  digests, and noncanonical event IDs fail before the transaction commits; same-event
+  cross-host retries serialize identically.
 - A transport crash after fencing remains explicit `UNKNOWN` and reconciliation-required;
   automatic lease takeover is forbidden without downstream `event_id` dedupe evidence.
 - Exact and semantic duplicates are recorded without operator-message authorization.
@@ -70,8 +77,11 @@ second notification stream.
 - Missing-ledger startup rejection and exclusive first-time provisioning.
 - Atomic first-provision publication, initialization/validation failure cleanup, no
   canonical or sidecar residue on handled failure, concurrent single-winner integrity,
-  and non-authoritative pre-publication crash residue across restart.
+  non-authoritative pre-publication crash residue across restart, and ordered parent
+  directory synchronization around publication and private-name removal.
 - Pre-send token/generation fencing and stale claimant rejection.
+- Fail-closed transport identity typing, canonical serialization, object-coercion rejection,
+  and cross-host JSON round-trip stability.
 - Current-generation acquisition-time fencing across restart.
 - Correlated token/generation acknowledgement stopping retry.
 - Heartbeat and continuation non-replay.
@@ -99,7 +109,7 @@ Completion values are not inferred from these units. Runtime effectiveness remai
 
 ## Local Verification Snapshot
 
-- Notification contract/ledger suite: 43 passed in each of two final runs on Python 3.12
+- Notification contract/ledger suite: 46 passed in each of two final runs on Python 3.12
   and in each of two final runs on Python 3.13.
 - Native task and board correlation suite: 22 passed in each of two runs.
 - Root QA pipeline suite: 78 passed in each of two runs.

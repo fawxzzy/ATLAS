@@ -19,6 +19,7 @@ from jsonschema import Draft202012Validator, FormatChecker
 from ops.atlas.operator_notification_idempotency import (
     ACK_CONTRACT_VERSION,
     EVENT_CONTRACT_VERSION,
+    TRANSPORT_IDENTITY_VERSION,
     ClaimTokenError,
     DeliveryStateError,
     LedgerCorruptionError,
@@ -29,6 +30,7 @@ from ops.atlas.operator_notification_idempotency import (
     UnknownLedgerSchemaError,
     build_event,
     main as notification_main,
+    serialize_transport_identity,
     validate_event,
 )
 
@@ -189,10 +191,100 @@ class OperatorNotificationIdempotencyTests(unittest.TestCase):
         self.assertTrue(delivery["operator_message_authorized"])
         self.assertTrue(delivery["transport_event_id_dedupe_required"])
         self.assertEqual(delivery["transport_idempotency_key"], event["event_id"])
+        self.assertEqual(
+            delivery["transport_payload_digest"], event["canonical_payload_digest"]
+        )
+        self.assertEqual(
+            json.loads(delivery["transport_identity_json"]),
+            {
+                "contract_version": TRANSPORT_IDENTITY_VERSION,
+                "event_id": event["event_id"],
+                "payload_digest": event["canonical_payload_digest"],
+            },
+        )
         self.assertEqual(delivery["delivery_outcome"], "UNKNOWN")
         self.assertTrue(delivery["reconciliation_required"])
         with self.assertRaisesRegex(DeliveryStateError, "requires reconciliation"):
             self.begin(event, claim)
+
+    def test_transport_identity_is_stable_across_hosts_and_json_round_trips(self) -> None:
+        first = self.event(transport={"host_id": "host-a", "attempt": 1})
+        retry = self.event(
+            transport={"host_id": "host-b", "attempt": 2},
+            created_at="2026-07-17T14:05:00Z",
+        )
+        self.assertEqual(first["event_id"], retry["event_id"])
+        self.assertEqual(
+            first["canonical_payload_digest"], retry["canonical_payload_digest"]
+        )
+
+        first_wire = serialize_transport_identity(
+            first["event_id"], first["canonical_payload_digest"]
+        )
+        retry_wire = serialize_transport_identity(
+            retry["event_id"], retry["canonical_payload_digest"]
+        )
+        self.assertEqual(first_wire, retry_wire)
+        self.assertEqual(
+            first_wire,
+            json.dumps(
+                json.loads(first_wire),
+                sort_keys=True,
+                separators=(",", ":"),
+            ),
+        )
+        decoded = json.loads(first_wire)
+        self.assertIs(type(decoded["event_id"]), str)
+        self.assertIs(type(decoded["payload_digest"]), str)
+
+    def test_transport_identity_rejects_object_coercion_and_noncanonical_strings(self) -> None:
+        event = self.event()
+
+        class Coercible:
+            def __str__(self) -> str:
+                return event["event_id"]
+
+        invalid_event_ids = (
+            None,
+            {},
+            [],
+            Coercible(),
+            "",
+            "[object Object]",
+            event["event_id"].removeprefix("onv1_"),
+        )
+        invalid_digests = (
+            None,
+            {},
+            [],
+            Coercible(),
+            "",
+            "[object Object]",
+            event["canonical_payload_digest"].removeprefix("sha256:"),
+        )
+        for value in invalid_event_ids:
+            with self.subTest(event_id=type(value).__name__):
+                with self.assertRaisesRegex(
+                    NotificationContractError, "event_id must be a canonical string"
+                ):
+                    serialize_transport_identity(
+                        value, event["canonical_payload_digest"]
+                    )
+        for value in invalid_digests:
+            with self.subTest(payload_digest=type(value).__name__):
+                with self.assertRaisesRegex(
+                    NotificationContractError,
+                    "payload_digest must be a canonical string",
+                ):
+                    serialize_transport_identity(event["event_id"], value)
+
+        claim = self.claim(event)
+        with self.assertRaisesRegex(NotificationContractError, "event_id is invalid"):
+            self.ledger.begin_delivery(
+                {"event_id": event["event_id"]},
+                claim_token=claim["claim_token"],
+                claim_generation=claim["claim_generation"],
+            )
 
     def test_expired_claimant_is_fenced_after_replacement_claim(self) -> None:
         event = self.event()
@@ -785,6 +877,43 @@ class OperatorNotificationIdempotencyTests(unittest.TestCase):
         self.assertIsNone(restarted.record(self.event()["event_id"]))
         with self.assertRaisesRegex(LedgerProvisioningError, "already exists"):
             NotificationLedger.provision(self.runtime_root, missing_path)
+
+    def test_provision_syncs_directory_after_publish_and_private_name_removal(self) -> None:
+        ledger_path = (
+            self.runtime_root
+            / "atlas"
+            / "notifications"
+            / "directory-sync.sqlite3"
+        )
+        events: list[str] = []
+        original_remove = NotificationLedger._remove_private_provision_artifacts
+
+        def record_remove(*args, **kwargs) -> None:
+            events.append("remove-private-name")
+            original_remove(*args, **kwargs)
+
+        with patch.object(
+            NotificationLedger,
+            "_fsync_directory",
+            side_effect=lambda path: events.append(f"sync:{Path(path).name}"),
+        ), patch.object(
+            NotificationLedger,
+            "_remove_private_provision_artifacts",
+            side_effect=record_remove,
+        ):
+            provisioned = NotificationLedger.provision(self.runtime_root, ledger_path)
+
+        self.assertEqual(
+            events,
+            [
+                "sync:notifications",
+                "remove-private-name",
+                "sync:notifications",
+            ],
+        )
+        self.assertTrue(ledger_path.is_file())
+        self.assertEqual(self.provision_residue_paths(ledger_path), [])
+        self.assertIsNone(provisioned.record(self.event()["event_id"]))
 
     def test_handled_provision_failures_leave_no_canonical_or_sidecar_state(self) -> None:
         def fail_schema(_connection: sqlite3.Connection) -> None:

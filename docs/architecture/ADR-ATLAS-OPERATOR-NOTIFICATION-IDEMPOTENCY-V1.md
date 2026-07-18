@@ -54,6 +54,10 @@ as the configured ledger, and never blocks a later exclusive provision. Its dele
 separate bounded cleanup operation requiring exact path and identity proof; broad cleanup
 by prefix is forbidden.
 
+On POSIX filesystems, provisioning synchronizes the parent directory immediately after
+publishing the canonical hard link and again after removing the private name. A successful
+return therefore covers both directory-entry transitions, not only SQLite file contents.
+
 ## Stable Identity
 
 `canonical_payload_digest` is SHA-256 over canonical JSON for `payload.facts` only.
@@ -137,6 +141,15 @@ not network exactly-once delivery. `started_at` must be at or after the active g
 persisted acquisition timestamp and before its expiry; the original event `first_seen`
 timestamp cannot authorize a later generation. The ledger records `started_at` from its
 UTC runtime clock inside the fence transaction; callers cannot supply or backdate it.
+
+The same transaction validates the stored payload digest and produces one canonical
+`transport_identity_json` string containing only contract version, `event_id`, and
+`payload_digest`. Both identifiers must already be exact strings matching `onv1_` plus 64
+lowercase hexadecimal characters and `sha256:` plus 64 lowercase hexadecimal characters.
+Adapters must forward this serialized string unchanged or parse it with a strict JSON
+decoder; object coercion, string interpolation of mappings, bare digests, and reconstruction
+from transport-local metadata are prohibited. Cross-host retries therefore serialize to
+identical bytes, while invalid identity types fail before the delivery transaction commits.
 
 Every newly issued claim generation receives an independently generated 256-bit capability
 from the operating system cryptographic random source. The token is persisted before the

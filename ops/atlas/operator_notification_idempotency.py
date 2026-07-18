@@ -30,6 +30,7 @@ EVENT_CONTRACT_VERSION = "atlas.operator-notification.event.v1"
 ACK_CONTRACT_VERSION = "atlas.operator-notification.ack.v1"
 LEDGER_SCHEMA_VERSION = "atlas.operator-notification.ledger.v2"
 CANONICALIZATION_VERSION = "atlas.operator-notification.canonical-json.v1"
+TRANSPORT_IDENTITY_VERSION = "atlas.operator-notification.transport-identity.v1"
 TRANSPORT_VOLATILE_PATHS = ("$.payload.transport", "$.created_at")
 NOTIFICATION_KINDS = frozenset(
     {"operator_update", "periodic_digest", "heartbeat", "continuation"}
@@ -174,6 +175,26 @@ def canonical_json_bytes(value: Any) -> bytes:
         separators=(",", ":"),
         sort_keys=True,
     ).encode("utf-8")
+
+
+def serialize_transport_identity(event_id: Any, payload_digest: Any) -> str:
+    """Return the only transport-safe event identity representation."""
+
+    if type(event_id) is not str or not EVENT_ID_RE.fullmatch(event_id):
+        raise NotificationContractError(
+            "transport event_id must be a canonical string"
+        )
+    if type(payload_digest) is not str or not DIGEST_RE.fullmatch(payload_digest):
+        raise NotificationContractError(
+            "transport payload_digest must be a canonical string"
+        )
+    return canonical_json_bytes(
+        {
+            "contract_version": TRANSPORT_IDENTITY_VERSION,
+            "event_id": event_id,
+            "payload_digest": payload_digest,
+        }
+    ).decode("utf-8")
 
 
 def _sha256(value: bytes) -> str:
@@ -489,6 +510,7 @@ class NotificationLedger:
                     "atomic notification ledger publication was not admitted"
                 ) from exc
             published = True
+            cls._fsync_directory(canonical_path.parent)
             canonical_identity = cls._regular_file_identity(canonical_path)
             if canonical_identity != private_identity:
                 raise LedgerProvisioningError(
@@ -500,6 +522,7 @@ class NotificationLedger:
                 expected_identity=private_identity,
                 remove_database=True,
             )
+            cls._fsync_directory(canonical_path.parent)
             instance.path = canonical_path
             instance._open_existing()
             return instance
@@ -634,6 +657,22 @@ class NotificationLedger:
         except OSError as exc:
             raise LedgerProvisioningError(
                 "private notification ledger could not be synchronized"
+            ) from exc
+
+    @staticmethod
+    def _fsync_directory(path: Path) -> None:
+        if os.name == "nt":
+            return
+        flags = os.O_RDONLY | getattr(os, "O_DIRECTORY", 0)
+        try:
+            descriptor = os.open(path, flags)
+            try:
+                os.fsync(descriptor)
+            finally:
+                os.close(descriptor)
+        except OSError as exc:
+            raise LedgerProvisioningError(
+                "notification ledger directory could not be synchronized"
             ) from exc
 
     @classmethod
@@ -1412,7 +1451,7 @@ class NotificationLedger:
     ) -> dict[str, Any]:
         """Atomically fence one claim immediately before transport begins."""
 
-        if not EVENT_ID_RE.fullmatch(event_id):
+        if type(event_id) is not str or not EVENT_ID_RE.fullmatch(event_id):
             raise NotificationContractError("event_id is invalid")
         if not CLAIM_TOKEN_RE.fullmatch(claim_token):
             raise ClaimTokenError("claim_token is invalid")
@@ -1438,6 +1477,9 @@ class NotificationLedger:
                 raise DeliveryStateError(
                     "heartbeat and continuation events do not authorize delivery"
                 )
+            transport_identity_json = serialize_transport_identity(
+                event_id, row["canonical_payload_digest"]
+            )
             if (
                 row["claim_token"] != claim_token
                 or row["claim_generation"] != claim_generation
@@ -1482,6 +1524,8 @@ class NotificationLedger:
                 "reconciliation_required": True,
                 "delivery_started_at": started_at,
                 "transport_idempotency_key": event_id,
+                "transport_payload_digest": row["canonical_payload_digest"],
+                "transport_identity_json": transport_identity_json,
                 "transport_event_id_dedupe_required": True,
                 "should_emit": True,
                 "retry_authorized": False,

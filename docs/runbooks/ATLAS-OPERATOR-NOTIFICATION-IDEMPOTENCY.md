@@ -18,7 +18,8 @@ receipts only. It does not connect to FAWXZZY MESSAGES or any other transport.
    returned claim token and generation immediately before transport.
 5. Deliver only when that pre-send receipt sets both `should_emit=true` and
    `operator_message_authorized=true`, the caller already has delivery authority, and the
-   transport uses `event_id` as its idempotency key.
+   transport uses `event_id` as its idempotency key. Forward the returned
+   `transport_identity_json` string unchanged; do not interpolate a result object.
 6. Record the correlated acknowledgement using the same token and generation.
 7. Stop sender retries when the acknowledgement sets `retry_authorized=false`.
 
@@ -93,7 +94,9 @@ python ops/atlas/operator_notification_idempotency.py provision `
 
 Provisioning builds and validates a complete database at a uniquely named private path in
 the configured ledger's directory, checkpoints and synchronizes it without SQLite
-sidecars, then atomically publishes it without replacing any existing configured path.
+sidecars, then atomically publishes it without replacing any existing configured path. On
+POSIX, it synchronizes the parent directory after publication and again after removing the
+private name so both directory-entry changes are durable before success is reported.
 Concurrent provisioners may prepare independently, but exactly one can publish; every
 loser fails without altering the winner. Claim, delivery, acknowledgement, and status
 commands open only an existing database and never create a replacement. If an adopted
@@ -164,6 +167,16 @@ required. Never replay automatically from `delivery_in_progress`. `started_at` m
 or after the active claim generation's persisted acquisition timestamp and before expiry;
 the ledger captures it from the UTC runtime clock inside the transaction, so callers cannot
 backdate it to the event's original `first_seen`.
+
+The receipt also returns `transport_payload_digest` and `transport_identity_json`. The
+first two identity values are exact strings: `event_id` matches `onv1_[0-9a-f]{64}` and the
+payload digest matches `sha256:[0-9a-f]{64}`. The JSON identity string is canonical UTF-8
+JSON and is stable across same-event host and retry metadata. Reject any missing, empty,
+object-valued, list-valued, coerced, bare, or noncanonical identifier before calling the
+transport. In JavaScript, never concatenate an object into the message header; that yields
+`[object Object]` and destroys retry correlation. The repository capability has no live
+transport adapter, so runtime adoption remains held until the named sender proves it uses
+this exact pre-send output.
 
 Treat the claim token as a secret capability. Each generation receives a new 256-bit token
 from the operating system cryptographic random source; it is never derivable from
