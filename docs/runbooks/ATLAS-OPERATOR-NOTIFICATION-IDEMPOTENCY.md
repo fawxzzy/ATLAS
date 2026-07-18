@@ -91,10 +91,22 @@ python ops/atlas/operator_notification_idempotency.py provision `
   --ledger <atlas-runtime-root>\atlas\notifications\receive.sqlite3
 ```
 
-Provisioning reserves a new file exclusively and fails if any file already exists. Claim,
-delivery, acknowledgement, and status commands open only an existing database and never
-create a replacement. If an adopted ledger is missing, stop and restore it; never run
-`provision` to bypass missing duplicate or acknowledgement history.
+Provisioning builds and validates a complete database at a uniquely named private path in
+the configured ledger's directory, checkpoints and synchronizes it without SQLite
+sidecars, then atomically publishes it without replacing any existing configured path.
+Concurrent provisioners may prepare independently, but exactly one can publish; every
+loser fails without altering the winner. Claim, delivery, acknowledgement, and status
+commands open only an existing database and never create a replacement. If an adopted
+ledger is missing, stop and restore it; never run `provision` to bypass missing duplicate
+or acknowledgement history.
+
+A handled provisioning failure removes only its exact identity-checked private database
+and exact sidecars. An abrupt exit can leave a non-authoritative private file named
+`.<ledger>.provision-<32-lowercase-hex>.tmp`; startup ignores it and a later first-time
+provision does not adopt or overwrite it. Do not delete by wildcard. Quarantine or remove
+crash residue only in a separately admitted cleanup after proving the exact configured
+ledger is absent or healthy and verifying the residue's parent, name, regular-file type,
+non-symlink status, and captured file identity.
 
 ## Claim
 

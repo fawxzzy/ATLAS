@@ -18,6 +18,12 @@ second notification stream.
   fencing, stable acknowledgement identities, and fail-closed schema/integrity checks.
 - Normal startup opens only a previously provisioned ledger and cannot recreate a missing
   authority file; first-time provisioning is a separate exclusive operation.
+- First-time provisioning now initializes, validates, checkpoints, and synchronizes a
+  complete `ledger.v2` database at an exclusively owned same-directory private path, then
+  publishes atomically without replacing an existing configured path. Concurrent losers
+  cannot alter the winner; handled failures clean only exact identity-checked private
+  artifacts. Abrupt-exit residue remains uniquely named, non-authoritative, and separately
+  classifiable without blocking a clean retry.
 - `notification_kind` is part of deterministic event identity, preserving same-kind
   cross-host retries while separating control and operator delivery semantics.
 - Changed deliverables include their causal predecessor in identity, representing repeated
@@ -62,6 +68,9 @@ second notification stream.
 - Ready-blocked-ready causal occurrence identity, stable retry, and legacy replay.
 - Notification-kind identity separation.
 - Missing-ledger startup rejection and exclusive first-time provisioning.
+- Atomic first-provision publication, initialization/validation failure cleanup, no
+  canonical or sidecar residue on handled failure, concurrent single-winner integrity,
+  and non-authoritative pre-publication crash residue across restart.
 - Pre-send token/generation fencing and stale claimant rejection.
 - Current-generation acquisition-time fencing across restart.
 - Correlated token/generation acknowledgement stopping retry.
@@ -90,7 +99,7 @@ Completion values are not inferred from these units. Runtime effectiveness remai
 
 ## Local Verification Snapshot
 
-- Notification contract/ledger suite: 40 passed in each of two final runs on Python 3.12
+- Notification contract/ledger suite: 43 passed in each of two final runs on Python 3.12
   and in each of two final runs on Python 3.13.
 - Native task and board correlation suite: 22 passed in each of two runs.
 - Root QA pipeline suite: 78 passed in each of two runs.

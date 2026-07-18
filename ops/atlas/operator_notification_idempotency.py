@@ -17,6 +17,7 @@ import os
 import re
 import secrets
 import sqlite3
+import stat
 import sys
 import time
 import unicodedata
@@ -34,6 +35,7 @@ NOTIFICATION_KINDS = frozenset(
     {"operator_update", "periodic_digest", "heartbeat", "continuation"}
 )
 CONTROL_KINDS = frozenset({"heartbeat", "continuation"})
+PROVISION_SIDECAR_SUFFIXES = ("-wal", "-shm", "-journal")
 ID_RE = re.compile(r"^[a-z0-9][a-z0-9._:-]*$")
 EVENT_ID_RE = re.compile(r"^onv1_[0-9a-f]{64}$")
 DIGEST_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
@@ -455,25 +457,221 @@ class NotificationLedger:
         instance._clock = _clock or _system_utc_now
         instance._token_bytes = _token_bytes or secrets.token_bytes
         instance._busy_timeout_ms = _busy_timeout_ms
-        instance.path.parent.mkdir(parents=True, exist_ok=True)
-        try:
-            descriptor = os.open(
-                instance.path,
-                os.O_CREAT | os.O_EXCL | os.O_WRONLY,
-                0o600,
-            )
-        except FileExistsError as exc:
+        canonical_path = instance.path
+        canonical_path.parent.mkdir(parents=True, exist_ok=True)
+        if os.path.lexists(canonical_path):
             raise LedgerProvisioningError(
                 "configured notification ledger already exists; provisioning will not replace it"
+            )
+        private_path, private_identity = cls._create_private_provision_path(
+            canonical_path
+        )
+        published = False
+        try:
+            instance.path = private_path
+            instance._provision_new()
+            instance._before_provision_publish()
+            cls._validate_private_provision_path(
+                canonical_path,
+                private_path,
+                expected_identity=private_identity,
+            )
+            cls._require_no_provision_sidecars(private_path)
+            cls._fsync_file(private_path)
+            try:
+                os.link(private_path, canonical_path)
+            except FileExistsError as exc:
+                raise LedgerProvisioningError(
+                    "configured notification ledger already exists; provisioning will not replace it"
+                ) from exc
+            except OSError as exc:
+                raise LedgerProvisioningError(
+                    "atomic notification ledger publication was not admitted"
+                ) from exc
+            published = True
+            canonical_identity = cls._regular_file_identity(canonical_path)
+            if canonical_identity != private_identity:
+                raise LedgerProvisioningError(
+                    "published notification ledger identity did not match its private source"
+                )
+            cls._remove_private_provision_artifacts(
+                canonical_path,
+                private_path,
+                expected_identity=private_identity,
+                remove_database=True,
+            )
+            instance.path = canonical_path
+            instance._open_existing()
+            return instance
+        except Exception as exc:
+            if not published:
+                cls._remove_private_provision_artifacts(
+                    canonical_path,
+                    private_path,
+                    expected_identity=private_identity,
+                    remove_database=True,
+                )
+            if isinstance(
+                exc,
+                (
+                    LedgerProvisioningError,
+                    LedgerCorruptionError,
+                    UnknownLedgerSchemaError,
+                    LedgerUnavailableError,
+                ),
+            ):
+                raise
+            raise LedgerProvisioningError(
+                "notification ledger provisioning failed before publication"
             ) from exc
+
+    @staticmethod
+    def _provision_prefix(canonical_path: Path) -> str:
+        return f".{canonical_path.name}.provision-"
+
+    @classmethod
+    def _create_private_provision_path(
+        cls, canonical_path: Path
+    ) -> tuple[Path, tuple[int, int]]:
+        prefix = cls._provision_prefix(canonical_path)
+        for _ in range(16):
+            candidate = canonical_path.with_name(
+                f"{prefix}{secrets.token_hex(16)}.tmp"
+            )
+            try:
+                descriptor = os.open(
+                    candidate,
+                    os.O_CREAT | os.O_EXCL | os.O_RDWR,
+                    0o600,
+                )
+            except FileExistsError:
+                continue
+            except OSError as exc:
+                raise LedgerProvisioningError(
+                    "private notification ledger path could not be created"
+                ) from exc
+            try:
+                observed = os.fstat(descriptor)
+                if not stat.S_ISREG(observed.st_mode):
+                    raise LedgerProvisioningError(
+                        "private notification ledger path is not a regular file"
+                    )
+                identity = (observed.st_dev, observed.st_ino)
+            finally:
+                os.close(descriptor)
+            return candidate, identity
+        raise LedgerProvisioningError(
+            "a unique private notification ledger path could not be created"
+        )
+
+    @classmethod
+    def _validate_private_provision_path(
+        cls,
+        canonical_path: Path,
+        private_path: Path,
+        *,
+        expected_identity: tuple[int, int] | None = None,
+    ) -> None:
+        prefix = cls._provision_prefix(canonical_path)
+        token = private_path.name.removeprefix(prefix).removesuffix(".tmp")
+        if (
+            private_path.parent.resolve() != canonical_path.parent.resolve()
+            or not private_path.name.startswith(prefix)
+            or not private_path.name.endswith(".tmp")
+            or not re.fullmatch(r"[0-9a-f]{32}", token)
+            or private_path.is_symlink()
+        ):
+            raise LedgerProvisioningError(
+                "private notification ledger path failed ownership validation"
+            )
+        observed_identity = cls._regular_file_identity(private_path)
+        if (
+            expected_identity is not None
+            and observed_identity != expected_identity
+        ):
+            raise LedgerProvisioningError(
+                "private notification ledger identity changed before publication"
+            )
+
+    @staticmethod
+    def _regular_file_identity(path: Path) -> tuple[int, int]:
+        try:
+            observed = path.stat(follow_symlinks=False)
         except OSError as exc:
             raise LedgerProvisioningError(
-                "notification ledger path could not be reserved for provisioning"
+                "notification ledger artifact could not be inspected safely"
             ) from exc
-        else:
-            os.close(descriptor)
-        instance._provision_new()
-        return instance
+        if not stat.S_ISREG(observed.st_mode):
+            raise LedgerProvisioningError(
+                "notification ledger artifact is not a regular file"
+            )
+        return observed.st_dev, observed.st_ino
+
+    @staticmethod
+    def _provision_sidecars(private_path: Path) -> tuple[Path, ...]:
+        return tuple(
+            Path(str(private_path) + suffix)
+            for suffix in PROVISION_SIDECAR_SUFFIXES
+        )
+
+    @classmethod
+    def _require_no_provision_sidecars(cls, private_path: Path) -> None:
+        if any(os.path.lexists(path) for path in cls._provision_sidecars(private_path)):
+            raise LedgerProvisioningError(
+                "private notification ledger retained SQLite sidecars after validation"
+            )
+
+    @staticmethod
+    def _fsync_file(path: Path) -> None:
+        try:
+            # Windows requires a writable descriptor for FlushFileBuffers,
+            # which is the operation Python's os.fsync delegates to there.
+            descriptor = os.open(path, os.O_RDWR)
+            try:
+                os.fsync(descriptor)
+            finally:
+                os.close(descriptor)
+        except OSError as exc:
+            raise LedgerProvisioningError(
+                "private notification ledger could not be synchronized"
+            ) from exc
+
+    @classmethod
+    def _remove_private_provision_artifacts(
+        cls,
+        canonical_path: Path,
+        private_path: Path,
+        *,
+        expected_identity: tuple[int, int],
+        remove_database: bool,
+    ) -> None:
+        cls._validate_private_provision_path(
+            canonical_path,
+            private_path,
+            expected_identity=expected_identity,
+        )
+        for sidecar in cls._provision_sidecars(private_path):
+            if not os.path.lexists(sidecar):
+                continue
+            if (
+                sidecar.parent.resolve() != canonical_path.parent.resolve()
+                or sidecar.is_symlink()
+            ):
+                raise LedgerProvisioningError(
+                    "private SQLite sidecar failed ownership validation"
+                )
+            cls._regular_file_identity(sidecar)
+            sidecar.unlink()
+        if remove_database and os.path.lexists(private_path):
+            cls._validate_private_provision_path(
+                canonical_path,
+                private_path,
+                expected_identity=expected_identity,
+            )
+            private_path.unlink()
+
+    def _before_provision_publish(self) -> None:
+        """Test seam after private validation and before atomic publication."""
 
     def _connect(self) -> sqlite3.Connection:
         connection = None
@@ -596,6 +794,14 @@ class NotificationLedger:
                     if connection.in_transaction:
                         connection.execute("ROLLBACK")
                     raise
+                self._verify_existing(connection)
+                checkpoint = connection.execute(
+                    "PRAGMA wal_checkpoint(TRUNCATE)"
+                ).fetchone()
+                if checkpoint[0] != 0 or checkpoint[1] != checkpoint[2]:
+                    raise LedgerCorruptionError(
+                        "private notification ledger WAL checkpoint did not complete"
+                    )
                 quick_check = connection.execute("PRAGMA quick_check").fetchone()[0]
                 if quick_check != "ok":
                     raise LedgerCorruptionError(

@@ -38,6 +38,22 @@ opens only an existing file with SQLite `mode=rw`; it never creates a missing le
 missing adopted ledger requires restore or operator action, not fresh provisioning. No
 runtime database is committed. Tests own temporary runtime directories.
 
+First-time provisioning constructs the complete `ledger.v2` database at an exclusively
+created, same-directory private path. It initializes and validates schema and metadata,
+checkpoints WAL state, requires no SQLite sidecars, and synchronizes the database before an
+atomic no-replace publication to the configured path. The configured path is therefore
+absent or complete; it is never used as initialization scratch. Concurrent provisioners
+may each prepare a private database, but exactly one may publish. Losers fail closed and
+remove only their own identity-checked artifacts without changing the winner.
+
+Handled pre-publication failures remove only the exact private database and its exact
+`-wal`, `-shm`, or `-journal` sidecars after parent, name, regular-file, symlink, and file
+identity checks. An abrupt process exit may leave a uniquely named private artifact of the
+form `.<ledger>.provision-<random>.tmp`. Such residue is never authoritative, never adopted
+as the configured ledger, and never blocks a later exclusive provision. Its deletion is a
+separate bounded cleanup operation requiring exact path and identity proof; broad cleanup
+by prefix is forbidden.
+
 ## Stable Identity
 
 `canonical_payload_digest` is SHA-256 over canonical JSON for `payload.facts` only.
@@ -197,6 +213,12 @@ deliver only after its own authority check and a successful, current `begin_deli
 receipt with `should_emit=true` and `operator_message_authorized=true`.
 
 ## Failure Mode
+
+**Canonical-path bootstrap wedge:** reserving the configured ledger path before SQLite
+schema initialization lets a handled failure or process exit leave an empty or partial file
+that startup rejects and provisioning cannot replace. Build and validate at a private,
+same-filesystem path, then atomically publish without replacement. Never treat a private
+provision residue as authority.
 
 **Duplicate acknowledgement amplification:** acknowledging a duplicate by creating another
 operator-facing notification can turn one retry loop into two mutually amplifying message

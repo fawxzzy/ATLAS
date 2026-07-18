@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import io
 import json
+import re
 import sqlite3
 import tempfile
 import threading
@@ -11,6 +12,7 @@ from concurrent.futures import ThreadPoolExecutor
 from contextlib import closing, redirect_stderr, redirect_stdout
 from datetime import datetime
 from pathlib import Path
+from unittest.mock import patch
 
 from jsonschema import Draft202012Validator, FormatChecker
 
@@ -114,6 +116,15 @@ class OperatorNotificationIdempotencyTests(unittest.TestCase):
         with redirect_stdout(stdout), redirect_stderr(stderr):
             exit_code = notification_main(list(argv))
         return exit_code, stdout.getvalue(), stderr.getvalue()
+
+    @staticmethod
+    def provision_residue_paths(ledger_path: Path) -> list[Path]:
+        if not ledger_path.parent.exists():
+            return []
+        prefix = f".{ledger_path.name}.provision-"
+        return sorted(
+            path for path in ledger_path.parent.iterdir() if path.name.startswith(prefix)
+        )
 
     def begin(self, event: dict, claim: dict, *, clock_at: str = STARTED) -> dict:
         self.clock_now = datetime.fromisoformat(clock_at[:-1] + "+00:00")
@@ -766,11 +777,155 @@ class OperatorNotificationIdempotencyTests(unittest.TestCase):
 
         provisioned = NotificationLedger.provision(self.runtime_root, missing_path)
         self.assertTrue(missing_path.is_file())
+        self.assertEqual(self.provision_residue_paths(missing_path), [])
+        for suffix in ("-wal", "-shm", "-journal"):
+            self.assertFalse(Path(str(missing_path) + suffix).exists())
         self.assertIsNone(provisioned.record(self.event()["event_id"]))
         restarted = NotificationLedger(self.runtime_root, missing_path)
         self.assertIsNone(restarted.record(self.event()["event_id"]))
         with self.assertRaisesRegex(LedgerProvisioningError, "already exists"):
             NotificationLedger.provision(self.runtime_root, missing_path)
+
+    def test_handled_provision_failures_leave_no_canonical_or_sidecar_state(self) -> None:
+        def fail_schema(_connection: sqlite3.Connection) -> None:
+            raise RuntimeError("injected schema failure")
+
+        def fail_validation(_connection: sqlite3.Connection) -> None:
+            raise UnknownLedgerSchemaError("injected validation failure")
+
+        cases = (
+            ("schema", staticmethod(fail_schema), "_create_schema", LedgerProvisioningError),
+            (
+                "validation",
+                staticmethod(fail_validation),
+                "_verify_existing",
+                UnknownLedgerSchemaError,
+            ),
+        )
+        for name, replacement, attribute, expected_error in cases:
+            with self.subTest(name=name):
+                ledger_path = (
+                    self.runtime_root
+                    / "atlas"
+                    / "notifications"
+                    / f"{name}-failure.sqlite3"
+                )
+                with patch.object(NotificationLedger, attribute, replacement):
+                    with self.assertRaises(expected_error):
+                        NotificationLedger.provision(self.runtime_root, ledger_path)
+                self.assertFalse(ledger_path.exists())
+                self.assertEqual(self.provision_residue_paths(ledger_path), [])
+                for suffix in ("-wal", "-shm", "-journal"):
+                    self.assertFalse(Path(str(ledger_path) + suffix).exists())
+
+                recovered = NotificationLedger.provision(
+                    self.runtime_root, ledger_path
+                )
+                self.assertIsNone(recovered.record(self.event()["event_id"]))
+                restarted = NotificationLedger(self.runtime_root, ledger_path)
+                self.assertIsNone(restarted.record(self.event()["event_id"]))
+
+        sidecar_path = (
+            self.runtime_root
+            / "atlas"
+            / "notifications"
+            / "sidecar-failure.sqlite3"
+        )
+
+        def fail_with_private_sidecars(ledger: NotificationLedger) -> None:
+            for suffix in ("-wal", "-shm", "-journal"):
+                Path(str(ledger.path) + suffix).touch()
+            raise RuntimeError("injected pre-publication failure")
+
+        with patch.object(
+            NotificationLedger,
+            "_before_provision_publish",
+            fail_with_private_sidecars,
+        ):
+            with self.assertRaises(LedgerProvisioningError):
+                NotificationLedger.provision(self.runtime_root, sidecar_path)
+        self.assertFalse(sidecar_path.exists())
+        self.assertEqual(self.provision_residue_paths(sidecar_path), [])
+
+    def test_concurrent_provision_publishes_exactly_one_complete_winner(self) -> None:
+        ledger_path = (
+            self.runtime_root
+            / "atlas"
+            / "notifications"
+            / "provision-race.sqlite3"
+        )
+        barrier = threading.Barrier(2)
+
+        def pause_before_publish(_ledger: NotificationLedger) -> None:
+            barrier.wait(timeout=10)
+
+        def attempt() -> str:
+            try:
+                NotificationLedger.provision(self.runtime_root, ledger_path)
+                return "published"
+            except LedgerProvisioningError:
+                return "collision"
+
+        with patch.object(
+            NotificationLedger,
+            "_before_provision_publish",
+            pause_before_publish,
+        ):
+            with ThreadPoolExecutor(max_workers=2) as executor:
+                results = list(executor.map(lambda _index: attempt(), range(2)))
+
+        self.assertEqual(sorted(results), ["collision", "published"])
+        self.assertEqual(self.provision_residue_paths(ledger_path), [])
+        winner = NotificationLedger(self.runtime_root, ledger_path)
+        self.assertIsNone(winner.record(self.event()["event_id"]))
+        with closing(sqlite3.connect(ledger_path)) as connection:
+            self.assertEqual(connection.execute("PRAGMA quick_check").fetchone()[0], "ok")
+            self.assertEqual(
+                connection.execute(
+                    "SELECT value FROM ledger_meta WHERE key='schema_version'"
+                ).fetchone()[0],
+                "atlas.operator-notification.ledger.v2",
+            )
+
+    def test_pre_publish_crash_residue_is_private_and_does_not_block_retry(self) -> None:
+        class SimulatedCrash(BaseException):
+            pass
+
+        ledger_path = (
+            self.runtime_root
+            / "atlas"
+            / "notifications"
+            / "crash-residue.sqlite3"
+        )
+
+        def crash_before_publish(_ledger: NotificationLedger) -> None:
+            raise SimulatedCrash()
+
+        with patch.object(
+            NotificationLedger,
+            "_before_provision_publish",
+            crash_before_publish,
+        ):
+            with self.assertRaises(SimulatedCrash):
+                NotificationLedger.provision(self.runtime_root, ledger_path)
+
+        self.assertFalse(ledger_path.exists())
+        with self.assertRaises(LedgerUnavailableError):
+            NotificationLedger(self.runtime_root, ledger_path)
+        residues = self.provision_residue_paths(ledger_path)
+        self.assertEqual(len(residues), 1)
+        self.assertRegex(
+            residues[0].name,
+            rf"^\.{re.escape(ledger_path.name)}\.provision-[0-9a-f]{{32}}\.tmp$",
+        )
+        for suffix in ("-wal", "-shm", "-journal"):
+            self.assertFalse(Path(str(residues[0]) + suffix).exists())
+
+        provisioned = NotificationLedger.provision(self.runtime_root, ledger_path)
+        self.assertIsNone(provisioned.record(self.event()["event_id"]))
+        self.assertEqual(self.provision_residue_paths(ledger_path), residues)
+        restarted = NotificationLedger(self.runtime_root, ledger_path)
+        self.assertIsNone(restarted.record(self.event()["event_id"]))
 
     def test_lock_contention_is_temporarily_unavailable_not_corruption(self) -> None:
         short_wait_ledger = NotificationLedger(
