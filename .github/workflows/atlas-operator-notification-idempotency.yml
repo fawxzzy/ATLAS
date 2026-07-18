@@ -1,0 +1,42 @@
+name: Atlas Operator Notification Idempotency
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/atlas-operator-notification-idempotency.yml"
+      - "docs/architecture/ADR-ATLAS-OPERATOR-NOTIFICATION-IDEMPOTENCY-V1.md"
+      - "docs/runbooks/ATLAS-OPERATOR-NOTIFICATION-IDEMPOTENCY.md"
+      - "docs/ops/ATLAS-MSG-IDEMPOTENCY-001-IMPLEMENTATION-RECEIPT-2026-07-17.md"
+      - "ops/atlas/operator_notification_idempotency.py"
+      - "schemas/atlas.operator-notification.*.v1.json"
+      - "tests/test_atlas_operator_notification_idempotency.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ["3.12", "3.13"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install schema validator
+        run: python -m pip install jsonschema==4.25.1
+
+      - name: Validate deterministic contracts and ledger twice
+        shell: bash
+        run: |
+          python -m unittest tests.test_atlas_operator_notification_idempotency -v
+          python -m unittest tests.test_atlas_operator_notification_idempotency -v
