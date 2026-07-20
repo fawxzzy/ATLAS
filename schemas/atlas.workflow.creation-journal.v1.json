@@ -61,6 +61,8 @@
       "additionalProperties": false,
       "required": [
         "role_id",
+        "operation_key",
+        "provider_idempotency_key_supported",
         "runtime_id",
         "prior_runtime_id",
         "accepted_plan_id",
@@ -76,8 +78,18 @@
           "type": "string",
           "pattern": "^[a-z0-9][a-z0-9.-]+$"
         },
-        "runtime_id": {
+        "operation_key": {
           "type": "string",
+          "pattern": "^awci1_[0-9a-f]{64}$"
+        },
+        "provider_idempotency_key_supported": {
+          "type": "boolean"
+        },
+        "runtime_id": {
+          "type": [
+            "string",
+            "null"
+          ],
           "minLength": 1
         },
         "prior_runtime_id": {
@@ -107,6 +119,7 @@
         },
         "state": {
           "enum": [
+            "CREATE_INTENT",
             "CREATED_PENDING_READBACK",
             "READBACK_CONFIRMED"
           ]
@@ -125,7 +138,76 @@
           ],
           "pattern": "^sha256:[0-9a-f]{64}$"
         }
-      }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "CREATE_INTENT"
+              }
+            },
+            "required": [
+              "state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "runtime_id": {
+                "const": null
+              },
+              "post_apply_plan_id": {
+                "const": null
+              },
+              "post_apply_plan_digest": {
+                "const": null
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "runtime_id": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "READBACK_CONFIRMED"
+              }
+            },
+            "required": [
+              "state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "post_apply_plan_id": {
+                "type": "string",
+                "pattern": "^awrp1_[0-9a-f]{64}$"
+              },
+              "post_apply_plan_digest": {
+                "type": "string",
+                "pattern": "^sha256:[0-9a-f]{64}$"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "post_apply_plan_id": {
+                "const": null
+              },
+              "post_apply_plan_digest": {
+                "const": null
+              }
+            }
+          }
+        }
+      ]
     }
   }
 }

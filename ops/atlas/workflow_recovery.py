@@ -40,6 +40,8 @@ DESKTOP_OBSERVATION_FIXTURE_REF = "tests/fixtures/atlas-workflow-recovery/valid-
 DESKTOP_OBSERVATION_MAX_AGE_SECONDS = 300
 DESKTOP_OBSERVATION_FUTURE_SKEW_SECONDS = 30
 MODERN_PERMISSION_PROFILES = frozenset({":read-only", ":workspace", ":danger-full-access"})
+CREATION_JOURNAL_LOCK_TIMEOUT_SECONDS = 5.0
+CREATION_JOURNAL_LOCK_POLL_SECONDS = 0.05
 
 HEALTH_VALUES = (
     "HEALTHY",
@@ -257,6 +259,172 @@ def _atomic_write_bytes(path: Path, value: bytes) -> None:
             pass
 
 
+def _acquire_native_file_lock(handle: Any, platform_name: str) -> None:
+    """Acquire one non-blocking exclusive byte/file lock on a persistent handle."""
+
+    if platform_name == "nt":
+        import msvcrt
+
+        handle.seek(0)
+        msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK, 1)
+        return
+    if platform_name == "posix":
+        import fcntl
+
+        fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        return
+    raise OSError(
+        errno.ENOTSUP,
+        f"platform {platform_name!r} does not expose a supported file-lock primitive",
+    )
+
+
+def _release_native_file_lock(handle: Any, platform_name: str) -> None:
+    """Release a native lock without unlinking its stable lock-file inode."""
+
+    if platform_name == "nt":
+        import msvcrt
+
+        handle.seek(0)
+        msvcrt.locking(handle.fileno(), msvcrt.LK_UNLCK, 1)
+        return
+    if platform_name == "posix":
+        import fcntl
+
+        fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+        return
+    raise OSError(
+        errno.ENOTSUP,
+        f"platform {platform_name!r} does not expose a supported file-unlock primitive",
+    )
+
+
+def _is_file_lock_contention(exc: OSError) -> bool:
+    return exc.errno in {errno.EACCES, errno.EAGAIN, errno.EDEADLK} or getattr(
+        exc,
+        "winerror",
+        None,
+    ) in {32, 33}
+
+
+class _CrossProcessFileLock:
+    """Bounded native lock whose persistent path is never deleted on release."""
+
+    def __init__(
+        self,
+        path: Path,
+        *,
+        timeout_seconds: float,
+        poll_seconds: float = CREATION_JOURNAL_LOCK_POLL_SECONDS,
+        platform_name: str | None = None,
+    ) -> None:
+        if timeout_seconds < 0:
+            raise ValueError("file-lock timeout must be non-negative")
+        if poll_seconds <= 0:
+            raise ValueError("file-lock poll interval must be positive")
+        self.path = path
+        self.timeout_seconds = timeout_seconds
+        self.poll_seconds = poll_seconds
+        self.platform_name = platform_name or os.name
+        self.handle: Any = None
+        self.acquired = False
+
+    def __enter__(self) -> "_CrossProcessFileLock":
+        if self.platform_name not in {"nt", "posix"}:
+            raise WorkflowRecoveryError(
+                f"creation journal lock failed for {self.path}: platform "
+                f"{self.platform_name!r} is unsupported"
+            )
+        try:
+            self.path.parent.mkdir(parents=True, exist_ok=True)
+            self.handle = self.path.open("a+b")
+            self.handle.seek(0, os.SEEK_END)
+            if self.handle.tell() == 0:
+                self.handle.write(b"\0")
+                self.handle.flush()
+                os.fsync(self.handle.fileno())
+            deadline = time.monotonic() + self.timeout_seconds
+            while True:
+                try:
+                    _acquire_native_file_lock(self.handle, self.platform_name)
+                    self.acquired = True
+                    return self
+                except OSError as exc:
+                    if not _is_file_lock_contention(exc):
+                        raise
+                    remaining = deadline - time.monotonic()
+                    if remaining <= 0:
+                        raise WorkflowRecoveryError(
+                            f"creation journal lock timed out after "
+                            f"{self.timeout_seconds:g}s for {self.path}"
+                        ) from exc
+                    time.sleep(min(self.poll_seconds, remaining))
+        except WorkflowRecoveryError:
+            self._close_after_failed_acquire()
+            raise
+        except (OSError, ValueError) as exc:
+            self._close_after_failed_acquire()
+            raise WorkflowRecoveryError(
+                f"creation journal lock acquisition failed for {self.path}: {exc}"
+            ) from exc
+
+    def _close_after_failed_acquire(self) -> None:
+        if self.handle is not None:
+            try:
+                self.handle.close()
+            except OSError:
+                pass
+            self.handle = None
+
+    def __exit__(self, exc_type: Any, exc: Any, traceback: Any) -> bool:
+        release_error: BaseException | None = None
+        close_error: BaseException | None = None
+        if self.handle is not None and self.acquired:
+            try:
+                _release_native_file_lock(self.handle, self.platform_name)
+            except (OSError, ValueError) as caught:
+                release_error = caught
+            finally:
+                self.acquired = False
+        if self.handle is not None:
+            try:
+                self.handle.close()
+            except OSError as caught:
+                close_error = caught
+            finally:
+                self.handle = None
+        if release_error is not None:
+            raise WorkflowRecoveryError(
+                f"creation journal lock release failed for {self.path}: {release_error}"
+            ) from release_error
+        if close_error is not None:
+            raise WorkflowRecoveryError(
+                f"creation journal lock close failed for {self.path}: {close_error}"
+            ) from close_error
+        return False
+
+
+def _creation_operation_key(
+    manifest_digest: str,
+    accepted_plan_digest: str,
+    role_id: str,
+    prior_runtime_id: str | None,
+    adapter_name: str,
+    provider_idempotency_key_supported: bool,
+) -> str:
+    payload = {
+        "schema": "atlas.workflow.create-intent.v1",
+        "manifest_digest": manifest_digest,
+        "accepted_plan_digest": accepted_plan_digest,
+        "role_id": role_id,
+        "prior_runtime_id": prior_runtime_id,
+        "adapter": adapter_name,
+        "provider_idempotency_key_supported": provider_idempotency_key_supported,
+    }
+    digest = _sha256_bytes(_canonical_bytes(payload)).removeprefix("sha256:")
+    return f"awci1_{digest}"
+
+
 class CreationJournal:
     """Content-addressed retained bindings written before post-create actions."""
 
@@ -268,11 +436,18 @@ class CreationJournal:
         manifest: dict[str, Any],
         durable_registry: dict[str, Any],
         manifest_digest: str,
+        *,
+        lock_timeout_seconds: float = CREATION_JOURNAL_LOCK_TIMEOUT_SECONDS,
+        lock_platform_name: str | None = None,
     ) -> None:
         self.path = path
+        self.lock_path = path.with_name(f"{path.name}.lock")
+        self.create_lock_path = path.with_name(f"{path.name}.create.lock")
         self.manifest = manifest
         self.durable_registry = durable_registry
         self.manifest_digest = manifest_digest
+        self.lock_timeout_seconds = lock_timeout_seconds
+        self.lock_platform_name = lock_platform_name
         self.event_id: str | None = None
         self.payload_digest: str | None = None
         self.entries: dict[str, dict[str, Any]] = {}
@@ -281,7 +456,19 @@ class CreationJournal:
 
     @property
     def bindings(self) -> dict[str, str]:
-        return {role_id: entry["runtime_id"] for role_id, entry in self.entries.items()}
+        return {
+            role_id: entry["runtime_id"]
+            for role_id, entry in self.entries.items()
+            if entry["runtime_id"] is not None
+        }
+
+    @property
+    def intents(self) -> dict[str, str]:
+        return {
+            role_id: entry["operation_key"]
+            for role_id, entry in self.entries.items()
+            if entry["state"] == "CREATE_INTENT"
+        }
 
     def _load(self) -> None:
         envelope = _load_json(self.path)
@@ -301,11 +488,18 @@ class CreationJournal:
             )
         role_ids = {item["role_id"] for item in self.manifest["roles"]}
         entry_role_ids = [item["role_id"] for item in payload["entries"]]
-        runtime_ids = [item["runtime_id"] for item in payload["entries"]]
+        runtime_ids = [
+            item["runtime_id"]
+            for item in payload["entries"]
+            if item["runtime_id"] is not None
+        ]
+        operation_keys = [item["operation_key"] for item in payload["entries"]]
         if len(entry_role_ids) != len(set(entry_role_ids)):
             errors.append("role IDs are not unique")
         if len(runtime_ids) != len(set(runtime_ids)):
             errors.append("runtime IDs are not unique")
+        if len(operation_keys) != len(set(operation_keys)):
+            errors.append("operation keys are not unique")
         unknown_roles = sorted(set(entry_role_ids) - role_ids)
         if unknown_roles:
             errors.append(f"unknown logical roles: {unknown_roles}")
@@ -313,9 +507,28 @@ class CreationJournal:
             accepted_digest_hex = entry["accepted_plan_digest"].removeprefix("sha256:")
             if entry["accepted_plan_id"] != f"awrp1_{accepted_digest_hex}":
                 errors.append(f"{entry['role_id']}: accepted plan ID/digest mismatch")
+            expected_operation_key = _creation_operation_key(
+                self.manifest_digest,
+                entry["accepted_plan_digest"],
+                entry["role_id"],
+                entry["prior_runtime_id"],
+                entry["adapter"],
+                entry["provider_idempotency_key_supported"],
+            )
+            if entry["operation_key"] != expected_operation_key:
+                errors.append(f"{entry['role_id']}: create operation key mismatch")
             post_apply_plan_id = entry["post_apply_plan_id"]
             post_apply_plan_digest = entry["post_apply_plan_digest"]
-            if entry["state"] == "CREATED_PENDING_READBACK":
+            if entry["state"] == "CREATE_INTENT":
+                if entry["runtime_id"] is not None:
+                    errors.append(
+                        f"{entry['role_id']}: create intent cannot bind a runtime"
+                    )
+                if post_apply_plan_id is not None or post_apply_plan_digest is not None:
+                    errors.append(
+                        f"{entry['role_id']}: create intent cannot bind a post-apply plan"
+                    )
+            elif entry["state"] == "CREATED_PENDING_READBACK":
                 if post_apply_plan_id is not None or post_apply_plan_digest is not None:
                     errors.append(
                         f"{entry['role_id']}: pending entry cannot bind a post-apply plan"
@@ -339,7 +552,34 @@ class CreationJournal:
             for item in payload["entries"]
         }
 
-    def _write(self) -> None:
+    def _transition_lock(self) -> _CrossProcessFileLock:
+        return _CrossProcessFileLock(
+            self.lock_path,
+            timeout_seconds=self.lock_timeout_seconds,
+            platform_name=self.lock_platform_name,
+        )
+
+    def create_transaction_lock(self) -> _CrossProcessFileLock:
+        return _CrossProcessFileLock(
+            self.create_lock_path,
+            timeout_seconds=self.lock_timeout_seconds,
+            platform_name=self.lock_platform_name,
+        )
+
+    def _reload_committed_locked(self) -> None:
+        if not self.path.exists():
+            self.event_id = None
+            self.payload_digest = None
+            self.entries = {}
+            return
+        try:
+            self._load()
+        except (OSError, ValueError, WorkflowRecoveryError) as exc:
+            raise WorkflowRecoveryError(
+                f"creation journal locked reload failed for {self.path}: {exc}"
+            ) from exc
+
+    def _write_locked(self) -> None:
         payload = {
             "manifest_digest": self.manifest_digest,
             "no_archive": True,
@@ -356,8 +596,82 @@ class CreationJournal:
         }
         _assert_schema(envelope, CREATION_JOURNAL_SCHEMA_REF, "creation journal")
         _atomic_write_bytes(self.path, _pretty_bytes(envelope))
-        self.event_id = event_id
-        self.payload_digest = payload_digest
+        # Read and fully validate the committed envelope while the same native
+        # lock is still held. The caller never proceeds using an uncommitted or
+        # process-local journal snapshot.
+        try:
+            self._load()
+        except (OSError, ValueError, WorkflowRecoveryError) as exc:
+            raise WorkflowRecoveryError(
+                f"creation journal committed readback failed for {self.path}: {exc}"
+            ) from exc
+
+    def record_intent(
+        self,
+        accepted_plan: dict[str, Any],
+        role_id: str,
+        adapter_name: str,
+        *,
+        provider_idempotency_key_supported: bool,
+    ) -> str:
+        prior_runtime_id = next(
+            item["current_runtime_id"]
+            for item in self.durable_registry["bindings"]
+            if item["role_id"] == role_id
+        )
+        operation_key = _creation_operation_key(
+            self.manifest_digest,
+            accepted_plan["plan_digest"],
+            role_id,
+            prior_runtime_id,
+            adapter_name,
+            provider_idempotency_key_supported,
+        )
+        with self._transition_lock():
+            self._reload_committed_locked()
+            existing = self.entries.get(role_id)
+            if existing is not None:
+                if (
+                    existing["state"] == "CREATE_INTENT"
+                    and existing["operation_key"] == operation_key
+                    and existing["accepted_plan_digest"] == accepted_plan["plan_digest"]
+                ):
+                    return operation_key
+                raise WorkflowRecoveryError(
+                    f"{role_id}: creation intent collision with existing "
+                    f"state {existing['state']} and operation {existing['operation_key']}"
+                )
+            operation_owner = next(
+                (
+                    existing_role_id
+                    for existing_role_id, existing_entry in self.entries.items()
+                    if existing_entry["operation_key"] == operation_key
+                ),
+                None,
+            )
+            if operation_owner is not None:
+                raise WorkflowRecoveryError(
+                    f"create operation {operation_key} is already retained for "
+                    f"another logical role {operation_owner}"
+                )
+            self.entries[role_id] = {
+                "role_id": role_id,
+                "operation_key": operation_key,
+                "provider_idempotency_key_supported": (
+                    provider_idempotency_key_supported
+                ),
+                "runtime_id": None,
+                "prior_runtime_id": prior_runtime_id,
+                "accepted_plan_id": accepted_plan["plan_id"],
+                "accepted_plan_digest": accepted_plan["plan_digest"],
+                "created_at": accepted_plan["generated_at"],
+                "adapter": adapter_name,
+                "state": "CREATE_INTENT",
+                "post_apply_plan_id": None,
+                "post_apply_plan_digest": None,
+            }
+            self._write_locked()
+        return operation_key
 
     def record_created(
         self,
@@ -365,68 +679,153 @@ class CreationJournal:
         role_id: str,
         runtime_id: str,
         adapter_name: str,
+        operation_key: str,
     ) -> None:
-        existing = self.entries.get(role_id)
-        if existing is not None:
-            if existing["runtime_id"] != runtime_id:
+        with self._transition_lock():
+            self._reload_committed_locked()
+            existing = self.entries.get(role_id)
+            if existing is None:
                 raise WorkflowRecoveryError(
-                    f"{role_id}: creation journal collision "
-                    f"{existing['runtime_id']} != {runtime_id}"
+                    f"{role_id}: created runtime {runtime_id} has no durable CREATE_INTENT"
                 )
-            return
-        if runtime_id in self.bindings.values():
-            raise WorkflowRecoveryError(
-                f"created runtime {runtime_id} is already retained for another logical role"
+            if existing["operation_key"] != operation_key:
+                raise WorkflowRecoveryError(
+                    f"{role_id}: creation operation collision "
+                    f"{existing['operation_key']} != {operation_key}"
+                )
+            if existing["accepted_plan_digest"] != accepted_plan["plan_digest"]:
+                raise WorkflowRecoveryError(
+                    f"{role_id}: accepted plan drifted after CREATE_INTENT"
+                )
+            if existing["adapter"] != adapter_name:
+                raise WorkflowRecoveryError(
+                    f"{role_id}: adapter drifted after CREATE_INTENT"
+                )
+            if existing["state"] != "CREATE_INTENT":
+                if existing["runtime_id"] != runtime_id:
+                    raise WorkflowRecoveryError(
+                        f"{role_id}: creation journal collision "
+                        f"{existing['runtime_id']} != {runtime_id}"
+                    )
+                return
+            runtime_owner = next(
+                (
+                    existing_role_id
+                    for existing_role_id, existing_entry in self.entries.items()
+                    if existing_entry["runtime_id"] == runtime_id
+                ),
+                None,
             )
-        self.entries[role_id] = {
-            "role_id": role_id,
-            "runtime_id": runtime_id,
-            "prior_runtime_id": next(
-                item["current_runtime_id"]
-                for item in self.durable_registry["bindings"]
-                if item["role_id"] == role_id
-            ),
-            "accepted_plan_id": accepted_plan["plan_id"],
-            "accepted_plan_digest": accepted_plan["plan_digest"],
-            "created_at": accepted_plan["generated_at"],
-            "adapter": adapter_name,
-            "state": "CREATED_PENDING_READBACK",
-            "post_apply_plan_id": None,
-            "post_apply_plan_digest": None,
-        }
-        self._write()
+            if runtime_owner is not None:
+                raise WorkflowRecoveryError(
+                    f"created runtime {runtime_id} is already retained for "
+                    f"another logical role {runtime_owner}"
+                )
+            existing["runtime_id"] = runtime_id
+            existing["state"] = "CREATED_PENDING_READBACK"
+            self._write_locked()
+
+    def reconcile_intent(
+        self,
+        role_id: str,
+        runtime_id: str,
+        adapter_name: str,
+        operation_key: str,
+        *,
+        provider_idempotency_key_supported: bool,
+    ) -> None:
+        """Bind an exactly discovered provider result to a retained intent."""
+
+        with self._transition_lock():
+            self._reload_committed_locked()
+            existing = self.entries.get(role_id)
+            if existing is None:
+                raise WorkflowRecoveryError(
+                    f"{role_id}: exact runtime {runtime_id} has no durable CREATE_INTENT"
+                )
+            if existing["operation_key"] != operation_key:
+                raise WorkflowRecoveryError(
+                    f"{role_id}: discovered creation operation collision "
+                    f"{existing['operation_key']} != {operation_key}"
+                )
+            if existing["adapter"] != adapter_name:
+                raise WorkflowRecoveryError(
+                    f"{role_id}: discovered adapter drifted after CREATE_INTENT"
+                )
+            if (
+                existing["provider_idempotency_key_supported"] is not True
+                or provider_idempotency_key_supported is not True
+            ):
+                raise WorkflowRecoveryError(
+                    f"{role_id}: CREATE_INTENT provider operation-key readback is "
+                    "unsupported; exact reconciliation is prohibited"
+                )
+            if existing["state"] != "CREATE_INTENT":
+                if existing["runtime_id"] != runtime_id:
+                    raise WorkflowRecoveryError(
+                        f"{role_id}: creation journal collision "
+                        f"{existing['runtime_id']} != {runtime_id}"
+                    )
+                return
+            runtime_owner = next(
+                (
+                    existing_role_id
+                    for existing_role_id, existing_entry in self.entries.items()
+                    if existing_entry["runtime_id"] == runtime_id
+                ),
+                None,
+            )
+            if runtime_owner is not None:
+                raise WorkflowRecoveryError(
+                    f"discovered runtime {runtime_id} is already retained for "
+                    f"another logical role {runtime_owner}"
+                )
+            existing["runtime_id"] = runtime_id
+            existing["state"] = "CREATED_PENDING_READBACK"
+            self._write_locked()
 
     def confirm_readback(
         self,
         post_apply_plan: dict[str, Any],
         threads: Iterable["ThreadRecord"],
     ) -> None:
-        roles = {item["role_id"]: item for item in post_apply_plan["roles"]}
-        returned_runtime_ids = {item.thread_id for item in threads}
-        changed = False
-        for role_id, entry in self.entries.items():
-            role = roles.get(role_id)
-            if (
-                role is None
-                or role["runtime_id"] != entry["runtime_id"]
-                or entry["runtime_id"] not in returned_runtime_ids
-            ):
-                raise WorkflowRecoveryError(
-                    f"{role_id}: retained created runtime {entry['runtime_id']!r} "
-                    "was not returned and bound by post-apply reconciliation"
-                )
-            if (
-                entry["state"] != "READBACK_CONFIRMED"
-                or entry["post_apply_plan_digest"] != post_apply_plan["plan_digest"]
-            ):
-                entry["state"] = "READBACK_CONFIRMED"
-                entry["post_apply_plan_id"] = post_apply_plan["plan_id"]
-                entry["post_apply_plan_digest"] = post_apply_plan["plan_digest"]
-                changed = True
-        if changed:
-            self._write()
+        with self._transition_lock():
+            self._reload_committed_locked()
+            roles = {item["role_id"]: item for item in post_apply_plan["roles"]}
+            returned_runtime_ids = {item.thread_id for item in threads}
+            changed = False
+            for role_id, entry in self.entries.items():
+                if entry["state"] == "CREATE_INTENT":
+                    raise WorkflowRecoveryError(
+                        f"{role_id}: unresolved CREATE_INTENT {entry['operation_key']} "
+                        "cannot be confirmed by post-apply readback"
+                    )
+                role = roles.get(role_id)
+                if (
+                    role is None
+                    or role["runtime_id"] != entry["runtime_id"]
+                    or entry["runtime_id"] not in returned_runtime_ids
+                ):
+                    raise WorkflowRecoveryError(
+                        f"{role_id}: retained created runtime {entry['runtime_id']!r} "
+                        "was not returned and bound by post-apply reconciliation"
+                    )
+                if (
+                    entry["state"] != "READBACK_CONFIRMED"
+                    or entry["post_apply_plan_digest"] != post_apply_plan["plan_digest"]
+                ):
+                    entry["state"] = "READBACK_CONFIRMED"
+                    entry["post_apply_plan_id"] = post_apply_plan["plan_id"]
+                    entry["post_apply_plan_digest"] = post_apply_plan["plan_digest"]
+                    changed = True
+            if changed:
+                self._write_locked()
 
-    def apply_to(self, adapter: "DiscoveryAdapter", durable_registry: dict[str, Any]) -> None:
+    def _apply_loaded_to(
+        self,
+        adapter: "DiscoveryAdapter",
+        durable_registry: dict[str, Any],
+    ) -> None:
         durable = {item["role_id"]: item for item in durable_registry["bindings"]}
         durable_runtime_owners = {
             item["current_runtime_id"]: item["role_id"]
@@ -437,9 +836,30 @@ class CreationJournal:
             item["runtime_id"]
             for item in durable_registry["unbound_runtime_claims"]
         }
-        for role_id, runtime_id in self.bindings.items():
+        adapter.unresolved_creation_intents.clear()
+        for role_id, entry in self.entries.items():
+            if entry["state"] == "CREATE_INTENT":
+                durable_runtime_id = durable[role_id]["current_runtime_id"]
+                if durable_runtime_id != entry["prior_runtime_id"]:
+                    raise WorkflowRecoveryError(
+                        f"{role_id}: unresolved create intent conflicts with durable "
+                        f"runtime drift {entry['prior_runtime_id']} -> {durable_runtime_id}"
+                    )
+                adapter.unresolved_creation_intents[role_id] = {
+                    "operation_key": entry["operation_key"],
+                    "adapter": entry["adapter"],
+                    "provider_idempotency_key_supported": entry[
+                        "provider_idempotency_key_supported"
+                    ],
+                }
+                continue
+            runtime_id = entry["runtime_id"]
+            if runtime_id is None:  # schema and semantic validation should prevent this
+                raise WorkflowRecoveryError(
+                    f"{role_id}: retained created state has no runtime ID"
+                )
             durable_runtime_id = durable[role_id]["current_runtime_id"]
-            accepted_prior_runtime_id = self.entries[role_id]["prior_runtime_id"]
+            accepted_prior_runtime_id = entry["prior_runtime_id"]
             if durable_runtime_id not in {None, runtime_id, accepted_prior_runtime_id}:
                 raise WorkflowRecoveryError(
                     f"{role_id}: retained created runtime {runtime_id} conflicts with "
@@ -457,6 +877,11 @@ class CreationJournal:
             adapter.binding_overrides[role_id] = runtime_id
             adapter.retained_creation_bindings[role_id] = runtime_id
 
+    def apply_to(self, adapter: "DiscoveryAdapter", durable_registry: dict[str, Any]) -> None:
+        with self._transition_lock():
+            self._reload_committed_locked()
+            self._apply_loaded_to(adapter, durable_registry)
+
     def receipt_summary(self) -> dict[str, Any] | None:
         if self.event_id is None or self.payload_digest is None:
             return None
@@ -464,6 +889,7 @@ class CreationJournal:
             "path": str(self.path),
             "event_id": self.event_id,
             "payload_digest": self.payload_digest,
+            "intents": self.intents,
             "bindings": self.bindings,
         }
 
@@ -1019,13 +1445,22 @@ class JsonRpcAppServer:
 class DiscoveryAdapter:
     name = "abstract"
     capabilities: dict[str, bool] = {}
+    create_operation_key_supported = False
     binding_overrides: dict[str, str]
     retained_creation_bindings: dict[str, str]
+    unresolved_creation_intents: dict[str, dict[str, Any]]
 
     def discover(self) -> tuple[list[ThreadRecord], list[dict[str, Any]]]:
         raise NotImplementedError
 
-    def mutate(self, action: str, role: dict[str, Any], thread: ThreadRecord | None) -> ThreadRecord | None:
+    def mutate(
+        self,
+        action: str,
+        role: dict[str, Any],
+        thread: ThreadRecord | None,
+        *,
+        operation_key: str | None = None,
+    ) -> ThreadRecord | None:
         raise NotImplementedError
 
     def resolve_role_cwd(self, role: dict[str, Any]) -> str:
@@ -1070,6 +1505,7 @@ class LiveAppServerAdapter(DiscoveryAdapter):
         self.client: JsonRpcAppServer | None = None
         self.binding_overrides = {}
         self.retained_creation_bindings = {}
+        self.unresolved_creation_intents = {}
         self.cwd_bindings = dict(cwd_bindings or {})
 
     def _resolve_cwd_locator(self, locator: str) -> Path:
@@ -1200,7 +1636,14 @@ class LiveAppServerAdapter(DiscoveryAdapter):
             )
         return "\n\n".join(fragments) + "\n"
 
-    def mutate(self, action: str, role: dict[str, Any], thread: ThreadRecord | None) -> ThreadRecord | None:
+    def mutate(
+        self,
+        action: str,
+        role: dict[str, Any],
+        thread: ThreadRecord | None,
+        *,
+        operation_key: str | None = None,
+    ) -> ThreadRecord | None:
         if action in {"SET_PIN", "PROVE_PIN_STATE"}:
             raise WorkflowRecoveryError("Codex app-server exposes neither pin mutation nor pin readback; manual desktop fallback required")
         if action == "SET_RUNTIME_POLICY":
@@ -1208,6 +1651,10 @@ class LiveAppServerAdapter(DiscoveryAdapter):
                 "Codex app-server exposes no supported mutation for an existing thread runtime policy"
             )
         if action == "CREATE":
+            if operation_key is None:
+                raise WorkflowRecoveryError(
+                    f"{role['role_id']}: live CREATE requires a durable operation key"
+                )
             with JsonRpcAppServer(self.timeout_seconds) as client:
                 response = client.request(
                     "thread/start",
@@ -1243,6 +1690,7 @@ class LiveAppServerAdapter(DiscoveryAdapter):
 
 class FixtureAdapter(DiscoveryAdapter):
     name = "fixture"
+    create_operation_key_supported = True
     capabilities = {
         "discover": True,
         "create": True,
@@ -1268,6 +1716,7 @@ class FixtureAdapter(DiscoveryAdapter):
         self.created_counter = 0
         self.binding_overrides = {}
         self.retained_creation_bindings = {}
+        self.unresolved_creation_intents = {}
 
     def resolve_role_cwd(self, role: dict[str, Any]) -> str:
         return role["runtime"]["cwd_locator"]
@@ -1366,7 +1815,14 @@ class FixtureAdapter(DiscoveryAdapter):
         if self.fail_after_mutations is not None and self.mutations > self.fail_after_mutations:
             raise WorkflowRecoveryError(f"fixture injected failure after {self.fail_after_mutations} mutation(s)")
 
-    def mutate(self, action: str, role: dict[str, Any], thread: ThreadRecord | None) -> ThreadRecord | None:
+    def mutate(
+        self,
+        action: str,
+        role: dict[str, Any],
+        thread: ThreadRecord | None,
+        *,
+        operation_key: str | None = None,
+    ) -> ThreadRecord | None:
         if thread is not None:
             persisted = next(
                 (item for item in self.threads if item.thread_id == thread.thread_id),
@@ -1381,6 +1837,17 @@ class FixtureAdapter(DiscoveryAdapter):
                 raise WorkflowRecoveryError("fixture REFRESH_REGISTRY requires a runtime")
             self.binding_overrides[role["role_id"]] = thread.thread_id
             return thread
+        if action == "CREATE" and operation_key is not None:
+            existing = next(
+                (
+                    item
+                    for item in self.threads
+                    if item.raw.get("atlas_create_operation_key") == operation_key
+                ),
+                None,
+            )
+            if existing is not None:
+                return existing
         self._record_mutation()
         if action == "CREATE":
             self.created_counter += 1
@@ -1395,6 +1862,11 @@ class FixtureAdapter(DiscoveryAdapter):
                 role_marker=role["role_id"],
                 created_at=3000 + self.created_counter,
                 updated_at=3000 + self.created_counter,
+                raw=(
+                    {"atlas_create_operation_key": operation_key}
+                    if operation_key is not None
+                    else {}
+                ),
             )
             self.threads.append(thread)
         elif thread is None:
@@ -1566,6 +2038,94 @@ def build_recovery_plan(
             continue
 
         current = by_id.get(current_id) if current_id else None
+        reconciled_create_intent = False
+        create_intent = adapter.unresolved_creation_intents.get(role_id)
+        if create_intent is not None:
+            create_intent_operation_key = create_intent["operation_key"]
+            if not (
+                create_intent["provider_idempotency_key_supported"] is True
+                and adapter.create_operation_key_supported is True
+                and create_intent["adapter"] == adapter.name
+            ):
+                results.append(
+                    {
+                        "role_id": role_id,
+                        "runtime_id": current.thread_id if current is not None else None,
+                        "health": "BLOCKED",
+                        "decision": "FAIL_CLOSED_UNRESOLVED_CREATE_INTENT",
+                        "actions": [],
+                        "reasons": [
+                            "the retained CREATE_INTENT and current adapter do not both affirm authoritative provider operation-key readback with unchanged adapter identity; raw matching fields cannot authorize reconciliation"
+                        ],
+                        "active": current.active if current is not None else None,
+                        "archived": current.archived if current is not None else None,
+                        "pinned": current.pinned if current is not None else None,
+                    }
+                )
+                continue
+            exact_intent_matches = [
+                item
+                for item in threads
+                if item.raw.get("atlas_create_operation_key")
+                == create_intent_operation_key
+            ]
+            if current is not None:
+                results.append(
+                    {
+                        "role_id": role_id,
+                        "runtime_id": current.thread_id,
+                        "health": "BLOCKED",
+                        "decision": "FAIL_CLOSED_CREATE_INTENT_CLAIMANT_DRIFT",
+                        "actions": [],
+                        "reasons": [
+                            "an unresolved CREATE_INTENT exists, but the prior durable runtime is discoverable; reconcile the competing identity before any mutation"
+                        ],
+                        "active": current.active,
+                        "archived": current.archived,
+                        "pinned": current.pinned,
+                    }
+                )
+                continue
+            if len(exact_intent_matches) > 1:
+                results.append(
+                    {
+                        "role_id": role_id,
+                        "runtime_id": None,
+                        "health": "DUPLICATE",
+                        "decision": "FAIL_CLOSED_DUPLICATE_CREATE_INTENT",
+                        "actions": [],
+                        "reasons": [
+                            "multiple runtimes expose the exact retained create operation key: "
+                            + ", ".join(
+                                sorted(item.thread_id for item in exact_intent_matches)
+                            )
+                        ],
+                        "active": None,
+                        "archived": None,
+                        "pinned": None,
+                    }
+                )
+                continue
+            if not exact_intent_matches:
+                results.append(
+                    {
+                        "role_id": role_id,
+                        "runtime_id": None,
+                        "health": "BLOCKED",
+                        "decision": "FAIL_CLOSED_UNRESOLVED_CREATE_INTENT",
+                        "actions": [],
+                        "reasons": [
+                            "a durable CREATE_INTENT has no exact provider operation-key match in complete discovery; never issue another CREATE until the outcome is reconciled"
+                        ],
+                        "active": None,
+                        "archived": None,
+                        "pinned": None,
+                    }
+                )
+                continue
+            current = exact_intent_matches[0]
+            current_id = current.thread_id
+            reconciled_create_intent = True
         retained_runtime_id = adapter.retained_creation_bindings.get(role_id)
         if retained_runtime_id is not None and current is None:
             results.append(
@@ -1705,6 +2265,16 @@ def build_recovery_plan(
                     }
                 )
                 continue
+        elif reconciled_create_intent:
+            actions, reasons = _actions_for_record(role, current, stale_binding=True)
+            actions.insert(0, "COMMIT_CREATE_INTENT")
+            actions = list(dict.fromkeys(actions))
+            reasons.insert(
+                0,
+                "complete discovery returned exactly one runtime with the retained provider operation key; commit that identity before repair",
+            )
+            decision = "RECONCILE_EXACT_CREATE_INTENT"
+            health = "DEGRADED"
         else:
             actions, reasons = _actions_for_record(role, current, stale_binding=False)
             if role_id in observation_applied_roles:
@@ -1966,6 +2536,217 @@ def _revalidate_create_decision(
         )
 
 
+def _execute_create_transaction(
+    accepted_plan: dict[str, Any],
+    accepted_role_plan: dict[str, Any],
+    role: dict[str, Any],
+    thread: ThreadRecord | None,
+    manifest: dict[str, Any],
+    durable_registry: dict[str, Any],
+    adapter: DiscoveryAdapter,
+    creation_journal: CreationJournal | None,
+    receipts: list[dict[str, Any]],
+) -> ThreadRecord:
+    """Serialize fresh CREATE validation through durable runtime commitment."""
+
+    def create_and_record() -> ThreadRecord:
+        if creation_journal is not None:
+            # The create lock is already held. Refresh retained bindings under
+            # the separate journal lock before the fresh discovery decision.
+            creation_journal.apply_to(adapter, durable_registry)
+        _revalidate_create_decision(
+            accepted_plan,
+            accepted_role_plan,
+            manifest,
+            durable_registry,
+            adapter,
+        )
+        operation_key: str | None = None
+        if creation_journal is not None:
+            operation_key = creation_journal.record_intent(
+                accepted_plan,
+                accepted_role_plan["role_id"],
+                adapter.name,
+                provider_idempotency_key_supported=(
+                    adapter.create_operation_key_supported
+                ),
+            )
+            adapter.unresolved_creation_intents[accepted_role_plan["role_id"]] = {
+                "operation_key": operation_key,
+                "adapter": adapter.name,
+                "provider_idempotency_key_supported": (
+                    adapter.create_operation_key_supported
+                ),
+            }
+            receipts.append(
+                {
+                    "role_id": accepted_role_plan["role_id"],
+                    "action": "CREATE_INTENT",
+                    "before_runtime_id": thread.thread_id if thread else None,
+                    "after_runtime_id": None,
+                    "operation_key": operation_key,
+                    "provider_idempotency_key_supported": (
+                        adapter.create_operation_key_supported
+                    ),
+                    "status": "COMMITTED",
+                }
+            )
+        before_id = thread.thread_id if thread else None
+        created = adapter.mutate(
+            "CREATE",
+            role,
+            thread,
+            operation_key=operation_key,
+        )
+        after_id = created.thread_id if created else None
+        receipt = {
+            "role_id": accepted_role_plan["role_id"],
+            "action": "CREATE",
+            "before_runtime_id": before_id,
+            "after_runtime_id": after_id,
+            "operation_key": operation_key,
+            "provider_idempotency_key_supported": (
+                adapter.create_operation_key_supported
+            ),
+            "status": "APPLIED" if after_id else "UNKNOWN",
+        }
+        receipts.append(receipt)
+        if created is None or not after_id:
+            raise WorkflowRecoveryError(
+                f"{accepted_role_plan['role_id']}: CREATE returned no runtime ID; "
+                "the mutation outcome is unknown and no second CREATE is allowed"
+            )
+        # Preserve the accepted plan as immutable. The newly created runtime
+        # is carried separately into post-apply readback and registry output.
+        adapter.binding_overrides[accepted_role_plan["role_id"]] = after_id
+        if creation_journal is not None:
+            creation_journal.record_created(
+                accepted_plan,
+                accepted_role_plan["role_id"],
+                after_id,
+                adapter.name,
+                operation_key,
+            )
+            adapter.retained_creation_bindings[accepted_role_plan["role_id"]] = after_id
+            adapter.unresolved_creation_intents.pop(
+                accepted_role_plan["role_id"],
+                None,
+            )
+        return created
+
+    if creation_journal is None:
+        if adapter.name == "live-app-server":
+            raise WorkflowRecoveryError(
+                f"{accepted_role_plan['role_id']}: live CREATE requires the durable "
+                "creation journal and cross-process create lock"
+            )
+        return create_and_record()
+
+    # Lock order is always create lock -> journal lock. record_created and
+    # apply_to acquire only the journal lock, so no recursive acquisition or
+    # reverse-order cycle is possible.
+    with creation_journal.create_transaction_lock():
+        return create_and_record()
+
+
+def _commit_discovered_create_intent(
+    accepted_plan: dict[str, Any],
+    accepted_role_plan: dict[str, Any],
+    role: dict[str, Any],
+    thread: ThreadRecord | None,
+    manifest: dict[str, Any],
+    durable_registry: dict[str, Any],
+    adapter: DiscoveryAdapter,
+    creation_journal: CreationJournal | None,
+) -> ThreadRecord:
+    """Commit only an exact provider-key match while holding the create lock."""
+
+    if creation_journal is None:
+        raise WorkflowRecoveryError(
+            f"{accepted_role_plan['role_id']}: COMMIT_CREATE_INTENT requires the "
+            "durable creation journal"
+        )
+    if thread is None:
+        raise WorkflowRecoveryError(
+            f"{accepted_role_plan['role_id']}: COMMIT_CREATE_INTENT requires an exact runtime"
+        )
+    with creation_journal.create_transaction_lock():
+        creation_journal.apply_to(adapter, durable_registry)
+        create_intent = adapter.unresolved_creation_intents.get(
+            accepted_role_plan["role_id"]
+        )
+        if create_intent is None:
+            raise WorkflowRecoveryError(
+                f"{accepted_role_plan['role_id']}: CREATE_INTENT changed before commit; "
+                "fail closed"
+            )
+        operation_key = create_intent["operation_key"]
+        if not (
+            create_intent["provider_idempotency_key_supported"] is True
+            and adapter.create_operation_key_supported is True
+            and create_intent["adapter"] == adapter.name
+        ):
+            raise WorkflowRecoveryError(
+                f"{accepted_role_plan['role_id']}: CREATE_INTENT provider-key readback "
+                "support or adapter identity changed before commit; fail closed"
+            )
+        try:
+            current_threads, current_leases = adapter.discover()
+        except WorkflowRecoveryError as exc:
+            raise WorkflowRecoveryError(
+                f"{accepted_role_plan['role_id']}: exact intent discovery failed before "
+                f"commit: {exc}; fail closed"
+            ) from exc
+        current_plan, _, _ = build_recovery_plan(
+            manifest,
+            durable_registry,
+            adapter,
+            mode=accepted_plan["mode"],
+            deterministic=True,
+            discovery_snapshot=(current_threads, current_leases),
+        )
+        current_role_plan = next(
+            item
+            for item in current_plan["roles"]
+            if item["role_id"] == accepted_role_plan["role_id"]
+        )
+        if _canonical_bytes(current_role_plan) != _canonical_bytes(
+            accepted_role_plan
+        ):
+            raise WorkflowRecoveryError(
+                f"{accepted_role_plan['role_id']}: exact CREATE_INTENT decision drifted "
+                f"to {current_role_plan['decision']}; fail closed"
+            )
+        exact_matches = [
+            item
+            for item in current_threads
+            if item.raw.get("atlas_create_operation_key") == operation_key
+        ]
+        if len(exact_matches) != 1 or exact_matches[0].thread_id != thread.thread_id:
+            raise WorkflowRecoveryError(
+                f"{accepted_role_plan['role_id']}: provider operation-key readback is no "
+                "longer one exact runtime; fail closed"
+            )
+        creation_journal.reconcile_intent(
+            accepted_role_plan["role_id"],
+            thread.thread_id,
+            adapter.name,
+            operation_key,
+            provider_idempotency_key_supported=(
+                adapter.create_operation_key_supported
+            ),
+        )
+        adapter.binding_overrides[accepted_role_plan["role_id"]] = thread.thread_id
+        adapter.retained_creation_bindings[
+            accepted_role_plan["role_id"]
+        ] = thread.thread_id
+        adapter.unresolved_creation_intents.pop(
+            accepted_role_plan["role_id"],
+            None,
+        )
+    return thread
+
+
 def apply_plan(
     plan: dict[str, Any],
     manifest: dict[str, Any],
@@ -1989,21 +2770,43 @@ def apply_plan(
             thread = by_id.get(item["runtime_id"]) if item["runtime_id"] else None
             for action in item["actions"]:
                 if action == "CREATE":
-                    _revalidate_create_decision(
+                    thread = _execute_create_transaction(
                         plan,
                         item,
+                        role,
+                        thread,
                         manifest,
                         durable_registry,
                         adapter,
+                        creation_journal,
+                        receipts,
                     )
+                    continue
+                if action == "COMMIT_CREATE_INTENT":
+                    before_id = thread.thread_id if thread else None
+                    thread = _commit_discovered_create_intent(
+                        plan,
+                        item,
+                        role,
+                        thread,
+                        manifest,
+                        durable_registry,
+                        adapter,
+                        creation_journal,
+                    )
+                    receipts.append(
+                        {
+                            "role_id": item["role_id"],
+                            "action": action,
+                            "before_runtime_id": before_id,
+                            "after_runtime_id": thread.thread_id,
+                            "status": "COMMITTED",
+                        }
+                    )
+                    continue
                 before_id = thread.thread_id if thread else None
                 thread = adapter.mutate(action, role, thread)
                 after_id = thread.thread_id if thread else None
-                if action == "CREATE" and after_id:
-                    # Preserve the accepted plan as immutable. The newly created
-                    # runtime is carried separately into post-apply readback and
-                    # registry generation.
-                    adapter.binding_overrides[item["role_id"]] = after_id
                 receipt = {
                     "role_id": item["role_id"],
                     "action": action,
@@ -2012,19 +2815,11 @@ def apply_plan(
                     "status": "APPLIED",
                 }
                 receipts.append(receipt)
-                if action == "CREATE" and after_id and creation_journal is not None:
-                    creation_journal.record_created(
-                        plan,
-                        item["role_id"],
-                        after_id,
-                        adapter.name,
-                    )
-                    # The same process must use the durable binding immediately;
-                    # otherwise a failed post-apply discovery could plan a second
-                    # CREATE before a restart has a chance to reload the journal.
-                    adapter.retained_creation_bindings[item["role_id"]] = after_id
     except WorkflowRecoveryError as exc:
-        if any(item["action"] == "CREATE" for item in receipts):
+        if any(
+            item["action"] in {"CREATE_INTENT", "CREATE"}
+            for item in receipts
+        ):
             raise PartialCreateFailure(str(exc), receipts) from exc
         raise
     return receipts
@@ -2229,7 +3024,7 @@ def render_markdown(
         "",
         "A live apply additionally requires `--apply --acceptance <receipt.json>`. The receipt must bind the exact manifest and plan digests and name `atlas.main` as accepter. The current Codex app-server protocol does not expose pin readback or pin mutation, so any role needing pin proof fails closed before creation or repair. `ATLAS-WORKFLOW-MAN-001` rejected a manual fallback: the observation bridge can prove supported activity evidence, but live recovery remains blocked until deterministic pin readback and mutation exist.",
         "",
-        "Creation binds its accepted runtime policy through `thread/start`; the supported app-server contract exposes no mutation for repairing a missing policy on an existing runtime, so that case fails preflight. Live apply must use the canonical runtime output directory. Immediately before every `CREATE`, complete discovery rebuilds the exact logical-role decision; any claimant, lease, or decision drift fails closed without creation. Immediately after `CREATE`, the exact runtime ID is retained in a content-addressed creation journal before any later action can run. The temporary file is fsynced before replacement; POSIX then fsyncs the modified parent directory, while Windows uses `MoveFileExW` with replace-existing and write-through flags. An unsupported primitive or failed metadata flush stops later actions. A fresh process validates and loads the binding before planning: it reuses the exact ID when discovery returns it and blocks without another create when discovery does not. A successful apply keeps the accepted plan immutable and carries the read-back runtime ID through a separate post-apply binding map into a content-addressed post-apply plan and the live registry. The terminal receipt binds the accepted plan, post-apply plan, and journal event/digest. Terminal health comes from the post-apply plan. If the bound runtime is absent from complete readback, registry generation fails closed.",
+        "Creation binds its accepted runtime policy through `thread/start`; the supported app-server contract exposes no mutation for repairing a missing policy on an existing runtime, so that case fails preflight. Live apply must use the canonical runtime output directory. Every `CREATE` transaction first acquires a bounded native exclusive lock on the stable persistent `creation-journal.json.create.lock` path. While holding it, recovery reloads retained state under the separate journal transition lock, performs complete discovery, rebuilds the exact logical-role decision, and durably commits a content-addressed `CREATE_INTENT` before issuing the remote create. The intent binds the accepted plan, logical role, prior runtime, adapter, and whether that provider supports the deterministic operation key. The key is supplied to the provider only where the supported adapter contract exposes such idempotency; the current live app-server thread protocol does not. The create lock remains held through the remote create and durable journal commitment of the returned runtime ID. A process death after the remote call therefore leaves either the binding or the earlier intent. An unresolved intent blocks every later `CREATE`; exactly one discovered runtime carrying the same provider operation key may be committed after a new accepted plan, while no match, multiple matches, claimant drift, or an adapter without supported key readback remains fail-closed. Any timeout, claimant, lease, decision, intent, create, journal, or release failure stops without a second create or cleanup. Lock order is always create lock then journal lock, and journal transitions never recursively acquire the create lock. Every journal intent, record, reconciliation, or readback-confirmation transition acquires the stable persistent `creation-journal.json.lock`, reloads and fully validates the latest committed envelope under that lock, merges role-bound entries, rejects role/runtime/operation collisions, performs the durable replacement while still locked, and refreshes caller state from the committed envelope before release. Both shared lock files are never unlinked, preventing split-inode or split-handle races. The temporary journal file is fsynced before replacement; POSIX then fsyncs the modified parent directory, while Windows uses `MoveFileExW` with replace-existing and write-through flags. Unsupported locking or replacement primitives and lock acquisition, lock I/O, reload, merge, durability, release, or metadata-flush failures stop later actions. A successful apply keeps the accepted plan immutable and carries the read-back runtime ID through a separate post-apply binding map into a content-addressed post-apply plan and the live registry. The terminal receipt binds the accepted plan, post-apply plan, and journal event/digest. Terminal health comes from the post-apply plan. If the bound runtime is absent from complete readback, registry generation fails closed.",
         "",
         "Fixture-safe creation proof:",
         "",
@@ -2243,8 +3038,8 @@ def render_markdown(
         "2. Recover/reuse ATLAS MAIN first. Do not create downstream roles until Main is unique and accepted.",
         "3. Recover queue surfaces in parallel, then owner/control surfaces by non-overlapping writer scope.",
         "4. For a rollover, persist a related epoch, bootstrap the successor with a stable event ID, prove routes/readback, obtain ATLAS MAIN acceptance, then and only then make the predecessor archive-eligible.",
-        "5. On partial create, atomically journal the created ID before the next action, stop, and retry by logical role. A fresh process must load the journal and either reuse the exact ID or block; never delete it as rollback and never create a replacement while its identity is unresolved.",
-        "6. On crash, re-run dry-run. Idempotence derives from role IDs, event IDs, payload digests, and retained runtime IDs—not from chat recollection.",
+        "5. Before remote create, atomically journal the content-addressed `CREATE_INTENT`. After create, atomically replace it with the returned runtime binding before the next action. A fresh process must load either state: reuse the bound ID, reconcile one exact supported provider-key match, or block. Never delete the journal as rollback and never create a replacement while identity or outcome is unresolved.",
+        "6. On crash, re-run dry-run. Idempotence derives from role IDs, event IDs, payload digests, retained operation intent, supported provider idempotency, and retained runtime IDs—not from chat recollection.",
         "",
         "## Current archive-readiness truth",
         "",

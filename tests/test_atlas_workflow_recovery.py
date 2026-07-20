@@ -5,8 +5,11 @@ import datetime as dt
 import importlib.util
 import io
 import json
+import subprocess
 import sys
 import tempfile
+import threading
+import time
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -45,6 +48,29 @@ class WorkflowRecoveryTests(unittest.TestCase):
 
     def role(self, plan: dict, role_id: str) -> dict:
         return next(item for item in plan["roles"] if item["role_id"] == role_id)
+
+    def journal_record_created(
+        self,
+        journal: object,
+        plan: dict,
+        role_id: str,
+        runtime_id: str,
+        adapter_name: str = "fixture",
+    ) -> str:
+        operation_key = journal.record_intent(
+            plan,
+            role_id,
+            adapter_name,
+            provider_idempotency_key_supported=(adapter_name == "fixture"),
+        )
+        journal.record_created(
+            plan,
+            role_id,
+            runtime_id,
+            adapter_name,
+            operation_key,
+        )
+        return operation_key
 
     def observation(self) -> dict:
         return RECOVERY._load_json(FIXTURES / "valid-desktop-observation.json")
@@ -185,6 +211,10 @@ class WorkflowRecoveryTests(unittest.TestCase):
             self.assertEqual(str(admitted_cwd), bootstrap_params["cwd"])
             self.assertEqual(":danger-full-access", create_params["permissions"])
             self.assertNotIn("sandbox", create_params)
+            self.assertFalse(adapter.create_operation_key_supported)
+            self.assertFalse(
+                any("idempot" in key.lower() or "operation" in key.lower() for key in create_params)
+            )
 
             legacy_role = json.loads(json.dumps(role))
             legacy_role["runtime"]["permissions"] = "danger-full-access"
@@ -330,6 +360,111 @@ class WorkflowRecoveryTests(unittest.TestCase):
                 )
         replace.assert_not_called()
 
+    def test_creation_journal_lock_times_out_and_keeps_stable_path(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            lock_path = Path(temporary_directory) / "creation-journal.json.lock"
+            with RECOVERY._CrossProcessFileLock(
+                lock_path,
+                timeout_seconds=0.2,
+                poll_seconds=0.005,
+            ):
+                with self.assertRaisesRegex(
+                    RECOVERY.WorkflowRecoveryError,
+                    "lock timed out",
+                ):
+                    with RECOVERY._CrossProcessFileLock(
+                        lock_path,
+                        timeout_seconds=0.02,
+                        poll_seconds=0.005,
+                    ):
+                        self.fail("a second native lock unexpectedly acquired")
+                self.assertTrue(lock_path.is_file())
+            self.assertTrue(lock_path.is_file())
+
+    def test_creation_journal_lock_acquisition_failure_is_explicit(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            lock_path = Path(temporary_directory) / "creation-journal.json.lock"
+            with (
+                mock.patch.object(
+                    RECOVERY,
+                    "_acquire_native_file_lock",
+                    side_effect=OSError(RECOVERY.errno.EIO, "injected lock failure"),
+                ),
+                self.assertRaisesRegex(
+                    RECOVERY.WorkflowRecoveryError,
+                    "lock acquisition failed",
+                ),
+            ):
+                with RECOVERY._CrossProcessFileLock(lock_path, timeout_seconds=0.01):
+                    self.fail("failed lock acquisition entered its body")
+            self.assertTrue(lock_path.is_file())
+
+    def test_creation_journal_lock_rejects_unsupported_platform(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            lock_path = Path(temporary_directory) / "creation-journal.json.lock"
+            with self.assertRaisesRegex(
+                RECOVERY.WorkflowRecoveryError,
+                "platform 'unsupported' is unsupported",
+            ):
+                with RECOVERY._CrossProcessFileLock(
+                    lock_path,
+                    timeout_seconds=0.01,
+                    platform_name="unsupported",
+                ):
+                    self.fail("unsupported lock platform entered its body")
+            self.assertFalse(lock_path.exists())
+
+    def test_creation_journal_lock_excludes_another_process(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            temporary_path = Path(temporary_directory)
+            lock_path = temporary_path / "creation-journal.json.lock"
+            ready_path = temporary_path / "ready"
+            child_source = (
+                "import importlib.util, pathlib, sys, time\n"
+                "spec = importlib.util.spec_from_file_location('child_recovery', sys.argv[1])\n"
+                "module = importlib.util.module_from_spec(spec)\n"
+                "sys.modules[spec.name] = module\n"
+                "spec.loader.exec_module(module)\n"
+                "with module._CrossProcessFileLock(pathlib.Path(sys.argv[2]), timeout_seconds=2):\n"
+                "    pathlib.Path(sys.argv[3]).write_text('ready', encoding='utf-8')\n"
+                "    time.sleep(0.5)\n"
+            )
+            child = subprocess.Popen(
+                [sys.executable, "-c", child_source, str(MODULE_PATH), str(lock_path), str(ready_path)],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            try:
+                deadline = time.monotonic() + 2
+                while not ready_path.is_file() and time.monotonic() < deadline:
+                    if child.poll() is not None:
+                        break
+                    time.sleep(0.01)
+                if not ready_path.is_file():
+                    stdout, stderr = child.communicate(timeout=1)
+                    self.fail(f"lock holder failed before readiness: {stdout!r} {stderr!r}")
+                with self.assertRaisesRegex(
+                    RECOVERY.WorkflowRecoveryError,
+                    "lock timed out",
+                ):
+                    with RECOVERY._CrossProcessFileLock(
+                        lock_path,
+                        timeout_seconds=0.05,
+                        poll_seconds=0.005,
+                    ):
+                        self.fail("a second process lock unexpectedly acquired")
+                self.assertEqual(0, child.wait(timeout=2))
+            finally:
+                if child.poll() is None:
+                    child.kill()
+                    child.wait(timeout=2)
+                if child.stdout is not None:
+                    child.stdout.close()
+                if child.stderr is not None:
+                    child.stderr.close()
+            self.assertTrue(lock_path.is_file())
+
     def test_stale_runtime_id_repairs_binding_without_create(self) -> None:
         plan, _ = self.plan("stale-id.json")
         inbox = self.role(plan, "atlas.inbox")
@@ -469,7 +604,791 @@ class WorkflowRecoveryTests(unittest.TestCase):
             self.assertEqual(created_runtime_id, repair_inbox["runtime_id"])
             self.assertNotIn("CREATE", repair_inbox["actions"])
 
-    def test_journal_metadata_durability_failure_stops_after_create(self) -> None:
+    def test_independent_journals_reload_and_merge_without_lost_binding(self) -> None:
+        plan, _ = self.plan("missing-task.json", mode="apply")
+        manifest_digest = RECOVERY._sha256_file(ROOT / RECOVERY.MANIFEST_REF)
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            path = Path(temporary_directory) / "creation-journal.json"
+            first = RECOVERY.CreationJournal(
+                path,
+                self.manifest,
+                self.registry,
+                manifest_digest,
+            )
+            stale_second = RECOVERY.CreationJournal(
+                path,
+                self.manifest,
+                self.registry,
+                manifest_digest,
+            )
+
+            self.journal_record_created(first, plan, "atlas.inbox", "runtime-inbox")
+            self.journal_record_created(stale_second, plan, "ai.questions", "runtime-ai")
+
+            merged = RECOVERY.CreationJournal(
+                path,
+                self.manifest,
+                self.registry,
+                manifest_digest,
+            )
+            self.assertEqual(
+                {
+                    "ai.questions": "runtime-ai",
+                    "atlas.inbox": "runtime-inbox",
+                },
+                merged.bindings,
+            )
+
+    def test_journal_same_role_different_runtime_collision_fails_closed(self) -> None:
+        plan, _ = self.plan("missing-task.json", mode="apply")
+        manifest_digest = RECOVERY._sha256_file(ROOT / RECOVERY.MANIFEST_REF)
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            path = Path(temporary_directory) / "creation-journal.json"
+            first = RECOVERY.CreationJournal(
+                path,
+                self.manifest,
+                self.registry,
+                manifest_digest,
+            )
+            stale_second = RECOVERY.CreationJournal(
+                path,
+                self.manifest,
+                self.registry,
+                manifest_digest,
+            )
+            self.journal_record_created(first, plan, "atlas.inbox", "runtime-inbox-a")
+            with self.assertRaisesRegex(
+                RECOVERY.WorkflowRecoveryError,
+                "creation intent collision",
+            ):
+                self.journal_record_created(
+                    stale_second,
+                    plan,
+                    "atlas.inbox",
+                    "runtime-inbox-b",
+                )
+            self.assertEqual(
+                {"atlas.inbox": "runtime-inbox-a"},
+                RECOVERY.CreationJournal(
+                    path,
+                    self.manifest,
+                    self.registry,
+                    manifest_digest,
+                ).bindings,
+            )
+
+    def test_journal_same_runtime_different_role_collision_fails_closed(self) -> None:
+        plan, _ = self.plan("missing-task.json", mode="apply")
+        manifest_digest = RECOVERY._sha256_file(ROOT / RECOVERY.MANIFEST_REF)
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            path = Path(temporary_directory) / "creation-journal.json"
+            first = RECOVERY.CreationJournal(
+                path,
+                self.manifest,
+                self.registry,
+                manifest_digest,
+            )
+            stale_second = RECOVERY.CreationJournal(
+                path,
+                self.manifest,
+                self.registry,
+                manifest_digest,
+            )
+            self.journal_record_created(first, plan, "atlas.inbox", "runtime-shared")
+            with self.assertRaisesRegex(
+                RECOVERY.WorkflowRecoveryError,
+                "already retained for another logical role atlas.inbox",
+            ):
+                self.journal_record_created(
+                    stale_second,
+                    plan,
+                    "ai.questions",
+                    "runtime-shared",
+                )
+            self.assertEqual(
+                {"atlas.inbox": "runtime-shared"},
+                RECOVERY.CreationJournal(
+                    path,
+                    self.manifest,
+                    self.registry,
+                    manifest_digest,
+                ).bindings,
+            )
+
+    def test_stale_journal_merge_preserves_confirmed_state(self) -> None:
+        plan, _ = self.plan("missing-task.json", mode="apply")
+        manifest_digest = RECOVERY._sha256_file(ROOT / RECOVERY.MANIFEST_REF)
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            path = Path(temporary_directory) / "creation-journal.json"
+            first = RECOVERY.CreationJournal(
+                path,
+                self.manifest,
+                self.registry,
+                manifest_digest,
+            )
+            self.journal_record_created(first, plan, "atlas.inbox", "runtime-inbox")
+            stale_second = RECOVERY.CreationJournal(
+                path,
+                self.manifest,
+                self.registry,
+                manifest_digest,
+            )
+            post_digest = "sha256:" + "1" * 64
+            post_apply_plan = {
+                "plan_id": "awrp1_" + "1" * 64,
+                "plan_digest": post_digest,
+                "roles": [{"role_id": "atlas.inbox", "runtime_id": "runtime-inbox"}],
+            }
+            first.confirm_readback(
+                post_apply_plan,
+                [
+                    RECOVERY.ThreadRecord(
+                        thread_id="runtime-inbox",
+                        title="ATLAS INBOX",
+                        status="idle",
+                        cwd="ATLAS_ROOT",
+                        archived=False,
+                        pinned=True,
+                    )
+                ],
+            )
+
+            self.journal_record_created(stale_second, plan, "ai.questions", "runtime-ai")
+            persisted = RECOVERY._load_json(path)
+            entries = {item["role_id"]: item for item in persisted["payload"]["entries"]}
+            self.assertEqual("READBACK_CONFIRMED", entries["atlas.inbox"]["state"])
+            self.assertEqual(post_digest, entries["atlas.inbox"]["post_apply_plan_digest"])
+            self.assertEqual("CREATED_PENDING_READBACK", entries["ai.questions"]["state"])
+
+    def test_locked_journal_reload_rejects_invalid_committed_state(self) -> None:
+        plan, _ = self.plan("missing-task.json", mode="apply")
+        manifest_digest = RECOVERY._sha256_file(ROOT / RECOVERY.MANIFEST_REF)
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            path = Path(temporary_directory) / "creation-journal.json"
+            journal = RECOVERY.CreationJournal(
+                path,
+                self.manifest,
+                self.registry,
+                manifest_digest,
+            )
+            self.journal_record_created(journal, plan, "atlas.inbox", "runtime-inbox")
+            path.write_text("{}", encoding="utf-8")
+            with self.assertRaisesRegex(
+                RECOVERY.WorkflowRecoveryError,
+                "locked reload failed",
+            ):
+                self.journal_record_created(journal, plan, "ai.questions", "runtime-ai")
+
+    def test_intent_lock_release_failure_stops_before_create(self) -> None:
+        plan, adapter = self.plan("missing-task.json", mode="apply")
+        manifest_digest = RECOVERY._sha256_file(ROOT / RECOVERY.MANIFEST_REF)
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            journal = RECOVERY.CreationJournal(
+                Path(temporary_directory) / "creation-journal.json",
+                self.manifest,
+                self.registry,
+                manifest_digest,
+            )
+            real_release = RECOVERY._release_native_file_lock
+            release_calls = 0
+
+            def fail_record_release(handle: object, platform_name: str) -> None:
+                nonlocal release_calls
+                release_calls += 1
+                if release_calls == 2:
+                    raise OSError("injected lock release failure")
+                real_release(handle, platform_name)
+
+            with (
+                mock.patch.object(
+                    RECOVERY,
+                    "_release_native_file_lock",
+                    side_effect=fail_record_release,
+                ),
+                self.assertRaises(RECOVERY.WorkflowRecoveryError) as caught,
+            ):
+                RECOVERY.apply_plan(
+                    plan,
+                    self.manifest,
+                    self.registry,
+                    adapter,
+                    creation_journal=journal,
+                )
+
+            self.assertIn("lock release failed", str(caught.exception))
+            self.assertNotIsInstance(caught.exception, RECOVERY.PartialCreateFailure)
+            self.assertEqual(0, adapter.mutations)
+            self.assertFalse(
+                any(item.role_marker == "atlas.inbox" for item in adapter.threads)
+            )
+
+    def test_create_transaction_lock_timeout_stops_before_create(self) -> None:
+        plan, adapter = self.plan("missing-task.json", mode="apply")
+        manifest_digest = RECOVERY._sha256_file(ROOT / RECOVERY.MANIFEST_REF)
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            path = Path(temporary_directory) / "creation-journal.json"
+            holder = RECOVERY.CreationJournal(
+                path,
+                self.manifest,
+                self.registry,
+                manifest_digest,
+            )
+            contender = RECOVERY.CreationJournal(
+                path,
+                self.manifest,
+                self.registry,
+                manifest_digest,
+                lock_timeout_seconds=0.02,
+            )
+            with holder.create_transaction_lock():
+                with self.assertRaisesRegex(
+                    RECOVERY.WorkflowRecoveryError,
+                    "lock timed out",
+                ):
+                    RECOVERY.apply_plan(
+                        plan,
+                        self.manifest,
+                        self.registry,
+                        adapter,
+                        creation_journal=contender,
+                    )
+
+            self.assertEqual(0, adapter.mutations)
+            self.assertFalse(path.exists())
+            self.assertTrue(holder.create_lock_path.exists())
+
+    def test_create_failure_retains_intent_and_blocks_retry(self) -> None:
+        plan, adapter = self.plan("missing-task.json", mode="apply")
+        manifest_digest = RECOVERY._sha256_file(ROOT / RECOVERY.MANIFEST_REF)
+        create_attempts = 0
+        original_mutate = adapter.mutate
+
+        def fail_create(
+            action: str,
+            role: dict,
+            thread: object | None,
+            *,
+            operation_key: str | None = None,
+        ) -> object | None:
+            nonlocal create_attempts
+            if action == "CREATE":
+                create_attempts += 1
+                raise RECOVERY.WorkflowRecoveryError("injected remote create failure")
+            return original_mutate(
+                action,
+                role,
+                thread,
+                operation_key=operation_key,
+            )
+
+        adapter.mutate = fail_create
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            path = Path(temporary_directory) / "creation-journal.json"
+            journal = RECOVERY.CreationJournal(
+                path,
+                self.manifest,
+                self.registry,
+                manifest_digest,
+            )
+            with self.assertRaisesRegex(
+                RECOVERY.WorkflowRecoveryError,
+                "injected remote create failure",
+            ):
+                RECOVERY.apply_plan(
+                    plan,
+                    self.manifest,
+                    self.registry,
+                    adapter,
+                    creation_journal=journal,
+                )
+
+            self.assertEqual(1, create_attempts)
+            self.assertEqual(0, adapter.mutations)
+            self.assertTrue(path.exists())
+            retained = RECOVERY.CreationJournal(
+                path,
+                self.manifest,
+                self.registry,
+                manifest_digest,
+            )
+            self.assertEqual({}, retained.bindings)
+            self.assertIn("atlas.inbox", retained.intents)
+            restarted_adapter = self.adapter("missing-task.json")
+            retained.apply_to(restarted_adapter, self.registry)
+            restarted_plan, _, _ = RECOVERY.build_recovery_plan(
+                self.manifest,
+                self.registry,
+                restarted_adapter,
+                mode="dry-run",
+                deterministic=True,
+            )
+            restarted_inbox = self.role(restarted_plan, "atlas.inbox")
+            self.assertEqual(
+                "FAIL_CLOSED_UNRESOLVED_CREATE_INTENT",
+                restarted_inbox["decision"],
+            )
+            self.assertNotIn("CREATE", restarted_inbox["actions"])
+            self.assertTrue(journal.create_lock_path.exists())
+
+    def test_process_death_after_remote_create_retains_intent_and_blocks_restart(
+        self,
+    ) -> None:
+        manifest_digest = RECOVERY._sha256_file(ROOT / RECOVERY.MANIFEST_REF)
+        child_source = """
+import importlib.util
+import os
+import sys
+from pathlib import Path
+
+root = Path(sys.argv[1])
+journal_path = Path(sys.argv[2])
+module_path = root / "ops/atlas/workflow_recovery.py"
+spec = importlib.util.spec_from_file_location("atlas_workflow_recovery_child", module_path)
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+manifest = module._load_json(root / module.MANIFEST_REF)
+registry = module._load_json(root / module.REGISTRY_REF)
+fixture = module._load_json(root / "tests/fixtures/atlas-workflow-recovery/missing-task.json")
+adapter = module.FixtureAdapter(manifest, registry, fixture)
+plan, _, _ = module.build_recovery_plan(
+    manifest,
+    registry,
+    adapter,
+    mode="apply",
+    deterministic=True,
+)
+journal = module.CreationJournal(
+    journal_path,
+    manifest,
+    registry,
+    module._sha256_file(root / module.MANIFEST_REF),
+)
+def crash_before_binding(*args, **kwargs):
+    os._exit(79)
+journal.record_created = crash_before_binding
+module.apply_plan(
+    plan,
+    manifest,
+    registry,
+    adapter,
+    creation_journal=journal,
+)
+os._exit(97)
+"""
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            path = Path(temporary_directory) / "creation-journal.json"
+            child = subprocess.run(
+                [sys.executable, "-c", child_source, str(ROOT), str(path)],
+                cwd=ROOT,
+                capture_output=True,
+                text=True,
+                timeout=20,
+                check=False,
+            )
+            self.assertEqual(79, child.returncode, child.stderr)
+
+            persisted = RECOVERY._load_json(path)
+            entry = persisted["payload"]["entries"][0]
+            self.assertEqual("atlas.inbox", entry["role_id"])
+            self.assertEqual("CREATE_INTENT", entry["state"])
+            self.assertIsNone(entry["runtime_id"])
+            self.assertRegex(entry["operation_key"], r"^awci1_[0-9a-f]{64}$")
+
+            retained = RECOVERY.CreationJournal(
+                path,
+                self.manifest,
+                self.registry,
+                manifest_digest,
+            )
+            # The operating system releases the persistent lock handle when
+            # the crashed process exits; retained intent, not a stale lock,
+            # governs the next decision.
+            with retained.create_transaction_lock():
+                pass
+            restarted_adapter = self.adapter("missing-task.json")
+            retained.apply_to(restarted_adapter, self.registry)
+            restarted_plan, _, _ = RECOVERY.build_recovery_plan(
+                self.manifest,
+                self.registry,
+                restarted_adapter,
+                mode="apply",
+                deterministic=True,
+            )
+            restarted_inbox = self.role(restarted_plan, "atlas.inbox")
+            self.assertEqual(
+                "FAIL_CLOSED_UNRESOLVED_CREATE_INTENT",
+                restarted_inbox["decision"],
+            )
+            self.assertEqual([], restarted_inbox["actions"])
+            self.assertEqual(0, restarted_plan["summary"]["create_count"])
+
+    def test_exact_provider_operation_key_reconciles_without_second_create(self) -> None:
+        plan, _ = self.plan("missing-task.json", mode="apply")
+        manifest_digest = RECOVERY._sha256_file(ROOT / RECOVERY.MANIFEST_REF)
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            path = Path(temporary_directory) / "creation-journal.json"
+            journal = RECOVERY.CreationJournal(
+                path,
+                self.manifest,
+                self.registry,
+                manifest_digest,
+            )
+            operation_key = journal.record_intent(
+                plan,
+                "atlas.inbox",
+                "fixture",
+                provider_idempotency_key_supported=True,
+            )
+            adapter = self.adapter("missing-task.json")
+            adapter.threads.append(
+                RECOVERY.ThreadRecord(
+                    thread_id="fixture-provider-recovered-atlas-inbox",
+                    title=None,
+                    status="idle",
+                    cwd="ATLAS_ROOT",
+                    archived=False,
+                    pinned=False,
+                    preview="",
+                    role_marker="atlas.inbox",
+                    created_at=5000,
+                    updated_at=5000,
+                    raw={"atlas_create_operation_key": operation_key},
+                )
+            )
+            journal.apply_to(adapter, self.registry)
+            reconcile_plan, _, _ = RECOVERY.build_recovery_plan(
+                self.manifest,
+                self.registry,
+                adapter,
+                mode="apply",
+                deterministic=True,
+            )
+            reconcile_inbox = self.role(reconcile_plan, "atlas.inbox")
+            self.assertEqual(
+                "RECONCILE_EXACT_CREATE_INTENT",
+                reconcile_inbox["decision"],
+            )
+            self.assertEqual("COMMIT_CREATE_INTENT", reconcile_inbox["actions"][0])
+            self.assertNotIn("CREATE", reconcile_inbox["actions"])
+
+            receipts = RECOVERY.apply_plan(
+                reconcile_plan,
+                self.manifest,
+                self.registry,
+                adapter,
+                creation_journal=journal,
+            )
+            self.assertNotIn("CREATE", [item["action"] for item in receipts])
+            self.assertEqual("COMMIT_CREATE_INTENT", receipts[0]["action"])
+            committed = RECOVERY.CreationJournal(
+                path,
+                self.manifest,
+                self.registry,
+                manifest_digest,
+            )
+            self.assertEqual(
+                "fixture-provider-recovered-atlas-inbox",
+                committed.bindings["atlas.inbox"],
+            )
+            self.assertEqual({}, committed.intents)
+            self.assertEqual(
+                1,
+                sum(item.role_marker == "atlas.inbox" for item in adapter.threads),
+            )
+
+    def test_unsupported_provider_operation_key_match_remains_blocked(self) -> None:
+        plan, _ = self.plan("missing-task.json", mode="apply")
+        manifest_digest = RECOVERY._sha256_file(ROOT / RECOVERY.MANIFEST_REF)
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            journal = RECOVERY.CreationJournal(
+                Path(temporary_directory) / "creation-journal.json",
+                self.manifest,
+                self.registry,
+                manifest_digest,
+            )
+            operation_key = journal.record_intent(
+                plan,
+                "atlas.inbox",
+                "fixture",
+                provider_idempotency_key_supported=False,
+            )
+            adapter = self.adapter("missing-task.json")
+            adapter.threads.append(
+                RECOVERY.ThreadRecord(
+                    thread_id="fixture-untrusted-operation-key-match",
+                    title=None,
+                    status="idle",
+                    cwd="ATLAS_ROOT",
+                    archived=False,
+                    pinned=False,
+                    preview="",
+                    role_marker="atlas.inbox",
+                    created_at=5050,
+                    updated_at=5050,
+                    raw={"atlas_create_operation_key": operation_key},
+                )
+            )
+            journal.apply_to(adapter, self.registry)
+
+            blocked_plan, _, _ = RECOVERY.build_recovery_plan(
+                self.manifest,
+                self.registry,
+                adapter,
+                mode="apply",
+                deterministic=True,
+            )
+            blocked_inbox = self.role(blocked_plan, "atlas.inbox")
+            self.assertEqual("BLOCKED", blocked_inbox["health"])
+            self.assertEqual(
+                "FAIL_CLOSED_UNRESOLVED_CREATE_INTENT",
+                blocked_inbox["decision"],
+            )
+            self.assertEqual([], blocked_inbox["actions"])
+            self.assertEqual(0, blocked_plan["summary"]["create_count"])
+
+    def test_intent_reconciliation_requires_current_adapter_support_and_identity(
+        self,
+    ) -> None:
+        plan, _ = self.plan("missing-task.json", mode="apply")
+        manifest_digest = RECOVERY._sha256_file(ROOT / RECOVERY.MANIFEST_REF)
+        cases = [
+            (False, "fixture", "current adapter support is false"),
+            (True, "live-app-server", "current adapter identity changed"),
+        ]
+        for current_support, current_name, label in cases:
+            with self.subTest(label=label), tempfile.TemporaryDirectory() as temporary_directory:
+                journal = RECOVERY.CreationJournal(
+                    Path(temporary_directory) / "creation-journal.json",
+                    self.manifest,
+                    self.registry,
+                    manifest_digest,
+                )
+                operation_key = journal.record_intent(
+                    plan,
+                    "atlas.inbox",
+                    "fixture",
+                    provider_idempotency_key_supported=True,
+                )
+                adapter = self.adapter("missing-task.json")
+                adapter.create_operation_key_supported = current_support
+                adapter.name = current_name
+                adapter.threads.append(
+                    RECOVERY.ThreadRecord(
+                        thread_id=f"fixture-untrusted-{current_name}",
+                        title=None,
+                        status="idle",
+                        cwd="ATLAS_ROOT",
+                        archived=False,
+                        pinned=False,
+                        preview="",
+                        role_marker="atlas.inbox",
+                        created_at=5075,
+                        updated_at=5075,
+                        raw={"atlas_create_operation_key": operation_key},
+                    )
+                )
+                journal.apply_to(adapter, self.registry)
+                blocked_plan, _, _ = RECOVERY.build_recovery_plan(
+                    self.manifest,
+                    self.registry,
+                    adapter,
+                    mode="apply",
+                    deterministic=True,
+                )
+                blocked_inbox = self.role(blocked_plan, "atlas.inbox")
+                self.assertEqual(
+                    "FAIL_CLOSED_UNRESOLVED_CREATE_INTENT",
+                    blocked_inbox["decision"],
+                )
+                self.assertEqual([], blocked_inbox["actions"])
+
+    def test_duplicate_provider_operation_key_matches_fail_closed(self) -> None:
+        plan, _ = self.plan("missing-task.json", mode="apply")
+        manifest_digest = RECOVERY._sha256_file(ROOT / RECOVERY.MANIFEST_REF)
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            journal = RECOVERY.CreationJournal(
+                Path(temporary_directory) / "creation-journal.json",
+                self.manifest,
+                self.registry,
+                manifest_digest,
+            )
+            operation_key = journal.record_intent(
+                plan,
+                "atlas.inbox",
+                "fixture",
+                provider_idempotency_key_supported=True,
+            )
+            adapter = self.adapter("missing-task.json")
+            for index in range(2):
+                adapter.threads.append(
+                    RECOVERY.ThreadRecord(
+                        thread_id=f"fixture-provider-duplicate-{index}",
+                        title=None,
+                        status="idle",
+                        cwd="ATLAS_ROOT",
+                        archived=False,
+                        pinned=False,
+                        preview="",
+                        role_marker="atlas.inbox",
+                        created_at=5100 + index,
+                        updated_at=5100 + index,
+                        raw={"atlas_create_operation_key": operation_key},
+                    )
+                )
+            journal.apply_to(adapter, self.registry)
+            duplicate_plan, _, _ = RECOVERY.build_recovery_plan(
+                self.manifest,
+                self.registry,
+                adapter,
+                mode="dry-run",
+                deterministic=True,
+            )
+            duplicate_inbox = self.role(duplicate_plan, "atlas.inbox")
+            self.assertEqual("DUPLICATE", duplicate_inbox["health"])
+            self.assertEqual(
+                "FAIL_CLOSED_DUPLICATE_CREATE_INTENT",
+                duplicate_inbox["decision"],
+            )
+            self.assertEqual([], duplicate_inbox["actions"])
+
+    def test_concurrent_missing_role_apply_creates_exactly_one_runtime(self) -> None:
+        accepted_plan, _ = self.plan("missing-task.json", mode="apply")
+        manifest_digest = RECOVERY._sha256_file(ROOT / RECOVERY.MANIFEST_REF)
+        adapters = [self.adapter("missing-task.json") for _ in range(2)]
+        shared_threads = adapters[0].threads
+        adapters[1].threads = shared_threads
+        start_barrier = threading.Barrier(2)
+        counter_lock = threading.Lock()
+        create_attempts = 0
+
+        def instrument(adapter: object) -> None:
+            original_discover = adapter.discover
+            original_mutate = adapter.mutate
+            discovery_calls = 0
+
+            def discover() -> tuple[list[object], list[dict]]:
+                nonlocal discovery_calls
+                discovery_calls += 1
+                if discovery_calls == 1:
+                    start_barrier.wait(timeout=2)
+                return original_discover()
+
+            def mutate(
+                action: str,
+                role: dict,
+                thread: object | None,
+                *,
+                operation_key: str | None = None,
+            ) -> object | None:
+                nonlocal create_attempts
+                if action == "CREATE":
+                    with counter_lock:
+                        create_attempts += 1
+                return original_mutate(
+                    action,
+                    role,
+                    thread,
+                    operation_key=operation_key,
+                )
+
+            adapter.discover = discover
+            adapter.mutate = mutate
+
+        for adapter in adapters:
+            instrument(adapter)
+
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            path = Path(temporary_directory) / "creation-journal.json"
+            journals = [
+                RECOVERY.CreationJournal(
+                    path,
+                    self.manifest,
+                    self.registry,
+                    manifest_digest,
+                )
+                for _ in range(2)
+            ]
+            results: list[tuple[str, object]] = []
+            results_lock = threading.Lock()
+
+            def apply(index: int) -> None:
+                try:
+                    value: object = RECOVERY.apply_plan(
+                        accepted_plan,
+                        self.manifest,
+                        self.registry,
+                        adapters[index],
+                        creation_journal=journals[index],
+                    )
+                    outcome = ("success", value)
+                except BaseException as exc:  # test captures contender failure
+                    outcome = ("failure", exc)
+                with results_lock:
+                    results.append(outcome)
+
+            workers = [threading.Thread(target=apply, args=(index,)) for index in range(2)]
+            for worker in workers:
+                worker.start()
+            for worker in workers:
+                worker.join(timeout=5)
+
+            self.assertTrue(all(not worker.is_alive() for worker in workers))
+            self.assertEqual(1, create_attempts)
+            self.assertEqual(
+                1,
+                sum(item.role_marker == "atlas.inbox" for item in shared_threads),
+            )
+            self.assertEqual(1, sum(kind == "success" for kind, _ in results))
+            failures = [value for kind, value in results if kind == "failure"]
+            self.assertEqual(1, len(failures))
+            self.assertIn("apply-time discovery changed", str(failures[0]))
+            committed = RECOVERY.CreationJournal(
+                path,
+                self.manifest,
+                self.registry,
+                manifest_digest,
+            )
+            self.assertEqual(
+                "fixture-created-atlas.inbox-1",
+                committed.bindings["atlas.inbox"],
+            )
+            self.assertTrue(committed.create_lock_path.exists())
+
+    def test_intent_committed_readback_failure_stops_before_create(self) -> None:
+        plan, adapter = self.plan("missing-task.json", mode="apply")
+        manifest_digest = RECOVERY._sha256_file(ROOT / RECOVERY.MANIFEST_REF)
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            journal = RECOVERY.CreationJournal(
+                Path(temporary_directory) / "creation-journal.json",
+                self.manifest,
+                self.registry,
+                manifest_digest,
+            )
+            with (
+                mock.patch.object(
+                    journal,
+                    "_load",
+                    side_effect=ValueError("injected committed readback failure"),
+                ),
+                self.assertRaises(RECOVERY.WorkflowRecoveryError) as caught,
+            ):
+                RECOVERY.apply_plan(
+                    plan,
+                    self.manifest,
+                    self.registry,
+                    adapter,
+                    creation_journal=journal,
+                )
+
+            self.assertIn("committed readback failed", str(caught.exception))
+            self.assertNotIsInstance(caught.exception, RECOVERY.PartialCreateFailure)
+            self.assertEqual(0, adapter.mutations)
+            self.assertFalse(
+                any(item.role_marker == "atlas.inbox" for item in adapter.threads)
+            )
+
+    def test_intent_metadata_durability_failure_stops_before_create(self) -> None:
         plan, adapter = self.plan("missing-task.json", mode="apply")
         manifest_digest = RECOVERY._sha256_file(ROOT / RECOVERY.MANIFEST_REF)
 
@@ -490,7 +1409,7 @@ class WorkflowRecoveryTests(unittest.TestCase):
                     "_durable_replace",
                     side_effect=fail_after_replace,
                 ),
-                self.assertRaises(RECOVERY.PartialCreateFailure) as caught,
+                self.assertRaises(RECOVERY.WorkflowRecoveryError) as caught,
             ):
                 RECOVERY.apply_plan(
                     plan,
@@ -500,12 +1419,11 @@ class WorkflowRecoveryTests(unittest.TestCase):
                     creation_journal=journal,
                 )
 
-            self.assertEqual(["CREATE"], [item["action"] for item in caught.exception.mutation_receipts])
-            self.assertEqual(1, adapter.mutations)
-            created = next(item for item in adapter.threads if item.role_marker == "atlas.inbox")
-            self.assertIsNone(created.title)
-            self.assertFalse(created.pinned)
-            self.assertEqual("", created.preview)
+            self.assertNotIsInstance(caught.exception, RECOVERY.PartialCreateFailure)
+            self.assertEqual(0, adapter.mutations)
+            self.assertFalse(
+                any(item.role_marker == "atlas.inbox" for item in adapter.threads)
+            )
             self.assertTrue(journal.path.is_file())
             self.assertIsNone(journal.event_id)
             self.assertIsNone(journal.payload_digest)
@@ -748,9 +1666,21 @@ class WorkflowRecoveryTests(unittest.TestCase):
                 adapter,
                 creation_journal=journal,
             )
+            self.assertEqual(
+                ["CREATE_INTENT", "CREATE"],
+                [item["action"] for item in receipts[:2]],
+            )
             created_runtime_id = next(
                 item["after_runtime_id"] for item in receipts if item["action"] == "CREATE"
             )
+            created_thread = next(
+                item for item in adapter.threads if item.thread_id == created_runtime_id
+            )
+            self.assertEqual(
+                receipts[0]["operation_key"],
+                created_thread.raw["atlas_create_operation_key"],
+            )
+            self.assertTrue(receipts[0]["provider_idempotency_key_supported"])
             adapter.threads = [
                 item for item in adapter.threads if item.thread_id != created_runtime_id
             ]
