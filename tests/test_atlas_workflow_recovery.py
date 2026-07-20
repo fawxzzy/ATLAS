@@ -9,6 +9,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -126,6 +127,49 @@ class WorkflowRecoveryTests(unittest.TestCase):
         self.assertEqual("ATLAS_ROOT", inbox["resolved_cwd"])
         self.assertNotIn("SET_RUNTIME_POLICY", inbox["actions"])
 
+    def test_apply_time_claimant_race_fails_before_create(self) -> None:
+        plan, adapter = self.plan("missing-task.json", mode="apply")
+        role = next(item for item in self.manifest["roles"] if item["role_id"] == "atlas.inbox")
+        adapter.threads.append(
+            RECOVERY.ThreadRecord(
+                thread_id="fixture-late-atlas-inbox-claimant",
+                title=role["human_title"],
+                status="idle",
+                cwd="ATLAS_ROOT",
+                archived=False,
+                pinned=True,
+                preview="late claimant",
+                role_marker="atlas.inbox",
+                created_at=4000,
+                updated_at=4000,
+            )
+        )
+
+        with self.assertRaisesRegex(
+            RECOVERY.WorkflowRecoveryError,
+            "apply-time discovery changed the accepted CREATE decision",
+        ):
+            RECOVERY.apply_plan(plan, self.manifest, self.registry, adapter)
+
+        self.assertEqual(0, adapter.mutations)
+        self.assertEqual(
+            ["fixture-late-atlas-inbox-claimant"],
+            [item.thread_id for item in adapter.threads if item.role_marker == "atlas.inbox"],
+        )
+
+    def test_apply_time_discovery_failure_fails_before_create(self) -> None:
+        plan, adapter = self.plan("missing-task.json", mode="apply")
+        adapter.fixture["discovery_error"] = "injected apply-time discovery failure"
+
+        with self.assertRaisesRegex(
+            RECOVERY.WorkflowRecoveryError,
+            "complete apply-time discovery failed before mutation",
+        ):
+            RECOVERY.apply_plan(plan, self.manifest, self.registry, adapter)
+
+        self.assertEqual(0, adapter.mutations)
+        self.assertFalse(any(item.role_marker == "atlas.inbox" for item in adapter.threads))
+
     def test_live_create_and_bootstrap_use_admitted_cwd_and_modern_permissions(self) -> None:
         role = next(item for item in self.manifest["roles"] if item["role_id"] == "owner.socials-os")
         locator = role["runtime"]["cwd_locator"]
@@ -213,6 +257,79 @@ class WorkflowRecoveryTests(unittest.TestCase):
         self.assertEqual(2, exit_code)
         self.assertIn("canonical runtime output directory", stderr.getvalue())
 
+    def test_posix_durable_replace_orders_rename_before_parent_fsync(self) -> None:
+        events: list[tuple[str, object]] = []
+
+        def record_replace(source: Path, target: Path) -> None:
+            events.append(("replace", (source, target)))
+
+        def record_open(path: Path, flags: int) -> int:
+            events.append(("open_parent", (path, flags)))
+            return 71
+
+        def record_fsync(file_descriptor: int) -> None:
+            events.append(("fsync_parent", file_descriptor))
+
+        def record_close(file_descriptor: int) -> None:
+            events.append(("close_parent", file_descriptor))
+
+        with (
+            mock.patch.object(RECOVERY.os, "replace", side_effect=record_replace),
+            mock.patch.object(RECOVERY.os, "open", side_effect=record_open),
+            mock.patch.object(RECOVERY.os, "fsync", side_effect=record_fsync),
+            mock.patch.object(RECOVERY.os, "close", side_effect=record_close),
+        ):
+            RECOVERY._durable_replace(
+                Path("journal.tmp"),
+                Path("runtime/journal.json"),
+                platform_name="posix",
+            )
+
+        self.assertEqual(
+            ["replace", "open_parent", "fsync_parent", "close_parent"],
+            [item[0] for item in events],
+        )
+        self.assertEqual(71, events[2][1])
+        self.assertEqual(71, events[3][1])
+
+    def test_atomic_write_fsyncs_file_before_durable_replace(self) -> None:
+        events: list[str] = []
+        real_fsync = RECOVERY.os.fsync
+        real_durable_replace = RECOVERY._durable_replace
+
+        def record_fsync(file_descriptor: int) -> None:
+            events.append("fsync")
+            real_fsync(file_descriptor)
+
+        def record_durable_replace(source: Path, target: Path) -> None:
+            events.append("durable_replace")
+            real_durable_replace(source, target)
+
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            target = Path(temporary_directory) / "journal.json"
+            with (
+                mock.patch.object(RECOVERY.os, "fsync", side_effect=record_fsync),
+                mock.patch.object(
+                    RECOVERY,
+                    "_durable_replace",
+                    side_effect=record_durable_replace,
+                ),
+            ):
+                RECOVERY._atomic_write_bytes(target, b"first")
+            self.assertEqual(b"first", target.read_bytes())
+
+        self.assertEqual(["fsync", "durable_replace"], events[:2])
+
+    def test_durable_replace_fails_closed_on_an_unsupported_platform(self) -> None:
+        with mock.patch.object(RECOVERY.os, "replace") as replace:
+            with self.assertRaisesRegex(OSError, "does not expose"):
+                RECOVERY._durable_replace(
+                    Path("journal.tmp"),
+                    Path("journal.json"),
+                    platform_name="unsupported",
+                )
+        replace.assert_not_called()
+
     def test_stale_runtime_id_repairs_binding_without_create(self) -> None:
         plan, _ = self.plan("stale-id.json")
         inbox = self.role(plan, "atlas.inbox")
@@ -238,7 +355,7 @@ class WorkflowRecoveryTests(unittest.TestCase):
     def test_partial_create_is_retained_and_retry_reuses_it(self) -> None:
         plan, adapter = self.plan("partial-create.json", mode="apply")
         with self.assertRaises(RECOVERY.PartialCreateFailure) as caught:
-            RECOVERY.apply_plan(plan, self.manifest, adapter)
+            RECOVERY.apply_plan(plan, self.manifest, self.registry, adapter)
         receipts = caught.exception.mutation_receipts
         self.assertEqual(["CREATE"], [item["action"] for item in receipts])
         created = [item for item in adapter.threads if item.role_marker == "atlas.inbox"]
@@ -258,7 +375,7 @@ class WorkflowRecoveryTests(unittest.TestCase):
             adapter.binding_overrides["atlas.inbox"],
         )
         self.assertNotIn("CREATE", inbox["actions"])
-        RECOVERY.apply_plan(retry_plan, self.manifest, adapter)
+        RECOVERY.apply_plan(retry_plan, self.manifest, self.registry, adapter)
         final_plan, _, _ = RECOVERY.build_recovery_plan(
             self.manifest,
             self.registry,
@@ -284,6 +401,7 @@ class WorkflowRecoveryTests(unittest.TestCase):
                 RECOVERY.apply_plan(
                     plan,
                     self.manifest,
+                    self.registry,
                     adapter,
                     creation_journal=journal,
                 )
@@ -350,6 +468,47 @@ class WorkflowRecoveryTests(unittest.TestCase):
             repair_inbox = self.role(repair_plan, "atlas.inbox")
             self.assertEqual(created_runtime_id, repair_inbox["runtime_id"])
             self.assertNotIn("CREATE", repair_inbox["actions"])
+
+    def test_journal_metadata_durability_failure_stops_after_create(self) -> None:
+        plan, adapter = self.plan("missing-task.json", mode="apply")
+        manifest_digest = RECOVERY._sha256_file(ROOT / RECOVERY.MANIFEST_REF)
+
+        def fail_after_replace(source: Path, target: Path) -> None:
+            RECOVERY.os.replace(source, target)
+            raise OSError("injected replacement metadata durability failure")
+
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            journal = RECOVERY.CreationJournal(
+                Path(temporary_directory) / "creation-journal.json",
+                self.manifest,
+                self.registry,
+                manifest_digest,
+            )
+            with (
+                mock.patch.object(
+                    RECOVERY,
+                    "_durable_replace",
+                    side_effect=fail_after_replace,
+                ),
+                self.assertRaises(RECOVERY.PartialCreateFailure) as caught,
+            ):
+                RECOVERY.apply_plan(
+                    plan,
+                    self.manifest,
+                    self.registry,
+                    adapter,
+                    creation_journal=journal,
+                )
+
+            self.assertEqual(["CREATE"], [item["action"] for item in caught.exception.mutation_receipts])
+            self.assertEqual(1, adapter.mutations)
+            created = next(item for item in adapter.threads if item.role_marker == "atlas.inbox")
+            self.assertIsNone(created.title)
+            self.assertFalse(created.pinned)
+            self.assertEqual("", created.preview)
+            self.assertTrue(journal.path.is_file())
+            self.assertIsNone(journal.event_id)
+            self.assertIsNone(journal.payload_digest)
 
     def test_partial_create_cli_restart_loads_journal_before_planning(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -462,7 +621,7 @@ class WorkflowRecoveryTests(unittest.TestCase):
         plan, adapter = self.plan("missing-task.json", mode="apply")
         accepted_digest = plan["plan_digest"]
         self.assertIsNone(self.role(plan, "atlas.inbox")["runtime_id"])
-        receipts = RECOVERY.apply_plan(plan, self.manifest, adapter)
+        receipts = RECOVERY.apply_plan(plan, self.manifest, self.registry, adapter)
         self.assertEqual(1, sum(item["action"] == "CREATE" for item in receipts))
         self.assertEqual(accepted_digest, plan["plan_digest"])
         self.assertIsNone(self.role(plan, "atlas.inbox")["runtime_id"])
@@ -585,6 +744,7 @@ class WorkflowRecoveryTests(unittest.TestCase):
             receipts = RECOVERY.apply_plan(
                 plan,
                 self.manifest,
+                self.registry,
                 adapter,
                 creation_journal=journal,
             )

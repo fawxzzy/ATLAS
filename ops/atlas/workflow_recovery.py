@@ -2,8 +2,10 @@ from __future__ import annotations
 
 import argparse
 import copy
+import ctypes
 import dataclasses
 import datetime as dt
+import errno
 import hashlib
 import json
 import os
@@ -192,8 +194,51 @@ def _assert_schema(value: Any, schema_ref: str, label: str) -> None:
         raise ValidationFailure(f"{label} failed {schema_ref}:\n{joined}")
 
 
+def _windows_replace_with_write_through(source: Path, target: Path) -> None:
+    """Replace a Windows file without returning before the move reaches disk."""
+
+    move_file_ex = ctypes.WinDLL("kernel32", use_last_error=True).MoveFileExW
+    move_file_ex.argtypes = [ctypes.c_wchar_p, ctypes.c_wchar_p, ctypes.c_uint32]
+    move_file_ex.restype = ctypes.c_int
+    movefile_replace_existing = 0x1
+    movefile_write_through = 0x8
+    if not move_file_ex(
+        str(source.resolve()),
+        str(target.resolve()),
+        movefile_replace_existing | movefile_write_through,
+    ):
+        raise ctypes.WinError(ctypes.get_last_error())
+
+
+def _durable_replace(
+    source: Path,
+    target: Path,
+    *,
+    platform_name: str | None = None,
+) -> None:
+    """Atomically replace a file and prove the replacement metadata durable."""
+
+    effective_platform = platform_name or os.name
+    if effective_platform == "nt":
+        _windows_replace_with_write_through(source, target)
+        return
+    if effective_platform == "posix":
+        os.replace(source, target)
+        directory_flags = os.O_RDONLY | getattr(os, "O_DIRECTORY", 0)
+        directory_fd = os.open(target.parent, directory_flags)
+        try:
+            os.fsync(directory_fd)
+        finally:
+            os.close(directory_fd)
+        return
+    raise OSError(
+        errno.ENOTSUP,
+        f"platform {effective_platform!r} does not expose a supported durable replacement primitive",
+    )
+
+
 def _atomic_write_bytes(path: Path, value: bytes) -> None:
-    """Replace one runtime artifact atomically within its destination directory."""
+    """Replace one runtime artifact atomically and durably in its directory."""
 
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_name(f".{path.name}.{os.getpid()}.{time.time_ns()}.tmp")
@@ -202,7 +247,7 @@ def _atomic_write_bytes(path: Path, value: bytes) -> None:
             handle.write(value)
             handle.flush()
             os.fsync(handle.fileno())
-        os.replace(temporary, path)
+        _durable_replace(temporary, path)
     except OSError as exc:
         raise WorkflowRecoveryError(f"atomic runtime artifact write failed for {path}: {exc}") from exc
     finally:
@@ -1452,6 +1497,7 @@ def build_recovery_plan(
     desktop_observation: dict[str, Any] | None = None,
     desktop_observation_current: dict[str, Any] | None = None,
     observation_now: dt.datetime | None = None,
+    discovery_snapshot: tuple[list[ThreadRecord], list[dict[str, Any]]] | None = None,
 ) -> tuple[dict[str, Any], list[ThreadRecord], list[dict[str, Any]]]:
     manifest_digest = _sha256_file(ROOT / MANIFEST_REF)
     registry_digest = _sha256_file(ROOT / REGISTRY_REF)
@@ -1477,12 +1523,17 @@ def build_recovery_plan(
             item["role_id"]: item for item in desktop_observation["payload"]["entries"]
         }
 
-    try:
-        threads, leases = adapter.discover()
+    if discovery_snapshot is not None:
+        threads = copy.deepcopy(discovery_snapshot[0])
+        leases = copy.deepcopy(discovery_snapshot[1])
         discovery_error: str | None = None
-    except WorkflowRecoveryError as exc:
-        threads, leases = [], []
-        discovery_error = str(exc)
+    else:
+        try:
+            threads, leases = adapter.discover()
+            discovery_error = None
+        except WorkflowRecoveryError as exc:
+            threads, leases = [], []
+            discovery_error = str(exc)
 
     observation_applied_roles: set[str] = set()
     if desktop_observation is not None and discovery_error is None:
@@ -1878,15 +1929,58 @@ def _preflight_apply(plan: dict[str, Any], adapter: DiscoveryAdapter) -> None:
                 raise WorkflowRecoveryError(f"{item['role_id']}: {action} requires manual/live proof before mutation")
 
 
+def _revalidate_create_decision(
+    accepted_plan: dict[str, Any],
+    accepted_role_plan: dict[str, Any],
+    manifest: dict[str, Any],
+    durable_registry: dict[str, Any],
+    adapter: DiscoveryAdapter,
+) -> None:
+    """Fail closed when fresh discovery changes one accepted CREATE decision."""
+
+    try:
+        current_threads, current_leases = adapter.discover()
+    except WorkflowRecoveryError as exc:
+        raise WorkflowRecoveryError(
+            f"{accepted_role_plan['role_id']}: complete apply-time discovery failed "
+            f"before CREATE: {exc}; fail closed"
+        ) from exc
+    current_plan, _, _ = build_recovery_plan(
+        manifest,
+        durable_registry,
+        adapter,
+        mode=accepted_plan["mode"],
+        deterministic=True,
+        discovery_snapshot=(current_threads, current_leases),
+    )
+    current_role_plan = next(
+        item
+        for item in current_plan["roles"]
+        if item["role_id"] == accepted_role_plan["role_id"]
+    )
+    if _canonical_bytes(current_role_plan) != _canonical_bytes(accepted_role_plan):
+        raise WorkflowRecoveryError(
+            f"{accepted_role_plan['role_id']}: apply-time discovery changed the accepted "
+            f"CREATE decision from {accepted_role_plan['decision']} to "
+            f"{current_role_plan['decision']}; fail closed without CREATE"
+        )
+
+
 def apply_plan(
     plan: dict[str, Any],
     manifest: dict[str, Any],
+    durable_registry: dict[str, Any],
     adapter: DiscoveryAdapter,
     creation_journal: CreationJournal | None = None,
 ) -> list[dict[str, Any]]:
     _preflight_apply(plan, adapter)
     roles = {item["role_id"]: item for item in manifest["roles"]}
-    discovered, _ = adapter.discover()
+    try:
+        discovered, _ = adapter.discover()
+    except WorkflowRecoveryError as exc:
+        raise WorkflowRecoveryError(
+            f"complete apply-time discovery failed before mutation: {exc}; fail closed"
+        ) from exc
     by_id = {item.thread_id: item for item in discovered}
     receipts: list[dict[str, Any]] = []
     try:
@@ -1894,6 +1988,14 @@ def apply_plan(
             role = roles[item["role_id"]]
             thread = by_id.get(item["runtime_id"]) if item["runtime_id"] else None
             for action in item["actions"]:
+                if action == "CREATE":
+                    _revalidate_create_decision(
+                        plan,
+                        item,
+                        manifest,
+                        durable_registry,
+                        adapter,
+                    )
                 before_id = thread.thread_id if thread else None
                 thread = adapter.mutate(action, role, thread)
                 after_id = thread.thread_id if thread else None
@@ -1922,7 +2024,9 @@ def apply_plan(
                     # CREATE before a restart has a chance to reload the journal.
                     adapter.retained_creation_bindings[item["role_id"]] = after_id
     except WorkflowRecoveryError as exc:
-        raise PartialCreateFailure(str(exc), receipts) from exc
+        if any(item["action"] == "CREATE" for item in receipts):
+            raise PartialCreateFailure(str(exc), receipts) from exc
+        raise
     return receipts
 
 
@@ -2125,7 +2229,7 @@ def render_markdown(
         "",
         "A live apply additionally requires `--apply --acceptance <receipt.json>`. The receipt must bind the exact manifest and plan digests and name `atlas.main` as accepter. The current Codex app-server protocol does not expose pin readback or pin mutation, so any role needing pin proof fails closed before creation or repair. `ATLAS-WORKFLOW-MAN-001` rejected a manual fallback: the observation bridge can prove supported activity evidence, but live recovery remains blocked until deterministic pin readback and mutation exist.",
         "",
-        "Creation binds its accepted runtime policy through `thread/start`; the supported app-server contract exposes no mutation for repairing a missing policy on an existing runtime, so that case fails preflight. Live apply must use the canonical runtime output directory. Immediately after `CREATE`, the exact runtime ID is atomically retained in a content-addressed creation journal before any later action can run. A fresh process validates and loads that binding before planning: it reuses the exact ID when discovery returns it and blocks without another create when discovery does not. A successful apply keeps the accepted plan immutable and carries the read-back runtime ID through a separate post-apply binding map into a content-addressed post-apply plan and the live registry. The terminal receipt binds the accepted plan, post-apply plan, and journal event/digest. Terminal health comes from the post-apply plan. If the bound runtime is absent from complete readback, registry generation fails closed.",
+        "Creation binds its accepted runtime policy through `thread/start`; the supported app-server contract exposes no mutation for repairing a missing policy on an existing runtime, so that case fails preflight. Live apply must use the canonical runtime output directory. Immediately before every `CREATE`, complete discovery rebuilds the exact logical-role decision; any claimant, lease, or decision drift fails closed without creation. Immediately after `CREATE`, the exact runtime ID is retained in a content-addressed creation journal before any later action can run. The temporary file is fsynced before replacement; POSIX then fsyncs the modified parent directory, while Windows uses `MoveFileExW` with replace-existing and write-through flags. An unsupported primitive or failed metadata flush stops later actions. A fresh process validates and loads the binding before planning: it reuses the exact ID when discovery returns it and blocks without another create when discovery does not. A successful apply keeps the accepted plan immutable and carries the read-back runtime ID through a separate post-apply binding map into a content-addressed post-apply plan and the live registry. The terminal receipt binds the accepted plan, post-apply plan, and journal event/digest. Terminal health comes from the post-apply plan. If the bound runtime is absent from complete readback, registry generation fails closed.",
         "",
         "Fixture-safe creation proof:",
         "",
@@ -2404,6 +2508,7 @@ def main(argv: list[str] | None = None) -> int:
             mutation_receipts = apply_plan(
                 plan,
                 manifest,
+                registry,
                 adapter,
                 creation_journal=creation_journal,
             )
