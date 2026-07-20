@@ -1,0 +1,7 @@
+{
+  "schema": "atlas.workflow.recovery-acceptance.v1",
+  "event_id": "FIXTURE-RECOVERY-ACCEPTANCE-001",
+  "accepted_by_role_id": "atlas.main",
+  "fixture_only": true,
+  "no_archive": true
+}

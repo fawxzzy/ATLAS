@@ -47,6 +47,8 @@ Read these files first:
 - `docs/registry/ATLAS-SESSION-MODE-REGISTRY.json`
 - `docs/ops/ATLAS-STATUS-RUNBOOK.md`
 - `docs/ops/ATLAS-COCKPIT-RUNBOOK.md`
+- `docs/ops/ATLAS-WORKFLOW-RECOVERY-RUNBOOK.md`
+- `docs/registry/ATLAS-WORKFLOW-MANIFEST.v1.json`
 - `docs/ops/ATLAS-LIFELINE-PLATFORM-RESTART.md`
 - `docs/ops/ATLAS-PLAYBOOK-CONVERGENCE.md`
 - `docs/ops/PLAYBOOK-ADOPTION-MATRIX.md`
@@ -168,6 +170,18 @@ Some local repo roots may exist under `repos/` without being admitted stack memb
 The worker-execution receipt lane is a root-visible runtime lane for Lifeline-owned receipts. The root may index and route those artifacts, but Lifeline remains the canonical owner of receipt semantics.
 
 ## Codex Context
+
+### Workflow recovery
+
+The versioned standing-role and topology contract is `docs/registry/ATLAS-WORKFLOW-MANIFEST.v1.json`; `docs/registry/ATLAS-WORKFLOW-LIVE-MAPPING.v1.json` preserves accepted epochs and unbound historical claims; `docs/registry/ATLAS-WORKFLOW-DECISIONS.v1.json` suppresses answered questions; and `docs/architecture/ATLAS-WORKFLOW-RECOVERY.md` is generated from those sources. Run the no-archive live discovery from the ATLAS root with:
+
+```powershell
+python ops/atlas/workflow_recovery.py recover --dry-run --adapter live
+```
+
+The command writes only ignored runtime plans/receipts under `runtime/atlas/workflow-recovery/`. A live apply needs an independently accepted manifest/plan digest and fails closed when pin, active-boundary, lease, or identity readback is unavailable. `_stack` remains the owner of stack task orchestration; adopting this command behind an `_stack` wrapper is a separately governed owner-repository change.
+
+Validate a routed envelope before delivery with `python ops/atlas/workflow_recovery.py validate-envelope <path>`. Source thread ID/host/title and a canonical sorted-key payload digest are mandatory; an answer digest alone is insufficient.
 
 Root-launched Codex work should use intent-routed context packs instead of broad stack dumps.
 

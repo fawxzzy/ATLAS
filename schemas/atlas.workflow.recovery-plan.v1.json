@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas.workflow.recovery-plan.v1",
+  "title": "ATLAS Workflow Recovery Plan v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "manifest_ref",
+    "manifest_digest",
+    "registry_ref",
+    "registry_digest",
+    "adapter",
+    "mode",
+    "no_archive",
+    "generated_at",
+    "capabilities",
+    "roles",
+    "summary",
+    "terminal_status",
+    "plan_digest",
+    "plan_id"
+  ],
+  "properties": {
+    "schema": { "const": "atlas.workflow.recovery-plan.v1" },
+    "manifest_ref": { "type": "string", "minLength": 1 },
+    "manifest_digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "registry_ref": { "type": "string", "minLength": 1 },
+    "registry_digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "adapter": { "enum": ["live-app-server", "fixture"] },
+    "mode": { "enum": ["dry-run", "apply"] },
+    "no_archive": { "const": true },
+    "generated_at": { "type": "string", "minLength": 1 },
+    "capabilities": { "type": "object", "additionalProperties": true },
+    "roles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["role_id", "runtime_id", "health", "decision", "actions", "reasons", "active", "archived", "pinned", "cwd_locator", "resolved_cwd"],
+        "properties": {
+          "role_id": { "type": "string", "minLength": 1 },
+          "runtime_id": { "type": ["string", "null"] },
+          "health": { "enum": ["HEALTHY", "DEGRADED", "MISSING", "DUPLICATE", "BLOCKED", "HELD", "UNKNOWN"] },
+          "decision": { "type": "string", "minLength": 1 },
+          "actions": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+          "reasons": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+          "active": { "type": ["boolean", "null"] },
+          "archived": { "type": ["boolean", "null"] },
+          "pinned": { "type": ["boolean", "null"] },
+          "cwd_locator": { "type": "string", "minLength": 1 },
+          "resolved_cwd": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "summary": { "type": "object", "additionalProperties": true },
+    "terminal_status": { "enum": ["HEALTHY", "DEGRADED", "BLOCKED", "UNKNOWN", "PARTIAL_CREATE"] },
+    "plan_digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "plan_id": { "type": "string", "pattern": "^awrp1_[0-9a-f]{64}$" }
+  }
+}

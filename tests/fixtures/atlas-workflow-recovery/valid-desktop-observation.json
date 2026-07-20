@@ -1,0 +1,160 @@
+{
+  "schema": "atlas.workflow.desktop-observation.v1",
+  "kind": "THREAD_STATUS_SNAPSHOT",
+  "observation_id": "onv1_1635a7b85714119e8d066547da923271b54f861107d383fc6e3e150b1020382b",
+  "payload_digest": "sha256:1635a7b85714119e8d066547da923271b54f861107d383fc6e3e150b1020382b",
+  "payload": {
+    "producer_interface": "SUPPORTED_TASK_THREAD_READBACK",
+    "source_host_id": "local",
+    "captured_at": "2026-07-20T16:50:00Z",
+    "supersession": {
+      "supersedes_observation_ids": []
+    },
+    "required_role_count": 13,
+    "entries": [
+      {
+        "role_id": "atlas.main",
+        "runtime_thread_id": "019f52d9-7667-72a3-a5f7-9c0613aedd8f",
+        "source_host_id": "local",
+        "source_title": "ATLAS MAIN",
+        "observed_at": "2026-07-20T16:50:00Z",
+        "activity": "idle",
+        "activity_evidence": "SUPPORTED_TASK_THREAD_STATUS",
+        "pin_state": "UNKNOWN",
+        "pin_capability": "UNSUPPORTED"
+      },
+      {
+        "role_id": "atlas.inbox",
+        "runtime_thread_id": "019f7de0-3e1d-7433-a760-a9b724174ab6",
+        "source_host_id": "local",
+        "source_title": "ATLAS INBOX",
+        "observed_at": "2026-07-20T16:50:00Z",
+        "activity": "idle",
+        "activity_evidence": "SUPPORTED_TASK_THREAD_STATUS",
+        "pin_state": "UNKNOWN",
+        "pin_capability": "UNSUPPORTED"
+      },
+      {
+        "role_id": "atlas.workflow-architect",
+        "runtime_thread_id": "019f7df6-8521-7292-a012-297208fce120",
+        "source_host_id": "local",
+        "source_title": "ATLAS WORKFLOW ARCHITECT",
+        "observed_at": "2026-07-20T16:50:00Z",
+        "activity": "idle",
+        "activity_evidence": "SUPPORTED_TASK_THREAD_STATUS",
+        "pin_state": "UNKNOWN",
+        "pin_capability": "UNSUPPORTED"
+      },
+      {
+        "role_id": "atlas.release-control-plane",
+        "runtime_thread_id": "019f79ac-bd85-7952-8935-58dfbb77aa20",
+        "source_host_id": "local",
+        "source_title": "ATLAS PR, CI & Release Control Plane",
+        "observed_at": "2026-07-20T16:50:00Z",
+        "activity": "idle",
+        "activity_evidence": "SUPPORTED_TASK_THREAD_STATUS",
+        "pin_state": "UNKNOWN",
+        "pin_capability": "UNSUPPORTED"
+      },
+      {
+        "role_id": "fawxzzy.questions",
+        "runtime_thread_id": "019f75ca-d9c7-7941-b73f-fb06ff2a0459",
+        "source_host_id": "local",
+        "source_title": "FAWXZZY QUESTIONS",
+        "observed_at": "2026-07-20T16:50:00Z",
+        "activity": "idle",
+        "activity_evidence": "SUPPORTED_TASK_THREAD_STATUS",
+        "pin_state": "UNKNOWN",
+        "pin_capability": "UNSUPPORTED"
+      },
+      {
+        "role_id": "manual.messages",
+        "runtime_thread_id": "019f70b7-fad4-74d2-90e3-e5f34c6fab06",
+        "source_host_id": "local",
+        "source_title": "MANUAL MESSAGES",
+        "observed_at": "2026-07-20T16:50:00Z",
+        "activity": "idle",
+        "activity_evidence": "SUPPORTED_TASK_THREAD_STATUS",
+        "pin_state": "UNKNOWN",
+        "pin_capability": "UNSUPPORTED"
+      },
+      {
+        "role_id": "ai.questions",
+        "runtime_thread_id": "019f79de-76cd-7062-9d8b-1b9f5fd6a8ba",
+        "source_host_id": "local",
+        "source_title": "AI QUESTIONS",
+        "observed_at": "2026-07-20T16:50:00Z",
+        "activity": "idle",
+        "activity_evidence": "SUPPORTED_TASK_THREAD_STATUS",
+        "pin_state": "UNKNOWN",
+        "pin_capability": "UNSUPPORTED"
+      },
+      {
+        "role_id": "fawxzzy.messages",
+        "runtime_thread_id": "019f58c4-6d0b-7dc0-a4e3-9f6335f381e1",
+        "source_host_id": "local",
+        "source_title": "FAWXZZY MESSAGES",
+        "observed_at": "2026-07-20T16:50:00Z",
+        "activity": "notLoaded",
+        "activity_evidence": "SUPPORTED_TASK_THREAD_STATUS",
+        "pin_state": "UNKNOWN",
+        "pin_capability": "UNSUPPORTED"
+      },
+      {
+        "role_id": "owner.fitness",
+        "runtime_thread_id": "019f58c4-4a9e-7af3-bb3e-06e199884027",
+        "source_host_id": "local",
+        "source_title": "Fitness",
+        "observed_at": "2026-07-20T16:50:00Z",
+        "activity": "notLoaded",
+        "activity_evidence": "SUPPORTED_TASK_THREAD_STATUS",
+        "pin_state": "UNKNOWN",
+        "pin_capability": "UNSUPPORTED"
+      },
+      {
+        "role_id": "owner.mazer",
+        "runtime_thread_id": "019f61a0-6b80-7913-b479-f75f2a8a5b77",
+        "source_host_id": "local",
+        "source_title": "Mazer",
+        "observed_at": "2026-07-20T16:50:00Z",
+        "activity": "notLoaded",
+        "activity_evidence": "SUPPORTED_TASK_THREAD_STATUS",
+        "pin_state": "UNKNOWN",
+        "pin_capability": "UNSUPPORTED"
+      },
+      {
+        "role_id": "owner.socials-os",
+        "runtime_thread_id": "019f62b0-6fbe-79f0-9c47-a0942feb0825",
+        "source_host_id": "local",
+        "source_title": "Socials OS",
+        "observed_at": "2026-07-20T16:50:00Z",
+        "activity": "idle",
+        "activity_evidence": "SUPPORTED_TASK_THREAD_STATUS",
+        "pin_state": "UNKNOWN",
+        "pin_capability": "UNSUPPORTED"
+      },
+      {
+        "role_id": "owner.fawxzzyweb",
+        "runtime_thread_id": "019f7614-e612-77d0-b99b-ed1b0d277d1d",
+        "source_host_id": "local",
+        "source_title": "FawxzzyWeb",
+        "observed_at": "2026-07-20T16:50:00Z",
+        "activity": "idle",
+        "activity_evidence": "SUPPORTED_TASK_THREAD_STATUS",
+        "pin_state": "UNKNOWN",
+        "pin_capability": "UNSUPPORTED"
+      },
+      {
+        "role_id": "platform.supabase-migration",
+        "runtime_thread_id": "019f6dad-2cc3-7551-a47d-4b8c912c51ef",
+        "source_host_id": "local",
+        "source_title": "FawxzzyPlatform — Supabase Migration",
+        "observed_at": "2026-07-20T16:50:00Z",
+        "activity": "idle",
+        "activity_evidence": "SUPPORTED_TASK_THREAD_STATUS",
+        "pin_state": "UNKNOWN",
+        "pin_capability": "UNSUPPORTED"
+      }
+    ]
+  }
+}

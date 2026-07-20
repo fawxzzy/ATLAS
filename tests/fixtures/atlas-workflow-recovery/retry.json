@@ -1,0 +1,20 @@
+{
+  "schema": "atlas.workflow.discovery-fixture.v1",
+  "scenario": "retry-partial-runtime",
+  "seed_from_registry": true,
+  "seed_status": "idle",
+  "seed_pinned": true,
+  "operations": [
+    {
+      "op": "partial_runtime",
+      "role_id": "atlas.inbox",
+      "runtime_id": "fixture-created-atlas.inbox-1",
+      "title": null,
+      "cwd": null,
+      "status": "idle",
+      "archived": false,
+      "pinned": false
+    }
+  ],
+  "leases": []
+}

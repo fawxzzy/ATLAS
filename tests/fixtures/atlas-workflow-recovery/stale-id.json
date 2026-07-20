@@ -1,0 +1,11 @@
+{
+  "schema": "atlas.workflow.discovery-fixture.v1",
+  "scenario": "stale-id",
+  "seed_from_registry": true,
+  "seed_status": "idle",
+  "seed_pinned": true,
+  "operations": [
+    {"op": "stale_id", "role_id": "atlas.inbox", "runtime_id": "fixture-atlas-inbox-successor-001"}
+  ],
+  "leases": []
+}

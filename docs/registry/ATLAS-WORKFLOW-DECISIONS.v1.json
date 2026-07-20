@@ -1,0 +1,65 @@
+{
+  "schema": "atlas.workflow.decision-registry.v1",
+  "observed_at": "2026-07-20T06:58:47.210Z",
+  "source_evidence": [
+    "codex-session://2026/07/17/019f70b7-fad4-74d2-90e3-e5f34c6fab06",
+    "codex-session://2026/07/20/019f7de0-3e1d-7433-a760-a9b724174ab6",
+    "ATLAS-WORKFLOW-DECISION-NORMALIZATION-20260720-002"
+  ],
+  "questions": [
+    {
+      "question_id": "ATLAS-WORKFLOW-MAN-001",
+      "project": "ATLAS Workflow Recovery",
+      "status": "ANSWERED",
+      "question_payload_digest": "sha256:57d2902a657252144d64ed89d9a3de7eeeb9c86080ae87693c02f966a2332d5e",
+      "operator_answer": "DEFER_LIVE_APPLY_UNTIL_DETERMINISTIC_DESKTOP_PIN_AND_ACTIVITY_ADAPTER_EXISTS",
+      "answer_digest": "sha256:0fd6d4c1666970506fc9fcb1b10305cbc2d99b180d81f1325e7f14b71fa9bac5",
+      "answer_event_id": "ATLAS-WORKFLOW-MAN-001-ANSWER-NORMALIZATION-20260720-002",
+      "answer_payload_digest": "sha256:3703ffc81f076dd71265ce7b556fa0f13f5ca90a9ceb2466de023c3733f2af46",
+      "answered_at": "2026-07-20T06:58:47.210Z",
+      "transport_state": "RETAINED",
+      "atlas_main_route_state": "UNKNOWN",
+      "execution_state": "NOT_STARTED",
+      "exact_authority": ["Recovery remains dry-run and fixture-only until deterministic desktop pin and activity proof exists.", "Standing tasks remain unarchived."],
+      "authority_denied": ["live reconstruction apply", "manual fallback admission", "task, repository, automation, provider, or lifecycle mutation"],
+      "remaining_blockers": ["deterministic desktop pin and activity adapter"],
+      "supersedes_event_ids": ["OPERATOR-DECISION-ANSWERED-ATLAS-WORKFLOW-MAN-001-20260720-001", "ATLAS-WORKFLOW-MAN-001-ANSWER-NORMALIZATION-20260720-001"]
+    },
+    {
+      "question_id": "ATLAS-WORKFLOW-MAN-002",
+      "project": "ATLAS _stack",
+      "status": "ANSWERED",
+      "question_payload_digest": "sha256:9109f8f8b901c0cbfeef68fc1ddc55433c7d64a2885c42f30dd8dbc02fdc9bce",
+      "operator_answer": "ADMIT_A_SEPARATE_BOUNDED_STACK_OWNER_CHANGE_FOR_ONE_THIN_RECOVERY_WRAPPER",
+      "answer_digest": "sha256:4ca9d1f134487e8bca0fb3534f142cc0e5308d853a07163791b5fa897ed6692a",
+      "answer_event_id": "ATLAS-WORKFLOW-MAN-002-ANSWER-NORMALIZATION-20260720-002",
+      "answer_payload_digest": "sha256:3bc165909518801ff1fe0bbd5bcdb8358071b983955815d22cbd331678dc047b",
+      "answered_at": "2026-07-20T06:58:47.210Z",
+      "transport_state": "RETAINED",
+      "atlas_main_route_state": "UNKNOWN",
+      "execution_state": "NOT_STARTED",
+      "exact_authority": ["Plan and route one separately bounded _stack owner change that wraps the root recovery engine without duplicating orchestration."],
+      "authority_denied": ["repository edit by this Architect lane", "task creation", "merge", "deployment", "provider action", "wrapper execution without a separately admitted owner packet"],
+      "remaining_blockers": ["separate _stack owner packet", "owner lease", "frozen scope", "verification and review"],
+      "supersedes_event_ids": ["OPERATOR-DECISION-ANSWERED-ATLAS-WORKFLOW-MAN-002-20260720-001", "ATLAS-WORKFLOW-MAN-002-ANSWER-NORMALIZATION-20260720-001"]
+    },
+    {
+      "question_id": "ATLAS-WORKFLOW-MAN-003",
+      "project": "ATLAS Standing Tasks",
+      "status": "ANSWERED",
+      "question_payload_digest": "sha256:687a7afc4ebac09b40a0003749d77c7ac97a993235be3d00bf1d5e939ae290ac",
+      "operator_answer": "DEFER_RUNTIME_LIFECYCLE_DISPOSITION_UNTIL_PIN_ACTIVITY_AND_ZERO_PENDING_ROUTE_PROOF_EXISTS",
+      "answer_digest": "sha256:16e14951c4e8cdc210df80f3efbe116bc8048f40511b49f4bd77a8b2cd2f61dc",
+      "answer_event_id": "ATLAS-WORKFLOW-MAN-003-ANSWER-NORMALIZATION-20260720-002",
+      "answer_payload_digest": "sha256:b2aefa643fc0923e6d23f67f748dc66467d03ae5cf561f24a440ce5ef97ebdb8",
+      "answered_at": "2026-07-20T06:58:47.210Z",
+      "transport_state": "RETAINED",
+      "atlas_main_route_state": "UNKNOWN",
+      "execution_state": "NOT_STARTED",
+      "exact_authority": ["Defer lifecycle disposition until deterministic pin, activity, and zero-pending-route proof exists."],
+      "authority_denied": ["archive", "rename", "replace", "fork", "consolidation", "other lifecycle action"],
+      "remaining_blockers": ["pin proof", "activity proof", "zero-pending-route proof"],
+      "supersedes_event_ids": ["OPERATOR-DECISION-ANSWERED-ATLAS-WORKFLOW-MAN-003-20260720-001", "ATLAS-WORKFLOW-MAN-003-ANSWER-NORMALIZATION-20260720-001"]
+    }
+  ]
+}
