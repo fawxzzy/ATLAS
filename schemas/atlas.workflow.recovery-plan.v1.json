@@ -37,7 +37,7 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["role_id", "runtime_id", "health", "decision", "actions", "reasons", "active", "archived", "pinned"],
+        "required": ["role_id", "runtime_id", "health", "decision", "actions", "reasons", "active", "archived", "pinned", "cwd_locator", "resolved_cwd"],
         "properties": {
           "role_id": { "type": "string", "minLength": 1 },
           "runtime_id": { "type": ["string", "null"] },
@@ -47,7 +47,9 @@
           "reasons": { "type": "array", "items": { "type": "string", "minLength": 1 } },
           "active": { "type": ["boolean", "null"] },
           "archived": { "type": ["boolean", "null"] },
-          "pinned": { "type": ["boolean", "null"] }
+          "pinned": { "type": ["boolean", "null"] },
+          "cwd_locator": { "type": "string", "minLength": 1 },
+          "resolved_cwd": { "type": ["string", "null"] }
         }
       }
     },

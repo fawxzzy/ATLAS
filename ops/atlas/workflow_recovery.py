@@ -36,6 +36,7 @@ DESKTOP_OBSERVATION_FIXTURE_REF = "tests/fixtures/atlas-workflow-recovery/valid-
 
 DESKTOP_OBSERVATION_MAX_AGE_SECONDS = 300
 DESKTOP_OBSERVATION_FUTURE_SKEW_SECONDS = 30
+MODERN_PERMISSION_PROFILES = frozenset({":read-only", ":workspace", ":danger-full-access"})
 
 HEALTH_VALUES = (
     "HEALTHY",
@@ -749,6 +750,12 @@ class DiscoveryAdapter:
     def mutate(self, action: str, role: dict[str, Any], thread: ThreadRecord | None) -> ThreadRecord | None:
         raise NotImplementedError
 
+    def resolve_role_cwd(self, role: dict[str, Any]) -> str:
+        raise NotImplementedError
+
+    def validate_planned_cwd(self, role_plan: dict[str, Any]) -> None:
+        del role_plan
+
 
 def _status_text(value: Any) -> str:
     if isinstance(value, str):
@@ -776,10 +783,78 @@ class LiveAppServerAdapter(DiscoveryAdapter):
         "archive": False,
     }
 
-    def __init__(self, timeout_seconds: float = 25.0) -> None:
+    def __init__(
+        self,
+        timeout_seconds: float = 25.0,
+        cwd_bindings: dict[str, Path] | None = None,
+    ) -> None:
         self.timeout_seconds = timeout_seconds
         self.client: JsonRpcAppServer | None = None
         self.binding_overrides = {}
+        self.cwd_bindings = dict(cwd_bindings or {})
+
+    def _resolve_cwd_locator(self, locator: str) -> Path:
+        if locator == "ATLAS_ROOT":
+            resolved = ROOT.resolve()
+        else:
+            bound = self.cwd_bindings.get(locator)
+            if bound is None:
+                raise WorkflowRecoveryError(
+                    f"cwd locator {locator} has no admitted absolute binding; "
+                    f"pass --cwd-binding {locator}=<absolute-worktree>"
+                )
+            try:
+                resolved = Path(bound).resolve(strict=True)
+            except OSError as exc:
+                raise WorkflowRecoveryError(
+                    f"cwd locator {locator} is no longer resolvable: {bound}"
+                ) from exc
+        if not resolved.is_dir():
+            raise WorkflowRecoveryError(f"cwd locator {locator} does not resolve to a directory: {resolved}")
+        if locator != "ATLAS_ROOT" and resolved == ROOT.resolve():
+            raise WorkflowRecoveryError(
+                f"cwd locator {locator} resolves to the ATLAS recovery checkout instead of an admitted isolated worktree"
+            )
+        return resolved
+
+    def resolve_role_cwd(self, role: dict[str, Any]) -> str:
+        return str(self._resolve_cwd_locator(role["runtime"]["cwd_locator"]))
+
+    def validate_planned_cwd(self, role_plan: dict[str, Any]) -> None:
+        expected = str(self._resolve_cwd_locator(role_plan["cwd_locator"]))
+        if role_plan.get("resolved_cwd") != expected:
+            raise WorkflowRecoveryError(
+                f"{role_plan['role_id']}: accepted cwd binding drifted; "
+                f"plan={role_plan.get('resolved_cwd')!r} current={expected!r}"
+            )
+
+    def _thread_start_params(self, role: dict[str, Any]) -> dict[str, Any]:
+        runtime = role["runtime"]
+        permission_profile = runtime["permissions"]
+        if permission_profile not in MODERN_PERMISSION_PROFILES:
+            raise WorkflowRecoveryError(
+                f"{role['role_id']}: unsupported modern permission profile {permission_profile!r}; "
+                "legacy sandbox tokens are not accepted"
+            )
+        return {
+            "cwd": self.resolve_role_cwd(role),
+            "model": runtime["model"],
+            "approvalPolicy": runtime["approval_policy"],
+            "permissions": permission_profile,
+            "serviceTier": runtime["service_tier"],
+            "ephemeral": False,
+        }
+
+    def _bootstrap_params(self, role: dict[str, Any], thread_id: str) -> dict[str, Any]:
+        runtime = role["runtime"]
+        return {
+            "threadId": thread_id,
+            "input": [{"type": "text", "text": self._prompt(role)}],
+            "cwd": self.resolve_role_cwd(role),
+            "model": runtime["model"],
+            "effort": runtime["effort_floor"],
+            "approvalPolicy": runtime["approval_policy"],
+        }
 
     @staticmethod
     def _thread_from_raw(raw: dict[str, Any], archived: bool) -> ThreadRecord:
@@ -850,18 +925,10 @@ class LiveAppServerAdapter(DiscoveryAdapter):
         if action in {"SET_PIN", "PROVE_PIN_STATE"}:
             raise WorkflowRecoveryError("Codex app-server exposes neither pin mutation nor pin readback; manual desktop fallback required")
         if action == "CREATE":
-            runtime = role["runtime"]
             with JsonRpcAppServer(self.timeout_seconds) as client:
                 response = client.request(
                     "thread/start",
-                    {
-                        "cwd": str(ROOT),
-                        "model": runtime["model"],
-                        "approvalPolicy": runtime["approval_policy"],
-                        "sandbox": runtime["permissions"],
-                        "serviceTier": runtime["service_tier"],
-                        "ephemeral": False,
-                    },
+                    self._thread_start_params(role),
                 )
             raw = (response or {}).get("thread", response or {})
             return self._thread_from_raw(raw, archived=False)
@@ -878,17 +945,9 @@ class LiveAppServerAdapter(DiscoveryAdapter):
                 client.request("thread/resume", {"threadId": thread.thread_id})
                 thread.status = "idle"
             elif action == "BOOTSTRAP":
-                runtime = role["runtime"]
                 client.request(
                     "turn/start",
-                    {
-                        "threadId": thread.thread_id,
-                        "input": [{"type": "text", "text": self._prompt(role)}],
-                        "cwd": str(ROOT),
-                        "model": runtime["model"],
-                        "effort": runtime["effort_floor"],
-                        "approvalPolicy": runtime["approval_policy"],
-                    },
+                    self._bootstrap_params(role, thread.thread_id),
                 )
             elif action == "REFRESH_REGISTRY":
                 self.binding_overrides[role["role_id"]] = thread.thread_id
@@ -925,6 +984,13 @@ class FixtureAdapter(DiscoveryAdapter):
         self.fail_after_mutations = fixture.get("fail_after_mutations")
         self.created_counter = 0
         self.binding_overrides = {}
+
+    def resolve_role_cwd(self, role: dict[str, Any]) -> str:
+        return role["runtime"]["cwd_locator"]
+
+    def validate_planned_cwd(self, role_plan: dict[str, Any]) -> None:
+        if role_plan.get("resolved_cwd") != role_plan["cwd_locator"]:
+            raise WorkflowRecoveryError(f"{role_plan['role_id']}: fixture cwd binding drifted")
 
     def _build_threads(self) -> list[ThreadRecord]:
         roles = {item["role_id"]: item for item in self.manifest["roles"]}
@@ -1376,6 +1442,19 @@ def build_recovery_plan(
             }
         )
 
+    for item in results:
+        role = roles[item["role_id"]]
+        item["cwd_locator"] = role["runtime"]["cwd_locator"]
+        item["resolved_cwd"] = None
+        if any(action in {"CREATE", "BOOTSTRAP"} for action in item["actions"]):
+            try:
+                item["resolved_cwd"] = adapter.resolve_role_cwd(role)
+            except WorkflowRecoveryError as exc:
+                item["health"] = "BLOCKED"
+                item["decision"] = "FAIL_CLOSED_CWD_BINDING_REQUIRED"
+                item["actions"] = []
+                item["reasons"].append(str(exc))
+
     lease_groups: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for lease in leases:
         if str(lease.get("status", "")).lower() == "active":
@@ -1522,6 +1601,8 @@ def _preflight_apply(plan: dict[str, Any], adapter: DiscoveryAdapter) -> None:
             )
         if item["active"] is True and item["actions"]:
             raise WorkflowRecoveryError(f"{item['role_id']}: active runtime has pending repairs; fail closed without steering")
+        if any(action in {"CREATE", "BOOTSTRAP"} for action in item["actions"]):
+            adapter.validate_planned_cwd(item)
         for action in item["actions"]:
             capability = {
                 "CREATE": "create",
@@ -1753,6 +1834,8 @@ def render_markdown(
         "",
         "The command validates the manifest/schemas/prompts, discovers non-archived and archived tasks, reconciles by stable role ID, detects duplicate/active-writer collisions, emits a deterministic plan digest, refreshes only `runtime/atlas/workflow-recovery/`, and performs no archive or task mutation in dry-run mode.",
         "",
+        "A role whose manifest locator is not `ATLAS_ROOT` can be created or bootstrapped only when the operator supplies an explicit absolute admitted worktree through a repeated `--cwd-binding LOCATOR=ABSOLUTE_PATH` argument. Missing, relative, duplicate, nonexistent, recovery-root, or changed bindings fail closed. The resolved cwd is included in plan identity. Creation sends one canonical modern named profile (`:read-only`, `:workspace`, or `:danger-full-access`) through `permissions`, rejects legacy sandbox tokens, and omits `sandbox`; bootstrap reuses the same accepted cwd.",
+        "",
         "Optional `--desktop-observation <receipt.json> --desktop-observation-current <head.json>` inputs supply a complete, fresh, content-addressed activity snapshot plus the trusted current immutable head produced by a supported external task/thread readback ledger on the v1 `local` host. Each newer head cumulatively names prior receipt IDs in `supersedes_observation_ids`, so an older candidate is rejected without mutating its identity. Observation is dry-run only and can replace only `active`, `idle`, `notLoaded`, or `UNKNOWN` activity provenance on a runtime already returned by primary discovery. Pin state remains exactly `UNKNOWN` with capability `UNSUPPORTED`; private desktop storage, SQLite coupling, UI scraping, and pin inference are prohibited. Receipt/head identity, host, and timestamps are reported but excluded from plan identity; their validated activity effects remain digest-bound.",
         "",
         "A live apply additionally requires `--apply --acceptance <receipt.json>`. The receipt must bind the exact manifest and plan digests and name `atlas.main` as accepter. The current Codex app-server protocol does not expose pin readback or pin mutation, so any role needing pin proof fails closed before creation or repair. `ATLAS-WORKFLOW-MAN-001` rejected a manual fallback: the observation bridge can prove supported activity evidence, but live recovery remains blocked until deterministic pin readback and mutation exist.",
@@ -1821,6 +1904,13 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     recover.add_argument("--deterministic", action="store_true")
     recover.add_argument("--json", action="store_true", help="print full plan JSON")
     recover.add_argument("--timeout-seconds", type=float, default=25.0)
+    recover.add_argument(
+        "--cwd-binding",
+        action="append",
+        default=[],
+        metavar="LOCATOR=ABSOLUTE_PATH",
+        help="bind a non-root manifest cwd locator to one admitted absolute worktree; repeat as needed",
+    )
 
     validate = subparsers.add_parser("validate", help="validate schemas, manifest, prompts, registry, and generated view")
     validate.add_argument("--json", action="store_true")
@@ -1842,6 +1932,39 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     observation.add_argument("--current", type=Path, required=True)
 
     return parser.parse_args(argv)
+
+
+def _parse_cwd_bindings(values: list[str]) -> dict[str, Path]:
+    bindings: dict[str, Path] = {}
+    paths: dict[Path, str] = {}
+    for value in values:
+        locator, separator, raw_path = value.partition("=")
+        locator = locator.strip()
+        raw_path = raw_path.strip()
+        if not separator or not locator or not raw_path:
+            raise ValidationFailure(
+                "--cwd-binding must use LOCATOR=ABSOLUTE_PATH with both values present"
+            )
+        if locator == "ATLAS_ROOT":
+            raise ValidationFailure("ATLAS_ROOT is reserved and resolves to the recovery checkout")
+        if locator in bindings:
+            raise ValidationFailure(f"duplicate --cwd-binding for {locator}")
+        path = Path(raw_path)
+        if not path.is_absolute():
+            raise ValidationFailure(f"cwd binding for {locator} must be absolute: {raw_path}")
+        try:
+            resolved = path.resolve(strict=True)
+        except OSError as exc:
+            raise ValidationFailure(f"cwd binding for {locator} is not resolvable: {raw_path}") from exc
+        if not resolved.is_dir():
+            raise ValidationFailure(f"cwd binding for {locator} is not a directory: {resolved}")
+        if resolved in paths:
+            raise ValidationFailure(
+                f"cwd bindings {paths[resolved]} and {locator} resolve to the same path: {resolved}"
+            )
+        bindings[locator] = resolved
+        paths[resolved] = locator
+    return bindings
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -1894,13 +2017,18 @@ def main(argv: list[str] | None = None) -> int:
         if args.adapter == "fixture":
             if args.fixture is None:
                 raise ValidationFailure("--fixture is required for the fixture adapter")
+            if args.cwd_binding:
+                raise ValidationFailure("--cwd-binding is valid only with --adapter live")
             fixture_path = args.fixture if args.fixture.is_absolute() else ROOT / args.fixture
             fixture = _load_json(fixture_path)
             adapter: DiscoveryAdapter = FixtureAdapter(manifest, registry, fixture)
         else:
             if args.fixture is not None:
                 raise ValidationFailure("--fixture is valid only with --adapter fixture")
-            adapter = LiveAppServerAdapter(args.timeout_seconds)
+            adapter = LiveAppServerAdapter(
+                args.timeout_seconds,
+                cwd_bindings=_parse_cwd_bindings(args.cwd_binding),
+            )
 
         desktop_observation = None
         desktop_observation_current = None

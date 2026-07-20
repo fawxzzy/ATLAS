@@ -153,7 +153,7 @@
         "model": { "type": "string", "minLength": 1 },
         "effort_floor": { "type": "string", "minLength": 1 },
         "service_tier": { "type": "string", "minLength": 1 },
-        "permissions": { "type": "string", "minLength": 1 },
+        "permissions": { "enum": [":read-only", ":workspace", ":danger-full-access"] },
         "approval_policy": { "type": "string", "minLength": 1 },
         "cwd_locator": { "type": "string", "minLength": 1 },
         "environment": { "type": "string", "minLength": 1 },

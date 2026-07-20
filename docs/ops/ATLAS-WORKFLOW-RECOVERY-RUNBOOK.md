@@ -56,7 +56,7 @@ Observation can replace activity provenance only for a runtime already returned 
    python ops/atlas/workflow_recovery.py recover --dry-run --adapter live --desktop-observation runtime/atlas/workflow-recovery/desktop-observation.json --desktop-observation-current runtime/atlas/workflow-recovery/current-desktop-observation.json
    ```
 
-4. Inspect `runtime/atlas/workflow-recovery/plan.json`, `live-registry.json`, and `RECEIPT.json`. Runtime output is intentionally ignored by Git. The plan digest always excludes `generated_at`; when an observation is present it also excludes volatile receipt identity, source host, and timestamps. The validated activity effects and all recovery decisions remain digest-bound.
+4. Inspect `runtime/atlas/workflow-recovery/plan.json`, `live-registry.json`, and `RECEIPT.json`. Runtime output is intentionally ignored by Git. The plan digest always excludes `generated_at`; when an observation is present it also excludes volatile receipt identity, source host, and timestamps. The validated activity effects, recovery decisions, cwd locator, and any resolved creation/bootstrap cwd remain digest-bound.
 5. Reconcile every role as `HEALTHY`, `DEGRADED`, `MISSING`, `DUPLICATE`, `BLOCKED`, `HELD`, or `UNKNOWN`. Also inspect `unbound_runtime_claims`; they are preserved inventory and must never trigger create or lifecycle actions. Do not translate `notLoaded` into missing and do not translate an archived rollout file into an accepted supersession.
 6. Read `docs/registry/ATLAS-WORKFLOW-DECISIONS.v1.json`. Repeat only `OPEN` questions; suppress `ANSWERED`, `EXPIRED`, and `SUPERSEDED` questions. Transport retention is not execution completion.
 7. Recover ATLAS MAIN first. Do not initialize queues or owners until the root role is unique, readable, unarchived, pinned, and accepted.
@@ -86,7 +86,14 @@ Then run:
 python ops/atlas/workflow_recovery.py recover --apply --adapter live --acceptance runtime/atlas/workflow-recovery/ACCEPTANCE.json
 ```
 
-The command preflights all required capabilities before the first mutation. The current Codex app-server supports list/read/start/resume/unarchive/title/model/effort/cwd/bootstrap operations, but does not expose task pin mutation or pin readback. Because every standing role requires a pin, creation or pin repair fails closed before mutation. `ATLAS-WORKFLOW-MAN-001` explicitly selected no manual fallback. The desktop observation bridge closes only supported activity provenance; it does not close the pin gate. Live recovery apply and archive-readiness remain unproven.
+Roles whose manifest locator is not `ATLAS_ROOT` require an explicit, absolute, admitted worktree binding on both the accepted planning run and the apply run. Repeat `--cwd-binding LOCATOR=ABSOLUTE_PATH` for each role that needs `CREATE` or `BOOTSTRAP`. The resolved path is included in the plan digest, and preflight rejects a missing, relative, duplicate, nonexistent, recovery-root, or changed binding before the first mutation. Local-only example:
+
+```powershell
+# Set this local-only variable to the absolute worktree approved in the acceptance packet.
+python ops/atlas/workflow_recovery.py recover --apply --adapter live --cwd-binding "SOCIALS_OS_OWNER_PROJECT=$atlasSocialsWorktree" --acceptance runtime/atlas/workflow-recovery/ACCEPTANCE.json
+```
+
+Creation sends one canonical modern named profile (`:read-only`, `:workspace`, or `:danger-full-access`) through the app-server `permissions` field and omits legacy `sandbox`; unknown identifiers and legacy tokens such as `danger-full-access` fail closed. Bootstrap uses the same accepted cwd. The command preflights all required capabilities before the first mutation. The current Codex app-server supports list/read/start/resume/unarchive/title/model/effort/cwd/bootstrap operations, but does not expose task pin mutation or pin readback. Because every standing role requires a pin, creation or pin repair fails closed before mutation. `ATLAS-WORKFLOW-MAN-001` explicitly selected no manual fallback. The desktop observation bridge closes only supported activity provenance; it does not close the pin gate. Live recovery apply and archive-readiness remain unproven.
 
 ## Fixture-only creation and retry proof
 

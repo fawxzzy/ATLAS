@@ -2,7 +2,7 @@
 # ATLAS workflow architecture and recovery
 
 Canonical manifest: `docs/registry/ATLAS-WORKFLOW-MANIFEST.v1.json`
-Manifest digest: `sha256:ce75812e75467387b61119abefe75d0ea4068b7946db211e64d74110479f1e72`
+Manifest digest: `sha256:fe92fec6943c7c11d5170d4e02db5002900b4c19f2bcdfc0647e38bb0a9c1ee0`
 Runtime seed: `docs/registry/ATLAS-WORKFLOW-LIVE-MAPPING.v1.json`
 
 This view is generated from the versioned manifest. Stable logical role IDs are the contract; Codex thread IDs are replaceable runtime epochs refreshed in the live registry.
@@ -172,6 +172,8 @@ python ops/atlas/workflow_recovery.py recover --dry-run --adapter live
 ```
 
 The command validates the manifest/schemas/prompts, discovers non-archived and archived tasks, reconciles by stable role ID, detects duplicate/active-writer collisions, emits a deterministic plan digest, refreshes only `runtime/atlas/workflow-recovery/`, and performs no archive or task mutation in dry-run mode.
+
+A role whose manifest locator is not `ATLAS_ROOT` can be created or bootstrapped only when the operator supplies an explicit absolute admitted worktree through a repeated `--cwd-binding LOCATOR=ABSOLUTE_PATH` argument. Missing, relative, duplicate, nonexistent, recovery-root, or changed bindings fail closed. The resolved cwd is included in plan identity. Creation sends one canonical modern named profile (`:read-only`, `:workspace`, or `:danger-full-access`) through `permissions`, rejects legacy sandbox tokens, and omits `sandbox`; bootstrap reuses the same accepted cwd.
 
 Optional `--desktop-observation <receipt.json> --desktop-observation-current <head.json>` inputs supply a complete, fresh, content-addressed activity snapshot plus the trusted current immutable head produced by a supported external task/thread readback ledger on the v1 `local` host. Each newer head cumulatively names prior receipt IDs in `supersedes_observation_ids`, so an older candidate is rejected without mutating its identity. Observation is dry-run only and can replace only `active`, `idle`, `notLoaded`, or `UNKNOWN` activity provenance on a runtime already returned by primary discovery. Pin state remains exactly `UNKNOWN` with capability `UNSUPPORTED`; private desktop storage, SQLite coupling, UI scraping, and pin inference are prohibited. Receipt/head identity, host, and timestamps are reported but excluded from plan identity; their validated activity effects remain digest-bound.
 

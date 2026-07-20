@@ -6,6 +6,7 @@ import importlib.util
 import io
 import json
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -121,6 +122,59 @@ class WorkflowRecoveryTests(unittest.TestCase):
         self.assertIn("CREATE", inbox["actions"])
         self.assertEqual(1, plan["summary"]["create_count"])
         self.assertTrue(plan["no_archive"])
+        self.assertEqual("ATLAS_ROOT", inbox["cwd_locator"])
+        self.assertEqual("ATLAS_ROOT", inbox["resolved_cwd"])
+
+    def test_live_create_and_bootstrap_use_admitted_cwd_and_modern_permissions(self) -> None:
+        role = next(item for item in self.manifest["roles"] if item["role_id"] == "owner.socials-os")
+        locator = role["runtime"]["cwd_locator"]
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            admitted_cwd = Path(temporary_directory).resolve()
+            adapter = RECOVERY.LiveAppServerAdapter(
+                cwd_bindings={locator: admitted_cwd},
+            )
+
+            create_params = adapter._thread_start_params(role)
+            bootstrap_params = adapter._bootstrap_params(role, "thread-owner-socials-os-001")
+            self.assertEqual(str(admitted_cwd), create_params["cwd"])
+            self.assertEqual(str(admitted_cwd), bootstrap_params["cwd"])
+            self.assertEqual(":danger-full-access", create_params["permissions"])
+            self.assertNotIn("sandbox", create_params)
+
+            legacy_role = json.loads(json.dumps(role))
+            legacy_role["runtime"]["permissions"] = "danger-full-access"
+            with self.assertRaisesRegex(RECOVERY.WorkflowRecoveryError, "legacy sandbox tokens"):
+                adapter._thread_start_params(legacy_role)
+
+            legacy_manifest = json.loads(json.dumps(self.manifest))
+            next(
+                item for item in legacy_manifest["roles"] if item["role_id"] == role["role_id"]
+            )["runtime"]["permissions"] = "danger-full-access"
+            with self.assertRaises(RECOVERY.ValidationFailure):
+                RECOVERY._assert_schema(
+                    legacy_manifest,
+                    RECOVERY.MANIFEST_SCHEMA_REF,
+                    "legacy permission manifest",
+                )
+
+            role_plan = {
+                "role_id": role["role_id"],
+                "cwd_locator": locator,
+                "resolved_cwd": str(admitted_cwd),
+            }
+            adapter.validate_planned_cwd(role_plan)
+            role_plan["resolved_cwd"] = str(ROOT)
+            with self.assertRaisesRegex(RECOVERY.WorkflowRecoveryError, "accepted cwd binding drifted"):
+                adapter.validate_planned_cwd(role_plan)
+
+    def test_live_non_root_cwd_requires_an_explicit_absolute_binding(self) -> None:
+        role = next(item for item in self.manifest["roles"] if item["role_id"] == "owner.fawxzzyweb")
+        adapter = RECOVERY.LiveAppServerAdapter()
+        with self.assertRaisesRegex(RECOVERY.WorkflowRecoveryError, "no admitted absolute binding"):
+            adapter.resolve_role_cwd(role)
+
+        with self.assertRaisesRegex(RECOVERY.ValidationFailure, "must be absolute"):
+            RECOVERY._parse_cwd_bindings([f"{role['runtime']['cwd_locator']}=relative/path"])
 
     def test_stale_runtime_id_repairs_binding_without_create(self) -> None:
         plan, _ = self.plan("stale-id.json")
